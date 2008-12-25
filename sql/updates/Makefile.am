@@ -144,6 +144,7 @@ pkgdata_DATA = \
 	2008_12_15_01_character_arenas.sql \
 	2008_12_15_01_mangos_arenas.sql \
 	6939_01_mangos_quest_template.sql \
+	6944_01_mangos_mangos_string.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -269,4 +270,5 @@ EXTRA_DIST = \
 	2008_12_15_01_character_arenas.sql \
 	2008_12_15_01_mangos_arenas.sql \
 	6939_01_mangos_quest_template.sql \
+	6944_01_mangos_mangos_string.sql \
 	README
