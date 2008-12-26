@@ -123,7 +123,7 @@ void Pet::RemoveFromWorld()
     Unit::RemoveFromWorld();
 }
 
-bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool current )
+bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool current )
 {
     uint32 ownerid = owner->GetGUIDLow();
 
