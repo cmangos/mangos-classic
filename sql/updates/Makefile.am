@@ -146,6 +146,7 @@ pkgdata_DATA = \
 	6939_01_mangos_quest_template.sql \
 	6944_01_mangos_mangos_string.sql \
 	6961_01_mangos_command.sql \
+	6970_01_mangos_playercreateinfo.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -273,4 +274,5 @@ EXTRA_DIST = \
 	6939_01_mangos_quest_template.sql \
 	6944_01_mangos_mangos_string.sql \
 	6961_01_mangos_command.sql \
+	6970_01_mangos_playercreateinfo.sql \
 	README
