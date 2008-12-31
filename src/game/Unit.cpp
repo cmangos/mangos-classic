@@ -2359,7 +2359,6 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
     // bonus from skills is 0.04%
     int32    skillBonus  = 4 * ( attackerWeaponSkill - victimMaxSkillValueForLevel );
-    int32    skillBonus2 = 4 * ( attackerMaxSkillValueForLevel - victimDefenseSkill );
     int32    sum = 0, tmp = 0;
     int32    roll = urand (0, 10000);
 
@@ -2441,7 +2440,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
                 && (roll < (sum += tmp)))
             {
                 // Critical chance
-                tmp = crit_chance + skillBonus2;
+                tmp = crit_chance;
                 if ( GetTypeId() == TYPEID_PLAYER && SpellCasted && tmp > 0 )
                 {
                     if ( roll_chance_i(tmp/100))
@@ -2457,7 +2456,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     }
 
     // Critical chance
-    tmp = crit_chance + skillBonus2;
+    tmp = crit_chance;
 
     if (tmp > 0 && roll < (sum += tmp))
     {
@@ -3092,6 +3091,9 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
         else
             crit -= ((Player*)pVictim)->GetRatingBonusValue(CR_CRIT_TAKEN_MELEE);
     }
+
+    // Apply crit chance from defence skill
+    crit += (int32(GetMaxSkillValueForLevel(pVictim)) - int32(pVictim->GetDefenseSkillValue(this))) * 0.04f;
 
     if (crit < 0.0f)
         crit = 0.0f;
@@ -7685,7 +7687,6 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
             if (pVictim)
             {
                 crit_chance = GetUnitCriticalChance(attackType, pVictim);
-                crit_chance+= (int32(GetMaxSkillValueForLevel(pVictim)) - int32(pVictim->GetDefenseSkillValue(this))) * 0.04f;
                 crit_chance+= GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
             }
             break;
