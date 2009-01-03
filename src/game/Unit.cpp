@@ -4236,6 +4236,17 @@ Aura* Unit::GetAura(uint32 spellId, uint32 effindex)
     return NULL;
 }
 
+bool Unit::HasAura(uint32 spellId) const
+{
+    for (int i = 0; i < 3 ; ++i)
+    {
+        AuraMap::const_iterator iter = m_Auras.find(spellEffectPair(spellId, i));
+        if (iter != m_Auras.end())
+            return true;
+    }
+    return false;
+}
+
 void Unit::AddDynObject(DynamicObject* dynObj)
 {
     m_dynObjGUIDs.push_back(dynObj->GetGUID());
