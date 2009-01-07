@@ -687,7 +687,6 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(const char* args)
 
     std::string targetAccountName;
     uint32 targetAccountId = 0;
-    uint32 targetSecurity = 0;
 
     /// only target player different from self allowed (if targetPlayer!=NULL then not console)
     Player* targetPlayer = getSelectedPlayer();
@@ -701,13 +700,6 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(const char* args)
         arg2 = arg1;
 
         targetAccountId = targetPlayer->GetSession()->GetAccountId();
-        targetSecurity = targetPlayer->GetSession()->GetSecurity();
-        if(!accmgr.GetName(targetAccountId,targetAccountName))
-        {
-            PSendSysMessage(LANG_ACCOUNT_NOT_EXIST,targetAccountName.c_str());
-            SetSentErrorMessage(true);
-            return false;
-        }
     }
     else
     {
@@ -724,7 +716,12 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(const char* args)
         }
 
         targetAccountId = accmgr.GetId(targetAccountName);
-        targetSecurity = accmgr.GetSecurity(targetAccountId);
+        if(!targetAccountId)
+        {
+            PSendSysMessage(LANG_ACCOUNT_NOT_EXIST,targetAccountName.c_str());
+            SetSentErrorMessage(true);
+            return false;
+        }
     }
 
     int32 gm = (int32)atoi(arg2);
@@ -735,12 +732,14 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(const char* args)
         return false;
     }
 
-    /// m_session==NULL only for console
-    uint32 plSecurity = m_session ? m_session->GetSecurity() : SEC_CONSOLE;
-
     /// can set security level only for target with less security and to less security that we have
     /// This is also reject self apply in fact
-    if(targetSecurity >= plSecurity || uint32(gm) >= plSecurity )
+    if(HasLowerSecurityAccount(NULL,targetAccountId,true))
+        return false;
+
+    /// account can't set security to same or grater level, need more power GM or console
+    uint32 plSecurity = m_session ? m_session->GetSecurity() : SEC_CONSOLE;
+    if (uint32(gm) >= plSecurity )
     {
         SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
         SetSentErrorMessage(true);
@@ -789,19 +788,10 @@ bool ChatHandler::HandleAccountSetPasswordCommand(const char* args)
         return false;
     }
 
-    uint32 targetSecurity = accmgr.GetSecurity(targetAccountId);
-
-    /// m_session==NULL only for console
-    uint32 plSecurity = m_session ? m_session->GetSecurity() : SEC_CONSOLE;
-
     /// can set password only for target with less security
     /// This is also reject self apply in fact
-    if (targetSecurity >= plSecurity)
-    {
-        SendSysMessage (LANG_YOURS_SECURITY_IS_LOW);
-        SetSentErrorMessage (true);
+    if(HasLowerSecurityAccount (NULL,targetAccountId,true))
         return false;
-    }
 
     if (strcmp(szPassword1,szPassword2))
     {
@@ -6179,7 +6169,14 @@ bool ChatHandler::HandleAccountSetAddonCommand(const char* args)
             SetSentErrorMessage(true);
             return false;
         }
+
     }
+
+    // Let set addon state only for lesser (strong) security level
+    // or to self account
+    if (m_session && m_session->GetAccountId () != account_id &&
+        HasLowerSecurityAccount (NULL,account_id,true))
+        return false;
 
     int lev=atoi(szExp);                                    //get int anyway (0 if error)
     if(lev < 0)
