@@ -54,7 +54,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         inline uint32 GetZoneId(uint32 mapid, float x, float y) { return Map::GetZoneId(GetAreaFlag(mapid, x, y),mapid); }
 
         void Initialize(void);
-        void Update(time_t);
+        void Update(uint32);
 
         inline void SetGridCleanUpDelay(uint32 t)
         {
