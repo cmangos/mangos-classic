@@ -5165,9 +5165,6 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    // pet guids are not saved to DB, set to 0 (pet guid != pet id)
-    m_hiPetGuid = 0;
-
     result = CharacterDatabase.Query( "SELECT MAX(guid) FROM item_instance" );
     if( result )
     {
