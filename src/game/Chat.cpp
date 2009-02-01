@@ -439,10 +439,10 @@ ChatCommand * ChatHandler::getCommandTable()
     {
         { "add",            SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectCommand,          "", NULL },
         { "delete",         SEC_GAMEMASTER,     false, &ChatHandler::HandleDelObjectCommand,           "", NULL },
-        { "target",         SEC_GAMEMASTER,     false, &ChatHandler::HandleTargetObjectCommand,        "", NULL },
-        { "turn",           SEC_GAMEMASTER,     false, &ChatHandler::HandleTurnObjectCommand,          "", NULL },
         { "move",           SEC_GAMEMASTER,     false, &ChatHandler::HandleMoveObjectCommand,          "", NULL },
         { "near",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleNearObjectCommand,          "", NULL },
+        { "target",         SEC_GAMEMASTER,     false, &ChatHandler::HandleTargetObjectCommand,        "", NULL },
+        { "turn",           SEC_GAMEMASTER,     false, &ChatHandler::HandleTurnObjectCommand,          "", NULL },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
@@ -1280,6 +1280,51 @@ GameTele const* ChatHandler::extractGameTeleFromLink(char* text)
             return objmgr.GetGameTele(id);
 
     return objmgr.GetGameTele(cId);
+}
+
+enum GuidLinkType
+{
+    SPELL_LINK_CREATURE   = 0,
+    SPELL_LINK_GAMEOBJECT = 1
+};
+
+static char const* const guidKeys[] =
+{
+    "Hcreature",
+    "Hgameobject",
+    0
+};
+
+uint64 ChatHandler::extractGuidFromLink(char* text)
+{
+    int type = 0;
+
+    // |color|Hcreature:creature_guid|h[name]|h|r
+    // |color|Hgameobject:go_guid|h[name]|h|r
+    char* idS = extractKeyFromLink(text,guidKeys,&type);
+    if(!idS)
+        return 0;
+
+    uint32 lowguid = (uint32)atol(idS);
+
+    switch(type)
+    {
+        case SPELL_LINK_CREATURE:
+        {
+            if(CreatureData const* data = objmgr.GetCreatureData(lowguid) )
+                return MAKE_NEW_GUID(lowguid,data->id,HIGHGUID_UNIT);
+            else
+                return 0;
+        }
+        case SPELL_LINK_GAMEOBJECT:
+            if(GameObjectData const* data = objmgr.GetGOData(lowguid) )
+                return MAKE_NEW_GUID(lowguid,data->id,HIGHGUID_GAMEOBJECT);
+            else
+                return 0;
+    }
+
+    // unknown type?
+    return 0;
 }
 
 const char *ChatHandler::GetName() const

@@ -261,6 +261,13 @@ bool ChatHandler::HandleGPSCommand(const char* args)
 
         if(!obj)
         {
+            uint64 guid = extractGuidFromLink((char*)args);
+            if(guid)
+                obj = (WorldObject*)ObjectAccessor::GetObjectByTypeMask(*m_session->GetPlayer(),guid,TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
+        }
+
+        if(!obj)
+        {
             SendSysMessage(LANG_PLAYER_NOT_FOUND);
             SetSentErrorMessage(true);
             return false;
