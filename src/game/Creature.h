@@ -342,6 +342,7 @@ struct VendorItemData
     {
         for (VendorItemList::iterator itr = m_items.begin(); itr != m_items.end(); ++itr)
             delete (*itr);
+        m_items.clear();
     }
 };
 
