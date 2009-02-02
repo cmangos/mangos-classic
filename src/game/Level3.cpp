@@ -6539,7 +6539,7 @@ bool ChatHandler::HandleModifyGenderCommand(const char *args)
 
     PSendSysMessage(LANG_YOU_CHANGE_GENDER, GetNameLink(player).c_str(), gender_full);
     if (needReportToTarget(player))
-        ChatHandler(player).PSendSysMessage(LANG_YOUR_GENDER_CHANGED, gender_full,GetName());
+        ChatHandler(player).PSendSysMessage(LANG_YOUR_GENDER_CHANGED, gender_full,GetNameLink().c_str());
 
     return true;
 }
