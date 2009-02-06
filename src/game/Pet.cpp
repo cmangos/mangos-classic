@@ -1735,7 +1735,8 @@ bool Pet::Create(uint32 guidlow, Map *map, uint32 Entry, uint32 pet_number)
 
 bool Pet::HasSpell(uint32 spell) const
 {
-    return m_spells.find(spell) != m_spells.end();
+    PetSpellMap::const_iterator itr = m_spells.find(spell);
+    return (itr != m_spells.end() && itr->second->state != PETSPELL_REMOVED );
 }
 
 // Get all passive spells in our skill line
