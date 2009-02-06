@@ -45,18 +45,18 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         Map const* GetBaseMap(uint32 id) const { return const_cast<MapManager*>(this)->_GetBaseMap(id); }
         void DeleteInstance(uint32 mapid, uint32 instanceId);
 
-        inline uint16 GetAreaFlag(uint32 mapid, float x, float y) const
+        uint16 GetAreaFlag(uint32 mapid, float x, float y) const
         {
             Map const* m = GetBaseMap(mapid);
             return m->GetAreaFlag(x, y);
         }
-        inline uint32 GetAreaId(uint32 mapid, float x, float y) { return Map::GetAreaId(GetAreaFlag(mapid, x, y),mapid); }
-        inline uint32 GetZoneId(uint32 mapid, float x, float y) { return Map::GetZoneId(GetAreaFlag(mapid, x, y),mapid); }
+        uint32 GetAreaId(uint32 mapid, float x, float y) const { return Map::GetAreaId(GetAreaFlag(mapid, x, y),mapid); }
+        uint32 GetZoneId(uint32 mapid, float x, float y) const { return Map::GetZoneId(GetAreaFlag(mapid, x, y),mapid); }
 
         void Initialize(void);
         void Update(uint32);
 
-        inline void SetGridCleanUpDelay(uint32 t)
+        void SetGridCleanUpDelay(uint32 t)
         {
             if( t < MIN_GRID_DELAY )
                 i_gridCleanUpDelay = MIN_GRID_DELAY;
@@ -64,7 +64,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
                 i_gridCleanUpDelay = t;
         }
 
-        inline void SetMapUpdateInterval(uint32 t)
+        void SetMapUpdateInterval(uint32 t)
         {
             if( t > MIN_MAP_UPDATE_DELAY )
                 t = MIN_MAP_UPDATE_DELAY;
@@ -106,7 +106,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
 
         bool CanPlayerEnter(uint32 mapid, Player* player);
         void RemoveBonesFromMap(uint32 mapid, uint64 guid, float x, float y);
-        inline uint32 GenerateInstanceId() { return ++i_MaxInstanceId; }
+        uint32 GenerateInstanceId() { return ++i_MaxInstanceId; }
         void InitMaxInstanceId();
 
         /* statistics */
