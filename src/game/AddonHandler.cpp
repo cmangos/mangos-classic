@@ -64,17 +64,17 @@ bool AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target)
     if (Source->rpos() + 4 > Source->size())
         return false;
 
-    *Source >> TempValue;                                   //get real size of the packed structure
+    *Source >> TempValue;                                   // get real size of the packed structure
 
     // empty addon packet, nothing process, can't be received from real client
     if(!TempValue)
         return false;
 
-    AddonRealSize = TempValue;                              //temp value because ZLIB only excepts uLongf
+    AddonRealSize = TempValue;                              // temp value because ZLIB only excepts uLongf
 
-    CurrentPosition = Source->rpos();                       //get the position of the pointer in the structure
+    CurrentPosition = Source->rpos();                       // get the position of the pointer in the structure
 
-    AddOnPacked.resize(AddonRealSize);                      //resize target for zlib action
+    AddOnPacked.resize(AddonRealSize);                      // resize target for zlib action
 
     if (!uncompress(const_cast<uint8*>(AddOnPacked.contents()), &AddonRealSize, const_cast<uint8*>((*Source).contents() + CurrentPosition), (*Source).size() - CurrentPosition)!= Z_OK)
     {

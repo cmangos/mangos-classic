@@ -153,7 +153,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if( target->GetTypeId()==TYPEID_PLAYER && target != i_check && (((Player*)target)->isGameMaster() || ((Player*)target)->GetVisibility()==VISIBILITY_OFF) )
         return;
 
-    if( i_check->GetTypeId()==TYPEID_PLAYER )
+    if (i_check->GetTypeId()==TYPEID_PLAYER )
     {
         if (i_check->IsFriendlyTo( target ))
             return;

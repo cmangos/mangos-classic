@@ -1698,7 +1698,7 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
         }
 
         // check online security
-	Player* player = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
+        Player* player = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
         if (player && HasLowerSecurity(player, 0))
             return false;
 
@@ -4134,7 +4134,7 @@ bool ChatHandler::HandleNpcTameCommand(const char* /*args*/)
     player->GetClosePoint (x,y,z,creatureTarget->GetObjectSize (),CONTACT_DISTANCE);
     pet->Relocate (x,y,z,M_PI-player->GetOrientation ());
 
-    // set pet to defensive mode by default (some classes can't control contolled pets in fact).
+    // set pet to defensive mode by default (some classes can't control controlled pets in fact).
     pet->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
 
     // prepare visual effect for levelup
