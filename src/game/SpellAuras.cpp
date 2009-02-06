@@ -2972,7 +2972,9 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
     Unit* caster = GetCaster();
     if(!caster || caster->GetTypeId() != TYPEID_PLAYER)
         return;
-    if(caster->GetPet() != m_target)
+
+    Pet *pet = caster->GetPet();
+    if(!pet || pet != m_target)
         return;
 
     if(apply)
