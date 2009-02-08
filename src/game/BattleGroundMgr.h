@@ -225,8 +225,10 @@ class BattleGroundMgr
         void InitAutomaticArenaPointDistribution();
         void DistributeArenaPoints();
         void ToggleArenaTesting();
+        void ToggleTesting();
 
         bool isArenaTesting() const { return m_ArenaTesting; }
+        bool isTesting() const { return m_Testing; }
 
         static bool IsArenaType(uint32 bgTypeId);
         static bool IsBattleGroundType(uint32 bgTypeId) { return !BattleGroundMgr::IsArenaType(bgTypeId); }
@@ -241,6 +243,7 @@ class BattleGroundMgr
         uint64 m_NextAutoDistributionTime;
         uint32 m_AutoDistributionTimeChecker;
         bool   m_ArenaTesting;
+        bool   m_Testing;
 };
 
 #define sBattleGroundMgr MaNGOS::Singleton<BattleGroundMgr>::Instance()

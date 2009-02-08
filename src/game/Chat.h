@@ -430,6 +430,7 @@ class ChatHandler
         bool HandleGetItemState(const char * args);
         bool HandleGetLootRecipient(const char * args);
         bool HandleDebugArenaCommand(const char * args);
+        bool HandleDebugBattlegroundCommand(const char * args);
 
         Player*   getSelectedPlayer();
         Creature* getSelectedCreature();
