@@ -43,6 +43,7 @@
 #include "SpellAuras.h"
 #include "Util.h"
 #include "WaypointManager.h"
+#include "BattleGround.h"
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 
@@ -6342,6 +6343,11 @@ void ObjectMgr::LoadBattleMastersEntry()
 
         uint32 entry = fields[0].GetUInt32();
         uint32 bgTypeId  = fields[1].GetUInt32();
+        if (bgTypeId >= MAX_BATTLEGROUND_TYPE_ID)
+        {
+            sLog.outErrorDb("Table `battlemaster_entry` contain entry %u for not existed battleground type %u, ignored.",entry,bgTypeId);
+            continue;
+        }
 
         mBattleMastersMap[entry] = bgTypeId;
 
@@ -7038,14 +7044,13 @@ void ObjectMgr::LoadTrainerSpell()
 
         TrainerSpell* pTrainerSpell = new TrainerSpell();
         pTrainerSpell->spell         = spell;
-        pTrainerSpell->spellcost     = fields[2].GetUInt32();
-        pTrainerSpell->reqskill      = fields[3].GetUInt32();
-        pTrainerSpell->reqskillvalue = fields[4].GetUInt32();
-        pTrainerSpell->reqlevel      = fields[5].GetUInt32();
+        pTrainerSpell->spellCost     = fields[2].GetUInt32();
+        pTrainerSpell->reqSkill      = fields[3].GetUInt32();
+        pTrainerSpell->reqSkillValue = fields[4].GetUInt32();
+        pTrainerSpell->reqLevel      = fields[5].GetUInt32();
 
-        if(!pTrainerSpell->reqlevel)
-            pTrainerSpell->reqlevel = spellinfo->spellLevel;
-
+        if(!pTrainerSpell->reqLevel)
+            pTrainerSpell->reqLevel = spellinfo->spellLevel;
 
         TrainerSpellData& data = m_mCacheTrainerSpellMap[entry];
 
