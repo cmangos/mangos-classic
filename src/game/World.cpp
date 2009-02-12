@@ -35,6 +35,7 @@
 #include "SkillDiscovery.h"
 #include "World.h"
 #include "AccountMgr.h"
+#include "AuctionHouseMgr.h"
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
 #include "Chat.h"
@@ -1217,8 +1218,8 @@ void World::SetInitialWorldSettings()
     ///- Load dynamic data tables from the database
     sLog.outString( "Loading Auctions..." );
     sLog.outString();
-    objmgr.LoadAuctionItems();
-    objmgr.LoadAuctions();
+    auctionmgr.LoadAuctionItems();
+    auctionmgr.LoadAuctions();
     sLog.outString( ">>> Auctions loaded" );
     sLog.outString();
 
@@ -1429,13 +1430,13 @@ void World::Update(uint32 diff)
             switch (i)
             {
                 case 0:
-                    AuctionMap = objmgr.GetAuctionsMap( 6 );//horde
+                    AuctionMap = auctionmgr.GetAuctionsMap(AUCTION_HORDE);
                     break;
                 case 1:
-                    AuctionMap = objmgr.GetAuctionsMap( 2 );//alliance
+                    AuctionMap = auctionmgr.GetAuctionsMap(AUCTION_ALLIANCE);
                     break;
                 case 2:
-                    AuctionMap = objmgr.GetAuctionsMap( 7 );//neutral
+                    AuctionMap = auctionmgr.GetAuctionsMap(AUCTION_NEUTRAL);
                     break;
             }
 
@@ -1450,7 +1451,7 @@ void World::Update(uint32 diff)
                     ///- Either cancel the auction if there was no bidder
                     if (itr->second->bidder == 0)
                     {
-                        objmgr.SendAuctionExpiredMail( itr->second );
+                        auctionmgr.SendAuctionExpiredMail( itr->second );
                     }
                     ///- Or perform the transaction
                     else
@@ -1458,14 +1459,14 @@ void World::Update(uint32 diff)
                         //we should send an "item sold" message if the seller is online
                         //we send the item to the winner
                         //we send the money to the seller
-                        objmgr.SendAuctionSuccessfulMail( itr->second );
-                        objmgr.SendAuctionWonMail( itr->second );
+                        auctionmgr.SendAuctionSuccessfulMail( itr->second );
+                        auctionmgr.SendAuctionWonMail( itr->second );
                     }
 
                     ///- In any case clear the auction
                     //No SQL injection (Id is integer)
                     CharacterDatabase.PExecute("DELETE FROM auctionhouse WHERE id = '%u'",itr->second->Id);
-                    objmgr.RemoveAItem(itr->second->item_guidlow);
+                    auctionmgr.RemoveAItem(itr->second->item_guidlow);
                     delete itr->second;
                     AuctionMap->RemoveAuction(itr->first);
                 }
