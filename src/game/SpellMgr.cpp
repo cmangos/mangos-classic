@@ -2056,7 +2056,7 @@ uint8 GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,u
 {
     // normal case
     if( spellInfo->AreaId > 0 && spellInfo->AreaId != zone_id && spellInfo->AreaId != area_id )
-        return false;
+        return SPELL_FAILED_REQUIRES_AREA;
 
     // elixirs (all area dependent elixirs have family SPELLFAMILY_POTION, use this for speedup)
     if(spellInfo->SpellFamilyName==SPELLFAMILY_POTION)
@@ -2087,7 +2087,7 @@ uint8 GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,u
             }
 
             // elixirs not have another limitations
-            return true;
+            return 0;
         }
     }
 
