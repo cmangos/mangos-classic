@@ -52,6 +52,9 @@ class MANGOS_DLL_SPEC CreatureAI
         // Called for reaction at stopping attack at no attackers or targets
         virtual void EnterEvadeMode() {}
 
+        // Called at reaching home after evade
+        virtual void JustReachedHome() {}
+
         // Called at any heal cast/item used (call non implemented)
         virtual void HealBy(Unit * /*healer*/, uint32 /*amount_healed*/) {}
 

@@ -18,6 +18,7 @@
 
 #include "HomeMovementGenerator.h"
 #include "Creature.h"
+#include "CreatureAI.h"
 #include "Traveller.h"
 #include "DestinationHolderImp.h"
 #include "ObjectMgr.h"
@@ -75,6 +76,8 @@ HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time_diff
                 owner.SendMessageToSet(&packet, false);
             }
         }
+
+        owner.AI()->JustReachedHome();
         return false;
     }
 
