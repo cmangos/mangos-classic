@@ -250,7 +250,7 @@ void BattleGroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
 {
     Player *plr = objmgr.GetPlayer(guid);
 
-    uint32 queue_id = 0;
+    int32 queue_id = 0;                                     // signed for proper for-loop finish
     QueuedPlayersMap::iterator itr;
     GroupQueueInfo * group;
     QueuedGroupsList::iterator group_itr;
