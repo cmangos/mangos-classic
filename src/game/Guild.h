@@ -51,10 +51,10 @@ enum GuildRankRights
     GR_RIGHT_VIEWOFFNOTE        = 0x00004040,
     GR_RIGHT_EOFFNOTE           = 0x00008040,
     GR_RIGHT_MODIFY_GUILD_INFO  = 0x00010040,
-    GR_RIGHT_REPAIR_FROM_GUILD  = 0x00020000,               // unused in 2.4.x?, Remove money withdraw capacity
+    GR_RIGHT_WITHDRAW_GOLD_LOCK = 0x00020000,               // remove money withdraw capacity
     GR_RIGHT_WITHDRAW_REPAIR    = 0x00040000,               // withdraw for repair
     GR_RIGHT_WITHDRAW_GOLD      = 0x00080000,               // withdraw gold
-    GR_RIGHT_ALL                = 0x000FF1FF
+    GR_RIGHT_ALL                = 0x000DF1FF
 };
 
 enum Typecommand
