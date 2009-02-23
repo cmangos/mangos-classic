@@ -556,7 +556,9 @@ enum DiminishingLevels
 
 struct DiminishingReturn
 {
-    DiminishingReturn(DiminishingGroup group, uint32 t, uint32 count) : DRGroup(group), hitTime(t), hitCount(count), stack(0) {}
+    DiminishingReturn(DiminishingGroup group, uint32 t, uint32 count)
+        : DRGroup(group), stack(0), hitTime(t), hitCount(count)
+    {}
 
     DiminishingGroup        DRGroup:16;
     uint16                  stack:16;
