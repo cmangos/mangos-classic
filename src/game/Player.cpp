@@ -18296,8 +18296,6 @@ void Player::UpdateAreaDependentAuras( uint32 newArea )
             ++iter;
     }
 
-    if( newArea == 35)
-
     // some auras applied at subzone enter
     switch(newArea)
     {
