@@ -2051,6 +2051,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasTitle(CharTitlesEntry const* title) { return HasTitle(title->bit_index); }
         void SetTitle(CharTitlesEntry const* title);
 
+        bool isActiveObject() const { return true; }
     protected:
 
         /*********************************************************/
