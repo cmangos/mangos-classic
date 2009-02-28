@@ -92,7 +92,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
     if (pUser->isInCombat())
     {
-        for(int i = 0; i < 5; ++i)
+        for(int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
         {
             if (SpellEntry const *spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId))
             {
@@ -148,7 +148,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         // use triggered flag only for items with many spell casts and for not first cast
         int count = 0;
 
-        for(int i = 0; i < 5; ++i)
+        for(int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
         {
             _Spell const& spellData = pItem->GetProto()->Spells[i];
 

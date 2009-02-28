@@ -470,6 +470,11 @@ struct _Socket
     uint32 Content;
 };
 
+#define MAX_ITEM_PROTO_DAMAGES 5
+#define MAX_ITEM_PROTO_SOCKETS 3
+#define MAX_ITEM_PROTO_SPELLS  5
+#define MAX_ITEM_PROTO_STATS  10
+
 struct ItemPrototype
 {
     uint32 ItemId;
@@ -498,8 +503,8 @@ struct ItemPrototype
     uint32 MaxCount;
     uint32 Stackable;
     uint32 ContainerSlots;
-    _ItemStat ItemStat[10];
-    _Damage Damage[5];
+    _ItemStat ItemStat[MAX_ITEM_PROTO_STATS];
+    _Damage Damage[MAX_ITEM_PROTO_DAMAGES];
     uint32 Armor;
     uint32 HolyRes;
     uint32 FireRes;
@@ -510,7 +515,7 @@ struct ItemPrototype
     uint32 Delay;
     uint32 AmmoType;
     float  RangedModRange;
-    _Spell Spells[5];
+    _Spell Spells[MAX_ITEM_PROTO_SPELLS];
     uint32 Bonding;
     char*  Description;
     uint32 PageText;
@@ -529,7 +534,7 @@ struct ItemPrototype
     uint32 Map;                                             // id from Map.dbc
     uint32 BagFamily;                                       // id from ItemBagFamily.dbc
     uint32 TotemCategory;                                   // id from TotemCategory.dbc
-    _Socket Socket[3];
+    _Socket Socket[MAX_ITEM_PROTO_SOCKETS];
     uint32 socketBonus;                                     // id from SpellItemEnchantment.dbc
     uint32 GemProperties;                                   // id from GemProperties.dbc
     uint32 RequiredDisenchantSkill;
