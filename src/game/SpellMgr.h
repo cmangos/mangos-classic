@@ -207,6 +207,13 @@ enum SpellFailedReason
     SPELL_FAILED_UNKNOWN                        = 0xA8,
 };
 
+// only used in code
+enum SpellCategories
+{
+    SPELLCATEGORY_HEALTH_MANA_POTIONS = 4,
+    SPELLCATEGORY_DEVOUR_MAGIC        = 12
+};
+
 enum SpellFamilyNames
 {
     SPELLFAMILY_GENERIC     = 0,
