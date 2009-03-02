@@ -296,61 +296,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
     if (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND && !GetPlayer()->isInFlight())
-    {
-        // calculate total z distance of the fall
-        float z_diff = GetPlayer()->m_lastFallZ - movementInfo.z;
-        sLog.outDebug("zDiff = %f", z_diff);
-        Player *target = GetPlayer();
-
-        //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
-        // 14.57 can be calculated by resolving damageperc formular below to 0
-        if (z_diff >= 14.57f && !target->isDead() && !target->isGameMaster() &&
-            !target->HasAuraType(SPELL_AURA_HOVER) && !target->HasAuraType(SPELL_AURA_FEATHER_FALL) &&
-            !target->HasAuraType(SPELL_AURA_FLY) && !target->IsImmunedToDamage(SPELL_SCHOOL_MASK_NORMAL,true) )
-        {
-            //Safe fall, fall height reduction
-            int32 safe_fall = target->GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);
-
-            float damageperc = 0.018f*(z_diff-safe_fall)-0.2426f;
-
-            if(damageperc >0 )
-            {
-                uint32 damage = (uint32)(damageperc * target->GetMaxHealth()*sWorld.getRate(RATE_DAMAGE_FALL));
-
-                float height = movementInfo.z;
-                target->UpdateGroundPositionZ(movementInfo.x,movementInfo.y,height);
-
-                if (damage > 0)
-                {
-                    //Prevent fall damage from being more than the player maximum health
-                    if (damage > target->GetMaxHealth())
-                        damage = target->GetMaxHealth();
-
-                    // Gust of Wind
-                    if (target->GetDummyAura(43621))
-                        damage = target->GetMaxHealth()/2;
-
-                    target->EnvironmentalDamage(target->GetGUID(), DAMAGE_FALL, damage);
-                }
-
-                //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-                DEBUG_LOG("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d" , movementInfo.z, height, target->GetPositionZ(), movementInfo.fallTime, height, damage, safe_fall);
-            }
-        }
-
-        //handle fall and logout at the same time (logout started before fall finished)
-        /* outdated and create problems with sit at stun sometime
-        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE))
-        {
-            target->SetStandState(PLAYER_STATE_SIT);
-            // Can't move
-            WorldPacket data( SMSG_FORCE_MOVE_ROOT, 12 );
-            data.append(target->GetPackGUID());
-            data << (uint32)2;
-            SendPacket( &data );
-        }
-        */
-    }
+        GetPlayer()->HandleFall(movementInfo);
 
     if(((MovementFlags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
     {
