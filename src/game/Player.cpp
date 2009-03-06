@@ -17920,7 +17920,7 @@ uint32 Player::GetMinLevelForBattleGroundQueueId(uint32 queue_id)
 
 uint32 Player::GetMaxLevelForBattleGroundQueueId(uint32 queue_id)
 {
-    if(queue_id >=6)
+    if(queue_id >=7)
         return 255;                                         // hardcoded max level
 
     return 10*(queue_id+2)-1;
