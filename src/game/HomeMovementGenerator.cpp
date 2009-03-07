@@ -19,8 +19,6 @@
 #include "HomeMovementGenerator.h"
 #include "Creature.h"
 #include "Traveller.h"
-#include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "DestinationHolderImp.h"
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
