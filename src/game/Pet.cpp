@@ -1280,7 +1280,7 @@ void Pet::_LoadSpells()
         {
             Field *fields = result->Fetch();
 
-            addSpell(fields[0].GetUInt32(), fields[1].GetUInt16(), PETSPELL_UNCHANGED, fields[1].GetUInt16());
+            addSpell(fields[0].GetUInt32(), fields[2].GetUInt16(), PETSPELL_UNCHANGED, fields[1].GetUInt16());
         }
         while( result->NextRow() );
 
