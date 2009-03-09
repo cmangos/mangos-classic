@@ -1913,7 +1913,7 @@ void InstanceMap::PermBindAllPlayers(Player *player)
     InstanceSave *save = sInstanceSaveManager.GetInstanceSave(GetInstanceId());
     if(!save)
     {
-        sLog.outError("Cannot bind players, no instance save available for map!\n");
+        sLog.outError("Cannot bind players, no instance save available for map!");
         return;
     }
 

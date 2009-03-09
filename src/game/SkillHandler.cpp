@@ -130,7 +130,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 
     // learn! (other talent ranks will unlearned at learning)
     GetPlayer( )->learnSpell(spellid);
-    sLog.outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
+    sLog.outDetail("TalentID: %u Rank: %u Spell: %u", talent_id, requested_rank, spellid);
 
     // update free talent points
     GetPlayer()->SetFreeTalentPoints(CurTalentPoints - 1);
