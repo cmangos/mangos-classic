@@ -1320,6 +1320,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_unit_movement_flags;
 
         uint32 m_reactiveTimer[MAX_REACTIVE];
+        uint32 m_regenTimer;
 
     private:
         void SendAttackStop(Unit* victim);                  // only from AttackStop(Unit*)

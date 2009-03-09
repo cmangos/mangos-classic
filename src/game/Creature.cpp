@@ -113,6 +113,7 @@ m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_A
 m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
 m_creatureInfo(NULL), m_isActiveObject(false)
 {
+    m_regenTimer = 200;
     m_valuesCount = UNIT_END;
 
     for(int i =0; i<4; ++i)
