@@ -4743,7 +4743,7 @@ void ObjectMgr::LoadAreaTriggerTeleports()
         if(at.requiredQuest)
         {
             QuestMap::iterator qReqItr = mQuestTemplates.find(at.requiredQuest);
-            if(qReqItr != mQuestTemplates.end())
+            if(qReqItr == mQuestTemplates.end())
             {
                 sLog.outErrorDb("Required Quest %u not exist for trigger %u, remove quest done requirement.",at.requiredQuest,Trigger_ID);
                 at.requiredQuest = 0;
