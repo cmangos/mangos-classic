@@ -568,6 +568,9 @@ struct ItemPrototype
     }
 
     uint32 GetMaxStackSize() const { return Stackable; }
+
+    bool IsPotion() const { return Class==ITEM_CLASS_CONSUMABLE && SubClass==ITEM_SUBCLASS_POTION; }
+    bool IsConjuredConsumable() const { return Class == ITEM_CLASS_CONSUMABLE && (Flags & ITEM_FLAGS_CONJURED); }
 };
 
 struct ItemLocale
