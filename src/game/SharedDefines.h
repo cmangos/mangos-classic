@@ -1804,6 +1804,8 @@ inline uint8 ClassByQuestSort(int32 QuestSort)
 
 enum SkillType
 {
+    SKILL_NONE                     = 0,
+
     SKILL_FROST                    = 6,
     SKILL_FIRE                     = 8,
     SKILL_ARMS                     = 26,
@@ -1945,6 +1947,19 @@ enum SkillType
 };
 
 #define MAX_SKILL_TYPE               770
+
+inline SkillType SkillByLockType(LockType locktype)
+{
+    switch(locktype)
+    {
+        case LOCKTYPE_PICKLOCK:    return SKILL_LOCKPICKING;
+        case LOCKTYPE_HERBALISM:   return SKILL_HERBALISM;
+        case LOCKTYPE_MINING:      return SKILL_MINING;
+        case LOCKTYPE_FISHING:     return SKILL_FISHING;
+        default: break;
+    }
+    return SKILL_NONE;
+}
 
 inline uint32 SkillByQuestSort(int32 QuestSort)
 {
