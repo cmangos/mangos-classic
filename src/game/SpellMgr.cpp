@@ -531,13 +531,13 @@ bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellI
     return false;
 }
 
-uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
+SpellCastResult GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
 {
     // talents that learn spells can have stance requirements that need ignore
     // (this requirement only for client-side stance show in talent description)
     if( GetTalentSpellCost(spellInfo->Id) > 0 &&
         (spellInfo->Effect[0]==SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[1]==SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[2]==SPELL_EFFECT_LEARN_SPELL) )
-        return 0;
+        return SPELL_CAST_OK;
 
     uint32 stanceMask = (form ? 1 << (form - 1) : 0);
 
@@ -545,7 +545,7 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
         return SPELL_FAILED_NOT_SHAPESHIFT;
 
     if (stanceMask & spellInfo->Stances)                    // can explicitly be casted in this stance
-        return 0;
+        return SPELL_CAST_OK;
 
     bool actAsShifted = false;
     if (form > 0)
@@ -554,7 +554,7 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
         if (!shapeInfo)
         {
             sLog.outError("GetErrorAtShapeshiftedCast: unknown shapeshift %u", form);
-            return 0;
+            return SPELL_CAST_OK;
         }
         actAsShifted = !(shapeInfo->flags1 & 1);            // shapeshift acts as normal form for spells
     }
@@ -573,7 +573,7 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
             return SPELL_FAILED_ONLY_SHAPESHIFT;
     }
 
-    return 0;
+    return SPELL_CAST_OK;
 }
 
 void SpellMgr::LoadSpellTargetPositions()
@@ -2052,7 +2052,7 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
     return true;
 }
 
-uint8 GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,uint32 zone_id,uint32 area_id, uint32 bgInstanceId)
+SpellCastResult GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,uint32 zone_id,uint32 area_id, uint32 bgInstanceId)
 {
     // normal case
     if( spellInfo->AreaId > 0 && spellInfo->AreaId != zone_id && spellInfo->AreaId != area_id )
@@ -2066,28 +2066,28 @@ uint8 GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,u
             if(mask & ELIXIR_BATTLE_MASK)
             {
                 if(spellInfo->Id==45373)                    // Bloodberry Elixir
-                    return zone_id==4075 ? 0 : SPELL_FAILED_REQUIRES_AREA;
+                    return zone_id==4075 ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
             }
             if(mask & ELIXIR_UNSTABLE_MASK)
             {
                 // in the Blade's Edge Mountains Plateaus and Gruul's Lair.
-                return zone_id ==3522 || map_id==565 ? 0 : SPELL_FAILED_REQUIRES_AREA;
+                return zone_id ==3522 || map_id==565 ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
             }
             if(mask & ELIXIR_SHATTRATH_MASK)
             {
                 // in Tempest Keep, Serpentshrine Cavern, Caverns of Time: Mount Hyjal, Black Temple, Sunwell Plateau
                 if(zone_id ==3607 || map_id==534 || map_id==564 || zone_id==4075)
-                    return 0;
+                    return SPELL_CAST_OK;
 
                 MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
                 if(!mapEntry)
                     return SPELL_FAILED_REQUIRES_AREA;
 
-                return mapEntry->multimap_id==206 ? 0 : SPELL_FAILED_REQUIRES_AREA;
+                return mapEntry->multimap_id==206 ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
             }
 
             // elixirs not have another limitations
-            return 0;
+            return SPELL_CAST_OK;
         }
     }
 
@@ -2101,7 +2101,7 @@ uint8 GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,u
             if(!mapEntry)
                 return SPELL_FAILED_REQUIRES_AREA;
 
-            return mapEntry->multimap_id==206 ? 0 : SPELL_FAILED_REQUIRES_AREA;
+            return mapEntry->multimap_id==206 ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
         case 41617:                                         // Cenarion Mana Salve
         case 41619:                                         // Cenarion Healing Salve
@@ -2110,16 +2110,16 @@ uint8 GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,u
             if(!mapEntry)
                 return SPELL_FAILED_REQUIRES_AREA;
 
-            return mapEntry->multimap_id==207 ? 0 : SPELL_FAILED_REQUIRES_AREA;
+            return mapEntry->multimap_id==207 ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
         case 40216:                                         // Dragonmaw Illusion
         case 42016:                                         // Dragonmaw Illusion
-            return area_id == 3759 || area_id == 3966 || area_id == 3939 ? 0 : SPELL_FAILED_REQUIRES_AREA;
+            return area_id == 3759 || area_id == 3966 || area_id == 3939 ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 23333:                                         // Warsong Flag
         case 23335:                                         // Silverwing Flag
-            return map_id == 489 && bgInstanceId ? 0 : SPELL_FAILED_REQUIRES_AREA;
+            return map_id == 489 && bgInstanceId ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 34976:                                         // Netherstorm Flag
-            return map_id == 566 && bgInstanceId ? 0 : SPELL_FAILED_REQUIRES_AREA;
+            return map_id == 566 && bgInstanceId ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 2584:                                          // Waiting to Resurrect
         case 22011:                                         // Spirit Heal Channel
         case 22012:                                         // Spirit Heal
@@ -2132,7 +2132,7 @@ uint8 GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,u
             if(!mapEntry)
                 return SPELL_FAILED_REQUIRES_AREA;
 
-            return mapEntry->IsBattleGround() && bgInstanceId ? 0 : SPELL_FAILED_REQUIRES_AREA;
+            return mapEntry->IsBattleGround() && bgInstanceId ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
         case 44521:                                         // Preparation
         {
@@ -2147,7 +2147,7 @@ uint8 GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,u
                 return SPELL_FAILED_REQUIRES_AREA;
 
             BattleGround* bg = sBattleGroundMgr.GetBattleGround(bgInstanceId);
-            return bg && bg->GetStatus()==STATUS_WAIT_JOIN ? 0 : SPELL_FAILED_REQUIRES_AREA;
+            return bg && bg->GetStatus()==STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
         case 32724:                                         // Gold Team (Alliance)
         case 32725:                                         // Green Team (Alliance)
@@ -2158,7 +2158,7 @@ uint8 GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,u
             if(!mapEntry)
                 return SPELL_FAILED_REQUIRES_AREA;
 
-            return mapEntry->IsBattleArena() && bgInstanceId ? 0 : SPELL_FAILED_REQUIRES_AREA;
+            return mapEntry->IsBattleArena() && bgInstanceId ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
         case 32727:                                         // Arena Preparation
         {
@@ -2173,11 +2173,11 @@ uint8 GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,u
                 return SPELL_FAILED_REQUIRES_AREA;
 
             BattleGround* bg = sBattleGroundMgr.GetBattleGround(bgInstanceId);
-            return bg && bg->GetStatus()==STATUS_WAIT_JOIN ? 0 : SPELL_FAILED_REQUIRES_AREA;
+            return bg && bg->GetStatus()==STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         }
     }
 
-    return 0;
+    return SPELL_CAST_OK;
 }
 
 void SpellMgr::LoadSkillLineAbilityMap()

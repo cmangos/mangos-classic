@@ -149,7 +149,7 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB);
 bool IsSingleTargetSpell(SpellEntry const *spellInfo);
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2);
 
-uint8 GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,uint32 zone_id,uint32 area_id,uint32 bgInstanceId);
+SpellCastResult GetSpellAllowedInLocationError(SpellEntry const *spellInfo,uint32 map_id,uint32 zone_id,uint32 area_id,uint32 bgInstanceId);
 
 inline bool IsAreaEffectTarget( Targets target )
 {
@@ -211,7 +211,7 @@ inline bool isSpellBreakStealth(SpellEntry const* spellInfo)
     return !(spellInfo->AttributesEx & SPELL_ATTR_EX_NOT_BREAK_STEALTH);
 }
 
-uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form);
+SpellCastResult GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form);
 
 inline bool IsChanneledSpell(SpellEntry const* spellInfo)
 {
