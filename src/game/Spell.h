@@ -310,7 +310,7 @@ class Spell
         void TriggerSpell();
 
         SpellCastResult CheckCast(bool strict);
-        int16 PetCanCast(Unit* target);
+        SpellCastResult CheckPetCast(Unit* target);
 
         // handlers
         void handle_immediate();
