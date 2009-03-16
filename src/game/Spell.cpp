@@ -389,7 +389,7 @@ void Spell::FillTargetMap()
         if(m_spellInfo->Effect[i]==0)
             continue;
 
-        // targets for TARGET_SCRIPT_COORDINATES (A) and TARGET_SCRIPT  filled in Spell::canCast call
+        // targets for TARGET_SCRIPT_COORDINATES (A) and TARGET_SCRIPT  filled in Spell::CheckCast call
         if( m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT_COORDINATES ||
             m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT ||
             m_spellInfo->EffectImplicitTargetB[i] == TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[i] != TARGET_SELF )
@@ -434,7 +434,10 @@ void Spell::FillTargetMap()
             default:
                 switch(m_spellInfo->EffectImplicitTargetB[i])
                 {
-                    case TARGET_SCRIPT_COORDINATES:         // B case filled in canCast but we need fill unit list base at A case
+                    case 0:
+                        SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
+                        break;
+                    case TARGET_SCRIPT_COORDINATES:         // B case filled in CheckCast but we need fill unit list base at A case
                         SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
                         break;
                     default:
@@ -1946,8 +1949,8 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
     // Fill cost data
     m_powerCost = CalculatePowerCost();
 
-    uint8 result = CanCast(true);
-    if(result != 0 && !IsAutoRepeat())                      //always cast autorepeat dummy for triggering
+    SpellCastResult result = CheckCast(true);
+    if(result != SPELL_CAST_OK && !IsAutoRepeat())          //always cast autorepeat dummy for triggering
     {
         if(triggeredByAura)
         {
@@ -1959,7 +1962,7 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
         return;
     }
 
-    // calculate cast time (calculated after first CanCast check to prevent charge counting for first CanCast fail)
+    // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
     m_casttime = GetSpellCastTime(m_spellInfo, this);
 
     // set timer base at cast time
@@ -2044,7 +2047,7 @@ void Spell::cast(bool skipCheck)
     if(m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
         m_caster->SetInFront(m_targets.getUnitTarget());
 
-    uint8 castResult = CheckPower();
+    SpellCastResult castResult = CheckPower();
     if(castResult != SPELL_CAST_OK)
     {
         SendCastResult(castResult);
@@ -2056,8 +2059,8 @@ void Spell::cast(bool skipCheck)
     // triggered cast called from Spell::prepare where it was already checked
     if(!skipCheck)
     {
-        castResult = CanCast(false);
-        if(castResult != 0)
+        castResult = CheckCast(false);
+        if(castResult != SPELL_CAST_OK)
         {
             SendCastResult(castResult);
             finish(false);
@@ -2476,7 +2479,7 @@ void Spell::finish(bool ok)
         m_caster->AttackStop();
 }
 
-void Spell::SendCastResult(uint8 result)
+void Spell::SendCastResult(SpellCastResult result)
 {
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -2484,64 +2487,63 @@ void Spell::SendCastResult(uint8 result)
     if(((Player*)m_caster)->GetSession()->PlayerLoading())  // don't send cast results at loading time
         return;
 
-    if(result != 0)
-    {
-        WorldPacket data(SMSG_CAST_FAILED, (4+1+1));
-        data << uint32(m_spellInfo->Id);
-        data << uint8(result);                              // problem
-        data << uint8(m_cast_count);                        // single cast or multi 2.3 (0/1)
-        switch (result)
-        {
-            case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
-                data << uint32(m_spellInfo->RequiresSpellFocus);
-                break;
-            case SPELL_FAILED_REQUIRES_AREA:
-                // hardcode areas limitation case
-                switch(m_spellInfo->Id)
-                {
-                    case 41617:                             // Cenarion Mana Salve
-                    case 41619:                             // Cenarion Healing Salve
-                        data << uint32(3905);
-                        break;
-                    case 41618:                             // Bottled Nethergon Energy
-                    case 41620:                             // Bottled Nethergon Vapor
-                        data << uint32(3842);
-                        break;
-                    case 45373:                             // Bloodberry Elixir
-                        data << uint32(4075);
-                        break;
-                    default:                                // default case
-                        data << uint32(m_spellInfo->AreaId);
-                        break;
-                }
-                break;
-            case SPELL_FAILED_TOTEMS:
-                if(m_spellInfo->Totem[0])
-                    data << uint32(m_spellInfo->Totem[0]);
-                if(m_spellInfo->Totem[1])
-                    data << uint32(m_spellInfo->Totem[1]);
-                break;
-            case SPELL_FAILED_TOTEM_CATEGORY:
-                if(m_spellInfo->TotemCategory[0])
-                    data << uint32(m_spellInfo->TotemCategory[0]);
-                if(m_spellInfo->TotemCategory[1])
-                    data << uint32(m_spellInfo->TotemCategory[1]);
-                break;
-            case SPELL_FAILED_EQUIPPED_ITEM_CLASS:
-                data << uint32(m_spellInfo->EquippedItemClass);
-                data << uint32(m_spellInfo->EquippedItemSubClassMask);
-                data << uint32(m_spellInfo->EquippedItemInventoryTypeMask);
-                break;
-        }
-        ((Player*)m_caster)->GetSession()->SendPacket(&data);
-    }
-    else
+    if(result == SPELL_CAST_OK)
     {
         WorldPacket data(SMSG_CLEAR_EXTRA_AURA_INFO, (8+4));
         data.append(m_caster->GetPackGUID());
         data << uint32(m_spellInfo->Id);
         ((Player*)m_caster)->GetSession()->SendPacket(&data);
+        return;
     }
+
+    WorldPacket data(SMSG_CAST_FAILED, (4+1+1));
+    data << uint32(m_spellInfo->Id);
+    data << uint8(result);                              // problem
+    data << uint8(m_cast_count);                        // single cast or multi 2.3 (0/1)
+    switch (result)
+    {
+        case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
+            data << uint32(m_spellInfo->RequiresSpellFocus);
+            break;
+        case SPELL_FAILED_REQUIRES_AREA:
+            // hardcode areas limitation case
+            switch(m_spellInfo->Id)
+            {
+                case 41617:                             // Cenarion Mana Salve
+                case 41619:                             // Cenarion Healing Salve
+                    data << uint32(3905);
+                    break;
+                case 41618:                             // Bottled Nethergon Energy
+                case 41620:                             // Bottled Nethergon Vapor
+                    data << uint32(3842);
+                    break;
+                case 45373:                             // Bloodberry Elixir
+                    data << uint32(4075);
+                    break;
+                default:                                // default case
+                    data << uint32(m_spellInfo->AreaId);
+                    break;
+            }
+            break;
+        case SPELL_FAILED_TOTEMS:
+            if(m_spellInfo->Totem[0])
+                data << uint32(m_spellInfo->Totem[0]);
+            if(m_spellInfo->Totem[1])
+                data << uint32(m_spellInfo->Totem[1]);
+            break;
+        case SPELL_FAILED_TOTEM_CATEGORY:
+            if(m_spellInfo->TotemCategory[0])
+                data << uint32(m_spellInfo->TotemCategory[0]);
+            if(m_spellInfo->TotemCategory[1])
+                data << uint32(m_spellInfo->TotemCategory[1]);
+            break;
+        case SPELL_FAILED_EQUIPPED_ITEM_CLASS:
+            data << uint32(m_spellInfo->EquippedItemClass);
+            data << uint32(m_spellInfo->EquippedItemSubClassMask);
+            data << uint32(m_spellInfo->EquippedItemInventoryTypeMask);
+            break;
+    }
+    ((Player*)m_caster)->GetSession()->SendPacket(&data);
 }
 
 void Spell::SendSpellStart()
@@ -3084,7 +3086,7 @@ void Spell::TriggerSpell()
     }
 }
 
-uint8 Spell::CanCast(bool strict)
+SpellCastResult Spell::CheckCast(bool strict)
 {
     // check cooldowns to prevent cheating
     if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->HasSpellCooldown(m_spellInfo->Id))
@@ -3130,9 +3132,7 @@ uint8 Spell::CanCast(bool strict)
             return SPELL_FAILED_MOVING;
     }
 
-    Unit *target = m_targets.getUnitTarget();
-
-    if(target)
+    if(Unit *target = m_targets.getUnitTarget())
     {
         // target state requirements (not allowed state), apply to self also
         if(m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
@@ -3273,7 +3273,7 @@ uint8 Spell::CanCast(bool strict)
     }
 
     //ImpliciteTargetA-B = 38, If fact there is 0 Spell with  ImpliciteTargetB=38
-    if(m_UniqueTargetInfo.empty())                          // skip second canCast apply (for delayed spells for example)
+    if(m_UniqueTargetInfo.empty())                          // skip second CheckCast apply (for delayed spells for example)
     {
         for(uint8 j = 0; j < 3; j++)
         {
@@ -3448,7 +3448,7 @@ uint8 Spell::CanCast(bool strict)
                 {
                     // spell different for friends and enemies
                     // hart version required facing
-                    if(m_targets.getUnitTarget() && !m_caster->IsFriendlyTo(m_targets.getUnitTarget()) && !m_caster->HasInArc( M_PI, target ))
+                    if(m_targets.getUnitTarget() && !m_caster->IsFriendlyTo(m_targets.getUnitTarget()) && !m_caster->HasInArc( M_PI, m_targets.getUnitTarget() ))
                         return SPELL_FAILED_UNIT_NOT_INFRONT;
                 }
                 break;
@@ -3874,7 +3874,7 @@ uint8 Spell::CanCast(bool strict)
     }
 
     // all ok
-    return 0;
+    return SPELL_CAST_OK;
 }
 
 int16 Spell::PetCanCast(Unit* target)
@@ -3941,8 +3941,8 @@ int16 Spell::PetCanCast(Unit* target)
             return SPELL_FAILED_NOT_READY;
     }
 
-    uint16 result = CanCast(true);
-    if(result != 0)
+    SpellCastResult result = CheckCast(true);
+    if(result != SPELL_CAST_OK)
         return result;
     else
         return -1;                                          //this allows to check spell fail 0, in combat
