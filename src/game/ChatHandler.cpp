@@ -577,7 +577,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     cell_lock->Visit(cell_lock, message, *GetPlayer()->GetMap());
 
     //Send scripted event call
-    if (unit->GetTypeId()==TYPEID_UNIT && Script)
+    if (unit && unit->GetTypeId()==TYPEID_UNIT && Script)
         Script->ReceiveEmote(GetPlayer(),(Creature*)unit,text_emote);
 }
 
