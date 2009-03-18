@@ -947,6 +947,24 @@ void ObjectMgr::LoadGameobjects()
             continue;
         }
 
+        if(data.rotation2 < -1.0f || data.rotation2 > 1.0f)
+        {
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation2 (%f) value, skip",guid,data.id,data.rotation2 );
+            continue;
+        }
+
+        if(data.rotation3 < -1.0f || data.rotation3 > 1.0f)
+        {
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid rotation3 (%f) value, skip",guid,data.id,data.rotation3 );
+            continue;
+        }
+
+        if(!MapManager::IsValidMapCoord(data.mapid,data.posX,data.posY,data.posZ,data.orientation))
+        {
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid coordinates, skip",guid,data.id );
+            continue;
+        }
+
         if (gameEvent==0)                                   // if not this is to be managed by GameEvent System
             AddGameobjectToGrid(guid, &data);
         ++count;
