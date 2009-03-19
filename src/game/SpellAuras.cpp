@@ -3217,7 +3217,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         if(GetId() == 39837)
         {
             GameObject* pObj = new GameObject;
-            if(pObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 185584, m_target->GetMap(), m_target->GetPhaseMask(),
+            if(pObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 185584, m_target->GetMap(),
                 m_target->GetPositionX(), m_target->GetPositionY(), m_target->GetPositionZ(), m_target->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 100, 1))
             {
                 pObj->SetRespawnTime(GetAuraDuration()/IN_MILISECONDS);
@@ -4036,93 +4036,173 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     // For prevent double apply bonuses
     bool loading = (m_target->GetTypeId() == TYPEID_PLAYER && ((Player*)m_target)->GetSession()->PlayerLoading());
 
-    Unit *caster = GetCaster();
-
-    switch (m_spellProto->SpellFamilyName)
+    // Custom damage calculation after
+    if (apply)
     {
-        case SPELLFAMILY_GENERIC:
+        if(loading)
+            return; 
+
+        Unit *caster = GetCaster();
+        if (!caster)
+            return;
+
+        switch (m_spellProto->SpellFamilyName)
         {
-            // Pounce Bleed
-            if ( m_spellProto->SpellIconID == 147 && m_spellProto->SpellVisual == 0 )
+            case SPELLFAMILY_GENERIC:
             {
-                // $AP*0.18/6 bonus per tick
-                if (apply && !loading && caster)
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 3 / 100);
-                return;
-            }
-            break;
-        }
-        case SPELLFAMILY_WARRIOR:
-        {
-            // Rend
-            if (m_spellProto->SpellFamilyFlags & 0x0000000000000020LL)
-            {
-                // 0.00743*(($MWB+$mwb)/2+$AP/14*$MWS) bonus per tick
-                if (apply && !loading && caster)
+                // Pounce Bleed
+                if ( m_spellProto->SpellIconID == 147 && m_spellProto->SpellVisual == 0 )
                 {
+                    // $AP*0.18/6 bonus per tick
+                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 3 / 100);
+                    return;
+                }
+                break;
+            }
+            case SPELLFAMILY_WARRIOR:
+            {
+                // Rend
+                if (m_spellProto->SpellFamilyFlags & 0x0000000000000020LL)
+                {
+                    // 0.00743*(($MWB+$mwb)/2+$AP/14*$MWS) bonus per tick
                     float ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     int32 mws = caster->GetAttackTime(BASE_ATTACK);
                     float mwb_min = caster->GetWeaponDamageRange(BASE_ATTACK,MINDAMAGE);
                     float mwb_max = caster->GetWeaponDamageRange(BASE_ATTACK,MAXDAMAGE);
                     // WARNING! in 3.0 multiplier 0.00743f change to 0.6
                     m_modifier.m_amount+=int32(((mwb_min+mwb_max)/2+ap*mws/14000)*0.00743f);
+                    return;
                 }
-                return;
+                break;
             }
-            break;
-        }
-        case SPELLFAMILY_DRUID:
-        {
-            // Rake
-            if (m_spellProto->SpellFamilyFlags & 0x0000000000001000LL)
+            case SPELLFAMILY_DRUID:
             {
-                // $AP*0.06/3 bonus per tick
-                if (apply && !loading && caster)
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 2 / 100);
-                return;
-            }
-            // Lacerate
-            if (m_spellProto->SpellFamilyFlags & 0x000000010000000000LL)
-            {
-                // $AP*0.05/5 bonus per tick
-                if (apply && !loading && caster)
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
-                return;
-            }
-            // Rip
-            if (m_spellProto->SpellFamilyFlags & 0x000000000000800000LL)
-            {
-                // $AP * min(0.06*$cp, 0.24)/6 [Yes, there is no difference, whether 4 or 5 CPs are being used]
-                if (apply && !loading && caster && caster->GetTypeId() == TYPEID_PLAYER)
+                // Rake
+                if (m_spellProto->SpellFamilyFlags & 0x0000000000001000LL)
                 {
-                    uint8 cp = ((Player*)caster)->GetComboPoints();
-
-                    // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
-                    Unit::AuraList const& dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
+                    // $AP*0.06/3 bonus per tick
+                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 2 / 100);
+                    return;
+                }
+                // Lacerate
+                if (m_spellProto->SpellFamilyFlags & 0x000000010000000000LL)
+                {
+                    // $AP*0.05/5 bonus per tick
+                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
+                    return;
+                }
+                // Rip
+                if (m_spellProto->SpellFamilyFlags & 0x000000000000800000LL)
+                {
+                    // $AP * min(0.06*$cp, 0.24)/6 [Yes, there is no difference, whether 4 or 5 CPs are being used]
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
                     {
-                        if((*itr)->GetId()==34241)
+                        uint8 cp = ((Player*)caster)->GetComboPoints();
+
+                        // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
+                        Unit::AuraList const& dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
+                        for(Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
                         {
-                            m_modifier.m_amount += cp * (*itr)->GetModifier()->m_amount;
-                            break;
+                            if((*itr)->GetId()==34241)
+                            {
+                                m_modifier.m_amount += cp * (*itr)->GetModifier()->m_amount;
+                                break;
+                            }
+                        }
+
+                        if (cp > 4) cp = 4;
+                        m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
+                    }
+                    return;
+                }
+                break;
+            }
+            case SPELLFAMILY_ROGUE:
+            {
+                // Deadly poison aura state
+                if((m_spellProto->SpellFamilyFlags & 0x10000) && m_spellProto->SpellVisual==5100)
+                {
+                    m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,true);
+                    return;
+                }
+                // Rupture
+                if (m_spellProto->SpellFamilyFlags & 0x000000000000100000LL)
+                {
+                    // Dmg/tick = $AP*min(0.01*$cp, 0.03) [Like Rip: only the first three CP increase the contribution from AP]
+                    if (caster->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        uint8 cp = ((Player*)caster)->GetComboPoints();
+                        if (cp > 3) cp = 3;
+                        m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
+                    }
+                    return;
+                }
+                // Garrote
+                if (m_spellProto->SpellFamilyFlags & 0x000000000000000100LL)
+                {
+                    // $AP*0.18/6 bonus per tick
+                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 3 / 100);
+                    return;
+                }
+                break;
+            }
+            case SPELLFAMILY_HUNTER:
+            {
+                // Serpent Sting
+                if (m_spellProto->SpellFamilyFlags & 0x0000000000004000LL)
+                {
+                    // $RAP*0.1/5 bonus per tick
+                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 10 / 500);
+                    return;
+                }
+                // Immolation Trap
+                if (m_spellProto->SpellFamilyFlags & 0x0000000000000004LL && m_spellProto->SpellIconID == 678)
+                {
+                    // $RAP*0.1/5 bonus per tick
+                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 10 / 500);
+                    return;
+                }
+                break;
+            }
+            case SPELLFAMILY_PALADIN:
+            {
+                // Consecration
+                if (m_spellProto->SpellFamilyFlags & 0x0000000000000020LL)
+                {
+                    Unit::AuraList const& classScripts = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                    for(Unit::AuraList::const_iterator k = classScripts.begin(); k != classScripts.end(); ++k)
+                    {
+                        int32 tickcount = GetSpellDuration(m_spellProto) / m_spellProto->EffectAmplitude[m_effIndex];
+                        switch((*k)->GetModifier()->m_miscvalue)
+                        {
+                        case 5147:                  // Improved Consecration - Libram of the Eternal Rest
+                            {
+                                m_modifier.m_amount += (*k)->GetModifier()->m_amount / tickcount;
+                                break;
+                            }
                         }
                     }
-
-                    if (cp > 4) cp = 4;
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
+                    return;
                 }
-                return;
+                break;
             }
-            break;
+            default:
+                break;
         }
-        case SPELLFAMILY_ROGUE:
+    }
+    // remove time effects
+    else
+    {
+        // Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
+        if(m_spellProto->Id == 41917)
+            m_target->CastSpell(m_target, 41915, true);
+
+        switch (m_spellProto->SpellFamilyName)
         {
-            // Deadly poison aura state
-            if((m_spellProto->SpellFamilyFlags & 0x10000) && m_spellProto->SpellVisual==5100)
+            case SPELLFAMILY_ROGUE:
             {
-                if(apply)
-                    m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,true);
-                else
+                // Deadly poison aura state
+                if((m_spellProto->SpellFamilyFlags & 0x10000) && m_spellProto->SpellVisual==5100)
                 {
                     // current aura already removed, search present of another
                     bool found = false;
@@ -4140,80 +4220,11 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     if(!found)
                         m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,false);
                 }
-                return;
+                break;
             }
-            // Rupture
-            if (m_spellProto->SpellFamilyFlags & 0x000000000000100000LL)
-            {
-                // Dmg/tick = $AP*min(0.01*$cp, 0.03) [Like Rip: only the first three CP increase the contribution from AP]
-                if (apply && !loading && caster && caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    uint8 cp = ((Player*)caster)->GetComboPoints();
-                    if (cp > 3) cp = 3;
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
-                }
-                return;
-            }
-            // Garrote
-            if (m_spellProto->SpellFamilyFlags & 0x000000000000000100LL)
-            {
-                // $AP*0.18/6 bonus per tick
-                if (apply && !loading && caster)
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 3 / 100);
-                return;
-            }
-            break;
+            default:
+                break;
         }
-        case SPELLFAMILY_HUNTER:
-        {
-            // Serpent Sting
-            if (m_spellProto->SpellFamilyFlags & 0x0000000000004000LL)
-            {
-                // $RAP*0.1/5 bonus per tick
-                if (apply && !loading && caster)
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 10 / 500);
-                return;
-            }
-            // Immolation Trap
-            if (m_spellProto->SpellFamilyFlags & 0x0000000000000004LL && m_spellProto->SpellIconID == 678)
-            {
-                // $RAP*0.1/5 bonus per tick
-                if (apply && !loading && caster)
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 10 / 500);
-                return;
-            }
-            break;
-        }
-        case SPELLFAMILY_PALADIN:
-        {
-            // Consecration
-            if (m_spellProto->SpellFamilyFlags & 0x0000000000000020LL)
-            {
-                if (apply && !loading)
-                {
-                    if(Unit* caster = GetCaster())
-                    {
-                        Unit::AuraList const& classScripts = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                        for(Unit::AuraList::const_iterator k = classScripts.begin(); k != classScripts.end(); ++k)
-                        {
-                            int32 tickcount = GetSpellDuration(m_spellProto) / m_spellProto->EffectAmplitude[m_effIndex];
-                            switch((*k)->GetModifier()->m_miscvalue)
-                            {
-                                case 5147:                  // Improved Consecration - Libram of the Eternal Rest
-                                {
-                                    m_modifier.m_amount += (*k)->GetModifier()->m_amount / tickcount;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                return;
-            }
-            break;
-        }
-        default:
-            break;
     }
 }
 
