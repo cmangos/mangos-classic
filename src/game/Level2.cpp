@@ -602,7 +602,7 @@ bool ChatHandler::HandleGameObjectTurnCommand(const char* args)
     obj->SaveToDB();
     obj->Refresh();
 
-    PSendSysMessage(LANG_COMMAND_TURNOBJMESSAGE, obj->GetGUIDLow(), o);
+    PSendSysMessage(LANG_COMMAND_TURNOBJMESSAGE, obj->GetGUIDLow(), obj->GetGOInfo()->name, obj->GetGUIDLow(), o);
 
     return true;
 }
@@ -680,7 +680,7 @@ bool ChatHandler::HandleGameObjectMoveCommand(const char* args)
     obj->SaveToDB();
     obj->Refresh();
 
-    PSendSysMessage(LANG_COMMAND_MOVEOBJMESSAGE, obj->GetGUIDLow());
+    PSendSysMessage(LANG_COMMAND_MOVEOBJMESSAGE, obj->GetGUIDLow(), obj->GetGOInfo()->name, obj->GetGUIDLow());
 
     return true;
 }
