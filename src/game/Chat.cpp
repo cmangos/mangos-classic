@@ -115,7 +115,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "buyerr",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugBuyErrorCommand,            "", NULL },
         { "sendopcode",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendOpcodeCommand,          "", NULL },
         { "uws",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugUpdateWorldStateCommand,    "", NULL },
-        { "ps",             SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugPlaySound2Command,          "", NULL },
         { "scn",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendChannelNotifyCommand,   "", NULL },
         { "scm",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSendChatMsgCommand,         "", NULL },
         { "getitemstate",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugGetItemState,               "", NULL },
