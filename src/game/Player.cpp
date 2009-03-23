@@ -794,14 +794,14 @@ void Player::StopMirrorTimer(MirrorTimerType Type)
     GetSession()->SendPacket( &data );
 }
 
-void Player::EnvironmentalDamage(uint64 guid, EnviromentalDamage type, uint32 damage)
+void Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 {
     WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, (21));
-    data << (uint64)guid;
-    data << (uint8)(type!=DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);
-    data << (uint32)damage;
-    data << (uint32)0;
-    data << (uint32)0;
+    data << uint64(GetGUID());
+    data << uint8(type!=DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);
+    data << uint32(damage);
+    data << uint32(0);
+    data << uint32(0);
     SendMessageToSet(&data, true);
 
     DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -18696,7 +18696,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
                 if (GetDummyAura(43621))
                     damage = GetMaxHealth()/2;
 
-                EnvironmentalDamage(GetGUID(), DAMAGE_FALL, damage);
+                EnvironmentalDamage(DAMAGE_FALL, damage);
             }
 
             //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
