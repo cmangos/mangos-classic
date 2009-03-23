@@ -856,7 +856,7 @@ void Player::HandleDrowning()
             uint64 guid = GetGUID();
             uint32 damage = GetMaxHealth() / 5 + urand(0, getLevel()-1);
 
-            EnvironmentalDamage(guid, DAMAGE_DROWNING,damage);
+            EnvironmentalDamage(DAMAGE_DROWNING,damage);
             m_breathTimer = 2000;
         }
     }
@@ -918,7 +918,7 @@ void Player::HandleLava()
 
             // if is valid area and is not gamemaster then deal damage
             if ( ValidArea && !isGameMaster() )
-                EnvironmentalDamage(guid, DAMAGE_LAVA, damage);
+                EnvironmentalDamage(DAMAGE_LAVA, damage);
 
             m_breathTimer = 1*IN_MILISECONDS;
         }
