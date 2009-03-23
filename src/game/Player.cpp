@@ -427,6 +427,9 @@ Player::Player (WorldSession *session): Unit()
     m_contestedPvPTimer = 0;
 
     m_declinedname = NULL;
+
+    m_lastFallTime = 0;
+    m_lastFallZ = 0;
 }
 
 Player::~Player ()
@@ -18703,4 +18706,10 @@ void Player::HandleFall(MovementInfo const& movementInfo)
             DEBUG_LOG("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d" , movementInfo.z, height, GetPositionZ(), movementInfo.fallTime, height, damage, safe_fall);
         }
     }
+}
+
+void Player::UpdateFallInformationIfNeed( MovementInfo const& minfo,uint16 opcode )
+{
+    if (m_lastFallTime >= minfo.fallTime || m_lastFallZ <=minfo.z || opcode == MSG_MOVE_FALL_LAND)
+        SetFallInformation(minfo.fallTime, minfo.z);
 }
