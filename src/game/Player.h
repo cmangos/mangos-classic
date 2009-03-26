@@ -1227,6 +1227,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id );
         void TalkedToCreature( uint32 entry, uint64 guid );
         void MoneyChanged( uint32 value );
+        void ReputationChanged(FactionEntry const* factionEntry );
         bool HasQuestForItem( uint32 itemid ) const;
         bool HasQuestForGO(int32 GOId) const;
         void UpdateForQuestsGO();
@@ -1679,9 +1680,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsAtGroupRewardDistance(WorldObject const* pRewardSource) const;
         bool RewardPlayerAndGroupAtKill(Unit* pVictim);
 
-        FactionStateList m_factions;
-        ForcedReactions m_forcedReactions;
         FactionStateList const& GetFactionStateList() { return m_factions; }
+        FactionState const* GetFactionState(RepListID id) const
+        {
+            FactionStateList::const_iterator repItr = m_factions.find (id);
+            return repItr != m_factions.end() ? &repItr->second : NULL;
+        }
+        FactionState const* GetFactionState(FactionEntry const* factionEntry) const
+        {
+            return factionEntry->reputationListID >= 0 ? GetFactionState(factionEntry->reputationListID) : NULL;
+        }
         uint32 GetDefaultReputationFlags(const FactionEntry *factionEntry) const;
         int32 GetBaseReputation(const FactionEntry *factionEntry) const;
         int32 GetReputation(uint32 faction_id) const;
@@ -1695,23 +1703,27 @@ class MANGOS_DLL_SPEC Player : public Unit
         const static int32 Reputation_Bottom = -42000;
         bool ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation);
         bool ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing);
-        bool ModifyOneFactionReputation(FactionEntry const* factionEntry, int32 standing);
         bool SetFactionReputation(uint32 FactionTemplateId, int32 standing);
         bool SetFactionReputation(FactionEntry const* factionEntry, int32 standing);
-        bool SetOneFactionReputation(FactionEntry const* factionEntry, int32 standing);
-        int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, bool for_quest);
         void RewardReputation(Unit *pVictim, float rate);
         void RewardReputation(Quest const *pQuest);
         void SetInitialFactions();
         void UpdateReputation() const;
         void SendFactionState(FactionState const* faction) const;
         void SendInitialReputations();
-        FactionState const* GetFactionState( FactionEntry const* factionEntry) const;
-        void SetFactionAtWar(FactionState* faction, bool atWar);
-        void SetFactionInactive(FactionState* faction, bool inactive);
-        void SetFactionVisible(FactionState* faction);
-        void SetFactionVisibleForFactionTemplateId(uint32 FactionTemplateId);
-        void SetFactionVisibleForFactionId(uint32 FactionId);
+        void SetFactionAtWar(RepListID repListID, bool atWar);
+        void SetFactionInactive(RepListID repListID, bool inactive);
+        void SetFactionVisible(FactionTemplateEntry const* factionTemplateEntry);
+        void SetFactionVisible(FactionEntry const* factionEntry);
+        ReputationRank const* GetForcedRankIfAny(FactionTemplateEntry const* factionTemplateEntry) const
+        {
+            ForcedReactions::const_iterator forceItr = m_forcedReactions.find(factionTemplateEntry->faction);
+            return forceItr != m_forcedReactions.end() ? &forceItr->second : NULL;
+        }
+        void ApplyForceReaction(uint32 faction_id,ReputationRank rank,bool apply);
+        void SendForceReactions();
+        void SendFactionStates() const;
+
         void UpdateSkillsForLevel();
         void UpdateSkillsToMaxSkillsForLevel();             // for .levelup
         void ModifySkillBonus(uint32 skillid,int32 val, bool talent);
@@ -2285,6 +2297,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 _CanStoreItem_InInventorySlots( uint8 slot_begin, uint8 slot_end, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool merge, Item *pSrcItem, uint8 skip_bag, uint8 skip_slot ) const;
         Item* _StoreItem( uint16 pos, Item *pItem, uint32 count, bool clone, bool update );
 
+        void UpdateKnownCurrencies(uint32 itemId, bool apply);
+        int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, bool for_quest);
+        void SetFactionVisible(FactionState* faction);
+        void SetFactionAtWar(FactionState* faction, bool atWar);
+        void SetFactionInactive(FactionState* faction, bool inactive);
+        bool ModifyOneFactionReputation(FactionEntry const* factionEntry, int32 standing);
+        bool SetOneFactionReputation(FactionEntry const* factionEntry, int32 standing);
         void AdjustQuestReqItemCount( Quest const* pQuest, QuestStatusData& questStatusData );
 
         GridReference<Player> m_gridRef;
@@ -2295,6 +2314,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint8 m_isunderwater;
         bool m_isInWater;
+
+        FactionStateList m_factions;
+        ForcedReactions m_forcedReactions;
 };
 
 void AddItemsSetItem(Player*player,Item *item);

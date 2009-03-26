@@ -5432,6 +5432,12 @@ void Player::SendFactionState(FactionState const* faction) const
     }
 }
 
+void Player::SendFactionStates() const
+{
+    for(FactionStateList::const_iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+        SendFactionState(&(itr->second));
+}
+
 void Player::SendInitialReputations()
 {
     WorldPacket data(SMSG_INITIALIZE_FACTIONS, (4+128*5));
@@ -5465,13 +5471,17 @@ void Player::SendInitialReputations()
     GetSession()->SendPacket(&data);
 }
 
-FactionState const* Player::GetFactionState( FactionEntry const* factionEntry) const
+void Player::SetFactionAtWar( RepListID repListID, bool on )
 {
-    FactionStateList::const_iterator itr = m_factions.find(factionEntry->reputationListID);
-    if (itr != m_factions.end())
-        return &itr->second;
+    FactionStateList::iterator itr = m_factions.find(repListID);
+    if (itr == m_factions.end())
+        return;
 
-    return NULL;
+    // always invisible or hidden faction can't change war state
+    if(itr->second.Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN) )
+        return;
+
+    SetFactionAtWar(&itr->second,on);
 }
 
 void Player::SetFactionAtWar(FactionState* faction, bool atWar)
@@ -5492,6 +5502,15 @@ void Player::SetFactionAtWar(FactionState* faction, bool atWar)
     faction->Changed = true;
 }
 
+void Player::SetFactionInactive( RepListID repListID, bool on )
+{
+    FactionStateList::iterator itr = m_factions.find(repListID);
+    if (itr == m_factions.end())
+        return;
+
+    SetFactionInactive(&itr->second,on);
+}
+
 void Player::SetFactionInactive(FactionState* faction, bool inactive)
 {
     // always invisible or hidden faction can't be inactive
@@ -5510,23 +5529,17 @@ void Player::SetFactionInactive(FactionState* faction, bool inactive)
     faction->Changed = true;
 }
 
-void Player::SetFactionVisibleForFactionTemplateId(uint32 FactionTemplateId)
+void Player::SetFactionVisible(FactionTemplateEntry const*factionTemplateEntry)
 {
-    FactionTemplateEntry const*factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
-
-    if(!factionTemplateEntry)
+    if(!factionTemplateEntry->faction)
         return;
 
-    if(factionTemplateEntry->faction)
-        SetFactionVisibleForFactionId(factionTemplateEntry->faction);
+    if(FactionEntry const *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction))
+        SetFactionVisible(factionEntry);
 }
 
-void Player::SetFactionVisibleForFactionId(uint32 FactionId)
+void Player::SetFactionVisible(FactionEntry const *factionEntry)
 {
-    FactionEntry const *factionEntry = sFactionStore.LookupEntry(FactionId);
-    if(!factionEntry)
-        return;
-
     if(factionEntry->reputationListID < 0)
         return;
 
@@ -5733,28 +5746,7 @@ bool Player::ModifyOneFactionReputation(FactionEntry const* factionEntry, int32 
 
         SetFactionVisible(&itr->second);
 
-        for( int i = 0; i < MAX_QUEST_LOG_SIZE; ++i )
-        {
-            if(uint32 questid = GetQuestSlotQuestId(i))
-            {
-                Quest const* qInfo = objmgr.GetQuestTemplate(questid);
-                if( qInfo && qInfo->GetRepObjectiveFaction() == factionEntry->ID )
-                {
-                    QuestStatusData& q_status = mQuestStatus[questid];
-                    if( q_status.m_status == QUEST_STATUS_INCOMPLETE )
-                    {
-                        if(GetReputation(factionEntry) >= qInfo->GetRepObjectiveValue())
-                            if ( CanCompleteQuest( questid ) )
-                                CompleteQuest( questid );
-                    }
-                    else if( q_status.m_status == QUEST_STATUS_COMPLETE )
-                    {
-                        if(GetReputation(factionEntry) < qInfo->GetRepObjectiveValue())
-                            IncompleteQuest( questid );
-                    }
-                }
-            }
-        }
+        ReputationChanged(factionEntry);
 
         SendFactionState(&(itr->second));
 
@@ -5824,6 +5816,27 @@ bool Player::SetOneFactionReputation(FactionEntry const* factionEntry, int32 sta
         return true;
     }
     return false;
+}
+
+void Player::ApplyForceReaction( uint32 faction_id,ReputationRank rank,bool apply )
+{
+    if(apply)
+        m_forcedReactions[faction_id] = rank;
+    else
+        m_forcedReactions.erase(faction_id);
+}
+
+void Player::SendForceReactions()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_SET_FORCED_REACTIONS, 4+m_forcedReactions.size()*(4+4));
+    data << uint32(m_forcedReactions.size());
+    for(ForcedReactions::const_iterator itr = m_forcedReactions.begin(); itr != m_forcedReactions.end(); ++itr)
+    {
+        data << uint32(itr->first);                         // faction_id (Faction.dbc)
+        data << uint32(itr->second);                        // reputation rank
+    }
+    SendDirectMessage(&data);
 }
 
 //Calculate total reputation percent player gain with quest/creature level
@@ -12071,7 +12084,8 @@ void Player::AddQuest( Quest const *pQuest, Object *questGiver )
     AdjustQuestReqItemCount( pQuest, questStatusData );
 
     if( pQuest->GetRepObjectiveFaction() )
-        SetFactionVisibleForFactionId(pQuest->GetRepObjectiveFaction());
+        if(FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->GetRepObjectiveFaction()))
+            SetFactionVisible(factionEntry);
 
     uint32 qtime = 0;
     if( pQuest->HasFlag( QUEST_MANGOS_FLAGS_TIMED ) )
@@ -13149,6 +13163,34 @@ void Player::MoneyChanged( uint32 count )
             {
                 if(int32(count) < -qInfo->GetRewOrReqMoney())
                     IncompleteQuest( questid );
+            }
+        }
+    }
+}
+
+void Player::ReputationChanged(FactionEntry const* factionEntry )
+{
+    for( int i = 0; i < MAX_QUEST_LOG_SIZE; ++i )
+    {
+        if(uint32 questid = GetQuestSlotQuestId(i))
+        {
+            if(Quest const* qInfo = objmgr.GetQuestTemplate(questid))
+            {
+                if(qInfo->GetRepObjectiveFaction() == factionEntry->ID )
+                {
+                    QuestStatusData& q_status = mQuestStatus[questid];
+                    if( q_status.m_status == QUEST_STATUS_INCOMPLETE )
+                    {
+                        if(GetReputation(factionEntry) >= qInfo->GetRepObjectiveValue())
+                            if ( CanCompleteQuest( questid ) )
+                                CompleteQuest( questid );
+                    }
+                    else if( q_status.m_status == QUEST_STATUS_COMPLETE )
+                    {
+                        if(GetReputation(factionEntry) < qInfo->GetRepObjectiveValue())
+                            IncompleteQuest( questid );
+                    }
+                }
             }
         }
     }
