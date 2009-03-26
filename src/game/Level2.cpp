@@ -33,6 +33,7 @@
 #include "AccountMgr.h"
 #include "GMTicketMgr.h"
 #include "WaypointManager.h"
+#include "DBCStores.h"
 #include "Util.h"
 #include <cctype>
 #include <iostream>

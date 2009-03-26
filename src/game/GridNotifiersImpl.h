@@ -26,6 +26,7 @@
 #include "UpdateData.h"
 #include "CreatureAI.h"
 #include "SpellAuras.h"
+#include "DBCStores.h"
 
 template<class T>
 inline void

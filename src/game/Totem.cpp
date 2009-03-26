@@ -23,6 +23,7 @@
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
+#include "DBCStores.h"
 
 Totem::Totem() : Creature()
 {

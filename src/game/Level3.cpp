@@ -49,6 +49,7 @@
 #include "BattleGroundMgr.h"
 #include "InstanceSaveMgr.h"
 #include "InstanceData.h"
+#include "DBCStores.h"
 
 //reload commands
 bool ChatHandler::HandleReloadAllCommand(const char*)

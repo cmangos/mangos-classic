@@ -34,6 +34,7 @@
 #include "MapReference.h"
 #include "Util.h"                                           // for Tokens typedef
 #include "ReputationMgr.h"
+#include "DBCStores.h"
 
 #include<string>
 #include<vector>
