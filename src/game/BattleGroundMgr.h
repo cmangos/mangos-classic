@@ -20,6 +20,7 @@
 #define __BATTLEGROUNDMGR_H
 
 #include "Common.h"
+#include "Policies/Singleton.h"
 #include "BattleGround.h"
 
 //TODO it is not possible to have this structure, because we should have BattlegroundSet for each queue
