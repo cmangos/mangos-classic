@@ -933,17 +933,21 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     if (missInfo!=SPELL_MISS_NONE)
         doTriggers(missInfo);
 
-    // Call scripted function for AI if this spell is casted upon a creature (except pets)
-    if(IS_CREATURE_GUID(target->targetGUID))
+    // Call scripted function for AI if this spell is casted upon a creature
+    if(unit->GetTypeId()==TYPEID_UNIT)
     {
         // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
-        // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
-        if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive() )
+        // ignore pets or autorepeat/melee casts for speed (not exist quest for spells (hm... )
+        if( !((Creature*)unit)->isPet() && m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive() )
             ((Player*)m_caster)->CastedCreatureOrGO(unit->GetEntry(),unit->GetGUID(),m_spellInfo->Id);
 
         if(((Creature*)unit)->AI())
             ((Creature*)unit)->AI()->SpellHit(m_caster ,m_spellInfo);
     }
+
+    // Call scripted function for AI if this spell is casted by a creature
+    if(m_caster->GetTypeId()==TYPEID_UNIT && ((Creature*)m_caster)->AI())
+        ((Creature*)m_caster)->AI()->SpellHitTarget(unit,m_spellInfo);
 }
 
 void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
@@ -1073,6 +1077,10 @@ void Spell::DoAllEffectOnTarget(GOTargetInfo *target)
     // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
     if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive() )
         ((Player*)m_caster)->CastedCreatureOrGO(go->GetEntry(),go->GetGUID(),m_spellInfo->Id);
+
+    // Call scripted function for AI if this spell is casted by a creature
+    if(m_caster->GetTypeId()==TYPEID_UNIT && ((Creature*)m_caster)->AI())
+        ((Creature*)m_caster)->AI()->SpellHitTarget(go,m_spellInfo);
 }
 
 void Spell::DoAllEffectOnTarget(ItemTargetInfo *target)
