@@ -330,6 +330,8 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE)
     m_isPassive = IsPassiveSpell(GetId());
     m_positive = IsPositiveEffect(GetId(), m_effIndex);
 
+    m_isSingleTargetAura = IsSingleTargetSpell(m_spellProto);
+
     m_applyTime = time(NULL);
 
     int32 damage;
@@ -6326,4 +6328,23 @@ void Aura::HandleArenaPreparation(bool apply, bool Real)
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PREPARATION);
     else
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PREPARATION);
+}
+
+void Aura::UnregisterSingleCastAura()
+{
+    if (IsSingleTarget())
+    {
+        Unit* caster = NULL;
+        caster = GetCaster();
+        if(caster)
+        {
+            caster->GetSingleCastAuras().remove(this);
+        }
+        else
+        {
+            sLog.outError("Couldn't find the caster of the single target aura, may crash later!");
+            assert(false);
+        }
+        m_isSingleTargetAura = false;
+    }
 }

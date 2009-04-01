@@ -253,6 +253,8 @@ class MANGOS_DLL_SPEC Aura
                 SetAuraApplication(slot, m_procCharges - 1);
         }
 
+        void UnregisterSingleCastAura();
+
         bool IsPositive() { return m_positive; }
         void SetNegative() { m_positive = false; }
         void SetPositive() { m_positive = true; }
@@ -277,6 +279,10 @@ class MANGOS_DLL_SPEC Aura
 
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }
+
+        bool IsSingleTarget() {return m_isSingleTargetAura;}
+        void SetIsSingleTarget(bool val) { m_isSingleTargetAura = val;}
+
         void SetRemoveMode(AuraRemoveMode mode) { m_removeMode = mode; }
 
         int32 m_procCharges;
@@ -323,6 +329,7 @@ class MANGOS_DLL_SPEC Aura
         bool m_isRemovedOnShapeLost:1;
         bool m_updated:1;
         bool m_in_use:1;                                    // true while in Aura::ApplyModifier call
+        bool m_isSingleTargetAura:1;                        // true if it's a single target spell and registered at caster - can change at spell steal for example
 
         int32 m_periodicTimer;
         uint32 m_PeriodicEventId;
