@@ -4032,7 +4032,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     if (apply)
     {
         if(loading)
-            return; 
+            return;
 
         Unit *caster = GetCaster();
         if (!caster)
