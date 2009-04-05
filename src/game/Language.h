@@ -740,7 +740,11 @@ enum MangosStrings
     LANG_SKILL_VALUES                   = 1122,
     // Room for more level 3              1123-1199 not used
 
-    // FREE IDS                           1200-9999
+    // Debug commands
+    LANG_CINEMATIC_NOT_EXIST            = 1200,
+    // Room for more debug                1201-1299 not used
+
+    // FREE IDS                           1300-9999
 
     // Use for not-in-offcial-sources patches
     //                                    10000-10999

@@ -1,5 +1,3 @@
-ALTER TABLE db_version CHANGE COLUMN required_7568_01_mangos_spell_proc_event required_7615_01_mangos_command bit;
-
 DELETE FROM `command` WHERE `name` IN ('senditems','sendmail','sendmoney','sendmessage','send items','send mail','send money','send message');
 
 INSERT INTO `command` VALUES

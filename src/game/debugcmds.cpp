@@ -211,6 +211,30 @@ bool ChatHandler::HandleDebugUpdateWorldStateCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleDebugPlayCinematicCommand(const char* args)
+{
+    // USAGE: .debug play cinematic #cinematicid
+    // #cinematicid - ID decimal number from CinemaicSequences.dbc (1st column)
+    if( !*args )
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 dwId = atoi((char*)args);
+
+    if(!sCinematicSequencesStore.LookupEntry(dwId))
+    {
+        PSendSysMessage(LANG_CINEMATIC_NOT_EXIST, dwId);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    m_session->GetPlayer()->SendCinematicStart(dwId);
+    return true;
+}
+
 //Play sound
 bool ChatHandler::HandleDebugPlaySoundCommand(const char* args)
 {
