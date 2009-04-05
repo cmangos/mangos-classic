@@ -1226,11 +1226,30 @@ uint16 Map::GetAreaFlag(float x, float y, float z) const
     //FIXME: some hacks for areas above or underground for ground area
     //       required for area specific spells/etc, until map/vmap data
     //       not provided correct areaflag with this hacks
-    /* no zones at this moment
     switch(areaflag)
     {
+        // Undercity (sewers enter and path)
+        case 179:                                           // Tirisfal Glades
+            if (x > 1595.0f && x < 1699.0f && y > 535.0f && y < 643.5f && z < 30.5f) areaflag = 685; break;
+        // Undercity (Royal Quarter)
+        case 210:                                           // Silverpine Forest
+        case 316:                                           // The Shining Strand (Silverpine Forest)
+        case 438:                                           // Lordamere Lake (Silverpine Forest)
+            if (x > 1237.0f && x < 1401.0f && y > 284.0f && y < 440.0f && z < -40.0f) areaflag = 685; break;
+        // Undercity (cave and ground zone, part of royal quarter)
+        case 607:                                           // Ruins of Lordaeron (Tirisfal Glades)
+            // ground and near to ground (by city walls)
+            if(z > 0.0f)
+            {
+                if (x > 1510.0f && x < 1839.0f && y > 29.77f && y < 433.0f) areaflag = 685;
+            }
+            // more wide underground, part of royal quarter
+            else
+            {
+                if (x > 1299.0f && x < 1839.0f && y > 10.0f && y < 440.0f) areaflag = 685;
+            }
+            break;
     }
-    */
 
     return areaflag;
 }
