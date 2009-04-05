@@ -45,13 +45,13 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         Map const* GetBaseMap(uint32 id) const { return const_cast<MapManager*>(this)->_GetBaseMap(id); }
         void DeleteInstance(uint32 mapid, uint32 instanceId);
 
-        uint16 GetAreaFlag(uint32 mapid, float x, float y) const
+        uint16 GetAreaFlag(uint32 mapid, float x, float y, float z) const
         {
             Map const* m = GetBaseMap(mapid);
-            return m->GetAreaFlag(x, y);
+            return m->GetAreaFlag(x, y, z);
         }
-        uint32 GetAreaId(uint32 mapid, float x, float y) const { return Map::GetAreaId(GetAreaFlag(mapid, x, y),mapid); }
-        uint32 GetZoneId(uint32 mapid, float x, float y) const { return Map::GetZoneId(GetAreaFlag(mapid, x, y),mapid); }
+        uint32 GetAreaId(uint32 mapid, float x, float y, float z) { return Map::GetAreaId(GetAreaFlag(mapid, x, y, z),mapid); }
+        uint32 GetZoneId(uint32 mapid, float x, float y, float z) { return Map::GetZoneId(GetAreaFlag(mapid, x, y, z),mapid); }
 
         void Initialize(void);
         void Update(uint32);

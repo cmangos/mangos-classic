@@ -1198,7 +1198,7 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps) const
     }
 }
 
-uint16 Map::GetAreaFlag(float x, float y ) const
+uint16 Map::GetAreaFlag(float x, float y, float z) const
 {
     //local x,y coords
     float lx,ly;
@@ -1216,11 +1216,23 @@ uint16 Map::GetAreaFlag(float x, float y ) const
     // ensure GridMap is loaded
     const_cast<Map*>(this)->EnsureGridCreated(GridPair(63-gx,63-gy));
 
+    uint16 areaflag;
     if(GridMaps[gx][gy])
-        return GridMaps[gx][gy]->area_flag[(int)(lx)][(int)(ly)];
+        areaflag = GridMaps[gx][gy]->area_flag[(int)(lx)][(int)(ly)];
     // this used while not all *.map files generated (instances)
     else
-        return GetAreaFlagByMapId(i_id);
+        areaflag = GetAreaFlagByMapId(i_id);
+
+    //FIXME: some hacks for areas above or underground for ground area
+    //       required for area specific spells/etc, until map/vmap data
+    //       not provided correct areaflag with this hacks
+    /* no zones at this moment
+    switch(areaflag)
+    {
+    }
+    */
+
+    return areaflag;
 }
 
 uint8 Map::GetTerrainType(float x, float y ) const
