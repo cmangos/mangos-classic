@@ -5181,6 +5181,16 @@ inline void CheckAndFixGOChairHeightId(GameObjectInfo const* goInfo,uint32 const
     const_cast<uint32&>(dataN) = 0;
 }
 
+inline void CheckGONoDamageImmuneId(GameObjectInfo const* goInfo,uint32 dataN,uint32 N)
+{
+    // 0/1 correct values
+    if (dataN <= 1)
+        return;
+
+    sLog.outErrorDb("Gameobject (Entry: %u GoType: %u) have data%d=%u but expected boolean (0/1) noDamageImmune field value.",
+        goInfo->id,goInfo->type,N,dataN);
+}
+
 void ObjectMgr::LoadGameobjectInfo()
 {
     SQLGameObjectLoader loader;
@@ -5199,18 +5209,21 @@ void ObjectMgr::LoadGameobjectInfo()
             {
                 if (goInfo->door.lockId)
                     CheckGOLockId(goInfo,goInfo->door.lockId,1);
+                CheckGONoDamageImmuneId(goInfo,goInfo->door.noDamageImmune,3);
                 break;
             }
             case GAMEOBJECT_TYPE_BUTTON:                    //1
             {
                 if (goInfo->button.lockId)
                     CheckGOLockId(goInfo,goInfo->button.lockId,1);
+                CheckGONoDamageImmuneId(goInfo,goInfo->button.noDamageImmune,4);
                 break;
             }
             case GAMEOBJECT_TYPE_QUESTGIVER:                //2
             {
                 if (goInfo->questgiver.lockId)
                     CheckGOLockId(goInfo,goInfo->questgiver.lockId,0);
+                CheckGONoDamageImmuneId(goInfo,goInfo->questgiver.noDamageImmune,5);
                 break;
             }
             case GAMEOBJECT_TYPE_CHEST:                     //3
@@ -5263,6 +5276,7 @@ void ObjectMgr::LoadGameobjectInfo()
                 if (goInfo->goober.spellId)                 // spell
                     CheckGOSpellId(goInfo,goInfo->goober.spellId,10);
                 */
+                CheckGONoDamageImmuneId(goInfo,goInfo->goober.noDamageImmune,11);
                 if (goInfo->goober.linkedTrapId)            // linked trap
                     CheckGOLinkedTrapId(goInfo,goInfo->goober.linkedTrapId,12);
                 break;
@@ -5307,6 +5321,7 @@ void ObjectMgr::LoadGameobjectInfo()
             {
                 if (goInfo->flagstand.lockId)
                     CheckGOLockId(goInfo,goInfo->flagstand.lockId,0);
+                CheckGONoDamageImmuneId(goInfo,goInfo->flagstand.noDamageImmune,5);
                 break;
             }
             case GAMEOBJECT_TYPE_FISHINGHOLE:               //25
@@ -5319,6 +5334,7 @@ void ObjectMgr::LoadGameobjectInfo()
             {
                 if (goInfo->flagdrop.lockId)
                     CheckGOLockId(goInfo,goInfo->flagdrop.lockId,0);
+                CheckGONoDamageImmuneId(goInfo,goInfo->flagdrop.noDamageImmune,3);
                 break;
             }
         }
