@@ -44,7 +44,15 @@ SQL update can include special protection against multiply and wrong order SQL u
 So attempt apply sql update to more old DB without previous SQL update in list for targeted database
 or to DB with already applied this or later SQL update will generate error and not applied.
 
-=== For commiters ====
+=== What do for upgrade to MaNGOS 0.13 ====
+
+MaNGOS 0.12 DB structure can have changes not compatibale with slq updates in MaNGOS 0.13 sql/updates directory.
+For resolve this problem apply all sql updates form sql/updates/before_upgrade_to_0.13 in REVERSED order,
+from high order number prefix to low. Aftre this you will have DB structure compatiable with state that exist at moment
+MaNGOS 0.12 release and then sql updates from MaNGOS 0.13 sql/updates directory will applied without problem in normal order
+(starting from MaNGOS 0.13 sql/updates/2008_12_22_01_mangos_creature_equip_template.sql)
+
+=== For commiters ===
 
 DO NOT use git_id tool for mangos-0.12 branch or any branch different from master.
 
@@ -55,7 +63,30 @@ then:
    using next free order_number in sql/updates files list.
 2. Drop sql order guards from sql update file
 3. Restore field name in db version table in db sql file (mangos.sql/etc) to state before related revision backporting.
-4. Fix/update sql update file name in slq/updates/Makefiel.am
+4. Fix/update sql update file name in slq/updates/Makefile.am
 
-If revison modify table structure and include sql update that can't be applied to db multiply times then please
-NOT backport like revisoons.
+If revison modify table structure and include sql update that can't be applied to db multiply times
+then:
+
+1. Rename sql update from master form (7643_01_mangos_db_version.sql) to mangos-0.12 form (020_7643_01_mangos_db_version.sql)
+   using next free order_number in sql/updates files list.
+
+2. Replace sql order guards from sql update file
+   (ALTER TABLE db_version CHANGE COLUMN required_7633_01_mangos_achievement_criteria_data required_7643_01_mangos_db_version bit;)
+   to 0.12 form.
+2.1: Look at current guard field name in affected DB (sql/mangos.sql) and replace first (old) name (`required_2008_12_15_01_mangos_arenas`)
+2.2: Create new field name base at 0.12 sql update name (`required_020_7643_01_mangos_db_version`)
+2.3: Form final 0.12 guard query
+     (ALTER TABLE db_version CHANGE COLUMN required_2008_12_15_01_mangos_arenas required_020_7643_01_mangos_db_version bit;)
+2.4: Update field name in db version table (db_version in mangos.sql in our case) to new field name (required_020_7643_01_mangos_db_version)
+3. Fix/update sql update file name in slq/updates/Makefile.am
+
+4. Write undo slq update for sql/updates/before_upgrade_to_0.13 directory.
+4.1: Name it in same way as add sql update (020_7643_01_mangos_db_version.sql)
+4.2: Use REVERSED order for guard query field names
+     (ALTER TABLE db_version CHANGE COLUMN required_020_7643_01_mangos_db_version required_2008_12_15_01_mangos_arenas bit;)
+4.3: write required sql queries that will restore DB structure to state _before_ related sql update apply
+     (if filed added then field drop, if field drop then field re-added with some useful value,
+     if field renamed thne field renamed back, etc)
+5. Add undo sql update file name into slq/updates/before_upgrade_to_0.13/Makefile.am
+
