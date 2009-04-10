@@ -922,7 +922,7 @@ int WorldSocket::HandlePing (WorldPacket& recvPacket)
                 if (m_Session && m_Session->GetSecurity () == SEC_PLAYER)
                 {
                     sLog.outError  ("WorldSocket::HandlePing: Player kicked for "
-                                    "over-speed pings address = %s",
+                                    "overspeeded pings address = %s",
                                     GetRemoteAddress ().c_str ());
 
                     return -1;
