@@ -454,7 +454,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x1A9*/ { "SMSG_SHOWTAXINODES",               STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x1AA*/ { "CMSG_TAXINODE_STATUS_QUERY",       STATUS_LOGGEDIN, &WorldSession::HandleTaxiNodeStatusQueryOpcode },
     /*0x1AB*/ { "SMSG_TAXINODE_STATUS",             STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
-    /*0x1AC*/ { "CMSG_TAXIQUERYAVAILABLENODES",     STATUS_LOGGEDIN, &WorldSession::HandleTaxiQueryAvailableNodesOpcode},
+    /*0x1AC*/ { "CMSG_TAXIQUERYAVAILABLENODES",     STATUS_LOGGEDIN, &WorldSession::HandleTaxiQueryAvailableNodes   },
     /*0x1AD*/ { "CMSG_ACTIVATETAXI",                STATUS_LOGGEDIN, &WorldSession::HandleActivateTaxiOpcode        },
     /*0x1AE*/ { "SMSG_ACTIVATETAXIREPLY",           STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x1AF*/ { "SMSG_NEW_TAXI_PATH",               STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
