@@ -315,7 +315,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     GetPlayer()->SetPosition(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o);
     GetPlayer()->m_movementInfo = movementInfo;
 
-    GetPlayer()->UpdateFallInformationIfNeed(movementInfo,MSG_MOVE_FALL_LAND);
+    GetPlayer()->UpdateFallInformationIfNeed(movementInfo, recv_data.GetOpcode());
 
     if(GetPlayer()->isMovingOrTurning())
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
