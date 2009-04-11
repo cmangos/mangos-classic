@@ -375,10 +375,14 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             if(GetPlayer()->isAlive())
             {
                 GetPlayer()->EnvironmentalDamage(DAMAGE_FALL_TO_VOID, GetPlayer()->GetMaxHealth());
-                // change the death state to CORPSE to prevent the death timer from
-                // starting in the next player update
-                GetPlayer()->KillPlayer();
-                GetPlayer()->BuildPlayerRepop();
+                // pl can be alive if GM/etc
+                if(!GetPlayer()->isAlive())
+                {
+                    // change the death state to CORPSE to prevent the death timer from
+                    // starting in the next player update
+                    GetPlayer()->KillPlayer();
+                    GetPlayer()->BuildPlayerRepop();
+                }
             }
 
             // cancel the death timer here if started
