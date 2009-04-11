@@ -137,7 +137,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
         result = CharacterDatabase.PQuery("SELECT id, entry, owner, modelid, level, exp, Reactstate, loyaltypoints, loyalty, trainpoint, slot, name, renamed, curhealth, curmana, curhappiness, abdata, TeachSpelldata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType "
             "FROM character_pet WHERE owner = '%u' AND slot = '%u'",
             ownerid, PET_SAVE_AS_CURRENT );
-    else if(petentry)
+    else if (petentry)
         // known petentry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
         //                                        0   1      2      3        4      5    6           7              8        9           10    11    12       13         14       15            16      17              18        19                 20                 21              22
         result = CharacterDatabase.PQuery("SELECT id, entry, owner, modelid, level, exp, Reactstate, loyaltypoints, loyalty, trainpoint, slot, name, renamed, curhealth, curmana, curhappiness, abdata, TeachSpelldata, savetime, resettalents_cost, resettalents_time, CreatedBySpell, PetType "
@@ -157,7 +157,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
 
     // update for case of current pet "slot = 0"
     petentry = fields[1].GetUInt32();
-    if(!petentry)
+    if (!petentry)
     {
         delete result;
         return false;
@@ -169,16 +169,24 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     bool is_temporary_summoned = spellInfo && GetSpellDuration(spellInfo) > 0;
 
     // check temporary summoned pets like mage water elemental
-    if(current && is_temporary_summoned)
+    if (current && is_temporary_summoned)
     {
+        delete result;
+        return false;
+    }
+
+    uint32 pet_number = fields[0].GetUInt32();
+
+    if (current && owner->IsPetNeedBeTemporaryUnsummoned())
+    {
+        owner->SetTemporaryUnsummonedPetNumber(pet_number);
         delete result;
         return false;
     }
 
     Map *map = owner->GetMap();
     uint32 guid = objmgr.GenerateLowGuid(HIGHGUID_PET);
-    uint32 pet_number = fields[0].GetUInt32();
-    if(!Create(guid, map, petentry, pet_number))
+    if (!Create(guid, map, petentry, pet_number))
     {
         delete result;
         return false;
@@ -189,7 +197,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
 
     Relocate(px, py, pz, owner->GetOrientation());
 
-    if(!IsPositionValid())
+    if (!IsPositionValid())
     {
         sLog.outError("ERROR: Pet (guidlow %d, entry %d) not loaded. Suggested coordinates isn't valid (X: %f Y: %f)",
             GetGUIDLow(), GetEntry(), GetPositionX(), GetPositionY());
@@ -202,7 +210,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     SetUInt32Value(UNIT_CREATED_BY_SPELL, summon_spell_id);
 
     CreatureInfo const *cinfo = GetCreatureInfo();
-    if(cinfo->type == CREATURE_TYPE_CRITTER)
+    if (cinfo->type == CREATURE_TYPE_CRITTER)
     {
         AIM_Initialize();
         map->Add((Creature*)this);
@@ -210,7 +218,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
         return true;
     }
 
-    if(getPetType() == HUNTER_PET || (getPetType() == SUMMON_PET && cinfo->type == CREATURE_TYPE_DEMON && owner->getClass() == CLASS_WARLOCK))
+    if (getPetType() == HUNTER_PET || (getPetType() == SUMMON_PET && cinfo->type == CREATURE_TYPE_DEMON && owner->getClass() == CLASS_WARLOCK))
         m_charmInfo->SetPetNumber(pet_number, true);
     else
         m_charmInfo->SetPetNumber(pet_number, false);
@@ -222,7 +230,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     SetUInt32Value(UNIT_NPC_FLAGS, 0);
     SetName(fields[11].GetString());
 
-    switch(getPetType())
+    switch (getPetType())
     {
         case SUMMON_PET:
             petlevel=owner->getLevel();
@@ -274,12 +282,12 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
         CharacterDatabase.CommitTransaction();
     }
 
-    if(!is_temporary_summoned)
+    if (!is_temporary_summoned)
     {
         // permanent controlled pets store state in DB
         Tokens tokens = StrSplit(fields[16].GetString(), " ");
 
-        if(tokens.size() != 20)
+        if (tokens.size() != 20)
         {
             delete result;
             return false;
@@ -319,7 +327,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     _LoadAuras(timediff);
 
     //init AB
-    if(is_temporary_summoned)
+    if (is_temporary_summoned)
     {
         // Temporary summoned pets always have initial spell list at load
         InitPetCreateSpells();
@@ -330,7 +338,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
         CastPetAuras(current);
     }
 
-    if(getPetType() == SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
+    if (getPetType() == SUMMON_PET && !current)             //all (?) summon pets come with full health when called, but not when they are current
     {
         SetHealth(GetMaxHealth());
         SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
@@ -351,14 +359,14 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     owner->SetPet(this);                                    // in DB stored only full controlled creature
     sLog.outDebug("New Pet has guid %u", GetGUIDLow());
 
-    if(owner->GetTypeId() == TYPEID_PLAYER)
+    if (owner->GetTypeId() == TYPEID_PLAYER)
     {
         ((Player*)owner)->PetSpellInitialize();
         if(((Player*)owner)->GetGroup())
             ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
 
-    if(owner->GetTypeId() == TYPEID_PLAYER && getPetType() == HUNTER_PET)
+    if (owner->GetTypeId() == TYPEID_PLAYER && getPetType() == HUNTER_PET)
     {
         result = CharacterDatabase.PQuery("SELECT genitive, dative, accusative, instrumental, prepositional FROM character_pet_declinedname WHERE owner = '%u' AND id = '%u'", owner->GetGUIDLow(), GetCharmInfo()->GetPetNumber());
 
@@ -381,12 +389,32 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
 
 void Pet::SavePetToDB(PetSaveMode mode)
 {
-    if(!GetEntry())
+    if (!GetEntry())
         return;
 
     // save only fully controlled creature
-    if(!isControlled())
+    if (!isControlled())
         return;
+
+    // not save not player pets
+    if(!IS_PLAYER_GUID(GetOwnerGUID()))
+        return;
+
+    Player* pOwner = (Player*)GetOwner();
+    if (!pOwner)
+        return;
+
+    // not save pet as current if another pet temporary unsummoned
+    if (mode == PET_SAVE_AS_CURRENT && pOwner->GetTemporaryUnsummonedPetNumber() &&
+        pOwner->GetTemporaryUnsummonedPetNumber() != m_charmInfo->GetPetNumber())
+    {
+        // pet will lost anyway at restore temporary unsummoned
+        if(getPetType()==HUNTER_PET)
+            return;
+
+        // for warlock case
+        mode = PET_SAVE_NOT_IN_SLOT;
+    }
 
     uint32 curhealth = GetHealth();
     uint32 curmana = GetPower(POWER_MANA);
