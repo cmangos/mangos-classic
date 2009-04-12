@@ -235,10 +235,10 @@ World::AddSession_ (WorldSession* s)
 
     WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 1);
     packet << uint8 (AUTH_OK);
-    packet << uint32 (0); // unknown random value...
+    packet << uint32 (0);                                   // unknown random value...
     packet << uint8 (0);
     packet << uint32 (0);
-    packet << uint8 (s->Expansion()); // 0 - normal, 1 - TBC, must be set in database manually for each account
+    packet << uint8 (s->Expansion());                       // 0 - normal, 1 - TBC, must be set in database manually for each account
     s->SendPacket (&packet);
 
     UpdateMaxSessionCounters ();
@@ -246,7 +246,7 @@ World::AddSession_ (WorldSession* s)
     // Updates the population
     if (pLimit > 0)
     {
-        float popu = GetActiveSessionCount (); //updated number of users on the server
+        float popu = GetActiveSessionCount ();              //updated number of users on the server
         popu /= pLimit;
         popu *= 2;
         loginDatabase.PExecute ("UPDATE realmlist SET population = '%f' WHERE id = '%d'", popu, realmID);
