@@ -997,7 +997,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                         unit->SetStandState(PLAYER_STATE_NONE);
 
                     if(!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
-                        ((Creature*)unit)->AI()->AttackStart(m_caster);
+                        ((Creature*)unit)->AI()->AttackedBy(m_caster);
 
                     unit->SetInCombatWith(m_caster);
                     m_caster->SetInCombatWith(unit);
