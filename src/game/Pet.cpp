@@ -1532,6 +1532,7 @@ bool Pet::addSpell(uint32 spell_id, uint16 active, PetSpellState state, uint16 s
 
             oldspell_id = itr->first;
             removeSpell(itr->first);
+            break;
         }
     }
 
