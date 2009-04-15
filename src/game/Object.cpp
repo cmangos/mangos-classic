@@ -153,7 +153,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         ****/
     }
 
-    if(flags & UPDATEFLAG_HASPOSITION)
+    if(flags & UPDATEFLAG_HAS_POSITION)
     {
         // UPDATETYPE_CREATE_OBJECT2 dynamic objects, corpses...
         if(isType(TYPEMASK_DYNAMICOBJECT) || isType(TYPEMASK_CORPSE) || isType(TYPEMASK_PLAYER))
@@ -253,7 +253,7 @@ void Object::DestroyForPlayer(Player *target) const
     target->GetSession()->SendPacket( &data );
 }
 
-void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 ) const
+void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2) const
 {
     *data << (uint8)flags;                                  // update flags
 
@@ -294,7 +294,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
     }
 
     // 0x40
-    if (flags & UPDATEFLAG_HASPOSITION)
+    if (flags & UPDATEFLAG_HAS_POSITION)
     {
         // 0x02
         if(flags & UPDATEFLAG_TRANSPORT && ((GameObject*)this)->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
@@ -512,7 +512,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
     }
 
     // 0x4
-    if(flags & UPDATEFLAG_FULLGUID)
+    if(flags & UPDATEFLAG_HAS_TARGET)                       // packed guid (current target guid)
     {
         *data << uint8(0);                                  // packed guid (probably target guid)
     }
