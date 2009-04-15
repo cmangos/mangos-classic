@@ -577,8 +577,8 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     cell_lock->Visit(cell_lock, message, *GetPlayer()->GetMap());
 
     //Send scripted event call
-    if (unit && unit->GetTypeId()==TYPEID_UNIT && Script)
-        Script->ReceiveEmote(GetPlayer(),(Creature*)unit,text_emote);
+    if (unit && unit->GetTypeId()==TYPEID_UNIT && ((Creature*)unit)->AI())
+        ((Creature*)unit)->AI()->ReceiveEmote(GetPlayer(),text_emote);
 }
 
 void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )

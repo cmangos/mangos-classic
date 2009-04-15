@@ -41,7 +41,7 @@ struct Script
         pGossipHello(NULL), pQuestAccept(NULL), pGossipSelect(NULL), pGossipSelectWithCode(NULL),
         pQuestSelect(NULL), pQuestComplete(NULL), pNPCDialogStatus(NULL), pGODialogStatus(NULL), pChooseReward(NULL),
         pItemHello(NULL), pGOHello(NULL), pAreaTrigger(NULL), pItemQuestAccept(NULL), pGOQuestAccept(NULL),
-        pGOChooseReward(NULL), pReceiveEmote(NULL), pItemUse(NULL), GetAI(NULL)
+        pGOChooseReward(NULL), pItemUse(NULL), GetAI(NULL)
     {}
 
     std::string Name;
@@ -62,7 +62,6 @@ struct Script
     bool (*pItemQuestAccept     )(Player *player, Item *_Item, Quest const*_Quest );
     bool (*pGOQuestAccept       )(Player *player, GameObject *_GO, Quest const*_Quest );
     bool (*pGOChooseReward      )(Player *player, GameObject *_GO, Quest const*_Quest, uint32 opt );
-    bool (*pReceiveEmote        )(Player *player, Creature *_Creature, uint32 emote );
     bool (*pItemUse             )(Player *player, Item* _Item, SpellCastTargets const& targets);
 
     CreatureAI* (*GetAI)(Creature *_Creature);
