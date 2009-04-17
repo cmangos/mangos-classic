@@ -6546,7 +6546,7 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const *pSkill, bool racial)
                 return SKILL_RANGE_MONO;
         default:
         case SKILL_CATEGORY_ATTRIBUTES:                     //not found in dbc
-        case SKILL_CATEGORY_NOT_DISPLAYED:                  //only GENEREC(DND)
+        case SKILL_CATEGORY_GENERIC:                        //only GENERIC(DND)
             return SKILL_RANGE_NONE;
     }
 }

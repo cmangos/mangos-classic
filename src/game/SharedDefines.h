@@ -1820,8 +1820,8 @@ enum SkillType
     SKILL_BEAST_MASTERY            = 50,
     SKILL_SURVIVAL                 = 51,
     SKILL_MACES                    = 54,
-    SKILL_HOLY                     = 56,
     SKILL_2H_SWORDS                = 55,
+    SKILL_HOLY                     = 56,
     SKILL_SHADOW                   = 78,
     SKILL_DEFENSE                  = 95,
     SKILL_LANG_COMMON              = 98,
@@ -1877,8 +1877,8 @@ enum SkillType
     SKILL_PET_BOAR                 = 211,
     SKILL_PET_CROCILISK            = 212,
     SKILL_PET_CARRION_BIRD         = 213,
-    SKILL_PET_GORILLA              = 215,
     SKILL_PET_CRAB                 = 214,
+    SKILL_PET_GORILLA              = 215,
     SKILL_PET_RAPTOR               = 217,
     SKILL_PET_TALLSTRIDER          = 218,
     SKILL_RACIAL_UNDED             = 220,
@@ -1981,14 +1981,14 @@ inline uint32 SkillByQuestSort(int32 QuestSort)
 
 enum SkillCategory
 {
-    SKILL_CATEGORY_ATTRIBUTES    =  5,
-    SKILL_CATEGORY_WEAPON        =  6,
-    SKILL_CATEGORY_CLASS         =  7,
-    SKILL_CATEGORY_ARMOR         =  8,
-    SKILL_CATEGORY_SECONDARY     =  9,                      // secondary professions
+    SKILL_CATEGORY_ATTRIBUTES    = 5,
+    SKILL_CATEGORY_WEAPON        = 6,
+    SKILL_CATEGORY_CLASS         = 7,
+    SKILL_CATEGORY_ARMOR         = 8,
+    SKILL_CATEGORY_SECONDARY     = 9,                       // secondary professions
     SKILL_CATEGORY_LANGUAGES     = 10,
     SKILL_CATEGORY_PROFESSION    = 11,                      // primary professions
-    SKILL_CATEGORY_NOT_DISPLAYED = 12
+    SKILL_CATEGORY_GENERIC       = 12
 };
 
 enum TotemCategory
