@@ -109,4 +109,23 @@ enum TotemCategoryType
     TOTEM_CATEGORY_TYPE_SPANNER = 24
 };
 
+// SummonProperties.dbc, col 1
+enum SummonPropGroup
+{
+    SUMMON_PROP_GROUP_UNKNOWN1       = 0,                   // 704 spells in 2.4.3
+    SUMMON_PROP_GROUP_UNKNOWN2       = 1,                   // 655 spells in 2.4.3
+    SUMMON_PROP_GROUP_PETS           = 2,                   // 41 spells in 2.4.3, pets mostly
+    SUMMON_PROP_GROUP_CONTROLLABLE   = 3,                   // 7 spells in 2.4.3, mostly controllable
+};
+
+// SummonProperties.dbc, col 3
+enum SummonPropType
+{
+    SUMMON_PROP_TYPE_UNKNOWN         = 0,                   // different summons, 730 spells in 2.4.3
+    SUMMON_PROP_TYPE_SUMMON          = 1,                   // generic summons, 59 spells in 2.4.3
+    SUMMON_PROP_TYPE_GUARDIAN        = 2,                   // summon guardian, 311 spells in 2.4.3
+    SUMMON_PROP_TYPE_TOTEM           = 4,                   // summon totem, 148 spells in 2.4.3
+    SUMMON_PROP_TYPE_CRITTER         = 5,                   // critter/minipet, 159 spells in 2.4.3
+};
+
 #endif
