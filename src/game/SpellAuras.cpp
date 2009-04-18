@@ -2965,15 +2965,11 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
         return;
 
     if(apply)
-    {
-        caster->SetUInt64Value(PLAYER_FARSIGHT, m_target->GetGUID());
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN5);
-    }
     else
-    {
-        caster->SetUInt64Value(PLAYER_FARSIGHT, 0);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN5);
-    }
+
+    ((Player*)caster)->SetFarSightGUID(apply ? m_target->GetGUID() : 0);
 }
 
 void Aura::HandleModCharm(bool apply, bool Real)
