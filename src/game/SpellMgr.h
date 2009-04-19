@@ -281,7 +281,7 @@ enum ProcFlags
     PROC_FLAG_TARGET_LOW_HEALTH     = 0x00000100,           // On deal damage to enemy with 20% or less health
     PROC_FLAG_LOW_HEALTH            = 0x00000200,           // On health dropped below 20%
     PROC_FLAG_STRUCK_RANGED         = 0x00000400,           // On being struck ranged
-    PROC_FLAG_HIT_SPECIAL           = 0x00000800,           // (!)Removed, may be reassigned in future
+    PROC_FLAG_PERIODIC_TICK         = 0x00000800,           // On periodic tick
     PROC_FLAG_CRIT_MELEE            = 0x00001000,           // On crit melee
     PROC_FLAG_STRUCK_CRIT_MELEE     = 0x00002000,           // On being critically struck in melee
     PROC_FLAG_CAST_SPELL            = 0x00004000,           // On cast spell
