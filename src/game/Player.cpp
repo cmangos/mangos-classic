@@ -1546,7 +1546,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // ObjectAccessor won't find the flag.
     if (duel && GetMapId()!=mapid)
     {
-        GameObject* obj = ObjectAccessor::GetGameObject(*this, GetUInt64Value(PLAYER_DUEL_ARBITER));
+        GameObject* obj = GetMap()->GetGameObject(GetUInt64Value(PLAYER_DUEL_ARBITER));
         if (obj)
             DuelComplete(DUEL_FLED);
     }
@@ -1894,7 +1894,7 @@ Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
         return NULL;
 
     // exist
-    Creature *unit = ObjectAccessor::GetCreature(*this,guid);
+    Creature *unit = GetMap()->GetCreature(guid);
     if (!unit)
         return NULL;
 
@@ -1934,7 +1934,7 @@ Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
 
 GameObject* Player::GetGameObjectIfCanInteractWith(uint64 guid, GameobjectTypes type) const
 {
-    if(GameObject *go = ObjectAccessor::GetGameObject(*this,guid))
+    if(GameObject *go = GetMap()->GetGameObject(guid))
     {
         if(go->GetGoType() == type)
         {
@@ -5927,7 +5927,7 @@ void Player::CheckDuelDistance(time_t currTime)
         return;
 
     uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
-    GameObject* obj = ObjectAccessor::GetGameObject(*this, duelFlagGUID);
+    GameObject* obj = GetMap()->GetGameObject(duelFlagGUID);
     if(!obj)
         return;
 
@@ -5994,7 +5994,7 @@ void Player::DuelComplete(DuelCompleteType type)
     duel->opponent->GetSession()->SendPacket(&data);*/
 
     //Remove Duel Flag object
-    GameObject* obj = ObjectAccessor::GetGameObject(*this, GetUInt64Value(PLAYER_DUEL_ARBITER));
+    GameObject* obj = GetMap()->GetGameObject(GetUInt64Value(PLAYER_DUEL_ARBITER));
     if(obj)
         duel->initiator->RemoveGameObject(obj,true);
 
@@ -6755,8 +6755,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     if (IS_GAMEOBJECT_GUID(guid))
     {
         sLog.outDebug("       IS_GAMEOBJECT_GUID(guid)");
-        GameObject *go =
-            ObjectAccessor::GetGameObject(*this, guid);
+        GameObject *go = GetMap()->GetGameObject(guid);
 
         // not check distance for GO in case owned GO (fishing bobber case, for example)
         // And permit out of range GO with no owner in case fishing hole
@@ -6858,7 +6857,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     }
     else
     {
-        Creature *creature = ObjectAccessor::GetCreature(*this, guid);
+        Creature *creature = GetMap()->GetCreature(guid);
 
         // must be in range and creature must be alive for pickpocket and must be dead for another loot
         if (!creature || creature->isAlive()!=(loot_type == LOOT_PICKPOCKETING) || !creature->IsWithinDistInMap(this,INTERACTION_DISTANCE))
@@ -11271,7 +11270,7 @@ void Player::PrepareQuestMenu( uint64 guid )
     Object *pObject;
     QuestRelations* pObjectQR;
     QuestRelations* pObjectQIR;
-    Creature *pCreature = ObjectAccessor::GetCreature(*this, guid);
+    Creature *pCreature = GetMap()->GetCreature(guid);
     if( pCreature )
     {
         pObject = (Object*)pCreature;
@@ -11280,7 +11279,7 @@ void Player::PrepareQuestMenu( uint64 guid )
     }
     else
     {
-        GameObject *pGameObject = ObjectAccessor::GetGameObject(*this, guid);
+        GameObject *pGameObject = GetMap()->GetGameObject(guid);
         if( pGameObject )
         {
             pObject = (Object*)pGameObject;
@@ -11357,7 +11356,7 @@ void Player::SendPreparedQuest( uint64 guid )
         qe._Delay = 0;
         qe._Emote = 0;
         std::string title = "";
-        Creature *pCreature = ObjectAccessor::GetCreature(*this, guid);
+        Creature *pCreature = GetMap()->GetCreature(guid);
         if( pCreature )
         {
             uint32 textid = pCreature->GetNpcTextId();
@@ -11421,7 +11420,7 @@ Quest const * Player::GetNextQuest( uint64 guid, Quest const *pQuest )
     QuestRelations* pObjectQR;
     QuestRelations* pObjectQIR;
 
-    Creature *pCreature = ObjectAccessor::GetCreature(*this, guid);
+    Creature *pCreature = GetMap()->GetCreature(guid);
     if( pCreature )
     {
         pObject = (Object*)pCreature;
@@ -11430,7 +11429,7 @@ Quest const * Player::GetNextQuest( uint64 guid, Quest const *pQuest )
     }
     else
     {
-        GameObject *pGameObject = ObjectAccessor::GetGameObject(*this, guid);
+        GameObject *pGameObject = GetMap()->GetGameObject(guid);
         if( pGameObject )
         {
             pObject = (Object*)pGameObject;

@@ -263,8 +263,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     recv_data >> guid;
 
     sLog.outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", GUID_LOPART(guid));
-    GameObject *obj = ObjectAccessor::GetGameObject(*_player, guid);
 
+    GameObject *obj = GetPlayer()->GetMap()->GetGameObject(guid);
     if(!obj)
         return;
 
@@ -443,7 +443,7 @@ void WorldSession::HandleTotemDestroy( WorldPacket& recvPacket)
     if(!_player->m_TotemSlot[slotId])
         return;
 
-    Creature* totem = ObjectAccessor::GetCreature(*_player,_player->m_TotemSlot[slotId]);
+    Creature* totem = GetPlayer()->GetMap()->GetCreature(_player->m_TotemSlot[slotId]);
     if(totem && totem->isTotem())
         ((Totem*)totem)->UnSummon();
 }
