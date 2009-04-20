@@ -5747,7 +5747,7 @@ void Aura::PeriodicTick()
 
             // DO NOT ACCESS MEMBERS OF THE AURA FROM NOW ON (DealDamage can delete aura)
 
-            pCaster->ProcDamageAndSpell(target, (PROC_FLAG_HEALED | PROC_FLAG_PERIODIC_TICK), PROC_FLAG_TAKE_DAMAGE, new_damage, GetSpellSchoolMask(spellProto), spellProto);
+            pCaster->ProcDamageAndSpell(target, PROC_FLAG_PERIODIC_TICK, PROC_FLAG_TAKE_DAMAGE, new_damage, GetSpellSchoolMask(spellProto), spellProto);
             if (!target->isAlive() && pCaster->IsNonMeleeSpellCasted(false))
             {
                 for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
