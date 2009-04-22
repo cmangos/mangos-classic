@@ -284,6 +284,7 @@ void ScriptedAI::UpdateAI(const uint32)
 
 void ScriptedAI::EnterEvadeMode()
 {
+    m_creature->CombatStop(true);
     if( m_creature->isAlive() )
         DoGoHome();
 }

@@ -749,8 +749,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         AttackerSet const& getAttackers() const { return m_attackers; }
         bool isAttackingPlayer() const;
         Unit* getVictim() const { return m_attacking; }
-        void CombatStop(bool cast = false);
-        void CombatStopWithPets(bool cast = false);
+        void CombatStop(bool includingCast = false);
+        void CombatStopWithPets(bool includingCast = false);
         Unit* SelectNearbyTarget() const;
 
         void addUnitState(uint32 f) { m_state |= f; }
