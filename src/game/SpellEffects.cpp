@@ -2426,14 +2426,9 @@ void Spell::EffectHeal( uint32 /*i*/ )
         bool crit = caster->isSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask, m_attackType);
         if (crit)
             addhealth = caster->SpellCriticalBonus(m_spellInfo, addhealth, unitTarget);
-        caster->SendHealSpellLog(unitTarget, m_spellInfo->Id, addhealth, crit);
 
-        int32 gain = unitTarget->ModifyHealth( int32(addhealth) );
+        int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo, crit);
         unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
-
-        if(caster->GetTypeId()==TYPEID_PLAYER)
-            if(BattleGround *bg = ((Player*)caster)->GetBattleGround())
-                bg->UpdatePlayerScore(((Player*)caster), SCORE_HEALING_DONE, gain);
 
         // ignore item heals
         if(m_CastItem)
@@ -2459,14 +2454,8 @@ void Spell::EffectHealPct( uint32 /*i*/ )
             return;
 
         uint32 addhealth = unitTarget->GetMaxHealth() * damage / 100;
-        caster->SendHealSpellLog(unitTarget, m_spellInfo->Id, addhealth, false);
-
-        int32 gain = unitTarget->ModifyHealth( int32(addhealth) );
+        int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo);
         unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
-
-        if(caster->GetTypeId()==TYPEID_PLAYER)
-            if(BattleGround *bg = ((Player*)caster)->GetBattleGround())
-                bg->UpdatePlayerScore(((Player*)caster), SCORE_HEALING_DONE, gain);
     }
 }
 
@@ -2483,8 +2472,7 @@ void Spell::EffectHealMechanical( uint32 /*i*/ )
             return;
 
         uint32 addhealth = caster->SpellHealingBonus(m_spellInfo, uint32(damage), HEAL, unitTarget);
-        caster->SendHealSpellLog(unitTarget, m_spellInfo->Id, addhealth, false);
-        unitTarget->ModifyHealth( int32(damage) );
+        caster->DealHeal(unitTarget, addhealth, m_spellInfo);
     }
 }
 
@@ -2514,11 +2502,7 @@ void Spell::EffectHealthLeech(uint32 i)
     if(m_caster->isAlive())
     {
         new_damage = m_caster->SpellHealingBonus(m_spellInfo, new_damage, HEAL, m_caster);
-
-        m_caster->ModifyHealth(new_damage);
-
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            m_caster->SendHealSpellLog(m_caster, m_spellInfo->Id, uint32(new_damage));
+        m_caster->DealHeal(m_caster, uint32(new_damage), m_spellInfo);
     }
 }
 
@@ -4406,10 +4390,8 @@ void Spell::EffectHealMaxHealth(uint32 /*i*/)
 
     uint32 heal = m_caster->GetMaxHealth();
 
-    int32 gain = unitTarget->ModifyHealth(heal);
+    int32 gain = m_caster->DealHeal(unitTarget, heal, m_spellInfo);
     unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
-
-    m_caster->SendHealSpellLog(unitTarget, m_spellInfo->Id, heal);
 }
 
 void Spell::EffectInterruptCast(uint32 /*i*/)

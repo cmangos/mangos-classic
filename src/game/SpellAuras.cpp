@@ -1320,8 +1320,7 @@ void Aura::TriggerSpell()
                     case 23493:
                     {
                         int32 heal = caster->GetMaxHealth() / 10;
-                        caster->ModifyHealth( heal );
-                        caster->SendHealSpellLog(caster, 23493, heal);
+                        caster->DealHeal(caster, heal, auraSpellInfo);
 
                         int32 mana = caster->GetMaxPower(POWER_MANA);
                         if (mana)
@@ -5763,10 +5762,8 @@ void Aura::PeriodicTick()
 
             uint32 heal = pCaster->SpellHealingBonus(spellProto, uint32(new_damage * multiplier), DOT, pCaster);
 
-            int32 gain = pCaster->ModifyHealth(heal);
+            int32 gain = pCaster->DealHeal(pCaster, heal, spellProto);
             pCaster->getHostilRefManager().threatAssist(pCaster, gain * 0.5f, spellProto);
-
-            pCaster->SendHealSpellLog(pCaster, spellProto->Id, heal);
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
