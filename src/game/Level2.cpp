@@ -3549,7 +3549,7 @@ bool ChatHandler::HandleWpImportCommand(const char *args)
 }
 
 //rename characters
-bool ChatHandler::HandleRenameCommand(const char* args)
+bool ChatHandler::HandleCharacterRenameCommand(const char* args)
 {
     Player* target = NULL;
     uint64 targetGUID = 0;
