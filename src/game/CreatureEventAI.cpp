@@ -36,7 +36,7 @@ int CreatureEventAI::Permissible(const Creature *creature)
     return PERMIT_BASE_NO;
 }
 
-CreatureEventAI::CreatureEventAI(Creature *c ) : CreatureAI(c), InCombat(false)
+CreatureEventAI::CreatureEventAI(Creature *c ) : CreatureAI(c)
 {
     CreatureEventAI_Event_Map::iterator CreatureEvents = CreatureEAI_Mgr.GetCreatureEventAIMap().find(m_creature->GetEntry());
     if (CreatureEvents != CreatureEAI_Mgr.GetCreatureEventAIMap().end())
@@ -138,7 +138,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
     {
         case EVENT_T_TIMER:
         {
-            if (!InCombat)
+            if (!m_creature->isInCombat())
                 return false;
 
             //Repeat Timers
@@ -157,7 +157,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         break;
         case EVENT_T_TIMER_OOC:
         {
-            if (InCombat)
+            if (m_creature->isInCombat())
                 return false;
 
             //Repeat Timers
@@ -177,7 +177,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         break;
         case EVENT_T_HP:
         {
-            if (!InCombat || !m_creature->GetMaxHealth())
+            if (!m_creature->isInCombat() || !m_creature->GetMaxHealth())
                 return false;
 
             uint32 perc = (m_creature->GetHealth()*100) / m_creature->GetMaxHealth();
@@ -202,7 +202,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         break;
         case EVENT_T_MANA:
         {
-            if (!InCombat || !m_creature->GetMaxPower(POWER_MANA))
+            if (!m_creature->isInCombat() || !m_creature->GetMaxPower(POWER_MANA))
                 return false;
 
             uint32 perc = (m_creature->GetPower(POWER_MANA)*100) / m_creature->GetMaxPower(POWER_MANA);
@@ -312,7 +312,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         break;
         case EVENT_T_TARGET_HP:
         {
-            if (!InCombat || !m_creature->getVictim() || !m_creature->getVictim()->GetMaxHealth())
+            if (!m_creature->isInCombat() || !m_creature->getVictim() || !m_creature->getVictim()->GetMaxHealth())
                 return false;
 
             uint32 perc = (m_creature->getVictim()->GetHealth()*100) / m_creature->getVictim()->GetMaxHealth();
@@ -337,7 +337,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         break;
         case EVENT_T_TARGET_CASTING:
         {
-            if (!InCombat || !m_creature->getVictim() || !m_creature->getVictim()->IsNonMeleeSpellCasted(false, false, true))
+            if (!m_creature->isInCombat() || !m_creature->getVictim() || !m_creature->getVictim()->IsNonMeleeSpellCasted(false, false, true))
                 return false;
 
             //Repeat Timers
@@ -357,7 +357,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         break;
         case EVENT_T_FRIENDLY_HP:
         {
-            if (!InCombat)
+            if (!m_creature->isInCombat())
                 return false;
 
             Unit* pUnit = DoSelectLowestHpFriendly(param2, param1);
@@ -384,7 +384,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         break;
         case EVENT_T_FRIENDLY_IS_CC:
         {
-            if (!InCombat)
+            if (!m_creature->isInCombat())
                 return false;
 
             std::list<Creature*> pList;
@@ -988,7 +988,6 @@ void CreatureEventAI::ProcessAction(uint16 type, uint32 param1, uint32 param2, u
 
 void CreatureEventAI::JustRespawned()
 {
-    InCombat = false;
     Reset();
 
     if (bEmptyList)
@@ -1068,8 +1067,6 @@ void CreatureEventAI::EnterEvadeMode()
 
     m_creature->SetLootRecipient(NULL);
 
-    InCombat = false;
-
     if (bEmptyList)
         return;
 
@@ -1083,7 +1080,6 @@ void CreatureEventAI::EnterEvadeMode()
 
 void CreatureEventAI::JustDied(Unit* killer)
 {
-    InCombat = false;
     Reset();
 
     if (bEmptyList)
@@ -1167,17 +1163,16 @@ void CreatureEventAI::AttackStart(Unit *who)
     if (!who)
         return;
 
+    bool inCombat = m_creature->isInCombat();
+
     if (m_creature->Attack(who, MeleeEnabled))
     {
         m_creature->AddThreat(who, 0.0f);
         m_creature->SetInCombatWith(who);
         who->SetInCombatWith(m_creature);
 
-        if (!InCombat)
-        {
-            InCombat = true;
+        if (!inCombat)
             Aggro(who);
-        }
 
         if (CombatMovementEnabled)
         {
@@ -1267,7 +1262,7 @@ void CreatureEventAI::SpellHit(Unit* pUnit, const SpellEntry* pSpell)
 void CreatureEventAI::UpdateAI(const uint32 diff)
 {
     //Check if we are in combat (also updates calls threat update code)
-    bool Combat = InCombat ? (m_creature->SelectHostilTarget() && m_creature->getVictim()) : false;
+    bool Combat = m_creature->SelectHostilTarget() && m_creature->getVictim();
 
     //Must return if creature isn't alive. Normally select hostil target and get victim prevent this
     if (!m_creature->isAlive())
