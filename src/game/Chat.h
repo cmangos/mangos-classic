@@ -113,6 +113,10 @@ class ChatHandler
         bool HandleCastSelfCommand(const char *args);
         bool HandleCastTargetCommand(const char *args);
 
+        bool HandleCharacterCustomizeCommand(const char * args);
+        bool HandleCharacterDeleteCommand(const char* args);
+        bool HandleCharacterRenameCommand(const char * args);
+
         bool HandleDebugAnimCommand(const char* args);
         bool HandleDebugArenaCommand(const char * args);
         bool HandleDebugBattlegroundCommand(const char * args);
@@ -348,9 +352,10 @@ class ChatHandler
         bool HandleServerIdleShutDownCommand(const char* args);
         bool HandleServerInfoCommand(const char* args);
         bool HandleServerMotdCommand(const char* args);
+        bool HandleServerPLimitCommand(const char* args);
         bool HandleServerRestartCommand(const char* args);
-        bool HandleServerSetMotdCommand(const char* args);
         bool HandleServerSetLogLevelCommand(const char* args);
+        bool HandleServerSetMotdCommand(const char* args);
         bool HandleServerShutDownCommand(const char* args);
         bool HandleServerShutDownCancelCommand(const char* args);
 
@@ -397,12 +402,10 @@ class ChatHandler
         bool HandleGoTriggerCommand(const char* args);
         bool HandleGoGraveyardCommand(const char* args);
         bool HandlePInfoCommand(const char* args);
-        bool HandlePLimitCommand(const char* args);
         bool HandleMuteCommand(const char* args);
         bool HandleUnmuteCommand(const char* args);
         bool HandleMovegensCommand(const char* args);
 
-        bool HandleCharacterDeleteCommand(const char* args);
         bool HandleGoXYCommand(const char* args);
         bool HandleGoXYZCommand(const char* args);
         bool HandleGoZoneXYCommand(const char* args);
@@ -439,7 +442,6 @@ class ChatHandler
         bool HandleMaxSkillCommand(const char* args);
         bool HandleSetSkillCommand(const char* args);
         bool HandleRespawnCommand(const char* args);
-        bool HandleCharacterRenameCommand(const char * args);
         bool HandlePDumpLoadCommand(const char *args);
         bool HandlePDumpWriteCommand(const char *args);
         bool HandleComeToMeCommand(const char *args);
