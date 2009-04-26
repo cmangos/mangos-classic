@@ -2044,11 +2044,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             if( GetId()==24658 )
             {
                 uint32 spellId = 24659;
-                if (apply)
+                if (apply && caster)
                 {
                     const SpellEntry *spell = sSpellStore.LookupEntry(spellId);
                     if (!spell)
                         return;
+
                     for (int i=0; i < spell->StackAmount; ++i)
                         caster->CastSpell(m_target, spell->Id, true, NULL, NULL, GetCasterGUID());
                     return;
@@ -2060,7 +2061,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             if( GetId()==24661 )
             {
                 uint32 spellId = 24662;
-                if (apply)
+                if (apply && caster)
                 {
                     const SpellEntry *spell = sSpellStore.LookupEntry(spellId);
                     if (!spell)

@@ -632,16 +632,16 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, uint32 queue_id, uin
             BattleGround* bg = *itr; //we have to store battleground pointer here, because when battleground is full, it is removed from free queue (not yet implemented!!)
             // and iterator is invalid
 
-            for(QueuedGroupsList::iterator itr = m_QueuedGroups[queue_id].begin(); itr != m_QueuedGroups[queue_id].end(); ++itr)
+            for(QueuedGroupsList::iterator itr2 = m_QueuedGroups[queue_id].begin(); itr2 != m_QueuedGroups[queue_id].end(); ++itr2)
             {
                 // did the group join for this bg type?
-                if((*itr)->BgTypeId != bgTypeId)
+                if((*itr2)->BgTypeId != bgTypeId)
                     continue;
                 // if so, check if fits in
-                if(bg->GetFreeSlotsForTeam((*itr)->Team) >= (*itr)->Players.size())
+                if(bg->GetFreeSlotsForTeam((*itr2)->Team) >= (*itr2)->Players.size())
                 {
                     // if group fits in, invite it
-                    InviteGroupToBG((*itr),bg,(*itr)->Team);
+                    InviteGroupToBG((*itr2),bg,(*itr2)->Team);
                 }
             }
 
@@ -1747,10 +1747,11 @@ void BattleGroundMgr::DistributeArenaPoints()
 
 void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, const uint64& guid, Player* plr, BattleGroundTypeId bgTypeId)
 {
-    uint32 PlayerLevel = 10;
+    if (!plr)
+        return;
 
-    if(plr)
-        PlayerLevel = plr->getLevel();
+    uint32 PlayerLevel = 10;
+    PlayerLevel = plr->getLevel();
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
     *data << uint64(guid);                                  // battlemaster guid
