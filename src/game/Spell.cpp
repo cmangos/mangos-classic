@@ -999,6 +999,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                     if(!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
                         ((Creature*)unit)->AI()->AttackedBy(m_caster);
 
+                    unit->AddThreat(m_caster, 0.0f);
                     unit->SetInCombatWith(m_caster);
                     m_caster->SetInCombatWith(unit);
 
