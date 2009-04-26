@@ -3755,12 +3755,15 @@ void ChatHandler::HandleCharacterLevel(Player* player, uint64 player_guid, uint3
         player->InitTalentForLevel();
         player->SetUInt32Value(PLAYER_XP,0);
 
-        if(oldlevel == newlevel)
-            ChatHandler(player).SendSysMessage(LANG_YOURS_LEVEL_PROGRESS_RESET);
-        else if(oldlevel < newlevel)
-            ChatHandler(player).PSendSysMessage(LANG_YOURS_LEVEL_UP,newlevel-oldlevel);
-        else                                                // if(oldlevel > newlevel)
-            ChatHandler(player).PSendSysMessage(LANG_YOURS_LEVEL_DOWN,newlevel-oldlevel);
+        if(needReportToTarget(player))
+        {
+            if(oldlevel == newlevel)
+                ChatHandler(player).PSendSysMessage(LANG_YOURS_LEVEL_PROGRESS_RESET,GetNameLink().c_str());
+            else if(oldlevel < newlevel)
+                ChatHandler(player).PSendSysMessage(LANG_YOURS_LEVEL_UP,GetNameLink().c_str(),newlevel);
+            else                                                // if(oldlevel > newlevel)
+                ChatHandler(player).PSendSysMessage(LANG_YOURS_LEVEL_DOWN,GetNameLink().c_str(),newlevel);
+        }
     }
     else
     {
@@ -3853,7 +3856,7 @@ bool ChatHandler::HandleCharacterLevelCommand(const char* args)
 
     HandleCharacterLevel(chr,chr_guid,oldlevel,newlevel);
 
-    if(m_session->GetPlayer() != chr)                    // including player==NULL
+    if(m_session && m_session->GetPlayer() != chr)          // including player==NULL
     {
         std::string nameLink = playerLink(name);
         PSendSysMessage(LANG_YOU_CHANGE_LVL,nameLink.c_str(),newlevel);
@@ -3938,11 +3941,12 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
 
     HandleCharacterLevel(chr,chr_guid,oldlevel,newlevel);
 
-    if(m_session->GetPlayer() != chr)                       // including chr==NULL
+    if(m_session && m_session->GetPlayer() != chr)          // including chr==NULL
     {
         std::string nameLink = playerLink(name);
         PSendSysMessage(LANG_YOU_CHANGE_LVL,nameLink.c_str(),newlevel);
     }
+
     return true;
 }
 
