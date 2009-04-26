@@ -814,7 +814,7 @@ void Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
         DurabilityLossAll(0.10f,false);
         // durability lost message
         WorldPacket data2(SMSG_DURABILITY_DAMAGE_DEATH, 0);
-        GetSession2()->SendPacket(&data);
+        GetSession()->SendPacket(&data2);
     }
 }
 
