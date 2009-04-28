@@ -26,10 +26,12 @@ pkgdatadir = $(datadir)/mangos/sql/updates/before_upgrade_to_0.13
 #  Install basic SQL files to datadir
 pkgdata_DATA = \
 	020_7643_01_mangos_db_version.sql \
+	029_7393_01_mangos_game_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
 #  SQL update files, to upgrade database schema from older revisions
 EXTRA_DIST = \
 	020_7643_01_mangos_db_version.sql \
+	029_7393_01_mangos_game_event.sql \
 	README

@@ -81,12 +81,12 @@ then:
 2.4: Update field name in db version table (db_version in mangos.sql in our case) to new field name (required_020_7643_01_mangos_db_version)
 3. Fix/update sql update file name in slq/updates/Makefile.am
 
-4. Write undo slq update for sql/updates/before_upgrade_to_0.13 directory.
-4.1: Name it in same way as add sql update (020_7643_01_mangos_db_version.sql)
+4. Write undo sql update for sql/updates/before_upgrade_to_0.13 directory.
+4.1: Name it in same way as added sql update (020_7643_01_mangos_db_version.sql)
 4.2: Use REVERSED order for guard query field names
      (ALTER TABLE db_version CHANGE COLUMN required_020_7643_01_mangos_db_version required_2008_12_15_01_mangos_arenas bit;)
 4.3: write required sql queries that will restore DB structure to state _before_ related sql update apply
-     (if filed added then field drop, if field drop then field re-added with some useful value,
-     if field renamed thne field renamed back, etc)
+     (if field added then field drop, if field drop then field re-added with some useful value,
+     if field renamed then field renamed back, etc)
 5. Add undo sql update file name into slq/updates/before_upgrade_to_0.13/Makefile.am
 

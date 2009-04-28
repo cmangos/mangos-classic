@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_GAMEEVENT_H
-#define MANGOS_GAMEEVENT_H
+#ifndef MANGOS_GAMEEVENT_MGR_H
+#define MANGOS_GAMEEVENT_MGR_H
 
 #include "Common.h"
 #include "SharedDefines.h"
@@ -26,6 +26,9 @@
 
 #define max_ge_check_delay 86400                            // 1 day in seconds
 
+class Creature;
+class GameObject;
+
 struct GameEventData
 {
     GameEventData() : start(1),end(0),occurence(0),length(0) {}
@@ -33,6 +36,7 @@ struct GameEventData
     time_t end;
     uint32 occurence;
     uint32 length;
+    uint32 holiday_id;
     std::string description;
 
     bool isValid() const { return length > 0; }
@@ -46,11 +50,11 @@ struct ModelEquip
     uint32 equipement_id_prev;
 };
 
-class GameEvent
+class GameEventMgr
 {
     public:
-        GameEvent();
-        ~GameEvent() {};
+        GameEventMgr();
+        ~GameEventMgr() {};
         typedef std::set<uint16> ActiveEvents;
         typedef std::vector<GameEventData> GameEventDataMap;
         ActiveEvents const& GetActiveEventList() const { return m_ActiveEvents; }
@@ -90,5 +94,8 @@ class GameEvent
         bool isSystemInit;
 };
 
-#define gameeventmgr MaNGOS::Singleton<GameEvent>::Instance()
+#define gameeventmgr MaNGOS::Singleton<GameEventMgr>::Instance()
+
+MANGOS_DLL_SPEC bool IsHolidayActive(HolidayIds id);
+
 #endif

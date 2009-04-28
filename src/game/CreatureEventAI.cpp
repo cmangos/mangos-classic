@@ -24,6 +24,7 @@
 #include "World.h"
 #include "Cell.h"
 #include "CellImpl.h"
+#include "GameEventMgr.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "WorldPacket.h"
@@ -1676,9 +1677,8 @@ void CreatureEventAI::ReceiveEmote(Player* pPlayer, uint32 text_emote)
                         bProcess = true;
                     break;
                 case CONDITION_ACTIVE_EVENT:                // event_id     0
-                    //if (IsHolidayActive(HolidayIds((*itr).Event.event_param3)))
-                    //    bProcess = true;
-                    // not on mangos-0.12
+                    if (IsHolidayActive(HolidayIds((*itr).Event.event_param3)))
+                        bProcess = true;
                     break;
             }
 
