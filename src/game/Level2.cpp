@@ -30,6 +30,7 @@
 #include "World.h"
 #include "GameEventMgr.h"
 #include "SpellMgr.h"
+#include "PoolHandler.h"
 #include "AccountMgr.h"
 #include "GMTicketMgr.h"
 #include "WaypointManager.h"
