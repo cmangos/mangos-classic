@@ -800,7 +800,7 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
 bool Item::GemsFitSockets() const
 {
     bool fits = true;
-    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
+    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+MAX_GEM_SOCKETS; ++enchant_slot)
     {
         uint8 SocketColor = GetProto()->Socket[enchant_slot-SOCK_ENCHANTMENT_SLOT].Color;
 
@@ -840,7 +840,7 @@ bool Item::GemsFitSockets() const
 uint8 Item::GetGemCountWithID(uint32 GemID) const
 {
     uint8 count = 0;
-    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
+    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+MAX_GEM_SOCKETS; ++enchant_slot)
     {
         uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot));
         if(!enchant_id)

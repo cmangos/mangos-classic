@@ -1648,9 +1648,8 @@ void CreatureEventAI::ReceiveEmote(Player* pPlayer, uint32 text_emote)
                         bProcess = true;
                     break;
                 case CONDITION_ITEM_EQUIPPED:               // item_id      count
-                    //if (pPlayer->HasItemOrGemWithIdEquipped((*itr).Event.event_param3,(*itr).Event.event_param4))
-                    //    bProcess = true;
-                    // not on mangos-0.12
+                    if (pPlayer->HasItemOrGemWithIdEquipped((*itr).Event.event_param3,(*itr).Event.event_param4))
+                        bProcess = true;
                     break;
                 case CONDITION_ZONEID:                      // zone_id      0
                     if (pPlayer->GetZoneId() == (*itr).Event.event_param3)
