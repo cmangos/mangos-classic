@@ -446,20 +446,6 @@ enum ActivateTaxiReplies
     ERR_TAXINOTSTANDING             = 12
 };
 
-enum LootType
-{
-    LOOT_CORPSE                 = 1,
-    LOOT_PICKPOCKETING          = 2,
-    LOOT_FISHING                = 3,
-    LOOT_DISENCHANTING          = 4,
-                                                            // ignored always by client
-    LOOT_SKINNING               = 6,                        // unsupported by client, sending LOOT_PICKPOCKETING instead
-    LOOT_PROSPECTING            = 7,                        // unsupported by client, sending LOOT_PICKPOCKETING instead
-
-    LOOT_FISHINGHOLE            = 20,                       // unsupported by client, sending LOOT_FISHING instead
-    LOOT_INSIGNIA               = 21                        // unsupported by client, sending LOOT_CORPSE instead
-};
-
 enum MirrorTimerType
 {
     FATIGUE_TIMER      = 0,
