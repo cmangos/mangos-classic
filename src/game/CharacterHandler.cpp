@@ -508,7 +508,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     SendPacket(&data);
 
     data.Initialize( SMSG_ACCOUNT_DATA_TIMES, 128 );
-    for(int i = 0; i < 32; i++)
+    for(int i = 0; i < 32; ++i)
         data << uint32(0);
     SendPacket(&data);
 
@@ -820,14 +820,14 @@ void WorldSession::HandleTutorialFlag( WorldPacket & recv_data )
 
 void WorldSession::HandleTutorialClear( WorldPacket & /*recv_data*/ )
 {
-    for ( uint32 iI = 0; iI < 8; iI++)
-        GetPlayer()->SetTutorialInt( iI, 0xFFFFFFFF );
+    for (int i = 0; i < 8; ++i)
+        GetPlayer()->SetTutorialInt( i, 0xFFFFFFFF );
 }
 
 void WorldSession::HandleTutorialReset( WorldPacket & /*recv_data*/ )
 {
-    for ( uint32 iI = 0; iI < 8; iI++)
-        GetPlayer()->SetTutorialInt( iI, 0x00000000 );
+    for (int i = 0; i < 8; ++i)
+        GetPlayer()->SetTutorialInt( i, 0x00000000 );
 }
 
 void WorldSession::HandleSetWatchedFactionIndexOpcode(WorldPacket & recv_data)

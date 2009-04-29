@@ -309,7 +309,7 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
         if(_player->InBattleGroundQueue())
         {
             // update all queues, send invitation info if player is invited, queue info if queued
-            for (uint32 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; i++)
+            for (uint32 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
             {
                 uint32 queue_id = _player->GetBattleGroundQueueId(i);
                 if(!queue_id)

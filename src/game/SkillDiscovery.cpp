@@ -133,11 +133,11 @@ void LoadSkillDiscoveryTable()
 uint32 GetSkillDiscoverySpell(uint32 skillId, uint32 spellId, Player* player)
 {
     // check spell case
-    SkillDiscoveryMap::iterator tab = SkillDiscoveryStore.find(spellId);
+    SkillDiscoveryMap::const_iterator tab = SkillDiscoveryStore.find(spellId);
 
     if(tab != SkillDiscoveryStore.end())
     {
-        for(SkillDiscoveryList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
+        for(SkillDiscoveryList::const_iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
         {
             if( roll_chance_f(item_iter->chance * sWorld.getRate(RATE_SKILL_DISCOVERY))
                 && !player->HasSpell(item_iter->spellId) )
@@ -151,7 +151,7 @@ uint32 GetSkillDiscoverySpell(uint32 skillId, uint32 spellId, Player* player)
     tab = SkillDiscoveryStore.find(-(int32)skillId);
     if(tab != SkillDiscoveryStore.end())
     {
-        for(SkillDiscoveryList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
+        for(SkillDiscoveryList::const_iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
         {
             if( roll_chance_f(item_iter->chance * sWorld.getRate(RATE_SKILL_DISCOVERY))
                 && !player->HasSpell(item_iter->spellId) )

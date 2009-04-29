@@ -162,7 +162,7 @@ Unit::Unit()
     m_form = FORM_NONE;
     m_deathState = ALIVE;
 
-    for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
         m_currentSpells[i] = NULL;
 
     m_addDmgOnce = 0;
@@ -233,7 +233,7 @@ Unit::Unit()
 Unit::~Unit()
 {
     // set current spells as deletable
-    for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
     {
         if (m_currentSpells[i])
         {
@@ -417,7 +417,7 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
 void Unit::RemoveSpellsCausingAura(AuraType auraType)
 {
     if (auraType >= TOTAL_AURAS) return;
-    AuraList::iterator iter, next;
+    AuraList::const_iterator iter, next;
     for (iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end(); iter = next)
     {
         next = iter;
@@ -823,7 +823,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
         // TODO: Store auras by interrupt flag to speed this up.
         AuraMap& vAuras = pVictim->GetAuras();
-        for (AuraMap::iterator i = vAuras.begin(), next; i != vAuras.end(); i = next)
+        for (AuraMap::const_iterator i = vAuras.begin(), next; i != vAuras.end(); i = next)
         {
             const SpellEntry *se = i->second->GetSpellProto();
             next = i; ++next;
@@ -848,7 +848,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         {
             if( damagetype != DOT )
             {
-                for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
+                for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
                 {
                     // skip channeled spell (processed differently below)
                     if (i == CURRENT_CHANNELED_SPELL)
@@ -910,7 +910,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
 void Unit::CastStop(uint32 except_spellid)
 {
-    for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
+    for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
         if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id!=except_spellid)
             InterruptSpell(i,false);
 }
@@ -1497,7 +1497,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
         uint32 faq[4] = {24,6,4,6};
         uint8 m = 0;
         float Binom = 0.0f;
-        for (uint8 i = 0; i < 4; i++)
+        for (uint8 i = 0; i < 4; ++i)
         {
             Binom += 2400 *( powf(tmpvalue2, i) * powf( (1-tmpvalue2), (4-i)))/faq[i];
             if (ran > Binom )
@@ -2877,7 +2877,7 @@ float Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
     if (haveOffhandWeapon() && attType != RANGED_ATTACK)
     {
         bool isNormal = false;
-        for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
+        for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
         {
             if( m_currentSpells[i] && (GetSpellSchoolMask(m_currentSpells[i]->m_spellInfo) & SPELL_SCHOOL_MASK_NORMAL) )
             {
@@ -3133,7 +3133,7 @@ void Unit::_UpdateSpells( uint32 time )
         _UpdateAutoRepeatSpell();
 
     // remove finished spells from current pointers
-    for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
     {
         if (m_currentSpells[i] && m_currentSpells[i]->getState() == SPELL_STATE_FINISHED)
         {
@@ -3378,7 +3378,7 @@ void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id)
 
 Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
 {
-    for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
         if(m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id==spell_id)
             return m_currentSpells[i];
     return NULL;
@@ -3683,7 +3683,7 @@ bool Unit::AddAura(Aura *Aur)
 
             bool restart = false;
             AuraList& scAuras = caster->GetSingleCastAuras();
-            for(AuraList::iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
+            for(AuraList::const_iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
             {
                 if( (*itr)->GetTarget() != Aur->GetTarget() &&
                     IsSingleTargetSpells((*itr)->GetSpellProto(),aurSpellInfo) )
@@ -3726,7 +3726,7 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if(!spellInfo)
         return;
-    AuraMap::iterator i,next;
+    AuraMap::const_iterator i,next;
     for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
     {
         next = i;
@@ -4186,7 +4186,7 @@ void Unit::RemoveAllAurasOnDeath()
 
 void Unit::DelayAura(uint32 spellId, uint32 effindex, int32 delaytime)
 {
-    AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
+    AuraMap::const_iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
     if (iter != m_Auras.end())
     {
         if (iter->second->GetAuraDuration() < delaytime)
@@ -4200,7 +4200,7 @@ void Unit::DelayAura(uint32 spellId, uint32 effindex, int32 delaytime)
 
 void Unit::_RemoveAllAuraMods()
 {
-    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
+    for (AuraMap::const_iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
         (*i).second->ApplyModifier(false);
     }
@@ -4208,7 +4208,7 @@ void Unit::_RemoveAllAuraMods()
 
 void Unit::_ApplyAllAuraMods()
 {
-    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
+    for (AuraMap::const_iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
         (*i).second->ApplyModifier(true);
     }
@@ -4216,7 +4216,7 @@ void Unit::_ApplyAllAuraMods()
 
 Aura* Unit::GetAura(uint32 spellId, uint32 effindex)
 {
-    AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
+    AuraMap::const_iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
     if (iter != m_Auras.end())
         return iter->second;
     return NULL;
@@ -7034,7 +7034,7 @@ bool Unit::isAttackingPlayer() const
     if(charmed && charmed->isAttackingPlayer())
         return true;
 
-    for (int8 i = 0; i < MAX_TOTEM; i++)
+    for (int8 i = 0; i < MAX_TOTEM; ++i)
     {
         if(m_TotemSlot[i])
         {
@@ -7051,7 +7051,7 @@ void Unit::RemoveAllAttackers()
 {
     while (!m_attackers.empty())
     {
-        AttackerSet::iterator iter = m_attackers.begin();
+        AttackerSet::const_iterator iter = m_attackers.begin();
         if(!(*iter)->AttackStop())
         {
             sLog.outError("WORLD: Unit has an attacker that isn't attacking it!");
@@ -8208,7 +8208,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
         bool normalized = false;
         if(spellProto)
         {
-            for (uint8 i = 0; i<3;i++)
+            for (uint8 i = 0; i<3;++i)
             {
                 if (spellProto->Effect[i] == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
                 {
@@ -9945,7 +9945,7 @@ CharmInfo::CharmInfo(Unit* unit)
 void CharmInfo::InitPetActionBar()
 {
     // the first 3 SpellOrActions are attack, follow and stay
-    for(uint32 i = 0; i < 3; i++)
+    for(uint32 i = 0; i < 3; ++i)
     {
         PetActionBar[i].Type = ACT_COMMAND;
         PetActionBar[i].SpellOrAction = COMMAND_ATTACK - i;
@@ -9953,7 +9953,7 @@ void CharmInfo::InitPetActionBar()
         PetActionBar[i + 7].Type = ACT_REACTION;
         PetActionBar[i + 7].SpellOrAction = COMMAND_ATTACK - i;
     }
-    for(uint32 i=0; i < 4; i++)
+    for(uint32 i=0; i < 4; ++i)
     {
         PetActionBar[i + 3].Type = ACT_DISABLED;
         PetActionBar[i + 3].SpellOrAction = 0;
@@ -10035,7 +10035,7 @@ void CharmInfo::InitCharmCreateSpells()
 
 bool CharmInfo::AddSpellToAB(uint32 oldid, uint32 newid, ActiveStates newstate)
 {
-    for(uint8 i = 0; i < 10; i++)
+    for(uint8 i = 0; i < 10; ++i)
     {
         if((PetActionBar[i].Type == ACT_DISABLED || PetActionBar[i].Type == ACT_ENABLED || PetActionBar[i].Type == ACT_CAST) && PetActionBar[i].SpellOrAction == oldid)
         {
@@ -10663,7 +10663,7 @@ uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectT
     bool DirectDamage = false;
     bool AreaEffect   = false;
 
-    for ( uint32 i=0; i<3;i++)
+    for ( uint32 i=0; i<3;++i)
     {
         switch ( spellProto->Effect[i] )
         {

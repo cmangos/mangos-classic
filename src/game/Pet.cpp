@@ -98,7 +98,7 @@ Pet::~Pet()
 {
     if(m_uint32Values)                                      // only for fully created Object
     {
-        for (PetSpellMap::iterator i = m_spells.begin(); i != m_spells.end(); ++i)
+        for (PetSpellMap::const_iterator i = m_spells.begin(); i != m_spells.end(); ++i)
             delete i->second;
         ObjectAccessor::Instance().RemoveObject(this);
     }
@@ -477,14 +477,14 @@ void Pet::SavePetToDB(PetSaveMode mode)
             << curmana << ", "
             << GetPower(POWER_HAPPINESS) << ", '";
 
-        for(uint32 i = 0; i < 10; i++)
+        for(uint32 i = 0; i < 10; ++i)
             ss << uint32(m_charmInfo->GetActionBarEntry(i)->Type) << " " << uint32(m_charmInfo->GetActionBarEntry(i)->SpellOrAction) << " ";
         ss << "', '";
 
         //save spells the pet can teach to it's Master
         {
             int i = 0;
-            for(TeachSpellMap::iterator itr = m_teachspells.begin(); i < 4 && itr != m_teachspells.end(); ++i, ++itr)
+            for(TeachSpellMap::const_iterator itr = m_teachspells.begin(); i < 4 && itr != m_teachspells.end(); ++i, ++itr)
                 ss << itr->first << " " << itr->second << " ";
             for(; i < 4; ++i)
                 ss << uint32(0) << " " << uint32(0) << " ";
@@ -754,7 +754,7 @@ bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
 
     chainstartstore[0] = spellmgr.GetFirstSpellInChain(spellid);
 
-    for (PetSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    for (PetSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if(IsPassiveSpell(itr->first))
             continue;
@@ -1144,7 +1144,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
                 SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
                 //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
 
-                for( int i = STAT_STRENGTH; i < MAX_STATS; i++)
+                for( int i = STAT_STRENGTH; i < MAX_STATS; ++i)
                 {
                     SetCreateStat(Stats(i),  float(pInfo->stats[i]));
                 }
@@ -1336,7 +1336,7 @@ void Pet::_SaveSpells()
 void Pet::_LoadAuras(uint32 timediff)
 {
     m_Auras.clear();
-    for (int i = 0; i < TOTAL_AURAS; i++)
+    for (int i = 0; i < TOTAL_AURAS; ++i)
         m_modAuras[i].clear();
 
     // all aura related fields
@@ -1394,7 +1394,7 @@ void Pet::_LoadAuras(uint32 timediff)
             if (caster_guid != GetGUID() && IsSingleTargetSpell(spellproto))
                 continue;
 
-            for(uint32 i=0; i<stackcount; i++)
+            for(uint32 i=0; i<stackcount; ++i)
             {
                 Aura* aura = CreateAura(spellproto, effindex, NULL, this, NULL);
 
@@ -1436,7 +1436,7 @@ void Pet::_SaveAuras()
                 {
                     // skip all auras from spell that apply at cast SPELL_AURA_MOD_SHAPESHIFT or pet area auras.
                     uint8 i;
-                    for (i = 0; i < 3; i++)
+                    for (i = 0; i < 3; ++i)
                         if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH ||
                             spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_OWNER ||
                             spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_PET )
@@ -1612,7 +1612,7 @@ void Pet::InitPetCreateSpells()
 {
     m_charmInfo->InitPetActionBar();
 
-    for (PetSpellMap::iterator i = m_spells.begin(); i != m_spells.end(); ++i)
+    for (PetSpellMap::const_iterator i = m_spells.begin(); i != m_spells.end(); ++i)
         delete i->second;
     m_spells.clear();
 
@@ -1622,7 +1622,7 @@ void Pet::InitPetCreateSpells()
     PetCreateSpellEntry const* CreateSpells = objmgr.GetPetCreateSpellEntry(GetEntry());
     if(CreateSpells)
     {
-        for(uint8 i = 0; i < 4; i++)
+        for(uint8 i = 0; i < 4; ++i)
         {
             if(!CreateSpells->spellid[i])
                 break;
@@ -1717,7 +1717,7 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
 
     if(apply)
     {
-        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; i++)
+        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; ++i)
             ;                                               // just search
 
         if (i == m_autospells.size())
@@ -1730,7 +1730,7 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
     else
     {
         AutoSpellList::iterator itr2 = m_autospells.begin();
-        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; i++, itr2++)
+        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; ++i, itr2++)
             ;                                               // just search
 
         if (i < m_autospells.size())
@@ -1798,7 +1798,7 @@ void Pet::CastPetAuras(bool current)
     if(getPetType() != HUNTER_PET && (getPetType() != SUMMON_PET || owner->getClass() != CLASS_WARLOCK))
         return;
 
-    for(PetAuraSet::iterator itr = owner->m_petAuras.begin(); itr != owner->m_petAuras.end();)
+    for(PetAuraSet::const_iterator itr = owner->m_petAuras.begin(); itr != owner->m_petAuras.end();)
     {
         PetAura const* pa = *itr;
         ++itr;
