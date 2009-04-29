@@ -258,6 +258,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                         case SPELL_FAILED_REQUIRES_AREA:
                             data << uint32(spellInfo->AreaId);
                             break;
+                        default:
+                            break;
                     }
                     SendPacket(&data);
                 }

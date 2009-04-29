@@ -69,7 +69,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         bool foundAura = false;
         for(Unit::AuraList::const_iterator i = langAuras.begin();i != langAuras.end(); ++i)
         {
-            if((*i)->GetModifier()->m_miscvalue == lang)
+            if((*i)->GetModifier()->m_miscvalue == int32(lang))
             {
                 foundAura = true;
                 break;
@@ -192,7 +192,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             Player *player = objmgr.GetPlayer(to.c_str());
             uint32 tSecurity = GetSecurity();
             uint32 pSecurity = player ? player->GetSession()->GetSecurity() : SEC_PLAYER;
-            if(!player || tSecurity == SEC_PLAYER && pSecurity > SEC_PLAYER && !player->isAcceptWhispers())
+            if (!player || (tSecurity == SEC_PLAYER && pSecurity > SEC_PLAYER && !player->isAcceptWhispers()))
             {
                 WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
                 data<<to;

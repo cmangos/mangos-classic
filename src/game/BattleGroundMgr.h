@@ -153,10 +153,10 @@ class BGQueueInviteEvent : public BasicEvent
 class BGQueueRemoveEvent : public BasicEvent
 {
     public:
-        BGQueueRemoveEvent(const uint64& pl_guid, uint32 bgInstanceGUID, uint32 playersTeam) :
-          m_PlayerGuid(pl_guid), m_BgInstanceGUID(bgInstanceGUID), m_PlayersTeam(playersTeam)
-          {
-          };
+        BGQueueRemoveEvent(const uint64& pl_guid, uint32 bgInstanceGUID, uint32 playersTeam)
+            : m_PlayerGuid(pl_guid), m_BgInstanceGUID(bgInstanceGUID), m_PlayersTeam(playersTeam)
+        {}
+
         virtual ~BGQueueRemoveEvent() {};
 
         virtual bool Execute(uint64 e_time, uint32 p_time);
@@ -251,7 +251,7 @@ class BattleGroundMgr
         /* Battlegrounds */
         BattleGroundSet m_BattleGrounds;
         uint32 m_NextRatingDiscardUpdate;
-        uint64 m_NextAutoDistributionTime;
+        time_t m_NextAutoDistributionTime;
         uint32 m_AutoDistributionTimeChecker;
         bool   m_ArenaTesting;
         bool   m_Testing;
