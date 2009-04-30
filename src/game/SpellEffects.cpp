@@ -334,6 +334,10 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                             damage = 200;
                         break;
                     }
+                    // Cataclysmic Bolt
+                    case 38441:
+                        damage = unitTarget->GetMaxHealth() / 2;
+                        break;
                 }
                 break;
             }
