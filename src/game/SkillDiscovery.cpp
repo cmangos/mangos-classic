@@ -89,7 +89,6 @@ void LoadSkillDiscoveryTable()
                     sLog.outErrorDb("Spell (ID: %u) not have have MECHANIC_DISCOVERY (28) value in Mechanic field in spell.dbc but listed in `skill_discovery_template` table",spellId);
                     continue;
                 }
-
                 SkillDiscoveryStore[reqSkillOrSpell].push_back( SkillDiscoveryEntry(spellId, chance) );
             }
             else if( reqSkillOrSpell == 0 )                 // skill case

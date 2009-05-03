@@ -1804,6 +1804,7 @@ void Player::Regenerate(Powers power)
             break;
         case POWER_FOCUS:
         case POWER_HAPPINESS:
+        case POWER_HEALTH:
             break;
     }
 
@@ -5412,7 +5413,7 @@ uint32 Player::TeamForRace(uint8 race)
         case 1: return HORDE;
     }
 
-    sLog.outError("Race %u have wrong team id in DBC: wrong DBC files?",uint32(race),rEntry->TeamID);
+    sLog.outError("Race %u have wrong teamid %u in DBC: wrong DBC files?",uint32(race),rEntry->TeamID);
     return ALLIANCE;
 }
 
@@ -9147,7 +9148,6 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, Item *p
             if (!pItem->IsBag())
                 return EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT;
 
-            Bag *pBag = (Bag*)pItem;
             if( !HasBankBagSlot( slot ) )
                 return EQUIP_ERR_MUST_PURCHASE_THAT_BAG_SLOT;
 
@@ -12386,7 +12386,6 @@ void Player::AdjustQuestReqItemCount( Quest const* pQuest, QuestStatusData& ques
             uint32 reqitemcount = pQuest->ReqItemCount[i];
             if( reqitemcount != 0 )
             {
-                uint32 quest_id = pQuest->GetQuestId();
                 uint32 curitemcount = GetItemCount(pQuest->ReqItemId[i],true);
 
                 questStatusData.m_itemcount[i] = std::min(curitemcount, reqitemcount);
@@ -17765,7 +17764,7 @@ uint32 Player::GetResurrectionSpellId()
                 case 20765: spell_id = 20761; break;        // rank 5
                 case 27239: spell_id = 27240; break;        // rank 6
                 default:
-                    sLog.outError("Unhandled spell %%u: S.Resurrection",(*itr)->GetId());
+                    sLog.outError("Unhandled spell %u: S.Resurrection",(*itr)->GetId());
                     continue;
             }
 

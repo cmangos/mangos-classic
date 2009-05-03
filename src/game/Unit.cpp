@@ -4927,7 +4927,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                         break;
                     }
                     return false;
-                }/**/
+                }*/
                 // Sunwell Exalted Caster Neck (Shattered Sun Pendant of Acumen neck)
                 // cast 45479 Light's Wrath if Exalted by Aldor
                 // cast 45429 Arcane Bolt if Exalted by Scryers
@@ -9673,7 +9673,6 @@ Powers Unit::GetPowerTypeByAuraGroup(UnitMods unitMod) const
         case UNIT_MOD_FOCUS:      power = POWER_FOCUS;      break;
         case UNIT_MOD_ENERGY:     power = POWER_ENERGY;     break;
         case UNIT_MOD_HAPPINESS:  power = POWER_HAPPINESS;  break;
-
         default:
             break;
     }

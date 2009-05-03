@@ -595,7 +595,7 @@ bool ChatHandler::HandleReloadSpellScriptsCommand(const char* arg)
     return true;
 }
 
-bool ChatHandler::HandleReloadDbScriptStringCommand(const char* arg)
+bool ChatHandler::HandleReloadDbScriptStringCommand(const char* /*arg*/)
 {
     sLog.outString( "Re-Loading Script strings from `db_script_string`...");
     objmgr.LoadDbScriptStrings();
@@ -1856,7 +1856,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
 
     if(args[0]=='[')                                        // [name] manual form
     {
-        char* citemName = citemName = strtok((char*)args, "]");
+        char* citemName = strtok((char*)args, "]");
 
         if(citemName && citemName[0])
         {
@@ -3263,7 +3263,7 @@ bool ChatHandler::HandleDamageCommand(const char * args)
     if(!spellid || !sSpellStore.LookupEntry(spellid))
         return false;
 
-    m_session->GetPlayer()->SpellNonMeleeDamageLog(target, spellid, damage, false);
+    m_session->GetPlayer()->SpellNonMeleeDamageLog(target, spellid, damage);
     return true;
 }
 
@@ -4712,7 +4712,7 @@ bool ChatHandler::HandleResetAllCommand(const char * args)
     return true;
 }
 
-bool ChatHandler::HandleServerShutDownCancelCommand(const char* args)
+bool ChatHandler::HandleServerShutDownCancelCommand(const char* /*args*/)
 {
     sWorld.ShutdownCancel();
     return true;
@@ -4729,7 +4729,7 @@ bool ChatHandler::HandleServerShutDownCommand(const char* args)
     int32 time = atoi (time_str);
 
     ///- Prevent interpret wrong arg value as 0 secs shutdown time
-    if(time == 0 && (time_str[0]!='0' || time_str[1]!='\0') || time < 0)
+    if ((time == 0 && (time_str[0]!='0' || time_str[1]!='\0')) || time < 0)
         return false;
 
     if (exitcode_str)
