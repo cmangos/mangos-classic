@@ -1895,7 +1895,7 @@ Player::GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask)
         return NULL;
 
     // exist (we need look pets also for some interaction (quest/etc)
-    Creature *unit = ObjectAccessor::GetCreatureOrPetOrVehicle(*this,guid);
+    Creature *unit = ObjectAccessor::GetCreatureOrPet(*this,guid);
     if (!unit)
         return NULL;
 
@@ -11238,7 +11238,7 @@ void Player::PrepareQuestMenu( uint64 guid )
     QuestRelations* pObjectQIR;
 
     // pets also can have quests
-    Creature *pCreature = ObjectAccessor::GetCreatureOrPetOrVehicle(*this,guid);
+    Creature *pCreature = ObjectAccessor::GetCreatureOrPet(*this,guid);
     if( pCreature )
     {
         pObject = (Object*)pCreature;
@@ -11326,7 +11326,7 @@ void Player::SendPreparedQuest( uint64 guid )
         std::string title = "";
 
         // need pet case for some quests
-        Creature *pCreature = ObjectAccessor::GetCreatureOrPetOrVehicle(*this,guid);
+        Creature *pCreature = ObjectAccessor::GetCreatureOrPet(*this,guid);
         if( pCreature )
         {
             uint32 textid = pCreature->GetNpcTextId();
@@ -11390,7 +11390,7 @@ Quest const * Player::GetNextQuest( uint64 guid, Quest const *pQuest )
     QuestRelations* pObjectQR;
     QuestRelations* pObjectQIR;
 
-    Creature *pCreature = ObjectAccessor::GetCreatureOrPetOrVehicle(*this,guid);
+    Creature *pCreature = ObjectAccessor::GetCreatureOrPet(*this,guid);
     if( pCreature )
     {
         pObject = (Object*)pCreature;
