@@ -850,15 +850,14 @@ struct TalentTabEntry
 
 struct TaxiNodesEntry
 {
-    uint32    ID;                                           // 0
-    uint32    map_id;                                       // 1
-    float     x;                                            // 2
-    float     y;                                            // 3
-    float     z;                                            // 4
-    //char*     name[16];                                   // 5-21
-                                                            // 22 string flags, unused
-    uint32    horde_mount_type;                             // 23
-    uint32    alliance_mount_type;                          // 24
+    uint32    ID;                                           // 0        m_ID
+    uint32    map_id;                                       // 1        m_ContinentID
+    float     x;                                            // 2        m_x
+    float     y;                                            // 3        m_y
+    float     z;                                            // 4        m_z
+    char*     name[16];                                     // 5-21     m_Name_lang
+                                                            // 22 string flags
+    uint32    MountCreatureID[2];                           // 23-24    m_MountCreatureID[2]
 };
 
 struct TaxiPathEntry
