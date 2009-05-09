@@ -353,6 +353,8 @@ class Spell
         void FillAreaTargets( UnitList& TagUnitMap, float x, float y, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets );
 
         Unit* SelectMagnetTarget();
+        template<typename T> WorldObject* FindCorpseUsing();
+
         bool CheckTarget( Unit* target, uint32 eff );
         bool CanAutoCast(Unit* target);
 

@@ -477,22 +477,16 @@ namespace MaNGOS
                 if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() )
                     return false;
 
-                if(i_funit->IsWithinDistInMap(u, i_range) )
-                    return true;
-
-                return false;
+                return i_funit->IsWithinDistInMap(u, i_range);
             }
             bool operator()(Corpse* u);
             bool operator()(Creature* u)
             {
-                if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() ||
+                if (i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() ||
                     (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD)==0)
                     return false;
 
-                if(i_funit->IsWithinDistInMap(u, i_range) )
-                    return true;
-
-                return false;
+                return i_funit->IsWithinDistInMap(u, i_range);
             }
             template<class NOT_INTERESTED> bool operator()(NOT_INTERESTED*) { return false; }
         private:
