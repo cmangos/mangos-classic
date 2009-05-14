@@ -422,7 +422,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
             return IsInWorld() && obj->IsInWorld() && GetMapId()==obj->GetMapId() &&
                 GetInstanceId()==obj->GetInstanceId();
         }
-        bool IsWithinDist(float x, float y, float z, float dist2compare) const;
+        bool IsWithinDist3d(float x, float y, float z, float dist2compare) const;
         bool IsWithinDist2d(float x, float y, float dist2compare) const;
         bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const;
         bool IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D = true) const
@@ -439,7 +439,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true) const;
         bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true) const;
         bool IsInRange2d(float x, float y, float minRange, float maxRange) const;
-        bool IsInRange(float x, float y, float z, float minRange, float maxRange) const;
+        bool IsInRange3d(float x, float y, float z, float minRange, float maxRange) const;
 
         float GetAngle( const WorldObject* obj ) const;
         float GetAngle( const float x, const float y ) const;
