@@ -1172,7 +1172,7 @@ struct TargetDistanceOrder : public std::binary_function<const Unit, const Unit,
     // functor for operator ">"
     bool operator()(const Unit* _Left, const Unit* _Right) const
     {
-        return (MainTarget->GetDistance(_Left) < MainTarget->GetDistance(_Right));
+        return MainTarget->GetDistanceOrder(_Left,_Right);
     }
 };
 
@@ -1243,7 +1243,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap)
             //Now to get us a random target that's in the initial range of the spell
             uint32 t = 0;
             std::list<Unit *>::iterator itr = tempUnitMap.begin();
-            while(itr!= tempUnitMap.end() && (*itr)->GetDistance(m_caster) < radius)
+            while(itr!= tempUnitMap.end() && (*itr)->IsWithinDist(m_caster,radius))
                 ++t, ++itr;
 
             if(!t)
@@ -1264,7 +1264,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap)
 
             while(t && next != tempUnitMap.end() )
             {
-                if(prev->GetDistance(*next) > CHAIN_SPELL_JUMP_RADIUS)
+                if(!prev->IsWithinDist(*next,CHAIN_SPELL_JUMP_RADIUS))
                     break;
 
                 if(!prev->IsWithinLOSInMap(*next))
@@ -1349,7 +1349,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap)
 
                     while(t && next != tempUnitMap.end() )
                     {
-                        if(prev->GetDistance(*next) > CHAIN_SPELL_JUMP_RADIUS)
+                        if(!prev->IsWithinDist(*next,CHAIN_SPELL_JUMP_RADIUS))
                             break;
 
                         if(!prev->IsWithinLOSInMap(*next))
@@ -1683,7 +1683,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap)
 
                 while(t && next != tempUnitMap.end() )
                 {
-                    if(prev->GetDistance(*next) > CHAIN_SPELL_JUMP_RADIUS)
+                    if(!prev->IsWithinDist(*next,CHAIN_SPELL_JUMP_RADIUS))
                         break;
 
                     if(!prev->IsWithinLOSInMap(*next))
@@ -4022,10 +4022,9 @@ SpellCastResult Spell::CheckRange(bool strict)
 
     if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destZ != 0)
     {
-        float dist = m_caster->GetDistance(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
-        if(dist > max_range)
+        if(!m_caster->IsWithinDist(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ,max_range))
             return SPELL_FAILED_OUT_OF_RANGE;
-        if(dist < min_range)
+        if(m_caster->IsWithinDist(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ,min_range))
             return SPELL_FAILED_TOO_CLOSE;
     }
 

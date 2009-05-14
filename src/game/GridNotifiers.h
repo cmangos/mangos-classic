@@ -458,7 +458,7 @@ namespace MaNGOS
         void Visit(PlayerMapType &m)
         {
             for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                if(itr->getSource()->GetDistance(i_searcher) <= i_dist)
+                if (itr->getSource()->IsWithinDist(i_searcher,i_dist))
                     i_do(itr->getSource());
         }
 
