@@ -41,6 +41,7 @@
 #include <fstream>
 #include <map>
 #include "GlobalEvents.h"
+#include "Formulas.h"
 
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 
@@ -1227,6 +1228,11 @@ bool ChatHandler::HandleNpcChangeLevelCommand(const char* args)
 
     if(pCreature->isPet())
     {
+        if(((Pet*)pCreature)->getPetType()==HUNTER_PET)
+        {
+            pCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32((MaNGOS::XP::xp_to_level(lvl))/4));
+            pCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
+        }
         ((Pet*)pCreature)->GivePetLevel(lvl);
     }
     else
