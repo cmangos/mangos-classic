@@ -15588,7 +15588,7 @@ void Player::PetSpellInitialize()
         {
             for(PetSpellMap::iterator itr = pet->m_spells.begin();itr != pet->m_spells.end();++itr)
             {
-                if(itr->second->state == PETSPELL_REMOVED)
+                if(itr->second.state == PETSPELL_REMOVED)
                     continue;
                 ++addlist;
             }
@@ -15604,7 +15604,8 @@ void Player::PetSpellInitialize()
 
         for(uint32 i = 0; i < 10; ++i)                      //40
         {
-            data << uint16(charmInfo->GetActionBarEntry(i)->SpellOrAction) << uint16(charmInfo->GetActionBarEntry(i)->Type);
+            data << uint16(charmInfo->GetActionBarEntry(i)->SpellOrAction);
+            data << uint16(charmInfo->GetActionBarEntry(i)->Type);
         }
 
         data << uint8(addlist);                             //1
@@ -15613,11 +15614,11 @@ void Player::PetSpellInitialize()
         {
             for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
             {
-                if(itr->second->state == PETSPELL_REMOVED)
+                if(itr->second.state == PETSPELL_REMOVED)
                     continue;
 
                 data << uint16(itr->first);
-                data << uint16(itr->second->active);        // pet spell active state isn't boolean
+                data << uint16(itr->second.active);         // pet spell active state isn't boolean
             }
         }
 
