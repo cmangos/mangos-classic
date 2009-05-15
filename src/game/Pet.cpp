@@ -1296,7 +1296,7 @@ void Pet::_SaveSpellCooldowns()
 
 void Pet::_LoadSpells()
 {
-    QueryResult *result = CharacterDatabase.PQuery("SELECT spell,slot,active FROM pet_spell WHERE guid = '%u'",m_charmInfo->GetPetNumber());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT spell,active FROM pet_spell WHERE guid = '%u'",m_charmInfo->GetPetNumber());
 
     if(result)
     {
@@ -1304,7 +1304,7 @@ void Pet::_LoadSpells()
         {
             Field *fields = result->Fetch();
 
-            addSpell(fields[0].GetUInt32(), fields[2].GetUInt16(), PETSPELL_UNCHANGED, fields[1].GetUInt16());
+            addSpell(fields[0].GetUInt32(), fields[1].GetUInt16(), PETSPELL_UNCHANGED);
         }
         while( result->NextRow() );
 
@@ -1321,7 +1321,7 @@ void Pet::_SaveSpells()
         if (itr->second->state == PETSPELL_REMOVED || itr->second->state == PETSPELL_CHANGED)
             CharacterDatabase.PExecute("DELETE FROM pet_spell WHERE guid = '%u' and spell = '%u'", m_charmInfo->GetPetNumber(), itr->first);
         if (itr->second->state == PETSPELL_NEW || itr->second->state == PETSPELL_CHANGED)
-            CharacterDatabase.PExecute("INSERT INTO pet_spell (guid,spell,slot,active) VALUES ('%u', '%u', '%u','%u')", m_charmInfo->GetPetNumber(), itr->first, itr->second->slotId,itr->second->active);
+            CharacterDatabase.PExecute("INSERT INTO pet_spell (guid,spell,active) VALUES ('%u', '%u', '%u')", m_charmInfo->GetPetNumber(), itr->first, itr->second->active);
 
         if (itr->second->state == PETSPELL_REMOVED)
             _removeSpell(itr->first);
@@ -1461,7 +1461,7 @@ void Pet::_SaveAuras()
     }
 }
 
-bool Pet::addSpell(uint32 spell_id, uint16 active, PetSpellState state, uint16 slot_id, PetSpellType type)
+bool Pet::addSpell(uint32 spell_id, uint16 active, PetSpellState state, PetSpellType type)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
@@ -1527,7 +1527,6 @@ bool Pet::addSpell(uint32 spell_id, uint16 active, PetSpellState state, uint16 s
 
         if(spellmgr.GetFirstSpellInChain(itr->first) == chainstart)
         {
-            slot_id = itr->second->slotId;
             newspell->active = itr->second->active;
 
             if(newspell->active == ACT_ENABLED)
@@ -1539,21 +1538,6 @@ bool Pet::addSpell(uint32 spell_id, uint16 active, PetSpellState state, uint16 s
         }
     }
 
-    uint16 tmpslot=slot_id;
-
-    if (tmpslot == 0xffff)
-    {
-        uint16 maxid = 0;
-        PetSpellMap::iterator itr;
-        for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
-        {
-            if(itr->second->state == PETSPELL_REMOVED) continue;
-            if (itr->second->slotId > maxid) maxid = itr->second->slotId;
-        }
-        tmpslot = maxid + 1;
-    }
-
-    newspell->slotId = tmpslot;
     m_spells[spell_id] = newspell;
 
     if (IsPassiveSpell(spell_id))
@@ -1816,7 +1800,7 @@ void Pet::LearnPetPassives()
     if(petStore != sPetFamilySpellsStore.end())
     {
         for(PetFamilySpellsSet::const_iterator petSet = petStore->second.begin(); petSet != petStore->second.end(); ++petSet)
-            addSpell(*petSet, ACT_DECIDE, PETSPELL_NEW, 0xffff, PETSPELL_FAMILY);
+            addSpell(*petSet, ACT_DECIDE, PETSPELL_NEW, PETSPELL_FAMILY);
     }
 }
 
