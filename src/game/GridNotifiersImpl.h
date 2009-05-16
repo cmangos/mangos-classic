@@ -490,7 +490,7 @@ void MaNGOS::PlayerSearcher<Check>::Visit(PlayerMapType &m)
 template<class Builder>
 void MaNGOS::LocalizedPacketDo<Builder>::operator()( Player* p )
 {
-    uint32 loc_idx = p->GetSession()->GetSessionDbLocaleIndex();
+    int32 loc_idx = p->GetSession()->GetSessionDbLocaleIndex();
     uint32 cache_idx = loc_idx+1;
     WorldPacket* data;
 
