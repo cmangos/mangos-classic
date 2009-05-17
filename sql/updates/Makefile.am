@@ -65,6 +65,8 @@ pkgdata_DATA = \
 	031_7796_02_mangos_mangos_string.sql \
 	032_7059_01_characters_character_spell.sql \
 	032_7059_02_characters_pet_spell.sql \
+	033_7839_01_mangos_mangos_string.sql \
+	033_7839_02_mangos_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -109,4 +111,6 @@ EXTRA_DIST = \
 	031_7796_02_mangos_mangos_string.sql \
 	032_7059_01_characters_character_spell.sql \
 	032_7059_02_characters_pet_spell.sql \
+	033_7839_01_mangos_mangos_string.sql \
+	033_7839_02_mangos_command.sql \
 	README
