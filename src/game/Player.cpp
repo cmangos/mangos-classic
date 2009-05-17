@@ -1330,6 +1330,8 @@ void Player::setDeathState(DeathState s)
 
 void Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
 {
+    Field *fields = result->Fetch();
+
     *p_data << GetGUID();
     *p_data << m_name;
 
