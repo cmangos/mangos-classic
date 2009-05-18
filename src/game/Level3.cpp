@@ -2433,7 +2433,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         if(!pProto)
             continue;
 
-        int loc_idx = m_session ? m_session->GetSessionDbLocaleIndex() : objmgr.GetDBCLocaleIndex();
+        int loc_idx = GetSessionDbLocaleIndex();
         if ( loc_idx >= 0 )
         {
             ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);
@@ -2498,7 +2498,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
         ItemSetEntry const *set = sItemSetStore.LookupEntry(id);
         if(set)
         {
-            int loc = m_session ? m_session->GetSessionDbcLocale() : sWorld.GetDefaultDbcLocale();
+            int loc = GetSessionDbcLocale();
             std::string name = set->name[loc];
             if(name.empty())
                 continue;
@@ -2508,7 +2508,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
                 loc = 0;
                 for(; loc < MAX_LOCALE; ++loc)
                 {
-                    if(m_session && loc==m_session->GetSessionDbcLocale())
+                    if(loc==GetSessionDbcLocale())
                         continue;
 
                     name = set->name[loc];
@@ -2561,7 +2561,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
         SkillLineEntry const *skillInfo = sSkillLineStore.LookupEntry(id);
         if(skillInfo)
         {
-            int loc = m_session ? m_session->GetSessionDbcLocale() : sWorld.GetDefaultDbcLocale();
+            int loc = GetSessionDbcLocale();
             std::string name = skillInfo->name[loc];
             if(name.empty())
                 continue;
@@ -2571,7 +2571,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
                 loc = 0;
                 for(; loc < MAX_LOCALE; ++loc)
                 {
-                    if(m_session && loc==m_session->GetSessionDbcLocale())
+                    if(loc==GetSessionDbcLocale())
                         continue;
 
                     name = skillInfo->name[loc];
@@ -2639,7 +2639,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
         SpellEntry const *spellInfo = sSpellStore.LookupEntry(id);
         if(spellInfo)
         {
-            int loc = m_session ? m_session->GetSessionDbcLocale() : sWorld.GetDefaultDbcLocale();
+            int loc = GetSessionDbcLocale();
             std::string name = spellInfo->SpellName[loc];
             if(name.empty())
                 continue;
@@ -2649,7 +2649,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
                 loc = 0;
                 for(; loc < MAX_LOCALE; ++loc)
                 {
-                    if(m_session && loc==m_session->GetSessionDbcLocale())
+                    if(loc==GetSessionDbcLocale())
                         continue;
 
                     name = spellInfo->SpellName[loc];
@@ -2738,7 +2738,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     {
         Quest * qinfo = iter->second;
 
-        int loc_idx = m_session ? m_session->GetSessionDbLocaleIndex() : objmgr.GetDBCLocaleIndex();
+        int loc_idx = GetSessionDbLocaleIndex();
         if ( loc_idx >= 0 )
         {
             QuestLocale const *il = objmgr.GetQuestLocale(qinfo->GetQuestId());
@@ -2838,7 +2838,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         if(!cInfo)
             continue;
 
-        int loc_idx = m_session ? m_session->GetSessionDbLocaleIndex() : objmgr.GetDBCLocaleIndex();
+        int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
         {
             CreatureLocale const *cl = objmgr.GetCreatureLocale (id);
@@ -2903,7 +2903,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
         if(!gInfo)
             continue;
 
-        int loc_idx = m_session ? m_session->GetSessionDbLocaleIndex() : objmgr.GetDBCLocaleIndex();
+        int loc_idx = GetSessionDbLocaleIndex();
         if ( loc_idx >= 0 )
         {
             GameObjectLocale const *gl = objmgr.GetGameObjectLocale(id);
@@ -2968,7 +2968,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(const char * args)
         TaxiNodesEntry const *nodeEntry = sTaxiNodesStore.LookupEntry(id);
         if(nodeEntry)
         {
-            int loc = m_session ? m_session->GetSessionDbcLocale() : sWorld.GetDefaultDbcLocale();
+            int loc = GetSessionDbcLocale();
             std::string name = nodeEntry->name[loc];
             if(name.empty())
                 continue;
@@ -2978,7 +2978,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(const char * args)
                 loc = 0;
                 for(; loc < MAX_LOCALE; ++loc)
                 {
-                    if(m_session && loc==m_session->GetSessionDbcLocale())
+                    if(loc==GetSessionDbcLocale())
                         continue;
 
                     name = nodeEntry->name[loc];
@@ -4232,7 +4232,7 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
     {
         bool talent = GetTalentSpellCost(itr->second->GetId()) > 0;
 
-        char const* name = itr->second->GetSpellProto()->SpellName[m_session->GetSessionDbcLocale()];
+        char const* name = itr->second->GetSpellProto()->SpellName[GetSessionDbcLocale()];
 
         if (m_session)
         {
@@ -4263,7 +4263,7 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
         {
             bool talent = GetTalentSpellCost((*itr)->GetId()) > 0;
 
-            char const* name = (*itr)->GetSpellProto()->SpellName[m_session->GetSessionDbcLocale()];
+            char const* name = (*itr)->GetSpellProto()->SpellName[GetSessionDbcLocale()];
 
             if (m_session)
             {
