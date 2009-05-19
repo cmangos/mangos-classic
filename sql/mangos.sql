@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_029_7393_01_mangos_game_event` bit(1) default NULL
+  `required_035_7855_01_mangos_pools` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -10269,6 +10269,7 @@ CREATE TABLE `pool_creature` (
   `guid` int(10) unsigned NOT NULL default '0',
   `pool_entry` mediumint(8) unsigned NOT NULL default '0',
   `chance` float unsigned NOT NULL default '0',
+  `description` varchar(255) NOT NULL,
   PRIMARY KEY  (`pool_entry`,`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -10291,6 +10292,7 @@ CREATE TABLE `pool_gameobject` (
   `guid` int(10) unsigned NOT NULL default '0',
   `pool_entry` mediumint(8) unsigned NOT NULL default '0',
   `chance` float unsigned NOT NULL default '0',
+  `description` varchar(255) NOT NULL,
   PRIMARY KEY  (`guid`,`pool_entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -10312,6 +10314,7 @@ CREATE TABLE `pool_pool` (
   `pool_id` mediumint(8) unsigned NOT NULL default '0',
   `mother_pool` mediumint(8) unsigned NOT NULL default '0',
   `chance` float NOT NULL default '0',
+  `description` varchar(255) NOT NULL,
   PRIMARY KEY  (`pool_id`,`mother_pool`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -10332,6 +10335,7 @@ DROP TABLE IF EXISTS `pool_template`;
 CREATE TABLE `pool_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Pool entry',
   `max_limit` int(10) unsigned NOT NULL default '0' COMMENT 'Max number of objects (0) is no limit',
+  `description` varchar(255) NOT NULL,
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
