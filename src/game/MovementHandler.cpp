@@ -196,9 +196,10 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 
     plMover->SetPosition(dest.x, dest.y, dest.z, dest.o, true);
 
-    uint32 newzone = plMover->GetZoneId();
+    uint32 newzone,newarea;
+    plMover->GetZoneAndAreaId(newzone,newarea);
 
-    plMover->UpdateZone(newzone);
+    plMover->UpdateZone(newzone,newarea);
 
     // new zone
     if(old_zone != newzone)

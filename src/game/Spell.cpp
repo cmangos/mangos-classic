@@ -3154,7 +3154,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_NOT_IN_ARENA;
 
     // zone check
-    SpellCastResult locRes = GetSpellAllowedInLocationError(m_spellInfo,m_caster->GetMapId(),m_caster->GetZoneId(),m_caster->GetAreaId(),
+    uint32 zone, area;
+    m_caster->GetZoneAndAreaId(zone,area);
+
+    SpellCastResult locRes = GetSpellAllowedInLocationError(m_spellInfo,m_caster->GetMapId(),zone,area,
         m_caster->GetTypeId()==TYPEID_PLAYER ? ((Player*)m_caster)->GetBattleGroundId() : 0);
     if(locRes != SPELL_CAST_OK)
         return locRes;
