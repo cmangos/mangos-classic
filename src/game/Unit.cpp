@@ -10876,6 +10876,9 @@ Pet* Unit::CreateTamedPetFrom(Creature* creatureTarget,uint32 spell_id)
     if(GetTypeId()==TYPEID_PLAYER)
         pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
+    if(IsPvP())
+        pet->SetPvP(true);
+
     if(!pet->InitStatsForLevel(creatureTarget->getLevel()))
     {
         sLog.outError("ERROR: Pet::InitStatsForLevel() failed for creature (Entry: %u)!",creatureTarget->GetEntry());
@@ -11019,4 +11022,22 @@ void Unit::RemoveAurasAtChanneledTarget(SpellEntry const* spellInfo)
         else
             ++iter;
     }
+}
+
+void Unit::SetPvP( bool state )
+{
+    if(state)
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+    else
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+
+    if(Pet* pet = GetPet())
+        pet->SetPvP(state);
+    if(Unit* charmed = GetCharm())
+        charmed->SetPvP(state);
+
+    for (int8 i = 0; i < MAX_TOTEM; ++i)
+        if(m_TotemSlot[i])
+            if(Creature *totem = GetMap()->GetCreature(m_TotemSlot[i]))
+                totem->SetPvP(state);
 }
