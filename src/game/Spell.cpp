@@ -2959,10 +2959,10 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     sLog.outDebug( "Spell: Effect : %u", eff);
 
     //Simply return. Do not display "immune" in red text on client
-    if(unitTarget && unitTarget->IsImmunedToSpellEffect(eff, mechanic))
+    if(unitTarget && unitTarget->IsImmunedToSpellEffect(m_spellInfo, i))
         return;
 
-    if(eff<TOTAL_SPELL_EFFECTS)
+    if(eff < TOTAL_SPELL_EFFECTS)
     {
         //sLog.outDebug( "WORLD: Spell FX %d < TOTAL_SPELL_EFFECTS ", eff);
         (*this.*SpellEffects[eff])(i);
