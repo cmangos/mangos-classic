@@ -1,5 +1,3 @@
-ALTER TABLE db_version CHANGE COLUMN required_7839_02_mangos_command required_7850_01_mangos_command bit;
-
 DELETE FROM `command` WHERE `name` IN ('character reputation','pinfo');
 
 INSERT INTO `command` VALUES
