@@ -3372,7 +3372,7 @@ void ObjectMgr::LoadPetCreateSpells()
 
         sLog.outString();
         sLog.outString( ">> Loaded 0 pet create spells" );
-        sLog.outErrorDb("`petcreateinfo_spell` table is empty!");
+        //sLog.outErrorDb("`petcreateinfo_spell` table is empty!");
         return;
     }
 
@@ -3399,6 +3399,12 @@ void ObjectMgr::LoadPetCreateSpells()
         if(!cInfo)
         {
             sLog.outErrorDb("Creature id %u listed in `petcreateinfo_spell` not exist.",creature_id);
+            continue;
+        }
+
+        if(CreatureSpellDataEntry const* petSpellEntry = cInfo->PetSpellDataId ? sCreatureSpellDataStore.LookupEntry(cInfo->PetSpellDataId) : NULL)
+        {
+            sLog.outErrorDb("Creature id %u listed in `petcreateinfo_spell` have set `PetSpellDataId` field and will use its instead, skip.",creature_id);
             continue;
         }
 
@@ -3442,8 +3448,28 @@ void ObjectMgr::LoadPetCreateSpells()
 
     delete result;
 
+    // fill data from DBC as more correct source if available
+    uint32 dcount = 0;
+    for(uint32 cr_id = 1; cr_id < sCreatureStorage.MaxEntry; ++cr_id)
+    {
+        CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(cr_id);
+        if(!cInfo)
+            continue;
+
+        CreatureSpellDataEntry const* petSpellEntry = cInfo->PetSpellDataId ? sCreatureSpellDataStore.LookupEntry(cInfo->PetSpellDataId) : NULL;
+        if(!petSpellEntry)
+            continue;
+
+        PetCreateSpellEntry PetCreateSpell;
+        for(int i = 0; i < MAX_CREATURE_SPELL_DATA_SLOT; ++i)
+            PetCreateSpell.spellid[i] = petSpellEntry->spellId[i];
+
+        mPetCreateSpell[cr_id] = PetCreateSpell;
+        ++dcount;
+    }
+
     sLog.outString();
-    sLog.outString( ">> Loaded %u pet create spells", count );
+    sLog.outString( ">> Loaded %u pet create spells from table and %u from DBC", count, dcount );
 }
 
 void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
