@@ -72,6 +72,7 @@ pkgdata_DATA = \
 	036_7867_01_realmd_account.sql \
 	037_7893_01_mangos_command.sql \
 	038_7886_01_mangos_petcreateinfo_spell.sql \
+	039_7896_01_mangos_creature_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -123,4 +124,5 @@ EXTRA_DIST = \
 	036_7867_01_realmd_account.sql \
 	037_7893_01_mangos_command.sql \
 	038_7886_01_mangos_petcreateinfo_spell.sql \
+	039_7896_01_mangos_creature_template.sql \
 	README
