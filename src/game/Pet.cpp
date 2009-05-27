@@ -78,6 +78,8 @@ Pet::Pet(PetType type) : Creature()
 
     m_auraUpdateMask = 0;
 
+    m_loading = false;
+
     // pets always have a charminfo, even if they are not actually charmed
     CharmInfo* charmInfo = InitCharmInfo(this);
 
@@ -119,6 +121,8 @@ void Pet::RemoveFromWorld()
 
 bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool current )
 {
+    m_loading = true;
+
     uint32 ownerid = owner->GetGUIDLow();
 
     QueryResult *result;
@@ -195,7 +199,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
 
     if (!IsPositionValid())
     {
-        sLog.outError("ERROR: Pet (guidlow %d, entry %d) not loaded. Suggested coordinates isn't valid (X: %f Y: %f)",
+        sLog.outError("Pet (guidlow %d, entry %d) not loaded. Suggested coordinates isn't valid (X: %f Y: %f)",
             GetGUIDLow(), GetEntry(), GetPositionX(), GetPositionY());
         delete result;
         return false;
@@ -379,6 +383,8 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
             }
         }
     }
+
+    m_loading = false;
 
     SynchronizeLevelWithOwner();
     return true;
@@ -753,6 +759,9 @@ bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
 
     for (PetSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
+        if(itr->second.state == PETSPELL_REMOVED)
+            continue;
+
         if(IsPassiveSpell(itr->first))
             continue;
 
@@ -936,7 +945,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 {
     if(!creature)
     {
-        sLog.outError("CRITICAL ERROR: NULL pointer parsed into CreateBaseAtCreature()");
+        sLog.outError("CRITICAL: NULL pointer parsed into CreateBaseAtCreature()");
         return false;
     }
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_PET);
@@ -953,7 +962,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     if(!IsPositionValid())
     {
-        sLog.outError("ERROR: Pet (guidlow %d, entry %d) not created base at creature. Suggested coordinates isn't valid (X: %f Y: %f)",
+        sLog.outError("Pet (guidlow %d, entry %d) not created base at creature. Suggested coordinates isn't valid (X: %f Y: %f)",
             GetGUIDLow(), GetEntry(), GetPositionX(), GetPositionY());
         return false;
     }
@@ -961,7 +970,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     CreatureInfo const *cinfo = GetCreatureInfo();
     if(!cinfo)
     {
-        sLog.outError("ERROR: CreateBaseAtCreature() failed, creatureInfo is missing!");
+        sLog.outError("CreateBaseAtCreature() failed, creatureInfo is missing!");
         return false;
     }
 
@@ -1007,7 +1016,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
     Unit* owner = GetOwner();
     if(!owner)
     {
-        sLog.outError("ERROR: attempt to summon pet (Entry %u) without owner! Attempt terminated.", cinfo->Entry);
+        sLog.outError("attempt to summon pet (Entry %u) without owner! Attempt terminated.", cinfo->Entry);
         return false;
     }
 
@@ -1303,7 +1312,7 @@ void Pet::_LoadSpells()
         {
             Field *fields = result->Fetch();
 
-            addSpell(fields[0].GetUInt32(), fields[1].GetUInt16(), PETSPELL_UNCHANGED);
+            addSpell(fields[0].GetUInt32(), ActiveStates(fields[1].GetUInt16()), PETSPELL_UNCHANGED);
         }
         while( result->NextRow() );
 
@@ -1473,7 +1482,7 @@ void Pet::_SaveAuras()
     }
 }
 
-bool Pet::addSpell(uint32 spell_id,uint16 active /*= ACT_DECIDE*/, PetSpellState state /*= PETSPELL_NEW*/, PetSpellType type /*= PETSPELL_NORMAL*/)
+bool Pet::addSpell(uint32 spell_id,ActiveStates active /*= ACT_DECIDE*/, PetSpellState state /*= PETSPELL_NEW*/, PetSpellType type /*= PETSPELL_NORMAL*/)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
@@ -1530,22 +1539,30 @@ bool Pet::addSpell(uint32 spell_id,uint16 active /*= ACT_DECIDE*/, PetSpellState
     else
         newspell.active = active;
 
-    uint32 chainstart = spellmgr.GetFirstSpellInChain(spell_id);
-
-    for (PetSpellMap::const_iterator itr2 = m_spells.begin(); itr2 != m_spells.end(); ++itr2)
+    if(spellmgr.GetSpellRank(spell_id)!=0)
     {
-        if(itr2->second.state == PETSPELL_REMOVED) continue;
-
-        if(spellmgr.GetFirstSpellInChain(itr2->first) == chainstart)
+        for (PetSpellMap::const_iterator itr2 = m_spells.begin(); itr2 != m_spells.end(); ++itr2)
         {
-            newspell.active = itr2->second.active;
+            if(itr2->second.state == PETSPELL_REMOVED) continue;
 
-            if(newspell.active == ACT_ENABLED)
-                ToggleAutocast(itr2->first, false);
+            if( spellmgr.IsRankSpellDueToSpell(spellInfo,itr2->first) )
+            {
+                // replace by new high rank
+                if(spellmgr.IsHighRankOfSpell(spell_id,itr2->first))
+                {
+                    newspell.active = itr2->second.active;
 
-            oldspell_id = itr2->first;
-            removeSpell(itr2->first);
-            break;
+                    if(newspell.active == ACT_ENABLED)
+                        ToggleAutocast(itr2->first, false);
+
+                    oldspell_id = itr2->first;
+                    unlearnSpell(itr2->first,false);
+                    break;
+                }
+                // ignore new lesser rank
+                else if(spellmgr.IsHighRankOfSpell(itr2->first,spell_id))
+                    return false;
+            }
         }
     }
 
@@ -1553,7 +1570,7 @@ bool Pet::addSpell(uint32 spell_id,uint16 active /*= ACT_DECIDE*/, PetSpellState
 
     if (IsPassiveSpell(spell_id))
         CastSpell(this, spell_id, true);
-    else if(state == PETSPELL_NEW)
+    else
         m_charmInfo->AddSpellToAB(oldspell_id, spell_id);
 
     if(newspell.active == ACT_ENABLED)
@@ -1574,14 +1591,21 @@ bool Pet::learnSpell(uint32 spell_id)
     return true;
 }
 
-void Pet::removeSpell(uint32 spell_id)
+bool Pet::unlearnSpell(uint32 spell_id, bool learn_prev)
+{
+    if(removeSpell(spell_id,learn_prev))
+        return true;
+    return false;
+}
+
+bool Pet::removeSpell(uint32 spell_id, bool learn_prev)
 {
     PetSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr == m_spells.end())
-        return;
+        return false;
 
     if(itr->second.state == PETSPELL_REMOVED)
-        return;
+        return false;
 
     if(itr->second.state == PETSPELL_NEW)
         m_spells.erase(itr);
@@ -1589,6 +1613,29 @@ void Pet::removeSpell(uint32 spell_id)
         itr->second.state = PETSPELL_REMOVED;
 
     RemoveAurasDueToSpell(spell_id);
+
+    if (learn_prev)
+    {
+        if (uint32 prev_id = spellmgr.GetPrevSpellInChain (spell_id))
+        {
+            // replace to next spell
+            if(!IsPassiveSpell(prev_id))
+                m_charmInfo->AddSpellToAB(spell_id, prev_id);
+
+            learnSpell(prev_id);
+        }
+        else
+        {
+            m_charmInfo->AddSpellToAB(spell_id, 0);
+
+            // need update action bar for last removed rank
+            if (Unit* owner = GetOwner())
+                if (owner->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)owner)->PetSpellInitialize();
+        }
+    }
+
+    return true;
 }
 
 void Pet::InitPetCreateSpells()

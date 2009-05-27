@@ -9986,7 +9986,7 @@ void CharmInfo::InitEmptyActionBar()
 {
     for(uint32 x = 1; x < 10; ++x)
     {
-        PetActionBar[x].Type = ACT_CAST;
+        PetActionBar[x].Type = ACT_PASSIVE;
         PetActionBar[x].SpellOrAction = 0;
     }
     PetActionBar[0].Type = ACT_COMMAND;
@@ -10005,7 +10005,7 @@ void CharmInfo::InitPossessCreateSpells()
         if (IsPassiveSpell(((Creature*)m_unit)->m_spells[x]))
             m_unit->CastSpell(m_unit, ((Creature*)m_unit)->m_spells[x], true);
         else
-            AddSpellToAB(0, ((Creature*)m_unit)->m_spells[x], ACT_CAST);
+            AddSpellToAB(0, ((Creature*)m_unit)->m_spells[x], ACT_PASSIVE);
     }
 }
 
@@ -10048,7 +10048,7 @@ void CharmInfo::InitCharmCreateSpells()
             if(onlyselfcast || !IsPositiveSpell(spellId))   //only self cast and spells versus enemies are autocastable
                 newstate = ACT_DISABLED;
             else
-                newstate = ACT_CAST;
+                newstate = ACT_PASSIVE;
 
             AddSpellToAB(0, spellId, newstate);
         }
@@ -10057,20 +10057,30 @@ void CharmInfo::InitCharmCreateSpells()
 
 bool CharmInfo::AddSpellToAB(uint32 oldid, uint32 newid, ActiveStates newstate)
 {
+    // new spell already listed for example in case prepered switch to lesser rank in Pet::removeSpell
+    for(uint8 i = 0; i < 10; ++i)
+        if (PetActionBar[i].Type == ACT_DISABLED || PetActionBar[i].Type == ACT_ENABLED || PetActionBar[i].Type == ACT_PASSIVE)
+            if (newid && PetActionBar[i].SpellOrAction == newid)
+                return true;
+
+    // old spell can be leasted for example in case learn high rank
     for(uint8 i = 0; i < 10; ++i)
     {
-        if((PetActionBar[i].Type == ACT_DISABLED || PetActionBar[i].Type == ACT_ENABLED || PetActionBar[i].Type == ACT_CAST) && PetActionBar[i].SpellOrAction == oldid)
+        if (PetActionBar[i].Type == ACT_DISABLED || PetActionBar[i].Type == ACT_ENABLED || PetActionBar[i].Type == ACT_PASSIVE)
         {
-            PetActionBar[i].SpellOrAction = newid;
-            if(!oldid)
+            if (PetActionBar[i].SpellOrAction == oldid)
             {
-                if(newstate == ACT_DECIDE)
-                    PetActionBar[i].Type = ACT_DISABLED;
-                else
-                    PetActionBar[i].Type = newstate;
-            }
+                PetActionBar[i].SpellOrAction = newid;
+                if (!oldid)
+                {
+                    if (newstate == ACT_DECIDE)
+                        PetActionBar[i].Type = ACT_DISABLED;
+                    else
+                        PetActionBar[i].Type = newstate;
+                }
 
-            return true;
+                return true;
+            }
         }
     }
     return false;

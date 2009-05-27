@@ -156,9 +156,9 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     break;
             }
             break;
-        case ACT_DISABLED:                                  //0x8100    spell (disabled), ignore
-        case ACT_CAST:                                      //0x0100
-        case ACT_ENABLED:                                   //0xc100    spell
+        case ACT_DISABLED:                                  // 0x8100    spell (disabled), ignore
+        case ACT_PASSIVE:                                   // 0x0100
+        case ACT_ENABLED:                                   // 0xC100    spell
         {
             Unit* unit_target = NULL;
             if (((Creature*)pet)->GetGlobalCooldown() > 0)
@@ -363,7 +363,7 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
         sLog.outDetail( "Player %s has changed pet spell action. Position: %u, Spell: %u, State: 0x%X", _player->GetName(), position, spell_id, act_state);
 
                                                             //if it's act for spell (en/disable/cast) and there is a spell given (0 = remove spell) which pet doesn't know, don't add
-        if(!((act_state == ACT_ENABLED || act_state == ACT_DISABLED || act_state == ACT_CAST) && spell_id && !pet->HasSpell(spell_id)))
+        if(!((act_state == ACT_ENABLED || act_state == ACT_DISABLED || act_state == ACT_PASSIVE) && spell_id && !pet->HasSpell(spell_id)))
         {
             //sign for autocast
             if(act_state == ACT_ENABLED && spell_id)
@@ -533,7 +533,7 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
     {
         uint32 spell_id = itr->first;                       // Pet::removeSpell can invalidate iterator at erase NEW spell
         ++itr;
-        pet->removeSpell(spell_id);
+        pet->unlearnSpell(spell_id,false);
     }
 
     pet->SetTP(pet->getLevel() * (pet->GetLoyaltyLevel() - 1));
