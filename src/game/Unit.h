@@ -583,22 +583,6 @@ struct CleanDamage
     MeleeHitOutcome hitOutCome;
 };
 
-struct UnitActionBarEntry
-{
-    union
-    {
-        struct 
-        {
-            uint16 Type;
-            uint16 SpellOrAction;
-        };
-        struct
-        {
-            uint32 Raw;
-        };
-    };
-};
-
 #define MAX_DECLINED_NAME_CASES 5
 
 struct DeclinedName
@@ -641,11 +625,27 @@ enum CommandStates
     COMMAND_ABANDON = 3
 };
 
+struct UnitActionBarEntry
+{
+    UnitActionBarEntry() : SpellOrAction(0), Type(ACT_DISABLED) {}
+
+    uint16 SpellOrAction;
+    uint16 Type;
+
+    // helper
+    bool IsActionBarForSpell() const
+    {
+        return Type == ACT_DISABLED || Type == ACT_ENABLED || Type == ACT_PASSIVE;
+    }
+};
+
 struct CharmSpellEntry
 {
     uint16 spellId;
     uint16 active;
 };
+
+#define MAX_UNIT_ACTION_BAR_INDEX 10
 
 struct CharmInfo
 {
@@ -665,15 +665,27 @@ struct CharmInfo
         void InitCharmCreateSpells();
         void InitPetActionBar();
         void InitEmptyActionBar();
+
                                                             //return true if successful
-        bool AddSpellToAB(uint32 oldid, uint32 newid, ActiveStates newstate = ACT_DECIDE);
+        bool AddSpellToActionBar(uint32 spellid, ActiveStates newstate = ACT_DECIDE);
+        bool RemoveSpellFromActionBar(uint32 spell_id);
+        bool LoadActionBar(std::string data);
+        void BuildActionBar(WorldPacket* data);
+        void SetSpellAutocast(uint32 spell_id, bool state);
+        void SetActionBar(uint8 index, uint32 spellOrAction,ActiveStates type)
+        {
+            PetActionBar[index].Type = type;
+            PetActionBar[index].SpellOrAction = spellOrAction;
+        }
+        UnitActionBarEntry const* GetActionBarEntry(uint8 index) const { return &(PetActionBar[index]); }
+
         void ToggleCreatureAutocast(uint32 spellid, bool apply);
 
-        UnitActionBarEntry* GetActionBarEntry(uint8 index) { return &(PetActionBar[index]); }
         CharmSpellEntry* GetCharmSpell(uint8 index) { return &(m_charmspells[index]); }
     private:
+
         Unit* m_unit;
-        UnitActionBarEntry PetActionBar[10];
+        UnitActionBarEntry PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
         CharmSpellEntry m_charmspells[4];
         CommandStates   m_CommandState;
         ReactStates     m_reactState;

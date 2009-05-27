@@ -219,8 +219,9 @@ class Pet : public Creature
 
         bool addSpell(uint32 spell_id,ActiveStates active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, PetSpellType type = PETSPELL_NORMAL);
         bool learnSpell(uint32 spell_id);
-        bool unlearnSpell(uint32 spell_id, bool learn_prev);
-        bool removeSpell(uint32 spell_id, bool learn_prev);
+        bool unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
+        bool removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
+        void CleanupActionBar();
 
         PetSpellMap     m_spells;
         TeachSpellMap   m_teachspells;

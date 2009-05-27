@@ -15611,17 +15611,14 @@ void Player::PetSpellInitialize()
 
     CharmInfo *charmInfo = pet->GetCharmInfo();
 
-    WorldPacket data(SMSG_PET_SPELLS, 8+4+4+4+10*4);
+    WorldPacket data(SMSG_PET_SPELLS, 8+4+4+MAX_UNIT_ACTION_BAR_INDEX*4);
     data << uint64(pet->GetGUID());
 
     data << uint32(0);
     data << uint8(charmInfo->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
 
     // action bar loop
-    for(uint32 i = 0; i < 10; i++)
-    {
-        data << uint32(charmInfo->GetActionBarEntry(i)->Raw);
-    }
+    charmInfo->BuildActionBar(&data);
 
     size_t spellsCountPos = data.wpos();
 
@@ -15696,10 +15693,7 @@ void Player::PossessSpellInitialize()
     data << uint32(0x00000000);
     data << uint32(0);
 
-    for(uint32 i = 0; i < 10; ++i)                          //40
-    {
-        data << uint16(charmInfo->GetActionBarEntry(i)->SpellOrAction) << uint16(charmInfo->GetActionBarEntry(i)->Type);
-    }
+    charmInfo->BuildActionBar(&data);                       //40
 
     data << uint8(addlist);                                 //1
 
@@ -15749,10 +15743,7 @@ void Player::CharmSpellInitialize()
         data << uint8(0) << uint8(0);
     data << uint16(0);
 
-    for(uint32 i = 0; i < 10; ++i)                          //40
-    {
-        data << uint16(charmInfo->GetActionBarEntry(i)->SpellOrAction) << uint16(charmInfo->GetActionBarEntry(i)->Type);
-    }
+    charmInfo->BuildActionBar(&data);                       //40
 
     data << uint8(addlist);                                 //1
 

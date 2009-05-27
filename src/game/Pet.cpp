@@ -284,26 +284,16 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
 
     if (!is_temporary_summoned)
     {
-        // permanent controlled pets store state in DB
-        Tokens tokens = StrSplit(fields[16].GetString(), " ");
-
-        if (tokens.size() != 20)
+        if(!m_charmInfo->LoadActionBar(fields[16].GetCppString()))
         {
             delete result;
             return false;
         }
 
-        int index;
-        Tokens::iterator iter;
-        for(iter = tokens.begin(), index = 0; index < 10; ++iter, ++index )
-        {
-            m_charmInfo->GetActionBarEntry(index)->Type = atol((*iter).c_str());
-            ++iter;
-            m_charmInfo->GetActionBarEntry(index)->SpellOrAction = atol((*iter).c_str());
-        }
-
         //init teach spells
-        tokens = StrSplit(fields[17].GetString(), " ");
+        Tokens tokens = StrSplit(fields[17].GetString(), " ");
+        Tokens::const_iterator iter;
+        int index;
         for (iter = tokens.begin(), index = 0; index < 4; ++iter, ++index)
         {
             uint32 tmp = atol((*iter).c_str());
@@ -354,6 +344,8 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
 
     // Spells should be loaded after pet is added to map, because in CheckCast is check on it
     _LoadSpells();
+    CleanupActionBar();                                     // remove unknown spells from action bar after load
+
     _LoadSpellCooldowns();
 
     owner->SetPet(this);                                    // in DB stored only full controlled creature
@@ -480,8 +472,11 @@ void Pet::SavePetToDB(PetSaveMode mode)
             << curmana << ", "
             << GetPower(POWER_HAPPINESS) << ", '";
 
-        for(uint32 i = 0; i < 10; ++i)
-            ss << uint32(m_charmInfo->GetActionBarEntry(i)->Type) << " " << uint32(m_charmInfo->GetActionBarEntry(i)->SpellOrAction) << " ";
+        for(uint32 i = 0; i < MAX_UNIT_ACTION_BAR_INDEX; ++i)
+        {
+            ss << uint32(m_charmInfo->GetActionBarEntry(i)->Type) << " "
+               << uint32(m_charmInfo->GetActionBarEntry(i)->SpellOrAction) << " ";
+        }
         ss << "', '";
 
         //save spells the pet can teach to it's Master
@@ -1556,7 +1551,7 @@ bool Pet::addSpell(uint32 spell_id,ActiveStates active /*= ACT_DECIDE*/, PetSpel
                         ToggleAutocast(itr2->first, false);
 
                     oldspell_id = itr2->first;
-                    unlearnSpell(itr2->first,false);
+                    unlearnSpell(itr2->first,false,false);
                     break;
                 }
                 // ignore new lesser rank
@@ -1571,7 +1566,7 @@ bool Pet::addSpell(uint32 spell_id,ActiveStates active /*= ACT_DECIDE*/, PetSpel
     if (IsPassiveSpell(spell_id))
         CastSpell(this, spell_id, true);
     else
-        m_charmInfo->AddSpellToAB(oldspell_id, spell_id);
+        m_charmInfo->AddSpellToActionBar(spell_id);
 
     if(newspell.active == ACT_ENABLED)
         ToggleAutocast(spell_id, true);
@@ -1585,20 +1580,23 @@ bool Pet::learnSpell(uint32 spell_id)
     if (!addSpell(spell_id))
         return false;
 
-    Unit* owner = GetOwner();
-    if(owner->GetTypeId()==TYPEID_PLAYER)
-        ((Player*)owner)->PetSpellInitialize();
+    if(!m_loading)
+    {
+        Unit* owner = GetOwner();
+        if(owner && owner->GetTypeId() == TYPEID_PLAYER)
+            ((Player*)owner)->PetSpellInitialize();
+    }
     return true;
 }
 
-bool Pet::unlearnSpell(uint32 spell_id, bool learn_prev)
+bool Pet::unlearnSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
 {
-    if(removeSpell(spell_id,learn_prev))
+    if(removeSpell(spell_id,learn_prev,clear_ab))
         return true;
     return false;
 }
 
-bool Pet::removeSpell(uint32 spell_id, bool learn_prev)
+bool Pet::removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab)
 {
     PetSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr == m_spells.end())
@@ -1617,17 +1615,16 @@ bool Pet::removeSpell(uint32 spell_id, bool learn_prev)
     if (learn_prev)
     {
         if (uint32 prev_id = spellmgr.GetPrevSpellInChain (spell_id))
-        {
-            // replace to next spell
-            if(!IsPassiveSpell(prev_id))
-                m_charmInfo->AddSpellToAB(spell_id, prev_id);
-
             learnSpell(prev_id);
-        }
         else
-        {
-            m_charmInfo->AddSpellToAB(spell_id, 0);
+            learn_prev = false;
+    }
 
+    // if remove last rank or non-ranked then update action bar at server and client if need
+    if (clear_ab && !learn_prev && m_charmInfo->RemoveSpellFromActionBar(spell_id))
+    {
+        if(!m_loading)
+        {
             // need update action bar for last removed rank
             if (Unit* owner = GetOwner())
                 if (owner->GetTypeId() == TYPEID_PLAYER)
@@ -1636,6 +1633,14 @@ bool Pet::removeSpell(uint32 spell_id, bool learn_prev)
     }
 
     return true;
+}
+
+void Pet::CleanupActionBar()
+{
+    for(int i = 0; i < MAX_UNIT_ACTION_BAR_INDEX; ++i)
+        if(UnitActionBarEntry const* ab = m_charmInfo->GetActionBarEntry(i))
+            if(ab->SpellOrAction && ab->IsActionBarForSpell() && !HasSpell(ab->SpellOrAction))
+                m_charmInfo->SetActionBar(i,0,ACT_DISABLED);
 }
 
 void Pet::InitPetCreateSpells()
