@@ -914,3 +914,16 @@ Item* Item::CloneItem( uint32 count, Player const* player ) const
     newItem->SetItemRandomProperties(GetItemRandomPropertyId());
     return newItem;
 }
+
+bool Item::IsBindedNotWith( Player const* player ) const
+{
+    // not binded item
+    if(!IsSoulBound())
+        return false;
+
+    // own item
+    if(GetOwnerGUID()== player->GetGUID())
+        return false;
+
+    return true;
+}
