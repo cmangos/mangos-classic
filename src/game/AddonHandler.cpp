@@ -106,7 +106,7 @@ bool AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target)
             *Target << (uint8)unk1;
             if (unk1)
             {
-                uint8 unk2 = crc != 0x1c776d01LL;           //If addon is Standard addon CRC
+                uint8 unk2 = crc != UI64LIT(0x1c776d01);           //If addon is Standard addon CRC
                 *Target << (uint8)unk2;
                 if (unk2)
                     Target->append(tdata, sizeof(tdata));
@@ -181,7 +181,7 @@ void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, ui
                 sLog.outDetail("Found new Addon, Name:%s CRC:%x Unknown:%x",AddonNames.c_str(), CRCCHECK, unk6);
             }
 
-            if (CRCCHECK == 0x4C1C776D01LL)                 //If addon is Standard addon CRC
+            if (CRCCHECK == UI64LIT(0x4C1C776D01))          //If addon is Standard addon CRC
             {
                                                             //value's standard Addons
                 *Target << uint8(0) << uint8(2) << uint8(1) << uint8(0) << uint32(0);

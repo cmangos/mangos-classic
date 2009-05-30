@@ -3954,7 +3954,7 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID, Unit
         {
             // Custom dispel case
             // Unstable Affliction
-            if (aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (aur->GetSpellProto()->SpellFamilyFlags & 0x010000000000LL))
+            if (aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (aur->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x010000000000)))
             {
                 int32 damage = aur->GetModifier()->m_amount*9;
                 uint64 caster_guid = aur->GetCasterGUID();
@@ -4762,7 +4762,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     {
                         if(SpellEntry const* iterSpellProto = (*iter)->GetSpellProto())
                         {
-                            if(iterSpellProto->SpellFamilyName==SPELLFAMILY_MAGE && (iterSpellProto->SpellFamilyFlags & 0x10000000))
+                            if(iterSpellProto->SpellFamilyName==SPELLFAMILY_MAGE && (iterSpellProto->SpellFamilyFlags & UI64LIT(0x10000000)))
                             {
                                 found=true;
                                 break;
@@ -5116,7 +5116,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
         case SPELLFAMILY_WARRIOR:
         {
             // Retaliation
-            if(dummySpell->SpellFamilyFlags==0x0000000800000000LL)
+            if (dummySpell->SpellFamilyFlags == UI64LIT(0x0000000800000000))
             {
                 // check attack comes not from behind
                 if (!HasInArc(M_PI, pVictim))
@@ -5130,7 +5130,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
         case SPELLFAMILY_WARLOCK:
         {
             // Seed of Corruption
-            if (dummySpell->SpellFamilyFlags & 0x0000001000000000LL)
+            if (dummySpell->SpellFamilyFlags & UI64LIT(0x0000001000000000))
             {
                 Modifier* mod = triggeredByAura->GetModifier();
                 // if damage is more than need or target die from damage deal finish spell
@@ -5153,7 +5153,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 return true;
             }
             // Seed of Corruption (Mobs cast) - no die req
-            if (dummySpell->SpellFamilyFlags == 0x00LL && dummySpell->SpellIconID == 1932)
+            if (dummySpell->SpellFamilyFlags == UI64LIT(0x0) && dummySpell->SpellIconID == 1932)
             {
                 Modifier* mod = triggeredByAura->GetModifier();
                 // if damage is more than need deal finish spell
@@ -5224,7 +5224,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
         case SPELLFAMILY_PRIEST:
         {
             // Vampiric Touch
-            if( dummySpell->SpellFamilyFlags & 0x0000040000000000LL )
+            if (dummySpell->SpellFamilyFlags & UI64LIT(0x0000040000000000))
             {
                 if(!pVictim || !pVictim->isAlive())
                     return false;
@@ -5259,10 +5259,10 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 case 40438:
                 {
                     // Shadow Word: Pain
-                    if( procSpell->SpellFamilyFlags & 0x0000000000008000LL )
+                    if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000008000))
                         triggered_spell_id = 40441;
                     // Renew
-                    else if( procSpell->SpellFamilyFlags & 0x0000000000000010LL )
+                    else if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000010))
                         triggered_spell_id = 40440;
                     else
                         return false;
@@ -5334,19 +5334,19 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     float  chance;
 
                     // Starfire
-                    if( procSpell->SpellFamilyFlags & 0x0000000000000004LL )
+                    if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000004))
                     {
                         triggered_spell_id = 40445;
                         chance = 25.0f;
                     }
                     // Rejuvenation
-                    else if( procSpell->SpellFamilyFlags & 0x0000000000000010LL )
+                    else if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000010))
                     {
                         triggered_spell_id = 40446;
                         chance = 25.0f;
                     }
                     // Mangle (cat/bear)
-                    else if( procSpell->SpellFamilyFlags & 0x0000044000000000LL )
+                    else if (procSpell->SpellFamilyFlags & UI64LIT(0x0000044000000000))
                     {
                         triggered_spell_id = 40452;
                         chance = 40.0f;
@@ -5410,7 +5410,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
         case SPELLFAMILY_HUNTER:
         {
             // Thrill of the Hunt
-            if ( dummySpell->SpellIconID == 2236 )
+            if (dummySpell->SpellIconID == 2236)
             {
                 if(!procSpell)
                     return false;
@@ -5429,7 +5429,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
         case SPELLFAMILY_PALADIN:
         {
             // Seal of Righteousness - melee proc dummy
-            if (dummySpell->SpellFamilyFlags&0x000000008000000LL && triggeredByAura->GetEffIndex()==0)
+            if ((dummySpell->SpellFamilyFlags & UI64LIT(0x000000008000000)) && triggeredByAura->GetEffIndex()==0)
             {
                 if(GetTypeId() != TYPEID_PLAYER)
                     return false;
@@ -5471,7 +5471,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 return true;                                // no hidden cooldown
             }
             // Seal of Blood do damage trigger
-            if(dummySpell->SpellFamilyFlags & 0x0000040000000000LL)
+            if(dummySpell->SpellFamilyFlags & UI64LIT(0x0000040000000000))
             {
                 switch(triggeredByAura->GetEffIndex())
                 {
@@ -5552,19 +5552,19 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 // Paladin Tier 6 Trinket (Ashtongue Talisman of Zeal)
                 case 40470:
                 {
-                    if( !procSpell )
+                    if (!procSpell)
                         return false;
 
                     float  chance;
 
                     // Flash of light/Holy light
-                    if( procSpell->SpellFamilyFlags & 0x00000000C0000000LL)
+                    if (procSpell->SpellFamilyFlags & UI64LIT(0x00000000C0000000))
                     {
                         triggered_spell_id = 40471;
                         chance = 15.0f;
                     }
                     // Judgement
-                    else if( procSpell->SpellFamilyFlags & 0x0000000000800000LL )
+                    else if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000800000))
                     {
                         triggered_spell_id = 40472;
                         chance = 50.0f;
@@ -5692,17 +5692,17 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                         return false;
 
                     float  chance;
-                    if (procSpell->SpellFamilyFlags & 0x0000000000000001LL)
+                    if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000001))
                     {
                         triggered_spell_id = 40465;         // Lightning Bolt
                         chance = 15.0f;
                     }
-                    else if (procSpell->SpellFamilyFlags & 0x0000000000000080LL)
+                    else if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000080))
                     {
                         triggered_spell_id = 40465;         // Lesser Healing Wave
                         chance = 10.0f;
                     }
-                    else if (procSpell->SpellFamilyFlags & 0x0000001000000000LL)
+                    else if (procSpell->SpellFamilyFlags & UI64LIT(0x0000001000000000))
                     {
                         triggered_spell_id = 40466;         // Stormstrike
                         chance = 50.0f;
@@ -5719,7 +5719,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
             }
 
             // Earth Shield
-            if(dummySpell->SpellFamilyFlags==0x40000000000LL)
+            if (dummySpell->SpellFamilyFlags & UI64LIT(0x0000040000000000))
             {
                 if(GetTypeId() != TYPEID_PLAYER)
                     return false;
@@ -5776,12 +5776,12 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                 mod->spellId = dummySpell->Id;
                 mod->effectId = 0;
                 mod->lastAffected = NULL;
-                mod->mask = 0x0000000000000003LL;
+                mod->mask = UI64LIT(0x0000000000000003);
                 mod->charges = 0;
                 ((Player*)this)->AddSpellMod(mod, true);
 
                 // Remove cooldown (Chain Lightning - have Category Recovery time)
-                if (procSpell->SpellFamilyFlags & 0x0000000000000002LL)
+                if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000002))
                     ((Player*)this)->RemoveSpellCooldown(spellId);
 
                 // Hmmm.. in most case spells already set half basepoints but...
@@ -5979,7 +5979,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         case SPELLFAMILY_WARRIOR:
         {
             //Rampage
-            if((auraSpellInfo->SpellFamilyFlags & 0x100000) && auraSpellInfo->SpellIconID==2006)
+            if((auraSpellInfo->SpellFamilyFlags & UI64LIT(0x100000)) && auraSpellInfo->SpellIconID==2006)
             {
                 //all ranks have effect[0]==AURA (Proc Trigger Spell, non-existed)
                 //and effect[1]==TriggerSpell
@@ -5996,7 +5996,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         case SPELLFAMILY_WARLOCK:
         {
             // Pyroclasm
-            if(auraSpellInfo->SpellFamilyFlags == 0x0000000000000000 && auraSpellInfo->SpellIconID==1137)
+            if(auraSpellInfo->SpellFamilyFlags == UI64LIT(0x0000000000000000) && auraSpellInfo->SpellIconID==1137)
             {
                 // last case for Hellfire that damage caster also but don't must stun caster
                 if( pVictim == this )
@@ -6018,7 +6018,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 break;
             }
             // Drain Soul
-            if(auraSpellInfo->SpellFamilyFlags & 0x0000000000004000)
+            if(auraSpellInfo->SpellFamilyFlags & UI64LIT(0x0000000000004000))
             {
                 bool found = false;
                 Unit::AuraList const& mAddFlatModifier = GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
@@ -6043,7 +6043,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         case SPELLFAMILY_PRIEST:
         {
             //Blessed Recovery
-            if(auraSpellInfo->SpellFamilyFlags == 0x00000000LL && auraSpellInfo->SpellIconID==1875)
+            if(auraSpellInfo->SpellFamilyFlags == UI64LIT(0x00000000) && auraSpellInfo->SpellIconID==1875)
             {
                 switch (triggeredByAura->GetSpellProto()->Id)
                 {
@@ -6061,7 +6061,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 break;
             }
             // Shadowguard
-            if((auraSpellInfo->SpellFamilyFlags & 0x80000000LL) && auraSpellInfo->SpellVisual==7958)
+            if((auraSpellInfo->SpellFamilyFlags & UI64LIT(0x80000000)) && auraSpellInfo->SpellVisual==7958)
             {
                 switch(triggeredByAura->GetSpellProto()->Id)
                 {
@@ -6129,7 +6129,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         }
         case SPELLFAMILY_ROGUE:
         {
-            if(auraSpellInfo->SpellFamilyFlags == 0x0000000000000000LL)
+            if(auraSpellInfo->SpellFamilyFlags == UI64LIT(0x0000000000000000))
             {
                 switch(auraSpellInfo->SpellIconID)
                 {
@@ -6147,7 +6147,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         }
         case SPELLFAMILY_PALADIN:
         {
-            if(auraSpellInfo->SpellFamilyFlags == 0x00000000LL)
+            if(auraSpellInfo->SpellFamilyFlags == UI64LIT(0x00000000))
             {
                 switch(auraSpellInfo->Id)
                 {
@@ -6223,7 +6223,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                                 // Holy Shock
                                 if(procSpell->SpellFamilyName == SPELLFAMILY_PALADIN)
                                 {
-                                    if(procSpell->SpellFamilyFlags & 0x0001000000000000LL)
+                                    if(procSpell->SpellFamilyFlags & UI64LIT(0x0001000000000000))
                                     {
                                         switch(procSpell->Id)
                                         {
@@ -6259,7 +6259,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     }
                 }
             }
-            if(auraSpellInfo->SpellFamilyFlags & 0x00080000)
+            if(auraSpellInfo->SpellFamilyFlags & UI64LIT(0x00080000))
             {
                 switch(auraSpellInfo->SpellIconID)
                 {
@@ -6355,7 +6355,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         }
         case SPELLFAMILY_SHAMAN:
         {
-            if(auraSpellInfo->SpellFamilyFlags == 0x0000000000000000)
+            if(auraSpellInfo->SpellFamilyFlags == UI64LIT(0x0000000000000000))
             {
                 switch(auraSpellInfo->SpellIconID)
                 {
@@ -6418,14 +6418,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             }
 
             // Water Shield (we can't set cooldown for main spell - it's player casted spell
-            if((auraSpellInfo->SpellFamilyFlags & 0x0000002000000000LL) && auraSpellInfo->SpellVisual==7358)
+            if((auraSpellInfo->SpellFamilyFlags & UI64LIT(0x0000002000000000)) && auraSpellInfo->SpellVisual==7358)
             {
                 target = this;
                 break;
             }
 
             // Lightning Shield
-            if((auraSpellInfo->SpellFamilyFlags & 0x00000400) && auraSpellInfo->SpellVisual==37)
+            if((auraSpellInfo->SpellFamilyFlags & UI64LIT(0x00000400)) && auraSpellInfo->SpellVisual==37)
             {
                 // overwrite non existing triggered spell call in spell.dbc
                 switch(triggeredByAura->GetSpellProto()->Id)
@@ -7117,7 +7117,7 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
                 {
                     // exceptions (applied at state but not removed at state change)
                     // Rampage
-                    if(spellProto->SpellIconID==2006 && spellProto->SpellFamilyName==SPELLFAMILY_WARRIOR && spellProto->SpellFamilyFlags==0x100000)
+                    if(spellProto->SpellIconID==2006 && spellProto->SpellFamilyName==SPELLFAMILY_WARRIOR && spellProto->SpellFamilyFlags==UI64LIT(0x100000))
                     {
                         ++itr;
                         continue;
@@ -7419,77 +7419,77 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 return pdamage;
             }
             // Ice Lance
-            else if((spellProto->SpellFamilyFlags & 0x20000LL) && spellProto->SpellIconID == 186)
+            else if((spellProto->SpellFamilyFlags & UI64LIT(0x20000)) && spellProto->SpellIconID == 186)
             {
                 CastingTime /= 3;                           // applied 1/3 bonuses in case generic target
                 if(pVictim->isFrozen())                     // and compensate this for frozen target.
                     TakenTotalMod *= 3.0f;
             }
             // Pyroblast - 115% of Fire Damage, DoT - 20% of Fire Damage
-            else if((spellProto->SpellFamilyFlags & 0x400000LL) && spellProto->SpellIconID == 184 )
+            else if((spellProto->SpellFamilyFlags & UI64LIT(0x400000)) && spellProto->SpellIconID == 184 )
             {
                 DotFactor = damagetype == DOT ? 0.2f : 1.0f;
                 CastingTime = damagetype == DOT ? 3500 : 4025;
             }
             // Fireball - 100% of Fire Damage, DoT - 0% of Fire Damage
-            else if((spellProto->SpellFamilyFlags & 0x1LL) && spellProto->SpellIconID == 185)
+            else if((spellProto->SpellFamilyFlags & UI64LIT(0x1)) && spellProto->SpellIconID == 185)
             {
                 CastingTime = 3500;
                 DotFactor = damagetype == DOT ? 0.0f : 1.0f;
             }
             // Molten armor
-            else if (spellProto->SpellFamilyFlags & 0x0000000800000000LL)
+            else if (spellProto->SpellFamilyFlags & UI64LIT(0x0000000800000000))
             {
                 CastingTime = 0;
             }
             // Arcane Missiles triggered spell
-            else if ((spellProto->SpellFamilyFlags & 0x200000LL) && spellProto->SpellIconID == 225)
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x200000)) && spellProto->SpellIconID == 225)
             {
                 CastingTime = 1000;
             }
             // Blizzard triggered spell
-            else if ((spellProto->SpellFamilyFlags & 0x80080LL) && spellProto->SpellIconID == 285)
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x80080)) && spellProto->SpellIconID == 285)
             {
                 CastingTime = 500;
             }
             break;
         case SPELLFAMILY_WARLOCK:
             // Life Tap
-            if((spellProto->SpellFamilyFlags & 0x40000LL) && spellProto->SpellIconID == 208)
+            if((spellProto->SpellFamilyFlags & UI64LIT(0x40000)) && spellProto->SpellIconID == 208)
             {
                 CastingTime = 2800;                         // 80% from +shadow damage
                 DoneTotalMod = 1.0f;
                 TakenTotalMod = 1.0f;
             }
             // Dark Pact
-            else if((spellProto->SpellFamilyFlags & 0x80000000LL) && spellProto->SpellIconID == 154 && GetPetGUID())
+            else if((spellProto->SpellFamilyFlags & UI64LIT(0x80000000)) && spellProto->SpellIconID == 154 && GetPetGUID())
             {
                 CastingTime = 3360;                         // 96% from +shadow damage
                 DoneTotalMod = 1.0f;
                 TakenTotalMod = 1.0f;
             }
             // Soul Fire - 115% of Fire Damage
-            else if((spellProto->SpellFamilyFlags & 0x8000000000LL) && spellProto->SpellIconID == 184)
+            else if((spellProto->SpellFamilyFlags & UI64LIT(0x8000000000)) && spellProto->SpellIconID == 184)
             {
                 CastingTime = 4025;
             }
             // Curse of Agony - 120% of Shadow Damage
-            else if((spellProto->SpellFamilyFlags & 0x0000000400LL) && spellProto->SpellIconID == 544)
+            else if((spellProto->SpellFamilyFlags & UI64LIT(0x0000000400)) && spellProto->SpellIconID == 544)
             {
                 DotFactor = 1.2f;
             }
             // Drain Mana - 0% of Shadow Damage
-            else if((spellProto->SpellFamilyFlags & 0x10LL) && spellProto->SpellIconID == 548)
+            else if((spellProto->SpellFamilyFlags & UI64LIT(0x10)) && spellProto->SpellIconID == 548)
             {
                 CastingTime = 0;
             }
             // Drain Soul 214.3%
-            else if ((spellProto->SpellFamilyFlags & 0x4000LL) && spellProto->SpellIconID == 113 )
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x4000)) && spellProto->SpellIconID == 113 )
             {
                 CastingTime = 7500;
             }
             // Hellfire
-            else if ((spellProto->SpellFamilyFlags & 0x40LL) && spellProto->SpellIconID == 937)
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x40)) && spellProto->SpellIconID == 937)
             {
                 CastingTime = damagetype == DOT ? 5000 : 500; // self damage seems to be so
             }
@@ -7499,20 +7499,20 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 CastingTime = 6300;
             }
             // Corruption 93%
-            else if ((spellProto->SpellFamilyFlags & 0x2LL) && spellProto->SpellIconID == 313)
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x2)) && spellProto->SpellIconID == 313)
             {
                 DotFactor = 0.93f;
             }
             break;
         case SPELLFAMILY_PALADIN:
             // Consecration - 95% of Holy Damage
-            if((spellProto->SpellFamilyFlags & 0x20LL) && spellProto->SpellIconID == 51)
+            if((spellProto->SpellFamilyFlags & UI64LIT(0x20)) && spellProto->SpellIconID == 51)
             {
                 DotFactor = 0.95f;
                 CastingTime = 3500;
             }
             // Seal of Righteousness - 10.2%/9.8% ( based on weapon type ) of Holy Damage, multiplied by weapon speed
-            else if((spellProto->SpellFamilyFlags & 0x8000000LL) && spellProto->SpellIconID == 25)
+            else if((spellProto->SpellFamilyFlags & UI64LIT(0x8000000)) && spellProto->SpellIconID == 25)
             {
                 Item *item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                 float wspeed = GetAttackTime(BASE_ATTACK)/1000.0f;
@@ -7528,30 +7528,30 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 CastingTime = 2555;
             }
             // Seal of Vengeance - 17% per Fully Stacked Tick - 5 Applications
-            else if ((spellProto->SpellFamilyFlags & 0x80000000000LL) && spellProto->SpellIconID == 2292)
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x80000000000)) && spellProto->SpellIconID == 2292)
             {
                 DotFactor = 0.17f;
                 CastingTime = 3500;
             }
             // Holy shield - 5% of Holy Damage
-            else if ((spellProto->SpellFamilyFlags & 0x4000000000LL) && spellProto->SpellIconID == 453)
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x4000000000)) && spellProto->SpellIconID == 453)
             {
                 CastingTime = 175;
             }
             // Blessing of Sanctuary - 0%
-            else if ((spellProto->SpellFamilyFlags & 0x10000000LL) && spellProto->SpellIconID == 29)
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x10000000)) && spellProto->SpellIconID == 29)
             {
                 CastingTime = 0;
             }
             // Seal of Righteousness trigger - already computed for parent spell
-            else if ( spellProto->SpellFamilyName==SPELLFAMILY_PALADIN && spellProto->SpellIconID==25 && spellProto->AttributesEx4 & 0x00800000LL )
+            else if ( spellProto->SpellFamilyName==SPELLFAMILY_PALADIN && spellProto->SpellIconID==25 && (spellProto->AttributesEx4 & UI64LIT(0x00800000)))
             {
                 return pdamage;
             }
             break;
         case  SPELLFAMILY_SHAMAN:
             // totem attack
-            if (spellProto->SpellFamilyFlags & 0x000040000000LL)
+            if (spellProto->SpellFamilyFlags & UI64LIT(0x000040000000))
             {
                 if (spellProto->SpellIconID == 33)          // Fire Nova totem attack must be 21.4%(untested)
                     CastingTime = 749;                      // ignore CastingTime and use as modifier
@@ -7561,33 +7561,33 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                     CastingTime = 234;                      // ignore CastingTimePenalty and use as modifier
             }
             // Lightning Shield (and proc shield from T2 8 pieces bonus ) 33% per charge
-            else if( (spellProto->SpellFamilyFlags & 0x00000000400LL) || spellProto->Id == 23552)
+            else if( (spellProto->SpellFamilyFlags & UI64LIT(0x00000000400)) || spellProto->Id == 23552)
                 CastingTime = 1155;                         // ignore CastingTimePenalty and use as modifier
             break;
         case SPELLFAMILY_PRIEST:
             // Mana Burn - 0% of Shadow Damage
-            if((spellProto->SpellFamilyFlags & 0x10LL) && spellProto->SpellIconID == 212)
+            if((spellProto->SpellFamilyFlags & UI64LIT(0x10)) && spellProto->SpellIconID == 212)
             {
                 CastingTime = 0;
             }
             // Mind Flay - 59% of Shadow Damage
-            else if((spellProto->SpellFamilyFlags & 0x800000LL) && spellProto->SpellIconID == 548)
+            else if((spellProto->SpellFamilyFlags & UI64LIT(0x800000)) && spellProto->SpellIconID == 548)
             {
                 CastingTime = 2065;
             }
             // Holy Fire - 86.71%, DoT - 16.5%
-            else if ((spellProto->SpellFamilyFlags & 0x100000LL) && spellProto->SpellIconID == 156)
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x100000)) && spellProto->SpellIconID == 156)
             {
                 DotFactor = damagetype == DOT ? 0.165f : 1.0f;
                 CastingTime = damagetype == DOT ? 3500 : 3035;
             }
             // Shadowguard - 28% per charge
-            else if ((spellProto->SpellFamilyFlags & 0x2000000LL) && spellProto->SpellIconID == 19)
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x2000000)) && spellProto->SpellIconID == 19)
             {
                 CastingTime = 980;
             }
             // Touch of Weakeness - 10%
-            else if ((spellProto->SpellFamilyFlags & 0x80000LL) && spellProto->SpellIconID == 1591)
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x80000)) && spellProto->SpellIconID == 1591)
             {
                 CastingTime = 350;
             }
@@ -7597,14 +7597,14 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 CastingTime = 0;
             }
             // Holy Nova - 14%
-            else if ((spellProto->SpellFamilyFlags & 0x400000LL) && spellProto->SpellIconID == 1874)
+            else if ((spellProto->SpellFamilyFlags & UI64LIT(0x400000)) && spellProto->SpellIconID == 1874)
             {
                 CastingTime = 500;
             }
             break;
         case SPELLFAMILY_DRUID:
             // Hurricane triggered spell
-            if((spellProto->SpellFamilyFlags & 0x400000LL) && spellProto->SpellIconID == 220)
+            if((spellProto->SpellFamilyFlags & UI64LIT(0x400000)) && spellProto->SpellIconID == 220)
             {
                 CastingTime = 500;
             }
@@ -7841,7 +7841,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     AdvertisedBenefit += SpellBaseHealingBonusForVictim(GetSpellSchoolMask(spellProto), pVictim);
 
     // Blessing of Light dummy effects healing taken from Holy Light and Flash of Light
-    if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN && (spellProto->SpellFamilyFlags & 0x00000000C0000000LL))
+    if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN && (spellProto->SpellFamilyFlags & UI64LIT(0x00000000C0000000)))
     {
         AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
         for(AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
@@ -7849,10 +7849,10 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
             if((*i)->GetSpellProto()->SpellVisual == 9180)
             {
                 // Flash of Light
-                if ((spellProto->SpellFamilyFlags & 0x0000000040000000LL) && (*i)->GetEffIndex() == 1)
+                if ((spellProto->SpellFamilyFlags & UI64LIT(0x0000000040000000)) && (*i)->GetEffIndex() == 1)
                     AdvertisedBenefit += (*i)->GetModifier()->m_amount;
                 // Holy Light
-                else if ((spellProto->SpellFamilyFlags & 0x0000000080000000LL) && (*i)->GetEffIndex() == 0)
+                else if ((spellProto->SpellFamilyFlags & UI64LIT(0x0000000080000000)) && (*i)->GetEffIndex() == 0)
                     AdvertisedBenefit += (*i)->GetModifier()->m_amount;
             }
         }
@@ -7910,27 +7910,27 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         {
             case  SPELLFAMILY_SHAMAN:
                 // Healing stream from totem (add 6% per tick from hill bonus owner)
-                if (spellProto->SpellFamilyFlags & 0x000000002000LL)
+                if (spellProto->SpellFamilyFlags & UI64LIT(0x000000002000))
                     CastingTime = 210;
                 // Earth Shield 30% per charge
-                else if (spellProto->SpellFamilyFlags & 0x40000000000LL)
+                else if (spellProto->SpellFamilyFlags & UI64LIT(0x40000000000))
                     CastingTime = 1050;
                 break;
             case  SPELLFAMILY_DRUID:
                 // Lifebloom
-                if (spellProto->SpellFamilyFlags & 0x1000000000LL)
+                if (spellProto->SpellFamilyFlags & UI64LIT(0x1000000000))
                 {
                     CastingTime = damagetype == DOT ? 3500 : 1200;
                     DotFactor = damagetype == DOT ? 0.519f : 1.0f;
                 }
                 // Tranquility triggered spell
-                else if (spellProto->SpellFamilyFlags & 0x80LL)
+                else if (spellProto->SpellFamilyFlags & UI64LIT(0x80))
                     CastingTime = 667;
                 // Rejuvenation
-                else if (spellProto->SpellFamilyFlags & 0x10LL)
+                else if (spellProto->SpellFamilyFlags & UI64LIT(0x10))
                     DotFactor = 0.845f;
                 // Regrowth
-                else if (spellProto->SpellFamilyFlags & 0x40LL)
+                else if (spellProto->SpellFamilyFlags & UI64LIT(0x40))
                 {
                     DotFactor = damagetype == DOT ? 0.705f : 1.0f;
                     CastingTime = damagetype == DOT ? 3500 : 1010;
@@ -7938,12 +7938,12 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
                 break;
             case SPELLFAMILY_PRIEST:
                 // Holy Nova - 14%
-                if ((spellProto->SpellFamilyFlags & 0x8000000LL) && spellProto->SpellIconID == 1874)
+                if ((spellProto->SpellFamilyFlags & UI64LIT(0x8000000)) && spellProto->SpellIconID == 1874)
                     CastingTime = 500;
                 break;
             case SPELLFAMILY_PALADIN:
                 // Seal and Judgement of Light
-                if ( spellProto->SpellFamilyFlags & 0x100040000LL )
+                if ( spellProto->SpellFamilyFlags & UI64LIT(0x100040000))
                     CastingTime = 0;
                 break;
             case SPELLFAMILY_WARRIOR:
@@ -7980,7 +7980,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         modOwner->ApplySpellMod(spellProto->Id, damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, heal);
 
     // Healing Wave cast
-    if (spellProto->SpellFamilyName == SPELLFAMILY_SHAMAN && spellProto->SpellFamilyFlags & 0x0000000000000040LL)
+    if (spellProto->SpellFamilyName == SPELLFAMILY_SHAMAN && (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000040)))
     {
         // Search for Healing Way on Victim (stack up to 3 time)
         int32 pctMod = 0;
@@ -8299,7 +8299,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
                 if(spellProto==NULL)
                     break;
                 // Should increase Shred (initial Damage of Lacerate and Rake handled in Spell::EffectSchoolDMG)
-                if(spellProto->SpellFamilyName==SPELLFAMILY_DRUID && (spellProto->SpellFamilyFlags==0x00008000LL))
+                if(spellProto->SpellFamilyName==SPELLFAMILY_DRUID && (spellProto->SpellFamilyFlags == UI64LIT(0x00008000)))
                     TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f;
                 break;
         }

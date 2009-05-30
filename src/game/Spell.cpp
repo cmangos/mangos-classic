@@ -724,7 +724,7 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
             m_delayMoment = target.timeDelay;
     }
     else
-        target.timeDelay = 0LL;
+        target.timeDelay = UI64LIT(0);
 
     // If target reflect spell back to caster
     if (target.missCondition==SPELL_MISS_REFLECT)
@@ -787,7 +787,7 @@ void Spell::AddGOTarget(GameObject* pVictim, uint32 effIndex)
             m_delayMoment = target.timeDelay;
     }
     else
-        target.timeDelay = 0LL;
+        target.timeDelay = UI64LIT(0);
 
     ++m_countOfHit;
 
@@ -991,7 +991,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
             // exclude Arcane Missiles Dummy Aura aura for now (attack on hit)
             // TODO: find way to not need this?
             if(!(m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&
-                m_spellInfo->SpellFamilyFlags & 0x800LL))
+                m_spellInfo->SpellFamilyFlags & UI64LIT(0x800)))
             {
                 unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
@@ -1978,7 +1978,7 @@ void Spell::cast(bool skipCheck)
         Unit::AuraList const &mPeriodic = m_targets.getUnitTarget()->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
         for(Unit::AuraList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
         {
-            if( (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && ((*i)->GetSpellProto()->SpellFamilyFlags & 4) &&
+            if( (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && ((*i)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x4)) &&
                 (*i)->GetCasterGUID()==m_caster->GetGUID() )
             {
                 m_targets.getUnitTarget()->RemoveAura((*i)->GetId(), (*i)->GetEffIndex());
@@ -3120,7 +3120,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         if( m_spellInfo->AttributesEx2 == 0x100000 && (m_spellInfo->AttributesEx & 0x200) == 0x200 && target->HasInArc(M_PI, m_caster) )
         {
             //Exclusion for Pounce: Facing Limitation was removed in 2.0.1, but it still uses the same, old Ex-Flags
-            if( m_spellInfo->SpellFamilyName != SPELLFAMILY_DRUID || m_spellInfo->SpellFamilyFlags != 0x0000000000020000LL )
+            if (m_spellInfo->SpellFamilyName != SPELLFAMILY_DRUID || (m_spellInfo->SpellFamilyFlags != UI64LIT(0x0000000000020000)))
             {
                 SendInterrupted(2);
                 return SPELL_FAILED_NOT_BEHIND;
@@ -4604,7 +4604,7 @@ bool Spell::CheckTargetCreatureType(Unit* target) const
     uint32 spellCreatureTargetMask = m_spellInfo->TargetCreatureType;
 
     // Curse of Doom : not find another way to fix spell target check :/
-    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags == 0x0200000000LL)
+    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags == UI64LIT(0x0200000000))
     {
         // not allow cast at player
         if(target->GetTypeId()==TYPEID_PLAYER)
