@@ -3290,7 +3290,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
         // only at real aura add
         if (Real)
         {
-            pTarget->SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x02);
+            pTarget->SetStandFlags(UNIT_STAND_FLAGS_CREEP);
             if(pTarget->GetTypeId()==TYPEID_PLAYER)
                 pTarget->SetFlag(PLAYER_FIELD_BYTES2, 0x2000);
 
@@ -3335,7 +3335,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
             // if no GM invisibility
             if(pTarget->GetVisibility()!=VISIBILITY_OFF)
             {
-                pTarget->SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x00);
+                pTarget->RemoveStandFlags(UNIT_STAND_FLAGS_CREEP);
                 if(pTarget->GetTypeId()==TYPEID_PLAYER)
                     pTarget->RemoveFlag(PLAYER_FIELD_BYTES2, 0x2000);
 
@@ -4513,7 +4513,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool /*Real*/)
             return;
 
         if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && !m_target->IsSitState())
-            m_target->SetStandState(PLAYER_STATE_SIT);
+            m_target->SetStandState(UNIT_STAND_STATE_SIT);
 
         if(m_periodicTimer <= 0)
         {
@@ -4533,7 +4533,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool /*Real*/)
 void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool /*Real*/)
 {
     if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply  && !m_target->IsSitState())
-        m_target->SetStandState(PLAYER_STATE_SIT);
+        m_target->SetStandState(UNIT_STAND_STATE_SIT);
     if(apply)
     {
         if(m_modifier.periodictime == 0)
@@ -4561,7 +4561,7 @@ void Aura::HandleModRegen(bool apply, bool /*Real*/)        // eating
             return;
 
         if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)  && !m_target->IsSitState())
-            m_target->SetStandState(PLAYER_STATE_SIT);
+            m_target->SetStandState(UNIT_STAND_STATE_SIT);
 
         if(m_periodicTimer <= 0)
         {
@@ -4583,7 +4583,7 @@ void Aura::HandleModRegen(bool apply, bool /*Real*/)        // eating
 void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 {
     if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply && !m_target->IsSitState())
-        m_target->SetStandState(PLAYER_STATE_SIT);
+        m_target->SetStandState(UNIT_STAND_STATE_SIT);
 
     if(apply && m_periodicTimer <= 0)
     {
@@ -5279,9 +5279,9 @@ void Aura::HandleAuraEmpathy(bool apply, bool /*Real*/)
 void Aura::HandleAuraUntrackable(bool apply, bool /*Real*/)
 {
     if(apply)
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_UNTRACKABLE);
+        m_target->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_UNTRACKABLE);
     else
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_UNTRACKABLE);
+        m_target->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_UNTRACKABLE);
 }
 
 void Aura::HandleAuraModPacify(bool apply, bool /*Real*/)
@@ -5434,7 +5434,7 @@ void Aura::HandleSpiritOfRedemption( bool apply, bool Real )
 
             // set stand state (expected in this form)
             if(!m_target->IsStandState())
-                m_target->SetStandState(PLAYER_STATE_NONE);
+                m_target->SetStandState(UNIT_STAND_STATE_STAND);
         }
 
         m_target->SetHealth(1);
