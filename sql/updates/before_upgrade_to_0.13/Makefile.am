@@ -31,6 +31,7 @@ pkgdata_DATA = \
 	035_7855_01_mangos_pools.sql \
 	039_7896_01_mangos_creature_template.sql \
 	040_7902_01_mangos_pool.sql \
+	041_7932_01_characters_character_pet.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -42,4 +43,5 @@ EXTRA_DIST = \
 	035_7855_01_mangos_pools.sql \
 	039_7896_01_mangos_creature_template.sql \
 	040_7902_01_mangos_pool.sql \
+	041_7932_01_characters_character_pet.sql \
 	README
