@@ -41,7 +41,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `account`;
 CREATE TABLE `account` (
-  `id` bigint(20) unsigned NOT NULL auto_increment COMMENT 'Identifier',
+  `id` int(11) unsigned NOT NULL auto_increment COMMENT 'Identifier',
   `username`      varchar(32) NOT NULL default '',
   `sha_pass_hash` varchar(40) NOT NULL default '',
   `gmlevel` tinyint(3) unsigned NOT NULL default '0',
