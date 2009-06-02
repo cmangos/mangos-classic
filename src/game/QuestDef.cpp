@@ -116,14 +116,20 @@ Quest::Quest(Field * questRecord)
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
         DetailsEmote[i] = questRecord[110+i].GetUInt32();
 
-    IncompleteEmote = questRecord[114].GetUInt32();
-    CompleteEmote = questRecord[115].GetUInt32();
+    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
+        DetailsEmoteDelay[i] = questRecord[114+i].GetUInt32();
+
+    IncompleteEmote = questRecord[118].GetUInt32();
+    CompleteEmote = questRecord[119].GetUInt32();
 
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        OfferRewardEmote[i] = questRecord[116+i].GetInt32();
+        OfferRewardEmote[i] = questRecord[120+i].GetInt32();
 
-    QuestStartScript = questRecord[120].GetUInt32();
-    QuestCompleteScript = questRecord[121].GetUInt32();
+    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
+        OfferRewardEmoteDelay[i] = questRecord[124+i].GetInt32();
+
+    QuestStartScript = questRecord[128].GetUInt32();
+    QuestCompleteScript = questRecord[129].GetUInt32();
 
     QuestFlags |= SpecialFlags << 16;
 
