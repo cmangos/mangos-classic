@@ -3467,6 +3467,23 @@ void ObjectMgr::LoadPetCreateSpells()
 
     delete result;
 
+    // cache spell->learn spell map for use in next loop
+    std::map<uint32,uint32> learnCache;
+    for(uint32 spell_id = 1; spell_id < sSpellStore.GetNumRows(); ++spell_id)
+    {
+        SpellEntry const *spellproto = sSpellStore.LookupEntry(spell_id);
+        if(!spellproto)
+            continue;
+
+        if(spellproto->Effect[0] != SPELL_EFFECT_LEARN_SPELL && spellproto->Effect[0] != SPELL_EFFECT_LEARN_PET_SPELL)
+            continue;
+
+        if(!spellproto->EffectTriggerSpell[0])
+            continue;
+
+        learnCache[spellproto->EffectTriggerSpell[0]] = spellproto->Id;
+    }
+
     // fill data from DBC as more correct source if available
     uint32 dcount = 0;
     for(uint32 cr_id = 1; cr_id < sCreatureStorage.MaxEntry; ++cr_id)
@@ -3481,7 +3498,18 @@ void ObjectMgr::LoadPetCreateSpells()
 
         PetCreateSpellEntry PetCreateSpell;
         for(int i = 0; i < MAX_CREATURE_SPELL_DATA_SLOT; ++i)
-            PetCreateSpell.spellid[i] = petSpellEntry->spellId[i];
+        {
+            uint32 petspell_id = petSpellEntry->spellId[i];
+            if(petspell_id)
+            {
+                // in dbc stored spell for pet use, but for teaching work we need learn spell ids
+                std::map<uint32,uint32>::const_iterator cache_itr = learnCache.find(petspell_id);
+                if(cache_itr != learnCache.end())
+                    petspell_id = cache_itr->second;
+            }
+
+            PetCreateSpell.spellid[i] = petspell_id;
+        }
 
         mPetCreateSpell[cr_id] = PetCreateSpell;
         ++dcount;
