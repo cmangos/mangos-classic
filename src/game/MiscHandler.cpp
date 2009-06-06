@@ -912,7 +912,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
         }
         else if(type==ACTION_BUTTON_SPELL)
         {
-            sLog.outDetail( "MISC: Added Action %u into button %u", action, button );
+            sLog.outDetail( "MISC: Added Spell %u into button %u", action, button );
             GetPlayer()->addActionButton(button,action,type,misc);
         }
         else if(type==ACTION_BUTTON_ITEM)
