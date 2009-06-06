@@ -221,6 +221,14 @@ struct CreatureSpellDataEntry
     //uint32    availability[MAX_CREATURE_SPELL_DATA_SLOT]; // 4-7      m_availability[4]
 };
 
+struct CreatureTypeEntry
+{
+    uint32    ID;                                           // 0        m_ID
+    //char*   Name[16];                                     // 1-16     name
+                                                            // 17       string flags
+    //uint32    no_expirience;                              // 18 no exp? critters, non-combat pets, gas cloud.
+};
+
 struct DurabilityCostsEntry
 {
     uint32    Itemlvl;                                      // 0
@@ -817,7 +825,7 @@ struct SummonPropertiesEntry
 {
     uint32  Id;                                             // 0
     uint32  Group;                                          // 1, enum SummonPropGroup,  0 - can't be controlled?, 1 - something guardian?, 2 - pet?, 3 - something controllable?, 4 - taxi/mount?
-    uint32  Unk2;                                           // 2,                        14 rows > 0
+    uint32  FactionId;                                      // 2,                        14 rows > 0
     uint32  Type;                                           // 3, enum SummonPropType
     uint32  Slot;                                           // 4,                        0-6
     uint32  Flags;                                          // 5, enum SummonPropFlags

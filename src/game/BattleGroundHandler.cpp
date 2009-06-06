@@ -32,7 +32,7 @@
 #include "ArenaTeam.h"
 #include "Language.h"
 
-void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
+void WorldSession::HandleBattleMasterHelloOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 8);
 
@@ -69,7 +69,7 @@ void WorldSession::SendBattlegGroundList( uint64 guid, BattleGroundTypeId bgType
     SendPacket( &data );
 }
 
-void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
+void WorldSession::HandleBattlemasterJoinOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 8+4+4+1);
 
@@ -249,7 +249,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket & /*recv
     }
 }
 
-void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket & /*recv_data*/ )
+void WorldSession::HandlePVPLogDataOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug( "WORLD: Recvd MSG_PVP_LOG_DATA Message");
 
@@ -264,7 +264,7 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket & /*recv_data
     sLog.outDebug( "WORLD: Sent MSG_PVP_LOG_DATA Message");
 }
 
-void WorldSession::HandleBattleGroundListOpcode( WorldPacket &recv_data )
+void WorldSession::HandleBattlefieldListOpcode( WorldPacket &recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 4);
 
@@ -285,7 +285,7 @@ void WorldSession::HandleBattleGroundListOpcode( WorldPacket &recv_data )
     SendPacket( &data );
 }
 
-void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
+void WorldSession::HandleBattleFieldPortOpcode( WorldPacket &recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 1+1+4+2+1);
 
@@ -491,7 +491,7 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
     }
 }
 
-void WorldSession::HandleBattleGroundLeaveOpcode( WorldPacket & /*recv_data*/ )
+void WorldSession::HandleLeaveBattlefieldOpcode( WorldPacket & /*recv_data*/ )
 {
     //CHECK_PACKET_SIZE(recv_data, 1+1+4+2);
 
@@ -645,7 +645,7 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode( WorldPacket & recv_data )
     bg->AddPlayerToResurrectQueue(guid, _player->GetGUID());
 }
 
-void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
+void WorldSession::HandleBattlemasterJoinArena( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 8+1+1+1);
 
@@ -686,7 +686,7 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
             arenatype = ARENA_TYPE_5v5;
             break;
         default:
-            sLog.outError("Unknown arena type %u at HandleBattleGroundArenaJoin()", type);
+            sLog.outError("Unknown arena slot %u at HandleBattlemasterJoinArena()", type);
             return;
     }
 
@@ -807,7 +807,7 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
     }
 }
 
-void WorldSession::HandleBattleGroundReportAFK( WorldPacket & recv_data )
+void WorldSession::HandleReportPvPAFK( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 8);
 
@@ -817,11 +817,11 @@ void WorldSession::HandleBattleGroundReportAFK( WorldPacket & recv_data )
 
     if(!reportedPlayer)
     {
-        sLog.outDebug("WorldSession::HandleBattleGroundReportAFK: player not found");
+        sLog.outDebug("WorldSession::HandleReportPvPAFK: player not found");
         return;
     }
 
-    sLog.outDebug("WorldSession::HandleBattleGroundReportAFK: %s reported %s", _player->GetName(), reportedPlayer->GetName());
+    sLog.outDebug("WorldSession::HandleReportPvPAFK: %s reported %s", _player->GetName(), reportedPlayer->GetName());
 
     reportedPlayer->ReportedAfkBy(_player);
 }
