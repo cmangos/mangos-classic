@@ -78,6 +78,7 @@ pkgdata_DATA = \
 	041_7932_01_characters_character_pet.sql \
 	042_7938_01_realmd_account.sql \
 	043_7945_01_mangos_quest_template.sql \
+	044_7980_01_mangos_item_required_target.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -135,4 +136,5 @@ EXTRA_DIST = \
 	041_7932_01_characters_character_pet.sql \
 	042_7938_01_realmd_account.sql \
 	043_7945_01_mangos_quest_template.sql \
+	044_7980_01_mangos_item_required_target.sql \
 	README

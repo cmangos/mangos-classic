@@ -2393,65 +2393,70 @@ void Spell::SendCastResult(SpellCastResult result)
     if(((Player*)m_caster)->GetSession()->PlayerLoading())  // don't send cast results at loading time
         return;
 
+    SendCastResult((Player*)m_caster,m_spellInfo,m_cast_count,result);
+}
+
+void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 cast_count, SpellCastResult result)
+{
     if(result == SPELL_CAST_OK)
     {
         WorldPacket data(SMSG_CLEAR_EXTRA_AURA_INFO, (8+4));
-        data.append(m_caster->GetPackGUID());
-        data << uint32(m_spellInfo->Id);
-        ((Player*)m_caster)->GetSession()->SendPacket(&data);
+        data.append(caster->GetPackGUID());
+        data << uint32(spellInfo->Id);
+        caster->GetSession()->SendPacket(&data);
         return;
     }
 
     WorldPacket data(SMSG_CAST_FAILED, (4+1+1));
-    data << uint32(m_spellInfo->Id);
-    data << uint8(result);                              // problem
-    data << uint8(m_cast_count);                        // single cast or multi 2.3 (0/1)
+    data << uint32(spellInfo->Id);
+    data << uint8(result);                                  // problem
+    data << uint8(cast_count);                              // single cast or multi 2.3 (0/1)
     switch (result)
     {
         case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
-            data << uint32(m_spellInfo->RequiresSpellFocus);
+            data << uint32(spellInfo->RequiresSpellFocus);
             break;
         case SPELL_FAILED_REQUIRES_AREA:
             // hardcode areas limitation case
-            switch(m_spellInfo->Id)
+            switch(spellInfo->Id)
             {
-                case 41617:                             // Cenarion Mana Salve
-                case 41619:                             // Cenarion Healing Salve
+                case 41617:                                 // Cenarion Mana Salve
+                case 41619:                                 // Cenarion Healing Salve
                     data << uint32(3905);
                     break;
-                case 41618:                             // Bottled Nethergon Energy
-                case 41620:                             // Bottled Nethergon Vapor
+                case 41618:                                 // Bottled Nethergon Energy
+                case 41620:                                 // Bottled Nethergon Vapor
                     data << uint32(3842);
                     break;
-                case 45373:                             // Bloodberry Elixir
+                case 45373:                                 // Bloodberry Elixir
                     data << uint32(4075);
                     break;
-                default:                                // default case
-                    data << uint32(m_spellInfo->AreaId);
+                default:                                    // default case
+                    data << uint32(spellInfo->AreaId);
                     break;
             }
             break;
         case SPELL_FAILED_TOTEMS:
-            if(m_spellInfo->Totem[0])
-                data << uint32(m_spellInfo->Totem[0]);
-            if(m_spellInfo->Totem[1])
-                data << uint32(m_spellInfo->Totem[1]);
+            if(spellInfo->Totem[0])
+                data << uint32(spellInfo->Totem[0]);
+            if(spellInfo->Totem[1])
+                data << uint32(spellInfo->Totem[1]);
             break;
         case SPELL_FAILED_TOTEM_CATEGORY:
-            if(m_spellInfo->TotemCategory[0])
-                data << uint32(m_spellInfo->TotemCategory[0]);
-            if(m_spellInfo->TotemCategory[1])
-                data << uint32(m_spellInfo->TotemCategory[1]);
+            if(spellInfo->TotemCategory[0])
+                data << uint32(spellInfo->TotemCategory[0]);
+            if(spellInfo->TotemCategory[1])
+                data << uint32(spellInfo->TotemCategory[1]);
             break;
         case SPELL_FAILED_EQUIPPED_ITEM_CLASS:
-            data << uint32(m_spellInfo->EquippedItemClass);
-            data << uint32(m_spellInfo->EquippedItemSubClassMask);
-            data << uint32(m_spellInfo->EquippedItemInventoryTypeMask);
+            data << uint32(spellInfo->EquippedItemClass);
+            data << uint32(spellInfo->EquippedItemSubClassMask);
+            data << uint32(spellInfo->EquippedItemInventoryTypeMask);
             break;
         default:
             break;
     }
-    ((Player*)m_caster)->GetSession()->SendPacket(&data);
+    caster->GetSession()->SendPacket(&data);
 }
 
 void Spell::SendSpellStart()
