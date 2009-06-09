@@ -947,6 +947,9 @@ bool Item::IsBindedNotWith( Player const* player ) const
 
 bool ItemRequiredTarget::IsFitToRequirements( Unit* pUnitTarget ) const
 {
+    if(pUnitTarget->GetTypeId() != TYPEID_UNIT)
+        return false;
+
     if(pUnitTarget->GetEntry() != m_uiTargetEntry)
         return false;
 
