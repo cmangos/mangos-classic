@@ -2242,10 +2242,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool ex
         DealDamage (pVictim, damage, &cleanDamage, DIRECT_DAMAGE, meleeSchoolMask, NULL, true);
 
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
-        {
-            for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
-                ((Player*)this)->CastItemCombatSpell(((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0,i),pVictim,attType);
-        }
+            ((Player*)this)->CastItemCombatSpell(pVictim,attType);
     }
 
     if (GetTypeId() == TYPEID_PLAYER)
