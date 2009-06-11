@@ -2919,6 +2919,11 @@ void Player::removeSpell(uint32 spell_id, bool disabled)
         if(HasSpell(itr2->second) && !GetTalentSpellPos(itr2->second))
             removeSpell(itr2->second,disabled);
 
+    // re-search, it can be corrupted in prev loop
+    itr = m_spells.find(spell_id);
+    if (itr == m_spells.end())
+        return;                                             // already unleared
+
     // removing
     WorldPacket data(SMSG_REMOVED_SPELL, 4);
     data << uint16(spell_id);
@@ -3037,7 +3042,6 @@ void Player::removeSpell(uint32 spell_id, bool disabled)
     for(SpellLearnSpellMap::const_iterator itr2 = spell_begin; itr2 != spell_end; ++itr2)
         removeSpell(itr2->second.spell, disabled);
 }
-
 
 void Player::RemoveSpellCooldown( uint32 spell_id, bool update /* = false */ )
 {
