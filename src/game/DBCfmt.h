@@ -42,6 +42,7 @@ const char EmotesEntryfmt[]="nxxiiix";
 const char EmotesTextEntryfmt[]="nxixxxxxxxxxxxxxxxx";
 const char FactionEntryfmt[]="niiiiiiiiiiiiiiiiiissssssssssssssssxxxxxxxxxxxxxxxxxx";
 const char FactionTemplateEntryfmt[]="niiiiiiiiiiiii";
+const char GameObjectDisplayInfofmt[]="nxxxxxxxxxxxxxxxxx";
 const char GemPropertiesEntryfmt[]="nixxi";
 const char GtCombatRatingsfmt[]="f";
 const char GtChanceToMeleeCritBasefmt[]="f";
