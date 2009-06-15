@@ -816,6 +816,8 @@ enum ReactiveType
 #define MAX_REACTIVE 6
 #define MAX_TOTEM 4
 
+typedef std::set<uint64> GuardianPetList;
+
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
 
@@ -1131,6 +1133,11 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void SetPet(Pet* pet);
         void SetCharm(Unit* pet);
+
+        void AddGuardian(Pet* pet);
+        void RemoveGuardian(Pet* pet);
+        void RemoveGuardians();
+        bool HasGuardianWithEntry(uint32 entry);
 
         bool isCharmed() const { return GetCharmerGUID() != 0; }
 
@@ -1498,5 +1505,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         FollowerRefManager m_FollowingRefManager;
 
         ComboPointHolderSet m_ComboPointHolders;
+
+        GuardianPetList m_guardianPets;
 };
 #endif
