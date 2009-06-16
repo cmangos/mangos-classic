@@ -127,7 +127,7 @@ void Map::LoadMap(int gx,int gy, bool reload)
         if(GridMaps[gx][gy])
             return;
 
-        Map* baseMap = const_cast<Map*>(MapManager::Instance().GetBaseMap(i_id));
+        Map* baseMap = const_cast<Map*>(MapManager::Instance().CreateBaseMap(i_id));
 
         // load grid map for base map
         if (!baseMap->GridMaps[gx][gy])
@@ -442,10 +442,9 @@ template<class T>
 void
 Map::Add(T *obj)
 {
-    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-
     assert(obj);
 
+    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
         sLog.outError("Map::Add: Object (GUID: %u TypeId: %u) have invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUIDLow(), obj->GetTypeId(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
@@ -1038,7 +1037,7 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool pForce)
             VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gy, gx);
         }
         else
-            ((MapInstanced*)(MapManager::Instance().GetBaseMap(i_id)))->RemoveGridMapReference(GridPair(gx, gy));
+            ((MapInstanced*)(MapManager::Instance().CreateBaseMap(i_id)))->RemoveGridMapReference(GridPair(gx, gy));
         GridMaps[gx][gy] = NULL;
     }
     DEBUG_LOG("Unloading grid[%u,%u] for map %u finished", x,y, i_id);
