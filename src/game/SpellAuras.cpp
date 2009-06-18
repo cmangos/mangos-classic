@@ -1443,9 +1443,7 @@ void Aura::TriggerSpell()
 
                             player->AutoStoreLoot(creature->GetCreatureInfo()->SkinLootId,LootTemplates_Skinning,true);
 
-                            creature->setDeathState(JUST_DIED);
-                            creature->RemoveCorpse();
-                            creature->SetHealth(0);         // just for nice GM-mode view
+                            creature->ForcedDespawn();
                         }
                         return;
                         break;
@@ -1595,9 +1593,7 @@ void Aura::TriggerSpell()
 
                         Creature* creatureTarget = (Creature*)m_target;
 
-                        creatureTarget->setDeathState(JUST_DIED);
-                        creatureTarget->RemoveCorpse();
-                        creatureTarget->SetHealth(0);       // just for nice GM-mode view
+                        creatureTarget->ForcedDespawn();
                         return;
                     }
 //                    // Magic Sucker Device timer
