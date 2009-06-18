@@ -48,8 +48,11 @@ ObjectAccessor::~ObjectAccessor() {}
 Creature*
 ObjectAccessor::GetCreatureOrPet(WorldObject const &u, uint64 guid)
 {
-    if(Creature *unit = GetPet(guid))
-        return unit;
+    if(IS_PLAYER_GUID(guid))
+        return NULL;
+
+    if(IS_PET_GUID(guid))
+        return GetPet(guid);
 
     return u.GetMap()->GetCreature(guid);
 }
