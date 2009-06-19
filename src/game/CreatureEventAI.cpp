@@ -90,7 +90,7 @@ CreatureEventAI::CreatureEventAI(Creature *c ) : CreatureAI(c)
     Phase = 0;
     CombatMovementEnabled = true;
     MeleeEnabled = true;
-    AttackDistance = 0;
+    AttackDistance = 0.0f;
     AttackAngle = 0.0f;
 
     //Handle Spawned Events
@@ -480,8 +480,8 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                         {
                             if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE)
                             {
-                                AttackDistance = 0;
-                                AttackAngle = 0;
+                                AttackDistance = 0.0f;
+                                AttackAngle = 0.0f;
 
                                 m_creature->GetMotionMaster()->Clear(false);
                                 m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), AttackDistance, AttackAngle);
@@ -650,7 +650,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 target->RemoveAurasDueToSpell(action.remove_aura.spellId);
             break;
         case ACTION_T_RANGED_MOVEMENT:
-            AttackDistance = action.ranged_movement.distance;
+            AttackDistance = (float)action.ranged_movement.distance;
             AttackAngle = action.ranged_movement.angle/180.0f*M_PI;
 
             if (CombatMovementEnabled)
