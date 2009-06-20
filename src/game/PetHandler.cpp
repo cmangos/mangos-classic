@@ -251,8 +251,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 else
                     pet->SendPetCastFail(spellid, result);
 
-                if(!((Creature*)pet)->HasSpellCooldown(spellid))
-                    pet->SendPetClearCooldown(spellid);
+                if (!((Creature*)pet)->HasSpellCooldown(spellid))
+                    GetPlayer()->SendClearCooldown(spellid, pet);
 
                 spell->finish(false);
                 delete spell;
@@ -596,7 +596,7 @@ void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
 
     recvPacket >> guid >> spellid;
 
-    if(!_player->GetPet() && !_player->GetCharm())
+    if (!_player->GetPet() && !_player->GetCharm())
         return;
 
     if (GUID_HIPART(guid) == HIGHGUID_PLAYER)
@@ -604,7 +604,7 @@ void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
 
     Creature* pet = ObjectAccessor::GetCreatureOrPet(*_player,guid);
 
-    if(!pet || (pet != _player->GetPet() && pet!= _player->GetCharm()))
+    if (!pet || (pet != _player->GetPet() && pet!= _player->GetCharm()))
     {
         sLog.outError( "HandlePetCastSpellOpcode: Pet %u isn't pet of player %s .", uint32(GUID_LOPART(guid)),GetPlayer()->GetName() );
         return;
@@ -614,18 +614,18 @@ void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
         return;
 
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellid);
-    if(!spellInfo)
+    if (!spellInfo)
     {
         sLog.outError("WORLD: unknown PET spell id %i", spellid);
         return;
     }
 
     // do not cast not learned spells
-    if(!pet->HasSpell(spellid) || IsPassiveSpell(spellid))
+    if (!pet->HasSpell(spellid) || IsPassiveSpell(spellid))
         return;
 
     SpellCastTargets targets;
-    if(!targets.read(&recvPacket,pet))
+    if (!targets.read(&recvPacket,pet))
         return;
 
     pet->clearUnitState(UNIT_STAT_FOLLOW);
@@ -634,10 +634,10 @@ void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
     spell->m_targets = targets;
 
     SpellCastResult result = spell->CheckPetCast(NULL);
-    if(result == SPELL_CAST_OK)
+    if (result == SPELL_CAST_OK)
     {
         pet->AddCreatureSpellCooldown(spellid);
-        if(pet->isPet())
+        if (pet->isPet())
         {
             Pet* p = (Pet*)pet;
             p->CheckLearning(spellid);
@@ -654,8 +654,8 @@ void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
     else
     {
         pet->SendPetCastFail(spellid, result);
-        if(!pet->HasSpellCooldown(spellid))
-            pet->SendPetClearCooldown(spellid);
+        if (!pet->HasSpellCooldown(spellid))
+            GetPlayer()->SendClearCooldown(spellid, pet);
 
         spell->finish(false);
         delete spell;
