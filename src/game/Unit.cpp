@@ -223,7 +223,6 @@ Unit::Unit()
 
     m_removedAuras = 0;
     m_charmInfo = NULL;
-    m_unit_movement_flags = 0;
 
     // remove aurastates allowing special moves
     for(int i=0; i < MAX_REACTIVE; ++i)
@@ -301,33 +300,7 @@ bool Unit::haveOffhandWeapon() const
         return false;
 }
 
-void Unit::SendMonsterMoveWithSpeedToCurrentDestination(Player* player)
-{
-    float x, y, z;
-    if(GetMotionMaster()->GetDestination(x, y, z))
-        SendMonsterMoveWithSpeed(x, y, z, 0, player);
-}
-
-void Unit::SendMonsterMoveWithSpeed(float x, float y, float z, uint32 transitTime, Player* player)
-{
-    if (!transitTime)
-    {
-        if(GetTypeId()==TYPEID_PLAYER)
-        {
-            Traveller<Player> traveller(*(Player*)this);
-            transitTime = traveller.GetTotalTrevelTimeTo(x,y,z);
-        }
-        else
-        {
-            Traveller<Creature> traveller(*(Creature*)this);
-            transitTime = traveller.GetTotalTrevelTimeTo(x,y,z);
-        }
-    }
-    //float orientation = (float)atan2((double)dy, (double)dx);
-    SendMonsterMove(x, y, z, 0, GetUnitMovementFlags(), transitTime, player);
-}
-
-void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time, Player* player)
+void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, MonsterMovementFlags flags, uint32 Time, Player* player)
 {
     WorldPacket data( SMSG_MONSTER_MOVE, (41 + GetPackGUID().size()) );
     data.append(GetPackGUID());
@@ -361,7 +334,10 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 ty
     }
 
     //Movement Flags (0x0 = walk, 0x100 = run, 0x200 = fly/swim)
-    data << uint32(MovementFlags);
+    data << uint32(flags);
+
+    if(flags & MONSTER_MOVE_WALK)
+        Time *= 1.05f;
 
     data << uint32(Time);                                   // Time in between points
     data << uint32(1);                                      // 1 single waypoint
@@ -373,7 +349,7 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 ty
         SendMessageToSet( &data, true );
 }
 
-void Unit::SendMonsterMoveByPath(Path const& path, uint32 start, uint32 end, uint32 MovementFlags)
+void Unit::SendMonsterMoveByPath(Path const& path, uint32 start, uint32 end, MonsterMovementFlags flags)
 {
     uint32 traveltime = uint32(path.GetTotalLength(start, end) * 32);
 
@@ -385,14 +361,30 @@ void Unit::SendMonsterMoveByPath(Path const& path, uint32 start, uint32 end, uin
     data << GetPositionY();
     data << GetPositionZ();
     data << uint32(getMSTime());
-    data << uint8( 0 );
-    data << uint32( MovementFlags );
-    data << uint32( traveltime );
-    data << uint32( pathSize );
-    data.append( (char*)path.GetNodes(start), pathSize * 4 * 3 );
-
-    //WPAssert( data.size() == 37 + pathnodes.Size( ) * 4 * 3 );
+    data << uint8(0);
+    data << uint32(flags);
+    data << uint32(traveltime);
+    data << uint32(pathSize);
+    data.append((char*)path.GetNodes(start), pathSize * 4 * 3);
     SendMessageToSet(&data, true);
+}
+
+void Unit::BuildHeartBeatMsg(WorldPacket *data) const
+{
+    MovementFlags move_flags = GetTypeId()==TYPEID_PLAYER
+        ? ((Player const*)this)->m_movementInfo.GetMovementFlags()
+        : MOVEMENTFLAG_NONE;
+
+    data->Initialize(MSG_MOVE_HEARTBEAT, 32);
+    data->append(GetPackGUID());
+    *data << uint32(move_flags);                            // movement flags
+    *data << uint8(0);                                      // 2.3.0
+    *data << uint32(getMSTime());                           // time
+    *data << float(GetPositionX());
+    *data << float(GetPositionY());
+    *data << float(GetPositionZ());
+    *data << float(GetOrientation());
+    *data << uint32(0);
 }
 
 void Unit::resetAttackTimer(WeaponAttackType type)
@@ -11143,6 +11135,20 @@ void Unit::RemoveAurasAtChanneledTarget(SpellEntry const* spellInfo)
             target->RemoveAura(iter);
         else
             ++iter;
+    }
+}
+
+void Unit::NearTeleportTo( float x, float y, float z, float orientation, bool casting /*= false*/ )
+{
+    if(GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->TeleportTo(GetMapId(), x, y, z, orientation, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (casting ? TELE_TO_SPELL : 0));
+    else
+    {
+        GetMap()->CreatureRelocation((Creature*)this, x, y, z, orientation);
+
+        WorldPacket data;
+        BuildHeartBeatMsg(&data);
+        SendMessageToSet(&data, false);
     }
 }
 

@@ -80,7 +80,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
-        void ReadMovementInfo(WorldPacket &data, MovementInfo *mi, uint32* flags);
+        void ReadMovementInfo(WorldPacket &data, MovementInfo *mi);
 
         void SendPacket(WorldPacket const* packet);
         void SendNotification(const char *format,...) ATTR_PRINTF(2,3);

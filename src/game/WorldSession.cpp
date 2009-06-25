@@ -515,10 +515,10 @@ void WorldSession::SendAuthWaitQue(uint32 position)
     }
 }
 
-void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi, uint32* flags)
+void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
 {
     CHECK_PACKET_SIZE(data, 4+1+4+4+4+4+4);
-    data >> *flags;
+    data >> mi->flags;
     data >> mi->unk1;
     data >> mi->time;
     data >> mi->x;
@@ -526,7 +526,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi, uint32*
     data >> mi->z;
     data >> mi->o;
 
-    if((*flags) & MOVEMENTFLAG_ONTRANSPORT)
+    if(mi->HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
     {
         CHECK_PACKET_SIZE(data, data.rpos()+8+4+4+4+4+4);
 
@@ -538,7 +538,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi, uint32*
         data >> mi->t_time;
     }
 
-    if((*flags) & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2))
+    if(mi->HasMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2)))
     {
         CHECK_PACKET_SIZE(data, data.rpos()+4);
         data >> mi->s_pitch;
@@ -547,7 +547,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi, uint32*
     CHECK_PACKET_SIZE(data, data.rpos()+4);
     data >> mi->fallTime;
 
-    if((*flags) & MOVEMENTFLAG_JUMPING)
+    if(mi->HasMovementFlag(MOVEMENTFLAG_JUMPING))
     {
         CHECK_PACKET_SIZE(data, data.rpos()+4+4+4+4);
         data >> mi->j_unk;
@@ -556,7 +556,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi, uint32*
         data >> mi->j_xyspeed;
     }
 
-    if((*flags) & MOVEMENTFLAG_SPLINE)
+    if(mi->HasMovementFlag(MOVEMENTFLAG_SPLINE))
     {
         CHECK_PACKET_SIZE(data, data.rpos()+4);
         data >> mi->u_unk1;

@@ -256,12 +256,12 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2)
         {
             case TYPEID_UNIT:
             {
-                flags2 = ((Unit*)this)->GetUnitMovementFlags();
+                flags2 = ((Unit*)this)->isInFlight() ? (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_LEVITATING) : MOVEMENTFLAG_NONE;
             }
             break;
             case TYPEID_PLAYER:
             {
-                flags2 = ((Player*)this)->GetUnitMovementFlags();
+                flags2 = ((Player*)this)->m_movementInfo.GetMovementFlags();
 
                 if(((Player*)this)->GetTransport())
                     flags2 |= MOVEMENTFLAG_ONTRANSPORT;
@@ -1444,43 +1444,6 @@ void WorldObject::BuildMonsterChat(WorldPacket *data, uint8 msgtype, char const*
         data->append("%s ",3);
     *data << text;
     *data << (uint8)0;                                      // ChatTag
-}
-
-void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const
-{
-    //Heartbeat message cannot be used for non-units
-    if (!isType(TYPEMASK_UNIT))
-        return;
-
-    data->Initialize(MSG_MOVE_HEARTBEAT, 32);
-    data->append(GetPackGUID());
-    *data << uint32(((Unit*)this)->GetUnitMovementFlags()); // movement flags
-    *data << uint8(0);                                      // 2.3.0
-    *data << uint32(getMSTime());                           // time
-    *data << m_positionX;
-    *data << m_positionY;
-    *data << m_positionZ;
-    *data << m_orientation;
-    *data << uint32(0);
-}
-
-void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const
-{
-    //TeleportAck message cannot be used for non-units
-    if (!isType(TYPEMASK_UNIT))
-        return;
-
-    data->Initialize(MSG_MOVE_TELEPORT_ACK, 41);
-    data->append(GetPackGUID());
-    *data << uint32(0);                                     // this value increments every time
-    *data << uint32(((Unit*)this)->GetUnitMovementFlags()); // movement flags
-    *data << uint8(0);                                      // 2.3.0
-    *data << uint32(getMSTime());                           // time
-    *data << x;
-    *data << y;
-    *data << z;
-    *data << ang;
-    *data << uint32(0);
 }
 
 void WorldObject::SendMessageToSet(WorldPacket *data, bool /*bToSelf*/)

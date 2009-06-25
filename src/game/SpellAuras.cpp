@@ -3200,11 +3200,11 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
         // Creature specific
         if(m_target->GetTypeId() != TYPEID_PLAYER)
-            ((Creature*)m_target)->StopMoving();
+            m_target->StopMoving();
         else
         {
-            m_target->SetUnitMovementFlags(0);              // Clear movement flags
-            m_target->SetStandState(UNIT_STAND_STATE_STAND);
+            ((Player*)m_target)->m_movementInfo.SetMovementFlags(MOVEMENTFLAG_NONE);
+            m_target->SetStandState(UNIT_STAND_STATE_STAND);// in 1.5 client
         }
 
         WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
@@ -3462,10 +3462,10 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             m_target->SendMessageToSet(&data, true);
 
             //Clear unit movement flags
-            m_target->SetUnitMovementFlags(0);
+            ((Player*)m_target)->m_movementInfo.SetMovementFlags(MOVEMENTFLAG_NONE);
         }
         else
-            ((Creature *)m_target)->StopMoving();
+            m_target->StopMoving();
     }
     else
     {

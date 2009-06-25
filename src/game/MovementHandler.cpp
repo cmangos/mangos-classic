@@ -223,8 +223,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     /* extract packet */
     MovementInfo movementInfo;
-    uint32 movementFlags;
-    ReadMovementInfo(recv_data, &movementInfo, &movementFlags);
+    ReadMovementInfo(recv_data, &movementInfo);
     /*----------------*/
 
     if(recv_data.size() != recv_data.rpos())
@@ -238,7 +237,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         return;
 
     /* handle special cases */
-    if (movementFlags & MOVEMENTFLAG_ONTRANSPORT)
+    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
     {
         // transports size limited
         // (also received at zeppelin leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
@@ -282,7 +281,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if (opcode == MSG_MOVE_FALL_LAND && !GetPlayer()->isInFlight())
         GetPlayer()->HandleFall(movementInfo);
 
-    if(((movementFlags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
+    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_SWIMMING) != GetPlayer()->IsInWater())
     {
         // now client not include swimming flag in case jumping under water
         GetPlayer()->SetInWater( !GetPlayer()->IsInWater() || GetPlayer()->GetBaseMap()->IsUnderWater(movementInfo.x, movementInfo.y, movementInfo.z) );
@@ -299,7 +298,6 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     GetPlayer()->SetPosition(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o);
     GetPlayer()->m_movementInfo = movementInfo;
-    GetPlayer()->SetUnitMovementFlags(movementFlags);
 
     GetPlayer()->UpdateFallInformationIfNeed(movementInfo,recv_data.GetOpcode());
 
@@ -358,8 +356,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     recv_data >> unk1;
 
     MovementInfo movementInfo;
-    uint32 movementFlags;
-    ReadMovementInfo(recv_data, &movementInfo, &movementFlags);
+    ReadMovementInfo(recv_data, &movementInfo);
 
     // recheck
     CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);

@@ -111,7 +111,7 @@ m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_resp
 m_gossipOptionLoaded(false), m_isPet(false), m_isTotem(false),
 m_defaultMovementType(IDLE_MOTION_TYPE), m_DBTableGuid(0), m_equipmentId(0), m_AlreadyCallAssistance(false),
 m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false), m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),
-m_creatureInfo(NULL), m_isActiveObject(false), m_AlreadySearchedAssistance(false)
+m_creatureInfo(NULL), m_isActiveObject(false), m_monsterMoveFlags(MONSTER_MOVE_WALK)
 {
     m_regenTimer = 200;
     m_valuesCount = UNIT_END;
@@ -122,7 +122,8 @@ m_creatureInfo(NULL), m_isActiveObject(false), m_AlreadySearchedAssistance(false
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
     m_GlobalCooldown = 0;
-    m_unit_movement_flags = MOVEMENTFLAG_WALK_MODE;
+
+    m_monsterMoveFlags = MONSTER_MOVE_WALK;
 }
 
 Creature::~Creature()
@@ -1025,7 +1026,7 @@ void Creature::LoadGossipOptions()
     m_gossipOptionLoaded = true;
 }
 
-void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint32 MovementFlags, uint8 type)
+void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, MonsterMovementFlags flags, uint8 type)
 {
     /*    uint32 timeElap = getMSTime();
         if ((timeElap - m_startMove) < m_moveTime)
@@ -1045,7 +1046,7 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint3
 
         m_startMove = getMSTime();
         m_moveTime = time;*/
-    SendMonsterMove(x, y, z, type, MovementFlags, time);
+    SendMonsterMove(x, y, z, type, flags, time);
 }
 
 Player *Creature::GetLootRecipient() const
@@ -1530,7 +1531,7 @@ void Creature::setDeathState(DeathState s)
         CreatureInfo const *cinfo = GetCreatureInfo();
         SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-        AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
+        AddMonsterMoveFlag(MONSTER_MOVE_WALK);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();
@@ -1934,7 +1935,7 @@ bool Creature::LoadCreaturesAddon(bool reload)
         SetUInt32Value(UNIT_NPC_EMOTESTATE, cainfo->emote);
 
     if (cainfo->move_flags != 0)
-        SetUnitMovementFlags(cainfo->move_flags);
+        SetMonsterMoveFlags(MonsterMovementFlags(cainfo->move_flags));
 
     if(cainfo->auras)
     {
@@ -2274,4 +2275,30 @@ void Creature::SetActiveObjectState( bool on )
 
     if(world)
         map->Add(this);
+}
+
+void Creature::SendMonsterMoveWithSpeedToCurrentDestination(Player* player)
+{
+    float x, y, z;
+    if(GetMotionMaster()->GetDestination(x, y, z))
+        SendMonsterMoveWithSpeed(x, y, z, 0, player);
+}
+
+void Creature::SendMonsterMoveWithSpeed(float x, float y, float z, uint32 transitTime, Player* player)
+{
+    if (!transitTime)
+    {
+        if(GetTypeId()==TYPEID_PLAYER)
+        {
+            Traveller<Player> traveller(*(Player*)this);
+            transitTime = traveller.GetTotalTrevelTimeTo(x,y,z);
+        }
+        else
+        {
+            Traveller<Creature> traveller(*(Creature*)this);
+            transitTime = traveller.GetTotalTrevelTimeTo(x,y,z);
+        }
+    }
+    //float orientation = (float)atan2((double)dy, (double)dx);
+    SendMonsterMove(x, y, z, 0, GetMonsterMoveFlags(), transitTime, player);
 }

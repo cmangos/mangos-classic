@@ -1951,16 +1951,7 @@ void Spell::EffectTeleportUnits(uint32 i)
             float y = m_targets.m_destY;
             float z = m_targets.m_destZ;
             float orientation = pTarget->GetOrientation();
-            // Teleport
-            if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)unitTarget)->TeleportTo(mapid, x, y, z, orientation, TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (unitTarget==m_caster ? TELE_TO_SPELL : 0));
-            else
-            {
-                m_caster->GetMap()->CreatureRelocation((Creature*)unitTarget, x, y, z, orientation);
-                WorldPacket data;
-                unitTarget->BuildTeleportAckMsg(&data, x, y, z, orientation);
-                unitTarget->SendMessageToSet(&data, false);
-            }
+            unitTarget->NearTeleportTo(x,y,z,orientation,unitTarget==m_caster);
             return;
         }
         default:
@@ -1978,15 +1969,7 @@ void Spell::EffectTeleportUnits(uint32 i)
             float z = m_targets.m_destZ;
             float orientation = unitTarget->GetOrientation();
             // Teleport
-            if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)unitTarget)->TeleportTo(mapid, x, y, z, orientation, TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (unitTarget==m_caster ? TELE_TO_SPELL : 0));
-            else
-            {
-                m_caster->GetMap()->CreatureRelocation((Creature*)unitTarget, x, y, z, orientation);
-                WorldPacket data;
-                unitTarget->BuildTeleportAckMsg(&data, x, y, z, orientation);
-                unitTarget->SendMessageToSet(&data, false);
-            }
+            unitTarget->NearTeleportTo(x,y,z,orientation,unitTarget==m_caster);
             return;
         }
     }
@@ -5538,7 +5521,7 @@ void Spell::EffectCharge(uint32 /*i*/)
         ((Creature *)unitTarget)->StopMoving();
 
     // Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
-    m_caster->SendMonsterMove(x, y, z, 0, MOVEMENTFLAG_WALK_MODE, 1);
+    m_caster->SendMonsterMove(x, y, z, 0, MONSTER_MOVE_WALK, 1);
 
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         m_caster->GetMap()->CreatureRelocation((Creature*)m_caster,x,y,z,m_caster->GetOrientation());
