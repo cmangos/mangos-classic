@@ -514,3 +514,51 @@ void WorldSession::SendAuthWaitQue(uint32 position)
         SendPacket(&packet);
     }
 }
+
+void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi, uint32* flags)
+{
+    CHECK_PACKET_SIZE(data, 4+1+4+4+4+4+4);
+    data >> *flags;
+    data >> mi->unk1;
+    data >> mi->time;
+    data >> mi->x;
+    data >> mi->y;
+    data >> mi->z;
+    data >> mi->o;
+
+    if((*flags) & MOVEMENTFLAG_ONTRANSPORT)
+    {
+        CHECK_PACKET_SIZE(data, data.rpos()+8+4+4+4+4+4);
+
+        data >> mi->t_guid;
+        data >> mi->t_x;
+        data >> mi->t_y;
+        data >> mi->t_z;
+        data >> mi->t_o;
+        data >> mi->t_time;
+    }
+
+    if((*flags) & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2))
+    {
+        CHECK_PACKET_SIZE(data, data.rpos()+4);
+        data >> mi->s_pitch;
+    }
+
+    CHECK_PACKET_SIZE(data, data.rpos()+4);
+    data >> mi->fallTime;
+
+    if((*flags) & MOVEMENTFLAG_JUMPING)
+    {
+        CHECK_PACKET_SIZE(data, data.rpos()+4+4+4+4);
+        data >> mi->j_unk;
+        data >> mi->j_sinAngle;
+        data >> mi->j_cosAngle;
+        data >> mi->j_xyspeed;
+    }
+
+    if((*flags) & MOVEMENTFLAG_SPLINE)
+    {
+        CHECK_PACKET_SIZE(data, data.rpos()+4);
+        data >> mi->u_unk1;
+    }
+}

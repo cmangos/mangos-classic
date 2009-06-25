@@ -30,6 +30,7 @@ class MailItemsInfo;
 struct ItemPrototype;
 struct AuctionEntry;
 struct DeclinedName;
+struct MovementInfo;
 
 class Creature;
 class Item;
@@ -78,6 +79,8 @@ class MANGOS_DLL_SPEC WorldSession
         bool PlayerLogout() const { return m_playerLogout; }
 
         void SizeError(WorldPacket const& packet, uint32 size) const;
+
+        void ReadMovementInfo(WorldPacket &data, MovementInfo *mi, uint32* flags);
 
         void SendPacket(WorldPacket const* packet);
         void SendNotification(const char *format,...) ATTR_PRINTF(2,3);

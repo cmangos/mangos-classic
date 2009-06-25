@@ -83,7 +83,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         if(!GetPlayer()->TeleportTo(GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation()))
         {
             // the player must always be able to teleport home
-            sLog.outError("WORLD: failed to teleport player %s (%d) to homebind location %d,%f,%f,%f,%f!", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation());
+            sLog.outError("WORLD: failed to teleport player %s (%d) to homebind location %d, %f, %f, %f, %f!", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation());
             assert(false);
         }
         return;
@@ -91,7 +91,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->SendInitialPacketsAfterAddToMap();
 
     // flight fast teleport case
-    if(GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType()==FLIGHT_MOTION_TYPE)
+    if(GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
     {
         if(!_player->InBattleGround())
         {
@@ -169,7 +169,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 {
-    CHECK_PACKET_SIZE(recv_data,8+4);
+    CHECK_PACKET_SIZE(recv_data, 8+4);
 
     sLog.outDebug("MSG_MOVE_TELEPORT_ACK");
     uint64 guid;
@@ -177,8 +177,8 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 
     recv_data >> guid;
     recv_data >> flags >> time;
-    DEBUG_LOG("Guid " UI64FMTD,guid);
-    DEBUG_LOG("Flags %u, time %u",flags, time/IN_MILISECONDS);
+    DEBUG_LOG("Guid " UI64FMTD, guid);
+    DEBUG_LOG("Flags %u, time %u", flags, time/IN_MILISECONDS);
 
     Player* plMover = GetPlayer();
 
@@ -197,8 +197,8 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
     plMover->SetPosition(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation, true);
 
     uint32 newzone, newarea;
-    plMover->GetZoneAndAreaId(newzone,newarea);
-    plMover->UpdateZone(newzone,newarea);
+    plMover->GetZoneAndAreaId(newzone, newarea);
+    plMover->UpdateZone(newzone, newarea);
 
     // new zone
     if(old_zone != newzone)
@@ -214,7 +214,8 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data, 4+1+4+4+4+4+4);
+    uint32 opcode = recv_data.GetOpcode();
+    sLog.outDebug("WORLD: Recvd %s (%u, 0x%X) opcode", LookupOpcodeName(opcode), opcode, opcode);
 
     // ignore, waiting processing in WorldSession::HandleMoveWorldportAckOpcode and WorldSession::HandleMoveTeleportAck
     if(GetPlayer()->IsBeingTeleported())
@@ -222,63 +223,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     /* extract packet */
     MovementInfo movementInfo;
-    uint32 MovementFlags;
-
-    recv_data >> MovementFlags;
-    recv_data >> movementInfo.unk1;
-    recv_data >> movementInfo.time;
-    recv_data >> movementInfo.x;
-    recv_data >> movementInfo.y;
-    recv_data >> movementInfo.z;
-    recv_data >> movementInfo.o;
-
-    //Save movement flags
-    _player->SetUnitMovementFlags(MovementFlags);
-
-    if(MovementFlags & MOVEMENTFLAG_ONTRANSPORT)
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+8+4+4+4+4+4);
-
-        recv_data >> movementInfo.t_guid;
-        recv_data >> movementInfo.t_x;
-        recv_data >> movementInfo.t_y;
-        recv_data >> movementInfo.t_z;
-        recv_data >> movementInfo.t_o;
-        recv_data >> movementInfo.t_time;
-    }
-
-    if(MovementFlags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2))
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
-
-        recv_data >> movementInfo.s_pitch;                  // pitch, -1.55=looking down, 0=looking straight forward, +1.55=looking up
-    }
-
-    // recheck
-    CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
-
-    recv_data >> movementInfo.fallTime;                     // duration of last jump (when in jump duration from jump begin to now)
-
-    if(MovementFlags & MOVEMENTFLAG_JUMPING)
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4+4);
-
-        recv_data >> movementInfo.j_unk;                    // constant, but different when jumping in water and on land?
-        recv_data >> movementInfo.j_sinAngle;               // sin of angle between orientation0 and players orientation
-        recv_data >> movementInfo.j_cosAngle;               // cos of angle between orientation0 and players orientation
-        recv_data >> movementInfo.j_xyspeed;                // speed of xy movement
-    }
-
-    if(MovementFlags & MOVEMENTFLAG_SPLINE)
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
-
-        recv_data >> movementInfo.u_unk1;                   // unknown
-    }
+    uint32 movementFlags;
+    ReadMovementInfo(recv_data, &movementInfo, &movementFlags);
     /*----------------*/
 
     if(recv_data.size() != recv_data.rpos())
@@ -292,7 +238,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         return;
 
     /* handle special cases */
-    if (MovementFlags & MOVEMENTFLAG_ONTRANSPORT)
+    if (movementFlags & MOVEMENTFLAG_ONTRANSPORT)
     {
         // transports size limited
         // (also received at zeppelin leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
@@ -300,7 +246,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             return;
 
         if( !MaNGOS::IsValidMapCoord(movementInfo.x+movementInfo.t_x, movementInfo.y+movementInfo.t_y,
-            movementInfo.z+movementInfo.t_z, movementInfo.o+movementInfo.t_o) )
+            movementInfo.z+movementInfo.t_z, movementInfo.o + movementInfo.t_o) )
             return;
 
         // if we boarded a transport, add us to it
@@ -333,10 +279,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     }
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
-    if (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND && !GetPlayer()->isInFlight())
+    if (opcode == MSG_MOVE_FALL_LAND && !GetPlayer()->isInFlight())
         GetPlayer()->HandleFall(movementInfo);
 
-    if(((MovementFlags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
+    if(((movementFlags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
     {
         // now client not include swimming flag in case jumping under water
         GetPlayer()->SetInWater( !GetPlayer()->IsInWater() || GetPlayer()->GetBaseMap()->IsUnderWater(movementInfo.x, movementInfo.y, movementInfo.z) );
@@ -353,7 +299,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     GetPlayer()->SetPosition(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o);
     GetPlayer()->m_movementInfo = movementInfo;
-    
+    GetPlayer()->SetUnitMovementFlags(movementFlags);
+
     GetPlayer()->UpdateFallInformationIfNeed(movementInfo,recv_data.GetOpcode());
 
     if(GetPlayer()->isMovingOrTurning())
@@ -397,16 +344,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 
     /* extract packet */
     uint64 guid;
-    uint8  unkB;
-    uint32 unk1, flags, time, fallTime;
-    float x, y, z, orientation;
-
-    uint64 t_GUID;
-    float  t_x, t_y, t_z, t_o;
-    uint32 t_time;
-    float  s_pitch;
-    float  j_unk1, j_sinAngle, j_cosAngle, j_xyspeed;
-    float  u_unk1;
+    uint32 unk1;
     float  newspeed;
 
     recv_data >> guid;
@@ -418,46 +356,10 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     // continue parse packet
 
     recv_data >> unk1;
-    recv_data >> flags >> unkB >> time;
-    recv_data >> x >> y >> z >> orientation;
-    if (flags & MOVEMENTFLAG_ONTRANSPORT)
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+8+4+4+4+4+4);
 
-        recv_data >> t_GUID;
-        recv_data >> t_x >> t_y >> t_z >> t_o >> t_time;
-    }
-    if (flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2))
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
-
-        recv_data >> s_pitch;                               // pitch, -1.55=looking down, 0=looking straight forward, +1.55=looking up
-    }
-
-    // recheck
-    CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
-
-    recv_data >> fallTime;                                  // duration of last jump (when in jump duration from jump begin to now)
-
-    if ((flags & MOVEMENTFLAG_JUMPING) || (flags & MOVEMENTFLAG_FALLING))
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4+4);
-
-        recv_data >> j_unk1;                                // ?constant, but different when jumping in water and on land?
-        recv_data >> j_sinAngle >> j_cosAngle;              // sin + cos of angle between orientation0 and players orientation
-        recv_data >> j_xyspeed;                             // speed of xy movement
-    }
-
-    if(flags & MOVEMENTFLAG_SPLINE)
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
-
-        recv_data >> u_unk1;                                // unknown
-    }
+    MovementInfo movementInfo;
+    uint32 movementFlags;
+    ReadMovementInfo(recv_data, &movementInfo, &movementFlags);
 
     // recheck
     CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
@@ -518,7 +420,7 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
 {
     sLog.outDebug("WORLD: Recvd CMSG_SET_ACTIVE_MOVER");
 
-    CHECK_PACKET_SIZE(recv_data,8);
+    CHECK_PACKET_SIZE(recv_data, 8);
 
     uint64 guid;
     recv_data >> guid;
@@ -580,7 +482,7 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& /*recv_data*/)
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
 {
-    CHECK_PACKET_SIZE(recv_data,8+1);
+    CHECK_PACKET_SIZE(recv_data, 8+1);
 
     if(!_player->isAlive() || _player->isInCombat() )
         return;
