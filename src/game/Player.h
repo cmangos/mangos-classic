@@ -1806,6 +1806,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                 VARIOUS SYSTEMS                   ***/
         /*********************************************************/
         MovementInfo m_movementInfo;
+        bool HasMovementFlag(MovementFlags f) const;        // for script access to m_movementInfo.HasMovementFlag
         void UpdateFallInformationIfNeed(MovementInfo const& minfo,uint16 opcode);
         void SetFallInformation(uint32 time, float z)
         {

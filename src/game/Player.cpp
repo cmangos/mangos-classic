@@ -13414,7 +13414,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     //speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
     float bubble1 = 0.125;
 
-    if((int32)fields[16].GetUInt32() > 0)
+    if(time_diff > 0)
     {
         float bubble = fields[17].GetUInt32() > 0
             ? bubble1*sWorld.getRate(RATE_REST_OFFLINE_IN_TAVERN_OR_CITY)
@@ -18578,4 +18578,9 @@ void Player::BuildTeleportAckMsg( WorldPacket *data, float x, float y, float z, 
     *data << z;
     *data << ang;
     *data << uint32(0);
+}
+
+bool Player::HasMovementFlag( MovementFlags f ) const
+{
+    return m_movementInfo.HasMovementFlag(f);
 }
