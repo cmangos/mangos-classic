@@ -148,6 +148,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "Mod32Value",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugMod32Value,                 "", NULL },
         { "play",           SEC_MODERATOR,      false, NULL,                                                "", debugPlayCommandTable },
         { "send",           SEC_ADMINISTRATOR,  false, NULL,                                                "", debugSendCommandTable },
+        { "setaurastate",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetAuraStateCommand,        "", NULL },
         { "setitemflag",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetItemFlagCommand,         "", NULL },
         { "setvalue",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetValue,                   "", NULL },
         { "uws",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugUpdateWorldStateCommand,    "", NULL },
