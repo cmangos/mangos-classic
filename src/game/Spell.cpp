@@ -1748,6 +1748,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap)
                     m_targets.setDestination(_target_x, _target_y, _target_z);
             }
         }break;
+        case TARGET_DYNAMIC_OBJECT_COORDINATES:
+        {
+            // if parent spell create dynamic object extract area from it
+            if(DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
+                m_targets.setDestination(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ());
+        }break;
         default:
             break;
     }
