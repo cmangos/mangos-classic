@@ -2264,7 +2264,8 @@ void Player::InitTalentForLevel()
     }
     else
     {
-        uint32 talentPointsForLevel = uint32((level-9)*sWorld.getRate(RATE_TALENT));
+        uint32 talentPointsForLevel = CalculateTalentsPoints();
+
         // if used more that have then reset
         if(m_usedTalentCount > talentPointsForLevel)
         {
@@ -3180,8 +3181,7 @@ bool Player::resetTalents(bool no_cost)
     if(HasAtLoginFlag(AT_LOGIN_RESET_TALENTS))
         RemoveAtLoginFlag(AT_LOGIN_RESET_TALENTS,true);
 
-    uint32 level = getLevel();
-    uint32 talentPointsForLevel = level < 10 ? 0 : uint32((level-9)*sWorld.getRate(RATE_TALENT));
+    uint32 talentPointsForLevel = CalculateTalentsPoints();
 
     if (m_usedTalentCount == 0)
     {
@@ -18371,6 +18371,12 @@ void Player::UnsummonPetTemporaryIfAny()
     }
 
     RemovePet(pet, PET_SAVE_AS_CURRENT);
+}
+
+uint32 Player::CalculateTalentsPoints() const
+{
+    uint32 talentPointsForLevel = getLevel() < 10 ? 0 : getLevel()-9;
+    return uint32(talentPointsForLevel * sWorld.getRate(RATE_TALENT));
 }
 
 void Player::ResummonPetTemporaryUnSummonedIfAny()

@@ -1311,6 +1311,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void InitTalentForLevel();
 
         void LearnTalent(uint32 talentId, uint32 talentRank);
+        uint32 CalculateTalentsPoints() const;
 
         uint32 GetFreePrimaryProfessionPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS2); }
         void SetFreePrimaryProfessions(uint16 profs) { SetUInt32Value(PLAYER_CHARACTER_POINTS2, profs); }
