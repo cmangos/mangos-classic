@@ -1922,35 +1922,37 @@ void Spell::EffectTeleportUnits(uint32 i)
         }
         case TARGET_TABLE_X_Y_Z_COORDINATES:
         {
-            // TODO: Only players can teleport?
-            if (unitTarget->GetTypeId() != TYPEID_PLAYER)
-                return;
             SpellTargetPosition const* st = spellmgr.GetSpellTargetPosition(m_spellInfo->Id);
             if(!st)
             {
                 sLog.outError( "Spell::EffectTeleportUnits - unknown Teleport coordinates for spell ID %u", m_spellInfo->Id );
                 return;
             }
-            ((Player*)unitTarget)->TeleportTo(st->target_mapId,st->target_X,st->target_Y,st->target_Z,st->target_Orientation,unitTarget==m_caster ? TELE_TO_SPELL : 0);
+
+            if(st->target_mapId==unitTarget->GetMapId())
+                unitTarget->NearTeleportTo(st->target_X,st->target_Y,st->target_Z,st->target_Orientation,unitTarget==m_caster);
+            else if(unitTarget->GetTypeId()==TYPEID_PLAYER)
+                ((Player*)unitTarget)->TeleportTo(st->target_mapId,st->target_X,st->target_Y,st->target_Z,st->target_Orientation,unitTarget==m_caster ? TELE_TO_SPELL : 0);
             break;
         }
         case TARGET_BEHIND_VICTIM:
         {
-            // Get selected target for player (or victim for units)
             Unit *pTarget = NULL;
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
-                pTarget = ObjectAccessor::GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
-            else
-                pTarget = m_caster->getVictim();
-            // No target present - return
-            if (!pTarget)
-                return;
+
+            // explicit cast data from client or server-side cast
+            // some spell at client send caster
+            if(m_targets.getUnitTarget() && m_targets.getUnitTarget()!=unitTarget)
+                pTarget = m_targets.getUnitTarget();
+            else if(unitTarget->getVictim())
+                pTarget = unitTarget->getVictim();
+            else if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+                pTarget = ObjectAccessor::GetUnit(*unitTarget, ((Player*)unitTarget)->GetSelection());
+
             // Init dest coordinates
-            uint32 mapid = m_caster->GetMapId();
             float x = m_targets.m_destX;
             float y = m_targets.m_destY;
             float z = m_targets.m_destZ;
-            float orientation = pTarget->GetOrientation();
+            float orientation = pTarget ? pTarget->GetOrientation() : unitTarget->GetOrientation();
             unitTarget->NearTeleportTo(x,y,z,orientation,unitTarget==m_caster);
             return;
         }
@@ -3591,16 +3593,12 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
     if(unitTarget->isInFlight())
         return;
 
-    uint32 mapid = m_caster->GetMapId();
     float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
     float fx, fy, fz;
     m_caster->GetClosePoint(fx, fy, fz, unitTarget->GetObjectSize(), dis);
 
-    if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, -m_caster->GetOrientation(), TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (unitTarget==m_caster ? TELE_TO_SPELL : 0));
-    else
-        m_caster->GetMap()->CreatureRelocation((Creature*)m_caster, fx, fy, fz, -m_caster->GetOrientation());
+    unitTarget->NearTeleportTo(fx,fy,fz,-m_caster->GetOrientation(),unitTarget==m_caster);
 }
 
 void Spell::EffectLearnSkill(uint32 i)
@@ -5393,7 +5391,6 @@ void Spell::EffectMomentMove(uint32 i)
 
     if( m_spellInfo->rangeIndex == 1)                       //self range
     {
-        uint32 mapid = m_caster->GetMapId();
         float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
         // before caster
@@ -5402,8 +5399,8 @@ void Spell::EffectMomentMove(uint32 i)
         float ox, oy, oz;
         unitTarget->GetPosition(ox, oy, oz);
 
-        float fx2, fy2, fz2;                                  // getObjectHitPos overwrite last args in any result case
-        if(VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, ox,oy,oz+0.5, fx,fy,oz+0.5,fx2,fy2,fz2, -0.5))
+        float fx2, fy2, fz2;                                // getObjectHitPos overwrite last args in any result case
+        if(VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(unitTarget->GetMapId(), ox,oy,oz+0.5, fx,fy,oz+0.5,fx2,fy2,fz2, -0.5))
         {
             fx = fx2;
             fy = fy2;
@@ -5411,10 +5408,7 @@ void Spell::EffectMomentMove(uint32 i)
             unitTarget->UpdateGroundPositionZ(fx, fy, fz);
         }
 
-        if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, unitTarget->GetOrientation(), TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (unitTarget==m_caster ? TELE_TO_SPELL : 0));
-        else
-            m_caster->GetMap()->CreatureRelocation((Creature*)unitTarget, fx, fy, fz, unitTarget->GetOrientation());
+        unitTarget->NearTeleportTo(fx, fy, fz, unitTarget->GetOrientation(),unitTarget==m_caster);
     }
 }
 
