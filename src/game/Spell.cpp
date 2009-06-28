@@ -100,6 +100,14 @@ void SpellCastTargets::setDestination(float x, float y, float z)
     m_targetMask |= TARGET_FLAG_DEST_LOCATION;
 }
 
+void SpellCastTargets::setSource(float x, float y, float z)
+{
+    m_srcX = x;
+    m_srcY = y;
+    m_srcZ = z;
+    m_targetMask |= TARGET_FLAG_SOURCE_LOCATION;
+}
+
 void SpellCastTargets::setGOTarget(GameObject *target)
 {
     m_GOTarget = target;
@@ -436,17 +444,11 @@ void Spell::FillTargetMap()
         // but need it support in some know cases
         switch(m_spellInfo->EffectImplicitTargetA[i])
         {
-            case TARGET_ALL_AROUND_CASTER:
-                if( m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_PARTY ||
-                    m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER ||
-                    m_spellInfo->EffectImplicitTargetB[i]==TARGET_RANDOM_RAID_MEMBER )
-                {
-                    SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
-                }
+            case TARGET_CASTER_COORDINATES:
                 // Note: this hack with search required until GO casting not implemented
                 // environment damage spells already have around enemies targeting but this not help in case not existed GO casting support
                 // currently each enemy selected explicitly and self cast damage
-                else if(m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_ENEMY_IN_AREA && m_spellInfo->Effect[i]==SPELL_EFFECT_ENVIRONMENTAL_DAMAGE)
+                if(m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_ENEMY_IN_AREA && m_spellInfo->Effect[i]==SPELL_EFFECT_ENVIRONMENTAL_DAMAGE)
                 {
                     if(m_targets.getUnitTarget())
                         tmpUnitMap.push_back(m_targets.getUnitTarget());
@@ -1371,6 +1373,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap)
         }break;
         case TARGET_ALL_ENEMY_IN_AREA:
         {
+            FillAreaTargets(TagUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
             break;
         }
         case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
@@ -1414,9 +1417,17 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap)
                 if( target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->isPet() && ((Pet*)target)->getPetType() == MINI_PET)
                     TagUnitMap.push_back(target);
         }break;
-        case TARGET_ALL_AROUND_CASTER:
-            FillAreaTargets(TagUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius,PUSH_SELF_CENTER,SPELL_TARGETS_AOE_DAMAGE);
-            break;
+        case TARGET_CASTER_COORDINATES:
+        {
+            // Check original caster is GO - set its coordinates as dst cast
+            WorldObject *caster = NULL;
+            if (IS_GAMEOBJECT_GUID(m_originalCasterGUID))
+                caster = m_caster->GetMap()->GetGameObject(m_originalCasterGUID);
+            if (!caster)
+                caster = m_caster;
+            // Set dest for targets
+            m_targets.setDestination(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+        }break;
         case TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER:
             FillAreaTargets(TagUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius,PUSH_SELF_CENTER,SPELL_TARGETS_FRIENDLY);
             break;
@@ -2477,6 +2488,7 @@ void Spell::SendSpellGo()
         castFlags |= CAST_FLAG_AMMO;                        // arrows/bullets visual
 
     WorldPacket data(SMSG_SPELL_GO, 50);                    // guess size
+
     if(m_CastItem)
         data.append(m_CastItem->GetPackGUID());
     else
@@ -4695,7 +4707,13 @@ bool Spell::CheckTarget( Unit* target, uint32 eff )
             // all ok by some way or another, skip normal check
             break;
         default:                                            // normal case
-            if(target!=m_caster && !target->IsWithinLOSInMap(m_caster))
+            // Get GO cast coordinates if original caster -> GO
+            WorldObject *caster = NULL;
+            if (m_originalCasterGUID)
+                caster = m_caster->GetMap()->GetGameObject(m_originalCasterGUID);
+            if (!caster)
+                caster = m_caster;
+            if(target!=m_caster && !target->IsWithinLOSInMap(caster))
                 return false;
             break;
     }
