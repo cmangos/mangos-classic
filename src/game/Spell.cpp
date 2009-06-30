@@ -3207,8 +3207,8 @@ SpellCastResult Spell::CheckCast(bool strict)
     uint32 zone, area;
     m_caster->GetZoneAndAreaId(zone, area);
 
-    SpellCastResult locRes = GetSpellAllowedInLocationError(m_spellInfo,m_caster->GetMapId(),zone,area,
-        m_caster->GetTypeId()==TYPEID_PLAYER ? ((Player*)m_caster)->GetBattleGroundId() : 0);
+    SpellCastResult locRes = spellmgr.GetSpellAllowedInLocationError(m_spellInfo,m_caster->GetMapId(),zone, area,
+        m_caster->GetTypeId()==TYPEID_PLAYER ? ((Player*)m_caster) : NULL);
     if(locRes != SPELL_CAST_OK)
         return locRes;
 

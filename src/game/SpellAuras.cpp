@@ -2247,6 +2247,29 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             m_target->RemovePetAura(petSpell);
         return;
     }
+
+    if(GetEffIndex()==0 && m_target->GetTypeId()==TYPEID_PLAYER)
+    {
+        SpellAreaForAreaMapBounds saBounds = spellmgr.GetSpellAreaForAuraMapBounds(GetId());
+        if(saBounds.first != saBounds.second)
+        {
+            uint32 zone, area;
+            m_target->GetZoneAndAreaId(zone, area);
+
+            for(SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
+            {
+                // some auras remove at aura remove
+                if(!itr->second->IsFitToRequirements((Player*)m_target, zone, area))
+                    m_target->RemoveAurasDueToSpell(itr->second->spellId);
+                // some auras applied at aura apply
+                else if(itr->second->autocast)
+                {
+                    if( !m_target->HasAura(itr->second->spellId, 0) )
+                        m_target->CastSpell(m_target, itr->second->spellId, true);
+                }
+            }
+        }
+    }
 }
 
 void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
