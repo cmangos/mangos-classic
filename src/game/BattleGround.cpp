@@ -1338,7 +1338,6 @@ bool BattleGround::DelCreature(uint32 type)
         sLog.outError("Can't find creature guid: %u",GUID_LOPART(m_BgCreatures[type]));
         return false;
     }
-    cr->CleanupsBeforeDelete();
     cr->AddObjectToRemoveList();
     m_BgCreatures[type] = 0;
     return true;

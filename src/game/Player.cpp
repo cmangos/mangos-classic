@@ -15487,7 +15487,6 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
 
     pet->SavePetToDB(mode);
 
-    pet->CleanupsBeforeDelete();
     pet->AddObjectToRemoveList();
     pet->m_removed = true;
 

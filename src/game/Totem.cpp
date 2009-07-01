@@ -123,7 +123,6 @@ void Totem::UnSummon()
         }
     }
 
-    CleanupsBeforeDelete();
     AddObjectToRemoveList();
 }
 
