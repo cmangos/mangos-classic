@@ -7692,6 +7692,14 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             break;
     }
 
+    // Mod damage taken from AoE spells
+    if(IsAreaOfEffectSpell(spellProto))
+    {
+        AuraList const& avoidAuras = pVictim->GetAurasByType(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE);
+        for(AuraList::const_iterator itr = avoidAuras.begin(); itr != avoidAuras.end(); ++itr)
+            TakenTotalMod *= ((*itr)->GetModifier()->m_amount+100.0f)/100.0f;
+    }
+
     float LvlPenalty = CalculateLevelPenalty(spellProto);
 
     // Spellmod SpellDamage
@@ -8413,6 +8421,14 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
         AuraList const& mModRangedDamageTakenPercent = pVictim->GetAurasByType(SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT);
         for(AuraList::const_iterator i = mModRangedDamageTakenPercent.begin(); i != mModRangedDamageTakenPercent.end(); ++i)
             TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+    }
+
+    // Mod damage taken from AoE spells
+    if(spellProto && IsAreaOfEffectSpell(spellProto))
+    {
+        AuraList const& avoidAuras = pVictim->GetAurasByType(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE);
+        for(AuraList::const_iterator itr = avoidAuras.begin(); itr != avoidAuras.end(); ++itr)
+            TakenTotalMod *= ((*itr)->GetModifier()->m_amount+100.0f)/100.0f;
     }
 
     float tmpDamage = float(int32(*pdamage) + DoneFlatBenefit) * DoneTotalMod;
