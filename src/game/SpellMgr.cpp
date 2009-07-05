@@ -344,7 +344,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                         case 38639:                         // Nether Exhaustion (blue)
                             return false;
                         // some spells have unclear target modes for selection, so just make effect positive
-                        case 27184:                         
+                        case 27184:
                         case 27190:
                         case 27191:
                         case 27201:
@@ -1062,7 +1062,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     if(!spellInfo_1 || !spellInfo_2)
         return false;
 
-    if(spellInfo_1->Id == spellId_2)
+    if(spellId_1 == spellId_2)
         return false;
 
     //I think we don't check this correctly because i need a exception for spell:
@@ -1115,6 +1115,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 
                     break;
                 }
+                case SPELLFAMILY_MAGE:
+                    // Arcane Intellect and Insight
+                    if( spellInfo_2->SpellIconID == 125 && spellInfo_1->Id == 18820 )
+                        return false;
+                    break;
                 case SPELLFAMILY_WARRIOR:
                 {
                     // Scroll of Protection and Defensive Stance (multi-family check)
@@ -1194,6 +1199,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 
             // Combustion and Fire Protection Aura (multi-family check)
             if( spellInfo_1->Id == 11129 && spellInfo_2->SpellIconID == 33 && spellInfo_2->SpellVisual == 321 )
+                return false;
+
+            // Arcane Intellect and Insight
+            if( spellInfo_1->SpellIconID == 125 && spellInfo_2->Id == 18820 )
                 return false;
 
             break;
