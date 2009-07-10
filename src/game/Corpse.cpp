@@ -147,7 +147,7 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
 
     if( !result )
     {
-        sLog.outError("ERROR: Corpse (GUID: %u) not found in table `corpse`, can't load. ",guid);
+        sLog.outError("Corpse (GUID: %u) not found in table `corpse`, can't load. ",guid);
         return false;
     }
 
@@ -181,7 +181,7 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
 
     if(!LoadValues( fields[5].GetString() ))
     {
-        sLog.outError("ERROR: Corpse #%d have broken data in `data` field. Can't be loaded.",guid);
+        sLog.outError("Corpse #%d have broken data in `data` field. Can't be loaded.",guid);
         return false;
     }
 
@@ -190,7 +190,7 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
 
     if(m_type >= MAX_CORPSE_TYPE)
     {
-        sLog.outError("ERROR: Corpse (guidlow %d, owner %d) have wrong corpse type, not load.",GetGUIDLow(),GUID_LOPART(GetOwnerGUID()));
+        sLog.outError("Corpse (guidlow %d, owner %d) have wrong corpse type, not load.",GetGUIDLow(),GUID_LOPART(GetOwnerGUID()));
         return false;
     }
 
