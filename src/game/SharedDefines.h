@@ -72,7 +72,7 @@ enum Classes
     CLASS_HUNTER        = 3,
     CLASS_ROGUE         = 4,
     CLASS_PRIEST        = 5,
-    CLASS_DEATH_KNIGHT  = 6,
+    //CLASS_DEATH_KNIGHT  = 6,                              // not listed in DBC, will be in 3.0
     CLASS_SHAMAN        = 7,
     CLASS_MAGE          = 8,
     CLASS_WARLOCK       = 9,
