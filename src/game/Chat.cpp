@@ -151,6 +151,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "setaurastate",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetAuraStateCommand,        "", NULL },
         { "setitemflag",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetItemFlagCommand,         "", NULL },
         { "setvalue",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetValueCommand,            "", NULL },
+        { "spellcheck",     SEC_CONSOLE,        true,  &ChatHandler::HandleDebugSpellCheckCommand,          "", NULL },
         { "uws",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugUpdateWorldStateCommand,    "", NULL },
         { "update",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugUpdateCommand,              "", NULL },
         { NULL,             0,                  false, NULL,                                                "", NULL }
@@ -543,7 +544,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "go",             SEC_MODERATOR,      false, NULL,                                           "", goCommandTable       },
         { "learn",          SEC_MODERATOR,      false, NULL,                                           "", learnCommandTable    },
         { "modify",         SEC_MODERATOR,      false, NULL,                                           "", modifyCommandTable   },
-        { "debug",          SEC_MODERATOR,      false, NULL,                                           "", debugCommandTable    },
+        { "debug",          SEC_MODERATOR,      true,  NULL,                                           "", debugCommandTable    },
         { "tele",           SEC_MODERATOR,      true,  NULL,                                           "", teleCommandTable     },
         { "character",      SEC_GAMEMASTER,     false, NULL,                                           "", characterCommandTable},
         { "event",          SEC_GAMEMASTER,     false, NULL,                                           "", eventCommandTable    },
