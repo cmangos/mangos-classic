@@ -6825,7 +6825,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         if (go->getLootState() == GO_READY)
         {
-            uint32 lootid =  go->GetLootId();
+            uint32 lootid =  go->GetGOInfo()->GetLootId();
 
             if (lootid)
             {
