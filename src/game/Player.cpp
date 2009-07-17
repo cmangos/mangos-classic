@@ -18302,7 +18302,7 @@ bool Player::isAllowUseBattleGroundObject()
 
 bool Player::HasTitle(uint32 bitIndex)
 {
-    if (bitIndex > 64)
+    if (bitIndex > MAX_TITLE_INDEX)
         return false;
 
     uint32 fieldIndexOffset = bitIndex / 32;

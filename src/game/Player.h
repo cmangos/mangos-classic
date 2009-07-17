@@ -405,6 +405,8 @@ enum PlayerFlags
 #define PLAYER_TITLE_HAND_OF_ADAL          UI64LIT(0x0000008000000000) // 39
 #define PLAYER_TITLE_VENGEFUL_GLADIATOR    UI64LIT(0x0000010000000000) // 40
 
+#define MAX_TITLE_INDEX     64
+
 // used in PLAYER_FIELD_BYTES values
 enum PlayerFieldByteFlags
 {
