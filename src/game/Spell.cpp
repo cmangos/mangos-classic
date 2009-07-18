@@ -2002,6 +2002,28 @@ void Spell::cast(bool skipCheck)
         }
     }
 
+    // different triggred (for caster) cases
+    switch(m_spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_PRIEST:
+        {
+            switch(m_spellInfo->Id)
+            {
+                case 15237: AddTriggeredSpell(23455); break;// Holy Nova, rank 1
+                case 15430: AddTriggeredSpell(23458); break;// Holy Nova, rank 2
+                case 15431: AddTriggeredSpell(23459); break;// Holy Nova, rank 3
+                case 27799: AddTriggeredSpell(27803); break;// Holy Nova, rank 4
+                case 27800: AddTriggeredSpell(27804); break;// Holy Nova, rank 5
+                case 27801: AddTriggeredSpell(27805); break;// Holy Nova, rank 6
+                case 25331: AddTriggeredSpell(25329); break;// Holy Nova, rank 7
+                default:break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
     // Conflagrate - consumes immolate
     if ((m_spellInfo->TargetAuraState == AURA_STATE_IMMOLATE) && m_targets.getUnitTarget())
     {
