@@ -47,8 +47,8 @@ bool Model::open()
             indices[i] = indexLookup[triangles[i]];
         }
         f.close();
-    } 
-    else 
+    }
+    else
     {
         //printf("not included %s\n", filename.c_str());
         f.close();
