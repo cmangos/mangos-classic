@@ -77,6 +77,8 @@ enum SpellFamilyNames
 #define SPELLFAMILYFLAG_ROGUE_KIDNEYSHOT        UI64LIT(0x000200000)
 #define SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE   UI64LIT(0x9003E0000)
 
+#define SPELLFAMILYFLAG_PALADIN_SEALS           UI64LIT(0x000004000A000200)
+
 // Spell clasification
 enum SpellSpecific
 {
@@ -132,7 +134,7 @@ inline bool IsSealSpell(SpellEntry const *spellInfo)
 {
     //Collection of all the seal family flags. No other paladin spell has any of those.
     return spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-        ( spellInfo->SpellFamilyFlags & UI64LIT(0x4000A000200));
+        ( spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_PALADIN_SEALS );
 }
 
 inline bool IsElementalShield(SpellEntry const *spellInfo)
