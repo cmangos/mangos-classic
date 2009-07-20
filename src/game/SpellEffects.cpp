@@ -375,11 +375,11 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 if ((m_spellInfo->SpellFamilyFlags & UI64LIT(0x00004000000000)) && m_spellInfo->SpellIconID==2128)
                 {
                     // Incinerate does more dmg (dmg*0.25) if the target is Immolated.
-                    if(unitTarget->HasAuraState(AURA_STATE_IMMOLATE))
+                    if(unitTarget->HasAuraState(AURA_STATE_CONFLAGRATE))
                         damage += int32(damage*0.25);
                 }
                 // Conflagrate - consumes Immolate
-                if (m_spellInfo->TargetAuraState == AURA_STATE_IMMOLATE)
+                else if (m_spellInfo->TargetAuraState == AURA_STATE_CONFLAGRATE)
                 {
                     // for caster applied auras only
                     Unit::AuraList const &mPeriodic = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
