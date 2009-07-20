@@ -3929,6 +3929,18 @@ void Unit::RemoveAura(uint32 spellId, uint32 effindex, Aura* except)
     }
 }
 
+void Unit::RemoveAurasByCasterSpell(uint32 spellId, uint64 casterGUID)
+{
+    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
+    {
+        Aura *aur = iter->second;
+        if (aur->GetId() == spellId && aur->GetCasterGUID() == casterGUID)
+            RemoveAura(iter);
+        else
+            ++iter;
+    }
+}
+
 void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID, Unit *dispeler)
 {
     for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
@@ -4223,6 +4235,22 @@ Aura* Unit::GetAura(uint32 spellId, uint32 effindex)
     AuraMap::const_iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
     if (iter != m_Auras.end())
         return iter->second;
+    return NULL;
+}
+
+Aura* Unit::GetAura(AuraType type, uint32 family, uint64 familyFlag, uint64 casterGUID)
+{
+    AuraList const& auras = GetAurasByType(type);
+    for(AuraList::const_iterator i = auras.begin();i != auras.end(); ++i)
+    {
+        SpellEntry const *spell = (*i)->GetSpellProto();
+        if (spell->SpellFamilyName == family && (spell->SpellFamilyFlags & familyFlag))
+        {
+            if (casterGUID && (*i)->GetCasterGUID()!=casterGUID)
+                continue;
+            return (*i);
+        }
+    }
     return NULL;
 }
 
