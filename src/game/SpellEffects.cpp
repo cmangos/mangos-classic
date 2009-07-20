@@ -378,6 +378,23 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     if(unitTarget->HasAuraState(AURA_STATE_IMMOLATE))
                         damage += int32(damage*0.25);
                 }
+                // Conflagrate - consumes Immolate
+                if (m_spellInfo->TargetAuraState == AURA_STATE_IMMOLATE)
+                {
+                    // for caster applied auras only
+                    Unit::AuraList const &mPeriodic = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for(Unit::AuraList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
+                    {
+                        if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+                            (*i)->GetCasterGUID()==m_caster->GetGUID() &&
+                            // Immolate
+                            ((*i)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000004)))
+                        {
+                            unitTarget->RemoveAurasByCasterSpell((*i)->GetId(), m_caster->GetGUID());
+                            break;
+                        }
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_DRUID:
