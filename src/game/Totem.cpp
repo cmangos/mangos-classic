@@ -61,9 +61,9 @@ void Totem::Summon(Unit* owner)
 
     // select totem model in dependent from owner team
     CreatureInfo const *cinfo = GetCreatureInfo();
-    if(owner->GetTypeId()==TYPEID_PLAYER && cinfo)
+    if(owner->GetTypeId() == TYPEID_PLAYER && cinfo)
     {
-        uint32 display_id = objmgr.ChooseDisplayId(((Player*)owner)->GetTeam(),cinfo);
+        uint32 display_id = objmgr.ChooseDisplayId(((Player*)owner)->GetTeam(), cinfo);
         CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(display_id);
         if (minfo)
             display_id = minfo->modelid;
@@ -78,8 +78,12 @@ void Totem::Summon(Unit* owner)
 
     switch(m_type)
     {
-        case TOTEM_PASSIVE: CastSpell(this, GetSpell(), true); break;
-        case TOTEM_STATUE:  CastSpell(GetOwner(), GetSpell(), true); break;
+        case TOTEM_PASSIVE:
+            CastSpell(this, GetSpell(), true);
+            break;
+        case TOTEM_STATUE:
+            CastSpell(GetOwner(), GetSpell(), true);
+            break;
         default: break;
     }
 }
@@ -93,10 +97,10 @@ void Totem::UnSummon()
     Unit *owner = GetOwner();
     if (owner)
     {
-        // clear owenr's totem slot
+        // clear owner's totem slot
         for(int i = 0; i < MAX_TOTEM; ++i)
         {
-            if(owner->m_TotemSlot[i]==GetGUID())
+            if(owner->m_TotemSlot[i] == GetGUID())
             {
                 owner->m_TotemSlot[i] = 0;
                 break;
@@ -106,12 +110,10 @@ void Totem::UnSummon()
         owner->RemoveAurasDueToSpell(GetSpell());
 
         //remove aura all party members too
-        Group *pGroup = NULL;
         if (owner->GetTypeId() == TYPEID_PLAYER)
         {
             // Not only the player can summon the totem (scripted AI)
-            pGroup = ((Player*)owner)->GetGroup();
-            if (pGroup)
+            if(Group *pGroup = ((Player*)owner)->GetGroup())
             {
                 for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
@@ -155,7 +157,7 @@ void Totem::SetTypeBySummonSpell(SpellEntry const * spellProto)
         if (GetSpellCastTime(totemSpell))
             m_type = TOTEM_ACTIVE;
     }
-    if(spellProto->SpellIconID==2056)
+    if(spellProto->SpellIconID == 2056)
         m_type = TOTEM_STATUE;                              //Jewelery statue
 }
 
