@@ -127,7 +127,7 @@ bool UpdateData::BuildPacket(WorldPacket *packet, bool hasTransport)
 
     if (m_data.size() > 50 )
     {
-        uint32 destsize = compressBound(pSize);
+        uint32 destsize = compressBound(m_data.size());
         packet->resize( destsize + sizeof(uint32) );
 
         packet->put(0, (uint32)buf.size());
