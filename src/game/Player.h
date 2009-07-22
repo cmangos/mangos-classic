@@ -1926,7 +1926,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             void UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& data_updates, std::set<WorldObject*>& visibleNow);
 
         // Stealth detection system
-        uint32 m_DetectInvTimer;
         void HandleStealthedUnitsDetection();
 
         uint8 m_forced_speed_changes[MAX_MOVE_TYPE];
@@ -2230,6 +2229,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         WorldLocation m_teleport_dest;
         bool mSemaphoreTeleport_Near;
         bool mSemaphoreTeleport_Far;
+
+        uint32 m_DetectInvTimer;
 
         // Temporary removed pet cache
         uint32 m_temporaryUnsummonedPetNumber;

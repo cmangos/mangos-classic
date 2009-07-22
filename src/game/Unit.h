@@ -786,6 +786,7 @@ typedef std::set<uint64> GuardianPetList;
 
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
+#define MAX_PLAYER_STEALTH_DETECT_RANGE 45.0f               // max distance for detection targets by player
 
 class MANGOS_DLL_SPEC Unit : public WorldObject
 {
