@@ -123,26 +123,22 @@ bool UpdateData::BuildPacket(WorldPacket *packet, bool hasTransport)
 
     buf.append(m_data);
 
-    packet->clear();
+    size_t pSize = buf.wpos();                              // use real used data size
 
-    if (m_data.size() > 50 )
+    if (pSize > 100 )                                       // compress large packets
     {
-        uint32 destsize = compressBound(m_data.size());
+        uint32 destsize = compressBound(pSize);
         packet->resize( destsize + sizeof(uint32) );
 
-        packet->put(0, (uint32)buf.size());
-
-        Compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32),
-            &destsize,
-            (void*)buf.contents(),
-            buf.size());
+        packet->put<uint32>(0, pSize);
+        Compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32), &destsize, (void*)buf.contents(), pSize);
         if (destsize == 0)
             return false;
 
         packet->resize( destsize + sizeof(uint32) );
         packet->SetOpcode( SMSG_COMPRESSED_UPDATE_OBJECT );
     }
-    else
+    else                                                    // send small packets without compression
     {
         packet->append( buf );
         packet->SetOpcode( SMSG_UPDATE_OBJECT );
