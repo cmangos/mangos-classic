@@ -167,7 +167,10 @@ enum MangosStrings
     LANG_SOUND_NOT_EXIST                = 170,
     LANG_CANT_TELEPORT_SELF             = 171,
     LANG_CONSOLE_COMMAND                = 172,
-    // Room for more level 1              173-199 not used
+    //                                    173               // used in master
+    //                                    174               // used in master
+    LANG_LIQUID_STATUS                  = 175,
+    // Room for more level 1              176-199 not used
 
     // level 2 chat
     LANG_NO_SELECTION                   = 200,
