@@ -1064,12 +1064,9 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& /*recv_data*/)
 
 void WorldSession::HandlePlayedTime(WorldPacket& /*recv_data*/)
 {
-    uint32 TotalTimePlayed = GetPlayer()->GetTotalPlayedTime();
-    uint32 LevelPlayedTime = GetPlayer()->GetLevelPlayedTime();
-
-    WorldPacket data(SMSG_PLAYED_TIME, 8);
-    data << TotalTimePlayed;
-    data << LevelPlayedTime;
+    WorldPacket data(SMSG_PLAYED_TIME, 4 + 4);
+    data << uint32(_player->GetTotalPlayedTime());
+    data << uint32(_player->GetLevelPlayedTime());
     SendPacket(&data);
 }
 
