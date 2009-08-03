@@ -3081,9 +3081,18 @@ void Aura::HandleModCharm(bool apply, bool Real)
                 CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
                 if(cinfo && cinfo->type == CREATURE_TYPE_DEMON)
                 {
-                    //does not appear to have relevance. Why code added initially? See note below at !apply
-                    //to prevent client crash
-                    //m_target->SetFlag(UNIT_FIELD_BYTES_0, 2048);
+                    // creature with pet number expected have class set
+                    if(m_target->GetByteValue(UNIT_FIELD_BYTES_0, 1)==0)
+                    {
+                        CreatureDataAddon const *cainfo = ((Creature*)m_target)->GetCreatureAddon();
+                        if(!cainfo || (cainfo->bytes0 & 0x0000FF00) == 0)
+                            sLog.outErrorDb("Creature (Entry: %u) not have creature addon or have bytes0 class byte = 0 but used in charmed spell, that will be result client crash.",cinfo->Entry);
+                        else
+                            sLog.outError("Creature (Entry: %u) have creature addon with bytes0 = %u but at charming have class 0!!! that will be result client crash.",cinfo->Entry,cainfo->bytes0);
+
+                        m_target->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
+                    }
+
                     //just to enable stat window
                     charmInfo->SetPetNumber(objmgr.GeneratePetNumber(), true);
                     //if charmed two demons the same session, the 2nd gets the 1st one's name
@@ -3119,13 +3128,9 @@ void Aura::HandleModCharm(bool apply, bool Real)
             // restore UNIT_FIELD_BYTES_0
             if(cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->type == CREATURE_TYPE_DEMON)
             {
-                //does not appear to have relevance. Why code added initially? Class, gender, powertype should be same.
-                //db field removed and replaced with better way to set class, restore using this if problems
-                /*CreatureDataAddon const *cainfo = ((Creature*)m_target)->GetCreatureAddon();
-                if(cainfo && cainfo->bytes0 != 0)
-                m_target->SetUInt32Value(UNIT_FIELD_BYTES_0, cainfo->bytes0);
-                else
-                m_target->RemoveFlag(UNIT_FIELD_BYTES_0, 2048);*/
+                // DB must have proper class set in field at loading, not req. restore, including workaround case at apply
+                //if(CreatureDataAddon const *cainfo = ((Creature*)m_target)->GetCreatureAddon())
+                //    m_target->SetByteValue(UNIT_FIELD_BYTES_0, 1, (cainfo->bytes0 & 0x0000FF00) >> 8);
 
                 if(m_target->GetCharmInfo())
                     m_target->GetCharmInfo()->SetPetNumber(0, true);
