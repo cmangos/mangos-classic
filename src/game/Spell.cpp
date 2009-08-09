@@ -343,6 +343,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     gameObjTarget = NULL;
     focusObject = NULL;
     m_cast_count = 0;
+    m_preCastSpells = NULL;
     m_triggeredByAuraSpell  = NULL;
 
     //Auto Shot & Shoot
@@ -384,6 +385,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
 
 Spell::~Spell()
 {
+    delete m_preCastSpells;
 }
 
 template<typename T>
@@ -1092,6 +1094,15 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     // Increase Diminishing on unit, current informations for actually casts will use values above
     if((GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) || GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_ALL)
         unit->IncrDiminishing(m_diminishGroup);
+
+    // Apply additional spell effects to target
+    if (m_preCastSpells)
+    {
+        for (SpellPrecasts::const_iterator i = m_preCastSpells->begin(); i != m_preCastSpells->end(); ++i)
+            m_caster->CastSpell(unit, *i, true, m_CastItem);
+        delete m_preCastSpells;
+        m_preCastSpells = NULL;
+    }
 
     for(uint32 effectNumber = 0; effectNumber < 3; ++effectNumber)
     {
@@ -2014,11 +2025,31 @@ void Spell::cast(bool skipCheck)
         }
     }
 
-    // different triggred (for caster) cases
+    // different triggered (for caster) cases
     switch(m_spellInfo->SpellFamilyName)
     {
+        case SPELLFAMILY_GENERIC:
+        {
+            if (m_spellInfo->Mechanic == MECHANIC_BANDAGE)  // Bandages
+                AddPrecastSpell(11196);                     // Recently Bandaged
+            else if(m_spellInfo->SpellIconID == 1662 && m_spellInfo->AttributesEx & 0x20)
+                                                            // Blood Fury (Racial)
+                AddPrecastSpell(23230);                     // Blood Fury - Healing Reduction
+            break;
+        }
+        case SPELLFAMILY_MAGE:
+        {
+            // Ice Block
+            if(m_spellInfo->CasterAuraStateNot==AURA_STATE_HYPOTHERMIA)
+                AddPrecastSpell(41425);                     // Hypothermia
+            break;
+        }
         case SPELLFAMILY_PRIEST:
         {
+            // Power Word: Shield
+            if(m_spellInfo->CasterAuraStateNot==AURA_STATE_WEAKENED_SOUL || m_spellInfo->TargetAuraStateNot==AURA_STATE_WEAKENED_SOUL)
+                AddPrecastSpell(6788);                      // Weakened Soul
+
             switch(m_spellInfo->Id)
             {
                 case 15237: AddTriggeredSpell(23455); break;// Holy Nova, rank 1
@@ -2030,7 +2061,14 @@ void Spell::cast(bool skipCheck)
                 case 25331: AddTriggeredSpell(25329); break;// Holy Nova, rank 7
                 default:break;
             }
-            break;
+            break;      
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Divine Shield, Divine Protection, Blessing of Protection or Avenging Wrath
+            if(m_spellInfo->CasterAuraStateNot==AURA_STATE_FORBEARANCE || m_spellInfo->TargetAuraStateNot==AURA_STATE_FORBEARANCE)
+                AddPrecastSpell(25771);                     // Forbearance         
+          break;
         }
         default:
             break;

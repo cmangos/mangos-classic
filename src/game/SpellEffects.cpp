@@ -2134,31 +2134,6 @@ void Spell::EffectApplyAura(uint32 i)
     if(!Aur)
         return;
 
-    // TODO Make a way so it works for every related spell!
-    if(unitTarget->GetTypeId()==TYPEID_PLAYER)              // Negative buff should only be applied on players
-    {
-        uint32 spellId = 0;
-        if(m_spellInfo->CasterAuraStateNot==AURA_STATE_WEAKENED_SOUL || m_spellInfo->TargetAuraStateNot==AURA_STATE_WEAKENED_SOUL)
-            spellId = 6788;                                 // Weakened Soul
-        else if(m_spellInfo->CasterAuraStateNot==AURA_STATE_FORBEARANCE || m_spellInfo->TargetAuraStateNot==AURA_STATE_FORBEARANCE)
-            spellId = 25771;                                // Forbearance
-        else if(m_spellInfo->CasterAuraStateNot==AURA_STATE_HYPOTHERMIA)
-            spellId = 41425;                                // Hypothermia
-        else if (m_spellInfo->Mechanic == MECHANIC_BANDAGE) // Bandages
-            spellId = 11196;                                // Recently Bandaged
-        else if( (m_spellInfo->AttributesEx & 0x20) && (m_spellInfo->AttributesEx2 & 0x20000) )
-            spellId = 23230;                                // Blood Fury - Healing Reduction
-
-        SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
-        if (AdditionalSpellInfo)
-        {
-            // applied at target by target
-            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, 0, &m_currentBasePoints[0], unitTarget,unitTarget, 0);
-            unitTarget->AddAura(AdditionalAura);
-            sLog.outDebug("Spell: Additional Aura is: %u", AdditionalSpellInfo->EffectApplyAuraName[0]);
-        }
-    }
-
     // Prayer of Mending (jump animation), we need formal caster instead original for correct animation
     if( m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && (m_spellInfo->SpellFamilyFlags & UI64LIT(0x00002000000000)))
         m_caster->CastSpell(unitTarget, 41637, true, NULL, Aur, m_originalCasterGUID);
