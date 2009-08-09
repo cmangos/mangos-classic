@@ -3342,46 +3342,43 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
 void Aura::HandleModStealth(bool apply, bool Real)
 {
-    uint32 spell_id = GetId();
-    Unit* pTarget = m_target;
-
     if (apply)
     {
         // drop flag at stealth in bg
-        if(Real && pTarget->GetTypeId()==TYPEID_PLAYER && ((Player*)pTarget)->InBattleGround())
-            if(BattleGround *bg = ((Player*)pTarget)->GetBattleGround())
-                bg->EventPlayerDroppedFlag((Player*)pTarget);
+        if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
+            if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
+                bg->EventPlayerDroppedFlag((Player*)m_target);
 
         // only at real aura add
         if (Real)
         {
-            pTarget->SetStandFlags(UNIT_STAND_FLAGS_CREEP);
-            if(pTarget->GetTypeId()==TYPEID_PLAYER)
-                pTarget->SetFlag(PLAYER_FIELD_BYTES2, 0x2000);
+            m_target->SetStandFlags(UNIT_STAND_FLAGS_CREEP);
+            if(m_target->GetTypeId()==TYPEID_PLAYER)
+                m_target->SetFlag(PLAYER_FIELD_BYTES2, 0x2000);
 
             // apply only if not in GM invisibility (and overwrite invisibility state)
-            if (pTarget->GetVisibility()!=VISIBILITY_OFF)
+            if (m_target->GetVisibility()!=VISIBILITY_OFF)
             {
-                pTarget->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
-                pTarget->SetVisibility(VISIBILITY_GROUP_STEALTH);
+                m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
+                m_target->SetVisibility(VISIBILITY_GROUP_STEALTH);
             }
 
             // for RACE_NIGHTELF stealth
-            if(pTarget->GetTypeId()==TYPEID_PLAYER && spell_id==20580)
-                pTarget->CastSpell(pTarget, 21009, true, NULL, this);
+            if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
+                m_target->CastSpell(m_target, 21009, true, NULL, this);
 
             // apply full stealth period bonuses only at first stealth aura in stack
-            if(pTarget->GetAurasByType(SPELL_AURA_MOD_STEALTH).size()<=1)
+            if(m_target->GetAurasByType(SPELL_AURA_MOD_STEALTH).size()<=1)
             {
-                Unit::AuraList const& mDummyAuras = pTarget->GetAurasByType(SPELL_AURA_DUMMY);
+                Unit::AuraList const& mDummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
                 for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
                 {
                     // Master of Subtlety
                     if ((*i)->GetSpellProto()->SpellIconID == 2114)
                     {
-                        pTarget->RemoveAurasDueToSpell(31666);
+                        m_target->RemoveAurasDueToSpell(31666);
                         int32 bp = (*i)->GetModifier()->m_amount;
-                        pTarget->CastCustomSpell(pTarget,31665,&bp,NULL,NULL,true);
+                        m_target->CastCustomSpell(m_target,31665,&bp,NULL,NULL,true);
                         break;
                     }
                 }
@@ -3391,37 +3388,37 @@ void Aura::HandleModStealth(bool apply, bool Real)
     else
     {
         // for RACE_NIGHTELF stealth
-        if(Real && pTarget->GetTypeId()==TYPEID_PLAYER && spell_id==20580)
-            pTarget->RemoveAurasDueToSpell(21009);
+        if(Real && m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
+            m_target->RemoveAurasDueToSpell(21009);
 
         // only at real aura remove of _last_ SPELL_AURA_MOD_STEALTH
-        if (Real && !pTarget->HasAuraType(SPELL_AURA_MOD_STEALTH))
+        if (Real && !m_target->HasAuraType(SPELL_AURA_MOD_STEALTH))
         {
             // if no GM invisibility
-            if(pTarget->GetVisibility()!=VISIBILITY_OFF)
+            if (m_target->GetVisibility()!=VISIBILITY_OFF)
             {
-                pTarget->RemoveStandFlags(UNIT_STAND_FLAGS_CREEP);
-                if(pTarget->GetTypeId()==TYPEID_PLAYER)
-                    pTarget->RemoveFlag(PLAYER_FIELD_BYTES2, 0x2000);
+                m_target->RemoveStandFlags(UNIT_STAND_FLAGS_CREEP);
+                if(m_target->GetTypeId()==TYPEID_PLAYER)
+                    m_target->RemoveFlag(PLAYER_FIELD_BYTES2, 0x2000);
 
                 // restore invisibility if any
-                if (pTarget->HasAuraType(SPELL_AURA_MOD_INVISIBILITY))
+                if (m_target->HasAuraType(SPELL_AURA_MOD_INVISIBILITY))
                 {
-                    pTarget->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
-                    pTarget->SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
+                    m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
+                    m_target->SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
                 }
                 else
-                    pTarget->SetVisibility(VISIBILITY_ON);
+                    m_target->SetVisibility(VISIBILITY_ON);
             }
 
             // apply delayed talent bonus remover at last stealth aura remove
-            Unit::AuraList const& mDummyAuras = pTarget->GetAurasByType(SPELL_AURA_DUMMY);
+            Unit::AuraList const& mDummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
             for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
             {
                 // Master of Subtlety
                 if ((*i)->GetSpellProto()->SpellIconID == 2114)
                 {
-                    pTarget->CastSpell(pTarget,31666,true);
+                    m_target->CastSpell(m_target,31666,true);
                     break;
                 }
             }
@@ -3782,20 +3779,17 @@ void Aura::HandleAuraModUseNormalSpeed(bool /*apply*/, bool Real)
 
 void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
 {
-    // cache values in local vars for prevent access to possible deleted aura data
-    SpellEntry const* spellInfo = GetSpellProto();
     uint32 misc  = m_modifier.m_miscvalue;
-    Unit* target = m_target;
 
-    if(apply && spellInfo->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
+    if(apply && GetSpellProto()->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
     {
-        uint32 mechanic = 1 << m_modifier.m_miscvalue;
+        uint32 mechanic = 1 << misc;
 
         //immune movement impairment and loss of control
         if(GetId()==42292)
             mechanic=IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
 
-        Unit::AuraMap& Auras = target->GetAuras();
+        Unit::AuraMap& Auras = m_target->GetAuras();
         for(Unit::AuraMap::iterator iter = Auras.begin(), next; iter != Auras.end(); iter = next)
         {
             next = iter;
@@ -3803,12 +3797,12 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
             SpellEntry const *spell = iter->second->GetSpellProto();
             if (!( spell->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)  // spells unaffected by invulnerability
                 && !iter->second->IsPositive()                                    // only remove negative spells
-                && spell->Id != spellInfo->Id)
+                && spell->Id != GetId())
             {
                 //check for mechanic mask
                 if(GetSpellMechanicMask(spell, iter->second->GetEffIndex()) & mechanic)
                 {
-                    target->RemoveAurasDueToSpell(spell->Id);
+                    m_target->RemoveAurasDueToSpell(spell->Id);
                     if(Auras.empty())
                         break;
                     else
@@ -3818,24 +3812,24 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
         }
     }
 
-    target->ApplySpellImmune(spellInfo->Id,IMMUNITY_MECHANIC,misc,apply);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,misc,apply);
 
     // special cases
     switch(misc)
     {
         case MECHANIC_INVULNERABILITY:
-            target->ModifyAuraState(AURA_STATE_FORBEARANCE,apply);
+            m_target->ModifyAuraState(AURA_STATE_FORBEARANCE,apply);
             break;
         case MECHANIC_SHIELD:
-            target->ModifyAuraState(AURA_STATE_WEAKENED_SOUL,apply);
+            m_target->ModifyAuraState(AURA_STATE_WEAKENED_SOUL,apply);
             break;
     }
 
     // Bestial Wrath
-    if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->SpellIconID == 1680)
+    if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1680)
     {
         // The Beast Within cast on owner if talent present
-        if (Unit* owner = target->GetOwner())
+        if (Unit* owner = m_target->GetOwner())
         {
             // Search talent
             Unit::AuraList const& dummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
@@ -3850,25 +3844,6 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
                     break;
                 }
             }
-        }
-    }
-
-    // The Beast Within and Bestial Wrath - immunity
-    if (spellInfo->Id == 19574 || spellInfo->Id == 34471)
-    {
-        if (apply)
-        {
-            target->CastSpell(target, 24395, true);
-            target->CastSpell(target, 24396, true);
-            target->CastSpell(target, 24397, true);
-            target->CastSpell(target, 26592, true);
-        }
-        else
-        {
-            target->RemoveAurasDueToSpell(24395);
-            target->RemoveAurasDueToSpell(24396);
-            target->RemoveAurasDueToSpell(24397);
-            target->RemoveAurasDueToSpell(26592);
         }
     }
 }
@@ -5352,6 +5327,7 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
     uint32 spellId1 = 0;
     uint32 spellId2 = 0;
     uint32 spellId3 = 0;
+    uint32 spellId4 = 0;
 
     switch(GetSpellProto()->SpellFamilyName)
     {
@@ -5376,6 +5352,21 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
             }
             break;
         }
+        case SPELLFAMILY_HUNTER:
+        {
+            // The Beast Within and Bestial Wrath - immunity
+            if (GetId() == 19574 || GetId() == 34471)
+            {
+                spellId1 = 24395;
+                spellId2 = 24396;
+                spellId3 = 24397;
+                spellId4 = 26592;
+            }
+            else
+                return;
+
+            break;
+        }
         default:
             return;
     }
@@ -5388,6 +5379,8 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
             m_target->CastSpell(m_target, spellId2, true, NULL, this);
         if (spellId3)
             m_target->CastSpell(m_target, spellId3, true, NULL, this);
+        if (spellId4)
+            m_target->CastSpell(m_target, spellId4, true, NULL, this);
     }
     else
     {
@@ -5397,6 +5390,8 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
             m_target->RemoveAurasByCasterSpell(spellId2, GetCasterGUID());
         if (spellId3)
             m_target->RemoveAurasByCasterSpell(spellId3, GetCasterGUID());
+        if (spellId4)
+            m_target->RemoveAurasByCasterSpell(spellId4, GetCasterGUID());
     }
 }
 
