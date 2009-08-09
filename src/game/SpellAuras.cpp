@@ -316,8 +316,8 @@ Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, U
 m_procCharges(0), m_spellmod(NULL), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false),
-m_isPersistent(false), m_updated(false), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_isRemovedOnShapeLost(true), m_in_use(false),
-m_periodicTimer(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE)
+m_isPersistent(false), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_isRemovedOnShapeLost(true), m_deleted(false),
+m_periodicTimer(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE), m_in_use(0)
 {
     assert(target);
 
@@ -721,12 +721,8 @@ void AreaAura::Update(uint32 diff)
     }
     else                                                    // aura at non-caster
     {
-        Unit * tmp_target = m_target;
         Unit* caster = GetCaster();
-        uint32 tmp_spellId = GetId(), tmp_effIndex = m_effIndex;
 
-        // WARNING: the aura may get deleted during the update
-        // DO NOT access its members after update!
         Aura::Update(diff);
 
         // remove aura if out-of-range from caster (after teleport for example)
@@ -734,35 +730,35 @@ void AreaAura::Update(uint32 diff)
         // or caster is (no longer) friendly
         bool needFriendly = (m_areaAuraType == AREA_AURA_ENEMY ? false : true);
         if( !caster || caster->hasUnitState(UNIT_STAT_ISOLATED) ||
-            !caster->IsWithinDistInMap(tmp_target, m_radius)    ||
-            !caster->HasAura(tmp_spellId, tmp_effIndex)         ||
-            caster->IsFriendlyTo(tmp_target) != needFriendly
+            !caster->IsWithinDistInMap(m_target, m_radius)      ||
+            !caster->HasAura(GetId(), GetEffIndex())            ||
+            caster->IsFriendlyTo(m_target) != needFriendly
            )
         {
-            tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
+            m_target->RemoveAura(GetId(), GetEffIndex());
         }
         else if( m_areaAuraType == AREA_AURA_PARTY)         // check if in same sub group
         {
             // not check group if target == owner or target == pet
-            if (caster->GetCharmerOrOwnerGUID() != tmp_target->GetGUID() && caster->GetGUID() != tmp_target->GetCharmerOrOwnerGUID())
+            if (caster->GetCharmerOrOwnerGUID() != m_target->GetGUID() && caster->GetGUID() != m_target->GetCharmerOrOwnerGUID())
             {
                 Player* check = caster->GetCharmerOrOwnerPlayerOrPlayerItself();
 
                 Group *pGroup = check ? check->GetGroup() : NULL;
                 if( pGroup )
                 {
-                    Player* checkTarget = tmp_target->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    Player* checkTarget = m_target->GetCharmerOrOwnerPlayerOrPlayerItself();
                     if(!checkTarget || !pGroup->SameSubGroup(check, checkTarget))
-                        tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
+                        m_target->RemoveAura(GetId(), GetEffIndex());
                 }
                 else
-                    tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
+                    m_target->RemoveAura(GetId(), GetEffIndex());
             }
         }
         else if( m_areaAuraType == AREA_AURA_PET || m_areaAuraType == AREA_AURA_OWNER )
         {
-            if( tmp_target->GetGUID() != caster->GetCharmerOrOwnerGUID() )
-                tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
+            if( m_target->GetGUID() != caster->GetCharmerOrOwnerGUID() )
+                m_target->RemoveAura(GetId(), GetEffIndex());
         }
     }
 }
@@ -773,8 +769,7 @@ void PersistentAreaAura::Update(uint32 diff)
 
     // remove the aura if its caster or the dynamic object causing it was removed
     // or if the target moves too far from the dynamic object
-    Unit *caster = GetCaster();
-    if (caster)
+    if(Unit *caster = GetCaster())
     {
         DynamicObject *dynObj = caster->GetDynObject(GetId(), GetEffIndex());
         if (dynObj)
@@ -788,25 +783,20 @@ void PersistentAreaAura::Update(uint32 diff)
     else
         remove = true;
 
-    Unit *tmp_target = m_target;
-    uint32 tmp_id = GetId(), tmp_index = GetEffIndex();
-
-    // WARNING: the aura may get deleted during the update
-    // DO NOT access its members after update!
     Aura::Update(diff);
 
     if(remove)
-        tmp_target->RemoveAura(tmp_id, tmp_index);
+        m_target->RemoveAura(GetId(), GetEffIndex());
 }
 
 void Aura::ApplyModifier(bool apply, bool Real)
 {
     AuraType aura = m_modifier.m_auraname;
 
-    m_in_use = true;
+    SetInUse(true);
     if(aura < TOTAL_AURAS)
         (*this.*AuraHandler [aura])(apply, Real);
-    m_in_use = false;
+    SetInUse(false);
 }
 
 void Aura::UpdateAuraDuration()
@@ -5775,14 +5765,9 @@ void Aura::PeriodicTick()
             SpellPeriodicAuraLogInfo pInfo(this, pdamage, absorb, resist, 0.0f);
             m_target->SendPeriodicAuraLog(&pInfo);
 
-            Unit* target = m_target;                        // aura can be deleted in DealDamage
-            SpellEntry const* spellProto = GetSpellProto();
-
             pCaster->DealDamage(m_target, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), true);
 
-            // DO NOT ACCESS MEMBERS OF THE AURA FROM NOW ON (DealDamage can delete aura)
-
-            pCaster->ProcDamageAndSpell(target, PROC_FLAG_PERIODIC_TICK, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), GetSpellSchoolMask(spellProto), spellProto);
+            pCaster->ProcDamageAndSpell(m_target, PROC_FLAG_PERIODIC_TICK, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), GetSpellSchoolMask(GetSpellProto()), GetSpellProto());
             break;
         }
         case SPELL_AURA_PERIODIC_LEECH:
@@ -5886,32 +5871,28 @@ void Aura::PeriodicTick()
 
             pCaster->SendSpellNonMeleeDamageLog(m_target, GetId(), pdamage, GetSpellSchoolMask(GetSpellProto()), absorb, resist, false, 0);
 
-            Unit* target = m_target;                        // aura can be deleted in DealDamage
-            SpellEntry const* spellProto = GetSpellProto();
-            float multiplier = spellProto->EffectMultipleValue[GetEffIndex()] > 0 ? spellProto->EffectMultipleValue[GetEffIndex()] : 1;
+            float multiplier = GetSpellProto()->EffectMultipleValue[GetEffIndex()] > 0 ? GetSpellProto()->EffectMultipleValue[GetEffIndex()] : 1;
 
             uint32 new_damage = pCaster->DealDamage(m_target, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), false);
 
-            // DO NOT ACCESS MEMBERS OF THE AURA FROM NOW ON (DealDamage can delete aura)
-
-            pCaster->ProcDamageAndSpell(target, PROC_FLAG_PERIODIC_TICK, PROC_FLAG_TAKE_DAMAGE, new_damage, GetSpellSchoolMask(spellProto), spellProto);
-            if (!target->isAlive() && pCaster->IsNonMeleeSpellCasted(false))
+            pCaster->ProcDamageAndSpell(m_target, PROC_FLAG_PERIODIC_TICK, PROC_FLAG_TAKE_DAMAGE, new_damage, GetSpellSchoolMask(GetSpellProto()), GetSpellProto());
+            if (!m_target->isAlive() && pCaster->IsNonMeleeSpellCasted(false))
             {
                 for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
                 {
-                    if (pCaster->m_currentSpells[i] && pCaster->m_currentSpells[i]->m_spellInfo->Id == spellProto->Id)
+                    if (pCaster->m_currentSpells[i] && pCaster->m_currentSpells[i]->m_spellInfo->Id == GetId())
                         pCaster->m_currentSpells[i]->cancel();
                 }
             }
 
 
             if(Player *modOwner = pCaster->GetSpellModOwner())
-                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
+                modOwner->ApplySpellMod(GetId(), SPELLMOD_MULTIPLE_VALUE, multiplier);
 
-            uint32 heal = pCaster->SpellHealingBonus(spellProto, uint32(new_damage * multiplier), DOT, pCaster);
+            uint32 heal = pCaster->SpellHealingBonus(GetSpellProto(), uint32(new_damage * multiplier), DOT, pCaster);
 
-            int32 gain = pCaster->DealHeal(pCaster, heal, spellProto);
-            pCaster->getHostilRefManager().threatAssist(pCaster, gain * 0.5f, spellProto);
+            int32 gain = pCaster->DealHeal(pCaster, heal, GetSpellProto());
+            pCaster->getHostilRefManager().threatAssist(pCaster, gain * 0.5f, GetSpellProto());
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
