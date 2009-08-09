@@ -1390,9 +1390,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN )
             {
                 // Paladin Seals
-                if( IsSealSpell(spellInfo_1) && IsSealSpell(spellInfo_2) )
+                if (IsSealSpell(spellInfo_1) && IsSealSpell(spellInfo_2))
                     return true;
             }
+
             // Combustion and Fire Protection Aura (multi-family check)
             if( spellInfo_2->Id == 11129 && spellInfo_1->SpellIconID == 33 && spellInfo_1->SpellVisual == 321 )
                 return false;

@@ -985,7 +985,7 @@ void Aura::_AddAura()
     }
 }
 
-void Aura::_RemoveAura()
+bool Aura::_RemoveAura()
 {
     // Remove all triggered by aura spells vs unlimited duration
     // except same aura replace case
@@ -1008,15 +1008,15 @@ void Aura::_RemoveAura()
     //passive auras do not get put in slots
     // Note: but totem can be not accessible for aura target in time remove (to far for find in grid)
     //if(m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem()))
-    //    return;
+    //    return false;
 
     uint8 slot = GetAuraSlot();
 
     if(slot >= MAX_AURAS)                                   // slot not set
-        return;
+        return false;
 
     if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
-        return;
+        return false;
 
     bool samespell = false;
     bool sameaura = false;
@@ -1042,69 +1042,75 @@ void Aura::_RemoveAura()
     }
 
     // only remove icon when the last aura of the spell is removed (current aura already removed from list)
-    if (!samespell)
+    if (samespell)
     {
-        SetAura(slot, true);
-        SetAuraFlag(slot, false);
-        SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL));
+        if(sameaura)                                       // decrease count for spell, only for same aura effect, or this spell auras in remove process.
+            UpdateSlotCounterAndDuration(false);
 
-        SetAuraApplication(slot, 0);
-        // update for out of range group members
-        m_target->UpdateAuraForGroup(slot);
-
-        //*****************************************************
-        // Update target aura state flag (at last aura remove)
-        //*****************************************************
-        uint32 removeState = 0;
-        uint64 removeFamilyFlag = m_spellProto->SpellFamilyFlags;
-        switch(m_spellProto->SpellFamilyName)
-        {
-            case SPELLFAMILY_PALADIN:
-                if (IsSealSpell(m_spellProto))
-                    removeState = AURA_STATE_JUDGEMENT;     // Update Seals information
-                break;
-            case SPELLFAMILY_WARLOCK:
-                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000004))
-                    removeState = AURA_STATE_CONFLAGRATE;   // Conflagrate aura state
-                break;
-            case SPELLFAMILY_DRUID:
-                if(m_spellProto->SpellFamilyFlags & 0x50)
-                {
-                    removeFamilyFlag = 0x50;
-                    removeState = AURA_STATE_SWIFTMEND;     // Swiftmend aura state
-                }
-                break;
-        }
-        // Remove state (but need check other auras for it)
-        if (removeState)
-        {
-            bool found = false;
-            Unit::AuraMap& Auras = m_target->GetAuras();
-            for(Unit::AuraMap::iterator i = Auras.begin(); i != Auras.end(); ++i)
-            {
-                SpellEntry const *auraSpellInfo = (*i).second->GetSpellProto();
-                if(auraSpellInfo->SpellFamilyName  == m_spellProto->SpellFamilyName &&
-                   auraSpellInfo->SpellFamilyFlags & removeFamilyFlag)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            // this has been last aura
-            if(!found)
-                m_target->ModifyAuraState(AuraState(removeState), false);
-        }
-
-        // reset cooldown state for spells
-        if(caster && caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            if ( GetSpellProto()->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE )
-                // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existed cases)
-                ((Player*)caster)->SendCooldownEvent(GetSpellProto());
-        }
+        return false;
     }
-    else if(sameaura)                                       // decrease count for spell, only for same aura effect, or this spell auras in remove process.
-        UpdateSlotCounterAndDuration(false);
+
+    SetAura(slot, true);
+    SetAuraFlag(slot, false);
+    SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL));
+
+    SetAuraApplication(slot, 0);
+    // update for out of range group members
+    m_target->UpdateAuraForGroup(slot);
+
+    //*****************************************************
+    // Update target aura state flag (at last aura remove)
+    //*****************************************************
+    uint32 removeState = 0;
+    uint64 removeFamilyFlag = m_spellProto->SpellFamilyFlags;
+    switch(m_spellProto->SpellFamilyName)
+    {
+    case SPELLFAMILY_PALADIN:
+        if (IsSealSpell(m_spellProto))
+            removeState = AURA_STATE_JUDGEMENT;     // Update Seals information
+        break;
+    case SPELLFAMILY_WARLOCK:
+        if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000004))
+            removeState = AURA_STATE_CONFLAGRATE;   // Conflagrate aura state
+        break;
+    case SPELLFAMILY_DRUID:
+        if(m_spellProto->SpellFamilyFlags & 0x50)
+        {
+            removeFamilyFlag = 0x50;
+            removeState = AURA_STATE_SWIFTMEND;     // Swiftmend aura state
+        }
+        break;
+    }
+
+    // Remove state (but need check other auras for it)
+    if (removeState)
+    {
+        bool found = false;
+        Unit::AuraMap& Auras = m_target->GetAuras();
+        for(Unit::AuraMap::iterator i = Auras.begin(); i != Auras.end(); ++i)
+        {
+            SpellEntry const *auraSpellInfo = (*i).second->GetSpellProto();
+            if(auraSpellInfo->SpellFamilyName  == m_spellProto->SpellFamilyName &&
+                auraSpellInfo->SpellFamilyFlags & removeFamilyFlag)
+            {
+                found = true;
+                break;
+            }
+        }
+        // this has been last aura
+        if(!found)
+            m_target->ModifyAuraState(AuraState(removeState), false);
+    }
+
+    // reset cooldown state for spells
+    if(caster && caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if ( GetSpellProto()->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE )
+            // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existed cases)
+            ((Player*)caster)->SendCooldownEvent(GetSpellProto());
+    }
+
+    return true;
 }
 
 void Aura::SetAuraFlag(uint32 slot, bool add)
@@ -5349,6 +5355,59 @@ void Aura::HandleShapeshiftBoosts(bool apply)
 
     /*double healthPercentage = (double)m_target->GetHealth() / (double)m_target->GetMaxHealth();
     m_target->SetHealth(uint32(ceil((double)m_target->GetMaxHealth() * healthPercentage)));*/
+}
+
+void Aura::HandleSpellSpecificBoosts(bool apply)
+{
+    uint32 spellId1 = 0;
+    uint32 spellId2 = 0;
+    uint32 spellId3 = 0;
+
+    switch(GetSpellProto()->SpellFamilyName)
+    {
+        case SPELLFAMILY_WARRIOR:
+        {
+            if(!apply)
+            {
+                // Remove Blood Frenzy only if target no longer has any Deep Wound or Rend (applying is handled by procs)
+                if (GetSpellProto()->Mechanic != MECHANIC_BLEED)
+                    return;
+
+                // If target still has one of Warrior's bleeds, do nothing
+                Unit::AuraList const& PeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                for(Unit::AuraList::const_iterator i = PeriodicDamage.begin(); i != PeriodicDamage.end(); ++i)
+                    if( (*i)->GetCasterGUID() == GetCasterGUID() &&
+                        (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR &&
+                        (*i)->GetSpellProto()->Mechanic == MECHANIC_BLEED)
+                        return;
+
+                spellId1 = 30069;
+                spellId2 = 30070;
+            }
+            break;
+        }
+        default:
+            return;
+    }
+
+    if (apply)
+    {
+        if (spellId1)
+            m_target->CastSpell(m_target, spellId1, true, NULL, this);
+        if (spellId2)
+            m_target->CastSpell(m_target, spellId2, true, NULL, this);
+        if (spellId3)
+            m_target->CastSpell(m_target, spellId3, true, NULL, this);
+    }
+    else
+    {
+        if (spellId1)
+            m_target->RemoveAurasByCasterSpell(spellId1, GetCasterGUID());
+        if (spellId2)
+            m_target->RemoveAurasByCasterSpell(spellId2, GetCasterGUID());
+        if (spellId3)
+            m_target->RemoveAurasByCasterSpell(spellId3, GetCasterGUID());
+    }
 }
 
 void Aura::HandleAuraEmpathy(bool apply, bool /*Real*/)
