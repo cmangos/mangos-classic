@@ -6173,7 +6173,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
 void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
 {
-    if(slot >= INVENTORY_SLOT_BAG_END || !proto)
+    if (slot >= INVENTORY_SLOT_BAG_END || !proto)
         return;
 
     for (int i = 0; i < MAX_ITEM_PROTO_STATS; ++i)
