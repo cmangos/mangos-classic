@@ -10412,7 +10412,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                     sLog.outDebug("ProcDamageAndSpell: casting mending (triggered by %s dummy aura of spell %u)",
                         (isVictim?"a victim's":"an attacker's"),triggeredByAura->GetId());
 
-                    casted = HandleMeandingAuraProc(triggeredByAura);
+                    casted = HandleMendingAuraProc(triggeredByAura);
                     break;
                 }
                 case SPELL_AURA_MOD_HASTE:
@@ -11112,7 +11112,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(SpellEntry const* spellProto, SpellEntry 
     return roll_chance_f(chance);
 }
 
-bool Unit::HandleMeandingAuraProc( Aura* triggeredByAura )
+bool Unit::HandleMendingAuraProc( Aura* triggeredByAura )
 {
     // aura can be deleted at casts
     SpellEntry const* spellProto = triggeredByAura->GetSpellProto();
