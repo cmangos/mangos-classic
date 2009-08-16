@@ -31,8 +31,6 @@
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
     // TODO: add targets.read() check
-    CHECK_PACKET_SIZE(recvPacket,1+1+1+1+8);
-
     Player* pUser = _player;
     uint8 bagIndex, slot;
     uint8 spell_count;                                      // number of spells at item, not used
@@ -205,8 +203,6 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
-
     sLog.outDetail("WORLD: CMSG_OPEN_ITEM packet, data length = %i",(uint32)recvPacket.size());
 
     Player* pUser = _player;
@@ -280,8 +276,6 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data, 8);
-
     uint64 guid;
 
     recv_data >> guid;
@@ -300,8 +294,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,4+1+2);
-
     uint32 spellId;
     uint8  cast_count;
     recvPacket >> spellId;
@@ -347,8 +339,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,4);
-
     uint32 spellId;
     recvPacket >> spellId;
 
@@ -362,8 +352,6 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,4);
-
     uint32 spellId;
     recvPacket >> spellId;
 
@@ -390,8 +378,6 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 
 void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket, 8+4);
-
     uint64 guid;
     uint32 spellId;
 
@@ -446,8 +432,6 @@ void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& /*recvPacket*
 void WorldSession::HandleCancelChanneling( WorldPacket & /*recv_data */)
 {
     /*
-        CHECK_PACKET_SIZE(recv_data, 4);
-
         uint32 spellid;
         recv_data >> spellid;
     */
@@ -455,8 +439,6 @@ void WorldSession::HandleCancelChanneling( WorldPacket & /*recv_data */)
 
 void WorldSession::HandleTotemDestroyed( WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket, 1);
-
     uint8 slotId;
 
     recvPacket >> slotId;

@@ -24,6 +24,26 @@
 #include "Log.h"
 #include "Utilities/ByteConverter.h"
 
+class ByteBufferException
+{
+    public:
+        ByteBufferException(bool add, size_t pos, size_t esize, size_t size):add(add), pos(pos), esize(esize), size(size)
+        {
+            PrintPosError();
+        }
+
+        void PrintPosError() const
+        {
+            sLog.outError("ERROR: Attempted to %s in ByteBuffer (pos: %lu size: %lu) value with size: %lu",(add ? "put" : "get"),(unsigned long)pos, (unsigned long)size, (unsigned long)esize);
+
+        }
+    private:
+        bool add;
+        size_t pos;
+        size_t esize;
+        size_t size;
+};
+
 class ByteBuffer
 {
     public:
@@ -228,7 +248,8 @@ class ByteBuffer
         };
         template <typename T> T read(size_t pos) const
         {
-            ASSERT(pos + sizeof(T) <= size() || PrintPosError(false,pos,sizeof(T)));
+            if(pos + sizeof(T) > size())
+                throw ByteBufferException(false, pos, sizeof(T), size());
             T val = *((T const*)&_storage[pos]);
             EndianConvert(val);
             return val;
@@ -236,7 +257,8 @@ class ByteBuffer
 
         void read(uint8 *dest, size_t len)
         {
-            ASSERT(_rpos  + len  <= size() || PrintPosError(false,_rpos,len));
+            if(_rpos  + len > size())
+               throw ByteBufferException(false, _rpos, len, size());
             memcpy(dest, &_storage[_rpos], len);
             _rpos += len;
         }
@@ -330,7 +352,8 @@ class ByteBuffer
 
         void put(size_t pos, const uint8 *src, size_t cnt)
         {
-            ASSERT(pos + cnt <= size() || PrintPosError(true,pos,cnt));
+            if(pos + cnt > size())
+               throw ByteBufferException(true, pos, cnt, size());
             memcpy(&_storage[pos], src, cnt);
         }
         void print_storage() const
@@ -418,14 +441,6 @@ class ByteBuffer
         }
 
     protected:
-        bool PrintPosError(bool add, size_t pos, size_t esize) const
-        {
-            sLog.outError("ERROR: Attempt %s in ByteBuffer (pos: %lu size: %lu) value with size: %lu",(add ? "put" : "get"),(unsigned long)pos, (unsigned long)size(), (unsigned long)esize);
-
-            // assert must fail after function call
-            return false;
-        }
-
         size_t _rpos, _wpos;
         std::vector<uint8> _storage;
 };

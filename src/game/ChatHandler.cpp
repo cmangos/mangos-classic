@@ -39,8 +39,6 @@
 
 void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,4+4+1);
-
     uint32 type;
     uint32 lang;
 
@@ -171,7 +169,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         {
             std::string to, msg;
             recv_data >> to;
-            CHECK_PACKET_SIZE(recv_data,4+4+(to.size()+1)+1);
             recv_data >> msg;
 
             // strip invisible characters for non-addon messages
@@ -416,9 +413,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string channel = "", msg = "";
             recv_data >> channel;
 
-            // recheck
-            CHECK_PACKET_SIZE(recv_data,4+4+(channel.size()+1)+1);
-
             recv_data >> msg;
 
             // strip invisible characters for non-addon messages
@@ -483,8 +477,6 @@ void WorldSession::HandleEmoteOpcode( WorldPacket & recv_data )
 {
     if(!GetPlayer()->isAlive())
         return;
-    CHECK_PACKET_SIZE(recv_data,4);
-
     uint32 emote;
     recv_data >> emote;
     GetPlayer()->HandleEmoteCommand(emote);
@@ -534,8 +526,6 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         return;
     }
 
-    CHECK_PACKET_SIZE(recv_data,4+4+8);
-
     uint32 text_emote, emoteNum;
     uint64 guid;
 
@@ -583,8 +573,6 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data, 8+1);
-
     uint64 iguid;
     uint8 unk;
     //sLog.outDebug("WORLD: Received CMSG_CHAT_IGNORED");

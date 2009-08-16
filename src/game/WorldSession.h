@@ -44,8 +44,6 @@ class QueryResult;
 class LoginQueryHolder;
 class CharacterHandler;
 
-#define CHECK_PACKET_SIZE(P,S) if((P).size() < (S)) return SizeError((P),(S));
-
 enum PartyOperation
 {
     PARTY_OP_INVITE = 0,

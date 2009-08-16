@@ -31,8 +31,6 @@
 
 void WorldSession::HandlePetAction( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data, 8+2+2+8);
-
     uint64 guid1;
     uint32 data;
     uint64 guid2;
@@ -267,8 +265,6 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
 void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,4+8);
-
     sLog.outDetail( "HandlePetNameQuery. CMSG_PET_NAME_QUERY" );
 
     uint32 petnumber;
@@ -307,8 +303,6 @@ void WorldSession::SendPetNameQuery( uint64 petguid, uint32 petnumber)
 
 void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data, 8+4+2+2);
-
     sLog.outDetail( "HandlePetSetAction. CMSG_PET_SET_ACTION" );
 
     uint64 petguid;
@@ -381,8 +375,6 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 
 void WorldSession::HandlePetRename( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data, 8+1);
-
     sLog.outDetail( "HandlePetRename. CMSG_PET_RENAME" );
 
     uint64 petguid;
@@ -393,7 +385,6 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 
     recv_data >> petguid;
     recv_data >> name;
-    CHECK_PACKET_SIZE(recv_data, recv_data.rpos() + 1);
     recv_data >> isdeclined;
 
     Pet* pet = ObjectAccessor::GetPet(petguid);
@@ -428,7 +419,6 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     {
         for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
         {
-            CHECK_PACKET_SIZE(recv_data, recv_data.rpos() + 1);
             recv_data >> declinedname.name[i];
         }
 
@@ -460,8 +450,6 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 
 void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data, 8);
-
     uint64 guid;
     recv_data >> guid;                                      //pet guid
     sLog.outDetail( "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid) );
@@ -489,8 +477,6 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
 
 void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,8);
-
     sLog.outDetail("CMSG_PET_UNLEARN");
     uint64 guid;
     recvPacket >> guid;
@@ -547,8 +533,6 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandlePetSpellAutocastOpcode( WorldPacket& recvPacket )
 {
-    CHECK_PACKET_SIZE(recvPacket,8+2+2+1);
-
     sLog.outDetail("CMSG_PET_SPELL_AUTOCAST");
     uint64 guid;
     uint32 spellid;
@@ -593,7 +577,6 @@ void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
 {
     sLog.outDetail("WORLD: CMSG_PET_CAST_SPELL");
 
-    CHECK_PACKET_SIZE(recvPacket,8+4);
     uint64 guid;
     uint32 spellid;
 

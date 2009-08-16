@@ -70,6 +70,12 @@ bool AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target)
     if(!TempValue)
         return false;
 
+    if(TempValue > 0xFFFFF)
+    {
+        sLog.outError("WorldSession::ReadAddonsInfo addon info too big, size %u", TempValue);
+        return false;
+    }
+
     AddonRealSize = TempValue;                              // temp value because ZLIB only excepts uLongf
 
     CurrentPosition = Source->rpos();                       // get the position of the pointer in the structure
@@ -86,15 +92,7 @@ bool AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target)
             uint8 unk6;
             uint32 crc, unk7;
 
-            // check next addon data format correctness
-            if(AddOnPacked.rpos()+1+4+4+1 > AddOnPacked.size())
-                return false;
-
             AddOnPacked >> AddonNames;
-
-            // recheck next addon data format correctness
-            if(AddOnPacked.rpos()+4+4+1 > AddOnPacked.size())
-                return false;
 
             AddOnPacked >> crc >> unk7 >> unk6;
 
