@@ -963,6 +963,8 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
 {
     uint32 itemid;
     recv_data >> itemid;
+    recv_data.read_skip<uint64>();                          // guid
+
     sLog.outDebug("WORLD: CMSG_ITEM_NAME_QUERY %u", itemid);
     ItemPrototype const *pProto = objmgr.GetItemPrototype( itemid );
     if( pProto )

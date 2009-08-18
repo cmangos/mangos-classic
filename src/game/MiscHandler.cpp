@@ -838,9 +838,10 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,TELE_TO_NOT_LEAVE_TRANSPORT);
 }
 
-void WorldSession::HandleUpdateAccountData(WorldPacket &/*recv_data*/)
+void WorldSession::HandleUpdateAccountData(WorldPacket & recv_data)
 {
     sLog.outDetail("WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
+    recv_data.rpos(recv_data.wpos());                       // prevent spam at unimplemented packet
     //recv_data.hexlike();
 }
 
@@ -903,7 +904,8 @@ void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
     /*  WorldSession::Update( getMSTime() );*/
     DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );
 
-    recv_data.read_skip2<uint64,uint32>();
+    recv_data.read_skip<uint64>();
+    recv_data.read_skip<uint32>();
     /*
         uint64 guid;
         uint32 time_skipped;
