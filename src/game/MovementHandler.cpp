@@ -217,7 +217,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     // ignore, waiting processing in WorldSession::HandleMoveWorldportAckOpcode and WorldSession::HandleMoveTeleportAck
     if(GetPlayer()->IsBeingTeleported())
+    {
+        recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
         return;
+    }
 
     /* extract packet */
     MovementInfo movementInfo;
@@ -228,11 +231,15 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     {
         sLog.outError("MovementHandler: player %s (guid %d, account %u) sent a packet (opcode %u) that is " SIZEFMTD " bytes larger than it should be. Kicked as cheater.", _player->GetName(), _player->GetGUIDLow(), _player->GetSession()->GetAccountId(), recv_data.GetOpcode(), recv_data.size() - recv_data.rpos());
         KickPlayer();
+        recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
         return;
     }
 
     if (!MaNGOS::IsValidMapCoord(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o))
+    {
+        recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
         return;
+    }
 
     /* handle special cases */
     if (movementInfo.HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
@@ -240,11 +247,17 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         // transports size limited
         // (also received at zeppelin leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
         if( movementInfo.t_x > 50 || movementInfo.t_y > 50 || movementInfo.t_z > 50 )
+        {
+            recv_data.rpos(recv_data.wpos());               // prevent warnings spam
             return;
+        }
 
         if( !MaNGOS::IsValidMapCoord(movementInfo.x+movementInfo.t_x, movementInfo.y+movementInfo.t_y,
             movementInfo.z+movementInfo.t_z, movementInfo.o + movementInfo.t_o) )
+        {
+            recv_data.rpos(recv_data.wpos());               // prevent warnings spam
             return;
+        }
 
         // if we boarded a transport, add us to it
         if (!GetPlayer()->m_transport)
@@ -345,7 +358,10 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 
     // now can skip not our packet
     if(_player->GetGUID() != guid)
+    {
+        recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
         return;
+    }
 
     // continue parse packet
 
