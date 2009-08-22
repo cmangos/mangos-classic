@@ -3839,9 +3839,8 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 
         SpellSpecific i_spellId_spec = GetSpellSpecific(i_spellId);
 
+        // single allowed spell specific from same caster
         bool is_sspc = IsSingleFromSpellSpecificPerCaster(spellId_spec,i_spellId_spec);
-        bool is_sspt = IsSingleFromSpellSpecificRanksPerTarget(spellId_spec,i_spellId_spec);
-
         if( is_sspc && Aur->GetCasterGUID() == (*i).second->GetCasterGUID() )
         {
             // cannot remove higher rank
@@ -3861,8 +3860,15 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                 break;
             else
                 next =  m_Auras.begin();
+
+            continue;
         }
-        else if( is_sspt && Aur->GetCasterGUID() != (*i).second->GetCasterGUID() && spellmgr.IsRankSpellDueToSpell(spellProto, i_spellId) )
+
+        // spell with spell specific that allow single ranks for spell from diff caster
+        // same caster case processed or early or later
+        bool is_sspt = IsSingleFromSpellSpecificRanksPerTarget(spellId_spec,i_spellId_spec);
+        if ( is_sspt && Aur->GetCasterGUID() != (*i).second->GetCasterGUID() &&
+            (spellProto->Id == i_spellId || spellmgr.IsRankSpellDueToSpell(spellProto, i_spellId)))
         {
             // cannot remove higher rank
             if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
@@ -3880,8 +3886,12 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                 break;
             else
                 next =  m_Auras.begin();
+
+            continue;
         }
-        else if( !is_sspc && spellmgr.IsNoStackSpellDueToSpell(spellId, i_spellId) )
+
+        // non single per caster spell specific (possible single per target spells at caster)
+        if( !is_sspc && spellmgr.IsNoStackSpellDueToSpell(spellId, i_spellId) )
         {
             // Its a parent aura (create this aura in ApplyModifier)
             if ((*i).second->IsInUse())
@@ -3895,9 +3905,12 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                 break;
             else
                 next =  m_Auras.begin();
+
+            continue;
         }
+
         // Potions stack aura by aura (elixirs/flask already checked)
-        else if( spellProto->SpellFamilyName == SPELLFAMILY_POTION && i_spellProto->SpellFamilyName == SPELLFAMILY_POTION )
+        if( spellProto->SpellFamilyName == SPELLFAMILY_POTION && i_spellProto->SpellFamilyName == SPELLFAMILY_POTION )
         {
             if (IsNoStackAuraDueToAura(spellId, effIndex, i_spellId, i_effIndex))
             {
