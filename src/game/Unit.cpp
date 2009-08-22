@@ -10372,6 +10372,10 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
 
             Aura* i_aura = *i;
 
+            // skip deleted auras (possible at recursive triggered call
+            if(i_aura->IsDeleted())
+                continue;
+
             uint32 cooldown;                                // returned at next line
             if(!IsTriggeredAtSpellProcEvent(i_aura->GetSpellProto(), procSpell, procFlag,attType,isVictim,cooldown))
                 continue;
