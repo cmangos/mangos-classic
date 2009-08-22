@@ -96,6 +96,8 @@ pkgdata_DATA = \
 	055_8332_01_realmd_realmcharacters.sql \
 	056_8377_01_mangos_spell_area.sql \
 	057_8399_01_mangos_spell_elixir.sql \
+	058_7544_01_mangos_uptime.sql \
+	058_7546_02_realmd_uptime.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -171,4 +173,6 @@ EXTRA_DIST = \
 	055_8332_01_realmd_realmcharacters.sql \
 	056_8377_01_mangos_spell_area.sql \
 	057_8399_01_mangos_spell_elixir.sql \
+	058_7544_01_mangos_uptime.sql \
+	058_7546_02_realmd_uptime.sql \
 	README
