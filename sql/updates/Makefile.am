@@ -98,6 +98,7 @@ pkgdata_DATA = \
 	057_8399_01_mangos_spell_elixir.sql \
 	058_7544_01_mangos_uptime.sql \
 	058_7546_02_realmd_uptime.sql \
+	059_7168_01_mangos_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -175,4 +176,5 @@ EXTRA_DIST = \
 	057_8399_01_mangos_spell_elixir.sql \
 	058_7544_01_mangos_uptime.sql \
 	058_7546_02_realmd_uptime.sql \
+	059_7168_01_mangos_command.sql \
 	README
