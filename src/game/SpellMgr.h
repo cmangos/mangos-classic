@@ -97,8 +97,8 @@ enum SpellSpecific
     SPELL_BATTLE_ELIXIR     = 14,
     SPELL_GUARDIAN_ELIXIR   = 15,
     SPELL_FLASK_ELIXIR      = 16,
-    SPELL_PRESENCE          = 17,                           // used in 3.x
-    SPELL_HAND              = 18,                           // used in 3.x
+    //SPELL_PRESENCE          = 17,                         // used in 3.x
+    //SPELL_HAND              = 18,                         // used in 3.x
     SPELL_WELL_FED          = 19,
     SPELL_FOOD              = 20,
     SPELL_DRINK             = 21,
@@ -156,8 +156,12 @@ inline bool IsElementalShield(SpellEntry const *spellInfo)
 }
 
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
-bool IsSingleFromSpellSpecificPerCaster(SpellSpecific spellSpec1,SpellSpecific spellSpec2);
-bool IsSingleFromSpellSpecificRanksPerTarget(SpellSpecific spellId_spec, SpellSpecific i_spellId_spec);
+
+// order from less to more strict
+bool IsSingleFromSpellSpecificPerTargetPerCaster(SpellSpecific spellSpec1,SpellSpecific spellSpec2);
+bool IsSingleFromSpellSpecificSpellRanksPerTarget(SpellSpecific spellSpec1,SpellSpecific spellSpec2);
+bool IsSingleFromSpellSpecificPerTarget(SpellSpecific spellSpec1,SpellSpecific spellSpec2);
+
 bool IsPassiveSpell(uint32 spellId);
 
 inline bool IsDeathPersistentSpell(SpellEntry const *spellInfo)
