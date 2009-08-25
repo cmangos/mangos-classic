@@ -167,8 +167,6 @@ struct ActionButton
 
 typedef std::map<uint8,ActionButton> ActionButtonList;
 
-typedef std::pair<uint16, uint8> CreateSpellPair;
-
 struct PlayerCreateInfoItem
 {
     PlayerCreateInfoItem(uint32 id, uint32 amount) : item_id(id), item_amount(amount) {}
@@ -200,7 +198,7 @@ struct PlayerLevelInfo
     uint8 stats[MAX_STATS];
 };
 
-typedef std::list<CreateSpellPair> PlayerCreateInfoSpells;
+typedef std::list<uint32> PlayerCreateInfoSpells;
 
 struct PlayerCreateInfoAction
 {

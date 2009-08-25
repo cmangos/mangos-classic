@@ -1,0 +1,1 @@
+ALTER TABLE character_db_version CHANGE COLUMN required_061_7067_03_characters_character_spell required_052_8072_01_characters_characters bit;

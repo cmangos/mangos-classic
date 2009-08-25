@@ -30,7 +30,7 @@ CREATE TABLE `saved_variables` (
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_052_8072_01_characters_characters` bit(1) default NULL
+  `required_061_7067_03_characters_character_spell` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
