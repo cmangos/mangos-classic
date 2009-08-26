@@ -46,7 +46,7 @@ class DynamicObject : public WorldObject
         void AddAffected(Unit *unit) { m_affected.insert(unit); }
         void RemoveAffected(Unit *unit) { m_affected.erase(unit); }
         void Delay(int32 delaytime);
-        bool isVisibleForInState(Player const* u, bool inVisibleList) const;
+        bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const;
 
         void Say(const char* text, uint32 language, uint64 TargetGuid) { MonsterSay(text,language,TargetGuid); }
         void Yell(const char* text, uint32 language, uint64 TargetGuid) { MonsterYell(text,language,TargetGuid); }
@@ -60,15 +60,16 @@ class DynamicObject : public WorldObject
 
         GridReference<DynamicObject> &GetGridRef() { return m_gridRef; }
 
-        bool isActiveObject() const { return false; }
+        bool isActiveObject() const { return m_isActiveObject; }
     protected:
         uint32 m_spellId;
         uint32 m_effIndex;
         int32 m_aliveDuration;
         time_t m_nextThinkTime;
-        float m_radius;
+        float m_radius;                                     // radius apply persistent effect, 0 = no persistent effect
         AffectedSet m_affected;
     private:
         GridReference<DynamicObject> m_gridRef;
+        bool m_isActiveObject;
 };
 #endif
