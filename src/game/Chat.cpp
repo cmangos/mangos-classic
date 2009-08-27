@@ -1255,10 +1255,10 @@ valid examples:
                 break;
             case 'h':
                 // if h is next element in sequence, this one must contain the linked text :)
-                if(*validSequenceIterator == 'h')
+                if (*validSequenceIterator == 'h')
                 {
                     // links start with '['
-                    if(reader.get() != '[')
+                    if (reader.get() != '[')
                     {
 #ifdef MANGOS_DEBUG
                         sLog.outBasic("ChatHandler::isValidChatMessage link caption doesn't start with '['");
@@ -1271,18 +1271,16 @@ valid examples:
                     if (linkedSpell)
                     {
                         // spells with that flag have a prefix of "$PROFESSION: "
-                        if(linkedSpell->Attributes & SPELL_ATTR_TRADESPELL)
+                        if (linkedSpell->Attributes & SPELL_ATTR_TRADESPELL)
                         {
                             // lookup skillid
-                            SkillLineAbilityMap::const_iterator lower = spellmgr.GetBeginSkillLineAbilityMap(linkedSpell->Id);
-                            SkillLineAbilityMap::const_iterator upper = spellmgr.GetEndSkillLineAbilityMap(linkedSpell->Id);
-
-                            if(lower == upper)
+                            SkillLineAbilityMapBounds bounds = spellmgr.GetSkillLineAbilityMapBounds(linkedSpell->Id);
+                            if (bounds.first == bounds.second)
                             {
                                 return false;
                             }
 
-                            SkillLineAbilityEntry const *skillInfo = lower->second;
+                            SkillLineAbilityEntry const *skillInfo = bounds.first->second;
 
                             if (!skillInfo)
                             {
@@ -1290,7 +1288,7 @@ valid examples:
                             }
 
                             SkillLineEntry const *skillLine = sSkillLineStore.LookupEntry(skillInfo->skillId);
-                            if(!skillLine)
+                            if (!skillLine)
                             {
                                 return false;
                             }
@@ -1298,7 +1296,7 @@ valid examples:
                             for(uint8 i=0; i<MAX_LOCALE; ++i)
                             {
                                 uint32 skillLineNameLength = strlen(skillLine->name[i]);
-                                if(skillLineNameLength > 0 && strncmp(skillLine->name[i], buffer, skillLineNameLength) == 0)
+                                if (skillLineNameLength > 0 && strncmp(skillLine->name[i], buffer, skillLineNameLength) == 0)
                                 {
                                     // found the prefix, remove it to perform spellname validation below
                                     // -2 = strlen(": ")
@@ -1310,22 +1308,22 @@ valid examples:
                         bool foundName = false;
                         for(uint8 i=0; i<MAX_LOCALE; ++i)
                         {
-                            if(*linkedSpell->SpellName[i] && strcmp(linkedSpell->SpellName[i], buffer) == 0)
+                            if (*linkedSpell->SpellName[i] && strcmp(linkedSpell->SpellName[i], buffer) == 0)
                             {
                                 foundName = true;
                                 break;
                             }
                         }
-                        if(!foundName)
+                        if (!foundName)
                             return false;
                     }
-                    else if(linkedQuest)
+                    else if (linkedQuest)
                     {
                         if (linkedQuest->GetTitle() != buffer)
                         {
                             QuestLocale const *ql = objmgr.GetQuestLocale(linkedQuest->GetQuestId());
 
-                            if(!ql)
+                            if (!ql)
                             {
 #ifdef MANOGS_DEBUG
                                 sLog.outBasic("ChatHandler::isValidChatMessage default questname didn't match and there is no locale");
@@ -1336,13 +1334,13 @@ valid examples:
                             bool foundName = false;
                             for(uint8 i=0; i<ql->Title.size(); i++)
                             {
-                                if(ql->Title[i] == buffer)
+                                if (ql->Title[i] == buffer)
                                 {
                                     foundName = true;
                                     break;
                                 }
                             }
-                            if(!foundName)
+                            if (!foundName)
                             {
 #ifdef MANOGS_DEBUG
                                 sLog.outBasic("ChatHandler::isValidChatMessage no quest locale title matched")
@@ -1353,11 +1351,11 @@ valid examples:
                     }
                     else if(linkedItem)
                     {
-                        if(strcmp(linkedItem->Name1, buffer) != 0)
+                        if (strcmp(linkedItem->Name1, buffer) != 0)
                         {
                             ItemLocale const *il = objmgr.GetItemLocale(linkedItem->ItemId);
 
-                            if(!il)
+                            if (!il)
                             {
 #ifdef MANGOS_DEBUG
                                 sLog.outBasic("ChatHandler::isValidChatMessage linked item name doesn't is wrong and there is no localization");
@@ -1368,13 +1366,13 @@ valid examples:
                             bool foundName = false;
                             for(uint8 i=0; i<il->Name.size(); ++i)
                             {
-                                if(il->Name[i] == buffer)
+                                if (il->Name[i] == buffer)
                                 {
                                     foundName = true;
                                     break;
                                 }
                             }
-                            if(!foundName)
+                            if (!foundName)
                             {
 #ifdef MANGOS_DEBUG
                                 sLog.outBasic("ChatHandler::isValidChatMessage linked item name wasn't found in any localization");

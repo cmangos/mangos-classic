@@ -107,21 +107,18 @@ void LoadSkillDiscoveryTable()
 
             SkillDiscoveryStore[reqSkillOrSpell].push_back( SkillDiscoveryEntry(spellId, chance) );
         }
-        else if( reqSkillOrSpell == 0 )                     // skill case
+        else if (reqSkillOrSpell == 0)                      // skill case
         {
-            SkillLineAbilityMap::const_iterator lower = spellmgr.GetBeginSkillLineAbilityMap(spellId);
-            SkillLineAbilityMap::const_iterator upper = spellmgr.GetEndSkillLineAbilityMap(spellId);
+            SkillLineAbilityMapBounds bounds = spellmgr.GetSkillLineAbilityMapBounds(spellId);
 
-            if(lower==upper)
+            if (bounds.first==bounds.second)
             {
                 sLog.outErrorDb("Spell (ID: %u) not listed in `SkillLineAbility.dbc` but listed with `reqSpell`=0 in `skill_discovery_template` table",spellId);
                 continue;
             }
 
-            for(SkillLineAbilityMap::const_iterator _spell_idx = lower; _spell_idx != upper; ++_spell_idx)
-            {
+            for(SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
                 SkillDiscoveryStore[-int32(_spell_idx->second->skillId)].push_back( SkillDiscoveryEntry(spellId, chance) );
-            }
         }
         else
         {
@@ -136,7 +133,7 @@ void LoadSkillDiscoveryTable()
 
     sLog.outString();
     sLog.outString( ">> Loaded %u skill discovery definitions", count );
-    if(!ssNonDiscoverableEntries.str().empty())
+    if (!ssNonDiscoverableEntries.str().empty())
         sLog.outErrorDb("Some items can't be successfully discovered: have in chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n%s",ssNonDiscoverableEntries.str().c_str());
 }
 
