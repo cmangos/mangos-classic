@@ -195,6 +195,7 @@ enum BattleGroundTeamId
     BG_TEAM_ALLIANCE        = 0,
     BG_TEAM_HORDE           = 1
 };
+#define BG_TEAMS_COUNT  2
 
 enum BattleGroundJoinError
 {
@@ -441,6 +442,9 @@ class BattleGround
         uint32 GetPlayerTeam(uint64 guid);
 
         void SetDeleteThis() {m_SetDeleteThis = true;}
+
+        /* virtual score-array - get's used in bg-subclasses */
+        int32 m_TeamScores[BG_TEAMS_COUNT];
 
     protected:
         //this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround
