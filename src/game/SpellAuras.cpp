@@ -1224,15 +1224,22 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
     uint64 spellFamilyMask = m_spellmod->mask;
 
+    // collect list of affected auras before spell mod deeltion
+    std::set<uint32> affectedPassives;
+
+    for(Unit::AuraMap::const_iterator itr = m_target->GetAuras().begin(); itr != m_target->GetAuras().end(); ++itr)
+        if (itr->second->IsPassive() && itr->second->IsPermanent() &&
+            itr->second->GetCasterGUID() == m_target->GetGUID() && ((Player*)m_target)->IsAffectedBySpellmod(itr->second->GetSpellProto(),m_spellmod))
+            affectedPassives.insert(itr->second->GetId());
+
+    // unapply spell mod (including deleting m_spellmod)
     ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
 
-    // reapply some passive spells after add/remove related spellmods
-    if (spellInfo->SpellFamilyName==SPELLFAMILY_WARRIOR && (spellFamilyMask & UI64LIT(0x0000100000000000)))
+    // reaplly talents to own passive persistent auras
+    for(std::set<uint32>::const_iterator set_itr = affectedPassives.begin(); set_itr != affectedPassives.end(); ++set_itr)
     {
-        m_target->RemoveAurasDueToSpell(45471);
-
-        if(apply)
-            m_target->CastSpell(m_target, 45471, true);
+        m_target->RemoveAurasDueToSpell(*set_itr);
+        m_target->CastSpell(m_target, *set_itr, true);
     }
 }
 

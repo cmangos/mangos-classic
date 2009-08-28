@@ -36,6 +36,7 @@ See an example below:
          |   |
          |   MaNGOS master commit revison related to sql update.
          |   It included in commit description in form [6936] as you can see at http://github.com/mangos/mangos/commits/mangos-0.12
+         |   It can be absent (and replaced by ____) if sql update not really backported but only mangos-0.12 specific.
          |
          Order_number set special order for apply sql updates from different backported revisions in mangos-0.12 branch
 
