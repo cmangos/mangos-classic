@@ -199,6 +199,19 @@ bool WorldSession::Update(uint32 /*diff*/)
                         }
                         // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
                         break;
+                    case STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT:
+                        if(!_player && !m_playerRecentlyLogout)
+                        {
+                            LogUnexpectedOpcode(packet, "the player has not logged in yet and not recently logout");
+                        }
+                        else
+                        {
+                            // not expected _player or must checked in packet hanlder
+                            (this->*opHandle.handler)(*packet);
+                            if (sLog.IsOutDebug() && packet->rpos() < packet->wpos())
+                                LogUnprocessedTail(packet);
+                        }
+                        break;
                     case STATUS_TRANSFER:
                         if(!_player)
                             LogUnexpectedOpcode(packet, "the player has not logged in yet");
@@ -418,7 +431,7 @@ void WorldSession::LogoutPlayer(bool Save)
         _player->CleanupsBeforeDelete();                    // do some cleanup before deleting to prevent crash at crossreferences to already deleted data
 
         delete _player;
-        _player = NULL;
+        SetPlayer(NULL);
 
         ///- Send the 'logout complete' packet to the client
         WorldPacket data( SMSG_LOGOUT_COMPLETE, 0 );

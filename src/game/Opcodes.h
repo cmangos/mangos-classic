@@ -1102,9 +1102,10 @@ enum Opcodes
 /// Player state
 enum SessionStatus
 {
-    STATUS_AUTHED = 0,                                      ///< Player authenticated
-    STATUS_LOGGEDIN,                                        ///< Player in game
-    STATUS_TRANSFER,                                        ///< Player transferring to another map
+    STATUS_AUTHED = 0,                                      ///< Player authenticated (_player==NULL, m_playerRecentlyLogout = false or will be reset before handler call)
+    STATUS_LOGGEDIN,                                        ///< Player in game (_player!=NULL, inWorld())
+    STATUS_TRANSFER,                                        ///< Player transferring to another map (_player!=NULL, !inWorld())
+    STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT,                    ///< _player!= NULL or _player==NULL && m_playerRecentlyLogout)
     STATUS_NEVER                                            ///< Opcode not accepted from client (deprecated or server side only)
 };
 
