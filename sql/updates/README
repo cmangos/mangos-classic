@@ -57,7 +57,7 @@ MaNGOS 0.12 release and then sql updates from MaNGOS 0.13 sql/updates directory 
 
 DO NOT use git_id tool for mangos-0.12 branch or any branch different from master.
 
-If backported revision include sql update in form that can be re-apply without problem mutiply times
+Possible use simplifed steps if backported revision include sql update in form that can be re-apply without problem mutiply times
 then:
 
 1. Rename sql update from master form (6939_01_mangos_quest_template.sql) to mangos-0.12 form (001_6939_01_mangos_quest_template.sql)
@@ -80,6 +80,8 @@ then:
 2.3: Form final 0.12 guard query
      (ALTER TABLE db_version CHANGE COLUMN required_2008_12_15_01_mangos_arenas required_020_7643_01_mangos_db_version bit;)
 2.4: Update field name in db version table (db_version in mangos.sql in our case) to new field name (required_020_7643_01_mangos_db_version)
+2.5: Update field name in affected DB related define (REVISION_DB_MANGOS) in src/shared/revision_sql/h
+     to new field name (required_020_7643_01_mangos_db_version)
 3. Fix/update sql update file name in slq/updates/Makefile.am
 
 4. Write undo sql update for sql/updates/before_upgrade_to_0.13 directory.
