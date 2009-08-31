@@ -718,7 +718,7 @@ bool ChatHandler::HandleGameObjectAddCommand(const char* args)
     GameObject* pGameObj = new GameObject;
     uint32 db_lowGUID = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-    if (!pGameObj->Create(db_lowGUID, goI->id, map, x, y, z, o, 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
+    if (!pGameObj->Create(db_lowGUID, gInfo->id, map, x, y, z, o, 0.0f, 0.0f, 0.0f, 0.0f, 0, GO_STATE_READY))
     {
         delete pGameObj;
         return false;
