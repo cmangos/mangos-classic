@@ -776,10 +776,10 @@ void Player::StopMirrorTimer(MirrorTimerType Type)
     GetSession()->SendPacket( &data );
 }
 
-void Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
+uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 {
     if(!isAlive() || isGameMaster())
-        return;
+        return 0;
 
     // Absorb, resist some environmental damage type
     uint32 absorb = 0;
@@ -799,7 +799,7 @@ void Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     data << (uint32)resist; // resist
     SendMessageToSet(&data, true);
 
-    DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+    uint32 final_damage = DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
     if(type==DAMAGE_FALL && !isAlive())                     // DealDamage not apply item durability loss at self damage
     {
@@ -809,6 +809,8 @@ void Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
         WorldPacket data2(SMSG_DURABILITY_DAMAGE_DEATH, 0);
         GetSession()->SendPacket(&data2);
     }
+
+    return final_damage;
 }
 
 int32 Player::getMaxTimer(MirrorTimerType timer)
@@ -18381,49 +18383,6 @@ void Player::AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore cons
     }
 }
 
-void Player::HandleFall(MovementInfo const& movementInfo)
-{
-    // calculate total z distance of the fall
-    float z_diff = m_lastFallZ - movementInfo.z;
-    sLog.outDebug("zDiff = %f", z_diff);
-
-    //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
-    // 14.57 can be calculated by resolving damageperc formula below to 0
-    if (z_diff >= 14.57f && !isDead() && !isGameMaster() &&
-        !HasAuraType(SPELL_AURA_HOVER) && !HasAuraType(SPELL_AURA_FEATHER_FALL) &&
-        !HasAuraType(SPELL_AURA_FLY) && !IsImmunedToDamage(SPELL_SCHOOL_MASK_NORMAL) )
-    {
-        //Safe fall, fall height reduction
-        int32 safe_fall = GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);
-
-        float damageperc = 0.018f*(z_diff-safe_fall)-0.2426f;
-
-        if(damageperc >0 )
-        {
-            uint32 damage = (uint32)(damageperc * GetMaxHealth()*sWorld.getRate(RATE_DAMAGE_FALL));
-
-            float height = movementInfo.z;
-            UpdateGroundPositionZ(movementInfo.x,movementInfo.y,height);
-
-            if (damage > 0)
-            {
-                //Prevent fall damage from being more than the player maximum health
-                if (damage > GetMaxHealth())
-                    damage = GetMaxHealth();
-
-                // Gust of Wind
-                if (GetDummyAura(43621))
-                    damage = GetMaxHealth()/2;
-
-                EnvironmentalDamage(DAMAGE_FALL, damage);
-            }
-
-            //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-            DEBUG_LOG("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d" , movementInfo.z, height, GetPositionZ(), movementInfo.fallTime, height, damage, safe_fall);
-        }
-    }
-}
-
 void Player::UpdateFallInformationIfNeed( MovementInfo const& minfo,uint16 opcode )
 {
     if (m_lastFallTime >= minfo.fallTime || m_lastFallZ <=minfo.z || opcode == MSG_MOVE_FALL_LAND)
@@ -18510,6 +18469,49 @@ uint8 Player::CanEquipUniqueItem( ItemPrototype const* itemProto, uint8 except_s
     }
 
     return EQUIP_ERR_OK;
+}
+
+void Player::HandleFall(MovementInfo const& movementInfo)
+{
+    // calculate total z distance of the fall
+    float z_diff = m_lastFallZ - movementInfo.z;
+    sLog.outDebug("zDiff = %f", z_diff);
+
+    //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
+    // 14.57 can be calculated by resolving damageperc formula below to 0
+    if (z_diff >= 14.57f && !isDead() && !isGameMaster() &&
+        !HasAuraType(SPELL_AURA_HOVER) && !HasAuraType(SPELL_AURA_FEATHER_FALL) &&
+        !HasAuraType(SPELL_AURA_FLY) && !IsImmunedToDamage(SPELL_SCHOOL_MASK_NORMAL) )
+    {
+        //Safe fall, fall height reduction
+        int32 safe_fall = GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);
+
+        float damageperc = 0.018f*(z_diff-safe_fall)-0.2426f;
+
+        if(damageperc >0 )
+        {
+            uint32 damage = (uint32)(damageperc * GetMaxHealth()*sWorld.getRate(RATE_DAMAGE_FALL));
+
+            float height = movementInfo.z;
+            UpdateGroundPositionZ(movementInfo.x,movementInfo.y,height);
+
+            if (damage > 0)
+            {
+                //Prevent fall damage from being more than the player maximum health
+                if (damage > GetMaxHealth())
+                    damage = GetMaxHealth();
+
+                // Gust of Wind
+                if (GetDummyAura(43621))
+                    damage = GetMaxHealth()/2;
+
+                EnvironmentalDamage(DAMAGE_FALL, damage);
+            }
+
+            //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
+            DEBUG_LOG("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d" , movementInfo.z, height, GetPositionZ(), movementInfo.fallTime, height, damage, safe_fall);
+        }
+    }
 }
 
 void Player::LearnTalent(uint32 talentId, uint32 talentRank)
