@@ -710,8 +710,6 @@ void SpellMgr::LoadSpellTargetPositions()
 
         bar.step();
 
-        ++count;
-
         uint32 Spell_ID = fields[0].GetUInt32();
 
         SpellTargetPosition st;
@@ -758,6 +756,7 @@ void SpellMgr::LoadSpellTargetPositions()
         }
 
         mSpellTargetPositions[Spell_ID] = st;
+        ++count;
 
     } while( result->NextRow() );
 
