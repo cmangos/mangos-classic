@@ -107,6 +107,9 @@ pkgdata_DATA = \
 	063_8444_01_mangos_mangos_string.sql \
 	064_8462_01_mangos_creature_ai_texts.sql \
 	065_8469_01_characters_character_spell.sql \
+	066_8402_01_characters_guild_eventlog.sql \
+	066_8402_02_characters_guild_bank_eventlog.sql \
+	066_8409_01_characters_guild.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -193,4 +196,7 @@ EXTRA_DIST = \
 	063_8444_01_mangos_mangos_string.sql \
 	064_8462_01_mangos_creature_ai_texts.sql \
 	065_8469_01_characters_character_spell.sql \
+	066_8402_01_characters_guild_eventlog.sql \
+	066_8402_02_characters_guild_bank_eventlog.sql \
+	066_8409_01_characters_guild.sql \
 	README
