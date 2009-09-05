@@ -353,7 +353,7 @@ class Spell
 
         typedef std::list<Unit*> UnitList;
         void FillTargetMap();
-        void SetTargetMap(uint32 i,uint32 cur,UnitList& TagUnitMap);
+        void SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap);
 
         void FillAreaTargets( UnitList& TagUnitMap, float x, float y, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets );
         void FillRaidOrPartyTargets( UnitList &TagUnitMap, Unit* target, float radius, bool raid, bool withPets, bool withcaster );
