@@ -106,6 +106,7 @@ pkgdata_DATA = \
 	062______01_mangos_spell_learn_spell.sql \
 	063_8444_01_mangos_mangos_string.sql \
 	064_8462_01_mangos_creature_ai_texts.sql \
+	065_8469_01_characters_character_spell.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -191,4 +192,5 @@ EXTRA_DIST = \
 	062______01_mangos_spell_learn_spell.sql \
 	063_8444_01_mangos_mangos_string.sql \
 	064_8462_01_mangos_creature_ai_texts.sql \
+	065_8469_01_characters_character_spell.sql \
 	README
