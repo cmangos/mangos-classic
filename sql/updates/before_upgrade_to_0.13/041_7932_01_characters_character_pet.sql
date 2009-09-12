@@ -6,4 +6,3 @@ UPDATE character_pet
 UPDATE character_pet
   SET abdata = CONCAT('0 0 0 0 0 0 ',abdata,'0 0 0 0 0 0 ')
   WHERE length(SUBSTRING_INDEX(abdata, ' ', 8)) < length(abdata) and length(SUBSTRING_INDEX(abdata, ' ', 9)) >= length(abdata);
-
