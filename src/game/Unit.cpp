@@ -6173,6 +6173,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             // Shadowguard
             if((auraSpellInfo->SpellFamilyFlags & UI64LIT(0x80000000)) && auraSpellInfo->SpellVisual==7958)
             {
+                // ignore self damage (self applied damage spell effect/etc)
+                if (pVictim == this)
+                    return false;
+
                 switch(triggeredByAura->GetSpellProto()->Id)
                 {
                     case 18137:
