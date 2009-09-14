@@ -38,6 +38,7 @@
 #include "AddonHandler.h"
 #include "Opcodes.h"
 #include "Database/DatabaseEnv.h"
+#include "Auth/BigNumber.h"
 #include "Auth/Sha1.h"
 #include "WorldSession.h"
 #include "WorldSocketMgr.h"
