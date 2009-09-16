@@ -75,17 +75,17 @@ enum BG_AB_NodeObjectId
 enum BG_AB_ObjectType
 {
     // for all 5 node points 8*5=40 objects
-    BG_AB_OBJECT_BANNER_NEUTRAL     = 0,
-    BG_AB_OBJECT_BANNER_CONT_A      = 1,
-    BG_AB_OBJECT_BANNER_CONT_H      = 2,
-    BG_AB_OBJECT_BANNER_ALLY        = 3,
-    BG_AB_OBJECT_BANNER_HORDE       = 4,
-    BG_AB_OBJECT_AURA_ALLY          = 5,
-    BG_AB_OBJECT_AURA_HORDE         = 6,
-    BG_AB_OBJECT_AURA_CONTESTED     = 7,
+    BG_AB_OBJECT_BANNER_NEUTRAL          = 0,
+    BG_AB_OBJECT_BANNER_CONT_A           = 1,
+    BG_AB_OBJECT_BANNER_CONT_H           = 2,
+    BG_AB_OBJECT_BANNER_ALLY             = 3,
+    BG_AB_OBJECT_BANNER_HORDE            = 4,
+    BG_AB_OBJECT_AURA_ALLY               = 5,
+    BG_AB_OBJECT_AURA_HORDE              = 6,
+    BG_AB_OBJECT_AURA_CONTESTED          = 7,
     //gates
-    BG_AB_OBJECT_GATE_A             = 40,
-    BG_AB_OBJECT_GATE_H             = 41,
+    BG_AB_OBJECT_GATE_A                  = 40,
+    BG_AB_OBJECT_GATE_H                  = 41,
     //buffs
     BG_AB_OBJECT_SPEEDBUFF_STABLES       = 42,
     BG_AB_OBJECT_REGENBUFF_STABLES       = 43,
@@ -128,8 +128,8 @@ enum BG_AB_Timers
 
 enum BG_AB_Score
 {
-    BG_AB_MAX_TEAM_SCORE                = 2000,
-    BG_AB_WARNING_SCORE                 = 1800
+    BG_AB_WARNING_NEAR_VICTORY_SCORE    = 1800,
+    BG_AB_MAX_TEAM_SCORE                = 2000
 };
 
 /* do NOT change the order, else wrong behaviour */
@@ -162,12 +162,12 @@ enum BG_AB_NodeStatus
 
 enum BG_AB_Sounds
 {
-    SOUND_NODE_CLAIMED                  = 8192,
-    SOUND_NODE_CAPTURED_ALLIANCE        = 8173,
-    SOUND_NODE_CAPTURED_HORDE           = 8213,
-    SOUND_NODE_ASSAULTED_ALLIANCE       = 8174,
-    SOUND_NODE_ASSAULTED_HORDE          = 8212,
-    SOUND_NEAR_VICTORY                  = 8456
+    BG_AB_SOUND_NODE_CLAIMED            = 8192,
+    BG_AB_SOUND_NODE_CAPTURED_ALLIANCE  = 8173,
+    BG_AB_SOUND_NODE_CAPTURED_HORDE     = 8213,
+    BG_AB_SOUND_NODE_ASSAULTED_ALLIANCE = 8174,
+    BG_AB_SOUND_NODE_ASSAULTED_HORDE    = 8212,
+    BG_AB_SOUND_NEAR_VICTORY            = 8456
 };
 
 // x, y, z, o
@@ -271,13 +271,13 @@ class BattleGroundAB : public BattleGround
             2: horde contested
             3: ally occupied
             4: horde occupied     */
-        uint8             m_Nodes[BG_AB_DYNAMIC_NODES_COUNT];
-        uint8             m_prevNodes[BG_AB_DYNAMIC_NODES_COUNT];
-        BG_AB_BannerTimer m_BannerTimers[BG_AB_DYNAMIC_NODES_COUNT];
-        uint32            m_NodeTimers[BG_AB_DYNAMIC_NODES_COUNT];
-        uint32            m_lastTick[2];
-        uint32            m_HonorScoreTics[2];
-        uint32            m_ReputationScoreTics[2];
-        bool              m_IsInformedNearVictory;
+        uint8               m_Nodes[BG_AB_DYNAMIC_NODES_COUNT];
+        uint8               m_prevNodes[BG_AB_DYNAMIC_NODES_COUNT];
+        BG_AB_BannerTimer   m_BannerTimers[BG_AB_DYNAMIC_NODES_COUNT];
+        uint32              m_NodeTimers[BG_AB_DYNAMIC_NODES_COUNT];
+        uint32              m_lastTick[BG_TEAMS_COUNT];
+        uint32              m_HonorScoreTics[BG_TEAMS_COUNT];
+        uint32              m_ReputationScoreTics[BG_TEAMS_COUNT];
+        bool                m_IsInformedNearVictory;
 };
 #endif
