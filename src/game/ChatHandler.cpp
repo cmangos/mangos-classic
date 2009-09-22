@@ -575,7 +575,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     MaNGOS::PlayerDistWorker<MaNGOS::LocalizedPacketDo<MaNGOS::EmoteChatBuilder > > emote_worker(GetPlayer(),sWorld.getConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE),emote_do);
     TypeContainerVisitor<MaNGOS::PlayerDistWorker<MaNGOS::LocalizedPacketDo<MaNGOS::EmoteChatBuilder > >, WorldTypeMapContainer > message(emote_worker);
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, message, *GetPlayer()->GetMap());
+    cell_lock->Visit(cell_lock, message, *GetPlayer()->GetMap(), *GetPlayer(), sWorld.getConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE));
 
     //Send scripted event call
     if (unit && unit->GetTypeId()==TYPEID_UNIT && ((Creature*)unit)->AI())
