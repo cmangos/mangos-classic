@@ -1789,3 +1789,11 @@ void WorldObject::PlayDirectSound( uint32 sound_id, Player* target /*= NULL*/ )
     else
         SendMessageToSet( &data, true );
 }
+
+void WorldObject::UpdateObjectVisibility()
+{
+    CellPair p = MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY());
+    Cell cell(p);
+
+    GetMap()->UpdateObjectVisibility(this, cell, p);
+}
