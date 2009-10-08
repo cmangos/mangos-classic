@@ -32,6 +32,8 @@ typedef std::deque<BattleGround*> BGFreeSlotQueueType;
 #define MAX_BATTLEGROUND_QUEUES 7                           // for level ranges 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70+
 
 typedef UNORDERED_MAP<uint32, BattleGroundTypeId> BattleMastersMap;
+typedef UNORDERED_MAP<uint32, BattleGroundEventIdx> CreatureBattleEventIndexesMap;
+typedef UNORDERED_MAP<uint32, BattleGroundEventIdx> GameObjectBattleEventIndexesMap;
 
 
 #define MAX_BATTLEGROUND_QUEUE_TYPES 8
@@ -185,7 +187,6 @@ class BattleGroundMgr
         void BuildBattleGroundStatusPacket(WorldPacket *data, BattleGround *bg, uint32 team, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, uint32 arenatype = 0, uint8 israted = 0);
         void BuildPlaySoundPacket(WorldPacket *data, uint32 soundid);
 
-        void SendAreaSpiritHealerQueryOpcode(Player *pl, BattleGround *bg, const uint64& guid);
         /* Player invitation */
         // called from Queue update, or from Addplayer to queue
         void InvitePlayer(Player* plr, uint32 bgInstanceGUID, uint32 team);
@@ -237,6 +238,22 @@ class BattleGroundMgr
             return BATTLEGROUND_WS;
         }
 
+        void LoadBattleEventIndexes();
+        const BattleGroundEventIdx GetCreatureEventIndex(uint32 dbTableGuidLow) const
+        {
+            CreatureBattleEventIndexesMap::const_iterator itr = m_CreatureBattleEventIndexMap.find(dbTableGuidLow);
+            if(itr != m_CreatureBattleEventIndexMap.end())
+                return itr->second;
+            return m_CreatureBattleEventIndexMap.find(-1)->second;
+        }
+        const BattleGroundEventIdx GetGameObjectEventIndex(uint32 dbTableGuidLow) const
+        {
+            GameObjectBattleEventIndexesMap::const_iterator itr = m_GameObjectBattleEventIndexMap.find(dbTableGuidLow);
+            if(itr != m_GameObjectBattleEventIndexMap.end())
+                return itr->second;
+            return m_GameObjectBattleEventIndexMap.find(-1)->second;
+        }
+
         bool isArenaTesting() const { return m_ArenaTesting; }
         bool isTesting() const { return m_Testing; }
 
@@ -247,6 +264,8 @@ class BattleGroundMgr
         static uint8 BGArenaType(uint32 bgQueueTypeId);
     private:
         BattleMastersMap    mBattleMastersMap;
+        CreatureBattleEventIndexesMap m_CreatureBattleEventIndexMap;
+        GameObjectBattleEventIndexesMap m_GameObjectBattleEventIndexMap;
 
         /* Battlegrounds */
         BattleGroundSet m_BattleGrounds;

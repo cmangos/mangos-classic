@@ -240,7 +240,7 @@ BattleGroundMap* MapInstanced::CreateBattleGroundMap(uint32 InstanceId, BattleGr
 
     sLog.outDebug("MapInstanced::CreateBattleGroundMap: instance:%d for map:%d and bgType:%d created.", InstanceId, GetId(), bg->GetTypeID());
 
-    BattleGroundMap *map = new BattleGroundMap(GetId(), GetGridExpiry(), InstanceId, this);
+    BattleGroundMap *map = new BattleGroundMap(GetId(), GetGridExpiry(), InstanceId);
     ASSERT(map->IsBattleGroundOrArena());
     map->SetBG(bg);
 

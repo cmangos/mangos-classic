@@ -26,7 +26,6 @@
 
 BattleGroundNA::BattleGroundNA()
 {
-    m_BgObjects.resize(BG_NA_OBJECT_MAX);
 }
 
 BattleGroundNA::~BattleGroundNA()
@@ -52,9 +51,6 @@ void BattleGroundNA::Update(uint32 diff)
                 EndNow();
                 return;
             }
-            for(uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_4; i++)
-                SpawnBGObject(i, RESPAWN_IMMEDIATELY);
-
             SetStartDelayTime(START_DELAY1);
             SendMessageToAll(LANG_ARENA_ONE_MINUTE);
         }
@@ -75,11 +71,7 @@ void BattleGroundNA::Update(uint32 diff)
         {
             m_Events |= 0x10;
 
-            for(uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_2; i++)
-                DoorOpen(i);
-
-            for(uint32 i = BG_NA_OBJECT_BUFF_1; i <= BG_NA_OBJECT_BUFF_2; i++)
-                SpawnBGObject(i, 60);
+            OpenDoorEvent(BG_EVENT_DOOR);
 
             SendMessageToAll(LANG_ARENA_BEGUN);
             SetStatus(STATUS_IN_PROGRESS);
@@ -198,19 +190,6 @@ void BattleGroundNA::ResetBGSubclass()
 
 bool BattleGroundNA::SetupBattleGround()
 {
-    // gates
-    if(    !AddObject(BG_NA_OBJECT_DOOR_1, BG_NA_OBJECT_TYPE_DOOR_1, 4031.854, 2966.833, 12.6462, -2.648788, 0, 0, 0.9697962, -0.2439165, RESPAWN_IMMEDIATELY)
-        || !AddObject(BG_NA_OBJECT_DOOR_2, BG_NA_OBJECT_TYPE_DOOR_2, 4081.179, 2874.97, 12.39171, 0.4928045, 0, 0, 0.2439165, 0.9697962, RESPAWN_IMMEDIATELY)
-        || !AddObject(BG_NA_OBJECT_DOOR_3, BG_NA_OBJECT_TYPE_DOOR_3, 4023.709, 2981.777, 10.70117, -2.648788, 0, 0, 0.9697962, -0.2439165, RESPAWN_IMMEDIATELY)
-        || !AddObject(BG_NA_OBJECT_DOOR_4, BG_NA_OBJECT_TYPE_DOOR_4, 4090.064, 2858.438, 10.23631, 0.4928045, 0, 0, 0.2439165, 0.9697962, RESPAWN_IMMEDIATELY)
-    // buffs
-        || !AddObject(BG_NA_OBJECT_BUFF_1, BG_NA_OBJECT_TYPE_BUFF_1, 4009.189941, 2895.250000, 13.052700, -1.448624, 0, 0, 0.6626201, -0.7489557, 120)
-        || !AddObject(BG_NA_OBJECT_BUFF_2, BG_NA_OBJECT_TYPE_BUFF_2, 4103.330078, 2946.350098, 13.051300, -0.06981307, 0, 0, 0.03489945, -0.9993908, 120))
-    {
-        sLog.outErrorDb("BatteGroundNA: Failed to spawn some object!");
-        return false;
-    }
-
     return true;
 }
 

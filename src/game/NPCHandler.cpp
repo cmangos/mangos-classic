@@ -31,8 +31,6 @@
 #include "ScriptCalls.h"
 #include "Creature.h"
 #include "Pet.h"
-#include "BattleGroundMgr.h"
-#include "BattleGround.h"
 #include "Guild.h"
 
 void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
@@ -267,17 +265,8 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
         unit->StopMoving();
     }
 
-    // If spiritguide, no need for gossip menu, just put player into resurrect queue
     if (unit->isSpiritGuide())
-    {
-        BattleGround *bg = _player->GetBattleGround();
-        if(bg)
-        {
-            bg->AddPlayerToResurrectQueue(unit->GetGUID(), _player->GetGUID());
-            sBattleGroundMgr.SendAreaSpiritHealerQueryOpcode(_player, bg, unit->GetGUID());
-            return;
-        }
-    }
+        unit->SendAreaSpiritHealerQueryOpcode(_player);
 
     if(!Script->GossipHello( _player, unit ))
     {
