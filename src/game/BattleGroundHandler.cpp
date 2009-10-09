@@ -50,7 +50,10 @@ void WorldSession::HandleBattleMasterHelloOpcode( WorldPacket & recv_data )
 
     BattleGroundTypeId bgTypeId = sBattleGroundMgr.GetBattleMasterBG(unit->GetEntry());
 
-    if(!_player->GetBGAccessByLevel(bgTypeId))
+    if (bgTypeId == BATTLEGROUND_TYPE_NONE)
+        return;
+
+    if (!_player->GetBGAccessByLevel(bgTypeId))
     {
                                                             // temp, must be gossip message...
         SendNotification(LANG_YOUR_BG_LEVEL_REQ_ERROR);

@@ -696,6 +696,9 @@ bool Creature::isCanInteractWithBattleMaster(Player* pPlayer, bool msg) const
         return false;
 
     BattleGroundTypeId bgTypeId = sBattleGroundMgr.GetBattleMasterBG(GetEntry());
+    if (bgTypeId == BATTLEGROUND_TYPE_NONE)
+        return false;
+
     if(!msg)
         return pPlayer->GetBGAccessByLevel(bgTypeId);
 
@@ -950,6 +953,11 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
         case GOSSIP_OPTION_BATTLEFIELD:
         {
             BattleGroundTypeId bgTypeId = sBattleGroundMgr.GetBattleMasterBG(GetEntry());
+            if (bgTypeId == BATTLEGROUND_TYPE_NONE)
+            {
+                sLog.outError("a user (guid %u) requested battlegroundlist from a npc who is no battlemaster", player->GetGUIDLow());
+                return;
+            }
             player->GetSession()->SendBattlegGroundList( GetGUID(), bgTypeId );
             break;
         }
