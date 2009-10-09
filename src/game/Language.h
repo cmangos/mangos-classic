@@ -750,7 +750,9 @@ enum MangosStrings
     //                                    1127 used in master branch
     LANG_TAXINODE_ENTRY_LIST_CHAT       = 1128,
     LANG_TAXINODE_ENTRY_LIST_CONSOLE    = 1129,
-    // Room for more level 3              1130-1199 not used
+    LANG_EVENT_STARTED                  = 1130,
+    LANG_EVENT_STOPPED                  = 1131,
+    // Room for more level 3              1132-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,

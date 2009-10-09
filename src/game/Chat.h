@@ -155,7 +155,7 @@ class ChatHandler
         bool HandleDebugSendSellErrorCommand(const char* args);
         bool HandleDebugSendSpellFailCommand(const char* args);
 
-        bool HandleEventActiveListCommand(const char* args);
+        bool HandleEventListCommand(const char* args);
         bool HandleEventStartCommand(const char* args);
         bool HandleEventStopCommand(const char* args);
         bool HandleEventInfoCommand(const char* args);
