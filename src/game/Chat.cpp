@@ -1019,6 +1019,8 @@ valid examples:
     ItemPrototype const* linkedItem;
     Quest const* linkedQuest;
     SpellEntry const *linkedSpell;
+    ItemRandomPropertiesEntry const* itemProperty;
+    ItemRandomSuffixEntry const* itemSuffix;
 
     while(!reader.eof())
     {
@@ -1027,6 +1029,8 @@ valid examples:
             linkedItem = NULL;
             linkedQuest = NULL;
             linkedSpell = NULL;
+            itemProperty = NULL;
+            itemSuffix = NULL;
 
             reader.ignore(255, '|');
         }
@@ -1143,10 +1147,48 @@ valid examples:
                         return false;
                     }
 
-                    char c = reader.peek();
+                    // the itementry is followed by several integers which describe an instance of this item
 
-                    // ignore enchants etc.
-                    while(c >='0' && c <='9' || c==':')
+                    // position relative after itemEntry
+                    const uint8 randomPropertyPosition = 6;
+
+                    int32 propertyId = 0;
+                    bool negativeNumber = false;
+                    char c;
+                    for(uint8 i=0; i<randomPropertyPosition; ++i)
+                    {
+                        propertyId = 0;
+                        negativeNumber = false;
+                        while((c = reader.get())!=':')
+                        {
+                            if(c >='0' && c<='9')
+                            {
+                                propertyId*=10;
+                                propertyId += c-'0';
+                            } else if(c == '-')
+                                negativeNumber = true;
+                            else
+                                return false;
+                        }
+                    }
+                    if (negativeNumber)
+                        propertyId *= -1;
+
+                    if (propertyId > 0)
+                    {
+                        itemProperty = sItemRandomPropertiesStore.LookupEntry(propertyId);
+                        if (!itemProperty)
+                            return false;
+                    }
+                    else if(propertyId < 0)
+                    {
+                        itemSuffix = sItemRandomSuffixStore.LookupEntry(-propertyId);
+                        if (!itemSuffix)
+                            return false;
+                    }
+
+                    // ignore other integers
+                    while ((c >= '0' && c <= '9') || c== ':')
                     {
                         reader.ignore(1);
                         c = reader.peek();
@@ -1351,22 +1393,34 @@ valid examples:
                     }
                     else if(linkedItem)
                     {
-                        if (strcmp(linkedItem->Name1, buffer) != 0)
+                        char* const* suffix = itemSuffix?itemSuffix->nameSuffix:(itemProperty?itemProperty->nameSuffix:NULL);
+
+                        std::string expectedName = std::string(linkedItem->Name1);
+                        if (suffix)
+                        {
+                            expectedName += " ";
+                            expectedName += suffix[LOCALE_enUS];
+                        }
+
+                        if (expectedName != buffer)
                         {
                             ItemLocale const *il = objmgr.GetItemLocale(linkedItem->ItemId);
 
-                            if (!il)
-                            {
-#ifdef MANGOS_DEBUG
-                                sLog.outBasic("ChatHandler::isValidChatMessage linked item name doesn't is wrong and there is no localization");
-#endif
-                                return false;
-                            }
-
                             bool foundName = false;
-                            for(uint8 i=0; i<il->Name.size(); ++i)
+                            for(uint8 i=LOCALE_koKR; i<MAX_LOCALE; ++i)
                             {
-                                if (il->Name[i] == buffer)
+                                int8 dbIndex = objmgr.GetIndexForLocale(LocaleConstant(i));
+                                if (dbIndex == -1 || il == NULL || dbIndex >= il->Name.size())
+                                    // using strange database/client combinations can lead to this case
+                                    expectedName = linkedItem->Name1;
+                                else
+                                    expectedName = il->Name[dbIndex];
+                                if (suffix)
+                                {
+                                    expectedName += " ";
+                                    expectedName += suffix[i];
+                                }
+                                if ( expectedName == buffer)
                                 {
                                     foundName = true;
                                     break;

@@ -431,14 +431,14 @@ struct ItemRandomPropertiesEntry
     //char*     internalName                                // 1   unused
     uint32    enchant_id[3];                                // 2-4
                                                             // 5-6 unused, 0 only values, reserved for additional enchantments?
-    //char*     nameSuffix[16]                              // 7-22, unused
+    char*     nameSuffix[16];                               // 7-22
                                                             // 23 nameSufix flags, unused
 };
 
 struct ItemRandomSuffixEntry
 {
     uint32    ID;                                           // 0
-    //char*     name[16]                                    // 1-16 unused
+    char*     nameSuffix[16];                               // 1-16
                                                             // 17, name flags, unused
                                                             // 18  unused
     uint32    enchant_id[3];                                // 19-21
