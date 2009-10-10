@@ -1,5 +1,3 @@
-ALTER TABLE db_version CHANGE COLUMN required_8607_01_mangos_string required_8607_02_mangos_command bit;
-
 DELETE FROM command where name='event activelist';
 
 INSERT INTO `command` VALUES
