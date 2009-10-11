@@ -9613,7 +9613,7 @@ Item* Player::_StoreItem( uint16 pos, Item *pItem, uint32 count, bool clone, boo
             if( IsInWorld() && update )
             {
                 pItem->AddToWorld();
-                pItem->SendUpdateToPlayer( this );
+                pItem->SendCreateUpdateToPlayer( this );
             }
 
             pItem->SetState(ITEM_CHANGED, this);
@@ -9624,7 +9624,7 @@ Item* Player::_StoreItem( uint16 pos, Item *pItem, uint32 count, bool clone, boo
             if( IsInWorld() && update )
             {
                 pItem->AddToWorld();
-                pItem->SendUpdateToPlayer( this );
+                pItem->SendCreateUpdateToPlayer( this );
             }
             pItem->SetState(ITEM_CHANGED, this);
             pBag->SetState(ITEM_CHANGED, this);
@@ -9644,7 +9644,7 @@ Item* Player::_StoreItem( uint16 pos, Item *pItem, uint32 count, bool clone, boo
 
         pItem2->SetCount( pItem2->GetCount() + count );
         if (IsInWorld() && update)
-            pItem2->SendUpdateToPlayer( this );
+            pItem2->SendCreateUpdateToPlayer( this );
 
         if (!clone)
         {
@@ -9734,7 +9734,7 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
         if( IsInWorld() && update )
         {
             pItem->AddToWorld();
-            pItem->SendUpdateToPlayer( this );
+            pItem->SendCreateUpdateToPlayer( this );
         }
 
         ApplyEquipCooldown(pItem);
@@ -9748,7 +9748,7 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
     {
         pItem2->SetCount( pItem2->GetCount() + pItem->GetCount() );
         if( IsInWorld() && update )
-            pItem2->SendUpdateToPlayer( this );
+            pItem2->SendCreateUpdateToPlayer( this );
 
         // delete item (it not in any slot currently)
         //pItem->DeleteFromDB();
@@ -9786,7 +9786,7 @@ void Player::QuickEquipItem( uint16 pos, Item *pItem)
         if( IsInWorld() )
         {
             pItem->AddToWorld();
-            pItem->SendUpdateToPlayer( this );
+            pItem->SendCreateUpdateToPlayer( this );
         }
     }
 }
@@ -9915,7 +9915,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
         // pItem->SetUInt64Value( ITEM_FIELD_OWNER, 0 ); not clear owner at remove (it will be set at store). This used in mail and auction code
         pItem->SetSlot( NULL_SLOT );
         if( IsInWorld() && update )
-            pItem->SendUpdateToPlayer( this );
+            pItem->SendCreateUpdateToPlayer( this );
     }
 }
 
@@ -10054,7 +10054,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update, bool uneq
                     ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
                     pItem->SetCount( pItem->GetCount() - count + remcount );
                     if (IsInWorld() & update)
-                        pItem->SendUpdateToPlayer( this );
+                        pItem->SendCreateUpdateToPlayer( this );
                     pItem->SetState(ITEM_CHANGED, this);
                     return;
                 }
@@ -10082,7 +10082,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update, bool uneq
                     ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
                     pItem->SetCount( pItem->GetCount() - count + remcount );
                     if (IsInWorld() & update)
-                        pItem->SendUpdateToPlayer( this );
+                        pItem->SendCreateUpdateToPlayer( this );
                     pItem->SetState(ITEM_CHANGED, this);
                     return;
                 }
@@ -10115,7 +10115,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update, bool uneq
                             ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
                             pItem->SetCount( pItem->GetCount() - count + remcount );
                             if (IsInWorld() && update)
-                                pItem->SendUpdateToPlayer( this );
+                                pItem->SendCreateUpdateToPlayer( this );
                             pItem->SetState(ITEM_CHANGED, this);
                             return;
                         }
@@ -10148,7 +10148,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update, bool uneq
                     ItemRemovedQuestCheck( pItem->GetEntry(), count - remcount );
                     pItem->SetCount( pItem->GetCount() - count + remcount );
                     if (IsInWorld() & update)
-                        pItem->SendUpdateToPlayer( this );
+                        pItem->SendCreateUpdateToPlayer( this );
                     pItem->SetState(ITEM_CHANGED, this);
                     return;
                 }
@@ -10233,7 +10233,7 @@ void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
         pItem->SetCount( pItem->GetCount() - count );
         count = 0;
         if( IsInWorld() & update )
-            pItem->SendUpdateToPlayer( this );
+            pItem->SendCreateUpdateToPlayer( this );
         pItem->SetState(ITEM_CHANGED, this);
     }
 }
@@ -10298,7 +10298,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
         }
 
         if( IsInWorld() )
-            pSrcItem->SendUpdateToPlayer( this );
+            pSrcItem->SendCreateUpdateToPlayer( this );
         pSrcItem->SetState(ITEM_CHANGED, this);
         StoreItem( dest, pNewItem, true);
     }
@@ -10318,7 +10318,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
         }
 
         if( IsInWorld() )
-            pSrcItem->SendUpdateToPlayer( this );
+            pSrcItem->SendCreateUpdateToPlayer( this );
         pSrcItem->SetState(ITEM_CHANGED, this);
         BankItem( dest, pNewItem, true);
     }
@@ -10338,7 +10338,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
         }
 
         if( IsInWorld() )
-            pSrcItem->SendUpdateToPlayer( this );
+            pSrcItem->SendCreateUpdateToPlayer( this );
         pSrcItem->SetState(ITEM_CHANGED, this);
         EquipItem( dest, pNewItem, true);
         AutoUnequipOffhandIfNeed();
@@ -10509,8 +10509,8 @@ void Player::SwapItem( uint16 src, uint16 dst )
                 pDstItem->SetState(ITEM_CHANGED, this);
                 if( IsInWorld() )
                 {
-                    pSrcItem->SendUpdateToPlayer( this );
-                    pDstItem->SendUpdateToPlayer( this );
+                    pSrcItem->SendCreateUpdateToPlayer( this );
+                    pDstItem->SendCreateUpdateToPlayer( this );
                 }
             }
             return;
@@ -16020,7 +16020,7 @@ void Player::HandleStealthedUnitsDetection()
         {
             if(!hasAtClient)
             {
-                (*i)->SendUpdateToPlayer(this);
+                (*i)->SendCreateUpdateToPlayer(this);
                 m_clientGUIDs.insert((*i)->GetGUID());
 
                 #ifdef MANGOS_DEBUG
@@ -17029,7 +17029,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
     {
         if(target->isVisibleForInState(this, viewPoint, false))
         {
-            target->SendUpdateToPlayer(this);
+            target->SendCreateUpdateToPlayer(this);
             if(target->GetTypeId()!=TYPEID_GAMEOBJECT||!((GameObject*)target)->IsTransport())
                 m_clientGUIDs.insert(target->GetGUID());
 
@@ -17083,7 +17083,6 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateD
         if(target->isVisibleForInState(this,viewPoint,false))
         {
             visibleNow.insert(target);
-            target->BuildUpdate(data_updates);
             target->BuildCreateUpdateBlockForPlayer(&data, this);
             UpdateVisibilityOf_helper(m_clientGUIDs,target);
 
