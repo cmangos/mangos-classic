@@ -52,5 +52,5 @@ void HmacHash::Finalize()
 {
     uint32 length = 0;
     HMAC_Final(&m_ctx, m_digest, &length);
-    ASSERT(length == SHA_DIGEST_LENGTH)
+    ASSERT(length == SHA_DIGEST_LENGTH);
 }
