@@ -36,6 +36,7 @@ class GameObject;
 class Group;
 class Player;
 class WorldPacket;
+class BattleGroundMap;
 
 struct WorldSafeLocsEntry;
 
@@ -176,10 +177,7 @@ enum ScoreType
     SCORE_GRAVEYARDS_DEFENDED   = 12,
     SCORE_TOWERS_ASSAULTED      = 13,
     SCORE_TOWERS_DEFENDED       = 14,
-    SCORE_MINES_CAPTURED        = 15,
-    SCORE_LEADERS_KILLED        = 16,
-    SCORE_SECONDARY_OBJECTIVES  = 17
-    // TODO : implement them
+    SCORE_SECONDARY_OBJECTIVES  = 15
 };
 
 enum ArenaType
@@ -348,6 +346,14 @@ class BattleGround
         void SetMapId(uint32 MapID) { m_MapId = MapID; }
         uint32 GetMapId() const { return m_MapId; }
 
+        /* Map pointers */
+        void SetBgMap(BattleGroundMap* map) { m_Map = map; }
+        BattleGroundMap* GetBgMap()
+        {
+            ASSERT(m_Map);
+            return m_Map;
+        }
+
         void SetTeamStartLoc(uint32 TeamID, float X, float Y, float Z, float O);
         void GetTeamStartLoc(uint32 TeamID, float &X, float &Y, float &Z, float &O) const
         {
@@ -380,6 +386,10 @@ class BattleGround
 
         void SendMessageToAll(char const* text);
         void SendMessageToAll(int32 entry);
+        // partially backported functions from master:
+        void SendMessageToAll(int32 entry, ChatMsg type, Player const* source = NULL);
+        void SendYellToAll(int32 entry, uint32 language, uint64 const& guid);
+        void SendYell2ToAll(int32 entry, uint32 language, uint64 const& guid, int32 arg1, int32 arg2);
 
         /* Raid Group */
         Group *GetBgRaid(uint32 TeamID) const { return TeamID == ALLIANCE ? m_BgRaids[BG_TEAM_ALLIANCE] : m_BgRaids[BG_TEAM_HORDE]; }
@@ -409,6 +419,7 @@ class BattleGround
         virtual void HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/) {}
         // must be implemented in BG subclass if need AND call base class generic code
         virtual void HandleKillPlayer(Player *player, Player *killer);
+        virtual void HandleKillUnit(Creature* /*unit*/, Player* /*killer*/) { return; };
 
         /* Battleground events */
         virtual void EventPlayerDroppedFlag(Player* /*player*/) {}
@@ -437,10 +448,14 @@ class BattleGround
                 return false;
             return m_ActiveEvents[event1] == event2;
         }
+        uint64 GetSingleCreatureGuid(uint8 event1, uint8 event2);
+
         void OpenDoorEvent(uint8 event1, uint8 event2 = 0);
         bool IsDoor(uint8 event1, uint8 event2);
 
         /* other things */
+        virtual void OnCreatureRespawn(Creature* /*creature*/) {}
+
         void HandleTriggerBuff(uint64 const& go_guid);
 
         // TODO: make this protected:
@@ -555,6 +570,7 @@ class BattleGround
 
         /* Start Location */
         uint32 m_MapId;
+        BattleGroundMap* m_Map;
         float m_TeamStartLocX[BG_TEAMS_COUNT];
         float m_TeamStartLocY[BG_TEAMS_COUNT];
         float m_TeamStartLocZ[BG_TEAMS_COUNT];

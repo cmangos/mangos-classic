@@ -30,7 +30,6 @@
 #include "Group.h"
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
-#include "Util.h"
 #include "Formulas.h"
 
 BattleGround::BattleGround()
@@ -61,6 +60,7 @@ BattleGround::BattleGround()
     m_MinPlayers        = 0;
 
     m_MapId             = 0;
+    m_Map               = NULL;
 
     m_TeamStartLocX[BG_TEAM_ALLIANCE]   = 0;
     m_TeamStartLocX[BG_TEAM_HORDE]      = 0;
@@ -109,10 +109,11 @@ BattleGround::~BattleGround()
     CharacterDatabase.PExecute("DELETE FROM instance WHERE id = '%u'",GetInstanceID());
     // remove from battlegrounds
     sBattleGroundMgr.RemoveBattleGround(GetInstanceID());
+
     // unload map
-    if(Map * map = MapManager::Instance().FindMap(GetMapId(), GetInstanceID()))
-        if(map->IsBattleGroundOrArena())
-            ((BattleGroundMap*)map)->SetUnload();
+    // map can be null at bg destruction
+    if (m_Map)
+        m_Map->SetUnload();
     // remove from bg free slot queue
     this->RemoveFromBGFreeSlotQueue();
 
@@ -492,6 +493,12 @@ void BattleGround::EndBattleGround(uint32 winner)
         {
             plr->ResurrectPlayer(1.0f);
             plr->SpawnCorpseBones();
+        }
+        else
+        {
+            //needed cause else in av some creatures will kill the players at the end
+            plr->CombatStop();
+            plr->getHostilRefManager().deleteReferences();
         }
 
         uint32 team = itr->second.Team;
@@ -1104,15 +1111,11 @@ void BattleGround::UpdatePlayerScore(Player *Source, uint32 type, uint32 value)
 
 bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime)
 {
-    Map * map = MapManager::Instance().FindMap(GetMapId(),GetInstanceID());
-    if(!map)
-        return false;
-
     // must be created this way, adding to godatamap would add it to the base map of the instance
     // and when loading it (in go::LoadFromDB()), a new guid would be assigned to the object, and a new object would be created
     // so we must create it specific for this instance
     GameObject * go = new GameObject;
-    if(!go->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT),entry, map,x,y,z,o,rotation0,rotation1,rotation2,rotation3,100,GO_STATE_READY))
+    if(!go->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT),entry, GetBgMap(),x,y,z,o,rotation0,rotation1,rotation2,rotation3,100,GO_STATE_READY))
     {
         sLog.outErrorDb("Gameobject template %u not found in database! BattleGround not created!", entry);
         sLog.outError("Cannot create gameobject template %u! BattleGround not created!", entry);
@@ -1151,7 +1154,7 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
 //it would be nice to correctly implement GO_ACTIVATED state and open/close doors in gameobject code
 void BattleGround::DoorClose(uint64 const& guid)
 {
-    GameObject *obj = HashMapHolder<GameObject>::Find(guid);
+    GameObject *obj = GetBgMap()->GetGameObject(guid);
     if (obj)
     {
         //if doors are open, close it
@@ -1170,7 +1173,7 @@ void BattleGround::DoorClose(uint64 const& guid)
 
 void BattleGround::DoorOpen(uint64 const& guid)
 {
-    GameObject *obj = HashMapHolder<GameObject>::Find(guid);
+    GameObject *obj = GetBgMap()->GetGameObject(guid);
     if (obj)
     {
         //change state to be sure they will be opened
@@ -1193,6 +1196,13 @@ void BattleGround::OnObjectDBLoad(Creature* creature)
         SpawnBGCreature(creature->GetGUID(), RESPAWN_ONE_DAY);
 }
 
+uint64 BattleGround::GetSingleCreatureGuid(uint8 event1, uint8 event2)
+{
+    BGCreatures::const_iterator itr = m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
+    if (itr != m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.end())
+        return *itr;
+    return 0;
+}
 
 void BattleGround::OnObjectDBLoad(GameObject* obj)
 {
@@ -1270,13 +1280,12 @@ void BattleGround::SpawnEvent(uint8 event1, uint8 event2, bool spawn)
 
 void BattleGround::SpawnBGObject(uint64 const& guid, uint32 respawntime)
 {
-    GameObject *obj = HashMapHolder<GameObject>::Find(guid);
+    Map* map = GetBgMap();
+
+    GameObject *obj = map->GetGameObject(guid);
     if(!obj)
         return;
-    Map * map = MapManager::Instance().FindMap(GetMapId(),GetInstanceID());
-    if(!map)
-        return;
-    if( respawntime == 0 )
+    if (respawntime == 0)
     {
         //we need to change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
         if (obj->getLootState() == GO_JUST_DEACTIVATED)
@@ -1294,9 +1303,7 @@ void BattleGround::SpawnBGObject(uint64 const& guid, uint32 respawntime)
 
 void BattleGround::SpawnBGCreature(uint64 const& guid, uint32 respawntime)
 {
-    Map * map = MapManager::Instance().FindMap(GetMapId(),GetInstanceID());
-    if(!map)
-        return;
+    Map* map = GetBgMap();
 
     Creature* obj = map->GetCreature(guid);
     if (!obj)
@@ -1317,15 +1324,16 @@ void BattleGround::SpawnBGCreature(uint64 const& guid, uint32 respawntime)
 
 bool BattleGround::DelObject(uint32 type)
 {
-    if(!m_BgObjects[type])
+    if (!m_BgObjects[type])
         return true;
 
-    GameObject *obj = HashMapHolder<GameObject>::Find(m_BgObjects[type]);
-    if(!obj)
+    GameObject *obj = GetBgMap()->GetGameObject(m_BgObjects[type]);
+    if (!obj)
     {
         sLog.outError("Can't find gobject guid: %u",GUID_LOPART(m_BgObjects[type]));
         return false;
     }
+
     obj->SetRespawnTime(0);                                 // not save respawn time
     obj->Delete();
     m_BgObjects[type] = 0;
@@ -1345,6 +1353,57 @@ void BattleGround::SendMessageToAll(int32 entry)
     WorldPacket data;
     ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, text, NULL);
     SendPacketToAll(&data);
+}
+
+// following functions are partially backported, (only the function call) from master
+void BattleGround::SendMessageToAll(int32 entry, ChatMsg type, Player const* /*source*/)
+{
+    char const* text = GetMangosString(entry);
+    WorldPacket data;
+    ChatHandler::FillMessageData(&data, NULL, type, LANG_UNIVERSAL, NULL, 0, text, NULL);
+    SendPacketToAll(&data);
+}
+
+void BattleGround::SendYellToAll(int32 entry, uint32 language, uint64 const& guid)
+{
+    Creature* source = GetBgMap()->GetCreature(guid);
+    if(!source)
+        return;
+    char buf[256];
+    sprintf(buf, GetMangosString(entry));
+    for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    {
+        WorldPacket data(SMSG_MESSAGECHAT, 200);
+        Player *plr = objmgr.GetPlayer(itr->first);
+        if(!plr)
+        {
+            sLog.outError("BattleGround: Player " UI64FMTD " not found!", itr->first);
+            continue;
+        }
+        source->BuildMonsterChat(&data, CHAT_MSG_MONSTER_YELL, buf, language, source->GetName(), itr->first);
+        plr->GetSession()->SendPacket(&data);
+    }
+}
+
+void BattleGround::SendYell2ToAll(int32 entry, uint32 language, uint64 const& guid, int32 arg1, int32 arg2)
+{
+    Creature* source = GetBgMap()->GetCreature(guid);
+    if(!source)
+        return;
+    char buf[256];
+    sprintf(buf, GetMangosString(entry), GetMangosString(arg1), GetMangosString(arg2));
+    for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    {
+        WorldPacket data(SMSG_MESSAGECHAT, 200);
+        Player *plr = objmgr.GetPlayer(itr->first);
+        if(!plr)
+        {
+            sLog.outError("BattleGround: Player " UI64FMTD " not found!", itr->first);
+            continue;
+        }
+        source->BuildMonsterChat(&data, CHAT_MSG_MONSTER_YELL, buf, language, source->GetName(), itr->first);
+        plr->GetSession()->SendPacket(&data);
+    }
 }
 
 void BattleGround::EndNow()
@@ -1370,8 +1429,8 @@ buffs are in their positions when battleground starts
 */
 void BattleGround::HandleTriggerBuff(uint64 const& go_guid)
 {
-    GameObject *obj = HashMapHolder<GameObject>::Find(go_guid);
-    if(!obj || obj->GetGoType() != GAMEOBJECT_TYPE_TRAP || !obj->isSpawned())
+    GameObject *obj = GetBgMap()->GetGameObject(go_guid);
+    if (!obj || obj->GetGoType() != GAMEOBJECT_TYPE_TRAP || !obj->isSpawned())
         return;
 
     // static buffs are already handled just by database and don't need
@@ -1396,7 +1455,7 @@ void BattleGround::HandleTriggerBuff(uint64 const& go_guid)
     //randomly select new buff
     uint8 buff = urand(0, 2);
     uint32 entry = obj->GetEntry();
-    if( m_BuffChange && entry != Buff_Entries[buff] )
+    if (m_BuffChange && entry != Buff_Entries[buff])
     {
         //despawn current buff
         SpawnBGObject(m_BgObjects[index], RESPAWN_ONE_DAY);
@@ -1416,8 +1475,6 @@ void BattleGround::HandleTriggerBuff(uint64 const& go_guid)
 
 void BattleGround::HandleKillPlayer( Player *player, Player *killer )
 {
-    //keep in mind that for arena this will have to be changed a bit
-
     // add +1 deaths
     UpdatePlayerScore(player, SCORE_DEATHS, 1);
 
