@@ -77,6 +77,7 @@ static Unit::AuraTypeSet GenerateVictimProcCastAuraTypes()
 {
     static Unit::AuraTypeSet auraTypes;
     auraTypes.insert(SPELL_AURA_DUMMY);
+    auraTypes.insert(SPELL_AURA_MANA_SHIELD);
     auraTypes.insert(SPELL_AURA_PRAYER_OF_MENDING);
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
     return auraTypes;
@@ -5188,12 +5189,23 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     return false;
 
                 // mana cost save
-                basepoints0 = procSpell->manaCost * triggeredByAura->GetModifier()->m_amount/100;
+                int32 cost = procSpell->manaCost + procSpell->ManaCostPercentage * GetCreateMana() / 100;
+                basepoints0 = cost * triggeredByAura->GetModifier()->m_amount/100;
                 if( basepoints0 <=0 )
                     return false;
 
                 target = this;
                 triggered_spell_id = 29077;
+                break;
+            }
+            // Incanter's Regalia set (add trigger chance to Mana Shield)
+            if (dummySpell->SpellFamilyFlags & 0x0000000000008000LL)
+            {
+                if(GetTypeId() != TYPEID_PLAYER)
+                    return false;
+
+                target = this;
+                triggered_spell_id = 37436;
                 break;
             }
             switch(dummySpell->Id)
@@ -10473,6 +10485,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                     break;
                 }
                 case SPELL_AURA_DUMMY:
+                case SPELL_AURA_MANA_SHIELD:
                 {
                     uint32 effect = triggeredByAura->GetEffIndex();
                     sLog.outDebug("ProcDamageAndSpell: casting spell (triggered by %s dummy aura of spell %u)",
