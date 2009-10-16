@@ -2364,7 +2364,7 @@ void Spell::EffectHeal( uint32 /*i*/ )
             addhealth = caster->SpellCriticalBonus(m_spellInfo, addhealth, unitTarget);
 
         int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo, crit);
-        unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
+        unitTarget->getHostileRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
 
         // ignore item heals
         if(m_CastItem)
@@ -2391,7 +2391,7 @@ void Spell::EffectHealPct( uint32 /*i*/ )
 
         uint32 addhealth = unitTarget->GetMaxHealth() * damage / 100;
         int32 gain = caster->DealHeal(unitTarget, addhealth, m_spellInfo);
-        unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
+        unitTarget->getHostileRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
     }
 }
 
@@ -4341,7 +4341,7 @@ void Spell::EffectHealMaxHealth(uint32 /*i*/)
     uint32 heal = m_caster->GetMaxHealth();
 
     int32 gain = m_caster->DealHeal(unitTarget, heal, m_spellInfo);
-    unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
+    unitTarget->getHostileRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
 }
 
 void Spell::EffectInterruptCast(uint32 /*i*/)
@@ -4859,7 +4859,7 @@ void Spell::EffectSanctuary(uint32 /*i*/)
     //unitTarget->CombatStop();
 
     unitTarget->CombatStop();
-    unitTarget->getHostilRefManager().deleteReferences();   // stop all fighting
+    unitTarget->getHostileRefManager().deleteReferences();  // stop all fighting
     // Vanish allows to remove all threat and cast regular stealth so other spells can be used
     if(m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && (m_spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_VANISH))
     {

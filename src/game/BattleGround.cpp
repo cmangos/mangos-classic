@@ -498,7 +498,7 @@ void BattleGround::EndBattleGround(uint32 winner)
         {
             //needed cause else in av some creatures will kill the players at the end
             plr->CombatStop();
-            plr->getHostilRefManager().deleteReferences();
+            plr->getHostileRefManager().deleteReferences();
         }
 
         uint32 team = itr->second.Team;
