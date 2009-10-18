@@ -3609,13 +3609,10 @@ void Spell::EffectAddHonor(uint32 /*i*/)
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    sLog.outDebug("SpellEffect::AddHonor called for spell_id %u , that rewards %d honor points to player: %u", m_spellInfo->Id, damage, ((Player*)unitTarget)->GetGUIDLow());
-
-    // TODO: find formula for honor reward based on player's level!
-
-    // now fixed only for level 70 players:
-    if (((Player*)unitTarget)->getLevel() == 70)
-        ((Player*)unitTarget)->RewardHonor(NULL, 1, damage);
+    // 2.4.3 honor-spells don't scale with level and won't be casted by an item
+    // also we must use damage+1 (spelldescription says +25 honor but damage is only 24)
+    ((Player*)unitTarget)->RewardHonor(NULL, 1, damage + 1);
+    sLog.outDebug("SpellEffect::AddHonor (spell_id %u) rewards %u honor points (non scale) for player: %u", m_spellInfo->Id, damage, ((Player*)unitTarget)->GetGUIDLow());
 }
 
 void Spell::EffectTradeSkill(uint32 /*i*/)
