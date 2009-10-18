@@ -388,7 +388,6 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
             switch(spellId)
             {
                 case 28441:                                 // AB Effect 000
-                case 44689:                                 // Relay Race Accept Hidden Debuff - DND
                     return false;
                 default:
                     break;
@@ -419,6 +418,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                         case 38637:                         // Nether Exhaustion (red)
                         case 38638:                         // Nether Exhaustion (green)
                         case 38639:                         // Nether Exhaustion (blue)
+                        case 44689:                         // Relay Race Accept Hidden Debuff - DND
                             return false;
                         // some spells have unclear target modes for selection, so just make effect positive
                         case 27184:
