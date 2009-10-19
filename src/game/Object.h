@@ -142,6 +142,7 @@ class MANGOS_DLL_SPEC Object
         virtual void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void SendCreateUpdateToPlayer(Player* player);
 
+        virtual void BuildUpdateData(UpdateDataMapType& update_players) =0;
         void BuildValuesUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void BuildOutOfRangeUpdateBlock( UpdateData *data ) const;
         void BuildMovementUpdateBlock( UpdateData * data, uint32 flags = 0 ) const;
@@ -301,8 +302,9 @@ class MANGOS_DLL_SPEC Object
         virtual void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
 
         virtual void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
-        void _BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 ) const;
-        void _BuildValuesUpdate(uint8 updatetype, ByteBuffer *data, UpdateMask *updateMask, Player *target ) const;
+        void BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 ) const;
+        void BuildValuesUpdate(uint8 updatetype, ByteBuffer *data, UpdateMask *updateMask, Player *target ) const;
+        void BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players);
 
         uint16 m_objectType;
 
@@ -333,8 +335,12 @@ class MANGOS_DLL_SPEC Object
         Object& operator=(Object const&);                   // prevent generation assigment operator
 };
 
+struct WorldObjectChangeAccumulator;
+
 class MANGOS_DLL_SPEC WorldObject : public Object
 {
+    friend struct WorldObjectChangeAccumulator;
+
     public:
         virtual ~WorldObject ( ) {}
 
@@ -477,12 +483,14 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         Map      * GetMap() const;
         Map const* GetBaseMap() const;
-        Creature* SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
 
+        void BuildUpdateData(UpdateDataMapType &);
+
+        Creature* SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
     protected:
         explicit WorldObject();
-        std::string m_name;
 
+        std::string m_name;
     private:
         uint32 m_mapId;                                     // object at map with map_id
         uint32 m_InstanceId;                                // in map copy with instance id

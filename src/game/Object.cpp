@@ -127,7 +127,7 @@ void Object::BuildMovementUpdateBlock(UpdateData * data, uint32 flags ) const
     buf << uint8( UPDATETYPE_MOVEMENT );
     buf << GetGUID();
 
-    _BuildMovementUpdate(&buf, flags, 0x00000000);
+    BuildMovementUpdate(&buf, flags, 0x00000000);
 
     data->AddUpdateBlock(buf);
 }
@@ -183,12 +183,12 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     buf << (uint8)0xFF << GetGUID();
     buf << (uint8)m_objectTypeId;
 
-    _BuildMovementUpdate(&buf, flags, flags2);
+    BuildMovementUpdate(&buf, flags, flags2);
 
     UpdateMask updateMask;
     updateMask.SetCount( m_valuesCount );
     _SetCreateBits( &updateMask, target );
-    _BuildValuesUpdate(updatetype, &buf, &updateMask, target);
+    BuildValuesUpdate(updatetype, &buf, &updateMask, target);
     data->AddUpdateBlock(buf);
 }
 
@@ -216,7 +216,7 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
     updateMask.SetCount( m_valuesCount );
 
     _SetUpdateBits( &updateMask, target );
-    _BuildValuesUpdate(UPDATETYPE_VALUES, &buf, &updateMask, target);
+    BuildValuesUpdate(UPDATETYPE_VALUES, &buf, &updateMask, target);
 
     data->AddUpdateBlock(buf);
 }
@@ -235,7 +235,7 @@ void Object::DestroyForPlayer( Player *target ) const
     target->GetSession()->SendPacket( &data );
 }
 
-void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2) const
+void Object::BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2) const
 {
     *data << (uint8)flags;                                  // update flags
 
@@ -506,7 +506,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2)
     }
 }
 
-void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *updateMask, Player *target) const
+void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *updateMask, Player *target) const
 {
     if(!target)
         return;
@@ -987,6 +987,20 @@ bool Object::PrintIndexError(uint32 index, bool set) const
 
     // assert must fail after function call
     return false;
+}
+
+void Object::BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players)
+{
+    UpdateDataMapType::iterator iter = update_players.find(pl);
+
+    if (iter == update_players.end())
+    {
+        std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert( UpdateDataMapType::value_type(pl, UpdateData()) );
+        assert(p.second);
+        iter = p.first;
+    }
+
+    BuildValuesUpdateBlockForPlayer(&iter->second, iter->first);
 }
 
 WorldObject::WorldObject()
@@ -1772,4 +1786,35 @@ void WorldObject::UpdateObjectVisibility()
     Cell cell(p);
 
     GetMap()->UpdateObjectVisibility(this, cell, p);
+}
+
+struct WorldObjectChangeAccumulator
+{
+    UpdateDataMapType &i_updateDatas;
+    WorldObject &i_object;
+    WorldObjectChangeAccumulator(WorldObject &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj) {}
+    void Visit(PlayerMapType &m)
+    {
+        for(PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+            if(iter->getSource()->HaveAtClient(&i_object))
+                i_object.BuildUpdateDataForPlayer(iter->getSource(), i_updateDatas);
+    }
+
+    template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+};
+
+void WorldObject::BuildUpdateData( UpdateDataMapType & update_players)
+{
+    CellPair p = MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY());
+    Cell cell(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+    WorldObjectChangeAccumulator notifier(*this, update_players);
+    TypeContainerVisitor<WorldObjectChangeAccumulator, WorldTypeMapContainer > player_notifier(notifier);
+    CellLock<GridReadGuard> cell_lock(cell, p);
+    Map* aMap = GetMap();
+    //we must build packets for all visible players
+    cell_lock->Visit(cell_lock, player_notifier, *aMap, *this, aMap->GetVisibilityDistance());
+
+    ClearUpdateMask(false);
 }
