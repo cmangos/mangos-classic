@@ -677,6 +677,9 @@ void Map::Update(const uint32 &t_diff)
         }
     }
 
+    // Send world objects and item update field changes
+    SendObjectUpdates();
+
     // Don't unload grids if it's battleground, since we may have manually added GOs,creatures, those doesn't load from DB at grid re-load !
     // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
     if (IsBattleGroundOrArena())
@@ -2576,4 +2579,26 @@ Map::GetDynamicObject(uint64 guid)
     if(ret->GetInstanceId() != GetInstanceId())
         return NULL;
     return ret;
+}
+
+void Map::SendObjectUpdates()
+{
+    UpdateDataMapType update_players;
+
+    while(!i_objectsToClientUpdate.empty())
+    {
+        Object* obj = *i_objectsToClientUpdate.begin();
+        i_objectsToClientUpdate.erase(i_objectsToClientUpdate.begin());
+        if (!obj)
+            continue;
+        obj->BuildUpdateData(update_players);
+    }
+
+    WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
+    for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
+    {
+        iter->second.BuildPacket(&packet);
+        iter->first->GetSession()->SendPacket(&packet);
+        packet.clear();                                     // clean the string
+    }
 }

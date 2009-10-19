@@ -79,9 +79,6 @@ Object::Object( )
 
 Object::~Object( )
 {
-    if(m_objectUpdated)
-        ObjectAccessor::Instance().RemoveUpdateObject(this);
-
     if(m_uint32Values)
     {
         if(IsInWorld())
@@ -668,10 +665,11 @@ void Object::ClearUpdateMask(bool remove)
         if(m_uint32Values_mirror[index]!= m_uint32Values[index])
             m_uint32Values_mirror[index] = m_uint32Values[index];
     }
+
     if(m_objectUpdated)
     {
         if(remove)
-            ObjectAccessor::Instance().RemoveUpdateObject(this);
+            RemoveFromClientUpdateList();
         m_objectUpdated = false;
     }
 }
@@ -725,7 +723,7 @@ void Object::SetInt32Value( uint16 index, int32 value )
         {
             if(!m_objectUpdated)
             {
-                ObjectAccessor::Instance().AddUpdateObject(this);
+                AddToClientUpdateList();
                 m_objectUpdated = true;
             }
         }
@@ -744,7 +742,7 @@ void Object::SetUInt32Value( uint16 index, uint32 value )
         {
             if(!m_objectUpdated)
             {
-                ObjectAccessor::Instance().AddUpdateObject(this);
+                AddToClientUpdateList();
                 m_objectUpdated = true;
             }
         }
@@ -763,7 +761,7 @@ void Object::SetUInt64Value( uint16 index, const uint64 &value )
         {
             if(!m_objectUpdated)
             {
-                ObjectAccessor::Instance().AddUpdateObject(this);
+                AddToClientUpdateList();
                 m_objectUpdated = true;
             }
         }
@@ -782,7 +780,7 @@ void Object::SetFloatValue( uint16 index, float value )
         {
             if(!m_objectUpdated)
             {
-                ObjectAccessor::Instance().AddUpdateObject(this);
+                AddToClientUpdateList();
                 m_objectUpdated = true;
             }
         }
@@ -808,7 +806,7 @@ void Object::SetByteValue( uint16 index, uint8 offset, uint8 value )
         {
             if(!m_objectUpdated)
             {
-                ObjectAccessor::Instance().AddUpdateObject(this);
+                AddToClientUpdateList();
                 m_objectUpdated = true;
             }
         }
@@ -834,7 +832,7 @@ void Object::SetUInt16Value( uint16 index, uint8 offset, uint16 value )
         {
             if(!m_objectUpdated)
             {
-                ObjectAccessor::Instance().AddUpdateObject(this);
+                AddToClientUpdateList();
                 m_objectUpdated = true;
             }
         }
@@ -903,7 +901,7 @@ void Object::SetFlag( uint16 index, uint32 newFlag )
         {
             if(!m_objectUpdated)
             {
-                ObjectAccessor::Instance().AddUpdateObject(this);
+                AddToClientUpdateList();
                 m_objectUpdated = true;
             }
         }
@@ -924,7 +922,7 @@ void Object::RemoveFlag( uint16 index, uint32 oldFlag )
         {
             if(!m_objectUpdated)
             {
-                ObjectAccessor::Instance().AddUpdateObject(this);
+                AddToClientUpdateList();
                 m_objectUpdated = true;
             }
         }
@@ -949,7 +947,7 @@ void Object::SetByteFlag( uint16 index, uint8 offset, uint8 newFlag )
         {
             if(!m_objectUpdated)
             {
-                ObjectAccessor::Instance().AddUpdateObject(this);
+                AddToClientUpdateList();
                 m_objectUpdated = true;
             }
         }
@@ -974,7 +972,7 @@ void Object::RemoveByteFlag( uint16 index, uint8 offset, uint8 oldFlag )
         {
             if(!m_objectUpdated)
             {
-                ObjectAccessor::Instance().AddUpdateObject(this);
+                AddToClientUpdateList();
                 m_objectUpdated = true;
             }
         }
@@ -1786,6 +1784,16 @@ void WorldObject::UpdateObjectVisibility()
     Cell cell(p);
 
     GetMap()->UpdateObjectVisibility(this, cell, p);
+}
+
+void WorldObject::AddToClientUpdateList()
+{
+    GetMap()->AddUpdateObject(this);
+}
+
+void WorldObject::RemoveFromClientUpdateList()
+{
+    GetMap()->RemoveUpdateObject(this);
 }
 
 struct WorldObjectChangeAccumulator

@@ -413,6 +413,16 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         Creature* GetCreature(uint64 guid);
         GameObject* GetGameObject(uint64 guid);
         DynamicObject* GetDynamicObject(uint64 guid);
+
+        void AddUpdateObject(Object *obj)
+        {
+            i_objectsToClientUpdate.insert(obj);
+        }
+
+        void RemoveUpdateObject(Object *obj)
+        {
+            i_objectsToClientUpdate.erase( obj );
+        }
     private:
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);
@@ -456,6 +466,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
 
+        void SendObjectUpdates();
+        std::set<Object *> i_objectsToClientUpdate;
     protected:
         void SetUnloadReferenceLock(const GridPair &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadReferenceLock(on); }
 
