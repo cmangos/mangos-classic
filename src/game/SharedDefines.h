@@ -2273,6 +2273,15 @@ enum DungeonDifficulties
     TOTAL_DIFFICULTIES
 };
 
+enum SpawnMask
+{
+    SPAWNMASK_CONTINENT         = 1,                        // any any maps without spawn modes
+
+    SPAWNMASK_DUNGEON_NORMAL    = (1 << DIFFICULTY_NORMAL),
+    SPAWNMASK_DUNGEON_HEROIC    = (1 << DIFFICULTY_HEROIC),
+    SPAWNMASK_DUNGEON_ALL       = (SPAWNMASK_DUNGEON_NORMAL | SPAWNMASK_DUNGEON_HEROIC),
+};
+
 enum SummonType
 {
     SUMMON_TYPE_CRITTER     = 41,
