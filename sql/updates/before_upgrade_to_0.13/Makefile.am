@@ -45,7 +45,7 @@ pkgdata_DATA = \
 	061_7067_01_mangos_playercreateinfo_spell.sql \
 	061_7067_02_mangos_spell_learn_spell.sql \
 	061_7067_03_characters_character_spell.sql \
-	062______01_mangos_spell_learn_spell.sql \
+	062_xxxx_01_mangos_spell_learn_spell.sql \
 	066_8402_01_characters_guild_eventlog.sql \
 	066_8402_02_characters_guild_bank_eventlog.sql \
 	066_8409_01_characters_guild.sql \
@@ -75,7 +75,7 @@ EXTRA_DIST = \
 	061_7067_01_mangos_playercreateinfo_spell.sql \
 	061_7067_02_mangos_spell_learn_spell.sql \
 	061_7067_03_characters_character_spell.sql \
-	062______01_mangos_spell_learn_spell.sql \
+	062_xxxx_01_mangos_spell_learn_spell.sql \
 	066_8402_01_characters_guild_eventlog.sql \
 	066_8402_02_characters_guild_bank_eventlog.sql \
 	066_8409_01_characters_guild.sql \
