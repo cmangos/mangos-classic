@@ -407,38 +407,32 @@ void Pet::SavePetToDB(PetSaveMode mode)
     if (!pOwner)
         return;
 
-    // not save pet as current if another pet temporary unsummoned
-    if (mode == PET_SAVE_AS_CURRENT && pOwner->GetTemporaryUnsummonedPetNumber() &&
-        pOwner->GetTemporaryUnsummonedPetNumber() != m_charmInfo->GetPetNumber())
-    {
-        // pet will lost anyway at restore temporary unsummoned
-        if(getPetType()==HUNTER_PET)
-            return;
-
-        // for warlock case
-        mode = PET_SAVE_NOT_IN_SLOT;
-    }
-
-    uint32 curhealth = GetHealth();
-    uint32 curmana = GetPower(POWER_MANA);
-
-    // stable and not in slot saves
-    if(mode > PET_SAVE_AS_CURRENT)
-    {
-        RemoveAllAuras();
-
-        //only alive hunter pets get auras saved, the others don't
-        if(!(getPetType() == HUNTER_PET && isAlive()))
-            m_Auras.clear();
-    }
-
-    _SaveSpells();
-    _SaveSpellCooldowns();
-    _SaveAuras();
-
     // current/stable/not_in_slot
-    if(mode >= PET_SAVE_AS_CURRENT)
+    if (mode >= PET_SAVE_AS_CURRENT)
     {
+        // not save pet as current if another pet temporary unsummoned
+        if (mode == PET_SAVE_AS_CURRENT && pOwner->GetTemporaryUnsummonedPetNumber() &&
+            pOwner->GetTemporaryUnsummonedPetNumber() != m_charmInfo->GetPetNumber())
+        {
+            // pet will lost anyway at restore temporary unsummoned
+            if(getPetType()==HUNTER_PET)
+                return;
+
+            // for warlock case
+            mode = PET_SAVE_NOT_IN_SLOT;
+        }
+
+        uint32 curhealth = GetHealth();
+        uint32 curmana = GetPower(POWER_MANA);
+
+        // stable and not in slot saves
+        if (mode != PET_SAVE_AS_CURRENT)
+            RemoveAllAuras();
+
+        _SaveSpells();
+        _SaveSpellCooldowns();
+        _SaveAuras();
+
         uint32 loyalty =1;
         if(getPetType()!=HUNTER_PET)
             loyalty = GetLoyaltyLevel();
@@ -509,7 +503,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
     }
     else
     {
-        RemoveAllAuras();
+        RemoveAllAuras(AURA_REMOVE_BY_DELETE);
         DeleteFromDB(m_charmInfo->GetPetNumber());
     }
 }
@@ -1357,9 +1351,7 @@ void Pet::_SaveSpells()
 
 void Pet::_LoadAuras(uint32 timediff)
 {
-    m_Auras.clear();
-    for (int i = 0; i < TOTAL_AURAS; ++i)
-        m_modAuras[i].clear();
+    RemoveAllAuras();
 
     // all aura related fields
     for(int i = UNIT_FIELD_AURA; i <= UNIT_FIELD_AURASTATE; ++i)
