@@ -50,6 +50,7 @@ pkgdata_DATA = \
 	066_8402_02_characters_guild_bank_eventlog.sql \
 	066_8409_01_characters_guild.sql \
 	077_8728_01_realmd_account.sql \
+	078_8749_01_mangos_mail_loot_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -80,4 +81,5 @@ EXTRA_DIST = \
 	066_8402_02_characters_guild_bank_eventlog.sql \
 	066_8409_01_characters_guild.sql \
 	077_8728_01_realmd_account.sql \
+	078_8749_01_mangos_mail_loot_template.sql \
 	README
