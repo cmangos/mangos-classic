@@ -45,30 +45,30 @@ enum eAuthResults
 
 enum LoginResult
 {
-    LOGIN_OK                = 0x00,
-    LOGIN_FAILED            = 0x01,
-    LOGIN_FAILED2           = 0x02,
-    LOGIN_BANNED            = 0x03,
-    LOGIN_UNKNOWN_ACCOUNT   = 0x04,
-    LOGIN_UNKNOWN_ACCOUNT3  = 0x05,
-    LOGIN_ALREADYONLINE     = 0x06,
-    LOGIN_NOTIME            = 0x07,
-    LOGIN_DBBUSY            = 0x08,
-    LOGIN_BADVERSION        = 0x09,
+    LOGIN_OK                = 0x0C,
+    LOGIN_FAILED            = 0x0D,
+    LOGIN_FAILED2           = 0x0F,
+    LOGIN_BANNED            = 0x1C,
+    LOGIN_UNKNOWN_ACCOUNT   = 0x15,
+    LOGIN_UNKNOWN_ACCOUNT3  = 0x15,
+    LOGIN_ALREADYONLINE     = 0x1D,
+    LOGIN_NOTIME            = 0x0E,
+    LOGIN_DBBUSY            = 0x1F,
+    LOGIN_BADVERSION        = 0x14,
     LOGIN_DOWNLOAD_FILE     = 0x0A,
-    LOGIN_FAILED3           = 0x0B,
-    LOGIN_SUSPENDED         = 0x0C,
+    LOGIN_FAILED3           = 0x0D,
+    LOGIN_SUSPENDED         = 0x20,
     LOGIN_FAILED4           = 0x0D,
-    LOGIN_CONNECTED         = 0x0E,
+    LOGIN_CONNECTED         = 0x05,
     LOGIN_PARENTALCONTROL   = 0x0F,
-    LOGIN_LOCKED_ENFORCED   = 0x10,
+    LOGIN_LOCKED_ENFORCED   = 0x1C,
 };
 
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
-// will only support WoW 1.12 client build
+// will only support 1.12.1 client (build 5875) and 1.12.2 client (build 6005)..
 
-#define EXPECTED_MANGOS_CLIENT_BUILD        {5875, 0}
+#define EXPECTED_MANGOS_CLIENT_BUILD        {5875,6005, 0}
 
 // At update excepted builds please update if need define DEFAULT_MAX_LEVEL
 // in DBCEnum.h to default max player level expected by build
