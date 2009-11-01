@@ -1666,32 +1666,6 @@ bool ChatHandler::HandleModifyBitCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleModifyHonorCommand (const char* args)
-{
-    if (!*args)
-        return false;
-
-    Player *target = getSelectedPlayer();
-    if(!target)
-    {
-        SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    // check online security
-    if (HasLowerSecurity(target, 0))
-        return false;
-
-    int32 amount = (uint32)atoi(args);
-
-    target->ModifyHonorPoints(amount);
-
-    PSendSysMessage(LANG_COMMAND_MODIFY_HONOR, GetNameLink(target).c_str(), target->GetHonorPoints());
-
-    return true;
-}
-
 bool ChatHandler::HandleTeleCommand(const char * args)
 {
     if(!*args)
