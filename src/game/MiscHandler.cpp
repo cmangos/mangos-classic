@@ -1097,25 +1097,43 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 {
+    Player *pl;
     uint64 guid;
     recv_data >> guid;
+    // DEBUG_LOG("Party Stats guid is " I64FMTD,guid);
 
-    Player *player = objmgr.GetPlayer(guid);
-
-    if(!player)
+    pl = objmgr.GetPlayer(guid);
+    if(pl)
     {
-        sLog.outError("InspectHonorStats: WTF, player not found...");
-        return;
+        WorldPacket data( MSG_INSPECT_HONOR_STATS, (8+1+4+4+4+4+4+4+4+4+4+4+1) );
+        data << guid;                                       // player guid
+                                                            // Rank, filling bar, PLAYER_BYTES_3, ??
+        data << (uint8)pl->GetUInt32Value(PLAYER_FIELD_BYTES2);
+                                                            // Today Honorable and Dishonorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
+                                                            // Yesterday Honorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
+                                                            // Last Week Honorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS);
+                                                            // This Week Honorable kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
+                                                            // Lifetime Honorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+                                                            // Lifetime Dishonorable Kills
+        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
+                                                            // Yesterday Honor
+        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
+                                                            // Last Week Honor
+        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
+                                                            // This Week Honor
+        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
+                                                            // Last Week Standing
+        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
+        data << (uint8)pl->GetHonorHighestRank();           // Highest Rank, ??
+        SendPacket(&data);
     }
-
-    WorldPacket data(MSG_INSPECT_HONOR_STATS, 8+1+4*4);
-    data << uint64(player->GetGUID());
-    data << uint8(player->GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY));
-    data << uint32(player->GetUInt32Value(PLAYER_FIELD_KILLS));
-    data << uint32(player->GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
-    data << uint32(player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION));
-    data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS));
-    SendPacket(&data);
+    else
+        sLog.outDebug("Player %u not found!", guid);
 }
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)

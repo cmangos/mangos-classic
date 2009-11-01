@@ -349,6 +349,14 @@ enum DrunkenState
     DRUNKEN_SMASHED = 3
 };
 
+enum TYPE_OF_KILL
+{
+    HONORABLE_KILL    = 1,
+    DISHONORABLE_KILL = 2,
+};
+
+#define HONOR_RANK_COUNT 16
+
 enum PlayerFlags
 {
     PLAYER_FLAGS_GROUP_LEADER   = 0x00000001,
@@ -1672,14 +1680,47 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ModifySkillBonus(uint32 skillid,int32 val, bool talent);
 
         /*********************************************************/
+        /***                  HONOR SYSTEM                     ***/
+        /*********************************************************/
+        void UpdateHonor();
+        bool CalculateHonor(Unit *pVictim,uint32 groupsize);
+        uint32 CalculateHonorRank(float honor) const;
+        uint32 GetHonorRank() const;
+        int  CalculateTotalKills(Player *pVictim) const;
+        //Acessors of total honor points
+        void SetTotalHonor(float total_honor_points) { m_total_honor_points = total_honor_points; };
+        float GetTotalHonor(void) const { return m_total_honor_points; };
+        //Acessors of righest rank
+        uint32 GetHonorHighestRank() const { return m_highest_rank; }
+        void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; }
+        //Acessors of rating
+        float GetStoredHonor() const { return m_stored_honor; }
+        void SetStoredHonor(float rating) { m_stored_honor = rating; }
+        //Acessors of lifetime
+        uint32 GetHonorStoredKills(bool honorable) const { return honorable? m_stored_honorableKills : m_stored_dishonorableKills; }
+        void SetHonorStoredKills(uint32 kills,bool honorable) { if (honorable) m_stored_honorableKills = kills; else m_stored_dishonorableKills = kills; }
+        //Acessors of last week standing
+        int32 GetHonorLastWeekStanding() const { return m_standing; }
+        void SetHonorLastWeekStanding(int32 standing){ m_standing = standing; }
+
+        float m_total_honor_points;
+        float m_stored_honor;
+        float m_pending_honor;
+        uint32 m_pending_honorableKills;
+        uint32 m_pending_dishonorableKills;
+        uint32 m_storingDate;
+        uint32 m_stored_honorableKills;
+        uint32 m_stored_dishonorableKills;
+        uint32 m_highest_rank;
+        int32 m_standing;
+
+        //End of Honor System
+
+        /*********************************************************/
         /***                  PVP SYSTEM                       ***/
         /*********************************************************/
         void UpdateArenaFields();
-        void UpdateHonorFields();
-        bool RewardHonor(Unit *pVictim, uint32 groupsize, float honor = -1);
-        uint32 GetHonorPoints() { return GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY); }
         uint32 GetArenaPoints() { return GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY); }
-        void ModifyHonorPoints( int32 value );
         void ModifyArenaPoints( int32 value );
         uint32 GetMaxPersonalArenaRatingRequirement();
 

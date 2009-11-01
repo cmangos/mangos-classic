@@ -314,6 +314,14 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this)
     m_groupUpdateMask = 0;
     m_auraUpdateMask = 0;
 
+    m_total_honor_points = 0;
+    m_pending_honor = 0;
+    m_pending_honorableKills = 0;
+    m_pending_dishonorableKills = 0;
+    m_storingDate = 0;
+    m_stored_honorableKills = 0;
+    m_stored_dishonorableKills = 0;
+
     duel = NULL;
 
     m_GuildIdInvited = 0;
@@ -592,7 +600,6 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
         SetUInt32Value (UNIT_FIELD_LEVEL, sWorld.getConfig(CONFIG_START_PLAYER_LEVEL));
 
     SetUInt32Value (PLAYER_FIELD_COINAGE, sWorld.getConfig(CONFIG_START_PLAYER_MONEY));
-    SetUInt32Value (PLAYER_FIELD_HONOR_CURRENCY, sWorld.getConfig(CONFIG_START_HONOR_POINTS));
     SetUInt32Value (PLAYER_FIELD_ARENA_CURRENCY, sWorld.getConfig(CONFIG_START_ARENA_POINTS));
 
     // Played time
@@ -5611,181 +5618,259 @@ void Player::UpdateArenaFields(void)
     /* arena calcs go here */
 }
 
-void Player::UpdateHonorFields()
+//Update honor fields
+void Player::UpdateHonor(void)
 {
-    /// called when rewarding honor and at each save
-    uint64 now = time(NULL);
-    uint64 today = uint64(time(NULL) / DAY) * DAY;
+    time_t rawtime;
+    struct tm * now;
+    uint32 today = 0;
+    uint32 date = 0;
 
-    if(m_lastHonorUpdateTime < today)
+    uint32 Yesterday = 0;
+    uint32 ThisWeekBegin = 0;
+    uint32 ThisWeekEnd = 0;
+    uint32 LastWeekBegin = 0;
+    uint32 LastWeekEnd = 0;
+
+    uint32 lastweek_honorableKills = 0;
+    uint32 lastweek_dishonorableKills = 0;
+    uint32 today_honorableKills = 0;
+    uint32 today_dishonorableKills = 0;
+    m_pending_honorableKills = 0;
+    m_pending_dishonorableKills = 0;
+    m_pending_honor = 0;
+
+    uint32 yesterdayKills = 0;
+    uint32 thisWeekKills = 0;
+    uint32 lastWeekKills = 0;
+
+    float lastWeekTotalHonor = 0;
+    float yesterdayHonor = 0;
+    float thisWeekHonor = 0;
+    float lastWeekHonor = 0;
+
+    time( &rawtime );
+    now = localtime( &rawtime );
+
+    today = ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday));
+
+    Yesterday     = today - 1;
+    ThisWeekBegin = today - now->tm_wday;
+    ThisWeekEnd   = ThisWeekBegin + 7;
+    LastWeekBegin = ThisWeekBegin - 7;
+    LastWeekEnd   = LastWeekBegin + 7;
+    m_storingDate = LastWeekBegin;
+
+    sLog.outDetail("PLAYER: UpdateHonor");
+
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `type`,`honor`,`date` FROM `character_kill` WHERE `guid` = '%u'", GetGUIDLow());
+
+    if(result)
     {
-        uint64 yesterday = today - DAY;
-
-        uint16 kills_today = PAIR32_LOPART(GetUInt32Value(PLAYER_FIELD_KILLS));
-
-        // update yesterday's contribution
-        if(m_lastHonorUpdateTime >= yesterday )
+        do
         {
-            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
+            Field *fields = result->Fetch();
+            date = fields[2].GetUInt32();
 
-            // this is the first update today, reset today's contribution
-            SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
-            SetUInt32Value(PLAYER_FIELD_KILLS, MAKE_PAIR32(0,kills_today));
-        }
-        else
-        {
-            // no honor/kills yesterday or today, reset
-            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
-            SetUInt32Value(PLAYER_FIELD_KILLS, 0);
-        }
-    }
-
-    m_lastHonorUpdateTime = now;
-}
-
-///Calculate the amount of honor gained based on the victim
-///and the size of the group for which the honor is divided
-///An exact honor value can also be given (overriding the calcs)
-bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
-{
-    // do not reward honor in arenas, but enable onkill spellproc
-    if(InArena())
-    {
-        if(!uVictim || uVictim == this || uVictim->GetTypeId() != TYPEID_PLAYER)
-            return false;
-
-        if( GetBGTeam() == ((Player*)uVictim)->GetBGTeam() )
-            return false;
-
-        return true;
-    }
-
-    // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
-    if(GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
-        return false;
-
-    uint64 victim_guid = 0;
-    uint32 victim_rank = 0;
-
-    // need call before fields update to have chance move yesterday data to appropriate fields before today data change.
-    UpdateHonorFields();
-
-    if(honor <= 0)
-    {
-        if(!uVictim || uVictim == this || uVictim->HasAuraType(SPELL_AURA_NO_PVP_CREDIT))
-            return false;
-
-        victim_guid = uVictim->GetGUID();
-
-        if( uVictim->GetTypeId() == TYPEID_PLAYER )
-        {
-            Player *pVictim = (Player *)uVictim;
-
-            if( GetTeam() == pVictim->GetTeam() && !sWorld.IsFFAPvPRealm() )
-                return false;
-
-            float f = 1;                                    //need for total kills (?? need more info)
-            uint32 k_grey = 0;
-            uint32 k_level = getLevel();
-            uint32 v_level = pVictim->getLevel();
-
+            if(fields[0].GetUInt32() == HONORABLE_KILL)
             {
-                // PLAYER_CHOSEN_TITLE VALUES DESCRIPTION
-                //  [0]      Just name
-                //  [1..14]  Alliance honor titles and player name
-                //  [15..28] Horde honor titles and player name
-                //  [29..38] Other title and player name
-                //  [39+]    Nothing
-                uint32 victim_title = pVictim->GetUInt32Value(PLAYER_CHOSEN_TITLE);
-                                                            // Get Killer titles, CharTitlesEntry::bit_index
-                // Ranks:
-                //  title[1..14]  -> rank[5..18]
-                //  title[15..28] -> rank[5..18]
-                //  title[other]  -> 0
-                if (victim_title == 0)
-                    victim_guid = 0;                        // Don't show HK: <rank> message, only log.
-                else if (victim_title < 15)
-                    victim_rank = victim_title + 4;
-                else if (victim_title < 29)
-                    victim_rank = victim_title - 14 + 4;
-                else
-                    victim_guid = 0;                        // Don't show HK: <rank> message, only log.
+                if( date == today)
+                {
+                    today_honorableKills++;
+                }
+                if( date == Yesterday)
+                {
+                    yesterdayKills++;
+                    yesterdayHonor += fields[1].GetFloat();
+                }
+                if( (date >= ThisWeekBegin) && (date < ThisWeekEnd) )
+                {
+                    thisWeekKills++;
+                    thisWeekHonor += fields[1].GetFloat();
+                }
+                if( (date >= LastWeekBegin) && (date < LastWeekEnd) )
+                {
+                    lastWeekKills++;
+                    lastWeekHonor += fields[1].GetFloat();
+                }
+                
+                if(date < m_storingDate)
+                {
+                    m_pending_honor += fields[1].GetFloat();
+                    m_pending_honorableKills++;
+                }
+
             }
+            else if(fields[0].GetUInt32() == DISHONORABLE_KILL)
+            {
+                if( date == today)
+                {
+                    today_dishonorableKills++;
+                }
 
-            if(k_level <= 5)
-                k_grey = 0;
-            else if( k_level <= 39 )
-                k_grey = k_level - 5 - k_level/10;
-            else
-                k_grey = k_level - 1 - k_level/5;
-
-            if(v_level<=k_grey)
-                return false;
-
-            float diff_level = (k_level == k_grey) ? 1 : ((float(v_level) - float(k_grey)) / (float(k_level) - float(k_grey)));
-
-            int32 v_rank =1;                                //need more info
-
-            honor = ((f * diff_level * (190 + v_rank*10))/6);
-            honor *= ((float)k_level) / 70.0f;              //factor of dependence on levels of the killer
-
-            // count the number of playerkills in one day
-            ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
-            // and those in a lifetime
-            ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 1, true);
+                if( (date >= LastWeekBegin) && (date < LastWeekEnd) )
+                {
+                    lastWeekTotalHonor -= fields[1].GetFloat();
+                    lastweek_dishonorableKills++;
+                }
+                
+                if( date < m_storingDate)
+                {
+                    m_pending_honor -= fields[1].GetFloat();
+                    m_pending_dishonorableKills++;
+                }
+            }
         }
-        else
-        {
-            Creature *cVictim = (Creature *)uVictim;
+        while( result->NextRow() );
 
-            if (!cVictim->isRacialLeader())
-                return false;
-
-            honor = 100;                                    // ??? need more info
-            victim_rank = 19;                               // HK: Leader
-        }
+        delete result;
     }
 
-    if (uVictim != NULL)
+    lastWeekTotalHonor += lastWeekHonor;
+
+    uint32 total_dishonorableKills = m_pending_dishonorableKills + lastweek_dishonorableKills + today_dishonorableKills + GetHonorStoredKills(false);
+    uint32 total_honorableKills = m_pending_honorableKills + lastweek_honorableKills + today_honorableKills + GetHonorStoredKills(true);
+
+    //Store Total Honor points...
+    SetTotalHonor(lastWeekTotalHonor+m_pending_honor+GetStoredHonor());
+
+    //RIGHEST RANK
+    //If the new rank is highest then the old one, then m_highest_rank is updated
+    uint32 new_honor_rank = CalculateHonorRank(GetTotalHonor());
+    if( new_honor_rank > GetHonorHighestRank() )
     {
-        honor *= sWorld.getRate(RATE_HONOR);
-
-        if(groupsize > 1)
-            honor /= groupsize;
-
-        honor *= (((float)urand(8,12))/10);                 // approx honor: 80% - 120% of real honor
+        SetHonorHighestRank( new_honor_rank );
     }
 
-    // honor - for show honor points in log
-    // victim_guid - for show victim name in log
-    // victim_rank [1..4]  HK: <dishonored rank>
-    // victim_rank [5..19] HK: <alliance\horde rank>
-    // victim_rank [0,20+] HK: <>
-    WorldPacket data(SMSG_PVP_CREDIT,4+8+4);
-    data << (uint32) honor;
-    data << (uint64) victim_guid;
-    data << (uint32) victim_rank;
+    //RATING
+    SetStoredHonor( MaNGOS::Honor::CalculeRating(this) );
 
-    GetSession()->SendPacket(&data);
+    //STANDING
+    SetHonorLastWeekStanding( MaNGOS::Honor::CalculeStanding(this) );
 
-    // add honor points
-    ModifyHonorPoints(int32(honor));
+    //NEXT RANK BAR
+    //PLAYER_FIELD_HONOR_BAR
+    SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)GetTotalHonor());
 
-    ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, uint32(honor), true);
-    return true;
+    //RANK (Patent)
+    if( CalculateHonorRank(GetTotalHonor()) )
+        SetUInt32Value(PLAYER_BYTES_3, (( CalculateHonorRank(GetTotalHonor()) << 24) + 0x04000000) + (m_drunk & 0xFFFE) + getGender());
+    else
+        SetUInt32Value(PLAYER_BYTES_3, (m_drunk & 0xFFFE) + getGender());
+
+    //TODAY
+    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (today_dishonorableKills << 16) + today_honorableKills );
+    //YESTERDAY
+    SetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS, yesterdayKills);
+    SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)yesterdayHonor);
+    //THIS WEEK
+    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS, thisWeekKills);
+    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION, (uint32)thisWeekHonor);
+    //LAST WEEK
+    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS, lastWeekKills);
+    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION, (uint32)lastWeekHonor);
+    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK, GetHonorLastWeekStanding());
+
+    //LIFE TIME
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, total_dishonorableKills);
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, total_honorableKills);
+    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS) << 16) + GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS) );
+    //TODO: Into what field we need to set it? Fix it!
+    SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? ((GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
 }
 
-void Player::ModifyHonorPoints( int32 value )
+
+
+uint32 Player::GetHonorRank() const
 {
-    if(value < 0)
+    return CalculateHonorRank(m_total_honor_points);
+}
+
+//What is Player's rank... private, scout...
+uint32 Player::CalculateHonorRank(float honor_points) const
+{
+    uint32 rank = 0;
+    // you can modify this formula on negative values to show old dishonored ranks too
+    if(honor_points <=    0.00)
+        rank = 0;
+    else if(honor_points <  2000.00)
+        rank = 1;
+    else if(honor_points > ((HONOR_RANK_COUNT-1)-1)*5000)
+        rank = HONOR_RANK_COUNT-1;
+    else
+        rank = uint32(honor_points / 5000) + 1;
+
+    return rank;
+}
+
+//How many times Player kill pVictim...
+int Player::CalculateTotalKills(Player *pVictim) const
+{
+    int total_kills = 0;
+
+    QueryResult *result = CharacterDatabase.PQuery("SELECT count(*) as cnt FROM `character_kill` WHERE `guid` = '%u' AND `creature_template` = '%u'", GetGUIDLow(), pVictim->GetEntry());
+
+    if(result)
     {
-        if (GetHonorPoints() > sWorld.getConfig(CONFIG_MAX_HONOR_POINTS))
-            SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, sWorld.getConfig(CONFIG_MAX_HONOR_POINTS) + value);
-        else
-            SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, GetHonorPoints() > uint32(-value) ? GetHonorPoints() + value : 0);
+        Field *fields = result->Fetch();
+        total_kills = fields[0].GetUInt32();
+        delete result;
+    }
+    return total_kills;
+}
+
+//How much honor Player gains/loses killing uVictim
+bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
+{
+    float parcial_honor_points = 0;
+    int kill_type = 0;
+    bool savekill = false;
+
+    sLog.outDetail("PLAYER: CalculateHonor");
+
+    if( !uVictim ) return false;
+    if( uVictim->GetAura(2479,0) ) return false;                  // is honorless target
+
+    if( uVictim->GetTypeId() == TYPEID_UNIT )
+    {
+        Creature *cVictim = (Creature *)uVictim;
+        if( cVictim->isCivilian() )
+        {
+            parcial_honor_points = MaNGOS::Honor::DishonorableKillPoints( getLevel() );
+            kill_type = DISHONORABLE_KILL;
+            savekill = true;
+        }
     }
     else
-        SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, GetHonorPoints() < sWorld.getConfig(CONFIG_MAX_HONOR_POINTS) - value ? GetHonorPoints() + value : sWorld.getConfig(CONFIG_MAX_HONOR_POINTS));
+    if( uVictim->GetTypeId() == TYPEID_PLAYER )
+    {
+        Player *pVictim = (Player *)uVictim;
+
+        if( GetTeam() == pVictim->GetTeam() ) return false;
+
+        if( getLevel() < (pVictim->getLevel()+5) )
+        {
+            parcial_honor_points = MaNGOS::Honor::HonorableKillPoints( this, pVictim );
+            kill_type = HONORABLE_KILL;
+            savekill = true;
+        }
+    }
+
+    if (savekill)
+    {
+        time_t rawtime;
+        struct tm * now;
+        uint32 today = 0;
+        time( &rawtime );
+        now = localtime( &rawtime );
+        today = ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday));
+
+        CharacterDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`,`type`) VALUES (%u, %u, %f, %u, %u)", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(), (float)parcial_honor_points, (uint32)today, (uint8)kill_type);
+
+        UpdateHonor();
+        return true;
+    }
+    return false;
 }
 
 void Player::ModifyArenaPoints( int32 value )
@@ -9438,6 +9523,9 @@ uint8 Player::CanUseItem( Item *pItem, bool not_loading ) const
             if (pProto->RequiredSpell != 0 && !HasSpell(pProto->RequiredSpell))
                 return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
 
+            if( not_loading && GetHonorRank() < pProto->RequiredHonorRank )
+                return EQUIP_ERR_CANT_EQUIP_RANK;
+
             if (pProto->RequiredReputationFaction && uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank)
                 return EQUIP_ERR_CANT_EQUIP_REPUTATION;
 
@@ -9466,6 +9554,8 @@ bool Player::CanUseItem( ItemPrototype const *pProto )
                 return false;
         }
         if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
+            return false;
+        if( GetHonorRank() < pProto->RequiredHonorRank )
             return false;
         if( getLevel() < pProto->RequiredLevel )
             return false;
@@ -9497,6 +9587,8 @@ uint8 Player::CanUseAmmo( uint32 item ) const
         }
         if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
+        if( GetHonorRank() < pProto->RequiredHonorRank )
+            return EQUIP_ERR_CANT_EQUIP_RANK;
         /*if( GetReputationMgr().GetReputation() < pProto->RequiredReputation )
         return EQUIP_ERR_CANT_EQUIP_REPUTATION;
         */
@@ -11898,9 +11990,10 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
     // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
     ModifyMoney( pQuest->GetRewOrReqMoney() );
 
+    /*[-ZERO] to replace? 
     // honor reward
     if (pQuest->GetRewHonorableKills())
-        RewardHonor(NULL, 0, MaNGOS::Honor::hk_honor_at_level(getLevel(), pQuest->GetRewHonorableKills()));
+        RewardHonor(NULL, 0, MaNGOS::Honor::hk_honor_at_level(getLevel(), pQuest->GetRewHonorableKills())); */
 
     // title reward
     if (pQuest->GetCharTitleId())
@@ -13174,8 +13267,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 {
-    ////                                                     0     1        2     3     4     5      6       7      8   9      10           11            12           13          14          15          16   17           18        19         20         21         22          23           24                 25                 26                 27       28       29       30       31         32           33            34        35    36      37                 38         39                  40
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account, data, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags, position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, dungeon_difficulty, arena_pending_points FROM characters WHERE guid = '%u'", guid);
+    ////                                                     0     1        2     3     4     5      6       7      8   9      10           11            12           13          14          15          16   17           18        19         20         21         22          23           24                 25                 26                 27       28       29       30       31         32           33            34        35    36      37                 38         39                  40              41            42                  43
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account, data, name, race, class, gender, level, xp, money, playerBytes, playerBytes2, playerFlags, position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, honor_highest_rank, honor_standing, honor_rating, dungeon_difficulty, arena_pending_points FROM characters WHERE guid = '%u'", guid);
     QueryResult *result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if(!result)
@@ -13216,6 +13309,10 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         delete result;
         return false;
     }
+
+    //Store original values before modifying temporarily the data field (maybe hack)
+    SetHonorStoredKills(GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS),true);
+    SetHonorStoredKills(GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS),false);
 
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
@@ -13273,13 +13370,17 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     uint32 transGUID = fields[31].GetUInt32();
     Relocate(fields[13].GetFloat(),fields[14].GetFloat(),fields[15].GetFloat(),fields[17].GetFloat());
     SetMapId(fields[16].GetUInt32());
-    SetDifficulty(fields[39].GetUInt32());                  // may be changed in _LoadGroup
+    SetDifficulty(fields[42].GetUInt32());                  // [-ZERO] to delete
 
     _LoadGroup(holder->GetResult(PLAYER_LOGIN_QUERY_LOADGROUP));
 
+    m_highest_rank = fields[39].GetUInt32();
+    m_standing = fields[40].GetUInt32();
+    m_stored_honor = fields[41].GetFloat();
+
     _LoadArenaTeamInfo(holder->GetResult(PLAYER_LOGIN_QUERY_LOADARENAINFO));
 
-    uint32 arena_currency = GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY) + fields[40].GetUInt32();
+    uint32 arena_currency = GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY) + fields[43].GetUInt32(); //  [-ZERO] to delete
     if (arena_currency > sWorld.getConfig(CONFIG_MAX_ARENA_POINTS))
         arena_currency = sWorld.getConfig(CONFIG_MAX_ARENA_POINTS);
 
@@ -13467,11 +13568,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     }
 
     m_atLoginFlags = fields[34].GetUInt32();
-
-    // Honor system
-    // Update Honor kills data
-    m_lastHonorUpdateTime = logoutTime;
-    UpdateHonorFields();
 
     m_deathExpireTime = (time_t)fields[37].GetUInt64();
     if(m_deathExpireTime > now+MAX_DEATH_COUNT*DEATH_EXPIRE_STEP)
@@ -14612,9 +14708,6 @@ void Player::SaveToDB()
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
 
-    // first save/honor gain after midnight will also update the player's honor fields
-    UpdateHonorFields();
-
     // players aren't saved on battleground maps
     uint32 mapid = IsBeingTeleported() ? GetTeleportDest().mapid : GetMapId();
     const MapEntry * me = sMapStore.LookupEntry(mapid);
@@ -14643,7 +14736,15 @@ void Player::SaveToDB()
 
     bool inworld = IsInWorld();
 
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, GetHonorStoredKills(false)+m_pending_honorableKills);
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, GetHonorStoredKills(true)+m_pending_dishonorableKills);
+    m_stored_honor += m_pending_honor;
+    m_pending_honor = 0;
+
     CharacterDatabase.BeginTransaction();
+
+    CharacterDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'",GetGUIDLow());
+    CharacterDatabase.PExecute("DELETE FROM character_kill WHERE date < '%u'",m_storingDate);
 
     CharacterDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'",GetGUIDLow());
 
@@ -14761,7 +14862,17 @@ void Player::SaveToDB()
 
     ss << ", '";
     ss << m_taxi.SaveTaxiDestinationsToString();
-    ss << "', '0' )";
+
+    ss << "', ";
+    ss << m_highest_rank;
+
+    ss << ", ";
+    ss << m_standing;
+
+    ss << ", ";
+    ss << m_stored_honor;
+
+    ss << ", '0' )"; // [-ZERO] arena field to delete
 
     CharacterDatabase.Execute( ss.str().c_str() );
 
@@ -16376,13 +16487,6 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             return false;
         }
 
-        // honor points price
-        if (GetHonorPoints() < (iece->reqhonorpoints * count))
-        {
-            SendEquipError(EQUIP_ERR_NOT_ENOUGH_HONOR_POINTS, NULL, NULL);
-            return false;
-        }
-
         // arena points price
         if (GetArenaPoints() < (iece->reqarenapoints * count))
         {
@@ -16407,6 +16511,13 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK,NULL,NULL);
             return false;
         }
+    }
+
+    // not check level requiremnt for normal items (PvP related bonus items is another case)
+    if(pProto->RequiredHonorRank && (GetHonorHighestRank() < pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
+    {
+        SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
+        return false;
     }
 
     uint32 price  = pProto->BuyPrice * count;
@@ -16434,8 +16545,6 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         if (crItem->ExtendedCost)                            // case for new honor system
         {
             ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
-            if (iece->reqhonorpoints)
-                ModifyHonorPoints( - int32(iece->reqhonorpoints * count));
             if (iece->reqarenapoints)
                 ModifyArenaPoints( - int32(iece->reqarenapoints * count));
             for (uint8 i = 0; i < 5; ++i)
@@ -16479,8 +16588,6 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         if (crItem->ExtendedCost)                            // case for new honor system
         {
             ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
-            if (iece->reqhonorpoints)
-                ModifyHonorPoints( - int32(iece->reqhonorpoints));
             if (iece->reqarenapoints)
                 ModifyArenaPoints( - int32(iece->reqarenapoints));
             for (uint8 i = 0; i < 5; ++i)
@@ -17192,6 +17299,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     SendInitialActionButtons();
     m_reputationMgr.SendInitialReputations();
+    UpdateHonor();
 
     // update zone
     uint32 newzone, newarea;
@@ -17877,7 +17985,6 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
 {
     bool PvP = pVictim->isCharmedOwnedByPlayerOrPlayer();
 
-    // prepare data for near group iteration (PvP and !PvP cases)
     uint32 xp = 0;
     bool honored_kill = false;
 
@@ -17910,7 +18017,7 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
                     continue;                               // member (alive or dead) or his corpse at req. distance
 
                 // honor can be in PvP and !PvP (racial leader) cases (for alive)
-                if(pGroupGuy->isAlive() && pGroupGuy->RewardHonor(pVictim,count) && pGroupGuy==this)
+                if(pGroupGuy->isAlive() && pGroupGuy->CalculateHonor(pVictim,count) && pGroupGuy==this)
                     honored_kill = true;
 
                 // xp and reputation only in !PvP case
@@ -17949,7 +18056,7 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
         xp = PvP ? 0 : MaNGOS::XP::Gain(this, pVictim);
 
         // honor can be in PvP and !PvP (racial leader) cases
-        if(RewardHonor(pVictim,1))
+        if(CalculateHonor(pVictim,1))
             honored_kill = true;
 
         // xp and reputation only in !PvP case
