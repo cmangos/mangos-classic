@@ -35,11 +35,6 @@ typedef UNORDERED_MAP<uint32, BattleGroundTypeId> BattleMastersMap;
 typedef UNORDERED_MAP<uint32, BattleGroundEventIdx> CreatureBattleEventIndexesMap;
 typedef UNORDERED_MAP<uint32, BattleGroundEventIdx> GameObjectBattleEventIndexesMap;
 
-
-#define MAX_BATTLEGROUND_QUEUE_TYPES 8
-
-#define BATTLEGROUND_ARENA_POINT_DISTRIBUTION_DAY 86400     // seconds in a day
-
 struct GroupQueueInfo;                                      // type predefinition
 struct PlayerQueueInfo                                      // stores information for players in queue
 {
@@ -54,13 +49,8 @@ struct GroupQueueInfo                                       // stores informatio
     std::map<uint64, PlayerQueueInfo*> Players;             // player queue info map
     uint32  Team;                                           // Player team (ALLIANCE/HORDE)
     BattleGroundTypeId BgTypeId;                            // battleground type id
-    bool    IsRated;                                        // rated
-    uint8   ArenaType;                                      // 2v2, 3v3, 5v5 or 0 when BG
-    uint32  ArenaTeamId;                                    // team id if rated match
     uint32  JoinTime;                                       // time when group was added
     uint32  IsInvitedToBGInstanceGUID;                      // was invited to certain BG
-    uint32  ArenaTeamRating;                                // if rated match, inited to the rating of the team
-    uint32  OpponentsTeamRating;                            // for rated arena matches
 };
 
 class BattleGround;
@@ -70,9 +60,9 @@ class BattleGroundQueue
         BattleGroundQueue();
         ~BattleGroundQueue();
 
-        void Update(BattleGroundTypeId bgTypeId, uint32 queue_id, uint8 arenatype = 0, bool isRated = false, uint32 minRating = 0);
+        void Update(BattleGroundTypeId bgTypeId, uint32 queue_id);
 
-        GroupQueueInfo * AddGroup(Player * leader, BattleGroundTypeId bgTypeId, uint8 ArenaType, bool isRated, uint32 ArenaRating, uint32 ArenaTeamId = 0);
+        GroupQueueInfo * AddGroup(Player * leader, BattleGroundTypeId bgTypeId);
         void AddPlayer(Player *plr, GroupQueueInfo *ginfo);
         void RemovePlayer(const uint64& guid, bool decreaseInvitedCount);
         void DecreaseGroupLength(uint32 queueId, uint32 AsGroup);
@@ -89,7 +79,7 @@ class BattleGroundQueue
         class EligibleGroups : public std::list<GroupQueueInfo *>
         {
         public:
-            void Init(QueuedGroupsList * source, BattleGroundTypeId BgTypeId, uint32 side, uint32 MaxPlayers, uint8 ArenaType = 0, bool IsRated = false, uint32 MinRating = 0, uint32 MaxRating = 0, uint32 DisregardTime = 0, uint32 excludeTeam = 0);
+            void Init(QueuedGroupsList * source, BattleGroundTypeId BgTypeId, uint32 side, uint32 MaxPlayers);
             void RemoveGroup(GroupQueueInfo * ginfo);
         };
 
@@ -125,7 +115,7 @@ class BattleGroundQueue
 
         SelectionPool m_SelectionPools[NUM_SELECTION_POOL_TYPES];
 
-        bool BuildSelectionPool(BattleGroundTypeId bgTypeId, uint32 queue_id, uint32 MinPlayers, uint32 MaxPlayers, SelectionPoolBuildMode mode, uint8 ArenaType = 0, bool isRated = false, uint32 MinRating = 0, uint32 MaxRating = 0, uint32 DisregardTime = 0, uint32 excludeTeam = 0);
+        bool BuildSelectionPool(BattleGroundTypeId bgTypeId, uint32 queue_id, uint32 MinPlayers, uint32 MaxPlayers, SelectionPoolBuildMode mode);
 
     private:
 
@@ -184,7 +174,7 @@ class BattleGroundMgr
         void BuildGroupJoinedBattlegroundPacket(WorldPacket *data, BattleGroundTypeId bgTypeId);
         void BuildUpdateWorldStatePacket(WorldPacket *data, uint32 field, uint32 value);
         void BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg);
-        void BuildBattleGroundStatusPacket(WorldPacket *data, BattleGround *bg, uint32 team, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2, uint32 arenatype = 0, uint8 israted = 0);
+        void BuildBattleGroundStatusPacket(WorldPacket *data, BattleGround *bg, uint32 team, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2);
         void BuildPlaySoundPacket(WorldPacket *data, uint32 soundid);
 
         /* Player invitation */
@@ -220,13 +210,8 @@ class BattleGroundMgr
 
         BGFreeSlotQueueType BGFreeSlotQueue[MAX_BATTLEGROUND_TYPE_ID];
 
-        uint32 GetMaxRatingDifference() const;
-        uint32 GetRatingDiscardTimer()  const;
         uint32 GetPrematureFinishTime() const;
 
-        void InitAutomaticArenaPointDistribution();
-        void DistributeArenaPoints();
-        void ToggleArenaTesting();
         void ToggleTesting();
 
         void LoadBattleMastersEntry();
@@ -254,14 +239,10 @@ class BattleGroundMgr
             return m_GameObjectBattleEventIndexMap.find(-1)->second;
         }
 
-        bool isArenaTesting() const { return m_ArenaTesting; }
         bool isTesting() const { return m_Testing; }
 
-        static bool IsArenaType(BattleGroundTypeId bgTypeId);
-        static bool IsBattleGroundType(BattleGroundTypeId bgTypeId) { return !BattleGroundMgr::IsArenaType(bgTypeId); }
-        static uint32 BGQueueTypeId(BattleGroundTypeId bgTypeId, uint8 arenaType);
+        static uint32 BGQueueTypeId(BattleGroundTypeId bgTypeId);
         static BattleGroundTypeId BGTemplateId(uint32 bgQueueTypeId);
-        static uint8 BGArenaType(uint32 bgQueueTypeId);
     private:
         BattleMastersMap    mBattleMastersMap;
         CreatureBattleEventIndexesMap m_CreatureBattleEventIndexMap;
@@ -269,10 +250,6 @@ class BattleGroundMgr
 
         /* Battlegrounds */
         BattleGroundSet m_BattleGrounds;
-        uint32 m_NextRatingDiscardUpdate;
-        time_t m_NextAutoDistributionTime;
-        uint32 m_AutoDistributionTimeChecker;
-        bool   m_ArenaTesting;
         bool   m_Testing;
 };
 

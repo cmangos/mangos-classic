@@ -30,7 +30,6 @@
 #include "World.h"
 #include "Group.h"
 #include "Guild.h"
-#include "ArenaTeam.h"
 #include "Transports.h"
 #include "ProgressBar.h"
 #include "Language.h"
@@ -119,7 +118,6 @@ ObjectMgr::ObjectMgr()
     m_ItemTextId        = 1;
     m_mailid            = 1;
     m_guildId           = 1;
-    m_arenaTeamId       = 1;
     m_auctionid         = 1;
 
     // Only zero condition left, others will be added while loading DB tables
@@ -147,9 +145,6 @@ ObjectMgr::~ObjectMgr()
         delete (*itr);
 
     for (GuildMap::iterator itr = mGuildMap.begin(); itr != mGuildMap.end(); ++itr)
-        delete itr->second;
-
-    for (ArenaTeamMap::iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
         delete itr->second;
 
     for (CacheVendorItemMap::iterator itr = m_mCacheVendorItemMap.begin(); itr != m_mCacheVendorItemMap.end(); ++itr)
@@ -212,43 +207,6 @@ void ObjectMgr::AddGuild(Guild* guild)
 void ObjectMgr::RemoveGuild(uint32 Id)
 {
     mGuildMap.erase(Id);
-}
-
-ArenaTeam* ObjectMgr::GetArenaTeamById(uint32 arenateamid) const
-{
-    ArenaTeamMap::const_iterator itr = mArenaTeamMap.find(arenateamid);
-    if (itr != mArenaTeamMap.end())
-        return itr->second;
-
-    return NULL;
-}
-
-ArenaTeam* ObjectMgr::GetArenaTeamByName(const std::string& arenateamname) const
-{
-    for(ArenaTeamMap::const_iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
-        if (itr->second->GetName() == arenateamname)
-            return itr->second;
-
-    return NULL;
-}
-
-ArenaTeam* ObjectMgr::GetArenaTeamByCaptain(uint64 const& guid) const
-{
-    for(ArenaTeamMap::const_iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
-        if (itr->second->GetCaptain() == guid)
-            return itr->second;
-
-    return NULL;
-}
-
-void ObjectMgr::AddArenaTeam(ArenaTeam* arenaTeam)
-{
-    mArenaTeamMap[arenaTeam->GetId()] = arenaTeam;
-}
-
-void ObjectMgr::RemoveArenaTeam(uint32 Id)
-{
-    mArenaTeamMap.erase(Id);
 }
 
 CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id)
@@ -2636,48 +2594,6 @@ void ObjectMgr::LoadGuilds()
 
     sLog.outString();
     sLog.outString( ">> Loaded %u guild definitions", count );
-}
-
-void ObjectMgr::LoadArenaTeams()
-{
-    uint32 count = 0;
-
-    QueryResult *result = CharacterDatabase.Query( "SELECT arenateamid FROM arena_team" );
-
-    if( !result )
-    {
-
-        barGoLink bar( 1 );
-
-        bar.step();
-
-        sLog.outString();
-        sLog.outString( ">> Loaded %u arenateam definitions", count );
-        return;
-    }
-
-    barGoLink bar( result->GetRowCount() );
-
-    do
-    {
-        Field *fields = result->Fetch();
-
-        bar.step();
-        ++count;
-
-        ArenaTeam *newarenateam = new ArenaTeam;
-        if(!newarenateam->LoadArenaTeamFromDB(fields[0].GetUInt32()))
-        {
-            delete newarenateam;
-            continue;
-        }
-        AddArenaTeam(newarenateam);
-    }while( result->NextRow() );
-
-    delete result;
-
-    sLog.outString();
-    sLog.outString( ">> Loaded %u arenateam definitions", count );
 }
 
 void ObjectMgr::LoadGroups()
@@ -5357,29 +5273,12 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = CharacterDatabase.Query("SELECT MAX(arenateamid) FROM arena_team");
-    if (result)
-    {
-        m_arenaTeamId = (*result)[0].GetUInt32()+1;
-        delete result;
-    }
-
     result = CharacterDatabase.Query( "SELECT MAX(guildid) FROM guild" );
     if (result)
     {
         m_guildId = (*result)[0].GetUInt32()+1;
         delete result;
     }
-}
-
-uint32 ObjectMgr::GenerateArenaTeamId()
-{
-    if(m_arenaTeamId>=0xFFFFFFFE)
-    {
-        sLog.outError("Arena team ids overflow!! Can't continue, shutting down server. ");
-        World::StopNow(ERROR_EXIT_CODE);
-    }
-    return m_arenaTeamId++;
 }
 
 uint32 ObjectMgr::GenerateAuctionID()

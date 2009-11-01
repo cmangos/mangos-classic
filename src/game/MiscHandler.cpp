@@ -613,10 +613,6 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket &recv_data)
     if (GetPlayer()->isAlive())
         return;
 
-    // do not allow corpse reclaim in arena
-    if (GetPlayer()->InArena())
-        return;
-
     // body not released yet
     if(!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
@@ -1310,25 +1306,6 @@ void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
             sLog.outDebug("Added FarSight (GUID:%u TypeId:%u) to player %u", GUID_LOPART(_player->GetFarSight()), GuidHigh2TypeId(GUID_HIPART(_player->GetFarSight())), _player->GetGUIDLow());
             break;
     }
-}
-
-void WorldSession::HandleSetTitleOpcode( WorldPacket & recv_data )
-{
-    sLog.outDebug("CMSG_SET_TITLE");
-
-    int32 title;
-    recv_data >> title;
-
-    // -1 at none
-    if(title > 0 && title < MAX_TITLE_INDEX)
-    {
-       if(!GetPlayer()->HasTitle(title))
-            return;
-    }
-    else
-        title = 0;
-
-    GetPlayer()->SetUInt32Value(PLAYER_CHOSEN_TITLE, title);
 }
 
 void WorldSession::HandleResetInstancesOpcode( WorldPacket & /*recv_data*/ )

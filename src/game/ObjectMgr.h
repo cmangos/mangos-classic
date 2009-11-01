@@ -55,7 +55,6 @@ extern SQLStorage sInstanceTemplate;
 
 class Group;
 class Guild;
-class ArenaTeam;
 class Path;
 class TransportPath;
 class Item;
@@ -289,8 +288,6 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, Guild *> GuildMap;
 
-        typedef UNORDERED_MAP<uint32, ArenaTeam*> ArenaTeamMap;
-
         typedef UNORDERED_MAP<uint32, Quest*> QuestMap;
 
         typedef UNORDERED_MAP<uint32, AreaTrigger> AreaTriggerMap;
@@ -323,14 +320,6 @@ class ObjectMgr
         std::string GetGuildNameById(uint32 GuildId) const;
         void AddGuild(Guild* guild);
         void RemoveGuild(uint32 Id);
-
-        ArenaTeam* GetArenaTeamById(uint32 arenateamid) const;
-        ArenaTeam* GetArenaTeamByName(const std::string& arenateamname) const;
-        ArenaTeam* GetArenaTeamByCaptain(uint64 const& guid) const;
-        void AddArenaTeam(ArenaTeam* arenaTeam);
-        void RemoveArenaTeam(uint32 Id);
-        ArenaTeamMap::iterator GetArenaTeamMapBegin() { return mArenaTeamMap.begin(); }
-        ArenaTeamMap::iterator GetArenaTeamMapEnd()   { return mArenaTeamMap.end(); }
 
         static CreatureInfo const *GetCreatureTemplate( uint32 id );
         CreatureModelInfo const *GetCreatureModelInfo( uint32 modelid );
@@ -446,7 +435,6 @@ class ObjectMgr
         }
 
         void LoadGuilds();
-        void LoadArenaTeams();
         void LoadGroups();
         void LoadQuests();
         void LoadQuestRelations()
@@ -537,7 +525,6 @@ class ObjectMgr
 
         void SetHighestGuids();
         uint32 GenerateLowGuid(HighGuid guidhigh);
-        uint32 GenerateArenaTeamId();
         uint32 GenerateAuctionID();
         uint32 GenerateGuildId();
         uint32 GenerateItemTextID();
@@ -737,7 +724,6 @@ class ObjectMgr
     protected:
 
         // first free id for selected id type
-        uint32 m_arenaTeamId;
         uint32 m_auctionid;
         uint32 m_guildId;
         uint32 m_ItemTextId;
@@ -763,7 +749,6 @@ class ObjectMgr
 
         GroupSet            mGroupSet;
         GuildMap            mGuildMap;
-        ArenaTeamMap        mArenaTeamMap;
 
         ItemTextMap         mItemTexts;
 

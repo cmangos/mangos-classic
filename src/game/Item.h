@@ -36,6 +36,7 @@ struct ItemSetEffect
     SpellEntry const *spells[8];
 };
 
+// [-ZERO] Need fix, possible uptodate in mangos-0.6
 enum InventoryChangeFailure
 {
     EQUIP_ERR_OK                                 = 0,

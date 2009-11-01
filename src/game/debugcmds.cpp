@@ -569,12 +569,6 @@ bool ChatHandler::HandleDebugBattlegroundCommand(const char * /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleDebugArenaCommand(const char * /*args*/)
-{
-    sBattleGroundMgr.ToggleArenaTesting();
-    return true;
-}
-
 bool ChatHandler::HandleDebugSpellCheckCommand(const char* /*args*/)
 {
     sLog.outString( "Check expected in code spell properties base at table 'spell_check' content...");

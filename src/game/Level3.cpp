@@ -3288,28 +3288,6 @@ bool ChatHandler::HandleDamageCommand(const char * args)
     return true;
 }
 
-bool ChatHandler::HandleModifyArenaCommand(const char * args)
-{
-    if (!*args)
-        return false;
-
-    Player *target = getSelectedPlayer();
-    if(!target)
-    {
-        SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    int32 amount = (uint32)atoi(args);
-
-    target->ModifyArenaPoints(amount);
-
-    PSendSysMessage(LANG_COMMAND_MODIFY_ARENA, GetNameLink(target).c_str(), target->GetArenaPoints());
-
-    return true;
-}
-
 bool ChatHandler::HandleReviveCommand(const char* args)
 {
     Player* target;
@@ -6137,12 +6115,6 @@ bool ChatHandler::HandleSendMessageCommand(const char* args)
     //Confirmation message
     std::string nameLink = GetNameLink(rPlayer);
     PSendSysMessage(LANG_SENDMESSAGE,nameLink.c_str(),msg_str);
-    return true;
-}
-
-bool ChatHandler::HandleFlushArenaPointsCommand(const char * /*args*/)
-{
-    sBattleGroundMgr.DistributeArenaPoints();
     return true;
 }
 

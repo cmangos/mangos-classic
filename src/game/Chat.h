@@ -128,7 +128,6 @@ class ChatHandler
         bool HandleCharacterReputationCommand(const char* args);
 
         bool HandleDebugAnimCommand(const char* args);
-        bool HandleDebugArenaCommand(const char * args);
         bool HandleDebugBattlegroundCommand(const char * args);
         bool HandleDebugGetItemStateCommand(const char * args);
         bool HandleDebugGetLootRecipientCommand(const char * args);
@@ -253,7 +252,6 @@ class ChatHandler
         bool HandleModifyTalentCommand (const char* args);
         bool HandleModifyHonorCommand (const char* args);
         bool HandleModifyRepCommand(const char* args);
-        bool HandleModifyArenaCommand(const char* args);
         bool HandleModifyGenderCommand(const char* args);
 
         //-----------------------Npc Commands-----------------------
@@ -469,7 +467,6 @@ class ChatHandler
         bool HandleRespawnCommand(const char* args);
         bool HandleComeToMeCommand(const char *args);
         bool HandleCombatStopCommand(const char *args);
-        bool HandleFlushArenaPointsCommand(const char *args);
         bool HandleRepairitemsCommand(const char* args);
         bool HandleWaterwalkCommand(const char* args);
 

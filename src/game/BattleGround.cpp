@@ -25,7 +25,6 @@
 #include "Language.h"
 #include "Chat.h"
 #include "SpellAuras.h"
-#include "ArenaTeam.h"
 #include "World.h"
 #include "Group.h"
 #include "ObjectMgr.h"
@@ -41,12 +40,9 @@ BattleGround::BattleGround()
     m_Queue_type        = MAX_BATTLEGROUND_QUEUES;
     m_InvitedAlliance   = 0;
     m_InvitedHorde      = 0;
-    m_ArenaType         = 0;
-    m_IsArena           = false;
     m_Winner            = 2;
     m_StartTime         = 0;
     m_Events            = 0;
-    m_IsRated           = false;
     m_BuffChange        = false;
     m_Name              = "";
     m_LevelMin          = 0;
@@ -73,12 +69,6 @@ BattleGround::BattleGround()
 
     m_TeamStartLocO[BG_TEAM_ALLIANCE]   = 0;
     m_TeamStartLocO[BG_TEAM_HORDE]      = 0;
-
-    m_ArenaTeamIds[BG_TEAM_ALLIANCE]   = 0;
-    m_ArenaTeamIds[BG_TEAM_HORDE]      = 0;
-
-    m_ArenaTeamRatingChanges[BG_TEAM_ALLIANCE]   = 0;
-    m_ArenaTeamRatingChanges[BG_TEAM_HORDE]      = 0;
 
     m_BgRaids[BG_TEAM_ALLIANCE]         = NULL;
     m_BgRaids[BG_TEAM_HORDE]            = NULL;
@@ -182,7 +172,7 @@ void BattleGround::Update(uint32 diff)
     /*********************************************************/
 
     // if less then minimum players are in on one side, then start premature finish timer
-    if(GetStatus() == STATUS_IN_PROGRESS && !isArena() && sBattleGroundMgr.GetPrematureFinishTime() && (GetPlayersCountByTeam(ALLIANCE) < GetMinPlayersPerTeam() || GetPlayersCountByTeam(HORDE) < GetMinPlayersPerTeam()))
+    if(GetStatus() == STATUS_IN_PROGRESS && sBattleGroundMgr.GetPrematureFinishTime() && (GetPlayersCountByTeam(ALLIANCE) < GetMinPlayersPerTeam() || GetPlayersCountByTeam(HORDE) < GetMinPlayersPerTeam()))
     {
         if(!m_PrematureCountDown)
         {
@@ -208,19 +198,6 @@ void BattleGround::Update(uint32 diff)
     }
     else if (m_PrematureCountDown)
         m_PrematureCountDown = false;
-
-    /*********************************************************/
-    /***           ARENA BUFF OBJECT SPAWNING              ***/
-    /*********************************************************/
-    if (isArena() && !m_ArenaBuffSpawned)
-    {
-        // 60 seconds after start the buffobjects in arena should get spawned
-        if (m_StartTime > START_DELAY1 + ARENA_SPAWN_BUFF_OBJECTS)
-        {
-            SpawnEvent(ARENA_BUFF_EVENT, 0, true);
-            m_ArenaBuffSpawned = true;
-        }
-    }
 
     /*********************************************************/
     /***           BATTLEGROUND ENDING SYSTEM              ***/
@@ -400,8 +377,6 @@ void BattleGround::EndBattleGround(uint32 winner)
 {
     this->RemoveFromBGFreeSlotQueue();
 
-    ArenaTeam * winner_arena_team = NULL;
-    ArenaTeam * loser_arena_team = NULL;
     uint32 loser_rating = 0;
     uint32 winner_rating = 0;
     WorldPacket data;
@@ -410,10 +385,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
     if(winner == ALLIANCE)
     {
-        if(isBattleGround())
-            winmsg = GetMangosString(LANG_BG_A_WINS);
-        else
-            winmsg = GetMangosString(LANG_ARENA_GOLD_WINS);
+        winmsg = GetMangosString(LANG_BG_A_WINS);
 
         PlaySoundToAll(SOUND_ALLIANCE_WINS);                // alliance wins sound
 
@@ -421,10 +393,7 @@ void BattleGround::EndBattleGround(uint32 winner)
     }
     else if(winner == HORDE)
     {
-        if(isBattleGround())
-            winmsg = GetMangosString(LANG_BG_H_WINS);
-        else
-            winmsg = GetMangosString(LANG_ARENA_GREEN_WINS);
+        winmsg = GetMangosString(LANG_BG_H_WINS);
 
         PlaySoundToAll(SOUND_HORDE_WINS);                   // horde wins sound
 
@@ -437,44 +406,6 @@ void BattleGround::EndBattleGround(uint32 winner)
 
     SetStatus(STATUS_WAIT_LEAVE);
     m_EndTime = 0;
-
-    // arena rating calculation
-    if(isArena() && isRated())
-    {
-        if(winner == ALLIANCE)
-        {
-            winner_arena_team = objmgr.GetArenaTeamById(GetArenaTeamIdForTeam(ALLIANCE));
-            loser_arena_team = objmgr.GetArenaTeamById(GetArenaTeamIdForTeam(HORDE));
-        }
-        else if(winner == HORDE)
-        {
-            winner_arena_team = objmgr.GetArenaTeamById(GetArenaTeamIdForTeam(HORDE));
-            loser_arena_team = objmgr.GetArenaTeamById(GetArenaTeamIdForTeam(ALLIANCE));
-        }
-        if(winner_arena_team && loser_arena_team)
-        {
-            loser_rating = loser_arena_team->GetStats().rating;
-            winner_rating = winner_arena_team->GetStats().rating;
-            int32 winner_change = winner_arena_team->WonAgainst(loser_rating);
-            int32 loser_change = loser_arena_team->LostAgainst(winner_rating);
-            sLog.outDebug("--- Winner rating: %u, Loser rating: %u, Winner change: %u, Losser change: %u ---", winner_rating, loser_rating, winner_change, loser_change);
-            if(winner == ALLIANCE)
-            {
-                SetArenaTeamRatingChangeForTeam(ALLIANCE, winner_change);
-                SetArenaTeamRatingChangeForTeam(HORDE, loser_change);
-            }
-            else
-            {
-                SetArenaTeamRatingChangeForTeam(HORDE, winner_change);
-                SetArenaTeamRatingChangeForTeam(ALLIANCE, loser_change);
-            }
-        }
-        else
-        {
-            SetArenaTeamRatingChangeForTeam(ALLIANCE, 0);
-            SetArenaTeamRatingChangeForTeam(HORDE, 0);
-        }
-    }
 
     for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
@@ -504,15 +435,6 @@ void BattleGround::EndBattleGround(uint32 winner)
         uint32 team = itr->second.Team;
         if(!team) team = plr->GetTeam();
 
-        // per player calculation
-        if(isArena() && isRated() && winner_arena_team && loser_arena_team)
-        {
-            if(team == winner)
-                winner_arena_team->MemberWon(plr,loser_rating);
-            else
-                loser_arena_team->MemberLost(plr,winner_rating);
-        }
-
         if(team == winner)
         {
             if(!Source)
@@ -531,27 +453,13 @@ void BattleGround::EndBattleGround(uint32 winner)
         sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
         plr->GetSession()->SendPacket(&data);
 
-        uint32 bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID(), GetArenaType());
+        uint32 bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID());
         sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
         plr->GetSession()->SendPacket(&data);
     }
 
-    if(isArena() && isRated() && winner_arena_team && loser_arena_team)
-    {
-        // update arena points only after increasing the player's match count!
-        //obsolete: winner_arena_team->UpdateArenaPointsHelper();
-        //obsolete: loser_arena_team->UpdateArenaPointsHelper();
-        // save the stat changes
-        winner_arena_team->SaveToDB();
-        loser_arena_team->SaveToDB();
-        // send updated arena team stats to players
-        // this way all arena team members will get notified, not only the ones who participated in this match
-        winner_arena_team->NotifyStatsChanged();
-        loser_arena_team->NotifyStatsChanged();
-    }
-
     // inform invited players about the removal
-    sBattleGroundMgr.m_BattleGroundQueues[BattleGroundMgr::BGQueueTypeId(GetTypeID(), GetArenaType())].BGEndedRemoveInvites(this);
+    sBattleGroundMgr.m_BattleGroundQueues[BattleGroundMgr::BGQueueTypeId(GetTypeID())].BGEndedRemoveInvites(this);
 
     if(Source)
     {
@@ -573,8 +481,6 @@ uint32 BattleGround::GetBattlemasterEntry() const
         case BATTLEGROUND_AV: return 15972;
         case BATTLEGROUND_WS: return 14623;
         case BATTLEGROUND_AB: return 14879;
-        case BATTLEGROUND_EY: return 22516;
-        case BATTLEGROUND_NA: return 20200;
         default:              return 0;
     }
 }
@@ -605,10 +511,6 @@ void BattleGround::RewardMark(Player *plr,uint32 count)
                 mark = SPELL_AB_MARK_WINNER;
             else
                 mark = SPELL_AB_MARK_LOSER;
-            break;
-        case BATTLEGROUND_EY:
-            IsSpell = false;
-            mark = ITEM_EY_MARK_OF_HONOR;
             break;
         default:
             return;
@@ -718,9 +620,6 @@ void BattleGround::RewardQuestComplete(Player *plr)
         case BATTLEGROUND_AB:
             quest = SPELL_AB_QUEST_REWARD;
             break;
-        case BATTLEGROUND_EY:
-            quest = SPELL_EY_QUEST_REWARD;
-            break;
         default:
             return;
     }
@@ -777,38 +676,7 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
             if(!team) team = plr->GetTeam();
 
             BattleGroundTypeId bgTypeId = GetTypeID();
-            uint32 bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID(), GetArenaType());
-            // if arena, remove the specific arena auras
-            if(isArena())
-            {
-                plr->RemoveArenaAuras(true);    // removes debuffs / dots etc., we don't want the player to die after porting out
-                bgTypeId=BATTLEGROUND_AA;       // set the bg type to all arenas (it will be used for queue refreshing)
-
-                // unsummon current and summon old pet if there was one and there isn't a current pet
-                plr->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT);
-                plr->ResummonPetTemporaryUnSummonedIfAny();
-
-                if(isRated() && GetStatus() == STATUS_IN_PROGRESS)
-                {
-                    //left a rated match while the encounter was in progress, consider as loser
-                    ArenaTeam * winner_arena_team = 0;
-                    ArenaTeam * loser_arena_team = 0;
-                    if(team == HORDE)
-                    {
-                        winner_arena_team = objmgr.GetArenaTeamById(GetArenaTeamIdForTeam(ALLIANCE));
-                        loser_arena_team = objmgr.GetArenaTeamById(GetArenaTeamIdForTeam(HORDE));
-                    }
-                    else
-                    {
-                        winner_arena_team = objmgr.GetArenaTeamById(GetArenaTeamIdForTeam(HORDE));
-                        loser_arena_team = objmgr.GetArenaTeamById(GetArenaTeamIdForTeam(ALLIANCE));
-                    }
-                    if(winner_arena_team && loser_arena_team)
-                    {
-                        loser_arena_team->MemberLost(plr,winner_arena_team->GetRating());
-                    }
-                }
-            }
+            uint32 bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID());
 
             WorldPacket data;
             if(SendPacket)
@@ -874,18 +742,11 @@ void BattleGround::Reset()
     SetStatus(STATUS_WAIT_QUEUE);
     SetStartTime(0);
     SetEndTime(0);
-    SetArenaType(0);
-    SetRated(false);
 
     m_Events = 0;
 
     // door-event2 is always 0
     m_ActiveEvents[BG_EVENT_DOOR] = 0;
-    if (isArena())
-    {
-        m_ActiveEvents[ARENA_BUFF_EVENT] = BG_EVENT_NONE;
-        m_ArenaBuffSpawned = false;
-    }
 
     if (m_InvitedAlliance > 0 || m_InvitedHorde > 0)
         sLog.outError("BattleGround system: bad counter, m_InvitedAlliance: %d, m_InvitedHorde: %d", m_InvitedAlliance, m_InvitedHorde);
@@ -934,43 +795,8 @@ void BattleGround::AddPlayer(Player *plr)
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
     SendPacketToTeam(team, &data, plr, false);
 
-    // add arena specific auras
-    if(isArena())
-    {
-        plr->RemoveArenaSpellCooldowns();
-        plr->RemoveArenaAuras();
-        plr->RemoveAllEnchantments(TEMP_ENCHANTMENT_SLOT);
-        if(team == ALLIANCE)                                // gold
-        {
-            if(plr->GetTeam() == HORDE)
-                plr->CastSpell(plr, SPELL_HORDE_GOLD_FLAG,true);
-            else
-                plr->CastSpell(plr, SPELL_ALLIANCE_GOLD_FLAG,true);
-        }
-        else                                                // green
-        {
-            if(plr->GetTeam() == HORDE)
-                plr->CastSpell(plr, SPELL_HORDE_GREEN_FLAG,true);
-            else
-                plr->CastSpell(plr, SPELL_ALLIANCE_GREEN_FLAG,true);
-        }
-
-        plr->DestroyConjuredItems(true);
-        plr->UnsummonPetTemporaryIfAny();
-
-        if(GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
-        {
-            plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
-
-            plr->SetHealth(plr->GetMaxHealth());
-            plr->SetPower(POWER_MANA, plr->GetMaxPower(POWER_MANA));
-        }
-    }
-    else
-    {
-        if(GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
-            plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
-    }
+    if(GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
+        plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
 
     // Log
     sLog.outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());
@@ -1088,13 +914,9 @@ void BattleGround::UpdatePlayerScore(Player *Source, uint32 type, uint32 value)
             itr->second->HonorableKills += value;
             break;
         case SCORE_BONUS_HONOR:                             // Honor bonus
-            // do not add honor in arenas
-            if(isBattleGround())
-            {
-                // reward honor instantly
-                if(Source->RewardHonor(NULL, 1, value))
-                    itr->second->BonusHonor += value;
-            }
+            // reward honor instantly
+            if(Source->RewardHonor(NULL, 1, value))
+                itr->second->BonusHonor += value;
             break;
             //used only in EY, but in MSG_PVP_LOG_DATA opcode
         case SCORE_DAMAGE_DONE:                             // Damage Done
@@ -1412,7 +1234,7 @@ void BattleGround::EndNow()
     SetStatus(STATUS_WAIT_LEAVE);
     SetEndTime(TIME_TO_AUTOREMOVE);
     // inform invited players about the removal
-    sBattleGroundMgr.m_BattleGroundQueues[BattleGroundMgr::BGQueueTypeId(GetTypeID(), GetArenaType())].BGEndedRemoveInvites(this);
+    sBattleGroundMgr.m_BattleGroundQueues[BattleGroundMgr::BGQueueTypeId(GetTypeID())].BGEndedRemoveInvites(this);
 }
 
 // Battleground messages are localized using the dbc lang, they are not client language dependent

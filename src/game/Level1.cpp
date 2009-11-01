@@ -370,7 +370,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 
         Map* pMap = m_session->GetPlayer()->GetMap();
 
-        if (pMap->IsBattleGroundOrArena())
+        if (pMap->IsBattleGround())
         {
             // only allow if gm mode is on
             if (!target->isGameMaster())
@@ -484,7 +484,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         std::string chrNameLink = playerLink(target_name);
 
         Map* cMap = target->GetMap();
-        if (cMap->IsBattleGroundOrArena())
+        if (cMap->IsBattleGround())
         {
             // only allow if gm mode is on
             if (!_player->isGameMaster())
@@ -628,42 +628,6 @@ bool ChatHandler::HandleRecallCommand(const char* args)
     }
 
     target->TeleportTo(target->m_recallMap, target->m_recallX, target->m_recallY, target->m_recallZ, target->m_recallO);
-    return true;
-}
-
-//Edit Player KnownTitles
-bool ChatHandler::HandleModifyKnownTitlesCommand(const char* args)
-{
-    if(!*args)
-        return false;
-
-    uint64 titles = 0;
-
-    sscanf((char*)args, UI64FMTD, &titles);
-
-    Player *chr = getSelectedPlayer();
-    if (!chr)
-    {
-        SendSysMessage(LANG_NO_CHAR_SELECTED);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    // check online security
-    if (HasLowerSecurity(chr, 0))
-        return false;
-
-    uint64 titles2 = titles;
-
-    for(int i = 1; i < sCharTitlesStore.GetNumRows(); ++i)
-        if(CharTitlesEntry const* tEntry = sCharTitlesStore.LookupEntry(i))
-            titles2 &= ~(uint64(1) << tEntry->bit_index);
-
-    titles &= ~titles2;                                     // remove not existed titles
-
-    chr->SetUInt64Value(PLAYER__FIELD_KNOWN_TITLES, titles);
-    SendSysMessage(LANG_DONE);
-
     return true;
 }
 

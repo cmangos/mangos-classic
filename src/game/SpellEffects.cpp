@@ -44,7 +44,6 @@
 #include "CreatureAI.h"
 #include "BattleGroundMgr.h"
 #include "BattleGround.h"
-#include "BattleGroundEY.h"
 #include "BattleGroundWS.h"
 #include "VMapFactory.h"
 #include "Language.h"
@@ -2828,11 +2827,7 @@ void Spell::EffectOpenLock(uint32 effIndex)
             //CanUseBattleGroundObject() already called in CanCast()
             // in battleground check
             if (BattleGround *bg = player->GetBattleGround())
-            {
-                if (bg->GetTypeID() == BATTLEGROUND_EY)
-                    bg->EventPlayerClickedOnFlag(player, gameObjTarget);
                 return;
-            }
         }
         lockId = goInfo->GetLockId();
         guid = gameObjTarget->GetGUID();
@@ -4405,14 +4400,6 @@ void Spell::EffectSummonObjectWild(uint32 i)
                         team = HORDE;
 
                     ((BattleGroundWS*)bg)->SetDroppedFlagGUID(pGameObj->GetGUID(),team);
-                }
-                break;
-            }
-            case 566:                                       //EY
-            {
-                if(bg && bg->GetTypeID()==BATTLEGROUND_EY && bg->GetStatus() == STATUS_IN_PROGRESS)
-                {
-                    ((BattleGroundEY*)bg)->SetDroppedFlagGUID(pGameObj->GetGUID());
                 }
                 break;
             }

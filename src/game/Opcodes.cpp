@@ -910,7 +910,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x371*/ { "SMSG_LFG_PENDING_MATCH",                       STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x372*/ { "SMSG_LFG_PENDING_MATCH_DONE",                  STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x373*/ { "SMSG_TITLE_EARNED",                            STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
-    /*0x374*/ { "CMSG_SET_TITLE",                               STATUS_LOGGEDIN, &WorldSession::HandleSetTitleOpcode            },
+    /*0x374*/ { "CMSG_SET_TITLE",                               STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x375*/ { "CMSG_CANCEL_MOUNT_AURA",                       STATUS_LOGGEDIN, &WorldSession::HandleCancelMountAuraOpcode     },
     /*0x376*/ { "SMSG_ARENA_ERROR",                             STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x377*/ { "MSG_INSPECT_ARENA_TEAMS",                      STATUS_LOGGEDIN, &WorldSession::HandleInspectArenaTeamsOpcode   },

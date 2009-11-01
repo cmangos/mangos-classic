@@ -2430,13 +2430,8 @@ enum BattleGroundTypeId
     BATTLEGROUND_AV            = 1,
     BATTLEGROUND_WS            = 2,
     BATTLEGROUND_AB            = 3,
-    BATTLEGROUND_NA            = 4,
-    BATTLEGROUND_BE            = 5,
-    BATTLEGROUND_AA            = 6,
-    BATTLEGROUND_EY            = 7,
-    BATTLEGROUND_RL            = 8
 };
-#define MAX_BATTLEGROUND_TYPE_ID 9
+#define MAX_BATTLEGROUND_TYPE_ID 4
 
 enum MailResponseType
 {

@@ -534,10 +534,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\ArenaTeamHandler.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\AuctionHouseHandler.cpp"
 				>
 			</File>
@@ -547,14 +543,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\BattleGround.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAA.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAA.h"
 				>
 			</File>
 			<File
@@ -574,22 +562,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\BattleGroundBE.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundBE.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundEY.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundEY.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\BattleGroundHandler.cpp"
 				>
 			</File>
@@ -599,22 +571,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\BattleGroundMgr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundNA.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundNA.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundRL.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundRL.h"
 				>
 			</File>
 			<File
@@ -979,14 +935,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\AnimalRandomMovementGenerator.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ArenaTeam.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ArenaTeam.h"
 				>
 			</File>
 			<File

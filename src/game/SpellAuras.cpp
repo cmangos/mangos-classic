@@ -3907,12 +3907,6 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
                         {
                             break;
                         }
-                        case BATTLEGROUND_EY:
-                        {
-                           if(GetId() == 34976)
-                                bg->EventPlayerDroppedFlag(((Player*)m_target));
-                            break;
-                        }
                     }
                 }
             }

@@ -25,25 +25,12 @@
 #include "Log.h"
 #include "Opcodes.h"
 #include "Guild.h"
-#include "ArenaTeam.h"
 #include "GossipDef.h"
 #include "SocialMgr.h"
-
-/*enum PetitionType // dbc data
-{
-    PETITION_TYPE_GUILD      = 1,
-    PETITION_TYPE_ARENA_TEAM = 3
-};*/
 
 // Charters ID in item_template
 #define GUILD_CHARTER               5863
 #define GUILD_CHARTER_COST          1000                    // 10 S
-#define ARENA_TEAM_CHARTER_2v2      23560
-#define ARENA_TEAM_CHARTER_2v2_COST 800000                  // 80 G
-#define ARENA_TEAM_CHARTER_3v3      23561
-#define ARENA_TEAM_CHARTER_3v3_COST 1200000                 // 120 G
-#define ARENA_TEAM_CHARTER_5v5      23562
-#define ARENA_TEAM_CHARTER_5v5_COST 2000000                 // 200 G
 
 void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
 {
@@ -82,87 +69,30 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         return;
     }
 
+    if (!pCreature->isTabardDesigner())
+        return;
+
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    uint32 charterid = 0;
-    uint32 cost = 0;
-    uint32 type = 0;
-    if(pCreature->isTabardDesigner())
-    {
-        // if tabard designer, then trying to buy a guild charter.
-        // do not let if already in guild.
-        if(_player->GetGuildId())
-            return;
+    // if tabard designer, then trying to buy a guild charter.
+    // do not let if already in guild.
+    if(_player->GetGuildId())
+        return;
 
-        charterid = GUILD_CHARTER;
-        cost = GUILD_CHARTER_COST;
-        type = 9;
+    uint32 charterid = GUILD_CHARTER;
+    uint32 cost = GUILD_CHARTER_COST;
+
+    if(objmgr.GetGuildByName(name))
+    {
+        SendGuildCommandResult(GUILD_CREATE_S, name, GUILD_NAME_EXISTS);
+        return;
     }
-    else
+    if(objmgr.IsReservedName(name) || !ObjectMgr::IsValidCharterName(name))
     {
-        // TODO: find correct opcode
-        if(_player->getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
-        {
-            SendNotification(LANG_ARENA_ONE_TOOLOW, sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL));
-            return;
-        }
-
-        switch(unk10)
-        {
-            case 1:
-                charterid = ARENA_TEAM_CHARTER_2v2;
-                cost = ARENA_TEAM_CHARTER_2v2_COST;
-                type = 2;                                   // 2v2
-                break;
-            case 2:
-                charterid = ARENA_TEAM_CHARTER_3v3;
-                cost = ARENA_TEAM_CHARTER_3v3_COST;
-                type = 3;                                   // 3v3
-                break;
-            case 3:
-                charterid = ARENA_TEAM_CHARTER_5v5;
-                cost = ARENA_TEAM_CHARTER_5v5_COST;
-                type = 5;                                   // 5v5
-                break;
-            default:
-                sLog.outDebug("unknown selection at buy petition: %u", unk10);
-                return;
-        }
-
-        if(_player->GetArenaTeamId(unk10-1))
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ALREADY_IN_ARENA_TEAM);
-            return;
-        }
-    }
-
-    if(type == 9)
-    {
-        if(objmgr.GetGuildByName(name))
-        {
-            SendGuildCommandResult(GUILD_CREATE_S, name, GUILD_NAME_EXISTS);
-            return;
-        }
-        if(objmgr.IsReservedName(name) || !ObjectMgr::IsValidCharterName(name))
-        {
-            SendGuildCommandResult(GUILD_CREATE_S, name, GUILD_NAME_INVALID);
-            return;
-        }
-    }
-    else
-    {
-        if(objmgr.GetArenaTeamByName(name))
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ARENA_TEAM_NAME_EXISTS_S);
-            return;
-        }
-        if(objmgr.IsReservedName(name) || !ObjectMgr::IsValidCharterName(name))
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ARENA_TEAM_NAME_INVALID);
-            return;
-        }
+        SendGuildCommandResult(GUILD_CREATE_S, name, GUILD_NAME_INVALID);
+        return;
     }
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype(charterid);
@@ -200,7 +130,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     // a petition is invalid, if both the owner and the type matches
     // we checked above, if this player is in an arenateam, so this must be
     // datacorruption
-    QueryResult *result = CharacterDatabase.PQuery("SELECT petitionguid FROM petition WHERE ownerguid = '%u'  AND type = '%u'", _player->GetGUIDLow(), type);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT petitionguid FROM petition WHERE ownerguid = '%u'", _player->GetGUIDLow());
 
     std::ostringstream ssInvalidPetitionGUIDs;
 
@@ -224,8 +154,8 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("DELETE FROM petition WHERE petitionguid IN ( %s )",  ssInvalidPetitionGUIDs.str().c_str());
     CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE petitionguid IN ( %s )", ssInvalidPetitionGUIDs.str().c_str());
-    CharacterDatabase.PExecute("INSERT INTO petition (ownerguid, petitionguid, name, type) VALUES ('%u', '%u', '%s', '%u')",
-        _player->GetGUIDLow(), charter->GetGUIDLow(), name.c_str(), type);
+    CharacterDatabase.PExecute("INSERT INTO petition (ownerguid, petitionguid, name) VALUES ('%u', '%u', '%s')",
+        _player->GetGUIDLow(), charter->GetGUIDLow(), name.c_str());
     CharacterDatabase.CommitTransaction();
 }
 
@@ -242,21 +172,11 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket & recv_data)
     // solve (possible) some strange compile problems with explicit use GUID_LOPART(petitionguid) at some GCC versions (wrong code optimization in compiler?)
     uint32 petitionguid_low = GUID_LOPART(petitionguid);
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT type FROM petition WHERE petitionguid = '%u'", petitionguid_low);
-    if(!result)
-    {
-        sLog.outError("any petition on server...");
-        return;
-    }
-    Field *fields = result->Fetch();
-    uint32 type = fields[0].GetUInt32();
-    delete result;
-
     // if guild petition and has guild => error, return;
-    if(type==9 && _player->GetGuildId())
+    if(_player->GetGuildId())
         return;
 
-    result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", petitionguid_low);
+    QueryResult* result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", petitionguid_low);
 
     // result==NULL also correct in case no sign yet
     if(result)
@@ -301,14 +221,12 @@ void WorldSession::HandlePetitionQueryOpcode(WorldPacket & recv_data)
 void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
 {
     uint64 ownerguid = 0;
-    uint32 type;
     std::string name = "NO_NAME_FOR_GUID";
     uint8 signs = 0;
 
     QueryResult *result = CharacterDatabase.PQuery(
         "SELECT ownerguid, name, "
-        "  (SELECT COUNT(playerguid) FROM petition_sign WHERE petition_sign.petitionguid = '%u') AS signs, "
-        "  type "
+        "  (SELECT COUNT(playerguid) FROM petition_sign WHERE petition_sign.petitionguid = '%u') AS signs "
         "FROM petition WHERE petitionguid = '%u'", GUID_LOPART(petitionguid), GUID_LOPART(petitionguid));
 
     if(result)
@@ -317,7 +235,6 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
         ownerguid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
         name      = fields[1].GetCppString();
         signs     = fields[2].GetUInt8();
-        type      = fields[3].GetUInt32();
         delete result;
     }
     else
@@ -331,18 +248,9 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
     data << ownerguid;                                      // charter owner guid
     data << name;                                           // name (guild/arena team)
     data << uint8(0);                                       // 1
-    if(type == 9)
-    {
-        data << uint32(9);
-        data << uint32(9);
-        data << uint32(0);                                  // bypass client - side limitation, a different value is needed here for each petition
-    }
-    else
-    {
-        data << type-1;
-        data << type-1;
-        data << type;                                       // bypass client - side limitation, a different value is needed here for each petition
-    }
+    data << uint32(9);
+    data << uint32(9);
+    data << uint32(0);                                      // bypass client - side limitation, a different value is needed here for each petition
     data << uint32(0);                                      // 5
     data << uint32(0);                                      // 6
     data << uint32(0);                                      // 7
@@ -352,10 +260,7 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
     data << uint32(0);                                      // 11
     data << uint32(0);                                      // 13 count of next strings?
     data << uint32(0);                                      // 14
-    if(type == 9)
-        data << uint32(0);                                  // 15 0 - guild, 1 - arena team
-    else
-        data << uint32(1);
+    data << uint32(0);                                      // 15 0 - guild, 1 - arena team
     SendPacket(&data);
 }
 
@@ -365,7 +270,6 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recv_data)
     //recv_data.hexlike();
 
     uint64 petitionguid;
-    uint32 type;
     std::string newname;
 
     recv_data >> petitionguid;                              // guid
@@ -375,45 +279,15 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recv_data)
     if(!item)
         return;
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT type FROM petition WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
-
-    if(result)
+    if(objmgr.GetGuildByName(newname))
     {
-        Field* fields = result->Fetch();
-        type = fields[0].GetUInt32();
-        delete result;
-    }
-    else
-    {
-        sLog.outDebug("CMSG_PETITION_QUERY failed for petition (GUID: %u)", GUID_LOPART(petitionguid));
+        SendGuildCommandResult(GUILD_CREATE_S, newname, GUILD_NAME_EXISTS);
         return;
     }
-
-    if(type == 9)
+    if(objmgr.IsReservedName(newname) || !ObjectMgr::IsValidCharterName(newname))
     {
-        if(objmgr.GetGuildByName(newname))
-        {
-            SendGuildCommandResult(GUILD_CREATE_S, newname, GUILD_NAME_EXISTS);
-            return;
-        }
-        if(objmgr.IsReservedName(newname) || !ObjectMgr::IsValidCharterName(newname))
-        {
-            SendGuildCommandResult(GUILD_CREATE_S, newname, GUILD_NAME_INVALID);
-            return;
-        }
-    }
-    else
-    {
-        if(objmgr.GetArenaTeamByName(newname))
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, newname, "", ERR_ARENA_TEAM_NAME_EXISTS_S);
-            return;
-        }
-        if(objmgr.IsReservedName(newname) || !ObjectMgr::IsValidCharterName(newname))
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, newname, "", ERR_ARENA_TEAM_NAME_INVALID);
-            return;
-        }
+        SendGuildCommandResult(GUILD_CREATE_S, newname, GUILD_NAME_INVALID);
+        return;
     }
 
     std::string db_newname = newname;
@@ -441,8 +315,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
 
     QueryResult *result = CharacterDatabase.PQuery(
         "SELECT ownerguid, "
-        "  (SELECT COUNT(playerguid) FROM petition_sign WHERE petition_sign.petitionguid = '%u') AS signs, "
-        "  type "
+        "  (SELECT COUNT(playerguid) FROM petition_sign WHERE petition_sign.petitionguid = '%u') AS signs "
         "FROM petition WHERE petitionguid = '%u'", GUID_LOPART(petitionguid), GUID_LOPART(petitionguid));
 
     if(!result)
@@ -454,7 +327,6 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
     fields = result->Fetch();
     uint64 ownerguid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
     uint8 signs = fields[1].GetUInt8();
-    uint32 type = fields[2].GetUInt32();
 
     delete result;
 
@@ -465,52 +337,22 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
     // not let enemies sign guild charter
     if(!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && GetPlayer()->GetTeam() != objmgr.GetPlayerTeamByGUID(ownerguid))
     {
-        if(type != 9)
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", "", ERR_ARENA_TEAM_NOT_ALLIED);
-        else
-            SendGuildCommandResult(GUILD_CREATE_S, "", GUILD_NOT_ALLIED);
+        SendGuildCommandResult(GUILD_CREATE_S, "", GUILD_NOT_ALLIED);
         return;
     }
 
-    if(type != 9)
+    if(_player->GetGuildId())
     {
-        if(_player->getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, "", _player->GetName(), ERR_ARENA_TEAM_PLAYER_TO_LOW);
-            return;
-        }
-
-        uint8 slot = ArenaTeam::GetSlotByType(type);
-        if(slot >= MAX_ARENA_SLOT)
-            return;
-
-        if(_player->GetArenaTeamId(slot))
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", _player->GetName(), ERR_ALREADY_IN_ARENA_TEAM_S);
-            return;
-        }
-
-        if(_player->GetArenaTeamIdInvited())
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", _player->GetName(), ERR_ALREADY_INVITED_TO_ARENA_TEAM_S);
-            return;
-        }
+        SendGuildCommandResult(GUILD_INVITE_S, _player->GetName(), ALREADY_IN_GUILD);
+        return;
     }
-    else
+    if(_player->GetGuildIdInvited())
     {
-        if(_player->GetGuildId())
-        {
-            SendGuildCommandResult(GUILD_INVITE_S, _player->GetName(), ALREADY_IN_GUILD);
-            return;
-        }
-        if(_player->GetGuildIdInvited())
-        {
-            SendGuildCommandResult(GUILD_INVITE_S, _player->GetName(), ALREADY_INVITED_TO_GUILD);
-            return;
-        }
+        SendGuildCommandResult(GUILD_INVITE_S, _player->GetName(), ALREADY_INVITED_TO_GUILD);
+        return;
     }
 
-    if(++signs > type)                                        // client signs maximum
+    if(++signs > 9)                                         // client signs maximum
         return;
 
     //client doesn't allow to sign petition two times by one character, but not check sign by another character from same account
@@ -590,7 +432,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recv_data)
 
     uint8 signs = 0;
     uint64 petitionguid, plguid;
-    uint32 type, junk;
+    uint32 junk;
     Player *player;
     recv_data >> junk;                                      // this is not petition type!
     recv_data >> petitionguid;                              // petition guid
@@ -600,67 +442,27 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recv_data)
     if (!player)
         return;
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT type FROM petition WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
-    if (!result)
-        return;
-
-    Field *fields = result->Fetch();
-    type = fields[0].GetUInt32();
-    delete result;
-
-    sLog.outDebug("OFFER PETITION: type %u, GUID1 %u, to player id: %u", type, GUID_LOPART(petitionguid), GUID_LOPART(plguid));
+    sLog.outDebug("OFFER PETITION: GUID1 %u, to player id: %u", GUID_LOPART(petitionguid), GUID_LOPART(plguid));
 
     if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && GetPlayer()->GetTeam() != player->GetTeam() )
     {
-        if(type != 9)
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", "", ERR_ARENA_TEAM_NOT_ALLIED);
-        else
-            SendGuildCommandResult(GUILD_CREATE_S, "", GUILD_NOT_ALLIED);
+        SendGuildCommandResult(GUILD_CREATE_S, "", GUILD_NOT_ALLIED);
         return;
     }
 
-    if(type != 9)
+    if(player->GetGuildId())
     {
-        if(player->getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
-        {
-            // player is too low level to join an arena team
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, player->GetName(), "", ERR_ARENA_TEAM_PLAYER_TO_LOW);
-            return;
-        }
-
-        uint8 slot = ArenaTeam::GetSlotByType(type);
-        if(slot >= MAX_ARENA_SLOT)
-            return;
-
-        if(player->GetArenaTeamId(slot))
-        {
-            // player is already in an arena team
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, player->GetName(), "", ERR_ALREADY_IN_ARENA_TEAM_S);
-            return;
-        }
-
-        if(player->GetArenaTeamIdInvited())
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", _player->GetName(), ERR_ALREADY_INVITED_TO_ARENA_TEAM_S);
-            return;
-        }
-    }
-    else
-    {
-        if(player->GetGuildId())
-        {
-            SendGuildCommandResult(GUILD_INVITE_S, _player->GetName(), ALREADY_IN_GUILD);
-            return;
-        }
-
-        if(player->GetGuildIdInvited())
-        {
-            SendGuildCommandResult(GUILD_INVITE_S, _player->GetName(), ALREADY_INVITED_TO_GUILD);
-            return;
-        }
+        SendGuildCommandResult(GUILD_INVITE_S, _player->GetName(), ALREADY_IN_GUILD);
+        return;
     }
 
-    result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
+    if(player->GetGuildIdInvited())
+    {
+        SendGuildCommandResult(GUILD_INVITE_S, _player->GetName(), ALREADY_INVITED_TO_GUILD);
+        return;
+    }
+
+    QueryResult* result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
     // result==NULL also correct charter without signs
     if(result)
         signs = result->GetRowCount();
@@ -695,7 +497,6 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     uint64 petitionguid;
 
     uint32 ownerguidlo;
-    uint32 type;
     std::string name;
 
     recv_data >> petitionguid;
@@ -703,13 +504,12 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     sLog.outDebug("Petition %u turned in by %u", GUID_LOPART(petitionguid), _player->GetGUIDLow());
 
     // data
-    QueryResult *result = CharacterDatabase.PQuery("SELECT ownerguid, name, type FROM petition WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT ownerguid, name FROM petition WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
     if(result)
     {
         Field *fields = result->Fetch();
         ownerguidlo = fields[0].GetUInt32();
         name = fields[1].GetCppString();
-        type = fields[2].GetUInt32();
         delete result;
     }
     else
@@ -718,30 +518,12 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if(type == 9)
+    if(_player->GetGuildId())
     {
-        if(_player->GetGuildId())
-        {
-            data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
-            data << (uint32)PETITION_TURN_ALREADY_IN_GUILD; // already in guild
-            _player->GetSession()->SendPacket(&data);
-            return;
-        }
-    }
-    else
-    {
-        uint8 slot = ArenaTeam::GetSlotByType(type);
-        if(slot >= MAX_ARENA_SLOT)
-            return;
-
-        if(_player->GetArenaTeamId(slot))
-        {
-            //data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
-            //data << (uint32)PETITION_TURN_ALREADY_IN_GUILD;                          // already in guild
-            //_player->GetSession()->SendPacket(&data);
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ALREADY_IN_ARENA_TEAM);
-            return;
-        }
+        data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
+        data << (uint32)PETITION_TURN_ALREADY_IN_GUILD; // already in guild
+        _player->GetSession()->SendPacket(&data);
+        return;
     }
 
     if(_player->GetGUIDLow() != ownerguidlo)
@@ -755,12 +537,8 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     else
         signs = 0;
 
-    uint32 count;
-    //if(signs < sWorld.getConfig(CONFIG_MIN_PETITION_SIGNS))
-    if(type == 9)
-        count = sWorld.getConfig(CONFIG_MIN_PETITION_SIGNS);
-    else
-        count = type-1;
+    uint32 count = sWorld.getConfig(CONFIG_MIN_PETITION_SIGNS);
+
     if(signs < count)
     {
         data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
@@ -770,23 +548,11 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if(type == 9)
+    if(objmgr.GetGuildByName(name))
     {
-        if(objmgr.GetGuildByName(name))
-        {
-            SendGuildCommandResult(GUILD_CREATE_S, name, GUILD_NAME_EXISTS);
-            delete result;
-            return;
-        }
-    }
-    else
-    {
-        if(objmgr.GetArenaTeamByName(name))
-        {
-            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ARENA_TEAM_NAME_EXISTS_S);
-            delete result;
-            return;
-        }
+        SendGuildCommandResult(GUILD_CREATE_S, name, GUILD_NAME_EXISTS);
+        delete result;
+        return;
     }
 
     // and at last charter item check
@@ -802,56 +568,23 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     // delete charter item
     _player->DestroyItem(item->GetBagSlot(),item->GetSlot(), true);
 
-    if(type == 9)                                           // create guild
+    Guild* guild = new Guild;
+    if(!guild->Create(_player, name))
     {
-        Guild* guild = new Guild;
-        if(!guild->Create(_player, name))
-        {
-            delete guild;
-            delete result;
-            return;
-        }
-
-        // register guild and add guildmaster
-        objmgr.AddGuild(guild);
-
-        // add members
-        for(uint8 i = 0; i < signs; ++i)
-        {
-            Field* fields = result->Fetch();
-            guild->AddMember(fields[0].GetUInt64(), guild->GetLowestRank());
-            result->NextRow();
-        }
+        delete guild;
+        delete result;
+        return;
     }
-    else                                                    // or arena team
+
+    // register guild and add guildmaster
+    objmgr.AddGuild(guild);
+
+    // add members
+    for(uint8 i = 0; i < signs; ++i)
     {
-        ArenaTeam* at = new ArenaTeam;
-        if(!at->Create(_player->GetGUID(), type, name))
-        {
-            sLog.outError("PetitionsHandler: arena team create failed.");
-            delete at;
-            delete result;
-            return;
-        }
-
-        uint32 icon, iconcolor, border, bordercolor, backgroud;
-        recv_data >> backgroud >> icon >> iconcolor >> border >> bordercolor;
-
-        at->SetEmblem(backgroud, icon, iconcolor, border, bordercolor);
-
-        // register team and add captain
-        objmgr.AddArenaTeam(at);
-        sLog.outDebug("PetitonsHandler: arena team added to objmrg");
-
-        // add members
-        for(uint8 i = 0; i < signs; ++i)
-        {
-            Field* fields = result->Fetch();
-            uint64 memberGUID = fields[0].GetUInt64();
-            sLog.outDebug("PetitionsHandler: adding arena member %u", GUID_LOPART(memberGUID));
-            at->AddMember(memberGUID);
-            result->NextRow();
-        }
+        Field* fields = result->Fetch();
+        guild->AddMember(fields[0].GetUInt64(), guild->GetLowestRank());
+        result->NextRow();
     }
 
     delete result;
@@ -893,48 +626,17 @@ void WorldSession::SendPetitionShowList(uint64 guid)
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    uint8 count = 0;
-    if(pCreature->isTabardDesigner())
-        count = 1;
-    else
-        count = 3;
+    uint8 count = 1;
 
     WorldPacket data(SMSG_PETITION_SHOWLIST, 8+1+4*6);
     data << guid;                                           // npc guid
     data << count;                                          // count
-    if(count == 1)
-    {
-        data << uint32(1);                                  // index
-        data << uint32(GUILD_CHARTER);                      // charter entry
-        data << uint32(16161);                              // charter display id
-        data << uint32(GUILD_CHARTER_COST);                 // charter cost
-        data << uint32(0);                                  // unknown
-        data << uint32(9);                                  // required signs?
-    }
-    else
-    {
-        // 2v2
-        data << uint32(1);                                  // index
-        data << uint32(ARENA_TEAM_CHARTER_2v2);             // charter entry
-        data << uint32(16161);                              // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_2v2_COST);        // charter cost
-        data << uint32(2);                                  // unknown
-        data << uint32(2);                                  // required signs?
-        // 3v3
-        data << uint32(2);                                  // index
-        data << uint32(ARENA_TEAM_CHARTER_3v3);             // charter entry
-        data << uint32(16161);                              // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_3v3_COST);        // charter cost
-        data << uint32(3);                                  // unknown
-        data << uint32(3);                                  // required signs?
-        // 5v5
-        data << uint32(3);                                  // index
-        data << uint32(ARENA_TEAM_CHARTER_5v5);             // charter entry
-        data << uint32(16161);                              // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_5v5_COST);        // charter cost
-        data << uint32(5);                                  // unknown
-        data << uint32(5);                                  // required signs?
-    }
+    data << uint32(1);                                  // index
+    data << uint32(GUILD_CHARTER);                      // charter entry
+    data << uint32(16161);                              // charter display id
+    data << uint32(GUILD_CHARTER_COST);                 // charter cost
+    data << uint32(0);                                  // unknown
+    data << uint32(9);                                  // required signs?
     //for(uint8 i = 0; i < count; ++i)
     //{
     //    data << uint32(i);                      // index

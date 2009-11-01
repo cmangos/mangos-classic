@@ -377,7 +377,7 @@ LogColors = ""
 #                 3 basic latin characters + server timezone specific
 #
 #    StrictCharterNames
-#        Limit guild/arena team charter names to language specific symbols set, not allow create charters with allowed symbols in name
+#        Limit guild team charter names to language specific symbols set, not allow create charters with allowed symbols in name
 #        Default: 0 disable
 #                 1 basic latin characters  (strict)
 #                 2 realm zone specific (strict). See RealmZone setting.
@@ -452,14 +452,6 @@ LogColors = ""
 #        Amount of honor that new players will start with
 #        Default: 0
 #
-#    MaxArenaPoints
-#        Max arena points that player can have.
-#        Default: 5000
-#
-#    StartArenaPoints
-#        Amount of arena points that new players will start with
-#        Default: 0
-#
 #    InstantLogout
 #        Enable or disable instant logout for security level (0..4) or high (NOT in combat/while dueling/while falling)
 #        Default: 1 (Mods/GMs/Admins)
@@ -491,10 +483,6 @@ LogColors = ""
 #
 #    Battleground.QueueAnnouncer.PlayerOnly
 #        Enable queue announcer posting to chat
-#        Default: 0 (false)
-#                 1 (true)
-#
-#    Arena.QueueAnnouncer.Enable: Enable queue announcer posting to chat
 #        Default: 0 (false)
 #                 1 (true)
 #
@@ -629,8 +617,6 @@ StartPlayerLevel = 1
 StartPlayerMoney = 0
 MaxHonorPoints = 75000
 StartHonorPoints = 0
-MaxArenaPoints = 5000
-StartArenaPoints = 0
 InstantLogout = 1
 DisableWaterBreath = 4
 AllFlightPaths = 0
@@ -639,7 +625,6 @@ ActivateWeather = 1
 Battleground.CastDeserter = 1
 Battleground.QueueAnnouncer.Enable = 0
 Battleground.QueueAnnouncer.PlayerOnly = 0
-Arena.QueueAnnouncer.Enable = 0
 CastUnstuck = 1
 Instance.IgnoreLevel = 0
 Instance.IgnoreRaid = 0
@@ -972,9 +957,9 @@ GM.LowerSecurity         = 0
 #
 #    Visibility.Distance.Continents
 #    Visibility.Distance.Instances
-#    Visibility.Distance.BGArenas
+#    Visibility.Distance.BG
 #        Visibility distance for different ingame object in different maps.
-#        Visibility on continents on offy ~90 yards. In BG/Arenas ~180. For instances default ~120.
+#        Visibility on continents on offy ~90 yards. In BG ~180. For instances default ~120.
 #        Max limited by active player zone: ~ 333
 #        Min limit is max aggro radius (45) * Rate.Creature.Aggro
 #
@@ -1003,7 +988,7 @@ GM.LowerSecurity         = 0
 Visibility.GroupMode = 0
 Visibility.Distance.Continents    = 90
 Visibility.Distance.Instances     = 120
-Visibility.Distance.BGArenas      = 180
+Visibility.Distance.BG            = 180
 Visibility.Distance.Object        = 66
 Visibility.Distance.InFlight      = 66
 Visibility.Distance.Grey.Unit   = 1
@@ -1137,8 +1122,8 @@ Visibility.Distance.Grey.Object = 10
 #                  0 (disabled)
 #
 #    Death.Bones.World
-#    Death.Bones.BattlegroundOrArena
-#         Enabled/disabled creating bones instead corpse at resurrection (in normal zones/instacnes, or battleground/arenas)
+#    Death.Bones.Battleground
+#         Enabled/disabled creating bones instead corpse at resurrection (in normal zones/instacnes, or battleground)
 #         Default: 1 (enabled)
 #                  0 (disabled)
 #
@@ -1197,37 +1182,7 @@ Death.SicknessLevel = 11
 Death.CorpseReclaimDelay.PvP = 1
 Death.CorpseReclaimDelay.PvE = 1
 Death.Bones.World = 1
-Death.Bones.BattlegroundOrArena = 1
-
-###################################################################################################################
-#
-# Rated arena matches config
-#
-# MaxRatingDifference: the maximum rating difference between two groups in rated matches
-#             Default: 0 (disable, rating difference is discarded)
-#
-# RatingDiscardTimer: after the specified milliseconds has passed,
-#                     rating information will be discarded when selecting teams for matches
-#                     also initiates an update by this timer
-#             Default: 60000
-#
-# AutoDistributePoints: set if arena points should be distributed automatically, or by GM command
-#             Default: 0 (disable) (recommended): use gm command or sql query to distribute the points
-#                      1 (enable): arena points are distributed automatically
-#
-# AutoDistributeInterval: how often should the distribution take place
-#                         if automatic distribution is enabled
-#                         in days
-#             Default: 7 (weekly)
-#
-###################################################################################################################
-
-Arena.MaxRatingDifference = 0
-Arena.RatingDiscardTimer = 60000
-Arena.AutoDistributePoints = 0
-Arena.AutoDistributeInterval = 7
-Arena.ArenaSeason.ID = 1
-Arena.ArenaSeason.InProgress = 1
+Death.Bones.Battleground = 1
 
 ###################################################################################################################
 #

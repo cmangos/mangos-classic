@@ -35,31 +35,18 @@ libmangosgame_a_SOURCES = \
 	AggressorAI.cpp \
 	AggressorAI.h \
 	AnimalRandomMovementGenerator.h \
-	ArenaTeam.cpp \
-	ArenaTeam.h \
-	ArenaTeamHandler.cpp \
 	AuctionHouseHandler.cpp \
 	AuctionHouseMgr.cpp \
 	AuctionHouseMgr.h \
 	Bag.cpp \
 	Bag.h \
 	BattleGround.cpp \
-	BattleGroundAA.cpp \
 	BattleGroundAB.cpp \
 	BattleGroundAV.cpp \
-	BattleGroundBE.cpp \
-	BattleGroundEY.cpp \
-	BattleGroundNA.cpp \
-	BattleGroundRL.cpp \
 	BattleGroundWS.cpp \
 	BattleGround.h \
-	BattleGroundAA.h \
 	BattleGroundAB.h \
 	BattleGroundAV.h \
-	BattleGroundBE.h \
-	BattleGroundEY.h \
-	BattleGroundNA.h \
-	BattleGroundRL.h \
 	BattleGroundWS.h \
 	BattleGroundHandler.cpp \
 	BattleGroundMgr.cpp \

@@ -17,14 +17,6 @@
 
 
 --
--- Table structure for table `saved_variables`
---
-
-CREATE TABLE `saved_variables` (
-    `NextArenaPointDistributionTime` bigint(40) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Variable Saves';
-
---
 -- Table structure for table `character_db_version`
 --
 
@@ -42,82 +34,6 @@ LOCK TABLES `character_db_version` WRITE;
 INSERT INTO `character_db_version` VALUES
 (NULL);
 /*!40000 ALTER TABLE `character_db_version` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `arena_team`
---
-
-DROP TABLE IF EXISTS `arena_team`;
-CREATE TABLE `arena_team` (
-  `arenateamid` int(10) unsigned NOT NULL default '0',
-  `name` char(255) NOT NULL,
-  `captainguid` int(10) unsigned NOT NULL default '0',
-  `type` tinyint(3) unsigned NOT NULL default '0',
-  `BackgroundColor` int(10) unsigned NOT NULL default '0',
-  `EmblemStyle` int(10) unsigned NOT NULL default '0',
-  `EmblemColor` int(10) unsigned NOT NULL default '0',
-  `BorderStyle` int(10) unsigned NOT NULL default '0',
-  `BorderColor` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`arenateamid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `arena_team`
---
-
-LOCK TABLES `arena_team` WRITE;
-/*!40000 ALTER TABLE `arena_team` DISABLE KEYS */;
-/*!40000 ALTER TABLE `arena_team` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `arena_team_member`
---
-
-DROP TABLE IF EXISTS `arena_team_member`;
-CREATE TABLE `arena_team_member` (
-  `arenateamid` int(10) unsigned NOT NULL default '0',
-  `guid` int(10) unsigned NOT NULL default '0',
-  `played_week` int(10) unsigned NOT NULL default '0',
-  `wons_week` int(10) unsigned NOT NULL default '0',
-  `played_season` int(10) unsigned NOT NULL default '0',
-  `wons_season` int(10) unsigned NOT NULL default '0',
-  `personal_rating` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `arena_team_member`
---
-
-LOCK TABLES `arena_team_member` WRITE;
-/*!40000 ALTER TABLE `arena_team_member` DISABLE KEYS */;
-/*!40000 ALTER TABLE `arena_team_member` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `arena_team_stats`
---
-
-DROP TABLE IF EXISTS `arena_team_stats`;
-CREATE TABLE `arena_team_stats` (
-  `arenateamid` int(10) unsigned NOT NULL default '0',
-  `rating` int(10) unsigned NOT NULL default '0',
-  `games` int(10) unsigned NOT NULL default '0',
-  `wins` int(10) unsigned NOT NULL default '0',
-  `played` int(10) unsigned NOT NULL default '0',
-  `wins2` int(10) unsigned NOT NULL default '0',
-  `rank` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`arenateamid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `arena_team_stats`
---
-
-LOCK TABLES `arena_team_stats` WRITE;
-/*!40000 ALTER TABLE `arena_team_stats` DISABLE KEYS */;
-/*!40000 ALTER TABLE `arena_team_stats` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -218,7 +134,6 @@ CREATE TABLE `characters` (
   `zone` int(11) unsigned NOT NULL default '0',
   `death_expire_time` bigint(20) unsigned NOT NULL default '0',
   `taxi_path` text,
-  `arena_pending_points` int(10) UNSIGNED NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),
@@ -1211,7 +1126,6 @@ CREATE TABLE `petition` (
   `ownerguid` int(10) unsigned NOT NULL,
   `petitionguid` int(10) unsigned default '0',
   `name` varchar(255) NOT NULL default '',
-  `type` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`ownerguid`,`type`),
   UNIQUE KEY `index_ownerguid_petitionguid` (`ownerguid`,`petitionguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
@@ -1235,7 +1149,6 @@ CREATE TABLE `petition_sign` (
   `petitionguid` int(11) unsigned NOT NULL default '0',
   `playerguid` int(11) unsigned NOT NULL default '0',
   `player_account` int(11) unsigned NOT NULL default '0',
-  `type` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`petitionguid`,`playerguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 --

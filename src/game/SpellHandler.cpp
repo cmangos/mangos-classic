@@ -75,15 +75,6 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    // only allow conjured consumable, bandage, poisons (all should have the 2^21 item flag set in DB)
-    if( proto->Class == ITEM_CLASS_CONSUMABLE &&
-        !(proto->Flags & ITEM_FLAGS_USEABLE_IN_ARENA) &&
-        pUser->InArena())
-    {
-        pUser->SendEquipError(EQUIP_ERR_NOT_DURING_ARENA_MATCH,pItem,NULL);
-        return;
-    }
-
     if (pUser->isInCombat())
     {
         for(int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)

@@ -368,8 +368,6 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         bool IsRaid() const { return i_mapEntry && i_mapEntry->IsRaid(); }
         bool IsHeroic() const { return i_spawnMode == DIFFICULTY_HEROIC; }
         bool IsBattleGround() const { return i_mapEntry && i_mapEntry->IsBattleGround(); }
-        bool IsBattleArena() const { return i_mapEntry && i_mapEntry->IsBattleArena(); }
-        bool IsBattleGroundOrArena() const { return i_mapEntry && i_mapEntry->IsBattleGroundOrArena(); }
         bool GetEntrancePos(int32 &mapid, float &x, float &y)
         {
             if(!i_mapEntry)

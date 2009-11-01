@@ -119,8 +119,6 @@ enum WorldConfigs
     CONFIG_START_PLAYER_MONEY,
     CONFIG_MAX_HONOR_POINTS,
     CONFIG_START_HONOR_POINTS,
-    CONFIG_MAX_ARENA_POINTS,
-    CONFIG_START_ARENA_POINTS,
     CONFIG_INSTANCE_IGNORE_LEVEL,
     CONFIG_INSTANCE_IGNORE_RAID,
     CONFIG_BATTLEGROUND_CAST_DESERTER,
@@ -188,7 +186,7 @@ enum WorldConfigs
     CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP,
     CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE,
     CONFIG_DEATH_BONES_WORLD,
-    CONFIG_DEATH_BONES_BG_OR_ARENA,
+    CONFIG_DEATH_BONES_BG,
     CONFIG_THREAT_RADIUS,
     CONFIG_INSTANT_LOGOUT,
     CONFIG_ALL_TAXI_PATHS,
@@ -196,13 +194,6 @@ enum WorldConfigs
     CONFIG_LISTEN_RANGE_SAY,
     CONFIG_LISTEN_RANGE_TEXTEMOTE,
     CONFIG_LISTEN_RANGE_YELL,
-    CONFIG_ARENA_MAX_RATING_DIFFERENCE,
-    CONFIG_ARENA_RATING_DISCARD_TIMER,
-    CONFIG_ARENA_AUTO_DISTRIBUTE_POINTS,
-    CONFIG_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS,
-    CONFIG_ARENA_QUEUE_ANNOUNCER_ENABLE,
-    CONFIG_ARENA_SEASON_ID,
-    CONFIG_ARENA_SEASON_IN_PROGRESS,
     CONFIG_BATTLEGROUND_PREMATURE_FINISH_TIMER,
     CONFIG_GUILD_EVENT_LOG_COUNT,
     CONFIG_GUILD_BANK_EVENT_LOG_COUNT,
@@ -490,7 +481,7 @@ class World
         // for max speed access
         static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
         static float GetMaxVisibleDistanceInInstances()     { return m_MaxVisibleDistanceInInctances;  }
-        static float GetMaxVisibleDistanceInBGArenas()      { return m_MaxVisibleDistanceInBGArenas;   }
+        static float GetMaxVisibleDistanceInBG()            { return m_MaxVisibleDistanceInBG;         }
         static float GetMaxVisibleDistanceForObject()       { return m_MaxVisibleDistanceForObject;   }
 
         static float GetMaxVisibleDistanceInFlight()        { return m_MaxVisibleDistanceInFlight;    }
@@ -558,7 +549,7 @@ class World
         // for max speed access
         static float m_MaxVisibleDistanceOnContinents;
         static float m_MaxVisibleDistanceInInctances;
-        static float m_MaxVisibleDistanceInBGArenas;
+        static float m_MaxVisibleDistanceInBG;
         static float m_MaxVisibleDistanceForObject;
 
         static float m_MaxVisibleDistanceInFlight;

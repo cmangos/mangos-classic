@@ -83,7 +83,6 @@ enum MapTypes
     MAP_INSTANCE        = 1,
     MAP_RAID            = 2,
     MAP_BATTLEGROUND    = 3,
-    MAP_ARENA           = 4
 };
 
 enum AbilytyLearnType
