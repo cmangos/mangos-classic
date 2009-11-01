@@ -39,6 +39,7 @@ class ObjectMgr;
 #define QUEST_REPUTATIONS_COUNT 5
 #define QUEST_EMOTE_COUNT 4
 
+// [-ZERO] need update
 enum QuestFailedReasons
 {
     INVALIDREASON_DONT_HAVE_REQ                 = 0,

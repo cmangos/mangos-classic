@@ -213,15 +213,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // prevent character creating Expansion race without Expansion account
-    if (raceEntry->addon > Expansion())
-    {
-        data << (uint8)CHAR_CREATE_EXPANSION;
-        sLog.outError("Expansion %u account:[%d] tried to Create character with expansion %u race (%u)",Expansion(),GetAccountId(),raceEntry->addon,race_);
-        SendPacket( &data );
-        return;
-    }
-
     // prevent character creating with invalid name
     if (!normalizePlayerName(name))
     {

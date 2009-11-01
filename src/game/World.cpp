@@ -237,12 +237,12 @@ World::AddSession_ (WorldSession* s)
         return;
     }
 
-    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 1);
+    // Checked for 1.12.2
+    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4);
     packet << uint8 (AUTH_OK);
     packet << uint32 (0);                                   // BillingTimeRemaining
     packet << uint8 (0);                                    // BillingPlanFlags
     packet << uint32 (0);                                   // BillingTimeRested
-    packet << uint8 (s->Expansion());                       // 0 - normal, 1 - TBC, must be set in database manually for each account
     s->SendPacket (&packet);
 
     UpdateMaxSessionCounters ();
@@ -274,13 +274,13 @@ void World::AddQueuedPlayer(WorldSession* sess)
     sess->SetInQueue(true);
     m_QueuedPlayer.push_back (sess);
 
+    // [-ZERO] Possible wrong
     // The 1st SMSG_AUTH_RESPONSE needs to contain other info too.
-    WorldPacket packet (SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 1);
+    WorldPacket packet (SMSG_AUTH_RESPONSE, 1 + 4 + 1 + 4 + 4);
     packet << uint8 (AUTH_WAIT_QUEUE);
     packet << uint32 (0);                                   // BillingTimeRemaining
     packet << uint8 (0);                                    // BillingPlanFlags
     packet << uint32 (0);                                   // BillingTimeRested
-    packet << uint8 (sess->Expansion());                    // 0 - normal, 1 - TBC, must be set in database manually for each account
     packet << uint32(GetQueuePos (sess));
     sess->SendPacket (&packet);
 
@@ -835,15 +835,6 @@ void World::LoadConfigSettings(bool reload)
 
     m_configs[CONFIG_ALWAYS_MAX_SKILL_FOR_LEVEL] = sConfig.GetBoolDefault("AlwaysMaxSkillForLevel", false);
 
-    if(reload)
-    {
-        uint32 val = sConfig.GetIntDefault("Expansion",1);
-        if(val!=m_configs[CONFIG_EXPANSION])
-            sLog.outError("Expansion option can't be changed at mangosd.conf reload, using current value (%u).",m_configs[CONFIG_EXPANSION]);
-    }
-    else
-        m_configs[CONFIG_EXPANSION] = sConfig.GetIntDefault("Expansion",1);
-
     m_configs[CONFIG_CHATFLOOD_MESSAGE_COUNT] = sConfig.GetIntDefault("ChatFlood.MessageCount",10);
     m_configs[CONFIG_CHATFLOOD_MESSAGE_DELAY] = sConfig.GetIntDefault("ChatFlood.MessageDelay",1);
     m_configs[CONFIG_CHATFLOOD_MUTE_TIME]     = sConfig.GetIntDefault("ChatFlood.MuteTime",10);
@@ -1032,9 +1023,7 @@ void World::SetInitialWorldSettings()
         ||!MapManager::ExistMapAndVMap(1,-618.518f,-4251.67f)
         ||!MapManager::ExistMapAndVMap(0, 1676.35f, 1677.45f)
         ||!MapManager::ExistMapAndVMap(1, 10311.3f, 832.463f)
-        ||!MapManager::ExistMapAndVMap(1,-2917.58f,-257.98f)
-        ||m_configs[CONFIG_EXPANSION] && (
-        !MapManager::ExistMapAndVMap(530,10349.6f,-6357.29f) || !MapManager::ExistMapAndVMap(530,-3961.64f,-13931.2f) ) )
+        ||!MapManager::ExistMapAndVMap(1,-2917.58f,-257.98f))
     {
         sLog.outError("Correct *.map files not found in path '%smaps' or *.vmap/*vmdir files in '%svmaps'. Please place *.map/*.vmap/*.vmdir files in appropriate directories or correct the DataDir value in the mangosd.conf file.",m_dataPath.c_str(),m_dataPath.c_str());
         exit(1);

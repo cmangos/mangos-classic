@@ -39,14 +39,6 @@ uint32 GetAreaFlagByMapId(uint32 mapid);
 
 uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
 
-enum ContentLevels
-{
-    CONTENT_1_60 = 0,
-    CONTENT_61_70,
-    CONTENT_71_80
-};
-ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId);
-
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
 
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);

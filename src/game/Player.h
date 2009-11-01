@@ -557,6 +557,7 @@ enum TradeSlots
     TRADE_SLOT_NONTRADED        = 6
 };
 
+// [-ZERO] Need fix, or maybe not exists
 enum TransferAbortReason
 {
     TRANSFER_ABORT_ERROR                    = 0x00,

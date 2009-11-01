@@ -1536,22 +1536,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if(!InBattleGround() && mEntry->IsBattleGround())
         return false;
 
-    // [-ZERO] client without expansion support
-    if(GetSession()->Expansion() < mEntry->Expansion())
-    {
-        sLog.outDebug("Player %s using client without required expansion tried teleport to non accessible map %u", GetName(), mapid);
-
-        if(GetTransport())
-            RepopAtGraveyard();                             // teleport to near graveyard if on transport, looks blizz like :)
-
-        SendTransferAborted(mapid, TRANSFER_ABORT_INSUF_EXPAN_LVL, mEntry->Expansion());
-
-        return false;                                       // normal client can't teleport to this map...
-    }
-    else
-    {
-        sLog.outDebug("Player %s will teleported to map %u", GetName(), mapid);
-    }
+    sLog.outDebug("Player %s will teleported to map %u", GetName(), mapid);
 
     // if we were on a transport, leave
     if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT) && m_transport)
@@ -13194,14 +13179,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         {
             if( (*iter)->GetGUIDLow() == transGUID)
             {
-                MapEntry const* transMapEntry = sMapStore.LookupEntry((*iter)->GetMapId());
-                // client without expansion support
-                if(GetSession()->Expansion() < transMapEntry->Expansion())
-                {
-                    sLog.outDebug("Player %s using client without required expansion tried login at transport at non accessible map %u", GetName(), (*iter)->GetMapId());
-                    break;
-                }
-
                 m_transport = *iter;
                 m_transport->AddPassenger(this);
                 SetMapId(m_transport->GetMapId());
@@ -13222,16 +13199,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
             m_movementInfo.t_o = 0.0f;
 
             transGUID = 0;
-        }
-    }
-    else                                                    // not transport case
-    {
-        MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
-        // client without expansion support
-        if(GetSession()->Expansion() < mapEntry->Expansion())
-        {
-            sLog.outDebug("Player %s using client without required expansion tried login at non accessible map %u", GetName(), GetMapId());
-            RelocateToHomebind();
         }
     }
 
@@ -14402,7 +14369,7 @@ bool Player::_LoadHomeBind(QueryResult *result)
 
         // accept saved data only for valid position (and non instanceable), and accessable
         if( MapManager::IsValidMapCoord(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ) &&
-            !bindMapEntry->Instanceable() && GetSession()->Expansion() >= bindMapEntry->Expansion())
+            !bindMapEntry->Instanceable())
         {
             ok = true;
         }

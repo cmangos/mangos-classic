@@ -562,24 +562,6 @@ uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId)
     return mapid;
 }
 
-ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId)
-{
-    mapid = GetVirtualMapForMapAndZone(mapid,zoneId);
-    if(mapid < 2)
-        return CONTENT_1_60;
-
-    MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
-    if(!mapEntry)
-        return CONTENT_1_60;
-
-    switch(mapEntry->Expansion())
-    {
-        default: return CONTENT_1_60;
-        case 1:  return CONTENT_61_70;
-        case 2:  return CONTENT_71_80;
-    }
-}
-
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
 {
     // not sorted, numbering index from 0
