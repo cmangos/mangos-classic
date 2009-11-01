@@ -1,4 +1,0 @@
-ALTER TABLE db_version CHANGE COLUMN required_061_7067_02_mangos_spell_learn_spell required_061_7067_01_mangos_playercreateinfo_spell bit;
-
-ALTER TABLE spell_learn_spell
-  DROP COLUMN Active;

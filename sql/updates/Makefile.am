@@ -17,7 +17,7 @@
 ## Process this file with automake to produce Makefile.in
 
 ## Sub-directories to parse
-SUBDIRS = before_upgrade_to_0.13
+#SUBDIRS = before_upgrade_to_0.13
 
 ## Change installation location
 #  datadir = mangos/sql/updates

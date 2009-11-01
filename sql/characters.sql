@@ -134,6 +134,9 @@ CREATE TABLE `characters` (
   `zone` int(11) unsigned NOT NULL default '0',
   `death_expire_time` bigint(20) unsigned NOT NULL default '0',
   `taxi_path` text,
+  `honor_highest_rank` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  `honor_standing` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  `honor_rating` FLOAT UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),
@@ -313,6 +316,30 @@ CREATE TABLE `character_inventory` (
 LOCK TABLES `character_inventory` WRITE;
 /*!40000 ALTER TABLE `character_inventory` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_inventory` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+--
+-- Table structure for table `character_kill`
+--
+
+DROP TABLE IF EXISTS `character_kill`;
+CREATE TABLE `character_kill` (
+  `guid` INT(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
+  `creature_template` INT(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Creature Identifier',
+  `honor` FLOAT NOT NULL DEFAULT '0',
+  `date` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  `type` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
+  KEY `idx_guid` (`guid`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+
+--
+-- Dumping data for table `character_kill`
+--
+
+LOCK TABLES `character_kill` WRITE;
+/*!40000 ALTER TABLE `character_kill` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_kill` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1126,7 +1153,7 @@ CREATE TABLE `petition` (
   `ownerguid` int(10) unsigned NOT NULL,
   `petitionguid` int(10) unsigned default '0',
   `name` varchar(255) NOT NULL default '',
-  PRIMARY KEY  (`ownerguid`,`type`),
+  PRIMARY KEY  (`ownerguid`),
   UNIQUE KEY `index_ownerguid_petitionguid` (`ownerguid`,`petitionguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
