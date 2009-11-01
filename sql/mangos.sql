@@ -206,7 +206,7 @@ INSERT INTO battleground_events (map, event1, event2, description) VALUES
 (572, 253, 0, 'buffs'),
 (572, 254, 0, 'doors'),
 (562, 253, 0, 'buffs'),
-(562, 254, 0, 'doors');
+(562, 254, 0, 'doors'),
 -- alterac valley
 (30, 254, 0, 'Doors'),
 

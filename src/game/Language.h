@@ -332,7 +332,49 @@ enum MangosStrings
     //                                    346 used in master branch
     LANG_COMMAND_GOTAXINODENOTFOUND     = 347,
     LANG_GAMEOBJECT_HAVE_INVALID_DATA   = 348,
-    // Room for more level 2              349-399 not used
+
+    // alliance ranks
+    LANG_ALI_PRIVATE                    = 349,
+    LANG_ALI_CORPORAL                   = 350,
+    LANG_ALI_SERGEANT                   = 351,               
+    LANG_ALI_MASTER_SERGEANT            = 352,        
+    LANG_ALI_SERGEANT_MAJOR             = 353,         
+    LANG_ALI_KNIGHT                     = 354,                 
+    LANG_ALI_KNIGHT_LIEUTENANT          = 355,      
+    LANG_ALI_KNIGHT_CAPTAIN             = 356,         
+    LANG_ALI_KNIGHT_CHAMPION            = 357,        
+    LANG_ALI_LIEUTENANT_COMMANDER       = 358,    
+    LANG_ALI_COMMANDER                  = 359,              
+    LANG_ALI_MARSHAL                    = 360,                
+    LANG_ALI_FIELD_MARSHAL              = 361,          
+    LANG_ALI_GRAND_MARSHAL              = 362,                     
+
+// horde ranks
+    LANG_HRD_SCOUT                      = 363,                  
+    LANG_HRD_GRUNT                      = 364,                  
+    LANG_HRD_SERGEANT                   = 365,               
+    LANG_HRD_SENIOR_SERGEANT            = 366,        
+    LANG_HRD_FIRST_SERGEANT             = 367,        
+    LANG_HRD_STONE_GUARD                = 368,             
+    LANG_HRD_BLOOD_GUARD                = 369,            
+    LANG_HRD_LEGIONNARE                 = 370,             
+    LANG_HRD_CENTURION                  = 371,              
+    LANG_HRD_CHAMPION                   = 372,               
+    LANG_HRD_LIEUTENANT_GENERAL         = 373,     
+    LANG_HRD_GENERAL                    = 374,                
+    LANG_HRD_WARLORD                    = 375,                
+    LANG_HRD_HIGH_WARLORD               = 376,
+
+    LANG_GAME_MASTER                    = 377,             
+    LANG_NO_RANK                        = 378,                    
+    LANG_RANK                           = 379,                       
+    LANG_HONOR_TODAY                    = 380,                
+    LANG_HONOR_YESTERDAY                = 381,           
+    LANG_HONOR_THIS_WEEK                = 382,            
+    LANG_HONOR_LAST_WEEK                = 383,            
+    LANG_HONOR_LIFE                     = 384, 
+
+    // Room for more level 2              385-399 not used
 
     // level 3 chat
     LANG_SCRIPTS_RELOADED               = 400,

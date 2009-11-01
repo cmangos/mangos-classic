@@ -3488,9 +3488,96 @@ bool ChatHandler::HandleModifyStandStateCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleHonorAddCommand(const char* args)
+
+bool ChatHandler::HandleShowHonor(const char* args)
 {
-    if (!*args)
+    uint32 dishonorable_kills       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
+    uint32 honorable_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+    uint32 highest_rank             = (m_session->GetPlayer()->GetHonorHighestRank() < HONOR_RANK_COUNT)? m_session->GetPlayer()->GetHonorHighestRank() : 0;
+    uint32 today_honorable_kills    = (uint16)m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
+    uint32 today_dishonorable_kills = (uint16)(m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS)>>16);
+    uint32 yesterday_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
+    uint32 yesterday_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
+    uint32 this_week_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
+    uint32 this_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
+    uint32 last_week_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS);
+    uint32 last_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
+    uint32 last_week_standing       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
+
+    static int16 alliance_ranks[HONOR_RANK_COUNT] =
+    {
+        LANG_NO_RANK,
+        LANG_ALI_PRIVATE,
+        LANG_ALI_CORPORAL,
+        LANG_ALI_SERGEANT,
+        LANG_ALI_MASTER_SERGEANT,
+        LANG_ALI_SERGEANT_MAJOR,
+        LANG_ALI_KNIGHT,
+        LANG_ALI_KNIGHT_LIEUTENANT,
+        LANG_ALI_KNIGHT_CAPTAIN,
+        LANG_ALI_KNIGHT_CHAMPION,
+        LANG_ALI_LIEUTENANT_COMMANDER,
+        LANG_ALI_COMMANDER,
+        LANG_ALI_MARSHAL,
+        LANG_ALI_FIELD_MARSHAL,
+        LANG_ALI_GRAND_MARSHAL,
+        LANG_GAME_MASTER
+    };
+    static int16 horde_ranks[HONOR_RANK_COUNT] =
+    {
+        LANG_NO_RANK,
+        LANG_HRD_SCOUT,
+        LANG_HRD_GRUNT,
+        LANG_HRD_SERGEANT,
+        LANG_HRD_SENIOR_SERGEANT,
+        LANG_HRD_FIRST_SERGEANT,
+        LANG_HRD_STONE_GUARD,
+        LANG_HRD_BLOOD_GUARD,
+        LANG_HRD_LEGIONNARE,
+        LANG_HRD_CENTURION,
+        LANG_HRD_CHAMPION,
+        LANG_HRD_LIEUTENANT_GENERAL,
+        LANG_HRD_GENERAL,
+        LANG_HRD_WARLORD,
+        LANG_HRD_HIGH_WARLORD,
+        LANG_GAME_MASTER
+    };
+    char const* rank_name = NULL;
+    char const* hrank_name = NULL;
+ 
+    Player *target = getSelectedPlayer();
+    uint32 honor_rank = target->CalculateHonorRank( target->GetTotalHonor() );
+
+    if ( target->GetTeam() == ALLIANCE )
+    {
+        rank_name = GetMangosString(alliance_ranks[ honor_rank ]);
+        hrank_name = GetMangosString(alliance_ranks[ highest_rank ]);
+    }
+    else
+    if ( target->GetTeam() == HORDE )
+    {
+        rank_name = GetMangosString(horde_ranks[ honor_rank ]);
+        hrank_name = GetMangosString(horde_ranks[ highest_rank ]);
+    }
+    else
+    {
+        rank_name = GetMangosString(LANG_NO_RANK);
+        hrank_name = GetMangosString(LANG_NO_RANK);
+    }
+
+    PSendSysMessage(LANG_RANK, rank_name, honor_rank);
+    PSendSysMessage(LANG_HONOR_TODAY, today_honorable_kills, today_dishonorable_kills);
+    PSendSysMessage(LANG_HONOR_YESTERDAY, yesterday_kills, yesterday_honor);
+    PSendSysMessage(LANG_HONOR_THIS_WEEK, this_week_kills, this_week_honor);
+    PSendSysMessage(LANG_HONOR_LAST_WEEK, last_week_kills, last_week_honor, last_week_standing);
+    PSendSysMessage(LANG_HONOR_LIFE, honorable_kills, dishonorable_kills, highest_rank, hrank_name);
+
+    return true;
+}
+
+bool ChatHandler::HandleAddHonorCommand(const char* args)
+{
+   if (!*args)
         return false;
 
     Player *target = getSelectedPlayer();
@@ -3501,12 +3588,9 @@ bool ChatHandler::HandleHonorAddCommand(const char* args)
         return false;
     }
 
-    // check online security
-    if (HasLowerSecurity(target, 0))
-        return false;
-
-    uint32 amount = (uint32)atoi(args);
-    target->RewardHonor(NULL, 1, amount);
+    float amount = (float)atof(args);
+    target->SetStoredHonor(target->GetStoredHonor()+amount);
+    target->UpdateHonor();
     return true;
 }
 
@@ -3520,15 +3604,14 @@ bool ChatHandler::HandleHonorAddKillCommand(const char* /*args*/)
         return false;
     }
 
-    // check online security
-    if (target->GetTypeId() == TYPEID_PLAYER && HasLowerSecurity((Player*)target, 0))
+    if( target == m_session->GetPlayer())
         return false;
 
-    m_session->GetPlayer()->RewardHonor(target, 1);
+    m_session->GetPlayer()->CalculateHonor(target,1);
     return true;
 }
 
-bool ChatHandler::HandleHonorUpdateCommand(const char* /*args*/)
+bool ChatHandler::HandleUpdateHonorFieldsCommand(const char* /*args*/)
 {
     Player *target = getSelectedPlayer();
     if(!target)
@@ -3538,11 +3621,61 @@ bool ChatHandler::HandleHonorUpdateCommand(const char* /*args*/)
         return false;
     }
 
-    // check online security
-    if (HasLowerSecurity(target, 0))
+    target->UpdateHonor();
+    return true;
+}
+
+bool ChatHandler::HandleModifyHonorCommand (const char* args)
+{
+  if (!*args)
         return false;
 
-    target->UpdateHonorFields();
+    Player *target = getSelectedPlayer();
+    if(!target)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    std::string field = (strtok((char*)args, " "));
+    if (field.empty())
+        return false;
+
+    char * temp = strtok(NULL, " ");
+    if (!temp)
+        return false;
+    
+    int32 amount = atoi(temp);
+
+    // hack code 
+    if (hasStringAbbr(field.c_str(),"points"))
+       target->SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)amount);
+    else if (hasStringAbbr(field.c_str(),"rank"))
+       target->SetInt32Value(PLAYER_BYTES_3, (( amount << 24) + 0x04000000) + (target->GetDrunkValue() & 0xFFFE) + target->getGender());
+    else if (hasStringAbbr(field.c_str(),"todaykills"))
+       target->SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, ((uint32)amount << 16) + (uint32)amount );
+    else if (hasStringAbbr(field.c_str(),"yesterdaykills"))
+       target->SetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS, (uint32)amount);
+    else if (hasStringAbbr(field.c_str(),"yesterdayhonor"))
+       target->SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)amount);
+    else if (hasStringAbbr(field.c_str(),"thisweekkills"))
+       target->SetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS, (uint32)amount);
+    else if (hasStringAbbr(field.c_str(),"thisweekhonor"))
+       target->SetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION, (uint32)amount);
+    else if (hasStringAbbr(field.c_str(),"lastweekkills"))
+       target->SetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS,(uint32)amount);
+    else if (hasStringAbbr(field.c_str(), "lastweekhonor"))
+       target->SetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION, (uint32)amount);
+    else if (hasStringAbbr(field.c_str(),"lastweekstanding"))
+       target->SetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK,(uint32)amount);
+    else if (hasStringAbbr(field.c_str(),"lifetimedishonorablekills"))
+       target->SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, (uint32)amount);
+    else if (hasStringAbbr(field.c_str(),"lifetimehonorablekills"))
+       target->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS,(uint32)amount);
+
+    PSendSysMessage(LANG_COMMAND_MODIFY_HONOR, field.c_str(), target->GetName(), hasStringAbbr(field.c_str(),"rank") ? amount : (uint32)amount);
+
     return true;
 }
 

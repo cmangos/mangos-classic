@@ -4095,15 +4095,39 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
 
 bool ChatHandler::HandleResetHonorCommand (const char * args)
 {
-    Player* target;
-    if (!extractPlayerTarget((char*)args,&target))
-        return false;
+    char* pName = strtok((char*)args, "");
+    Player *player = NULL;
+    if (pName)
+    {
+        std::string name = pName;
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
 
-    target->SetUInt32Value(PLAYER_FIELD_KILLS, 0);
-    target->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 0);
-    target->SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, 0);
-    target->SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
-    target->SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
+        uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
+        player = objmgr.GetPlayer(guid);
+    }
+    else
+        player = getSelectedPlayer();
+
+    if(!player)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    player->SetStoredHonor(0);
+    player->SetHonorStoredKills(0,true);
+    player->SetHonorStoredKills(0,false);
+    player->SetHonorLastWeekStanding(0);
+    player->m_pending_dishonorableKills = 0;
+    player->m_pending_honorableKills = 0;
+    player->m_pending_honor = 0;
+    CharacterDatabase.PExecute("DELETE FROM character_kill WHERE guid = '%u'",player->GetGUIDLow());
+
     return true;
 }
 
