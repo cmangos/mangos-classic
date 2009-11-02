@@ -44,9 +44,9 @@ struct AreaTableEntry
     uint32    flags;                                        // 4, unknown value but 312 for all cities
                                                             // 5-9 unused
     int32     area_level;                                   // 10
-    char*     area_name[16];                                // 11-26
-                                                            // 27, string flags, unused
-    uint32    team;                                         // 28
+    char*     area_name[8];                                 // 11-18
+                                                            // 29, string flags, unused
+    uint32    team;                                         // 20
 };
 
 struct AreaTriggerEntry
@@ -69,8 +69,7 @@ struct AuctionHouseEntry
     uint32    faction;                                      // 1 id of faction.dbc for player factions associated with city
     uint32    depositPercent;                               // 2 1/3 from real
     uint32    cutPercent;                                   // 3
-    //char*     name[16];                                   // 4-19
-                                                            // 20 string flag, unused
+    //char*     name[8];                                    //
 };
 
 struct BankBagSlotPricesEntry
@@ -79,23 +78,7 @@ struct BankBagSlotPricesEntry
     uint32      price;
 };
 
-struct BattlemasterListEntry
-{
-    uint32      id;                                         // 0
-    uint32      mapid[3];                                   // 1-3 mapid
-                                                            // 4-8 unused
-    uint32      type;                                       // 9 (3 - BG, 4 - arena)
-    uint32      minlvl;                                     // 10
-    uint32      maxlvl;                                     // 11
-    uint32      maxplayersperteam;                          // 12
-                                                            // 13-14 unused
-    char*       name[16];                                   // 15-30
-                                                            // 31 string flag, unused
-                                                            // 32 unused
-};
-
 #define MAX_OUTFIT_ITEMS 12
-// #define MAX_OUTFIT_ITEMS 24                              // 12->24 in 3.0.x
 
 struct CharStartOutfitEntry
 {

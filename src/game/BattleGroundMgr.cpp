@@ -1056,20 +1056,31 @@ BattleGround * BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeI
 }
 
 // used to create the BG templates
-uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO)
+uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO)
 {
     // Create the BG
     BattleGround *bg = NULL;
 
     switch(bgTypeId)
     {
-        case BATTLEGROUND_AV: bg = new BattleGroundAV; break;
-        case BATTLEGROUND_WS: bg = new BattleGroundWS; break;
-        case BATTLEGROUND_AB: bg = new BattleGroundAB; break;
-        default:              bg = new BattleGround;   break;                           // placeholder for non implemented BG
-    }
+        case BATTLEGROUND_AV: 
+            bg = new BattleGroundAV; 
+            bg->SetName("Alterac Valley");
+            bg->SetMapId(30);
+        break;
+        case BATTLEGROUND_WS: 
+            bg = new BattleGroundWS;
+            bg->SetName("Warsong Gulch");
+            bg->SetMapId(489);
+        break;
+        case BATTLEGROUND_AB: 
+            bg = new BattleGroundAB;
+            bg->SetName("Arathi Basin");
+            bg->SetMapId(529);
+        break;
 
-    bg->SetMapId(MapID);
+        default:bg = new BattleGround;   break;             // placeholder for non implemented BG
+    }
 
     bg->Reset();
 
@@ -1079,7 +1090,6 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 M
     bg->SetMaxPlayersPerTeam(MaxPlayersPerTeam);
     bg->SetMinPlayers(MinPlayersPerTeam*2);
     bg->SetMaxPlayers(MaxPlayersPerTeam*2);
-    bg->SetName(BattleGroundName);
     bg->SetTeamStartLoc(ALLIANCE, Team1StartLocX, Team1StartLocY, Team1StartLocZ, Team1StartLocO);
     bg->SetTeamStartLoc(HORDE,    Team2StartLocX, Team2StartLocY, Team2StartLocZ, Team2StartLocO);
     bg->SetLevelRange(LevelMin, LevelMax);
@@ -1098,7 +1108,6 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     float AStartLoc[4];
     float HStartLoc[4];
     uint32 MaxPlayersPerTeam, MinPlayersPerTeam, MinLvl, MaxLvl, start1, start2;
-    BattlemasterListEntry const *bl;
     WorldSafeLocsEntry const *start;
 
     uint32 count = 0;
@@ -1126,20 +1135,12 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
         uint32 bgTypeID_ = fields[0].GetUInt32();
 
-        // can be overwrite by values from DB
-        bl = sBattlemasterListStore.LookupEntry(bgTypeID_);
-        if(!bl)
-        {
-            sLog.outError("Battleground ID %u not found in BattlemasterList.dbc. Battleground not created.",bgTypeID_);
-            continue;
-        }
-
         BattleGroundTypeId bgTypeID = BattleGroundTypeId(bgTypeID_);
 
-        MaxPlayersPerTeam = bl->maxplayersperteam;
-        MinPlayersPerTeam = bl->maxplayersperteam/2;
-        MinLvl = bl->minlvl;
-        MaxLvl = bl->maxlvl;
+        MaxPlayersPerTeam = 0;
+        MinPlayersPerTeam = 0;
+        MinLvl = 0;
+        MaxLvl = 0;
 
         if(fields[1].GetUInt32())
             MinPlayersPerTeam = fields[1].GetUInt32();
@@ -1186,7 +1187,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         }
 
         //sLog.outDetail("Creating battleground %s, %u-%u", bl->name[sWorld.GetDBClang()], MinLvl, MaxLvl);
-        if(!CreateBattleGround(bgTypeID, MinPlayersPerTeam, MaxPlayersPerTeam, MinLvl, MaxLvl, bl->name[sWorld.GetDefaultDbcLocale()], bl->mapid[0], AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]))
+        if(!CreateBattleGround(bgTypeID, MinPlayersPerTeam, MaxPlayersPerTeam, MinLvl, MaxLvl, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]))
             continue;
 
         ++count;
@@ -1320,7 +1321,7 @@ void BattleGroundMgr::LoadBattleMastersEntry()
 
         uint32 entry = fields[0].GetUInt32();
         uint32 bgTypeId  = fields[1].GetUInt32();
-        if (!sBattlemasterListStore.LookupEntry(bgTypeId))
+        if (bgTypeId > MAX_BATTLEGROUND_TYPE_ID)
         {
             sLog.outErrorDb("Table `battlemaster_entry` contain entry %u for not existed battleground type %u, ignored.",entry,bgTypeId);
             continue;
