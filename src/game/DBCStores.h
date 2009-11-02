@@ -70,16 +70,6 @@ extern DBCStorage <FactionEntry>                 sFactionStore;
 extern DBCStorage <FactionTemplateEntry>         sFactionTemplateStore;
 extern DBCStorage <GameObjectDisplayInfoEntry>   sGameObjectDisplayInfoStore;
 
-extern DBCStorage <GtCombatRatingsEntry>         sGtCombatRatingsStore;
-extern DBCStorage <GtChanceToMeleeCritBaseEntry> sGtChanceToMeleeCritBaseStore;
-extern DBCStorage <GtChanceToMeleeCritEntry>     sGtChanceToMeleeCritStore;
-extern DBCStorage <GtChanceToSpellCritBaseEntry> sGtChanceToSpellCritBaseStore;
-extern DBCStorage <GtChanceToSpellCritEntry>     sGtChanceToSpellCritStore;
-extern DBCStorage <GtOCTRegenHPEntry>            sGtOCTRegenHPStore;
-//extern DBCStorage <GtOCTRegenMPEntry>            sGtOCTRegenMPStore; -- not used currently
-extern DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore;
-extern DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore;
-extern DBCStorage <ItemEntry>                    sItemStore;
 extern DBCStorage <ItemBagFamilyEntry>           sItemBagFamilyStore;
 //extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
 extern DBCStorage <ItemExtendedCostEntry>        sItemExtendedCostStore;
@@ -126,7 +116,6 @@ MANGOS_DLL_SPEC DBCStorage <SoundEntriesEntry>          const* GetSoundEntriesSt
 MANGOS_DLL_SPEC DBCStorage <SpellEntry>                 const* GetSpellStore();
 MANGOS_DLL_SPEC DBCStorage <SpellRangeEntry>            const* GetSpellRangeStore();
 MANGOS_DLL_SPEC DBCStorage <FactionEntry>               const* GetFactionStore();
-MANGOS_DLL_SPEC DBCStorage <ItemEntry>                  const* GetItemDisplayStore();
 MANGOS_DLL_SPEC DBCStorage <CreatureDisplayInfoEntry>   const* GetCreatureDisplayStore();
 MANGOS_DLL_SPEC DBCStorage <EmotesEntry>                const* GetEmotesStore();
 MANGOS_DLL_SPEC DBCStorage <EmotesTextEntry>            const* GetEmotesTextStore();

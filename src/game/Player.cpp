@@ -4385,22 +4385,45 @@ uint32 Player::GetShieldBlockValue() const
 
 float Player::GetMeleeCritFromAgility()
 {
-    uint32 level = getLevel();
-    uint32 pclass = getClass();
+  // from mangos 3462 for 1.12
+  float val=0,classrate = 0;
+    // critical
+    switch(getClass())
+    {
+        case CLASS_PALADIN: classrate = 19.77; break;
+        case CLASS_SHAMAN:  classrate = 19.7;  break;
+        case CLASS_MAGE:    classrate = 19.44; break;
+        case CLASS_ROGUE:   classrate = 29.0;  break;
+        case CLASS_HUNTER:  classrate = 53.0;  break;       // in 2.0.x = 33
+        case CLASS_PRIEST:
+        case CLASS_WARLOCK:
+        case CLASS_DRUID:
+        case CLASS_WARRIOR:
+        default:            classrate = 20.0; break;
+    }
 
-    if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
-
-    GtChanceToMeleeCritBaseEntry const *critBase  = sGtChanceToMeleeCritBaseStore.LookupEntry(pclass-1);
-    GtChanceToMeleeCritEntry     const *critRatio = sGtChanceToMeleeCritStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    if (critBase==NULL || critRatio==NULL)
-        return 0.0f;
-
-    float crit=critBase->base + GetStat(STAT_AGILITY)*critRatio->ratio;
-    return crit*100.0f;
+    val = GetStat(STAT_AGILITY)/classrate;
+  return val;
 }
 
 float Player::GetDodgeFromAgility()
 {
+     // from mangos 3462 for 1.12
+    float val=0,classrate=0;
+
+    //dodge
+    if(getClass() == CLASS_HUNTER) classrate = 26.5;
+    else if(getClass() == CLASS_ROGUE)  classrate = 14.5;
+    else classrate = 20;
+    ///*+(Defense*0,04);
+    if (getRace() == RACE_NIGHTELF)
+        val = GetStat(STAT_AGILITY)/classrate + 1;
+    else
+        val = GetStat(STAT_AGILITY)/classrate;
+
+    return val;
+
+    /* [-ZERO]
     // Table for base dodge values
     float dodge_base[MAX_CLASSES] = {
          0.0075f,   // Warrior
@@ -4441,27 +4464,83 @@ float Player::GetDodgeFromAgility()
         return 0.0f;
 
     float dodge=dodge_base[pclass-1] + GetStat(STAT_AGILITY) * dodgeRatio->ratio * crit_to_dodge[pclass-1];
-    return dodge*100.0f;
+    return dodge*100.0f; */
 }
 
 float Player::GetSpellCritFromIntellect()
 {
-    uint32 level = getLevel();
-    uint32 pclass = getClass();
+ // Chance to crit is computed from INT and LEVEL as follows:
+    //   chance = base + INT / (rate0 + rate1 * LEVEL)
+    // The formula keeps the crit chance at %5 on every level unless the player
+    // increases his intelligence by other means (enchants, buffs, talents, ...)
 
-    if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+    //[TZERO] from mangos 3462 for 1.12 MUST BE CHECKED
+    float val=0;
 
-    GtChanceToSpellCritBaseEntry const *critBase  = sGtChanceToSpellCritBaseStore.LookupEntry(pclass-1);
-    GtChanceToSpellCritEntry     const *critRatio = sGtChanceToSpellCritStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    if (critBase==NULL || critRatio==NULL)
-        return 0.0f;
+    static const struct
+    {
+        float base;
+        float rate0, rate1;
+    }
+    crit_data[MAX_CLASSES] =
+    {
+        {                                                   //  0: unused
+            0,0,10
+        },
+        {                                                   //  1: warrior
+            0,0,10
+        },
+        {                                                   //  2: paladin
+            3.70, 14.77, 0.65
+        },
+        {                                                   //  3: hunter
+            0,0,10
+        },
+        {                                                   //  4: rogue
+            0,0,10
+        },
+        {                                                   //  5: priest
+            2.97, 10.03, 0.82
+        },
+        {                                                   //  6: unused
+            0,0,10
+        },
+        {                                                   //  7: shaman
+            3.54, 11.51, 0.80
+        },
+        {                                                   //  8: mage
+            3.70, 14.77, 0.65
+        },
+        {                                                   //  9: warlock
+            3.18, 11.30, 0.82
+        },
+        {                                                   // 10: unused
+            0,0,10
+        },
+        {                                                   // 11: druid
+            3.33, 12.41, 0.79
+        }
+    };
+    float crit_chance;
 
-    float crit=critBase->base + GetStat(STAT_INTELLECT)*critRatio->ratio;
-    return crit*100.0f;
+    // only players use intelligence for critical chance computations
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        int my_class = getClass();
+        float crit_ratio = crit_data[my_class].rate0 + crit_data[my_class].rate1*getLevel();
+        crit_chance = crit_data[my_class].base + GetStat(STAT_INTELLECT) / crit_ratio;
+    }
+    else
+        crit_chance = m_baseSpellCritChance;
+
+    crit_chance = crit_chance > 0.0 ? crit_chance : 0.0;
+
+    return crit_chance;
 }
 
 float Player::GetRatingCoefficient(CombatRating cr) const
 {
+  /*  [-ZERO] to rewrite?
     uint32 level = getLevel();
 
     if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
@@ -4470,7 +4549,8 @@ float Player::GetRatingCoefficient(CombatRating cr) const
     if (Rating == NULL)
         return 1.0f;                                        // By default use minimum coefficient (not must be called)
 
-    return Rating->ratio;
+    return Rating->ratio; */
+    return 1.0f;
 }
 
 float Player::GetRatingBonusValue(CombatRating cr) const
@@ -4512,41 +4592,47 @@ uint32 Player::GetDotDamageReduction(uint32 damage) const
 
 float Player::OCTRegenHPPerSpirit()
 {
-    uint32 level = getLevel();
-    uint32 pclass = getClass();
 
-    if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+    float regen = 0.0f;
 
-    GtOCTRegenHPEntry     const *baseRatio = sGtOCTRegenHPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    GtRegenHPPerSptEntry  const *moreRatio = sGtRegenHPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    if (baseRatio==NULL || moreRatio==NULL)
-        return 0.0f;
+    float Spirit = GetStat(STAT_SPIRIT);
+    uint8 Class = getClass();
 
-    // Formula from PaperDollFrame script
-    float spirit = GetStat(STAT_SPIRIT);
-    float baseSpirit = spirit;
-    if (baseSpirit>50) baseSpirit = 50;
-    float moreSpirit = spirit - baseSpirit;
-    float regen = baseSpirit * baseRatio->ratio + moreSpirit * moreRatio->ratio;
+    switch (Class)
+    {
+        case CLASS_DRUID:   regen = (Spirit*0.11 + 1);    break;
+        case CLASS_HUNTER:  regen = (Spirit*0.43 - 5.5);  break;
+        case CLASS_MAGE:    regen = (Spirit*0.11 + 1);    break;
+        case CLASS_PALADIN: regen = (Spirit*0.25);        break;
+        case CLASS_PRIEST:  regen = (Spirit*0.15 + 1.4);  break;
+        case CLASS_ROGUE:   regen = (Spirit*0.84 - 13);   break;
+        case CLASS_SHAMAN:  regen = (Spirit*0.28 - 3.6);  break;
+        case CLASS_WARLOCK: regen = (Spirit*0.12 + 1.5);  break;
+        case CLASS_WARRIOR: regen = (Spirit*1.26 - 22.6); break;
+    }
+
     return regen;
 }
 
 float Player::OCTRegenMPPerSpirit()
 {
-    uint32 level = getLevel();
-    uint32 pclass = getClass();
+    float addvalue = 0.0;
 
-    if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+    float Spirit = GetStat(STAT_SPIRIT);
+    uint8 Class = getClass();
 
-//    GtOCTRegenMPEntry     const *baseRatio = sGtOCTRegenMPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    GtRegenMPPerSptEntry  const *moreRatio = sGtRegenMPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    if (moreRatio==NULL)
-        return 0.0f;
+        switch (Class)
+        {
+            case CLASS_DRUID:   addvalue = (Spirit/5 + 15);   break;
+            case CLASS_HUNTER:  addvalue = (Spirit/5 + 15);    break;
+            case CLASS_MAGE:    addvalue = (Spirit/4 + 12.5); break;
+            case CLASS_PALADIN: addvalue = (Spirit/5 + 15);   break;
+            case CLASS_PRIEST:  addvalue = (Spirit/4 + 12.5); break;
+            case CLASS_SHAMAN:  addvalue = (Spirit/5 + 17);   break;
+            case CLASS_WARLOCK: addvalue = (Spirit/5 + 15);   break;
+        }
 
-    // Formula get from PaperDollFrame script
-    float spirit    = GetStat(STAT_SPIRIT);
-    float regen     = spirit * moreRatio->ratio;
-    return regen;
+    return addvalue;
 }
 
 void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)

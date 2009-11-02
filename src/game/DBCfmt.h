@@ -39,16 +39,7 @@ const char EmotesTextEntryfmt[]="nxixxxxxxxxxxxxxxxx";
 const char FactionEntryfmt[]="niiiiiiiiiiiiiiiiiissssssssxxxxxxxxxx";
 const char FactionTemplateEntryfmt[]="niiiiiiiiiiiii";
 const char GameObjectDisplayInfofmt[]="nxxxxxxxxxxx";
-const char GtCombatRatingsfmt[]="f";
-const char GtChanceToMeleeCritBasefmt[]="f";
-const char GtChanceToMeleeCritfmt[]="f";
-const char GtChanceToSpellCritBasefmt[]="f";
-const char GtChanceToSpellCritfmt[]="f";
-const char GtOCTRegenHPfmt[]="f";
-//const char GtOCTRegenMPfmt[]="f";
-const char GtRegenHPPerSptfmt[]="f";
-const char GtRegenMPPerSptfmt[]="f";
-const char Itemfmt[]="niii";
+
 const char ItemBagFamilyfmt[]="nxxxxxxxxxxxxxxxxx";
 //const char ItemDisplayTemplateEntryfmt[]="nxxxxxxxxxxixxxxxxxxxxx";
 //const char ItemCondExtCostsEntryfmt[]="xiii";
