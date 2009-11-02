@@ -72,19 +72,11 @@ float CONF_flat_liquid_delta_limit = 0.001f; // If max - min less this value - l
 
 // List MPQ for extract from
 char *CONF_mpq_list[]={
-    "common.MPQ",
-    "common-2.MPQ",
-    "lichking.MPQ",
-    "expansion.MPQ",
+    "dbc.MPQ",
+    "terrain.MPQ",
     "patch.MPQ",
     "patch-2.MPQ",
-    "patch-3.MPQ",
-    "patch-4.MPQ",
-    "patch-5.MPQ",
 };
-
-static char* const langs[] = {"enGB", "enUS", "deDE", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU" };
-#define LANG_COUNT 12
 
 void CreateDir( const std::string& Path )
 {
@@ -239,7 +231,7 @@ void ReadLiquidTypeTableDBC()
 
 // Map file format data
 #define MAP_MAGIC             'SPAM'
-#define MAP_VERSION_MAGIC     '5.0w'
+#define MAP_VERSION_MAGIC     '1.01'
 #define MAP_AREA_MAGIC        'AERA'
 #define MAP_HEIGHT_MAGIC      'TGHM'
 #define MAP_LIQUID_MAGIC      'QILM'
@@ -878,7 +870,7 @@ void ExtractMapsFromMpq()
     delete [] map_ids;
 }
 
-void ExtractDBCFiles(int locale, bool basicLocale)
+void ExtractDBCFiles()
 {
     printf("Extracting dbc files...\n");
 
@@ -897,12 +889,6 @@ void ExtractDBCFiles(int locale, bool basicLocale)
     string path = output_path;
     path += "/dbc/";
     CreateDir(path);
-    if(!basicLocale)
-    {
-        path += langs[locale];
-        path += "/";
-        CreateDir(path);
-    }
 
     // extract DBCs
     int count = 0;
@@ -925,25 +911,6 @@ void ExtractDBCFiles(int locale, bool basicLocale)
         ++count;
     }
     printf("Extracted %u DBC files\n\n", count);
-}
-
-void LoadLocaleMPQFiles(int const locale)
-{
-    char filename[512];
-
-    sprintf(filename,"%s/Data/%s/locale-%s.MPQ", input_path, langs[locale], langs[locale]);
-    new MPQArchive(filename);
-
-    for(int i = 1; i < 5; ++i)
-    {
-        char ext[3] = "";
-        if(i > 1)
-            sprintf(ext, "-%i", i);
-
-        sprintf(filename,"%s/Data/%s/patch-%s%s.MPQ", input_path, langs[locale], langs[locale], ext);
-        if(FileExists(filename))
-            new MPQArchive(filename);
-    }
 }
 
 void LoadCommonMPQFiles()
@@ -971,52 +938,14 @@ int main(int argc, char * arg[])
 
     HandleArgs(argc, arg);
 
-    int FirstLocale = -1;
-
-    for (int i = 0; i < LANG_COUNT; i++)
-    {
-        char tmp1[512];
-        sprintf(tmp1, "%s/Data/%s/locale-%s.MPQ", input_path, langs[i], langs[i]);
-        if (FileExists(tmp1))
-        {
-            printf("Detected locale: %s\n", langs[i]);
-
-            //Open MPQs
-            LoadLocaleMPQFiles(i);
-
-            if((CONF_extract & EXTRACT_DBC) == 0)
-            {
-                FirstLocale = i;
-                break;
-            }
-
-            //Extract DBC files
-            if(FirstLocale < 0)
-            {
-                ExtractDBCFiles(i, true);
-                FirstLocale = i;
-            }
-            else
-                ExtractDBCFiles(i, false);
-
-            //Close MPQs
-            CloseMPQFiles();
-        }
-    }
-
-    if(FirstLocale < 0)
-    {
-        printf("No locales detected\n");
-        return 0;
-    }
-
     if (CONF_extract & EXTRACT_MAP)
     {
-        printf("Using locale: %s\n", langs[FirstLocale]);
 
         // Open MPQs
-        LoadLocaleMPQFiles(FirstLocale);
         LoadCommonMPQFiles();
+
+        // Extract dbc
+		ExtractDBCFiles();
 
         // Extract maps
         ExtractMapsFromMpq();

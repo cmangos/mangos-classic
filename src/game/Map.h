@@ -68,7 +68,7 @@ typedef MaNGOS::SingleThreaded<GridRWLock>::Lock NullGuard;
 // Map file format defines
 //******************************************
 #define MAP_MAGIC             'SPAM'
-#define MAP_VERSION_MAGIC     '5.0w'
+#define MAP_VERSION_MAGIC     '1.01'
 #define MAP_AREA_MAGIC        'AERA'
 #define MAP_HEIGHT_MAGIC      'TGHM'
 #define MAP_LIQUID_MAGIC      'QILM'
