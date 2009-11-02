@@ -555,7 +555,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleBattleFieldPortOpcode( WorldPacket &recv_data );
         void HandleBattlefieldListOpcode( WorldPacket &recv_data );
         void HandleLeaveBattlefieldOpcode( WorldPacket &recv_data );
-        void HandleBattlemasterJoinArena( WorldPacket &recv_data );
         void HandleReportPvPAFK( WorldPacket &recv_data );
 
         void HandleWardenDataOpcode(WorldPacket& recv_data);
@@ -578,18 +577,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleTimeSyncResp(WorldPacket& recv_data);
         void HandleWhoisOpcode(WorldPacket& recv_data);
         void HandleResetInstancesOpcode(WorldPacket& recv_data);
-
-        // Arena Team
-        void HandleInspectArenaTeamsOpcode(WorldPacket& recv_data);
-        void HandleArenaTeamQueryOpcode(WorldPacket& recv_data);
-        void HandleArenaTeamRosterOpcode(WorldPacket& recv_data);
-        void HandleArenaTeamInviteOpcode(WorldPacket& recv_data);
-        void HandleArenaTeamAcceptOpcode(WorldPacket& recv_data);
-        void HandleArenaTeamDeclineOpcode(WorldPacket& recv_data);
-        void HandleArenaTeamLeaveOpcode(WorldPacket& recv_data);
-        void HandleArenaTeamRemoveOpcode(WorldPacket& recv_data);
-        void HandleArenaTeamDisbandOpcode(WorldPacket& recv_data);
-        void HandleArenaTeamLeaderOpcode(WorldPacket& recv_data);
 
         void HandleAreaSpiritHealerQueryOpcode(WorldPacket& recv_data);
         void HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data);

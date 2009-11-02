@@ -233,7 +233,6 @@ class ChatHandler
         bool HandleLookupTaxiNodeCommand(const char * args);
         bool HandleLookupTeleCommand(const char * args);
 
-        bool HandleModifyKnownTitlesCommand(const char* args);
         bool HandleModifyHPCommand(const char* args);
         bool HandleModifyManaCommand(const char* args);
         bool HandleModifyRageCommand(const char* args);
