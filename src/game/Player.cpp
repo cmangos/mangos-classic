@@ -286,6 +286,10 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this)
 
     m_usedTalentCount = 0;
 
+    m_modManaRegen = 0;
+    m_modManaRegenInterrupt = 0;
+    for ( int s=0;s<MAX_SPELL_SCHOOL;s++)
+    m_SpellCritPercentage[s] = 0.0f;
     m_regenTimer = 0;
     m_weaponChangeTimer = 0;
 
@@ -1795,11 +1799,11 @@ void Player::Regenerate(Powers power)
             if (recentCast)
             {
                 // Mangos Updates Mana in intervals of 2s, which is correct
-                addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT) *  ManaIncreaseRate * 2.00f;
+                addvalue = m_modManaRegenInterrupt *  ManaIncreaseRate * 2.00f;
             }
             else
             {
-                addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN) * ManaIncreaseRate * 2.00f;
+                addvalue = m_modManaRegen * ManaIncreaseRate * 2.00f;
             }
         }   break;
         case POWER_RAGE:                                    // Regenerate rage
@@ -2295,7 +2299,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     PlayerLevelInfo info;
     objmgr.GetPlayerLevelInfo(getRace(),getClass(),getLevel(),&info);
 
-    SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) );
+   //[-ZERO] SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) );
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(getLevel()));
 
     UpdateSkillsForLevel ();
@@ -2326,7 +2330,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for(uint16 index = PLAYER_FIELD_COMBAT_RATING_1; index < PLAYER_FIELD_COMBAT_RATING_1 + MAX_COMBAT_RATING; ++index)
         SetUInt32Value(index, 0);
 
-    SetUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,0);
+    //[-ZERO] SetUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,0);
     for (int i = 0; i < 7; ++i)
     {
         SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+i, 0);
@@ -2355,16 +2359,16 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // Base crit values (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
     SetFloatValue(PLAYER_CRIT_PERCENTAGE,0.0f);
-    SetFloatValue(PLAYER_OFFHAND_CRIT_PERCENTAGE,0.0f);
+    //[-ZERO] SetFloatValue(PLAYER_OFFHAND_CRIT_PERCENTAGE,0.0f);
     SetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE,0.0f);
 
     // Init spell schools (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
-    for (uint8 i = 0; i < 7; ++i)
-        SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1+i, 0.0f);
+    for (uint8 i = 0; i < MAX_SPELL_SCHOOL; ++i)
+        m_SpellCritPercentage[i] = 0.0f;
 
     SetFloatValue(PLAYER_PARRY_PERCENTAGE, 0.0f);
     SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 0.0f);
-    SetUInt32Value(PLAYER_SHIELD_BLOCK, 0);
+    // [-ZERO] SetUInt32Value(PLAYER_SHIELD_BLOCK, 0);
 
     // Dodge percentage
     SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.0f);
@@ -2381,8 +2385,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
         SetResistanceBuffMods(SpellSchools(i), false, 0.0f);
     }
 
-    SetUInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE,0);
-    SetUInt32Value(PLAYER_FIELD_MOD_TARGET_PHYSICAL_RESISTANCE,0);
+//[-ZERO]    SetUInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE,0);
+//[-ZERO]    SetUInt32Value(PLAYER_FIELD_MOD_TARGET_PHYSICAL_RESISTANCE,0);
     for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
     {
         SetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+i,0);
@@ -3372,7 +3376,7 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(UNIT_FIELD_FACTIONTEMPLATE);
     updateVisualBits.SetBit(UNIT_FIELD_BYTES_0);
     updateVisualBits.SetBit(UNIT_FIELD_FLAGS);
-    updateVisualBits.SetBit(UNIT_FIELD_FLAGS_2);
+    //[-ZERO] updateVisualBits.SetBit(UNIT_FIELD_FLAGS_2);
     for(uint16 i = UNIT_FIELD_AURA; i < UNIT_FIELD_AURASTATE; ++i)
         updateVisualBits.SetBit(i);
     updateVisualBits.SetBit(UNIT_FIELD_AURASTATE);
@@ -3403,7 +3407,7 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(PLAYER_GUILD_TIMESTAMP);
 
     // PLAYER_QUEST_LOG_x also visible bit on official (but only on party/raid)...
-    for(uint16 i = PLAYER_QUEST_LOG_1_1; i < PLAYER_QUEST_LOG_25_2; i+=4)
+    for(uint16 i = PLAYER_QUEST_LOG_1_1; i < PLAYER_QUEST_LOG_20_2; i+=4)
         updateVisualBits.SetBit(i);
 
     //Players visible items are not inventory stuff
@@ -4509,20 +4513,6 @@ uint32 Player::GetDotDamageReduction(uint32 damage) const
     return uint32 (spellDot * damage / 100.0f);
 }
 
-float Player::GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const
-{
-    switch (attType)
-    {
-        case BASE_ATTACK:
-            return GetUInt32Value(PLAYER_EXPERTISE) / 4.0f;
-        case OFF_ATTACK:
-            return GetUInt32Value(PLAYER_OFFHAND_EXPERTISE) / 4.0f;
-        default:
-            break;
-    }
-    return 0.0f;
-}
-
 float Player::OCTRegenHPPerSpirit()
 {
     uint32 level = getLevel();
@@ -4639,13 +4629,6 @@ void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
         case CR_WEAPON_SKILL_MAINHAND:                      // Implemented in Unit::RollMeleeOutcomeAgainst
         case CR_WEAPON_SKILL_OFFHAND:
         case CR_WEAPON_SKILL_RANGED:
-            break;
-        case CR_EXPERTISE:
-            if(affectStats)
-            {
-                UpdateExpertise(BASE_ATTACK);
-                UpdateExpertise(OFF_ATTACK);
-            }
             break;
     }
 }
@@ -6329,9 +6312,6 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 ApplyRatingMod(CR_HASTE_MELEE, int32(val), apply);
                 ApplyRatingMod(CR_HASTE_RANGED, int32(val), apply);
                 ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
-                break;
-            case ITEM_MOD_EXPERTISE_RATING:
-                ApplyRatingMod(CR_EXPERTISE, int32(val), apply);
                 break;
         }
     }
@@ -9644,10 +9624,6 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
 
         ApplyEquipCooldown(pItem);
 
-        if( slot == EQUIPMENT_SLOT_MAINHAND )
-            UpdateExpertise(BASE_ATTACK);
-        else if( slot == EQUIPMENT_SLOT_OFFHAND )
-            UpdateExpertise(OFF_ATTACK);
     }
     else
     {
@@ -9783,7 +9759,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                 {
                     RemoveItemDependentAurasAndCasts(pItem);
 
-                    // remove held enchantments, update expertise
+                    // remove held enchantments
                     if ( slot == EQUIPMENT_SLOT_MAINHAND )
                     {
                         if (pItem->GetItemSuffixFactor())
@@ -9796,11 +9772,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                             pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_0);
                             pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_1);
                         }
-
-                        UpdateExpertise(BASE_ATTACK);
                     }
-                    else if( slot == EQUIPMENT_SLOT_OFFHAND )
-                        UpdateExpertise(OFF_ATTACK);
                 }
             }
 
@@ -9904,12 +9876,6 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
             {
                 // remove item dependent auras and casts (only weapon and armor slots)
                 RemoveItemDependentAurasAndCasts(pItem);
-
-                // update expertise
-                if ( slot == EQUIPMENT_SLOT_MAINHAND )
-                    UpdateExpertise(BASE_ATTACK);
-                else if( slot == EQUIPMENT_SLOT_OFFHAND )
-                    UpdateExpertise(OFF_ATTACK);
 
                 // equipment visual show
                 SetVisibleItemSlot(slot, NULL);
@@ -11105,10 +11071,6 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                             ((Player*)this)->ApplyRatingMod(CR_HASTE_RANGED, enchant_amount, apply);
                             ((Player*)this)->ApplyRatingMod(CR_HASTE_SPELL, enchant_amount, apply);
                             sLog.outDebug("+ %u HASTE", enchant_amount);
-                            break;
-                        case ITEM_MOD_EXPERTISE_RATING:
-                            ((Player*)this)->ApplyRatingMod(CR_EXPERTISE, enchant_amount, apply);
-                            sLog.outDebug("+ %u EXPERTISE", enchant_amount);
                             break;
                         default:
                             break;
