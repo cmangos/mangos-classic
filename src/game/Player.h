@@ -52,7 +52,6 @@ class PlayerSocial;
 typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS       127
-#define PLAYER_MAX_DAILY_QUESTS 25
 
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
@@ -710,7 +709,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADAURAS                = 3,
     PLAYER_LOGIN_QUERY_LOADSPELLS               = 4,
     PLAYER_LOGIN_QUERY_LOADQUESTSTATUS          = 5,
-    PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS     = 6,
+    //[-ZERO] PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS     = 6,
     PLAYER_LOGIN_QUERY_LOADTUTORIALS            = 7,        // common for all characters for some account at specific realm
     PLAYER_LOGIN_QUERY_LOADREPUTATION           = 8,
     PLAYER_LOGIN_QUERY_LOADINVENTORY            = 9,
@@ -1098,16 +1097,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool SatisfyQuestExclusiveGroup( Quest const* qInfo, bool msg );
         bool SatisfyQuestNextChain( Quest const* qInfo, bool msg );
         bool SatisfyQuestPrevChain( Quest const* qInfo, bool msg );
-        bool SatisfyQuestDay( Quest const* qInfo, bool msg );
         bool GiveQuestSourceItem( Quest const *pQuest );
         bool TakeQuestSourceItem( uint32 quest_id, bool msg );
         bool GetQuestRewardStatus( uint32 quest_id ) const;
         QuestStatus GetQuestStatus( uint32 quest_id ) const;
         void SetQuestStatus( uint32 quest_id, QuestStatus status );
-
-        // [-ZERO] not exist
-        void SetDailyQuestStatus( uint32 quest_id );
-        void ResetDailyQuestStatus();
 
         uint16 FindQuestSlot( uint32 quest_id ) const;
         uint32 GetQuestSlotQuestId(uint16 slot) const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_ID_OFFSET); }
@@ -2039,7 +2033,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadMail();
         void _LoadMailedItems(Mail *mail);
         void _LoadQuestStatus(QueryResult *result);
-        void _LoadDailyQuestStatus(QueryResult *result);
         void _LoadGroup(QueryResult *result);
         void _LoadSpells(QueryResult *result);
         void _LoadTutorials(QueryResult *result);
@@ -2056,7 +2049,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveInventory();
         void _SaveMail();
         void _SaveQuestStatus();
-        void _SaveDailyQuestStatus();
         void _SaveSpells();
         void _SaveTutorials();
 
@@ -2143,9 +2135,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_Tutorials[8];
         bool   m_TutorialsChanged;
-
-        bool   m_DailyQuestChanged;
-        time_t m_lastDailyQuestTime;
 
         uint32 m_drunkTimer;
         uint16 m_drunk;
