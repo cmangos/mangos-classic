@@ -478,7 +478,6 @@ struct _Socket
 };
 
 #define MAX_ITEM_PROTO_DAMAGES 5
-#define MAX_ITEM_PROTO_SOCKETS 3
 #define MAX_ITEM_PROTO_SPELLS  5
 #define MAX_ITEM_PROTO_STATS  10
 
@@ -541,9 +540,6 @@ struct ItemPrototype
     uint32 Map;                                             // id from Map.dbc
     uint32 BagFamily;                                       // bit mask (1 << id from ItemBagFamily.dbc)
     uint32 TotemCategory;                                   // id from TotemCategory.dbc
-    _Socket Socket[MAX_ITEM_PROTO_SOCKETS];
-    uint32 socketBonus;                                     // id from SpellItemEnchantment.dbc
-    uint32 GemProperties;                                   // id from GemProperties.dbc
     uint32 RequiredDisenchantSkill;
     float  ArmorDamageModifier;
     uint32 ScriptId;

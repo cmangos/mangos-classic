@@ -585,9 +585,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleComplainOpcode(WorldPacket& recv_data);
         void HandleRequestPetInfoOpcode(WorldPacket& recv_data);
 
-        // Socket gem
-        void HandleSocketOpcode(WorldPacket& recv_data);
-
         void HandleCancelTempEnchantmentOpcode(WorldPacket& recv_data);
 
         void HandleChannelVoiceOnOpcode(WorldPacket & recv_data);

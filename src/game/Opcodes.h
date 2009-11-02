@@ -873,7 +873,6 @@ enum OpcodesList
     SMSG_MOVE_UNSET_CAN_FLY                         = 0x344,
     CMSG_MOVE_SET_CAN_FLY_ACK                       = 0x345,
     CMSG_MOVE_SET_FLY                               = 0x346,
-    CMSG_SOCKET_GEMS                                = 0x347,
     MSG_MOVE_START_ASCEND                           = 0x359,
     MSG_MOVE_STOP_ASCEND                            = 0x35A,
     CMSG_LFG_SET_AUTOJOIN                           = 0x35C,

@@ -166,8 +166,6 @@ enum EnchantmentSlot
 
 #define MAX_VISIBLE_ITEM_OFFSET       16                    // 16 fields per visible item (creator(2) + enchantments(12) + properties(1) + pad(1))
 
-#define MAX_GEM_SOCKETS               MAX_ITEM_PROTO_SOCKETS// (BONUS_ENCHANTMENT_SLOT-SOCK_ENCHANTMENT_SLOT) and item proto size, equal value expected
-
 enum EnchantmentOffset
 {
     ENCHANTMENT_ID_OFFSET       = 0,
@@ -247,12 +245,10 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsFitToSpellRequirements(SpellEntry const* spellInfo) const;
         bool IsTargetValidForItemUse(Unit* pUnitTarget);
         bool IsLimitedToAnotherMapOrZone( uint32 cur_mapId, uint32 cur_zoneId) const;
-        bool GemsFitSockets() const;
 
         uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
         void SetCount(uint32 value) { SetUInt32Value (ITEM_FIELD_STACK_COUNT, value); }
         uint32 GetMaxStackCount() const { return GetProto()->GetMaxStackSize(); }
-        uint8 GetGemCountWithID(uint32 GemID) const;
 
         uint8 GetSlot() const {return m_slot;}
         Bag *GetContainer() { return m_container; }

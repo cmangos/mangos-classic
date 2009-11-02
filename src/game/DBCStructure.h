@@ -92,25 +92,14 @@ struct CharStartOutfitEntry
     //uint32 Unknown3;                                      // 40
 };
 
-struct CharTitlesEntry
-{
-    uint32      ID;                                         // 0, title ids, for example in Quest::GetCharTitleId()
-    //uint32      unk1;                                     // 1 flags?
-    //char*       name[16];                                 // 2-17, unused
-                                                            // 18 string flag, unused
-    //char*       name2[16];                                // 19-34, unused
-                                                            // 35 string flag, unused
-    uint32      bit_index;                                  // 36 used in PLAYER_CHOSEN_TITLE and 1<<index in PLAYER__FIELD_KNOWN_TITLES
-};
-
 struct ChatChannelsEntry
 {
     uint32      ChannelID;                                  // 0
     uint32      flags;                                      // 1
-    char*       pattern[16];                                // 3-18
-                                                            // 19 string flags, unused
-    //char*       name[16];                                 // 20-35 unused
-                                                            // 36 string flag, unused
+    char*       pattern[8];                                 // 3-10
+                                                            // 11 string flags, unused
+    //char*       name[8];                                  // 12-19 unused
+                                                            // 20 string flag, unused
 };
 
 struct ChrClassesEntry
@@ -119,15 +108,9 @@ struct ChrClassesEntry
                                                             // 1-2, unused
     uint32      powerType;                                  // 3
                                                             // 4, unused
-    //char*       name[16];                                 // 5-20 unused
-                                                            // 21 string flag, unused
-    //char*       nameFemale[16];                           // 21-36 unused, if different from base (male) case
-                                                            // 37 string flag, unused
-    //char*       nameNeutralGender[16];                    // 38-53 unused, if different from base (male) case
-                                                            // 54 string flag, unused
-                                                            // 55, unused
-    uint32      spellfamily;                                // 56
-                                                            // 57, unused
+    //char*       name[8];                                  // 5-12 unused
+    uint32      spellfamily;                                // 15
+                                                            // 16, unused
 };
 
 struct ChrRacesEntry
@@ -140,16 +123,9 @@ struct ChrRacesEntry
     uint32      model_f;                                    // 5
                                                             // 6-7 unused
     uint32      TeamID;                                     // 8 (7-Alliance 1-Horde)
-                                                            // 9-12 unused
+    uint32      startingTaxiMask;  
     uint32      CinematicSequence;                          // 13 id from CinematicCamera.dbc
-    char*       name[16];                                   // 14-29 used for DBC language detection/selection
-                                                            // 30 string flags, unused
-    //char*       nameFemale[16];                           // 31-46, if different from base (male) case
-                                                            // 47 string flags, unused
-    //char*       nameNeutralGender[16];                    // 48-63, if different from base (male) case
-                                                            // 64 string flags, unused
-                                                            // 65-67 unused
-    uint32      addon;                                      // 68 (0 - original race, 1 - tbc addon, ...)
+    char*       name[8];                                    // 17-25 used for DBC language detection/selection
 };
 
 /* not used
@@ -176,9 +152,10 @@ struct CinematicSequencesEntry
 struct CreatureDisplayInfoEntry
 {
     uint32      Displayid;                                  // 0
-                                                            // 1-3,unused
-    float       scale;                                      // 4
-                                                            // 5-13,unused
+                                                            // 1    iRefID_CreatureModelData Points to the model filename.
+                                                            // 3    iRefID_CreatureDisplayInfoExtra    
+    float       scale;                                      // 4    Default model scale if not set by server for that spawn
+                                                            // 6        Opacity     Integer     0 - 255. 0 is totally transparent, 255 is solid  
 };
 
 struct CreatureFamilyEntry
@@ -190,9 +167,7 @@ struct CreatureFamilyEntry
     uint32    maxScaleLevel;                                // 4 0/60
     uint32    skillLine[2];                                 // 5-6
     uint32    petFoodMask;                                  // 7
-    char*     Name[16];                                     // 8-23
-                                                            // 24 string flags, unused
-                                                            // 25 icon, unused
+    char*     Name[8];
 };
 
 #define MAX_CREATURE_SPELL_DATA_SLOT 4
@@ -207,9 +182,9 @@ struct CreatureSpellDataEntry
 struct CreatureTypeEntry
 {
     uint32    ID;                                           // 0        m_ID
-    //char*   Name[16];                                     // 1-16     name
-                                                            // 17       string flags
-    //uint32    no_expirience;                              // 18 no exp? critters, non-combat pets, gas cloud.
+    //char*   Name[8];                                      // 1-8      name
+                                                            // 9       string flags
+    //uint32    no_expirience;                              // 10 no exp? critters, non-combat pets, gas cloud.
 };
 
 struct DurabilityCostsEntry
@@ -250,10 +225,8 @@ struct FactionEntry
     int32       BaseRepValue[4];                            // 10-13 Base reputation values
     uint32      ReputationFlags[4];                         // 14-17 Default flags to apply
     uint32      team;                                       // 18 enum Team
-    char*       name[16];                                   // 19-34
-                                                            // 35 string flags, unused
-    //char*     description[16];                            // 36-51 unused
-                                                            // 52 string flags, unused
+    char*       name[8];
+    //char*     description[8 ];
 };
 
 struct FactionTemplateEntry
@@ -312,13 +285,6 @@ struct GameObjectDisplayInfoEntry
     // char* filename;                                      // 1
     // uint32 unknown2[10];                                 // 2-11     unknown data
     // float  unknown12[6];                                 // 12-17    unknown data
-};
-
-struct GemPropertiesEntry
-{
-    uint32      ID;
-    uint32      spellitemenchantement;
-    uint32      color;
 };
 
 // All Gt* DBC store data for 100 levels, some by 100 per class/race

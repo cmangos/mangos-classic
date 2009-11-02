@@ -824,65 +824,6 @@ void Item::ClearEnchantment(EnchantmentSlot slot)
     SetState(ITEM_CHANGED);
 }
 
-bool Item::GemsFitSockets() const
-{
-    bool fits = true;
-    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+MAX_GEM_SOCKETS; ++enchant_slot)
-    {
-        uint8 SocketColor = GetProto()->Socket[enchant_slot-SOCK_ENCHANTMENT_SLOT].Color;
-
-        uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot));
-        if(!enchant_id)
-        {
-            if(SocketColor) fits &= false;
-            continue;
-        }
-
-        SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-        if(!enchantEntry)
-        {
-            if(SocketColor) fits &= false;
-            continue;
-        }
-
-        uint8 GemColor = 0;
-
-        uint32 gemid = enchantEntry->GemID;
-        if(gemid)
-        {
-            ItemPrototype const* gemProto = sItemStorage.LookupEntry<ItemPrototype>(gemid);
-            if(gemProto)
-            {
-                GemPropertiesEntry const* gemProperty = sGemPropertiesStore.LookupEntry(gemProto->GemProperties);
-                if(gemProperty)
-                    GemColor = gemProperty->color;
-            }
-        }
-
-        fits &= (GemColor & SocketColor) ? true : false;
-    }
-    return fits;
-}
-
-uint8 Item::GetGemCountWithID(uint32 GemID) const
-{
-    uint8 count = 0;
-    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+MAX_GEM_SOCKETS; ++enchant_slot)
-    {
-        uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot));
-        if(!enchant_id)
-            continue;
-
-        SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-        if(!enchantEntry)
-            continue;
-
-        if(GemID == enchantEntry->GemID)
-            ++count;
-    }
-    return count;
-}
-
 bool Item::IsLimitedToAnotherMapOrZone( uint32 cur_mapId, uint32 cur_zoneId) const
 {
     ItemPrototype const* proto = GetProto();

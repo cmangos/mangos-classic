@@ -6177,9 +6177,6 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     ApplyItemEquipSpell(item,apply);
     ApplyEnchantment(item, apply);
 
-    if(proto->Socket[0].Color)                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
-        CorrectMetaGemEnchants(slot, apply);
-
     sLog.outDebug("_ApplyItemMods complete.");
 }
 
@@ -7699,16 +7696,6 @@ uint32 Player::GetItemCount( uint32 item, bool inBankAlso, Item* skipItem ) cons
             count += pBag->GetItemCount(item,skipItem);
     }
 
-    if(skipItem && skipItem->GetProto()->GemProperties)
-    {
-        for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
-        {
-            Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-            if( pItem && pItem != skipItem && pItem->GetProto()->Socket[0].Color )
-                count += pItem->GetGemCountWithID(item);
-        }
-    }
-
     if(inBankAlso)
     {
         for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
@@ -7722,16 +7709,6 @@ uint32 Player::GetItemCount( uint32 item, bool inBankAlso, Item* skipItem ) cons
             Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
             if( pBag )
                 count += pBag->GetItemCount(item,skipItem);
-        }
-
-        if(skipItem && skipItem->GetProto()->GemProperties)
-        {
-            for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
-            {
-                Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-                if( pItem && pItem != skipItem && pItem->GetProto()->Socket[0].Color )
-                    count += pItem->GetGemCountWithID(item);
-            }
         }
     }
 
@@ -8057,24 +8034,6 @@ bool Player::HasItemOrGemWithIdEquipped( uint32 item, uint32 count, uint8 except
             tempcount += pItem->GetCount();
             if( tempcount >= count )
                 return true;
-        }
-    }
-
-    ItemPrototype const *pProto = objmgr.GetItemPrototype(item);
-    if (pProto && pProto->GemProperties)
-    {
-        for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
-        {
-            if(i==int(except_slot))
-                continue;
-
-            Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-            if( pItem && pItem->GetProto()->Socket[0].Color)
-            {
-                tempcount += pItem->GetGemCountWithID(item);
-                if( tempcount >= count )
-                    return true;
-            }
         }
     }
 
@@ -16287,6 +16246,8 @@ void Player::SendCooldownEvent(SpellEntry const *spellInfo, uint32 itemId, Spell
                                                            //slot to be excluded while counting
 bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
 {
+    return false;
+    /* [-ZERO] to delete?
     if(!enchantmentcondition)
         return true;
 
@@ -16366,82 +16327,7 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
 
     sLog.outDebug("Checking Condition %u, there are %u Meta Gems, %u Red Gems, %u Yellow Gems and %u Blue Gems, Activate:%s", enchantmentcondition, curcount[0], curcount[1], curcount[2], curcount[3], activate ? "yes" : "no");
 
-    return activate;
-}
-
-void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
-{
-                                                            //cycle all equipped items
-    for(uint32 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
-    {
-        //enchants for the slot being socketed are handled by Player::ApplyItemMods
-        if(slot == exceptslot)
-            continue;
-
-        Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
-
-        if(!pItem || !pItem->GetProto()->Socket[0].Color)
-            continue;
-
-        for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
-        {
-            uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(enchant_slot));
-            if(!enchant_id)
-                continue;
-
-            SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-            if(!enchantEntry)
-                continue;
-
-            uint32 condition = enchantEntry->EnchantmentCondition;
-            if(condition)
-            {
-                                                            //was enchant active with/without item?
-                bool wasactive = EnchantmentFitsRequirements(condition, apply ? exceptslot : -1);
-                                                            //should it now be?
-                if(wasactive != EnchantmentFitsRequirements(condition, apply ? -1 : exceptslot))
-                {
-                    // ignore item gem conditions
-                                                            //if state changed, (dis)apply enchant
-                    ApplyEnchantment(pItem,EnchantmentSlot(enchant_slot),!wasactive,true,true);
-                }
-            }
-        }
-    }
-}
-
-                                                            //if false -> then toggled off if was on| if true -> toggled on if was off AND meets requirements
-void Player::ToggleMetaGemsActive(uint8 exceptslot, bool apply)
-{
-    //cycle all equipped items
-    for(int slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
-    {
-        //enchants for the slot being socketed are handled by WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
-        if(slot == exceptslot)
-            continue;
-
-        Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
-
-        if(!pItem || !pItem->GetProto()->Socket[0].Color)   //if item has no sockets or no item is equipped go to next item
-            continue;
-
-        //cycle all (gem)enchants
-        for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
-        {
-            uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(enchant_slot));
-            if(!enchant_id)                                 //if no enchant go to next enchant(slot)
-                continue;
-
-            SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-            if(!enchantEntry)
-                continue;
-
-            //only metagems to be (de)activated, so only enchants with condition
-            uint32 condition = enchantEntry->EnchantmentCondition;
-            if(condition)
-                ApplyEnchantment(pItem,EnchantmentSlot(enchant_slot), apply);
-        }
-    }
+    return activate; */
 }
 
 void Player::LeaveBattleground(bool teleportToEntryPoint)

@@ -186,7 +186,6 @@ class Quest
         int32  GetExclusiveGroup() const { return ExclusiveGroup; }
         uint32 GetNextQuestInChain() const { return NextQuestInChain; }
         // [-ZERO] not exist
-        uint32 GetCharTitleId() const { return CharTitleId; }
         uint32 GetSrcItemId() const { return SrcItemId; }
         uint32 GetSrcItemCount() const { return SrcItemCount; }
         uint32 GetSrcSpell() const { return SrcSpell; }
@@ -274,7 +273,6 @@ class Quest
         uint32 SuggestedPlayers;
         uint32 LimitTime;
         uint32 QuestFlags;
-        uint32 CharTitleId;
         int32  PrevQuestId;
         int32  NextQuestId;
         int32  ExclusiveGroup;
