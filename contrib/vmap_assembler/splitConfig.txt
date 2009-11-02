@@ -9,9 +9,3 @@
 533 #Stratholme Raid
 209 #TanarisInstance
 309 #Zul'gurub
-560 #HillsbradPast
-534 #HyjalPast
-532 #Karazahn
-543 #HellfireRampart
-568 #ZulAman
-564 #BlackTemple

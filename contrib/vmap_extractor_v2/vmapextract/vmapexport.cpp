@@ -340,51 +340,6 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
     printf("\nGame path: %s\n", input_path);
 
     char path[512];
-    std::vector<std::string> locales;
-
-    // scan game directories
-    WIN32_FIND_DATA ffData;
-    HANDLE hFind;
-    DWORD dwError;
-
-    // first, scan for locales (4-letter directories)
-    printf("Scanning for locales.\n");
-    sprintf(path, "%s*.*", input_path);
-    hFind = INVALID_HANDLE_VALUE;
-    hFind = FindFirstFile(path, &ffData);
-    if (hFind == INVALID_HANDLE_VALUE)
-    {
-        printf("\nCould not open data directory for reading. Aborting.\n");
-        return(false);
-    }
-    do
-    {
-        if (ffData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-        {
-            if (ffData.cFileName[0] != '.')
-            {
-                if (strlen(ffData.cFileName) == 4)
-                {
-                    printf("Found locale: %s\n", ffData.cFileName);
-                    locales.push_back(ffData.cFileName);
-                }
-            }
-        }
-    } while (FindNextFile(hFind, &ffData) != 0);
-    dwError = GetLastError();
-    FindClose(hFind);
-    if (dwError != ERROR_NO_MORE_FILES)
-    {
-        printf("\nError reading data directory while scanning locales. Aborting.\n");
-        return(false);
-    }
-    printf("\n");
-
-    if (locales.size() == 0)
-    {
-        printf("Sorry, no locales found. Aborting.\n");
-        return(false);
-    }
 
     // now, scan for the patch levels in the core dir
     printf("Loading patch levels from data directory.\n");
@@ -392,34 +347,22 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
     if (!scan_patches(path, pArchiveNames))
         return(false);
 
-    // now, scan for the patch levels in locale dirs
-    printf("Loading patch levels from locale directories.\n");
-    for (std::vector<std::string>::iterator i = locales.begin(); i != locales.end(); ++i)
-    {
-        printf("Locale: %s\n", i->c_str());
-        sprintf(path, "%s%s\\patch-%s", input_path, i->c_str(), i->c_str());
-        if (!scan_patches(path, pArchiveNames)) return(false);
-    }
-
     // open expansion and common files
     printf("Opening data files from data directory.\n");
-    sprintf(path, "%sexpansion.mpq", input_path);
+    sprintf(path, "%sterrain.mpq", input_path);
     pArchiveNames.push_back(path);
-    sprintf(path, "%scommon.mpq", input_path);
+    sprintf(path, "%smodel.mpq", input_path);
     pArchiveNames.push_back(path);
+    pArchiveNames.push_back(path);
+	sprintf(path, "%stexture.mpq", input_path);
+    pArchiveNames.push_back(path);
+	sprintf(path, "%swmo.mpq", input_path);
+    pArchiveNames.push_back(path);
+	sprintf(path, "%sbase.mpq", input_path);
+    pArchiveNames.push_back(path);
+	sprintf(path, "%smisc.mpq", input_path);
     printf("\n");
 
-    // open locale expansion and common files
-    printf("Opening data files from locale directories.\n");
-    for (std::vector<std::string>::iterator i = locales.begin(); i != locales.end(); ++i)
-    {
-        printf("Locale: %s\n", i->c_str());
-        sprintf(path, "%s%s\\expansion-locale-%s.mpq", input_path, i->c_str(), i->c_str());
-        pArchiveNames.push_back(path);
-        sprintf(path, "%s%s\\locale-%s.mpq", input_path, i->c_str(), i->c_str());
-        pArchiveNames.push_back(path);
-        printf("\n");
-    }
     return true;
 }
 
