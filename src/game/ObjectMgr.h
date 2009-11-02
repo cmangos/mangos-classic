@@ -99,8 +99,6 @@ struct AreaTrigger
     uint8  requiredLevel;
     uint32 requiredItem;
     uint32 requiredItem2;
-    uint32 heroicKey;
-    uint32 heroicKey2;
     uint32 requiredQuest;
     std::string requiredFailedText;
     uint32 target_mapId;
@@ -554,9 +552,9 @@ class ObjectMgr
                 return NULL;
         }
 
-        CellObjectGuids const& GetCellObjectGuids(uint16 mapid, uint8 spawnMode, uint32 cell_id)
+        CellObjectGuids const& GetCellObjectGuids(uint16 mapid, uint32 cell_id)
         {
-            return mMapObjectGuids[MAKE_PAIR32(mapid,spawnMode)][cell_id];
+            return mMapObjectGuids[MAKE_PAIR32(mapid,0)][cell_id];
         }
 
         CreatureData const* GetCreatureData(uint32 guid) const

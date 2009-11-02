@@ -5696,47 +5696,41 @@ bool ChatHandler::HandleInstanceListBindsCommand(const char* /*args*/)
     Player* player = getSelectedPlayer();
     if (!player) player = m_session->GetPlayer();
     uint32 counter = 0;
-    for(uint8 i = 0; i < TOTAL_DIFFICULTIES; ++i)
+
+    Player::BoundInstancesMap &binds = player->GetBoundInstances();
+    for(Player::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
     {
-        Player::BoundInstancesMap &binds = player->GetBoundInstances(i);
-        for(Player::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
+        InstanceSave *save = itr->second.save;
+        std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
+        if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
         {
-            InstanceSave *save = itr->second.save;
-            std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
-            if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
-            {
-                PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
-                    itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no",
-                    save->GetDifficulty() == DIFFICULTY_NORMAL ? "normal" : "heroic", save->CanReset() ? "yes" : "no", timeleft.c_str());
-            }
-            else
-                PSendSysMessage("bound for a nonexistant map %u", itr->first);
-            counter++;
+            PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
+                itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no");
         }
+        else
+            PSendSysMessage("bound for a nonexistant map %u", itr->first);
+        counter++;
     }
+
     PSendSysMessage("player binds: %d", counter);
     counter = 0;
     Group *group = player->GetGroup();
     if(group)
     {
-        for(uint8 i = 0; i < TOTAL_DIFFICULTIES; ++i)
+        Group::BoundInstancesMap &binds = group->GetBoundInstances();
+        for(Group::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
         {
-            Group::BoundInstancesMap &binds = group->GetBoundInstances(i);
-            for(Group::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
-            {
-                InstanceSave *save = itr->second.save;
-                std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
+            InstanceSave *save = itr->second.save;
+            std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
 
-                if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
-                {
-                    PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
-                        itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no",
-                        save->GetDifficulty() == DIFFICULTY_NORMAL ? "normal" : "heroic", save->CanReset() ? "yes" : "no", timeleft.c_str());
-                }
-                else
-                    PSendSysMessage("bound for a nonexistant map %u", itr->first);
-                counter++;
+            if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
+            {
+                PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
+                    itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no");
             }
+            else
+                PSendSysMessage("bound for a nonexistant map %u", itr->first);
+            counter++;
         }
     }
     PSendSysMessage("group binds: %d", counter);
@@ -5765,34 +5759,30 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char* args)
         mapid = atoi(args);
     }
 
-    for(uint8 i = 0; i < TOTAL_DIFFICULTIES; ++i)
+    Player::BoundInstancesMap &binds = player->GetBoundInstances();
+    for(Player::BoundInstancesMap::iterator itr = binds.begin(); itr != binds.end();)
     {
-        Player::BoundInstancesMap &binds = player->GetBoundInstances(i);
-        for(Player::BoundInstancesMap::iterator itr = binds.begin(); itr != binds.end();)
+        if (got_map && mapid != itr->first)
         {
-            if (got_map && mapid != itr->first)
+            ++itr;
+            continue;
+        }
+        if (itr->first != player->GetMapId())
+        {
+            InstanceSave *save = itr->second.save;
+            std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
+            if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
             {
-                ++itr;
-                continue;
-            }
-            if (itr->first != player->GetMapId())
-            {
-                InstanceSave *save = itr->second.save;
-                std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
-                if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
-                {
-                    PSendSysMessage("unbinding map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
-                        itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no",
-                        save->GetDifficulty() == DIFFICULTY_NORMAL ? "normal" : "heroic", save->CanReset() ? "yes" : "no", timeleft.c_str());
-                }
-                else
-                    PSendSysMessage("bound for a nonexistant map %u - try to unbind anyway", itr->first);
-                player->UnbindInstance(itr, i);
-                counter++;
+                PSendSysMessage("unbinding map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
+                    itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no");
             }
             else
-                ++itr;
+                PSendSysMessage("bound for a nonexistant map %u - try to unbind anyway", itr->first);
+            player->UnbindInstance(itr);
+            counter++;
         }
+        else
+            ++itr;
     }
     PSendSysMessage("instances unbound: %d", counter);
 

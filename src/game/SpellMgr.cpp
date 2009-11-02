@@ -2443,15 +2443,6 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
             return SPELL_FAILED_REQUIRES_AREA;
     }
 
-    // continent limitation (virtual continent)
-    if (spellInfo->AttributesEx4 & SPELL_ATTR_EX4_CAST_ONLY_IN_OUTLAND)
-    {
-        uint32 v_map = GetVirtualMapForMapAndZone(map_id, zone_id);
-        MapEntry const* mapEntry = sMapStore.LookupEntry(v_map);
-        if(!mapEntry || mapEntry->addon < 1 || !mapEntry->IsContinent())
-            return SPELL_FAILED_REQUIRES_AREA;
-    }
-
     // DB base check (if non empty then must fit at least single for allow)
     SpellAreaMapBounds saBounds = spellmgr.GetSpellAreaMapBounds(spellInfo->Id);
     if (saBounds.first != saBounds.second)

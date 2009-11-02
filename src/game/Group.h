@@ -96,7 +96,7 @@ class Roll : public LootValidatorRef
 {
     public:
         Roll(uint64 _guid, LootItem const& li)
-            : itemGUID(_guid), itemid(li.itemid), itemRandomPropId(li.randomPropertyId), itemRandomSuffix(li.randomSuffix),
+            : itemGUID(_guid), itemid(li.itemid), itemRandomPropId(li.randomPropertyId),
             totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemSlot(0) {}
         ~Roll() { }
         void setLoot(Loot *pLoot) { link(pLoot, this); }
@@ -277,8 +277,6 @@ class MANGOS_DLL_SPEC Group
         }
 
         void SetTargetIcon(uint8 id, uint64 guid);
-        void SetDifficulty(uint8 difficulty);
-        uint8 GetDifficulty() { return m_difficulty; }
         uint16 InInstance();
         bool InCombatToInstance(uint32 instanceId);
         void ResetInstances(uint8 method, Player* SendMsgTo);
@@ -324,9 +322,9 @@ class MANGOS_DLL_SPEC Group
         void DelinkMember(GroupReference* /*pRef*/ ) { }
 
         InstanceGroupBind* BindToInstance(InstanceSave *save, bool permanent, bool load = false);
-        void UnbindInstance(uint32 mapid, uint8 difficulty, bool unload = false);
-        InstanceGroupBind* GetBoundInstance(uint32 mapid, uint8 difficulty);
-        BoundInstancesMap& GetBoundInstances(uint8 difficulty) { return m_boundInstances[difficulty]; }
+        void UnbindInstance(uint32 mapid, bool unload = false);
+        InstanceGroupBind* GetBoundInstance(uint32 mapid);
+        BoundInstancesMap& GetBoundInstances() { return m_boundInstances; }
 
     protected:
         bool _addMember(const uint64 &guid, const char* name, bool isAssistant=false);
@@ -395,14 +393,13 @@ class MANGOS_DLL_SPEC Group
         uint64              m_mainTank;
         uint64              m_mainAssistant;
         GroupType           m_groupType;
-        uint8               m_difficulty;
         BattleGround*       m_bgGroup;
         uint64              m_targetIcons[TARGETICONCOUNT];
         LootMethod          m_lootMethod;
         ItemQualities       m_lootThreshold;
         uint64              m_looterGuid;
         Rolls               RollId;
-        BoundInstancesMap   m_boundInstances[TOTAL_DIFFICULTIES];
+        BoundInstancesMap   m_boundInstances;
         uint8*              m_subGroupsCounts;
 };
 #endif

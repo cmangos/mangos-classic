@@ -287,7 +287,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
     float y = corpse->GetPositionY();
     float z = corpse->GetPositionZ();
     int32 corpsemapid = mapid;
-
+    /* [-zero]
     // if corpse at different map
     if(mapid != _player->GetMapId())
     {
@@ -306,7 +306,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
                 }
             }
         }
-    }
+    } */
 
     WorldPacket data(MSG_CORPSE_QUERY, 1+(5*4));
     data << uint8(1);                                       // corpse found

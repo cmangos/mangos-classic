@@ -1019,7 +1019,6 @@ valid examples:
     Quest const* linkedQuest;
     SpellEntry const *linkedSpell;
     ItemRandomPropertiesEntry const* itemProperty;
-    ItemRandomSuffixEntry const* itemSuffix;
 
     while(!reader.eof())
     {
@@ -1029,7 +1028,6 @@ valid examples:
             linkedQuest = NULL;
             linkedSpell = NULL;
             itemProperty = NULL;
-            itemSuffix = NULL;
 
             reader.ignore(255, '|');
         }
@@ -1177,12 +1175,6 @@ valid examples:
                     {
                         itemProperty = sItemRandomPropertiesStore.LookupEntry(propertyId);
                         if (!itemProperty)
-                            return false;
-                    }
-                    else if(propertyId < 0)
-                    {
-                        itemSuffix = sItemRandomSuffixStore.LookupEntry(-propertyId);
-                        if (!itemSuffix)
                             return false;
                     }
 
@@ -1392,14 +1384,7 @@ valid examples:
                     }
                     else if(linkedItem)
                     {
-                        char* const* suffix = itemSuffix?itemSuffix->nameSuffix:(itemProperty?itemProperty->nameSuffix:NULL);
-
                         std::string expectedName = std::string(linkedItem->Name1);
-                        if (suffix)
-                        {
-                            expectedName += " ";
-                            expectedName += suffix[LOCALE_enUS];
-                        }
 
                         if (expectedName != buffer)
                         {
@@ -1414,11 +1399,7 @@ valid examples:
                                     expectedName = linkedItem->Name1;
                                 else
                                     expectedName = il->Name[dbIndex];
-                                if (suffix)
-                                {
-                                    expectedName += " ";
-                                    expectedName += suffix[i];
-                                }
+
                                 if ( expectedName == buffer)
                                 {
                                     foundName = true;

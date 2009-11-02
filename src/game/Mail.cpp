@@ -708,19 +708,6 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 
     uint32 itemTextId = m->itemTextId;
 
-    // in mail template case we need create new text id
-    if(!itemTextId)
-    {
-        MailTemplateEntry const* mailTemplateEntry = sMailTemplateStore.LookupEntry(m->mailTemplateId);
-        if(!mailTemplateEntry)
-        {
-            pl->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_ERR_INTERNAL_ERROR);
-            return;
-        }
-
-        itemTextId = objmgr.CreateItemText(mailTemplateEntry->content[GetSessionDbcLocale()]);
-    }
-
     Item *bodyItem = new Item;                              // This is not bag and then can be used new Item.
     if(!bodyItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), MAIL_BODY_ITEM_TEMPLATE, pl))
     {

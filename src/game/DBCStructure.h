@@ -302,55 +302,26 @@ struct ItemDisplayInfoEntry
     uint32      randomPropertyChance;
 };
 
-//struct ItemCondExtCostsEntry
-//{
-//    uint32      ID;
-//    uint32      condExtendedCost;                           // ItemPrototype::CondExtendedCost
-//    uint32      itemextendedcostentry;                      // ItemPrototype::ExtendedCost
-//    uint32      arenaseason;                                // arena season number(1-4)
-//};
-
-struct ItemExtendedCostEntry
-{
-    uint32      ID;                                         // 0 extended-cost entry id
-    uint32      reqhonorpoints;                             // 1 required honor points
-    uint32      reqarenapoints;                             // 2 required arena points
-    uint32      reqitem[5];                                 // 3-7 required item id
-    uint32      reqitemcount[5];                            // 8-12 required count of 1st item
-    uint32      reqpersonalarenarating;                     // 13 required personal arena rating
-};
-
 struct ItemRandomPropertiesEntry
 {
     uint32    ID;                                           // 0
     //char*     internalName                                // 1   unused
     uint32    enchant_id[3];                                // 2-4
                                                             // 5-6 unused, 0 only values, reserved for additional enchantments?
-    char*     nameSuffix[16];                               // 7-22
-                                                            // 23 nameSufix flags, unused
-};
-
-struct ItemRandomSuffixEntry
-{
-    uint32    ID;                                           // 0
-    char*     nameSuffix[16];                               // 1-16
-                                                            // 17, name flags, unused
-                                                            // 18  unused
-    uint32    enchant_id[3];                                // 19-21
-    uint32    prefix[3];                                    // 22-24
+    char*     nameSuffix[8];
 };
 
 struct ItemSetEntry
 {
     //uint32    id                                          // 0 item set ID
-    char*     name[16];                                     // 1-16
-                                                            // 17 string flags, unused
-                                                            // 18-28 items from set, but not have all items listed, use ItemPrototype::ItemSet instead
-                                                            // 29-34 unused
-    uint32    spells[8];                                    // 35-42
-    uint32    items_to_triggerspell[8];                     // 43-50
-    uint32    required_skill_id;                            // 51
-    uint32    required_skill_value;                         // 52
+    char*     name[8];                                      // 1-8
+                                                            // 9 string flags, unused
+                                                            // 10-20 items from set, but not have all items listed, use ItemPrototype::ItemSet instead
+                                                            // 21-26 unused
+    uint32    spells[8];                                    // 37-34
+    uint32    items_to_triggerspell[8];                     // 35-42
+    uint32    required_skill_id;                            // 43
+    uint32    required_skill_value;                         // 44
 };
 
 #define MAX_LOCK_CASE 8
@@ -367,9 +338,8 @@ struct LockEntry
 struct MailTemplateEntry
 {
     uint32      ID;                                         // 0
-    //char*       subject[16];                              // 1-16
-                                                            // 17 name flags, unused
-    char*       content[16];                                // 18-33
+    //char*       subject[8];                               // 1-8
+                                                            // 9 name flags, unused
 };
 
 struct MapEntry
@@ -378,51 +348,31 @@ struct MapEntry
     //char*       internalname;                             // 1 unused
     uint32      map_type;                                   // 2
                                                             // 3 unused
-    char*       name[16];                                   // 4-19
-                                                            // 20 name flags, unused
-                                                            // 21-23 unused (something PvPZone related - levels?)
-                                                            // 24-26
-    uint32      linked_zone;                                // 27 common zone for instance and continent map
-    //char*     hordeIntro                                  // 28-43 text for PvP Zones
-                                                            // 44 intro text flags
-    //char*     allianceIntro                               // 45-60 text for PvP Zones
-                                                            // 46 intro text flags
-                                                            // 47-61 not used
-    uint32      multimap_id;                                // 62
-                                                            // 63-65 not used
-    //chat*     unknownText1                                // 66-81 unknown empty text fields, possible normal Intro text.
-                                                            // 82 text flags
-    //chat*     heroicIntroText                             // 83-98 heroic mode requirement text
-                                                            // 99 text flags
-    //chat*     unknownText2                                // 100-115 unknown empty text fields
-                                                            // 116 text flags
-    int32       entrance_map;                               // 117 map_id of entrance map
-    float       entrance_x;                                 // 118 entrance x coordinate (if exist single entry)
-    float       entrance_y;                                 // 119 entrance y coordinate (if exist single entry)
-    uint32 resetTimeRaid;                                   // 120
-    uint32 resetTimeHeroic;                                 // 121
-                                                            // 122-123
-    uint32      addon;                                      // 124 (0-original maps,1-tbc addon)
-
+    char*       name[8];                                    // 4-11
+                                                            // 12 name flags, unused
+                                                            // 13-15 unused (something PvPZone related - levels?)
+                                                            // 16-18
+    uint32      linked_zone;                                // 19 common zone for instance and continent map
+    //char*     hordeIntro                                  // 20-27 text for PvP Zones
+                                                            // 28 intro text flags
+    //char*     allianceIntro                               // 29-36 text for PvP Zones
+                                                            // 37 intro text flags
+    uint32      multimap_id;                                // 38
+                                                            // 39-42 unused
     // Helpers
+
+
     bool IsDungeon() const { return map_type == MAP_INSTANCE || map_type == MAP_RAID; }
     bool Instanceable() const { return map_type == MAP_INSTANCE || map_type == MAP_RAID || map_type == MAP_BATTLEGROUND; }
     bool IsRaid() const { return map_type == MAP_RAID; }
     bool IsBattleGround() const { return map_type == MAP_BATTLEGROUND; }
-    bool SupportsHeroicMode() const { return resetTimeHeroic && !resetTimeRaid; }
-    bool HasResetTime() const { return resetTimeHeroic || resetTimeRaid; }
+    bool HasResetTime() const { return false; /* resetTimeRaid; */}
 
     bool IsMountAllowed() const
     {
         return !IsDungeon() ||
-            MapID==209 || MapID==269 || MapID==309 ||       // TanarisInstance, CavernsOfTime, Zul'gurub
-            MapID==509 || MapID==534 || MapID==560 ||       // AhnQiraj, HyjalPast, HillsbradPast
-            MapID==568 || MapID==580;                       // ZulAman, Sunwell Plateau
-    }
-
-    bool IsContinent() const
-    {
-        return MapID == 0 || MapID == 1 || MapID == 530;
+            MapID==568 || MapID==309 || MapID==209 || MapID==534 ||
+            MapID==560 || MapID==509 || MapID==269;
     }
 };
 
@@ -431,15 +381,6 @@ struct QuestSortEntry
     uint32      id;                                         // 0, sort id
     //char*       name[16];                                 // 1-16, unused
                                                             // 17 name flags, unused
-};
-
-struct RandomPropertiesPointsEntry
-{
-    //uint32  Id;                                           // 0 hidden key
-    uint32    itemLevel;                                    // 1
-    uint32    EpicPropertiesPoints[5];                      // 2-6
-    uint32    RarePropertiesPoints[5];                      // 7-11
-    uint32    UncommonPropertiesPoints[5];                  // 12-16
 };
 
 //struct SkillLineCategoryEntry{
@@ -471,7 +412,7 @@ struct SkillLineEntry
     uint32    id;                                           // 0
     int32     categoryId;                                   // 1 (index from SkillLineCategory.dbc)
     //uint32    skillCostID;                                // 2 not used
-    char*     name[16];                                     // 3-18
+    char*     name[8];                                     // 3-18
                                                             // 19 string flags, not used
     //char*     description[16];                            // 20-35, not used
                                                             // 36 string flags, not used

@@ -42,19 +42,16 @@ const char GameObjectDisplayInfofmt[]="nxxxxxxxxxxx";
 
 const char ItemBagFamilyfmt[]="nxxxxxxxxxxxxxxxxx";
 //const char ItemDisplayTemplateEntryfmt[]="nxxxxxxxxxxixxxxxxxxxxx";
-//const char ItemCondExtCostsEntryfmt[]="xiii";
-const char ItemExtendedCostEntryfmt[]="niiiiiiiiiiiii";
-const char ItemRandomPropertiesfmt[]="nxiiixxssssssssssssssssx";
-const char ItemRandomSuffixfmt[]="nssssssssssssssssxxiiiiii";
-const char ItemSetEntryfmt[]="dssssssssssssssssxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
-const char LockEntryfmt[]="niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
-const char MailTemplateEntryfmt[]="nxxxxxxxxxxxxxxxxxssssssssssssssssx";
-const char MapEntryfmt[]="nxixssssssssssssssssxxxxxxxixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiffiixxi";
-const char QuestSortEntryfmt[]="nxxxxxxxxxxxxxxxxx";
-const char RandomPropertiesPointsfmt[]="niiiiiiiiiiiiiii";
-const char SkillLinefmt[]="nixssssssssssssssssxxxxxxxxxxxxxxxxxxi";
+const char ItemRandomPropertiesfmt[]="nxiiixxxxxxxxxxx";
+const char ItemSetEntryfmt[]="dssssssssxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
+const char LockEntryfmt[]="niiiiixxxiiiiixxxiixxxxxxxxxxxxxx";
+const char MailTemplateEntryfmt[]="nxxxxxxxxx";
+const char MapEntryfmt[]="nxixssssssssxxxxxxxixxxxxxxxxxxxxxxxxxixxx";
+const char QuestSortEntryfmt[]="nxxxxxxxxx";
+const char SkillLinefmt[]="nixssssssssxxxxxxxxxxi";
 const char SkillLineAbilityfmt[]="niiiixxiiiiixxi";
 const char SoundEntriesfmt[]="nxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
 const char SpellCastTimefmt[]="nixx";
 const char SpellDurationfmt[]="niii";
 const char SpellEntryfmt[]="nixiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifxiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiifffixiixssssssssssssssssxssssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiixfffxxxiiii";

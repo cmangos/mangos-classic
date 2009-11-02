@@ -372,79 +372,6 @@ void ObjectMgr::LoadCreatureTemplates()
         if (!cInfo)
             continue;
 
-        if (cInfo->HeroicEntry)
-        {
-            CreatureInfo const* heroicInfo = GetCreatureTemplate(cInfo->HeroicEntry);
-            if (!heroicInfo)
-            {
-                sLog.outErrorDb("Creature (Entry: %u) have `heroic_entry`=%u but creature entry %u not exist.", i, cInfo->HeroicEntry, cInfo->HeroicEntry);
-                continue;
-            }
-
-            if (heroicEntries.find(i)!=heroicEntries.end())
-            {
-                sLog.outErrorDb("Creature (Entry: %u) listed as heroic but have value in `heroic_entry`.",i);
-                continue;
-            }
-
-            if (heroicEntries.find(cInfo->HeroicEntry)!=heroicEntries.end())
-            {
-                sLog.outErrorDb("Creature (Entry: %u) already listed as heroic for another entry.",cInfo->HeroicEntry);
-                continue;
-            }
-
-            if (hasHeroicEntries.find(cInfo->HeroicEntry)!=hasHeroicEntries.end())
-            {
-                sLog.outErrorDb("Creature (Entry: %u) have `heroic_entry`=%u but creature entry %u have heroic entry also.",i,cInfo->HeroicEntry,cInfo->HeroicEntry);
-                continue;
-            }
-
-            if (cInfo->npcflag != heroicInfo->npcflag)
-            {
-                sLog.outErrorDb("Creature (Entry: %u) has different `npcflag` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
-                continue;
-            }
-
-            if (cInfo->trainer_class != heroicInfo->trainer_class)
-            {
-                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_class` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
-                continue;
-            }
-
-            if (cInfo->trainer_race != heroicInfo->trainer_race)
-            {
-                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_race` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
-                continue;
-            }
-
-            if (cInfo->trainer_type != heroicInfo->trainer_type)
-            {
-                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_type` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
-                continue;
-            }
-
-            if (cInfo->trainer_spell != heroicInfo->trainer_spell)
-            {
-                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_spell` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
-                continue;
-            }
-
-            if (heroicInfo->AIName && *heroicInfo->AIName)
-            {
-                sLog.outErrorDb("Heroic mode creature (Entry: %u) has `AIName`, but in any case will used normal mode creature (Entry: %u) AIName.",cInfo->HeroicEntry,i);
-                continue;
-            }
-
-            if (heroicInfo->ScriptID)
-            {
-                sLog.outErrorDb("Heroic mode creature (Entry: %u) has `ScriptName`, but in any case will used normal mode creature (Entry: %u) ScriptName.",cInfo->HeroicEntry,i);
-                continue;
-            }
-
-            hasHeroicEntries.insert(i);
-            heroicEntries.insert(cInfo->HeroicEntry);
-        }
-
         FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction_A);
         if (!factionTemplate)
             sLog.outErrorDb("Creature (Entry: %u) has non-existing faction_A template (%u)", cInfo->Entry, cInfo->faction_A);
@@ -834,8 +761,8 @@ void ObjectMgr::LoadCreatures()
     QueryResult *result = WorldDatabase.Query("SELECT creature.guid, id, map, modelid,"
     //   4             5           6           7           8            9              10         11
         "equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint,"
-    //   12         13       14          15            16         17     18
-        "curhealth, curmana, DeathState, MovementType, spawnMask, event, pool_entry "
+    //   12         13       14          15            16         17
+        "curhealth, curmana, DeathState, MovementType, event, pool_entry "
         "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid "
         "LEFT OUTER JOIN pool_creature ON creature.guid = pool_creature.guid");
 
@@ -851,11 +778,6 @@ void ObjectMgr::LoadCreatures()
     }
 
     // build single time for check creature data
-    std::set<uint32> heroicCreatures;
-    for(uint32 i = 0; i < sCreatureStorage.MaxEntry; ++i)
-        if(CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
-            if(cInfo->HeroicEntry)
-                heroicCreatures.insert(cInfo->HeroicEntry);
 
     barGoLink bar(result->GetRowCount());
 
@@ -891,31 +813,13 @@ void ObjectMgr::LoadCreatures()
         data.curmana        = fields[13].GetUInt32();
         data.is_dead        = fields[14].GetBool();
         data.movementType   = fields[15].GetUInt8();
-        data.spawnMask      = fields[16].GetUInt8();
-        int16 gameEvent     = fields[17].GetInt16();
-        int16 PoolId        = fields[18].GetInt16();
+        int16 gameEvent     = fields[16].GetInt16();
+        int16 PoolId        = fields[17].GetInt16();
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if(!mapEntry)
         {
             sLog.outErrorDb("Table `creature` have creature (GUID: %u) that spawned at not existed map (Id: %u), skipped.",guid, data.mapid );
-            continue;
-        }
-
-        if(mapEntry->IsDungeon())
-        {
-            if(data.spawnMask & ~SPAWNMASK_DUNGEON_ALL)
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u) that have wrong spawn mask %u for non-raid dungeon map (Id: %u).",guid, data.spawnMask, data.mapid );
-        }
-        else
-        {
-            if(data.spawnMask & ~SPAWNMASK_CONTINENT)
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u) that have wrong spawn mask %u for non-dungeon map (Id: %u).",guid, data.spawnMask, data.mapid );
-        }
-
-        if(heroicCreatures.find(data.id)!=heroicCreatures.end())
-        {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u) that listed as heroic template in `creature_template`, skipped.",guid,data.id );
             continue;
         }
 
@@ -982,34 +886,20 @@ void ObjectMgr::LoadCreatures()
 
 void ObjectMgr::AddCreatureToGrid(uint32 guid, CreatureData const* data)
 {
-    uint8 mask = data->spawnMask;
-    for(uint8 i = 0; mask != 0; i++, mask >>= 1)
-    {
-        if(mask & 1)
-        {
-            CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
-            uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-            CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,i)][cell_id];
-            cell_guids.creatures.insert(guid);
-        }
-    }
+    CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,0)][cell_id];
+    cell_guids.creatures.insert(guid);
 }
 
 void ObjectMgr::RemoveCreatureFromGrid(uint32 guid, CreatureData const* data)
 {
-    uint8 mask = data->spawnMask;
-    for(uint8 i = 0; mask != 0; i++, mask >>= 1)
-    {
-        if(mask & 1)
-        {
-            CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
-            uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-            CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,i)][cell_id];
-            cell_guids.creatures.erase(guid);
-        }
-    }
+    CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,0)][cell_id];
+    cell_guids.creatures.erase(guid);
 }
 
 void ObjectMgr::LoadGameobjects()
@@ -1018,8 +908,8 @@ void ObjectMgr::LoadGameobjects()
 
     //                                                0                1   2    3           4           5           6
     QueryResult *result = WorldDatabase.Query("SELECT gameobject.guid, id, map, position_x, position_y, position_z, orientation,"
-    //   7          8          9          10         11             12            13     14         15     16
-        "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, spawnMask, event, pool_entry "
+    //   7          8          9          10         11             12            13     14         15
+        "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, event, pool_entry "
         "FROM gameobject LEFT OUTER JOIN game_event_gameobject ON gameobject.guid = game_event_gameobject.guid "
         "LEFT OUTER JOIN pool_gameobject ON gameobject.guid = pool_gameobject.guid");
 
@@ -1078,17 +968,6 @@ void ObjectMgr::LoadGameobjects()
             continue;
         }
 
-        if(mapEntry->IsDungeon())
-        {
-            if(data.spawnMask & ~SPAWNMASK_DUNGEON_ALL)
-                sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) that have wrong spawn mask %u for dungeon map (Id: %u), skip", guid, data.id, data.spawnMask, data.mapid);
-        }
-        else
-        {
-            if(data.spawnMask & ~SPAWNMASK_CONTINENT)
-                sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) that have wrong spawn mask %u for non-dungeon map (Id: %u), skip", guid, data.id, data.spawnMask, data.mapid);
-        }
-
         if (data.spawntimesecs==0 && gInfo->IsDespawnAtAction())
         {
             sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with `spawntimesecs` (0) value, but gameobejct marked as despawnable at action.",guid,data.id);
@@ -1104,9 +983,8 @@ void ObjectMgr::LoadGameobjects()
         }
         data.go_state       = GOState(go_state);
 
-        data.spawnMask      = fields[14].GetUInt8();
-        int16 gameEvent     = fields[15].GetInt16();
-        int16 PoolId        = fields[16].GetInt16();
+        int16 gameEvent     = fields[14].GetInt16();
+        int16 PoolId        = fields[15].GetInt16();
 
         if (data.rotation2 < -1.0f || data.rotation2 > 1.0f)
         {
@@ -1140,34 +1018,20 @@ void ObjectMgr::LoadGameobjects()
 
 void ObjectMgr::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)
 {
-    uint8 mask = data->spawnMask;
-    for(uint8 i = 0; mask != 0; i++, mask >>= 1)
-    {
-        if(mask & 1)
-        {
-            CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
-            uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-            CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,i)][cell_id];
-            cell_guids.gameobjects.insert(guid);
-        }
-    }
+    CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,0)][cell_id];
+    cell_guids.gameobjects.insert(guid);
 }
 
 void ObjectMgr::RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data)
 {
-    uint8 mask = data->spawnMask;
-    for(uint8 i = 0; mask != 0; i++, mask >>= 1)
-    {
-        if(mask & 1)
-        {
-            CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
-            uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-            CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,i)][cell_id];
-            cell_guids.gameobjects.erase(guid);
-        }
-    }
+    CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,0)][cell_id];
+    cell_guids.gameobjects.erase(guid);
 }
 
 void ObjectMgr::LoadCreatureRespawnTimes()
@@ -1658,12 +1522,6 @@ void ObjectMgr::LoadItemPrototypes()
         {
             sLog.outErrorDb("Item (Entry: %u) has unknown (wrong or not listed in `item_enchantment_template`) RandomProperty (%u)",i,proto->RandomProperty);
             const_cast<ItemPrototype*>(proto)->RandomProperty = 0;
-        }
-
-        if(proto->RandomSuffix && !sItemRandomSuffixStore.LookupEntry(GetItemEnchantMod(proto->RandomSuffix)))
-        {
-            sLog.outErrorDb("Item (Entry: %u) has wrong RandomSuffix (%u)",i,proto->RandomSuffix);
-            const_cast<ItemPrototype*>(proto)->RandomSuffix = 0;
         }
 
         if(proto->ItemSet && !sItemSetStore.LookupEntry(proto->ItemSet))
@@ -2553,8 +2411,8 @@ void ObjectMgr::LoadGroups()
     Group *group = NULL;
     uint64 leaderGuid = 0;
     uint32 count = 0;
-    //                                                     0         1              2           3           4              5      6      7      8      9      10     11     12     13      14          15
-    QueryResult *result = CharacterDatabase.Query("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, difficulty, leaderGuid FROM groups");
+    //                                                     0         1              2           3           4              5      6      7      8      9      10     11     12     13      14
+    QueryResult *result = CharacterDatabase.Query("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, leaderGuid FROM groups");
 
     if( !result )
     {
@@ -2574,7 +2432,7 @@ void ObjectMgr::LoadGroups()
         bar.step();
         Field *fields = result->Fetch();
         ++count;
-        leaderGuid = MAKE_NEW_GUID(fields[15].GetUInt32(),0,HIGHGUID_PLAYER);
+        leaderGuid = MAKE_NEW_GUID(fields[14].GetUInt32(),0,HIGHGUID_PLAYER);
 
         group = new Group;
         if(!group->LoadGroupFromDB(leaderGuid, result, false))
@@ -2650,8 +2508,8 @@ void ObjectMgr::LoadGroups()
     group = NULL;
     leaderGuid = 0;
     result = CharacterDatabase.Query(
-        //      0           1    2         3          4           5
-        "SELECT leaderGuid, map, instance, permanent, difficulty, resettime, "
+        //      0           1    2         3          4
+        "SELECT leaderGuid, map, instance, permanent, resettime, "
         // 6
         "(SELECT COUNT(*) FROM character_instance WHERE guid = leaderGuid AND instance = group_instance.instance AND permanent = 1 LIMIT 1) "
         "FROM group_instance LEFT JOIN instance ON instance = id ORDER BY leaderGuid"
@@ -2688,7 +2546,7 @@ void ObjectMgr::LoadGroups()
                 continue;
             }
 
-            InstanceSave *save = sInstanceSaveManager.AddInstanceSave(mapEntry->MapID, fields[2].GetUInt32(), fields[4].GetUInt8(), (time_t)fields[5].GetUInt64(), (fields[6].GetUInt32() == 0), true);
+            InstanceSave *save = sInstanceSaveManager.AddInstanceSave(mapEntry->MapID, fields[2].GetUInt32(), (time_t)fields[4].GetUInt64(), (fields[5].GetUInt32() == 0), true);
             group->BindToInstance(save, fields[3].GetBool(), true);
         }while( result->NextRow() );
         delete result;
@@ -4212,15 +4070,12 @@ void ObjectMgr::LoadInstanceTemplate()
 
         if(temp->reset_delay == 0)
         {
+            /* [-ZERO]
             // use defaults from the DBC
-            if(entry->SupportsHeroicMode())
-            {
-                temp->reset_delay = entry->resetTimeHeroic / DAY;
-            }
-            else if (entry->resetTimeRaid && entry->map_type == MAP_RAID)
+            if (entry->resetTimeRaid && entry->map_type == MAP_RAID)
             {
                 temp->reset_delay = entry->resetTimeRaid / DAY;
-            }
+            } */
         }
 
         // the reset_delay must be at least one day
@@ -4859,7 +4714,7 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
 
     // at entrance map for corpse map
     bool foundEntr = false;
-    float distEntr;
+    // float distEntr;
     WorldSafeLocsEntry const* entryEntr = NULL;
 
     // some where other
@@ -4886,34 +4741,9 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
         // find now nearest graveyard at other map
         if(MapId != entry->map_id)
         {
-            // if find graveyard at different map from where entrance placed (or no entrance data), use any first
-            if (!mapEntry ||
-                 mapEntry->entrance_map < 0 ||
-                 mapEntry->entrance_map != entry->map_id ||
-                (mapEntry->entrance_x == 0 && mapEntry->entrance_y == 0))
-            {
-                // not have any corrdinates for check distance anyway
+            if(!entryFar)
                 entryFar = entry;
-                continue;
-            }
-
-            // at entrance map calculate distance (2D);
-            float dist2 = (entry->x - mapEntry->entrance_x)*(entry->x - mapEntry->entrance_x)
-                +(entry->y - mapEntry->entrance_y)*(entry->y - mapEntry->entrance_y);
-            if(foundEntr)
-            {
-                if(dist2 < distEntr)
-                {
-                    distEntr = dist2;
-                    entryEntr = entry;
-                }
-            }
-            else
-            {
-                foundEntr = true;
-                distEntr = dist2;
-                entryEntr = entry;
-            }
+            continue;
         }
         // find now nearest graveyard at same map
         else
@@ -4987,8 +4817,8 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 
     uint32 count = 0;
 
-    //                                                0   1               2              3               4           5            6                    7                     8           9                  10                 11                 12
-    QueryResult *result = WorldDatabase.Query("SELECT id, required_level, required_item, required_item2, heroic_key, heroic_key2, required_quest_done, required_failed_text, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport");
+    //                                                0   1               2              3               4                    5                      6                    7                     8           9                  10
+    QueryResult *result = WorldDatabase.Query("SELECT id, required_level, required_item, required_item2, required_quest_done, required_failed_text, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport");
     if( !result )
     {
 
@@ -5018,15 +4848,13 @@ void ObjectMgr::LoadAreaTriggerTeleports()
         at.requiredLevel      = fields[1].GetUInt8();
         at.requiredItem       = fields[2].GetUInt32();
         at.requiredItem2      = fields[3].GetUInt32();
-        at.heroicKey          = fields[4].GetUInt32();
-        at.heroicKey2         = fields[5].GetUInt32();
-        at.requiredQuest      = fields[6].GetUInt32();
-        at.requiredFailedText = fields[7].GetCppString();
-        at.target_mapId       = fields[8].GetUInt32();
-        at.target_X           = fields[9].GetFloat();
-        at.target_Y           = fields[10].GetFloat();
-        at.target_Z           = fields[11].GetFloat();
-        at.target_Orientation = fields[12].GetFloat();
+        at.requiredQuest      = fields[4].GetUInt32();
+        at.requiredFailedText = fields[5].GetCppString();
+        at.target_mapId       = fields[6].GetUInt32();
+        at.target_X           = fields[7].GetFloat();
+        at.target_Y           = fields[8].GetFloat();
+        at.target_Z           = fields[9].GetFloat();
+        at.target_Orientation = fields[10].GetFloat();
 
         AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
         if(!atEntry)
@@ -5051,26 +4879,6 @@ void ObjectMgr::LoadAreaTriggerTeleports()
             {
                 sLog.outError("Second item %u not exist for trigger %u, remove key requirement.", at.requiredItem2, Trigger_ID);
                 at.requiredItem2 = 0;
-            }
-        }
-
-        if(at.heroicKey)
-        {
-            ItemPrototype const *pProto = GetItemPrototype(at.heroicKey);
-            if(!pProto)
-            {
-                sLog.outError("Heroic key item %u not exist for trigger %u, remove key requirement.", at.heroicKey, Trigger_ID);
-                at.heroicKey = 0;
-            }
-        }
-
-        if(at.heroicKey2)
-        {
-            ItemPrototype const *pProto = GetItemPrototype(at.heroicKey2);
-            if(!pProto)
-            {
-                sLog.outError("Heroic second key item %u not exist for trigger %u, remove key requirement.", at.heroicKey2, Trigger_ID);
-                at.heroicKey2 = 0;
             }
         }
 
@@ -5111,7 +4919,7 @@ void ObjectMgr::LoadAreaTriggerTeleports()
  * Searches for the areatrigger which teleports players out of the given map
  */
 AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 Map) const
-{
+{ /* [-ZERO]
     const MapEntry *mapEntry = sMapStore.LookupEntry(Map);
     if(!mapEntry) return NULL;
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
@@ -5122,7 +4930,7 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 Map) const
             if(atEntry && atEntry->mapid == Map)
                 return &itr->second;
         }
-    }
+    } */
     return NULL;
 }
 
@@ -7286,15 +7094,6 @@ bool ObjectMgr::IsVendorItemValid( uint32 vendor_entry, uint32 item_id, uint32 m
             ChatHandler(pl).PSendSysMessage(LANG_ITEM_NOT_FOUND, item_id);
         else
             sLog.outErrorDb("Table `npc_vendor` for Vendor (Entry: %u) have in item list non-existed item (%u), ignore",vendor_entry,item_id);
-        return false;
-    }
-
-    if(ExtendedCost && !sItemExtendedCostStore.LookupEntry(ExtendedCost))
-    {
-        if(pl)
-            ChatHandler(pl).PSendSysMessage(LANG_EXTENDED_COST_NOT_EXIST,ExtendedCost);
-        else
-            sLog.outErrorDb("Table `npc_vendor` have Item (Entry: %u) with wrong ExtendedCost (%u) for vendor (%u), ignore",item_id,ExtendedCost,vendor_entry);
         return false;
     }
 

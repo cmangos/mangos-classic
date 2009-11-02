@@ -418,7 +418,6 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this)
 
     m_HomebindTimer = 0;
     m_InstanceValid = true;
-    m_dungeonDifficulty = DIFFICULTY_NORMAL;
 
     for (int i = 0; i < BASEMOD_END; ++i)
     {
@@ -483,9 +482,8 @@ Player::~Player ()
             delete ItemSetEff[x];
 
     // clean up player-instance binds, may unload some instance saves
-    for(uint8 i = 0; i < TOTAL_DIFFICULTIES; ++i)
-        for(BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
-            itr->second.save->RemovePlayer(this);
+    for(BoundInstancesMap::iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
+        itr->second.save->RemovePlayer(this);
 
     delete m_declinedname;
 }
@@ -1952,8 +1950,7 @@ GameObject* Player::GetGameObjectIfCanInteractWith(uint64 guid, GameobjectTypes 
             switch(type)
             {
                 // TODO: find out how the client calculates the maximal usage distance to spellless working
-                // gameobjects like guildbanks and mailboxes - 10.0 is a just an abitrary choosen number
-                case GAMEOBJECT_TYPE_GUILD_BANK:
+                // gameobjects like mailboxes - 10.0 is a just an abitrary choosen number
                 case GAMEOBJECT_TYPE_MAILBOX:
                     maxdist = 10.0f;
                     break;
@@ -10916,72 +10913,16 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                     if (enchant_spell_id)
                     {
                         if (apply)
-                        {
-                            int32 basepoints = 0;
-                            // Random Property Exist - try found basepoints for spell (basepoints depends from item suffix factor)
-                            if (item->GetItemRandomPropertyId())
-                            {
-                                ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
-                                if (item_rand)
-                                {
-                                    // Search enchant_amount
-                                    for (int k = 0; k < 3; ++k)
-                                    {
-                                        if(item_rand->enchant_id[k] == enchant_id)
-                                        {
-                                            basepoints = int32((item_rand->prefix[k] * item->GetItemSuffixFactor()) / 10000 );
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            // Cast custom spell vs all equal basepoints getted from enchant_amount
-                            if (basepoints)
-                                CastCustomSpell(this, enchant_spell_id, &basepoints, &basepoints, &basepoints, true, item);
-                            else
-                                CastSpell(this, enchant_spell_id, true, item);
-                        }
+                            CastSpell(this, enchant_spell_id, true, item);
                         else
                             RemoveAurasDueToItemSpell(item, enchant_spell_id);
                     }
                     break;
                 case ITEM_ENCHANTMENT_TYPE_RESISTANCE:
-                    if (!enchant_amount)
-                    {
-                        ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
-                        if(item_rand)
-                        {
-                            for (int k = 0; k < 3; ++k)
-                            {
-                                if(item_rand->enchant_id[k] == enchant_id)
-                                {
-                                    enchant_amount = uint32((item_rand->prefix[k] * item->GetItemSuffixFactor()) / 10000 );
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
                     HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + enchant_spell_id), TOTAL_VALUE, float(enchant_amount), apply);
                     break;
                 case ITEM_ENCHANTMENT_TYPE_STAT:
                 {
-                    if (!enchant_amount)
-                    {
-                        ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
-                        if(item_rand_suffix)
-                        {
-                            for (int k = 0; k < 3; ++k)
-                            {
-                                if(item_rand_suffix->enchant_id[k] == enchant_id)
-                                {
-                                    enchant_amount = uint32((item_rand_suffix->prefix[k] * item->GetItemSuffixFactor()) / 10000 );
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
                     sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
                     switch (enchant_spell_id)
                     {
@@ -13083,7 +13024,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     uint32 transGUID = fields[31].GetUInt32();
     Relocate(fields[13].GetFloat(),fields[14].GetFloat(),fields[15].GetFloat(),fields[17].GetFloat());
     SetMapId(fields[16].GetUInt32());
-    SetDifficulty(DIFFICULTY_NORMAL);                       // [-ZERO] to delete
 
     _LoadGroup(holder->GetResult(PLAYER_LOGIN_QUERY_LOADGROUP));
 
@@ -14039,23 +13979,17 @@ void Player::_LoadGroup(QueryResult *result)
         {
             uint8 subgroup = group->GetMemberGroup(GetGUID());
             SetGroup(group, subgroup);
-            if(getLevel() >= LEVELREQUIREMENT_HEROIC)
-            {
-                // the group leader may change the instance difficulty while the player is offline
-                SetDifficulty(group->GetDifficulty());
-            }
         }
     }
 }
 
 void Player::_LoadBoundInstances(QueryResult *result)
 {
-    for(uint8 i = 0; i < TOTAL_DIFFICULTIES; ++i)
-        m_boundInstances[i].clear();
+    m_boundInstances.clear();
 
     Group *group = GetGroup();
 
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", GUID_LOPART(m_guid));
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT id, permanent, map, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", GUID_LOPART(m_guid));
     if(result)
     {
         do
@@ -14064,8 +13998,7 @@ void Player::_LoadBoundInstances(QueryResult *result)
             bool perm = fields[1].GetBool();
             uint32 mapId = fields[2].GetUInt32();
             uint32 instanceId = fields[0].GetUInt32();
-            uint8 difficulty = fields[3].GetUInt8();
-            time_t resetTime = (time_t)fields[4].GetUInt64();
+            time_t resetTime = (time_t)fields[3].GetUInt64();
             // the resettime for normal instances is only saved when the InstanceSave is unloaded
             // so the value read from the DB may be wrong here but only if the InstanceSave is loaded
             // and in that case it is not used
@@ -14080,45 +14013,43 @@ void Player::_LoadBoundInstances(QueryResult *result)
 
             if(!perm && group)
             {
-                sLog.outError("_LoadBoundInstances: player %s(%d) is in group %d but has a non-permanent character bind to map %d,%d,%d", GetName(), GetGUIDLow(), GUID_LOPART(group->GetLeaderGUID()), mapId, instanceId, difficulty);
+                sLog.outError("_LoadBoundInstances: player %s(%d) is in group %d but has a non-permanent character bind to map %d,%d", GetName(), GetGUIDLow(), GUID_LOPART(group->GetLeaderGUID()), mapId, instanceId);
                 CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'", GetGUIDLow(), instanceId);
                 continue;
             }
 
             // since non permanent binds are always solo bind, they can always be reset
-            InstanceSave *save = sInstanceSaveManager.AddInstanceSave(mapId, instanceId, difficulty, resetTime, !perm, true);
+            InstanceSave *save = sInstanceSaveManager.AddInstanceSave(mapId, instanceId, resetTime, !perm, true);
             if(save) BindToInstance(save, perm, true);
         } while(result->NextRow());
         delete result;
     }
 }
 
-InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, uint8 difficulty)
+InstancePlayerBind* Player::GetBoundInstance(uint32 mapid)
 {
-    // some instances only have one difficulty
     const MapEntry* entry = sMapStore.LookupEntry(mapid);
-    if(!entry || !entry->SupportsHeroicMode()) difficulty = DIFFICULTY_NORMAL;
 
-    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
-    if(itr != m_boundInstances[difficulty].end())
+    BoundInstancesMap::iterator itr = m_boundInstances.find(mapid);
+    if(itr != m_boundInstances.end())
         return &itr->second;
     else
         return NULL;
 }
 
-void Player::UnbindInstance(uint32 mapid, uint8 difficulty, bool unload)
+void Player::UnbindInstance(uint32 mapid,bool unload)
 {
-    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
-    UnbindInstance(itr, difficulty, unload);
+    BoundInstancesMap::iterator itr = m_boundInstances.find(mapid);
+    UnbindInstance(itr, unload);
 }
 
-void Player::UnbindInstance(BoundInstancesMap::iterator &itr, uint8 difficulty, bool unload)
+void Player::UnbindInstance(BoundInstancesMap::iterator &itr, bool unload)
 {
-    if(itr != m_boundInstances[difficulty].end())
+    if(itr != m_boundInstances.end())
     {
         if(!unload) CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%u' AND instance = '%u'", GetGUIDLow(), itr->second.save->GetInstanceId());
         itr->second.save->RemovePlayer(this);               // save can become invalid
-        m_boundInstances[difficulty].erase(itr++);
+        m_boundInstances.erase(itr++);
     }
 }
 
@@ -14126,7 +14057,7 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
 {
     if(save)
     {
-        InstancePlayerBind& bind = m_boundInstances[save->GetDifficulty()][save->GetMapId()];
+        InstancePlayerBind& bind = m_boundInstances[save->GetMapId()];
         if(bind.save)
         {
             // update the save when the group kills a boss
@@ -14146,7 +14077,7 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
 
         bind.save = save;
         bind.perm = permanent;
-        if(!load) sLog.outDebug("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d", GetName(), GetGUIDLow(), save->GetMapId(), save->GetInstanceId(), save->GetDifficulty());
+        if(!load) sLog.outDebug("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d", GetName(), GetGUIDLow(), save->GetMapId(), save->GetInstanceId());
         return &bind;
     }
     else
@@ -14158,24 +14089,20 @@ void Player::SendRaidInfo()
     WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
 
     uint32 counter = 0, i;
-    for(i = 0; i < TOTAL_DIFFICULTIES; i++)
-        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
-            if(itr->second.perm) counter++;
+    for (BoundInstancesMap::iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
+        if(itr->second.perm) counter++;
 
     data << counter;
-    for(i = 0; i < TOTAL_DIFFICULTIES; i++)
+    for (BoundInstancesMap::const_iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
     {
-        for (BoundInstancesMap::const_iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
+        if(itr->second.perm)
         {
-            if(itr->second.perm)
-            {
-                InstanceSave *save = itr->second.save;
-                data << (save->GetMapId());
-                data << (uint32)(save->GetResetTime() - time(NULL));
-                data << save->GetInstanceId();
-                data << uint32(counter);
-                counter--;
-            }
+            InstanceSave *save = itr->second.save;
+            data << (save->GetMapId());
+            data << (uint32)(save->GetResetTime() - time(NULL));
+            data << save->GetInstanceId();
+            data << uint32(counter);
+            counter--;
         }
     }
     GetSession()->SendPacket(&data);
@@ -14189,15 +14116,12 @@ void Player::SendSavedInstances()
     bool hasBeenSaved = false;
     WorldPacket data;
 
-    for(uint8 i = 0; i < TOTAL_DIFFICULTIES; ++i)
+    for (BoundInstancesMap::const_iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
     {
-        for (BoundInstancesMap::const_iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
+        if(itr->second.perm)                                // only permanent binds are sent
         {
-            if(itr->second.perm)                                // only permanent binds are sent
-            {
-                hasBeenSaved = true;
-                break;
-            }
+            hasBeenSaved = true;
+            break;
         }
     }
 
@@ -14209,16 +14133,13 @@ void Player::SendSavedInstances()
     if(!hasBeenSaved)
         return;
 
-    for(uint8 i = 0; i < TOTAL_DIFFICULTIES; ++i)
+    for (BoundInstancesMap::const_iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
     {
-        for (BoundInstancesMap::const_iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
+        if(itr->second.perm)
         {
-            if(itr->second.perm)
-            {
-                data.Initialize(SMSG_UPDATE_LAST_INSTANCE);
-                data << uint32(itr->second.save->GetMapId());
-                GetSession()->SendPacket(&data);
-            }
+            data.Initialize(SMSG_UPDATE_LAST_INSTANCE);
+            data << uint32(itr->second.save->GetMapId());
+            GetSession()->SendPacket(&data);
         }
     }
 }
@@ -14237,21 +14158,18 @@ void Player::ConvertInstancesToGroup(Player *player, Group *group, uint64 player
 
     if(player)
     {
-        for(uint8 i = 0; i < TOTAL_DIFFICULTIES; ++i)
+        for (BoundInstancesMap::iterator itr = player->m_boundInstances.begin(); itr != player->m_boundInstances.end();)
         {
-            for (BoundInstancesMap::iterator itr = player->m_boundInstances[i].begin(); itr != player->m_boundInstances[i].end();)
+            has_binds = true;
+            if(group) group->BindToInstance(itr->second.save, itr->second.perm, true);
+            // permanent binds are not removed
+            if(!itr->second.perm)
             {
-                has_binds = true;
-                if(group) group->BindToInstance(itr->second.save, itr->second.perm, true);
-                // permanent binds are not removed
-                if(!itr->second.perm)
-                {
-                    player->UnbindInstance(itr, i, true);   // increments itr
-                    has_solo = true;
-                }
-                else
-                    ++itr;
+                player->UnbindInstance(itr, true);   // increments itr
+                has_solo = true;
             }
+            else
+                ++itr;
         }
     }
 
@@ -14989,16 +14907,6 @@ void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
     GetSession()->SendPacket(&data);
 }
 
-void Player::SendDungeonDifficulty(bool IsInGroup)
-{
-    uint8 val = 0x00000001;
-    WorldPacket data(MSG_SET_DUNGEON_DIFFICULTY, 12);
-    data << (uint32)GetDifficulty();
-    data << uint32(val);
-    data << uint32(IsInGroup);
-    GetSession()->SendPacket(&data);
-}
-
 void Player::SendResetFailedNotify(uint32 mapid)
 {
     WorldPacket data(SMSG_RESET_FAILED_NOTIFY, 4);
@@ -15009,12 +14917,10 @@ void Player::SendResetFailedNotify(uint32 mapid)
 /// Reset all solo instances and optionally send a message on success for each
 void Player::ResetInstances(uint8 method)
 {
-    // method can be INSTANCE_RESET_ALL, INSTANCE_RESET_CHANGE_DIFFICULTY, INSTANCE_RESET_GROUP_JOIN
+    // method can be INSTANCE_RESET_ALL, INSTANCE_RESET_GROUP_JOIN
 
-    // we assume that when the difficulty changes, all instances that can be reset will be
-    uint8 dif = GetDifficulty();
 
-    for (BoundInstancesMap::iterator itr = m_boundInstances[dif].begin(); itr != m_boundInstances[dif].end();)
+    for (BoundInstancesMap::iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end();)
     {
         InstanceSave *p = itr->second.save;
         const MapEntry *entry = sMapStore.LookupEntry(itr->first);
@@ -15027,7 +14933,7 @@ void Player::ResetInstances(uint8 method)
         if(method == INSTANCE_RESET_ALL)
         {
             // the "reset all instances" method can only reset normal maps
-            if(dif == DIFFICULTY_HEROIC || entry->map_type == MAP_RAID)
+            if(entry->map_type == MAP_RAID)
             {
                 ++itr;
                 continue;
@@ -15040,11 +14946,11 @@ void Player::ResetInstances(uint8 method)
             ((InstanceMap*)map)->Reset(method);
 
         // since this is a solo instance there should not be any players inside
-        if(method == INSTANCE_RESET_ALL || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
+        if(method == INSTANCE_RESET_ALL)
             SendResetInstanceSuccess(p->GetMapId());
 
         p->DeleteFromDB();
-        m_boundInstances[dif].erase(itr++);
+        m_boundInstances.erase(itr++);
 
         // the following should remove the instance save from the manager and delete it as well
         p->RemovePlayer(this);
@@ -16034,26 +15940,6 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         return false;
     }
 
-    if (crItem->ExtendedCost)
-    {
-        ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
-        if (!iece)
-        {
-            sLog.outError("Item %u have wrong ExtendedCost field value %u", pProto->ItemId, crItem->ExtendedCost);
-            return false;
-        }
-
-        // item base price
-        for (uint8 i = 0; i < 5; ++i)
-        {
-            if(iece->reqitem[i] && !HasItemCount(iece->reqitem[i], (iece->reqitemcount[i] * count)))
-            {
-                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
-                return false;
-            }
-        }
-    }
-
     // not check level requiremnt for normal items (PvP related bonus items is another case)
     if(pProto->RequiredHonorRank && (GetHonorHighestRank() < pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
     {
@@ -16083,15 +15969,6 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         }
 
         ModifyMoney( -(int32)price );
-        if (crItem->ExtendedCost)                            // case for new honor system
-        {
-            ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
-            for (uint8 i = 0; i < 5; ++i)
-            {
-                if (iece->reqitem[i])
-                    DestroyItemCount(iece->reqitem[i], (iece->reqitemcount[i] * count), true);
-            }
-        }
 
         if (Item *it = StoreNewItem( dest, item, true ))
         {
@@ -16124,15 +16001,6 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         }
 
         ModifyMoney( -(int32)price );
-        if (crItem->ExtendedCost)                            // case for new honor system
-        {
-            ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
-            for (uint8 i = 0; i < 5; ++i)
-            {
-                if(iece->reqitem[i])
-                    DestroyItemCount(iece->reqitem[i], iece->reqitemcount[i], true);
-            }
-        }
 
         if (Item *it = EquipNewItem( dest, item, true ))
         {
@@ -16818,10 +16686,11 @@ void Player::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg)
     data << uint8(reason);                                  // transfer abort reason
     switch(reason)
     {
+       /*[-ZERO]
         case TRANSFER_ABORT_INSUF_EXPAN_LVL:
         case TRANSFER_ABORT_DIFFICULTY:
             data << uint8(arg);
-            break;
+            break; */
         default:                                            // possible not neaded (absent in 0.13, but add at backport for safe)
             data << uint8(0);
             break;

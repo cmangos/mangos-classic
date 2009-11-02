@@ -564,8 +564,6 @@ enum TransferAbortReason
     TRANSFER_ABORT_NOT_FOUND                = 0x02,         // Transfer Aborted: instance not found
     TRANSFER_ABORT_TOO_MANY_INSTANCES       = 0x03,         // You have entered too many instances recently.
     TRANSFER_ABORT_ZONE_IN_COMBAT           = 0x05,         // Unable to zone in while an encounter is in progress.
-    TRANSFER_ABORT_INSUF_EXPAN_LVL          = 0x06,         // You must have TBC expansion installed to access this area.
-    TRANSFER_ABORT_DIFFICULTY               = 0x07,         // <Normal,Heroic,Epic> difficulty mode is not available for %s.
 };
 
 enum InstanceResetWarningType
@@ -1444,10 +1442,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         int GetGuildIdInvited() { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(uint64 guid);
 
-        // [-ZERO] not exist
-        void SetDifficulty(uint32 dungeon_difficulty) { m_dungeonDifficulty = dungeon_difficulty; }
-        uint8 GetDifficulty() { return m_dungeonDifficulty; }
-
         bool UpdateSkill(uint32 skill_id, uint32 step);
         bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);
 
@@ -1522,7 +1516,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendAutoRepeatCancel();
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 
-        void SendDungeonDifficulty(bool IsInGroup);
         void ResetInstances(uint8 method);
         void SendResetInstanceSuccess(uint32 MapId);
         void SendResetInstanceFailed(uint32 reason, uint32 MapId);
@@ -1946,12 +1939,12 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_HomebindTimer;
         bool m_InstanceValid;
-        // permanent binds and solo binds by difficulty
-        BoundInstancesMap m_boundInstances[TOTAL_DIFFICULTIES];
-        InstancePlayerBind* GetBoundInstance(uint32 mapid, uint8 difficulty);
-        BoundInstancesMap& GetBoundInstances(uint8 difficulty) { return m_boundInstances[difficulty]; }
-        void UnbindInstance(uint32 mapid, uint8 difficulty, bool unload = false);
-        void UnbindInstance(BoundInstancesMap::iterator &itr, uint8 difficulty, bool unload = false);
+        // permanent binds
+        BoundInstancesMap m_boundInstances;
+        InstancePlayerBind* GetBoundInstance(uint32 mapid);
+        BoundInstancesMap& GetBoundInstances() { return m_boundInstances; }
+        void UnbindInstance(uint32 mapid, bool unload = false);
+        void UnbindInstance(BoundInstancesMap::iterator &itr, bool unload = false);
         InstancePlayerBind* BindToInstance(InstanceSave *save, bool permanent, bool load = false);
         void SendRaidInfo();
         void SendSavedInstances();
@@ -2078,8 +2071,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_nextSave;
         time_t m_speakTime;
         uint32 m_speakCount;
-        uint32 m_dungeonDifficulty;
-
         uint32 m_atLoginFlags;
 
         Item* m_items[PLAYER_SLOTS_COUNT];

@@ -563,7 +563,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleRandomRollOpcode(WorldPacket& recv_data);
         void HandleFarSightOpcode(WorldPacket& recv_data);
         void HandleSetLfgOpcode(WorldPacket& recv_data);
-        void HandleSetDungeonDifficultyOpcode(WorldPacket& recv_data);
         void HandleMoveSetCanFlyAckOpcode(WorldPacket& recv_data);
         void HandleLfgSetAutoJoinOpcode(WorldPacket& recv_data);
         void HandleLfgClearAutoJoinOpcode(WorldPacket& recv_data);
@@ -591,21 +590,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleVoiceSessionEnableOpcode(WorldPacket& recv_data);
         void HandleSetActiveVoiceChannel(WorldPacket& recv_data);
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
-
-        // Guild Bank
-        void HandleGuildPermissions(WorldPacket& recv_data);
-        void HandleGuildBankMoneyWithdrawn(WorldPacket& recv_data);
-        void HandleGuildBankerActivate(WorldPacket& recv_data);
-        void HandleGuildBankQueryTab(WorldPacket& recv_data);
-        void HandleGuildBankLogQuery(WorldPacket& recv_data);
-        void HandleGuildBankDepositMoney(WorldPacket& recv_data);
-        void HandleGuildBankWithdrawMoney(WorldPacket& recv_data);
-        void HandleGuildBankSwapItems(WorldPacket& recv_data);
-
-        void HandleGuildBankUpdateTab(WorldPacket& recv_data);
-        void HandleGuildBankBuyTab(WorldPacket& recv_data);
-        void HandleQueryGuildBankTabText(WorldPacket& recv_data);
-        void HandleSetGuildBankTabText(WorldPacket& recv_data);
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);

@@ -346,30 +346,6 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE), m_in_
 
         damage        = caster->CalculateSpellDamage(m_spellProto,m_effIndex,m_currentBasePoints,target);
         m_maxduration = caster->CalculateSpellDuration(m_spellProto, m_effIndex, target);
-
-        if (!damage && castItem && castItem->GetItemSuffixFactor())
-        {
-            ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(castItem->GetItemRandomPropertyId()));
-            if(item_rand_suffix)
-            {
-                for (int k = 0; k < 3; ++k)
-                {
-                    SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(item_rand_suffix->enchant_id[k]);
-                    if(pEnchant)
-                    {
-                        for (int t = 0; t < 3; ++t)
-                            if(pEnchant->spellid[t] == m_spellProto->Id)
-                        {
-                            damage = uint32((item_rand_suffix->prefix[k]*castItem->GetItemSuffixFactor()) / 10000 );
-                            break;
-                        }
-                    }
-
-                    if(damage)
-                        break;
-                }
-            }
-        }
     }
 
     if(m_maxduration == -1 || m_isPassive && m_spellProto->DurationIndex == 0)
@@ -2076,7 +2052,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 if (m_target->GetMap()->IsDungeon())
                 {
-                    uint32 spellId = m_target->GetMap()->IsHeroic() ? 46163 : 44190;
+                    uint32 spellId = 44190;
 
                     m_target->CastSpell(m_target, spellId, true, NULL, this);
                 }

@@ -71,7 +71,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->SetInstanceId(0);
 
     // check this before Map::Add(player), because that will create the instance save!
-    bool reset_notify = (GetPlayer()->GetBoundInstance(GetPlayer()->GetMapId(), GetPlayer()->GetDifficulty()) == NULL);
+    bool reset_notify = (GetPlayer()->GetBoundInstance(GetPlayer()->GetMapId()) == NULL);
 
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     // the CanEnter checks are done in TeleporTo but conditions may change

@@ -1118,10 +1118,6 @@ enum GameobjectTypes
     GAMEOBJECT_TYPE_LOTTERY_KIOSK          = 28,
     GAMEOBJECT_TYPE_CAPTURE_POINT          = 29,
     GAMEOBJECT_TYPE_AURA_GENERATOR         = 30,
-    GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY     = 31,
-    GAMEOBJECT_TYPE_BARBER_CHAIR           = 32,
-    GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING  = 33,
-    GAMEOBJECT_TYPE_GUILD_BANK             = 34,
 };
 
 #define MAX_GAMEOBJECT_TYPE                  35             // sending to client this or greater value can crash client.
@@ -2264,22 +2260,6 @@ enum DiminishingGroup
     // Other
     // Don't Diminish, but limit duration to 10s
     DIMINISHING_LIMITONLY
-};
-
-enum DungeonDifficulties
-{
-    DIFFICULTY_NORMAL = 0,
-    DIFFICULTY_HEROIC = 1,
-    TOTAL_DIFFICULTIES
-};
-
-enum SpawnMask
-{
-    SPAWNMASK_CONTINENT         = 1,                        // any any maps without spawn modes
-
-    SPAWNMASK_DUNGEON_NORMAL    = (1 << DIFFICULTY_NORMAL),
-    SPAWNMASK_DUNGEON_HEROIC    = (1 << DIFFICULTY_HEROIC),
-    SPAWNMASK_DUNGEON_ALL       = (SPAWNMASK_DUNGEON_NORMAL | SPAWNMASK_DUNGEON_HEROIC),
 };
 
 enum SummonType

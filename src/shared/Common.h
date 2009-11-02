@@ -176,7 +176,6 @@ enum LocaleConstant
     LOCALE_zhTW = 5,
     LOCALE_esES = 6,
     LOCALE_esMX = 7,
-    LOCALE_ruRU = 8
 };
 
 #define MAX_LOCALE 9

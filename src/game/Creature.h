@@ -158,7 +158,6 @@ enum CreatureFlagsExtra
 struct CreatureInfo
 {
     uint32  Entry;
-    uint32  HeroicEntry;
     uint32  KillCredit[MAX_KILL_CREDIT];
     uint32  DisplayID_A[2];
     uint32  DisplayID_H[2];
@@ -276,7 +275,6 @@ struct CreatureData
     uint32 curmana;
     bool  is_dead;
     uint8 movementType;
-    uint8 spawnMask;
 };
 
 struct CreatureDataAddonAura
@@ -583,7 +581,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool LoadFromDB(uint32 guid, Map *map);
         void SaveToDB();
                                                             // overwrited in Pet
-        virtual void SaveToDB(uint32 mapid, uint8 spawnMask);
+        virtual void SaveToDB(uint32 mapid);
         virtual void DeleteFromDB();                        // overwrited in Pet
 
         Loot loot;
