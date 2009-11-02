@@ -75,7 +75,7 @@ WorldSession::~WorldSession()
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
 {
     sLog.outError("Client (account %u) send packet %s (%u) with size " SIZEFMTD " but expected %u (attempt crash server?), skipped",
-        GetAccountId(),LookupOpcodeName(packet.GetOpcode()),packet.GetOpcode(),packet.size(),size);
+        GetAccountId(),opCodes.LookupOpcode(packet.GetOpcode())->name,packet.GetOpcode(),packet.size(),size);
 }
 
 /// Get the player name
@@ -140,7 +140,7 @@ void WorldSession::QueuePacket(WorldPacket* new_packet)
 void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char *reason)
 {
     sLog.outError( "SESSION: received unexpected opcode %s (0x%.4X) %s",
-        LookupOpcodeName(packet->GetOpcode()),
+        opCodes.LookupOpcode(packet->GetOpcode())->name,
         packet->GetOpcode(),
         reason);
 }
@@ -149,7 +149,7 @@ void WorldSession::LogUnexpectedOpcode(WorldPacket* packet, const char *reason)
 void WorldSession::LogUnprocessedTail(WorldPacket *packet)
 {
     sLog.outError( "SESSION: opcode %s (0x%.4X) have unprocessed tail data (read stop at %u from %u)",
-        LookupOpcodeName(packet->GetOpcode()),
+        opCodes.LookupOpcode(packet->GetOpcode())->name,
         packet->GetOpcode(),
         packet->rpos(),packet->wpos());
 }
@@ -168,18 +168,17 @@ bool WorldSession::Update(uint32 /*diff*/)
                         packet->GetOpcode());
         #endif*/
 
-        if(packet->GetOpcode() >= NUM_MSG_TYPES)
+        OpcodeStruct const* opHandle = opCodes.LookupOpcode(packet->GetOpcode());
+        if(!opHandle)
         {
-            sLog.outError( "SESSION: received non-existed opcode %s (0x%.4X)",
-                LookupOpcodeName(packet->GetOpcode()),
+            sLog.outError( "SESSION: received non-existed opcode (0x%.4X)",
                 packet->GetOpcode());
         }
         else
         {
-            OpcodeHandler& opHandle = opcodeTable[packet->GetOpcode()];
             try
             {
-                switch (opHandle.status)
+                switch (opHandle->status)
                 {
                     case STATUS_LOGGEDIN:
                         if(!_player)
@@ -190,7 +189,7 @@ bool WorldSession::Update(uint32 /*diff*/)
                         }
                         else if(_player->IsInWorld())
                         {
-                            (this->*opHandle.handler)(*packet);
+                            (this->*opHandle->handler)(*packet);
                             if (sLog.IsOutDebug() && packet->rpos() < packet->wpos())
                                 LogUnprocessedTail(packet);
                         }
@@ -204,7 +203,7 @@ bool WorldSession::Update(uint32 /*diff*/)
                         else
                         {
                             // not expected _player or must checked in packet hanlder
-                            (this->*opHandle.handler)(*packet);
+                            (this->*opHandle->handler)(*packet);
                             if (sLog.IsOutDebug() && packet->rpos() < packet->wpos())
                                 LogUnprocessedTail(packet);
                         }
@@ -216,7 +215,7 @@ bool WorldSession::Update(uint32 /*diff*/)
                             LogUnexpectedOpcode(packet, "the player is still in world");
                         else
                         {
-                            (this->*opHandle.handler)(*packet);
+                            (this->*opHandle->handler)(*packet);
                             if (sLog.IsOutDebug() && packet->rpos() < packet->wpos())
                                 LogUnprocessedTail(packet);
                         }
@@ -234,13 +233,13 @@ bool WorldSession::Update(uint32 /*diff*/)
                         if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL)
                             m_playerRecentlyLogout = false;
 
-                        (this->*opHandle.handler)(*packet);
+                        (this->*opHandle->handler)(*packet);
                         if (sLog.IsOutDebug() && packet->rpos() < packet->wpos())
                             LogUnprocessedTail(packet);
                         break;
                     case STATUS_NEVER:
                         sLog.outError( "SESSION: received not allowed opcode %s (0x%.4X)",
-                            LookupOpcodeName(packet->GetOpcode()),
+                            opHandle->name,
                             packet->GetOpcode());
                         break;
                 }
@@ -519,28 +518,28 @@ const char * WorldSession::GetMangosString( int32 entry ) const
 void WorldSession::Handle_NULL( WorldPacket& recvPacket )
 {
     sLog.outError( "SESSION: received unhandled opcode %s (0x%.4X)",
-        LookupOpcodeName(recvPacket.GetOpcode()),
+        opCodes.LookupOpcode(recvPacket.GetOpcode())->name,
         recvPacket.GetOpcode());
 }
 
 void WorldSession::Handle_EarlyProccess( WorldPacket& recvPacket )
 {
     sLog.outError( "SESSION: received opcode %s (0x%.4X) that must be processed in WorldSocket::OnRead",
-        LookupOpcodeName(recvPacket.GetOpcode()),
+        opCodes.LookupOpcode(recvPacket.GetOpcode())->name,
         recvPacket.GetOpcode());
 }
 
 void WorldSession::Handle_ServerSide( WorldPacket& recvPacket )
 {
     sLog.outError( "SESSION: received server-side opcode %s (0x%.4X)",
-        LookupOpcodeName(recvPacket.GetOpcode()),
+        opCodes.LookupOpcode(recvPacket.GetOpcode())->name,
         recvPacket.GetOpcode());
 }
 
 void WorldSession::Handle_Deprecated( WorldPacket& recvPacket )
 {
     sLog.outError( "SESSION: received deprecated opcode %s (0x%.4X)",
-        LookupOpcodeName(recvPacket.GetOpcode()),
+        opCodes.LookupOpcode(recvPacket.GetOpcode())->name,
         recvPacket.GetOpcode());
 }
 

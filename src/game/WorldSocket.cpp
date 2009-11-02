@@ -144,7 +144,7 @@ int WorldSocket::SendPacket (const WorldPacket& pct)
         sWorldLog.Log ("SERVER:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
                      (uint32) get_handle (),
                      pct.size (),
-                     LookupOpcodeName (pct.GetOpcode ()),
+                     opCodes.LookupOpcode(pct.GetOpcode ())->name,
                      pct.GetOpcode ());
 
         uint32 p = 0;
@@ -575,7 +575,7 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
         sWorldLog.Log ("CLIENT:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
                      (uint32) get_handle (),
                      new_pct->size (),
-                     LookupOpcodeName (new_pct->GetOpcode ()),
+                     opCodes.LookupOpcode(new_pct->GetOpcode ())->name,
                      new_pct->GetOpcode ());
 
         uint32 p = 0;
