@@ -416,9 +416,9 @@ bool Master::_StartDB()
         sLog.outError("Cannot connect to world database %s",dbstring.c_str());
         return false;
     }
-
-    if(!WorldDatabase.CheckRequiredField("db_version",REVISION_DB_MANGOS))
-        return false;
+    // to fix
+    //if(!WorldDatabase.CheckRequiredField("db_version",REVISION_DB_MANGOS))
+    //    return false;
 
     dbstring = sConfig.GetStringDefault("CharacterDatabaseInfo", "");
     if(dbstring.empty())
@@ -434,9 +434,9 @@ bool Master::_StartDB()
         sLog.outError("Cannot connect to Character database %s",dbstring.c_str());
         return false;
     }
-
-    if(!CharacterDatabase.CheckRequiredField("character_db_version",REVISION_DB_CHARACTERS))
-        return false;
+    // to fix
+    //if(!CharacterDatabase.CheckRequiredField("character_db_version",REVISION_DB_CHARACTERS))
+    //    return false;
 
     ///- Get login database info from configuration file
     dbstring = sConfig.GetStringDefault("LoginDatabaseInfo", "");
@@ -453,9 +453,9 @@ bool Master::_StartDB()
         sLog.outError("Cannot connect to login database %s",dbstring.c_str());
         return false;
     }
-
-    if(!loginDatabase.CheckRequiredField("realmd_db_version",REVISION_DB_REALMD))
-        return false;
+    // to fix
+    //if(!loginDatabase.CheckRequiredField("realmd_db_version",REVISION_DB_REALMD))
+    //    return false;
 
     ///- Get the realm Id from the configuration file
     realmID = sConfig.GetIntDefault("RealmID", 0);
