@@ -4359,9 +4359,9 @@ SpellCastResult Spell::CheckRange(bool strict)
             return SPELL_FAILED_OUT_OF_RANGE;               //0x5A;
         if(min_range && dist < min_range)
             return SPELL_FAILED_TOO_CLOSE;
-       // if( m_caster->GetTypeId() == TYPEID_PLAYER &&
-       //     (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc( M_PI, target ) )
-       //     return SPELL_FAILED_UNIT_NOT_INFRONT;
+        if( m_caster->GetTypeId() == TYPEID_PLAYER &&
+             ( spellmgr.GetSpellFacingFlag(m_spellInfo->Id) & SPELL_FACING_FLAG_INFRONT ) && !m_caster->HasInArc( M_PI, target ) )
+              return SPELL_FAILED_UNIT_NOT_INFRONT;
     }
 
     if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destZ != 0)
