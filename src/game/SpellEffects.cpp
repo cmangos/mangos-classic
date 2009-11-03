@@ -370,22 +370,30 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
             }
             case SPELLFAMILY_WARLOCK:
             {
-                // Conflagrate - consumes immolate
-                if(AuraStates const *SpellTargetAuraStates = spellmgr.GetTargetAuraStates(m_spellInfo->Id))
-                    if (SpellTargetAuraStates->AuraState == AURA_STATE_IMMOLATE)
+                // Incinerate Rank 1 & 2
+                if ((m_spellInfo->SpellFamilyFlags & UI64LIT(0x00004000000000)) && m_spellInfo->SpellIconID==2128)
+                {
+                    // Incinerate does more dmg (dmg*0.25) if the target is Immolated.
+                    if(unitTarget->HasAuraState(AURA_STATE_CONFLAGRATE))
+                        damage += int32(damage*0.25);
+                }
+                // Conflagrate - consumes Immolate
+                else if (m_spellInfo->TargetAuraState == AURA_STATE_CONFLAGRATE)
+                {
+                    // for caster applied auras only
+                    Unit::AuraList const &mPeriodic = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for(Unit::AuraList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
                     {
-                        // for caster applied auras only
-                        Unit::AuraList const &mPeriodic = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                        for(Unit::AuraList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
+                        if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+                            (*i)->GetCasterGUID()==m_caster->GetGUID() &&
+                            // Immolate
+                            ((*i)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000004)))
                         {
-                            if( (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && ((*i)->GetSpellProto()->SpellFamilyFlags & 4) &&
-                                (*i)->GetCasterGUID()==m_caster->GetGUID() )
-                            {
-                                unitTarget->RemoveAurasByCasterSpell((*i)->GetId(), m_caster->GetGUID());
-                                break;
-                            }
+                            unitTarget->RemoveAurasByCasterSpell((*i)->GetId(), m_caster->GetGUID());
+                            break;
                         }
                     }
+                }
                 break;
             }
             case SPELLFAMILY_DRUID:
@@ -2313,7 +2321,7 @@ void Spell::EffectHeal( uint32 /*i*/ )
             addhealth += damageAmount;
         }
         // Swiftmend - consumes Regrowth or Rejuvenation
-        else if (AuraStates const *SpellTargetAuraStates = spellmgr.GetTargetAuraStates(m_spellInfo->Id) && SpellTargetAuraStates->AuraState == AURA_STATE_SWIFTMEND && unitTarget->HasAuraState(AURA_STATE_SWIFTMEND))
+        else if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND && unitTarget->HasAuraState(AURA_STATE_SWIFTMEND))
         {
             Unit::AuraList const& RejorRegr = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
             // find most short by duration

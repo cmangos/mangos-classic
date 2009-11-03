@@ -466,8 +466,8 @@ struct SpellEntry
     uint32    Targets;                                      // 13
     uint32    TargetCreatureType;                           // 14
     uint32    RequiresSpellFocus;                           // 15
-    //uint32    CasterAuraState;                            // 16 not used in SpellEntry (we are using info from sql imported from 2.4.3 spell.dbc)
-    //uint32    TargetAuraState;                            // 17 not used in SpellEntry (we are using info from sql imported from 2.4.3 spell.dbc)
+    uint32    CasterAuraState;                              // 16
+    uint32    TargetAuraState;                              // 17
     uint32    CastingTimeIndex;                             // 18
     uint32    RecoveryTime;                                 // 19
     uint32    CategoryRecoveryTime;                         // 20

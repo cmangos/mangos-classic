@@ -609,6 +609,14 @@ inline bool IsProfessionSkill(uint32 skill)
     return  IsPrimaryProfessionSkill(skill) || skill == SKILL_FISHING || skill == SKILL_COOKING || skill == SKILL_FIRST_AID;
 }
 
+struct AuraStates
+{
+    uint32 AuraState;
+    uint32 AuraStateNot;
+};
+
+typedef std::map<uint32, AuraStates> SpellAuraStates;
+
 class SpellMgr
 {
     // Constructors
@@ -681,21 +689,12 @@ class SpellMgr
             return NULL;
         }
 
-        
         AuraStates const *GetCasterAuraStates(uint32 spellId) const
         {
             SpellAuraStates::const_iterator itr = mSpellCasterAuraStates.find(spellId);
             if(itr != mSpellCasterAuraStates.end())
                 return &itr->second;
             return NULL;
-        }
-
-        uint32 GetSpellFacingFlag(uint32 spellId) const
-        {
-            SpellFacingFlagMap::const_iterator itr =  mSpellFacingFlagMap.find(spellId);
-            if(itr != mSpellFacingFlagMap.end())
-                return itr->second;
-            return 0x0;
         }
 
         static bool IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, SpellEntry const * procSpell, uint32 procFlags );
@@ -876,6 +875,8 @@ class SpellMgr
         void LoadSkillLineAbilityMap();
         void LoadSpellPetAuras();
         void LoadSpellAreas();
+        void LoadTargetAuraStates();
+        void LoadCasterAuraStates();
 
     private:
         SpellScriptTarget  mSpellScriptTarget;
@@ -896,6 +897,8 @@ class SpellMgr
         SpellAreaForQuestMap mSpellAreaForQuestEndMap;
         SpellAreaForAuraMap  mSpellAreaForAuraMap;
         SpellAreaForAreaMap  mSpellAreaForAreaMap;
+        SpellAuraStates     mSpellTargetAuraStates;
+        SpellAuraStates     mSpellCasterAuraStates;
 };
 
 #define spellmgr SpellMgr::Instance()
