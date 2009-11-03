@@ -27,7 +27,6 @@ char const* localeNames[MAX_LOCALE] = {
   "zhTW",
   "esES",
   "esMX",
-  "ruRU"
 };
 
 LocaleConstant GetLocaleByName(const std::string& name)

@@ -1321,7 +1321,7 @@ void BattleGroundMgr::LoadBattleMastersEntry()
 
         uint32 entry = fields[0].GetUInt32();
         uint32 bgTypeId  = fields[1].GetUInt32();
-        if (bgTypeId > MAX_BATTLEGROUND_TYPE_ID)
+        if (bgTypeId >= MAX_BATTLEGROUND_TYPE_ID)
         {
             sLog.outErrorDb("Table `battlemaster_entry` contain entry %u for not existed battleground type %u, ignored.",entry,bgTypeId);
             continue;
