@@ -3012,7 +3012,7 @@ void Spell::EffectApplyAreaAura(uint32 i)
 
 void Spell::EffectSummonType(uint32 i)
 {
-    switch(m_spellInfo->EffectMiscValueB[i])
+/*[-ZERO]    switch(m_spellInfo->EffectMiscValueB[i])
     {
         case SUMMON_TYPE_GUARDIAN:
         case SUMMON_TYPE_POSESSED:
@@ -3049,7 +3049,7 @@ void Spell::EffectSummonType(uint32 i)
         default:
             sLog.outError("EffectSummonType: Unhandled summon type %u", m_spellInfo->EffectMiscValueB[i]);
             break;
-    }
+    } */
 }
 
 void Spell::EffectSummon(uint32 i)
@@ -5009,7 +5009,7 @@ void Spell::EffectActivateObject(uint32 effect_idx)
 void Spell::EffectSummonTotem(uint32 i)
 {
     uint8 slot = 0;
-    switch(m_spellInfo->EffectMiscValueB[i])
+/*[-ZERO]    switch(m_spellInfo->EffectMiscValueB[i])
     {
         case SUMMON_TYPE_TOTEM_SLOT1: slot = 0; break;
         case SUMMON_TYPE_TOTEM_SLOT2: slot = 1; break;
@@ -5021,7 +5021,7 @@ void Spell::EffectSummonTotem(uint32 i)
         case SUMMON_TYPE_GUARDIAN:    slot = 255; break;
         default: return;
     }
-
+*/
     if(slot < MAX_TOTEM)
     {
         uint64 guid = m_caster->m_TotemSlot[slot];

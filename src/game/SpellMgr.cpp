@@ -593,8 +593,8 @@ bool IsPositiveSpell(uint32 spellId)
 bool IsSingleTargetSpell(SpellEntry const *spellInfo)
 {
     // all other single target spells have if it has AttributesEx5
-    if ( spellInfo->AttributesEx5 & SPELL_ATTR_EX5_SINGLE_TARGET_SPELL )
-        return true;
+  //[-ZERO]  if ( spellInfo->AttributesEx5 & SPELL_ATTR_EX5_SINGLE_TARGET_SPELL )
+  //      return true;
 
     // TODO - need found Judgements rule
     switch(GetSpellSpecific(spellInfo->Id))
@@ -2432,7 +2432,7 @@ void SpellMgr::LoadSpellAreas()
 SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player)
 {
     // normal case
-    if( spellInfo->AreaId > 0 && spellInfo->AreaId != zone_id && spellInfo->AreaId != area_id )
+/*[-ZERO]    if( spellInfo->AreaId > 0 && spellInfo->AreaId != zone_id && spellInfo->AreaId != area_id )
         return SPELL_FAILED_REQUIRES_AREA;
 
     // raid instance limitation
@@ -2442,7 +2442,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
         if (!mapEntry || mapEntry->IsRaid())
             return SPELL_FAILED_REQUIRES_AREA;
     }
-
+*/
     // DB base check (if non empty then must fit at least single for allow)
     SpellAreaMapBounds saBounds = spellmgr.GetSpellAreaMapBounds(spellInfo->Id);
     if (saBounds.first != saBounds.second)

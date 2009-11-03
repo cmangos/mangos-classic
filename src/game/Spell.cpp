@@ -1913,13 +1913,13 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                     }
                     break;
                 case SPELL_EFFECT_SUMMON:
-                    if (m_spellInfo->EffectMiscValueB[effIndex] == SUMMON_TYPE_POSESSED ||
+                  /*[-ZERO]  if (m_spellInfo->EffectMiscValueB[effIndex] == SUMMON_TYPE_POSESSED ||
                         m_spellInfo->EffectMiscValueB[effIndex] == SUMMON_TYPE_POSESSED2)
                     {
                         if(m_targets.getUnitTarget())
                             TagUnitMap.push_back(m_targets.getUnitTarget());
                     }
-                    else
+                    else */
                         TagUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
@@ -2182,20 +2182,14 @@ void Spell::cast(bool skipCheck)
                 AddPrecastSpell(23230);                     // Blood Fury - Healing Reduction
             break;
         }
-        case SPELLFAMILY_MAGE:
-        {
-            // Ice Block
-            if(m_spellInfo->CasterAuraStateNot==AURA_STATE_HYPOTHERMIA)
-                AddPrecastSpell(41425);                     // Hypothermia
-            break;
-        }
         case SPELLFAMILY_PRIEST:
         {
             // Power Word: Shield
-            if(m_spellInfo->CasterAuraStateNot==AURA_STATE_WEAKENED_SOUL || m_spellInfo->TargetAuraStateNot==AURA_STATE_WEAKENED_SOUL)
-                AddPrecastSpell(6788);                      // Weakened Soul
+/*[ZERO]            if(m_spellInfo->CasterAuraStateNot==AURA_STATE_WEAKENED_SOUL || m_spellInfo->TargetAuraStateNot==AURA_STATE_WEAKENED_SOUL)
+                AddPrecastSpell(6788);                      // Weakened Soul 
             // Prayer of Mending (jump animation), we need formal caster instead original for correct animation
-            else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000002000000000))
+            else */ 
+            if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000002000000000))
                 AddTriggeredSpell(41637);
 
             switch(m_spellInfo->Id)
@@ -2214,8 +2208,8 @@ void Spell::cast(bool skipCheck)
         case SPELLFAMILY_PALADIN:
         {
             // Divine Shield, Divine Protection, Blessing of Protection or Avenging Wrath
-            if(m_spellInfo->CasterAuraStateNot==AURA_STATE_FORBEARANCE || m_spellInfo->TargetAuraStateNot==AURA_STATE_FORBEARANCE)
-                AddPrecastSpell(25771);                     // Forbearance         
+           /*[-ZERO] if(m_spellInfo->CasterAuraStateNot==AURA_STATE_FORBEARANCE || m_spellInfo->TargetAuraStateNot==AURA_STATE_FORBEARANCE)
+                AddPrecastSpell(25771);                     // Forbearance  */       
           break;
         }
         default:
@@ -2656,7 +2650,7 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
             data << uint32(spellInfo->RequiresSpellFocus);
             break;
         case SPELL_FAILED_REQUIRES_AREA:
-            // hardcode areas limitation case
+        /* [-ZERO]    // hardcode areas limitation case
             switch(spellInfo->Id)
             {
                 case 41617:                                 // Cenarion Mana Salve
@@ -2673,19 +2667,7 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
                 default:                                    // default case
                     data << uint32(spellInfo->AreaId);
                     break;
-            }
-            break;
-        case SPELL_FAILED_TOTEMS:
-            if(spellInfo->Totem[0])
-                data << uint32(spellInfo->Totem[0]);
-            if(spellInfo->Totem[1])
-                data << uint32(spellInfo->Totem[1]);
-            break;
-        case SPELL_FAILED_TOTEM_CATEGORY:
-            if(spellInfo->TotemCategory[0])
-                data << uint32(spellInfo->TotemCategory[0]);
-            if(spellInfo->TotemCategory[1])
-                data << uint32(spellInfo->TotemCategory[1]);
+            } */
             break;
         case SPELL_FAILED_EQUIPPED_ITEM_CLASS:
             data << uint32(spellInfo->EquippedItemClass);
@@ -3315,8 +3297,8 @@ SpellCastResult Spell::CheckCast(bool strict)
     // caster state requirements
     if(m_spellInfo->CasterAuraState && !m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraState)))
         return SPELL_FAILED_CASTER_AURASTATE;
-    if(m_spellInfo->CasterAuraStateNot && m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraStateNot)))
-        return SPELL_FAILED_CASTER_AURASTATE;
+   /*[-ZERO] if(m_spellInfo->CasterAuraStateNot && m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraStateNot)))
+        return SPELL_FAILED_CASTER_AURASTATE; */
 
     // cancel autorepeat spells if cast start when moving
     // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
@@ -3331,8 +3313,8 @@ SpellCastResult Spell::CheckCast(bool strict)
     if(Unit *target = m_targets.getUnitTarget())
     {
         // target state requirements (not allowed state), apply to self also
-        if(m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
-            return SPELL_FAILED_TARGET_AURASTATE;
+        /* [-ZERO] if(m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
+            return SPELL_FAILED_TARGET_AURASTATE; */
 
         bool non_caster_target = target != m_caster && !IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
 
@@ -3896,7 +3878,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             // These won't show up in m_caster->GetPetGUID()
             case SPELL_EFFECT_SUMMON:
             {
-                switch(m_spellInfo->EffectMiscValueB[i])
+               /*[-ZERO] switch(m_spellInfo->EffectMiscValueB[i])
                 {
                     case SUMMON_TYPE_POSESSED:
                     case SUMMON_TYPE_POSESSED2:
@@ -3910,7 +3892,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                             return SPELL_FAILED_ALREADY_HAVE_CHARM;
                         break;
                     }
-                }
+                } */
                 break;
             }
             // Don't make this check for SPELL_EFFECT_SUMMON_CRITTER, SPELL_EFFECT_SUMMON_WILD or SPELL_EFFECT_SUMMON_GUARDIAN.
@@ -4091,7 +4073,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_NO_MOUNTS_ALLOWED;
 
                 // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
-                if (m_caster->GetTypeId()==TYPEID_PLAYER && !sMapStore.LookupEntry(m_caster->GetMapId())->IsMountAllowed() && !m_IsTriggeredSpell && !m_spellInfo->AreaId)
+                if (m_caster->GetTypeId()==TYPEID_PLAYER && !sMapStore.LookupEntry(m_caster->GetMapId())->IsMountAllowed() && !m_IsTriggeredSpell) //[-ZERO] && !m_spellInfo->AreaId)
                     return SPELL_FAILED_NO_MOUNTS_ALLOWED;
 
                 if (m_caster->GetAreaId()==35)
@@ -4242,13 +4224,14 @@ SpellCastResult Spell::CheckCasterAuras() const
     SpellCastResult prevented_reason = SPELL_CAST_OK;
     // Have to check if there is a stun aura. Otherwise will have problems with ghost aura apply while logging out
     uint32 unitflag = m_caster->GetUInt32Value(UNIT_FIELD_FLAGS);     // Get unit state
-    if (unitflag & UNIT_FLAG_STUNNED && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_STUNNED))
+/*[-ZERO]    if (unitflag & UNIT_FLAG_STUNNED && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_STUNNED))
         prevented_reason = SPELL_FAILED_STUNNED;
     else if (unitflag & UNIT_FLAG_CONFUSED && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED))
         prevented_reason = SPELL_FAILED_CONFUSED;
     else if (unitflag & UNIT_FLAG_FLEEING && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_FEARED))
         prevented_reason = SPELL_FAILED_FLEEING;
-    else if (unitflag & UNIT_FLAG_SILENCED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
+    else */ 
+    if (unitflag & UNIT_FLAG_SILENCED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
         prevented_reason = SPELL_FAILED_SILENCED;
     else if (unitflag & UNIT_FLAG_PACIFIED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY)
         prevented_reason = SPELL_FAILED_PACIFIED;
@@ -4275,7 +4258,7 @@ SpellCastResult Spell::CheckCasterAuras() const
                     // That is needed when your casting is prevented by multiple states and you are only immune to some of them.
                     switch(itr->second->GetModifier()->m_auraname)
                     {
-                        case SPELL_AURA_MOD_STUN:
+ /*  [-ZERO]                     case SPELL_AURA_MOD_STUN:
                             if (!(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_STUNNED))
                                 return SPELL_FAILED_STUNNED;
                             break;
@@ -4286,7 +4269,7 @@ SpellCastResult Spell::CheckCasterAuras() const
                         case SPELL_AURA_MOD_FEAR:
                             if (!(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_FEARED))
                                 return SPELL_FAILED_FLEEING;
-                            break;
+                            break; */
                         case SPELL_AURA_MOD_SILENCE:
                         case SPELL_AURA_MOD_PACIFY:
                         case SPELL_AURA_MOD_PACIFY_SILENCE:
@@ -4376,9 +4359,9 @@ SpellCastResult Spell::CheckRange(bool strict)
             return SPELL_FAILED_OUT_OF_RANGE;               //0x5A;
         if(min_range && dist < min_range)
             return SPELL_FAILED_TOO_CLOSE;
-        if( m_caster->GetTypeId() == TYPEID_PLAYER &&
-            (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc( M_PI, target ) )
-            return SPELL_FAILED_UNIT_NOT_INFRONT;
+       // if( m_caster->GetTypeId() == TYPEID_PLAYER &&
+       //     (m_spellInfo->FacingCasterFlags & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc( M_PI, target ) )
+       //     return SPELL_FAILED_UNIT_NOT_INFRONT;
     }
 
     if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destZ != 0)
@@ -4652,6 +4635,7 @@ SpellCastResult Spell::CheckItems()
     if(totems != 0)
         return SPELL_FAILED_TOTEMS;                         //0x7C
 
+  /*[-ZERO] to rewrite?
     // Check items for TotemCategory  (items presence in inventory)
     uint32 TotemCategory = 2;
     for(int i= 0; i < 2; ++i)
@@ -4669,6 +4653,7 @@ SpellCastResult Spell::CheckItems()
     }
     if(TotemCategory != 0)
         return SPELL_FAILED_TOTEM_CATEGORY;                 //0x7B
+    */
 
     // special checks for spell effects
     for(int i = 0; i < 3; ++i)
