@@ -93,7 +93,6 @@ enum BattleGroundTimeIntervals
     START_DELAY0                    = 120000,               // ms
     START_DELAY1                    = 60000,                // ms
     START_DELAY2                    = 30000,                // ms
-    START_DELAY3                    = 15000,                // ms used only in arena
     RESPAWN_ONE_DAY                 = 86400,                // secs
     RESPAWN_IMMEDIATELY             = 0,                    // secs
     BUFF_RESPAWN_TIME               = 180,                  // secs
@@ -139,9 +138,8 @@ enum BattleGroundQueueTypeId
     BATTLEGROUND_QUEUE_AV       = 1,
     BATTLEGROUND_QUEUE_WS       = 2,
     BATTLEGROUND_QUEUE_AB       = 3,
-    BATTLEGROUND_QUEUE_EY       = 4,
 };
-#define MAX_BATTLEGROUND_QUEUE_TYPES 5
+#define MAX_BATTLEGROUND_QUEUE_TYPES 4
 
 enum ScoreType
 {

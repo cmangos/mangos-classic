@@ -178,7 +178,7 @@ enum LocaleConstant
     LOCALE_esMX = 7,
 };
 
-#define MAX_LOCALE 9
+#define MAX_LOCALE 8
 
 extern char const* localeNames[MAX_LOCALE];
 
