@@ -1545,8 +1545,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void DurabilityPointsLossAll(int32 points, bool inventory);
         void DurabilityPointsLoss(Item* item, int32 points);
         void DurabilityPointLossForEquipSlot(EquipmentSlots slot);
-        uint32 DurabilityRepairAll(bool cost, float discountMod, bool guildBank);
-        uint32 DurabilityRepair(uint16 pos, bool cost, float discountMod, bool guildBank);
+        uint32 DurabilityRepairAll(bool cost, float discountMod);
+        uint32 DurabilityRepair(uint16 pos, bool cost, float discountMod);
 
         void UpdateMirrorTimers();
         void StopMirrorTimers()

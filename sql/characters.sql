@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.1.34, for Win32 (ia32)
+-- MySQL dump 10.13  Distrib 5.1.40, for Win32 (ia32)
 --
 -- Host: localhost    Database: characters
 -- ------------------------------------------------------
--- Server version	5.1.34-community
+-- Server version	5.1.40-community
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -785,7 +785,6 @@ CREATE TABLE `guild` (
   `info` text NOT NULL,
   `motd` varchar(255) NOT NULL DEFAULT '',
   `createdate` bigint(20) NOT NULL DEFAULT '0',
-  `BankMoney` bigint(20) NOT NULL DEFAULT '0',
   PRIMARY KEY (`guildid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -840,20 +839,6 @@ CREATE TABLE `guild_member` (
   `rank` tinyint(2) unsigned NOT NULL DEFAULT '0',
   `pnote` varchar(255) NOT NULL DEFAULT '',
   `offnote` varchar(255) NOT NULL DEFAULT '',
-  `BankResetTimeMoney` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankRemMoney` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankResetTimeTab0` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankRemSlotsTab0` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankResetTimeTab1` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankRemSlotsTab1` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankResetTimeTab2` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankRemSlotsTab2` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankResetTimeTab3` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankRemSlotsTab3` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankResetTimeTab4` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankRemSlotsTab4` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankResetTimeTab5` int(11) unsigned NOT NULL DEFAULT '0',
-  `BankRemSlotsTab5` int(11) unsigned NOT NULL DEFAULT '0',
   UNIQUE KEY `guid_key` (`guid`),
   KEY `guildid_key` (`guildid`),
   KEY `guildid_rank_key` (`guildid`,`rank`)
@@ -881,7 +866,6 @@ CREATE TABLE `guild_rank` (
   `rid` int(11) unsigned NOT NULL,
   `rname` varchar(255) NOT NULL DEFAULT '',
   `rights` int(3) unsigned NOT NULL DEFAULT '0',
-  `BankMoneyPerDay` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guildid`,`rid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1192,4 +1176,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2009-11-03 10:02:19
+-- Dump completed on 2009-11-03 23:42:22

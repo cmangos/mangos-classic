@@ -633,7 +633,7 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     Guild *guild;
     std::string rankname;
     uint32 rankId;
-    uint32 rights, MoneyPerDay;
+    uint32 rights;
 
     //sLog.outDebug("WORLD: Received CMSG_GUILD_RANK");
 
@@ -655,21 +655,8 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     recvPacket >> rankId;
     recvPacket >> rights;
     recvPacket >> rankname;
-    recvPacket >> MoneyPerDay;
-
-    for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
-    {
-        uint32 BankRights;
-        uint32 BankSlotPerDay;
-
-        recvPacket >> BankRights;
-        recvPacket >> BankSlotPerDay;
-        guild->SetBankRightsAndSlots(rankId, uint8(i), uint16(BankRights & 0xFF), uint16(BankSlotPerDay), true);
-    }
-
     sLog.outDebug("WORLD: Changed RankName to %s , Rights to 0x%.4X", rankname.c_str(), rights);
 
-    guild->SetBankMoneyPerDay(rankId, MoneyPerDay);
     guild->SetRankName(rankId, rankname);
 
     if (rankId == GR_GUILDMASTER)                           // prevent loss leader rights

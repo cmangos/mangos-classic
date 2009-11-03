@@ -785,9 +785,8 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
     sLog.outDebug("WORLD: CMSG_REPAIR_ITEM");
 
     uint64 npcGUID, itemGUID;
-    uint8 guildBank;                                        // new in 2.3.2, bool that means from guild bank money
 
-    recv_data >> npcGUID >> itemGUID >> guildBank;
+    recv_data >> npcGUID >> itemGUID;
 
     Creature *unit = GetPlayer()->GetNPCIfCanInteractWith(npcGUID, UNIT_NPC_FLAG_REPAIR);
     if (!unit)
@@ -811,23 +810,12 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
         Item* item = _player->GetItemByGuid(itemGUID);
 
         if(item)
-            TotalCost= _player->DurabilityRepair(item->GetPos(),true,discountMod,guildBank>0?true:false);
+            TotalCost= _player->DurabilityRepair(item->GetPos(),true,discountMod);
     }
     else
     {
         sLog.outDebug("ITEM: Repair all items, npcGUID = %u", GUID_LOPART(npcGUID));
 
-        TotalCost = _player->DurabilityRepairAll(true,discountMod,guildBank>0?true:false);
-    }
-    if (guildBank)
-    {
-        uint32 GuildId = _player->GetGuildId();
-        if (!GuildId)
-            return;
-        Guild *pGuild = objmgr.GetGuildById(GuildId);
-        if (!pGuild)
-            return;
-        pGuild->LogBankEvent(GUILD_BANK_LOG_REPAIR_MONEY, 0, _player->GetGUIDLow(), TotalCost);
-        pGuild->SendMoneyInfo(this, _player->GetGUIDLow());
+        TotalCost = _player->DurabilityRepairAll(true,discountMod);
     }
 }
