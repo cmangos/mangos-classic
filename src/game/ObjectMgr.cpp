@@ -1554,9 +1554,6 @@ void ObjectMgr::LoadItemPrototypes()
             }
         }
 
-        if(proto->TotemCategory && !sTotemCategoryStore.LookupEntry(proto->TotemCategory))
-            sLog.outErrorDb("Item (Entry: %u) has wrong TotemCategory (%u)",i,proto->TotemCategory);
-
         if(proto->FoodType >= MAX_PET_DIET)
         {
             sLog.outErrorDb("Item (Entry: %u) has wrong FoodType value (%u)",i,proto->FoodType);

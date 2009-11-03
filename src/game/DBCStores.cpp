@@ -76,7 +76,6 @@ DBCStorage <SkillLineAbilityEntry> sSkillLineAbilityStore(SkillLineAbilityfmt);
 DBCStorage <SoundEntriesEntry> sSoundEntriesStore(SoundEntriesfmt);
 
 DBCStorage <SpellItemEnchantmentEntry> sSpellItemEnchantmentStore(SpellItemEnchantmentfmt);
-DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentConditionStore(SpellItemEnchantmentConditionfmt);
 DBCStorage <SpellEntry> sSpellStore(SpellEntryfmt);
 SpellCategoryStore sSpellCategoryStore;
 PetFamilySpellsStore sPetFamilySpellsStore;
@@ -110,9 +109,8 @@ DBCStorage <TaxiPathEntry> sTaxiPathStore(TaxiPathEntryfmt);
 TaxiPathNodesByPath sTaxiPathNodesByPath;
 
 static DBCStorage <TaxiPathNodeEntry> sTaxiPathNodeStore(TaxiPathNodeEntryfmt);
-DBCStorage <TotemCategoryEntry> sTotemCategoryStore(TotemCategoryEntryfmt);
 DBCStorage <WorldMapAreaEntry>  sWorldMapAreaStore(WorldMapAreaEntryfmt);
-//DBCStorage <WorldMapOverlayEntry> sWorldMapOverlayStore(WorldMapOverlayEntryfmt);
+DBCStorage <WorldMapOverlayEntry> sWorldMapOverlayStore(WorldMapOverlayEntryfmt);
 DBCStorage <WorldSafeLocsEntry> sWorldSafeLocsStore(WorldSafeLocsEntryfmt);
 
 typedef std::list<std::string> StoreProblemList;
@@ -165,7 +163,7 @@ void LoadDBCStores(const std::string& dataPath)
 {
     std::string dbcPath = dataPath+"dbc/";
 
-    const uint32 DBCFilesCount = 40;
+    const uint32 DBCFilesCount = 46;
 
     barGoLink bar( DBCFilesCount );
 
@@ -273,12 +271,10 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sSpellDurationStore,       dbcPath,"SpellDuration.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sSpellFocusObjectStore,    dbcPath,"SpellFocusObject.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sSpellItemEnchantmentStore,dbcPath,"SpellItemEnchantment.dbc");
-    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sSpellItemEnchantmentConditionStore,dbcPath,"SpellItemEnchantmentCondition.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sSpellRadiusStore,         dbcPath,"SpellRadius.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sSpellRangeStore,          dbcPath,"SpellRange.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sSpellShapeshiftStore,     dbcPath,"SpellShapeshiftForm.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sStableSlotPricesStore,    dbcPath,"StableSlotPrices.dbc");
-    //LoadDBC(availableDbcLocales,bar,bad_dbc_files,sSummonPropertiesStore,    dbcPath,"SummonProperties.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sTalentStore,              dbcPath,"Talent.dbc");
 
     // create talent spells set
@@ -396,9 +392,8 @@ void LoadDBCStores(const std::string& dataPath)
             sTaxiPathNodesByPath[entry->path][entry->index] = TaxiPathNode(entry->mapid,entry->x,entry->y,entry->z,entry->actionFlag,entry->delay);
     sTaxiPathNodeStore.Clear();
 
-    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sTotemCategoryStore,       dbcPath,"TotemCategory.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sWorldMapAreaStore,        dbcPath,"WorldMapArea.dbc");
-    //LoadDBC(availableDbcLocales,bar,bad_dbc_files,sWorldMapOverlayStore,     dbcPath,"WorldMapOverlay.dbc");
+    LoadDBC(availableDbcLocales,bar,bad_dbc_files,sWorldMapOverlayStore,     dbcPath,"WorldMapOverlay.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sWorldSafeLocsStore,       dbcPath,"WorldSafeLocs.dbc");
 
     // error checks
@@ -508,16 +503,6 @@ uint32 GetAreaFlagByMapId(uint32 mapid)
         return i->second;
 }
 
-uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId)
-{
-    if(mapid != 530)                                        // speed for most cases
-        return mapid;
-
-    if(WorldMapAreaEntry const* wma = sWorldMapAreaStore.LookupEntry(zoneId))
-        return wma->virtual_map_id >= 0 ? wma->virtual_map_id : wma->map_id;
-
-    return mapid;
-}
 
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
 {
@@ -530,7 +515,7 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
     }
     return NULL;
 }
-
+/*[-ZERO]
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId)
 {
     if(requiredTotemCategoryId==0)
@@ -550,7 +535,7 @@ bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredT
 
     return (itemEntry->categoryMask & reqEntry->categoryMask)==reqEntry->categoryMask;
 }
-
+*/
 void Zone2MapCoordinates(float& x,float& y,uint32 zone)
 {
     WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);

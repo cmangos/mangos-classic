@@ -2076,7 +2076,7 @@ enum SkillCategory
     SKILL_CATEGORY_PROFESSION    = 11,                      // primary professions
     SKILL_CATEGORY_GENERIC       = 12
 };
-
+/*[-ZERO]
 enum TotemCategory
 {
     TC_SKINNING_SKIFE              = 1,
@@ -2099,6 +2099,7 @@ enum TotemCategory
     TC_ADAMANTITE_ROD              = 62,
     TC_ETERNIUM_ROD                = 63
 };
+*/
 
 enum UnitDynFlags
 {

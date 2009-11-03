@@ -538,7 +538,6 @@ struct ItemPrototype
     uint32 Area;                                            // id from AreaTable.dbc
     uint32 Map;                                             // id from Map.dbc
     uint32 BagFamily;                                       // bit mask (1 << id from ItemBagFamily.dbc)
-    uint32 TotemCategory;                                   // id from TotemCategory.dbc
     uint32 RequiredDisenchantSkill;
     float  ArmorDamageModifier;
     uint32 ScriptId;

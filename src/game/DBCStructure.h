@@ -574,8 +574,8 @@ struct SpellFocusObjectEntry
 struct SpellRadiusEntry
 {
     uint32    ID;
-    float     Radius;
-    float     Radius2;
+    float     Radius;   //hostile
+    float     Radius2;  //friedly
 };
 
 struct SpellRangeEntry
@@ -583,30 +583,18 @@ struct SpellRangeEntry
     uint32    ID;
     float     minRange;
     float     maxRange;
+    // uint32    type;                                      // unused
 };
 
 struct SpellShapeshiftEntry
 {
     uint32 ID;                                              // 0
     //uint32 buttonPosition;                                // 1 unused
-    //char*  Name[16];                                      // 2-17 unused
-    //uint32 NameFlags;                                     // 18 unused
-    uint32 flags1;                                          // 19
-    int32  creatureType;                                    // 20 <=0 humanoid, other normal creature types
-    //uint32 unk1;                                          // 21 unused
-    uint32 attackSpeed;                                     // 22
-    //uint32 modelID;                                       // 23 unused, alliance modelid (where horde case?)
-    //uint32 unk2;                                          // 24 unused
-    //uint32 unk3;                                          // 25 unused
-    //uint32 unk4;                                          // 26 unused
-    //uint32 unk5;                                          // 27 unused
-    //uint32 unk6;                                          // 28 unused
-    //uint32 unk7;                                          // 29 unused
-    //uint32 unk8;                                          // 30 unused
-    //uint32 unk9;                                          // 31 unused
-    //uint32 unk10;                                         // 32 unused
-    //uint32 unk11;                                         // 33 unused
-    //uint32 unk12;                                         // 34 unused
+    //char*  Name[8];                                       // 2-9 unused
+    //uint32 NameFlags;                                     // 10 unused
+    uint32 flags1;                                          // 11
+    int32  creatureType;                                    // 12 <=0 humanoid , 1 beast (maybe)
+    //uint32 unk1;                                          // 13 unused
 };
 
 struct SpellDurationEntry
@@ -622,21 +610,10 @@ struct SpellItemEnchantmentEntry
     uint32      amount[3];                                  // 4-6
     //uint32    amount2[3]                                  // 7-9 always same as similar `amount` value
     uint32      spellid[3];                                 // 10-12
-    char*       description[16];                            // 13-29
-                                                            // 30 description flags
-    uint32      aura_id;                                    // 31
-    uint32      slot;                                       // 32
-    uint32      GemID;                                      // 33
-    uint32      EnchantmentCondition;                       // 34
-};
-
-struct SpellItemEnchantmentConditionEntry
-{
-    uint32  ID;
-    uint8   Color[5];
-    uint8   Comparator[5];
-    uint8   CompareColor[5];
-    uint32  Value[5];
+    char*       description[8];                             // 13-20
+                                                            // 21 description flags
+    uint32      aura_id;                                    // 22
+    uint32      slot;                                       // 23
 };
 
 struct StableSlotPricesEntry
@@ -644,18 +621,6 @@ struct StableSlotPricesEntry
     uint32 Slot;
     uint32 Price;
 };
-
-/* unused currently
-struct SummonPropertiesEntry
-{
-    uint32  Id;                                             // 0
-    uint32  Group;                                          // 1, enum SummonPropGroup,  0 - can't be controlled?, 1 - something guardian?, 2 - pet?, 3 - something controllable?, 4 - taxi/mount?
-    uint32  FactionId;                                      // 2,                        14 rows > 0
-    uint32  Type;                                           // 3, enum SummonPropType
-    uint32  Slot;                                           // 4,                        0-6
-    uint32  Flags;                                          // 5, enum SummonPropFlags
-};
-*/
 
 struct TalentEntry
 {
@@ -691,9 +656,9 @@ struct TaxiNodesEntry
     float     x;                                            // 2        m_x
     float     y;                                            // 3        m_y
     float     z;                                            // 4        m_z
-    char*     name[16];                                     // 5-21     m_Name_lang
-                                                            // 22 string flags
-    uint32    MountCreatureID[2];                           // 23-24    m_MountCreatureID[2]
+    char*     name[8];                                      // 5-12     m_Name_lang
+                                                            // 13 string flags
+    uint32    MountCreatureID[2];                           // 14-15    m_MountCreatureID[2] horde[14]-alliance[15]
 };
 
 struct TaxiPathEntry
@@ -716,15 +681,6 @@ struct TaxiPathNodeEntry
     uint32    delay;
 };
 
-struct TotemCategoryEntry
-{
-    uint32    ID;                                           // 0
-    //char*   name[16];                                     // 1-16
-                                                            // 17 string flags, unused
-    uint32    categoryType;                                 // 18 (one for specialization)
-    uint32    categoryMask;                                 // 19 (compatibility mask for same type: different for totems, compatible from high to low for rods)
-};
-
 struct WorldMapAreaEntry
 {
     //uint32    ID;                                         // 0
@@ -735,12 +691,11 @@ struct WorldMapAreaEntry
     float     y2;                                           // 5
     float     x1;                                           // 6
     float     x2;                                           // 7
-    int32   virtual_map_id;                                 // 8 -1 (map_id have correct map) other: virtual map where zone show (map_id - where zone in fact internally)
 };
 
-/* not used in 2.4.3 code
-#define MAX_WORLD_MAP_OVERLAY_AREA_IDX 4
 
+#define MAX_WORLD_MAP_OVERLAY_AREA_IDX 4
+// to implement [?]
 struct WorldMapOverlayEntry
 {
     uint32    ID;                                           // 0
@@ -750,7 +705,6 @@ struct WorldMapOverlayEntry
     //char* internal_name                                   // 8
                                                             // 9-16 some ints
 };
-*/
 
 struct WorldSafeLocsEntry
 {
@@ -759,8 +713,8 @@ struct WorldSafeLocsEntry
     float     x;                                            // 2
     float     y;                                            // 3
     float     z;                                            // 4
-    //char*   name[16]                                      // 5-20 name, unused
-                                                            // 21 name flags, unused
+    //char*   name[8]                                       // 5-12 name, unused
+                                                            // 13 name flags, unused
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
@@ -808,6 +762,6 @@ struct TaxiPathNode
 typedef std::vector<TaxiPathNode> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
-#define TaxiMaskSize 16
+#define TaxiMaskSize 8
 typedef uint32 TaxiMask[TaxiMaskSize];
 #endif

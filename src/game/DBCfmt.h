@@ -26,8 +26,7 @@ const char BankBagSlotPricesEntryfmt[]="ni";
 const char ChrClassesEntryfmt[]="nxxixssssssssixxx";
 const char ChrRacesEntryfmt[]="nxixiixxixxxxxixissssssssxxxx";
 const char CharStartOutfitEntryfmt[]="diiiiiiiiiiiiixxxxxxxxxxxxxxxxxxxxxxxxxxx";
-const char ChatChannelsEntryfmt[]="iixssssssssxxxxxxxxxx";
-                                                            // ChatChannelsEntryfmt, index not used (more compact store)
+const char ChatChannelsEntryfmt[]="iixssssssssxxxxxxxxxx";                 // ChatChannelsEntryfmt, index not used (more compact store)
 const char CinematicSequencesEntryfmt[]="nxxxxxxxxx";
 const char CreatureDisplayInfofmt[]="nxxxfxxxxxxx";
 const char CreatureFamilyfmt[]="nfifiiiissssssssxx";
@@ -39,7 +38,6 @@ const char EmotesTextEntryfmt[]="nxixxxxxxxxxxxxxxxx";
 const char FactionEntryfmt[]="niiiiiiiiiiiiiiiiiissssssssxxxxxxxxxx";
 const char FactionTemplateEntryfmt[]="niiiiiiiiiiiii";
 const char GameObjectDisplayInfofmt[]="nxxxxxxxxxxx";
-
 const char ItemBagFamilyfmt[]="nxxxxxxxxxxxxxxxxx";
 //const char ItemDisplayTemplateEntryfmt[]="nxxxxxxxxxxixxxxxxxxxxx";
 const char ItemRandomPropertiesfmt[]="nxiiixxxxxxxxxxx";
@@ -51,27 +49,22 @@ const char QuestSortEntryfmt[]="nxxxxxxxxx";
 const char SkillLinefmt[]="nixssssssssxxxxxxxxxxi";
 const char SkillLineAbilityfmt[]="niiiixxiiiiixxi";
 const char SoundEntriesfmt[]="nxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-
 const char SpellCastTimefmt[]="nixx";
 const char SpellDurationfmt[]="niii";
 const char SpellEntryfmt[]="niixiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiifffixiixssssssssxssssssssxxxxxxxxxxxxxxxxxxxiiiiiiiiiixfffxxx";
-const char SpellFocusObjectfmt[]="nxxxxxxxxxxxxxxxxx";
-const char SpellItemEnchantmentfmt[]="niiiiiixxxiiissssssssssssssssxiiii";
-const char SpellItemEnchantmentConditionfmt[]="nbbbbbxxxxxbbbbbbbbbbiiiiiXXXXX";
+const char SpellFocusObjectfmt[]="nxxxxxxxxx";
+const char SpellItemEnchantmentfmt[]="niiiiiixxxiiissssssssxii";
 const char SpellRadiusfmt[]="nfxf";
-const char SpellRangefmt[]="nffxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-const char SpellShapeshiftfmt[]="nxxxxxxxxxxxxxxxxxxiixixxxxxxxxxxxx";
+const char SpellRangefmt[]="nffixxxxxxxxxxxxxxxxxx";
+const char SpellShapeshiftfmt[]="nxxxxxxxxxxiix";
 const char StableSlotPricesfmt[] = "ni";
-
-//const char SummonPropertiesfmt[] = "niiiii";
 const char TalentEntryfmt[]="niiiiiiiixxxxixxixxxi";
-const char TalentTabEntryfmt[]="nxxxxxxxxxxxxxxxxxxxiix";
-const char TaxiNodesEntryfmt[]="nifffssssssssssssssssxii";
+const char TalentTabEntryfmt[]="nxxxxxxxxxxxiix";
+const char TaxiNodesEntryfmt[]="nifffssssssssxii";
 const char TaxiPathEntryfmt[]="niii";
-const char TaxiPathNodeEntryfmt[]="diiifffiixx";
-const char TotemCategoryEntryfmt[]="nxxxxxxxxxxxxxxxxxii";
-const char WorldMapAreaEntryfmt[]="xinxffffi";
-//const char WorldMapOverlayEntryfmt[]="nxiiiixxxxxxxxxxx";
-const char WorldSafeLocsEntryfmt[]="nifffxxxxxxxxxxxxxxxxx";
+const char TaxiPathNodeEntryfmt[]="diiifffii";
+const char WorldMapAreaEntryfmt[]="xinxffff";
+const char WorldMapOverlayEntryfmt[]="nxiiiixxxxxxxxxxx";
+const char WorldSafeLocsEntryfmt[]="nifffxxxxxxxxx";
 
 #endif

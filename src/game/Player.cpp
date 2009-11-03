@@ -8151,7 +8151,7 @@ uint8 Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, 
 
 bool Player::HasItemTotemCategory( uint32 TotemCategory ) const
 {
-    Item *pItem;
+   /*[-ZERO] Item *pItem;
     for(uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
     {
         pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
@@ -8175,7 +8175,7 @@ bool Player::HasItemTotemCategory( uint32 TotemCategory ) const
                     return true;
             }
         }
-    }
+    } */
     return false;
 }
 
@@ -10873,9 +10873,6 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
 
     SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
     if (!pEnchant)
-        return;
-
-    if (!ignore_condition && pEnchant->EnchantmentCondition && !((Player*)this)->EnchantmentFitsRequirements(pEnchant->EnchantmentCondition, -1))
         return;
 
     if (!item->IsBroken())
@@ -15834,15 +15831,7 @@ void Player::ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs )
 
 void Player::InitDataForForm(bool reapplyMods)
 {
-    SpellShapeshiftEntry const* ssEntry = sSpellShapeshiftStore.LookupEntry(m_form);
-    if(ssEntry && ssEntry->attackSpeed)
-    {
-        SetAttackTime(BASE_ATTACK,ssEntry->attackSpeed);
-        SetAttackTime(OFF_ATTACK,ssEntry->attackSpeed);
-        SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
-    }
-    else
-        SetRegularAttackTime();
+    SetRegularAttackTime();
 
     switch(m_form)
     {

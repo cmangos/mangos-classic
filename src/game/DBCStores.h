@@ -41,7 +41,7 @@ uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
 
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
 
-bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
+// [-ZERO] bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
 
 void Zone2MapCoordinates(float& x,float& y,uint32 zone);
 void Map2ZoneCoordinates(float& x,float& y,uint32 zone);
@@ -85,7 +85,6 @@ extern DBCStorage <SpellCastTimesEntry>          sSpellCastTimesStore;
 extern DBCStorage <SpellDurationEntry>           sSpellDurationStore;
 extern DBCStorage <SpellFocusObjectEntry>        sSpellFocusObjectStore;
 extern DBCStorage <SpellItemEnchantmentEntry>    sSpellItemEnchantmentStore;
-extern DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentConditionStore;
 extern SpellCategoryStore                        sSpellCategoryStore;
 extern PetFamilySpellsStore                      sPetFamilySpellsStore;
 extern DBCStorage <SpellRadiusEntry>             sSpellRadiusStore;
@@ -93,7 +92,6 @@ extern DBCStorage <SpellRangeEntry>              sSpellRangeStore;
 extern DBCStorage <SpellShapeshiftEntry>         sSpellShapeshiftStore;
 extern DBCStorage <SpellEntry>                   sSpellStore;
 extern DBCStorage <StableSlotPricesEntry>        sStableSlotPricesStore;
-//extern DBCStorage <SummonPropertiesEntry>        sSummonPropertiesStore;
 extern DBCStorage <TalentEntry>                  sTalentStore;
 extern DBCStorage <TalentTabEntry>               sTalentTabStore;
 extern DBCStorage <TaxiNodesEntry>               sTaxiNodesStore;
@@ -101,9 +99,8 @@ extern DBCStorage <TaxiPathEntry>                sTaxiPathStore;
 extern TaxiMask                                  sTaxiNodesMask;
 extern TaxiPathSetBySource                       sTaxiPathSetBySource;
 extern TaxiPathNodesByPath                       sTaxiPathNodesByPath;
-extern DBCStorage <TotemCategoryEntry>           sTotemCategoryStore;
 //extern DBCStorage <WorldMapAreaEntry>           sWorldMapAreaStore; -- use Zone2MapCoordinates and Map2ZoneCoordinates
-//extern DBCStorage <WorldMapOverlayEntry>         sWorldMapOverlayStore; -- not used currently
+extern DBCStorage <WorldMapOverlayEntry>         sWorldMapOverlayStore;
 extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
 
 void LoadDBCStores(const std::string& dataPath);
