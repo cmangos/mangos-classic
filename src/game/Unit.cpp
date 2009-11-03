@@ -2305,7 +2305,7 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
     if (GetTypeId() == TYPEID_PLAYER)
     {
         // Increase from SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL aura
-        crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, spellInfo->SchoolMask);
+        crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, GetSchoolMask(spellInfo->School));
 
         if( dodge_chance != 0.0f )                          // if dodge chance is already 0, ignore talents for speed
         {

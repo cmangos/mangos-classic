@@ -310,7 +310,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
         if((m_caster->getClassMask() & CLASSMASK_WAND_USERS) != 0 && m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             if(Item* pItem = ((Player*)m_caster)->GetWeaponForAttack(RANGED_ATTACK))
-                m_spellSchoolMask = SpellSchoolMask(1 << pItem->GetProto()->Damage[0].DamageType);
+                m_spellSchoolMask = GetSchoolMask(pItem->GetProto()->Damage[0].DamageType);
         }
     }
 
@@ -3331,15 +3331,19 @@ SpellCastResult Spell::CheckCast(bool strict)
     if(Unit *target = m_targets.getUnitTarget())
     {
         // target state requirements (not allowed state), apply to self also
-        if(m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
-            return SPELL_FAILED_TARGET_AURASTATE;
+        AuraStates const *SpellTargetAuraStates = spellmgr.GetTargetAuraStates(m_spellInfo->Id);
+        if(SpellTargetAuraStates)
+        {
+            if(SpellTargetAuraStates->AuraStateNot && target->HasAuraState(AuraState(SpellTargetAuraStates->AuraStateNot)))
+                return SPELL_FAILED_TARGET_AURASTATE;
+        }
 
         bool non_caster_target = target != m_caster && !IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
 
         if(non_caster_target)
         {
             // target state requirements (apply to non-self only), to allow cast affects to self like Dirty Deeds
-            if(m_spellInfo->TargetAuraState && !target->HasAuraStateForCaster(AuraState(m_spellInfo->TargetAuraState),m_caster->GetGUID()))
+            if(SpellTargetAuraStates->AuraState && !target->HasAuraState(AuraState(SpellTargetAuraStates->AuraState)))
                 return SPELL_FAILED_TARGET_AURASTATE;
 
             // Not allow casting on flying player

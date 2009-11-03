@@ -3252,7 +3252,7 @@ bool ChatHandler::HandleDamageCommand(const char * args)
     if(school >= MAX_SPELL_SCHOOL)
         return false;
 
-    SpellSchoolMask schoolmask = SpellSchoolMask(1 << school);
+    SpellSchoolMask schoolmask = GetSchoolMask(school);
 
     if ( schoolmask & SPELL_SCHOOL_MASK_NORMAL )
         damage = m_session->GetPlayer()->CalcArmorReducedDamage(target, damage);

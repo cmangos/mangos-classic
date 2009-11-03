@@ -335,7 +335,7 @@ inline bool NeedsComboPoints(SpellEntry const* spellInfo)
 
 inline SpellSchoolMask GetSpellSchoolMask(SpellEntry const* spellInfo)
 {
-    return SpellSchoolMask(spellInfo->SchoolMask);
+    return GetSchoolMask(spellInfo->School);
 }
 
 inline uint32 GetSpellMechanicMask(SpellEntry const* spellInfo, int32 effect)
@@ -671,6 +671,31 @@ class SpellMgr
             if( itr != mSpellProcEventMap.end( ) )
                 return &itr->second;
             return NULL;
+        }
+
+        AuraStates const *GetTargetAuraStates(uint32 spellId) const
+        {
+            SpellAuraStates::const_iterator itr = mSpellTargetAuraStates.find(spellId);
+            if(itr != mSpellTargetAuraStates.end())
+                return &itr->second;
+            return NULL;
+        }
+
+        
+        AuraStates const *GetCasterAuraStates(uint32 spellId) const
+        {
+            SpellAuraStates::const_iterator itr = mSpellCasterAuraStates.find(spellId);
+            if(itr != mSpellCasterAuraStates.end())
+                return &itr->second;
+            return NULL;
+        }
+
+        uint32 GetSpellFacingFlag(uint32 spellId) const
+        {
+            SpellFacingFlagMap::const_iterator itr =  mSpellFacingFlagMap.find(spellId);
+            if(itr != mSpellFacingFlagMap.end())
+                return itr->second;
+            return 0x0;
         }
 
         static bool IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, SpellEntry const * procSpell, uint32 procFlags );

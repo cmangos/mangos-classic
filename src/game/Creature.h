@@ -516,7 +516,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         }
 
         SpellSchoolMask GetMeleeDamageSchoolMask() const { return m_meleeDamageSchoolMask; }
-        void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchoolMask = SpellSchoolMask(1 << school); }
+        void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchoolMask = GetSchoolMask(school); }
 
         void _AddCreatureSpellCooldown(uint32 spell_id, time_t end_time);
         void _AddCreatureCategoryCooldown(uint32 category, time_t apply_time);

@@ -180,6 +180,12 @@ enum SpellSchoolMask
       SPELL_SCHOOL_MASK_FROST | SPELL_SCHOOL_MASK_SHADOW | \
       SPELL_SCHOOL_MASK_ARCANE )
 
+// it convert school value into schoolmask missing in 1.12 dbc
+inline SpellSchoolMask GetSchoolMask(uint32 school)
+{
+    return SpellSchoolMask(1 << school);
+}
+
 inline SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
 {
     for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)

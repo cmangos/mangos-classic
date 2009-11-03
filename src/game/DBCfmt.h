@@ -54,7 +54,7 @@ const char SoundEntriesfmt[]="nxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
 const char SpellCastTimefmt[]="nixx";
 const char SpellDurationfmt[]="niii";
-const char SpellEntryfmt[]="nixiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifxiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiifffixiixssssssssssssssssxssssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiixfffxxxiiii";
+const char SpellEntryfmt[]="niixiiiiiiiiiiiixxiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiifffixiixssssssssxssssssssxxxxxxxxxxxxxxxxxxxiiiiiiiiiixfffxxx";
 const char SpellFocusObjectfmt[]="nxxxxxxxxxxxxxxxxx";
 const char SpellItemEnchantmentfmt[]="niiiiiixxxiiissssssssssssssssxiiii";
 const char SpellItemEnchantmentConditionfmt[]="nbbbbbxxxxxbbbbbbbbbbiiiiiXXXXX";
@@ -62,6 +62,7 @@ const char SpellRadiusfmt[]="nfxf";
 const char SpellRangefmt[]="nffxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char SpellShapeshiftfmt[]="nxxxxxxxxxxxxxxxxxxiixixxxxxxxxxxxx";
 const char StableSlotPricesfmt[] = "ni";
+
 //const char SummonPropertiesfmt[] = "niiiii";
 const char TalentEntryfmt[]="niiiiiiiixxxxixxixxxi";
 const char TalentTabEntryfmt[]="nxxxxxxxxxxxxxxxxxxxiix";
