@@ -8103,7 +8103,7 @@ bool Player::HasItemCount( uint32 item, uint32 count, bool inBankAlso ) const
     return false;
 }
 
-bool Player::HasItemOrGemWithIdEquipped( uint32 item, uint32 count, uint8 except_slot ) const
+bool Player::HasItemWithIdEquipped( uint32 item, uint32 count, uint8 except_slot ) const
 {
     uint32 tempcount = 0;
     for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
@@ -9800,17 +9800,9 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
 
                     // remove held enchantments
                     if ( slot == EQUIPMENT_SLOT_MAINHAND )
-                    {
-                        if (pItem->GetItemSuffixFactor())
-                        {
-                            pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_3);
-                            pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_4);
-                        }
-                        else
-                        {
-                            pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_0);
-                            pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_1);
-                        }
+                    {   // to check
+                        for (uint8 i=PROP_ENCHANTMENT_SLOT_0;i<=PROP_ENCHANTMENT_SLOT_3;i++)
+                            pItem->ClearEnchantment(EnchantmentSlot(i));
                     }
                 }
             }
@@ -14088,7 +14080,7 @@ void Player::SendRaidInfo()
 {
     WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
 
-    uint32 counter = 0, i;
+    uint32 counter = 0;
     for (BoundInstancesMap::iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
         if(itr->second.perm) counter++;
 
@@ -16684,17 +16676,7 @@ void Player::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg)
     WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
     data << uint32(mapid);
     data << uint8(reason);                                  // transfer abort reason
-    switch(reason)
-    {
-       /*[-ZERO]
-        case TRANSFER_ABORT_INSUF_EXPAN_LVL:
-        case TRANSFER_ABORT_DIFFICULTY:
-            data << uint8(arg);
-            break; */
-        default:                                            // possible not neaded (absent in 0.13, but add at backport for safe)
-            data << uint8(0);
-            break;
-    }
+    data << uint8(0);                                       // arg. not used
     GetSession()->SendPacket(&data);
 }
 
@@ -17765,24 +17747,6 @@ uint8 Player::CanEquipUniqueItem(Item* pItem, uint8 eslot) const
     if(uint8 res = CanEquipUniqueItem(pProto,eslot))
         return res;
 
-    // check unique-equipped on gems
-    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
-    {
-        uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(enchant_slot));
-        if(!enchant_id)
-            continue;
-        SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-        if(!enchantEntry)
-            continue;
-
-        ItemPrototype const* pGem = objmgr.GetItemPrototype(enchantEntry->GemID);
-        if(!pGem)
-            continue;
-
-        if(uint8 res = CanEquipUniqueItem(pGem, eslot))
-            return res;
-    }
-
     return EQUIP_ERR_OK;
 }
 
@@ -17792,7 +17756,7 @@ uint8 Player::CanEquipUniqueItem( ItemPrototype const* itemProto, uint8 except_s
     if (itemProto->Flags & ITEM_FLAGS_UNIQUE_EQUIPPED)
     {
         // there is an equip limit on this item
-        if(HasItemOrGemWithIdEquipped(itemProto->ItemId,1,except_slot))
+        if(HasItemWithIdEquipped(itemProto->ItemId,1,except_slot))
             return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
     }
 

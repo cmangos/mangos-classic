@@ -383,13 +383,6 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
         need_save = true;
     }
 
-    // recalculate suffix factor
-    if(GetItemRandomPropertyId() < 0)
-    {
-        if(UpdateItemSuffixFactor())
-            need_save = true;
-    }
-
     // Remove bind flag for items vs NO_BIND set
     if (IsSoulBound() && proto->Bonding == NO_BIND)
     {
@@ -529,17 +522,6 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
     if(!itemProto)
         return 0;
 
-    // item must have one from this field values not null if it can have random enchantments
-    if((!itemProto->RandomProperty) && (!itemProto->RandomSuffix))
-        return 0;
-
-    // item can have not null only one from field values
-    if((itemProto->RandomProperty) && (itemProto->RandomSuffix))
-    {
-        sLog.outErrorDb("Item template %u have RandomProperty==%u and RandomSuffix==%u, but must have one from field =0",itemProto->ItemId,itemProto->RandomProperty,itemProto->RandomSuffix);
-        return 0;
-    }
-
     // RandomProperty case
     if(itemProto->RandomProperty)
     {
@@ -553,19 +535,8 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
 
         return random_id->ID;
     }
-    // RandomSuffix case
-    else
-    {
-        uint32 randomPropId = GetItemEnchantMod(itemProto->RandomSuffix);
-        ItemRandomSuffixEntry const *random_id = sItemRandomSuffixStore.LookupEntry(randomPropId);
-        if(!random_id)
-        {
-            sLog.outErrorDb("Enchantment id #%u used but it doesn't have records in sItemRandomSuffixStore.",randomPropId);
-            return 0;
-        }
 
-        return -int32(random_id->ID);
-    }
+    return 0;
 }
 
 void Item::SetItemRandomProperties(int32 randomPropId)
@@ -583,36 +554,10 @@ void Item::SetItemRandomProperties(int32 randomPropId)
                 SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
                 SetState(ITEM_CHANGED);
             }
-            for(uint32 i = PROP_ENCHANTMENT_SLOT_2; i < PROP_ENCHANTMENT_SLOT_2 + 3; ++i)
-                SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_2],0,0);
-        }
-    }
-    else
-    {
-        ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(-randomPropId);
-        if(item_rand)
-        {
-            if( GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID) != -int32(item_rand->ID) ||
-                !GetItemSuffixFactor())
-            {
-                SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,-int32(item_rand->ID));
-                UpdateItemSuffixFactor();
-                SetState(ITEM_CHANGED);
-            }
-
             for(uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_0 + 3; ++i)
                 SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_0],0,0);
         }
     }
-}
-
-bool Item::UpdateItemSuffixFactor()
-{
-    uint32 suffixFactor = GenerateEnchSuffixFactor(GetEntry());
-    if(GetItemSuffixFactor()==suffixFactor)
-        return false;
-    SetUInt32Value(ITEM_FIELD_PROPERTY_SEED,suffixFactor);
-    return true;
 }
 
 void Item::SetState(ItemUpdateState state, Player *forplayer)

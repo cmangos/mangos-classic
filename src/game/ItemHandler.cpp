@@ -307,7 +307,6 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->ItemId;
         data << pProto->Class;
         data << pProto->SubClass;
-        data << uint32(-1);                                 // new 2.0.3, not exist in wdb cache?
         data << Name;
         data << uint8(0x00);                                //pProto->Name2; // blizz not send name there, just uint8(0x00); <-- \0 = empty string = empty name...
         data << uint8(0x00);                                //pProto->Name3; // blizz not send name there, just uint8(0x00);
@@ -403,14 +402,12 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->Material;
         data << pProto->Sheath;
         data << pProto->RandomProperty;
-        data << pProto->RandomSuffix;
         data << pProto->Block;
         data << pProto->ItemSet;
         data << pProto->MaxDurability;
         data << pProto->Area;
         data << pProto->Map;                                // Added in 1.12.x & 2.0.1 client branch
         data << pProto->BagFamily;
-        data << pProto->TotemCategory;
         data << pProto->RequiredDisenchantSkill;
         data << pProto->ArmorDamageModifier;
         SendPacket( &data );

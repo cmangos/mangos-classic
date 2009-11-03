@@ -148,20 +148,15 @@ enum SellFailure
 // -1 from client enchantment slot number
 enum EnchantmentSlot
 {
-    PERM_ENCHANTMENT_SLOT           = 0,
-    TEMP_ENCHANTMENT_SLOT           = 1,
-    SOCK_ENCHANTMENT_SLOT           = 2,
-    SOCK_ENCHANTMENT_SLOT_2         = 3,
-    SOCK_ENCHANTMENT_SLOT_3         = 4,
-    BONUS_ENCHANTMENT_SLOT          = 5,
-    MAX_INSPECTED_ENCHANTMENT_SLOT  = 6,
+    PERM_ENCHANTMENT_SLOT       = 0,
+    TEMP_ENCHANTMENT_SLOT       = 1,
+    MAX_INSPECTED_ENCHANTMENT_SLOT = 2,
 
-    PROP_ENCHANTMENT_SLOT_0         = 6,                    // used with RandomSuffix
-    PROP_ENCHANTMENT_SLOT_1         = 7,                    // used with RandomSuffix
-    PROP_ENCHANTMENT_SLOT_2         = 8,                    // used with RandomSuffix and RandomProperty
-    PROP_ENCHANTMENT_SLOT_3         = 9,                    // used with RandomProperty
-    PROP_ENCHANTMENT_SLOT_4         = 10,                   // used with RandomProperty
-    MAX_ENCHANTMENT_SLOT            = 11
+    PROP_ENCHANTMENT_SLOT_0     = 3,
+    PROP_ENCHANTMENT_SLOT_1     = 4,
+    PROP_ENCHANTMENT_SLOT_2     = 5,
+    PROP_ENCHANTMENT_SLOT_3     = 6,
+    MAX_ENCHANTMENT_SLOT        = 7
 };
 
 #define MAX_VISIBLE_ITEM_OFFSET       16                    // 16 fields per visible item (creator(2) + enchantments(12) + properties(1) + pad(1))
@@ -267,7 +262,6 @@ class MANGOS_DLL_SPEC Item : public Object
         int32 GetItemRandomPropertyId() const { return GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID); }
         uint32 GetItemSuffixFactor() const { return GetUInt32Value(ITEM_FIELD_PROPERTY_SEED); }
         void SetItemRandomProperties(int32 randomPropId);
-        bool UpdateItemSuffixFactor();
         static int32 GenerateItemRandomPropertyId(uint32 item_id);
         void SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges);
         void SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration);
