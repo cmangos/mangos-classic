@@ -1282,6 +1282,8 @@ void ObjectMgr::LoadItemPrototypes()
     for(uint32 i = 1; i < sItemStorage.MaxEntry; ++i)
     {
         ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype >(i);
+        if(!proto)
+            continue;
 
         if(proto->Class >= MAX_ITEM_CLASS)
         {
