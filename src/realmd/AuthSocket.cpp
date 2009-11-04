@@ -126,11 +126,10 @@ typedef struct AUTH_LOGON_PROOF_S
     uint8   cmd;
     uint8   error;
     uint8   M2[20];
-    uint32  unk1;
     uint32  unk2;
-    uint16  unk3;
 } sAuthLogonProof_S;
 
+// [-ZERO] Need recheck structure
 typedef struct AUTH_RECONNECT_PROOF_C
 {
     uint8   cmd;
@@ -698,9 +697,7 @@ bool AuthSocket::_HandleLogonProof()
         memcpy(proof.M2, sha.GetDigest(), 20);
         proof.cmd = AUTH_LOGON_PROOF;
         proof.error = 0;
-        proof.unk1 = 0x00800000;
         proof.unk2 = 0x00;
-        proof.unk3 = 0x00;
 
         SendBuf((char *)&proof, sizeof(proof));
 
@@ -886,7 +883,7 @@ bool AuthSocket::_HandleRealmList()
     ///- Circle through realms in the RealmList and construct the return packet (including # of user characters in each realm)
     ByteBuffer pkt;
     pkt << (uint32) 0;
-    pkt << (uint16) m_realmList.size();
+    pkt << (uint8) m_realmList.size();
     RealmList::RealmMap::const_iterator i;
     for( i = m_realmList.begin(); i != m_realmList.end(); ++i )
     {
@@ -903,20 +900,19 @@ bool AuthSocket::_HandleRealmList()
         else
             AmountOfCharacters = 0;
 
-        uint8 lock = (i->second.allowedSecurityLevel > _accountSecurityLevel) ? 1 : 0;
+        uint8 color = (i->second.allowedSecurityLevel > _accountSecurityLevel) ? 2 : i->second.color;
 
-        pkt << i->second.icon;                              // realm type
-        pkt << lock;                                        // if 1, then realm locked
-        pkt << i->second.color;                             // if 2, then realm is offline
+        pkt << (uint32)i->second.icon;                      // realm type
+        pkt << color;                                       // if 2, then realm is offline
         pkt << i->first;
         pkt << i->second.address;
         pkt << i->second.populationLevel;
         pkt << AmountOfCharacters;
         pkt << i->second.timezone;                          // realm category
-        pkt << (uint8) 0x2C;                                // unk, may be realm number/id?
+        pkt << (uint8) 0;                                   // unk, may be realm number/id?
     }
-    pkt << (uint8) 0x10;
-    pkt << (uint8) 0x00;
+    pkt << (uint8) 0x0;
+    pkt << (uint8) 0x2;
 
     ByteBuffer hdr;
     hdr << (uint8) REALM_LIST;
