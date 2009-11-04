@@ -108,7 +108,7 @@ struct ChrClassesEntry
                                                             // 1-2, unused
     uint32      powerType;                                  // 3
                                                             // 4, unused
-    //char*       name[8];                                  // 5-12 unused
+    char*       name[8];                                    // 5-12 unused
     uint32      spellfamily;                                // 15
                                                             // 16, unused
 };
@@ -308,7 +308,7 @@ struct ItemRandomPropertiesEntry
     //char*     internalName                                // 1   unused
     uint32    enchant_id[3];                                // 2-4
                                                             // 5-6 unused, 0 only values, reserved for additional enchantments?
-    char*     nameSuffix[8];
+    // char*     nameSuffix[8];
 };
 
 struct ItemSetEntry
@@ -379,13 +379,13 @@ struct MapEntry
 struct QuestSortEntry
 {
     uint32      id;                                         // 0, sort id
-    //char*       name[16];                                 // 1-16, unused
-                                                            // 17 name flags, unused
+    //char*       name[8];                                  // 1-8, unused
+                                                            // 9 name flags, unused
 };
 
 //struct SkillLineCategoryEntry{
 //    uint32    id;                                           // 0 hidden key
-//    char*     name[16];                                     // 1 - 17 Category name
+//    char*     name[8];                                     // 1 - 17 Category name
 //                                                                  // 18 string flag
 //    uint32    displayOrder;                                 // Display order in character tab
 //};
@@ -567,8 +567,8 @@ struct SpellCastTimesEntry
 struct SpellFocusObjectEntry
 {
     uint32    ID;                                           // 0
-    //char*     Name[16];                                   // 1-15 unused
-                                                            // 16 string flags, unused
+    //char*     Name[8];                                    // 1-8 unused
+                                                            // 9 string flags, unused
 };
 
 struct SpellRadiusEntry
