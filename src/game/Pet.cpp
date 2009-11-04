@@ -93,15 +93,12 @@ Pet::Pet(PetType type) : Creature()
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
     m_autospells.clear();
-    m_declinedname = NULL;
 }
 
 Pet::~Pet()
 {
     if(m_uint32Values)                                      // only for fully created Object
         ObjectAccessor::Instance().RemoveObject(this);
-
-    delete m_declinedname;
 }
 
 void Pet::AddToWorld()
@@ -366,24 +363,6 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
             ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
 
-    if (owner->GetTypeId() == TYPEID_PLAYER && getPetType() == HUNTER_PET)
-    {
-        result = CharacterDatabase.PQuery("SELECT genitive, dative, accusative, instrumental, prepositional FROM character_pet_declinedname WHERE owner = '%u' AND id = '%u'", owner->GetGUIDLow(), GetCharmInfo()->GetPetNumber());
-
-        if(result)
-        {
-            if(m_declinedname)
-                delete m_declinedname;
-
-            m_declinedname = new DeclinedName;
-            Field *fields2 = result->Fetch();
-            for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            {
-                m_declinedname->name[i] = fields2[i].GetCppString();
-            }
-        }
-    }
-
     m_loading = false;
 
     SynchronizeLevelWithOwner();
@@ -511,7 +490,6 @@ void Pet::SavePetToDB(PetSaveMode mode)
 void Pet::DeleteFromDB(uint32 guidlow)
 {
     CharacterDatabase.PExecute("DELETE FROM character_pet WHERE id = '%u'", guidlow);
-    CharacterDatabase.PExecute("DELETE FROM character_pet_declinedname WHERE id = '%u'", guidlow);
     CharacterDatabase.PExecute("DELETE FROM pet_aura WHERE guid = '%u'", guidlow);
     CharacterDatabase.PExecute("DELETE FROM pet_spell WHERE guid = '%u'", guidlow);
     CharacterDatabase.PExecute("DELETE FROM pet_spell_cooldown WHERE guid = '%u'", guidlow);

@@ -73,6 +73,7 @@
 #define SKILL_PERM_BONUS(x)    int16(PAIR32_HIPART(x))
 #define MAKE_SKILL_BONUS(t, p) MAKE_PAIR32(t,p)
 
+// [-ZERO] need recheck, some values known not existed in 1.12.1
 enum CharacterFlags
 {
     CHARACTER_FLAG_NONE                 = 0x00000000,
@@ -439,8 +440,6 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this)
     m_bgAfkReportedTimer = 0;
     m_contestedPvPTimer = 0;
 
-    m_declinedname = NULL;
-
     m_lastFallTime = 0;
     m_lastFallZ = 0;
 }
@@ -484,8 +483,6 @@ Player::~Player ()
     // clean up player-instance binds, may unload some instance saves
     for(BoundInstancesMap::iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
         itr->second.save->RemovePlayer(this);
-
-    delete m_declinedname;
 }
 
 void Player::CleanupsBeforeDelete()
@@ -1353,8 +1350,8 @@ bool Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
     //    "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.playerBytes, characters.playerBytes2, characters.level, "
     //     8                9               10                     11                     12                     13                    14
     //    "characters.zone, characters.map, characters.position_x, characters.position_y, characters.position_z, guild_member.guildid, characters.playerFlags, "
-    //    15                    16                   17                     18                   19               20
-    //    "characters.at_login, character_pet.entry, character_pet.modelid, character_pet.level, characters.data, character_declinedname.genitive "
+    //    15                    16                   17                     18                   19
+    //    "characters.at_login, character_pet.entry, character_pet.modelid, character_pet.level, characters.data "
 
     Field *fields = result->Fetch();
 
@@ -1405,13 +1402,6 @@ bool Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
         char_flags |= CHARACTER_FLAG_GHOST;
     if(atLoginFlags & AT_LOGIN_RENAME)
         char_flags |= CHARACTER_FLAG_RENAME;
-    if(sWorld.getConfig(CONFIG_DECLINED_NAMES_USED))
-    {
-        if(!fields[20].GetCppString().empty())
-            char_flags |= CHARACTER_FLAG_DECLINED;
-    }
-    else
-        char_flags |= CHARACTER_FLAG_DECLINED;
 
     *p_data << uint32(char_flags);                          // character flags
 
@@ -3665,7 +3655,6 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     }
 
     CharacterDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'",guid);
-    CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_action WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_gifts WHERE guid = '%u'",guid);
@@ -3683,7 +3672,6 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     CharacterDatabase.PExecute("DELETE FROM mail WHERE receiver = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM mail_items WHERE receiver = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_pet WHERE owner = '%u'",guid);
-    CharacterDatabase.PExecute("DELETE FROM character_pet_declinedname WHERE owner = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE PlayerGuid1 = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE PlayerGuid2 = '%u'",guid);
     CharacterDatabase.CommitTransaction();
@@ -12789,22 +12777,6 @@ void Player::SendQuestUpdateAddCreatureOrGo( Quest const* pQuest, uint64 guid, u
 /***                   LOAD SYSTEM                     ***/
 /*********************************************************/
 
-void Player::_LoadDeclinedNames(QueryResult* result)
-{
-    if(!result)
-        return;
-
-    if(m_declinedname)
-        delete m_declinedname;
-
-    m_declinedname = new DeclinedName;
-    Field *fields = result->Fetch();
-    for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-        m_declinedname->name[i] = fields[i].GetCppString();
-
-    delete result;
-}
-
 bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, bool& in_flight, uint64 guid)
 {
     QueryResult *result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,taxi_path FROM characters WHERE guid = '%u'",GUID_LOPART(guid));
@@ -13348,8 +13320,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
                 break;
         }
     }
-
-    _LoadDeclinedNames(holder->GetResult(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES));
 
     return true;
 }

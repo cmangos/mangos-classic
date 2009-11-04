@@ -6404,20 +6404,6 @@ uint16 ObjectMgr::GetConditionId( ConditionType condition, uint32 value1, uint32
     return mConditions.size() - 1;
 }
 
-bool ObjectMgr::CheckDeclinedNames( std::wstring mainpart, DeclinedName const& names )
-{
-    for(int i =0; i < MAX_DECLINED_NAME_CASES; ++i)
-    {
-        std::wstring wname;
-        if(!Utf8toWStr(names.name[i],wname))
-            return false;
-
-        if(mainpart!=GetMainPartOfName(wname,i+1))
-            return false;
-    }
-    return true;
-}
-
 uint32 ObjectMgr::GetAreaTriggerScriptId(uint32 trigger_id)
 {
     AreaTriggerScriptMap::const_iterator i = mAreaTriggerScripts.find(trigger_id);

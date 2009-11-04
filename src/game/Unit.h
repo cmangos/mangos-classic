@@ -632,13 +632,6 @@ struct SpellPeriodicAuraLogInfo
     float  multiplier;
 };
 
-#define MAX_DECLINED_NAME_CASES 5
-
-struct DeclinedName
-{
-    std::string name[MAX_DECLINED_NAME_CASES];
-};
-
 enum CurrentSpellTypes
 {
     CURRENT_MELEE_SPELL             = 0,

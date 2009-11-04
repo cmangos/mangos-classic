@@ -717,7 +717,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADSOCIALLIST           = 13,
     PLAYER_LOGIN_QUERY_LOADHOMEBIND             = 14,
     PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS       = 15,
-    PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES        = 16,
+    //PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES      = 16,       // reserved for use in 0.12 and later
     PLAYER_LOGIN_QUERY_LOADGUILD                = 17,
 
     MAX_PLAYER_LOGIN_QUERY
@@ -1973,9 +1973,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool isAllowedToLoot(Creature* creature);
 
-        // [-ZERO] not exist
-        DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
-
         bool isActiveObject() const { return true; }
     protected:
 
@@ -2029,7 +2026,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadTutorials(QueryResult *result);
         void _LoadFriendList(QueryResult *result);
         bool _LoadHomeBind(QueryResult *result);
-        void _LoadDeclinedNames(QueryResult *result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -2180,7 +2176,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         float  m_summon_y;
         float  m_summon_z;
 
-        DeclinedName *m_declinedname;
     private:
         // internal common parts for CanStore/StoreItem functions
         uint8 _CanStoreItem_InSpecificSlot( uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool swap, Item *pSrcItem ) const;

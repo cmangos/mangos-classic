@@ -189,7 +189,6 @@ enum WorldConfigs
     CONFIG_THREAT_RADIUS,
     CONFIG_INSTANT_LOGOUT,
     CONFIG_ALL_TAXI_PATHS,
-    CONFIG_DECLINED_NAMES_USED,
     CONFIG_LISTEN_RANGE_SAY,
     CONFIG_LISTEN_RANGE_TEXTEMOTE,
     CONFIG_LISTEN_RANGE_YELL,
@@ -279,6 +278,7 @@ enum RealmType
                                                             // replaced by REALM_PVP in realm list
 };
 
+// [-ZERO] Need drop not existed cases
 enum RealmZone
 {
     REALM_ZONE_UNKNOWN       = 0,                           // any language

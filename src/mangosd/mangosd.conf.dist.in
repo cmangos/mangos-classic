@@ -350,13 +350,8 @@ LogColors = ""
 #
 #    DBC.Locale
 #        DBC Language Settings
-#        0 = English; 1 = Korean; 2 = French; 3 = German; 4 = Chinese; 5 = Taiwanese; 6 = Spanish; 7 = Spanish Mexico
-#        8 = Russian; 255 = Auto Detect (Default)
-#
-#    DeclinedNames
-#    Allow russian clients to set and use declined names
-#    Default: 0 - do not use declined names, except when the Russian RealmZone is set
-#         1 - use declined names
+#        0 = English; 1 = Korean; 2 = French; 3 = German; 4 = Chinese; 5 = Taiwanese; 6 = Spanish;
+#        255 = Auto Detect (Default)
 #
 #    StrictPlayerNames
 #        Limit player name to language specific symbols set, not allow create characters, and set rename request and disconnect at not allowed symbols name

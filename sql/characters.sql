@@ -151,33 +151,6 @@ INSERT INTO `character_db_version` VALUES (NULL);
 UNLOCK TABLES;
 
 --
--- Table structure for table `character_declinedname`
---
-
-DROP TABLE IF EXISTS `character_declinedname`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `character_declinedname` (
-  `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
-  `genitive` varchar(15) NOT NULL DEFAULT '',
-  `dative` varchar(15) NOT NULL DEFAULT '',
-  `accusative` varchar(15) NOT NULL DEFAULT '',
-  `instrumental` varchar(15) NOT NULL DEFAULT '',
-  `prepositional` varchar(15) NOT NULL DEFAULT '',
-  PRIMARY KEY (`guid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `character_declinedname`
---
-
-LOCK TABLES `character_declinedname` WRITE;
-/*!40000 ALTER TABLE `character_declinedname` DISABLE KEYS */;
-/*!40000 ALTER TABLE `character_declinedname` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `character_gifts`
 --
 
@@ -351,35 +324,6 @@ CREATE TABLE `character_pet` (
 LOCK TABLES `character_pet` WRITE;
 /*!40000 ALTER TABLE `character_pet` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_pet` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `character_pet_declinedname`
---
-
-DROP TABLE IF EXISTS `character_pet_declinedname`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `character_pet_declinedname` (
-  `id` int(11) unsigned NOT NULL DEFAULT '0',
-  `owner` int(11) unsigned NOT NULL DEFAULT '0',
-  `genitive` varchar(12) NOT NULL DEFAULT '',
-  `dative` varchar(12) NOT NULL DEFAULT '',
-  `accusative` varchar(12) NOT NULL DEFAULT '',
-  `instrumental` varchar(12) NOT NULL DEFAULT '',
-  `prepositional` varchar(12) NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`),
-  KEY `owner_key` (`owner`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `character_pet_declinedname`
---
-
-LOCK TABLES `character_pet_declinedname` WRITE;
-/*!40000 ALTER TABLE `character_pet_declinedname` DISABLE KEYS */;
-/*!40000 ALTER TABLE `character_pet_declinedname` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

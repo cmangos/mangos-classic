@@ -289,15 +289,6 @@ void WorldSession::SendPetNameQuery( uint64 petguid, uint32 petnumber)
     data << name.c_str();
     data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));
 
-    if( pet->isPet() && ((Pet*)pet)->GetDeclinedNames() )
-    {
-        data << uint8(1);
-        for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            data << ((Pet*)pet)->GetDeclinedNames()->name[i];
-    }
-    else
-        data << uint8(0);
-
     _player->GetSession()->SendPacket(&data);
 }
 
@@ -378,14 +369,11 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     sLog.outDetail( "HandlePetRename. CMSG_PET_RENAME" );
 
     uint64 petguid;
-    uint8 isdeclined;
 
     std::string name;
-    DeclinedName declinedname;
 
     recv_data >> petguid;
     recv_data >> name;
-    recv_data >> isdeclined;
 
     Pet* pet = ObjectAccessor::GetPet(petguid);
                                                             // check it!
@@ -397,13 +385,13 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     PetNameInvalidReason res = ObjectMgr::CheckPetName(name);
     if(res != PET_NAME_SUCCESS)
     {
-        SendPetNameInvalid(res, name, NULL);
+        SendPetNameInvalid(res, name);
         return;
     }
 
     if(objmgr.IsReservedName(name))
     {
-        SendPetNameInvalid(PET_NAME_RESERVED, name, NULL);
+        SendPetNameInvalid(PET_NAME_RESERVED, name);
         return;
     }
 
@@ -415,32 +403,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 
     pet->SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_NOT_ALLOWED);
 
-    if(isdeclined)
-    {
-        for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-        {
-            recv_data >> declinedname.name[i];
-        }
-
-        std::wstring wname;
-        Utf8toWStr(name, wname);
-        if(!ObjectMgr::CheckDeclinedNames(GetMainPartOfName(wname,0),declinedname))
-        {
-            SendPetNameInvalid(PET_NAME_DECLENSION_DOESNT_MATCH_BASE_NAME, name, &declinedname);
-            return;
-        }
-    }
-
     CharacterDatabase.BeginTransaction();
-    if(isdeclined)
-    {
-        for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            CharacterDatabase.escape_string(declinedname.name[i]);
-        CharacterDatabase.PExecute("DELETE FROM character_pet_declinedname WHERE owner = '%u' AND id = '%u'", _player->GetGUIDLow(), pet->GetCharmInfo()->GetPetNumber());
-        CharacterDatabase.PExecute("INSERT INTO character_pet_declinedname (id, owner, genitive, dative, accusative, instrumental, prepositional) VALUES ('%u','%u','%s','%s','%s','%s','%s')",
-            pet->GetCharmInfo()->GetPetNumber(), _player->GetGUIDLow(), declinedname.name[0].c_str(), declinedname.name[1].c_str(), declinedname.name[2].c_str(), declinedname.name[3].c_str(), declinedname.name[4].c_str());
-    }
-
     CharacterDatabase.escape_string(name);
     CharacterDatabase.PExecute("UPDATE character_pet SET name = '%s', renamed = '1' WHERE owner = '%u' AND id = '%u'", name.c_str(), _player->GetGUIDLow(), pet->GetCharmInfo()->GetPetNumber());
     CharacterDatabase.CommitTransaction();
@@ -648,18 +611,12 @@ void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
     }
 }
 
-void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName *declinedName)
+void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name)
 {
+    // [-ZERO] Need check
     WorldPacket data(SMSG_PET_NAME_INVALID, 4 + name.size() + 1 + 1);
     data << uint32(error);
     data << name;
-    if(declinedName)
-    {
-        data << uint8(1);
-        for(uint32 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            data << declinedName->name[i];
-    }
-    else
-        data << uint8(0);
+    data << uint8(0);                                       // possible not exist in 1.12.*
     SendPacket(&data);
 }

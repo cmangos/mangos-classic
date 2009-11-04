@@ -99,6 +99,8 @@ enum PetTalk
     PET_TALK_ATTACK         = 1
 };
 
+
+// [-ZERO] Need recheck and drop not existed cases
 enum PetNameInvalidReason
 {
     // custom, not send
@@ -248,8 +250,6 @@ class Pet : public Creature
         // overwrite Creature function for name localization back to WorldObject version without localization
         const char* GetNameForLocaleIdx(int32 locale_idx) const { return WorldObject::GetNameForLocaleIdx(locale_idx); }
 
-        DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
-
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
     protected:
         uint32  m_happinessTimer;
@@ -260,8 +260,6 @@ class Pet : public Creature
         int32   m_bonusdamage;
         uint64  m_auraUpdateMask;
         bool    m_loading;
-
-        DeclinedName *m_declinedname;
 
     private:
         void SaveToDB(uint32)                        // overwrited of Creature::SaveToDB     - don't must be called

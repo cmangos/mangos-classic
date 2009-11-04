@@ -1045,8 +1045,6 @@ enum OpcodesList
     CMSG_NO_SPELL_VARIANCE                          = 0x415,
     CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY           = 0x416,
     SMSG_QUESTGIVER_STATUS_MULTIPLE                 = 0x417,
-    CMSG_SET_PLAYER_DECLINED_NAMES                  = 0x418,
-    SMSG_SET_PLAYER_DECLINED_NAMES_RESULT           = 0x419,
     CMSG_QUERY_SERVER_BUCK_DATA                     = 0x41A,
     CMSG_CLEAR_SERVER_BUCK_DATA                     = 0x41B,
     SMSG_SERVER_BUCK_DATA                           = 0x41C,
