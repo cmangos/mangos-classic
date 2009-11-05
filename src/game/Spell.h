@@ -281,7 +281,6 @@ class Spell
         void EffectSelfResurrect(uint32 i);
         void EffectSkinning(uint32 i);
         void EffectCharge(uint32 i);
-        void EffectProspecting(uint32 i);
         void EffectSendTaxi(uint32 i);
         void EffectSummonCritter(uint32 i);
         void EffectKnockBack(uint32 i);
@@ -299,7 +298,6 @@ class Spell
         void EffectSpiritHeal(uint32 i);
         void EffectSkinPlayerCorpse(uint32 i);
         void EffectSummonDemon(uint32 i);
-        void EffectStealBeneficialBuff(uint32 i);
 
         Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 originalCasterGUID = 0, Spell** triggeringContainer = NULL );
         ~Spell();

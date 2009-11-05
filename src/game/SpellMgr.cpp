@@ -401,7 +401,6 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
 
             // non-positive aura use
         case SPELL_EFFECT_APPLY_AURA:
-        case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
         {
             switch(spellproto->EffectApplyAuraName[effIndex])
             {

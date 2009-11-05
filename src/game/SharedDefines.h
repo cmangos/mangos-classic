@@ -656,10 +656,10 @@ enum SpellEffects
     SPELL_EFFECT_SEND_TAXI                 = 123,
     SPELL_EFFECT_PLAYER_PULL               = 124,
     SPELL_EFFECT_MODIFY_THREAT_PERCENT     = 125,
-    SPELL_EFFECT_STEAL_BENEFICIAL_BUFF     = 126,
-    SPELL_EFFECT_PROSPECTING               = 127,
-    SPELL_EFFECT_APPLY_AREA_AURA_FRIEND    = 128,
-    SPELL_EFFECT_APPLY_AREA_AURA_ENEMY     = 129,
+    SPELL_EFFECT_126                       = 126,
+    SPELL_EFFECT_127                       = 127,
+    SPELL_EFFECT_128                       = 128,
+    SPELL_EFFECT_129                       = 129,
     TOTAL_SPELL_EFFECTS                    = 130
 };
 
@@ -1865,6 +1865,7 @@ inline uint8 ClassByQuestSort(int32 QuestSort)
     return 0;
 }
 
+// [-ZERO] Need cleanup base at SkillLine.dbc data
 enum SkillType
 {
     SKILL_NONE                     = 0,

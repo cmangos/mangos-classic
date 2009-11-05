@@ -6944,9 +6944,6 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 case LOOT_DISENCHANTING:
                     loot->FillLoot(item->GetProto()->DisenchantID, LootTemplates_Disenchant, this,true);
                     break;
-                case LOOT_PROSPECTING:
-                    loot->FillLoot(item->GetEntry(), LootTemplates_Prospecting, this,true);
-                    break;
                 default:
                     loot->FillLoot(item->GetEntry(), LootTemplates_Item, this,true);
                     loot->generateMoneyLoot(item->GetProto()->MinMoneyLoot,item->GetProto()->MaxMoneyLoot);
@@ -7106,7 +7103,6 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     switch(loot_type)
     {
         case LOOT_SKINNING:    loot_type = LOOT_PICKPOCKETING; break;
-        case LOOT_PROSPECTING: loot_type = LOOT_PICKPOCKETING; break;
         case LOOT_INSIGNIA:    loot_type = LOOT_PICKPOCKETING; break;
         case LOOT_FISHINGHOLE: loot_type = LOOT_FISHING;       break;
         default: break;

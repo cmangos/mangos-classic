@@ -2810,36 +2810,6 @@ LOCK TABLES `pool_template` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `prospecting_loot_template`
---
-
-DROP TABLE IF EXISTS `prospecting_loot_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `prospecting_loot_template` (
-  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `ChanceOrQuestChance` float NOT NULL DEFAULT '100',
-  `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
-  `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`entry`,`item`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `prospecting_loot_template`
---
-
-LOCK TABLES `prospecting_loot_template` WRITE;
-/*!40000 ALTER TABLE `prospecting_loot_template` DISABLE KEYS */;
-/*!40000 ALTER TABLE `prospecting_loot_template` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `quest_end_scripts`
 --
 

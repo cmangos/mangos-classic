@@ -1941,7 +1941,6 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
                 case SPELL_EFFECT_DISENCHANT:
                 case SPELL_EFFECT_FEED_PET:
-                case SPELL_EFFECT_PROSPECTING:
                     if(m_targets.getItemTarget())
                         AddItemTarget(m_targets.getItemTarget(), effIndex);
                     break;
@@ -3976,12 +3975,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                             return SPELL_FAILED_TRY_AGAIN;
                 break;
             }
-            case SPELL_EFFECT_STEAL_BENEFICIAL_BUFF:
-            {
-                if (m_targets.getUnitTarget() == m_caster)
-                    return SPELL_FAILED_BAD_TARGETS;
-                break;
-            }
             default:break;
         }
     }
@@ -4739,29 +4732,6 @@ SpellCastResult Spell::CheckItems()
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
                 if (!itemProto->DisenchantID)
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
-                break;
-            }
-            case SPELL_EFFECT_PROSPECTING:
-            {
-                if(!m_targets.getItemTarget())
-                    return SPELL_FAILED_CANT_BE_PROSPECTED;
-                //ensure item is a prospectable ore
-                if(!(m_targets.getItemTarget()->GetProto()->BagFamily & BAG_FAMILY_MASK_MINING_SUPP) || m_targets.getItemTarget()->GetProto()->Class != ITEM_CLASS_TRADE_GOODS)
-                    return SPELL_FAILED_CANT_BE_PROSPECTED;
-                //prevent prospecting in trade slot
-                if( m_targets.getItemTarget()->GetOwnerGUID() != m_caster->GetGUID() )
-                    return SPELL_FAILED_CANT_BE_PROSPECTED;
-                //Check for enough skill in jewelcrafting
-                uint32 item_prospectingskilllevel = m_targets.getItemTarget()->GetProto()->RequiredSkillRank;
-                if(item_prospectingskilllevel >p_caster->GetSkillValue(SKILL_JEWELCRAFTING))
-                    return SPELL_FAILED_LOW_CASTLEVEL;
-                //make sure the player has the required ores in inventory
-                if(m_targets.getItemTarget()->GetCount() < 5)
-                    return SPELL_FAILED_PROSPECT_NEED_MORE;
-
-                if(!LootTemplates_Prospecting.HaveLootFor(m_targets.getItemTargetEntry()))
-                    return SPELL_FAILED_CANT_BE_PROSPECTED;
-
                 break;
             }
             case SPELL_EFFECT_WEAPON_DAMAGE:

@@ -405,14 +405,6 @@ Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target,
             if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->isTotem())
                 m_modifier.m_auraname = SPELL_AURA_NONE;
             break;
-        case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
-            m_areaAuraType = AREA_AURA_FRIEND;
-            break;
-        case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
-            m_areaAuraType = AREA_AURA_ENEMY;
-            if (target == caster_ptr)
-                m_modifier.m_auraname = SPELL_AURA_NONE;    // Do not do any effect on self
-            break;
         case SPELL_EFFECT_APPLY_AREA_AURA_PET:
             m_areaAuraType = AREA_AURA_PET;
             break;
@@ -629,40 +621,6 @@ void AreaAura::Update(uint32 diff)
                     }
                     break;
                 }
-                case AREA_AURA_FRIEND:
-                {
-                    CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
-                    Cell cell(p);
-                    cell.data.Part.reserved = ALL_DISTRICT;
-                    cell.SetNoCreate();
-
-                    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(caster, owner, m_radius);
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
-                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
-
-                    CellLock<GridReadGuard> cell_lock(cell, p);
-                    cell_lock->Visit(cell_lock, grid_unit_searcher,  *caster->GetMap(), *caster, m_radius);
-                    cell_lock->Visit(cell_lock, world_unit_searcher, *caster->GetMap(), *caster, m_radius);
-                    break;
-                }
-                case AREA_AURA_ENEMY:
-                {
-                    CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
-                    Cell cell(p);
-                    cell.data.Part.reserved = ALL_DISTRICT;
-                    cell.SetNoCreate();
-
-                    MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(caster, owner, m_radius); // No GetCharmer in searcher
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(targets, u_check);
-                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
-
-                    CellLock<GridReadGuard> cell_lock(cell, p);
-                    cell_lock->Visit(cell_lock, grid_unit_searcher,  *caster->GetMap(), *caster, m_radius);
-                    cell_lock->Visit(cell_lock, world_unit_searcher, *caster->GetMap(), *caster, m_radius);
-                    break;
-                }
                 case AREA_AURA_PET:
                 {
                     if(owner != caster)
@@ -699,7 +657,7 @@ void AreaAura::Update(uint32 diff)
         // remove aura if out-of-range from caster (after teleport for example)
         // or caster is isolated or caster no longer has the aura
         // or caster is (no longer) friendly
-        bool needFriendly = (m_areaAuraType == AREA_AURA_ENEMY ? false : true);
+        bool needFriendly = true;
         if( !caster || caster->hasUnitState(UNIT_STAT_ISOLATED) ||
             !caster->IsWithinDistInMap(m_target, m_radius)      ||
             !caster->HasAura(GetId(), GetEffIndex())            ||
@@ -875,8 +833,7 @@ void Aura::_AddAura()
 
     // passive auras (except totem auras) do not get placed in the slots
     // area auras with SPELL_AURA_NONE are not shown on target
-    if((!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem())) &&
-        (m_spellProto->Effect[GetEffIndex()] != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY || m_target != caster))
+    if((!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem())))
     {
         if(!samespell)                                      // new slot need
         {

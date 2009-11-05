@@ -63,7 +63,6 @@ enum LootType
     LOOT_DISENCHANTING          = 4,
                                                             // ignored always by client
     LOOT_SKINNING               = 6,                        // unsupported by client, sending LOOT_PICKPOCKETING instead
-    LOOT_PROSPECTING            = 7,                        // unsupported by client, sending LOOT_PICKPOCKETING instead
 
     LOOT_FISHINGHOLE            = 20,                       // unsupported by client, sending LOOT_FISHING instead
     LOOT_INSIGNIA               = 21                        // unsupported by client, sending LOOT_CORPSE instead
@@ -321,7 +320,6 @@ extern LootStore LootTemplates_Mail;
 extern LootStore LootTemplates_Pickpocketing;
 extern LootStore LootTemplates_Skinning;
 extern LootStore LootTemplates_Disenchant;
-extern LootStore LootTemplates_Prospecting;
 
 void LoadLootTemplates_Creature();
 void LoadLootTemplates_Fishing();
@@ -331,7 +329,6 @@ void LoadLootTemplates_Mail();
 void LoadLootTemplates_Pickpocketing();
 void LoadLootTemplates_Skinning();
 void LoadLootTemplates_Disenchant();
-void LoadLootTemplates_Prospecting();
 
 void LoadLootTemplates_Reference();
 
@@ -345,7 +342,6 @@ inline void LoadLootTables()
     LoadLootTemplates_Pickpocketing();
     LoadLootTemplates_Skinning();
     LoadLootTemplates_Disenchant();
-    LoadLootTemplates_Prospecting();
 
     LoadLootTemplates_Reference();
 }
