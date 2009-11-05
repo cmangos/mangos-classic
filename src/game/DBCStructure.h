@@ -512,11 +512,10 @@ struct SpellEntry
     uint32    EffectChainTarget[3];                         // 100-102
     uint32    EffectItemType[3];                            // 103-105
     int32     EffectMiscValue[3];                           // 106-108
-//    int32     EffectMiscValueB[3];                          // missing in 1.12?
     uint32    EffectTriggerSpell[3];                        // 109-111
     float     EffectPointsPerComboPoint[3];                 // 112-114
     uint32    SpellVisual;                                  // 115
-                                                            // 116 not used
+    //uint32    SpellVisual2                                // 116 not used
     uint32    SpellIconID;                                  // 117
     uint32    activeIconID;                                 // 118
     //uint32    spellPriority;                              // 119

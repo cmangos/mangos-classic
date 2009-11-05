@@ -306,7 +306,6 @@ enum AreaAuraType
     AREA_AURA_PARTY,
     AREA_AURA_FRIEND,
     AREA_AURA_ENEMY,
-    AREA_AURA_PET,
-    AREA_AURA_OWNER
+    AREA_AURA_PET
 };
 #endif

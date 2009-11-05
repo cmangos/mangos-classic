@@ -416,11 +416,6 @@ Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target,
         case SPELL_EFFECT_APPLY_AREA_AURA_PET:
             m_areaAuraType = AREA_AURA_PET;
             break;
-        case SPELL_EFFECT_APPLY_AREA_AURA_OWNER:
-            m_areaAuraType = AREA_AURA_OWNER;
-            if (target == caster_ptr)
-                m_modifier.m_auraname = SPELL_AURA_NONE;
-            break;
         default:
             sLog.outError("Wrong spell effect in AreaAura constructor");
             ASSERT(false);
@@ -668,7 +663,6 @@ void AreaAura::Update(uint32 diff)
                     cell_lock->Visit(cell_lock, world_unit_searcher, *caster->GetMap(), *caster, m_radius);
                     break;
                 }
-                case AREA_AURA_OWNER:
                 case AREA_AURA_PET:
                 {
                     if(owner != caster)
@@ -732,7 +726,7 @@ void AreaAura::Update(uint32 diff)
                     m_target->RemoveAura(GetId(), GetEffIndex());
             }
         }
-        else if( m_areaAuraType == AREA_AURA_PET || m_areaAuraType == AREA_AURA_OWNER )
+        else if( m_areaAuraType == AREA_AURA_PET )
         {
             if( m_target->GetGUID() != caster->GetCharmerOrOwnerGUID() )
                 m_target->RemoveAura(GetId(), GetEffIndex());

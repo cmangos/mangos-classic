@@ -252,7 +252,6 @@ class Spell
         void EffectSummonPet(uint32 i);
         void EffectLearnPetSpell(uint32 i);
         void EffectWeaponDmg(uint32 i);
-        void EffectForceCast(uint32 i);
         void EffectTriggerSpell(uint32 i);
         void EffectTriggerMissileSpell(uint32 i);
         void EffectThreat(uint32 i);
@@ -273,7 +272,6 @@ class Spell
         void EffectParry(uint32 i);
         void EffectBlock(uint32 i);
         void EffectLeapForward(uint32 i);
-        void EffectLeapBack(uint32 i);
         void EffectTransmitted(uint32 i);
         void EffectDisEnchant(uint32 i);
         void EffectInebriate(uint32 i);
@@ -283,7 +281,6 @@ class Spell
         void EffectSelfResurrect(uint32 i);
         void EffectSkinning(uint32 i);
         void EffectCharge(uint32 i);
-        void EffectCharge2(uint32 i);
         void EffectProspecting(uint32 i);
         void EffectSendTaxi(uint32 i);
         void EffectSummonCritter(uint32 i);
@@ -303,14 +300,6 @@ class Spell
         void EffectSkinPlayerCorpse(uint32 i);
         void EffectSummonDemon(uint32 i);
         void EffectStealBeneficialBuff(uint32 i);
-        void EffectUnlearnSpecialization(uint32 i);
-        void EffectHealPct(uint32 i);
-        void EffectEnergisePct(uint32 i);
-        void EffectTriggerSpellWithValue(uint32 i);
-        void EffectTriggerRitualOfSummoning(uint32 i);
-        void EffectKillCredit(uint32 i);
-        void EffectQuestFail(uint32 i);
-        void EffectPlayMusic(uint32 i);
 
         Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 originalCasterGUID = 0, Spell** triggeringContainer = NULL );
         ~Spell();

@@ -660,31 +660,7 @@ enum SpellEffects
     SPELL_EFFECT_PROSPECTING               = 127,
     SPELL_EFFECT_APPLY_AREA_AURA_FRIEND    = 128,
     SPELL_EFFECT_APPLY_AREA_AURA_ENEMY     = 129,
-    SPELL_EFFECT_REDIRECT_THREAT           = 130,
-    SPELL_EFFECT_131                       = 131,
-    SPELL_EFFECT_PLAY_MUSIC                = 132,
-    SPELL_EFFECT_UNLEARN_SPECIALIZATION    = 133,
-    SPELL_EFFECT_KILL_CREDIT               = 134,
-    SPELL_EFFECT_CALL_PET                  = 135,
-    SPELL_EFFECT_HEAL_PCT                  = 136,
-    SPELL_EFFECT_ENERGIZE_PCT              = 137,
-    SPELL_EFFECT_LEAP_BACK                 = 138,
-    SPELL_EFFECT_CLEAR_QUEST               = 139,
-    SPELL_EFFECT_FORCE_CAST                = 140,
-    SPELL_EFFECT_141                       = 141,
-    SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
-    SPELL_EFFECT_APPLY_AREA_AURA_OWNER     = 143,
-    SPELL_EFFECT_144                       = 144,
-    SPELL_EFFECT_145                       = 145,
-    SPELL_EFFECT_146                       = 146,
-    SPELL_EFFECT_QUEST_FAIL                = 147,
-    SPELL_EFFECT_148                       = 148,
-    SPELL_EFFECT_149                       = 149,
-    SPELL_EFFECT_150                       = 150,
-    SPELL_EFFECT_TRIGGER_SPELL_2           = 151,
-    SPELL_EFFECT_152                       = 152,
-    SPELL_EFFECT_153                       = 153,
-    TOTAL_SPELL_EFFECTS                    = 154
+    TOTAL_SPELL_EFFECTS                    = 130
 };
 
 enum SpellCastResult

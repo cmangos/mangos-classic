@@ -1430,7 +1430,6 @@ void Pet::_SaveAuras()
                     uint8 i;
                     for (i = 0; i < 3; ++i)
                         if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH ||
-                            spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_OWNER ||
                             spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_PET )
                             break;
 
