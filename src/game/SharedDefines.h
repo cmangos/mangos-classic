@@ -492,6 +492,7 @@ enum CharacterSlot
     SLOT_EMPTY                         = 19
 };
 
+// from Languages.dbc (checked for 1.12.1)
 enum Language
 {
     LANG_UNIVERSAL      = 0,
@@ -508,14 +509,10 @@ enum Language
     LANG_GNOMISH        = 13,
     LANG_TROLL          = 14,
     LANG_GUTTERSPEAK    = 33,
-    LANG_DRAENEI        = 35,
-    LANG_ZOMBIE         = 36,
-    LANG_GNOMISH_BINARY = 37,
-    LANG_GOBLIN_BINARY  = 38,
     LANG_ADDON          = 0xFFFFFFFF                        // used by addons, in 2.4.0 not exit, replaced by messagetype?
 };
 
-#define LANGUAGES_COUNT   19
+#define LANGUAGES_COUNT   15
 
 enum Team
 {
@@ -1865,7 +1862,7 @@ inline uint8 ClassByQuestSort(int32 QuestSort)
     return 0;
 }
 
-// [-ZERO] Need cleanup base at SkillLine.dbc data
+// Data from SpellLine.dbc (1.12.1 checked)
 enum SkillType
 {
     SKILL_NONE                     = 0,
@@ -1908,8 +1905,8 @@ enum SkillType
     SKILL_SURVIVAL2                = 142,
     SKILL_RIDING_HORSE             = 148,
     SKILL_RIDING_WOLF              = 149,
-    SKILL_RIDING_RAM               = 152,
     SKILL_RIDING_TIGER             = 150,
+    SKILL_RIDING_RAM               = 152,
     SKILL_SWIMING                  = 155,
     SKILL_2H_MACES                 = 160,
     SKILL_UNARMED                  = 162,
@@ -1945,14 +1942,11 @@ enum SkillType
     SKILL_PET_RAPTOR               = 217,
     SKILL_PET_TALLSTRIDER          = 218,
     SKILL_RACIAL_UNDED             = 220,
-    SKILL_WEAPON_TALENTS           = 222,
     SKILL_CROSSBOWS                = 226,
-    SKILL_SPEARS                   = 227,
     SKILL_WANDS                    = 228,
     SKILL_POLEARMS                 = 229,
     SKILL_PET_SCORPID              = 236,
     SKILL_ARCANE                   = 237,
-    SKILL_OPEN_LOCK                = 242,
     SKILL_PET_TURTLE               = 251,
     SKILL_ASSASSINATION            = 253,
     SKILL_FURY                     = 256,
@@ -1994,23 +1988,11 @@ enum SkillType
     SKILL_RACIAL_TROLL             = 733,
     SKILL_RACIAL_GNOME             = 753,
     SKILL_RACIAL_HUMAN             = 754,
-    SKILL_JEWELCRAFTING            = 755,
-    SKILL_RACIAL_BLOODELF          = 756,
     SKILL_PET_EVENT_RC             = 758,
-    SKILL_LANG_DRAENEI             = 759,
-    SKILL_RACIAL_DRAENEI           = 760,
-    SKILL_PET_FELGUARD             = 761,
     SKILL_RIDING                   = 762,
-    SKILL_PET_DRAGONHAWK           = 763,
-    SKILL_PET_NETHER_RAY           = 764,
-    SKILL_PET_SPOREBAT             = 765,
-    SKILL_PET_WARP_STALKER         = 766,
-    SKILL_PET_RAVAGER              = 767,
-    SKILL_PET_SERPENT              = 768,
-    SKILL_INTERNAL                 = 769
 };
 
-#define MAX_SKILL_TYPE               770
+#define MAX_SKILL_TYPE               763
 
 inline SkillType SkillByLockType(LockType locktype)
 {
