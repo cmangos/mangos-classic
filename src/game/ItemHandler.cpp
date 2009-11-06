@@ -354,7 +354,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
         data << pProto->Delay;
         data << pProto->AmmoType;
-        data << pProto->RangedModRange;
+        data << (float)pProto->RangedModRange;
 
         for(int s = 0; s < MAX_ITEM_PROTO_SPELLS; ++s)
         {

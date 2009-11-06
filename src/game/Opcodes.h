@@ -904,7 +904,6 @@ enum OpcodesList
     SMSG_INIT_EXTRA_AURA_INFO                       = 0x3A3,
     SMSG_SET_EXTRA_AURA_INFO                        = 0x3A4,
     SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE            = 0x3A5,
-    SMSG_CLEAR_EXTRA_AURA_INFO                      = 0x3A6,
     MSG_MOVE_START_DESCEND                          = 0x3A7,
     CMSG_IGNORE_REQUIREMENTS_CHEAT                  = 0x3A8,
     SMSG_IGNORE_REQUIREMENTS_CHEAT                  = 0x3A9,
