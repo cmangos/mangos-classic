@@ -134,8 +134,8 @@ enum MangosStrings
     LANG_YOURS_SWIM_SPEED_CHANGED       = 142,
     LANG_YOU_CHANGE_BACK_SPEED          = 143,
     LANG_YOURS_BACK_SPEED_CHANGED       = 144,
-    LANG_YOU_CHANGE_FLY_SPEED           = 145,
-    LANG_YOURS_FLY_SPEED_CHANGED        = 146,
+    //LANG_YOU_CHANGE_FLY_SPEED           = 145,
+    //LANG_YOURS_FLY_SPEED_CHANGED        = 146,
 
     LANG_YOU_CHANGE_SIZE                = 147,
     LANG_YOURS_SIZE_CHANGED             = 148,

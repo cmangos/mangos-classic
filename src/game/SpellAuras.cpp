@@ -240,75 +240,6 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModRating,                                 //189 SPELL_AURA_MOD_RATING
     &Aura::HandleNoImmediateEffect,                         //190 SPELL_AURA_MOD_FACTION_REPUTATION_GAIN     implemented in Player::CalculateReputationGain
     &Aura::HandleAuraModUseNormalSpeed,                     //191 SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED
-    &Aura::HandleModMeleeRangedSpeedPct,                    //192 SPELL_AURA_HASTE_MELEE
-    &Aura::HandleModCombatSpeedPct,                         //193 SPELL_AURA_MELEE_SLOW (in fact combat (any type attack) speed pct)
-    &Aura::HandleUnused,                                    //194 SPELL_AURA_MOD_DEPRICATED_1 not used now (old SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT)
-    &Aura::HandleUnused,                                    //195 SPELL_AURA_MOD_DEPRICATED_2 not used now (old SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT)
-    &Aura::HandleNULL,                                      //196 SPELL_AURA_MOD_COOLDOWN
-    &Aura::HandleNoImmediateEffect,                         //197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE implemented in Unit::SpellCriticalBonus Unit::GetUnitCriticalChance
-    &Aura::HandleUnused,                                    //198 SPELL_AURA_MOD_ALL_WEAPON_SKILLS
-    &Aura::HandleNoImmediateEffect,                         //199 SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT  implemented in Unit::MagicSpellHitResult
-    &Aura::HandleNoImmediateEffect,                         //200 SPELL_AURA_MOD_XP_PCT implemented in Player::GiveXP
-    &Aura::HandleAuraAllowFlight,                           //201 SPELL_AURA_FLY                             this aura enable flight mode...
-    &Aura::HandleNoImmediateEffect,                         //202 SPELL_AURA_CANNOT_BE_DODGED                implemented in Unit::RollPhysicalOutcomeAgainst
-    &Aura::HandleNoImmediateEffect,                         //203 SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE  implemented in Unit::DoAttackDamage
-    &Aura::HandleNoImmediateEffect,                         //204 SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE implemented in Unit::DoAttackDamage
-    &Aura::HandleNULL,                                      //205 vulnerable to school dmg?
-    &Aura::HandleNULL,                                      //206 SPELL_AURA_MOD_SPEED_MOUNTED
-    &Aura::HandleAuraModIncreaseFlightSpeed,                //207 SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED
-    &Aura::HandleAuraModIncreaseFlightSpeed,                //208 SPELL_AURA_MOD_SPEED_FLIGHT, used only in spell: Flight Form (Passive)
-    &Aura::HandleAuraModIncreaseFlightSpeed,                //209 SPELL_AURA_MOD_FLIGHT_SPEED_ALWAYS
-    &Aura::HandleNULL,                                      //210 Commentator's Command
-    &Aura::HandleAuraModIncreaseFlightSpeed,                //211 SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK
-    &Aura::HandleAuraModRangedAttackPowerOfStatPercent,     //212 SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT
-    &Aura::HandleNoImmediateEffect,                         //213 SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT implemented in Player::RewardRage
-    &Aura::HandleNULL,                                      //214 Tamed Pet Passive
-    &Aura::HandleArenaPreparation,                          //215 SPELL_AURA_ARENA_PREPARATION
-    &Aura::HandleModCastingSpeed,                           //216 SPELL_AURA_HASTE_SPELLS
-    &Aura::HandleUnused,                                    //217                                   unused
-    &Aura::HandleAuraModRangedHaste,                        //218 SPELL_AURA_HASTE_RANGED
-    &Aura::HandleModManaRegen,                              //219 SPELL_AURA_MOD_MANA_REGEN_FROM_STAT
-    &Aura::HandleNULL,                                      //220 SPELL_AURA_MOD_RATING_FROM_STAT
-    &Aura::HandleNULL,                                      //221 ignored
-    &Aura::HandleUnused,                                    //222 unused
-    &Aura::HandleNULL,                                      //223 Cold Stare
-    &Aura::HandleUnused,                                    //224 unused
-    &Aura::HandleNoImmediateEffect,                         //225 SPELL_AURA_PRAYER_OF_MENDING
-    &Aura::HandleAuraPeriodicDummy,                         //226 SPELL_AURA_PERIODIC_DUMMY
-    &Aura::HandleNULL,                                      //227 periodic trigger spell
-    &Aura::HandleNoImmediateEffect,                         //228 stealth detection
-    &Aura::HandleNoImmediateEffect,                         //229 SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE        implemented in Unit::SpellDamageBonus
-    &Aura::HandleAuraModIncreaseMaxHealth,                  //230 Commanding Shout
-    &Aura::HandleNULL,                                      //231
-    &Aura::HandleNoImmediateEffect,                         //232 SPELL_AURA_MECHANIC_DURATION_MOD           implement in Unit::CalculateSpellDuration
-    &Aura::HandleNULL,                                      //233 set model id to the one of the creature with id m_modifier.m_miscvalue
-    &Aura::HandleNoImmediateEffect,                         //234 SPELL_AURA_MECHANIC_DURATION_MOD_NOT_STACK implement in Unit::CalculateSpellDuration
-    &Aura::HandleAuraModDispelResist,                       //235 SPELL_AURA_MOD_DISPEL_RESIST               implement in Unit::MagicSpellHitResult
-    &Aura::HandleUnused,                                    //236 unused
-    &Aura::HandleModSpellDamagePercentFromAttackPower,      //237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER  implemented in Unit::SpellBaseDamageBonus
-    &Aura::HandleModSpellHealingPercentFromAttackPower,     //238 SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER implemented in Unit::SpellBaseHealingBonus
-    &Aura::HandleAuraModScale,                              //239 SPELL_AURA_MOD_SCALE_2 only in Noggenfogger Elixir (16595) before 2.3.0 aura 61
-    &Aura::HandleForceMoveForward,                          //241 Forces the player to move forward
-    &Aura::HandleUnused,                                    //242 SPELL_AURA_MOD_SPELL_DAMAGE_FROM_HEALING
-    &Aura::HandleUnused,                                    //243 used by two test spells
-    &Aura::HandleComprehendLanguage,                        //244 Comprehend language
-    &Aura::HandleUnused,                                    //245 SPELL_AURA_MOD_DURATION_OF_MAGIC_EFFECTS
-    &Aura::HandleUnused,                                    //246 unused
-    &Aura::HandleUnused,                                    //247 unused
-    &Aura::HandleNoImmediateEffect,                         //248 SPELL_AURA_MOD_COMBAT_RESULT_CHANCE         implemented in Unit::RollMeleeOutcomeAgainst
-    &Aura::HandleNULL,                                      //249
-    &Aura::HandleAuraModIncreaseHealth,                     //250 SPELL_AURA_MOD_INCREASE_HEALTH_2
-    &Aura::HandleNULL,                                      //251 SPELL_AURA_MOD_ENEMY_DODGE
-    &Aura::HandleUnused,                                    //252 unused
-    &Aura::HandleUnused,                                    //253 unused
-    &Aura::HandleUnused,                                    //254 unused
-    &Aura::HandleUnused,                                    //255 unused
-    &Aura::HandleUnused,                                    //256 unused
-    &Aura::HandleUnused,                                    //257 unused
-    &Aura::HandleUnused,                                    //258 unused
-    &Aura::HandleUnused,                                    //259 unused
-    &Aura::HandleUnused,                                    //260 unused
-    &Aura::HandleNULL                                       //261 SPELL_AURA_261 some phased state (44856 spell)
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem) :
@@ -810,7 +741,6 @@ void Aura::_AddAura()
             break;
         case SPELL_AURA_MOD_REGEN:
         case SPELL_AURA_MOD_POWER_REGEN:
-        case SPELL_AURA_MOD_MANA_REGEN_FROM_STAT:
             m_periodicTimer = 5000;
             break;
     }
@@ -2289,42 +2219,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     }
 }
 
-void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
-{
-    // spells required only Real aura add/remove
-    if(!Real)
-        return;
-
-    SpellEntry const*spell = GetSpellProto();
-    switch( spell->SpellFamilyName)
-    {
-        case SPELLFAMILY_ROGUE:
-        {
-            // Master of Subtlety
-            if (spell->Id==31666 && !apply && Real)
-            {
-                m_target->RemoveAurasDueToSpell(31665);
-                break;
-            }
-            break;
-        }
-        case SPELLFAMILY_HUNTER:
-        {
-            // Aspect of the Viper
-            if (spell->SpellFamilyFlags & UI64LIT(0x0004000000000000))
-            {
-                // Update regen on remove
-                if (!apply && m_target->GetTypeId() == TYPEID_PLAYER)
-                    ((Player*)m_target)->UpdateManaRegen();
-                break;
-            }
-            break;
-        }
-    }
-
-    m_isPeriodic = apply;
-}
-
 void Aura::HandleAuraMounted(bool apply, bool Real)
 {
     // only at real add/remove aura
@@ -2466,23 +2360,11 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_GHOSTWOLF:
             modelid = 4613;
             break;
-        case FORM_FLIGHT:
-            if(Player::TeamForRace(m_target->getRace()) == ALLIANCE)
-                modelid = 20857;
-            else
-                modelid = 20872;
-            break;
         case FORM_MOONKIN:
             if(Player::TeamForRace(m_target->getRace()) == ALLIANCE)
                 modelid = 15374;
             else
                 modelid = 15375;
-            break;
-        case FORM_FLIGHT_EPIC:
-            if(Player::TeamForRace(m_target->getRace()) == ALLIANCE)
-                modelid = 21243;
-            else
-                modelid = 21244;
             break;
         case FORM_AMBIENT:
         case FORM_SHADOW:
@@ -2512,8 +2394,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_AQUA:
         case FORM_BEAR:
         case FORM_DIREBEAR:
-        case FORM_FLIGHT_EPIC:
-        case FORM_FLIGHT:
         case FORM_MOONKIN:
         {
             // remove movement affects
@@ -2747,10 +2627,6 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             {
                                                             // Will use the default model here
                 m_target->SetDisplayId(ci->DisplayID_A[0]);
-
-                // Dragonmaw Illusion (set mount model also)
-                if(GetId()==42016 && m_target->GetMountID() && !m_target->GetAurasByType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED).empty())
-                    m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,16314);
             }
         }
 
@@ -3667,36 +3543,6 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool /*apply*/, bool Real)
     m_target->UpdateSpeed(MOVE_RUN, true);
 }
 
-void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
-{
-    // all applied/removed only at real aura add/remove
-    if(!Real)
-        return;
-
-    // Enable Fly mode for flying mounts
-    if (m_modifier.m_auraname == SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED)
-    {
-        WorldPacket data;
-        if(apply)
-            data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
-        else
-            data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
-        data.append(m_target->GetPackGUID());
-        data << uint32(0);                                      // unknown
-        m_target->SendMessageToSet(&data, true);
-
-        //Players on flying mounts must be immune to polymorph
-        if (m_target->GetTypeId()==TYPEID_PLAYER)
-            m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,MECHANIC_POLYMORPH,apply);
-
-        // Dragonmaw Illusion (overwrite mount model, mounted aura already applied)
-        if( apply && m_target->HasAura(42016,0) && m_target->GetMountID())
-            m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,16314);
-    }
-
-    m_target->UpdateSpeed(MOVE_FLIGHT, true);
-}
-
 void Aura::HandleAuraModIncreaseSwimSpeed(bool /*apply*/, bool Real)
 {
     // all applied/removed only at real aura add/remove
@@ -3725,7 +3571,6 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
 
     m_target->UpdateSpeed(MOVE_RUN, true);
     m_target->UpdateSpeed(MOVE_SWIM, true);
-    m_target->UpdateSpeed(MOVE_FLIGHT, true);
 }
 
 void Aura::HandleAuraModUseNormalSpeed(bool /*apply*/, bool Real)
@@ -3736,7 +3581,6 @@ void Aura::HandleAuraModUseNormalSpeed(bool /*apply*/, bool Real)
 
     m_target->UpdateSpeed(MOVE_RUN, true);
     m_target->UpdateSpeed(MOVE_SWIM, true);
-    m_target->UpdateSpeed(MOVE_FLIGHT, true);
 }
 
 /*********************************************************/
@@ -4418,35 +4262,6 @@ void Aura::HandleModSpellHealingPercentFromStat(bool /*apply*/, bool /*Real*/)
     ((Player*)m_target)->UpdateSpellDamageAndHealingBonus();
 }
 
-void Aura::HandleAuraModDispelResist(bool apply, bool Real)
-{
-    if(!Real || !apply)
-        return;
-
-    if(GetId() == 33206)
-        m_target->CastSpell(m_target, 44416, true, NULL, this, GetCasterGUID());
-}
-
-void Aura::HandleModSpellDamagePercentFromAttackPower(bool /*apply*/, bool /*Real*/)
-{
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    // Magic damage modifiers implemented in Unit::SpellDamageBonus
-    // This information for client side use only
-    // Recalculate bonus
-    ((Player*)m_target)->UpdateSpellDamageAndHealingBonus();
-}
-
-void Aura::HandleModSpellHealingPercentFromAttackPower(bool /*apply*/, bool /*Real*/)
-{
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    // Recalculate bonus
-    ((Player*)m_target)->UpdateSpellDamageAndHealingBonus();
-}
-
 void Aura::HandleModHealingDone(bool /*apply*/, bool /*Real*/)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
@@ -4636,27 +4451,6 @@ void Aura::HandleModPowerRegenPCT(bool /*apply*/, bool Real)
         ((Player*)m_target)->UpdateManaRegen();
 }
 
-void Aura::HandleModManaRegen(bool /*apply*/, bool Real)
-{
-    // spells required only Real aura add/remove
-    if(!Real)
-        return;
-
-    if (m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    //Note: an increase in regen does NOT cause threat.
-    ((Player*)m_target)->UpdateManaRegen();
-}
-
-void Aura::HandleComprehendLanguage(bool apply, bool /*Real*/)
-{
-  /*[-ZERO]  if(apply)
-        m_target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_COMPREHEND_LANG);
-    else
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_COMPREHEND_LANG); */
-}
-
 void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 {
     // Special case with temporary increase max/current health
@@ -4689,24 +4483,6 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 
     // generic case
     m_target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
-}
-
-void  Aura::HandleAuraModIncreaseMaxHealth(bool apply, bool /*Real*/)
-{
-    uint32 oldhealth = m_target->GetHealth();
-    double healthPercentage = (double)oldhealth / (double)m_target->GetMaxHealth();
-
-    m_target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
-
-    // refresh percentage
-    if(oldhealth > 0)
-    {
-        uint32 newhealth = uint32(ceil((double)m_target->GetMaxHealth() * healthPercentage));
-        if(newhealth==0)
-            newhealth = 1;
-
-        m_target->SetHealth(newhealth);
-    }
 }
 
 void Aura::HandleAuraModIncreaseEnergy(bool apply, bool /*Real*/)
@@ -4857,21 +4633,6 @@ void Aura::HandleModCastingSpeed(bool apply, bool /*Real*/)
     m_target->ApplyCastTimePercentMod(m_modifier.m_amount,apply);
 }
 
-void Aura::HandleModMeleeRangedSpeedPct(bool apply, bool /*Real*/)
-{
-    m_target->ApplyAttackTimePercentMod(BASE_ATTACK, m_modifier.m_amount, apply);
-    m_target->ApplyAttackTimePercentMod(OFF_ATTACK, m_modifier.m_amount, apply);
-    m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, m_modifier.m_amount, apply);
-}
-
-void Aura::HandleModCombatSpeedPct(bool apply, bool /*Real*/)
-{
-    m_target->ApplyCastTimePercentMod(m_modifier.m_amount, apply);
-    m_target->ApplyAttackTimePercentMod(BASE_ATTACK, m_modifier.m_amount, apply);
-    m_target->ApplyAttackTimePercentMod(OFF_ATTACK, m_modifier.m_amount, apply);
-    m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, m_modifier.m_amount, apply);
-}
-
 void Aura::HandleModAttackSpeed(bool apply, bool /*Real*/)
 {
     if(!m_target->isAlive() )
@@ -4929,26 +4690,6 @@ void Aura::HandleAuraModRangedAttackPowerPercent(bool apply, bool /*Real*/)
 
     //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
     m_target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
-}
-
-void Aura::HandleAuraModRangedAttackPowerOfStatPercent(bool /*apply*/, bool Real)
-{
-    // spells required only Real aura add/remove
-    if(!Real)
-        return;
-
-    if(m_target->GetTypeId() == TYPEID_PLAYER && (m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0)
-        return;
-
-    if(m_modifier.m_miscvalue != STAT_INTELLECT)
-    {
-        // support required adding UpdateAttackPowerAndDamage calls at stat update
-        sLog.outError("Aura SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT (212) need support non-intelect stats!");
-        return;
-    }
-
-    // Recalculate bonus
-    ((Player*)m_target)->UpdateAttackPowerAndDamage(true);
 }
 
 /********************************/
@@ -5184,14 +4925,6 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             // aura from effect trigger spell
             spellId2 = 24907;
             break;
-        case FORM_FLIGHT:
-            spellId1 = 33948;
-            spellId2 = 34764;
-            break;
-        case FORM_FLIGHT_EPIC:
-            spellId1 = 40122;
-            spellId2 = 40121;
-            break;
         case FORM_SPIRITOFREDEMPTION:
             spellId1 = 27792;
             spellId2 = 27795;                               // must be second, this important at aura remove to prevent to early iterator invalidation.
@@ -5400,23 +5133,6 @@ void Aura::HandleAuraGhost(bool apply, bool /*Real*/)
     }
 }
 
-void Aura::HandleAuraAllowFlight(bool apply, bool Real)
-{
-    // all applied/removed only at real aura add/remove
-    if(!Real)
-        return;
-
-    // allow fly
-    WorldPacket data;
-    if(apply)
-        data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
-    else
-        data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
-    data.append(m_target->GetPackGUID());
-    data << uint32(0);                                      // unk
-    m_target->SendMessageToSet(&data, true);
-}
-
 void Aura::HandleModRating(bool apply, bool Real)
 {
     // spells required only Real aura add/remove
@@ -5429,16 +5145,6 @@ void Aura::HandleModRating(bool apply, bool Real)
     for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
         if (m_modifier.m_miscvalue & (1 << rating))
             ((Player*)m_target)->ApplyRatingMod(CombatRating(rating), m_modifier.m_amount, apply);
-}
-
-void Aura::HandleForceMoveForward(bool apply, bool Real)
-{
-    if(!Real || m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-   /*[-ZERO] if(apply)
-        m_target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FORCE_MOVE);
-    else
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FORCE_MOVE); */
 }
 
 void Aura::HandleModTargetResistance(bool apply, bool Real)
@@ -6045,261 +5751,6 @@ void Aura::PeriodicTick()
             pCaster->SpellNonMeleeDamageLog(m_target, GetId(), gain);
             break;
         }
-        // Here tick dummy auras
-        case SPELL_AURA_PERIODIC_DUMMY:
-        {
-            PeriodicDummyTick();
-            break;
-        }
-        default:
-            break;
-    }
-}
-
-void Aura::PeriodicDummyTick()
-{
-    SpellEntry const* spell = GetSpellProto();
-    switch (spell->Id)
-    {
-        // Drink
-        case 430:
-        case 431:
-        case 432:
-        case 1133:
-        case 1135:
-        case 1137:
-        case 10250:
-        case 22734:
-        case 27089:
-        case 34291:
-        case 43706:
-        case 46755:
-        {
-            if (m_target->GetTypeId() != TYPEID_PLAYER)
-                return;
-            // Search SPELL_AURA_MOD_POWER_REGEN aura for this spell and add bonus
-            Unit::AuraList const& aura = m_target->GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
-            for(Unit::AuraList::const_iterator i = aura.begin(); i != aura.end(); ++i)
-            {
-                if ((*i)->GetId() == GetId())
-                {
-                    // Get tick number
-                    int32 tick = (m_maxduration - m_duration) / m_modifier.periodictime;
-                    // Default case (not on arenas)
-                    if (tick == 0)
-                    {
-                        (*i)->GetModifier()->m_amount = m_modifier.m_amount;
-                        ((Player*)m_target)->UpdateManaRegen();
-                        // Disable continue
-                        m_isPeriodic = false;
-                    }
-                    return;
-                    //**********************************************
-                    // Code commended since arena patch not added
-                    // This feature uses only in arenas
-                    //**********************************************
-                    // Here need increase mana regen per tick (6 second rule)
-                    // on 0 tick -   0  (handled in 2 second)
-                    // on 1 tick - 166% (handled in 4 second)
-                    // on 2 tick - 133% (handled in 6 second)
-                    // Not need update after 3 tick
-                    /*
-                    if (tick > 3)
-                        return;
-                    // Apply bonus for 0 - 3 tick
-                    switch (tick)
-                    {
-                        case 0:   // 0%
-                            (*i)->GetModifier()->m_amount = m_modifier.m_amount = 0;
-                            break;
-                        case 1:   // 166%
-                            (*i)->GetModifier()->m_amount = m_modifier.m_amount * 5 / 3;
-                            break;
-                        case 2:   // 133%
-                            (*i)->GetModifier()->m_amount = m_modifier.m_amount * 4 / 3;
-                            break;
-                        default:  // 100% - normal regen
-                            (*i)->GetModifier()->m_amount = m_modifier.m_amount;
-                            break;
-                    }
-                    ((Player*)m_target)->UpdateManaRegen();
-                    return;*/
-                }
-            }
-            return;
-        }
-//        // Panda
-//        case 19230: break;
-//        // Master of Subtlety
-//        case 31666: break;
-//        // Gossip NPC Periodic - Talk
-//        case 33208: break;
-//        // Gossip NPC Periodic - Despawn
-//        case 33209: break;
-//        // Force of Nature
-//        case 33831: break;
-        // Aspect of the Viper
-        case 34074:
-        {
-            if (m_target->GetTypeId() != TYPEID_PLAYER)
-                return;
-            // Should be manauser
-            if (m_target->getPowerType()!=POWER_MANA)
-                return;
-            Unit *caster = GetCaster();
-            if (!caster)
-                return;
-            // Regen amount is max (100% from spell) on 21% or less mana and min on 92.5% or greater mana (20% from spell)
-            int mana = m_target->GetPower(POWER_MANA);
-            int max_mana = m_target->GetMaxPower(POWER_MANA);
-            int32 base_regen = caster->CalculateSpellDamage(m_spellProto, m_effIndex, m_currentBasePoints, m_target);
-            float regen_pct = 1.20f - 1.1f * mana / max_mana;
-            if      (regen_pct > 1.0f) regen_pct = 1.0f;
-            else if (regen_pct < 0.2f) regen_pct = 0.2f;
-            m_modifier.m_amount = int32 (base_regen * regen_pct);
-            ((Player*)m_target)->UpdateManaRegen();
-            return;
-        }
-//        // Steal Weapon
-//        case 36207: break;
-//        // Simon Game START timer, (DND)
-//        case 39993: break;
-//        // Harpooner's Mark
-//        case 40084: break;
-//        // Knockdown Fel Cannon: break; The Aggro Burst
-//        case 40119: break;
-//        // Old Mount Spell
-//        case 40154: break;
-//        // Magnetic Pull
-//        case 40581: break;
-//        // Ethereal Ring: break; The Bolt Burst
-//        case 40801: break;
-//        // Crystal Prison
-//        case 40846: break;
-//        // Copy Weapon
-//        case 41054: break;
-//        // Ethereal Ring Visual, Lightning Aura
-//        case 41477: break;
-//        // Ethereal Ring Visual, Lightning Aura (Fork)
-//        case 41525: break;
-//        // Ethereal Ring Visual, Lightning Jumper Aura
-//        case 41567: break;
-//        // No Man's Land
-//        case 41955: break;
-//        // Headless Horseman - Fire
-//        case 42074: break;
-//        // Headless Horseman - Visual - Large Fire
-//        case 42075: break;
-//        // Headless Horseman - Start Fire, Periodic Aura
-//        case 42140: break;
-//        // Ram Speed Boost
-//        case 42152: break;
-//        // Headless Horseman - Fires Out Victory Aura
-//        case 42235: break;
-//        // Pumpkin Life Cycle
-//        case 42280: break;
-//        // Brewfest Request Chick Chuck Mug Aura
-//        case 42537: break;
-//        // Squashling
-//        case 42596: break;
-//        // Headless Horseman Climax, Head: Periodic
-//        case 42603: break;
-//        // Fire Bomb
-//        case 42621: break;
-//        // Headless Horseman - Conflagrate, Periodic Aura
-//        case 42637: break;
-//        // Headless Horseman - Create Pumpkin Treats Aura
-//        case 42774: break;
-//        // Headless Horseman Climax - Summoning Rhyme Aura
-//        case 42879: break;
-//        // Tricky Treat
-//        case 42919: break;
-//        // Giddyup!
-//        case 42924: break;
-//        // Ram - Trot
-//        case 42992: break;
-//        // Ram - Canter
-//        case 42993: break;
-//        // Ram - Gallop
-//        case 42994: break;
-//        // Ram Level - Neutral
-//        case 43310: break;
-//        // Headless Horseman - Maniacal Laugh, Maniacal, Delayed 17
-//        case 43884: break;
-//        // Headless Horseman - Maniacal Laugh, Maniacal, other, Delayed 17
-//        case 44000: break;
-//        // Energy Feedback
-//        case 44328: break;
-//        // Romantic Picnic
-//        case 45102: break;
-//        // Romantic Picnic
-//        case 45123: break;
-//        // Looking for Love
-//        case 45124: break;
-//        // Kite - Lightning Strike Kite Aura
-//        case 45197: break;
-//        // Rocket Chicken
-//        case 45202: break;
-//        // Copy Offhand Weapon
-//        case 45205: break;
-//        // Upper Deck - Kite - Lightning Periodic Aura
-//        case 45207: break;
-//        // Kite -Sky  Lightning Strike Kite Aura
-//        case 45251: break;
-//        // Ribbon Pole Dancer Check Aura
-//        case 45390: break;
-//        // Holiday - Midsummer, Ribbon Pole Periodic Visual
-//        case 45406: break;
-//        // Parachute
-//        case 45472: break;
-//        // Alliance Flag, Extra Damage Debuff
-//        case 45898: break;
-//        // Horde Flag, Extra Damage Debuff
-//        case 45899: break;
-//        // Ahune - Summoning Rhyme Aura
-//        case 45926: break;
-//        // Ahune - Slippery Floor
-//        case 45945: break;
-//        // Ahune's Shield
-//        case 45954: break;
-//        // Nether Vapor Lightning
-//        case 45960: break;
-//        // Darkness
-//        case 45996: break;
-//        // Summon Blood Elves Periodic
-//        case 46041: break;
-//        // Transform Visual Missile Periodic
-//        case 46205: break;
-//        // Find Opening Beam End
-//        case 46333: break;
-//        // Ice Spear Control Aura
-//        case 46371: break;
-//        // Hailstone Chill
-//        case 46458: break;
-//        // Hailstone Chill, Internal
-//        case 46465: break;
-//        // Chill, Internal Shifter
-//        case 46549: break;
-//        // Summon Ice Spear Knockback Delayer
-//        case 46878: break;
-//        // Burninate Effect
-//        case 47214: break;
-//        // Fizzcrank Practice Parachute
-//        case 47228: break;
-//        // Send Mug Control Aura
-//        case 47369: break;
-//        // Direbrew's Disarm (precast)
-//        case 47407: break;
-//        // Mole Machine Port Schedule
-//        case 47489: break;
-//        // Mole Machine Portal Schedule
-//        case 49466: break;
-//        // Drink Coffee
-//        case 49472: break;
-//        // Listening to Music
-//        case 50493: break;
-//        // Love Rocket Barrage
-//        case 50530: break;
         default:
             break;
     }
@@ -6351,17 +5802,6 @@ void Aura::HandleManaShield(bool apply, bool Real)
             m_modifier.m_amount += (int32)DoneActualBenefit;
         }
     }
-}
-
-void Aura::HandleArenaPreparation(bool apply, bool Real)
-{
-    if(!Real)
-        return;
-
-    if(apply)
-        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PREPARATION);
-    else
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PREPARATION);
 }
 
 void Aura::UnregisterSingleCastAura()

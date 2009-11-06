@@ -1728,9 +1728,6 @@ void Player::RewardRage( uint32 damage, uint32 weaponSpeedHitFactor, bool attack
     if(attacker)
     {
         addRage = ((damage/rageconversion*7.5 + weaponSpeedHitFactor)/2);
-
-        // talent who gave more rage on attack
-        addRage *= 1.0f + GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT) / 100.0f;
     }
     else
     {
@@ -2149,11 +2146,6 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     // XP to money conversion processed in Player::RewardQuest
     if(level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
         return;
-
-    // handle SPELL_AURA_MOD_XP_PCT auras
-    Unit::AuraList const& ModXPPctAuras = GetAurasByType(SPELL_AURA_MOD_XP_PCT);
-    for(Unit::AuraList::const_iterator i = ModXPPctAuras.begin();i != ModXPPctAuras.end(); ++i)
-        xp = uint32(xp*(1.0f + (*i)->GetModifier()->m_amount / 100.0f));
 
     // XP resting bonus for kill
     uint32 rested_bonus_xp = victim ? GetXPRestBonus(xp) : 0;
@@ -2767,9 +2759,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
             (spell_id ==  7376 && m_form == FORM_DEFENSIVESTANCE) ||
             (spell_id ==  7381 && m_form == FORM_BERSERKERSTANCE) ||
             (spell_id == 21156 && m_form == FORM_BATTLESTANCE)||
-            (spell_id == 21178 && (m_form == FORM_BEAR || m_form == FORM_DIREBEAR) ) ||
-            (spell_id == 33948 && m_form == FORM_FLIGHT) ||
-            (spell_id == 40121 && m_form == FORM_FLIGHT_EPIC) )
+            (spell_id == 21178 && (m_form == FORM_BEAR || m_form == FORM_DIREBEAR) ) )
             //Check CasterAuraStates
             if (!spellInfo->CasterAuraState || HasAuraState(AuraState(spellInfo->CasterAuraState)))
                 CastSpell(this, spell_id, true);
@@ -16536,10 +16526,6 @@ void Player::SendInitialPacketsBeforeAddToMap()
     data << uint32(secsToTimeBitFields(sWorld.GetGameTime()));
     data << (float)0.01666667f;                             // game speed
     GetSession()->SendPacket( &data );
-
-    // set fly flag if in fly form or taxi flight to prevent visually drop at ground in showup moment
-    if(HasAuraType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED) || isInFlight())
-        m_movementInfo.AddMovementFlag(MOVEMENTFLAG_FLYING2);
 }
 
 void Player::SendInitialPacketsAfterAddToMap()
@@ -16553,7 +16539,7 @@ void Player::SendInitialPacketsAfterAddToMap()
     {
         SPELL_AURA_MOD_FEAR,     SPELL_AURA_TRANSFORM,                 SPELL_AURA_WATER_WALK,
         SPELL_AURA_FEATHER_FALL, SPELL_AURA_HOVER,                     SPELL_AURA_SAFE_FALL,
-        SPELL_AURA_FLY,          SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED, SPELL_AURA_NONE
+        SPELL_AURA_NONE
     };
     for(AuraType const* itr = &auratypes[0]; itr && itr[0] != SPELL_AURA_NONE; ++itr)
     {
@@ -17693,7 +17679,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
     // 14.57 can be calculated by resolving damageperc formula below to 0
     if (z_diff >= 14.57f && !isDead() && !isGameMaster() &&
         !HasAuraType(SPELL_AURA_HOVER) && !HasAuraType(SPELL_AURA_FEATHER_FALL) &&
-        !HasAuraType(SPELL_AURA_FLY) && !IsImmunedToDamage(SPELL_SCHOOL_MASK_NORMAL) )
+        !IsImmunedToDamage(SPELL_SCHOOL_MASK_NORMAL) )
     {
         //Safe fall, fall height reduction
         int32 safe_fall = GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);

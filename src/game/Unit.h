@@ -154,7 +154,7 @@ enum UnitBytes1_Flags
     UNIT_BYTE1_FLAG_ALL          = 0xFF
 };
 
-// high byte (3 from 0..3) of UNIT_FIELD_BYTES_2
+// high byte (3 from 0..3) of UNIT_FIELD_BYTES_2 (SpellShapeshiftForm.dbc, checked for 1.12.1)
 enum ShapeshiftForm
 {
     FORM_NONE               = 0x00,
@@ -172,11 +172,7 @@ enum ShapeshiftForm
     FORM_BATTLESTANCE       = 0x11,
     FORM_DEFENSIVESTANCE    = 0x12,
     FORM_BERSERKERSTANCE    = 0x13,
-    FORM_TEST               = 0x14,
-    FORM_ZOMBIE             = 0x15,
-    FORM_FLIGHT_EPIC        = 0x1B,
     FORM_SHADOW             = 0x1C,
-    FORM_FLIGHT             = 0x1D,
     FORM_STEALTH            = 0x1E,
     FORM_MOONKIN            = 0x1F,
     FORM_SPIRITOFREDEMPTION = 0x20
@@ -405,11 +401,9 @@ enum UnitMoveType
     MOVE_SWIM           = 3,
     MOVE_SWIM_BACK      = 4,
     MOVE_TURN_RATE      = 5,
-    MOVE_FLIGHT         = 6,
-    MOVE_FLIGHT_BACK    = 7,
 };
 
-#define MAX_MOVE_TYPE 8
+#define MAX_MOVE_TYPE 6
 
 extern float baseMoveSpeed[MAX_MOVE_TYPE];
 
@@ -471,6 +465,7 @@ enum UnitVisibility
     VISIBILITY_RESPAWN            = 5                       // special totally not detectable visibility for force delete object at respawn command
 };
 
+// [-ZERO] Need recheck values
 // Value masks for UNIT_FIELD_FLAGS
 enum UnitFlags
 {
@@ -1448,7 +1443,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, WeaponAttackType attType, uint32 cooldown);
         bool HandleHasteAuraProc(   Unit *pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 cooldown);
         bool HandleOverrideClassScriptAuraProc(Unit *pVictim, Aura* triggeredByAura, SpellEntry const *procSpell, uint32 cooldown);
-        bool HandleMendingAuraProc(Aura* triggeredByAura);
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;

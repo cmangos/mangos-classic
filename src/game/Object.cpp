@@ -240,53 +240,43 @@ void Object::DestroyForPlayer( Player *target ) const
 
 void Object::BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2) const
 {
-    *data << (uint8)flags;                                  // update flags
+    *data << (uint8)flags;
 
-    // 0x20
-    if (flags & UPDATEFLAG_LIVING)
+    if (flags & UPDATEFLAG_LIVING)                          // 0x20
     {
-        switch(GetTypeId())
+        if( m_objectTypeId==TYPEID_PLAYER && ((Player*)this)->GetTransport())
         {
-            case TYPEID_UNIT:
-            {
-                flags2 = ((Unit*)this)->isInFlight() ? (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_LEVITATING) : MOVEMENTFLAG_NONE;
-            }
-            break;
-            case TYPEID_PLAYER:
-            {
-                flags2 = ((Player*)this)->m_movementInfo.GetMovementFlags();
-
-                if(((Player*)this)->GetTransport())
-                    flags2 |= MOVEMENTFLAG_ONTRANSPORT;
-                else
-                    flags2 &= ~MOVEMENTFLAG_ONTRANSPORT;
-
-                // remove unknown, unused etc flags for now
-                flags2 &= ~MOVEMENTFLAG_SPLINE2;            // will be set manually
-
-                if(((Player*)this)->isInFlight())
-                {
-                    WPAssert(((Player*)this)->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE);
-                    flags2 = (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2);
-                }
-            }
-            break;
+            flags2 |= 0x02000000;
         }
 
-        *data << uint32(flags2);                            // movement flags
-        *data << uint8(0);                                  // unk 2.3.0
-        *data << uint32(getMSTime());                       // time (in milliseconds)
+        *data << (uint32)flags2;
+        *data << (uint32)getMSTime();
     }
 
-    // 0x40
-    if (flags & UPDATEFLAG_HAS_POSITION)
+    if (flags & UPDATEFLAG_HAS_POSITION)                     // 0x40
     {
-        // 0x02
-        if(flags & UPDATEFLAG_TRANSPORT && ((GameObject*)this)->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
+        if( m_objectTypeId==TYPEID_PLAYER && ((Player *)this)->GetTransport())
         {
-            *data << (float)0;
-            *data << (float)0;
-            *data << (float)0;
+            //*data << ((Player *)this)->m_transport->GetPositionX() + (float)((Player *)this)->m_transX;
+            //*data << ((Player *)this)->m_transport->GetPositionY() + (float)((Player *)this)->m_transY;
+            //*data << ((Player *)this)->m_transport->GetPositionZ() + (float)((Player *)this)->m_transZ;
+
+            *data << ((Player *)this)->GetTransport()->GetPositionX();
+            *data << ((Player *)this)->GetTransport()->GetPositionY();
+            *data << ((Player *)this)->GetTransport()->GetPositionZ();
+            *data << ((Player *)this)->GetTransport()->GetOrientation();
+
+            *data << (uint64)(((Player *)this)->GetTransport()->GetGUID());
+            *data << ((Player *)this)->GetTransOffsetX();
+            *data << ((Player *)this)->GetTransOffsetY();
+            *data << ((Player *)this)->GetTransOffsetZ();
+            *data << ((Player *)this)->GetTransOffsetO();
+        }
+        else if(GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT)
+        {
+            *data << (uint32)0;
+            *data << (uint32)0;
+            *data << (uint32)0;
             *data << ((WorldObject *)this)->GetOrientation();
         }
         else
@@ -298,214 +288,53 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2) 
         }
     }
 
-    // 0x20
-    if(flags & UPDATEFLAG_LIVING)
+    if (flags & UPDATEFLAG_LIVING)                          // 0x20
     {
-        // 0x00000200
-        if(flags2 & MOVEMENTFLAG_ONTRANSPORT)
+        *data << (float)0;
+
+        if(flags2 & 0x2000)                                 //update self
         {
-            if(GetTypeId() == TYPEID_PLAYER)
-            {
-                *data << (uint64)((Player*)this)->GetTransport()->GetGUID();
-                *data << (float)((Player*)this)->GetTransOffsetX();
-                *data << (float)((Player*)this)->GetTransOffsetY();
-                *data << (float)((Player*)this)->GetTransOffsetZ();
-                *data << (float)((Player*)this)->GetTransOffsetO();
-                *data << (uint32)((Player*)this)->GetTransTime();
-            }
-            //MaNGOS currently not have support for other than player on transport
+            *data << (float)0;
+            *data << (float)1.0;
+            *data << (float)0;
+            *data << (float)0;
         }
 
-        // 0x02200000
-        if(flags2 & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2))
+        *data << ((Player*)this)->GetSpeed( MOVE_WALK );
+        *data << ((Player*)this)->GetSpeed( MOVE_RUN );
+        *data << ((Player*)this)->GetSpeed( MOVE_SWIM_BACK );
+        *data << ((Player*)this)->GetSpeed( MOVE_SWIM );
+        *data << ((Player*)this)->GetSpeed( MOVE_RUN_BACK );
+        *data << ((Player*)this)->GetSpeed( MOVE_TURN_RATE );
+
+        if( m_objectTypeId==TYPEID_UNIT )
         {
-            if(GetTypeId() == TYPEID_PLAYER)
-                *data << (float)((Player*)this)->m_movementInfo.s_pitch;
-            else
-                *data << (float)0;                          // is't part of movement packet, we must store and send it...
-        }
-
-        if(GetTypeId() == TYPEID_PLAYER)
-            *data << (uint32)((Player*)this)->m_movementInfo.fallTime;
-        else
-            *data << (uint32)0;                             // last fall time
-
-        // 0x00001000
-        if(flags2 & MOVEMENTFLAG_JUMPING)
-        {
-            if(GetTypeId() == TYPEID_PLAYER)
+            uint8 PosCount=0;
+            if(flags2 & 0x400000)
             {
-                *data << (float)((Player*)this)->m_movementInfo.j_unk;
-                *data << (float)((Player*)this)->m_movementInfo.j_sinAngle;
-                *data << (float)((Player*)this)->m_movementInfo.j_cosAngle;
-                *data << (float)((Player*)this)->m_movementInfo.j_xyspeed;
+                *data << (uint32)0x0;
+                *data << (uint32)0x659;
+                *data << (uint32)0xB7B;
+                *data << (uint32)0xFDA0B4;
+                *data << (uint32)PosCount;
+                for(int i=0;i<PosCount+1;i++)
+                {
+                    *data << (float)0;                          //x
+                    *data << (float)0;                          //y
+                    *data << (float)0;                          //z
+                }
             }
-            else
-            {
-                *data << (float)0;
-                *data << (float)0;
-                *data << (float)0;
-                *data << (float)0;
-            }
-        }
-
-        // 0x04000000
-        if(flags2 & MOVEMENTFLAG_SPLINE)
-        {
-            if(GetTypeId() == TYPEID_PLAYER)
-                *data << (float)((Player*)this)->m_movementInfo.u_unk1;
-            else
-                *data << (float)0;
-        }
-
-        *data << ((Unit*)this)->GetSpeed( MOVE_WALK );
-        *data << ((Unit*)this)->GetSpeed( MOVE_RUN );
-        *data << ((Unit*)this)->GetSpeed( MOVE_SWIM_BACK );
-        *data << ((Unit*)this)->GetSpeed( MOVE_SWIM );
-        *data << ((Unit*)this)->GetSpeed( MOVE_RUN_BACK );
-        *data << ((Unit*)this)->GetSpeed( MOVE_FLIGHT );
-        *data << ((Unit*)this)->GetSpeed( MOVE_FLIGHT_BACK );
-        *data << ((Unit*)this)->GetSpeed( MOVE_TURN_RATE );
-
-        // 0x08000000
-        if(flags2 & MOVEMENTFLAG_SPLINE2)
-        {
-            if(GetTypeId() != TYPEID_PLAYER)
-            {
-                sLog.outDebug("_BuildMovementUpdate: MOVEMENTFLAG_SPLINE2 for non-player");
-                return;
-            }
-
-            if(!((Player*)this)->isInFlight())
-            {
-                sLog.outDebug("_BuildMovementUpdate: MOVEMENTFLAG_SPLINE2 but not in flight");
-                return;
-            }
-
-            WPAssert(((Player*)this)->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE);
-
-            FlightPathMovementGenerator *fmg = (FlightPathMovementGenerator*)(((Player*)this)->GetMotionMaster()->top());
-
-            uint32 flags3 = 0x00000300;
-
-            *data << uint32(flags3);                        // splines flag?
-
-            if(flags3 & 0x10000)                            // probably x,y,z coords there
-            {
-                *data << (float)0;
-                *data << (float)0;
-                *data << (float)0;
-            }
-
-            if(flags3 & 0x20000)                            // probably guid there
-            {
-                *data << uint64(0);
-            }
-
-            if(flags3 & 0x40000)                            // may be orientation
-            {
-                *data << (float)0;
-            }
-
-            Path &path = fmg->GetPath();
-
-            float x, y, z;
-            ((Player*)this)->GetPosition(x, y, z);
-
-            uint32 inflighttime = uint32(path.GetPassedLength(fmg->GetCurrentNode(), x, y, z) * 32);
-            uint32 traveltime = uint32(path.GetTotalLength() * 32);
-
-            *data << uint32(inflighttime);                  // passed move time?
-            *data << uint32(traveltime);                    // full move time?
-            *data << uint32(0);                             // ticks count?
-
-            uint32 poscount = uint32(path.Size());
-
-            *data << uint32(poscount);                      // points count
-
-            for(uint32 i = 0; i < poscount; ++i)
-            {
-                *data << path.GetNodes()[i].x;
-                *data << path.GetNodes()[i].y;
-                *data << path.GetNodes()[i].z;
-            }
-
-            /*for(uint32 i = 0; i < poscount; i++)
-            {
-                // path points
-                *data << (float)0;
-                *data << (float)0;
-                *data << (float)0;
-            }*/
-
-            *data << path.GetNodes()[poscount-1].x;
-            *data << path.GetNodes()[poscount-1].y;
-            *data << path.GetNodes()[poscount-1].z;
-
-            // target position (path end)
-            /**data << ((Unit*)this)->GetPositionX();
-             *data << ((Unit*)this)->GetPositionY();
-             *data << ((Unit*)this)->GetPositionZ();*/
         }
     }
 
-    // 0x8
-    if(flags & UPDATEFLAG_LOWGUID)
+    if (flags & UPDATEFLAG_ALL)                             // 0x10
     {
-        switch(GetTypeId())
-        {
-            case TYPEID_OBJECT:
-            case TYPEID_ITEM:
-            case TYPEID_CONTAINER:
-            case TYPEID_GAMEOBJECT:
-            case TYPEID_DYNAMICOBJECT:
-            case TYPEID_CORPSE:
-                *data << uint32(GetGUIDLow());              // GetGUIDLow()
-                break;
-            case TYPEID_UNIT:
-                *data << uint32(0x0000000B);                // unk, can be 0xB or 0xC
-                break;
-            case TYPEID_PLAYER:
-                if(flags & UPDATEFLAG_SELF)
-                    *data << uint32(0x00000015);            // unk, can be 0x15 or 0x22
-                else
-                    *data << uint32(0x00000008);            // unk, can be 0x7 or 0x8
-                break;
-            default:
-                *data << uint32(0x00000000);                // unk
-                break;
-        }
+        *data << (uint32)0x1;
     }
 
-    // 0x10
-    if(flags & UPDATEFLAG_HIGHGUID)
+    if (flags & UPDATEFLAG_TRANSPORT)                       // 0x02, including corpse
     {
-        switch(GetTypeId())
-        {
-            case TYPEID_OBJECT:
-            case TYPEID_ITEM:
-            case TYPEID_CONTAINER:
-            case TYPEID_GAMEOBJECT:
-            case TYPEID_DYNAMICOBJECT:
-            case TYPEID_CORPSE:
-                *data << uint32(GetGUIDHigh());             // GetGUIDHigh()
-                break;
-            default:
-                *data << uint32(0x00000000);                // unk
-                break;
-        }
-    }
-
-    // 0x4
-    if(flags & UPDATEFLAG_HAS_TARGET)                       // packed guid (current target guid)
-    {
-        *data << uint8(0);                                  // packed guid (probably target guid)
-    }
-
-    // 0x2
-    if(flags & UPDATEFLAG_TRANSPORT)
-    {
-        *data << uint32(getMSTime());                       // ms time
+        *data << (uint32)getMSTime();
     }
 }
 

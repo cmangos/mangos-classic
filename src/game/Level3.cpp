@@ -5100,19 +5100,11 @@ bool ChatHandler::HandleGMFlyCommand(const char* args)
     if (!target)
         target = m_session->GetPlayer();
 
-    WorldPacket data(12);
-    if (strncmp(args, "on", 3) == 0)
-        data.SetOpcode(SMSG_MOVE_SET_CAN_FLY);
-    else if (strncmp(args, "off", 4) == 0)
-        data.SetOpcode(SMSG_MOVE_UNSET_CAN_FLY);
-    else
+    // [-ZERO] Need reimplement in another way
     {
         SendSysMessage(LANG_USE_BOL);
         return false;
     }
-    data.append(target->GetPackGUID());
-    data << uint32(0);                                      // unknown
-    target->SendMessageToSet(&data, true);
     PSendSysMessage(LANG_COMMAND_FLYMODE_STATUS, GetNameLink(target).c_str(), args);
     return true;
 }

@@ -81,14 +81,11 @@ class MANGOS_DLL_SPEC Aura
         void HandleModPossess(bool Apply, bool Real);
         void HandlePeriodicDamage(bool Apply, bool Real);
         void HandleAuraDummy(bool Apply, bool Real);
-        void HandleAuraPeriodicDummy(bool apply, bool Real);
         void HandleModConfuse(bool Apply, bool Real);
         void HandleModCharm(bool Apply, bool Real);
         void HandleModFear(bool Apply, bool Real);
         void HandlePeriodicHeal(bool Apply, bool Real);
         void HandleModAttackSpeed(bool Apply, bool Real);
-        void HandleModMeleeRangedSpeedPct(bool apply, bool Real);
-        void HandleModCombatSpeedPct(bool apply, bool Real);
         void HandleModThreat(bool Apply, bool Real);
         void HandleModTaunt(bool Apply, bool Real);
         void HandleFeignDeath(bool Apply, bool Real);
@@ -123,7 +120,6 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModStat(bool Apply, bool Real);
         void HandleAuraModIncreaseSpeed(bool Apply, bool Real);
         void HandleAuraModIncreaseMountedSpeed(bool Apply, bool Real);
-        void HandleAuraModIncreaseFlightSpeed(bool Apply, bool Real);
         void HandleAuraModDecreaseSpeed(bool Apply, bool Real);
         void HandleAuraModUseNormalSpeed(bool Apply, bool Real);
         void HandleAuraModIncreaseHealth(bool Apply, bool Real);
@@ -182,32 +178,22 @@ class MANGOS_DLL_SPEC Aura
         void HandleModUnattackable(bool Apply, bool Real);
         void HandleAuraModPacify(bool Apply, bool Real);
         void HandleAuraGhost(bool Apply, bool Real);
-        void HandleAuraAllowFlight(bool Apply, bool Real);
         void HandleModRating(bool apply, bool Real);
         void HandleModTargetResistance(bool apply, bool Real);
         void HandleAuraModAttackPowerPercent(bool apply, bool Real);
         void HandleAuraModRangedAttackPowerPercent(bool apply, bool Real);
-        void HandleAuraModRangedAttackPowerOfStatPercent(bool apply, bool Real);
         void HandleSpiritOfRedemption(bool apply, bool Real);
-        void HandleModManaRegen(bool apply, bool Real);
-        void HandleComprehendLanguage(bool apply, bool Real);
         void HandleShieldBlockValue(bool apply, bool Real);
         void HandleModSpellCritChanceShool(bool apply, bool Real);
         void HandleAuraRetainComboPoints(bool apply, bool Real);
         void HandleModSpellDamagePercentFromStat(bool apply, bool Real);
         void HandleModSpellHealingPercentFromStat(bool apply, bool Real);
-        void HandleAuraModDispelResist(bool apply, bool Real);
-        void HandleModSpellDamagePercentFromAttackPower(bool apply, bool Real);
-        void HandleModSpellHealingPercentFromAttackPower(bool apply, bool Real);
         void HandleAuraModPacifyAndSilence(bool Apply, bool Real);
-        void HandleAuraModIncreaseMaxHealth(bool apply, bool Real);
-        void HandleForceMoveForward(bool apply, bool Real);
         void HandleAuraModResistenceOfStatPercent(bool apply, bool Real);
         void HandleAuraPowerBurn(bool apply, bool Real);
         void HandleSchoolAbsorb(bool apply, bool Real);
         void HandlePreventFleeing(bool apply, bool Real);
         void HandleManaShield(bool apply, bool Real);
-        void HandleArenaPreparation(bool apply, bool Real);
 
         virtual ~Aura();
 
@@ -312,7 +298,6 @@ class MANGOS_DLL_SPEC Aura
 
         // must be called only from Aura*::Update
         void PeriodicTick();
-        void PeriodicDummyTick();
 
         void ReapplyAffectedPassiveAuras(Unit* target, SpellModifier const& spellmod);
 

@@ -574,6 +574,7 @@ enum InstanceResetWarningType
     RAID_INSTANCE_WELCOME           = 4                     // Welcome to %s. This raid instance is scheduled to reset in %s.
 };
 
+// [-ZERO] Need check and update
 // used in most movement packets (send and received)
 enum MovementFlags
 {
@@ -1856,9 +1857,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool isMoving() const { return m_movementInfo.HasMovementFlag(movementFlagsMask); }
         bool isMovingOrTurning() const { return m_movementInfo.HasMovementFlag(movementOrTurningFlagsMask); }
-
-        bool CanFly() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY); }
-        bool IsFlying() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_FLYING); }
 
         void SetClientControl(Unit* target, uint8 allowMove);
 

@@ -241,7 +241,6 @@ class ChatHandler
         bool HandleModifyASpeedCommand(const char* args);
         bool HandleModifySpeedCommand(const char* args);
         bool HandleModifyBWalkCommand(const char* args);
-        bool HandleModifyFlyCommand(const char* args);
         bool HandleModifySwimCommand(const char* args);
         bool HandleModifyScaleCommand(const char* args);
         bool HandleModifyMountCommand(const char* args);

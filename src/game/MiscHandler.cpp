@@ -1343,23 +1343,6 @@ void WorldSession::HandleCancelMountAuraOpcode( WorldPacket & /*recv_data*/ )
     _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 }
 
-void WorldSession::HandleMoveSetCanFlyAckOpcode( WorldPacket & recv_data )
-{
-    // fly mode on/off
-    sLog.outDebug("WORLD: CMSG_MOVE_SET_CAN_FLY_ACK");
-    //recv_data.hexlike();
-
-    recv_data.read_skip<uint64>();                          // guid
-    recv_data.read_skip<uint32>();                          // unk
-
-    MovementInfo movementInfo;
-    ReadMovementInfo(recv_data, &movementInfo);
-
-    recv_data.read_skip<uint32>();                          // unk2
-
-    _player->m_movementInfo.SetMovementFlags(movementInfo.GetMovementFlags());
-}
-
 void WorldSession::HandleRequestPetInfoOpcode( WorldPacket & /*recv_data */)
 {
     /*

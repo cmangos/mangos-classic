@@ -66,7 +66,6 @@ bool Player::UpdateStats(Stats stat)
         case STAT_INTELLECT:
             UpdateMaxPower(POWER_MANA);
             UpdateAllSpellCritChances();
-            UpdateAttackPowerAndDamage(true);               //SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT, only intelect currently
             UpdateArmor();                                  //SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT, only armor currently
             break;
 
@@ -304,14 +303,6 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
 
     float base_attPower  = GetModifierValue(unitMod, BASE_VALUE) * GetModifierValue(unitMod, BASE_PCT);
     float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
-
-    //add dynamic flat mods
-    if( ranged && (getClassMask() & CLASSMASK_WAND_USERS)==0)
-    {
-        AuraList const& mRAPbyIntellect = GetAurasByType(SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT);
-        for(AuraList::const_iterator i = mRAPbyIntellect.begin();i != mRAPbyIntellect.end(); ++i)
-            attPowerMod += int32(GetStat(Stats((*i)->GetModifier()->m_miscvalue)) * (*i)->GetModifier()->m_amount / 100.0f);
-    }
 
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
@@ -565,24 +556,6 @@ void Player::UpdateManaRegen()
 
     // Mana regen from SPELL_AURA_MOD_POWER_REGEN aura
     float power_regen_mp5 = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
-
-    // Get bonus from SPELL_AURA_MOD_MANA_REGEN_FROM_STAT aura
-    AuraList const& regenAura = GetAurasByType(SPELL_AURA_MOD_MANA_REGEN_FROM_STAT);
-    for(AuraList::const_iterator i = regenAura.begin();i != regenAura.end(); ++i)
-    {
-        Modifier* mod = (*i)->GetModifier();
-        power_regen_mp5 += GetStat(Stats(mod->m_miscvalue)) * mod->m_amount / 500.0f;
-    }
-
-    // Bonus from some dummy auras
-    AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_PERIODIC_DUMMY);
-    for(AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
-        if((*i)->GetId() == 34074)                          // Aspect of the Viper
-        {
-            power_regen_mp5 += (*i)->GetModifier()->m_amount * Intellect / 500.0f;
-            // Add regen bonus from level in this dummy
-            power_regen_mp5 += getLevel() * 35 / 100;
-        }
 
     // Set regen rate in cast state apply only on spirit based regen
     int32 modManaRegenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);

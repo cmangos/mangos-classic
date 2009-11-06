@@ -68,6 +68,7 @@ class Transport : protected GameObject
         using GameObject::GetPositionX;
         using GameObject::GetPositionY;
         using GameObject::GetPositionZ;
+        using GameObject::GetOrientation;
         using GameObject::BuildCreateUpdateBlockForPlayer;
         using GameObject::BuildOutOfRangeUpdateBlock;
         using GameObject::GetPackGUID;

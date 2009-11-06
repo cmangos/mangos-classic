@@ -73,8 +73,6 @@ inline float Traveller<Creature>::Speed()
 {
     if(i_traveller.HasMonsterMoveFlag(MONSTER_MOVE_WALK))
         return i_traveller.GetSpeed(MOVE_WALK);
-    else if(i_traveller.HasMonsterMoveFlag(MONSTER_MOVE_FLY))
-        return i_traveller.GetSpeed(MOVE_FLIGHT);
     else
         return i_traveller.GetSpeed(MOVE_RUN);
 }

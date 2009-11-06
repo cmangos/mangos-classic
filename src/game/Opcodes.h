@@ -867,10 +867,7 @@ enum OpcodesList
     CMSG_MOVE_FLIGHT_ACK_OBSOLETE                   = 0x340,
     MSG_MOVE_START_SWIM_CHEAT                       = 0x341,
     MSG_MOVE_STOP_SWIM_CHEAT                        = 0x342,
-    SMSG_MOVE_SET_CAN_FLY                           = 0x343,
-    SMSG_MOVE_UNSET_CAN_FLY                         = 0x344,
-    CMSG_MOVE_SET_CAN_FLY_ACK                       = 0x345,
-    CMSG_MOVE_SET_FLY                               = 0x346,
+    // [-ZERO] Last existed in 1.12.1 opcode, maybe some renumbering from other side
     MSG_MOVE_START_ASCEND                           = 0x359,
     MSG_MOVE_STOP_ASCEND                            = 0x35A,
     CMSG_LFG_SET_AUTOJOIN                           = 0x35C,
@@ -903,14 +900,6 @@ enum OpcodesList
     CMSG_CANCEL_TEMP_ENCHANTMENT                    = 0x379,
     SMSG_FORCED_DEATH_UPDATE                        = 0x37A,
     CMSG_CHEAT_SET_HONOR_CURRENCY                   = 0x37B,
-    MSG_MOVE_SET_FLIGHT_SPEED_CHEAT                 = 0x37D,
-    MSG_MOVE_SET_FLIGHT_SPEED                       = 0x37E,
-    MSG_MOVE_SET_FLIGHT_BACK_SPEED_CHEAT            = 0x37F,
-    MSG_MOVE_SET_FLIGHT_BACK_SPEED                  = 0x380,
-    SMSG_FORCE_FLIGHT_SPEED_CHANGE                  = 0x381,
-    CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK              = 0x382,
-    SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE             = 0x383,
-    CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK         = 0x384,
     SMSG_SPLINE_SET_FLIGHT_SPEED                    = 0x385,
     SMSG_SPLINE_SET_FLIGHT_BACK_SPEED               = 0x386,
     CMSG_MAELSTROM_INVALIDATE_CACHE                 = 0x387,
@@ -951,7 +940,6 @@ enum OpcodesList
     SMSG_SPELL_CHANCE_PROC_LOG                      = 0x3AA,
     CMSG_MOVE_SET_RUN_SPEED                         = 0x3AB,
     SMSG_DISMOUNT                                   = 0x3AC,
-    MSG_MOVE_UPDATE_CAN_FLY                         = 0x3AD,
     MSG_RAID_READY_CHECK_CONFIRM                    = 0x3AE,
     CMSG_VOICE_SESSION_ENABLE                       = 0x3AF,
     SMSG_VOICE_PARENTAL_CONTROLS                    = 0x3B0,
@@ -1052,8 +1040,6 @@ enum OpcodesList
     SMSG_PROPOSE_LEVEL_GRANT                        = 0x41E,
     CMSG_ACCEPT_LEVEL_GRANT                         = 0x41F,
     SMSG_REFER_A_FRIEND_FAILURE                     = 0x420,
-    SMSG_SPLINE_MOVE_SET_FLYING                     = 0x421,
-    SMSG_SPLINE_MOVE_UNSET_FLYING                   = 0x422,
     SMSG_SUMMON_CANCEL                              = 0x423
 };
 

@@ -1076,7 +1076,6 @@ bool ChatHandler::HandleModifyASpeedCommand(const char* args)
     chr->SetSpeed(MOVE_RUN,     ASpeed,true);
     chr->SetSpeed(MOVE_SWIM,    ASpeed,true);
     //chr->SetSpeed(MOVE_TURN,    ASpeed,true);
-    chr->SetSpeed(MOVE_FLIGHT,     ASpeed,true);
     return true;
 }
 
@@ -1211,42 +1210,6 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
         ChatHandler(chr).PSendSysMessage(LANG_YOURS_BACK_SPEED_CHANGED, GetNameLink().c_str(), BSpeed);
 
     chr->SetSpeed(MOVE_RUN_BACK,BSpeed,true);
-
-    return true;
-}
-
-//Edit Player Fly
-bool ChatHandler::HandleModifyFlyCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    float FSpeed = (float)atof((char*)args);
-
-    if (FSpeed > 10.0f || FSpeed < 0.1f)
-    {
-        SendSysMessage(LANG_BAD_VALUE);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    Player *chr = getSelectedPlayer();
-    if (chr == NULL)
-    {
-        SendSysMessage(LANG_NO_CHAR_SELECTED);
-        SetSentErrorMessage(true);
-        return false;
-    }
-
-    // check online security
-    if (HasLowerSecurity(chr, 0))
-        return false;
-
-    PSendSysMessage(LANG_YOU_CHANGE_FLY_SPEED, FSpeed, GetNameLink(chr).c_str());
-    if (needReportToTarget(chr))
-        ChatHandler(chr).PSendSysMessage(LANG_YOURS_FLY_SPEED_CHANGED, GetNameLink().c_str(), FSpeed);
-
-    chr->SetSpeed(MOVE_FLIGHT,FSpeed,true);
 
     return true;
 }
