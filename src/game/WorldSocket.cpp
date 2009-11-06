@@ -825,7 +825,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     // NOTE ATM the socket is single-threaded, have this in mind ...
     ACE_NEW_RETURN (m_Session, WorldSession (id, this, AccountTypes(security), mutetime, locale), -1);
 
-    m_Crypt.SetKey (&K);
+    m_Crypt.SetKey (K.AsByteArray(), 40 );
     m_Crypt.Init ();
 
     // In case needed sometime the second arg is in microseconds 1 000 000 = 1 sec
@@ -914,10 +914,11 @@ int WorldSocket::iSendPacket (const WorldPacket& pct)
     ServerPktHeader header;
 
     header.cmd = pct.GetOpcode ();
-    EndianConvert(header.cmd);
 
     header.size = (uint16) pct.size () + 2;
+    
     EndianConvertReverse(header.size);
+    EndianConvert(header.cmd);
 
     m_Crypt.EncryptSend ((uint8*) & header, sizeof (header));
 

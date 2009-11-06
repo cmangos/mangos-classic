@@ -35,7 +35,7 @@ class AuthCrypt
 
         void Init();
 
-        void SetKey(BigNumber *);
+        void SetKey(uint8 *key, size_t len);
 
         void DecryptRecv(uint8 *, size_t);
         void EncryptSend(uint8 *, size_t);
