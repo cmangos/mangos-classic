@@ -1405,7 +1405,7 @@ bool Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
 
     *p_data << uint32(char_flags);                          // character flags
 
-    *p_data << uint8(1);                                    // unknown
+    *p_data << uint8(0);                                    // unknown
 
     // Pets info
     {
@@ -1443,29 +1443,14 @@ bool Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
         {
             *p_data << uint32(0);
             *p_data << uint8(0);
-            *p_data << uint32(0);
             continue;
-        }
-
-        SpellItemEnchantmentEntry const *enchant = NULL;
-
-        for(uint8 enchantSlot = PERM_ENCHANTMENT_SLOT; enchantSlot <= TEMP_ENCHANTMENT_SLOT; ++enchantSlot)
-        {
-            uint32 enchantId = GetUInt32ValueFromArray(data, visualbase+1+enchantSlot);
-            if(!enchantId)
-                continue;
-
-            if(enchant = sSpellItemEnchantmentStore.LookupEntry(enchantId))
-                break;
         }
 
         *p_data << uint32(proto->DisplayInfoID);
         *p_data << uint8(proto->InventoryType);
-        *p_data << uint32(enchant ? enchant->aura_id : 0);
     }
     *p_data << uint32(0);                                   // first bag display id
     *p_data << uint8(0);                                    // first bag inventory type
-    *p_data << uint32(0);                                   // enchant?
 
     return true;
 }
@@ -4649,10 +4634,6 @@ void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
         case CR_HASTE_SPELL:
             RatingChange = value / RatingCoeffecient;
             ApplyCastTimePercentMod(RatingChange,apply);
-            break;
-        case CR_WEAPON_SKILL_MAINHAND:                      // Implemented in Unit::RollMeleeOutcomeAgainst
-        case CR_WEAPON_SKILL_OFFHAND:
-        case CR_WEAPON_SKILL_RANGED:
             break;
     }
 }
@@ -14197,7 +14178,8 @@ void Player::SaveToDB()
         "taximask, online, cinematic, "
         "totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, "
         "trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, "
-        "death_expire_time, taxi_path) VALUES ("
+        "death_expire_time, taxi_path, "
+        "honor_highest_rank, honor_standing, honor_rating) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << sql_name << "', "
@@ -14310,7 +14292,7 @@ void Player::SaveToDB()
     ss << ", ";
     ss << m_stored_honor;
 
-    ss << ", '0' )"; // [-ZERO] arena field to delete
+    ss << ")";
 
     CharacterDatabase.Execute( ss.str().c_str() );
 

@@ -438,12 +438,9 @@ enum CombatRating
     CR_HASTE_MELEE              = 17,
     CR_HASTE_RANGED             = 18,
     CR_HASTE_SPELL              = 19,
-    CR_WEAPON_SKILL_MAINHAND    = 20,
-    CR_WEAPON_SKILL_OFFHAND     = 21,
-    CR_WEAPON_SKILL_RANGED      = 22,
 };
 
-#define MAX_COMBAT_RATING         24
+#define MAX_COMBAT_RATING         20
 
 enum DamageEffectType
 {
