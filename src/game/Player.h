@@ -530,18 +530,15 @@ enum MovementFlags
     MOVEMENTFLAG_PITCH_UP       = 0x00000040,
     MOVEMENTFLAG_PITCH_DOWN     = 0x00000080,
     MOVEMENTFLAG_WALK_MODE      = 0x00000100,               // Walking
-    MOVEMENTFLAG_ONTRANSPORT    = 0x00000200,               // Used for flying on some creatures
     MOVEMENTFLAG_LEVITATING     = 0x00000400,
-    MOVEMENTFLAG_FLY_UNK1       = 0x00000800,
-    MOVEMENTFLAG_JUMPING        = 0x00001000,
-    MOVEMENTFLAG_UNK4           = 0x00002000,
+    MOVEMENTFLAG_FLY_UNK1       = 0x00000800,               // [-ZERO] is it really need and correct value
+    MOVEMENTFLAG_JUMPING        = 0x00002000,
     MOVEMENTFLAG_FALLING        = 0x00004000,
-    // 0x8000, 0x10000, 0x20000, 0x40000, 0x80000, 0x100000
     MOVEMENTFLAG_SWIMMING       = 0x00200000,               // appears with fly flag also
-    MOVEMENTFLAG_FLY_UP         = 0x00400000,
-    MOVEMENTFLAG_CAN_FLY        = 0x00800000,
-    MOVEMENTFLAG_FLYING         = 0x01000000,
-    MOVEMENTFLAG_FLYING2        = 0x02000000,               // Actual flying mode
+    MOVEMENTFLAG_FLY_UP         = 0x00400000,               // [-ZERO] is it really need and correct value
+    MOVEMENTFLAG_CAN_FLY        = 0x00800000,               // [-ZERO] is it really need and correct value
+    MOVEMENTFLAG_FLYING         = 0x01000000,               // [-ZERO] is it really need and correct value
+    MOVEMENTFLAG_ONTRANSPORT    = 0x02000000,               // Used for flying on some creatures
     MOVEMENTFLAG_SPLINE         = 0x04000000,               // used for flight paths
     MOVEMENTFLAG_SPLINE2        = 0x08000000,               // used for flight paths
     MOVEMENTFLAG_WATERWALKING   = 0x10000000,               // prevent unit from falling through water

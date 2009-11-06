@@ -577,7 +577,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
         data >> mi->t_o;
     }
 
-    if(mi->HasMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2)))
+    if(mi->HasMovementFlag(MOVEMENTFLAG_SWIMMING))
     {
         data >> mi->s_pitch;
     }
