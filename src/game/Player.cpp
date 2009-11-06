@@ -1521,7 +1521,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         m_movementInfo.t_y = 0.0f;
         m_movementInfo.t_z = 0.0f;
         m_movementInfo.t_o = 0.0f;
-        m_movementInfo.t_time = 0;
     }
 
     // The player was ported to another map and looses the duel immediately.

@@ -824,11 +824,6 @@ ListenRange.Yell = 300
 #        Chat anti-flood protection, mute time at activation flood protection (not saved)
 #        Default: 10 (in secs)
 #
-#    Channel.RestrictedLfg
-#        Restrict use LookupForGroup channel only registered in LFG tool players
-#        Default: 1 (allow join to channel only if active in LFG)
-#                 0 (allow join to channel in any time)
-#
 #    Channel.SilentlyGMJoin
 #        Silently join GM characters (security level > 1) to channels
 #        Default: 0 (join announcement in normal way)
@@ -842,7 +837,6 @@ ChatStrictLinkChecking.Kick = 0
 ChatFlood.MessageCount = 10
 ChatFlood.MessageDelay = 1
 ChatFlood.MuteTime = 10
-Channel.RestrictedLfg = 1
 Channel.SilentlyGMJoin = 0
 
 ###################################################################################################################

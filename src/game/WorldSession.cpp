@@ -230,8 +230,7 @@ bool WorldSession::Update(uint32 /*diff*/)
 
                         // single from authed time opcodes send in to after logout time
                         // and before other STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes.
-                        if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL)
-                            m_playerRecentlyLogout = false;
+                        m_playerRecentlyLogout = false;
 
                         (this->*opHandle->handler)(*packet);
                         if (sLog.IsOutDebug() && packet->rpos() < packet->wpos())
@@ -563,7 +562,6 @@ void WorldSession::SendAuthWaitQue(uint32 position)
 void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
 {
     data >> mi->flags;
-    data >> mi->unk1;
     data >> mi->time;
     data >> mi->x;
     data >> mi->y;
@@ -577,7 +575,6 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
         data >> mi->t_y;
         data >> mi->t_z;
         data >> mi->t_o;
-        data >> mi->t_time;
     }
 
     if(mi->HasMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2)))
@@ -593,10 +590,5 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
         data >> mi->j_sinAngle;
         data >> mi->j_cosAngle;
         data >> mi->j_xyspeed;
-    }
-
-    if(mi->HasMovementFlag(MOVEMENTFLAG_SPLINE))
-    {
-        data >> mi->u_unk1;
     }
 }

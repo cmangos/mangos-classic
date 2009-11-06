@@ -714,10 +714,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\LFGHandler.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\LootHandler.cpp"
 				>
 			</File>
@@ -891,10 +887,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\UpdateData.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\VoiceChatHandler.cpp"
 				>
 			</File>
 			<File

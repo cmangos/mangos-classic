@@ -141,7 +141,6 @@ libmangosgame_a_SOURCES = \
 	Level1.cpp \
 	Level2.cpp \
 	Level3.cpp \
-	LFGHandler.cpp \
 	LootHandler.cpp \
 	LootMgr.cpp \
 	LootMgr.h \
@@ -246,7 +245,6 @@ libmangosgame_a_SOURCES = \
 	UpdateData.h \
 	UpdateFields.h \
 	UpdateMask.h \
-	VoiceChatHandler.cpp \
 	WaypointManager.cpp \
 	WaypointManager.h \
 	WaypointMovementGenerator.cpp \
