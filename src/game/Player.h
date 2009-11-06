@@ -460,26 +460,26 @@ enum InventoryPackSlots                                     // 16 slots
 enum BankItemSlots                                          // 28 slots
 {
     BANK_SLOT_ITEM_START        = 39,
-    BANK_SLOT_ITEM_END          = 67
+    BANK_SLOT_ITEM_END          = 63
 };
 
 enum BankBagSlots                                           // 7 slots
 {
-    BANK_SLOT_BAG_START         = 67,
-    BANK_SLOT_BAG_END           = 74
+    BANK_SLOT_BAG_START         = 63,
+    BANK_SLOT_BAG_END           = 69
 };
 
 enum BuyBackSlots                                           // 12 slots
 {
     // stored in m_buybackitems
-    BUYBACK_SLOT_START          = 74,
-    BUYBACK_SLOT_END            = 86
+    BUYBACK_SLOT_START          = 69,
+    BUYBACK_SLOT_END            = 81
 };
 
 enum KeyRingSlots                                           // 32 slots
 {
-    KEYRING_SLOT_START          = 86,
-    KEYRING_SLOT_END            = 118
+    KEYRING_SLOT_START          = 81,
+    KEYRING_SLOT_END            = 97
 };
 
 struct ItemPosCount

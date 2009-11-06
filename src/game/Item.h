@@ -159,7 +159,7 @@ enum EnchantmentSlot
     MAX_ENCHANTMENT_SLOT        = 7
 };
 
-#define MAX_VISIBLE_ITEM_OFFSET       16                    // 16 fields per visible item (creator(2) + enchantments(12) + properties(1) + pad(1))
+#define MAX_VISIBLE_ITEM_OFFSET       12
 
 enum EnchantmentOffset
 {
