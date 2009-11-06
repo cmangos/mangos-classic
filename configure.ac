@@ -260,7 +260,6 @@ AC_CONFIG_FILES([
    sql/Makefile
    sql/tools/Makefile
    sql/updates/Makefile
-   sql/updates/before_upgrade_to_0.13/Makefile
    src/Makefile
    src/tools/Makefile
    src/tools/genrevision/Makefile
