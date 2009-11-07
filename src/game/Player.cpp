@@ -1001,16 +1001,6 @@ void Player::SetDrunkValue(uint16 newDrunkenValue, uint32 itemId)
         m_detectInvisibilityMask |= (1<<6);
     else
         m_detectInvisibilityMask &= ~(1<<6);
-
-    if(newDrunkenState == oldDrunkenState)
-        return;
-
-    WorldPacket data(SMSG_CROSSED_INEBRIATION_THRESHOLD, (8+4+4));
-    data << uint64(GetGUID());
-    data << uint32(newDrunkenState);
-    data << uint32(itemId);
-
-    SendMessageToSet(&data, true);
 }
 
 void Player::Update( uint32 p_time )
