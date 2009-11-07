@@ -15014,8 +15014,8 @@ void Player::BuildPlayerChat(WorldPacket *data, uint8 msgtype, const std::string
     *data << (uint8)msgtype;
     *data << (uint32)language;
     *data << (uint64)GetGUID();
-    *data << (uint32)language;                               //language 2.1.0 ?
-    *data << (uint64)GetGUID();
+    if (msgtype == CHAT_MSG_SAY || msgtype == CHAT_MSG_YELL || msgtype == CHAT_MSG_PARTY)
+        *data << (uint64)GetGUID();
     *data << (uint32)(text.length()+1);
     *data << text;
     *data << (uint8)chatTag();
@@ -15060,7 +15060,7 @@ void Player::Whisper(const std::string& text, uint32 language,uint64 receiver)
         if (language != LANG_ADDON)
         {
             data.Initialize(SMSG_MESSAGECHAT, 200);
-            rPlayer->BuildPlayerChat(&data, CHAT_MSG_REPLY, text, language);
+            rPlayer->BuildPlayerChat(&data, CHAT_MSG_WHISPER_INFORM, text, language);
             GetSession()->SendPacket(&data);
         }
     }
