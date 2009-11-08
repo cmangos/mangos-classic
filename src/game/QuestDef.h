@@ -104,10 +104,10 @@ enum __QuestGiverStatus
     DIALOG_STATUS_CHAT                     = 2,
     DIALOG_STATUS_INCOMPLETE               = 3,
     DIALOG_STATUS_REWARD_REP               = 4,
-    DIALOG_STATUS_AVAILABLE_REP            = 5,
-    DIALOG_STATUS_AVAILABLE                = 6,
-    DIALOG_STATUS_REWARD2                  = 7,             // not yellow dot on minimap
-    DIALOG_STATUS_REWARD                   = 8              // yellow dot on minimap
+    DIALOG_STATUS_AVAILABLE                = 5,
+    DIALOG_STATUS_REWARD_OLD               = 6,             // red dot on minimap
+    DIALOG_STATUS_REWARD2                  = 7,             // yellow dot on minimap
+    // [-ZERO] tbc?  DIALOG_STATUS_REWARD                   = 8              // yellow dot on minimap
 };
 
 enum __QuestFlags
