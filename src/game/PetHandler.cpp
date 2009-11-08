@@ -246,7 +246,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             else
             {
                 if(pet->HasAuraType(SPELL_AURA_MOD_POSSESS))
-                    Spell::SendCastResult(GetPlayer(),spellInfo,0,result);
+                    Spell::SendCastResult(GetPlayer(),spellInfo,result);
                 else
                     pet->SendPetCastFail(spellid, result);
 
