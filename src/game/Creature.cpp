@@ -1351,12 +1351,6 @@ bool Creature::LoadFromDB(uint32 guid, Map *map)
     if(m_respawnTime > time(NULL))                          // not ready to respawn
     {
         m_deathState = DEAD;
-        if(canFly())
-        {
-            float tz = GetMap()->GetHeight(data->posX,data->posY,data->posZ,false);
-            if(data->posZ - tz > 0.1)
-                Relocate(data->posX,data->posY,tz);
-        }
     }
     else if(m_respawnTime)                                  // respawn time set but expired
     {
@@ -1505,8 +1499,8 @@ void Creature::setDeathState(DeathState s)
         if(sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY) || isWorldBoss())
             SaveRespawnTime();
 
-        if (canFly() && FallGround())
-            return;
+        if (FallGround())  //[-ZERO] maybe not needed
+          return;
 
         if(!IsStopped())
             StopMoving();
@@ -1522,7 +1516,7 @@ void Creature::setDeathState(DeathState s)
             if ( LootTemplates_Skinning.HaveLootFor(GetCreatureInfo()->SkinLootId) )
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-        if (canFly() && FallGround())
+        if (FallGround())  //[-ZERO] maybe not needed
             return;
 
         SetNoSearchAssistance(false);

@@ -84,8 +84,6 @@ TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
     Traveller<T> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z);
     owner.addUnitState(UNIT_STAT_CHASE);
-    if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->canFly())
-        ((Creature&)owner).AddMonsterMoveFlag(MONSTER_MOVE_FLY);
 }
 
 template<>
@@ -95,9 +93,6 @@ void TargetedMovementGenerator<Creature>::Initialize(Creature &owner)
         owner.AddMonsterMoveFlag(MONSTER_MOVE_WALK);
     else
         owner.RemoveMonsterMoveFlag(MONSTER_MOVE_WALK);
-
-    if (((Creature*)&owner)->canFly())
-        owner.AddMonsterMoveFlag(MONSTER_MOVE_FLY);
 
     _setTargetLocation(owner);
 }
@@ -154,8 +149,6 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
     if (owner.IsStopped() && !i_destinationHolder.HasArrived())
     {
         owner.addUnitState(UNIT_STAT_CHASE);
-        if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->canFly())
-            ((Creature&)owner).AddMonsterMoveFlag(MONSTER_MOVE_FLY);
 
         i_destinationHolder.StartTravel(traveller);
         return true;

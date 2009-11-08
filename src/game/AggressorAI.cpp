@@ -42,8 +42,7 @@ AggressorAI::AggressorAI(Creature *c) : CreatureAI(c), i_victimGuid(0), i_state(
 void
 AggressorAI::MoveInLineOfSight(Unit *u)
 {
-    // Ignore Z for flying creatures
-    if( !m_creature->canFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE )
+    if(m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE )
         return;
 
     if( !m_creature->hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED) && u->isTargetableForAttack() &&
@@ -86,15 +85,15 @@ void AggressorAI::EnterEvadeMode()
     }
     else if( !victim->isAlive() )
     {
-        DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", m_creature->GetGUIDLow());
+        DEBUG_LOG("Creature stopped attacking because his victim is dead [guid=%u]", m_creature->GetGUIDLow());
     }
     else if( victim->HasStealthAura() )
     {
-        DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", m_creature->GetGUIDLow());
+        DEBUG_LOG("Creature stopped attacking because his victim is stealth [guid=%u]", m_creature->GetGUIDLow());
     }
     else if( victim->isInFlight() )
     {
-        DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", m_creature->GetGUIDLow());
+        DEBUG_LOG("Creature stopped attacking because his victim is fly away [guid=%u]", m_creature->GetGUIDLow());
     }
     else
     {

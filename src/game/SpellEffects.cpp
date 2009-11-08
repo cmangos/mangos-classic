@@ -880,7 +880,7 @@ void Spell::EffectDummy(uint32 i)
 
                     m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
-                    //5 different spells used depending on mounted speed and if mount can fly or not
+                    //5 different spells used depending on mounted speed
                     if (speed >= 2.0f)
                         m_caster->CastSpell(m_caster, 25859, true); //100% ground Reindeer
                     else

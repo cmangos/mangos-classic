@@ -31,9 +31,6 @@ void PointMovementGenerator<T>::Initialize(T &unit)
     unit.addUnitState(UNIT_STAT_ROAMING);
     Traveller<T> traveller(unit);
     i_destinationHolder.SetDestination(traveller,i_x,i_y,i_z);
-
-    if (unit.GetTypeId() == TYPEID_UNIT && ((Creature*)&unit)->canFly())
-        ((Creature&)unit).AddMonsterMoveFlag(MONSTER_MOVE_FLY);
 }
 
 template<class T>

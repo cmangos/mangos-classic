@@ -109,8 +109,7 @@ bool WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint3
             SetStoppedByPlayer(false);
             // Now we re-set destination to same node and start travel
             creature.addUnitState(UNIT_STAT_ROAMING);
-            if (creature.canFly())
-                creature.AddMonsterMoveFlag(MONSTER_MOVE_FLY);
+
             const WaypointNode &node = i_path->at(i_currentNode);
             i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
             i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
@@ -172,8 +171,7 @@ bool WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint3
         if( creature.IsStopped() ) // If stopped then begin a new move segment
         {
             creature.addUnitState(UNIT_STAT_ROAMING);
-            if (creature.canFly())
-                creature.AddMonsterMoveFlag(MONSTER_MOVE_FLY);
+
             const WaypointNode &node = i_path->at(i_currentNode);
             i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
             i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
@@ -209,7 +207,7 @@ void WaypointMovementGenerator<Creature>::MovementInform(Creature &unit)
     if(unit.AI())
         unit.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
 }
-
+//[-ZERO] maybe flightpath code should be dropped
 //----------------------------------------------------//
 void FlightPathMovementGenerator::LoadPath(Player &)
 {

@@ -309,8 +309,7 @@ enum InhabitTypeValues
 {
     INHABIT_GROUND = 1,
     INHABIT_WATER  = 2,
-    INHABIT_AIR    = 4,
-    INHABIT_ANYWHERE = INHABIT_GROUND | INHABIT_WATER | INHABIT_AIR
+    INHABIT_ANYWHERE = INHABIT_GROUND | INHABIT_WATER
 };
 
 // Enums used by StringTextData::Type (CreatureEventAI)
@@ -465,7 +464,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
         bool canWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
         bool canSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
-        bool canFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
         ///// TODO RENAME THIS!!!!!
         bool isCanTrainingOf(Player* player, bool msg) const;
         bool isCanInteractWithBattleMaster(Player* player, bool msg) const;

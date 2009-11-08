@@ -475,7 +475,7 @@ void ObjectMgr::LoadCreatureTemplates()
 
         if(cInfo->InhabitType <= 0 || cInfo->InhabitType > INHABIT_ANYWHERE)
         {
-            sLog.outErrorDb("Creature (Entry: %u) has wrong value (%u) in `InhabitType`, creature will not correctly walk/swim/fly",cInfo->Entry,cInfo->InhabitType);
+            sLog.outErrorDb("Creature (Entry: %u) has wrong value (%u) in `InhabitType`, creature will not correctly walk/swim",cInfo->Entry,cInfo->InhabitType);
             const_cast<CreatureInfo*>(cInfo)->InhabitType = INHABIT_ANYWHERE;
         }
 

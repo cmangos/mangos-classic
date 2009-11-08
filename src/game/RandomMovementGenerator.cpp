@@ -39,7 +39,7 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
     // For 2D/3D system selection
     //bool is_land_ok  = creature.canWalk();                // not used?
     //bool is_water_ok = creature.canSwim();                // not used?
-    bool is_air_ok   = creature.canFly();
+    //[-ZERO] bool is_air_ok   = creature.canFly();
 
     const float angle = rand_norm()*(M_PI*2);
     const float range = rand_norm()*wander_distance;
@@ -55,7 +55,7 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
 
     dist = distanceX*distanceX + distanceY*distanceY;
 
-    if (is_air_ok) // 3D system above ground and above water (flying mode)
+    /*[-ZERO] if (is_air_ok) // 3D system above ground and above water (flying mode)
     {
         const float distanceZ = rand_norm() * sqrtf(dist)/2; // Limit height change
         nz = Z + distanceZ;
@@ -66,7 +66,7 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
     }
     //else if (is_water_ok) // 3D system under water and above ground (swimming mode)
     else // 2D only
-    {
+    { */
         dist = dist>=100.0f ? 10.0f : sqrtf(dist); // 10.0 is the max that vmap high can check (MAX_CAN_FALL_DISTANCE)
         // The fastest way to get an accurate result 90% of the time.
         // Better result can be obtained like 99% accuracy with a ray light, but the cost is too high and the code is too long.
@@ -81,23 +81,15 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
                     return; // let's forget this bad coords where a z cannot be find and retry at next tick
             }
         }
-    }
+   // }
 
     Traveller<Creature> traveller(creature);
     creature.SetOrientation(creature.GetAngle(nx,ny));
     i_destinationHolder.SetDestination(traveller, nx, ny, nz);
     creature.addUnitState(UNIT_STAT_ROAMING);
-    if (is_air_ok)
-    {
-        i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
-        creature.AddMonsterMoveFlag(MONSTER_MOVE_FLY);
-    }
-    //else if (is_water_ok) // Swimming mode to be done with more than this check
-    else
-    {
-        i_nextMoveTime.Reset(urand(500+i_destinationHolder.GetTotalTravelTime(),5000+i_destinationHolder.GetTotalTravelTime()));
-        creature.AddMonsterMoveFlag(MONSTER_MOVE_WALK);
-    }
+
+    i_nextMoveTime.Reset(urand(500+i_destinationHolder.GetTotalTravelTime(),5000+i_destinationHolder.GetTotalTravelTime()));
+    creature.AddMonsterMoveFlag(MONSTER_MOVE_WALK);
 }
 
 template<>
@@ -107,9 +99,7 @@ RandomMovementGenerator<Creature>::Initialize(Creature &creature)
     if(!creature.isAlive())
         return;
 
-    if (creature.canFly())
-        creature.AddMonsterMoveFlag(MONSTER_MOVE_FLY);
-    else if(irand(0,RUNNING_CHANCE_RANDOMMV) > 0)
+    if(irand(0,RUNNING_CHANCE_RANDOMMV) > 0)
         creature.AddMonsterMoveFlag(MONSTER_MOVE_WALK);
     else
         creature.RemoveMonsterMoveFlag(MONSTER_MOVE_WALK);  // run with 1/RUNNING_CHANCE_RANDOMMV chance
@@ -137,7 +127,7 @@ RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 &diff
 
     i_nextMoveTime.Update(diff);
 
-    if(i_destinationHolder.HasArrived() && !creature.IsStopped() && !creature.canFly())
+    if(i_destinationHolder.HasArrived() && !creature.IsStopped())
         creature.clearUnitState(UNIT_STAT_ROAMING);
 
     if(!i_destinationHolder.HasArrived() && creature.IsStopped())
@@ -149,9 +139,7 @@ RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 &diff
     {
         if(i_nextMoveTime.Passed())
         {
-            if (creature.canFly())
-                creature.AddMonsterMoveFlag(MONSTER_MOVE_FLY);
-            else if(irand(0,RUNNING_CHANCE_RANDOMMV) > 0)
+            if(irand(0,RUNNING_CHANCE_RANDOMMV) > 0)
                 creature.AddMonsterMoveFlag(MONSTER_MOVE_WALK);
             else                                            // run with 1/RUNNING_CHANCE_RANDOMMV chance
                 creature.RemoveMonsterMoveFlag(MONSTER_MOVE_WALK);
