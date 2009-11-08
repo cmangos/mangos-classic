@@ -156,7 +156,7 @@ void SpellCastTargets::Update(Unit* caster)
 
 bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
 {
-    if(data->rpos() + 4 > data->size())
+    if(data->rpos() + 2 > data->size())
         return false;
 
     *data >> m_targetMask;
@@ -223,7 +223,7 @@ bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
 
 void SpellCastTargets::write ( WorldPacket * data )
 {
-    *data << uint32(m_targetMask);
+    *data << uint16(m_targetMask);
 
     if( m_targetMask & ( TARGET_FLAG_UNIT | TARGET_FLAG_PVP_CORPSE | TARGET_FLAG_OBJECT | TARGET_FLAG_CORPSE | TARGET_FLAG_UNK2 ) )
     {
@@ -343,7 +343,6 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     itemTarget = NULL;
     gameObjTarget = NULL;
     focusObject = NULL;
-    m_cast_count = 0;
     m_triggeredByAuraSpell  = NULL;
 
     //Auto Shot & Shoot
@@ -2040,7 +2039,7 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
     //Prevent casting at cast another spell (ServerSide check)
-    if(m_caster->IsNonMeleeSpellCasted(false, true) && m_cast_count)
+    if(m_caster->IsNonMeleeSpellCasted(false, true))
     {
         SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
         finish(false);
@@ -2625,10 +2624,10 @@ void Spell::SendCastResult(SpellCastResult result)
     if(((Player*)m_caster)->GetSession()->PlayerLoading())  // don't send cast results at loading time
         return;
 
-    SendCastResult((Player*)m_caster,m_spellInfo,m_cast_count,result);
+    SendCastResult((Player*)m_caster,m_spellInfo,result);
 }
 
-void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 cast_count, SpellCastResult result)
+void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, SpellCastResult result)
 {
     WorldPacket data(SMSG_CAST_FAILED, (4+1+1));
     data << uint32(spellInfo->Id);
@@ -2646,17 +2645,6 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
             /* [-ZERO]    // hardcode areas limitation case
                 switch(spellInfo->Id)
                 {
-                    case 41617:                                 // Cenarion Mana Salve
-                    case 41619:                                 // Cenarion Healing Salve
-                        data << uint32(3905);
-                        break;
-                    case 41618:                                 // Bottled Nethergon Energy
-                    case 41620:                                 // Bottled Nethergon Vapor
-                        data << uint32(3842);
-                        break;
-                    case 45373:                                 // Bloodberry Elixir
-                        data << uint32(4075);
-                        break;
                     default:                                    // default case
                         data << uint32(spellInfo->AreaId);
                         break;
@@ -2697,7 +2685,6 @@ void Spell::SendSpellStart()
 
     data.append(m_caster->GetPackGUID());
     data << uint32(m_spellInfo->Id);
-    data << uint8(m_cast_count);                            // single cast or multi 2.3 (0/1)
     data << uint16(castFlags);
     data << uint32(m_timer);
 
@@ -3433,7 +3420,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         !IsPassiveSpell(m_spellInfo->Id) && !(m_spellInfo->Attributes & SPELL_ATTR_CASTABLE_WHILE_MOUNTED))
     {
         if (m_caster->isInFlight())
-            return SPELL_FAILED_NOT_FLYING;
+            return SPELL_FAILED_NOT_ON_TAXI;
         else
             return SPELL_FAILED_NOT_MOUNTED;
     }
@@ -4511,14 +4498,14 @@ SpellCastResult Spell::CheckItems()
                 {
                     if(m_spellInfo->EffectMiscValue[i] < 0 || m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
                     {
-                        failReason = SPELL_FAILED_ALREADY_AT_FULL_POWER;
+                        failReason = SPELL_FAILED_ALREADY_AT_FULL_MANA;
                         continue;
                     }
 
                     Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
                     if (m_targets.getUnitTarget()->GetPower(power) == m_targets.getUnitTarget()->GetMaxPower(power))
                     {
-                        failReason = SPELL_FAILED_ALREADY_AT_FULL_POWER;
+                        failReason = SPELL_FAILED_ALREADY_AT_FULL_MANA;
                         continue;
                     }
                     else

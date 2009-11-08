@@ -34,10 +34,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     Player* pUser = _player;
     uint8 bagIndex, slot;
     uint8 spell_count;                                      // number of spells at item, not used
-    uint8 cast_count;                                       // next cast if exists (single or not)
-    uint64 item_guid;
 
-    recvPacket >> bagIndex >> slot >> spell_count >> cast_count >> item_guid;
+    recvPacket >> bagIndex >> slot >> spell_count;
 
     Item *pItem = pUser->GetItemByPos(bagIndex, slot);
     if(!pItem)
@@ -46,13 +44,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if(pItem->GetGUID() != item_guid)
-    {
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
-        return;
-    }
-
-    sLog.outDetail("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, spell_count: %u , cast_count: %u, Item: %u, data length = %i", bagIndex, slot, spell_count, cast_count, pItem->GetEntry(), (uint32)recvPacket.size());
+    sLog.outDetail("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, spell_count: %u , Item: %u, data length = %i", bagIndex, slot, spell_count, pItem->GetEntry(), (uint32)recvPacket.size());
 
     ItemPrototype const *proto = pItem->GetProto();
     if(!proto)
@@ -124,7 +116,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
         // send spell error
         if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid))
-            Spell::SendCastResult(_player,spellInfo,cast_count,SPELL_FAILED_BAD_TARGETS);
+            Spell::SendCastResult(_player,spellInfo,SPELL_FAILED_BAD_TARGETS);
         return;
     }
 
@@ -148,7 +140,6 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
             Spell *spell = new Spell(pUser, spellInfo, false);
             spell->m_CastItem = pItem;
-            spell->m_cast_count = cast_count;               //set count of casts
             spell->m_currentBasePoints[0] = learning_spell_id;
             spell->prepare(&targets);
             return;
@@ -178,7 +169,6 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
             Spell *spell = new Spell(pUser, spellInfo, (count > 0));
             spell->m_CastItem = pItem;
-            spell->m_cast_count = cast_count;               //set count of casts
             spell->prepare(&targets);
 
             ++count;
@@ -286,12 +276,10 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 {
     uint32 spellId;
-    uint8  cast_count;
     recvPacket >> spellId;
-    recvPacket >> cast_count;
 
-    sLog.outDebug("WORLD: got cast spell packet, spellId - %u, cast_count: %u data length = %i",
-        spellId, cast_count, (uint32)recvPacket.size());
+    sLog.outDebug("WORLD: got cast spell packet, spellId - %u, data length = %i",
+        spellId, (uint32)recvPacket.size());
 
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
 
@@ -324,7 +312,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     Spell *spell = new Spell(_player, spellInfo, false);
-    spell->m_cast_count = cast_count;                       // set count of casts
     spell->prepare(&targets);
 }
 

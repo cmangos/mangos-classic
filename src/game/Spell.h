@@ -163,7 +163,7 @@ class SpellCastTargets
         float m_destX, m_destY, m_destZ;
         std::string m_strTarget;
 
-        uint32 m_targetMask;
+        uint16 m_targetMask;
     private:
         // objects (can be used at spell creating and after Update at casting
         Unit *m_unitTarget;
@@ -353,7 +353,7 @@ class Spell
         bool CheckTarget( Unit* target, uint32 eff );
         bool CanAutoCast(Unit* target);
 
-        static void MANGOS_DLL_SPEC SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 cast_count, SpellCastResult result);
+        static void MANGOS_DLL_SPEC SendCastResult(Player* caster, SpellEntry const* spellInfo, SpellCastResult result);
         void SendCastResult(SpellCastResult result);
         void SendSpellStart();
         void SendSpellGo();
@@ -372,7 +372,6 @@ class Spell
         SpellEntry const* m_spellInfo;
         int32 m_currentBasePoints[3];                       // cache SpellEntry::EffectBasePoints and use for set custom base points
         Item* m_CastItem;
-        uint8 m_cast_count;
         SpellCastTargets m_targets;
 
         int32 GetCastTime() const { return m_casttime; }

@@ -568,7 +568,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data);
         void HandleCancelMountAuraOpcode(WorldPacket& recv_data);
         void HandleSelfResOpcode(WorldPacket& recv_data);
-        void HandleComplainOpcode(WorldPacket& recv_data);
         void HandleRequestPetInfoOpcode(WorldPacket& recv_data);
 
         void HandleCancelTempEnchantmentOpcode(WorldPacket& recv_data);
