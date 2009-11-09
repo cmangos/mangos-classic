@@ -17822,7 +17822,6 @@ void Player::BuildTeleportAckMsg( WorldPacket *data, float x, float y, float z, 
     data->append(GetPackGUID());
     *data << uint32(0);                                     // this value increments every time
     *data << uint32(m_movementInfo.GetMovementFlags());     // movement flags
-    *data << uint8(0);                                      // 2.3.0
     *data << uint32(getMSTime());                           // time
     *data << x;
     *data << y;
