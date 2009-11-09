@@ -384,10 +384,9 @@ void Unit::BuildHeartBeatMsg(WorldPacket *data) const
         ? ((Player const*)this)->m_movementInfo.GetMovementFlags()
         : MOVEMENTFLAG_NONE;
 
-    data->Initialize(MSG_MOVE_HEARTBEAT, 32);
+    data->Initialize(MSG_MOVE_HEARTBEAT, 31);
     data->append(GetPackGUID());
     *data << uint32(move_flags);                            // movement flags
-    *data << uint8(0);                                      // 2.3.0
     *data << uint32(getMSTime());                           // time
     *data << float(GetPositionX());
     *data << float(GetPositionY());

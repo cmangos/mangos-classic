@@ -743,12 +743,11 @@ void WorldSession::SendListInventory( uint64 vendorguid )
                 data << uint32(price);
                 data << uint32(pProto->MaxDurability);
                 data << uint32(pProto->BuyCount);
-                data << uint32(crItem->ExtendedCost);
             }
         }
     }
 
-    if ( count == 0 || data.size() != 8 + 1 + size_t(count) * 8 * 4 )
+    if ( count == 0 || data.size() != 8 + 1 + size_t(count) * 7 * 4 )
         return;
 
     data.put<uint8>(8, count);
