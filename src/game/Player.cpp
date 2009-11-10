@@ -16911,19 +16911,20 @@ void Player::UpdateForQuestsGO()
     if(m_clientGUIDs.empty())
         return;
 
-    UpdateData udata;
-    WorldPacket packet;
-    for(ClientGUIDs::const_iterator itr=m_clientGUIDs.begin(); itr!=m_clientGUIDs.end(); ++itr)
+    //UpdateData udata;
+    //WorldPacket packet;
+    for(ClientGUIDs::iterator itr=m_clientGUIDs.begin(); itr!=m_clientGUIDs.end(); ++itr)
     {
         if(IS_GAMEOBJECT_GUID(*itr))
         {
             GameObject *obj = HashMapHolder<GameObject>::Find(*itr);
             if(obj)
-                obj->BuildValuesUpdateBlockForPlayer(&udata,this);
+                //obj->BuildValuesUpdateBlockForPlayer(&udata,this);
+                obj->SendCreateUpdateToPlayer(this); //[-ZERO] we must send create packet because of GAMEOBJECT_FLAGS change (not dynamic) - probably incorrect
         }
     }
-    udata.BuildPacket(&packet);
-    GetSession()->SendPacket(&packet);
+    //udata.BuildPacket(&packet);
+    //GetSession()->SendPacket(&packet);
 }
 
 void Player::SummonIfPossible(bool agree)

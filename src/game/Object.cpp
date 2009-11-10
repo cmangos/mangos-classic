@@ -353,7 +353,16 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
             {
                 IsActivateToQuest = true;
                 updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);
+
+                if(GetUInt32Value(GAMEOBJECT_FLAGS))
+                {
+                    IsActivateToQuest = true;
+                    updateMask->SetBit(GAMEOBJECT_FLAGS);
+                }
             }
+            
+            if (GetUInt32Value(GAMEOBJECT_ARTKIT))
+                updateMask->SetBit(GAMEOBJECT_ARTKIT);
         }
         else if (isType(TYPEMASK_UNIT))
         {
@@ -474,6 +483,25 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                     }
                     else
                         *data << uint32(0);                 // disable quest object
+                }
+                else
+                    *data << m_uint32Values[ index ];       // other cases
+            }
+        }
+    }
+    else if(isType(TYPEMASK_GAMEOBJECT))                    // gameobject case
+    {
+        for( uint16 index = 0; index < m_valuesCount; index ++ )
+        {
+            if( updateMask->GetBit( index ) )
+            {
+                // send in current format (float as float, uint32 as uint32)
+                if ( index == GAMEOBJECT_FLAGS )
+                {
+                    if(IsActivateToQuest)
+                        *data << (m_uint32Values[ index ] & ~GO_FLAG_INTERACT_COND);
+                    else 
+                        *data << m_uint32Values[ index ];
                 }
                 else
                     *data << m_uint32Values[ index ];       // other cases
