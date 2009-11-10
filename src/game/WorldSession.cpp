@@ -591,4 +591,9 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
         data >> mi->j_cosAngle;
         data >> mi->j_xyspeed;
     }
+
+    if(mi->HasMovementFlag(MOVEMENTFLAG_SPLINE))
+    {
+        data >> mi->u_unk1;            // unknown
+    }
 }

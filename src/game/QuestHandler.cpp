@@ -34,8 +34,8 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
     recv_data >> guid;
-    uint8 questStatus = DIALOG_STATUS_NONE;
-    uint8 defstatus = DIALOG_STATUS_NONE;
+    uint32 questStatus = DIALOG_STATUS_NONE;
+    uint32 defstatus = DIALOG_STATUS_NONE;
 
     Object* questgiver = ObjectAccessor::GetObjectByTypeMask(*_player, guid,TYPEMASK_UNIT|TYPEMASK_GAMEOBJECT);
     if(!questgiver)
@@ -470,9 +470,10 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
         Player *pPlayer = ObjectAccessor::FindPlayer( _player->GetDivider() );
         if( pPlayer )
         {
-            WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+1) );
+            WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+4+1) );
             data << uint64(guid);
-            data << uint8(msg);                             // valid values: 0-8
+            data << uint32(msg);                             // valid values: 0-8
+            data << uint8(0);
             pPlayer->GetSession()->SendPacket(&data);
             _player->SetDivider( 0 );
         }

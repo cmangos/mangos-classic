@@ -216,9 +216,9 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
         data << uint32(info->type);
         data << uint32(info->displayId);
         data << Name;
-        data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4
+        data << uint16(0) << uint8(0) << uint8(0);           // name2, name3, name4
         data.append(info->raw.data, 24);
-        data << float(info->size);                          // go size
+        //data << float(info->size);                          // go size , to check
         SendPacket( &data );
         sLog.outDebug( "WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE" );
     }
