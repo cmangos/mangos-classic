@@ -2560,7 +2560,6 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
     PlayerSpellState state = learning ? PLAYERSPELL_NEW : PLAYERSPELL_UNCHANGED;
 
     bool disabled_case = false;
-    bool superceded_old = false;
 
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr != m_spells.end())
@@ -2641,13 +2640,14 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
             }
         }
         // non talent spell: learn low ranks (recursive call)
+        /*[-ZERO]
         else if(uint32 prev_spell = spellmgr.GetPrevSpellInChain(spell_id))
         {
             if(loading)                                     // at spells loading, no output, but allow save
                 addSpell(prev_spell,active,true,loading,disabled);
             else                                            // at normal learning
                 learnSpell(prev_spell);
-        }
+        } */
 
         PlayerSpell *newspell = new PlayerSpell;
         newspell->active = active;
@@ -2671,24 +2671,23 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
                         {
                             if(!loading)                    // not send spell (re-/over-)learn packets at loading
                             {
-                                WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
-                                data << uint16(itr2->first);
-                                data << uint16(spell_id);
+                                WorldPacket data(SMSG_SUPERCEDED_SPELL, (8));
+                                data << uint32(itr2->first);
+                                data << uint32(spell_id);
                                 GetSession()->SendPacket( &data );
                             }
 
                             // mark old spell as disable (SMSG_SUPERCEDED_SPELL replace it in client by new)
                             itr2->second->active = false;
                             itr2->second->state = PLAYERSPELL_CHANGED;
-                            superceded_old = true;          // new spell replace old in action bars and spell book.
                         }
                         else if(spellmgr.IsHighRankOfSpell(itr2->first,spell_id))
                         {
                             if(!loading)                    // not send spell (re-/over-)learn packets at loading
                             {
-                                WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
-                                data << uint16(spell_id);
-                                data << uint16(itr2->first);
+                                WorldPacket data(SMSG_SUPERCEDED_SPELL, (8));
+                                data << uint32(spell_id);
+                                data << uint32(itr2->first);
                                 GetSession()->SendPacket( &data );
                             }
 
@@ -2826,7 +2825,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
     }
 
     // return true (for send learn packet) only if spell active (in case ranked spells) and not replace old spell
-    return active && !disabled && !superceded_old;
+    return active && !disabled;
 }
 
 void Player::learnSpell(uint32 spell_id)
@@ -3456,19 +3455,25 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     if (!trainer_spell->spell)
         return TRAINER_SPELL_RED;
 
+    // exist, already checked at loading
+    SpellEntry const* spell = sSpellStore.LookupEntry(trainer_spell->spell);
+    SpellEntry const* TriggerSpell = sSpellStore.LookupEntry(spell->EffectTriggerSpell[0]);
+
+
     // known spell
-    if(HasSpell(trainer_spell->spell))
+    if(HasSpell(TriggerSpell->Id))
         return TRAINER_SPELL_GRAY;
 
     // check race/class requirement
-    if(!IsSpellFitByClassAndRace(trainer_spell->spell))
+    if(!IsSpellFitByClassAndRace(TriggerSpell->Id))
         return TRAINER_SPELL_RED;
 
     // check level requirement
-    if(getLevel() < trainer_spell->reqLevel)
+    uint32 spellLevel = trainer_spell->reqLevel ? trainer_spell->reqLevel : TriggerSpell->spellLevel;
+    if(getLevel() < spellLevel)
         return TRAINER_SPELL_RED;
 
-    if(SpellChainNode const* spell_chain = spellmgr.GetSpellChainNode(trainer_spell->spell))
+    if(SpellChainNode const* spell_chain = spellmgr.GetSpellChainNode(TriggerSpell->Id))
     {
         // check prev.rank requirement
         if(spell_chain->prev && !HasSpell(spell_chain->prev))
@@ -3484,7 +3489,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
         return TRAINER_SPELL_RED;
 
     // exist, already checked at loading
-    SpellEntry const* spell = sSpellStore.LookupEntry(trainer_spell->spell);
+    // SpellEntry const* spell = sSpellStore.LookupEntry(trainer_spell->spell);
 
     // secondary prof. or not prof. spell
     uint32 skill = spell->EffectMiscValue[1];

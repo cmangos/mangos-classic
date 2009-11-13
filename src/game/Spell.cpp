@@ -2677,7 +2677,7 @@ void Spell::SendSpellStart()
         castFlags |= CAST_FLAG_AMMO;
 
 
-    WorldPacket data(SMSG_SPELL_START, (8+8+4+4+2));
+    WorldPacket data(SMSG_SPELL_START, (8+8+4+4+2+2));
     if(m_CastItem)
         data.append(m_CastItem->GetPackGUID());
     else
@@ -2688,6 +2688,7 @@ void Spell::SendSpellStart()
     data << uint16(castFlags);
     data << uint32(m_timer);
 
+    data << m_targets.m_targetMask;
     m_targets.write(&data);
 
     if( castFlags & CAST_FLAG_AMMO )
@@ -2708,7 +2709,7 @@ void Spell::SendSpellGo()
     if(IsRangedSpell())
         castFlags |= CAST_FLAG_AMMO;                        // arrows/bullets visual
 
-    WorldPacket data(SMSG_SPELL_GO, 50);                    // guess size
+    WorldPacket data(SMSG_SPELL_GO, 53);                    // guess size
 
     if(m_CastItem)
         data.append(m_CastItem->GetPackGUID());
@@ -2718,10 +2719,12 @@ void Spell::SendSpellGo()
     data.append(m_caster->GetPackGUID());
     data << uint32(m_spellInfo->Id);
     data << uint16(castFlags);
-    data << uint32(getMSTime());                            // timestamp
+    // data << uint32(getMSTime());                            // timestamp
 
     WriteSpellGoTargets(&data);
 
+    data << uint8(0); // timestamp?
+    data << m_targets.m_targetMask;
     m_targets.write(&data);
 
     if( castFlags & CAST_FLAG_AMMO )
@@ -2778,7 +2781,7 @@ void Spell::WriteSpellGoTargets( WorldPacket * data )
 
     for(std::list<GOTargetInfo>::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end(); ++ighit)
         *data << uint64(ighit->targetGUID);                 // Always hits
-
+/* [-ZERO] prebc has some reflecting trinkets but seems no data sendeed
     *data << (uint8)m_countOfMiss;
     for(std::list<TargetInfo>::const_iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
     {
@@ -2789,7 +2792,7 @@ void Spell::WriteSpellGoTargets( WorldPacket * data )
             if( ihit->missCondition == SPELL_MISS_REFLECT )
                 *data << uint8(ihit->reflectResult);
         }
-    }
+    } */
 }
 
 void Spell::SendLogExecute()
