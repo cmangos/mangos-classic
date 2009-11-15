@@ -2640,14 +2640,13 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
             }
         }
         // non talent spell: learn low ranks (recursive call)
-        /*[-ZERO]
         else if(uint32 prev_spell = spellmgr.GetPrevSpellInChain(spell_id))
         {
             if(loading)                                     // at spells loading, no output, but allow save
                 addSpell(prev_spell,active,true,loading,disabled);
             else                                            // at normal learning
                 learnSpell(prev_spell);
-        } */
+        }
 
         PlayerSpell *newspell = new PlayerSpell;
         newspell->active = active;
@@ -2671,9 +2670,9 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
                         {
                             if(!loading)                    // not send spell (re-/over-)learn packets at loading
                             {
-                                WorldPacket data(SMSG_SUPERCEDED_SPELL, (8));
-                                data << uint32(itr2->first);
-                                data << uint32(spell_id);
+                                WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
+                                data << uint16(itr2->first);
+                                data << uint16(spell_id);
                                 GetSession()->SendPacket( &data );
                             }
 
@@ -2685,9 +2684,9 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
                         {
                             if(!loading)                    // not send spell (re-/over-)learn packets at loading
                             {
-                                WorldPacket data(SMSG_SUPERCEDED_SPELL, (8));
-                                data << uint32(spell_id);
-                                data << uint32(itr2->first);
+                                WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
+                                data << uint16(spell_id);
+                                data << uint16(itr2->first);
                                 GetSession()->SendPacket( &data );
                             }
 
