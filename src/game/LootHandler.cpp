@@ -374,7 +374,7 @@ void WorldSession::DoLootRelease( uint64 lguid )
         Item *pItem = player->GetItemByGuid(lguid );
         if(!pItem)
             return;
-        if( (pItem->GetProto()->BagFamily & BAG_FAMILY_MASK_MINING_SUPP) &&
+        if( (pItem->GetProto()->BagFamily == BAG_FAMILY_ENCHANTING_SUPP) &&
             pItem->GetProto()->Class == ITEM_CLASS_TRADE_GOODS &&
             pItem->GetCount() >= 5)
         {

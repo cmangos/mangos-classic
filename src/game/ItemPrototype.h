@@ -108,35 +108,19 @@ enum ITEM_FLAGS
     ITEM_FLAGS_MILLABLE                       = 0x20000000
 };
 
-enum BAG_FAMILY_MASK
+enum BAG_FAMILY
 {
-    BAG_FAMILY_MASK_NONE                      = 0x00000000,
-    BAG_FAMILY_MASK_ARROWS                    = 0x00000001,
-    BAG_FAMILY_MASK_BULLETS                   = 0x00000002,
-    BAG_FAMILY_MASK_SOUL_SHARDS               = 0x00000004,
-    BAG_FAMILY_MASK_LEATHERWORKING_SUPP       = 0x00000008,
-    BAG_FAMILY_MASK_INSCRIPTION_SUPP          = 0x00000010,
-    BAG_FAMILY_MASK_HERBS                     = 0x00000020,
-    BAG_FAMILY_MASK_ENCHANTING_SUPP           = 0x00000040,
-    BAG_FAMILY_MASK_ENGINEERING_SUPP          = 0x00000080,
-    BAG_FAMILY_MASK_KEYS                      = 0x00000100,
-    BAG_FAMILY_MASK_GEMS                      = 0x00000200,
-    BAG_FAMILY_MASK_MINING_SUPP               = 0x00000400,
-    BAG_FAMILY_MASK_SOULBOUND_EQUIPMENT       = 0x00000800,
-    BAG_FAMILY_MASK_VANITY_PETS               = 0x00001000,
-    BAG_FAMILY_MASK_CURRENCY_TOKENS           = 0x00002000,
-    BAG_FAMILY_MASK_QUEST_ITEMS               = 0x00004000
+    BAG_FAMILY_NONE                             = 0,
+    BAG_FAMILY_ARROWS                           = 1,
+    BAG_FAMILY_BULLETS                          = 2,
+    BAG_FAMILY_SOUL_SHARDS                      = 3,
+    BAG_FAMILY_UNKNOWN1                         = 4,
+    BAG_FAMILY_UNKNOWN2                         = 5,
+    BAG_FAMILY_HERBS                            = 6,
+    BAG_FAMILY_ENCHANTING_SUPP                  = 7,
+    BAG_FAMILY_ENGINEERING_SUPP                 = 8,
+    BAG_FAMILY_KEYS                             = 9,
 };
-
-enum SocketColor
-{
-    SOCKET_COLOR_META                           = 1,
-    SOCKET_COLOR_RED                            = 2,
-    SOCKET_COLOR_YELLOW                         = 4,
-    SOCKET_COLOR_BLUE                           = 8
-};
-
-#define SOCKET_COLOR_ALL (SOCKET_COLOR_META | SOCKET_COLOR_RED | SOCKET_COLOR_YELLOW | SOCKET_COLOR_BLUE)
 
 enum InventoryType
 {
@@ -537,7 +521,7 @@ struct ItemPrototype
     uint32 MaxDurability;
     uint32 Area;                                            // id from AreaTable.dbc
     uint32 Map;                                             // id from Map.dbc
-    uint32 BagFamily;                                       // bit mask (1 << id from ItemBagFamily.dbc)
+    uint32 BagFamily;
     uint32 RequiredDisenchantSkill;
     float  ArmorDamageModifier;
     uint32 ScriptId;

@@ -1536,19 +1536,11 @@ void ObjectMgr::LoadItemPrototypes()
 
         if(proto->BagFamily)
         {
-            // check bits
-            for(uint32 j = 0; j < sizeof(proto->BagFamily)*8; ++j)
+            ItemBagFamilyEntry const* bf = sItemBagFamilyStore.LookupEntry(proto->BagFamily);
+            if(!bf)
             {
-                uint32 mask = 1 << j;
-                if((proto->BagFamily & mask)==0)
-                    continue;
-
-                ItemBagFamilyEntry const* bf = sItemBagFamilyStore.LookupEntry(j+1);
-                if(!bf)
-                {
-                    sLog.outErrorDb("Item (Entry: %u) has bag family bit set not listed in ItemBagFamily.dbc, remove bit",i);
-                    const_cast<ItemPrototype*>(proto)->BagFamily &= ~mask;
-                }
+                sLog.outErrorDb("Item (Entry: %u) has bag family %u not listed in ItemBagFamily.dbc, setted it to 0",i,proto->BagFamily);
+                const_cast<ItemPrototype*>(proto)->BagFamily = 0;
             }
         }
 
