@@ -572,7 +572,7 @@ CREATE TABLE `characters` (
   `taxi_path` text,
   `honor_highest_rank` int(11) unsigned NOT NULL DEFAULT '0',
   `honor_standing` int(11) unsigned NOT NULL DEFAULT '0',
-  `honor_rating` float unsigned NOT NULL DEFAULT '0',
+  `honor_rating` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),

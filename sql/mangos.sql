@@ -1,7 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.1.40, for Win32 (ia32)
 --
--- Host: localhost    Database: mangos_zero_clean
--- ------------------------------------------------------
+-- Host: localhost    Database: mangos-- ------------------------------------------------------
 -- Server version	5.1.40-community
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
