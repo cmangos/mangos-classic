@@ -452,26 +452,19 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         data << uint32(0);
     SendPacket(&data);
 
-    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 2);         // added in 2.2.0
-    data << uint8(2);                                       // unknown value
-    data << uint8(0);                                       // enable(1)/disable(0) voice chat interface in client
-    SendPacket(&data);
-
     // Send MOTD
     {
-        data.Initialize(SMSG_MOTD, 50);                     // new in 2.0.1
-        data << (uint32)0;
-
         uint32 linecount=0;
         std::string str_motd = sWorld.GetMotd();
         std::string::size_type pos, nextpos;
+        std::string motd;
 
         pos = 0;
         while ( (nextpos= str_motd.find('@',pos)) != std::string::npos )
         {
             if (nextpos != pos)
             {
-                data << str_motd.substr(pos,nextpos-pos);
+                chH.PSendSysMessage(str_motd.substr(pos,nextpos-pos).c_str());
                 ++linecount;
             }
             pos = nextpos+1;
@@ -479,14 +472,17 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
         if (pos<str_motd.length())
         {
-            data << str_motd.substr(pos);
+            chH.PSendSysMessage(str_motd.substr(pos).c_str());
             ++linecount;
         }
 
-        data.put(0, linecount);
-
-        SendPacket( &data );
         DEBUG_LOG( "WORLD: Sent motd (SMSG_MOTD)" );
+
+        // send server info
+        if(sWorld.getConfig(CONFIG_ENABLE_SINFO_LOGIN) == 1)
+            chH.PSendSysMessage(_FULLVERSION);
+
+        DEBUG_LOG( "WORLD: Sent server info" );
     }
 
     //QueryResult *result = CharacterDatabase.PQuery("SELECT guildid,rank FROM guild_member WHERE guid = '%u'",pCurrChar->GetGUIDLow());
