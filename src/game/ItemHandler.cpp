@@ -716,7 +716,7 @@ void WorldSession::SendListInventory( uint64 vendorguid )
     uint8 numitems = vItems->GetItemCount();
     uint8 count = 0;
 
-    WorldPacket data( SMSG_LIST_INVENTORY, (8+1+numitems*8*4) );
+    WorldPacket data( SMSG_LIST_INVENTORY, (8+1+numitems*7*4) );
     data << uint64(vendorguid);
     data << uint8(numitems);
 
