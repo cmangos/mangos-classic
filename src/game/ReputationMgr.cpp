@@ -133,9 +133,8 @@ void ReputationMgr::SendState(FactionState const* faction) const
 {
     if(faction->Flags & FACTION_FLAG_VISIBLE)               //If faction is visible then update it
     {
-        WorldPacket data(SMSG_SET_FACTION_STANDING, (16));  // last check 2.4.0
-        data << (float) 0;                                  // unk 2.4.0
-        data << (uint32) 1;                                 // count
+        WorldPacket data(SMSG_SET_FACTION_STANDING, (12));
+        data << (uint32) 1;                                 // count [-ZERO] maybe we've to use faction->flags instead
         // for
         data << (uint32) faction->ReputationListID;
         data << (uint32) faction->Standing;

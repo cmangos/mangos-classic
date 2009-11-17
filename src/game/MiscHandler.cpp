@@ -235,7 +235,6 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         data << uint32( lvl );                              // player level
         data << uint32( class_ );                           // player class
         data << uint32( race );                             // player race
-        data << uint8(0);                                   // new 2.4.0
         data << uint32( pzoneid );                          // player zone id
 
         // 49 is maximum player count sent to client

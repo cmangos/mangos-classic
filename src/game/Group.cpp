@@ -438,7 +438,6 @@ void Group::SendLootRoll(const uint64& SourceGuid, const uint64& TargetGuid, uin
     data << uint32(r.itemRandomPropId);                     // Item random property ID
     data << uint8(RollNumber);                              // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
     data << uint8(RollType);                                // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
-    data << uint8(0);                                       // 2.4.0
 
     for( Roll::PlayerVote::const_iterator itr=r.playerVote.begin(); itr!=r.playerVote.end(); ++itr)
     {
@@ -880,12 +879,10 @@ void Group::SendUpdate()
         if(!player || !player->GetSession())
             continue;
                                                             // guess size
-        WorldPacket data(SMSG_GROUP_LIST, (1+1+1+1+8+4+GetMembersCount()*20));
+        WorldPacket data(SMSG_GROUP_LIST, (1+1+1+4+GetMembersCount()*20)+8+1+8+1);
         data << (uint8)m_groupType;                         // group type
-        data << (uint8)(isBGGroup() ? 1 : 0);               // 2.0.x, isBattleGroundGroup?
-        data << (uint8)(citr->group);                       // groupid
-        data << (uint8)(citr->assistant?0x01:0);            // 0x2 main assist, 0x4 main tank
-        data << uint64(0x50000000FFFFFFFELL);               // related to voice chat?
+        data << (uint8)(citr->group | (citr->assistant?0x80:0));  // own flags (groupid | (assistant?0x80:0))
+
         data << uint32(GetMembersCount()-1);
         for(member_citerator citr2 = m_memberSlots.begin(); citr2 != m_memberSlots.end(); ++citr2)
         {
@@ -896,8 +893,7 @@ void Group::SendUpdate()
             data << (uint64)citr2->guid;
                                                             // online-state
             data << (uint8)(objmgr.GetPlayer(citr2->guid) ? 1 : 0);
-            data << (uint8)(citr2->group);                  // groupid
-            data << (uint8)(citr2->assistant?0x01:0);       // 0x2 main assist, 0x4 main tank
+            data << (uint8)(citr2->group | (citr2->assistant?0x80:0));
         }
 
         data << uint64(m_leaderGuid);                       // leader guid

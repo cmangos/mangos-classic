@@ -592,7 +592,6 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         if ((*itr)->HasItems() && (*itr)->messageType == MAIL_NORMAL)
             show_flags |= MAIL_SHOW_RETURN;
 
-        data << (uint16) 0x0040;                            // unknown 2.3.0, different values
         data << (uint32) (*itr)->messageID;                 // Message ID
         data << (uint8) (*itr)->messageType;                // Message Type
 

@@ -519,7 +519,6 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
     auctionHouse->BuildListBidderItems(data,pl,count,totalcount);
     data.put<uint32>( 0, count );                           // add count to placeholder
     data << totalcount;
-    data << (uint32)300;                                    //unk 2.3.0
     SendPacket(&data);
 }
 
@@ -611,6 +610,5 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
 
     data.put<uint32>(0, count);
     data << (uint32) totalcount;
-    data << (uint32) 300;                                   // unk 2.3.0 const?
     SendPacket(&data);
 }

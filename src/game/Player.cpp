@@ -2102,7 +2102,6 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
         data << uint32(GivenXP);                            // experience without rested bonus
         data << float(1);                                   // 1 - none 0 - 100% group bonus output
     }
-    data << uint8(0);                                       // new 2.4.0
     GetSession()->SendPacket(&data);
 }
 
@@ -4458,7 +4457,7 @@ float Player::GetSpellCritFromIntellect()
 
 float Player::GetRatingCoefficient(CombatRating cr) const
 {
-  /*  [-ZERO] to rewrite?
+  /*  [-ZERO] mechanic combat rating doesn't exist in 1.12
     uint32 level = getLevel();
 
     if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
@@ -10550,10 +10549,6 @@ void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
 
     if (msg != EQUIP_ERR_OK)
     {
-        data << uint64(pItem ? pItem->GetGUID() : 0);
-        data << uint64(pItem2 ? pItem2->GetGUID() : 0);
-        data << uint8(0);                                   // not 0 there...
-
         if (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I)
         {
             uint32 level = 0;
@@ -10562,8 +10557,12 @@ void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
                 if (ItemPrototype const* proto =  pItem->GetProto())
                     level = proto->RequiredLevel;
 
-            data << uint32(level);                          // new 2.4.0
+            data << uint32(level);
         }
+
+        data << uint64(pItem ? pItem->GetGUID() : 0);
+        data << uint64(pItem2 ? pItem2->GetGUID() : 0);
+        data << uint8(0);                                   // not 0 there...
     }
     GetSession()->SendPacket(&data);
 }
