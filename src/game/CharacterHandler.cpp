@@ -36,6 +36,7 @@
 #include "SocialMgr.h"
 #include "Util.h"
 #include "Language.h"
+#include "Chat.h"
 
 class LoginQueryHolder : public SqlQueryHolder
 {
@@ -464,7 +465,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         {
             if (nextpos != pos)
             {
-                chH.PSendSysMessage(str_motd.substr(pos,nextpos-pos).c_str());
+                ChatHandler(pCurrChar).PSendSysMessage(str_motd.substr(pos,nextpos-pos).c_str());
                 ++linecount;
             }
             pos = nextpos+1;
@@ -472,17 +473,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
         if (pos<str_motd.length())
         {
-            chH.PSendSysMessage(str_motd.substr(pos).c_str());
+            ChatHandler(pCurrChar).PSendSysMessage(str_motd.substr(pos).c_str());
             ++linecount;
         }
 
         DEBUG_LOG( "WORLD: Sent motd (SMSG_MOTD)" );
-
-        // send server info
-        if(sWorld.getConfig(CONFIG_ENABLE_SINFO_LOGIN) == 1)
-            chH.PSendSysMessage(_FULLVERSION);
-
-        DEBUG_LOG( "WORLD: Sent server info" );
     }
 
     //QueryResult *result = CharacterDatabase.PQuery("SELECT guildid,rank FROM guild_member WHERE guid = '%u'",pCurrChar->GetGUIDLow());
