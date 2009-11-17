@@ -162,7 +162,7 @@ struct ActionButton
     }
 };
 
-#define  MAX_ACTION_BUTTONS 132                             //checked in 2.3.0
+#define  MAX_ACTION_BUTTONS 120   // TBC 132 checked in 2.3.0
 
 typedef std::map<uint8,ActionButton> ActionButtonList;
 
