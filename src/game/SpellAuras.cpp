@@ -968,8 +968,8 @@ bool Aura::_RemoveAura()
 
 void Aura::SetAuraFlag(uint32 slot, bool add)
 {
-    uint32 index    = slot / 4;
-    uint32 byte     = (slot % 4) * 8;
+    uint32 index    = slot >> 3;//slot / 4; [-ZERO]
+    uint32 byte     = (slot & 7) << 2;//(slot % 4) * 8;
     uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURAFLAGS + index);
     val &= ~((uint32)AFLAG_MASK << byte);
     if(add)
@@ -3192,7 +3192,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
         // only at real aura add
         if (Real)
         {
-            m_target->SetStandFlags(UNIT_STAND_FLAGS_CREEP);
+            m_target->SetStandFlags(UNIT_BYTE1_FLAGS_CREEP);
             if(m_target->GetTypeId()==TYPEID_PLAYER)
                 m_target->SetFlag(PLAYER_FIELD_BYTES2, 0x2000);
 
@@ -3237,7 +3237,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
             // if no GM invisibility
             if (m_target->GetVisibility()!=VISIBILITY_OFF)
             {
-                m_target->RemoveStandFlags(UNIT_STAND_FLAGS_CREEP);
+                m_target->RemoveStandFlags(UNIT_BYTE1_FLAGS_CREEP);
                 if(m_target->GetTypeId()==TYPEID_PLAYER)
                     m_target->RemoveFlag(PLAYER_FIELD_BYTES2, 0x2000);
 

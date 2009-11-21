@@ -139,22 +139,15 @@ enum UnitStandStateType
     UNIT_STAND_STATE_KNEEL             = 8
 };
 
-// byte flag value (UNIT_FIELD_BYTES_1,2)
+/* byte flag value (UNIT_FIELD_BYTES_1,2) [-ZERO] not existant in 1.12 moved in offset 3
 enum UnitStandFlags
 {
     UNIT_STAND_FLAGS_CREEP        = 0x02,
     UNIT_STAND_FLAGS_ALL          = 0xFF
 };
+*/
 
-// byte flags value (UNIT_FIELD_BYTES_1,3)
-enum UnitBytes1_Flags
-{
-    UNIT_BYTE1_FLAG_ALWAYS_STAND = 0x01,
-    UNIT_BYTE1_FLAG_UNTRACKABLE  = 0x04,
-    UNIT_BYTE1_FLAG_ALL          = 0xFF
-};
-
-// high byte (3 from 0..3) of UNIT_FIELD_BYTES_2 (SpellShapeshiftForm.dbc, checked for 1.12.1)
+// byte flags  value (UNIT_FIELD_BYTES_1,2) (SpellShapeshiftForm.dbc, checked for 1.12.1)
 enum ShapeshiftForm
 {
     FORM_NONE               = 0x00,
@@ -176,6 +169,15 @@ enum ShapeshiftForm
     FORM_STEALTH            = 0x1E,
     FORM_MOONKIN            = 0x1F,
     FORM_SPIRITOFREDEMPTION = 0x20
+};
+
+// byte flags value (UNIT_FIELD_BYTES_1,3)
+enum UnitBytes1_Flags
+{
+    UNIT_BYTE1_FLAG_ALWAYS_STAND = 0x01,
+    UNIT_BYTE1_FLAGS_CREEP        = 0x02,
+    UNIT_BYTE1_FLAG_UNTRACKABLE  = 0x04,
+    UNIT_BYTE1_FLAG_ALL          = 0xFF
 };
 
 // low byte ( 0 from 0..3 ) of UNIT_FIELD_BYTES_2
@@ -925,8 +927,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsStandState() const;
         void SetStandState(uint8 state);
 
-        void  SetStandFlags(uint8 flags) { SetByteFlag(UNIT_FIELD_BYTES_1, 2,flags); }
-        void  RemoveStandFlags(uint8 flags) { RemoveByteFlag(UNIT_FIELD_BYTES_1, 2,flags); }
+        void  SetStandFlags(uint8 flags) { SetByteFlag(UNIT_FIELD_BYTES_1, 3,flags); }
+        void  RemoveStandFlags(uint8 flags) { RemoveByteFlag(UNIT_FIELD_BYTES_1, 3,flags); }
 
         bool IsMounted() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT ); }
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }

@@ -1924,13 +1924,13 @@ bool Creature::LoadCreaturesAddon(bool reload)
     {
         // 0 StandState
         // 1 LoyaltyLevel  Pet only, so always 0 for default creature
-        // 2 StandFlags
+        // 2 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
         // 3 StandMiscFlags
 
         SetByteValue(UNIT_FIELD_BYTES_1, 0, uint8(cainfo->bytes1 & 0xFF));
         //SetByteValue(UNIT_FIELD_BYTES_1, 1, uint8((cainfo->bytes1 >> 8) & 0xFF));
         SetByteValue(UNIT_FIELD_BYTES_1, 1, 0);
-        SetByteValue(UNIT_FIELD_BYTES_1, 2, uint8((cainfo->bytes1 >> 16) & 0xFF));
+        SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
         SetByteValue(UNIT_FIELD_BYTES_1, 3, uint8((cainfo->bytes1 >> 24) & 0xFF));
     }
 
@@ -1939,14 +1939,12 @@ bool Creature::LoadCreaturesAddon(bool reload)
         // 0 SheathState
         // 1 Bytes2Flags
         // 2 UnitRename         Pet only, so always 0 for default creature
-        // 3 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
 
         SetByteValue(UNIT_FIELD_BYTES_2, 0, uint8(cainfo->bytes2 & 0xFF));
         SetByteValue(UNIT_FIELD_BYTES_2, 1, uint8((cainfo->bytes2 >> 8) & 0xFF));
         //SetByteValue(UNIT_FIELD_BYTES_2, 2, uint8((cainfo->bytes2 >> 16) & 0xFF));
         SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
         //SetByteValue(UNIT_FIELD_BYTES_2, 3, uint8((cainfo->bytes2 >> 24) & 0xFF));
-        SetByteValue(UNIT_FIELD_BYTES_2, 3, 0);
     }
 
     if (cainfo->emote != 0)

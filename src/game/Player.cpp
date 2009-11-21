@@ -2364,7 +2364,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // cleanup player flags (will be re-applied if need at aura load), to avoid have ghost flag without ghost aura, for example.
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK | PLAYER_FLAGS_DND | PLAYER_FLAGS_GM | PLAYER_FLAGS_GHOST | PLAYER_FLAGS_FFA_PVP);
 
-    RemoveStandFlags(UNIT_STAND_FLAGS_ALL);                 // one form stealth modified bytes
+    RemoveStandFlags(UNIT_BYTE1_FLAG_ALL);                 // one form stealth modified bytes
 
     // restore if need some important flags
     SetUInt32Value(PLAYER_FIELD_BYTES2, 0 );                // flags empty by default
@@ -14182,7 +14182,7 @@ void Player::SaveToDB()
 
     // Set player sit state to standing on save, also stealth and shifted form
     SetByteValue(UNIT_FIELD_BYTES_1, 0, UNIT_STAND_STATE_STAND);
-    SetByteValue(UNIT_FIELD_BYTES_2, 3, 0);                 // shapeshift
+    SetByteValue(UNIT_FIELD_BYTES_1, 2, 0);                 // shapeshift
     SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);                 // stand flags?
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
     SetDisplayId(GetNativeDisplayId());
