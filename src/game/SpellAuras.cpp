@@ -2436,7 +2436,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         if(m_target->m_ShapeShiftFormSpellId)
             m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftFormSpellId, this);
 
-        m_target->SetByteValue(UNIT_FIELD_BYTES_2, 3, form);
+        m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, form);
 
         if(modelid > 0)
             m_target->SetDisplayId(modelid);
@@ -2513,7 +2513,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     {
         if(modelid > 0)
             m_target->SetDisplayId(m_target->GetNativeDisplayId());
-        m_target->SetByteValue(UNIT_FIELD_BYTES_2, 3, FORM_NONE);
+        m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, FORM_NONE);
         if(m_target->getClass() == CLASS_DRUID)
             m_target->setPowerType(POWER_MANA);
         m_target->m_ShapeShiftFormSpellId = 0;
