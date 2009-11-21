@@ -16425,15 +16425,13 @@ void Player::InitPrimaryProfessions()
     SetFreePrimaryProfessions(sWorld.getConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL));
 }
 
-void Player::SendComboPoints()
+void Player::SetComboPoints()
 {
     Unit *combotarget = ObjectAccessor::GetUnit(*this, m_comboTarget);
     if (combotarget)
     {
-        WorldPacket data(SMSG_UPDATE_COMBO_POINTS, combotarget->GetPackGUID().size()+1);
-        data.append(combotarget->GetPackGUID());
-        data << uint8(m_comboPoints);
-        GetSession()->SendPacket(&data);
+         SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,combotarget->GetGUID());
+         SetUInt32Value(PLAYER_FIELD_BYTES,((GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (m_comboPoints << 8)));
     }
 }
 
@@ -16464,7 +16462,7 @@ void Player::AddComboPoints(Unit* target, int8 count)
     if (m_comboPoints > 5) m_comboPoints = 5;
     if (m_comboPoints < 0) m_comboPoints = 0;
 
-    SendComboPoints();
+    SetComboPoints();
 }
 
 void Player::ClearComboPoints()
@@ -16477,7 +16475,7 @@ void Player::ClearComboPoints()
 
     m_comboPoints = 0;
 
-    SendComboPoints();
+    SetComboPoints();
 
     if(Unit* target = ObjectAccessor::GetUnit(*this,m_comboTarget))
         target->RemoveComboPointHolder(GetGUIDLow());

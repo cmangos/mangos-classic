@@ -883,7 +883,6 @@ enum OpcodesList
     CMSG_TIME_SYNC_RESP                             = 0x391,
     SMSG_RESET_FAILED_NOTIFY                        = 0x396,
     SMSG_REAL_GROUP_UPDATE                          = 0x397,
-    SMSG_UPDATE_COMBO_POINTS                        = 0x39D,
     SMSG_INIT_EXTRA_AURA_INFO                       = 0x3A3,
     SMSG_SET_EXTRA_AURA_INFO                        = 0x3A4,
     SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE            = 0x3A5,

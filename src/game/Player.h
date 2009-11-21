@@ -1184,7 +1184,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void AddComboPoints(Unit* target, int8 count);
         void ClearComboPoints();
-        void SendComboPoints();
+        void SetComboPoints();
 
         void SendMailResult(uint32 mailId, MailResponseType mailAction, MailResponseResult mailError, uint32 equipError = 0, uint32 item_guid = 0, uint32 item_count = 0);
         void SendNewMail();
