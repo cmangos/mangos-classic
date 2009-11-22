@@ -2637,6 +2637,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
         // polymorph case
         if (Real && m_target->GetTypeId() == TYPEID_PLAYER && m_target->IsPolymorphed())
         {
+            // [-ZERO] maybe we wanna remove it
             // for players, start regeneration after 1s (in polymorph fast regeneration case)
             // only if caster is Player (after patch 2.4.2)
             if (IS_PLAYER_GUID(GetCasterGUID()) )

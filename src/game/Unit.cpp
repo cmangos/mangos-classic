@@ -9552,6 +9552,7 @@ void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration,Un
         return;
 
     // Duration of crowd control abilities on pvp target is limited by 10 sec. (2.2.0)
+    /*[-ZERO] maybe you want activate it ( however not for 1.12 )
     if(duration > 10000 && IsDiminishingReturnsGroupDurationLimited(group))
     {
         // test pet/charm masters instead pets/charmeds
@@ -9564,6 +9565,7 @@ void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration,Un
         if(target->GetTypeId() == TYPEID_PLAYER && source->GetTypeId() == TYPEID_PLAYER)
             duration = 10000;
     }
+    */
 
     float mod = 1.0f;
 

@@ -298,8 +298,7 @@ enum ItemSubclassTradeGoods
     ITEM_SUBCLASS_HERB                          = 9,
     ITEM_SUBCLASS_ELEMENTAL                     = 10,
     ITEM_SUBCLASS_TRADE_GOODS_OTHER             = 11,
-    ITEM_SUBCLASS_ENCHANTING                    = 12,
-    ITEM_SUBCLASS_MATERIAL                      = 13        // Added in 2.4.2
+    ITEM_SUBCLASS_ENCHANTING                    = 12
 };
 
 #define MAX_ITEM_SUBCLASS_TRADE_GOODS             14

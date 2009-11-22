@@ -104,6 +104,7 @@ enum ItemEnchantmentType
     ITEM_ENCHANTMENT_TYPE_TOTEM        = 6
 };
 
+/* [-ZERO] TODO remove it if completely useless
 enum TotemCategoryType
 {
     TOTEM_CATEGORY_TYPE_KNIFE   = 1,
@@ -133,5 +134,6 @@ enum SummonPropType
     SUMMON_PROP_TYPE_TOTEM           = 4,                   // summon totem, 148 spells in 2.4.3
     SUMMON_PROP_TYPE_CRITTER         = 5,                   // critter/minipet, 159 spells in 2.4.3
 };
+*/
 
 #endif
