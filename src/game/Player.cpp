@@ -9587,9 +9587,8 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
                 {
                     m_weaponChangeTimer = spellProto->StartRecoveryTime;
 
-                    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4);
+                    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+4+4);
                     data << uint64(GetGUID());
-                    data << uint8(1);
                     data << uint32(cooldownSpell);
                     data << uint32(0);
                     GetSession()->SendPacket(&data);
@@ -15733,10 +15732,9 @@ bool Player::ActivateTaxiPathTo( uint32 taxi_path_id, uint32 spellid /*= 0*/ )
 
 void Player::ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs )
 {
-                                                            // last check 2.0.10
-    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+m_spells.size()*8);
+                                                            // last check 1.12
+    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+m_spells.size()*8);
     data << GetGUID();
-    data << uint8(0x0);                                     // flags (0x1, 0x2)
     time_t curTime = time(NULL);
     for(PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
