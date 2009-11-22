@@ -669,25 +669,18 @@ enum SpellCastResult
     SPELL_FAILED_ALREADY_HAVE_CHARM             = 0x04,
     SPELL_FAILED_ALREADY_HAVE_SUMMON            = 0x05,
     SPELL_FAILED_ALREADY_OPEN                   = 0x06,
-    SPELL_FAILED_AURA_BOUNCED                   = 0x07,     // CAST_FAIL_MORE_POWERFUL_SPELL_ACTIVE
-
-    // [-ZERO] need check is it correct
+    SPELL_FAILED_MORE_POWERFUL_SPELL_ACTIVE     = 0x07,
     //SPELL_FAILED_AUTOTRACK_INTERRUPTED          = 0x08, old commented CAST_FAIL_FAILED = 8,-> 29
-
     SPELL_FAILED_BAD_IMPLICIT_TARGETS           = 0x09,
     SPELL_FAILED_BAD_TARGETS                    = 0x0A,
     SPELL_FAILED_CANT_BE_CHARMED                = 0x0B,
     SPELL_FAILED_CANT_BE_DISENCHANTED           = 0x0C,
-
-    // [-ZERO] in 0.12 this 2 case, need check what from
-    //SPELL_FAILED_CANT_BE_DISENCHANTED_SKILL     = 0x0D,
-    //SPELL_FAILED_CANT_BE_PROSPECTED             = 0x0D,
-
+    SPELL_FAILED_CANT_BE_PROSPECTED             = 0x0D,
     SPELL_FAILED_CANT_CAST_ON_TAPPED            = 0x0E,
     SPELL_FAILED_CANT_DUEL_WHILE_INVISIBLE      = 0x0F,
     SPELL_FAILED_CANT_DUEL_WHILE_STEALTHED      = 0x10,
-    SPELL_FAILED_CANT_STEALTH                   = 0x11,     // CAST_FAIL_TOO_CLOSE_TO_ENEMY
-    SPELL_FAILED_CASTER_AURASTATE               = 0x12,     // CAST_FAIL_CANT_DO_THAT_YET
+    SPELL_FAILED_CANT_TOO_CLOSE_TO_ENEMY        = 0x11,
+    SPELL_FAILED_CANT_DO_THAT_YET               = 0x12,
     SPELL_FAILED_CASTER_DEAD                    = 0x13,
     SPELL_FAILED_CHARMED                        = 0x14,
     SPELL_FAILED_CHEST_IN_USE                   = 0x15,
@@ -702,25 +695,22 @@ enum SpellCastResult
     SPELL_FAILED_FLEEING                        = 0x1E,
     SPELL_FAILED_FOOD_LOWLEVEL                  = 0x1F,
     SPELL_FAILED_HIGHLEVEL                      = 0x20,
-
-    // [-ZERO] need check 
     //SPELL_FAILED_HUNGER_SATIATED                = 0x21,
-
     SPELL_FAILED_IMMUNE                         = 0x22,
     SPELL_FAILED_INTERRUPTED                    = 0x23,
     SPELL_FAILED_INTERRUPTED_COMBAT             = 0x24,
     SPELL_FAILED_ITEM_ALREADY_ENCHANTED         = 0x25,
     SPELL_FAILED_ITEM_GONE                      = 0x26,
-    SPELL_FAILED_ITEM_NOT_FOUND                 = 0x27,     // CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM
+    SPELL_FAILED_ENCHANT_NOT_EXISTING_ITEM      = 0x27,
     SPELL_FAILED_ITEM_NOT_READY                 = 0x28,
     SPELL_FAILED_LEVEL_REQUIREMENT              = 0x29,
     SPELL_FAILED_LINE_OF_SIGHT                  = 0x2A,
     SPELL_FAILED_LOWLEVEL                       = 0x2B,
-    SPELL_FAILED_LOW_CASTLEVEL                  = 0x2C,     // CAST_FAIL_SKILL_NOT_HIGH_ENOUGH
+    SPELL_FAILED_SKILL_NOT_HIGH_ENOUGH          = 0x2C,
     SPELL_FAILED_MAINHAND_EMPTY                 = 0x2D,
     SPELL_FAILED_MOVING                         = 0x2E,
     SPELL_FAILED_NEED_AMMO                      = 0x2F,
-    SPELL_FAILED_NEED_AMMO_POUCH                = 0x30,     // CAST_FAIL_REQUIRES_SOMETHING
+    SPELL_FAILED_NEED_REQUIRES_SOMETHING        = 0x30,
     SPELL_FAILED_NEED_EXOTIC_AMMO               = 0x31,
     SPELL_FAILED_NOPATH                         = 0x32,
     SPELL_FAILED_NOT_BEHIND                     = 0x33,
@@ -750,11 +740,8 @@ enum SpellCastResult
     SPELL_FAILED_NO_MOUNTS_ALLOWED              = 0x4B,
     SPELL_FAILED_NO_PET                         = 0x4C,
     SPELL_FAILED_NO_POWER                       = 0x4D,     // CAST_FAIL_NOT_ENOUGH_MANA
-
-    // [-ZERO] need check is its correct
-    //SPELL_FAILED_NOTHING_TO_DISPEL              = 0x4E, CAST_FAIL_NOT_AURA_TO_QUSHAN
-    //SPELL_FAILED_NOTHING_TO_STEAL               = 0x4F,
-
+    SPELL_FAILED_NOTHING_TO_DISPEL              = 0x4E,
+    SPELL_FAILED_NOTHING_TO_STEAL               = 0x4F,
     SPELL_FAILED_ONLY_ABOVEWATER                = 0x50,     // CAST_FAIL_CANT_USE_WHILE_SWIMMING
     SPELL_FAILED_ONLY_DAYTIME                   = 0x51,
     SPELL_FAILED_ONLY_INDOORS                   = 0x52,
@@ -767,7 +754,7 @@ enum SpellCastResult
     SPELL_FAILED_OUT_OF_RANGE                   = 0x59,
     SPELL_FAILED_PACIFIED                       = 0x5A,
     SPELL_FAILED_POSSESSED                      = 0x5B,
-    SPELL_FAILED_REAGENTS                       = 0x5C,
+    // SPELL_FAILED_REAGENTS                       = 0x5C, [-ZERO] not in 1.12
     SPELL_FAILED_REQUIRES_AREA                  = 0x5D,     // CAST_FAIL_YOU_NEED_TO_BE_IN_XXX
     SPELL_FAILED_REQUIRES_SPELL_FOCUS           = 0x5E,     // CAST_FAIL_REQUIRES_XXX
     SPELL_FAILED_ROOTED                         = 0x5F,     // CAST_FAIL_UNABLE_TO_MOVE
@@ -795,11 +782,7 @@ enum SpellCastResult
     SPELL_FAILED_THIRST_SATIATED                = 0x75,
     SPELL_FAILED_TOO_CLOSE                      = 0x76,
     SPELL_FAILED_TOO_MANY_OF_ITEM               = 0x77,
-
-    // [-ZERO] need check what from its correct
-    SPELL_FAILED_TOTEM_CATEGORY                 = 0x78,
-    SPELL_FAILED_TOTEMS                         = 0x78,
-
+    // SPELL_FAILED_TOTEMS                         = 0x78,  // [-ZERO] not in 1.12
     SPELL_FAILED_TRAINING_POINTS                = 0x79,
     SPELL_FAILED_TRY_AGAIN                      = 0x7A,     // CAST_FAIL_FAILED_ATTEMPT
     SPELL_FAILED_UNIT_NOT_BEHIND                = 0x7B,
@@ -810,34 +793,23 @@ enum SpellCastResult
     SPELL_FAILED_NOT_WHILE_TRADING              = 0x80,
     SPELL_FAILED_TARGET_NOT_IN_RAID             = 0x81,
     SPELL_FAILED_DISENCHANT_WHILE_LOOTING       = 0x82,
-
-    // [-ZERO] need check what from its correct
-    //SPELL_FAILED_TARGET_NOT_GHOST
-    //SPELL_FAILED_PROSPECT_WHILE_LOOTING
-    //SPELL_FAILED_PROSPECT_NEED_MORE
-    //SPELL_FAILED_TARGET_FREEFORALL
-    // 
-    //CAST_FAIL_TARGET_IS_NOT_A_GHOST       = 128,                  //SPELL_FAILED_TARGET_NOT_GHOST
-    //CAST_FAIL_TARGET_IS_IN_FFA_PVP_COMBAT   = 133,
-
+    SPELL_FAILED_PROSPECT_WHILE_LOOTING         = 0x83,
+  //  SPELL_FAILED_PROSPECT_NEED_MORE             = 0x85,
+    SPELL_FAILED_TARGET_FREEFORALL              = 0x85,
     SPELL_FAILED_NO_EDIBLE_CORPSES              = 0x86,
     SPELL_FAILED_ONLY_BATTLEGROUNDS             = 0x87,
-
-    CAST_FAIL_CANT_EQUIP_ON_LOW_RANK        = 131 + 1 + 4,
-
+    SPELL_FAILED_TARGET_NOT_GHOST               = 0x88,
     SPELL_FAILED_TOO_MANY_SKILLS                = 0x89,     // CAST_FAIL_YOUR_PET_CANT_LEARN_MORE_SKILLS
-
-    // [-ZERO] need check what from its correct
-    //SPELL_FAILED_TRANSFORM_UNUSABLE            = 0x8A,     // CAST_FAIL_CANT_USE_NEW_ITEM
-
+    SPELL_FAILED_CANT_USE_NEW_ITEM              = 0x8A,
     SPELL_FAILED_WRONG_WEATHER                  = 0x8B,     // CAST_FAIL_CANT_DO_IN_THIS_WEATHER
     SPELL_FAILED_DAMAGE_IMMUNE                  = 0x8C,     // CAST_FAIL_CANT_DO_IN_IMMUNE
     SPELL_FAILED_PREVENTED_BY_MECHANIC          = 0x8D,     // CAST_FAIL_CANT_DO_IN_XXX
     SPELL_FAILED_PLAY_TIME                      = 0x8E,     // CAST_FAIL_GAME_TIME_OVER
-    SPELL_FAILED_MIN_SKILL                      = 0x8F,     // CAST_FAIL_NOT_ENOUGH_RANK
-    SPELL_FAILED_UNKNOWN                        = 0x90,
+    SPELL_FAILED_REPUTATION                     = 0x8F,
+    SPELL_FAILED_MIN_SKILL                      = 0x90,
+    SPELL_FAILED_UNKNOWN                        = 0x91,
 
-    SPELL_CAST_OK                               = 0xFF      //custom value, don't must be send to client
+    SPELL_CAST_OK                               = 0xFF,      // custom value, don't must be send to client
 };
 
 // Spell aura states

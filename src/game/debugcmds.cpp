@@ -51,8 +51,9 @@ bool ChatHandler::HandleDebugSendSpellFailCommand(const char* args)
     char* p2 = strtok(NULL, " ");
     uint8 failarg2 = p2 ? (uint8)atoi(p2) : 0;
 
-    WorldPacket data(SMSG_CAST_FAILED, 5);
+    WorldPacket data(SMSG_CAST_FAILED, 4+1+1);
     data << uint32(133);
+    data << uint8(2);
     data << uint8(failnum);
     if (p1 || p2)
         data << uint32(failarg1);

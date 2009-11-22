@@ -3282,7 +3282,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // caster state requirements
     if(m_spellInfo->CasterAuraState && !m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraState)))
-        return SPELL_FAILED_CASTER_AURASTATE;
+        return SPELL_FAILED_CANT_DO_THAT_YET;
    /*[-ZERO] if(m_spellInfo->CasterAuraStateNot && m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraStateNot)))
         return SPELL_FAILED_CASTER_AURASTATE; */
 
@@ -3786,7 +3786,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 int32 TargetLevel = m_targets.getUnitTarget()->getLevel();
                 int32 ReqValue = (skillValue < 100 ? (TargetLevel-10) * 10 : TargetLevel * 5);
                 if (ReqValue > skillValue)
-                    return SPELL_FAILED_LOW_CASTLEVEL;
+                    return SPELL_FAILED_SKILL_NOT_HIGH_ENOUGH;
 
                 // chance for fail at orange skinning attempt
                 if( (m_selfContainer && (*m_selfContainer) == this) &&
@@ -4429,7 +4429,7 @@ SpellCastResult Spell::CheckPower()
     if(m_spellInfo->powerType == POWER_HEALTH)
     {
         if(m_caster->GetHealth() <= m_powerCost)
-            return SPELL_FAILED_CASTER_AURASTATE;
+            return SPELL_FAILED_CANT_DO_THAT_YET;
         return SPELL_CAST_OK;
     }
 
@@ -4612,7 +4612,7 @@ SpellCastResult Spell::CheckItems()
         totems -= 1;
     }
     if(totems != 0)
-        return SPELL_FAILED_TOTEMS;                         //0x7C
+        return SPELL_FAILED_ITEM_GONE;                         //[-ZERO] not sure of it
 
   /*[-ZERO] to rewrite?
     // Check items for TotemCategory  (items presence in inventory)
@@ -4657,7 +4657,7 @@ SpellCastResult Spell::CheckItems()
             {
                 Item* targetItem = m_targets.getItemTarget();
                 if(!targetItem)
-                    return SPELL_FAILED_ITEM_NOT_FOUND;
+                    return SPELL_FAILED_ITEM_GONE;
 
                 if( targetItem->GetProto()->ItemLevel < m_spellInfo->baseLevel )
                     return SPELL_FAILED_LOWLEVEL;
@@ -4677,7 +4677,7 @@ SpellCastResult Spell::CheckItems()
             {
                 Item *item = m_targets.getItemTarget();
                 if(!item)
-                    return SPELL_FAILED_ITEM_NOT_FOUND;
+                    return SPELL_FAILED_ITEM_GONE;
                 // Not allow enchant in trade slot for some enchant type
                 if( item->GetOwner() != m_caster )
                 {
@@ -4712,7 +4712,7 @@ SpellCastResult Spell::CheckItems()
                 if (item_disenchantskilllevel == uint32(-1))
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
                 if (item_disenchantskilllevel > p_caster->GetSkillValue(SKILL_ENCHANTING))
-                    return SPELL_FAILED_LOW_CASTLEVEL;
+                    return SPELL_FAILED_SKILL_NOT_HIGH_ENOUGH;
                 if(item_quality > 4 || item_quality < 2)
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
                 if(itemProto->Class != ITEM_CLASS_WEAPON && itemProto->Class != ITEM_CLASS_ARMOR)
@@ -5231,7 +5231,7 @@ SpellCastResult Spell::CanOpenLock(uint32 effIndex, uint32 lockId, SkillType& sk
                     skillValue += spellSkillBonus;
 
                     if (skillValue < reqSkillValue)
-                        return SPELL_FAILED_LOW_CASTLEVEL;
+                        return SPELL_FAILED_SKILL_NOT_HIGH_ENOUGH;
                 }
 
                 return SPELL_CAST_OK;
