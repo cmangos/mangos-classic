@@ -126,7 +126,7 @@ void WorldSession::SendUpdateTrade()
     WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, (100));    // guess size
     data << (uint8 ) 1;                                     // can be different (only seen 0 and 1)
     data << (uint32) TRADE_SLOT_COUNT;                      // trade slots count/number?, = next field in most cases
-    data << (uint32) TRADE_SLOT_COUNT;                      // trade slots count/number?, = prev field in most cases
+    data << (uint32) TRADE_SLOT_COUNT;                                     // trade slots count/number?, = prev field in most cases
     data << (uint32) _player->pTrader->tradeGold;           // trader gold
     data << (uint32) 0;                                     // spell casted on lowest slot item
 
@@ -134,28 +134,32 @@ void WorldSession::SendUpdateTrade()
     {
         item = (_player->pTrader->tradeItems[i] != NULL_SLOT ? _player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i] ) : NULL);
 
-        data << (uint8) i;                                  // trade slot number, if not specified, then end of packet
-
+        data << (uint8) i;
         if(item)
         {
-            data << (uint32) item->GetProto()->ItemId;      // entry
-                                                            // display id
+            data << (uint32) item->GetProto()->ItemId;
             data << (uint32) item->GetProto()->DisplayInfoID;
-                                                            // stack count
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
+
+            /* [-ZERO] maybe not for 1.12 , to check better
             data << (uint32) 0;                             // probably gift=1, created_by=0?
                                                             // gift creator
             data << (uint64) item->GetUInt64Value(ITEM_FIELD_GIFTCREATOR);
             data << (uint32) item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
-            for(uint8 j = 0; j < 3; ++j)
-                data << (uint32) 0;                         // enchantment id (permanent/gems?)
-                                                            // creator
+            */
+
+            data << (uint32) 0;                             // gift here ???
+            data << (uint32) 0;                             // gift here ???
+            data << (uint32) 0;                             // gift here ??? or enchants count ?
+
+
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT);
             data << (uint64) item->GetUInt64Value(ITEM_FIELD_CREATOR);
             data << (uint32) item->GetSpellCharges();       // charges
             data << (uint32) item->GetItemSuffixFactor();   // SuffixFactor
                                                             // random properties id
             data << (uint32) item->GetItemRandomPropertyId();
-            data << (uint32) item->GetProto()->LockID;      // lock id
+            data << (uint32) item->GetProto()->LockID;      // lock id  //or better ITEM_FIELD_FLAGS ?
                                                             // max durability
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
                                                             // durability
@@ -163,10 +167,11 @@ void WorldSession::SendUpdateTrade()
         }
         else
         {
-            for(uint8 j = 0; j < 18; j++)
-                data << uint32(0);
+            for(int j=0; j<15; j++)
+                data << (uint32) 0;
         }
     }
+
     SendPacket(&data);
 }
 
