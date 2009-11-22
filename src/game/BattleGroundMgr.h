@@ -29,7 +29,7 @@ typedef std::map<uint32, BattleGround*> BattleGroundSet;
 //typedef std::map<uint32, BattleGroundQueue*> BattleGroundQueueSet;
 typedef std::deque<BattleGround*> BGFreeSlotQueueType;
 
-#define MAX_BATTLEGROUND_QUEUES 7                           // for level ranges 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70+
+#define MAX_BATTLEGROUND_QUEUES 6                           // for level ranges 10-19, 20-29, 30-39, 40-49, 50-59, 60+
 
 typedef UNORDERED_MAP<uint32, BattleGroundTypeId> BattleMastersMap;
 typedef UNORDERED_MAP<uint32, BattleGroundEventIdx> CreatureBattleEventIndexesMap;

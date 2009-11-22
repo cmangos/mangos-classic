@@ -16852,8 +16852,8 @@ uint32 Player::GetBattleGroundQueueIdFromLevel() const
     uint32 level = getLevel();
     if(level <= 19)
         return 0;
-    else if (level > 69)
-        return 6;
+    else if (level >= 60)
+        return 5;
     else
         return level/10 - 1;                                // 20..29 -> 1, 30-39 -> 2, ...
     /*

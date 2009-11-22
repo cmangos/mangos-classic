@@ -293,7 +293,6 @@ bool Guild::LoadRanksFromDB(uint32 GuildId)
         uint32 rankID        = fields[0].GetUInt32();
         std::string rankName = fields[1].GetCppString();
         uint32 rankRights    = fields[2].GetUInt32();
-        uint32 rankMoney     = fields[3].GetUInt32();
 
         if (rankID != m_Ranks.size())                       // guild_rank.ids are sequence 0,1,2,3..
             broken_ranks =  true;

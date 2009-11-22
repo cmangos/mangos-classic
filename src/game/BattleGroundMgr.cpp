@@ -549,6 +549,12 @@ should be called after removeplayer functions in some cases
 */
 void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, uint32 queue_id)
 {
+    if(bgTypeId >= MAX_BATTLEGROUND_TYPE_ID)
+    {
+        sLog.outError("BattleGroundQueue::Update() non existing BG Type %u", bgTypeId);
+        return;
+    }
+
     if (queue_id >= MAX_BATTLEGROUND_QUEUES)
     {
         //this is error, that caused crashes (not in , but now it shouldn't)
@@ -816,44 +822,19 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
     // we can be in 3 queues in same time...
     if(StatusID == 0)
     {
-        data->Initialize(SMSG_BATTLEFIELD_STATUS, 4*3);
+        data->Initialize(SMSG_BATTLEFIELD_STATUS, 4*2);
         *data << uint32(QueueSlot);                         // queue id (0...2)
-        *data << uint64(0);
+        *data << uint32(0);
         return;
     }
 
     data->Initialize(SMSG_BATTLEFIELD_STATUS, (4+1+1+4+2+4+1+4+4+4));
     *data << uint32(QueueSlot);                             // queue id (0...2) - player can be in 3 queues in time
     // uint64 in client
-    *data << uint64( (uint64(0x0D) << 8) | (uint64(bg->GetTypeID()) << 16) | (uint64(0x1F90) << 48) );
-    *data << uint32(0);                                     // unknown
-    // alliance/horde for BG and skirmish/rated for Arenas
-    *data << uint8(bg->GetTeamIndexByTeamId(team));
-/*    *data << uint8(arenatype ? arenatype : bg->GetArenaType());                     // team type (0=BG, 2=2x2, 3=3x3, 5=5x5), for arenas    // NOT PROPER VALUE IF ARENA ISN'T RUNNING YET!!!!
-    switch(bg->GetTypeID())                                 // value depends on bg id
-    {
-        case BATTLEGROUND_AV:
-            *data << uint8(1);
-            break;
-        case BATTLEGROUND_WS:
-            *data << uint8(2);
-            break;
-        case BATTLEGROUND_AB:
-            *data << uint8(3);
-            break;
-        default:                                            // unknown
-            *data << uint8(0);
-            break;
-    }
-
-    *data << uint32(bg->GetTypeID());                   // BG id from DBC
-
-    *data << uint16(0x1F90);                                // unk value 8080
-    *data << uint32(bg->GetInstanceID());                   // instance id
-
-    *data << uint8(bg->GetTeamIndexByTeamId(team));     // team
-*/
-    *data << uint32(StatusID);                              // status
+    *data << uint32(bg->GetMapId());                          // MapID
+    *data << uint8(0);                                        // Unknown
+    *data << uint32(bg->GetInstanceID());                     // Instance ID
+    *data << uint32(StatusID);                                // Status ID
     switch(StatusID)
     {
         case STATUS_WAIT_QUEUE:                             // status_in_queue
