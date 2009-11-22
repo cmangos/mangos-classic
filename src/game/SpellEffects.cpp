@@ -730,7 +730,8 @@ void Spell::EffectDummy(uint32 i)
                         uint32 classspell = itr->first;
                         SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
-                        if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && (spellInfo->SpellFamilyFlags & UI64LIT(0x26000000860)))
+                        if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE &&
+                            spellInfo->Id != m_spellInfo->Id && GetSpellRecoveryTime(spellInfo) > 0)
                             ((Player*)m_caster)->RemoveSpellCooldown(classspell,true);
                     }
                     return;
@@ -1168,7 +1169,7 @@ void Spell::EffectDummy(uint32 i)
         case SPELLFAMILY_MAGE:
             switch(m_spellInfo->Id )
             {
-                case 11958:                                 // Cold Snap
+                case 12472:                                 // Cold Snap
                 {
                     if (m_caster->GetTypeId()!=TYPEID_PLAYER)
                         return;
@@ -1181,7 +1182,7 @@ void Spell::EffectDummy(uint32 i)
 
                         if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&
                             (GetSpellSchoolMask(spellInfo) & SPELL_SCHOOL_MASK_FROST) &&
-                            spellInfo->Id != 11958 && GetSpellRecoveryTime(spellInfo) > 0)
+                            spellInfo->Id != m_spellInfo->Id && GetSpellRecoveryTime(spellInfo) > 0)
                         {
                             ((Player*)m_caster)->RemoveSpellCooldown((itr++)->first, true);
                         }
