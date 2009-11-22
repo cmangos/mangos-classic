@@ -4769,6 +4769,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
         {
             switch (dummySpell->Id)
             {
+                // [-ZERO] TODO:  check all spell id ( most of them are different in 1.12 )
+
                 // Eye of Eye
                 case 9799:
                 case 25988:
@@ -4799,6 +4801,16 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                         return false;
 
                     triggered_spell_id = 26654;
+                    break;
+                }
+                // Retaliation
+                case 20230:
+                {
+                    // check attack comes not from behind
+                    if (!HasInArc(M_PI, pVictim))
+                        return false;
+
+                    triggered_spell_id = 22858;
                     break;
                 }
                 // Unstable Power
@@ -4989,120 +5001,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     if (roll_chance_i(10))
                         ((Player*)this)->Say("This is Madness!", LANG_UNIVERSAL);
                     break;
-                }
-                /*
-                // Sunwell Exalted Caster Neck (??? neck)
-                // cast ??? Light's Wrath if Exalted by Aldor
-                // cast ??? Arcane Bolt if Exalted by Scryers*/
-                case 46569:
-                    return false;                           // old unused version
-                // Sunwell Exalted Caster Neck (Shattered Sun Pendant of Acumen neck)
-                // cast 45479 Light's Wrath if Exalted by Aldor
-                // cast 45429 Arcane Bolt if Exalted by Scryers
-                case 45481:
-                {
-                    if(GetTypeId() != TYPEID_PLAYER)
-                        return false;
-
-                    // Get Aldor reputation rank
-                    if (((Player *)this)->GetReputationRank(932) == REP_EXALTED)
-                    {
-                        target = this;
-                        triggered_spell_id = 45479;
-                        break;
-                    }
-                    // Get Scryers reputation rank
-                    if (((Player *)this)->GetReputationRank(934) == REP_EXALTED)
-                    {
-                        // triggered at positive/self casts also, current attack target used then
-                        if(IsFriendlyTo(target))
-                        {
-                            target = getVictim();
-                            if(!target)
-                            {
-                                uint64 selected_guid = ((Player *)this)->GetSelection();
-                                target = ObjectAccessor::GetUnit(*this,selected_guid);
-                                if(!target)
-                                    return false;
-                            }
-                            if(IsFriendlyTo(target))
-                                return false;
-                        }
-
-                        triggered_spell_id = 45429;
-                        break;
-                    }
-                    return false;
-                }
-                // Sunwell Exalted Melee Neck (Shattered Sun Pendant of Might neck)
-                // cast 45480 Light's Strength if Exalted by Aldor
-                // cast 45428 Arcane Strike if Exalted by Scryers
-                case 45482:
-                {
-                    if(GetTypeId() != TYPEID_PLAYER)
-                        return false;
-
-                    // Get Aldor reputation rank
-                    if (((Player *)this)->GetReputationRank(932) == REP_EXALTED)
-                    {
-                        target = this;
-                        triggered_spell_id = 45480;
-                        break;
-                    }
-                    // Get Scryers reputation rank
-                    if (((Player *)this)->GetReputationRank(934) == REP_EXALTED)
-                    {
-                        triggered_spell_id = 45428;
-                        break;
-                    }
-                    return false;
-                }
-                // Sunwell Exalted Tank Neck (Shattered Sun Pendant of Resolve neck)
-                // cast 45431 Arcane Insight if Exalted by Aldor
-                // cast 45432 Light's Ward if Exalted by Scryers
-                case 45483:
-                {
-                    if(GetTypeId() != TYPEID_PLAYER)
-                        return false;
-
-                    // Get Aldor reputation rank
-                    if (((Player *)this)->GetReputationRank(932) == REP_EXALTED)
-                    {
-                        target = this;
-                        triggered_spell_id = 45432;
-                        break;
-                    }
-                    // Get Scryers reputation rank
-                    if (((Player *)this)->GetReputationRank(934) == REP_EXALTED)
-                    {
-                        target = this;
-                        triggered_spell_id = 45431;
-                        break;
-                    }
-                    return false;
-                }
-                // Sunwell Exalted Healer Neck (Shattered Sun Pendant of Restoration neck)
-                // cast 45478 Light's Salvation if Exalted by Aldor
-                // cast 45430 Arcane Surge if Exalted by Scryers
-                case 45484:
-                {
-                    if(GetTypeId() != TYPEID_PLAYER)
-                        return false;
-
-                    // Get Aldor reputation rank
-                    if (((Player *)this)->GetReputationRank(932) == REP_EXALTED)
-                    {
-                        target = this;
-                        triggered_spell_id = 45478;
-                        break;
-                    }
-                    // Get Scryers reputation rank
-                    if (((Player *)this)->GetReputationRank(934) == REP_EXALTED)
-                    {
-                        triggered_spell_id = 45430;
-                        break;
-                    }
-                    return false;
                 }
             }
             break;

@@ -329,7 +329,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
             case SPELLFAMILY_WARRIOR:
             {
                 // Bloodthirst
-                if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x40000000000))
+                if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x2000000))
                 {
                     damage = uint32(damage * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) / 100);
                 }
@@ -549,7 +549,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 case SPELLFAMILY_WARRIOR:
                 {
                     // Bloodthirst
-                    if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x40000000000))
+                    if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x2000000))
                     {
                         uint32 BTAura = 0;
                         switch(m_spellInfo->Id)
@@ -558,8 +558,6 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                             case 23892: BTAura = 23886; break;
                             case 23893: BTAura = 23887; break;
                             case 23894: BTAura = 23888; break;
-                            case 25251: BTAura = 25252; break;
-                            case 30335: BTAura = 30339; break;
                             default:
                                 sLog.outError("Spell::EffectSchoolDMG: Spell %u not handled in BTAura",m_spellInfo->Id);
                                 break;
