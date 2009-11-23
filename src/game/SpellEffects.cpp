@@ -2554,8 +2554,6 @@ void Spell::EffectEnergize(uint32 i)
         {
             if (itr->second & elixir_mask)
             {
-                if (itr->second & (ELIXIR_UNSTABLE_MASK | ELIXIR_SHATTRATH_MASK))
-                    continue;
 
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
                 if (spellInfo && (spellInfo->spellLevel < m_spellInfo->spellLevel || spellInfo->spellLevel > unitTarget->getLevel()))

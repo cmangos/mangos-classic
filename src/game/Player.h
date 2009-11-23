@@ -666,7 +666,7 @@ struct InstancePlayerBind
 {
     InstanceSave *save;
     bool perm;
-    /* permanent PlayerInstanceBinds are created in Raid/Heroic instances for players
+    /* permanent PlayerInstanceBinds are created in Raid instances for players
        that aren't already permanently bound when they are inside when a boss is killed
        or when they enter an instance that the group leader is permanently bound to. */
     InstancePlayerBind() : save(NULL), perm(false) {}
@@ -678,7 +678,7 @@ class MANGOS_DLL_SPEC PlayerTaxi
         PlayerTaxi();
         ~PlayerTaxi() {}
         // Nodes
-        void InitTaxiNodesForLevel(uint32 race, uint32 level);
+        void InitTaxiNodes(uint32 race, uint32 level);
         void LoadTaxiMask(const char* data);
 
         bool IsTaximaskNodeKnown(uint32 nodeidx) const
@@ -792,7 +792,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         PlayerSocial *GetSocial() { return m_social; }
 
         PlayerTaxi m_taxi;
-        void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getRace(),getLevel()); }
+        void InitTaxiNodes() { m_taxi.InitTaxiNodes(getRace(),getLevel()); }
         bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc = NULL, uint32 spellid = 0);
         bool ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid = 0);
                                                             // mount_id can be used in scripting calls

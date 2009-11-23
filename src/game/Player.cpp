@@ -125,10 +125,15 @@ PlayerTaxi::PlayerTaxi()
     memset(m_taximask, 0, sizeof(m_taximask));
 }
 
-void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 level)
+void PlayerTaxi::InitTaxiNodes(uint32 race, uint32 level)
 {
+    memset(m_taximask, 0, sizeof(m_taximask));
     // capital and taxi hub masks
-    switch(race)
+    ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
+    m_taximask[0] = rEntry->startingTaxiMask;
+
+    // capital and taxi hub masks
+ /*   switch(race)
     {
         case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human
         case RACE_ORC:      SetTaximaskNode(23); break;     // Orc
@@ -141,16 +146,7 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 level)
         case RACE_TROLL:    SetTaximaskNode(23); break;     // Troll
         case RACE_BLOODELF: SetTaximaskNode(82); break;     // Blood Elf
         case RACE_DRAENEI:  SetTaximaskNode(94); break;     // Draenei
-    }
-    // new continent starting masks (It will be accessible only at new map)
-    switch(Player::TeamForRace(race))
-    {
-        case ALLIANCE: SetTaximaskNode(100); break;
-        case HORDE:    SetTaximaskNode(99);  break;
-    }
-    // level dependent taxi hubs
-    if(level>=68)
-        SetTaximaskNode(213);                               //Shattered Sun Staging Area
+    } */
 }
 
 void PlayerTaxi::LoadTaxiMask(const char* data)
@@ -600,7 +596,7 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
 
     // base stats and related field values
     InitStatsForLevel();
-    InitTaxiNodesForLevel();
+    InitTaxiNodes();
     InitTalentForLevel();
     InitPrimaryProfessions();                               // to max set before any spell added
 
@@ -2187,7 +2183,6 @@ void Player::GiveLevel(uint32 level)
     SetCreateMana(classInfo.basemana);
 
     InitTalentForLevel();
-    InitTaxiNodesForLevel();
 
     UpdateAllStats();
 
@@ -13085,7 +13080,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM) )
         SetUInt32Value(PLAYER_FLAGS, 0 | old_safe_flags);
 
-    m_taxi.LoadTaxiMask( fields[18].GetString() );          // must be before InitTaxiNodesForLevel
+    m_taxi.LoadTaxiMask( fields[18].GetString() );
 
     uint32 extraflags = fields[32].GetUInt32();
 
@@ -13156,7 +13151,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     // reset stats before loading any modifiers
     InitStatsForLevel();
-    InitTaxiNodesForLevel();
 
     // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
 
@@ -14047,7 +14041,7 @@ void Player::SendSavedInstances()
         }
     }
 
-    //Send opcode 811. true or false means, whether you have current raid/heroic instances
+    //Send opcode 811. true or false means, whether you have current raid instances
     data.Initialize(SMSG_UPDATE_INSTANCE_OWNERSHIP);
     data << uint32(hasBeenSaved);
     GetSession()->SendPacket(&data);

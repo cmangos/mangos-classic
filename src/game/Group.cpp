@@ -278,7 +278,7 @@ bool Group::AddMember(const uint64 &guid, const char* name)
         if(!IsLeader(player->GetGUID()) && !isBGGroup())
         {
             // reset the new member's instances, unless he is currently in one of them
-            // including raid/heroic instances that they are not permanently bound to!
+            // including raid instances that they are not permanently bound to!
             player->ResetInstances(INSTANCE_RESET_GROUP_JOIN);
         }
         player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);

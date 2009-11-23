@@ -36,7 +36,6 @@
 #define TRADESKILL_MINING                11
 #define TRADESKILL_FISHING               12
 #define TRADESKILL_SKINNING              13
-#define TRADESKILL_JEWELCRAFTING         14
 
 #define TRADESKILL_LEVEL_NONE            0
 #define TRADESKILL_LEVEL_APPRENTICE      1

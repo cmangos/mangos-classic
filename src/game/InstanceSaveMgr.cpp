@@ -365,7 +365,7 @@ void InstanceSaveManager::LoadResetTimes()
 
     // get the current reset times for normal instances (these may need to be updated)
     // these are only kept in memory for InstanceSaves that are loaded later
-    // resettime = 0 in the DB for raid/heroic instances so those are skipped
+    // resettime = 0 in the DB for raid instances so those are skipped
     typedef std::map<uint32, std::pair<uint32, time_t> > ResetTimeMapType;
     ResetTimeMapType InstResetTime;
     QueryResult *result = CharacterDatabase.Query("SELECT id, map, resettime FROM instance WHERE resettime > 0");
@@ -409,7 +409,7 @@ void InstanceSaveManager::LoadResetTimes()
                 ScheduleReset(true, itr->second.second, InstResetEvent(0, itr->second.first, itr->first));
     }
 
-    // load the global respawn times for raid/heroic instances
+    // load the global respawn times for raid instances
     uint32 diff = sWorld.getConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
     m_resetTimeByMapId.resize(sMapStore.GetNumRows()+1);
     result = CharacterDatabase.Query("SELECT mapid, resettime FROM instance_reset");
@@ -447,7 +447,7 @@ void InstanceSaveManager::LoadResetTimes()
     {
         InstanceTemplate const* temp = objmgr.GetInstanceTemplate(i);
         if(!temp) continue;
-        // only raid/heroic maps have a global reset time
+        // only raid maps have a global reset time
         const MapEntry* entry = sMapStore.LookupEntry(temp->map);
         if(!entry || !entry->HasResetTime())
             continue;

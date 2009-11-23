@@ -36,7 +36,7 @@ class Group;
     Holds the information necessary for creating a new map for an existing instance
     Is referenced in three cases:
     - player-instance binds for solo players (not in group)
-    - player-instance binds for permanent heroic/raid saves
+    - player-instance binds for permanent raid saves
     - group-instance binds (both solo and permanent) cache the player binds for the group leader
 */
 class InstanceSave
@@ -68,7 +68,7 @@ class InstanceSave
         void DeleteFromDB();
 
         /* for normal instances this corresponds to max(creature respawn time) + X hours
-           for raid/heroic instances this caches the global respawn time for the map */
+           for raid instances this caches the global respawn time for the map */
         time_t GetResetTime() { return m_resetTime; }
         void SetResetTime(time_t resetTime) { m_resetTime = resetTime; }
         time_t GetResetTimeForDB();
