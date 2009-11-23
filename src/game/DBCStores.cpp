@@ -173,7 +173,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sAreaStore,                dbcPath,"AreaTable.dbc");
 
     // must be after sAreaStore loading
-    for(uint32 i = 0; i < sAreaStore.GetNumRows(); ++i)           // areaflag numbered from 0
+    for(uint32 i = 1; i <= sAreaStore.GetNumRows(); ++i)           // areaid numbered from 1
     {
         if(AreaTableEntry const* area = sAreaStore.LookupEntry(i))
         {
@@ -181,7 +181,7 @@ void LoadDBCStores(const std::string& dataPath)
             sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(uint16(area->ID),area->exploreFlag));
 
             // fill MapId->DBC records ( skip sub zones and continents )
-            if(area->zone==0 && area->mapid != 0 && area->mapid != 1 && area->mapid != 530 )
+            if(area->zone==0 && area->mapid != 0 && area->mapid != 1)
                 sAreaFlagByMapID.insert(AreaFlagByMapID::value_type(area->mapid,area->exploreFlag));
         }
     }
@@ -476,11 +476,13 @@ int32 GetAreaFlagByAreaID(uint32 area_id)
 
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
 {
-    int32 areaflag = GetAreaFlagByAreaID(area_id);
-    if(areaflag < 0)
-        return NULL;
+   // int32 areaflag = GetAreaFlagByAreaID(area_id);
+   // if(areaflag < 0)
+   //     return NULL;
 
-    return sAreaStore.LookupEntry(areaflag );
+   // return sAreaStore.LookupEntry(areaflag );
+   // NOTE : GetMethod for MANGOS_DLL
+    return sAreaStore.LookupEntry(area_id); 
 }
 
 AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag,uint32 map_id)
