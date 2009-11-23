@@ -771,7 +771,7 @@ void Player::StopMirrorTimer(MirrorTimerType Type)
     GetSession()->SendPacket( &data );
 }
 
-uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
+uint32 Player::EnvironmentalDamage(EnvironmentalDamageType type, uint32 damage)
 {
     if(!isAlive() || isGameMaster())
         return 0;
