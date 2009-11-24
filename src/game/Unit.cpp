@@ -4532,7 +4532,7 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, 
     data << (uint8)SwingType;                               // count?
 
     // for(i = 0; i < SwingType; ++i)
-    data << (uint32)damageSchoolMask;
+    data << (uint32)GetFirstSchoolInMask(damageSchoolMask);
     data << (float)(Damage-AbsorbDamage-Resist-BlockedAmount);
     // still need to double check damage
     data << (uint32)(Damage-AbsorbDamage-Resist-BlockedAmount);
