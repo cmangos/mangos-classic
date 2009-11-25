@@ -1675,9 +1675,9 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
     wstrToLower (wnamepart);
 
     // Search in AreaTable.dbc
-    for (uint32 areaflag = 0; areaflag < sAreaStore.GetNumRows (); ++areaflag)
+    for (uint32 areaid = 0; areaid <= sAreaStore.GetNumRows (); ++areaid)
     {
-        AreaTableEntry const *areaEntry = sAreaStore.LookupEntry (areaflag);
+        AreaTableEntry const *areaEntry = sAreaStore.LookupEntry (areaid);
         if (areaEntry)
         {
             int loc = GetSessionDbcLocale ();

@@ -26,11 +26,11 @@
 
 #include <map>
 
-typedef std::map<uint16,uint32> AreaFlagByAreaID;
+typedef std::map<uint32,uint32> AreaIDByAreaFlag;
 typedef std::map<uint32,uint32> AreaFlagByMapID;
 
 DBCStorage <AreaTableEntry> sAreaStore(AreaTableEntryfmt);
-static AreaFlagByAreaID sAreaFlagByAreaID;
+static AreaIDByAreaFlag sAreaIDByAreaFlag;
 static AreaFlagByMapID  sAreaFlagByMapID;                   // for instances without generated *.map files
 
 DBCStorage <AreaTriggerEntry> sAreaTriggerStore(AreaTriggerEntryfmt);
@@ -178,7 +178,7 @@ void LoadDBCStores(const std::string& dataPath)
         if(AreaTableEntry const* area = sAreaStore.LookupEntry(i))
         {
             // fill AreaId->DBC records
-            sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(uint16(area->ID),area->exploreFlag));
+            sAreaIDByAreaFlag.insert(AreaIDByAreaFlag::value_type(uint16(area->exploreFlag),area->ID));
 
             // fill MapId->DBC records ( skip sub zones and continents )
             if(area->zone==0 && area->mapid != 0 && area->mapid != 1)
@@ -419,8 +419,8 @@ void LoadDBCStores(const std::string& dataPath)
     // check at up-to-date DBC files (3486 is last area added in 1.12.1)
     if( !sSpellStore.LookupEntry(33392)            ||
         !sSkillLineAbilityStore.LookupEntry(15030) ||
-        !sMapStore.LookupEntry(533)                )
-//        !sAreaStore.LookupEntry(3486)              ) [-ZERO] to check
+        !sMapStore.LookupEntry(533)                ||
+        !sAreaStore.LookupEntry(3486)              )
     {
         sLog.outError("\nYou have _outdated_ DBC files. Please extract correct versions from current using client.");
         exit(1);
@@ -467,11 +467,11 @@ uint32 GetTalentSpellCost(uint32 spellId)
 
 int32 GetAreaFlagByAreaID(uint32 area_id)
 {
-    AreaFlagByAreaID::iterator i = sAreaFlagByAreaID.find(area_id);
-    if(i == sAreaFlagByAreaID.end())
+    AreaTableEntry const* AreaEntry = sAreaStore.LookupEntry(area_id); 
+    if(!AreaEntry)
         return -1;
 
-    return i->second;
+    return AreaEntry->exploreFlag;
 }
 
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
@@ -487,11 +487,27 @@ AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
 
 AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag,uint32 map_id)
 {
-    if(area_flag)
-        return sAreaStore.LookupEntry(area_flag);
+    // alternative method ( not checked )
+    //uint32 AreaID = sAreaIDByAreaFlag.find(area_flag)->first;
+    //if(MapEntry const* mapEntry = sMapStore.LookupEntry(map_id))
+    //{
+    //    AreaTableEntry const* AreaEntry = GetAreaEntryByAreaID(mapEntry->linked_zone);
+    //    if(AreaID == AreaEntry->ID)
+    //        return AreaEntry;
+    //}
 
-    if(MapEntry const* mapEntry = sMapStore.LookupEntry(map_id))
-        return GetAreaEntryByAreaID(mapEntry->linked_zone);
+    for (uint32 i=0 ; i<=sAreaStore.GetNumRows() ; i++)
+    {
+        AreaTableEntry const* AreaEntry = sAreaStore.LookupEntry(i);
+        if (AreaEntry )
+        {
+            MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+            //TODO check the condition
+            if ((AreaEntry->exploreFlag == area_flag && AreaEntry->mapid == map_id) || 
+                (AreaEntry == GetAreaEntryByAreaID(mapEntry->linked_zone)))
+            return AreaEntry;
+        }
+    }
 
     return NULL;
 }
