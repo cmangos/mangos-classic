@@ -1549,9 +1549,11 @@ bool Creature::FallGround()
 
     // Let's do with no vmap because no way to get far distance with vmap high call
     float tz = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ(), false);
+    // TODO check if height is calculate correctly in GetHeight
 
+    float Z = fabs(GetPositionZ() - tz);
     // Abort too if the ground is very near
-    if (fabs(GetPositionZ() - tz) < 0.1f)
+    if (Z < 0.1f || Z >= INVALID_HEIGHT)
         return false;
 
     Unit::setDeathState(DEAD_FALLING);
