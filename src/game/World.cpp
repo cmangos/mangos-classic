@@ -1081,6 +1081,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Spell Elixir types..." );
     spellmgr.LoadSpellElixirs();
 
+    sLog.outString( "Loading Spell Facing Flags..." );
+    spellmgr.LoadFacingCasterFlags();
+
     sLog.outString( "Loading Spell Learn Skills..." );
     spellmgr.LoadSpellLearnSkills();                        // must be after LoadSpellChains
 
