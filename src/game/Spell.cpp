@@ -2039,7 +2039,7 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
     //Prevent casting at cast another spell (ServerSide check)
-    if(m_caster->IsNonMeleeSpellCasted(false, true))
+    if(m_caster->IsNonMeleeSpellCasted(false, true,true))
     {
         SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
         finish(false);
@@ -2677,7 +2677,7 @@ void Spell::SendSpellStart()
         castFlags |= CAST_FLAG_AMMO;
 
 
-    WorldPacket data(SMSG_SPELL_START, (8+8+4+4+2+2));
+    WorldPacket data(SMSG_SPELL_START, (8+8+4+2+4));
     if(m_CastItem)
         data.append(m_CastItem->GetPackGUID());
     else
@@ -2688,7 +2688,6 @@ void Spell::SendSpellStart()
     data << uint16(castFlags);
     data << uint32(m_timer);
 
-    data << m_targets.m_targetMask;
     m_targets.write(&data);
 
     if( castFlags & CAST_FLAG_AMMO )
@@ -2723,8 +2722,7 @@ void Spell::SendSpellGo()
 
     WriteSpellGoTargets(&data);
 
-    data << uint8(0); // timestamp?
-    data << m_targets.m_targetMask;
+    data << uint8(m_countOfMiss); // miss count ?
     m_targets.write(&data);
 
     if( castFlags & CAST_FLAG_AMMO )
@@ -2758,11 +2756,6 @@ void Spell::WriteAmmoToPacket( WorldPacket * data )
                         ammoInventoryType = pProto->InventoryType;
                     }
                 }
-                else if(m_caster->GetDummyAura(46699))      // Requires No Ammo
-                {
-                    ammoDisplayID = 5996;                   // normal arrow
-                    ammoInventoryType = INVTYPE_AMMO;
-                }
             }
         }
     }
@@ -2774,7 +2767,7 @@ void Spell::WriteAmmoToPacket( WorldPacket * data )
 
 void Spell::WriteSpellGoTargets( WorldPacket * data )
 {
-    *data << (uint8)m_countOfHit;
+    *data << (uint8)(m_countOfHit+m_countOfMiss);
     for(std::list<TargetInfo>::const_iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
         if ((*ihit).missCondition == SPELL_MISS_NONE)       // Add only hits
             *data << uint64(ihit->targetGUID);
