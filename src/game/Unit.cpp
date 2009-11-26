@@ -4438,7 +4438,7 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage *log)
     data.append(log->attacker->GetPackGUID());
     data << uint32(log->SpellID);
     data << uint32(log->damage);                            // damage amount
-    data << uint8 (log->schoolMask);                        // damage school
+    data << uint8 (log->school);                             // damage school
     data << uint32(log->absorb);                            // AbsorbedDamage
     data << uint32(log->resist);                            // resist
     data << uint8 (log->physicalLog);                       // if 1, then client show spell name (example: %s's ranged shot hit %s for %u school or %s suffers %u school damage from %s's spell_name
@@ -4451,7 +4451,7 @@ void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage *log)
 
 void Unit::SendSpellNonMeleeDamageLog(Unit *target, uint32 SpellID, uint32 Damage, SpellSchoolMask damageSchoolMask, uint32 AbsorbedDamage, uint32 Resist, bool PhysicalDamage, uint32 Blocked, bool CriticalHit)
 {
-    SpellNonMeleeDamage log(this, target, SpellID, damageSchoolMask);
+    SpellNonMeleeDamage log(this, target, SpellID, GetFirstSchoolInMask(damageSchoolMask));
     log.damage = Damage - AbsorbedDamage - Resist - Blocked;
     log.absorb = AbsorbedDamage;
     log.resist = Resist;
