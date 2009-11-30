@@ -180,8 +180,8 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     switch(etime)
     {
         case 1*MIN_AUCTION_TIME:
-        case 2*MIN_AUCTION_TIME:
         case 4*MIN_AUCTION_TIME:
+        case 12*MIN_AUCTION_TIME:
             break;
         default:
             return;
@@ -544,7 +544,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
 
     AuctionHouseObject* auctionHouse = auctionmgr.GetAuctionsMap( pCreature->getFaction() );
 
-    WorldPacket data( SMSG_AUCTION_OWNER_LIST_RESULT, (4+4+4) );
+    WorldPacket data( SMSG_AUCTION_OWNER_LIST_RESULT, (4+4) );
     data << (uint32) 0;                                     // amount place holder
 
     uint32 count = 0;
@@ -553,7 +553,6 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
     auctionHouse->BuildListOwnerItems(data,_player,count,totalcount);
     data.put<uint32>(0, count);
     data << (uint32) totalcount;
-    data << (uint32) 0;
     SendPacket(&data);
 }
 
@@ -573,8 +572,6 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     recv_data >> auctionSlotID >> auctionMainCategory >> auctionSubCategory;
     recv_data >> quality >> usable;
 
-    recv_data.read_skip(16);                                // unknown 16 bytes: 00 07 01 00 00 01 05 00 06 00 09 01 08 00 03 00
-
     Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid,UNIT_NPC_FLAG_AUCTIONEER);
     if (!pCreature)
     {
@@ -591,7 +588,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     //sLog.outDebug("Auctionhouse search (GUID: %u TypeId: %u)", , list from: %u, searchedname: %s, levelmin: %u, levelmax: %u, auctionSlotID: %u, auctionMainCategory: %u, auctionSubCategory: %u, quality: %u, usable: %u",
     //  GUID_LOPART(guid),GuidHigh2TypeId(GUID_HIPART(guid)), listfrom, searchedname.c_str(), levelmin, levelmax, auctionSlotID, auctionMainCategory, auctionSubCategory, quality, usable);
 
-    WorldPacket data( SMSG_AUCTION_LIST_RESULT, (4+4+4) );
+    WorldPacket data( SMSG_AUCTION_LIST_RESULT, (4+4) );
     count = 0;
     totalcount = 0;
     data << (uint32) 0;

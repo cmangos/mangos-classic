@@ -26,7 +26,7 @@ class Item;
 class Player;
 class WorldPacket;
 
-#define MIN_AUCTION_TIME (12*HOUR)
+#define MIN_AUCTION_TIME (2*HOUR)
 
 enum AuctionError
 {
