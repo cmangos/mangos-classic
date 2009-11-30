@@ -598,9 +598,8 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         data << (uint32) 0;                                 // unknown
         data << (uint32) (*itr)->stationery;                // stationery (Stationery.dbc)
 
-        // not used?
+        //FIXME we need to find where it's used in 1.12 
         //data << (uint32) show_flags;                        // unknown, 0x4 - auction, 0x10 - normal
-        //data << (uint32) (*itr)->mailTemplateId;            // mail template (MailTemplate.dbc)
 
         //[-ZERO] TODO not use vector for mail items since 1.12 doesn't support multiple items sending in mails
         if ( (*itr)->items.size() > 0)
@@ -639,8 +638,8 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
             data << (uint32) (*itr)->checked;
             // expire time
             data << (float)  ((*itr)->expire_time-time(NULL))/DAY;
-            // Constant, something like end..
-            data << (uint32) 0;   
+            // mail template (MailTemplate.dbc)   
+            data << (uint32) (*itr)->mailTemplateId;
         }
 
         mails_count += 1;
