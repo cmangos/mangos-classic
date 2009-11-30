@@ -192,11 +192,7 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     const GameObjectInfo *info = objmgr.GetGameObjectInfo(entryID);
     if(info)
     {
-        std::string Name;
-        std::string CastBarCaption;
-
-        Name = info->name;
-        CastBarCaption = info->castBarCaption;
+        std::string Name = info->name;
 
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
@@ -206,8 +202,6 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
             {
                 if (gl->Name.size() > size_t(loc_idx) && !gl->Name[loc_idx].empty())
                     Name = gl->Name[loc_idx];
-                if (gl->CastBarCaption.size() > size_t(loc_idx) && !gl->CastBarCaption[loc_idx].empty())
-                    CastBarCaption = gl->CastBarCaption[loc_idx];
             }
         }
         sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name, entryID);
