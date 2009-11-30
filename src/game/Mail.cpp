@@ -53,7 +53,7 @@ void MailItem::deleteItem( bool inDB )
 
 void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
-    uint64 mailbox, unk3;
+    uint64 mailbox, unk3, item_guid;
     std::string receiver, subject, body;
     uint32 unk1, unk2, money, COD;
     uint8 unk4;
@@ -72,29 +72,12 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     MailItemsInfo mi;
 
-    uint8 items_count;
-    recv_data >> items_count;                               // attached items count
-
-    if(items_count > 12)                                    // client limit
-    {
-        GetPlayer()->SendMailResult(0, MAIL_SEND, MAIL_ERR_TOO_MANY_ATTACHMENTS);
-        recv_data.rpos(recv_data.wpos());                   // set to end to avoid warnings spam
-        return;
-    }
-
-    for(uint8 i = 0; i < items_count; ++i)
-    {
-        uint64 item_guid;
-        recv_data.read_skip<uint8>();                   // item slot in mail, not used
-        recv_data >> item_guid;
-        mi.AddItem(GUID_LOPART(item_guid));
-    }
+    recv_data >> item_guid;
+    mi.AddItem(GUID_LOPART(item_guid));
 
     recv_data >> money >> COD;                              // money and cod
     recv_data >> unk3;                                      // const 0
     recv_data >> unk4;                                      // const 0
-
-    items_count = mi.size();                                // this is the real size after the duplicates have been removed
 
     if (receiver.empty())
         return;
@@ -107,13 +90,13 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     if (!rc)
     {
-        sLog.outDetail("Player %u is sending mail to %s (GUID: not existed!) with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u",
-            pl->GetGUIDLow(), receiver.c_str(), subject.c_str(), body.c_str(), items_count, money, COD, unk1, unk2);
+        sLog.outDetail("Player %u is sending mail to %s (GUID: not existed!) with subject %s and body %s, %u copper and %u COD copper with unk1 = %u, unk2 = %u",
+            pl->GetGUIDLow(), receiver.c_str(), subject.c_str(), body.c_str(), money, COD, unk1, unk2);
         pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);
         return;
     }
 
-    sLog.outDetail("Player %u is sending mail to %s (GUID: %u) with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u", pl->GetGUIDLow(), receiver.c_str(), GUID_LOPART(rc), subject.c_str(), body.c_str(), items_count, money, COD, unk1, unk2);
+    sLog.outDetail("Player %u is sending mail to %s (GUID: %u) with subject %s and body %s includes, %u copper and %u COD copper with unk1 = %u, unk2 = %u", pl->GetGUIDLow(), receiver.c_str(), GUID_LOPART(rc), subject.c_str(), body.c_str(), money, COD, unk1, unk2);
 
     if(pl->GetGUID() == rc)
     {
@@ -122,8 +105,6 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     }
 
     uint32 reqmoney = money + 30;
-    if (items_count)
-        reqmoney = money + (30 * items_count);
 
     if (pl->GetMoney() < reqmoney)
     {
@@ -215,7 +196,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     bool needItemDelay = false;
 
-    if(items_count > 0 || money > 0)
+    if(item_guid || money > 0)
     {
         uint32 rc_account = 0;
         if(receive)
@@ -223,8 +204,9 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         else
             rc_account = objmgr.GetPlayerAccountIdByGUID(rc);
 
-        if (items_count > 0)
+        if (item_guid)
         {
+            //FIXME maybe cycle not needed since mail system in 1.12 doesn't support multiple items
             for(MailItemMap::iterator mailItemIter = mi.begin(); mailItemIter != mi.end(); ++mailItemIter)
             {
                 MailItem& mailItem = mailItemIter->second;
@@ -432,7 +414,6 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data )
         return;
 
     recv_data >> mailId;
-    recv_data >> itemId;                                    // item guid low?
     Player* pl = _player;
 
     Mail* m = pl->GetMail(mailId);
@@ -449,14 +430,17 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data )
         return;
     }
 
-    Item *it = pl->GetMItem(itemId);
+    itemId = m->items[0].item_template; 
+    uint32 itemGuid = m->items[0].item_guid;
+
+    Item *it = pl->GetMItem(itemGuid);
 
     ItemPosCountVec dest;
     uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, it, false );
     if( msg == EQUIP_ERR_OK )
     {
-        m->RemoveItem(itemId);
-        m->removedItems.push_back(itemId);
+        m->RemoveItem(itemGuid);
+        m->removedItems.push_back(itemGuid);
 
         if (m->COD > 0)                                     // if there is COD, take COD money from player and send them to sender by mail
         {
@@ -577,12 +561,12 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         if ((*itr)->state == MAIL_STATE_DELETED || cur_time < (*itr)->deliver_time)
             continue;
 
-        uint8 item_count = (*itr)->items.size();            // max count is MAX_MAIL_ITEMS (12)
-
+        /*[-ZERO] TODO recheck this
         size_t next_mail_size = 2+4+1+8+4*8+((*itr)->subject.size()+1)+1+item_count*(1+4+4+6*3*4+4+4+1+4+4+4);
 
         if(data.wpos()+next_mail_size > maxPacketSize)
             break;
+        */
 
         uint32 show_flags = 0;
         if ((*itr)->messageType != MAIL_NORMAL)
@@ -609,37 +593,33 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
                 break;
         }
 
-        data << (uint32) (*itr)->COD;                       // COD
+        data << (*itr)->subject;                            // Subject string - once 00, when mail type = 3
         data << (uint32) (*itr)->itemTextId;                // sure about this
         data << (uint32) 0;                                 // unknown
         data << (uint32) (*itr)->stationery;                // stationery (Stationery.dbc)
-        data << (uint32) (*itr)->money;                     // Gold
-        data << (uint32) show_flags;                        // unknown, 0x4 - auction, 0x10 - normal
-                                                            // Time
-        data << (float)  ((*itr)->expire_time-time(NULL))/DAY;
-        data << (uint32) (*itr)->mailTemplateId;            // mail template (MailTemplate.dbc)
-        data << (*itr)->subject;                            // Subject string - once 00, when mail type = 3
 
-        data << (uint8) item_count;
+        // not used?
+        //data << (uint32) show_flags;                        // unknown, 0x4 - auction, 0x10 - normal
+        //data << (uint32) (*itr)->mailTemplateId;            // mail template (MailTemplate.dbc)
 
-        for(uint8 i = 0; i < item_count; ++i)
+        //[-ZERO] TODO not use vector for mail items since 1.12 doesn't support multiple items sending in mails
+        if ( (*itr)->items.size() > 0)
         {
-            Item *item = pl->GetMItem((*itr)->items[i].item_guid);
-            // item index (0-6?)
-            data << (uint8)  i;
-            // item guid low?
-            data << (uint32) (item ? item->GetGUIDLow() : 0);
+            Item *item = pl->GetMItem((*itr)->items[0].item_guid);
             // entry
             data << (uint32) (item ? item->GetEntry() : 0);
-            for(uint8 j = 0; j < MAX_INSPECTED_ENCHANTMENT_SLOT; ++j)
-            {
-                // unsure
-                data << (uint32) (item ? item->GetEnchantmentCharges((EnchantmentSlot)j) : 0);
-                // unsure
-                data << (uint32) (item ? item->GetEnchantmentDuration((EnchantmentSlot)j) : 0);
-                // unsure
-                data << (uint32) (item ? item->GetEnchantmentId((EnchantmentSlot)j) : 0);
-            }
+            
+            //[-ZERO] no other infos about enchantment in 1.12 [?]
+            //for(uint8 j = 0; j < MAX_INSPECTED_ENCHANTMENT_SLOT; ++j)
+            //{
+            //    // unsure
+            data << (uint32) (item ? item->GetEnchantmentCharges((EnchantmentSlot)PERM_ENCHANTMENT_SLOT) : 0);
+            //    // unsure
+            //    data << (uint32) (item ? item->GetEnchantmentDuration((EnchantmentSlot)j) : 0);
+            //    // unsure
+            //    data << (uint32) (item ? item->GetEnchantmentId((EnchantmentSlot)j) : 0);
+            //}
+
             // can be negative
             data << (uint32) (item ? item->GetItemRandomPropertyId() : 0);
             // unk
@@ -652,6 +632,15 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
             data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
             // durability
             data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
+            // Gold
+            data << (uint32) (*itr)->money;
+            // Cash on delivery
+            data << (uint32) (*itr)->COD;
+            data << (uint32) (*itr)->checked;
+            // expire time
+            data << (float)  ((*itr)->expire_time-time(NULL))/DAY;
+            // Constant, something like end..
+            data << (uint32) 0;   
         }
 
         mails_count += 1;
