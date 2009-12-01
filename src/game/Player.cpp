@@ -14187,8 +14187,8 @@ void Player::SaveToDB()
 
     bool inworld = IsInWorld();
 
-    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, GetHonorStoredKills(false)+m_pending_honorableKills);
-    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, GetHonorStoredKills(true)+m_pending_dishonorableKills);
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, GetHonorStoredKills(false)+m_pending_dishonorableKills);
+    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, GetHonorStoredKills(true)+m_pending_honorableKills);
     m_stored_honor += m_pending_honor;
     m_pending_honor = 0;
 
