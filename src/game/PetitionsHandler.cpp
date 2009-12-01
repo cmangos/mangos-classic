@@ -243,14 +243,14 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
         return;
     }
 
-    WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4+8+name.size()+1+1+4*13));
+    WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4+8+name.size()+1+2+4*11));
     data << GUID_LOPART(petitionguid);                      // guild/team guid (in mangos always same as GUID_LOPART(petition guid)
     data << ownerguid;                                      // charter owner guid
     data << name;                                           // name (guild/arena team)
     data << uint8(0);                                       // 1
+    data << uint32(1);
     data << uint32(9);
-    data << uint32(9);
-    data << uint32(0);                                      // bypass client - side limitation, a different value is needed here for each petition
+    data << uint32(9);                                      // bypass client - side limitation, a different value is needed here for each petition
     data << uint32(0);                                      // 5
     data << uint32(0);                                      // 6
     data << uint32(0);                                      // 7
@@ -260,7 +260,6 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
     data << uint32(0);                                      // 11
     data << uint32(0);                                      // 13 count of next strings?
     data << uint32(0);                                      // 14
-    data << uint32(0);                                      // 15 0 - guild, 1 - arena team
     SendPacket(&data);
 }
 
@@ -633,7 +632,7 @@ void WorldSession::SendPetitionShowList(uint64 guid)
     data << uint32(GUILD_CHARTER);                      // charter entry
     data << uint32(16161);                              // charter display id
     data << uint32(GUILD_CHARTER_COST);                 // charter cost
-    data << uint32(0);                                  // unknown
+    data << uint32(1);                                  // unknown
     data << uint32(9);                                  // required signs?
     //for(uint8 i = 0; i < count; ++i)
     //{
