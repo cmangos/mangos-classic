@@ -3171,7 +3171,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
     damage = int32(CalculateDamage((uint8)i, unitTarget) * DamageMultiplier);
 
-    sLog.outDebug( "Spell: Effect : %u", eff);
+    sLog.outDebug( "Spell %u Effect%d : %u", m_spellInfo->Id, i, eff);
 
     //Simply return. Do not display "immune" in red text on client
     if(unitTarget && unitTarget->IsImmunedToSpellEffect(m_spellInfo, i))
