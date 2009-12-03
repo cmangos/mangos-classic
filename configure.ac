@@ -13,7 +13,7 @@
 # TODO: create m4 directory and put the checks there, because this file got realy poluted ( by Derex )
 
 ## Prelude, basic settings for Autoconf
-#  PACKAGE:            mangos
+#  PACKAGE:            mangoszero
 #  VERSION:            0.12.0 (trunk)
 #  BUG-REPORT-ADDRESS: mangos-devs@lists.sourceforge.net
 AC_INIT( [mangos], [0.12.0], [mangos-devs@lists.sourceforge.net])
