@@ -4,7 +4,7 @@ Copyright (c) 2005-2009 MaNGOS <http://getmangos.com/>
 
 See the COPYING file for copying conditions.
 
-NOTE: This is file special addition for mangos-0.12 branch
+NOTE: This is file special addition for mangoszero fork (from mangos 0.12)
       It describe work with backported sql updates
 
 == Database Updates ==
@@ -18,78 +18,60 @@ that should enable you to see if you need an update or not.
 File names are divided into two parts. First part is the order_number+revision+counter
 that show commit revision that will be compatible with database after apply update.
 Counter set order in sql updates apply for same revision. Order_number set global order in directory
-for backported sql updates (its backported in random order and need special mangos-0.12 side order for apply).
+for backported sql updates (its backported in random order and need special mangoszero side order for apply).
 The second part of the name of the database and the table that needs and update or has been added.
 See an example below:
 
-         001_6939_01_mangos_quest_template.sql
-         |   |    |  |      |
-         |   |    |  |      |
-         |   |    |  |      The table `spell_chain`
-         |   |    |  |      will need an update.
-         |   |    |  |
-         |   |    |  Name of affected DB (default recommended name)
-         |   |    |  Can be: characters, mangos, realmd
-         |   |    |
-         |   |    Counter show number of sql update in master updates list for provided master revision
-         |   |    and set proper order for sql updates for same revision
-         |   |
-         |   MaNGOS master commit revison related to sql update.
-         |   It included in commit description in form [6936] as you can see at http://github.com/mangos/mangos/commits/mangos-0.12
-         |   It can be absent (and replaced by ____) if sql update not really backported but only mangos-0.12 specific.
+         z0001_xxx_01_characters_character_db_version.sql
+         |     |   |  |          |
+         |     |   |  |          |
+         |     |   |  |          The table `character_db_version`
+         |     |   |  |          will need an update.
+         |     |   |  |
+         |     |   |  Name of affected DB (default recommended name)
+         |     |   |  Can be: characters, mangos, realmd
+         |     |   |
+         |     |   Counter show number of sql update in 0.12 backported or own (non bakported, xxx) updates list for provided master revision
+         |     |   and set proper order for sql updates for same revision
+         |     |
+         |     MaNGOS 0.12 commit revison related to sql update (if this backported slq update.
+         |     It can be absent (and replaced by xxx) if sql update not really backported but only mangoszero specific.
          |
-         Order_number set special order for apply sql updates from different backported revisions in mangos-0.12 branch
+         Order_number set special order for apply sql updates from different backported revisions in mangoszero
 
 After appling this update DB compatiable with database that include this sql update.
 SQL update can include special protection against multiply and wrong order SQL updates apply.
 So attempt apply sql update to more old DB without previous SQL update in list for targeted database
 or to DB with already applied this or later SQL update will generate error and not applied.
 
-=== What do for upgrade to MaNGOS 0.13 ====
-
-MaNGOS 0.12 DB structure can have changes not compatibale with slq updates in MaNGOS 0.13 sql/updates directory.
-For resolve this problem apply all sql updates form sql/updates/before_upgrade_to_0.13 in REVERSED order,
-from high order number prefix to low. Aftre this you will have DB structure compatiable with state that exist at moment
-MaNGOS 0.12 release and then sql updates from MaNGOS 0.13 sql/updates directory will applied without problem in normal order
-(starting from MaNGOS 0.13 sql/updates/2008_12_22_01_mangos_creature_equip_template.sql)
-
 === For commiters ===
 
-DO NOT use git_id tool for mangos-0.12 branch or any branch different from master.
+DO NOT use git_id tool for mangoszero or any branch different from mangos master.
 
 Possible use simplifed steps if backported revision include sql update in form that can be re-apply without problem mutiply times
 then:
 
-1. Rename sql update from master form (6939_01_mangos_quest_template.sql) to mangos-0.12 form (001_6939_01_mangos_quest_template.sql)
+1. Rename sql update from 0.12 form (001_6939_01_mangos_quest_template.sql) to mangoszero form (z0001_001_01_mangos_quest_template.sql)
    using next free order_number in sql/updates files list.
 2. Drop sql order guards from sql update file
 3. Restore field name in db version table in db sql file (mangos.sql/etc) to state before related revision backporting.
+3. Restore field name in src/shared/revision_sql.h file to state before related revision backporting.
 4. Fix/update sql update file name in slq/updates/Makefile.am
 
 If revison modify table structure and include sql update that can't be applied to db multiply times
 then:
 
-1. Rename sql update from master form (7643_01_mangos_db_version.sql) to mangos-0.12 form (020_7643_01_mangos_db_version.sql)
+1. Rename sql update from 0.12 form (001_6939_01_mangos_quest_template.sql) to mangoszero form (z0001_001_01_mangos_quest_template.sql)
    using next free order_number in sql/updates files list.
 
 2. Replace sql order guards from sql update file
-   (ALTER TABLE db_version CHANGE COLUMN required_7633_01_mangos_achievement_criteria_data required_7643_01_mangos_db_version bit;)
-   to 0.12 form.
-2.1: Look at current guard field name in affected DB (sql/mangos.sql) and replace first (old) name (`required_2008_12_15_01_mangos_arenas`)
-2.2: Create new field name base at 0.12 sql update name (`required_020_7643_01_mangos_db_version`)
-2.3: Form final 0.12 guard query
-     (ALTER TABLE db_version CHANGE COLUMN required_2008_12_15_01_mangos_arenas required_020_7643_01_mangos_db_version bit;)
-2.4: Update field name in db version table (db_version in mangos.sql in our case) to new field name (required_020_7643_01_mangos_db_version)
-2.5: Update field name in affected DB related define (REVISION_DB_MANGOS) in src/shared/revision_sql/h
-     to new field name (required_020_7643_01_mangos_db_version)
+   (ALTER TABLE db_version CHANGE COLUMN required_029_7393_01_mangos_game_event required_035_7855_01_mangos_pools bit;)
+   to mangozzero form.
+2.1: Look at current guard field name in affected DB (sql/mangos.sql) and replace first (old) name (`required_029_7393_01_mangos_game_event`)
+2.2: Create new field name base at mangoszero sql update name (`required_z001_029_01_mangos_game_event`)
+2.3: Form final mangoszero guard query
+     (ALTER TABLE db_version CHANGE COLUMN required_z001_029_01_mangos_game_event required_z0002_035_01_mangos_pools bit;)
+2.4: Update field name in db version table (db_version in mangos.sql in our case) to new field name (required_z0002_035_01_mangos_pools)
+2.5: Update field name in affected DB related define (REVISION_DB_MANGOS) in src/shared/revision_sql.h
+     to new field name (required_z0002_035_01_mangos_pools)
 3. Fix/update sql update file name in slq/updates/Makefile.am
-
-4. Write undo sql update for sql/updates/before_upgrade_to_0.13 directory.
-4.1: Name it in same way as added sql update (020_7643_01_mangos_db_version.sql)
-4.2: Use REVERSED order for guard query field names
-     (ALTER TABLE db_version CHANGE COLUMN required_020_7643_01_mangos_db_version required_2008_12_15_01_mangos_arenas bit;)
-4.3: write required sql queries that will restore DB structure to state _before_ related sql update apply
-     (if field added then field drop, if field drop then field re-added with some useful value,
-     if field renamed then field renamed back, etc)
-5. Add undo sql update file name into slq/updates/before_upgrade_to_0.13/Makefile.am
-
