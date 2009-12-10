@@ -620,6 +620,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "combatstop",     SEC_GAMEMASTER,     false, &ChatHandler::HandleCombatStopCommand,          "", NULL },
         { "repairitems",    SEC_GAMEMASTER,     true,  &ChatHandler::HandleRepairitemsCommand,         "", NULL },
         { "waterwalk",      SEC_GAMEMASTER,     false, &ChatHandler::HandleWaterwalkCommand,           "", NULL },
+        { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", NULL },
 
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
