@@ -1813,13 +1813,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         float  m_recallO;
         void   SaveRecallPosition();
 
-        // Homebind coordinates
-        uint32 m_homebindMapId;
-        uint16 m_homebindZoneId;
-        float m_homebindX;
-        float m_homebindY;
-        float m_homebindZ;
+        void SetHomebindToCurrentPos();
         void RelocateToHomebind() { SetMapId(m_homebindMapId); Relocate(m_homebindX,m_homebindY,m_homebindZ); }
+        bool TeleportToHomebind(uint32 options = 0) { return TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation(),options); }
 
         // currently visible objects at player client
         typedef std::set<uint64> ClientGUIDs;
@@ -2114,6 +2110,13 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         GridReference<Player> m_gridRef;
         MapReference m_mapRef;
+
+        // Homebind coordinates
+        uint32 m_homebindMapId;
+        uint16 m_homebindZoneId;
+        float m_homebindX;
+        float m_homebindY;
+        float m_homebindZ;
 
         uint32 m_lastFallTime;
         float  m_lastFallZ;

@@ -80,7 +80,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     {
         sLog.outDebug("WORLD: teleport of player %s (%d) to location %d, %f, %f, %f, %f failed", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
         // teleport the player home
-        if(!GetPlayer()->TeleportTo(GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation()))
+        if(!GetPlayer()->TeleportToHomebind())
         {
             // the player must always be able to teleport home
             sLog.outError("WORLD: failed to teleport player %s (%d) to homebind location %d, %f, %f, %f, %f!", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation());
