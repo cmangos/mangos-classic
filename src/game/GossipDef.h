@@ -31,14 +31,14 @@ class WorldSession;
 //POI defines
 enum Poi_Icon
 {
-    ICON_POI_0                  =   0,                      // Grey ?
-    ICON_POI_1                  =   1,                      // Red ?
-    ICON_POI_2                  =   2,                      // Blue ?
+    ICON_POI_GREY_AV_MINE       =   0,                      // Grey mine lorry
+    ICON_POI_RED_AV_MINE        =   1,                      // Red mine lorry
+    ICON_POI_BLUE_AV_MINE       =   2,                      // Blue mine lorry
     ICON_POI_BWTOMB             =   3,                      // Blue and White Tomb Stone
-    ICON_POI_HOUSE              =   4,                      // House
-    ICON_POI_TOWER              =   5,                      // Tower
-    ICON_POI_REDFLAG            =   6,                      // Red Flag with Yellow !
-    ICON_POI_TOMB               =   7,                      // Tomb Stone
+    ICON_POI_SMALL_HOUSE        =   4,                      // Small house
+    ICON_POI_GREYTOWER          =   5,                      // Grey Tower
+    ICON_POI_REDFLAG            =   6,                      // Red Flag w/Yellow !
+    ICON_POI_TOMBSTONE          =   7,                      // Normal tomb stone (brown)
     ICON_POI_BWTOWER            =   8,                      // Blue and White Tower
     ICON_POI_REDTOWER           =   9,                      // Red Tower
     ICON_POI_BLUETOWER          =   10,                     // Blue Tower
@@ -46,9 +46,9 @@ enum Poi_Icon
     ICON_POI_REDTOMB            =   12,                     // Red Tomb Stone
     ICON_POI_RWTOMB             =   13,                     // Red and White Tomb Stone
     ICON_POI_BLUETOMB           =   14,                     // Blue Tomb Stone
-    ICON_POI_NOTHING            =   15,                     // NOTHING
-    ICON_POI_16                 =   16,                     // Red ?
-    ICON_POI_17                 =   17,                     // Grey ?
+    ICON_POI_BLANK              =   15,                     // Blank (not visible)
+    ICON_POI_16                 =   16,                     // Grey ?
+    ICON_POI_17                 =   17,                     // Blue/White ?
     ICON_POI_18                 =   18,                     // Blue ?
     ICON_POI_19                 =   19,                     // Red and White ?
     ICON_POI_20                 =   20,                     // Red ?
