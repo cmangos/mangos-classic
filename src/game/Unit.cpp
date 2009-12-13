@@ -3775,17 +3775,6 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 
         for(int j = 0; j < 3; ++j)
         {
-            // prevent remove dummy triggered spells at next effect aura add
-            switch(spellProto->Effect[j])                   // main spell auras added added after triggered spell
-            {
-                case SPELL_EFFECT_DUMMY:
-                    switch(spellId)
-                    {
-                        case 5420: if(i_spellId==34123) is_triggered_by_spell = true; break;
-                    }
-                    break;
-            }
-
             if(is_triggered_by_spell)
                 break;
 
@@ -3796,7 +3785,6 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                     switch(i_spellId)
                     {
                         case 24858: if(spellId==24905)                  is_triggered_by_spell = true; break;
-                        case 33891: if(spellId==5420 || spellId==34123) is_triggered_by_spell = true; break;
                         case 34551: if(spellId==22688)                  is_triggered_by_spell = true; break;
                     }
                     break;
