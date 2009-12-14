@@ -4610,7 +4610,23 @@ void Spell::EffectScriptEffect(uint32 effIndex)
 
     if( m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN )
     {
-        if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000800000))
+        // Holy Light
+        if (m_spellInfo->SpellIconID == 70)
+        {
+            if(!unitTarget || !unitTarget->isAlive())
+                return;
+            int32 heal = damage;
+            m_caster->CastCustomSpell(unitTarget,19968,&heal,NULL,NULL,true);
+        }
+        // Flash of Light
+        else if (m_spellInfo->SpellIconID  == 242)
+        {
+            if(!unitTarget || !unitTarget->isAlive())
+                return;
+            int32 heal = damage;
+            m_caster->CastCustomSpell(unitTarget,19993,&heal,NULL,NULL,true);
+        }
+        else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000800000))
         {
             if(!unitTarget || !unitTarget->isAlive())
                 return;
