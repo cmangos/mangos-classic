@@ -604,6 +604,18 @@ void Spell::EffectDummy(uint32 i)
         {
             switch(m_spellInfo->Id )
             {
+                case 13535:                                 // Tame Beast
+                {
+                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (!m_originalCaster || m_originalCaster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_originalCaster->CastSpell(unitTarget,13481,true);
+                    return;
+                }
+
                 case 8063:                                  // Deviate Fish
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
