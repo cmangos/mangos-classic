@@ -114,7 +114,7 @@ bool ChatHandler::HandleNpcWhisperCommand(const char* args)
     uint64 receiver_guid= atol(receiver_str);
 
     // check online security
-    if (HasLowerSecurity(objmgr.GetPlayer(receiver_guid), 0))
+    if (HasLowerSecurity(sObjectMgr.GetPlayer(receiver_guid), 0))
         return false;
 
     pCreature->Whisper(text,receiver_guid);
@@ -1749,7 +1749,7 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
 
     std::ostringstream reply;
 
-    GameTeleMap const & teleMap = objmgr.GetGameTeleMap();
+    GameTeleMap const & teleMap = sObjectMgr.GetGameTeleMap();
     for(GameTeleMap::const_iterator itr = teleMap.begin(); itr != teleMap.end(); ++itr)
     {
         GameTele const* tele = &itr->second;
@@ -1845,7 +1845,7 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
 
     uint32 messagetype = MAIL_NORMAL;
     uint32 stationery = MAIL_STATIONERY_GM;
-    uint32 itemTextId = !text.empty() ? objmgr.CreateItemText( text ) : 0;
+    uint32 itemTextId = !text.empty() ? sObjectMgr.CreateItemText( text ) : 0;
 
     WorldSession::SendMailTo(target,messagetype, stationery, sender_guidlo, GUID_LOPART(target_guid), subject, itemTextId, NULL, 0, 0, MAIL_CHECK_MASK_NONE);
 

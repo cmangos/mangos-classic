@@ -389,7 +389,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
         return;
     }
 
-    if(objmgr.IsReservedName(name))
+    if(sObjectMgr.IsReservedName(name))
     {
         SendPetNameInvalid(PET_NAME_RESERVED, name);
         return;

@@ -2301,7 +2301,7 @@ void SpellMgr::LoadSpellAreas()
             continue;
         }
 
-        if(spellArea.questStart && !objmgr.GetQuestTemplate(spellArea.questStart))
+        if(spellArea.questStart && !sObjectMgr.GetQuestTemplate(spellArea.questStart))
         {
             sLog.outErrorDb("Spell %u listed in `spell_area` have wrong start quest (%u) requirement", spell,spellArea.questStart);
             continue;
@@ -2309,7 +2309,7 @@ void SpellMgr::LoadSpellAreas()
 
         if(spellArea.questEnd)
         {
-            if(!objmgr.GetQuestTemplate(spellArea.questEnd))
+            if(!sObjectMgr.GetQuestTemplate(spellArea.questEnd))
             {
                 sLog.outErrorDb("Spell %u listed in `spell_area` have wrong end quest (%u) requirement", spell,spellArea.questEnd);
                 continue;

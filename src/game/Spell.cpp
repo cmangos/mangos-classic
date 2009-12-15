@@ -1892,7 +1892,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 case SPELL_EFFECT_SUMMON_PLAYER:
                     if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->GetSelection())
                     {
-                        Player* target = objmgr.GetPlayer(((Player*)m_caster)->GetSelection());
+                        Player* target = sObjectMgr.GetPlayer(((Player*)m_caster)->GetSelection());
                         if(target)
                             TagUnitMap.push_back(target);
                     }
@@ -2748,7 +2748,7 @@ void Spell::WriteAmmoToPacket( WorldPacket * data )
                 uint32 ammoID = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
                 if(ammoID)
                 {
-                    ItemPrototype const *pProto = objmgr.GetItemPrototype( ammoID );
+                    ItemPrototype const *pProto = sObjectMgr.GetItemPrototype( ammoID );
                     if(pProto)
                     {
                         ammoDisplayID = pProto->DisplayInfoID;
@@ -3922,7 +3922,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if(!((Player*)m_caster)->GetSelection())
                     return SPELL_FAILED_BAD_TARGETS;
 
-                Player* target = objmgr.GetPlayer(((Player*)m_caster)->GetSelection());
+                Player* target = sObjectMgr.GetPlayer(((Player*)m_caster)->GetSelection());
                 if( !target || ((Player*)m_caster) == target || !target->IsInSameRaidWith((Player*)m_caster) )
                     return SPELL_FAILED_BAD_TARGETS;
 
@@ -4752,7 +4752,7 @@ SpellCastResult Spell::CheckItems()
                             return SPELL_FAILED_NO_AMMO;
                         }
 
-                        ItemPrototype const *ammoProto = objmgr.GetItemPrototype( ammo );
+                        ItemPrototype const *ammoProto = sObjectMgr.GetItemPrototype( ammo );
                         if(!ammoProto)
                             return SPELL_FAILED_NO_AMMO;
 

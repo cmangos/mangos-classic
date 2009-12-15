@@ -199,7 +199,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         if (!(wplayer_name.empty() || wpname.find(wplayer_name) != std::wstring::npos))
             continue;
 
-        std::string gname = objmgr.GetGuildNameById(itr->second->GetGuildId());
+        std::string gname = sObjectMgr.GetGuildNameById(itr->second->GetGuildId());
         std::wstring wgname;
         if(!Utf8toWStr(gname,wgname))
             continue;
@@ -744,10 +744,10 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     if(Script->scriptAreaTrigger(GetPlayer(), atEntry))
         return;
 
-    uint32 quest_id = objmgr.GetQuestForAreaTrigger( Trigger_ID );
+    uint32 quest_id = sObjectMgr.GetQuestForAreaTrigger( Trigger_ID );
     if( quest_id && GetPlayer()->isAlive() && GetPlayer()->IsActiveQuest(quest_id) )
     {
-        Quest const* pQuest = objmgr.GetQuestTemplate(quest_id);
+        Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest_id);
         if( pQuest )
         {
             if(GetPlayer()->GetQuestStatus(quest_id) == QUEST_STATUS_INCOMPLETE)
@@ -755,7 +755,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         }
     }
 
-    if(objmgr.IsTavernAreaTrigger(Trigger_ID))
+    if(sObjectMgr.IsTavernAreaTrigger(Trigger_ID))
     {
         // set resting flag we are in the inn
         GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
@@ -777,7 +777,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
 
     // NULL if all values default (non teleport trigger)
-    AreaTrigger const* at = objmgr.GetAreaTrigger(Trigger_ID);
+    AreaTrigger const* at = sObjectMgr.GetAreaTrigger(Trigger_ID);
     if(!at)
         return;
 
@@ -806,7 +806,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         {
             // TODO: all this is probably wrong
             if(missingItem)
-                SendAreaTriggerMessage(GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM), at->requiredLevel, objmgr.GetItemPrototype(missingItem)->Name1);
+                SendAreaTriggerMessage(GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM), at->requiredLevel, sObjectMgr.GetItemPrototype(missingItem)->Name1);
             /*[-ZERO] else if(missingKey)
                 GetPlayer()->SendTransferAborted(at->target_mapId,0); */
             else if(missingQuest)
@@ -1001,7 +1001,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
     _player->SetSelection(guid);
 
-    Player *plr = objmgr.GetPlayer(guid);
+    Player *plr = sObjectMgr.GetPlayer(guid);
     if(!plr)                                                // wrong player
         return;
 
@@ -1087,7 +1087,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     recv_data >> guid;
     // DEBUG_LOG("Party Stats guid is " I64FMTD,guid);
 
-    pl = objmgr.GetPlayer(guid);
+    pl = sObjectMgr.GetPlayer(guid);
     if(pl)
     {
         WorldPacket data( MSG_INSPECT_HONOR_STATS, (8+1+4+4+4+4+4+4+4+4+4+4+1) );
@@ -1176,7 +1176,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
         return;
     }
 
-    Player *plr = objmgr.GetPlayer(charname.c_str());
+    Player *plr = sObjectMgr.GetPlayer(charname.c_str());
 
     if(!plr)
     {

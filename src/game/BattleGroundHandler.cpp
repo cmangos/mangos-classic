@@ -215,10 +215,10 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket & /*recv
         uint32 count1 = 0;
         uint32 count2 = 0;
 
-        Player *ap = objmgr.GetPlayer(((BattleGroundWS*)bg)->GetAllianceFlagPickerGUID());
+        Player *ap = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetAllianceFlagPickerGUID());
         if(ap) ++count2;
 
-        Player *hp = objmgr.GetPlayer(((BattleGroundWS*)bg)->GetHordeFlagPickerGUID());
+        Player *hp = sObjectMgr.GetPlayer(((BattleGroundWS*)bg)->GetHordeFlagPickerGUID());
         if(hp) ++count2;
 
         WorldPacket data(MSG_BATTLEGROUND_PLAYER_POSITIONS, (4+4+16*count1+16*count2));
@@ -599,7 +599,7 @@ void WorldSession::HandleReportPvPAFK( WorldPacket & recv_data )
 {
     uint64 playerGuid;
     recv_data >> playerGuid;
-    Player *reportedPlayer = objmgr.GetPlayer(playerGuid);
+    Player *reportedPlayer = sObjectMgr.GetPlayer(playerGuid);
 
     if(!reportedPlayer)
     {

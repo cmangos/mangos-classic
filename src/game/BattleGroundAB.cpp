@@ -96,7 +96,7 @@ void BattleGroundAB::Update(uint32 diff)
             SetStatus(STATUS_IN_PROGRESS);
 
             for(BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-                if (Player* plr = objmgr.GetPlayer(itr->first))
+                if (Player* plr = sObjectMgr.GetPlayer(itr->first))
                     plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
         }
 

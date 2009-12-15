@@ -387,7 +387,7 @@ void WorldSession::SendSpiritResurrect()
     WorldSafeLocsEntry const *corpseGrave = NULL;
     Corpse *corpse = _player->GetCorpse();
     if(corpse)
-        corpseGrave = objmgr.GetClosestGraveYard(
+        corpseGrave = sObjectMgr.GetClosestGraveYard(
             corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetMapId(), _player->GetTeam() );
 
     // now can spawn bones
@@ -396,7 +396,7 @@ void WorldSession::SendSpiritResurrect()
     // teleport to nearest from corpse graveyard, if different from nearest to player ghost
     if(corpseGrave)
     {
-        WorldSafeLocsEntry const *ghostGrave = objmgr.GetClosestGraveYard(
+        WorldSafeLocsEntry const *ghostGrave = sObjectMgr.GetClosestGraveYard(
             _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetMapId(), _player->GetTeam() );
 
         if(corpseGrave != ghostGrave)
@@ -660,7 +660,7 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
         return;
     }
 
-    CreatureInfo const* creatureInfo = objmgr.GetCreatureTemplate(creature_id);
+    CreatureInfo const* creatureInfo = sObjectMgr.GetCreatureTemplate(creature_id);
     if(!creatureInfo || !creatureInfo->isTameable())
     {
         WorldPacket data(SMSG_STABLE_RESULT, 1);
@@ -787,7 +787,7 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
         return;
     }
 
-    CreatureInfo const* creatureInfo = objmgr.GetCreatureTemplate(creature_id);
+    CreatureInfo const* creatureInfo = sObjectMgr.GetCreatureTemplate(creature_id);
     if(!creatureInfo || !creatureInfo->isTameable())
     {
         WorldPacket data(SMSG_STABLE_RESULT, 1);

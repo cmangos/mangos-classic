@@ -192,7 +192,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
             }
 
-            Player *player = objmgr.GetPlayer(to.c_str());
+            Player *player = sObjectMgr.GetPlayer(to.c_str());
             uint32 tSecurity = GetSecurity();
             uint32 pSecurity = player ? player->GetSession()->GetSecurity() : SEC_PLAYER;
             if (!player || (tSecurity == SEC_PLAYER && pSecurity > SEC_PLAYER && !player->isAcceptWhispers()))
@@ -264,7 +264,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             if (GetPlayer()->GetGuildId())
             {
-                Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
+                Guild *guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
                 if (guild)
                     guild->BroadcastToGuild(this, msg, lang == LANG_ADDON ? LANG_ADDON : LANG_UNIVERSAL);
             }
@@ -290,7 +290,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             if (GetPlayer()->GetGuildId())
             {
-                Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
+                Guild *guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
                 if (guild)
                     guild->BroadcastToOfficers(this, msg, lang == LANG_ADDON ? LANG_ADDON : LANG_UNIVERSAL);
             }
@@ -577,7 +577,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
     recv_data >> iguid;
     recv_data >> unk;                                       // probably related to spam reporting
 
-    Player *player = objmgr.GetPlayer(iguid);
+    Player *player = sObjectMgr.GetPlayer(iguid);
     if(!player || !player->GetSession())
         return;
 

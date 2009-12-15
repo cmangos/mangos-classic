@@ -214,14 +214,14 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if (GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(name))
+    if (GetSecurity() == SEC_PLAYER && sObjectMgr.IsReservedName(name))
     {
         data << (uint8)CHAR_NAME_RESERVED;
         SendPacket( &data );
         return;
     }
 
-    if (objmgr.GetPlayerGUIDByName(name))
+    if (sObjectMgr.GetPlayerGUIDByName(name))
     {
         data << (uint8)CHAR_CREATE_NAME_IN_USE;
         SendPacket( &data );
@@ -313,7 +313,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     recv_data >> hairStyle >> hairColor >> facialHair >> outfitId;
 
     Player * pNewChar = new Player(this);
-    if(!pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId ))
+    if(!pNewChar->Create( sObjectMgr.GenerateLowGuid(HIGHGUID_PLAYER), name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId ))
     {
         // Player not create (race/class problem?)
         delete pNewChar;
@@ -350,14 +350,14 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     recv_data >> guid;
 
     // can't delete loaded character
-    if(objmgr.GetPlayer(guid))
+    if(sObjectMgr.GetPlayer(guid))
         return;
 
     uint32 accountId = 0;
     std::string name;
 
     // is guild leader
-    if(objmgr.GetGuildByLeader(guid))
+    if(sObjectMgr.GetGuildByLeader(guid))
     {
         WorldPacket data(SMSG_CHAR_DELETE, 1);
         data << (uint8)CHAR_DELETE_FAILED_GUILD_LEADER;
@@ -498,7 +498,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     if(pCurrChar->GetGuildId() != 0)
     {
-        Guild* guild = objmgr.GetGuildById(pCurrChar->GetGuildId());
+        Guild* guild = sObjectMgr.GetGuildById(pCurrChar->GetGuildId());
         if(guild)
         {
             data.Initialize(SMSG_GUILD_EVENT, (2+guild->GetMOTD().size()+1));
@@ -543,7 +543,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     if (!pCurrChar->GetMap()->Add(pCurrChar))
     {
-        AreaTrigger const* at = objmgr.GetGoBackTrigger(pCurrChar->GetMapId());
+        AreaTrigger const* at = sObjectMgr.GetGoBackTrigger(pCurrChar->GetMapId());
         if(at)
             pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->GetOrientation());
         else
@@ -588,7 +588,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     {
         sLog.outDebug( "WORLD: Restart character %u taxi flight", pCurrChar->GetGUIDLow() );
 
-        uint32 mountDisplayId = objmgr.GetTaxiMountDisplayId(sourceNode, pCurrChar->GetTeam(),true);
+        uint32 mountDisplayId = sObjectMgr.GetTaxiMountDisplayId(sourceNode, pCurrChar->GetTeam(),true);
         uint32 path = pCurrChar->m_taxi.GetCurrentTaxiPath();
 
         // search appropriate start path node
@@ -811,7 +811,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recv_data)
     }
 
     // check name limitations
-    if (GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(newname))
+    if (GetSecurity() == SEC_PLAYER && sObjectMgr.IsReservedName(newname))
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << uint8(CHAR_NAME_RESERVED);

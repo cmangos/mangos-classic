@@ -86,7 +86,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     uint64 rc = 0;
     if(normalizePlayerName(receiver))
-        rc = objmgr.GetPlayerGUIDByName(receiver);
+        rc = sObjectMgr.GetPlayerGUIDByName(receiver);
 
     if (!rc)
     {
@@ -112,7 +112,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         return;
     }
 
-    Player *receive = objmgr.GetPlayer(rc);
+    Player *receive = sObjectMgr.GetPlayer(rc);
 
     uint32 rc_team = 0;
     uint8 mails_count = 0;                                  // do not allow to send to one player more than 100 mails
@@ -124,7 +124,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     }
     else
     {
-        rc_team = objmgr.GetPlayerTeamByGUID(rc);
+        rc_team = sObjectMgr.GetPlayerTeamByGUID(rc);
         QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM mail WHERE receiver = '%u'", GUID_LOPART(rc));
         if(result)
         {
@@ -189,7 +189,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     uint32 itemTextId = 0;
     if (!body.empty())
     {
-        itemTextId = objmgr.CreateItemText( body );
+        itemTextId = sObjectMgr.CreateItemText( body );
     }
 
     pl->ModifyMoney( -int32(reqmoney) );
@@ -202,7 +202,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         if(receive)
             rc_account = receive->GetSession()->GetAccountId();
         else
-            rc_account = objmgr.GetPlayerAccountIdByGUID(rc);
+            rc_account = sObjectMgr.GetPlayerAccountIdByGUID(rc);
 
         if (item_guid)
         {
@@ -363,11 +363,11 @@ void WorldSession::SendReturnToSender(uint8 messageType, uint32 sender_acc, uint
         return;
     }
 
-    Player *receiver = objmgr.GetPlayer(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER));
+    Player *receiver = sObjectMgr.GetPlayer(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER));
 
     uint32 rc_account = 0;
     if(!receiver)
-        rc_account = objmgr.GetPlayerAccountIdByGUID(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER));
+        rc_account = sObjectMgr.GetPlayerAccountIdByGUID(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER));
 
     if(!receiver && !rc_account)                            // sender not exist
     {
@@ -445,7 +445,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data )
         if (m->COD > 0)                                     // if there is COD, take COD money from player and send them to sender by mail
         {
             uint64 sender_guid = MAKE_NEW_GUID(m->sender, 0, HIGHGUID_PLAYER);
-            Player *receive = objmgr.GetPlayer(sender_guid);
+            Player *receive = sObjectMgr.GetPlayer(sender_guid);
 
             uint32 sender_accId = 0;
 
@@ -460,16 +460,16 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data )
                 else
                 {
                     // can be calculated early
-                    sender_accId = objmgr.GetPlayerAccountIdByGUID(sender_guid);
+                    sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
 
-                    if(!objmgr.GetPlayerNameByGUID(sender_guid,sender_name))
-                        sender_name = objmgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
+                    if(!sObjectMgr.GetPlayerNameByGUID(sender_guid,sender_name))
+                        sender_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
                 }
                 sLog.outCommand(GetAccountId(),"GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
                     GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),it->GetCount(),m->COD,sender_name.c_str(),sender_accId);
             }
             else if(!receive)
-                sender_accId = objmgr.GetPlayerAccountIdByGUID(sender_guid);
+                sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
 
             // check player existence
             if(receive || sender_accId)
@@ -667,7 +667,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 
     WorldPacket data(SMSG_ITEM_TEXT_QUERY_RESPONSE, (4+10));// guess size
     data << itemTextId;
-    data << objmgr.GetItemText( itemTextId );
+    data << sObjectMgr.GetItemText( itemTextId );
     SendPacket(&data);
 }
 
@@ -696,7 +696,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     uint32 itemTextId = m->itemTextId;
 
     Item *bodyItem = new Item;                              // This is not bag and then can be used new Item.
-    if(!bodyItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), MAIL_BODY_ITEM_TEMPLATE, pl))
+    if(!bodyItem->Create(sObjectMgr.GenerateLowGuid(HIGHGUID_ITEM), MAIL_BODY_ITEM_TEMPLATE, pl))
     {
         delete bodyItem;
         return;
@@ -783,7 +783,7 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket & /*recv_data*/ )
 
 void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 stationery, uint32 sender_guidlow_or_entry, uint32 receiver_guidlow, std::string subject, uint32 itemTextId, MailItemsInfo* mi, uint32 money, uint32 COD, uint32 checked, uint32 deliver_delay, uint16 mailTemplateId)
 {
-    uint32 mailId = objmgr.GenerateMailID();
+    uint32 mailId = sObjectMgr.GenerateMailID();
 
     time_t deliver_time = time(NULL) + deliver_delay;
 

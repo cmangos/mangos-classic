@@ -47,7 +47,7 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature &c)
 {
     sLog.outDetail("LoadPath: loading waypoint path for creature %u, %u", c.GetGUIDLow(), c.GetDBTableGUIDLow());
 
-    i_path = WaypointMgr.GetPath(c.GetDBTableGUIDLow());
+    i_path = sWaypointMgr.GetPath(c.GetDBTableGUIDLow());
 
     if (!i_path)
     {
@@ -229,7 +229,7 @@ void WaypointMovementGenerator<Creature>::MovementInform(Creature &unit)
 //----------------------------------------------------//
 void FlightPathMovementGenerator::LoadPath(Player &)
 {
-    objmgr.GetTaxiPathNodes(i_pathId, i_path,i_mapIds);
+    sObjectMgr.GetTaxiPathNodes(i_pathId, i_path,i_mapIds);
 }
 
 uint32 FlightPathMovementGenerator::GetPathAtMapEnd() const
