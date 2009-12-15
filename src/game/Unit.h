@@ -1063,9 +1063,15 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint64 GetCreatorGUID() const { return GetUInt64Value(UNIT_FIELD_CREATEDBY); }
         void SetCreatorGUID(uint64 creator) { SetUInt64Value(UNIT_FIELD_CREATEDBY, creator); }
         uint64 GetPetGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMON); }
+        void SetPetGUID(uint64 pet) { SetUInt64Value(UNIT_FIELD_SUMMON, pet); }
         uint64 GetCharmerGUID() const { return GetUInt64Value(UNIT_FIELD_CHARMEDBY); }
         void SetCharmerGUID(uint64 owner) { SetUInt64Value(UNIT_FIELD_CHARMEDBY, owner); }
-        uint64 GetCharmGUID() const { return  GetUInt64Value(UNIT_FIELD_CHARM); }
+        uint64 GetCharmGUID() const { return GetUInt64Value(UNIT_FIELD_CHARM); }
+        void SetCharmGUID(uint64 charm) { SetUInt64Value(UNIT_FIELD_CHARM, charm); }
+        uint64 GetTargetGUID() const { return GetUInt64Value(UNIT_FIELD_TARGET); }
+        void SetTargetGUID(uint64 targetGuid) { SetUInt64Value(UNIT_FIELD_TARGET, targetGuid); }
+        uint64 GetChannelObjectGUID() const { return GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT); }
+        void SetChannelObjectGUID(uint64 targetGuid) { SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, targetGuid); }
 
         uint64 GetCharmerOrOwnerGUID() const { return GetCharmerGUID() ? GetCharmerGUID() : GetOwnerGUID(); }
         uint64 GetCharmerOrOwnerOrOwnGUID() const
@@ -1122,7 +1128,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveAurasByCasterSpell(uint32 spellId, uint32 effindex, uint64 casterGUID);
         void RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit *stealer);
         void RemoveAurasDueToSpellByCancel(uint32 spellId);
-        void RemoveAurasAtChanneledTarget(SpellEntry const* spellInfo);
 
         // removing unknown aura stacks by diff reasons and selections
         void RemoveNotOwnSingleTargetAuras();
@@ -1434,6 +1439,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_lastManaUseTimer;
 
     private:
+        void CleanupDeletedAuars();
+
         void ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag, AuraTypeSet const& procAuraTypes, WeaponAttackType attType, SpellEntry const * procSpell, uint32 damage, SpellSchoolMask damageSchoolMask );
         bool IsTriggeredAtSpellProcEvent( SpellEntry const* spellProto, SpellEntry const* procSpell, uint32 procFlag, WeaponAttackType attType, bool isVictim, uint32& cooldown );
         bool HandleDummyAuraProc(   Unit *pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 cooldown);

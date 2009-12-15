@@ -258,6 +258,8 @@ void Unit::Update( uint32 p_time )
     m_Events.Update( p_time );
     _UpdateSpells( p_time );
 
+    CleanupDeletedAuars();
+
     if (m_lastManaUseTimer)
     {
         if (p_time >= m_lastManaUseTimer)
@@ -266,10 +268,6 @@ void Unit::Update( uint32 p_time )
             m_lastManaUseTimer -= p_time;
     }
 
-    // really delete auras "deleted" while processing its ApplyModify code
-    for(AuraList::const_iterator itr = m_deletedAuras.begin(); itr != m_deletedAuras.begin(); ++itr)
-        delete *itr;
-    m_deletedAuras.clear();
 
     // update combat timer only for players and pets
     if (isInCombat() && (GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->isPet() || ((Creature*)this)->isCharmed()))
@@ -4137,19 +4135,10 @@ void Unit::RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode)
 
     // Statue unsummoned at aura remove
     Totem* statue = NULL;
-    bool caster_channeled = false;
     if(IsChanneledSpell(AurSpellInfo))
-    {
-        Unit* caster = Aur->GetCaster();
-
-        if(caster)
-        {
+        if(Unit* caster = Aur->GetCaster())
             if(caster->GetTypeId()==TYPEID_UNIT && ((Creature*)caster)->isTotem() && ((Totem*)caster)->GetTotemType()==TOTEM_STATUE)
                 statue = ((Totem*)caster);
-            else
-                caster_channeled = caster==this;
-        }
-    }
 
     sLog.outDebug("Aura %u now is remove mode %d",Aur->GetModifier()->m_auraname, mode);
     if (mode != AURA_REMOVE_BY_DELETE)                      // not unapply if target will deleted
@@ -4169,9 +4158,6 @@ void Unit::RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode)
     else
         delete Aur;
 
-    if(caster_channeled)
-        RemoveAurasAtChanneledTarget (AurSpellInfo);
-
     if(statue)
         statue->UnSummon();
 
@@ -4180,6 +4166,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode)
         i = m_Auras.end();
     else
         i = m_Auras.begin();
+
 }
 
 void Unit::RemoveAllAuras(AuraRemoveMode mode /*= AURA_REMOVE_BY_DEFAULT*/)
@@ -6932,7 +6919,7 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
     }
 
     //Set our target
-    SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
+    SetTargetGUID(victim->GetGUID());
 
     if(meleeAttack)
         addUnitState(UNIT_STAT_MELEE_ATTACKING);
@@ -6967,7 +6954,7 @@ bool Unit::AttackStop(bool targetSwitch /*=false*/)
     m_attacking = NULL;
 
     //Clear our target
-    SetUInt64Value(UNIT_FIELD_TARGET, 0);
+    SetTargetGUID(0);
 
     clearUnitState(UNIT_STAT_MELEE_ATTACKING);
 
@@ -7186,7 +7173,7 @@ float Unit::GetCombatDistance( const Unit* target ) const
 
 void Unit::SetPet(Pet* pet)
 {
-    SetUInt64Value(UNIT_FIELD_SUMMON, pet ? pet->GetGUID() : 0);
+    SetPetGUID(pet ? pet->GetGUID() : 0);
 
     // FIXME: hack, speed must be set only at follow
     if(pet && GetTypeId()==TYPEID_PLAYER)
@@ -7196,7 +7183,7 @@ void Unit::SetPet(Pet* pet)
 
 void Unit::SetCharm(Unit* pet)
 {
-    SetUInt64Value(UNIT_FIELD_CHARM, pet ? pet->GetGUID() : 0);
+    SetCharmGUID(pet ? pet->GetGUID() : 0);
 }
 
 
@@ -9926,6 +9913,9 @@ void Unit::RemoveFromWorld()
     {
         RemoveNotOwnSingleTargetAuras();
         RemoveGuardians();
+        RemoveAllGameObjects();
+        RemoveAllDynObjects();
+        CleanupDeletedAuars();
     }
 
     Object::RemoveFromWorld();
@@ -11028,26 +11018,6 @@ bool Unit::IsTriggeredAtSpellProcEvent(SpellEntry const* spellProto, SpellEntry 
     return roll_chance_f(chance);
 }
 
-void Unit::RemoveAurasAtChanneledTarget(SpellEntry const* spellInfo)
-{
-    uint64 target_guid = GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT);
-
-    if(!IS_UNIT_GUID(target_guid))
-        return;
-
-    Unit* target = ObjectAccessor::GetUnit(*this, target_guid);
-    if(!target)
-        return;
-
-    for (AuraMap::iterator iter = target->GetAuras().begin(); iter != target->GetAuras().end(); )
-    {
-        if (iter->second->GetId() == spellInfo->Id && iter->second->GetCasterGUID()==GetGUID())
-            target->RemoveAura(iter);
-        else
-            ++iter;
-    }
-}
-
 void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, bool non_positive /*= false*/)
 {
     Unit::AuraMap& auras = GetAuras();
@@ -11147,4 +11117,12 @@ void Unit::KnockBackFrom(Unit* target, float horizintalSpeed, float verticalSpee
         //       with CreatureRelocation at server side
         NearTeleportTo(fx, fy, fz, GetOrientation(), this == target);
     }
+}
+
+void Unit::CleanupDeletedAuars()
+{
+    // really delete auras "deleted" while processing its ApplyModify code
+    for(AuraList::const_iterator itr = m_deletedAuras.begin(); itr != m_deletedAuras.end(); ++itr)
+        delete *itr;
+    m_deletedAuras.clear();
 }

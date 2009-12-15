@@ -13440,7 +13440,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     delete result;
 
     // clear channel spell data (if saved at channel spell casting)
-    SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, 0);
+    SetChannelObjectGUID(0);
     SetUInt32Value(UNIT_CHANNEL_SPELL,0);
 
     // clear charm/summon related fields

@@ -2108,11 +2108,10 @@ void Spell::cancel()
                 {
                     Unit* unit = m_caster->GetGUID()==(*ihit).targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID);
                     if( unit && unit->isAlive() )
-                        unit->RemoveAurasDueToSpell(m_spellInfo->Id);
+                        unit->RemoveAurasByCasterSpell(m_spellInfo->Id,m_caster->GetGUID());
                 }
             }
 
-            m_caster->RemoveAurasDueToSpell(m_spellInfo->Id);
             SendChannelUpdate(0);
             SendInterrupted(0);
             SendCastResult(SPELL_FAILED_INTERRUPTED);
@@ -2918,7 +2917,14 @@ void Spell::SendChannelUpdate(uint32 time)
 {
     if(time == 0)
     {
-        m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, 0);
+        m_caster->RemoveAurasByCasterSpell(m_spellInfo->Id,m_caster->GetGUID());
+
+        if(uint64 target_guid = m_caster->GetChannelObjectGUID())
+            if(target_guid != m_caster->GetGUID() && IS_UNIT_GUID(target_guid))
+                if(Unit* target = ObjectAccessor::GetUnit(*m_caster, target_guid))
+                    target->RemoveAurasByCasterSpell(m_spellInfo->Id,m_caster->GetGUID());
+
+        m_caster->SetChannelObjectGUID(0);
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
     }
 
@@ -2972,7 +2978,7 @@ void Spell::SendChannelStart(uint32 duration)
 
     m_timer = duration;
     if(target)
-        m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, target->GetGUID());
+        m_caster->SetChannelObjectGUID(target->GetGUID());
     m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, m_spellInfo->Id);
 }
 
