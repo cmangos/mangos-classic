@@ -1395,194 +1395,6 @@ void Aura::TriggerSpell()
 //                    case 32236: break;
 //                    // Earthquake
 //                    case 32686: break;
-//                    // Possess
-//                    case 33401: break;
-//                    // Draw Shadows
-//                    case 33563: break;
-//                    // Murmur's Touch
-//                    case 33711: break;
-                    // Flame Quills
-                    case 34229:
-                    {
-                        // cast 24 spells 34269-34289, 34314-34316
-                        for(uint32 spell_id = 34269; spell_id != 34290; ++spell_id)
-                            target->CastSpell(target, spell_id, true, NULL, this, casterGUID);
-                        for(uint32 spell_id = 34314; spell_id != 34317; ++spell_id)
-                            target->CastSpell(target, spell_id, true, NULL, this, casterGUID);
-                        return;
-                    }
-//                    // Gravity Lapse
-//                    case 34480: break;
-//                    // Tornado
-//                    case 34683: break;
-//                    // Frostbite Rotate
-//                    case 34748: break;
-//                    // Arcane Flurry
-//                    case 34821: break;
-//                    // Interrupt Shutdown
-//                    case 35016: break;
-//                    // Interrupt Shutdown
-//                    case 35176: break;
-//                    // Inferno
-//                    case 35268: break;
-//                    // Salaadin's Tesla
-//                    case 35515: break;
-//                    // Ethereal Channel (Red)
-//                    case 35518: break;
-//                    // Nether Vapor
-//                    case 35879: break;
-//                    // Dark Portal Storm
-//                    case 36018: break;
-//                    // Burning Maul
-//                    case 36056: break;
-//                    // Living Grove Defender Lifespan
-//                    case 36061: break;
-//                    // Professor Dabiri Talks
-//                    case 36064: break;
-//                    // Kael Gaining Power
-//                    case 36091: break;
-//                    // They Must Burn Bomb Aura
-//                    case 36344: break;
-//                    // They Must Burn Bomb Aura (self)
-//                    case 36350: break;
-//                    // Stolen Ravenous Ravager Egg
-//                    case 36401: break;
-//                    // Activated Cannon
-//                    case 36410: break;
-//                    // Stolen Ravenous Ravager Egg
-//                    case 36418: break;
-//                    // Enchanted Weapons
-//                    case 36510: break;
-//                    // Cursed Scarab Periodic
-//                    case 36556: break;
-//                    // Cursed Scarab Despawn Periodic
-//                    case 36561: break;
-//                    // Vision Guide
-//                    case 36573: break;
-//                    // Cannon Charging (platform)
-//                    case 36785: break;
-//                    // Cannon Charging (self)
-//                    case 36860: break;
-                    // Remote Toy
-                    case 37027: trigger_spell_id = 37029; break;
-//                    // Mark of Death
-//                    case 37125: break;
-//                    // Arcane Flurry
-//                    case 37268: break;
-//                    // Spout
-//                    case 37429: break;
-//                    // Spout
-//                    case 37430: break;
-//                    // Karazhan - Chess NPC AI, Snapshot timer
-//                    case 37440: break;
-//                    // Karazhan - Chess NPC AI, action timer
-//                    case 37504: break;
-//                    // Karazhan - Chess: Is Square OCCUPIED aura (DND)
-//                    case 39400: break;
-//                    // Banish
-//                    case 37546: break;
-//                    // Shriveling Gaze
-//                    case 37589: break;
-//                    // Fake Aggro Radius (2 yd)
-//                    case 37815: break;
-//                    // Corrupt Medivh
-//                    case 37853: break;
-                    // Eye of Grillok
-                    case 38495:
-                    {
-                        m_target->CastSpell(m_target, 38530, true);
-                        return;
-                    }
-                    // Absorb Eye of Grillok (Zezzak's Shard)
-                    case 38554:
-                    {
-                        if(m_target->GetTypeId() != TYPEID_UNIT)
-                            return;
-
-                        if (Unit* caster = GetCaster())
-                            caster->CastSpell(caster, 38495, true, NULL, this);
-                        else
-                            return;
-
-                        Creature* creatureTarget = (Creature*)m_target;
-
-                        creatureTarget->ForcedDespawn();
-                        return;
-                    }
-//                    // Magic Sucker Device timer
-//                    case 38672: break;
-//                    // Tomb Guarding Charging
-//                    case 38751: break;
-//                    // Murmur's Touch
-//                    case 38794: break;
-//                    // Activate Nether-wraith Beacon (31742 Nether-wraith Beacon item)
-//                    case 39105: break;
-//                    // Drain World Tree Visual
-//                    case 39140: break;
-//                    // Quest - Dustin's Undead Dragon Visual aura
-//                    case 39259: break;
-//                    // Hellfire - The Exorcism, Jules releases darkness, aura
-//                    case 39306: break;
-//                    // Inferno
-//                    case 39346: break;
-//                    // Enchanted Weapons
-//                    case 39489: break;
-//                    // Shadow Bolt Whirl
-//                    case 39630: break;
-//                    // Shadow Bolt Whirl
-//                    case 39634: break;
-//                    // Shadow Inferno
-//                    case 39645: break;
-                    // Tear of Azzinoth Summon Channel - it's not really supposed to do anything,and this only prevents the console spam
-                    case 39857: trigger_spell_id = 39856; break;
-//                    // Soulgrinder Ritual Visual (Smashed)
-//                    case 39974: break;
-//                    // Simon Game Pre-game timer
-//                    case 40041: break;
-//                    // Knockdown Fel Cannon: The Aggro Check Aura
-//                    case 40113: break;
-//                    // Spirit Lance
-//                    case 40157: break;
-//                    // Demon Transform 2
-//                    case 40398: break;
-//                    // Demon Transform 1
-//                    case 40511: break;
-//                    // Ancient Flames
-//                    case 40657: break;
-//                    // Ethereal Ring Cannon: Cannon Aura
-//                    case 40734: break;
-//                    // Cage Trap
-//                    case 40760: break;
-//                    // Random Periodic
-//                    case 40867: break;
-//                    // Prismatic Shield
-//                    case 40879: break;
-//                    // Aura of Desire
-//                    case 41350: break;
-//                    // Dementia
-//                    case 41404: break;
-//                    // Chaos Form
-//                    case 41629: break;
-//                    // Alert Drums
-//                    case 42177: break;
-//                    // Spout
-//                    case 42581: break;
-//                    // Spout
-//                    case 42582: break;
-//                    // Return to the Spirit Realm
-//                    case 44035: break;
-//                    // Curse of Boundless Agony
-//                    case 45050: break;
-//                    // Earthquake
-//                    case 46240: break;
-                    // Personalized Weather
-                    case 46736: trigger_spell_id = 46737; break;
-//                    // Stay Submerged
-//                    case 46981: break;
-//                    // Dragonblight Ram
-//                    case 47015: break;
-//                    // Party G.R.E.N.A.D.E.
-//                    case 51510: break;
                     default:
                         break;
                 }
@@ -1623,8 +1435,6 @@ void Aura::TriggerSpell()
 //                {
 //                    // Blue Beam
 //                    case 32930: break;
-//                    // Fury of the Dreghood Elders
-//                    case 35460: break;
 //                    default:
 //                        break;
 //                }
@@ -1666,9 +1476,6 @@ void Aura::TriggerSpell()
 //                {
 //                    //Frost Trap Aura
 //                    case 13810:
-//                        return;
-//                    //Rizzle's Frost Trap
-//                    case 39900:
 //                        return;
 //                    // Tame spells
 //                    case 19597:         // Tame Ice Claw Bear
@@ -1712,25 +1519,6 @@ void Aura::TriggerSpell()
                                 return;
                         }
                         target->RemoveAurasDueToSpell(28820);
-                        return;
-                    }
-                    // Totemic Mastery (Skyshatter Regalia (Shaman Tier 6) - bonus)
-                    case 38443:
-                    {
-                        bool all = true;
-                        for(int i = 0; i < MAX_TOTEM; ++i)
-                        {
-                            if(!target->m_TotemSlot[i])
-                            {
-                                all = false;
-                                break;
-                            }
-                        }
-
-                        if(all)
-                            target->CastSpell(target, 38437, true, NULL, this);
-                        else
-                            target->RemoveAurasDueToSpell(38437);
                         return;
                     }
                     default:
@@ -1796,10 +1584,6 @@ void Aura::TriggerSpell()
                 target->CastCustomSpell(target, trigger_spell_id, &m_modifier.m_amount, NULL, NULL, true, NULL, this);
                 return;
             }
-            // Ground Slam
-            case 33525:
-                target->CastSpell(target, trigger_spell_id, true, NULL, this, casterGUID);
-                return;
         }
     }
     // All ok cast by default case
@@ -1823,42 +1607,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     {
         switch(GetId())
         {
-            case 1515:                                      // Tame beast
-                // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
-                if( caster && m_target->CanHaveThreatList())
-                    m_target->AddThreat(caster, 10.0f, false, GetSpellSchoolMask(GetSpellProto()), GetSpellProto());
-                return;
             case 13139:                                     // net-o-matic
                 // root to self part of (root_target->charge->root_self sequence
                 if(caster)
                     caster->CastSpell(caster, 13138, true, NULL, this);
-                return;
-            case 39850:                                     // Rocket Blast
-                if(roll_chance_i(20))                       // backfire stun
-                    m_target->CastSpell(m_target, 51581, true, NULL, this);
-                return;
-            case 43873:                                     // Headless Horseman Laugh
-                m_target->PlayDistanceSound(11965);
-                return;
-            case 46354:                                     // Blood Elf Illusion
-                if(caster)
-                {
-                    switch(caster->getGender())
-                    {
-                        case GENDER_FEMALE:
-                            caster->CastSpell(m_target, 46356, true, NULL, this);
-                            break;
-                        case GENDER_MALE:
-                            caster->CastSpell(m_target, 46355, true, NULL, this);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                return;
-            case 46699:                                     // Requires No Ammo
-                if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    ((Player*)m_target)->RemoveAmmo();      // not use ammo and not allow use
                 return;
         }
 
@@ -1914,38 +1666,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 caster->CastSpell(m_target, finalSpelId, true, NULL, this);
             return;
         }
-
-        switch(GetId())
-        {
-            case 36730:                                     // Flame Strike
-            {
-                m_target->CastSpell(m_target, 36731, true, NULL, this);
-                return;
-            }
-            case 44191:                                     // Flame Strike
-            {
-                if (m_target->GetMap()->IsDungeon())
-                {
-                    uint32 spellId = 44190;
-
-                    m_target->CastSpell(m_target, spellId, true, NULL, this);
-                }
-                return;
-            }
-            case 45934:                                     // Dark Fiend
-            {
-                // Kill target if dispelled
-                if (m_removeMode==AURA_REMOVE_BY_DISPEL)
-                    m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                return;
-            }
-            case 46308:                                     // Burning Winds
-            {
-                // casted only at creatures at spawn
-                m_target->CastSpell(m_target, 47287, true, NULL, this);
-                return;
-            }
-        }
     }
 
     // AT APPLY & REMOVE
@@ -1994,149 +1714,15 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     if(m_target->getClass()==CLASS_WARRIOR)
                         m_target->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, apply);
                     return;
-                //Summon Fire Elemental
-                case 40133:
-                {
-                    if (!caster)
-                        return;
-
-                    Unit *owner = caster->GetOwner();
-                    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        if(apply)
-                            owner->CastSpell(owner, 8985, true);
-                        else
-                            ((Player*)owner)->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
-                    }
-                    return;
-                }
-                //Summon Earth Elemental
-                case 40132 :
-                {
-                    if (!caster)
-                        return;
-
-                    Unit *owner = caster->GetOwner();
-                    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        if(apply)
-                            owner->CastSpell(owner, 19704, true);
-                        else
-                            ((Player*)owner)->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
-                    }
-                    return;
-                }
-                //Dragonmaw Illusion
-                case 40214 :
-                {
-                    if(apply)
-                    {
-                        m_target->CastSpell(m_target, 40216, true);
-                        m_target->CastSpell(m_target, 42016, true);
-                    }
-                    else
-                    {
-                        m_target->RemoveAurasDueToSpell(40216);
-                        m_target->RemoveAurasDueToSpell(42016);
-                    }
-                    return;
-                }
-            }
-            break;
-        }
-        case SPELLFAMILY_MAGE:
-        {
-            // Hypothermia
-            if( GetId()==41425 )
-            {
-                m_target->ModifyAuraState(AURA_STATE_HYPOTHERMIA,apply);
-                return;
             }
             break;
         }
         case SPELLFAMILY_DRUID:
         {
-            // Lifebloom
-            if (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x1000000000))
-            {
-                if ( apply )
-                {
-                    if ( caster )
-                        // prevent double apply bonuses
-                        if(m_target->GetTypeId()!=TYPEID_PLAYER || !((Player*)m_target)->GetSession()->PlayerLoading())
-                            m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
-                }
-                else
-                {
-                    // Final heal only on dispelled or duration end
-                    if ( !(GetAuraDuration() <= 0 || m_removeMode == AURA_REMOVE_BY_DISPEL) )
-                        return;
-
-                    // have a look if there is still some other Lifebloom dummy aura
-                    Unit::AuraList auras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::iterator itr = auras.begin(); itr!=auras.end(); ++itr)
-                        if((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
-                            ((*itr)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x1000000000)))
-                            return;
-
-                    // final heal
-                    if(m_target->IsInWorld())
-                        m_target->CastCustomSpell(m_target, 33778, &m_modifier.m_amount, NULL, NULL, true, NULL, this, GetCasterGUID());
-                }
-                return;
-            }
-
             // Predatory Strikes
             if(m_target->GetTypeId()==TYPEID_PLAYER && GetSpellProto()->SpellIconID == 1563)
             {
                 ((Player*)m_target)->UpdateAttackPowerAndDamage();
-                return;
-            }
-            // Idol of the Emerald Queen
-            if ( GetId() == 34246 && m_target->GetTypeId()==TYPEID_PLAYER )
-            {
-                if(apply)
-                {
-                    SpellModifier *mod = new SpellModifier;
-                    mod->op = SPELLMOD_DOT;
-                    mod->value = m_modifier.m_amount/7;
-                    mod->type = SPELLMOD_FLAT;
-                    mod->spellId = GetId();
-                    mod->effectId = m_effIndex;
-                    mod->lastAffected = NULL;
-                    mod->mask = UI64LIT(0x001000000000);
-                    mod->charges = 0;
-
-                    m_spellmod = mod;
-                }
-
-                ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
-                return;
-            }
-            break;
-        }
-        case SPELLFAMILY_HUNTER:
-        {
-            // Improved Aspect of the Viper
-            if( GetId()==38390 && m_target->GetTypeId()==TYPEID_PLAYER )
-            {
-                if(apply)
-                {
-                    // + effect value for Aspect of the Viper
-                    SpellModifier *mod = new SpellModifier;
-                    mod->op = SPELLMOD_EFFECT1;
-                    mod->value = m_modifier.m_amount;
-                    mod->type = SPELLMOD_FLAT;
-                    mod->spellId = GetId();
-                    mod->effectId = m_effIndex;
-                    mod->lastAffected = NULL;
-                    mod->mask = UI64LIT(0x4000000000000);
-                    mod->charges = 0;
-
-                    m_spellmod = mod;
-                }
-
-                ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
                 return;
             }
             break;
@@ -3800,10 +3386,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 if (m_removeMode != AURA_REMOVE_BY_DISPEL)
                     // Cast Wrath of the Plaguebringer if not dispelled
                     m_target->CastSpell(m_target, 29214, true, 0, this);
-                return;
-            case 42783:                                     //Wrath of the Astrom...
-                if (m_removeMode == AURA_REMOVE_BY_DEFAULT && GetEffIndex() + 1 < 3)
-                    m_target->CastSpell(m_target, m_spellProto->CalculateSimpleValue(GetEffIndex()+1), true);
                 return;
             default:
                 break;
