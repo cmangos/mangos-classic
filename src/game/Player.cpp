@@ -16103,12 +16103,13 @@ void Player::ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs )
 
 void Player::InitDataForForm(bool reapplyMods)
 {
-    SetRegularAttackTime();
-
     switch(m_form)
     {
         case FORM_CAT:
         {
+            SetAttackTime(BASE_ATTACK,1000);                //Speed 1
+            SetAttackTime(OFF_ATTACK,1000);                 //Speed 1
+
             if(getPowerType()!=POWER_ENERGY)
                 setPowerType(POWER_ENERGY);
             break;
@@ -16116,15 +16117,21 @@ void Player::InitDataForForm(bool reapplyMods)
         case FORM_BEAR:
         case FORM_DIREBEAR:
         {
+            SetAttackTime(BASE_ATTACK,2500);                //Speed 2.5
+            SetAttackTime(OFF_ATTACK,2500);                 //Speed 2.5
+
             if(getPowerType()!=POWER_RAGE)
                 setPowerType(POWER_RAGE);
             break;
         }
         default:                                            // 0, for example
         {
+            SetRegularAttackTime();
+
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(getClass());
             if(cEntry && cEntry->powerType < MAX_POWERS && uint32(getPowerType()) != cEntry->powerType)
                 setPowerType(Powers(cEntry->powerType));
+
             break;
         }
     }
