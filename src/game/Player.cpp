@@ -314,8 +314,8 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this)
     m_groupUpdateMask = 0;
     m_auraUpdateMask = 0;
 
-    m_total_honor_points = 0;
-    m_pending_honor = 0;
+    m_total_honor_points = 0.0f;
+    m_pending_honor = 0.0f;
     m_pending_honorableKills = 0;
     m_pending_dishonorableKills = 0;
     m_storingDate = 0;
@@ -577,7 +577,7 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
     SetUInt32Value( PLAYER_GUILDRANK, 0 );
     SetUInt32Value( PLAYER_GUILD_TIMESTAMP, 0 );
 
-    m_stored_honor = 0;
+    m_stored_honor = 0.0f;
     m_highest_rank = 0;
     m_standing = 0;
 
@@ -5606,44 +5606,34 @@ void Player::RewardReputation(Quest const *pQuest)
 //Update honor fields
 void Player::UpdateHonor(void)
 {
-    time_t rawtime;
-    struct tm * now;
-    uint32 today = 0;
-    uint32 date = 0;
-
-    uint32 Yesterday = 0;
-    uint32 ThisWeekBegin = 0;
-    uint32 ThisWeekEnd = 0;
-    uint32 LastWeekBegin = 0;
-    uint32 LastWeekEnd = 0;
-
     uint32 lastweek_honorableKills = 0;
     uint32 lastweek_dishonorableKills = 0;
     uint32 today_honorableKills = 0;
     uint32 today_dishonorableKills = 0;
     m_pending_honorableKills = 0;
     m_pending_dishonorableKills = 0;
-    m_pending_honor = 0;
+    m_pending_honor = 0.0f;
 
     uint32 yesterdayKills = 0;
     uint32 thisWeekKills = 0;
     uint32 lastWeekKills = 0;
 
-    float lastWeekTotalHonor = 0;
-    float yesterdayHonor = 0;
-    float thisWeekHonor = 0;
-    float lastWeekHonor = 0;
+    float lastWeekTotalHonor = 0.0f;
+    float yesterdayHonor = 0.0f;
+    float thisWeekHonor = 0.0f;
+    float lastWeekHonor = 0.0f;
 
+    time_t rawtime;
     time( &rawtime );
-    now = localtime( &rawtime );
+    tm* now = localtime( &rawtime );
 
-    today = ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday));
+    uint32 today = ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday));
 
-    Yesterday     = today - 1;
-    ThisWeekBegin = today - now->tm_wday;
-    ThisWeekEnd   = ThisWeekBegin + 7;
-    LastWeekBegin = ThisWeekBegin - 7;
-    LastWeekEnd   = LastWeekBegin + 7;
+    uint32 Yesterday     = today - 1;
+    uint32 ThisWeekBegin = today - now->tm_wday;
+    uint32 ThisWeekEnd   = ThisWeekBegin + 7;
+    uint32 LastWeekBegin = ThisWeekBegin - 7;
+    uint32 LastWeekEnd   = LastWeekBegin + 7;
     m_storingDate = LastWeekBegin;
 
     sLog.outDetail("PLAYER: UpdateHonor");
@@ -5655,7 +5645,7 @@ void Player::UpdateHonor(void)
         do
         {
             Field *fields = result->Fetch();
-            date = fields[2].GetUInt32();
+            uint32 date = fields[2].GetUInt32();
 
             if(fields[0].GetUInt32() == HONORABLE_KILL)
             {
@@ -14530,7 +14520,7 @@ void Player::SaveToDB()
     SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, GetHonorStoredKills(false)+m_pending_dishonorableKills);
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, GetHonorStoredKills(true)+m_pending_honorableKills);
     m_stored_honor += m_pending_honor;
-    m_pending_honor = 0;
+    m_pending_honor = 0.0f;
 
     CharacterDatabase.BeginTransaction();
 
@@ -14660,7 +14650,7 @@ void Player::SaveToDB()
     ss << m_standing;
 
     ss << ", ";
-    ss << m_stored_honor;
+    ss << finiteAlways(m_stored_honor);
 
     ss << ")";
 
