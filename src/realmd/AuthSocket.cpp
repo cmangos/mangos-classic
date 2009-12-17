@@ -22,17 +22,13 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "ByteBuffer.h"
 #include "Config/ConfigEnv.h"
 #include "Log.h"
 #include "RealmList.h"
 #include "AuthSocket.h"
 #include "AuthCodes.h"
 #include <openssl/md5.h>
-#include "Auth/Sha1.h"
 //#include "Util.h" -- for commented utf8ToUpperOnlyLatin
-
-extern RealmList m_realmList;
 
 extern DatabaseType loginDatabase;
 
@@ -126,10 +122,21 @@ typedef struct AUTH_LOGON_PROOF_S
     uint8   cmd;
     uint8   error;
     uint8   M2[20];
+    uint32  unk1;
     uint32  unk2;
+    uint16  unk3;
 } sAuthLogonProof_S;
 
-// [-ZERO] Need recheck structure
+typedef struct AUTH_LOGON_PROOF_S_BUILD_6005
+{
+    uint8   cmd;
+    uint8   error;
+    uint8   M2[20];
+    //uint32  unk1;
+    uint32  unk2;
+    //uint16  unk3;
+} sAuthLogonProof_S_BUILD_6005;
+
 typedef struct AUTH_RECONNECT_PROOF_C
 {
     uint8   cmd;
@@ -322,6 +329,40 @@ void AuthSocket::_SetVSFields(const std::string& rI)
     OPENSSL_free((void*)s_hex);
 }
 
+void AuthSocket::SendProof(Sha1Hash sha)
+{
+    switch(_build)
+    {
+        case 5875:                                          // 1.12.1
+        case 6005:                                          // 1.12.2
+        {
+            sAuthLogonProof_S_BUILD_6005 proof;
+            memcpy(proof.M2, sha.GetDigest(), 20);
+            proof.cmd = AUTH_LOGON_PROOF;
+            proof.error = 0;
+            proof.unk2 = 0x00;
+
+            SendBuf((char *)&proof, sizeof(proof));
+            break;
+        }
+        case 8606:                                          // 2.4.3
+        case 10505:                                         // 3.2.2a
+        default:                                            // or later
+        {
+            sAuthLogonProof_S proof;
+            memcpy(proof.M2, sha.GetDigest(), 20);
+            proof.cmd = AUTH_LOGON_PROOF;
+            proof.error = 0;
+            proof.unk1 = 0x00800000;
+            proof.unk2 = 0x00;
+            proof.unk3 = 0x00;
+
+            SendBuf((char *)&proof, sizeof(proof));
+            break;
+        }
+    }
+}
+
 /// Logon Challenge command handler
 bool AuthSocket::_HandleLogonChallenge()
 {
@@ -347,6 +388,11 @@ bool AuthSocket::_HandleLogonChallenge()
     buf[buf.size() - 1] = 0;
     sAuthLogonChallenge_C *ch = (sAuthLogonChallenge_C*)&buf[0];
 
+    ///- Read the remaining of the packet
+    ibuf.Read((char *)&buf[4], remaining);
+    DEBUG_LOG("[AuthChallenge] got full packet, %#04x bytes", ch->size);
+    DEBUG_LOG("[AuthChallenge] name(%d): '%s'", ch->I_len, ch->I);
+
     // BigEndian code, nop in little endian case
     // size already converted
     EndianConvert(*((uint32*)(&ch->gamename[0])));
@@ -356,11 +402,6 @@ bool AuthSocket::_HandleLogonChallenge()
     EndianConvert(*((uint32*)(&ch->country[0])));
     EndianConvert(ch->timezone_bias);
     EndianConvert(ch->ip);
-
-    ///- Read the remaining of the packet
-    ibuf.Read((char *)&buf[4], remaining);
-    DEBUG_LOG("[AuthChallenge] got full packet, %#04x bytes", ch->size);
-    DEBUG_LOG("[AuthChallenge] name(%d): '%s'", ch->I_len, ch->I);
 
     ByteBuffer pkt;
 
@@ -380,15 +421,15 @@ bool AuthSocket::_HandleLogonChallenge()
 
     ///- Verify that this IP is not in the ip_banned table
     // No SQL injection possible (paste the IP address as passed by the socket)
-    loginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
-
     std::string address = GetRemoteAddress();
     loginDatabase.escape_string(address);
-    QueryResult *result = loginDatabase.PQuery(  "SELECT * FROM ip_banned WHERE ip = '%s'",address.c_str());
-    if(result)
+    QueryResult *result = loginDatabase.PQuery("SELECT unbandate FROM ip_banned WHERE "
+    //    permanent                    still banned
+        "(unbandate = bandate OR unbandate > UNIX_TIMESTAMP()) AND ip = '%s'", address.c_str());
+    if (result)
     {
         pkt << (uint8)REALM_AUTH_ACCOUNT_BANNED;
-        sLog.outBasic("[AuthChallenge] Banned ip %s tries to login!",GetRemoteAddress().c_str ());
+        sLog.outBasic("[AuthChallenge] Banned ip %s tries to login!", GetRemoteAddress().c_str());
         delete result;
     }
     else
@@ -423,13 +464,12 @@ bool AuthSocket::_HandleLogonChallenge()
 
             if (!locked)
             {
-                //set expired bans to inactive
-                loginDatabase.Execute("UPDATE account_banned SET active = 0 WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
                 ///- If the account is banned, reject the logon attempt
-                QueryResult *banresult = loginDatabase.PQuery("SELECT bandate,unbandate FROM account_banned WHERE id = %u AND active = 1", (*result)[1].GetUInt32());
+                QueryResult *banresult = loginDatabase.PQuery("SELECT bandate,unbandate FROM account_banned WHERE "
+                    "id = %u AND active = 1 AND (unbandate > UNIX_TIMESTAMP() OR unbandate = bandate)", (*result)[1].GetUInt32());
                 if(banresult)
                 {
-                    if((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
+                    if((*banresult)[0].GetUInt64() != (*banresult)[1].GetUInt64())
                     {
                         pkt << (uint8) REALM_AUTH_ACCOUNT_BANNED;
                         sLog.outBasic("[AuthChallenge] Banned account %s tries to login!",_login.c_str ());
@@ -538,13 +578,19 @@ bool AuthSocket::_HandleLogonProof()
 
     ///- Check if the client has one of the expected version numbers
     bool valid_version = false;
-    int accepted_versions[] = EXPECTED_MANGOS_CLIENT_BUILD;
-    for(int i = 0; accepted_versions[i]; ++i)
+    int accepted_versions[] = EXPECTED_REALMD_CLIENT_BUILD;
+    if (_build >= accepted_versions[0])                     // first build is low bound of always accepted range
+        valid_version = true;
+    else
     {
-        if(_build == accepted_versions[i])
+        // continue from 1 with explict equal check
+        for(int i = 1; accepted_versions[i]; ++i)
         {
-            valid_version = true;
-            break;
+            if(_build == accepted_versions[i])
+            {
+                valid_version = true;
+                break;
+            }
         }
     }
 
@@ -692,14 +738,8 @@ bool AuthSocket::_HandleLogonProof()
         sha.Initialize();
         sha.UpdateBigNumbers(&A, &M, &K, NULL);
         sha.Finalize();
-
-        sAuthLogonProof_S proof;
-        memcpy(proof.M2, sha.GetDigest(), 20);
-        proof.cmd = AUTH_LOGON_PROOF;
-        proof.error = 0;
-        proof.unk2 = 0x00;
-
-        SendBuf((char *)&proof, sizeof(proof));
+        
+        SendProof(sha);
 
         ///- Set _authed to true!
         _authed = true;
@@ -878,42 +918,12 @@ bool AuthSocket::_HandleRealmList()
     delete result;
 
     ///- Update realm list if need
-    m_realmList.UpdateIfNeed();
+    sRealmList.UpdateIfNeed();
 
     ///- Circle through realms in the RealmList and construct the return packet (including # of user characters in each realm)
     ByteBuffer pkt;
-    pkt << (uint32) 0;
-    pkt << (uint8) m_realmList.size();
-    RealmList::RealmMap::const_iterator i;
-    for( i = m_realmList.begin(); i != m_realmList.end(); ++i )
-    {
-        uint8 AmountOfCharacters;
-
-        // No SQL injection. id of realm is controlled by the database.
-        result = loginDatabase.PQuery( "SELECT numchars FROM realmcharacters WHERE realmid = '%d' AND acctid='%u'",i->second.m_ID,id);
-        if( result )
-        {
-            Field *fields = result->Fetch();
-            AmountOfCharacters = fields[0].GetUInt8();
-            delete result;
-        }
-        else
-            AmountOfCharacters = 0;
-
-        uint8 color = (i->second.allowedSecurityLevel > _accountSecurityLevel) ? 2 : i->second.color;
-
-        pkt << (uint32)i->second.icon;                      // realm type
-        pkt << color;                                       // if 2, then realm is offline
-        pkt << i->first;
-        pkt << i->second.address;
-        pkt << i->second.populationLevel;
-        pkt << AmountOfCharacters;
-        pkt << i->second.timezone;                          // realm category
-        pkt << (uint8) 0;                                   // unk, may be realm number/id?
-    }
-    pkt << (uint8) 0x0;
-    pkt << (uint8) 0x2;
-
+    LoadRealmlist(pkt, id);
+    
     ByteBuffer hdr;
     hdr << (uint8) REALM_LIST;
     hdr << (uint16)pkt.size();
@@ -922,6 +932,95 @@ bool AuthSocket::_HandleRealmList()
     SendBuf((char const*)hdr.contents(), hdr.size());
 
     return true;
+}
+
+void AuthSocket::LoadRealmlist(ByteBuffer &pkt, uint32 acctid)
+{   
+    switch(_build)
+    {
+        case 5875:                                          // 1.12.1
+        case 6005:                                          // 1.12.2
+        {
+            pkt << uint32(0);
+            pkt << uint8(sRealmList.size());
+            
+            for(RealmList::RealmMap::const_iterator  i = sRealmList.begin(); i != sRealmList.end(); ++i)
+            {
+                uint8 AmountOfCharacters;
+
+                // No SQL injection. id of realm is controlled by the database.
+                QueryResult *result = loginDatabase.PQuery( "SELECT numchars FROM realmcharacters WHERE realmid = '%d' AND acctid='%u'", i->second.m_ID, acctid);
+                if( result )
+                {
+                    Field *fields = result->Fetch();
+                    AmountOfCharacters = fields[0].GetUInt8();
+                    delete result;
+                }
+                else
+                    AmountOfCharacters = 0;
+
+                // Show offline state for unsupported client builds
+                uint8 color = (std::find(i->second.realmbuilds.begin(), i->second.realmbuilds.end(), _build) != i->second.realmbuilds.end()) ? i->second.color : 2;
+                color = (i->second.allowedSecurityLevel > _accountSecurityLevel) ? 2 : color;
+
+                pkt << uint32(i->second.icon);                      // realm type
+                pkt << uint8(color);                                // if 2, then realm is offline
+                pkt << i->first;                                    // name
+                pkt << i->second.address;                           // address
+                pkt << float(i->second.populationLevel);
+                pkt << uint8(AmountOfCharacters);
+                pkt << uint8(i->second.timezone);                   // realm category
+                pkt << uint8(0x00);                                 // unk, may be realm number/id?
+            }
+            
+            pkt << uint8(0x00);
+            pkt << uint8(0x02);
+            break;
+        }
+            
+        case 8606:                                          // 2.4.3
+        case 10505:                                         // 3.2.2a
+        default:                                            // and later
+        {
+            pkt << uint32(0);
+            pkt << uint16(sRealmList.size());
+            
+            for(RealmList::RealmMap::const_iterator  i = sRealmList.begin(); i != sRealmList.end(); ++i)
+            {
+                uint8 AmountOfCharacters;
+
+                // No SQL injection. id of realm is controlled by the database.
+                QueryResult *result = loginDatabase.PQuery( "SELECT numchars FROM realmcharacters WHERE realmid = '%d' AND acctid='%u'", i->second.m_ID, acctid);
+                if( result )
+                {
+                    Field *fields = result->Fetch();
+                    AmountOfCharacters = fields[0].GetUInt8();
+                    delete result;
+                }
+                else
+                    AmountOfCharacters = 0;
+
+                uint8 lock = (i->second.allowedSecurityLevel > _accountSecurityLevel) ? 1 : 0;
+
+                // Show offline state for unsupported client builds
+                uint8 color = (std::find(i->second.realmbuilds.begin(), i->second.realmbuilds.end(), _build) != i->second.realmbuilds.end()) ? i->second.color : 2;
+
+                pkt << uint8(i->second.icon);                       // realm type
+                pkt << uint8(lock);                                 // if 1, then realm locked
+                pkt << uint8(color);                                // if 2, then realm is offline
+                pkt << i->first;                                    // name
+                pkt << i->second.address;                           // address
+                pkt << float(i->second.populationLevel);
+                pkt << uint8(AmountOfCharacters);
+                pkt << uint8(i->second.timezone);                   // realm category
+                pkt << uint8(0x2C);                                 // unk, may be realm number/id?
+            }
+            
+            pkt << uint8(0x10);
+            pkt << uint8(0x00);
+            break;
+        }
+    }
 }
 
 /// Resume patch transfer

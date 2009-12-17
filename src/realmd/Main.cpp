@@ -55,7 +55,6 @@ void UnhookSignals();
 void HookSignals();
 
 bool stopEvent = false;                                     ///< Setting it to true stops the server
-RealmList m_realmList;                                      ///< Holds the list of realms for this server
 
 DatabaseType loginDatabase;                                 ///< Accessor to the realm server database
 
@@ -191,8 +190,8 @@ extern int main(int argc, char **argv)
         return 1;
 
     ///- Get the list of realms for the server
-    m_realmList.Initialize(sConfig.GetIntDefault("RealmsStateUpdateDelay", 20));
-    if (m_realmList.size() == 0)
+    sRealmList.Initialize(sConfig.GetIntDefault("RealmsStateUpdateDelay", 20));
+    if (sRealmList.size() == 0)
     {
         sLog.outError("No valid realms specified.");
         return 1;
@@ -209,6 +208,11 @@ extern int main(int argc, char **argv)
         sLog.outError( "MaNGOS realmd can not bind to %s:%d",bind_ip.c_str(), rmport );
         return 1;
     }
+
+    // cleanup query
+    //set expired bans to inactive
+    loginDatabase.Execute("UPDATE account_banned SET active = 0 WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
+    loginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
 
     h.Add(&authListenSocket);
 

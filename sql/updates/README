@@ -64,6 +64,8 @@ then:
 1. Rename sql update from 0.12 form (001_6939_01_mangos_quest_template.sql) to mangoszero form (z0001_001_01_mangos_quest_template.sql)
    using next free order_number in sql/updates files list.
 
+   If this realmd sql update preserve existed mangos master sql guards, and do next step with this goal.
+
 2. Replace sql order guards from sql update file
    (ALTER TABLE db_version CHANGE COLUMN required_029_7393_01_mangos_game_event required_035_7855_01_mangos_pools bit;)
    to mangozzero form.

@@ -31,6 +31,7 @@ pkgdata_DATA = \
 	z0001_xxx_03_realmd_realmd_db_version.sql \
 	z0002_083_01_mangos_mangos_string.sql \
 	z0002_083_02_mangos_command.sql \
+	z0003_086_01_realmd_realmlist.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -41,4 +42,5 @@ EXTRA_DIST = \
 	z0001_xxx_03_realmd_realmd_db_version.sql \
 	z0002_083_01_mangos_mangos_string.sql \
 	z0002_083_02_mangos_command.sql \
+	z0003_086_01_realmd_realmlist.sql \
 	README

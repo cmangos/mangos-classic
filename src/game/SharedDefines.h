@@ -2399,4 +2399,10 @@ enum PetTameFailureReason
     PETTAME_UNKNOWNERROR            = 11
 };
 
+// we need to stick to 1 version or half of the stuff will work for someone
+// others will not and opposite
+// will only support 1.12.1 client (build 5875) and 1.12.2 client (build 6005)..
+
+#define EXPECTED_MANGOSD_CLIENT_BUILD        {5875,6005, 0}
+
 #endif
