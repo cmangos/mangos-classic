@@ -75,7 +75,7 @@ enum SpellFamilyNames
 #define SPELLFAMILYFLAG_ROGUE_KIDNEYSHOT        UI64LIT(0x0000000000200000)
 #define SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE   UI64LIT(0x00000009003E0000)
 
-#define SPELLFAMILYFLAG_PALADIN_SEALS           UI64LIT(0x000004000A000200)
+#define SPELLFAMILYFLAG_PALADIN_SEALS           UI64LIT(0x000000000A000200)
 
 // Spell clasification
 enum SpellSpecific
@@ -152,7 +152,7 @@ inline bool IsSealSpell(SpellEntry const *spellInfo)
 inline bool IsElementalShield(SpellEntry const *spellInfo)
 {
     // family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
-    return (spellInfo->SpellFamilyFlags & UI64LIT(0x42000000400)) || spellInfo->Id == 23552;
+    return (spellInfo->SpellFamilyFlags & UI64LIT(0x00000000400)) || spellInfo->Id == 23552;
 }
 
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);

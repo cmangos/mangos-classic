@@ -172,7 +172,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             {
                 // Well Fed buffs (must be exclusive with Food / Drink replenishment effects, or else Well Fed will cause them to be removed)
                 // SpellIcon 2560 is Spell 46687, does not have this flag
-                if ((spellInfo->AttributesEx2 & SPELL_ATTR_EX2_FOOD_BUFF) || spellInfo->SpellIconID == 2560)
+                if (spellInfo->AttributesEx2 & SPELL_ATTR_EX2_FOOD_BUFF)
                     return SPELL_WELL_FED;
             }
             break;
@@ -180,10 +180,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         case SPELLFAMILY_MAGE:
         {
             // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
-            if (spellInfo->SpellFamilyFlags & UI64LIT(0x12040000))
+            if (spellInfo->SpellFamilyFlags & UI64LIT(0x12000000))
                 return SPELL_MAGE_ARMOR;
 
-            if ((spellInfo->SpellFamilyFlags & UI64LIT(0x1000000)) && spellInfo->EffectApplyAuraName[0]==SPELL_AURA_MOD_CONFUSE)
+            if (spellInfo->EffectApplyAuraName[0]==SPELL_AURA_MOD_CONFUSE && spellInfo->PreventionType==SPELL_PREVENTION_TYPE_SILENCE)
                 return SPELL_MAGE_POLYMORPH;
 
             break;
@@ -200,11 +200,6 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             // only warlock curses have this
             if (spellInfo->Dispel == DISPEL_CURSE)
                 return SPELL_CURSE;
-
-            // family flag 37 (only part spells have family name)
-            if (spellInfo->SpellFamilyFlags & UI64LIT(0x2000000000))
-                return SPELL_WARLOCK_ARMOR;
-
             break;
         }
         case SPELLFAMILY_PRIEST:
@@ -232,7 +227,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->SpellFamilyFlags & UI64LIT(0x10000100))
                 return SPELL_BLESSING;
 
-            if ((spellInfo->SpellFamilyFlags & UI64LIT(0x00000820180400)) && (spellInfo->AttributesEx3 & 0x200))
+            if ((spellInfo->SpellFamilyFlags & UI64LIT(0x00000020180400)) && spellInfo->baseLevel != 0)
                 return SPELL_JUDGEMENT;
 
             for (int i = 0; i < 3; ++i)
