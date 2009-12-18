@@ -73,7 +73,9 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     MailItemsInfo mi;
 
     recv_data >> item_guid;
-    mi.AddItem(GUID_LOPART(item_guid));
+
+    if (item_guid)
+        mi.AddItem(GUID_LOPART(item_guid));
 
     recv_data >> money >> COD;                              // money and cod
     recv_data >> unk3;                                      // const 0
@@ -283,7 +285,6 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
     uint32 mailId;
     recv_data >> mailbox;
     recv_data >> mailId;
-    recv_data.read_skip<uint32>();                          // mailTemplateId
 
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
         return;
@@ -557,6 +558,10 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
 
     for(PlayerMails::iterator itr = pl->GetmailBegin(); itr != pl->GetmailEnd(); ++itr)
     {
+        // packet send mail count as uint8, prevent overflow
+        if(mails_count >= 254)
+            break;
+
         // skip deleted or not delivered (deliver delay not expired) mails
         if ((*itr)->state == MAIL_STATE_DELETED || cur_time < (*itr)->deliver_time)
             continue;
@@ -567,14 +572,6 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         if(data.wpos()+next_mail_size > maxPacketSize)
             break;
         */
-
-        uint32 show_flags = 0;
-        if ((*itr)->messageType != MAIL_NORMAL)
-            show_flags |= MAIL_SHOW_DELETE;
-        if ((*itr)->messageType == MAIL_AUCTION)
-            show_flags |= MAIL_SHOW_AUCTION;
-        if ((*itr)->HasItems() && (*itr)->messageType == MAIL_NORMAL)
-            show_flags |= MAIL_SHOW_RETURN;
 
         data << (uint32) (*itr)->messageID;                 // Message ID
         data << (uint8) (*itr)->messageType;                // Message Type
@@ -598,49 +595,34 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         data << (uint32) 0;                                 // unknown
         data << (uint32) (*itr)->stationery;                // stationery (Stationery.dbc)
 
-        //FIXME we need to find where it's used in 1.12 
-        //data << (uint32) show_flags;                        // unknown, 0x4 - auction, 0x10 - normal
+        // 1.12.1 can have only single item
+        Item *item = (*itr)->items.size() > 0 ? pl->GetMItem((*itr)->items[0].item_guid) : NULL;
+        // entry
+        data << (uint32) (item ? item->GetEntry() : 0);
+        // permanent enchantment            
+        data << (uint32) (item ? item->GetEnchantmentId((EnchantmentSlot)PERM_ENCHANTMENT_SLOT) : 0);
+        // can be negative
+        data << (uint32) (item ? item->GetItemRandomPropertyId() : 0);
+        // unk
+        data << (uint32) (item ? item->GetItemSuffixFactor() : 0);
+        // stack count
+        data << (uint8)  (item ? item->GetCount() : 0);
+        // charges
+        data << (uint32) (item ? item->GetSpellCharges() : 0);
+        // durability
+        data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
+        // durability
+        data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
 
-        //[-ZERO] TODO not use vector for mail items since 1.12 doesn't support multiple items sending in mails
-        if ( (*itr)->items.size() > 0)
-        {
-            Item *item = pl->GetMItem((*itr)->items[0].item_guid);
-            // entry
-            data << (uint32) (item ? item->GetEntry() : 0);
-            
-            //[-ZERO] no other infos about enchantment in 1.12 [?]
-            //for(uint8 j = 0; j < MAX_INSPECTED_ENCHANTMENT_SLOT; ++j)
-            //{
-            //    // unsure
-            data << (uint32) (item ? item->GetEnchantmentCharges((EnchantmentSlot)PERM_ENCHANTMENT_SLOT) : 0);
-            //    // unsure
-            //    data << (uint32) (item ? item->GetEnchantmentDuration((EnchantmentSlot)j) : 0);
-            //    // unsure
-            //    data << (uint32) (item ? item->GetEnchantmentId((EnchantmentSlot)j) : 0);
-            //}
-
-            // can be negative
-            data << (uint32) (item ? item->GetItemRandomPropertyId() : 0);
-            // unk
-            data << (uint32) (item ? item->GetItemSuffixFactor() : 0);
-            // stack count
-            data << (uint8)  (item ? item->GetCount() : 0);
-            // charges
-            data << (uint32) (item ? item->GetSpellCharges() : 0);
-            // durability
-            data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
-            // durability
-            data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
-            // Gold
-            data << (uint32) (*itr)->money;
-            // Cash on delivery
-            data << (uint32) (*itr)->COD;
-            data << (uint32) (*itr)->checked;
-            // expire time
-            data << (float)  ((*itr)->expire_time-time(NULL))/DAY;
-            // mail template (MailTemplate.dbc)   
-            data << (uint32) (*itr)->mailTemplateId;
-        }
+        // Gold
+        data << (uint32) (*itr)->money;
+        // Cash on delivery
+        data << (uint32) (*itr)->COD;
+        data << (uint32) (*itr)->checked;
+        // expire time
+        data << (float)  ((*itr)->expire_time-time(NULL))/DAY;
+        // mail template (MailTemplate.dbc)   
+        data << (uint32) (*itr)->mailTemplateId;
 
         mails_count += 1;
     }
