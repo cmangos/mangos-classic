@@ -878,5 +878,5 @@ class SpellMgr
         SpellFacingFlagMap  mSpellFacingFlagMap;
 };
 
-#define spellmgr SpellMgr::Instance()
+#define sSpellMgr SpellMgr::Instance()
 #endif

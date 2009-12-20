@@ -573,7 +573,7 @@ bool ChatHandler::HandleDebugBattlegroundCommand(const char * /*args*/)
 bool ChatHandler::HandleDebugSpellCheckCommand(const char* /*args*/)
 {
     sLog.outString( "Check expected in code spell properties base at table 'spell_check' content...");
-    spellmgr.CheckUsedSpells("spell_check");
+    sSpellMgr.CheckUsedSpells("spell_check");
     return true;
 }
 

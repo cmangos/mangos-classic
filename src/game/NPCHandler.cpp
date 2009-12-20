@@ -178,9 +178,9 @@ void WorldSession::SendTrainerList( uint64 guid, const std::string& strTitle )
 
         ++count;
 
-        bool primary_prof_first_rank = spellmgr.IsPrimaryProfessionFirstRankSpell(triggerSpell);
+        bool primary_prof_first_rank = sSpellMgr.IsPrimaryProfessionFirstRankSpell(triggerSpell);
 
-        SpellChainNode const* chain_node = spellmgr.GetSpellChainNode(triggerSpell);
+        SpellChainNode const* chain_node = sSpellMgr.GetSpellChainNode(triggerSpell);
         //uint32 req_spell = spellmgr.GetSpellChainNode(tSpell->spell)->req;
 
         data << uint32(tSpell->spell);
