@@ -872,38 +872,6 @@ void SpellMgr::LoadSpellAffects()
     }
 }
 
-bool SpellMgr::IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, uint8 effectId, uint64 familyFlags) const
-{
-    // false for spellInfo == NULL
-    if (!spellInfo)
-        return false;
-
-    SpellEntry const *affect_spell = sSpellStore.LookupEntry(spellId);
-    // false for affect_spell == NULL
-    if (!affect_spell)
-        return false;
-
-    // False if spellFamily not equal
-    if (affect_spell->SpellFamilyName != spellInfo->SpellFamilyName)
-        return false;
-
-    // If familyFlags == 0
-    if (!familyFlags)
-    {
-        // Get it from spellAffect table
-        familyFlags = GetSpellAffectMask(spellId,effectId);
-        // false if familyFlags == 0
-        if (!familyFlags)
-            return false;
-    }
-
-    // true
-    if (familyFlags & spellInfo->SpellFamilyFlags)
-        return true;
-
-    return false;
-}
-
 void SpellMgr::LoadSpellProcEvents()
 {
     mSpellProcEventMap.clear();                             // need for reload case

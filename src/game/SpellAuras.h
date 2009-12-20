@@ -215,6 +215,8 @@ class MANGOS_DLL_SPEC Aura
         void UpdateAuraDuration();
         void SendAuraDurationForCaster(Player* caster);
 
+        SpellModifier *getAuraSpellMod() {return m_spellmod; }
+
         uint64 const& GetCasterGUID() const { return m_caster_guid; }
         Unit* GetCaster() const;
         Unit* GetTarget() const { return m_target; }
@@ -290,6 +292,8 @@ class MANGOS_DLL_SPEC Aura
         DiminishingGroup getDiminishGroup() const { return m_AuraDRGroup; }
 
         void TriggerSpell();
+
+        bool isAffectedOnSpell(SpellEntry const *spell) const;
     protected:
         Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
 
