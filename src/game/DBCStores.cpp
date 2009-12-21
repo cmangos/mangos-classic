@@ -476,38 +476,19 @@ int32 GetAreaFlagByAreaID(uint32 area_id)
 
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
 {
-   // int32 areaflag = GetAreaFlagByAreaID(area_id);
-   // if(areaflag < 0)
-   //     return NULL;
-
-   // return sAreaStore.LookupEntry(areaflag );
-   // NOTE : GetMethod for MANGOS_DLL
     return sAreaStore.LookupEntry(area_id); 
 }
 
 AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag,uint32 map_id)
 {
-    // alternative method ( not checked )
-    //uint32 AreaID = sAreaIDByAreaFlag.find(area_flag)->first;
-    //if(MapEntry const* mapEntry = sMapStore.LookupEntry(map_id))
-    //{
-    //    AreaTableEntry const* AreaEntry = GetAreaEntryByAreaID(mapEntry->linked_zone);
-    //    if(AreaID == AreaEntry->ID)
-    //        return AreaEntry;
-    //}
-
+    // 1.12.1 areatable have duplicates for areaflag
     for (uint32 i=0 ; i<=sAreaStore.GetNumRows() ; i++)
-    {
-        AreaTableEntry const* AreaEntry = sAreaStore.LookupEntry(i);
-        if (AreaEntry )
-        {
-            MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
-            //TODO check the condition
-            if ((AreaEntry->exploreFlag == area_flag && AreaEntry->mapid == map_id) || 
-                (AreaEntry == GetAreaEntryByAreaID(mapEntry->linked_zone)))
-            return AreaEntry;
-        }
-    }
+        if (AreaTableEntry const* AreaEntry = sAreaStore.LookupEntry(i))
+            if (AreaEntry->exploreFlag == area_flag && AreaEntry->mapid == map_id)
+                return AreaEntry;
+
+    if(MapEntry const* mapEntry = sMapStore.LookupEntry(map_id))
+        return GetAreaEntryByAreaID(mapEntry->linked_zone);
 
     return NULL;
 }
