@@ -23,9 +23,7 @@
 
 enum AURA_FLAGS
 {
-    AFLAG_NEGATIVE          = 0x09,
-    AFLAG_POSITIVE          = 0x1F,
-    AFLAG_MASK              = 0xFF
+    AFLAG_MASK              = 0x09
 };
 
 //m_schoolAbsorb

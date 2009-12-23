@@ -961,17 +961,14 @@ bool Aura::_RemoveAura()
 
 void Aura::SetAuraFlag(uint32 slot, bool add)
 {
-    uint32 index    = slot >> 3;//slot / 4; [-ZERO]
-    uint32 byte     = (slot & 7) << 2;//(slot % 4) * 8;
+    uint32 index    = slot >> 3;
+    uint32 byte     = (slot & 7) << 2;
     uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURAFLAGS + index);
-    val &= ~((uint32)AFLAG_MASK << byte);
-    if(add)
-    {
-        if (IsPositive())
-            val |= ((uint32)AFLAG_POSITIVE << byte);
-        else
-            val |= ((uint32)AFLAG_NEGATIVE << byte);
-    }
+    if (add)
+        val |= ((uint32)AFLAG_MASK << byte);
+    else
+        val &= ~((uint32)AFLAG_MASK << byte);
+
     m_target->SetUInt32Value(UNIT_FIELD_AURAFLAGS + index, val);
 }
 
