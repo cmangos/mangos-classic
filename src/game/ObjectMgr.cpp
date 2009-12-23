@@ -4048,18 +4048,9 @@ void ObjectMgr::LoadInstanceTemplate()
             sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad mapid %d for template!", temp->map);
             continue;
         }
-        else if(!entry->HasResetTime())
-            continue;
 
-        if(temp->reset_delay == 0)
-        {
-            /* [-ZERO]
-            // use defaults from the DBC
-            if (entry->resetTimeRaid && entry->map_type == MAP_RAID)
-            {
-                temp->reset_delay = entry->resetTimeRaid / DAY;
-            } */
-        }
+        if(!temp->reset_delay)
+            continue;
 
         // the reset_delay must be at least one day
         temp->reset_delay = std::max((uint32)1, (uint32)(temp->reset_delay * sWorld.getRate(RATE_INSTANCE_RESET_TIME)));

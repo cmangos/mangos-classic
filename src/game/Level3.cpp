@@ -5647,8 +5647,9 @@ bool ChatHandler::HandleInstanceListBindsCommand(const char* /*args*/)
         std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
         if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
         {
-            PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
-                itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no");
+            PSendSysMessage("map: %d (%s) inst: %d perm: %s canReset: %s TTR: %s",
+                itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no",
+                save->CanReset() ? "yes" : "no", timeleft.c_str());
         }
         else
             PSendSysMessage("bound for a nonexistant map %u", itr->first);
@@ -5668,9 +5669,9 @@ bool ChatHandler::HandleInstanceListBindsCommand(const char* /*args*/)
 
             if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
             {
-                PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
-                    itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no");
-            }
+                PSendSysMessage("map: %d (%s) inst: %d perm: %s canReset: %s TTR: %s",
+                    itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no",
+                    save->CanReset() ? "yes" : "no", timeleft.c_str());}
             else
                 PSendSysMessage("bound for a nonexistant map %u", itr->first);
             counter++;
@@ -5716,8 +5717,9 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char* args)
             std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
             if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
             {
-                PSendSysMessage("unbinding map: %d (%s) inst: %d perm: %s diff: %s canReset: %s TTR: %s",
-                    itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no");
+                PSendSysMessage("unbinding map: %d (%s) inst: %d perm: %s canReset: %s TTR: %s",
+                    itr->first, entry->name[m_session->GetSessionDbcLocale()], save->GetInstanceId(), itr->second.perm ? "yes" : "no",
+                    save->CanReset() ? "yes" : "no", timeleft.c_str());
             }
             else
                 PSendSysMessage("bound for a nonexistant map %u - try to unbind anyway", itr->first);

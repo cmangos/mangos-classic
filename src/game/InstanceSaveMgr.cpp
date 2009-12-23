@@ -445,15 +445,12 @@ void InstanceSaveManager::LoadResetTimes()
     // add the global reset times to the priority queue
     for(uint32 i = 0; i < sInstanceTemplate.MaxEntry; i++)
     {
-        InstanceTemplate const* temp = sObjectMgr.GetInstanceTemplate(i);
-        if(!temp) continue;
         // only raid maps have a global reset time
-        const MapEntry* entry = sMapStore.LookupEntry(temp->map);
-        if(!entry || !entry->HasResetTime())
+        InstanceTemplate const* temp = sObjectMgr.GetInstanceTemplate(i);
+        if(!temp || !temp->reset_delay)
             continue;
 
         uint32 period = temp->reset_delay * DAY;
-        assert(period != 0);
         time_t t = m_resetTimeByMapId[temp->map];
         if(!t)
         {
