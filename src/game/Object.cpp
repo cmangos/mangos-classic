@@ -364,14 +364,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
             if (GetUInt32Value(GAMEOBJECT_ARTKIT))
                 updateMask->SetBit(GAMEOBJECT_ARTKIT);
         }
-        else if (isType(TYPEMASK_UNIT))
-        {
-            if( ((Unit*)this)->HasAuraState(AURA_STATE_CONFLAGRATE))
-            {
-                IsPerCasterAuraState = true;
-                updateMask->SetBit(UNIT_FIELD_AURASTATE);
-            }
-        }
     }
     else                                                    // case UPDATETYPE_VALUES
     {
@@ -383,14 +375,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
             }
             updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);
             updateMask->SetBit(GAMEOBJECT_ANIMPROGRESS);
-        }
-        else if (isType(TYPEMASK_UNIT))
-        {
-            if( ((Unit*)this)->HasAuraState(AURA_STATE_CONFLAGRATE))
-            {
-                IsPerCasterAuraState = true;
-                updateMask->SetBit(UNIT_FIELD_AURASTATE);
-            }
         }
     }
 
@@ -409,19 +393,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                 // remove custom flag before send
                 if( index == UNIT_NPC_FLAGS )
                     *data << uint32(m_uint32Values[ index ] & ~UNIT_NPC_FLAG_GUARD);
-                else if (index == UNIT_FIELD_AURASTATE)
-                {
-                    if(IsPerCasterAuraState)
-                    {
-                        // IsPerCasterAuraState set if related pet caster aura state set already
-                        if (((Unit*)this)->HasAuraStateForCaster(AURA_STATE_CONFLAGRATE,target->GetGUID()))
-                            *data << m_uint32Values[ index ];
-                        else
-                            *data << (m_uint32Values[ index ] & ~(1 << (AURA_STATE_CONFLAGRATE-1)));
-                    }
-                    else
-                        *data << m_uint32Values[ index ];
-                }
                 // FIXME: Some values at server stored in float format but must be sent to client in uint32 format
                 else if(index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME)
                 {

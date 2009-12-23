@@ -813,16 +813,6 @@ void Aura::_AddAura()
         // Update Seals information
         if( IsSealSpell(GetSpellProto()) )
             m_target->ModifyAuraState(AURA_STATE_JUDGEMENT, true);
-
-        // Conflagrate aura state
-        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags & 4))
-            m_target->ModifyAuraState(AURA_STATE_CONFLAGRATE, true);
-
-        if(GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
-            && (GetSpellProto()->SpellFamilyFlags == 0x40 || GetSpellProto()->SpellFamilyFlags == 0x10))
-        {
-            m_target->ModifyAuraState(AURA_STATE_SWIFTMEND, true);
-        }
     }
 }
 
@@ -912,17 +902,6 @@ bool Aura::_RemoveAura()
             case SPELLFAMILY_PALADIN:
                 if (IsSealSpell(m_spellProto))
                     removeState = AURA_STATE_JUDGEMENT;     // Update Seals information
-                break;
-            case SPELLFAMILY_WARLOCK:
-                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000004))
-                    removeState = AURA_STATE_CONFLAGRATE;   // Conflagrate aura state
-                break;
-            case SPELLFAMILY_DRUID:
-                if(m_spellProto->SpellFamilyFlags & 0x50)
-                {
-                    removeFamilyFlag = 0x50;
-                    removeState = AURA_STATE_SWIFTMEND;     // Swiftmend aura state
-                }
                 break;
         }
 
@@ -1691,11 +1670,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     m_target->RemoveAurasDueToSpell(spellId);
                     return;
                 }
-                // Victorious
-                case 32216:
-                    if(m_target->getClass()==CLASS_WARRIOR)
-                        m_target->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, apply);
-                    return;
             }
             break;
         }
@@ -3157,17 +3131,6 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
 
     m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,misc,apply);
 
-    // special cases
-    switch(misc)
-    {
-        case MECHANIC_INVULNERABILITY:
-            m_target->ModifyAuraState(AURA_STATE_FORBEARANCE,apply);
-            break;
-        case MECHANIC_SHIELD:
-            m_target->ModifyAuraState(AURA_STATE_WEAKENED_SOUL,apply);
-            break;
-    }
-
     // Bestial Wrath
     if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1680)
     {
@@ -3520,12 +3483,6 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             }
             case SPELLFAMILY_ROGUE:
             {
-                // Deadly poison aura state
-                if((m_spellProto->SpellFamilyFlags & UI64LIT(0x10000)) && m_spellProto->SpellVisual==5100)
-                {
-                    m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,true);
-                    return;
-                }
                 // Rupture
                 if (m_spellProto->SpellFamilyFlags & UI64LIT(0x000000000000100000))
                 {
@@ -3597,35 +3554,6 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
         // Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
         if(m_spellProto->Id == 41917)
             m_target->CastSpell(m_target, 41915, true);
-
-        switch (m_spellProto->SpellFamilyName)
-        {
-            case SPELLFAMILY_ROGUE:
-            {
-                // Deadly poison aura state
-                if((m_spellProto->SpellFamilyFlags & UI64LIT(0x10000)) && m_spellProto->SpellVisual==5100)
-                {
-                    // current aura already removed, search present of another
-                    bool found = false;
-                    Unit::AuraList const& auras = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                    for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-                    {
-                        SpellEntry const* itr_spell = (*itr)->GetSpellProto();
-                        if(itr_spell && itr_spell->SpellFamilyName==SPELLFAMILY_ROGUE && (itr_spell->SpellFamilyFlags & UI64LIT(0x10000)) && itr_spell->SpellVisual==5100)
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    // this has been last deadly poison aura
-                    if(!found)
-                        m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,false);
-                }
-                break;
-            }
-            default:
-                break;
-        }
     }
 }
 
@@ -3691,7 +3619,8 @@ void Aura::HandleAuraModResistance(bool apply, bool /*Real*/)
         m_spellProto->SpellFamilyName == SPELLFAMILY_DRUID &&
         m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000400))
     {
-        m_target->ModifyAuraState(AURA_STATE_FAERIE_FIRE,apply);
+        m_target->ApplySpellDispelImmunity(m_spellProto, DISPEL_STEALTH, apply);
+        m_target->ApplySpellDispelImmunity(m_spellProto, DISPEL_INVISIBILITY, apply);
     }
 }
 

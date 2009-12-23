@@ -340,21 +340,13 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x10000000000))
                 {
                     damage = uint32(damage * m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
-                    m_caster->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, false);
                 }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
             {
-                // Incinerate Rank 1 & 2
-                if ((m_spellInfo->SpellFamilyFlags & UI64LIT(0x00004000000000)) && m_spellInfo->SpellIconID==2128)
-                {
-                    // Incinerate does more dmg (dmg*0.25) if the target is Immolated.
-                    if(unitTarget->HasAuraState(AURA_STATE_CONFLAGRATE))
-                        damage += int32(damage*0.25);
-                }
                 // Conflagrate - consumes Immolate
-                else if (m_spellInfo->TargetAuraState == AURA_STATE_CONFLAGRATE)
+                if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000200))
                 {
                     // for caster applied auras only
                     Unit::AuraList const &mPeriodic = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
@@ -1378,32 +1370,6 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
                 return;
             }
-            // Kill command
-            if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x00080000000000))
-            {
-                if (m_caster->getClass()!=CLASS_HUNTER)
-                    return;
-
-                // clear hunter crit aura state
-                m_caster->ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE,false);
-
-                // additional damage from pet to pet target
-                Pet* pet = m_caster->GetPet();
-                if (!pet || !pet->getVictim())
-                    return;
-
-                uint32 spell_id = 0;
-                switch (m_spellInfo->Id)
-                {
-                    case 34026: spell_id = 34027; break;    // rank 1
-                    default:
-                        sLog.outError("Spell::EffectDummy: Spell %u not handled in KC",m_spellInfo->Id);
-                        return;
-                }
-
-                pet->CastSpell(pet->getVictim(), spell_id, true);
-                return;
-            }
 
             switch(m_spellInfo->Id)
             {
@@ -2218,7 +2184,7 @@ void Spell::EffectHeal( uint32 /*i*/ )
             addhealth += damageAmount;
         }
         // Swiftmend - consumes Regrowth or Rejuvenation
-        else if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND && unitTarget->HasAuraState(AURA_STATE_SWIFTMEND))
+        else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellFamilyFlags & UI64LIT(0x200000000))
         {
             Unit::AuraList const& RejorRegr = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
             // find most short by duration
@@ -3966,30 +3932,6 @@ void Spell::EffectWeaponDmg(uint32 i)
             {
                 customBonusDamagePercentMod = true;
                 bonusDamagePercentMod = 2.5f;               // 250%
-            }
-            // Mutilate (for each hand)
-            else if(m_spellInfo->SpellFamilyFlags & UI64LIT(0x600000000))
-            {
-                bool found = false;
-                // fast check
-                if(unitTarget->HasAuraState(AURA_STATE_DEADLY_POISON))
-                    found = true;
-                // full aura scan
-                else
-                {
-                    Unit::AuraMap const& auras = unitTarget->GetAuras();
-                    for(Unit::AuraMap::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
-                    {
-                        if(itr->second->GetSpellProto()->Dispel == DISPEL_POISON)
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-
-                if(found)
-                    totalDamagePercentMod *= 1.5f;          // 150% if poisoned
             }
             break;
         }

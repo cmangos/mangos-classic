@@ -2190,12 +2190,8 @@ void Spell::cast(bool skipCheck)
         case SPELLFAMILY_PRIEST:
         {
             // Power Word: Shield
-/*[ZERO]            if(m_spellInfo->CasterAuraStateNot==AURA_STATE_WEAKENED_SOUL || m_spellInfo->TargetAuraStateNot==AURA_STATE_WEAKENED_SOUL)
+            if(m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000001))
                 AddPrecastSpell(6788);                      // Weakened Soul 
-            // Prayer of Mending (jump animation), we need formal caster instead original for correct animation
-            else */ 
-            if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000002000000000))
-                AddTriggeredSpell(41637);
 
             switch(m_spellInfo->Id)
             {
@@ -2212,9 +2208,9 @@ void Spell::cast(bool skipCheck)
         }
         case SPELLFAMILY_PALADIN:
         {
-            // Divine Shield, Divine Protection, Blessing of Protection or Avenging Wrath
-           /*[-ZERO] if(m_spellInfo->CasterAuraStateNot==AURA_STATE_FORBEARANCE || m_spellInfo->TargetAuraStateNot==AURA_STATE_FORBEARANCE)
-                AddPrecastSpell(25771);                     // Forbearance  */       
+            // Divine Shield, Divine Protection, Blessing of Protection
+            if(m_spellInfo->Mechanic == MECHANIC_INVULNERABILITY && m_spellInfo->Id != 25771)
+                AddPrecastSpell(25771);                     // Forbearance
           break;
         }
         default:
@@ -3308,10 +3304,6 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         if(non_caster_target)
         {
-            // target state requirements (apply to non-self only), to allow cast affects to self like Dirty Deeds
-            if(m_spellInfo->TargetAuraState && !target->HasAuraStateForCaster(AuraState(m_spellInfo->TargetAuraState),m_caster->GetGUID()))
-                return SPELL_FAILED_TARGET_AURASTATE;
-
             // Not allow casting on flying player
             if (target->isInFlight())
                 return SPELL_FAILED_BAD_TARGETS;
@@ -3628,6 +3620,30 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                     if(m_targets.getUnitTarget()->GetHealth() > m_targets.getUnitTarget()->GetMaxHealth()*0.2)
                         return SPELL_FAILED_BAD_TARGETS;
+                }
+                // Conflagrate
+                else if(m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000200))
+                {
+                    if (!m_targets.getUnitTarget())
+                        return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+
+                    // for caster applied auras only
+                    bool found = false;
+                    Unit::AuraList const &mPeriodic = m_targets.getUnitTarget()->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for(Unit::AuraList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
+                    {
+                        if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+                            (*i)->GetCasterGUID()==m_caster->GetGUID() &&
+                            // Immolate
+                            ((*i)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000004)))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found)
+                        return SPELL_FAILED_TARGET_AURASTATE;
                 }
                 break;
             }
