@@ -302,6 +302,7 @@ class MANGOS_DLL_SPEC Aura
 
         // must be called only from Aura*::Update
         void PeriodicTick();
+        void PeriodicDummyTick();
 
         void ReapplyAffectedPassiveAuras(Unit* target, SpellModifier const& spellmod);
 

@@ -1568,6 +1568,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     {
         switch(GetId())
         {
+            case 7057:                                      // Haunting Spirits
+                // expected to tick with 30 sec period (tick part see in Aura::PeriodicTick)
+                m_isPeriodic = true;
+                m_modifier.periodictime = 30*IN_MILISECONDS;
+                m_periodicTimer = m_modifier.periodictime;
+                return;
             case 13139:                                     // net-o-matic
                 // root to self part of (root_target->charge->root_self sequence
                 if(caster)
@@ -5228,6 +5234,26 @@ void Aura::PeriodicTick()
             pCaster->SpellNonMeleeDamageLog(m_target, GetId(), gain);
             break;
         }
+        // Here tick dummy auras
+        case SPELL_AURA_DUMMY:                              // some spells have dummy aura
+        {
+            PeriodicDummyTick();
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void Aura::PeriodicDummyTick()
+{
+    SpellEntry const* spell = GetSpellProto();
+    switch (spell->Id)
+    {
+        case 7057:                                  // Haunting Spirits
+            if (roll_chance_i(33))
+                m_target->CastSpell(m_target,7067,true,NULL,this);
+            return;
         default:
             break;
     }
