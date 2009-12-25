@@ -1633,6 +1633,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 caster->CastSpell(m_target, finalSpelId, true, NULL, this);
             return;
         }
+
+        switch(GetId())
+        {
+            case 28169:                                     // Mutating Injection
+            {
+                // Poison Cloud
+                m_target->CastSpell(m_target, 28240, true, NULL, this);
+                return;
+            }
+        }
     }
 
     // AT APPLY & REMOVE
