@@ -5772,8 +5772,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
         ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
 
-    uint32 triggered_spell_id = auraSpellInfo->EffectTriggerSpell[triggeredByAura->GetEffIndex()];
-    Unit* target = !(procFlags & PROC_FLAG_HEAL) && IsPositiveSpell(triggered_spell_id) ? this : pVictim;
+    uint32 trigger_spell_id = auraSpellInfo->EffectTriggerSpell[triggeredByAura->GetEffIndex()];
+    Unit* target = !(procFlags & PROC_FLAG_HEAL) && IsPositiveSpell(trigger_spell_id) ? this : pVictim;
     int32 basepoints0 = 0;
 
     switch(auraSpellInfo->SpellFamilyName)
@@ -5785,90 +5785,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 // Aegis of Preservation
                 case 23780:
                     //Aegis Heal (instead non-existed triggered spell)
-                    triggered_spell_id = 23781;
+                    trigger_spell_id = 23781;
                     target = this;
                     break;
-                // Elune's Touch (moonkin mana restore)
-                case 24905:
-                {
-                    // Elune's Touch (instead non-existed triggered spell)
-                    triggered_spell_id = 33926;
-                    basepoints0 = int32(0.3f * GetTotalAttackPowerValue(BASE_ATTACK));
-                    target = this;
-                    break;
-                }
-                // Enlightenment
-                case 29601:
-                {
-                    // only for cast with mana price
-                    if(!procSpell || procSpell->powerType!=POWER_MANA || procSpell->manaCost==0 && procSpell->ManaCostPercentage==0 && procSpell->manaCostPerlevel==0)
-                        return false;
-                    break;                                  // fall through to normal cast
-                }
-                // Health Restore
-                case 33510:
-                {
-                    // at melee hit call std triggered spell
-                    if(procFlags & PROC_FLAG_HIT_MELEE)
-                        break;                              // fall through to normal cast
-
-                    // Mark of Conquest - else (at range hit) called custom case
-                    triggered_spell_id = 39557;
-                    target = this;
-                    break;
-                }
-                // Shaleskin
-                case 36576:
-                    return true;                            // nothing to do
-                // Forgotten Knowledge (Blade of Wizardry)
-                case 38319:
-                    // only for harmful enemy targeted spell
-                    if(!pVictim || pVictim==this || !procSpell || IsPositiveSpell(procSpell->Id))
-                        return false;
-                    break;                              // fall through to normal cast
-                // Aura of Wrath (Darkmoon Card: Wrath trinket bonus)
-                case 39442:
-                {
-                    // proc only at non-crit hits
-                    if(procFlags & (PROC_FLAG_CRIT_MELEE|PROC_FLAG_CRIT_RANGED|PROC_FLAG_CRIT_SPELL))
-                        return false;
-                    break;                                  // fall through to normal cast
-                }
-                // Augment Pain (Timbal's Focusing Crystal trinket bonus)
-                case 45054:
-                {
-                    if(!procSpell)
-                        return false;
-
-                    //only periodic damage can trigger spell
-                    bool found = false;
-                    for(int j = 0; j < 3; ++j)
-                    {
-                        if( procSpell->EffectApplyAuraName[j]==SPELL_AURA_PERIODIC_DAMAGE         ||
-                            procSpell->EffectApplyAuraName[j]==SPELL_AURA_PERIODIC_DAMAGE_PERCENT ||
-                            procSpell->EffectApplyAuraName[j]==SPELL_AURA_PERIODIC_LEECH          )
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if(!found)
-                        return false;
-
-                    break;                                  // fall through to normal cast
-                }
-                // Evasive Maneuvers (Commendation of Kael'thas)
-                case 45057:
-                {
-                    // damage taken that reduces below 35% health
-                    // does NOT mean you must have been >= 35% before
-                    if (int32(GetHealth())-int32(damage) >= int32(GetMaxHealth()*0.35f))
-                        return false;
-                    break;                                  // fall through to normal cast
-                }
             }
 
-            switch(triggered_spell_id)
+            switch(trigger_spell_id)
             {
                 // Setup
                 case 15250:
@@ -5880,24 +5802,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     // continue normal case
                     break;
                 }
-                // Shamanistic Rage triggered spell
-                case 30824:
-                    basepoints0 = int32(GetTotalAttackPowerValue(BASE_ATTACK)*triggeredByAura->GetModifier()->m_amount/100);
-                    break;
             }
             break;
         }
         case SPELLFAMILY_MAGE:
         {
-            switch(auraSpellInfo->SpellIconID)
-            {
-                // Blazing Speed
-                case 2127:
-                    //Blazing Speed (instead non-existed triggered spell)
-                    triggered_spell_id = 31643;
-                    target = this;
-                    break;
-            }
             switch(auraSpellInfo->Id)
             {
                 // Persistent Shield (Scarab Brooch)
@@ -5908,22 +5817,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             break;
         }
         case SPELLFAMILY_WARRIOR:
-        {
-            //Rampage
-            if((auraSpellInfo->SpellFamilyFlags & UI64LIT(0x100000)) && auraSpellInfo->SpellIconID==2006)
-            {
-                //all ranks have effect[0]==AURA (Proc Trigger Spell, non-existed)
-                //and effect[1]==TriggerSpell
-                if(auraSpellInfo->Effect[1]!=SPELL_EFFECT_TRIGGER_SPELL)
-                {
-                    sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have wrong effect in RM",triggeredByAura->GetSpellProto()->Id);
-                    return false;
-                }
-                triggered_spell_id = auraSpellInfo->EffectTriggerSpell[1];
-                break;                                      // fall through to normal cast
-            }
             break;
-        }
         case SPELLFAMILY_WARLOCK:
         {
             // Pyroclasm
@@ -5944,7 +5838,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     return false;
 
                 // Pyroclasm (instead non-existed triggered spell)
-                triggered_spell_id = 18093;
+                trigger_spell_id = 18093;
                 target = pVictim;
                 break;
             }
@@ -5978,9 +5872,9 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             {
                 switch (triggeredByAura->GetSpellProto()->Id)
                 {
-                    case 27811: triggered_spell_id = 27813; break;
-                    case 27815: triggered_spell_id = 27817; break;
-                    case 27816: triggered_spell_id = 27818; break;
+                    case 27811: trigger_spell_id = 27813; break;
+                    case 27815: trigger_spell_id = 27817; break;
+                    case 27816: trigger_spell_id = 27818; break;
                     default:
                         sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in BR",triggeredByAura->GetSpellProto()->Id);
                         return false;
@@ -6001,19 +5895,17 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 switch(triggeredByAura->GetSpellProto()->Id)
                 {
                     case 18137:
-                        triggered_spell_id = 28377; break;  // Rank 1
+                        trigger_spell_id = 28377; break;    // Rank 1
                     case 19308:
-                        triggered_spell_id = 28378; break;  // Rank 2
+                        trigger_spell_id = 28378; break;    // Rank 2
                     case 19309:
-                        triggered_spell_id = 28379; break;  // Rank 3
+                        trigger_spell_id = 28379; break;    // Rank 3
                     case 19310:
-                        triggered_spell_id = 28380; break;  // Rank 4
+                        trigger_spell_id = 28380; break;    // Rank 4
                     case 19311:
-                        triggered_spell_id = 28381; break;  // Rank 5
+                        trigger_spell_id = 28381; break;    // Rank 5
                     case 19312:
-                        triggered_spell_id = 28382; break;  // Rank 6
-                    case 25477:
-                        triggered_spell_id = 28385; break;  // Rank 7
+                        trigger_spell_id = 28382; break;    // Rank 6
                     default:
                         sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in SG",triggeredByAura->GetSpellProto()->Id);
                         return false;
@@ -6033,113 +5925,18 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     if (triggeredByAura->GetModifier()->m_amount == 0)
                         return false;
                     basepoints0 = triggeredByAura->GetModifier()->m_amount * GetMaxHealth() / 100;
-                    triggered_spell_id = 34299;
+                    trigger_spell_id = 34299;
                     break;
                 };
-                // Druid Forms Trinket (Druid Tier5 Trinket, triggers different spells per Form)
-                case 37336:
-                {
-                    switch(m_form)
-                    {
-                        case FORM_BEAR:
-                        case FORM_DIREBEAR:
-                            triggered_spell_id=37340; break;// Ursine Blessing
-                        case FORM_CAT:
-                            triggered_spell_id=37341; break;// Feline Blessing
-                        case FORM_TREE:
-                            triggered_spell_id=37342; break;// Slyvan Blessing
-                        case FORM_MOONKIN:
-                            triggered_spell_id=37343; break;// Lunar Blessing
-                        case FORM_NONE:
-                            triggered_spell_id=37344; break;// Cenarion Blessing (for caster form, except FORM_MOONKIN)
-                        default:
-                            return false;
-                    }
-
-                    target = this;
-                    break;
-                }
             }
             break;
         }
         case SPELLFAMILY_ROGUE:
-        {
-            if(auraSpellInfo->SpellFamilyFlags == UI64LIT(0x0000000000000000))
-            {
-                switch(auraSpellInfo->SpellIconID)
-                {
-                    // Combat Potency
-                    case 2260:
-                    {
-                        // skip non offhand attacks
-                        if(attackType!=OFF_ATTACK)
-                            return false;
-                        break;                                  // fall through to normal cast
-                    }
-                }
-            }
             break;
-        }
         case SPELLFAMILY_PALADIN:
         {
             if(auraSpellInfo->SpellFamilyFlags == UI64LIT(0x00000000))
             {
-                switch(auraSpellInfo->Id)
-                {
-                    // Lightning Capacitor
-                    case 37657:
-                    {
-                        // trinket ProcTriggerSpell but for safe checks for player
-                        if(!castItem || !pVictim || !pVictim->isAlive() || GetTypeId()!=TYPEID_PLAYER)
-                            return false;
-
-                        if(((Player*)this)->HasSpellCooldown(37657))
-                            return false;
-
-                        // stacking
-                        CastSpell(this, 37658, true, castItem, triggeredByAura);
-                        // 2.5s cooldown before it can stack again, current system allow 1 sec step in cooldown
-                        ((Player*)this)->AddSpellCooldown(37657,0,time(NULL)+(roll_chance_i(50) ? 2 : 3));
-
-                        // counting
-                        uint32 count = 0;
-                        AuraList const& dummyAura = GetAurasByType(SPELL_AURA_DUMMY);
-                        for(AuraList::const_iterator itr = dummyAura.begin(); itr != dummyAura.end(); ++itr)
-                            if((*itr)->GetId()==37658)
-                                ++count;
-
-                        // release at 3 aura in stack
-                        if(count <= 2)
-                            return true;                    // main triggered spell casted anyway
-
-                        RemoveAurasDueToSpell(37658);
-                        CastSpell(pVictim, 37661, true, castItem, triggeredByAura);
-                        return true;
-                    }
-                    // Healing Discount
-                    case 37705:
-                        // Healing Trance (instead non-existed triggered spell)
-                        triggered_spell_id = 37706;
-                        target = this;
-                        break;
-                    // HoTs on Heals (Fel Reaver's Piston trinket)
-                    case 38299:
-                    {
-                        // at direct heal effect
-                        if(!procSpell || !IsSpellHaveEffect(procSpell,SPELL_EFFECT_HEAL))
-                            return false;
-
-                        // single proc at time
-                        AuraList const& scAuras = GetSingleCastAuras();
-                        for(AuraList::const_iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
-                            if((*itr)->GetId()==triggered_spell_id)
-                                return false;
-
-                        // positive cast at victim instead self
-                        target = pVictim;
-                        break;
-                    }
-                }
                 switch(auraSpellInfo->SpellIconID)
                 {
                     case 241:
@@ -6165,8 +5962,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                                             case 25914: originalSpellId = 20473; break;
                                             case 25913: originalSpellId = 20929; break;
                                             case 25903: originalSpellId = 20930; break;
-                                            case 27175: originalSpellId = 27174; break;
-                                            case 33074: originalSpellId = 33072; break;
                                             default:
                                                 sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in HShock",procSpell->Id);
                                                 return false;
@@ -6185,7 +5980,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                                 int32 percent = auraSpellInfo->EffectBasePoints[1]+1;
 
                                 basepoints0 = originalSpell->manaCost*percent/100;
-                                triggered_spell_id = 20272;
+                                trigger_spell_id = 20272;
                                 target = this;
                                 break;
                             }
@@ -6207,23 +6002,20 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                         switch(triggeredByAura->GetSpellProto()->Id)
                         {
                             case 20186:
-                                triggered_spell_id = 20268; // Rank 1
+                                trigger_spell_id = 20268;   // Rank 1
                                 break;
                             case 20354:
-                                triggered_spell_id = 20352; // Rank 2
+                                trigger_spell_id = 20352;   // Rank 2
                                 break;
                             case 20355:
-                                triggered_spell_id = 20353; // Rank 3
-                                break;
-                            case 27164:
-                                triggered_spell_id = 27165; // Rank 4
+                                trigger_spell_id = 20353;   // Rank 3
                                 break;
                             default:
                                 sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in JoW",triggeredByAura->GetSpellProto()->Id);
                                 return false;
                         }
 
-                        pVictim->CastSpell(pVictim,triggered_spell_id,true,castItem,triggeredByAura,GetGUID());
+                        pVictim->CastSpell(pVictim,trigger_spell_id,true,castItem,triggeredByAura,GetGUID());
                         return true;                        // no hidden cooldown
                     }
                     //Judgement of Light
@@ -6236,48 +6028,28 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                         switch(triggeredByAura->GetSpellProto()->Id)
                         {
                             case 20185:
-                                triggered_spell_id = 20267; // Rank 1
+                                trigger_spell_id = 20267;   // Rank 1
                                 break;
                             case 20344:
-                                triggered_spell_id = 20341; // Rank 2
+                                trigger_spell_id = 20341;   // Rank 2
                                 break;
                             case 20345:
-                                triggered_spell_id = 20342; // Rank 3
+                                trigger_spell_id = 20342;   // Rank 3
                                 break;
                             case 20346:
-                                triggered_spell_id = 20343; // Rank 4
-                                break;
-                            case 27162:
-                                triggered_spell_id = 27163; // Rank 5
+                                trigger_spell_id = 20343;   // Rank 4
                                 break;
                             default:
                                 sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in JoL",triggeredByAura->GetSpellProto()->Id);
                                 return false;
                         }
-                        pVictim->CastSpell(pVictim,triggered_spell_id,true,castItem,triggeredByAura,GetGUID());
+                        pVictim->CastSpell(pVictim,trigger_spell_id,true,castItem,triggeredByAura,GetGUID());
                         return true;                        // no hidden cooldown
                     }
                 }
             }
             // custom check for proc spell
-            switch(auraSpellInfo->Id)
-            {
-                // Bonus Healing (item spell)
-                case 40971:
-                {
-                    if(!pVictim || !pVictim->isAlive())
-                        return false;
-
-                    // bonus if health < 50%
-                    if(pVictim->GetHealth() >= pVictim->GetMaxHealth()*triggeredByAura->GetModifier()->m_amount/100)
-                        return false;
-
-                    // cast at target positive spell
-                    target = pVictim;
-                    break;
-                }
-            }
-            switch(triggered_spell_id)
+            switch(trigger_spell_id)
             {
                 // Seal of Command
                 case 20424:
@@ -6301,14 +6073,14 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                             case 23551:                     // Lightning Shield - Tier2: 8 pieces proc shield
                             {
                                 // Lightning Shield (overwrite non existing triggered spell call in spell.dbc)
-                                triggered_spell_id = 23552;
+                                trigger_spell_id = 23552;
                                 target = pVictim;
                                 break;
                             }
                             case 23552:                     // Lightning Shield - trigger shield damage
                             {
                                 // Lightning Shield (overwrite non existing triggered spell call in spell.dbc)
-                                triggered_spell_id = 27635;
+                                trigger_spell_id = 27635;
                                 target = pVictim;
                                 break;
                             }
@@ -6322,41 +6094,11 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                             return false;
 
                         basepoints0 = procSpell->manaCost * 35/100;
-                        triggered_spell_id = 23571;
+                        trigger_spell_id = 23571;
                         target = this;
-                        break;
-                    }
-                    //Nature's Guardian
-                    case 2013:
-                    {
-                        if(GetTypeId()!=TYPEID_PLAYER)
-                            return false;
-
-                        // damage taken that reduces below 30% health
-                        // does NOT mean you must have been >= 30% before
-                        if (10*(int32(GetHealth())-int32(damage)) >= 3*GetMaxHealth())
-                            return false;
-
-                        triggered_spell_id = 31616;
-
-                        // need check cooldown now
-                        if( cooldown && ((Player*)this)->HasSpellCooldown(triggered_spell_id))
-                            return false;
-
-                        basepoints0 = triggeredByAura->GetModifier()->m_amount * GetMaxHealth() / 100;
-                        target = this;
-                        if(pVictim && pVictim->isAlive())
-                            pVictim->getThreatManager().modifyThreatPercent(this,-10);
                         break;
                     }
                 }
-            }
-
-            // Water Shield (we can't set cooldown for main spell - it's player casted spell
-            if((auraSpellInfo->SpellFamilyFlags & UI64LIT(0x0000002000000000)) && auraSpellInfo->SpellVisual==7358)
-            {
-                target = this;
-                break;
             }
 
             // Lightning Shield
@@ -6366,23 +6108,19 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 switch(triggeredByAura->GetSpellProto()->Id)
                 {
                     case   324:
-                        triggered_spell_id = 26364; break;  // Rank 1
+                        trigger_spell_id = 26364; break;    // Rank 1
                     case   325:
-                        triggered_spell_id = 26365; break;  // Rank 2
+                        trigger_spell_id = 26365; break;    // Rank 2
                     case   905:
-                        triggered_spell_id = 26366; break;  // Rank 3
+                        trigger_spell_id = 26366; break;    // Rank 3
                     case   945:
-                        triggered_spell_id = 26367; break;  // Rank 4
+                        trigger_spell_id = 26367; break;    // Rank 4
                     case  8134:
-                        triggered_spell_id = 26369; break;  // Rank 5
+                        trigger_spell_id = 26369; break;    // Rank 5
                     case 10431:
-                        triggered_spell_id = 26370; break;  // Rank 6
+                        trigger_spell_id = 26370; break;    // Rank 6
                     case 10432:
-                        triggered_spell_id = 26363; break;  // Rank 7
-                    case 25469:
-                        triggered_spell_id = 26371; break;  // Rank 8
-                    case 25472:
-                        triggered_spell_id = 26372; break;  // Rank 9
+                        trigger_spell_id = 26363; break;    // Rank 7
                     default:
                         sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in LShield",triggeredByAura->GetSpellProto()->Id);
                         return false;
@@ -6396,17 +6134,17 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     }
 
     // standard non-dummy case
-    if(!triggered_spell_id)
+    if(!trigger_spell_id)
     {
         sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",auraSpellInfo->Id,triggeredByAura->GetEffIndex());
         return false;
     }
 
-    SpellEntry const* triggerEntry = sSpellStore.LookupEntry(triggered_spell_id);
+    SpellEntry const* triggerEntry = sSpellStore.LookupEntry(trigger_spell_id);
 
     if(!triggerEntry)
     {
-        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have not existed EffectTriggered[%d]=%u, not handled custom case?",auraSpellInfo->Id,triggeredByAura->GetEffIndex(),triggered_spell_id);
+        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have not existed EffectTriggered[%d]=%u, not handled custom case?",auraSpellInfo->Id,triggeredByAura->GetEffIndex(),trigger_spell_id);
         return false;
     }
 
@@ -6414,7 +6152,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     if( m_extraAttacks && IsSpellHaveEffect(triggerEntry,SPELL_EFFECT_ADD_EXTRA_ATTACKS) )
         return false;
 
-    if( cooldown && GetTypeId()==TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(triggered_spell_id))
+    if( cooldown && GetTypeId()==TYPEID_PLAYER && ((Player*)this)->HasSpellCooldown(trigger_spell_id))
         return false;
 
     // default case
@@ -6422,12 +6160,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         return false;
 
     if(basepoints0)
-        CastCustomSpell(target,triggered_spell_id,&basepoints0,NULL,NULL,true,castItem,triggeredByAura);
+        CastCustomSpell(target,trigger_spell_id,&basepoints0,NULL,NULL,true,castItem,triggeredByAura);
     else
-        CastSpell(target,triggered_spell_id,true,castItem,triggeredByAura);
+        CastSpell(target,trigger_spell_id,true,castItem,triggeredByAura);
 
     if( cooldown && GetTypeId()==TYPEID_PLAYER )
-        ((Player*)this)->AddSpellCooldown(triggered_spell_id,0,time(NULL) + cooldown);
+        ((Player*)this)->AddSpellCooldown(trigger_spell_id,0,time(NULL) + cooldown);
 
     return true;
 }
