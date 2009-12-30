@@ -53,8 +53,8 @@
 #define NUM_DATABASES 3
 
 char remotes[NUM_REMOTES][MAX_REMOTE] = {
-    "git@github.com:mangos/mangos.git",
-    "git://github.com/mangos/mangos.git"        // used for fetch if present
+    "git@github.com:mangoszero/mangoszero.git",
+    "git://github.com/mangoszero/mangoszero.git"            // used for fetch if present
 };
 
 char remote_branch[MAX_REMOTE] = "master";
@@ -231,8 +231,10 @@ int get_rev(const char *from_msg)
 {
     // accept only the rev number format, not the sql update format
     char nr_str[256];
-    if(sscanf(from_msg, "[%[0123456789]]", nr_str) != 1) return 0;
-    if(from_msg[strlen(nr_str)+1] != ']') return 0;
+    if(sscanf(from_msg, "[z%[0123456789]]", nr_str) != 1) return 0;
+    // ("[z")+("]")-1
+    if(from_msg[strlen(nr_str)+2] != ']') return 0;
+
     return atoi(nr_str);
 }
 
@@ -259,7 +261,7 @@ bool find_rev()
         pclose(cmd_pipe);
     }
 
-    if(rev > 0) printf("Found [%d].\n", rev);
+    if(rev > 0) printf("Found [z%04d].\n", rev);
 
     return rev > 0;
 }
@@ -302,7 +304,7 @@ bool write_rev_nr()
 {
     printf("+ writing revision_nr.h\n");
     char rev_str[256];
-    sprintf(rev_str, "%d", rev);
+    sprintf(rev_str, "%04d", rev);
     std::string header = generateNrHeader(rev_str);
 
     char prefixed_file[MAX_PATH];
@@ -363,7 +365,7 @@ bool find_head_msg()
     {
         if(!allow_replace)
         {
-            printf("Last commit on HEAD is [%d]. Use -r to replace it with [%d].\n", head_rev, rev);
+            printf("Last commit on HEAD is [z%04d]. Use -r to replace it with [%z04d].\n", head_rev, rev);
             return false;
         }
 
@@ -389,7 +391,7 @@ bool amend_commit()
     if( (cmd_pipe = popen( cmd, "w" )) == NULL )
         return false;
 
-    fprintf(cmd_pipe, "[%d] %s", rev, head_message);
+    fprintf(cmd_pipe, "[z%04d] %s", rev, head_message);
     pclose(cmd_pipe);
     if(use_new_index && putenv(old_index_cmd) != 0) return false;
 
@@ -852,8 +854,8 @@ int main(int argc, char *argv[])
             local = true;
         else if(strncmp(argv[i], "-f", 2) == 0 || strncmp(argv[i], "--fetch", 7) == 0)
             do_fetch = true;
-        else if(strncmp(argv[i], "-s", 2) == 0 || strncmp(argv[i], "--sql", 5) == 0)
-            do_sql = true;
+        //else if(strncmp(argv[i], "-s", 2) == 0 || strncmp(argv[i], "--sql", 5) == 0)
+        //    do_sql = true;
         else if(strncmp(argv[i], "--branch=", 9) == 0)
             snprintf(remote_branch, MAX_REMOTE, "%s", argv[i] + 9);
         else if(strncmp(argv[i], "-h", 2) == 0 || strncmp(argv[i], "--help", 6) == 0)
@@ -866,7 +868,7 @@ int main(int argc, char *argv[])
             printf("                         to the last commit\n");
             printf("   -l, --local           search for the highest rev number on HEAD\n");
             printf("   -f, --fetch           fetch from origin before searching for the new rev\n");
-            printf("   -s, --sql             search for new sql updates and do all of the changes\n");
+            printf("   -s, --sql             (DISBLED) search for new sql updates and do all of the changes\n");
             printf("                         for the new rev\n");
             printf("       --branch=BRANCH   specify which remote branch to use\n");
             return 0;
