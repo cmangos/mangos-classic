@@ -247,7 +247,7 @@ m_procCharges(0), m_spellmod(NULL), m_effIndex(eff), m_caster_guid(0), m_target(
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false),
 m_isPersistent(false), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_isRemovedOnShapeLost(true), m_deleted(false),
-m_periodicTimer(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE), m_in_use(0)
+m_periodicTimer(0), m_periodicTick(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE), m_in_use(0)
 {
     assert(target);
 
@@ -486,6 +486,7 @@ void Aura::Update(uint32 diff)
             // update before applying (aura can be removed in TriggerSpell or PeriodicTick calls)
             m_periodicTimer += m_modifier.periodictime;
 
+            ++m_periodicTick;                               // for some infinity auras in some cases can overflow and reset
             if(m_isTrigger)
                 TriggerSpell();
             else
@@ -4888,10 +4889,10 @@ void Aura::PeriodicTick()
                 if (GetSpellProto()->SpellFamilyName==SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000400)) && GetSpellProto()->SpellIconID==544)
                 {
                     // 1..4 ticks, 1/2 from normal tick damage
-                    if (m_duration >= ((m_maxduration-m_modifier.periodictime) * 2 / 3))
+                    if (GetAuraTicks() <= 4)
                         pdamage = pdamage/2;
                     // 9..12 ticks, 3/2 from normal tick damage
-                    else if(m_duration < ((m_maxduration-m_modifier.periodictime) / 3))
+                    else if(GetAuraTicks() >= 9)
                         pdamage += (pdamage + 1) / 2;       // +1 prevent 0.5 damage possible lost at 1..4 ticks
                     // 5..8 ticks have normal tick damage
                 }

@@ -214,6 +214,8 @@ class MANGOS_DLL_SPEC Aura
         time_t GetAuraApplyTime() { return m_applyTime; }
         void UpdateAuraDuration();
         void SendAuraDurationForCaster(Player* caster);
+        uint32 GetAuraTicks() const { return m_periodicTick; }
+        uint32 GetAuraMaxTicks() const { return m_maxduration > 0 && m_modifier.periodictime > 0 ? m_maxduration / m_modifier.periodictime : 0; }
 
         SpellModifier *getAuraSpellMod() {return m_spellmod; }
 
@@ -228,6 +230,9 @@ class MANGOS_DLL_SPEC Aura
             m_maxduration = maxduration;
             m_duration = duration;
             m_procCharges = charges;
+
+            if(uint32 maxticks = GetAuraMaxTicks())
+                m_periodicTick = maxticks - m_duration / m_modifier.periodictime;
         }
 
         uint8 GetAuraSlot() const { return m_auraSlot; }
@@ -336,6 +341,7 @@ class MANGOS_DLL_SPEC Aura
         bool m_isSingleTargetAura:1;                        // true if it's a single target spell and registered at caster - can change at spell steal for example
 
         int32 m_periodicTimer;
+        uint32 m_periodicTick;                              // Tick count pass (including current if use in tick code) from aura apply, used for some tick count dependent aura effects
         uint32 m_PeriodicEventId;
         DiminishingGroup m_AuraDRGroup;
 
