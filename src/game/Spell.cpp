@@ -3366,20 +3366,70 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
         }
 
-        // TODO: this check can be applied and for player to prevent cheating when IsPositiveSpell will return always correct result.
-        // check target for pet/charmed casts (not self targeted), self targeted cast used for area effects and etc
-        if(non_caster_target && m_caster->GetTypeId() == TYPEID_UNIT && m_caster->GetCharmerOrOwnerGUID())
+        if(non_caster_target)
         {
-            // check correctness positive/negative cast target (pet cast real check and cheating check)
-            if(IsPositiveSpell(m_spellInfo->Id))
+            // simple cases
+            bool explicit_target_mode = false;
+            bool target_hostile = false;
+            bool target_hostile_checked = false;
+            bool target_friendly = false;
+            bool target_friendly_checked = false;
+            for(int k = 0; k < 3;  ++k)
             {
-                if(m_caster->IsHostileTo(target))
-                    return SPELL_FAILED_BAD_TARGETS;
+                if (IsExplicitPositiveTarget(m_spellInfo->EffectImplicitTargetA[k]))
+                {
+                    if (!target_hostile_checked)
+                    {
+                        target_hostile_checked = true;
+                        target_hostile = m_caster->IsHostileTo(target);
+                    }
+
+                    if(target_hostile)
+                        return SPELL_FAILED_BAD_TARGETS;
+
+                    explicit_target_mode = true;
+                }
+                else if (IsExplicitNegativeTarget(m_spellInfo->EffectImplicitTargetA[k]))
+                {
+                    if (!target_friendly_checked)
+                    {
+                        target_friendly_checked = true;
+                        target_friendly = m_caster->IsFriendlyTo(target);
+                    }
+
+                    if(target_friendly)
+                        return SPELL_FAILED_BAD_TARGETS;
+
+                    explicit_target_mode = true;
+                }
             }
-            else
+            // TODO: this check can be applied and for player to prevent cheating when IsPositiveSpell will return always correct result.
+            // check target for pet/charmed casts (not self targeted), self targeted cast used for area effects and etc
+            if (!explicit_target_mode && m_caster->GetTypeId() == TYPEID_UNIT && m_caster->GetCharmerOrOwnerGUID())
             {
-                if(m_caster->IsFriendlyTo(target))
-                    return SPELL_FAILED_BAD_TARGETS;
+                // check correctness positive/negative cast target (pet cast real check and cheating check)
+                if(IsPositiveSpell(m_spellInfo->Id))
+                {
+                    if (!target_hostile_checked)
+                    {
+                        target_hostile_checked = true;
+                        target_hostile = m_caster->IsHostileTo(target);
+                    }
+
+                    if(target_hostile)
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                else
+                {
+                    if (!target_friendly_checked)
+                    {
+                        target_friendly_checked = true;
+                        target_friendly = m_caster->IsFriendlyTo(target);
+                    }
+
+                    if(target_friendly)
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
             }
         }
 

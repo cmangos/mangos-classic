@@ -371,6 +371,39 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB)
     return true;
 }
 
+bool IsExplicitPositiveTarget(uint32 targetA)
+{
+    // positive targets that in target selection code expect target in m_targers, so not that auto-select target by spell data by m_caster and etc
+    switch(targetA)
+    {
+        case TARGET_SINGLE_FRIEND:
+        case TARGET_SINGLE_PARTY:
+        case TARGET_CHAIN_HEAL:
+        case TARGET_SINGLE_FRIEND_2:
+        case TARGET_AREAEFFECT_PARTY_AND_CLASS:
+        case TARGET_SELF2:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
+bool IsExplicitNegativeTarget(uint32 targetA)
+{
+    // non-positive targets that in target selection code expect target in m_targers, so not that auto-select target by spell data by m_caster and etc
+    switch(targetA)
+    {
+        case TARGET_CHAIN_DAMAGE:
+        case TARGET_CURRENT_ENEMY_COORDINATES:
+        case TARGET_SINGLE_ENEMY:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
 {
     SpellEntry const *spellproto = sSpellStore.LookupEntry(spellId);
