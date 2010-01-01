@@ -211,8 +211,6 @@ inline bool IsCasterSourceTarget(uint32 target)
         case TARGET_SUMMON:
         case TARGET_AREAEFFECT_CUSTOM_2:
         case TARGET_RANDOM_RAID_MEMBER:
-        case TARGET_SELF2:
-        case TARGET_NONCOMBAT_PET:
             return true;
         default:
             break;
@@ -248,15 +246,6 @@ inline bool IsPointEffectTarget( Targets target )
         case TARGET_SCRIPT_COORDINATES:
         case TARGET_CURRENT_ENEMY_COORDINATES:
         case TARGET_DUELVSPLAYER_COORDINATES:
-        case TARGET_DYNAMIC_OBJECT_COORDINATES:
-        case TARGET_POINT_AT_NORTH:
-        case TARGET_POINT_AT_SOUTH:
-        case TARGET_POINT_AT_EAST:
-        case TARGET_POINT_AT_WEST:
-        case TARGET_POINT_AT_NE:
-        case TARGET_POINT_AT_NW:
-        case TARGET_POINT_AT_SE:
-        case TARGET_POINT_AT_SW:
             return true;
         default:
             break;
