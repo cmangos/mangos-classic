@@ -3642,7 +3642,7 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
             ChatHandler(chr).PSendSysMessage(LANG_YOURS_EXPLORE_SET_NOTHING,GetNameLink().c_str());
     }
 
-    for (uint8 i=0; i<128; ++i)
+    for (uint8 i=0; i < 64; ++i)
     {
         if (flag != 0)
         {
@@ -3799,7 +3799,7 @@ bool ChatHandler::HandleShowAreaCommand(const char* args)
     int offset = area / 32;
     uint32 val = (uint32)(1 << (area % 32));
 
-    if(area<0 || offset >= 128)
+    if(area<0 || offset >= 64)
     {
         SendSysMessage(LANG_BAD_VALUE);
         SetSentErrorMessage(true);
@@ -3830,7 +3830,7 @@ bool ChatHandler::HandleHideAreaCommand(const char* args)
     int offset = area / 32;
     uint32 val = (uint32)(1 << (area % 32));
 
-    if(area<0 || offset >= 128)
+    if(area<0 || offset >= 64)
     {
         SendSysMessage(LANG_BAD_VALUE);
         SetSentErrorMessage(true);
