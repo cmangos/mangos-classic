@@ -1118,7 +1118,7 @@ struct TargetDistanceOrder : public std::binary_function<const Unit, const Unit,
     }
 };
 
-void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
+void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode, UnitList& targetUnitMap)
 {
     float radius;
     if (m_spellInfo->EffectRadiusIndex[effIndex])
@@ -1151,7 +1151,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             m_caster->GetClosePoint(dest_x, dest_y, dest_z, 0.0f, radius, angle);
             m_targets.setDestination(dest_x, dest_y, dest_z);
 
-            TagUnitMap.push_back(m_caster);
+            targetUnitMap.push_back(m_caster);
             break;
         }
         case TARGET_RANDOM_NEARBY_DEST:
@@ -1167,10 +1167,10 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             if (radius > 0.0f)
             {
                 // caster included here?
-                FillAreaTargets(TagUnitMap, dest_x, dest_y, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+                FillAreaTargets(targetUnitMap, dest_x, dest_y, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             }
             else
-                TagUnitMap.push_back(m_caster);
+                targetUnitMap.push_back(m_caster);
 
             break;
         }
@@ -1183,7 +1183,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
         case TARGET_AREAEFFECT_CUSTOM:
         case TARGET_AREAEFFECT_CUSTOM_2:
         case TARGET_SUMMON:
-            TagUnitMap.push_back(m_caster);
+            targetUnitMap.push_back(m_caster);
             break;
         case TARGET_RANDOM_ENEMY_CHAIN_IN_AREA:
         {
@@ -1196,11 +1196,11 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
 
-            std::list<Unit *> tempUnitMap;
+            std::list<Unit *> tempTargetUnitMap;
 
             {
                 MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, m_caster, max_range);
-                MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
+                MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
 
                 TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
                 TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
@@ -1210,34 +1210,34 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 cell_lock->Visit(cell_lock, grid_unit_searcher, *m_caster->GetMap(), *m_caster, max_range);
             }
 
-            if(tempUnitMap.empty())
+            if(tempTargetUnitMap.empty())
                 break;
 
-            tempUnitMap.sort(TargetDistanceOrder(m_caster));
+            tempTargetUnitMap.sort(TargetDistanceOrder(m_caster));
 
             //Now to get us a random target that's in the initial range of the spell
             uint32 t = 0;
-            std::list<Unit *>::iterator itr = tempUnitMap.begin();
-            while(itr!= tempUnitMap.end() && (*itr)->IsWithinDist(m_caster,radius))
+            std::list<Unit *>::iterator itr = tempTargetUnitMap.begin();
+            while(itr!= tempTargetUnitMap.end() && (*itr)->IsWithinDist(m_caster,radius))
                 ++t, ++itr;
 
             if(!t)
                 break;
 
-            itr = tempUnitMap.begin();
+            itr = tempTargetUnitMap.begin();
             std::advance(itr, rand()%t);
             Unit *pUnitTarget = *itr;
-            TagUnitMap.push_back(pUnitTarget);
+            targetUnitMap.push_back(pUnitTarget);
 
-            tempUnitMap.erase(itr);
+            tempTargetUnitMap.erase(itr);
 
-            tempUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+            tempTargetUnitMap.sort(TargetDistanceOrder(pUnitTarget));
 
             t = unMaxTargets - 1;
             Unit *prev = pUnitTarget;
-            std::list<Unit*>::iterator next = tempUnitMap.begin();
+            std::list<Unit*>::iterator next = tempTargetUnitMap.begin();
 
-            while(t && next != tempUnitMap.end() )
+            while(t && next != tempTargetUnitMap.end() )
             {
                 if(!prev->IsWithinDist(*next,CHAIN_SPELL_JUMP_RADIUS))
                     break;
@@ -1249,10 +1249,10 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 }
 
                 prev = *next;
-                TagUnitMap.push_back(prev);
-                tempUnitMap.erase(next);
-                tempUnitMap.sort(TargetDistanceOrder(prev));
-                next = tempUnitMap.begin();
+                targetUnitMap.push_back(prev);
+                tempTargetUnitMap.erase(next);
+                tempTargetUnitMap.sort(TargetDistanceOrder(prev));
+                next = tempTargetUnitMap.begin();
 
                 --t;
             }
@@ -1262,7 +1262,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
         {
             Pet* tmpUnit = m_caster->GetPet();
             if (!tmpUnit) break;
-            TagUnitMap.push_back(tmpUnit);
+            targetUnitMap.push_back(tmpUnit);
             break;
         }
         case TARGET_CHAIN_DAMAGE:
@@ -1271,7 +1271,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             {
                 Unit* pUnitTarget = SelectMagnetTarget();
                 if(pUnitTarget)
-                    TagUnitMap.push_back(pUnitTarget);
+                    targetUnitMap.push_back(pUnitTarget);
             }
             else
             {
@@ -1296,11 +1296,11 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 Unit* originalCaster = GetOriginalCaster();
                 if(originalCaster)
                 {
-                    std::list<Unit *> tempUnitMap;
+                    std::list<Unit *> tempTargetUnitMap;
 
                     {
                         MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range, false);
-                        MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
+                        MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
 
                         TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
                         TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
@@ -1310,20 +1310,20 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
 						cell_lock->Visit(cell_lock, grid_unit_searcher, *m_caster->GetMap(), *m_caster, max_range);
                     }
 
-                    tempUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+                    tempTargetUnitMap.sort(TargetDistanceOrder(pUnitTarget));
 
-                    if(tempUnitMap.empty())
+                    if(tempTargetUnitMap.empty())
                         break;
 
-                    if(*tempUnitMap.begin() == pUnitTarget)
-                        tempUnitMap.erase(tempUnitMap.begin());
+                    if(*tempTargetUnitMap.begin() == pUnitTarget)
+                        tempTargetUnitMap.erase(tempTargetUnitMap.begin());
 
-                    TagUnitMap.push_back(pUnitTarget);
+                    targetUnitMap.push_back(pUnitTarget);
                     uint32 t = unMaxTargets - 1;
                     Unit *prev = pUnitTarget;
-                    std::list<Unit*>::iterator next = tempUnitMap.begin();
+                    std::list<Unit*>::iterator next = tempTargetUnitMap.begin();
 
-                    while(t && next != tempUnitMap.end() )
+                    while(t && next != tempTargetUnitMap.end() )
                     {
                         if(!prev->IsWithinDist(*next,CHAIN_SPELL_JUMP_RADIUS))
                             break;
@@ -1335,10 +1335,10 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                         }
 
                         prev = *next;
-                        TagUnitMap.push_back(prev);
-                        tempUnitMap.erase(next);
-                        tempUnitMap.sort(TargetDistanceOrder(prev));
-                        next = tempUnitMap.begin();
+                        targetUnitMap.push_back(prev);
+                        tempTargetUnitMap.erase(next);
+                        tempTargetUnitMap.sort(TargetDistanceOrder(prev));
+                        next = tempTargetUnitMap.begin();
 
                         --t;
                     }
@@ -1347,7 +1347,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             break;
         }
         case TARGET_ALL_ENEMY_IN_AREA:
-            FillAreaTargets(TagUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
             break;
         case TARGET_AREAEFFECT_INSTANT:
         {
@@ -1356,10 +1356,10 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             if (IsPositiveEffect(m_spellInfo->Id, effIndex))
                 targetB = SPELL_TARGETS_FRIENDLY;
 
-            FillAreaTargets(TagUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius, PUSH_DEST_CENTER, targetB);
+            FillAreaTargets(targetUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius, PUSH_DEST_CENTER, targetB);
 
             // exclude caster
-            TagUnitMap.remove(m_caster);
+            targetUnitMap.remove(m_caster);
             break;
         }
         case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
@@ -1370,10 +1370,10 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 case SPELL_EFFECT_PERSISTENT_AREA_AURA:
                     break;
                 case SPELL_EFFECT_SUMMON:
-                    TagUnitMap.push_back(m_caster);
+                    targetUnitMap.push_back(m_caster);
                     break;
                 default:
-                    FillAreaTargets(TagUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+                    FillAreaTargets(targetUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
                     break;
             }
             break;
@@ -1383,29 +1383,29 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             if(Unit* currentTarget = m_targets.getUnitTarget())
             {
                 m_targets.setDestination(currentTarget->GetPositionX(), currentTarget->GetPositionY(), currentTarget->GetPositionZ());
-                TagUnitMap.push_back(currentTarget);
+                targetUnitMap.push_back(currentTarget);
             }
             break;
         }
         case TARGET_ALL_PARTY_AROUND_CASTER:
         case TARGET_ALL_PARTY_AROUND_CASTER_2:
         case TARGET_ALL_PARTY:
-            FillRaidOrPartyTargets(TagUnitMap,m_caster,radius,false,true,true);
+            FillRaidOrPartyTargets(targetUnitMap,m_caster,radius,false,true,true);
             break;
         case TARGET_RANDOM_RAID_MEMBER:
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 if(Player* target = ((Player*)m_caster)->GetNextRandomRaidMember(radius))
-                    TagUnitMap.push_back(target);
+                    targetUnitMap.push_back(target);
             break;
         case TARGET_SINGLE_FRIEND:
         case TARGET_SINGLE_FRIEND_2:
             if(m_targets.getUnitTarget())
-                TagUnitMap.push_back(m_targets.getUnitTarget());
+                targetUnitMap.push_back(m_targets.getUnitTarget());
             break;
         case TARGET_NONCOMBAT_PET:
             if(Unit* target = m_targets.getUnitTarget())
                 if( target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->isPet() && ((Pet*)target)->getPetType() == MINI_PET)
-                    TagUnitMap.push_back(target);
+                    targetUnitMap.push_back(target);
             break;
         case TARGET_CASTER_COORDINATES:
         {
@@ -1420,13 +1420,13 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             break;
         }
         case TARGET_ALL_HOSTILE_UNITS_AROUND_CASTER:
-            FillAreaTargets(TagUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE);
+            FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_SELF_CENTER, SPELL_TARGETS_HOSTILE);
             break;
         case TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER:
-            FillAreaTargets(TagUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius,PUSH_SELF_CENTER,SPELL_TARGETS_FRIENDLY);
+            FillAreaTargets(targetUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius,PUSH_SELF_CENTER,SPELL_TARGETS_FRIENDLY);
             break;
         case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
-            FillAreaTargets(TagUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_FRIENDLY);
+            FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_FRIENDLY);
             break;
         // TARGET_SINGLE_PARTY means that the spells can only be casted on a party member and not on the caster (some seals, fire shield from imp, etc..)
         case TARGET_SINGLE_PARTY:
@@ -1446,7 +1446,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                     {
                         if( target == owner )
                         {
-                            TagUnitMap.push_back(target);
+                            targetUnitMap.push_back(target);
                             break;
                         }
                         pGroup = ((Player*)owner)->GetGroup();
@@ -1456,7 +1456,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 {
                     if( targetOwner == m_caster && target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->isPet())
                     {
-                        TagUnitMap.push_back(target);
+                        targetUnitMap.push_back(target);
                         break;
                     }
                     pGroup = ((Player*)m_caster)->GetGroup();
@@ -1472,13 +1472,13 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                             target->GetOwnerGUID() == targetOwner->GetGUID() &&
                             pGroup->IsMember(((Player*)targetOwner)->GetGUID()))
                         {
-                            TagUnitMap.push_back(target);
+                            targetUnitMap.push_back(target);
                         }
                     }
                     // 1Our target can be a player who is on our group
                     else if (target->GetTypeId() == TYPEID_PLAYER && pGroup->IsMember(((Player*)target)->GetGUID()))
                     {
-                        TagUnitMap.push_back(target);
+                        targetUnitMap.push_back(target);
                     }
                 }
             }
@@ -1491,14 +1491,14 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
         case TARGET_IN_FRONT_OF_CASTER:
         {
             bool inFront = m_spellInfo->SpellVisual != 3879;
-            FillAreaTargets(TagUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius,inFront ? PUSH_IN_FRONT : PUSH_IN_BACK,SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius,inFront ? PUSH_IN_FRONT : PUSH_IN_BACK,SPELL_TARGETS_AOE_DAMAGE);
             break;
         }
         case TARGET_LARGE_FRONTAL_CONE:
-            FillAreaTargets(TagUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_90, SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_90, SPELL_TARGETS_AOE_DAMAGE);
             break;
         case TARGET_NARROW_FRONTAL_CONE:
-            FillAreaTargets(TagUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_15, SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_15, SPELL_TARGETS_AOE_DAMAGE);
             break;
         case TARGET_DUELVSPLAYER:
         {
@@ -1507,13 +1507,13 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             {
                 if(m_caster->IsFriendlyTo(target))
                 {
-                    TagUnitMap.push_back(target);
+                    targetUnitMap.push_back(target);
                 }
                 else
                 {
                     Unit* pUnitTarget = SelectMagnetTarget();
                     if(pUnitTarget)
-                        TagUnitMap.push_back(pUnitTarget);
+                        targetUnitMap.push_back(pUnitTarget);
                 }
             }
             break;
@@ -1526,22 +1526,22 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             break;
         case TARGET_MASTER:
             if(Unit* owner = m_caster->GetCharmerOrOwner())
-                TagUnitMap.push_back(owner);
+                targetUnitMap.push_back(owner);
             break;
         case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
             // targets the ground, not the units in the area
             if (m_spellInfo->Effect[effIndex]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
-                FillAreaTargets(TagUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+                FillAreaTargets(targetUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
             break;
         case TARGET_MINION:
             if(m_spellInfo->Effect[effIndex] != SPELL_EFFECT_DUEL)
-                TagUnitMap.push_back(m_caster);
+                targetUnitMap.push_back(m_caster);
             break;
         case TARGET_SINGLE_ENEMY:
         {
             Unit* pUnitTarget = SelectMagnetTarget();
             if(pUnitTarget)
-                TagUnitMap.push_back(pUnitTarget);
+                targetUnitMap.push_back(pUnitTarget);
             break;
         }
         case TARGET_AREAEFFECT_PARTY:
@@ -1551,7 +1551,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
 
             if(owner)
             {
-                TagUnitMap.push_back(m_caster);
+                targetUnitMap.push_back(m_caster);
                 if(owner->GetTypeId() == TYPEID_PLAYER)
                     pTarget = (Player*)owner;
             }
@@ -1587,39 +1587,39 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                     if(Target && Target->GetSubGroup()==subgroup && !m_caster->IsHostileTo(Target))
                     {
                         if( pTarget->IsWithinDistInMap(Target, radius) )
-                            TagUnitMap.push_back(Target);
+                            targetUnitMap.push_back(Target);
 
                         if(Pet* pet = Target->GetPet())
                             if( pTarget->IsWithinDistInMap(pet, radius) )
-                                TagUnitMap.push_back(pet);
+                                targetUnitMap.push_back(pet);
                     }
                 }
             }
             else if (owner)
             {
                 if(m_caster->IsWithinDistInMap(owner, radius))
-                    TagUnitMap.push_back(owner);
+                    targetUnitMap.push_back(owner);
             }
             else if(pTarget)
             {
-                TagUnitMap.push_back(pTarget);
+                targetUnitMap.push_back(pTarget);
 
                 if(Pet* pet = pTarget->GetPet())
                     if( m_caster->IsWithinDistInMap(pet, radius) )
-                        TagUnitMap.push_back(pet);
+                        targetUnitMap.push_back(pet);
             }
             break;
         }
         case TARGET_SCRIPT:
         {
             if(m_targets.getUnitTarget())
-                TagUnitMap.push_back(m_targets.getUnitTarget());
+                targetUnitMap.push_back(m_targets.getUnitTarget());
             if(m_targets.getItemTarget())
                 AddItemTarget(m_targets.getItemTarget(), effIndex);
             break;
         }
         case TARGET_SELF_FISHING:
-            TagUnitMap.push_back(m_caster);
+            targetUnitMap.push_back(m_caster);
             break;
         case TARGET_CHAIN_HEAL:
         {
@@ -1628,7 +1628,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 break;
 
             if (EffectChainTarget <= 1)
-                TagUnitMap.push_back(pUnitTarget);
+                targetUnitMap.push_back(pUnitTarget);
             else
             {
                 unMaxTargets = EffectChainTarget;
@@ -1649,7 +1649,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 if(*tempUnitMap.begin() == pUnitTarget)
                     tempUnitMap.erase(tempUnitMap.begin());
 
-                TagUnitMap.push_back(pUnitTarget);
+                targetUnitMap.push_back(pUnitTarget);
                 uint32 t = unMaxTargets - 1;
                 Unit *prev = pUnitTarget;
                 std::list<Unit*>::iterator next = tempUnitMap.begin();
@@ -1672,7 +1672,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                     }
 
                     prev = *next;
-                    TagUnitMap.push_back(prev);
+                    targetUnitMap.push_back(prev);
                     tempUnitMap.erase(next);
                     tempUnitMap.sort(TargetDistanceOrder(prev));
                     next = tempUnitMap.begin();
@@ -1687,10 +1687,10 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             Unit* currentTarget = m_targets.getUnitTarget();
             if(currentTarget)
             {
-                TagUnitMap.push_back(currentTarget);
+                targetUnitMap.push_back(currentTarget);
                 m_targets.setDestination(currentTarget->GetPositionX(), currentTarget->GetPositionY(), currentTarget->GetPositionZ());
                 if(m_spellInfo->EffectImplicitTargetB[effIndex]==TARGET_ALL_ENEMY_IN_AREA_INSTANT)
-                    FillAreaTargets(TagUnitMap, currentTarget->GetPositionX(), currentTarget->GetPositionY(), radius, PUSH_TARGET_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+                    FillAreaTargets(targetUnitMap, currentTarget->GetPositionX(), currentTarget->GetPositionY(), radius, PUSH_TARGET_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             }
             break;
         }
@@ -1711,12 +1711,12 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                         targetPlayer->getClass() == Target->getClass() &&
                         !m_caster->IsHostileTo(Target) )
                     {
-                        TagUnitMap.push_back(Target);
+                        targetUnitMap.push_back(Target);
                     }
                 }
             }
             else if(m_targets.getUnitTarget())
-                TagUnitMap.push_back(m_targets.getUnitTarget());
+                targetUnitMap.push_back(m_targets.getUnitTarget());
             break;
         }
         case TARGET_TABLE_X_Y_Z_COORDINATES:
@@ -1766,7 +1766,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 pTarget->GetClosePoint(_target_x, _target_y, _target_z, pTarget->GetObjectSize(), dist, angle);
                 if(pTarget->IsWithinLOS(_target_x, _target_y, _target_z))
                 {
-                    TagUnitMap.push_back(m_caster);
+                    targetUnitMap.push_back(m_caster);
                     m_targets.setDestination(_target_x, _target_y, _target_z);
                 }
             }
@@ -1796,7 +1796,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 m_targets.setDestination(x,y,m_caster->GetPositionZ());
             }
 
-            TagUnitMap.push_back(m_caster);
+            targetUnitMap.push_back(m_caster);
             break;
 
         case TARGET_POINT_AT_NORTH:
@@ -1852,12 +1852,12 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                                 {
                                     case TYPEID_UNIT:
                                     case TYPEID_PLAYER:
-                                        TagUnitMap.push_back((Unit*)result);
+                                        targetUnitMap.push_back((Unit*)result);
                                         break;
                                     case TYPEID_CORPSE:
                                         m_targets.setCorpseTarget((Corpse*)result);
                                         if(Player* owner = ObjectAccessor::FindPlayer(((Corpse*)result)->GetOwnerGUID()))
-                                            TagUnitMap.push_back(owner);
+                                            targetUnitMap.push_back(owner);
                                         break;
                                 }
                             }
@@ -1873,7 +1873,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                         }
                         default:
                             if(m_targets.getUnitTarget())
-                                TagUnitMap.push_back(m_targets.getUnitTarget());
+                                targetUnitMap.push_back(m_targets.getUnitTarget());
                             break;
                     }
                     break;
@@ -1893,19 +1893,19 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 case SPELL_EFFECT_REPUTATION:
                 case SPELL_EFFECT_SEND_TAXI:
                     if(m_targets.getUnitTarget())
-                        TagUnitMap.push_back(m_targets.getUnitTarget());
+                        targetUnitMap.push_back(m_targets.getUnitTarget());
                     break;
                 case SPELL_EFFECT_SUMMON_PLAYER:
                     if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->GetSelection())
                     {
                         Player* target = sObjectMgr.GetPlayer(((Player*)m_caster)->GetSelection());
                         if(target)
-                            TagUnitMap.push_back(target);
+                            targetUnitMap.push_back(target);
                     }
                     break;
                 case SPELL_EFFECT_RESURRECT_NEW:
                     if(m_targets.getUnitTarget())
-                        TagUnitMap.push_back(m_targets.getUnitTarget());
+                        targetUnitMap.push_back(m_targets.getUnitTarget());
                     if(m_targets.getCorpseTargetGUID())
                     {
                         Corpse *corpse = ObjectAccessor::GetCorpse(*m_caster, m_targets.getCorpseTargetGUID());
@@ -1913,7 +1913,7 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                         {
                             Player* owner = ObjectAccessor::FindPlayer(corpse->GetOwnerGUID());
                             if(owner)
-                                TagUnitMap.push_back(owner);
+                                targetUnitMap.push_back(owner);
                         }
                     }
                     break;
@@ -1922,10 +1922,10 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                         m_spellInfo->EffectMiscValueB[effIndex] == SUMMON_TYPE_POSESSED2)
                     {
                         if(m_targets.getUnitTarget())
-                            TagUnitMap.push_back(m_targets.getUnitTarget());
+                            targetUnitMap.push_back(m_targets.getUnitTarget());
                     }
                     else */
-                        TagUnitMap.push_back(m_caster);
+                        targetUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
                 case SPELL_EFFECT_SUMMON_WILD:
@@ -1936,11 +1936,11 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                 case SPELL_EFFECT_DESTROY_ALL_TOTEMS:
                 case SPELL_EFFECT_SUMMON_DEMON:
                 case SPELL_EFFECT_SKILL:
-                    TagUnitMap.push_back(m_caster);
+                    targetUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_LEARN_PET_SPELL:
                     if(Pet* pet = m_caster->GetPet())
-                        TagUnitMap.push_back(pet);
+                        targetUnitMap.push_back(pet);
                     break;
                 case SPELL_EFFECT_ENCHANT_ITEM:
                 case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
@@ -1954,29 +1954,29 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
                     {
                         case SPELL_AURA_ADD_FLAT_MODIFIER:  // some spell mods auras have 0 target modes instead expected TARGET_SELF(1) (and present for other ranks for same spell for example)
                         case SPELL_AURA_ADD_PCT_MODIFIER:
-                            TagUnitMap.push_back(m_caster);
+                            targetUnitMap.push_back(m_caster);
                             break;
                         default:                            // apply to target in other case
                             if(m_targets.getUnitTarget())
-                                TagUnitMap.push_back(m_targets.getUnitTarget());
+                                targetUnitMap.push_back(m_targets.getUnitTarget());
                             break;
                     }
                     break;
                 case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
                     // AreaAura
                     if(m_spellInfo->Attributes == 0x9050000 || m_spellInfo->Attributes == 0x10000)
-                        SetTargetMap(effIndex, TARGET_AREAEFFECT_PARTY, TagUnitMap);
+                        SetTargetMap(effIndex, TARGET_AREAEFFECT_PARTY, targetUnitMap);
                     break;
                 case SPELL_EFFECT_SKIN_PLAYER_CORPSE:
                     if(m_targets.getUnitTarget())
                     {
-                        TagUnitMap.push_back(m_targets.getUnitTarget());
+                        targetUnitMap.push_back(m_targets.getUnitTarget());
                     }
                     else if (m_targets.getCorpseTargetGUID())
                     {
                         if (Corpse *corpse = ObjectAccessor::GetCorpse(*m_caster,m_targets.getCorpseTargetGUID()))
                             if (Player* owner = ObjectAccessor::FindPlayer(corpse->GetOwnerGUID()))
-                                TagUnitMap.push_back(owner);
+                                targetUnitMap.push_back(owner);
                     }
                     break;
                 default:
@@ -1989,40 +1989,40 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode,UnitList& TagUnitMap)
             break;
     }
 
-    if (unMaxTargets && TagUnitMap.size() > unMaxTargets)
+    if (unMaxTargets && targetUnitMap.size() > unMaxTargets)
     {
         // make sure one unit is always removed per iteration
         uint32 removed_utarget = 0;
-        for (UnitList::iterator itr = TagUnitMap.begin(), next; itr != TagUnitMap.end(); itr = next)
+        for (UnitList::iterator itr = targetUnitMap.begin(), next; itr != targetUnitMap.end(); itr = next)
         {
             next = itr;
             ++next;
             if (!*itr) continue;
             if ((*itr) == m_targets.getUnitTarget())
             {
-                TagUnitMap.erase(itr);
+                targetUnitMap.erase(itr);
                 removed_utarget = 1;
                 //        break;
             }
         }
         // remove random units from the map
-        while (TagUnitMap.size() > unMaxTargets - removed_utarget)
+        while (targetUnitMap.size() > unMaxTargets - removed_utarget)
         {
-            uint32 poz = urand(0, TagUnitMap.size()-1);
-            for (UnitList::iterator itr = TagUnitMap.begin(); itr != TagUnitMap.end(); ++itr, --poz)
+            uint32 poz = urand(0, targetUnitMap.size()-1);
+            for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr, --poz)
             {
                 if (!*itr) continue;
 
                 if (!poz)
                 {
-                    TagUnitMap.erase(itr);
+                    targetUnitMap.erase(itr);
                     break;
                 }
             }
         }
         // the player's target will always be added to the map
         if (removed_utarget && m_targets.getUnitTarget())
-            TagUnitMap.push_back(m_targets.getUnitTarget());
+            targetUnitMap.push_back(m_targets.getUnitTarget());
     }
 }
 
