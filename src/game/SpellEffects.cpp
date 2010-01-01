@@ -285,13 +285,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 {
                     // Meteor like spells (divided damage to targets)
                     case 24340: case 26558: case 28884:     // Meteor
-                    case 36837: case 38903: case 41276:     // Meteor
                     case 26789:                             // Shard of the Fallen Star
-                    case 31436:                             // Malevolent Cleave
-                    case 35181:                             // Dive Bomb
-                    case 40810: case 43267: case 43268:     // Saber Lash
-                    case 42384:                             // Brutal Swipe
-                    case 45150:                             // Meteor Slash
                     {
                         uint32 count = 0;
                         for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
@@ -309,38 +303,22 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                             damage = 200;
                         break;
                     }
-                    // Cataclysmic Bolt
-                    case 38441:
-                        damage = unitTarget->GetMaxHealth() / 2;
-                        break;
                 }
                 break;
             }
 
             case SPELLFAMILY_MAGE:
-            {
-                // Arcane Blast
-                if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x20000000))
-                {
-                    m_caster->CastSpell(m_caster, 36032, true);
-                }
                 break;
-            }
             case SPELLFAMILY_WARRIOR:
             {
                 // Bloodthirst
-                if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x2000000))
+                if (m_spellInfo->SpellIconID==38 && m_spellInfo->SpellFamilyFlags & UI64LIT(0x2000000))
                 {
                     damage = uint32(damage * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) / 100);
                 }
                 // Shield Slam
-                else if(m_spellInfo->SpellFamilyFlags & UI64LIT(0x100000000))
+                else if (m_spellInfo->SpellIconID==413 && m_spellInfo->SpellFamilyFlags & UI64LIT(0x2000000))
                     damage += int32(m_caster->GetShieldBlockValue());
-                // Victory Rush
-                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x10000000000))
-                {
-                    damage = uint32(damage * m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
-                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
@@ -374,157 +352,24 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     damage += int32(m_caster->GetPower(POWER_ENERGY) * multiple);
                     m_caster->SetPower(POWER_ENERGY,0);
                 }
-                // Rake
-                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000001000))
-                {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
-                }
-                // Swipe
-                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0010000000000000))
-                {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.08f);
-                }
-                // Starfire
-                else if ( m_spellInfo->SpellFamilyFlags & UI64LIT(0x0004))
-                {
-                    Unit::AuraList const& m_OverrideClassScript = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                    for(Unit::AuraList::const_iterator i = m_OverrideClassScript.begin(); i != m_OverrideClassScript.end(); ++i)
-                    {
-                        // Starfire Bonus (caster)
-                        switch((*i)->GetModifier()->m_miscvalue)
-                        {
-                            case 5481:                      // Nordrassil Regalia - bonus
-                            {
-                                Unit::AuraList const& m_periodicDamageAuras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                                for(Unit::AuraList::const_iterator itr = m_periodicDamageAuras.begin(); itr != m_periodicDamageAuras.end(); ++itr)
-                                {
-                                    // Moonfire or Insect Swarm (target debuff from any casters)
-                                    if ( (*itr)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x00200002))
-                                    {
-                                        int32 mod = (*i)->GetModifier()->m_amount;
-                                        damage += damage*mod/100;
-                                        break;
-                                    }
-                                }
-                                break;
-                            }
-                            case 5148:                      //Improved Starfire - Ivory Idol of the Moongoddes Aura
-                            {
-                                damage += (*i)->GetModifier()->m_amount;
-                                break;
-                            }
-                        }
-                    }
-                }
-                //Mangle Bonus for the initial damage of Lacerate and Rake
-                if ((m_spellInfo->SpellFamilyFlags==UI64LIT(0x0000000000001000) && m_spellInfo->SpellIconID==494) ||
-                    (m_spellInfo->SpellFamilyFlags==UI64LIT(0x0000010000000000) && m_spellInfo->SpellIconID==2246))
-                {
-                    Unit::AuraList const& mDummyAuras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
-                        if(((*i)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000044000000000)) && (*i)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_DRUID)
-                        {
-                            damage = int32(damage*(100.0f+(*i)->GetModifier()->m_amount)/100.0f);
-                            break;
-                        }
-                }
                 break;
             }
             case SPELLFAMILY_ROGUE:
             {
-                // Envenom
-                if (m_caster->GetTypeId()==TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags & UI64LIT(0x800000000)))
-                {
-                    // consume from stack dozes not more that have combo-points
-                    if(uint32 combo = ((Player*)m_caster)->GetComboPoints())
-                    {
-                        // count consumed deadly poison doses at target
-                        uint32 doses = 0;
-
-                        // remove consumed poison doses
-                        Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                        for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end() && combo;)
-                        {
-                            // Deadly poison (only attacker applied)
-                            if( (*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && ((*itr)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x10000)) &&
-                                (*itr)->GetSpellProto()->SpellVisual==5100 && (*itr)->GetCasterGUID()==m_caster->GetGUID() )
-                            {
-                                --combo;
-                                ++doses;
-
-                                unitTarget->RemoveSingleAuraFromStack((*itr)->GetId(), (*itr)->GetEffIndex());
-
-                                itr = auras.begin();
-                            }
-                            else
-                                ++itr;
-                        }
-
-                        damage *= doses;
-                        damage += int32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.03f * doses);
-
-                        // Eviscerate and Envenom Bonus Damage (item set effect)
-                        if(m_caster->GetDummyAura(37169))
-                            damage += ((Player*)m_caster)->GetComboPoints()*40;
-                    }
-                }
                 // Eviscerate
-                else if ((m_spellInfo->SpellFamilyFlags & UI64LIT(0x00020000)) && m_caster->GetTypeId()==TYPEID_PLAYER)
+                if ((m_spellInfo->SpellFamilyFlags & UI64LIT(0x00020000)) && m_caster->GetTypeId()==TYPEID_PLAYER)
                 {
                     if(uint32 combo = ((Player*)m_caster)->GetComboPoints())
                     {
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * combo * 0.03f);
-
-                        // Eviscerate and Envenom Bonus Damage (item set effect)
-                        if(m_caster->GetDummyAura(37169))
-                            damage += combo*40;
                     }
                 }
                 break;
             }
             case SPELLFAMILY_HUNTER:
-            {
-                // Mongoose Bite
-                if ((m_spellInfo->SpellFamilyFlags & UI64LIT(0x000000002)) && m_spellInfo->SpellVisual==342)
-                {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2);
-                }
-                // Arcane Shot
-                else if ((m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000800)) && m_spellInfo->maxLevel > 0)
-                {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.15);
-                }
-                // Steady Shot
-                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x100000000))
-                {
-                    int32 base = irand((int32)m_caster->GetWeaponDamageRange(RANGED_ATTACK, MINDAMAGE),(int32)m_caster->GetWeaponDamageRange(RANGED_ATTACK, MAXDAMAGE));
-                    damage += int32(float(base)/m_caster->GetAttackTime(RANGED_ATTACK)*2800 + m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2f);
-                }
-                //Explosive Trap Effect
-                else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000004))
-                {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.1);
-                }
                 break;
-            }
             case SPELLFAMILY_PALADIN:
-            {
-                //Judgement of Vengeance
-                if((m_spellInfo->SpellFamilyFlags & UI64LIT(0x800000000)) && m_spellInfo->SpellIconID==2292)
-                {
-                    uint32 stacks = 0;
-                    Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                    for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
-                        if((*itr)->GetId() == 31803 && (*itr)->GetCasterGUID()==m_caster->GetGUID())
-                            ++stacks;
-                    if(!stacks)
-                        //No damage if the target isn't affected by this
-                        damage = -1;
-                    else
-                        damage *= stacks;
-                }
                 break;
-            }
         }
 
         if(damage >= 0)
@@ -541,7 +386,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 case SPELLFAMILY_WARRIOR:
                 {
                     // Bloodthirst
-                    if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x2000000))
+                    if (m_spellInfo->SpellIconID==38 && m_spellInfo->SpellFamilyFlags & UI64LIT(0x2000000))
                     {
                         uint32 BTAura = 0;
                         switch(m_spellInfo->Id)
@@ -561,24 +406,9 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     break;
                 }
                 case SPELLFAMILY_PRIEST:
-                {
-                    // Shadow Word: Death
-                    if(finalDamage > 0 && (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000200000000)) && unitTarget->isAlive())
-                        // deals damage equal to damage done to caster if victim is not killed
-                        m_caster->SpellNonMeleeDamageLog( m_caster, m_spellInfo->Id, finalDamage, m_IsTriggeredSpell, false);
-
                     break;
-                }
                 case SPELLFAMILY_PALADIN:
-                {
-                    // Judgement of Blood
-                    if(finalDamage > 0 && (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000800000000)) && m_spellInfo->SpellIconID==153)
-                    {
-                        int32 damagePoint  = finalDamage * 33 / 100;
-                        m_caster->CastCustomSpell(m_caster, 32220, &damagePoint, NULL, NULL, true);
-                    }
                     break;
-                }
             }
         }
     }
