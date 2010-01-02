@@ -44,6 +44,12 @@
 
 GridState* si_GridStates[MAX_GRID_STATE];
 
+static char const* MAP_MAGIC         = "MAPS";
+static char const* MAP_VERSION_MAGIC = "10.1";
+static char const* MAP_AREA_MAGIC    = "AREA";
+static char const* MAP_HEIGHT_MAGIC  = "MHGT";
+static char const* MAP_LIQUID_MAGIC  = "MLIQ";
+
 Map::~Map()
 {
     UnloadAll(true);
@@ -66,8 +72,8 @@ bool Map::ExistMap(uint32 mapid,int gx,int gy)
 
     map_fileheader header;
     fread(&header, sizeof(header), 1, pf);
-    if (header.mapMagic     != uint32(MAP_MAGIC) ||
-        header.versionMagic != uint32(MAP_VERSION_MAGIC))
+    if (header.mapMagic     != *((uint32 const*)(MAP_MAGIC)) ||
+        header.versionMagic != *((uint32 const*)(MAP_VERSION_MAGIC)))
     {
         sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.",tmp);
         delete [] tmp;
@@ -1110,8 +1116,8 @@ bool GridMap::loadData(char *filename)
     if (!in)
         return true;
     fread(&header, sizeof(header),1,in);
-    if (header.mapMagic     == uint32(MAP_MAGIC) &&
-        header.versionMagic == uint32(MAP_VERSION_MAGIC))
+    if (header.mapMagic     == *((uint32 const*)(MAP_MAGIC)) &&
+        header.versionMagic == *((uint32 const*)(MAP_VERSION_MAGIC)))
     {
         // loadup area data
         if (header.areaMapOffset && !loadAreaData(in, header.areaMapOffset, header.areaMapSize))
@@ -1162,7 +1168,7 @@ bool GridMap::loadAreaData(FILE *in, uint32 offset, uint32 size)
     map_areaHeader header;
     fseek(in, offset, SEEK_SET);
     fread(&header, sizeof(header), 1, in);
-    if (header.fourcc != uint32(MAP_AREA_MAGIC))
+    if (header.fourcc != *((uint32 const*)(MAP_AREA_MAGIC)))
         return false;
 
     m_gridArea = header.gridArea;
@@ -1179,7 +1185,7 @@ bool  GridMap::loadHeihgtData(FILE *in, uint32 offset, uint32 size)
     map_heightHeader header;
     fseek(in, offset, SEEK_SET);
     fread(&header, sizeof(header), 1, in);
-    if (header.fourcc != uint32(MAP_HEIGHT_MAGIC))
+    if (header.fourcc != *((uint32 const*)(MAP_HEIGHT_MAGIC)))
         return false;
 
     m_gridHeight = header.gridHeight;
@@ -1222,7 +1228,7 @@ bool  GridMap::loadLiquidData(FILE *in, uint32 offset, uint32 size)
     map_liquidHeader header;
     fseek(in, offset, SEEK_SET);
     fread(&header, sizeof(header), 1, in);
-    if (header.fourcc != uint32(MAP_LIQUID_MAGIC))
+    if (header.fourcc != *((uint32 const*)(MAP_LIQUID_MAGIC)))
         return false;
 
     m_liquidType   = header.liquidType;
