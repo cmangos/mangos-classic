@@ -3086,13 +3086,6 @@ void Spell::EffectSummonGuardian(uint32 i)
     if (!pet_entry)
         return;
 
-    // Jewelery statue case (totem like)
-    if(m_spellInfo->SpellIconID == 2056)
-    {
-        EffectSummonTotem(i);
-        return;
-    }
-
     // set timer for unsummon
     int32 duration = GetSpellDuration(m_spellInfo);
 
@@ -4626,19 +4619,16 @@ void Spell::EffectActivateObject(uint32 effect_idx)
 void Spell::EffectSummonTotem(uint32 i)
 {
     uint8 slot = 0;
-/*[-ZERO]    switch(m_spellInfo->EffectMiscValueB[i])
+    switch(m_spellInfo->Effect[i])
     {
-        case SUMMON_TYPE_TOTEM_SLOT1: slot = 0; break;
-        case SUMMON_TYPE_TOTEM_SLOT2: slot = 1; break;
-        case SUMMON_TYPE_TOTEM_SLOT3: slot = 2; break;
-        case SUMMON_TYPE_TOTEM_SLOT4: slot = 3; break;
-        // Battle standard case
-        case SUMMON_TYPE_TOTEM:       slot = 254; break;
-        // jewelery statue case, like totem without slot
-        case SUMMON_TYPE_GUARDIAN:    slot = 255; break;
+        case SPELL_EFFECT_SUMMON_TOTEM: slot = 254; break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT1: slot = 0; break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT2: slot = 1; break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT3: slot = 2; break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT4: slot = 3; break;
         default: return;
     }
-*/
+
     if(slot < MAX_TOTEM)
     {
         uint64 guid = m_caster->m_TotemSlot[slot];
