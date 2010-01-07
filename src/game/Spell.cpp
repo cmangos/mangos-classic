@@ -1127,6 +1127,23 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode, UnitList& targetUnit
 
     uint32 unMaxTargets = m_spellInfo->MaxAffectedTargets;
 
+    // custom target amount cases
+    switch(m_spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_GENERIC:
+        {
+            switch(m_spellInfo->Id)
+            {
+                case 28796:                                 // Poison Bolt Volley
+                    unMaxTargets = 10;
+                    break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
     switch(targetMode)
     {
         case TARGET_TOTEM_EARTH:
