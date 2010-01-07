@@ -1193,7 +1193,7 @@ void BattleGround::SendYellToAll(int32 entry, uint32 language, uint64 const& gui
     if(!source)
         return;
     char buf[256];
-    sprintf(buf, GetMangosString(entry));
+    sprintf(buf, "%s", GetMangosString(entry));
     for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
         WorldPacket data(SMSG_MESSAGECHAT, 200);

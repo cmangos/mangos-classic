@@ -326,15 +326,15 @@ void Log::outTitle( const char * str)
         SetColor(true,WHITE);
 
     // not expected utf8 and then send as-is
-    printf( str );
+    printf("%s", str);
 
     if(m_colored)
         ResetColor(true);
 
-    printf( "\n" );
+    printf("\n");
     if(logfile)
     {
-        fprintf(logfile, str);
+        fprintf(logfile, "%s", str);
         fprintf(logfile, "\n" );
         fflush(logfile);
     }
@@ -762,10 +762,10 @@ void outstring_log(const char * str, ...)
     char buf[256];
     va_list ap;
     va_start(ap, str);
-    vsnprintf(buf,256, str, ap);
+    vsnprintf(buf, 256, str, ap);
     va_end(ap);
 
-    MaNGOS::Singleton<Log>::Instance().outString(buf);
+    sLog.outString("%s", buf);
 }
 
 void detail_log(const char * str, ...)
@@ -779,7 +779,7 @@ void detail_log(const char * str, ...)
     vsnprintf(buf,256, str, ap);
     va_end(ap);
 
-    MaNGOS::Singleton<Log>::Instance().outDetail(buf);
+    sLog.outDetail("%s", buf);
 }
 
 void debug_log(const char * str, ...)
@@ -793,7 +793,7 @@ void debug_log(const char * str, ...)
     vsnprintf(buf,256, str, ap);
     va_end(ap);
 
-    MaNGOS::Singleton<Log>::Instance().outDebug(buf);
+    sLog.outDebug("%s", buf);
 }
 
 void error_log(const char * str, ...)
@@ -807,7 +807,7 @@ void error_log(const char * str, ...)
     vsnprintf(buf,256, str, ap);
     va_end(ap);
 
-    MaNGOS::Singleton<Log>::Instance().outError(buf);
+    sLog.outError("%s", buf);
 }
 
 void error_db_log(const char * str, ...)
@@ -821,5 +821,5 @@ void error_db_log(const char * str, ...)
     vsnprintf(buf,256, str, ap);
     va_end(ap);
 
-    MaNGOS::Singleton<Log>::Instance().outErrorDb(buf);
+    sLog.outErrorDb("%s", buf);
 }

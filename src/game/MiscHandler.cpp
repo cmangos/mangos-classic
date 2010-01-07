@@ -810,7 +810,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             /*[-ZERO] else if(missingKey)
                 GetPlayer()->SendTransferAborted(at->target_mapId,0); */
             else if(missingQuest)
-                SendAreaTriggerMessage(at->requiredFailedText.c_str());
+                SendAreaTriggerMessage("%s", at->requiredFailedText.c_str());
             else if(missingLevel)
                 SendAreaTriggerMessage(GetMangosString(LANG_LEVEL_MINREQUIRED), missingLevel);
             return;
