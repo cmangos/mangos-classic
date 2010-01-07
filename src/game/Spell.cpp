@@ -1134,6 +1134,9 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode, UnitList& targetUnit
         {
             switch(m_spellInfo->Id)
             {
+                case 28542:                                 // Life Drain
+                    unMaxTargets = 2;
+                    break;
                 case 28796:                                 // Poison Bolt Volley
                     unMaxTargets = 10;
                     break;
