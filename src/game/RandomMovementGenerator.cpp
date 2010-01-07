@@ -88,7 +88,7 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
     i_destinationHolder.SetDestination(traveller, nx, ny, nz);
     creature.addUnitState(UNIT_STAT_ROAMING);
 
-    i_nextMoveTime.Reset(urand(500+i_destinationHolder.GetTotalTravelTime(),5000+i_destinationHolder.GetTotalTravelTime()));
+    i_nextMoveTime.Reset(urand(500+i_destinationHolder.GetTotalTravelTime(),10000+i_destinationHolder.GetTotalTravelTime()));
     creature.AddMonsterMoveFlag(MONSTER_MOVE_WALK);
 }
 
