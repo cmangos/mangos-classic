@@ -37,7 +37,7 @@ BattleGround::BattleGround()
     m_InstanceID        = 0;
     m_Status            = STATUS_NONE;
     m_EndTime           = 0;
-    m_Queue_type        = MAX_BATTLEGROUND_QUEUES;
+    m_BracketId         = MAX_BATTLEGROUND_BRACKETS;        // use as mark bg template
     m_InvitedAlliance   = 0;
     m_InvitedHorde      = 0;
     m_Winner            = 2;
@@ -690,8 +690,8 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
 
             DecreaseInvitedCount(team);
             //we should update battleground queue, but only if bg isn't ending
-            if (GetQueueType() < MAX_BATTLEGROUND_QUEUES)
-                sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].Update(bgTypeId, GetQueueType());
+            if (GetBracketId() < MAX_BATTLEGROUND_BRACKETS)
+                sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].Update(bgTypeId, GetBracketId());
 
             Group * group = plr->GetGroup();
             // remove from raid group if exist
@@ -737,7 +737,7 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
 // this method is called when no players remains in battleground
 void BattleGround::Reset()
 {
-    SetQueueType(MAX_BATTLEGROUND_QUEUES);
+    SetBracketId(MAX_BATTLEGROUND_BRACKETS);
     SetWinner(WINNER_NONE);
     SetStatus(STATUS_WAIT_QUEUE);
     SetStartTime(0);

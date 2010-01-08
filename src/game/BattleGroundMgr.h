@@ -29,8 +29,6 @@ typedef std::map<uint32, BattleGround*> BattleGroundSet;
 //typedef std::map<uint32, BattleGroundQueue*> BattleGroundQueueSet;
 typedef std::deque<BattleGround*> BGFreeSlotQueueType;
 
-#define MAX_BATTLEGROUND_QUEUES 6                           // for level ranges 10-19, 20-29, 30-39, 40-49, 50-59, 60+
-
 typedef UNORDERED_MAP<uint32, BattleGroundTypeId> BattleMastersMap;
 typedef UNORDERED_MAP<uint32, BattleGroundEventIdx> CreatureBattleEventIndexesMap;
 typedef UNORDERED_MAP<uint32, BattleGroundEventIdx> GameObjectBattleEventIndexesMap;
@@ -60,9 +58,9 @@ class BattleGroundQueue
         BattleGroundQueue();
         ~BattleGroundQueue();
 
-        void Update(BattleGroundTypeId bgTypeId, uint32 queue_id);
+        void Update(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id);
 
-        GroupQueueInfo * AddGroup(Player * leader, BattleGroundTypeId bgTypeId);
+        GroupQueueInfo * AddGroup(Player * leader, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id);
         void AddPlayer(Player *plr, GroupQueueInfo *ginfo);
         void RemovePlayer(const uint64& guid, bool decreaseInvitedCount);
         void DecreaseGroupLength(uint32 queueId, uint32 AsGroup);
@@ -70,10 +68,10 @@ class BattleGroundQueue
         void AnnounceWorld(GroupQueueInfo *ginfo, const uint64& playerGUID, bool isAddedToQueue);
 
         typedef std::map<uint64, PlayerQueueInfo> QueuedPlayersMap;
-        QueuedPlayersMap m_QueuedPlayers[MAX_BATTLEGROUND_QUEUES];
+        QueuedPlayersMap m_QueuedPlayers[MAX_BATTLEGROUND_BRACKETS];
 
         typedef std::list<GroupQueueInfo*> QueuedGroupsList;
-        QueuedGroupsList m_QueuedGroups[MAX_BATTLEGROUND_QUEUES];
+        QueuedGroupsList m_QueuedGroups[MAX_BATTLEGROUND_BRACKETS];
 
         // class to hold pointers to the groups eligible for a specific selection pool building mode
         class EligibleGroups : public std::list<GroupQueueInfo *>
@@ -115,7 +113,7 @@ class BattleGroundQueue
 
         SelectionPool m_SelectionPools[NUM_SELECTION_POOL_TYPES];
 
-        bool BuildSelectionPool(BattleGroundTypeId bgTypeId, uint32 queue_id, uint32 MinPlayers, uint32 MaxPlayers, SelectionPoolBuildMode mode);
+        bool BuildSelectionPool(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id, uint32 MinPlayers, uint32 MaxPlayers, SelectionPoolBuildMode mode);
 
     private:
 
@@ -241,7 +239,7 @@ class BattleGroundMgr
 
         bool isTesting() const { return m_Testing; }
 
-        static uint32 BGQueueTypeId(BattleGroundTypeId bgTypeId);
+        static BattleGroundQueueTypeId BGQueueTypeId(BattleGroundTypeId bgTypeId);
         static BattleGroundTypeId BGTemplateId(uint32 bgQueueTypeId);
     private:
         BattleMastersMap    mBattleMastersMap;

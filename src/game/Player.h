@@ -34,6 +34,7 @@
 #include "MapReference.h"
 #include "Util.h"                                           // for Tokens typedef
 #include "ReputationMgr.h"
+#include "BattleGround.h"
 #include "DBCStores.h"
 
 #include<string>
@@ -1691,9 +1692,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetBattleGroundId() const    { return m_bgBattleGroundID; }
         BattleGround* GetBattleGround() const;
 
-        static uint32 GetMinLevelForBattleGroundQueueId(uint32 queue_id);
-        static uint32 GetMaxLevelForBattleGroundQueueId(uint32 queue_id);
-        uint32 GetBattleGroundQueueIdFromLevel() const;
+        static uint32 GetMinLevelForBattleGroundBracketId(BattleGroundBracketId bracket_id);
+        static uint32 GetMaxLevelForBattleGroundBracketId(BattleGroundBracketId bracket_id);
+        BattleGroundBracketId GetBattleGroundBracketIdFromLevel() const;
 
         bool InBattleGroundQueue() const
         {
