@@ -618,9 +618,28 @@ bool IsPositiveSpell(uint32 spellId)
 
 bool IsSingleTargetSpell(SpellEntry const *spellInfo)
 {
-    // all other single target spells have if it has AttributesEx5
-  //[-ZERO]  if ( spellInfo->AttributesEx5 & SPELL_ATTR_EX5_SINGLE_TARGET_SPELL )
-  //      return true;
+    // cheap shot is an exception
+    if (spellInfo->Id == 1833 || spellInfo->Id == 14902 )
+        return false;
+
+    // hunter's mark and similar
+    if(spellInfo->SpellVisual == 3239)
+        return true;
+
+    // cannot be cast on another target while not cooled down anyway
+    if (GetSpellDuration(spellInfo) < int32(GetSpellRecoveryTime(spellInfo)))
+        return false;
+
+    // all other single target spells have if it has AttributesEx
+    if (spellInfo->AttributesEx & (1<<18))
+        return true;
+
+    // other single target
+    //Fear
+    if ((spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
+        //Banish
+        || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305)
+        ) return true;
 
     // TODO - need found Judgements rule
     switch(GetSpellSpecific(spellInfo->Id))
@@ -630,12 +649,6 @@ bool IsSingleTargetSpell(SpellEntry const *spellInfo)
         default:
             break;
     }
-
-    // single target triggered spell.
-    // Not real client side single target spell, but it' not triggered until prev. aura expired.
-    // This is allow store it in single target spells list for caster for spell proc checking
-    if(spellInfo->Id==38324)                                // Regeneration (triggered by 38299 (HoTs on Heals))
-        return true;
 
     return false;
 }
