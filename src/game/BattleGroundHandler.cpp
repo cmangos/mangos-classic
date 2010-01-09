@@ -286,18 +286,21 @@ void WorldSession::HandleBattleFieldPortOpcode( WorldPacket &recv_data )
 {
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEFIELD_PORT Message");
 
-    uint8 type;                                             // arenatype if arena
-    uint8 unk2;                                             // unk, can be 0x0 (may be if was invited?) and 0x1
-    uint32 instanceId;
-    uint32 bgTypeId_;                                       // type id from dbc
-    uint16 unk;                                             // 0x1F90 constant?
     uint8 action;                                           // enter battle 0x1, leave queue 0x0
+	uint32 mapId;
+    recv_data >> mapId >> action;
 
-    recv_data >> type >> unk2 >> bgTypeId_ >> unk >> action;
-
-    if(bgTypeId_ >= MAX_BATTLEGROUND_TYPE_ID)
+    BattleGroundTypeId bgTypeId = BATTLEGROUND_TYPE_NONE;
+    switch(mapId)
     {
-        sLog.outError("Battleground: invalid bgtype (%u) received.",bgTypeId_);
+        case 30:  bgTypeId = BATTLEGROUND_AV; break;
+        case 489: bgTypeId = BATTLEGROUND_WS; break;
+        case 529: bgTypeId = BATTLEGROUND_AB; break;
+    }
+
+    if(bgTypeId == BATTLEGROUND_TYPE_NONE)
+    {
+        sLog.outError("Battleground: invalid bgtype (%u) received.",bgTypeId);
         // update battleground slots for the player to fix his UI and sent data.
         // this is a HACK, I don't know why the client starts sending invalid packets in the first place.
         // it usually happens with extremely high latency (if debugging / stepping in the code for example)
@@ -310,7 +313,7 @@ void WorldSession::HandleBattleFieldPortOpcode( WorldPacket &recv_data )
                 if(!queue_id)
                     continue;
                 BattleGroundQueue::QueuedPlayersMap::iterator itrPlayerStatus = sBattleGroundMgr.m_BattleGroundQueues[queue_id].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].find(_player->GetGUID());
-                // if the player is not in queue, contine
+                // if the player is not in queue, continue
                 if(itrPlayerStatus == sBattleGroundMgr.m_BattleGroundQueues[queue_id].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].end())
                     continue;
 
@@ -355,20 +358,18 @@ void WorldSession::HandleBattleFieldPortOpcode( WorldPacket &recv_data )
         return;
     }
 
-    BattleGroundTypeId bgTypeId = BattleGroundTypeId(bgTypeId_);
-
-    uint32 bgQueueTypeId = 0;
     // get the bg what we were invited to
-    BattleGroundQueue::QueuedPlayersMap::iterator itrPlayerStatus;
-    bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bgTypeId);
-    itrPlayerStatus = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].find(_player->GetGUID());
+    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bgTypeId);
+    BattleGroundQueue::QueuedPlayersMap::iterator itrPlayerStatus =
+        sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].find(_player->GetGUID());
 
     if(itrPlayerStatus == sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].end())
     {
         sLog.outError("Battleground: itrplayerstatus not found.");
         return;
     }
-    instanceId = itrPlayerStatus->second.GroupInfo->IsInvitedToBGInstanceGUID;
+
+    uint32 instanceId = itrPlayerStatus->second.GroupInfo->IsInvitedToBGInstanceGUID;
 
     // if action == 1, then instanceId is _required_
     if(!instanceId && action == 1)
