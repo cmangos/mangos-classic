@@ -5071,10 +5071,6 @@ void Aura::PeriodicTick()
 
             int32 gain = m_target->ModifyHealth(pdamage);
 
-            // add HoTs to amount healed in bgs
-            if( pCaster->GetTypeId() == TYPEID_PLAYER )
-                if( BattleGround *bg = ((Player*)pCaster)->GetBattleGround() )
-                    bg->UpdatePlayerScore(((Player*)pCaster), SCORE_HEALING_DONE, gain);
             //Do check before because m_modifier.auraName can be invalidate by DealDamage.
             bool procSpell = (m_modifier.m_auraname == SPELL_AURA_PERIODIC_HEAL && m_target != pCaster);
 

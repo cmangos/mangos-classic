@@ -865,11 +865,7 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
 
 void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
 {
-    // [-ZERO] need fix packet, type fro bg/arenas seelction
-    uint8 type = 0;
-                                                            // last check on 2.4.1
-    data->Initialize(MSG_PVP_LOG_DATA, (1+1+4+40*bg->GetPlayerScoresSize()));
-    *data << uint8(type);                                   // seems to be type (battleground=0/arena=1)
+    data->Initialize(MSG_PVP_LOG_DATA, (1+4+40*bg->GetPlayerScoresSize()));
 
     if(bg->GetWinner() == 2)
     {
@@ -881,30 +877,31 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
         *data << uint8(bg->GetWinner());                    // who win
     }
 
-    *data << (int32)(bg->GetPlayerScoresSize());
+    *data << (uint32)(bg->GetPlayerScoresSize());
 
     for(BattleGround::BattleGroundScoreMap::const_iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
     {
-        *data << (uint64)itr->first;
-        *data << (int32)itr->second->KillingBlows;
-        Player *plr = sObjectMgr.GetPlayer(itr->first);
-        uint32 team = bg->GetPlayerTeam(itr->first);
-        if(!team && plr) team = plr->GetTeam();
+        *data << uint64(itr->first);
 
-        *data << (int32)itr->second->HonorableKills;
-        *data << (int32)itr->second->Deaths;
-        *data << (int32)(itr->second->BonusHonor);
-        *data << (int32)itr->second->DamageDone;             // damage done
-        *data << (int32)itr->second->HealingDone;            // healing done
+        Player *plr = sObjectMgr.GetPlayer(itr->first);
+
+        *data << uint32(plr ? plr->GetHonorRank() : 0);
+        *data << uint32(itr->second->KillingBlows);
+        *data << uint32(itr->second->HonorableKills);
+        *data << uint32(itr->second->Deaths);
+        *data << uint32(itr->second->BonusHonor);
+
         switch(bg->GetTypeID())                              // battleground specific things
         {
             case BATTLEGROUND_AV:
-                *data << (uint32)0x00000005;                // count of next fields
+                *data << (uint32)0x00000007;                // count of next fields
                 *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsAssaulted;  // GraveyardsAssaulted
                 *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsDefended;   // GraveyardsDefended
                 *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersAssaulted;      // TowersAssaulted
                 *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersDefended;       // TowersDefended
-                *data << (uint32)((BattleGroundAVScore*)itr->second)->SecondaryObjectives;  // SecondaryObjectives - free some of the Lieutnants
+                *data << (uint32)((BattleGroundAVScore*)itr->second)->SecondaryObjectives;  // Mines Taken
+                *data << (uint32)((BattleGroundAVScore*)itr->second)->LieutnantCount;       // Lieutnant kills
+                *data << (uint32)((BattleGroundAVScore*)itr->second)->SecondaryNPC;         // Secondary unit summons
                 break;
             case BATTLEGROUND_WS:
                 *data << (uint32)0x00000002;                // count of next fields
@@ -918,7 +915,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
                 break;
             default:
                 sLog.outDebug("Unhandled MSG_PVP_LOG_DATA for BG id %u", bg->GetTypeID());
-                *data << (int32)0;
+                *data << (uint32)0;
                 break;
         }
     }

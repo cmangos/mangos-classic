@@ -574,17 +574,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         }
     }
 
-    if(pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER)
-    {
-        if(((Player*)pVictim)->InBattleGround())
-        {
-            Player *killer = ((Player*)this);
-            if(killer != ((Player*)pVictim))
-                if(BattleGround *bg = killer->GetBattleGround())
-                    bg->UpdatePlayerScore(killer, SCORE_DAMAGE_DONE, damage);
-        }
-    }
-
     if (pVictim->GetTypeId() == TYPEID_UNIT && !((Creature*)pVictim)->isPet() && !((Creature*)pVictim)->hasLootRecipient())
         ((Creature*)pVictim)->SetLootRecipient(this);
     if (health <= damage)
@@ -6416,12 +6405,7 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
         unit = GetOwner();
 
     if (unit->GetTypeId()==TYPEID_PLAYER)
-    {
         unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, critical);
-
-        if (BattleGround *bg = ((Player*)unit)->GetBattleGround())
-            bg->UpdatePlayerScore((Player*)unit, SCORE_HEALING_DONE, gain);
-    }
 
     return gain;
 }

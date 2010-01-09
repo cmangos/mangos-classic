@@ -919,13 +919,6 @@ void BattleGround::UpdatePlayerScore(Player *Source, uint32 type, uint32 value)
             if(Source->RewardHonor(NULL, 1, value))
                 itr->second->BonusHonor += value; */
             break;
-            //used only in EY, but in MSG_PVP_LOG_DATA opcode
-        case SCORE_DAMAGE_DONE:                             // Damage Done
-            itr->second->DamageDone += value;
-            break;
-        case SCORE_HEALING_DONE:                            // Healing Done
-            itr->second->HealingDone += value;
-            break;
         default:
             sLog.outError("BattleGround: Unknown player score type %u", type);
             break;

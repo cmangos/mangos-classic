@@ -163,9 +163,6 @@ enum ScoreType
     SCORE_DEATHS                = 2,
     SCORE_HONORABLE_KILLS       = 3,
     SCORE_BONUS_HONOR           = 4,
-    //EY, but in MSG_PVP_LOG_DATA opcode!
-    SCORE_DAMAGE_DONE           = 5,
-    SCORE_HEALING_DONE          = 6,
     //WS
     SCORE_FLAG_CAPTURES         = 7,
     SCORE_FLAG_RETURNS          = 8,
@@ -211,17 +208,16 @@ enum BattleGroundJoinError
 class BattleGroundScore
 {
     public:
-        BattleGroundScore() : KillingBlows(0), Deaths(0), HonorableKills(0),
-            BonusHonor(0), DamageDone(0), HealingDone(0)
+       BattleGroundScore() : KillingBlows(0), Deaths(0), HonorableKills(0),
+           DishonorableKills(0), BonusHonor(0)
         {}
         virtual ~BattleGroundScore() {}                     //virtual destructor is used when deleting score from scores map
 
         uint32 KillingBlows;
         uint32 Deaths;
         uint32 HonorableKills;
+        uint32 DishonorableKills;
         uint32 BonusHonor;
-        uint32 DamageDone;
-        uint32 HealingDone;
 };
 
 /*
