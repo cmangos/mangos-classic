@@ -415,9 +415,6 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
 void WorldSession::HandleContactListOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: Received CMSG_CONTACT_LIST" );
-    uint32 unk;
-    recv_data >> unk;
-    sLog.outDebug("unk value is %u", unk);
     _player->GetSocial()->SendSocialList();
 }
 
