@@ -7191,6 +7191,12 @@ void Player::SendInitWorldStates(uint32 zoneid)
         case 2918:
             NumberOfFields = 6;
             break;
+        case 139:
+            NumberOfFields = 39;
+            break;
+        case 1377:
+            NumberOfFields = 13;
+            break;
         case 2597:
             NumberOfFields = 81;
             break;
@@ -7225,7 +7231,7 @@ void Player::SendInitWorldStates(uint32 zoneid)
 
     WorldPacket data(SMSG_INIT_WORLD_STATES, (4+2+(NumberOfFields*8)));
     data << uint32(mapid);                                  // mapid
-    //data << uint32(zoneid);                                 // zone id [-ZERO] to check if we need mapid or zoneid
+    data << uint32(zoneid);                                 // zone id
     data << uint16(NumberOfFields);                         // count of uint64 blocks
     data << uint32(0x8d8) << uint32(0x0);                   // 1
     data << uint32(0x8d7) << uint32(0x0);                   // 2
@@ -7244,6 +7250,54 @@ void Player::SendInitWorldStates(uint32 zoneid)
         case 1519:
         case 1537:
         case 2257:
+            break;
+        case 139:                                           // EPL
+            {
+                data << uint32(0x97a) << uint32(0x0); // 10 2426
+                data << uint32(0x917) << uint32(0x0); // 11 2327
+                data << uint32(0x918) << uint32(0x0); // 12 2328
+                data << uint32(0x97b) << uint32(0x32); // 13 2427
+                data << uint32(0x97c) << uint32(0x32); // 14 2428
+                data << uint32(0x933) << uint32(0x1); // 15 2355
+                data << uint32(0x946) << uint32(0x0); // 16 2374
+                data << uint32(0x947) << uint32(0x0); // 17 2375
+                data << uint32(0x948) << uint32(0x0); // 18 2376
+                data << uint32(0x949) << uint32(0x0); // 19 2377
+                data << uint32(0x94a) << uint32(0x0); // 20 2378
+                data << uint32(0x94b) << uint32(0x0); // 21 2379
+                data << uint32(0x932) << uint32(0x0); // 22 2354
+                data << uint32(0x934) << uint32(0x0); // 23 2356
+                data << uint32(0x935) << uint32(0x0); // 24 2357
+                data << uint32(0x936) << uint32(0x0); // 25 2358
+                data << uint32(0x937) << uint32(0x0); // 26 2359
+                data << uint32(0x938) << uint32(0x0); // 27 2360
+                data << uint32(0x939) << uint32(0x1); // 28 2361
+                data << uint32(0x930) << uint32(0x1); // 29 2352
+                data << uint32(0x93a) << uint32(0x0); // 30 2362
+                data << uint32(0x93b) << uint32(0x0); // 31 2363
+                data << uint32(0x93c) << uint32(0x0); // 32 2364
+                data << uint32(0x93d) << uint32(0x0); // 33 2365
+                data << uint32(0x944) << uint32(0x0); // 34 2372
+                data << uint32(0x945) << uint32(0x0); // 35 2373
+                data << uint32(0x931) << uint32(0x1); // 36 2353
+                data << uint32(0x93e) << uint32(0x0); // 37 2366
+                data << uint32(0x931) << uint32(0x1); // 38 2367 ??  grey horde not in dbc! send for consistency's sake, and to match field count
+                data << uint32(0x940) << uint32(0x0); // 39 2368
+                data << uint32(0x941) << uint32(0x0); // 7 2369
+                data << uint32(0x942) << uint32(0x0); // 8 2370
+                data << uint32(0x943) << uint32(0x0); // 9 2371
+            }
+            break;
+        case 1377:                                          // Silithus
+            {
+                data << uint32(0x909) << uint32(0x0); // 7 ally silityst gathered
+                data << uint32(0x90A) << uint32(0x0); // 8 horde silityst gathered
+                data << uint32(0x90D) << uint32(0x0C8); // 9 max silithyst
+                data << uint32(0x912) << uint32(0x0); // 10 sandworm N
+                data << uint32(0x913) << uint32(0x0); // 11 sandworm S
+                data << uint32(0x914) << uint32(0x0); // 12 sandworm SW
+                data << uint32(0x915) << uint32(0x0); // 13 sandworm E
+            }
             break;
         case 2597:                                          // AV
             if (bg && bg->GetTypeID() == BATTLEGROUND_AV)
