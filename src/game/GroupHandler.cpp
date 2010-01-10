@@ -633,12 +633,12 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
         if (player)
         {
             if (player->IsPvP())
-                *data << (uint16) (MEMBER_STATUS_ONLINE | MEMBER_STATUS_PVP);
+                *data << (uint8) (MEMBER_STATUS_ONLINE | MEMBER_STATUS_PVP);
             else
-                *data << (uint16) MEMBER_STATUS_ONLINE;
+                *data << (uint8) MEMBER_STATUS_ONLINE;
         }
         else
-            *data << (uint16) MEMBER_STATUS_OFFLINE;
+            *data << (uint8) MEMBER_STATUS_OFFLINE;
     }
 
     if (mask & GROUP_UPDATE_FLAG_CUR_HP)
@@ -669,13 +669,12 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
     if (mask & GROUP_UPDATE_FLAG_AURAS)
     {
         const uint64& auramask = player->GetAuraUpdateMask();
-        *data << uint64(auramask);
+        *data << uint32(auramask);
         for(uint32 i = 0; i < MAX_AURAS; ++i)
         {
             if(auramask & (uint64(1) << i))
             {
                 *data << uint16(player->GetUInt32Value(UNIT_FIELD_AURA + i));
-                *data << uint8(1);
             }
         }
     }
@@ -750,18 +749,17 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
         if(pet)
         {
             const uint64& auramask = pet->GetAuraUpdateMask();
-            *data << uint64(auramask);
+            *data << uint32(auramask);
             for(uint32 i = 0; i < MAX_AURAS; ++i)
             {
                 if(auramask & (uint64(1) << i))
                 {
                     *data << uint16(pet->GetUInt32Value(UNIT_FIELD_AURA + i));
-                    *data << uint8(1);
                 }
             }
         }
         else
-            *data << (uint64) 0;
+            *data << (uint32) 0;
     }
 }
 
@@ -807,17 +805,16 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 
     uint64 auramask = 0;
     size_t maskPos = data.wpos();
-    data << (uint64) auramask;                              // placeholder
+    data << (uint32) auramask;                              // placeholder
     for(uint8 i = 0; i < MAX_AURAS; ++i)
     {
         if(uint32 aura = player->GetUInt32Value(UNIT_FIELD_AURA + i))
         {
             auramask |= (uint64(1) << i);
             data << uint16(aura);
-            data << uint8(1);
         }
     }
-    data.put<uint64>(maskPos,auramask);                     // GROUP_UPDATE_FLAG_AURAS
+    data.put<uint32>(maskPos,auramask);                     // GROUP_UPDATE_FLAG_AURAS
 
     if(pet)
     {
@@ -833,22 +830,21 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 
         uint64 petauramask = 0;
         size_t petMaskPos = data.wpos();
-        data << (uint64) petauramask;                       // placeholder
+        data << (uint32) petauramask;                       // placeholder
         for(uint8 i = 0; i < MAX_AURAS; ++i)
         {
             if(uint32 petaura = pet->GetUInt32Value(UNIT_FIELD_AURA + i))
             {
                 petauramask |= (uint64(1) << i);
                 data << (uint16) petaura;
-                data << (uint8)  1;
             }
         }
-        data.put<uint64>(petMaskPos,petauramask);           // GROUP_UPDATE_FLAG_PET_AURAS
+        data.put<uint32>(petMaskPos,petauramask);           // GROUP_UPDATE_FLAG_PET_AURAS
     }
     else
     {
         data << (uint8)  0;                                 // GROUP_UPDATE_FLAG_PET_NAME
-        data << (uint64) 0;                                 // GROUP_UPDATE_FLAG_PET_AURAS
+        data << (uint32) 0;                                 // GROUP_UPDATE_FLAG_PET_AURAS
     }
 
     SendPacket(&data);
