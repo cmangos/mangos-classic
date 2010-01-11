@@ -40,7 +40,7 @@ void PoolGroup<T>::AddEntry(PoolObject& poolitem, uint32 maxentries)
 
 // Method to check the chances are proper in this object pool
 template <class T>
-bool PoolGroup<T>::CheckPool(void)
+bool PoolGroup<T>::CheckPool() const
 {
     if (EqualChanced.size() == 0)
     {
@@ -55,7 +55,7 @@ bool PoolGroup<T>::CheckPool(void)
 
 // Method that tell if the gameobject, creature or pool is spawned currently
 template <class T>
-bool PoolGroup<T>::IsSpawnedObject(uint32 guid)
+bool PoolGroup<T>::IsSpawnedObject(uint32 guid) const
 {
     for (uint32 i = 0; i < ExplicitlyChanced.size(); ++i)
         if (ExplicitlyChanced[i].guid == guid)
@@ -147,7 +147,7 @@ void PoolGroup<Creature>::Despawn1Object(uint32 guid)
     {
         sObjectMgr.RemoveCreatureFromGrid(guid, data);
 
-        if (Creature* pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT), (Creature*)NULL))
+        if (Creature* pCreature = ObjectAccessor::GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT), (Creature*)NULL))
             pCreature->AddObjectToRemoveList();
     }
 }
@@ -160,7 +160,7 @@ void PoolGroup<GameObject>::Despawn1Object(uint32 guid)
     {
         sObjectMgr.RemoveGameobjectFromGrid(guid, data);
 
-        if (GameObject* pGameobject = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))
+        if (GameObject* pGameobject = ObjectAccessor::GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))
             pGameobject->AddObjectToRemoveList();
     }
 }
@@ -201,7 +201,7 @@ void PoolGroup<T>::SpawnObject(uint32 limit, uint32 triggerFrom)
     int count = limit - m_SpawnedPoolAmount;
 
     // If triggered from some object respawn this object is still marked as spawned
-    // and also counted into m_SpawnedPoolAmount so we need increase count to be 
+    // and also counted into m_SpawnedPoolAmount so we need increase count to be
     // spawned by 1
     if (triggerFrom)
         ++count;
@@ -248,7 +248,7 @@ bool PoolGroup<Creature>::Spawn1Object(uint32 guid)
         sObjectMgr.AddCreatureToGrid(guid, data);
 
         // Spawn if necessary (loaded grids only)
-        Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
+        Map* map = const_cast<Map*>(sMapMgr.CreateBaseMap(data->mapid));
         // We use spawn coords to spawn
         if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
@@ -276,7 +276,7 @@ bool PoolGroup<GameObject>::Spawn1Object(uint32 guid)
         sObjectMgr.AddGameobjectToGrid(guid, data);
         // Spawn if necessary (loaded grids only)
         // this base map checked as non-instanced and then only existed
-        Map* map = const_cast<Map*>(MapManager::Instance().CreateBaseMap(data->mapid));
+        Map* map = const_cast<Map*>(sMapMgr.CreateBaseMap(data->mapid));
         // We use current coords to unspawn, not spawn coords since creature can have changed grid
         if (!map->Instanceable() && map->IsLoaded(data->posX, data->posY))
         {
@@ -314,7 +314,7 @@ bool PoolGroup<Creature>::ReSpawn1Object(uint32 guid)
 {
     if (CreatureData const* data = sObjectMgr.GetCreatureData(guid))
     {
-        if (Creature* pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT), (Creature*)NULL))
+        if (Creature* pCreature = ObjectAccessor::GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_UNIT), (Creature*)NULL))
             pCreature->GetMap()->Add(pCreature);
         return true;
     }
@@ -327,7 +327,7 @@ bool PoolGroup<GameObject>::ReSpawn1Object(uint32 guid)
 {
     if (GameObjectData const* data = sObjectMgr.GetGOData(guid))
     {
-        if (GameObject* pGameobject = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))
+        if (GameObject* pGameobject = ObjectAccessor::GetObjectInWorld(MAKE_NEW_GUID(guid, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL))
             pGameobject->GetMap()->Add(pGameobject);
         return true;
     }
@@ -347,7 +347,6 @@ bool PoolGroup<Pool>::ReSpawn1Object(uint32 /*guid*/)
 
 PoolManager::PoolManager()
 {
-    m_IsPoolSystemStarted = false;
 }
 
 void PoolManager::LoadFromDB()
@@ -495,7 +494,7 @@ void PoolManager::LoadFromDB()
                 sLog.outErrorDb("`pool_gameobject` has a non existing gameobject spawn (GUID: %u) defined for pool id (%u), skipped.", guid, pool_id );
                 continue;
             }
-            GameObjectInfo const* goinfo = sObjectMgr.GetGameObjectInfo(data->id);
+            GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(data->id);
             if (goinfo->type != GAMEOBJECT_TYPE_CHEST &&
                 goinfo->type != GAMEOBJECT_TYPE_GOOBER &&
                 goinfo->type != GAMEOBJECT_TYPE_FISHINGHOLE)
@@ -643,7 +642,6 @@ void PoolManager::Initialize()
     }
 
     sLog.outBasic("Pool handling system initialized, %u pools spawned.", count);
-    m_IsPoolSystemStarted = true;
 }
 
 // Call to spawn a pool, if cache if true the method will spawn only if cached entry is different
@@ -691,7 +689,7 @@ void PoolManager::UpdatePool(uint16 pool_id, uint32 guid, uint32 type)
 }
 
 // Method that tell if the gameobject/creature is part of a pool and return the pool id if yes
-uint16 PoolManager::IsPartOfAPool(uint32 guid, uint32 type)
+uint16 PoolManager::IsPartOfAPool(uint32 guid, uint32 type) const
 {
     if (type == 0) // pool of pool
     {
@@ -715,7 +713,7 @@ uint16 PoolManager::IsPartOfAPool(uint32 guid, uint32 type)
 }
 
 // Method that check chance integrity of the creatures and gameobjects in this pool
-bool PoolManager::CheckPool(uint16 pool_id)
+bool PoolManager::CheckPool(uint16 pool_id) const
 {
     return pool_id <= max_pool_id &&
         mPoolGameobjectGroups[pool_id].CheckPool() &&
@@ -724,7 +722,7 @@ bool PoolManager::CheckPool(uint16 pool_id)
 }
 
 // Method that tell if a creature or gameobject in pool_id is spawned currently
-bool PoolManager::IsSpawnedObject(uint16 pool_id, uint32 guid, uint32 type)
+bool PoolManager::IsSpawnedObject(uint16 pool_id, uint32 guid, uint32 type) const
 {
     if (pool_id > max_pool_id)
         return false;

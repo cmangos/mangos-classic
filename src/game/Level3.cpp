@@ -179,7 +179,7 @@ bool ChatHandler::HandleReloadConfigCommand(const char* /*args*/)
 {
     sLog.outString( "Re-Loading config settings..." );
     sWorld.LoadConfigSettings(true);
-    MapManager::Instance().InitializeVisibilityDistanceInfo();
+    sMapMgr.InitializeVisibilityDistanceInfo();
     SendGlobalSysMessage("World config settings reloaded.");
     return true;
 }
@@ -2234,7 +2234,7 @@ bool ChatHandler::HandleListObjectCommand(const char* args)
         return false;
     }
 
-    GameObjectInfo const * gInfo = sObjectMgr.GetGameObjectInfo(go_id);
+    GameObjectInfo const * gInfo = ObjectMgr::GetGameObjectInfo(go_id);
     if(!gInfo)
     {
         PSendSysMessage(LANG_COMMAND_LISTOBJINVALIDID, go_id);
@@ -5736,8 +5736,8 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char* args)
 
 bool ChatHandler::HandleInstanceStatsCommand(const char* /*args*/)
 {
-    PSendSysMessage("instances loaded: %d", MapManager::Instance().GetNumInstances());
-    PSendSysMessage("players in instances: %d", MapManager::Instance().GetNumPlayersInInstances());
+    PSendSysMessage("instances loaded: %d", sMapMgr.GetNumInstances());
+    PSendSysMessage("players in instances: %d", sMapMgr.GetNumPlayersInInstances());
     PSendSysMessage("instance saves: %d", sInstanceSaveManager.GetNumInstanceSaves());
     PSendSysMessage("players bound: %d", sInstanceSaveManager.GetNumBoundPlayersTotal());
     PSendSysMessage("groups bound: %d", sInstanceSaveManager.GetNumBoundGroupsTotal());

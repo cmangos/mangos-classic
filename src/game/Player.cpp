@@ -1581,12 +1581,12 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         // Check enter rights before map getting to avoid creating instance copy for player
         // this check not dependent from map instance copy and same for all instance copies of selected map
-        if (!MapManager::Instance().CanPlayerEnter(mapid, this))
+        if (!sMapMgr.CanPlayerEnter(mapid, this))
             return false;
 
         // If the map is not created, assume it is possible to enter it.
         // It will be created in the WorldPortAck.
-        Map *map = MapManager::Instance().FindMap(mapid);
+        Map *map = sMapMgr.FindMap(mapid);
         if (!map ||  map->CanEnter(this))
         {
             SetSelection(0);
@@ -5376,7 +5376,7 @@ void Player::SaveRecallPosition()
 
 void Player::SendMessageToSet(WorldPacket *data, bool self)
 {
-    Map * _map = IsInWorld() ? GetMap() : MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+    Map * _map = IsInWorld() ? GetMap() : sMapMgr.FindMap(GetMapId(), GetInstanceId());
     if(_map)
     {
         _map->MessageBroadcast(this, data, self);
@@ -5391,7 +5391,7 @@ void Player::SendMessageToSet(WorldPacket *data, bool self)
 
 void Player::SendMessageToSetInRange(WorldPacket *data, float dist, bool self)
 {
-    Map * _map = IsInWorld() ? GetMap() : MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+    Map * _map = IsInWorld() ? GetMap() : sMapMgr.FindMap(GetMapId(), GetInstanceId());
     if(_map)
     {
         _map->MessageDistBroadcast(this, data, dist, self);
@@ -5404,7 +5404,7 @@ void Player::SendMessageToSetInRange(WorldPacket *data, float dist, bool self)
 
 void Player::SendMessageToSetInRange(WorldPacket *data, float dist, bool self, bool own_team_only)
 {
-    Map * _map = IsInWorld() ? GetMap() : MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+    Map * _map = IsInWorld() ? GetMap() : sMapMgr.FindMap(GetMapId(), GetInstanceId());
     if(_map)
     {
         _map->MessageDistBroadcast(this, data, dist, self, own_team_only);
@@ -5920,7 +5920,7 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
         float posz = fields[3].GetFloat();
         delete result;
 
-        zone = MapManager::Instance().GetZoneId(map,posx,posy,posz);
+        zone = sMapMgr.GetZoneId(map,posx,posy,posz);
 
         if (zone > 0)
             CharacterDatabase.PExecute("UPDATE characters SET zone='%u' WHERE guid='%u'", zone, guidLow);
@@ -13403,7 +13403,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     if (transGUID != 0)
     {
-        for (MapManager::TransportSet::const_iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); ++iter)
+        for (MapManager::TransportSet::const_iterator iter = sMapMgr.m_Transports.begin(); iter != sMapMgr.m_Transports.end(); ++iter)
         {
             if( (*iter)->GetGUIDLow() == transGUID)
             {
@@ -15279,7 +15279,7 @@ void Player::ResetInstances(uint8 method)
         }
 
         // if the map is loaded, reset it
-        Map *map = MapManager::Instance().FindMap(p->GetMapId(), p->GetInstanceId());
+        Map *map = sMapMgr.FindMap(p->GetMapId(), p->GetInstanceId());
         if(map && map->IsDungeon())
             ((InstanceMap*)map)->Reset(method);
 

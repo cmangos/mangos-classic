@@ -131,7 +131,7 @@ void Map::LoadMap(int gx,int gy, bool reload)
         if(GridMaps[gx][gy])
             return;
 
-        Map* baseMap = const_cast<Map*>(MapManager::Instance().CreateBaseMap(i_id));
+        Map* baseMap = const_cast<Map*>(sMapMgr.CreateBaseMap(i_id));
 
         // load grid map for base map
         if (!baseMap->GridMaps[gx][gy])
@@ -750,7 +750,7 @@ bool Map::RemoveBones(uint64 guid, float x, float y)
 {
     if (IsRemovalGrid(x, y))
     {
-        Corpse * corpse = ObjectAccessor::Instance().GetObjectInWorld(GetId(), x, y, guid, (Corpse*)NULL);
+        Corpse * corpse = ObjectAccessor::GetObjectInWorld(GetId(), x, y, guid, (Corpse*)NULL);
         if(corpse && corpse->GetTypeId() == TYPEID_CORPSE && corpse->GetType() == CORPSE_BONES)
             corpse->DeleteBonesFromWorld();
         else
@@ -1055,7 +1055,7 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool pForce)
             VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gx, gy);
         }
         else
-            ((MapInstanced*)(MapManager::Instance().CreateBaseMap(i_id)))->RemoveGridMapReference(GridPair(gx, gy));
+            ((MapInstanced*)(sMapMgr.CreateBaseMap(i_id)))->RemoveGridMapReference(GridPair(gx, gy));
         GridMaps[gx][gy] = NULL;
     }
     DEBUG_LOG("Unloading grid[%u,%u] for map %u finished", x,y, i_id);
@@ -1897,7 +1897,7 @@ void Map::SendInitSelf( Player * player )
 void Map::SendInitTransports( Player * player )
 {
     // Hack to send out transports
-    MapManager::TransportMap& tmap = MapManager::Instance().m_TransportsByMap;
+    MapManager::TransportMap& tmap = sMapMgr.m_TransportsByMap;
 
     // no transports at map
     if (tmap.find(player->GetMapId()) == tmap.end())
@@ -1927,7 +1927,7 @@ void Map::SendInitTransports( Player * player )
 void Map::SendRemoveTransports( Player * player )
 {
     // Hack to send out transports
-    MapManager::TransportMap& tmap = MapManager::Instance().m_TransportsByMap;
+    MapManager::TransportMap& tmap = sMapMgr.m_TransportsByMap;
 
     // no transports at map
     if (tmap.find(player->GetMapId()) == tmap.end())

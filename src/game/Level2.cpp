@@ -467,7 +467,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(const char* args)
     int mapid = fields[6].GetUInt16();
     delete result;
 
-    GameObjectInfo const* goI = sObjectMgr.GetGameObjectInfo(id);
+    GameObjectInfo const* goI = ObjectMgr::GetGameObjectInfo(id);
 
     if (!goI)
     {
@@ -690,7 +690,7 @@ bool ChatHandler::HandleGameObjectAddCommand(const char* args)
 
     char* spawntimeSecs = strtok(NULL, " ");
 
-    const GameObjectInfo *gInfo = sObjectMgr.GetGameObjectInfo(id);
+    const GameObjectInfo *gInfo = ObjectMgr::GetGameObjectInfo(id);
 
     if (!gInfo)
     {
@@ -776,7 +776,7 @@ bool ChatHandler::HandleGameObjectNearCommand(const char* args)
             float z = fields[4].GetFloat();
             int mapid = fields[5].GetUInt16();
 
-            GameObjectInfo const * gInfo = sObjectMgr.GetGameObjectInfo(entry);
+            GameObjectInfo const * gInfo = ObjectMgr::GetGameObjectInfo(entry);
 
             if(!gInfo)
                 continue;

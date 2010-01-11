@@ -1335,7 +1335,7 @@ void WorldObject::BuildMonsterChat(WorldPacket *data, uint8 msgtype, char const*
 void WorldObject::SendMessageToSet(WorldPacket *data, bool /*bToSelf*/)
 {
     //if object is in world, map for it already created!
-    Map * _map = IsInWorld() ? GetMap() : MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+    Map * _map = IsInWorld() ? GetMap() : sMapMgr.FindMap(GetMapId(), GetInstanceId());
     if(_map)
         _map->MessageBroadcast(this, data);
 }
@@ -1343,7 +1343,7 @@ void WorldObject::SendMessageToSet(WorldPacket *data, bool /*bToSelf*/)
 void WorldObject::SendMessageToSetInRange(WorldPacket *data, float dist, bool /*bToSelf*/)
 {
     //if object is in world, map for it already created!
-    Map * _map = IsInWorld() ? GetMap() : MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+    Map * _map = IsInWorld() ? GetMap() : sMapMgr.FindMap(GetMapId(), GetInstanceId());
     if(_map)
         _map->MessageDistBroadcast(this, data, dist);
 }
@@ -1357,12 +1357,12 @@ void WorldObject::SendObjectDeSpawnAnim(uint64 guid)
 
 Map* WorldObject::GetMap() const
 {
-    return MapManager::Instance().GetMap(GetMapId(), this);
+    return sMapMgr.GetMap(GetMapId(), this);
 }
 
 Map const* WorldObject::GetBaseMap() const
 {
-    return MapManager::Instance().CreateBaseMap(GetMapId());
+    return sMapMgr.CreateBaseMap(GetMapId());
 }
 
 void WorldObject::AddObjectToRemoveList()

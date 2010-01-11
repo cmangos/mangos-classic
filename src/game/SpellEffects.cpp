@@ -5337,7 +5337,7 @@ void Spell::EffectTransmitted(uint32 effIndex)
 {
     uint32 name_id = m_spellInfo->EffectMiscValue[effIndex];
 
-    GameObjectInfo const* goinfo = sObjectMgr.GetGameObjectInfo(name_id);
+    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(name_id);
 
     if (!goinfo)
     {

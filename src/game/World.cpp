@@ -550,7 +550,7 @@ void World::LoadConfigSettings(bool reload)
         m_configs[CONFIG_INTERVAL_GRIDCLEAN] = MIN_GRID_DELAY;
     }
     if(reload)
-        MapManager::Instance().SetGridCleanUpDelay(m_configs[CONFIG_INTERVAL_GRIDCLEAN]);
+        sMapMgr.SetGridCleanUpDelay(m_configs[CONFIG_INTERVAL_GRIDCLEAN]);
 
     m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig.GetIntDefault("MapUpdateInterval", 100);
     if(m_configs[CONFIG_INTERVAL_MAPUPDATE] < MIN_MAP_UPDATE_DELAY)
@@ -559,7 +559,7 @@ void World::LoadConfigSettings(bool reload)
         m_configs[CONFIG_INTERVAL_MAPUPDATE] = MIN_MAP_UPDATE_DELAY;
     }
     if(reload)
-        MapManager::Instance().SetMapUpdateInterval(m_configs[CONFIG_INTERVAL_MAPUPDATE]);
+        sMapMgr.SetMapUpdateInterval(m_configs[CONFIG_INTERVAL_MAPUPDATE]);
 
     m_configs[CONFIG_INTERVAL_CHANGEWEATHER] = sConfig.GetIntDefault("ChangeWeatherInterval", 600000);
 
@@ -1350,7 +1350,7 @@ void World::SetInitialWorldSettings()
 
     ///- Initialize MapManager
     sLog.outString( "Starting Map System" );
-    MapManager::Instance().Initialize();
+    sMapMgr.Initialize();
 
     ///- Initialize Battlegrounds
     sLog.outString( "Starting BattleGround System" );
@@ -1358,7 +1358,7 @@ void World::SetInitialWorldSettings()
 
     //Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
     sLog.outString( "Loading Transports..." );
-    MapManager::Instance().LoadTransports();
+    sMapMgr.LoadTransports();
 
     sLog.outString("Deleting expired bans..." );
     loginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
@@ -1490,7 +1490,7 @@ void World::Update(uint32 diff)
     {
         m_timers[WUPDATE_OBJECTS].Reset();
         ///- Update objects when the timer has passed (maps, transport, creatures,...)
-        MapManager::Instance().Update(diff);                // As interval = 0
+        sMapMgr.Update(diff);                // As interval = 0
 
         ///- Process necessary scripts
         if (!m_scriptSchedule.empty())
@@ -1521,7 +1521,7 @@ void World::Update(uint32 diff)
 
     /// </ul>
     ///- Move all creatures with "delayed move" and remove and delete all objects with "delayed remove"
-    MapManager::Instance().DoDelayedMovesAndRemoves();
+    sMapMgr.DoDelayedMovesAndRemoves();
 
     // update the instance reset times
     sInstanceSaveManager.Update();

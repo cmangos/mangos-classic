@@ -60,7 +60,7 @@ static void CorpsesEraseCallBack(QueryResult *result, bool bones)
         else
             ///- or delete bones
         {
-            MapManager::Instance().RemoveBonesFromMap(mapid, guid, positionX, positionY);
+            sMapMgr.RemoveBonesFromMap(mapid, guid, positionX, positionY);
 
             ///- remove bones from the database
             CharacterDatabase.PExecute("DELETE FROM corpse WHERE guid = '%u'",guidlow);

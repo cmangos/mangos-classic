@@ -1009,7 +1009,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     //Notify the map's instance data.
     //Only works if you create the object in it, not if it is moves to that map.
     //Normally non-players do not teleport to other maps.
-    Map *map = MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+    Map *map = sMapMgr.FindMap(GetMapId(), GetInstanceId());
     if(map && map->IsDungeon() && ((InstanceMap*)map)->GetInstanceData())
     {
         ((InstanceMap*)map)->GetInstanceData()->OnCreatureCreate(this);
