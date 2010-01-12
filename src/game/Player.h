@@ -1771,9 +1771,12 @@ class MANGOS_DLL_SPEC Player : public Unit
             return false;
         }
         WorldLocation const& GetBattleGroundEntryPoint() const { return m_bgEntryPoint; }
-        void SetBattleGroundEntryPoint(uint32 Map, float PosX, float PosY, float PosZ, float PosO )
+        void SetBattleGroundEntryPoint(Player* leader = NULL)
         {
-            m_bgEntryPoint = WorldLocation(Map,PosX,PosY,PosZ,PosO);
+            if (!leader)
+                leader = this;
+
+            m_bgEntryPoint = WorldLocation(leader->GetMapId(),leader->GetPositionX(),leader->GetPositionY(),leader->GetPositionZ(),leader->GetOrientation());
         }
 
         void SetBGTeam(uint32 team) { m_bgTeam = team; }

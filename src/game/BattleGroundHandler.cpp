@@ -166,7 +166,7 @@ void WorldSession::HandleBattlemasterJoinOpcode( WorldPacket & recv_data )
             uint32 queueSlot = member->AddBattleGroundQueueId(bgQueueTypeId);           // add to queue
 
             // store entry point coords (same as leader entry point)
-            member->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+            member->SetBattleGroundEntryPoint(_player);
 
             WorldPacket data;
                                                             // send status packet (in queue)
@@ -187,7 +187,7 @@ void WorldSession::HandleBattlemasterJoinOpcode( WorldPacket & recv_data )
         // already checked if queueSlot is valid, now just get it
         uint32 queueSlot = _player->AddBattleGroundQueueId(bgQueueTypeId);
         // store entry point coords
-        _player->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+        _player->SetBattleGroundEntryPoint();
 
         WorldPacket data;
                                                             // send status packet (in queue)
