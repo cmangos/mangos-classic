@@ -41,7 +41,6 @@ LocaleNameStr fullLocaleNameList[] =
     { "zhTW", LOCALE_zhTW },
     { "esES", LOCALE_esES },
     { "esMX", LOCALE_esMX },
-    { "ruRU", LOCALE_ruRU },
     { NULL,   LOCALE_enUS }
 };
 
