@@ -870,11 +870,27 @@ void ExtractMapsFromMpq()
     delete [] map_ids;
 }
 
+bool ExtractFile( char const* mpq_name, std::string const& filename ) 
+{
+    FILE *output = fopen(filename.c_str(), "wb");
+    if(!output)
+    {
+        printf("Can't create the output file '%s'\n", filename.c_str());
+        return false;
+    }
+    MPQFile m(mpq_name);
+    if(!m.isEof())
+        fwrite(m.getPointer(), 1, m.getSize(), output);
+
+    fclose(output);
+    return true;
+}
+
 void ExtractDBCFiles()
 {
     printf("Extracting dbc files...\n");
 
-    set<string> dbcfiles;
+    std::set<std::string> dbcfiles;
 
     // get DBC file list
     for(ArchiveSet::iterator i = gOpenArchives.begin(); i != gOpenArchives.end();++i)
@@ -886,7 +902,7 @@ void ExtractDBCFiles()
                     dbcfiles.insert(*iter);
     }
 
-    string path = output_path;
+    std::string path = output_path;
     path += "/dbc/";
     CreateDir(path);
 
@@ -897,18 +913,8 @@ void ExtractDBCFiles()
         string filename = path;
         filename += (iter->c_str() + strlen("DBFilesClient\\"));
 
-        FILE *output = fopen(filename.c_str(), "wb");
-        if(!output)
-        {
-            printf("Can't create the output file '%s'\n", filename.c_str());
-            continue;
-        }
-        MPQFile m(iter->c_str());
-        if(!m.isEof())
-            fwrite(m.getPointer(), 1, m.getSize(), output);
-
-        fclose(output);
-        ++count;
+        if(ExtractFile(iter->c_str(), filename))
+            ++count;
     }
     printf("Extracted %u DBC files\n\n", count);
 }
@@ -938,21 +944,20 @@ int main(int argc, char * arg[])
 
     HandleArgs(argc, arg);
 
-    if (CONF_extract & EXTRACT_MAP)
-    {
+    // Open MPQs
+    LoadCommonMPQFiles();
 
-        // Open MPQs
-        LoadCommonMPQFiles();
 
-        // Extract dbc
+    // Extract dbc
+    if (CONF_extract & EXTRACT_DBC)
 		ExtractDBCFiles();
 
-        // Extract maps
+    // Extract maps
+    if (CONF_extract & EXTRACT_MAP)
         ExtractMapsFromMpq();
 
-        // Close MPQs
-        CloseMPQFiles();
-    }
+    // Close MPQs
+    CloseMPQFiles();
 
     return 0;
 }
