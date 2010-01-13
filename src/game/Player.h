@@ -1173,10 +1173,6 @@ class MANGOS_DLL_SPEC Player : public Unit
                 SetMoney (GetMoney() > uint32(-d) ? GetMoney() + d : 0);
             else
                 SetMoney (GetMoney() < uint32(MAX_MONEY_AMOUNT - d) ? GetMoney() + d : MAX_MONEY_AMOUNT);
-
-            // "At Gold Limit"
-            if(GetMoney() >= MAX_MONEY_AMOUNT)
-                SendEquipError(EQUIP_ERR_TOO_MUCH_GOLD,NULL,NULL);
         }
         void SetMoney( uint32 value )
         {

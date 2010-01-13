@@ -9341,7 +9341,7 @@ uint8 Player::CanUseItem( Item *pItem, bool not_loading ) const
                     return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
 
                 if (GetSkillValue( pProto->RequiredSkill ) < pProto->RequiredSkillRank)
-                    return EQUIP_ERR_ERR_CANT_EQUIP_SKILL;
+                    return EQUIP_ERR_CANT_EQUIP_SKILL;
             }
 
             if (pProto->RequiredSpell != 0 && !HasSpell(pProto->RequiredSpell))
@@ -9407,7 +9407,7 @@ uint8 Player::CanUseAmmo( uint32 item ) const
             if( GetSkillValue( pProto->RequiredSkill ) == 0 )
                 return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
             else if( GetSkillValue( pProto->RequiredSkill ) < pProto->RequiredSkillRank )
-                return EQUIP_ERR_ERR_CANT_EQUIP_SKILL;
+                return EQUIP_ERR_CANT_EQUIP_SKILL;
         }
         if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
@@ -18096,7 +18096,7 @@ uint8 Player::CanEquipUniqueItem( ItemPrototype const* itemProto, uint8 except_s
     {
         // there is an equip limit on this item
         if(HasItemWithIdEquipped(itemProto->ItemId,1,except_slot))
-            return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
+            return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
     }
 
     return EQUIP_ERR_OK;
