@@ -2828,8 +2828,7 @@ void Spell::SendChannelUpdate(uint32 time)
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
     }
 
-    WorldPacket data( MSG_CHANNEL_UPDATE, 8+4 );
-    data.append(m_caster->GetPackGUID());
+    WorldPacket data( MSG_CHANNEL_UPDATE, 4 );
     data << uint32(time);
 
     m_caster->SendMessageToSet(&data, true);
@@ -2863,8 +2862,7 @@ void Spell::SendChannelStart(uint32 duration)
         }
     }
 
-    WorldPacket data( MSG_CHANNEL_START, (8+4+4) );
-    data.append(m_caster->GetPackGUID());
+    WorldPacket data( MSG_CHANNEL_START, (4+4) );
     data << uint32(m_spellInfo->Id);
     data << uint32(duration);
 
