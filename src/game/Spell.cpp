@@ -1140,6 +1140,9 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode, UnitList& targetUnit
                 case 28796:                                 // Poison Bolt Volley
                     unMaxTargets = 10;
                     break;
+                case 25991:                                 // Poison Bolt Volley (Pincess Huhuran)
+                    unMaxTargets = 15;
+                    break;
             }
             break;
         }
