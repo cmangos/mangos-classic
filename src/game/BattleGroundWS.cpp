@@ -85,10 +85,6 @@ void BattleGroundWS::Update(uint32 diff)
 
             PlaySoundToAll(SOUND_BG_START);
             SetStatus(STATUS_IN_PROGRESS);
-
-            for(BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-                if (Player* plr = sObjectMgr.GetPlayer(itr->first))
-                    plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
         }
     }
     else if (GetStatus() == STATUS_IN_PROGRESS)
@@ -337,7 +333,6 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
 
     if (set)
     {
-        Source->CastSpell(Source, SPELL_RECENTLY_DROPPED_FLAG, true);
         UpdateFlagState(Source->GetTeam(), 1);
 
         WorldPacket data;

@@ -1914,12 +1914,6 @@ void Spell::EffectSendEvent(uint32 EffectIndex)
                             bg->EventPlayerClickedOnFlag((Player*)m_caster, gameObjTarget);
                         sLog.outDebug("Horde Flag Returned");
                         break;*/
-                case 34976:
-                    /*
-                    if(bg->GetTypeID()==BATTLEGROUND_EY)
-                        bg->EventPlayerClickedOnFlag((Player*)m_caster, gameObjTarget);
-                    */
-                    break;
                 default:
                     sLog.outDebug("Unknown spellid %u in BG event", m_spellInfo->Id);
                     break;

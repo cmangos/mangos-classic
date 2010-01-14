@@ -578,10 +578,6 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                             break;
                     }
                 }   break;
-                case SPELL_AURA_FORCE_REACTION:
-                    if(spellproto->Id==42792)               // Recently Dropped Flag (prevent cancel)
-                        return false;
-                    break;
                 default:
                     break;
             }
@@ -2485,31 +2481,18 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spell
         case 23333:                                         // Warsong Flag
         case 23335:                                         // Silverwing Flag
             return map_id == 489 && player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
-        case 34976:                                         // Netherstorm Flag
-            return map_id == 566 && player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
         case 2584:                                          // Waiting to Resurrect
-        case 42792:                                         // Recently Dropped Flag
-        case 43681:                                         // Inactive
         {
             return player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_ONLY_BATTLEGROUNDS;
         }
         case 22011:                                         // Spirit Heal Channel
         case 22012:                                         // Spirit Heal
         case 24171:                                         // Resurrection Impact Visual
-        case 44535:                                         // Spirit Heal (mana)
         {
             MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
             if (!mapEntry)
                 return SPELL_FAILED_REQUIRES_AREA;
             return mapEntry->IsBattleGround()? SPELL_CAST_OK : SPELL_FAILED_ONLY_BATTLEGROUNDS;
-        }
-        case 44521:                                         // Preparation
-        {
-            if (!player)
-                return SPELL_FAILED_REQUIRES_AREA;
-
-            BattleGround* bg = player->GetBattleGround();
-            return bg && bg->GetStatus()==STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_ONLY_BATTLEGROUNDS;
         }
     }
 

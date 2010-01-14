@@ -524,10 +524,6 @@ void BattleGround::RewardMark(Player *plr,uint32 count)
 
 void BattleGround::RewardSpellCast(Player *plr, uint32 spell_id)
 {
-    // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
-    if (plr->GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
-        return;
-
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if(!spellInfo)
     {
@@ -540,10 +536,6 @@ void BattleGround::RewardSpellCast(Player *plr, uint32 spell_id)
 
 void BattleGround::RewardItem(Player *plr, uint32 item_id, uint32 count)
 {
-    // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
-    if (plr->GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
-        return;
-
     ItemPosCountVec dest;
     uint32 no_space_count = 0;
     uint8 msg = plr->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item_id, count, &no_space_count );
@@ -604,10 +596,6 @@ void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
 
 void BattleGround::RewardQuestComplete(Player *plr)
 {
-    // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
-    if(plr->GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
-        return;
-
     uint32 quest;
     switch(GetTypeID())
     {
@@ -669,8 +657,6 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
 
     if(plr)
     {
-        plr->ClearAfkReports();
-
         if(participant) // if the player was a match participant, remove auras, calc rating, update queue
         {
             if(!team) team = plr->GetTeam();
@@ -794,9 +780,6 @@ void BattleGround::AddPlayer(Player *plr)
     WorldPacket data;
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
     SendPacketToTeam(team, &data, plr, false);
-
-    if(GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
-        plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
 
     // Log
     sLog.outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());

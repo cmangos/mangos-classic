@@ -598,23 +598,6 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode( WorldPacket & recv_data )
     Script->GossipHello(GetPlayer(), unit);
 }
 
-void WorldSession::HandleReportPvPAFK( WorldPacket & recv_data )
-{
-    uint64 playerGuid;
-    recv_data >> playerGuid;
-    Player *reportedPlayer = sObjectMgr.GetPlayer(playerGuid);
-
-    if(!reportedPlayer)
-    {
-        sLog.outDebug("WorldSession::HandleReportPvPAFK: player not found");
-        return;
-    }
-
-    sLog.outDebug("WorldSession::HandleReportPvPAFK: %s reported %s", _player->GetName(), reportedPlayer->GetName());
-
-    reportedPlayer->ReportedAfkBy(_player);
-}
-
 void WorldSession::SendBattleGroundJoinError(uint8 err)
 {
     WorldPacket data;

@@ -292,10 +292,6 @@ void BattleGroundAV::Update(uint32 diff)
             SetStatus(STATUS_IN_PROGRESS);
 
             OpenDoorEvent(BG_EVENT_DOOR);
-
-            for(BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
-                if(Player* plr = sObjectMgr.GetPlayer(itr->first))
-                    plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
         }
     }
 

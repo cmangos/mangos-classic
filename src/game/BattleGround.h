@@ -76,13 +76,6 @@ enum BattleGroundMarksCount
     ITEM_LOSER_COUNT                = 1
 };
 
-enum BattleGroundSpells
-{
-    SPELL_PREPARATION               = 44521,                // Preparation
-    SPELL_RECENTLY_DROPPED_FLAG     = 42792,                // Recently Dropped Flag
-    SPELL_AURA_PLAYER_INACTIVE      = 43681                 // Inactive
-};
-
 enum BattleGroundTimeIntervals
 {
     RESURRECTION_INTERVAL           = 30000,                // ms

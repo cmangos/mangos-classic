@@ -1360,7 +1360,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateZoneDependentAuras( uint32 zone_id );    // zones
         void UpdateAreaDependentAuras( uint32 area_id );    // subzones
 
-        void UpdateAfkReport(time_t currTime);
         void UpdatePvPFlag(time_t currTime);
         void UpdateContestedPvP(uint32 currTime);
         void SetContestedPvPTimer(uint32 newTime) {m_contestedPvPTimer = newTime;}
@@ -1780,9 +1779,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void LeaveBattleground(bool teleportToEntryPoint = true);
         bool CanJoinToBattleground() const;
-        bool CanReportAfkDueToLimit();
-        void ReportedAfkBy(Player* reporter);
-        void ClearAfkReports() { m_bgAfkReporter.clear(); }
 
         bool GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const;
         bool CanUseBattleGroundObject();
@@ -1958,9 +1954,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         BgBattleGroundQueueID_Rec m_bgBattleGroundQueueID[PLAYER_MAX_BATTLEGROUND_QUEUES];
         WorldLocation m_bgEntryPoint;
 
-        std::set<uint32> m_bgAfkReporter;
-        uint8 m_bgAfkReportedCount;
-        time_t m_bgAfkReportedTimer;
         uint32 m_contestedPvPTimer;
 
         uint32 m_bgTeam;                                    // what side the player will be added to
