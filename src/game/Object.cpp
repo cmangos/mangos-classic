@@ -1355,6 +1355,14 @@ void WorldObject::SendObjectDeSpawnAnim(uint64 guid)
     SendMessageToSet(&data, true);
 }
 
+void WorldObject::SendGameObjectCustomAnim(uint64 guid)
+{
+    WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM, 8+4);
+    data << uint64(guid);
+    data << uint32(0);                                      // not known what this is
+    SendMessageToSet(&data, true);
+}
+
 Map* WorldObject::GetMap() const
 {
     return sMapMgr.GetMap(GetMapId(), this);
