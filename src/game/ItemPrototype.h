@@ -30,34 +30,9 @@ enum ItemModType
     ITEM_MOD_INTELLECT                = 5,
     ITEM_MOD_SPIRIT                   = 6,
     ITEM_MOD_STAMINA                  = 7,
-    ITEM_MOD_DEFENSE_SKILL_RATING     = 12,
-    ITEM_MOD_DODGE_RATING             = 13,
-    ITEM_MOD_PARRY_RATING             = 14,
-    ITEM_MOD_BLOCK_RATING             = 15,
-    ITEM_MOD_HIT_MELEE_RATING         = 16,
-    ITEM_MOD_HIT_RANGED_RATING        = 17,
-    ITEM_MOD_HIT_SPELL_RATING         = 18,
-    ITEM_MOD_CRIT_MELEE_RATING        = 19,
-    ITEM_MOD_CRIT_RANGED_RATING       = 20,
-    ITEM_MOD_CRIT_SPELL_RATING        = 21,
-    ITEM_MOD_HIT_TAKEN_MELEE_RATING   = 22,
-    ITEM_MOD_HIT_TAKEN_RANGED_RATING  = 23,
-    ITEM_MOD_HIT_TAKEN_SPELL_RATING   = 24,
-    ITEM_MOD_CRIT_TAKEN_MELEE_RATING  = 25,
-    ITEM_MOD_CRIT_TAKEN_RANGED_RATING = 26,
-    ITEM_MOD_CRIT_TAKEN_SPELL_RATING  = 27,
-    ITEM_MOD_HASTE_MELEE_RATING       = 28,
-    ITEM_MOD_HASTE_RANGED_RATING      = 29,
-    ITEM_MOD_HASTE_SPELL_RATING       = 30,
-    ITEM_MOD_HIT_RATING               = 31,
-    ITEM_MOD_CRIT_RATING              = 32,
-    ITEM_MOD_HIT_TAKEN_RATING         = 33,
-    ITEM_MOD_CRIT_TAKEN_RATING        = 34,
-    ITEM_MOD_RESILIENCE_RATING        = 35,
-    ITEM_MOD_HASTE_RATING             = 36,
 };
 
-#define MAX_ITEM_MOD                    38
+#define MAX_ITEM_MOD                    8
 
 enum ItemSpelltriggerType
 {
