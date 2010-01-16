@@ -2005,7 +2005,7 @@ void Player::SetGameMaster(bool on)
 
         CallForAllControlledUnits(SetGameMasterOnHelper(),true,true,true,false);
 
-        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+        SetFFAPvP(false);
         ResetContestedPvP();
 
         getHostileRefManager().setOnlineOfflineState(false);
@@ -2021,7 +2021,7 @@ void Player::SetGameMaster(bool on)
 
         // restore FFA PvP Server state
         if(sWorld.IsFFAPvPRealm())
-            SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+            SetFFAPvP(true);
 
         // restore FFA PvP area state, remove not allowed for GM mounts
         UpdateArea(m_areaUpdateId);
@@ -5953,14 +5953,14 @@ void Player::UpdateArea(uint32 newArea)
     if(area && (area->flags & AREA_FLAG_ARENA))
     {
         if(!isGameMaster())
-            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+            SetFFAPvP(true);
     }
     else
     {
         // remove ffa flag only if not ffapvp realm
         // removal in sanctuaries and capitals is handled in zone update
-        if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP) && !sWorld.IsFFAPvPRealm())
-            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+        if(IsFFAPvP() && !sWorld.IsFFAPvPRealm())
+            SetFFAPvP(false);
     }
 
     UpdateAreaDependentAuras(newArea);
@@ -6032,7 +6032,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     {
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY);
         if(sWorld.IsFFAPvPRealm())
-            RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+            SetFFAPvP(false);
     }
     else
     {
@@ -6046,7 +6046,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         InnEnter(time(0),GetMapId(),0,0,0);
 
         if(sWorld.IsFFAPvPRealm())
-            RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+            SetFFAPvP(false);
     }
     else                                                    // anywhere else
     {
@@ -6060,7 +6060,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
                     SetRestType(REST_TYPE_NO);
 
                     if(sWorld.IsFFAPvPRealm())
-                        SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+                        SetFFAPvP(true);
                 }
             }
             else                                            // not in tavern (leave city then)
@@ -6070,7 +6070,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
                 // Set player to FFA PVP when not in rested environment.
                 if(sWorld.IsFFAPvPRealm())
-                    SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+                    SetFFAPvP(true);
             }
         }
     }
@@ -15335,6 +15335,14 @@ void Player::UpdatePvPFlag(time_t currTime)
         return;
 
     UpdatePvP(false);
+}
+
+void Player::SetFFAPvP( bool state )
+{
+    if(state)
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+    else
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
 }
 
 void Player::UpdateDuelFlag(time_t currTime)

@@ -760,7 +760,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         GetPlayer()->SetRestType(REST_TYPE_IN_TAVERN);
 
         if(sWorld.IsFFAPvPRealm())
-            GetPlayer()->RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+            GetPlayer()->SetFFAPvP(false);
 
         return;
     }
