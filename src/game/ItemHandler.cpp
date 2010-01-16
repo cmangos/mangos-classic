@@ -329,7 +329,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->RequiredHonorRank;
         data << pProto->RequiredCityRank;
         data << pProto->RequiredReputationFaction;
-        data << pProto->RequiredReputationRank;
+        data << (pProto->RequiredReputationFaction > 0  ? pProto->RequiredReputationRank : 0 );  // send value only if reputation faction id setted ( needed for some items)
         data << pProto->MaxCount;
         data << pProto->Stackable;
         data << pProto->ContainerSlots;
@@ -729,8 +729,10 @@ void WorldSession::SendListInventory( uint64 vendorguid )
         {
             if(ItemPrototype const *pProto = sObjectMgr.GetItemPrototype(crItem->item))
             {
-                if((pProto->AllowableClass & _player->getClassMask()) == 0 && pProto->Bonding == BIND_WHEN_PICKED_UP && !_player->isGameMaster())
-                    continue;
+                if(!_player->isGameMaster() && ( pProto->AllowableClass & _player->getClassMask()) == 0 /*&& pProto->Bonding == BIND_WHEN_PICKED_UP*/  ||
+                    // when no faction required but rank > 0 will be used faction id from the vendor faction template to compare the rank        
+                     (!pProto->RequiredReputationFaction && pProto->RequiredReputationRank > 0 && pProto->RequiredReputationRank > _player->GetReputationRank(pCreature->getFactionTemplateEntry()->faction) ))
+                     continue;
 
                 ++count;
 
