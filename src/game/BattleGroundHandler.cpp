@@ -464,15 +464,13 @@ void WorldSession::HandleBattleFieldPortOpcode( WorldPacket &recv_data )
     }
 }
 
-void WorldSession::HandleLeaveBattlefieldOpcode( WorldPacket & /*recv_data*/ )
+void WorldSession::HandleLeaveBattlefieldOpcode( WorldPacket& recv_data )
 {
     sLog.outDebug( "WORLD: Recvd CMSG_LEAVE_BATTLEFIELD Message");
 
-    //uint8 unk1, unk2;
-    //uint32 bgTypeId;                                        // id from DBC
-    //uint16 unk3;
-
-    //recv_data >> unk1 >> unk2 >> bgTypeId >> unk3; - no used currently
+    recv_data.read_skip<uint8>();                           // unk1
+    recv_data.read_skip<uint8>();                           // BattleGroundTypeId-1 ?
+    recv_data.read_skip<uint16>();                          // unk2 0
 
     //if(bgTypeId >= MAX_BATTLEGROUND_TYPES)                  // cheating? but not important in this case
     //    return;
