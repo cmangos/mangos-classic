@@ -6377,7 +6377,7 @@ Unit* Unit::_GetTotem(uint8 slot) const
 
 Totem* Unit::GetTotem( uint8 slot ) const
 {
-    if(slot >= MAX_TOTEM)
+    if(slot >= MAX_TOTEM || !IsInWorld())
         return NULL;
 
     Creature *totem = GetMap()->GetCreature(m_TotemSlot[slot]);
