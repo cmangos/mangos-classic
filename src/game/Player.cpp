@@ -14109,8 +14109,6 @@ void Player::SendRaidInfo()
             data << (save->GetMapId());
             data << (uint32)(save->GetResetTime() - time(NULL));
             data << save->GetInstanceId();
-            data << uint32(counter);
-            counter--;
         }
     }
     GetSession()->SendPacket(&data);
