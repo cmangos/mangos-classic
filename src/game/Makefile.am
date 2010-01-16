@@ -34,7 +34,6 @@ libmangosgame_a_SOURCES = \
 	AddonHandler.h \
 	AggressorAI.cpp \
 	AggressorAI.h \
-	AnimalRandomMovementGenerator.h \
 	AuctionHouseHandler.cpp \
 	AuctionHouseMgr.cpp \
 	AuctionHouseMgr.h \
