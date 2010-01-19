@@ -97,7 +97,7 @@ void TargetedMovementGenerator<Creature>::Initialize(Creature &owner)
 {
     if (owner.HasSearchedAssistance())
         owner.AddMonsterMoveFlag(MONSTER_MOVE_WALK);
-    else
+    else if (owner.isInCombat())
         owner.RemoveMonsterMoveFlag(MONSTER_MOVE_WALK);
 
     _setTargetLocation(owner);
