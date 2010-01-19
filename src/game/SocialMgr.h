@@ -51,7 +51,6 @@ struct FriendInfo
     uint32 Area;
     uint32 Level;
     uint32 Class;
-    std::string Note;
 
     FriendInfo()
     {
@@ -60,17 +59,15 @@ struct FriendInfo
         Area = 0;
         Level = 0;
         Class = 0;
-        Note = "";
     }
 
-    FriendInfo(uint32 flags, const std::string& note)
+    explicit FriendInfo(uint32 flags)
     {
         Status = FRIEND_STATUS_OFFLINE;
         Flags = flags;
         Area = 0;
         Level = 0;
         Class = 0;
-        Note = note;
     }
 };
 
@@ -123,7 +120,8 @@ class PlayerSocial
         void RemoveFromSocialList(uint32 friend_guid, bool ignore);
         void SetFriendNote(uint32 friend_guid, std::string note);
         // Packet send's
-        void SendSocialList();
+        void SendFriendList();
+        void SendIgnoreList();
         // Misc
         bool HasFriend(uint32 friend_guid);
         bool HasIgnore(uint32 ignore_guid);

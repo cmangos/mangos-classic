@@ -105,42 +105,24 @@ void PlayerSocial::RemoveFromSocialList(uint32 friend_guid, bool ignore)
     }
 }
 
-void PlayerSocial::SetFriendNote(uint32 friend_guid, std::string note)
-{
-    PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_guid);
-    if(itr == m_playerSocialMap.end())                      // not exist
-        return;
-
-    utf8truncate(note,48);                                  // DB and client size limitation
-
-    std::string safe_note = note;
-    CharacterDatabase.escape_string(safe_note);
-    CharacterDatabase.PExecute("UPDATE character_social SET note = '%s' WHERE guid = '%u' AND friend = '%u'", safe_note.c_str(), GetPlayerGUID(), friend_guid);
-    m_playerSocialMap[friend_guid].Note = note;
-}
-
-void PlayerSocial::SendSocialList()
+void PlayerSocial::SendFriendList()
 {
     Player *plr = sObjectMgr.GetPlayer(GetPlayerGUID());
     if(!plr)
         return;
 
-    uint32 size = m_playerSocialMap.size();
+    uint32 size = GetNumberOfSocialsWithFlag(SOCIAL_FLAG_FRIEND);
 
-    WorldPacket data(SMSG_CONTACT_LIST, (1+size*25));     // just can guess size
-    // [-ZERO] data << uint32(7);                                      // unk flag (0x1, 0x2, 0x4), 0x7 if it include ignore list
+    WorldPacket data(SMSG_FRIEND_LIST, (1+size*25));     // just can guess size
     data << uint8(size);                                   // friends count
 
     for(PlayerSocialMap::iterator itr = m_playerSocialMap.begin(); itr != m_playerSocialMap.end(); ++itr)
     {
-        sSocialMgr.GetFriendInfo(plr, itr->first, itr->second);
-
-        data << uint64(itr->first);                         // player guid
-        /* [-ZERO]
-        data << uint32(itr->second.Flags);                  // player flag (0x1-friend?, 0x2-ignored?, 0x4-muted?)
-        data << itr->second.Note;                           // string note */
         if(itr->second.Flags & SOCIAL_FLAG_FRIEND)          // if IsFriend()
         {
+            sSocialMgr.GetFriendInfo(plr, itr->first, itr->second);
+
+            data << uint64(itr->first);                     // player guid
             data << uint8(itr->second.Status);              // online/offline/etc?
             if(itr->second.Status)                          // if online
             {
@@ -152,7 +134,30 @@ void PlayerSocial::SendSocialList()
     }
 
     plr->GetSession()->SendPacket(&data);
-    sLog.outDebug("WORLD: Sent SMSG_CONTACT_LIST");
+    sLog.outDebug("WORLD: Sent SMSG_FRIEND_LIST");
+}
+
+void PlayerSocial::SendIgnoreList()
+{
+    Player *plr = sObjectMgr.GetPlayer(GetPlayerGUID());
+    if(!plr)
+        return;
+
+    uint32 size = GetNumberOfSocialsWithFlag(SOCIAL_FLAG_IGNORED);
+
+    WorldPacket data(SMSG_IGNORE_LIST, (1+size*8));     // just can guess size
+    data << uint8(size);                                   // friends count
+
+    for(PlayerSocialMap::iterator itr = m_playerSocialMap.begin(); itr != m_playerSocialMap.end(); ++itr)
+    {
+        if(itr->second.Flags & SOCIAL_FLAG_IGNORED)
+        {
+            data << uint64(itr->first);                     // player guid
+        }
+    }
+
+    plr->GetSession()->SendPacket(&data);
+    sLog.outDebug("WORLD: Sent SMSG_IGNORE_LIST");
 }
 
 bool PlayerSocial::HasFriend(uint32 friend_guid)
@@ -195,7 +200,6 @@ void SocialMgr::GetFriendInfo(Player *player, uint32 friendGUID, FriendInfo &fri
 
     PlayerSocialMap::iterator itr = player->GetSocial()->m_playerSocialMap.find(friendGUID);
     if(itr != player->GetSocial()->m_playerSocialMap.end())
-      //[-ZERO]  friendInfo.Note = itr->second.Note;
 
     // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
     // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
@@ -236,15 +240,6 @@ void SocialMgr::SendFriendStatus(Player *player, FriendsResult result, uint32 fr
     WorldPacket data;
     MakeFriendStatusPacket(result, friend_guid, &data);
     GetFriendInfo(player, friend_guid, fi);
-    switch(result)
-    {
-        case FRIEND_ADDED_OFFLINE:
-        case FRIEND_ADDED_ONLINE:
-            // data << fi.Note;
-            break;
-        default:
-            break;
-    }
 
     switch(result)
     {
@@ -306,7 +301,6 @@ PlayerSocial *SocialMgr::LoadFromDB(QueryResult *result, uint32 guid)
 
     uint32 friend_guid = 0;
     uint32 flags = 0;
-    std::string note = "";
 
     // used to speed up check below. Using GetNumberOfSocialsWithFlag will cause unneeded iteration
     uint32 friendCounter=0, ignoreCounter=0;
@@ -317,14 +311,13 @@ PlayerSocial *SocialMgr::LoadFromDB(QueryResult *result, uint32 guid)
 
         friend_guid = fields[0].GetUInt32();
         flags = fields[1].GetUInt32();
-        note = fields[2].GetCppString();
 
         if((flags & SOCIAL_FLAG_IGNORED) && ignoreCounter >= SOCIALMGR_IGNORE_LIMIT)
             continue;
         if((flags & SOCIAL_FLAG_FRIEND) && friendCounter >= SOCIALMGR_FRIEND_LIMIT)
             continue;
 
-        social->m_playerSocialMap[friend_guid] = FriendInfo(flags, note);
+        social->m_playerSocialMap[friend_guid] = FriendInfo(flags);
 
         if(flags & SOCIAL_FLAG_IGNORED)
             ignoreCounter++;

@@ -412,10 +412,10 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
     _player->SetStandState(animstate);
 }
 
-void WorldSession::HandleContactListOpcode( WorldPacket & recv_data )
+void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug( "WORLD: Received CMSG_CONTACT_LIST" );
-    _player->GetSocial()->SendSocialList();
+    sLog.outDebug( "WORLD: Received CMSG_FRIEND_LIST" );
+    _player->GetSocial()->SendFriendList();
 }
 
 void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
@@ -423,11 +423,8 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_ADD_FRIEND" );
 
     std::string friendName = GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN);
-    std::string friendNote;
 
     recv_data >> friendName;
-
-    recv_data >> friendNote;
 
     if(!normalizePlayerName(friendName))
         return;
@@ -437,10 +434,10 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
 
-    CharacterDatabase.AsyncPQuery(&WorldSession::HandleAddFriendOpcodeCallBack, GetAccountId(), friendNote, "SELECT guid, race FROM characters WHERE name = '%s'", friendName.c_str());
+    CharacterDatabase.AsyncPQuery(&WorldSession::HandleAddFriendOpcodeCallBack, GetAccountId(), "SELECT guid, race FROM characters WHERE name = '%s'", friendName.c_str());
 }
 
-void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult *result, uint32 accountId, std::string friendNote)
+void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult *result, uint32 accountId)
 {
     if(!result)
         return;
@@ -476,8 +473,6 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult *result, uint32 acc
                 friendResult = FRIEND_LIST_FULL;
                 sLog.outDebug( "WORLD: %s's friend list is full.", session->GetPlayer()->GetName());
             }
-
-            session->GetPlayer()->GetSocial()->SetFriendNote(GUID_LOPART(friendGuid), friendNote);
         }
     }
 
@@ -568,15 +563,6 @@ void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
     sSocialMgr.SendFriendStatus(GetPlayer(), FRIEND_IGNORE_REMOVED, GUID_LOPART(IgnoreGUID), false);
 
     sLog.outDebug( "WORLD: Sent motd (SMSG_FRIEND_STATUS)" );
-}
-
-void WorldSession::HandleSetContactNotesOpcode( WorldPacket & recv_data )
-{
-    sLog.outDebug("CMSG_SET_CONTACT_NOTES");
-    uint64 guid;
-    std::string note;
-    recv_data >> guid >> note;
-    _player->GetSocial()->SetFriendNote(guid, note);
 }
 
 void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
