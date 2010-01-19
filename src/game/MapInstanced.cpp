@@ -205,22 +205,22 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save)
 
     // make sure we have a valid map id
     const MapEntry* entry = sMapStore.LookupEntry(GetId());
-    if(!entry)
+    if (!entry)
     {
         sLog.outError("CreateInstance: no entry for map %d", GetId());
         assert(false);
     }
-    const InstanceTemplate * iTemplate = sObjectMgr.GetInstanceTemplate(GetId());
-    if(!iTemplate)
+
+    if (!sObjectMgr.GetInstanceTemplate(GetId()))
     {
         sLog.outError("CreateInstance: no instance template for map %d", GetId());
         assert(false);
     }
 
-    sLog.outDebug("MapInstanced::CreateInstance: %smap instance %d for %d created", save?"":"new ", InstanceId, GetId());
+    sLog.outDebug("MapInstanced::CreateInstance: %s map instance %d for %d created", save?"":"new ", InstanceId, GetId());
 
     InstanceMap *map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId);
-    assert(map->IsDungeon());
+    ASSERT(map->IsDungeon());
 
     bool load_data = save != NULL;
     map->CreateInstanceData(load_data);
