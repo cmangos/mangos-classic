@@ -301,7 +301,7 @@ void AuctionHouseMgr::LoadAuctionItems()
         uint32 item_guid        = fields[1].GetUInt32();
         uint32 item_template    = fields[2].GetUInt32();
 
-        ItemPrototype const *proto = sObjectMgr.GetItemPrototype(item_template);
+        ItemPrototype const *proto = ObjectMgr::GetItemPrototype(item_template);
 
         if(!proto)
         {
@@ -394,7 +394,7 @@ void AuctionHouseMgr::LoadAuctions()
             continue;
         }
 
-        CreatureInfo const* auctioneerInfo = sObjectMgr.GetCreatureTemplate(auctioneerData->id);
+        CreatureInfo const* auctioneerInfo = ObjectMgr::GetCreatureTemplate(auctioneerData->id);
         if(!auctioneerInfo)
         {
             aItem->DeleteFromDB();

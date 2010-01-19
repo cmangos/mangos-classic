@@ -1909,7 +1909,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
 
     sLog.outDetail(GetMangosString(LANG_ADDITEM), itemId, count);
 
-    ItemPrototype const *pProto = sObjectMgr.GetItemPrototype(itemId);
+    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemId);
     if(!pProto)
     {
         PSendSysMessage(LANG_COMMAND_ITEMIDINVALID, itemId);
@@ -2048,7 +2048,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
         return false;
     }
 
-    ItemPrototype const* itemProto = sObjectMgr.GetItemPrototype(item_id);
+    ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(item_id);
     if(!itemProto)
     {
         PSendSysMessage(LANG_COMMAND_ITEMIDINVALID, item_id);
@@ -2310,7 +2310,7 @@ bool ChatHandler::HandleListCreatureCommand(const char* args)
         return false;
     }
 
-    CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(cr_id);
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(cr_id);
     if(!cInfo)
     {
         PSendSysMessage(LANG_COMMAND_INVALIDCREATUREID, cr_id);
@@ -3576,7 +3576,7 @@ bool ChatHandler::HandleNpcAddWeaponCommand(const char* /*args*/)
     uint32 ItemID = atoi(pItemID);
     uint32 SlotID = atoi(pSlotID);
 
-    ItemPrototype* tmpItem = objmgr.GetItemPrototype(ItemID);
+    ItemPrototype* tmpItem = ObjectMgr::GetItemPrototype(ItemID);
 
     bool added = false;
     if(tmpItem)
@@ -4571,7 +4571,7 @@ bool ChatHandler::HandleQuestComplete(const char* args)
         }
         else if(creature > 0)
         {
-            if(CreatureInfo const* cInfo = sObjectMgr.GetCreatureTemplate(creature))
+            if(CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature))
                 for(uint16 z = 0; z < creaturecount; ++z)
                     player->KilledMonster(cInfo,0);
         }
@@ -5914,7 +5914,7 @@ bool ChatHandler::HandleSendItemsCommand(const char* args)
         if(!item_id)
             return false;
 
-        ItemPrototype const* item_proto = sObjectMgr.GetItemPrototype(item_id);
+        ItemPrototype const* item_proto = ObjectMgr::GetItemPrototype(item_id);
         if(!item_proto)
         {
             PSendSysMessage(LANG_COMMAND_ITEMIDINVALID, item_id);

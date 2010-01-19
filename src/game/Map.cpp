@@ -216,7 +216,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
 void Map::InitVisibilityDistance()
 {
     //init visibility for continents
-    m_VisibleDistance = sWorld.GetMaxVisibleDistanceOnContinents();
+    m_VisibleDistance = World::GetMaxVisibleDistanceOnContinents();
 }
 
 // Template specialization of utility methods
@@ -2149,7 +2149,7 @@ InstanceMap::~InstanceMap()
 void InstanceMap::InitVisibilityDistance()
 {
     //init visibility distance for instances
-    m_VisibleDistance = sWorld.GetMaxVisibleDistanceInInstances();
+    m_VisibleDistance = World::GetMaxVisibleDistanceInInstances();
 }
 
 /*
@@ -2316,7 +2316,7 @@ void InstanceMap::CreateInstanceData(bool load)
     if(i_data != NULL)
         return;
 
-    InstanceTemplate const* mInstance = sObjectMgr.GetInstanceTemplate(GetId());
+    InstanceTemplate const* mInstance = ObjectMgr::GetInstanceTemplate(GetId());
     if (mInstance)
     {
         i_script_id = mInstance->script_id;
@@ -2463,7 +2463,7 @@ void InstanceMap::SetResetSchedule(bool on)
 
 uint32 InstanceMap::GetMaxPlayers() const
 {
-    InstanceTemplate const* iTemplate = sObjectMgr.GetInstanceTemplate(GetId());
+    InstanceTemplate const* iTemplate = ObjectMgr::GetInstanceTemplate(GetId());
     if(!iTemplate)
         return 0;
     return iTemplate->maxPlayers;
@@ -2485,7 +2485,7 @@ BattleGroundMap::~BattleGroundMap()
 void BattleGroundMap::InitVisibilityDistance()
 {
     //init visibility distance for BG/Arenas
-    m_VisibleDistance = sWorld.GetMaxVisibleDistanceInBG();
+    m_VisibleDistance = World::GetMaxVisibleDistanceInBG();
 }
 
 bool BattleGroundMap::CanEnter(Player * player)

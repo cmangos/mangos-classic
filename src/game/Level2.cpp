@@ -1093,7 +1093,7 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(const char* args)
 
     sObjectMgr.AddVendorItem(vendor_entry,itemId,maxcount,incrtime,extendedcost);
 
-    ItemPrototype const* pProto = sObjectMgr.GetItemPrototype(itemId);
+    ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemId);
 
     PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,itemId,pProto->Name1,maxcount,incrtime,extendedcost);
     return true;
@@ -1129,7 +1129,7 @@ bool ChatHandler::HandleNpcDelVendorItemCommand(const char* args)
         return false;
     }
 
-    ItemPrototype const* pProto = sObjectMgr.GetItemPrototype(itemId);
+    ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemId);
 
     PSendSysMessage(LANG_ITEM_DELETED_FROM_LIST,itemId,pProto->Name1);
     return true;

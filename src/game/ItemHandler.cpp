@@ -285,7 +285,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
     sLog.outDetail("STORAGE: Item Query = %u", item);
 
-    ItemPrototype const *pProto = sObjectMgr.GetItemPrototype( item );
+    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype( item );
     if( pProto )
     {
         std::string Name        = pProto->Name1;
@@ -727,7 +727,7 @@ void WorldSession::SendListInventory( uint64 vendorguid )
     {
         if(VendorItem const* crItem = vItems->GetItem(i))
         {
-            if(ItemPrototype const *pProto = sObjectMgr.GetItemPrototype(crItem->item))
+            if(ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(crItem->item))
             {
                 if(!_player->isGameMaster() && ( ( pProto->AllowableClass & _player->getClassMask()) == 0 && pProto->Bonding == BIND_WHEN_PICKED_UP )  ||
                     // when no faction required but rank > 0 will be used faction id from the vendor faction template to compare the rank        
@@ -958,7 +958,7 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
     recv_data.read_skip<uint64>();                          // guid
 
     sLog.outDebug("WORLD: CMSG_ITEM_NAME_QUERY %u", itemid);
-    ItemPrototype const *pProto = sObjectMgr.GetItemPrototype( itemid );
+    ItemPrototype const *pProto = ObjectMgr::GetItemPrototype( itemid );
     if( pProto )
     {
         std::string Name;

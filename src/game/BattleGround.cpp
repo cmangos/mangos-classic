@@ -563,8 +563,8 @@ void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
     if(!bmEntry)
         return;
 
-    ItemPrototype const* markProto = sObjectMgr.GetItemPrototype(mark);
-    if(!markProto)
+    ItemPrototype const* markProto = ObjectMgr::GetItemPrototype(mark);
+    if (!markProto)
         return;
 
     if(Item* markItem = Item::CreateItem(mark,count,plr))
