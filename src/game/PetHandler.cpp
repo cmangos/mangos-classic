@@ -184,7 +184,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             if(!pet->HasSpell(spellid) || IsPassiveSpell(spellid))
                 return;
 
-            pet->clearUnitState(UNIT_STAT_FOLLOW);
+            pet->clearUnitState(UNIT_STAT_MOVING);
 
             Spell *spell = new Spell(pet, spellInfo, false);
 
@@ -619,7 +619,7 @@ void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
     if (!targets.read(&recvPacket,pet))
         return;
 
-    pet->clearUnitState(UNIT_STAT_FOLLOW);
+    pet->clearUnitState(UNIT_STAT_MOVING);
 
     Spell *spell = new Spell(pet, spellInfo, false);
     spell->m_targets = targets;

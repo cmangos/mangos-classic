@@ -86,7 +86,7 @@ ReactorAI::UpdateAI(const uint32 /*time_diff*/)
 void
 ReactorAI::EnterEvadeMode()
 {
-    if( !m_creature->isAlive() )
+    if (!m_creature->isAlive())
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", m_creature->GetGUIDLow());
         m_creature->GetMotionMaster()->MovementExpired();
@@ -99,15 +99,15 @@ ReactorAI::EnterEvadeMode()
 
     Unit* victim = ObjectAccessor::GetUnit(*m_creature, i_victimGuid );
 
-    if( !victim  )
+    if (!victim)
     {
         DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", m_creature->GetGUIDLow());
     }
-    else if( victim->HasStealthAura() )
+    else if (victim->HasStealthAura())
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", m_creature->GetGUIDLow());
     }
-    else if( victim->isInFlight() )
+    else if (victim->isInFlight())
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", m_creature->GetGUIDLow());
     }
@@ -122,7 +122,7 @@ ReactorAI::EnterEvadeMode()
     m_creature->CombatStop(true);
     m_creature->SetLootRecipient(NULL);
 
-    // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-    if( m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE )
+    // Remove ChaseMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
+    if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
         m_creature->GetMotionMaster()->MoveTargetedHome();
 }

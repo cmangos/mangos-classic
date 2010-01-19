@@ -291,9 +291,6 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if (opcode == MSG_MOVE_FALL_LAND && !GetPlayer()->isInFlight())
         GetPlayer()->HandleFall(movementInfo);
 
-    if ((opcode == MSG_MOVE_SET_WALK_MODE || opcode == MSG_MOVE_SET_RUN_MODE))
-        GetPlayer()->UpdateWalkModeForPets(movementInfo.HasMovementFlag(MOVEMENTFLAG_WALK_MODE));
-
     if (movementInfo.HasMovementFlag(MOVEMENTFLAG_SWIMMING) != GetPlayer()->IsInWater())
     {
         // now client not include swimming flag in case jumping under water
@@ -313,6 +310,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     GetPlayer()->m_movementInfo = movementInfo;
 
     GetPlayer()->UpdateFallInformationIfNeed(movementInfo,recv_data.GetOpcode());
+
+    // after move info set
+    if ((opcode == MSG_MOVE_SET_WALK_MODE || opcode == MSG_MOVE_SET_RUN_MODE))
+        GetPlayer()->UpdateWalkMode(GetPlayer(),false);
 
     if(GetPlayer()->isMovingOrTurning())
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -411,7 +412,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
         {
             sLog.outError("%sSpeedChange player %s is NOT correct (must be %f instead %f), force set to correct value",
                 move_type_name[move_type], _player->GetName(), _player->GetSpeed(move_type), newspeed);
-            _player->SetSpeed(move_type,_player->GetSpeedRate(move_type),true);
+            _player->SetSpeedRate(move_type,_player->GetSpeedRate(move_type),true);
         }
         else                                                // must be lesser - cheating
         {

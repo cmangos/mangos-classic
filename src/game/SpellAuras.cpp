@@ -2898,8 +2898,6 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     {
         m_target->addUnitState(UNIT_STAT_ROOT);
         m_target->SetTargetGUID(0);
-                                                            // probably wrong
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         //Save last orientation
         if( m_target->getVictim() )
@@ -2925,8 +2923,6 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             return;
 
         m_target->clearUnitState(UNIT_STAT_ROOT);
-                                                            // probably wrong
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         if(!m_target->hasUnitState(UNIT_STAT_STUNNED))      // prevent allow move if have also stun effect
         {

@@ -3718,8 +3718,8 @@ void Player::BuildPlayerRepop()
         // CastSpell(this, 20584, true); // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
         
         // [-ZERO] night elf spirit form and speed handled by code, maybe spell or aura should be found
-        SetSpeed(MOVE_RUN,  1.5f, true);
-        SetSpeed(MOVE_SWIM, 1.5f, true);
+        SetSpeedRate(MOVE_RUN,  1.5f, true);
+        SetSpeedRate(MOVE_SWIM, 1.5f, true);
         SetDisplayId(10045);          
     }
 
@@ -3800,8 +3800,8 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     SetMovement(MOVE_LAND_WALK);
     SetMovement(MOVE_UNROOT);
 
-    SetSpeed(MOVE_RUN,  1.0f, true);
-    SetSpeed(MOVE_SWIM, 1.0f, true);
+    SetSpeedRate(MOVE_RUN,  1.0f, true);
+    SetSpeedRate(MOVE_SWIM, 1.0f, true);
 
     SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
 
