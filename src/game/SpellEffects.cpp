@@ -472,7 +472,6 @@ void Spell::EffectDummy(uint32 i)
                     return;
                 }
                 case 8593:                                  // Symbol of life (restore creature to life)
-                case 31225:                                 // Shimmering Vessel (restore creature to life)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
                         return;
@@ -569,7 +568,6 @@ void Spell::EffectDummy(uint32 i)
                     return;
                 }
                 case 15998:                                 // Capture Worg Pup
-                case 29435:                                 // Capture Female Kaliri Hatchling
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
                         return;
@@ -618,6 +616,17 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster, spell_id, true, NULL);
                     return;
                 }
+                case 20572:                                 // Blood Fury 
+                { 
+                    if(m_caster->GetTypeId() != TYPEID_PLAYER) 
+                        return; 
+                         
+                    m_caster->CastSpell(m_caster, 23230, true); 
+                     
+                    damage = uint32(damage * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) / 100); 
+                    m_caster->CastCustomSpell(m_caster, 23234, &damage, NULL, NULL, true, NULL); 
+                    return; 
+                } 
                 case 20577:                                 // Cannibalize
                     if (unitTarget)
                         m_caster->CastSpell(m_caster, 20578, true, NULL);
@@ -727,248 +736,6 @@ void Spell::EffectDummy(uint32 i)
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER )
                         m_caster->CastSpell(unitTarget, 29294, true);
-                    return;
-                }
-                case 28730:                                 // Arcane Torrent (Mana)
-                {
-                    int32 count = 0;
-                    Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
-                        if ((*i)->GetId() == 28734)
-                            ++count;
-                    if (count)
-                    {
-                        m_caster->RemoveAurasDueToSpell(28734);
-                        int32 bp = damage * count;
-                        m_caster->CastCustomSpell(m_caster, 28733, &bp, NULL, NULL, true);
-                    }
-                    return;
-                }
-                case 29200:                                 // Purify Helboar Meat
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    uint32 spell_id = roll_chance_i(50) ? 29277 : 29278;
-
-                    m_caster->CastSpell(m_caster,spell_id,true,NULL);
-                    return;
-                }
-                case 29858:                                 // Soulshatter
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->IsHostileTo(m_caster))
-                        m_caster->CastSpell(unitTarget,32835,true);
-                    return;
-                case 30458:                                 // Nigh Invulnerability
-                    if (!m_CastItem)
-                        return;
-                    if (roll_chance_i(86))                  // Nigh-Invulnerability   - success
-                        m_caster->CastSpell(m_caster, 30456, true, m_CastItem);
-                    else                                    // backfire in 14% casts
-                        m_caster->CastSpell(m_caster, 30457, true, m_CastItem);
-                    return;
-                case 30507:                                 // Poultryizer
-                    if(!m_CastItem)
-                        return;
-                    if (roll_chance_i(80))                  // Poultryized! - success
-                        m_caster->CastSpell(unitTarget, 30501, true, m_CastItem);
-                    else                                    // backfire 20%
-                        m_caster->CastSpell(unitTarget, 30504, true, m_CastItem);
-                    return;
-                case 33060:                                         // Make a Wish
-                {
-                    if (m_caster->GetTypeId()!=TYPEID_PLAYER)
-                        return;
-
-                    uint32 spell_id = 0;
-
-                    switch(urand(1,5))
-                    {
-                        case 1: spell_id = 33053; break;
-                        case 2: spell_id = 33057; break;
-                        case 3: spell_id = 33059; break;
-                        case 4: spell_id = 33062; break;
-                        case 5: spell_id = 33064; break;
-                    }
-
-                    m_caster->CastSpell(m_caster, spell_id, true, NULL);
-                    return;
-                }
-                case 35745:
-                {
-                    uint32 spell_id;
-                    switch(m_caster->GetAreaId())
-                    {
-                        case 3900: spell_id = 35743; break;
-                        case 3742: spell_id = 35744; break;
-                        default: return;
-                    }
-
-                    m_caster->CastSpell(m_caster, spell_id, true);
-                    return;
-                }
-                case 37674:                                 // Chaos Blast
-                {
-                    if (!unitTarget)
-                        return;
-
-                    int32 basepoints0 = 100;
-                    m_caster->CastCustomSpell(unitTarget, 37675, &basepoints0, NULL, NULL, true);
-                    return;
-                }
-                case 40802:                                 // Mingo's Fortune Generator (Mingo's Fortune Giblets)
-                {
-                    // selecting one from Bloodstained Fortune item
-                    uint32 newitemid;
-                    switch(urand(1, 20))
-                    {
-                        case 1:  newitemid = 32688; break;
-                        case 2:  newitemid = 32689; break;
-                        case 3:  newitemid = 32690; break;
-                        case 4:  newitemid = 32691; break;
-                        case 5:  newitemid = 32692; break;
-                        case 6:  newitemid = 32693; break;
-                        case 7:  newitemid = 32700; break;
-                        case 8:  newitemid = 32701; break;
-                        case 9:  newitemid = 32702; break;
-                        case 10: newitemid = 32703; break;
-                        case 11: newitemid = 32704; break;
-                        case 12: newitemid = 32705; break;
-                        case 13: newitemid = 32706; break;
-                        case 14: newitemid = 32707; break;
-                        case 15: newitemid = 32708; break;
-                        case 16: newitemid = 32709; break;
-                        case 17: newitemid = 32710; break;
-                        case 18: newitemid = 32711; break;
-                        case 19: newitemid = 32712; break;
-                        case 20: newitemid = 32713; break;
-                        default:
-                            return;
-                    }
-
-                    DoCreateItem(i, newitemid);
-                    return;
-                }
-                // Demon Broiled Surprise
-                /* FIX ME: Required for correct work implementing implicit target 7 (in pair (22,7))
-                case 43723:
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    ((Player*)m_caster)->CastSpell(unitTarget, 43753, true);
-                    return;
-                }
-                */
-                case 44875:                                 // Complete Raptor Capture
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    Creature* creatureTarget = (Creature*)unitTarget;
-
-                    creatureTarget->ForcedDespawn();
-
-                    //cast spell Raptor Capture Credit
-                    m_caster->CastSpell(m_caster, 42337, true, NULL);
-                    return;
-                }
-                case 37573:                                 //Temporal Phase Modulator
-                {
-                    if(!unitTarget)
-                        return;
-
-                    TemporarySummon* tempSummon = dynamic_cast<TemporarySummon*>(unitTarget);
-                    if(!tempSummon)
-                        return;
-
-                    uint32 health = tempSummon->GetHealth();
-                    const uint32 entry_list[6] = {21821, 21820, 21817};
-
-                    float x = tempSummon->GetPositionX();
-                    float y = tempSummon->GetPositionY();
-                    float z = tempSummon->GetPositionZ();
-                    float o = tempSummon->GetOrientation();
-
-                    tempSummon->UnSummon();
-
-                    Creature* pCreature = m_caster->SummonCreature(entry_list[urand(0, 2)], x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,180000);
-                    if (!pCreature)
-                        return;
-
-                    pCreature->SetHealth(health);
-
-                    if(pCreature->AI())
-                        pCreature->AI()->AttackStart(m_caster);
-
-                    return;
-                }
-                case 34665:                                 //Administer Antidote
-                {
-                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER )
-                        return;
-                    // Spell has scriptable target but for sure.
-                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    uint32 health = unitTarget->GetHealth();
-                    float x, y, z, o;
-
-                    unitTarget->GetPosition(x, y, z);
-                    o = unitTarget->GetOrientation();
-                    ((Creature*)unitTarget)->ForcedDespawn();
-
-                    if (Creature* summon = m_caster->SummonCreature(16992, x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,180000))
-                    {
-                        summon->SetHealth(health);
-                        ((Player*)m_caster)->RewardPlayerAndGroupAtEvent(16992, summon);
-
-                        if (summon->AI())
-                            summon->AI()->AttackStart(m_caster);
-                    }
-                    return;
-                }
-                case 44997:                                 // Converting Sentry
-                {
-                    //Converted Sentry Credit
-                    m_caster->CastSpell(m_caster, 45009, true);
-                    return;
-                }
-                case 45030:                                 // Impale Emissary
-                {
-                    // Emissary of Hate Credit
-                    m_caster->CastSpell(m_caster, 45088, true);
-                    return;
-                }
-                case 50243:                                 // Teach Language
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // spell has a 1/3 chance to trigger one of the below
-                    if (roll_chance_i(66))
-                        return;
-                    if (((Player*)m_caster)->GetTeam() == ALLIANCE)
-                    {
-                        // 1000001 - gnomish binary
-                        m_caster->CastSpell(m_caster, 50242, true);
-                    }
-                    else
-                    {
-                        // 01001000 - goblin binary
-                        m_caster->CastSpell(m_caster, 50246, true);
-                    }
-
-                    return;
-                }
-                case 51582:                                 //Rocket Boots Engaged (Rocket Boots Xtreme and Rocket Boots Xtreme Lite)
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    if (BattleGround* bg = ((Player*)m_caster)->GetBattleGround())
-                        bg->EventPlayerDroppedFlag((Player*)m_caster);
-
-                    m_caster->CastSpell(m_caster, 30452, true, NULL);
                     return;
                 }
             }
@@ -2258,7 +2025,7 @@ void Spell::EffectEnergize(uint32 i)
             level_diff = m_caster->getLevel() - 40;
             multiplier = 2;
             break;
-        // Blood Fury
+        // Blood Fury (warrior spell)
         case 24571:
             level_diff = m_caster->getLevel() - 60;
             multiplier = 10;
