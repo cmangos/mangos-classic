@@ -180,56 +180,6 @@ namespace MaNGOS
             return (uint32)(xp_gain*sWorld.getRate(RATE_XP_KILL));
         }
 
-        inline uint32 xp_Diff(uint32 lvl)
-        {
-            if( lvl < 29 )
-                return 0;
-            if( lvl == 29 )
-                return 1;
-            if( lvl == 30 )
-                return 3;
-            if( lvl == 31 )
-                return 6;
-            else
-                return (5*(lvl-30));
-        }
-
-        inline uint32 mxp(uint32 lvl)
-        {
-            if (lvl < 60)
-            {
-                return (45 + (5*lvl));
-            }
-            else
-            {
-                return (235 + (5*lvl));
-            }
-        }
-
-        inline uint32 xp_to_level(uint32 lvl)
-        {
-            uint32 xp = 0;
-            if (lvl < 60)
-            {
-                xp = (8*lvl + xp_Diff(lvl)) * mxp(lvl);
-            }
-            else if (lvl == 60)
-            {
-                xp = (155 + mxp(lvl) * (1344 - 70 - ((69 - lvl) * (7 + (69 - lvl) * 8 - 1)/2)));
-            }
-            else
-            {
-                // level higher than 60 is not supported
-                xp = (uint32)(779700 * (pow(sWorld.getRate(RATE_XP_PAST_60), (int32)lvl - 59)));
-                return ((xp < 0x7fffffff) ? xp : 0x7fffffff);
-            }
-
-            // The XP to Level is always rounded to the nearest 100 points (50 rounded to high).
-            xp = ((xp + 50) / 100) * 100;                   // use additional () for prevent free association operations in C++
-
-            return xp;
-        }
-
         inline float xp_in_group_rate(uint32 count, bool isRaid)
         {
             if(isRaid)
