@@ -2575,7 +2575,6 @@ void Spell::SendSpellStart()
     if(IsRangedSpell())
         castFlags |= CAST_FLAG_AMMO;
 
-
     WorldPacket data(SMSG_SPELL_START, (8+8+4+2+4));
     if(m_CastItem)
         data.append(m_CastItem->GetPackGUID());

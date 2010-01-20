@@ -58,27 +58,18 @@ uint32 const LevelStartLoyalty[6] =
     17500,
 };
 
-Pet::Pet(PetType type) : Creature()
+Pet::Pet(PetType type) :
+Creature(), m_removed(false), m_petType(type), m_happinessTimer(7500), m_duration(0), m_resetTalentsCost(0),
+m_bonusdamage(0), m_resetTalentsTime(0), m_auraUpdateMask(0), m_loading(false)
 {
     m_isPet = true;
     m_name = "Pet";
-    m_petType = type;
 
-    m_removed = false;
     m_regenTimer = 4000;
-    m_happinessTimer = 7500;
     m_loyaltyTimer = 12000;
-    m_duration = 0;
-    m_bonusdamage = 0;
 
     m_loyaltyPoints = 0;
     m_TrainingPoints = 0;
-    m_resetTalentsCost = 0;
-    m_resetTalentsTime = 0;
-
-    m_auraUpdateMask = 0;
-
-    m_loading = false;
 
     // pets always have a charminfo, even if they are not actually charmed
     CharmInfo* charmInfo = InitCharmInfo(this);

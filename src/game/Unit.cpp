@@ -8798,20 +8798,17 @@ Stats Unit::GetStatByAuraGroup(UnitMods unitMod) const
 
 Powers Unit::GetPowerTypeByAuraGroup(UnitMods unitMod) const
 {
-    Powers power = POWER_MANA;
-
     switch(unitMod)
     {
-        case UNIT_MOD_MANA:       power = POWER_MANA;       break;
-        case UNIT_MOD_RAGE:       power = POWER_RAGE;       break;
-        case UNIT_MOD_FOCUS:      power = POWER_FOCUS;      break;
-        case UNIT_MOD_ENERGY:     power = POWER_ENERGY;     break;
-        case UNIT_MOD_HAPPINESS:  power = POWER_HAPPINESS;  break;
-        default:
-            break;
+        case UNIT_MOD_MANA:       return POWER_MANA;
+        case UNIT_MOD_RAGE:       return POWER_RAGE;
+        case UNIT_MOD_FOCUS:      return POWER_FOCUS;
+        case UNIT_MOD_ENERGY:     return POWER_ENERGY;
+        case UNIT_MOD_HAPPINESS:  return POWER_HAPPINESS;
+        default:                  return POWER_MANA;
     }
 
-    return power;
+    return POWER_MANA;
 }
 
 float Unit::GetTotalAttackPowerValue(WeaponAttackType attType) const
@@ -9018,6 +9015,7 @@ uint32 Unit::GetCreatePowers( Powers power ) const
         case POWER_FOCUS:     return (GetTypeId()==TYPEID_PLAYER || !((Creature const*)this)->isPet() || ((Pet const*)this)->getPetType()!=HUNTER_PET ? 0 : 100);
         case POWER_ENERGY:    return 100;
         case POWER_HAPPINESS: return (GetTypeId()==TYPEID_PLAYER || !((Creature const*)this)->isPet() || ((Pet const*)this)->getPetType()!=HUNTER_PET ? 0 : 1050000);
+        case POWER_HEALTH:    return 0;
     }
 
     return 0;

@@ -1845,7 +1845,7 @@ void Aura::HandleAuraHover(bool apply, bool Real)
     m_target->SendMessageToSet(&data, true);
 }
 
-void Aura::HandleWaterBreathing(bool apply, bool /*Real*/)
+void Aura::HandleWaterBreathing(bool /*apply*/, bool /*Real*/)
 {
     // update timers in client
     if(m_target->GetTypeId()==TYPEID_PLAYER)
@@ -2893,7 +2893,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     // only at real add/remove aura
     if(!Real)
         return;
-    uint32 apply_stat = UNIT_STAT_ROOT;
+
     if (apply)
     {
         m_target->addUnitState(UNIT_STAT_ROOT);
