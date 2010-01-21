@@ -34,6 +34,8 @@
 #include "Database/DatabaseEnv.h"
 #include "Mail.h"
 #include "Map.h"
+#include "Group.h"
+#include "Guild.h"
 #include "ObjectAccessor.h"
 #include "ObjectDefines.h"
 #include "Policies/Singleton.h"
@@ -285,9 +287,9 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, Item*> ItemMap;
 
-        typedef std::set< Group * > GroupSet;
+        typedef UNORDERED_MAP<uint32, Group*> GroupMap;
 
-        typedef UNORDERED_MAP<uint32, Guild *> GuildMap;
+        typedef UNORDERED_MAP<uint32, Guild*> GuildMap;
 
         typedef UNORDERED_MAP<uint32, Quest*> QuestMap;
 
@@ -311,16 +313,16 @@ class ObjectMgr
         void LoadGameobjectInfo();
         void AddGameobjectInfo(GameObjectInfo *goinfo);
 
-        Group * GetGroupByLeader(const uint64 &guid) const;
-        void AddGroup(Group* group) { mGroupSet.insert( group ); }
-        void RemoveGroup(Group* group) { mGroupSet.erase( group ); }
+        Group * GetGroupByLeaderLowGUID(uint32 lowguid) const;
+        void AddGroup(Group* group) { mGroupMap[GUID_LOPART(group->GetLeaderGUID())] = group ; }
+        void RemoveGroup(Group* group) { mGroupMap.erase(GUID_LOPART(group->GetLeaderGUID())); }
 
         Guild* GetGuildByLeader(uint64 const&guid) const;
         Guild* GetGuildById(uint32 GuildId) const;
         Guild* GetGuildByName(const std::string& guildname) const;
         std::string GetGuildNameById(uint32 GuildId) const;
-        void AddGuild(Guild* guild);
-        void RemoveGuild(uint32 Id);
+        void AddGuild(Guild* guild) { mGuildMap[guild->GetId()] = guild ; }
+        void RemoveGuild(uint32 Id) { mGuildMap.erase(Id); }
 
         static CreatureInfo const *GetCreatureTemplate( uint32 id );
         CreatureModelInfo const *GetCreatureModelInfo( uint32 modelid );
@@ -748,7 +750,7 @@ class ObjectMgr
         typedef std::set<uint32> TavernAreaTriggerSet;
         typedef std::set<uint32> GameObjectForQuestSet;
 
-        GroupSet            mGroupSet;
+        GroupMap            mGroupMap;
         GuildMap            mGuildMap;
 
         ItemTextMap         mItemTexts;
