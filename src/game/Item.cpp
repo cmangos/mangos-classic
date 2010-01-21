@@ -636,6 +636,9 @@ bool Item::IsEquipped() const
 
 bool Item::CanBeTraded() const
 {
+    if (m_lootGenerated)
+        return false;
+
     if (IsSoulBound())
         return false;
     if (IsBag() && (Player::IsBagPos(GetPos()) || !((Bag const*)this)->IsEmpty()) )
@@ -846,6 +849,23 @@ void Item::BuildUpdateData(UpdateDataMapType& update_players)
         BuildUpdateDataForPlayer(pl, update_players);
 
     ClearUpdateMask(false);
+}
+
+uint8 Item::CanBeMergedPartlyWith( ItemPrototype const* proto ) const
+{
+    // check item type
+    if (GetEntry() != proto->ItemId)
+        return EQUIP_ERR_ITEM_CANT_STACK;
+
+    // check free space (full stacks can't be target of merge
+    if (GetCount() >= proto->GetMaxStackSize())
+        return EQUIP_ERR_ITEM_CANT_STACK;
+
+    // not allow merge looting currently items
+    if (m_lootGenerated)
+        return EQUIP_ERR_ALREADY_LOOTED;
+
+    return EQUIP_ERR_OK;
 }
 
 bool ItemRequiredTarget::IsFitToRequirements( Unit* pUnitTarget ) const
