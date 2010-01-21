@@ -25,9 +25,8 @@
 #include "SpellMgr.h"
 #include "DBCStores.h"
 
-Totem::Totem() : Creature()
+Totem::Totem() : Creature(CREATURE_SUBTYPE_TOTEM)
 {
-    m_isTotem = true;
     m_duration = 0;
     m_type = TOTEM_PASSIVE;
 }

@@ -59,10 +59,9 @@ uint32 const LevelStartLoyalty[6] =
 };
 
 Pet::Pet(PetType type) :
-Creature(), m_removed(false), m_petType(type), m_happinessTimer(7500), m_duration(0), m_resetTalentsCost(0),
+Creature(CREATURE_SUBTYPE_PET), m_removed(false), m_petType(type), m_happinessTimer(7500), m_duration(0), m_resetTalentsCost(0),
 m_bonusdamage(0), m_resetTalentsTime(0), m_auraUpdateMask(0), m_loading(false)
 {
-    m_isPet = true;
     m_name = "Pet";
 
     m_regenTimer = 4000;

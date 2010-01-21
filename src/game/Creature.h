@@ -432,13 +432,21 @@ typedef std::map<uint32,time_t> CreatureSpellCooldowns;
 
 #define MAX_VENDOR_ITEMS 255                                // Limitation in item count field size in SMSG_LIST_INVENTORY
 
+enum CreatureSubtype
+{
+    CREATURE_SUBTYPE_GENERIC,                               // new Creature
+    CREATURE_SUBTYPE_PET,                                   // new Pet
+    CREATURE_SUBTYPE_TOTEM,                                 // new Totem
+    CREATURE_SUBTYPE_TEMPORARY_SUMMON,                      // new TemporarySummon
+};
+
 class MANGOS_DLL_SPEC Creature : public Unit
 {
     CreatureAI *i_AI;
 
     public:
 
-        explicit Creature();
+        explicit Creature(CreatureSubtype subtype = CREATURE_SUBTYPE_GENERIC);
         virtual ~Creature();
 
         void AddToWorld();
@@ -456,9 +464,12 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void GetRespawnCoord(float &x, float &y, float &z, float* ori = NULL, float* dist =NULL) const;
         uint32 GetEquipmentId() const { return m_equipmentId; }
 
-        bool isPet() const { return m_isPet; }
+        CreatureSubtype GetSubtype() const { return m_subtype; }
+        bool isPet() const { return m_subtype == CREATURE_SUBTYPE_PET; }
+        bool isTotem() const { return m_subtype == CREATURE_SUBTYPE_TOTEM; }
+        bool isTemporarySummon() const { return m_subtype == CREATURE_SUBTYPE_TEMPORARY_SUMMON; }
+
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
-        bool isTotem() const { return m_isTotem; }
         bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool isCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
         bool canWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
@@ -708,8 +719,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_gossipOptionLoaded;
         GossipOptionList m_goptions;
 
-        bool m_isPet;                                       // set only in Pet::Pet
-        bool m_isTotem;                                     // set only in Totem::Totem
+        CreatureSubtype m_subtype;                          // set in Creatures subclasses for fast it detect without dynamic_cast use
+
         void RegenerateMana();
         void RegenerateHealth();
         MovementGeneratorType m_defaultMovementType;
