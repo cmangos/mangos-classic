@@ -34,8 +34,6 @@
 #include "Database/DatabaseEnv.h"
 #include "Mail.h"
 #include "Map.h"
-#include "Group.h"
-#include "Guild.h"
 #include "ObjectAccessor.h"
 #include "ObjectDefines.h"
 #include "Policies/Singleton.h"
@@ -314,15 +312,15 @@ class ObjectMgr
         void AddGameobjectInfo(GameObjectInfo *goinfo);
 
         Group * GetGroupByLeaderLowGUID(uint32 lowguid) const;
-        void AddGroup(Group* group) { mGroupMap[GUID_LOPART(group->GetLeaderGUID())] = group ; }
-        void RemoveGroup(Group* group) { mGroupMap.erase(GUID_LOPART(group->GetLeaderGUID())); }
+        void AddGroup(Group* group);
+        void RemoveGroup(Group* group);
 
         Guild* GetGuildByLeader(uint64 const&guid) const;
         Guild* GetGuildById(uint32 GuildId) const;
         Guild* GetGuildByName(const std::string& guildname) const;
         std::string GetGuildNameById(uint32 GuildId) const;
-        void AddGuild(Guild* guild) { mGuildMap[guild->GetId()] = guild ; }
-        void RemoveGuild(uint32 Id) { mGuildMap.erase(Id); }
+        void AddGuild(Guild* guild);
+        void RemoveGuild(uint32 Id);
 
         static CreatureInfo const *GetCreatureTemplate( uint32 id );
         CreatureModelInfo const *GetCreatureModelInfo( uint32 modelid );

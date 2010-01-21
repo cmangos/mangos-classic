@@ -7335,6 +7335,26 @@ void ObjectMgr::LoadDbScriptStrings()
         sLog.outErrorDb( "Table `db_script_string` has unused string id  %u", *itr);
 }
 
+void ObjectMgr::AddGuild( Guild* guild )
+{
+    mGuildMap[guild->GetId()] = guild ;
+}
+
+void ObjectMgr::RemoveGuild( uint32 Id )
+{
+    mGuildMap.erase(Id);
+}
+
+void ObjectMgr::AddGroup( Group* group )
+{
+    mGroupMap[GUID_LOPART(group->GetLeaderGUID())] = group ;
+}
+
+void ObjectMgr::RemoveGroup( Group* group )
+{
+    mGroupMap.erase(GUID_LOPART(group->GetLeaderGUID()));
+}
+
 // Functions for scripting access
 uint32 GetAreaTriggerScriptId(uint32 trigger_id)
 {
