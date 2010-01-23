@@ -1873,8 +1873,7 @@ void World::ScriptsProcess()
                 MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck> checker(go,go_check);
 
                 TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck>, GridTypeMapContainer > object_checker(checker);
-                CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, object_checker, *summoner->GetMap());
+                cell.Visit(p, object_checker, *summoner->GetMap());
 
                 if ( !go )
                 {
@@ -1933,8 +1932,7 @@ void World::ScriptsProcess()
                 MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck> checker(door,go_check);
 
                 TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck>, GridTypeMapContainer > object_checker(checker);
-                CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, object_checker, *caster->GetMap());
+                cell.Visit(p, object_checker, *caster->GetMap());
 
                 if (!door)
                 {
@@ -1989,8 +1987,7 @@ void World::ScriptsProcess()
                 MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck> checker(door,go_check);
 
                 TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck>, GridTypeMapContainer > object_checker(checker);
-                CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, object_checker, *caster->GetMap());
+                cell.Visit(p, object_checker, *caster->GetMap());
 
                 if ( !door )
                 {
