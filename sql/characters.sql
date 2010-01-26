@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z0082_xxx_01_characters_character_social` bit(1) DEFAULT NULL
+  `required_z0114_xxx_02_characters` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -264,7 +264,8 @@ DROP TABLE IF EXISTS `character_kill`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_kill` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
-  `creature_template` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Creature Identifier',
+  `victim_type` TINYINT(3) UNSIGNED NOT NULL DEFAULT '4',                                             
+  `victim` INT(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Creature / Player Identifier',  
   `honor` float NOT NULL DEFAULT '0',
   `date` int(11) unsigned NOT NULL DEFAULT '0',
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -571,7 +572,9 @@ CREATE TABLE `characters` (
   `taxi_path` text,
   `honor_highest_rank` int(11) unsigned NOT NULL DEFAULT '0',
   `honor_standing` int(11) unsigned NOT NULL DEFAULT '0',
-  `honor_rating` float NOT NULL DEFAULT '0',
+  `stored_honor_rating` FLOAT NOT NULL DEFAULT '0',                                 
+  `stored_dishonorable_kills` INT(11) NOT NULL DEFAULT '0',                         
+  `stored_honorable_kills` INT(11) NOT NULL DEFAULT '0',  
   PRIMARY KEY (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),

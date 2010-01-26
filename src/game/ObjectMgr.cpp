@@ -2316,6 +2316,47 @@ void ObjectMgr::LoadPlayerInfo()
     }
 }
 
+void ObjectMgr::LoadRatingList()
+{
+    uint8 type=0;
+    uint32 guid=0, honor=0;
+
+    uint32 LastWeekBegin = sWorld.GetDateLastWeekBegin( localtime(&sWorld.GetGameTime()) );
+    
+    Field *fields = NULL;
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid,SUM(honor),type,COUNT(*) FROM `character_kill` WHERE `date` BETWEEN %u AND %u GROUP BY guid,type", LastWeekBegin,LastWeekBegin+7);
+    if (result)
+    {
+        barGoLink bar(result->GetRowCount());
+        
+        do
+        {
+            fields = result->Fetch();
+            guid  = fields[0].GetUInt32();
+            honor = fields[1].GetUInt32();
+            type  = fields[2].GetUInt8();
+
+            if (type == HONORABLE_KILL)
+                mHonorStandingList[guid].HonorPoints += fields[1].GetUInt32();
+            else if (type == DISHONORABLE_KILL)
+                if (mHonorStandingList[guid].HonorPoints > honor)
+                    mHonorStandingList[guid].HonorPoints -= fields[1].GetUInt32();
+                else
+                    mHonorStandingList[guid].HonorPoints = 0;
+
+            mHonorStandingList[guid].HonorKills = fields[3].GetUInt32();
+
+            bar.step();
+
+        } while (result->NextRow());
+
+        delete result;
+    }
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u honor rating definitions", mHonorStandingList.size());    
+}
+
 void ObjectMgr::GetPlayerClassLevelInfo(uint32 class_, uint32 level, PlayerClassLevelInfo* info) const
 {
     if(level < 1 || class_ >= MAX_CLASSES)

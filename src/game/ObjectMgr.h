@@ -238,6 +238,12 @@ struct PlayerCondition
     }
 };
 
+struct HonorStanding
+{
+    float HonorPoints;
+    uint32 HonorKills;
+};
+
 // NPC gossip text id
 typedef UNORDERED_MAP<uint32, uint32> CacheNpcTextIdMap;
 typedef std::list<GossipOption> CacheNpcOptionList;
@@ -496,6 +502,7 @@ class ObjectMgr
         void LoadPageTexts();
 
         void LoadPlayerInfo();
+        void LoadRatingList();
         void LoadPetLevelInfo();
         void LoadExplorationBaseXP();
         void LoadPetNames();
@@ -523,6 +530,26 @@ class ObjectMgr
             FishingBaseSkillMap::const_iterator itr = mFishingBaseForArea.find(entry);
             return itr != mFishingBaseForArea.end() ? itr->second : 0;
         }
+
+        uint32 GetHonorStandingPosition(uint32 guid) const
+        {
+            HonorStandingMap::const_iterator itr = mHonorStandingList.find(guid);
+            if (itr == mHonorStandingList.end())
+                return 0;
+
+            HonorStanding standing = itr->second;
+            if (!standing.HonorPoints || standing.HonorKills > HONOR_STANDING_MIN_KILL)
+                return 0;
+
+            uint32 count = 1;
+            for (HonorStandingMap::const_iterator itr = mHonorStandingList.begin(); itr != mHonorStandingList.end(); ++itr)
+                if (itr->second.HonorPoints > standing.HonorPoints )
+                    count++;
+
+            return count;
+        }
+        
+        void UpdateHonorStandingByGuid(uint32 guid,HonorStanding standing) { mHonorStandingList.find(guid)->second = standing; }
 
         void ReturnOrDeleteOldMails(bool serverUp);
 
@@ -808,6 +835,10 @@ class ObjectMgr
 
         typedef std::map<uint32,int32> FishingBaseSkillMap; // [areaId][base skill level]
         FishingBaseSkillMap mFishingBaseForArea;
+
+        // Honor System        
+        typedef std::map<uint32 /*playerGuid*/,HonorStanding> HonorStandingMap;
+        HonorStandingMap mHonorStandingList;
 
         typedef std::map<uint32,std::vector<std::string> > HalfNameMap;
         HalfNameMap PetHalfName0;

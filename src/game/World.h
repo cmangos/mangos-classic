@@ -410,6 +410,9 @@ class World
         /// Uptime (in secs)
         uint32 GetUptime() const { return uint32(m_gameTime - m_startTime); }
 
+        uint32 GetDateToday(tm *now) const { return ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday)); }
+        uint32 GetDateLastWeekBegin(tm *now) const { return GetDateToday(now) - now->tm_wday - 7; }
+
         /// Get the maximum skill level a player can reach
         uint16 GetConfigMaxSkillValue() const
         {

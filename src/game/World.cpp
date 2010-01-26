@@ -1199,6 +1199,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( ">>> Player Create Info & Level Stats loaded" );
     sLog.outString();
 
+    sLog.outString( "Loading Honor Rating List..." );
+    sObjectMgr.LoadRatingList();
+
     sLog.outString( "Loading Exploration BaseXP Data..." );
     sObjectMgr.LoadExplorationBaseXP();
 

@@ -176,7 +176,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendDoFlight( uint32 mountDisplayId, uint32 path, uint32 pathNode = 0 );
         bool SendLearnNewTaxiNode( Creature* unit );
 
-        // Guild/Arena Team
+        // Guild Team
         void SendGuildCommandResult(uint32 typecmd, const std::string& str, uint32 cmdresult);
         void SendPetitionShowList( uint64 guid );
         void SendSaveGuildEmblem( uint32 msg );

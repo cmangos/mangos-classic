@@ -21,6 +21,7 @@
 
 #include "World.h"
 
+
 namespace MaNGOS
 {
     namespace Honor
@@ -39,22 +40,13 @@ namespace MaNGOS
             return plr->GetTotalHonor()+plr->GetStoredHonor();
         }
 
-        //TODO: Implement this function
-        // NOTE: DO NOT IMPLEMENT A FUNCTION THAT USES A QUERY, SAVE THE DATA
-        inline int32 CalculeStanding(Player *plr)
-        {
-            uint64 guid = 0;
-            int standing = 0;
-
-            float m_rating = CalculeRating(plr);
-            QueryResult *result = CharacterDatabase.PQuery("SELECT count(*) as cnt FROM `characters` WHERE `honor_rating` >= '%f'", m_rating );
-            if(result)
-            {
-                Field *fields = result->Fetch();
-                standing = fields[0].GetUInt32();
-                delete result;
-            }
-            return standing;
+        inline int32 CalculeStanding(Player *plr,float lastWeekHonor,uint32 lastWeekHonorKills)
+        {    
+            HonorStanding standing;
+            standing.HonorPoints = lastWeekHonor;
+            standing.HonorKills  = lastWeekHonorKills; 
+            sObjectMgr.UpdateHonorStandingByGuid(plr->GetGUIDLow(),standing);
+            return sObjectMgr.GetHonorStandingPosition(plr->GetGUIDLow());
         }
 
         inline float DishonorableKillPoints(int level)
@@ -74,11 +66,11 @@ namespace MaNGOS
                 return result;
         }
 
-        // THIS FUNCTION WILL NEVER BE FAST as it uses a mysql query
-        // TODO: Load it at player load and modify it while the player is playing
-        // then when player save, save it!!!
-        inline float HonorableKillPoints( Player *killer, Player *victim )
+        inline float HonorableKillPoints( Player *killer, Player *victim, uint32 groupsize)
         {
+            if (!killer || !victim || !groupsize)
+                return 0.0;
+
             int total_kills  = killer->CalculateTotalKills(victim);
             //int k_rank       = killer->CalculateHonorRank( killer->GetTotalHonor() );
             uint32 v_rank    = victim->CalculateHonorRank( victim->GetTotalHonor() );
@@ -89,7 +81,7 @@ namespace MaNGOS
 
             int f = (4 - total_kills) >= 0 ? (4 - total_kills) : 0;
             int honor_points = int(((float)(f * 0.25)*(float)((k_level+(v_rank*5+1))*(1+0.05*diff_honor)*diff_level)));
-            return (honor_points <= 400 ? honor_points : 400);
+            return (honor_points <= 400 ? honor_points : 400) / groupsize;
         }
 
     }

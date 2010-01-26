@@ -4049,15 +4049,7 @@ bool ChatHandler::HandleResetHonorCommand (const char * args)
         return true;
     }
 
-    player->SetStoredHonor(0.0f);
-    player->SetHonorStoredKills(0,true);
-    player->SetHonorStoredKills(0,false);
-    player->SetHonorLastWeekStanding(0);
-    player->m_pending_dishonorableKills = 0;
-    player->m_pending_honorableKills = 0;
-    player->m_pending_honor = 0.0f;
-    CharacterDatabase.PExecute("DELETE FROM character_kill WHERE guid = '%u'",player->GetGUIDLow());
-
+    player->ResetHonor();
     return true;
 }
 

@@ -308,6 +308,26 @@ enum TYPE_OF_KILL
     DISHONORABLE_KILL = 2,
 };
 
+struct HonorKill
+{
+   uint8 victimType;
+   uint32 victimID;
+   float honorPoints;
+   uint32 date;
+   uint8 type;
+   uint8 state;
+};
+
+enum HonorKillState
+{
+   HK_NEW = 0,
+   HK_OLD = 1,
+   HK_DELETED = 2,
+   HK_UNCHANGED = 3
+};
+
+typedef std::list<HonorKill> HonorKillsMap;
+
 #define HONOR_RANK_COUNT 16
 
 enum PlayerFlags
@@ -654,7 +674,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADAURAS                = 3,
     PLAYER_LOGIN_QUERY_LOADSPELLS               = 4,
     PLAYER_LOGIN_QUERY_LOADQUESTSTATUS          = 5,
-    //[-ZERO] PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS     = 6,
+    PLAYER_LOGIN_QUERY_LOADKILLS                = 6,
     PLAYER_LOGIN_QUERY_LOADTUTORIALS            = 7,        // common for all characters for some account at specific realm
     PLAYER_LOGIN_QUERY_LOADREPUTATION           = 8,
     PLAYER_LOGIN_QUERY_LOADINVENTORY            = 9,
@@ -1566,11 +1586,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
+        bool AddHonorKill(float honor,uint8 type,uint32 victim,uint8 victimType);
         void UpdateHonor();
+        void ResetHonor();
         bool CalculateHonor(Unit *pVictim,uint32 groupsize);
         uint32 CalculateHonorRank(float honor) const;
         uint32 GetHonorRank() const;
-        int  CalculateTotalKills(Player *pVictim) const;
+        uint32 CalculateTotalKills(Unit *Victim) const;
         //Acessors of total honor points
         void SetTotalHonor(float total_honor_points) { m_total_honor_points = total_honor_points; };
         float GetTotalHonor(void) const { return m_total_honor_points; };
@@ -1586,19 +1608,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         //Acessors of last week standing
         int32 GetHonorLastWeekStanding() const { return m_standing; }
         void SetHonorLastWeekStanding(int32 standing){ m_standing = standing; }
-
-        float m_total_honor_points;
-        float m_stored_honor;
-        float m_pending_honor;
-        uint32 m_pending_honorableKills;
-        uint32 m_pending_dishonorableKills;
-        uint32 m_storingDate;
-        uint32 m_stored_honorableKills;
-        uint32 m_stored_dishonorableKills;
-        uint32 m_highest_rank;
-        int32 m_standing;
-
-        //End of Honor System
 
         /*********************************************************/
         /***                  PVP SYSTEM                       ***/
@@ -1978,6 +1987,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadAuras(QueryResult *result, uint32 timediff);
         void _LoadBoundInstances(QueryResult *result);
         void _LoadInventory(QueryResult *result, uint32 timediff);
+        void _LoadKills(QueryResult *result);
         void _LoadMailInit(QueryResult *resultUnread, QueryResult *resultDelivery);
         void _LoadMail();
         void _LoadMailedItems(Mail *mail);
@@ -1995,6 +2005,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveActions();
         void _SaveAuras();
         void _SaveInventory();
+        void _SaveKills();
         void _SaveMail();
         void _SaveQuestStatus();
         void _SaveSpells();
@@ -2018,7 +2029,17 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
-        time_t m_lastHonorUpdateTime;
+        tm *m_lastHonorUpdateTime;
+        HonorKillsMap m_honorKills;     
+        float m_total_honor_points;
+        float m_stored_honor;
+        float m_pending_honor;
+        uint32 m_pending_honorableKills;
+        uint32 m_pending_dishonorableKills;
+        uint32 m_stored_honorableKills;
+        uint32 m_stored_dishonorableKills;
+        uint32 m_highest_rank;
+        int32 m_standing;
 
         void outDebugValues() const;
         bool _removeSpell(uint16 spell_id);

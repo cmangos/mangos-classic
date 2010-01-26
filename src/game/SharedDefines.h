@@ -92,6 +92,8 @@ enum Classes
 
 #define PLAYER_MAX_BATTLEGROUND_QUEUES 3
 
+#define HONOR_STANDING_MIN_KILL 15
+
 enum ReputationRank
 {
     REP_HATED       = 0,
