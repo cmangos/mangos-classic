@@ -18,6 +18,7 @@
 #  BUG-REPORT-ADDRESS: mangos-devs@lists.sourceforge.net
 AC_INIT( [mangos], [0.12.0], [mangos-devs@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([src/shared/Base.cpp])
+AC_CONFIG_MACRO_DIR([m4])
 
 ## Prelude, basic settings for Automake
 #  Turn on all warnings and error messages, and enforce GNU
