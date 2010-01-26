@@ -11430,9 +11430,10 @@ DROP TABLE IF EXISTS `spell_facing`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_facing` (
-  `entry` double DEFAULT NULL,
-  `facingcasterflag` tinyint(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `entry` DOUBLE UNSIGNED NOT NULL,
+  `facingcasterflag` TINYINT(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`entry`)   
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
