@@ -1154,20 +1154,26 @@ bool SpellMgr::canStackSpellRanks(SpellEntry const *spellInfo)
     // All stance spells. if any better way, change it.
     for (int i = 0; i < 3; ++i)
     {
-        // Paladin aura Spell
-        if(spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN
-            && spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AREA_AURA_PARTY)
-            return false;
-        // Druid form Spell
-        if(spellInfo->SpellFamilyName == SPELLFAMILY_DRUID
-            && spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AURA
-            && spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT)
-            return false;
-        // Rogue Stealth
-        if(spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE
-            && spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AURA
-            && spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT)
-            return false;
+        switch(spellInfo->SpellFamilyName)
+        {
+            case SPELLFAMILY_PALADIN:
+                // Paladin aura Spell
+                if (spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AREA_AURA_PARTY)
+                    return false;
+                break;
+            case SPELLFAMILY_DRUID:
+                // Druid form Spell
+                if (spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AURA &&
+                    spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT)
+                    return false;
+                break;
+            case SPELLFAMILY_ROGUE:
+                // Rogue Stealth
+                if (spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AURA &&
+                    spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT)
+                    return false;
+                break;
+        }
     }
     return true;
 }
