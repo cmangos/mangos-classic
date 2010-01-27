@@ -14684,7 +14684,7 @@ void Player::_SaveKills()
 {
     HonorKillsMap tempList;
 
-    CharacterDatabase.PExecute("DELETE FROM character_kill WHERE date < '%u'", sWorld.GetDateLastWeekBegin(m_lastHonorUpdateTime) );
+    CharacterDatabase.PExecute("DELETE FROM character_kill WHERE date < '%u' AND guid = '%u'", sWorld.GetDateLastWeekBegin(m_lastHonorUpdateTime),GetGUIDLow() );
     
     for (HonorKillsMap::iterator itr = m_honorKills.begin(); itr != m_honorKills.end() ; ++itr)
     {
