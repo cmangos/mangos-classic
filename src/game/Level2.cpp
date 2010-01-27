@@ -412,7 +412,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(const char* args)
 
         if(id)
             result = WorldDatabase.PQuery("SELECT guid, id, position_x, position_y, position_z, orientation, map, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) AS order_ FROM gameobject WHERE map = '%i' AND id = '%u' ORDER BY order_ ASC LIMIT 1",
-                pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), pl->GetMapId(),id);
+            pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), pl->GetMapId(),id);
         else
         {
             std::string name = cId;
@@ -447,7 +447,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(const char* args)
 
         result = WorldDatabase.PQuery("SELECT gameobject.guid, id, position_x, position_y, position_z, orientation, map, "
             "(POW(position_x - %f, 2) + POW(position_y - %f, 2) + POW(position_z - %f, 2)) AS order_ FROM gameobject "
-            "LEFT OUTER JOIN game_event_gameobject on gameobject.guid=game_event_gameobject.guid WHERE map = '%i' %s ORDER BY order_ ASC LIMIT 1",
+            "LEFT OUTER JOIN game_event_gameobject on gameobject.guid=game_event_gameobject.guid WHERE map = '%i' %s ORDER BY order_ ASC LIMIT 10",
             m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId(),eventFilter.str().c_str());
     }
 
@@ -457,15 +457,33 @@ bool ChatHandler::HandleGameObjectTargetCommand(const char* args)
         return true;
     }
 
-    Field *fields = result->Fetch();
-    uint32 lowguid = fields[0].GetUInt32();
-    uint32 id = fields[1].GetUInt32();
-    float x = fields[2].GetFloat();
-    float y = fields[3].GetFloat();
-    float z = fields[4].GetFloat();
-    float o = fields[5].GetFloat();
-    int mapid = fields[6].GetUInt16();
+    bool found = false;
+    float x, y, z, o;
+    uint32 lowguid, id;
+    uint16 mapid, pool_id;
+
+    do
+    {
+        Field *fields = result->Fetch();
+        lowguid = fields[0].GetUInt32();
+        id =      fields[1].GetUInt32();
+        x =       fields[2].GetFloat();
+        y =       fields[3].GetFloat();
+        z =       fields[4].GetFloat();
+        o =       fields[5].GetFloat();
+        mapid =   fields[6].GetUInt16();
+        pool_id = sPoolMgr.IsPartOfAPool<GameObject>(lowguid);
+        if (!pool_id || (pool_id && sPoolMgr.IsSpawnedObject<GameObject>(pool_id, lowguid)))
+            found = true;
+    } while( result->NextRow() && (!found) );
+
     delete result;
+
+    if (!found)
+    {
+        PSendSysMessage(LANG_GAMEOBJECT_NOT_EXIST,id);
+        return false;
+    }
 
     GameObjectInfo const* goI = ObjectMgr::GetGameObjectInfo(id);
 
