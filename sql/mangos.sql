@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z0101_xxx_01_mangos_item_template` bit(1) DEFAULT NULL
+  `required_z0124_xxx_02_mangos` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1464,7 +1464,6 @@ CREATE TABLE `game_event` (
   `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Absolute end date, the event will never start afler',
   `occurence` bigint(20) unsigned NOT NULL DEFAULT '86400' COMMENT 'Delay in hours between occurences of the event',
   `length` bigint(20) unsigned NOT NULL DEFAULT '43200' COMMENT 'Length in hours of the event',
-  `holiday` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Client side holiday id',
   `description` varchar(255) DEFAULT NULL COMMENT 'Description of the event displayed in console',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -2910,7 +2909,7 @@ INSERT INTO `mangos_string` VALUES
 (203,'Error, name can only contain characters A-Z and a-z.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (204,'The subname was too long by %i characters.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (205,'Not yet implemented',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(206,'Item \'%i\' \'%s\' added to list with maxcount \'%i\' and incrtime \'%i\' and extendedcost \'%i\'',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(206,'Item \'%i\' \'%s\' added to list with maxcount \'%i\' and incrtime \'%i\' ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (207,'Item \'%i\' not found in database.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (208,'Item \'%i\' \'%s\' deleted from vendor list',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (209,'Item \'%i\' not found in vendor list.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -3505,7 +3504,6 @@ CREATE TABLE `npc_option` (
   `npcflag` int(10) unsigned NOT NULL DEFAULT '0',
   `icon` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `action` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `box_money` int(10) unsigned NOT NULL DEFAULT '0',
   `coded` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `option_text` text,
   `box_text` text,
@@ -11430,8 +11428,8 @@ DROP TABLE IF EXISTS `spell_facing`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_facing` (
-  `entry` DOUBLE UNSIGNED NOT NULL,
-  `facingcasterflag` TINYINT(1) NOT NULL DEFAULT '1',
+  `entry` INT(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell ID',
+  `facingcasterflag` TINYINT(1) NOT NULL DEFAULT '1' COMMENT 'flag for facing state, usually 1',
   PRIMARY KEY (`entry`)   
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;

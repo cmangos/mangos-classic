@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z0114_xxx_02_characters` bit(1) DEFAULT NULL
+  `required_z0124_xxx_01_characters` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -547,7 +547,6 @@ CREATE TABLE `characters` (
   `position_y` float NOT NULL DEFAULT '0',
   `position_z` float NOT NULL DEFAULT '0',
   `map` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Map Identifier',
-  `dungeon_difficulty` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `orientation` float NOT NULL DEFAULT '0',
   `taximask` longtext,
   `online` tinyint(3) unsigned NOT NULL DEFAULT '0',

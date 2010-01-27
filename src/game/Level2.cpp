@@ -1096,24 +1096,22 @@ bool ChatHandler::HandleNpcAddVendorItemCommand(const char* args)
     if (fincrtime)
         incrtime = atol(fincrtime);
 
-    char* fextendedcost = strtok(NULL, " ");                //add ExtendedCost, default: 0
-    uint32 extendedcost = fextendedcost ? atol(fextendedcost) : 0;
 
     Creature* vendor = getSelectedCreature();
 
     uint32 vendor_entry = vendor ? vendor->GetEntry() : 0;
 
-    if(!sObjectMgr.IsVendorItemValid(vendor_entry,itemId,maxcount,incrtime,extendedcost,m_session->GetPlayer()))
+    if(!sObjectMgr.IsVendorItemValid(vendor_entry,itemId,maxcount,incrtime,m_session->GetPlayer()))
     {
         SetSentErrorMessage(true);
         return false;
     }
 
-    sObjectMgr.AddVendorItem(vendor_entry,itemId,maxcount,incrtime,extendedcost);
+    sObjectMgr.AddVendorItem(vendor_entry,itemId,maxcount,incrtime);
 
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemId);
 
-    PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,itemId,pProto->Name1,maxcount,incrtime,extendedcost);
+    PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,itemId,pProto->Name1,maxcount,incrtime);
     return true;
 }
 

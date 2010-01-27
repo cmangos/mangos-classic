@@ -7039,7 +7039,7 @@ void ObjectMgr::LoadVendors()
 
     std::set<uint32> skip_vendors;
 
-    QueryResult *result = WorldDatabase.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost FROM npc_vendor");
+    QueryResult *result = WorldDatabase.Query("SELECT entry, item, maxcount, incrtime FROM npc_vendor");
     if( !result )
     {
         barGoLink bar( 1 );
@@ -7063,14 +7063,13 @@ void ObjectMgr::LoadVendors()
         uint32 item_id      = fields[1].GetUInt32();
         uint32 maxcount     = fields[2].GetUInt32();
         uint32 incrtime     = fields[3].GetUInt32();
-        uint32 ExtendedCost = fields[4].GetUInt32();
 
-        if(!IsVendorItemValid(entry,item_id,maxcount,incrtime,ExtendedCost,NULL,&skip_vendors))
+        if(!IsVendorItemValid(entry,item_id,maxcount,incrtime,NULL,&skip_vendors))
             continue;
 
         VendorItemData& vList = m_mCacheVendorItemMap[entry];
 
-        vList.AddItem(item_id,maxcount,incrtime,ExtendedCost);
+        vList.AddItem(item_id,maxcount,incrtime);
         ++count;
 
     } while (result->NextRow());
@@ -7136,8 +7135,8 @@ void ObjectMgr::LoadNpcOptions()
     m_mCacheNpcOptionList.clear();                          // For reload case
 
     QueryResult *result = WorldDatabase.Query(
-        //      0  1         2       3    4      5         6     7           8
-        "SELECT id,gossip_id,npcflag,icon,action,box_money,coded,option_text,box_text "
+        //      0  1         2       3      4      5        6          7
+        "SELECT id,gossip_id,npcflag,icon,action,coded,option_text,box_text "
         "FROM npc_option");
 
     if( !result )
@@ -7167,10 +7166,9 @@ void ObjectMgr::LoadNpcOptions()
         go.NpcFlag          = fields[2].GetUInt32();
         go.Icon             = fields[3].GetUInt32();
         go.Action           = fields[4].GetUInt32();
-        go.BoxMoney         = fields[5].GetUInt32();
-        go.Coded            = fields[6].GetUInt8()!=0;
-        go.OptionText       = fields[7].GetCppString();
-        go.BoxText          = fields[8].GetCppString();
+        go.Coded            = fields[5].GetUInt8()!=0;
+        go.OptionText       = fields[6].GetCppString();
+        go.BoxText          = fields[7].GetCppString();
 
         m_mCacheNpcOptionList.push_back(go);
 
@@ -7183,12 +7181,12 @@ void ObjectMgr::LoadNpcOptions()
     sLog.outString( ">> Loaded %d npc_option entries", count );
 }
 
-void ObjectMgr::AddVendorItem( uint32 entry,uint32 item, uint32 maxcount, uint32 incrtime, uint32 extendedcost )
+void ObjectMgr::AddVendorItem( uint32 entry,uint32 item, uint32 maxcount, uint32 incrtime )
 {
     VendorItemData& vList = m_mCacheVendorItemMap[entry];
-    vList.AddItem(item,maxcount,incrtime,extendedcost);
+    vList.AddItem(item,maxcount,incrtime);
 
-    WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime,extendedcost) VALUES('%u','%u','%u','%u','%u')",entry, item, maxcount,incrtime,extendedcost);
+    WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime) VALUES('%u','%u','%u','%u')",entry, item, maxcount,incrtime);
 }
 
 bool ObjectMgr::RemoveVendorItem( uint32 entry,uint32 item )
@@ -7205,7 +7203,7 @@ bool ObjectMgr::RemoveVendorItem( uint32 entry,uint32 item )
     return true;
 }
 
-bool ObjectMgr::IsVendorItemValid( uint32 vendor_entry, uint32 item_id, uint32 maxcount, uint32 incrtime, uint32 ExtendedCost, Player* pl, std::set<uint32>* skip_vendors ) const
+bool ObjectMgr::IsVendorItemValid( uint32 vendor_entry, uint32 item_id, uint32 maxcount, uint32 incrtime, Player* pl, std::set<uint32>* skip_vendors ) const
 {
     CreatureInfo const* cInfo = GetCreatureTemplate(vendor_entry);
     if(!cInfo)

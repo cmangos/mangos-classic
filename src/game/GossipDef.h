@@ -82,7 +82,6 @@ struct GossipMenuItem
     uint32      m_gSender;
     uint32      m_gAction;
     std::string m_gBoxMessage;
-    uint32      m_gBoxMoney;
 };
 
 typedef std::vector<GossipMenuItem> GossipMenuItemList;
@@ -102,11 +101,11 @@ class MANGOS_DLL_SPEC GossipMenu
         ~GossipMenu();
 
         void AddMenuItem(uint8 Icon, const std::string& Message, bool Coded = false);
-        void AddMenuItem(uint8 Icon, const std::string& Message, uint32 dtSender, uint32 dtAction, const std::string& BoxMessage, uint32 BoxMoney, bool Coded = false);
+        void AddMenuItem(uint8 Icon, const std::string& Message, uint32 dtSender, uint32 dtAction, const std::string& BoxMessage, bool Coded = false);
 
         // for using from scripts, don't must be inlined
         void AddMenuItem(uint8 Icon, char const* Message, bool Coded = false);
-        void AddMenuItem(uint8 Icon, char const* Message, uint32 dtSender, uint32 dtAction, char const* BoxMessage, uint32 BoxMoney, bool Coded = false);
+        void AddMenuItem(uint8 Icon, char const* Message, uint32 dtSender, uint32 dtAction, char const* BoxMessage, bool Coded = false);
 
         unsigned int MenuItemCount() const
         {

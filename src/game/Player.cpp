@@ -10988,7 +10988,7 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 gossipid)
                     }
                 }
 
-                pMenu->GetGossipMenu().AddMenuItem((uint8)gso->Icon,OptionText, gossipid,gso->Action,BoxText,gso->BoxMoney,gso->Coded);
+                pMenu->GetGossipMenu().AddMenuItem((uint8)gso->Icon,OptionText, gossipid,gso->Action,BoxText,gso->Coded);
             }
         }
     }

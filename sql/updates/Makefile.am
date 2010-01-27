@@ -42,6 +42,8 @@ pkgdata_DATA = \
 	z0101_xxx_01_mangos_item_template.sql \
 	z0114_xxx_01_character_kill.sql \
 	z0114_xxx_01_characters.sql \
+	z0124_xxx_01_characters.sql \
+	z0124_xxx_02_mangos.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -63,4 +65,6 @@ EXTRA_DIST = \
 	z0101_xxx_01_mangos_item_template.sql \
 	z0114_xxx_01_character_kill.sql \
 	z0114_xxx_01_characters.sql \
+	z0124_xxx_01_characters.sql \
+	z0124_xxx_02_mangos.sql \
 	README

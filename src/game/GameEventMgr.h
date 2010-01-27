@@ -36,7 +36,6 @@ struct GameEventData
     time_t end;
     uint32 occurence;
     uint32 length;
-    uint32 holiday_id;
     std::string description;
 
     bool isValid() const { return length > 0; }
@@ -98,7 +97,5 @@ class GameEventMgr
 };
 
 #define sGameEventMgr MaNGOS::Singleton<GameEventMgr>::Instance()
-
-MANGOS_DLL_SPEC bool IsHolidayActive(HolidayIds id);
 
 #endif

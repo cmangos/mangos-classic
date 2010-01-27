@@ -34,7 +34,7 @@ GossipMenu::~GossipMenu()
     ClearMenu();
 }
 
-void GossipMenu::AddMenuItem(uint8 Icon, const std::string& Message, uint32 dtSender, uint32 dtAction, const std::string& BoxMessage, uint32 BoxMoney, bool Coded)
+void GossipMenu::AddMenuItem(uint8 Icon, const std::string& Message, uint32 dtSender, uint32 dtAction, const std::string& BoxMessage, bool Coded)
 {
     ASSERT( m_gItems.size() <= GOSSIP_MAX_MENU_ITEMS  );
 
@@ -46,14 +46,13 @@ void GossipMenu::AddMenuItem(uint8 Icon, const std::string& Message, uint32 dtSe
     gItem.m_gSender     = dtSender;
     gItem.m_gAction     = dtAction;
     gItem.m_gBoxMessage = BoxMessage;
-    gItem.m_gBoxMoney   = BoxMoney;
 
     m_gItems.push_back(gItem);
 }
 
 void GossipMenu::AddMenuItem(uint8 Icon, const std::string& Message, bool Coded)
 {
-    AddMenuItem( Icon, Message, 0, 0, "", 0, Coded);
+    AddMenuItem( Icon, Message, 0, 0, "", Coded);
 }
 
 void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, bool Coded)
@@ -61,9 +60,9 @@ void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, bool Coded)
     AddMenuItem(Icon, std::string(Message ? Message : ""),Coded);
 }
 
-void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, uint32 dtSender, uint32 dtAction, char const* BoxMessage, uint32 BoxMoney, bool Coded)
+void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, uint32 dtSender, uint32 dtAction, char const* BoxMessage, bool Coded)
 {
-    AddMenuItem(Icon, std::string(Message ? Message : ""), dtSender, dtAction, std::string(BoxMessage ? BoxMessage : ""), BoxMoney, Coded);
+    AddMenuItem(Icon, std::string(Message ? Message : ""), dtSender, dtAction, std::string(BoxMessage ? BoxMessage : ""), Coded);
 }
 
 uint32 GossipMenu::MenuItemSender( unsigned int ItemId )
