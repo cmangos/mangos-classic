@@ -41,7 +41,7 @@ pkgdata_DATA = \
 	z0096_xxx_01_mangos.sql \
 	z0101_xxx_01_mangos_item_template.sql \
 	z0114_xxx_01_character_kill.sql \
-	z0114_xxx_01_characters.sql \
+	z0114_xxx_02_characters.sql \
 	z0124_xxx_01_characters.sql \
 	z0124_xxx_02_mangos.sql \
 	README
@@ -64,7 +64,7 @@ EXTRA_DIST = \
 	z0096_xxx_01_mangos.sql \
 	z0101_xxx_01_mangos_item_template.sql \
 	z0114_xxx_01_character_kill.sql \
-	z0114_xxx_01_characters.sql \
+	z0114_xxx_02_characters.sql \
 	z0124_xxx_01_characters.sql \
 	z0124_xxx_02_mangos.sql \
 	README
