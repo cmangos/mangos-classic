@@ -549,7 +549,12 @@ class ObjectMgr
             return count;
         }
         
-        void UpdateHonorStandingByGuid(uint32 guid,HonorStanding standing) { mHonorStandingList.find(guid)->second = standing; }
+        void UpdateHonorStandingByGuid(uint32 guid,HonorStanding standing) 
+        { 
+             HonorStandingMap::iterator itr = mHonorStandingList.find(guid);
+             if (itr != mHonorStandingList.end())
+                 itr->second = standing; 
+        }
 
         void ReturnOrDeleteOldMails(bool serverUp);
 
