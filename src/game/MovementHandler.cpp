@@ -300,7 +300,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     /*----------------------*/
 
     /* process position-change */
-    recv_data.put<uint32>(5, getMSTime());                  // offset flags(4) + unk(1)
+    //recv_data.put<uint32>(5, getMSTime());                  // offset flags(4) + unk(1) [-ZERO] seems to cause strange lag
     WorldPacket data(recv_data.GetOpcode(), (GetPlayer()->GetPackGUID().size()+recv_data.size()));
     data.append(GetPlayer()->GetPackGUID());
     data.append(recv_data.contents(), recv_data.size());
