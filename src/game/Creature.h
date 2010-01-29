@@ -159,8 +159,7 @@ struct CreatureInfo
 {
     uint32  Entry;
     uint32  KillCredit[MAX_KILL_CREDIT];
-    uint32  DisplayID_A[2];
-    uint32  DisplayID_H[2];
+    uint32  DisplayID[2];
     char*   Name;
     char*   SubName;
     uint32  minlevel;
