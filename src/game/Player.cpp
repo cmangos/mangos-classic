@@ -5731,11 +5731,11 @@ bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
     if( uVictim->GetTypeId() == TYPEID_UNIT )
     {
         Creature *cVictim = (Creature *)uVictim;
-        if( cVictim->isCivilian() )
+        /* if( cVictim->isCivilian() ) [-ZERO] deactived, civilian check need to be rewrited/fixed
         {
             AddHonorKill(MaNGOS::Honor::DishonorableKillPoints(getLevel()),DISHONORABLE_KILL,cVictim->GetEntry(),TYPEID_UNIT);
             return true;
-        }
+        } */
 
         if( cVictim->isRacialLeader() )
         {
