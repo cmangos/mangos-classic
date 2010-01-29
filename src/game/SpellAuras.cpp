@@ -2193,7 +2193,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             else
             {
                                                             // Will use the default model here
-                m_target->SetDisplayId(ci->DisplayID_A[0]);
+                m_target->SetDisplayId(ci->DisplayID[0]);
             }
         }
 

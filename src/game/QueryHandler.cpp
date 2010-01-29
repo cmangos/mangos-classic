@@ -172,7 +172,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
         if (unit)
             data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); //DisplayID      wdbFeild13
         else
-            data << (uint32)ci->DisplayID_A;  // workaround, way to manage models must be fixed
+            data << uint32(sObjectMgr.ChooseDisplayId(0, ci));  // workaround, way to manage models must be fixed
 
         data << uint16(ci->civilian);                        //wdbFeild14
         SendPacket( &data );

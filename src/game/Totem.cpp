@@ -58,7 +58,7 @@ void Totem::Summon(Unit* owner)
     SetInstanceId(owner->GetInstanceId());
     owner->GetMap()->Add((Creature*)this);
 
-    // select totem model in dependent from owner team
+    // select totem model in dependent from owner team [-ZERO] not implemented/useful
     CreatureInfo const *cinfo = GetCreatureInfo();
     if(owner->GetTypeId() == TYPEID_PLAYER && cinfo)
     {
