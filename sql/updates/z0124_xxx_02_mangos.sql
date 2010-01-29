@@ -4,7 +4,7 @@ ALTER TABLE db_version CHANGE COLUMN required_z0101_xxx_01_mangos_item_template 
 ALTER TABLE game_event DROP COLUMN holiday;
 ALTER TABLE npc_option DROP COLUMN box_money;
 ALTER TABLE npc_vendor DROP COLUMN ExtendedCost;
-ALTER TABLE spell_facing CHANGE COLUMN entry  entry int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell ID' ADD PRIMARY KEY (entry);
+ALTER TABLE spell_facing CHANGE COLUMN entry  entry int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell ID', ADD PRIMARY KEY (entry);
 ALTER TABLE spell_facing CHANGE COLUMN facingcasterflag facingcasterflag tinyint(1) NOT NULL DEFAULT '1' COMMENT 'flag for facing state, usually 1';
 
 
