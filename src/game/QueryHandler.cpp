@@ -122,8 +122,15 @@ void WorldSession::HandleQueryTimeOpcode( WorldPacket & /*recv_data*/ )
 void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 {
     uint32 entry;
+    uint64 guid;
+
     recv_data >> entry;
-    recv_data.read_skip<uint64>();                          // guid
+    recv_data >> guid;
+
+    Creature *unit = ObjectAccessor::Instance().GetCreatureOrPet(*_player, guid);
+
+    //if (unit == NULL)
+    //    sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
 
     CreatureInfo const *ci = ObjectMgr::GetCreatureTemplate(entry);
     if (ci)
@@ -153,18 +160,21 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
         data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4, always empty
         data << SubName;
         data << uint32(ci->type_flags);                     // flags
-        data << uint32(ci->type);                           // CreatureType.dbc
+        if (unit)
+            data << uint32(((unit->isPet()) ? 0 : ci->type));   //CreatureType.dbc   wdbFeild8
+        else
+            data << uint32(ci->type);
+
         data << uint32(ci->family);                         // CreatureFamily.dbc
         data << uint32(ci->rank);                           // Creature Rank (elite, boss, etc)
         data << uint32(0);                                  // unknown        wdbFeild11
         data << uint32(ci->PetSpellDataId);                 // Id from CreatureSpellData.dbc    wdbField12
-        data << uint32(ci->DisplayID_A[0]);                 // modelid_male1
-        data << uint32(ci->DisplayID_H[0]);                 // modelid_female1 ?
-        data << uint32(ci->DisplayID_A[1]);                 // modelid_male2 ?
-        data << uint32(ci->DisplayID_H[1]);                 // modelid_femmale2 ?
-        data << float(ci->unk16);                           // unk
-        data << float(ci->unk17);                           // unk
-        data << uint8(ci->RacialLeader);
+        if (unit)
+            data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); //DisplayID      wdbFeild13
+        else
+            data << (uint32)ci->DisplayID_A;  // workaround, way to manage models must be fixed
+
+        data << uint16(ci->civilian);                        //wdbFeild14
         SendPacket( &data );
         sLog.outDebug( "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE" );
     }
