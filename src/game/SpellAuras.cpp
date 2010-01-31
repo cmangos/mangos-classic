@@ -1025,17 +1025,44 @@ void Aura::ReapplyAffectedPassiveAuras( Unit* target, SpellModifier const& spell
     }
 }
 
+struct ReapplyAffectedPassiveAurasHelper
+{
+    explicit ReapplyAffectedPassiveAurasHelper(Aura* _aura, SpellModifier const* _spellmod) : aura(_aura), spellmod(_spellmod) {}
+    void operator()(Unit* unit) const { aura->ReapplyAffectedPassiveAuras(unit, *spellmod); }
+    Aura* aura;
+    SpellModifier const* spellmod;
+};
+
+void Aura::ReapplyAffectedPassiveAuras(SpellModifier const& spellmod)
+{
+    // not reapply spell mods with charges (use original value because processed and at remove)
+    if (m_spellProto->procCharges)
+        return;
+
+    // not reapply some spell mods ops (mostly speedup case)
+    switch (m_modifier.m_miscvalue)
+    {
+        case SPELLMOD_DURATION:
+        case SPELLMOD_CHARGES:
+        case SPELLMOD_NOT_LOSE_CASTING_TIME:
+        case SPELLMOD_CASTING_TIME:
+        case SPELLMOD_COOLDOWN:
+        case SPELLMOD_COST:
+        case SPELLMOD_ACTIVATION_TIME:
+        case SPELLMOD_CASTING_TIME_OLD:
+            return;
+    }
+
+    // reapply talents to own passive persistent auras
+    ReapplyAffectedPassiveAuras(m_target,spellmod);
+
+    // re-apply talents/passives/area auras applied to pet/totems (it affected by player spellmods)
+    m_target->CallForAllControlledUnits(ReapplyAffectedPassiveAurasHelper(this,&spellmod),true,false,false);
+}
+
 /*********************************************************/
 /***               BASIC AURA FUNCTION                 ***/
 /*********************************************************/
-struct AuraHandleAddModifierHelper
-{
-    explicit AuraHandleAddModifierHelper(Aura* _aura, SpellModifier* _spellmod) : aura(_aura), spellmod(_spellmod) {}
-    void operator()(Unit* unit) const { aura->ReapplyAffectedPassiveAuras(unit, *spellmod); }
-    Aura* aura;
-    SpellModifier* spellmod;
-};
-
 void Aura::HandleAddModifier(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER || !Real)
@@ -1075,29 +1102,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
     // unapply spell mod (including deleting m_spellmod)
     ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
 
-    // not reapply spell mods with charges (use original value because processed and at remove)
-    if (m_spellProto->procCharges)
-        return;
-
-    // not reapply some spell mods ops (mostly speedup case)
-    switch (m_modifier.m_miscvalue)
-    {
-        case SPELLMOD_DURATION:
-        case SPELLMOD_CHARGES:
-        case SPELLMOD_NOT_LOSE_CASTING_TIME:
-        case SPELLMOD_CASTING_TIME:
-        case SPELLMOD_COOLDOWN:
-        case SPELLMOD_COST:
-        case SPELLMOD_ACTIVATION_TIME:
-        case SPELLMOD_CASTING_TIME_OLD:
-            return;
-    }
-
-    // reapply talents to own passive persistent auras
-    ReapplyAffectedPassiveAuras(m_target,spellmod);
-
-    // re-apply talents/passives/area auras applied to pet/totems (it affected by player spellmods)
-    m_target->CallForAllControlledUnits(AuraHandleAddModifierHelper(this,&spellmod),true,false,false);
+    ReapplyAffectedPassiveAuras(spellmod);
 }
 
 void Aura::TriggerSpell()

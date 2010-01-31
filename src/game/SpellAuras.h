@@ -46,7 +46,7 @@ struct ProcTriggerSpell;
 class Aura;
 
 // internal helper
-struct AuraHandleAddModifierHelper;
+struct ReapplyAffectedPassiveAurasHelper;
 
 typedef void(Aura::*pAuraHandler)(bool Apply, bool Real);
 // Real == true at aura add/remove
@@ -64,7 +64,7 @@ typedef void(Aura::*pAuraHandler)(bool Apply, bool Real);
 
 class MANGOS_DLL_SPEC Aura
 {
-    friend struct AuraHandleAddModifierHelper;
+    friend struct ReapplyAffectedPassiveAurasHelper;
     friend Aura* CreateAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem);
 
     public:
@@ -312,7 +312,7 @@ class MANGOS_DLL_SPEC Aura
         void PeriodicTick();
         void PeriodicDummyTick();
 
-        void ReapplyAffectedPassiveAuras(Unit* target, SpellModifier const& spellmod);
+        void ReapplyAffectedPassiveAuras(SpellModifier const& spellmod);
 
         Modifier m_modifier;
         SpellModifier *m_spellmod;
@@ -356,6 +356,7 @@ class MANGOS_DLL_SPEC Aura
         void SetAuraFlag(uint32 slot, bool add);
         void SetAuraLevel(uint32 slot, uint32 level);
         void SetAuraApplication(uint32 slot, int8 count);
+        void ReapplyAffectedPassiveAuras(Unit* target, SpellModifier const& spellmod);
 };
 
 class MANGOS_DLL_SPEC AreaAura : public Aura
