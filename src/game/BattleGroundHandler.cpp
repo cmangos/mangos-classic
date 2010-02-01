@@ -72,39 +72,23 @@ void WorldSession::SendBattlegGroundList( uint64 guid, BattleGroundTypeId bgType
 void WorldSession::HandleBattlemasterJoinOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
-    uint32 bgTypeId_;
     uint32 instanceId;
-	uint32 mapId;
+    uint32 mapId;
     uint8 joinAsGroup;
     Group * grp;
 
     recv_data >> guid;                                      // battlemaster guid
-    recv_data >> mapId;		                                // battleground type id (DBC id)
+    recv_data >> mapId;                                     // battleground type id (DBC id)
     recv_data >> instanceId;                                // instance id, 0 if First Available selected
     recv_data >> joinAsGroup;                               // join as group
 
-	switch (mapId)
-	{
-	case 30:
-		bgTypeId_ = 1;
-		break;
-	case 489:
-		bgTypeId_ = 2;
-		break;
-	case 529:
-		bgTypeId_ = 3;
-		break;
-	default:
-		bgTypeId_ = mapId;
-	}
+    BattleGroundTypeId bgTypeId = GetBattleGroundTypeIdByMapId(mapId);
 
-    if(bgTypeId_ >= MAX_BATTLEGROUND_TYPE_ID)
+    if(bgTypeId == BATTLEGROUND_TYPE_NONE)
     {
-        sLog.outError("Battleground: invalid bgtype (%u) received. possible cheater? player guid %u",bgTypeId_,_player->GetGUIDLow());
+        sLog.outError("Battleground: invalid bgtype (%u) received. possible cheater? player guid %u",bgTypeId,_player->GetGUIDLow());
         return;
     }
-
-    BattleGroundTypeId bgTypeId = BattleGroundTypeId(bgTypeId_);
 
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from (GUID: %u TypeId:%u)", GUID_LOPART(guid), GuidHigh2TypeId(GUID_HIPART(guid)));
 
@@ -284,10 +268,12 @@ void WorldSession::HandleBattlefieldListOpcode( WorldPacket &recv_data )
 {
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEFIELD_LIST Message");
 
-    uint32 bgTypeId;
-    recv_data >> bgTypeId;                                  // id from DBC
+    uint32 mapId;
+    recv_data >> mapId;
 
-    if(bgTypeId >= MAX_BATTLEGROUND_TYPE_ID)
+    BattleGroundTypeId bgTypeId = GetBattleGroundTypeIdByMapId(mapId);
+
+    if(bgTypeId == BATTLEGROUND_TYPE_NONE)
     {
         sLog.outError("Battleground: invalid bgtype received.");
         return;
@@ -306,13 +292,7 @@ void WorldSession::HandleBattleFieldPortOpcode( WorldPacket &recv_data )
 	uint32 mapId;
     recv_data >> mapId >> action;
 
-    BattleGroundTypeId bgTypeId = BATTLEGROUND_TYPE_NONE;
-    switch(mapId)
-    {
-        case 30:  bgTypeId = BATTLEGROUND_AV; break;
-        case 489: bgTypeId = BATTLEGROUND_WS; break;
-        case 529: bgTypeId = BATTLEGROUND_AB; break;
-    }
+    BattleGroundTypeId bgTypeId = GetBattleGroundTypeIdByMapId(mapId);
 
     if(bgTypeId == BATTLEGROUND_TYPE_NONE)
     {

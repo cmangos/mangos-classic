@@ -2301,6 +2301,27 @@ enum BattleGroundTypeId
 };
 #define MAX_BATTLEGROUND_TYPE_ID 4
 
+inline BattleGroundTypeId GetBattleGroundTypeIdByMapId(uint32 mapId)
+{
+    switch(mapId)
+    {
+        case 30:    return BATTLEGROUND_AV;
+        case 489:   return BATTLEGROUND_WS;
+        case 529:   return BATTLEGROUND_AB;
+        default:    return BATTLEGROUND_TYPE_NONE;
+    }
+}
+
+inline uint32 GetBattleGrounMapIdByTypeId(BattleGroundTypeId bgTypeId)
+{
+    switch(bgTypeId)
+    {
+        case BATTLEGROUND_AV:   return 30;
+        case BATTLEGROUND_WS:   return 489;
+        case BATTLEGROUND_AB:   return 529;
+    }
+}
+
 enum MailResponseType
 {
     MAIL_SEND               = 0,
