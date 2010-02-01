@@ -306,7 +306,7 @@ class MANGOS_DLL_SPEC Object
 
         virtual void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
 
-        void BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 ) const;
+        void BuildMovementUpdate(ByteBuffer * data, uint8 updateFlags, uint32 moveFlags ) const;
         void BuildValuesUpdate(uint8 updatetype, ByteBuffer *data, UpdateMask *updateMask, Player *target ) const;
         void BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players);
 

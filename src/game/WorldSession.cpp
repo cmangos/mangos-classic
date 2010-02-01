@@ -582,7 +582,6 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
         data >> mi->t_z;
         data >> mi->t_o;
     }
-
     if(mi->HasMovementFlag(MOVEMENTFLAG_SWIMMING))
     {
         data >> mi->s_pitch;
@@ -592,7 +591,7 @@ void WorldSession::ReadMovementInfo(WorldPacket &data, MovementInfo *mi)
 
     if(mi->HasMovementFlag(MOVEMENTFLAG_JUMPING))
     {
-        data >> mi->j_unk;
+        data >> mi->j_velocity;
         data >> mi->j_sinAngle;
         data >> mi->j_cosAngle;
         data >> mi->j_xyspeed;

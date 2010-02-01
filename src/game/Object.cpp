@@ -238,61 +238,58 @@ void Object::DestroyForPlayer( Player *target ) const
     target->GetSession()->SendPacket( &data );
 }
 
-void Object::BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2) const
+void Object::BuildMovementUpdate(ByteBuffer * data, uint8 updateFlags, uint32 moveFlags) const
 {
-    *data << (uint8)flags;
+    *data << uint8(updateFlags);                            // update flags
 
-    if (flags & UPDATEFLAG_LIVING)                          // 0x20
+    // 0x20
+    if (updateFlags & UPDATEFLAG_LIVING)
     {
         if( m_objectTypeId==TYPEID_PLAYER && ((Player*)this)->GetTransport())
         {
-            flags2 |= 0x02000000;
+            moveFlags |= 0x02000000;
         }
 
-        *data << (uint32)flags2;
-        *data << (uint32)getMSTime();
+        *data << uint32(moveFlags);
+        *data << uint32(getMSTime());
     }
 
-    if (flags & UPDATEFLAG_HAS_POSITION)                     // 0x40
+    if (updateFlags & UPDATEFLAG_HAS_POSITION)                     // 0x40
     {
-        if( m_objectTypeId==TYPEID_PLAYER && ((Player *)this)->GetTransport())
+        if (m_objectTypeId==TYPEID_PLAYER && ((Player *)this)->GetTransport())
         {
-            //*data << ((Player *)this)->m_transport->GetPositionX() + (float)((Player *)this)->m_transX;
-            //*data << ((Player *)this)->m_transport->GetPositionY() + (float)((Player *)this)->m_transY;
-            //*data << ((Player *)this)->m_transport->GetPositionZ() + (float)((Player *)this)->m_transZ;
+            *data << float(((Player *)this)->GetTransport()->GetPositionX());
+            *data << float(((Player *)this)->GetTransport()->GetPositionY());
+            *data << float(((Player *)this)->GetTransport()->GetPositionZ());
+            *data << float(((Player *)this)->GetTransport()->GetOrientation());
 
-            *data << ((Player *)this)->GetTransport()->GetPositionX();
-            *data << ((Player *)this)->GetTransport()->GetPositionY();
-            *data << ((Player *)this)->GetTransport()->GetPositionZ();
-            *data << ((Player *)this)->GetTransport()->GetOrientation();
-
-            *data << (uint64)(((Player *)this)->GetTransport()->GetGUID());
-            *data << ((Player *)this)->GetTransOffsetX();
-            *data << ((Player *)this)->GetTransOffsetY();
-            *data << ((Player *)this)->GetTransOffsetZ();
-            *data << ((Player *)this)->GetTransOffsetO();
+            *data << uint64(((Player*)this)->GetTransport()->GetGUID());
+            *data << float(((Player*)this)->GetTransOffsetX());
+            *data << float(((Player*)this)->GetTransOffsetY());
+            *data << float(((Player*)this)->GetTransOffsetZ());
+            *data << float(((Player*)this)->GetTransOffsetO());
         }
         else if(GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT)
         {
-            *data << (uint32)0;
-            *data << (uint32)0;
-            *data << (uint32)0;
-            *data << ((WorldObject *)this)->GetOrientation();
+            *data << float(0);
+            *data << float(0);
+            *data << float(0);
+            *data << float(((WorldObject*)this)->GetOrientation());
         }
         else
         {
-            *data << ((WorldObject *)this)->GetPositionX();
-            *data << ((WorldObject *)this)->GetPositionY();
-            *data << ((WorldObject *)this)->GetPositionZ();
-            *data << ((WorldObject *)this)->GetOrientation();
+            *data << float(((WorldObject*)this)->GetPositionX());
+            *data << float(((WorldObject*)this)->GetPositionY());
+            *data << float(((WorldObject*)this)->GetPositionZ());
+            *data << float(((WorldObject*)this)->GetOrientation());
         }
     }
 
-    if (flags & UPDATEFLAG_LIVING)                          // 0x20
+    if (updateFlags & UPDATEFLAG_LIVING)                    // 0x20
     {
         *data << (float)0;
 
-        if(flags2 & 0x2000)                                 //update self
+        if (moveFlags & 0x2000)                             //update self
         {
             *data << (float)0;
             *data << (float)1.0;
@@ -300,17 +297,17 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2) 
             *data << (float)0;
         }
 
-        *data << ((Player*)this)->GetSpeed( MOVE_WALK );
-        *data << ((Player*)this)->GetSpeed( MOVE_RUN );
-        *data << ((Player*)this)->GetSpeed( MOVE_SWIM_BACK );
-        *data << ((Player*)this)->GetSpeed( MOVE_SWIM );
-        *data << ((Player*)this)->GetSpeed( MOVE_RUN_BACK );
-        *data << ((Player*)this)->GetSpeed( MOVE_TURN_RATE );
+        *data << float(((Unit*)this)->GetSpeed(MOVE_WALK));
+        *data << float(((Unit*)this)->GetSpeed(MOVE_RUN));
+        *data << float(((Unit*)this)->GetSpeed(MOVE_SWIM_BACK));
+        *data << float(((Unit*)this)->GetSpeed(MOVE_SWIM));
+        *data << float(((Unit*)this)->GetSpeed(MOVE_RUN_BACK));
+        *data << float(((Unit*)this)->GetSpeed(MOVE_TURN_RATE));
 
         if( m_objectTypeId==TYPEID_UNIT )
         {
             uint8 PosCount=0;
-            if(flags2 & 0x400000)
+            if(moveFlags & 0x400000)
             {
                 *data << (uint32)0x0;
                 *data << (uint32)0x659;
@@ -319,22 +316,23 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2) 
                 *data << (uint32)PosCount;
                 for(int i=0;i<PosCount+1;i++)
                 {
-                    *data << (float)0;                          //x
-                    *data << (float)0;                          //y
-                    *data << (float)0;                          //z
+                    *data << (float)0;                      //x
+                    *data << (float)0;                      //y
+                    *data << (float)0;                      //z
                 }
             }
         }
     }
 
-    if (flags & UPDATEFLAG_ALL)                             // 0x10
+    if (updateFlags & UPDATEFLAG_ALL)                       // 0x10
     {
         *data << (uint32)0x1;
     }
 
-    if (flags & UPDATEFLAG_TRANSPORT)                       // 0x02, including corpse
+    // 0x2
+    if(updateFlags & UPDATEFLAG_TRANSPORT)
     {
-        *data << (uint32)getMSTime();
+        *data << uint32(getMSTime());                       // ms time
     }
 }
 
