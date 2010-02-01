@@ -74,13 +74,29 @@ void WorldSession::HandleBattlemasterJoinOpcode( WorldPacket & recv_data )
     uint64 guid;
     uint32 bgTypeId_;
     uint32 instanceId;
+	uint32 mapId;
     uint8 joinAsGroup;
     Group * grp;
 
     recv_data >> guid;                                      // battlemaster guid
-    recv_data >> bgTypeId_;                                 // battleground type id (DBC id)
+    recv_data >> mapId;		                                // battleground type id (DBC id)
     recv_data >> instanceId;                                // instance id, 0 if First Available selected
     recv_data >> joinAsGroup;                               // join as group
+
+	switch (mapId)
+	{
+	case 30:
+		bgTypeId_ = 1;
+		break;
+	case 489:
+		bgTypeId_ = 2;
+		break;
+	case 529:
+		bgTypeId_ = 3;
+		break;
+	default:
+		bgTypeId_ = mapId;
+	}
 
     if(bgTypeId_ >= MAX_BATTLEGROUND_TYPE_ID)
     {

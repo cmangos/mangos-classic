@@ -1187,9 +1187,25 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, const uint6
 
     uint32 PlayerLevel = plr->getLevel();
 
+	uint32 mapId;
+	switch (bgTypeId)
+	{
+	case 1:
+		mapId = 30;
+		break;
+	case 2:
+		mapId = 489;
+		break;
+	case 3:
+		mapId = 529;
+		break;
+	default:
+		mapId = bgTypeId;
+	}
+
     data->Initialize(SMSG_BATTLEFIELD_LIST);
     *data << uint64(guid);                                  // battlemaster guid
-    *data << uint32(bgTypeId);                              // battleground id
+    *data << uint32(mapId);                              // battleground id
     *data << uint8(0x00);                               // unk
 
     size_t count_pos = data->wpos();
