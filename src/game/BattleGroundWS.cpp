@@ -536,11 +536,23 @@ void BattleGroundWS::HandleAreaTrigger(Player *Source, uint32 Trigger)
                 if (GetAllianceFlagPickerGUID() == Source->GetGUID())
                     EventPlayerCapturedFlag(Source);
             break;
-        case 3649:                                          // unk1
+        case 3669: // horde portal
+            if (Source->GetTeam() != HORDE)
+                Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_HORDE_USE);
+            else
+                Source->LeaveBattleground();
+            break;
+        case 3671: // alliance portal
+            if (Source->GetTeam() != ALLIANCE)
+                Source->GetSession()->SendNotification(LANG_BATTLEGROUND_ONLY_ALLIANCE_USE);
+            else
+                Source->LeaveBattleground();
+            break;
+      /*case 3649:                                          // unk1
         case 3688:                                          // unk2
         case 4628:                                          // unk3
         case 4629:                                          // unk4
-            break;
+            break; */
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
             Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
