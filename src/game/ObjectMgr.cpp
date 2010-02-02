@@ -7342,6 +7342,12 @@ void ObjectMgr::RemoveGroup( Group* group )
     mGroupMap.erase(GUID_LOPART(group->GetLeaderGUID()));
 }
 
+void ObjectMgr::UpdateGroup( uint32 old_guidlow, Group* group )
+{
+    mGroupMap.erase(old_guidlow);
+    AddGroup(group);
+}
+
 // Functions for scripting access
 uint32 GetAreaTriggerScriptId(uint32 trigger_id)
 {
