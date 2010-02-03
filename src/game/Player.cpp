@@ -15911,7 +15911,7 @@ bool Player::ActivateTaxiPathTo( uint32 taxi_path_id, uint32 spellid /*= 0*/ )
     return ActivateTaxiPathTo(nodes,NULL,spellid);
 }
 
-void Player::ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs )
+void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs )
 {
                                                             // last check 1.12
     WorldPacket data(SMSG_SPELL_COOLDOWN, 8+m_spells.size()*8);
