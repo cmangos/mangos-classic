@@ -236,12 +236,12 @@ ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* ma
         {
             if (iter->second->GetInstanceId() == map->GetInstanceId())
             {
-                grid.AddWorldObject(iter->second,iter->second->GetGUID());
+                grid.AddWorldObject(iter->second);
             }
         }
         else
         {
-            grid.AddWorldObject(iter->second,iter->second->GetGUID());
+            grid.AddWorldObject(iter->second);
         }
     }
 }

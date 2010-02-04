@@ -223,13 +223,13 @@ void Map::InitVisibilityDistance()
 template<class T>
 void Map::AddToGrid(T* obj, NGridType *grid, Cell const& cell)
 {
-    (*grid)(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj, obj->GetGUID());
+    (*grid)(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj);
 }
 
 template<>
 void Map::AddToGrid(Player* obj, NGridType *grid, Cell const& cell)
 {
-    (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(obj, obj->GetGUID());
+    (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(obj);
 }
 
 template<>
@@ -238,12 +238,12 @@ void Map::AddToGrid(Corpse *obj, NGridType *grid, Cell const& cell)
     // add to world object registry in grid
     if(obj->GetType()!=CORPSE_BONES)
     {
-        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(obj);
     }
     // add to grid object store
     else
     {
-        (*grid)(cell.CellX(), cell.CellY()).AddGridObject(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).AddGridObject(obj);
     }
 }
 
@@ -253,13 +253,13 @@ void Map::AddToGrid(Creature* obj, NGridType *grid, Cell const& cell)
     // add to world object registry in grid
     if(obj->isPet())
     {
-        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject<Creature>(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).AddWorldObject<Creature>(obj);
         obj->SetCurrentCell(cell);
     }
     // add to grid object store
     else
     {
-        (*grid)(cell.CellX(), cell.CellY()).AddGridObject<Creature>(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).AddGridObject<Creature>(obj);
         obj->SetCurrentCell(cell);
     }
 }
@@ -267,13 +267,13 @@ void Map::AddToGrid(Creature* obj, NGridType *grid, Cell const& cell)
 template<class T>
 void Map::RemoveFromGrid(T* obj, NGridType *grid, Cell const& cell)
 {
-    (*grid)(cell.CellX(), cell.CellY()).template RemoveGridObject<T>(obj, obj->GetGUID());
+    (*grid)(cell.CellX(), cell.CellY()).template RemoveGridObject<T>(obj);
 }
 
 template<>
 void Map::RemoveFromGrid(Player* obj, NGridType *grid, Cell const& cell)
 {
-    (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject(obj, obj->GetGUID());
+    (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject(obj);
 }
 
 template<>
@@ -282,12 +282,12 @@ void Map::RemoveFromGrid(Corpse *obj, NGridType *grid, Cell const& cell)
     // remove from world object registry in grid
     if(obj->GetType()!=CORPSE_BONES)
     {
-        (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject(obj);
     }
     // remove from grid object store
     else
     {
-        (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject(obj);
     }
 }
 
@@ -297,12 +297,12 @@ void Map::RemoveFromGrid(Creature* obj, NGridType *grid, Cell const& cell)
     // remove from world object registry in grid
     if(obj->isPet())
     {
-        (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject<Creature>(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject<Creature>(obj);
     }
     // remove from grid object store
     else
     {
-        (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject<Creature>(obj, obj->GetGUID());
+        (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject<Creature>(obj);
     }
 }
 
