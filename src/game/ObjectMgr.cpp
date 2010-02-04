@@ -357,11 +357,11 @@ void ObjectMgr::LoadCreatureTemplates()
 
         FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction_A);
         if (!factionTemplate)
-            sLog.outErrorDb("Creature (Entry: %u) has non-existing faction_A template (%u)", cInfo->Entry, cInfo->faction_A);
+            sLog.outErrorDb("Creature (Entry: %u) has nonexistent faction_A template (%u)", cInfo->Entry, cInfo->faction_A);
 
         factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction_H);
         if (!factionTemplate)
-            sLog.outErrorDb("Creature (Entry: %u) has non-existing faction_H template (%u)", cInfo->Entry, cInfo->faction_H);
+            sLog.outErrorDb("Creature (Entry: %u) has nonexistent faction_H template (%u)", cInfo->Entry, cInfo->faction_H);
 
         // used later for scale
         CreatureDisplayInfoEntry const* displayScaleEntry = NULL;
@@ -379,7 +379,7 @@ void ObjectMgr::LoadCreatureTemplates()
 
             CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->DisplayID[0]);
             if (!minfo)
-                sLog.outErrorDb("Creature (Entry: %u) not has model data for DisplayID_1 (%u)", cInfo->Entry, cInfo->DisplayID[0]);
+                sLog.outErrorDb("Creature (Entry: %u) not has model data for DisplayID_1 (%u), but creature_model_info are missing for this model.", cInfo->Entry, cInfo->DisplayID[0]);
         }
 
         if (cInfo->DisplayID[1])
@@ -395,7 +395,7 @@ void ObjectMgr::LoadCreatureTemplates()
 
             CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->DisplayID[1]);
             if (!minfo)
-                sLog.outErrorDb("Creature (Entry: %u) not has model data for DisplayID_2 (%u)", cInfo->Entry, cInfo->DisplayID[1]);
+                sLog.outErrorDb("Creature (Entry: %u) not has model data for DisplayID_2 (%u), but creature_model_info are missing for this model.", cInfo->Entry, cInfo->DisplayID[1]);
         }
 
         if (!displayScaleEntry)
@@ -407,7 +407,7 @@ void ObjectMgr::LoadCreatureTemplates()
             {
                 if(!GetCreatureTemplate(cInfo->KillCredit[k]))
                 {
-                    sLog.outErrorDb("Creature (Entry: %u) has not existed creature entry in `KillCredit%d` (%u)",cInfo->Entry,k+1,cInfo->KillCredit[k]);
+                    sLog.outErrorDb("Creature (Entry: %u) has nonexistent creature entry in `KillCredit%d` (%u)",cInfo->Entry,k+1,cInfo->KillCredit[k]);
                     const_cast<CreatureInfo*>(cInfo)->KillCredit[k] = 0;
                 }
             }
