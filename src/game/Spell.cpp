@@ -2823,9 +2823,12 @@ void Spell::SendChannelUpdate(uint32 time)
         m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
     }
 
-    WorldPacket data( MSG_CHANNEL_UPDATE, 4 );
-    data << uint32(time);
-    m_caster->SendMessageToSet(&data, true);
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        WorldPacket data( MSG_CHANNEL_UPDATE, 4 );
+        data << uint32(time);
+        ((Player*)m_caster)->SendDirectMessage(&data);
+    }
 }
 
 void Spell::SendChannelStart(uint32 duration)
@@ -2856,10 +2859,13 @@ void Spell::SendChannelStart(uint32 duration)
         }
     }
 
-    WorldPacket data( MSG_CHANNEL_START, (4+4) );
-    data << uint32(m_spellInfo->Id);
-    data << uint32(duration);
-    m_caster->SendMessageToSet(&data, true);
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        WorldPacket data( MSG_CHANNEL_START, (4+4) );
+        data << uint32(m_spellInfo->Id);
+        data << uint32(duration);
+        ((Player*)m_caster)->SendDirectMessage(&data);
+    }
 
     m_timer = duration;
 
