@@ -425,9 +425,7 @@ struct SpellProcEventEntry
 
 typedef UNORDERED_MAP<uint32, SpellProcEventEntry> SpellProcEventMap;
 
-#define ELIXIR_BATTLE_MASK    0x01
-#define ELIXIR_GUARDIAN_MASK  0x02
-#define ELIXIR_FLASK_MASK     (ELIXIR_BATTLE_MASK|ELIXIR_GUARDIAN_MASK)
+#define ELIXIR_FLASK_MASK     0x03                          // 2 bit mask for batter compatibility with more recent client version, flaks must have both bits set
 #define ELIXIR_WELL_FED       0x10                          // Some foods have SPELLFAMILY_POTION
 
 typedef std::map<uint32, uint8> SpellElixirMap;
@@ -629,12 +627,10 @@ class SpellMgr
         SpellSpecific GetSpellElixirSpecific(uint32 spellid) const
         {
             uint32 mask = GetSpellElixirMask(spellid);
+
+            // flasks must have all bits set from ELIXIR_FLASK_MASK
             if((mask & ELIXIR_FLASK_MASK)==ELIXIR_FLASK_MASK)
                 return SPELL_FLASK_ELIXIR;
-            else if(mask & ELIXIR_BATTLE_MASK)
-                return SPELL_BATTLE_ELIXIR;
-            else if(mask & ELIXIR_GUARDIAN_MASK)
-                return SPELL_GUARDIAN_ELIXIR;
             else if(mask & ELIXIR_WELL_FED)
                 return SPELL_WELL_FED;
             else
