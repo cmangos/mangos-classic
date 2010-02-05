@@ -444,11 +444,12 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
             index = PLAYER_RANGED_CRIT_PERCENTAGE;
             break;
         case BASE_ATTACK:
-        case OFF_ATTACK:
-        default:
             modGroup = CRIT_PERCENTAGE;
             index = PLAYER_CRIT_PERCENTAGE;
             break;
+        case OFF_ATTACK:                                    // client have only main hand crit
+        default:
+            return;
     }
 
     float value = GetTotalPercentageModValue(modGroup);
