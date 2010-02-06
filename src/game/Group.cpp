@@ -1112,7 +1112,7 @@ void Group::_setLeader(const uint64 &guid)
         CharacterDatabase.CommitTransaction();
     }
 
-    uint32 old_guidlow = m_leaderGuid;
+    uint32 old_guidlow = GUID_LOPART(m_leaderGuid);
 
     m_leaderGuid = slot->guid;
     m_leaderName = slot->name;
