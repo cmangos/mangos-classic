@@ -4804,10 +4804,11 @@ void Spell::Delayed()
     sLog.outDetail("Spell %u partially interrupted for (%d) ms at damage", m_spellInfo->Id, delaytime);
 
     WorldPacket data(SMSG_SPELL_DELAYED, 8+4);
-    data.append(m_caster->GetPackGUID());
+    data << uint64(m_caster->GetGUID());
     data << uint32(delaytime);
 
-    m_caster->SendMessageToSet(&data, true);
+	if (m_caster->GetTypeId() == TYPEID_PLAYER)
+		((Player*)m_caster)->SendDirectMessage(&data);
 }
 
 void Spell::DelayedChannel()
