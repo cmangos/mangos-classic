@@ -44,11 +44,13 @@ struct Mail;
 class Channel;
 class DynamicObject;
 class Creature;
-class Pet;
 class PlayerMenu;
 class Transport;
 class UpdateMask;
 class PlayerSocial;
+class InstanceSave;
+class Spell;
+class Item;
 
 typedef std::deque<Mail*> PlayerMails;
 
@@ -436,11 +438,6 @@ enum QuestSlotStateMask
     QUEST_STATE_FAIL     = 0x0002
 };
 
-class Quest;
-class Spell;
-class Item;
-class WorldSession;
-
 enum PlayerSlots
 {
     // first slot for item stored (in any way in player m_items data)
@@ -547,81 +544,6 @@ enum InstanceResetWarningType
     RAID_INSTANCE_WARNING_MIN_SOON  = 3,                    // WARNING! %s is scheduled to reset in %d minute(s). Please exit the zone or you will be returned to your bind location!
     RAID_INSTANCE_WELCOME           = 4                     // Welcome to %s. This raid instance is scheduled to reset in %s.
 };
-
-// [-ZERO] Need check and update
-// used in most movement packets (send and received)
-enum MovementFlags
-{
-    MOVEMENTFLAG_NONE           = 0x00000000,
-    MOVEMENTFLAG_FORWARD        = 0x00000001,
-    MOVEMENTFLAG_BACKWARD       = 0x00000002,
-    MOVEMENTFLAG_STRAFE_LEFT    = 0x00000004,
-    MOVEMENTFLAG_STRAFE_RIGHT   = 0x00000008,
-    MOVEMENTFLAG_LEFT           = 0x00000010,
-    MOVEMENTFLAG_RIGHT          = 0x00000020,
-    MOVEMENTFLAG_PITCH_UP       = 0x00000040,
-    MOVEMENTFLAG_PITCH_DOWN     = 0x00000080,
-    MOVEMENTFLAG_WALK_MODE      = 0x00000100,               // Walking
-    MOVEMENTFLAG_LEVITATING     = 0x00000400,
-    MOVEMENTFLAG_FLY_UNK1       = 0x00000800,               // [-ZERO] is it really need and correct value
-    MOVEMENTFLAG_JUMPING        = 0x00002000,
-    MOVEMENTFLAG_FALLING        = 0x00004000,
-    MOVEMENTFLAG_SWIMMING       = 0x00200000,               // appears with fly flag also
-    MOVEMENTFLAG_FLY_UP         = 0x00400000,               // [-ZERO] is it really need and correct value
-    MOVEMENTFLAG_CAN_FLY        = 0x00800000,               // [-ZERO] is it really need and correct value
-    MOVEMENTFLAG_FLYING         = 0x01000000,               // [-ZERO] is it really need and correct value
-    MOVEMENTFLAG_ONTRANSPORT    = 0x02000000,               // Used for flying on some creatures
-    MOVEMENTFLAG_SPLINE         = 0x04000000,               // used for flight paths
-    MOVEMENTFLAG_SPLINE2        = 0x08000000,               // used for flight paths
-    MOVEMENTFLAG_WATERWALKING   = 0x10000000,               // prevent unit from falling through water
-    MOVEMENTFLAG_SAFE_FALL      = 0x20000000,               // active rogue safe fall spell (passive)
-    MOVEMENTFLAG_UNK3           = 0x40000000
-};
-
-struct MovementInfo
-{
-    // common
-    uint32 flags;                                           // see enum MovementFlags
-    uint32  time;
-    float   x, y, z, o;
-    // transport
-    uint64  t_guid;
-    float   t_x, t_y, t_z, t_o;
-    // swimming and unknown
-    float   s_pitch;
-    // last fall time
-    uint32  fallTime;
-    // jumping
-    float   j_velocity, j_sinAngle, j_cosAngle, j_xyspeed;
-    // spline
-    float   u_unk1;
-
-    MovementInfo()
-    {
-        flags = MOVEMENTFLAG_NONE;
-        time = fallTime = 0;
-        x = y = z = o = t_x = t_y = t_z = t_o = s_pitch = j_velocity = j_sinAngle = j_cosAngle = j_xyspeed = u_unk1 = 0.0f;
-        t_guid = 0;
-    }
-
-    void AddMovementFlag(MovementFlags f) { flags |= f; }
-    void RemoveMovementFlag(MovementFlags f) { flags &= ~f; }
-    bool HasMovementFlag(MovementFlags f) const { return flags & f; }
-    MovementFlags GetMovementFlags() const { return MovementFlags(flags); }
-    void SetMovementFlags(MovementFlags f) { flags = f; }
-};
-
-// flags that use in movement check for example at spell casting
-MovementFlags const movementFlagsMask = MovementFlags(
-    MOVEMENTFLAG_FORWARD |MOVEMENTFLAG_BACKWARD  |MOVEMENTFLAG_STRAFE_LEFT|MOVEMENTFLAG_STRAFE_RIGHT|
-    MOVEMENTFLAG_PITCH_UP|MOVEMENTFLAG_PITCH_DOWN|MOVEMENTFLAG_FLY_UNK1    |
-    MOVEMENTFLAG_JUMPING |MOVEMENTFLAG_FALLING   |MOVEMENTFLAG_SPLINE
-);
-
-MovementFlags const movementOrTurningFlagsMask = MovementFlags(
-    movementFlagsMask | MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT
-);
-class InstanceSave;
 
 enum RestType
 {
@@ -1850,10 +1772,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         Transport * GetTransport() const { return m_transport; }
         void SetTransport(Transport * t) { m_transport = t; }
 
-        float GetTransOffsetX() const { return m_movementInfo.t_x; }
-        float GetTransOffsetY() const { return m_movementInfo.t_y; }
-        float GetTransOffsetZ() const { return m_movementInfo.t_z; }
-        float GetTransOffsetO() const { return m_movementInfo.t_o; }
+        float GetTransOffsetX() const { return m_movementInfo.GetTransportPos()->x; }
+        float GetTransOffsetY() const { return m_movementInfo.GetTransportPos()->y; }
+        float GetTransOffsetZ() const { return m_movementInfo.GetTransportPos()->z; }
+        float GetTransOffsetO() const { return m_movementInfo.GetTransportPos()->o; }
+        uint32 GetTransTime() const { return m_movementInfo.GetTransportTime(); }
 
         uint32 GetSaveTimer() const { return m_nextSave; }
         void   SetSaveTimer(uint32 timer) { m_nextSave = timer; }
@@ -1867,8 +1790,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void   SaveRecallPosition();
 
         void SetHomebindToCurrentPos();
-        void RelocateToHomebind() { SetMapId(m_homebindMapId); Relocate(m_homebindX,m_homebindY,m_homebindZ); }
-        bool TeleportToHomebind(uint32 options = 0) { return TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation(),options); }
+        void RelocateToHomebind() { SetMapId(m_homebindMapId); Relocate(m_homebindX, m_homebindY, m_homebindZ); }
+        bool TeleportToHomebind(uint32 options = 0) { return TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation(), options); }
 
         // currently visible objects at player client
         typedef std::set<uint64> ClientGUIDs;

@@ -570,6 +570,110 @@ enum MonsterMovementFlags
     MONSTER_MOVE_SPLINE_FLY     = 0x00000300,               // fly by points
 };
 
+// [-ZERO] Need check and update
+// used in most movement packets (send and received)
+enum MovementFlags
+{
+    MOVEFLAG_NONE           = 0x00000000,
+    MOVEFLAG_FORWARD        = 0x00000001,
+    MOVEFLAG_BACKWARD       = 0x00000002,
+    MOVEFLAG_STRAFE_LEFT    = 0x00000004,
+    MOVEFLAG_STRAFE_RIGHT   = 0x00000008,
+    MOVEFLAG_LEFT           = 0x00000010,
+    MOVEFLAG_RIGHT          = 0x00000020,
+    MOVEFLAG_PITCH_UP       = 0x00000040,
+    MOVEFLAG_PITCH_DOWN     = 0x00000080,
+    MOVEFLAG_WALK_MODE      = 0x00000100,                   // Walking
+    MOVEFLAG_LEVITATING     = 0x00000400,
+    MOVEFLAG_FLY_UNK1       = 0x00000800,                   // [-ZERO] is it really need and correct value
+    MOVEFLAG_JUMPING        = 0x00002000,
+    MOVEFLAG_FALLING        = 0x00004000,
+    MOVEFLAG_SWIMMING       = 0x00200000,                   // appears with fly flag also
+    MOVEFLAG_FLY_UP         = 0x00400000,                   // [-ZERO] is it really need and correct value
+    MOVEFLAG_CAN_FLY        = 0x00800000,                   // [-ZERO] is it really need and correct value
+    MOVEFLAG_FLYING         = 0x01000000,                   // [-ZERO] is it really need and correct value
+    MOVEFLAG_ONTRANSPORT    = 0x02000000,                   // Used for flying on some creatures
+    MOVEFLAG_SPLINE         = 0x04000000,                   // used for flight paths
+    MOVEFLAG_SPLINE2        = 0x08000000,                   // used for flight paths
+    MOVEFLAG_WATERWALKING   = 0x10000000,                   // prevent unit from falling through water
+    MOVEFLAG_SAFE_FALL      = 0x20000000,                   // active rogue safe fall spell (passive)
+    MOVEFLAG_UNK3           = 0x40000000
+};
+
+// flags that use in movement check for example at spell casting
+MovementFlags const movementFlagsMask = MovementFlags(
+    MOVEFLAG_FORWARD |MOVEFLAG_BACKWARD  |MOVEFLAG_STRAFE_LEFT|MOVEFLAG_STRAFE_RIGHT|
+    MOVEFLAG_PITCH_UP|MOVEFLAG_PITCH_DOWN|MOVEFLAG_FLY_UNK1    |
+    MOVEFLAG_JUMPING |MOVEFLAG_FALLING   |MOVEFLAG_SPLINE
+);
+
+MovementFlags const movementOrTurningFlagsMask = MovementFlags(
+    movementFlagsMask | MOVEFLAG_LEFT | MOVEFLAG_RIGHT
+);
+
+struct Position
+{
+    Position() : x(0.0f), y(0.0f), z(0.0f), o(0.0f) {}
+    float x, y, z, o;
+};
+
+class MovementInfo
+{
+    public: 
+        MovementInfo() : moveFlags(MOVEFLAG_NONE), time(0), t_guid(0),
+            t_time(0), s_pitch(0.0f), fallTime(0), j_velocity(0.0f), j_sinAngle(0.0f),
+            j_cosAngle(0.0f), j_xyspeed(0.0f), u_unk1(0.0f) {}
+
+        MovementInfo(WorldPacket &data);
+
+        // Read/Write methods
+        void Read(ByteBuffer &data);
+        void Write(ByteBuffer &data);
+
+        // Movement flags manipulations
+        void AddMovementFlag(MovementFlags f) { moveFlags |= f; }
+        void RemoveMovementFlag(MovementFlags f) { moveFlags &= ~f; }
+        bool HasMovementFlag(MovementFlags f) const { return moveFlags & f; }
+        MovementFlags GetMovementFlags() const { return MovementFlags(moveFlags); }
+        void SetMovementFlags(MovementFlags f) { moveFlags = f; }
+
+        // Position manipulations
+        Position const *GetPos() const { return &pos; }
+        void SetTransportData(uint64 guid, float x, float y, float z, float o, uint32 time, int8 seat)
+        {
+            t_guid = guid;
+            t_pos.x = x;
+            t_pos.y = y;
+            t_pos.z = z;
+            t_pos.o = z;
+            t_time = time;
+        }
+        uint64 GetTransportGuid() const { return t_guid; }
+        Position const *GetTransportPos() const { return &t_pos; }
+        uint32 GetTransportTime() const { return t_time; }
+        uint32 GetFallTime() const { return fallTime; }
+        void ChangePosition(float x, float y, float z, float o) { pos.x = x; pos.y = y; pos.z = z; pos.o = o; }
+        void UpdateTime(uint32 _time) { time = _time; }
+
+    //private:
+        // common
+        uint32  moveFlags;                                  // see enum MovementFlags
+        uint32  time;
+        Position pos;
+        // transport
+        uint64  t_guid;
+        Position t_pos;
+        uint32  t_time;
+        // swimming and unknown
+        float   s_pitch;
+        // last fall time
+        uint32  fallTime;
+        // jumping
+        float   j_velocity, j_sinAngle, j_cosAngle, j_xyspeed;
+        // spline
+        float   u_unk1;
+};
+
 enum DiminishingLevels
 {
     DIMINISHING_LEVEL_1             = 0,
@@ -1065,7 +1169,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool isAlive() const { return (m_deathState == ALIVE); };
         bool isDead() const { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
         DeathState getDeathState() { return m_deathState; };
-        virtual void setDeathState(DeathState s);           // overwrited in Creature/Player/Pet
+        virtual void setDeathState(DeathState s);           // overwritten in Creature/Player/Pet
 
         uint64 GetOwnerGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMONEDBY); }
         void SetOwnerGUID(uint64 owner) { SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner); }

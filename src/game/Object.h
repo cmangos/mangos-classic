@@ -148,7 +148,7 @@ class MANGOS_DLL_SPEC Object
 
         void BuildValuesUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void BuildOutOfRangeUpdateBlock( UpdateData *data ) const;
-        void BuildMovementUpdateBlock( UpdateData * data, uint32 flags = 0 ) const;
+        void BuildMovementUpdateBlock( UpdateData * data, uint8 flags = 0 ) const;
 
         virtual void DestroyForPlayer( Player *target ) const;
 
@@ -282,7 +282,7 @@ class MANGOS_DLL_SPEC Object
 
         void ApplyModFlag64( uint16 index, uint64 flag, bool apply)
         {
-            if(apply) SetFlag64(index,flag); else RemoveFlag64(index,flag);
+            if(apply) SetFlag64(index,flag); else RemoveFlag64(index, flag);
         }
 
         void ClearUpdateMask(bool remove);
@@ -306,7 +306,7 @@ class MANGOS_DLL_SPEC Object
 
         virtual void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
 
-        void BuildMovementUpdate(ByteBuffer * data, uint8 updateFlags, uint32 moveFlags ) const;
+        void BuildMovementUpdate(ByteBuffer * data, uint8 updateFlags) const;
         void BuildValuesUpdate(uint8 updatetype, ByteBuffer *data, UpdateMask *updateMask, Player *target ) const;
         void BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players);
 
@@ -352,20 +352,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         void _Create( uint32 guidlow, HighGuid guidhigh, uint32 mapid );
 
-        void Relocate(float x, float y, float z, float orientation)
-        {
-            m_positionX = x;
-            m_positionY = y;
-            m_positionZ = z;
-            m_orientation = orientation;
-        }
-
-        void Relocate(float x, float y, float z)
-        {
-            m_positionX = x;
-            m_positionY = y;
-            m_positionZ = z;
-        }
+        void Relocate(float x, float y, float z, float orientation);
+        void Relocate(float x, float y, float z);
 
         void SetOrientation(float orientation) { m_orientation = orientation; }
 
