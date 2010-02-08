@@ -404,8 +404,14 @@ class Spell
 
         CurrentSpellTypes GetCurrentContainer();
 
+        // caster types:
+        // formal spell caster, in game source of spell affects cast
         Unit* GetCaster() const { return m_caster; }
-        Unit* GetOriginalCaster() const { return m_originalCaster; }
+        // real source of cast affects, explcit caster, or DoT/HoT applier, or GO owner, etc. Can be NULL
+        Unit* GetAffectiveCaster() const { return m_originalCasterGUID ? m_originalCaster : m_caster; }
+        // m_originalCasterGUID can store GO guid, and in this case this is visual caster
+        WorldObject* GetCastingObject() const;
+
         int32 GetPowerCost() const { return m_powerCost; }
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
@@ -425,6 +431,7 @@ class Spell
     protected:
 
         void SendLoot(uint64 guid, LootType loottype);
+        void UpdateOriginalCasterPointer();
 
         Unit* m_caster;
 
@@ -564,7 +571,7 @@ namespace MaNGOS
         SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i, float radius)
             : i_data(data), i_spell(spell), i_index(i), i_radius(radius)
         {
-            i_originalCaster = i_spell.GetOriginalCaster();
+            i_originalCaster = i_spell.GetAffectiveCaster();
         }
 
         void Visit(PlayerMapType &m)
@@ -601,7 +608,7 @@ namespace MaNGOS
             SpellTargets TargetType = SPELL_TARGETS_NOT_FRIENDLY)
             : i_data(&data), i_spell(spell), i_push_type(type), i_radius(radius), i_TargetType(TargetType)
         {
-            i_originalCaster = spell.GetOriginalCaster();
+            i_originalCaster = spell.GetAffectiveCaster();
         }
 
         template<class T> inline void Visit(GridRefManager<T>  &m)

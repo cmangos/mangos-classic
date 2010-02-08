@@ -320,13 +320,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     else
         m_originalCasterGUID = m_caster->GetGUID();
 
-    if(m_originalCasterGUID == m_caster->GetGUID())
-        m_originalCaster = m_caster;
-    else
-    {
-        m_originalCaster = ObjectAccessor::GetUnit(*m_caster, m_originalCasterGUID);
-        if(m_originalCaster && !m_originalCaster->IsInWorld()) m_originalCaster = NULL;
-    }
+    UpdateOriginalCasterPointer();
 
     for(int i = 0; i < 3; ++i)
         m_currentBasePoints[i] = m_spellInfo->EffectBasePoints[i];
@@ -880,36 +874,40 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
 
 void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
 {
-    if(!unit || !effectMask)
+    if (!unit || !effectMask)
+        return;
+
+    Unit* realCaster = GetAffectiveCaster();
+    if (!realCaster)
         return;
 
     // Recheck immune (only for delayed spells)
-    if( m_spellInfo->speed && (
+    if (m_spellInfo->speed && (
         unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo),true) ||
-        unit->IsImmunedToSpell(m_spellInfo,true) ))
+        unit->IsImmunedToSpell(m_spellInfo,true)))
     {
-        m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
+        realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
         return;
     }
 
-    if( m_caster != unit )
+    if (realCaster != unit)
     {
         // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
         if (m_spellInfo->speed > 0.0f &&
             unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) &&
             unit->GetCharmerOrOwnerGUID() != m_caster->GetGUID())
         {
-            m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
+            realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
             return;
         }
 
-        if( !m_caster->IsFriendlyTo(unit) )
+        if (!realCaster->IsFriendlyTo(unit))
         {
             // for delayed spells ignore not visible explicit target
             if (m_spellInfo->speed > 0.0f && unit == m_targets.getUnitTarget() &&
                 !unit->isVisibleForOrDetect(m_caster, m_caster, false))
             {
-                m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
+                realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
                 return;
             }
 
@@ -932,32 +930,33 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                     unit->SetStandState(UNIT_STAND_STATE_STAND);
 
                 if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
-                    ((Creature*)unit)->AI()->AttackedBy(m_caster);
+                    ((Creature*)unit)->AI()->AttackedBy(realCaster);
 
-                unit->AddThreat(m_caster);
-                unit->SetInCombatWith(m_caster);
-                m_caster->SetInCombatWith(unit);
+                unit->AddThreat(realCaster);
+                unit->SetInCombatWith(realCaster);
+                realCaster->SetInCombatWith(unit);
 
-                if(Player *attackedPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    m_caster->SetContestedPvP(attackedPlayer);
+                if (Player *attackedPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    realCaster->SetContestedPvP(attackedPlayer);
             }
         }
         else
         {
             // for delayed spells ignore negative spells (after duel end) for friendly targets
-            if(m_spellInfo->speed > 0.0f && !IsPositiveSpell(m_spellInfo->Id))
+            if (m_spellInfo->speed > 0.0f && !IsPositiveSpell(m_spellInfo->Id))
             {
-                m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
+                realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
                 return;
             }
 
             // assisting case, healing and resurrection
-            if(unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
-                m_caster->SetContestedPvP();
-            if( unit->isInCombat() && !(m_spellInfo->AttributesEx & SPELL_ATTR_EX_NO_INITIAL_AGGRO) )
+            if (unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
+                realCaster->SetContestedPvP();
+
+            if (unit->isInCombat() && !(m_spellInfo->AttributesEx & SPELL_ATTR_EX_NO_INITIAL_AGGRO))
             {
-                m_caster->SetInCombatState(unit->GetCombatTimer() > 0);
-                unit->getHostileRefManager().threatAssist(m_caster, 0.0f, m_spellInfo);
+                realCaster->SetInCombatState(unit->GetCombatTimer() > 0);
+                unit->getHostileRefManager().threatAssist(realCaster, 0.0f, m_spellInfo);
             }
         }
     }
@@ -966,7 +965,8 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo,m_triggeredByAuraSpell);
     m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
     // Increase Diminishing on unit, current informations for actually casts will use values above
-    if((GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) || GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_ALL)
+    if ((GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) ||
+        GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_ALL)
         unit->IncrDiminishing(m_diminishGroup);
 
     // Apply additional spell effects to target
@@ -982,7 +982,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                 // Get multiplier
                 float multiplier = m_spellInfo->DmgMultiplier[effectNumber];
                 // Apply multiplier mods
-                if(Player* modOwner = m_originalCaster->GetSpellModOwner())
+                if(Player* modOwner = realCaster->GetSpellModOwner())
                     modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_EFFECT_PAST_FIRST, multiplier, this);
                 m_damageMultipliers[effectNumber] *= multiplier;
             }
@@ -1117,9 +1117,9 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode, UnitList& targetUnit
 
     uint32 EffectChainTarget = m_spellInfo->EffectChainTarget[effIndex];
 
-    if(m_originalCaster)
+    if (Unit* realCaster = GetAffectiveCaster())
     {
-        if(Player* modOwner = m_originalCaster->GetSpellModOwner())
+        if(Player* modOwner = realCaster->GetSpellModOwner())
         {
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius, this);
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
@@ -1252,7 +1252,8 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode, UnitList& targetUnit
             else
             {
                 Unit* pUnitTarget = m_targets.getUnitTarget();
-                if(!pUnitTarget)
+                Unit* originalCaster = GetAffectiveCaster();
+                if(!pUnitTarget || !originalCaster)
                     break;
 
                 unMaxTargets = EffectChainTarget;
@@ -1269,54 +1270,50 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode, UnitList& targetUnit
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
-                Unit* originalCaster = GetOriginalCaster();
-                if(originalCaster)
+                std::list<Unit *> tempTargetUnitMap;
+
                 {
-                    std::list<Unit *> tempTargetUnitMap;
+                    MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range, false);
+                    MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
 
-                    {
-                        MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range, false);
-                        MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
 
-                        TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-                        TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+                    cell.Visit(p, world_unit_searcher, *m_caster->GetMap(), *m_caster, max_range);
+                    cell.Visit(p, grid_unit_searcher, *m_caster->GetMap(), *m_caster, max_range);
+                }
 
-						cell.Visit(p, world_unit_searcher, *m_caster->GetMap(), *m_caster, max_range);
-						cell.Visit(p, grid_unit_searcher, *m_caster->GetMap(), *m_caster, max_range);
-                    }
+                tempTargetUnitMap.sort(TargetDistanceOrder(pUnitTarget));
 
-                    tempTargetUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+                if(tempTargetUnitMap.empty())
+                    break;
 
-                    if(tempTargetUnitMap.empty())
+                if(*tempTargetUnitMap.begin() == pUnitTarget)
+                    tempTargetUnitMap.erase(tempTargetUnitMap.begin());
+
+                targetUnitMap.push_back(pUnitTarget);
+                uint32 t = unMaxTargets - 1;
+                Unit *prev = pUnitTarget;
+                std::list<Unit*>::iterator next = tempTargetUnitMap.begin();
+
+                while(t && next != tempTargetUnitMap.end() )
+                {
+                    if(!prev->IsWithinDist(*next,CHAIN_SPELL_JUMP_RADIUS))
                         break;
 
-                    if(*tempTargetUnitMap.begin() == pUnitTarget)
-                        tempTargetUnitMap.erase(tempTargetUnitMap.begin());
-
-                    targetUnitMap.push_back(pUnitTarget);
-                    uint32 t = unMaxTargets - 1;
-                    Unit *prev = pUnitTarget;
-                    std::list<Unit*>::iterator next = tempTargetUnitMap.begin();
-
-                    while(t && next != tempTargetUnitMap.end() )
+                    if(!prev->IsWithinLOSInMap(*next))
                     {
-                        if(!prev->IsWithinDist(*next,CHAIN_SPELL_JUMP_RADIUS))
-                            break;
-
-                        if(!prev->IsWithinLOSInMap(*next))
-                        {
-                            ++next;
-                            continue;
-                        }
-
-                        prev = *next;
-                        targetUnitMap.push_back(prev);
-                        tempTargetUnitMap.erase(next);
-                        tempTargetUnitMap.sort(TargetDistanceOrder(prev));
-                        next = tempTargetUnitMap.begin();
-
-                        --t;
+                        ++next;
+                        continue;
                     }
+
+                    prev = *next;
+                    targetUnitMap.push_back(prev);
+                    tempTargetUnitMap.erase(next);
+                    tempTargetUnitMap.sort(TargetDistanceOrder(prev));
+                    next = tempTargetUnitMap.begin();
+
+                    --t;
                 }
             }
             break;
@@ -1380,13 +1377,8 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode, UnitList& targetUnit
         case TARGET_CASTER_COORDINATES:
         {
             // Check original caster is GO - set its coordinates as dst cast
-            WorldObject *caster = NULL;
-            if (IS_GAMEOBJECT_GUID(m_originalCasterGUID))
-                caster = m_caster->GetMap()->GetGameObject(m_originalCasterGUID);
-            if (!caster)
-                caster = m_caster;
-            // Set dest for targets
-            m_targets.setDestination(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+            if (WorldObject *caster = GetCastingObject())
+                m_targets.setDestination(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
             break;
         }
         case TARGET_ALL_HOSTILE_UNITS_AROUND_CASTER:
@@ -2262,8 +2254,8 @@ void Spell::_handle_immediate_phase()
             m_needSpellLog = false;
 
         uint32 EffectChainTarget = m_spellInfo->EffectChainTarget[j];
-        if(m_originalCaster)
-            if(Player* modOwner = m_originalCaster->GetSpellModOwner())
+        if (Unit* realCaster = GetAffectiveCaster())
+            if(Player* modOwner = realCaster->GetSpellModOwner())
                 modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
 
         // initialize multipliers
@@ -3609,9 +3601,8 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_EFFECT_TAMECREATURE:
             {
                 // Spell can be triggered, we need to check original caster prior to caster
-                Unit* caster = m_originalCaster ? m_originalCaster : m_caster;
-
-                if (caster->GetTypeId() != TYPEID_PLAYER ||
+                Unit* caster = GetAffectiveCaster();
+                if (!caster || caster->GetTypeId() != TYPEID_PLAYER ||
                     !m_targets.getUnitTarget() ||
                     m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER)
                     return SPELL_FAILED_BAD_TARGETS;
@@ -4861,15 +4852,25 @@ void Spell::DelayedChannel()
     SendChannelUpdate(m_timer);
 }
 
-void Spell::UpdatePointers()
+void Spell::UpdateOriginalCasterPointer()
 {
     if(m_originalCasterGUID == m_caster->GetGUID())
         m_originalCaster = m_caster;
+    else if (IS_GAMEOBJECT_GUID(m_originalCasterGUID))
+    {
+        GameObject* go = m_caster->IsInWorld() ? m_caster->GetMap()->GetGameObject(m_originalCasterGUID) : NULL;
+        m_originalCaster = go ? go->GetOwner() : NULL;
+    }
     else
     {
-        m_originalCaster = ObjectAccessor::GetUnit(*m_caster, m_originalCasterGUID);
-        if(m_originalCaster && !m_originalCaster->IsInWorld()) m_originalCaster = NULL;
+        Unit* unit = ObjectAccessor::GetUnit(*m_caster, m_originalCasterGUID);
+        m_originalCaster = unit && unit->IsInWorld() ? unit : NULL;
     }
+}
+
+void Spell::UpdatePointers()
+{
+    UpdateOriginalCasterPointer();
 
     m_targets.Update(m_caster);
 }
@@ -4987,13 +4988,10 @@ bool Spell::CheckTarget( Unit* target, uint32 eff )
             break;
         default:                                            // normal case
             // Get GO cast coordinates if original caster -> GO
-            WorldObject *caster = NULL;
-            if (m_originalCasterGUID)
-                caster = m_caster->GetMap()->GetGameObject(m_originalCasterGUID);
-            if (!caster)
-                caster = m_caster;
-            if(target!=m_caster && !target->IsWithinLOSInMap(caster))
-                return false;
+            if (target != m_caster)
+                if (WorldObject *caster = GetCastingObject())
+                    if (!target->IsWithinLOSInMap(caster))
+                        return false;
             break;
     }
 
@@ -5283,4 +5281,12 @@ void Spell::FillRaidOrPartyTargets( UnitList &TagUnitMap, Unit* target, float ra
                     pet!=m_caster && m_caster->IsWithinDistInMap(pet, radius))
                     TagUnitMap.push_back(pet);
     }
+}
+
+WorldObject* Spell::GetCastingObject() const
+{
+    if (IS_GAMEOBJECT_GUID(m_originalCasterGUID))
+        return m_caster->IsInWorld() ? m_caster->GetMap()->GetGameObject(m_originalCasterGUID) : NULL;
+    else
+        return m_caster;
 }
