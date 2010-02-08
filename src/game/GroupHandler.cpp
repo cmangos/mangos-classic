@@ -193,9 +193,12 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
     // forming a new group, create it
     if(!group->IsCreated())
     {
-        if(leader) group->RemoveInvite(leader);
-        group->Create(group->GetLeaderGUID(), group->GetLeaderName());
-        sObjectMgr.AddGroup(group);
+        if (leader)
+            group->RemoveInvite(leader);
+        if (group->Create(group->GetLeaderGUID(), group->GetLeaderName()))
+            sObjectMgr.AddGroup(group);
+        else
+            return;
     }
 
     // everything's fine, do it
