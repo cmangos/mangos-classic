@@ -495,7 +495,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
             ROLLBACK(DUMP_FILE_BROKEN);
         }
 
-        DumpTableType type;
+        DumpTableType type = DTT_CHARACTER;                 //Fixed: Using uninitialized memory 'type'
         uint8 i;
         for(i = 0; i < DUMP_TABLE_COUNT; ++i)
         {

@@ -1705,8 +1705,8 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (!spell)
                             return;
 
-                        for (int i=0; i < spell->StackAmount; ++i)
-                            caster->CastSpell(m_target, spell->Id, true, NULL, NULL, GetCasterGUID());
+                        for (uint32 i = 0; i < spell->StackAmount; ++i)
+                            caster->CastSpell(m_target, spellId, true, NULL, NULL, GetCasterGUID());
                         return;
                     }
                     m_target->RemoveAurasDueToSpell(spellId);
@@ -1721,7 +1721,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         const SpellEntry *spell = sSpellStore.LookupEntry(spellId);
                         if (!spell)
                             return;
-                        for (int i=0; i < spell->StackAmount; ++i)
+                        for (uint32 i=0; i < spell->StackAmount; ++i)
                             caster->CastSpell(m_target, spell->Id, true, NULL, NULL, GetCasterGUID());
                         return;
                     }
@@ -2038,13 +2038,13 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 case FORM_DIREBEAR:
                 {
                     // get furor proc chance
-                    uint32 FurorChance = 0;
+                    int32 furorChance = 0;
                     Unit::AuraList const& mDummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
                     for(Unit::AuraList::const_iterator i = mDummy.begin(); i != mDummy.end(); ++i)
                     {
                         if ((*i)->GetSpellProto()->SpellIconID == 238)
                         {
-                            FurorChance = (*i)->GetModifier()->m_amount;
+                            furorChance = (*i)->GetModifier()->m_amount;
                             break;
                         }
                     }
@@ -2052,13 +2052,13 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                     if (m_modifier.m_miscvalue == FORM_CAT)
                     {
                         m_target->SetPower(POWER_ENERGY, 0);
-                        if(urand(1,100) <= FurorChance)
+                        if(irand(1,100) <= furorChance)
                             m_target->CastSpell(m_target, 17099, true, NULL, this);
                     }
                     else
                     {
                         m_target->SetPower(POWER_RAGE, 0);
-                        if(urand(1,100) <= FurorChance)
+                        if(irand(1,100) <= furorChance)
                             m_target->CastSpell(m_target, 17057, true, NULL, this);
                     }
                     break;

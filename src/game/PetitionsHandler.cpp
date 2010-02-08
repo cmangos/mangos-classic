@@ -180,7 +180,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket & recv_data)
 
     // result==NULL also correct in case no sign yet
     if(result)
-        signs = result->GetRowCount();
+        signs = (uint8)result->GetRowCount();
 
     sLog.outDebug("CMSG_PETITION_SHOW_SIGNATURES petition entry: '%u'", petitionguid_low);
 
@@ -462,7 +462,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recv_data)
     QueryResult* result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
     // result==NULL also correct charter without signs
     if(result)
-        signs = result->GetRowCount();
+        signs = (uint8)result->GetRowCount();
 
     WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, (8+8+4+signs+signs*12));
     data << petitionguid;                                   // petition guid
@@ -530,7 +530,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     uint8 signs;
     result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
     if(result)
-        signs = result->GetRowCount();
+        signs = (uint8)result->GetRowCount();
     else
         signs = 0;
 

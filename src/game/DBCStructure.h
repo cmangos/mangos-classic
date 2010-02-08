@@ -619,13 +619,15 @@ struct StableSlotPricesEntry
     uint32 Price;
 };
 
+#define MAX_TALENT_RANK 5
+
 struct TalentEntry
 {
     uint32    TalentID;                                     // 0
     uint32    TalentTab;                                    // 1 index in TalentTab.dbc (TalentTabEntry)
     uint32    Row;                                          // 2
     uint32    Col;                                          // 3
-    uint32    RankID[5];                                    // 4-8
+    uint32    RankID[MAX_TALENT_RANK];                      // 4-8
                                                             // 9-12 not used, always 0, maybe not used high ranks
     uint32    DependsOn;                                    // 13 index in Talent.dbc (TalentEntry)
                                                             // 14-15 not used

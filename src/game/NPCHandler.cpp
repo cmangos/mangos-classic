@@ -760,7 +760,6 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
 
     Pet* pet = _player->GetPet();
 
@@ -798,6 +797,8 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
 
     // move alive pet to slot or delete dead pet
     _player->RemovePet(pet,pet->isAlive() ? PetSaveMode(slot) : PET_SAVE_AS_DELETED);
+
+    WorldPacket data(SMSG_STABLE_RESULT, 1);                // guess size
 
     // summon unstabled pet
     Pet *newpet = new Pet;
