@@ -1604,7 +1604,7 @@ void Spell::EffectPowerDrain(uint32 i)
     if(damage < 0)
         return;
 
-    uint32 curPower = unitTarget->GetPower(drain_power);
+    int32 curPower = unitTarget->GetPower(drain_power);
 
     //add spell damage bonus
     damage = m_caster->SpellDamageBonus(unitTarget,m_spellInfo,uint32(damage),SPELL_DIRECT_DAMAGE);

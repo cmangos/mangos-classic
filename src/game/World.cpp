@@ -1054,6 +1054,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Packing instances..." );
     sInstanceSaveMgr.PackInstances();
 
+    sLog.outString( "Packing groups..." );
+    sObjectMgr.PackGroupIds();
+
     sLog.outString();
     sLog.outString( "Loading Localization strings..." );
     sObjectMgr.LoadCreatureLocales();
@@ -2284,13 +2287,13 @@ void World::SendWorldText(int32 string_id, ...)
         else
             data_list = &data_cache[cache_idx];
 
-        for(int i = 0; i < data_list->size(); ++i)
+        for(size_t i = 0; i < data_list->size(); ++i)
             itr->second->SendPacket((*data_list)[i]);
     }
 
     // free memory
-    for(int i = 0; i < data_cache.size(); ++i)
-        for(int j = 0; j < data_cache[i].size(); ++j)
+    for(size_t i = 0; i < data_cache.size(); ++i)
+        for(size_t j = 0; j < data_cache[i].size(); ++j)
             delete data_cache[i][j];
 }
 

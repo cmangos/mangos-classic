@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z0124_xxx_01_characters` bit(1) DEFAULT NULL
+  `required_z0169_091_01_characters_group` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -626,9 +626,43 @@ LOCK TABLES `corpse` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `group_instance`
+-- Table structure for table `groups`
 --
 
+DROP TABLE IF EXISTS `groups`;
+CREATE TABLE `groups` (
+  `groupId` int(11) unsigned NOT NULL,
+  `leaderGuid` int(11) unsigned NOT NULL,
+  `mainTank` int(11) unsigned NOT NULL,
+  `mainAssistant` int(11) unsigned NOT NULL,
+  `lootMethod` tinyint(4) unsigned NOT NULL,
+  `looterGuid` int(11) unsigned NOT NULL,
+  `lootThreshold` tinyint(4) unsigned NOT NULL,
+  `icon1` int(11) unsigned NOT NULL,
+  `icon2` int(11) unsigned NOT NULL,
+  `icon3` int(11) unsigned NOT NULL,
+  `icon4` int(11) unsigned NOT NULL,
+  `icon5` int(11) unsigned NOT NULL,
+  `icon6` int(11) unsigned NOT NULL,
+  `icon7` int(11) unsigned NOT NULL,
+  `icon8` int(11) unsigned NOT NULL,
+  `isRaid` tinyint(1) unsigned NOT NULL,
+  PRIMARY KEY  (`groupId`),
+  UNIQUE KEY  (`leaderGuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
+
+--
+-- Dumping data for table `groups`
+--
+
+LOCK TABLES `groups` WRITE;
+/*!40000 ALTER TABLE `groups` DISABLE KEYS */;
+/*!40000 ALTER TABLE `groups` ENABLE KEYS */;
+UNLOCK TABLES;
+
+-- ----------------------------
+-- Table structure for group_instance
+-- ----------------------------
 DROP TABLE IF EXISTS `group_instance`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -658,11 +692,11 @@ DROP TABLE IF EXISTS `group_member`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `group_member` (
-  `leaderGuid` int(11) unsigned NOT NULL,
+  `groupId` int(11) unsigned NOT NULL,
   `memberGuid` int(11) unsigned NOT NULL,
   `assistant` tinyint(1) unsigned NOT NULL,
   `subgroup` smallint(6) unsigned NOT NULL,
-  PRIMARY KEY (`leaderGuid`,`memberGuid`)
+  PRIMARY KEY  (`groupId`,`memberGuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -673,42 +707,6 @@ CREATE TABLE `group_member` (
 LOCK TABLES `group_member` WRITE;
 /*!40000 ALTER TABLE `group_member` DISABLE KEYS */;
 /*!40000 ALTER TABLE `group_member` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `groups`
---
-
-DROP TABLE IF EXISTS `groups`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `groups` (
-  `leaderGuid` int(11) unsigned NOT NULL,
-  `mainTank` int(11) unsigned NOT NULL,
-  `mainAssistant` int(11) unsigned NOT NULL,
-  `lootMethod` tinyint(4) unsigned NOT NULL,
-  `looterGuid` int(11) unsigned NOT NULL,
-  `lootThreshold` tinyint(4) unsigned NOT NULL,
-  `icon1` int(11) unsigned NOT NULL,
-  `icon2` int(11) unsigned NOT NULL,
-  `icon3` int(11) unsigned NOT NULL,
-  `icon4` int(11) unsigned NOT NULL,
-  `icon5` int(11) unsigned NOT NULL,
-  `icon6` int(11) unsigned NOT NULL,
-  `icon7` int(11) unsigned NOT NULL,
-  `icon8` int(11) unsigned NOT NULL,
-  `isRaid` tinyint(1) unsigned NOT NULL,
-  PRIMARY KEY (`leaderGuid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `groups`
---
-
-LOCK TABLES `groups` WRITE;
-/*!40000 ALTER TABLE `groups` DISABLE KEYS */;
-/*!40000 ALTER TABLE `groups` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

@@ -3558,12 +3558,12 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     }
 
     // the player was uninvited already on logout so just remove from group
-    QueryResult *resultGroup = CharacterDatabase.PQuery("SELECT leaderGuid FROM group_member WHERE memberGuid='%u'", guid);
+    QueryResult *resultGroup = CharacterDatabase.PQuery("SELECT groupId FROM group_member WHERE memberGuid='%u'", guid);
     if(resultGroup)
     {
-        uint32 leaderGuidLow = (*resultGroup)[0].GetUInt32();
+        uint32 groupId = (*resultGroup)[0].GetUInt32();
         delete resultGroup;
-        if (Group* group = sObjectMgr.GetGroupByLeaderLowGUID(leaderGuidLow))
+        if (Group* group = sObjectMgr.GetGroupById(groupId))
             RemoveFromGroup(group, playerguid);
     }
 
@@ -4477,11 +4477,11 @@ float Player::GetSpellCritFromIntellect()
         {   3.70f, 14.77f,  0.65f },                        //  2: paladin
         {   0.0f,   0.0f,  10.0f  },                        //  3: hunter
         {   0.0f,   0.0f,  10.0f  },                        //  4: rogue
-        {   2.97,  10.03f,  0.82f },                        //  5: priest
+        {   2.97f, 10.03f,  0.82f },                        //  5: priest
         {   0.0f,   0.0f,  10.0f  },                        //  6: unused
-        {   3.54f, 11.51f,  0.80  },                        //  7: shaman
-        {   3.70f, 14.77f,  0.65  },                        //  8: mage
-        {   3.18f, 11.30f,  0.82  },                        //  9: warlock
+        {   3.54f, 11.51f,  0.80f },                        //  7: shaman
+        {   3.70f, 14.77f,  0.65f },                        //  8: mage
+        {   3.18f, 11.30f,  0.82f },                        //  9: warlock
         {   0.0f,   0.0f,  10.0f  },                        // 10: unused
         {   3.33f, 12.41f,  0.79f }                         // 11: druid
     };
@@ -14014,13 +14014,13 @@ void Player::_LoadTutorials(QueryResult *result)
 
 void Player::_LoadGroup(QueryResult *result)
 {
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT leaderGuid FROM group_member WHERE memberGuid='%u'", GetGUIDLow());
-    if(result)
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT groupId FROM group_member WHERE memberGuid='%u'", GetGUIDLow());
+    if (result)
     {
-        uint32 leaderGuidLow = (*result)[0].GetUInt32();
+        uint32 groupId = (*result)[0].GetUInt32();
         delete result;
 
-        if (Group* group = sObjectMgr.GetGroupByLeaderLowGUID(leaderGuidLow))
+        if (Group* group = sObjectMgr.GetGroupById(groupId))
         {
             uint8 subgroup = group->GetMemberGroup(GetGUID());
             SetGroup(group, subgroup);
@@ -14217,9 +14217,12 @@ void Player::ConvertInstancesToGroup(Player *player, Group *group, uint64 player
     }
 
     // if the player's not online we don't know what binds it has
-    if(!player || !group || has_binds) CharacterDatabase.PExecute("INSERT INTO group_instance SELECT guid, instance, permanent FROM character_instance WHERE guid = '%u'", GUID_LOPART(player_guid));
+    if(!player || !group || has_binds)
+        CharacterDatabase.PExecute("INSERT INTO group_instance SELECT guid, instance, permanent FROM character_instance WHERE guid = '%u'", GUID_LOPART(player_guid));
+
     // the following should not get executed when changing leaders
-    if(!player || has_solo) CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND permanent = 0", GUID_LOPART(player_guid));
+    if(!player || has_solo)
+        CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND permanent = 0", GUID_LOPART(player_guid));
 }
 
 bool Player::_LoadHomeBind(QueryResult *result)
