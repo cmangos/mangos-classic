@@ -196,8 +196,9 @@ void Map::DeleteStateMachine()
 Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
   : i_mapEntry (sMapStore.LookupEntry(id)),
   i_id(id), i_InstanceId(InstanceId), m_unloadTimer(0),
+  m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE),
   m_activeNonPlayersIter(m_activeNonPlayers.end()),
-  i_gridExpiry(expiry), m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE)
+  i_gridExpiry(expiry)
 {
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
     {

@@ -1393,7 +1393,7 @@ valid examples:
                             for(uint8 i=LOCALE_koKR; i<MAX_LOCALE; ++i)
                             {
                                 int8 dbIndex = sObjectMgr.GetIndexForLocale(LocaleConstant(i));
-                                if (dbIndex == -1 || il == NULL || dbIndex >= il->Name.size())
+                                if (dbIndex == -1 || il == NULL || (size_t)dbIndex >= il->Name.size())
                                     // using strange database/client combinations can lead to this case
                                     expectedName = linkedItem->Name1;
                                 else

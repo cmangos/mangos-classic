@@ -1990,7 +1990,7 @@ const char* Creature::GetNameForLocaleIdx(int32 loc_idx) const
         CreatureLocale const *cl = sObjectMgr.GetCreatureLocale(GetEntry());
         if (cl)
         {
-            if (cl->Name.size() > loc_idx && !cl->Name[loc_idx].empty())
+            if (cl->Name.size() > (size_t)loc_idx && !cl->Name[loc_idx].empty())
                 return cl->Name[loc_idx].c_str();
         }
     }
