@@ -436,6 +436,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         bool HasInArc( const float arcangle, const WorldObject* obj ) const;
         bool isInFrontInMap(WorldObject const* target,float distance, float arc = M_PI) const;
         bool isInBackInMap(WorldObject const* target, float distance, float arc = M_PI) const;
+        bool isInFront(WorldObject const* target,float distance, float arc = M_PI) const;
+        bool isInBack(WorldObject const* target, float distance, float arc = M_PI) const;
 
         virtual void CleanupsBeforeDelete();                // used in destructor or explicitly before mass creature delete to remove cross-references to already deleted units
 

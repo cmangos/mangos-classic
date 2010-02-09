@@ -1049,10 +1049,10 @@ void World::SetInitialWorldSettings()
 
     ///- Clean up and pack instances
     sLog.outString( "Cleaning up instances..." );
-    sInstanceSaveManager.CleanupInstances();                // must be called before `creature_respawn`/`gameobject_respawn` tables
+    sInstanceSaveMgr.CleanupInstances();                // must be called before `creature_respawn`/`gameobject_respawn` tables
 
     sLog.outString( "Packing instances..." );
-    sInstanceSaveManager.PackInstances();
+    sInstanceSaveMgr.PackInstances();
 
     sLog.outString();
     sLog.outString( "Loading Localization strings..." );
@@ -1524,7 +1524,7 @@ void World::Update(uint32 diff)
     sMapMgr.DoDelayedMovesAndRemoves();
 
     // update the instance reset times
-    sInstanceSaveManager.Update();
+    sInstanceSaveMgr.Update();
 
     // And last, but not least handle the issued cli commands
     ProcessCliCommands();

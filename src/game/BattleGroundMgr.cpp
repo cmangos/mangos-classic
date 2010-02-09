@@ -510,7 +510,7 @@ void BattleGroundQueue::BGEndedRemoveInvites(BattleGround *bg)
             // after removing this much playerinfos, the ginfo will be deleted, so we'll use a for loop
             uint32 to_remove = ginfo->Players.size();
             uint32 team = ginfo->Team;
-            for(int i = 0; i < to_remove; ++i)
+            for(uint32 i = 0; i < to_remove; ++i)
             {
                 // always remove the first one in the group
                 std::map<uint64, PlayerQueueInfo * >::iterator itr2 = ginfo->Players.begin();

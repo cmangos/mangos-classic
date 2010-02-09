@@ -1125,7 +1125,7 @@ void Player::Update( uint32 p_time )
                     }
                 }
                 //120 degrees of radiant range
-                else if( !HasInArc( 2*M_PI/3, pVictim ))
+                else if( !HasInArc( 2*M_PI_F/3, pVictim ))
                 {
                     setAttackTimer(BASE_ATTACK,100);
                     if(m_swingErrorMsg != 2)                // send single time (client auto repeat)
@@ -1156,7 +1156,7 @@ void Player::Update( uint32 p_time )
                 {
                     setAttackTimer(OFF_ATTACK,100);
                 }
-                else if( !HasInArc( 2*M_PI/3, pVictim ))
+                else if( !HasInArc( 2*M_PI_F/3, pVictim ))
                 {
                     setAttackTimer(OFF_ATTACK,100);
                 }
@@ -1747,7 +1747,7 @@ void Player::RewardRage( uint32 damage, uint32 weaponSpeedHitFactor, bool attack
 
         // Berserker Rage effect
         if(HasAura(18499,0))
-            addRage *= 1.3;
+            addRage *= 1.3f;
     }
 
     addRage *= sWorld.getRate(RATE_POWER_RAGE_INCOME);
@@ -4374,20 +4374,20 @@ uint32 Player::GetShieldBlockValue() const
 float Player::GetMeleeCritFromAgility()
 {
   // from mangos 3462 for 1.12
-  float val=0,classrate = 0;
+  float val=0.0f,classrate = 0.0f;
     // critical
     switch(getClass())
     {
-        case CLASS_PALADIN: classrate = 19.77; break;
-        case CLASS_SHAMAN:  classrate = 19.7;  break;
-        case CLASS_MAGE:    classrate = 19.44; break;
-        case CLASS_ROGUE:   classrate = 29.0;  break;
-        case CLASS_HUNTER:  classrate = 53.0;  break;       // in 2.0.x = 33
+        case CLASS_PALADIN: classrate = 19.77f; break;
+        case CLASS_SHAMAN:  classrate = 19.7f;  break;
+        case CLASS_MAGE:    classrate = 19.44f; break;
+        case CLASS_ROGUE:   classrate = 29.0f;  break;
+        case CLASS_HUNTER:  classrate = 53.0f;  break;      // in 2.0.x = 33
         case CLASS_PRIEST:
         case CLASS_WARLOCK:
         case CLASS_DRUID:
         case CLASS_WARRIOR:
-        default:            classrate = 20.0; break;
+        default:            classrate = 20.0f; break;
     }
 
     val = GetStat(STAT_AGILITY)/classrate;
@@ -4463,7 +4463,7 @@ float Player::GetSpellCritFromIntellect()
     // increases his intelligence by other means (enchants, buffs, talents, ...)
 
     //[TZERO] from mangos 3462 for 1.12 MUST BE CHECKED
-    float val=0;
+    float val=0.0f;
 
     static const struct
     {
@@ -4472,42 +4472,18 @@ float Player::GetSpellCritFromIntellect()
     }
     crit_data[MAX_CLASSES] =
     {
-        {                                                   //  0: unused
-            0,0,10
-        },
-        {                                                   //  1: warrior
-            0,0,10
-        },
-        {                                                   //  2: paladin
-            3.70, 14.77, 0.65
-        },
-        {                                                   //  3: hunter
-            0,0,10
-        },
-        {                                                   //  4: rogue
-            0,0,10
-        },
-        {                                                   //  5: priest
-            2.97, 10.03, 0.82
-        },
-        {                                                   //  6: unused
-            0,0,10
-        },
-        {                                                   //  7: shaman
-            3.54, 11.51, 0.80
-        },
-        {                                                   //  8: mage
-            3.70, 14.77, 0.65
-        },
-        {                                                   //  9: warlock
-            3.18, 11.30, 0.82
-        },
-        {                                                   // 10: unused
-            0,0,10
-        },
-        {                                                   // 11: druid
-            3.33, 12.41, 0.79
-        }
+        {   0.0f,   0.0f,  10.0f  },                        //  0: unused
+        {   0.0f,   0.0f,  10.0f  },                        //  1: warrior
+        {   3.70f, 14.77f,  0.65f },                        //  2: paladin
+        {   0.0f,   0.0f,  10.0f  },                        //  3: hunter
+        {   0.0f,   0.0f,  10.0f  },                        //  4: rogue
+        {   2.97,  10.03f,  0.82f },                        //  5: priest
+        {   0.0f,   0.0f,  10.0f  },                        //  6: unused
+        {   3.54f, 11.51f,  0.80  },                        //  7: shaman
+        {   3.70f, 14.77f,  0.65  },                        //  8: mage
+        {   3.18f, 11.30f,  0.82  },                        //  9: warlock
+        {   0.0f,   0.0f,  10.0f  },                        // 10: unused
+        {   3.33f, 12.41f,  0.79f }                         // 11: druid
     };
     float crit_chance;
 
@@ -11335,7 +11311,7 @@ void Player::SendPreparedQuest( uint64 guid )
                         NpcTextLocale const *nl = sObjectMgr.GetNpcTextLocale(textid);
                         if (nl)
                         {
-                            if (nl->Text_0[0].size() > loc_idx && !nl->Text_0[0][loc_idx].empty())
+                            if ((int32)nl->Text_0[0].size() > loc_idx && !nl->Text_0[0][loc_idx].empty())
                                 title = nl->Text_0[0][loc_idx];
                         }
                     }
@@ -11350,7 +11326,7 @@ void Player::SendPreparedQuest( uint64 guid )
                         NpcTextLocale const *nl = sObjectMgr.GetNpcTextLocale(textid);
                         if (nl)
                         {
-                            if (nl->Text_1[0].size() > loc_idx && !nl->Text_1[0][loc_idx].empty())
+                            if ((int32)nl->Text_1[0].size() > loc_idx && !nl->Text_1[0][loc_idx].empty())
                                 title = nl->Text_1[0][loc_idx];
                         }
                     }
@@ -13147,7 +13123,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     SetInstanceId(map->GetInstanceId());
 
     // if the player is in an instance and it has been reset in the meantime teleport him to the entrance
-    if(GetInstanceId() && !sInstanceSaveManager.GetInstanceSave(GetInstanceId()))
+    if(GetInstanceId() && !sInstanceSaveMgr.GetInstanceSave(GetInstanceId()))
     {
         AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(GetMapId());
         if(at)
@@ -13176,9 +13152,9 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     m_rest_bonus = fields[22].GetFloat();
     //speed collect rest bonus in offline, in logout, far from tavern, city (section/in hour)
-    float bubble0 = 0.031;
+    float bubble0 = 0.031f;
     //speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
-    float bubble1 = 0.125;
+    float bubble1 = 0.125f;
 
     if(time_diff > 0)
     {
@@ -14088,7 +14064,7 @@ void Player::_LoadBoundInstances(QueryResult *result)
             }
 
             // since non permanent binds are always solo bind, they can always be reset
-            InstanceSave *save = sInstanceSaveManager.AddInstanceSave(mapId, instanceId, resetTime, !perm, true);
+            InstanceSave *save = sInstanceSaveMgr.AddInstanceSave(mapId, instanceId, resetTime, !perm, true);
             if(save) BindToInstance(save, perm, true);
         } while(result->NextRow());
         delete result;
@@ -17761,50 +17737,10 @@ void Player::AutoStoreLoot(uint8 bag, uint8 slot, uint32 loot_id, LootStore cons
     }
 }
 
-void Player::UpdateFallInformationIfNeed( MovementInfo const& minfo,uint16 opcode )
-{
-    if (m_lastFallTime >= minfo.GetFallTime() || m_lastFallZ <= minfo.GetPos()->z || opcode == MSG_MOVE_FALL_LAND)
-        SetFallInformation(minfo.GetFallTime(), minfo.GetPos()->z);
-}
-
-void Player::UnsummonPetTemporaryIfAny()
-{
-    Pet* pet = GetPet();
-    if(!pet)
-        return;
-
-    if(!m_temporaryUnsummonedPetNumber && pet->isControlled() && !pet->isTemporarySummoned() )
-    {
-        m_temporaryUnsummonedPetNumber = pet->GetCharmInfo()->GetPetNumber();
-        m_oldpetspell = pet->GetUInt32Value(UNIT_CREATED_BY_SPELL);
-    }
-
-    RemovePet(pet, PET_SAVE_AS_CURRENT);
-}
-
 uint32 Player::CalculateTalentsPoints() const
 {
     uint32 talentPointsForLevel = getLevel() < 10 ? 0 : getLevel()-9;
     return uint32(talentPointsForLevel * sWorld.getRate(RATE_TALENT));
-}
-
-void Player::ResummonPetTemporaryUnSummonedIfAny()
-{
-    if(!m_temporaryUnsummonedPetNumber)
-        return;
-
-    // not resummon in not appropriate state
-    if(IsPetNeedBeTemporaryUnsummoned())
-        return;
-
-    if(GetPetGUID())
-        return;
-
-    Pet* NewPet = new Pet;
-    if(!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true))
-        delete NewPet;
-
-    m_temporaryUnsummonedPetNumber = 0;
 }
 
 uint8 Player::CanEquipUniqueItem(Item* pItem, uint8 eslot) const
@@ -17998,6 +17934,46 @@ void Player::SendClearCooldown( uint32 spell_id, Unit* target )
     data << uint32(spell_id);
     data << uint64(target->GetGUID());
     SendDirectMessage(&data);
+}
+
+void Player::UpdateFallInformationIfNeed( MovementInfo const& minfo,uint16 opcode )
+{
+    if (m_lastFallTime >= minfo.GetFallTime() || m_lastFallZ <= minfo.GetPos()->z || opcode == MSG_MOVE_FALL_LAND)
+        SetFallInformation(minfo.GetFallTime(), minfo.GetPos()->z);
+}
+
+void Player::UnsummonPetTemporaryIfAny()
+{
+    Pet* pet = GetPet();
+    if(!pet)
+        return;
+
+    if(!m_temporaryUnsummonedPetNumber && pet->isControlled() && !pet->isTemporarySummoned() )
+    {
+        m_temporaryUnsummonedPetNumber = pet->GetCharmInfo()->GetPetNumber();
+        m_oldpetspell = pet->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+    }
+
+    RemovePet(pet, PET_SAVE_AS_CURRENT);
+}
+
+void Player::ResummonPetTemporaryUnSummonedIfAny()
+{
+    if(!m_temporaryUnsummonedPetNumber)
+        return;
+
+    // not resummon in not appropriate state
+    if(IsPetNeedBeTemporaryUnsummoned())
+        return;
+
+    if(GetPetGUID())
+        return;
+
+    Pet* NewPet = new Pet;
+    if(!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true))
+        delete NewPet;
+
+    m_temporaryUnsummonedPetNumber = 0;
 }
 
 void Player::RemoveAtLoginFlag( AtLoginFlags f, bool in_db_also /*= false*/ )

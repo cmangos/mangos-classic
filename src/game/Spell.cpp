@@ -1699,9 +1699,9 @@ void Spell::SetTargetMap(uint32 effIndex,uint32 targetMode, UnitList& targetUnit
                 switch(targetMode)
                 {
                     case TARGET_DYNAMIC_OBJECT_FRONT:                           break;
-                    case TARGET_DYNAMIC_OBJECT_BEHIND:      angle += M_PI;      break;
-                    case TARGET_DYNAMIC_OBJECT_LEFT_SIDE:   angle += M_PI / 2;  break;
-                    case TARGET_DYNAMIC_OBJECT_RIGHT_SIDE:  angle -= M_PI / 2;  break;
+                    case TARGET_DYNAMIC_OBJECT_BEHIND:      angle += M_PI_F;      break;
+                    case TARGET_DYNAMIC_OBJECT_LEFT_SIDE:   angle += M_PI_F / 2;  break;
+                    case TARGET_DYNAMIC_OBJECT_RIGHT_SIDE:  angle -= M_PI_F / 2;  break;
                 }
 
                 float x, y;
@@ -3318,7 +3318,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_TARGET_AURASTATE;
 
         //Must be behind the target.
-        if( m_spellInfo->AttributesEx2 == 0x100000 && (m_spellInfo->AttributesEx & 0x200) == 0x200 && target->HasInArc(M_PI, m_caster) )
+        if( m_spellInfo->AttributesEx2 == 0x100000 && (m_spellInfo->AttributesEx & 0x200) == 0x200 && target->HasInArc(M_PI_F, m_caster) )
         {
             //Exclusion for Pounce: Facing Limitation was removed in 2.0.1, but it still uses the same, old Ex-Flags
             if (m_spellInfo->SpellFamilyName != SPELLFAMILY_DRUID || (m_spellInfo->SpellFamilyFlags != UI64LIT(0x0000000000020000)))
@@ -3329,7 +3329,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
 
         //Target must be facing you.
-        if((m_spellInfo->Attributes == 0x150010) && !target->HasInArc(M_PI, m_caster) )
+        if((m_spellInfo->Attributes == 0x150010) && !target->HasInArc(M_PI_F, m_caster) )
         {
             SendInterrupted(2);
             return SPELL_FAILED_NOT_INFRONT;
@@ -3556,7 +3556,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     // spell different for friends and enemies
                     // hart version required facing
-                    if(m_targets.getUnitTarget() && !m_caster->IsFriendlyTo(m_targets.getUnitTarget()) && !m_caster->HasInArc( M_PI, m_targets.getUnitTarget() ))
+                    if(m_targets.getUnitTarget() && !m_caster->IsFriendlyTo(m_targets.getUnitTarget()) && !m_caster->HasInArc( M_PI_F, m_targets.getUnitTarget() ))
                         return SPELL_FAILED_UNIT_NOT_INFRONT;
                 }
                 break;
@@ -4307,8 +4307,8 @@ SpellCastResult Spell::CheckRange(bool strict)
         if(min_range && dist < min_range)
             return SPELL_FAILED_TOO_CLOSE;
         if( m_caster->GetTypeId() == TYPEID_PLAYER &&
-             ( sSpellMgr.GetSpellFacingFlag(m_spellInfo->Id) & SPELL_FACING_FLAG_INFRONT ) && !m_caster->HasInArc( M_PI, target ) )
-              return SPELL_FAILED_UNIT_NOT_INFRONT;
+            ( sSpellMgr.GetSpellFacingFlag(m_spellInfo->Id) & SPELL_FACING_FLAG_INFRONT ) && !m_caster->HasInArc( M_PI_F, target ) )
+            return SPELL_FAILED_UNIT_NOT_INFRONT;
     }
 
     if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destZ != 0)

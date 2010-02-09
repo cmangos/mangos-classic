@@ -655,7 +655,7 @@ const char *ChatHandler::GetMangosString(int32 entry) const
 bool ChatHandler::isAvailable(ChatCommand const& cmd) const
 {
     // check security level only for simple  command (without child commands)
-    return m_session->GetSecurity() >= cmd.SecurityLevel;
+    return m_session->GetSecurity() >= (AccountTypes)cmd.SecurityLevel;
 }
 
 bool ChatHandler::HasLowerSecurity(Player* target, uint64 guid, bool strong)

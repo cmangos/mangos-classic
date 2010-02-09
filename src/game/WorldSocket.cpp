@@ -313,7 +313,7 @@ int WorldSocket::handle_output (ACE_HANDLE)
 
         return -1;
     }
-    else if (n < send_len) //now n > 0
+    else if (n < (ssize_t)send_len) //now n > 0
     {
         m_OutBuffer->rd_ptr (static_cast<size_t> (n));
 

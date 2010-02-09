@@ -2320,6 +2320,9 @@ inline uint32 GetBattleGrounMapIdByTypeId(BattleGroundTypeId bgTypeId)
         case BATTLEGROUND_WS:   return 489;
         case BATTLEGROUND_AB:   return 529;
     }
+
+    // impossible, just make compiler happy
+    return 0;
 }
 
 enum MailResponseType

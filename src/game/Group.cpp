@@ -292,7 +292,7 @@ bool Group::AddMember(const uint64 &guid, const char* name)
 uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
 {
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove
-    if(GetMembersCount() > (isBGGroup() ? 1 : 2))           // in BG group case allow 1 members group
+    if(GetMembersCount() > uint32(isBGGroup() ? 1 : 2))           // in BG group case allow 1 members group
     {
         bool leaderChanged = _removeMember(guid);
 
@@ -1484,7 +1484,7 @@ void Group::_homebindIfInstance(Player *player)
     {
         // leaving the group in an instance, the homebind timer is started
         // unless the player is permanently saved to the instance
-        InstanceSave *save = sInstanceSaveManager.GetInstanceSave(player->GetInstanceId());
+        InstanceSave *save = sInstanceSaveMgr.GetInstanceSave(player->GetInstanceId());
         InstancePlayerBind *playerBind = save ? player->GetBoundInstance(save->GetMapId()) : NULL;
         if(!playerBind || !playerBind->perm)
             player->m_InstanceValid = false;
