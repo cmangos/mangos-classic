@@ -835,6 +835,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     if (!unit)
         return;
 
+    // Get original caster (if exist) and calculate damage/healing from him data
+    Unit *real_caster = GetAffectiveCaster();
+
     SpellMissInfo missInfo = target->missCondition;
     // Need init unitTarget by default unit (can changed in code on reflect)
     // Or on missInfo!=SPELL_MISS_NONE unitTarget undefined (but need in trigger subsystem)
@@ -853,22 +856,20 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         doTriggers(missInfo);
 
     // Call scripted function for AI if this spell is casted upon a creature
-    if(unit->GetTypeId() == TYPEID_UNIT)
+    if (unit->GetTypeId() == TYPEID_UNIT)
     {
         // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
         // ignore pets or autorepeat/melee casts for speed (not exist quest for spells (hm... )
-        if( !((Creature*)unit)->isPet() && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive() )
-        {
-            if ( Player* p = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself() )
+        if (real_caster && !((Creature*)unit)->isPet() && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive())
+            if (Player* p = real_caster->GetCharmerOrOwnerPlayerOrPlayerItself())
                 p->CastedCreatureOrGO(unit->GetEntry(), unit->GetGUID(), m_spellInfo->Id);
-        }
 
         if(((Creature*)unit)->AI())
             ((Creature*)unit)->AI()->SpellHit(m_caster, m_spellInfo);
     }
 
     // Call scripted function for AI if this spell is casted by a creature
-    if(m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
+    if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
         ((Creature*)m_caster)->AI()->SpellHitTarget(unit, m_spellInfo);
 }
 
@@ -878,19 +879,18 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         return;
 
     Unit* realCaster = GetAffectiveCaster();
-    if (!realCaster)
-        return;
 
     // Recheck immune (only for delayed spells)
     if (m_spellInfo->speed && (
         unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo),true) ||
         unit->IsImmunedToSpell(m_spellInfo,true)))
     {
-        realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
+        if (realCaster)
+            realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
         return;
     }
 
-    if (realCaster != unit)
+    if (realCaster && realCaster != unit)
     {
         // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
         if (m_spellInfo->speed > 0.0f &&
@@ -982,8 +982,9 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                 // Get multiplier
                 float multiplier = m_spellInfo->DmgMultiplier[effectNumber];
                 // Apply multiplier mods
-                if(Player* modOwner = realCaster->GetSpellModOwner())
-                    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_EFFECT_PAST_FIRST, multiplier, this);
+                if (realCaster)
+                    if(Player* modOwner = realCaster->GetSpellModOwner())
+                        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_EFFECT_PAST_FIRST, multiplier, this);
                 m_damageMultipliers[effectNumber] *= multiplier;
             }
         }
