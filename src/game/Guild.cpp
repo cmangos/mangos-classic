@@ -281,10 +281,10 @@ bool Guild::LoadRanksFromDB(uint32 GuildId)
 
     bool broken_ranks = false;
 
-    //GUILD RANKS are sequence starting from 0 = GUILD_MASTER (ALL PRIVILEGES) to max 9 (lowest privileges)
-    //the lower rank id is considered higher rank - so promotion does rank-- and demotion does rank++
-    //between ranks in sequence cannot be gaps - so 0,1,2,4 cannot be
-    //min ranks count is 5 and max is 10.
+    // GUILD RANKS are sequence starting from 0 = GUILD_MASTER (ALL PRIVILEGES) to max 9 (lowest privileges)
+    // the lower rank id is considered higher rank - so promotion does rank-- and demotion does rank++
+    // between ranks in sequence cannot be gaps - so 0,1,2,4 cannot be
+    // min ranks count is 5 and max is 10.
 
     do
     {
@@ -346,9 +346,9 @@ bool Guild::LoadMembersFromDB(uint32 GuildId)
     {
         Field *fields = result->Fetch();
         MemberSlot newmember;
-        uint64 guid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
+        uint64 guid      = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
         newmember.RankId = fields[1].GetUInt32();
-        //don't allow member to have not existing rank!
+        // don't allow member to have not existing rank!
         if (newmember.RankId >= m_Ranks.size())
             newmember.RankId = GetLowestRank();
 
@@ -361,7 +361,7 @@ bool Guild::LoadMembersFromDB(uint32 GuildId)
         newmember.ZoneId                = fields[7].GetUInt32();
         newmember.LogoutTime            = fields[8].GetUInt64();
 
-        //this code will remove unexisting character guids from guild
+        // this code will remove not existing character guids from guild
         if (newmember.Level < 1 || newmember.Level > STRONG_MAX_LEVEL) // can be at broken `data` field
         {
             sLog.outError("Player (GUID: %u) has a broken data in field `characters`.`data`, deleting him from guild!",GUID_LOPART(guid));
@@ -418,8 +418,8 @@ void Guild::SetLeader(uint64 guid)
 
 void Guild::DelMember(uint64 guid, bool isDisbanding)
 {
-    //guild master can be deleted when loading guild and guid doesn't exist in characters table
-    //or when he is removed from guild by gm command
+    // guild master can be deleted when loading guild and guid doesn't exist in characters table
+    // or when he is removed from guild by gm command
     if (m_LeaderGuid == guid && !isDisbanding)
     {
         MemberSlot* oldLeader = NULL;
@@ -454,21 +454,10 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
         // when leader non-exist (at guild load with deleted leader only) not send broadcasts
         if (oldLeader)
         {
-            WorldPacket data(SMSG_GUILD_EVENT, (1+1+(oldLeader->Name).size()+1+(best->Name).size()+1));
-            data << (uint8)GE_LEADER_CHANGED;
-            data << (uint8)2;
-            data << oldLeader->Name;
-            data << best->Name;
-            BroadcastPacket(&data);
+            BroadcastEvent(GE_LEADER_CHANGED, 0, 2, oldLeader->Name, best->Name, "");
 
-            data.Initialize(SMSG_GUILD_EVENT, (1+1+(oldLeader->Name).size()+1));
-            data << (uint8)GE_LEFT;
-            data << (uint8)1;
-            data << oldLeader->Name;
-            BroadcastPacket(&data);
+            BroadcastEvent(GE_LEFT, guid, 1, oldLeader->Name, "", "");
         }
-
-        sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
     }
 
     members.erase(GUID_LOPART(guid));
@@ -661,9 +650,7 @@ int32 Guild::GetRank(uint32 LowGuid)
 
 void Guild::Disband()
 {
-    WorldPacket data(SMSG_GUILD_EVENT, 1);
-    data << (uint8)GE_DISBANDED;
-    BroadcastPacket(&data);
+    BroadcastEvent(GE_DISBANDED, 0, 0, "", "", "");
 
     while (!members.empty())
     {
@@ -684,11 +671,11 @@ void Guild::Roster(WorldSession *session /*= NULL*/)
 {
                                                             // we can only guess size
     WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+4+m_Ranks.size()*4+members.size()*50));
-    data << (uint32)members.size();
+    data << uint32(members.size());
     data << MOTD;
     data << GINFO;
 
-    data << (uint32)m_Ranks.size();
+    data << uint32(m_Ranks.size());
     for (RankList::const_iterator ritr = m_Ranks.begin(); ritr != m_Ranks.end(); ++ritr)
         data << uint32(ritr->Rights);
 
@@ -731,7 +718,7 @@ void Guild::Query(WorldSession *session)
 {
     WorldPacket data(SMSG_GUILD_QUERY_RESPONSE, (8*32+200));// we can only guess size
 
-    data << m_Id;
+    data << uint32(m_Id);
     data << m_Name;
 
     for (size_t i = 0 ; i < 10; ++i)                        // show always 10 ranks
@@ -739,7 +726,7 @@ void Guild::Query(WorldSession *session)
         if (i < m_Ranks.size())
             data << m_Ranks[i].Name;
         else
-            data << (uint8)0;                               // null string
+            data << uint8(0);                               // null string
     }
 
     data << uint32(m_EmblemStyle);
@@ -884,4 +871,36 @@ void Guild::LogGuildEvent(uint8 EventType, uint32 PlayerGuid1, uint32 PlayerGuid
     CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid='%u' AND LogGuid='%u'", m_Id, m_GuildEventLogNextGuid);
     CharacterDatabase.PExecute("INSERT INTO guild_eventlog (guildid, LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp) VALUES ('%u','%u','%u','%u','%u','%u','" UI64FMTD "')",
         m_Id, m_GuildEventLogNextGuid, uint32(NewEvent.EventType), NewEvent.PlayerGuid1, NewEvent.PlayerGuid2, uint32(NewEvent.NewRank), NewEvent.TimeStamp);
+}
+
+void Guild::BroadcastEvent(GuildEvents event, uint64 guid, uint8 strCount, std::string str1, std::string str2, std::string str3)
+{
+    WorldPacket data(SMSG_GUILD_EVENT, 1+1+(guid ? 8 : 0));
+    data << uint8(event);
+    data << uint8(strCount);
+
+    switch(strCount)
+    {
+    case 0:
+        break;
+    case 1:
+        data << str1;
+        break;
+    case 2:
+        data << str1 << str2;
+        break;
+    case 3:
+        data << str1 << str2 << str3;
+        break;
+    default:
+        sLog.outError("Guild::BroadcastEvent: incorrect strings count %u!", strCount);
+        break;
+    }
+
+    if(guid)
+        data << uint64(guid);
+
+    BroadcastPacket(&data);
+
+    sLog.outDebug("WORLD: Sent SMSG_GUILD_EVENT");
 }
