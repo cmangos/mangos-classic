@@ -4889,7 +4889,7 @@ bool Spell::CheckTargetCreatureType(Unit* target) const
     uint32 spellCreatureTargetMask = m_spellInfo->TargetCreatureType;
 
     // Curse of Doom : not find another way to fix spell target check :/
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags == UI64LIT(0x0200000000))
+    if (m_spellInfo->Id == 603)                             // in 1.12 "Curse of doom" have only 1 rank.
     {
         // not allow cast at player
         if(target->GetTypeId() == TYPEID_PLAYER)
