@@ -195,7 +195,7 @@ template<>
 void ChaseMovementGenerator<Creature>::Initialize(Creature &owner)
 {
     owner.addUnitState(UNIT_STAT_CHASE|UNIT_STAT_CHASE_MOVE);
-    owner.RemoveMonsterMoveFlag(MONSTER_MOVE_WALK);
+    owner.RemoveSplineFlag(SPLINEFLAG_WALKMODE);
 
     _setTargetLocation(owner);
 }

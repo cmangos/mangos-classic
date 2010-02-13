@@ -556,60 +556,71 @@ enum NPCFlags
     UNIT_NPC_FLAG_OUTDOORPVP            = 0x20000000,       // custom flag for outdoor pvp creatures || Custom flag
 };
 
-// used in SMSG_MONSTER_MOVE
-// only some values known as correct for 2.4.3
-enum MonsterMovementFlags
-{
-    MONSTER_MOVE_NONE           = 0x00000000,
-    MONSTER_MOVE_WALK           = 0x00000100,
-    MONSTER_MOVE_LEVITATING     = 0x00000400,
-    MONSTER_MOVE_FLY            = 0x02000000,               // swimming/flying (depends on mob?)
-    MONSTER_MOVE_SPLINE         = 0x00002000,               // spline n*(float x,y,z)
-
-    // masks
-    MONSTER_MOVE_SPLINE_FLY     = 0x00000300,               // fly by points
-};
-
 // [-ZERO] Need check and update
 // used in most movement packets (send and received)
 enum MovementFlags
 {
-    MOVEFLAG_NONE           = 0x00000000,
-    MOVEFLAG_FORWARD        = 0x00000001,
-    MOVEFLAG_BACKWARD       = 0x00000002,
-    MOVEFLAG_STRAFE_LEFT    = 0x00000004,
-    MOVEFLAG_STRAFE_RIGHT   = 0x00000008,
-    MOVEFLAG_LEFT           = 0x00000010,
-    MOVEFLAG_RIGHT          = 0x00000020,
-    MOVEFLAG_PITCH_UP       = 0x00000040,
-    MOVEFLAG_PITCH_DOWN     = 0x00000080,
-    MOVEFLAG_WALK_MODE      = 0x00000100,                   // Walking
-    MOVEFLAG_LEVITATING     = 0x00000400,
-    MOVEFLAG_FLY_UNK1       = 0x00000800,                   // [-ZERO] is it really need and correct value
-    MOVEFLAG_JUMPING        = 0x00002000,
-    MOVEFLAG_FALLING        = 0x00004000,
-    MOVEFLAG_SWIMMING       = 0x00200000,                   // appears with fly flag also
-    MOVEFLAG_FLY_UP         = 0x00400000,                   // [-ZERO] is it really need and correct value
-    MOVEFLAG_CAN_FLY        = 0x00800000,                   // [-ZERO] is it really need and correct value
-    MOVEFLAG_FLYING         = 0x01000000,                   // [-ZERO] is it really need and correct value
-    MOVEFLAG_ONTRANSPORT    = 0x02000000,                   // Used for flying on some creatures
-    MOVEFLAG_SPLINE         = 0x04000000,                   // used for flight paths
-    MOVEFLAG_SPLINE2        = 0x08000000,                   // used for flight paths
-    MOVEFLAG_WATERWALKING   = 0x10000000,                   // prevent unit from falling through water
-    MOVEFLAG_SAFE_FALL      = 0x20000000,                   // active rogue safe fall spell (passive)
-    MOVEFLAG_UNK3           = 0x40000000
+    MOVEFLAG_NONE               = 0x00000000,
+    MOVEFLAG_FORWARD            = 0x00000001,
+    MOVEFLAG_BACKWARD           = 0x00000002,
+    MOVEFLAG_STRAFE_LEFT        = 0x00000004,
+    MOVEFLAG_STRAFE_RIGHT       = 0x00000008,
+    MOVEFLAG_TURN_LEFT          = 0x00000010,
+    MOVEFLAG_TURN_RIGHT         = 0x00000020,
+    MOVEFLAG_PITCH_UP           = 0x00000040,
+    MOVEFLAG_PITCH_DOWN         = 0x00000080,
+    MOVEFLAG_WALK_MODE          = 0x00000100,               // Walking
+
+    MOVEFLAG_LEVITATING         = 0x00000400,
+    MOVEFLAG_ROOT               = 0x00000800,               // [-ZERO] is it really need and correct value
+    MOVEFLAG_FALLING            = 0x00002000,
+    MOVEFLAG_FALLINGFAR         = 0x00004000,
+    MOVEFLAG_SWIMMING           = 0x00200000,               // appears with fly flag also
+    MOVEFLAG_ASCENDING          = 0x00400000,               // [-ZERO] is it really need and correct value
+    MOVEFLAG_CAN_FLY            = 0x00800000,               // [-ZERO] is it really need and correct value
+    MOVEFLAG_FLYING             = 0x01000000,               // [-ZERO] is it really need and correct value
+
+    MOVEFLAG_ONTRANSPORT        = 0x02000000,               // Used for flying on some creatures
+    MOVEFLAG_SPLINE_ELEVATION   = 0x04000000,               // used for flight paths
+    MOVEFLAG_SPLINE_ENABLED     = 0x08000000,               // used for flight paths
+    MOVEFLAG_WATERWALKING       = 0x10000000,               // prevent unit from falling through water
+    MOVEFLAG_SAFE_FALL          = 0x20000000,               // active rogue safe fall spell (passive)
+    MOVEFLAG_HOVER              = 0x40000000
 };
 
 // flags that use in movement check for example at spell casting
 MovementFlags const movementFlagsMask = MovementFlags(
-    MOVEFLAG_FORWARD |MOVEFLAG_BACKWARD  |MOVEFLAG_STRAFE_LEFT|MOVEFLAG_STRAFE_RIGHT|
-    MOVEFLAG_PITCH_UP|MOVEFLAG_PITCH_DOWN|MOVEFLAG_FLY_UNK1    |
-    MOVEFLAG_JUMPING |MOVEFLAG_FALLING   |MOVEFLAG_SPLINE
+    MOVEFLAG_FORWARD |MOVEFLAG_BACKWARD  |MOVEFLAG_STRAFE_LEFT |MOVEFLAG_STRAFE_RIGHT|
+    MOVEFLAG_PITCH_UP|MOVEFLAG_PITCH_DOWN|MOVEFLAG_ROOT        |
+    MOVEFLAG_FALLING |MOVEFLAG_FALLINGFAR|MOVEFLAG_SPLINE_ELEVATION
 );
 
 MovementFlags const movementOrTurningFlagsMask = MovementFlags(
-    movementFlagsMask | MOVEFLAG_LEFT | MOVEFLAG_RIGHT
+    movementFlagsMask | MOVEFLAG_TURN_LEFT | MOVEFLAG_TURN_RIGHT
 );
+
+// used in SMSG_MONSTER_MOVE
+// only some values known as correct for 2.4.3
+enum SplineFlags
+{
+    SPLINEFLAG_NONE           = 0x00000000,
+    SPLINEFLAG_WALKMODE       = 0x00000100,
+    SPLINEFLAG_LEVITATING     = 0x00000400,
+    SPLINEFLAG_UNKNOWN7       = 0x02000000,               // swimming/flying (depends on mob?)
+    SPLINEFLAG_SPLINE         = 0x00002000,               // spline n*(float x,y,z)
+
+    // masks
+    SPLINEFLAG_SPLINE_FLY     = 0x00000300,               // fly by points
+};
+
+enum SplineType
+{
+    SPLINETYPE_NORMAL       = 0,
+    SPLINETYPE_STOP         = 1,
+    SPLINETYPE_FACINGSPOT   = 2,
+    SPLINETYPE_FACINGTARGET = 3,
+    SPLINETYPE_FACINGANGLE  = 4
+};
 
 struct Position
 {
@@ -1159,8 +1170,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void NearTeleportTo(float x, float y, float z, float orientation, bool casting = false);
 
-        void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, MonsterMovementFlags flags, uint32 Time, Player* player = NULL);
-        void SendMonsterMoveByPath(Path const& path, uint32 start, uint32 end, MonsterMovementFlags flags);
+        void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, SplineFlags flags, uint32 Time, Player* player = NULL);
+        void SendMonsterMoveByPath(Path const& path, uint32 start, uint32 end, SplineFlags flags);
 
         void BuildHeartBeatMsg( WorldPacket *data ) const;
 

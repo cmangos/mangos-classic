@@ -142,6 +142,7 @@ bool WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint3
 
             creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
 
+            // Now we re-set destination to same node and start travel
             const WaypointNode &node = i_path->at(i_currentNode);
             i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
             i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
@@ -285,7 +286,7 @@ void FlightPathMovementGenerator::Initialize(Player &player)
     // do not send movement, it was sent already
     i_destinationHolder.SetDestination(traveller, i_path[i_currentNode].x, i_path[i_currentNode].y, i_path[i_currentNode].z, false);
 
-    player.SendMonsterMoveByPath(GetPath(),GetCurrentNode(),GetPathAtMapEnd(),MONSTER_MOVE_SPLINE_FLY);
+    player.SendMonsterMoveByPath(GetPath(),GetCurrentNode(),GetPathAtMapEnd(),SPLINEFLAG_SPLINE_FLY);
 }
 
 void FlightPathMovementGenerator::Finalize(Player & player)
