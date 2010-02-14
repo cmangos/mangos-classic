@@ -522,7 +522,7 @@ void GameObject::SaveToDB(uint32 mapid)
     data.rotation1 = GetFloatValue(GAMEOBJECT_ROTATION+1);
     data.rotation2 = GetFloatValue(GAMEOBJECT_ROTATION+2);
     data.rotation3 = GetFloatValue(GAMEOBJECT_ROTATION+3);
-    data.spawntimesecs = m_spawnedByDefault ? m_respawnDelayTime : -(int32)m_respawnDelayTime;
+    data.spawntimesecs = m_spawnedByDefault ? (int32)m_respawnDelayTime : -(int32)m_respawnDelayTime;
     data.animprogress = GetGoAnimProgress();
     data.go_state = GetGoState();
 
@@ -929,7 +929,7 @@ void GameObject::Use(Unit* user)
 
                 // the object orientation + 1/2 pi
                 // every slot will be on that straight line
-                float orthogonalOrientation = GetOrientation()+M_PI*0.5f;
+                float orthogonalOrientation = GetOrientation()+M_PI_F*0.5f;
                 // find nearest slot
                 for(uint32 i=0; i<info->chair.slots; ++i)
                 {

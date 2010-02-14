@@ -396,7 +396,7 @@ void BattleGroundAV::EndBattleGround(uint32 winner)
     BattleGround::EndBattleGround(winner);
 }
 
-void BattleGroundAV::RemovePlayer(Player* plr,uint64 /*guid*/)
+void BattleGroundAV::RemovePlayer(Player* /*plr*/,uint64 /*guid*/)
 {
 }
 

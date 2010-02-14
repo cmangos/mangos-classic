@@ -517,7 +517,7 @@ void InstanceSaveManager::Update()
         {
             // global reset/warning for a certain map
             time_t resetTime = GetResetTimeFor(event.mapid);
-            _ResetOrWarnAll(event.mapid, event.type != 4, resetTime - now);
+            _ResetOrWarnAll(event.mapid, event.type != 4, uint32(resetTime - now));
             if(event.type != 4)
             {
                 // schedule the next warning/reset
@@ -575,7 +575,8 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeLe
     Map const *map = sMapMgr.CreateBaseMap(mapid);
     if(!map->Instanceable())
         return;
-    uint64 now = (uint64)time(NULL);
+
+    time_t now = time(NULL);
 
     if(!warn)
     {
@@ -606,9 +607,9 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeLe
         // calculate the next reset time
         uint32 diff = sWorld.getConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
         uint32 period = temp->reset_delay * DAY;
-        uint64 next_reset = ((now + timeLeft + MINUTE) / DAY * DAY) + period + diff;
+        time_t next_reset = ((now + timeLeft + MINUTE) / DAY * DAY) + period + diff;
         // update it in the DB
-        CharacterDatabase.PExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%d'", next_reset, mapid);
+        CharacterDatabase.PExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%d'", (uint64)next_reset, mapid);
     }
 
     MapInstanced::InstancedMaps &instMaps = ((MapInstanced*)map)->GetInstancedMaps();
@@ -616,9 +617,13 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeLe
     for(mitr = instMaps.begin(); mitr != instMaps.end(); ++mitr)
     {
         Map *map2 = mitr->second;
-        if(!map2->IsDungeon()) continue;
-        if(warn) ((InstanceMap*)map2)->SendResetWarnings(timeLeft);
-        else ((InstanceMap*)map2)->Reset(INSTANCE_RESET_GLOBAL);
+        if (!map2->IsDungeon())
+            continue;
+
+        if (warn)
+            ((InstanceMap*)map2)->SendResetWarnings(timeLeft);
+        else
+            ((InstanceMap*)map2)->Reset(INSTANCE_RESET_GLOBAL);
     }
 
     // TODO: delete creature/gameobject respawn times even if the maps are not loaded

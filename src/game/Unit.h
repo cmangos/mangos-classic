@@ -656,7 +656,7 @@ class MovementInfo
             t_pos.x = x;
             t_pos.y = y;
             t_pos.z = z;
-            t_pos.o = z;
+            t_pos.o = o;
             t_time = time;
         }
         uint64 GetTransportGuid() const { return t_guid; }
