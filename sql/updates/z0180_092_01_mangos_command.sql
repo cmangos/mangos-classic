@@ -1,4 +1,4 @@
-ALTER TABLE db_version CHANGE COLUMN required_z0144_xxx_01_mangos_player_classlevelstats required_z0180_092_01_mangos_command  BIT;
+ALTER TABLE db_version CHANGE COLUMN required_z0155_xxx_01_mangos_creature_template required_z0180_092_01_mangos_command  BIT;
 
 DELETE FROM command WHERE name IN ('modify fly', 'npc say', 'npc yell');
 INSERT INTO command VALUES
