@@ -256,6 +256,8 @@ Unit::Unit()
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
         m_currentSpells[i] = NULL;
 
+    m_castCounter = 0;
+
     m_addDmgOnce = 0;
 
     for(int i = 0; i < MAX_TOTEM; ++i)
@@ -10388,4 +10390,15 @@ void Unit::StopAttackFaction(uint32 faction_id)
     getHostileRefManager().deleteReferencesForFaction(faction_id);
 
     CallForAllControlledUnits(StopAttackFactionHelper(faction_id),false,true,true);
+}
+
+bool Unit::CheckAndIncreaseCastCounter()
+{
+    uint32 maxCasts = sWorld.getConfig(CONFIG_MAX_SPELL_CASTS_IN_CHAIN);
+
+    if (maxCasts && m_castCounter >= maxCasts)
+        return false;
+
+    ++m_castCounter;
+    return true;
 }
