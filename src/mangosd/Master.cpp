@@ -119,7 +119,7 @@ public:
 
     RARunnable ()
     {
-        uint32 socketSelecttime = sWorld.getConfig (CONFIG_SOCKET_SELECTTIME);
+        uint32 socketSelecttime = sWorld.getConfig (CONFIG_UINT32_SOCKET_SELECTTIME);
         numLoops = (sConfig.GetIntDefault ("MaxPingTime", 30) * (MINUTE * 1000000 / socketSelecttime));
         loopCounter = 0;
     }
@@ -163,7 +163,7 @@ public:
         }
 
         // Socket Selet time is in microseconds , not miliseconds!!
-        uint32 socketSelecttime = sWorld.getConfig (CONFIG_SOCKET_SELECTTIME);
+        uint32 socketSelecttime = sWorld.getConfig (CONFIG_UINT32_SOCKET_SELECTTIME);
 
         // if use ra spend time waiting for io, if not use ra ,just sleep
         if (usera)
@@ -292,7 +292,7 @@ int Master::Run()
     uint32 realCurrTime, realPrevTime;
     realCurrTime = realPrevTime = getMSTime();
 
-    uint32 socketSelecttime = sWorld.getConfig(CONFIG_SOCKET_SELECTTIME);
+    uint32 socketSelecttime = sWorld.getConfig(CONFIG_UINT32_SOCKET_SELECTTIME);
 
     // maximum counter for next ping
     uint32 numLoops = (sConfig.GetIntDefault( "MaxPingTime", 30 ) * (MINUTE * 1000000 / socketSelecttime));
@@ -309,7 +309,7 @@ int Master::Run()
     }
 
     ///- Launch the world listener socket
-    port_t wsport = sWorld.getConfig (CONFIG_PORT_WORLD);
+    port_t wsport = sWorld.getConfig (CONFIG_UINT32_PORT_WORLD);
     std::string bind_ip = sConfig.GetStringDefault ("BindIP", "0.0.0.0");
 
     if (sWorldSocketMgr->StartNetwork (wsport, bind_ip.c_str ()) == -1)

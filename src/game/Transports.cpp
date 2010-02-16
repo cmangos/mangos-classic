@@ -43,7 +43,7 @@ void MapManager::LoadTransports()
         return;
     }
 
-    barGoLink bar( result->GetRowCount() );
+    barGoLink bar( (int)result->GetRowCount() );
 
     do
     {

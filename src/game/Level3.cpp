@@ -2106,7 +2106,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
                 item_guid,owner_name.c_str(),owner_guid,owner_acc,item_pos);
         } while (result->NextRow());
 
-        int64 res_count = result->GetRowCount();
+        int res_count = (int)result->GetRowCount();
 
         delete result;
 
@@ -2156,7 +2156,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
                 item_guid,item_s_name.c_str(),item_s,item_s_acc,item_r_name.c_str(),item_r,item_r_acc,item_pos);
         } while (result->NextRow());
 
-        int64 res_count = result->GetRowCount();
+        int res_count = (int)result->GetRowCount();
 
         delete result;
 
@@ -3859,7 +3859,7 @@ bool ChatHandler::HandleChangeWeather(const char* args)
         return false;
 
     //Weather is OFF
-    if (!sWorld.getConfig(CONFIG_WEATHER))
+    if (!sWorld.getConfig(CONFIG_BOOL_WEATHER))
     {
         SendSysMessage(LANG_WEATHER_DISABLED);
         SetSentErrorMessage(true);
@@ -4135,7 +4135,7 @@ bool ChatHandler::HandleResetLevelCommand(const char * args)
         return false;
 
     // set starting level
-    uint32 start_level = sWorld.getConfig(CONFIG_START_PLAYER_LEVEL);
+    uint32 start_level = sWorld.getConfig(CONFIG_UINT32_START_PLAYER_LEVEL);
 
     target->SetLevel(start_level);
     target->InitStatsForLevel(true);

@@ -47,7 +47,7 @@ void GMTicketMgr::LoadGMTickets()
         return;
     }
 
-    barGoLink bar( result->GetRowCount() );
+    barGoLink bar( (int)result->GetRowCount() );
 
     uint32 count = 0;
 
