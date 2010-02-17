@@ -33,7 +33,6 @@
 #include "ScriptCalls.h"
 #include "Group.h"
 #include "MapRefManager.h"
-#include "MovementGenerator.h"
 
 #include "MapInstanced.h"
 #include "InstanceSaveMgr.h"
@@ -836,11 +835,6 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
 void
 Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang)
 {
-    // Creature relocation acts like instant movement generator, so current generator expects interrupt/reset calls to react properly
-    if (!creature->GetMotionMaster()->empty())
-        if (MovementGenerator *movgen = creature->GetMotionMaster()->top())
-            movgen->Interrupt(*creature);
-
     assert(CheckGridIntegrity(creature,false));
 
     Cell old_cell = creature->GetCurrentCell();
@@ -865,12 +859,6 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
     }
 
     assert(CheckGridIntegrity(creature,true));
-
-    // finished relocation, movegen can different from top before creature relocation,
-    // but apply Reset expected to be safe in any case
-    if (!creature->GetMotionMaster()->empty())
-        if (MovementGenerator *movgen = creature->GetMotionMaster()->top())
-            movgen->Reset(*creature);
 }
 
 void Map::AddCreatureToMoveList(Creature *c, float x, float y, float z, float ang)
