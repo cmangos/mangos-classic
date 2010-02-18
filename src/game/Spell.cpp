@@ -976,7 +976,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     {
         if (effectMask & (1 << effectNumber))
         {
-            HandleEffects(unit, NULL, NULL, effectNumber, m_damageMultipliers[effectNumber]);
+            HandleEffects(unit, NULL, NULL, SpellEffectIndex(effectNumber), m_damageMultipliers[effectNumber]);
             if ( m_applyMultiplierMask & (1 << effectNumber) )
             {
                 // Get multiplier
@@ -1007,7 +1007,7 @@ void Spell::DoAllEffectOnTarget(GOTargetInfo *target)
 
     for(int effectNumber = 0; effectNumber < MAX_EFFECT_INDEX; ++effectNumber)
         if (effectMask & (1 << effectNumber))
-            HandleEffects(NULL, NULL, go, effectNumber);
+            HandleEffects(NULL, NULL, go, SpellEffectIndex(effectNumber));
 
     // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
     // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
@@ -1026,7 +1026,7 @@ void Spell::DoAllEffectOnTarget(ItemTargetInfo *target)
 
     for(int effectNumber = 0; effectNumber < MAX_EFFECT_INDEX; ++effectNumber)
         if (effectMask & (1 << effectNumber))
-            HandleEffects(NULL, target->item, NULL, effectNumber);
+            HandleEffects(NULL, target->item, NULL, SpellEffectIndex(effectNumber));
 }
 
 bool Spell::IsAliveUnitPresentInTargetList()
@@ -2264,7 +2264,7 @@ void Spell::_handle_immediate_phase()
         // apply Send Event effect to ground in case empty target lists
         if( m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT && !HaveTargetsForEffect(j) )
         {
-            HandleEffects(NULL, NULL, NULL, j);
+            HandleEffects(NULL, NULL, NULL, SpellEffectIndex(j));
             continue;
         }
 
@@ -2297,7 +2297,7 @@ void Spell::_handle_immediate_phase()
     {
         // persistent area auras target only the ground
         if(m_spellInfo->Effect[j] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
-            HandleEffects(NULL, NULL, NULL, j);
+            HandleEffects(NULL, NULL, NULL, SpellEffectIndex(j));
     }
 }
 
@@ -3071,7 +3071,7 @@ void Spell::HandleThreatSpells(uint32 spellId)
     DEBUG_LOG("Spell %u, rank %u, added an additional %i threat", spellId, sSpellMgr.GetSpellRank(spellId), threat);
 }
 
-void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i, float DamageMultiplier)
+void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,SpellEffectIndex i, float DamageMultiplier)
 {
     unitTarget = pUnitTarget;
     itemTarget = pItemTarget;
