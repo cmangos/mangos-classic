@@ -36,6 +36,7 @@
 #include "BattleGround.h"
 #include "BattleGroundAV.h"
 #include "Util.h"
+#include "ScriptCalls.h"
 
 GameObject::GameObject() : WorldObject()
 {
@@ -871,6 +872,10 @@ void GameObject::Use(Unit* user)
     // by default spell caster is user
     Unit* spellCaster = user;
     uint32 spellId = 0;
+    bool triggered = false;
+
+    if (user->GetTypeId() == TYPEID_PLAYER && Script->GOHello((Player*)user, this))
+        return;
 
     switch(GetGoType())
     {
@@ -969,6 +974,15 @@ void GameObject::Use(Unit* user)
             player->SetStandState(UNIT_STAND_STATE_SIT_LOW_CHAIR+info->chair.height);
             return;
         }
+        case GAMEOBJECT_TYPE_SPELL_FOCUS:
+        {
+            // triggering linked GO
+            if (uint32 trapEntry = GetGOInfo()->spellFocus.linkedTrapId)
+                TriggeringLinkedGameObject(trapEntry, user);
+
+            // some may be activated in addition? Conditions for this? (ex: entry 181616)
+            break;
+        }
         //big gun, its a spell/aura
         case GAMEOBJECT_TYPE_GOOBER:                        //10
         {
@@ -986,12 +1000,38 @@ void GameObject::Use(Unit* user)
                     player->GetSession()->SendPacket(&data);
                 }
 
-                // possible quest objective for active quests
-                player->CastedCreatureOrGO(info->id, GetGUID(), 0);
-
                 if (info->goober.eventId)
+                {
+                    sLog.outDebug("Goober ScriptStart id %u for GO entry %u (GUID %u).", info->goober.eventId, GetEntry(), GetDBTableGUIDLow());
                     sWorld.ScriptsStart(sEventScripts, info->goober.eventId, player, this);
+                }
+
+                // possible quest objective for active quests
+                if (info->goober.questId && sObjectMgr.GetQuestTemplate(info->goober.questId))
+                {
+                    //Quest require to be active for GO using
+                    if (player->GetQuestStatus(info->goober.questId) != QUEST_STATUS_INCOMPLETE)
+                        break;
+                }
+
+                player->CastedCreatureOrGO(info->id, GetGUID(), 0);
             }
+
+            if (uint32 trapEntry = info->goober.linkedTrapId)
+                TriggeringLinkedGameObject(trapEntry, user);
+
+            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+            SetLootState(GO_ACTIVATED);
+
+            uint32 time_to_restore = info->GetAutoCloseTime();
+
+            // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
+            if (time_to_restore && info->goober.customAnim)
+                SendGameObjectCustomAnim(GetGUID());
+            else
+                SetGoState(GO_STATE_ACTIVE);
+
+            m_cooldownTime = time(NULL) + time_to_restore;
 
             // cast this spell later if provided
             spellId = info->goober.spellId;
