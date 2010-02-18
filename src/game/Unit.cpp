@@ -2795,7 +2795,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     // Chance resist mechanic (select max value from every mechanic spell effect)
     int32 resist_mech = 0;
     // Get effects mechanic and chance
-    for(int eff = 0; eff < 3; ++eff)
+    for(int eff = 0; eff < MAX_EFFECT_INDEX; ++eff)
     {
         int32 effect_mech = GetEffectMechanic(spell, eff);
         if (effect_mech)
@@ -3805,12 +3805,12 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 
         bool is_triggered_by_spell = false;
         // prevent triggering aura of removing aura that triggered it
-        for(int j = 0; j < 3; ++j)
+        for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
             if (i_spellProto->EffectTriggerSpell[j] == spellId)
                 is_triggered_by_spell = true;
 
         // prevent triggered aura of removing aura that triggering it (triggered effect early some aura of parent spell
-        for(int j = 0; j < 3; ++j)
+        for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
             if (spellProto->EffectTriggerSpell[j] == i_spellId)
                 is_triggered_by_spell = true;
         if (is_triggered_by_spell) continue;
@@ -4075,13 +4075,13 @@ void Unit::RemoveSingleAuraByCasterSpell(uint32 spellId, uint32 effindex, uint64
 
 void Unit::RemoveAurasDueToSpell(uint32 spellId, Aura* except)
 {
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         RemoveAura(spellId,i,except);
 }
 
 void Unit::RemoveAurasDueToItemSpell(Item* castItem,uint32 spellId)
 {
-    for (int k=0; k < 3; ++k)
+    for (int k=0; k < MAX_EFFECT_INDEX; ++k)
     {
         spellEffectPair spair = spellEffectPair(spellId, k);
         for (AuraMap::iterator iter = m_Auras.lower_bound(spair); iter != m_Auras.upper_bound(spair);)
@@ -4291,7 +4291,7 @@ Aura* Unit::GetAura(AuraType type, uint32 family, uint64 familyFlag, uint64 cast
 
 bool Unit::HasAura(uint32 spellId) const
 {
-    for (int i = 0; i < 3 ; ++i)
+    for (int i = 0; i < MAX_EFFECT_INDEX ; ++i)
     {
         AuraMap::const_iterator iter = m_Auras.find(spellEffectPair(spellId, i));
         if (iter != m_Auras.end())
@@ -7145,7 +7145,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );
 
         // 0% bonus for damage and healing spells for leech spells from healing bonus
-        for(int j = 0; j < 3; ++j)
+        for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
             if( spellProto->Effect[j] == SPELL_EFFECT_HEALTH_LEECH ||
                 spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH )

@@ -494,24 +494,24 @@ struct SpellEntry
     int32     EquippedItemClass;                            // 58 (value)
     int32     EquippedItemSubClassMask;                     // 59 (mask)
     int32     EquippedItemInventoryTypeMask;                // 60 (mask)
-    uint32    Effect[3];                                    // 61-63
-    int32     EffectDieSides[3];                            // 64-66
-    uint32    EffectBaseDice[3];                            // 67-69
-    float     EffectDicePerLevel[3];                        // 70-72
-    float     EffectRealPointsPerLevel[3];                  // 73-75
-    int32     EffectBasePoints[3];                          // 76-78 (don't must be used in spell/auras explicitly, must be used cached Spell::m_currentBasePoints)
-    uint32    EffectMechanic[3];                            // 79-81
-    uint32    EffectImplicitTargetA[3];                     // 82-84
-    uint32    EffectImplicitTargetB[3];                     // 85-87
-    uint32    EffectRadiusIndex[3];                         // 88-90 - spellradius.dbc
-    uint32    EffectApplyAuraName[3];                       // 91-93
-    uint32    EffectAmplitude[3];                           // 94-96
-    float     EffectMultipleValue[3];                       // 97-99
-    uint32    EffectChainTarget[3];                         // 100-102
-    uint32    EffectItemType[3];                            // 103-105
-    int32     EffectMiscValue[3];                           // 106-108
-    uint32    EffectTriggerSpell[3];                        // 109-111
-    float     EffectPointsPerComboPoint[3];                 // 112-114
+    uint32    Effect[MAX_EFFECT_INDEX];                     // 61-63
+    int32     EffectDieSides[MAX_EFFECT_INDEX];             // 64-66
+    uint32    EffectBaseDice[MAX_EFFECT_INDEX];             // 67-69
+    float     EffectDicePerLevel[MAX_EFFECT_INDEX];         // 70-72
+    float     EffectRealPointsPerLevel[MAX_EFFECT_INDEX];   // 73-75
+    int32     EffectBasePoints[MAX_EFFECT_INDEX];           // 76-78 (don't must be used in spell/auras explicitly, must be used cached Spell::m_currentBasePoints)
+    uint32    EffectMechanic[MAX_EFFECT_INDEX];             // 79-81
+    uint32    EffectImplicitTargetA[MAX_EFFECT_INDEX];      // 82-84
+    uint32    EffectImplicitTargetB[MAX_EFFECT_INDEX];      // 85-87
+    uint32    EffectRadiusIndex[MAX_EFFECT_INDEX];          // 88-90 - spellradius.dbc
+    uint32    EffectApplyAuraName[MAX_EFFECT_INDEX];        // 91-93
+    uint32    EffectAmplitude[MAX_EFFECT_INDEX];            // 94-96
+    float     EffectMultipleValue[MAX_EFFECT_INDEX];        // 97-99
+    uint32    EffectChainTarget[MAX_EFFECT_INDEX];          // 100-102
+    uint32    EffectItemType[MAX_EFFECT_INDEX];             // 103-105
+    int32     EffectMiscValue[MAX_EFFECT_INDEX];            // 106-108
+    uint32    EffectTriggerSpell[MAX_EFFECT_INDEX];         // 109-111
+    float     EffectPointsPerComboPoint[MAX_EFFECT_INDEX];  // 112-114
     uint32    SpellVisual;                                  // 115
     //uint32    SpellVisual2                                // 116 not used
     uint32    SpellIconID;                                  // 117
@@ -535,7 +535,7 @@ struct SpellEntry
     uint32    DmgClass;                                     // 164 defenseType
     uint32    PreventionType;                               // 165
     //uint32    StanceBarOrder;                             // 166 not used
-    float     DmgMultiplier[3];                             // 167-169
+    float     DmgMultiplier[MAX_EFFECT_INDEX];              // 167-169
     //uint32    MinFactionId;                               // 170 not used, and 0 in 2.4.2
     //uint32    MinReputation;                              // 171 not used, and 0 in 2.4.2
     //uint32    RequiredAuraVision;                         // 172 not used

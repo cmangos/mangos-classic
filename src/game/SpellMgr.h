@@ -118,7 +118,7 @@ int32 GetSpellMaxDuration(SpellEntry const *spellInfo);
 
 inline bool IsSpellHaveEffect(SpellEntry const *spellInfo, SpellEffects effect)
 {
-    for(int i = 0; i < 3; ++i)
+    for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if(SpellEffects(spellInfo->Effect[i])==effect)
             return true;
     return false;
@@ -126,7 +126,7 @@ inline bool IsSpellHaveEffect(SpellEntry const *spellInfo, SpellEffects effect)
 
 inline bool IsSpellHaveAura(SpellEntry const *spellInfo, AuraType aura)
 {
-    for(int i = 0; i < 3; ++i)
+    for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if(AuraType(spellInfo->EffectApplyAuraName[i])==aura)
             return true;
     return false;
@@ -134,7 +134,7 @@ inline bool IsSpellHaveAura(SpellEntry const *spellInfo, AuraType aura)
 
 inline bool IsSpellLastAuraEffect(SpellEntry const *spellInfo, int effecIdx)
 {
-    for(int i = effecIdx+1; i < 3; ++i)
+    for(int i = effecIdx+1; i < MAX_EFFECT_INDEX; ++i)
         if(spellInfo->EffectApplyAuraName[i])
             return false;
     return true;
@@ -219,7 +219,7 @@ inline bool IsCasterSourceTarget(uint32 target)
 
 inline bool IsSpellWithCasterSourceTargetsOnly(SpellEntry const* spellInfo)
 {
-    for(int i = 0; i < 3; ++i)
+    for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         uint32 targetA = spellInfo->EffectImplicitTargetA[i];
         if(targetA && !IsCasterSourceTarget(targetA))
@@ -341,7 +341,7 @@ inline uint32 GetAllSpellMechanicMask(SpellEntry const* spellInfo)
     uint32 mask = 0;
     if (spellInfo->Mechanic)
         mask |= 1 << (spellInfo->Mechanic - 1);
-    for (int i=0; i< 3; ++i)
+    for (int i=0; i< MAX_EFFECT_INDEX; ++i)
         if (spellInfo->EffectMechanic[i])
             mask |= 1 << (spellInfo->EffectMechanic[i]-1);
     return mask;

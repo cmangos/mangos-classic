@@ -3386,7 +3386,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     // multiple weapon dmg effect workaround
     // execute only the last weapon damage
     // and handle all effects at once
-    for (uint32 j = 0; j < 3; ++j)
+    for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
     {
         switch(m_spellInfo->Effect[j])
         {
@@ -3394,7 +3394,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
             case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-                if (j < i)                                  // we must calculate only at last weapon effect
+                if (j < int(i))                             // we must calculate only at last weapon effect
                     return;
             break;
         }
@@ -3480,7 +3480,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     }
 
     int32 fixed_bonus = 0;
-    for (int j = 0; j < 3; ++j)
+    for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
     {
         switch(m_spellInfo->Effect[j])
         {
