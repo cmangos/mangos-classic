@@ -279,11 +279,11 @@ inline bool IsAreaEffectTarget( Targets target )
 
 inline bool IsAreaOfEffectSpell(SpellEntry const *spellInfo)
 {
-    if(IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[0])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[0])))
+    if(IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_0])))
         return true;
-    if(IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[1])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[1])))
+    if(IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_1])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_1])))
         return true;
-    if(IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[2])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[2])))
+    if(IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_2])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_2])))
         return true;
     return false;
 }
@@ -298,9 +298,9 @@ inline bool IsAreaAuraEffect(uint32 effect)
 
 inline bool IsDispelSpell(SpellEntry const *spellInfo)
 {
-    if (spellInfo->Effect[0] == SPELL_EFFECT_DISPEL ||
-        spellInfo->Effect[1] == SPELL_EFFECT_DISPEL ||
-        spellInfo->Effect[2] == SPELL_EFFECT_DISPEL )
+    if (spellInfo->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_DISPEL ||
+        spellInfo->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_DISPEL ||
+        spellInfo->Effect[EFFECT_INDEX_2] == SPELL_EFFECT_DISPEL )
         return true;
     return false;
 }

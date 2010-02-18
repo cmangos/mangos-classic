@@ -3727,10 +3727,10 @@ void Spell::EffectScriptEffect(uint32 effIndex)
         // PX-238 Winter Wondervolt TRAP
         case 26275:
         {
-            if( unitTarget->HasAura(26272,0)
-             || unitTarget->HasAura(26157,0)
-             || unitTarget->HasAura(26273,0)
-             || unitTarget->HasAura(26274,0))
+            if( unitTarget->HasAura(26272,EFFECT_INDEX_0)
+             || unitTarget->HasAura(26157,EFFECT_INDEX_0)
+             || unitTarget->HasAura(26273,EFFECT_INDEX_0)
+             || unitTarget->HasAura(26274,EFFECT_INDEX_0))
                 return;
 
             uint32 iTmpSpellId;
