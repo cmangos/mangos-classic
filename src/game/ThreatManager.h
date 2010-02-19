@@ -127,10 +127,12 @@ class MANGOS_DLL_SPEC HostileReference : public Reference<Unit, ThreatManager>
 //==============================================================
 class ThreatManager;
 
+typedef std::list<HostileReference*> ThreatList;
+
 class MANGOS_DLL_SPEC ThreatContainer
 {
     private:
-        std::list<HostileReference*> iThreatList;
+        ThreatList iThreatList;
         bool iDirty;
     protected:
         friend class ThreatManager;
@@ -160,7 +162,7 @@ class MANGOS_DLL_SPEC ThreatContainer
 
         HostileReference* getReferenceByTarget(Unit* pVictim);
 
-        std::list<HostileReference*>& getThreatList() { return iThreatList; }
+        ThreatList& getThreatList() { return iThreatList; }
 };
 
 //=================================================
@@ -201,8 +203,8 @@ class MANGOS_DLL_SPEC ThreatManager
 
         // methods to access the lists from the outside to do sume dirty manipulation (scriping and such)
         // I hope they are used as little as possible.
-        std::list<HostileReference*>& getThreatList() { return iThreatContainer.getThreatList(); }
-        std::list<HostileReference*>& getOfflieThreatList() { return iThreatOfflineContainer.getThreatList(); }
+        ThreatList& getThreatList() { return iThreatContainer.getThreatList(); }
+        ThreatList& getOfflieThreatList() { return iThreatOfflineContainer.getThreatList(); }
         ThreatContainer& getOnlineContainer() { return iThreatContainer; }
         ThreatContainer& getOfflineContainer() { return iThreatOfflineContainer; }
     private:
