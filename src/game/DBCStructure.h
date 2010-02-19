@@ -541,7 +541,7 @@ struct SpellEntry
     //uint32    RequiredAuraVision;                         // 172 not used
 
     // helpers
-    int32 CalculateSimpleValue(uint8 eff) const { return EffectBasePoints[eff]+int32(EffectBaseDice[eff]); }
+    int32 CalculateSimpleValue(SpellEffectIndex eff) const { return EffectBasePoints[eff]+int32(EffectBaseDice[eff]); }
 
     private:
         // prevent creating custom entries (copy data from original in fact)

@@ -19,6 +19,7 @@
 #define MANGOS_SPELLAURAS_H
 
 #include "SpellAuraDefines.h"
+#include "DBCEnums.h"
 
 struct DamageManaShield
 {
@@ -65,7 +66,7 @@ typedef void(Aura::*pAuraHandler)(bool Apply, bool Real);
 class MANGOS_DLL_SPEC Aura
 {
     friend struct ReapplyAffectedPassiveAurasHelper;
-    friend Aura* CreateAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem);
+    friend Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem);
 
     public:
         //aura handlers
@@ -207,7 +208,7 @@ class MANGOS_DLL_SPEC Aura
         SpellEntry const* GetSpellProto() const { return m_spellProto; }
         uint32 GetId() const{ return m_spellProto->Id; }
         uint64 GetCastItemGUID() const { return m_castItemGuid; }
-        uint32 GetEffIndex() const{ return m_effIndex; }
+        SpellEffectIndex GetEffIndex() const{ return m_effIndex; }
         int32 GetBasePoints() const { return m_currentBasePoints; }
 
         int32 GetAuraMaxDuration() const { return m_maxduration; }
@@ -303,7 +304,7 @@ class MANGOS_DLL_SPEC Aura
 
         bool isAffectedOnSpell(SpellEntry const *spell) const;
     protected:
-        Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+        Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
 
         // must be called only from Aura::UpdateAura
         virtual void Update(uint32 diff);
@@ -316,7 +317,7 @@ class MANGOS_DLL_SPEC Aura
 
         Modifier m_modifier;
         SpellModifier *m_spellmod;
-        uint32 m_effIndex;
+        SpellEffectIndex m_effIndex;                        // Aura effect index in spell
         SpellEntry const *m_spellProto;
         int32 m_currentBasePoints;                          // cache SpellEntry::EffectBasePoints and use for set custom base points
         uint64 m_caster_guid;
@@ -362,7 +363,7 @@ class MANGOS_DLL_SPEC Aura
 class MANGOS_DLL_SPEC AreaAura : public Aura
 {
     public:
-        AreaAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+        AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         ~AreaAura();
     protected:
         void Update(uint32 diff);
@@ -374,7 +375,7 @@ class MANGOS_DLL_SPEC AreaAura : public Aura
 class MANGOS_DLL_SPEC PersistentAreaAura : public Aura
 {
     public:
-        PersistentAreaAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+        PersistentAreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         ~PersistentAreaAura();
     protected:
         void Update(uint32 diff);
@@ -382,16 +383,16 @@ class MANGOS_DLL_SPEC PersistentAreaAura : public Aura
 
 class MANGOS_DLL_SPEC SingleEnemyTargetAura : public Aura
 {
-    friend Aura* CreateAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem);
+    friend Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem);
 
     public:
         ~SingleEnemyTargetAura();
         Unit* GetTriggerTarget() const;
 
     protected:
-        SingleEnemyTargetAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster  = NULL, Item* castItem = NULL);
+        SingleEnemyTargetAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, Unit *target, Unit *caster  = NULL, Item* castItem = NULL);
         uint64 m_casters_target_guid;
 };
 
-Aura* CreateAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
 #endif

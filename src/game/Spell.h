@@ -21,6 +21,7 @@
 
 #include "GridDefines.h"
 #include "SharedDefines.h"
+#include "DBCEnums.h"
 
 class WorldSession;
 class Unit;
@@ -327,10 +328,10 @@ class Spell
         SpellCastResult CheckPower();
         SpellCastResult CheckCasterAuras() const;
 
-        int32 CalculateDamage(uint8 i, Unit* target) { return m_caster->CalculateSpellDamage(m_spellInfo,i,m_currentBasePoints[i],target); }
+        int32 CalculateDamage(SpellEffectIndex i, Unit* target) { return m_caster->CalculateSpellDamage(m_spellInfo,i,m_currentBasePoints[i],target); }
         int32 CalculatePowerCost();
 
-        bool HaveTargetsForEffect(uint8 effect) const;
+        bool HaveTargetsForEffect(SpellEffectIndex effect) const;
         void Delayed();
         void DelayedChannel();
         uint32 getState() const { return m_spellState; }
@@ -343,7 +344,7 @@ class Spell
 
         typedef std::list<Unit*> UnitList;
         void FillTargetMap();
-        void SetTargetMap(uint32 effIndex,uint32 targetMode, UnitList& targetUnitMap);
+        void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList &targetUnitMap);
 
         void FillAreaTargets( UnitList& TagUnitMap, float x, float y, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets );
         void FillRaidOrPartyTargets( UnitList &TagUnitMap, Unit* target, float radius, bool raid, bool withPets, bool withcaster );
@@ -351,7 +352,7 @@ class Spell
         Unit* SelectMagnetTarget();
         template<typename T> WorldObject* FindCorpseUsing();
 
-        bool CheckTarget( Unit* target, uint32 eff );
+        bool CheckTarget( Unit* target, SpellEffectIndex eff );
         bool CanAutoCast(Unit* target);
 
         static void MANGOS_DLL_SPEC SendCastResult(Player* caster, SpellEntry const* spellInfo, SpellCastResult result);
@@ -516,17 +517,17 @@ class Spell
         };
         std::list<ItemTargetInfo> m_UniqueItemInfo;
 
-        void AddUnitTarget(Unit* target, uint32 effIndex);
-        void AddUnitTarget(uint64 unitGUID, uint32 effIndex);
-        void AddGOTarget(GameObject* target, uint32 effIndex);
-        void AddGOTarget(uint64 goGUID, uint32 effIndex);
-        void AddItemTarget(Item* target, uint32 effIndex);
+        void AddUnitTarget(Unit* target, SpellEffectIndex effIndex);
+        void AddUnitTarget(uint64 unitGUID, SpellEffectIndex effIndex);
+        void AddGOTarget(GameObject* target, SpellEffectIndex effIndex);
+        void AddGOTarget(uint64 goGUID, SpellEffectIndex effIndex);
+        void AddItemTarget(Item* target, SpellEffectIndex effIndex);
         void DoAllEffectOnTarget(TargetInfo *target);
         void DoSpellHitOnUnit(Unit *unit, uint32 effectMask);
         void DoAllEffectOnTarget(GOTargetInfo *target);
         void DoAllEffectOnTarget(ItemTargetInfo *target);
         bool IsAliveUnitPresentInTargetList();
-        SpellCastResult CanOpenLock(uint32 effIndex, uint32 lockid, SkillType& skillid, int32& reqSkillValue, int32& skillValue);
+        SpellCastResult CanOpenLock(SpellEffectIndex effIndex, uint32 lockid, SkillType& skillid, int32& reqSkillValue, int32& skillValue);
         // -------------------------------------------
 
         //List For Triggered Spells

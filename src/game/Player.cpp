@@ -247,7 +247,7 @@ std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi)
     return ss;
 }
 
-SpellModifier::SpellModifier( SpellModOp _op, SpellModType _type, int32 _value, SpellEntry const* spellEntry, uint8 eff, int16 _charges /*= 0*/ ) : op(_op), type(_type), charges(_charges), value(_value), spellId(spellEntry->Id), lastAffected(NULL)
+SpellModifier::SpellModifier( SpellModOp _op, SpellModType _type, int32 _value, SpellEntry const* spellEntry, SpellEffectIndex eff, int16 _charges /*= 0*/ ) : op(_op), type(_type), charges(_charges), value(_value), spellId(spellEntry->Id), lastAffected(NULL)
 {
     mask = sSpellMgr.GetSpellAffectMask(spellEntry->Id, eff);
     if (!mask)
@@ -3866,9 +3866,9 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
         {
             int32 delta = (int32(getLevel()) - startLevel + 1)*MINUTE;
 
-            for(int i =0; i < MAX_EFFECT_INDEX; ++i)
+            for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
-                if(Aura* Aur = GetAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS,i))
+                if(Aura* Aur = GetAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS,SpellEffectIndex(i)))
                 {
                     Aur->SetAuraDuration(delta*IN_MILISECONDS);
                     Aur->UpdateAuraDuration();
@@ -5648,22 +5648,22 @@ bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
 
     sLog.outDetail("PLAYER: CalculateHonor");
 
-    if( !uVictim ) 
+    if (!uVictim) 
         return false;
 
-    if( uVictim->GetAura(2479,0) ) 
-        return false;                  // is honorless target
+    if (uVictim->GetAura(2479, EFFECT_INDEX_0))             // Honorless Target
+        return false;
 
-    if( uVictim->GetTypeId() == TYPEID_UNIT )
+    if (uVictim->GetTypeId() == TYPEID_UNIT)
     {
         Creature *cVictim = (Creature *)uVictim;
-        if( cVictim->isCivilian() )
+        if (cVictim->isCivilian())
         {
             AddHonorKill(MaNGOS::Honor::DishonorableKillPoints(getLevel()),DISHONORABLE,cVictim->GetEntry(),TYPEID_UNIT);
             return true;
         }
 
-        if( cVictim->isRacialLeader() )
+        if (cVictim->isRacialLeader())
         {
             // maybe uncorrect honor value but no source to get it actually
             AddHonorKill(398.0,HONORABLE,cVictim->GetEntry(),TYPEID_UNIT);
@@ -6300,7 +6300,7 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
             bool found = false;
             for (int k=0; k < MAX_EFFECT_INDEX; ++k)
             {
-                spellEffectPair spair = spellEffectPair(spellInfo->Id, k);
+                spellEffectPair spair = spellEffectPair(spellInfo->Id, SpellEffectIndex(k));
                 for (AuraMap::const_iterator iter = m_Auras.lower_bound(spair); iter != m_Auras.upper_bound(spair); ++iter)
                 {
                     if(!item || iter->second->GetCastItemGUID() == item->GetGUID())
@@ -6425,9 +6425,9 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
         uint32 enchant_id = item->GetEnchantmentId(EnchantmentSlot(e_slot));
         SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant) continue;
-        for (int s=0;s<3;s++)
+        for (int s = 0; s < 3; ++s)
         {
-            if(pEnchant->type[s]!=ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+            if (pEnchant->type[s]!=ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
                 continue;
 
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(pEnchant->spellid[s]);
@@ -13420,7 +13420,7 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
             Field *fields = result->Fetch();
             uint64 caster_guid = fields[0].GetUInt64();
             uint32 spellid = fields[1].GetUInt32();
-            uint32 effindex = fields[2].GetUInt32();
+            SpellEffectIndex effindex = SpellEffectIndex(fields[2].GetUInt32());
             uint32 stackcount = fields[3].GetUInt32();
             int32 damage     = fields[4].GetInt32();
             int32 maxduration = fields[5].GetInt32();
@@ -13428,13 +13428,13 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
             int32 remaincharges = fields[7].GetInt32();
 
             SpellEntry const* spellproto = sSpellStore.LookupEntry(spellid);
-            if(!spellproto)
+            if (!spellproto)
             {
                 sLog.outError("Unknown aura (spellid %u, effindex %u), ignore.",spellid,effindex);
                 continue;
             }
 
-            if(effindex >= 3)
+            if (effindex >= MAX_EFFECT_INDEX)
             {
                 sLog.outError("Invalid effect index (spellid %u, effindex %u), ignore.",spellid,effindex);
                 continue;
@@ -13450,19 +13450,19 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
             }
 
             // prevent wrong values of remaincharges
-            if(spellproto->procCharges)
+            if (spellproto->procCharges)
             {
-                if(remaincharges <= 0 || remaincharges > (int32)spellproto->procCharges)
+                if (remaincharges <= 0 || remaincharges > (int32)spellproto->procCharges)
                     remaincharges = spellproto->procCharges;
             }
             else
                 remaincharges = -1;
 
 
-            for(uint32 i=0; i < stackcount; ++i)
+            for(uint32 i = 0; i < stackcount; ++i)
             {
                 Aura* aura = CreateAura(spellproto, effindex, NULL, this, NULL);
-                if(!damage)
+                if (!damage)
                     damage = aura->GetModifier()->m_amount;
 
                 // reset stolen single target auras

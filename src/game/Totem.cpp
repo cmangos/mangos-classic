@@ -162,7 +162,7 @@ void Totem::SetTypeBySummonSpell(SpellEntry const * spellProto)
 
 bool Totem::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges)
 {
-    for (int i=0;i<3;i++)
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         switch(spellInfo->EffectApplyAuraName[i])
         {

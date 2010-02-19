@@ -27,6 +27,7 @@
 #include "CreatureAI.h"
 #include "SpellAuras.h"
 #include "DBCStores.h"
+#include "DBCEnums.h"
 
 template<class T>
 inline void
@@ -173,7 +174,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         return;
 
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(i_dynobject.GetSpellId());
-    uint32 eff_index  = i_dynobject.GetEffIndex();
+    SpellEffectIndex eff_index  = i_dynobject.GetEffIndex();
     // Check target immune to spell or aura
     if (target->IsImmunedToSpell(spellInfo) || target->IsImmunedToSpellEffect(spellInfo, eff_index))
         return;

@@ -132,7 +132,7 @@ inline bool IsSpellHaveAura(SpellEntry const *spellInfo, AuraType aura)
     return false;
 }
 
-inline bool IsSpellLastAuraEffect(SpellEntry const *spellInfo, int effecIdx)
+inline bool IsSpellLastAuraEffect(SpellEntry const *spellInfo, SpellEffectIndex effecIdx)
 {
     for(int i = effecIdx+1; i < MAX_EFFECT_INDEX; ++i)
         if(spellInfo->EffectApplyAuraName[i])
@@ -140,7 +140,7 @@ inline bool IsSpellLastAuraEffect(SpellEntry const *spellInfo, int effecIdx)
     return true;
 }
 
-bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
+bool IsNoStackAuraDueToAura(uint32 spellId_1, SpellEffectIndex effIndex_1, uint32 spellId_2, SpellEffectIndex effIndex_2);
 
 inline bool IsSealSpell(SpellEntry const *spellInfo)
 {
@@ -155,7 +155,7 @@ inline bool IsElementalShield(SpellEntry const *spellInfo)
     return (spellInfo->SpellFamilyFlags & UI64LIT(0x00000000400)) || spellInfo->Id == 23552;
 }
 
-int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
+int32 CompareAuraRanks(uint32 spellId_1, SpellEffectIndex effIndex_1, uint32 spellId_2, SpellEffectIndex effIndex_2);
 
 // order from less to more strict
 bool IsSingleFromSpellSpecificPerTargetPerCaster(SpellSpecific spellSpec1,SpellSpecific spellSpec2);
@@ -182,7 +182,7 @@ inline bool IsNonCombatSpell(SpellEntry const *spellInfo)
 }
 
 bool IsPositiveSpell(uint32 spellId);
-bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
+bool IsPositiveEffect(uint32 spellId, SpellEffectIndex effIndex);
 bool IsPositiveTarget(uint32 targetA, uint32 targetB);
 
 bool IsExplicitPositiveTarget(uint32 targetA);
@@ -347,7 +347,7 @@ inline uint32 GetAllSpellMechanicMask(SpellEntry const* spellInfo)
     return mask;
 }
 
-inline Mechanics GetEffectMechanic(SpellEntry const* spellInfo, int32 effect)
+inline Mechanics GetEffectMechanic(SpellEntry const* spellInfo, SpellEffectIndex effect)
 {
     if (spellInfo->EffectMechanic[effect])
         return Mechanics(spellInfo->EffectMechanic[effect]);

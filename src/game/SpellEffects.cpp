@@ -862,7 +862,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastCustomSpell(m_caster,31818,&mana,NULL,NULL,true,NULL);
 
                     // Mana Feed
-                    int32 manaFeedVal = m_caster->CalculateSpellDamage(m_spellInfo,1, m_spellInfo->EffectBasePoints[1],m_caster);
+                    int32 manaFeedVal = m_caster->CalculateSpellDamage(m_spellInfo, EFFECT_INDEX_1, m_spellInfo->EffectBasePoints[1],m_caster);
                     manaFeedVal = manaFeedVal * mana / 100;
                     if (manaFeedVal > 0)
                         m_caster->CastCustomSpell(m_caster,32553,&manaFeedVal,NULL,NULL,true,NULL);
@@ -929,7 +929,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!pEnchant)
                         return;
 
-                    for (int s=0;s<3;s++)
+                    for (int s = 0; s < 3; ++s)
                     {
                         if (pEnchant->type[s]!=ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
                             continue;
@@ -1092,7 +1092,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         if (!roll_chance_f(chance))
                             continue;
                         ++count;
-                        AddUnitTarget((*aItr), 1);
+                        AddUnitTarget((*aItr), EFFECT_INDEX_1);
                     }
 
                     // now let next effect cast spell at each target.
@@ -1194,8 +1194,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
     }
 
     // Script based implementation. Must be used only for not good for implementation in core spell effects
-    // So called only for not proccessed cases
-    if(gameObjTarget)
+    // So called only for not processed cases
+    if (gameObjTarget)
         Script->EffectDummyGameObj(m_caster, m_spellInfo->Id, eff_idx, gameObjTarget);
     else if(unitTarget && unitTarget->GetTypeId()==TYPEID_UNIT)
         Script->EffectDummyCreature(m_caster, m_spellInfo->Id, eff_idx, (Creature*)unitTarget);
@@ -3441,14 +3441,14 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
         {
             case SPELL_EFFECT_WEAPON_DAMAGE:
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
-                fixed_bonus += CalculateDamage(j, unitTarget);
+                fixed_bonus += CalculateDamage(SpellEffectIndex(j), unitTarget);
                 break;
             case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
-                fixed_bonus += CalculateDamage(j, unitTarget);
+                fixed_bonus += CalculateDamage(SpellEffectIndex(j), unitTarget);
                 normalized = true;
                 break;
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-                weaponDamagePercentMod *= float(CalculateDamage(j, unitTarget)) / 100.0f;
+                weaponDamagePercentMod *= float(CalculateDamage(SpellEffectIndex(j), unitTarget)) / 100.0f;
 
                 // applied only to prev.effects fixed damage
                 if(customBonusDamagePercentMod)
@@ -3893,8 +3893,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
             const uint32 spellid = 28703;
 
             // don't overwrite an existing aura
-            for(uint8 i=0; i<5; i++)
-                if(unitTarget->HasAura(spellid+i, 0))
+            for(uint8 i = 0; i < 5; ++i)
+                if(unitTarget->HasAura(spellid+i, EFFECT_INDEX_0))
                     return;
             unitTarget->CastSpell(unitTarget, spellid+urand(0, 4), true);
             break;
