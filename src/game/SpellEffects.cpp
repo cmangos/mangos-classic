@@ -425,7 +425,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
     {
         case SPELLFAMILY_GENERIC:
         {
-            switch(m_spellInfo->Id )
+            switch(m_spellInfo->Id)
             {
                 case 13535:                                 // Tame Beast
                 {
@@ -469,6 +469,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         // Yaaarrrr - pirate
                         case 2: spell_id = (m_caster->getGender() == GENDER_MALE ? 8221 : 8222); break;
                     }
+
                     m_caster->CastSpell(m_caster,spell_id,true,NULL);
                     return;
                 }
@@ -476,6 +477,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
                         return;
+
                     ((Creature*)unitTarget)->setDeathState(JUST_ALIVED);
                     return;
                 }
@@ -631,9 +633,11 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     return; 
                 } 
                 case 20577:                                 // Cannibalize
+                {
                     if (unitTarget)
                         m_caster->CastSpell(m_caster, 20578, true, NULL);
                     return;
+                }
                 case 23019:                                 // Crystal Prison Dummy DND
                 {
                     if (!unitTarget || !unitTarget->isAlive() || unitTarget->GetTypeId() != TYPEID_UNIT || ((Creature*)unitTarget)->isPet())
@@ -673,26 +677,38 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 23074:                                 // Arcanite Dragonling
+                {
                     if (!m_CastItem)
                         return;
+
                     m_caster->CastSpell(m_caster, 19804, true, m_CastItem);
                     return;
+                }
                 case 23075:                                 // Mithril Mechanical Dragonling
+                {
                     if (!m_CastItem)
                         return;
+
                     m_caster->CastSpell(m_caster, 12749, true, m_CastItem);
                     return;
+                }
                 case 23076:                                 // Mechanical Dragonling
+                {
                     if (!m_CastItem)
                         return;
+
                     m_caster->CastSpell(m_caster, 4073, true, m_CastItem);
                     return;
+                }
                 case 23133:                                 // Gnomish Battle Chicken
+                {
                     if (!m_CastItem)
                         return;
+
                     m_caster->CastSpell(m_caster, 13166, true, m_CastItem);
                     return;
-                case 23448:                                 // Ultrasafe Transporter: Gadgetzan - backfires
+                }
+                case 23448:                                 // Transporter Arrival - Ultrasafe Transporter: Gadgetzan - backfires
                 {
                     int32 r = irand(0, 119);
                     if (r < 20)                             // Transporter Malfunction - 1/6 polymorph
@@ -701,14 +717,18 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         m_caster->CastSpell(m_caster, 23445, true);
                     else                                    // 1/6 miss the target
                         m_caster->CastSpell(m_caster, 36902, true);
+
                     return;
                 }
                 case 23453:                                 // Gnomish Transporter - Ultrasafe Transporter: Gadgetzan
+                {
                     if (roll_chance_i(50))                  // Gadgetzan Transporter         - success
                         m_caster->CastSpell(m_caster, 23441, true);
                     else                                    // failure
                         m_caster->CastSpell(m_caster, 23446, true);
+
                     return;
+                }
                 case 23645:                                 // Hourglass Sand
                     m_caster->RemoveAurasDueToSpell(23170);
                     return;
@@ -739,6 +759,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER )
                         m_caster->CastSpell(unitTarget, 29294, true);
+
                     return;
                 }
             }
@@ -769,7 +790,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             break;
         }
         case SPELLFAMILY_MAGE:
-            switch(m_spellInfo->Id )
+        {
+            switch(m_spellInfo->Id)
             {
                 case 12472:                                 // Cold Snap
                 {
@@ -793,19 +815,29 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
-                case 32826:
+                case 32826:                                 // Polymorph Cast Visual
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
                     {
                         //Polymorph Cast Visual Rank 1
-                        const uint32 spell_list[6] = {32813, 32816, 32817, 32818, 32819, 32820};
+                        const uint32 spell_list[6] =
+                        {
+                            32813,                          // Squirrel Form
+                            32816,                          // Giraffe Form
+                            32817,                          // Serpent Form
+                            32818,                          // Dragonhawk Form
+                            32819,                          // Worgen Form
+                            32820                           // Sheep Form
+                        };
                         unitTarget->CastSpell( unitTarget, spell_list[urand(0, 5)], true);
                     }
                     return;
                 }
             }
             break;
+        }
         case SPELLFAMILY_WARRIOR:
+        {
             // Charge
             if ((m_spellInfo->SpellFamilyFlags & UI64LIT(0x1)) && m_spellInfo->SpellVisual == 867)
             {
@@ -816,7 +848,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             // Execute
             if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x20000000))
             {
-                if(!unitTarget)
+                if (!unitTarget)
                     return;
 
                 int32 basePoints0 = damage+int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[eff_idx]);
@@ -833,7 +865,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 return;
             }
             break;
+        }
         case SPELLFAMILY_WARLOCK:
+        {
             // Life Tap
             if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000040000))
             {
@@ -869,10 +903,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 else
                     SendCastResult(SPELL_FAILED_FIZZLE);
+
                 return;
             }
             break;
+        }
         case SPELLFAMILY_PRIEST:
+        {
             switch(m_spellInfo->Id )
             {
                 case 28598:                                 // Touch of Weakness triggered spell
@@ -899,10 +936,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
             }
             break;
+        }
         case SPELLFAMILY_DRUID:
             break;
         case SPELLFAMILY_ROGUE:
-            switch(m_spellInfo->Id )
+        {
+            switch(m_spellInfo->Id)
             {
                 case 31231:                                 // Cheat Death
                 {
@@ -946,7 +985,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
             }
             break;
+        }
         case SPELLFAMILY_HUNTER:
+        {
             // Steady Shot
             if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x100000000))
             {
@@ -1004,10 +1045,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
             }
             break;
+        }
         case SPELLFAMILY_PALADIN:
+        {
             switch(m_spellInfo->SpellIconID)
             {
-                case  156:                                  // Holy Shock
+                case 156:                                   // Holy Shock
                 {
                     if (!unitTarget)
                         return;
@@ -1118,7 +1161,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
             }
             break;
+        }
         case SPELLFAMILY_SHAMAN:
+        {
             //Shaman Rockbiter Weapon
             if (m_spellInfo->SpellFamilyFlags == UI64LIT(0x400000))
             {
@@ -1184,6 +1229,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             }
 
             break;
+        }
     }
 
     // pet auras
