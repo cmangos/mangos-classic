@@ -3747,8 +3747,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
+
                     unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
-                    break;
+
+                    return;
                 }
                 case 24590:                                 // Brittle Armor - need remove one 24575 Brittle Armor aura
                     unitTarget->RemoveSingleAuraFromStack(24575,EFFECT_INDEX_0);
@@ -3857,13 +3859,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         }
                     }
 
-                    static uint32 const itypes[6][3] = {
-                        { 5512,19004,19005},                // Minor Healthstone
-                        { 5511,19006,19007},                // Lesser Healthstone
-                        { 5509,19008,19009},                // Healthstone
-                        { 5510,19010,19011},                // Greater Healthstone
-                        { 9421,19012,19013},                // Major Healthstone
-                        {22103,22104,22105}                 // Master Healthstone
+                    static uint32 const itypes[6][3] =
+                    {
+                        { 5512, 19004, 19005},              // Minor Healthstone
+                        { 5511, 19006, 19007},              // Lesser Healthstone
+                        { 5509, 19008, 19009},              // Healthstone
+                        { 5510, 19010, 19011},              // Greater Healthstone
+                        { 9421, 19012, 19013},              // Major Healthstone
+                        {22103, 22104, 22105}               // Master Healthstone
                     };
 
                     switch(m_spellInfo->Id)
