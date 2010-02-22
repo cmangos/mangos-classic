@@ -3722,407 +3722,247 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 {
     // TODO: we must implement hunter pet summon at login there (spell 6962)
 
-    // by spell id
-    switch(m_spellInfo->Id)
+    switch(m_spellInfo->SpellFamilyName)
     {
-        // PX-238 Winter Wondervolt TRAP
-        case 26275:
+        case SPELLFAMILY_GENERIC:
         {
-            if( unitTarget->HasAura(26272,EFFECT_INDEX_0)
-             || unitTarget->HasAura(26157,EFFECT_INDEX_0)
-             || unitTarget->HasAura(26273,EFFECT_INDEX_0)
-             || unitTarget->HasAura(26274,EFFECT_INDEX_0))
-                return;
-
-            uint32 iTmpSpellId;
-
-            switch(urand(0,3))
-            {
-                case 0:
-                    iTmpSpellId = 26272;
-                    break;
-                case 1:
-                    iTmpSpellId = 26157;
-                    break;
-                case 2:
-                    iTmpSpellId = 26273;
-                    break;
-                case 3:
-                    iTmpSpellId = 26274;
-                    break;
-            }
-
-            unitTarget->CastSpell(unitTarget, iTmpSpellId, true);
-
-            return;
-        }
-
-        // Bending Shinbone
-        case 8856:
-        {
-            if(!itemTarget && m_caster->GetTypeId()!=TYPEID_PLAYER)
-                return;
-
-            uint32 spell_id = 0;
-            switch(urand(1,5))
-            {
-                case 1:  spell_id = 8854; break;
-                default: spell_id = 8855; break;
-            }
-
-            m_caster->CastSpell(m_caster,spell_id,true,NULL);
-            return;
-        }
-
-        // Healthstone creating spells
-        case  6201:
-        case  6202:
-        case  5699:
-        case 11729:
-        case 11730:
-        case 27230:
-        {
-            uint32 itemtype;
-            uint32 rank = 0;
-            Unit::AuraList const& mDummyAuras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
-            for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
-            {
-                if((*i)->GetId() == 18692)
-                {
-                    rank = 1;
-                    break;
-                }
-                else if((*i)->GetId() == 18693)
-                {
-                    rank = 2;
-                    break;
-                }
-            }
-
-            static uint32 const itypes[6][3] = {
-                { 5512,19004,19005},                        // Minor Healthstone
-                { 5511,19006,19007},                        // Lesser Healthstone
-                { 5509,19008,19009},                        // Healthstone
-                { 5510,19010,19011},                        // Greater Healthstone
-                { 9421,19012,19013},                        // Major Healthstone
-                {22103,22104,22105}                         // Master Healthstone
-            };
-
             switch(m_spellInfo->Id)
             {
-                case  6201: itemtype=itypes[0][rank];break; // Minor Healthstone
-                case  6202: itemtype=itypes[1][rank];break; // Lesser Healthstone
-                case  5699: itemtype=itypes[2][rank];break; // Healthstone
-                case 11729: itemtype=itypes[3][rank];break; // Greater Healthstone
-                case 11730: itemtype=itypes[4][rank];break; // Major Healthstone
-                case 27230: itemtype=itypes[5][rank];break; // Master Healthstone
-                default:
-                    return;
-            }
-            DoCreateItem( eff_idx, itemtype );
-            return;
-        }
-        // Brittle Armor - need remove one 24575 Brittle Armor aura
-        case 24590:
-            unitTarget->RemoveSingleAuraFromStack(24575, EFFECT_INDEX_0);
-            unitTarget->RemoveSingleAuraFromStack(24575, EFFECT_INDEX_1);
-            return;
-        // Mercurial Shield - need remove one 26464 Mercurial Shield aura
-        case 26465:
-            unitTarget->RemoveSingleAuraFromStack(26464, EFFECT_INDEX_0);
-            return;
-        // Orb teleport spells
-        case 25140:
-        case 25143:
-        case 25650:
-        case 25652:
-        case 29128:
-        case 29129:
-        case 35376:
-        case 35727:
-        {
-            if(!unitTarget)
-                return;
-
-            uint32 spellid = 0;
-            switch(m_spellInfo->Id)
-            {
-                case 25140: spellid =  32571; break;
-                case 25143: spellid =  32572; break;
-                case 25650: spellid =  30140; break;
-                case 25652: spellid =  30141; break;
-                case 29128: spellid =  32568; break;
-                case 29129: spellid =  32569; break;
-                case 35376: spellid =  25649; break;
-                case 35727: spellid =  35730; break;
-                default:
-                    return;
-            }
-            unitTarget->CastSpell(unitTarget,spellid,false);
-            return;
-        }
-
-        // Shadow Flame (All script effects, not just end ones to prevent player from dodging the last triggered spell)
-        case 22539:
-        case 22972:
-        case 22975:
-        case 22976:
-        case 22977:
-        case 22978:
-        case 22979:
-        case 22980:
-        case 22981:
-        case 22982:
-        case 22983:
-        case 22984:
-        case 22985:
-        {
-            if(!unitTarget || !unitTarget->isAlive())
-                return;
-
-            // Onyxia Scale Cloak
-            if(unitTarget->GetDummyAura(22683))
-                return;
-
-            // Shadow Flame
-            m_caster->CastSpell(unitTarget, 22682, true);
-            return;
-        }
-        break;
-
-        // Summon Black Qiraji Battle Tank
-        case 26656:
-        {
-            if(!unitTarget)
-                return;
-
-            // Prevent stacking of mounts
-            unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-
-            // Two separate mounts depending on area id (allows use both in and out of specific instance)
-            if (unitTarget->GetAreaId() == 3428)
-                unitTarget->CastSpell(unitTarget, 25863, false);
-            else
-                unitTarget->CastSpell(unitTarget, 26655, false);
-            break;
-        }
-        // Piccolo of the Flaming Fire
-        case 17512:
-        {
-            if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                return;
-            unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
-            break;
-        }
-
-        // Dreaming Glory
-        case 28698:
-        {
-            if(!unitTarget)
-                return;
-            unitTarget->CastSpell(unitTarget, 28694, true);
-            break;
-        }
-
-        // Netherbloom
-        case 28702:
-        {
-            if(!unitTarget)
-                return;
-            // 25% chance of casting a random buff
-            if(roll_chance_i(75))
-                return;
-
-            // triggered spells are 28703 to 28707
-            // Note: some sources say, that there was the possibility of
-            //       receiving a debuff. However, this seems to be removed by a patch.
-            const uint32 spellid = 28703;
-
-            // don't overwrite an existing aura
-            for(uint8 i = 0; i < 5; ++i)
-                if(unitTarget->HasAura(spellid+i, EFFECT_INDEX_0))
-                    return;
-            unitTarget->CastSpell(unitTarget, spellid+urand(0, 4), true);
-            break;
-        }
-
-        // Nightmare Vine
-        case 28720:
-        {
-            if(!unitTarget)
-                return;
-            // 25% chance of casting Nightmare Pollen
-            if(roll_chance_i(75))
-                return;
-            unitTarget->CastSpell(unitTarget, 28721, true);
-            break;
-        }
-
-        // Mirren's Drinking Hat
-        case 29830:
-        {
-            uint32 item = 0;
-            switch ( urand(1,6) )
-            {
-                case 1: case 2: case 3: item = 23584; break;// Loch Modan Lager
-                case 4: case 5:         item = 23585; break;// Stouthammer Lite
-                case 6:                 item = 23586; break;// Aerie Peak Pale Ale
-            }
-            if (item)
-                DoCreateItem(eff_idx,item);
-            break;
-        }
-        // Improved Sprint
-        case 30918:
-        {
-            // Removes snares and roots.
-            Unit::AuraMap& Auras = unitTarget->GetAuras();
-            for(Unit::AuraMap::iterator iter = Auras.begin(), next; iter != Auras.end(); iter = next)
-            {
-                next = iter;
-                ++next;
-                Aura *aur = iter->second;
-                if (!aur->IsPositive())             //only remove negative spells
+                case 8856:                                  // Bending Shinbone
                 {
-                    // check for mechanic mask
-                    if(GetSpellMechanicMask(aur->GetSpellProto(), aur->GetEffIndex()) & IMMUNE_TO_ROOT_AND_SNARE_MASK)
+                    if (!itemTarget && m_caster->GetTypeId()!=TYPEID_PLAYER)
+                        return;
+
+                    uint32 spell_id = 0;
+                    switch(urand(1,5))
                     {
-                        unitTarget->RemoveAurasDueToSpell(aur->GetId());
-                        if(Auras.empty())
-                            break;
-                        else
-                            next = Auras.begin();
+                        case 1:  spell_id = 8854; break;
+                        default: spell_id = 8855; break;
                     }
+
+                    m_caster->CastSpell(m_caster,spell_id,true,NULL);
+                    return;
+                }
+                case 17512:                                 // Piccolo of the Flaming Fire
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+                    unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
+                    break;
+                }
+                case 24590:                                 // Brittle Armor - need remove one 24575 Brittle Armor aura
+                    unitTarget->RemoveSingleAuraFromStack(24575,EFFECT_INDEX_0);
+                    unitTarget->RemoveSingleAuraFromStack(24575,EFFECT_INDEX_1);
+                    return;
+                case 26275:                                 // PX-238 Winter Wondervolt TRAP
+                {
+                    uint32 spells[4] = { 26272, 26157, 26273, 26274 };
+
+                    // check presence
+                    for(int j = 0; j < 4; ++j)
+                        if (unitTarget->HasAura(spells[j], EFFECT_INDEX_0))
+                            return;
+
+                    // select spell
+                    uint32 iTmpSpellId = spells[urand(0,3)];
+
+                    // cast
+                    unitTarget->CastSpell(unitTarget, iTmpSpellId, true);
+                    return;
+                }
+                case 26465:                                 // Mercurial Shield - need remove one 26464 Mercurial Shield aura
+                    unitTarget->RemoveSingleAuraFromStack(26464,EFFECT_INDEX_0);
+                    return;
+                case 22539:                                 // Shadow Flame (All script effects, not just end ones to
+                case 22972:                                 // prevent player from dodging the last triggered spell)
+                case 22975:
+                case 22976:
+                case 22977:
+                case 22978:
+                case 22979:
+                case 22980:
+                case 22981:
+                case 22982:
+                case 22983:
+                case 22984:
+                case 22985:
+                {
+                    if (!unitTarget || !unitTarget->isAlive())
+                        return;
+
+                    // Onyxia Scale Cloak
+                    if (unitTarget->GetDummyAura(22683))
+                        return;
+
+                    // Shadow Flame
+                    m_caster->CastSpell(unitTarget, 22682, true);
+                    return;
+                }
+                case 26656:                                 // Summon Black Qiraji Battle Tank
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Prevent stacking of mounts
+                    unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+
+                    // Two separate mounts depending on area id (allows use both in and out of specific instance)
+                    if (unitTarget->GetAreaId() == 3428)
+                        unitTarget->CastSpell(unitTarget, 25863, false);
+                    else
+                        unitTarget->CastSpell(unitTarget, 26655, false);
+
+                    return;
+                }
+                case 30918:                                 // Improved Sprint
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Removes snares and roots.
+                    unitTarget->RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK,30918,true);
+                    break;
                 }
             }
             break;
         }
-        case 41126:                                         // Flame Crash
+        case SPELLFAMILY_WARLOCK:
         {
-            if(!unitTarget)
-                return;
-
-           unitTarget->CastSpell(unitTarget, 41131, true);
-           break;
-        }
-        case 44876:                                         // Force Cast - Portal Effect: Sunwell Isle
-        {
-            if(!unitTarget)
-                return;
-
-            unitTarget->CastSpell(unitTarget, 44870, true);
-            break;
-        }
-
-        // Goblin Weather Machine
-        case 46203:
-        {
-            if(!unitTarget)
-                return;
-
-            uint32 spellId;
-            switch(rand()%4)
+            switch(m_spellInfo->Id)
             {
-                case 0:
-                    spellId=46740;
-                    break;
-                case 1:
-                    spellId=46739;
-                    break;
-                case 2:
-                    spellId=46738;
-                    break;
-                case 3:
-                    spellId=46736;
-                    break;
-            }
-            unitTarget->CastSpell(unitTarget, spellId, true);
-            break;
-        }
-        //5,000 Gold
-        case 46642:
-        {
-            if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            ((Player*)unitTarget)->ModifyMoney(50000000);
-
-            break;
-        }
-    }
-
-    if( m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN )
-    {
-        // Holy Light
-        if (m_spellInfo->SpellIconID == 70)
-        {
-            if(!unitTarget || !unitTarget->isAlive())
-                return;
-            int32 heal = damage;
-            m_caster->CastCustomSpell(unitTarget,19968,&heal,NULL,NULL,true);
-        }
-        // Flash of Light
-        else if (m_spellInfo->SpellIconID  == 242)
-        {
-            if(!unitTarget || !unitTarget->isAlive())
-                return;
-            int32 heal = damage;
-            m_caster->CastCustomSpell(unitTarget,19993,&heal,NULL,NULL,true);
-        }
-        else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000800000))
-        {
-            if(!unitTarget || !unitTarget->isAlive())
-                return;
-            uint32 spellId2 = 0;
-
-            // all seals have aura dummy
-            Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-            for(Unit::AuraList::const_iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
-            {
-                SpellEntry const *spellInfo = (*itr)->GetSpellProto();
-
-                // search seal (all seals have judgement's aura dummy spell id in 2 effect
-                if ( !spellInfo || !IsSealSpell((*itr)->GetSpellProto()) || (*itr)->GetEffIndex() != 2 )
-                    continue;
-
-                // must be calculated base at raw base points in spell proto, GetModifier()->m_value for S.Righteousness modified by SPELLMOD_DAMAGE
-                spellId2 = (*itr)->GetSpellProto()->EffectBasePoints[2]+1;
-
-                if(spellId2 <= 1)
-                    continue;
-
-                // found, remove seal
-                m_caster->RemoveAurasDueToSpell((*itr)->GetId());
-
-                // Sanctified Judgement
-                Unit::AuraList const& m_auras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                for(Unit::AuraList::const_iterator i = m_auras.begin(); i != m_auras.end(); ++i)
+                case  6201:                                 // Healthstone creating spells
+                case  6202:
+                case  5699:
+                case 11729:
+                case 11730:
+                case 27230:
                 {
-                    if ((*i)->GetSpellProto()->SpellIconID == 205 && (*i)->GetSpellProto()->Attributes == UI64LIT(0x01D0))
+                    if (!unitTarget)
+                        return;
+
+                    uint32 itemtype;
+                    uint32 rank = 0;
+                    Unit::AuraList const& mDummyAuras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
                     {
-                        int32 chance = (*i)->GetModifier()->m_amount;
-                        if ( roll_chance_i(chance) )
+                        if ((*i)->GetId() == 18692)
                         {
-                            int32 mana = spellInfo->manaCost;
-                            if ( Player* modOwner = m_caster->GetSpellModOwner() )
-                                modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_COST, mana);
-                            mana = int32(mana* 0.8f);
-                            m_caster->CastCustomSpell(m_caster,31930,&mana,NULL,NULL,true,NULL,*i);
+                            rank = 1;
+                            break;
                         }
-                        break;
+                        else if ((*i)->GetId() == 18693)
+                        {
+                            rank = 2;
+                            break;
+                        }
                     }
+
+                    static uint32 const itypes[6][3] = {
+                        { 5512,19004,19005},                // Minor Healthstone
+                        { 5511,19006,19007},                // Lesser Healthstone
+                        { 5509,19008,19009},                // Healthstone
+                        { 5510,19010,19011},                // Greater Healthstone
+                        { 9421,19012,19013},                // Major Healthstone
+                        {22103,22104,22105}                 // Master Healthstone
+                    };
+
+                    switch(m_spellInfo->Id)
+                    {
+                        case  6201:
+                            itemtype=itypes[0][rank];break; // Minor Healthstone
+                        case  6202:
+                            itemtype=itypes[1][rank];break; // Lesser Healthstone
+                        case  5699:
+                            itemtype=itypes[2][rank];break; // Healthstone
+                        case 11729:
+                            itemtype=itypes[3][rank];break; // Greater Healthstone
+                        case 11730:
+                            itemtype=itypes[4][rank];break; // Major Healthstone
+                        case 27230:
+                            itemtype=itypes[5][rank];break; // Master Healthstone
+                        default:
+                            return;
+                    }
+                    DoCreateItem( eff_idx, itemtype );
+                    return;
+                }
+            }
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Holy Light
+            if (m_spellInfo->SpellIconID == 70)
+            {
+                if(!unitTarget || !unitTarget->isAlive())
+                    return;
+                int32 heal = damage;
+                m_caster->CastCustomSpell(unitTarget,19968,&heal,NULL,NULL,true);
+            }
+            // Flash of Light
+            else if (m_spellInfo->SpellIconID  == 242)
+            {
+                if(!unitTarget || !unitTarget->isAlive())
+                    return;
+                int32 heal = damage;
+                m_caster->CastCustomSpell(unitTarget,19993,&heal,NULL,NULL,true);
+            }
+            else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000800000))
+            {
+                if (!unitTarget || !unitTarget->isAlive())
+                    return;
+                uint32 spellId2 = 0;
+
+                // all seals have aura dummy
+                Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                for(Unit::AuraList::const_iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
+                {
+                    SpellEntry const *spellInfo = (*itr)->GetSpellProto();
+
+                    // search seal (all seals have judgement's aura dummy spell id in 2 effect
+                    if ( !spellInfo || !IsSealSpell((*itr)->GetSpellProto()) || (*itr)->GetEffIndex() != 2 )
+                        continue;
+
+                    // must be calculated base at raw base points in spell proto, GetModifier()->m_value for S.Righteousness modified by SPELLMOD_DAMAGE
+                    spellId2 = (*itr)->GetSpellProto()->EffectBasePoints[2]+1;
+
+                    if(spellId2 <= 1)
+                        continue;
+
+                    // found, remove seal
+                    m_caster->RemoveAurasDueToSpell((*itr)->GetId());
+
+                    // Sanctified Judgement
+                    Unit::AuraList const& m_auras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::const_iterator i = m_auras.begin(); i != m_auras.end(); ++i)
+                    {
+                        if ((*i)->GetSpellProto()->SpellIconID == 205 && (*i)->GetSpellProto()->Attributes == UI64LIT(0x01D0))
+                        {
+                            int32 chance = (*i)->GetModifier()->m_amount;
+                            if ( roll_chance_i(chance) )
+                            {
+                                int32 mana = spellInfo->manaCost;
+                                if ( Player* modOwner = m_caster->GetSpellModOwner() )
+                                    modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_COST, mana);
+                                mana = int32(mana* 0.8f);
+                                m_caster->CastCustomSpell(m_caster,31930,&mana,NULL,NULL,true,NULL,*i);
+                            }
+                            break;
+                        }
+                    }
+
+                    break;
                 }
 
-                break;
+                m_caster->CastSpell(unitTarget,spellId2,true);
+                return;
             }
-
-            m_caster->CastSpell(unitTarget,spellId2,true);
-            return;
+            break;
         }
     }
 
     // normal DB scripted effect
-    if(!unitTarget)
+    if (!unitTarget)
         return;
 
     sLog.outDebug("Spell ScriptStart spellid %u in EffectScriptEffect ", m_spellInfo->Id);
