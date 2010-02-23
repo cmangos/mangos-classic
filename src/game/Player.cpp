@@ -475,9 +475,6 @@ Player::~Player ()
     }
     CleanupChannels();
 
-    for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
-        delete itr->second;
-
     //all mailed items should be deleted, also all mail should be deallocated
     for (PlayerMails::const_iterator itr =  m_mail.begin(); itr != m_mail.end();++itr)
         delete *itr;
@@ -2434,10 +2431,10 @@ void Player::SendInitialSpells()
 
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        if(itr->second->state == PLAYERSPELL_REMOVED)
+        if(itr->second.state == PLAYERSPELL_REMOVED)
             continue;
 
-        if(!itr->second->active || itr->second->disabled)
+        if(!itr->second.active || itr->second.disabled)
             continue;
 
         data << uint16(itr->first);
@@ -2597,15 +2594,15 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
     if (itr != m_spells.end())
     {
         // update active state for known spell
-        if(itr->second->active != active && itr->second->state != PLAYERSPELL_REMOVED && !itr->second->disabled)
+        if(itr->second.active != active && itr->second.state != PLAYERSPELL_REMOVED && !itr->second.disabled)
         {
-            itr->second->active = active;
+            itr->second.active = active;
 
             // loading && !learning == explicitly load from DB and then exist in it already and set correctly
             if(loading && !learning)
-                itr->second->state = PLAYERSPELL_UNCHANGED;
-            else if(itr->second->state != PLAYERSPELL_NEW)
-                itr->second->state = PLAYERSPELL_CHANGED;
+                itr->second.state = PLAYERSPELL_UNCHANGED;
+            else if(itr->second.state != PLAYERSPELL_NEW)
+                itr->second.state = PLAYERSPELL_CHANGED;
 
             if(!active)
             {
@@ -2616,24 +2613,23 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
             return active;                                  // learn (show in spell book if active now)
         }
 
-        if(itr->second->disabled != disabled && itr->second->state != PLAYERSPELL_REMOVED)
+        if(itr->second.disabled != disabled && itr->second.state != PLAYERSPELL_REMOVED)
         {
-            if(itr->second->state != PLAYERSPELL_NEW)
-                itr->second->state = PLAYERSPELL_CHANGED;
-            itr->second->disabled = disabled;
+            if(itr->second.state != PLAYERSPELL_NEW)
+                itr->second.state = PLAYERSPELL_CHANGED;
+            itr->second.disabled = disabled;
 
             if(disabled)
                 return false;
 
             disabled_case = true;
         }
-        else switch(itr->second->state)
+        else switch(itr->second.state)
         {
             case PLAYERSPELL_UNCHANGED:                     // known saved spell
                 return false;
             case PLAYERSPELL_REMOVED:                       // re-learning removed not saved spell
             {
-                delete itr->second;
                 m_spells.erase(itr);
                 state = PLAYERSPELL_CHANGED;
                 break;                                      // need re-add
@@ -2642,7 +2638,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
             {
                 // can be in case spell loading but learned at some previous spell loading
                 if(loading && !learning)
-                    itr->second->state = PLAYERSPELL_UNCHANGED;
+                    itr->second.state = PLAYERSPELL_UNCHANGED;
 
                 return false;
             }
@@ -2680,23 +2676,23 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
                 learnSpell(prev_spell);
         }
 
-        PlayerSpell *newspell = new PlayerSpell;
-        newspell->active = active;
-        newspell->state = state;
-        newspell->disabled = disabled;
+        PlayerSpell newspell;
+        newspell.active = active;
+        newspell.state = state;
+        newspell.disabled = disabled;
 
         // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
-        if(newspell->active && !newspell->disabled && !SpellMgr::canStackSpellRanks(spellInfo) && sSpellMgr.GetSpellRank(spellInfo->Id) != 0)
+        if(newspell.active && !newspell.disabled && !SpellMgr::canStackSpellRanks(spellInfo) && sSpellMgr.GetSpellRank(spellInfo->Id) != 0)
         {
             for( PlayerSpellMap::iterator itr2 = m_spells.begin(); itr2 != m_spells.end(); ++itr2 )
             {
-                if(itr2->second->state == PLAYERSPELL_REMOVED) continue;
+                if(itr2->second.state == PLAYERSPELL_REMOVED) continue;
                 SpellEntry const *i_spellInfo = sSpellStore.LookupEntry(itr2->first);
                 if(!i_spellInfo) continue;
 
                 if( sSpellMgr.IsRankSpellDueToSpell(spellInfo,itr2->first) )
                 {
-                    if(itr2->second->active)
+                    if(itr2->second.active)
                     {
                         if(sSpellMgr.IsHighRankOfSpell(spell_id,itr2->first))
                         {
@@ -2709,8 +2705,9 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
                             }
 
                             // mark old spell as disable (SMSG_SUPERCEDED_SPELL replace it in client by new)
-                            itr2->second->active = false;
-                            itr2->second->state = PLAYERSPELL_CHANGED;
+                            itr2->second.active = false;
+                            if(itr2->second.state != PLAYERSPELL_NEW)
+                                itr2->second.state = PLAYERSPELL_CHANGED;
                         }
                         else if(sSpellMgr.IsHighRankOfSpell(itr2->first,spell_id))
                         {
@@ -2723,9 +2720,9 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
                             }
 
                             // mark new spell as disable (not learned yet for client and will not learned)
-                            newspell->active = false;
-                            if(newspell->state != PLAYERSPELL_NEW)
-                                newspell->state = PLAYERSPELL_CHANGED;
+                            newspell.active = false;
+                            if(newspell.state != PLAYERSPELL_NEW)
+                                newspell.state = PLAYERSPELL_CHANGED;
                         }
                     }
                 }
@@ -2735,7 +2732,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
         m_spells[spell_id] = newspell;
 
         // return false if spell disabled
-        if (newspell->disabled)
+        if (newspell.disabled)
             return false;
     }
 
@@ -2863,8 +2860,8 @@ void Player::learnSpell(uint32 spell_id)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
 
-    bool disabled = (itr != m_spells.end()) ? itr->second->disabled : false;
-    bool active = disabled ? itr->second->active : true;
+    bool disabled = (itr != m_spells.end()) ? itr->second.disabled : false;
+    bool active = disabled ? itr->second.active : true;
 
     bool learning = addSpell(spell_id,active);
 
@@ -2873,7 +2870,7 @@ void Player::learnSpell(uint32 spell_id)
     for(SpellChainMapNext::const_iterator i = nextMap.lower_bound(spell_id); i != nextMap.upper_bound(spell_id); ++i)
     {
         PlayerSpellMap::iterator iter = m_spells.find(i->second);
-        if (disabled && iter != m_spells.end() && iter->second->disabled)
+        if (disabled && iter != m_spells.end() && iter->second.disabled)
             learnSpell(i->second);
     }
 
@@ -2892,7 +2889,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled)
     if (itr == m_spells.end())
         return;
 
-    if(itr->second->state == PLAYERSPELL_REMOVED || disabled && itr->second->disabled)
+    if (itr->second.state == PLAYERSPELL_REMOVED || disabled && itr->second.disabled)
         return;
 
     // unlearn non talent higher ranks (recursive)
@@ -2913,19 +2910,16 @@ void Player::removeSpell(uint32 spell_id, bool disabled)
 
     if (disabled)
     {
-        itr->second->disabled = disabled;
-        if(itr->second->state != PLAYERSPELL_NEW)
-            itr->second->state = PLAYERSPELL_CHANGED;
+        itr->second.disabled = disabled;
+        if(itr->second.state != PLAYERSPELL_NEW)
+            itr->second.state = PLAYERSPELL_CHANGED;
     }
     else
     {
-        if(itr->second->state == PLAYERSPELL_NEW)
-        {
-            delete itr->second;
+        if(itr->second.state == PLAYERSPELL_NEW)
             m_spells.erase(itr);
-        }
         else
-            itr->second->state = PLAYERSPELL_REMOVED;
+            itr->second.state = PLAYERSPELL_REMOVED;
     }
 
     RemoveAurasDueToSpell(spell_id);
@@ -3219,7 +3213,7 @@ bool Player::resetTalents(bool no_cost)
         {
             for(PlayerSpellMap::iterator itr = GetSpellMap().begin(); itr != GetSpellMap().end();)
             {
-                if(itr->second->state == PLAYERSPELL_REMOVED || itr->second->disabled)
+                if(itr->second.state == PLAYERSPELL_REMOVED || itr->second.disabled)
                 {
                     ++itr;
                     continue;
@@ -3262,7 +3256,6 @@ bool Player::_removeSpell(uint16 spell_id)
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr != m_spells.end())
     {
-        delete itr->second;
         m_spells.erase(itr);
         return true;
     }
@@ -3475,7 +3468,7 @@ void Player::DestroyForPlayer( Player *target ) const
 bool Player::HasSpell(uint32 spell) const
 {
     PlayerSpellMap::const_iterator itr = m_spells.find(spell);
-    return (itr != m_spells.end() && itr->second->state != PLAYERSPELL_REMOVED && !itr->second->disabled);
+    return (itr != m_spells.end() && itr->second.state != PLAYERSPELL_REMOVED && !itr->second.disabled);
 }
 
 TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell) const
@@ -4905,7 +4898,7 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
             for (PlayerSpellMap::const_iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
             {
                 ++next;
-                if(itr->second->state == PLAYERSPELL_REMOVED)
+                if(itr->second.state == PLAYERSPELL_REMOVED)
                     continue;
 
                 SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(itr->first);
@@ -13922,8 +13915,6 @@ void Player::_LoadQuestStatus(QueryResult *result)
 
 void Player::_LoadSpells(QueryResult *result)
 {
-    for (PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
-        delete itr->second;
     m_spells.clear();
 
     //QueryResult *result = CharacterDatabase.PQuery("SELECT spell,active,disabled FROM character_spell WHERE guid = '%u'",GetGUIDLow());
@@ -14698,18 +14689,18 @@ void Player::_SaveQuestStatus()
 
 void Player::_SaveSpells()
 {
-    for (PlayerSpellMap::const_iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
+    for (PlayerSpellMap::iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
     {
         ++next;
-        if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->state == PLAYERSPELL_CHANGED)
+        if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.state == PLAYERSPELL_CHANGED)
             CharacterDatabase.PExecute("DELETE FROM character_spell WHERE guid = '%u' and spell = '%u'", GetGUIDLow(), itr->first);
-        if (itr->second->state == PLAYERSPELL_NEW || itr->second->state == PLAYERSPELL_CHANGED)
-            CharacterDatabase.PExecute("INSERT INTO character_spell (guid,spell,active,disabled) VALUES ('%u', '%u', '%u', '%u')", GetGUIDLow(), itr->first, itr->second->active ? 1 : 0,itr->second->disabled ? 1 : 0);
+        if (itr->second.state == PLAYERSPELL_NEW || itr->second.state == PLAYERSPELL_CHANGED)
+            CharacterDatabase.PExecute("INSERT INTO character_spell (guid,spell,active,disabled) VALUES ('%u', '%u', '%u', '%u')", GetGUIDLow(), itr->first, itr->second.active ? 1 : 0,itr->second.disabled ? 1 : 0);
 
-        if (itr->second->state == PLAYERSPELL_REMOVED)
+        if (itr->second.state == PLAYERSPELL_REMOVED)
             _removeSpell(itr->first);
         else
-            itr->second->state = PLAYERSPELL_UNCHANGED;
+            itr->second.state = PLAYERSPELL_UNCHANGED;
     }
 }
 
@@ -15830,7 +15821,7 @@ void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs )
     time_t curTime = time(NULL);
     for(PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        if (itr->second->state == PLAYERSPELL_REMOVED)
+        if (itr->second.state == PLAYERSPELL_REMOVED)
             continue;
         uint32 unSpellId = itr->first;
         SpellEntry const *spellInfo = sSpellStore.LookupEntry(unSpellId);
@@ -16789,7 +16780,7 @@ void Player::learnQuestRewardedSpells(Quest const* quest)
             // search other specialization for same prof
             for(PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
             {
-                if(itr->second->state == PLAYERSPELL_REMOVED || itr->first==learned_0)
+                if(itr->second.state == PLAYERSPELL_REMOVED || itr->first==learned_0)
                     continue;
 
                 SpellEntry const *itrInfo = sSpellStore.LookupEntry(itr->first);
