@@ -2278,7 +2278,7 @@ void ObjectMgr::LoadStandingList(uint32 dateBegin)
     Field *fields = NULL;
     QueryResult *result2 = NULL;
     // this query create an ordered standing list
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid,SUM(honor) as honor_sum FROM character_kill WHERE TYPE = %u AND date BETWEEN %u AND %u GROUP BY guid ORDER BY honor_sum DESC",HONORABLE,dateBegin,dateBegin+7);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid,SUM(honor) as honor_sum FROM character_honor_cp WHERE TYPE = %u AND date BETWEEN %u AND %u GROUP BY guid ORDER BY honor_sum DESC",HONORABLE,dateBegin,dateBegin+7);
     if (result)
     {
         barGoLink bar(result->GetRowCount());
@@ -2291,7 +2291,7 @@ void ObjectMgr::LoadStandingList(uint32 dateBegin)
 
             kills=0;
             // kills count with victim setted ( not zero value )
-            result2 = CharacterDatabase.PQuery("SELECT COUNT(*) FROM character_kill WHERE guid = %u AND victim>0 AND TYPE = %u AND date BETWEEN %u AND %u",guid,HONORABLE,dateBegin,dateBegin+7);
+            result2 = CharacterDatabase.PQuery("SELECT COUNT(*) FROM character_honor_cp WHERE guid = %u AND victim>0 AND TYPE = %u AND date BETWEEN %u AND %u",guid,HONORABLE,dateBegin,dateBegin+7);
             if (result2)
                 kills = result2->Fetch()->GetUInt32();
 
@@ -2340,7 +2340,7 @@ void ObjectMgr::FlushRankPoints(uint32 dateBegin)
 {
     uint32 WeekBegin = dateBegin;
     uint8 WeekCount = 0;
-    QueryResult *result = CharacterDatabase.PQuery("SELECT date FROM character_kill WHERE TYPE = %u AND date <= %u GROUP BY date ORDER BY date DESC",HONORABLE,WeekBegin);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT date FROM character_honor_cp WHERE TYPE = %u AND date <= %u GROUP BY date ORDER BY date DESC",HONORABLE,WeekBegin);
     if (result)
     {
         uint32 date;
@@ -2367,7 +2367,7 @@ void ObjectMgr::FlushRankPoints(uint32 dateBegin)
         } while (result->NextRow());
     }
 
-    result = CharacterDatabase.PQuery("SELECT guid,TYPE,COUNT(*) AS kills FROM character_kill WHERE date <= %u AND victim_type>0 GROUP BY guid,type",dateBegin);
+    result = CharacterDatabase.PQuery("SELECT guid,TYPE,COUNT(*) AS kills FROM character_honor_cp WHERE date <= %u AND victim_type>0 GROUP BY guid,type",dateBegin);
     if (result)
     {
         uint32 guid,kills;
@@ -2380,7 +2380,7 @@ void ObjectMgr::FlushRankPoints(uint32 dateBegin)
             kills  = fields[2].GetUInt32();
 
             CharacterDatabase.BeginTransaction();
-            CharacterDatabase.PExecute("DELETE FROM character_kill WHERE guid = %u AND date <= %u",guid,dateBegin);
+            CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE guid = %u AND date <= %u",guid,dateBegin);
             if (type == HONORABLE ) 
                 CharacterDatabase.PExecute("UPDATE characters SET stored_honorable_kills = stored_honorable_kills + %u WHERE guid = %u",kills,guid);
             else if (type == DISHONORABLE ) 
@@ -2428,7 +2428,7 @@ void ObjectMgr::DistributeRankPoints(uint32 team, uint32 dateBegin , bool flush 
         if (flush)
         {
             CharacterDatabase.BeginTransaction();
-            CharacterDatabase.PExecute("DELETE FROM character_kill WHERE guid = %u AND TYPE = %u AND date BETWEEN %u AND %u",itr->guid,HONORABLE,dateBegin,dateBegin+7);
+            CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE guid = %u AND TYPE = %u AND date BETWEEN %u AND %u",itr->guid,HONORABLE,dateBegin,dateBegin+7);
             CharacterDatabase.PExecute("UPDATE characters SET stored_honor_rating = %f , stored_honorable_kills = %u WHERE guid = %u",finiteAlways(RP+itr->rpEarning),HK+itr->honorKills,itr->guid);
             CharacterDatabase.CommitTransaction();
         }

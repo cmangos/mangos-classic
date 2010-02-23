@@ -81,7 +81,6 @@ class BattleGroundWGScore : public BattleGroundScore
         uint32 FlagReturns;
 };
 
-
 enum BG_WS_Events
 {
     WS_EVENT_FLAG_A               = 0,
@@ -89,6 +88,10 @@ enum BG_WS_Events
     // spiritguides will spawn (same moment, like WS_EVENT_DOOR_OPEN)
     WS_EVENT_SPIRITGUIDES_SPAWN   = 2
 };
+
+// Honor granted depending on player's level
+const uint32 BG_WSG_FlagCapturedHonor[6] = {48, 82, 136, 226, 378, 396};
+const uint32 BG_WSG_WinMatchHonor[6] = {24, 41, 68, 113, 189, 198};
 
 class BattleGroundWS : public BattleGround
 {

@@ -230,8 +230,8 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         PlaySoundToAll(BG_WS_SOUND_FLAG_CAPTURED_HORDE);
         RewardReputationToTeam(889, m_ReputationCapture, HORDE);
     }
-    //for flag capture is reward 2 honorable kills
-    RewardHonorToTeam(GetBonusHonorFromKill(2), Source->GetTeam());
+    //for flag capture is reward distributed according level range
+    RewardHonorToTeamDepOnLvl(BG_WSG_FlagCapturedHonor, Source->GetTeam());
 
     // despawn flags
     SpawnEvent(WS_EVENT_FLAG_A, 0, false);
@@ -593,12 +593,9 @@ void BattleGroundWS::EndBattleGround(uint32 winner)
 {
     //win reward
     if (winner == ALLIANCE)
-        RewardHonorToTeam(GetBonusHonorFromKill(m_HonorWinKills), ALLIANCE);
+        RewardHonorToTeamDepOnLvl(BG_WSG_WinMatchHonor, ALLIANCE);
     if (winner == HORDE)
-        RewardHonorToTeam(GetBonusHonorFromKill(m_HonorWinKills), HORDE);
-    //complete map_end rewards (even if no team wins)
-    RewardHonorToTeam(GetBonusHonorFromKill(m_HonorEndKills), ALLIANCE);
-    RewardHonorToTeam(GetBonusHonorFromKill(m_HonorEndKills), HORDE);
+        RewardHonorToTeamDepOnLvl(BG_WSG_WinMatchHonor, HORDE);
 
     BattleGround::EndBattleGround(winner);
 }

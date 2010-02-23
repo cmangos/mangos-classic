@@ -43,7 +43,7 @@ static DumpTable dumpTables[DUMP_TABLE_COUNT] =
     { "character_aura",           DTT_CHAR_TABLE },
     { "character_homebind",       DTT_CHAR_TABLE },
     { "character_ticket",         DTT_CHAR_TABLE },
-    { "character_kill",           DTT_CHAR_TABLE },
+    { "character_honor_cp",       DTT_CHAR_TABLE },
     { "character_inventory",      DTT_INVENTORY  },
     { "mail",                     DTT_MAIL       },
     { "mail_items",               DTT_MAIL_ITEM  },

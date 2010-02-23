@@ -136,12 +136,16 @@ enum BG_AB_Sounds
 
 #define BG_AB_NotABBGWeekendHonorTicks      330
 #define BG_AB_ABBGWeekendHonorTicks         200
-#define BG_AB_NotABBGWeekendReputationTicks 200
-#define BG_AB_ABBGWeekendReputationTicks    150
+#define BG_AB_NotABBGWeekendReputationTicks 330
+#define BG_AB_ABBGWeekendReputationTicks    200
 
 // Tick intervals and given points: case 0,1,2,3,4,5 captured nodes
 const uint32 BG_AB_TickIntervals[6] = {0, 12000, 9000, 6000, 3000, 1000};
 const uint32 BG_AB_TickPoints[6] = {0, 10, 10, 10, 10, 30};
+
+// Honor granted depending on player's level
+const uint32 BG_AB_PerTickHonor[6] = {24, 41, 68, 113, 189, 198};
+const uint32 BG_AB_WinMatchHonor[6] = {24, 41, 68, 113, 189, 198};
 
 // WorldSafeLocs ids for 5 nodes, and for ally, and horde starting location
 const uint32 BG_AB_GraveyardIds[7] = {895, 894, 893, 897, 896, 898, 899};

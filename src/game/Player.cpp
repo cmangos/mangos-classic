@@ -5506,42 +5506,46 @@ void Player::UpdateHonor()
     uint32 total_dishonorableKills = GetHonorStoredKills(false);
     uint32 total_honorableKills = GetHonorStoredKills(true);
 
-    for (HonorKillsMap::iterator itr = m_honorKills.begin(); itr != m_honorKills.end(); ++itr)
+    for (HonorCPMap::iterator itr = m_honorCP.begin(); itr != m_honorCP.end(); ++itr)
     {
         if (itr->state == HK_DELETED)
             continue;
 
-        if(itr->type == HONORABLE)
+        if (itr->type == HONORABLE)
         {
-            total_honorableKills++;    
+            if (itr->isKill)
+                total_honorableKills++;    
 
-            if( itr->date == today)
+            if (itr->isKill && itr->date == today)
                 today_honorableKills++;
 
-            if( itr->date == yesterday)
+            if (itr->date == yesterday)
             {
-                yesterdayKills++;
+                if (itr->isKill)
+                    yesterdayKills++;
                 yesterdayHonor += itr->honorPoints;
             }
-            if( (itr->date >= thisWeekBegin) && (itr->date < thisWeekEnd) )
+            if ( (itr->date >= thisWeekBegin) && (itr->date < thisWeekEnd) )
             {
-                thisWeekKills++;
+                if (itr->isKill)
+                    thisWeekKills++;
                 thisWeekHonor += itr->honorPoints;
             }
-            if( (itr->date >= lastWeekBegin) && (itr->date < lastWeekEnd) )
+            if ( (itr->date >= lastWeekBegin) && (itr->date < lastWeekEnd) )
             {
-                lastWeekKills++;
+                if (itr->isKill)
+                    lastWeekKills++;
                 lastWeekHonor += itr->honorPoints;
             }
         }
-        else if (itr->type == DISHONORABLE)
+        else if (itr->isKill && itr->type == DISHONORABLE)
         {
             total_dishonorableKills++;
 
-            if( itr->date == today)
+            if ( itr->date == today)
                 today_dishonorableKills++;
             
-            if( itr->date > today)
+            if ( itr->date > today)
                 itr->state = HK_OLD;
         }
     }
@@ -5561,7 +5565,7 @@ void Player::UpdateHonor()
     //If the new rank is highest then the old one, then m_highest_rank is updated
     SetHonorRank(MaNGOS::Honor::CalculateHonorRank(GetRankPoints(),total_honorableKills));
     
-    if( GetHonorRank() > GetHonorHighestRank() )
+    if ( GetHonorRank() > GetHonorHighestRank() )
         SetHonorHighestRank( GetHonorRank() );
 
 
@@ -5570,7 +5574,7 @@ void Player::UpdateHonor()
     SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)GetRankPoints() > 0 ? GetRankPoints() : 0.0f);
 
     //RANK (Patent)
-    if( GetHonorRank() )
+    if ( GetHonorRank() )
         SetUInt32Value(PLAYER_BYTES_3, (( GetHonorRank() << 24) + 0x04000000) + (m_drunk & 0xFFFE) + getGender());
     else
         SetUInt32Value(PLAYER_BYTES_3, (m_drunk & 0xFFFE) + getGender());
@@ -5599,8 +5603,8 @@ void Player::UpdateHonor()
 void Player::ResetHonor()
 {
     //it will delete all honor permanently
-    CharacterDatabase.PExecute("DELETE FROM character_kills WHERE guid = '%u'",GetGUIDLow());
-    m_honorKills.clear();
+    CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE guid = '%u'",GetGUIDLow());
+    m_honorCP.clear();
     SetHonorStoredKills(0,true);
     SetHonorStoredKills(0,false);
     SetStoredHonor(0);
@@ -5609,7 +5613,7 @@ void Player::ResetHonor()
     UpdateHonor();
 }
 
-//How many times Player kill pVictim...
+//How many times Player kill pVictim... ( toDate shouldn't be > lastWeekBegin )
 uint32 Player::CalculateTotalKills(Unit *Victim,uint32 fromDate,uint32 toDate) const
 {
     uint32 total_kills = 0;
@@ -5632,8 +5636,8 @@ uint32 Player::CalculateTotalKills(Unit *Victim,uint32 fromDate,uint32 toDate) c
             return 0;
     }
 
-    for (HonorKillsMap::const_iterator itr = m_honorKills.begin(); itr != m_honorKills.end(); ++itr)
-        if (itr->victimType == vType && itr->victimID == ID)
+    for (HonorCPMap::const_iterator itr = m_honorCP.begin(); itr != m_honorCP.end(); ++itr)
+        if (itr->victimType != TYPEID_OBJECT && itr->victimType == vType && itr->victimID == ID)
             if (itr->date >= fromDate && itr->date <= toDate)
                 total_kills ++;
 
@@ -5659,14 +5663,14 @@ bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
         Creature *cVictim = (Creature *)uVictim;
         if (cVictim->isCivilian())
         {
-            AddHonorKill(MaNGOS::Honor::DishonorableKillPoints(getLevel()),DISHONORABLE,cVictim->GetEntry(),TYPEID_UNIT);
+            AddHonorCP(MaNGOS::Honor::DishonorableKillPoints(getLevel()),DISHONORABLE,cVictim->GetEntry(),TYPEID_UNIT);
             return true;
         }
 
         if (cVictim->isRacialLeader())
         {
             // maybe uncorrect honor value but no source to get it actually
-            AddHonorKill(398.0,HONORABLE,cVictim->GetEntry(),TYPEID_UNIT);
+            AddHonorCP(398.0,HONORABLE,cVictim->GetEntry(),TYPEID_UNIT);
             return true;
         } 
     }
@@ -5680,7 +5684,7 @@ bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
 
         if( getLevel() < (pVictim->getLevel()+5) )
         {
-            AddHonorKill( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
+            AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
             return true;
         } 
     }
@@ -5688,32 +5692,33 @@ bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
     return false;
 }
 
-bool Player::AddHonorKill(float honor,uint8 type,uint32 victim,uint8 victimType)
+bool Player::AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType)
 {
 
     if (!honor)
         return false;
 
-    // CharacterDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`victim`,`victim_type`,`honor`,`date`,`type`) VALUES (%u, %u, %u, %f, %u, %u)", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(),uVictim->GetType() (float)honor_points, (uint32)today, (uint8)kill_type);
+    // CharacterDatabase.PExecute("INSERT INTO `character_honor_cp` (`guid`,`victim`,`victim_type`,`honor`,`date`,`type`) VALUES (%u, %u, %u, %f, %u, %u)", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(),uVictim->GetType() (float)honor_points, (uint32)today, (uint8)kill_type);
     
-    HonorKill kill;
-    kill.date = sWorld.GetDateToday();
-    kill.honorPoints = honor;
-    kill.victimID = victim;
-    kill.victimType = victimType;
-    kill.type = type;
+    HonorCP CP;
+    CP.date = sWorld.GetDateToday();
+    CP.honorPoints = honor;
+    CP.victimID = victim;
+    CP.victimType = victimType;
+    CP.type = type;
 
     if (type == DISHONORABLE)
     {
         // DK penalties are subtracted from your RP score immediately 
         // and are not included in weekly adjustment
-        float RP = GetRankPoints() > kill.honorPoints ? GetRankPoints() - kill.honorPoints : 0;
+        float RP = GetRankPoints() > CP.honorPoints ? GetRankPoints() - CP.honorPoints : 0;
         SetStoredHonor(RP);
     }   
     
-    kill.state = HK_NEW;
+    CP.state = HK_NEW;
+    CP.isKill =  isKill(victimType);  
 
-    m_honorKills.push_back(kill);
+    m_honorCP.push_back(CP);
 
     UpdateHonor();
     return true;
@@ -12996,7 +13001,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     m_stored_dishonorableKills = fields[42].GetUInt32();
     m_stored_honorableKills    = fields[43].GetUInt32();
 
-    _LoadKills(holder->GetResult(PLAYER_LOGIN_QUERY_LOADKILLS));
+    _LoadHonorCP(holder->GetResult(PLAYER_LOGIN_QUERY_LOADHONORCP));
 
     _LoadBoundInstances(holder->GetResult(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES));
 
@@ -13662,24 +13667,26 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
     _ApplyAllItemMods();
 }
 
-void Player::_LoadKills(QueryResult *result)
+void Player::_LoadHonorCP(QueryResult *result)
 {
     if(result)
     {
-        m_honorKills.clear();
+        m_honorCP.clear();
         
         do
         {
             Field *fields = result->Fetch();
             
-            HonorKill kill;
-            kill.victimType       = fields[0].GetUInt8();
-            kill.victimID         = fields[1].GetUInt32();
-            kill.honorPoints      = fields[2].GetFloat();
-            kill.date             = fields[3].GetUInt32();
-            kill.type             = fields[4].GetUInt8();
+            HonorCP CP;
+            CP.victimType       = fields[0].GetUInt8();
+            CP.victimID         = fields[1].GetUInt32();
+            CP.honorPoints      = fields[2].GetFloat();
+            CP.date             = fields[3].GetUInt32();
+            CP.type             = fields[4].GetUInt8();
+            CP.state            = HK_UNCHANGED;
+            CP.isKill           = isKill(CP.victimType);
 
-            m_honorKills.push_back(kill);
+            m_honorCP.push_back(CP);
         } 
         while( result->NextRow() );
 
@@ -14393,7 +14400,7 @@ void Player::SaveToDB()
     _SaveActions();
     _SaveAuras();
     m_reputationMgr.SaveToDB();
-    _SaveKills();
+    _SaveHonorCP();
 
     CharacterDatabase.CommitTransaction();
 
@@ -14585,11 +14592,11 @@ void Player::_SaveInventory()
     m_itemUpdateQueue.clear();
 }
 
-void Player::_SaveKills()
+void Player::_SaveHonorCP()
 {
-    HonorKillsMap tempList;
+    HonorCPMap tempList;
     
-    for (HonorKillsMap::iterator itr = m_honorKills.begin(); itr != m_honorKills.end() ; ++itr)
+    for (HonorCPMap::iterator itr = m_honorCP.begin(); itr != m_honorCP.end() ; ++itr)
     {
 
         switch(itr->state)
@@ -14599,7 +14606,7 @@ void Player::_SaveKills()
                 itr->state = HK_DELETED;
                 break;
             case HK_NEW:
-                CharacterDatabase.PExecute("INSERT INTO character_kill (guid,victim_type,victim,honor,date,type) "
+                CharacterDatabase.PExecute("INSERT INTO character_honor_cp (guid,victim_type,victim,honor,date,type) "
                     " VALUES (%u,%u,%u,%f,%u,%u)", GetGUIDLow(), itr->victimType, itr->victimID, itr->honorPoints , itr->date, itr->type);
                 itr->state = HK_UNCHANGED;
                 tempList.push_back(*itr);
@@ -14612,8 +14619,8 @@ void Player::_SaveKills()
         }
     }
 
-    m_honorKills.clear();
-    m_honorKills = tempList;
+    m_honorCP.clear();
+    m_honorCP = tempList;
     tempList.clear();
 }
 

@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z0185_xxx_01_characters_saved_variables` bit(1) DEFAULT NULL
+  `required_z0212_xxx_01_characters_kill` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -256,13 +256,13 @@ LOCK TABLES `character_inventory` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `character_kill`
+-- Table structure for table `character_honor_cp`
 --
 
-DROP TABLE IF EXISTS `character_kill`;
+DROP TABLE IF EXISTS `character_honor_cp`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `character_kill` (
+CREATE TABLE `character_honor_cp` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `victim_type` TINYINT(3) UNSIGNED NOT NULL DEFAULT '4',                                             
   `victim` INT(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Creature / Player Identifier',  
@@ -274,12 +274,12 @@ CREATE TABLE `character_kill` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `character_kill`
+-- Dumping data for table `character_honor_cp`
 --
 
-LOCK TABLES `character_kill` WRITE;
-/*!40000 ALTER TABLE `character_kill` DISABLE KEYS */;
-/*!40000 ALTER TABLE `character_kill` ENABLE KEYS */;
+LOCK TABLES `character_honor_cp` WRITE;
+/*!40000 ALTER TABLE `character_honor_cp` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_honor_cp` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

@@ -334,6 +334,29 @@ void BattleGround::RewardHonorToTeam(uint32 Honor, uint32 TeamID)
     }
 }
 
+void BattleGround::RewardHonorToTeamDepOnLvl(const uint32 Honor[], uint32 TeamID)
+{
+    for(BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    {
+        Player *plr = sObjectMgr.GetPlayer(itr->first);
+
+        if(!plr)
+        {
+            sLog.outError("BattleGround: Player (GUID: %u) not found!", GUID_LOPART(itr->first));
+            continue;
+        }
+
+        uint32 team = itr->second.Team;
+        if(!team) team = plr->GetTeam();
+
+        if(team == TeamID)
+        {
+            uint32 range = GetLevelRange(plr->getLevel());
+            UpdatePlayerScore(plr, SCORE_BONUS_HONOR, Honor[range]);
+        }
+    }
+}
+
 void BattleGround::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, uint32 TeamID)
 {
     FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction_id);
@@ -440,7 +463,6 @@ void BattleGround::EndBattleGround(uint32 winner)
             if(!Source)
                 Source = plr;
             RewardMark(plr,ITEM_WINNER_COUNT);
-            UpdatePlayerScore(plr, SCORE_BONUS_HONOR, 20);
             RewardQuestComplete(plr);
         }
         else
@@ -472,6 +494,22 @@ uint32 BattleGround::GetBonusHonorFromKill(uint32 kills) const
 {
     //variable kills means how many honorable kills you scored (so we need kills * honor_for_one_kill)
     return (uint32)MaNGOS::Honor::hk_honor_at_level(GetMaxLevel(), kills);
+}
+
+uint32 BattleGround::GetLevelRange(uint32 level) const
+{
+    if (level < 20)
+        return 0;
+    else if (level < 30)
+        return 1;
+    else if (level < 40)
+        return 2;
+    else if (level < 50)
+        return 3;
+    else if (level < 60)
+        return 4;
+    else
+        return 5;
 }
 
 uint32 BattleGround::GetBattlemasterEntry() const
@@ -898,7 +936,7 @@ void BattleGround::UpdatePlayerScore(Player *Source, uint32 type, uint32 value)
             break;
         case SCORE_BONUS_HONOR:                             // Honor bonus
             // reward honor instantly
-            if(Source->AddHonorKill(value,HONORABLE,0,0))
+            if (Source->AddHonorCP(value,HONORABLE,0,0))
                 itr->second->BonusHonor += value;
             break;
         default:

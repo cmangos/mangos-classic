@@ -310,7 +310,7 @@ enum TYPE_OF_HONOR
     DISHONORABLE = 2,
 };
 
-struct HonorKill
+struct HonorCP
 {
    uint8 victimType;
    uint32 victimID;
@@ -318,6 +318,7 @@ struct HonorKill
    uint32 date;
    uint8 type;
    uint8 state;
+   bool isKill;
 };
 
 enum HonorKillState
@@ -328,7 +329,7 @@ enum HonorKillState
    HK_UNCHANGED = 3
 };
 
-typedef std::list<HonorKill> HonorKillsMap;
+typedef std::list<HonorCP> HonorCPMap;
 
 #define HONOR_RANK_COUNT 16
 
@@ -597,7 +598,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADAURAS                = 3,
     PLAYER_LOGIN_QUERY_LOADSPELLS               = 4,
     PLAYER_LOGIN_QUERY_LOADQUESTSTATUS          = 5,
-    PLAYER_LOGIN_QUERY_LOADKILLS                = 6,
+    PLAYER_LOGIN_QUERY_LOADHONORCP              = 6,
     PLAYER_LOGIN_QUERY_LOADTUTORIALS            = 7,        // common for all characters for some account at specific realm
     PLAYER_LOGIN_QUERY_LOADREPUTATION           = 8,
     PLAYER_LOGIN_QUERY_LOADINVENTORY            = 9,
@@ -1510,17 +1511,20 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
-        bool AddHonorKill(float honor,uint8 type,uint32 victim,uint8 victimType);
+        bool AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType);
         void UpdateHonor();
         void ResetHonor();
         bool CalculateHonor(Unit *pVictim,uint32 groupsize);
+        //Assume only Players and Units as kills
+        //TYPEID_OBJECT used for CP from BG,quests etc.
+        bool isKill(uint8 victimType) { return (victimType == TYPEID_UNIT || victimType == TYPEID_PLAYER ); }
         uint32 CalculateTotalKills(Unit *Victim,uint32 fromDate,uint32 toDate) const;
         //Acessors of honor rank
-        uint32 GetHonorRank() const { return m_honor_rank; };
-        void SetHonorRank(uint8 rank) { m_honor_rank = rank; };
+        uint32 GetHonorRank() const { return m_honor_rank; }
+        void SetHonorRank(uint8 rank) { m_honor_rank = rank; }
         //Acessors of total honor points
-        void SetRankPoints(float rankPoints) { m_rank_points = rankPoints; };
-        float GetRankPoints(void) const { return m_rank_points; };
+        void SetRankPoints(float rankPoints) { m_rank_points = rankPoints; }
+        float GetRankPoints(void) const { return m_rank_points; }
         //Acessors of righest rank
         uint32 GetHonorHighestRank() const { return m_highest_rank; }
         void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; }
@@ -1914,7 +1918,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadAuras(QueryResult *result, uint32 timediff);
         void _LoadBoundInstances(QueryResult *result);
         void _LoadInventory(QueryResult *result, uint32 timediff);
-        void _LoadKills(QueryResult *result);
+        void _LoadHonorCP(QueryResult *result);
         void _LoadMailInit(QueryResult *resultUnread, QueryResult *resultDelivery);
         void _LoadMail();
         void _LoadMailedItems(Mail *mail);
@@ -1932,7 +1936,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveActions();
         void _SaveAuras();
         void _SaveInventory();
-        void _SaveKills();
+        void _SaveHonorCP();
         void _SaveMail();
         void _SaveQuestStatus();
         void _SaveSpells();
@@ -1956,7 +1960,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
-        HonorKillsMap m_honorKills; 
+        HonorCPMap m_honorCP; 
         uint8 m_honor_rank;
         float m_rank_points;
         float m_stored_honor;
