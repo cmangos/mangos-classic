@@ -441,11 +441,15 @@ LogColors = ""
 #    MaintenanceDay
 #        The day of the week is performed server maintenance ( currently used for Honor distribution )
 #        range (0..6): 0 is the first day of the week , 6 is the latest 
-#        Default: 4
+#        Default: 2 (Wednesday in EU)
 #
 #    InstantLogout
 #        Enable or disable instant logout for security level (0..4) or high (NOT in combat/while dueling/while falling)
 #        Default: 1 (Mods/GMs/Admins)
+#
+#    DisableWaterBreath
+#        Disable/enable water breath for security level (0..4) or high
+#        Default: 4 (None)
 #
 #    AllFlightPaths
 #        Players will start with all flight paths (Note: ALL flight paths, not only player's team)
@@ -602,7 +606,7 @@ StartPlayerLevel = 1
 StartPlayerMoney = 0
 MaxHonorPoints = 75000
 StartHonorPoints = 0
-MaintenanceDay = 4
+MaintenanceDay = 2
 InstantLogout = 1
 DisableWaterBreath = 4
 AllFlightPaths = 0

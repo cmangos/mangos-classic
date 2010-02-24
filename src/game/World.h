@@ -433,11 +433,12 @@ class World
         uint32 GetDateLastMaintenanceDay() const 
         { 
             uint32 today = GetDateToday();
-            tm *date =  GetLocalTimeByTime(m_gameTime);
-            if (getConfig(CONFIG_UINT32_MAINTENANCE_DAY) > (uint32)date->tm_wday)
-               return today - ( (  date->tm_wday + getConfig(CONFIG_UINT32_MAINTENANCE_DAY)) + 1 );
+            uint32 mDay  = getConfig(CONFIG_UINT32_MAINTENANCE_DAY);
+            tm *date     = GetLocalTimeByTime(m_gameTime);
+            if (mDay < (uint32)date->tm_wday)
+               return today - ( date->tm_wday + mDay );
             else
-               return today - ( getConfig(CONFIG_UINT32_MAINTENANCE_DAY) - date->tm_wday );
+               return today - ( mDay - date->tm_wday );
         }
 
         /// Get the maximum skill level a player can reach

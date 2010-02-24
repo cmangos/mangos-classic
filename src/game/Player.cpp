@@ -5518,7 +5518,7 @@ void Player::UpdateHonor()
                     yesterdayKills++;
                 yesterdayHonor += itr->honorPoints;
             }
-            if ( (itr->date >= thisWeekBegin) && (itr->date < thisWeekEnd) )
+            if ( (itr->date >= thisWeekBegin) && (itr->date <= thisWeekEnd) )
             {
                 if (itr->isKill)
                     thisWeekKills++;
