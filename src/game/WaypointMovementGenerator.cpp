@@ -94,7 +94,6 @@ void WaypointMovementGenerator<Creature>::Interrupt( Creature &u )
 
 void WaypointMovementGenerator<Creature>::Reset( Creature &u )
 {
-    ReloadPath(u);
     b_StoppedByPlayer = false;
     i_nextMoveTime.Reset(0);
     u.addUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
@@ -130,7 +129,11 @@ bool WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint3
     CreatureTraveller traveller(creature);
 
     i_nextMoveTime.Update(diff);
-    i_destinationHolder.UpdateTraveller(traveller, diff, false, true);
+    if (i_destinationHolder.UpdateTraveller(traveller, diff, false, true))
+    {
+        if (!IsActive(creature))                            // force stop processing (movement can move out active zone with cleanup movegens list)
+            return true;                                    // not expire now, but already lost
+    }
 
     // creature has been stopped in middle of the waypoint segment
     if (!i_destinationHolder.HasArrived() && creature.IsStopped())
@@ -203,6 +206,16 @@ bool WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint3
 
             i_hasDone[idx] = true;
             MovementInform(creature);
+
+            if (!IsActive(creature))                        // force stop processing (movement can move out active zone with cleanup movegens list)
+                return true;                                // not expire now, but already lost
+
+            // prevent a crash at empty waypoint path.
+            if (!i_path || i_path->empty() || i_currentNode >= i_path->size())
+            {
+                creature.clearUnitState(UNIT_STAT_ROAMING_MOVE);
+                return true;
+            }
         }                                                   // HasDone == false
     }                                                       // i_creature.IsStopped()
 
@@ -254,7 +267,12 @@ void WaypointMovementGenerator<Creature>::MovementInform(Creature &unit)
     if (unit.AI())
         unit.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
 }
-//[-ZERO] maybe flightpath code should be dropped
+
+bool WaypointMovementGenerator<Creature>::GetResetPosition( Creature&, float& x, float& y, float& z )
+{
+    return PathMovementBase<Creature, WaypointPath const*>::GetPosition(x,y,z);
+}
+
 //----------------------------------------------------//
 void FlightPathMovementGenerator::LoadPath(Player &)
 {
