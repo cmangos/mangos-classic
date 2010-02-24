@@ -36,6 +36,7 @@
 #include "Policies/SingletonImp.h"
 #include "Totem.h"
 #include "Creature.h"
+#include "ScriptCalls.h"
 #include "Formulas.h"
 #include "BattleGround.h"
 #include "CreatureAI.h"
@@ -1800,6 +1801,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
         }
     }
+
+    // script has to "handle with care", only use where data are not ok to use in the above code.
+    if (m_target->GetTypeId() == TYPEID_UNIT)
+        Script->EffectAuraDummy(this, apply);
 }
 
 void Aura::HandleAuraMounted(bool apply, bool Real)
