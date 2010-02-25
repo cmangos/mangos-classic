@@ -14600,6 +14600,7 @@ void Player::_SaveKills()
             case HK_NEW:
                 CharacterDatabase.PExecute("INSERT INTO character_kill (guid,victim_type,victim,honor,date,type) "
                     " VALUES (%u,%u,%u,%f,%u,%u)", GetGUIDLow(), itr->victimType, itr->victimID, itr->honorPoints , itr->date, itr->type);
+                itr->state = HK_UNCHANGED;
                 tempList.push_back(*itr);
                 break;
             case HK_UNCHANGED:
