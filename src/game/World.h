@@ -436,7 +436,7 @@ class World
             uint32 mDay  = getConfig(CONFIG_UINT32_MAINTENANCE_DAY);
             tm *date     = GetLocalTimeByTime(m_gameTime);
             if (mDay < (uint32)date->tm_wday)
-               return today - ( date->tm_wday + mDay );
+               return today - ( (date->tm_wday+1) + (mDay+1) + 1 );
             else
                return today - ( mDay - date->tm_wday );
         }

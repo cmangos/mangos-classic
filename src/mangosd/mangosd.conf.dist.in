@@ -604,7 +604,6 @@ MaxHonorPoints = 75000
 StartHonorPoints = 0
 MaintenanceDay = 2
 InstantLogout = 1
-DisableWaterBreath = 4
 AllFlightPaths = 0
 AlwaysMaxSkillForLevel = 0
 ActivateWeather = 1
