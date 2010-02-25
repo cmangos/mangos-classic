@@ -387,7 +387,7 @@ enum UnitState
     UNIT_STAT_ISOLATED        = 0x00000020,                     // area auras do not affect other players, Aura::HandleAuraModSchoolImmunity
 
     // persistent movement generator state (all time while movement generator applied to unit (independent from top state of movegen)
-    UNIT_STAT_IN_FLIGHT       = 0x00000040,                     // player is in flight mode
+    UNIT_STAT_IN_FLIGHT       = 0x00000040,                     // player is in flight mode (in fact interrupted at far teleport until next map telport landing)
     UNIT_STAT_DISTRACTED      = 0x00000080,                     // DistractedMovementGenerator active
 
     // persistent movement generator state with non-persistent mirror states for stop support
@@ -605,12 +605,10 @@ enum SplineFlags
 {
     SPLINEFLAG_NONE           = 0x00000000,
     SPLINEFLAG_WALKMODE       = 0x00000100,
+    SPLINEFLAG_FLYING         = 0x00000200,
     SPLINEFLAG_LEVITATING     = 0x00000400,
     SPLINEFLAG_UNKNOWN7       = 0x02000000,               // swimming/flying (depends on mob?)
     SPLINEFLAG_SPLINE         = 0x00002000,               // spline n*(float x,y,z)
-
-    // masks
-    SPLINEFLAG_SPLINE_FLY     = 0x00000300,               // fly by points
 };
 
 enum SplineType
