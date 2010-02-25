@@ -341,10 +341,8 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this)
     m_groupUpdateMask = 0;
     m_auraUpdateMask = 0;
 
-    m_total_honor_points = 0.0f;
-    m_pending_honor = 0.0f;
-    m_pending_honorableKills = 0;
-    m_pending_dishonorableKills = 0;
+    m_rank_points = 0.0f;
+    m_honor_rank  = 0.0f;
     m_stored_honorableKills = 0;
     m_stored_dishonorableKills = 0;
 
@@ -447,9 +445,6 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this)
         m_auraBaseMod[i][FLAT_MOD] = 0.0f;
         m_auraBaseMod[i][PCT_MOD] = 1.0f;
     }
-
-    // Honor System
-    m_lastHonorUpdateTime = NULL;
 
     // Player summoning
     m_summon_expire = 0;
@@ -604,7 +599,7 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
 
     m_stored_honor = 0.0f;
     m_highest_rank = 0;
-    m_standing = 0;
+    m_standing_pos = 0;
 
     // set starting level
     if (GetSession()->GetSecurity() >= SEC_MODERATOR)
@@ -5489,10 +5484,6 @@ void Player::UpdateHonor()
     uint32 lastweek_honorableKills = 0;
     uint32 today_honorableKills = 0;
     uint32 today_dishonorableKills = 0;
-    m_pending_honorableKills = 0;
-    m_pending_dishonorableKills = 0;
-    m_pending_honor = 0.0f;
-
     uint32 yesterdayKills = 0;
     uint32 thisWeekKills = 0;
     uint32 lastWeekKills = 0;
@@ -5502,13 +5493,10 @@ void Player::UpdateHonor()
     float lastWeekHonor = 0.0f;
     float todayLostHonor = 0.0f;
 
-    tm* now = localtime( &sWorld.GetGameTime() );
-    m_lastHonorUpdateTime = now;
-
-    uint32 today = sWorld.GetDateToday(now);
+    uint32 today = sWorld.GetDateToday();
 
     uint32 yesterday     = today - 1;
-    uint32 thisWeekBegin = today - now->tm_wday;
+    uint32 thisWeekBegin = sWorld.GetDateLastMaintenanceDay();
     uint32 thisWeekEnd   = thisWeekBegin + 7;
     uint32 lastWeekBegin = thisWeekBegin - 7;
     uint32 lastWeekEnd   = lastWeekBegin + 7;
@@ -5523,7 +5511,7 @@ void Player::UpdateHonor()
         if (itr->state == HK_DELETED)
             continue;
 
-        if(itr->type == HONORABLE_KILL)
+        if(itr->type == HONORABLE)
         {
             total_honorableKills++;    
 
@@ -5545,68 +5533,45 @@ void Player::UpdateHonor()
                 lastWeekKills++;
                 lastWeekHonor += itr->honorPoints;
             }
-            
-            if(itr->date < lastWeekBegin)
-            {
-                m_pending_honor += itr->honorPoints;
-                m_pending_honorableKills++;
-                itr->state = HK_OLD;
-            }
-
         }
-        else if (itr->type == DISHONORABLE_KILL)
+        else if (itr->type == DISHONORABLE)
         {
             total_dishonorableKills++;
 
             if( itr->date == today)
-            {
-                // DK penalties are subtracted from your RP score immediately 
-                // and are not included in the weekly adjustment
-                todayLostHonor =  itr->honorPoints;
                 today_dishonorableKills++;
-            }
-
-            if( itr->date == yesterday)
-                yesterdayHonor -= itr->honorPoints;
-
-            if( (itr->date >= thisWeekBegin) && (itr->date < thisWeekEnd) )
-                thisWeekHonor -= itr->honorPoints;
-
-            if( (itr->date >= lastWeekBegin) && (itr->date < lastWeekEnd) )
-                lastWeekHonor -= itr->honorPoints;
             
-            if( itr->date < lastWeekBegin)
-            {
-                m_pending_honor -= itr->honorPoints;
-                m_pending_dishonorableKills++;
+            if( itr->date > today)
                 itr->state = HK_OLD;
-            }
         }
     }
 
-    //Store Total Honor points 
-    SetTotalHonor(lastWeekHonor + m_pending_honor + GetStoredHonor() - todayLostHonor);
+    //STANDING
+    SetHonorLastWeekStandingPos(sObjectMgr.GetHonorStandingPositionByGUID(GetGUIDLow(),GetTeam()) );
+
+    //RANK POINTS
+    HonorStanding *standing = sObjectMgr.GetHonorStandingByGUID(GetGUIDLow(),GetTeam());
+    uint32 rankP = GetStoredHonor();
+    if (standing)
+        rankP += standing->rpEarning;
+
+    SetRankPoints(rankP);
 
     //RIGHEST RANK
     //If the new rank is highest then the old one, then m_highest_rank is updated
-    uint32 honor_rank = CalculateHonorRank(GetTotalHonor());
+    SetHonorRank(MaNGOS::Honor::CalculateHonorRank(GetRankPoints(),total_honorableKills));
     
-    if( honor_rank > GetHonorHighestRank() )
-        SetHonorHighestRank( honor_rank );
+    if( GetHonorRank() > GetHonorHighestRank() )
+        SetHonorHighestRank( GetHonorRank() );
 
-    //RATING
-    //MaNGOS::Honor::CalculeRating(this) );
-
-    //STANDING
-    SetHonorLastWeekStanding( MaNGOS::Honor::CalculeStanding(this,lastWeekHonor,lastweek_honorableKills) );
 
     //NEXT RANK BAR
     //PLAYER_FIELD_HONOR_BAR
-    SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)GetTotalHonor() > 0 ? GetTotalHonor() : 0.0f);
+    SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)GetRankPoints() > 0 ? GetRankPoints() : 0.0f);
 
     //RANK (Patent)
-    if( honor_rank )
-        SetUInt32Value(PLAYER_BYTES_3, (( honor_rank << 24) + 0x04000000) + (m_drunk & 0xFFFE) + getGender());
+    if( GetHonorRank() )
+        SetUInt32Value(PLAYER_BYTES_3, (( GetHonorRank() << 24) + 0x04000000) + (m_drunk & 0xFFFE) + getGender());
     else
         SetUInt32Value(PLAYER_BYTES_3, (m_drunk & 0xFFFE) + getGender());
 
@@ -5621,7 +5586,7 @@ void Player::UpdateHonor()
     //LAST WEEK
     SetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS, lastWeekKills);
     SetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION, (uint32) (lastWeekHonor > 0.0f ? lastWeekHonor : 0.0f));
-    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK, GetHonorLastWeekStanding());
+    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK, GetHonorLastWeekStandingPos());
 
     //LIFE TIME
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, total_honorableKills);
@@ -5639,35 +5604,13 @@ void Player::ResetHonor()
     SetHonorStoredKills(0,true);
     SetHonorStoredKills(0,false);
     SetStoredHonor(0);
-    SetHonorLastWeekStanding(0);
+    SetHonorLastWeekStandingPos(0);
     SetHonorHighestRank(0);
     UpdateHonor();
 }
 
-uint32 Player::GetHonorRank() const
-{
-    return CalculateHonorRank(m_total_honor_points);
-}
-
-//What is Player's rank... private, scout...
-uint32 Player::CalculateHonorRank(float honor_points) const
-{
-    uint32 rank = 0;
-    // you can modify this formula on negative values to show old dishonored ranks too
-    if(honor_points <=    0.00)
-        rank = 0;
-    else if(honor_points <  2000.00)
-        rank = 1;
-    else if(honor_points > ((HONOR_RANK_COUNT-1)-1)*5000)
-        rank = HONOR_RANK_COUNT-1;
-    else
-        rank = uint32(honor_points / 5000) + 1;
-
-    return rank;
-}
-
 //How many times Player kill pVictim...
-uint32 Player::CalculateTotalKills(Unit *Victim) const
+uint32 Player::CalculateTotalKills(Unit *Victim,uint32 fromDate,uint32 toDate) const
 {
     uint32 total_kills = 0;
     uint32 ID= 0;
@@ -5691,7 +5634,8 @@ uint32 Player::CalculateTotalKills(Unit *Victim) const
 
     for (HonorKillsMap::const_iterator itr = m_honorKills.begin(); itr != m_honorKills.end(); ++itr)
         if (itr->victimType == vType && itr->victimID == ID)
-            total_kills ++;
+            if (itr->date >= fromDate && itr->date <= toDate)
+                total_kills ++;
 
     return total_kills;
 }
@@ -5715,14 +5659,14 @@ bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
         Creature *cVictim = (Creature *)uVictim;
         if( cVictim->isCivilian() )
         {
-            AddHonorKill(MaNGOS::Honor::DishonorableKillPoints(getLevel()),DISHONORABLE_KILL,cVictim->GetEntry(),TYPEID_UNIT);
+            AddHonorKill(MaNGOS::Honor::DishonorableKillPoints(getLevel()),DISHONORABLE,cVictim->GetEntry(),TYPEID_UNIT);
             return true;
         }
 
         if( cVictim->isRacialLeader() )
         {
-            // maybe uncorrect honor points ( share with group?)
-            AddHonorKill(100.0,HONORABLE_KILL,cVictim->GetEntry(),TYPEID_UNIT);
+            // maybe uncorrect honor value but no source to get it actually
+            AddHonorKill(398.0,HONORABLE,cVictim->GetEntry(),TYPEID_UNIT);
             return true;
         } 
     }
@@ -5736,7 +5680,7 @@ bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
 
         if( getLevel() < (pVictim->getLevel()+5) )
         {
-            AddHonorKill( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE_KILL,pVictim->GetGUIDLow(),TYPEID_PLAYER);
+            AddHonorKill( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
             return true;
         } 
     }
@@ -5750,17 +5694,23 @@ bool Player::AddHonorKill(float honor,uint8 type,uint32 victim,uint8 victimType)
     if (!honor)
         return false;
 
-    if (!victim)
-        return false;
-
     // CharacterDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`victim`,`victim_type`,`honor`,`date`,`type`) VALUES (%u, %u, %u, %f, %u, %u)", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(),uVictim->GetType() (float)honor_points, (uint32)today, (uint8)kill_type);
     
     HonorKill kill;
-    kill.date = sWorld.GetDateToday(localtime( &sWorld.GetGameTime() ));
+    kill.date = sWorld.GetDateToday();
     kill.honorPoints = honor;
     kill.victimID = victim;
     kill.victimType = victimType;
     kill.type = type;
+
+    if (type == DISHONORABLE)
+    {
+        // DK penalties are subtracted from your RP score immediately 
+        // and are not included in weekly adjustment
+        float RP = GetRankPoints() > kill.honorPoints ? GetRankPoints() - kill.honorPoints : 0;
+        SetStoredHonor(RP);
+    }   
+    
     kill.state = HK_NEW;
 
     m_honorKills.push_back(kill);
@@ -13041,10 +12991,10 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     _LoadGroup(holder->GetResult(PLAYER_LOGIN_QUERY_LOADGROUP));
 
     m_highest_rank = fields[39].GetUInt32();
-    m_standing = fields[40].GetUInt32();
+    m_standing_pos = fields[40].GetUInt32();
     m_stored_honor = fields[41].GetFloat();
-    SetHonorStoredKills(fields[42].GetUInt32(),false);
-    SetHonorStoredKills(fields[43].GetUInt32(),true);
+    m_stored_dishonorableKills = fields[42].GetUInt32();
+    m_stored_honorableKills    = fields[43].GetUInt32();
 
     _LoadKills(holder->GetResult(PLAYER_LOGIN_QUERY_LOADKILLS));
 
@@ -14416,16 +14366,16 @@ void Player::SaveToDB()
     ss << m_highest_rank;
 
     ss << ", ";
-    ss << m_standing;
+    ss << m_standing_pos;
 
     ss << ", ";
-    ss << finiteAlways(m_stored_honor+m_pending_honor);
+    ss << finiteAlways(m_stored_honor);
 
     ss << ", ";
-    ss << uint32(m_stored_dishonorableKills+m_pending_dishonorableKills);
+    ss << m_stored_dishonorableKills;
     
     ss << ", ";
-    ss << uint32(m_stored_honorableKills+m_pending_honorableKills);
+    ss << m_stored_honorableKills;
 
     ss << ")";
 
@@ -14637,8 +14587,6 @@ void Player::_SaveInventory()
 void Player::_SaveKills()
 {
     HonorKillsMap tempList;
-
-    CharacterDatabase.PExecute("DELETE FROM character_kill WHERE date < '%u' AND guid = '%u'", sWorld.GetDateLastWeekBegin(m_lastHonorUpdateTime),GetGUIDLow() );
     
     for (HonorKillsMap::iterator itr = m_honorKills.begin(); itr != m_honorKills.end() ; ++itr)
     {

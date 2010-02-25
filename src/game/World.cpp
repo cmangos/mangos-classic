@@ -721,6 +721,14 @@ void World::LoadConfigSettings(bool reload)
         m_configs[CONFIG_START_HONOR_POINTS] = m_configs[CONFIG_MAX_HONOR_POINTS];
     }
 
+    m_configs[CONFIG_MAINTENANCE_DAY] = sConfig.GetIntDefault("MaintenanceDay", 4);
+    if(int8(m_configs[CONFIG_MAINTENANCE_DAY]) < 0 || int8(m_configs[CONFIG_MAINTENANCE_DAY]) > 6 )
+    {
+        sLog.outError("MaintenanceDay (%i) must be in range 0..6. Set to %u.",
+            m_configs[CONFIG_MAINTENANCE_DAY],4);
+        m_configs[CONFIG_MAINTENANCE_DAY] = 4;
+    }
+
     m_configs[CONFIG_ALL_TAXI_PATHS] = sConfig.GetBoolDefault("AllFlightPaths", false);
 
     m_configs[CONFIG_INSTANCE_IGNORE_LEVEL] = sConfig.GetBoolDefault("Instance.IgnoreLevel", false);
@@ -1204,9 +1212,6 @@ void World::SetInitialWorldSettings()
     sLog.outString( ">>> Player Create Info & Level Stats loaded" );
     sLog.outString();
 
-    sLog.outString( "Loading Honor Rating List..." );
-    sObjectMgr.LoadRatingList();
-
     sLog.outString( "Loading Exploration BaseXP Data..." );
     sObjectMgr.LoadExplorationBaseXP();
 
@@ -1371,6 +1376,12 @@ void World::SetInitialWorldSettings()
     sLog.outString("Starting objects Pooling system..." );
     sPoolMgr.Initialize();
 
+    sLog.outString("Starting server Maintenance system..." );
+    InitServerMaintenanceCheck();
+
+    sLog.outString("Loading Honor Standing list..." );
+    sObjectMgr.LoadStandingList();
+
     sLog.outString("Starting Game Event system..." );
     uint32 nextGameEvent = sGameEventMgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    //depend on next event
@@ -1530,6 +1541,17 @@ void World::Update(uint32 diff)
 
     // update the instance reset times
     sInstanceSaveMgr.Update();
+
+    if (m_MaintenanceTimeChecker < diff)
+    {
+        if (GetDateToday() >= m_NextMaintenanceDate)
+        {
+            InitServerMaintenanceCheck();
+        }
+        m_MaintenanceTimeChecker = 600000; // check 10 minutes
+    }
+    else
+        m_MaintenanceTimeChecker -= diff;
 
     // And last, but not least handle the issued cli commands
     ProcessCliCommands();
@@ -2589,6 +2611,40 @@ void World::UpdateSessions( uint32 diff )
             m_sessions.erase(itr);
         }
     }
+}
+
+void World::ServerMaintenanceStart()
+{
+    uint32 LastWeekBegin = GetDateLastMaintenanceDay() - 7;
+    // re-loading standing and flushing rank points list
+    sObjectMgr.FlushRankPoints(LastWeekBegin);
+}
+
+void World::InitServerMaintenanceCheck()
+{
+    QueryResult * result = CharacterDatabase.Query("SELECT NextMaintenanceDate FROM saved_variables");
+    if (!result)
+    {
+
+        sLog.outDebug("Maintenance date not found in SavedVariables, reseting it now.");
+        uint32 mDate = GetDateLastMaintenanceDay();
+        m_NextMaintenanceDate = mDate == GetDateToday() ?  mDate : mDate + 7;
+        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextMaintenanceDate) VALUES ('"UI64FMTD"')", uint64(m_NextMaintenanceDate));
+    }
+    else
+    {
+        m_NextMaintenanceDate = (*result)[0].GetUInt64();
+        delete result;
+    }
+
+    if (m_NextMaintenanceDate <= GetDateToday() )
+    {
+        ServerMaintenanceStart();
+        m_NextMaintenanceDate = GetDateLastMaintenanceDay() + 7;
+        CharacterDatabase.PExecute("UPDATE saved_variables SET NextMaintenanceDate = '"UI64FMTD"'", uint64(m_NextMaintenanceDate));
+    }
+
+    sLog.outDebug("Server maintenance check initialized.");
 }
 
 // This handles the issued and queued CLI commands

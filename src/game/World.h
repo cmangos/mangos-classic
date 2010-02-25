@@ -119,6 +119,7 @@ enum WorldConfigs
     CONFIG_START_PLAYER_MONEY,
     CONFIG_MAX_HONOR_POINTS,
     CONFIG_START_HONOR_POINTS,
+    CONFIG_MAINTENANCE_DAY,
     CONFIG_INSTANCE_IGNORE_LEVEL,
     CONFIG_INSTANCE_IGNORE_RAID,
     CONFIG_BATTLEGROUND_CAST_DESERTER,
@@ -411,8 +412,19 @@ class World
         /// Uptime (in secs)
         uint32 GetUptime() const { return uint32(m_gameTime - m_startTime); }
 
-        uint32 GetDateToday(tm *now) const { return ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday)); }
-        uint32 GetDateLastWeekBegin(tm *now) const { return GetDateToday(now) - now->tm_wday - 7; }
+        tm *GetLocalTimeByTime(time_t now) const { return localtime(&now); }
+        uint32 GetDateByLocalTime(tm * now) const { return ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday)); }
+        uint32 GetDateToday() const {   return GetDateByLocalTime( GetLocalTimeByTime(m_gameTime) ); }
+        uint32 GetDateThisWeekBegin() const {   return GetDateToday() - GetLocalTimeByTime(m_gameTime)->tm_wday; }
+        uint32 GetDateLastMaintenanceDay() const 
+        { 
+            uint32 today = GetDateToday();
+            tm *date =  GetLocalTimeByTime(m_gameTime);
+            if (m_configs[CONFIG_MAINTENANCE_DAY] > (uint32)date->tm_wday)
+               return today - ( (  date->tm_wday + m_configs[CONFIG_MAINTENANCE_DAY]) + 1 );
+            else
+               return today - ( m_configs[CONFIG_MAINTENANCE_DAY] - date->tm_wday );
+        }
 
         /// Get the maximum skill level a player can reach
         uint16 GetConfigMaxSkillValue() const
@@ -487,6 +499,9 @@ class World
         static float GetVisibleUnitGreyDistance()           { return m_VisibleUnitGreyDistance;       }
         static float GetVisibleObjectGreyDistance()         { return m_VisibleObjectGreyDistance;     }
 
+        void InitServerMaintenanceCheck();
+        void ServerMaintenanceStart();
+
         void ProcessCliCommands();
         void QueueCliCommand( CliCommandHolder::Print* zprintf, char const* input ) { cliCmdQueue.add(new CliCommandHolder(input, zprintf)); }
 
@@ -517,6 +532,9 @@ class World
         static uint8 m_ExitCode;
         uint32 m_ShutdownTimer;
         uint32 m_ShutdownMask;
+
+        uint32 m_NextMaintenanceDate;
+        uint32 m_MaintenanceTimeChecker;
 
         time_t m_startTime;
         time_t m_gameTime;

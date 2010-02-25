@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z0169_091_01_characters_group` bit(1) DEFAULT NULL
+  `required_z0185_xxx_01_characters_saved_variables` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1110,6 +1110,27 @@ LOCK TABLES `petition_sign` WRITE;
 /*!40000 ALTER TABLE `petition_sign` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+
+--
+-- Table structure for table `saved_variables`
+--
+
+DROP TABLE IF EXISTS `saved_variables`;
+CREATE TABLE `saved_variables` (
+    `NextMaintenanceDate` int(11) UNSIGNED NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Variable Saves';
+
+--
+-- Dumping data for table `saved_variables`
+--
+
+LOCK TABLES `saved_variables` WRITE;
+/*!40000 ALTER TABLE `saved_variables` DISABLE KEYS */;
+/*!40000 ALTER TABLE `saved_variables` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

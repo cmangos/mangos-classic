@@ -438,6 +438,11 @@ LogColors = ""
 #        Amount of honor that new players will start with
 #        Default: 0
 #
+#    MaintenanceDay
+#        The day of the week is performed server maintenance ( currently used for Honor distribution )
+#        range (0..6): 0 is the first day of the week , 6 is the latest 
+#        Default: 4
+#
 #    InstantLogout
 #        Enable or disable instant logout for security level (0..4) or high (NOT in combat/while dueling/while falling)
 #        Default: 1 (Mods/GMs/Admins)
@@ -597,6 +602,7 @@ StartPlayerLevel = 1
 StartPlayerMoney = 0
 MaxHonorPoints = 75000
 StartHonorPoints = 0
+MaintenanceDay = 4
 InstantLogout = 1
 DisableWaterBreath = 4
 AllFlightPaths = 0

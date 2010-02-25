@@ -3563,7 +3563,7 @@ bool ChatHandler::HandleShowHonor(const char* args)
     char const* hrank_name = NULL;
  
     Player *target = getSelectedPlayer();
-    uint32 honor_rank = target->CalculateHonorRank( target->GetTotalHonor() );
+    uint32 honor_rank = target->GetHonorRank();
 
     if ( target->GetTeam() == ALLIANCE )
     {

@@ -2319,6 +2319,7 @@ inline uint32 GetBattleGrounMapIdByTypeId(BattleGroundTypeId bgTypeId)
         case BATTLEGROUND_AV:   return 30;
         case BATTLEGROUND_WS:   return 489;
         case BATTLEGROUND_AB:   return 529;
+        default:                return 0;   //none
     }
 
     // impossible, just make compiler happy

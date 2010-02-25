@@ -238,12 +238,6 @@ struct PlayerCondition
     }
 };
 
-struct HonorStanding
-{
-    float HonorPoints;
-    uint32 HonorKills;
-};
-
 // NPC gossip text id
 typedef UNORDERED_MAP<uint32, uint32> CacheNpcTextIdMap;
 typedef std::list<GossipOption> CacheNpcOptionList;
@@ -280,6 +274,32 @@ extern LanguageDesc lang_description[LANGUAGES_COUNT];
 MANGOS_DLL_SPEC LanguageDesc const* GetLanguageDescByID(uint32 lang);
 
 class PlayerDumpReader;
+
+class HonorStanding
+{
+    public:
+        HonorStanding() {
+            honorPoints = 0;
+            honorKills  = 0;
+            guid        = 0;
+            rpEarning   = 0;
+        }
+
+        float honorPoints;
+        uint32 honorKills;
+        uint32 guid;
+        float rpEarning;
+
+        HonorStanding *GetInfo() { return this; };
+
+        // create the standing order
+        bool operator < (const HonorStanding& rhs) 
+        {
+            return honorPoints < rhs.honorPoints;
+        }
+};
+
+typedef std::list<HonorStanding> HonorStandingList;
 
 class ObjectMgr
 {
@@ -503,7 +523,6 @@ class ObjectMgr
         void LoadPageTexts();
 
         void LoadPlayerInfo();
-        void LoadRatingList();
         void LoadPetLevelInfo();
         void LoadExplorationBaseXP();
         void LoadPetNames();
@@ -532,30 +551,15 @@ class ObjectMgr
             return itr != mFishingBaseForArea.end() ? itr->second : 0;
         }
 
-        uint32 GetHonorStandingPosition(uint32 guid) const
-        {
-            HonorStandingMap::const_iterator itr = mHonorStandingList.find(guid);
-            if (itr == mHonorStandingList.end())
-                return 0;
-
-            HonorStanding standing = itr->second;
-            if (!standing.HonorPoints || standing.HonorKills > HONOR_STANDING_MIN_KILL)
-                return 0;
-
-            uint32 count = 1;
-            for (HonorStandingMap::const_iterator itr = mHonorStandingList.begin(); itr != mHonorStandingList.end(); ++itr)
-                if (itr->second.HonorPoints > standing.HonorPoints )
-                    count++;
-
-            return count;
-        }
-        
-        void UpdateHonorStandingByGuid(uint32 guid,HonorStanding standing) 
-        { 
-             HonorStandingMap::iterator itr = mHonorStandingList.find(guid);
-             if (itr != mHonorStandingList.end())
-                 itr->second = standing; 
-        }
+        static HonorStanding* GetHonorStandingByGUID(uint32 guid,uint32 side);
+        static HonorStanding* GetHonorStandingByPosition(uint32 position,uint32 side);
+        HonorStandingList GetStandingListBySide(uint32 side);
+        uint32 GetHonorStandingPositionByGUID(uint32 guid,uint32 side);
+        void UpdateHonorStandingByGuid(uint32 guid,HonorStanding standing,uint32 side) ;
+        void FlushRankPoints(uint32 dateBegin);
+        void DistributeRankPoints(uint32 team,uint32 dateBegin , bool flush = false);
+        void LoadStandingList(uint32 dateBegin);
+        void LoadStandingList();
 
         void ReturnOrDeleteOldMails(bool serverUp);
 
@@ -844,9 +848,9 @@ class ObjectMgr
         typedef std::map<uint32,int32> FishingBaseSkillMap; // [areaId][base skill level]
         FishingBaseSkillMap mFishingBaseForArea;
 
-        // Honor System        
-        typedef std::map<uint32 /*playerGuid*/,HonorStanding> HonorStandingMap;
-        HonorStandingMap mHonorStandingList;
+        // Standing System        
+        HonorStandingList HordeHonorStandingList;
+        HonorStandingList AllyHonorStandingList;
 
         typedef std::map<uint32,std::vector<std::string> > HalfNameMap;
         HalfNameMap PetHalfName0;

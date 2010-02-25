@@ -897,10 +897,9 @@ void BattleGround::UpdatePlayerScore(Player *Source, uint32 type, uint32 value)
             itr->second->HonorableKills += value;
             break;
         case SCORE_BONUS_HONOR:                             // Honor bonus
-           /*[-ZERO] to replace?
             // reward honor instantly
-            if(Source->RewardHonor(NULL, 1, value))
-                itr->second->BonusHonor += value; */
+            if(Source->AddHonorKill(value,HONORABLE,0,0))
+                itr->second->BonusHonor += value;
             break;
         default:
             sLog.outError("BattleGround: Unknown player score type %u", type);

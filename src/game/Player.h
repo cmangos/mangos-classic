@@ -304,10 +304,10 @@ enum DrunkenState
     DRUNKEN_SMASHED = 3
 };
 
-enum TYPE_OF_KILL
+enum TYPE_OF_HONOR
 {
-    HONORABLE_KILL    = 1,
-    DISHONORABLE_KILL = 2,
+    HONORABLE    = 1,
+    DISHONORABLE = 2,
 };
 
 struct HonorKill
@@ -1514,12 +1514,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateHonor();
         void ResetHonor();
         bool CalculateHonor(Unit *pVictim,uint32 groupsize);
-        uint32 CalculateHonorRank(float honor) const;
-        uint32 GetHonorRank() const;
-        uint32 CalculateTotalKills(Unit *Victim) const;
+        uint32 CalculateTotalKills(Unit *Victim,uint32 fromDate,uint32 toDate) const;
+        //Acessors of honor rank
+        uint32 GetHonorRank() const { return m_honor_rank; };
+        void SetHonorRank(uint8 rank) { m_honor_rank = rank; };
         //Acessors of total honor points
-        void SetTotalHonor(float total_honor_points) { m_total_honor_points = total_honor_points; };
-        float GetTotalHonor(void) const { return m_total_honor_points; };
+        void SetRankPoints(float rankPoints) { m_rank_points = rankPoints; };
+        float GetRankPoints(void) const { return m_rank_points; };
         //Acessors of righest rank
         uint32 GetHonorHighestRank() const { return m_highest_rank; }
         void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; }
@@ -1530,8 +1531,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetHonorStoredKills(bool honorable) const { return honorable? m_stored_honorableKills : m_stored_dishonorableKills; }
         void SetHonorStoredKills(uint32 kills,bool honorable) { if (honorable) m_stored_honorableKills = kills; else m_stored_dishonorableKills = kills; }
         //Acessors of last week standing
-        int32 GetHonorLastWeekStanding() const { return m_standing; }
-        void SetHonorLastWeekStanding(int32 standing){ m_standing = standing; }
+        int32 GetHonorLastWeekStandingPos() const { return m_standing_pos; }
+        void SetHonorLastWeekStandingPos(int32 standingPos){ m_standing_pos = standingPos; }
 
         /*********************************************************/
         /***                  PVP SYSTEM                       ***/
@@ -1955,17 +1956,14 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
-        tm *m_lastHonorUpdateTime;
-        HonorKillsMap m_honorKills;     
-        float m_total_honor_points;
+        HonorKillsMap m_honorKills; 
+        uint8 m_honor_rank;
+        float m_rank_points;
         float m_stored_honor;
-        float m_pending_honor;
-        uint32 m_pending_honorableKills;
-        uint32 m_pending_dishonorableKills;
         uint32 m_stored_honorableKills;
         uint32 m_stored_dishonorableKills;
         uint32 m_highest_rank;
-        int32 m_standing;
+        int32 m_standing_pos;
 
         void outDebugValues() const;
         bool _removeSpell(uint16 spell_id);

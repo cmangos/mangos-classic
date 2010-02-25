@@ -34,19 +34,102 @@ namespace MaNGOS
 
     namespace Honor
     {
-        //TODO: Fix this formula, for now the weekly rating is how many honor player gain all life time
-        inline float CalculeRating(Player *plr)
+
+        //What is Player's rank... private, scout...
+        inline uint32 CalculateHonorRank(float honor_points,uint32 totalKills)
         {
-            return plr->GetTotalHonor()+plr->GetStoredHonor();
+            uint32 rank = 0;
+            // you can modify this formula on negative values to show old dishonored ranks too
+            if(honor_points <=    0.00 || totalKills < HONOR_STANDING_MIN_KILL)
+                rank = 0;
+            else if(honor_points <  2000.00 && totalKills >= HONOR_STANDING_MIN_KILL)
+                rank = 1;
+            else if(honor_points > ((HONOR_RANK_COUNT-2)-1)*5000)
+                rank = HONOR_RANK_COUNT-2;
+            else
+                rank = uint32(honor_points / 5000) + 2;
+
+            return rank;
         }
 
-        inline int32 CalculeStanding(Player *plr,float lastWeekHonor,uint32 lastWeekHonorKills)
-        {    
-            HonorStanding standing;
-            standing.HonorPoints = lastWeekHonor;
-            standing.HonorKills  = lastWeekHonorKills; 
-            sObjectMgr.UpdateHonorStandingByGuid(plr->GetGUIDLow(),standing);
-            return sObjectMgr.GetHonorStandingPosition(plr->GetGUIDLow());
+        inline float CalculateRPearning(HonorStandingList standingList,HonorStanding *StandingInfo,uint32 team,uint32 RP)
+        {
+            float CP = StandingInfo->honorPoints;
+
+            if (standingList.empty())
+               return CP;
+
+            float BRK[14], FX[15], FY[15];
+            // initialize the breakpoint values
+            BRK[13] = 0.002f;
+            BRK[12] = 0.007f;
+            BRK[11] = 0.017f;
+            BRK[10] = 0.037f;
+            BRK[ 9] = 0.077f;
+            BRK[ 8] = 0.137f;       
+            BRK[ 7] = 0.207f;       
+            BRK[ 6] = 0.287f;       
+            BRK[ 5] = 0.377f;       
+            BRK[ 4] = 0.477f;       
+            BRK[ 3] = 0.587f;      
+            BRK[ 2] = 0.715f;      
+            BRK[ 1] = 0.858f;
+            BRK[ 0] = 1.000f;
+
+            // get the WS scores at the top of each break point
+            for (uint8 group=1; group<14; group++) {
+              BRK[group] = finiteAlways( BRK[group] * standingList.size() );
+            }     
+
+            // set the high point
+            FX[14] = standingList.begin()->honorPoints;   // top scorer
+            FY[14] = 13000;   // ... gets 13000 RP
+
+            // set the low point
+            FX[ 0] = 0;
+            FY[ 0] = 0;
+
+            // the Y values for each breakpoint are fixed
+            FY[ 1] = 400;
+            for (uint8 i=2;i<=13;i++) {
+              FY[i] = (i-2) * 1000;
+            }
+
+            // the X values for each breakpoint are found from the CP scores
+            // of the players around that point in the WS scores
+            HonorStanding *tempSt;
+            float honor;
+            for (uint8 i=1;i<=13;i++) {
+              honor = 0.0f;
+              tempSt = sObjectMgr.GetHonorStandingByPosition( BRK[i],team );
+              if (tempSt)
+                  honor += tempSt->honorPoints;
+              tempSt = sObjectMgr.GetHonorStandingByPosition( BRK[i]+1, team );
+              if (tempSt)
+                  honor += tempSt->honorPoints;
+
+              FX[i] = honor / 2;
+            }
+
+            // search the function for the two points that bound the given CP
+            uint8 i = 15;
+            while (i>0 && FX[i-1] > CP) {
+              i--;
+            }
+
+            // we now have i such that FX[i] > CP >= FX[i-1]
+            // so interpolate
+            float rpEarning = (FY[i] - FY[i-1]) * (CP - FX[i-1]) / (FX[i] - FX[i-1]) + FY[i-1];
+
+            float Decay = finiteAlways(0.2 * RP);
+            float Delta = rpEarning - Decay;
+            if (Delta < 0) {
+               Delta = Delta / 2;
+            }
+            if (Delta < -2500) {
+               Delta = -2500;
+            }
+            return Delta;
         }
 
         inline float DishonorableKillPoints(int level)
@@ -71,15 +154,17 @@ namespace MaNGOS
             if (!killer || !victim || !groupsize)
                 return 0.0;
 
-            int total_kills  = killer->CalculateTotalKills(victim);
+            uint32 today = sWorld.GetDateToday();
+
+            int total_kills  = killer->CalculateTotalKills(victim,today,today);
             //int k_rank       = killer->CalculateHonorRank( killer->GetTotalHonor() );
-            uint32 v_rank    = victim->CalculateHonorRank( victim->GetTotalHonor() );
+            uint32 v_rank    = victim->GetHonorRank();
             uint32 k_level   = killer->getLevel();
             //int v_level      = victim->getLevel();
-            float diff_honor = (victim->GetTotalHonor() /(killer->GetTotalHonor()+1))+1;
+            float diff_honor = (victim->GetRankPoints() /(killer->GetRankPoints()+1))+1;
             float diff_level = (victim->getLevel()*(1.0/( killer->getLevel() )));
 
-            int f = (4 - total_kills) >= 0 ? (4 - total_kills) : 0;
+            int f = (10 - total_kills) >= 0 ? (10 - total_kills) : 0;
             int honor_points = int(((float)(f * 0.25)*(float)((k_level+(v_rank*5+1))*(1+0.05*diff_honor)*diff_level)));
             return (honor_points <= 400 ? honor_points : 400) / groupsize;
         }
