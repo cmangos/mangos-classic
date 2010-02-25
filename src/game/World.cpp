@@ -675,10 +675,9 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_FLOAT_THREAT_RADIUS, "ThreatRadius", 100.0f);
 
-    setConfig(CONFIG_BOOL_BATTLEGROUND_CAST_DESERTER,              "Battleground.CastDeserter", true);
-    setConfig(CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE,     "Battleground.QueueAnnouncer.Enable", false);
-    setConfig(CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY, "Battleground.QueueAnnouncer.PlayerOnly", false);
-
+    setConfig(CONFIG_BOOL_BATTLEGROUND_CAST_DESERTER,                  "Battleground.CastDeserter", true);
+    setConfigMinMax(CONFIG_UINT32_BATTLEGROUND_QUEUE_ANNOUNCER_JOIN,   "Battleground.QueueAnnouncer.Join", 0, 0, 2);
+    setConfig(CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_START,          "Battleground.QueueAnnouncer.Start", false);
     setConfig(CONFIG_UINT32_BATTLEGROUND_PREMATURE_FINISH_TIMER,       "BattleGround.PrematureFinishTimer", 5 * MINUTE * IN_MILISECONDS);
 
     setConfig(CONFIG_UINT32_INSTANT_LOGOUT, "InstantLogout", SEC_MODERATOR);

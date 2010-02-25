@@ -462,21 +462,6 @@ LogColors = ""
 #        Default: 1 (true)
 #                 0 (false)
 #
-#    Battleground.CastDeserter
-#        Cast or not Deserter spell at player who leave battleground in progress
-#        Default: 1 (true)
-#                 0 (false)
-#
-#    Battleground.QueueAnnouncer.Enable
-#        Enable queue announcer posting to chat
-#        Default: 0 (false)
-#                 1 (true)
-#
-#    Battleground.QueueAnnouncer.PlayerOnly
-#        Enable queue announcer posting to chat
-#        Default: 0 (false)
-#                 1 (true)
-#
 #    CastUnstuck
 #        Allow cast or not Unstuck spell at .start or client Help option use
 #        Default: 1 (true)
@@ -607,9 +592,6 @@ InstantLogout = 1
 AllFlightPaths = 0
 AlwaysMaxSkillForLevel = 0
 ActivateWeather = 1
-Battleground.CastDeserter = 1
-Battleground.QueueAnnouncer.Enable = 0
-Battleground.QueueAnnouncer.PlayerOnly = 0
 CastUnstuck = 1
 MaxSpellCastsInChain = 10
 Instance.IgnoreLevel = 0
@@ -1158,16 +1140,34 @@ Death.Bones.World = 1
 Death.Bones.Battleground = 1
 
 ###################################################################################################################
+# BATTLEGROUND CONFIG
 #
-# Battleground config
+#    Battleground.CastDeserter
+#        Cast Deserter spell at player who leave battleground in progress
+#        Default: 1 (enable)
+#                 0 (disable)
 #
-# PrematureFinishTimer: the time to end the bg if there are less than minplayersperteam on one side
-#                       in milliseconds
-#              Default: 300000
-#                       0 - disable
+#    Battleground.QueueAnnouncer.Join
+#        Enable queue announcer posting to chat at join
+#        Default: 0 (not send)
+#                 1 (send to joined player only)
+#                 2 (send to all players)
+#
+#    Battleground.QueueAnnouncer.Start
+#        Enable queue announcer posting to chat at BG start
+#        Default: 0 (disable)
+#                 1 (enable)
+#
+#    Battleground.PrematureFinishTimer
+#        The time to end the bg if there are less than MinPlayersPerTeam on one side in milliseconds
+#        Default: 300000 (5 minutes)
+#                 0 - disable (not recommended)
 #
 ###################################################################################################################
 
+Battleground.CastDeserter = 1
+Battleground.QueueAnnouncer.Join = 0
+Battleground.QueueAnnouncer.Start = 0
 BattleGround.PrematureFinishTimer = 300000
 
 ###################################################################################################################
