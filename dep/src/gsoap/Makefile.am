@@ -1,4 +1,4 @@
-# Copyright (C) 2005-2008 MaNGOS <http://getmangos.com/>
+# Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,14 @@
 ## Process this file with automake to produce Makefile.in
 
 ## Sub-directories to parse
-SUBDIRS = g3dlite sockets gsoap zlib
 
-## Additional files to include when running 'make dist'
-#  Nothing yet.
+## CPP flags for includes, defines, etc.
+AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../../include/gsoap
+
+## Build MaNGOS shared library and its parts as convenience library.
+#  All libraries will be convenience libraries. Might be changed to shared
+#  later.
+noinst_LIBRARIES = libgsoap.a
+
+libgsoap_a_SOURCES = \
+	stdsoap2.cpp
