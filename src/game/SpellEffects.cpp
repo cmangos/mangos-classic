@@ -4156,27 +4156,21 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
 
 void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)
 {
-    uint8 slot = 0;
+    int slot = 0;
     switch(m_spellInfo->Effect[eff_idx])
     {
-        case SPELL_EFFECT_SUMMON_TOTEM: slot = 254; break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT1: slot = 0; break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT2: slot = 1; break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT3: slot = 2; break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT4: slot = 3; break;
+        case SPELL_EFFECT_SUMMON_TOTEM:       slot = TOTEM_SLOT_NONE;  break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT1: slot = TOTEM_SLOT_FIRE;  break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT2: slot = TOTEM_SLOT_EARTH; break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT3: slot = TOTEM_SLOT_WATER; break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT4: slot = TOTEM_SLOT_AIR;   break;
         default: return;
     }
 
-    if(slot < MAX_TOTEM)
-    {
-        uint64 guid = m_caster->m_TotemSlot[slot];
-        if(guid != 0)
-        {
-            Creature *OldTotem = m_caster->GetMap()->GetCreature(guid);
-            if(OldTotem && OldTotem->isTotem())
-                ((Totem*)OldTotem)->UnSummon();
-        }
-    }
+    // unsummon old totem
+    if(slot < MAX_TOTEM_SLOT)
+        if (Totem *OldTotem = m_caster->GetTotem(TotemSlot(slot)))
+            OldTotem->UnSummon();
 
     uint32 team = 0;
     if (m_caster->GetTypeId()==TYPEID_PLAYER)
@@ -4190,7 +4184,7 @@ void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)
         return;
     }
 
-    float angle = slot < MAX_TOTEM ? M_PI_F/MAX_TOTEM - (slot*2*M_PI_F/MAX_TOTEM) : 0;
+    float angle = slot < MAX_TOTEM_SLOT ? M_PI_F/MAX_TOTEM_SLOT - (slot*2*M_PI_F/MAX_TOTEM_SLOT) : 0;
 
     float x, y, z;
     m_caster->GetClosePoint(x, y, z, pTotem->GetObjectSize(), 2.0f, angle);
@@ -4201,14 +4195,14 @@ void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)
 
     pTotem->Relocate(x, y, z, m_caster->GetOrientation());
 
-    if(slot < MAX_TOTEM)
-        m_caster->m_TotemSlot[slot] = pTotem->GetGUID();
+    if (slot < MAX_TOTEM_SLOT)
+        m_caster->_AddTotem(TotemSlot(slot),pTotem);
 
     pTotem->SetOwner(m_caster->GetGUID());
     pTotem->SetTypeBySummonSpell(m_spellInfo);              // must be after Create call where m_spells initilized
 
     int32 duration=GetSpellDuration(m_spellInfo);
-    if(Player* modOwner = m_caster->GetSpellModOwner())
+    if (Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
     pTotem->SetDuration(duration);
 
@@ -4231,7 +4225,7 @@ void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)
 
     pTotem->Summon(m_caster);
 
-    if(slot < MAX_TOTEM && m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (slot < MAX_TOTEM_SLOT && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         WorldPacket data(SMSG_TOTEM_CREATED, 1 + 8 + 4 + 4);
         data << uint8(slot);
@@ -4792,24 +4786,19 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
 
 void Spell::EffectDestroyAllTotems(SpellEffectIndex /*eff_idx*/)
 {
-    float mana = 0;
-    for(int slot = 0;  slot < MAX_TOTEM; ++slot)
+    int32 mana = 0;
+    for(int slot = 0;  slot < MAX_TOTEM_SLOT; ++slot)
     {
-        if(!m_caster->m_TotemSlot[slot])
-            continue;
-
-        Creature* totem = m_caster->GetMap()->GetCreature(m_caster->m_TotemSlot[slot]);
-        if(totem && totem->isTotem())
+        if (Totem* totem = m_caster->GetTotem(TotemSlot(slot)))
         {
             uint32 spell_id = totem->GetUInt32Value(UNIT_CREATED_BY_SPELL);
-            SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
-            if(spellInfo)
+            if(SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id))
                 mana += spellInfo->manaCost * damage / 100;
-            ((Totem*)totem)->UnSummon();
+            totem->UnSummon();
         }
     }
 
-    int32 gain = m_caster->ModifyPower(POWER_MANA,int32(mana));
+    int32 gain = m_caster->ModifyPower(POWER_MANA,mana);
     m_caster->SendEnergizeSpellLog(m_caster, m_spellInfo->Id, gain, POWER_MANA);
 }
 

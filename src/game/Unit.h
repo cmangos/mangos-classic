@@ -886,7 +886,6 @@ enum ReactiveType
 };
 
 #define MAX_REACTIVE 6
-#define MAX_TOTEM 4
 
 typedef std::set<uint64> GuardianPetList;
 
@@ -1237,7 +1236,12 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         Pet* CreateTamedPetFrom(Creature* creatureTarget,uint32 spell_id = 0);
 
-        Totem* GetTotem(uint8 slot) const;
+        uint64 const& GetTotemGUID(TotemSlot slot) const { return m_TotemSlot[slot]; }
+        Totem* GetTotem(TotemSlot slot) const;
+        bool IsAllTotemSlotsUsed() const;
+
+        void _AddTotem(TotemSlot slot, Totem* totem);       // only for call from Totem summon code
+        void _RemoveTotem(Totem* totem);                    // only for call from Totem class
 
         template<typename Func>
         void CallForAllControlledUnits(Func const& func, bool withTotems, bool withGuardians, bool withCharms);
@@ -1310,7 +1314,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void DecreaseCastCounter() { if (m_castCounter) --m_castCounter; }
 
         uint32 m_addDmgOnce;
-        uint64 m_TotemSlot[MAX_TOTEM];
         uint64 m_ObjectSlot[4];
         uint32 m_detectInvisibilityMask;
         uint32 m_invisibilityMask;
@@ -1582,7 +1585,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool HandleHasteAuraProc(   Unit *pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const* procSpell, uint32 procFlag, uint32 cooldown);
         bool HandleOverrideClassScriptAuraProc(Unit *pVictim, Aura* triggeredByAura, SpellEntry const *procSpell, uint32 cooldown);
 
-        Unit* _GetTotem(uint8 slot) const;                  // for templated function without include need
+        Unit* _GetTotem(TotemSlot slot) const;              // for templated function without include need
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
@@ -1603,6 +1606,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         ComboPointHolderSet m_ComboPointHolders;
 
         GuardianPetList m_guardianPets;
+
+        uint64 m_TotemSlot[MAX_TOTEM_SLOT];
 };
 
 template<typename Func>
@@ -1620,8 +1625,8 @@ void Unit::CallForAllControlledUnits(Func const& func, bool withTotems, bool wit
 
     if (withTotems)
     {
-        for (int8 i = 0; i < MAX_TOTEM; ++i)
-            if (Unit *totem = _GetTotem(i))
+        for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
+            if (Unit *totem = _GetTotem(TotemSlot(i)))
                 func(totem);
     }
 
@@ -1649,8 +1654,8 @@ bool Unit::CheckAllControlledUnits(Func const& func, bool withTotems, bool withG
 
     if (withTotems)
     {
-        for (int8 i = 0; i < MAX_TOTEM; ++i)
-            if (Unit *totem = _GetTotem(i))
+        for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
+            if (Unit *totem = _GetTotem(TotemSlot(i)))
                 if (func(totem))
                     return true;
     }

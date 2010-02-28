@@ -96,16 +96,7 @@ void Totem::UnSummon()
     Unit *owner = GetOwner();
     if (owner)
     {
-        // clear owner's totem slot
-        for(int i = 0; i < MAX_TOTEM; ++i)
-        {
-            if(owner->m_TotemSlot[i] == GetGUID())
-            {
-                owner->m_TotemSlot[i] = 0;
-                break;
-            }
-        }
-
+        owner->_RemoveTotem(this);
         owner->RemoveAurasDueToSpell(GetSpell());
 
         //remove aura all party members too
