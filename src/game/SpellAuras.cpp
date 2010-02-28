@@ -1620,28 +1620,38 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     // AT APPLY
     if(apply)
     {
-        switch(GetId())
+        switch(m_spellProto->SpellFamilyName)
         {
-            case 7057:                                      // Haunting Spirits
-                // expected to tick with 30 sec period (tick part see in Aura::PeriodicTick)
-                m_isPeriodic = true;
-                m_modifier.periodictime = 30*IN_MILISECONDS;
-                m_periodicTimer = m_modifier.periodictime;
-                return;
-            case 13139:                                     // net-o-matic
-                // root to self part of (root_target->charge->root_self sequence
-                if(caster)
-                    caster->CastSpell(caster, 13138, true, NULL, this);
-                return;
-        }
-
-        // Earth Shield
-        if ( caster && GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x40000000000)))
-        {
-            // prevent double apply bonuses
-            if(m_target->GetTypeId() != TYPEID_PLAYER || !((Player*)m_target)->GetSession()->PlayerLoading())
-                m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
-            return;
+            case SPELLFAMILY_GENERIC:
+            {
+                switch(GetId())
+                {
+                    case 7057:                                      // Haunting Spirits
+                        // expected to tick with 30 sec period (tick part see in Aura::PeriodicTick)
+                        m_isPeriodic = true;
+                        m_modifier.periodictime = 30*IN_MILISECONDS;
+                        m_periodicTimer = m_modifier.periodictime;
+                        return;
+                    case 13139:                                     // net-o-matic
+                        // root to self part of (root_target->charge->root_self sequence
+                        if(caster)
+                            caster->CastSpell(caster, 13138, true, NULL, this);
+                        return;
+                }
+                break;
+            }
+            case SPELLFAMILY_SHAMAN:
+            {
+                // Earth Shield
+                if (caster && (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x40000000000)))
+                {
+                    // prevent double apply bonuses
+                    if(m_target->GetTypeId() != TYPEID_PLAYER || !((Player*)m_target)->GetSession()->PlayerLoading())
+                        m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
+                    return;
+                }
+                break;
+            }
         }
     }
     // AT REMOVE
@@ -1743,6 +1753,17 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         return;
                     }
                     m_target->RemoveAurasDueToSpell(spellId);
+                    return;
+                }
+                case 29266:                             // Permanent Feign Death
+                {
+                    // Unclear what the difference really is between them.
+                    // Some has effect1 that makes the difference, however not all.
+                    // Some appear to be used depending on creature location, in water, at solid ground, in air/suspended, etc
+                    // For now, just handle all the same way
+                    if (m_target->GetTypeId() == TYPEID_UNIT)
+                        m_target->SetFeignDeath(apply);
+
                     return;
                 }
             }
