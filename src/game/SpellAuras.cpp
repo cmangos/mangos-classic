@@ -689,6 +689,25 @@ void Aura::SendAuraDurationForCaster(Player* caster)
     caster->GetSession()->SendPacket(&data);
 }
 
+bool Aura::IsNeedVisibleSlot(Unit const* caster) const
+{
+    bool totemAura = caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem();
+
+    // special area auras cases
+    switch(m_spellProto->Effect[GetEffIndex()])
+    {
+        case SPELL_EFFECT_APPLY_AREA_AURA_PET:
+        case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
+            // passive auras (except totem auras) do not get placed in caster slot
+            return (m_target != caster || totemAura || !m_isPassive) && m_modifier.m_auraname != SPELL_AURA_NONE;
+        default:
+            break;
+    }
+
+    // passive auras (except totem auras) do not get placed in the slots
+    return !m_isPassive || totemAura;
+}
+
 void Aura::_AddAura()
 {
     if (!GetId())
@@ -750,9 +769,7 @@ void Aura::_AddAura()
         }
     }
 
-    // passive auras (except totem auras) do not get placed in the slots
-    // area auras with SPELL_AURA_NONE are not shown on target
-    if((!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem())))
+    if (IsNeedVisibleSlot(caster))
     {
         if(!samespell)                                      // new slot need
         {
