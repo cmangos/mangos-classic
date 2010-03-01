@@ -2041,7 +2041,8 @@ void Player::SetGameMaster(bool on)
 
         getHostileRefManager().setOnlineOfflineState(true);
     }
-
+     
+    UpdateForQuestsGO();
     UpdateVisibilityForPlayer();
 }
 
