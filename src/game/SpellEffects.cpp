@@ -2928,15 +2928,13 @@ void Spell::EffectLearnSkill(SpellEffectIndex eff_idx)
 
 void Spell::EffectAddHonor(SpellEffectIndex /*eff_idx*/)
 {
-  /*[-ZERO] not used in 1.12?
   if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    // 2.4.3 honor-spells don't scale with level and won't be casted by an item
-    // also we must use damage+1 (spelldescription says +25 honor but damage is only 24)
-    ((Player*)unitTarget)->RewardHonor(NULL, 1, float(damage + 1));
+    // honor-spells don't scale with level and won't be casted by an item
+    // also we must use damage (spelldescription says +25 honor but damage is only 24)
+    ((Player*)unitTarget)->AddHonorCP(float(damage),HONORABLE,0,0);
     sLog.outDebug("SpellEffect::AddHonor (spell_id %u) rewards %u honor points (non scale) for player: %u", m_spellInfo->Id, damage, ((Player*)unitTarget)->GetGUIDLow());
-  */
 }
 
 void Spell::EffectTradeSkill(SpellEffectIndex /*eff_idx*/)
