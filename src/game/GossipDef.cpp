@@ -680,7 +680,6 @@ void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID,
 
     data << uint32(pQuest->GetRewOrReqMoney());
 
-    // rewarded honor points. Multiply with 10 to satisfy client
     data << uint32(pQuest->GetRewSpell());                  // reward spell, this spell will display (icon) (casted if RewSpellCast==0)
     data << uint32(pQuest->GetRewSpellCast());              // casted spell [-zero] to check
     //data << uint32(0x00);                                   // unk, NOT honor
