@@ -1612,13 +1612,13 @@ void Aura::TriggerSpell()
 void Aura::HandleAuraDummy(bool apply, bool Real)
 {
     // spells required only Real aura add/remove
-    if(!Real)
+    if (!Real)
         return;
 
     Unit* caster = GetCaster();
 
     // AT APPLY
-    if(apply)
+    if (apply)
     {
         switch(m_spellProto->SpellFamilyName)
         {
@@ -1646,7 +1646,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 if (caster && (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x40000000000)))
                 {
                     // prevent double apply bonuses
-                    if(m_target->GetTypeId() != TYPEID_PLAYER || !((Player*)m_target)->GetSession()->PlayerLoading())
+                    if (m_target->GetTypeId() != TYPEID_PLAYER || !((Player*)m_target)->GetSession()->PlayerLoading())
                         m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
                     return;
                 }
@@ -1657,7 +1657,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     // AT REMOVE
     else
     {
-        if( m_target->GetTypeId() == TYPEID_PLAYER &&
+        if (m_target->GetTypeId() == TYPEID_PLAYER &&
             (GetSpellProto()->Effect[EFFECT_INDEX_0] == 72 || GetSpellProto()->Effect[EFFECT_INDEX_0] == 6 &&
             (GetSpellProto()->EffectApplyAuraName[EFFECT_INDEX_0] == 1 || GetSpellProto()->EffectApplyAuraName[EFFECT_INDEX_0] == 128)))
         {
@@ -1693,8 +1693,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 30105: finalSpelId = 30104; break;
             }
 
-            if(finalSpelId)
+            if (finalSpelId)
                 caster->CastSpell(m_target, finalSpelId, true, NULL, this);
+
             return;
         }
 
@@ -1722,8 +1723,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         {
             switch(GetId())
             {
-                // Unstable Power
-                case 24658:
+                case 24658:                                 // Unstable Power
                 {
                     uint32 spellId = 24659;
                     if (apply && caster)
@@ -1734,13 +1734,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                         for (uint32 i = 0; i < spell->StackAmount; ++i)
                             caster->CastSpell(m_target, spellId, true, NULL, NULL, GetCasterGUID());
+
                         return;
                     }
                     m_target->RemoveAurasDueToSpell(spellId);
                     return;
                 }
-                // Restless Strength
-                case 24661:
+                case 24661:                                 // Restless Strength
                 {
                     uint32 spellId = 24662;
                     if (apply && caster)
@@ -1748,14 +1748,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         const SpellEntry *spell = sSpellStore.LookupEntry(spellId);
                         if (!spell)
                             return;
+
                         for (uint32 i=0; i < spell->StackAmount; ++i)
                             caster->CastSpell(m_target, spell->Id, true, NULL, NULL, GetCasterGUID());
+
                         return;
                     }
                     m_target->RemoveAurasDueToSpell(spellId);
                     return;
                 }
-                case 29266:                             // Permanent Feign Death
+                case 29266:                                 // Permanent Feign Death
                 {
                     // Unclear what the difference really is between them.
                     // Some has effect1 that makes the difference, however not all.
@@ -1772,7 +1774,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         case SPELLFAMILY_DRUID:
         {
             // Predatory Strikes
-            if(m_target->GetTypeId()==TYPEID_PLAYER && GetSpellProto()->SpellIconID == 1563)
+            if (m_target->GetTypeId()==TYPEID_PLAYER && GetSpellProto()->SpellIconID == 1563)
             {
                 ((Player*)m_target)->UpdateAttackPowerAndDamage();
                 return;
@@ -1808,9 +1810,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     }
 
     // pet auras
-    if(PetAura const* petSpell = sSpellMgr.GetPetAura(GetId()))
+    if (PetAura const* petSpell = sSpellMgr.GetPetAura(GetId()))
     {
-        if(apply)
+        if (apply)
             m_target->AddPetAura(petSpell);
         else
             m_target->RemovePetAura(petSpell);
@@ -1820,7 +1822,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     if (GetEffIndex() == EFFECT_INDEX_0 && m_target->GetTypeId() == TYPEID_PLAYER)
     {
         SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAuraMapBounds(GetId());
-        if(saBounds.first != saBounds.second)
+        if (saBounds.first != saBounds.second)
         {
             uint32 zone, area;
             m_target->GetZoneAndAreaId(zone, area);
@@ -1828,10 +1830,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             for(SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
             {
                 // some auras remove at aura remove
-                if(!itr->second->IsFitToRequirements((Player*)m_target, zone, area))
+                if (!itr->second->IsFitToRequirements((Player*)m_target, zone, area))
                     m_target->RemoveAurasDueToSpell(itr->second->spellId);
                 // some auras applied at aura apply
-                else if(itr->second->autocast)
+                else if (itr->second->autocast)
                 {
                     if (!m_target->HasAura(itr->second->spellId, EFFECT_INDEX_0))
                         m_target->CastSpell(m_target, itr->second->spellId, true);
