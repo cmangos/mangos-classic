@@ -339,7 +339,7 @@ void GameObject::Update(uint32 /*p_time*/)
                     Unit *caster =  owner ? owner : ok;
 
                     caster->CastSpell(ok, goInfo->trap.spellId, true, 0, 0, GetGUID());
-                    m_cooldownTime = time(NULL) + 4;        // 4 seconds
+                    m_cooldownTime = time(NULL) + goInfo->trap.cooldown > 0 ? goInfo->trap.cooldown : 4;        // min 4 seconds
 
                     if(NeedDespawn)
                         SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
