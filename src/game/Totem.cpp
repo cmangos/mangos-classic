@@ -24,6 +24,7 @@
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
 #include "DBCStores.h"
+#include "CreatureAI.h"
 
 Totem::Totem() : Creature(CREATURE_SUBTYPE_TOTEM)
 {
@@ -75,6 +76,13 @@ void Totem::Summon(Unit* owner)
 
     AIM_Initialize();
 
+    if (owner->GetTypeId() == TYPEID_UNIT && ((Creature*)owner)->AI())
+        ((Creature*)owner)->AI()->JustSummoned((Creature*)this);
+
+    // there are some totems, which exist just for their visual appeareance
+    if (!GetSpell())
+        return;
+
     switch(m_type)
     {
         case TOTEM_PASSIVE:
@@ -113,6 +121,9 @@ void Totem::UnSummon()
                 }
             }
         }
+
+        if (owner->GetTypeId() == TYPEID_UNIT && ((Creature*)owner)->AI())
+            ((Creature*)owner)->AI()->SummonedCreatureDespawn((Creature*)this);
     }
 
     AddObjectToRemoveList();
