@@ -17229,6 +17229,26 @@ uint32 Player::GetResurrectionSpellId()
     return spell_id;
 }
 
+// Used in triggers for check "Only to targets that grant experience or honor" req
+bool Player::isHonorOrXPTarget(Unit* pVictim) const
+{
+    uint32 v_level = pVictim->getLevel();
+    uint32 k_grey  = MaNGOS::XP::GetGrayLevel(getLevel());
+
+    // Victim level less gray level
+    if(v_level<=k_grey)
+        return false;
+
+    if(pVictim->GetTypeId() == TYPEID_UNIT)
+    {
+        if (((Creature*)pVictim)->isTotem() ||
+            ((Creature*)pVictim)->isPet() ||
+            ((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)
+                return false;
+    }
+    return true;
+}
+
 bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
 {
     bool PvP = pVictim->isCharmedOwnedByPlayerOrPlayer();
