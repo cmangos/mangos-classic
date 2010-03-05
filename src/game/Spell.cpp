@@ -2084,6 +2084,9 @@ void Spell::cast(bool skipCheck)
         {
             if (m_spellInfo->Mechanic == MECHANIC_BANDAGE)  // Bandages
                 AddPrecastSpell(11196);                     // Recently Bandaged
+            // Divine Shield, Divine Protection, Blessing of Protection
+            else if(m_spellInfo->Mechanic == MECHANIC_INVULNERABILITY)
+                AddPrecastSpell(25771);                     // Forbearance
             break;
         }
         case SPELLFAMILY_PRIEST:
@@ -2104,13 +2107,6 @@ void Spell::cast(bool skipCheck)
                 default:break;
             }
             break;      
-        }
-        case SPELLFAMILY_PALADIN:
-        {
-            // Divine Shield, Divine Protection, Blessing of Protection
-            if(m_spellInfo->Mechanic == MECHANIC_INVULNERABILITY && m_spellInfo->Id != 25771)
-                AddPrecastSpell(25771);                     // Forbearance
-          break;
         }
         default:
             break;
