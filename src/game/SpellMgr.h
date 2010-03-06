@@ -605,7 +605,7 @@ class SpellMgr
     // Accessors (const or static functions)
     public:
         // Spell affects
-        uint64 GetSpellAffectMask(uint32 spellId, uint8 effectId) const
+        uint64 GetSpellAffectMask(uint32 spellId, SpellEffectIndex effectId) const
         {
             SpellAffectMap::const_iterator itr = mSpellAffectMap.find((spellId<<8) + effectId);
             if( itr != mSpellAffectMap.end( ) )

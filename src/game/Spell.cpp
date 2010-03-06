@@ -2456,7 +2456,7 @@ void Spell::finish(bool ok)
     Unit::AuraList const& targetTriggers = m_caster->GetAurasByType(SPELL_AURA_ADD_TARGET_TRIGGER);
     for(Unit::AuraList::const_iterator i = targetTriggers.begin(); i != targetTriggers.end(); ++i)
     {
-        if (IsAffectedByAura(*i))
+        if ((*i)->isAffectedOnSpell(m_spellInfo))
         {
             SpellEntry const *auraSpellInfo = (*i)->GetSpellProto();
             SpellEffectIndex auraSpellIdx = (*i)->GetEffIndex();
@@ -4884,14 +4884,6 @@ void Spell::UpdatePointers()
     UpdateOriginalCasterPointer();
 
     m_targets.Update(m_caster);
-}
-
-bool Spell::IsAffectedByAura(Aura *aura) const
-{
-    if(SpellModifier* mod = aura->getAuraSpellMod())
-        return mod->isAffectedOnSpell(m_spellInfo);
-    else
-        return false;
 }
 
 bool Spell::CheckTargetCreatureType(Unit* target) const
