@@ -26,6 +26,7 @@
 #include "Creature.h"
 #include "Player.h"
 #include "ObjectMgr.h"
+#include "ObjectGuid.h"
 #include "UpdateData.h"
 #include "UpdateMask.h"
 #include "Util.h"

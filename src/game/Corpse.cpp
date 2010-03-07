@@ -21,6 +21,7 @@
 #include "Player.h"
 #include "UpdateMask.h"
 #include "ObjectAccessor.h"
+#include "ObjectGuid.h"
 #include "Database/DatabaseEnv.h"
 #include "Opcodes.h"
 #include "GossipDef.h"
