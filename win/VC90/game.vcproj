@@ -1199,6 +1199,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\ObjectGuid.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\ObjectGuid.h"
 				>
 			</File>
