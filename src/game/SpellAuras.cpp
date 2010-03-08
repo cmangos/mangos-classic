@@ -660,7 +660,7 @@ void Aura::UpdateAuraDuration()
         ((Player*)m_target)->SendDirectMessage(&data);
 
         data.Initialize(SMSG_SET_EXTRA_AURA_INFO, (8+1+4+4+4));
-        data.append(m_target->GetPackGUID());
+        data << m_target->GetPackGUID();
         data << uint8(m_auraSlot);
         data << uint32(GetId());
         data << uint32(GetAuraMaxDuration());
@@ -681,7 +681,7 @@ void Aura::UpdateAuraDuration()
 void Aura::SendAuraDurationForCaster(Player* caster)
 {
     WorldPacket data(SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE, (8+1+4+4+4));
-    data.append(m_target->GetPackGUID());
+    data << m_target->GetPackGUID();
     data << uint8(m_auraSlot);
     data << uint32(GetId());
     data << uint32(GetAuraMaxDuration());                   // full
@@ -1899,7 +1899,7 @@ void Aura::HandleAuraWaterWalk(bool apply, bool Real)
         data.Initialize(SMSG_MOVE_WATER_WALK, 8+4);
     else
         data.Initialize(SMSG_MOVE_LAND_WALK, 8+4);
-    data.append(m_target->GetPackGUID());
+    data << m_target->GetPackGUID();
     data << uint32(0);
     m_target->SendMessageToSet(&data, true);
 }
@@ -1915,7 +1915,7 @@ void Aura::HandleAuraFeatherFall(bool apply, bool Real)
         data.Initialize(SMSG_MOVE_FEATHER_FALL, 8+4);
     else
         data.Initialize(SMSG_MOVE_NORMAL_FALL, 8+4);
-    data.append(m_target->GetPackGUID());
+    data << m_target->GetPackGUID();
     data << uint32(0);
     m_target->SendMessageToSet(&data, true);
 
@@ -1935,7 +1935,7 @@ void Aura::HandleAuraHover(bool apply, bool Real)
         data.Initialize(SMSG_MOVE_SET_HOVER, 8+4);
     else
         data.Initialize(SMSG_MOVE_UNSET_HOVER, 8+4);
-    data.append(m_target->GetPackGUID());
+    data << m_target->GetPackGUID();
     data << uint32(0);
     m_target->SendMessageToSet(&data, true);
 }
@@ -2757,7 +2757,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         }
 
         WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
-        data.append(m_target->GetPackGUID());
+        data << m_target->GetPackGUID();
         data << uint32(0);
         m_target->SendMessageToSet(&data, true);
 
@@ -2792,7 +2792,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                 m_target->SetTargetGUID(m_target->getVictim()->GetGUID() );
 
             WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8+4);
-            data.append(m_target->GetPackGUID());
+            data << m_target->GetPackGUID();
             data << uint32(0);
             m_target->SendMessageToSet(&data, true);
         }
@@ -3001,7 +3001,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         if(m_target->GetTypeId() == TYPEID_PLAYER)
         {
             WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
-            data.append(m_target->GetPackGUID());
+            data << m_target->GetPackGUID();
             data << (uint32)2;
             m_target->SendMessageToSet(&data, true);
 
@@ -3027,7 +3027,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             if(m_target->GetTypeId() == TYPEID_PLAYER)
             {
                 WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 10);
-                data.append(m_target->GetPackGUID());
+                data << m_target->GetPackGUID();
                 data << (uint32)2;
                 m_target->SendMessageToSet(&data, true);
             }

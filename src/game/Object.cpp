@@ -72,9 +72,6 @@ Object::Object( )
 
     m_inWorld           = false;
     m_objectUpdated     = false;
-
-    m_PackGUID.clear();
-    m_PackGUID.appendPackGUID(0);
 }
 
 Object::~Object( )
@@ -120,8 +117,7 @@ void Object::_Create( uint32 guidlow, uint32 entry, HighGuid guidhigh )
     uint64 guid = MAKE_NEW_GUID(guidlow, entry, guidhigh);
     SetUInt64Value(OBJECT_FIELD_GUID, guid);
     SetUInt32Value(OBJECT_FIELD_TYPE, m_objectType);
-    m_PackGUID.wpos(0);
-    m_PackGUID.appendPackGUID(GetGUID());
+    m_PackGUID.Set(guid);
 }
 
 void Object::BuildMovementUpdateBlock(UpdateData * data, uint8 flags ) const
@@ -182,7 +178,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
     ByteBuffer buf(500);
     buf << (uint8)updatetype;
-    //buf.append(GetPackGUID());    //client crashes when using this
+    //buf << GetPackGUID();                                 //client crashes when using this
     buf << (uint8)0xFF << GetGUID();
     buf << uint8(m_objectTypeId);
 
@@ -211,7 +207,7 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
     ByteBuffer buf(500);
 
     buf << uint8(UPDATETYPE_VALUES);
-    //buf.append(GetPackGUID());    //client crashes when using this. but not have crash in debug mode
+    //buf << GetPackGUID();                                 //client crashes when using this. but not have crash in debug mode
     buf << (uint8)0xFF;
     buf << GetGUID();
 

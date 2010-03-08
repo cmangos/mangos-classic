@@ -286,7 +286,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
         GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
 
         WorldPacket data( SMSG_FORCE_MOVE_ROOT, (8+4) );    // guess size
-        data.append(GetPlayer()->GetPackGUID());
+        data << GetPlayer()->GetPackGUID();
         data << (uint32)2;
         SendPacket( &data );
         GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
@@ -318,7 +318,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & /*recv_data*/ )
     {
         //!we can move again
         data.Initialize( SMSG_FORCE_MOVE_UNROOT, 8 );       // guess size
-        data.append(GetPlayer()->GetPackGUID());
+        data << GetPlayer()->GetPackGUID();
         data << uint32(0);
         SendPacket( &data );
 
@@ -870,8 +870,8 @@ void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
     /*  WorldSession::Update( getMSTime() );*/
     DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );
 
-    recv_data.read_skip<uint64>();
-    recv_data.read_skip<uint32>();
+    recv_data >> Unused<uint64>();
+    recv_data >> Unused<uint32>();
     /*
         uint64 guid;
         uint32 time_skipped;
@@ -990,7 +990,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         return;
 
     WorldPacket data( SMSG_INSPECT, 8 );
-    data << guid;
+    data << uint64(guid);
     SendPacket(&data);
 }
 

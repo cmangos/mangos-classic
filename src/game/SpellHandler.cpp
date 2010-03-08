@@ -93,8 +93,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     }
 
     SpellCastTargets targets;
-    if (!targets.read(&recvPacket, pUser))
-        return;
+
+    recvPacket >> targets.ReadForCaster(pUser);
 
     targets.Update(pUser);
 
@@ -298,8 +298,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     // client provided targets
     SpellCastTargets targets;
-    if(!targets.read(&recvPacket,_player))
-        return;
+
+    recvPacket >> targets.ReadForCaster(_player);
 
     // auto-selection buff level base at target level (in spellInfo)
     if(targets.getUnitTarget())

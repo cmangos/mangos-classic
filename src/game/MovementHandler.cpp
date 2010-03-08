@@ -170,7 +170,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 {
     sLog.outDebug("MSG_MOVE_TELEPORT_ACK");
-    uint64 guid;
+    ObjectGuid guid;
     uint32 flags, time;
 
     recv_data >> guid;
@@ -183,7 +183,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
     if(!plMover || !plMover->IsBeingTeleportedNear())
         return;
 
-    if(guid != plMover->GetGUID())
+    if(guid.GetRawValue() != plMover->GetGUID())
         return;
 
     plMover->SetSemaphoreTeleportNear(false);
@@ -226,7 +226,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     }
 
     /* extract packet */
-    MovementInfo movementInfo(recv_data);
+    MovementInfo movementInfo;
+    recv_data >> movementInfo;
     /*----------------*/
 
     if (!MaNGOS::IsValidMapCoord(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z, movementInfo.GetPos()->o))
@@ -352,26 +353,18 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 {
     /* extract packet */
-    uint64 guid;
-    uint32 unk1;
+    ObjectGuid guid;
+    MovementInfo movementInfo;
     float  newspeed;
 
     recv_data >> guid;
+    recv_data >> Unused<uint32>();                          // counter or moveEvent
+    recv_data >> movementInfo;
+    recv_data >> newspeed;
 
     // now can skip not our packet
-    if(_player->GetGUID() != guid)
-    {
-        recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
+    if(_player->GetGUID() != guid.GetRawValue())
         return;
-    }
-
-    // continue parse packet
-
-    recv_data >> unk1;
-
-    MovementInfo movementInfo(recv_data);
-
-    recv_data >> newspeed;
     /*----------------*/
 
     // client ACK send one packet for mounted/run case and need skip all except last from its
@@ -447,34 +440,35 @@ void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_MOVE_KNOCK_BACK_ACK");
 
-    recv_data.read_skip<uint64>();                          // guid
-    recv_data.read_skip<uint32>();                          // unk
+    MovementInfo movementInfo;
 
-    MovementInfo movementInfo(recv_data);
+    recv_data >> Unused<uint64>();                          // guid
+    recv_data >> Unused<uint32>();                          // unk
+    recv_data >> movementInfo;
 }
 
 void WorldSession::HandleMoveHoverAck( WorldPacket& recv_data )
 {
     sLog.outDebug("CMSG_MOVE_HOVER_ACK");
 
-    recv_data.read_skip<uint64>();                          // guid
-    recv_data.read_skip<uint32>();                          // unk
+    MovementInfo movementInfo;
 
-    MovementInfo movementInfo(recv_data);
-
-    recv_data.read_skip<uint32>();                          // unk2
+    recv_data >> Unused<uint64>();                          // guid
+    recv_data >> Unused<uint32>();                          // unk
+    recv_data >> movementInfo;
+    recv_data >> Unused<uint32>();                          // unk2
 }
 
 void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 {
     sLog.outDebug("CMSG_MOVE_WATER_WALK_ACK");
 
+    MovementInfo movementInfo;
+
     recv_data.read_skip<uint64>();                          // guid
     recv_data.read_skip<uint32>();                          // unk
-
-    MovementInfo movementInfo(recv_data);
-
-    recv_data.read_skip<uint32>();                          // unk2
+    recv_data >> movementInfo;
+    recv_data >> Unused<uint32>();                          // unk2
 }
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)

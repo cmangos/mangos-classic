@@ -621,15 +621,13 @@ struct Position
 class MovementInfo
 {
     public: 
-        MovementInfo() : moveFlags(MOVEFLAG_NONE), time(0), t_guid(0),
+        MovementInfo() : moveFlags(MOVEFLAG_NONE), time(0),
             t_time(0), s_pitch(0.0f), fallTime(0), j_velocity(0.0f), j_sinAngle(0.0f),
             j_cosAngle(0.0f), j_xyspeed(0.0f), u_unk1(0.0f) {}
 
-        MovementInfo(WorldPacket &data);
-
         // Read/Write methods
         void Read(ByteBuffer &data);
-        void Write(ByteBuffer &data);
+        void Write(ByteBuffer &data) const;
 
         // Movement flags manipulations
         void AddMovementFlag(MovementFlags f) { moveFlags |= f; }
@@ -649,7 +647,7 @@ class MovementInfo
             t_pos.o = o;
             t_time = time;
         }
-        uint64 GetTransportGuid() const { return t_guid; }
+        uint64 GetTransportGuid() const { return t_guid.GetRawValue(); }
         Position const *GetTransportPos() const { return &t_pos; }
         uint32 GetTransportTime() const { return t_time; }
         uint32 GetFallTime() const { return fallTime; }
@@ -662,7 +660,7 @@ class MovementInfo
         uint32  time;
         Position pos;
         // transport
-        uint64  t_guid;
+        ObjectGuid t_guid;
         Position t_pos;
         uint32  t_time;
         // swimming and unknown
@@ -674,6 +672,18 @@ class MovementInfo
         // spline
         float   u_unk1;
 };
+
+inline ByteBuffer& operator<< (ByteBuffer& buf, MovementInfo const& mi)
+{
+    mi.Write(buf);
+    return buf;
+}
+
+inline ByteBuffer& operator>> (ByteBuffer& buf, MovementInfo& mi)
+{
+    mi.Read(buf);
+    return buf;
+}
 
 enum DiminishingLevels
 {

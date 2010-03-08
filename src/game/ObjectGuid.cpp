@@ -17,7 +17,6 @@
  */
 
 #include "ObjectGuid.h"
-#include "ByteBuffer.h"
 #include <sstream>
 
 char const* ObjectGuid::GetTypeName() const
@@ -57,5 +56,17 @@ ByteBuffer& operator<< (ByteBuffer& buf, ObjectGuid const& guid)
 ByteBuffer &operator>>(ByteBuffer& buf, ObjectGuid& guid)
 {
     guid.Set(buf.read<uint64>());
+    return buf;
+}
+
+ByteBuffer& operator<< (ByteBuffer& buf, PackedGuid const& guid)
+{
+    buf.append(guid.m_packedGuid);
+    return buf;
+}
+
+ByteBuffer &operator>>(ByteBuffer& buf, PackedGuidReader const& guid)
+{
+    guid.m_guidPtr->Set(buf.readPackGUID());
     return buf;
 }
