@@ -69,12 +69,6 @@ class ByteBuffer
             _rpos = _wpos = 0;
         }
 
-        template <typename T> void append(T value)
-        {
-            EndianConvert(value);
-            append((uint8 *)&value, sizeof(value));
-        }
-
         template <typename T> void put(size_t pos,T value)
         {
             EndianConvert(value);
@@ -449,6 +443,13 @@ class ByteBuffer
                 }
             }
             sLog.outDebugInLine("\n");
+        }
+    private:
+        // limited for internal use because can "append" any unexpected type (like pointer and etc) with hard detection problem
+        template <typename T> void append(T value)
+        {
+            EndianConvert(value);
+            append((uint8 *)&value, sizeof(value));
         }
 
     protected:
