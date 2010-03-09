@@ -6988,7 +6988,7 @@ void Player::SendInitWorldStates(uint32 zoneid)
 
     WorldPacket data(SMSG_INIT_WORLD_STATES, (4+2+(NumberOfFields*8)));
     data << uint32(mapid);                                  // mapid
-    data << uint32(zoneid);                                 // zone id
+    //data << uint32(zoneid);                                 // zone id [-ZERO] maybe not used
     data << uint16(NumberOfFields);                         // count of uint64 blocks
     data << uint32(0x8d8) << uint32(0x0);                   // 1
     data << uint32(0x8d7) << uint32(0x0);                   // 2
