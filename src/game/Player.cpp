@@ -3694,7 +3694,12 @@ void Player::SetMovement(PlayerMovementType pType)
   - the player must be in world
 */
 void Player::BuildPlayerRepop()
-{
+{   
+    CastSpell(this, 8326, true);                            // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
+    if(getRace() == RACE_NIGHTELF)
+        // in 1.12 ghost spell doesn't work as well
+        CastSpell(this, 20584, true); // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)       
+
     // the player cannot have a corpse already, only bones which are not returned by GetCorpse
     if(GetCorpse())
     {
@@ -3719,16 +3724,8 @@ void Player::BuildPlayerRepop()
     if(!GetSession()->isLogingOut())
         SetMovement(MOVE_UNROOT);
 
-    if(getRace() == RACE_NIGHTELF)
-    {
-        // in 1.12 ghost spell doesn't work as well
-        // CastSpell(this, 20584, true); // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
-        
-        // [-ZERO] night elf spirit form and speed handled by code, maybe spell or aura should be found
-        SetSpeedRate(MOVE_RUN,  1.5f, true);
-        SetSpeedRate(MOVE_SWIM, 1.5f, true);
-        SetDisplayId(10045);          
-    }
+    // BG - remove insignia related
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
     SendCorpseReclaimDelay();
 
@@ -3736,54 +3733,11 @@ void Player::BuildPlayerRepop()
     corpse->ResetGhostTime();
 
     StopMirrorTimers();                                     //disable timers(bars)
-    //[-ZERO] not works properly in 1.12
-    //CastSpell(this, 8326, true);                            // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
-
-    WorldPacket data;
-
-    //TODO: Check/research this
-    data.Initialize(SMSG_SPELL_START, (GetPackGUID().size()*2 + 12));
-    data << GetPackGUID();                                  //9
-    data << GetPackGUID();                                  //9
-    data << uint32(20305);                                  //2
-    data << uint16(2);
-    data << uint32(0) << uint16(0);                         //6
-    GetSession()->SendPacket( &data );
-
-    data.Initialize(SMSG_SPELL_GO, (GetPackGUID().size()*2 + 23));
-    data << GetPackGUID();
-    data << GetPackGUID();
-    data << uint16(8326);
-    /// uint8(0x0D) = probably race + 2
-    data << uint16(0) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << GetGUID();
-    data << uint32(0) << uint16(0x0200) << uint16(0);
-    GetSession()->SendPacket( &data );
-
-    data.Initialize(SMSG_UPDATE_AURA_DURATION, 5);
-    data << uint32(0x20) << uint8(0);
-    GetSession()->SendPacket( &data );
-
-    SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);             // set ghost form
-    SetUInt32Value(UNIT_FIELD_AURA + 33, 0x5068 );          //!dono
-
-    SetUInt32Value(UNIT_FIELD_AURAFLAGS + 4, 0xEE);
-
-    SetUInt32Value(UNIT_FIELD_AURASTATE, 0x02);
-
-    // BG - remove insignia related
-    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, (float)1.0);   //see radius of death player?
 
     // set and clear other
     SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
-
-        // set initial flags + set ghost + restore pvp
-    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_PVP_ATTACKABLE | (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP)?UNIT_FLAG_PVP:0) );
-
-    // reserve some flags + ad ghost flag
-    uint32 old_safe_flags = GetUInt32Value(PLAYER_FLAGS) & ( PLAYER_FLAGS_IN_PVP | PLAYER_FLAGS_HIDE_CLOAK | PLAYER_FLAGS_HIDE_HELM );
-    SetUInt32Value(PLAYER_FLAGS, old_safe_flags | PLAYER_FLAGS_GHOST );
 }
 
 void Player::SendDelayResponse(const uint32 ml_seconds)
@@ -3797,38 +3751,14 @@ void Player::SendDelayResponse(const uint32 ml_seconds)
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 {
-    // remove death flag + set aura
-    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
-    // SetByteValue(UNIT_FIELD_BYTES_1, 3, 0x00);
-    RemoveFlag(UNIT_FIELD_BYTES_1, UNIT_BYTE1_FLAG_ALL);
+    if(getRace() == RACE_NIGHTELF)
+        RemoveAurasDueToSpell(20584);                       // speed bonuses
+    RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
 
     setDeathState(ALIVE);
 
     SetMovement(MOVE_LAND_WALK);
     SetMovement(MOVE_UNROOT);
-
-    SetSpeedRate(MOVE_RUN,  1.0f, true);
-    SetSpeedRate(MOVE_SWIM, 1.0f, true);
-
-    SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
-
-    SetUInt32Value(UNIT_FIELD_AURA+32, 0);
-    SetUInt32Value(UNIT_FIELD_AURALEVELS+8, 0xeeeeeeee);
-    SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeeeee);
-    SetUInt32Value(UNIT_FIELD_AURAFLAGS+4, 0);
-    SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
-
-    if(getRace() == RACE_NIGHTELF)
-    {
-        DeMorph();
-    }
-
-    // trigger update zone for alive state zone updates
-    uint32 newzone, newarea;
-    GetZoneAndAreaId(newzone,newarea);
-    UpdateZone(newzone,newarea);
-
-    m_deathTimer = 0;
 
     // set health/powers (0- will be set in caller)
     if(restore_percent>0.0f)
@@ -3838,6 +3768,13 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
         SetPower(POWER_RAGE, 0);
         SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
     }
+
+    // trigger update zone for alive state zone updates
+    uint32 newzone, newarea;
+    GetZoneAndAreaId(newzone,newarea);
+    UpdateZone(newzone,newarea);
+
+    m_deathTimer = 0;
 
     // update visibility
     UpdateVisibilityForPlayer();

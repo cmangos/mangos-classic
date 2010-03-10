@@ -2240,20 +2240,10 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                         case 1563: m_target->SetDisplayId(10148); break;
                         // Gnome Female
                         case 1564: m_target->SetDisplayId(10149); break;
-                        // BloodElf Female
-                        case 15475: m_target->SetDisplayId(17830); break;
-                        // BloodElf Male
-                        case 15476: m_target->SetDisplayId(17829); break;
-                        // Dranei Female
-                        case 16126: m_target->SetDisplayId(17828); break;
-                        // Dranei Male
-                        case 16125: m_target->SetDisplayId(17827); break;
                         default: break;
                     }
                     break;
                 }
-                // Murloc costume
-                case 42365: m_target->SetDisplayId(21723); break;
                 default: break;
             }
         }
