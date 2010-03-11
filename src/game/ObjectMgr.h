@@ -302,6 +302,24 @@ class HonorStanding
 
 typedef std::list<HonorStanding> HonorStandingList;
 
+template<typename T>
+class IdGenerator
+{
+    public:                                                 // constructors
+        explicit IdGenerator(char const* _name) : m_name(_name), m_nextGuid(1) {}
+
+    public:                                                 // modifiers
+        void Set(T val) { m_nextGuid = val; }
+        T Generate();
+
+    public:                                                 // accessors
+        T GetNextAfterMaxUsed() const { return m_nextGuid; }
+
+    private:                                                // fields
+        char const* m_name;
+        T m_nextGuid;
+};
+
 class ObjectMgr
 {
     friend class PlayerDumpReader;
@@ -566,12 +584,12 @@ class ObjectMgr
 
         void SetHighestGuids();
         uint32 GenerateLowGuid(HighGuid guidhigh);
-        uint32 GenerateAuctionID();
-        uint32 GenerateGuildId();
-        uint32 GenerateGroupId();
-        uint32 GenerateItemTextID();
-        uint32 GenerateMailID();
-        uint32 GeneratePetNumber();
+        uint32 GenerateAuctionID() { return m_AuctionIds.Generate(); }
+        uint32 GenerateGuildId() { return m_GuildIds.Generate(); }
+        uint32 GenerateGroupId() { return m_GroupIds.Generate(); }
+        uint32 GenerateItemTextID() { return m_ItemGuids.Generate(); }
+        uint32 GenerateMailID() { return m_MailIds.Generate(); }
+        uint32 GeneratePetNumber() { return m_PetNumbers.Generate(); }
 
         uint32 CreateItemText(std::string text);
         void AddItemText(uint32 itemTextId, std::string text) { mItemTexts[itemTextId] = text; }
@@ -764,21 +782,21 @@ class ObjectMgr
     protected:
 
         // first free id for selected id type
-        uint32 m_auctionid;
-        uint32 m_guildId;
-        uint32 m_ItemTextId;
-        uint32 m_mailid;
-        uint32 m_hiPetNumber;
-        uint32 m_groupId;
+        IdGenerator<uint32> m_AuctionIds;
+        IdGenerator<uint32> m_GuildIds;
+        IdGenerator<uint32> m_ItemTextIds;
+        IdGenerator<uint32> m_MailIds;
+        IdGenerator<uint32> m_PetNumbers;
+        IdGenerator<uint32> m_GroupIds;
 
         // first free low guid for selected guid type
-        uint32 m_hiCharGuid;
-        uint32 m_hiCreatureGuid;
-        uint32 m_hiPetGuid;
-        uint32 m_hiItemGuid;
-        uint32 m_hiGoGuid;
-        uint32 m_hiDoGuid;
-        uint32 m_hiCorpseGuid;
+        ObjectGuidGenerator<HIGHGUID_PLAYER>     m_CharGuids;
+        ObjectGuidGenerator<HIGHGUID_UNIT>       m_CreatureGuids;
+        ObjectGuidGenerator<HIGHGUID_ITEM>       m_ItemGuids;
+        ObjectGuidGenerator<HIGHGUID_GAMEOBJECT> m_GameobjectGuids;
+        ObjectGuidGenerator<HIGHGUID_CORPSE>     m_CorpseGuids;
+        ObjectGuidGenerator<HIGHGUID_DYNAMICOBJECT> m_DynObjectGuids;
+        ObjectGuidGenerator<HIGHGUID_PET> m_PetGuids;
 
         QuestMap            mQuestTemplates;
 
