@@ -465,7 +465,7 @@ class ByteBuffer
 };
 
 template <typename T>
-inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
+inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> const& v)
 {
     b << (uint32)v.size();
     for (typename std::vector<T>::iterator i = v.begin(); i != v.end(); i++)
@@ -491,7 +491,7 @@ inline ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
 }
 
 template <typename T>
-inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> v)
+inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> const& v)
 {
     b << (uint32)v.size();
     for (typename std::list<T>::iterator i = v.begin(); i != v.end(); i++)
