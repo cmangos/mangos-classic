@@ -865,6 +865,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadNpcTextLocales();
     sObjectMgr.LoadPageTextLocales();
     sObjectMgr.LoadNpcOptionLocales();
+    sObjectMgr.LoadPointOfInterestLocales();
     sObjectMgr.SetDBCLocaleIndex(GetDefaultDbcLocale());    // Get once for all the locale index of DBC language (console/broadcasts)
     sLog.outString( ">>> Localization strings loaded" );
     sLog.outString();
@@ -925,6 +926,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Creature Reputation OnKill Data..." );
     sObjectMgr.LoadReputationOnKill();
+
+    sLog.outString( "Loading Points Of Interest Data..." );
+    sObjectMgr.LoadPointsOfInterest();
 
     sLog.outString( "Loading Pet Create Spells..." );
     sObjectMgr.LoadPetCreateSpells();
