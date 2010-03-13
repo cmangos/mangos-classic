@@ -188,6 +188,10 @@ class ObjectGuid
 
         TypeID GetTypeId() const { return GetTypeId(GetHigh()); }
 
+        bool operator== (ObjectGuid const& guid) const { return GetRawValue() == guid.GetRawValue(); }
+        bool operator!= (ObjectGuid const& guid) const { return GetRawValue() != guid.GetRawValue(); }
+        bool operator< (ObjectGuid const& guid) const { return GetRawValue() < guid.GetRawValue(); }
+
     public:                                                 // accessors - for debug
         static char const* GetTypeName(HighGuid high);
         char const* GetTypeName() const { return !IsEmpty() ? GetTypeName(GetHigh()) : "None"; }

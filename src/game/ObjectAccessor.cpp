@@ -142,9 +142,9 @@ Object* ObjectAccessor::GetObjectByTypeMask(WorldObject const &p, uint64 guid, u
 }
 
 Player*
-ObjectAccessor::FindPlayer(uint64 guid)
+ObjectAccessor::FindPlayer(ObjectGuid guid)
 {
-    return GetObjectInWorld(guid, (Player*)NULL);
+    return GetObjectInWorld(guid.GetRawValue(), (Player*)NULL);
 }
 
 Player*

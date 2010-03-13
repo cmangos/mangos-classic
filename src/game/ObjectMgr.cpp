@@ -379,7 +379,7 @@ void ObjectMgr::LoadPointOfInterestLocales()
             int idx = GetOrNewIndexForLocale(LocaleConstant(i));
             if(idx >= 0)
             {
-                if(data.IconName.size() <= idx)
+                if(data.IconName.size() <= size_t(idx))
                     data.IconName.resize(idx+1);
 
                 data.IconName[idx] = str;

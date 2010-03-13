@@ -102,6 +102,8 @@ class MANGOS_DLL_SPEC Object
             m_inWorld = false;
         }
 
+        ObjectGuid const& GetObjectGuid() const { return *reinterpret_cast<ObjectGuid const*>(&GetUInt64Value(0)); }
+
         const uint64& GetGUID() const { return GetUInt64Value(0); }
         uint32 GetGUIDLow() const { return GUID_LOPART(GetUInt64Value(0)); }
         uint32 GetGUIDMid() const { return GUID_ENPART(GetUInt64Value(0)); }

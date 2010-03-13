@@ -141,8 +141,9 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         static Player* GetPlayer(Unit const &, uint64 guid) { return FindPlayer(guid); }
         static Corpse* GetCorpse(WorldObject const &u, uint64 guid);
         static Pet* GetPet(uint64 guid);
-        static Player* FindPlayer(uint64);
 
+        // Player access
+        static Player* FindPlayer(ObjectGuid guid);
         static Player* FindPlayerByName(const char *name) ;
 
         HashMapHolder<Player>::MapType& GetPlayers()
