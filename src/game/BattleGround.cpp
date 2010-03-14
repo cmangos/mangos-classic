@@ -217,6 +217,9 @@ void BattleGround::Update(uint32 diff)
             // do not change any battleground's private variables
         }
     }
+
+    //update start time
+    m_StartTime += diff;
 }
 
 void BattleGround::SetTeamStartLoc(uint32 TeamID, float X, float Y, float Z, float O)
