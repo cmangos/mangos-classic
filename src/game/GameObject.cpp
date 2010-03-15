@@ -1001,12 +1001,6 @@ void GameObject::Use(Unit* user)
                     player->GetSession()->SendPacket(&data);
                 }
 
-                if (info->goober.eventId)
-                {
-                    sLog.outDebug("Goober ScriptStart id %u for GO entry %u (GUID %u).", info->goober.eventId, GetEntry(), GetDBTableGUIDLow());
-                    sWorld.ScriptsStart(sEventScripts, info->goober.eventId, player, this);
-                }
-
                 // possible quest objective for active quests
                 if (info->goober.questId && sObjectMgr.GetQuestTemplate(info->goober.questId))
                 {
@@ -1016,6 +1010,9 @@ void GameObject::Use(Unit* user)
                 }
 
                 player->CastedCreatureOrGO(info->id, GetGUID(), 0);
+
+                if (info->goober.eventId)
+                    GetMap()->ScriptsStart(sEventScripts, info->goober.eventId, player, this);
             }
 
             if (uint32 trapEntry = info->goober.linkedTrapId)
