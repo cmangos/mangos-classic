@@ -1695,56 +1695,11 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
 
 void Spell::EffectSendEvent(SpellEffectIndex eff_idx)
 {
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround())
-    {
-        BattleGround* bg = ((Player *)m_caster)->GetBattleGround();
-        if(bg && bg->GetStatus() == STATUS_IN_PROGRESS)
-        {
-            switch(m_spellInfo->Id)
-            {
-                case 23333:                                 // Pickup Horde Flag
-                    /*do not uncomment .
-                    if(bg->GetTypeID()==BATTLEGROUND_WS)
-                        bg->EventPlayerClickedOnFlag((Player*)m_caster, gameObjTarget);
-                    sLog.outDebug("Send Event Horde Flag Picked Up");
-                    break;
-                    /* not used :
-                    case 23334:                                 // Drop Horde Flag
-                        if(bg->GetTypeID()==BATTLEGROUND_WS)
-                            bg->EventPlayerDroppedFlag((Player*)m_caster);
-                        sLog.outDebug("Drop Horde Flag");
-                        break;
-                    */
-                case 23335:                                 // Pickup Alliance Flag
-                    /*do not uncomment ... (it will cause crash, because of null targetobject!) anyway this is a bad way to call that event, because it would cause recursion
-                    if(bg->GetTypeID()==BATTLEGROUND_WS)
-                        bg->EventPlayerClickedOnFlag((Player*)m_caster, gameObjTarget);
-                    sLog.outDebug("Send Event Alliance Flag Picked Up");
-                    break;
-                    /* not used :
-                    case 23336:                                 // Drop Alliance Flag
-                        if(bg->GetTypeID()==BATTLEGROUND_WS)
-                            bg->EventPlayerDroppedFlag((Player*)m_caster);
-                        sLog.outDebug("Drop Alliance Flag");
-                        break;
-                    case 23385:                                 // Alliance Flag Returns
-                        if(bg->GetTypeID()==BATTLEGROUND_WS)
-                            bg->EventPlayerClickedOnFlag((Player*)m_caster, gameObjTarget);
-                        sLog.outDebug("Alliance Flag Returned");
-                        break;
-                    case 23386:                                   // Horde Flag Returns
-                        if(bg->GetTypeID()==BATTLEGROUND_WS)
-                            bg->EventPlayerClickedOnFlag((Player*)m_caster, gameObjTarget);
-                        sLog.outDebug("Horde Flag Returned");
-                        break;*/
-                default:
-                    sLog.outDebug("Unknown spellid %u in BG event", m_spellInfo->Id);
-                    break;
-            }
-        }
-    }
+    /*
+    we do not handle a flag dropping or clicking on flag in battleground by sendevent system
+    */
     sLog.outDebug("Spell ScriptStart %u for spellid %u in EffectSendEvent ", m_spellInfo->EffectMiscValue[eff_idx], m_spellInfo->Id);
-    sWorld.ScriptsStart(sEventScripts, m_spellInfo->EffectMiscValue[eff_idx], m_caster, focusObject);
+    m_caster->GetMap()->ScriptsStart(sEventScripts, m_spellInfo->EffectMiscValue[eff_idx], m_caster, focusObject);
 }
 
 void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
@@ -3982,7 +3937,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         return;
 
     sLog.outDebug("Spell ScriptStart spellid %u in EffectScriptEffect ", m_spellInfo->Id);
-    sWorld.ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, unitTarget);
+    m_caster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, unitTarget);
 }
 
 void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
@@ -4164,7 +4119,7 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
 
     int32 delay_secs = m_spellInfo->EffectMiscValue[eff_idx];
 
-    sWorld.ScriptCommandStart(activateCommand, delay_secs, m_caster, gameObjTarget);
+    gameObjTarget->GetMap()->ScriptCommandStart(activateCommand, delay_secs, m_caster, gameObjTarget);
 }
 
 void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)

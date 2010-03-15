@@ -42,6 +42,8 @@ class InstanceData;
 class Group;
 class InstanceSave;
 class BattleGround;
+struct ScriptInfo;
+struct ScriptAction;
 
 //******************************************
 // Map file format defines
@@ -345,6 +347,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         typedef MapRefManager PlayerList;
         PlayerList const& GetPlayers() const { return m_mapRefManager; }
 
+        //per-map script storage
+        void ScriptsStart(std::map<uint32, std::multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);
+        void ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target);
+
         // must called with AddToWorld
         template<class T>
         void AddToActive(T* obj) { AddToActiveHelper(obj); }
@@ -358,6 +364,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         void RemoveFromActive(Creature* obj);
 
         Creature* GetCreature(uint64 guid);
+        Pet* GetPet(ObjectGuid guid);
         GameObject* GetGameObject(uint64 guid);
         DynamicObject* GetDynamicObject(uint64 guid);
 
@@ -408,6 +415,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         void setGridObjectDataLoaded(bool pLoaded, uint32 x, uint32 y) { getNGrid(x,y)->setGridObjectDataLoaded(pLoaded); }
 
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
+        void ScriptsProcess();
 
         void SendObjectUpdates();
         std::set<Object *> i_objectsToClientUpdate;
@@ -438,6 +446,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         time_t i_gridExpiry;
 
         std::set<WorldObject *> i_objectsToRemove;
+        std::multimap<time_t, ScriptAction> m_scriptSchedule;
 
         // Type specific code for add/remove to/from grid
         template<class T>

@@ -886,7 +886,7 @@ void GameObject::Use(Unit* user)
             UseDoorOrButton();
 
             // activate script
-            sWorld.ScriptsStart(sGameObjectScripts, GetDBTableGUIDLow(), spellCaster, this);
+            GetMap()->ScriptsStart(sGameObjectScripts, GetDBTableGUIDLow(), spellCaster, this);
             return;
         }
         case GAMEOBJECT_TYPE_BUTTON:                        //1
@@ -895,7 +895,7 @@ void GameObject::Use(Unit* user)
             UseDoorOrButton();
 
             // activate script
-            sWorld.ScriptsStart(sGameObjectScripts, GetDBTableGUIDLow(), spellCaster, this);
+            GetMap()->ScriptsStart(sGameObjectScripts, GetDBTableGUIDLow(), spellCaster, this);
 
             // triggering linked GO
             if (uint32 trapEntry = GetGOInfo()->button.linkedTrapId)
@@ -1054,7 +1054,7 @@ void GameObject::Use(Unit* user)
                 player->SendCinematicStart(info->camera.cinematicId);
 
             if (info->camera.eventID)
-                sWorld.ScriptsStart(sEventScripts, info->camera.eventID, player, this);
+                GetMap()->ScriptsStart(sEventScripts, info->camera.eventID, player, this);
 
             return;
         }
