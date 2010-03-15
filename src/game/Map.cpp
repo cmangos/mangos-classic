@@ -696,14 +696,11 @@ void Map::Update(const uint32 &t_diff)
     {
         for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end(); )
         {
-            for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end(); )
-            {
-                NGridType *grid = i->getSource();
-                GridInfo *info = i->getSource()->getGridInfoRef();
-                ++i;                                                // The update might delete the map and we need the next map before the iterator gets invalid
-                assert(grid->GetGridState() >= 0 && grid->GetGridState() < MAX_GRID_STATE);
-                si_GridStates[grid->GetGridState()]->Update(*this, *grid, *info, grid->getX(), grid->getY(), t_diff);
-            }
+            NGridType *grid = i->getSource();
+            GridInfo *info = i->getSource()->getGridInfoRef();
+            ++i;                                                // The update might delete the map and we need the next map before the iterator gets invalid
+            assert(grid->GetGridState() >= 0 && grid->GetGridState() < MAX_GRID_STATE);
+            si_GridStates[grid->GetGridState()]->Update(*this, *grid, *info, grid->getX(), grid->getY(), t_diff);
         }
     }
 
