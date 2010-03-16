@@ -459,6 +459,9 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
     recv_data >> guid;                                      //pet guid
     sLog.outDetail( "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid) );
 
+    if(!_player->IsInWorld())
+        return;
+
     // pet/charmed
     Creature* pet = ObjectAccessor::GetCreatureOrPet(*_player, guid);
     if(pet)

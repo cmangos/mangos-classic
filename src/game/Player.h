@@ -615,6 +615,14 @@ enum PlayerLoginQueryIndex
     MAX_PLAYER_LOGIN_QUERY
 };
 
+enum PlayerDelayedOperations
+{
+    DELAYED_SAVE_PLAYER = 1,
+    DELAYED_RESURRECT_PLAYER = 2,
+    DELAYED_SPELL_CAST_DESERTER = 4,
+    DELAYED_END
+};
+
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
 #define MAX_MONEY_AMOUNT                       (0x7FFFFFFF-1)
@@ -1487,6 +1495,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsBeingTeleportedFar() const { return mSemaphoreTeleport_Far; }
         void SetSemaphoreTeleportNear(bool semphsetting) { mSemaphoreTeleport_Near = semphsetting; }
         void SetSemaphoreTeleportFar(bool semphsetting) { mSemaphoreTeleport_Far = semphsetting; }
+        void ProcessDelayedOperations();
 
         void CheckExploreSystem(void);
 
@@ -2099,6 +2108,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, int32 faction, bool for_quest);
         void AdjustQuestReqItemCount( Quest const* pQuest, QuestStatusData& questStatusData );
 
+        bool IsCanDelayTeleport() const { return m_bCanDelayTeleport; }
+        void SetCanDelayTeleport(bool setting) { m_bCanDelayTeleport = setting; }
+        bool IsHasDelayedTeleport() const { return m_bHasDelayedTeleport; }
+        void SetDelayedTeleportFlag(bool setting) { m_bHasDelayedTeleport = setting; }
+
+        void ScheduleDelayedOperation(uint32 operation);
+
         GridReference<Player> m_gridRef;
         MapReference m_mapRef;
 
@@ -2117,8 +2133,13 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         // Current teleport data
         WorldLocation m_teleport_dest;
+        uint32 m_teleport_options;
         bool mSemaphoreTeleport_Near;
         bool mSemaphoreTeleport_Far;
+
+        uint32 m_DelayedOperations;
+        bool m_bCanDelayTeleport;
+        bool m_bHasDelayedTeleport;
 
         uint32 m_DetectInvTimer;
 

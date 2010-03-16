@@ -364,6 +364,8 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->TeleportToHomebind();
             //this is a bad place to call for far teleport because we need player to be in world for successful logout
             //maybe we should implement delayed far teleport logout?
+            while(_player->IsBeingTeleportedFar())
+                HandleMoveWorldportAckOpcode();
         }
 
         for (int i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
