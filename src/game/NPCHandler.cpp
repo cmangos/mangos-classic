@@ -309,7 +309,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     if(!Script->GossipHello( _player, unit ))
     {
         _player->TalkedToCreature(unit->GetEntry(), unit->GetGUID());
-        _player->PrepareGossipMenu(unit);
+        _player->PrepareGossipMenu(unit, unit->GetCreatureInfo()->GossipMenuId);
         _player->SendPreparedGossip(unit);
     }
 }
@@ -318,40 +318,57 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_GOSSIP_SELECT_OPTION");
 
-    uint32 option;
+    uint32 gossipListId;
     uint64 guid;
     std::string code = "";
 
-    recv_data >> guid >> option;
+    recv_data >> guid >> gossipListId;
 
-    if (_player->PlayerTalkClass->GossipOptionCoded(option))
+    if (_player->PlayerTalkClass->GossipOptionCoded(gossipListId))
     {
         sLog.outBasic("reading string");
         recv_data >> code;
         sLog.outBasic("string read: %s", code.c_str());
     }
 
-    Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
-
-    if (!pCreature)
-    {
-        sLog.outDebug( "WORLD: HandleGossipSelectOptionOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
-        return;
-    }
-
     // remove fake death
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    if (!code.empty())
+    // TODO: determine if scriptCall is needed for GO and also if scriptCall can be same as current, with modified argument WorldObject*
+
+    if (IS_CREATURE_GUID(guid))
     {
-        if (!Script->GossipSelectWithCode(_player, pCreature, _player->PlayerTalkClass->GossipOptionSender(option), _player->PlayerTalkClass->GossipOptionAction(option), code.c_str()))
-            _player->OnGossipSelect(pCreature, option);
+        Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
+
+        if (!pCreature)
+        {
+            sLog.outDebug("WORLD: HandleGossipSelectOptionOpcode - Creature (GUID: %u) not found or you can't interact with it.", uint32(GUID_LOPART(guid)));
+            return;
+        }
+
+        if (!code.empty())
+        {
+            if (!Script->GossipSelectWithCode(_player, pCreature, _player->PlayerTalkClass->GossipOptionSender(gossipListId), _player->PlayerTalkClass->GossipOptionAction(gossipListId), code.c_str()))
+                _player->OnGossipSelect(pCreature, gossipListId);
+        }
+        else
+        {
+            if (!Script->GossipSelect(_player, pCreature, _player->PlayerTalkClass->GossipOptionSender(gossipListId), _player->PlayerTalkClass->GossipOptionAction(gossipListId)))
+                _player->OnGossipSelect(pCreature, gossipListId);
+        }
     }
-    else
+    else if (IS_GAMEOBJECT_GUID(guid))
     {
-        if (!Script->GossipSelect(_player, pCreature, _player->PlayerTalkClass->GossipOptionSender(option), _player->PlayerTalkClass->GossipOptionAction(option)))
-           _player->OnGossipSelect(pCreature, option);
+        GameObject *pGo = GetPlayer()->GetGameObjectIfCanInteractWith(guid);
+
+        if (!pGo)
+        {
+            sLog.outDebug("WORLD: HandleGossipSelectOptionOpcode - GameObject (GUID: %u) not found or you can't interact with it.", uint32(GUID_LOPART(guid)));
+            return;
+        }
+
+        _player->OnGossipSelect(pGo, gossipListId);
     }
 }
 

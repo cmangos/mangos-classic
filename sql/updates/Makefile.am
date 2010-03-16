@@ -58,6 +58,8 @@ pkgdata_DATA = \
 	z0238_xxx_01_mangos_quest_template.sql \
 	z0271_084_01_mangos_points_of_interest.sql \
 	z0271_084_02_mangos_locales_points_of_interest.sql \
+	z0289_085_01_mangos_gossip.sql \
+	z0289_085_02_mangos_gossip_scripts.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -95,4 +97,6 @@ EXTRA_DIST = \
 	z0238_xxx_01_mangos_quest_template.sql \
 	z0271_084_01_mangos_points_of_interest.sql \
 	z0271_084_02_mangos_locales_points_of_interest.sql \
+	z0289_085_01_mangos_gossip.sql \
+	z0289_085_02_mangos_gossip_scripts.sql \
 	README

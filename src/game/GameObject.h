@@ -176,6 +176,8 @@ struct GameObjectInfo
             uint32 closeTextID;                             //15
             uint32 losOK;                                   //16 isBattlegroundObject
             uint32 allowMounted;                            //17
+            uint32 floatingTooltip;                         //18
+            uint32 gossipID;                                //19
         } goober;
         //11 GAMEOBJECT_TYPE_TRANSPORT
         struct
@@ -418,6 +420,16 @@ struct GameObjectInfo
         {
             case GAMEOBJECT_TYPE_CHEST:       return chest.lootId;
             case GAMEOBJECT_TYPE_FISHINGHOLE: return fishinghole.lootId;
+            default: return 0;
+        }
+    }
+
+    uint32 GetGossipMenuId() const
+    {
+        switch(type)
+        {
+            case GAMEOBJECT_TYPE_QUESTGIVER:    return questgiver.gossipID;
+            case GAMEOBJECT_TYPE_GOOBER:        return goober.gossipID;
             default: return 0;
         }
     }

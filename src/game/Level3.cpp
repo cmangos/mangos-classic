@@ -94,7 +94,6 @@ bool ChatHandler::HandleReloadAllLootCommand(const char*)
 bool ChatHandler::HandleReloadAllNpcCommand(const char* /*args*/)
 {
     HandleReloadNpcGossipCommand("a");
-    HandleReloadNpcOptionCommand("a");
     HandleReloadNpcTrainerCommand("a");
     HandleReloadNpcVendorCommand("a");
     HandleReloadPointsOfInterestCommand("a");
@@ -225,6 +224,22 @@ bool ChatHandler::HandleReloadCreatureQuestInvRelationsCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadGossipMenuCommand(const char*)
+{
+    sLog.outString( "Re-Loading `gossip_menu` Table!" );
+    sObjectMgr.LoadGossipMenu();
+    SendGlobalSysMessage("DB table `gossip_menu` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadGossipMenuOptionCommand(const char*)
+{
+    sLog.outString( "Re-Loading `gossip_menu_option` Table!" );
+    sObjectMgr.LoadGossipMenuItems();
+    SendGlobalSysMessage("DB table `gossip_menu_option` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadGOQuestRelationsCommand(const char*)
 {
     sLog.outString( "Loading Quests Relations... (`gameobject_questrelation`)" );
@@ -347,14 +362,6 @@ bool ChatHandler::HandleReloadMangosStringCommand(const char*)
     sLog.outString( "Re-Loading mangos_string Table!" );
     sObjectMgr.LoadMangosStrings();
     SendGlobalSysMessage("DB table `mangos_string` reloaded.");
-    return true;
-}
-
-bool ChatHandler::HandleReloadNpcOptionCommand(const char*)
-{
-    sLog.outString( "Re-Loading `npc_option` Table!" );
-    sObjectMgr.LoadNpcOptions();
-    SendGlobalSysMessage("DB table `npc_option` reloaded.");
     return true;
 }
 

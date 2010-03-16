@@ -742,7 +742,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         Creature* GetNPCIfCanInteractWith(uint64 guid, uint32 npcflagmask);
         bool CanInteractWithNPCs(bool alive = true) const;
-        GameObject* GetGameObjectIfCanInteractWith(uint64 guid, GameobjectTypes type) const;
+        GameObject* GetGameObjectIfCanInteractWith(uint64 guid, uint32 gameobject_type = MAX_GAMEOBJECT_TYPE) const;
 
         void UpdateVisibilityForPlayer();
 
@@ -973,14 +973,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                    GOSSIP SYSTEM                  ***/
         /*********************************************************/
 
-        void PrepareGossipMenu(WorldObject *pSource, uint32 gossipid = 0);
+        void PrepareGossipMenu(WorldObject *pSource, uint32 menuId = 0);
         void SendPreparedGossip(WorldObject *pSource);
-        void OnGossipSelect(WorldObject *pSource, uint32 option);
-        void OnPoiSelect(WorldObject *pSource, GossipOption const *gossip);
+        void OnGossipSelect(WorldObject *pSource, uint32 gossipListId);
 
-        uint32 GetGossipTextId(uint32 action, uint32 zoneid);
+        uint32 GetGossipTextId(uint32 menuId);
         uint32 GetGossipTextId(WorldObject *pSource);
-        GossipOption const* GetGossipOption(WorldObject *pSource, uint32 id) const;
+        uint32 GetDefaultGossipMenuForSource(WorldObject *pSource);
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/

@@ -27,6 +27,7 @@
 GossipMenu::GossipMenu()
 {
     m_gItems.reserve(16);                                   // can be set for max from most often sizes to speedup push_back and less memory use
+    m_gMenuId = 0;
 }
 
 GossipMenu::~GossipMenu()
@@ -44,10 +45,21 @@ void GossipMenu::AddMenuItem(uint8 Icon, const std::string& Message, uint32 dtSe
     gItem.m_gMessage    = Message;
     gItem.m_gCoded      = Coded;
     gItem.m_gSender     = dtSender;
-    gItem.m_gAction     = dtAction;
+    gItem.m_gOptionId   = dtAction;
     gItem.m_gBoxMessage = BoxMessage;
 
     m_gItems.push_back(gItem);
+}
+
+void GossipMenu::AddGossipMenuItemData(uint32 action_menu, uint32 action_poi, uint32 action_script)
+{
+    GossipMenuItemData pItemData;
+
+    pItemData.m_gAction_menu    = action_menu;
+    pItemData.m_gAction_poi     = action_poi;
+    pItemData.m_gAction_script  = action_script;
+
+    m_gItemsData.push_back(pItemData);
 }
 
 void GossipMenu::AddMenuItem(uint8 Icon, const std::string& Message, bool Coded)
@@ -76,7 +88,7 @@ uint32 GossipMenu::MenuItemAction( unsigned int ItemId )
 {
     if ( ItemId >= m_gItems.size() ) return 0;
 
-    return m_gItems[ ItemId ].m_gAction;
+    return m_gItems[ ItemId ].m_gOptionId;
 }
 
 bool GossipMenu::MenuItemCoded( unsigned int ItemId )
@@ -89,6 +101,8 @@ bool GossipMenu::MenuItemCoded( unsigned int ItemId )
 void GossipMenu::ClearMenu()
 {
     m_gItems.clear();
+    m_gItemsData.clear();
+    m_gMenuId = 0;
 }
 
 PlayerMenu::PlayerMenu( WorldSession *session ) : pSession(session)
@@ -121,12 +135,12 @@ bool PlayerMenu::GossipOptionCoded( unsigned int Selection )
     return mGossipMenu.MenuItemCoded( Selection );
 }
 
-void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
+void PlayerMenu::SendGossipMenu(uint32 TitleTextId, uint64 objectGUID)
 {
-    WorldPacket data( SMSG_GOSSIP_MESSAGE, (100) );         // guess size
-    data << uint64(npcGUID);
-    data << uint32( TitleTextId );
-    data << uint32( mGossipMenu.MenuItemCount() );          // max count 0x0F
+    WorldPacket data(SMSG_GOSSIP_MESSAGE, (100));           // guess size
+    data << uint64(objectGUID);
+    data << uint32(TitleTextId);
+    data << uint32(mGossipMenu.MenuItemCount());            // max count 0x10
 
     for (uint32 iI = 0; iI < mGossipMenu.MenuItemCount(); ++iI )
     {
