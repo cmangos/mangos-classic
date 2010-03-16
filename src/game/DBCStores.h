@@ -54,6 +54,8 @@ uint32 GetTalentInspectBitPosInTab(uint32 talentId);
 uint32 GetTalentTabInspectBitSize(uint32 talentTabId);
 uint32 const* /*[3]*/ GetTalentTabPages(uint32 cls);
 
+bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, float x, float y, float z, float delta = 0.0f);
+
 extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access using functions
 extern DBCStorage <AreaTriggerEntry>             sAreaTriggerStore;
 extern DBCStorage <AuctionHouseEntry>            sAuctionHouseStore;
