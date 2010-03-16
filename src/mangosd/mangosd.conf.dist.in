@@ -627,10 +627,11 @@ Motd = "Welcome to the Massive Network Game Object Server."
 #    AllowTwoSide.Interaction.Channel
 #    AllowTwoSide.Interaction.Group
 #    AllowTwoSide.Interaction.Guild
+#    AllowTwoSide.Interaction.Trade
 #    AllowTwoSide.Interaction.Auction
 #    AllowTwoSide.Interaction.Mail
-#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);merge all auction houses for players from
-#        different teams, send mail to different team.
+#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);trade with different team, 
+#        merge all auction houses for players from different teams, send mail to different team.
 #        Default: 0 (Not allowed)
 #                 1 (Allowed)
 #
@@ -657,6 +658,7 @@ AllowTwoSide.Interaction.Chat = 0
 AllowTwoSide.Interaction.Channel = 0
 AllowTwoSide.Interaction.Group = 0
 AllowTwoSide.Interaction.Guild = 0
+AllowTwoSide.Interaction.Trade = 0
 AllowTwoSide.Interaction.Auction = 0
 AllowTwoSide.Interaction.Mail = 0
 AllowTwoSide.WhoList = 0

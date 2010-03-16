@@ -9096,6 +9096,7 @@ CREATE TABLE `points_of_interest` (
   `flags` mediumint(8) unsigned NOT NULL default '0',
   `data` mediumint(8) unsigned NOT NULL default '0',
   `icon_name` text NOT NULL,
+  PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
