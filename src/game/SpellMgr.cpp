@@ -2655,7 +2655,8 @@ void SpellMgr::CheckUsedSpells(char const* table)
                 {
                     if(spellEntry->SpellFamilyFlags != 0)
                     {
-                        sLog.outError("Spell %u '%s' not fit to (" I64FMT ") but used in %s.",spell,name.c_str(),familyMask,code.c_str());
+                        sLog.outError("Spell %u '%s' not fit to (" UI64FMTD ") but used in %s.",
+                            spell, name.c_str(), familyMask, code.c_str());
                         continue;
                     }
 

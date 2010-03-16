@@ -757,11 +757,11 @@ namespace MaNGOS
                 return false;
             }
         private:
-            bool i_hitHidden;
             bool i_targetForPlayer;
             WorldObject const* i_obj;
             Unit const* i_funit;
             float i_range;
+            bool i_hitHidden;
     };
 
     class AnyAoETargetUnitInObjectRangeCheck

@@ -4245,6 +4245,7 @@ SpellCastResult Spell::CheckCasterAuras() const
                             else if ( m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
                                 return SPELL_FAILED_SILENCED;
                             break;
+                        default: break;
                     }
                 }
             }
