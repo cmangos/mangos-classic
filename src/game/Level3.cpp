@@ -64,6 +64,7 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
     HandleReloadAllQuestCommand("");
     HandleReloadAllSpellCommand("");
     HandleReloadAllItemCommand("");
+    HandleReloadAllGossipsCommand("");
     HandleReloadAllLocalesCommand("");
 
     HandleReloadCommandCommand("");
@@ -91,9 +92,10 @@ bool ChatHandler::HandleReloadAllLootCommand(const char*)
     return true;
 }
 
-bool ChatHandler::HandleReloadAllNpcCommand(const char* /*args*/)
+bool ChatHandler::HandleReloadAllNpcCommand(const char* args)
 {
-    HandleReloadNpcGossipCommand("a");
+    if(*args!='a')                                          // will be reloaded from all_gossips
+        HandleReloadNpcGossipCommand("a");
     HandleReloadNpcTrainerCommand("a");
     HandleReloadNpcVendorCommand("a");
     HandleReloadPointsOfInterestCommand("a");
@@ -154,6 +156,17 @@ bool ChatHandler::HandleReloadAllSpellCommand(const char*)
     HandleReloadSpellTargetPositionCommand("a");
     HandleReloadSpellThreatsCommand("a");
     HandleReloadSpellPetAurasCommand("a");
+    return true;
+}
+
+bool ChatHandler::HandleReloadAllGossipsCommand(const char* args)
+{
+    HandleReloadGossipMenuCommand("a");
+    HandleReloadGossipMenuOptionCommand("a");
+    if(*args!='a')                                          // already reload from all_scripts
+        HandleReloadGossipScriptsCommand("a");
+    HandleReloadNpcGossipCommand("a");
+    HandleReloadPointsOfInterestCommand("a");
     return true;
 }
 
