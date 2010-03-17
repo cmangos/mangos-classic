@@ -11041,9 +11041,9 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
 
             if (pMenuData.m_gAction_script)
             {
-                if (pSource->GetTypeId() == TYPEID_UNIT)
+                if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
                     GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, this, pSource);
-                else if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
+                else if (pSource->GetTypeId() == TYPEID_UNIT)
                     GetMap()->ScriptsStart(sGossipScripts, pMenuData.m_gAction_script, pSource, this);
             }
 
