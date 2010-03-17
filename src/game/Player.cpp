@@ -11030,14 +11030,14 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
     {
         case GOSSIP_OPTION_GOSSIP:
         {
+            if (pMenuData.m_gAction_poi)
+                PlayerTalkClass->SendPointOfInterest(pMenuData.m_gAction_poi);
+
             if (pMenuData.m_gAction_menu)
             {
                 PrepareGossipMenu(pSource, pMenuData.m_gAction_menu);
                 SendPreparedGossip(pSource);
             }
-
-            if (pMenuData.m_gAction_poi)
-                PlayerTalkClass->SendPointOfInterest(pMenuData.m_gAction_poi);
 
             if (pMenuData.m_gAction_script)
             {
