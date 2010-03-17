@@ -728,7 +728,8 @@ void Aura::_AddAura()
             // allow use single slot only by auras from same caster
             if(itr->second->GetCasterGUID()==GetCasterGUID())
             {
-                samespell = true;
+                // Check for coexisting Weapon-proced Auras
+                samespell = !isWeaponBuffCoexistableWith(itr->second);
                 if (m_effIndex > itr->second->GetEffIndex())
                      secondaura = true;
                 slot = itr->second->GetAuraSlot();
@@ -1088,6 +1089,37 @@ void Aura::ReapplyAffectedPassiveAuras()
 
     // re-apply talents/passives/area auras applied to pet/totems (it affected by player spellmods)
     m_target->CallForAllControlledUnits(ReapplyAffectedPassiveAurasHelper(this),true,false,false);
+}
+
+bool Aura::isWeaponBuffCoexistableWith(Aura *ref)
+{
+    // Exclude Debuffs
+    if (!IsPositive())
+        return false;
+
+    // Exclude Non-generic Buffs
+    if (GetSpellProto()->SpellFamilyName != SPELLFAMILY_GENERIC)
+        return false;
+
+    // Exclude Stackable Buffs [ie: Blood Reserve]
+    if (GetSpellProto()->StackAmount)
+        return false;
+
+    // only self applied player buffs
+    if (m_target->GetTypeId() != TYPEID_PLAYER || m_target->GetGUID() != GetCasterGUID())
+        return false;
+
+    Item* castItem = ((Player*)m_target)->GetItemByGuid(GetCastItemGUID());
+    if (!castItem)
+        return false;
+
+    // Limit to Weapon-Slots
+    if (!castItem->IsEquipped() ||
+        (castItem->GetSlot() != EQUIPMENT_SLOT_MAINHAND && castItem->GetSlot() != EQUIPMENT_SLOT_OFFHAND))
+        return false;
+
+    // form different weapons
+    return ref->GetCastItemGUID() != GetCastItemGUID();
 }
 
 /*********************************************************/

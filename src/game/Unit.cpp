@@ -3625,8 +3625,13 @@ bool Unit::AddAura(Aura *Aur)
             {
                 for(AuraMap::iterator i2 = m_Auras.lower_bound(spair); i2 != m_Auras.upper_bound(spair); ++i2)
                 {
-                    if(i2->second->GetCasterGUID()==Aur->GetCasterGUID())
+                    Aura* aur2 = i2->second;
+                    if(aur2->GetCasterGUID()==Aur->GetCasterGUID())
                     {
+                        // Check for coexisting Weapon-proced Auras
+                        if (Aur->isWeaponBuffCoexistableWith(aur2))
+                            continue;
+
                         // can be only single (this check done at _each_ aura add
                         RemoveAura(i2,AURA_REMOVE_BY_STACK);
                         break;

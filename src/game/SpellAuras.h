@@ -302,6 +302,7 @@ class MANGOS_DLL_SPEC Aura
 
         // more limited that used in future versions (spell_affect table based only), so need be careful with backporting uses
         bool isAffectedOnSpell(SpellEntry const *spell) const;
+        bool isWeaponBuffCoexistableWith(Aura *ref);
     protected:
         Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
 
