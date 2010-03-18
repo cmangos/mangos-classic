@@ -26,6 +26,7 @@
 #include "Player.h"
 #include "UpdateMask.h"
 #include "AuctionHouseMgr.h"
+#include "Mail.h"
 #include "Util.h"
 
 //please DO NOT use iterator++, because it is slower than ++iterator!!!
@@ -123,7 +124,9 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPri
         if (oldBidder)
             oldBidder->GetSession()->SendAuctionBidderNotification( auction->GetHouseId(), auction->Id, _player->GetGUID(), newPrice, auction->GetAuctionOutBid(), auction->item_template);
 
-        WorldSession::SendMailTo(oldBidder, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->GetHouseId(), auction->bidder, msgAuctionOutbiddedSubject.str(), 0, NULL, auction->bid, 0, MAIL_CHECK_MASK_NONE);
+        MailDraft(msgAuctionOutbiddedSubject.str())
+            .AddMoney(auction->bid)
+            .SendMailTo(MailReceiver(oldBidder, auction->bidder), auction);
     }
 }
 
@@ -143,7 +146,9 @@ void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
         std::ostringstream msgAuctionCancelledSubject;
         msgAuctionCancelledSubject << auction->item_template << ":0:" << AUCTION_CANCELLED_TO_BIDDER;
 
-        WorldSession::SendMailTo(bidder, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->GetHouseId(), auction->bidder, msgAuctionCancelledSubject.str(), 0, NULL, auction->bid, 0, MAIL_CHECK_MASK_NONE);
+        MailDraft(msgAuctionCancelledSubject.str())
+            .AddMoney(auction->bid)
+            .SendMailTo(MailReceiver(bidder, auction->bidder), auction);
     }
 }
 
@@ -437,11 +442,10 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             std::ostringstream msgAuctionCanceledOwner;
             msgAuctionCanceledOwner << auction->item_template << ":0:" << AUCTION_CANCELED;
 
-            MailItemsInfo mi;
-            mi.AddItem(pItem);
-
             // item will deleted or added to received mail list
-            WorldSession::SendMailTo(pl, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->GetHouseId(), pl->GetGUIDLow(), msgAuctionCanceledOwner.str(), 0, &mi, 0, 0, MAIL_CHECK_MASK_NONE);
+            MailDraft(msgAuctionCanceledOwner.str())
+                .AddItem(pItem)
+                .SendMailTo(pl, auction);
         }
         else
         {

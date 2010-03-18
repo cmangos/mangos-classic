@@ -43,6 +43,7 @@
 #include "Util.h"
 #include "WaypointManager.h"
 #include "GossipDef.h"
+#include "Mail.h"
 #include "Formulas.h"
 
 #include <limits>
