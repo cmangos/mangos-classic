@@ -1720,6 +1720,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const;
         bool CanUseBattleGroundObject();
+        bool isTotalImmune();
         bool CanCaptureTowerPoint();
 
         /*********************************************************/
