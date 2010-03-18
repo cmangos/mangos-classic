@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2005,2006,2007 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
+ * Copyright (C) 2009-2010 MaNGOSZero <http://github.com/mangoszero/mangoszero/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
