@@ -88,20 +88,20 @@ m_bonusdamage(0), m_resetTalentsTime(0), m_auraUpdateMask(0), m_loading(false)
 Pet::~Pet()
 {
     if(m_uint32Values)                                      // only for fully created Object
-        ObjectAccessor::Instance().RemoveObject(this);
+        sObjectAccessor.RemoveObject(this);
 }
 
 void Pet::AddToWorld()
 {
     ///- Register the pet for guid lookup
-    if(!IsInWorld()) ObjectAccessor::Instance().AddObject(this);
+    if(!IsInWorld()) sObjectAccessor.AddObject(this);
     Unit::AddToWorld();
 }
 
 void Pet::RemoveFromWorld()
 {
     ///- Remove the pet from the accessor
-    if(IsInWorld()) ObjectAccessor::Instance().RemoveObject(this);
+    if(IsInWorld()) sObjectAccessor.RemoveObject(this);
     ///- Don't call the function for Creature, normal mobs + totems go in a different storage
     Unit::RemoveFromWorld();
 }

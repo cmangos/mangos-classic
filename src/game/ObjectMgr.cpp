@@ -5874,7 +5874,7 @@ void ObjectMgr::LoadCorpses()
             continue;
         }
 
-        ObjectAccessor::Instance().AddCorpse(corpse);
+        sObjectAccessor.AddCorpse(corpse);
 
         ++count;
     }

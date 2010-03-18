@@ -51,7 +51,7 @@ static void CorpsesEraseCallBack(QueryResult *result, bool bones)
         /// Resurrectable - convert corpses to bones
         if(!bones)
         {
-            if(!ObjectAccessor::Instance().ConvertCorpseForPlayer(player_guid))
+            if(!sObjectAccessor.ConvertCorpseForPlayer(player_guid))
             {
                 sLog.outDebug("Corpse %u not found in world or bones creating forbidden. Delete from DB.",guidlow);
                 CharacterDatabase.PExecute("DELETE FROM corpse WHERE guid = '%u'",guidlow);

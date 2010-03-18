@@ -3317,7 +3317,7 @@ bool ChatHandler::HandleReviveCommand(const char* args)
     }
     else
         // will resurrected at login without corpse
-        ObjectAccessor::Instance().ConvertCorpseForPlayer(target_guid);
+        sObjectAccessor.ConvertCorpseForPlayer(target_guid);
 
     return true;
 }
@@ -4308,7 +4308,7 @@ bool ChatHandler::HandleResetAllCommand(const char * args)
     }
 
     CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE (at_login & '%u') = '0'",atLogin,atLogin);
-    HashMapHolder<Player>::MapType const& plist = ObjectAccessor::Instance().GetPlayers();
+    HashMapHolder<Player>::MapType const& plist = sObjectAccessor.GetPlayers();
     for(HashMapHolder<Player>::MapType::const_iterator itr = plist.begin(); itr != plist.end(); ++itr)
         itr->second->SetAtLoginFlag(atLogin);
 

@@ -128,7 +128,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     recv_data >> entry;
     recv_data >> guid;
 
-    Creature *unit = ObjectAccessor::Instance().GetCreatureOrPet(*_player, guid);
+    Creature *unit = sObjectAccessor.GetCreatureOrPet(*_player, guid);
 
     //if (unit == NULL)
     //    sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );

@@ -1815,7 +1815,7 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
 //Save all players in the world
 bool ChatHandler::HandleSaveAllCommand(const char* /*args*/)
 {
-    ObjectAccessor::Instance().SaveAllPlayers();
+    sObjectAccessor.SaveAllPlayers();
     SendSysMessage(LANG_PLAYERS_SAVED);
     return true;
 }

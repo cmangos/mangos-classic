@@ -407,7 +407,7 @@ bool Map::EnsureGridLoaded(const Cell &cell)
         loader.LoadN();
 
         // Add resurrectable corpses to world object list in grid
-        ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()), this);
+        sObjectAccessor.AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()), this);
 
         setGridObjectDataLoaded(true,cell.GridX(), cell.GridY());
         return true;
@@ -1948,7 +1948,7 @@ void Map::RemoveAllObjectsInRemoveList()
         {
             case TYPEID_CORPSE:
             {
-                Corpse* corpse = ObjectAccessor::Instance().GetCorpse(*obj, obj->GetGUID());
+                Corpse* corpse = sObjectAccessor.GetCorpse(*obj, obj->GetGUID());
                 if (!corpse)
                     sLog.outError("Try delete corpse/bones %u that not in map", obj->GetGUIDLow());
                 else

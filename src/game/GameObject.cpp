@@ -96,14 +96,14 @@ void GameObject::CleanupsBeforeDelete()
 void GameObject::AddToWorld()
 {
     ///- Register the gameobject for guid lookup
-    if(!IsInWorld()) ObjectAccessor::Instance().AddObject(this);
+    if(!IsInWorld()) sObjectAccessor.AddObject(this);
     Object::AddToWorld();
 }
 
 void GameObject::RemoveFromWorld()
 {
     ///- Remove the gameobject from the accessor
-    if(IsInWorld()) ObjectAccessor::Instance().RemoveObject(this);
+    if(IsInWorld()) sObjectAccessor.RemoveObject(this);
     Object::RemoveFromWorld();
 }
 

@@ -438,7 +438,7 @@ void WorldSession::LogoutPlayer(bool Save)
         // calls to GetMap in this case may cause crashes
         if(_player->IsInWorld()) _player->GetMap()->Remove(_player, false);
         // RemoveFromWorld does cleanup that requires the player to be in the accessor
-        ObjectAccessor::Instance().RemoveObject(_player);
+        sObjectAccessor.RemoveObject(_player);
 
         ///- Delete the player object
         _player->CleanupsBeforeDelete();                    // do some cleanup before deleting to prevent crash at crossreferences to already deleted data
