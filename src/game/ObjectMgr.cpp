@@ -7754,7 +7754,7 @@ void ObjectMgr::CheckScripts(ScriptMapMap const& scripts,std::set<int32>& ids)
                 case SCRIPT_COMMAND_TALK:
                 {
                     if(!GetMangosStringLocale (itrM->second.dataint))
-                        sLog.outErrorDb( "Table `db_script_string` not has string id  %u used db script (ID: %u)", itrM->second.dataint, itrMM->first);
+                        sLog.outErrorDb( "Table `db_script_string` is missing string id %u, used in database script id %u.", itrM->second.dataint, itrMM->first);
 
                     if (ids.find(itrM->second.dataint) != ids.end())
                         ids.erase(itrM->second.dataint);
