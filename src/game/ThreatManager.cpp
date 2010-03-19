@@ -379,7 +379,7 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, bool crit, SpellScho
         return;
 
     // not to GM
-    if(!pVictim || (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->isGameMaster()) )
+    if (!pVictim || (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->isGameMaster()) )
         return;
 
     // not to dead and not for dead
@@ -392,7 +392,7 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, bool crit, SpellScho
 
     HostileReference* ref = iThreatContainer.addThreat(pVictim, threat);
     // Ref is not in the online refs, search the offline refs next
-    if(!ref)
+    if (!ref)
         ref = iThreatOfflineContainer.addThreat(pVictim, threat);
 
     if(!ref)                                                // there was no ref => create a new one
@@ -440,12 +440,16 @@ float ThreatManager::getThreat(Unit *pVictim, bool pAlsoSearchOfflineList)
 
 void ThreatManager::tauntApply(Unit* pTaunter)
 {
-    HostileReference* ref = iThreatContainer.getReferenceByTarget(pTaunter);
-    if(getCurrentVictim() && ref && (ref->getThreat() < getCurrentVictim()->getThreat()))
+    if(HostileReference* ref = iThreatContainer.getReferenceByTarget(pTaunter))
     {
-        if(ref->getTempThreatModifyer() == 0.0f)
-                                                            // Ok, temp threat is unused
-            ref->setTempThreat(getCurrentVictim()->getThreat());
+        if(getCurrentVictim() && (ref->getThreat() < getCurrentVictim()->getThreat()))
+        {
+            // Ok, temp threat is unused
+            if(ref->getTempThreatModifyer() == 0.0f)
+            {
+                ref->setTempThreat(getCurrentVictim()->getThreat());
+            }
+        }
     }
 }
 
@@ -453,9 +457,10 @@ void ThreatManager::tauntApply(Unit* pTaunter)
 
 void ThreatManager::tauntFadeOut(Unit *pTaunter)
 {
-    HostileReference* ref = iThreatContainer.getReferenceByTarget(pTaunter);
-    if(ref)
+    if(HostileReference* ref = iThreatContainer.getReferenceByTarget(pTaunter))
+    {
         ref->resetTempThreat();
+    }
 }
 
 //============================================================
@@ -508,7 +513,9 @@ void ThreatManager::processThreatEvent(ThreatRefStatusChangeEvent* threatRefStat
                 setDirty(true);
             }
             if(hostileReference->isOnline())
+            {
                 iThreatContainer.remove(hostileReference);
+            }
             else
                 iThreatOfflineContainer.remove(hostileReference);
             break;

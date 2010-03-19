@@ -155,15 +155,15 @@ class MANGOS_DLL_SPEC ThreatContainer
 
         void setDirty(bool pDirty) { iDirty = pDirty; }
 
-        bool isDirty() { return iDirty; }
+        bool isDirty() const { return iDirty; }
 
-        bool empty() { return(iThreatList.empty()); }
+        bool empty() const { return(iThreatList.empty()); }
 
         HostileReference* getMostHated() { return iThreatList.empty() ? NULL : iThreatList.front(); }
 
         HostileReference* getReferenceByTarget(Unit* pVictim);
 
-        ThreatList& getThreatList() { return iThreatList; }
+        ThreatList const& getThreatList() const { return iThreatList; }
 };
 
 //=================================================
@@ -185,13 +185,13 @@ class MANGOS_DLL_SPEC ThreatManager
 
         float getThreat(Unit *pVictim, bool pAlsoSearchOfflineList = false);
 
-        bool isThreatListEmpty() { return iThreatContainer.empty();}
+        bool isThreatListEmpty() const { return iThreatContainer.empty(); }
 
         void processThreatEvent(ThreatRefStatusChangeEvent* threatRefStatusChangeEvent);
 
         HostileReference* getCurrentVictim() { return iCurrentVictim; }
 
-        Unit*  getOwner() { return iOwner; }
+        Unit*  getOwner() const { return iOwner; }
 
         Unit* getHostileTarget();
 
@@ -202,12 +202,8 @@ class MANGOS_DLL_SPEC ThreatManager
 
         void setDirty(bool pDirty) { iThreatContainer.setDirty(pDirty); }
 
-        // methods to access the lists from the outside to do sume dirty manipulation (scriping and such)
-        // I hope they are used as little as possible.
-        ThreatList& getThreatList() { return iThreatContainer.getThreatList(); }
-        ThreatList& getOfflieThreatList() { return iThreatOfflineContainer.getThreatList(); }
-        ThreatContainer& getOnlineContainer() { return iThreatContainer; }
-        ThreatContainer& getOfflineContainer() { return iThreatOfflineContainer; }
+        // Don't must be used for explicit modify threat values in iterator return pointers
+        ThreatList const& getThreatList() const { return iThreatContainer.getThreatList(); }
     private:
         HostileReference* iCurrentVictim;
         Unit* iOwner;
