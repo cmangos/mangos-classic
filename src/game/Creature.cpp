@@ -1231,18 +1231,18 @@ void Creature::setDeathState(DeathState s)
         if (FallGround())  //[-ZERO] maybe not needed
           return;
 
-        if(!IsStopped())
+        if (!IsStopped())
             StopMoving();
     }
     Unit::setDeathState(s);
 
-    if(s == JUST_DIED)
+    if (s == JUST_DIED)
     {
         SetTargetGUID(0);                                   // remove target selection in any cases (can be set at aura remove in Unit::setDeathState)
         SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
-        if(!isPet() && GetCreatureInfo()->SkinLootId)
-            if ( LootTemplates_Skinning.HaveLootFor(GetCreatureInfo()->SkinLootId) )
+        if (!isPet() && GetCreatureInfo()->SkinLootId)
+            if (LootTemplates_Skinning.HaveLootFor(GetCreatureInfo()->SkinLootId))
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
         if (FallGround())  //[-ZERO] maybe not needed
@@ -1256,7 +1256,7 @@ void Creature::setDeathState(DeathState s)
 
         Unit::setDeathState(CORPSE);
     }
-    if(s == JUST_ALIVED)
+    if (s == JUST_ALIVED)
     {
         SetHealth(GetMaxHealth());
         SetLootRecipient(NULL);
