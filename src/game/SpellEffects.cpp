@@ -4546,8 +4546,6 @@ void Spell::EffectSelfResurrect(SpellEffectIndex eff_idx)
     plr->SetPower(POWER_ENERGY, plr->GetMaxPower(POWER_ENERGY) );
 
     plr->SpawnCorpseBones();
-
-    plr->SaveToDB();
 }
 
 void Spell::EffectSkinning(SpellEffectIndex /*eff_idx*/)

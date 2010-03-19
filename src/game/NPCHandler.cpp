@@ -426,8 +426,6 @@ void WorldSession::SendSpiritResurrect()
     // or update at original position
     else
         _player->UpdateVisibilityForPlayer();
-
-    _player->SaveToDB();
 }
 
 void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
