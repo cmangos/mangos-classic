@@ -699,8 +699,18 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         // Reward player, his pets, and group/raid members
         // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
         if(player && player!=pVictim)
+        {
+            WorldPacket data(SMSG_PARTYKILLLOG, (8+8));     //send event PARTY_KILL
+            data << uint64(player->GetGUID());              //player with killing blow
+            data << uint64(pVictim->GetGUID());             //victim
+            if (Group *group =  player->GetGroup())
+                group->BroadcastPacket(&data, group->GetMemberGroup(player->GetGUID()));
+            else
+                player->SendDirectMessage(&data);
+
             if(player->RewardPlayerAndGroupAtKill(pVictim))
                 player->ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
+        }
 
         DEBUG_LOG("DealDamageAttackStop");
 
@@ -1492,15 +1502,15 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
             return 0;
         }
 
-        // Deal damage done
-        damage = DealDamage(pVictim, damage, &cleanDamage, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(spellInfo), spellInfo, true);
-
         // Send damage log
         sLog.outDetail("SpellNonMeleeDamageLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u,absorb is %u,resist is %u",
             GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damage, spellID, absorb,resist);
 
         // Actual log sent to client
         SendSpellNonMeleeDamageLog(pVictim, spellID, damage, GetSpellSchoolMask(spellInfo), absorb, resist, false, 0, crit);
+
+        // Deal damage done
+        damage = DealDamage(pVictim, damage, &cleanDamage, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(spellInfo), spellInfo, true);
 
         // Procflags
         uint32 procAttacker = PROC_FLAG_HIT_SPELL;
