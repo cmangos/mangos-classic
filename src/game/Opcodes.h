@@ -980,7 +980,7 @@ class Opcodes
         void StoreOpcode(uint16 Opcode,char const* name, SessionStatus status, void (WorldSession::*handler)(WorldPacket& recvPacket)) 
         { mOpcodeMap[Opcode].name = name; mOpcodeMap[Opcode].status = status ; mOpcodeMap[Opcode].handler = handler; };
 
-        /// Lookup opcode name for human understandable logging
+        /// Lookup opcode
         inline OpcodeStruct const* LookupOpcode(uint16 id)
         {
             OpcodeMap::iterator itr = mOpcodeMap.find(id);
@@ -994,5 +994,13 @@ class Opcodes
 };
 
 #define opCodes MaNGOS::Singleton<Opcodes>::Instance()
+
+/// Lookup opcode name for human understandable logging
+inline char const* LookupOpcodeName(uint16 id)
+{
+    if (OpcodeStruct const* op = opCodes.LookupOpcode(id))
+        return op->name;
+    return "Received unknown opcode, it's more than max!";
+}
 #endif
 /// @}
