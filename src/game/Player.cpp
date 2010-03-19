@@ -2372,6 +2372,9 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(getLevel()));
 
+    // reset before any aura state sources (health set/aura apply)
+    SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
+
     UpdateSkillsForLevel ();
 
     // set default cast time multiplier
