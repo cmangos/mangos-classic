@@ -2088,7 +2088,7 @@ void Spell::cast(bool skipCheck)
                 case 25331: AddTriggeredSpell(25329); break;// Holy Nova, rank 7
                 default:break;
             }
-            break;      
+            break;
         }
         default:
             break;
