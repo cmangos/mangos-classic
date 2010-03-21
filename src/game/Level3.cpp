@@ -4117,9 +4117,6 @@ bool ChatHandler::HandleResetHonorCommand (const char * args)
 
 static bool HandleResetStatsOrLevelHelper(Player* player)
 {
-    PlayerInfo const *info = sObjectMgr.GetPlayerInfo(player->getRace(), player->getClass());
-    if(!info) return false;
-
     ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(player->getClass());
     if(!cEntry)
     {
@@ -4155,21 +4152,7 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
 
     // reset only if player not in some form;
     if(player->m_form==FORM_NONE)
-    {
-        switch(player->getGender())
-        {
-            case GENDER_FEMALE:
-                player->SetDisplayId(info->displayId_f);
-                player->SetNativeDisplayId(info->displayId_f);
-                break;
-            case GENDER_MALE:
-                player->SetDisplayId(info->displayId_m);
-                player->SetNativeDisplayId(info->displayId_m);
-                break;
-            default:
-                break;
-        }
-    }
+        player->InitDisplayIds();
 
     // set UNIT_FIELD_BYTES_1 to init state but preserve m_form value
     player->SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield);
@@ -6163,8 +6146,7 @@ bool ChatHandler::HandleModifyGenderCommand(const char *args)
     player->SetByteValue(PLAYER_BYTES_3, 0, gender);
 
     // Change display ID
-    player->SetDisplayId(gender ? info->displayId_f : info->displayId_m);
-    player->SetNativeDisplayId(gender ? info->displayId_f : info->displayId_m);
+    player->InitDisplayIds();
 
     char const* gender_full = gender ? "female" : "male";
 

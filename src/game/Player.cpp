@@ -562,27 +562,12 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE );
     SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
 
-    switch(gender)
-    {
-        case GENDER_FEMALE:
-            SetDisplayId(info->displayId_f );
-            SetNativeDisplayId(info->displayId_f );
-            break;
-        case GENDER_MALE:
-            SetDisplayId(info->displayId_m );
-            SetNativeDisplayId(info->displayId_m );
-            break;
-        default:
-            sLog.outError("Invalid gender %u for player",gender);
-            return false;
-            break;
-    }
-
     setFactionForRace(race);
 
     uint32 RaceClassGender = ( race ) | ( class_ << 8 ) | ( gender << 16 );
 
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( RaceClassGender | ( powertype << 24 ) ) );
+    InitDisplayIds();
     SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield);
     SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_UNK5 );
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE );
@@ -1389,7 +1374,7 @@ bool Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
     PlayerInfo const *info = sObjectMgr.GetPlayerInfo(pRace, pClass);
     if(!info)
     {
-        sLog.outError("Player %u have incorrect race/class pair. Don't build enum.", guid);
+        sLog.outError("Player %u has incorrect race/class pair. Don't build enum.", guid);
         return false;
     }
 
@@ -3175,7 +3160,7 @@ void Player::_LoadSpellCooldowns(QueryResult *result)
 
             if(!sSpellStore.LookupEntry(spell_id))
             {
-                sLog.outError("Player %u have unknown spell %u in `character_spell_cooldown`, skipping.",GetGUIDLow(),spell_id);
+                sLog.outError("Player %u has unknown spell %u in `character_spell_cooldown`, skipping.",GetGUIDLow(),spell_id);
                 continue;
             }
 
@@ -13003,6 +12988,8 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     SetUInt32Value(PLAYER_BYTES_3, (GetUInt32Value(PLAYER_BYTES_3) & ~1) | fields[6].GetUInt8());
     SetUInt32Value(PLAYER_FLAGS, fields[12].GetUInt32());
 
+    InitDisplayIds();
+
     // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
     for(uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
     {
@@ -13762,7 +13749,7 @@ void Player::_LoadMailedItems(Mail *mail)
 
         if(!proto)
         {
-            sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail (%u), deleted.", GetGUIDLow(), item_guid_low, item_template,mail->messageID);
+            sLog.outError( "Player %u has unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail (%u), deleted.", GetGUIDLow(), item_guid_low, item_template,mail->messageID);
             CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid = '%u'", item_guid_low);
             CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'", item_guid_low);
             continue;
@@ -14314,7 +14301,6 @@ void Player::SaveToDB()
     SetByteValue(UNIT_FIELD_BYTES_1, 2, 0);                 // shapeshift
     SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);                 // stand flags?
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-    SetDisplayId(GetNativeDisplayId());
 
     bool inworld = IsInWorld();
 
@@ -14459,7 +14445,6 @@ void Player::SaveToDB()
     CharacterDatabase.CommitTransaction();
 
     // restore state (before aura apply, if aura remove flag then aura must set it ack by self)
-    SetDisplayId(tmp_displayid);
     SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
     SetUInt32Value(UNIT_FIELD_BYTES_2, tmp_bytes2);
     SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
@@ -15939,6 +15924,32 @@ void Player::InitDataForForm(bool reapplyMods)
 
     UpdateAttackPowerAndDamage();
     UpdateAttackPowerAndDamage(true);
+}
+
+void Player::InitDisplayIds()
+{
+    PlayerInfo const *info = sObjectMgr.GetPlayerInfo(getRace(), getClass());
+    if(!info)
+    {
+        sLog.outError("Player %u has incorrect race/class pair. Can't init display ids.", GetGUIDLow());
+        return;
+    }
+
+    uint8 gender = getGender();
+    switch(gender)
+    {
+        case GENDER_FEMALE:
+            SetDisplayId(info->displayId_f );
+            SetNativeDisplayId(info->displayId_f );
+            break;
+        case GENDER_MALE:
+            SetDisplayId(info->displayId_m );
+            SetNativeDisplayId(info->displayId_m );
+            break;
+        default:
+            sLog.outError("Invalid gender %u for player",gender);
+            return;
+    }
 }
 
 // Return true is the bought item has a max count to force refresh of window by caller
