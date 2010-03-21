@@ -346,7 +346,7 @@ void Unit::Update( uint32 p_time )
     m_Events.Update( p_time );
     _UpdateSpells( p_time );
 
-    CleanupDeletedAuars();
+    CleanupDeletedAuras();
 
     if (m_lastManaUseTimer)
     {
@@ -9244,7 +9244,7 @@ void Unit::RemoveFromWorld()
         RemoveGuardians();
         RemoveAllGameObjects();
         RemoveAllDynObjects();
-        CleanupDeletedAuars();
+        CleanupDeletedAuras();
     }
 
     Object::RemoveFromWorld();
@@ -10483,7 +10483,7 @@ void Unit::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpee
     }
 }
 
-void Unit::CleanupDeletedAuars()
+void Unit::CleanupDeletedAuras()
 {
     // really delete auras "deleted" while processing its ApplyModify code
     for(AuraList::const_iterator itr = m_deletedAuras.begin(); itr != m_deletedAuras.end(); ++itr)
