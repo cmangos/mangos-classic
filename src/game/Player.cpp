@@ -1791,6 +1791,10 @@ void Player::RemoveFromWorld()
             m_items[i]->RemoveFromWorld();
     }
 
+    // remove duel before calling Unit::RemoveFromWorld
+    // otherwise there will be an existing duel flag pointer but no entry in m_gameObj
+    DuelComplete(DUEL_INTERUPTED);
+
     ///- Do not add/remove the player from the object storage
     ///- It will crash when updating the ObjectAccessor
     ///- The player should only be removed when logging out
