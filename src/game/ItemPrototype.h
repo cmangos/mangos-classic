@@ -75,11 +75,11 @@ enum ITEM_FLAGS
     ITEM_FLAGS_BROKEN                         = 0x00000010, // appears red icon (like when item durability==0)
     ITEM_FLAGS_WRAPPER                        = 0x00000200, // used or not used wrapper
     ITEM_FLAGS_PARTY_LOOT                     = 0x00000800, // determines if item is party loot or not
-    ITEM_FLAGS_CHARTER                        = 0x00002000, // arena/guild charter
+    ITEM_FLAGS_CHARTER                        = 0x00002000, // guild charter
     ITEM_FLAGS_UNIQUE_EQUIPPED                = 0x00080000,
     ITEM_FLAGS_USEABLE_IN_ARENA               = 0x00200000,
     ITEM_FLAGS_THROWABLE                      = 0x00400000, // not used in game for check trow possibility, only for item in game tooltip
-    ITEM_FLAGS_SPECIALUSE                     = 0x00800000, // last used flag in 2.3.0
+    ITEM_FLAGS_SPECIALUSE                     = 0x00800000,
     ITEM_FLAGS_BOA                            = 0x08000000, // bind on account (set in template for items that can binded in like way)
     ITEM_FLAGS_MILLABLE                       = 0x20000000
 };
@@ -211,9 +211,9 @@ enum ItemSubclassWeapon
 
 #define MAX_ITEM_SUBCLASS_WEAPON                  21
 
-enum ItemSubclassGem
+/* enum ItemSubclassGem [-ZERO] not used in pre-bc
 {
-    ITEM_SUBCLASS_GEM_RED                       = 0,
+  ITEM_SUBCLASS_GEM_RED                       = 0,
     ITEM_SUBCLASS_GEM_BLUE                      = 1,
     ITEM_SUBCLASS_GEM_YELLOW                    = 2,
     ITEM_SUBCLASS_GEM_PURPLE                    = 3,
@@ -221,10 +221,11 @@ enum ItemSubclassGem
     ITEM_SUBCLASS_GEM_ORANGE                    = 5,
     ITEM_SUBCLASS_GEM_META                      = 6,
     ITEM_SUBCLASS_GEM_SIMPLE                    = 7,
-    ITEM_SUBCLASS_GEM_PRISMATIC                 = 8
+    ITEM_SUBCLASS_GEM_PRISMATIC                 = 8 
 };
+*/
 
-#define MAX_ITEM_SUBCLASS_GEM                     9
+#define MAX_ITEM_SUBCLASS_GEM                     1
 
 enum ItemSubclassArmor
 {
@@ -352,22 +353,6 @@ enum ItemSubclassJunk
 };
 
 #define MAX_ITEM_SUBCLASS_JUNK                    6
-
-enum ItemSubclassGlyph
-{
-    ITEM_SUBCLASS_GLYPH_WARRIOR                 = 1,
-    ITEM_SUBCLASS_GLYPH_PALADIN                 = 2,
-    ITEM_SUBCLASS_GLYPH_HUNTER                  = 3,
-    ITEM_SUBCLASS_GLYPH_ROGUE                   = 4,
-    ITEM_SUBCLASS_GLYPH_PRIEST                  = 5,
-    ITEM_SUBCLASS_GLYPH_DEATH_KNIGHT            = 6,
-    ITEM_SUBCLASS_GLYPH_SHAMAN                  = 7,
-    ITEM_SUBCLASS_GLYPH_MAGE                    = 8,
-    ITEM_SUBCLASS_GLYPH_WARLOCK                 = 9,
-    ITEM_SUBCLASS_GLYPH_DRUID                   = 11
-};
-
-#define MAX_ITEM_SUBCLASS_GLYPH                   12
 
 const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] =
 {
