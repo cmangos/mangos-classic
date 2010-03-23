@@ -5433,10 +5433,6 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return m_GameobjectGuids.Generate();
         case HIGHGUID_CORPSE:
             return m_CorpseGuids.Generate();
-        case HIGHGUID_DYNAMICOBJECT:
-            return m_DynObjectGuids.Generate();
-        case HIGHGUID_PET:
-            return m_PetGuids.Generate();
         default:
             ASSERT(0);
     }

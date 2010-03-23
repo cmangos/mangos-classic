@@ -25,7 +25,6 @@
 #include "Bag.h"
 #include "Creature.h"
 #include "Player.h"
-#include "DynamicObject.h"
 #include "GameObject.h"
 #include "Corpse.h"
 #include "QuestDef.h"
@@ -867,8 +866,6 @@ class ObjectMgr
         ObjectGuidGenerator<HIGHGUID_ITEM>       m_ItemGuids;
         ObjectGuidGenerator<HIGHGUID_GAMEOBJECT> m_GameobjectGuids;
         ObjectGuidGenerator<HIGHGUID_CORPSE>     m_CorpseGuids;
-        ObjectGuidGenerator<HIGHGUID_DYNAMICOBJECT> m_DynObjectGuids;
-        ObjectGuidGenerator<HIGHGUID_PET> m_PetGuids;
 
         QuestMap            mQuestTemplates;
 

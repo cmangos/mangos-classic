@@ -59,6 +59,7 @@ struct ScriptAction
 
 Map::~Map()
 {
+    ObjectAccessor::DelinkMap(this);
     UnloadAll(true);
 
     if(!m_scriptSchedule.empty())
@@ -219,6 +220,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
             setNGrid(NULL, idx, j);
         }
     }
+    ObjectAccessor::LinkMap(this);
 
     //lets initialize visibility distance for map
     Map::InitVisibilityDistance();
@@ -759,7 +761,30 @@ bool Map::RemoveBones(uint64 guid, float x, float y)
 {
     if (IsRemovalGrid(x, y))
     {
-        Corpse * corpse = ObjectAccessor::GetObjectInWorld(GetId(), x, y, guid, (Corpse*)NULL);
+        Corpse* corpse = ObjectAccessor::GetCorpseInMap(guid,GetId());
+        if (!corpse)
+            return false;
+
+        CellPair p = MaNGOS::ComputeCellPair(x,y);
+        if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+        {
+            sLog.outError("Map::RemoveBones: invalid coordinates supplied X:%f Y:%f grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
+            return false;
+        }
+
+        CellPair q = MaNGOS::ComputeCellPair(corpse->GetPositionX(),corpse->GetPositionY());
+        if(q.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || q.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+        {
+            sLog.outError("Map::RemoveBones: object (GUID: %u TypeId: %u) has invalid coordinates X:%f Y:%f grid cell [%u:%u]", corpse->GetGUIDLow(), corpse->GetTypeId(), corpse->GetPositionX(), corpse->GetPositionY(), q.x_coord, q.y_coord);
+            return false;
+        }
+
+        int32 dx = int32(p.x_coord) - int32(q.x_coord);
+        int32 dy = int32(p.y_coord) - int32(q.y_coord);
+
+        if (dx <= -2 || dx >= 2 || dy <= -2 || dy >= 2)
+            return false;
+
         if(corpse && corpse->GetTypeId() == TYPEID_CORPSE && corpse->GetType() == CORPSE_BONES)
             corpse->DeleteBonesFromWorld();
         else
@@ -1949,7 +1974,8 @@ void Map::RemoveAllObjectsInRemoveList()
         {
             case TYPEID_CORPSE:
             {
-                Corpse* corpse = sObjectAccessor.GetCorpse(*obj, obj->GetGUID());
+                // ??? WTF
+                Corpse* corpse = GetCorpse(obj->GetGUID());
                 if (!corpse)
                     sLog.outError("Try delete corpse/bones %u that not in map", obj->GetGUIDLow());
                 else
@@ -3206,58 +3232,63 @@ void Map::ScriptsProcess()
     return;
 }
 
-Creature*
-Map::GetCreature(uint64 guid)
+Creature* Map::GetCreature(uint64 guid)
 {
-    Creature * ret = ObjectAccessor::GetObjectInWorld(guid, (Creature*)NULL);
-    if(!ret)
-        return NULL;
-
-    if(ret->GetMapId() != GetId())
-        return NULL;
-
-    if(ret->GetInstanceId() != GetInstanceId())
-        return NULL;
-
-    return ret;
+    return m_objectsStore.find<Creature>(guid, (Creature*)NULL);
 }
 
 Pet* Map::GetPet(ObjectGuid guid)
 {
-    Pet* ret = ObjectAccessor::GetObjectInWorld<Pet>(guid.GetRawValue(), (Pet*)NULL);
-    if(!ret)
+    return m_objectsStore.find<Pet>(guid.GetRawValue(), (Pet*)NULL);
+}
+
+Corpse* Map::GetCorpse(uint64 guid)
+{
+    Corpse * ret = ObjectAccessor::GetCorpseInMap(guid,GetId());
+    if (!ret)
         return NULL;
-    if(ret->GetMapId() != GetId())
-        return NULL;
-    if(ret->GetInstanceId() != GetInstanceId())
+    if (ret->GetInstanceId() != GetInstanceId())
         return NULL;
     return ret;
 }
 
-GameObject*
-Map::GetGameObject(uint64 guid)
+Creature* Map::GetCreatureOrPet(uint64 guid)
 {
-    GameObject * ret = ObjectAccessor::GetObjectInWorld(guid, (GameObject*)NULL);
-    if(!ret)
+    if (IS_PLAYER_GUID(guid))
         return NULL;
-    if(ret->GetMapId() != GetId())
-        return NULL;
-    if(ret->GetInstanceId() != GetInstanceId())
-        return NULL;
-    return ret;
+
+    if (IS_PET_GUID(guid))
+        return GetPet(guid);
+
+    return GetCreature(guid);
 }
 
-DynamicObject*
-Map::GetDynamicObject(uint64 guid)
+GameObject* Map::GetGameObject(uint64 guid)
 {
-    DynamicObject * ret = ObjectAccessor::GetObjectInWorld(guid, (DynamicObject*)NULL);
-    if(!ret)
-        return NULL;
-    if(ret->GetMapId() != GetId())
-        return NULL;
-    if(ret->GetInstanceId() != GetInstanceId())
-        return NULL;
-    return ret;
+    return m_objectsStore.find<GameObject>(guid, (GameObject*)NULL);
+}
+
+DynamicObject* Map::GetDynamicObject(uint64 guid)
+{
+    return m_objectsStore.find<DynamicObject>(guid, (DynamicObject*)NULL);
+}
+
+WorldObject* Map::GetWorldObject(uint64 guid)
+{
+    switch(GUID_HIPART(guid))
+    {
+        case HIGHGUID_PLAYER:       return ObjectAccessor::FindPlayer(guid);
+        case HIGHGUID_GAMEOBJECT:   return GetGameObject(guid);
+        case HIGHGUID_UNIT:         return GetCreature(guid);
+        case HIGHGUID_PET:          return GetPet(guid);
+        case HIGHGUID_DYNAMICOBJECT:return GetDynamicObject(guid);
+        case HIGHGUID_CORPSE:       return GetCorpse(guid);
+        case HIGHGUID_MO_TRANSPORT:
+        case HIGHGUID_TRANSPORT:
+        default:                    break;
+    }
+
+    return NULL;
 }
 
 void Map::SendObjectUpdates()
@@ -3280,4 +3311,21 @@ void Map::SendObjectUpdates()
         iter->first->GetSession()->SendPacket(&packet);
         packet.clear();                                     // clean the string
     }
+}
+
+uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
+{
+    // TODO: for map local guid counters possible force reload map instead shutdown server at guid counter overflow
+    switch(guidhigh)
+    {
+        case HIGHGUID_DYNAMICOBJECT:
+            return m_DynObjectGuids.Generate();
+        case HIGHGUID_PET:
+            return m_PetGuids.Generate();
+        default:
+            ASSERT(0);
+    }
+
+    ASSERT(0);
+    return 0;
 }

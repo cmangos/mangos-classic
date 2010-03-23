@@ -1668,7 +1668,7 @@ Creature* ChatHandler::getSelectedCreature()
     if(!m_session)
         return NULL;
 
-    return ObjectAccessor::GetCreatureOrPet(*m_session->GetPlayer(),m_session->GetPlayer()->GetSelection());
+    return m_session->GetPlayer()->GetMap()->GetCreatureOrPet(m_session->GetPlayer()->GetSelection());
 }
 
 char* ChatHandler::extractKeyFromLink(char* text, char const* linkType, char** something1)

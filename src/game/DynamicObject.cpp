@@ -41,7 +41,7 @@ void DynamicObject::AddToWorld()
 {
     ///- Register the dynamicObject for guid lookup
     if(!IsInWorld())
-        sObjectAccessor.AddObject(this);
+        GetMap()->GetObjectsStore().insert<DynamicObject>(GetGUID(), (DynamicObject*)this);
 
     Object::AddToWorld();
 }
@@ -50,7 +50,7 @@ void DynamicObject::RemoveFromWorld()
 {
     ///- Remove the dynamicObject from the accessor
     if(IsInWorld())
-        sObjectAccessor.RemoveObject(this);
+        GetMap()->GetObjectsStore().erase<DynamicObject>(GetGUID(), (DynamicObject*)NULL);
 
     Object::RemoveFromWorld();
 }

@@ -33,10 +33,12 @@
 #include "SharedDefines.h"
 #include "GameSystem/GridRefManager.h"
 #include "MapRefManager.h"
+#include "Utilities/TypeList.h"
 
 #include <bitset>
 #include <list>
 
+class Creature;
 class Unit;
 class WorldPacket;
 class InstanceData;
@@ -366,8 +368,13 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         Creature* GetCreature(uint64 guid);
         Pet* GetPet(ObjectGuid guid);
+        Creature* GetCreatureOrPet(uint64 guid);
         GameObject* GetGameObject(uint64 guid);
         DynamicObject* GetDynamicObject(uint64 guid);
+        Corpse* GetCorpse(uint64 guid);
+        WorldObject* GetWorldObject(uint64 guid);
+
+        TypeUnorderedMapContainer<AllMapStoredObjectTypes>& GetObjectsStore() { return m_objectsStore; }
 
         void AddUpdateObject(Object *obj)
         {
@@ -378,6 +385,9 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         {
             i_objectsToClientUpdate.erase( obj );
         }
+
+        // DynObjects currently
+        uint32 GenerateLocalLowGuid(HighGuid guidhigh);
     private:
         void LoadMapAndVMap(int gx, int gy);
         void LoadVMap(int gx, int gy);
@@ -438,6 +448,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         typedef std::set<WorldObject*> ActiveNonPlayers;
         ActiveNonPlayers m_activeNonPlayers;
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
+        TypeUnorderedMapContainer<AllMapStoredObjectTypes> m_objectsStore;
     private:
 
         NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
@@ -448,6 +459,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         std::set<WorldObject *> i_objectsToRemove;
         std::multimap<time_t, ScriptAction> m_scriptSchedule;
+
+        // Map local low guid counters
+        ObjectGuidGenerator<HIGHGUID_DYNAMICOBJECT> m_DynObjectGuids;
+        ObjectGuidGenerator<HIGHGUID_PET> m_PetGuids;
 
         // Type specific code for add/remove to/from grid
         template<class T>
