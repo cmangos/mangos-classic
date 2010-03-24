@@ -183,7 +183,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 
     recv_data >> guid;
     recv_data >> flags >> time;
-    DEBUG_LOG("Guid " UI64FMTD, guid.GetRawValue());
+    DEBUG_LOG("Guid: %s", guid.GetString().c_str());
     DEBUG_LOG("Flags %u, time %u", flags, time/IN_MILISECONDS);
 
     Player* plMover = GetPlayer();
@@ -191,7 +191,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
     if(!plMover || !plMover->IsBeingTeleportedNear())
         return;
 
-    if(guid.GetRawValue() != plMover->GetGUID())
+    if(guid != plMover->GetObjectGuid())
         return;
 
     plMover->SetSemaphoreTeleportNear(false);
@@ -374,7 +374,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     recv_data >> newspeed;
 
     // now can skip not our packet
-    if(_player->GetGUID() != guid.GetRawValue())
+    if(_player->GetObjectGuid() != guid)
         return;
     /*----------------*/
 

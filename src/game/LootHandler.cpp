@@ -438,7 +438,8 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
 void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
 {
     uint8 slotid;
-    uint64 lootguid, target_playerguid;
+    ObjectGuid lootguid;
+    ObjectGuid target_playerguid;
 
     recv_data >> lootguid >> slotid >> target_playerguid;
 
@@ -448,18 +449,18 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
         return;
     }
 
-    Player *target = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, target_playerguid));
+    Player *target = ObjectAccessor::FindPlayer(target_playerguid);
     if(!target)
         return;
 
-    sLog.outDebug("WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = [%s].", target->GetName());
+    sLog.outDebug("WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = %s [%s].", target_playerguid.GetString().c_str(), target->GetName());
 
-    if(_player->GetLootGUID() != lootguid)
+    if(_player->GetLootGUID() != lootguid.GetRawValue())
         return;
 
     Loot *pLoot = NULL;
 
-    if(IS_CREATURE_GUID(GetPlayer()->GetLootGUID()))
+    if(lootguid.IsCreature())
     {
         Creature *pCreature = GetPlayer()->GetMap()->GetCreature(lootguid);
         if(!pCreature)
@@ -467,7 +468,7 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
 
         pLoot = &pCreature->loot;
     }
-    else if(IS_GAMEOBJECT_GUID(GetPlayer()->GetLootGUID()))
+    else if(lootguid.IsGameobject())
     {
         GameObject *pGO = GetPlayer()->GetMap()->GetGameObject(lootguid);
         if(!pGO)
@@ -475,8 +476,7 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
 
         pLoot = &pGO->loot;
     }
-
-    if(!pLoot)
+    else
         return;
 
     if (slotid > pLoot->items.size())

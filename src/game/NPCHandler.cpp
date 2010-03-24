@@ -320,7 +320,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     sLog.outDebug("WORLD: CMSG_GOSSIP_SELECT_OPTION");
 
     uint32 gossipListId;
-    uint64 guid;
+    ObjectGuid guid;
     std::string code = "";
 
     recv_data >> guid >> gossipListId;
@@ -336,13 +336,13 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    if (IS_CREATURE_OR_PET_GUID(guid))
+    if (guid.IsCreatureOrPet())
     {
         Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
 
         if (!pCreature)
         {
-            sLog.outDebug("WORLD: HandleGossipSelectOptionOpcode - Creature (GUID: %u) not found or you can't interact with it.", uint32(GUID_LOPART(guid)));
+            sLog.outDebug("WORLD: HandleGossipSelectOptionOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
             return;
         }
 
@@ -357,13 +357,13 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
                 _player->OnGossipSelect(pCreature, gossipListId);
         }
     }
-    else if (IS_GAMEOBJECT_GUID(guid))
+    else if (guid.IsGameobject())
     {
         GameObject *pGo = GetPlayer()->GetGameObjectIfCanInteractWith(guid);
 
         if (!pGo)
         {
-            sLog.outDebug("WORLD: HandleGossipSelectOptionOpcode - GameObject (GUID: %u) not found or you can't interact with it.", uint32(GUID_LOPART(guid)));
+            sLog.outDebug("WORLD: HandleGossipSelectOptionOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
             return;
         }
 
