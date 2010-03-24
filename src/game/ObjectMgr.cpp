@@ -2447,6 +2447,8 @@ void ObjectMgr::FlushRankPoints(uint32 dateTop)
     }
 
     // FLUSH KILLS
+    CharacterDatabase.BeginTransaction();
+    // process only HK ( victim_type > 0 )
     result = CharacterDatabase.PQuery("SELECT guid,TYPE,COUNT(*) AS kills FROM character_honor_cp WHERE date <= %u AND victim_type>0 GROUP BY guid,type",dateTop);
     if (result)
     {
@@ -2459,18 +2461,17 @@ void ObjectMgr::FlushRankPoints(uint32 dateTop)
             type   = fields[1].GetUInt8();
             kills  = fields[2].GetUInt32();
 
-            CharacterDatabase.BeginTransaction();
-            CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE guid = %u AND date <= %u",guid,dateTop);
             if (type == HONORABLE ) 
                 CharacterDatabase.PExecute("UPDATE characters SET stored_honorable_kills = stored_honorable_kills + %u WHERE guid = %u",kills,guid);
             else if (type == DISHONORABLE ) 
                 CharacterDatabase.PExecute("UPDATE characters SET stored_dishonorable_kills = stored_dishonorable_kills + %u WHERE guid = %u",kills,guid);
-            
-            CharacterDatabase.CommitTransaction();
-            
 
         } while (result->NextRow());
     }
+
+    // cleanin ALL cp before dateTop 
+    CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE date <= %u",dateTop); 
+    CharacterDatabase.CommitTransaction();
 
     sLog.outString();
     sLog.outString( ">> Flushed all ranking points");  
