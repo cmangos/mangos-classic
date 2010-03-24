@@ -632,7 +632,7 @@ class ObjectMgr
         HonorStandingList GetStandingListBySide(uint32 side);
         uint32 GetHonorStandingPositionByGUID(uint32 guid,uint32 side);
         void UpdateHonorStandingByGuid(uint32 guid,HonorStanding standing,uint32 side) ;
-        void FlushRankPoints(uint32 dateBegin);
+        void FlushRankPoints(uint32 dateTop);
         void DistributeRankPoints(uint32 team,uint32 dateBegin , bool flush = false);
         void LoadStandingList(uint32 dateBegin);
         void LoadStandingList();

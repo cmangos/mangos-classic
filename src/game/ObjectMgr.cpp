@@ -2415,38 +2415,39 @@ void ObjectMgr::LoadStandingList()
 }
 
 
-void ObjectMgr::FlushRankPoints(uint32 dateBegin)
+void ObjectMgr::FlushRankPoints(uint32 dateTop)
 {
-    uint32 WeekBegin = dateBegin;
+    uint32 WeekBegin = dateTop;
     uint8 WeekCount = 0;
-    QueryResult *result = CharacterDatabase.PQuery("SELECT date FROM character_honor_cp WHERE TYPE = %u AND date <= %u GROUP BY date ORDER BY date DESC",HONORABLE,WeekBegin);
+
+    // FLUSH CP
+    QueryResult *result = CharacterDatabase.PQuery("SELECT date FROM character_honor_cp WHERE TYPE = %u AND date <= %u GROUP BY date ORDER BY date DESC",HONORABLE,dateTop);
     if (result)
     {
         uint32 date;
 
+        // search latest non-processed date if the server has been offline for different weeks
         do {
-
             date = result->Fetch()->GetUInt32();
-            // search latest non-processed date if the server has been offline for different weeks
             while (WeekBegin && date < WeekBegin) {
                 WeekBegin -= 7;            
             }
-
-            if (date >= WeekBegin && date <= WeekBegin+7)
-            {
-                LoadStandingList(WeekBegin);
-                
-                DistributeRankPoints(ALLIANCE,date,true);
-                DistributeRankPoints(HORDE,date,true);
-
-                WeekBegin -= 7;
-            }
-
-
         } while (result->NextRow());
+
+        // start to flush from latest non-processed date to up
+        while (WeekBegin <= dateTop)
+        {
+            LoadStandingList(WeekBegin);
+            
+            DistributeRankPoints(ALLIANCE,WeekBegin,true);
+            DistributeRankPoints(HORDE,WeekBegin,true);
+
+            WeekBegin += 7;
+        }
     }
 
-    result = CharacterDatabase.PQuery("SELECT guid,TYPE,COUNT(*) AS kills FROM character_honor_cp WHERE date <= %u AND victim_type>0 GROUP BY guid,type",dateBegin);
+    // FLUSH KILLS
+    result = CharacterDatabase.PQuery("SELECT guid,TYPE,COUNT(*) AS kills FROM character_honor_cp WHERE date <= %u AND victim_type>0 GROUP BY guid,type",dateTop);
     if (result)
     {
         uint32 guid,kills;
@@ -2459,7 +2460,7 @@ void ObjectMgr::FlushRankPoints(uint32 dateBegin)
             kills  = fields[2].GetUInt32();
 
             CharacterDatabase.BeginTransaction();
-            CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE guid = %u AND date <= %u",guid,dateBegin);
+            CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE guid = %u AND date <= %u",guid,dateTop);
             if (type == HONORABLE ) 
                 CharacterDatabase.PExecute("UPDATE characters SET stored_honorable_kills = stored_honorable_kills + %u WHERE guid = %u",kills,guid);
             else if (type == DISHONORABLE ) 
@@ -2469,8 +2470,6 @@ void ObjectMgr::FlushRankPoints(uint32 dateBegin)
             
 
         } while (result->NextRow());
-
-    
     }
 
     sLog.outString();

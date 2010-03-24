@@ -1338,7 +1338,8 @@ void World::Update(uint32 diff)
     {
         if (GetDateToday() >= m_NextMaintenanceDate)
         {
-            InitServerMaintenanceCheck();
+            ServerMaintenanceStart();
+            sObjectMgr.LoadStandingList();
         }
         m_MaintenanceTimeChecker = 600000; // check 10 minutes
     }
@@ -1710,9 +1711,17 @@ void World::UpdateSessions( uint32 diff )
 
 void World::ServerMaintenanceStart()
 {
-    uint32 LastWeekBegin = GetDateLastMaintenanceDay() - 7;
-    // re-loading standing and flushing rank points list
+    uint32 today  = GetDateToday();
+    uint32 LastWeekBegin    = today - 7;
+    m_NextMaintenanceDate   = GetDateLastMaintenanceDay() + 7; // next maintenance begin
+
+    if (m_NextMaintenanceDate <= today ) // avoid loop in manually case, maybe useless
+        m_NextMaintenanceDate += 7;
+
+    //flushing rank points list ( standing must be reloaded after server maintenance )
     sObjectMgr.FlushRankPoints(LastWeekBegin);
+
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextMaintenanceDate = '"UI64FMTD"'", uint64(m_NextMaintenanceDate));
 }
 
 void World::InitServerMaintenanceCheck()
@@ -1733,11 +1742,7 @@ void World::InitServerMaintenanceCheck()
     }
 
     if (m_NextMaintenanceDate <= GetDateToday() )
-    {
         ServerMaintenanceStart();
-        m_NextMaintenanceDate = GetDateLastMaintenanceDay() + 7;
-        CharacterDatabase.PExecute("UPDATE saved_variables SET NextMaintenanceDate = '"UI64FMTD"'", uint64(m_NextMaintenanceDate));
-    }
 
     sLog.outDebug("Server maintenance check initialized.");
 }

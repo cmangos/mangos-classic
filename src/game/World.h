@@ -449,7 +449,7 @@ class World
             if (mDay < (uint32)date->tm_wday)
                return today - ( (date->tm_wday+1) + (mDay+1) + 1 );
             else
-               return today - ( mDay - date->tm_wday );
+               return today - ( ( mDay > 0 ? (mDay + date->tm_wday) - 1 : 0 ) );
         }
 
         /// Get the maximum skill level a player can reach
