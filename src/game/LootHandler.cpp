@@ -483,14 +483,13 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // not move item from loot to target inventory
+    // now move item from loot to target inventory
     Item * newitem = target->StoreNewItem( dest, item.itemid, true, item.randomPropertyId );
     target->SendNewItem(newitem, uint32(item.count), false, false, true );
 
     // mark as looted
     item.count=0;
     item.is_looted=true;
-
 
     pLoot->NotifyItemRemoved(slotid);
     --pLoot->unlootedCount;

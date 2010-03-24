@@ -158,8 +158,12 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 {
     uint64 auctioneer, item;
     uint32 etime, bid, buyout;
-    recv_data >> auctioneer >> item;
-    recv_data >> bid >> buyout >> etime;
+    recv_data >> auctioneer;
+    recv_data >> item;
+    recv_data >> bid;
+    recv_data >> buyout;
+    recv_data >> etime;
+
     Player *pl = GetPlayer();
 
     if (!item || !bid || !etime)
@@ -178,7 +182,6 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: HandleAuctionSellItem - Unit (GUID: %u) has wrong faction.", uint32(GUID_LOPART(auctioneer)) );
         return;
     }
-
 
     // client send time in minutes, convert to common used sec time
     etime *= MINUTE;
