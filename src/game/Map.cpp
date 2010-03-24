@@ -3232,9 +3232,9 @@ void Map::ScriptsProcess()
     return;
 }
 
-Creature* Map::GetCreature(uint64 guid)
+Creature* Map::GetCreature(ObjectGuid guid)
 {
-    return m_objectsStore.find<Creature>(guid, (Creature*)NULL);
+    return m_objectsStore.find<Creature>(guid.GetRawValue(), (Creature*)NULL);
 }
 
 Pet* Map::GetPet(ObjectGuid guid)
@@ -3242,7 +3242,7 @@ Pet* Map::GetPet(ObjectGuid guid)
     return m_objectsStore.find<Pet>(guid.GetRawValue(), (Pet*)NULL);
 }
 
-Corpse* Map::GetCorpse(uint64 guid)
+Corpse* Map::GetCorpse(ObjectGuid guid)
 {
     Corpse * ret = ObjectAccessor::GetCorpseInMap(guid,GetId());
     if (!ret)
@@ -3252,30 +3252,31 @@ Corpse* Map::GetCorpse(uint64 guid)
     return ret;
 }
 
-Creature* Map::GetCreatureOrPet(uint64 guid)
+Creature* Map::GetCreatureOrPet(ObjectGuid guid)
 {
-    if (IS_PLAYER_GUID(guid))
-        return NULL;
+    switch(guid.GetHigh())
+    {
+        case HIGHGUID_UNIT:         return GetCreature(guid);
+        case HIGHGUID_PET:          return GetPet(guid);
+        default:                    break;
+    }
 
-    if (IS_PET_GUID(guid))
-        return GetPet(guid);
-
-    return GetCreature(guid);
+    return NULL;
 }
 
-GameObject* Map::GetGameObject(uint64 guid)
+GameObject* Map::GetGameObject(ObjectGuid guid)
 {
-    return m_objectsStore.find<GameObject>(guid, (GameObject*)NULL);
+    return m_objectsStore.find<GameObject>(guid.GetRawValue(), (GameObject*)NULL);
 }
 
-DynamicObject* Map::GetDynamicObject(uint64 guid)
+DynamicObject* Map::GetDynamicObject(ObjectGuid guid)
 {
-    return m_objectsStore.find<DynamicObject>(guid, (DynamicObject*)NULL);
+    return m_objectsStore.find<DynamicObject>(guid.GetRawValue(), (DynamicObject*)NULL);
 }
 
-WorldObject* Map::GetWorldObject(uint64 guid)
+WorldObject* Map::GetWorldObject(ObjectGuid guid)
 {
-    switch(GUID_HIPART(guid))
+    switch(guid.GetHigh())
     {
         case HIGHGUID_PLAYER:       return ObjectAccessor::FindPlayer(guid);
         case HIGHGUID_GAMEOBJECT:   return GetGameObject(guid);

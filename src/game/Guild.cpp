@@ -521,7 +521,7 @@ void Guild::BroadcastToGuild(WorldSession *session, const std::string& msg, uint
 
         for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
         {
-            Player *pl = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
+            Player *pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_GCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetGUIDLow()) )
                 pl->GetSession()->SendPacket(&data);
@@ -538,7 +538,7 @@ void Guild::BroadcastToOfficers(WorldSession *session, const std::string& msg, u
             WorldPacket data;
             ChatHandler::FillMessageData(&data, session, CHAT_MSG_OFFICER, language, NULL, 0, msg.c_str(),NULL);
 
-            Player *pl = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
+            Player *pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_OFFCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetGUIDLow()))
                 pl->GetSession()->SendPacket(&data);
@@ -550,7 +550,7 @@ void Guild::BroadcastPacket(WorldPacket *packet)
 {
     for(MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player *player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
+        Player *player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
         if (player)
             player->GetSession()->SendPacket(packet);
     }
@@ -562,7 +562,7 @@ void Guild::BroadcastPacketToRank(WorldPacket *packet, uint32 rankId)
     {
         if (itr->second.RankId == rankId)
         {
-            Player *player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
+            Player *player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
             if (player)
                 player->GetSession()->SendPacket(packet);
         }
@@ -682,7 +682,7 @@ void Guild::Roster(WorldSession *session /*= NULL*/)
 
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        if (Player *pl = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER)))
+        if (Player *pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
         {
             data << (uint64)pl->GetGUID();
             data << (uint8)1;
@@ -696,7 +696,7 @@ void Guild::Roster(WorldSession *session /*= NULL*/)
         }
         else
         {
-            data << uint64(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
+            data << uint64(ObjectGuid(HIGHGUID_PLAYER, itr->first).GetRawValue());
             data << uint8(0);
             data << itr->second.Name;
             data << uint32(itr->second.RankId);
