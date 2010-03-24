@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z0332_xxx_01_mangos_gossip_menu_option` bit(1) DEFAULT NULL
+  `required_z0366_095_01_mangos_creature_template` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1159,7 +1159,8 @@ CREATE TABLE `creature_template` (
   `faction_A` smallint(5) unsigned NOT NULL DEFAULT '0',
   `faction_H` smallint(5) unsigned NOT NULL DEFAULT '0',
   `npcflag` int(10) unsigned NOT NULL DEFAULT '0',
-  `speed` float NOT NULL DEFAULT '1',
+  `speed_walk` float NOT NULL default '1' COMMENT 'Result of 2.5/2.5, most common value',
+  `speed_run` float NOT NULL default '1.14286' COMMENT 'Result of 8.0/7.0, most common value',
   `scale` float NOT NULL DEFAULT '1',
   `rank` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mindmg` float NOT NULL DEFAULT '0',
@@ -1217,7 +1218,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,0,0,10045,0,'Waypoint(Only GM can see it)','Visual',0,1,1,64,64,0,0,0,35,35,0,0.91,1,0,14,15,0,100,2000,2200,4096,0,0,0,0,0,0,1.76,2.42,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,0,1,0,0,130,'');
+(1,0,0,10045,0,'Waypoint(Only GM can see it)','Visual',0,1,1,64,64,0,0,0,35,35,0,0.91,1,1,0,14,15,0,100,2000,2200,4096,0,0,0,0,0,0,1.76,2.42,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,0,1,0,0,130,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 

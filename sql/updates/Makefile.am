@@ -62,6 +62,7 @@ pkgdata_DATA = \
 	z0289_085_01_mangos_gossip.sql \
 	z0289_085_02_mangos_gossip_scripts.sql \
 	z0332_xxx_01_mangos_gossip_menu_option.sql \
+	z0366_095_01_mangos_creature_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -102,4 +103,5 @@ EXTRA_DIST = \
 	z0289_085_01_mangos_gossip.sql \
 	z0289_085_02_mangos_gossip_scripts.sql \
 	z0332_xxx_01_mangos_gossip_menu_option.sql \
+	z0366_095_01_mangos_creature_template.sql \
 	README
