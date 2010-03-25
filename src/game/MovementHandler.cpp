@@ -271,7 +271,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             // elevators also cause the client to send MOVEFLAG_ONTRANSPORT - just unmount if the guid can be found in the transport list
             for (MapManager::TransportSet::const_iterator iter = sMapMgr.m_Transports.begin(); iter != sMapMgr.m_Transports.end(); ++iter)
             {
-                if ((*iter)->GetGUID() == movementInfo.GetTransportGuid())
+                if ((*iter)->GetObjectGuid() == movementInfo.GetTransportGuid())
                 {
                     // unmount before boarding
                     plMover->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);

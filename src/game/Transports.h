@@ -64,6 +64,7 @@ class Transport : protected GameObject
         using GameObject::IsTransport;
         using GameObject::GetEntry;
         using GameObject::GetGUID;
+        using GameObject::GetObjectGuid;
         using GameObject::GetGUIDLow;
         using GameObject::GetMapId;
         using GameObject::GetPositionX;

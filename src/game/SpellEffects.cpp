@@ -1616,7 +1616,7 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
     {
         // FIXME: currently we can't have auras applied explIcitly by gameobjects
         // so for auras from wild gameobjects (no owner) target used
-        if (IS_GAMEOBJECT_GUID(m_originalCasterGUID))
+        if (m_originalCasterGUID.IsGameobject())
             caster = unitTarget;
         else
             return;
