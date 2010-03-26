@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z0212_xxx_01_characters_kill` bit(1) DEFAULT NULL
+  `required_z0378_097_01_characters` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -612,7 +612,9 @@ CREATE TABLE `corpse` (
   `instance` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`),
   KEY `idx_type` (`corpse_type`),
-  KEY `instance` (`instance`)
+  KEY `instance` (`instance`),
+  INDEX `Idx_player`(`player`),
+  INDEX `Idx_time`(`time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -696,7 +698,8 @@ CREATE TABLE `group_member` (
   `memberGuid` int(11) unsigned NOT NULL,
   `assistant` tinyint(1) unsigned NOT NULL,
   `subgroup` smallint(6) unsigned NOT NULL,
-  PRIMARY KEY  (`groupId`,`memberGuid`)
+  PRIMARY KEY  (`groupId`,`memberGuid`),
+  INDEX `Idx_memberGuid`(`memberGuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -756,9 +759,11 @@ CREATE TABLE `guild_eventlog` (
   `PlayerGuid2` int(11) NOT NULL COMMENT 'Player 2',
   `NewRank` tinyint(2) NOT NULL COMMENT 'New rank(in case promotion/demotion)',
   `TimeStamp` bigint(20) NOT NULL COMMENT 'Event UNIX time',
-  PRIMARY KEY (`guildid`,`LogGuid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Guild Eventlog';
-/*!40101 SET character_set_client = @saved_cs_client */;
+  PRIMARY KEY (`guildid`, `LogGuid`),
+  INDEX `Idx_PlayerGuid1`(`PlayerGuid1`),
+  INDEX `Idx_PlayerGuid2`(`PlayerGuid2`),
+  INDEX `Idx_LogGuid`(`LogGuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT 'Guild Eventlog';
 
 --
 -- Dumping data for table `guild_eventlog`
@@ -809,7 +814,8 @@ CREATE TABLE `guild_rank` (
   `rid` int(11) unsigned NOT NULL,
   `rname` varchar(255) NOT NULL DEFAULT '',
   `rights` int(3) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`guildid`,`rid`)
+  PRIMARY KEY  (`guildid`,`rid`),
+  INDEX `Idx_rid`(`rid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1094,10 +1100,12 @@ DROP TABLE IF EXISTS `petition_sign`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `petition_sign` (
   `ownerguid` int(10) unsigned NOT NULL,
-  `petitionguid` int(11) unsigned NOT NULL DEFAULT '0',
-  `playerguid` int(11) unsigned NOT NULL DEFAULT '0',
-  `player_account` int(11) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`petitionguid`,`playerguid`)
+  `petitionguid` int(11) unsigned NOT NULL default '0',
+  `playerguid` int(11) unsigned NOT NULL default '0',
+  `player_account` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`petitionguid`,`playerguid`),
+  INDEX `Idx_playerguid`(`playerguid`),
+  INDEX `Idx_ownerguid`(`ownerguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
