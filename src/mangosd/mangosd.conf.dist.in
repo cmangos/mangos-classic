@@ -444,6 +444,10 @@ LogColors = ""
 #        Amount of honor that new players will start with
 #        Default: 0
 #
+#    MinHonorKills
+#        Min kills that players must obtain to enter in weekly honor calculation 
+#        Default: 15
+#
 #    MaintenanceDay
 #        The day of the week is performed server maintenance ( currently used for Honor distribution )
 #        range (0..6): 0 is the first day of the week (normally sunday), 6 is the latest 
@@ -593,6 +597,7 @@ StartPlayerLevel = 1
 StartPlayerMoney = 0
 MaxHonorPoints = 75000
 StartHonorPoints = 0
+MinHonorKills = 15
 MaintenanceDay = 3
 InstantLogout = 1
 AllFlightPaths = 0

@@ -2374,8 +2374,8 @@ void ObjectMgr::LoadStandingList(uint32 dateBegin)
             if (result2)
                 kills = result2->Fetch()->GetUInt32();
 
-            // you need to reach HONOR_STANDING_MIN_KILL to be added in standing list
-            if (kills < HONOR_STANDING_MIN_KILL)
+            // you need to reach CONFIG_UINT32_MIN_HONOR_KILLS to be added in standing list
+            if (kills < sWorld.getConfig(CONFIG_UINT32_MIN_HONOR_KILLS))
                 continue;
 
             Standing.guid = guid;
