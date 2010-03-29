@@ -53,7 +53,7 @@ namespace MaNGOS
             return rank;
         }
 
-        inline float CalculateRPearning(HonorStandingList standingList,HonorStanding *StandingInfo,uint32 team,uint32 RP)
+        inline float CalculateRpEarning(HonorStandingList standingList,HonorStanding *StandingInfo,uint32 team,uint32 RP)
         {
             float CP = StandingInfo->honorPoints;
 
@@ -120,8 +120,11 @@ namespace MaNGOS
 
             // we now have i such that FX[i] > CP >= FX[i-1]
             // so interpolate
-            float rpEarning = (FY[i] - FY[i-1]) * (CP - FX[i-1]) / (FX[i] - FX[i-1]) + FY[i-1];
+            return rpEarning = (FY[i] - FY[i-1]) * (CP - FX[i-1]) / (FX[i] - FX[i-1]) + FY[i-1];
+        }
 
+        inline float CalculateRpDecay(float rpEarning,float RP)
+        {
             float Decay = finiteAlways(0.2 * RP);
             float Delta = rpEarning - Decay;
             if (Delta < 0) {
@@ -130,7 +133,7 @@ namespace MaNGOS
             if (Delta < -2500) {
                Delta = -2500;
             }
-            return Delta;
+            return RP + Delta;
         }
 
         inline float DishonorableKillPoints(int level)

@@ -1713,15 +1713,14 @@ void World::UpdateSessions( uint32 diff )
 
 void World::ServerMaintenanceStart()
 {
-    uint32 today  = GetDateToday();
-    uint32 LastWeekBegin    = today - 7;
-    m_NextMaintenanceDate   = GetDateLastMaintenanceDay() + 7; // next maintenance begin
+    uint32 LastWeekEnd    = GetDateLastMaintenanceDay();
+    m_NextMaintenanceDate   = LastWeekEnd + 7; // next maintenance begin
 
-    if (m_NextMaintenanceDate <= today ) // avoid loop in manually case, maybe useless
+    if (m_NextMaintenanceDate <= GetDateToday() ) // avoid loop in manually case, maybe useless
         m_NextMaintenanceDate += 7;
 
     //flushing rank points list ( standing must be reloaded after server maintenance )
-    sObjectMgr.FlushRankPoints(LastWeekBegin);
+    sObjectMgr.FlushRankPoints(LastWeekEnd);
 
     // save and update all online players
     for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)

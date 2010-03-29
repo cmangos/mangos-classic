@@ -2451,15 +2451,13 @@ void ObjectMgr::LoadStandingList()
 
 void ObjectMgr::FlushRankPoints(uint32 dateTop)
 {
-    uint32 WeekBegin = dateTop;
-    uint8 WeekCount = 0;
-
     // FLUSH CP
     QueryResult *result = CharacterDatabase.PQuery("SELECT date FROM character_honor_cp WHERE TYPE = %u AND date <= %u GROUP BY date ORDER BY date DESC",HONORABLE,dateTop);
     if (result)
     {
         uint32 date;
-
+        bool flush;
+        uint32 WeekBegin = dateTop - 7;
         // search latest non-processed date if the server has been offline for different weeks
         do {
             date = result->Fetch()->GetUInt32();
@@ -2473,8 +2471,10 @@ void ObjectMgr::FlushRankPoints(uint32 dateTop)
         {
             LoadStandingList(WeekBegin);
             
-            DistributeRankPoints(ALLIANCE,WeekBegin,true);
-            DistributeRankPoints(HORDE,WeekBegin,true);
+            flush = WeekBegin < dateTop - 7; // flush only with date < lastweek
+
+            DistributeRankPoints(ALLIANCE,WeekBegin,flush);
+            DistributeRankPoints(HORDE,WeekBegin,flush);
 
             WeekBegin += 7;
         }
@@ -2483,7 +2483,7 @@ void ObjectMgr::FlushRankPoints(uint32 dateTop)
     // FLUSH KILLS
     CharacterDatabase.BeginTransaction();
     // process only HK ( victim_type > 0 )
-    result = CharacterDatabase.PQuery("SELECT guid,TYPE,COUNT(*) AS kills FROM character_honor_cp WHERE date <= %u AND victim_type>0 GROUP BY guid,type",dateTop);
+    result = CharacterDatabase.PQuery("SELECT guid,TYPE,COUNT(*) AS kills FROM character_honor_cp WHERE date <= %u AND victim_type>0 GROUP BY guid,type",dateTop - 7);
     if (result)
     {
         uint32 guid,kills;
@@ -2504,7 +2504,7 @@ void ObjectMgr::FlushRankPoints(uint32 dateTop)
     }
 
     // cleanin ALL cp before dateTop 
-    CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE date <= %u",dateTop); 
+    CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE date <= %u",dateTop - 7); 
     CharacterDatabase.CommitTransaction();
 
     sLog.outString();
@@ -2536,7 +2536,8 @@ void ObjectMgr::DistributeRankPoints(uint32 team, uint32 dateBegin , bool flush 
         RP = fields[0].GetFloat();
         HK = fields[1].GetUInt32();
 
-        itr->rpEarning = MaNGOS::Honor::CalculateRPearning(list,itr->GetInfo(),team,RP);
+        itr->rpEarning = MaNGOS::Honor::CalculateRpEarning(list,itr->GetInfo(),team,RP);
+        RP             = MaNGOS::Honor::CalculateRpDecay(itr->rpEarning,RP);
         
         if (flush)
         {
