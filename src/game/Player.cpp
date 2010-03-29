@@ -5753,7 +5753,7 @@ bool Player::AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType)
         SetStoredHonor(RP);
     }   
     
-    CP.state = HK_NEW;
+    CP.state  =  HK_NEW;
     CP.isKill =  isKill(victimType);  
 
     m_honorCP.push_back(CP);

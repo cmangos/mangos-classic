@@ -120,7 +120,7 @@ namespace MaNGOS
 
             // we now have i such that FX[i] > CP >= FX[i-1]
             // so interpolate
-            return rpEarning = (FY[i] - FY[i-1]) * (CP - FX[i-1]) / (FX[i] - FX[i-1]) + FY[i-1];
+            return (FY[i] - FY[i-1]) * (CP - FX[i-1]) / (FX[i] - FX[i-1]) + FY[i-1];
         }
 
         inline float CalculateRpDecay(float rpEarning,float RP)
