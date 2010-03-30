@@ -199,12 +199,12 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save)
     if (!entry)
     {
         sLog.outError("CreateInstance: no entry for map %d", GetId());
-        assert(false);
+        ASSERT(false);
     }
     if (!ObjectMgr::GetInstanceTemplate(GetId()))
     {
         sLog.outError("CreateInstance: no instance template for map %d", GetId());
-        assert(false);
+        ASSERT(false);
     }
 
     sLog.outDebug("MapInstanced::CreateInstance: %s map instance %d for %d created", save?"":"new ", InstanceId, GetId());

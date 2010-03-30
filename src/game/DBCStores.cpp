@@ -140,7 +140,7 @@ static bool LoadDBC_assert_print(uint32 fsize,uint32 rsize, const std::string& f
 {
     sLog.outError("ERROR: Size of '%s' setted by format string (%u) not equal size of C++ structure (%u).",filename.c_str(),fsize,rsize);
 
-    // assert must fail after function call
+    // ASSERT must fail after function call
     return false;
 }
 
@@ -148,7 +148,7 @@ template<class T>
 inline void LoadDBC(uint32& availableDbcLocales,barGoLink& bar, StoreProblemList& errlist, DBCStorage<T>& storage, const std::string& dbc_path, const std::string& filename)
 {
     // compatibility format and C++ structure sizes
-    assert(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()) == sizeof(T) || LoadDBC_assert_print(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()),sizeof(T),filename));
+    ASSERT(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()) == sizeof(T) || LoadDBC_assert_print(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()),sizeof(T),filename));
 
     std::string dbc_filename = dbc_path + filename;
     if(storage.Load(dbc_filename.c_str()))

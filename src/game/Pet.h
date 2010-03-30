@@ -263,11 +263,11 @@ class Pet : public Creature
     private:
         void SaveToDB(uint32)                        // overwrited of Creature::SaveToDB     - don't must be called
         {
-            assert(false);
+            ASSERT(false);
         }
         void DeleteFromDB()                                 // overwrited of Creature::DeleteFromDB - don't must be called
         {
-            assert(false);
+            ASSERT(false);
         }
 };
 #endif
