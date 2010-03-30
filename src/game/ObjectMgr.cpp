@@ -2523,6 +2523,8 @@ void ObjectMgr::DistributeRankPoints(uint32 team, uint32 dateBegin , bool flush 
     if ( list.empty() )
         return;
 
+    HonorScores scores = MaNGOS::Honor::GenerateScores(list,team);
+
     Field *fields = NULL;
     QueryResult *result = NULL;
     for (HonorStandingList::iterator itr = list.begin();itr != list.end() ; ++itr)
@@ -2536,9 +2538,9 @@ void ObjectMgr::DistributeRankPoints(uint32 team, uint32 dateBegin , bool flush 
         RP = fields[0].GetFloat();
         HK = fields[1].GetUInt32();
 
-        itr->rpEarning = MaNGOS::Honor::CalculateRpEarning(list,itr->GetInfo(),team,RP);
+        itr->rpEarning = MaNGOS::Honor::CalculateRpEarning(itr->GetInfo()->honorPoints,scores);
         RP             = MaNGOS::Honor::CalculateRpDecay(itr->rpEarning,RP);
-        
+
         if (flush)
         {
             CharacterDatabase.BeginTransaction();

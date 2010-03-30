@@ -338,7 +338,7 @@ class HonorStanding
         // create the standing order
         bool operator < (const HonorStanding& rhs) 
         {
-            return honorPoints < rhs.honorPoints;
+            return honorPoints > rhs.honorPoints;
         }
 };
 
