@@ -3587,7 +3587,7 @@ bool ChatHandler::HandleShowHonor(const char* args)
         hrank_name = GetMangosString(LANG_NO_RANK);
     }
 
-    PSendSysMessage(LANG_RANK, rank_name, honor_rank,target->GetName());
+    PSendSysMessage(LANG_RANK, target->GetName(),rank_name, honor_rank);
     PSendSysMessage(LANG_HONOR_TODAY, today_honorable_kills, today_dishonorable_kills);
     PSendSysMessage(LANG_HONOR_YESTERDAY, yesterday_kills, yesterday_honor);
     PSendSysMessage(LANG_HONOR_THIS_WEEK, this_week_kills, this_week_honor);
