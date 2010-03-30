@@ -197,7 +197,8 @@ void BattleGround::Update(uint32 diff)
         {
             uint32 newtime = m_PrematureCountDownTimer - diff;
             // announce every minute
-            if(m_PrematureCountDownTimer != sBattleGroundMgr.GetPrematureFinishTime() && newtime / 60000 != m_PrematureCountDownTimer / 60000)
+            if (m_PrematureCountDownTimer != sBattleGroundMgr.GetPrematureFinishTime() &&
+                newtime / (MINUTE * IN_MILLISECONDS) != m_PrematureCountDownTimer / (MINUTE * IN_MILLISECONDS))
                 SendMessageToAll(LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING);
             m_PrematureCountDownTimer = newtime;
         }

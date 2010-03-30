@@ -184,7 +184,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
     recv_data >> guid;
     recv_data >> flags >> time;
     DEBUG_LOG("Guid: %s", guid.GetString().c_str());
-    DEBUG_LOG("Flags %u, time %u", flags, time/IN_MILISECONDS);
+    DEBUG_LOG("Flags %u, time %u", flags, time/IN_MILLISECONDS);
 
     Player* plMover = GetPlayer();
 
