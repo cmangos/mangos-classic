@@ -3510,18 +3510,22 @@ bool ChatHandler::HandleModifyStandStateCommand(const char* args)
 
 bool ChatHandler::HandleShowHonor(const char* args)
 {
-    uint32 dishonorable_kills       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
-    uint32 honorable_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
-    uint32 highest_rank             = (m_session->GetPlayer()->GetHonorHighestRank() < HONOR_RANK_COUNT)? m_session->GetPlayer()->GetHonorHighestRank() : 0;
-    uint32 today_honorable_kills    = (uint16)m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
-    uint32 today_dishonorable_kills = (uint16)(m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS)>>16);
-    uint32 yesterday_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
-    uint32 yesterday_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
-    uint32 this_week_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
-    uint32 this_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
-    uint32 last_week_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS);
-    uint32 last_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
-    uint32 last_week_standing       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
+    Player *target = getSelectedPlayer();
+    if (!target)
+        target = m_session->GetPlayer();
+
+    uint32 dishonorable_kills       = target->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
+    uint32 honorable_kills          = target->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+    uint32 highest_rank             = target->GetHonorHighestRank() < HONOR_RANK_COUNT ?  target->GetHonorHighestRank() : 0;
+    uint32 today_honorable_kills    = target->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
+    uint32 today_dishonorable_kills = target->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS)>>16;
+    uint32 yesterday_kills          = target->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
+    uint32 yesterday_honor          = target->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
+    uint32 this_week_kills          = target->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
+    uint32 this_week_honor          = target->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
+    uint32 last_week_kills          = target->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS);
+    uint32 last_week_honor          = target->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
+    uint32 last_week_standing       = target->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
 
     static int16 alliance_ranks[HONOR_RANK_COUNT] =
     {
@@ -3564,7 +3568,6 @@ bool ChatHandler::HandleShowHonor(const char* args)
     char const* rank_name = NULL;
     char const* hrank_name = NULL;
  
-    Player *target = getSelectedPlayer();
     uint32 honor_rank = target->GetHonorRank();
 
     if ( target->GetTeam() == ALLIANCE )
@@ -3584,12 +3587,12 @@ bool ChatHandler::HandleShowHonor(const char* args)
         hrank_name = GetMangosString(LANG_NO_RANK);
     }
 
-    PSendSysMessage(LANG_RANK, rank_name, honor_rank);
+    PSendSysMessage(LANG_RANK, rank_name, honor_rank,target->GetName());
     PSendSysMessage(LANG_HONOR_TODAY, today_honorable_kills, today_dishonorable_kills);
     PSendSysMessage(LANG_HONOR_YESTERDAY, yesterday_kills, yesterday_honor);
     PSendSysMessage(LANG_HONOR_THIS_WEEK, this_week_kills, this_week_honor);
     PSendSysMessage(LANG_HONOR_LAST_WEEK, last_week_kills, last_week_honor, last_week_standing);
-    PSendSysMessage(LANG_HONOR_LIFE, honorable_kills, dishonorable_kills, highest_rank, hrank_name);
+    PSendSysMessage(LANG_HONOR_LIFE, target->GetRankPoints(), honorable_kills, dishonorable_kills, highest_rank, hrank_name);
 
     return true;
 }
