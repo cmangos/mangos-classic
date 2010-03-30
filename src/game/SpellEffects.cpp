@@ -4168,7 +4168,7 @@ void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)
         m_caster->_AddTotem(TotemSlot(slot),pTotem);
 
     pTotem->SetOwner(m_caster->GetGUID());
-    pTotem->SetTypeBySummonSpell(m_spellInfo);              // must be after Create call where m_spells initilized
+    pTotem->SetTypeBySummonSpell(m_spellInfo);              // must be after Create call where m_spells initialized
 
     int32 duration=GetSpellDuration(m_spellInfo);
     if (Player* modOwner = m_caster->GetSpellModOwner())
