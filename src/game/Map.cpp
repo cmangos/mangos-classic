@@ -2464,7 +2464,7 @@ uint32 InstanceMap::GetMaxPlayers() const
 BattleGroundMap::BattleGroundMap(uint32 id, time_t expiry, uint32 InstanceId)
   : Map(id, expiry, InstanceId)
 {
-    //lets initialize visibility distance for BG/Arenas
+    //lets initialize visibility distance for BG
     BattleGroundMap::InitVisibilityDistance();
 }
 
@@ -2474,7 +2474,7 @@ BattleGroundMap::~BattleGroundMap()
 
 void BattleGroundMap::InitVisibilityDistance()
 {
-    //init visibility distance for BG/Arenas
+    //init visibility distance for BG
     m_VisibleDistance = World::GetMaxVisibleDistanceInBG();
 }
 

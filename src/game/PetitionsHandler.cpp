@@ -127,7 +127,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         return;
 
     charter->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, charter->GetGUIDLow());
-    // ITEM_FIELD_ENCHANTMENT is guild/arenateam id
+    // ITEM_FIELD_ENCHANTMENT is guild
     // ITEM_FIELD_ENCHANTMENT+1 is current signatures count (showed on item)
     charter->SetState(ITEM_CHANGED, _player);
     _player->SendNewItem(charter, 1, true, false);
@@ -250,7 +250,7 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
     WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4+8+name.size()+1+2+4*11));
     data << GUID_LOPART(petitionguid);                      // guild/team guid (in mangos always same as GUID_LOPART(petition guid)
     data << ownerguid;                                      // charter owner guid
-    data << name;                                           // name (guild/arena team)
+    data << name;                                           // name (guild)
     data << uint8(0);                                       // 1
     data << uint32(1);
     data << uint32(9);

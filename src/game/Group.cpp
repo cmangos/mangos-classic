@@ -1306,7 +1306,7 @@ void Group::UpdateLooterGuid( Creature* creature, bool ifneed )
     SendUpdate();
 }
 
-uint32 Group::CanJoinBattleGroundQueue(BattleGroundTypeId bgTypeId, uint32 bgQueueType, uint32 MinPlayerCount, uint32 MaxPlayerCount, uint32 arenaSlot)
+uint32 Group::CanJoinBattleGroundQueue(BattleGroundTypeId bgTypeId, uint32 bgQueueType, uint32 MinPlayerCount, uint32 MaxPlayerCount)
 {
     // check for min / max count
     uint32 memberscount = GetMembersCount();
@@ -1315,7 +1315,7 @@ uint32 Group::CanJoinBattleGroundQueue(BattleGroundTypeId bgTypeId, uint32 bgQue
     if(memberscount > MaxPlayerCount)
         return BG_JOIN_ERR_GROUP_TOO_MANY;
 
-    // get a player as reference, to compare other players' stats to (arena team id, queue id based on level, etc.)
+    // get a player as reference, to compare other players' stats to (queue id based on level, etc.)
     Player * reference = GetFirstMember()->getSource();
     // no reference found, can't join this way
     if(!reference)
@@ -1340,7 +1340,7 @@ uint32 Group::CanJoinBattleGroundQueue(BattleGroundTypeId bgTypeId, uint32 bgQue
         // don't let join if someone from the group is already in that bg queue
         if(member->InBattleGroundQueueForBattleGroundQueueType(bgQueueType))
             return BG_JOIN_ERR_GROUP_MEMBER_ALREADY_IN_QUEUE;
-        // check for deserter debuff in case not arena queue
+        // check for deserter debuff
         if(!member->CanJoinToBattleground())
             return BG_JOIN_ERR_GROUP_DESERTER;
         // check if member can join any more battleground queues

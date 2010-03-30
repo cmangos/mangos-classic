@@ -7712,9 +7712,9 @@ float Unit::GetPPMProcChance(uint32 WeaponSpeed, float PPM) const
     return WeaponSpeed * PPM / 600.0f;                      // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
 }
 
-void Unit::Mount(uint32 mount)
+void Unit::Mount(uint32 mount, uint32 spellId)
 {
-    if(!mount)
+    if (!mount)
         return;
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNTING);
@@ -7723,9 +7723,24 @@ void Unit::Mount(uint32 mount)
 
     SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
 
-    // unsummon pet
-    if(GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->UnsummonPetTemporaryIfAny();
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        // Called by Taxi system / GM command
+        if (!spellId)
+            ((Player*)this)->UnsummonPetTemporaryIfAny();
+        // Called by mount aura
+        else if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId))
+        {
+            // Normal case (Unsummon only permanent pet)
+            if (Pet* pet = GetPet())
+            {
+                if (pet->IsPermanentPetFor((Player*)this))
+                    ((Player*)this)->UnsummonPetTemporaryIfAny();
+                else
+                    pet->ApplyModeFlags(PET_MODE_DISABLE_ACTIONS,true);
+            }
+        }
+    }
 }
 
 void Unit::Unmount()
@@ -7742,7 +7757,12 @@ void Unit::Unmount()
     // this prevents adding a pet to a not created map which would otherwise cause a crash
     // (it could probably happen when logging in after a previous crash)
     if(GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny();
+    {
+        if(Pet* pet = GetPet())
+            pet->ApplyModeFlags(PET_MODE_DISABLE_ACTIONS,false);
+        else
+            ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny();
+    }
 }
 
 void Unit::SetInCombatWith(Unit* enemy)

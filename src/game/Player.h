@@ -1264,7 +1264,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemoveSpellCategoryCooldown(uint32 cat, bool update = false);
         void SendClearCooldown( uint32 spell_id, Unit* target );
 
-        void RemoveArenaSpellCooldowns();
         void RemoveAllSpellCooldown();
         void _LoadSpellCooldowns(QueryResult *result);
         void _SaveSpellCooldowns();
@@ -1994,7 +1993,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         QuestStatusMap mQuestStatus;
 
         uint32 m_GuildIdInvited;
-        uint32 m_ArenaTeamIdInvited;
 
         PlayerMails m_mail;
         PlayerSpellMap m_spells;

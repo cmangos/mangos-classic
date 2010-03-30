@@ -145,7 +145,7 @@ void WorldSession::HandleBattlemasterJoinOpcode( WorldPacket & recv_data )
         // no group found, error
         if(!grp)
             return;
-        uint32 err = grp->CanJoinBattleGroundQueue(bgTypeId, bgQueueTypeId, 0, bg->GetMaxPlayersPerTeam(), 0);
+        uint32 err = grp->CanJoinBattleGroundQueue(bgTypeId, bgQueueTypeId, 0, bg->GetMaxPlayersPerTeam());
         if (err != BG_JOIN_ERR_OK)
         {
             SendBattleGroundJoinError(err);
@@ -621,7 +621,7 @@ void WorldSession::SendBattleGroundJoinError(uint8 err)
             msg = LANG_BG_GROUP_MEMBER_NO_FREE_QUEUE_SLOTS;
             break;
         case BG_JOIN_ERR_GROUP_NOT_ENOUGH:
-        case BG_JOIN_ERR_MIXED_ARENATEAM:
+        //case BG_JOIN_ERR_MIXED_ARENATEAM:
         default:
             return;
             break;

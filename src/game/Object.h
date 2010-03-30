@@ -36,7 +36,7 @@
 #define MAX_VISIBILITY_DISTANCE     333.0f      // max distance for visible object show, limited in 333 yards
 #define DEFAULT_VISIBILITY_DISTANCE 90.0f       // default visible distance, 90 yards on continents
 #define DEFAULT_VISIBILITY_INSTANCE 120.0f      // default visible distance in instances, 120 yards
-#define DEFAULT_VISIBILITY_BG       180.0f      // default visible distance in BG/Arenas, 180 yards
+#define DEFAULT_VISIBILITY_BG       180.0f      // default visible distance in BG, 180 yards
 
 #define DEFAULT_WORLD_OBJECT_SIZE   0.388999998569489f      // player size, also currently used (correctly?) for any non Unit world objects
 #define MAX_STEALTH_DETECT_RANGE    45.0f

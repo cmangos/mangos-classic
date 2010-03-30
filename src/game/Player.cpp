@@ -352,7 +352,6 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this)
     duel = NULL;
 
     m_GuildIdInvited = 0;
-    m_ArenaTeamIdInvited = 0;
 
     m_atLoginFlags = AT_LOGIN_NONE;
 
@@ -1210,7 +1209,6 @@ void Player::Update( uint32 p_time )
             else
             {
                 // use area updates as well
-                // needed for free far all arenas for example
                 if( m_areaUpdateId != newarea )
                     UpdateArea(newarea);
 
@@ -3114,27 +3112,6 @@ void Player::RemoveSpellCategoryCooldown(uint32 cat, bool update /* = false */)
             RemoveSpellCooldown((i++)->first, update);
         else
             ++i;
-    }
-}
-
-void Player::RemoveArenaSpellCooldowns()
-{
-    // remove cooldowns on spells that has < 15 min CD
-    SpellCooldowns::iterator itr, next;
-    // iterate spell cooldowns
-    for(itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end(); itr = next)
-    {
-        next = itr;
-        ++next;
-        SpellEntry const * entry = sSpellStore.LookupEntry(itr->first);
-        // check if spellentry is present and if the cooldown is less than 15 mins
-        if( entry &&
-            entry->RecoveryTime <= 15 * MINUTE * IN_MILLISECONDS &&
-            entry->CategoryRecoveryTime <= 15 * MINUTE * IN_MILLISECONDS )
-        {
-            // remove & notify
-            RemoveSpellCooldown(itr->first, true);
-        }
     }
 }
 
@@ -8786,7 +8763,6 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
 
                 // do not allow equipping gear except weapons, offhands, projectiles, relics in
                 // - combat
-                // - in-progress arenas
                 if( !pProto->CanChangeEquipStateInCombat() )
                 {
                     if( isInCombat() )
@@ -8899,7 +8875,6 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
 
     // do not allow unequipping gear except weapons, offhands, projectiles, relics in
     // - combat
-    // - in-progress arenas
     if( !pProto->CanChangeEquipStateInCombat() )
     {
         if( isInCombat() )
@@ -9886,7 +9861,6 @@ void Player::DestroyZoneLimitedItem( bool update, uint32 new_zone )
 
 void Player::DestroyConjuredItems( bool update )
 {
-    // used when entering arena
     // destroys all conjured items
     sLog.outDebug( "STORAGE: DestroyConjuredItems" );
 
@@ -14338,7 +14312,7 @@ void Player::SaveToDB()
     bool save_to_dest = false;
     if(IsBeingTeleported())
     {
-        // don't save to battlegrounds or arenas
+        // don't save to battlegrounds
         const MapEntry *entry = sMapStore.LookupEntry(GetTeleportDest().mapid);
         if(entry && entry->map_type != MAP_BATTLEGROUND)
             save_to_dest = true;
@@ -15082,10 +15056,17 @@ void Player::UpdateDuelFlag(time_t currTime)
 
 void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
 {
-    if(!pet)
+    if (!pet)
         pet = GetPet();
 
-    if(returnreagent && (pet || m_temporaryUnsummonedPetNumber))
+    if (!pet || pet->GetOwnerGUID() != GetGUID())
+        return;
+
+    // not save secondary permanent pet as current
+    if (pet && m_temporaryUnsummonedPetNumber && m_temporaryUnsummonedPetNumber != pet->GetCharmInfo()->GetPetNumber() && mode == PET_SAVE_AS_CURRENT)
+        mode = PET_SAVE_NOT_IN_SLOT;
+
+    if (returnreagent && pet && mode != PET_SAVE_AS_CURRENT)
     {
         //returning of reagents only for players, so best done here
         uint32 spellId = pet ? pet->GetUInt32Value(UNIT_CREATED_BY_SPELL) : m_oldpetspell;
@@ -15108,11 +15089,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
                 }
             }
         }
-        m_temporaryUnsummonedPetNumber = 0;
     }
-
-    if(!pet || pet->GetOwnerGUID()!=GetGUID())
-        return;
 
     // only if current pet in slot
     switch(pet->getPetType())
@@ -15124,33 +15101,19 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
             RemoveGuardian(pet);
             break;
         default:
-            if(GetPetGUID() == pet->GetGUID())
+            if (GetPetGUID() == pet->GetGUID())
                 SetPet(NULL);
             break;
     }
 
     pet->CombatStop();
 
-    if(returnreagent)
-    {
-        switch(pet->GetEntry())
-        {
-            //warlock pets except imp are removed(?) when logging out
-            case 1860:
-            case 1863:
-            case 417:
-            case 17252:
-                mode = PET_SAVE_NOT_IN_SLOT;
-                break;
-        }
-    }
-
     pet->SavePetToDB(mode);
 
     pet->AddObjectToRemoveList();
     pet->m_removed = true;
 
-    if(pet->isControlled())
+    if (pet->isControlled())
     {
         RemovePetActionBar();
 
@@ -15161,7 +15124,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
 
 void Player::RemoveMiniPet()
 {
-    if(Pet* pet = GetMiniPet())
+    if (Pet* pet = GetMiniPet())
     {
         pet->Remove(PET_SAVE_AS_DELETED);
         m_miniPet = 0;
@@ -15170,8 +15133,9 @@ void Player::RemoveMiniPet()
 
 Pet* Player::GetMiniPet()
 {
-    if(!m_miniPet)
+    if (!m_miniPet)
         return NULL;
+
     return GetMap()->GetPet(m_miniPet);
 }
 

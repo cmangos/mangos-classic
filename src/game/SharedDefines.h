@@ -374,8 +374,8 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX4_UNK13                      0x00002000            // 13
 #define SPELL_ATTR_EX4_UNK14                      0x00004000            // 14
 #define SPELL_ATTR_EX4_UNK15                      0x00008000            // 15
-#define SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA        0x00010000            // 16 not usable in arena
-#define SPELL_ATTR_EX4_USABLE_IN_ARENA            0x00020000            // 17 usable in arena
+//#define SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA        0x00010000            // 16 not usable in arena
+//#define SPELL_ATTR_EX4_USABLE_IN_ARENA            0x00020000            // 17 usable in arena
 #define SPELL_ATTR_EX4_UNK18                      0x00040000            // 18
 #define SPELL_ATTR_EX4_UNK19                      0x00080000            // 19
 #define SPELL_ATTR_EX4_UNK20                      0x00100000            // 20
