@@ -1561,6 +1561,24 @@ void Unit::HandleEmoteCommand(uint32 anim_id)
     SendMessageToSet(&data, true);
 }
 
+void Unit::HandleEmoteState(uint32 anim_id)
+{
+    SetUInt32Value(UNIT_NPC_EMOTESTATE, anim_id);
+}
+
+void Unit::HandleEmote(uint32 anim_id)
+{
+    if (!anim_id)
+        HandleEmoteState(0);
+    else if (EmotesEntry const* emoteEntry = sEmotesStore.LookupEntry(anim_id))
+    {
+        if (emoteEntry->EmoteType)                          // 1,2 states, 0 command
+            HandleEmoteState(anim_id);
+        else
+            HandleEmoteCommand(anim_id);
+    }
+}
+
 uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
 {
     uint32 newdamage = 0;
