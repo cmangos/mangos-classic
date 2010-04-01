@@ -333,7 +333,9 @@ enum HonorKillState
 
 typedef std::list<HonorCP> HonorCPMap;
 
-#define HONOR_RANK_COUNT 16
+#define NEGATIVE_HONOR_RANK_COUNT 4
+#define POSITIVE_HONOR_RANK_COUNT 15
+#define HONOR_RANK_COUNT 19 // negative + positive ranks
 
 enum PlayerFlags
 {
@@ -1517,14 +1519,14 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool isKill(uint8 victimType) { return (victimType == TYPEID_UNIT || victimType == TYPEID_PLAYER ); }
         uint32 CalculateTotalKills(Unit *Victim,uint32 fromDate,uint32 toDate) const;
         //Acessors of honor rank
-        uint32 GetHonorRank() const { return m_honor_rank; }
+        uint8 GetHonorRank() const { return m_honor_rank; }
         void SetHonorRank(uint8 rank) { m_honor_rank = rank; }
         //Acessors of total honor points
         void SetRankPoints(float rankPoints) { m_rank_points = rankPoints; }
         float GetRankPoints(void) const { return m_rank_points; }
         //Acessors of righest rank
-        uint32 GetHonorHighestRank() const { return m_highest_rank; }
-        void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; }
+        int8 GetHonorHighestRank() const { return m_highest_rank; }
+        void SetHonorHighestRank(int8 hr) { m_highest_rank = hr; }
         //Acessors of rating
         float GetStoredHonor() const { return m_stored_honor; }
         void SetStoredHonor(float rating) { m_stored_honor = rating; }
@@ -1965,7 +1967,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_stored_honor;
         uint32 m_stored_honorableKills;
         uint32 m_stored_dishonorableKills;
-        uint32 m_highest_rank;
+        int8 m_highest_rank;
         int32 m_standing_pos;
 
         void outDebugValues() const;

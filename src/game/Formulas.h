@@ -29,6 +29,14 @@ struct HonorScores
     float BRK[14];
 };
 
+struct HonorRankInfo
+{
+    uint8 rank;
+    int8 visualRank;
+    float maxRP;
+    float minRP;
+    bool positive;
+};
 
 namespace MaNGOS
 {
@@ -38,26 +46,50 @@ namespace MaNGOS
         {
             return (float)ceil(count*(-0.53177f + 0.59357f * exp((level +23.54042f) / 26.07859f )));
         }
-    }
-
-    namespace Honor
-    {
 
         //What is Player's rank... private, scout...
-        inline uint32 CalculateHonorRank(float honor_points,uint32 totalKills)
+        inline HonorRankInfo CalculateHonorRank(float honor_points)
         {
-            uint32 rank = 0;
-            // you can modify this formula on negative values to show old dishonored ranks too
-            if(honor_points <=    0.00 || totalKills < HONOR_STANDING_MIN_KILL)
-                rank = 0;
-            else if(honor_points <  2000.00 && totalKills >= HONOR_STANDING_MIN_KILL)
-                rank = 1;
-            else if(honor_points > ((HONOR_RANK_COUNT-2)-1)*5000)
-                rank = HONOR_RANK_COUNT-2;
-            else
-                rank = uint32(honor_points / 5000) + 2;
+            HonorRankInfo prk;
+            prk.maxRP = 2000.00f;
+            prk.minRP = 0.00f;
+            prk.rank  = 0;
+            prk.visualRank = 0;
+            prk.positive = true;
 
-            return rank;
+            // rank none
+            if (honor_points == 0)
+                return prk;
+
+            prk.positive = honor_points > 0;
+            if (!prk.positive)
+                honor_points *= -1;
+
+            uint8 rCount = prk.positive ? POSITIVE_HONOR_RANK_COUNT - 2 : NEGATIVE_HONOR_RANK_COUNT;
+            uint8 firstRank = prk.positive ? NEGATIVE_HONOR_RANK_COUNT + 1 : 1;
+
+            if(honor_points < 2000.00f)
+                prk.rank = prk.positive ? firstRank : NEGATIVE_HONOR_RANK_COUNT;
+            else
+            {
+                if(honor_points > (rCount - 1)*5000.00f)
+                    prk.rank = prk.positive ? HONOR_RANK_COUNT - 1 : firstRank;
+                else
+                {
+                    prk.rank = uint32(honor_points / 5000.00f) + firstRank;
+                    prk.rank = ( prk.positive ? prk.rank  + 1 : NEGATIVE_HONOR_RANK_COUNT - prk.rank );
+                }
+                
+                int8 rank = prk.positive ? prk.rank - NEGATIVE_HONOR_RANK_COUNT -1 : prk.rank - NEGATIVE_HONOR_RANK_COUNT;
+                prk.maxRP = (rank)*5000.00f;
+                if (prk.maxRP < 0) // in negative rank case
+                    prk.maxRP *= -1;
+                prk.minRP = prk.maxRP > 5000.0f ? prk.maxRP  - 5000.00f : 2000.00f;
+            }
+
+            prk.visualRank = prk.positive ? prk.rank - NEGATIVE_HONOR_RANK_COUNT : prk.rank * -1;
+
+            return prk;
         }
 
         inline HonorScores GenerateScores(HonorStandingList standingList,uint32 team)

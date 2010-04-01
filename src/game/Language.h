@@ -370,13 +370,17 @@ enum MangosStrings
     LANG_HRD_HIGH_WARLORD               = 376,
 
     LANG_GAME_MASTER                    = 377,             
-    LANG_NO_RANK                        = 378,                    
-    LANG_RANK                           = 379,                       
-    LANG_HONOR_TODAY                    = 380,                
-    LANG_HONOR_YESTERDAY                = 381,           
-    LANG_HONOR_THIS_WEEK                = 382,            
-    LANG_HONOR_LAST_WEEK                = 383,            
-    LANG_HONOR_LIFE                     = 384, 
+    LANG_NO_RANK                        = 378, 
+    LANG_RANK_DISHONORED                = 379,
+    LANG_RANK_EXILED                    = 380,
+    LANG_RANK_OUTLAW                    = 381,
+    LANG_RANK_PARIAH                    = 382,
+    LANG_RANK                           = 383,                       
+    LANG_HONOR_TODAY                    = 384,                
+    LANG_HONOR_YESTERDAY                = 385,           
+    LANG_HONOR_THIS_WEEK                = 386,            
+    LANG_HONOR_LAST_WEEK                = 387,            
+    LANG_HONOR_LIFE                     = 388, 
 
     // Room for more level 2              385-399 not used
 
