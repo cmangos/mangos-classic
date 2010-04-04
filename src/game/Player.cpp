@@ -2982,7 +2982,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled)
 
     // re-search, it can be corrupted in prev loop
     itr = m_spells.find(spell_id);
-    if (itr == m_spells.end())
+    if (itr == m_spells.end() || itr->second.state == PLAYERSPELL_REMOVED)
         return;                                             // already unleared
 
     // removing
