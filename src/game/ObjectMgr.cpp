@@ -4721,7 +4721,7 @@ void ObjectMgr::LoadQuestAreaTriggers()
 
     uint32 count = 0;
 
-    if( !result )
+    if (!result)
     {
         barGoLink bar( 1 );
         bar.step();
@@ -4744,21 +4744,20 @@ void ObjectMgr::LoadQuestAreaTriggers()
         uint32 quest_ID   = fields[1].GetUInt32();
 
         AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(trigger_ID);
-        if(!atEntry)
+        if (!atEntry)
         {
-            sLog.outErrorDb("Area trigger (ID:%u) does not exist in `AreaTrigger.dbc`.",trigger_ID);
+            sLog.outErrorDb("Table `areatrigger_involvedrelation` has area trigger (ID: %u) not listed in `AreaTrigger.dbc`.", trigger_ID);
             continue;
         }
 
         Quest const* quest = GetQuestTemplate(quest_ID);
-
-        if(!quest)
+        if (!quest)
         {
             sLog.outErrorDb("Table `areatrigger_involvedrelation` has record (id: %u) for not existing quest %u",trigger_ID,quest_ID);
             continue;
         }
 
-        if(!quest->HasFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT))
+        if (!quest->HasFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT))
         {
             sLog.outErrorDb("Table `areatrigger_involvedrelation` has record (id: %u) for not quest %u, but quest not have flag QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT. Trigger or quest flags must be fixed, quest modified to require objective.",trigger_ID,quest_ID);
 
@@ -4786,7 +4785,7 @@ void ObjectMgr::LoadTavernAreaTriggers()
 
     uint32 count = 0;
 
-    if( !result )
+    if (!result)
     {
         barGoLink bar( 1 );
         bar.step();
@@ -4808,9 +4807,9 @@ void ObjectMgr::LoadTavernAreaTriggers()
         uint32 Trigger_ID      = fields[0].GetUInt32();
 
         AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
-        if(!atEntry)
+        if (!atEntry)
         {
-            sLog.outErrorDb("Area trigger (ID:%u) does not exist in `AreaTrigger.dbc`.",Trigger_ID);
+            sLog.outErrorDb("Table `areatrigger_tavern` has area trigger (ID:%u) not listed in `AreaTrigger.dbc`.", Trigger_ID);
             continue;
         }
 
@@ -4830,7 +4829,7 @@ void ObjectMgr::LoadAreaTriggerScripts()
 
     uint32 count = 0;
 
-    if( !result )
+    if (!result)
     {
         barGoLink bar( 1 );
         bar.step();
@@ -4853,11 +4852,12 @@ void ObjectMgr::LoadAreaTriggerScripts()
         const char *scriptName = fields[1].GetString();
 
         AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
-        if(!atEntry)
+        if (!atEntry)
         {
-            sLog.outErrorDb("Area trigger (ID:%u) does not exist in `AreaTrigger.dbc`.",Trigger_ID);
+            sLog.outErrorDb("Table `areatrigger_scripts` has area trigger (ID:%u) not listed in `AreaTrigger.dbc`.", Trigger_ID);
             continue;
         }
+
         mAreaTriggerScripts[Trigger_ID] = GetScriptId(scriptName);
     } while( result->NextRow() );
 
@@ -5238,51 +5238,52 @@ void ObjectMgr::LoadAreaTriggerTeleports()
         at.target_Orientation = fields[10].GetFloat();
 
         AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
-        if(!atEntry)
+        if (!atEntry)
         {
-            sLog.outErrorDb("Area trigger (ID:%u) does not exist in `AreaTrigger.dbc`.",Trigger_ID);
+            sLog.outErrorDb("Table `areatrigger_teleport` has area trigger (ID:%u) not listed in `AreaTrigger.dbc`.", Trigger_ID);
             continue;
         }
 
-        if(at.requiredItem)
+        if (at.requiredItem)
         {
             ItemPrototype const *pProto = GetItemPrototype(at.requiredItem);
-            if(!pProto)
+            if (!pProto)
             {
-                sLog.outError("Key item %u does not exist for trigger %u, removing key requirement.", at.requiredItem, Trigger_ID);
+                sLog.outError("Table `areatrigger_teleport` has not existed key item %u for trigger %u, removing key requirement.", at.requiredItem, Trigger_ID);
                 at.requiredItem = 0;
             }
         }
-        if(at.requiredItem2)
+
+        if (at.requiredItem2)
         {
             ItemPrototype const *pProto = GetItemPrototype(at.requiredItem2);
             if(!pProto)
             {
-                sLog.outError("Second item %u not exist for trigger %u, remove key requirement.", at.requiredItem2, Trigger_ID);
+                sLog.outError("Table `areatrigger_teleport` has not existed second key item %u for trigger %u, remove key requirement.", at.requiredItem2, Trigger_ID);
                 at.requiredItem2 = 0;
             }
         }
 
-        if(at.requiredQuest)
+        if (at.requiredQuest)
         {
             QuestMap::iterator qReqItr = mQuestTemplates.find(at.requiredQuest);
-            if(qReqItr == mQuestTemplates.end())
+            if (qReqItr == mQuestTemplates.end())
             {
-                sLog.outErrorDb("Required Quest %u not exist for trigger %u, remove quest done requirement.",at.requiredQuest,Trigger_ID);
+                sLog.outErrorDb("Table `areatrigger_teleport` has not existed required quest %u for trigger %u, remove quest done requirement.",at.requiredQuest,Trigger_ID);
                 at.requiredQuest = 0;
             }
         }
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(at.target_mapId);
-        if(!mapEntry)
+        if (!mapEntry)
         {
-            sLog.outErrorDb("Area trigger (ID:%u) target map (ID: %u) does not exist in `Map.dbc`.",Trigger_ID,at.target_mapId);
+            sLog.outErrorDb("Table `areatrigger_teleport` has not existed target map (ID: %u) for Area trigger (ID:%u).", at.target_mapId, Trigger_ID);
             continue;
         }
 
-        if(at.target_X==0 && at.target_Y==0 && at.target_Z==0)
+        if (at.target_X==0 && at.target_Y==0 && at.target_Z==0)
         {
-            sLog.outErrorDb("Area trigger (ID:%u) target coordinates not provided.",Trigger_ID);
+            sLog.outErrorDb("Table `areatrigger_teleport` has area trigger (ID:%u) without target coordinates.",Trigger_ID);
             continue;
         }
 
