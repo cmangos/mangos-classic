@@ -1065,7 +1065,7 @@ void Player::Update( uint32 p_time )
 
     if (!m_timedquests.empty())
     {
-        std::set<uint32>::iterator iter = m_timedquests.begin();
+        QuestSet::iterator iter = m_timedquests.begin();
         while (iter != m_timedquests.end())
         {
             QuestStatusData& q_status = mQuestStatus[*iter];
@@ -11479,11 +11479,11 @@ bool Player::CanCompleteRepeatableQuest( Quest const *pQuest )
 bool Player::CanRewardQuest( Quest const *pQuest, bool msg )
 {
     // not auto complete quest and not completed quest (only cheating case, then ignore without message)
-    if(!pQuest->IsAutoComplete() && GetQuestStatus(pQuest->GetQuestId()) != QUEST_STATUS_COMPLETE)
+    if (!pQuest->IsAutoComplete() && GetQuestStatus(pQuest->GetQuestId()) != QUEST_STATUS_COMPLETE)
         return false;
 
     // rewarded and not repeatable quest (only cheating case, then ignore without message)
-    if(GetQuestRewardStatus(pQuest->GetQuestId()))
+    if (GetQuestRewardStatus(pQuest->GetQuestId()))
         return false;
 
     // prevent receive reward with quest items in bank
@@ -11502,7 +11502,7 @@ bool Player::CanRewardQuest( Quest const *pQuest, bool msg )
     }
 
     // prevent receive reward with low money and GetRewOrReqMoney() < 0
-    if(pQuest->GetRewOrReqMoney() < 0 && GetMoney() < uint32(-pQuest->GetRewOrReqMoney()) )
+    if (pQuest->GetRewOrReqMoney() < 0 && GetMoney() < uint32(-pQuest->GetRewOrReqMoney()) )
         return false;
 
     return true;
@@ -12045,7 +12045,7 @@ bool Player::SatisfyQuestTimed(Quest const* qInfo, bool msg)
 bool Player::SatisfyQuestExclusiveGroup( Quest const* qInfo, bool msg )
 {
     // non positive exclusive group, if > 0 then can be start if any other quest in exclusive group already started/completed
-    if(qInfo->GetExclusiveGroup() <= 0)
+    if (qInfo->GetExclusiveGroup() <= 0)
         return true;
 
     ObjectMgr::ExclusiveQuestGroups::const_iterator iter = sObjectMgr.mExclusiveQuestGroups.lower_bound(qInfo->GetExclusiveGroup());
@@ -12058,14 +12058,14 @@ bool Player::SatisfyQuestExclusiveGroup( Quest const* qInfo, bool msg )
         uint32 exclude_Id = iter->second;
 
         // skip checked quest id, only state of other quests in group is interesting
-        if(exclude_Id == qInfo->GetQuestId())
+        if (exclude_Id == qInfo->GetQuestId())
             continue;
 
         QuestStatusMap::iterator i_exstatus = mQuestStatus.find( exclude_Id );
 
         // alternative quest already started or completed
-        if( i_exstatus != mQuestStatus.end()
-            && (i_exstatus->second.m_status == QUEST_STATUS_COMPLETE || i_exstatus->second.m_status == QUEST_STATUS_INCOMPLETE) )
+        if (i_exstatus != mQuestStatus.end()
+            && (i_exstatus->second.m_status == QUEST_STATUS_COMPLETE || i_exstatus->second.m_status == QUEST_STATUS_INCOMPLETE))
         {
             if( msg )
                 SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
@@ -12133,7 +12133,7 @@ bool Player::SatisfyQuestPrevChain( Quest const* qInfo, bool msg )
 bool Player::GiveQuestSourceItem( Quest const *pQuest )
 {
     uint32 srcitem = pQuest->GetSrcItemId();
-    if( srcitem > 0 )
+    if (srcitem > 0)
     {
         uint32 count = pQuest->GetSrcItemCount();
         if( count <= 0 )
@@ -12141,14 +12141,14 @@ bool Player::GiveQuestSourceItem( Quest const *pQuest )
 
         ItemPosCountVec dest;
         uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, srcitem, count );
-        if( msg == EQUIP_ERR_OK )
+        if (msg == EQUIP_ERR_OK)
         {
             Item * item = StoreNewItem(dest, srcitem, true);
             SendNewItem(item, count, true, false);
             return true;
         }
         // player already have max amount required item, just report success
-        else if( msg == EQUIP_ERR_CANT_CARRY_MORE_OF_THIS )
+        else if (msg == EQUIP_ERR_CANT_CARRY_MORE_OF_THIS)
             return true;
         else
             SendEquipError( msg, NULL, NULL );
@@ -14412,7 +14412,7 @@ void Player::SaveToDB()
 
     CharacterDatabase.Execute( ss.str().c_str() );
 
-    if(m_mailsUpdated)                                      //save mails only when needed
+    if (m_mailsUpdated)                                     //save mails only when needed
         _SaveMail();
 
     _SaveInventory();
@@ -14434,7 +14434,7 @@ void Player::SaveToDB()
     SetUInt32Value(PLAYER_FLAGS, tmp_pflags);
 
     // save pet (hunter pet level and experience and all type pets health/mana).
-    if(Pet* pet = GetPet())
+    if (Pet* pet = GetPet())
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 
