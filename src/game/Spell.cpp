@@ -438,6 +438,17 @@ void Spell::FillTargetMap()
                 switch(m_spellInfo->EffectImplicitTargetB[i])
                 {
                     case 0:
+                        // Arcane Missiles have strange targeting for auras
+                        if(m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000800))
+                        {
+                            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                                if (Unit *target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection()))
+                                    if (!m_caster->IsFriendlyTo(target))
+                                        tmpUnitMap.push_back(target);
+                        }
+                        else
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
+                        break;
                     case TARGET_EFFECT_SELECT:
                         SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
                         break;
