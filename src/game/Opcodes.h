@@ -875,8 +875,6 @@ enum OpcodesList
     CMSG_MOVE_CHNG_TRANSPORT                        = 0x38D,
     MSG_PARTY_ASSIGNMENT                            = 0x38E,
     SMSG_OFFER_PETITION_ERROR                       = 0x38F,
-    SMSG_TIME_SYNC_REQ                              = 0x390,
-    CMSG_TIME_SYNC_RESP                             = 0x391,
     SMSG_RESET_FAILED_NOTIFY                        = 0x396,
     SMSG_REAL_GROUP_UPDATE                          = 0x397,
     SMSG_INIT_EXTRA_AURA_INFO                       = 0x3A3,
