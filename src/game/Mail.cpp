@@ -202,13 +202,11 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     pl->SendMailResult(0, MAIL_SEND, MAIL_OK);
 
-    uint32 itemTextId = !body.empty() ? sObjectMgr.CreateItemText( body ) : 0;
-
     pl->ModifyMoney( -int32(reqmoney) );
 
     bool needItemDelay = false;
 
-    MailDraft draft(subject, itemTextId);
+    MailDraft draft(subject, body);
 
     if (item_guid > 0 || money > 0)
     {
@@ -590,38 +588,30 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         }
 
         data << (*itr)->subject;                            // Subject string - once 00, when mail type = 3
-        data << (uint32) (*itr)->itemTextId;                // sure about this
-        data << (uint32) 0;                                 // unknown
-        data << (uint32) (*itr)->stationery;                // stationery (Stationery.dbc)
+        data << uint32((*itr)->itemTextId);                 // sure about this
+        data << uint32(0);                                  // unknown
+        data << uint32((*itr)->stationery);                 // stationery (Stationery.dbc)
 
         // 1.12.1 can have only single item
         Item *item = (*itr)->items.size() > 0 ? pl->GetMItem((*itr)->items[0].item_guid) : NULL;
-        // entry
-        data << (uint32) (item ? item->GetEntry() : 0);
+        data << uint32(item ? item->GetEntry() : 0);        // entry
         // permanent enchantment            
-        data << (uint32) (item ? item->GetEnchantmentId((EnchantmentSlot)PERM_ENCHANTMENT_SLOT) : 0);
+        data << uint32(item ? item->GetEnchantmentId((EnchantmentSlot)PERM_ENCHANTMENT_SLOT) : 0);
         // can be negative
-        data << (uint32) (item ? item->GetItemRandomPropertyId() : 0);
+        data << uint32(item ? item->GetItemRandomPropertyId() : 0);
         // unk
-        data << (uint32) (item ? item->GetItemSuffixFactor() : 0);
-        // stack count
-        data << (uint8)  (item ? item->GetCount() : 0);
-        // charges
-        data << (uint32) (item ? item->GetSpellCharges() : 0);
+        data << uint32(item ? item->GetItemSuffixFactor() : 0);
+        data << uint8(item ? item->GetCount() : 0);         // stack count
+        data << uint32(item ? item->GetSpellCharges() : 0); // charges
         // durability
-        data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
+        data << uint32(item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
         // durability
-        data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
-
-        // Gold
-        data << (uint32) (*itr)->money;
-        // Cash on delivery
-        data << (uint32) (*itr)->COD;
-        data << (uint32) (*itr)->checked;
-        // expire time
-        data << (float)  ((*itr)->expire_time-time(NULL))/DAY;
-        // mail template (MailTemplate.dbc)   
-        data << (uint32) (*itr)->mailTemplateId;
+        data << uint32(item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
+        data << uint32((*itr)->money);                      // Gold
+        data << uint32((*itr)->COD);                        // Cash on delivery
+        data << uint32((*itr)->checked);
+        data << float(((*itr)->expire_time-time(NULL))/DAY);// expire time
+        data << uint32((*itr)->mailTemplateId);             // mail template (MailTemplate.dbc)
 
         mailsCount += 1;
     }
@@ -697,7 +687,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     bodyItem->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID, itemTextId );
     bodyItem->SetUInt32Value( ITEM_FIELD_CREATOR, m->sender);
 
-    sLog.outDetail("HandleMailCreateTextItem mailid=%u",mailId);
+    sLog.outDetail("HandleMailCreateTextItem mailid=%u", mailId);
 
     ItemPosCountVec dest;
     uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, bodyItem, false );
@@ -708,7 +698,6 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
         pl->m_mailsUpdated = true;
 
         pl->StoreItem(dest, bodyItem, true);
-        //bodyItem->SetState(ITEM_NEW, pl); is set automatically
         pl->SendMailResult(mailId, MAIL_MADE_PERMANENT, MAIL_OK);
     }
     else
@@ -858,7 +847,8 @@ m_bodyId(!text.empty() ? sObjectMgr.CreateItemText(text) : 0), m_money(0), m_COD
  */
 MailDraft& MailDraft::AddItem( Item* item )
 {
-    m_items[item->GetGUIDLow()] = item; return *this;
+    m_items[item->GetGUIDLow()] = item;
+    return *this;
 }
 /**
  * Prepares the items in a MailDraft.
