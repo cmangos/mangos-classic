@@ -269,7 +269,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
     data.Initialize(SMSG_TRAINER_BUY_SUCCEEDED, 12);
     data << uint64(guid);
-    data << uint32(trainer_spell->spell);
+    data << uint32(spellId);                                // should be same as in packet from client
     SendPacket(&data);
 
     Spell *spell;
