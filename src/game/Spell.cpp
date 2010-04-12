@@ -370,24 +370,15 @@ WorldObject* Spell::FindCorpseUsing()
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
     float max_range = GetSpellMaxRange(srange);
 
-    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-    Cell cell(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
-    cell.SetNoCreate();
-
     WorldObject* result = NULL;
 
     T u_check(m_caster, max_range);
     MaNGOS::WorldObjectSearcher<T> searcher(result, u_check);
 
-    TypeContainerVisitor<MaNGOS::WorldObjectSearcher<T>, GridTypeMapContainer > grid_searcher(searcher);
-    cell.Visit(p, grid_searcher, *m_caster->GetMap(), *m_caster, max_range);
+    Cell::VisitGridObjects(m_caster, searcher, max_range);
 
     if (!result)
-    {
-        TypeContainerVisitor<MaNGOS::WorldObjectSearcher<T>, WorldTypeMapContainer > world_searcher(searcher);
-        cell.Visit(p, world_searcher, *m_caster->GetMap(), *m_caster, max_range);
-    }
+        Cell::VisitWorldObjects(m_caster, searcher, max_range);
 
     return result;
 }
@@ -1164,22 +1155,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             unMaxTargets = EffectChainTarget;
             float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
-            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-            Cell cell(p);
-            cell.data.Part.reserved = ALL_DISTRICT;
-            cell.SetNoCreate();
-
             std::list<Unit *> tempTargetUnitMap;
 
             {
                 MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, max_range);
                 MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
-
-                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
-
-                cell.Visit(p, world_unit_searcher, *m_caster->GetMap(), *m_caster, max_range);
-                cell.Visit(p, grid_unit_searcher, *m_caster->GetMap(), *m_caster, max_range);
+                Cell::VisitAllObjects(m_caster, searcher, max_range);
             }
 
             if(tempTargetUnitMap.empty())
@@ -1261,21 +1242,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     //FIXME: This very like horrible hack and wrong for most spells
                     max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
-                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                Cell cell(p);
-                cell.data.Part.reserved = ALL_DISTRICT;
-                cell.SetNoCreate();
-
                 std::list<Unit *> tempTargetUnitMap;
 
                 {
                     MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range);
                     MaNGOS::UnitListSearcher<MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck > searcher(tempTargetUnitMap, u_check);
-                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck >, WorldTypeMapContainer > world_unit_searcher(searcher);
-                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck >, GridTypeMapContainer >  grid_unit_searcher(searcher);
-
-                    cell.Visit(p, world_unit_searcher, *m_caster->GetMap(), *m_caster, max_range);
-                    cell.Visit(p, grid_unit_searcher, *m_caster->GetMap(), *m_caster, max_range);
+                    Cell::VisitAllObjects(m_caster, searcher, max_range);
                 }
 
                 tempTargetUnitMap.sort(TargetDistanceOrder(pUnitTarget));
@@ -3411,15 +3383,9 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                             if (i_spellST->second.targetEntry)
                             {
-                                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                                Cell cell(p);
-                                cell.data.Part.reserved = ALL_DISTRICT;
-
                                 MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*m_caster, i_spellST->second.targetEntry, range);
                                 MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> checker(p_GameObject, go_check);
-
-                                TypeContainerVisitor<MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
-                                cell.Visit(p, object_checker, *m_caster->GetMap(), *m_caster, range);
+                                Cell::VisitGridObjects(m_caster, checker, range);
 
                                 if (p_GameObject)
                                 {
@@ -3468,17 +3434,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                             // no target provided or it was not valid, so use closest in range
                             if (!p_Creature)
                             {
-                                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                                Cell cell(p);
-                                cell.data.Part.reserved = ALL_DISTRICT;
-                                cell.SetNoCreate();
-
                                 MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster, i_spellST->second.targetEntry, i_spellST->second.type != SPELL_TARGET_TYPE_DEAD, range);
                                 MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(p_Creature, u_check);
 
-                                TypeContainerVisitor<MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
-
-                                cell.Visit(p, grid_creature_searcher, *m_caster->GetMap(), *m_caster, range);
+                                Cell::VisitGridObjects(m_caster, searcher, range);
 
                                 range = u_check.GetLastRange();
                             }
@@ -4550,17 +4509,10 @@ SpellCastResult Spell::CheckItems()
     // check spell focus object
     if(m_spellInfo->RequiresSpellFocus)
     {
-        CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-        Cell cell(p);
-        cell.data.Part.reserved = ALL_DISTRICT;
-
         GameObject* ok = NULL;
         MaNGOS::GameObjectFocusCheck go_check(m_caster,m_spellInfo->RequiresSpellFocus);
         MaNGOS::GameObjectSearcher<MaNGOS::GameObjectFocusCheck> checker(ok,go_check);
-
-        TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::GameObjectFocusCheck>, GridTypeMapContainer > object_checker(checker);
-        Map& map = *m_caster->GetMap();
-        cell.Visit(p, object_checker, map, *m_caster, map.GetVisibilityDistance());
+        Cell::VisitGridObjects(m_caster, checker, m_caster->GetMap()->GetVisibilityDistance());
 
         if(!ok)
             return SPELL_FAILED_REQUIRES_SPELL_FOCUS;

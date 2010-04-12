@@ -10033,21 +10033,11 @@ void Unit::UpdateReactives( uint32 p_time )
 
 Unit* Unit::SelectNearbyTarget(Unit* except /*= NULL*/) const
 {
-    CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
-    Cell cell(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
-    cell.SetNoCreate();
-
     std::list<Unit *> targets;
 
     MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, this, ATTACK_DISTANCE);
     MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
-
-    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
-
-    cell.Visit(p, world_unit_searcher, *GetMap(), *this, ATTACK_DISTANCE);
-    cell.Visit(p, grid_unit_searcher, *GetMap(), *this, ATTACK_DISTANCE);
+    Cell::VisitAllObjects(this, searcher, ATTACK_DISTANCE);
 
     // remove current target
     if(except)
