@@ -140,7 +140,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
             delete result;
         }
     }
-    //do not allow to have more than 100 mails in mailbox.. mails count is in opcode uint8!!! - so max can be 255..
+
+    // do not allow to have more than 100 mails in mailbox.. mails count is in opcode uint8!!! - so max can be 255..
     if (mails_count > 100)
     {
         pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_CAP_REACHED);
@@ -271,8 +272,8 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket & recv_data )
         return;
 
     Player *pl = _player;
-    Mail *m = pl->GetMail(mailId);
-    if (m)
+
+    if (Mail *m = pl->GetMail(mailId))
     {
         if (pl->unReadMails)
             --pl->unReadMails;
@@ -302,8 +303,8 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
 
     Player* pl = _player;
     pl->m_mailsUpdated = true;
-    Mail *m = pl->GetMail(mailId);
-    if(m)
+
+    if(Mail *m = pl->GetMail(mailId))
     {
         // delete shouldn't show up for COD mails
         if (m->COD)
@@ -342,6 +343,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket & recv_data )
         pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, MAIL_ERR_INTERNAL_ERROR);
         return;
     }
+
     //we can return mail now
     //so firstly delete the old one
     CharacterDatabase.BeginTransaction();
@@ -356,19 +358,14 @@ void WorldSession::HandleMailReturnToSender(WorldPacket & recv_data )
     {
         MailDraft draft(m->subject, m->itemTextId);
         if (m->mailTemplateId)
-            draft = MailDraft(m->mailTemplateId,false);     // items already included
+            draft = MailDraft(m->mailTemplateId, false);    // items already included
 
         if(m->HasItems())
         {
             for(std::vector<MailItemInfo>::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
             {
-                Item *item = pl->GetMItem(itr2->item_guid);
-                if(item)
+                if(Item *item = pl->GetMItem(itr2->item_guid))
                     draft.AddItem(item);
-                else
-                {
-                    //WTF?
-                }
 
                 pl->RemoveMItem(itr2->item_guid);
             }
@@ -517,7 +514,7 @@ void WorldSession::HandleMailTakeMoney(WorldPacket & recv_data )
 
 /**
  * Handles the packet sent by the client when requesting the current mail list.
- * It will send a list of all avaible mails in the players mailbox to the client.
+ * It will send a list of all available mails in the players mailbox to the client.
  */
 void WorldSession::HandleGetMailList(WorldPacket & recv_data )
 {
@@ -596,10 +593,10 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         data << uint32(item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
         // durability
         data << uint32(item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
-        data << uint32((*itr)->money);                      // Gold
+        data << uint32((*itr)->money);                      // copper
         data << uint32((*itr)->COD);                        // Cash on delivery
-        data << uint32((*itr)->checked);
-        data << float(((*itr)->expire_time-time(NULL))/DAY);// expire time
+        data << uint32((*itr)->checked);                    // flags
+        data << float(((*itr)->expire_time-time(NULL))/DAY);// Time
         data << uint32((*itr)->mailTemplateId);             // mail template (MailTemplate.dbc)
 
         mailsCount += 1;
@@ -701,7 +698,6 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
  */
 void WorldSession::HandleQueryNextMailTime(WorldPacket & /**recv_data*/ )
 {
-    //TODO Fix me! ... this void has probably bad condition, but good data are sent
     WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 8);
 
     if(!_player->m_mailsLoaded)
