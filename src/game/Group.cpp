@@ -210,7 +210,7 @@ uint32 Group::RemoveInvite(Player *player)
 
 void Group::RemoveAllInvites()
 {
-    for(InvitesList::iterator itr=m_invitees.begin(); itr!=m_invitees.end(); ++itr)
+    for(InvitesList::iterator itr = m_invitees.begin(); itr!=m_invitees.end(); ++itr)
         (*itr)->SetGroupInvite(NULL);
 
     m_invitees.clear();
@@ -240,6 +240,7 @@ bool Group::AddMember(const uint64 &guid, const char* name)
 {
     if(!_addMember(guid, name))
         return false;
+
     SendUpdate();
 
     Player *player = sObjectMgr.GetPlayer(guid);
@@ -429,7 +430,7 @@ void Group::SendLootRollWon(ObjectGuid const& targetGuid, uint8 rollNumber, uint
     data << uint32(0);                                      // randomSuffix - not used ?
     data << uint32(r.itemRandomPropId);                     // Item random property
     data << targetGuid;                                     // guid of the player who won.
-    data << uint8(rollNumber);                              // rollnumber realted to SMSG_LOOT_ROLL
+    data << uint8(rollNumber);                              // rollnumber related to SMSG_LOOT_ROLL
     data << uint8(rollType);                                // Rolltype related to SMSG_LOOT_ROLL
 
     for( Roll::PlayerVote::const_iterator itr=r.playerVote.begin(); itr!=r.playerVote.end(); ++itr)
@@ -483,7 +484,7 @@ void Group::GroupLoot(ObjectGuid const& playerGUID, Loot *loot, Creature *creatu
         //roll for over-threshold item if it's one-player loot
         if (item->Quality >= uint32(m_lootThreshold) && !i->freeforall)
         {
-            Roll* r=new Roll(creature->GetGUID(),*i);
+            Roll* r = new Roll(creature->GetGUID(), *i);
 
             //a vector is filled with only near party members
             for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
@@ -536,14 +537,14 @@ void Group::NeedBeforeGreed(ObjectGuid const& playerGUID, Loot *loot, Creature *
     Group *group = player->GetGroup();
 
     uint8 itemSlot = 0;
-    for(std::vector<LootItem>::iterator i=loot->items.begin(); i != loot->items.end(); ++i, ++itemSlot)
+    for(std::vector<LootItem>::iterator i = loot->items.begin(); i != loot->items.end(); ++i, ++itemSlot)
     {
         item = ObjectMgr::GetItemPrototype(i->itemid);
 
         //only roll for one-player items, not for ones everyone can get
         if (item->Quality >= uint32(m_lootThreshold) && !i->freeforall)
         {
-            Roll* r=new Roll(creature->GetGUID(),*i);
+            Roll* r = new Roll(creature->GetGUID(), *i);
 
             for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
             {
@@ -595,7 +596,7 @@ void Group::MasterLoot(ObjectGuid const& playerGUID, Loot* /*loot*/, Creature *c
     uint32 real_count = 0;
 
     WorldPacket data(SMSG_LOOT_MASTER_LIST, 330);
-    data << (uint8)GetMembersCount();
+    data << uint8(GetMembersCount());
 
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
@@ -605,7 +606,7 @@ void Group::MasterLoot(ObjectGuid const& playerGUID, Loot* /*loot*/, Creature *c
 
         if (looter->IsWithinDist(creature, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
         {
-            data << looter->GetGUID();
+            data << uint64(looter->GetGUID());
             ++real_count;
         }
     }
@@ -679,7 +680,7 @@ bool Group::CountRollVote(ObjectGuid const& playerGUID, Rolls::iterator& rollI, 
     return false;
 }
 
-//called when roll timer expires
+// called when roll timer expires
 void Group::EndRoll()
 {
     while(!RollId.empty())
@@ -950,8 +951,8 @@ void Group::OfflineReadyCheck()
         if (!pl || !pl->GetSession())
         {
             WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 9);
-            data << citr->guid;
-            data << (uint8)0;
+            data << uint64(citr->guid);
+            data << uint8(0);
             BroadcastReadyCheck(&data);
         }
     }
@@ -1058,7 +1059,7 @@ bool Group::_removeMember(const uint64 &guid)
 void Group::_setLeader(const uint64 &guid)
 {
     member_citerator slot = _getMemberCSlot(guid);
-    if(slot==m_memberSlots.end())
+    if(slot == m_memberSlots.end())
         return;
 
     if(!isBGGroup())
