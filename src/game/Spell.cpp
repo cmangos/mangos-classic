@@ -3045,7 +3045,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
     damage = int32(CalculateDamage(i, unitTarget) * DamageMultiplier);
 
-    sLog.outDebug( "Spell %u Effect%d : %u", m_spellInfo->Id, i, eff);
+    sLog.outDebug("Spell %u Effect%d : %u", m_spellInfo->Id, i, eff);
 
     //Simply return. Do not display "immune" in red text on client
     if(unitTarget && unitTarget->IsImmunedToSpellEffect(m_spellInfo, i))
@@ -3056,21 +3056,11 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
         //sLog.outDebug( "WORLD: Spell FX %d < TOTAL_SPELL_EFFECTS ", eff);
         (*this.*SpellEffects[eff])(i);
     }
-    /*
     else
     {
-        sLog.outDebug( "WORLD: Spell FX %d > TOTAL_SPELL_EFFECTS ", eff);
-        if (m_CastItem)
-            EffectEnchantItemTmp(i);
-        else
-        {
-            sLog.outError("SPELL: unknown effect %u spell id %u",
-                eff, m_spellInfo->Id);
-        }
+        sLog.outError("WORLD: Spell FX %d > TOTAL_SPELL_EFFECTS ", eff);
     }
-    */
 }
-
 
 void Spell::AddTriggeredSpell( uint32 spellId )
 {
