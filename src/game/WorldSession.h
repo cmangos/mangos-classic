@@ -45,22 +45,22 @@ class CharacterHandler;
 enum PartyOperation
 {
     PARTY_OP_INVITE = 0,
-    PARTY_OP_LEAVE = 2
+    PARTY_OP_LEAVE = 2,
 };
 
 enum PartyResult
 {
-    PARTY_RESULT_OK                   = 0,
-    PARTY_RESULT_CANT_FIND_TARGET     = 1,
-    PARTY_RESULT_NOT_IN_YOUR_PARTY    = 2,
-    PARTY_RESULT_NOT_IN_YOUR_INSTANCE = 3,
-    PARTY_RESULT_PARTY_FULL           = 4,
-    PARTY_RESULT_ALREADY_IN_GROUP     = 5,
-    PARTY_RESULT_YOU_NOT_IN_GROUP     = 6,
-    PARTY_RESULT_YOU_NOT_LEADER       = 7,
-    PARTY_RESULT_TARGET_UNFRIENDLY    = 8,
-    PARTY_RESULT_TARGET_IGNORE_YOU    = 9,
-    PARTY_RESULT_INVITE_RESTRICTED    = 13
+    ERR_PARTY_RESULT_OK                 = 0,
+    ERR_BAD_PLAYER_NAME_S               = 1,
+    ERR_TARGET_NOT_IN_GROUP_S           = 2,
+    ERR_TARGET_NOT_IN_INSTANCE_S        = 3,
+    ERR_GROUP_FULL                      = 4,
+    ERR_ALREADY_IN_GROUP_S              = 5,
+    ERR_NOT_IN_GROUP                    = 6,
+    ERR_NOT_LEADER                      = 7,
+    ERR_PLAYER_WRONG_FACTION            = 8,
+    ERR_IGNORING_YOU_S                  = 9,
+    ERR_INVITE_RESTRICTED               = 13,
 };
 
 /// Player session in the World
@@ -478,6 +478,9 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleQuestPushResult(WorldPacket& recvPacket);
 
         bool processChatmessageFurtherAfterSecurityChecks(std::string&, uint32);
+        void SendPlayerNotFoundNotice(std::string name);
+        void SendWrongFactionNotice();
+        void SendChatRestrictedNotice();
         void HandleMessagechatOpcode(WorldPacket& recvPacket);
         void HandleTextEmoteOpcode(WorldPacket& recvPacket);
         void HandleChatIgnoredOpcode(WorldPacket& recvPacket);

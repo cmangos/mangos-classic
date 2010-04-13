@@ -210,9 +210,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 uint32 sideb = player->GetTeam();
                 if( sidea != sideb )
                 {
-                    WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
-                    data<<to;
-                    SendPacket(&data);
+                    SendWrongFactionNotice();
                     return;
                 }
             }
@@ -577,4 +575,23 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
     WorldPacket data;
     ChatHandler::FillMessageData(&data, this, CHAT_MSG_IGNORED, LANG_UNIVERSAL, NULL, GetPlayer()->GetGUID(), GetPlayer()->GetName(),NULL);
     player->GetSession()->SendPacket(&data);
+}
+
+void WorldSession::SendPlayerNotFoundNotice(std::string name)
+{
+    WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size()+1);
+    data << name;
+    SendPacket(&data);
+}
+
+void WorldSession::SendWrongFactionNotice()
+{
+    WorldPacket data(SMSG_CHAT_WRONG_FACTION, 0);
+    SendPacket(&data);
+}
+
+void WorldSession::SendChatRestrictedNotice()
+{
+    WorldPacket data(SMSG_CHAT_RESTRICTED, 0);
+    SendPacket(&data);
 }
