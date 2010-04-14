@@ -2,5 +2,5 @@
 #define __REVISION_SQL_H__
  #define REVISION_DB_CHARACTERS "required_z0378_097_01_characters"
  #define REVISION_DB_MANGOS "required_z0405_101_01_mangos_mangos_string"
- #define REVISION_DB_REALMD "required_9746_01_realmd_realmlist"
+ #define REVISION_DB_REALMD "required_9748_01_realmd_realmlist"
 #endif // __REVISION_SQL_H__
