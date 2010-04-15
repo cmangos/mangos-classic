@@ -14424,6 +14424,11 @@ void Player::SaveToDB()
 
     CharacterDatabase.CommitTransaction();
 
+    // check if stats should only be saved on logout
+    // save stats can be out of transaction
+    if(m_session->isLogingOut() || !sWorld.getConfig(CONFIG_BOOL_STATS_SAVE_ONLY_ON_LOGOUT))
+        _SaveStats();
+
     // restore state (before aura apply, if aura remove flag then aura must set it ack by self)
     SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
     SetUInt32Value(UNIT_FIELD_BYTES_2, tmp_bytes2);
@@ -14757,6 +14762,38 @@ void Player::_SaveTutorials()
     };
 
     m_TutorialsChanged = false;
+}
+
+// save player stats -- only for external usage
+// real stats will be recalculated on player login
+void Player::_SaveStats()
+{
+    // check if stat saving is enabled and if char level is high enough
+    if(!sWorld.getConfig(CONFIG_UINT32_MIN_LEVEL_STAT_SAVE) || getLevel() < sWorld.getConfig(CONFIG_UINT32_MIN_LEVEL_STAT_SAVE))
+        return;
+
+    CharacterDatabase.PExecute("DELETE FROM character_stats WHERE guid = '%u'", GetGUIDLow());
+    std::ostringstream ss;
+    ss << "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, "
+        "strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, "
+        "blockPct, dodgePct, parryPct, critPct, rangedCritPct, attackPower, rangedAttackPower) VALUES ("
+        << GetGUIDLow() << ", "
+        << GetMaxHealth() << ", ";
+    for(int i = 0; i < MAX_POWERS; ++i)
+        ss << GetMaxPower(Powers(i)) << ", ";
+    for(int i = 0; i < MAX_STATS; ++i)
+        ss << GetStat(Stats(i)) << ", ";
+    // armor + school resistances
+    for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
+        ss << GetResistance(SpellSchools(i)) << ",";
+    ss << GetFloatValue(PLAYER_BLOCK_PERCENTAGE) << ", "
+       << GetFloatValue(PLAYER_DODGE_PERCENTAGE) << ", "
+       << GetFloatValue(PLAYER_PARRY_PERCENTAGE) << ", "
+       << GetFloatValue(PLAYER_CRIT_PERCENTAGE) << ", "
+       << GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE) << ", "
+       << GetUInt32Value(UNIT_FIELD_ATTACK_POWER) << ", "
+       << GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) << ")";
+    CharacterDatabase.Execute( ss.str().c_str() );
 }
 
 void Player::outDebugValues() const

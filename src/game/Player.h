@@ -1952,6 +1952,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveQuestStatus();
         void _SaveSpells();
         void _SaveTutorials();
+        void _SaveStats();
 
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
