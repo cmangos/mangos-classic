@@ -2453,7 +2453,7 @@ void Spell::EffectLearnSpell(SpellEffectIndex eff_idx)
 
     Player *player = (Player*)unitTarget;
 
-    uint32 spellToLearn = (m_spellInfo->Id==SPELL_ID_GENERIC_LEARN) ? damage : m_spellInfo->EffectTriggerSpell[eff_idx];
+    uint32 spellToLearn = m_spellInfo->EffectTriggerSpell[eff_idx];
     player->learnSpell(spellToLearn);
 
     sLog.outDebug( "Spell: Player %u has learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
