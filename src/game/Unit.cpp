@@ -1119,13 +1119,13 @@ void Unit::CastCustomSpell(Unit* Victim, SpellEntry const *spellInfo, int32 cons
     Spell *spell = new Spell(this, spellInfo, triggered, originalCaster);
 
     if(bp0)
-        spell->m_currentBasePoints[EFFECT_INDEX_0] = *bp0-int32(spellInfo->EffectBaseDice[EFFECT_INDEX_0]);
+        spell->m_currentBasePoints[EFFECT_INDEX_0] = *bp0;
 
     if(bp1)
-        spell->m_currentBasePoints[EFFECT_INDEX_1] = *bp1-int32(spellInfo->EffectBaseDice[EFFECT_INDEX_1]);
+        spell->m_currentBasePoints[EFFECT_INDEX_1] = *bp1;
 
     if(bp2)
-        spell->m_currentBasePoints[EFFECT_INDEX_2] = *bp2-int32(spellInfo->EffectBaseDice[EFFECT_INDEX_2]);
+        spell->m_currentBasePoints[EFFECT_INDEX_2] = *bp2;
 
     SpellCastTargets targets;
     targets.setUnitTarget( Victim );
@@ -5461,7 +5461,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     //Improved Drain Soul
                     if ((*i)->GetModifier()->m_miscvalue == SPELLMOD_CHANCE_OF_SUCCESS && (*i)->GetSpellProto()->SpellIconID == 113)
                     {
-                        int32 value2 = CalculateSpellDamage((*i)->GetSpellProto(),EFFECT_INDEX_2,(*i)->GetSpellProto()->EffectBasePoints[2],this);
+                        int32 value2 = CalculateSpellDamage(this,(*i)->GetSpellProto(),EFFECT_INDEX_2);
                         basepoints0 = value2 * GetMaxPower(POWER_MANA) / 100;
                         // Drain Soul
                         CastCustomSpell(this, 18371, &basepoints0, NULL, NULL, true, castItem, triggeredByAura);
@@ -5586,7 +5586,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                                 }
 
                                 // percent stored in effect 1 (class scripts) base points
-                                int32 percent = auraSpellInfo->EffectBasePoints[1]+1;
+                                int32 percent = auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1);
 
                                 basepoints0 = originalSpell->manaCost*percent/100;
                                 trigger_spell_id = 20272;
@@ -5789,6 +5789,9 @@ bool Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, Aura *triggeredByAur
     Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
         ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
 
+    // Basepoints of trigger aura
+    int32 triggerAmount = triggeredByAura->GetModifier()->m_amount;
+
     uint32 triggered_spell_id = 0;
 
     switch(scriptId)
@@ -5817,8 +5820,7 @@ bool Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, Aura *triggeredByAur
         case 4086:                                          // Improved Mend Pet (Rank 1)
         case 4087:                                          // Improved Mend Pet (Rank 2)
         {
-            int32 chance = triggeredByAura->GetSpellProto()->EffectBasePoints[triggeredByAura->GetEffIndex()];
-            if(!roll_chance_i(chance))
+            if(!roll_chance_i(triggerAmount))
                 return false;
 
             triggered_spell_id = 24406;
@@ -8687,7 +8689,7 @@ bool Unit::SelectHostileTarget()
 //======================================================================
 //======================================================================
 
-int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 effBasePoints, Unit const* target)
+int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* effBasePoints)
 {
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
 
@@ -8700,18 +8702,34 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, SpellEffectIndex 
         level = (int32)spellProto->baseLevel;
     level-= (int32)spellProto->spellLevel;
 
+    int32 baseDice = int32(spellProto->EffectBaseDice[effect_index]);
     float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
     float randomPointsPerLevel = spellProto->EffectDicePerLevel[effect_index];
-    int32 basePoints = int32(effBasePoints + level * basePointsPerLevel);
+    int32 basePoints = effBasePoints
+        ? *effBasePoints - baseDice
+        : spellProto->EffectBasePoints[effect_index];
+
+    basePoints += int32(level * basePointsPerLevel);
     int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
     float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
 
-    // range can have possitive and negative values, so order its for irand
-    int32 randvalue = int32(spellProto->EffectBaseDice[effect_index]) >= randomPoints
-        ? irand(randomPoints, int32(spellProto->EffectBaseDice[effect_index]))
-        : irand(int32(spellProto->EffectBaseDice[effect_index]), randomPoints);
+    switch(randomPoints)
+    {
+        case 0:
+        case 1: basePoints += baseDice; break;              // range 1..1
+        default:
+        {
+            // range can have positive (1..rand) and negative (rand..1) values, so order its for irand
+            int32 randvalue = baseDice >= randomPoints
+                ? irand(randomPoints, baseDice)
+                : irand(baseDice, randomPoints);
 
-    int32 value = basePoints + randvalue;
+            basePoints += randvalue;
+            break;
+        }
+    }
+        
+    int32 value = basePoints;
     //random damage
     if(comboDamage != 0 && unitPlayer && target && (target->GetGUID() == unitPlayer->GetComboTarget()))
         value += (int32)(comboDamage * comboPoints);

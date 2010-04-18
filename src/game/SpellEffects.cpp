@@ -877,7 +877,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             // Life Tap
             if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000040000))
             {
-                float cost = m_currentBasePoints[0]+1;
+                float cost = m_currentBasePoints[EFFECT_INDEX_0];
 
                 if (Player* modOwner = m_caster->GetSpellModOwner())
                     modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost,this);
@@ -902,7 +902,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastCustomSpell(m_caster,31818,&mana,NULL,NULL,true,NULL);
 
                     // Mana Feed
-                    int32 manaFeedVal = m_caster->CalculateSpellDamage(m_spellInfo, EFFECT_INDEX_1, m_spellInfo->EffectBasePoints[1],m_caster);
+                    int32 manaFeedVal = m_caster->CalculateSpellDamage(m_caster, m_spellInfo, EFFECT_INDEX_1);
                     manaFeedVal = manaFeedVal * mana / 100;
                     if (manaFeedVal > 0)
                         m_caster->CastCustomSpell(m_caster,32553,&manaFeedVal,NULL,NULL,true,NULL);
@@ -1088,7 +1088,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!unitTarget)
                         return;
 
-                    uint32 spell_id = m_currentBasePoints[eff_idx]+1;
+                    uint32 spell_id = m_currentBasePoints[eff_idx];
                     SpellEntry const* spell_proto = sSpellStore.LookupEntry(spell_id);
                     if (!spell_proto)
                         return;
@@ -1211,8 +1211,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                             // enchanting spell selected by calculated damage-per-sec in enchanting effect
                             // at calculation applied affect from Elemental Weapons talent
-                            // real enchantment damage-1
-                            spell->m_currentBasePoints[1] = damage-1;
+                            // real enchantment damage
+                            spell->m_currentBasePoints[1] = damage;
 
                             SpellCastTargets targets;
                             targets.setItemTarget( item );
@@ -1895,28 +1895,7 @@ void Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype)
             break;
     }
 
-    uint32 num_to_add;
-
-    // TODO: maybe all this can be replaced by using correct calculated `damage` value
-    if(pProto->Class != ITEM_CLASS_CONSUMABLE || m_spellInfo->SpellFamilyName != SPELLFAMILY_MAGE)
-    {
-        int32 basePoints = m_currentBasePoints[eff_idx];
-        int32 randomPoints = m_spellInfo->EffectDieSides[eff_idx];
-        if (randomPoints)
-            num_to_add = basePoints + irand(1, randomPoints);
-        else
-            num_to_add = basePoints + 1;
-    }
-    else if (pProto->MaxCount == 1)
-        num_to_add = 1;
-    else if(player->getLevel() >= m_spellInfo->spellLevel)
-    {
-        int32 basePoints = m_currentBasePoints[eff_idx];
-        float pointPerLevel = m_spellInfo->EffectRealPointsPerLevel[eff_idx];
-        num_to_add = basePoints + 1 + uint32((player->getLevel() - m_spellInfo->spellLevel)*pointPerLevel);
-    }
-    else
-        num_to_add = 2;
+    uint32 num_to_add = damage;
 
     if (num_to_add < 1)
         num_to_add = 1;
@@ -2976,7 +2955,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
     // Shaman Rockbiter Weapon
     if (eff_idx==EFFECT_INDEX_0 && m_spellInfo->Effect[EFFECT_INDEX_1]==SPELL_EFFECT_DUMMY)
     {
-        int32 enchnting_damage = m_currentBasePoints[EFFECT_INDEX_1]+1;
+        int32 enchnting_damage = m_currentBasePoints[EFFECT_INDEX_1];
 
         // enchanting id selected by calculated damage-per-sec stored in Effect[1] base value
         // with already applied percent bonus from Elemental Weapons talent
@@ -3895,7 +3874,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         continue;
 
                     // must be calculated base at raw base points in spell proto, GetModifier()->m_value for S.Righteousness modified by SPELLMOD_DAMAGE
-                    spellId2 = (*itr)->GetSpellProto()->EffectBasePoints[2]+1;
+                    spellId2 = (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
 
                     if(spellId2 <= 1)
                         continue;
@@ -4226,7 +4205,7 @@ void Spell::EffectEnchantHeldItem(SpellEffectIndex eff_idx)
         uint32 enchant_id = m_spellInfo->EffectMiscValue[eff_idx];
         int32 duration = GetSpellDuration(m_spellInfo);     // Try duration index first...
         if(!duration)
-            duration = m_currentBasePoints[eff_idx]+1;      //Base points after ..
+            duration = m_currentBasePoints[eff_idx];        //Base points after ..
         if(!duration)
             duration = 10;                                  // 10 seconds for enchants which don't have listed duration
 
@@ -4488,7 +4467,7 @@ void Spell::EffectReputation(SpellEffectIndex eff_idx)
 
     Player *_player = (Player*)unitTarget;
 
-    int32  rep_change = m_currentBasePoints[eff_idx]+1;     // field store reputation change -1
+    int32  rep_change = m_currentBasePoints[eff_idx];
 
     uint32 faction_id = m_spellInfo->EffectMiscValue[eff_idx];
 

@@ -320,16 +320,16 @@ class MANGOS_DLL_SPEC Aura
         SpellModifier *m_spellmod;
         SpellEffectIndex m_effIndex;                        // Aura effect index in spell
         SpellEntry const *m_spellProto;
-        int32 m_currentBasePoints;                          // cache SpellEntry::EffectBasePoints and use for set custom base points
+        int32 m_currentBasePoints;                          // cache SpellEntry::CalculateSimpleValue and use for set custom base points
         uint64 m_caster_guid;
         Unit* m_target;
-        int32 m_maxduration;
-        int32 m_duration;
+        int32 m_maxduration;                                // Max aura duration
+        int32 m_duration;                                   // Current time
         int32 m_timeCla;
         uint64 m_castItemGuid;                              // it is NOT safe to keep a pointer to the item because it may get deleted
         time_t m_applyTime;
 
-        AuraRemoveMode m_removeMode;
+        AuraRemoveMode m_removeMode:8;                      // Store info for know remove aura reason
 
         uint8 m_auraSlot;
 

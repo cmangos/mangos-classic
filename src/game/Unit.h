@@ -1511,7 +1511,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
 
-        int32 CalculateSpellDamage(SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 basePoints, Unit const* target);
+        int32 CalculateSpellDamage(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* basePoints = NULL);
         int32 CalculateSpellDuration(SpellEntry const* spellProto, SpellEffectIndex effect_index, Unit const* target);
         float CalculateLevelPenalty(SpellEntry const* spellProto) const;
 

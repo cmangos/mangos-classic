@@ -305,7 +305,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, ObjectGuid o
     UpdateOriginalCasterPointer();
 
     for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
-        m_currentBasePoints[i] = m_spellInfo->EffectBasePoints[i];
+        m_currentBasePoints[i] = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
 
     m_spellState = SPELL_STATE_NULL;
 
@@ -2438,8 +2438,8 @@ void Spell::finish(bool ok)
                 if (unit && unit->isAlive())
                 {
                     // Calculate chance at that moment (can be depend for example from combo points)
-                    int32 chance = m_caster->CalculateSpellDamage(auraSpellInfo, auraSpellIdx, (*i)->GetBasePoints(),unit);
-
+                    int32 auraBasePoints = (*i)->GetBasePoints();
+                    int32 chance = m_caster->CalculateSpellDamage(unit, auraSpellInfo, auraSpellIdx, &auraBasePoints);
                     if(roll_chance_i(chance))
                         m_caster->CastSpell(unit, auraSpellInfo->EffectTriggerSpell[auraSpellIdx], true, NULL, (*i));
                 }
@@ -5175,7 +5175,7 @@ SpellCastResult Spell::CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, Ski
                 {
                     // skill bonus provided by casting spell (mostly item spells)
                     // add the damage modifier from the spell casted (cheat lock / skeleton key etc.) (use m_currentBasePoints, CalculateDamage returns wrong value)
-                    uint32 spellSkillBonus = uint32(m_currentBasePoints[effIndex]+1);
+                    uint32 spellSkillBonus = uint32(m_currentBasePoints[effIndex]);
                     reqSkillValue = lockInfo->Skill[j];
 
                     // castitem check: rogue using skeleton keys. the skill values should not be added in this case.
