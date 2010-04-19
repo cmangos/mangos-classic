@@ -11006,7 +11006,9 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
     if (gossipListId >= gossipmenu.MenuItemCount())
         return;
 
-    uint32 gossipOptionId = gossipmenu.GetItem(gossipListId).m_gOptionId;
+    GossipMenuItem const&  menu_item = gossipmenu.GetItem(gossipListId);
+
+    uint32 gossipOptionId = menu_item.m_gOptionId;
     uint64 guid = pSource->GetGUID();
 
     if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
