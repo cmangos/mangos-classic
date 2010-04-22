@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z0451_108_01_mangos_gameobject_template` bit(1) DEFAULT NULL
+  `required_z0452_109_01_mangos_instance_template` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2055,15 +2055,14 @@ DROP TABLE IF EXISTS `instance_template`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `instance_template` (
   `map` smallint(5) unsigned NOT NULL,
-  `parent` int(10) unsigned NOT NULL,
+  `parent` smallint(5) unsigned NOT NULL default '0',
   `levelMin` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `levelMax` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `maxPlayers` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `reset_delay` int(10) unsigned NOT NULL DEFAULT '0',
-  `startLocX` float DEFAULT NULL,
-  `startLocY` float DEFAULT NULL,
-  `startLocZ` float DEFAULT NULL,
-  `startLocO` float DEFAULT NULL,
+  `ghostEntranceMap` smallint(5) unsigned NOT NULL,
+  `ghostEntranceX` float NOT NULL,
+  `ghostEntranceY` float NOT NULL,
   `script` varchar(128) NOT NULL DEFAULT '',
   PRIMARY KEY (`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -2076,32 +2075,32 @@ CREATE TABLE `instance_template` (
 LOCK TABLES `instance_template` WRITE;
 /*!40000 ALTER TABLE `instance_template` DISABLE KEYS */;
 INSERT INTO `instance_template` VALUES
-(33,0,22,30,10,7200,NULL,NULL,NULL,NULL,''),
-(34,0,24,32,10,7200,NULL,NULL,NULL,NULL,''),
-(36,0,15,20,10,7200,NULL,NULL,NULL,NULL,''),
-(43,0,15,21,10,7200,NULL,NULL,NULL,NULL,''),
-(47,0,29,38,10,7200,NULL,NULL,NULL,NULL,''),
-(48,0,24,32,10,7200,NULL,NULL,NULL,NULL,''),
-(70,0,35,47,10,7200,NULL,NULL,NULL,NULL,''),
-(90,0,29,38,10,7200,NULL,NULL,NULL,NULL,''),
-(109,0,45,55,10,7200,NULL,NULL,NULL,NULL,''),
-(129,0,37,46,10,7200,NULL,NULL,NULL,NULL,''),
-(189,0,34,45,10,7200,NULL,NULL,NULL,NULL,''),
-(209,0,44,54,10,7200,NULL,NULL,NULL,NULL,''),
-(229,0,58,0,10,120000,78.5083,-225.044,49.839,5.1,''),
-(230,0,52,0,5,7200,NULL,NULL,NULL,NULL,''),
-(249,0,60,0,40,432000,NULL,NULL,NULL,NULL,''),
-(289,0,57,0,5,7200,NULL,NULL,NULL,NULL,''),
-(309,0,60,0,20,259200,NULL,NULL,NULL,NULL,''),
-(329,0,58,60,5,7200,NULL,NULL,NULL,NULL,''),
-(349,0,46,55,10,7200,NULL,NULL,NULL,NULL,''),
-(389,0,13,18,10,7200,NULL,NULL,NULL,NULL,''),
-(409,0,60,0,40,604800,NULL,NULL,NULL,NULL,''),
-(429,0,55,60,5,7200,NULL,NULL,NULL,NULL,''),
-(469,0,60,0,40,604800,NULL,NULL,NULL,NULL,''),
-(509,0,60,0,20,259200,NULL,NULL,NULL,NULL,''),
-(531,0,60,0,40,604800,NULL,NULL,NULL,NULL,''),
-(533,0,60,0,40,604800,NULL,NULL,NULL,NULL,'');
+(33,0,22,30,10,0,0,-230.989,1571.57,''),
+(34,0,24,32,10,0,0,-8762.38,848.01,''),
+(36,0,15,20,10,0,0,-11207.8,1681.15,''),
+(43,0,15,21,10,0,1,-751.131,-2209.24,''),
+(47,0,29,38,10,0,1,-4459.45,-1660.21,''),
+(48,0,24,32,10,0,1,4249.12,748.387,''),
+(70,0,35,47,10,0,0,-6060.18,-2955,''),
+(90,0,29,38,10,0,0,-5162.66,931.599,''),
+(109,0,45,55,10,0,0,-10170.1,-3995.97,''),
+(129,0,37,46,10,0,1,-4662.88,-2535.87,''),
+(189,0,34,45,10,0,0,2892.24,-811.264,''),
+(209,0,44,54,10,0,1,-6790.58,-2891.28,''),
+(229,0,58,0,10,3,0,-7522.53,-1233.04,''),
+(230,0,52,0,5,0,0,-7178.1,-928.639,''),
+(249,0,60,0,40,5,1,-4753.31,-3752.42,''),
+(289,0,57,0,5,0,0,1274.78,-2552.56,''),
+(309,0,60,0,20,3,0,-11916.1,-1224.58,''),
+(329,0,58,60,5,0,0,3392.32,-3378.48,''),
+(349,0,46,55,10,0,1,-1432.7,2924.98,''),
+(389,0,13,18,10,0,1,1816.76,-4423.37,''),
+(409,0,60,0,40,7,0,-7510.56,-1036.7,''),
+(429,0,55,60,5,0,1,-3908.03,1130,''),
+(469,0,60,0,40,7,0,-7663.41,-1218.67,''),
+(509,0,60,0,20,3,1,-8114.46,1526.37,''),
+(531,0,60,0,40,7,1,-8111.72,1526.79,''),
+(533,0,60,0,40,7,-1,0,0,'');
 /*!40000 ALTER TABLE `instance_template` ENABLE KEYS */;
 UNLOCK TABLES;
 

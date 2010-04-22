@@ -4372,20 +4372,75 @@ void ObjectMgr::LoadInstanceTemplate()
 
     for(uint32 i = 0; i < sInstanceTemplate.MaxEntry; i++)
     {
-        InstanceTemplate* temp = (InstanceTemplate*)GetInstanceTemplate(i);
-        if(!temp) continue;
-        const MapEntry* entry = sMapStore.LookupEntry(temp->map);
-        if(!entry)
+        InstanceTemplate * temp = const_cast<InstanceTemplate*>(GetInstanceTemplate(i));
+        if (!temp)
+            continue;
+
+        MapEntry const* mapEntry = sMapStore.LookupEntry(temp->map);
+        if (!mapEntry)
         {
             sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad mapid %d for template!", temp->map);
+            sInstanceTemplate.EraseEntry(i);
             continue;
         }
 
-        if(!temp->reset_delay)
+        if (mapEntry->IsContinent())
+        {
+            sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: continent mapid %d for template!", temp->map);
+            sInstanceTemplate.EraseEntry(i);
             continue;
+        }
+
+        if (temp->parent > 0)
+        {
+            // check existence 
+            MapEntry const* parentEntry = sMapStore.LookupEntry(temp->parent);
+            if (!parentEntry)
+            {
+                sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad parent map id for instance template %d template!",
+                    parentEntry->MapID, temp->map);
+                temp->parent = 0;
+                continue;
+            }
+
+            if (parentEntry->IsContinent())
+            {
+                sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: parent point to continent map id %u for instance template %d template, ignored, need be set only for non-continent parents!",
+                    parentEntry->MapID,temp->map);
+                temp->parent = 0;
+                continue;
+            }
+        }
+
+        // if ghost entrance coordinates provided, can't be not exist for instance without ground entrance
+        if (temp->ghostEntranceMap >= 0)
+        {
+            if (!MapManager::IsValidMapCoord(temp->ghostEntranceMap, temp->ghostEntranceX, temp->ghostEntranceY))
+            {
+                sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: ghost entrance coordinates invalid for instance template %d template, ignored, need be set only for non-continent parents!", temp->map);
+                sInstanceTemplate.EraseEntry(i);
+                continue;
+            }
+
+            MapEntry const* ghostEntry = sMapStore.LookupEntry(temp->ghostEntranceMap);
+            if (!ghostEntry)
+            {
+                sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad ghost entrance map id %u for instance template %d template!", ghostEntry->MapID, temp->map);
+                sInstanceTemplate.EraseEntry(i);
+                continue;
+            }
+
+            if (!ghostEntry->IsContinent())
+            {
+                sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: ghost entrance not at continent map id %u for instance template %d template, ignored, need be set only for non-continent parents!", ghostEntry->MapID,temp->map);
+                sInstanceTemplate.EraseEntry(i);
+                continue;
+            }
+        }
 
         // the reset_delay must be at least one day
-        temp->reset_delay = std::max((uint32)1, (uint32)(temp->reset_delay * sWorld.getConfig(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME)));
+        if (temp->reset_delay)
+            temp->reset_delay = std::max((uint32)1, (uint32)(temp->reset_delay * sWorld.getConfig(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME)));
     }
 
     sLog.outString( ">> Loaded %u Instance Template definitions", sInstanceTemplate.RecordCount );
@@ -5020,13 +5075,13 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
 
     // at entrance map for corpse map
     bool foundEntr = false;
-    // float distEntr;
+    float distEntr;
     WorldSafeLocsEntry const* entryEntr = NULL;
 
     // some where other
     WorldSafeLocsEntry const* entryFar = NULL;
 
-    MapEntry const* mapEntry = sMapStore.LookupEntry(MapId);
+    InstanceTemplate const* tempEntry = GetInstanceTemplate(MapId);
 
     for(GraveYardMap::const_iterator itr = graveLow; itr != graveUp; ++itr)
     {
@@ -5044,12 +5099,37 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
         if(data.team != 0 && team != 0 && data.team != team)
             continue;
 
-        // find now nearest graveyard at other map
+        // find now nearest graveyard at other (continent) map
         if(MapId != entry->map_id)
         {
-            if(!entryFar)
+            // if find graveyard at different map from where entrance placed (or no entrance data), use any first
+            if (!tempEntry ||
+                tempEntry->ghostEntranceMap < 0 ||
+                tempEntry->ghostEntranceMap != entry->map_id ||
+                (tempEntry->ghostEntranceX == 0.0f && tempEntry->ghostEntranceY == 0.0f))
+            {
+                // not have any coordinates for check distance anyway
                 entryFar = entry;
-            continue;
+                continue;
+            }
+
+            // at entrance map calculate distance (2D);
+            float dist2 = (entry->x - tempEntry->ghostEntranceX)*(entry->x - tempEntry->ghostEntranceX)
+                +(entry->y - tempEntry->ghostEntranceY)*(entry->y - tempEntry->ghostEntranceY);
+            if(foundEntr)
+            {
+                if(dist2 < distEntr)
+                {
+                    distEntr = dist2;
+                    entryEntr = entry;
+                }
+            }
+            else
+            {
+                foundEntr = true;
+                distEntr = dist2;
+                entryEntr = entry;
+            }
         }
         // find now nearest graveyard at same map
         else
@@ -5223,21 +5303,23 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 }
 
 /*
- * Searches for the areatrigger which teleports players out of the given map
+ * Searches for the areatrigger which teleports players out of the given map (only direct to continent)
  */
-AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 Map) const
-{ /* [-ZERO]
-    const MapEntry *mapEntry = sMapStore.LookupEntry(Map);
-    if(!mapEntry) return NULL;
+AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
+{
+    InstanceTemplate const* temp = GetInstanceTemplate(map_id);
+    if (!temp)
+        return NULL;
+
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
-        if(itr->second.target_mapId == mapEntry->entrance_map)
+        if(itr->second.target_mapId == temp->ghostEntranceMap)
         {
             AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
-            if(atEntry && atEntry->mapid == Map)
+            if(atEntry && atEntry->mapid == map_id)
                 return &itr->second;
         }
-    } */
+    }
     return NULL;
 }
 

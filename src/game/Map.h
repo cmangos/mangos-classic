@@ -189,16 +189,16 @@ public:
 
 struct InstanceTemplate
 {
-    uint32 map;
-    uint32 parent;
+    uint32 map;                                             // instance map
+    uint32 parent;                                          // non-continent parent instance (for instance with entrance in another instances)
+                                                            // or 0 (not related to continent 0 map id)
     uint32 levelMin;
     uint32 levelMax;
     uint32 maxPlayers;
     uint32 reset_delay;
-    float startLocX;
-    float startLocY;
-    float startLocZ;
-    float startLocO;
+    int32 ghostEntranceMap;                                 // < 0 if not entrance coordinates
+    float ghostEntranceX;
+    float ghostEntranceY;
     uint32 script_id;
 };
 

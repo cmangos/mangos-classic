@@ -373,6 +373,11 @@ struct MapEntry
         return !IsDungeon() ||
             MapID==309 || MapID==209 || MapID==509 || MapID==269;
     }
+
+    bool IsContinent() const
+    {
+        return MapID == 0 || MapID == 1;
+    }
 };
 
 struct QuestSortEntry
