@@ -407,7 +407,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data )
         return;
     }
 
-    uint32 itemId = m->items[0].item_template; 
+    uint32 itemId = m->items[0].item_template;
     uint32 itemGuid = m->items[0].item_guid;
 
     Item *it = pl->GetMItem(itemGuid);
@@ -581,7 +581,7 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         // 1.12.1 can have only single item
         Item *item = (*itr)->items.size() > 0 ? pl->GetMItem((*itr)->items[0].item_guid) : NULL;
         data << uint32(item ? item->GetEntry() : 0);        // entry
-        // permanent enchantment            
+        // permanent enchantment
         data << uint32(item ? item->GetEnchantmentId((EnchantmentSlot)PERM_ENCHANTMENT_SLOT) : 0);
         // can be negative
         data << uint32(item ? item->GetItemRandomPropertyId() : 0);

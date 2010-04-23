@@ -975,7 +975,7 @@ class Opcodes
         ~Opcodes();
     public:
         void BuildOpcodeList();
-        void StoreOpcode(uint16 Opcode,char const* name, SessionStatus status, void (WorldSession::*handler)(WorldPacket& recvPacket)) 
+        void StoreOpcode(uint16 Opcode,char const* name, SessionStatus status, void (WorldSession::*handler)(WorldPacket& recvPacket))
         { mOpcodeMap[Opcode].name = name; mOpcodeMap[Opcode].status = status ; mOpcodeMap[Opcode].handler = handler; };
 
         /// Lookup opcode

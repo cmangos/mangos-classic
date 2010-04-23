@@ -79,7 +79,7 @@ namespace MaNGOS
                     prk.rank = uint32(honor_points / 5000.00f) + firstRank;
                     prk.rank = ( prk.positive ? prk.rank  + 1 : NEGATIVE_HONOR_RANK_COUNT - prk.rank );
                 }
-                
+
                 int8 rank = prk.positive ? prk.rank - NEGATIVE_HONOR_RANK_COUNT -1 : prk.rank - NEGATIVE_HONOR_RANK_COUNT;
                 prk.maxRP = (rank)*5000.00f;
                 if (prk.maxRP < 0) // in negative rank case
@@ -102,18 +102,18 @@ namespace MaNGOS
             sc.BRK[11] = 0.017f;
             sc.BRK[10] = 0.037f;
             sc.BRK[ 9] = 0.077f;
-            sc.BRK[ 8] = 0.137f;       
-            sc.BRK[ 7] = 0.207f;       
-            sc.BRK[ 6] = 0.287f;       
-            sc.BRK[ 5] = 0.377f;       
-            sc.BRK[ 4] = 0.477f;       
-            sc.BRK[ 3] = 0.587f;      
-            sc.BRK[ 2] = 0.715f;      
+            sc.BRK[ 8] = 0.137f;
+            sc.BRK[ 7] = 0.207f;
+            sc.BRK[ 6] = 0.287f;
+            sc.BRK[ 5] = 0.377f;
+            sc.BRK[ 4] = 0.477f;
+            sc.BRK[ 3] = 0.587f;
+            sc.BRK[ 2] = 0.715f;
             sc.BRK[ 1] = 0.858f;
             sc.BRK[ 0] = 1.000f;
 
             // get the WS scores at the top of each break point
-            for (uint8 group=0; group<14; group++) 
+            for (uint8 group=0; group<14; group++)
               sc.BRK[group] = floor( (sc.BRK[group] * standingList.size()) + 0.5f);
 
             // initialize RP array

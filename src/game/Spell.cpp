@@ -2062,7 +2062,7 @@ void Spell::cast(bool skipCheck)
         {
             // Power Word: Shield
             if(m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000001))
-                AddPrecastSpell(6788);                      // Weakened Soul 
+                AddPrecastSpell(6788);                      // Weakened Soul
 
             switch(m_spellInfo->Id)
             {
@@ -2501,7 +2501,7 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, SpellCas
 {
     WorldPacket data(SMSG_CAST_FAILED, (4+1+1));
     data << uint32(spellInfo->Id);
-    
+
     if(result != SPELL_CAST_OK)
     {
         data << uint8(2); // status = fail
@@ -4162,7 +4162,7 @@ SpellCastResult Spell::CheckCasterAuras() const
         prevented_reason = SPELL_FAILED_CONFUSED;
     else if (unitflag & UNIT_FLAG_FLEEING && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_FEARED))
         prevented_reason = SPELL_FAILED_FLEEING;
-    else */ 
+    else */
     if (unitflag & UNIT_FLAG_SILENCED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
         prevented_reason = SPELL_FAILED_SILENCED;
     else if (unitflag & UNIT_FLAG_PACIFIED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY)

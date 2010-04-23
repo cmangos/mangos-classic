@@ -3578,7 +3578,7 @@ bool ChatHandler::HandleShowHonor(const char* args)
     };
     char const* rank_name = NULL;
     char const* hrank_name = NULL;
- 
+
     uint32 honor_rank = target->GetHonorRank();
 
     if ( target->GetTeam() == ALLIANCE )
@@ -3682,10 +3682,10 @@ bool ChatHandler::HandleModifyHonorCommand (const char* args)
     char * temp = strtok(NULL, " ");
     if (!temp)
         return false;
-    
+
     int32 amount = atoi(temp);
 
-    // hack code 
+    // hack code
     if (hasStringAbbr(field.c_str(),"points"))
        target->SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)amount);
     else if (hasStringAbbr(field.c_str(),"rank"))

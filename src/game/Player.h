@@ -1972,7 +1972,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
-        HonorCPMap m_honorCP; 
+        HonorCPMap m_honorCP;
         uint8 m_honor_rank;
         float m_rank_points;
         float m_stored_honor;

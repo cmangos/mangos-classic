@@ -5157,7 +5157,7 @@ void Aura::PeriodicTick()
             Unit *pCaster = GetCaster();
             if(!pCaster)
                 return;
-            
+
             // heal for caster damage (must be alive)
             if(m_target != pCaster && GetSpellProto()->SpellVisual==163 && !pCaster->isAlive())
                 return;

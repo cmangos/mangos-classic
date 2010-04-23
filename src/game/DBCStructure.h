@@ -124,7 +124,7 @@ struct ChrRacesEntry
     uint32      model_f;                                    // 5
                                                             // 6-7 unused
     uint32      TeamID;                                     // 8 (7-Alliance 1-Horde)
-    uint32      startingTaxiMask;  
+    uint32      startingTaxiMask;
     uint32      CinematicSequence;                          // 13 id from CinematicCamera.dbc
     char*       name[8];                                    // 17-25 used for DBC language detection/selection
 };
@@ -154,9 +154,9 @@ struct CreatureDisplayInfoEntry
 {
     uint32      Displayid;                                  // 0
                                                             // 1    iRefID_CreatureModelData Points to the model filename.
-                                                            // 3    iRefID_CreatureDisplayInfoExtra    
+                                                            // 3    iRefID_CreatureDisplayInfoExtra
     float       scale;                                      // 4    Default model scale if not set by server for that spawn
-                                                            // 6        Opacity     Integer     0 - 255. 0 is totally transparent, 255 is solid  
+                                                            // 6        Opacity     Integer     0 - 255. 0 is totally transparent, 255 is solid
 };
 
 struct CreatureFamilyEntry

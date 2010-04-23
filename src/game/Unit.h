@@ -489,7 +489,7 @@ enum UnitFlags
     UNIT_FLAG_PVP_ATTACKABLE = 0x00000008,                // allow apply pvp rules to attackable state in addition to faction dependent state, UNIT_FLAG_UNKNOWN1 in pre-bc mangos
     UNIT_FLAG_RENAME         = 0x00000010,                // rename creature
     UNIT_FLAG_PREPARATION    = 0x00000020,                // don't take reagents for spells with SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP   // UNIT_FLAG_RESTING in pre-bc mangos
-    UNIT_FLAG_PVP            = 0x00001000,                  
+    UNIT_FLAG_PVP            = 0x00001000,
     UNIT_FLAG_MOUNT          = 0x00002000,                // to check
     UNIT_FLAG_DISABLE_ROTATE = 0x00040000,
     UNIT_FLAG_IN_COMBAT      = 0x00080000,
@@ -535,7 +535,7 @@ enum UnitFlags2
 
 /// Non Player Character flags
 enum NPCFlags
-{   
+{
     UNIT_NPC_FLAG_NONE                  = 0x00000000,
     UNIT_NPC_FLAG_GOSSIP                = 0x00000001,       // 100%
     UNIT_NPC_FLAG_QUESTGIVER            = 0x00000002,       // guessed, probably ok
@@ -629,7 +629,7 @@ struct Position
 
 class MovementInfo
 {
-    public: 
+    public:
         MovementInfo() : moveFlags(MOVEFLAG_NONE), time(0),
             t_time(0), s_pitch(0.0f), fallTime(0), j_velocity(0.0f), j_sinAngle(0.0f),
             j_cosAngle(0.0f), j_xyspeed(0.0f), u_unk1(0.0f) {}

@@ -264,8 +264,8 @@ DROP TABLE IF EXISTS `character_honor_cp`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_honor_cp` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
-  `victim_type` TINYINT(3) UNSIGNED NOT NULL DEFAULT '4',                                             
-  `victim` INT(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Creature / Player Identifier',  
+  `victim_type` TINYINT(3) UNSIGNED NOT NULL DEFAULT '4',
+  `victim` INT(11) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Creature / Player Identifier',
   `honor` float NOT NULL DEFAULT '0',
   `date` int(11) unsigned NOT NULL DEFAULT '0',
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -496,11 +496,10 @@ CREATE TABLE `character_stats` (
   `blockPct` float UNSIGNED NOT NULL default '0',
   `dodgePct` float UNSIGNED NOT NULL default '0',
   `parryPct` float UNSIGNED NOT NULL default '0',
-  `critPct` float UNSIGNED NOT NULL default '0',  
+  `critPct` float UNSIGNED NOT NULL default '0',
   `rangedCritPct` float UNSIGNED NOT NULL default '0',
   `attackPower` int(10) UNSIGNED NOT NULL default '0',
   `rangedAttackPower` int(10) UNSIGNED NOT NULL default '0',
-   
   PRIMARY KEY  (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -619,9 +618,9 @@ CREATE TABLE `characters` (
   `taxi_path` text,
   `honor_highest_rank` int(11) unsigned NOT NULL DEFAULT '0',
   `honor_standing` int(11) unsigned NOT NULL DEFAULT '0',
-  `stored_honor_rating` FLOAT NOT NULL DEFAULT '0',                                 
-  `stored_dishonorable_kills` INT(11) NOT NULL DEFAULT '0',                         
-  `stored_honorable_kills` INT(11) NOT NULL DEFAULT '0',  
+  `stored_honor_rating` FLOAT NOT NULL DEFAULT '0',
+  `stored_dishonorable_kills` INT(11) NOT NULL DEFAULT '0',
+  `stored_honorable_kills` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`),

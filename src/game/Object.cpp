@@ -359,7 +359,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                     updateMask->SetBit(GAMEOBJECT_FLAGS);
                 }
             }
-            
+
             if (GetUInt32Value(GAMEOBJECT_ARTKIT))
                 updateMask->SetBit(GAMEOBJECT_ARTKIT);
         }
@@ -460,7 +460,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                 {
                     if(IsActivateToQuest || target->isGameMaster()) // activate if GM
                         *data << (m_uint32Values[ index ] & ~GO_FLAG_INTERACT_COND);
-                    else 
+                    else
                         *data << m_uint32Values[ index ];
                 }
                 else if ( index == GAMEOBJECT_DYN_FLAGS )
@@ -1542,6 +1542,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     {
         MaNGOS::NearUsedPosDo u_do(*this,searcher,absAngle,selector);
         MaNGOS::WorldObjectWorker<MaNGOS::NearUsedPosDo> worker(u_do);
+
         Cell::VisitAllObjects(this, worker, distance2d);
     }
 

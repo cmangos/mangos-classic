@@ -337,7 +337,7 @@ class HonorStanding
         HonorStanding *GetInfo() { return this; };
 
         // create the standing order
-        bool operator < (const HonorStanding& rhs) 
+        bool operator < (const HonorStanding& rhs)
         {
             return honorPoints > rhs.honorPoints;
         }
@@ -941,7 +941,7 @@ class ObjectMgr
         typedef std::map<uint32,int32> FishingBaseSkillMap; // [areaId][base skill level]
         FishingBaseSkillMap mFishingBaseForArea;
 
-        // Standing System        
+        // Standing System
         HonorStandingList HordeHonorStandingList;
         HonorStandingList AllyHonorStandingList;
 

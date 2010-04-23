@@ -117,7 +117,7 @@ struct CreatureInfo
     char const* AIName;
     uint32  MovementType;
     uint32  InhabitType;
-    uint32  civilian; 
+    uint32  civilian;
     bool    RacialLeader;
     bool    RegenHealth;
     uint32  equipmentId;

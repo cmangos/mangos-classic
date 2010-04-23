@@ -910,7 +910,7 @@ int WorldSocket::iSendPacket (const WorldPacket& pct)
     header.cmd = pct.GetOpcode ();
 
     header.size = (uint16) pct.size () + 2;
-    
+
     EndianConvertReverse(header.size);
     EndianConvert(header.cmd);
 

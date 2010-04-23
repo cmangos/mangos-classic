@@ -2328,7 +2328,7 @@ void ObjectMgr::LoadStandingList(uint32 dateBegin)
     if (result)
     {
         barGoLink bar(result->GetRowCount());
-        
+
         do
         {
             fields = result->Fetch();
@@ -2378,7 +2378,7 @@ void ObjectMgr::LoadStandingList()
     DistributeRankPoints(HORDE,LastWeekBegin);
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u Horde and %u Ally honor standing definitions", HordeHonorStandingList.size(), AllyHonorStandingList.size());    
+    sLog.outString( ">> Loaded %u Horde and %u Ally honor standing definitions", HordeHonorStandingList.size(), AllyHonorStandingList.size());
 }
 
 
@@ -2395,7 +2395,7 @@ void ObjectMgr::FlushRankPoints(uint32 dateTop)
         do {
             date = result->Fetch()->GetUInt32();
             while (WeekBegin && date < WeekBegin) {
-                WeekBegin -= 7;            
+                WeekBegin -= 7;
             }
         } while (result->NextRow());
 
@@ -2403,7 +2403,7 @@ void ObjectMgr::FlushRankPoints(uint32 dateTop)
         while (WeekBegin <= dateTop)
         {
             LoadStandingList(WeekBegin);
-            
+
             flush = WeekBegin < dateTop - 7; // flush only with date < lastweek
 
             DistributeRankPoints(ALLIANCE,WeekBegin,flush);
@@ -2428,20 +2428,20 @@ void ObjectMgr::FlushRankPoints(uint32 dateTop)
             type   = fields[1].GetUInt8();
             kills  = fields[2].GetUInt32();
 
-            if (type == HONORABLE ) 
+            if (type == HONORABLE)
                 CharacterDatabase.PExecute("UPDATE characters SET stored_honorable_kills = stored_honorable_kills + %u WHERE guid = %u",kills,guid);
-            else if (type == DISHONORABLE ) 
+            else if (type == DISHONORABLE)
                 CharacterDatabase.PExecute("UPDATE characters SET stored_dishonorable_kills = stored_dishonorable_kills + %u WHERE guid = %u",kills,guid);
 
         } while (result->NextRow());
     }
 
-    // cleanin ALL cp before dateTop 
-    CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE date <= %u",dateTop - 7); 
+    // cleanin ALL cp before dateTop
+    CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE date <= %u",dateTop - 7);
     CharacterDatabase.CommitTransaction();
 
     sLog.outString();
-    sLog.outString( ">> Flushed all ranking points");  
+    sLog.outString( ">> Flushed all ranking points");
 
     delete result;
 }
@@ -2464,7 +2464,7 @@ void ObjectMgr::DistributeRankPoints(uint32 team, uint32 dateBegin , bool flush 
     {
         RP = 0;
         result = CharacterDatabase.PQuery("SELECT stored_honor_rating,stored_honorable_kills FROM characters WHERE guid = %u ",itr->guid);
-        if (!result) 
+        if (!result)
             continue; // not cleaned table?
 
         fields = result->Fetch();
@@ -2503,7 +2503,7 @@ HonorStanding* ObjectMgr::GetHonorStandingByGUID(uint32 guid, uint32 side)
     for (HonorStandingList::iterator itr = standingList.begin();itr != standingList.end() ; ++itr)
         if (itr->guid == guid)
             return itr->GetInfo();
-    
+
     return 0;
 }
 
@@ -2519,7 +2519,7 @@ HonorStanding* ObjectMgr::GetHonorStandingByPosition(uint32 position, uint32 sid
             return itr->GetInfo();
         pos++;
     }
-    
+
     return 0;
 }
 
@@ -2534,7 +2534,7 @@ uint32 ObjectMgr::GetHonorStandingPositionByGUID(uint32 guid, uint32 side)
             return pos;
         pos++;
     }
-    
+
     return 0;
 }
 
@@ -4393,7 +4393,7 @@ void ObjectMgr::LoadInstanceTemplate()
 
         if (temp->parent > 0)
         {
-            // check existence 
+            // check existence
             MapEntry const* parentEntry = sMapStore.LookupEntry(temp->parent);
             if (!parentEntry)
             {

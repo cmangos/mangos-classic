@@ -188,7 +188,7 @@ void WorldSession::SendTrainerList( uint64 guid, const std::string& strTitle )
         data << uint8(_player->GetTrainerSpellState(tSpell));
         data << uint32(floor(tSpell->spellCost * fDiscountMod));
 
-        data << uint32(primary_prof_first_rank ? 1 : 0);    // primary prof. learn confirmation dialog [-ZERO] seems it not works in 1.12 
+        data << uint32(primary_prof_first_rank ? 1 : 0);    // primary prof. learn confirmation dialog [-ZERO] seems it not works in 1.12
         data << uint32(primary_prof_first_rank ? 1 : 0);    // must be equal prev. field to have learn button in enabled state
         data << uint8(tSpell->reqLevel);
         data << uint32(tSpell->reqSkill);

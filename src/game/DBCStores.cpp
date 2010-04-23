@@ -495,7 +495,7 @@ uint32 GetTalentSpellCost(uint32 spellId)
 
 int32 GetAreaFlagByAreaID(uint32 area_id)
 {
-    AreaTableEntry const* AreaEntry = sAreaStore.LookupEntry(area_id); 
+    AreaTableEntry const* AreaEntry = sAreaStore.LookupEntry(area_id);
     if(!AreaEntry)
         return -1;
 
@@ -504,7 +504,7 @@ int32 GetAreaFlagByAreaID(uint32 area_id)
 
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
 {
-    return sAreaStore.LookupEntry(area_id); 
+    return sAreaStore.LookupEntry(area_id);
 }
 
 AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag,uint32 map_id)

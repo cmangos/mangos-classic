@@ -2105,7 +2105,7 @@ void Player::SetGameMaster(bool on)
 
         getHostileRefManager().setOnlineOfflineState(true);
     }
-     
+
     UpdateForQuestsGO();
     UpdateVisibilityForPlayer();
 }
@@ -3757,10 +3757,10 @@ void Player::SetMovement(PlayerMovementType pType)
   - the player must be in world
 */
 void Player::BuildPlayerRepop()
-{   
+{
     CastSpell(this, 8326, true);                            // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
     if(getRace() == RACE_NIGHTELF)
-        CastSpell(this, 20584, true);                       // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)       
+        CastSpell(this, 20584, true);                       // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
 
     // the player cannot have a corpse already, only bones which are not returned by GetCorpse
     if(GetCorpse())
@@ -5532,7 +5532,7 @@ void Player::UpdateHonor()
         if (itr->type == HONORABLE)
         {
             if (itr->isKill)
-                total_honorableKills++;    
+                total_honorableKills++;
 
             if (itr->isKill && itr->date == today)
                 today_honorableKills++;
@@ -5562,7 +5562,7 @@ void Player::UpdateHonor()
 
             if ( itr->date == today)
                 today_dishonorableKills++;
-            
+
             if ( itr->date > today)
                 itr->state = HK_OLD;
         }
@@ -5586,11 +5586,11 @@ void Player::UpdateHonor()
     if (prk.visualRank > 0 && prk.visualRank > GetHonorHighestRank() )
         SetHonorHighestRank(prk.visualRank);
 
-    // rank points is sent to client with same size of uint8(255) for each rank 
+    // rank points is sent to client with same size of uint8(255) for each rank
     // so we set it in correct rate:
     uint32 RP = uint32( GetRankPoints() >= 0 ? GetRankPoints() : -1 * GetRankPoints() );
-    RP = int8( ( (RP-prk.minRP)/(prk.maxRP-prk.minRP) ) * ( prk.positive ? 255 : -255) ); 
-    
+    RP = int8( ( (RP-prk.minRP)/(prk.maxRP-prk.minRP) ) * ( prk.positive ? 255 : -255) );
+
 
     //NEXT RANK BAR
     //PLAYER_FIELD_HONOR_BAR
@@ -5668,7 +5668,7 @@ bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
 
     sLog.outDetail("PLAYER: CalculateHonor");
 
-    if (!uVictim) 
+    if (!uVictim)
         return false;
 
     if (uVictim->GetAura(2479, EFFECT_INDEX_0))             // Honorless Target
@@ -5688,21 +5688,21 @@ bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
             // maybe uncorrect honor value but no source to get it actually
             AddHonorCP(398.0,HONORABLE,cVictim->GetEntry(),TYPEID_UNIT);
             return true;
-        } 
+        }
     }
     else
     if( uVictim->GetTypeId() == TYPEID_PLAYER )
     {
         Player *pVictim = (Player *)uVictim;
 
-        if( GetTeam() == pVictim->GetTeam() ) 
+        if( GetTeam() == pVictim->GetTeam() )
             return false;
 
         if( getLevel() < (pVictim->getLevel()+5) )
         {
             AddHonorCP( MaNGOS::Honor::HonorableKillPoints( this, pVictim, groupsize),HONORABLE,pVictim->GetGUIDLow(),TYPEID_PLAYER);
             return true;
-        } 
+        }
     }
 
     return false;
@@ -5715,7 +5715,7 @@ bool Player::AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType)
         return false;
 
     // CharacterDatabase.PExecute("INSERT INTO `character_honor_cp` (`guid`,`victim`,`victim_type`,`honor`,`date`,`type`) VALUES (%u, %u, %u, %f, %u, %u)", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(),uVictim->GetType() (float)honor_points, (uint32)today, (uint8)kill_type);
-    
+
     HonorCP CP;
     CP.date = sWorld.GetDateToday();
     CP.honorPoints = honor;
@@ -5725,14 +5725,14 @@ bool Player::AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType)
 
     if (type == DISHONORABLE)
     {
-        // DK penalties are subtracted from your RP score immediately 
+        // DK penalties are subtracted from your RP score immediately
         // and are not included in weekly adjustment
         float RP = GetRankPoints() > CP.honorPoints ? GetRankPoints() - CP.honorPoints : 0; // remove this check to have negative ranks
         SetStoredHonor(RP);
-    }   
-    
+    }
+
     CP.state  =  HK_NEW;
-    CP.isKill =  isKill(victimType);  
+    CP.isKill =  isKill(victimType);
 
     m_honorCP.push_back(CP);
 
@@ -13688,11 +13688,11 @@ void Player::_LoadHonorCP(QueryResult *result)
     if(result)
     {
         m_honorCP.clear();
-        
+
         do
         {
             Field *fields = result->Fetch();
-            
+
             HonorCP CP;
             CP.victimType       = fields[0].GetUInt8();
             CP.victimID         = fields[1].GetUInt32();
@@ -13703,7 +13703,7 @@ void Player::_LoadHonorCP(QueryResult *result)
             CP.isKill           = isKill(CP.victimType);
 
             m_honorCP.push_back(CP);
-        } 
+        }
         while( result->NextRow() );
 
         delete result;
@@ -14403,7 +14403,7 @@ void Player::SaveToDB()
 
     ss << ", ";
     ss << m_stored_dishonorableKills;
-    
+
     ss << ", ";
     ss << m_stored_honorableKills;
 
@@ -14621,7 +14621,7 @@ void Player::_SaveInventory()
 void Player::_SaveHonorCP()
 {
     HonorCPMap tempList;
-    
+
     for (HonorCPMap::iterator itr = m_honorCP.begin(); itr != m_honorCP.end() ; ++itr)
     {
 

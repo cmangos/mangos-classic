@@ -42,7 +42,7 @@ Quest::Quest(Field * questRecord)
     LimitTime = questRecord[16].GetUInt32();
     QuestFlags = questRecord[17].GetUInt16();
     uint32 SpecialFlags = questRecord[18].GetUInt16();
-    // [-ZERO] to remove field from db  CharTitleId = questRecord[19].GetUInt32();  
+    // [-ZERO] to remove field from db  CharTitleId = questRecord[19].GetUInt32();
     PrevQuestId = questRecord[20].GetInt32();
     NextQuestId = questRecord[21].GetInt32();
     ExclusiveGroup = questRecord[22].GetInt32();

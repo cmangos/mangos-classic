@@ -324,4 +324,3 @@ int RASocket::sendf(const char* msg)
     }
     return 0;
 }
-

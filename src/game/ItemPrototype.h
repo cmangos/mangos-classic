@@ -220,7 +220,7 @@ enum ItemSubclassWeapon
     ITEM_SUBCLASS_GEM_ORANGE                    = 5,
     ITEM_SUBCLASS_GEM_META                      = 6,
     ITEM_SUBCLASS_GEM_SIMPLE                    = 7,
-    ITEM_SUBCLASS_GEM_PRISMATIC                 = 8 
+    ITEM_SUBCLASS_GEM_PRISMATIC                 = 8
 };
 */
 

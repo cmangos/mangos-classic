@@ -156,7 +156,7 @@ bool QuestAccept( Player *player, Creature *_Creature, Quest *_Quest )
         return false;
 
     player->PlayerTalkClass->ClearMenus();
-    
+
     return tmpscript->pQuestAccept(player,_Creature,_Quest);
 }
 

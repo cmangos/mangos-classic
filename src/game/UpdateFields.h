@@ -260,7 +260,7 @@ enum EUnitFields
     PLAYER_FIELD_YESTERDAY_CONTRIBUTION        = 0x42d + UNIT_END, // Size:1
     PLAYER_FIELD_LAST_WEEK_CONTRIBUTION        = 0x42e + UNIT_END, // Size:1
     PLAYER_FIELD_LAST_WEEK_RANK                = 0x42f + UNIT_END, // Size:1
-    PLAYER_FIELD_BYTES2                        = 0x430 + UNIT_END, // Size:1 
+    PLAYER_FIELD_BYTES2                        = 0x430 + UNIT_END, // Size:1
     PLAYER_FIELD_WATCHED_FACTION_INDEX         = 0x431 + UNIT_END, // Size:1
     PLAYER_FIELD_COMBAT_RATING_1               = 0x432 + UNIT_END, // Size:20
 

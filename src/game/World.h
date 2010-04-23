@@ -444,8 +444,8 @@ class World
         uint32 GetDateByLocalTime(tm * now) const { return ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday)); }
         uint32 GetDateToday() const {   return GetDateByLocalTime( GetLocalTimeByTime(m_gameTime) ); }
         uint32 GetDateThisWeekBegin() const {   return GetDateToday() - GetLocalTimeByTime(m_gameTime)->tm_wday; }
-        uint32 GetDateLastMaintenanceDay() const 
-        { 
+        uint32 GetDateLastMaintenanceDay() const
+        {
             uint32 today = GetDateToday();
             uint32 mDay  = getConfig(CONFIG_UINT32_MAINTENANCE_DAY);
             tm *date     = GetLocalTimeByTime(m_gameTime);

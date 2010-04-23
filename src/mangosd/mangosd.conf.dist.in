@@ -458,12 +458,12 @@ LogColors = ""
 #        Default: 0
 #
 #    MinHonorKills
-#        Min kills that players must obtain to enter in weekly honor calculation 
+#        Min kills that players must obtain to enter in weekly honor calculation
 #        Default: 15
 #
 #    MaintenanceDay
 #        The day of the week is performed server maintenance ( currently used for Honor distribution )
-#        range (0..6): 0 is the first day of the week (normally sunday), 6 is the latest 
+#        range (0..6): 0 is the first day of the week (normally sunday), 6 is the latest
 #        Default: 3 (Wednesday in EU)
 #
 #    InstantLogout
@@ -654,7 +654,7 @@ Motd = "Welcome to the Massive Network Game Object Server."
 #    AllowTwoSide.Interaction.Trade
 #    AllowTwoSide.Interaction.Auction
 #    AllowTwoSide.Interaction.Mail
-#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);trade with different team, 
+#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);trade with different team,
 #        merge all auction houses for players from different teams, send mail to different team.
 #        Default: 0 (Not allowed)
 #                 1 (Allowed)
@@ -1291,4 +1291,3 @@ Ra.Stricted = 1
 SOAP.Enabled = 0
 SOAP.IP = 127.0.0.1
 SOAP.Port = 7878
-

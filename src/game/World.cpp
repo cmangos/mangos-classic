@@ -1727,7 +1727,7 @@ void World::ServerMaintenanceStart()
 
     // save and update all online players
     for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-        if(itr->second->GetPlayer() && itr->second->GetPlayer()->IsInWorld()) 
+        if(itr->second->GetPlayer() && itr->second->GetPlayer()->IsInWorld())
             itr->second->GetPlayer()->SaveToDB();
 
     CharacterDatabase.PExecute("UPDATE saved_variables SET NextMaintenanceDate = '"UI64FMTD"'", uint64(m_NextMaintenanceDate));

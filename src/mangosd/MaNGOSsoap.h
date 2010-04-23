@@ -116,4 +116,3 @@ class SOAPCommand
 };
 
 #endif
-

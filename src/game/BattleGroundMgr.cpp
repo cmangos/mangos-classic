@@ -1044,17 +1044,17 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 M
 
     switch(bgTypeId)
     {
-        case BATTLEGROUND_AV: 
-            bg = new BattleGroundAV; 
+        case BATTLEGROUND_AV:
+            bg = new BattleGroundAV;
             bg->SetName("Alterac Valley");
             bg->SetMapId(30);
         break;
-        case BATTLEGROUND_WS: 
+        case BATTLEGROUND_WS:
             bg = new BattleGroundWS;
             bg->SetName("Warsong Gulch");
             bg->SetMapId(489);
         break;
-        case BATTLEGROUND_AB: 
+        case BATTLEGROUND_AB:
             bg = new BattleGroundAB;
             bg->SetName("Arathi Basin");
             bg->SetMapId(529);
