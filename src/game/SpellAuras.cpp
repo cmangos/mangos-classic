@@ -5016,12 +5016,14 @@ void Aura::PeriodicTick()
             sLog.outDetail("PeriodicTick: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
                 GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), m_target->GetGUIDLow(), m_target->GetTypeId(), pdamage, GetId(),absorb);
 
+            pdamage = (pdamage <= absorb + resist) ? 0 : (pdamage - absorb - resist);
+
             SpellPeriodicAuraLogInfo pInfo(this, pdamage, absorb, resist, 0.0f);
             m_target->SendPeriodicAuraLog(&pInfo);
 
-            pCaster->DealDamage(m_target, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), true);
+            pCaster->DealDamage(m_target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), true);
 
-            pCaster->ProcDamageAndSpell(m_target, PROC_FLAG_PERIODIC_TICK, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), GetSpellSchoolMask(GetSpellProto()), GetSpellProto());
+            pCaster->ProcDamageAndSpell(m_target, PROC_FLAG_PERIODIC_TICK, PROC_FLAG_TAKE_DAMAGE, pdamage, GetSpellSchoolMask(GetSpellProto()), GetSpellProto());
             break;
         }
         case SPELL_AURA_PERIODIC_LEECH:
