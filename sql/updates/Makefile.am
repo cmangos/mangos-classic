@@ -81,6 +81,10 @@ pkgdata_DATA = \
 	z0451_108_01_mangos_gameobject_template.sql \
 	z0452_109_01_mangos_instance_template.sql \
 	z0456_110_01_mangos_mangos_string.sql \
+	z0457_111_01_mangos_mangos_string.sql \
+	z0457_111_02_mangos_command.sql \
+	z0457_111_03_characters_characters.sql \
+	z0457_111_04_mangos_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -140,4 +144,8 @@ EXTRA_DIST = \
 	z0451_108_01_mangos_gameobject_template.sql \
 	z0452_109_01_mangos_instance_template.sql \
 	z0456_110_01_mangos_mangos_string.sql \
+	z0457_111_01_mangos_mangos_string.sql \
+	z0457_111_02_mangos_command.sql \
+	z0457_111_03_characters_characters.sql \
+	z0457_111_04_mangos_command.sql \
 	README
