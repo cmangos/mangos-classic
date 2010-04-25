@@ -451,6 +451,25 @@ enum QuestSlotStateMask
     QUEST_STATE_FAIL     = 0x0002
 };
 
+enum SkillUpdateState
+{
+    SKILL_UNCHANGED     = 0,
+    SKILL_CHANGED       = 1,
+    SKILL_NEW           = 2,
+    SKILL_DELETED       = 3
+};
+
+struct SkillStatusData
+{
+    SkillStatusData(uint8 _pos, SkillUpdateState _uState) : pos(_pos), uState(_uState)
+    {
+    }
+    uint8 pos;
+    SkillUpdateState uState;
+};
+
+typedef UNORDERED_MAP<uint32, SkillStatusData> SkillStatusMap;
+
 enum PlayerSlots
 {
     // first slot for item stored (in any way in player m_items data)
@@ -622,7 +641,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS       = 15,
     //PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES      = 16,       // reserved for use in 0.12 and later
     PLAYER_LOGIN_QUERY_LOADGUILD                = 17,
-
+    PLAYER_LOGIN_QUERY_LOADSKILLS               = 19,
     MAX_PLAYER_LOGIN_QUERY
 };
 
@@ -1484,7 +1503,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         int16 GetSkillTempBonusValue(uint32 skill) const;
         bool HasSkill(uint32 skill) const;
         void learnSkillRewardedSpells( uint32 id );
-        void learnSkillRewardedSpells();
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
         bool IsBeingTeleported() const { return mSemaphoreTeleport_Near || mSemaphoreTeleport_Far; }
@@ -1937,6 +1955,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadMailedItems(Mail *mail);
         void _LoadQuestStatus(QueryResult *result);
         void _LoadGroup(QueryResult *result);
+        void _LoadSkills(QueryResult *result);
         void _LoadSpells(QueryResult *result);
         void _LoadTutorials(QueryResult *result);
         void _LoadFriendList(QueryResult *result);
@@ -1952,6 +1971,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveHonorCP();
         void _SaveMail();
         void _SaveQuestStatus();
+        void _SaveSkills();
         void _SaveSpells();
         void _SaveTutorials();
         void _SaveStats();
@@ -2006,6 +2026,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         int8 m_comboPoints;
 
         QuestStatusMap mQuestStatus;
+
+        SkillStatusMap mSkillStatus;
 
         uint32 m_GuildIdInvited;
 
