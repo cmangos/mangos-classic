@@ -429,7 +429,6 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
     std::string Title      = pQuest->GetTitle();
     std::string Details    = pQuest->GetDetails();
     std::string Objectives = pQuest->GetObjectives();
-    std::string EndText    = pQuest->GetEndText();
 
     int loc_idx = pSession->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
@@ -442,8 +441,6 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
                 Details = ql->Details[loc_idx];
             if (ql->Objectives.size() > (size_t)loc_idx && !ql->Objectives[loc_idx].empty())
                 Objectives = ql->Objectives[loc_idx];
-            if (ql->EndText.size() > (size_t)loc_idx && !ql->EndText[loc_idx].empty())
-                EndText=ql->EndText[loc_idx];
         }
     }
 
@@ -471,11 +468,13 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
         {
             data << uint32(pQuest->RewChoiceItemId[i]);
             data << uint32(pQuest->RewChoiceItemCount[i]);
+
             IProto = ObjectMgr::GetItemPrototype(pQuest->RewChoiceItemId[i]);
-            if ( IProto )
+
+            if (IProto)
                 data << uint32(IProto->DisplayInfoID);
             else
-                data << uint32( 0x00 );
+                data << uint32(0x00);
         }
 
         data << uint32(pQuest->GetRewItemsCount());
@@ -484,9 +483,11 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
         {
             data << uint32(pQuest->RewItemId[i]);
             data << uint32(pQuest->RewItemCount[i]);
+
             IProto = ObjectMgr::GetItemPrototype(pQuest->RewItemId[i]);
-            if ( IProto )
-               data << uint32(IProto->DisplayInfoID);
+
+            if (IProto)
+                data << uint32(IProto->DisplayInfoID);
             else
                 data << uint32( 0x00 );
         }
