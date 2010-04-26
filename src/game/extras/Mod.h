@@ -107,3 +107,4 @@ class MANGOS_DLL_SPEC ModClass
 #define sMod MaNGOS::Singleton<ModClass>::Instance()
 
 #endif
+
