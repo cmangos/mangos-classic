@@ -44,6 +44,7 @@
 #include "LootMgr.h"
 #include "VMapFactory.h"
 #include "BattleGround.h"
+#include "extras/Mod.h"
 #include "Util.h"
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL (1 * IN_MILLISECONDS)
@@ -1934,6 +1935,8 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
     }
 
+    sMod.spellPrepare(this, m_caster);  // extra for prepare
+
     // add non-triggered (with cast time and without)
     if (!m_IsTriggeredSpell)
     {
@@ -3058,6 +3061,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     {
         //sLog.outDebug( "WORLD: Spell FX %d < TOTAL_SPELL_EFFECTS ", eff);
         (*this.*SpellEffects[eff])(i);
+         sMod.spellEffect(this, eff , i);  // extra for prepare
     }
     else
     {

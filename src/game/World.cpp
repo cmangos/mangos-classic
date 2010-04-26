@@ -60,6 +60,7 @@
 #include "WaypointManager.h"
 #include "GMTicketMgr.h"
 #include "Util.h"
+#include "extras/Mod.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -803,6 +804,7 @@ void World::SetInitialWorldSettings()
 
     ///- Initialize config settings
     LoadConfigSettings();
+    sMod.ModInit();
 
     ///- Init highest guids before any table loading to prevent using not initialized guids in some code.
     sObjectMgr.SetHighestGuids();

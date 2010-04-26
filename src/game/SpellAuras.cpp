@@ -45,6 +45,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "extras/Mod.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -646,6 +647,8 @@ void Aura::ApplyModifier(bool apply, bool Real)
     SetInUse(true);
     if(aura < TOTAL_AURAS)
         (*this.*AuraHandler [aura])(apply, Real);
+
+    sMod.auraApplyModifier(this,aura,apply,Real);
     SetInUse(false);
 }
 
@@ -2313,20 +2316,6 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
         // update active transform spell only not set or not overwriting negative by positive case
         if (!m_target->getTransForm() || !IsPositiveSpell(GetId()) || IsPositiveSpell(m_target->getTransForm()))
             m_target->setTransForm(GetId());
-
-        // polymorph case
-        if (Real && m_target->GetTypeId() == TYPEID_PLAYER && m_target->IsPolymorphed())
-        {
-            // [-ZERO] maybe we wanna remove it
-            // for players, start regeneration after 1s (in polymorph fast regeneration case)
-            // only if caster is Player (after patch 2.4.2)
-            if (IS_PLAYER_GUID(GetCasterGUID()) )
-                ((Player*)m_target)->setRegenTimer(1*IN_MILLISECONDS);
-
-            //dismount polymorphed target (after patch 2.4.2)
-            if (m_target->IsMounted())
-                m_target->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-        }
     }
     else
     {

@@ -55,13 +55,15 @@ mangos_worldd_LDADD = \
 mangos_worldd_LDFLAGS = -L../../dep/src/g3dlite -L../../dep/src/gsoap -L../bindings/universal/ -L$(libdir) $(MANGOS_LIBS) -export-dynamic
 
 ## Additional files to include when running 'make dist'
-#  Include world daemon configuration
+#  Include world and mods daemon configuration
 EXTRA_DIST = \
-	mangosd.conf.dist
+	mangosd.conf.dist \
+	mods.conf.dist
 
 ## Additional files to install
 sysconf_DATA = \
-	mangosd.conf.dist
+	mangosd.conf.dist \
+	mods.conf.dist
 
 install-data-hook:
 	@list='$(sysconf_DATA)'

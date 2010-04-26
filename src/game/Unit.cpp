@@ -50,6 +50,7 @@
 #include "DBCStores.h"
 #include "VMapFactory.h"
 #include "MovementGenerator.h"
+#include "extras/Mod.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -8832,21 +8833,7 @@ void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration,Un
     if(duration == -1 || group == DIMINISHING_NONE || caster->IsFriendlyTo(this) )
         return;
 
-    // Duration of crowd control abilities on pvp target is limited by 10 sec. (2.2.0)
-    /*[-ZERO] maybe you want activate it ( however not for 1.12 )
-    if(duration > 10000 && IsDiminishingReturnsGroupDurationLimited(group))
-    {
-        // test pet/charm masters instead pets/charmeds
-        Unit const* targetOwner = GetCharmerOrOwner();
-        Unit const* casterOwner = caster->GetCharmerOrOwner();
-
-        Unit const* target = targetOwner ? targetOwner : this;
-        Unit const* source = casterOwner ? casterOwner : caster;
-
-        if(target->GetTypeId() == TYPEID_PLAYER && source->GetTypeId() == TYPEID_PLAYER)
-            duration = 10000;
-    }
-    */
+    sMod.applyDiminishingToDuration(this,caster,duration,group);
 
     float mod = 1.0f;
 

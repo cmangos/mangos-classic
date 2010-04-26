@@ -307,6 +307,7 @@ AC_CONFIG_FILES([
    src/realmd/realmd.conf.dist
    src/mangosd/Makefile
    src/mangosd/mangosd.conf.dist
+   src/mangosd/mods.conf.dist
    src/bindings/Makefile
    src/bindings/universal/Makefile
 ])

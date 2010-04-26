@@ -29,6 +29,9 @@ noinst_LIBRARIES = libmangosgame.a
 
 #  libmangossgame library will later be reused by ...
 libmangosgame_a_SOURCES = \
+        extras/Mod.h \
+	extras/Mod.cpp \
+	extras/SpellMod.cpp \
 	AccountMgr.cpp \
 	AccountMgr.h \
 	AddonHandler.cpp \

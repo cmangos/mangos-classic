@@ -474,6 +474,8 @@
     <ClCompile Include="..\..\src\game\WorldSession.cpp" />
     <ClCompile Include="..\..\src\game\WorldSocket.cpp" />
     <ClCompile Include="..\..\src\game\WorldSocketMgr.cpp" />
+    <ClCompile Include="..\..\src\game\extras\Mod.cpp" />
+    <ClCompile Include="..\..\src\game\extras\SpellMod.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\AccountMgr.h" />
@@ -591,6 +593,7 @@
     <ClInclude Include="..\..\src\game\WorldSession.h" />
     <ClInclude Include="..\..\src\game\WorldSocket.h" />
     <ClInclude Include="..\..\src\game\WorldSocketMgr.h" />
+    <ClCompile Include="..\..\src\game\extras\Mod.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="shared.vcxproj">

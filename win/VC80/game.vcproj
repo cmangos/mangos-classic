@@ -1411,6 +1411,22 @@
 			</File>
 		</Filter>
 		<Filter
+			Name="Extras"
+			>
+			<File
+				RelativePath="..\..\src\game\extras\Mod.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\extras\Mod.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\extras\SpellMod.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
 			Name="Tool"
 			>
 			<File
