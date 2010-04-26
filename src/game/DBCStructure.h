@@ -109,7 +109,7 @@ struct ChrClassesEntry
                                                             // 1-2, unused
     uint32      powerType;                                  // 3
                                                             // 4, unused
-    char*       name[8];                                    // 5-12 unused
+    char const* name[8];                                    // 5-12 unused
     uint32      spellfamily;                                // 15
                                                             // 16, unused
 };
