@@ -347,6 +347,7 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this)
     m_rank_points = 0.0f;
     m_honor_rank  = 0;
     m_highest_rank = 0;
+    m_stored_honor = 0;
     m_stored_honorableKills = 0;
     m_stored_dishonorableKills = 0;
 
