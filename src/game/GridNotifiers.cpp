@@ -130,6 +130,20 @@ MessageDeliverer::Visit(PlayerMapType &m)
     }
 }
 
+void MessageDelivererExcept::Visit(PlayerMapType &m)
+{
+    for(PlayerMapType::iterator it = m.begin(); it!= m.end(); ++it)
+    {
+        Player* player = it->getSource();
+        if(player == i_skipped_receiver)
+            continue;
+
+        if (WorldSession* session = player->GetSession())
+            session->SendPacket(i_message);
+    }
+}
+
+
 void
 ObjectMessageDeliverer::Visit(PlayerMapType &m)
 {
