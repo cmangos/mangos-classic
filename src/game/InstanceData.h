@@ -71,5 +71,9 @@ class MANGOS_DLL_SPEC InstanceData
         //All-purpose data storage 32 bit
         virtual uint32 GetData(uint32 /*Type*/) { return 0; }
         virtual void SetData(uint32 /*Type*/, uint32 /*Data*/) {}
+
+        // Condition criteria additional requirements check
+        // This is used for such things are heroic loot
+        virtual bool CheckConditionCriteriaMeet(Player const* source, uint32 map_id, uint32 instance_condition_id);
 };
 #endif
