@@ -7072,25 +7072,7 @@ void Player::SendInitWorldStates(uint32 zoneid)
             NumberOfFields = 14;
             break;
         case 3358:
-        case 3820:
             NumberOfFields = 38;
-            break;
-        case 3483:
-            NumberOfFields = 22;
-            break;
-        case 3519:
-            NumberOfFields = 36;
-            break;
-        case 3521:
-            NumberOfFields = 35;
-            break;
-        case 3698:
-        case 3702:
-        case 3968:
-            NumberOfFields = 9;
-            break;
-        case 3703:
-            NumberOfFields = 9;
             break;
         default:
             NumberOfFields = 10;
@@ -7099,7 +7081,7 @@ void Player::SendInitWorldStates(uint32 zoneid)
 
     WorldPacket data(SMSG_INIT_WORLD_STATES, (4+2+(NumberOfFields*8)));
     data << uint32(mapid);                                  // mapid
-    //data << uint32(zoneid);                                 // zone id [-ZERO] maybe not used
+    data << uint32(zoneid);                                 // zone id
     data << uint16(NumberOfFields);                         // count of uint64 blocks
     data << uint32(0x8d8) << uint32(0x0);                   // 1
     data << uint32(0x8d7) << uint32(0x0);                   // 2
