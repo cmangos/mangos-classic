@@ -524,12 +524,6 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
         return;
 
-    Player* pl = _player;
-
-    //load players mails, and mailed items
-    if(!pl->m_mailsLoaded)
-        pl ->_LoadMail();
-
     // client can't work with packets > max int16 value
     const uint32 maxPacketSize = 32767;
 
@@ -539,7 +533,7 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
     data << uint8(0);                                       // mail's count
     time_t cur_time = time(NULL);
 
-    for(PlayerMails::iterator itr = pl->GetmailBegin(); itr != pl->GetmailEnd(); ++itr)
+    for(PlayerMails::iterator itr = _player->GetmailBegin(); itr != _player->GetmailEnd(); ++itr)
     {
         // packet send mail count as uint8, prevent overflow
         if(mailsCount >= 254)
@@ -579,7 +573,7 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         data << uint32((*itr)->stationery);                 // stationery (Stationery.dbc)
 
         // 1.12.1 can have only single item
-        Item *item = (*itr)->items.size() > 0 ? pl->GetMItem((*itr)->items[0].item_guid) : NULL;
+        Item *item = (*itr)->items.size() > 0 ? _player->GetMItem((*itr)->items[0].item_guid) : NULL;
         data << uint32(item ? item->GetEntry() : 0);        // entry
         // permanent enchantment
         data << uint32(item ? item->GetEnchantmentId((EnchantmentSlot)PERM_ENCHANTMENT_SLOT) : 0);
@@ -699,9 +693,6 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 void WorldSession::HandleQueryNextMailTime(WorldPacket & /**recv_data*/ )
 {
     WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 8);
-
-    if(!_player->m_mailsLoaded)
-        _player->_LoadMail();
 
     if( _player->unReadMails > 0 )
     {
@@ -981,41 +972,36 @@ void MailDraft::SendMailTo(MailReceiver const& receiver, MailSender const& sende
     {
         pReceiver->AddNewMailDeliverTime(deliver_time);
 
-        if (pReceiver->IsMailsLoaded())
+        Mail *m = new Mail;
+        m->messageID = mailId;
+        m->mailTemplateId = GetMailTemplateId();
+        m->subject = GetSubject();
+        m->itemTextId = GetBodyId();
+        m->money = GetMoney();
+        m->COD = GetCOD();
+
+        for(MailItemMap::const_iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)
         {
-            Mail *m = new Mail;
-            m->messageID = mailId;
-            m->mailTemplateId = GetMailTemplateId();
-            m->subject = GetSubject();
-            m->itemTextId = GetBodyId();
-            m->money = GetMoney();
-            m->COD = GetCOD();
-
-            for(MailItemMap::const_iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)
-            {
-                Item* item = mailItemIter->second;
-                m->AddItem(item->GetGUIDLow(), item->GetEntry());
-            }
-
-            m->messageType = sender.GetMailMessageType();
-            m->stationery = sender.GetStationery();
-            m->sender = sender.GetSenderId();
-            m->receiver = receiver.GetPlayerGUIDLow();
-            m->expire_time = expire_time;
-            m->deliver_time = deliver_time;
-            m->checked = checked;
-            m->state = MAIL_STATE_UNCHANGED;
-
-            pReceiver->AddMail(m);                           // to insert new mail to beginning of maillist
-
-            if (!m_items.empty())
-            {
-                for(MailItemMap::iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)
-                    pReceiver->AddMItem(mailItemIter->second);
-            }
+            Item* item = mailItemIter->second;
+            m->AddItem(item->GetGUIDLow(), item->GetEntry());
         }
-        else if (!m_items.empty())
-            deleteIncludedItems();
+
+        m->messageType = sender.GetMailMessageType();
+        m->stationery = sender.GetStationery();
+        m->sender = sender.GetSenderId();
+        m->receiver = receiver.GetPlayerGUIDLow();
+        m->expire_time = expire_time;
+        m->deliver_time = deliver_time;
+        m->checked = checked;
+        m->state = MAIL_STATE_UNCHANGED;
+
+        pReceiver->AddMail(m);                           // to insert new mail to beginning of maillist
+
+        if (!m_items.empty())
+        {
+            for(MailItemMap::iterator mailItemIter = m_items.begin(); mailItemIter != m_items.end(); ++mailItemIter)
+                pReceiver->AddMItem(mailItemIter->second);
+        }
     }
     else if (!m_items.empty())
         deleteIncludedItems();
