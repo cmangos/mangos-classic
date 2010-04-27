@@ -71,7 +71,7 @@ uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32
 {
     uint32 deposit = pItem->GetProto()->SellPrice * pItem->GetCount() * (time / MIN_AUCTION_TIME );
 
-    return uint32(deposit * entry->depositPercent * 3 * sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_DEPOSIT) / 100.0f );
+    return uint32(deposit * entry->depositPercent * sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_DEPOSIT) / 100.0f );
 }
 
 //does not clear ram
