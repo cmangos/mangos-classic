@@ -26,6 +26,7 @@
 #include "Chat.h"
 #include "Spell.h"
 #include "BattleGroundMgr.h"
+#include "extras/Mod.h"
 
 SpellMgr::SpellMgr()
 {
@@ -91,6 +92,8 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
 
     if (spellInfo->Attributes & SPELL_ATTR_RANGED && (!spell || !spell->IsAutoRepeat()))
         castTime += 500;
+
+    sMod.getSpellCastTime(spellInfo,spell,castTime);
 
     return (castTime > 0) ? uint32(castTime) : 0;
 }

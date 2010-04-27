@@ -36,7 +36,7 @@ void ModClass::auraApplyModifier(Aura *aura, AuraType aType, bool apply, bool re
 
 void ModClass::applyDiminishingToDuration(Unit *unit, Unit *caster, int32 &duration, DiminishingGroup group)
 {
-    // Duration of crowd control abilities on pvp target is limited by 10 sec. (after patch 2.2.0)
+    // [MOD] Duration of crowd control abilities on pvp target is limited by 10 sec. (after patch 2.2.0)
     if(getModConfig(MODCONFIG_BOOL_TBC_DIMINISHING_DURATION) && duration > 10*IN_MILLISECONDS && IsDiminishingReturnsGroupDurationLimited(group))
     {
         // test pet/charm masters instead pets/charmeds
@@ -49,4 +49,12 @@ void ModClass::applyDiminishingToDuration(Unit *unit, Unit *caster, int32 &durat
         if(target->GetTypeId() == TYPEID_PLAYER && source->GetTypeId() == TYPEID_PLAYER)
             duration = 10000;
     }
+}
+
+void ModClass::getSpellCastTime(const SpellEntry *spellInfo, const Spell *spell,int32 &castTime)
+{
+    // [workaround] holy light need script effect, but 19968 spell for it have 2.5 cast time sec
+    // it should be instant instead
+    if(spellInfo->Id == 19968) 
+        castTime = 0;
 }

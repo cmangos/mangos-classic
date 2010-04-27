@@ -80,13 +80,12 @@ class MANGOS_DLL_SPEC ModClass
         bool getModConfig(ModConfigBoolValues index) const { return m_modConfigBoolValues[index]; }
 
         // ==== Spell mods ==== //
-        
         // you can add modifications, workarounds and hack code for spell prepare
         void spellPrepare(Spell* spell,Unit *caster);
         // you can add modifications, workarounds and hack code for spell effect
         void spellEffect(Spell* spell, uint8 eff, SpellEffectIndex i);
-        // you can add modifications, workarounds and hack code for aura apply modifier
         void auraApplyModifier(Aura* aura,AuraType aType,bool apply,bool real);
+        void getSpellCastTime(SpellEntry const* spellInfo, Spell const* spell, int32 &castTime);
 
         // ==== Unit mods ==== //
 
