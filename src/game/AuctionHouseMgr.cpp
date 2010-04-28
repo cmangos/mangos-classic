@@ -474,7 +474,6 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(uint32 factionTem
             case  120: houseid = 7; break;                  // booty bay, neutral
             case  474: houseid = 7; break;                  // gadgetzan, neutral
             case  855: houseid = 7; break;                  // everlook, neutral
-            case 1604: houseid = 6; break;                  // b-elfs,
             default:                                        // for unknown case
             {
                 FactionTemplateEntry const* u_entry = sFactionTemplateStore.LookupEntry(factionTemplateId);
