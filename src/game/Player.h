@@ -331,6 +331,15 @@ struct HonorCP
    bool isKill;
 };
 
+struct HonorRankInfo
+{
+    uint8 rank;
+    int8 visualRank;
+    float maxRP;
+    float minRP;
+    bool positive;
+};
+
 enum HonorKillState
 {
    HK_NEW = 0,
@@ -1545,14 +1554,14 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool isKill(uint8 victimType) { return (victimType == TYPEID_UNIT || victimType == TYPEID_PLAYER ); }
         uint32 CalculateTotalKills(Unit *Victim,uint32 fromDate,uint32 toDate) const;
         //Acessors of honor rank
-        uint8 GetHonorRank() const { return m_honor_rank; }
-        void SetHonorRank(uint8 rank) { m_honor_rank = rank; }
+        HonorRankInfo GetHonorRankInfo() const { return m_honor_rank; }
+        void SetHonorRankInfo(HonorRankInfo rank) { m_honor_rank = rank; }
         //Acessors of total honor points
         void SetRankPoints(float rankPoints) { m_rank_points = rankPoints; }
         float GetRankPoints(void) const { return m_rank_points; }
-        //Acessors of righest rank
-        int8 GetHonorHighestRank() const { return m_highest_rank; }
-        void SetHonorHighestRank(int8 hr) { m_highest_rank = hr; }
+        //Acessors of highest rank
+        HonorRankInfo GetHonorHighestRankInfo() const { return m_highest_rank; }
+        void SetHonorHighestRankInfo(HonorRankInfo hr) { m_highest_rank = hr; }
         //Acessors of rating
         float GetStoredHonor() const { return m_stored_honor; }
         void SetStoredHonor(float rating) { m_stored_honor = rating; }
@@ -1991,12 +2000,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
         HonorCPMap m_honorCP;
-        uint8 m_honor_rank;
+        HonorRankInfo m_honor_rank;
+        HonorRankInfo m_highest_rank;
         float m_rank_points;
         float m_stored_honor;
         uint32 m_stored_honorableKills;
         uint32 m_stored_dishonorableKills;
-        int8 m_highest_rank;
         int32 m_standing_pos;
 
         void outDebugValues() const;

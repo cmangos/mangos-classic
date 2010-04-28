@@ -29,15 +29,6 @@ struct HonorScores
     float BRK[14];
 };
 
-struct HonorRankInfo
-{
-    uint8 rank;
-    int8 visualRank;
-    float maxRP;
-    float minRP;
-    bool positive;
-};
-
 namespace MaNGOS
 {
     namespace Honor
@@ -45,6 +36,26 @@ namespace MaNGOS
         inline float hk_honor_at_level(uint32 level, uint32 count=1)
         {
             return (float)ceil(count*(-0.53177f + 0.59357f * exp((level +23.54042f) / 26.07859f )));
+        }
+
+        inline HonorRankInfo CalculateRankInfo(HonorRankInfo prk)
+        {
+            prk.maxRP = 2000.00f;
+            prk.minRP = 0.00f;
+            prk.visualRank = 0;
+            
+            if (prk.rank != 0)
+            {
+                int8 rank = prk.positive ? prk.rank - NEGATIVE_HONOR_RANK_COUNT -1 : prk.rank - NEGATIVE_HONOR_RANK_COUNT;
+                prk.maxRP = (rank)*5000.00f;
+                if (prk.maxRP < 0) // in negative rank case
+                    prk.maxRP *= -1;
+                prk.minRP = prk.maxRP > 5000.0f ? prk.maxRP  - 5000.00f : 2000.00f;
+
+                prk.visualRank = prk.rank > NEGATIVE_HONOR_RANK_COUNT ? prk.rank - NEGATIVE_HONOR_RANK_COUNT : prk.rank * -1;
+            }
+
+            return prk;
         }
 
         //What is Player's rank... private, scout...
@@ -79,15 +90,9 @@ namespace MaNGOS
                     prk.rank = uint32(honor_points / 5000.00f) + firstRank;
                     prk.rank = ( prk.positive ? prk.rank  + 1 : NEGATIVE_HONOR_RANK_COUNT - prk.rank );
                 }
-
-                int8 rank = prk.positive ? prk.rank - NEGATIVE_HONOR_RANK_COUNT -1 : prk.rank - NEGATIVE_HONOR_RANK_COUNT;
-                prk.maxRP = (rank)*5000.00f;
-                if (prk.maxRP < 0) // in negative rank case
-                    prk.maxRP *= -1;
-                prk.minRP = prk.maxRP > 5000.0f ? prk.maxRP  - 5000.00f : 2000.00f;
             }
 
-            prk.visualRank = prk.positive ? prk.rank - NEGATIVE_HONOR_RANK_COUNT : prk.rank * -1;
+            prk = CalculateRankInfo(prk);
 
             return prk;
         }
@@ -208,7 +213,7 @@ namespace MaNGOS
 
             int total_kills  = killer->CalculateTotalKills(victim,today,today);
             //int k_rank       = killer->CalculateHonorRank( killer->GetTotalHonor() );
-            uint32 v_rank    = victim->GetHonorRank();
+            uint32 v_rank    = victim->GetHonorRankInfo().visualRank;
             uint32 k_level   = killer->getLevel();
             //int v_level      = victim->getLevel();
             float diff_honor = (victim->GetRankPoints() /(killer->GetRankPoints()+1))+1;

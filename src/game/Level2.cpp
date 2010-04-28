@@ -3517,7 +3517,7 @@ bool ChatHandler::HandleShowHonor(const char* args)
     if (!target)
         target = m_session->GetPlayer();
 
-    int8 highest_rank               = target->GetHonorHighestRank();
+    int8 highest_rank               = target->GetHonorHighestRankInfo().visualRank;
     uint32 dishonorable_kills       = target->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
     uint32 honorable_kills          = target->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
     uint32 today_honorable_kills    = target->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
@@ -3579,7 +3579,7 @@ bool ChatHandler::HandleShowHonor(const char* args)
     char const* rank_name = NULL;
     char const* hrank_name = NULL;
 
-    uint32 honor_rank = target->GetHonorRank();
+    uint32 honor_rank = target->GetHonorRankInfo().visualRank;
 
     if ( target->GetTeam() == ALLIANCE )
     {

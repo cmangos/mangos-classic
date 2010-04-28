@@ -345,8 +345,6 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this)
     m_auraUpdateMask = 0;
 
     m_rank_points = 0.0f;
-    m_honor_rank  = 0;
-    m_highest_rank = 0;
     m_stored_honor = 0;
     m_stored_honorableKills = 0;
     m_stored_dishonorableKills = 0;
@@ -5676,10 +5674,10 @@ void Player::UpdateHonor()
 
     //RIGHEST RANK
     //If the new rank is highest then the old one, then m_highest_rank is updated
-    HonorRankInfo prk = MaNGOS::Honor::CalculateHonorRank(GetRankPoints());
-    SetHonorRank(prk.rank);
-    if (prk.visualRank > 0 && prk.visualRank > GetHonorHighestRank() )
-        SetHonorHighestRank(prk.visualRank);
+    HonorRankInfo prk =  MaNGOS::Honor::CalculateHonorRank(GetRankPoints());
+    SetHonorRankInfo(prk);
+    if (prk.visualRank > 0 && prk.visualRank > GetHonorHighestRankInfo().visualRank )
+        SetHonorHighestRankInfo(prk);
 
     // rank points is sent to client with same size of uint8(255) for each rank
     // so we set it in correct rate:
@@ -5691,7 +5689,7 @@ void Player::UpdateHonor()
     //PLAYER_FIELD_HONOR_BAR
     SetInt32Value(PLAYER_FIELD_BYTES2, RP);
     //RANK (Patent)
-    SetUInt32Value(PLAYER_BYTES_3, ( GetHonorRank() << 24) + (m_drunk & 0xFFFE) + getGender());
+    SetUInt32Value(PLAYER_BYTES_3, ( GetHonorRankInfo().rank << 24) + (m_drunk & 0xFFFE) + getGender());
     //TODAY
     SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (today_dishonorableKills << 16) + today_honorableKills );
     //YESTERDAY
@@ -5708,7 +5706,7 @@ void Player::UpdateHonor()
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, total_honorableKills);
     SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, total_dishonorableKills);
     //TODO: Into what field we need to set it? Fix it!
-    SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() << 24) + 0x040F0001);
+    SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRankInfo().visualRank << 24) + 0x040F0001);
 }
 
 void Player::ResetHonor()
@@ -5720,7 +5718,10 @@ void Player::ResetHonor()
     SetHonorStoredKills(0,false);
     SetStoredHonor(0);
     SetHonorLastWeekStandingPos(0);
-    SetHonorHighestRank(0);
+    HonorRankInfo prk;
+    prk.rank = 0;
+    prk.visualRank = 0;
+    SetHonorHighestRankInfo(prk);
     UpdateHonor();
 }
 
@@ -9186,7 +9187,7 @@ uint8 Player::CanUseItem( Item *pItem, bool not_loading ) const
             if (pProto->RequiredSpell != 0 && !HasSpell(pProto->RequiredSpell))
                 return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
 
-            if( not_loading && GetHonorRank() < pProto->RequiredHonorRank )
+            if( not_loading && GetHonorHighestRankInfo().rank < (uint8)pProto->RequiredHonorRank )
                 return EQUIP_ERR_CANT_EQUIP_RANK;
 
             if (pProto->RequiredReputationFaction && uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank)
@@ -9218,7 +9219,7 @@ bool Player::CanUseItem( ItemPrototype const *pProto )
         }
         if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
             return false;
-        if( GetHonorRank() < pProto->RequiredHonorRank )
+        if( GetHonorHighestRankInfo().rank < (uint8)pProto->RequiredHonorRank )
             return false;
         if( getLevel() < pProto->RequiredLevel )
             return false;
@@ -9250,7 +9251,7 @@ uint8 Player::CanUseAmmo( uint32 item ) const
         }
         if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
-        if( GetHonorRank() < pProto->RequiredHonorRank )
+        if( GetHonorHighestRankInfo().rank < (uint8)pProto->RequiredHonorRank )
             return EQUIP_ERR_CANT_EQUIP_RANK;
         /*if( GetReputationMgr().GetReputation() < pProto->RequiredReputation )
         return EQUIP_ERR_CANT_EQUIP_REPUTATION;
@@ -13088,9 +13089,10 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     _LoadGroup(holder->GetResult(PLAYER_LOGIN_QUERY_LOADGROUP));
 
-    m_highest_rank = fields[39].GetUInt32();
-    m_standing_pos = fields[40].GetUInt32();
-    m_stored_honor = fields[41].GetFloat();
+    m_highest_rank.rank        = fields[39].GetUInt32();
+    m_highest_rank  = MaNGOS::Honor::CalculateRankInfo(m_highest_rank);
+    m_standing_pos             = fields[40].GetUInt32();
+    m_stored_honor             = fields[41].GetFloat();
     m_stored_dishonorableKills = fields[42].GetUInt32();
     m_stored_honorableKills    = fields[43].GetUInt32();
 
@@ -14433,7 +14435,7 @@ void Player::SaveToDB()
     ss << m_taxi.SaveTaxiDestinationsToString();
 
     ss << "', ";
-    ss << (int32)m_highest_rank;
+    ss << (uint32)m_highest_rank.rank;
 
     ss << ", ";
     ss << m_standing_pos;
@@ -16090,7 +16092,7 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
     }
 
     // not check level requiremnt for normal items (PvP related bonus items is another case)
-    if(pProto->RequiredHonorRank && (GetHonorHighestRank() < (int8)pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
+    if(pProto->RequiredHonorRank && (GetHonorHighestRankInfo().rank < (uint8)pProto->RequiredHonorRank || getLevel() < pProto->RequiredLevel) )
     {
         SendBuyError(BUY_ERR_RANK_REQUIRE, pCreature, item, 0);
         return false;

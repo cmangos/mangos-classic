@@ -983,7 +983,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
         data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
                                                             // Last Week Standing
         data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
-        data << (uint8)pl->GetHonorHighestRank();           // Highest Rank, ??
+        data << (uint8)pl->GetHonorHighestRankInfo().visualRank;           // Highest Rank, ??
         SendPacket(&data);
     }
     else
