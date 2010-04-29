@@ -1291,8 +1291,6 @@ Ra.Stricted = 1
 SOAP.Enabled = 0
 SOAP.IP = 127.0.0.1
 SOAP.Port = 7878
-<<<<<<< HEAD
-=======
 
 ###################################################################################################################
 #    CharDelete.Method
@@ -1320,4 +1318,3 @@ SOAP.Port = 7878
 CharDelete.Method = 0
 CharDelete.MinLevel = 0
 CharDelete.KeepDays = 30
->>>>>>> e8e3ff9... [9767] Add the posibility to keep deleted characters in the database for a while and also add related commands.
