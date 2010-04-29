@@ -588,54 +588,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         pCurrChar->SetMovement(MOVE_WATER_WALK);
     }
 
-    if(uint32 sourceNode = pCurrChar->m_taxi.GetTaxiSource())
-    {
-        sLog.outDebug( "WORLD: Restart character %u taxi flight", pCurrChar->GetGUIDLow() );
-
-        uint32 mountDisplayId = sObjectMgr.GetTaxiMountDisplayId(sourceNode, pCurrChar->GetTeam(),true);
-        uint32 path = pCurrChar->m_taxi.GetCurrentTaxiPath();
-
-        // search appropriate start path node
-        uint32 startNode = 0;
-
-        TaxiPathNodeList const& nodeList = sTaxiPathNodesByPath[path];
-
-        float distPrev = MAP_SIZE*MAP_SIZE;
-        float distNext =
-            (nodeList[0].x-pCurrChar->GetPositionX())*(nodeList[0].x-pCurrChar->GetPositionX())+
-            (nodeList[0].y-pCurrChar->GetPositionY())*(nodeList[0].y-pCurrChar->GetPositionY())+
-            (nodeList[0].z-pCurrChar->GetPositionZ())*(nodeList[0].z-pCurrChar->GetPositionZ());
-
-        for(uint32 i = 1; i < nodeList.size(); ++i)
-        {
-            TaxiPathNode const& node = nodeList[i];
-            TaxiPathNode const& prevNode = nodeList[i-1];
-
-            // skip nodes at another map
-            if(node.mapid != pCurrChar->GetMapId())
-                continue;
-
-            distPrev = distNext;
-
-            distNext =
-                (node.x-pCurrChar->GetPositionX())*(node.x-pCurrChar->GetPositionX())+
-                (node.y-pCurrChar->GetPositionY())*(node.y-pCurrChar->GetPositionY())+
-                (node.z-pCurrChar->GetPositionZ())*(node.z-pCurrChar->GetPositionZ());
-
-            float distNodes =
-                (node.x-prevNode.x)*(node.x-prevNode.x)+
-                (node.y-prevNode.y)*(node.y-prevNode.y)+
-                (node.z-prevNode.z)*(node.z-prevNode.z);
-
-            if(distNext + distPrev < distNodes)
-            {
-                startNode = i;
-                break;
-            }
-        }
-
-        SendDoFlight( mountDisplayId, path, startNode );
-    }
+    pCurrChar->ContinueTaxiFlight();
 
     // Load pet if any (if player not alive and in taxi flight or another then pet will remember as temporary unsummoned)
     pCurrChar->LoadPet();
