@@ -5562,10 +5562,10 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                                 // procspell is triggered spell but we need mana cost of original casted spell
                                 uint32 originalSpellId = procSpell->Id;
 
-                                // Holy Shock
                                 if(procSpell->SpellFamilyName == SPELLFAMILY_PALADIN)
                                 {
-                                    if(procSpell->SpellFamilyFlags & UI64LIT(0x0001000000000000))
+                                    // Holy Shock
+                                    if(procSpell->SpellFamilyFlags & UI64LIT(0x0000000000200000))
                                     {
                                         switch(procSpell->Id)
                                         {
@@ -5586,10 +5586,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                                     return false;
                                 }
 
-                                // percent stored in effect 1 (class scripts) base points
-                                int32 percent = auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1);
-
-                                basepoints0 = originalSpell->manaCost*percent/100;
+                                basepoints0 = originalSpell->manaCost;
                                 trigger_spell_id = 20272;
                                 target = this;
                                 break;

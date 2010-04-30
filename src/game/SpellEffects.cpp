@@ -3841,21 +3841,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_PALADIN:
         {
-            // Holy Light
-            if (m_spellInfo->SpellIconID == 70)
+            // Holy Light or Flash of Light
+            if (m_spellInfo->SpellIconID == 70 || m_spellInfo->SpellIconID  == 242)
             {
                 if(!unitTarget || !unitTarget->isAlive())
                     return;
-                int32 heal = damage;
-                m_caster->CastCustomSpell(unitTarget,19968,&heal,NULL,NULL,true);
-            }
-            // Flash of Light
-            else if (m_spellInfo->SpellIconID  == 242)
-            {
-                if(!unitTarget || !unitTarget->isAlive())
-                    return;
-                int32 heal = damage;
-                m_caster->CastCustomSpell(unitTarget,19993,&heal,NULL,NULL,true);
+
+                // use explicit effect call, this only known way properly process Illumination
+                // because if we use custom cast without mana cost we can't get original spell id
+                EffectHeal(eff_idx);
             }
             else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000800000))
             {
