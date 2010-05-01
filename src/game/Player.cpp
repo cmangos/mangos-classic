@@ -7038,6 +7038,8 @@ void Player::SendInitWorldStates(uint32 zoneid)
 
     sLog.outDebug("Sending SMSG_INIT_WORLD_STATES to Map:%u, Zone: %u", mapid, zoneid);
 
+    bool defZone = false;
+
     // may be exist better way to do this...
     switch(zoneid)
     {
@@ -7076,224 +7078,345 @@ void Player::SendInitWorldStates(uint32 zoneid)
             NumberOfFields = 38;
             break;
         default:
-            NumberOfFields = 10;
+            NumberOfFields = 13;
+            defZone = true;
             break;
     }
 
-    WorldPacket data(SMSG_INIT_WORLD_STATES, (4+2+(NumberOfFields*8)));
-    data << uint32(mapid);                                  // mapid
-    data << uint32(zoneid);                                 // zone id
-    data << uint16(NumberOfFields);                         // count of uint64 blocks
-    data << uint32(0x8d8) << uint32(0x0);                   // 1
-    data << uint32(0x8d7) << uint32(0x0);                   // 2
-    data << uint32(0x8d6) << uint32(0x0);                   // 3
-    data << uint32(0x8d5) << uint32(0x0);                   // 4
-    data << uint32(0x8d4) << uint32(0x0);                   // 5
-    data << uint32(0x8d3) << uint32(0x0);                   // 6
-    switch(zoneid)
+    if (defZone)
     {
-        case 1:
-        case 11:
-        case 12:
-        case 38:
-        case 40:
-        case 51:
-        case 1519:
-        case 1537:
-        case 2257:
-            break;
-        case 139:                                           // EPL
-            {
-                data << uint32(0x97a) << uint32(0x0); // 10 2426
-                data << uint32(0x917) << uint32(0x0); // 11 2327
-                data << uint32(0x918) << uint32(0x0); // 12 2328
-                data << uint32(0x97b) << uint32(0x32); // 13 2427
-                data << uint32(0x97c) << uint32(0x32); // 14 2428
-                data << uint32(0x933) << uint32(0x1); // 15 2355
-                data << uint32(0x946) << uint32(0x0); // 16 2374
-                data << uint32(0x947) << uint32(0x0); // 17 2375
-                data << uint32(0x948) << uint32(0x0); // 18 2376
-                data << uint32(0x949) << uint32(0x0); // 19 2377
-                data << uint32(0x94a) << uint32(0x0); // 20 2378
-                data << uint32(0x94b) << uint32(0x0); // 21 2379
-                data << uint32(0x932) << uint32(0x0); // 22 2354
-                data << uint32(0x934) << uint32(0x0); // 23 2356
-                data << uint32(0x935) << uint32(0x0); // 24 2357
-                data << uint32(0x936) << uint32(0x0); // 25 2358
-                data << uint32(0x937) << uint32(0x0); // 26 2359
-                data << uint32(0x938) << uint32(0x0); // 27 2360
-                data << uint32(0x939) << uint32(0x1); // 28 2361
-                data << uint32(0x930) << uint32(0x1); // 29 2352
-                data << uint32(0x93a) << uint32(0x0); // 30 2362
-                data << uint32(0x93b) << uint32(0x0); // 31 2363
-                data << uint32(0x93c) << uint32(0x0); // 32 2364
-                data << uint32(0x93d) << uint32(0x0); // 33 2365
-                data << uint32(0x944) << uint32(0x0); // 34 2372
-                data << uint32(0x945) << uint32(0x0); // 35 2373
-                data << uint32(0x931) << uint32(0x1); // 36 2353
-                data << uint32(0x93e) << uint32(0x0); // 37 2366
-                data << uint32(0x931) << uint32(0x1); // 38 2367 ??  grey horde not in dbc! send for consistency's sake, and to match field count
-                data << uint32(0x940) << uint32(0x0); // 39 2368
-                data << uint32(0x941) << uint32(0x0); // 7 2369
-                data << uint32(0x942) << uint32(0x0); // 8 2370
-                data << uint32(0x943) << uint32(0x0); // 9 2371
-            }
-            break;
-        case 1377:                                          // Silithus
-            {
-                data << uint32(0x909) << uint32(0x0); // 7 ally silityst gathered
-                data << uint32(0x90A) << uint32(0x0); // 8 horde silityst gathered
-                data << uint32(0x90D) << uint32(0x0C8); // 9 max silithyst
-                data << uint32(0x912) << uint32(0x0); // 10 sandworm N
-                data << uint32(0x913) << uint32(0x0); // 11 sandworm S
-                data << uint32(0x914) << uint32(0x0); // 12 sandworm SW
-                data << uint32(0x915) << uint32(0x0); // 13 sandworm E
-            }
-            break;
-        case 2597:                                          // AV
-            if (bg && bg->GetTypeID() == BATTLEGROUND_AV)
-                bg->FillInitialWorldStates(data);
-            else
-            {
-                data << uint32(0x7ae) << uint32(0x1);           // 7 snowfall n
-                data << uint32(0x532) << uint32(0x1);           // 8 frostwolfhut hc
-                data << uint32(0x531) << uint32(0x0);           // 9 frostwolfhut ac
-                data << uint32(0x52e) << uint32(0x0);           // 10 stormpike firstaid a_a
-                data << uint32(0x571) << uint32(0x0);           // 11 east frostwolf tower horde assaulted -unused
-                data << uint32(0x570) << uint32(0x0);           // 12 west frostwolf tower horde assaulted - unused
-                data << uint32(0x567) << uint32(0x1);           // 13 frostwolfe c
-                data << uint32(0x566) << uint32(0x1);           // 14 frostwolfw c
-                data << uint32(0x550) << uint32(0x1);           // 15 irondeep (N) ally
-                data << uint32(0x544) << uint32(0x0);           // 16 ice grave a_a
-                data << uint32(0x536) << uint32(0x0);           // 17 stormpike grave h_c
-                data << uint32(0x535) << uint32(0x1);           // 18 stormpike grave a_c
-                data << uint32(0x518) << uint32(0x0);           // 19 stoneheart grave a_a
-                data << uint32(0x517) << uint32(0x0);           // 20 stoneheart grave h_a
-                data << uint32(0x574) << uint32(0x0);           // 21 1396 unk
-                data << uint32(0x573) << uint32(0x0);           // 22 iceblood tower horde assaulted -unused
-                data << uint32(0x572) << uint32(0x0);           // 23 towerpoint horde assaulted - unused
-                data << uint32(0x56f) << uint32(0x0);           // 24 1391 unk
-                data << uint32(0x56e) << uint32(0x0);           // 25 iceblood a
-                data << uint32(0x56d) << uint32(0x0);           // 26 towerp a
-                data << uint32(0x56c) << uint32(0x0);           // 27 frostwolfe a
-                data << uint32(0x56b) << uint32(0x0);           // 28 froswolfw a
-                data << uint32(0x56a) << uint32(0x1);           // 29 1386 unk
-                data << uint32(0x569) << uint32(0x1);           // 30 iceblood c
-                data << uint32(0x568) << uint32(0x1);           // 31 towerp c
-                data << uint32(0x565) << uint32(0x0);           // 32 stoneh tower a
-                data << uint32(0x564) << uint32(0x0);           // 33 icewing tower a
-                data << uint32(0x563) << uint32(0x0);           // 34 dunn a
-                data << uint32(0x562) << uint32(0x0);           // 35 duns a
-                data << uint32(0x561) << uint32(0x0);           // 36 stoneheart bunker alliance assaulted - unused
-                data << uint32(0x560) << uint32(0x0);           // 37 icewing bunker alliance assaulted - unused
-                data << uint32(0x55f) << uint32(0x0);           // 38 dunbaldar south alliance assaulted - unused
-                data << uint32(0x55e) << uint32(0x0);           // 39 dunbaldar north alliance assaulted - unused
-                data << uint32(0x55d) << uint32(0x0);           // 40 stone tower d
-                data << uint32(0x3c6) << uint32(0x0);           // 41 966 unk
-                data << uint32(0x3c4) << uint32(0x0);           // 42 964 unk
-                data << uint32(0x3c2) << uint32(0x0);           // 43 962 unk
-                data << uint32(0x516) << uint32(0x1);           // 44 stoneheart grave a_c
-                data << uint32(0x515) << uint32(0x0);           // 45 stonheart grave h_c
-                data << uint32(0x3b6) << uint32(0x0);           // 46 950 unk
-                data << uint32(0x55c) << uint32(0x0);           // 47 icewing tower d
-                data << uint32(0x55b) << uint32(0x0);           // 48 dunn d
-                data << uint32(0x55a) << uint32(0x0);           // 49 duns d
-                data << uint32(0x559) << uint32(0x0);           // 50 1369 unk
-                data << uint32(0x558) << uint32(0x0);           // 51 iceblood d
-                data << uint32(0x557) << uint32(0x0);           // 52 towerp d
-                data << uint32(0x556) << uint32(0x0);           // 53 frostwolfe d
-                data << uint32(0x555) << uint32(0x0);           // 54 frostwolfw d
-                data << uint32(0x554) << uint32(0x1);           // 55 stoneh tower c
-                data << uint32(0x553) << uint32(0x1);           // 56 icewing tower c
-                data << uint32(0x552) << uint32(0x1);           // 57 dunn c
-                data << uint32(0x551) << uint32(0x1);           // 58 duns c
-                data << uint32(0x54f) << uint32(0x0);           // 59 irondeep (N) horde
-                data << uint32(0x54e) << uint32(0x0);           // 60 irondeep (N) ally
-                data << uint32(0x54d) << uint32(0x1);           // 61 mine (S) neutral
-                data << uint32(0x54c) << uint32(0x0);           // 62 mine (S) horde
-                data << uint32(0x54b) << uint32(0x0);           // 63 mine (S) ally
-                data << uint32(0x545) << uint32(0x0);           // 64 iceblood h_a
-                data << uint32(0x543) << uint32(0x1);           // 65 iceblod h_c
-                data << uint32(0x542) << uint32(0x0);           // 66 iceblood a_c
-                data << uint32(0x540) << uint32(0x0);           // 67 snowfall h_a
-                data << uint32(0x53f) << uint32(0x0);           // 68 snowfall a_a
-                data << uint32(0x53e) << uint32(0x0);           // 69 snowfall h_c
-                data << uint32(0x53d) << uint32(0x0);           // 70 snowfall a_c
-                data << uint32(0x53c) << uint32(0x0);           // 71 frostwolf g h_a
-                data << uint32(0x53b) << uint32(0x0);           // 72 frostwolf g a_a
-                data << uint32(0x53a) << uint32(0x1);           // 73 frostwolf g h_c
-                data << uint32(0x539) << uint32(0x0);           // 74 frostwolf g a_c
-                data << uint32(0x538) << uint32(0x0);           // 75 stormpike grave h_a
-                data << uint32(0x537) << uint32(0x0);           // 76 stormpike grave a_a
-                data << uint32(0x534) << uint32(0x0);           // 77 frostwolf hut h_a
-                data << uint32(0x533) << uint32(0x0);           // 78 frostwolf hut a_a
-                data << uint32(0x530) << uint32(0x0);           // 79 stormpike first aid h_a
-                data << uint32(0x52f) << uint32(0x0);           // 80 stormpike first aid h_c
-                data << uint32(0x52d) << uint32(0x1);           // 81 stormpike first aid a_c
-            }
-            break;
-        case 3277:                                          // WS
-            if (bg && bg->GetTypeID() == BATTLEGROUND_WS)
-                bg->FillInitialWorldStates(data);
-            else
-            {
-                data << uint32(0x62d) << uint32(0x0);       // 7 1581 alliance flag captures
-                data << uint32(0x62e) << uint32(0x0);       // 8 1582 horde flag captures
-                data << uint32(0x609) << uint32(0x0);       // 9 1545 unk, set to 1 on alliance flag pickup...
-                data << uint32(0x60a) << uint32(0x0);       // 10 1546 unk, set to 1 on horde flag pickup, after drop it's -1
-                data << uint32(0x60b) << uint32(0x2);       // 11 1547 unk
-                data << uint32(0x641) << uint32(0x3);       // 12 1601 unk (max flag captures?)
-                data << uint32(0x922) << uint32(0x1);       // 13 2338 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
-                data << uint32(0x923) << uint32(0x1);       // 14 2339 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
-            }
-            break;
-        case 3358:                                          // AB
-            if (bg && bg->GetTypeID() == BATTLEGROUND_AB)
-                bg->FillInitialWorldStates(data);
-            else
-            {
-                data << uint32(0x6e7) << uint32(0x0);       // 7 1767 stables alliance
-                data << uint32(0x6e8) << uint32(0x0);       // 8 1768 stables horde
-                data << uint32(0x6e9) << uint32(0x0);       // 9 1769 unk, ST?
-                data << uint32(0x6ea) << uint32(0x0);       // 10 1770 stables (show/hide)
-                data << uint32(0x6ec) << uint32(0x0);       // 11 1772 farm (0 - horde controlled, 1 - alliance controlled)
-                data << uint32(0x6ed) << uint32(0x0);       // 12 1773 farm (show/hide)
-                data << uint32(0x6ee) << uint32(0x0);       // 13 1774 farm color
-                data << uint32(0x6ef) << uint32(0x0);       // 14 1775 gold mine color, may be FM?
-                data << uint32(0x6f0) << uint32(0x0);       // 15 1776 alliance resources
-                data << uint32(0x6f1) << uint32(0x0);       // 16 1777 horde resources
-                data << uint32(0x6f2) << uint32(0x0);       // 17 1778 horde bases
-                data << uint32(0x6f3) << uint32(0x0);       // 18 1779 alliance bases
-                data << uint32(0x6f4) << uint32(0x7d0);     // 19 1780 max resources (2000)
-                data << uint32(0x6f6) << uint32(0x0);       // 20 1782 blacksmith color
-                data << uint32(0x6f7) << uint32(0x0);       // 21 1783 blacksmith (show/hide)
-                data << uint32(0x6f8) << uint32(0x0);       // 22 1784 unk, bs?
-                data << uint32(0x6f9) << uint32(0x0);       // 23 1785 unk, bs?
-                data << uint32(0x6fb) << uint32(0x0);       // 24 1787 gold mine (0 - horde contr, 1 - alliance contr)
-                data << uint32(0x6fc) << uint32(0x0);       // 25 1788 gold mine (0 - conflict, 1 - horde)
-                data << uint32(0x6fd) << uint32(0x0);       // 26 1789 gold mine (1 - show/0 - hide)
-                data << uint32(0x6fe) << uint32(0x0);       // 27 1790 gold mine color
-                data << uint32(0x700) << uint32(0x0);       // 28 1792 gold mine color, wtf?, may be LM?
-                data << uint32(0x701) << uint32(0x0);       // 29 1793 lumber mill color (0 - conflict, 1 - horde contr)
-                data << uint32(0x702) << uint32(0x0);       // 30 1794 lumber mill (show/hide)
-                data << uint32(0x703) << uint32(0x0);       // 31 1795 lumber mill color color
-                data << uint32(0x732) << uint32(0x1);       // 32 1842 stables (1 - uncontrolled)
-                data << uint32(0x733) << uint32(0x1);       // 33 1843 gold mine (1 - uncontrolled)
-                data << uint32(0x734) << uint32(0x1);       // 34 1844 lumber mill (1 - uncontrolled)
-                data << uint32(0x735) << uint32(0x1);       // 35 1845 farm (1 - uncontrolled)
-                data << uint32(0x736) << uint32(0x1);       // 36 1846 blacksmith (1 - uncontrolled)
-                data << uint32(0x745) << uint32(0x2);       // 37 1861 unk
-                data << uint32(0x7a3) << uint32(0x708);     // 38 1955 warning limit (1800)
-            }
-            break;
-        default:
-            data << uint32(0x914) << uint32(0x0);           // 7
-            data << uint32(0x913) << uint32(0x0);           // 8
-            data << uint32(0x912) << uint32(0x0);           // 9
-            data << uint32(0x915) << uint32(0x0);           // 10
-            break;
+        WorldPacket data(SMSG_INIT_WORLD_STATES, (4+2+NumberOfFields));
+        data <<
+        (uint32)mapid <<
+        (uint16)NumberOfFields <<
+        (uint16)0x07AE<< (uint16)0x01<<
+        (uint16)0x0532<< (uint16)0x01<<
+        (uint16)0x0531<< (uint16)0x00<<
+        (uint16)0x052E<< (uint16)0x00<<
+        (uint16)0x06F9<< (uint16)0x00<<
+        (uint16)0x06F3<< (uint16)0x00<<
+        (uint16)0x06F1<< (uint16)0x00<<
+        (uint16)0x06EE<< (uint16)0x00<<
+        (uint16)0x06ED<< (uint16)0x00<<
+        (uint16)0x0571<< (uint16)0x00<<
+        (uint16)0x0570<< (uint16)0x00<<
+        (uint16)0x0567<< (uint16)0x01<<
+        (uint16)0x0566<< (uint16)0x01<<
+        (uint16)0x0550<< (uint16)0x01<<
+        (uint16)0x0544<< (uint16)0x00<<
+        (uint16)0x0536<< (uint16)0x00<<
+        (uint16)0x0535<< (uint16)0x01<<
+        (uint16)0x03C6<< (uint16)0x00<<
+        (uint16)0x03C4<< (uint16)0x00<<
+        (uint16)0x03C2<< (uint16)0x00<<
+        (uint16)0x07A8<< (uint16)0x00<<
+        (uint16)0x07A3<< (uint16)0x270F<<
+        (uint16)0x0574<< (uint16)0x00<<
+        (uint16)0x0573<< (uint16)0x00<<
+        (uint16)0x0572<< (uint16)0x00<<
+        (uint16)0x056F<< (uint16)0x00<<
+        (uint16)0x056E<< (uint16)0x00<<
+        (uint16)0x056D<< (uint16)0x00<<
+        (uint16)0x056C<< (uint16)0x00<<
+        (uint16)0x056B<< (uint16)0x00<<
+        (uint16)0x056A<< (uint16)0x01<<
+        (uint16)0x0569<< (uint16)0x01<<
+        (uint16)0x0568<< (uint16)0x01<<
+        (uint16)0x0565<< (uint16)0x00<<
+        (uint16)0x0564<< (uint16)0x00<<
+        (uint16)0x0563<< (uint16)0x00<<
+        (uint16)0x0562<< (uint16)0x00<<
+        (uint16)0x0561<< (uint16)0x00<<
+        (uint16)0x0560<< (uint16)0x00<<
+        (uint16)0x055F<< (uint16)0x00<<
+        (uint16)0x055E<< (uint16)0x00<<
+        (uint16)0x055D<< (uint16)0x00<<
+        (uint16)0x055C<< (uint16)0x00<<
+        (uint16)0x055B<< (uint16)0x00<<
+        (uint16)0x055A<< (uint16)0x00<<
+        (uint16)0x0559<< (uint16)0x00<<
+        (uint16)0x0558<< (uint16)0x00<<
+        (uint16)0x0557<< (uint16)0x00<<
+        (uint16)0x0556<< (uint16)0x00<<
+        (uint16)0x0555<< (uint16)0x00<<
+        (uint16)0x0554<< (uint16)0x01<<
+        (uint16)0x0553<< (uint16)0x01<<
+        (uint16)0x0552<< (uint16)0x01<<
+        (uint16)0x0551<< (uint16)0x01<<
+        (uint16)0x054F<< (uint16)0x00<<
+        (uint16)0x054E<< (uint16)0x00<<
+        (uint16)0x054D<< (uint16)0x01<<
+        (uint16)0x054C<< (uint16)0x00<<
+        (uint16)0x054B<< (uint16)0x00<<
+        (uint16)0x0545<< (uint16)0x00<<
+        (uint16)0x0543<< (uint16)0x01<<
+        (uint16)0x0542<< (uint16)0x00<<
+        (uint16)0x0540<< (uint16)0x00<<
+        (uint16)0x053F<< (uint16)0x00<<
+        (uint16)0x053E<< (uint16)0x00<<
+        (uint16)0x053D<< (uint16)0x00<<
+        (uint16)0x053C<< (uint16)0x00<<
+        (uint16)0x053B<< (uint16)0x00<<
+        (uint16)0x053A<< (uint16)0x01<<
+        (uint16)0x0539<< (uint16)0x00<<
+        (uint16)0x0538<< (uint16)0x00<<
+        (uint16)0x0537<< (uint16)0x00<<
+        (uint16)0x0534<< (uint16)0x00<<
+        (uint16)0x0533<< (uint16)0x00<<
+        (uint16)0x0530<< (uint16)0x00<<
+        (uint16)0x052F<< (uint16)0x00<<
+        (uint16)0x052D<< (uint16)0x01<<
+        (uint16)0x0516<< (uint16)0x01<<
+        (uint16)0x0515<< (uint16)0x00<<
+        (uint16)0x03B6<< (uint16)0x00<<
+        (uint16)0x0745<< (uint16)0x02<<
+        (uint16)0x0736<< (uint16)0x01<<
+        (uint16)0x0735<< (uint16)0x01<<
+        (uint16)0x0734<< (uint16)0x01<<
+        (uint16)0x0733<< (uint16)0x01<<
+        (uint16)0x0732<< (uint16)0x01<<
+        (uint16)0x0702<< (uint16)0x00<<
+        (uint16)0x0701<< (uint16)0x00<<
+        (uint16)0x0700<< (uint16)0x00<<
+        (uint16)0x06FE<< (uint16)0x00<<
+        (uint16)0x06FD<< (uint16)0x00<<
+        (uint16)0x06FC<< (uint16)0x00<<
+        (uint16)0x06FB<< (uint16)0x00<<
+        (uint16)0x06F8<< (uint16)0x00<<
+        (uint16)0x06F7<< (uint16)0x00<<
+        (uint16)0x06F6<< (uint16)0x00<<
+        (uint16)0x06F4<< (uint16)0x7D0<<
+        (uint16)0x06F2<< (uint16)0x00<<
+        (uint16)0x06F0<< (uint16)0x00<<
+        (uint16)0x06EF<< (uint16)0x00<<
+        (uint16)0x06EC<< (uint16)0x00<<
+        (uint16)0x06EA<< (uint16)0x00<<
+        (uint16)0x06E9<< (uint16)0x00<<
+        (uint16)0x06E8<< (uint16)0x00<<
+        (uint16)0x06E7<< (uint16)0x00<<
+        (uint16)0x0518<< (uint16)0x00<<
+        (uint16)0x0517<< (uint16)0x00<<
+        (uint16)0x0703<< (uint16)0x00;
+
+         GetSession()->SendPacket(&data);
     }
-    GetSession()->SendPacket(&data);
+    else
+    {
+        WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+2+(NumberOfFields*8)));
+        data << uint32(mapid);                                  // mapid
+        data << uint32(zoneid);                                 // zone id
+        data << uint16(NumberOfFields);                         // count of uint64 blocks
+        data << uint32(0x8d8) << uint32(0x0);                   // 1
+        data << uint32(0x8d7) << uint32(0x0);                   // 2
+        data << uint32(0x8d6) << uint32(0x0);                   // 3
+        data << uint32(0x8d5) << uint32(0x0);                   // 4
+        data << uint32(0x8d4) << uint32(0x0);                   // 5
+        data << uint32(0x8d3) << uint32(0x0);                   // 6
+        switch(zoneid)
+        {
+            case 1:
+            case 11:
+            case 12:
+            case 38:
+            case 40:
+            case 51:
+            case 1519:
+            case 1537:
+            case 2257:
+                break;
+            case 139:                                           // EPL
+                {
+                    data << uint32(0x97a) << uint32(0x0); // 10 2426
+                    data << uint32(0x917) << uint32(0x0); // 11 2327
+                    data << uint32(0x918) << uint32(0x0); // 12 2328
+                    data << uint32(0x97b) << uint32(0x32); // 13 2427
+                    data << uint32(0x97c) << uint32(0x32); // 14 2428
+                    data << uint32(0x933) << uint32(0x1); // 15 2355
+                    data << uint32(0x946) << uint32(0x0); // 16 2374
+                    data << uint32(0x947) << uint32(0x0); // 17 2375
+                    data << uint32(0x948) << uint32(0x0); // 18 2376
+                    data << uint32(0x949) << uint32(0x0); // 19 2377
+                    data << uint32(0x94a) << uint32(0x0); // 20 2378
+                    data << uint32(0x94b) << uint32(0x0); // 21 2379
+                    data << uint32(0x932) << uint32(0x0); // 22 2354
+                    data << uint32(0x934) << uint32(0x0); // 23 2356
+                    data << uint32(0x935) << uint32(0x0); // 24 2357
+                    data << uint32(0x936) << uint32(0x0); // 25 2358
+                    data << uint32(0x937) << uint32(0x0); // 26 2359
+                    data << uint32(0x938) << uint32(0x0); // 27 2360
+                    data << uint32(0x939) << uint32(0x1); // 28 2361
+                    data << uint32(0x930) << uint32(0x1); // 29 2352
+                    data << uint32(0x93a) << uint32(0x0); // 30 2362
+                    data << uint32(0x93b) << uint32(0x0); // 31 2363
+                    data << uint32(0x93c) << uint32(0x0); // 32 2364
+                    data << uint32(0x93d) << uint32(0x0); // 33 2365
+                    data << uint32(0x944) << uint32(0x0); // 34 2372
+                    data << uint32(0x945) << uint32(0x0); // 35 2373
+                    data << uint32(0x931) << uint32(0x1); // 36 2353
+                    data << uint32(0x93e) << uint32(0x0); // 37 2366
+                    data << uint32(0x931) << uint32(0x1); // 38 2367 ??  grey horde not in dbc! send for consistency's sake, and to match field count
+                    data << uint32(0x940) << uint32(0x0); // 39 2368
+                    data << uint32(0x941) << uint32(0x0); // 7 2369
+                    data << uint32(0x942) << uint32(0x0); // 8 2370
+                    data << uint32(0x943) << uint32(0x0); // 9 2371
+                }
+                break;
+            case 1377:                                          // Silithus
+                {
+                    data << uint32(0x909) << uint32(0x0); // 7 ally silityst gathered
+                    data << uint32(0x90A) << uint32(0x0); // 8 horde silityst gathered
+                    data << uint32(0x90D) << uint32(0x0C8); // 9 max silithyst
+                    data << uint32(0x912) << uint32(0x0); // 10 sandworm N
+                    data << uint32(0x913) << uint32(0x0); // 11 sandworm S
+                    data << uint32(0x914) << uint32(0x0); // 12 sandworm SW
+                    data << uint32(0x915) << uint32(0x0); // 13 sandworm E
+                }
+                break;
+            case 2597:                                          // AV
+                if (bg && bg->GetTypeID() == BATTLEGROUND_AV)
+                    bg->FillInitialWorldStates(data);
+                else
+                {
+                    data << uint32(0x7ae) << uint32(0x1);           // 7 snowfall n
+                    data << uint32(0x532) << uint32(0x1);           // 8 frostwolfhut hc
+                    data << uint32(0x531) << uint32(0x0);           // 9 frostwolfhut ac
+                    data << uint32(0x52e) << uint32(0x0);           // 10 stormpike firstaid a_a
+                    data << uint32(0x571) << uint32(0x0);           // 11 east frostwolf tower horde assaulted -unused
+                    data << uint32(0x570) << uint32(0x0);           // 12 west frostwolf tower horde assaulted - unused
+                    data << uint32(0x567) << uint32(0x1);           // 13 frostwolfe c
+                    data << uint32(0x566) << uint32(0x1);           // 14 frostwolfw c
+                    data << uint32(0x550) << uint32(0x1);           // 15 irondeep (N) ally
+                    data << uint32(0x544) << uint32(0x0);           // 16 ice grave a_a
+                    data << uint32(0x536) << uint32(0x0);           // 17 stormpike grave h_c
+                    data << uint32(0x535) << uint32(0x1);           // 18 stormpike grave a_c
+                    data << uint32(0x518) << uint32(0x0);           // 19 stoneheart grave a_a
+                    data << uint32(0x517) << uint32(0x0);           // 20 stoneheart grave h_a
+                    data << uint32(0x574) << uint32(0x0);           // 21 1396 unk
+                    data << uint32(0x573) << uint32(0x0);           // 22 iceblood tower horde assaulted -unused
+                    data << uint32(0x572) << uint32(0x0);           // 23 towerpoint horde assaulted - unused
+                    data << uint32(0x56f) << uint32(0x0);           // 24 1391 unk
+                    data << uint32(0x56e) << uint32(0x0);           // 25 iceblood a
+                    data << uint32(0x56d) << uint32(0x0);           // 26 towerp a
+                    data << uint32(0x56c) << uint32(0x0);           // 27 frostwolfe a
+                    data << uint32(0x56b) << uint32(0x0);           // 28 froswolfw a
+                    data << uint32(0x56a) << uint32(0x1);           // 29 1386 unk
+                    data << uint32(0x569) << uint32(0x1);           // 30 iceblood c
+                    data << uint32(0x568) << uint32(0x1);           // 31 towerp c
+                    data << uint32(0x565) << uint32(0x0);           // 32 stoneh tower a
+                    data << uint32(0x564) << uint32(0x0);           // 33 icewing tower a
+                    data << uint32(0x563) << uint32(0x0);           // 34 dunn a
+                    data << uint32(0x562) << uint32(0x0);           // 35 duns a
+                    data << uint32(0x561) << uint32(0x0);           // 36 stoneheart bunker alliance assaulted - unused
+                    data << uint32(0x560) << uint32(0x0);           // 37 icewing bunker alliance assaulted - unused
+                    data << uint32(0x55f) << uint32(0x0);           // 38 dunbaldar south alliance assaulted - unused
+                    data << uint32(0x55e) << uint32(0x0);           // 39 dunbaldar north alliance assaulted - unused
+                    data << uint32(0x55d) << uint32(0x0);           // 40 stone tower d
+                    data << uint32(0x3c6) << uint32(0x0);           // 41 966 unk
+                    data << uint32(0x3c4) << uint32(0x0);           // 42 964 unk
+                    data << uint32(0x3c2) << uint32(0x0);           // 43 962 unk
+                    data << uint32(0x516) << uint32(0x1);           // 44 stoneheart grave a_c
+                    data << uint32(0x515) << uint32(0x0);           // 45 stonheart grave h_c
+                    data << uint32(0x3b6) << uint32(0x0);           // 46 950 unk
+                    data << uint32(0x55c) << uint32(0x0);           // 47 icewing tower d
+                    data << uint32(0x55b) << uint32(0x0);           // 48 dunn d
+                    data << uint32(0x55a) << uint32(0x0);           // 49 duns d
+                    data << uint32(0x559) << uint32(0x0);           // 50 1369 unk
+                    data << uint32(0x558) << uint32(0x0);           // 51 iceblood d
+                    data << uint32(0x557) << uint32(0x0);           // 52 towerp d
+                    data << uint32(0x556) << uint32(0x0);           // 53 frostwolfe d
+                    data << uint32(0x555) << uint32(0x0);           // 54 frostwolfw d
+                    data << uint32(0x554) << uint32(0x1);           // 55 stoneh tower c
+                    data << uint32(0x553) << uint32(0x1);           // 56 icewing tower c
+                    data << uint32(0x552) << uint32(0x1);           // 57 dunn c
+                    data << uint32(0x551) << uint32(0x1);           // 58 duns c
+                    data << uint32(0x54f) << uint32(0x0);           // 59 irondeep (N) horde
+                    data << uint32(0x54e) << uint32(0x0);           // 60 irondeep (N) ally
+                    data << uint32(0x54d) << uint32(0x1);           // 61 mine (S) neutral
+                    data << uint32(0x54c) << uint32(0x0);           // 62 mine (S) horde
+                    data << uint32(0x54b) << uint32(0x0);           // 63 mine (S) ally
+                    data << uint32(0x545) << uint32(0x0);           // 64 iceblood h_a
+                    data << uint32(0x543) << uint32(0x1);           // 65 iceblod h_c
+                    data << uint32(0x542) << uint32(0x0);           // 66 iceblood a_c
+                    data << uint32(0x540) << uint32(0x0);           // 67 snowfall h_a
+                    data << uint32(0x53f) << uint32(0x0);           // 68 snowfall a_a
+                    data << uint32(0x53e) << uint32(0x0);           // 69 snowfall h_c
+                    data << uint32(0x53d) << uint32(0x0);           // 70 snowfall a_c
+                    data << uint32(0x53c) << uint32(0x0);           // 71 frostwolf g h_a
+                    data << uint32(0x53b) << uint32(0x0);           // 72 frostwolf g a_a
+                    data << uint32(0x53a) << uint32(0x1);           // 73 frostwolf g h_c
+                    data << uint32(0x539) << uint32(0x0);           // 74 frostwolf g a_c
+                    data << uint32(0x538) << uint32(0x0);           // 75 stormpike grave h_a
+                    data << uint32(0x537) << uint32(0x0);           // 76 stormpike grave a_a
+                    data << uint32(0x534) << uint32(0x0);           // 77 frostwolf hut h_a
+                    data << uint32(0x533) << uint32(0x0);           // 78 frostwolf hut a_a
+                    data << uint32(0x530) << uint32(0x0);           // 79 stormpike first aid h_a
+                    data << uint32(0x52f) << uint32(0x0);           // 80 stormpike first aid h_c
+                    data << uint32(0x52d) << uint32(0x1);           // 81 stormpike first aid a_c
+                }
+                break;
+            case 3277:                                          // WS
+                if (bg && bg->GetTypeID() == BATTLEGROUND_WS)
+                    bg->FillInitialWorldStates(data);
+                else
+                {
+                    data << uint32(0x62d) << uint32(0x0);       // 7 1581 alliance flag captures
+                    data << uint32(0x62e) << uint32(0x0);       // 8 1582 horde flag captures
+                    data << uint32(0x609) << uint32(0x0);       // 9 1545 unk, set to 1 on alliance flag pickup...
+                    data << uint32(0x60a) << uint32(0x0);       // 10 1546 unk, set to 1 on horde flag pickup, after drop it's -1
+                    data << uint32(0x60b) << uint32(0x2);       // 11 1547 unk
+                    data << uint32(0x641) << uint32(0x3);       // 12 1601 unk (max flag captures?)
+                    data << uint32(0x922) << uint32(0x1);       // 13 2338 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+                    data << uint32(0x923) << uint32(0x1);       // 14 2339 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+                }
+                break;
+            case 3358:                                          // AB
+                if (bg && bg->GetTypeID() == BATTLEGROUND_AB)
+                    bg->FillInitialWorldStates(data);
+                else
+                {
+                    data << uint32(0x6e7) << uint32(0x0);       // 7 1767 stables alliance
+                    data << uint32(0x6e8) << uint32(0x0);       // 8 1768 stables horde
+                    data << uint32(0x6e9) << uint32(0x0);       // 9 1769 unk, ST?
+                    data << uint32(0x6ea) << uint32(0x0);       // 10 1770 stables (show/hide)
+                    data << uint32(0x6ec) << uint32(0x0);       // 11 1772 farm (0 - horde controlled, 1 - alliance controlled)
+                    data << uint32(0x6ed) << uint32(0x0);       // 12 1773 farm (show/hide)
+                    data << uint32(0x6ee) << uint32(0x0);       // 13 1774 farm color
+                    data << uint32(0x6ef) << uint32(0x0);       // 14 1775 gold mine color, may be FM?
+                    data << uint32(0x6f0) << uint32(0x0);       // 15 1776 alliance resources
+                    data << uint32(0x6f1) << uint32(0x0);       // 16 1777 horde resources
+                    data << uint32(0x6f2) << uint32(0x0);       // 17 1778 horde bases
+                    data << uint32(0x6f3) << uint32(0x0);       // 18 1779 alliance bases
+                    data << uint32(0x6f4) << uint32(0x7d0);     // 19 1780 max resources (2000)
+                    data << uint32(0x6f6) << uint32(0x0);       // 20 1782 blacksmith color
+                    data << uint32(0x6f7) << uint32(0x0);       // 21 1783 blacksmith (show/hide)
+                    data << uint32(0x6f8) << uint32(0x0);       // 22 1784 unk, bs?
+                    data << uint32(0x6f9) << uint32(0x0);       // 23 1785 unk, bs?
+                    data << uint32(0x6fb) << uint32(0x0);       // 24 1787 gold mine (0 - horde contr, 1 - alliance contr)
+                    data << uint32(0x6fc) << uint32(0x0);       // 25 1788 gold mine (0 - conflict, 1 - horde)
+                    data << uint32(0x6fd) << uint32(0x0);       // 26 1789 gold mine (1 - show/0 - hide)
+                    data << uint32(0x6fe) << uint32(0x0);       // 27 1790 gold mine color
+                    data << uint32(0x700) << uint32(0x0);       // 28 1792 gold mine color, wtf?, may be LM?
+                    data << uint32(0x701) << uint32(0x0);       // 29 1793 lumber mill color (0 - conflict, 1 - horde contr)
+                    data << uint32(0x702) << uint32(0x0);       // 30 1794 lumber mill (show/hide)
+                    data << uint32(0x703) << uint32(0x0);       // 31 1795 lumber mill color color
+                    data << uint32(0x732) << uint32(0x1);       // 32 1842 stables (1 - uncontrolled)
+                    data << uint32(0x733) << uint32(0x1);       // 33 1843 gold mine (1 - uncontrolled)
+                    data << uint32(0x734) << uint32(0x1);       // 34 1844 lumber mill (1 - uncontrolled)
+                    data << uint32(0x735) << uint32(0x1);       // 35 1845 farm (1 - uncontrolled)
+                    data << uint32(0x736) << uint32(0x1);       // 36 1846 blacksmith (1 - uncontrolled)
+                    data << uint32(0x745) << uint32(0x2);       // 37 1861 unk
+                    data << uint32(0x7a3) << uint32(0x708);     // 38 1955 warning limit (1800)
+                }
+                break;
+            default:
+                data << uint32(0x914) << uint32(0x0);           // 7
+                data << uint32(0x913) << uint32(0x0);           // 8
+                data << uint32(0x912) << uint32(0x0);           // 9
+                data << uint32(0x915) << uint32(0x0);           // 10
+                break;
+        }
+        GetSession()->SendPacket(&data);
+    }
 }
 
 uint32 Player::GetXPRestBonus(uint32 xp)
