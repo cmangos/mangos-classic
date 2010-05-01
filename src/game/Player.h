@@ -333,8 +333,8 @@ struct HonorCP
 
 struct HonorRankInfo
 {
-    uint8 rank;
-    int8 visualRank;
+    uint8 rank;       // internal range [0..18]
+    int8 visualRank;  // number visualized in rank bar [-4..14]
     float maxRP;
     float minRP;
     bool positive;
