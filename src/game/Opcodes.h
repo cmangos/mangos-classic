@@ -862,9 +862,10 @@ enum OpcodesList
     SMSG_CHARACTER_PROFILE_REALM_CONNECTED          = 0x339,
     SMSG_DEFENSE_MESSAGE                            = 0x33A,
     MSG_GM_RESETINSTANCELIMIT                       = 0x33C,
-    SMSG_MOVE_SET_FLIGHT_OBSOLETE                   = 0x33E,
-    SMSG_MOVE_UNSET_FLIGHT_OBSOLETE                 = 0x33F,
-    CMSG_MOVE_FLIGHT_ACK_OBSOLETE                   = 0x340,
+    //SMSG_MOTD                                       = 0x33D,
+    SMSG_MOVE_SET_FLIGHT                            = 0x33E,
+    SMSG_MOVE_UNSET_FLIGHT                          = 0x33F,
+    CMSG_MOVE_FLIGHT_ACK                            = 0x340,
     MSG_MOVE_START_SWIM_CHEAT                       = 0x341,
     MSG_MOVE_STOP_SWIM_CHEAT                        = 0x342,
     // [-ZERO] Last existed in 1.12.1 opcode, maybe some renumbering from other side
