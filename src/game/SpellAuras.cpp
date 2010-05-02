@@ -724,7 +724,8 @@ void Aura::_AddAura()
     bool secondaura = false;
     uint8 slot = NULL_AURA_SLOT;
 
-    for(uint8 i = 0; i < 3; i++)
+    // Lookup for some spell auras (and get slot from it)
+    for(uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         Unit::spellEffectPair spair = Unit::spellEffectPair(GetId(), SpellEffectIndex(i));
         for(Unit::AuraMap::const_iterator itr = m_target->GetAuras().lower_bound(spair); itr != m_target->GetAuras().upper_bound(spair); ++itr)
