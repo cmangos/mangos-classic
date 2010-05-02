@@ -412,7 +412,7 @@ void LoadDBCStores(const std::string& dataPath)
     // fill data (pointers to sTaxiPathNodeStore elements
     for(uint32 i = 1; i < sTaxiPathNodeStore.GetNumRows(); ++i)
         if(TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
-            sTaxiPathNodesByPath[entry->path][entry->index] = entry;
+            sTaxiPathNodesByPath[entry->path].set(entry->index, entry);
 
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sWorldMapAreaStore,        dbcPath,"WorldMapArea.dbc");
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sWorldMapOverlayStore,     dbcPath,"WorldMapOverlay.dbc");
