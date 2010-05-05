@@ -223,7 +223,8 @@ enum SpellTargets
     SPELL_TARGETS_NOT_FRIENDLY,
     SPELL_TARGETS_NOT_HOSTILE,
     SPELL_TARGETS_FRIENDLY,
-    SPELL_TARGETS_AOE_DAMAGE
+    SPELL_TARGETS_AOE_DAMAGE,
+    SPELL_TARGETS_ALL
 };
 
 #define SPELL_SPELL_CHANNEL_UPDATE_INTERVAL (1*IN_MILLISECONDS)
@@ -651,7 +652,7 @@ namespace MaNGOS
             {
                 // there are still more spells which can be casted on dead, but
                 // they are no AOE and don't have such a nice SPELL_ATTR flag
-                if ( !itr->getSource()->isTargetableForAttack(i_spell.m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_CAST_ON_DEAD)
+                if ( (i_TargetType != SPELL_TARGETS_ALL && !itr->getSource()->isTargetableForAttack(i_spell.m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_CAST_ON_DEAD))
                     // mostly phase check
                     || !itr->getSource()->IsInMap(i_originalCaster))
                     continue;
@@ -691,6 +692,8 @@ namespace MaNGOS
                         }
                     }
                     break;
+                    case SPELL_TARGETS_ALL:
+                        break;
                     default: continue;
                 }
 
