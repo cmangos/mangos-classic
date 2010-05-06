@@ -276,7 +276,7 @@ WorldSocketMgr::StartReactiveIO (ACE_UINT16 port, const char* address)
 int
 WorldSocketMgr::StartNetwork (ACE_UINT16 port, const char* address)
 {
-    if (!sLog.IsOutDebug ())
+    if (!sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))
         ACE_Log_Msg::instance ()->priority_mask (LM_ERROR, ACE_Log_Msg::PROCESS);
 
     if (StartReactiveIO (port, address) == -1)
