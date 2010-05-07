@@ -255,7 +255,7 @@ bool Group::AddMember(const uint64 &guid, const char* name)
         player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
         UpdatePlayerOutOfRange(player);
 
-        // quest related GO state dependent from raid memebership
+        // quest related GO state dependent from raid membership
         if(isRaidGroup())
             player->UpdateForQuestsGO();
     }
@@ -311,7 +311,7 @@ void Group::ChangeLeader(const uint64 &guid)
 {
     member_citerator slot = _getMemberCSlot(guid);
 
-    if(slot==m_memberSlots.end())
+    if(slot == m_memberSlots.end())
         return;
 
     _setLeader(guid);
