@@ -384,11 +384,14 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
     //sLog.outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, rollType:%u", (uint32)Guid, NumberOfPlayers, rollType);
 
     Group* group = GetPlayer()->GetGroup();
-    if(!group)
+    if (!group)
         return;
 
-    // everything's fine, do it
-    group->CountRollVote(GetPlayer()->GetObjectGuid(), lootedTarget, itemSlot, rollType);
+    if (rollType >= MAX_ROLL_FROM_CLIENT)
+        return;
+
+    // everything is fine, do it
+    group->CountRollVote(GetPlayer()->GetObjectGuid(), lootedTarget, itemSlot, RollVote(rollType));
 }
 
 void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
