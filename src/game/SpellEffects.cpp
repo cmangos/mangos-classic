@@ -4605,13 +4605,13 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
     // If dest location if present
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-         x = m_targets.m_destX;
-         y = m_targets.m_destY;
-         z = m_targets.m_destZ;
+        x = m_targets.m_destX;
+        y = m_targets.m_destY;
+        z = m_targets.m_destZ;
      }
      // Summon if dest location not present near caster
      else
-         m_caster->GetClosePoint(x, y, z, critter->GetObjectSize());
+        m_caster->GetClosePoint(x, y, z, critter->GetObjectSize());
 
     critter->Relocate(x, y, z, m_caster->GetOrientation());
     critter->SetSummonPoint(x, y, z, m_caster->GetOrientation());

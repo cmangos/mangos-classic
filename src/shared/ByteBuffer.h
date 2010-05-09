@@ -278,7 +278,7 @@ class ByteBuffer
         void read(uint8 *dest, size_t len)
         {
             if(_rpos  + len > size())
-               throw ByteBufferException(false, _rpos, len, size());
+                throw ByteBufferException(false, _rpos, len, size());
             memcpy(dest, &_storage[_rpos], len);
             _rpos += len;
         }
@@ -370,7 +370,7 @@ class ByteBuffer
         void put(size_t pos, const uint8 *src, size_t cnt)
         {
             if(pos + cnt > size())
-               throw ByteBufferException(true, pos, cnt, size());
+                throw ByteBufferException(true, pos, cnt, size());
             memcpy(&_storage[pos], src, cnt);
         }
         void print_storage() const
