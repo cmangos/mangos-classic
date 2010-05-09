@@ -87,7 +87,7 @@ int RASocket::close(int)
 {
     if(closing_)
         return -1;
-    sLog.outDebug("RASocket::close");
+    DEBUG_LOG("RASocket::close");
     shutdown();
 
     closing_ = true;
@@ -100,7 +100,7 @@ int RASocket::handle_close (ACE_HANDLE h, ACE_Reactor_Mask)
 {
     if(closing_)
         return -1;
-    sLog.outDebug("RASocket::handle_close");
+    DEBUG_LOG("RASocket::handle_close");
     ACE_GUARD_RETURN (ACE_Thread_Mutex, Guard, outBufferLock, -1);
 
     closing_ = true;
@@ -147,7 +147,7 @@ int RASocket::handle_output (ACE_HANDLE)
 /// Read data from the network
 int RASocket::handle_input(ACE_HANDLE)
 {
-    sLog.outDebug("RASocket::handle_input");
+    DEBUG_LOG("RASocket::handle_input");
     if(closing_)
     {
         sLog.outError("Called RASocket::handle_input with closing_ = true");
@@ -158,7 +158,7 @@ int RASocket::handle_input(ACE_HANDLE)
 
     if(readBytes <= 0)
     {
-        sLog.outDebug("read %u bytes in RASocket::handle_input", readBytes);
+        DEBUG_LOG("read %u bytes in RASocket::handle_input", readBytes);
         return -1;
     }
 

@@ -46,7 +46,7 @@ alter table creature_movement add `wpguid` int(11) default '0';
 //-----------------------------------------------//
 void WaypointMovementGenerator<Creature>::LoadPath(Creature &c)
 {
-    sLog.outDetail("LoadPath: loading waypoint path for creature %u, %u", c.GetGUIDLow(), c.GetDBTableGUIDLow());
+    DETAIL_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "LoadPath: loading waypoint path for creature %u, %u", c.GetGUIDLow(), c.GetDBTableGUIDLow());
 
     i_path = sWaypointMgr.GetPath(c.GetDBTableGUIDLow());
 
@@ -355,7 +355,7 @@ bool FlightPathMovementGenerator::Update(Player &player, const uint32 &diff)
                 ++i_currentNode;
                 if (MovementInProgress())
                 {
-                    DEBUG_LOG("loading node %u for player %s", i_currentNode, player.GetName());
+                    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "loading node %u for player %s", i_currentNode, player.GetName());
                     if ((*i_path)[i_currentNode].mapid == curMap)
                     {
                         // do not send movement, it was sent already

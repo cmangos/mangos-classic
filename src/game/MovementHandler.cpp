@@ -33,7 +33,7 @@
 
 void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
 {
-    sLog.outDebug( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
+    DEBUG_LOG( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
     HandleMoveWorldportAckOpcode();
 }
 
@@ -84,7 +84,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // while the player is in transit, for example the map may get full
     if(!GetPlayer()->GetMap()->Add(GetPlayer()))
     {
-        sLog.outDebug("WORLD: teleport of player %s (%d) to location %d, %f, %f, %f, %f failed", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+        DEBUG_LOG("WORLD: teleport of player %s (%d) to location %d, %f, %f, %f, %f failed", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
         // teleport the player home
         if(!GetPlayer()->TeleportToHomebind())
         {
@@ -177,7 +177,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 {
-    sLog.outDebug("MSG_MOVE_TELEPORT_ACK");
+    DEBUG_LOG("MSG_MOVE_TELEPORT_ACK");
+
     ObjectGuid guid;
     uint32 flags, time;
 
@@ -224,7 +225,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
     uint32 opcode = recv_data.GetOpcode();
-    sLog.outDebug("WORLD: Recvd %s (%u, 0x%X) opcode", opCodes.LookupOpcode(opcode)->name, opcode, opcode);
+    DEBUG_LOG("WORLD: Recvd %s (%u, 0x%X) opcode", opCodes.LookupOpcode(opcode)->name, opcode, opcode);
 
     Unit *mover = _player;                                  // for better code compatibiltiy until mover not backported from master
     Player *plMover = _player;
@@ -363,6 +364,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
 void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 {
+    uint32 opcode = recv_data.GetOpcode();
+    DEBUG_LOG("WORLD: Recvd %s (%u, 0x%X) opcode", LookupOpcodeName(opcode), opcode, opcode);
+
     /* extract packet */
     ObjectGuid guid;
     MovementInfo movementInfo;
@@ -385,7 +389,6 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 
     static char const* move_type_name[MAX_MOVE_TYPE] = {  "Walk", "Run", "RunBack", "Swim", "SwimBack", "TurnRate" };
 
-    uint16 opcode = recv_data.GetOpcode();
     switch(opcode)
     {
         case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:          move_type = MOVE_WALK;          force_move_type = MOVE_WALK;        break;
@@ -418,7 +421,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
         }
         else                                                // must be lesser - cheating
         {
-            sLog.outBasic("Player %s from account id %u kicked for incorrect speed (must be %f instead %f)",
+            BASIC_LOG("Player %s from account id %u kicked for incorrect speed (must be %f instead %f)",
                 _player->GetName(),_player->GetSession()->GetAccountId(),_player->GetSpeed(move_type), newspeed);
             _player->GetSession()->KickPlayer();
         }
@@ -427,7 +430,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 
 void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
 {
-    sLog.outDebug("WORLD: Recvd CMSG_SET_ACTIVE_MOVER");
+    DEBUG_LOG("WORLD: Recvd CMSG_SET_ACTIVE_MOVER");
 
     uint64 guid;
     recv_data >> guid;
@@ -435,7 +438,7 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
 
 void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvdata*/)
 {
-    //sLog.outDebug("WORLD: Recvd CMSG_MOUNTSPECIAL_ANIM");
+    //DEBUG_LOG("WORLD: Recvd CMSG_MOUNTSPECIAL_ANIM");
 
     WorldPacket data(SMSG_MOUNTSPECIAL_ANIM, 8);
     data << uint64(GetPlayer()->GetGUID());
@@ -445,7 +448,7 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvdata*/)
 
 void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
 {
-    sLog.outDebug("CMSG_MOVE_KNOCK_BACK_ACK");
+    DEBUG_LOG("CMSG_MOVE_KNOCK_BACK_ACK");
 
     MovementInfo movementInfo;
 
@@ -456,7 +459,7 @@ void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
 
 void WorldSession::HandleMoveHoverAck( WorldPacket& recv_data )
 {
-    sLog.outDebug("CMSG_MOVE_HOVER_ACK");
+    DEBUG_LOG("CMSG_MOVE_HOVER_ACK");
 
     MovementInfo movementInfo;
 
@@ -468,7 +471,7 @@ void WorldSession::HandleMoveHoverAck( WorldPacket& recv_data )
 
 void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 {
-    sLog.outDebug("CMSG_MOVE_WATER_WALK_ACK");
+    DEBUG_LOG("CMSG_MOVE_WATER_WALK_ACK");
 
     MovementInfo movementInfo;
 

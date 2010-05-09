@@ -195,7 +195,7 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save)
         ASSERT(false);
     }
 
-    sLog.outDebug("MapInstanced::CreateInstance: %s map instance %d for %d created", save?"":"new ", InstanceId, GetId());
+    DEBUG_LOG("MapInstanced::CreateInstance: %s map instance %d for %d created", save?"":"new ", InstanceId, GetId());
 
     InstanceMap *map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId);
     ASSERT(map->IsDungeon());
@@ -212,7 +212,7 @@ BattleGroundMap* MapInstanced::CreateBattleGroundMap(uint32 InstanceId, BattleGr
     // load/create a map
     Guard guard(*this);
 
-    sLog.outDebug("MapInstanced::CreateBattleGroundMap: instance:%d for map:%d and bgType:%d created.", InstanceId, GetId(), bg->GetTypeID());
+    DEBUG_LOG("MapInstanced::CreateBattleGroundMap: instance:%d for map:%d and bgType:%d created.", InstanceId, GetId(), bg->GetTypeID());
 
     BattleGroundMap *map = new BattleGroundMap(GetId(), GetGridExpiry(), InstanceId);
     ASSERT(map->IsBattleGround());

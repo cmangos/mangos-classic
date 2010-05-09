@@ -47,7 +47,7 @@ Group::~Group()
 {
     if(m_bgGroup)
     {
-        sLog.outDebug("Group::~Group: battleground group being deleted.");
+        DEBUG_LOG("Group::~Group: battleground group being deleted.");
         if(m_bgGroup->GetBgRaid(ALLIANCE) == this)
             m_bgGroup->SetBgRaid(ALLIANCE, NULL);
         else if(m_bgGroup->GetBgRaid(HORDE) == this)
@@ -481,7 +481,7 @@ void Group::GroupLoot(ObjectGuid const& playerGUID, Loot *loot, Creature *creatu
         item = ObjectMgr::GetItemPrototype(i->itemid);
         if (!item)
         {
-            //sLog.outDebug("Group::GroupLoot: missing item prototype for item with id: %d", i->itemid);
+            //DEBUG_LOG("Group::GroupLoot: missing item prototype for item with id: %d", i->itemid);
             continue;
         }
 
@@ -594,7 +594,7 @@ void Group::MasterLoot(ObjectGuid const& playerGUID, Loot* /*loot*/, Creature *c
     if(!player)
         return;
 
-    sLog.outDebug("Group::MasterLoot (SMSG_LOOT_MASTER_LIST, 330) player = [%s].", player->GetName());
+    DEBUG_LOG("Group::MasterLoot (SMSG_LOOT_MASTER_LIST, 330) player = [%s].", player->GetName());
 
     uint32 real_count = 0;
 
@@ -1484,7 +1484,7 @@ InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, boo
         bind.save = save;
         bind.perm = permanent;
         if(!load)
-            sLog.outDebug("Group::BindToInstance: %d is now bound to map %d, instance %d", GUID_LOPART(GetLeaderGUID()), save->GetMapId(), save->GetInstanceId());
+            DEBUG_LOG("Group::BindToInstance: %d is now bound to map %d, instance %d", GUID_LOPART(GetLeaderGUID()), save->GetMapId(), save->GetInstanceId());
         return &bind;
     }
     else

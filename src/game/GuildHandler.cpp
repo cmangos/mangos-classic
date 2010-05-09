@@ -30,6 +30,8 @@
 
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 {
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_QUERY");
+
     uint32 guildId;
 
     //sLog.outDebug("WORLD: Received CMSG_GUILD_QUERY");
@@ -47,9 +49,9 @@ void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
 {
-    std::string gname;
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_CREATE");
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_CREATE");
+    std::string gname;
 
     recvPacket >> gname;
 
@@ -68,9 +70,9 @@ void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 {
-    std::string Invitedname, plname;
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_INVITE");
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_INVITE");
+    std::string Invitedname, plname;
 
     Player * player = NULL;
 
@@ -123,7 +125,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    sLog.outDebug("Player %s Invited %s to Join his Guild", GetPlayer()->GetName(), Invitedname.c_str());
+    DEBUG_LOG("Player %s Invited %s to Join his Guild", GetPlayer()->GetName(), Invitedname.c_str());
 
     player->SetGuildIdInvited(GetPlayer()->GetGuildId());
     // Put record into guildlog
@@ -134,11 +136,13 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
     data << guild->GetName();
     player->GetSession()->SendPacket(&data);
 
-    //sLog.outDebug("WORLD: Sent (SMSG_GUILD_INVITE)");
+    DEBUG_LOG("WORLD: Sent (SMSG_GUILD_INVITE)");
 }
 
 void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 {
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_REMOVE");
+
     std::string plName;
 
     //sLog.outDebug("WORLD: Received CMSG_GUILD_REMOVE");
@@ -194,7 +198,7 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
     Guild *guild;
     Player *player = GetPlayer();
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_ACCEPT");
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_ACCEPT");
 
     guild = sObjectMgr.GetGuildById(player->GetGuildIdInvited());
     if(!guild || player->GetGuildId())
@@ -214,7 +218,7 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
 
 void WorldSession::HandleGuildDeclineOpcode(WorldPacket& /*recvPacket*/)
 {
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_DECLINE");
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_DECLINE");
 
     GetPlayer()->SetGuildIdInvited(0);
     GetPlayer()->SetInGuild(0);
@@ -222,10 +226,9 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& /*recvPacket*/)
 
 void WorldSession::HandleGuildInfoOpcode(WorldPacket& /*recvPacket*/)
 {
-    Guild *guild;
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_INFO");
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_INFO");
 
-    guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
+    Guild *guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
     {
         SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
@@ -245,7 +248,7 @@ void WorldSession::HandleGuildInfoOpcode(WorldPacket& /*recvPacket*/)
 
 void WorldSession::HandleGuildRosterOpcode(WorldPacket& /*recvPacket*/)
 {
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_ROSTER");
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_ROSTER");
 
     Guild* guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
@@ -256,9 +259,9 @@ void WorldSession::HandleGuildRosterOpcode(WorldPacket& /*recvPacket*/)
 
 void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 {
-    std::string plName;
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_PROMOTE");
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_PROMOTE");
+    std::string plName;
 
     recvPacket >> plName;
 
@@ -312,9 +315,9 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 {
-    std::string plName;
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_DEMOTE");
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_DEMOTE");
+    std::string plName;
 
     recvPacket >> plName;
 
@@ -375,12 +378,11 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildLeaveOpcode(WorldPacket& /*recvPacket*/)
 {
-    std::string plName;
-    Guild *guild;
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_LEAVE");
 
     //sLog.outDebug("WORLD: Received CMSG_GUILD_LEAVE");
 
-    guild = sObjectMgr.GetGuildById(_player->GetGuildId());
+    Guild *guild = sObjectMgr.GetGuildById(_player->GetGuildId());
     if(!guild)
     {
         SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
@@ -398,7 +400,7 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& /*recvPacket*/)
         return;
     }
 
-    plName = _player->GetName();
+    std::string plName = _player->GetName();
 
     guild->DelMember(_player->GetGUID());
     // Put record into guild log
@@ -411,12 +413,9 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& /*recvPacket*/)
 
 void WorldSession::HandleGuildDisbandOpcode(WorldPacket& /*recvPacket*/)
 {
-    std::string name;
-    Guild *guild;
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_DISBAND");
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_DISBAND");
-
-    guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
+    Guild *guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
     {
         SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
@@ -430,16 +429,16 @@ void WorldSession::HandleGuildDisbandOpcode(WorldPacket& /*recvPacket*/)
 
     guild->Disband();
 
-    //sLog.outDebug("WORLD: Guild Sucefully Disbanded");
+    DEBUG_LOG("WORLD: Guild Successfully Disbanded");
 }
 
 void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 {
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_LEADER");
+
     std::string name;
     Player *oldLeader = GetPlayer();
     Guild *guild;
-
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_LEADER");
 
     recvPacket >> name;
 
@@ -477,12 +476,11 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
 {
-    Guild *guild;
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_MOTD");
+
     std::string MOTD;
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_MOTD");
-
-    guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
+    Guild *guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
     {
         SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
@@ -506,9 +504,9 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
 {
-    std::string name,PNOTE;
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_SET_PUBLIC_NOTE");
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_SET_PUBLIC_NOTE");
+    std::string name,PNOTE;
 
     recvPacket >> name;
 
@@ -546,9 +544,9 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
 {
-    std::string plName, OFFNOTE;
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_SET_OFFICER_NOTE");
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_SET_OFFICER_NOTE");
+    std::string plName, OFFNOTE;
 
     recvPacket >> plName;
 
@@ -592,7 +590,7 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     uint32 rankId;
     uint32 rights;
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_RANK");
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_RANK");
 
     guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
@@ -612,7 +610,7 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     recvPacket >> rankId;
     recvPacket >> rights;
     recvPacket >> rankname;
-    sLog.outDebug("WORLD: Changed RankName to %s , Rights to 0x%.4X", rankname.c_str(), rights);
+    DEBUG_LOG("WORLD: Changed RankName to %s , Rights to 0x%.4X", rankname.c_str(), rights);
 
     guild->SetRankName(rankId, rankname);
 
@@ -627,12 +625,11 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
 {
-    Guild *guild;
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_ADD_RANK");
+
     std::string rankname;
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_ADD_RANK");
-
-    guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
+    Guild *guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
     {
         SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
@@ -658,12 +655,11 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildDelRankOpcode(WorldPacket& /*recvPacket*/)
 {
-    Guild *guild;
-    std::string rankname;
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_DEL_RANK");
 
     //sLog.outDebug("WORLD: Received CMSG_GUILD_DEL_RANK");
 
-    guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
+    Guild *guild = sObjectMgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild)
     {
         SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_PLAYER_NOT_IN_GUILD);
@@ -690,12 +686,12 @@ void WorldSession::SendGuildCommandResult(uint32 typecmd, const std::string& str
     data << cmdresult;
     SendPacket(&data);
 
-    //sLog.outDebug("WORLD: Sent (SMSG_GUILD_COMMAND_RESULT)");
+    DEBUG_LOG("WORLD: Sent (SMSG_GUILD_COMMAND_RESULT)");
 }
 
 void WorldSession::HandleGuildChangeInfoTextOpcode(WorldPacket& recvPacket)
 {
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_INFO_TEXT");
+    DEBUG_LOG("WORLD: Received CMSG_GUILD_INFO_TEXT");
 
     std::string GINFO;
 
@@ -719,7 +715,7 @@ void WorldSession::HandleGuildChangeInfoTextOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket)
 {
-    //sLog.outDebug("WORLD: Received MSG_SAVE_GUILD_EMBLEM");
+    DEBUG_LOG("WORLD: Received MSG_SAVE_GUILD_EMBLEM");
 
     uint64 vendorGuid;
 
@@ -736,7 +732,7 @@ void WorldSession::HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket)
     {
         //"That's not an emblem vendor!"
         SendSaveGuildEmblem(ERR_GUILDEMBLEM_INVALIDVENDOR);
-        sLog.outDebug("WORLD: HandleSaveGuildEmblemOpcode - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(vendorGuid));
+        DEBUG_LOG("WORLD: HandleSaveGuildEmblemOpcode - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(vendorGuid));
         return;
     }
 
@@ -784,8 +780,7 @@ void WorldSession::HandleSaveGuildEmblemOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleGuildEventLogQueryOpcode(WorldPacket& /* recvPacket */)
 {
                                                             // empty
-    sLog.outDebug("WORLD: Received (MSG_GUILD_EVENT_LOG_QUERY)");
-    //recvPacket.hexlike();
+    DEBUG_LOG("WORLD: Received (MSG_GUILD_EVENT_LOG_QUERY)");
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (GuildId == 0)

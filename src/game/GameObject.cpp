@@ -1279,7 +1279,7 @@ void GameObject::Use(Unit* user)
             break;
         }
         default:
-            sLog.outDebug("GameObject::Use unhandled GameObject type %u (entry %u).", GetGoType(), GetEntry());
+            DEBUG_LOG("GameObject::Use unhandled GameObject type %u (entry %u).", GetGoType(), GetEntry());
             break;
     }
 

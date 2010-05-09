@@ -72,7 +72,7 @@ bool Guild::Create(Player* leader, std::string gname)
     MOTD = "No message set.";
     m_Id = sObjectMgr.GenerateGuildId();
 
-    sLog.outDebug("GUILD: creating guild %s to leader: %u", gname.c_str(), GUID_LOPART(m_LeaderGuid));
+    DEBUG_LOG("GUILD: creating guild %s to leader: %u", gname.c_str(), GUID_LOPART(m_LeaderGuid));
 
     // gname already assigned to Guild::name, use it to encode string for DB
     CharacterDatabase.escape_string(gname);
@@ -262,7 +262,7 @@ bool Guild::LoadGuildFromDB(uint32 GuildId)
             ChangeRank(itr->first, GR_OFFICER);
     }
 
-    sLog.outDebug("Guild %u Creation time Loaded day: %u, month: %u, year: %u", GuildId, m_CreatedDay, m_CreatedMonth, m_CreatedYear);
+    DEBUG_LOG("Guild %u Creation time Loaded day: %u, month: %u, year: %u", GuildId, m_CreatedDay, m_CreatedMonth, m_CreatedYear);
 
     return true;
 }
@@ -712,7 +712,7 @@ void Guild::Roster(WorldSession *session /*= NULL*/)
         session->SendPacket(&data);
     else
         BroadcastPacket(&data);
-    sLog.outDebug( "WORLD: Sent (SMSG_GUILD_ROSTER)" );
+    DEBUG_LOG( "WORLD: Sent (SMSG_GUILD_ROSTER)" );
 }
 
 void Guild::Query(WorldSession *session)
@@ -737,7 +737,7 @@ void Guild::Query(WorldSession *session)
     data << uint32(m_BackgroundColor);
 
     session->SendPacket( &data );
-    sLog.outDebug( "WORLD: Sent (SMSG_GUILD_QUERY_RESPONSE)" );
+    DEBUG_LOG( "WORLD: Sent (SMSG_GUILD_QUERY_RESPONSE)" );
 }
 
 void Guild::SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor)
@@ -795,7 +795,7 @@ void Guild::DisplayGuildEventLog(WorldSession *session)
         data << uint32(time(NULL)-itr->TimeStamp);
     }
     session->SendPacket(&data);
-    sLog.outDebug("WORLD: Sent (MSG_GUILD_EVENT_LOG_QUERY)");
+    DEBUG_LOG("WORLD: Sent (MSG_GUILD_EVENT_LOG_QUERY)");
 }
 
 // Load guild eventlog from DB
@@ -903,5 +903,5 @@ void Guild::BroadcastEvent(GuildEvents event, uint64 guid, uint8 strCount, std::
 
     BroadcastPacket(&data);
 
-    sLog.outDebug("WORLD: Sent SMSG_GUILD_EVENT");
+    DEBUG_LOG("WORLD: Sent SMSG_GUILD_EVENT");
 }

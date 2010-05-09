@@ -93,7 +93,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
     recv_data.read_skip<uint32>();                          // unk2, 1
     recv_data.read_skip<uint32>();                          // unk3, 0
 
-    sLog.outDebug("TicketCreate: map %u, x %f, y %f, z %f, text %s", map, x, y, z, ticketText.c_str());
+    DEBUG_LOG("TicketCreate: map %u, x %f, y %f, z %f, text %s", map, x, y, z, ticketText.c_str());
 
     if(sTicketMgr.GetGMTicket(GetPlayer()->GetGUIDLow()))
     {
@@ -137,7 +137,7 @@ void WorldSession::HandleGMSurveySubmit( WorldPacket & recv_data)
     // GM survey is shown after SMSG_GM_TICKET_STATUS_UPDATE with status = 3
     uint32 x;
     recv_data >> x;                                         // answer range? (6 = 0-5?)
-    sLog.outDebug("SURVEY: X = %u", x);
+    DEBUG_LOG("SURVEY: X = %u", x);
 
     uint8 result[10];
     memset(result, 0, sizeof(result));
@@ -154,12 +154,12 @@ void WorldSession::HandleGMSurveySubmit( WorldPacket & recv_data)
         recv_data >> unk_text;                              // always empty?
 
         result[i] = value;
-        sLog.outDebug("SURVEY: ID %u, value %u, text %s", questionID, value, unk_text.c_str());
+        DEBUG_LOG("SURVEY: ID %u, value %u, text %s", questionID, value, unk_text.c_str());
     }
 
     std::string comment;
     recv_data >> comment;                                   // addional comment
-    sLog.outDebug("SURVEY: comment %s", comment.c_str());
+    DEBUG_LOG("SURVEY: comment %s", comment.c_str());
 
     // TODO: chart this data in some way
 }

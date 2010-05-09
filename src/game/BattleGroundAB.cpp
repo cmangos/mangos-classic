@@ -60,7 +60,7 @@ void BattleGroundAB::Update(uint32 diff)
                 return;
             }
 
-            sLog.outDebug("Arathi Basin: entering state STATUS_WAIT_JOIN ...");
+            DEBUG_LOG("Arathi Basin: entering state STATUS_WAIT_JOIN ...");
 
             // despawn buffs
             for (int i = 0; i < BG_AB_NODES_MAX * 3; ++i)
