@@ -4920,7 +4920,7 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
 
 void Spell::EffectSkill(SpellEffectIndex /*eff_idx*/)
 {
-    sLog.outDebug("WORLD: SkillEFFECT");
+    DEBUG_LOG("WORLD: SkillEFFECT");
 }
 
 void Spell::EffectSummonDemon(SpellEffectIndex eff_idx)

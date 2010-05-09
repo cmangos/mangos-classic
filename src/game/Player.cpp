@@ -5612,7 +5612,7 @@ void Player::UpdateHonor()
     uint32 lastWeekBegin = thisWeekBegin - 7;
     uint32 lastWeekEnd   = lastWeekBegin + 7;
 
-    sLog.outDetail("PLAYER: UpdateHonor");
+    DETAIL_LOG("PLAYER: UpdateHonor");
 
     uint32 total_dishonorableKills = GetHonorStoredKills(false);
     uint32 total_honorableKills = GetHonorStoredKills(true);
@@ -5762,7 +5762,7 @@ bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
     float honor_points = 0;
     int kill_type = 0;
 
-    sLog.outDetail("PLAYER: CalculateHonor");
+    DETAIL_LOG("PLAYER: CalculateHonor");
 
     if (!uVictim)
         return false;

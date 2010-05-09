@@ -1757,7 +1757,7 @@ void World::InitServerMaintenanceCheck()
     if (!result)
     {
 
-        sLog.outDebug("Maintenance date not found in SavedVariables, reseting it now.");
+        DEBUG_LOG("Maintenance date not found in SavedVariables, reseting it now.");
         uint32 mDate = GetDateLastMaintenanceDay();
         m_NextMaintenanceDate = mDate == GetDateToday() ?  mDate : mDate + 7;
         CharacterDatabase.PExecute("INSERT INTO saved_variables (NextMaintenanceDate) VALUES ('"UI64FMTD"')", uint64(m_NextMaintenanceDate));
@@ -1771,7 +1771,7 @@ void World::InitServerMaintenanceCheck()
     if (m_NextMaintenanceDate <= GetDateToday() )
         ServerMaintenanceStart();
 
-    sLog.outDebug("Server maintenance check initialized.");
+    DEBUG_LOG("Server maintenance check initialized.");
 }
 
 // This handles the issued and queued CLI/RA commands
