@@ -1037,31 +1037,20 @@ BattleGround * BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeI
 }
 
 // used to create the BG templates
-uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO)
+uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char const* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO)
 {
     // Create the BG
     BattleGround *bg = NULL;
 
     switch(bgTypeId)
     {
-        case BATTLEGROUND_AV:
-            bg = new BattleGroundAV;
-            bg->SetName("Alterac Valley");
-            bg->SetMapId(30);
-        break;
-        case BATTLEGROUND_WS:
-            bg = new BattleGroundWS;
-            bg->SetName("Warsong Gulch");
-            bg->SetMapId(489);
-        break;
-        case BATTLEGROUND_AB:
-            bg = new BattleGroundAB;
-            bg->SetName("Arathi Basin");
-            bg->SetMapId(529);
-        break;
-
-        default:bg = new BattleGround;   break;             // placeholder for non implemented BG
+        case BATTLEGROUND_AV: bg = new BattleGroundAV; break;
+        case BATTLEGROUND_WS: bg = new BattleGroundWS; break;
+        case BATTLEGROUND_AB: bg = new BattleGroundAB; break;
+        default:              bg = new BattleGround;   break;                           // placeholder for non implemented BG
     }
+
+    bg->SetMapId(MapID);
 
     bg->Reset();
 
@@ -1071,6 +1060,7 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 M
     bg->SetMaxPlayersPerTeam(MaxPlayersPerTeam);
     bg->SetMinPlayers(MinPlayersPerTeam*2);
     bg->SetMaxPlayers(MaxPlayersPerTeam*2);
+    bg->SetName(BattleGroundName);
     bg->SetTeamStartLoc(ALLIANCE, Team1StartLocX, Team1StartLocY, Team1StartLocZ, Team1StartLocO);
     bg->SetTeamStartLoc(HORDE,    Team2StartLocX, Team2StartLocY, Team2StartLocZ, Team2StartLocO);
     bg->SetLevelRange(LevelMin, LevelMax);
@@ -1167,8 +1157,19 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
             continue;
         }
 
+        uint32 mapId = GetBattleGrounMapIdByTypeId(bgTypeID);
+        char const* name;
+
+        if (MapEntry const* mapEntry = sMapStore.LookupEntry(mapId))
+            name = mapEntry->name[sWorld.GetDefaultDbcLocale()];
+        else
+        {
+            sLog.outErrorDb("Table `battleground_template` for id %u associated wth non-existed map id %u.",bgTypeID, mapId);
+            continue;
+        }
+
         //sLog.outDetail("Creating battleground %s, %u-%u", bl->name[sWorld.GetDBClang()], MinLvl, MaxLvl);
-        if(!CreateBattleGround(bgTypeID, MinPlayersPerTeam, MaxPlayersPerTeam, MinLvl, MaxLvl, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]))
+        if(!CreateBattleGround(bgTypeID, MinPlayersPerTeam, MaxPlayersPerTeam, MinLvl, MaxLvl, name, mapId, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]))
             continue;
 
         ++count;

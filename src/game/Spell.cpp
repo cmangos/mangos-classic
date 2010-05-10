@@ -3034,7 +3034,7 @@ void Spell::TakeReagents()
     if (p_caster->CanNoReagentCast(m_spellInfo))
         return;
 
-    for(uint32 x = 0; x < 8; ++x)
+    for(uint32 x = 0; x < MAX_SPELL_REAGENTS; ++x)
     {
         if(m_spellInfo->Reagent[x] <= 0)
             continue;
@@ -4568,7 +4568,7 @@ SpellCastResult Spell::CheckItems()
     // check reagents (ignore triggered spells with reagents processed by original spell) and special reagent ignore case.
     if (!m_IsTriggeredSpell && !p_caster->CanNoReagentCast(m_spellInfo))
     {
-        for(uint32 i = 0; i < 8; ++i)
+        for(uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
         {
             if(m_spellInfo->Reagent[i] <= 0)
                 continue;
@@ -4599,8 +4599,8 @@ SpellCastResult Spell::CheckItems()
     }
 
     // check totem-item requirements (items presence in inventory)
-    uint32 totems = 2;
-    for(int i = 0; i < 2 ; ++i)
+    uint32 totems = MAX_SPELL_TOTEMS;
+    for(int i = 0; i < MAX_SPELL_TOTEMS ; ++i)
     {
         if(m_spellInfo->Totem[i] != 0)
         {
@@ -4619,8 +4619,8 @@ SpellCastResult Spell::CheckItems()
 
   /*[-ZERO] to rewrite?
     // Check items for TotemCategory  (items presence in inventory)
-    uint32 TotemCategory = 2;
-    for(int i= 0; i < 2; ++i)
+    uint32 TotemCategory = MAX_SPELL_TOTEM_CATEGORIES;
+    for(int i= 0; i < MAX_SPELL_TOTEM_CATEGORIES; ++i)
     {
         if(m_spellInfo->TotemCategory[i] != 0)
         {
