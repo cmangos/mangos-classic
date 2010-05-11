@@ -403,10 +403,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->MaxDurability;
         data << pProto->Area;
         data << pProto->Map;                                // Added in 1.12.x & 2.0.1 client branch
-        // [-ZERO] In mangos-0.6 version after this only single uint32(0) bagfamily?
         data << pProto->BagFamily;
-        data << pProto->RequiredDisenchantSkill;
-        data << pProto->ArmorDamageModifier;
         SendPacket( &data );
     }
     else

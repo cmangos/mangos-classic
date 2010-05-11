@@ -487,8 +487,6 @@ struct ItemPrototype
     uint32 Area;                                            // id from AreaTable.dbc
     uint32 Map;                                             // id from Map.dbc
     uint32 BagFamily;
-    uint32 RequiredDisenchantSkill;
-    float  ArmorDamageModifier;
     uint32 ScriptId;
     uint32 DisenchantID;
     uint32 FoodType;
