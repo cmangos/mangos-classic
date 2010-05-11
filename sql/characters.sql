@@ -1198,7 +1198,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `saved_variables`;
 CREATE TABLE `saved_variables` (
-    `NextMaintenanceDate` int(11) UNSIGNED NOT NULL DEFAULT '0'
+    `NextMaintenanceDate` int(11) UNSIGNED NOT NULL DEFAULT '0',
     `cleaning_flags` int(11) unsigned NOT NULL default '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Variable Saves';
 
