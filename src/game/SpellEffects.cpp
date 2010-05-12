@@ -1811,7 +1811,22 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
         if (crit)
             procHealer |= PROC_FLAG_CRIT_HEAL;
 
-        m_caster->ProcDamageAndSpell(unitTarget,procHealer,PROC_FLAG_HEALED,addhealth,SPELL_SCHOOL_MASK_NONE,m_spellInfo,m_IsTriggeredSpell);
+        // Some spell expected send main spell info to triggered system
+        SpellEntry const* spellInfo = m_spellInfo;
+        bool triggredspell = m_IsTriggeredSpell;
+        switch(m_spellInfo->Id)
+        {
+            case 19968:                                     // Holy Light triggered heal
+            case 19993:                                     // Flash of Light triggered heal
+            {
+                // stored in unused spell effect basepoints in main spell code
+                uint32 spellid = m_currentBasePoints[EFFECT_INDEX_1];
+                spellInfo = sSpellStore.LookupEntry(spellid);
+                triggredspell = false;
+            }
+        }
+
+        m_caster->ProcDamageAndSpell(unitTarget,procHealer,PROC_FLAG_HEALED,addhealth,SPELL_SCHOOL_MASK_NONE,spellInfo,triggredspell);
     }
 }
 
@@ -3841,15 +3856,23 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_PALADIN:
         {
-            // Holy Light or Flash of Light
-            if (m_spellInfo->SpellIconID == 70 || m_spellInfo->SpellIconID  == 242)
+            // Holy Light
+            if (m_spellInfo->SpellIconID == 70)
             {
                 if(!unitTarget || !unitTarget->isAlive())
                     return;
-
-                // use explicit effect call, this only known way properly process Illumination
-                // because if we use custom cast without mana cost we can't get original spell id
-                EffectHeal(eff_idx);
+                int32 heal = damage;
+                int32 spellid = m_spellInfo->Id;            // send main spell id as basepoints for not used effect
+                m_caster->CastCustomSpell(unitTarget,19968,&heal,&spellid,NULL,true);
+            }
+            // Flash of Light
+            else if (m_spellInfo->SpellIconID  == 242)
+            {
+                if(!unitTarget || !unitTarget->isAlive())
+                    return;
+                int32 heal = damage;
+                int32 spellid = m_spellInfo->Id;            // send main spell id as basepoints for not used effect
+                m_caster->CastCustomSpell(unitTarget,19993,&heal,&spellid,NULL,true);
             }
             else if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000800000))
             {
