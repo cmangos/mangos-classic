@@ -98,83 +98,59 @@ void MapInstanced::UnloadAll(bool pForce)
 - create the instance if it's not created already
 - the player is not actually added to the instance (only in InstanceMap::Add)
 */
-Map* MapInstanced::GetInstance(const WorldObject* obj)
+Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
 {
-    uint32 CurInstanceId = obj->GetInstanceId();
-    Map* map = NULL;
+    if(GetId() != mapId || !player)
+        return NULL;
 
-    if (obj->GetMapId() == GetId() && CurInstanceId != 0)
+    Map* map = NULL;
+    uint32 NewInstanceId = 0;                       // instanceId of the resulting map
+
+    if(IsBattleGround())
     {
-        // the object wants to be put in a certain instance of this map
-        map = _FindMap(CurInstanceId);
+        // instantiate or find existing bg map for player
+        // the instance id is set in battlegroundid
+        NewInstanceId = player->GetBattleGroundId();
+        ASSERT(NewInstanceId);
+        map = _FindMap(NewInstanceId);
         if(!map)
-        {
-            // For players if the instanceId is set, it's assumed they are already in a map,
-            // hence the map must be loaded. For Creatures, GameObjects etc the map must exist
-            // prior to calling GetMap, they are not allowed to create maps for themselves.
-            sLog.outError("GetInstance: object %s(%d), typeId %d, in world %d, should be in map %d,%d but that's not loaded yet.", obj->GetName(), obj->GetGUIDLow(), obj->GetTypeId(), obj->IsInWorld(), obj->GetMapId(), obj->GetInstanceId());
-            assert(false);
-        }
-        return(map);
+            map = CreateBattleGroundMap(NewInstanceId, player->GetBattleGround());
     }
     else
     {
-        // instance not specified, find an existing or create a new one
-        if(obj->GetTypeId() != TYPEID_PLAYER)
+        InstancePlayerBind *pBind = player->GetBoundInstance(GetId());
+        InstanceSave *pSave = pBind ? pBind->save : NULL;
+
+        // the player's permanent player bind is taken into consideration first
+        // then the player's group bind and finally the solo bind.
+        if(!pBind || !pBind->perm)
         {
-            sLog.outError("MAPINSTANCED: WorldObject '%u' (Entry: %u TypeID: %u) is in map %d,%d and requested base map instance of map %d, this must not happen", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), obj->GetMapId(), obj->GetInstanceId(), GetId());
-            assert(false);
-            return NULL;
+            InstanceGroupBind *groupBind = NULL;
+            Group *group = player->GetGroup();
+            // use the player's difficulty setting (it may not be the same as the group's)
+            if(group && (groupBind = group->GetBoundInstance(GetId())))
+                pSave = groupBind->save;
+        }
+
+        if(pSave)
+        {
+            // solo/perm/group
+            NewInstanceId = pSave->GetInstanceId();
+            map = _FindMap(NewInstanceId);
+            // it is possible that the save exists but the map doesn't
+            if(!map)
+                map = CreateInstance(NewInstanceId, pSave);
         }
         else
         {
-            uint32 NewInstanceId = 0;                       // instanceId of the resulting map
-            Player* player = (Player*)obj;
-
-            if(IsBattleGround())
-            {
-                // instantiate or find existing bg map for player
-                // the instance id is set in battlegroundid
-                NewInstanceId = player->GetBattleGroundId();
-                assert(NewInstanceId);
-                map = _FindMap(NewInstanceId);
-                if(!map)
-                    map = CreateBattleGroundMap(NewInstanceId, player->GetBattleGround());
-                return map;
-            }
-
-            InstancePlayerBind *pBind = player->GetBoundInstance(GetId());
-            InstanceSave *pSave = pBind ? pBind->save : NULL;
-
-            // the player's permanet player bind is taken into consideration first
-            // then the player's group bind and finally the solo bind.
-            if(!pBind || !pBind->perm)
-            {
-                InstanceGroupBind *groupBind = NULL;
-                Group *group = player->GetGroup();
-                if(group && (groupBind = group->GetBoundInstance(GetId())))
-                    pSave = groupBind->save;
-            }
-
-            if(pSave)
-            {
-                // solo/perm/group
-                NewInstanceId = pSave->GetInstanceId();
-                map = _FindMap(NewInstanceId);
-                // it is possible that the save exists but the map doesn't
-                if(!map)
-                    map = CreateInstance(NewInstanceId, pSave);
-                return map;
-            }
-            else
-            {
-                // if no instanceId via group members or instance saves is found
-                // the instance will be created for the first time
-                NewInstanceId = sMapMgr.GenerateInstanceId();
-                return CreateInstance(NewInstanceId, NULL);
-            }
+            // if no instanceId via group members or instance saves is found
+            // the instance will be created for the first time
+            NewInstanceId = MapManager::Instance().GenerateInstanceId();
+            map = CreateInstance(NewInstanceId);
         }
     }
+
+    return map;
 }
 
 InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save)
@@ -197,7 +173,7 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save)
 
     DEBUG_LOG("MapInstanced::CreateInstance: %s map instance %d for %d created", save?"":"new ", InstanceId, GetId());
 
-    InstanceMap *map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId);
+    InstanceMap *map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId, this);
     ASSERT(map->IsDungeon());
 
     bool load_data = save != NULL;
@@ -214,7 +190,7 @@ BattleGroundMap* MapInstanced::CreateBattleGroundMap(uint32 InstanceId, BattleGr
 
     DEBUG_LOG("MapInstanced::CreateBattleGroundMap: instance:%d for map:%d and bgType:%d created.", InstanceId, GetId(), bg->GetTypeID());
 
-    BattleGroundMap *map = new BattleGroundMap(GetId(), GetGridExpiry(), InstanceId);
+    BattleGroundMap *map = new BattleGroundMap(GetId(), GetGridExpiry(), InstanceId, this);
     ASSERT(map->IsBattleGround());
     map->SetBG(bg);
     bg->SetBgMap(map);

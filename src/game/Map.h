@@ -216,7 +216,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 {
     friend class MapReference;
     public:
-        Map(uint32 id, time_t, uint32 InstanceId);
+        Map(uint32 id, time_t, uint32 InstanceId, Map* _parent = NULL);
         virtual ~Map();
 
         // currently unused for normal maps
@@ -280,6 +280,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         static void InitStateMachine();
         static void DeleteStateMachine();
+
+        Map const * GetParent() const { return m_parentMap; }
 
         // some calls like isInWater should not use vmaps due to processor power
         // can return INVALID_HEIGHT if under z+2 z coord not found height
@@ -433,7 +435,6 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         typedef MaNGOS::ObjectLevelLockable<Map, ACE_Thread_Mutex>::Lock Guard;
 
         MapEntry const* i_mapEntry;
-        uint8 i_spawnMode;
         uint32 i_id;
         uint32 i_InstanceId;
         uint32 m_unloadTimer;
@@ -447,6 +448,9 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         ActiveNonPlayers::iterator m_activeNonPlayersIter;
         TypeUnorderedMapContainer<AllMapStoredObjectTypes> m_objectsStore;
     private:
+        //used for fast base_map (e.g. MapInstanced class object) search for
+        //InstanceMaps and BattleGroundMaps...
+        Map* m_parentMap;
 
         NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
         GridMap *GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
@@ -508,7 +512,7 @@ enum InstanceResetMethod
 class MANGOS_DLL_SPEC InstanceMap : public Map
 {
     public:
-        InstanceMap(uint32 id, time_t, uint32 InstanceId);
+        InstanceMap(uint32 id, time_t, uint32 InstanceId, Map* _parent);
         ~InstanceMap();
         bool Add(Player *);
         void Remove(Player *, bool);
@@ -535,7 +539,7 @@ class MANGOS_DLL_SPEC InstanceMap : public Map
 class MANGOS_DLL_SPEC BattleGroundMap : public Map
 {
     public:
-        BattleGroundMap(uint32 id, time_t, uint32 InstanceId);
+        BattleGroundMap(uint32 id, time_t, uint32 InstanceId, Map* _parent);
         ~BattleGroundMap();
 
         bool Add(Player *);

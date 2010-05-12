@@ -3140,7 +3140,6 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
                 return;
 
             OldSummon->GetMap()->Remove((Creature*)OldSummon,false);
-            OldSummon->SetMapId(m_caster->GetMapId());
 
             float px, py, pz;
             m_caster->GetClosePoint(px, py, pz, OldSummon->GetObjectSize());
