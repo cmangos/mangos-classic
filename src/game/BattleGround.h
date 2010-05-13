@@ -22,6 +22,7 @@
 
 #include "Common.h"
 #include "SharedDefines.h"
+#include "ByteBuffer.h"
 
 // magic event-numbers
 #define BG_EVENT_NONE 255
@@ -336,7 +337,7 @@ class BattleGround
 
         /* Packet Transfer */
         // method that should fill worldpacket with actual world states (not yet implemented for all battlegrounds!)
-        virtual void FillInitialWorldStates(WorldPacket& /*data*/) {}
+        virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/) {}
         void SendPacketToTeam(uint32 TeamID, WorldPacket *packet, Player *sender = NULL, bool self = true);
         void SendPacketToAll(WorldPacket *packet);
         void PlaySoundToTeam(uint32 SoundID, uint32 TeamID);
@@ -532,4 +533,43 @@ class BattleGround
         float m_TeamStartLocZ[BG_TEAMS_COUNT];
         float m_TeamStartLocO[BG_TEAMS_COUNT];
 };
+
+// helper functions for world state list fill
+inline void FillInitialWorldState(ByteBuffer& data, uint32& count, uint16 state, uint32 value)
+{
+    data << uint16(state);
+    data << uint16(value);
+    ++count;
+}
+
+inline void FillInitialWorldState(ByteBuffer& data, uint32& count, uint16 state, int32 value)
+{
+    data << uint16(state);
+    data << int16(value);
+    ++count;
+}
+
+inline void FillInitialWorldState(ByteBuffer& data, uint32& count, uint16 state, bool value)
+{
+    data << uint16(state);
+    data << uint16(value?1:0);
+    ++count;
+}
+
+struct WorldStatePair
+{
+    uint16 state;
+    uint16 value;
+};
+
+inline void FillInitialWorldState(ByteBuffer& data, uint32& count, WorldStatePair const* array)
+{
+    for(WorldStatePair const* itr = array; itr->state; ++itr)
+    {
+        data << uint16(itr->state);
+        data << uint16(itr->value);
+        ++count;
+    }
+}
+
 #endif

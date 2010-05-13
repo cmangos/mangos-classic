@@ -315,7 +315,7 @@ class BattleGroundAV : public BattleGround
         virtual void OnCreatureRespawn(Creature* creature);
 
         // world states
-        virtual void FillInitialWorldStates(WorldPacket& data);
+        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count);
 
         void RemovePlayer(Player *plr,uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
