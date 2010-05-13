@@ -868,7 +868,7 @@ void Channel::MakePlayerUnbanned(WorldPacket *data, uint64 bad, uint64 good)
 void Channel::MakePlayerNotBanned(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_PLAYER_NOT_BANNED_NOTICE);
-    *data << uint64(guid);
+    *data << uint64(guid);                                  // should be string!!
 }
 
 // done 0x17
@@ -920,39 +920,13 @@ void Channel::MakePlayerInvited(WorldPacket *data, const std::string& name)
 void Channel::MakePlayerInviteBanned(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_PLAYER_INVITE_BANNED_NOTICE);
-    *data << uint64(guid);
+    *data << uint64(guid);                                  // should be string!!
 }
 
 // done 0x1F
 void Channel::MakeThrottled(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_THROTTLED_NOTICE);
-}
-
-// done 0x20
-void Channel::MakeNotInArea(WorldPacket *data)
-{
-    MakeNotifyPacket(data, CHAT_NOT_IN_AREA_NOTICE);
-}
-
-// done 0x21
-void Channel::MakeNotInLfg(WorldPacket *data)
-{
-    MakeNotifyPacket(data, CHAT_NOT_IN_LFG_NOTICE);
-}
-
-// done 0x22
-void Channel::MakeVoiceOn(WorldPacket *data, uint64 guid)
-{
-    MakeNotifyPacket(data, CHAT_VOICE_ON_NOTICE);
-    *data << uint64(guid);
-}
-
-// done 0x23
-void Channel::MakeVoiceOff(WorldPacket *data, uint64 guid)
-{
-    MakeNotifyPacket(data, CHAT_VOICE_OFF_NOTICE);
-    *data << uint64(guid);
 }
 
 void Channel::JoinNotify(uint64 guid)
