@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z0524_115_02_mangos_scripts` bit(1) default NULL
+  `required_z0525_116_02_mangos_creature_movement_scripts` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1031,23 +1031,24 @@ DROP TABLE IF EXISTS `creature_movement`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_movement` (
   `id` int(10) unsigned NOT NULL COMMENT 'Creature GUID',
-  `point` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `position_x` float NOT NULL DEFAULT '0',
-  `position_y` float NOT NULL DEFAULT '0',
-  `position_z` float NOT NULL DEFAULT '0',
-  `waittime` int(10) unsigned NOT NULL DEFAULT '0',
-  `textid1` int(11) NOT NULL DEFAULT '0',
-  `textid2` int(11) NOT NULL DEFAULT '0',
-  `textid3` int(11) NOT NULL DEFAULT '0',
-  `textid4` int(11) NOT NULL DEFAULT '0',
-  `textid5` int(11) NOT NULL DEFAULT '0',
-  `emote` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `spell` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `wpguid` int(11) NOT NULL DEFAULT '0',
-  `orientation` float NOT NULL DEFAULT '0',
-  `model1` mediumint(9) NOT NULL DEFAULT '0',
-  `model2` mediumint(9) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`,`point`)
+  `point` mediumint(8) unsigned NOT NULL default '0',
+  `position_x` float NOT NULL default '0',
+  `position_y` float NOT NULL default '0',
+  `position_z` float NOT NULL default '0',
+  `waittime` int(10) unsigned NOT NULL default '0',
+  `script_id` int(10) unsigned NOT NULL default '0',
+  `textid1` int(11) NOT NULL default '0',
+  `textid2` int(11) NOT NULL default '0',
+  `textid3` int(11) NOT NULL default '0',
+  `textid4` int(11) NOT NULL default '0',
+  `textid5` int(11) NOT NULL default '0',
+  `emote` mediumint(8) unsigned NOT NULL default '0',
+  `spell` mediumint(8) unsigned NOT NULL default '0',
+  `wpguid` int(11) NOT NULL default '0',
+  `orientation` float NOT NULL default '0',
+  `model1` mediumint(9) NOT NULL default '0',
+  `model2` mediumint(9) NOT NULL default '0',
+  PRIMARY KEY  (`id`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1058,6 +1059,36 @@ CREATE TABLE `creature_movement` (
 LOCK TABLES `creature_movement` WRITE;
 /*!40000 ALTER TABLE `creature_movement` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_movement` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_movement_scripts`
+--
+
+DROP TABLE IF EXISTS `creature_movement_scripts`;
+CREATE TABLE `creature_movement_scripts` (
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `delay` int(10) unsigned NOT NULL default '0',
+  `command` mediumint(8) unsigned NOT NULL default '0',
+  `datalong` mediumint(8) unsigned NOT NULL default '0',
+  `datalong2` int(10) unsigned NOT NULL default '0',
+  `datalong3` int(10) unsigned NOT NULL default '0',
+  `datalong4` int(10) unsigned NOT NULL default '0',
+  `data_flags` tinyint(3) unsigned NOT NULL default '0',
+  `dataint` int(11) NOT NULL default '0',
+  `x` float NOT NULL default '0',
+  `y` float NOT NULL default '0',
+  `z` float NOT NULL default '0',
+  `o` float NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `creature_movement_scripts`
+--
+
+LOCK TABLES `creature_movement_scripts` WRITE;
+/*!40000 ALTER TABLE `creature_movement_scripts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_movement_scripts` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1326,18 +1357,6 @@ DROP TABLE IF EXISTS `event_scripts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `event_scripts` (
-<<<<<<< HEAD
-  `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `delay` int(10) unsigned NOT NULL DEFAULT '0',
-  `command` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `datalong` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `datalong2` int(10) unsigned NOT NULL DEFAULT '0',
-  `dataint` int(11) NOT NULL DEFAULT '0',
-  `x` float NOT NULL DEFAULT '0',
-  `y` float NOT NULL DEFAULT '0',
-  `z` float NOT NULL DEFAULT '0',
-  `o` float NOT NULL DEFAULT '0'
-=======
   `id` mediumint(8) unsigned NOT NULL default '0',
   `delay` int(10) unsigned NOT NULL default '0',
   `command` mediumint(8) unsigned NOT NULL default '0',
@@ -1351,7 +1370,6 @@ CREATE TABLE `event_scripts` (
   `y` float NOT NULL default '0',
   `z` float NOT NULL default '0',
   `o` float NOT NULL default '0'
->>>>>>> 69c34a9... Add additional fields to *_scripts tables for storage of more data.
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1880,18 +1898,6 @@ DROP TABLE IF EXISTS `gameobject_scripts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `gameobject_scripts` (
-<<<<<<< HEAD
-  `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `delay` int(10) unsigned NOT NULL DEFAULT '0',
-  `command` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `datalong` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `datalong2` int(10) unsigned NOT NULL DEFAULT '0',
-  `dataint` int(11) NOT NULL DEFAULT '0',
-  `x` float NOT NULL DEFAULT '0',
-  `y` float NOT NULL DEFAULT '0',
-  `z` float NOT NULL DEFAULT '0',
-  `o` float NOT NULL DEFAULT '0'
-=======
   `id` mediumint(8) unsigned NOT NULL default '0',
   `delay` int(10) unsigned NOT NULL default '0',
   `command` mediumint(8) unsigned NOT NULL default '0',
@@ -1905,7 +1911,6 @@ CREATE TABLE `gameobject_scripts` (
   `y` float NOT NULL default '0',
   `z` float NOT NULL default '0',
   `o` float NOT NULL default '0'
->>>>>>> 69c34a9... Add additional fields to *_scripts tables for storage of more data.
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -9339,18 +9344,6 @@ DROP TABLE IF EXISTS `quest_end_scripts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `quest_end_scripts` (
-<<<<<<< HEAD
-  `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `delay` int(10) unsigned NOT NULL DEFAULT '0',
-  `command` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `datalong` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `datalong2` int(10) unsigned NOT NULL DEFAULT '0',
-  `dataint` int(11) NOT NULL DEFAULT '0',
-  `x` float NOT NULL DEFAULT '0',
-  `y` float NOT NULL DEFAULT '0',
-  `z` float NOT NULL DEFAULT '0',
-  `o` float NOT NULL DEFAULT '0'
-=======
   `id` mediumint(8) unsigned NOT NULL default '0',
   `delay` int(10) unsigned NOT NULL default '0',
   `command` mediumint(8) unsigned NOT NULL default '0',
@@ -9364,7 +9357,6 @@ CREATE TABLE `quest_end_scripts` (
   `y` float NOT NULL default '0',
   `z` float NOT NULL default '0',
   `o` float NOT NULL default '0'
->>>>>>> 69c34a9... Add additional fields to *_scripts tables for storage of more data.
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -9385,18 +9377,6 @@ DROP TABLE IF EXISTS `quest_start_scripts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `quest_start_scripts` (
-<<<<<<< HEAD
-  `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `delay` int(10) unsigned NOT NULL DEFAULT '0',
-  `command` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `datalong` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `datalong2` int(10) unsigned NOT NULL DEFAULT '0',
-  `dataint` int(11) NOT NULL DEFAULT '0',
-  `x` float NOT NULL DEFAULT '0',
-  `y` float NOT NULL DEFAULT '0',
-  `z` float NOT NULL DEFAULT '0',
-  `o` float NOT NULL DEFAULT '0'
-=======
   `id` mediumint(8) unsigned NOT NULL default '0',
   `delay` int(10) unsigned NOT NULL default '0',
   `command` mediumint(8) unsigned NOT NULL default '0',
@@ -9410,7 +9390,6 @@ CREATE TABLE `quest_start_scripts` (
   `y` float NOT NULL default '0',
   `z` float NOT NULL default '0',
   `o` float NOT NULL default '0'
->>>>>>> 69c34a9... Add additional fields to *_scripts tables for storage of more data.
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13483,18 +13462,6 @@ DROP TABLE IF EXISTS `spell_scripts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_scripts` (
-<<<<<<< HEAD
-  `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `delay` int(10) unsigned NOT NULL DEFAULT '0',
-  `command` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `datalong` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `datalong2` int(10) unsigned NOT NULL DEFAULT '0',
-  `dataint` int(11) NOT NULL DEFAULT '0',
-  `x` float NOT NULL DEFAULT '0',
-  `y` float NOT NULL DEFAULT '0',
-  `z` float NOT NULL DEFAULT '0',
-  `o` float NOT NULL DEFAULT '0'
-=======
   `id` mediumint(8) unsigned NOT NULL default '0',
   `delay` int(10) unsigned NOT NULL default '0',
   `command` mediumint(8) unsigned NOT NULL default '0',
@@ -13508,7 +13475,6 @@ CREATE TABLE `spell_scripts` (
   `y` float NOT NULL default '0',
   `z` float NOT NULL default '0',
   `o` float NOT NULL default '0'
->>>>>>> 69c34a9... Add additional fields to *_scripts tables for storage of more data.
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
