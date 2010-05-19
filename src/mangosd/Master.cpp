@@ -195,6 +195,7 @@ int Master::Run()
         if( !pid )
         {
             sLog.outError( "Cannot create PID file %s.\n", pidfile.c_str() );
+            Log::WaitBeforeContinueIfNeed();
             return 1;
         }
 
@@ -203,7 +204,10 @@ int Master::Run()
 
     ///- Start the databases
     if (!_StartDB())
+    {
+        Log::WaitBeforeContinueIfNeed();
         return 1;
+    }
 
     ///- Initialize the World
     sWorld.SetInitialWorldSettings();
@@ -318,6 +322,7 @@ int Master::Run()
     if (sWorldSocketMgr->StartNetwork (wsport, bind_ip.c_str ()) == -1)
     {
         sLog.outError ("Failed to start network");
+        Log::WaitBeforeContinueIfNeed();
         World::StopNow(ERROR_EXIT_CODE);
         // go down and shutdown the server
     }

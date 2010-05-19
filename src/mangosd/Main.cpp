@@ -109,6 +109,7 @@ extern int main(int argc, char **argv)
             {
                 sLog.outError("Runtime-Error: -s option requires an input argument");
                 usage(argv[0]);
+                Log::WaitBeforeContinueIfNeed();
                 return 1;
             }
             if( strcmp(argv[c],"install") == 0)
@@ -127,6 +128,7 @@ extern int main(int argc, char **argv)
             {
                 sLog.outError("Runtime-Error: unsupported option %s",argv[c]);
                 usage(argv[0]);
+                Log::WaitBeforeContinueIfNeed();
                 return 1;
             }
         }
@@ -142,6 +144,7 @@ extern int main(int argc, char **argv)
     if (!sConfig.SetSource(cfg_file))
     {
         sLog.outError("Could not find configuration file %s.", cfg_file);
+        Log::WaitBeforeContinueIfNeed();
         return 1;
     }
 
