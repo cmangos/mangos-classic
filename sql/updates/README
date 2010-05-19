@@ -9,18 +9,25 @@ NOTE: This is file special addition for mangoszero fork (from mangos 0.12)
       It describe work with backported sql updates
 
 == Database Updates ==
+
 This folder contains SQL files which will apply required updates to your MySQL
 database, whenever the MaNGOS database structure has been changed or extended.
 
 To see if you need an update, the file names have been given a fixed structure
 that should enable you to see if you need an update or not.
 
-=== File name descriptin ===
-File names are divided into two parts. First part is the order_number+revision+counter
-that show commit revision that will be compatible with database after apply update.
-Counter set order in sql updates apply for same revision. Order_number set global order in directory
-for backported sql updates (its backported in random order and need special mangoszero side order for apply).
-The second part of the name of the database and the table that needs and update or has been added.
+=== File Name Description ===
+
+File names are divided into two parts.
+
+First part is the order_number, revision and counter that shows the commit revision that
+will be compatible with the database after apply that particular update.
+Counter sets the order to apply sql updates for the same revision. Order_number set
+global order in directory for backported sql updates (its backported in random order
+and need special mangoszero side order for apply).
+
+The second part of the name is the database and the table that needs an update or has been added.
+
 See an example below:
 
          z0001_xxx_01_characters_character_db_version.sql
@@ -35,19 +42,19 @@ See an example below:
          |     |   Counter show number of sql update in 0.12 backported or own (non bakported, xxx) updates list for provided master revision
          |     |   and set proper order for sql updates for same revision
          |     |
-         |     MaNGOS 0.12 commit revison related to sql update (if this backported slq update.
+         |     MaNGOS 0.12 commit revision related to sql update (if this backported sql update.
          |     It can be absent (and replaced by xxx) if sql update not really backported but only mangoszero specific.
          |
          Order_number set special order for apply sql updates from different backported revisions in mangoszero
 
-After appling this update DB compatiable with database that include this sql update.
-SQL update can include special protection against multiply and wrong order SQL updates apply.
-So attempt apply sql update to more old DB without previous SQL update in list for targeted database
-or to DB with already applied this or later SQL update will generate error and not applied.
 
-=== For commiters ===
+After applying an update the DB is compatible with the mangos revision of this sql update.
+SQL updates include special protection against multiple and wrong order of update application.
 
-DO NOT use git_id tool for mangoszero or any branch different from mangos master.
+Attempts to apply sql updates to an older DB without previous SQL updates in list for the database
+or to DB with already applied this or later SQL update will generate an error and not be applied.
+
+=== For Commiters ====
 
 Possible use simplifed steps if backported revision include sql update in form that can be re-apply without problem mutiply times
 then:
