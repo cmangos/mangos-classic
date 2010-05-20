@@ -13,9 +13,16 @@ http://getmangos.com/community/
 Please submit bug reports at:
 http://mangos.lighthouseapp.com/
 
-Version 0.13
- * Under discussion.
- * Upgrade to client version 3.0.3 (build 9183).
+In branch
+
+ * OpenSSL lib upgrade to OpenSSL 1.0.0.
+ * Sockets lib use dropped.
+ * Implement AV battleground.
+ * Implement new DB-based gossip system for creatures/gameobjects.
+ * Implement realmd support realms for different client versions.
+ * New memory allocator for MaNGOS, based on Intel Threading Building Blocks library.
+ * DB-based store battleground gameobjects/creatures.
+ * Map search/loading improvements
 
 Version 0.12
  * Migrate from SVN to GIT.
