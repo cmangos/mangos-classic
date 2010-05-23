@@ -413,7 +413,7 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
     data << GetPlayer()->GetGUID();
     data << x;
     data << y;
-    GetPlayer()->GetGroup()->BroadcastPacket(&data, -1, GetPlayer()->GetGUID());
+    GetPlayer()->GetGroup()->BroadcastPacket(&data, true, -1, GetPlayer()->GetGUID());
 }
 
 void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
@@ -438,7 +438,7 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
     data << roll;
     data << GetPlayer()->GetGUID();
     if(GetPlayer()->GetGroup())
-        GetPlayer()->GetGroup()->BroadcastPacket(&data);
+        GetPlayer()->GetGroup()->BroadcastPacket(&data, false);
     else
         SendPacket(&data);
 }
@@ -581,7 +581,7 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
         // everything is fine, do it
         WorldPacket data(MSG_RAID_READY_CHECK, 8);
         data << GetPlayer()->GetGUID();
-        group->BroadcastPacket(&data, -1);
+        group->BroadcastPacket(&data, false, -1);
 
         group->OfflineReadyCheck();
     }

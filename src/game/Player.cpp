@@ -6919,7 +6919,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
 
                     loot->generateMoneyLoot(creature->GetCreatureInfo()->mingold,creature->GetCreatureInfo()->maxgold);
 
-                    if (Group* group = recipient->GetGroup())
+                    if (Group* group = creature->GetGroupLootRecipient())
                     {
                         group->UpdateLooterGuid(creature,true);
 
@@ -6950,9 +6950,9 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                 // set group rights only for loot_type != LOOT_SKINNING
                 else
                 {
-                    if(Group* group = GetGroup())
+                    if(Group* group = creature->GetGroupLootRecipient())
                     {
-                        if (group == recipient->GetGroup())
+                        if (group == GetGroup())
                         {
                             if (group->GetLootMethod() == FREE_FOR_ALL)
                                 permission = ALL_PERMISSION;
@@ -11026,7 +11026,7 @@ void Player::SendNewItem(Item *item, uint32 count, bool received, bool created, 
     data << uint32(GetItemCount(item->GetEntry()));         // count of items in inventory
 
     if (broadcast && GetGroup())
-        GetGroup()->BroadcastPacket(&data);
+        GetGroup()->BroadcastPacket(&data, true);
     else
         GetSession()->SendPacket(&data);
 }
@@ -13599,18 +13599,20 @@ bool Player::isAllowedToLoot(Creature* creature)
     {
         if (recipient == this)
             return true;
-        if( Group* otherGroup = recipient->GetGroup())
+
+        if (Group* otherGroup = recipient->GetGroup())
         {
             Group* thisGroup = GetGroup();
-            if(!thisGroup)
+            if (!thisGroup)
                 return false;
+
             return thisGroup == otherGroup;
         }
         return false;
     }
     else
         // prevent other players from looting if the recipient got disconnected
-        return !creature->hasLootRecipient();
+        return !creature->HasLootRecipient();
 }
 
 void Player::_LoadActions(QueryResult *result)
@@ -17608,98 +17610,29 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
     return true;
 }
 
-bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
+bool Player::RewardSinglePlayerAtKill(Unit* pVictim)
 {
     bool PvP = pVictim->isCharmedOwnedByPlayerOrPlayer();
 
-    uint32 xp = 0;
-    bool honored_kill = false;
+    uint32 xp = PvP ? 0 : MaNGOS::XP::Gain(this, pVictim);
 
-    if(Group *pGroup = GetGroup())
+    // honor can be in PvP and !PvP (racial leader) cases
+    bool honored_kill = CalculateHonor(pVictim,1);
+
+    // xp and reputation only in !PvP case
+    if(!PvP)
     {
-        uint32 count = 0;
-        uint32 sum_level = 0;
-        Player* member_with_max_level = NULL;
-        Player* not_gray_member_with_max_level = NULL;
+        RewardReputation(pVictim,1);
+        GiveXP(xp, pVictim);
 
-        pGroup->GetDataForXPAtKill(pVictim,count,sum_level,member_with_max_level,not_gray_member_with_max_level);
+        if(Pet* pet = GetPet())
+            pet->GivePetXP(xp);
 
-        if(member_with_max_level)
-        {
-            /// not get Xp in PvP or no not gray players in group
-            xp = (PvP || !not_gray_member_with_max_level) ? 0 : MaNGOS::XP::Gain(not_gray_member_with_max_level, pVictim);
-
-            /// skip in check PvP case (for speed, not used)
-            bool is_raid = PvP ? false : sMapStore.LookupEntry(GetMapId())->IsRaid() && pGroup->isRaidGroup();
-            bool is_dungeon = PvP ? false : sMapStore.LookupEntry(GetMapId())->IsDungeon();
-            float group_rate = MaNGOS::XP::xp_in_group_rate(count,is_raid);
-
-            for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
-            {
-                Player* pGroupGuy = itr->getSource();
-                if(!pGroupGuy)
-                    continue;
-
-                if(!pGroupGuy->IsAtGroupRewardDistance(pVictim))
-                    continue;                               // member (alive or dead) or his corpse at req. distance
-
-                // honor can be in PvP and !PvP (racial leader) cases (for alive)
-                if(pGroupGuy->isAlive() && pGroupGuy->CalculateHonor(pVictim,count) && pGroupGuy==this)
-                    honored_kill = true;
-
-                // xp and reputation only in !PvP case
-                if(!PvP)
-                {
-                    float rate = group_rate * float(pGroupGuy->getLevel()) / sum_level;
-
-                    // if is in dungeon then all receive full reputation at kill
-                    // rewarded any alive/dead/near_corpse group member
-                    pGroupGuy->RewardReputation(pVictim,is_dungeon ? 1.0f : rate);
-
-                    // XP updated only for alive group member
-                    if(pGroupGuy->isAlive() && not_gray_member_with_max_level &&
-                       pGroupGuy->getLevel() <= not_gray_member_with_max_level->getLevel())
-                    {
-                        uint32 itr_xp = (member_with_max_level == not_gray_member_with_max_level) ? uint32(xp*rate) : uint32((xp*rate/2)+1);
-
-                        pGroupGuy->GiveXP(itr_xp, pVictim);
-                        if(Pet* pet = pGroupGuy->GetPet())
-                            pet->GivePetXP(itr_xp/2);
-                    }
-
-                    // quest objectives updated only for alive group member or dead but with not released body
-                    if(pGroupGuy->isAlive()|| !pGroupGuy->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-                    {
-                        // normal creature (not pet/etc) can be only in !PvP case
-                        if(pVictim->GetTypeId()==TYPEID_UNIT)
-                            pGroupGuy->KilledMonster(((Creature*)pVictim)->GetCreatureInfo(), pVictim->GetObjectGuid());
-                    }
-                }
-            }
-        }
+        // normal creature (not pet/etc) can be only in !PvP case
+        if(pVictim->GetTypeId()==TYPEID_UNIT)
+            KilledMonster(((Creature*)pVictim)->GetCreatureInfo(), pVictim->GetObjectGuid());
     }
-    else                                                    // if (!pGroup)
-    {
-        xp = PvP ? 0 : MaNGOS::XP::Gain(this, pVictim);
 
-        // honor can be in PvP and !PvP (racial leader) cases
-        if(CalculateHonor(pVictim,1))
-            honored_kill = true;
-
-        // xp and reputation only in !PvP case
-        if(!PvP)
-        {
-            RewardReputation(pVictim,1);
-            GiveXP(xp, pVictim);
-
-            if(Pet* pet = GetPet())
-                pet->GivePetXP(xp);
-
-            // normal creature (not pet/etc) can be only in !PvP case
-            if(pVictim->GetTypeId()==TYPEID_UNIT)
-                KilledMonster(((Creature*)pVictim)->GetCreatureInfo(), pVictim->GetObjectGuid());
-        }
-    }
     return xp || honored_kill;
 }
 

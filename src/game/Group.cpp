@@ -301,7 +301,7 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
         {
             WorldPacket data(SMSG_GROUP_SET_LEADER, (m_memberSlots.front().name.size()+1));
             data << m_memberSlots.front().name;
-            BroadcastPacket(&data);
+            BroadcastPacket(&data, true);
         }
 
         SendUpdate();
@@ -324,7 +324,7 @@ void Group::ChangeLeader(const uint64 &guid)
 
     WorldPacket data(SMSG_GROUP_SET_LEADER, slot->name.size()+1);
     data << slot->name;
-    BroadcastPacket(&data);
+    BroadcastPacket(&data, true);
     SendUpdate();
 }
 
@@ -789,29 +789,47 @@ void Group::SetTargetIcon(uint8 id, uint64 guid)
     data << (uint8)0;
     data << id;
     data << guid;
-    BroadcastPacket(&data);
+    BroadcastPacket(&data, true);
 }
 
-void Group::GetDataForXPAtKill(Unit const* victim, uint32& count,uint32& sum_level, Player* & member_with_max_level, Player* & not_gray_member_with_max_level)
+static void GetDataForXPAtKill_helper(Player* player, Unit const* victim, uint32& sum_level, Player* & member_with_max_level, Player* & not_gray_member_with_max_level)
+{
+    sum_level += player->getLevel();
+    if(!member_with_max_level || member_with_max_level->getLevel() < player->getLevel())
+        member_with_max_level = player;
+
+    uint32 gray_level = MaNGOS::XP::GetGrayLevel(player->getLevel());
+    if( victim->getLevel() > gray_level && (!not_gray_member_with_max_level
+        || not_gray_member_with_max_level->getLevel() < player->getLevel()))
+        not_gray_member_with_max_level = player;
+}
+
+void Group::GetDataForXPAtKill(Unit const* victim, uint32& count,uint32& sum_level, Player* & member_with_max_level, Player* & not_gray_member_with_max_level, Player* additional)
 {
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player* member = itr->getSource();
-        if(!member || !member->isAlive())                   // only for alive
+        if (!member || !member->isAlive())                  // only for alive
             continue;
 
-        if(!member->IsAtGroupRewardDistance(victim))        // at req. distance
+        // will proccesed later
+        if (member == additional)
+            continue;
+
+        if (!member->IsAtGroupRewardDistance(victim))       // at req. distance
             continue;
 
         ++count;
-        sum_level += member->getLevel();
-        if(!member_with_max_level || member_with_max_level->getLevel() < member->getLevel())
-            member_with_max_level = member;
+        GetDataForXPAtKill_helper(member,victim,sum_level,member_with_max_level,not_gray_member_with_max_level);
+    }
 
-        uint32 gray_level = MaNGOS::XP::GetGrayLevel(member->getLevel());
-        if( victim->getLevel() > gray_level && (!not_gray_member_with_max_level
-           || not_gray_member_with_max_level->getLevel() < member->getLevel()))
-            not_gray_member_with_max_level = member;
+    if (additional)
+    {
+        if (additional->IsAtGroupRewardDistance(victim))    // at req. distance
+        {
+            ++count;
+            GetDataForXPAtKill_helper(additional,victim,sum_level,member_with_max_level,not_gray_member_with_max_level);
+        }
     }
 }
 
@@ -890,12 +908,12 @@ void Group::UpdatePlayerOutOfRange(Player* pPlayer)
     }
 }
 
-void Group::BroadcastPacket(WorldPacket *packet, int group, uint64 ignore)
+void Group::BroadcastPacket(WorldPacket *packet, bool ignorePlayersInBGRaid, int group, uint64 ignore)
 {
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player *pl = itr->getSource();
-        if(!pl || (ignore != 0 && pl->GetGUID() == ignore))
+        if(!pl || (ignore != 0 && pl->GetGUID() == ignore) || (ignorePlayersInBGRaid && pl->GetGroup() != this) )
             continue;
 
         if (pl->GetSession() && (group == -1 || itr->getSubGroup() == group))
@@ -1478,4 +1496,104 @@ void Group::_homebindIfInstance(Player *player)
         if(!playerBind || !playerBind->perm)
             player->m_InstanceValid = false;
     }
+}
+
+static bool RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 count, bool PvP, float group_rate, uint32 sum_level, bool is_dungeon, Player* not_gray_member_with_max_level, Player* member_with_max_level, uint32 xp )
+{
+    bool  honored_kill = false;
+
+    // honor can be in PvP and !PvP (racial leader) cases (for alive)
+    if (pGroupGuy->isAlive() && pGroupGuy->CalculateHonor(pVictim,count))
+        honored_kill = true;
+
+    // xp and reputation only in !PvP case
+    if(!PvP)
+    {
+        float rate = group_rate * float(pGroupGuy->getLevel()) / sum_level;
+
+        // if is in dungeon then all receive full reputation at kill
+        // rewarded any alive/dead/near_corpse group member
+        pGroupGuy->RewardReputation(pVictim,is_dungeon ? 1.0f : rate);
+
+        // XP updated only for alive group member
+        if(pGroupGuy->isAlive() && not_gray_member_with_max_level &&
+            pGroupGuy->getLevel() <= not_gray_member_with_max_level->getLevel())
+        {
+            uint32 itr_xp = (member_with_max_level == not_gray_member_with_max_level) ? uint32(xp*rate) : uint32((xp*rate/2)+1);
+
+            pGroupGuy->GiveXP(itr_xp, pVictim);
+            if(Pet* pet = pGroupGuy->GetPet())
+                pet->GivePetXP(itr_xp/2);
+        }
+
+        // quest objectives updated only for alive group member or dead but with not released body
+        if(pGroupGuy->isAlive()|| !pGroupGuy->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        {
+            // normal creature (not pet/etc) can be only in !PvP case
+            if(pVictim->GetTypeId()==TYPEID_UNIT)
+                pGroupGuy->KilledMonster(((Creature*)pVictim)->GetCreatureInfo(), pVictim->GetObjectGuid());
+        }
+    }
+
+    return honored_kill;
+}
+
+/** Provide rewards to group members at unit kill
+ *
+ * @param pVictim       Killed unit
+ * @param player_tap    Player who tap unit if online, it can be group member or can be not if leaved after tap but before kill target
+ *
+ * Rewards received by group members and player_tap
+ */
+bool Group::RewardGroupAtKill(Unit* pVictim, Player* player_tap)
+{
+    bool PvP = pVictim->isCharmedOwnedByPlayerOrPlayer();
+
+    // prepare data for near group iteration (PvP and !PvP cases)
+    uint32 xp = 0;
+    bool honored_kill = false;
+
+    uint32 count = 0;
+    uint32 sum_level = 0;
+    Player* member_with_max_level = NULL;
+    Player* not_gray_member_with_max_level = NULL;
+
+    GetDataForXPAtKill(pVictim,count,sum_level,member_with_max_level,not_gray_member_with_max_level,player_tap);
+
+    if(member_with_max_level)
+    {
+        /// not get Xp in PvP or no not gray players in group
+        xp = (PvP || !not_gray_member_with_max_level) ? 0 : MaNGOS::XP::Gain(not_gray_member_with_max_level, pVictim);
+
+        /// skip in check PvP case (for speed, not used)
+        bool is_raid = PvP ? false : sMapStore.LookupEntry(pVictim->GetMapId())->IsRaid() && isRaidGroup();
+        bool is_dungeon = PvP ? false : sMapStore.LookupEntry(pVictim->GetMapId())->IsDungeon();
+        float group_rate = MaNGOS::XP::xp_in_group_rate(count,is_raid);
+
+        for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            Player* pGroupGuy = itr->getSource();
+            if(!pGroupGuy)
+                continue;
+
+            // will proccessed later
+            if(pGroupGuy==player_tap)
+                continue;
+
+            if(!pGroupGuy->IsAtGroupRewardDistance(pVictim))
+                continue;                               // member (alive or dead) or his corpse at req. distance
+
+            RewardGroupAtKill_helper(pGroupGuy, pVictim, count, PvP, group_rate, sum_level, is_dungeon, not_gray_member_with_max_level, member_with_max_level, xp);
+        }
+
+        if(player_tap)
+        {
+            // member (alive or dead) or his corpse at req. distance
+            if(player_tap->IsAtGroupRewardDistance(pVictim))
+                if (RewardGroupAtKill_helper(player_tap, pVictim, count, PvP, group_rate, sum_level, is_dungeon, not_gray_member_with_max_level, member_with_max_level, xp))
+                    honored_kill = true;
+        }
+    }
+
+    return xp || honored_kill;
 }

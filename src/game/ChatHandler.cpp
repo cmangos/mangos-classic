@@ -241,7 +241,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             WorldPacket data;
             ChatHandler::FillMessageData(&data, this, CHAT_MSG_PARTY, lang, NULL, 0, msg.c_str(),NULL);
-            group->BroadcastPacket(&data, group->GetMemberGroup(GetPlayer()->GetGUID()));
+            group->BroadcastPacket(&data, false, group->GetMemberGroup(GetPlayer()->GetGUID()));
         }
         break;
         case CHAT_MSG_GUILD:
@@ -318,7 +318,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             WorldPacket data;
             ChatHandler::FillMessageData(&data, this, CHAT_MSG_RAID, lang, "", 0, msg.c_str(),NULL);
-            group->BroadcastPacket(&data);
+            group->BroadcastPacket(&data, false);
         } break;
         case CHAT_MSG_RAID_LEADER:
         {
@@ -343,7 +343,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             WorldPacket data;
             ChatHandler::FillMessageData(&data, this, CHAT_MSG_RAID_LEADER, lang, "", 0, msg.c_str(),NULL);
-            group->BroadcastPacket(&data);
+            group->BroadcastPacket(&data, false);
         } break;
         case CHAT_MSG_RAID_WARNING:
         {
@@ -362,7 +362,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             WorldPacket data;
             ChatHandler::FillMessageData(&data, this, CHAT_MSG_RAID_WARNING, lang, "", 0, msg.c_str(),NULL);
-            group->BroadcastPacket(&data);
+            group->BroadcastPacket(&data, false);
         } break;
 
         case CHAT_MSG_BATTLEGROUND:
@@ -382,7 +382,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             WorldPacket data;
             ChatHandler::FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND, lang, "", 0, msg.c_str(),NULL);
-            group->BroadcastPacket(&data);
+            group->BroadcastPacket(&data, false);
         } break;
 
         case CHAT_MSG_BATTLEGROUND_LEADER:
@@ -402,7 +402,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             WorldPacket data;
             ChatHandler::FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND_LEADER, lang, "", 0, msg.c_str(),NULL);
-            group->BroadcastPacket(&data);
+            group->BroadcastPacket(&data, false);
         } break;
 
         case CHAT_MSG_CHANNEL:
