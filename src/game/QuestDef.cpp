@@ -72,64 +72,61 @@ Quest::Quest(Field * questRecord)
     for (int i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
         ReqSourceCount[i] = questRecord[49+i].GetUInt32();
 
-    for (int i = 0; i < QUEST_SOURCE_ITEM_IDS_COUNT; ++i)
-        ReqSourceRef[i] = questRecord[53+i].GetUInt32();
+    for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+        ReqCreatureOrGOId[i] = questRecord[53+i].GetInt32();
 
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-        ReqCreatureOrGOId[i] = questRecord[57+i].GetInt32();
+        ReqCreatureOrGOCount[i] = questRecord[57+i].GetUInt32();
 
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-        ReqCreatureOrGOCount[i] = questRecord[61+i].GetUInt32();
-
-    for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
-        ReqSpell[i] = questRecord[65+i].GetUInt32();
+        ReqSpell[i] = questRecord[61+i].GetUInt32();
 
     for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
-        RewChoiceItemId[i] = questRecord[69+i].GetUInt32();
+        RewChoiceItemId[i] = questRecord[65+i].GetUInt32();
 
     for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
-        RewChoiceItemCount[i] = questRecord[75+i].GetUInt32();
+        RewChoiceItemCount[i] = questRecord[71+i].GetUInt32();
 
     for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
-        RewItemId[i] = questRecord[81+i].GetUInt32();
+        RewItemId[i] = questRecord[77+i].GetUInt32();
 
     for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
-        RewItemCount[i] = questRecord[85+i].GetUInt32();
+        RewItemCount[i] = questRecord[81+i].GetUInt32();
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
-        RewRepFaction[i] = questRecord[89+i].GetUInt32();
+        RewRepFaction[i] = questRecord[85+i].GetUInt32();
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
-        RewRepValue[i] = questRecord[94+i].GetInt32();
+        RewRepValue[i] = questRecord[90+i].GetInt32();
 
-    RewOrReqMoney = questRecord[99].GetInt32();
-    RewMoneyMaxLevel = questRecord[100].GetUInt32();
-    RewSpell = questRecord[101].GetUInt32();
-    RewSpellCast = questRecord[102].GetUInt32();
-    RewMailTemplateId = questRecord[103].GetUInt32();
-    RewMailDelaySecs = questRecord[104].GetUInt32();
-    PointMapId = questRecord[105].GetUInt32();
-    PointX = questRecord[106].GetFloat();
-    PointY = questRecord[107].GetFloat();
-    PointOpt = questRecord[108].GetUInt32();
-
-    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        DetailsEmote[i] = questRecord[109+i].GetUInt32();
+    RewOrReqMoney = questRecord[95].GetInt32();
+    RewMoneyMaxLevel = questRecord[96].GetUInt32();
+    RewSpell = questRecord[97].GetUInt32();
+    RewSpellCast = questRecord[98].GetUInt32();
+    RewMailTemplateId = questRecord[99].GetUInt32();
+    RewMailDelaySecs = questRecord[100].GetUInt32();
+    PointMapId = questRecord[101].GetUInt32();
+    PointX = questRecord[102].GetFloat();
+    PointY = questRecord[103].GetFloat();
+    PointOpt = questRecord[104].GetUInt32();
 
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        DetailsEmoteDelay[i] = questRecord[113+i].GetUInt32();
-
-    IncompleteEmote = questRecord[117].GetUInt32();
-    CompleteEmote = questRecord[118].GetUInt32();
+        DetailsEmote[i] = questRecord[105+i].GetUInt32();
 
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        OfferRewardEmote[i] = questRecord[119+i].GetInt32();
+        DetailsEmoteDelay[i] = questRecord[109+i].GetUInt32();
+
+    IncompleteEmote = questRecord[113].GetUInt32();
+    CompleteEmote = questRecord[114].GetUInt32();
 
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
-        OfferRewardEmoteDelay[i] = questRecord[123+i].GetInt32();
+        OfferRewardEmote[i] = questRecord[115+i].GetInt32();
 
-    QuestStartScript = questRecord[127].GetUInt32();
-    QuestCompleteScript = questRecord[128].GetUInt32();
+    for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
+        OfferRewardEmoteDelay[i] = questRecord[119+i].GetInt32();
+
+    QuestStartScript = questRecord[123].GetUInt32();
+    QuestCompleteScript = questRecord[124].GetUInt32();
 
     QuestFlags |= SpecialFlags << 16;
 
