@@ -99,6 +99,8 @@ struct LootItem
     bool AllowedForPlayer(Player const * player) const;
 };
 
+typedef std::vector<LootItem> LootItemList;
+
 struct QuestItem
 {
     uint8   index;                                          // position in quest_items;
@@ -218,7 +220,7 @@ struct Loot
     QuestItemMap const& GetPlayerFFAItems() const { return PlayerFFAItems; }
     QuestItemMap const& GetPlayerNonQuestNonFFAConditionalItems() const { return PlayerNonQuestNonFFAConditionalItems; }
 
-    std::vector<LootItem> items;
+    LootItemList items;
     uint32 gold;
     uint8 unlootedCount;
 
@@ -278,7 +280,7 @@ struct Loot
         QuestItemList* FillQuestLoot(Player* player);
         QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player);
 
-        std::vector<LootItem> quest_items;
+        LootItemList quest_items;
         std::set<uint64> PlayersLooting;
         QuestItemMap PlayerQuestItems;
         QuestItemMap PlayerFFAItems;
