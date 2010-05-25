@@ -388,6 +388,9 @@
     <ClCompile Include="..\..\src\game\AddonHandler.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\CharacterDatabaseCleaner.cpp">
+      <Filter>Tool</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\extras\Mod.cpp">
       <Filter>Extras</Filter>
     </ClCompile>
@@ -741,6 +744,9 @@
     <ClInclude Include="..\..\src\game\pchdef.h" />
     <ClInclude Include="..\..\src\game\AddonHandler.h">
       <Filter>World/Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\CharacterDatabaseCleaner.h">
+      <Filter>Tool</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
