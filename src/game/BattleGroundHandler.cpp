@@ -94,7 +94,7 @@ void WorldSession::HandleBattlemasterJoinOpcode( WorldPacket & recv_data )
     DEBUG_LOG( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from (GUID: %u TypeId:%u)", GUID_LOPART(guid), GuidHigh2TypeId(GUID_HIPART(guid)));
 
     // can do this, since it's battleground, not arena
-    uint32 bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bgTypeId);
+    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bgTypeId);
 
     // ignore if player is already in BG
     if(_player->InBattleGround())
