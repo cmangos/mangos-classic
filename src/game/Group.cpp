@@ -1507,13 +1507,11 @@ void Group::_homebindIfInstance(Player *player)
     }
 }
 
-static bool RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 count, bool PvP, float group_rate, uint32 sum_level, bool is_dungeon, Player* not_gray_member_with_max_level, Player* member_with_max_level, uint32 xp )
+static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 count, bool PvP, float group_rate, uint32 sum_level, bool is_dungeon, Player* not_gray_member_with_max_level, Player* member_with_max_level, uint32 xp )
 {
-    bool  honored_kill = false;
-
     // honor can be in PvP and !PvP (racial leader) cases (for alive)
-    if (pGroupGuy->isAlive() && pGroupGuy->CalculateHonor(pVictim,count))
-        honored_kill = true;
+    if (pGroupGuy->isAlive())
+        pGroupGuy->RewardHonor(pVictim,count);
 
     // xp and reputation only in !PvP case
     if(!PvP)
@@ -1543,8 +1541,6 @@ static bool RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
                 pGroupGuy->KilledMonster(((Creature*)pVictim)->GetCreatureInfo(), pVictim->GetObjectGuid());
         }
     }
-
-    return honored_kill;
 }
 
 /** Provide rewards to group members at unit kill
@@ -1554,13 +1550,12 @@ static bool RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
  *
  * Rewards received by group members and player_tap
  */
-bool Group::RewardGroupAtKill(Unit* pVictim, Player* player_tap)
+void Group::RewardGroupAtKill(Unit* pVictim, Player* player_tap)
 {
     bool PvP = pVictim->isCharmedOwnedByPlayerOrPlayer();
 
     // prepare data for near group iteration (PvP and !PvP cases)
     uint32 xp = 0;
-    bool honored_kill = false;
 
     uint32 count = 0;
     uint32 sum_level = 0;
@@ -1599,10 +1594,7 @@ bool Group::RewardGroupAtKill(Unit* pVictim, Player* player_tap)
         {
             // member (alive or dead) or his corpse at req. distance
             if(player_tap->IsAtGroupRewardDistance(pVictim))
-                if (RewardGroupAtKill_helper(player_tap, pVictim, count, PvP, group_rate, sum_level, is_dungeon, not_gray_member_with_max_level, member_with_max_level, xp))
-                    honored_kill = true;
+                RewardGroupAtKill_helper(player_tap, pVictim, count, PvP, group_rate, sum_level, is_dungeon, not_gray_member_with_max_level, member_with_max_level, xp);
         }
     }
-
-    return xp || honored_kill;
 }

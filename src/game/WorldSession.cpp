@@ -340,7 +340,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
             // give honor to all attackers from set like group case
             for(std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
-                (*itr)->CalculateHonor(_player,aset.size());
+                (*itr)->RewardHonor(_player,aset.size());
 
             // give bg rewards and update counters like kill by first from attackers
             // this can't be called for all attackers.

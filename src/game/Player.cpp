@@ -4831,19 +4831,6 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
 
 void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHitOutcome outcome, bool defence)
 {
-    switch(outcome)
-    {
-        case MELEE_HIT_CRIT:
-        case MELEE_HIT_DODGE:
-        case MELEE_HIT_PARRY:
-        case MELEE_HIT_BLOCK:
-        case MELEE_HIT_BLOCK_CRIT:
-            return;
-
-        default:
-            break;
-    }
-
     uint32 plevel = getLevel();                             // if defense than pVictim == attacker
     uint32 greylevel = MaNGOS::XP::GetGrayLevel(plevel);
     uint32 moblevel = pVictim->getLevelForTarget(this);
@@ -5760,12 +5747,12 @@ uint32 Player::CalculateTotalKills(Unit *Victim,uint32 fromDate,uint32 toDate) c
 }
 
 //How much honor Player gains/loses killing uVictim
-bool Player::CalculateHonor(Unit *uVictim,uint32 groupsize)
+bool Player::RewardHonor(Unit *uVictim,uint32 groupsize)
 {
     float honor_points = 0;
     int kill_type = 0;
 
-    DETAIL_LOG("PLAYER: CalculateHonor");
+    DETAIL_LOG("PLAYER: RewardHonor");
 
     if (!uVictim)
         return false;
@@ -17650,14 +17637,14 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
     return true;
 }
 
-bool Player::RewardSinglePlayerAtKill(Unit* pVictim)
+void Player::RewardSinglePlayerAtKill(Unit* pVictim)
 {
     bool PvP = pVictim->isCharmedOwnedByPlayerOrPlayer();
 
     uint32 xp = PvP ? 0 : MaNGOS::XP::Gain(this, pVictim);
 
     // honor can be in PvP and !PvP (racial leader) cases
-    bool honored_kill = CalculateHonor(pVictim,1);
+    RewardHonor(pVictim,1);
 
     // xp and reputation only in !PvP case
     if(!PvP)
@@ -17672,8 +17659,6 @@ bool Player::RewardSinglePlayerAtKill(Unit* pVictim)
         if(pVictim->GetTypeId()==TYPEID_UNIT)
             KilledMonster(((Creature*)pVictim)->GetCreatureInfo(), pVictim->GetObjectGuid());
     }
-
-    return xp || honored_kill;
 }
 
 void Player::RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewardSource)

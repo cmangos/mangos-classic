@@ -3644,7 +3644,7 @@ bool ChatHandler::HandleHonorAddKillCommand(const char* /*args*/)
     if( target == m_session->GetPlayer())
         return false;
 
-    m_session->GetPlayer()->CalculateHonor(target,1);
+    m_session->GetPlayer()->RewardHonor(target,1);
     return true;
 }
 

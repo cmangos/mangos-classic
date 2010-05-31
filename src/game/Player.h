@@ -1531,7 +1531,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void InitDisplayIds();
 
         bool IsAtGroupRewardDistance(WorldObject const* pRewardSource) const;
-        bool RewardSinglePlayerAtKill(Unit* pVictim);
+        void RewardSinglePlayerAtKill(Unit* pVictim);
         void RewardPlayerAndGroupAtEvent(uint32 creature_id,WorldObject* pRewardSource);
         bool isHonorOrXPTarget(Unit* pVictim) const;
 
@@ -1551,7 +1551,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType);
         void UpdateHonor();
         void ResetHonor();
-        bool CalculateHonor(Unit *pVictim,uint32 groupsize);
+        bool RewardHonor(Unit *pVictim,uint32 groupsize);
         //Assume only Players and Units as kills
         //TYPEID_OBJECT used for CP from BG,quests etc.
         bool isKill(uint8 victimType) { return (victimType == TYPEID_UNIT || victimType == TYPEID_PLAYER ); }
