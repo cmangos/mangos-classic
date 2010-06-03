@@ -26,7 +26,7 @@
 
 enum DumpTableType
 {
-    DTT_CHARACTER,      //                                  // characters
+    DTT_CHARACTER,      //    -> guid, name                 // characters
 
     DTT_CHAR_TABLE,     //                                  // character_action, character_aura, character_homebind,
                                                             // character_queststatus, character_reputation,
