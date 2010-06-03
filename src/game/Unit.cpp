@@ -4386,6 +4386,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     break;
                 }
                 // Sweeping Strikes
+                case 12292:
                 case 18765:
                 {
                     // prevent chain of triggered spell from same triggered spell
