@@ -626,14 +626,35 @@ bool IsPositiveSpell(uint32 spellId)
 
 bool IsSingleTargetSpell(SpellEntry const *spellInfo)
 {
-    // cheap shot is an exception
-    if (spellInfo->Id == 1833 || spellInfo->Id == 14902 )
-        return false;
-
     // hunter's mark and similar
     if(spellInfo->SpellVisual == 3239)
         return true;
 
+    // exceptions (have spellInfo->AttributesEx & (1<<18) but not single targeted)
+    switch(spellInfo->Id)
+    {
+        case 1833:                                          // Cheap Shot
+        case 4538:                                          // Extract Essence (group targets)
+        case 5106:                                          // Crystal Flash (group targets)
+        case 5530:                                          // Mace Stun Effect
+        case 5648:                                          // Stunning Blast, rank 1
+        case 5649:                                          // Stunning Blast, rank 2
+        case 5726:                                          // Stunning Blow, Rank 1 
+        case 5727:                                          // Stunning Blow, Rank 2 
+        case 6927:                                          // Shadowstalker Slash, Rank 1
+        case 8399:                                          // Sleep (group targets)
+        case 9159:                                          // Sleep (armor triggred affect)
+        case 9256:                                          // Deep Sleep (group targets)
+        case 13902:                                         // Fist of Ragnaros
+        case 14902:                                         // Cheap Shot
+        case 16104:                                         // Crystallize (group targets)
+        case 17286:                                         // Crusader's Hammer (group targets)
+        case 20277:                                         // Fist of Ragnaros (group targets)
+        case 20669:                                         // Sleep (group targets)
+        case 20683:                                         // Highlord's Justice
+        case 24664:                                         // Sleep (group targets)
+            return false;
+    }
     // cannot be cast on another target while not cooled down anyway
     if (GetSpellDuration(spellInfo) < int32(GetSpellRecoveryTime(spellInfo)))
         return false;
