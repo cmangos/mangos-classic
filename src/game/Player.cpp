@@ -15680,42 +15680,6 @@ void Player::CharmSpellInitialize()
     GetSession()->SendPacket(&data);
 }
 
-int32 Player::GetTotalFlatMods(uint32 spellId, SpellModOp op)
-{
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if (!spellInfo) return 0;
-    int32 total = 0;
-    for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
-    {
-        SpellModifier *mod = *itr;
-
-        if(!IsAffectedBySpellmod(spellInfo,mod))
-            continue;
-
-        if (mod->type == SPELLMOD_FLAT)
-            total += mod->value;
-    }
-    return total;
-}
-
-int32 Player::GetTotalPctMods(uint32 spellId, SpellModOp op)
-{
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if (!spellInfo) return 0;
-    int32 total = 0;
-    for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
-    {
-        SpellModifier *mod = *itr;
-
-        if(!IsAffectedBySpellmod(spellInfo,mod))
-            continue;
-
-        if (mod->type == SPELLMOD_PCT)
-            total += mod->value;
-    }
-    return total;
-}
-
 void Player::RemovePetActionBar()
 {
     WorldPacket data(SMSG_PET_SPELLS, 8);

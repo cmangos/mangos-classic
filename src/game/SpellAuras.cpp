@@ -1135,10 +1135,6 @@ void Aura::HandleAddModifier(bool apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_PLAYER || !Real)
         return;
 
-    SpellEntry const *spellInfo = GetSpellProto();
-    if(!spellInfo)
-        return;
-
     if(m_modifier.m_miscvalue >= MAX_SPELLMOD)
         return;
 
