@@ -4875,7 +4875,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     // Set trigger spell id, target, custom basepoints
     uint32 trigger_spell_id = auraSpellInfo->EffectTriggerSpell[triggeredByAura->GetEffIndex()];
     Unit*  target = NULL;
-    int32  basepoints0 = 0;
+    int32  basepoints[MAX_EFFECT_INDEX] = {0, 0, 0};
 
     Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
         ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
@@ -4927,7 +4927,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
      {
          // Elune's Touch (instead non-existed triggered spell) 30% from AP
          trigger_spell_id = 33926;
-         basepoints0 = GetTotalAttackPowerValue(BASE_ATTACK) * 30 / 100;
+         basepoints[0] = GetTotalAttackPowerValue(BASE_ATTACK) * 30 / 100;
          target = this;
      }
 //     else if (auraSpellInfo->Id==7137)  // Shadow Charge (Rank 1)
@@ -4975,22 +4975,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
 
              trigger_spell_id = 18093;
          }
-         // Drain Soul
-         else if (auraSpellInfo->SpellFamilyFlags & UI64LIT(0x0000000000004000))
-         {
-             Unit::AuraList const& mAddFlatModifier = GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
-             for(Unit::AuraList::const_iterator i = mAddFlatModifier.begin(); i != mAddFlatModifier.end(); ++i)
-             {
-                 if ((*i)->GetModifier()->m_miscvalue == SPELLMOD_CHANCE_OF_SUCCESS && (*i)->GetSpellProto()->SpellIconID == 113)
-                 {
-                     int32 value2 = CalculateSpellDamage(this,(*i)->GetSpellProto(),EFFECT_INDEX_2,&((*i)->GetSpellProto()->EffectBasePoints[2]));
-                     basepoints0 = value2 * GetMaxPower(POWER_MANA) / 100;
-                 }
-             }
-             if ( basepoints0 == 0 )
-                 return false;
-             trigger_spell_id = 18371;
-         }
          break;
      }
      //=====================================================================
@@ -5029,7 +5013,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                      sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in BR", auraSpellInfo->Id);
                  return false;
              }
-             basepoints0 = damage * triggerAmount / 100 / 3;
+             basepoints[0] = damage * triggerAmount / 100 / 3;
              target = this;
          }
          break;
@@ -5095,7 +5079,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                  return false;
              }
              // percent stored in effect 1 (class scripts) base points
-             basepoints0 = originalSpell->manaCost*(auraSpellInfo->EffectBasePoints[1]+1)/100;
+             int32 cost = originalSpell->manaCost;
+             basepoints[0] = cost*auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1)/100;
              trigger_spell_id = 20272;
              target = this;
          }
@@ -5141,7 +5126,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
          {
              if(!procSpell)
                  return false;
-             basepoints0 = procSpell->manaCost * 35 / 100;
+             basepoints[0] = procSpell->manaCost * 35 / 100;
              trigger_spell_id = 23571;
              target = this;
          }
@@ -5154,7 +5139,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
              if(pVictim && pVictim->isAlive())
                  pVictim->getThreatManager().modifyThreatPercent(this,-10);
 
-             basepoints0 = triggerAmount * GetMaxHealth() / 100;
+             basepoints[0] = triggerAmount * GetMaxHealth() / 100;
              trigger_spell_id = 31616;
              target = this;
          }
@@ -5186,7 +5171,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         // This spell originally trigger 13567 - Dummy Trigger (vs dummy efect)
         case 26467:
         {
-            basepoints0 = damage * 15 / 100;
+            basepoints[0] = damage * 15 / 100;
             target = pVictim;
             trigger_spell_id = 26470;
             break;
@@ -5241,7 +5226,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         // Shamanistic Rage triggered spell
         case 30824:
         {
-            basepoints0 = int32(GetTotalAttackPowerValue(BASE_ATTACK) * triggerAmount / 100);
+            basepoints[0] = int32(GetTotalAttackPowerValue(BASE_ATTACK) * triggerAmount / 100);
             trigger_spell_id = 30824;
             break;
         }
@@ -5258,8 +5243,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     if(!target || target!=this && !target->isAlive())
         return false;
 
-    if(basepoints0)
-        CastCustomSpell(target,trigger_spell_id,&basepoints0,NULL,NULL,true,castItem,triggeredByAura);
+    if (basepoints[EFFECT_INDEX_0] || basepoints[EFFECT_INDEX_1] || basepoints[EFFECT_INDEX_2])
+        CastCustomSpell(target,trigger_spell_id,
+            basepoints[EFFECT_INDEX_0] ? &basepoints[EFFECT_INDEX_0] : NULL,
+            basepoints[EFFECT_INDEX_1] ? &basepoints[EFFECT_INDEX_1] : NULL,
+            basepoints[EFFECT_INDEX_2] ? &basepoints[EFFECT_INDEX_2] : NULL,
+            true, castItem, triggeredByAura);
     else
         CastSpell(target,trigger_spell_id,true,castItem,triggeredByAura);
 
