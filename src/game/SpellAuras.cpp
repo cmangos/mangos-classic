@@ -5388,12 +5388,40 @@ void Aura::PeriodicTick()
 void Aura::PeriodicDummyTick()
 {
     SpellEntry const* spell = GetSpellProto();
-    switch (spell->Id)
+    switch (spell->SpellFamilyName)
     {
-        case 7057:                                  // Haunting Spirits
-            if (roll_chance_i(33))
-                m_target->CastSpell(m_target,7067,true,NULL,this);
-            return;
+        case SPELLFAMILY_GENERIC:
+        {
+            switch (spell->Id)
+            {
+                // Forsaken Skills
+                case 7054:
+                {
+                    // Possibly need cast one of them (but
+                    // 7038 Forsaken Skill: Swords
+                    // 7039 Forsaken Skill: Axes
+                    // 7040 Forsaken Skill: Daggers
+                    // 7041 Forsaken Skill: Maces
+                    // 7042 Forsaken Skill: Staves
+                    // 7043 Forsaken Skill: Bows
+                    // 7044 Forsaken Skill: Guns
+                    // 7045 Forsaken Skill: 2H Axes
+                    // 7046 Forsaken Skill: 2H Maces
+                    // 7047 Forsaken Skill: 2H Swords
+                    // 7048 Forsaken Skill: Defense
+                    // 7049 Forsaken Skill: Fire
+                    // 7050 Forsaken Skill: Frost
+                    // 7051 Forsaken Skill: Holy
+                    // 7053 Forsaken Skill: Shadow
+                    return;
+                }
+                case 7057:                                  // Haunting Spirits
+                    if (roll_chance_i(33))
+                        m_target->CastSpell(m_target,m_modifier.m_amount,true,NULL,this);
+                    return;
+            }
+            break;
+        }
         default:
             break;
     }
