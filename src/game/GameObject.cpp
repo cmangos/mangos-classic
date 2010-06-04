@@ -993,7 +993,7 @@ void GameObject::Use(Unit* user)
                         break;
                 }
 
-                player->CastedCreatureOrGO(info->id, GetObjectGuid(), 0);
+                player->RewardPlayerAndGroupAtCast(this);
 
                 if (info->goober.eventId)
                     GetMap()->ScriptsStart(sEventScripts, info->goober.eventId, player, this);
