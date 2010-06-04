@@ -966,6 +966,11 @@ class MANGOS_DLL_SPEC Player : public Unit
             // disarm applied only to mainhand weapon
             return !IsInFeralForm() && (!mainhand || !HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISARMED) );
         }
+        bool IsTwoHandUsed() const
+        {
+            Item* mainItem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            return mainItem && mainItem->GetProto()->InventoryType == INVTYPE_2HWEAPON;
+        }
         void SendNewItem( Item *item, uint32 count, bool received, bool created, bool broadcast = false );
         bool BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint8 bag, uint8 slot);
 
@@ -2092,6 +2097,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool m_canDualWield;
         uint8 m_swingErrorMsg;
         float m_ammoDPS;
+
         ////////////////////Rest System/////////////////////
         time_t time_inn_enter;
         uint32 inn_trigger_id;
