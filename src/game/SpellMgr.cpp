@@ -875,16 +875,16 @@ void SpellMgr::LoadSpellAffects()
             continue;
         }
 
-        if (effectId >= 3)
+        if (effectId >= MAX_EFFECT_INDEX)
         {
             sLog.outErrorDb("Spell %u listed in `spell_affect` have invalid effect index (%u)", entry,effectId);
             continue;
         }
 
-        if( spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA ||
+        if (spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA || (
             spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
             spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
-            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER )
+            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER))
         {
             sLog.outErrorDb("Spell %u listed in `spell_affect` have not SPELL_AURA_ADD_FLAT_MODIFIER (%u) or SPELL_AURA_ADD_PCT_MODIFIER (%u) or SPELL_AURA_ADD_TARGET_TRIGGER (%u) for effect index (%u)", entry,SPELL_AURA_ADD_FLAT_MODIFIER,SPELL_AURA_ADD_PCT_MODIFIER,SPELL_AURA_ADD_TARGET_TRIGGER,effectId);
             continue;
@@ -893,16 +893,16 @@ void SpellMgr::LoadSpellAffects()
         uint64 spellAffectMask = fields[2].GetUInt64();
 
         // Spell.dbc have own data for low part of SpellFamilyMask
-        if( spellInfo->EffectItemType[effectId])
+        if (spellInfo->EffectItemType[effectId])
         {
-            if(spellInfo->EffectItemType[effectId] == spellAffectMask)
+            if (spellInfo->EffectItemType[effectId] == spellAffectMask)
             {
                 sLog.outErrorDb("Spell %u listed in `spell_affect` have redundant (same with EffectItemType%d) data for effect index (%u) and not needed, skipped.", entry,effectId+1,effectId);
                 continue;
             }
 
             // 24429 have wrong data in EffectItemType and overwrites by DB, possible bug in client
-            if(spellInfo->Id!=24429 && spellInfo->EffectItemType[effectId] != spellAffectMask)
+            if (spellInfo->Id!=24429 && spellInfo->EffectItemType[effectId] != spellAffectMask)
             {
                 sLog.outErrorDb("Spell %u listed in `spell_affect` have different low part from EffectItemType%d for effect index (%u) and not needed, skipped.", entry,effectId+1,effectId);
                 continue;
@@ -925,18 +925,18 @@ void SpellMgr::LoadSpellAffects()
         if (!spellInfo)
             continue;
 
-        for (int effectId = 0; effectId < 3; ++effectId)
+        for (int effectId = 0; effectId < MAX_EFFECT_INDEX; ++effectId)
         {
-            if( spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA ||
-                (spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
+            if (spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA || (
+                spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
                 spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
-                spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER) )
+                spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER))
                 continue;
 
-            if(spellInfo->EffectItemType[effectId] != 0)
+            if (spellInfo->EffectItemType[effectId] != 0)
                 continue;
 
-            if(mSpellAffectMap.find((id<<8) + effectId) !=  mSpellAffectMap.end())
+            if (mSpellAffectMap.find((id<<8) + effectId) !=  mSpellAffectMap.end())
                 continue;
 
             sLog.outErrorDb("Spell %u (%s) misses spell_affect for effect %u",id,spellInfo->SpellName[sWorld.GetDefaultDbcLocale()], effectId);
