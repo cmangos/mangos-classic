@@ -4408,7 +4408,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
             {
                 // [-ZERO] TODO:  check all spell id ( most of them are different in 1.12 )
 
-                // Eye of Eye
+                // Eye for an Eye
                 case 9799:
                 case 25988:
                 {
@@ -4707,7 +4707,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
                     triggered_spell_id = 26170;
                     break;
                 }
-                // Vestments of Faith (Priest Tier 3) - 4 pieces bonus
+                // Greater Heal (Vestments of Faith (Priest Tier 3) - 4 pieces bonus)
                 case 28809:
                 {
                     triggered_spell_id = 28810;
