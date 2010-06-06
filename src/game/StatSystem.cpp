@@ -50,18 +50,12 @@ bool Player::UpdateStats(Stats stat)
     switch(stat)
     {
         case STAT_STRENGTH:
-            UpdateAttackPowerAndDamage();
             break;
         case STAT_AGILITY:
             UpdateArmor();
-            UpdateAttackPowerAndDamage(true);
-            if(getClass() == CLASS_ROGUE || getClass() == CLASS_HUNTER || getClass() == CLASS_DRUID && m_form==FORM_CAT)
-                UpdateAttackPowerAndDamage();
-
             UpdateAllCritPercentages();
             UpdateDodgePercentage();
             break;
-
         case STAT_STAMINA:   UpdateMaxHealth(); break;
         case STAT_INTELLECT:
             UpdateMaxPower(POWER_MANA);
@@ -75,8 +69,13 @@ bool Player::UpdateStats(Stats stat)
         default:
             break;
     }
+    // Need update (exist AP from stat auras)
+    UpdateAttackPowerAndDamage();
+    UpdateAttackPowerAndDamage(true);
+
     UpdateSpellDamageAndHealingBonus();
     UpdateManaRegen();
+
     return true;
 }
 
