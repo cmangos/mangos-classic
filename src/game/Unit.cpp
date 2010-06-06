@@ -4858,268 +4858,266 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
         ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
 
-    // Try handle uncnown trigger spells
-    if (sSpellStore.LookupEntry(trigger_spell_id)==NULL)
+    // Try handle unknown trigger spells
+    // Custom requirements (not listed in procEx) Warning! damage dealing after this
+    // Custom triggered spells
     switch (auraSpellInfo->SpellFamilyName)
     {
-     //=====================================================================
-     // Generic class
-     // ====================================================================
-     // .....
-     //=====================================================================
-     case SPELLFAMILY_GENERIC:
-     if (auraSpellInfo->Id == 23780)      // Aegis of Preservation (Aegis of Preservation trinket)
-         trigger_spell_id = 23781;
-//     else if (auraSpellInfo->Id==31255) // Deadly Swiftness (Rank 1)
-//     else if (auraSpellInfo->Id==5301)  // Defensive State (DND)
-//     else if (auraSpellInfo->Id==13358) // Defensive State (DND)
-//     else if (auraSpellInfo->Id==16092) // Defensive State (DND)
-//     else if (auraSpellInfo->Id==24949) // Defensive State 2 (DND)
-//     else if (auraSpellInfo->Id==18943) // Double Attack
-//     else if (auraSpellInfo->Id==19194) // Double Attack
-//     else if (auraSpellInfo->Id==19817) // Double Attack
-//     else if (auraSpellInfo->Id==19818) // Double Attack
-//     else if (auraSpellInfo->Id==22835) // Drunken Rage
-//          trigger_spell_id = 14822;
-//     else if (auraSpellInfo->Id==6542)  // Enraged Defense
-     else if (auraSpellInfo->Id==27522)   // Mana Drain Trigger
-     {
-         // On successful melee or ranged attack gain $29471s1 mana and if possible drain $27526s1 mana from the target.
-         if (this && this->isAlive())
-             CastSpell(this, 29471, true, castItem, triggeredByAura);
-         if (pVictim && pVictim->isAlive())
-             CastSpell(pVictim, 27526, true, castItem, triggeredByAura);
-         return true;
-     }
-     else if (auraSpellInfo->Id==24905)   // Moonkin Form (Passive)
-     {
-         // Elune's Touch (instead non-existed triggered spell) 30% from AP
-         trigger_spell_id = 33926;
-         basepoints[0] = GetTotalAttackPowerValue(BASE_ATTACK) * 30 / 100;
-         target = this;
-     }
-//     else if (auraSpellInfo->Id== 7137) // Shadow Charge (Rank 1)
-     break;
-     case SPELLFAMILY_MAGE:
-         break;
-     case SPELLFAMILY_WARRIOR:
-         break;
-     //=====================================================================
-     // Warlock
-     //=====================================================================
-     // Pyroclasm             trigger = 18350
-     // Drain Soul (Rank 1-5) trigger = 0
-     //=====================================================================
-     case SPELLFAMILY_WARLOCK:
-     {
-         // Pyroclasm
-         if (auraSpellInfo->SpellIconID == 1137)
-         {
-             if(!pVictim || !pVictim->isAlive() || pVictim == this || procSpell == NULL)
-                 return false;
-             // Calculate spell tick count for spells
-             uint32 tick = 1; // Default tick = 1
+        case SPELLFAMILY_GENERIC:
+            switch(auraSpellInfo->Id)
+            {
+                //case 5301:  break;                        // Defensive State (DND)
+                //case 7137:  break;                        // Shadow Charge (Rank 1)
+                //case 7377:  break;                        // Take Immune Periodic Damage <Not Working>
+                //case 13358: break;                        // Defensive State (DND)
+                //case 16092: break;                        // Defensive State (DND)
+                //case 18943: break;                        // Double Attack
+                //case 19194: break;                        // Double Attack
+                //case 19817: break;                        // Double Attack
+                //case 19818: break;                        // Double Attack
+                //case 22835: break;                        // Drunken Rage
+                //    trigger_spell_id = 14822; break;
+                case 23780:                                 // Aegis of Preservation (Aegis of Preservation trinket)
+                    trigger_spell_id = 23781;
+                    break;
+                //case 24949: break;                        // Defensive State 2 (DND)
+                case 27522:                                 // Mana Drain Trigger
+                {
+                    // On successful melee or ranged attack gain $29471s1 mana and if possible drain $27526s1 mana from the target.
+                    if (isAlive())
+                        CastSpell(this, 29471, true, castItem, triggeredByAura);
+                    if (pVictim && pVictim->isAlive())
+                        CastSpell(pVictim, 27526, true, castItem, triggeredByAura);
+                    return true;
+                }
+                case 31255:                                 // Deadly Swiftness (Rank 1)
+                {
+                    // whenever you deal damage to a target who is below 20% health.
+                    if (pVictim->GetHealth() > pVictim->GetMaxHealth() / 5)
+                        return false;
 
-             // Hellfire have 15 tick
-             if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000040))
-                 tick = 15;
-             // Rain of Fire have 4 tick
-             else if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000020))
-                 tick = 4;
-             else
-                 return false;
+                    target = this;
+                    trigger_spell_id = 22588;
+                    break;
+                }
+                break;
+            }
+            break;
+        case SPELLFAMILY_MAGE:
+            // Persistent Shield (Scarab Brooch trinket)
+            if(auraSpellInfo->Id == 26467)
+            {
+                basepoints[0] = damage * 15 / 100;
+                target = pVictim;
+                trigger_spell_id = 26470;
+            }
+            break;
+        case SPELLFAMILY_WARRIOR:
+            break;
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Pyroclasm
+            if (auraSpellInfo->SpellIconID == 1137)
+            {
+                if(!pVictim || !pVictim->isAlive() || pVictim == this || procSpell == NULL)
+                    return false;
+                // Calculate spell tick count for spells
+                uint32 tick = 1; // Default tick = 1
 
-             // Calculate chance = baseChance / tick
-             float chance = 0;
-             switch (auraSpellInfo->Id)
-             {
-                 case 18096: chance = 13.0f / tick; break;
-                 case 18073: chance = 26.0f / tick; break;
-             }
-             // Roll chance
-             if (!roll_chance_f(chance))
-                 return false;
+                // Hellfire have 15 tick
+                if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000040))
+                    tick = 15;
+                // Rain of Fire have 4 tick
+                else if (procSpell->SpellFamilyFlags & UI64LIT(0x0000000000000020))
+                    tick = 4;
+                else
+                    return false;
 
-             trigger_spell_id = 18093;
-         }
-         break;
-     }
-     //=====================================================================
-     // Priest
-     //=====================================================================
-     // Blessed Recovery (Rank 1-3) trigger = 18350
-     // Shadowguard (1-6)           trigger = 28376
-     //=====================================================================
-     case SPELLFAMILY_PRIEST:
-     {
-         // Shadowguard
-         if(auraSpellInfo->SpellFamilyFlags == UI64LIT(0x100080000000) && auraSpellInfo->SpellVisual==7958)
-         {
-             switch(auraSpellInfo->Id)
-             {
-                 case 18137: trigger_spell_id = 28377; break;   // Rank 1
-                 case 19308: trigger_spell_id = 28378; break;   // Rank 2
-                 case 19309: trigger_spell_id = 28379; break;   // Rank 3
-                 case 19310: trigger_spell_id = 28380; break;   // Rank 4
-                 case 19311: trigger_spell_id = 28381; break;   // Rank 5
-                 case 19312: trigger_spell_id = 28382; break;   // Rank 6
-                 default:
-                     sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in SG", auraSpellInfo->Id);
-                 return false;
-             }
-         }
-         // Blessed Recovery
-         else if (auraSpellInfo->SpellIconID == 1875)
-         {
-             switch (auraSpellInfo->Id)
-             {
-                 case 27811: trigger_spell_id = 27813; break;
-                 case 27815: trigger_spell_id = 27817; break;
-                 case 27816: trigger_spell_id = 27818; break;
-                 default:
-                     sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in BR", auraSpellInfo->Id);
-                 return false;
-             }
-             basepoints[0] = damage * triggerAmount / 100 / 3;
-             target = this;
-         }
-         break;
-     }
-     case SPELLFAMILY_DRUID:
-         break;
-     case SPELLFAMILY_HUNTER:
-         break;
-     //=====================================================================
-     // Paladin
-     // ====================================================================
-     // Illumination (Rank 1-5)        trigger = 18350
-     // Judgement of Light (Rank 1-4)  trigger = 5373
-     // Judgement of Wisdom (Rank 1-3) trigger = 1826
-     //=====================================================================
-     case SPELLFAMILY_PALADIN:
-     {
-         // Judgement of Light and Judgement of Wisdom
-         if (auraSpellInfo->SpellFamilyFlags & UI64LIT(0x0000000000080000))
-         {
-             switch (auraSpellInfo->Id)
-             {
-                 // Judgement of Light
-                 case 20185: trigger_spell_id = 20267;break; // Rank 1
-                 case 20344: trigger_spell_id = 20341;break; // Rank 2
-                 case 20345: trigger_spell_id = 20342;break; // Rank 3
-                 case 20346: trigger_spell_id = 20343;break; // Rank 4
-                 // Judgement of Wisdom
-                 case 20186: trigger_spell_id = 20268;break; // Rank 1
-                 case 20354: trigger_spell_id = 20352;break; // Rank 2
-                 case 20355: trigger_spell_id = 20353;break; // Rank 3
-                 default:
-                     sLog.outError("Unit::HandleProcTriggerSpell: Spell %u miss posibly Judgement of Light/Wisdom", auraSpellInfo->Id);
-                 return false;
-             }
-             pVictim->CastSpell(pVictim, trigger_spell_id, true, castItem, triggeredByAura);
-             return true;                        // no hidden cooldown
-         }
-         // Illumination
-         else if (auraSpellInfo->SpellIconID==241)
-         {
-             if(!procSpell)
-                 return false;
-             // procspell is triggered spell but we need mana cost of original casted spell
-             uint32 originalSpellId = procSpell->Id;
-             // Holy Shock
-             if(procSpell->SpellFamilyFlags & 0x00200000)
-             {
-                 switch(procSpell->Id)
-                 {
-                     case 25914: originalSpellId = 20473; break;
-                     case 25913: originalSpellId = 20929; break;
-                     case 25903: originalSpellId = 20930; break;
-                     default:
-                         sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in HShock",procSpell->Id);
-                     return false;
-                 }
-             }
-             SpellEntry const *originalSpell = sSpellStore.LookupEntry(originalSpellId);
-             if(!originalSpell)
-             {
-                 sLog.outError("Unit::HandleProcTriggerSpell: Spell %u unknown but selected as original in Illu",originalSpellId);
-                 return false;
-             }
-             // percent stored in effect 1 (class scripts) base points
-             int32 cost = originalSpell->manaCost;
-             basepoints[0] = cost*auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1)/100;
-             trigger_spell_id = 20272;
-             target = this;
-         }
-         break;
-     }
-     //=====================================================================
-     // Shaman
-     //====================================================================
-     // Lightning Shield             trigger = 18350
-     // Mana Surge                   trigger = 18350
-     // Nature's Guardian (Rank 1-5) trigger = 18350
-     //=====================================================================
-     case SPELLFAMILY_SHAMAN:
-     {
-         //Lightning Shield (overwrite non existing triggered spell call in spell.dbc
-         if(auraSpellInfo->SpellFamilyFlags==0x00000400 && auraSpellInfo->SpellVisual==37)
-         {
-             switch(auraSpellInfo->Id)
-             {
-                 case   324: trigger_spell_id = 26364; break;  // Rank 1
-                 case   325: trigger_spell_id = 26365; break;  // Rank 2
-                 case   905: trigger_spell_id = 26366; break;  // Rank 3
-                 case   945: trigger_spell_id = 26367; break;  // Rank 4
-                 case  8134: trigger_spell_id = 26369; break;  // Rank 5
-                 case 10431: trigger_spell_id = 26370; break;  // Rank 6
-                 case 10432: trigger_spell_id = 26363; break;  // Rank 7
-                 default:
-                     sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in LShield", auraSpellInfo->Id);
-                 return false;
-             }
-         }
-         // Lightning Shield (The Ten Storms set)
-         else if (auraSpellInfo->Id == 23551)
-         {
-             trigger_spell_id = 23552;
-             target = pVictim;
-         }
-         // Damage from Lightning Shield (The Ten Storms set)
-         else if (auraSpellInfo->Id == 23552)
-             trigger_spell_id = 27635;
-         // Mana Surge (The Earthfury set)
-         else if (auraSpellInfo->Id == 23572)
-         {
-             if(!procSpell)
-                 return false;
-             basepoints[0] = procSpell->manaCost * 35 / 100;
-             trigger_spell_id = 23571;
-             target = this;
-         }
-         else if (auraSpellInfo->SpellIconID == 2013) //Nature's Guardian
-         {
-             // Check health condition - should drop to less 30% (damage deal after this!)
-             if (!(10*(int32(GetHealth() - damage)) < int32(3 * GetMaxHealth())))
-                 return false;
+                // Calculate chance = baseChance / tick
+                float chance = 0;
+                switch (auraSpellInfo->Id)
+                {
+                    case 18096: chance = 13.0f / tick; break;
+                    case 18073: chance = 26.0f / tick; break;
+                }
+                // Roll chance
+                if (!roll_chance_f(chance))
+                    return false;
 
-             if(pVictim && pVictim->isAlive())
-                 pVictim->getThreatManager().modifyThreatPercent(this,-10);
+                trigger_spell_id = 18093;
+            }
+            // Cheat Death
+            else if (auraSpellInfo->Id == 28845)
+            {
+                // When your health drops below 20% ....
+                if (GetHealth() - damage > GetMaxHealth() / 5 || GetHealth() < GetMaxHealth() / 5)
+                    return false;
+            }
+            break;
+        }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Shadowguard
+            if(auraSpellInfo->SpellFamilyFlags == UI64LIT(0x100080000000) && auraSpellInfo->SpellVisual==7958)
+            {
+                switch(auraSpellInfo->Id)
+                {
+                    case 18137: trigger_spell_id = 28377; break;   // Rank 1
+                    case 19308: trigger_spell_id = 28378; break;   // Rank 2
+                    case 19309: trigger_spell_id = 28379; break;   // Rank 3
+                    case 19310: trigger_spell_id = 28380; break;   // Rank 4
+                    case 19311: trigger_spell_id = 28381; break;   // Rank 5
+                    case 19312: trigger_spell_id = 28382; break;   // Rank 6
+                    default:
+                        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in SG", auraSpellInfo->Id);
+                        return false;
+                }
+            }
+            // Blessed Recovery
+            else if (auraSpellInfo->SpellIconID == 1875)
+            {
+                switch (auraSpellInfo->Id)
+                {
+                    case 27811: trigger_spell_id = 27813; break;
+                    case 27815: trigger_spell_id = 27817; break;
+                    case 27816: trigger_spell_id = 27818; break;
+                    default:
+                        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in BR", auraSpellInfo->Id);
+                        return false;
+                }
+                basepoints[0] = damage * triggerAmount / 100 / 3;
+                target = this;
+            }
+            break;
+        }
+        case SPELLFAMILY_DRUID:
+            break;
+        case SPELLFAMILY_HUNTER:
+            break;
+        case SPELLFAMILY_PALADIN:
+        {
+            // Judgement of Light and Judgement of Wisdom
+            if (auraSpellInfo->SpellFamilyFlags & UI64LIT(0x0000000000080000))
+            {
+                switch (auraSpellInfo->Id)
+                {
+                    // Judgement of Light
+                    case 20185: trigger_spell_id = 20267;break; // Rank 1
+                    case 20344: trigger_spell_id = 20341;break; // Rank 2
+                    case 20345: trigger_spell_id = 20342;break; // Rank 3
+                    case 20346: trigger_spell_id = 20343;break; // Rank 4
+                    // Judgement of Wisdom
+                    case 20186: trigger_spell_id = 20268;break; // Rank 1
+                    case 20354: trigger_spell_id = 20352;break; // Rank 2
+                    case 20355: trigger_spell_id = 20353;break; // Rank 3
+                    default:
+                        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u miss posibly Judgement of Light/Wisdom", auraSpellInfo->Id);
+                        return false;
+                }
+                pVictim->CastSpell(pVictim, trigger_spell_id, true, castItem, triggeredByAura);
+                return true;                        // no hidden cooldown
+            }
+            // Illumination
+            else if (auraSpellInfo->SpellIconID==241)
+            {
+                if(!procSpell)
+                    return false;
+                // procspell is triggered spell but we need mana cost of original casted spell
+                uint32 originalSpellId = procSpell->Id;
+                // Holy Shock
+                if(procSpell->SpellFamilyFlags & UI64LIT(0x0000000000200000))
+                {
+                    switch(procSpell->Id)
+                    {
+                        case 25914: originalSpellId = 20473; break;
+                        case 25913: originalSpellId = 20929; break;
+                        case 25903: originalSpellId = 20930; break;
+                        default:
+                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in HShock",procSpell->Id);
+                            return false;
+                    }
+                }
+                SpellEntry const *originalSpell = sSpellStore.LookupEntry(originalSpellId);
+                if(!originalSpell)
+                {
+                    sLog.outError("Unit::HandleProcTriggerSpell: Spell %u unknown but selected as original in Illu",originalSpellId);
+                    return false;
+                }
+                // percent stored in effect 1 (class scripts) base points
+                int32 cost = originalSpell->manaCost;
+                basepoints[0] = cost*auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1)/100;
+                trigger_spell_id = 20272;
+                target = this;
+            }
+            break;
+        }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // Lightning Shield (overwrite non existing triggered spell call in spell.dbc
+            if(auraSpellInfo->SpellFamilyFlags==0x00000400 && auraSpellInfo->SpellVisual==37)
+            {
+                switch(auraSpellInfo->Id)
+                {
+                    case 324:                               // Rank 1
+                        trigger_spell_id = 26364; break;
+                    case 325:                               // Rank 2
+                        trigger_spell_id = 26365; break;
+                    case 905:                               // Rank 3
+                        trigger_spell_id = 26366; break;
+                    case 945:                               // Rank 4
+                        trigger_spell_id = 26367; break;
+                    case 8134:                              // Rank 5
+                        trigger_spell_id = 26369; break;
+                    case 10431:                             // Rank 6
+                        trigger_spell_id = 26370; break;
+                    case 10432:                             // Rank 7
+                        trigger_spell_id = 26363; break;
+                    default:
+                        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in LShield", auraSpellInfo->Id);
+                        return false;
+                }
+            }
+            // Lightning Shield (The Ten Storms set)
+            else if (auraSpellInfo->Id == 23551)
+            {
+                trigger_spell_id = 23552;
+                target = pVictim;
+            }
+            // Damage from Lightning Shield (The Ten Storms set)
+            else if (auraSpellInfo->Id == 23552)
+                trigger_spell_id = 27635;
+            // Mana Surge (The Earthfury set)
+            else if (auraSpellInfo->Id == 23572)
+            {
+                if(!procSpell)
+                    return false;
+                basepoints[0] = procSpell->manaCost * 35 / 100;
+                trigger_spell_id = 23571;
+                target = this;
+            }
+            //Nature's Guardian
+            else if (auraSpellInfo->SpellIconID == 2013)
+            {
+                // Check health condition - should drop to less 30% (damage deal after this!)
+                if (!(10*(int32(GetHealth() - damage)) < int32(3 * GetMaxHealth())))
+                    return false;
 
-             basepoints[0] = triggerAmount * GetMaxHealth() / 100;
-             trigger_spell_id = 31616;
-             target = this;
-         }
-         break;
-     }
-     // default
-     default:
-         break;
+                if(pVictim && pVictim->isAlive())
+                    pVictim->getThreatManager().modifyThreatPercent(this,-10);
+
+                basepoints[0] = triggerAmount * GetMaxHealth() / 100;
+                trigger_spell_id = 31616;
+                target = this;
+            }
+            break;
+        }
+        default:
+            break;
     }
 
     // All ok. Check current trigger spell
     SpellEntry const* triggerEntry = sSpellStore.LookupEntry(trigger_spell_id);
-    if ( triggerEntry == NULL )
+    if (!triggerEntry)
     {
         // Not cast unknown spell
         // sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",auraSpellInfo->Id,triggeredByAura->GetEffIndex());
@@ -5127,41 +5125,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     }
 
     // not allow proc extra attack spell at extra attack
-    if( m_extraAttacks && IsSpellHaveEffect(triggerEntry, SPELL_EFFECT_ADD_EXTRA_ATTACKS) )
+    if (m_extraAttacks && IsSpellHaveEffect(triggerEntry, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
         return false;
-
-    // Costum requirements (not listed in procEx) Warning! damage dealing after this
-    // Custom triggered spells
-    switch (auraSpellInfo->Id)
-    {
-        // Persistent Shield (Scarab Brooch trinket)
-        // This spell originally trigger 13567 - Dummy Trigger (vs dummy efect)
-        case 26467:
-        {
-            basepoints[0] = damage * 15 / 100;
-            target = pVictim;
-            trigger_spell_id = 26470;
-            break;
-        }
-        // Cheat Death
-        case 28845:
-        {
-            // When your health drops below 20% ....
-            if (GetHealth() - damage > GetMaxHealth() / 5 || GetHealth() < GetMaxHealth() / 5)
-                return false;
-            break;
-        }
-        // Deadly Swiftness (Rank 1)
-        case 31255:
-        {
-            // whenever you deal damage to a target who is below 20% health.
-            if (pVictim->GetHealth() > pVictim->GetMaxHealth() / 5)
-                return false;
-
-            target = this;
-            trigger_spell_id = 22588;
-        }
-    }
 
     // Costum basepoints/target for exist spell
     // dummy basepoints or other customs
@@ -5194,7 +5159,6 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         case 30824:
         {
             basepoints[0] = int32(GetTotalAttackPowerValue(BASE_ATTACK) * triggerAmount / 100);
-            trigger_spell_id = 30824;
             break;
         }
     }
