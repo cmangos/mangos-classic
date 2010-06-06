@@ -4930,29 +4930,19 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
      //=====================================================================
      case SPELLFAMILY_GENERIC:
      if (auraSpellInfo->Id == 23780)      // Aegis of Preservation (Aegis of Preservation trinket)
-          trigger_spell_id = 23781;
+         trigger_spell_id = 23781;
 //     else if (auraSpellInfo->Id==31255) // Deadly Swiftness (Rank 1)
-//          trigger_spell_id = ;
 //     else if (auraSpellInfo->Id==5301)  // Defensive State (DND)
-//          trigger_spell_id = ;
 //     else if (auraSpellInfo->Id==13358) // Defensive State (DND)
-//          trigger_spell_id = ;
 //     else if (auraSpellInfo->Id==16092) // Defensive State (DND)
-//          trigger_spell_id = ;
 //     else if (auraSpellInfo->Id==24949) // Defensive State 2 (DND)
-//          trigger_spell_id = ;
 //     else if (auraSpellInfo->Id==18943) // Double Attack
-//          trigger_spell_id = ;
 //     else if (auraSpellInfo->Id==19194) // Double Attack
-//          trigger_spell_id = ;
 //     else if (auraSpellInfo->Id==19817) // Double Attack
-//          trigger_spell_id = ;
 //     else if (auraSpellInfo->Id==19818) // Double Attack
-//          trigger_spell_id = ;
 //     else if (auraSpellInfo->Id==22835) // Drunken Rage
 //          trigger_spell_id = 14822;
 //     else if (auraSpellInfo->Id==6542)  // Enraged Defense
-//          trigger_spell_id = ;
      else if (auraSpellInfo->Id==27522)   // Mana Drain Trigger
      {
          // On successful melee or ranged attack gain $29471s1 mana and if possible drain $27526s1 mana from the target.
@@ -4969,8 +4959,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
          basepoints[0] = GetTotalAttackPowerValue(BASE_ATTACK) * 30 / 100;
          target = this;
      }
-//     else if (auraSpellInfo->Id==7137)  // Shadow Charge (Rank 1)
-//          trigger_spell_id = ;
+//     else if (auraSpellInfo->Id== 7137) // Shadow Charge (Rank 1)
      break;
      case SPELLFAMILY_MAGE:
          break;
