@@ -4,6 +4,9 @@
     <Filter Include="doc">
       <UniqueIdentifier>{bd80d2f0-aa7d-498e-b4f7-fca7f5bf0599}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Extras">
+      <UniqueIdentifier>{7a4f6db6-4cd1-48d9-a2b0-948563a6d574}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\AUTHORS">
@@ -42,6 +45,12 @@
     <ClCompile Include="..\..\dep\src\gsoap\stdsoap2.cpp" />
     <ClCompile Include="..\..\src\shared\WheatyExceptionReport.cpp" />
     <ClCompile Include="..\..\src\mangosd\WorldRunnable.cpp" />
+    <ClCompile Include="..\..\src\game\extras\Mod.cpp">
+      <Filter>Extras</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\extras\SpellMod.cpp">
+      <Filter>Extras</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\mangosd\CliRunnable.h" />
@@ -53,6 +62,9 @@
     <ClInclude Include="..\..\dep\include\gsoap\stdsoap2.h" />
     <ClInclude Include="..\..\src\shared\WheatyExceptionReport.h" />
     <ClInclude Include="..\..\src\mangosd\WorldRunnable.h" />
+    <ClInclude Include="..\..\src\game\extras\Mod.h">
+      <Filter>Extras</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\src\mangosd\mangosd.rc" />
