@@ -1063,7 +1063,7 @@ void SpellMgr::LoadSpellProcEvents()
     if (customProc)
         sLog.outString( ">> Loaded %u extra spell proc event conditions +%u custom",  count, customProc );
     else
-        sLog.outString( ">> Loaded %u spell proc event conditions", count );
+        sLog.outString( ">> Loaded %u extra spell proc event conditions", count );
 }
 
 bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const * spellProcEvent, uint32 EventProcFlag, SpellEntry const * procSpell, uint32 procFlags, uint32 procExtra, bool active)

@@ -959,7 +959,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::multimap< spellEffectPair, Aura*> AuraMap;
         typedef std::list<Aura *> AuraList;
         typedef std::list<DiminishingReturn> Diminishing;
-        typedef std::set<AuraType> AuraTypeSet;
         typedef std::set<uint32> ComboPointHolderSet;
 
         virtual ~Unit ( );

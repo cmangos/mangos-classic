@@ -65,72 +65,14 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
     3.141594f,                                              // MOVE_TURN_RATE
 };
 
-void InitTriggerAuraData();
-
-// auraTypes contains attacker auras capable of proc'ing cast auras
-static Unit::AuraTypeSet GenerateAttakerProcCastAuraTypes()
-{
-    static Unit::AuraTypeSet auraTypes;
-    auraTypes.insert(SPELL_AURA_DUMMY);
-    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
-    auraTypes.insert(SPELL_AURA_MOD_HASTE);
-    auraTypes.insert(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-    return auraTypes;
-}
-
-// auraTypes contains victim auras capable of proc'ing cast auras
-static Unit::AuraTypeSet GenerateVictimProcCastAuraTypes()
-{
-    static Unit::AuraTypeSet auraTypes;
-    auraTypes.insert(SPELL_AURA_DUMMY);
-    auraTypes.insert(SPELL_AURA_MANA_SHIELD);
-    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
-    return auraTypes;
-}
-
-// auraTypes contains auras capable of proc effect/damage (but not cast) for attacker
-static Unit::AuraTypeSet GenerateAttakerProcEffectAuraTypes()
-{
-    static Unit::AuraTypeSet auraTypes;
-    auraTypes.insert(SPELL_AURA_MOD_DAMAGE_DONE);
-    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-    auraTypes.insert(SPELL_AURA_MOD_CASTING_SPEED);
-    auraTypes.insert(SPELL_AURA_MOD_RATING);
-    return auraTypes;
-}
-
-// auraTypes contains auras capable of proc effect/damage (but not cast) for victim
-static Unit::AuraTypeSet GenerateVictimProcEffectAuraTypes()
-{
-    static Unit::AuraTypeSet auraTypes;
-    auraTypes.insert(SPELL_AURA_MOD_RESISTANCE);
-    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-    auraTypes.insert(SPELL_AURA_MOD_PARRY_PERCENT);
-    auraTypes.insert(SPELL_AURA_MOD_BLOCK_PERCENT);
-    auraTypes.insert(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
-    return auraTypes;
-}
-
-static Unit::AuraTypeSet attackerProcCastAuraTypes = GenerateAttakerProcCastAuraTypes();
-static Unit::AuraTypeSet attackerProcEffectAuraTypes = GenerateAttakerProcEffectAuraTypes();
-
-static Unit::AuraTypeSet victimProcCastAuraTypes = GenerateVictimProcCastAuraTypes();
-static Unit::AuraTypeSet victimProcEffectAuraTypes   = GenerateVictimProcEffectAuraTypes();
-
-// auraTypes contains auras capable of proc'ing for attacker and victim
-static Unit::AuraTypeSet GenerateProcAuraTypes()
-{
-    InitTriggerAuraData();
-
-    Unit::AuraTypeSet auraTypes;
-    auraTypes.insert(attackerProcCastAuraTypes.begin(),attackerProcCastAuraTypes.end());
-    auraTypes.insert(attackerProcEffectAuraTypes.begin(),attackerProcEffectAuraTypes.end());
-    auraTypes.insert(victimProcCastAuraTypes.begin(),victimProcCastAuraTypes.end());
-    auraTypes.insert(victimProcEffectAuraTypes.begin(),victimProcEffectAuraTypes.end());
-    return auraTypes;
-}
-
-static Unit::AuraTypeSet procAuraTypes = GenerateProcAuraTypes();
+// Used for prepare can/can`t triggr aura
+static bool InitTriggerAuraData();
+// Define can trigger auras
+static bool isTriggerAura[TOTAL_AURAS];
+// Define can`t trigger auras (need for disable second trigger)
+static bool isNonTriggerAura[TOTAL_AURAS];
+// Prepare lists
+static bool procPrepared = InitTriggerAuraData();
 
 bool IsPassiveStackableSpell( uint32 spellId )
 {
@@ -141,11 +83,8 @@ bool IsPassiveStackableSpell( uint32 spellId )
     if(!spellProto)
         return false;
 
-    for(int j = 0; j < 3; ++j)
-    {
-        if(std::find(procAuraTypes.begin(),procAuraTypes.end(),spellProto->EffectApplyAuraName[j])!=procAuraTypes.end())
-            return false;
-    }
+    if (spellProto->procFlags)
+        return false;
 
     return true;
 }
@@ -9029,9 +8968,7 @@ typedef std::list< uint32> RemoveSpellList;
 // in most case need for drop charges
 // in some types of aura need do additional check
 // for example SPELL_AURA_MECHANIC_IMMUNITY - need check for mechanic
-static bool isTriggerAura[TOTAL_AURAS];
-static bool isNonTriggerAura[TOTAL_AURAS];
-void InitTriggerAuraData()
+bool InitTriggerAuraData()
 {
     for (int i=0;i<TOTAL_AURAS;i++)
     {
@@ -9068,6 +9005,8 @@ void InitTriggerAuraData()
 
     isNonTriggerAura[SPELL_AURA_MOD_POWER_REGEN]=true;
     isNonTriggerAura[SPELL_AURA_RESIST_PUSHBACK]=true;
+
+    return true;
 }
 
 uint32 createProcExtendMask(SpellNonMeleeDamage *damageInfo, SpellMissInfo missCondition)
