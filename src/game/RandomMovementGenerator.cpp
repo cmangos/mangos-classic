@@ -38,7 +38,7 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
     // For 2D/3D system selection
     //bool is_land_ok  = creature.canWalk();                // not used?
     //bool is_water_ok = creature.canSwim();                // not used?
-    //[-ZERO] bool is_air_ok   = creature.canFly();
+    bool is_air_ok   = creature.canFly();
 
     const float angle = rand_norm_f()*(M_PI_F*2.0f);
     const float range = rand_norm_f()*wander_distance;
@@ -54,7 +54,7 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
 
     dist = distanceX*distanceX + distanceY*distanceY;
 
-    /*[-ZERO] if (is_air_ok)                                // 3D system above ground and above water (flying mode)
+    if (is_air_ok)                                // 3D system above ground and above water (flying mode)
     {
         // Limit height change
         const float distanceZ = rand_norm_f() * sqrtf(dist)/2.0f;
@@ -68,7 +68,7 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
     }
     //else if (is_water_ok)                                 // 3D system under water and above ground (swimming mode)
     else                                                    // 2D only
-    { */
+    {
         dist = dist>=100.0f ? 10.0f : sqrtf(dist);          // 10.0 is the max that vmap high can check (MAX_CAN_FALL_DISTANCE)
 
         // The fastest way to get an accurate result 90% of the time.
@@ -89,7 +89,7 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
                     return;
             }
         }
-   // }
+    }
 
     Traveller<Creature> traveller(creature);
 
@@ -143,7 +143,7 @@ bool RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 
 
     i_nextMoveTime.Update(diff);
 
-    if (i_destinationHolder.HasArrived() && !creature.IsStopped())
+    if (i_destinationHolder.HasArrived() && !creature.IsStopped() && !creature.canFly())
         creature.clearUnitState(UNIT_STAT_ROAMING_MOVE);
 
     if (!i_destinationHolder.HasArrived() && creature.IsStopped())

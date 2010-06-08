@@ -1163,6 +1163,12 @@ bool Creature::LoadFromDB(uint32 guid, Map *map)
     if(m_respawnTime > time(NULL))                          // not ready to respawn
     {
         m_deathState = DEAD;
+        if(canFly())
+        {
+            float tz = GetMap()->GetHeight(data->posX, data->posY, data->posZ, false);
+            if(data->posZ - tz > 0.1)
+                Relocate(data->posX, data->posY, tz);
+        }
     }
     else if(m_respawnTime)                                  // respawn time set but expired
     {
@@ -1311,7 +1317,7 @@ void Creature::setDeathState(DeathState s)
         if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATLY) || isWorldBoss())
             SaveRespawnTime();
 
-        if (FallGround())  //[-ZERO] maybe not needed
+        if (canFly() && FallGround())
           return;
 
         if (!IsStopped())
@@ -1324,7 +1330,7 @@ void Creature::setDeathState(DeathState s)
         SetTargetGUID(0);                                   // remove target selection in any cases (can be set at aura remove in Unit::setDeathState)
         SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
-        if (FallGround())  //[-ZERO] maybe not needed
+        if (canFly() && FallGround())
             return;
 
         if (HasSearchedAssistance())

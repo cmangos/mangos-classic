@@ -3063,7 +3063,7 @@ bool Unit::isInAccessablePlaceFor(Creature const* c) const
     if(IsInWater())
         return c->canSwim();
     else
-        return c->canWalk();
+        return c->canWalk() || c->canFly();;
 }
 
 bool Unit::IsInWater() const
