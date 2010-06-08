@@ -4227,7 +4227,7 @@ void Unit::SendSpellMiss(Unit *target, uint32 spellID, SpellMissInfo missInfo)
 
 void Unit::SendAttackStateUpdate(CalcDamageInfo *damageInfo)
 {
-    WorldPacket data(SMSG_ATTACKERSTATEUPDATE, (16+84));    // we guess size
+    WorldPacket data(SMSG_ATTACKERSTATEUPDATE, (16+45));    // we guess size
     data << (uint32)damageInfo->HitInfo;
     data << GetPackGUID();
     data << damageInfo->target->GetPackGUID();
@@ -4235,16 +4235,20 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo *damageInfo)
 
     data << (uint8)1;                         // Sub damage count
     //===  Sub damage description
-    data << (uint32)(damageInfo->damageSchoolMask); // School of sub damage
-    data << (float)damageInfo->damage;        // sub damage
-    data << (uint32)damageInfo->damage;       // Sub Damage
-    data << (uint32)damageInfo->absorb;       // Absorb
-    data << (uint32)damageInfo->resist;       // Resist
+    data << uint32(GetFirstSchoolInMask(damageInfo->damageSchoolMask));
+    data << float(damageInfo->damage);        // sub damage
+    data << uint32(damageInfo->damage);       // Sub Damage
+    data << uint32(damageInfo->absorb);       // Absorb
+    data << uint32(damageInfo->resist);       // Resist
     //=================================================
-    data << (uint32)damageInfo->TargetState;
-    data << (uint32)0;
-    data << (uint32)0;
-    data << (uint32)damageInfo->blocked_amount;
+    data << uint32(damageInfo->TargetState);
+    if (damageInfo->absorb == 0)                            //also 0x3E8 = 0x3E8, check when that happens
+        data << (uint32)0;
+    else
+        data << (uint32)-1;
+
+    data << uint32(0);
+    data << uint32(damageInfo->blocked_amount);
     SendMessageToSet( &data, true );/**/
 }
 
@@ -4261,17 +4265,17 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, 
     data << (uint8)SwingType;                               // count?
 
     // for(i = 0; i < SwingType; ++i)
-    data << (uint32)GetFirstSchoolInMask(damageSchoolMask);
-    data << (float)(Damage-AbsorbDamage-Resist-BlockedAmount);
+    data << uint32(GetFirstSchoolInMask(damageSchoolMask));
+    data << float(Damage-AbsorbDamage-Resist-BlockedAmount);
     // still need to double check damage
-    data << (uint32)(Damage-AbsorbDamage-Resist-BlockedAmount);
-    data << (uint32)AbsorbDamage;
-    data << (uint32)Resist;
+    data << uint32(Damage-AbsorbDamage-Resist-BlockedAmount);
+    data << uint32(AbsorbDamage);
+    data << uint32(Resist);
     // end loop
 
-    data << (uint32)TargetState;
+    data << uint32(TargetState);
 
-    if( AbsorbDamage == 0 )                                 //also 0x3E8 = 0x3E8, check when that happens
+    if (AbsorbDamage == 0)                                  //also 0x3E8 = 0x3E8, check when that happens
         data << (uint32)0;
     else
         data << (uint32)-1;
