@@ -7724,6 +7724,9 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
     if (rate < 0)
         rate = 0.0f;
 
+	if(GetTypeId() != TYPEID_PLAYER)
+		return;
+
     // Update speed only on change
     if (m_speed_rate[mtype] == rate)
         return;
@@ -7787,7 +7790,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
                 data.Initialize(SMSG_FORCE_WALK_SPEED_CHANGE, 16);
                 break;
             case MOVE_RUN:
-                data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE, 17);
+                data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE, 16);
                 break;
             case MOVE_RUN_BACK:
                 data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE, 16);
