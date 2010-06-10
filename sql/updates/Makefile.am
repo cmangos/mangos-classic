@@ -105,6 +105,7 @@ pkgdata_DATA = \
 	z0557_124_01_mangos_creature_template.sql \
 	z0557_124_02_mangos_creature_template.sql \
 	z0588_126_02_mangos_spell_proc_event.sql \
+	z0595_xxx_01_mangos_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -188,4 +189,5 @@ EXTRA_DIST = \
 	z0557_124_01_mangos_creature_template.sql \
 	z0557_124_02_mangos_creature_template.sql \
 	z0588_126_02_mangos_spell_proc_event.sql \
+	z0595_xxx_01_mangos_spell_proc_event.sql \
 	README
