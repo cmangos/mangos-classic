@@ -7724,9 +7724,6 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
     if (rate < 0)
         rate = 0.0f;
 
-	if(GetTypeId() != TYPEID_PLAYER)
-		return;
-
     // Update speed only on change
     if (m_speed_rate[mtype] == rate)
         return;
@@ -7734,6 +7731,9 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
     m_speed_rate[mtype] = rate;
 
     propagateSpeedChange();
+
+    if(GetTypeId() != TYPEID_PLAYER)
+		return;
 
     WorldPacket data;
     if(!forced)
