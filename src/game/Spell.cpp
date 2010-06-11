@@ -129,6 +129,15 @@ void SpellCastTargets::setItemTarget(Item* item)
     m_targetMask |= TARGET_FLAG_ITEM;
 }
 
+void SpellCastTargets::setTradeItemTarget(Player* caster)
+{
+    m_itemTargetGUID = ObjectGuid(uint64(TRADE_SLOT_NONTRADED));
+    m_itemTargetEntry = 0;
+    m_targetMask |= TARGET_FLAG_TRADE_ITEM;
+
+    Update(caster);
+}
+
 void SpellCastTargets::setCorpseTarget(Corpse* corpse)
 {
     m_CorpseTargetGUID = corpse->GetGUID();
@@ -142,17 +151,20 @@ void SpellCastTargets::Update(Unit* caster)
     NULL;
 
     m_itemTarget = NULL;
-    if(caster->GetTypeId() == TYPEID_PLAYER)
+    if (caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if(m_targetMask & TARGET_FLAG_ITEM)
-            m_itemTarget = ((Player*)caster)->GetItemByGuid(m_itemTargetGUID);
-        else if(m_targetMask & TARGET_FLAG_TRADE_ITEM)
+        Player *player = ((Player*)caster);
+
+        if (m_targetMask & TARGET_FLAG_ITEM)
+            m_itemTarget = player->GetItemByGuid(m_itemTargetGUID);
+        else if (m_targetMask & TARGET_FLAG_TRADE_ITEM)
         {
-            Player* pTrader = ((Player*)caster)->GetTrader();
-            if(pTrader && m_itemTargetGUID.GetRawValue() < TRADE_SLOT_COUNT)
-                m_itemTarget = pTrader->GetItemByTradeSlot(uint32(m_itemTargetGUID.GetRawValue()));
+            if (TradeData* pTrade = player->GetTradeData())
+                if (m_itemTargetGUID.GetRawValue() < TRADE_SLOT_COUNT)
+                    m_itemTarget = pTrade->GetTraderData()->GetItem(TradeSlots(m_itemTargetGUID.GetRawValue()));
         }
-        if(m_itemTarget)
+
+        if (m_itemTarget)
             m_itemTargetEntry = m_itemTarget->GetEntry();
     }
 }
@@ -3133,10 +3145,10 @@ void Spell::TakePower()
 
 void Spell::TakeReagents()
 {
-    if(m_IsTriggeredSpell)                                  // reagents used in triggered spell removed by original spell or don't must be removed.
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    if (IgnoreItemRequirements())                           // reagents used in triggered spell removed by original spell or don't must be removed.
         return;
 
     Player* p_caster = (Player*)m_caster;
@@ -4216,6 +4228,31 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
     }
 
+    // check trade slot case (last, for allow catch any another cast problems)
+    if (m_targets.m_targetMask & TARGET_FLAG_TRADE_ITEM)
+    {
+        if (m_caster->GetTypeId() != TYPEID_PLAYER)
+            return SPELL_FAILED_NOT_TRADING;
+
+        Player *pCaster = ((Player*)m_caster);
+        TradeData* my_trade = pCaster->GetTradeData();
+
+        if (!my_trade)
+            return SPELL_FAILED_NOT_TRADING;
+
+        TradeSlots slot = TradeSlots(m_targets.getItemTargetGUID());
+        if (slot != TRADE_SLOT_NONTRADED)
+            return SPELL_FAILED_ITEM_NOT_READY;
+
+        // if trade not complete then remember it in trade data
+        if (!my_trade->IsInAcceptProcess())
+        {
+            // Spell will be casted at completing the trade. Silently ignore at this place
+            my_trade->SetSpell(m_spellInfo->Id, m_CastItem);
+            return SPELL_FAILED_DONT_REPORT;
+        }
+    }
+
     // all ok
     return SPELL_CAST_OK;
 }
@@ -4567,6 +4604,21 @@ SpellCastResult Spell::CheckPower()
         return SPELL_CAST_OK;
 }
 
+bool Spell::IgnoreItemRequirements() const
+{
+    if (m_IsTriggeredSpell)
+    {
+        /// Not own traded item (in trader trade slot) req. reagents including triggered spell case
+        if (Item* targetItem = m_targets.getItemTarget())
+            if (targetItem->GetOwnerGUID() != m_caster->GetGUID())
+                return false;
+
+        return true;
+    }
+
+    return false;
+}
+
 SpellCastResult Spell::CheckItems()
 {
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -4676,77 +4728,80 @@ SpellCastResult Spell::CheckItems()
     }
 
     // check reagents (ignore triggered spells with reagents processed by original spell) and special reagent ignore case.
-    if (!m_IsTriggeredSpell && !p_caster->CanNoReagentCast(m_spellInfo))
+    if (!IgnoreItemRequirements())
     {
-        for(uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
+        if (!p_caster->CanNoReagentCast(m_spellInfo))
         {
-            if(m_spellInfo->Reagent[i] <= 0)
-                continue;
-
-            uint32 itemid    = m_spellInfo->Reagent[i];
-            uint32 itemcount = m_spellInfo->ReagentCount[i];
-
-            // if CastItem is also spell reagent
-            if( m_CastItem && m_CastItem->GetEntry() == itemid )
+            for(uint32 i = 0; i < MAX_SPELL_REAGENTS; ++i)
             {
-                ItemPrototype const *proto = m_CastItem->GetProto();
-                if(!proto)
-                    return SPELL_FAILED_ITEM_NOT_READY;
-                for(int s = 0; s < MAX_ITEM_PROTO_SPELLS; ++s)
+                if(m_spellInfo->Reagent[i] <= 0)
+                    continue;
+
+                uint32 itemid    = m_spellInfo->Reagent[i];
+                uint32 itemcount = m_spellInfo->ReagentCount[i];
+
+                // if CastItem is also spell reagent
+                if( m_CastItem && m_CastItem->GetEntry() == itemid )
                 {
-                    // CastItem will be used up and does not count as reagent
-                    int32 charges = m_CastItem->GetSpellCharges(s);
-                    if (proto->Spells[s].SpellCharges < 0 && !(proto->ExtraFlags & ITEM_EXTRA_NON_CONSUMABLE) && abs(charges) < 2)
+                    ItemPrototype const *proto = m_CastItem->GetProto();
+                    if(!proto)
+                        return SPELL_FAILED_ITEM_NOT_READY;
+                    for(int s = 0; s < MAX_ITEM_PROTO_SPELLS; ++s)
                     {
-                        ++itemcount;
-                        break;
+                        // CastItem will be used up and does not count as reagent
+                        int32 charges = m_CastItem->GetSpellCharges(s);
+                        if (proto->Spells[s].SpellCharges < 0 && !(proto->ExtraFlags & ITEM_EXTRA_NON_CONSUMABLE) && abs(charges) < 2)
+                        {
+                            ++itemcount;
+                            break;
+                        }
                     }
                 }
+                if( !p_caster->HasItemCount(itemid, itemcount) )
+                    return SPELL_FAILED_ITEM_NOT_READY;         //0x54
             }
-            if( !p_caster->HasItemCount(itemid, itemcount) )
-                return SPELL_FAILED_ITEM_NOT_READY;         //0x54
         }
-    }
 
-    // check totem-item requirements (items presence in inventory)
-    uint32 totems = MAX_SPELL_TOTEMS;
-    for(int i = 0; i < MAX_SPELL_TOTEMS ; ++i)
-    {
-        if(m_spellInfo->Totem[i] != 0)
+        // check totem-item requirements (items presence in inventory)
+        uint32 totems = MAX_SPELL_TOTEMS;
+        for(int i = 0; i < MAX_SPELL_TOTEMS ; ++i)
         {
-            if( p_caster->HasItemCount(m_spellInfo->Totem[i], 1) )
+            if(m_spellInfo->Totem[i] != 0)
             {
+                if( p_caster->HasItemCount(m_spellInfo->Totem[i], 1) )
+                {
+                    totems -= 1;
+                    continue;
+                }
+            }
+            else
                 totems -= 1;
-                continue;
-            }
         }
-        else
-            totems -= 1;
-    }
 
-    if (totems != 0)
-        return SPELL_FAILED_ITEM_GONE;                      //[-ZERO] not sure of it
+        if (totems != 0)
+            return SPELL_FAILED_ITEM_GONE;                      //[-ZERO] not sure of it
 
-  /*[-ZERO] to rewrite?
-    // Check items for TotemCategory  (items presence in inventory)
-    uint32 TotemCategory = MAX_SPELL_TOTEM_CATEGORIES;
-    for(int i= 0; i < MAX_SPELL_TOTEM_CATEGORIES; ++i)
-    {
-        if(m_spellInfo->TotemCategory[i] != 0)
+        /*[-ZERO] to rewrite?
+        // Check items for TotemCategory  (items presence in inventory)
+        uint32 TotemCategory = MAX_SPELL_TOTEM_CATEGORIES;
+        for(int i= 0; i < MAX_SPELL_TOTEM_CATEGORIES; ++i)
         {
-            if( p_caster->HasItemTotemCategory(m_spellInfo->TotemCategory[i]) )
+            if(m_spellInfo->TotemCategory[i] != 0)
             {
-                TotemCategory -= 1;
-                continue;
+                if( p_caster->HasItemTotemCategory(m_spellInfo->TotemCategory[i]) )
+                {
+                    TotemCategory -= 1;
+                    continue;
+                }
             }
+            else
+                TotemCategory -= 1;
         }
-        else
-            TotemCategory -= 1;
-    }
 
-    if (TotemCategory != 0)
-        return SPELL_FAILED_TOTEM_CATEGORY;                 //0x7B
-    */
+        if (TotemCategory != 0)
+            return SPELL_FAILED_TOTEM_CATEGORY;                 //0x7B
+        */
+    }
 
     // special checks for spell effects
     for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
