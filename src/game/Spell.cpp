@@ -898,7 +898,20 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
         {
-            caster->ProcDamageAndSpell(unitTarget, real_caster ? procAttacker : PROC_FLAG_NONE, procVictim, procEx, addhealth, m_attackType, m_spellInfo);
+            // Some spell expected send main spell info to triggered system
+            SpellEntry const* spellInfo = m_spellInfo;
+            switch(m_spellInfo->Id)
+            {
+                case 19968:                                 // Holy Light triggered heal
+                case 19993:                                 // Flash of Light triggered heal
+                {
+                    // stored in unused spell effect basepoints in main spell code
+                    uint32 spellid = m_currentBasePoints[EFFECT_INDEX_1];
+                    spellInfo = sSpellStore.LookupEntry(spellid);
+                }
+            }
+
+            caster->ProcDamageAndSpell(unitTarget, real_caster ? procAttacker : PROC_FLAG_NONE, procVictim, procEx, addhealth, m_attackType, spellInfo);
         }
 
         int32 gain = unitTarget->ModifyHealth( int32(addhealth) );

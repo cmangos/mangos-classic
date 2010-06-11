@@ -5065,9 +5065,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     sLog.outError("Unit::HandleProcTriggerSpell: Spell %u unknown but selected as original in Illu",originalSpellId);
                     return false;
                 }
-                // percent stored in effect 1 (class scripts) base points
-                int32 cost = originalSpell->manaCost;
-                basepoints[0] = cost*auraSpellInfo->CalculateSimpleValue(EFFECT_INDEX_1)/100;
+                basepoints[0] = originalSpell->manaCost;
                 trigger_spell_id = 20272;
                 target = this;
             }
