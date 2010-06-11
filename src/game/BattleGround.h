@@ -535,34 +535,45 @@ class BattleGround
 };
 
 // helper functions for world state list fill
-inline void FillInitialWorldState(ByteBuffer& data, uint32& count, uint16 state, uint32 value)
+inline void FillInitialWorldState(ByteBuffer& data, uint32& count, uint32 state, uint32 value)
 {
-    data << uint16(state);
-    data << uint16(value);
+    data << uint32(state);
+    data << uint32(value);
     ++count;
 }
 
-inline void FillInitialWorldState(ByteBuffer& data, uint32& count, uint16 state, int32 value)
+inline void FillInitialWorldState(ByteBuffer& data, uint32& count, uint32 state, int32 value)
 {
-    data << uint16(state);
-    data << int16(value);
+    data << uint32(state);
+    data << int32(value);
     ++count;
 }
 
-inline void FillInitialWorldState(ByteBuffer& data, uint32& count, uint16 state, bool value)
+inline void FillInitialWorldState(ByteBuffer& data, uint32& count, uint32 state, bool value)
 {
-    data << uint16(state);
-    data << uint16(value?1:0);
+    data << uint32(state);
+    data << uint32(value?1:0);
     ++count;
 }
 
 struct WorldStatePair
 {
-    uint16 state;
-    uint16 value;
+    uint32 state;
+    uint32 value;
 };
 
 inline void FillInitialWorldState(ByteBuffer& data, uint32& count, WorldStatePair const* array)
+{
+    for(WorldStatePair const* itr = array; itr->state; ++itr)
+    {
+        data << uint32(itr->state);
+        data << uint32(itr->value);
+        ++count;
+    }
+}
+
+// [-ZERO] it's just a workaround , packet values in 1.12 aren't known 
+inline void FillInitialDefWorldState(ByteBuffer& data, uint32& count, WorldStatePair const* array)
 {
     for(WorldStatePair const* itr = array; itr->state; ++itr)
     {

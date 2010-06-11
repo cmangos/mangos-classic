@@ -7368,7 +7368,7 @@ void Player::SendInitWorldStates(uint32 zoneid)
         data << uint32(mapid);                              // mapid
         size_t count_pos = data.wpos();
         data << uint16(0);                                  // count of uint32 blocks, placeholder
-        FillInitialWorldState(data, count, def_world_states);
+        FillInitialDefWorldState(data, count, def_world_states);
 
         data.put<uint16>(count_pos,count);                  // set actual world state amount
         GetSession()->SendPacket(&data);
