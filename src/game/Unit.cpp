@@ -2285,6 +2285,11 @@ bool Unit::isSpellBlocked(Unit *pVictim, SpellEntry const *spellProto, WeaponAtt
 {
     if (pVictim->HasInArc(M_PI_F,this))
     {
+        // Check creatures flags_extra for disable block
+        if(pVictim->GetTypeId()==TYPEID_UNIT &&
+           ((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_BLOCK )
+                return false;
+
         float blockChance = GetUnitBlockChance();
         blockChance += (GetWeaponSkillValue(attackType) - pVictim->GetMaxSkillValueForLevel() )*0.04f;
         if (roll_chance_f(blockChance))
