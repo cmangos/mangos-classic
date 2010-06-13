@@ -1510,12 +1510,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_ALL_PARTY_AROUND_CASTER:
         case TARGET_ALL_PARTY_AROUND_CASTER_2:
         case TARGET_ALL_PARTY:
-            FillRaidOrPartyTargets(targetUnitMap,m_caster,radius,false,true,true);
+            FillRaidOrPartyTargets(targetUnitMap, m_caster, radius, false, true, true);
             break;
-        case TARGET_RANDOM_RAID_MEMBER:
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                if(Player* target = ((Player*)m_caster)->GetNextRandomRaidMember(radius))
-                    targetUnitMap.push_back(target);
+        case TARGET_ALL_RAID_AROUND_CASTER:
+            FillRaidOrPartyTargets(targetUnitMap, m_caster, radius, true, true, true);
             break;
         case TARGET_SINGLE_FRIEND:
         case TARGET_SINGLE_FRIEND_2:
