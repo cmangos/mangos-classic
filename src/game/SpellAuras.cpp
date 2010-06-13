@@ -301,15 +301,9 @@ m_periodicTimer(0), m_periodicTick(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMIN
 
     m_isDeathPersist = IsDeathPersistentSpell(m_spellProto);
 
-    if(m_spellProto->procCharges)
-    {
-        m_procCharges = m_spellProto->procCharges;
-
-        if(modOwner)
-            modOwner->ApplySpellMod(GetId(), SPELLMOD_CHARGES, m_procCharges);
-    }
-    else
-        m_procCharges = -1;
+    m_procCharges = m_spellProto->procCharges;
+    if(modOwner)
+        modOwner->ApplySpellMod(GetId(), SPELLMOD_CHARGES, m_procCharges);
 
     m_isRemovedOnShapeLost = (m_caster_guid==m_target->GetGUID() && m_spellProto->Stances &&
                             !(m_spellProto->AttributesEx2 & 0x80000) && !(m_spellProto->Attributes & 0x10000));
@@ -1146,7 +1140,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             case 17941:    // Shadow Trance
             case 22008:    // Netherwind Focus
             case 34936:    // Backlash
-                m_procCharges = 1;
+                SetAuraCharges(1);
                 break;
         }
 
@@ -1155,7 +1149,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             SpellModType(m_modifier.m_auraname),            // SpellModType value == spell aura types
             m_modifier.m_amount,
             this,
-            m_procCharges > 0 ? m_procCharges : 0);
+            m_procCharges);
     }
 
     // unapply spell mod (including deleting m_spellmod)
@@ -3418,8 +3412,7 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
         switch (GetId())
         {
             case 28200:                                     // Ascendance (Talisman of Ascendance trinket)
-                m_procCharges = 6;
-                UpdateAuraCharges();
+                SetAuraCharges(6);
                 break;
             default: break;
         }

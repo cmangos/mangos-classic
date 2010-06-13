@@ -240,13 +240,32 @@ class MANGOS_DLL_SPEC Aura
 
         uint8 GetAuraSlot() const { return m_auraSlot; }
         void SetAuraSlot(uint8 slot) { m_auraSlot = slot; }
+        uint8 GetAuraCharges() const { return m_procCharges; }
+        void SetAuraCharges(uint8 charges)
+        {
+            if (m_procCharges == charges)
+                return;
+            m_procCharges = charges;
+
+            UpdateAuraCharges();
+        }
+
+        bool DropAuraCharge()                               // return true if last charge dropped
+        {
+            if (m_procCharges == 0)
+                return false;
+            m_procCharges--;
+            UpdateAuraCharges();
+            return m_procCharges == 0;
+        }
+
         void UpdateAuraCharges()
         {
             uint8 slot = GetAuraSlot();
 
             // only aura in slot with charges and without stack limitation
-            if (slot < MAX_AURAS && m_procCharges >= 1 && GetSpellProto()->StackAmount==0)
-                SetAuraApplication(slot, m_procCharges - 1);
+            if (slot < MAX_AURAS && m_procCharges > 0 && GetSpellProto()->StackAmount==0)
+                SetAuraApplication(slot, m_procCharges - 1);// field expect count-1 for proper amount show
         }
 
         void UnregisterSingleCastAura();
@@ -286,8 +305,6 @@ class MANGOS_DLL_SPEC Aura
         void SetIsSingleTarget(bool val) { m_isSingleTargetAura = val;}
 
         void SetRemoveMode(AuraRemoveMode mode) { m_removeMode = mode; }
-
-        int32 m_procCharges;
 
         virtual Unit* GetTriggerTarget() const { return m_target; }
 
@@ -332,6 +349,7 @@ class MANGOS_DLL_SPEC Aura
         AuraRemoveMode m_removeMode:8;                      // Store info for know remove aura reason
 
         uint8 m_auraSlot;
+        int8  m_procCharges;
 
         bool m_positive:1;
         bool m_permanent:1;

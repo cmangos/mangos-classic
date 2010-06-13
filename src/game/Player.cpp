@@ -13816,7 +13816,7 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
                     remaincharges = spellproto->procCharges;
             }
             else
-                remaincharges = -1;
+                remaincharges = 0;
 
 
             for(uint32 i = 0; i < stackcount; ++i)
@@ -14840,7 +14840,7 @@ void Player::_SaveAuras()
                     {
                         CharacterDatabase.PExecute("INSERT INTO character_aura (guid,caster_guid,spell,effect_index,stackcount,amount,maxduration,remaintime,remaincharges) "
                             "VALUES ('%u', '" UI64FMTD "' ,'%u', '%u', '%u', '%d', '%d', '%d', '%d')",
-                            GetGUIDLow(), itr2->second->GetCasterGUID(), (uint32)itr2->second->GetId(), (uint32)itr2->second->GetEffIndex(), stackCounter, itr2->second->GetModifier()->m_amount,int(itr2->second->GetAuraMaxDuration()),int(itr2->second->GetAuraDuration()),int(itr2->second->m_procCharges));
+                            GetGUIDLow(), itr2->second->GetCasterGUID(), (uint32)itr2->second->GetId(), (uint32)itr2->second->GetEffIndex(), stackCounter, itr2->second->GetModifier()->m_amount,int(itr2->second->GetAuraMaxDuration()),int(itr2->second->GetAuraDuration()),int(itr2->second->GetAuraCharges()));
                     }
                 }
             }
