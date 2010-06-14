@@ -54,6 +54,8 @@ libmangosgame_a_SOURCES = \
 	BattleGroundHandler.cpp \
 	BattleGroundMgr.cpp \
 	BattleGroundMgr.h \
+	Camera.cpp \
+	Camera.h \
 	Cell.h \
 	CellImpl.h \
 	Channel.cpp \

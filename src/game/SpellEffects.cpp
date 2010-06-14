@@ -2610,7 +2610,8 @@ void Spell::EffectAddFarsight(SpellEffectIndex eff_idx)
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x80000002);
     m_caster->AddDynObject(dynObj);
     m_caster->GetMap()->Add(dynObj);
-    ((Player*)m_caster)->SetFarSightGUID(dynObj->GetGUID());
+
+    ((Player*)m_caster)->GetCamera().SetView(dynObj);
 }
 
 void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
