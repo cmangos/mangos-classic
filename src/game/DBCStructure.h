@@ -112,6 +112,8 @@ struct ChrClassesEntry
     uint32      powerType;                                  // 3
                                                             // 4, unused
     char const* name[8];                                    // 5-12 unused
+                                                            // 13 string flag, unused
+    //char const* internalName                              // 14
     uint32      spellfamily;                                // 15
                                                             // 16, unused
 };
