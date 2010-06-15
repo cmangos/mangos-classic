@@ -42,10 +42,11 @@ void
 MotionMaster::Initialize()
 {
     // clear ALL movement generators (including default)
+    i_owner->StopMoving();
     Clear(false,true);
 
     // set new default movement generator
-    if (i_owner->GetTypeId() == TYPEID_UNIT)
+    if (i_owner->GetTypeId() == TYPEID_UNIT && !i_owner->hasUnitState(UNIT_STAT_CONTROLLED))
     {
         MovementGenerator* movement = FactorySelector::selectMovementGenerator((Creature*)i_owner);
         push(movement == NULL ? &si_idleMovement : movement);
@@ -227,7 +228,7 @@ void MotionMaster::MoveRandom()
 void
 MotionMaster::MoveTargetedHome()
 {
-    if(i_owner->hasUnitState(UNIT_STAT_FLEEING))
+    if(i_owner->hasUnitState(UNIT_STAT_LOST_CONTROL))
         return;
 
     Clear(false);
@@ -282,6 +283,9 @@ MotionMaster::MoveChase(Unit* target, float dist, float angle)
 void
 MotionMaster::MoveFollow(Unit* target, float dist, float angle)
 {
+    if(i_owner->hasUnitState(UNIT_STAT_LOST_CONTROL))
+        return;
+
     Clear();
 
     // ignore movement request if target not exist

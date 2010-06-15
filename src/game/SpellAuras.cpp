@@ -2517,6 +2517,8 @@ void Aura::HandleModPossess(bool apply, bool Real)
 
     if( apply )
     {
+        target->addUnitState(UNIT_STAT_CONTROLLED);
+
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
         target->SetCharmerGUID(p_caster->GetGUID());
@@ -2526,43 +2528,66 @@ void Aura::HandleModPossess(bool apply, bool Real)
 
         camera.SetView(target);
         p_caster->SetClientControl(target, 1);
+        p_caster->SetMover(target);
 
-        target->CombatStop();
+        target->CombatStop(true);
         target->DeleteThreatList();
+        target->getHostileRefManager().deleteReferences();
 
-        if(target->GetTypeId() == TYPEID_UNIT)
+        if(CharmInfo *charmInfo = target->InitCharmInfo(target))
         {
-            target->StopMoving();
-            target->GetMotionMaster()->Clear();
-            target->GetMotionMaster()->MoveIdle();
-            CharmInfo *charmInfo = ((Creature*)target)->InitCharmInfo(target);
             charmInfo->InitPossessCreateSpells();
+            charmInfo->SetReactState(REACT_PASSIVE);
+            charmInfo->SetCommandState(COMMAND_STAY);
         }
 
         p_caster->PossessSpellInitialize();
+
+        if(target->GetTypeId() == TYPEID_UNIT)
+        {
+            ((Creature*)target)->AIM_Initialize();
+        }
+        else if(target->GetTypeId() == TYPEID_PLAYER)
+        {
+            ((Player*)target)->SetClientControl(target, 0);
+        }
+
     }
     else
     {
+        p_caster->InterruptSpell(CURRENT_CHANNELED_SPELL);  // the spell is not automatically canceled when interrupted, do it now
+        p_caster->SetCharm(NULL);
+
+        camera.ResetView();
+        p_caster->SetClientControl(target, 0);
+        p_caster->SetMover(NULL);
+
+        p_caster->RemovePetActionBar();
+
+        // on delete only do caster related effects
+        if(m_removeMode == AURA_REMOVE_BY_DELETE)
+            return;
+
+        target->clearUnitState(UNIT_STAT_CONTROLLED);
+
+        target->CombatStop(true);
+        target->DeleteThreatList();
+        target->getHostileRefManager().deleteReferences();
+
         target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
         target->SetCharmerGUID(0);
 
-        p_caster->InterruptSpell(CURRENT_CHANNELED_SPELL);  // the spell is not automatically canceled when interrupted, do it now
-
         if(target->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_target)->setFactionForRace(target->getRace());
+        {
+            ((Player*)target)->setFactionForRace(target->getRace());
+            ((Player*)target)->SetClientControl(target, 1);
+        }
         else if(target->GetTypeId() == TYPEID_UNIT)
         {
             CreatureInfo const *cinfo = ((Creature*)target)->GetCreatureInfo();
             target->setFaction(cinfo->faction_A);
         }
-
-        p_caster->SetCharm(NULL);
-
-        camera.ResetView();
-        p_caster->SetClientControl(target, 0);
-
-        p_caster->RemovePetActionBar();
 
         if(target->GetTypeId() == TYPEID_UNIT)
         {
@@ -2603,6 +2628,7 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
 
     p_caster->SetCharm(apply ? pet : NULL);
     p_caster->SetClientControl(pet, apply ? 1 : 0);
+    ((Player*)caster)->SetMover(apply ? pet : NULL);
 
     if(apply)
     {
@@ -2623,8 +2649,10 @@ void Aura::HandleModCharm(bool apply, bool Real)
     if(!Real)
         return;
 
+    Unit *target = GetTarget();
+
     // not charm yourself
-    if(GetCasterGUID() == m_target->GetGUID())
+    if(GetCasterGUID() == target->GetGUID())
         return;
 
     Unit* caster = GetCaster();
@@ -2633,48 +2661,49 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
     if( apply )
     {
-        if (m_target->GetCharmerGUID())
+        if (target->GetCharmerGUID())
         {
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
+            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
+            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
         }
 
-        m_target->SetCharmerGUID(GetCasterGUID());
-        m_target->setFaction(caster->getFaction());
-        m_target->CastStop(m_target == caster ? GetId() : 0);
+        target->SetCharmerGUID(GetCasterGUID());
+        target->setFaction(caster->getFaction());
+        target->CastStop(m_target == caster ? GetId() : 0);
         caster->SetCharm(m_target);
 
-        m_target->CombatStop();
-        m_target->DeleteThreatList();
+        target->CombatStop(true);
+        target->DeleteThreatList();
+        target->getHostileRefManager().deleteReferences();
 
-        if(m_target->GetTypeId() == TYPEID_UNIT)
+        if(target->GetTypeId() == TYPEID_UNIT)
         {
-            ((Creature*)m_target)->AIM_Initialize();
-            CharmInfo *charmInfo = m_target->InitCharmInfo(m_target);
+            ((Creature*)target)->AIM_Initialize();
+            CharmInfo *charmInfo = m_target->InitCharmInfo(target);
             charmInfo->InitCharmCreateSpells();
             charmInfo->SetReactState( REACT_DEFENSIVE );
 
             if(caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK)
             {
-                CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+                CreatureInfo const *cinfo = ((Creature*)target)->GetCreatureInfo();
                 if(cinfo && cinfo->type == CREATURE_TYPE_DEMON)
                 {
                     // creature with pet number expected have class set
-                    if(m_target->GetByteValue(UNIT_FIELD_BYTES_0, 1)==0)
+                    if(target->GetByteValue(UNIT_FIELD_BYTES_0, 1)==0)
                     {
-                        CreatureDataAddon const *cainfo = ((Creature*)m_target)->GetCreatureAddon();
+                        CreatureDataAddon const *cainfo = ((Creature*)target)->GetCreatureAddon();
                         if(!cainfo || (cainfo->bytes0 & 0x0000FF00) == 0)
                             sLog.outErrorDb("Creature (Entry: %u) not have creature addon or have bytes0 class byte = 0 but used in charmed spell, that will be result client crash.",cinfo->Entry);
                         else
                             sLog.outError("Creature (Entry: %u) have creature addon with bytes0 = %u but at charming have class 0!!! that will be result client crash.",cinfo->Entry,cainfo->bytes0);
 
-                        m_target->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
+                        target->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
                     }
 
                     //just to enable stat window
                     charmInfo->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
                     //if charmed two demons the same session, the 2nd gets the 1st one's name
-                    m_target->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL)));
+                    target->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL)));
                 }
             }
         }
@@ -2684,36 +2713,36 @@ void Aura::HandleModCharm(bool apply, bool Real)
     }
     else
     {
-        m_target->SetCharmerGUID(0);
+        target->SetCharmerGUID(0);
 
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_target)->setFactionForRace(m_target->getRace());
+        if(target->GetTypeId() == TYPEID_PLAYER)
+            ((Player*)target)->setFactionForRace(target->getRace());
         else
         {
             CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
 
             // restore faction
-            if(((Creature*)m_target)->isPet())
+            if(((Creature*)target)->isPet())
             {
                 if(Unit* owner = m_target->GetOwner())
-                    m_target->setFaction(owner->getFaction());
+                    target->setFaction(owner->getFaction());
                 else if(cinfo)
-                    m_target->setFaction(cinfo->faction_A);
+                    target->setFaction(cinfo->faction_A);
             }
             else if(cinfo)                              // normal creature
-                m_target->setFaction(cinfo->faction_A);
+                target->setFaction(cinfo->faction_A);
 
             // restore UNIT_FIELD_BYTES_0
             if(cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->type == CREATURE_TYPE_DEMON)
             {
                 // DB must have proper class set in field at loading, not req. restore, including workaround case at apply
-                //if(CreatureDataAddon const *cainfo = ((Creature*)m_target)->GetCreatureAddon())
-                //    m_target->SetByteValue(UNIT_FIELD_BYTES_0, 1, (cainfo->bytes0 & 0x0000FF00) >> 8);
+                //if(CreatureDataAddon const *cainfo = ((Creature*)target)->GetCreatureAddon())
+                //    target->SetByteValue(UNIT_FIELD_BYTES_0, 1, (cainfo->bytes0 & 0x0000FF00) >> 8);
 
-                if(m_target->GetCharmInfo())
-                    m_target->GetCharmInfo()->SetPetNumber(0, true);
+                if(target->GetCharmInfo())
+                    target->GetCharmInfo()->SetPetNumber(0, true);
                 else
-                    sLog.outError("Aura::HandleModCharm: target (GUID: %u TypeId: %u) has a charm aura but no charm info!", m_target->GetGUIDLow(), m_target->GetTypeId());
+                    sLog.outError("Aura::HandleModCharm: target (GUID: %u TypeId: %u) has a charm aura but no charm info!", target->GetGUIDLow(), target->GetTypeId());
             }
         }
 
@@ -2722,11 +2751,15 @@ void Aura::HandleModCharm(bool apply, bool Real)
         if(caster->GetTypeId() == TYPEID_PLAYER)
             ((Player*)caster)->RemovePetActionBar();
 
-        if(m_target->GetTypeId() == TYPEID_UNIT)
+        target->CombatStop(true);
+        target->DeleteThreatList();
+        target->getHostileRefManager().deleteReferences();
+
+        if(target->GetTypeId() == TYPEID_UNIT)
         {
-            ((Creature*)m_target)->AIM_Initialize();
-            if (((Creature*)m_target)->AI())
-                ((Creature*)m_target)->AI()->AttackedBy(caster);
+            ((Creature*)target)->AIM_Initialize();
+            if (((Creature*)target)->AI())
+                ((Creature*)target)->AI()->AttackedBy(caster);
         }
     }
 }
