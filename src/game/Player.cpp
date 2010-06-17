@@ -392,6 +392,8 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this), m_mover(t
 
     m_valuesCount = PLAYER_END;
 
+    m_isActiveObject = true;                                // player is always active object
+
     m_session = session;
 
     m_divider = 0;

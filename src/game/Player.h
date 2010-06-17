@@ -1977,7 +1977,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool isAllowedToLoot(Creature* creature);
 
-        bool isActiveObject() const { return true; }
     protected:
 
         /*********************************************************/
