@@ -1871,8 +1871,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         Unit* GetMover() const { return m_mover; }
         bool IsSelfMover() const { return m_mover == this; }// normal case for player not controlling other unit
 
-        uint64 GetFarSight() const { return GetUInt64Value(PLAYER_FARSIGHT); }
-        void SetFarSightGUID(uint64 guid);
+        ObjectGuid const& GetFarSightGuid() const { return GetGuidValue(PLAYER_FARSIGHT); }
 
         // Transports
         Transport * GetTransport() const { return m_transport; }
