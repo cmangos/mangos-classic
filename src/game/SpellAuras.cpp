@@ -260,7 +260,7 @@ m_periodicTimer(0), m_periodicTick(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMIN
 
     m_currentBasePoints = currentBasePoints ? *currentBasePoints : m_spellProto->CalculateSimpleValue(eff);
 
-    m_isPassive = IsPassiveSpell(GetId());
+    m_isPassive = IsPassiveSpell(GetSpellProto());
     m_positive = IsPositiveEffect(GetId(), m_effIndex);
 
     m_isSingleTargetAura = IsSingleTargetSpell(m_spellProto);
@@ -438,7 +438,7 @@ void Aura::Update(uint32 diff)
         Unit* caster = GetCaster();
         if(!caster)
         {
-            m_target->RemoveAura(GetId(), GetEffIndex());
+            m_target->RemoveAurasByCasterSpell(GetId(), GetEffIndex(), GetCasterGUID());
             return;
         }
 
@@ -453,7 +453,7 @@ void Aura::Update(uint32 diff)
 
             if(!caster->IsWithinDistInMap(m_target, max_range))
             {
-                m_target->RemoveAura(GetId(), GetEffIndex());
+                m_target->RemoveAurasByCasterSpell(GetId(), GetEffIndex(), GetCasterGUID());
                 return;
             }
         }

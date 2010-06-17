@@ -2940,7 +2940,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
         CastSpell(this, spell_id, true);
     }
     // also cast passive spells (including all talents without SPELL_EFFECT_LEARN_SPELL) with additional checks
-    else if (IsPassiveSpell(spell_id))
+    else if (IsPassiveSpell(spellInfo))
     {
         // if spell doesn't require a stance or the player is in the required stance
         if( ( !spellInfo->Stances &&

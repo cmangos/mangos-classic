@@ -192,7 +192,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             }
 
             // do not cast not learned spells
-            if(!pet->HasSpell(spellid) || IsPassiveSpell(spellid))
+            if(!pet->HasSpell(spellid) || IsPassiveSpell(spellInfo))
                 return;
 
             pet->clearUnitState(UNIT_STAT_MOVING);
@@ -617,7 +617,7 @@ void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
     }
 
     // do not cast not learned spells
-    if (!pet->HasSpell(spellid) || IsPassiveSpell(spellid))
+    if (!pet->HasSpell(spellid) || IsPassiveSpell(spellInfo))
         return;
 
     SpellCastTargets targets;
