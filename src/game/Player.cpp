@@ -1777,6 +1777,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if(oldmap)
                 oldmap->Remove(this, false);
 
+            // set new map 
+            if(map)
+                SetMap(map);
+
             // new final coordinates
             float final_x = x;
             float final_y = y;

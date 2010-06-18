@@ -52,9 +52,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         sLog.outError("WorldSession::HandleMoveWorldportAckOpcode: player got's teleported far to a not valid location. (map:%u, x:%f, y:%f, z:%f) We log him out and don't save him..", loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
         // stop teleportation else we would try this again in the beginning of WorldSession::LogoutPlayer...
         GetPlayer()->SetSemaphoreTeleportFar(false);
-        // player don't gets saved - so his coords will stay at the point where
-        // he was last saved
-        LogoutPlayer(false);
+        // and teleport the player to a valid place
+        GetPlayer()->TeleportToHomebind();
         return;
     }
 
@@ -69,7 +68,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->SetSemaphoreTeleportFar(false);
 
     // relocate the player to the teleport destination
-    GetPlayer()->SetMap(MapManager::Instance().CreateMap(loc.mapid, GetPlayer()));
+    GetPlayer()->SetMap(sMapMgr.CreateMap(loc.mapid, GetPlayer()));
     GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
 
     // check this before Map::Add(player), because that will create the instance save!
@@ -88,7 +87,6 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         GetPlayer()->TeleportToHomebind();
         return;
     }
-    GetPlayer()->SendInitialPacketsAfterAddToMap();
 
     // flight fast teleport case
     if(GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
@@ -105,6 +103,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         GetPlayer()->GetMotionMaster()->MovementExpired();
         GetPlayer()->m_taxi.ClearTaxiDestinations();
     }
+
+    GetPlayer()->SendInitialPacketsAfterAddToMap();
 
     // resurrect character at enter into instance where his corpse exist after add to map
     Corpse *corpse = GetPlayer()->GetCorpse();
@@ -176,7 +176,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
     ObjectGuid guid;
     uint32 flags, time;
 
-    recv_data >> guid;
+    recv_data >> guid.ReadAsPacked();
     recv_data >> flags >> time;
     DEBUG_LOG("Guid: %s", guid.GetString().c_str());
     DEBUG_LOG("Flags %u, time %u", flags, time/IN_MILLISECONDS);
