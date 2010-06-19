@@ -960,14 +960,14 @@ enum SessionStatus
 
 class WorldPacket;
 
-struct OpcodeStruct
+struct OpcodeHandler
 {
     char const* name;
     SessionStatus status;
     void (WorldSession::*handler)(WorldPacket& recvPacket);
 };
 
-typedef std::map< uint16, OpcodeStruct> OpcodeMap;
+typedef std::map< uint16, OpcodeHandler> OpcodeMap;
 
 class Opcodes
 {
@@ -980,7 +980,7 @@ class Opcodes
         { mOpcodeMap[Opcode].name = name; mOpcodeMap[Opcode].status = status ; mOpcodeMap[Opcode].handler = handler; };
 
         /// Lookup opcode
-        inline OpcodeStruct const* LookupOpcode(uint16 id)
+        inline OpcodeHandler const* LookupOpcode(uint16 id)
         {
             OpcodeMap::iterator itr = mOpcodeMap.find(id);
             if (itr != mOpcodeMap.end())
@@ -997,7 +997,7 @@ class Opcodes
 /// Lookup opcode name for human understandable logging
 inline char const* LookupOpcodeName(uint16 id)
 {
-    if (OpcodeStruct const* op = opCodes.LookupOpcode(id))
+    if (OpcodeHandler const* op = opCodes.LookupOpcode(id))
         return op->name;
     return "Received unknown opcode, it's more than max!";
 }

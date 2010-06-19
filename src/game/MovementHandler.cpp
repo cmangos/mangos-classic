@@ -49,8 +49,9 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // possible errors in the coordinate validity check
     if(!MapManager::IsValidMapCoord(loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation))
     {
-        sLog.outError("WorldSession::HandleMoveWorldportAckOpcode: player got's teleported far to a not valid location. (map:%u, x:%f, y:%f, z:%f) We log him out and don't save him..", loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
-        // stop teleportation else we would try this again in the beginning of WorldSession::LogoutPlayer...
+        sLog.outError("WorldSession::HandleMoveWorldportAckOpcode: player %s (%d) was teleported far to a not valid location. (map:%u, x:%f, y:%f, "
+            "z:%f) We port him to his homebind instead..", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
+        // stop teleportation else we would try this again and again in LogoutPlayer...
         GetPlayer()->SetSemaphoreTeleportFar(false);
         // and teleport the player to a valid place
         GetPlayer()->TeleportToHomebind();
@@ -82,11 +83,13 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         //if player wasn't added to map, reset his map pointer!
         GetPlayer()->ResetMap();
 
-        DEBUG_LOG("WORLD: teleport of player %s (%d) to location %d, %f, %f, %f, %f failed", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+        sLog.outError("WorldSession::HandleMoveWorldportAckOpcode: player %s (%d) was teleported far but couldn't be added to map. (map:%u, x:%f, y:%f, "
+            "z:%f) We port him to his homebind instead..", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
         // teleport the player home
         GetPlayer()->TeleportToHomebind();
         return;
     }
+    GetPlayer()->SendInitialPacketsAfterAddToMap();
 
     // flight fast teleport case
     if(GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
@@ -103,8 +106,6 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         GetPlayer()->GetMotionMaster()->MovementExpired();
         GetPlayer()->m_taxi.ClearTaxiDestinations();
     }
-
-    GetPlayer()->SendInitialPacketsAfterAddToMap();
 
     // resurrect character at enter into instance where his corpse exist after add to map
     Corpse *corpse = GetPlayer()->GetCorpse();
