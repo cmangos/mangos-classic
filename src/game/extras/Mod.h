@@ -20,23 +20,16 @@
 #define _MOD_H
 
 #include "Common.h"
-#include "WorldPacket.h"
-#include "Log.h"
-#include "Config/ConfigEnv.h"
-#include "SystemConfig.h"
-#include "../WorldSession.h"
-#include "../World.h"
-#include "../ObjectAccessor.h"
-#include "../Spell.h"
-#include "../SpellMgr.h"
-#include "../SpellAuras.h"
+#include "..\DBCEnums.h"
+#include "..\SharedDefines.h"
+#include "..\SpellAuraDefines.h"
+#include "Config/Config.h"
 
 enum ModConfigUint32Values
 {
     MODCONFIG_UINT32_EMPTY = 0,  //overwrite with new conf
     MODCONFIG_UINT32_VALUE_COUNT
 };
-
 
 enum ModConfigInt32Values
 {
@@ -56,6 +49,10 @@ enum ModConfigBoolValues
     MODCONFIG_BOOL_VALUE_COUNT
 };
 
+class Aura;
+class Spell;
+struct SpellEntry;
+class Unit;
 
 class MANGOS_DLL_SPEC ModClass
 {

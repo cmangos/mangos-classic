@@ -24,11 +24,14 @@
 #include "SharedDefines.h"
 #include "DBCEnums.h"
 #include "ObjectGuid.h"
+#include "LootMgr.h"
+#include "Unit.h"
+#include "Player.h"
 
 class WorldSession;
-class Unit;
+class WorldPacket;
 class DynamicObj;
-class Player;
+class Item;
 class GameObject;
 class Group;
 class Aura;
@@ -164,14 +167,7 @@ class SpellCastTargets
         uint32 getItemTargetEntry() const { return m_itemTargetEntry; }
         void setItemTarget(Item* item);
         void setTradeItemTarget(Player* caster);
-        void updateTradeSlotItem()
-        {
-            if(m_itemTarget && (m_targetMask & TARGET_FLAG_TRADE_ITEM))
-            {
-                m_itemTargetGUID = m_itemTarget->GetGUID();
-                m_itemTargetEntry = m_itemTarget->GetEntry();
-            }
-        }
+        void updateTradeSlotItem();
 
         bool IsEmpty() const { return m_GOTargetGUID.IsEmpty() && m_unitTargetGUID.IsEmpty() && m_itemTarget==NULL && m_CorpseTargetGUID.IsEmpty(); }
 

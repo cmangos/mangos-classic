@@ -17,6 +17,9 @@
  */
 
 #include "Mod.h"
+#include "../Spell.h"
+#include "../SpellMgr.h"
+#include "../SpellAuras.h"
 
 
 void ModClass::spellPrepare(Spell* spell,Unit* caster)

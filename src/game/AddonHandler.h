@@ -23,7 +23,6 @@
 #include "Common.h"
 #include "Policies/Singleton.h"
 #include "WorldPacket.h"
-#include "Config/ConfigEnv.h"
 
 class AddonHandler
 {

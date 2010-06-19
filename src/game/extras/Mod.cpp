@@ -17,6 +17,9 @@
  */
 
 #include "Mod.h"
+
+#include "Log.h"
+#include "SystemConfig.h"
 #include "Policies/SingletonImp.h"
 
 
@@ -81,9 +84,7 @@ void ModClass::LoadModConfSettings(bool reload)
             sLog.outError("          Please check for updates, as your current default values may cause");
             sLog.outError("          unexpected behavior.");
             sLog.outError("*****************************************************************************");
-            clock_t pause = 3000 + clock();
-            while (pause > clock())
-                ;                                           // empty body
+            Log::WaitBeforeContinueIfNeed();
         }
     }
 
