@@ -20,9 +20,9 @@
 #define _MOD_H
 
 #include "Common.h"
-#include "..\DBCEnums.h"
-#include "..\SharedDefines.h"
-#include "..\SpellAuraDefines.h"
+#include "../DBCEnums.h"
+#include "../SharedDefines.h"
+#include "../SpellAuraDefines.h"
 #include "Config/Config.h"
 
 enum ModConfigUint32Values
