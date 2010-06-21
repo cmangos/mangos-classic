@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z0627_130_01_mangos_command` bit(1) default NULL
+  `required_z0630_131_01_mangos_game_event_pool` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1539,8 +1539,8 @@ DROP TABLE IF EXISTS `game_event_creature`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `game_event_creature` (
   `guid` int(10) unsigned NOT NULL,
-  `event` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Put negatives values to remove during event',
-  PRIMARY KEY (`guid`)
+  `event` smallint(6) NOT NULL default '0' COMMENT 'Negatives value to remove during event and ignore pool grouping, positive value for spawn during event and if guid is part of pool then al pool memebers must be listed as part of event spawn.',
+  PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1586,8 +1586,8 @@ DROP TABLE IF EXISTS `game_event_gameobject`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `game_event_gameobject` (
   `guid` int(10) unsigned NOT NULL,
-  `event` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Put negatives values to remove during event',
-  PRIMARY KEY (`guid`)
+  `event` smallint(6) NOT NULL default '0' COMMENT 'Negatives value to remove during event and ignore pool grouping, positive value for spawn during event and if guid is part of pool then al pool memebers must be listed as part of event spawn.',
+  PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
