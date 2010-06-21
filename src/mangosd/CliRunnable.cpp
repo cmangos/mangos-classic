@@ -594,7 +594,7 @@ bool ChatHandler::HandleServerLogLevelCommand(const char *args)
 {
     if(!*args)
     {
-        PSendSysMessage("Log level: %u");
+        PSendSysMessage("Log level: %u", sLog.GetLogLevel());
         return true;
     }
 
