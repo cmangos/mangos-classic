@@ -18,6 +18,7 @@ In branch
  * OpenSSL lib upgrade to OpenSSL 1.0.0.
  * Sockets lib use dropped.
  * dotconfpp lib use dropped.
+ * Visual Studio 2003 (VC71) support dropped
  * Implement AV battleground.
  * Implement new DB-based gossip system for creatures/gameobjects.
  * Implement realmd support realms for different client versions.
