@@ -1238,7 +1238,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage *damageInfo, bool durabilityLoss)
     if(pVictim != this && GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
     {
         const AreaTableEntry *area = GetAreaEntryByAreaID(pVictim->GetAreaId());
-        if(area && area->flags & 0x800)                     //sanctuary
+        if(area && area->flags & AREA_FLAG_SANCTUARY)       // sanctuary
             return;
     }
 
@@ -1513,11 +1513,11 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
     if(pVictim != this && GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
     {
         const AreaTableEntry *area = GetAreaEntryByAreaID(pVictim->GetAreaId());
-        if(area && area->flags & 0x800)                     //sanctuary
+        if(area && area->flags & AREA_FLAG_SANCTUARY)       // sanctuary
             return;
     }
 
-    // Hmmmm dont like this emotes cloent must by self do all animations
+    // Hmmmm dont like this emotes client must by self do all animations
     if (damageInfo->HitInfo&HITINFO_CRITICALHIT)
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
     if(damageInfo->blocked_amount && damageInfo->TargetState!=VICTIMSTATE_BLOCKS)
@@ -4261,36 +4261,17 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo *damageInfo)
 
 void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount)
 {
-    DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
-
-    WorldPacket data(SMSG_ATTACKERSTATEUPDATE, (16+45));    // we guess size
-    data << (uint32)HitInfo;
-    data << GetPackGUID();
-    data << target->GetPackGUID();
-    data << (uint32)(Damage-AbsorbDamage-Resist-BlockedAmount);
-
-    data << (uint8)SwingType;                               // count?
-
-    // for(i = 0; i < SwingType; ++i)
-    data << uint32(GetFirstSchoolInMask(damageSchoolMask));
-    data << float(Damage-AbsorbDamage-Resist-BlockedAmount);
-    // still need to double check damage
-    data << uint32(Damage-AbsorbDamage-Resist-BlockedAmount);
-    data << uint32(AbsorbDamage);
-    data << uint32(Resist);
-    // end loop
-
-    data << uint32(TargetState);
-
-    if (AbsorbDamage == 0)                                  //also 0x3E8 = 0x3E8, check when that happens
-        data << (uint32)0;
-    else
-        data << (uint32)-1;
-
-    data << (uint32)0;
-    data << (uint32)BlockedAmount;
-
-    SendMessageToSet( &data, true );
+    CalcDamageInfo dmgInfo;
+    dmgInfo.HitInfo = HitInfo;
+    dmgInfo.attacker = this;
+    dmgInfo.target = target;
+    dmgInfo.damage = Damage - AbsorbDamage - Resist - BlockedAmount;
+    dmgInfo.damageSchoolMask = damageSchoolMask;
+    dmgInfo.absorb = AbsorbDamage;
+    dmgInfo.resist = Resist;
+    dmgInfo.TargetState = TargetState;
+    dmgInfo.blocked_amount = BlockedAmount;
+    SendAttackStateUpdate(&dmgInfo);
 }
 
 bool Unit::HandleHasteAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const * procSpell, uint32 /*procFlag*/, uint32 /*procEx*/, uint32 cooldown)
@@ -5168,7 +5149,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             target = pVictim;
             break;
         }
-        // Combo points add triggers (need add combopoint only for main tatget, and after possible combopoints reset)
+        // Combo points add triggers (need add combopoint only for main target, and after possible combopoints reset)
         case 15250: // Rogue Setup
         {
             if(!pVictim || pVictim != getVictim())   // applied only for main target
