@@ -124,9 +124,185 @@ bool InstanceSave::UnloadIfEmpty()
         return true;
 }
 
+//== InstanceResetScheduler functions ======================
+
+void InstanceResetScheduler::LoadResetTimes()
+{
+    time_t now = time(NULL);
+    time_t today = (now / DAY) * DAY;
+
+    // NOTE: Use DirectPExecute for tables that will be queried later
+
+    // get the current reset times for normal instances (these may need to be updated)
+    // these are only kept in memory for InstanceSaves that are loaded later
+    // resettime = 0 in the DB for raid instances so those are skipped
+    typedef std::map<uint32, std::pair<uint32, time_t> > ResetTimeMapType;
+    ResetTimeMapType InstResetTime;
+    QueryResult *result = CharacterDatabase.Query("SELECT id, map, resettime FROM instance WHERE resettime > 0");
+    if( result )
+    {
+        do
+        {
+            if(time_t resettime = time_t((*result)[2].GetUInt64()))
+            {
+                uint32 id = (*result)[0].GetUInt32();
+                uint32 mapid = (*result)[1].GetUInt32();
+                InstResetTime[id] = std::pair<uint32, uint64>(mapid, resettime);
+            }
+        }
+        while (result->NextRow());
+        delete result;
+
+        // update reset time for normal instances with the max creature respawn time + X hours
+        result = WorldDatabase.Query("SELECT MAX(respawntime), instance FROM creature_respawn WHERE instance > 0 GROUP BY instance");
+        if( result )
+        {
+            do
+            {
+                Field *fields = result->Fetch();
+                uint32 instance = fields[1].GetUInt32();
+                time_t resettime = time_t(fields[0].GetUInt64() + 2 * HOUR);
+                ResetTimeMapType::iterator itr = InstResetTime.find(instance);
+                if(itr != InstResetTime.end() && itr->second.second != resettime)
+                {
+                    CharacterDatabase.DirectPExecute("UPDATE instance SET resettime = '"UI64FMTD"' WHERE id = '%u'", uint64(resettime), instance);
+                    itr->second.second = resettime;
+                }
+            }
+            while (result->NextRow());
+            delete result;
+        }
+
+        // schedule the reset times
+        for(ResetTimeMapType::iterator itr = InstResetTime.begin(); itr != InstResetTime.end(); ++itr)
+            if(itr->second.second > now)
+                ScheduleReset(true, itr->second.second, InstanceResetEvent(0, itr->second.first, itr->first));
+    }
+
+    // load the global respawn times for raid instances
+    uint32 diff = sWorld.getConfig(CONFIG_UINT32_INSTANCE_RESET_TIME_HOUR) * HOUR;
+    m_resetTimeByMapId.resize(sMapStore.GetNumRows()+1);
+    result = CharacterDatabase.Query("SELECT mapid, resettime FROM instance_reset");
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint32 mapid = fields[0].GetUInt32();
+            if(!ObjectMgr::GetInstanceTemplate(mapid))
+            {
+                sLog.outError("InstanceSaveManager::LoadResetTimes: invalid mapid %u in instance_reset!", mapid);
+                CharacterDatabase.DirectPExecute("DELETE FROM instance_reset WHERE mapid = '%u'", mapid);
+                continue;
+            }
+
+            // update the reset time if the hour in the configs changes
+            uint64 oldresettime = fields[1].GetUInt64();
+            uint64 newresettime = (oldresettime / DAY) * DAY + diff;
+            if(oldresettime != newresettime)
+                CharacterDatabase.DirectPExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%u'", newresettime, mapid);
+
+            m_resetTimeByMapId[mapid] = newresettime;
+        } while(result->NextRow());
+        delete result;
+    }
+
+    // clean expired instances, references to them will be deleted in CleanupInstances
+    // must be done before calculating new reset times
+    m_InstanceSaves._CleanupExiredInstancesAtTime(now);
+
+    // calculate new global reset times for expired instances and those that have never been reset yet
+    // add the global reset times to the priority queue
+    for(uint32 i = 0; i < sInstanceTemplate.MaxEntry; i++)
+    {
+        // only raid maps have a global reset time
+        InstanceTemplate const* temp = ObjectMgr::GetInstanceTemplate(i);
+        if(!temp || !temp->reset_delay)
+            continue;
+
+        uint32 period = temp->reset_delay * DAY;
+        time_t t = m_resetTimeByMapId[temp->map];
+        if(!t)
+        {
+            // initialize the reset time
+            t = today + period + diff;
+            CharacterDatabase.DirectPExecute("INSERT INTO instance_reset VALUES ('%u','"UI64FMTD"')", i, (uint64)t);
+        }
+
+        if(t < now)
+        {
+            // assume that expired instances have already been cleaned
+            // calculate the next reset time
+            t = (t / DAY) * DAY;
+            t += ((today - t) / period + 1) * period + diff;
+            CharacterDatabase.DirectPExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%u'", (uint64)t, i);
+        }
+
+        m_resetTimeByMapId[temp->map] = t;
+
+        // schedule the global reset/warning
+        uint8 type = 1;
+        static int tim[4] = {3600, 900, 300, 60};
+        for(; type < 4; type++)
+            if(t - tim[type-1] > now) break;
+        ScheduleReset(true, t - tim[type-1], InstanceResetEvent(type, i));
+    }
+}
+
+void InstanceResetScheduler::ScheduleReset(bool add, time_t time, InstanceResetEvent event)
+{
+    if(add) m_resetTimeQueue.insert(std::pair<time_t, InstanceResetEvent>(time, event));
+    else
+    {
+        // find the event in the queue and remove it
+        ResetTimeQueue::iterator itr;
+        std::pair<ResetTimeQueue::iterator, ResetTimeQueue::iterator> range;
+        range = m_resetTimeQueue.equal_range(time);
+        for(itr = range.first; itr != range.second; ++itr)
+            if(itr->second == event) { m_resetTimeQueue.erase(itr); return; }
+            // in case the reset time changed (should happen very rarely), we search the whole queue
+            if(itr == range.second)
+            {
+                for(itr = m_resetTimeQueue.begin(); itr != m_resetTimeQueue.end(); ++itr)
+                    if(itr->second == event) { m_resetTimeQueue.erase(itr); return; }
+                    if(itr == m_resetTimeQueue.end())
+                        sLog.outError("InstanceSaveManager::ScheduleReset: cannot cancel the reset, the event(%d,%d,%d) was not found!", event.type, event.mapid, event.instanceId);
+            }
+    }
+}
+
+void InstanceResetScheduler::Update()
+{
+    time_t now = time(NULL), t;
+    while(!m_resetTimeQueue.empty() && (t = m_resetTimeQueue.begin()->first) < now)
+    {
+        InstanceResetEvent &event = m_resetTimeQueue.begin()->second;
+        if(event.type == 0)
+        {
+            // for individual normal instances, max creature respawn + X hours
+            m_InstanceSaves._ResetInstance(event.mapid, event.instanceId);
+            m_resetTimeQueue.erase(m_resetTimeQueue.begin());
+        }
+        else
+        {
+            // global reset/warning for a certain map
+            time_t resetTime = GetResetTimeFor(event.mapid);
+            m_InstanceSaves._ResetOrWarnAll(event.mapid, event.type != 4, uint32(resetTime - now));
+            if(event.type != 4)
+            {
+                // schedule the next warning/reset
+                event.type++;
+                static int tim[4] = {3600, 900, 300, 60};
+                ScheduleReset(true, resetTime - tim[event.type-1], event);
+            }
+            m_resetTimeQueue.erase(m_resetTimeQueue.begin());
+        }
+    }
+}
+
 //== InstanceSaveManager functions =========================
 
-InstanceSaveManager::InstanceSaveManager() : lock_instLists(false)
+InstanceSaveManager::InstanceSaveManager() : lock_instLists(false), m_Scheduler(*this)
 {
 }
 
@@ -160,12 +336,12 @@ InstanceSave* InstanceSaveManager::AddInstanceSave(uint32 mapId, uint32 instance
         // initialize reset time
         // for normal instances if no creatures are killed the instance will reset in two hours
         if(entry->map_type == MAP_RAID)
-            resetTime = GetResetTimeFor(mapId);
+            resetTime = m_Scheduler.GetResetTimeFor(mapId);
         else
         {
             resetTime = time(NULL) + 2 * HOUR;
             // normally this will be removed soon after in InstanceMap::Add, prevent error
-            ScheduleReset(true, resetTime, InstResetEvent(0, mapId, instanceId));
+            m_Scheduler.ScheduleReset(true, resetTime, InstanceResetEvent(0, mapId, instanceId));
         }
     }
 
@@ -243,7 +419,7 @@ void InstanceSaveManager::CleanupInstances()
     bar.step();
 
     // load reset times and clean expired instances
-    LoadResetTimes();
+    m_Scheduler.LoadResetTimes();
 
     // clean character/group - instance binds with invalid group/characters
     _DelHelper(CharacterDatabase, "character_instance.guid, instance", "character_instance", "LEFT JOIN characters ON character_instance.guid = characters.guid WHERE characters.guid IS NULL");
@@ -353,180 +529,6 @@ void InstanceSaveManager::PackInstances()
     sLog.outString();
 }
 
-void InstanceSaveManager::LoadResetTimes()
-{
-    time_t now = time(NULL);
-    time_t today = (now / DAY) * DAY;
-
-    // NOTE: Use DirectPExecute for tables that will be queried later
-
-    // get the current reset times for normal instances (these may need to be updated)
-    // these are only kept in memory for InstanceSaves that are loaded later
-    // resettime = 0 in the DB for raid instances so those are skipped
-    typedef std::map<uint32, std::pair<uint32, time_t> > ResetTimeMapType;
-    ResetTimeMapType InstResetTime;
-    QueryResult *result = CharacterDatabase.Query("SELECT id, map, resettime FROM instance WHERE resettime > 0");
-    if( result )
-    {
-        do
-        {
-            if(time_t resettime = time_t((*result)[2].GetUInt64()))
-            {
-                uint32 id = (*result)[0].GetUInt32();
-                uint32 mapid = (*result)[1].GetUInt32();
-                InstResetTime[id] = std::pair<uint32, uint64>(mapid, resettime);
-            }
-        }
-        while (result->NextRow());
-        delete result;
-
-        // update reset time for normal instances with the max creature respawn time + X hours
-        result = WorldDatabase.Query("SELECT MAX(respawntime), instance FROM creature_respawn WHERE instance > 0 GROUP BY instance");
-        if( result )
-        {
-            do
-            {
-                Field *fields = result->Fetch();
-                uint32 instance = fields[1].GetUInt32();
-                time_t resettime = time_t(fields[0].GetUInt64() + 2 * HOUR);
-                ResetTimeMapType::iterator itr = InstResetTime.find(instance);
-                if(itr != InstResetTime.end() && itr->second.second != resettime)
-                {
-                    CharacterDatabase.DirectPExecute("UPDATE instance SET resettime = '"UI64FMTD"' WHERE id = '%u'", uint64(resettime), instance);
-                    itr->second.second = resettime;
-                }
-            }
-            while (result->NextRow());
-            delete result;
-        }
-
-        // schedule the reset times
-        for(ResetTimeMapType::iterator itr = InstResetTime.begin(); itr != InstResetTime.end(); ++itr)
-            if(itr->second.second > now)
-                ScheduleReset(true, itr->second.second, InstResetEvent(0, itr->second.first, itr->first));
-    }
-
-    // load the global respawn times for raid instances
-    uint32 diff = sWorld.getConfig(CONFIG_UINT32_INSTANCE_RESET_TIME_HOUR) * HOUR;
-    m_resetTimeByMapId.resize(sMapStore.GetNumRows()+1);
-    result = CharacterDatabase.Query("SELECT mapid, resettime FROM instance_reset");
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            uint32 mapid = fields[0].GetUInt32();
-            if(!ObjectMgr::GetInstanceTemplate(mapid))
-            {
-                sLog.outError("InstanceSaveManager::LoadResetTimes: invalid mapid %u in instance_reset!", mapid);
-                CharacterDatabase.DirectPExecute("DELETE FROM instance_reset WHERE mapid = '%u'", mapid);
-                continue;
-            }
-
-            // update the reset time if the hour in the configs changes
-            uint64 oldresettime = fields[1].GetUInt64();
-            uint64 newresettime = (oldresettime / DAY) * DAY + diff;
-            if(oldresettime != newresettime)
-                CharacterDatabase.DirectPExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%u'", newresettime, mapid);
-
-            m_resetTimeByMapId[mapid] = newresettime;
-        } while(result->NextRow());
-        delete result;
-    }
-
-    // clean expired instances, references to them will be deleted in CleanupInstances
-    // must be done before calculating new reset times
-    _DelHelper(CharacterDatabase, "id, map", "instance", "LEFT JOIN instance_reset ON mapid = map WHERE (instance.resettime < '"UI64FMTD"' AND instance.resettime > '0') OR (NOT instance_reset.resettime IS NULL AND instance_reset.resettime < '"UI64FMTD"')",  (uint64)now, (uint64)now);
-
-    // calculate new global reset times for expired instances and those that have never been reset yet
-    // add the global reset times to the priority queue
-    for(uint32 i = 0; i < sInstanceTemplate.MaxEntry; i++)
-    {
-        // only raid maps have a global reset time
-        InstanceTemplate const* temp = ObjectMgr::GetInstanceTemplate(i);
-        if(!temp || !temp->reset_delay)
-            continue;
-
-        uint32 period = temp->reset_delay * DAY;
-        time_t t = m_resetTimeByMapId[temp->map];
-        if(!t)
-        {
-            // initialize the reset time
-            t = today + period + diff;
-            CharacterDatabase.DirectPExecute("INSERT INTO instance_reset VALUES ('%u','"UI64FMTD"')", i, (uint64)t);
-        }
-
-        if(t < now)
-        {
-            // assume that expired instances have already been cleaned
-            // calculate the next reset time
-            t = (t / DAY) * DAY;
-            t += ((today - t) / period + 1) * period + diff;
-            CharacterDatabase.DirectPExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%u'", (uint64)t, i);
-        }
-
-        m_resetTimeByMapId[temp->map] = t;
-
-        // schedule the global reset/warning
-        uint8 type = 1;
-        static int tim[4] = {3600, 900, 300, 60};
-        for(; type < 4; type++)
-            if(t - tim[type-1] > now) break;
-        ScheduleReset(true, t - tim[type-1], InstResetEvent(type, i));
-    }
-}
-
-void InstanceSaveManager::ScheduleReset(bool add, time_t time, InstResetEvent event)
-{
-    if(add) m_resetTimeQueue.insert(std::pair<time_t, InstResetEvent>(time, event));
-    else
-    {
-        // find the event in the queue and remove it
-        ResetTimeQueue::iterator itr;
-        std::pair<ResetTimeQueue::iterator, ResetTimeQueue::iterator> range;
-        range = m_resetTimeQueue.equal_range(time);
-        for(itr = range.first; itr != range.second; ++itr)
-            if(itr->second == event) { m_resetTimeQueue.erase(itr); return; }
-        // in case the reset time changed (should happen very rarely), we search the whole queue
-        if(itr == range.second)
-        {
-            for(itr = m_resetTimeQueue.begin(); itr != m_resetTimeQueue.end(); ++itr)
-                if(itr->second == event) { m_resetTimeQueue.erase(itr); return; }
-            if(itr == m_resetTimeQueue.end())
-                sLog.outError("InstanceSaveManager::ScheduleReset: cannot cancel the reset, the event(%d,%d,%d) was not found!", event.type, event.mapid, event.instanceId);
-        }
-    }
-}
-
-void InstanceSaveManager::Update()
-{
-    time_t now = time(NULL), t;
-    while(!m_resetTimeQueue.empty() && (t = m_resetTimeQueue.begin()->first) < now)
-    {
-        InstResetEvent &event = m_resetTimeQueue.begin()->second;
-        if(event.type == 0)
-        {
-            // for individual normal instances, max creature respawn + X hours
-            _ResetInstance(event.mapid, event.instanceId);
-            m_resetTimeQueue.erase(m_resetTimeQueue.begin());
-        }
-        else
-        {
-            // global reset/warning for a certain map
-            time_t resetTime = GetResetTimeFor(event.mapid);
-            _ResetOrWarnAll(event.mapid, event.type != 4, uint32(resetTime - now));
-            if(event.type != 4)
-            {
-                // schedule the next warning/reset
-                event.type++;
-                static int tim[4] = {3600, 900, 300, 60};
-                ScheduleReset(true, resetTime - tim[event.type-1], event);
-            }
-            m_resetTimeQueue.erase(m_resetTimeQueue.begin());
-        }
-    }
-}
-
 void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
 {
     // unbind all players bound to the instance
@@ -628,4 +630,9 @@ uint32 InstanceSaveManager::GetNumBoundGroupsTotal()
     for(InstanceSaveHashMap::iterator itr = m_instanceSaveById.begin(); itr != m_instanceSaveById.end(); ++itr)
         ret += itr->second->GetGroupCount();
     return ret;
+}
+
+void InstanceSaveManager::_CleanupExiredInstancesAtTime( time_t t )
+{
+    _DelHelper(CharacterDatabase, "id, map", "instance", "LEFT JOIN instance_reset ON mapid = map WHERE (instance.resettime < '"UI64FMTD"' AND instance.resettime > '0') OR (NOT instance_reset.resettime IS NULL AND instance_reset.resettime < '"UI64FMTD"')",  (uint64)t, (uint64)t);
 }

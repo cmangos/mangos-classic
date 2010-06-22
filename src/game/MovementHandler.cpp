@@ -122,7 +122,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     {
         if(reset_notify)
         {
-            uint32 timeleft = sInstanceSaveMgr.GetResetTimeFor(GetPlayer()->GetMapId()) - time(NULL);
+            uint32 timeleft = sInstanceSaveMgr.GetScheduler().GetResetTimeFor(GetPlayer()->GetMapId()) - time(NULL);
             GetPlayer()->SendInstanceResetWarning(GetPlayer()->GetMapId(), timeleft); // greeting at the entrance of the resort raid instance
         }
     }
