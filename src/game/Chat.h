@@ -528,7 +528,7 @@ class ChatHandler
         void HandleCharacterLevel(Player* player, uint64 player_guid, uint32 oldlevel, uint32 newlevel);
         void HandleLearnSkillRecipesHelper(Player* player,uint32 skill_id);
         void ShowSpellListHelper(Player* target, SpellEntry const* spellInfo, LocaleConstant loc);
-        bool HandleGoHelper(Player* _player, uint32 mapid, float x, float y, float const* zPtr = NULL);
+        bool HandleGoHelper(Player* _player, uint32 mapid, float x, float y, float const* zPtr = NULL, float const* ortPtr = NULL);
 
 
         /**
@@ -582,7 +582,5 @@ class CliHandler : public ChatHandler
         void* m_callbackArg;
         Print* m_print;
 };
-
-char const *fmtstring( char const *format, ... );
 
 #endif
