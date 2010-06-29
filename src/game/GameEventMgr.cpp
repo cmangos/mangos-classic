@@ -725,8 +725,6 @@ void GameEventMgr::ChangeEquipOrModel(int16 event_id, bool activate)
                     {
                         pCreature->SetDisplayId(itr->second.modelid);
                         pCreature->SetNativeDisplayId(itr->second.modelid);
-                        pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
-                        pCreature->SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
                     }
                 }
             }
@@ -740,8 +738,6 @@ void GameEventMgr::ChangeEquipOrModel(int16 event_id, bool activate)
                     {
                         pCreature->SetDisplayId(itr->second.modelid_prev);
                         pCreature->SetNativeDisplayId(itr->second.modelid_prev);
-                        pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
-                        pCreature->SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
                     }
                 }
             }

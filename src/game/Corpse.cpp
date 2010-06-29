@@ -90,7 +90,7 @@ bool Corpse::Create( uint32 guidlow, Player *owner)
         return false;
     }
 
-    SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );
+    SetObjectScale(DEFAULT_OBJECT_SCALE);
     SetFloatValue( CORPSE_FIELD_POS_X, GetPositionX() );
     SetFloatValue( CORPSE_FIELD_POS_Y, GetPositionY() );
     SetFloatValue( CORPSE_FIELD_POS_Z, GetPositionZ() );
@@ -205,6 +205,8 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
 
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_CORPSE));
+
+    SetObjectScale(DEFAULT_OBJECT_SCALE);
 
     // place
     SetLocationInstanceId(instanceid);

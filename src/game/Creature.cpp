@@ -206,6 +206,8 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
     SetEntry(Entry);                                        // normal entry always
     m_creatureInfo = cinfo;                                 // map mode related always
 
+    SetObjectScale(cinfo->scale);
+
     uint32 display_id = sObjectMgr.ChooseDisplayId(team, GetCreatureInfo(), data);
     if (!display_id)                                        // Cancel load if no display id
     {
@@ -224,6 +226,7 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
 
     SetDisplayId(display_id);
     SetNativeDisplayId(display_id);
+
     SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
 
     // Load creature equipment
@@ -238,16 +241,11 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
 
     SetName(normalInfo->Name);                              // at normal entry always
 
-    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, minfo->bounding_radius);
-    SetFloatValue(UNIT_FIELD_COMBATREACH, minfo->combat_reach);
-
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 
     SetSpeedRate(MOVE_WALK, cinfo->speed_walk);
     SetSpeedRate(MOVE_RUN,  cinfo->speed_run);
     SetSpeedRate(MOVE_SWIM, 1.0f);                          // using 1.0 rate
-
-    SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->scale);
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
