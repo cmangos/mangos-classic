@@ -93,18 +93,12 @@ void MapInstanced::UnloadAll(bool pForce)
     Map::UnloadAll(pForce);
 }
 
-/*
-- return the right instance for the object, based on its InstanceId
-- create the instance if it's not created already
-- the player is not actually added to the instance (only in InstanceMap::Add)
-*/
-Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
+/// returns a new or existing Instance
+/// in case of battlegrounds it will only return an existing map, those maps are created by bg-system
+Map* MapInstanced::CreateInstance(Player * player)
 {
-    if(GetId() != mapId || !player)
-        return NULL;
-
-    Map* map = NULL;
-    uint32 NewInstanceId = 0;                       // instanceId of the resulting map
+    Map* map;
+    uint32 NewInstanceId;                                   // instanceId of the resulting map
 
     if(IsBattleGround())
     {
@@ -116,44 +110,28 @@ Map* MapInstanced::CreateInstance(const uint32 mapId, Player * player)
         if(!map)
             map = CreateBattleGroundMap(NewInstanceId, player->GetBattleGround());
     }
+    else if (InstanceSave* pSave = player->GetBoundInstanceSaveForSelfOrGroup(GetId()))
+    {
+        // solo/perm/group
+        NewInstanceId = pSave->GetInstanceId();
+        map = _FindMap(NewInstanceId);
+        // it is possible that the save exists but the map doesn't
+        if (!map)
+            map = CreateInstanceMap(NewInstanceId, pSave);
+    }
     else
     {
-        InstancePlayerBind *pBind = player->GetBoundInstance(GetId());
-        InstanceSave *pSave = pBind ? pBind->save : NULL;
+        // if no instanceId via group members or instance saves is found
+        // the instance will be created for the first time
+        NewInstanceId = sMapMgr.GenerateInstanceId();
 
-        // the player's permanent player bind is taken into consideration first
-        // then the player's group bind and finally the solo bind.
-        if(!pBind || !pBind->perm)
-        {
-            InstanceGroupBind *groupBind = NULL;
-            Group *group = player->GetGroup();
-            // use the player's difficulty setting (it may not be the same as the group's)
-            if(group && (groupBind = group->GetBoundInstance(GetId())))
-                pSave = groupBind->save;
-        }
-
-        if(pSave)
-        {
-            // solo/perm/group
-            NewInstanceId = pSave->GetInstanceId();
-            map = _FindMap(NewInstanceId);
-            // it is possible that the save exists but the map doesn't
-            if(!map)
-                map = CreateInstance(NewInstanceId, pSave);
-        }
-        else
-        {
-            // if no instanceId via group members or instance saves is found
-            // the instance will be created for the first time
-            NewInstanceId = MapManager::Instance().GenerateInstanceId();
-            map = CreateInstance(NewInstanceId);
-        }
+        map = CreateInstanceMap(NewInstanceId);
     }
 
     return map;
 }
 
-InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save)
+InstanceMap* MapInstanced::CreateInstanceMap(uint32 InstanceId, InstanceSave *save)
 {
     // load/create a map
     Guard guard(*this);
@@ -162,12 +140,12 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save)
     const MapEntry* entry = sMapStore.LookupEntry(GetId());
     if (!entry)
     {
-        sLog.outError("CreateInstance: no entry for map %d", GetId());
+        sLog.outError("CreateInstanceMap: no entry for map %d", GetId());
         ASSERT(false);
     }
     if (!ObjectMgr::GetInstanceTemplate(GetId()))
     {
-        sLog.outError("CreateInstance: no instance template for map %d", GetId());
+        sLog.outError("CreateInstanceMap: no instance template for map %d", GetId());
         ASSERT(false);
     }
 

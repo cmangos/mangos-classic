@@ -14394,6 +14394,29 @@ InstancePlayerBind* Player::BindToInstance(InstanceSave *save, bool permanent, b
         return NULL;
 }
 
+InstanceSave* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)
+{
+    MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
+    if(!mapEntry)
+        return NULL;
+
+    InstancePlayerBind *pBind = GetBoundInstance(mapid);
+    InstanceSave *pSave = pBind ? pBind->save : NULL;
+
+    // the player's permanent player bind is taken into consideration first
+    // then the player's group bind and finally the solo bind.
+    if(!pBind || !pBind->perm)
+    {
+        InstanceGroupBind *groupBind = NULL;
+        Group *group = GetGroup();
+        // use the player's difficulty setting (it may not be the same as the group's)
+        if(group && (groupBind = group->GetBoundInstance(mapid)))
+            pSave = groupBind->save;
+    }
+
+    return pSave;
+}
+
 void Player::SendRaidInfo()
 {
     WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
