@@ -1441,7 +1441,9 @@ void Group::ResetInstances(uint8 method, Player* SendMsgTo)
 
 InstanceGroupBind* Group::GetBoundInstance(uint32 mapid)
 {
-    const MapEntry* entry = sMapStore.LookupEntry(mapid);
+    MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
+    if(!mapEntry)
+        return NULL;
 
     BoundInstancesMap::iterator itr = m_boundInstances.find(mapid);
     if(itr != m_boundInstances.end())
@@ -1500,8 +1502,8 @@ void Group::_homebindIfInstance(Player *player)
     {
         // leaving the group in an instance, the homebind timer is started
         // unless the player is permanently saved to the instance
-        InstanceSave *save = sInstanceSaveMgr.GetInstanceSave(player->GetInstanceId());
-        InstancePlayerBind *playerBind = save ? player->GetBoundInstance(save->GetMapId()) : NULL;
+        Map* map = player->GetMap();
+        InstancePlayerBind *playerBind = map->IsDungeon() ? player->GetBoundInstance(map->GetId()) : NULL;
         if(!playerBind || !playerBind->perm)
             player->m_InstanceValid = false;
     }
