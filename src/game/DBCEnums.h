@@ -105,37 +105,28 @@ enum ItemEnchantmentType
     ITEM_ENCHANTMENT_TYPE_TOTEM        = 6
 };
 
-/* [-ZERO] TODO remove it if completely useless
-enum TotemCategoryType
+// SpellEntry::Targets
+enum SpellCastTargetFlags
 {
-    TOTEM_CATEGORY_TYPE_KNIFE   = 1,
-    TOTEM_CATEGORY_TYPE_TOTEM   = 2,
-    TOTEM_CATEGORY_TYPE_ROD     = 3,
-    TOTEM_CATEGORY_TYPE_PICK    = 21,
-    TOTEM_CATEGORY_TYPE_STONE   = 22,
-    TOTEM_CATEGORY_TYPE_HAMMER  = 23,
-    TOTEM_CATEGORY_TYPE_SPANNER = 24
+    TARGET_FLAG_SELF            = 0x00000000,
+    TARGET_FLAG_UNUSED1         = 0x00000001,               // not used in any spells (can be set dynamically)
+    TARGET_FLAG_UNIT            = 0x00000002,               // pguid
+    TARGET_FLAG_UNUSED2         = 0x00000004,               // not used in any spells (can be set dynamically)
+    TARGET_FLAG_UNUSED3         = 0x00000008,               // not used in any spells (can be set dynamically)
+    TARGET_FLAG_ITEM            = 0x00000010,               // pguid
+    TARGET_FLAG_SOURCE_LOCATION = 0x00000020,               // 3 float
+    TARGET_FLAG_DEST_LOCATION   = 0x00000040,               // 3 float
+    TARGET_FLAG_OBJECT_UNK      = 0x00000080,               // used in 7 spells only
+    TARGET_FLAG_UNIT_UNK        = 0x00000100,               // looks like self target (389 spells)
+    TARGET_FLAG_PVP_CORPSE      = 0x00000200,               // pguid
+    TARGET_FLAG_UNIT_CORPSE     = 0x00000400,               // 10 spells (gathering professions)
+    TARGET_FLAG_OBJECT          = 0x00000800,               // pguid, 0 spells
+    TARGET_FLAG_TRADE_ITEM      = 0x00001000,               // pguid, 0 spells
+    TARGET_FLAG_STRING          = 0x00002000,               // string, 0 spells
+    TARGET_FLAG_UNK1            = 0x00004000,               // 199 spells, opening object/lock
+    TARGET_FLAG_CORPSE          = 0x00008000,               // pguid, resurrection spells
+    TARGET_FLAG_UNK2            = 0x00010000,               // pguid, not used in any spells (can be set dynamically)
 };
-
-// SummonProperties.dbc, col 1
-enum SummonPropGroup
-{
-    SUMMON_PROP_GROUP_UNKNOWN1       = 0,                   // 704 spells in 2.4.3
-    SUMMON_PROP_GROUP_UNKNOWN2       = 1,                   // 655 spells in 2.4.3
-    SUMMON_PROP_GROUP_PETS           = 2,                   // 41 spells in 2.4.3, pets mostly
-    SUMMON_PROP_GROUP_CONTROLLABLE   = 3,                   // 7 spells in 2.4.3, mostly controllable
-};
-
-// SummonProperties.dbc, col 3
-enum SummonPropType
-{
-    SUMMON_PROP_TYPE_UNKNOWN         = 0,                   // different summons, 730 spells in 2.4.3
-    SUMMON_PROP_TYPE_SUMMON          = 1,                   // generic summons, 59 spells in 2.4.3
-    SUMMON_PROP_TYPE_GUARDIAN        = 2,                   // summon guardian, 311 spells in 2.4.3
-    SUMMON_PROP_TYPE_TOTEM           = 4,                   // summon totem, 148 spells in 2.4.3
-    SUMMON_PROP_TYPE_CRITTER         = 5,                   // critter/minipet, 159 spells in 2.4.3
-};
-*/
 
 enum SpellEffectIndex
 {

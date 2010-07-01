@@ -36,38 +36,6 @@ class GameObject;
 class Group;
 class Aura;
 
-enum SpellCastTargetFlags
-{
-    /*TARGET_FLAG_NONE             = 0x0000,
-    TARGET_FLAG_SWIMMER          = 0x0002,
-    TARGET_FLAG_ITEM             = 0x0010,
-    TARGET_FLAG_SOURCE_AREA      = 0x0020,
-    TARGET_FLAG_DEST_AREA        = 0x0040,
-    TARGET_FLAG_UNKNOWN          = 0x0080,
-    TARGET_FLAG_SELF             = 0x0100,
-    TARGET_FLAG_PVP_CORPSE       = 0x0200,
-    TARGET_FLAG_MASS_SPIRIT_HEAL = 0x0400,
-    TARGET_FLAG_BEAST_CORPSE     = 0x0402,
-    TARGET_FLAG_OBJECT           = 0x4000,
-    TARGET_FLAG_RESURRECTABLE    = 0x8000*/
-
-    TARGET_FLAG_SELF            = 0x00000000,
-    TARGET_FLAG_UNIT            = 0x00000002,               // pguid
-    TARGET_FLAG_ITEM            = 0x00000010,               // pguid
-    TARGET_FLAG_SOURCE_LOCATION = 0x00000020,               // 3 float
-    TARGET_FLAG_DEST_LOCATION   = 0x00000040,               // 3 float
-    TARGET_FLAG_OBJECT          = 0x00000800,               // pguid
-    TARGET_FLAG_TRADE_ITEM      = 0x00001000,               // pguid
-    TARGET_FLAG_STRING          = 0x00002000,               // string
-
-    //[TZERO] tbc enumerations [?]
-    TARGET_FLAG_OBJECT_UNK      = 0x00000080,               // ?
-    TARGET_FLAG_PVP_CORPSE      = 0x00000200,               // pguid
-    TARGET_FLAG_UNK1            = 0x00004000,               // ?
-    TARGET_FLAG_CORPSE          = 0x00008000,               // pguid
-    TARGET_FLAG_UNK2            = 0x00010000                // pguid
-};
-
 enum SpellCastFlags
 {
     CAST_FLAG_UNKNOWN1           = 0x00000002,
