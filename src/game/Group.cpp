@@ -1498,14 +1498,17 @@ void Group::UnbindInstance(uint32 mapid, bool unload)
 
 void Group::_homebindIfInstance(Player *player)
 {
-    if(player && !player->isGameMaster() && sMapStore.LookupEntry(player->GetMapId())->IsDungeon())
+    if (player && !player->isGameMaster())
     {
-        // leaving the group in an instance, the homebind timer is started
-        // unless the player is permanently saved to the instance
         Map* map = player->GetMap();
-        InstancePlayerBind *playerBind = map->IsDungeon() ? player->GetBoundInstance(map->GetId()) : NULL;
-        if(!playerBind || !playerBind->perm)
-            player->m_InstanceValid = false;
+        if (map->IsDungeon())
+        {
+            // leaving the group in an instance, the homebind timer is started
+            // unless the player is permanently saved to the instance
+            InstancePlayerBind *playerBind = player->GetBoundInstance(map->GetId());
+            if(!playerBind || !playerBind->perm)
+                player->m_InstanceValid = false;
+        }
     }
 }
 
