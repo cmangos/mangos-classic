@@ -127,6 +127,7 @@ void SQLStorageLoaderBase<T>::Load(SQLStorage &store)
     if(!result)
     {
         sLog.outError("Error loading %s table (not exist?)\n", store.table);
+        Log::WaitBeforeContinueIfNeed();
         exit(1);                                            // Stop server at loading non exited table or not accessable table
     }
 
@@ -160,6 +161,7 @@ void SQLStorageLoaderBase<T>::Load(SQLStorage &store)
         store.RecordCount = 0;
         sLog.outError("Error in %s table, probably sql file format was updated (there should be %d fields in sql).\n", store.table, store.iNumFields);
         delete result;
+        Log::WaitBeforeContinueIfNeed();
         exit(1);                                            // Stop server at loading broken or non-compatible table.
     }
 

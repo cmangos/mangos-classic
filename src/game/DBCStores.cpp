@@ -419,32 +419,31 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sWorldSafeLocsStore,       dbcPath,"WorldSafeLocs.dbc");
 
     // error checks
-    if(bad_dbc_files.size() >= DBCFilesCount )
+    if (bad_dbc_files.size() >= DBCFilesCount )
     {
         sLog.outError("\nIncorrect DataDir value in mangosd.conf or ALL required *.dbc files (%d) not found by path: %sdbc",DBCFilesCount,dataPath.c_str());
+        Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
-    else if(!bad_dbc_files.empty() )
+    else if (!bad_dbc_files.empty() )
     {
         std::string str;
         for(std::list<std::string>::iterator i = bad_dbc_files.begin(); i != bad_dbc_files.end(); ++i)
             str += *i + "\n";
 
         sLog.outError("\nSome required *.dbc files (%u from %d) not found or not compatible:\n%s",(uint32)bad_dbc_files.size(),DBCFilesCount,str.c_str());
+        Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
 
-    // something wrong with map.dbc - loads only 1077 entries instead 1081
-    // check at up-to-date DBC files (33392 is last added spell in 1.12.1)
-    // check at up-to-date DBC files (15030 is last ID in SkillLineAbilities in 1.12.1)
-    // check at up-to-date DBC files (533 is last map added in 1.12.1)
-    // check at up-to-date DBC files (3486 is last area added in 1.12.1)
-    if( !sSpellStore.LookupEntry(33392)            ||
+    // Check loaded DBC files proper version
+    if (!sSpellStore.LookupEntry(33392)            ||
         !sSkillLineAbilityStore.LookupEntry(15030) ||
         !sMapStore.LookupEntry(533)                ||
         !sAreaStore.LookupEntry(3486)              )
     {
         sLog.outError("\nYou have _outdated_ DBC files. Please re-extract DBC files for one from client build: %s",AcceptableClientBuildsListStr().c_str());
+        Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
 
