@@ -1417,3 +1417,9 @@ bool GameObject::IsFriendlyTo(Unit const* unit) const
     // common faction based case (GvC,GvP)
     return tester_faction->IsFriendlyTo(*target_faction);
 }
+
+float GameObject::GetObjectBoundingRadius() const
+{
+    // 1.12.1 GameObjectDisplayInfo.dbc not have any info related to size
+    return DEFAULT_WORLD_OBJECT_SIZE;
+}
