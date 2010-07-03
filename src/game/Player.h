@@ -1096,7 +1096,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool SatisfyQuestExclusiveGroup( Quest const* qInfo, bool msg ) const;
         bool SatisfyQuestNextChain( Quest const* qInfo, bool msg ) const;
         bool SatisfyQuestPrevChain( Quest const* qInfo, bool msg ) const;
-        bool GiveQuestSourceItem( Quest const *pQuest );
+        bool CanGiveQuestSourceItem( Quest const *pQuest, ItemPosCountVec* dest = NULL) const;
+        void GiveQuestSourceItem( Quest const *pQuest );
         bool TakeQuestSourceItem( uint32 quest_id, bool msg );
         bool GetQuestRewardStatus( uint32 quest_id ) const;
         QuestStatus GetQuestStatus( uint32 quest_id ) const;
