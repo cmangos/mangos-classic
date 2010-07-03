@@ -3304,6 +3304,8 @@ void Map::ScriptsProcess()
 
                 break;
             }
+            case SCRIPT_COMMAND_PLAY_MOVIE:
+                break;                                      // must be skipped at loading
             default:
                 sLog.outError("Unknown SCRIPT_COMMAND_ %u called for script id %u.",step.script->command, step.script->id);
                 break;

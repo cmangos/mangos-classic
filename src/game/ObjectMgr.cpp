@@ -4136,6 +4136,12 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
                 // for later, we might consider despawn by database guid, and define in datalong2 as option to despawn self.
                 break;
             }
+            case SCRIPT_COMMAND_PLAY_MOVIE:
+            {
+                sLog.outErrorDb("Table `%s` use unsupported SCRIPT_COMMAND_PLAY_MOVIE for script id %u",
+                    tablename, tmp.id);
+                continue;
+            }
         }
 
         if (scripts.find(tmp.id) == scripts.end())
