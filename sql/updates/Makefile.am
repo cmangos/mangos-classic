@@ -113,6 +113,7 @@ pkgdata_DATA = \
 	z0649_133_01_mangos_mangos_string.sql \
 	z0652_134_01_mangos_creature_model_info.sql \
 	z0662_135_01_mangos_mangos_string.sql \
+	z0672_136_01_mangos_mangos_string.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -204,4 +205,5 @@ EXTRA_DIST = \
 	z0649_133_01_mangos_mangos_string.sql \
 	z0652_134_01_mangos_creature_model_info.sql \
 	z0662_135_01_mangos_mangos_string.sql \
+	z0672_136_01_mangos_mangos_string.sql \
 	README
