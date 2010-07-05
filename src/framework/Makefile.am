@@ -26,6 +26,7 @@ AM_CPPFLAGS = $(MANGOS_INCLUDES) -I$(srcdir)
 #  libMaNGOSScript shared library will later be reused by world server daemon.
 noinst_LIBRARIES = libmangosframework.a
 libmangosframework_a_SOURCES = \
+	Policies/MemoryManagement.cpp \
 	Policies/ObjectLifeTime.cpp \
 	Utilities/EventProcessor.cpp
 
@@ -47,7 +48,6 @@ EXTRA_DIST = \
 	Platform/Define.h \
 	Policies/CreationPolicy.h \
 	Policies/ObjectLifeTime.h \
-	Policies/MemoryManagement.cpp \
 	Policies/Singleton.h \
 	Policies/SingletonImp.h \
 	Policies/ThreadingModel.h \
