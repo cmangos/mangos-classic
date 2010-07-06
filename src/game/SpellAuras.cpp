@@ -246,11 +246,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 };
 
 Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem) :
-m_procCharges(0), m_spellmod(NULL), m_effIndex(eff), m_caster_guid(0), m_target(target),
-m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
-m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false),
-m_isPersistent(false), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_isRemovedOnShapeLost(true), m_deleted(false),
-m_periodicTimer(0), m_periodicTick(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE), m_in_use(0)
+m_spellmod(NULL), m_caster_guid(0), m_castItemGuid(castItem?castItem->GetGUID():0), m_target(target),
+m_timeCla(1000), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_AuraDRGroup(DIMINISHING_NONE),
+m_effIndex(eff), m_auraSlot(MAX_AURAS), m_procCharges(0), m_stackAmount(1),
+m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), m_isPersistent(false), 
+m_isRemovedOnShapeLost(true), m_in_use(false)
 {
     ASSERT(target);
 
@@ -713,9 +713,9 @@ void Aura::_AddAura()
     if(!m_target)
         return;
 
-    // we can found aura in NULL_AURA_SLOT and then need store state instead check slot != NULL_AURA_SLOT
-    bool samespell = false;
+    // Second aura if some spell
     bool secondaura = false;
+    // Try find slot for aura
     uint8 slot = NULL_AURA_SLOT;
 
     // Lookup for some spell auras (and get slot from it)
@@ -725,53 +725,25 @@ void Aura::_AddAura()
         for(Unit::AuraMap::const_iterator itr = m_target->GetAuras().lower_bound(spair); itr != m_target->GetAuras().upper_bound(spair); ++itr)
         {
             // allow use single slot only by auras from same caster
-            if(itr->second->GetCasterGUID()==GetCasterGUID())
+            if(itr->second->GetCasterGUID()==GetCasterGUID() &&
+                !isWeaponBuffCoexistableWith(itr->second))
             {
-                // Check for coexisting Weapon-proced Auras
-                samespell = !isWeaponBuffCoexistableWith(itr->second);
-                if (m_effIndex > itr->second->GetEffIndex())
-                     secondaura = true;
                 slot = itr->second->GetAuraSlot();
+                secondaura = true;
                 break;
             }
         }
-
-        if(samespell)
+        if (secondaura)
             break;
     }
-
-    // not call total regen auras at adding
-    switch (m_modifier.m_auraname)
-    {
-        case SPELL_AURA_OBS_MOD_HEALTH:
-        case SPELL_AURA_OBS_MOD_MANA:
-            m_periodicTimer = m_modifier.periodictime;
-            break;
-        case SPELL_AURA_MOD_REGEN:
-        case SPELL_AURA_MOD_POWER_REGEN:
-            m_periodicTimer = 5000;
-            break;
-    }
-
-    // register aura
-    if (getDiminishGroup() != DIMINISHING_NONE )
-        m_target->ApplyDiminishingAura(getDiminishGroup(),true);
 
     Unit* caster = GetCaster();
 
-    // set infinity cooldown state for spells
-    if(caster && caster->GetTypeId() == TYPEID_PLAYER)
+    // Lookup free slot
+    if (slot == NULL_AURA_SLOT)                         // new slot need
     {
-        if (m_spellProto->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
-        {
-            Item* castItem = m_castItemGuid ? ((Player*)caster)->GetItemByGuid(m_castItemGuid) : NULL;
-            ((Player*)caster)->AddSpellAndCategoryCooldowns(m_spellProto,castItem ? castItem->GetEntry() : 0, NULL,true);
-        }
-    }
-
-    if (IsNeedVisibleSlot(caster))
-    {
-        if(!samespell)                                      // new slot need
+        // will be < MAX_AURAS slot (if find free) with !secondaura
+        if (IsNeedVisibleSlot(caster))
         {
             if (IsPositive())                               // empty positive slot
             {
@@ -795,34 +767,62 @@ void Aura::_AddAura()
                     }
                 }
             }
-
-            SetAuraSlot( slot );
-
-            // Not update fields for not first spell's aura, all data already in fields
-            if(!secondaura)
-            {
-                if(slot < MAX_AURAS)                        // slot found
-                {
-                    SetAura(slot, false);
-                    SetAuraFlag(slot, true);
-                    SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
-                    UpdateAuraCharges();
-
-                    // update for out of range group members
-                    m_target->UpdateAuraForGroup(slot);
-                }
-
-                UpdateAuraDuration();
-            }
         }
-        else                                                // use found slot
+    }
+
+    // not call total regen auras at adding
+    switch (m_modifier.m_auraname)
+    {
+        case SPELL_AURA_OBS_MOD_HEALTH:
+        case SPELL_AURA_OBS_MOD_MANA:
+            m_periodicTimer = m_modifier.periodictime;
+            break;
+        case SPELL_AURA_MOD_REGEN:
+        case SPELL_AURA_MOD_POWER_REGEN:
+            m_periodicTimer = 5000;
+            break;
+    }
+
+    // register aura
+    if (getDiminishGroup() != DIMINISHING_NONE )
+        m_target->ApplyDiminishingAura(getDiminishGroup(),true);
+
+    // set infinity cooldown state for spells
+    if(caster && caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (m_spellProto->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
         {
-            SetAuraSlot( slot );
-            // Not recalculate stack count for second aura of the same spell
-            if (!secondaura)
-                UpdateSlotCounterAndDuration(true);
+            Item* castItem = m_castItemGuid ? ((Player*)caster)->GetItemByGuid(m_castItemGuid) : NULL;
+            ((Player*)caster)->AddSpellAndCategoryCooldowns(m_spellProto,castItem ? castItem->GetEntry() : 0, NULL,true);
+        }
+    }
+
+    SetAuraSlot( slot );
+
+
+    // Not update fields for not first spell's aura, all data already in fields
+    if (slot < MAX_AURAS)                                   // slot found
+    {
+        if (!secondaura)
+        {
+            SetAura(slot, false);
+            SetAuraFlag(slot, true);
+            SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
+            UpdateAuraCharges();
+
+            // update for out of range group members
+            m_target->UpdateAuraForGroup(slot);
         }
 
+        UpdateAuraDuration();
+    }
+
+    //*****************************************************
+    // Update target aura state flag (at 1 aura apply)
+    // TODO: Make it easer
+    //*****************************************************
+    if (!secondaura)
+    {
         // Update Seals information
         if( IsSealSpell(GetSpellProto()) )
             m_target->ModifyAuraState(AURA_STATE_JUDGEMENT, true);
@@ -862,8 +862,7 @@ bool Aura::_RemoveAura()
     if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
         return false;
 
-    bool samespell = false;
-    bool sameaura = false;
+    bool lastaura = true;
 
     // find other aura in same slot (current already removed from list)
     for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -873,26 +872,17 @@ bool Aura::_RemoveAura()
         {
             if(itr->second->GetAuraSlot() == slot)
             {
-                samespell = true;
-
-                if(GetEffIndex()==i)
-                    sameaura = true;
-
+                lastaura = false;
                 break;
             }
         }
-        if(samespell)
+        if(!lastaura)
             break;
     }
 
     // only remove icon when the last aura of the spell is removed (current aura already removed from list)
-    if (samespell)
-    {
-        if(sameaura)                                       // decrease count for spell, only for same aura effect, or this spell auras in remove process.
-            UpdateSlotCounterAndDuration(false);
-
+    if (!lastaura)
         return false;
-    }
 
     SetAura(slot, true);
     SetAuraFlag(slot, false);
@@ -984,36 +974,59 @@ void Aura::SetAuraApplication(uint32 slot, int8 count)
     m_target->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS + index, val);
 }
 
-void Aura::UpdateSlotCounterAndDuration(bool add)
+void Aura::SetStackAmount(uint8 stackAmount)
 {
-    uint8 slot = GetAuraSlot();
-    if(slot >= MAX_AURAS)
+    Unit *target = GetTarget();
+    Unit *caster = GetCaster();
+    if (!target || !caster)
         return;
 
-    // calculate amount of similar auras by same effect index (similar different spells)
-    int8 count = 0;
-
-    // calculate auras and update durations in case aura adding
-    Unit::AuraList const& aura_list = m_target->GetAurasByType(GetModifier()->m_auraname);
-    for(Unit::AuraList::const_iterator i = aura_list.begin();i != aura_list.end(); ++i)
+    bool refresh = stackAmount >= m_stackAmount;
+    if (stackAmount != m_stackAmount)
     {
-        if( (*i)->GetId()==GetId() && (*i)->GetEffIndex()==m_effIndex &&
-            (*i)->GetCasterGUID()==GetCasterGUID() )
-        {
-            ++count;
+        m_stackAmount = stackAmount;
+        if (m_auraSlot < MAX_AURAS)
+            SetAuraApplication(m_auraSlot, m_stackAmount);
 
-            if(add)
-                (*i)->SetAuraDuration(GetAuraDuration());
+        int32 amount = m_stackAmount * caster->CalculateSpellDamage(target, m_spellProto, m_effIndex, &m_currentBasePoints);
+        // Reapply if amount change
+        if (amount!=m_modifier.m_amount)
+        {
+            ApplyModifier(false, true);
+            m_modifier.m_amount = amount;
+            ApplyModifier(true, true);
         }
     }
 
-    // at aura add aura not added yet, at aura remove aura already removed
-    // in field stored (count-1)
-    if(!add)
-        --count;
+    if (refresh)
+        // Stack increased refresh duration
+        RefreshAura();
+}
 
-    SetAuraApplication(slot, count);
+bool Aura::modStackAmount(int32 num)
+{
+    // Can`t mod
+    if (!m_spellProto->StackAmount)
+        return true;
 
+    // Modify stack but limit it
+    int32 stackAmount = m_stackAmount + num;
+    if (stackAmount > (int32)m_spellProto->StackAmount)
+        stackAmount = m_spellProto->StackAmount;
+    else if (stackAmount <=0) // Last aura from stack removed
+    {
+        m_stackAmount = 0;
+        return true; // need remove aura
+    }
+
+    // Update stack amount
+    SetStackAmount(stackAmount);
+    return false;
+}
+
+void Aura::RefreshAura()
+{
+    SetAuraDuration(GetAuraMaxDuration());
     UpdateAuraDuration();
 }
 
@@ -3148,15 +3161,11 @@ void Aura::HandleAuraModSilence(bool apply, bool Real)
                     return;
 
                 // Search Mana Tap auras on caster
-                int32 energy = 0;
-                Unit::AuraList const& m_dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
-                for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
-                    if ((*i)->GetId() == 28734)
-                        ++energy;
-                if (energy)
+                Aura * dummy = caster->GetDummyAura(28734);
+                if (dummy)
                 {
-                    energy *= 10;
-                    caster->CastCustomSpell(caster, 25048, &energy, NULL, NULL, true);
+                    int32 bp = dummy->GetStackAmount() * 10;
+                    caster->CastCustomSpell(caster, 25048, &bp, NULL, NULL, true);
                     caster->RemoveAurasDueToSpell(28734);
                 }
             }
@@ -3710,11 +3719,11 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     Unit::AuraList const& classScripts = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
                     for(Unit::AuraList::const_iterator k = classScripts.begin(); k != classScripts.end(); ++k)
                     {
-                        int32 tickcount = GetSpellDuration(m_spellProto) / m_spellProto->EffectAmplitude[m_effIndex];
                         switch((*k)->GetModifier()->m_miscvalue)
                         {
-                        case 5147:                  // Improved Consecration - Libram of the Eternal Rest
+                            case 5147:                      // Improved Consecration - Libram of the Eternal Rest
                             {
+                                int32 tickcount = GetSpellDuration(m_spellProto) / m_spellProto->EffectAmplitude[m_effIndex];
                                 m_modifier.m_amount += (*k)->GetModifier()->m_amount / tickcount;
                                 break;
                             }

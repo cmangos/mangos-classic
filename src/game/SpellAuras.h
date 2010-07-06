@@ -270,6 +270,11 @@ class MANGOS_DLL_SPEC Aura
 
         void UnregisterSingleCastAura();
 
+        int8 GetStackAmount() {return m_stackAmount;}
+        void SetStackAmount(uint8 num);
+        bool modStackAmount(int32 num); // return true if last charge dropped
+        void RefreshAura();
+
         bool IsPositive() { return m_positive; }
         void SetNegative() { m_positive = false; }
         void SetPositive() { m_positive = true; }
@@ -335,21 +340,28 @@ class MANGOS_DLL_SPEC Aura
 
         Modifier m_modifier;
         SpellModifier *m_spellmod;
-        SpellEffectIndex m_effIndex;                        // Aura effect index in spell
+
+
         SpellEntry const *m_spellProto;
-        int32 m_currentBasePoints;                          // cache SpellEntry::CalculateSimpleValue and use for set custom base points
-        uint64 m_caster_guid;
         Unit* m_target;
-        int32 m_maxduration;                                // Max aura duration
-        int32 m_duration;                                   // Current time
-        int32 m_timeCla;
+        uint64 m_caster_guid;
         uint64 m_castItemGuid;                              // it is NOT safe to keep a pointer to the item because it may get deleted
         time_t m_applyTime;
 
-        AuraRemoveMode m_removeMode:8;                      // Store info for know remove aura reason
+        int32 m_currentBasePoints;                          // cache SpellEntry::CalculateSimpleValue and use for set custom base points
+        int32 m_maxduration;                                // Max aura duration
+        int32 m_duration;                                   // Current time
+        int32 m_timeCla;                                    // Timer for power per sec calcultion
+        int32 m_periodicTimer;                              // Timer for periodic auras
+        uint32 m_periodicTick;                              // Tick count pass (including current if use in tick code) from aura apply, used for some tick count dependent aura effects
 
-        uint8 m_auraSlot;
-        int8  m_procCharges;
+        AuraRemoveMode m_removeMode:8;                      // Store info for know remove aura reason
+        DiminishingGroup m_AuraDRGroup:8;                   // Diminishing
+
+        SpellEffectIndex m_effIndex;                        // Aura effect index in spell
+        uint8 m_auraSlot;                                   // Aura slot on unit (for show in client)
+        uint8 m_procCharges;                                // Aura charges (0 for infinite)
+        uint8 m_stackAmount;                                // Aura stack amount
 
         bool m_positive:1;
         bool m_permanent:1;
@@ -363,14 +375,8 @@ class MANGOS_DLL_SPEC Aura
         bool m_deleted:1;                                   // true if RemoveAura(iterator) called while in Aura::ApplyModifier call (added to Unit::m_deletedAuras)
         bool m_isSingleTargetAura:1;                        // true if it's a single target spell and registered at caster - can change at spell steal for example
 
-        int32 m_periodicTimer;
-        uint32 m_periodicTick;                              // Tick count pass (including current if use in tick code) from aura apply, used for some tick count dependent aura effects
-        uint32 m_PeriodicEventId;
-        DiminishingGroup m_AuraDRGroup;
-
         uint32 m_in_use;                                    // > 0 while in Aura::ApplyModifier call/Aura::Update/etc
     private:
-        void UpdateSlotCounterAndDuration(bool add);
         void CleanupTriggeredSpells();
         bool IsNeedVisibleSlot(Unit const* caster) const;   // helper for check req. visibility slot
         void SetAura(uint32 slot, bool remove) { m_target->SetUInt32Value(UNIT_FIELD_AURA + slot, remove ? 0 : GetId()); }

@@ -3305,10 +3305,10 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
                     SpellEntry const *proto = (*itr)->GetSpellProto();
                     if(proto->SpellVisual == 406 && proto->SpellIconID == 565)
                     {
-                        int32 duration = GetSpellDuration(proto);
-                        (*itr)->SetAuraDuration(duration);
-                        (*itr)->UpdateAuraDuration();
-                        bonusDamagePercentMod += 1.0f;      // +100%
+                        (*itr)->RefreshAura();
+                        
+                        // +100% * stack 
+                        bonusDamagePercentMod += 1.0f * (*itr)->GetStackAmount();
                     }
                 }
             }
@@ -3599,8 +3599,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 24590:                                 // Brittle Armor - need remove one 24575 Brittle Armor aura
-                    unitTarget->RemoveSingleAuraFromStack(24575,EFFECT_INDEX_0);
-                    unitTarget->RemoveSingleAuraFromStack(24575,EFFECT_INDEX_1);
+                    unitTarget->RemoveSingleSpellAurasFromStack(24575);
                     return;
                 case 26275:                                 // PX-238 Winter Wondervolt TRAP
                 {
