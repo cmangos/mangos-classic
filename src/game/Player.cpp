@@ -4926,7 +4926,7 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
     UpdateAllCritPercentages();
 }
 
-void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHitOutcome outcome, bool defence)
+void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, bool defence)
 {
     uint32 plevel = getLevel();                             // if defense than pVictim == attacker
     uint32 greylevel = MaNGOS::XP::GetGrayLevel(plevel);

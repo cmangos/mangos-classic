@@ -675,7 +675,7 @@ void Spell::prepareDataForTriggerSystem()
                 m_procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_HIT;
                 m_procVictim   = PROC_FLAG_TAKEN_RANGED_HIT;
             }
-            else
+            else                                           // Negative spell
             {
                 m_procAttacker = PROC_FLAG_SUCCESSFUL_NEGATIVE_SPELL_HIT;
                 m_procVictim   = PROC_FLAG_TAKEN_NEGATIVE_SPELL_HIT;
