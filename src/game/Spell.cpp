@@ -2328,8 +2328,12 @@ void Spell::handle_immediate()
     // start channeling if applicable
     if(IsChanneledSpell(m_spellInfo))
     {
-        m_spellState = SPELL_STATE_CASTING;
-        SendChannelStart(GetSpellDuration(m_spellInfo));
+        int32 duration = GetSpellDuration(m_spellInfo);
+        if (duration)
+        {
+            m_spellState = SPELL_STATE_CASTING;
+            SendChannelStart(duration);
+        }
     }
 
     // process immediate effects (items, ground, etc.) also initialize some variables

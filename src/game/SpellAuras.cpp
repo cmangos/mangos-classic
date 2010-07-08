@@ -1765,6 +1765,18 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 return;
             }
         }
+
+        if (m_removeMode == AURA_REMOVE_BY_DEATH)
+        {
+            // Stop caster Arcane Missle chanelling on death
+            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_MAGE && (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000800)))
+            {
+                if (Unit* caster = GetCaster())
+                    caster->InterruptSpell(CURRENT_CHANNELED_SPELL);
+
+                return;
+            }
+        }
     }
 
     // AT APPLY & REMOVE
