@@ -8981,7 +8981,6 @@ bool InitTriggerAuraData()
       isTriggerAura[i]=false;
       isNonTriggerAura[i] = false;
     }
-    isTriggerAura[SPELL_AURA_PERIODIC_DAMAGE] = true;
     isTriggerAura[SPELL_AURA_DUMMY] = true;
     isTriggerAura[SPELL_AURA_MOD_CONFUSE] = true;
     isTriggerAura[SPELL_AURA_MOD_THREAT] = true;
