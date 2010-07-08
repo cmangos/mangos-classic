@@ -824,7 +824,7 @@ void Aura::_AddAura()
     if (!secondaura)
     {
         // Update Seals information
-        if( IsSealSpell(GetSpellProto()) )
+        if (IsSealSpell(GetSpellProto()))
             m_target->ModifyAuraState(AURA_STATE_JUDGEMENT, true);
     }
 }
