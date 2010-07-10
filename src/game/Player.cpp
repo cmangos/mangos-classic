@@ -9874,10 +9874,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
 
                     // remove held enchantments
                     if ( slot == EQUIPMENT_SLOT_MAINHAND )
-                    {   // to check
-                        for (uint8 i=PROP_ENCHANTMENT_SLOT_0;i<=PROP_ENCHANTMENT_SLOT_3;i++)
-                            pItem->ClearEnchantment(EnchantmentSlot(i));
-                    }
+                        pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_3);
                 }
             }
 
