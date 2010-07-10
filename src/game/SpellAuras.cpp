@@ -986,7 +986,7 @@ void Aura::SetStackAmount(uint8 stackAmount)
     {
         m_stackAmount = stackAmount;
         if (m_auraSlot < MAX_AURAS)
-            SetAuraApplication(m_auraSlot, m_stackAmount);
+            SetAuraApplication(m_auraSlot, m_stackAmount-1);// field expect count-1 for proper amount show
 
         int32 amount = m_stackAmount * caster->CalculateSpellDamage(target, m_spellProto, m_effIndex, &m_currentBasePoints);
         // Reapply if amount change
