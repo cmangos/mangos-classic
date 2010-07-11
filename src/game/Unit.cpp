@@ -1480,7 +1480,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
     {
         damageInfo->procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
         // Calculate absorb & resists
-        CalcAbsorbResist(damageInfo->target, SpellSchoolMask(damageInfo->damageSchoolMask), DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist);
+        CalcAbsorbResist(damageInfo->target, damageInfo->damageSchoolMask, DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, true);
         damageInfo->damage-=damageInfo->absorb + damageInfo->resist;
         if (damageInfo->absorb)
         {
@@ -1690,7 +1690,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
     return (newdamage > 1) ? newdamage : 1;
 }
 
-void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, bool canReflect)
+void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, bool /*canReflect*/)
 {
     if(!pVictim || !pVictim->isAlive() || !damage)
         return;
@@ -1732,81 +1732,72 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
 
     int32 RemainingDamage = damage - *resist;
 
-    // Death Prevention Aura
-    SpellEntry const*  preventDeathSpell = NULL;
-    // absorb without mana cost
-    int32 reflectDamage = 0;
-    Aura* reflectAura = NULL;
-    AuraList const& vSchoolAbsorb = pVictim->GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
-    for(AuraList::const_iterator i = vSchoolAbsorb.begin(), next; i != vSchoolAbsorb.end() && RemainingDamage > 0; i = next)
+    // full absorb cases (by chance)
+    /* none cases, but preserve for better backporting conflict resolve
+    AuraList const& vAbsorb = GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
+    for(AuraList::const_iterator i = vAbsorb.begin(); i != vAbsorb.end() && RemainingDamage > 0; ++i)
     {
-        next = i; ++next;
-
-        if (((*i)->GetModifier()->m_miscvalue & schoolMask)==0)
+        // only work with proper school mask damage
+        Modifier* i_mod = (*i)->GetModifier();
+        if (!(i_mod->m_miscvalue & schoolMask))
             continue;
 
-        // Cheat Death
-        if((*i)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && (*i)->GetSpellProto()->SpellIconID == 2109)
+        SpellEntry const* i_spellProto = (*i)->GetSpellProto();
+    }
+    */
+
+    // Need remove expired auras after
+    bool existExpired = false;
+
+    AuraList const& vSchoolAbsorb = pVictim->GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
+    for(AuraList::const_iterator i = vSchoolAbsorb.begin(); i != vSchoolAbsorb.end() && RemainingDamage > 0; ++i)
+    {
+        Modifier* mod = (*i)->GetModifier();
+        if (!(mod->m_miscvalue & schoolMask))
+            continue;
+
+        SpellEntry const* spellProto = (*i)->GetSpellProto();
+
+        // Max Amount can be absorbed by this aura
+        int32  currentAbsorb = mod->m_amount;
+
+        // Found empty aura (impossible but..)
+        if (currentAbsorb <=0)
         {
-            if (((Player*)pVictim)->HasSpellCooldown(31231))
-                continue;
-            int32 chance = (*i)->GetModifier()->m_amount;
-            if (roll_chance_i(chance))
-                preventDeathSpell = (*i)->GetSpellProto();
+            existExpired = true;
             continue;
         }
 
-        int32 currentAbsorb;
-
-        //Reflective Shield
-        if (canReflect && (pVictim != this) && (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_PRIEST && (*i)->GetSpellProto()->SpellFamilyFlags == 0x1)
-        {
-            if(Unit* caster = (*i)->GetCaster())
-            {
-                AuraList const& vOverRideCS = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                for(AuraList::const_iterator k = vOverRideCS.begin(); k != vOverRideCS.end(); ++k)
-                {
-                    switch((*k)->GetModifier()->m_miscvalue)
-                    {
-                        case 5065:                          // Rank 1
-                        case 5064:                          // Rank 2
-                        case 5063:                          // Rank 3
-                        case 5062:                          // Rank 4
-                        case 5061:                          // Rank 5
-                        {
-                            if(RemainingDamage >= (*i)->GetModifier()->m_amount)
-                                reflectDamage = (*i)->GetModifier()->m_amount * (*k)->GetModifier()->m_amount/100;
-                            else
-                                reflectDamage = (*k)->GetModifier()->m_amount * RemainingDamage/100;
-                            reflectAura = *i;
-
-                        } break;
-                        default: break;
-                    }
-
-                    if(reflectDamage)
-                        break;
-                }
-            }
-        }
-
-        if (RemainingDamage >= (*i)->GetModifier()->m_amount)
-        {
-            currentAbsorb = (*i)->GetModifier()->m_amount;
-            pVictim->RemoveAurasDueToSpell((*i)->GetId());
-            next = vSchoolAbsorb.begin();
-        }
-        else
-        {
+        // currentAbsorb - damage can be absorbed by shield
+        // If need absorb less damage
+        if (RemainingDamage < currentAbsorb)
             currentAbsorb = RemainingDamage;
-            (*i)->GetModifier()->m_amount -= RemainingDamage;
-        }
 
         RemainingDamage -= currentAbsorb;
+
+        // Reduce shield amount
+        mod->m_amount-=currentAbsorb;
+        if((*i)->DropAuraCharge())
+            mod->m_amount = 0;
+        // Need remove it later
+        if (mod->m_amount<=0)
+            existExpired = true;
     }
-    // do not cast spells while looping auras; auras can get invalid otherwise
-    if (canReflect && reflectDamage)
-        pVictim->CastCustomSpell(this, 33619, &reflectDamage, NULL, NULL, true, NULL, reflectAura);
+
+    // Remove all expired absorb auras
+    if (existExpired)
+    {
+        for(AuraList::const_iterator i = vSchoolAbsorb.begin(); i != vSchoolAbsorb.end();)
+        {
+            if ((*i)->GetModifier()->m_amount<=0)
+            {
+                pVictim->RemoveAurasDueToSpell((*i)->GetId(), NULL);
+                i = vSchoolAbsorb.begin();
+            }
+            else
+                ++i;
+        }
+    }
 
     // absorb by mana cost
     AuraList const& vManaShield = pVictim->GetAurasByType(SPELL_AURA_MANA_SHIELD);
@@ -1900,28 +1891,6 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
 
             CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
             DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
-        }
-    }
-
-    // Apply death prevention spells effects
-    if (preventDeathSpell && RemainingDamage >= (int32)pVictim->GetHealth())
-    {
-        switch(preventDeathSpell->SpellFamilyName)
-        {
-            // Cheat Death
-            case SPELLFAMILY_ROGUE:
-            {
-                // Cheat Death
-                if (preventDeathSpell->SpellIconID == 2109)
-                {
-                    pVictim->CastSpell(pVictim,31231,true);
-                    ((Player*)pVictim)->AddSpellCooldown(31231,0,time(NULL)+60);
-                    // with health > 10% lost health until health==10%, in other case no losses
-                    uint32 health10 = pVictim->GetMaxHealth()/10;
-                    RemainingDamage = pVictim->GetHealth() > health10 ? pVictim->GetHealth() - health10 : 0;
-                }
-                break;
-            }
         }
     }
 
