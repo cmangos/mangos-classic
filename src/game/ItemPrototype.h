@@ -72,6 +72,10 @@ enum ITEM_FLAGS
     ITEM_FLAGS_OPENABLE                       = 0x00000004,
     ITEM_FLAGS_WRAPPED                        = 0x00000008,
     ITEM_FLAGS_BROKEN                         = 0x00000010, // appears red icon (like when item durability==0)
+    ITEM_FLAGS_INDESTRUCTIBLE                 = 0x00000020, // used for totem. Item can not be destroyed, except by using spell (item can be reagent for spell and then allowed)
+    ITEM_FLAGS_USABLE                         = 0x00000040, // ?
+    ITEM_FLAGS_NO_EQUIP_COOLDOWN              = 0x00000080, // ?
+    ITEM_FLAGS_UNK3                           = 0x00000100,
     ITEM_FLAGS_WRAPPER                        = 0x00000200, // used or not used wrapper
     ITEM_FLAGS_PARTY_LOOT                     = 0x00000800, // determines if item is party loot or not
     ITEM_FLAGS_CHARTER                        = 0x00002000, // guild charter
