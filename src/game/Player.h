@@ -1611,6 +1611,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool AddHonorCP(float honor,uint8 type,uint32 victim,uint8 victimType);
         void UpdateHonor();
         void ResetHonor();
+        void ClearHonorInfo();
         bool RewardHonor(Unit *pVictim,uint32 groupsize);
         //Assume only Players and Units as kills
         //TYPEID_OBJECT used for CP from BG,quests etc.

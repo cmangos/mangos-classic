@@ -38,12 +38,19 @@ namespace MaNGOS
             return (float)ceil(count*(-0.53177f + 0.59357f * exp((level +23.54042f) / 26.07859f )));
         }
 
-        inline HonorRankInfo CalculateRankInfo(HonorRankInfo prk)
+        // set passed rank info to default
+        inline void InitRankInfo(HonorRankInfo &prk)
         {
+            prk.positive = true;
+            prk.rank = 0;
+            prk.visualRank = 0;
             prk.maxRP = 2000.00f;
             prk.minRP = 0.00f;
-            prk.visualRank = 0;
-            
+        }
+
+        inline HonorRankInfo CalculateRankInfo(HonorRankInfo prk)
+        {
+   
             if (prk.rank != 0)
             {
                 int8 rank = prk.positive ? prk.rank - NEGATIVE_HONOR_RANK_COUNT -1 : prk.rank - NEGATIVE_HONOR_RANK_COUNT;
@@ -53,6 +60,11 @@ namespace MaNGOS
                 prk.minRP = prk.maxRP > 5000.0f ? prk.maxRP  - 5000.00f : 2000.00f;
 
                 prk.visualRank = prk.rank > NEGATIVE_HONOR_RANK_COUNT ? prk.rank - NEGATIVE_HONOR_RANK_COUNT : prk.rank * -1;
+            } else
+            {
+                prk.maxRP = 2000.00f;
+                prk.minRP = 0.00f;
+                prk.visualRank = 0;
             }
 
             return prk;
@@ -62,11 +74,7 @@ namespace MaNGOS
         inline HonorRankInfo CalculateHonorRank(float honor_points)
         {
             HonorRankInfo prk;
-            prk.maxRP = 2000.00f;
-            prk.minRP = 0.00f;
-            prk.rank  = 0;
-            prk.visualRank = 0;
-            prk.positive = true;
+            InitRankInfo(prk);
 
             // rank none
             if (honor_points == 0)

@@ -445,10 +445,7 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this), m_mover(t
     m_groupUpdateMask = 0;
     m_auraUpdateMask = 0;
 
-    m_rank_points = 0.0f;
-    m_stored_honor = 0;
-    m_stored_honorableKills = 0;
-    m_stored_dishonorableKills = 0;
+    ClearHonorInfo();
 
     duel = NULL;
 
@@ -5790,16 +5787,20 @@ void Player::ResetHonor()
 {
     //it will delete all honor permanently
     CharacterDatabase.PExecute("DELETE FROM character_honor_cp WHERE guid = '%u'",GetGUIDLow());
+    ClearHonorInfo();
+    UpdateHonor();
+}
+
+// set all honor info to default
+void Player::ClearHonorInfo()
+{
     m_honorCP.clear();
     SetHonorStoredKills(0,true);
     SetHonorStoredKills(0,false);
     SetStoredHonor(0);
     SetHonorLastWeekStandingPos(0);
-    HonorRankInfo prk;
-    prk.rank = 0;
-    prk.visualRank = 0;
-    SetHonorHighestRankInfo(prk);
-    UpdateHonor();
+    MaNGOS::Honor::InitRankInfo(m_honor_rank);
+    MaNGOS::Honor::InitRankInfo(m_highest_rank);
 }
 
 //How many times Player kill pVictim... ( toDate shouldn't be > lastWeekBegin )
