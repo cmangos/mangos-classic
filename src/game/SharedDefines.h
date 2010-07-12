@@ -276,7 +276,7 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX_UNK14                       0x00004000            // 14
 #define SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY    0x00008000            // 15 remove auras on immunity
 #define SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE 0x00010000            // 16 unaffected by school immunity
-#define SPELL_ATTR_EX_UNK17                       0x00020000            // 17
+#define SPELL_ATTR_EX_UNK17                       0x00020000            // 17 for auras SPELL_AURA_TRACK_CREATURES, SPELL_AURA_TRACK_RESOURCES and SPELL_AURA_TRACK_STEALTHED select non-stacking tracking spells
 #define SPELL_ATTR_EX_UNK18                       0x00040000            // 18
 #define SPELL_ATTR_EX_UNK19                       0x00080000            // 19
 #define SPELL_ATTR_EX_REQ_COMBO_POINTS1           0x00100000            // 20 Req combo points on target
@@ -390,72 +390,6 @@ const uint32 ItemQualityColors[MAX_ITEM_QUALITY] = {
 #define SPELL_ATTR_EX4_UNK29                      0x20000000            // 29
 #define SPELL_ATTR_EX4_UNK30                      0x40000000            // 30
 #define SPELL_ATTR_EX4_UNK31                      0x80000000            // 31
-
-#define SPELL_ATTR_EX5_UNK0                       0x00000001            // 0
-#define SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP      0x00000002            // 1 not need reagents if UNIT_FLAG_PREPARATION
-#define SPELL_ATTR_EX5_UNK2                       0x00000004            // 2
-#define SPELL_ATTR_EX5_USABLE_WHILE_STUNNED       0x00000008            // 3 usable while stunned
-#define SPELL_ATTR_EX5_UNK4                       0x00000010            // 4
-#define SPELL_ATTR_EX5_SINGLE_TARGET_SPELL        0x00000020            // 5 Only one target can be apply at a time
-#define SPELL_ATTR_EX5_UNK6                       0x00000040            // 6
-#define SPELL_ATTR_EX5_UNK7                       0x00000080            // 7
-#define SPELL_ATTR_EX5_UNK8                       0x00000100            // 8
-#define SPELL_ATTR_EX5_UNK9                       0x00000200            // 9
-#define SPELL_ATTR_EX5_UNK10                      0x00000400            // 10
-#define SPELL_ATTR_EX5_UNK11                      0x00000800            // 11
-#define SPELL_ATTR_EX5_UNK12                      0x00001000            // 12
-#define SPELL_ATTR_EX5_UNK13                      0x00002000            // 13
-#define SPELL_ATTR_EX5_UNK14                      0x00004000            // 14
-#define SPELL_ATTR_EX5_UNK15                      0x00008000            // 15
-#define SPELL_ATTR_EX5_UNK16                      0x00010000            // 16
-#define SPELL_ATTR_EX5_USABLE_WHILE_FEARED        0x00020000            // 17 usable while feared
-#define SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED      0x00040000            // 18 usable while confused
-#define SPELL_ATTR_EX5_UNK19                      0x00080000            // 19
-#define SPELL_ATTR_EX5_UNK20                      0x00100000            // 20
-#define SPELL_ATTR_EX5_UNK21                      0x00200000            // 21
-#define SPELL_ATTR_EX5_UNK22                      0x00400000            // 22
-#define SPELL_ATTR_EX5_UNK23                      0x00800000            // 23
-#define SPELL_ATTR_EX5_UNK24                      0x01000000            // 24
-#define SPELL_ATTR_EX5_UNK25                      0x02000000            // 25
-#define SPELL_ATTR_EX5_UNK26                      0x04000000            // 26
-#define SPELL_ATTR_EX5_UNK27                      0x08000000            // 27
-#define SPELL_ATTR_EX5_UNK28                      0x10000000            // 28
-#define SPELL_ATTR_EX5_UNK29                      0x20000000            // 29
-#define SPELL_ATTR_EX5_UNK30                      0x40000000            // 30
-#define SPELL_ATTR_EX5_UNK31                      0x80000000            // 31 Forces all nearby enemies to focus attacks caster
-
-#define SPELL_ATTR_EX6_UNK0                       0x00000001            // 0 Only Move spell have this flag
-#define SPELL_ATTR_EX6_ONLY_IN_ARENA              0x00000002            // 1 only usable in arena, not used in 3.2.0a and early
-#define SPELL_ATTR_EX6_UNK2                       0x00000004            // 2
-#define SPELL_ATTR_EX6_UNK3                       0x00000008            // 3
-#define SPELL_ATTR_EX6_UNK4                       0x00000010            // 4 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK5                       0x00000020            // 5
-#define SPELL_ATTR_EX6_UNK6                       0x00000040            // 6
-#define SPELL_ATTR_EX6_UNK7                       0x00000080            // 7
-#define SPELL_ATTR_EX6_UNK8                       0x00000100            // 8
-#define SPELL_ATTR_EX6_UNK9                       0x00000200            // 9 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK10                      0x00000400            // 10
-#define SPELL_ATTR_EX6_NOT_IN_RAID_INSTANCE       0x00000800            // 11 not usable in raid instance
-#define SPELL_ATTR_EX6_UNK12                      0x00001000            // 12 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK13                      0x00002000            // 13 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK14                      0x00004000            // 14 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK15                      0x00008000            // 15 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK16                      0x00010000            // 16 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK17                      0x00020000            // 17 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK18                      0x00040000            // 18 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK19                      0x00080000            // 19 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK20                      0x00100000            // 20 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK21                      0x00200000            // 21 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK22                      0x00400000            // 22 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK23                      0x00800000            // 23 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK24                      0x01000000            // 24 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK25                      0x02000000            // 25 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK26                      0x04000000            // 26 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK27                      0x08000000            // 27 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK28                      0x10000000            // 28 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK29                      0x20000000            // 29 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK30                      0x40000000            // 30 not set in 2.4.2
-#define SPELL_ATTR_EX6_UNK31                      0x80000000            // 31 not set in 2.4.2
 
 enum SheathTypes
 {

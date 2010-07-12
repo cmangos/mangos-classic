@@ -160,8 +160,12 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     {
         case SPELLFAMILY_GENERIC:
         {
+            // Aspect of the Beast
+            if (spellInfo->Id == 13161)
+                return SPELL_ASPECT;
+
             // Food / Drinks (mostly)
-            if(spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+            if (spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
             {
                 bool food = false;
                 bool drink = false;
@@ -184,11 +188,11 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                     }
                 }
 
-                if(food && drink)
+                if (food && drink)
                     return SPELL_FOOD_AND_DRINK;
-                else if(food)
+                else if (food)
                     return SPELL_FOOD;
-                else if(drink)
+                else if (drink)
                     return SPELL_DRINK;
             }
             else
@@ -240,6 +244,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->Dispel == DISPEL_POISON)
                 return SPELL_STING;
 
+            // only hunter aspects have this (one have generic family), if exclude Auto Shot
+            if (spellInfo->activeIconID == 122 && spellInfo->Id != 75)
+                return SPELL_ASPECT;
+
             break;
         }
         case SPELLFAMILY_PALADIN:
@@ -279,22 +287,15 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         return SPELL_WARLOCK_ARMOR;
     }
 
-    // only hunter aspects have this (but not all aspects in hunter family)
-    if( spellInfo->activeIconID == 122 && (GetSpellSchoolMask(spellInfo) & SPELL_SCHOOL_MASK_NATURE) &&
-        (spellInfo->Attributes & 0x50000) != 0 && (spellInfo->Attributes & 0x9000010) == 0)
-    {
-        return SPELL_ASPECT;
-    }
-
-    for(int i = 0; i < 3; i++)
-        if( spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && (
-        spellInfo->EffectApplyAuraName[i] == SPELL_AURA_TRACK_CREATURES ||
-        spellInfo->EffectApplyAuraName[i] == SPELL_AURA_TRACK_RESOURCES ||
-        spellInfo->EffectApplyAuraName[i] == SPELL_AURA_TRACK_STEALTHED ) )
-            return SPELL_TRACKER;
+    // Tracking spells (exclude Well Fed, some other always allowed cases)
+    if ((IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_CREATURES) ||
+        IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_RESOURCES)  ||
+        IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_STEALTHED)) &&
+        ((spellInfo->AttributesEx & SPELL_ATTR_EX_UNK17) || (spellInfo->Attributes & SPELL_ATTR_CASTABLE_WHILE_MOUNTED)))
+        return SPELL_TRACKER;
 
     // elixirs can have different families, but potion most ofc.
-    if(SpellSpecific sp = sSpellMgr.GetSpellElixirSpecific(spellInfo->Id))
+    if (SpellSpecific sp = sSpellMgr.GetSpellElixirSpecific(spellInfo->Id))
         return sp;
 
     return SPELL_NORMAL;
