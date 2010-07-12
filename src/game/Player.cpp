@@ -3017,7 +3017,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool disabled
     {
         if (!itr2->second.autoLearned)
         {
-            if(!IsInWorld() || !itr->second.active)         // at spells loading, no output, but allow save
+            if(!IsInWorld() || !itr2->second.active)        // at spells loading, no output, but allow save
                 addSpell(itr2->second.spell,itr2->second.active,true,false);
             else                                            // at normal learning
                 learnSpell(itr2->second.spell);
