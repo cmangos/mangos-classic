@@ -61,11 +61,7 @@ namespace MaNGOS
 
                 prk.visualRank = prk.rank > NEGATIVE_HONOR_RANK_COUNT ? prk.rank - NEGATIVE_HONOR_RANK_COUNT : prk.rank * -1;
             } else
-            {
-                prk.maxRP = 2000.00f;
-                prk.minRP = 0.00f;
-                prk.visualRank = 0;
-            }
+                InitRankInfo(prk);
 
             return prk;
         }
