@@ -88,6 +88,9 @@ char db_sql_rev_field[NUM_DATABASES][MAX_PATH] = {
     "REVISION_DB_REALMD"
 };
 
+#define REV_PREFIX "z"
+#define REV_FORMAT "[" REV_PREFIX "%04d]"
+
 bool allow_replace = false;
 bool local = false;
 bool do_fetch = false;
@@ -232,9 +235,9 @@ int get_rev(const char *from_msg)
 {
     // accept only the rev number format, not the sql update format
     char nr_str[256];
-    if(sscanf(from_msg, "[z%[0123456789]]", nr_str) != 1) return 0;
-    // ("[z")+("]")-1
-    if(from_msg[strlen(nr_str)+2] != ']') return 0;
+    if(sscanf(from_msg, "[" REV_PREFIX "%[0123456789]]", nr_str) != 1) return 0;
+    // ("[")+(REV_PREFIX)+("]")-1
+    if(from_msg[strlen(nr_str)+strlen(REV_PREFIX)+2-1] != ']') return 0;
 
     return atoi(nr_str);
 }
@@ -262,7 +265,7 @@ bool find_rev()
         pclose(cmd_pipe);
     }
 
-    if(rev > 0) printf("Found [z%04d].\n", rev);
+    if(rev > 0) printf("Found " REV_FORMAT ".\n", rev);
 
     return rev > 0;
 }
@@ -366,7 +369,7 @@ bool find_head_msg()
     {
         if(!allow_replace)
         {
-            printf("Last commit on HEAD is [z%04d]. Use -r to replace it with [%z04d].\n", head_rev, rev);
+            printf("Last commit on HEAD is " REV_FORMAT ". Use -r to replace it with " REV_FORMAT ".\n", head_rev, rev);
             return false;
         }
 
@@ -392,7 +395,7 @@ bool amend_commit()
     if( (cmd_pipe = popen( cmd, "w" )) == NULL )
         return false;
 
-    fprintf(cmd_pipe, "[z%04d] %s", rev, head_message);
+    fprintf(cmd_pipe, REV_FORMAT " %s", rev, head_message);
     pclose(cmd_pipe);
     if(use_new_index && putenv(old_index_cmd) != 0) return false;
 
