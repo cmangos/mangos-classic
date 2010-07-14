@@ -32,7 +32,7 @@
 template<class T, typename D>
 void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
 {
-    if (!i_target.isValid() || !&owner)
+    if (!i_target.isValid() || !i_target->IsInWorld())
         return;
 
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
@@ -110,10 +110,10 @@ void TargetedMovementGeneratorMedium<Creature,FollowMovementGenerator<Creature> 
 template<class T, typename D>
 bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_diff)
 {
-    if (!i_target.isValid())
+    if (!i_target.isValid() || !i_target->IsInWorld())
         return false;
 
-    if (!&owner || !owner.isAlive())
+    if (!owner.isAlive())
         return true;
 
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
