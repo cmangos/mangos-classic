@@ -615,15 +615,19 @@ void Spell::prepareDataForTriggerSystem()
     // an spell trigger another or not ( m_canTrigger )
     // Create base triggers flags for Attacker and Victim ( m_procAttacker and  m_procVictim)
     //==========================================================================================
-
     // Fill flag can spell trigger or not
-    if (!m_IsTriggeredSpell)
+    // TODO: possible exist spell attribute for this
+    m_canTrigger = false;
+
+    if (m_CastItem)
+        m_canTrigger = false;         // Do not trigger from item cast spell
+    else if (!m_IsTriggeredSpell)
         m_canTrigger = true;          // Normal cast - can trigger
     else if (!m_triggeredByAuraSpell)
         m_canTrigger = true;          // Triggered from SPELL_EFFECT_TRIGGER_SPELL - can trigger
-    else                              // Exceptions (some periodic triggers)
+
+    if (!m_canTrigger)                // Exceptions (some periodic triggers)
     {
-        m_canTrigger = false;         // Triggered spells can`t trigger another
         switch (m_spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_MAGE:    // Arcane Missles triggers need do it
@@ -640,9 +644,6 @@ void Spell::prepareDataForTriggerSystem()
             break;
         }
     }
-    // Do not trigger from item cast spell
-    if (m_CastItem)
-       m_canTrigger = false;
 
     // Get data for type of attack and fill base info for trigger
     switch (m_spellInfo->DmgClass)
