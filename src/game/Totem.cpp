@@ -161,18 +161,25 @@ void Totem::SetTypeBySummonSpell(SpellEntry const * spellProto)
         m_type = TOTEM_STATUE;                              //Jewelery statue
 }
 
-bool Totem::IsImmunedToSpell(SpellEntry const* spellInfo)
+bool Totem::IsImmunedToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
 {
-    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    // TODO: possibly all negative auras immune?
+    switch(spellInfo->Effect[index])
     {
-        switch(spellInfo->EffectApplyAuraName[i])
-        {
-            case SPELL_AURA_PERIODIC_DAMAGE:
-            case SPELL_AURA_PERIODIC_LEECH:
-                return true;
-            default:
-                continue;
-        }
+        case SPELL_EFFECT_ATTACK_ME:
+            return true;
+        default:
+            break;
     }
-    return Creature::IsImmunedToSpell(spellInfo);
+    switch(spellInfo->EffectApplyAuraName[index])
+    {
+        case SPELL_AURA_PERIODIC_DAMAGE:
+        case SPELL_AURA_PERIODIC_LEECH:
+        case SPELL_AURA_MOD_FEAR:
+        case SPELL_AURA_TRANSFORM:
+            return true;
+        default:
+            break;
+    }
+    return Creature::IsImmunedToSpellEffect(spellInfo, index);
 }

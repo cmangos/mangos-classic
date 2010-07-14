@@ -694,8 +694,6 @@ void Spell::CleanupTargetList()
     m_UniqueTargetInfo.clear();
     m_UniqueGOTargetInfo.clear();
     m_UniqueItemInfo.clear();
-    m_countOfHit = 0;
-    m_countOfMiss = 0;
     m_delayMoment = 0;
 }
 
@@ -704,6 +702,9 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
     if( m_spellInfo->Effect[effIndex] == 0 )
         return;
 
+    // Check for effect immune skip if immuned
+    bool immuned = pVictim->IsImmunedToSpellEffect(m_spellInfo, effIndex);
+
     ObjectGuid targetGUID = pVictim->GetObjectGuid();
 
     // Lookup target in already in list
@@ -711,7 +712,8 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
     {
         if (targetGUID == ihit->targetGUID)                 // Found in list
         {
-            ihit->effectMask |= 1 << effIndex;              // Add only effect mask
+            if (!immuned)
+                ihit->effectMask |= 1<<effIndex;            // Add only effect mask if not immuned
             return;
         }
     }
@@ -721,15 +723,11 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
     // Get spell hit result on target
     TargetInfo target;
     target.targetGUID = targetGUID;                         // Store target GUID
-    target.effectMask =  1 << effIndex;                     // Store index of effect
+    target.effectMask = immuned ? 0 : 1<<effIndex;          // Store index of effect if not immuned
     target.processed  = false;                              // Effects not apply on target
 
     // Calculate hit result
     target.missCondition = m_caster->SpellHitResult(pVictim, m_spellInfo, m_canReflect);
-    if (target.missCondition == SPELL_MISS_NONE)
-        ++m_countOfHit;
-    else
-        ++m_countOfMiss;
 
     // Spell have speed - need calculate incoming time
     if (m_spellInfo->speed > 0.0f)
@@ -810,8 +808,6 @@ void Spell::AddGOTarget(GameObject* pVictim, SpellEffectIndex effIndex)
     else
         target.timeDelay = UI64LIT(0);
 
-    ++m_countOfHit;
-
     // Add target to list
     m_UniqueGOTargetInfo.push_back(target);
 }
@@ -854,8 +850,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
 
     // Get mask of effects for target
     uint32 mask = target->effectMask;
-    if (mask == 0)                                          // No effects
-        return;
 
     Unit* unit = m_caster->GetObjectGuid() == target->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, target->targetGUID);
     if (!unit)
@@ -887,6 +881,11 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     {
         if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
             DoSpellHitOnUnit(m_caster, mask);
+    }
+    else                                                    // in 1.12.1 we need explicit miss info
+    {
+        if (real_caster)
+            real_caster->SendSpellMiss(unit, m_spellInfo->Id, missInfo);
     }
 
     // All calculated do it!
@@ -2790,8 +2789,6 @@ void Spell::SendSpellGo()
 
     WriteSpellGoTargets(&data);
 
-    data << uint8(m_countOfMiss); // miss count ?
-
     data << m_targets;
 
     if( castFlags & CAST_FLAG_AMMO )
@@ -2836,30 +2833,37 @@ void Spell::WriteAmmoToPacket( WorldPacket * data )
 
 void Spell::WriteSpellGoTargets( WorldPacket * data )
 {
-    *data << (uint8)(m_countOfHit+m_countOfMiss);
+    uint32 hit  = m_UniqueGOTargetInfo.size(); // Always hits on GO
+    uint32 miss = 0;
+
+    for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
+    {
+        if ((*ihit).effectMask == 0)                  // No effect apply - all immuned add state
+        {
+            // possibly SPELL_MISS_IMMUNE2 for this??
+            ihit->missCondition = SPELL_MISS_IMMUNE2;
+            miss++;
+        }
+        else if ((*ihit).missCondition == SPELL_MISS_NONE)
+            hit++;
+        else
+            miss++;
+    }
+
+    *data << (uint8)(hit+miss);
     for(std::list<TargetInfo>::const_iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
     {
+        *data << ihit->targetGUID;                          // in 1.12.1 expected all targets
+
         if ((*ihit).missCondition == SPELL_MISS_NONE)       // Add only hits
-        {
-            *data << ihit->targetGUID;
             m_needAliveTargetMask |=ihit->effectMask;
-        }
     }
 
     for(std::list<GOTargetInfo>::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end(); ++ighit)
         *data << ighit->targetGUID;                         // Always hits
-/* [-ZERO] prebc has some reflecting trinkets but seems no data sendeed
-    *data << (uint8)m_countOfMiss;
-    for(std::list<TargetInfo>::const_iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
-    {
-        if( ihit->missCondition != SPELL_MISS_NONE )        // Add only miss
-        {
-            *data << ihit->targetGUID;
-            *data << uint8(ihit->missCondition);
-            if( ihit->missCondition == SPELL_MISS_REFLECT )
-                *data << uint8(ihit->reflectResult);
-        }
-    } */
+
+    *data << uint8(0);                                      // unknown, not miss
+
     // Reset m_needAliveTargetMask for non channeled spell
     if(!IsChanneledSpell(m_spellInfo))
         m_needAliveTargetMask = 0;
@@ -3254,10 +3258,6 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     damage = int32(CalculateDamage(i, unitTarget) * DamageMultiplier);
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u Effect%d : %u", m_spellInfo->Id, i, eff);
-
-    //Simply return. Do not display "immune" in red text on client
-    if(unitTarget && unitTarget->IsImmunedToSpellEffect(m_spellInfo, i))
-        return;
 
     if(eff < TOTAL_SPELL_EFFECTS)
     {
