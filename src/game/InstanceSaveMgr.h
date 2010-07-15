@@ -117,15 +117,29 @@ class InstanceSave
         bool m_usedByMap;                                   // true when instance map loaded
 };
 
+enum ResetEventType
+{
+    RESET_EVENT_DUNGEON      = 0,                           // no fixed reset time
+    RESET_EVENT_INFORM_1     = 1,                           // raid/heroic warnings
+    RESET_EVENT_INFORM_2     = 2,
+    RESET_EVENT_INFORM_3     = 3,
+    RESET_EVENT_INFORM_LAST  = 4,
+};
+
+#define MAX_RESET_EVENT_TYPE   5
+
 /* resetTime is a global propery of each (raid/heroic) map
     all instances of that map reset at the same time */
 struct InstanceResetEvent
 {
-    uint8 type;
-    uint16 mapid;
-    uint16 instanceId;
-    InstanceResetEvent(uint8 t = 0, uint16 m = 0, uint16 i = 0) : type(t), mapid(m), instanceId(i) {}
-    bool operator == (const InstanceResetEvent& e) { return e.instanceId == instanceId; }
+    ResetEventType type   :8;                               // if RESET_EVENT_DUNGEON then InstanceID == 0 and applied to all instances for map)
+    uint16 mapid;                                           // used with mapid used as for select reset for global cooldown instances (instanceid==0 for event)
+    uint32 instanceId;                                      // used for select reset for normal dungeons
+
+    InstanceResetEvent() : type(RESET_EVENT_DUNGEON), mapid(0), instanceId(0) {}
+    InstanceResetEvent(ResetEventType t, uint32 _mapid, uint32 _instanceid)
+        : type(t), mapid(_mapid), instanceId(_instanceid) {}
+    bool operator == (const InstanceResetEvent& e) { return e.mapid == mapid && e.instanceId == instanceId; }
 };
 
 class InstanceSaveManager;

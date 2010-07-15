@@ -40,6 +40,8 @@
 
 INSTANTIATE_SINGLETON_1( InstanceSaveManager );
 
+static uint32 resetEventTypeDelay[MAX_RESET_EVENT_TYPE] = { 0, 3600, 900, 300, 60 };
+
 //== InstanceSave functions ================================
 
 InstanceSave::InstanceSave(uint16 MapId, uint32 InstanceId, time_t resetTime, bool canReset)
@@ -137,6 +139,7 @@ void InstanceResetScheduler::LoadResetTimes()
     // resettime = 0 in the DB for raid instances so those are skipped
     typedef std::map<uint32, std::pair<uint32, time_t> > ResetTimeMapType;
     ResetTimeMapType InstResetTime;
+
     QueryResult *result = CharacterDatabase.Query("SELECT id, map, resettime FROM instance WHERE resettime > 0");
     if( result )
     {
@@ -175,7 +178,7 @@ void InstanceResetScheduler::LoadResetTimes()
         // schedule the reset times
         for(ResetTimeMapType::iterator itr = InstResetTime.begin(); itr != InstResetTime.end(); ++itr)
             if(itr->second.second > now)
-                ScheduleReset(true, itr->second.second, InstanceResetEvent(0, itr->second.first, itr->first));
+                ScheduleReset(true, itr->second.second, InstanceResetEvent(RESET_EVENT_DUNGEON, itr->second.first, itr->first));
     }
 
     // load the global respawn times for raid instances
@@ -225,7 +228,7 @@ void InstanceResetScheduler::LoadResetTimes()
         {
             // initialize the reset time
             t = today + period + diff;
-            CharacterDatabase.DirectPExecute("INSERT INTO instance_reset VALUES ('%u','"UI64FMTD"')", i, (uint64)t);
+            CharacterDatabase.DirectPExecute("INSERT INTO instance_reset VALUES ('%u','"UI64FMTD"')", temp->map, (uint64)t);
         }
 
         if(t < now)
@@ -234,17 +237,18 @@ void InstanceResetScheduler::LoadResetTimes()
             // calculate the next reset time
             t = (t / DAY) * DAY;
             t += ((today - t) / period + 1) * period + diff;
-            CharacterDatabase.DirectPExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%u'", (uint64)t, i);
+            CharacterDatabase.DirectPExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%u'", (uint64)t, temp->map);
         }
 
         m_resetTimeByMapId[temp->map] = t;
 
         // schedule the global reset/warning
-        uint8 type = 1;
-        static int tim[4] = {3600, 900, 300, 60};
-        for(; type < 4; type++)
-            if(t - tim[type-1] > now) break;
-        ScheduleReset(true, t - tim[type-1], InstanceResetEvent(type, i));
+        ResetEventType type = RESET_EVENT_INFORM_1;
+        for(; type < RESET_EVENT_INFORM_LAST; type = ResetEventType(type+1))
+            if(t - resetEventTypeDelay[type] > now)
+                break;
+
+        ScheduleReset(true, t - resetEventTypeDelay[type], InstanceResetEvent(type, temp->map, 0));
     }
 }
 
@@ -276,7 +280,7 @@ void InstanceResetScheduler::Update()
     while(!m_resetTimeQueue.empty() && (t = m_resetTimeQueue.begin()->first) < now)
     {
         InstanceResetEvent &event = m_resetTimeQueue.begin()->second;
-        if(event.type == 0)
+        if(event.type == RESET_EVENT_DUNGEON)
         {
             // for individual normal instances, max creature respawn + X hours
             m_InstanceSaves._ResetInstance(event.mapid, event.instanceId);
@@ -286,13 +290,12 @@ void InstanceResetScheduler::Update()
         {
             // global reset/warning for a certain map
             time_t resetTime = GetResetTimeFor(event.mapid);
-            m_InstanceSaves._ResetOrWarnAll(event.mapid, event.type != 4, uint32(resetTime - now));
-            if(event.type != 4)
+            m_InstanceSaves._ResetOrWarnAll(event.mapid, event.type != RESET_EVENT_INFORM_LAST, uint32(resetTime - now));
+            if(event.type != RESET_EVENT_INFORM_LAST)
             {
                 // schedule the next warning/reset
-                event.type++;
-                static int tim[4] = {3600, 900, 300, 60};
-                ScheduleReset(true, resetTime - tim[event.type-1], event);
+                event.type = ResetEventType(event.type+1);
+                ScheduleReset(true, resetTime - resetEventTypeDelay[event.type], event);
             }
             m_resetTimeQueue.erase(m_resetTimeQueue.begin());
         }
@@ -340,7 +343,7 @@ InstanceSave* InstanceSaveManager::AddInstanceSave(uint32 mapId, uint32 instance
         {
             resetTime = time(NULL) + 2 * HOUR;
             // normally this will be removed soon after in InstanceMap::Add, prevent error
-            m_Scheduler.ScheduleReset(true, resetTime, InstanceResetEvent(0, mapId, instanceId));
+            m_Scheduler.ScheduleReset(true, resetTime, InstanceResetEvent(RESET_EVENT_DUNGEON, mapId, instanceId));
         }
     }
 
