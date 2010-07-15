@@ -597,7 +597,7 @@
     <ClInclude Include="..\..\src\game\WorldSession.h" />
     <ClInclude Include="..\..\src\game\WorldSocket.h" />
     <ClInclude Include="..\..\src\game\WorldSocketMgr.h" />
-    <ClCompile Include="..\..\src\game\extras\Mod.h" />
+    <ClInclude Include="..\..\src\game\extras\Mod.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="shared.vcxproj">

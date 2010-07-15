@@ -460,8 +460,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\dep\src\gsoap\stdsoap2.cpp" />
-    <ClCompile Include="..\..\src\game\extras\Mod.cpp" />
-    <ClCompile Include="..\..\src\game\extras\SpellMod.cpp" />
     <ClCompile Include="..\..\src\mangosd\soapServer.cpp" />
     <ClCompile Include="..\..\src\mangosd\soapC.cpp" />
     <ClCompile Include="..\..\src\mangosd\MaNGOSsoap.cpp" />
@@ -474,7 +472,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\dep\include\gsoap\stdsoap2.h" />
-    <ClInclude Include="..\..\src\game\extras\Mod.h" />
     <ClInclude Include="..\..\src\mangosd\soapStub.h" />
     <ClInclude Include="..\..\src\mangosd\soapH.h" />
     <ClInclude Include="..\..\src\mangosd\MaNGOSsoap.h" />

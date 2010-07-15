@@ -397,9 +397,6 @@
     <ClCompile Include="..\..\src\game\extras\Mod.cpp">
       <Filter>Extras</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\extras\Mod.h">
-      <Filter>Extras</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\game\extras\SpellMod.cpp">
       <Filter>Extras</Filter>
     </ClCompile>
@@ -753,6 +750,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\Camera.h">
       <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\extras\Mod.h">
+      <Filter>Extras</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
