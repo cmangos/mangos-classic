@@ -42,7 +42,6 @@ LootStore LootTemplates_Gameobject(   "gameobject_loot_template",   "gameobject 
 LootStore LootTemplates_Item(         "item_loot_template",         "item entry",                     true);
 LootStore LootTemplates_Mail(         "mail_loot_template",         "mail template id",               false);
 LootStore LootTemplates_Pickpocketing("pickpocketing_loot_template","creature pickpocket lootid",     true);
-LootStore LootTemplates_QuestMail(    "quest_mail_loot_template",   "quest id (with mail template)",  false);
 LootStore LootTemplates_Reference(    "reference_loot_template",    "reference id",                   false);
 LootStore LootTemplates_Skinning(     "skinning_loot_template",     "creature skinning id",           true);
 
