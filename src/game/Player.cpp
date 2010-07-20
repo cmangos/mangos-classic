@@ -4329,13 +4329,6 @@ void Player::RepopAtGraveyard()
 
     AreaTableEntry const *zone = GetAreaEntryByAreaID(GetAreaId());
 
-    // Such zones are considered unreachable as a ghost and the player must be automatically revived
-    if ((!isAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || GetTransport())
-    {
-        ResurrectPlayer(0.5f);
-        SpawnCorpseBones();
-    }
-
     WorldSafeLocsEntry const *ClosestGrave = NULL;
 
     // Special handle for battleground maps
@@ -5972,15 +5965,15 @@ uint32 Player::GetLevelFromDB(uint64 guid)
 
 void Player::UpdateArea(uint32 newArea)
 {
-    // FFA_PVP flags are area and not zone id dependent
-    // so apply them accordingly
     m_areaUpdateId    = newArea;
 
     AreaTableEntry const* area = GetAreaEntryByAreaID(newArea);
 
-    if(area && (area->flags & AREA_FLAG_ARENA))
+    // FFA_PVP flags are area and not zone id dependent
+    // so apply them accordingly
+    if (area && (area->flags & AREA_FLAG_ARENA))
     {
-        if(!isGameMaster())
+        if (!isGameMaster())
             SetFFAPvP(true);
     }
     else
@@ -6054,17 +6047,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     {
         if(IsPvP() && !HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_IN_PVP) && pvpInfo.endTimer == 0)
             pvpInfo.endTimer = time(0);                     // start toggle-off
-    }
-
-    if(zone->flags & AREA_FLAG_SANCTUARY)                   // in sanctuary
-    {
-        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY);
-        if(sWorld.IsFFAPvPRealm())
-            SetFFAPvP(false);
-    }
-    else
-    {
-        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY);
     }
 
     if(zone->flags & AREA_FLAG_CAPITAL)                     // in capital city
@@ -12369,7 +12351,7 @@ bool Player::SatisfyQuestExclusiveGroup( Quest const* qInfo, bool msg ) const
         if (i_exstatus != mQuestStatus.end()
             && (i_exstatus->second.m_status == QUEST_STATUS_COMPLETE || i_exstatus->second.m_status == QUEST_STATUS_INCOMPLETE))
         {
-            if (msg) 
+            if (msg)
                 SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
             return false;
         }
