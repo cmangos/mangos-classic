@@ -250,7 +250,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint8 updateFlags) const
     {
         if( m_objectTypeId==TYPEID_PLAYER && ((Player*)this)->GetTransport())
         {
-            moveFlags |= 0x02000000;
+            moveFlags |= MOVEFLAG_ONTRANSPORT;
         }
 
         *data << uint32(moveFlags);

@@ -466,7 +466,7 @@ namespace MaNGOS
             CannibalizeObjectCheck(WorldObject const* fobj, float range) : i_fobj(fobj), i_range(range) {}
             bool operator()(Player* u)
             {
-                if( i_fobj->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() )
+                if( i_fobj->IsFriendlyTo(u) || u->isAlive() || u->IsTaxiFlying() )
                     return false;
 
                 return i_fobj->IsWithinDistInMap(u, i_range);
@@ -474,7 +474,7 @@ namespace MaNGOS
             bool operator()(Corpse* u);
             bool operator()(Creature* u)
             {
-                if (i_fobj->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() ||
+                if (i_fobj->IsFriendlyTo(u) || u->isAlive() || u->IsTaxiFlying() ||
                     (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD)==0)
                     return false;
 

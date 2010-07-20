@@ -427,7 +427,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             ChatHandler(target).PSendSysMessage(LANG_SUMMONED_BY, playerLink(_player->GetName()).c_str());
 
         // stop flight if need
-        if (target->isInFlight())
+        if (target->IsTaxiFlying())
         {
             target->GetMotionMaster()->MovementExpired();
             target->m_taxi.ClearTaxiDestinations();
@@ -561,7 +561,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
             ChatHandler(target).PSendSysMessage(LANG_APPEARING_TO, GetNameLink().c_str());
 
         // stop flight if need
-        if (_player->isInFlight())
+        if (_player->IsTaxiFlying())
         {
             _player->GetMotionMaster()->MovementExpired();
             _player->m_taxi.ClearTaxiDestinations();
@@ -1051,7 +1051,7 @@ bool ChatHandler::HandleModifyASpeedCommand(const char* args)
 
     std::string chrNameLink = GetNameLink(chr);
 
-    if(chr->isInFlight())
+    if(chr->IsTaxiFlying())
     {
         PSendSysMessage(LANG_CHAR_IN_FLIGHT,chrNameLink.c_str());
         SetSentErrorMessage(true);
@@ -1098,7 +1098,7 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
 
     std::string chrNameLink = GetNameLink(chr);
 
-    if(chr->isInFlight())
+    if(chr->IsTaxiFlying())
     {
         PSendSysMessage(LANG_CHAR_IN_FLIGHT,chrNameLink.c_str());
         SetSentErrorMessage(true);
@@ -1143,7 +1143,7 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
 
     std::string chrNameLink = GetNameLink(chr);
 
-    if(chr->isInFlight())
+    if(chr->IsTaxiFlying())
     {
         PSendSysMessage(LANG_CHAR_IN_FLIGHT,chrNameLink.c_str());
         SetSentErrorMessage(true);
@@ -1188,7 +1188,7 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
 
     std::string chrNameLink = GetNameLink(chr);
 
-    if(chr->isInFlight())
+    if(chr->IsTaxiFlying())
     {
         PSendSysMessage(LANG_CHAR_IN_FLIGHT,chrNameLink.c_str());
         SetSentErrorMessage(true);
@@ -1955,7 +1955,7 @@ bool ChatHandler::HandleTeleGroupCommand(const char * args)
             ChatHandler(pl).PSendSysMessage(LANG_TELEPORTED_TO_BY, nameLink.c_str());
 
         // stop flight if need
-        if(pl->isInFlight())
+        if(pl->IsTaxiFlying())
         {
             pl->GetMotionMaster()->MovementExpired();
             pl->m_taxi.ClearTaxiDestinations();
@@ -2044,7 +2044,7 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
             ChatHandler(pl).PSendSysMessage(LANG_SUMMONED_BY, nameLink.c_str());
 
         // stop flight if need
-        if(pl->isInFlight())
+        if(pl->IsTaxiFlying())
         {
             pl->GetMotionMaster()->MovementExpired();
             pl->m_taxi.ClearTaxiDestinations();
@@ -2097,7 +2097,7 @@ bool ChatHandler::HandleGoHelper( Player* player, uint32 mapid, float x, float y
     }
 
     // stop flight if need
-    if(player->isInFlight())
+    if(player->IsTaxiFlying())
     {
         player->GetMotionMaster()->MovementExpired();
         player->m_taxi.ClearTaxiDestinations();
