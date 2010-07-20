@@ -1707,17 +1707,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     // AT REMOVE
     else
     {
-        if (m_target->GetTypeId() == TYPEID_PLAYER &&
-            (GetSpellProto()->Effect[EFFECT_INDEX_0] == 72 || GetSpellProto()->Effect[EFFECT_INDEX_0] == 6 &&
-            (GetSpellProto()->EffectApplyAuraName[EFFECT_INDEX_0] == 1 || GetSpellProto()->EffectApplyAuraName[EFFECT_INDEX_0] == 128)))
-        {
-            // spells with SpellEffect=72 and aura=4: 6196, 6197, 21171, 21425
-            ((Player*)m_target)->GetCamera().ResetView();
-            WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0);
-            ((Player*)m_target)->GetSession()->SendPacket(&data);
-            return;
-        }
-
         if (IsQuestTameSpell(GetId()) && m_target->isAlive())
         {
             Unit* caster = GetCaster();
@@ -2556,13 +2545,14 @@ void Aura::HandleModPossess(bool apply, bool Real)
         target->addUnitState(UNIT_STAT_CONTROLLED);
 
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-
         target->SetCharmerGUID(p_caster->GetGUID());
         target->setFaction(p_caster->getFaction());
 
-        p_caster->SetCharm(target);
-
+        // target should became visible at SetView call(if not visible before):
+        // otherwise client\p_caster will ignore packets from the target(SetClientControl for example)
         camera.SetView(target);
+
+        p_caster->SetCharm(target);
         p_caster->SetClientControl(target, 1);
         p_caster->SetMover(target);
 
@@ -2594,9 +2584,12 @@ void Aura::HandleModPossess(bool apply, bool Real)
         p_caster->InterruptSpell(CURRENT_CHANNELED_SPELL);  // the spell is not automatically canceled when interrupted, do it now
         p_caster->SetCharm(NULL);
 
-        camera.ResetView();
         p_caster->SetClientControl(target, 0);
         p_caster->SetMover(NULL);
+
+        // there is a possibility that target became invisible for client\p_caster at ResetView call:
+        // it must be called after movement control unapplying, not before! the reason is same as at aura applying
+        camera.ResetView();
 
         p_caster->RemovePetActionBar();
 
@@ -2654,9 +2647,12 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
 
     if (apply)
     {
-        pet->addUnitState(UNIT_STAT_CONTROLLED);
+        target->addUnitState(UNIT_STAT_CONTROLLED);
 
+        // target should became visible at SetView call(if not visible before):
+        // otherwise client\p_caster will ignore packets from the target(SetClientControl for example)
         camera.SetView(pet);
+
         p_caster->SetCharm(pet);
         p_caster->SetClientControl(pet, 1);
         ((Player*)caster)->SetMover(pet);
@@ -2669,10 +2665,13 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
     }
     else
     {
-        camera.ResetView();
         p_caster->SetCharm(NULL);
         p_caster->SetClientControl(pet, 0);
         p_caster->SetMover(NULL);
+
+        // there is a possibility that target became invisible for client\p_caster at ResetView call:
+        // it must be called after movement control unapplying, not before! the reason is same as at aura applying
+        camera.ResetView();
 
         // on delete only do caster related effects
         if(m_removeMode == AURA_REMOVE_BY_DELETE)
