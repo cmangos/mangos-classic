@@ -722,14 +722,25 @@ void WorldSession::SendListInventory( uint64 vendorguid )
 
     for(int i = 0; i < numitems; ++i )
     {
-        if(VendorItem const* crItem = vItems->GetItem(i))
+        if (VendorItem const* crItem = vItems->GetItem(i))
         {
-            if(ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(crItem->item))
+            if (ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(crItem->item))
             {
-                if(!_player->isGameMaster() && ( ( pProto->AllowableClass & _player->getClassMask()) == 0 && pProto->Bonding == BIND_WHEN_PICKED_UP )  ||
+                if (!_player->isGameMaster())
+                {
+                    // class wrong item skip only for bindable case
+                    if ((pProto->AllowableClass & _player->getClassMask()) == 0 && pProto->Bonding == BIND_WHEN_PICKED_UP)
+                        continue;
+
+                    // race wrong item skip always
+                    if ((pProto->AllowableRace & _player->getRaceMask()) == 0)
+                        continue;
+
                     // when no faction required but rank > 0 will be used faction id from the vendor faction template to compare the rank
-                    (!pProto->RequiredReputationFaction && pProto->RequiredReputationRank > 0 && ReputationRank(pProto->RequiredReputationRank) > _player->GetReputationRank(pCreature->getFactionTemplateEntry()->faction) ))
-                    continue;
+                    if (!pProto->RequiredReputationFaction && pProto->RequiredReputationRank > 0 &&
+                        ReputationRank(pProto->RequiredReputationRank) > _player->GetReputationRank(pCreature->getFactionTemplateEntry()->faction))
+                        continue;
+                }
 
                 ++count;
 

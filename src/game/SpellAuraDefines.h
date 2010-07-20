@@ -22,16 +22,9 @@
 #define MAX_AURAS 56
 #define MAX_POSITIVE_AURAS 32
 
-enum AURA_FLAGS
+enum AuraFlags
 {
     AFLAG_MASK              = 0x09
-};
-
-//m_schoolAbsorb
-enum DAMAGE_ABSORB_TYPE
-{
-    ALL_DAMAGE_ABSORB       = -2,
-    ONLY_MAGIC_ABSORB       = -1,
 };
 
 enum AuraType

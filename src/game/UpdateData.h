@@ -25,7 +25,7 @@
 
 class WorldPacket;
 
-enum OBJECT_UPDATE_TYPE
+enum ObjectUpdateType
 {
     UPDATETYPE_VALUES               = 0,
     UPDATETYPE_MOVEMENT             = 1,
@@ -36,7 +36,7 @@ enum OBJECT_UPDATE_TYPE
 };
 
 // checked for 1.12.1
-enum OBJECT_UPDATE_FLAGS
+enum ObjectUpdateFlags
 {
     UPDATEFLAG_NONE         = 0x0000,
     UPDATEFLAG_SELF         = 0x0001,

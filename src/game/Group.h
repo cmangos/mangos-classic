@@ -28,9 +28,13 @@
 #include <map>
 #include <vector>
 
-#define MAXGROUPSIZE 5
-#define MAXRAIDSIZE 40
-#define TARGETICONCOUNT 8
+class BattleGround;
+class InstanceSave;
+
+#define MAX_GROUP_SIZE 5
+#define MAX_RAID_SIZE 40
+#define MAX_RAID_SUBGROUPS (MAX_RAID_SIZE / MAX_GROUP_SIZE)
+#define TARGET_ICON_COUNT 8
 
 enum LootMethod
 {
@@ -73,8 +77,6 @@ enum GroupType
     GROUPTYPE_RAID   = 1
 };
 
-class BattleGround;
-
 enum GroupUpdateFlags
 {
     GROUP_UPDATE_FLAG_NONE              = 0x00000000,       // nothing
@@ -105,8 +107,6 @@ enum GroupUpdateFlags
 #define GROUP_UPDATE_FLAGS_COUNT          20
                                                                 // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19
 static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 2, 2, 2, 1, 2, 2, 2, 2, 4, 8, 8, 1, 2, 2, 2, 1, 2, 2, 8};
-
-class InstanceSave;
 
 class Roll : public LootValidatorRef
 {
@@ -186,7 +186,7 @@ class MANGOS_DLL_SPEC Group
 
         // properties accessories
         uint32 GetId() const { return m_Id; }
-        bool IsFull() const { return (m_groupType==GROUPTYPE_NORMAL) ? (m_memberSlots.size()>=MAXGROUPSIZE) : (m_memberSlots.size()>=MAXRAIDSIZE); }
+        bool IsFull() const { return (m_groupType==GROUPTYPE_NORMAL) ? (m_memberSlots.size()>=MAX_GROUP_SIZE) : (m_memberSlots.size()>=MAX_RAID_SIZE); }
         bool isRaidGroup() const { return m_groupType==GROUPTYPE_RAID; }
         bool isBGGroup()   const { return m_bgGroup != NULL; }
         bool IsCreated()   const { return GetMembersCount() > 0; }
@@ -241,7 +241,7 @@ class MANGOS_DLL_SPEC Group
 
         bool HasFreeSlotSubGroup(uint8 subgroup) const
         {
-            return (m_subGroupsCounts && m_subGroupsCounts[subgroup] < MAXGROUPSIZE);
+            return (m_subGroupsCounts && m_subGroupsCounts[subgroup] < MAX_GROUP_SIZE);
         }
 
         bool SameSubGroup(Player const* member1, Player const* member2) const;
@@ -254,7 +254,7 @@ class MANGOS_DLL_SPEC Group
         {
             member_citerator mslot = _getMemberCSlot(guid);
             if(mslot==m_memberSlots.end())
-                return (MAXRAIDSIZE/MAXGROUPSIZE+1);
+                return (MAX_RAID_SUBGROUPS+1);
 
             return mslot->group;
         }
@@ -318,8 +318,8 @@ class MANGOS_DLL_SPEC Group
         void GroupLoot(Creature *creature, Loot *loot);
         void NeedBeforeGreed(Creature *creature, Loot *loot);
         void MasterLoot(Creature *creature, Loot *loot);
-        void CountRollVote(ObjectGuid const& playerGUID, ObjectGuid const& lootedTarget, uint32 itemSlot, RollVote choise);
-        void StartLootRool(Creature* lootTarget, Loot* loot, uint8 itemSlot, bool skipIfCanNotUse);
+        bool CountRollVote(Player* player, ObjectGuid const& lootedTarget, uint32 itemSlot, RollVote vote);
+        void StartLootRool(Creature* lootTarget, LootMethod method, Loot* loot, uint8 itemSlot);
         void EndRoll();
 
         void LinkMember(GroupReference *pRef) { m_memberMgr.insertFirst(pRef); }
@@ -349,9 +349,9 @@ class MANGOS_DLL_SPEC Group
         {
             // Sub group counters initialization
             if (!m_subGroupsCounts)
-                m_subGroupsCounts = new uint8[MAXRAIDSIZE / MAXGROUPSIZE];
+                m_subGroupsCounts = new uint8[MAX_RAID_SUBGROUPS];
 
-            memset((void*)m_subGroupsCounts, 0, (MAXRAIDSIZE / MAXGROUPSIZE)*sizeof(uint8));
+            memset((void*)m_subGroupsCounts, 0, MAX_RAID_SUBGROUPS*sizeof(uint8));
 
             for (member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
                 ++m_subGroupsCounts[itr->group];
@@ -390,7 +390,7 @@ class MANGOS_DLL_SPEC Group
         }
 
         void CountTheRoll(Rolls::iterator& roll);           // iterator update to next, in CountRollVote if true
-        bool CountRollVote(ObjectGuid const& playerGUID, Rolls::iterator& roll, RollVote choise);
+        bool CountRollVote(ObjectGuid const& playerGUID, Rolls::iterator& roll, RollVote vote);
 
         uint32              m_Id;                           // 0 for not created or BG groups
         MemberSlotList      m_memberSlots;
@@ -402,7 +402,7 @@ class MANGOS_DLL_SPEC Group
         uint64              m_mainAssistant;
         GroupType           m_groupType;
         BattleGround*       m_bgGroup;
-        uint64              m_targetIcons[TARGETICONCOUNT];
+        uint64              m_targetIcons[TARGET_ICON_COUNT];
         LootMethod          m_lootMethod;
         ItemQualities       m_lootThreshold;
         uint64              m_looterGuid;

@@ -390,8 +390,8 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
     if (rollType >= MAX_ROLL_FROM_CLIENT)
         return;
 
-    // everything is fine, do it
-    group->CountRollVote(GetPlayer()->GetObjectGuid(), lootedTarget, itemSlot, RollVote(rollType));
+    // everything is fine, do it, if false then some cheating problem found (result not used in pre-3.0)
+    group->CountRollVote(GetPlayer(), lootedTarget, itemSlot, RollVote(rollType));
 }
 
 void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)

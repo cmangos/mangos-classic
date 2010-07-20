@@ -65,7 +65,7 @@ enum ItemBondingType
 #define MAX_BIND_TYPE                             6
 
 // masks for ITEM_FIELD_FLAGS field
-enum ITEM_FLAGS
+enum ItemFlags
 {
     ITEM_FLAGS_BINDED                         = 0x00000001, // set in game at binding, not set in template
     ITEM_FLAGS_CONJURED                       = 0x00000002,
@@ -87,7 +87,7 @@ enum ITEM_FLAGS
     ITEM_FLAGS_MILLABLE                       = 0x20000000
 };
 
-enum BAG_FAMILY
+enum BagFamily
 {
     BAG_FAMILY_NONE                             = 0,
     BAG_FAMILY_ARROWS                           = 1,
@@ -392,7 +392,7 @@ enum ItemExtraFlags
     ITEM_EXTRA_NON_CONSUMABLE     = 0x01,                   // use as additional flag to spellcharges_N negative values, item not expire at no chanrges
     ITEM_EXTRA_REAL_TIME_DURATION = 0x02,                   // if set and have Duration time, then offline time included in counting, if not set then counted only in game time
 
-    ITEM_EXTRA_ALL                                          // all used flags, used for check DB data
+    ITEM_EXTRA_ALL                = 0x03                    // all used flags, used for check DB data (mask all above flags)
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
