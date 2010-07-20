@@ -3018,6 +3018,14 @@ void Player::learnSpell(uint32 spell_id)
 
     bool learning = addSpell(spell_id,active,true,false);
 
+    // prevent duplicated entires in spell book, also not send if not in world (loading)
+    if (learning && IsInWorld())
+    {
+        WorldPacket data(SMSG_LEARNED_SPELL, 4);
+        data << uint32(spell_id);
+        GetSession()->SendPacket(&data);
+    }
+
     // learn all disabled higher ranks (recursive)
     if(disabled)
     {
@@ -3029,14 +3037,6 @@ void Player::learnSpell(uint32 spell_id)
                 learnSpell(i->second);
         }
     }
-
-    // prevent duplicated entires in spell book, also not send if not in world (loading)
-    if(!learning || !IsInWorld ())
-        return;
-
-    WorldPacket data(SMSG_LEARNED_SPELL, 4);
-    data << uint32(spell_id);
-    GetSession()->SendPacket(&data);
 }
 
 void Player::removeSpell(uint32 spell_id, bool disabled)
