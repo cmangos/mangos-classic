@@ -14414,23 +14414,28 @@ InstanceSave* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)
 
 void Player::SendRaidInfo()
 {
+    uint32 counter = 0;
+
     WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
 
-    uint32 counter = 0;
-    for (BoundInstancesMap::iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
-        if(itr->second.perm) counter++;
+    size_t p_counter = data.wpos();
+    data << uint32(counter);                                // placeholder
 
-    data << counter;
+    time_t now = time(NULL);
+
     for (BoundInstancesMap::const_iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
     {
         if(itr->second.perm)
         {
             InstanceSave *save = itr->second.save;
-            data << (save->GetMapId());
-            data << (uint32)(save->GetResetTime() - time(NULL));
-            data << save->GetInstanceId();
+            data << uint32(save->GetMapId());               // map id
+            data << uint32(save->GetResetTime() - time(NULL));
+            data << uint32(save->GetInstanceId());          // instance id
+            counter++;
         }
     }
+
+    data.put<uint32>(p_counter, counter);
     GetSession()->SendPacket(&data);
 }
 
