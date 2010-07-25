@@ -11382,7 +11382,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
             GetSession()->SendTabardVendorActivate(guid);
             break;
         case GOSSIP_OPTION_AUCTIONEER:
-            GetSession()->SendAuctionHello(guid, ((Creature*)pSource));
+            GetSession()->SendAuctionHello(((Creature*)pSource));
             break;
         case GOSSIP_OPTION_SPIRITGUIDE:
             PrepareGossipMenu(pSource);

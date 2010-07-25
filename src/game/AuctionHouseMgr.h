@@ -25,6 +25,7 @@
 
 class Item;
 class Player;
+class Unit;
 class WorldPacket;
 
 #define MIN_AUCTION_TIME (2*HOUR)
@@ -48,7 +49,6 @@ enum AuctionAction
 struct AuctionEntry
 {
     uint32 Id;
-    uint32 auctioneer;                                      // creature low guid
     uint32 item_guidlow;
     uint32 item_template;
     uint32 owner;
@@ -123,7 +123,7 @@ class AuctionHouseMgr
 
         typedef UNORDERED_MAP<uint32, Item*> ItemMap;
 
-        AuctionHouseObject* GetAuctionsMap( uint32 factionTemplateId );
+        AuctionHouseObject* GetAuctionsMap(AuctionHouseEntry const* house);
 
         Item* GetAItem(uint32 id)
         {
@@ -141,7 +141,9 @@ class AuctionHouseMgr
         void SendAuctionSuccessfulMail( AuctionEntry * auction );
         void SendAuctionExpiredMail( AuctionEntry * auction );
         static uint32 GetAuctionDeposit(AuctionHouseEntry const* entry, uint32 time, Item *pItem);
-        static AuctionHouseEntry const* GetAuctionHouseEntry(uint32 factionTemplateId);
+
+        static uint32 GetAuctionHouseTeam(AuctionHouseEntry const* house);
+        static AuctionHouseEntry const* GetAuctionHouseEntry(Unit* unit);
 
     public:
         //load first auction items, because of check if item exists, when loading
