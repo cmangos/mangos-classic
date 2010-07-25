@@ -308,9 +308,11 @@ enum ConditionType
     CONDITION_SPELL                 = 17,                   // spell_id     0, 1 (0: has spell, 1: hasn't spell)
     CONDITION_INSTANCE_SCRIPT       = 18,                   // map_id       instance_condition_id (instance script specific enum)
     CONDITION_QUESTAVAILABLE        = 19,                   // quest_id     0       for case when loot/gossip possible only if player can start quest
+    CONDITION_RESERVED_1            = 20,                   // reserved for 3.x and later
+    CONDITION_RESERVED_2            = 21,                   // reserved for 3.x and later
 };
 
-#define MAX_CONDITION                 20                    // maximum value in ConditionType enum
+#define MAX_CONDITION                 22                    // maximum value in ConditionType enum
 
 struct PlayerCondition
 {

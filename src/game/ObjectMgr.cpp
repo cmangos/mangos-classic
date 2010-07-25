@@ -6991,8 +6991,11 @@ bool PlayerCondition::Meets(Player const * player) const
             if (Quest const* quest = sObjectMgr.GetQuestTemplate(value1))
                 return player->CanTakeQuest(quest, false);
             else
-                false;
+                return false;
         }
+        case CONDITION_RESERVED_1:
+        case CONDITION_RESERVED_2:
+            return false;
         default:
             return false;
     }
@@ -7220,6 +7223,12 @@ bool PlayerCondition::IsValid(ConditionType condition, uint32 value1, uint32 val
             }
 
             break;
+        }
+        case CONDITION_RESERVED_1:
+        case CONDITION_RESERVED_2:
+        {
+            sLog.outErrorDb("Condition (%u) reserved for later versions, skipped", condition);
+            return false;
         }
         case CONDITION_NONE:
             break;
