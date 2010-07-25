@@ -494,6 +494,7 @@ class ChatHandler
         bool HandleComeToMeCommand(const char *args);
         bool HandleCombatStopCommand(const char *args);
         bool HandleRepairitemsCommand(const char* args);
+        bool HandleStableCommand(const char* args);
         bool HandleWaterwalkCommand(const char* args);
         bool HandleQuitCommand(const char* args);
 
