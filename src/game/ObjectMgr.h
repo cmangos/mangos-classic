@@ -554,7 +554,7 @@ class ObjectMgr
 
         uint32 GetAreaTriggerScriptId(uint32 trigger_id);
 
-        ReputationOnKillEntry const* GetReputationOnKilEntry(uint32 id) const
+        ReputationOnKillEntry const* GetReputationOnKillEntry(uint32 id) const
         {
             RepOnKillMap::const_iterator itr = mRepOnKill.find(id);
             if(itr != mRepOnKill.end())
