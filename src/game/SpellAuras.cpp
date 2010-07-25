@@ -1366,97 +1366,15 @@ void Aura::TriggerSpell()
 //                    case 28522: break;
 //                    // Silithyst
 //                    case 29519: break;
-                    // Inoculate Nestlewood Owlkin
-                    case 29528:
-                        if(target->GetTypeId() != TYPEID_UNIT)// prevent error reports in case ignored player target
-                            return;
-                        break;
-//                    // Overload
-//                    case 29768: break;
-//                    // Return Fire
-//                    case 29788: break;
-//                    // Return Fire
-//                    case 29793: break;
-//                    // Return Fire
-//                    case 29794: break;
 //                    // Guardian of Icecrown Passive
 //                    case 29897: break;
-                    // Feed Captured Animal
-                    case 29917: trigger_spell_id = 29916; break;
-//                    // Flame Wreath
-//                    case 29946: break;
-//                    // Flame Wreath
-//                    case 29947: break;
 //                    // Mind Exhaustion Passive
 //                    case 30025: break;
-//                    // Nether Beam - Serenity
-//                    case 30401: break;
-                    // Extract Gas
-                    case 30427:
-                    {
-                        Unit* caster = GetCaster();
-                        if (!caster)
-                            return;
-                        // move loot to player inventory and despawn target
-                        if(caster->GetTypeId() ==TYPEID_PLAYER &&
-                           target->GetTypeId() == TYPEID_UNIT &&
-                           ((Creature*)target)->GetCreatureInfo()->type == CREATURE_TYPE_GAS_CLOUD)
-                        {
-                            Player* player = (Player*)caster;
-                            Creature* creature = (Creature*)target;
-                            // missing lootid has been reported on startup - just return
-                            if (!creature->GetCreatureInfo()->SkinLootId)
-                                return;
-
-                            player->AutoStoreLoot(creature->GetCreatureInfo()->SkinLootId,LootTemplates_Skinning,true);
-
-                            creature->ForcedDespawn();
-                        }
-                        return;
-                        break;
-                    }
-                    // Quake
-                    case 30576: trigger_spell_id = 30571; break;
-//                    // Burning Maul
-//                    case 30598: break;
 //                    // Regeneration
 //                    case 30799:
 //                    case 30800:
 //                    case 30801:
 //                        break;
-//                    // Despawn Self - Smoke cloud
-//                    case 31269: break;
-//                    // Time Rift Periodic
-//                    case 31320: break;
-//                    // Corrupt Medivh
-//                    case 31326: break;
-                    // Doom
-                    case 31347:
-                    {
-                        m_target->CastSpell(m_target,31350,true);
-                        m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                        return;
-                    }
-                    // Spellcloth
-                    case 31373:
-                    {
-                        // Summon Elemental after create item
-                        target->SummonCreature(17870, 0, 0, 0, target->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
-                        return;
-                    }
-//                    // Bloodmyst Tesla
-//                    case 31611: break;
-                    // Doomfire
-                    case 31944:
-                    {
-                        int32 damage = m_modifier.m_amount * ((GetAuraDuration() + m_modifier.periodictime) / GetAuraMaxDuration());
-                        target->CastCustomSpell(target, 31969, &damage, NULL, NULL, true, NULL, this, casterGUID);
-                        return;
-                    }
-//                    // Teleport Test
-//                    case 32236: break;
-//                    // Earthquake
-//                    case 32686: break;
                     default:
                         break;
                 }
