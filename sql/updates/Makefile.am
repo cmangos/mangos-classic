@@ -117,6 +117,7 @@ pkgdata_DATA = \
 	z0684_139_01_mangos_mangos_string.sql \
 	z0718_s0020_01_mangos_playercreateinfo.sql \
 	z0726_s0028_01_mangos_playercreateinfo.sql \
+	z0735_s0038_01_mangos_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -212,4 +213,5 @@ EXTRA_DIST = \
 	z0684_139_01_mangos_mangos_string.sql \
 	z0718_s0020_01_mangos_playercreateinfo.sql \
 	z0726_s0028_01_mangos_playercreateinfo.sql \
+	z0735_s0038_01_mangos_command.sql \
 	README
