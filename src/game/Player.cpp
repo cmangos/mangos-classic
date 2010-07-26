@@ -2706,7 +2706,7 @@ void Player::AddNewMailDeliverTime(time_t deliver_time)
     }
 }
 
-bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool disabled)
+bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
@@ -2739,28 +2739,81 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool disabled
 
     PlayerSpellState state = learning ? PLAYERSPELL_NEW : PLAYERSPELL_UNCHANGED;
 
+    bool dependent_set = false;
     bool disabled_case = false;
 
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr != m_spells.end())
     {
+        uint32 next_active_spell_id = 0;
+        // fix activate state for non-stackable low rank (and find next spell for !active case)
+        if(!SpellMgr::canStackSpellRanks(spellInfo) && sSpellMgr.GetSpellRank(spellInfo->Id) != 0)
+        {
+            SpellChainMapNext const& nextMap = sSpellMgr.GetSpellChainNext();
+            for(SpellChainMapNext::const_iterator next_itr = nextMap.lower_bound(spell_id); next_itr != nextMap.upper_bound(spell_id); ++next_itr)
+            {
+                if(HasSpell(next_itr->second))
+                {
+                    // high rank already known so this must !active
+                    active = false;
+                    next_active_spell_id = next_itr->second;
+                    break;
+                }
+            }
+        }
+
+        // not do anything if already known in expected state
+        if(itr->second.state != PLAYERSPELL_REMOVED && itr->second.active == active &&
+            itr->second.dependent == dependent && itr->second.disabled == disabled)
+        {
+            if(!IsInWorld() && !learning)                   // explicitly load from DB and then exist in it already and set correctly
+                itr->second.state = PLAYERSPELL_UNCHANGED;
+
+            return false;
+        }
+
+        // dependent spell known as not dependent, overwrite state
+        if (itr->second.state != PLAYERSPELL_REMOVED && !itr->second.dependent && dependent)
+        {
+            itr->second.dependent = dependent;
+            if (itr->second.state != PLAYERSPELL_NEW)
+                itr->second.state = PLAYERSPELL_CHANGED;
+            dependent_set = true;
+        }
+
         // update active state for known spell
         if(itr->second.active != active && itr->second.state != PLAYERSPELL_REMOVED && !itr->second.disabled)
         {
             itr->second.active = active;
 
-            // !IsInWorld() && !learning == explicitly load from DB and then exist in it already and set correctly
-            if(!IsInWorld() && !learning)
+            if(!IsInWorld() && !learning && !dependent_set) // explicitly load from DB and then exist in it already and set correctly
                 itr->second.state = PLAYERSPELL_UNCHANGED;
             else if(itr->second.state != PLAYERSPELL_NEW)
                 itr->second.state = PLAYERSPELL_CHANGED;
 
-            if(!active)
+            if(active)
             {
-                WorldPacket data(SMSG_REMOVED_SPELL, 4);
-                data << uint16(spell_id);
-                GetSession()->SendPacket(&data);
+                if (IsPassiveSpell(spell_id) && IsNeedCastPassiveSpellAtLearn(spellInfo))
+                    CastSpell (this,spell_id,true);
             }
+            else if(IsInWorld())
+            {
+                if(next_active_spell_id)
+                {
+                    // update spell ranks in spellbook and action bar
+                    WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
+                    data << uint16(spell_id);
+                    data << uint16(next_active_spell_id);
+                    GetSession()->SendPacket( &data );
+                }
+                else
+                {
+                    WorldPacket data(SMSG_REMOVED_SPELL, 4);
+                    data << uint16(spell_id);
+                    GetSession()->SendPacket(&data);
+                }
+            }
+
             return active;                                  // learn (show in spell book if active now)
         }
 
@@ -2788,7 +2841,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool disabled
             default:                                        // known not saved yet spell (new or modified)
             {
                 // can be in case spell loading but learned at some previous spell loading
-                if(!IsInWorld() && !learning)
+                if(!IsInWorld() && !learning && !dependent_set)
                     itr->second.state = PLAYERSPELL_UNCHANGED;
 
                 return false;
@@ -2812,23 +2865,24 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool disabled
                     if(!rankSpellId || rankSpellId == spell_id)
                         continue;
 
-                    removeSpell(rankSpellId);
+                    removeSpell(rankSpellId, false, false);
                 }
             }
         }
         // non talent spell: learn low ranks (recursive call)
         else if(uint32 prev_spell = sSpellMgr.GetPrevSpellInChain(spell_id))
         {
-            if(!IsInWorld())                                // at spells loading, no output, but allow save
-                addSpell(prev_spell,active,true,disabled);
+            if(!IsInWorld() || disabled)                    // at spells loading, no output, but allow save
+                addSpell(prev_spell,active,true,true,disabled);
             else                                            // at normal learning
-                learnSpell(prev_spell);
+                learnSpell(prev_spell,true);
         }
 
         PlayerSpell newspell;
-        newspell.active = active;
-        newspell.state = state;
-        newspell.disabled = disabled;
+        newspell.state     = state;
+        newspell.active    = active;
+        newspell.dependent = dependent;
+        newspell.disabled  = disabled;
 
         // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
         if(newspell.active && !newspell.disabled && !SpellMgr::canStackSpellRanks(spellInfo) && sSpellMgr.GetSpellRank(spellInfo->Id) != 0)
@@ -2909,22 +2963,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool disabled
     // also cast passive spells (including all talents without SPELL_EFFECT_LEARN_SPELL) with additional checks
     else if (IsPassiveSpell(spellInfo))
     {
-        bool need_cast =  false;
-
-        switch(spell_id)
-        {
-            // some spells not have stance data expected cast at form change or present
-            case  5420: need_cast = (m_form == FORM_TREE);            break;
-            case  5419: need_cast = (m_form == FORM_TRAVEL);          break;
-            case  7376: need_cast = (m_form == FORM_DEFENSIVESTANCE); break;
-            case  7381: need_cast = (m_form == FORM_BERSERKERSTANCE); break;
-            case 21156: need_cast = (m_form == FORM_BATTLESTANCE);    break;
-            case 21178: need_cast = (m_form == FORM_BEAR || m_form == FORM_DIREBEAR); break;
-            // another spells have proper stance data
-            default: need_cast = !spellInfo->Stances || m_form != 0 && (spellInfo->Stances & (1<<(m_form-1))); break;
-        }
-                                                            //Check CasterAuraStates
-        if (need_cast && (!spellInfo->CasterAuraState || HasAuraState(AuraState(spellInfo->CasterAuraState))))
+        if(IsNeedCastPassiveSpellAtLearn(spellInfo))
             CastSpell(this, spell_id, true);
     }
     else if (IsSpellHaveEffect(spellInfo,SPELL_EFFECT_SKILL_STEP))
@@ -2999,9 +3038,9 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool disabled
         if (!itr2->second.autoLearned)
         {
             if(!IsInWorld() || !itr2->second.active)        // at spells loading, no output, but allow save
-                addSpell(itr2->second.spell,itr2->second.active,true,false);
+                addSpell(itr2->second.spell,itr2->second.active,true,true,false);
             else                                            // at normal learning
-                learnSpell(itr2->second.spell);
+                learnSpell(itr2->second.spell,true);
         }
     }
 
@@ -3009,14 +3048,35 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool disabled
     return active && !disabled;
 }
 
-void Player::learnSpell(uint32 spell_id)
+bool Player::IsNeedCastPassiveSpellAtLearn(SpellEntry const* spellInfo) const
+{
+    bool need_cast =  false;
+
+    switch(spellInfo->Id)
+    {
+        // some spells not have stance data expacted cast at form change or present
+        case  5420: need_cast = (m_form == FORM_TREE);            break;
+        case  5419: need_cast = (m_form == FORM_TRAVEL);          break;
+        case  7376: need_cast = (m_form == FORM_DEFENSIVESTANCE); break;
+        case  7381: need_cast = (m_form == FORM_BERSERKERSTANCE); break;
+        case 21156: need_cast = (m_form == FORM_BATTLESTANCE);    break;
+        case 21178: need_cast = (m_form == FORM_BEAR || m_form == FORM_DIREBEAR); break;
+        // another spells have proper stance data
+        default: need_cast = !spellInfo->Stances || m_form != 0 && (spellInfo->Stances & (1<<(m_form-1))); break;
+    }
+
+    //Check CasterAuraStates
+    return need_cast && (!spellInfo->CasterAuraState || HasAuraState(AuraState(spellInfo->CasterAuraState)));
+}
+
+void Player::learnSpell(uint32 spell_id, bool dependent)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
 
     bool disabled = (itr != m_spells.end()) ? itr->second.disabled : false;
     bool active = disabled ? itr->second.active : true;
 
-    bool learning = addSpell(spell_id,active,true,false);
+    bool learning = addSpell(spell_id,active,true,dependent,false);
 
     // prevent duplicated entires in spell book, also not send if not in world (loading)
     if (learning && IsInWorld())
@@ -3034,12 +3094,12 @@ void Player::learnSpell(uint32 spell_id)
         {
             PlayerSpellMap::iterator iter = m_spells.find(i->second);
             if (disabled && iter != m_spells.end() && iter->second.disabled)
-                learnSpell(i->second);
+                learnSpell(i->second,false);
         }
     }
 }
 
-void Player::removeSpell(uint32 spell_id, bool disabled)
+void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
 {
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr == m_spells.end())
@@ -3052,17 +3112,15 @@ void Player::removeSpell(uint32 spell_id, bool disabled)
     SpellChainMapNext const& nextMap = sSpellMgr.GetSpellChainNext();
     for(SpellChainMapNext::const_iterator itr2 = nextMap.lower_bound(spell_id); itr2 != nextMap.upper_bound(spell_id); ++itr2)
         if(HasSpell(itr2->second) && !GetTalentSpellPos(itr2->second))
-            removeSpell(itr2->second,disabled);
+            removeSpell(itr2->second, disabled, false);
 
     // re-search, it can be corrupted in prev loop
     itr = m_spells.find(spell_id);
     if (itr == m_spells.end() || itr->second.state == PLAYERSPELL_REMOVED)
         return;                                             // already unleared
 
-    // removing
-    WorldPacket data(SMSG_REMOVED_SPELL, 4);
-    data << uint16(spell_id);
-    GetSession()->SendPacket(&data);
+    bool cur_active    = itr->second.active;
+    bool cur_dependent = itr->second.dependent;
 
     if (disabled)
     {
@@ -3175,7 +3233,57 @@ void Player::removeSpell(uint32 spell_id, bool disabled)
     for(SpellLearnSpellMap::const_iterator itr2 = spell_bounds.first; itr2 != spell_bounds.second; ++itr2)
         removeSpell(itr2->second.spell, disabled);
 
-    // TODO: recast if need lesser ranks spell for passive with IsPassiveSpellStackableWithRanks
+    // activate lesser rank in spellbook/action bar, and cast it if need
+    bool prev_activate = false;
+
+    if(uint32 prev_id = sSpellMgr.GetPrevSpellInChain (spell_id))
+    {
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
+
+        // if talent then lesser rank also talent and need learn
+        if (talentPos)
+        {
+            if(learn_low_rank)
+                learnSpell (prev_id,false);
+        }
+        // if ranked non-stackable spell: need activate lesser rank and update dependence state
+        else if(cur_active && !SpellMgr::canStackSpellRanks(spellInfo) && sSpellMgr.GetSpellRank(spellInfo->Id) != 0)
+        {
+            // need manually update dependence state (learn spell ignore like attempts)
+            PlayerSpellMap::iterator prev_itr = m_spells.find(prev_id);
+            if (prev_itr != m_spells.end())
+            {
+                if(prev_itr->second.dependent != cur_dependent)
+                {
+                    prev_itr->second.dependent = cur_dependent;
+                    if(prev_itr->second.state != PLAYERSPELL_NEW)
+                        prev_itr->second.state = PLAYERSPELL_CHANGED;
+                }
+
+                // now re-learn if need re-activate
+                if(cur_active && !prev_itr->second.active && learn_low_rank)
+                {
+                    if(addSpell(prev_id,true,false,prev_itr->second.dependent,prev_itr->second.disabled))
+                    {
+                        // downgrade spell ranks in spellbook and action bar
+                        WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
+                        data << uint16(spell_id);
+                        data << uint16(prev_id);
+                        GetSession()->SendPacket( &data );
+                        prev_activate = true;
+                    }
+                }
+            }
+        }
+    }
+
+    // remove from spell book if not replaced by lesser rank
+    if(!prev_activate)
+    {
+        WorldPacket data(SMSG_REMOVED_SPELL, 4);
+        data << uint16(spell_id);
+        GetSession()->SendPacket(&data);
+    }
 }
 
 void Player::RemoveSpellCooldown( uint32 spell_id, bool update /* = false */ )
@@ -3362,7 +3470,13 @@ bool Player::resetTalents(bool no_cost)
                 uint32 itrFirstId = sSpellMgr.GetFirstSpellInChain(itr->first);
 
                 // unlearn if first rank is talent or learned by talent
-                if (itrFirstId == talentInfo->RankID[j] || sSpellMgr.IsSpellLearnToSpell(talentInfo->RankID[j],itrFirstId))
+                if (itrFirstId == talentInfo->RankID[j])
+                {
+                    removeSpell(itr->first,!IsPassiveSpell(itr->first),false);
+                    itr = GetSpellMap().begin();
+                    continue;
+                }
+                else if (sSpellMgr.IsSpellLearnToSpell(talentInfo->RankID[j],itrFirstId))
                 {
                     removeSpell(itr->first,!IsPassiveSpell(itr->first));
                     itr = GetSpellMap().begin();
@@ -3388,17 +3502,6 @@ bool Player::resetTalents(bool no_cost)
     RemovePet(NULL,PET_SAVE_NOT_IN_SLOT, true);
 
     return true;
-}
-
-bool Player::_removeSpell(uint16 spell_id)
-{
-    PlayerSpellMap::iterator itr = m_spells.find(spell_id);
-    if (itr != m_spells.end())
-    {
-        m_spells.erase(itr);
-        return true;
-    }
-    return false;
 }
 
 Mail* Player::GetMail(uint32 id)
@@ -4768,7 +4871,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
             if (spellEntry && spellEntry->Mechanic == MECHANIC_DISCOVERY)
             {
                 if (uint32 discoveredSpell = GetSkillDiscoverySpell(_spell_idx->second->skillId, spellid, this))
-                    learnSpell(discoveredSpell);
+                    learnSpell(discoveredSpell,false);
             }
 
             uint32 craft_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_CRAFTING);
@@ -5055,6 +5158,7 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
             SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(itr->second.pos), MAKE_SKILL_VALUE(currVal,maxVal));
             if(itr->second.uState != SKILL_NEW)
                 itr->second.uState = SKILL_CHANGED;
+            //learnSkillRewardedSpells(id, currVal);        // pre-3.x have only 1 skill level req (so at learning only)
         }
         else                                                //remove
         {
@@ -5069,26 +5173,11 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
             else
                 mSkillStatus.erase(itr);
 
-            // remove spells that depend on this skill when removing the skill
-            for (PlayerSpellMap::const_iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
-            {
-                ++next;
-                if(itr->second.state == PLAYERSPELL_REMOVED)
-                    continue;
-
-                SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(itr->first);
-
-                for(SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
-                {
-                    if (_spell_idx->second->skillId == id)
-                    {
-                        // this may remove more than one spell (dependents)
-                        removeSpell(itr->first);
-                        next = m_spells.begin();
-                        break;
-                    }
-                }
-            }
+            // remove all spells that related to this skill
+            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+                if(SkillLineAbilityEntry const *pAbility = sSkillLineAbilityStore.LookupEntry(j))
+                    if (pAbility->skillId == id)
+                        removeSpell(sSpellMgr.GetFirstSpellInChain(pAbility->spellId));
         }
     }
     else if(currVal)                                        // add
@@ -5132,7 +5221,7 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
                         (*j)->ApplyModifier(true);
 
                 // Learn all spells for skill
-                learnSkillRewardedSpells(id);
+                learnSkillRewardedSpells(id, currVal);
                 return;
             }
         }
@@ -14242,7 +14331,7 @@ void Player::_LoadSpells(QueryResult *result)
 
             uint32 spell_id = fields[0].GetUInt32();
 
-            addSpell(spell_id, fields[1].GetBool(), false, fields[2].GetBool());
+            addSpell(spell_id, fields[1].GetBool(), false, false, fields[2].GetBool());
         }
         while( result->NextRow() );
 
@@ -15082,18 +15171,23 @@ void Player::_SaveSkills()
 
 void Player::_SaveSpells()
 {
-    for (PlayerSpellMap::iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
+    for (PlayerSpellMap::iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end();)
     {
-        ++next;
         if (itr->second.state == PLAYERSPELL_REMOVED || itr->second.state == PLAYERSPELL_CHANGED)
             CharacterDatabase.PExecute("DELETE FROM character_spell WHERE guid = '%u' and spell = '%u'", GetGUIDLow(), itr->first);
-        if (itr->second.state == PLAYERSPELL_NEW || itr->second.state == PLAYERSPELL_CHANGED)
+
+        // add only changed/new not dependent spells
+        if (!itr->second.dependent && (itr->second.state == PLAYERSPELL_NEW || itr->second.state == PLAYERSPELL_CHANGED))
             CharacterDatabase.PExecute("INSERT INTO character_spell (guid,spell,active,disabled) VALUES ('%u', '%u', '%u', '%u')", GetGUIDLow(), itr->first, itr->second.active ? 1 : 0,itr->second.disabled ? 1 : 0);
 
         if (itr->second.state == PLAYERSPELL_REMOVED)
-            _removeSpell(itr->first);
+            m_spells.erase(itr++);
         else
+        {
             itr->second.state = PLAYERSPELL_UNCHANGED;
+            ++itr;
+        }
+
     }
 }
 
@@ -17169,7 +17263,7 @@ void Player::resetSpells()
     PlayerSpellMap smap = GetSpellMap();
 
     for(PlayerSpellMap::const_iterator iter = smap.begin();iter != smap.end(); ++iter)
-        removeSpell(iter->first);                           // only iter->first can be accessed, object by iter->second can be deleted already
+        removeSpell(iter->first,false,false);               // only iter->first can be accessed, object by iter->second can be deleted already
 
     learnDefaultSpells();
     learnQuestRewardedSpells();
@@ -17184,9 +17278,9 @@ void Player::learnDefaultSpells()
         uint32 tspell = *itr;
         DEBUG_LOG("PLAYER (Class: %u Race: %u): Adding initial spell, id = %u",uint32(getClass()),uint32(getRace()), tspell);
         if(!IsInWorld())                                    // will send in INITIAL_SPELLS in list anyway at map add
-            addSpell(tspell,true,true,false);
+            addSpell(tspell,true,true,true,false);
         else                                                // but send in normal spell in game learn case
-            learnSpell(tspell);
+            learnSpell(tspell,true);
     }
 }
 
@@ -17278,7 +17372,7 @@ void Player::learnQuestRewardedSpells()
     }
 }
 
-void Player::learnSkillRewardedSpells(uint32 skill_id )
+void Player::learnSkillRewardedSpells(uint32 skill_id, uint32 skill_value )
 {
     uint32 raceMask  = getRaceMask();
     uint32 classMask = getClassMask();
@@ -17296,8 +17390,14 @@ void Player::learnSkillRewardedSpells(uint32 skill_id )
 
         if (sSpellStore.LookupEntry(pAbility->spellId))
         {
-            // Ok need learn spell
-            learnSpell(pAbility->spellId);
+            // need unlearn spell
+            if (skill_value < pAbility->req_skill_value)
+                removeSpell(pAbility->spellId);
+            // need learn
+            else if (!IsInWorld())
+                addSpell(pAbility->spellId,true,true,true,false);
+            else
+                learnSpell(pAbility->spellId,true);
         }
     }
 }
@@ -18125,13 +18225,19 @@ uint32 Player::CalculateTalentsPoints() const
     return uint32(talentPointsForLevel * sWorld.getConfig(CONFIG_FLOAT_RATE_TALENT));
 }
 
+struct DoPlayerLearnSpell
+{
+    DoPlayerLearnSpell(Player& _player) : player(_player) {}
+    void operator() (uint32 spell_id) { player.learnSpell(spell_id, false); }
+    Player& player;
+};
+
 void Player::learnSpellHighRank(uint32 spellid)
 {
-    learnSpell(spellid);
+    learnSpell(spellid, false);
 
-    SpellChainMapNext const& nextMap = sSpellMgr.GetSpellChainNext();
-    for(SpellChainMapNext::const_iterator itr = nextMap.lower_bound(spellid); itr != nextMap.upper_bound(spellid); ++itr)
-        learnSpellHighRank(itr->second);
+    DoPlayerLearnSpell worker(*this);
+    sSpellMgr.doForHighRanks(spellid, worker);
 }
 
 void Player::_LoadSkills(QueryResult *result)
@@ -18183,7 +18289,7 @@ void Player::_LoadSkills(QueryResult *result)
 
             mSkillStatus.insert(SkillStatusMap::value_type(skill, SkillStatusData(count, SKILL_UNCHANGED)));
 
-            learnSkillRewardedSpells(skill);
+            learnSkillRewardedSpells(skill, value);
 
             ++count;
 
@@ -18383,7 +18489,7 @@ void Player::LearnTalent(uint32 talentId, uint32 talentRank)
         return;
 
     // learn! (other talent ranks will unlearned at learning)
-    learnSpell(spellid);
+    learnSpell(spellid, false);
     DETAIL_LOG("TalentID: %u Rank: %u Spell: %u\n", talentId, talentRank, spellid);
 }
 

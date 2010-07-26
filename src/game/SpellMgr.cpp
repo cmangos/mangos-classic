@@ -1328,6 +1328,9 @@ bool SpellMgr::canStackSpellRanks(SpellEntry const *spellInfo)
     if(IsProfessionOrRidingSpell(spellInfo->Id))
         return false;
 
+    if(sSpellMgr.IsSkillBonusSpell(spellInfo->Id))
+        return false;
+
     // All stance spells. if any better way, change it.
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
@@ -1775,6 +1778,23 @@ bool SpellMgr::IsPrimaryProfessionSpell(uint32 spellId)
 bool SpellMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId) const
 {
     return IsPrimaryProfessionSpell(spellId) && GetSpellRank(spellId)==1;
+}
+
+bool SpellMgr::IsSkillBonusSpell(uint32 spellId) const
+{
+    SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBounds(spellId);
+
+    for(SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
+    {
+        SkillLineAbilityEntry const *pAbility = _spell_idx->second;
+        if (!pAbility || pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
+            continue;
+
+        if(pAbility->req_skill_value > 0)
+            return true;
+    }
+
+    return false;
 }
 
 SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, uint32 level) const
