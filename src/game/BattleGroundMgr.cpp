@@ -864,9 +864,9 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
 {
     data->Initialize(MSG_PVP_LOG_DATA, (1+4+40*bg->GetPlayerScoresSize()));
 
-    if(bg->GetWinner() == 2)
+    if(bg->GetStatus() != STATUS_WAIT_LEAVE)
     {
-        *data << uint8(0);                                  // bg in progress
+        *data << uint8(0);                                  // bg not ended
     }
     else
     {
