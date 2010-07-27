@@ -1357,6 +1357,64 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
             break;
         }
+        case TARGET_RANDOM_FRIEND_CHAIN_IN_AREA:
+        {
+            m_targets.m_targetMask = 0;
+            unMaxTargets = EffectChainTarget;
+            float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
+            std::list<Unit*> tempTargetUnitMap;
+            {
+                MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(m_caster, max_range);
+                MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
+                Cell::VisitAllObjects(m_caster, searcher, max_range);
+            }
+
+            if(tempTargetUnitMap.empty())
+                break;
+
+            tempTargetUnitMap.sort(TargetDistanceOrder(m_caster));
+
+            //Now to get us a random target that's in the initial range of the spell
+            uint32 t = 0;
+            std::list<Unit*>::iterator itr = tempTargetUnitMap.begin();
+            while(itr != tempTargetUnitMap.end() && (*itr)->IsWithinDist(m_caster, radius))
+                ++t, ++itr;
+
+            if(!t)
+                break;
+
+            itr = tempTargetUnitMap.begin();
+            std::advance(itr, rand() % t);
+            Unit *pUnitTarget = *itr;
+            targetUnitMap.push_back(pUnitTarget);
+
+            tempTargetUnitMap.erase(itr);
+
+            tempTargetUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+
+            t = unMaxTargets - 1;
+            Unit *prev = pUnitTarget;
+            std::list<Unit*>::iterator next = tempTargetUnitMap.begin();
+
+            while(t && next != tempTargetUnitMap.end())
+            {
+                if(!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
+                    break;
+
+                if(!prev->IsWithinLOSInMap(*next))
+                {
+                    ++next;
+                    continue;
+                }
+                prev = *next;
+                targetUnitMap.push_back(prev);
+                tempTargetUnitMap.erase(next);
+                tempTargetUnitMap.sort(TargetDistanceOrder(prev));
+                next = tempTargetUnitMap.begin();
+                --t;
+            }
+            break;
+        }
         case TARGET_PET:
         {
             Pet* tmpUnit = m_caster->GetPet();
