@@ -79,12 +79,6 @@ m_petModeFlags(PET_MODE_DEFAULT)
         charmInfo->SetReactState(REACT_PASSIVE);
     else if(type == GUARDIAN_PET)                           // always aggressive
         charmInfo->SetReactState(REACT_AGGRESSIVE);
-
-    m_spells.clear();
-    m_Auras.clear();
-    m_CreatureSpellCooldowns.clear();
-    m_CreatureCategoryCooldowns.clear();
-    m_autospells.clear();
 }
 
 Pet::~Pet()
