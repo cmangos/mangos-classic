@@ -3506,47 +3506,6 @@ void Aura::HandleAuraPowerBurn(bool apply, bool Real)
 void Aura::HandlePeriodicHeal(bool apply, bool Real)
 {
     m_isPeriodic = apply;
-
-    // only at real apply
-    if (Real && apply && GetSpellProto()->Mechanic == MECHANIC_BANDAGE)
-    {
-        // provided m_target as original caster to prevent apply aura caster selection for this negative buff
-        m_target->CastSpell(m_target,11196,true,NULL,this,m_target->GetGUID());
-    }
-
-    // For prevent double apply bonuses
-    bool loading = (m_target->GetTypeId() == TYPEID_PLAYER && ((Player*)m_target)->GetSession()->PlayerLoading());
-
-    if(!loading && apply)
-    {
-        switch (m_spellProto->SpellFamilyName)
-        {
-            case SPELLFAMILY_DRUID:
-            {
-                // Rejuvenation
-                if(m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000010))
-                {
-                    if(Unit* caster = GetCaster())
-                    {
-                        Unit::AuraList const& classScripts = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                        for(Unit::AuraList::const_iterator k = classScripts.begin(); k != classScripts.end(); ++k)
-                        {
-                            int32 tickcount = GetSpellDuration(m_spellProto) / m_spellProto->EffectAmplitude[m_effIndex];
-                            switch((*k)->GetModifier()->m_miscvalue)
-                            {
-                                case 4953:                          // Increased Rejuvenation Healing - Harold's Rejuvenating Broach Aura
-                                case 4415:                          // Increased Rejuvenation Healing - Idol of Rejuvenation Aura
-                                {
-                                    m_modifier.m_amount += (*k)->GetModifier()->m_amount / tickcount;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 void Aura::HandlePeriodicDamage(bool apply, bool Real)
@@ -3678,28 +3637,6 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 {
                     // $RAP*0.1/5 bonus per tick
                     m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 10 / 500);
-                    return;
-                }
-                break;
-            }
-            case SPELLFAMILY_PALADIN:
-            {
-                // Consecration
-                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000020))
-                {
-                    Unit::AuraList const& classScripts = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                    for(Unit::AuraList::const_iterator k = classScripts.begin(); k != classScripts.end(); ++k)
-                    {
-                        switch((*k)->GetModifier()->m_miscvalue)
-                        {
-                            case 5147:                      // Improved Consecration - Libram of the Eternal Rest
-                            {
-                                int32 tickcount = GetSpellDuration(m_spellProto) / m_spellProto->EffectAmplitude[m_effIndex];
-                                m_modifier.m_amount += (*k)->GetModifier()->m_amount / tickcount;
-                                break;
-                            }
-                        }
-                    }
                     return;
                 }
                 break;
