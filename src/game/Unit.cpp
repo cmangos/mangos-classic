@@ -3404,27 +3404,8 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
         for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
             if (spellProto->EffectTriggerSpell[j] == i_spellId)
                 is_triggered_by_spell = true;
-        if (is_triggered_by_spell) continue;
 
-        for(int j = 0; j < 3; ++j)
-        {
-            if(is_triggered_by_spell)
-                break;
-
-            // prevent remove form main spell by triggered passive spells
-            switch(i_spellProto->EffectApplyAuraName[j])    // main aura added before triggered spell
-            {
-                case SPELL_AURA_MOD_SHAPESHIFT:
-                    switch(i_spellId)
-                    {
-                        case 24858: if(spellId==24905)                  is_triggered_by_spell = true; break;
-                        case 34551: if(spellId==22688)                  is_triggered_by_spell = true; break;
-                    }
-                    break;
-            }
-        }
-
-        if(is_triggered_by_spell)
+        if (is_triggered_by_spell)
             continue;
 
         SpellSpecific i_spellId_spec = GetSpellSpecific(i_spellId);
