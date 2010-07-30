@@ -5004,58 +5004,6 @@ void Aura::PeriodicTick()
 
             pdamage = pCaster->SpellDamageBonus(m_target, GetSpellProto(), pdamage, DOT);
 
-            // talent Soul Siphon add bonus to Drain Life spells
-            if( GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags & 0x8) )
-            {
-                // find talent max bonus percentage
-                Unit::AuraList const& mClassScriptAuras = pCaster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                for(Unit::AuraList::const_iterator i = mClassScriptAuras.begin(); i != mClassScriptAuras.end(); ++i)
-                {
-                    if ((*i)->GetModifier()->m_miscvalue == 4992 || (*i)->GetModifier()->m_miscvalue == 4993)
-                    {
-                        if((*i)->GetEffIndex()!=1)
-                        {
-                            sLog.outError("Expected spell %u structure change, need code update",(*i)->GetId());
-                            break;
-                        }
-
-                        // effect 1 m_amount
-                        int32 maxPercent = (*i)->GetModifier()->m_amount;
-                        // effect 0 m_amount
-                        int32 stepPercent = pCaster->CalculateSpellDamage(pCaster, (*i)->GetSpellProto() ,EFFECT_INDEX_0);
-
-                        // count affliction effects and calc additional damage in percentage
-                        int32 modPercent = 0;
-                        Unit::AuraMap const& victimAuras = m_target->GetAuras();
-                        for (Unit::AuraMap::const_iterator itr = victimAuras.begin(); itr != victimAuras.end(); ++itr)
-                        {
-                            Aura* aura = itr->second;
-                            if (aura->IsPositive())continue;
-                            SpellEntry const* m_spell = aura->GetSpellProto();
-                            if (m_spell->SpellFamilyName != SPELLFAMILY_WARLOCK)
-                                continue;
-
-                            SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(m_spell->Id);
-
-                            for(SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
-                            {
-                                if(_spell_idx->second->skillId == SKILL_AFFLICTION)
-                                {
-                                    modPercent += stepPercent;
-                                    if (modPercent >= maxPercent)
-                                    {
-                                        modPercent = maxPercent;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        pdamage += (pdamage*modPercent/100);
-                        break;
-                    }
-                }
-            }
-
             pCaster->CalcAbsorbResist(m_target, GetSpellSchoolMask(GetSpellProto()), DOT, pdamage, &absorb, &resist, !(GetSpellProto()->AttributesEx2 & SPELL_ATTR_EX2_CANT_REFLECTED));
 
             if(m_target->GetHealth() < pdamage)

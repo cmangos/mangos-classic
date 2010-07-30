@@ -6065,36 +6065,23 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         if( (*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto) )
             TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
 
-    // .. taken pct: scripted (increases damage of * against targets *)
-    AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+    // done scripted mod (take it from owner)
+    Unit *owner = GetOwner();
+    if (!owner) owner = this;
+    AuraList const& mOverrideClassScript= owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
     for(AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
     {
+        if (!(*i)->isAffectedOnSpell(spellProto))
+            continue;
         switch((*i)->GetModifier()->m_miscvalue)
         {
-            //Molten Fury
-            case 4920: case 4919:
-                if(pVictim->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
-                    TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f; break;
-        }
-    }
-
-    // .. taken pct: dummy auras
-    AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
-    for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
-    {
-        switch((*i)->GetSpellProto()->SpellIconID)
-        {
-            //Mangle
-            case 2312:
-                for(int j = 0; j < MAX_EFFECT_INDEX; ++j)
-                {
-                    if(GetEffectMechanic(spellProto, SpellEffectIndex(j))==MECHANIC_BLEED)
-                    {
-                        TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f;
-                        break;
-                    }
-                }
+            case 4418: // Increased Shock Damage
+            case 4554: // Increased Lightning Damage
+            case 4555: // Improved Moonfire
+            {
+                pdamage+=(*i)->GetModifier()->m_amount;
                 break;
+            }
         }
     }
 
