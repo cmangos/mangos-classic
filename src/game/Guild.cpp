@@ -703,13 +703,13 @@ void Guild::Roster(WorldSession *session /*= NULL*/)
     {
         if (Player *pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
         {
-            data << (uint64)pl->GetGUID();
-            data << (uint8)1;
-            data << (std::string)pl->GetName();
-            data << (uint32)itr->second.RankId;
-            data << (uint8)pl->getLevel();
-            data << (uint8)pl->getClass();
-            data << (uint32)pl->GetZoneId();
+            data << uint64(pl->GetGUID());
+            data << uint8(1);
+            data << pl->GetName();
+            data << uint32(itr->second.RankId);
+            data << uint8(pl->getLevel());
+            data << uint8(pl->getClass());
+            data << uint32(pl->GetZoneId());
             data << itr->second.Pnote;
             data << itr->second.OFFnote;
         }
