@@ -160,6 +160,7 @@ struct GuildEventLogEntry
 
 struct MemberSlot
 {
+    uint32 accountId;
     std::string Name;
     uint32 RankId;
     uint8 Level;
@@ -223,6 +224,7 @@ class Guild
         void SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor);
 
         uint32 GetMemberSize() const { return members.size(); }
+        uint32 GetAccountsNumber();
 
         bool LoadGuildFromDB(uint32 GuildId);
         bool LoadRanksFromDB(uint32 GuildId);
@@ -303,6 +305,7 @@ class Guild
         uint32 m_BorderStyle;
         uint32 m_BorderColor;
         uint32 m_BackgroundColor;
+        uint32 m_accountsNumber;                            // 0 used as marker for need lazy calculation at request
 
         RankList m_Ranks;
 
@@ -316,5 +319,8 @@ class Guild
 
         bool m_EventLogLoaded;
         uint32 m_OnlineMembers;
+
+    private:
+        void UpdateAccountsNumber() { m_accountsNumber = 0;}// mark for lazy calculation at request in GetAccountsNumber
 };
 #endif
