@@ -2313,13 +2313,16 @@ void Spell::cast(bool skipCheck)
     {
         case SPELLFAMILY_GENERIC:
         {
-            if (m_spellInfo->Mechanic == MECHANIC_BANDAGE)  // Bandages
+            // Bandages
+            if (m_spellInfo->Mechanic == MECHANIC_BANDAGE)
                 AddPrecastSpell(11196);                     // Recently Bandaged
             // Divine Shield, Divine Protection, Blessing of Protection
             else if(m_spellInfo->Mechanic == MECHANIC_INVULNERABILITY)
                 AddPrecastSpell(25771);                     // Forbearance
             break;
         }
+        case SPELLFAMILY_WARRIOR:
+            break;
         case SPELLFAMILY_PRIEST:
         {
             // Power Word: Shield
