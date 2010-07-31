@@ -1924,7 +1924,7 @@ void SpellMgr::LoadSpellChains()
 
         if(node.prev!=0 && !sSpellStore.LookupEntry(node.prev))
         {
-            sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has not existed previous rank spell.",
+            sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has nonexistent previous rank spell.",
                 spell_id,node.prev,node.first,node.rank,node.req);
             continue;
         }
@@ -2139,7 +2139,7 @@ void SpellMgr::LoadSpellLearnSpells()
 
         if (!sSpellStore.LookupEntry(node.spell))
         {
-            sLog.outErrorDb("Spell %u listed in `spell_learn_spell` learning not existed spell %u",spell_id,node.spell);
+            sLog.outErrorDb("Spell %u listed in `spell_learn_spell` learning nonexistent spell %u",spell_id,node.spell);
             continue;
         }
 
@@ -2173,7 +2173,7 @@ void SpellMgr::LoadSpellLearnSpells()
                 dbc_node.spell       = entry->EffectTriggerSpell[i];
                 dbc_node.active      = true;                // all dbc based learned spells is active (show in spell book or hide by client itself)
 
-                // ignore learning not existed spells (broken/outdated/or generic learnig spell 483
+                // ignore learning nonexistent spells (broken/outdated/or generic learnig spell 483
                 if (!sSpellStore.LookupEntry(dbc_node.spell))
                     continue;
 
@@ -2443,7 +2443,7 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
             case 0:
                 continue;
 
-                // craft spell for crafting non-existed item (break client recipes list show)
+            // craft spell for crafting nonexistent item (break client recipes list show)
             case SPELL_EFFECT_CREATE_ITEM:
             {
                 if(!ObjectMgr::GetItemPrototype( spellInfo->EffectItemType[i] ))

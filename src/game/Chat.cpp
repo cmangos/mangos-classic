@@ -679,7 +679,7 @@ ChatCommand * ChatHandler::getCommandTable()
         load_command_table = false;
 
         // check hardcoded part integrity
-        CheckIntergrity(commandTable, NULL);
+        CheckIntegrity(commandTable, NULL);
 
         QueryResult *result = WorldDatabase.Query("SELECT name,security,help FROM command");
         if (result)
@@ -851,7 +851,7 @@ void ChatHandler::PSendSysMessage(const char *format, ...)
     SendSysMessage(str);
 }
 
-void ChatHandler::CheckIntergrity( ChatCommand *table, ChatCommand *parentCommand )
+void ChatHandler::CheckIntegrity( ChatCommand *table, ChatCommand *parentCommand )
 {
     for(uint32 i = 0; table[i].Name != NULL; ++i)
     {
@@ -866,10 +866,29 @@ void ChatHandler::CheckIntergrity( ChatCommand *table, ChatCommand *parentComman
 
         if (command->ChildCommands)
         {
+            if (command->Handler)
+            {
+                if (parentCommand)
+                    sLog.outError("Subcommand '%s' of command '%s' have handler and subcommands in same time, must be used '' subcommand for handler instead.",
+                        command->Name, parentCommand->Name);
+                else
+                    sLog.outError("First level command '%s' have handler and subcommands in same time, must be used '' subcommand for handler instead.",
+                        command->Name);
+            }
+
             if (parentCommand && strlen(command->Name)==0)
                 sLog.outError("Subcommand '' of command '%s' have subcommands", parentCommand->Name);
 
-            CheckIntergrity(command->ChildCommands, command);
+            CheckIntegrity(command->ChildCommands, command);
+        }
+        else if (!command->Handler)
+        {
+            if (parentCommand)
+                sLog.outError("Subcommand '%s' of command '%s' not have handler and subcommands in same time. Must have some from its!",
+                    command->Name, parentCommand->Name);
+            else
+                sLog.outError("First level command '%s' not have handler and subcommands in same time. Must have some from its!",
+                    command->Name);
         }
     }
 }
@@ -1130,7 +1149,7 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand *commandTable, const char
         }
         case CHAT_COMMAND_UNKNOWN:
         {
-            sLog.outErrorDb("Table `command` have not existed command '%s', skip.", cmdName.c_str());
+            sLog.outErrorDb("Table `command` have nonexistent command '%s', skip.", cmdName.c_str());
             return false;
         }
     }

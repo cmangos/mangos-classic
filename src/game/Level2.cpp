@@ -1531,7 +1531,7 @@ bool ChatHandler::HandleNpcSetMoveTypeCommand(const char* args)
         }
     }
 
-    // now lowguid is low guid really existed creature
+    // now lowguid is low guid really existing creature
     // and pCreature point (maybe) to this creature or NULL
 
     MovementGeneratorType move_type;

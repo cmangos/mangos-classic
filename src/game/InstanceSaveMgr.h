@@ -161,8 +161,7 @@ class InstanceResetScheduler
     private:                                                // fields
         InstanceSaveManager& m_InstanceSaves;
 
-
-        // fast lookup for reset times (always use existed functions for access/set)
+        // fast lookup for reset times (always use existing functions for access/set)
         typedef std::vector<time_t /*resetTime*/> ResetTimeVector;
         ResetTimeVector m_resetTimeByMapId;
 

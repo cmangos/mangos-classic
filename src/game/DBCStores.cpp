@@ -167,7 +167,7 @@ inline void LoadDBC(uint32& availableDbcLocales,barGoLink& bar, StoreProblemList
     }
     else
     {
-        // sort problematic dbc to (1) non compatible and (2) non-existed
+        // sort problematic dbc to (1) non compatible and (2) nonexistent
         FILE * f=fopen(dbc_filename.c_str(),"rb");
         if(f)
         {
@@ -408,7 +408,7 @@ void LoadDBCStores(const std::string& dataPath)
             sTaxiPathNodesByPath[entry->path].set(entry->index, entry);
 
     // Initialize global taxinodes mask
-    // include existed nodes that have at least single not spell base (scripted) path
+    // include existing nodes that have at least single not spell base (scripted) path
     {
         std::set<uint32> spellPaths;
         for(uint32 i = 1; i < sSpellStore.GetNumRows (); ++i)
