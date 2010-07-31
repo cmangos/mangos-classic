@@ -1319,16 +1319,16 @@ bool SpellMgr::IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellI
     return GetFirstSpellInChain(spellInfo_1->Id)==GetFirstSpellInChain(spellId_2);
 }
 
-bool SpellMgr::canStackSpellRanks(SpellEntry const *spellInfo)
+bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const *spellInfo) const
 {
-    if(IsPassiveSpell(spellInfo))                           // ranked passive spell
+    if (IsPassiveSpell(spellInfo))                          // ranked passive spell
         return false;
-    if(spellInfo->powerType != POWER_MANA && spellInfo->powerType != POWER_HEALTH)
+    if (spellInfo->powerType != POWER_MANA && spellInfo->powerType != POWER_HEALTH)
         return false;
-    if(IsProfessionOrRidingSpell(spellInfo->Id))
+    if (IsProfessionOrRidingSpell(spellInfo->Id))
         return false;
 
-    if(sSpellMgr.IsSkillBonusSpell(spellInfo->Id))
+    if (IsSkillBonusSpell(spellInfo->Id))
         return false;
 
     // All stance spells. if any better way, change it.
