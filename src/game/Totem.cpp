@@ -58,17 +58,6 @@ void Totem::Summon(Unit* owner)
     DEBUG_LOG("AddObject at Totem.cpp line 49");
     owner->GetMap()->Add((Creature*)this);
 
-    // select totem model in dependent from owner team [-ZERO] not implemented/useful
-    CreatureInfo const *cinfo = GetCreatureInfo();
-    if(owner->GetTypeId() == TYPEID_PLAYER && cinfo)
-    {
-        uint32 display_id = sObjectMgr.ChooseDisplayId(((Player*)owner)->GetTeam(), cinfo);
-        CreatureModelInfo const *minfo = sObjectMgr.GetCreatureModelRandomGender(display_id);
-        if (minfo)
-            display_id = minfo->modelid;
-        SetDisplayId(display_id);
-    }
-
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
     data << GetGUID();
     SendMessageToSet(&data,true);

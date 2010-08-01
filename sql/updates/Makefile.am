@@ -127,6 +127,7 @@ pkgdata_DATA = \
 	z0759_s0065_01_mangos_creature_addon.sql \
 	z0763_s0069_01_mangos_reputation_reward_rate.sql \
 	z0764_s0070_01_mangos_reputation_spillover_template.sql \
+	z0767_s0075_01_mangos_creature_model_info.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -232,4 +233,5 @@ EXTRA_DIST = \
 	z0759_s0065_01_mangos_creature_addon.sql \
 	z0763_s0069_01_mangos_reputation_reward_rate.sql \
 	z0764_s0070_01_mangos_reputation_spillover_template.sql \
+	z0767_s0075_01_mangos_creature_model_info.sql \
 	README

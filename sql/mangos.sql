@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z0764_s0070_01_mangos_reputation_spillover_template` bit(1) default NULL
+  `required_z0767_s0075_01_mangos_creature_model_info` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1013,11 +1013,12 @@ DROP TABLE IF EXISTS `creature_model_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_model_info` (
-  `modelid` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `bounding_radius` float NOT NULL DEFAULT '0',
-  `combat_reach` float NOT NULL DEFAULT '0',
-  `gender` tinyint(3) unsigned NOT NULL DEFAULT '2',
-  `modelid_other_gender` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `modelid` mediumint(8) unsigned NOT NULL default '0',
+  `bounding_radius` float NOT NULL default '0',
+  `combat_reach` float NOT NULL default '0',
+  `gender` tinyint(3) unsigned NOT NULL default '2',
+  `modelid_other_gender` mediumint(8) unsigned NOT NULL default '0',
+  `modelid_other_team` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY (`modelid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Creature System (Model related info)';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1029,23 +1030,23 @@ CREATE TABLE `creature_model_info` (
 LOCK TABLES `creature_model_info` WRITE;
 /*!40000 ALTER TABLE `creature_model_info` DISABLE KEYS */;
 INSERT INTO `creature_model_info` VALUES
-(49, 0.3060, 1.5, 0, 50),
-(50, 0.2080, 1.5, 1, 49),
-(51, 0.3720, 1.5, 0, 52),
-(52, 0.2360, 1.5, 1, 51),
-(53, 0.3470, 1.5, 0, 54),
-(54, 0.3470, 1.5, 1, 53),
-(55, 0.3890, 1.5, 0, 56),
-(56, 0.3060, 1.5, 1, 55),
-(57, 0.3830, 1.5, 0, 58),
-(58, 0.3830, 1.5, 1, 57),
-(59, 0.9747, 1.5, 0, 60),
-(60, 0.8725, 1.5, 1, 59),
-(1478, 0.3060, 1.5, 0, 1479),
-(1479, 0.3060, 1.5, 1, 1478),
-(1563, 0.3519, 1.5, 0, 1564),
-(1564, 0.3519, 1.5, 1, 1563),
-(10045, 1.0000, 1.5, 2, 0);
+(49, 0.3060, 1.5, 0, 50, 0),
+(50, 0.2080, 1.5, 1, 49, 0),
+(51, 0.3720, 1.5, 0, 52, 0),
+(52, 0.2360, 1.5, 1, 51, 0),
+(53, 0.3470, 1.5, 0, 54, 0),
+(54, 0.3470, 1.5, 1, 53, 0),
+(55, 0.3890, 1.5, 0, 56, 0),
+(56, 0.3060, 1.5, 1, 55, 0),
+(57, 0.3830, 1.5, 0, 58, 0),
+(58, 0.3830, 1.5, 1, 57, 0),
+(59, 0.9747, 1.5, 0, 60, 0),
+(60, 0.8725, 1.5, 1, 59, 0),
+(1478, 0.3060, 1.5, 0, 1479, 0),
+(1479, 0.3060, 1.5, 1, 1478, 0),
+(1563, 0.3519, 1.5, 0, 1564, 0),
+(1564, 0.3519, 1.5, 1, 1563, 0),
+(10045, 1.0000, 1.5, 2, 0, 0),
 /*!40000 ALTER TABLE `creature_model_info` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1205,12 +1206,12 @@ DROP TABLE IF EXISTS `creature_template`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_template` (
-  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `KillCredit1` int(11) unsigned NOT NULL DEFAULT '0',
-  `KillCredit2` int(11) unsigned NOT NULL DEFAULT '0',
-  `modelid_1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `modelid_2` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `name` char(100) NOT NULL DEFAULT '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `KillCredit1` int(11) unsigned NOT NULL default '0',
+  `KillCredit2` int(11) unsigned NOT NULL default '0',
+  `modelid_1` mediumint(8) unsigned NOT NULL default '0',
+  `modelid_2` mediumint(8) unsigned NOT NULL default '0',
+  `name` char(100) NOT NULL default '0',
   `subname` char(100) DEFAULT NULL,
   `gossip_menu_id` mediumint(8) unsigned NOT NULL default '0',
   `minlevel` tinyint(3) unsigned NOT NULL DEFAULT '1',

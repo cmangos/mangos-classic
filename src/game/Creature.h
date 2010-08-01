@@ -60,13 +60,14 @@ enum CreatureFlagsExtra
 #endif
 
 #define MAX_KILL_CREDIT 2
+#define MAX_CREATURE_MODEL 2                                // only single send to client in static data
 
 // from `creature_template` table
 struct CreatureInfo
 {
     uint32  Entry;
     uint32  KillCredit[MAX_KILL_CREDIT];
-    uint32  DisplayID[2];
+    uint32  ModelId[MAX_CREATURE_MODEL];
     char*   Name;
     char*   SubName;
     uint32  GossipMenuId;
@@ -174,7 +175,7 @@ struct CreatureData
 {
     uint32 id;                                              // entry in creature_template
     uint16 mapid;
-    uint32 displayid;
+    uint32 modelid_override;                                // overrides any model defined in creature_template
     int32 equipmentId;
     float posX;
     float posY;
@@ -214,7 +215,8 @@ struct CreatureModelInfo
     float bounding_radius;
     float combat_reach;
     uint8 gender;
-    uint32 modelid_other_gender;
+    uint32 modelid_other_gender;                            // The oposite gender for this modelid (male/female)
+    uint32 modelid_other_team;                              // The oposite team. Generally for alliance totem
 };
 
 enum InhabitTypeValues
@@ -482,6 +484,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         CreatureInfo const *GetCreatureInfo() const { return m_creatureInfo; }
         CreatureDataAddon const* GetCreatureAddon() const;
+
+        static uint32 ChooseDisplayId(uint32 team, const CreatureInfo *cinfo, const CreatureData *data = NULL);
 
         std::string GetAIName() const;
         std::string GetScriptName() const;
