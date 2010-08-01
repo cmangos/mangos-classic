@@ -290,6 +290,17 @@ bool AreaTrigger      ( Player *player, AreaTriggerEntry* atEntry )
 }
 
 MANGOS_DLL_EXPORT
+bool ProcessEventId(uint32 eventId, Object* source, Object* target, bool isStart)
+{
+    Script *tmpscript = m_scripts[GetEventIdScriptId(eventId)];
+    if (!tmpscript || !tmpscript->pProcessEventId)
+        return false;
+
+    // isStart are normally true. For taxi event id at arrival, it's false
+    return tmpscript->pProcessEventId(eventId, source, target, isStart);
+}
+
+MANGOS_DLL_EXPORT
 bool ItemUse( Player *player, Item* _Item, SpellCastTargets const& targets)
 {
     Script *tmpscript = m_scripts[_Item->GetProto()->ScriptId];

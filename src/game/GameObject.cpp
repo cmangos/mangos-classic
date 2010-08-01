@@ -990,7 +990,9 @@ void GameObject::Use(Unit* user)
                 if (info->goober.eventId)
                 {
                     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Goober ScriptStart id %u for GO entry %u (GUID %u).", info->goober.eventId, GetEntry(), GetDBTableGUIDLow());
-                    GetMap()->ScriptsStart(sEventScripts, info->goober.eventId, player, this);
+
+                    if (!Script->ProcessEventId(info->goober.eventId, player, this, true))
+                        GetMap()->ScriptsStart(sEventScripts, info->goober.eventId, player, this);
                 }
 
                 // possible quest objective for active quests
@@ -1033,7 +1035,10 @@ void GameObject::Use(Unit* user)
                 player->SendCinematicStart(info->camera.cinematicId);
 
             if (info->camera.eventID)
-                GetMap()->ScriptsStart(sEventScripts, info->camera.eventID, player, this);
+            {
+                if (!Script->ProcessEventId(info->camera.eventID, player, this, true))
+                    GetMap()->ScriptsStart(sEventScripts, info->camera.eventID, player, this);
+            }
 
             return;
         }

@@ -1667,8 +1667,10 @@ void Spell::EffectSendEvent(SpellEffectIndex eff_idx)
     /*
     we do not handle a flag dropping or clicking on flag in battleground by sendevent system
     */
-    DEBUG_LOG("Spell ScriptStart %u for spellid %u in EffectSendEvent ", m_spellInfo->EffectMiscValue[eff_idx], m_spellInfo->Id);
-    m_caster->GetMap()->ScriptsStart(sEventScripts, m_spellInfo->EffectMiscValue[eff_idx], m_caster, focusObject);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart %u for spellid %u in EffectSendEvent ", m_spellInfo->EffectMiscValue[eff_idx], m_spellInfo->Id);
+
+    if (!Script->ProcessEventId(m_spellInfo->EffectMiscValue[eff_idx], m_caster, focusObject, true))
+        m_caster->GetMap()->ScriptsStart(sEventScripts, m_spellInfo->EffectMiscValue[eff_idx], m_caster, focusObject);
 }
 
 void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
@@ -2025,6 +2027,8 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
 
 void Spell::SendLoot(uint64 guid, LootType loottype)
 {
+    Player* player = (Player*)m_caster;
+
     if (gameObjTarget)
     {
         switch (gameObjTarget->GetGoType())
@@ -2038,7 +2042,18 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 return;
 
             case GAMEOBJECT_TYPE_CHEST:
-                gameObjTarget->Use(m_caster);
+                // TODO: possible must be moved to loot release (in different from linked triggering)
+                if (gameObjTarget->GetGOInfo()->chest.eventId)
+                {
+                    DEBUG_LOG("Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId,gameObjTarget->GetDBTableGUIDLow());
+                    if (!Script->ProcessEventId(gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget, true))
+                        player->GetMap()->ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
+                }
+
+                // triggering linked GO
+                if (uint32 trapEntry = gameObjTarget->GetGOInfo()->chest.linkedTrapId)
+                    gameObjTarget->TriggeringLinkedGameObject(trapEntry,m_caster);
+
                 // Don't return, let loots been taken
                 break;
 
