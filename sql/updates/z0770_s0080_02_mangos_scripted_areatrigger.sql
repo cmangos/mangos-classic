@@ -1,0 +1,3 @@
+ALTER TABLE db_version CHANGE COLUMN required_z0770_s0080_01_mangos_instance_template required_z0770_s0080_02_mangos_scripted_areatrigger bit;
+
+RENAME TABLE areatrigger_scripts TO scripted_areatrigger;
