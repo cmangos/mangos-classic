@@ -17151,7 +17151,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // SMSG_SET_AURA_SINGLE
 
-    data.Initialize(SMSG_LOGIN_SETTIMESPEED, 8);
+    data.Initialize(SMSG_LOGIN_SETTIMESPEED, 4 + 4);
     data << uint32(secsToTimeBitFields(sWorld.GetGameTime()));
     data << (float)0.01666667f;                             // game speed
     GetSession()->SendPacket( &data );

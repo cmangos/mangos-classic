@@ -2742,10 +2742,13 @@ void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, Play
 
 void ObjectMgr::LoadGuilds()
 {
-    Guild *newguild;
+    Guild *newGuild;
     uint32 count = 0;
 
-    QueryResult *result = CharacterDatabase.Query( "SELECT guildid FROM guild" );
+    //                                                    0             1          2          3           4           5           6
+    QueryResult *result = CharacterDatabase.Query("SELECT guild.guildid,guild.name,leaderguid,EmblemStyle,EmblemColor,BorderStyle,BorderColor,"
+    //   7               8    9    10
+        "BackgroundColor,info,motd,createdate FROM guild ORDER BY guildid ASC");
 
     if( !result )
     {
@@ -2759,27 +2762,44 @@ void ObjectMgr::LoadGuilds()
         return;
     }
 
+    // load guild ranks
+    //                                                                0       1   2     3
+    QueryResult *guildRanksResult   = CharacterDatabase.Query("SELECT guildid,rid,rname,rights FROM guild_rank ORDER BY guildid ASC, rid ASC");
+
+    // load guild members
+    //                                                                0       1                 2    3     4
+    QueryResult *guildMembersResult = CharacterDatabase.Query("SELECT guildid,guild_member.guid,rank,pnote,offnote,"
+    //   5                6                 7                 8                9                       10
+        "characters.name, characters.level, characters.class, characters.zone, characters.logout_time, characters.account "
+        "FROM guild_member LEFT JOIN characters ON characters.guid = guild_member.guid ORDER BY guildid ASC");
+
     barGoLink bar( (int)result->GetRowCount() );
 
     do
     {
-        Field *fields = result->Fetch();
+        //Field *fields = result->Fetch();
 
         bar.step();
         ++count;
 
-        newguild = new Guild;
-        if(!newguild->LoadGuildFromDB(fields[0].GetUInt32()))
+        newGuild = new Guild;
+        if (!newGuild->LoadGuildFromDB(result) ||
+            !newGuild->LoadRanksFromDB(guildRanksResult) ||
+            !newGuild->LoadMembersFromDB(guildMembersResult) ||
+            !newGuild->CheckGuildStructure()
+            )
         {
-            newguild->Disband();
-            delete newguild;
+            newGuild->Disband();
+            delete newGuild;
             continue;
         }
-        AddGuild(newguild);
-
-    }while( result->NextRow() );
+        newGuild->LoadGuildEventLogFromDB();
+        AddGuild(newGuild);
+    } while( result->NextRow() );
 
     delete result;
+    delete guildRanksResult;
+    delete guildMembersResult;
 
     //delete unused LogGuid records in guild_eventlog table
     //you can comment these lines if you don't plan to change CONFIG_UINT32_GUILD_EVENT_LOG_COUNT
@@ -5520,14 +5540,14 @@ void ObjectMgr::PackGroupIds()
 
 void ObjectMgr::SetHighestGuids()
 {
-    QueryResult *result = CharacterDatabase.Query( "SELECT MAX(guid) FROM characters" );
+    QueryResult *result = CharacterDatabase.Query("SELECT MAX(guid) FROM characters");
     if( result )
     {
         m_CharGuids.Set((*result)[0].GetUInt32()+1);
         delete result;
     }
 
-    result = WorldDatabase.Query( "SELECT MAX(guid) FROM creature" );
+    result = WorldDatabase.Query("SELECT MAX(guid) FROM creature");
     if( result )
     {
         m_CreatureGuids.Set((*result)[0].GetUInt32()+1);
@@ -5574,7 +5594,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = CharacterDatabase.Query( "SELECT MAX(guid) FROM corpse" );
+    result = CharacterDatabase.Query("SELECT MAX(guid) FROM corpse");
     if( result )
     {
         m_CorpseGuids.Set((*result)[0].GetUInt32()+1);
