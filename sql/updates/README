@@ -56,32 +56,30 @@ or to DB with already applied this or later SQL update will generate an error an
 
 === For Commiters ====
 
-Possible use simplifed steps if backported revision include sql update in form that can be re-apply without problem mutiply times
-then:
+IMPORTNAT: Need use git_id tool from MaNGOSZero sources.
 
-1. Rename sql update from 0.12 form (001_6939_01_mangos_quest_template.sql) to mangoszero form (z0001_001_01_mangos_quest_template.sql)
-   using next free order_number in sql/updates files list.
-2. Drop sql order guards from sql update file
-3. Restore field name in db version table in db sql file (mangos.sql/etc) to state before related revision backporting.
-3. Restore field name in src/shared/revision_sql.h file to state before related revision backporting.
-4. Fix/update sql update file name in slq/updates/Makefile.am
+===== For backporting sql updates =====
 
-If revison modify table structure and include sql update that can't be applied to db multiply times
-then:
+1. Rename sql update from mangos-0.12 form (s0070_7932_01_characters_character_pet.sql) to mangoszero form (z0041_s0070_01_characters_character_pet.sql)
+   using any free order_number in sql/updates files list (it will replaced by proper at git_id -s use).
 
-1. Rename sql update from 0.12 form (001_6939_01_mangos_quest_template.sql) to mangoszero form (z0001_001_01_mangos_quest_template.sql)
-   using next free order_number in sql/updates files list.
+   For realmd sql update you need use master revision instead mangos-0.12 (realmd revisons master based):
+   (s0070_10008_01_realmd.sql) to mangoszero form (z0041_10008_01_realmd.sql)
 
-   If this realmd sql update preserve existed mangos master sql guards, and do next step with this goal.
+2. You can ignore sql order guards in sql update file. It will fixed at git_id -s use.
+   You can ignore content and changes/conflicts in sql/update/Makefile.am. It will regenerated at git_id -s use.
+   For make possible test code part build you can resolve revision_sql.h conflicts in any way.
+   Work test better do after apply git_id -s to comit when revision_sql.h will regenerated.
+   You also need resolve conflicts in DB sql file before git_id tool use (used revison in DB version not important and will replaced by git_id -s)
 
-2. Replace sql order guards from sql update file
-   (ALTER TABLE db_version CHANGE COLUMN required_029_7393_01_mangos_game_event required_035_7855_01_mangos_pools bit;)
-   to mangozzero form.
-2.1: Look at current guard field name in affected DB (sql/mangos.sql) and replace first (old) name (`required_029_7393_01_mangos_game_event`)
-2.2: Create new field name base at mangoszero sql update name (`required_z001_029_01_mangos_game_event`)
-2.3: Form final mangoszero guard query
-     (ALTER TABLE db_version CHANGE COLUMN required_z001_029_01_mangos_game_event required_z0002_035_01_mangos_pools bit;)
-2.4: Update field name in db version table (db_version in mangos.sql in our case) to new field name (required_z0002_035_01_mangos_pools)
-2.5: Update field name in affected DB related define (REVISION_DB_MANGOS) in src/shared/revision_sql.h
-     to new field name (required_z0002_035_01_mangos_pools)
-3. Fix/update sql update file name in slq/updates/Makefile.am
+3. Now use git_id -s
+
+===== For new sql updates =====
+
+1. Name sql update in mangoszero form (z0041_xxxxxx_01_characters_character_pet.sql)
+   using any free order_number in sql/updates files list (it will replaced by proper at git_id -s use).
+
+2. Add sql update to commit and manually include sql update changes in to related DB sql file.
+
+3. Now use git_id -s (sql update revison will updates in name, sql guards will added to sql update,
+   required revision data will update in related DB sql file and in revision_sql.h)

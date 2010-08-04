@@ -132,6 +132,7 @@ pkgdata_DATA = \
 	z0770_s0080_01_mangos_instance_template.sql \
 	z0770_s0080_02_mangos_scripted_areatrigger.sql \
 	z0770_s0080_03_mangos_scripted_event_id.sql \
+	z0774_10008_01_realmd_realmd_db_version.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -242,4 +243,5 @@ EXTRA_DIST = \
 	z0770_s0080_01_mangos_instance_template.sql \
 	z0770_s0080_02_mangos_scripted_areatrigger.sql \
 	z0770_s0080_03_mangos_scripted_event_id.sql \
+	z0774_10008_01_realmd_realmd_db_version.sql \
 	README
