@@ -1936,8 +1936,11 @@ void Player::Regenerate(Powers power)
             addvalue = 30 * RageDecreaseRate;               // 3 rage by tick
         }   break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
-            addvalue = 20;
+        {
+            float EnergyRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_ENERGY);
+            addvalue = 20 * EnergyRate;
             break;
+        }
         case POWER_FOCUS:
         case POWER_HAPPINESS:
         case POWER_HEALTH:
