@@ -133,7 +133,9 @@ pkgdata_DATA = \
 	z0770_s0080_02_mangos_scripted_areatrigger.sql \
 	z0770_s0080_03_mangos_scripted_event_id.sql \
 	z0774_10008_01_realmd_realmd_db_version.sql \
-	z0775_s0083_01_mangos_mangos_string.sql
+	z0775_s0083_01_mangos_mangos_string.sql \
+	z0778_s0087_01_characters_character_aura.sql \
+	z0778_s0087_02_characters_pet_aura.sql
 
 ## Additional files to include when running 'make dist'
 #  SQL update files, to upgrade database schema from older revisions
@@ -245,4 +247,6 @@ EXTRA_DIST = \
 	z0770_s0080_02_mangos_scripted_areatrigger.sql \
 	z0770_s0080_03_mangos_scripted_event_id.sql \
 	z0774_10008_01_realmd_realmd_db_version.sql \
-	z0775_s0083_01_mangos_mangos_string.sql
+	z0775_s0083_01_mangos_mangos_string.sql \
+	z0778_s0087_01_characters_character_aura.sql \
+	z0778_s0087_02_characters_pet_aura.sql
