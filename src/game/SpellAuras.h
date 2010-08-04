@@ -282,6 +282,8 @@ class MANGOS_DLL_SPEC Aura
         bool IsInUse() const { return m_in_use;}
         bool IsDeleted() const { return m_deleted;}
 
+        void SetDeleted() { m_deleted = true; }
+
         void SetInUse(bool state)
         {
             if(state)
