@@ -346,7 +346,22 @@ enum MangosStrings
     //                                    354 used in master branch
     //                                    355 used in master branch
     //                                    356 used in master branch
-    // Room for more level 2              357-399 not used
+    LANG_AREATRIGER_NOT_HAS_TARGET      = 357,
+    LANG_COMMAND_NOTRIGGERFOUND         = 358,
+    LANG_TRIGGER_TARGET_LIST_CHAT       = 359,
+    LANG_TRIGGER_TARGET_LIST_CONSOLE    = 360,
+    LANG_TRIGGER_LIST_CHAT              = 361,
+    LANG_TRIGGER_LIST_CONSOLE           = 362,
+    LANG_TRIGGER_DIST                   = 363,
+    LANG_TRIGGER_TAVERN                 = 364,
+    LANG_TRIGGER_QUEST                  = 365,
+    LANG_TRIGGER_EXPLORE_QUEST          = 366,
+    LANG_TRIGGER_REQ_LEVEL              = 367,
+    LANG_TRIGGER_REQ_ITEMS              = 368,
+    LANG_TRIGGER_REQ_QUEST              = 369,
+    //                                    370 used in master branch
+    //                                    371 used in master branch
+    // Room for more level 2              372-399 not used
 
     // level 3 chat
     LANG_SCRIPTS_RELOADED               = 400,
@@ -843,7 +858,8 @@ enum MangosStrings
     LANG_NPC_GO_INFO_POOL_STRING        = 1149,
     LANG_NPC_GO_INFO_EVENT_STRING       = 1150,
     LANG_NPC_GO_INFO_POOL_EVENT_STRING  = 1151,
-    // Room for more level 3              1152-1199 not used
+    LANG_COMMAND_ITEM_USABLE            = 1152,
+    // Room for more level 3              1153-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
