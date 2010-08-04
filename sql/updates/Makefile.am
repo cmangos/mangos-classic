@@ -41,7 +41,7 @@ pkgdata_DATA = \
 	z0095_090_01_mangos_player_xp_for_level.sql \
 	z0096_xxx_01_mangos.sql \
 	z0101_xxx_01_mangos_item_template.sql \
-	z0114_xxx_01_character_kill.sql \
+	z0114_xxx_01_characters_character_kill.sql \
 	z0114_xxx_02_characters.sql \
 	z0124_xxx_01_characters.sql \
 	z0124_xxx_02_mangos.sql \
@@ -135,7 +135,8 @@ pkgdata_DATA = \
 	z0774_10008_01_realmd_realmd_db_version.sql \
 	z0775_s0083_01_mangos_mangos_string.sql \
 	z0778_s0087_01_characters_character_aura.sql \
-	z0778_s0087_02_characters_pet_aura.sql
+	z0778_s0087_02_characters_pet_aura.sql \
+	z0782_xxxxx_01_mangos_mangos_string.sql
 
 ## Additional files to include when running 'make dist'
 #  SQL update files, to upgrade database schema from older revisions
@@ -155,7 +156,7 @@ EXTRA_DIST = \
 	z0095_090_01_mangos_player_xp_for_level.sql \
 	z0096_xxx_01_mangos.sql \
 	z0101_xxx_01_mangos_item_template.sql \
-	z0114_xxx_01_character_kill.sql \
+	z0114_xxx_01_characters_character_kill.sql \
 	z0114_xxx_02_characters.sql \
 	z0124_xxx_01_characters.sql \
 	z0124_xxx_02_mangos.sql \
@@ -249,4 +250,5 @@ EXTRA_DIST = \
 	z0774_10008_01_realmd_realmd_db_version.sql \
 	z0775_s0083_01_mangos_mangos_string.sql \
 	z0778_s0087_01_characters_character_aura.sql \
-	z0778_s0087_02_characters_pet_aura.sql
+	z0778_s0087_02_characters_pet_aura.sql \
+	z0782_xxxxx_01_mangos_mangos_string.sql

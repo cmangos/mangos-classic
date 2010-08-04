@@ -338,52 +338,15 @@ enum MangosStrings
     //                                    346 used in master branch
     LANG_COMMAND_GOTAXINODENOTFOUND     = 347,
     LANG_GAMEOBJECT_HAVE_INVALID_DATA   = 348,
-
-    // alliance ranks
-    LANG_ALI_PRIVATE                    = 349,
-    LANG_ALI_CORPORAL                   = 350,
-    LANG_ALI_SERGEANT                   = 351,
-    LANG_ALI_MASTER_SERGEANT            = 352,
-    LANG_ALI_SERGEANT_MAJOR             = 353,
-    LANG_ALI_KNIGHT                     = 354,
-    LANG_ALI_KNIGHT_LIEUTENANT          = 355,
-    LANG_ALI_KNIGHT_CAPTAIN             = 356,
-    LANG_ALI_KNIGHT_CHAMPION            = 357,
-    LANG_ALI_LIEUTENANT_COMMANDER       = 358,
-    LANG_ALI_COMMANDER                  = 359,
-    LANG_ALI_MARSHAL                    = 360,
-    LANG_ALI_FIELD_MARSHAL              = 361,
-    LANG_ALI_GRAND_MARSHAL              = 362,
-
-// horde ranks
-    LANG_HRD_SCOUT                      = 363,
-    LANG_HRD_GRUNT                      = 364,
-    LANG_HRD_SERGEANT                   = 365,
-    LANG_HRD_SENIOR_SERGEANT            = 366,
-    LANG_HRD_FIRST_SERGEANT             = 367,
-    LANG_HRD_STONE_GUARD                = 368,
-    LANG_HRD_BLOOD_GUARD                = 369,
-    LANG_HRD_LEGIONNARE                 = 370,
-    LANG_HRD_CENTURION                  = 371,
-    LANG_HRD_CHAMPION                   = 372,
-    LANG_HRD_LIEUTENANT_GENERAL         = 373,
-    LANG_HRD_GENERAL                    = 374,
-    LANG_HRD_WARLORD                    = 375,
-    LANG_HRD_HIGH_WARLORD               = 376,
-    LANG_GAME_MASTER                    = 377,
-    LANG_NO_RANK                        = 378,
-    LANG_RANK_DISHONORED                = 379,
-    LANG_RANK_EXILED                    = 380,
-    LANG_RANK_OUTLAW                    = 381,
-    LANG_RANK_PARIAH                    = 382,
-    LANG_RANK                           = 383,
-    LANG_HONOR_TODAY                    = 384,
-    LANG_HONOR_YESTERDAY                = 385,
-    LANG_HONOR_THIS_WEEK                = 386,
-    LANG_HONOR_LAST_WEEK                = 387,
-    LANG_HONOR_LIFE                     = 388,
-
-    // Room for more level 2              385-399 not used
+    //                                    349 used in master branch
+    //                                    350 used in master branch
+    //                                    351 used in master branch
+    //                                    352 used in master branch
+    //                                    353 used in master branch
+    //                                    354 used in master branch
+    //                                    355 used in master branch
+    //                                    356 used in master branch
+    // Room for more level 2              357-399 not used
 
     // level 3 chat
     LANG_SCRIPTS_RELOADED               = 400,
@@ -886,7 +849,56 @@ enum MangosStrings
     LANG_CINEMATIC_NOT_EXIST            = 1200,
     // Room for more debug                1201-1299 not used
 
-    // FREE IDS                           1300-9999
+    // Reserved for old client release branches specific strings
+    // Room for old clients 2.x           1300-1399 not used
+
+    // MaNGOSZero specific strings
+    // alliance ranks
+    LANG_ALI_PRIVATE                    = 1400,
+    LANG_ALI_CORPORAL                   = 1401,
+    LANG_ALI_SERGEANT                   = 1402,
+    LANG_ALI_MASTER_SERGEANT            = 1403,
+    LANG_ALI_SERGEANT_MAJOR             = 1404,
+    LANG_ALI_KNIGHT                     = 1405,
+    LANG_ALI_KNIGHT_LIEUTENANT          = 1406,
+    LANG_ALI_KNIGHT_CAPTAIN             = 1407,
+    LANG_ALI_KNIGHT_CHAMPION            = 1408,
+    LANG_ALI_LIEUTENANT_COMMANDER       = 1409,
+    LANG_ALI_COMMANDER                  = 1410,
+    LANG_ALI_MARSHAL                    = 1411,
+    LANG_ALI_FIELD_MARSHAL              = 1412,
+    LANG_ALI_GRAND_MARSHAL              = 1413,
+
+    // horde ranks
+    LANG_HRD_SCOUT                      = 1414,
+    LANG_HRD_GRUNT                      = 1415,
+    LANG_HRD_SERGEANT                   = 1416,
+    LANG_HRD_SENIOR_SERGEANT            = 1417,
+    LANG_HRD_FIRST_SERGEANT             = 1418,
+    LANG_HRD_STONE_GUARD                = 1419,
+    LANG_HRD_BLOOD_GUARD                = 1420,
+    LANG_HRD_LEGIONNARE                 = 1421,
+    LANG_HRD_CENTURION                  = 1422,
+    LANG_HRD_CHAMPION                   = 1423,
+    LANG_HRD_LIEUTENANT_GENERAL         = 1424,
+    LANG_HRD_GENERAL                    = 1425,
+    LANG_HRD_WARLORD                    = 1426,
+    LANG_HRD_HIGH_WARLORD               = 1427,
+    LANG_GAME_MASTER                    = 1428,
+    LANG_NO_RANK                        = 1429,
+    LANG_RANK_DISHONORED                = 1430,
+    LANG_RANK_EXILED                    = 1431,
+    LANG_RANK_OUTLAW                    = 1432,
+    LANG_RANK_PARIAH                    = 1433,
+    LANG_RANK                           = 1434,
+    LANG_HONOR_TODAY                    = 1435,
+    LANG_HONOR_YESTERDAY                = 1436,
+    LANG_HONOR_THIS_WEEK                = 1437,
+    LANG_HONOR_LAST_WEEK                = 1438,
+    LANG_HONOR_LIFE                     = 1439,
+    // Room for old clients 1.x           1440-1499 not used
+
+    // FREE IDS                           1500-9999
 
     // Use for not-in-offcial-sources patches
     //                                    10000-10999
