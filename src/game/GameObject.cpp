@@ -1090,7 +1090,7 @@ void GameObject::Use(Unit* user)
                         GameObject* ok = LookupFishingHoleAround(20.0f + CONTACT_DISTANCE);
                         if (ok)
                         {
-                            player->SendLoot(ok->GetGUID(),LOOT_FISHINGHOLE);
+                            ok->Use(player);
                             SetLootState(GO_JUST_DEACTIVATED);
                         }
                         else
@@ -1238,6 +1238,16 @@ void GameObject::Use(Unit* user)
                 return;                                     //we don;t need to delete flag ... it is despawned!
             }
             break;
+        }
+        case GAMEOBJECT_TYPE_FISHINGHOLE:                   // 25
+        {
+            if (user->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            Player* player = (Player*)user;
+
+            player->SendLoot(GetGUID(), LOOT_FISHINGHOLE);
+            return;
         }
         case GAMEOBJECT_TYPE_FLAGDROP:                      // 26
         {
