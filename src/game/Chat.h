@@ -361,6 +361,7 @@ class ChatHandler
         bool HandleReloadItemRequiredTragetCommand(const char* args);
         bool HandleReloadLocalesCreatureCommand(const char* args);
         bool HandleReloadLocalesGameobjectCommand(const char* args);
+        bool HandleReloadLocalesGossipMenuOptionCommand(const char* args);
         bool HandleReloadLocalesItemCommand(const char* args);
         bool HandleReloadLocalesNpcTextCommand(const char* args);
         bool HandleReloadLocalesPageTextCommand(const char* args);
