@@ -398,7 +398,7 @@ void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
         return;
     }
 
-    Creature* pet = GetPlayer()->GetMap()->GetCreatureOrPet(guid);
+    Creature* pet = GetPlayer()->GetMap()->GetAnyTypeCreature(guid);
 
     if(!pet)
     {

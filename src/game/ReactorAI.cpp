@@ -98,7 +98,7 @@ ReactorAI::EnterEvadeMode()
         return;
     }
 
-    Unit* victim = ObjectAccessor::GetUnit(*m_creature, i_victimGuid );
+    Unit* victim = m_creature->GetMap()->GetUnit(i_victimGuid);
 
     if (!victim)
     {

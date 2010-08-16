@@ -129,7 +129,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     recv_data >> entry;
     recv_data >> guid;
 
-    Creature *unit = _player->GetMap()->GetCreatureOrPet(guid);
+    Creature *unit = _player->GetMap()->GetAnyTypeCreature(guid);
 
     //if (unit == NULL)
     //    sLog.outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
