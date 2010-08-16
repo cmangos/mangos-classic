@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z0778_s0087_02_characters_pet_aura` bit(1) default NULL
+  `required_z0788_s0099_02_characters_pet_aura` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -198,6 +198,7 @@ DROP TABLE IF EXISTS `character_aura`;
 CREATE TABLE `character_aura` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
   `caster_guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Full Global Unique Identifier',
+  `item_guid` int(11) unsigned NOT NULL default '0',
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
   `stackcount` int(11) NOT NULL default '1',
@@ -205,7 +206,7 @@ CREATE TABLE `character_aura` (
   `maxduration` int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
   `remaincharges` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`guid`,`caster_guid`,`spell`,`effect_index`)
+  PRIMARY KEY  (`guid`,`caster_guid`,`item_guid`,`spell`,`effect_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1067,6 +1068,7 @@ DROP TABLE IF EXISTS `pet_aura`;
 CREATE TABLE `pet_aura` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `caster_guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Full Global Unique Identifier',
+  `item_guid` int(11) unsigned NOT NULL default '0',
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
   `stackcount` int(11) NOT NULL default '1',
@@ -1074,7 +1076,7 @@ CREATE TABLE `pet_aura` (
   `maxduration` int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
   `remaincharges` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`guid`,`caster_guid`,`spell`,`effect_index`)
+  PRIMARY KEY  (`guid`,`caster_guid`,`item_guid`,`spell`,`effect_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 

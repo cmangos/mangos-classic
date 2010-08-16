@@ -1085,6 +1085,10 @@ void Aura::ReapplyAffectedPassiveAuras()
 
 bool Aura::isWeaponBuffCoexistableWith(Aura *ref)
 {
+    // only item casted spells
+    if (!GetCastItemGUID())
+        return false;
+
     // Exclude Debuffs
     if (!IsPositive())
         return false;
@@ -1111,7 +1115,7 @@ bool Aura::isWeaponBuffCoexistableWith(Aura *ref)
         return false;
 
     // form different weapons
-    return ref->GetCastItemGUID() != GetCastItemGUID();
+    return ref->GetCastItemGUID() && ref->GetCastItemGUID() != GetCastItemGUID();
 }
 
 /*********************************************************/

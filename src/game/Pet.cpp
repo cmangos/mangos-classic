@@ -1322,7 +1322,7 @@ void Pet::_LoadAuras(uint32 timediff)
     for(int i = UNIT_FIELD_AURA; i <= UNIT_FIELD_AURASTATE; ++i)
         SetUInt32Value(i, 0);
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT caster_guid,spell,effect_index,stackcount,amount,maxduration,remaintime,remaincharges FROM pet_aura WHERE guid = '%u'",m_charmInfo->GetPetNumber());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT caster_guid,item_guid,spell,effect_index,stackcount,amount,maxduration,remaintime,remaincharges FROM pet_aura WHERE guid = '%u'",m_charmInfo->GetPetNumber());
 
     if(result)
     {
@@ -1330,13 +1330,14 @@ void Pet::_LoadAuras(uint32 timediff)
         {
             Field *fields = result->Fetch();
             uint64 caster_guid = fields[0].GetUInt64();
-            uint32 spellid = fields[1].GetUInt32();
-            SpellEffectIndex effindex = SpellEffectIndex(fields[2].GetUInt32());
-            uint32 stackcount= fields[3].GetUInt32();
-            int32 damage     = (int32)fields[4].GetUInt32();
-            int32 maxduration = (int32)fields[5].GetUInt32();
-            int32 remaintime = (int32)fields[6].GetUInt32();
-            int32 remaincharges = (int32)fields[7].GetUInt32();
+            uint32 item_lowguid = fields[1].GetUInt32();
+            uint32 spellid = fields[2].GetUInt32();
+            SpellEffectIndex effindex = SpellEffectIndex(fields[3].GetUInt32());
+            uint32 stackcount= fields[4].GetUInt32();
+            int32 damage     = (int32)fields[5].GetUInt32();
+            int32 maxduration = (int32)fields[6].GetUInt32();
+            int32 remaintime = (int32)fields[7].GetUInt32();
+            int32 remaincharges = (int32)fields[8].GetUInt32();
 
             SpellEntry const* spellproto = sSpellStore.LookupEntry(spellid);
             if(!spellproto)
@@ -1379,7 +1380,7 @@ void Pet::_LoadAuras(uint32 timediff)
 
                 if(!damage)
                     damage = aura->GetModifier()->m_amount;
-                aura->SetLoadedState(caster_guid,damage,maxduration,remaintime,remaincharges);
+                aura->SetLoadedState(caster_guid, item_lowguid ? MAKE_NEW_GUID(item_lowguid, 0, HIGHGUID_ITEM) : 0, damage, maxduration, remaintime, remaincharges);
                 AddAura(aura);
             }
         }
@@ -1422,9 +1423,9 @@ void Pet::_SaveAuras()
 
                     if (i == 3)
                     {
-                        CharacterDatabase.PExecute("INSERT INTO pet_aura (guid,caster_guid,spell,effect_index,stackcount,amount,maxduration,remaintime,remaincharges) "
-                            "VALUES ('%u', '" UI64FMTD "', '%u', '%u', '%u', '%d', '%d', '%d', '%d')",
-                            m_charmInfo->GetPetNumber(), itr2->second->GetCasterGUID(),(uint32)itr2->second->GetId(), (uint32)itr2->second->GetEffIndex(), stackCounter, itr2->second->GetModifier()->m_amount,int(itr2->second->GetAuraMaxDuration()),int(itr2->second->GetAuraDuration()),int(itr2->second->GetAuraCharges()));
+                        CharacterDatabase.PExecute("INSERT INTO pet_aura (guid, caster_guid, item_guid, spell, effect_index, stackcount, amount, maxduration, remaintime, remaincharges) "
+                            "VALUES ('%u', '" UI64FMTD "', '%u', '%u', '%u', '%u', '%d', '%d', '%d', '%d')",
+                            m_charmInfo->GetPetNumber(), itr2->second->GetCasterGUID(), GUID_LOPART(itr2->second->GetCastItemGUID()), (uint32)itr2->second->GetId(), (uint32)itr2->second->GetEffIndex(), stackCounter, itr2->second->GetModifier()->m_amount,int(itr2->second->GetAuraMaxDuration()), int(itr2->second->GetAuraDuration()), int(itr2->second->GetAuraCharges()));
                     }
                 }
             }

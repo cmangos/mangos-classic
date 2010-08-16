@@ -13869,13 +13869,13 @@ void Player::_LoadActions(QueryResult *result)
 
 void Player::_LoadAuras(QueryResult *result, uint32 timediff)
 {
-    //RemoveAllAuras(); -- some spells casted before aura load, for example in LoadSkills, aura list explcitly cleaned early
+    //RemoveAllAuras(); -- some spells casted before aura load, for example in LoadSkills, aura list explicitly cleaned early
 
     // all aura related fields
     for(int i = UNIT_FIELD_AURA; i <= UNIT_FIELD_AURASTATE; ++i)
         SetUInt32Value(i, 0);
 
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT caster_guid,spell,effect_index,stackcount,amount,maxduration,remaintime,remaincharges FROM character_aura WHERE guid = '%u'",GetGUIDLow());
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT caster_guid,item_guid,spell,effect_index,stackcount,amount,maxduration,remaintime,remaincharges FROM character_aura WHERE guid = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -13883,13 +13883,14 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
         {
             Field *fields = result->Fetch();
             uint64 caster_guid = fields[0].GetUInt64();
-            uint32 spellid = fields[1].GetUInt32();
-            SpellEffectIndex effindex = SpellEffectIndex(fields[2].GetUInt32());
-            uint32 stackcount = fields[3].GetUInt32();
-            int32 damage     = fields[4].GetInt32();
-            int32 maxduration = fields[5].GetInt32();
-            int32 remaintime = fields[6].GetInt32();
-            int32 remaincharges = fields[7].GetInt32();
+            uint32 item_lowguid = fields[1].GetUInt64();
+            uint32 spellid = fields[2].GetUInt32();
+            SpellEffectIndex effindex = SpellEffectIndex(fields[3].GetUInt32());
+            uint32 stackcount = fields[4].GetUInt32();
+            int32 damage     = fields[5].GetInt32();
+            int32 maxduration = fields[6].GetInt32();
+            int32 remaintime = fields[7].GetInt32();
+            int32 remaincharges = fields[8].GetInt32();
 
             SpellEntry const* spellproto = sSpellStore.LookupEntry(spellid);
             if (!spellproto)
@@ -13933,7 +13934,7 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
                 if (caster_guid != GetGUID() && aura->IsSingleTarget())
                     aura->SetIsSingleTarget(false);
 
-                aura->SetLoadedState(caster_guid,damage,maxduration,remaintime,remaincharges);
+                aura->SetLoadedState(caster_guid, item_lowguid ? MAKE_NEW_GUID(item_lowguid, 0, HIGHGUID_ITEM) : 0, damage, maxduration, remaintime, remaincharges);
                 AddAura(aura);
                 DETAIL_LOG("Added aura spellid %u, effect %u", spellproto->Id, effindex);
             }
@@ -14971,9 +14972,9 @@ void Player::_SaveAuras()
 
                     if (i == 3)
                     {
-                        CharacterDatabase.PExecute("INSERT INTO character_aura (guid,caster_guid,spell,effect_index,stackcount,amount,maxduration,remaintime,remaincharges) "
-                            "VALUES ('%u', '" UI64FMTD "' ,'%u', '%u', '%u', '%d', '%d', '%d', '%d')",
-                            GetGUIDLow(), itr2->second->GetCasterGUID(), (uint32)itr2->second->GetId(), (uint32)itr2->second->GetEffIndex(), stackCounter, itr2->second->GetModifier()->m_amount,int(itr2->second->GetAuraMaxDuration()),int(itr2->second->GetAuraDuration()),int(itr2->second->GetAuraCharges()));
+                        CharacterDatabase.PExecute("INSERT INTO character_aura (guid,caster_guid, item_guid, spell, effect_index, stackcount, amount, maxduration, remaintime, remaincharges) "
+                            "VALUES ('%u', '" UI64FMTD "', '%u', '%u', '%u', '%u', '%d', '%d', '%d', '%d')",
+                            GetGUIDLow(), itr2->second->GetCasterGUID(), GUID_LOPART(itr2->second->GetCastItemGUID()), (uint32)itr2->second->GetId(), (uint32)itr2->second->GetEffIndex(), stackCounter, itr2->second->GetModifier()->m_amount,int(itr2->second->GetAuraMaxDuration()), int(itr2->second->GetAuraDuration()), int(itr2->second->GetAuraCharges()));
                     }
                 }
             }
