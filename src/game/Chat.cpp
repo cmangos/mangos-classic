@@ -244,10 +244,10 @@ ChatCommand * ChatHandler::getCommandTable()
 
     static ChatCommand honorCommandTable[] =
     {
-        { "add",            SEC_GAMEMASTER,     false, &ChatHandler::HandleAddHonorCommand,            "", NULL },
+        { "add",            SEC_GAMEMASTER,     false, &ChatHandler::HandleHonorAddCommand,            "", NULL },
         { "addkill",        SEC_GAMEMASTER,     false, &ChatHandler::HandleHonorAddKillCommand,        "", NULL },
-        { "show",           SEC_GAMEMASTER,     false, &ChatHandler::HandleShowHonor,                  "", NULL },
-        { "update",         SEC_GAMEMASTER,     false, &ChatHandler::HandleUpdateHonorFieldsCommand,   "", NULL },
+        { "show",           SEC_GAMEMASTER,     false, &ChatHandler::HandleHonorShow,                  "", NULL },
+        { "update",         SEC_GAMEMASTER,     false, &ChatHandler::HandleHonorUpdateCommand,         "", NULL },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
@@ -392,9 +392,9 @@ ChatCommand * ChatHandler::getCommandTable()
 
     static ChatCommand questCommandTable[] =
     {
-        { "add",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestAdd,                   "", NULL },
-        { "complete",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestComplete,              "", NULL },
-        { "remove",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestRemove,                "", NULL },
+        { "add",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestAddCommand,            "", NULL },
+        { "complete",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestCompleteCommand,       "", NULL },
+        { "remove",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleQuestRemoveCommand,         "", NULL },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
@@ -664,7 +664,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "additem",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAddItemCommand,             "", NULL },
         { "additemset",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAddItemSetCommand,          "", NULL },
         { "bank",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleBankCommand,                "", NULL },
-        { "wchange",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleChangeWeather,              "", NULL },
+        { "wchange",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleChangeWeatherCommand,       "", NULL },
         { "ticket",         SEC_GAMEMASTER,     true,  &ChatHandler::HandleTicketCommand,              "", NULL },
         { "delticket",      SEC_GAMEMASTER,     true,  &ChatHandler::HandleDelTicketCommand,           "", NULL },
         { "maxskill",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMaxSkillCommand,            "", NULL },
@@ -1067,7 +1067,7 @@ void ChatHandler::ExecuteCommand(const char* text)
         case CHAT_COMMAND_OK:
         {
             SetSentErrorMessage(false);
-            if ((this->*(command->Handler))(text))
+            if ((this->*(command->Handler))((char*)text))   // text content destroyed at call
             {
                 if (command->SecurityLevel > SEC_PLAYER)
                 {

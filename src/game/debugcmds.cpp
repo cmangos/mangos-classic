@@ -34,12 +34,12 @@
 #include "ObjectGuid.h"
 #include "SpellMgr.h"
 
-bool ChatHandler::HandleDebugSendSpellFailCommand(const char* args)
+bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
 {
     if (!*args)
         return false;
 
-    char* px = strtok((char*)args, " ");
+    char* px = strtok(args, " ");
     if (!px)
         return false;
 
@@ -67,7 +67,7 @@ bool ChatHandler::HandleDebugSendSpellFailCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugSendPoiCommand(const char* args)
+bool ChatHandler::HandleDebugSendPoiCommand(char* args)
 {
     if (!*args)
         return false;
@@ -80,7 +80,7 @@ bool ChatHandler::HandleDebugSendPoiCommand(const char* args)
         return true;
     }
 
-    char* icon_text = strtok((char*)args, " ");
+    char* icon_text = strtok(args, " ");
     char* flags_text = strtok(NULL, " ");
     if (!icon_text || !flags_text)
         return false;
@@ -93,7 +93,7 @@ bool ChatHandler::HandleDebugSendPoiCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugSendEquipErrorCommand(const char* args)
+bool ChatHandler::HandleDebugSendEquipErrorCommand(char* args)
 {
     if (!*args)
         return false;
@@ -103,7 +103,7 @@ bool ChatHandler::HandleDebugSendEquipErrorCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugSendSellErrorCommand(const char* args)
+bool ChatHandler::HandleDebugSendSellErrorCommand(char* args)
 {
     if (!*args)
         return false;
@@ -113,7 +113,7 @@ bool ChatHandler::HandleDebugSendSellErrorCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugSendBuyErrorCommand(const char* args)
+bool ChatHandler::HandleDebugSendBuyErrorCommand(char* args)
 {
     if (!*args)
         return false;
@@ -123,7 +123,7 @@ bool ChatHandler::HandleDebugSendBuyErrorCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugSendOpcodeCommand(const char* /*args*/)
+bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
 {
     Unit *unit = getSelectedUnit();
     if (!unit || (unit->GetTypeId() != TYPEID_PLAYER))
@@ -200,9 +200,9 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(const char* /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleDebugUpdateWorldStateCommand(const char* args)
+bool ChatHandler::HandleDebugUpdateWorldStateCommand(char* args)
 {
-    char* w = strtok((char*)args, " ");
+    char* w = strtok(args, " ");
     char* s = strtok(NULL, " ");
 
     if (!w || !s)
@@ -214,7 +214,7 @@ bool ChatHandler::HandleDebugUpdateWorldStateCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugPlayCinematicCommand(const char* args)
+bool ChatHandler::HandleDebugPlayCinematicCommand(char* args)
 {
     // USAGE: .debug play cinematic #cinematicid
     // #cinematicid - ID decimal number from CinemaicSequences.dbc (1st column)
@@ -225,7 +225,7 @@ bool ChatHandler::HandleDebugPlayCinematicCommand(const char* args)
         return false;
     }
 
-    uint32 dwId = atoi((char*)args);
+    uint32 dwId = atoi(args);
 
     if (!sCinematicSequencesStore.LookupEntry(dwId))
     {
@@ -239,7 +239,7 @@ bool ChatHandler::HandleDebugPlayCinematicCommand(const char* args)
 }
 
 //Play sound
-bool ChatHandler::HandleDebugPlaySoundCommand(const char* args)
+bool ChatHandler::HandleDebugPlaySoundCommand(char* args)
 {
     // USAGE: .debug playsound #soundid
     // #soundid - ID decimal number from SoundEntries.dbc (1st column)
@@ -250,7 +250,7 @@ bool ChatHandler::HandleDebugPlaySoundCommand(const char* args)
         return false;
     }
 
-    uint32 dwSoundId = atoi((char*)args);
+    uint32 dwSoundId = atoi(args);
 
     if (!sSoundEntriesStore.LookupEntry(dwSoundId))
     {
@@ -277,7 +277,7 @@ bool ChatHandler::HandleDebugPlaySoundCommand(const char* args)
 }
 
 //Send notification in channel
-bool ChatHandler::HandleDebugSendChannelNotifyCommand(const char* args)
+bool ChatHandler::HandleDebugSendChannelNotifyCommand(char* args)
 {
     if (!*args)
         return false;
@@ -295,7 +295,7 @@ bool ChatHandler::HandleDebugSendChannelNotifyCommand(const char* args)
 }
 
 //Send notification in chat
-bool ChatHandler::HandleDebugSendChatMsgCommand(const char* args)
+bool ChatHandler::HandleDebugSendChatMsgCommand(char* args)
 {
     if (!*args)
         return false;
@@ -308,14 +308,14 @@ bool ChatHandler::HandleDebugSendChatMsgCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugSendQuestPartyMsgCommand(const char* args)
+bool ChatHandler::HandleDebugSendQuestPartyMsgCommand(char* args)
 {
-    uint32 msg = atol((char*)args);
+    uint32 msg = atol(args);
     m_session->GetPlayer()->SendPushToPartyResponse(m_session->GetPlayer(), msg);
     return true;
 }
 
-bool ChatHandler::HandleDebugGetLootRecipientCommand(const char* /*args*/)
+bool ChatHandler::HandleDebugGetLootRecipientCommand(char* /*args*/)
 {
     Creature* target = getSelectedCreature();
     if (!target)
@@ -334,14 +334,14 @@ bool ChatHandler::HandleDebugGetLootRecipientCommand(const char* /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleDebugSendQuestInvalidMsgCommand(const char* args)
+bool ChatHandler::HandleDebugSendQuestInvalidMsgCommand(char* args)
 {
-    uint32 msg = atol((char*)args);
+    uint32 msg = atol(args);
     m_session->GetPlayer()->SendCanTakeQuestResponse(msg);
     return true;
 }
 
-bool ChatHandler::HandleDebugGetItemStateCommand(const char* args)
+bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
 {
     if (!*args)
         return false;
@@ -575,25 +575,25 @@ bool ChatHandler::HandleDebugGetItemStateCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugBattlegroundCommand(const char * /*args*/)
+bool ChatHandler::HandleDebugBattlegroundCommand(char* /*args*/)
 {
     sBattleGroundMgr.ToggleTesting();
     return true;
 }
 
-bool ChatHandler::HandleDebugSpellCheckCommand(const char* /*args*/)
+bool ChatHandler::HandleDebugSpellCheckCommand(char* /*args*/)
 {
     sLog.outString( "Check expected in code spell properties base at table 'spell_check' content...");
     sSpellMgr.CheckUsedSpells("spell_check");
     return true;
 }
 
-bool ChatHandler::HandleDebugGetItemValueCommand(const char* args)
+bool ChatHandler::HandleDebugGetItemValueCommand(char* args)
 {
     if (!*args)
         return false;
 
-    char* e = strtok((char*)args, " ");
+    char* e = strtok(args, " ");
     char* f = strtok(NULL, " ");
 
     if (!e || !f)
@@ -617,12 +617,12 @@ bool ChatHandler::HandleDebugGetItemValueCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugSetItemValueCommand(const char* args)
+bool ChatHandler::HandleDebugSetItemValueCommand(char* args)
 {
     if (!*args)
         return false;
 
-    char* e = strtok((char*)args, " ");
+    char* e = strtok(args, " ");
     char* f = strtok(NULL, " ");
     char* g = strtok(NULL, " ");
 
@@ -647,17 +647,17 @@ bool ChatHandler::HandleDebugSetItemValueCommand(const char* args)
 }
 
 //show animation
-bool ChatHandler::HandleDebugAnimCommand(const char* args)
+bool ChatHandler::HandleDebugAnimCommand(char* args)
 {
     if (!*args)
         return false;
 
-    uint32 emote_id = atoi((char*)args);
+    uint32 emote_id = atoi(args);
     m_session->GetPlayer()->HandleEmoteCommand(emote_id);
     return true;
 }
 
-bool ChatHandler::HandleDebugSetAuraStateCommand(const char* args)
+bool ChatHandler::HandleDebugSetAuraStateCommand(char* args)
 {
     if (!*args)
     {
@@ -674,7 +674,7 @@ bool ChatHandler::HandleDebugSetAuraStateCommand(const char* args)
         return false;
     }
 
-    int32 state = atoi((char*)args);
+    int32 state = atoi(args);
     if (!state)
     {
         // reset all states
@@ -687,12 +687,12 @@ bool ChatHandler::HandleDebugSetAuraStateCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugSetValueCommand(const char* args)
+bool ChatHandler::HandleDebugSetValueCommand(char* args)
 {
     if(!*args)
         return false;
 
-    char* px = strtok((char*)args, " ");
+    char* px = strtok(args, " ");
     char* py = strtok(NULL, " ");
     char* pz = strtok(NULL, " ");
 
@@ -738,12 +738,12 @@ bool ChatHandler::HandleDebugSetValueCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugGetValueCommand(const char* args)
+bool ChatHandler::HandleDebugGetValueCommand(char* args)
 {
     if(!*args)
         return false;
 
-    char* px = strtok((char*)args, " ");
+    char* px = strtok(args, " ");
     char* pz = strtok(NULL, " ");
 
     if (!px)
@@ -787,12 +787,12 @@ bool ChatHandler::HandleDebugGetValueCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugMod32ValueCommand(const char* args)
+bool ChatHandler::HandleDebugMod32ValueCommand(char* args)
 {
     if(!*args)
         return false;
 
-    char* px = strtok((char*)args, " ");
+    char* px = strtok(args, " ");
     char* py = strtok(NULL, " ");
 
     if (!px || !py)
@@ -819,7 +819,7 @@ bool ChatHandler::HandleDebugMod32ValueCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugUpdateCommand(const char* args)
+bool ChatHandler::HandleDebugUpdateCommand(char* args)
 {
     if(!*args)
         return false;
@@ -827,7 +827,7 @@ bool ChatHandler::HandleDebugUpdateCommand(const char* args)
     uint32 updateIndex;
     uint32 value;
 
-    char* pUpdateIndex = strtok((char*)args, " ");
+    char* pUpdateIndex = strtok(args, " ");
 
     Unit* chr = getSelectedUnit();
     if (chr == NULL)
