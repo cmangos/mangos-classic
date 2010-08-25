@@ -1788,7 +1788,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
         case CHAT_MSG_RAID_BOSS_WHISPER:
         case CHAT_MSG_RAID_BOSS_EMOTE:
         {
-            *data << uint64(speaker->GetGUID());
+            *data << speaker->GetObjectGuid();
             *data << uint32(strlen(speaker->GetName()) + 1);
             *data << speaker->GetName();
             ObjectGuid listener_guid;

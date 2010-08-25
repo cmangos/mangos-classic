@@ -989,7 +989,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
         SendPacket(&data);
     }
     else
-        DEBUG_LOG("Player %u not found!", guid);
+        DEBUG_LOG("Player %u not found!", GUID_LOPART(guid));
 }
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
