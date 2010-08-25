@@ -30,11 +30,56 @@
 #include "Language.h"
 #include "World.h"
 
+//// MemberSlot ////////////////////////////////////////////
+void MemberSlot::SetMemberStats(Player* player)
+{
+    Name   = player->GetName();
+    Level  = player->getLevel();
+    Class  = player->getClass();
+    ZoneId = player->GetZoneId();
+}
+
+void MemberSlot::UpdateLogoutTime()
+{
+    LogoutTime = time(NULL);
+}
+
+void MemberSlot::SetPNOTE(std::string pnote)
+{
+    Pnote = pnote;
+
+    // pnote now can be used for encoding to DB
+    CharacterDatabase.escape_string(pnote);
+    CharacterDatabase.PExecute("UPDATE guild_member SET pnote = '%s' WHERE guid = '%u'", pnote.c_str(), guid.GetCounter());
+}
+
+void MemberSlot::SetOFFNOTE(std::string offnote)
+{
+    OFFnote = offnote;
+
+    // offnote now can be used for encoding to DB
+    CharacterDatabase.escape_string(offnote);
+    CharacterDatabase.PExecute("UPDATE guild_member SET offnote = '%s' WHERE guid = '%u'", offnote.c_str(), guid.GetCounter());
+}
+
+void MemberSlot::ChangeRank(uint32 newRank)
+{
+    RankId = newRank;
+
+    Player *player = sObjectMgr.GetPlayer(guid);
+    // If player not online data in data field will be loaded from guild tabs no need to update it !!
+    if (player)
+        player->SetRank(newRank);
+
+    CharacterDatabase.PExecute("UPDATE guild_member SET rank='%u' WHERE guid='%u'", newRank, guid.GetCounter());
+}
+
+//// Guild /////////////////////////////////////////////////
+
 Guild::Guild()
 {
     m_Id = 0;
     m_Name = "";
-    m_LeaderGuid = 0;
     GINFO = MOTD = "";
     m_EmblemStyle = 0;
     m_EmblemColor = 0;
@@ -63,7 +108,7 @@ bool Guild::Create(Player* leader, std::string gname)
     if (!lSession)
         return false;
 
-    m_LeaderGuid = leader->GetGUID();
+    m_LeaderGuid = leader->GetObjectGuid();
     m_Name = gname;
     GINFO = "";
     MOTD = "No message set.";
@@ -76,7 +121,7 @@ bool Guild::Create(Player* leader, std::string gname)
     m_CreatedMonth = local.tm_mon + 1;
     m_CreatedYear  = local.tm_year + 1900;
 
-    DEBUG_LOG("GUILD: creating guild %s to leader: %u", gname.c_str(), GUID_LOPART(m_LeaderGuid));
+    DEBUG_LOG("GUILD: creating guild %s to leader: %s", gname.c_str(), m_LeaderGuid.GetString().c_str());
 
     // gname already assigned to Guild::name, use it to encode string for DB
     CharacterDatabase.escape_string(gname);
@@ -91,7 +136,7 @@ bool Guild::Create(Player* leader, std::string gname)
     CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guildid='%u'", m_Id);
     CharacterDatabase.PExecute("INSERT INTO guild (guildid,name,leaderguid,info,motd,createdate,EmblemStyle,EmblemColor,BorderStyle,BorderColor,BackgroundColor) "
         "VALUES('%u','%s','%u', '%s', '%s','" UI64FMTD "','%u','%u','%u','%u','%u')",
-        m_Id, gname.c_str(), GUID_LOPART(m_LeaderGuid), dbGINFO.c_str(), dbMOTD.c_str(), uint64(now), m_EmblemStyle, m_EmblemColor, m_BorderStyle, m_BorderColor, m_BackgroundColor);
+        m_Id, gname.c_str(), m_LeaderGuid.GetCounter(), dbGINFO.c_str(), dbMOTD.c_str(), uint64(now), m_EmblemStyle, m_EmblemColor, m_BorderStyle, m_BorderColor, m_BackgroundColor);
     CharacterDatabase.CommitTransaction();
 
     CreateDefaultGuildRanks(lSession->GetSessionDbLocaleIndex());
@@ -110,7 +155,7 @@ void Guild::CreateDefaultGuildRanks(int locale_idx)
     CreateRank(sObjectMgr.GetMangosString(LANG_GUILD_INITIATE, locale_idx), GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
 }
 
-bool Guild::AddMember(uint64 plGuid, uint32 plRank)
+bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
 {
     Player* pl = sObjectMgr.GetPlayer(plGuid);
     if (pl)
@@ -128,8 +173,12 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
     // this will be prevent attempt joining player to many guilds and corrupt guild data integrity
     Player::RemovePetitionsAndSigns(plGuid);
 
+    uint32 lowguid = plGuid.GetCounter();
+
     // fill player data
     MemberSlot newmember;
+
+    newmember.guid = plGuid;
 
     if (pl)
     {
@@ -142,7 +191,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
     else
     {
         //                                                     0    1     2     3    4
-        QueryResult *result = CharacterDatabase.PQuery("SELECT name,level,class,zone,account FROM characters WHERE guid = '%u'", GUID_LOPART(plGuid));
+        QueryResult *result = CharacterDatabase.PQuery("SELECT name,level,class,zone,account FROM characters WHERE guid = '%u'", lowguid);
         if (!result)
             return false;                                   // player doesn't exist
 
@@ -156,7 +205,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
         if (newmember.Level < 1 || newmember.Level > STRONG_MAX_LEVEL ||
             newmember.Class < CLASS_WARRIOR || newmember.Class >= MAX_CLASSES)
         {
-            sLog.outError("Player (GUID: %u) has a broken data in field `characters` table, cannot add him to guild.",GUID_LOPART(plGuid));
+            sLog.outError("%s has a broken data in field `characters` table, cannot add him to guild.", plGuid.GetString().c_str());
             return false;
         }
     }
@@ -165,7 +214,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
     newmember.OFFnote = (std::string)"";
     newmember.Pnote   = (std::string)"";
     newmember.LogoutTime = time(NULL);
-    members[GUID_LOPART(plGuid)] = newmember;
+    members[lowguid] = newmember;
 
     std::string dbPnote   = newmember.Pnote;
     std::string dbOFFnote = newmember.OFFnote;
@@ -173,7 +222,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
     CharacterDatabase.escape_string(dbOFFnote);
 
     CharacterDatabase.PExecute("INSERT INTO guild_member (guildid,guid,rank,pnote,offnote) VALUES ('%u', '%u', '%u','%s','%s')",
-        m_Id, GUID_LOPART(plGuid), newmember.RankId, dbPnote.c_str(), dbOFFnote.c_str());
+        m_Id, lowguid, newmember.RankId, dbPnote.c_str(), dbOFFnote.c_str());
 
     // If player not in game data in data field will be loaded from guild tables, no need to update it!!
     if (pl)
@@ -215,7 +264,7 @@ bool Guild::LoadGuildFromDB(QueryResult *guildDataResult)
 
     m_Id              = fields[0].GetUInt32();
     m_Name            = fields[1].GetCppString();
-    m_LeaderGuid      = MAKE_NEW_GUID(fields[2].GetUInt32(), 0, HIGHGUID_PLAYER);
+    m_LeaderGuid      = ObjectGuid(HIGHGUID_PLAYER, fields[2].GetUInt32());
     m_EmblemStyle     = fields[3].GetUInt32();
     m_EmblemColor     = fields[4].GetUInt32();
     m_BorderStyle     = fields[5].GetUInt32();
@@ -241,7 +290,7 @@ bool Guild::CheckGuildStructure()
     // Repair the structure of guild
     // If the guildmaster doesn't exist or isn't the member of guild
     // attempt to promote another member
-    int32 GM_rights = GetRank(GUID_LOPART(m_LeaderGuid));
+    int32 GM_rights = GetRank(m_LeaderGuid);
     if (GM_rights == -1)
     {
         DelMember(m_LeaderGuid);
@@ -252,13 +301,10 @@ bool Guild::CheckGuildStructure()
     else if (GM_rights != GR_GUILDMASTER)
         SetLeader(m_LeaderGuid);
 
-    // Allow only 1 guildmaster
-    for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
-    {
-        if (itr->second.RankId == GR_GUILDMASTER && GUID_LOPART(m_LeaderGuid) != itr->first)
-            //set right of member to officer
-            ChangeRank(itr->first, GR_OFFICER);
-    }
+    // Allow only 1 guildmaster, set other to officer
+    for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
+        if (itr->second.RankId == GR_GUILDMASTER && m_LeaderGuid != itr->second.guid)
+            itr->second.ChangeRank(GR_OFFICER);
 
     return true;
 }
@@ -365,7 +411,7 @@ bool Guild::LoadMembersFromDB(QueryResult *guildMembersResult)
 
         MemberSlot newmember;
         uint32 lowguid = fields[1].GetUInt32();
-        ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, lowguid);
+        newmember.guid = ObjectGuid(HIGHGUID_PLAYER, lowguid);
         newmember.RankId = fields[2].GetUInt32();
         // don't allow member to have not existing rank!
         if (newmember.RankId >= m_Ranks.size())
@@ -384,20 +430,20 @@ bool Guild::LoadMembersFromDB(QueryResult *guildMembersResult)
         // this code will remove not existing character guids from guild
         if (newmember.Level < 1 || newmember.Level > STRONG_MAX_LEVEL) // can be at broken `data` field
         {
-            sLog.outError("%s has a broken data in field `characters`.`data`, deleting him from guild!", guid.GetString().c_str());
+            sLog.outError("%s has a broken data in field `characters`.`data`, deleting him from guild!", newmember.guid.GetString().c_str());
             CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guid = '%u'", lowguid);
             continue;
         }
         if (!newmember.ZoneId)
         {
-            sLog.outError("%s has broken zone-data", guid.GetString().c_str());
+            sLog.outError("%s has broken zone-data", newmember.guid.GetString().c_str());
             // here it will also try the same, to get the zone from characters-table, but additional it tries to find
             // the zone through xy coords .. this is a bit redundant, but shouldn't be called often
-            newmember.ZoneId = Player::GetZoneIdFromDB(guid);
+            newmember.ZoneId = Player::GetZoneIdFromDB(newmember.guid);
         }
         if (newmember.Class < CLASS_WARRIOR || newmember.Class >= MAX_CLASSES) // can be at broken `class` field
         {
-            sLog.outError("%s has a broken data in field `characters`.`class`, deleting him from guild!", guid.GetString().c_str());
+            sLog.outError("%s has a broken data in field `characters`.`class`, deleting him from guild!", newmember.guid.GetString().c_str());
             CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guid = '%u'", lowguid);
             continue;
         }
@@ -414,41 +460,32 @@ bool Guild::LoadMembersFromDB(QueryResult *guildMembersResult)
     return true;
 }
 
-void Guild::SetMemberStats(uint64 guid)
+void Guild::SetLeader(ObjectGuid guid)
 {
-    MemberList::iterator itr = members.find(GUID_LOPART(guid));
-    if (itr == members.end() )
+    MemberSlot* slot = GetMemberSlot(guid);
+    if (!slot)
         return;
 
-    Player *pl = ObjectAccessor::FindPlayer(guid);
-    if (!pl)
-        return;
-    itr->second.Name   = pl->GetName();
-    itr->second.Level  = pl->getLevel();
-    itr->second.Class  = pl->getClass();
-    itr->second.ZoneId = pl->GetZoneId();
-}
-
-void Guild::SetLeader(uint64 guid)
-{
     m_LeaderGuid = guid;
-    ChangeRank(guid, GR_GUILDMASTER);
+    slot->ChangeRank(GR_GUILDMASTER);
 
-    CharacterDatabase.PExecute("UPDATE guild SET leaderguid='%u' WHERE guildid='%u'", GUID_LOPART(guid), m_Id);
+    CharacterDatabase.PExecute("UPDATE guild SET leaderguid='%u' WHERE guildid='%u'", guid.GetCounter(), m_Id);
 }
 
-void Guild::DelMember(uint64 guid, bool isDisbanding)
+void Guild::DelMember(ObjectGuid guid, bool isDisbanding)
 {
+    uint32 lowguid = guid.GetCounter();
+
     // guild master can be deleted when loading guild and guid doesn't exist in characters table
     // or when he is removed from guild by gm command
     if (m_LeaderGuid == guid && !isDisbanding)
     {
         MemberSlot* oldLeader = NULL;
         MemberSlot* best = NULL;
-        uint64 newLeaderGUID = 0;
+        ObjectGuid newLeaderGUID;
         for (Guild::MemberList::iterator i = members.begin(); i != members.end(); ++i)
         {
-            if (i->first == GUID_LOPART(guid))
+            if (i->first == lowguid)
             {
                 oldLeader = &(i->second);
                 continue;
@@ -457,7 +494,7 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
             if (!best || best->RankId > i->second.RankId)
             {
                 best = &(i->second);
-                newLeaderGUID = i->first;
+                newLeaderGUID = ObjectGuid(HIGHGUID_PLAYER, i->first);
             }
         }
         if (!best)
@@ -480,7 +517,7 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
         }
     }
 
-    members.erase(GUID_LOPART(guid));
+    members.erase(lowguid);
 
     Player *player = sObjectMgr.GetPlayer(guid);
     // If player not online data in data field will be loaded from guild tabs no need to update it !!
@@ -490,48 +527,10 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
         player->SetRank(0);
     }
 
-    CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guid = '%u'", GUID_LOPART(guid));
+    CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guid = '%u'", lowguid);
 
     if (!isDisbanding)
         UpdateAccountsNumber();
-}
-
-void Guild::ChangeRank(uint64 guid, uint32 newRank)
-{
-    MemberList::iterator itr = members.find(GUID_LOPART(guid));
-    if (itr != members.end())
-        itr->second.RankId = newRank;
-
-    Player *player = sObjectMgr.GetPlayer(guid);
-    // If player not online data in data field will be loaded from guild tabs no need to update it !!
-    if (player)
-        player->SetRank(newRank);
-
-    CharacterDatabase.PExecute( "UPDATE guild_member SET rank='%u' WHERE guid='%u'", newRank, GUID_LOPART(guid) );
-}
-
-void Guild::SetPNOTE(uint64 guid,std::string pnote)
-{
-    MemberList::iterator itr = members.find(GUID_LOPART(guid));
-    if (itr == members.end())
-        return;
-
-    itr->second.Pnote = pnote;
-
-    // pnote now can be used for encoding to DB
-    CharacterDatabase.escape_string(pnote);
-    CharacterDatabase.PExecute("UPDATE guild_member SET pnote = '%s' WHERE guid = '%u'", pnote.c_str(), itr->first);
-}
-
-void Guild::SetOFFNOTE(uint64 guid,std::string offnote)
-{
-    MemberList::iterator itr = members.find(GUID_LOPART(guid));
-    if (itr == members.end())
-        return;
-    itr->second.OFFnote = offnote;
-    // offnote now can be used for encoding to DB
-    CharacterDatabase.escape_string(offnote);
-    CharacterDatabase.PExecute("UPDATE guild_member SET offnote = '%s' WHERE guid = '%u'", offnote.c_str(), itr->first);
 }
 
 void Guild::BroadcastToGuild(WorldSession *session, const std::string& msg, uint32 language)
@@ -662,15 +661,6 @@ void Guild::SetRankRights(uint32 rankId, uint32 rights)
     CharacterDatabase.PExecute("UPDATE guild_rank SET rights='%u' WHERE rid='%u' AND guildid='%u'", rights, rankId, m_Id);
 }
 
-int32 Guild::GetRank(uint32 LowGuid)
-{
-    MemberList::const_iterator itr = members.find(LowGuid);
-    if (itr == members.end())
-        return -1;
-
-    return itr->second.RankId;
-}
-
 void Guild::Disband()
 {
     BroadcastEvent(GE_DISBANDED);
@@ -678,7 +668,7 @@ void Guild::Disband()
     while (!members.empty())
     {
         MemberList::const_iterator itr = members.begin();
-        DelMember(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER), true);
+        DelMember(ObjectGuid(HIGHGUID_PLAYER, itr->first), true);
     }
 
     CharacterDatabase.BeginTransaction();
@@ -772,15 +762,6 @@ void Guild::SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle
     CharacterDatabase.PExecute("UPDATE guild SET EmblemStyle=%u, EmblemColor=%u, BorderStyle=%u, BorderColor=%u, BackgroundColor=%u WHERE guildid = %u", m_EmblemStyle, m_EmblemColor, m_BorderStyle, m_BorderColor, m_BackgroundColor, m_Id);
 }
 
-void Guild::UpdateLogoutTime(uint64 guid)
-{
-    MemberList::iterator itr = members.find(GUID_LOPART(guid));
-    if (itr == members.end() )
-        return;
-
-    itr->second.LogoutTime = time(NULL);
-}
-
 /**
  * Return the number of accounts that are in the guild after possible update if required
  * A player may have many characters in the guild, but with the same account
@@ -868,14 +849,14 @@ void Guild::LoadGuildEventLogFromDB()
 }
 
 // Add entry to guild eventlog
-void Guild::LogGuildEvent(uint8 EventType, uint32 PlayerGuid1, uint32 PlayerGuid2, uint8 NewRank)
+void Guild::LogGuildEvent(uint8 EventType, ObjectGuid playerGuid1, ObjectGuid playerGuid2, uint8 newRank)
 {
     GuildEventLogEntry NewEvent;
     // Create event
     NewEvent.EventType = EventType;
-    NewEvent.PlayerGuid1 = PlayerGuid1;
-    NewEvent.PlayerGuid2 = PlayerGuid2;
-    NewEvent.NewRank = NewRank;
+    NewEvent.PlayerGuid1 = playerGuid1.GetCounter();
+    NewEvent.PlayerGuid2 = playerGuid2.GetCounter();
+    NewEvent.NewRank = newRank;
     NewEvent.TimeStamp = uint32(time(NULL));
     // Count new LogGuid
     m_GuildEventLogNextGuid = (m_GuildEventLogNextGuid + 1) % sWorld.getConfig(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT);
