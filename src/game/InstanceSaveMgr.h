@@ -25,7 +25,7 @@
 #include "ace/Thread_Mutex.h"
 #include <list>
 #include <map>
-#include "Utilities/UnorderedMap.h"
+#include "Utilities/UnorderedMapSet.h"
 #include "Database/DatabaseEnv.h"
 
 struct InstanceTemplate;
