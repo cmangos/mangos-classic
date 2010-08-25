@@ -3396,10 +3396,13 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // only allow triggered spells if at an ended battleground
-    if( !m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
         if(BattleGround * bg = ((Player*)m_caster)->GetBattleGround())
             if(bg->GetStatus() == STATUS_WAIT_LEAVE)
                 return SPELL_FAILED_DONT_REPORT;
+
+    if (m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo))
+        return m_triggeredByAuraSpell ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_AFFECTING_COMBAT;
 
     // only check at first call, Stealth auras are already removed at second call
     // for now, ignore triggered spells
@@ -4004,7 +4007,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if(!pet->GetCurrentFoodBenefitLevel(foodItem->GetProto()->ItemLevel))
                     return SPELL_FAILED_FOOD_LOWLEVEL;
 
-                if(m_caster->isInCombat() || pet->isInCombat())
+                if(pet->isInCombat())
                     return SPELL_FAILED_AFFECTING_COMBAT;
 
                 break;
