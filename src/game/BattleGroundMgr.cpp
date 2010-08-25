@@ -1181,7 +1181,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     sLog.outString( ">> Loaded %u battlegrounds", count );
 }
 
-void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, const uint64& guid, Player* plr, BattleGroundTypeId bgTypeId)
+void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, ObjectGuid guid, Player* plr, BattleGroundTypeId bgTypeId)
 {
     if (!plr)
         return;
@@ -1191,13 +1191,13 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, const uint6
     uint32 mapId = GetBattleGrounMapIdByTypeId(bgTypeId);
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
-    *data << uint64(guid);                              // battlemaster guid
-    *data << uint32(mapId);                             // battleground id
-    *data << uint8(0x00);                               // unk
+    *data << guid;                                          // battlemaster guid
+    *data << uint32(mapId);                                 // battleground id
+    *data << uint8(0x00);                                   // unk
 
     size_t count_pos = data->wpos();
     uint32 count = 0;
-    *data << uint32(0x00);                              // number of bg instances
+    *data << uint32(0x00);                                  // number of bg instances
 
     for(std::map<uint32, BattleGround*>::iterator itr = m_BattleGrounds.begin(); itr != m_BattleGrounds.end(); ++itr)
     {

@@ -2446,7 +2446,7 @@ void ObjectMgr::LoadStandingList(uint32 dateBegin)
         {
             fields = result->Fetch();
             guid  = fields[0].GetUInt32();
-            side = GetPlayerTeamByGUID(MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
+            side = GetPlayerTeamByGUID(ObjectGuid(HIGHGUID_PLAYER, guid));
 
             kills=0;
             // kills count with victim setted ( not zero value )
