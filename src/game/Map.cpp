@@ -2183,15 +2183,16 @@ bool InstanceMap::Add(Player *player)
                     InstanceGroupBind *groupBind = pGroup->GetBoundInstance(GetId());
                     if(playerBind)
                     {
-                        sLog.outError("InstanceMap::Add: player %s(%d) is being put in instance %d,%d,%d,%d,%d but he is in group %d and is bound to instance %d,%d,%d,%d,%d!",
-                            player->GetName(), player->GetGUIDLow(), playerBind->save->GetMapId(), playerBind->save->GetInstanceId(),
+                        sLog.outError("InstanceMap::Add: %s is being put in instance %d,%d,%d,%d,%d but he is in group (Id: %d) and is bound to instance %d,%d,%d,%d,%d!",
+                            player->GetObjectGuid().GetString().c_str(), playerBind->save->GetMapId(), playerBind->save->GetInstanceId(),
                             playerBind->save->GetPlayerCount(), playerBind->save->GetGroupCount(),
-                            playerBind->save->CanReset(), GUID_LOPART(pGroup->GetLeaderGUID()),
+                            playerBind->save->CanReset(), pGroup->GetId(),
                             playerBind->save->GetMapId(), playerBind->save->GetInstanceId(),
                             playerBind->save->GetPlayerCount(), playerBind->save->GetGroupCount(), playerBind->save->CanReset());
 
                         if(groupBind)
-                            sLog.outError("InstanceMap::Add: the group is bound to instance %d,%d,%d,%d,%d",
+                            sLog.outError("InstanceMap::Add: the group (Id: %d) is bound to instance %d,%d,%d,%d,%d",
+                                pGroup->GetId(),
                                 groupBind->save->GetMapId(), groupBind->save->GetInstanceId(),
                                 groupBind->save->GetPlayerCount(), groupBind->save->GetGroupCount(), groupBind->save->CanReset());
 
@@ -2205,10 +2206,10 @@ bool InstanceMap::Add(Player *player)
                         // cannot jump to a different instance without resetting it
                         if (groupBind->save != GetInstanceSave())
                         {
-                            sLog.outError("InstanceMap::Add: player %s(%d) is being put in instance %d,%d but he is in group %d which is bound to instance %d,%d!",
-                                player->GetName(), player->GetGUIDLow(), GetInstanceSave()->GetMapId(),
+                            sLog.outError("InstanceMap::Add: %s is being put in instance %d,%d but he is in group (Id: %d) which is bound to instance %d,%d!",
+                                player->GetObjectGuid().GetString().c_str(), GetInstanceSave()->GetMapId(),
                                 GetInstanceSave()->GetInstanceId(),
-                                GUID_LOPART(pGroup->GetLeaderGUID()), groupBind->save->GetMapId(),
+                                pGroup->GetId(), groupBind->save->GetMapId(),
                                 groupBind->save->GetInstanceId());
 
                             if(GetInstanceSave())
@@ -2366,7 +2367,7 @@ bool InstanceMap::Reset(uint8 method)
 
 void InstanceMap::PermBindAllPlayers(Player *player)
 {
-    if(!IsDungeon())
+    if (!IsDungeon())
         return;
 
     Group *group = player->GetGroup();
@@ -2377,7 +2378,7 @@ void InstanceMap::PermBindAllPlayers(Player *player)
         // players inside an instance cannot be bound to other instances
         // some players may already be permanently bound, in this case nothing happens
         InstancePlayerBind *bind = plr->GetBoundInstance(GetId());
-        if(!bind || !bind->perm)
+        if (!bind || !bind->perm)
         {
             plr->BindToInstance(GetInstanceSave(), true);
             WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
@@ -2386,7 +2387,7 @@ void InstanceMap::PermBindAllPlayers(Player *player)
         }
 
         // if the leader is not in the instance the group will not get a perm bind
-        if(group && group->GetLeaderGUID() == plr->GetGUID())
+        if (group && group->GetLeaderGuid() == plr->GetObjectGuid())
             group->BindToInstance(GetInstanceSave(), true);
     }
 }

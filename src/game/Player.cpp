@@ -2257,9 +2257,9 @@ void Player::UninviteFromGroup()
 
 void Player::RemoveFromGroup(Group* group, ObjectGuid guid)
 {
-    if(group)
+    if (group)
     {
-        if (group->RemoveMember(guid.GetRawValue(), 0) <= 1)
+        if (group->RemoveMember(guid, 0) <= 1)
         {
             // group->Disband(); already disbanded in RemoveMember
             sObjectMgr.RemoveGroup(group);
@@ -7177,7 +7177,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                         {
                             if (group->GetLootMethod() == FREE_FOR_ALL)
                                 permission = ALL_PERMISSION;
-                            else if (group->GetLooterGuid() == GetGUID())
+                            else if (group->GetLooterGuid() == GetObjectGuid())
                             {
                                 if (group->GetLootMethod() == MASTER_LOOT)
                                     permission = MASTER_PERMISSION;
@@ -14415,7 +14415,7 @@ void Player::_LoadGroup(QueryResult *result)
 
         if (Group* group = sObjectMgr.GetGroupById(groupId))
         {
-            uint8 subgroup = group->GetMemberGroup(GetGUID());
+            uint8 subgroup = group->GetMemberGroup(GetObjectGuid());
             SetGroup(group, subgroup);
         }
     }
@@ -14451,8 +14451,10 @@ void Player::_LoadBoundInstances(QueryResult *result)
 
             if(!perm && group)
             {
-                sLog.outError("_LoadBoundInstances: player %s(%d) is in group %d but has a non-permanent character bind to map %d,%d", GetName(), GetGUIDLow(), GUID_LOPART(group->GetLeaderGUID()), mapId, instanceId);
-                CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'", GetGUIDLow(), instanceId);
+                sLog.outError("_LoadBoundInstances: %s is in group (Id: %d) but has a non-permanent character bind to map %d,%d",
+                    GetObjectGuid().GetString().c_str(), group->GetId(), mapId, instanceId);
+                CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'",
+                    GetGUIDLow(), instanceId);
                 continue;
             }
 
@@ -14610,13 +14612,19 @@ void Player::SendSavedInstances()
 }
 
 /// convert the player's binds to the group
-void Player::ConvertInstancesToGroup(Player *player, Group *group, uint64 player_guid)
+void Player::ConvertInstancesToGroup(Player *player, Group *group, ObjectGuid player_guid)
 {
     bool has_binds = false;
     bool has_solo = false;
 
-    if(player) { player_guid = player->GetGUID(); if(!group) group = player->GetGroup(); }
-    ASSERT(player_guid);
+    if (player)
+    {
+        player_guid = player->GetGUID();
+        if (!group)
+            group = player->GetGroup();
+    }
+
+    ASSERT(!player_guid.IsEmpty());
 
     // copy all binds to the group, when changing leader it's assumed the character
     // will not have any solo binds
@@ -14638,13 +14646,15 @@ void Player::ConvertInstancesToGroup(Player *player, Group *group, uint64 player
         }
     }
 
+    uint32 player_lowguid = player_guid.GetCounter();
+
     // if the player's not online we don't know what binds it has
     if(!player || !group || has_binds)
-        CharacterDatabase.PExecute("INSERT INTO group_instance SELECT guid, instance, permanent FROM character_instance WHERE guid = '%u'", GUID_LOPART(player_guid));
+        CharacterDatabase.PExecute("INSERT INTO group_instance SELECT guid, instance, permanent FROM character_instance WHERE guid = '%u'", player_lowguid);
 
     // the following should not get executed when changing leaders
     if(!player || has_solo)
-        CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND permanent = 0", GUID_LOPART(player_guid));
+        CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND permanent = 0", player_lowguid);
 }
 
 bool Player::_LoadHomeBind(QueryResult *result)
@@ -18119,13 +18129,13 @@ Player* Player::GetNextRandomRaidMember(float radius)
 PartyResult Player::CanUninviteFromGroup() const
 {
     const Group* grp = GetGroup();
-    if(!grp)
+    if (!grp)
         return ERR_NOT_IN_GROUP;
 
-    if(!grp->IsLeader(GetGUID()) && !grp->IsAssistant(GetGUID()))
+    if (!grp->IsLeader(GetObjectGuid()) && !grp->IsAssistant(GetObjectGuid()))
         return ERR_NOT_LEADER;
 
-    if(InBattleGround())
+    if (InBattleGround())
         return ERR_INVITE_RESTRICTED;
 
     return ERR_PARTY_RESULT_OK;

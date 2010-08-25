@@ -800,7 +800,7 @@ void BattleGround::AddPlayer(Player *plr)
 
     // score struct must be created in inherited class
 
-    uint64 guid = plr->GetGUID();
+    ObjectGuid guid = plr->GetObjectGuid();
     uint32 team = plr->GetBGTeam();
 
     BattleGroundPlayer bp;
@@ -808,7 +808,7 @@ void BattleGround::AddPlayer(Player *plr)
     bp.Team = team;
 
     // Add to list/maps
-    m_Players[guid] = bp;
+    m_Players[guid.GetRawValue()] = bp;
 
     UpdatePlayersCountByTeam(team, false);                  // +1 player
 

@@ -149,11 +149,11 @@ void WorldSession::HandleMoveWorldportAckOpcode()
                 {
                     Group *group = new Group;
                     bg->SetBgRaid(team, group);
-                    group->Create(_player->GetGUIDLow(), _player->GetName());
+                    group->Create(_player->GetObjectGuid(), _player->GetName());
                 }
                 else                                        // raid already exist
                 {
-                    bg->GetBgRaid(team)->AddMember(_player->GetGUID(), _player->GetName());
+                    bg->GetBgRaid(team)->AddMember(_player->GetObjectGuid(), _player->GetName());
                 }
             }
         }
