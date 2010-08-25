@@ -208,7 +208,7 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
 
     SetObjectScale(cinfo->scale);
 
-    uint32 display_id = ChooseDisplayId(team, GetCreatureInfo(), data);
+    uint32 display_id = ChooseDisplayId(GetCreatureInfo(), data);
     if (!display_id)                                        // Cancel load if no display id
     {
         sLog.outErrorDb("Creature (Entry: %u) has no model defined in table `creature_template`, can't load.", Entry);
@@ -323,7 +323,7 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data, 
     return true;
 }
 
-uint32 Creature::ChooseDisplayId(uint32 team, const CreatureInfo *cinfo, const CreatureData *data /*= NULL*/)
+uint32 Creature::ChooseDisplayId(const CreatureInfo *cinfo, const CreatureData *data /*= NULL*/)
 {
     // Use creature model explicit, override template (creature.modelid)
     if (data && data->modelid_override)

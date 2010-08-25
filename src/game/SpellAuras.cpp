@@ -1848,11 +1848,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
             return;
         }
 
-        uint32 team = 0;
-        if (m_target->GetTypeId()==TYPEID_PLAYER)
-            team = ((Player*)m_target)->GetTeam();
-
-        uint32 display_id = Creature::ChooseDisplayId(team,ci);
+        uint32 display_id = Creature::ChooseDisplayId(ci);
         CreatureModelInfo const *minfo = sObjectMgr.GetCreatureModelRandomGender(display_id);
         if (minfo)
             display_id = minfo->modelid;
@@ -2235,7 +2231,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                 sLog.outError("Auras: unknown creature id = %d (only need its modelid) Form Spell Aura Transform in Spell ID = %d", m_modifier.m_miscvalue, GetId());
             }
             else
-                model_id = Creature::ChooseDisplayId(0,ci); // Will use the default model here
+                model_id = Creature::ChooseDisplayId(ci);   // Will use the default model here
 
             m_target->SetDisplayId(model_id);
 
@@ -2284,11 +2280,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                 uint32 cr_id = m_target->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetModifier()->m_miscvalue;
                 if (CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(cr_id))
                 {
-                    uint32 team = 0;
-                    if (m_target->GetTypeId() == TYPEID_PLAYER)
-                        team = ((Player*)m_target)->GetTeam();
-
-                    uint32 display_id = Creature::ChooseDisplayId(team, ci);
+                    uint32 display_id = Creature::ChooseDisplayId(ci);
                     CreatureModelInfo const *minfo = sObjectMgr.GetCreatureModelRandomGender(display_id);
                     if (minfo)
                         display_id = minfo->modelid;
