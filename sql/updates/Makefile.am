@@ -142,7 +142,10 @@ pkgdata_DATA = \
 	z0788_s0099_01_characters_character_aura.sql \
 	z0788_s0099_02_characters_pet_aura.sql \
 	z0792_s0103_01_mangos_mangos_string.sql \
-	z0792_s0103_02_mangos_command.sql
+	z0792_s0103_02_mangos_command.sql \
+	z0801_s0114_01_characters_character_ticket.sql \
+	z0801_s0114_02_mangos_command.sql \
+	z0801_s0114_03_mangos_mangos_string.sql
 
 ## Additional files to include when running 'make dist'
 #  SQL update files, to upgrade database schema from older revisions
@@ -263,4 +266,7 @@ EXTRA_DIST = \
 	z0788_s0099_01_characters_character_aura.sql \
 	z0788_s0099_02_characters_pet_aura.sql \
 	z0792_s0103_01_mangos_mangos_string.sql \
-	z0792_s0103_02_mangos_command.sql
+	z0792_s0103_02_mangos_command.sql \
+	z0801_s0114_01_characters_character_ticket.sql \
+	z0801_s0114_02_mangos_command.sql \
+	z0801_s0114_03_mangos_mangos_string.sql

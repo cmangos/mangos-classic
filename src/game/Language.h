@@ -280,7 +280,7 @@ enum MangosStrings
     LANG_COMMAND_TICKETVIEW             = 290,
     LANG_COMMAND_TICKETON               = 291,
     LANG_COMMAND_TICKETOFF              = 292,
-    LANG_COMMAND_TICKENOTEXIST          = 293,
+    LANG_COMMAND_TICKETNOTEXIST         = 293,
     LANG_COMMAND_ALLTICKETDELETED       = 294,
     LANG_COMMAND_TICKETPLAYERDEL        = 295,
     LANG_COMMAND_TICKETDEL              = 296,
@@ -361,7 +361,11 @@ enum MangosStrings
     LANG_TRIGGER_REQ_QUEST              = 369,
     //                                    370 used in master branch
     //                                    371 used in master branch
-    // Room for more level 2              372-399 not used
+    //                                    372 used in master branch
+    LANG_COMMAND_TICKETRESPONSE         = 373,
+    LANG_COMMAND_TICKETCOUNT_CONSOLE    = 374,
+    LANG_COMMAND_TICKETNOTEXIST_NAME    = 375,
+    // Room for more level 2              376-399 not used
 
     // level 3 chat
     LANG_SCRIPTS_RELOADED               = 400,

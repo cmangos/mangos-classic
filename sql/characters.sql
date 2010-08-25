@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z0788_s0099_02_characters_pet_aura` bit(1) default NULL
+  `required_z0801_s0114_01_characters_character_ticket` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -614,8 +614,9 @@ CREATE TABLE `character_ticket` (
   `ticket_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `guid` int(11) unsigned NOT NULL DEFAULT '0',
   `ticket_text` text,
-  `ticket_lastchange` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`ticket_id`)
+  `response_text` text CHARSET utf8 COLLATE utf8_general_ci NULL,
+  `ticket_lastchange` TIMESTAMP ON  UPDATE  CURRENT_TIMESTAMP  NOT  NULL  DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`ticket_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 

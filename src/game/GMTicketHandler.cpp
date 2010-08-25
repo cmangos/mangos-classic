@@ -26,12 +26,25 @@
 #include "Player.h"
 #include "Chat.h"
 
-void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
+void WorldSession::SendGMTicketGetTicket(uint32 status, GMTicket *ticket /*= NULL*/)
 {
-    int len = text ? strlen(text) : 0;
+    std::string text = ticket ? ticket->GetText() : "";
+
+    if(ticket && ticket->HasResponse())
+    {
+        text += "\n\n";
+
+        std::string textFormat = GetMangosString(LANG_COMMAND_TICKETRESPONSE);
+        char textBuf[1024];
+        snprintf(textBuf, 1024, textFormat.c_str(), ticket->GetResponse());
+
+        text += textBuf;
+    }
+
+    int len = text.size()+1;
     WorldPacket data( SMSG_GMTICKET_GETTICKET, (4+len+1+4+2+4+4) );
     data << uint32(status);                                 // standard 0x0A, 0x06 if text present
-    if(status == 6)
+    if (status == 6)
     {
         data << text;                                       // ticket text
         data << uint8(0x7);                                 // ticket category
@@ -41,7 +54,7 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
         data << uint8(0);                                   // const
         data << uint8(0);                                   // const
     }
-    SendPacket( &data );
+    SendPacket(&data);
 }
 
 void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & /*recv_data*/ )
@@ -51,11 +64,10 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & /*recv_data*/ )
     data << (uint32)0;
     SendPacket( &data );
 
-    GMTicket* ticket = sTicketMgr.GetGMTicket(GetPlayer()->GetGUIDLow());
-    if(ticket)
-        SendGMTicketGetTicket(0x06,ticket->GetText());
+    if (GMTicket* ticket = sTicketMgr.GetGMTicket(GetPlayer()->GetGUIDLow()))
+        SendGMTicketGetTicket(0x06, ticket);
     else
-        SendGMTicketGetTicket(0x0A,0);
+        SendGMTicketGetTicket(0x0A);
 }
 
 void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
@@ -77,7 +89,7 @@ void WorldSession::HandleGMTicketDeleteTicketOpcode( WorldPacket & /*recv_data*/
     data << uint32(9);
     SendPacket( &data );
 
-    SendGMTicketGetTicket(0x0A, 0);
+    SendGMTicketGetTicket(0x0A);
 }
 
 void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
@@ -113,7 +125,6 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_GMTICKET_CREATE, 4 );
     data << uint32(2);
     SendPacket( &data );
-    DEBUG_LOG("update the ticket");
 
     //TODO: Guard player map
     HashMapHolder<Player>::MapType &m = sObjectAccessor.GetPlayers();
