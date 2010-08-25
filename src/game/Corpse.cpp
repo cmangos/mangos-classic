@@ -145,22 +145,22 @@ void Corpse::DeleteFromDB()
     CharacterDatabase.PExecute("DELETE FROM corpse WHERE player = '%d' AND corpse_type <> '0'",  GUID_LOPART(GetOwnerGUID()));
 }
 
-bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
+bool Corpse::LoadFromDB(uint32 lowguid, QueryResult *result)
 {
     bool external = (result != NULL);
     if (!external)
         //                                        0          1          2          3           4   5    6    7           8
-        result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,time,corpse_type,instance FROM corpse WHERE guid = '%u'",guid);
+        result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,time,corpse_type,instance FROM corpse WHERE guid = '%u'", lowguid);
 
     if( !result )
     {
-        sLog.outError("Corpse (GUID: %u) not found in table `corpse`, can't load. ",guid);
+        sLog.outError("Corpse (GUID: %u) not found in table `corpse`, can't load. ", lowguid);
         return false;
     }
 
     Field *fields = result->Fetch();
 
-    if(!LoadFromDB(guid, fields))
+    if (!LoadFromDB(lowguid, fields))
     {
         if (!external)
             delete result;
@@ -174,21 +174,21 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result)
     return true;
 }
 
-bool Corpse::LoadFromDB(uint32 guid, Field *fields)
+bool Corpse::LoadFromDB(uint32 lowguid, Field *fields)
 {
     //                                          0          1          2          3           4   5    6    7           8
-    //result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,time,corpse_type,instance FROM corpse WHERE guid = '%u'",guid);
+    //result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,time,corpse_type,instance FROM corpse WHERE guid = '%u'",lowguid);
     float positionX = fields[0].GetFloat();
     float positionY = fields[1].GetFloat();
     float positionZ = fields[2].GetFloat();
     float ort       = fields[3].GetFloat();
     uint32 mapid    = fields[4].GetUInt32();
 
-    Object::_Create(guid, 0, HIGHGUID_CORPSE);
+    Object::_Create(lowguid, 0, HIGHGUID_CORPSE);
 
     if(!LoadValues( fields[5].GetString() ))
     {
-        sLog.outError("Corpse #%d have broken data in `data` field. Can't be loaded.",guid);
+        sLog.outError("Corpse #%d have broken data in `data` field. Can't be loaded.", lowguid);
         return false;
     }
 
@@ -203,8 +203,10 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
 
     uint32 instanceid  = fields[8].GetUInt32();
 
+    ObjectGuid guid = ObjectGuid(HIGHGUID_CORPSE, lowguid);
+
     // overwrite possible wrong/corrupted guid
-    SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_CORPSE));
+    SetGuidValue(OBJECT_FIELD_GUID, guid);
 
     SetObjectScale(DEFAULT_OBJECT_SCALE);
 

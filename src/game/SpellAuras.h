@@ -219,10 +219,10 @@ class MANGOS_DLL_SPEC Aura
         Unit* GetCaster() const;
         Unit* GetTarget() const { return m_target; }
         void SetTarget(Unit* target) { m_target = target; }
-        void SetLoadedState(uint64 caster_guid,uint64 item_guid,int32 damage,int32 maxduration,int32 duration,int32 charges)
+        void SetLoadedState(uint64 caster_guid, ObjectGuid item_guid, int32 damage, int32 maxduration, int32 duration, int32 charges)
         {
             m_caster_guid = caster_guid;
-            m_castItemGuid = item_guid;
+            m_castItemGuid = item_guid.GetRawValue();
             m_modifier.m_amount = damage;
             m_maxduration = maxduration;
             m_duration = duration;

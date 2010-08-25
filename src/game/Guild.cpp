@@ -364,7 +364,8 @@ bool Guild::LoadMembersFromDB(QueryResult *guildMembersResult)
             break;
 
         MemberSlot newmember;
-        uint64 guid      = MAKE_NEW_GUID(fields[1].GetUInt32(), 0, HIGHGUID_PLAYER);
+        uint32 lowguid = fields[1].GetUInt32();
+        ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, lowguid);
         newmember.RankId = fields[2].GetUInt32();
         // don't allow member to have not existing rank!
         if (newmember.RankId >= m_Ranks.size())
@@ -383,25 +384,25 @@ bool Guild::LoadMembersFromDB(QueryResult *guildMembersResult)
         // this code will remove not existing character guids from guild
         if (newmember.Level < 1 || newmember.Level > STRONG_MAX_LEVEL) // can be at broken `data` field
         {
-            sLog.outError("Player (GUID: %u) has a broken data in field `characters`.`data`, deleting him from guild!",GUID_LOPART(guid));
-            CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guid = '%u'", GUID_LOPART(guid));
+            sLog.outError("%s has a broken data in field `characters`.`data`, deleting him from guild!", guid.GetString().c_str());
+            CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guid = '%u'", lowguid);
             continue;
         }
         if (!newmember.ZoneId)
         {
-            sLog.outError("Player (GUID: %u) has broken zone-data", GUID_LOPART(guid));
+            sLog.outError("%s has broken zone-data", guid.GetString().c_str());
             // here it will also try the same, to get the zone from characters-table, but additional it tries to find
             // the zone through xy coords .. this is a bit redundant, but shouldn't be called often
             newmember.ZoneId = Player::GetZoneIdFromDB(guid);
         }
         if (newmember.Class < CLASS_WARRIOR || newmember.Class >= MAX_CLASSES) // can be at broken `class` field
         {
-            sLog.outError("Player (GUID: %u) has a broken data in field `characters`.`class`, deleting him from guild!",GUID_LOPART(guid));
-            CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guid = '%u'", GUID_LOPART(guid));
+            sLog.outError("%s has a broken data in field `characters`.`class`, deleting him from guild!", guid.GetString().c_str());
+            CharacterDatabase.PExecute("DELETE FROM guild_member WHERE guid = '%u'", lowguid);
             continue;
         }
 
-        members[GUID_LOPART(guid)]      = newmember;
+        members[lowguid]      = newmember;
 
     } while (guildMembersResult->NextRow());
 

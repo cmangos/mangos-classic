@@ -284,9 +284,9 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
     Spell *spell;
     if(proto->SpellVisual == 222)
-        spell = new Spell(_player, proto, false, NULL);
+        spell = new Spell(_player, proto, false);
     else
-        spell = new Spell(unit, proto, false, NULL);
+        spell = new Spell(unit, proto, false);
 
     SpellCastTargets targets;
     targets.setUnitTarget( _player );

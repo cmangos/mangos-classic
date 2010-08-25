@@ -1159,7 +1159,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ItemAddedQuestCheck( uint32 entry, uint32 count );
         void ItemRemovedQuestCheck( uint32 entry, uint32 count );
         void KilledMonster( CreatureInfo const* cInfo, ObjectGuid guid );
-        void KilledMonsterCredit( uint32 entry, ObjectGuid guid );
+        void KilledMonsterCredit( uint32 entry, ObjectGuid guid = ObjectGuid());
         void CastedCreatureOrGO( uint32 entry, ObjectGuid guid, uint32 spell_id, bool original_caster = true );
         void TalkedToCreature( uint32 entry, ObjectGuid guid );
         void MoneyChanged( uint32 value );
@@ -1200,8 +1200,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         static float  GetFloatValueFromArray(Tokens const& data, uint16 index);
         static uint32 GetUInt32ValueFromDB(uint16 index, uint64 guid);
         static float  GetFloatValueFromDB(uint16 index, uint64 guid);
-        static uint32 GetZoneIdFromDB(uint64 guid);
-        static uint32 GetLevelFromDB(uint64 guid);
+        static uint32 GetZoneIdFromDB(ObjectGuid guid);
+        static uint32 GetLevelFromDB(ObjectGuid guid);
         static bool   LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, bool& in_flight, uint64 guid);
 
         /*********************************************************/
@@ -1219,7 +1219,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static void SetFloatValueInDB(uint16 index, float value, uint64 guid);
         static void SavePositionInDB(uint32 mapid, float x,float y,float z,float o,uint32 zone,uint64 guid);
 
-        static void DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmChars = true, bool deleteFinally = false);
+        static void DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRealmChars = true, bool deleteFinally = false);
         static void DeleteOldCharacters();
         static void DeleteOldCharacters(uint32 keepDays);
 
@@ -1457,19 +1457,19 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsInSameGroupWith(Player const* p) const;
         bool IsInSameRaidWith(Player const* p) const { return p==this || (GetGroup() != NULL && GetGroup() == p->GetGroup()); }
         void UninviteFromGroup();
-        static void RemoveFromGroup(Group* group, uint64 guid);
-        void RemoveFromGroup() { RemoveFromGroup(GetGroup(),GetGUID()); }
+        static void RemoveFromGroup(Group* group, ObjectGuid guid);
+        void RemoveFromGroup() { RemoveFromGroup(GetGroup(), GetObjectGuid()); }
         void SendUpdateToOutOfRangeGroupMembers();
 
         void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); }
         void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
         uint32 GetGuildId() { return GetUInt32Value(PLAYER_GUILDID);  }
-        static uint32 GetGuildIdFromDB(uint64 guid);
+        static uint32 GetGuildIdFromDB(ObjectGuid guid);
         uint32 GetRank(){ return GetUInt32Value(PLAYER_GUILDRANK); }
         static uint32 GetRankFromDB(uint64 guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
-        static void RemovePetitionsAndSigns(uint64 guid);
+        static void RemovePetitionsAndSigns(ObjectGuid guid);
 
         bool UpdateSkill(uint32 skill_id, uint32 step);
         bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);

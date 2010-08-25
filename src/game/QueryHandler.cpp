@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2005-2010 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2010 MaNGOSZero <http://github.com/mangoszero/mangoszero/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,7 +72,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult *result, uint32
     }
 
     Field *fields = result->Fetch();
-    uint32 guid      = fields[0].GetUInt32();
+    uint32 lowguid      = fields[0].GetUInt32();
     std::string name = fields[1].GetCppString();
     uint8 pRace = 0, pGender = 0, pClass = 0;
     if(name == "")
@@ -87,7 +86,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult *result, uint32
 
                                                             // guess size
     WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) );
-    data << MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER);
+    data << ObjectGuid(HIGHGUID_PLAYER, lowguid);
     data << name;
     data << uint8(0);                                       // realm name for cross realm BG usage
     data << uint32(pRace);                                  // race
@@ -261,6 +260,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
     float y = corpse->GetPositionY();
     float z = corpse->GetPositionZ();
     int32 corpsemapid = mapid;
+
     // if corpse at different map
     if(mapid != _player->GetMapId())
     {

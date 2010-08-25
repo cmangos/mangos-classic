@@ -1380,7 +1380,7 @@ void Pet::_LoadAuras(uint32 timediff)
 
                 if(!damage)
                     damage = aura->GetModifier()->m_amount;
-                aura->SetLoadedState(caster_guid, item_lowguid ? MAKE_NEW_GUID(item_lowguid, 0, HIGHGUID_ITEM) : 0, damage, maxduration, remaintime, remaincharges);
+                aura->SetLoadedState(caster_guid, ObjectGuid(HIGHGUID_ITEM, item_lowguid), damage, maxduration, remaintime, remaincharges);
                 AddAura(aura);
             }
         }
