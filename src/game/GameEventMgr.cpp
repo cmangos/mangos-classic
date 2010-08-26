@@ -110,7 +110,7 @@ void GameEventMgr::LoadFromDB()
         mGameEvent.resize(max_event_id+1);
     }
 
-    QueryResult *result = WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time),occurence,length,description FROM game_event");
+    QueryResult *result = WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time),occurence,length,holiday,description FROM game_event");
     if( !result )
     {
         mGameEvent.clear();
@@ -144,6 +144,7 @@ void GameEventMgr::LoadFromDB()
             pGameEvent.end          = time_t(endtime);
             pGameEvent.occurence    = fields[3].GetUInt32();
             pGameEvent.length       = fields[4].GetUInt32();
+            pGameEvent.holiday_id   = HolidayIds(fields[5].GetUInt32());
 
             if(pGameEvent.length==0)                            // length>0 is validity check
             {
@@ -151,7 +152,7 @@ void GameEventMgr::LoadFromDB()
                 continue;
             }
 
-            pGameEvent.description  = fields[5].GetCppString();
+            pGameEvent.description  = fields[6].GetCppString();
 
         } while( result->NextRow() );
         delete result;
@@ -838,4 +839,16 @@ int16 GameEventMgr::GetGameEventId<Pool>(uint32 guid_or_poolid)
 GameEventMgr::GameEventMgr()
 {
     m_IsGameEventsInit = false;
+}
+
+MANGOS_DLL_SPEC bool IsHolidayActive( HolidayIds id )
+{
+    GameEventMgr::GameEventDataMap const& events = sGameEventMgr.GetEventMap();
+    GameEventMgr::ActiveEvents const& ae = sGameEventMgr.GetActiveEventList();
+
+    for(GameEventMgr::ActiveEvents::const_iterator itr = ae.begin(); itr != ae.end(); ++itr)
+        if(events[*itr].holiday_id==id)
+            return true;
+
+    return false;
 }
