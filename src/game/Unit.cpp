@@ -5792,6 +5792,11 @@ Pet* Unit::GetPet() const
     return NULL;
 }
 
+Pet* Unit::_GetPet(ObjectGuid guid) const
+{
+    return GetMap()->GetPet(guid);
+}
+
 Unit* Unit::GetCharm() const
 {
     if (uint64 charm_guid = GetCharmGUID())
@@ -8237,11 +8242,6 @@ void Unit::ApplyDiminishingAura( DiminishingGroup group, bool apply )
     }
 }
 
-Unit* Unit::GetUnit(WorldObject const& object, uint64 guid)
-{
-    return ObjectAccessor::GetUnit(object,guid);
-}
-
 bool Unit::isVisibleForInState( Player const* u, WorldObject const* viewPoint, bool inVisibleList ) const
 {
     return isVisibleForOrDetect(u, viewPoint, false, inVisibleList, false);
@@ -9346,7 +9346,7 @@ void Unit::SetFeared(bool apply, uint64 const& casterGUID, uint32 spellID, uint3
 {
     if( apply )
     {
-        if(HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
+        if (HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
             return;
 
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
@@ -9354,7 +9354,7 @@ void Unit::SetFeared(bool apply, uint64 const& casterGUID, uint32 spellID, uint3
         GetMotionMaster()->MovementExpired(false);
         CastStop(GetGUID() == casterGUID ? spellID : 0);
 
-        Unit* caster = ObjectAccessor::GetUnit(*this,casterGUID);
+        Unit* caster = IsInWorld() ?  GetMap()->GetUnit(casterGUID) : NULL;
 
         GetMotionMaster()->MoveFleeing(caster, time);       // caster==NULL processed in MoveFleeing
     }
@@ -9364,18 +9364,19 @@ void Unit::SetFeared(bool apply, uint64 const& casterGUID, uint32 spellID, uint3
 
         GetMotionMaster()->MovementExpired(false);
 
-        if( GetTypeId() != TYPEID_PLAYER && isAlive() )
+        if (GetTypeId() != TYPEID_PLAYER && isAlive())
         {
+            Creature* c = ((Creature*)this);
             // restore appropriate movement generator
-            if(getVictim())
+            if (getVictim())
                 GetMotionMaster()->MoveChase(getVictim());
             else
                 GetMotionMaster()->Initialize();
 
             // attack caster if can
-            Unit* caster = Unit::GetUnit(*this, casterGUID);
-            if(caster && ((Creature*)this)->AI())
-                ((Creature*)this)->AI()->AttackedBy(caster);
+            if (Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGUID) : NULL)
+                if (c->AI())
+                    c->AI()->AttackedBy(caster);
         }
     }
 
