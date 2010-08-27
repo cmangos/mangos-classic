@@ -1657,6 +1657,9 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
     if (GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_AGGRO)
         return false;
 
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PASSIVE))
+        return false;
+
     // skip fighting creature
     if (isInCombat())
         return false;
