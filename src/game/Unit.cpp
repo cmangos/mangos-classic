@@ -42,6 +42,7 @@
 #include "Util.h"
 #include "Totem.h"
 #include "BattleGround.h"
+#include "InstanceData.h"
 #include "InstanceSaveMgr.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -740,6 +741,9 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 if (((Creature*)pOwner)->AI())
                     ((Creature*)pOwner)->AI()->SummonedCreatureJustDied(cVictim);
             }
+
+            if (InstanceData* mapInstance = cVictim->GetInstanceData())
+                mapInstance->OnCreatureDeath(cVictim);
 
             // Dungeon specific stuff, only applies to players killing creatures
             if(cVictim->GetInstanceId())
@@ -7159,6 +7163,9 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
         if (((Creature*)this)->AI())
             ((Creature*)this)->AI()->EnterCombat(enemy);
+
+        if (InstanceData* mapInstance = GetInstanceData())
+            mapInstance->OnCreatureEnterCombat((Creature*)this);
     }
 }
 
@@ -7961,6 +7968,10 @@ void Unit::TauntFadeOut(Unit *taunter)
     {
         if(((Creature*)this)->AI())
             ((Creature*)this)->AI()->EnterEvadeMode();
+
+        if (InstanceData* mapInstance = GetInstanceData())
+            mapInstance->OnCreatureEvade((Creature*)this);
+
         return;
     }
 
@@ -8055,6 +8066,9 @@ bool Unit::SelectHostileTarget()
 
     // enter in evade mode in other case
     ((Creature*)this)->AI()->EnterEvadeMode();
+
+    if (InstanceData* mapInstance = GetInstanceData())
+        mapInstance->OnCreatureEvade((Creature*)this);
 
     return false;
 }
