@@ -871,7 +871,11 @@ enum MangosStrings
     LANG_CHANGE_HEX_FIELD               = 1158,
     LANG_CHANGE_FLOAT                   = 1159,             //log
     LANG_CHANGE_FLOAT_FIELD             = 1160,
-    // Room for more level 3              1161-1199 not used
+    //                                    1161 used in master branch
+    //                                    1162 used in master branch
+    //                                    1163 used in master branch
+    //                                    1164 used in master branch
+    // Room for more level 3              1165-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
