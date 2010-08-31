@@ -87,7 +87,7 @@ void InstanceSave::SaveToDB()
     CharacterDatabase.PExecute("INSERT INTO instance VALUES ('%u', '%u', '"UI64FMTD"', '%s')", m_instanceid, GetMapId(), (uint64)GetResetTimeForDB(), data.c_str());
 }
 
-time_t InstanceSave::GetResetTimeForDB()
+time_t InstanceSave::GetResetTimeForDB() const
 {
     // only save the reset time for normal instances
     const MapEntry *entry = sMapStore.LookupEntry(GetMapId());
@@ -98,12 +98,12 @@ time_t InstanceSave::GetResetTimeForDB()
 }
 
 // to cache or not to cache, that is the question
-InstanceTemplate const* InstanceSave::GetTemplate()
+InstanceTemplate const* InstanceSave::GetTemplate() const
 {
     return ObjectMgr::GetInstanceTemplate(m_mapid);
 }
 
-MapEntry const* InstanceSave::GetMapEntry()
+MapEntry const* InstanceSave::GetMapEntry() const
 {
     return sMapStore.LookupEntry(m_mapid);
 }
