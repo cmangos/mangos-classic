@@ -8974,7 +8974,7 @@ bool InitTriggerAuraData()
     isTriggerAura[SPELL_AURA_DAMAGE_IMMUNITY] = true;
     isTriggerAura[SPELL_AURA_PROC_TRIGGER_SPELL] = true;
     isTriggerAura[SPELL_AURA_PROC_TRIGGER_DAMAGE] = true;
-    isTriggerAura[SPELL_AURA_MOD_CASTING_SPEED] = true;
+    isTriggerAura[SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK] = true;
     isTriggerAura[SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT] = true;
     isTriggerAura[SPELL_AURA_MOD_POWER_COST_SCHOOL] = true;
     isTriggerAura[SPELL_AURA_REFLECT_SPELLS_SCHOOL] = true;
@@ -9209,7 +9209,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                         auraModifier->m_amount = basevalue*4;
                 }
                 break;
-            case SPELL_AURA_MOD_CASTING_SPEED:
+            case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK:
                 // Skip melee hits or instant cast spells
                 if (procSpell == NULL || GetSpellCastTime(procSpell) == 0)
                     continue;
