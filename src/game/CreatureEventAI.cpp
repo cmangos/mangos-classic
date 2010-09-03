@@ -322,8 +322,9 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         }
         case EVENT_T_MISSING_BUFF:
         {
-            SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(event.buffed.spellId);
-            if (holder && holder->GetStackAmount() >= event.buffed.amount)
+            //Note: checked only aura for effect 0, if need check aura for effect 1/2 then
+            // possible way: pack in event.buffed.amount 2 uint16 (ammount+effectIdx)
+            if(m_creature->GetAuras().count(Unit::spellEffectPair(event.buffed.spellId,EFFECT_INDEX_0)) >= event.buffed.amount)
                 return false;
 
             //Repeat Timers
