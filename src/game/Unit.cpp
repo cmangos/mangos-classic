@@ -3269,7 +3269,7 @@ bool Unit::AddAura(Aura *Aur)
         if (Unit* caster = Aur->GetCaster())                // caster not in world
         {
             SingleCastSpellTargetMap& scTargets = caster->GetSingleCastSpellTargets();
-            for(SingleCastSpellTargetMap::const_iterator itr = scTargets.begin(); itr != scTargets.end();)
+            for(SingleCastSpellTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end();)
             {
                 spellEffectPair itr_spair = itr->first;
                 SpellEntry const* itr_spellEntry = sSpellStore.LookupEntry(itr_spair.first);
