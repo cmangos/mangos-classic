@@ -29,8 +29,11 @@
 template<class T>
 void PointMovementGenerator<T>::Initialize(T &unit)
 {
-    unit.StopMoving();
+    if (!unit.IsStopped())
+        unit.StopMoving();
+
     unit.addUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
+
     Traveller<T> traveller(unit);
     i_destinationHolder.SetDestination(traveller, i_x, i_y, i_z);
 }
@@ -50,10 +53,11 @@ void PointMovementGenerator<T>::Interrupt(T &unit)
 template<class T>
 void PointMovementGenerator<T>::Reset(T &unit)
 {
-    unit.StopMoving();
+    if (!unit.IsStopped())
+        unit.StopMoving();
+
     unit.addUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
 }
-
 
 template<class T>
 bool PointMovementGenerator<T>::Update(T &unit, const uint32 &diff)
@@ -68,6 +72,7 @@ bool PointMovementGenerator<T>::Update(T &unit, const uint32 &diff)
     }
 
     unit.addUnitState(UNIT_STAT_ROAMING_MOVE);
+
     Traveller<T> traveller(unit);
     if (i_destinationHolder.UpdateTraveller(traveller, diff, false))
     {
@@ -77,7 +82,7 @@ bool PointMovementGenerator<T>::Update(T &unit, const uint32 &diff)
 
     if(i_destinationHolder.HasArrived())
     {
-        unit.StopMoving();
+        unit.clearUnitState(UNIT_STAT_ROAMING_MOVE);
         MovementInform(unit);
         return false;
     }
