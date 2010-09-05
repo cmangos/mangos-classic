@@ -55,14 +55,12 @@ void Totem::Update( uint32 time )
 
 void Totem::Summon(Unit* owner)
 {
-    DEBUG_LOG("AddObject at Totem.cpp line 49");
+    AIM_Initialize();
     owner->GetMap()->Add((Creature*)this);
 
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
-    data << GetGUID();
+    data << GetObjectGuid();
     SendMessageToSet(&data,true);
-
-    AIM_Initialize();
 
     if (owner->GetTypeId() == TYPEID_UNIT && ((Creature*)owner)->AI())
         ((Creature*)owner)->AI()->JustSummoned((Creature*)this);
