@@ -55,7 +55,7 @@ class Reference : public LinkedListElement
         // Create new link
         void link(TO* toObj, FROM* fromObj)
         {
-            ASSERT(fromObj);                                // fromObj MUST not be NULL
+            assert(fromObj);                                // fromObj MUST not be NULL
             if (isValid())
                 unlink();
 

@@ -17,9 +17,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Common.h"
-#include "Database/SQLStorage.h"
+#include "InstanceSaveMgr.h"
 
+#include "Database/SQLStorage.h"
 #include "Player.h"
 #include "GridNotifiers.h"
 #include "Log.h"
@@ -28,7 +28,6 @@
 #include "Map.h"
 #include "MapManager.h"
 #include "MapInstanced.h"
-#include "InstanceSaveMgr.h"
 #include "Timer.h"
 #include "GridNotifiersImpl.h"
 #include "Transports.h"
@@ -75,7 +74,7 @@ void InstanceSave::SaveToDB()
     Map *map = sMapMgr.FindMap(GetMapId(),m_instanceid);
     if(map)
     {
-        ASSERT(map->IsDungeon());
+        MANGOS_ASSERT(map->IsDungeon());
         InstanceData *iData = ((InstanceMap *)map)->GetInstanceData();
         if(iData && iData->Save())
         {
@@ -399,7 +398,7 @@ void InstanceSaveManager::RemoveInstanceSave(uint32 InstanceId)
 void InstanceSaveManager::_DelHelper(DatabaseType &db, const char *fields, const char *table, const char *queryTail,...)
 {
     Tokens fieldTokens = StrSplit(fields, ", ");
-    ASSERT(fieldTokens.size() != 0);
+    MANGOS_ASSERT(fieldTokens.size() != 0);
 
     va_list ap;
     char szQueryTail [MAX_QUERY_LEN];

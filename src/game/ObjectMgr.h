@@ -20,6 +20,7 @@
 #ifndef _OBJECTMGR_H
 #define _OBJECTMGR_H
 
+#include "Common.h"
 #include "Log.h"
 #include "Object.h"
 #include "Bag.h"

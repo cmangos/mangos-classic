@@ -1851,7 +1851,7 @@ static void LoadSpellChains_AbilityHelper(SpellChainMap& chainMap, AbilitySpellP
     SpellChainMap::const_iterator chain_itr = chainMap.find(spell_id);
     if (chain_itr != chainMap.end())
     {
-        ASSERT(chain_itr->second.prev == prev_id && "LoadSpellChains_AbilityHelper: Conflicting data in talents or spell abilities dbc");
+        MANGOS_ASSERT(chain_itr->second.prev == prev_id && "LoadSpellChains_AbilityHelper: Conflicting data in talents or spell abilities dbc");
         return;
     }
 
@@ -1890,7 +1890,7 @@ static void LoadSpellChains_AbilityHelper(SpellChainMap& chainMap, AbilitySpellP
 
     if (deep == 0)
     {
-        ASSERT(false && "LoadSpellChains_AbilityHelper: Infinity cycle in spell ability data");
+        MANGOS_ASSERT(false && "LoadSpellChains_AbilityHelper: Infinity cycle in spell ability data");
         return;
     }
 
@@ -1986,7 +1986,7 @@ void SpellMgr::LoadSpellChains()
             SpellChainMap::const_iterator chain_itr = mSpellChains.find(forward_id);
             if (chain_itr != mSpellChains.end())
             {
-                ASSERT(chain_itr->second.prev == spell_id && "Conflicting data in talents or spell abilities dbc");
+                MANGOS_ASSERT(chain_itr->second.prev == spell_id && "Conflicting data in talents or spell abilities dbc");
                 continue;
             }
 
@@ -1994,7 +1994,7 @@ void SpellMgr::LoadSpellChains()
             AbilitySpellPrevMap::const_iterator prev_itr = prevRanks.find(forward_id);
             if (prev_itr != prevRanks.end())
             {
-                ASSERT(prev_itr->second == spell_id && "Conflicting data in talents or spell abilities dbc");
+                MANGOS_ASSERT(prev_itr->second == spell_id && "Conflicting data in talents or spell abilities dbc");
                 continue;
             }
 

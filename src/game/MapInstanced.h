@@ -20,6 +20,7 @@
 #ifndef MANGOS_MAP_INSTANCED_H
 #define MANGOS_MAP_INSTANCED_H
 
+#include "Common.h"
 #include "Map.h"
 #include "InstanceSaveMgr.h"
 

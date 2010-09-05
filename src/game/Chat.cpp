@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Common.h"
+#include "Chat.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -29,7 +29,6 @@
 #include "ObjectGuid.h"
 #include "Player.h"
 #include "UpdateMask.h"
-#include "Chat.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "AccountMgr.h"
@@ -1192,8 +1191,8 @@ bool ChatHandler::SetDataForCommandInTable(ChatCommand *commandTable, const char
 
 bool ChatHandler::ParseCommands(const char* text)
 {
-    ASSERT(text);
-    ASSERT(*text);
+    MANGOS_ASSERT(text);
+    MANGOS_ASSERT(*text);
 
     //if(m_session->GetSecurity() == SEC_PLAYER)
     //    return false;
@@ -1777,7 +1776,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
 
     if (type == CHAT_MSG_CHANNEL)
     {
-        ASSERT(channelName);
+        MANGOS_ASSERT(channelName);
         *data << channelName;
     }
 

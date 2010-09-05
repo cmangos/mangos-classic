@@ -20,8 +20,10 @@
 #ifndef _AUCTION_HOUSE_MGR_H
 #define _AUCTION_HOUSE_MGR_H
 
+#include "Common.h"
 #include "SharedDefines.h"
 #include "Policies/Singleton.h"
+#include "DBCStructure.h"
 
 class Item;
 class Player;
@@ -87,7 +89,7 @@ class AuctionHouseObject
 
         void AddAuction(AuctionEntry *ah)
         {
-            ASSERT( ah );
+            MANGOS_ASSERT( ah );
             AuctionsMap[ah->Id] = ah;
         }
 

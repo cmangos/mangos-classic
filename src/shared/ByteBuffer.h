@@ -21,7 +21,6 @@
 #define _BYTEBUFFER_H
 
 #include "Common.h"
-#include "Errors.h"
 #include "Log.h"
 #include "Utilities/ByteConverter.h"
 
@@ -335,7 +334,7 @@ class ByteBuffer
         {
             if (!cnt) return;
 
-            ASSERT(size() < 10000000);
+            MANGOS_ASSERT(size() < 10000000);
 
             if (_storage.size() < _wpos + cnt)
                 _storage.resize(_wpos + cnt);

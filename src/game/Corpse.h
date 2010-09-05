@@ -20,6 +20,7 @@
 #ifndef MANGOSSERVER_CORPSE_H
 #define MANGOSSERVER_CORPSE_H
 
+#include "Common.h"
 #include "Object.h"
 #include "Database/DatabaseEnv.h"
 #include "GridDefines.h"

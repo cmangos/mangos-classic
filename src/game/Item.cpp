@@ -17,7 +17,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Common.h"
 #include "Item.h"
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
@@ -160,7 +159,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
 
     if(!eff->item_count)                                    //all items of a set were removed
     {
-        ASSERT(eff == player->ItemSetEff[setindex]);
+        MANGOS_ASSERT(eff == player->ItemSetEff[setindex]);
         delete eff;
         player->ItemSetEff[setindex] = NULL;
     }
@@ -796,7 +795,7 @@ Item* Item::CreateItem( uint32 item, uint32 count, Player const* player )
         if ( count > pProto->GetMaxStackSize())
             count = pProto->GetMaxStackSize();
 
-        ASSERT(count !=0 && "pProto->Stackable==0 but checked at loading already");
+        MANGOS_ASSERT(count !=0 && "pProto->Stackable==0 but checked at loading already");
 
         Item *pItem = NewItemOrBag( pProto );
         if( pItem->Create(sObjectMgr.GenerateLowGuid(HIGHGUID_ITEM), item, player) )

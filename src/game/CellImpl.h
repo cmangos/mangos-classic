@@ -20,6 +20,7 @@
 #ifndef MANGOS_CELLIMPL_H
 #define MANGOS_CELLIMPL_H
 
+#include "Common.h"
 #include "Cell.h"
 #include "Map.h"
 #include <cmath>
@@ -109,7 +110,7 @@ Cell::Visit(const CellPair &standing_cell, TypeContainerVisitor<T, CONTAINER> &v
         }
         default:
         {
-            ASSERT( false );
+            MANGOS_ASSERT( false );
             break;
         }
     }
