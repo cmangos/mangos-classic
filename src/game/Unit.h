@@ -607,9 +607,10 @@ enum SplineFlags
     SPLINEFLAG_WALKMODE       = 0x00000100,
     SPLINEFLAG_FLYING         = 0x00000200,
     // backported flag to preserve compatibility not confirmed by data, but causes no problems
-    SPLINEFLAG_NO_SPLINE      = 0x00000400,               // former: SPLINEFLAG_LEVITATING
-    SPLINEFLAG_UNKNOWN7       = 0x02000000,               // swimming/flying (depends on mob?)
-    SPLINEFLAG_SPLINE         = 0x00002000,               // spline n*(float x,y,z)
+    SPLINEFLAG_NO_SPLINE      = 0x00000400,                 // former: SPLINEFLAG_LEVITATING
+    SPLINEFLAG_FALLING        = 0x00001000,
+    SPLINEFLAG_UNKNOWN7       = 0x02000000,                 // swimming/flying (depends on mob?)
+    SPLINEFLAG_SPLINE         = 0x00002000,                 // spline n*(float x,y,z)
 };
 
 enum SplineType
