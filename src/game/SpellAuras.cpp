@@ -5375,14 +5375,8 @@ void Aura::UnregisterSingleCastAura()
     if (IsSingleTarget())
     {
         if(Unit* caster = GetCaster())
-        {
-            caster->GetSingleCastAuras().remove(this);
-        }
-        else
-        {
-            sLog.outError("Couldn't find the caster of the single target aura (SpellId %u), may crash later!", GetId());
-            ASSERT(false);
-        }
+            caster->GetSingleCastSpellTargets().erase(Unit::spellEffectPair(GetId(),GetEffIndex()));
+
         m_isSingleTargetAura = false;
     }
 }

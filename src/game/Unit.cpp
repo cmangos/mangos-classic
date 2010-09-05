@@ -3264,39 +3264,36 @@ bool Unit::AddAura(Aura *Aur)
     }
 
     // update single target auras list (before aura add to aura list, to prevent unexpected remove recently added aura)
-    if (Aur->IsSingleTarget() && Aur->GetTarget())
+    if (Aur->IsSingleTarget())
     {
-        // caster pointer can be deleted in time aura remove, find it by guid at each iteration
-        for(;;)
+        if (Unit* caster = Aur->GetCaster())                // caster not in world
         {
-            Unit* caster = Aur->GetCaster();
-            if(!caster)                                     // caster deleted and not required adding scAura
-                break;
-
-            bool restart = false;
-            AuraList& scAuras = caster->GetSingleCastAuras();
-            for(AuraList::const_iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
+            SingleCastSpellTargetMap& scTargets = caster->GetSingleCastSpellTargets();
+            for(SingleCastSpellTargetMap::const_iterator itr = scTargets.begin(); itr != scTargets.end();)
             {
-                if( (*itr)->GetTarget() != Aur->GetTarget() &&
-                    IsSingleTargetSpells((*itr)->GetSpellProto(),aurSpellInfo) )
+                spellEffectPair itr_spair = itr->first;
+                SpellEntry const* itr_spellEntry = sSpellStore.LookupEntry(itr_spair.first);
+                ObjectGuid itr_targetGuid = itr->second;
+
+
+                if (itr_spellEntry && itr_targetGuid != GetObjectGuid() &&
+                    IsSingleTargetSpells(itr_spellEntry, aurSpellInfo))
                 {
-                    if ((*itr)->IsInUse())
-                    {
-                        sLog.outError("Aura (Spell %u Effect %u) is in process but attempt removed at aura (Spell %u Effect %u) adding, need add stack rule for IsSingleTargetSpell", (*itr)->GetId(), (*itr)->GetEffIndex(),Aur->GetId(), Aur->GetEffIndex());
-                        continue;
-                    }
-                    (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
-                    restart = true;
-                    break;
+                    scTargets.erase(itr);                   // remove for caster in any case
+
+                    // remove from target if target found
+                    if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
+                        itr_target->RemoveAurasDueToSpell(itr_spellEntry->Id);
+
+                    itr = scTargets.begin();                // list can be chnaged at remove aura
+                    continue;
                 }
+
+                ++itr;
             }
 
-            if(!restart)
-            {
-                // done
-                scAuras.push_back(Aur);
-                break;
-            }
+            // register spell holder single target
+            scTargets[spair] = GetObjectGuid();
         }
     }
 
@@ -3703,25 +3700,36 @@ void Unit::RemoveNotOwnSingleTargetAuras()
     // single target auras from other casters
     for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
     {
-        if (iter->second->GetCasterGUID()!=GetGUID() && IsSingleTargetSpell(iter->second->GetSpellProto()))
+        if (iter->second->GetCasterGUID() != GetGUID() && iter->second->IsSingleTarget())
+        {
             RemoveAura(iter);
-        else
-            ++iter;
+            continue;
+        }
+
+        ++iter;
     }
 
     // single target auras at other targets
-    AuraList& scAuras = GetSingleCastAuras();
-    for (AuraList::iterator iter = scAuras.begin(); iter != scAuras.end(); )
+    SingleCastSpellTargetMap& scTargets = GetSingleCastSpellTargets();
+    for (SingleCastSpellTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end(); )
     {
-        Aura* aura = *iter;
-        if (aura->GetTarget() != this)
+        spellEffectPair itr_spair = itr->first;
+        SpellEntry const* itr_spellEntry = sSpellStore.LookupEntry(itr_spair.first);
+        ObjectGuid itr_targetGuid = itr->second;
+
+        if (itr_spellEntry && itr_targetGuid != GetObjectGuid())
         {
-            scAuras.erase(iter);                            // explicitly remove, instead waiting remove in RemoveAura
-            aura->GetTarget()->RemoveAura(aura);
-            iter = scAuras.begin();
+            scTargets.erase(itr);                           // remove for caster in any case
+
+            // remove from target if target found
+            if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
+                itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, itr_spair.second, GetGUID());
+
+            itr = scTargets.begin();                        // list can be changed at remove aura
+            continue;
         }
-        else
-            ++iter;
+
+        ++itr;
     }
 
 }
