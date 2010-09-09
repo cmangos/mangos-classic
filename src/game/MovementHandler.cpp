@@ -490,9 +490,7 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
         return;
 
     uint64 summoner_guid;
-    bool agree;
     recv_data >> summoner_guid;
-    recv_data >> agree;
 
-    _player->SummonIfPossible(agree);
+    _player->SummonIfPossible(true);
 }
