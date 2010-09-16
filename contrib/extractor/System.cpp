@@ -353,7 +353,7 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
                     area_flags[i][j] = areas[areaid];
                     continue;
                 }
-                printf("File: filename\nCan't find area flag for areaid %u [%d, %d].\n", filename, areaid, cell->ix, cell->iy);
+                printf("File: %s\nCan't find area flag for areaid %u [%d, %d].\n", filename, areaid, cell->ix, cell->iy);
             }
             area_flags[i][j] = 0xffff;
         }
@@ -608,7 +608,7 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
                 // Dark water detect
                 if (type == LIQUID_TYPE_OCEAN)
                 {
-                    uint8 *lm = h2o->getLiquidLightMap(h); 
+                    uint8 *lm = h2o->getLiquidLightMap(h);
                     if (!lm)
                         liquid_type[i][j]|=MAP_LIQUID_TYPE_DARK_WATER;
                 }
@@ -766,7 +766,7 @@ bool ConvertADT(char *filename, char *filename2, int cell_y, int cell_x)
             liquidHeader.liquidType = type;
         else
             map.liquidMapSize+=sizeof(liquid_type);
-     
+
         if (!(liquidHeader.flags & MAP_LIQUID_NO_HEIGHT))
             map.liquidMapSize += sizeof(float)*liquidHeader.width*liquidHeader.height;
     }
@@ -870,7 +870,7 @@ void ExtractMapsFromMpq()
     delete [] map_ids;
 }
 
-bool ExtractFile( char const* mpq_name, std::string const& filename ) 
+bool ExtractFile( char const* mpq_name, std::string const& filename )
 {
     FILE *output = fopen(filename.c_str(), "wb");
     if(!output)
