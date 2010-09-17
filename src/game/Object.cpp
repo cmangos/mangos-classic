@@ -438,9 +438,9 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                     *data << (m_uint32Values[ index ] & ~UNIT_FLAG_NOT_SELECTABLE);
                 }
                 // hide lootable animation for unallowed players
-                else if(index == UNIT_DYNAMIC_FLAGS && GetTypeId() == TYPEID_UNIT)
+                else if (index == UNIT_DYNAMIC_FLAGS && GetTypeId() == TYPEID_UNIT)
                 {
-                    if(!target->isAllowedToLoot((Creature*)this))
+                    if (!target->isAllowedToLoot((Creature*)this))
                         *data << (m_uint32Values[ index ] & ~UNIT_DYNFLAG_LOOTABLE);
                     else
                         *data << (m_uint32Values[ index ] & ~UNIT_DYNFLAG_TAPPED);
