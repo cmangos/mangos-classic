@@ -906,7 +906,7 @@ int main(int argc, char *argv[])
             printf("                         to the last commit\n");
             printf("   -l, --local           search for the highest rev number on HEAD\n");
             printf("   -f, --fetch           fetch from origin before searching for the new rev\n");
-            printf("   -s, --sql             (DISBLED) search for new sql updates and do all of the changes\n");
+            printf("   -s, --sql             search for new sql updates and do all of the changes\n");
             printf("                         for the new rev\n");
             printf("       --branch=BRANCH   specify which remote branch to use\n");
             return 0;
