@@ -32,10 +32,8 @@ struct SpellEntry;
 
 class HostileRefManager : public RefManager<Unit, ThreatManager>
 {
-    private:
-        Unit *iOwner;
     public:
-        explicit HostileRefManager(Unit *pOwner) { iOwner = pOwner; }
+        explicit HostileRefManager(Unit *pOwner);
         ~HostileRefManager();
 
         Unit* getOwner() { return iOwner; }
@@ -65,6 +63,9 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
 
         // delete one reference, defined by Unit
         void deleteReference(Unit *pCreature);
+
+    private:
+        Unit* iOwner;                                       // owner of manager variable, back ref. to it, always exist
 };
 //=================================================
 #endif
