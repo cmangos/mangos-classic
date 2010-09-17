@@ -900,7 +900,7 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 */
 }
 
-void WorldSession::HandleSetActionBarToggles(WorldPacket& recv_data)
+void WorldSession::HandleSetActionBarTogglesOpcode(WorldPacket& recv_data)
 {
     uint8 ActionBar;
 

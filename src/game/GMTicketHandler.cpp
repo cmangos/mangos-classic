@@ -143,7 +143,7 @@ void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & /*recv_data*/
     SendPacket( &data );
 }
 
-void WorldSession::HandleGMSurveySubmit( WorldPacket & recv_data)
+void WorldSession::HandleGMSurveySubmitOpcode( WorldPacket & recv_data)
 {
     // GM survey is shown after SMSG_GM_TICKET_STATUS_UPDATE with status = 3
     uint32 x;
