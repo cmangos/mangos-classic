@@ -10,7 +10,6 @@
 # MaNGOS generated files at Windows build
 #
 
-*.ncb
-*.suo
-Release
 Debug
+Release
+bin
