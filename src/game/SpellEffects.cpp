@@ -1725,7 +1725,7 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
         int32 addhealth = damage;
 
         // Swiftmend - consumes Regrowth or Rejuvenation
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellFamilyFlags & UI64LIT(0x200000000))
+        if (m_spellInfo->Id == 18562)
         {
             Unit::AuraList const& RejorRegr = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
             // find most short by duration

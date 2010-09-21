@@ -3434,9 +3434,12 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     if(Unit *target = m_targets.getUnitTarget())
     {
-        // target state requirements (not allowed state), apply to self also
-        /* [-ZERO] if(m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
-            return SPELL_FAILED_TARGET_AURASTATE; */
+        // Swiftmend
+        if (m_spellInfo->Id == 18562)                       // future versions have special aura state for this
+        {
+            if (!target->GetAura(SPELL_AURA_PERIODIC_HEAL,SPELLFAMILY_DRUID,UI64LIT(0x50)))
+                return SPELL_FAILED_TARGET_AURASTATE;
+        }
 
         if (!m_IsTriggeredSpell && IsDeathOnlySpell(m_spellInfo) && target->isAlive())
             return SPELL_FAILED_TARGET_NOT_DEAD;
