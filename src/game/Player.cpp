@@ -10829,10 +10829,6 @@ void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 ) const
 
     if (msg != EQUIP_ERR_OK)
     {
-        data << (pItem ? pItem->GetObjectGuid() : ObjectGuid());
-        data << (pItem2 ? pItem2->GetObjectGuid() : ObjectGuid());
-        data << uint8(0);                                   // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
-
         if (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I)
         {
             uint32 level = 0;
@@ -10843,6 +10839,9 @@ void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 ) const
 
             data << uint32(level);
         }
+        data << (pItem ? pItem->GetObjectGuid() : ObjectGuid());
+        data << (pItem2 ? pItem2->GetObjectGuid() : ObjectGuid());
+        data << uint8(0);                                   // bag type subclass, used with EQUIP_ERR_EVENT_AUTOEQUIP_BIND_CONFIRM and EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG2
     }
     GetSession()->SendPacket(&data);
 }
