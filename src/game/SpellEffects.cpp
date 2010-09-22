@@ -2874,6 +2874,7 @@ void Spell::EffectEnchantItemPerm(SpellEffectIndex eff_idx)
 
     Player* p_caster = (Player*)m_caster;
 
+    // not grow at item use at item case
     p_caster->UpdateCraftSkill(m_spellInfo->Id);
 
     uint32 enchant_id = m_spellInfo->EffectMiscValue[eff_idx];
