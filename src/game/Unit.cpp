@@ -7088,13 +7088,16 @@ void Unit::Mount(uint32 mount, uint32 spellId)
         if (!spellId)
             ((Player*)this)->UnsummonPetTemporaryIfAny();
         // Called by mount aura
-        else if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId))
+        else
         {
             // Normal case (Unsummon only permanent pet)
             if (Pet* pet = GetPet())
             {
-                if (pet->IsPermanentPetFor((Player*)this))
+                if (pet->IsPermanentPetFor((Player*)this) &&
+                    sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT))
+                {
                     ((Player*)this)->UnsummonPetTemporaryIfAny();
+                }
                 else
                     pet->ApplyModeFlags(PET_MODE_DISABLE_ACTIONS,true);
             }

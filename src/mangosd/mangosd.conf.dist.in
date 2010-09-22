@@ -616,6 +616,11 @@ LogColors = ""
 #        Mail delivery delay time for item sending
 #        Default: 3600 sec (1 hour)
 #
+#    PetUnsummonAtMount
+#        Persmanent pet will unsummoned at player mount
+#        Default: 0 - not unsummon
+#                 1 - unsummon for any mount
+#
 #    Event.Announce
 #        Default: 0 (false)
 #                 1 (true)
@@ -681,6 +686,7 @@ MaxPrimaryTradeSkill = 2
 MinPetitionSigns = 9
 MaxGroupXPDistance = 74
 MailDeliveryDelay = 3600
+PetUnsummonAtMount = 0
 Event.Announce = 0
 BeepAtStart = 1
 WaitAtStartupError = 0
