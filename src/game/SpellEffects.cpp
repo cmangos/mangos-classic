@@ -1753,14 +1753,14 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
                 idx++;
             }
 
-            int32 tickheal = caster->SpellHealingBonus(targetAura->GetSpellProto(), targetAura->GetModifier()->m_amount, DOT, unitTarget);
+            int32 tickheal = caster->SpellHealingBonus(unitTarget, targetAura->GetSpellProto(), targetAura->GetModifier()->m_amount, DOT);
             int32 tickcount = GetSpellDuration(targetAura->GetSpellProto()) / targetAura->GetSpellProto()->EffectAmplitude[idx];
             unitTarget->RemoveAurasDueToSpell(targetAura->GetId());
 
             addhealth += tickheal * tickcount;
         }
         else
-            addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth,HEAL, unitTarget);
+            addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL);
 
         m_healing+=addhealth;
     }
@@ -1776,7 +1776,7 @@ void Spell::EffectHealMechanical(SpellEffectIndex /*eff_idx*/)
         if (!caster)
             return;
 
-        uint32 addhealth = caster->SpellHealingBonus(m_spellInfo, uint32(damage), HEAL, unitTarget);
+        uint32 addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, uint32(damage), HEAL);
         caster->DealHeal(unitTarget, addhealth, m_spellInfo);
     }
 }
@@ -1806,7 +1806,7 @@ void Spell::EffectHealthLeech(SpellEffectIndex eff_idx)
 
     if (m_caster->isAlive())
     {
-        new_damage = m_caster->SpellHealingBonus(m_spellInfo, new_damage, HEAL, m_caster);
+        new_damage = m_caster->SpellHealingBonus(m_caster, m_spellInfo, new_damage, HEAL);
         m_caster->DealHeal(m_caster, uint32(new_damage), m_spellInfo);
     }
 //    m_healthLeech+=tmpvalue;

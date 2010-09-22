@@ -502,7 +502,15 @@ struct SpellProcEventEntry
     uint32      cooldown;                                   // hidden cooldown used for some spell proc events, applied to _triggered_spell_
 };
 
+struct SpellBonusEntry
+{
+    float  direct_damage;
+    float  dot_damage;
+    float  ap_bonus;
+};
+
 typedef UNORDERED_MAP<uint32, SpellProcEventEntry> SpellProcEventMap;
+typedef UNORDERED_MAP<uint32, SpellBonusEntry>     SpellBonusMap;
 
 #define ELIXIR_FLASK_MASK     0x03                          // 2 bit mask for batter compatibility with more recent client version, flaks must have both bits set
 #define ELIXIR_WELL_FED       0x10                          // Some foods have SPELLFAMILY_POTION
@@ -682,6 +690,7 @@ typedef std::map<uint32, uint32> SpellFacingFlagMap;
 
 class SpellMgr
 {
+    friend struct DoSpellBonusess;
     friend struct DoSpellProcEvent;
 
     // Constructors
@@ -751,6 +760,17 @@ class SpellMgr
         }
 
         static bool IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, uint32 EventProcFlag, SpellEntry const * procSpell, uint32 procFlags, uint32 procExtra, bool active);
+
+        // Spell bonus data
+        SpellBonusEntry const* GetSpellBonusData(uint32 spellId) const
+        {
+            // Lookup data
+            SpellBonusMap::const_iterator itr = mSpellBonusMap.find(spellId);
+            if( itr != mSpellBonusMap.end( ) )
+                return &itr->second;
+
+            return NULL;
+        }
 
         // Spell target coordinates
         SpellTargetPosition const* GetSpellTargetPosition(uint32 spell_id) const
@@ -942,6 +962,7 @@ class SpellMgr
         void LoadSpellAffects();
         void LoadSpellElixirs();
         void LoadSpellProcEvents();
+        void LoadSpellBonusess();
         void LoadSpellTargetPositions();
         void LoadSpellThreats();
         void LoadSkillLineAbilityMap();
@@ -960,6 +981,7 @@ class SpellMgr
         SpellElixirMap     mSpellElixirs;
         SpellThreatMap     mSpellThreatMap;
         SpellProcEventMap  mSpellProcEventMap;
+        SpellBonusMap      mSpellBonusMap;
         SkillLineAbilityMap mSkillLineAbilityMap;
         SpellPetAuraMap     mSpellPetAuraMap;
         SpellAreaMap         mSpellAreaMap;

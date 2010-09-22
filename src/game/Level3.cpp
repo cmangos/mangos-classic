@@ -151,6 +151,7 @@ bool ChatHandler::HandleReloadAllSpellCommand(char* /*args*/)
     HandleReloadSkillExtraItemTemplateCommand((char*)"a");
     HandleReloadSpellAffectCommand((char*)"a");
     HandleReloadSpellAreaCommand((char*)"a");
+    HandleReloadSpellBonusesCommand((char*)"a");
     HandleReloadSpellChainCommand((char*)"a");
     HandleReloadSpellElixirCommand((char*)"a");
     HandleReloadSpellLearnSpellCommand((char*)"a");
@@ -498,6 +499,14 @@ bool ChatHandler::HandleReloadSpellAreaCommand(char* /*args*/)
     sSpellMgr.LoadSpellAreas();
     SendGlobalSysMessage("DB table `spell_area` (spell dependences from area/quest/auras state) reloaded.");
     return true;
+}
+
+bool ChatHandler::HandleReloadSpellBonusesCommand(char* /*args*/)
+{
+     sLog.outString( "Re-Loading Spell Bonus Data..." );
+     sSpellMgr.LoadSpellBonusess();
+     SendGlobalSysMessage("DB table `spell_bonus_data` (spell damage/healing coefficients) reloaded.");
+     return true;
 }
 
 bool ChatHandler::HandleReloadSpellChainCommand(char* /*args*/)
