@@ -479,7 +479,7 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this), m_mover(t
     m_bgBattleGroundID = 0;
     for (int j=0; j < PLAYER_MAX_BATTLEGROUND_QUEUES; ++j)
     {
-        m_bgBattleGroundQueueID[j].bgQueueType  = 0;
+        m_bgBattleGroundQueueID[j].bgQueueTypeId  = BATTLEGROUND_QUEUE_NONE;
         m_bgBattleGroundQueueID[j].invitedToInstance = 0;
     }
     m_bgTeam = 0;

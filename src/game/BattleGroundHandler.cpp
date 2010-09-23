@@ -307,12 +307,12 @@ void WorldSession::HandleBattleFieldPortOpcode( WorldPacket &recv_data )
             // update all queues, send invitation info if player is invited, queue info if queued
             for (uint32 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; ++i)
             {
-                uint32 queue_id = _player->GetBattleGroundQueueId(i);
-                if(!queue_id)
+                BattleGroundQueueTypeId bgQueueTypeId = _player->GetBattleGroundQueueTypeId(i);
+                if(!bgQueueTypeId)
                     continue;
-                BattleGroundQueue::QueuedPlayersMap::iterator itrPlayerStatus = sBattleGroundMgr.m_BattleGroundQueues[queue_id].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].find(_player->GetGUID());
+                BattleGroundQueue::QueuedPlayersMap::iterator itrPlayerStatus = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].find(_player->GetGUID());
                 // if the player is not in queue, continue
-                if(itrPlayerStatus == sBattleGroundMgr.m_BattleGroundQueues[queue_id].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].end())
+                if(itrPlayerStatus == sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].end())
                     continue;
 
                 // no group information, this should never happen
@@ -495,7 +495,7 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & /*recv_data*/ )
         BattleGround *bg = _player->GetBattleGround();
         if(bg)
         {
-            uint32 bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bg->GetTypeID());
+            BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bg->GetTypeID());
             uint32 queueSlot = _player->GetBattleGroundQueueIndex(bgQueueTypeId);
             if((bg->GetStatus() <= STATUS_IN_PROGRESS))
             {
@@ -504,13 +504,13 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & /*recv_data*/ )
             }
             for (uint32 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; i++)
             {
-                uint32 queue_id = _player->GetBattleGroundQueueId(i);       // battlegroundqueueid stores the type id, not the instance id, so this is definitely wrong
-                if (i == queueSlot || !queue_id)                            // we need to get the instance ids
+                BattleGroundQueueTypeId bgQueueTypeId = _player->GetBattleGroundQueueTypeId(i);
+                if (i == queueSlot || !bgQueueTypeId)
                     continue;
-                BattleGroundQueue::QueuedPlayersMap::iterator itrPlayerStatus = sBattleGroundMgr.m_BattleGroundQueues[queue_id].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].find(_player->GetGUID());
-                if(itrPlayerStatus == sBattleGroundMgr.m_BattleGroundQueues[queue_id].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].end())
+                BattleGroundQueue::QueuedPlayersMap::iterator itrPlayerStatus = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].find(_player->GetGUID());
+                if(itrPlayerStatus == sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].end())
                     continue;
-                BattleGround *bg2 = sBattleGroundMgr.GetBattleGroundTemplate(BattleGroundMgr::BGTemplateId(queue_id)); //  try this
+                BattleGround *bg2 = sBattleGroundMgr.GetBattleGroundTemplate(BattleGroundMgr::BGTemplateId(bgQueueTypeId));
                 if(bg2)
                 {
                     //in this call is small bug, this call should be filled by player's waiting time in queue
@@ -526,16 +526,16 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & /*recv_data*/ )
         // we should update all queues? .. i'm not sure if this code is correct
         for (uint32 i = 0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; i++)
         {
-            uint32 queue_id = _player->GetBattleGroundQueueId(i);
-            if(!queue_id)
+            BattleGroundQueueTypeId bgQueueTypeId = _player->GetBattleGroundQueueTypeId(i);
+            if(!bgQueueTypeId)
                 continue;
 
-            BattleGroundTypeId bgTypeId = BattleGroundMgr::BGTemplateId(queue_id);
+            BattleGroundTypeId bgTypeId = BattleGroundMgr::BGTemplateId(bgQueueTypeId);
             BattleGround *bg = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
-            BattleGroundQueue::QueuedPlayersMap::iterator itrPlayerStatus = sBattleGroundMgr.m_BattleGroundQueues[queue_id].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].find(_player->GetGUID());
-            if(itrPlayerStatus == sBattleGroundMgr.m_BattleGroundQueues[queue_id].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].end())
+            BattleGroundQueue::QueuedPlayersMap::iterator itrPlayerStatus = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].find(_player->GetGUID());
+            if(itrPlayerStatus == sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[_player->GetBattleGroundBracketIdFromLevel()].end())
                 continue;
-            if(bg && queue_id)
+            if(bg)
             {
                 sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), i, STATUS_WAIT_QUEUE, 0, 0);
                 SendPacket(&data);

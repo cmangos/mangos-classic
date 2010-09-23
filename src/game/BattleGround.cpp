@@ -484,7 +484,7 @@ void BattleGround::EndBattleGround(uint32 winner)
         sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
         plr->GetSession()->SendPacket(&data);
 
-        uint32 bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID());
+        BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID());
         sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
         plr->GetSession()->SendPacket(&data);
     }
@@ -696,7 +696,7 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
             if(!team) team = plr->GetTeam();
 
             BattleGroundTypeId bgTypeId = GetTypeID();
-            uint32 bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID());
+            BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID());
 
             WorldPacket data;
             if(SendPacket)
@@ -1379,7 +1379,7 @@ void BattleGround::PlayerRelogin(Player* plr)
         return;
 
     WorldPacket data;
-    uint32 bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID());
+    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID());
 
     BlockMovement(plr);
 

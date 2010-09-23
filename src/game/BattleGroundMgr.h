@@ -241,7 +241,7 @@ class BattleGroundMgr
         bool isTesting() const { return m_Testing; }
 
         static BattleGroundQueueTypeId BGQueueTypeId(BattleGroundTypeId bgTypeId);
-        static BattleGroundTypeId BGTemplateId(uint32 bgQueueTypeId);
+        static BattleGroundTypeId BGTemplateId(BattleGroundQueueTypeId bgQueueTypeId);
 
         static HolidayIds BGTypeToWeekendHolidayId(BattleGroundTypeId bgTypeId);
         static BattleGroundTypeId WeekendHolidayIdToBGType(HolidayIds holiday);
