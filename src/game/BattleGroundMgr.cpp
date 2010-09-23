@@ -46,12 +46,6 @@ INSTANTIATE_SINGLETON_1( BattleGroundMgr );
 BattleGroundQueue::BattleGroundQueue()
 {
     //queues are empty, we don't have to call clear()
-/*  for (int i = BG_BRACKET_ID_FIRST; i < MAX_BATTLEGROUND_BRACKETS; ++i)
-    {
-        //m_QueuedPlayers[i].Horde = 0;
-        //m_QueuedPlayers[i].Alliance = 0;
-        //m_QueuedPlayers[i].AverageTime = 0;
-    }*/
 }
 
 BattleGroundQueue::~BattleGroundQueue()
@@ -78,10 +72,10 @@ void BattleGroundQueue::EligibleGroups::Init(BattleGroundQueue::QueuedGroupsList
     {
         next = itr;
         ++next;
-        if( (*itr)->BgTypeId == BgTypeId &&     // bg type must match
-            (*itr)->IsInvitedToBGInstanceGUID == 0 && // leave out already invited groups
-            (*itr)->Team == side &&             // match side
-            (*itr)->Players.size() <= MaxPlayers)           // the group must fit in the bg
+        if( (*itr)->BgTypeId == BgTypeId &&                // bg type must match
+            (*itr)->IsInvitedToBGInstanceGUID == 0 &&      // leave out already invited groups
+            (*itr)->Team == side &&                        // match side
+            (*itr)->Players.size() <= MaxPlayers)          // the group must fit in the bg
         {
             // the group matches the conditions
             // insert it in order of groupsize, and join time
@@ -1007,9 +1001,8 @@ BattleGround * BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeI
             bg = new BattleGroundAB(*(BattleGroundAB*)bg_template);
             break;
         default:
-            //bg = new BattleGround;
+            //error, but it is handled few lines above
             return 0;
-            break;             // placeholder for non implemented BG
     }
 
     // generate a new instance id
@@ -1041,7 +1034,6 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 M
 {
     // Create the BG
     BattleGround *bg = NULL;
-
     switch(bgTypeId)
     {
         case BATTLEGROUND_AV: bg = new BattleGroundAV; break;
@@ -1055,11 +1047,11 @@ uint32 BattleGroundMgr::CreateBattleGround(BattleGroundTypeId bgTypeId, uint32 M
     bg->Reset();
 
     bg->SetTypeID(bgTypeId);
-    bg->SetInstanceID(0);                               // template bg, instance id is 0
+    bg->SetInstanceID(0);
     bg->SetMinPlayersPerTeam(MinPlayersPerTeam);
     bg->SetMaxPlayersPerTeam(MaxPlayersPerTeam);
-    bg->SetMinPlayers(MinPlayersPerTeam*2);
-    bg->SetMaxPlayers(MaxPlayersPerTeam*2);
+    bg->SetMinPlayers(MinPlayersPerTeam * 2);
+    bg->SetMaxPlayers(MaxPlayersPerTeam * 2);
     bg->SetName(BattleGroundName);
     bg->SetTeamStartLoc(ALLIANCE, Team1StartLocX, Team1StartLocY, Team1StartLocZ, Team1StartLocO);
     bg->SetTeamStartLoc(HORDE,    Team2StartLocX, Team2StartLocY, Team2StartLocZ, Team2StartLocO);
@@ -1108,22 +1100,10 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
         BattleGroundTypeId bgTypeID = BattleGroundTypeId(bgTypeID_);
 
-        MaxPlayersPerTeam = 0;
-        MinPlayersPerTeam = 0;
-        MinLvl = 0;
-        MaxLvl = 0;
-
-        if(fields[1].GetUInt32())
-            MinPlayersPerTeam = fields[1].GetUInt32();
-
-        if(fields[2].GetUInt32())
-            MaxPlayersPerTeam = fields[2].GetUInt32();
-
-        if(fields[3].GetUInt32())
-            MinLvl = fields[3].GetUInt32();
-
-        if(fields[4].GetUInt32())
-            MaxLvl = fields[4].GetUInt32();
+        MinPlayersPerTeam = fields[1].GetUInt32();
+        MaxPlayersPerTeam = fields[2].GetUInt32();
+        MinLvl = fields[3].GetUInt32();
+        MaxLvl = fields[4].GetUInt32();
 
         start1 = fields[5].GetUInt32();
 

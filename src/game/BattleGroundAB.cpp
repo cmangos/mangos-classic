@@ -467,8 +467,11 @@ bool BattleGroundAB::SetupBattleGround()
     return true;
 }
 
-void BattleGroundAB::ResetBGSubclass()
+void BattleGroundAB::Reset()
 {
+    //call parent's class reset
+    BattleGround::Reset();
+
     for (uint8 i = 0; i < BG_TEAMS_COUNT; ++i)
     {
         m_TeamScores[i]          = 0;

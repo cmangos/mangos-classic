@@ -570,8 +570,11 @@ bool BattleGroundWS::SetupBattleGround()
     return true;
 }
 
-void BattleGroundWS::ResetBGSubclass()
+void BattleGroundWS::Reset()
 {
+    //call parent's class reset
+    BattleGround::Reset();
+
     // spiritguides and flags not spawned at beginning
     m_ActiveEvents[WS_EVENT_SPIRITGUIDES_SPAWN] = BG_EVENT_NONE;
     m_ActiveEvents[WS_EVENT_FLAG_A] = BG_EVENT_NONE;

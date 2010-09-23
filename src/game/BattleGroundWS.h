@@ -127,9 +127,9 @@ class BattleGroundWS : public BattleGround
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         void HandleKillPlayer(Player *player, Player *killer);
         bool SetupBattleGround();
+        virtual void Reset();
         void EndBattleGround(uint32 winner);
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
-        virtual void ResetBGSubclass();
 
         void UpdateFlagState(uint32 team, uint32 value);
         void UpdateTeamScore(uint32 team);

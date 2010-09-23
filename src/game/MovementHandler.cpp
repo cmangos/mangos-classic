@@ -89,6 +89,26 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         GetPlayer()->TeleportToHomebind();
         return;
     }
+
+    // battleground state prepare (in case join to BG), at relogin/tele player not invited
+    // only add to bg group and object, if the player was invited (else he entered through command)
+    if(_player->InBattleGround())
+    {
+        // cleanup seting if outdated
+        if(!mEntry->IsBattleGround())
+        {
+            _player->SetBattleGroundId(0);                          // We're not in BG.
+            // reset destination bg team
+            _player->SetBGTeam(0);
+        }
+        // join to bg case
+        else if(BattleGround *bg = _player->GetBattleGround())
+        {
+            if(_player->IsInvitedForBattleGroundInstance(_player->GetBattleGroundId()))
+                bg->AddPlayer(_player);
+        }
+    }
+
     GetPlayer()->SendInitialPacketsAfterAddToMap();
 
     // flight fast teleport case
@@ -131,31 +151,23 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     if(!mEntry->IsMountAllowed())
         _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
-    // battleground state prepare
+    // battleground state prepare (in case join to BG), at relogin/tele player not invited
     // only add to bg group and object, if the player was invited (else he entered through command)
-    if(_player->InBattleGround() && _player->IsInvitedForBattleGroundInstance(_player->GetBattleGroundId()))
+    if(_player->InBattleGround())
     {
-        BattleGround *bg = _player->GetBattleGround();
-        if(bg)
+        // cleanup seting if outdated
+        if(!mEntry->IsBattleGround())
         {
-            bg->AddPlayer(_player);
-            if(bg->GetMapId() == _player->GetMapId())       // we teleported to bg
-            {
-                // get the team this way, because arenas might 'override' the teams.
-                uint32 team = bg->GetPlayerTeam(_player->GetGUID());
-                if(!team)
-                    team = _player->GetTeam();
-                if(!bg->GetBgRaid(team))      // first player joined
-                {
-                    Group *group = new Group;
-                    bg->SetBgRaid(team, group);
-                    group->Create(_player->GetObjectGuid(), _player->GetName());
-                }
-                else                                        // raid already exist
-                {
-                    bg->GetBgRaid(team)->AddMember(_player->GetObjectGuid(), _player->GetName());
-                }
-            }
+            // Do next only if found in battleground
+            _player->SetBattleGroundId(0);                          // We're not in BG.
+            // reset destination bg team
+            _player->SetBGTeam(0);
+        }
+        // join to bg case
+        else if(BattleGround *bg = _player->GetBattleGround())
+        {
+            if(_player->IsInvitedForBattleGroundInstance(_player->GetBattleGroundId()))
+                bg->AddPlayer(_player);
         }
     }
 

@@ -1834,6 +1834,11 @@ class MANGOS_DLL_SPEC Player : public Unit
             return false;
         }
         WorldLocation const& GetBattleGroundEntryPoint() const { return m_bgEntryPoint; }
+        void SetBattleGroundEntryPoint(uint32 Map, float PosX, float PosY, float PosZ, float PosO )
+        {
+            //FIXME: temp function unitl full backporting bg relogin code and related commits
+            m_bgEntryPoint = WorldLocation(Map,PosX,PosY,PosZ,PosO);
+        }
         void SetBattleGroundEntryPoint(Player* leader = NULL)
         {
             if (!leader)
