@@ -38,6 +38,11 @@
 #define WORLD_SLEEP_CONST 100                               //Is this still needed?? [On linux some time ago not working 50ms]
 #endif
 
+#ifdef WIN32
+#include "ServiceWin32.h"
+extern int m_ServiceStatus;
+#endif
+
 /// Heartbeat for the World
 void WorldRunnable::run()
 {
@@ -72,6 +77,11 @@ void WorldRunnable::run()
         }
         else
             prevSleepTime = 0;
+
+        #ifdef WIN32
+            if (m_ServiceStatus == 0) World::StopNow(SHUTDOWN_EXIT_CODE);
+            while (m_ServiceStatus == 2) Sleep(1000);
+        #endif
     }
 
     sWorld.KickAll();                                       // save and kick all players
