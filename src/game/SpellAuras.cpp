@@ -1949,6 +1949,16 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     uint32 modelid = 0;
     Powers PowerType = POWER_MANA;
     ShapeshiftForm form = ShapeshiftForm(m_modifier.m_miscvalue);
+
+    Unit *target = GetTarget();
+
+    SpellShapeshiftEntry const* ssEntry = sSpellShapeshiftStore.LookupEntry(form);
+    if (!ssEntry)
+    {
+        sLog.outError("Unknown shapeshift form %u in spell %u", form, GetId());
+        return;
+    }
+
     switch(form)
     {
         case FORM_CAT:
@@ -2013,7 +2023,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             modelid = 16031;
             break;
         default:
-            sLog.outError("Auras: Unknown Shapeshift Type: %u", m_modifier.m_miscvalue);
+            break;
     }
 
     // remove polymorph before changing display id to keep new display id
@@ -2028,8 +2038,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_MOONKIN:
         {
             // remove movement affects
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
-            Unit::AuraList const& slowingAuras = m_target->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
+            Unit::AuraList const& slowingAuras = target->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
             for (Unit::AuraList::const_iterator iter = slowingAuras.begin(); iter != slowingAuras.end();)
             {
                 SpellEntry const* aurSpellInfo = (*iter)->GetSpellProto();
@@ -2047,13 +2057,13 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 }
 
                 // All OK, remove aura now
-                m_target->RemoveAurasDueToSpellByCancel(aurSpellInfo->Id);
+                target->RemoveAurasDueToSpellByCancel(aurSpellInfo->Id);
                 iter = slowingAuras.begin();
             }
 
             // and polymorphic affects
-            if(m_target->IsPolymorphed())
-                m_target->RemoveAurasDueToSpell(m_target->getTransForm());
+            if(target->IsPolymorphed())
+                target->RemoveAurasDueToSpell(target->getTransForm());
 
             break;
         }
@@ -2064,19 +2074,19 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     if(apply)
     {
         // remove other shapeshift before applying a new one
-        if(m_target->m_ShapeShiftFormSpellId)
-            m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftFormSpellId, this);
+        if(target->m_ShapeShiftFormSpellId)
+            target->RemoveAurasDueToSpell(target->m_ShapeShiftFormSpellId, this);
 
-        m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, form);
+        target->SetByteValue(UNIT_FIELD_BYTES_1, 2, form);
 
         if(modelid > 0)
-            m_target->SetDisplayId(modelid);
+            target->SetDisplayId(modelid);
 
         if(PowerType != POWER_MANA)
         {
             // reset power to default values only at power change
-            if(m_target->getPowerType() != PowerType)
-                m_target->setPowerType(PowerType);
+            if(target->getPowerType() != PowerType)
+                target->setPowerType(PowerType);
 
             switch(form)
             {
@@ -2086,7 +2096,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 {
                     // get furor proc chance
                     int32 furorChance = 0;
-                    Unit::AuraList const& mDummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+                    Unit::AuraList const& mDummy = target->GetAurasByType(SPELL_AURA_DUMMY);
                     for(Unit::AuraList::const_iterator i = mDummy.begin(); i != mDummy.end(); ++i)
                     {
                         if ((*i)->GetSpellProto()->SpellIconID == 238)
@@ -2098,15 +2108,15 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
                     if (m_modifier.m_miscvalue == FORM_CAT)
                     {
-                        m_target->SetPower(POWER_ENERGY, 0);
+                        target->SetPower(POWER_ENERGY, 0);
                         if(irand(1,100) <= furorChance)
-                            m_target->CastSpell(m_target, 17099, true, NULL, this);
+                            target->CastSpell(target, 17099, true, NULL, this);
                     }
                     else
                     {
-                        m_target->SetPower(POWER_RAGE, 0);
+                        target->SetPower(POWER_RAGE, 0);
                         if(irand(1,100) <= furorChance)
-                            m_target->CastSpell(m_target, 17057, true, NULL, this);
+                            target->CastSpell(target, 17057, true, NULL, this);
                     }
                     break;
                 }
@@ -2116,9 +2126,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 {
                     uint32 Rage_val = 0;
                     //Tactical mastery
-                    if(m_target->GetTypeId() == TYPEID_PLAYER)
+                    if(target->GetTypeId() == TYPEID_PLAYER)
                     {
-                        Unit::AuraList const& aurasOverrideClassScripts = m_target->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                        Unit::AuraList const& aurasOverrideClassScripts = target->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
                         for(Unit::AuraList::const_iterator iter = aurasOverrideClassScripts.begin(); iter != aurasOverrideClassScripts.end(); ++iter)
                         {
                             // select by script id
@@ -2134,8 +2144,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                                 break;
                         }
                     }
-                    if (m_target->GetPower(POWER_RAGE) > Rage_val)
-                        m_target->SetPower(POWER_RAGE, Rage_val);
+                    if (target->GetPower(POWER_RAGE) > Rage_val)
+                        target->SetPower(POWER_RAGE, Rage_val);
                     break;
                 }
                 default:
@@ -2143,18 +2153,18 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             }
         }
 
-        m_target->m_ShapeShiftFormSpellId = GetId();
-        m_target->m_form = form;
+        target->m_ShapeShiftFormSpellId = GetId();
+        target->m_form = form;
     }
     else
     {
         if(modelid > 0)
-            m_target->SetDisplayId(m_target->GetNativeDisplayId());
-        m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, FORM_NONE);
-        if(m_target->getClass() == CLASS_DRUID)
-            m_target->setPowerType(POWER_MANA);
-        m_target->m_ShapeShiftFormSpellId = 0;
-        m_target->m_form = FORM_NONE;
+            target->SetDisplayId(target->GetNativeDisplayId());
+        target->SetByteValue(UNIT_FIELD_BYTES_1, 2, FORM_NONE);
+        if(target->getClass() == CLASS_DRUID)
+            target->setPowerType(POWER_MANA);
+        target->m_ShapeShiftFormSpellId = 0;
+        target->m_form = FORM_NONE;
 
         switch(form)
         {
@@ -2162,13 +2172,13 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             case FORM_BEAR:
             case FORM_DIREBEAR:
             case FORM_CAT:
-                if(Aura* dummy = m_target->GetDummyAura(37315) )
-                    m_target->CastSpell(m_target, 37316, true, NULL, dummy);
+                if(Aura* dummy = target->GetDummyAura(37315) )
+                    target->CastSpell(target, 37316, true, NULL, dummy);
                 break;
             // Nordrassil Regalia - bonus
             case FORM_MOONKIN:
-                if(Aura* dummy = m_target->GetDummyAura(37324) )
-                    m_target->CastSpell(m_target, 37325, true, NULL, dummy);
+                if(Aura* dummy = target->GetDummyAura(37324) )
+                    target->CastSpell(target, 37325, true, NULL, dummy);
                 break;
             default:
                 break;
@@ -2179,8 +2189,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     // add/remove the shapeshift aura's boosts
     HandleShapeshiftBoosts(apply);
 
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)m_target)->InitDataForForm();
+    if(target->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)target)->InitDataForForm();
 }
 
 void Aura::HandleAuraTransform(bool apply, bool Real)
