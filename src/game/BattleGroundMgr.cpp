@@ -210,10 +210,8 @@ GroupQueueInfo * BattleGroundQueue::AddGroup(Player *leader, BattleGroundTypeId 
     return ginfo;
 }
 
-void BattleGroundQueue::AddPlayer(Player *plr, GroupQueueInfo *ginfo)
+void BattleGroundQueue::AddPlayer(Player *plr, GroupQueueInfo *ginfo, BattleGroundBracketId bracket_id)
 {
-    uint32 bracket_id = plr->GetBattleGroundBracketIdFromLevel();
-
     //if player isn't in queue, he is added, if already is, then values are overwritten, no memory leak
     PlayerQueueInfo& info = m_QueuedPlayers[bracket_id][plr->GetGUID()];
     info.InviteTime                 = 0;
@@ -231,52 +229,35 @@ void BattleGroundQueue::RemovePlayer(const uint64& guid, bool decreaseInvitedCou
 
     int32 bracket_id = 0;                                   // signed for proper for-loop finish
     QueuedPlayersMap::iterator itr;
-    GroupQueueInfo * group;
-    QueuedGroupsList::iterator group_itr;
-    bool IsSet = false;
-    if(plr)
-    {
-        bracket_id = plr->GetBattleGroundBracketIdFromLevel();
 
+    // mostly people with the highest levels are in battlegrounds, thats why
+    // we count from MAX_BATTLEGROUND_QUEUES to 0
+    for (bracket_id = MAX_BATTLEGROUND_BRACKETS-1; bracket_id >= 0; bracket_id--)
+    {
         itr = m_QueuedPlayers[bracket_id].find(guid);
         if(itr != m_QueuedPlayers[bracket_id].end())
-            IsSet = true;
-    }
-
-    if(!IsSet)
-    {
-        // either player is offline, or he levelled up to another queue category
-        // sLog.outError("Battleground: removing offline player from BG queue - this might not happen, but it should not cause crash");
-        for (uint32 i = BG_BRACKET_ID_FIRST; i < MAX_BATTLEGROUND_BRACKETS; ++i)
-        {
-            itr = m_QueuedPlayers[i].find(guid);
-            if(itr != m_QueuedPlayers[i].end())
-            {
-                bracket_id = i;
-                IsSet = true;
-                break;
-            }
-        }
-    }
-
-    // couldn't find the player in bg queue, return
-    if(!IsSet)
-    {
-        sLog.outError("Battleground: couldn't find player to remove.");
-        return;
-    }
-
-    DEBUG_LOG("BattleGroundQueue: Removing player GUID %u, from bracket_id %u", GUID_LOPART(guid), (uint32)bracket_id);
-
-    group = itr->second.GroupInfo;
-
-    for(group_itr=m_QueuedGroups[bracket_id].begin(); group_itr != m_QueuedGroups[bracket_id].end(); ++group_itr)
-    {
-        if(group == (GroupQueueInfo*)(*group_itr))
             break;
     }
 
-    // variables are set (what about leveling up when in queue????)
+    //player can't be in queue without group, but just in case
+    if (bracket_id == -1)
+    {
+        sLog.outError("BattleGroundQueue: ERROR Cannot find groupinfo for player GUID: %u", GUID_LOPART(guid));
+        return;
+    }
+    DEBUG_LOG("BattleGroundQueue: Removing player GUID %u, from bracket_id %u", GUID_LOPART(guid), (uint32)bracket_id);
+
+    GroupQueueInfo* group = itr->second.GroupInfo;
+
+    QueuedGroupsList::iterator group_itr = m_QueuedGroups[bracket_id].begin();
+    for(; group_itr != m_QueuedGroups[bracket_id].end(); ++group_itr)
+    {
+        if(group == *group_itr)
+            break;
+    }
+
+    // variables are set (what about leveling up when in queue????
+    // iterate through all queue_ids this isn't bad for us)
     // remove player from group
     // if only player there, remove group
 
@@ -335,11 +316,11 @@ void BattleGroundQueue::AnnounceWorld(GroupQueueInfo *ginfo, const uint64& playe
         if(!bg)
             return;
 
-        BattleGroundBracketId bracket_id = plr->GetBattleGroundBracketIdFromLevel();
+        BattleGroundBracketId bracket_id = plr->GetBattleGroundBracketIdFromLevel(bg->GetTypeID());
         char const* bgName = bg->GetName();
 
-        uint32 q_min_level = Player::GetMinLevelForBattleGroundBracketId(bracket_id);
-        uint32 q_max_level = Player::GetMaxLevelForBattleGroundBracketId(bracket_id);
+        uint32 q_min_level = Player::GetMinLevelForBattleGroundBracketId(bracket_id, ginfo->BgTypeId);
+        uint32 q_max_level = Player::GetMaxLevelForBattleGroundBracketId(bracket_id, ginfo->BgTypeId);
 
         // replace hardcoded max level by player max level for nice output
         if(q_max_level > sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
@@ -638,8 +619,8 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
         if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_START))
         {
             char const* bgName = bg2->GetName();
-            uint32 q_min_level = Player::GetMinLevelForBattleGroundBracketId(bracket_id);
-            uint32 q_max_level = Player::GetMaxLevelForBattleGroundBracketId(bracket_id);
+            uint32 q_min_level = Player::GetMinLevelForBattleGroundBracketId(bracket_id, bgTypeId);
+            uint32 q_max_level = Player::GetMaxLevelForBattleGroundBracketId(bracket_id, bgTypeId);
             if(q_max_level > sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
                 q_max_level = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
             sWorld.SendWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, bgName, q_min_level, q_max_level);
@@ -697,12 +678,13 @@ bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     if (!bg)
         return true;
 
+    BattleGroundTypeId bgTypeId = bg->GetTypeID();
     BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bg->GetTypeID());
     uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgQueueTypeId);
     if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue
     {
         // check if player is invited to this bg ... this check must be here, because when player leaves queue and joins another, it would cause a problems
-        BattleGroundQueue::QueuedPlayersMap const& qpMap = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[plr->GetBattleGroundBracketIdFromLevel()];
+        BattleGroundQueue::QueuedPlayersMap const& qpMap = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[plr->GetBattleGroundBracketIdFromLevel(bgTypeId)];
         BattleGroundQueue::QueuedPlayersMap::const_iterator qItr = qpMap.find(m_PlayerGuid);
         if (qItr != qpMap.end() && qItr->second.GroupInfo->IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
         {
@@ -738,8 +720,10 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES) // player is in queue
     {
         // check if player is invited to this bg ... this check must be here, because when player leaves queue and joins another, it would cause a problems
-        BattleGroundQueue::QueuedPlayersMap::iterator qMapItr = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[plr->GetBattleGroundBracketIdFromLevel()].find(m_PlayerGuid);
-        if (qMapItr != sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[plr->GetBattleGroundBracketIdFromLevel()].end() && qMapItr->second.GroupInfo && qMapItr->second.GroupInfo->IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
+        BattleGroundBracketId bracket_id=plr->GetBattleGroundBracketIdFromLevel(bg->GetTypeID());
+        BattleGroundQueue::QueuedPlayersMap& qpMap = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].m_QueuedPlayers[bracket_id];
+        BattleGroundQueue::QueuedPlayersMap::iterator qMapItr = qpMap.find(m_PlayerGuid);
+        if (qMapItr != qpMap.end() && qMapItr->second.GroupInfo && qMapItr->second.GroupInfo->IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
         {
             plr->RemoveBattleGroundQueueId(bgQueueTypeId);
             sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId].RemovePlayer(m_PlayerGuid, true);
