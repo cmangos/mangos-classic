@@ -294,7 +294,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         case EVENT_T_REACHED_HOME:
         case EVENT_T_RECEIVE_EMOTE:
             break;
-        case EVENT_T_BUFFED:
+        case EVENT_T_AURA:
         {
             //Note: checked only aura for effect 0, if need check aura for effect 1/2 then
             // possible way: pack in event.buffed.amount 2 uint16 (ammount+effectIdx)
@@ -305,26 +305,37 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             pHolder.UpdateRepeatTimer(m_creature,event.buffed.repeatMin,event.buffed.repeatMax);
             break;
         }
-        case EVENT_T_TARGET_BUFFED:
+        case EVENT_T_TARGET_AURA:
         {
-            //Prevent event from occuring on no unit
-            if (!pActionInvoker)
+            if (!m_creature->isInCombat() || !m_creature->getVictim())
                 return false;
 
             //Note: checked only aura for effect 0, if need check aura for effect 1/2 then
             // possible way: pack in event.buffed.amount 2 uint16 (ammount+effectIdx)
-            if(pActionInvoker->GetAuras().count(Unit::spellEffectPair(event.buffed.spellId,EFFECT_INDEX_0)) < event.buffed.amount)
+            if(m_creature->getVictim()->GetAuras().count(Unit::spellEffectPair(event.buffed.spellId,EFFECT_INDEX_0)) < event.buffed.amount)
                 return false;
 
             //Repeat Timers
             pHolder.UpdateRepeatTimer(m_creature,event.buffed.repeatMin,event.buffed.repeatMax);
             break;
         }
-        case EVENT_T_MISSING_BUFF:
+        case EVENT_T_MISSING_AURA:
         {
             //Note: checked only aura for effect 0, if need check aura for effect 1/2 then
             // possible way: pack in event.buffed.amount 2 uint16 (ammount+effectIdx)
             if(m_creature->GetAuras().count(Unit::spellEffectPair(event.buffed.spellId,EFFECT_INDEX_0)) >= event.buffed.amount)
+                return false;
+
+            //Repeat Timers
+            pHolder.UpdateRepeatTimer(m_creature,event.buffed.repeatMin,event.buffed.repeatMax);
+            break;
+        }
+        case EVENT_T_TARGET_MISSING_AURA:
+        {
+            if (!m_creature->isInCombat() || !m_creature->getVictim())
+                return false;
+
+            if(m_creature->getVictim()->GetAuras().count(Unit::spellEffectPair(event.buffed.spellId,EFFECT_INDEX_0)) >= event.buffed.amount)
                 return false;
 
             //Repeat Timers
@@ -1121,6 +1132,10 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                     case EVENT_T_TARGET_HP:
                     case EVENT_T_TARGET_CASTING:
                     case EVENT_T_FRIENDLY_HP:
+                    case EVENT_T_AURA:
+                    case EVENT_T_TARGET_AURA:
+                    case EVENT_T_MISSING_AURA:
+                    case EVENT_T_TARGET_MISSING_AURA:
                         if (Combat)
                             ProcessEvent(*i);
                         break;
