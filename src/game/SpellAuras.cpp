@@ -290,7 +290,12 @@ m_isRemovedOnShapeLost(true), m_in_use(false)
     Player* modOwner = caster ? caster->GetSpellModOwner() : NULL;
 
     if(!m_permanent && modOwner)
+    {
         modOwner->ApplySpellMod(GetId(), SPELLMOD_DURATION, m_maxduration);
+        // Get zero duration aura after - need set m_maxduration > 0 for apply/remove aura work
+        if (m_maxduration<=0)
+            m_maxduration = 1;
+    }
 
     m_duration = m_maxduration;
 
@@ -1374,11 +1379,8 @@ void Aura::TriggerSpell()
                 {
                     // Invisibility
                     case 66:
-                    {
-                        if(!m_duration)
-                            m_target->CastSpell(m_target, 32612, true, NULL, this);
+                        // Here need periodic triger reducing threat spell (or do it manually)
                         return;
-                    }
                     default:
                         break;
                 }
