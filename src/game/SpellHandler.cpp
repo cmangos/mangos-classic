@@ -81,6 +81,14 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    // not allow use item from trade (cheat way only)
+    if (pItem->IsInTrade())
+    {
+        recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL );
+        return;
+    }
+
     if (pUser->isInCombat())
     {
         for(int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
