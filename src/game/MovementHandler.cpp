@@ -97,6 +97,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         // cleanup seting if outdated
         if(!mEntry->IsBattleGround())
         {
+            // Do next only if found in battleground
             _player->SetBattleGroundId(0);                          // We're not in BG.
             // reset destination bg team
             _player->SetBGTeam(0);
@@ -150,26 +151,6 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // mount allow check
     if(!mEntry->IsMountAllowed())
         _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-
-    // battleground state prepare (in case join to BG), at relogin/tele player not invited
-    // only add to bg group and object, if the player was invited (else he entered through command)
-    if(_player->InBattleGround())
-    {
-        // cleanup seting if outdated
-        if(!mEntry->IsBattleGround())
-        {
-            // Do next only if found in battleground
-            _player->SetBattleGroundId(0);                          // We're not in BG.
-            // reset destination bg team
-            _player->SetBGTeam(0);
-        }
-        // join to bg case
-        else if(BattleGround *bg = _player->GetBattleGround())
-        {
-            if(_player->IsInvitedForBattleGroundInstance(_player->GetBattleGroundId()))
-                bg->AddPlayer(_player);
-        }
-    }
 
     // honorless target
     if(GetPlayer()->pvpInfo.inHostileArea)
