@@ -17572,7 +17572,7 @@ uint32 Player::GetMaxLevelForBattleGroundBracketId(BattleGroundBracketId bracket
     if (bracket_id >= BG_BRACKET_ID_LAST)
         return 255;                                         // hardcoded max level
 
-    return GetMaxLevelForBattleGroundBracketId(bracket_id, bgTypeId) + 10;
+    return GetMinLevelForBattleGroundBracketId(bracket_id, bgTypeId) + 10;
 }
 
 BattleGroundBracketId Player::GetBattleGroundBracketIdFromLevel(BattleGroundTypeId bgTypeId) const
