@@ -154,7 +154,7 @@ class InstanceResetScheduler
         time_t GetResetTimeFor(uint32 mapid) { return m_resetTimeByMapId[mapid]; }
 
         static uint32 GetMaxResetTimeFor(InstanceTemplate const* temp);
-
+        static time_t CalculateNextResetTime(InstanceTemplate const* temp, time_t prevResetTime);
     public:                                                 // modifiers
         void ScheduleReset(bool add, time_t time, InstanceResetEvent event);
 
