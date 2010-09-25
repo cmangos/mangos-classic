@@ -171,9 +171,6 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
         case ACT_ENABLED:                                   // 0xC1    spell
         {
             Unit* unit_target = NULL;
-            if (((Creature*)pet)->GetGlobalCooldown() > 0)
-                return;
-
             if(guid2)
                 unit_target = _player->GetMap()->GetUnit(guid2);
 
@@ -184,6 +181,9 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 sLog.outError("WORLD: unknown PET spell id %i", spellid);
                 return;
             }
+
+            if (pet->GetCharmInfo() && pet->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+                return;
 
             for(int i = 0; i < MAX_EFFECT_INDEX;++i)
             {
@@ -606,15 +606,16 @@ void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
         return;
     }
 
-    if (pet->GetGlobalCooldown() > 0)
-        return;
-
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellid);
     if (!spellInfo)
     {
         sLog.outError("WORLD: unknown PET spell id %i", spellid);
         return;
     }
+
+    if (pet->GetCharmInfo() && pet->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+        return;
+
 
     // do not cast not learned spells
     if (!pet->HasSpell(spellid) || IsPassiveSpell(spellInfo))
