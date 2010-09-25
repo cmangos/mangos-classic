@@ -553,9 +553,10 @@ enum ConditionType
     CONDITION_QUESTAVAILABLE        = 19,                   // quest_id     0       for case when loot/gossip possible only if player can start quest
     CONDITION_RESERVED_1            = 20,                   // reserved for 3.x and later
     CONDITION_RESERVED_2            = 21,                   // reserved for 3.x and later
+    CONDITION_QUEST_NONE            = 22                    // quest_id     0 (quest did not take and not rewarded)
 };
 
-#define MAX_CONDITION                 22                    // maximum value in ConditionType enum
+#define MAX_CONDITION                 23                    // maximum value in ConditionType enum
 
 struct PlayerCondition
 {
