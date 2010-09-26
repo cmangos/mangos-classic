@@ -218,7 +218,7 @@ void InstanceResetScheduler::LoadResetTimes()
             if(oldresettime != newresettime)
                 CharacterDatabase.DirectPExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%u'", newresettime, mapid);
 
-            m_resetTimeByMapId[mapid] = newresettime;
+            SetResetTimeFor(mapid, newresettime);
         } while(result->NextRow());
         delete result;
     }
@@ -254,7 +254,7 @@ void InstanceResetScheduler::LoadResetTimes()
             CharacterDatabase.DirectPExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%u'", (uint64)t, temp->map);
         }
 
-        m_resetTimeByMapId[temp->map] = t;
+        SetResetTimeFor(temp->map, t);
 
         // schedule the global reset/warning
         ResetEventType type = RESET_EVENT_INFORM_1;
@@ -318,6 +318,10 @@ void InstanceResetScheduler::Update()
                 MANGOS_ASSERT(instanceTemplate);
 
                 time_t next_reset = InstanceResetScheduler::CalculateNextResetTime(instanceTemplate, resetTime);
+
+                CharacterDatabase.DirectPExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%u'", uint64(next_reset), uint32(event.mapid));
+
+                SetResetTimeFor(event.mapid, next_reset);
 
                 ResetEventType type = RESET_EVENT_INFORM_1;
                 for (; type < RESET_EVENT_INFORM_LAST; type = ResetEventType(type+1))
