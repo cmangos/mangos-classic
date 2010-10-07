@@ -7372,181 +7372,181 @@ static WorldStatePair def_world_states[] =
 
 static WorldStatePair AV_world_states[] =
 {
-    { 0x7ae, 0x1 },                                         // 7 snowfall n
-    { 0x532, 0x1 },                                         // 8 frostwolfhut hc
-    { 0x531, 0x0 },                                         // 9 frostwolfhut ac
-    { 0x52e, 0x0 },                                         // 10 stormpike firstaid a_a
-    { 0x571, 0x0 },                                         // 11 east frostwolf tower horde assaulted -unused
-    { 0x570, 0x0 },                                         // 12 west frostwolf tower horde assaulted - unused
-    { 0x567, 0x1 },                                         // 13 frostwolfe c
-    { 0x566, 0x1 },                                         // 14 frostwolfw c
-    { 0x550, 0x1 },                                         // 15 irondeep (N) ally
-    { 0x544, 0x0 },                                         // 16 ice grave a_a
-    { 0x536, 0x0 },                                         // 17 stormpike grave h_c
-    { 0x535, 0x1 },                                         // 18 stormpike grave a_c
-    { 0x518, 0x0 },                                         // 19 stoneheart grave a_a
-    { 0x517, 0x0 },                                         // 20 stoneheart grave h_a
-    { 0x574, 0x0 },                                         // 21 1396 unk
-    { 0x573, 0x0 },                                         // 22 iceblood tower horde assaulted -unused
-    { 0x572, 0x0 },                                         // 23 towerpoint horde assaulted - unused
-    { 0x56f, 0x0 },                                         // 24 1391 unk
-    { 0x56e, 0x0 },                                         // 25 iceblood a
-    { 0x56d, 0x0 },                                         // 26 towerp a
-    { 0x56c, 0x0 },                                         // 27 frostwolfe a
-    { 0x56b, 0x0 },                                         // 28 froswolfw a
-    { 0x56a, 0x1 },                                         // 29 1386 unk
-    { 0x569, 0x1 },                                         // 30 iceblood c
-    { 0x568, 0x1 },                                         // 31 towerp c
-    { 0x565, 0x0 },                                         // 32 stoneh tower a
-    { 0x564, 0x0 },                                         // 33 icewing tower a
-    { 0x563, 0x0 },                                         // 34 dunn a
-    { 0x562, 0x0 },                                         // 35 duns a
-    { 0x561, 0x0 },                                         // 36 stoneheart bunker alliance assaulted - unused
-    { 0x560, 0x0 },                                         // 37 icewing bunker alliance assaulted - unused
-    { 0x55f, 0x0 },                                         // 38 dunbaldar south alliance assaulted - unused
-    { 0x55e, 0x0 },                                         // 39 dunbaldar north alliance assaulted - unused
-    { 0x55d, 0x0 },                                         // 40 stone tower d
-    { 0x3c6, 0x0 },                                         // 41 966 unk
-    { 0x3c4, 0x0 },                                         // 42 964 unk
-    { 0x3c2, 0x0 },                                         // 43 962 unk
-    { 0x516, 0x1 },                                         // 44 stoneheart grave a_c
-    { 0x515, 0x0 },                                         // 45 stonheart grave h_c
-    { 0x3b6, 0x0 },                                         // 46 950 unk
-    { 0x55c, 0x0 },                                         // 47 icewing tower d
-    { 0x55b, 0x0 },                                         // 48 dunn d
-    { 0x55a, 0x0 },                                         // 49 duns d
-    { 0x559, 0x0 },                                         // 50 1369 unk
-    { 0x558, 0x0 },                                         // 51 iceblood d
-    { 0x557, 0x0 },                                         // 52 towerp d
-    { 0x556, 0x0 },                                         // 53 frostwolfe d
-    { 0x555, 0x0 },                                         // 54 frostwolfw d
-    { 0x554, 0x1 },                                         // 55 stoneh tower c
-    { 0x553, 0x1 },                                         // 56 icewing tower c
-    { 0x552, 0x1 },                                         // 57 dunn c
-    { 0x551, 0x1 },                                         // 58 duns c
-    { 0x54f, 0x0 },                                         // 59 irondeep (N) horde
-    { 0x54e, 0x0 },                                         // 60 irondeep (N) ally
-    { 0x54d, 0x1 },                                         // 61 mine (S) neutral
-    { 0x54c, 0x0 },                                         // 62 mine (S) horde
-    { 0x54b, 0x0 },                                         // 63 mine (S) ally
-    { 0x545, 0x0 },                                         // 64 iceblood h_a
-    { 0x543, 0x1 },                                         // 65 iceblod h_c
-    { 0x542, 0x0 },                                         // 66 iceblood a_c
-    { 0x540, 0x0 },                                         // 67 snowfall h_a
-    { 0x53f, 0x0 },                                         // 68 snowfall a_a
-    { 0x53e, 0x0 },                                         // 69 snowfall h_c
-    { 0x53d, 0x0 },                                         // 70 snowfall a_c
-    { 0x53c, 0x0 },                                         // 71 frostwolf g h_a
-    { 0x53b, 0x0 },                                         // 72 frostwolf g a_a
-    { 0x53a, 0x1 },                                         // 73 frostwolf g h_c
-    { 0x539, 0x0 },                                         // 74 frostwolf g a_c
-    { 0x538, 0x0 },                                         // 75 stormpike grave h_a
-    { 0x537, 0x0 },                                         // 76 stormpike grave a_a
-    { 0x534, 0x0 },                                         // 77 frostwolf hut h_a
-    { 0x533, 0x0 },                                         // 78 frostwolf hut a_a
-    { 0x530, 0x0 },                                         // 79 stormpike first aid h_a
-    { 0x52f, 0x0 },                                         // 80 stormpike first aid h_c
-    { 0x52d, 0x1 },                                         // 81 stormpike first aid a_c
+    { 0x7ae, 0x1 },                                         // 1966  7 snowfall n
+    { 0x532, 0x1 },                                         // 1330  8 frostwolfhut hc
+    { 0x531, 0x0 },                                         // 1329  9 frostwolfhut ac
+    { 0x52e, 0x0 },                                         // 1326 10 stormpike firstaid a_a
+    { 0x571, 0x0 },                                         // 1393 11 east frostwolf tower horde assaulted -unused
+    { 0x570, 0x0 },                                         // 1392 12 west frostwolf tower horde assaulted - unused
+    { 0x567, 0x1 },                                         // 1383 13 frostwolfe c
+    { 0x566, 0x1 },                                         // 1382 14 frostwolfw c
+    { 0x550, 0x1 },                                         // 1360 15 irondeep (N) ally
+    { 0x544, 0x0 },                                         // 1348 16 ice grave a_a
+    { 0x536, 0x0 },                                         // 1334 17 stormpike grave h_c
+    { 0x535, 0x1 },                                         // 1333 18 stormpike grave a_c
+    { 0x518, 0x0 },                                         // 1304 19 stoneheart grave a_a
+    { 0x517, 0x0 },                                         // 1303 20 stoneheart grave h_a
+    { 0x574, 0x0 },                                         // 1396 21 unk
+    { 0x573, 0x0 },                                         // 1395 22 iceblood tower horde assaulted -unused
+    { 0x572, 0x0 },                                         // 1394 23 towerpoint horde assaulted - unused
+    { 0x56f, 0x0 },                                         // 1391 24 unk
+    { 0x56e, 0x0 },                                         // 1390 25 iceblood a
+    { 0x56d, 0x0 },                                         // 1389 26 towerp a
+    { 0x56c, 0x0 },                                         // 1388 27 frostwolfe a
+    { 0x56b, 0x0 },                                         // 1387 28 froswolfw a
+    { 0x56a, 0x1 },                                         // 1386 29 unk
+    { 0x569, 0x1 },                                         // 1385 30 iceblood c
+    { 0x568, 0x1 },                                         // 1384 31 towerp c
+    { 0x565, 0x0 },                                         // 1381 32 stoneh tower a
+    { 0x564, 0x0 },                                         // 1380 33 icewing tower a
+    { 0x563, 0x0 },                                         // 1379 34 dunn a
+    { 0x562, 0x0 },                                         // 1378 35 duns a
+    { 0x561, 0x0 },                                         // 1377 36 stoneheart bunker alliance assaulted - unused
+    { 0x560, 0x0 },                                         // 1376 37 icewing bunker alliance assaulted - unused
+    { 0x55f, 0x0 },                                         // 1375 38 dunbaldar south alliance assaulted - unused
+    { 0x55e, 0x0 },                                         // 1374 39 dunbaldar north alliance assaulted - unused
+    { 0x55d, 0x0 },                                         // 1373 40 stone tower d
+    { 0x3c6, 0x0 },                                         //  966 41 unk
+    { 0x3c4, 0x0 },                                         //  964 42 unk
+    { 0x3c2, 0x0 },                                         //  962 43 unk
+    { 0x516, 0x1 },                                         // 1302 44 stoneheart grave a_c
+    { 0x515, 0x0 },                                         // 1301 45 stonheart grave h_c
+    { 0x3b6, 0x0 },                                         //  950 46 unk
+    { 0x55c, 0x0 },                                         // 1372 47 icewing tower d
+    { 0x55b, 0x0 },                                         // 1371 48 dunn d
+    { 0x55a, 0x0 },                                         // 1370 49 duns d
+    { 0x559, 0x0 },                                         // 1369 50 unk
+    { 0x558, 0x0 },                                         // 1368 51 iceblood d
+    { 0x557, 0x0 },                                         // 1367 52 towerp d
+    { 0x556, 0x0 },                                         // 1366 53 frostwolfe d
+    { 0x555, 0x0 },                                         // 1365 54 frostwolfw d
+    { 0x554, 0x1 },                                         // 1364 55 stoneh tower c
+    { 0x553, 0x1 },                                         // 1363 56 icewing tower c
+    { 0x552, 0x1 },                                         // 1362 57 dunn c
+    { 0x551, 0x1 },                                         // 1361 58 duns c
+    { 0x54f, 0x0 },                                         // 1359 59 irondeep (N) horde
+    { 0x54e, 0x0 },                                         // 1358 60 irondeep (N) ally
+    { 0x54d, 0x1 },                                         // 1357 61 mine (S) neutral
+    { 0x54c, 0x0 },                                         // 1356 62 mine (S) horde
+    { 0x54b, 0x0 },                                         // 1355 63 mine (S) ally
+    { 0x545, 0x0 },                                         // 1349 64 iceblood h_a
+    { 0x543, 0x1 },                                         // 1347 65 iceblod h_c
+    { 0x542, 0x0 },                                         // 1346 66 iceblood a_c
+    { 0x540, 0x0 },                                         // 1344 67 snowfall h_a
+    { 0x53f, 0x0 },                                         // 1343 68 snowfall a_a
+    { 0x53e, 0x0 },                                         // 1342 69 snowfall h_c
+    { 0x53d, 0x0 },                                         // 1341 70 snowfall a_c
+    { 0x53c, 0x0 },                                         // 1340 71 frostwolf g h_a
+    { 0x53b, 0x0 },                                         // 1339 72 frostwolf g a_a
+    { 0x53a, 0x1 },                                         // 1338 73 frostwolf g h_c
+    { 0x539, 0x0 },                                         // l33t 74 frostwolf g a_c
+    { 0x538, 0x0 },                                         // 1336 75 stormpike grave h_a
+    { 0x537, 0x0 },                                         // 1335 76 stormpike grave a_a
+    { 0x534, 0x0 },                                         // 1332 77 frostwolf hut h_a
+    { 0x533, 0x0 },                                         // 1331 78 frostwolf hut a_a
+    { 0x530, 0x0 },                                         // 1328 79 stormpike first aid h_a
+    { 0x52f, 0x0 },                                         // 1327 80 stormpike first aid h_c
+    { 0x52d, 0x1 },                                         // 1325 81 stormpike first aid a_c
     { 0x0,   0x0 }
 };
 
 static WorldStatePair WS_world_states[] =
 {
-    { 0x62d, 0x0 },                                         // 7 1581 alliance flag captures
-    { 0x62e, 0x0 },                                         // 8 1582 horde flag captures
-    { 0x609, 0x0 },                                         // 9 1545 unk, set to 1 on alliance flag pickup...
-    { 0x60a, 0x0 },                                         // 10 1546 unk, set to 1 on horde flag pickup, after drop it's -1
-    { 0x60b, 0x2 },                                         // 11 1547 unk
-    { 0x641, 0x3 },                                         // 12 1601 unk (max flag captures?)
-    { 0x922, 0x1 },                                         // 13 2338 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
-    { 0x923, 0x1 },                                         // 14 2339 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+    { 0x62d, 0x0 },                                         // 1581  7 alliance flag captures
+    { 0x62e, 0x0 },                                         // 1582  8 horde flag captures
+    { 0x609, 0x0 },                                         // 1545  9 unk, set to 1 on alliance flag pickup...
+    { 0x60a, 0x0 },                                         // 1546 10 unk, set to 1 on horde flag pickup, after drop it's -1
+    { 0x60b, 0x2 },                                         // 1547 11 unk
+    { 0x641, 0x3 },                                         // 1601 12 unk (max flag captures?)
+    { 0x922, 0x1 },                                         // 2338 13 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
+    { 0x923, 0x1 },                                         // 2339 14 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
     { 0x0,   0x0 }
 };
 
 static WorldStatePair AB_world_states[] =
 {
-    { 0x6e7, 0x0 },                                         // 7 1767 stables alliance
-    { 0x6e8, 0x0 },                                         // 8 1768 stables horde
-    { 0x6e9, 0x0 },                                         // 9 1769 unk, ST?
-    { 0x6ea, 0x0 },                                         // 10 1770 stables (show/hide)
-    { 0x6ec, 0x0 },                                         // 11 1772 farm (0 - horde controlled, 1 - alliance controlled)
-    { 0x6ed, 0x0 },                                         // 12 1773 farm (show/hide)
-    { 0x6ee, 0x0 },                                         // 13 1774 farm color
-    { 0x6ef, 0x0 },                                         // 14 1775 gold mine color, may be FM?
-    { 0x6f0, 0x0 },                                         // 15 1776 alliance resources
-    { 0x6f1, 0x0 },                                         // 16 1777 horde resources
-    { 0x6f2, 0x0 },                                         // 17 1778 horde bases
-    { 0x6f3, 0x0 },                                         // 18 1779 alliance bases
-    { 0x6f4, 0x7d0 },                                       // 19 1780 max resources (2000)
-    { 0x6f6, 0x0 },                                         // 20 1782 blacksmith color
-    { 0x6f7, 0x0 },                                         // 21 1783 blacksmith (show/hide)
-    { 0x6f8, 0x0 },                                         // 22 1784 unk, bs?
-    { 0x6f9, 0x0 },                                         // 23 1785 unk, bs?
-    { 0x6fb, 0x0 },                                         // 24 1787 gold mine (0 - horde contr, 1 - alliance contr)
-    { 0x6fc, 0x0 },                                         // 25 1788 gold mine (0 - conflict, 1 - horde)
-    { 0x6fd, 0x0 },                                         // 26 1789 gold mine (1 - show/0 - hide)
-    { 0x6fe, 0x0 },                                         // 27 1790 gold mine color
-    { 0x700, 0x0 },                                         // 28 1792 gold mine color, wtf?, may be LM?
-    { 0x701, 0x0 },                                         // 29 1793 lumber mill color (0 - conflict, 1 - horde contr)
-    { 0x702, 0x0 },                                         // 30 1794 lumber mill (show/hide)
-    { 0x703, 0x0 },                                         // 31 1795 lumber mill color color
-    { 0x732, 0x1 },                                         // 32 1842 stables (1 - uncontrolled)
-    { 0x733, 0x1 },                                         // 33 1843 gold mine (1 - uncontrolled)
-    { 0x734, 0x1 },                                         // 34 1844 lumber mill (1 - uncontrolled)
-    { 0x735, 0x1 },                                         // 35 1845 farm (1 - uncontrolled)
-    { 0x736, 0x1 },                                         // 36 1846 blacksmith (1 - uncontrolled)
-    { 0x745, 0x2 },                                         // 37 1861 unk
-    { 0x7a3, 0x708 },                                       // 38 1955 warning limit (1800)
+    { 0x6e7, 0x0 },                                         // 1767  7 stables alliance
+    { 0x6e8, 0x0 },                                         // 1768  8 stables horde
+    { 0x6e9, 0x0 },                                         // 1769  9 unk, ST?
+    { 0x6ea, 0x0 },                                         // 1770 10 stables (show/hide)
+    { 0x6ec, 0x0 },                                         // 1772 11 farm (0 - horde controlled, 1 - alliance controlled)
+    { 0x6ed, 0x0 },                                         // 1773 12 farm (show/hide)
+    { 0x6ee, 0x0 },                                         // 1774 13 farm color
+    { 0x6ef, 0x0 },                                         // 1775 14 gold mine color, may be FM?
+    { 0x6f0, 0x0 },                                         // 1776 15 alliance resources
+    { 0x6f1, 0x0 },                                         // 1777 16 horde resources
+    { 0x6f2, 0x0 },                                         // 1778 17 horde bases
+    { 0x6f3, 0x0 },                                         // 1779 18 alliance bases
+    { 0x6f4, 0x7d0 },                                       // 1780 19 max resources (2000)
+    { 0x6f6, 0x0 },                                         // 1782 20 blacksmith color
+    { 0x6f7, 0x0 },                                         // 1783 21 blacksmith (show/hide)
+    { 0x6f8, 0x0 },                                         // 1784 22 unk, bs?
+    { 0x6f9, 0x0 },                                         // 1785 23 unk, bs?
+    { 0x6fb, 0x0 },                                         // 1787 24 gold mine (0 - horde contr, 1 - alliance contr)
+    { 0x6fc, 0x0 },                                         // 1788 25 gold mine (0 - conflict, 1 - horde)
+    { 0x6fd, 0x0 },                                         // 1789 26 gold mine (1 - show/0 - hide)
+    { 0x6fe, 0x0 },                                         // 1790 27 gold mine color
+    { 0x700, 0x0 },                                         // 1792 28 gold mine color, wtf?, may be LM?
+    { 0x701, 0x0 },                                         // 1793 29 lumber mill color (0 - conflict, 1 - horde contr)
+    { 0x702, 0x0 },                                         // 1794 30 lumber mill (show/hide)
+    { 0x703, 0x0 },                                         // 1795 31 lumber mill color color
+    { 0x732, 0x1 },                                         // 1842 32 stables (1 - uncontrolled)
+    { 0x733, 0x1 },                                         // 1843 33 gold mine (1 - uncontrolled)
+    { 0x734, 0x1 },                                         // 1844 34 lumber mill (1 - uncontrolled)
+    { 0x735, 0x1 },                                         // 1845 35 farm (1 - uncontrolled)
+    { 0x736, 0x1 },                                         // 1846 36 blacksmith (1 - uncontrolled)
+    { 0x745, 0x2 },                                         // 1861 37 unk
+    { 0x7a3, 0x708 },                                       // 1955 38 warning limit (1800)
     { 0x0,   0x0 }
 };
 
 static WorldStatePair EPL_world_states[] =
 {
-    { 0x97a, 0x0 },                                         // 10 2426
-    { 0x917, 0x0 },                                         // 11 2327
-    { 0x918, 0x0 },                                         // 12 2328
-    { 0x97b, 0x32 },                                        // 13 2427
-    { 0x97c, 0x32 },                                        // 14 2428
-    { 0x933, 0x1 },                                         // 15 2355
-    { 0x946, 0x0 },                                         // 16 2374
-    { 0x947, 0x0 },                                         // 17 2375
-    { 0x948, 0x0 },                                         // 18 2376
-    { 0x949, 0x0 },                                         // 19 2377
-    { 0x94a, 0x0 },                                         // 20 2378
-    { 0x94b, 0x0 },                                         // 21 2379
-    { 0x932, 0x0 },                                         // 22 2354
-    { 0x934, 0x0 },                                         // 23 2356
-    { 0x935, 0x0 },                                         // 24 2357
-    { 0x936, 0x0 },                                         // 25 2358
-    { 0x937, 0x0 },                                         // 26 2359
-    { 0x938, 0x0 },                                         // 27 2360
-    { 0x939, 0x1 },                                         // 28 2361
-    { 0x930, 0x1 },                                         // 29 2352
-    { 0x93a, 0x0 },                                         // 30 2362
-    { 0x93b, 0x0 },                                         // 31 2363
-    { 0x93c, 0x0 },                                         // 32 2364
-    { 0x93d, 0x0 },                                         // 33 2365
-    { 0x944, 0x0 },                                         // 34 2372
-    { 0x945, 0x0 },                                         // 35 2373
-    { 0x931, 0x1 },                                         // 36 2353
-    { 0x93e, 0x0 },                                         // 37 2366
-    { 0x931, 0x1 },                                         // 38 2367 ??  grey horde not in dbc! send for consistency's sake, and to match field count
-    { 0x940, 0x0 },                                         // 39 2368
-    { 0x941, 0x0 },                                         // 7 2369
-    { 0x942, 0x0 },                                         // 8 2370
-    { 0x943, 0x0 },                                         // 9 2371
+    { 0x97a, 0x0 },                                         // 2426 10
+    { 0x917, 0x0 },                                         // 2327 11
+    { 0x918, 0x0 },                                         // 2328 12
+    { 0x97b, 0x32 },                                        // 2427 13
+    { 0x97c, 0x32 },                                        // 2428 14
+    { 0x933, 0x1 },                                         // 2355 15
+    { 0x946, 0x0 },                                         // 2374 16
+    { 0x947, 0x0 },                                         // 2375 17
+    { 0x948, 0x0 },                                         // 2376 18
+    { 0x949, 0x0 },                                         // 2377 19
+    { 0x94a, 0x0 },                                         // 2378 20
+    { 0x94b, 0x0 },                                         // 2379 21
+    { 0x932, 0x0 },                                         // 2354 22
+    { 0x934, 0x0 },                                         // 2356 23
+    { 0x935, 0x0 },                                         // 2357 24
+    { 0x936, 0x0 },                                         // 2358 25
+    { 0x937, 0x0 },                                         // 2359 26
+    { 0x938, 0x0 },                                         // 2360 27
+    { 0x939, 0x1 },                                         // 2361 28
+    { 0x930, 0x1 },                                         // 2352 29
+    { 0x93a, 0x0 },                                         // 2362 30
+    { 0x93b, 0x0 },                                         // 2363 31
+    { 0x93c, 0x0 },                                         // 2364 32
+    { 0x93d, 0x0 },                                         // 2365 33
+    { 0x944, 0x0 },                                         // 2372 34
+    { 0x945, 0x0 },                                         // 2373 35
+    { 0x931, 0x1 },                                         // 2353 36
+    { 0x93e, 0x0 },                                         // 2366 37
+    { 0x931, 0x1 },                                         // 2367 38 ??  grey horde not in dbc! send for consistency's sake, and to match field count
+    { 0x940, 0x0 },                                         // 2368 39
+    { 0x941, 0x0 },                                         // 2369 7
+    { 0x942, 0x0 },                                         // 2370 8
+    { 0x943, 0x0 },                                         // 2371 9
     { 0x0,   0x0 }
 };
 
 static WorldStatePair SIL_world_states[] =
 {
-    { 0x909, 0x0 },                                         // 7 ally silityst gathered
-    { 0x90A, 0x0 },                                         // 8 horde silityst gathered
-    { 0x90D, 0x0C8 },                                       // 9 max silithyst
-    { 0x912, 0x0 },                                         // 10 sandworm N
-    { 0x913, 0x0 },                                         // 11 sandworm S
-    { 0x914, 0x0 },                                         // 12 sandworm SW
-    { 0x915, 0x0 },                                         // 13 sandworm E
+    { 0x909, 0x0 },                                         // 2313 7 ally silityst gathered
+    { 0x90A, 0x0 },                                         // 2314 8 horde silityst gathered
+    { 0x90D, 0x0C8 },                                       // 2317 9 max silithyst
+    { 0x912, 0x0 },                                         // 2322 10 sandworm N
+    { 0x913, 0x0 },                                         // 2323 11 sandworm S
+    { 0x914, 0x0 },                                         // 2324 12 sandworm SW
+    { 0x915, 0x0 },                                         // 2325 13 sandworm E
     { 0x0,   0x0 }
 };
 
@@ -7612,12 +7612,12 @@ void Player::SendInitWorldStates(uint32 zoneid)
         size_t count_pos = data.wpos();
         data << uint16(0);                                  // count of uint32 blocks, placeholder
         // common fields
-        FillInitialWorldState(data, count, 0x8d8, 0x0);     // 1
-        FillInitialWorldState(data, count, 0x8d7, 0x0);     // 2
-        FillInitialWorldState(data, count, 0x8d6, 0x0);     // 3
-        FillInitialWorldState(data, count, 0x8d5, 0x0);     // 4
-        FillInitialWorldState(data, count, 0x8d4, 0x0);     // 5
-        FillInitialWorldState(data, count, 0x8d3, 0x0);     // 6
+        FillInitialWorldState(data, count, 0x8d8, 0x0);     // 2264 1
+        FillInitialWorldState(data, count, 0x8d7, 0x0);     // 2263 2
+        FillInitialWorldState(data, count, 0x8d6, 0x0);     // 2262 3
+        FillInitialWorldState(data, count, 0x8d5, 0x0);     // 2261 4
+        FillInitialWorldState(data, count, 0x8d4, 0x0);     // 2260 5
+        FillInitialWorldState(data, count, 0x8d3, 0x0);     // 2259 6
 
         switch(zoneid)
         {
@@ -7656,10 +7656,10 @@ void Player::SendInitWorldStates(uint32 zoneid)
                     FillInitialWorldState(data,count, AB_world_states);
                 break;
             default:
-                FillInitialWorldState(data,count, 0x914, 0x0);  // 7
-                FillInitialWorldState(data,count, 0x913, 0x0);  // 8
-                FillInitialWorldState(data,count, 0x912, 0x0);  // 9
-                FillInitialWorldState(data,count, 0x915, 0x0);  // 10
+                FillInitialWorldState(data,count,0x914,0x0);// 2324 7
+                FillInitialWorldState(data,count,0x913,0x0);// 2323 8
+                FillInitialWorldState(data,count,0x912,0x0);// 2322 9
+                FillInitialWorldState(data,count,0x915,0x0);// 2325 10
                 break;
         }
         GetSession()->SendPacket(&data);
