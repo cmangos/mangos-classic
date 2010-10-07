@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z0908_s0251_01_mangos_command` bit(1) default NULL
+  `required_z0919_s0298_02_mangos_spell_chain` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10173,6 +10173,15 @@ LOCK TABLES `spell_chain` WRITE;
 /*!40000 ALTER TABLE `spell_chain` DISABLE KEYS */;
 INSERT INTO `spell_chain` VALUES
 -- ------------------
+-- (0) Not associated with skills
+-- ------------------
+/* Healing Stream totem spell */
+(5672,0,5672, 1,0),
+(6371,5672,5672,2,0),
+(6372,6371,5672,3,0),
+(10460,6372,5672,4,0),
+(10461,10460,5672,5,0),
+-- ------------------
 -- (6) Frost
 -- ------------------
 /* Cone of Cold */
@@ -12820,7 +12829,7 @@ INSERT INTO `spell_bonus_data` VALUES
 (5185,  1.6104, 0,       0,     'Druid - Healing Touch'),
 (5570,  0,      0.127,   0,     'Druid - Insect Swarm'),
 (8921,  0.1515, 0.13,    0,     'Druid - Moonfire'),
-(8936,  0.539,  0.188,   0,     'Druid - Regrowth'),
+(8936,  0.3,    0.1,     0,     'Druid - Regrowth'),
 (774,   0,      0.37604, 0,     'Druid - Rejuvenation'),
 (2912,  1,      0,       0,     'Druid - Starfire'),
 (18562, 0,      0,       0,     'Druid - Swiftmend'),
@@ -12864,11 +12873,10 @@ INSERT INTO `spell_bonus_data` VALUES
 (20167, 0.25,   0,       0.16,  'Paladin - Seal of Light Proc'),
 (25742, 0.07,   0,       0.039, 'Paladin - Seal of Righteousness Dummy Proc'),
 /* Priest */
-(13908, 0.8068, 0,       0,     'Priest - Desperate Prayer'),
+(13908, 0.4286, 0,       0,     'Priest - Desperate Prayer'),
 (2944,  0.1849, 0,       0,     'Priest - Devouring Plague'),
-(379,   0,      0,       0,     'Shaman - Earth Shield Triggered'),
-(2061,  0.8068, 0,       0,     'Priest - Flash Heal'),
-(2060,  1.6135, 0,       0,     'Priest - Greater Heal'),
+(2061,  0.6177, 0,       0,     'Priest - Flash Heal'),
+(2060,  1.2353, 0,       0,     'Priest - Greater Heal'),
 (14914, 0.5711, 0.024,   0,     'Priest - Holy Fire'),
 (15237, 0.1606, 0,       0,     'Priest - Holy Nova Damage'),
 (23455, 0.3035, 0,       0,     'Priest - Holy Nova Heal Rank 1'),
@@ -12879,16 +12887,17 @@ INSERT INTO `spell_bonus_data` VALUES
 (27805, 0.3035, 0,       0,     'Priest - Holy Nova Heal Rank 6'),
 (8129,  0,      0,       0,     'Priest - Mana Burn'),
 (8092,  0.4296, 0,       0,     'Priest - Mind Blast'),
-(15407, 0.257,  0,       0,     'Priest - Mind Flay'),
+(15407, 0,      0.19,    0,     'Priest - Mind Flay'),
 (17,    0.8068, 0,       0,     'Priest - Power Word: Shield'),
-(596,   0.8086, 0,       0,     'Priest - Prayer of Healing'),
-(139,   0,      0.376,   0,     'Priest - Renew'),
+(596,   0.4285, 0,       0,     'Priest - Prayer of Healing'),
+(139,   0,      0.2,     0,     'Priest - Renew'),
 (589,   0,      0.1829,  0,     'Priest - Shadow Word: Pain'),
 (585,   0.714,  0,       0,     'Priest - Smite'),
 /* Shaman */
 (1064,  1.34,   0,       0,     'Shaman - Chain Heal'),
 (421,   0.57,   0,       0,     'Shaman - Chain Lightning'),
-(974,   0.4762, 0,       0,     'Shaman - Earth Shield'),
+(974,   0.2857, 0,       0,     'Shaman - Earth Shield'),
+(379,   0,      0,       0,     'Shaman - Earth Shield Triggered'),
 (8042,  0.3858, 0,       0,     'Shaman - Earth Shock'),
 (8443,  0.2142, 0,       0,     'Shaman - Fire Nova Totem Casted by Totem Rank 1'),
 (8504,  0.2142, 0,       0,     'Shaman - Fire Nova Totem Casted by Totem Rank 2'),
@@ -12908,8 +12917,9 @@ INSERT INTO `spell_bonus_data` VALUES
 (10458, 0.1,    0,       0,     'Shaman - Frostbrand Attack Rank 3'),
 (16352, 0.1,    0,       0,     'Shaman - Frostbrand Attack Rank 4'),
 (16353, 0.1,    0,       0,     'Shaman - Frostbrand Attack Rank 5'),
-(331,   1.6106, 0,       0,     'Shaman - Healing Wave'),
-(8004,  0.8082, 0,       0,     'Shaman - Lesser Healing Wave'),
+(5672,  0,      0.0450,  0,     'Shaman - Healing Stream Totem'),
+(331,   0.8571, 0,       0,     'Shaman - Healing Wave'),
+(8004,  0.4286, 0,       0,     'Shaman - Lesser Healing Wave'),
 (403,   0.7143, 0,       0,     'Shaman - Lightning Bolt'),
 (26364, 0.33,   0,       0,     'Shaman - Lightning Shield Proc Rank 1'),
 (26365, 0.33,   0,       0,     'Shaman - Lightning Shield Proc Rank 2'),
@@ -12944,6 +12954,7 @@ INSERT INTO `spell_bonus_data` VALUES
 (11681, 0.1428, 0,       0,     'Warlock - Hellfire Effect on Enemy Rank 2'),
 (11682, 0.1428, 0,       0,     'Warlock - Hellfire Effect on Enemy Rank 3'),
 (348,   0.2,    0.2,     0,     'Warlock - Immolate'),
+(1454,  0.8,    0,       0,     'Warlock - Life Tap'),
 (5676,  0.4286, 0,       0,     'Warlock - Searing Pain'),
 (686,   0.8571, 0,       0,     'Warlock - Shadow Bolt'),
 (6229,  0.3,    0,       0,     'Warlock - Shadow Ward'),
