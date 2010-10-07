@@ -149,9 +149,17 @@ void DynamicObject::Delete()
 void DynamicObject::Delay(int32 delaytime)
 {
     m_aliveDuration -= delaytime;
-    for(AffectedSet::iterator iunit= m_affected.begin(); iunit != m_affected.end(); ++iunit)
-        if (*iunit)
-            (*iunit)->DelayAura(m_spellId, m_effIndex, delaytime);
+    for(AffectedSet::iterator iter = m_affected.begin(); iter != m_affected.end(); )
+    {
+        Unit *target = GetMap()->GetUnit((*iter));
+        if (target)
+        {
+            target->DelayAura(m_spellId, m_effIndex, delaytime);
+            ++iter;
+        }
+        else
+            m_affected.erase(iter++);
+    }
 }
 
 bool DynamicObject::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
