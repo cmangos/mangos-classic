@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z0889_s0224_04_mangos_gameobject_respawn` bit(1) default NULL
+  `required_z0908_s0251_01_mangos_command` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -425,7 +425,7 @@ LOCK TABLES `command` WRITE;
 /*!40000 ALTER TABLE `command` DISABLE KEYS */;
 INSERT INTO `command` VALUES
 ('account',0,'Syntax: .account\r\n\r\nDisplay the access level of your account.'),
-('account characters',3,'Syntax: .account characters [#accountId|$accountName]\r\n\r\nShow list all characters for account seelcted by provided #accountId or $accountName, or for selected player in game.'),
+('account characters',3,'Syntax: .account characters [#accountId|$accountName]\r\n\r\nShow list all characters for account selected by provided #accountId or $accountName, or for selected player in game.'),
 ('account create',4,'Syntax: .account create $account $password\r\n\r\nCreate account and set password to it.'),
 ('account delete',4,'Syntax: .account delete $account\r\n\r\nDelete account with all characters.'),
 ('account lock',0,'Syntax: .account lock [on|off]\r\n\r\nAllow login from account only from current used IP or remove this requirement.'),
