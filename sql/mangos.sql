@@ -937,7 +937,7 @@ CREATE TABLE `creature_movement` (
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
   `waittime` int(10) unsigned NOT NULL default '0',
-  `script_id` int(10) unsigned NOT NULL default '0',
+  `script_id` mediumint(8) unsigned NOT NULL default '0',
   `textid1` int(11) NOT NULL default '0',
   `textid2` int(11) NOT NULL default '0',
   `textid3` int(11) NOT NULL default '0',
