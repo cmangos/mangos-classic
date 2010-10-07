@@ -1588,7 +1588,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             FillRaidOrPartyTargets(targetUnitMap, m_caster, radius, false, true, true);
             break;
         case TARGET_ALL_RAID_AROUND_CASTER:
-            FillRaidOrPartyTargets(targetUnitMap, m_caster, radius, true, true, true);
+            FillRaidOrPartyTargets(targetUnitMap, m_caster, radius, true, true, false);
             break;
         case TARGET_SINGLE_FRIEND:
         case TARGET_SINGLE_FRIEND_2:
