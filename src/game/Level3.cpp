@@ -1820,6 +1820,7 @@ bool ChatHandler::HandleLearnAllMyTalentsCommand(char* /*args*/)
 
         // search highest talent rank
         uint32 spellid = 0;
+
         for(int rank = MAX_TALENT_RANK-1; rank >= 0; --rank)
         {
             if(talentInfo->RankID[rank]!=0)
