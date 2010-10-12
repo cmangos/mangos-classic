@@ -518,6 +518,8 @@ class Unit;
 // 5 sec for bobber catch
 #define FISHING_BOBBER_READY_TIME 5
 
+#define GO_ANIMPROGRESS_DEFAULT 100                         // in 3.x 0xFF
+
 class MANGOS_DLL_SPEC GameObject : public WorldObject
 {
     public:

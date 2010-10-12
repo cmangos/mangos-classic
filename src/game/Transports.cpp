@@ -93,7 +93,7 @@ void MapManager::LoadTransports()
         x = t->m_WayPoints[0].x; y = t->m_WayPoints[0].y; z = t->m_WayPoints[0].z; mapid = t->m_WayPoints[0].mapid; o = 1;
 
         // creates the Gameobject
-        if(!t->Create(entry, mapid, x, y, z, o, 100, 0))
+        if (!t->Create(entry, mapid, x, y, z, o, GO_ANIMPROGRESS_DEFAULT))
         {
             delete t;
             continue;
@@ -139,7 +139,7 @@ Transport::Transport() : GameObject()
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_ALL | UPDATEFLAG_HAS_POSITION);
 }
 
-bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags)
+bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress)
 {
     Relocate(x,y,z,ang);
 
@@ -175,8 +175,6 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
     SetGoType(GameobjectTypes(goinfo->type));
 
     SetGoAnimProgress(animprogress);
-    if(dynflags)
-        SetUInt32Value(GAMEOBJECT_DYN_FLAGS, dynflags);
 
     SetName(goinfo->name);
 
