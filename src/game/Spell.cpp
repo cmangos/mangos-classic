@@ -2001,6 +2001,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case SPELL_EFFECT_SEND_TAXI:
                     if(m_targets.getUnitTarget())
                         targetUnitMap.push_back(m_targets.getUnitTarget());
+                    // Triggered spells have additional spell targets - cast them even if no explicit unit target is given (required for spell 50516 for example)
+                    else if(m_spellInfo->Effect[effIndex] == SPELL_EFFECT_TRIGGER_SPELL)
+                        targetUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_SUMMON_PLAYER:
                     if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->GetSelection())
