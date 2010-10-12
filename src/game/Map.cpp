@@ -176,9 +176,7 @@ void Map::LoadMap(int gx,int gy, bool reload)
     {
         sLog.outError("Error load map file: \n %s\n", tmp);
     }
-
     delete [] tmp;
-    return;
 }
 
 void Map::LoadMapAndVMap(int gx,int gy)
