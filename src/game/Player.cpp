@@ -1132,8 +1132,6 @@ void Player::Update( uint32 p_time )
 
     CheckDuelDistance(now);
 
-    CheckExploreSystem();
-
     // Update items that have just a limited lifetime
     if (now>m_Last_tick)
         UpdateItemDuration(uint32(now- m_Last_tick));
