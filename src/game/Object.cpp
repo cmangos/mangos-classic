@@ -343,25 +343,26 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint8 updateFlags) const
 
 void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *updateMask, Player *target) const
 {
-    if(!target)
+    if (!target)
         return;
 
     bool IsActivateToQuest = false;
     bool IsPerCasterAuraState = false;
+
     if (updatetype == UPDATETYPE_CREATE_OBJECT || updatetype == UPDATETYPE_CREATE_OBJECT2)
     {
         if (isType(TYPEMASK_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
         {
-            if ( ((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
+            if (((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
+                IsActivateToQuest = true;
+
+            updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);
+            updateMask->SetBit(GAMEOBJECT_ANIMPROGRESS);
+
+            if(GetUInt32Value(GAMEOBJECT_FLAGS))
             {
                 IsActivateToQuest = true;
-                updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);
-
-                if(GetUInt32Value(GAMEOBJECT_FLAGS))
-                {
-                    IsActivateToQuest = true;
-                    updateMask->SetBit(GAMEOBJECT_FLAGS);
-                }
+                updateMask->SetBit(GAMEOBJECT_FLAGS);
             }
 
             if (GetUInt32Value(GAMEOBJECT_ARTKIT))
@@ -372,10 +373,9 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
     {
         if (isType(TYPEMASK_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
         {
-            if ( ((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
-            {
+            if (((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
                 IsActivateToQuest = true;
-            }
+
             updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);
             updateMask->SetBit(GAMEOBJECT_ANIMPROGRESS);
         }
@@ -384,20 +384,19 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
     MANGOS_ASSERT(updateMask && updateMask->GetCount() == m_valuesCount);
 
     *data << (uint8)updateMask->GetBlockCount();
-    data->append( updateMask->GetMask(), updateMask->GetLength() );
+    data->append(updateMask->GetMask(), updateMask->GetLength());
 
     // 2 specialized loops for speed optimization in non-unit case
-    if(isType(TYPEMASK_UNIT))                               // unit (creature/player) case
+    if (isType(TYPEMASK_UNIT))                              // unit (creature/player) case
     {
-        for( uint16 index = 0; index < m_valuesCount; index ++ )
+        for(uint16 index = 0; index < m_valuesCount; ++index)
         {
-            if( updateMask->GetBit( index ) )
+            if (updateMask->GetBit(index))
             {
-                // remove custom flag before send
-                if( index == UNIT_NPC_FLAGS )
+                if (index == UNIT_NPC_FLAGS)
                 {
                     // remove custom flag before sending
-                    uint32 appendValue = m_uint32Values[ index ] & ~UNIT_NPC_FLAG_GUARD;
+                    uint32 appendValue = m_uint32Values[index] & ~UNIT_NPC_FLAG_GUARD;
 
                     if (GetTypeId() == TYPEID_UNIT)
                     {
@@ -417,10 +416,10 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                     *data << uint32(appendValue);
                 }
                 // FIXME: Some values at server stored in float format but must be sent to client in uint32 format
-                else if(index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME)
+                else if (index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME)
                 {
                     // convert from float to uint32 and send
-                    *data << uint32(m_floatValues[ index ] < 0 ? 0 : m_floatValues[ index ]);
+                    *data << uint32(m_floatValues[index] < 0 ? 0 : m_floatValues[index]);
                 }
 
                 // there are some float values which may be negative or can't get negative due to other checks
@@ -429,13 +428,13 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                     (index >= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE  && index <= (PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6)) ||
                     (index >= PLAYER_FIELD_POSSTAT0    && index <= PLAYER_FIELD_POSSTAT4))
                 {
-                    *data << uint32(m_floatValues[ index ]);
+                    *data << uint32(m_floatValues[index]);
                 }
 
                 // Gamemasters should be always able to select units - remove not selectable flag
-                else if(index == UNIT_FIELD_FLAGS && target->isGameMaster())
+                else if (index == UNIT_FIELD_FLAGS && target->isGameMaster())
                 {
-                    *data << (m_uint32Values[ index ] & ~UNIT_FLAG_NOT_SELECTABLE);
+                    *data << (m_uint32Values[index] & ~UNIT_FLAG_NOT_SELECTABLE);
                 }
                 // hide lootable animation for unallowed players
                 else if (index == UNIT_DYNAMIC_FLAGS && GetTypeId() == TYPEID_UNIT)
@@ -448,16 +447,16 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                 else
                 {
                     // send in current format (float as float, uint32 as uint32)
-                    *data << m_uint32Values[ index ];
+                    *data << m_uint32Values[index];
                 }
             }
         }
     }
-    else if(isType(TYPEMASK_GAMEOBJECT))                    // gameobject case
+    else if (isType(TYPEMASK_GAMEOBJECT))                   // gameobject case
     {
-        for( uint16 index = 0; index < m_valuesCount; index ++ )
+        for(uint16 index = 0; index < m_valuesCount; ++index)
         {
-            if( updateMask->GetBit( index ) )
+            if (updateMask->GetBit(index))
             {
                 // send in current format (float as float, uint32 as uint32)
                 if ( index == GAMEOBJECT_FLAGS )
@@ -469,15 +468,17 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                 }
                 else if ( index == GAMEOBJECT_DYN_FLAGS )
                 {
-                    if(IsActivateToQuest )
+                    if (IsActivateToQuest)
                     {
                         switch(((GameObject*)this)->GetGoType())
                         {
+                            case GAMEOBJECT_TYPE_QUESTGIVER:
                             case GAMEOBJECT_TYPE_CHEST:
-                                *data << uint32(9);         // enable quest object. Represent 9, but 1 for client before 2.3.0
-                                break;
+                            case GAMEOBJECT_TYPE_GENERIC:
+                            case GAMEOBJECT_TYPE_SPELL_FOCUS:
                             case GAMEOBJECT_TYPE_GOOBER:
-                                *data << uint32(1);
+                                *data << uint16(GO_DYNFLAG_LO_ACTIVATE);
+                                *data << uint16(0);
                                 break;
                             default:
                                 *data << uint32(0);         // unknown, not happen.
@@ -488,18 +489,18 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
                         *data << uint32(0);                 // disable quest object
                 }
                 else
-                    *data << m_uint32Values[ index ];       // other cases
+                    *data << m_uint32Values[index];         // other cases
             }
         }
     }
     else                                                    // other objects case (no special index checks)
     {
-        for( uint16 index = 0; index < m_valuesCount; index ++ )
+        for(uint16 index = 0; index < m_valuesCount; ++index)
         {
-            if( updateMask->GetBit( index ) )
+            if (updateMask->GetBit(index))
             {
                 // send in current format (float as float, uint32 as uint32)
-                *data << m_uint32Values[ index ];
+                *data << m_uint32Values[index];
             }
         }
     }

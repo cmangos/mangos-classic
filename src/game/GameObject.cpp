@@ -711,17 +711,52 @@ void GameObject::Respawn()
     }
 }
 
-bool GameObject::ActivateToQuest( Player *pTarget)const
+bool GameObject::ActivateToQuest(Player *pTarget)const
 {
-    if(!sObjectMgr.IsGameObjectForQuests(GetEntry()))
+    // if GO is ReqCreatureOrGoN for quest
+    if (pTarget->HasQuestForGO(GetEntry()))
+        return true;
+
+    if (!sObjectMgr.IsGameObjectForQuests(GetEntry()))
         return false;
 
     switch(GetGoType())
     {
+        case GAMEOBJECT_TYPE_QUESTGIVER:
+        {
+            // Not fully clear when GO's can activate/deactivate
+            // For cases where GO has additional (except quest itself),
+            // these conditions are not sufficient/will fail.
+            // Never expect flags|4 for these GO's? (NF-note: It doesn't appear it's expected)
+
+            const QuestRelations &qRel = sObjectMgr.mGOQuestRelations;
+
+            for(QuestRelations::const_iterator itr = qRel.lower_bound(GetEntry()); itr != qRel.upper_bound(GetEntry()); ++itr)
+            {
+                const Quest *qInfo = sObjectMgr.GetQuestTemplate(itr->second);
+
+                if (pTarget->CanTakeQuest(qInfo, false))
+                    return true;
+            }
+
+            const QuestRelations &qInRel = sObjectMgr.mGOQuestInvolvedRelations;
+
+            for(QuestRelations::const_iterator itr = qInRel.lower_bound(GetEntry()); itr != qInRel.upper_bound(GetEntry()); ++itr)
+            {
+                if ((pTarget->GetQuestStatus(itr->second) == QUEST_STATUS_INCOMPLETE || pTarget->GetQuestStatus(itr->second) == QUEST_STATUS_COMPLETE)
+                    && !pTarget->GetQuestRewardStatus(itr->second))
+                    return true;
+            }
+
+            break;
+        }
         // scan GO chest with loot including quest items
         case GAMEOBJECT_TYPE_CHEST:
         {
-            if(LootTemplates_Gameobject.HaveQuestLootForPlayer(GetGOInfo()->GetLootId(), pTarget))
+            if (pTarget->GetQuestStatus(GetGOInfo()->chest.questId) == QUEST_STATUS_INCOMPLETE)
+                return true;
+
+            if (LootTemplates_Gameobject.HaveQuestLootForPlayer(GetGOInfo()->GetLootId(), pTarget))
             {
                 //look for battlegroundAV for some objects which are only activated after mine gots captured by own team
                 if (GetEntry() == BG_AV_OBJECTID_MINE_N || GetEntry() == BG_AV_OBJECTID_MINE_S)
@@ -732,9 +767,21 @@ bool GameObject::ActivateToQuest( Player *pTarget)const
             }
             break;
         }
+        case GAMEOBJECT_TYPE_GENERIC:
+        {
+            if (pTarget->GetQuestStatus(GetGOInfo()->_generic.questID) == QUEST_STATUS_INCOMPLETE)
+                return true;
+            break;
+        }
+        case GAMEOBJECT_TYPE_SPELL_FOCUS:
+        {
+            if (pTarget->GetQuestStatus(GetGOInfo()->spellFocus.questID) == QUEST_STATUS_INCOMPLETE)
+                return true;
+            break;
+        }
         case GAMEOBJECT_TYPE_GOOBER:
         {
-            if(pTarget->GetQuestStatus(GetGOInfo()->goober.questId) == QUEST_STATUS_INCOMPLETE)
+            if (pTarget->GetQuestStatus(GetGOInfo()->goober.questId) == QUEST_STATUS_INCOMPLETE)
                 return true;
             break;
         }

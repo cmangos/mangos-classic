@@ -7064,7 +7064,7 @@ void ObjectMgr::LoadGameObjectForQuests()
 {
     mGameObjectForQuestSet.clear();                         // need for reload case
 
-    if( !sGOStorage.MaxEntry )
+    if (!sGOStorage.MaxEntry)
     {
         barGoLink bar( 1 );
         bar.step();
@@ -7073,7 +7073,7 @@ void ObjectMgr::LoadGameObjectForQuests()
         return;
     }
 
-    barGoLink bar( sGOStorage.MaxEntry - 1 );
+    barGoLink bar(sGOStorage.MaxEntry - 1);
     uint32 count = 0;
 
     // collect GO entries for GO that must activated
@@ -7081,27 +7081,60 @@ void ObjectMgr::LoadGameObjectForQuests()
     {
         bar.step();
         GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(go_entry);
-        if(!goInfo)
+        if (!goInfo)
             continue;
 
         switch(goInfo->type)
         {
-            // scan GO chest with loot including quest items
+            case GAMEOBJECT_TYPE_QUESTGIVER:
+            {
+                if (mGOQuestRelations.find(go_entry) != mGOQuestRelations.end())
+                {
+                    mGameObjectForQuestSet.insert(go_entry);
+                    ++count;
+                }
+                else if (mGOQuestInvolvedRelations.find(go_entry) != mGOQuestInvolvedRelations.end())
+                {
+                    mGameObjectForQuestSet.insert(go_entry);
+                    ++count;
+                }
+
+                break;
+            }
             case GAMEOBJECT_TYPE_CHEST:
             {
+                // scan GO chest with loot including quest items
                 uint32 loot_id = goInfo->GetLootId();
 
-                // find quest loot for GO
-                if(LootTemplates_Gameobject.HaveQuestLootFor(loot_id))
+                // always activate to quest, GO may not have loot, OR find if GO has loot for quest.
+                if (goInfo->chest.questId || LootTemplates_Gameobject.HaveQuestLootFor(loot_id))
                 {
                     mGameObjectForQuestSet.insert(go_entry);
                     ++count;
                 }
                 break;
             }
+            case GAMEOBJECT_TYPE_GENERIC:
+            {
+                if (goInfo->_generic.questID)               // quest related objects, has visual effects
+                {
+                    mGameObjectForQuestSet.insert(go_entry);
+                    count++;
+                }
+                break;
+            }
+            case GAMEOBJECT_TYPE_SPELL_FOCUS:
+            {
+                if (goInfo->spellFocus.questID)             // quest related objects, has visual effect
+                {
+                    mGameObjectForQuestSet.insert(go_entry);
+                    count++;
+                }
+                break;
+            }
             case GAMEOBJECT_TYPE_GOOBER:
             {
-                if(goInfo->goober.questId)                  //quests objects
+                if (goInfo->goober.questId)                 //quests objects
                 {
                     mGameObjectForQuestSet.insert(go_entry);
                     count++;
