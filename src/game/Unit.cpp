@@ -6000,6 +6000,24 @@ int32 Unit::DealHeal(Unit *pVictim, uint32 addhealth, SpellEntry const *spellPro
     return gain;
 }
 
+Unit* Unit::SelectMagnetTarget(Unit *victim, SpellEntry const *spellInfo)
+{
+    if(!victim)
+        return NULL;
+
+    // Magic case
+    if(spellInfo && (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC))
+    {
+        Unit::AuraList const& magnetAuras = victim->GetAurasByType(SPELL_AURA_SPELL_MAGNET);
+        for(Unit::AuraList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
+            if(Unit* magnet = (*itr)->GetCaster())
+                if(magnet->IsWithinLOSInMap(this) && magnet->isAlive())
+                    return magnet;
+    }
+
+    return victim;
+}
+
 void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, bool critical)
 {
     // we guess size
