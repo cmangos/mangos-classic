@@ -266,7 +266,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                     // unmount before boarding
                     plMover->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
-                    GetPlayer()->m_transport = (*iter);
+                    plMover->m_transport = (*iter);
                     (*iter)->AddPassenger(plMover);
                     break;
                 }
