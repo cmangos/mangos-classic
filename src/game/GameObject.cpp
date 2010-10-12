@@ -353,7 +353,17 @@ void GameObject::Update(uint32 /*p_time*/)
                     if (GetGOInfo()->GetAutoCloseTime() && (m_cooldownTime < time(NULL)))
                         ResetDoorOrButton();
                     break;
-                default: break;
+                case GAMEOBJECT_TYPE_GOOBER:
+                    if (m_cooldownTime < time(NULL))
+                    {
+                        RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+
+                        SetLootState(GO_JUST_DEACTIVATED);
+                        m_cooldownTime = 0;
+                    }
+                    break;
+                default:
+                    break;
             }
             break;
         }
@@ -372,6 +382,9 @@ void GameObject::Update(uint32 /*p_time*/)
 
                     ClearAllUsesData();
                 }
+
+                SetGoState(GO_STATE_READY);
+
                 //any return here in case battleground traps
             }
 
@@ -842,6 +855,9 @@ void GameObject::Use(Unit* user)
     uint32 spellId = 0;
     bool triggered = false;
 
+    if (user->GetTypeId() == TYPEID_PLAYER && Script->GOHello((Player*)user, this))
+        return;
+
     switch(GetGoType())
     {
         case GAMEOBJECT_TYPE_DOOR:                          //0
@@ -879,6 +895,26 @@ void GameObject::Use(Unit* user)
                 player->PrepareGossipMenu(this, GetGOInfo()->questgiver.gossipID);
                 player->SendPreparedGossip(this);
             }
+
+            return;
+        }
+        case GAMEOBJECT_TYPE_CHEST:
+        {
+            if (user->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            // TODO: possible must be moved to loot release (in different from linked triggering)
+            if (GetGOInfo()->chest.eventId)
+            {
+                DEBUG_LOG("Chest ScriptStart id %u for GO %u", GetGOInfo()->chest.eventId, GetDBTableGUIDLow());
+
+                if (!Script->ProcessEventId(GetGOInfo()->chest.eventId, user, this, true))
+                    GetMap()->ScriptsStart(sEventScripts, GetGOInfo()->chest.eventId, user, this);
+            }
+
+            // triggering linked GO
+            if (uint32 trapEntry = GetGOInfo()->chest.linkedTrapId)
+                TriggeringLinkedGameObject(trapEntry, user);
 
             return;
         }
@@ -991,6 +1027,13 @@ void GameObject::Use(Unit* user)
                 }
 
                 // possible quest objective for active quests
+                if (info->goober.questId && sObjectMgr.GetQuestTemplate(info->goober.questId))
+                {
+                    //Quest require to be active for GO using
+                    if (player->GetQuestStatus(info->goober.questId) != QUEST_STATUS_INCOMPLETE)
+                        break;
+                }
+
                 player->RewardPlayerAndGroupAtCast(this);
             }
 
@@ -1116,7 +1159,6 @@ void GameObject::Use(Unit* user)
             player->FinishSpell(CURRENT_CHANNELED_SPELL);
             return;
         }
-
         case GAMEOBJECT_TYPE_SUMMONING_RITUAL:              //18
         {
             if (user->GetTypeId() != TYPEID_PLAYER)
@@ -1238,6 +1280,7 @@ void GameObject::Use(Unit* user)
             uint8 level = player->getLevel();
             if (level < info->meetingstone.minLevel || level > info->meetingstone.maxLevel)
                 return;
+
             level = targetPlayer->getLevel();
             if (level < info->meetingstone.minLevel || level > info->meetingstone.maxLevel)
                 return;
@@ -1246,7 +1289,6 @@ void GameObject::Use(Unit* user)
 
             break;
         }
-
         case GAMEOBJECT_TYPE_FLAGSTAND:                     // 24
         {
             if (user->GetTypeId() != TYPEID_PLAYER)
@@ -1324,7 +1366,7 @@ void GameObject::Use(Unit* user)
             break;
         }
         default:
-            DEBUG_LOG("GameObject::Use unhandled GameObject type %u (entry %u).", GetGoType(), GetEntry());
+            sLog.outError("GameObject::Use unhandled GameObject type %u (entry %u).", GetGoType(), GetEntry());
             break;
     }
 
