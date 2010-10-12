@@ -1036,7 +1036,9 @@ bool Aura::isAffectedOnSpell(SpellEntry const *spell) const
 
 void Aura::ReapplyAffectedPassiveAuras( Unit* target )
 {
-    std::set<uint32> affectedPassives;
+    // we need store cast item guids for self casted spells
+    // expected that not exist permanent auras from stackable auras from different items
+    std::map<uint32, ObjectGuid> affectedSelf;
 
     for(Unit::AuraMap::const_iterator itr = target->GetAuras().begin(); itr != target->GetAuras().end(); ++itr)
     {
@@ -1049,14 +1051,20 @@ void Aura::ReapplyAffectedPassiveAuras( Unit* target )
             // and affected by spellmod
             isAffectedOnSpell(itr->second->GetSpellProto()))
         {
-            affectedPassives.insert(itr->second->GetId());
+            affectedSelf[itr->second->GetId()] = itr->second->GetCastItemGUID();
         }
     }
 
-    for(std::set<uint32>::const_iterator set_itr = affectedPassives.begin(); set_itr != affectedPassives.end(); ++set_itr)
+    if (!affectedSelf.empty())
     {
-        target->RemoveAurasDueToSpell(*set_itr);
-        target->CastSpell(m_target, *set_itr, true);
+        Player* pTarget = target->GetTypeId() == TYPEID_PLAYER ? (Player*)target : NULL;
+
+        for(std::map<uint32, ObjectGuid>::const_iterator map_itr = affectedSelf.begin(); map_itr != affectedSelf.end(); ++map_itr)
+        {
+            Item* item = pTarget && !map_itr->second.IsEmpty() ? pTarget->GetItemByGuid(map_itr->second) : NULL;
+            target->RemoveAurasDueToSpell(map_itr->first);
+            target->CastSpell(target, map_itr->first, true, item);
+        }
     }
 }
 
