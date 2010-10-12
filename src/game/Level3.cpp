@@ -3494,7 +3494,7 @@ bool ChatHandler::HandleNpcAllowMovementCommand(char* /*args*/)
 
 bool ChatHandler::HandleNpcChangeEntryCommand(char *args)
 {
-    if(!args)
+    if (!*args)
         return false;
 
     uint32 newEntryNum = atoi(args);
@@ -4628,7 +4628,7 @@ bool ChatHandler::HandleBanIPCommand(char* args)
 
 bool ChatHandler::HandleBanHelper(BanMode mode, char* args)
 {
-    if(!args)
+    if (!*args)
         return false;
 
     char* cnameOrIP = ExtractArg(&args);
@@ -4718,7 +4718,7 @@ bool ChatHandler::HandleUnBanIPCommand(char* args)
 
 bool ChatHandler::HandleUnBanHelper(BanMode mode, char* args)
 {
-    if(!args)
+    if (!*args)
         return false;
 
     char* cnameOrIP = ExtractArg(&args);
@@ -4761,7 +4761,7 @@ bool ChatHandler::HandleUnBanHelper(BanMode mode, char* args)
 
 bool ChatHandler::HandleBanInfoAccountCommand(char* args)
 {
-    if(!args)
+    if (!*args)
         return false;
 
     std::string account_name;
@@ -4821,7 +4821,7 @@ bool ChatHandler::HandleBanInfoHelper(uint32 accountid, char const* accountname)
 
 bool ChatHandler::HandleBanInfoIPCommand(char* args)
 {
-    if(!args)
+    if (!*args)
         return false;
 
     char* cIP = ExtractQuotedOrLiteralArg(&args);
@@ -5187,7 +5187,7 @@ bool ChatHandler::HandlePDumpLoadCommand(char *args)
 
 bool ChatHandler::HandlePDumpWriteCommand(char *args)
 {
-    if(!args)
+    if (!*args)
         return false;
 
     char* file = ExtractQuotedOrLiteralArg(&args);
