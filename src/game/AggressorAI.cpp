@@ -44,7 +44,8 @@ AggressorAI::AggressorAI(Creature *c) : CreatureAI(c), i_victimGuid(0), i_state(
 void
 AggressorAI::MoveInLineOfSight(Unit *u)
 {
-    if( !m_creature->canFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE )
+    // Ignore Z for flying creatures
+    if( !m_creature->CanFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE )
         return;
 
     if (m_creature->CanInitiateAttack() && u->isTargetableForAttack() &&

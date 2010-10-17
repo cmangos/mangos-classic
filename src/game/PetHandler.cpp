@@ -67,7 +67,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
         if (!(flag == ACT_COMMAND && spellid == COMMAND_ATTACK))
             return;
     }
-    else if (((Creature*)pet)->isPet())
+    else if (((Creature*)pet)->IsPet())
     {
         // pet can have action bar disabled
         if(((Pet*)pet)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
@@ -129,7 +129,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                                 ((Creature*)pet)->AI()->AttackStart(TargetUnit);
 
                             // 10% chance to play special pet attack talk, else growl
-                            if(((Creature*)pet)->isPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != TargetUnit && roll_chance_i(10))
+                            if(((Creature*)pet)->IsPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != TargetUnit && roll_chance_i(10))
                                 pet->SendPetTalk((uint32)PET_TALK_ATTACK);
                             else
                             {
@@ -141,14 +141,14 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     break;
                 }
                 case COMMAND_ABANDON:                       // abandon (hunter pet) or dismiss (summoned pet)
-                    if(((Creature*)pet)->isPet())
+                    if(((Creature*)pet)->IsPet())
                     {
                         Pet* p = (Pet*)pet;
                         if(p->getPetType() == HUNTER_PET)
                             _player->RemovePet(p,PET_SAVE_AS_DELETED);
                         else
                             //dismissing a summoned pet is like killing them (this prevents returning a soulshard...)
-                            p->setDeathState(CORPSE);
+                            p->SetDeathState(CORPSE);
                     }
                     else                                    // charmed
                         _player->Uncharm();
@@ -226,14 +226,14 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             if(result == SPELL_CAST_OK)
             {
                 ((Creature*)pet)->AddCreatureSpellCooldown(spellid);
-                if (((Creature*)pet)->isPet())
+                if (((Creature*)pet)->IsPet())
                     ((Pet*)pet)->CheckLearning(spellid);
 
                 unit_target = spell->m_targets.getUnitTarget();
 
                 //10% chance to play special pet attack talk, else growl
                 //actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-                if(((Creature*)pet)->isPet() && (((Pet*)pet)->getPetType() == SUMMON_PET) && (pet != unit_target) && (urand(0, 100) < 10))
+                if(((Creature*)pet)->IsPet() && (((Pet*)pet)->getPetType() == SUMMON_PET) && (pet != unit_target) && (urand(0, 100) < 10))
                     pet->SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
                 else
                 {
@@ -348,7 +348,7 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
     }
 
     // pet can have action bar disabled
-    if(pet->isPet() && ((Pet*)pet)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+    if(pet->IsPet() && ((Pet*)pet)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
         return;
 
     CharmInfo *charmInfo = pet->GetCharmInfo();
@@ -501,7 +501,7 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
     // pet/charmed
     if (Creature* pet = _player->GetMap()->GetAnyTypeCreature(guid))
     {
-        if(pet->isPet())
+        if(pet->IsPet())
         {
             if(pet->GetGUID() == _player->GetPetGUID())
             {
@@ -661,7 +661,7 @@ void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
     if (result == SPELL_CAST_OK)
     {
         pet->AddCreatureSpellCooldown(spellid);
-        if (pet->isPet())
+        if (pet->IsPet())
         {
             Pet* p = (Pet*)pet;
             p->CheckLearning(spellid);

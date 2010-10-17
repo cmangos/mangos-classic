@@ -36,6 +36,9 @@ void PointMovementGenerator<T>::Initialize(T &unit)
 
     Traveller<T> traveller(unit);
     i_destinationHolder.SetDestination(traveller, i_x, i_y, i_z);
+
+    if (unit.GetTypeId() == TYPEID_UNIT && ((Creature*)&unit)->CanFly())
+        ((Creature&)unit).AddSplineFlag(SPLINEFLAG_UNKNOWN7);
 }
 
 template<class T>
@@ -101,7 +104,7 @@ void PointMovementGenerator<Creature>::MovementInform(Creature &unit)
     if (unit.AI())
         unit.AI()->MovementInform(POINT_MOTION_TYPE, id);
 
-    if (unit.isTemporarySummon())
+    if (unit.IsTemporarySummon())
     {
         TemporarySummon* pSummon = (TemporarySummon*)(&unit);
         if (pSummon->GetSummonerGuid().IsCreature())

@@ -36,9 +36,9 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
     Map const* map = creature.GetBaseMap();
 
     // For 2D/3D system selection
-    //bool is_land_ok  = creature.canWalk();                // not used?
-    //bool is_water_ok = creature.canSwim();                // not used?
-    bool is_air_ok = creature.canFly();
+    //bool is_land_ok  = creature.CanWalk();                // not used?
+    //bool is_water_ok = creature.CanSwim();                // not used?
+    bool is_air_ok = creature.CanFly();
 
     const float angle = rand_norm_f() * (M_PI_F*2.0f);
     const float range = rand_norm_f() * wander_distance;
@@ -99,8 +99,17 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
     i_destinationHolder.SetDestination(traveller, destX, destY, destZ);
     creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
 
-    i_nextMoveTime.Reset(urand(500+i_destinationHolder.GetTotalTravelTime(), 10000+i_destinationHolder.GetTotalTravelTime()));
-    creature.AddSplineFlag(SPLINEFLAG_WALKMODE);
+    if (is_air_ok)
+    {
+        i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
+        creature.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+    }
+    //else if (is_water_ok)                                 // Swimming mode to be done with more than this check
+    else
+    {
+        i_nextMoveTime.Reset(urand(500+i_destinationHolder.GetTotalTravelTime(), 10000+i_destinationHolder.GetTotalTravelTime()));
+        creature.AddSplineFlag(SPLINEFLAG_WALKMODE);
+    }
 }
 
 template<>
@@ -109,7 +118,10 @@ void RandomMovementGenerator<Creature>::Initialize(Creature &creature)
     if (!creature.isAlive())
         return;
 
-    creature.AddSplineFlag(SPLINEFLAG_WALKMODE);
+    if (creature.CanFly())
+        creature.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+    else
+        creature.AddSplineFlag(SPLINEFLAG_WALKMODE);
 
     creature.addUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
     _setRandomLocation(creature);
@@ -145,7 +157,7 @@ bool RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 
 
     i_nextMoveTime.Update(diff);
 
-    if (i_destinationHolder.HasArrived() && !creature.IsStopped() && !creature.canFly())
+    if (i_destinationHolder.HasArrived() && !creature.IsStopped() && !creature.CanFly())
         creature.clearUnitState(UNIT_STAT_ROAMING_MOVE);
 
     if (!i_destinationHolder.HasArrived() && creature.IsStopped())
@@ -160,10 +172,14 @@ bool RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 
 
         if (i_nextMoveTime.Passed())
         {
-            creature.AddSplineFlag(SPLINEFLAG_WALKMODE);
+            if (creature.CanFly())
+                creature.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+            else
+                creature.AddSplineFlag(SPLINEFLAG_WALKMODE);
+
             _setRandomLocation(creature);
         }
-        else if (creature.isPet() && creature.GetOwner() && !creature.IsWithinDist(creature.GetOwner(), PET_FOLLOW_DIST+2.5f))
+        else if (creature.IsPet() && creature.GetOwner() && !creature.IsWithinDist(creature.GetOwner(), PET_FOLLOW_DIST+2.5f))
         {
             creature.AddSplineFlag(SPLINEFLAG_WALKMODE);
             _setRandomLocation(creature);

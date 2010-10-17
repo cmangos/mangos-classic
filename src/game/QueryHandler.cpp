@@ -162,7 +162,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
         data << SubName;
         data << uint32(ci->type_flags);                     // flags
         if (unit)
-            data << uint32(((unit->isPet()) ? 0 : ci->type));   //CreatureType.dbc   wdbFeild8
+            data << uint32(((unit->IsPet()) ? 0 : ci->type));   //CreatureType.dbc   wdbFeild8
         else
             data << uint32(ci->type);
 

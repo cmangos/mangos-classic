@@ -78,13 +78,15 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T &owner)
 
     // Just a temp hack, GetContactPoint/GetClosePoint in above code use UpdateGroundPositionZ (in GetNearPoint)
     // and then has the wrong z to use when creature try follow unit in the air.
-    if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->canFly())
+    if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
         z = i_target->GetPositionZ();
 
     Traveller<T> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z);
 
     D::_addUnitStateMove(owner);
+    if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
+        ((Creature&)owner).AddSplineFlag(SPLINEFLAG_UNKNOWN7);
 }
 
 template<>
@@ -150,6 +152,8 @@ bool TargetedMovementGeneratorMedium<T,D>::Update(T &owner, const uint32 & time_
     if (owner.IsStopped() && !i_destinationHolder.HasArrived())
     {
         D::_addUnitStateMove(owner);
+        if (owner.GetTypeId() == TYPEID_UNIT && ((Creature*)&owner)->CanFly())
+            ((Creature&)owner).AddSplineFlag(SPLINEFLAG_UNKNOWN7);
 
         i_destinationHolder.StartTravel(traveller);
         return true;
@@ -212,6 +216,9 @@ void ChaseMovementGenerator<Creature>::Initialize(Creature &owner)
     owner.addUnitState(UNIT_STAT_CHASE|UNIT_STAT_CHASE_MOVE);
     owner.RemoveSplineFlag(SPLINEFLAG_WALKMODE);
 
+    if (((Creature*)&owner)->CanFly())
+        owner.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+
     _setTargetLocation(owner);
 }
 
@@ -237,7 +244,7 @@ void ChaseMovementGenerator<T>::Reset(T &owner)
 template<>
 void FollowMovementGenerator<Creature>::_updateWalkMode(Creature &u)
 {
-    if (i_target.isValid() && u.isPet())
+    if (i_target.isValid() && u.IsPet())
         u.UpdateWalkMode(i_target.getTarget());
 }
 
@@ -256,7 +263,7 @@ template<>
 void FollowMovementGenerator<Creature>::_updateSpeed(Creature &u)
 {
     // pet only sync speed with owner
-    if (!((Creature&)u).isPet() || !i_target.isValid() || i_target->GetGUID() != u.GetOwnerGUID())
+    if (!((Creature&)u).IsPet() || !i_target.isValid() || i_target->GetGUID() != u.GetOwnerGUID())
         return;
 
     u.UpdateSpeed(MOVE_RUN,true);
@@ -279,6 +286,9 @@ void FollowMovementGenerator<Creature>::Initialize(Creature &owner)
     owner.addUnitState(UNIT_STAT_FOLLOW|UNIT_STAT_FOLLOW_MOVE);
     _updateWalkMode(owner);
     _updateSpeed(owner);
+
+    if (((Creature*)&owner)->CanFly())
+        owner.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
 
     _setTargetLocation(owner);
 }
