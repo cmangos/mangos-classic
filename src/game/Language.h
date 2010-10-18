@@ -603,9 +603,10 @@ enum MangosStrings
     // Battleground
     LANG_BG_A_WINS                      = 600,
     LANG_BG_H_WINS                      = 601,
-    LANG_BG_WS_ONE_MINUTE               = 602,
-    LANG_BG_WS_HALF_MINUTE              = 603,
-    LANG_BG_WS_BEGIN                    = 604,
+
+    LANG_BG_WS_START_ONE_MINUTE         = 602,
+    LANG_BG_WS_START_HALF_MINUTE        = 603,
+    LANG_BG_WS_HAS_BEGUN                = 604,
 
     LANG_BG_WS_CAPTURED_HF              = 605,
     LANG_BG_WS_CAPTURED_AF              = 606,
@@ -619,12 +620,13 @@ enum MangosStrings
     LANG_BG_WS_ALLIANCE_FLAG_RESPAWNED  = 614,
     LANG_BG_WS_HORDE_FLAG_RESPAWNED     = 615,
 
-    LANG_BG_EY_ONE_MINUTE               = 636,
-    LANG_BG_EY_HALF_MINUTE              = 637,
-    LANG_BG_EY_BEGIN                    = 638,
+    //LANG_BG_EY_START_ONE_MINUTE       = 636,
+    //LANG_BG_EY_START_HALF_MINUTE      = 637,
+    //LANG_BG_EY_HAS_BEGUN              = 638,
 
-    LANG_BG_AB_ALLY                     = 650,
-    LANG_BG_AB_HORDE                    = 651,
+    LANG_BG_ALLY                        = 650,
+    LANG_BG_HORDE                       = 651,
+
     LANG_BG_AB_NODE_STABLES             = 652,
     LANG_BG_AB_NODE_BLACKSMITH          = 653,
     LANG_BG_AB_NODE_FARM                = 654,
@@ -634,40 +636,41 @@ enum MangosStrings
     LANG_BG_AB_NODE_DEFENDED            = 658,
     LANG_BG_AB_NODE_ASSAULTED           = 659,
     LANG_BG_AB_NODE_CLAIMED             = 660,
-    LANG_BG_AB_ONEMINTOSTART            = 661,
-    LANG_BG_AB_HALFMINTOSTART           = 662,
-    LANG_BG_AB_STARTED                  = 663,
+
+    LANG_BG_AB_START_ONE_MINUTE         = 661,
+    LANG_BG_AB_START_HALF_MINUTE        = 662,
+    LANG_BG_AB_HAS_BEGUN                = 663,
     LANG_BG_AB_A_NEAR_VICTORY           = 664,
     LANG_BG_AB_H_NEAR_VICTORY           = 665,
     LANG_BG_MARK_BY_MAIL                = 666,
 
-    LANG_BG_EY_HAS_TAKEN_A_M_TOWER      = 667,
-    LANG_BG_EY_HAS_TAKEN_H_M_TOWER      = 668,
-    LANG_BG_EY_HAS_TAKEN_A_D_RUINS      = 669,
-    LANG_BG_EY_HAS_TAKEN_H_D_RUINS      = 670,
-    LANG_BG_EY_HAS_TAKEN_A_B_TOWER      = 671,
-    LANG_BG_EY_HAS_TAKEN_H_B_TOWER      = 672,
-    LANG_BG_EY_HAS_TAKEN_A_F_RUINS      = 673,
-    LANG_BG_EY_HAS_TAKEN_H_F_RUINS      = 674,
-    LANG_BG_EY_HAS_LOST_A_M_TOWER       = 675,
-    LANG_BG_EY_HAS_LOST_H_M_TOWER       = 676,
-    LANG_BG_EY_HAS_LOST_A_D_RUINS       = 677,
-    LANG_BG_EY_HAS_LOST_H_D_RUINS       = 678,
-    LANG_BG_EY_HAS_LOST_A_B_TOWER       = 679,
-    LANG_BG_EY_HAS_LOST_H_B_TOWER       = 680,
-    LANG_BG_EY_HAS_LOST_A_F_RUINS       = 681,
-    LANG_BG_EY_HAS_LOST_H_F_RUINS       = 682,
-    LANG_BG_EY_HAS_TAKEN_FLAG           = 683,
-    LANG_BG_EY_CAPTURED_FLAG_A          = 684,
-    LANG_BG_EY_CAPTURED_FLAG_H          = 685,
-    LANG_BG_EY_DROPPED_FLAG             = 686,
-    LANG_BG_EY_RESETED_FLAG             = 687,
+    //LANG_BG_EY_HAS_TAKEN_A_M_TOWER    = 667,
+    //LANG_BG_EY_HAS_TAKEN_H_M_TOWER    = 668,
+    //LANG_BG_EY_HAS_TAKEN_A_D_RUINS    = 669,
+    //LANG_BG_EY_HAS_TAKEN_H_D_RUINS    = 670,
+    //LANG_BG_EY_HAS_TAKEN_A_B_TOWER    = 671,
+    //LANG_BG_EY_HAS_TAKEN_H_B_TOWER    = 672,
+    //LANG_BG_EY_HAS_TAKEN_A_F_RUINS    = 673,
+    //LANG_BG_EY_HAS_TAKEN_H_F_RUINS    = 674,
+    //LANG_BG_EY_HAS_LOST_A_M_TOWER     = 675,
+    //LANG_BG_EY_HAS_LOST_H_M_TOWER     = 676,
+    //LANG_BG_EY_HAS_LOST_A_D_RUINS     = 677,
+    //LANG_BG_EY_HAS_LOST_H_D_RUINS     = 678,
+    //LANG_BG_EY_HAS_LOST_A_B_TOWER     = 679,
+    //LANG_BG_EY_HAS_LOST_H_B_TOWER     = 680,
+    //LANG_BG_EY_HAS_LOST_A_F_RUINS     = 681,
+    //LANG_BG_EY_HAS_LOST_H_F_RUINS     = 682,
+    //LANG_BG_EY_HAS_TAKEN_FLAG         = 683,
+    //LANG_BG_EY_CAPTURED_FLAG_A        = 684,
+    //LANG_BG_EY_CAPTURED_FLAG_H        = 685,
+    //LANG_BG_EY_DROPPED_FLAG           = 686,
+    //LANG_BG_EY_RESETED_FLAG           = 687,
 
-    //LANG_ARENA_ONE_TOOLOW               = 700,
-    //LANG_ARENA_ONE_MINUTE               = 701,
-    //LANG_ARENA_THIRTY_SECONDS           = 702,
-    //LANG_ARENA_FIFTEEN_SECONDS          = 703,
-    //LANG_ARENA_BEGUN                    = 704,
+    //LANG_ARENA_ONE_TOOLOW             = 700,
+    //LANG_ARENA_ONE_MINUTE             = 701,
+    //LANG_ARENA_THIRTY_SECONDS         = 702,
+    //LANG_ARENA_FIFTEEN_SECONDS        = 703,
+    //LANG_ARENA_BEGUN                  = 704,
 
     LANG_WAIT_BEFORE_SPEAKING           = 705,
     LANG_NOT_EQUIPPED_ITEM              = 706,
@@ -678,10 +681,10 @@ enum MangosStrings
 
     LANG_BG_QUEUE_ANNOUNCE_SELF         = 711,
     LANG_BG_QUEUE_ANNOUNCE_WORLD        = 712,
-    //LANG_YOUR_ARENA_LEVEL_REQ_ERROR     = 713,
-//                                      = 714, not used
+    //LANG_YOUR_ARENA_LEVEL_REQ_ERROR   = 713,
+    //                                  = 714, not used
     LANG_YOUR_BG_LEVEL_REQ_ERROR        = 715,
-//                                      = 716, not used
+    //                                  = 716, not used
     LANG_BG_STARTED_ANNOUNCE_WORLD      = 717,
     //LANG_ARENA_QUEUE_ANNOUNCE_WORLD_JOIN= 718,
     //LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT= 719,
@@ -704,8 +707,8 @@ enum MangosStrings
     LANG_CANNOT_SUMMON_TO_BG            = 734,              // "You cannot summon players to a battleground or arena map."
     LANG_CANNOT_GO_TO_BG_GM             = 735,              // "You must be in GM mode to teleport to a player in a battleground."
     LANG_CANNOT_GO_TO_BG_FROM_BG        = 736,              // "You cannot teleport to a battleground from another battleground. Please leave the current battleground first."
-    //LANG_DEBUG_ARENA_ON                 = 737,
-    //LANG_DEBUG_ARENA_OFF                = 738,
+    //LANG_DEBUG_ARENA_ON               = 737,
+    //LANG_DEBUG_ARENA_OFF              = 738,
     LANG_DEBUG_BG_ON                    = 739,
     LANG_DEBUG_BG_OFF                   = 740,
     //LANG_DIST_ARENA_POINTS_START        = 741,
@@ -721,6 +724,8 @@ enum MangosStrings
     LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING_SECS = 751,  // "Not enough players. This game will close in %u seconds."
     LANG_BATTLEGROUND_ONLY_ALLIANCE_USE = 752,              // "Only The Alliance can use that portal"
     LANG_BATTLEGROUND_ONLY_HORDE_USE    = 753,              // "Only The Horde can use that portal"
+    LANG_BG_AB_START_TWO_MINUTES        = 754,
+    //LANG_BG_EY_START_TWO_MINUTES      = 755,
 
     LANG_BG_AV_ALLY                     = 757,
     LANG_BG_AV_HORDE                    = 758,
@@ -758,7 +763,7 @@ enum MangosStrings
     LANG_BG_AV_H_NEAR_LOSE              = 788,
     LANG_BG_AV_H_GENERAL_DEAD           = 789,
     LANG_BG_AV_A_GENERAL_DEAD           = 790,
-    // Room for batleground/arena strings 790-799 not used
+    // Room for battleground/arena strings 791-799 not used
 
     // in game strings
     //                                  = 800, not used

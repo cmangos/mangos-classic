@@ -518,12 +518,12 @@ void ObjectMgr::LoadCreatureTemplates()
                 sLog.outErrorDb("Creature (Entry: %u) has non-existing PetSpellDataId (%u)", cInfo->Entry, cInfo->PetSpellDataId);
         }
 
-        for(int i = 0; i < CREATURE_MAX_SPELLS; ++i)
+        for(int j = 0; j < CREATURE_MAX_SPELLS; ++j)
         {
-            if(cInfo->spells[i] && !sSpellStore.LookupEntry(cInfo->spells[i]))
+            if(cInfo->spells[j] && !sSpellStore.LookupEntry(cInfo->spells[j]))
             {
-                sLog.outErrorDb("Creature (Entry: %u) has non-existing Spell%d (%u), set to 0", cInfo->Entry, i+1,cInfo->spells[i]);
-                const_cast<CreatureInfo*>(cInfo)->spells[i] = 0;
+                sLog.outErrorDb("Creature (Entry: %u) has non-existing Spell%d (%u), set to 0", cInfo->Entry, j+1,cInfo->spells[j]);
+                const_cast<CreatureInfo*>(cInfo)->spells[j] = 0;
             }
         }
 

@@ -56,12 +56,6 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     std::string membername;
     recv_data >> membername;
 
-    if(_player->InBattleGround())
-    {
-        SendPartyResult(PARTY_OP_INVITE, membername, ERR_INVITE_RESTRICTED);
-        return;
-    }
-
     // attempt add selected player
 
     // cheating
@@ -98,14 +92,19 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         return;
     }
 
+    Group *group = GetPlayer()->GetGroup();
+    if( group && group->isBGGroup() )
+        group = GetPlayer()->GetOriginalGroup();
+
+    Group *group2 = player->GetGroup();
+    if( group2 && group2->isBGGroup() )
+        group2 = player->GetOriginalGroup();
     // player already in another group or invited
-    if(player->GetGroup() || player->GetGroupInvite() )
+    if( group2 || player->GetGroupInvite() )
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_ALREADY_IN_GROUP_S);
         return;
     }
-
-    Group *group = GetPlayer()->GetGroup();
 
     if(group)
     {
@@ -115,7 +114,6 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
             SendPartyResult(PARTY_OP_INVITE, "", ERR_NOT_LEADER);
             return;
         }
-
         // not have place
         if(group->IsFull())
         {
@@ -186,12 +184,6 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
     }
 
     Player* leader = sObjectMgr.GetPlayer(group->GetLeaderGuid());
-
-    if(leader && leader->InBattleGround())
-    {
-        SendPartyResult(PARTY_OP_INVITE, "", ERR_INVITE_RESTRICTED);
-        return;
-    }
 
     // forming a new group, create it
     if (!group->IsCreated())
@@ -410,7 +402,7 @@ void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
     /** error handling **/
     /********************/
 
-    // everything's fine, do it
+    // everything is fine, do it
     WorldPacket data(MSG_MINIMAP_PING, (8+4+4));
     data << GetPlayer()->GetObjectGuid();
     data << float(x);
@@ -500,6 +492,9 @@ void WorldSession::HandleGroupChangeSubGroupOpcode( WorldPacket & recv_data )
     recv_data >> name;
 
     recv_data >> groupNr;
+
+    if (groupNr >= MAX_RAID_SUBGROUPS)
+        return;
 
     // we will get correct pointer for group here, so we don't have to check if group is BG raid
     Group *group = GetPlayer()->GetGroup();

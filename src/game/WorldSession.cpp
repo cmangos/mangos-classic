@@ -346,6 +346,9 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->BuildPlayerRepop();
             _player->RepopAtGraveyard();
         }
+        //drop a flag if player is carrying it
+        if(BattleGround *bg = _player->GetBattleGround())
+            bg->EventPlayerLoggedOut(_player);
 
         ///- Teleport to home if the player is in an invalid instance
         if(!_player->m_InstanceValid && !_player->isGameMaster())

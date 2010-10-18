@@ -91,8 +91,8 @@ enum BG_WS_Events
 };
 
 // Honor granted depending on player's level
-const uint32 BG_WSG_FlagCapturedHonor[6] = {48, 82, 136, 226, 378, 396};
-const uint32 BG_WSG_WinMatchHonor[6] = {24, 41, 68, 113, 189, 198};
+const uint32 BG_WSG_FlagCapturedHonor[MAX_BATTLEGROUND_BRACKETS] = {48, 82, 136, 226, 378, 396};
+const uint32 BG_WSG_WinMatchHonor[MAX_BATTLEGROUND_BRACKETS] = {24, 41, 68, 113, 189, 198};
 
 class BattleGroundWS : public BattleGround
 {
@@ -106,6 +106,8 @@ class BattleGroundWS : public BattleGround
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player *plr);
+        virtual void StartingEventCloseDoors();
+        virtual void StartingEventOpenDoors();
 
         /* BG Flags */
         uint64 GetAllianceFlagPickerGUID() const    { return m_FlagKeepers[BG_TEAM_ALLIANCE]; }

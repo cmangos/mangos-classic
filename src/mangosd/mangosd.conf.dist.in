@@ -1250,17 +1250,29 @@ Death.Bones.Battleground = 1
 #        Default: 0 (disable)
 #                 1 (enable)
 #
+#    Battleground.InvitationType
+#        Set Battleground invitation type
+#        Default: 0 (normal - invite as much players to bg as possible, don't bother with ballance)
+#                 1 (Experimental - don't allow to invite much more players of one faction)
+#
 #    Battleground.PrematureFinishTimer
 #        The time to end the bg if there are less than MinPlayersPerTeam on one side in milliseconds
 #        Default: 300000 (5 minutes)
 #                 0 - disable (not recommended)
+#
+#    BattleGround.PremadeGroupWaitForMatch
+#        The time in which premade group of 1 faction waits in BG Queue for premade group of other faction
+#                 1800000 (30 minutes)
+#        Default: 0 - disable premade group matches (group always added to bg team in normal way)
 #
 ###################################################################################################################
 
 Battleground.CastDeserter = 1
 Battleground.QueueAnnouncer.Join = 0
 Battleground.QueueAnnouncer.Start = 0
+Battleground.InvitationType = 0
 BattleGround.PrematureFinishTimer = 300000
+BattleGround.PremadeGroupWaitForMatch = 0
 
 ###################################################################################################################
 #

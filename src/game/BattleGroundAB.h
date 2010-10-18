@@ -146,8 +146,8 @@ const uint32 BG_AB_TickIntervals[6] = {0, 12000, 9000, 6000, 3000, 1000};
 const uint32 BG_AB_TickPoints[6] = {0, 10, 10, 10, 10, 30};
 
 // Honor granted depending on player's level
-const uint32 BG_AB_PerTickHonor[6] = {24, 41, 68, 113, 189, 198};
-const uint32 BG_AB_WinMatchHonor[6] = {24, 41, 68, 113, 189, 198};
+const uint32 BG_AB_PerTickHonor[MAX_BATTLEGROUND_BRACKETS] = {24, 41, 68, 113, 189, 198};
+const uint32 BG_AB_WinMatchHonor[MAX_BATTLEGROUND_BRACKETS] = {24, 41, 68, 113, 189, 198};
 
 // WorldSafeLocs ids for 5 nodes, and for ally, and horde starting location
 const uint32 BG_AB_GraveyardIds[7] = {895, 894, 893, 897, 896, 898, 899};
@@ -187,6 +187,8 @@ class BattleGroundAB : public BattleGround
 
         void Update(uint32 diff);
         void AddPlayer(Player *plr);
+        virtual void StartingEventCloseDoors();
+        virtual void StartingEventOpenDoors();
         void RemovePlayer(Player *plr,uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         virtual bool SetupBattleGround();
@@ -212,7 +214,7 @@ class BattleGroundAB : public BattleGround
         // TODO: working, scripted peons spawning
         void _NodeOccupied(uint8 node,Team team);
 
-        const char* _GetNodeName(uint8 node);
+        int32 _GetNodeNameId(uint8 node);
 
         /* Nodes info:
             0: neutral
