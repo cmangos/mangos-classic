@@ -687,12 +687,12 @@ enum MangosStrings
     //LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT= 719,
 
     LANG_BG_GROUP_TOO_LARGE             = 720,              // "Your group is too large for this battleground. Please regroup to join."
-    //LANG_ARENA_GROUP_TOO_LARGE          = 721,              // "Your group is too large for this arena. Please regroup to join."
-    //LANG_ARENA_YOUR_TEAM_ONLY           = 722,              // "Your group has members not in your arena team. Please regroup to join."
-    //LANG_ARENA_NOT_ENOUGH_PLAYERS       = 723,              // "Your group does not have enough players to join this match."
-    //LANG_ARENA_GOLD_WINS                = 724,              // "The Gold Team wins!"
-    //LANG_ARENA_GREEN_WINS               = 725,              // "The Green Team wins!"
-    LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING = 726,       // The battleground will end soon, because there aren't enough players. Get more ppl or win already!
+    //LANG_ARENA_GROUP_TOO_LARGE        = 721,              // "Your group is too large for this arena. Please regroup to join."
+    //LANG_ARENA_YOUR_TEAM_ONLY         = 722,              // "Your group has members not in your arena team. Please regroup to join."
+    //LANG_ARENA_NOT_ENOUGH_PLAYERS     = 723,              // "Your group does not have enough players to join this match."
+    //LANG_ARENA_GOLD_WINS              = 724,              // "The Gold Team wins!"
+    //LANG_ARENA_GREEN_WINS             = 725,              // "The Green Team wins!"
+    //                                  = 726, not used
     LANG_BG_GROUP_OFFLINE_MEMBER        = 727,              // "Your group has an offline member. Please remove him before joining."
     LANG_BG_GROUP_MIXED_FACTION         = 728,              // "Your group has players from the opposing faction. You can't join the battleground as a group."
     LANG_BG_GROUP_MIXED_LEVELS          = 729,              // "Your group has players from different battleground brakets. You can't join as group."
@@ -714,9 +714,13 @@ enum MangosStrings
     //LANG_DIST_ARENA_POINTS_TEAM_START   = 744,
     //LANG_DIST_ARENA_POINTS_TEAM_END     = 745,
     //LANG_DIST_ARENA_POINTS_END          = 746,
-
-    LANG_BATTLEGROUND_ONLY_ALLIANCE_USE = 752, // "Only The Alliance can use that portal"
-    LANG_BATTLEGROUND_ONLY_HORDE_USE    = 753, // "Only The Horde can use that portal"
+    //                                  = 747, not used
+    //                                  = 748, not used
+    //                                  = 749, not used
+    LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING = 750,       // "Not enough players. This game will close in %u mins."
+    LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING_SECS = 751,  // "Not enough players. This game will close in %u seconds."
+    LANG_BATTLEGROUND_ONLY_ALLIANCE_USE = 752,              // "Only The Alliance can use that portal"
+    LANG_BATTLEGROUND_ONLY_HORDE_USE    = 753,              // "Only The Horde can use that portal"
 
     LANG_BG_AV_ALLY                     = 757,
     LANG_BG_AV_HORDE                    = 758,
@@ -754,8 +758,6 @@ enum MangosStrings
     LANG_BG_AV_H_NEAR_LOSE              = 788,
     LANG_BG_AV_H_GENERAL_DEAD           = 789,
     LANG_BG_AV_A_GENERAL_DEAD           = 790,
-
-
     // Room for batleground/arena strings 790-799 not used
 
     // in game strings

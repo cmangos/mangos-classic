@@ -183,7 +183,6 @@ void BattleGround::Update(uint32 diff)
         {
             m_PrematureCountDown = true;
             m_PrematureCountDownTimer = sBattleGroundMgr.GetPrematureFinishTime();
-            SendMessageToAll(LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING);
         }
         else if(m_PrematureCountDownTimer < diff)
         {
@@ -195,9 +194,17 @@ void BattleGround::Update(uint32 diff)
         {
             uint32 newtime = m_PrematureCountDownTimer - diff;
             // announce every minute
-            if (m_PrematureCountDownTimer != sBattleGroundMgr.GetPrematureFinishTime() &&
-                newtime / (MINUTE * IN_MILLISECONDS) != m_PrematureCountDownTimer / (MINUTE * IN_MILLISECONDS))
-                SendMessageToAll(LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING);
+            if( newtime > (MINUTE * IN_MILLISECONDS) )
+            {
+                if( newtime / (MINUTE * IN_MILLISECONDS) != m_PrematureCountDownTimer / (MINUTE * IN_MILLISECONDS) )
+                    PSendMessageToAll(LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING, (uint32)(m_PrematureCountDownTimer / (MINUTE * IN_MILLISECONDS)));
+            }
+            else
+            {
+                //announce every 15 seconds
+                if( newtime / (15 * IN_MILLISECONDS) != m_PrematureCountDownTimer / (15 * IN_MILLISECONDS) )
+                    PSendMessageToAll(LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING_SECS, (uint32)(m_PrematureCountDownTimer / IN_MILLISECONDS));
+            }
             m_PrematureCountDownTimer = newtime;
         }
 
@@ -1239,6 +1246,17 @@ void BattleGround::SendYellToAll(int32 entry, uint32 language, uint64 const& gui
         source->BuildMonsterChat(&data, CHAT_MSG_MONSTER_YELL, buf, language, source->GetName(), itr->first);
         plr->GetSession()->SendPacket(&data);
     }
+}
+
+void BattleGround::PSendMessageToAll(int32 entry, ...)
+{
+    const char *format = GetMangosString(entry);
+    va_list ap;
+    char str [2048];
+    va_start(ap, entry);
+    vsnprintf(str,2048,format, ap );
+    va_end(ap);
+    SendMessageToAll(str);
 }
 
 void BattleGround::SendYell2ToAll(int32 entry, uint32 language, uint64 const& guid, int32 arg1, int32 arg2)

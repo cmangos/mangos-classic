@@ -346,11 +346,15 @@ class BattleGround
         void EndBattleGround(uint32 winner);
         void BlockMovement(Player *plr);
 
+        // must be remopved at full backport
         void SendMessageToAll(char const* text);
         void SendMessageToAll(int32 entry);
-        // partially backported functions from master:
+
         void SendMessageToAll(int32 entry, ChatMsg type, Player const* source = NULL);
         void SendYellToAll(int32 entry, uint32 language, uint64 const& guid);
+        void PSendMessageToAll(int32 entry, ...  );         // partly backported API
+
+        // specialized version with 2 string id args
         void SendYell2ToAll(int32 entry, uint32 language, uint64 const& guid, int32 arg1, int32 arg2);
 
         /* Raid Group */
