@@ -2183,6 +2183,7 @@ void Player::SetGameMaster(bool on)
     UpdateForQuestsGO();
     m_camera.UpdateVisibilityForOwner();
     UpdateObjectVisibility();
+    UpdateForQuestsGO();
 }
 
 void Player::SetGMVisible(bool on)
