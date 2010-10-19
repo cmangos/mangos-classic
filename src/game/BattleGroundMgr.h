@@ -157,6 +157,7 @@ class BGQueueRemoveEvent : public BasicEvent
         BGQueueRemoveEvent(const uint64& pl_guid, uint32 bgInstanceGUID, BattleGroundTypeId BgTypeId, BattleGroundQueueTypeId bgQueueTypeId, uint32 removeTime)
             : m_PlayerGuid(pl_guid), m_BgInstanceGUID(bgInstanceGUID), m_RemoveTime(removeTime), m_BgTypeId(BgTypeId), m_BgQueueTypeId(bgQueueTypeId)
         {}
+
         virtual ~BGQueueRemoveEvent() {}
 
         virtual bool Execute(uint64 e_time, uint32 p_time);

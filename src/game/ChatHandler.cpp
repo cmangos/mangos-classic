@@ -317,7 +317,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             // if player is in battleground, he cannot say to battleground members by /ra
             Group *group = GetPlayer()->GetOriginalGroup();
             // so if player hasn't OriginalGroup and his player->GetGroup() is BG raid or his group isn't raid, then return
-            if( !group && !(group = GetPlayer()->GetGroup()) || group->isBGGroup() || !group->isRaidGroup() )
+            if ((!group && !(group = GetPlayer()->GetGroup())) || group->isBGGroup() || !group->isRaidGroup())
                 return;
 
             WorldPacket data;
@@ -343,7 +343,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             // if player is in battleground, he cannot say to battleground members by /ra
             Group *group = GetPlayer()->GetOriginalGroup();
-            if( !group && !(group = GetPlayer()->GetGroup()) || group->isBGGroup() || !group->isRaidGroup() )
+            if ((!group && !(group = GetPlayer()->GetGroup())) || group->isBGGroup() || !group->isRaidGroup())
                 return;
 
             WorldPacket data;
