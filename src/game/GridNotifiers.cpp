@@ -202,7 +202,7 @@ void MaNGOS::RespawnDo::operator()( Creature* u ) const
 {
     // prevent respawn creatures for not active BG event
     Map* map = u->GetMap();
-    if (map->IsBattleGroundOrArena())
+    if (map->IsBattleGround())
     {
         BattleGroundEventIdx eventId = sBattleGroundMgr.GetCreatureEventIndex(u->GetDBTableGUIDLow());
         if (!((BattleGroundMap*)map)->GetBG()->IsActiveEvent(eventId.event1, eventId.event2))
@@ -216,7 +216,7 @@ void MaNGOS::RespawnDo::operator()( GameObject* u ) const
 {
     // prevent respawn gameobject for not active BG event
     Map* map = u->GetMap();
-    if (map->IsBattleGroundOrArena())
+    if (map->IsBattleGround())
     {
         BattleGroundEventIdx eventId = sBattleGroundMgr.GetGameObjectEventIndex(u->GetDBTableGUIDLow());
         if (!((BattleGroundMap*)map)->GetBG()->IsActiveEvent(eventId.event1, eventId.event2))
