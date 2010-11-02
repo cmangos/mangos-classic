@@ -176,6 +176,7 @@ void WorldSession::SendTrainerList( uint64 guid, const std::string& strTitle )
 
     // reputation discount
     float fDiscountMod = _player->GetReputationPriceDiscount(unit);
+    bool can_learn_primary_prof = GetPlayer()->GetFreePrimaryProfessionPoints() > 0;
 
     uint32 count = 0;
     for(TrainerSpellMap::const_iterator itr = Tspells.begin(); itr != Tspells.end(); ++itr)
@@ -187,18 +188,16 @@ void WorldSession::SendTrainerList( uint64 guid, const std::string& strTitle )
         if(!_player->IsSpellFitByClassAndRace(triggerSpell))
             continue;
 
-        ++count;
-
         bool primary_prof_first_rank = sSpellMgr.IsPrimaryProfessionFirstRankSpell(triggerSpell);
-
         SpellChainNode const* chain_node = sSpellMgr.GetSpellChainNode(triggerSpell);
-        //uint32 req_spell = spellmgr.GetSpellChainNode(tSpell->spell)->req;
+        TrainerSpellState state = _player->GetTrainerSpellState(tSpell);
 
         data << uint32(tSpell->spell);
-        data << uint8(_player->GetTrainerSpellState(tSpell));
+        data << uint8(state==TRAINER_SPELL_GREEN_DISABLED ? TRAINER_SPELL_GREEN : state);
         data << uint32(floor(tSpell->spellCost * fDiscountMod));
 
-        data << uint32(primary_prof_first_rank ? 1 : 0);    // primary prof. learn confirmation dialog [-ZERO] seems it not works in 1.12
+        data << uint32(primary_prof_first_rank && can_learn_primary_prof ? 1 : 0);
+                                                            // primary prof. learn confirmation dialog
         data << uint32(primary_prof_first_rank ? 1 : 0);    // must be equal prev. field to have learn button in enabled state
         data << uint8(tSpell->reqLevel);
         data << uint32(tSpell->reqSkill);
@@ -206,6 +205,8 @@ void WorldSession::SendTrainerList( uint64 guid, const std::string& strTitle )
         data << uint32(chain_node ? (chain_node->prev ? chain_node->prev : chain_node->req) : 0);
         data << uint32(chain_node && chain_node->prev ? chain_node->req : 0);
         data << uint32(0);
+
+        ++count;
     }
 
     data << strTitle;
