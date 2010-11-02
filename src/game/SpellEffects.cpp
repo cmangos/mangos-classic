@@ -4652,20 +4652,9 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
 
 void Spell::EffectDestroyAllTotems(SpellEffectIndex /*eff_idx*/)
 {
-    int32 mana = 0;
     for(int slot = 0;  slot < MAX_TOTEM_SLOT; ++slot)
-    {
         if (Totem* totem = m_caster->GetTotem(TotemSlot(slot)))
-        {
-            uint32 spell_id = totem->GetUInt32Value(UNIT_CREATED_BY_SPELL);
-            if(SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id))
-                mana += spellInfo->manaCost * damage / 100;
             totem->UnSummon();
-        }
-    }
-
-    int32 gain = m_caster->ModifyPower(POWER_MANA,mana);
-    m_caster->SendEnergizeSpellLog(m_caster, m_spellInfo->Id, gain, POWER_MANA);
 }
 
 void Spell::EffectDurabilityDamage(SpellEffectIndex eff_idx)
