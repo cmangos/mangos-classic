@@ -389,9 +389,6 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this), m_mover(t
     if(GetSession()->GetSecurity() == SEC_PLAYER)
         SetAcceptWhispers(true);
 
-    m_curSelection = 0;
-    m_lootGuid = 0;
-
     m_comboTarget = 0;
     m_comboPoints = 0;
 
@@ -1679,7 +1676,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 return true;
             }
 
-            SetSelection(0);
+            SetSelectionGuid(ObjectGuid());
 
             CombatStop();
 
@@ -13668,6 +13665,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     // clear charm/summon related fields
     SetCharm(NULL);
     SetPet(NULL);
+    SetTargetGuid(ObjectGuid());
     SetCharmerGUID(0);
     SetOwnerGUID(0);
     SetCreatorGUID(0);
