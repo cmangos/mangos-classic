@@ -1807,7 +1807,7 @@ void Spell::EffectHealthLeech(SpellEffectIndex eff_idx)
 
     int32 new_damage = int32(damage*multiplier);
     uint32 curHealth = unitTarget->GetHealth();
-    new_damage = m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, m_IsTriggeredSpell, true);
+    new_damage = m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage);
     if ((int32)curHealth < new_damage)
         new_damage = curHealth;
 

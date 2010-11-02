@@ -249,7 +249,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_STUN, SPELL_AURA_NONE };
 
 Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem) :
-m_spellmod(NULL), m_caster_guid(0), m_castItemGuid(castItem?castItem->GetGUID():0), m_target(target),
+m_spellmod(NULL), m_target(target), m_caster_guid(0), m_castItemGuid(castItem?castItem->GetGUID():0),
 m_timeCla(1000), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_AuraDRGroup(DIMINISHING_NONE),
 m_effIndex(eff), m_auraSlot(MAX_AURAS), m_procCharges(0), m_stackAmount(1),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isAreaAura(false), m_isPersistent(false), 
@@ -3574,7 +3574,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
     }
 }
 
-void Aura::HandlePeriodicTriggerSpellWithValue(bool apply, bool Real)
+void Aura::HandlePeriodicTriggerSpellWithValue(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
 }
@@ -3584,12 +3584,12 @@ void Aura::HandlePeriodicEnergize(bool apply, bool /*Real*/)
     m_isPeriodic = apply;
 }
 
-void Aura::HandleAuraPowerBurn(bool apply, bool Real)
+void Aura::HandleAuraPowerBurn(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
 }
 
-void Aura::HandlePeriodicHeal(bool apply, bool Real)
+void Aura::HandlePeriodicHeal(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
 }
@@ -3755,7 +3755,7 @@ void Aura::HandlePeriodicManaLeech(bool apply, bool /*Real*/)
     m_isPeriodic = apply;
 }
 
-void Aura::HandlePeriodicHealthFunnel(bool apply, bool Real)
+void Aura::HandlePeriodicHealthFunnel(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
 }
@@ -5107,9 +5107,7 @@ void Aura::PeriodicTick()
 
             m_target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f, GetSpellProto());
 
-            Unit* target = m_target;                        // aura can be deleted in DealDamage
             SpellEntry const* spellProto = GetSpellProto();
-            bool haveCastItem = GetCastItemGUID()!=0;
 
             // heal for caster damage
             if(m_target != pCaster && spellProto->SpellVisual==163)
