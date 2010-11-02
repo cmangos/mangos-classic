@@ -4095,13 +4095,13 @@ bool ChatHandler::HandleListAurasCommand (char* /*args*/)
 
                 PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(),
                     ss_name.str().c_str(),((*itr)->IsPassive() ? passiveStr : ""),(talent ? talentStr : ""),
-                    IS_PLAYER_GUID((*itr)->GetCasterGUID()) ? "player" : "creature",GUID_LOPART((*itr)->GetCasterGUID()));
+                    (*itr)->GetCasterGuid().GetString().c_str());
             }
             else
             {
                 PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(),
                     name,((*itr)->IsPassive() ? passiveStr : ""),(talent ? talentStr : ""),
-                    IS_PLAYER_GUID((*itr)->GetCasterGUID()) ? "player" : "creature",GUID_LOPART((*itr)->GetCasterGUID()));
+                    (*itr)->GetCasterGuid().GetString().c_str());
             }
         }
     }

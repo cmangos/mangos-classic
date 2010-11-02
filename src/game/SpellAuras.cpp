@@ -455,7 +455,7 @@ void Aura::Update(uint32 diff)
         }
 
         // need check distance for channeled target only
-        if (caster->GetChannelObjectGUID() == m_target->GetGUID())
+        if (caster->GetChannelObjectGuid() == m_target->GetObjectGuid())
         {
             // Get spell range
             float max_range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellProto->rangeIndex));
@@ -487,7 +487,7 @@ void Aura::Update(uint32 diff)
 void AreaAura::Update(uint32 diff)
 {
     // update for the caster of the aura
-    if(m_caster_guid == m_target->GetGUID())
+    if(GetCasterGuid() == GetTarget()->GetObjectGuid())
     {
         Unit* caster = m_target;
 
@@ -1174,10 +1174,10 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
 void Aura::TriggerSpell()
 {
-    const uint64& casterGUID = GetCasterGUID();
+    ObjectGuid casterGUID = GetCasterGuid();
     Unit* triggerTarget = GetTriggerTarget();
 
-    if(!casterGUID || !triggerTarget)
+    if (casterGUID.IsEmpty() || !triggerTarget)
         return;
 
     // generic casting code with custom spells and target/caster customs
@@ -1528,7 +1528,7 @@ void Aura::TriggerSpell()
                 // 2) maybe aura must be replace by new with accumulative stat mods instead stacking
 
                 // prevent cast by triggered auras
-                if(casterGUID == triggerTarget->GetGUID())
+                if (casterGUID == triggerTarget->GetObjectGuid())
                     return;
 
                 // stop triggering after each affected stats lost > 90
@@ -4973,8 +4973,8 @@ void Aura::PeriodicTick()
 
             pCaster->CalcAbsorbResist(m_target, GetSpellSchoolMask(GetSpellProto()), DOT, pdamage, &absorb, &resist, !(GetSpellProto()->AttributesEx2 & SPELL_ATTR_EX2_CANT_REFLECTED));
 
-            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
-                GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), m_target->GetGUIDLow(), m_target->GetTypeId(), pdamage, GetId(),absorb);
+            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u",
+                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
 
             pdamage = (pdamage <= absorb + resist) ? 0 : (pdamage - absorb - resist);
 
@@ -5035,8 +5035,8 @@ void Aura::PeriodicTick()
             if(m_target->GetHealth() < pdamage)
                 pdamage = uint32(m_target->GetHealth());
 
-            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %u (TypeId: %u) health leech of %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
-                GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), m_target->GetGUIDLow(), m_target->GetTypeId(), pdamage, GetId(),absorb);
+            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s health leech of %s for %u dmg inflicted by %u abs is %u",
+                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId(),absorb);
 
             pCaster->SendSpellNonMeleeDamageLog(m_target, GetId(), pdamage, GetSpellSchoolMask(GetSpellProto()), absorb, resist, false, 0);
 
@@ -5092,8 +5092,8 @@ void Aura::PeriodicTick()
 
             pdamage = pCaster->SpellHealingBonus(m_target, GetSpellProto(), pdamage, DOT, GetStackAmount());
 
-            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %u (TypeId: %u) heal of %u (TypeId: %u) for %u health inflicted by %u",
-                GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), m_target->GetGUIDLow(), m_target->GetTypeId(), pdamage, GetId());
+            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health inflicted by %u",
+                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
 
             SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
             m_target->SendPeriodicAuraLog(&pInfo);
@@ -5165,8 +5165,8 @@ void Aura::PeriodicTick()
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
-            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %u (TypeId: %u) power leech of %u (TypeId: %u) for %u dmg inflicted by %u",
-                GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), m_target->GetGUIDLow(), m_target->GetTypeId(), pdamage, GetId());
+            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s power leech of %s for %u dmg inflicted by %u",
+                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
 
             int32 drain_amount = m_target->GetPower(power) > pdamage ? pdamage : m_target->GetPower(power);
 
@@ -5203,8 +5203,8 @@ void Aura::PeriodicTick()
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
-            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %u (TypeId: %u) energize %u (TypeId: %u) for %u dmg inflicted by %u",
-                GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), m_target->GetGUIDLow(), m_target->GetTypeId(), pdamage, GetId());
+            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s energize %s for %u dmg inflicted by %u",
+                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
 
             if(m_modifier.m_miscvalue < 0 || m_modifier.m_miscvalue >= MAX_POWERS)
                 break;
@@ -5234,8 +5234,8 @@ void Aura::PeriodicTick()
 
             uint32 pdamage = uint32(m_target->GetMaxPower(POWER_MANA) * amount / 100);
 
-            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %u (TypeId: %u) energize %u (TypeId: %u) for %u mana inflicted by %u",
-                GUID_LOPART(GetCasterGUID()), GuidHigh2TypeId(GUID_HIPART(GetCasterGUID())), m_target->GetGUIDLow(), m_target->GetTypeId(), pdamage, GetId());
+            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s energize %s for %u mana inflicted by %u",
+                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
 
             if(m_target->GetMaxPower(POWER_MANA) == 0)
                 break;

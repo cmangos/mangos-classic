@@ -217,6 +217,7 @@ class MANGOS_DLL_SPEC Aura
         uint32 GetAuraMaxTicks() const { return m_maxduration > 0 && m_modifier.periodictime > 0 ? m_maxduration / m_modifier.periodictime : 0; }
 
         uint64 const& GetCasterGUID() const { return m_caster_guid; }
+        ObjectGuid GetCasterGuid() const { return m_caster_guid; }
         Unit* GetCaster() const;
         Unit* GetTarget() const { return m_target; }
         void SetTarget(Unit* target) { m_target = target; }

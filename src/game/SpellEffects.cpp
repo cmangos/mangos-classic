@@ -344,7 +344,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     for(Unit::AuraList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
                     {
                         if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK &&
-                            (*i)->GetCasterGUID()==m_caster->GetGUID() &&
+                            (*i)->GetCasterGuid() == m_caster->GetObjectGuid() &&
                             // Immolate
                             ((*i)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000004)))
                         {
@@ -4795,7 +4795,7 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
     {
         case GAMEOBJECT_TYPE_FISHINGNODE:
         {
-            m_caster->SetChannelObjectGUID(pGameObj->GetGUID());
+            m_caster->SetChannelObjectGuid(pGameObj->GetObjectGuid());
             m_caster->AddGameObject(pGameObj);              // will removed at spell cancel
 
             // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
