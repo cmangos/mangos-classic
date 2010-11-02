@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z0978_s0346_01_mangos_mangos_string` bit(1) default NULL
+  `required_z0986_s0356_01_mangos_quest_template` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -9469,11 +9469,12 @@ CREATE TABLE `quest_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `Method` tinyint(3) unsigned NOT NULL DEFAULT '2',
   `ZoneOrSort` smallint(6) NOT NULL DEFAULT '0',
-  `SkillOrClass` smallint(6) NOT NULL DEFAULT '0',
   `MinLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `QuestLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `Type` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `RequiredClasses` smallint(5) unsigned NOT NULL default '0',
   `RequiredRaces` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `RequiredSkill` smallint(5) unsigned NOT NULL default '0',
   `RequiredSkillValue` smallint(5) unsigned NOT NULL DEFAULT '0',
   `RepObjectiveFaction` smallint(5) unsigned NOT NULL DEFAULT '0',
   `RepObjectiveValue` mediumint(9) NOT NULL DEFAULT '0',
@@ -9485,7 +9486,6 @@ CREATE TABLE `quest_template` (
   `LimitTime` int(10) unsigned NOT NULL DEFAULT '0',
   `QuestFlags` smallint(5) unsigned NOT NULL DEFAULT '0',
   `SpecialFlags` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `CharTitleId` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `PrevQuestId` mediumint(9) NOT NULL DEFAULT '0',
   `NextQuestId` mediumint(9) NOT NULL DEFAULT '0',
   `ExclusiveGroup` mediumint(9) NOT NULL DEFAULT '0',
