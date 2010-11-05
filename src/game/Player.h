@@ -452,9 +452,9 @@ typedef std::map<uint32, QuestStatusData> QuestStatusMap;
 
 enum QuestSlotOffsets
 {
-    QUEST_ID_OFFSET     = 0,
-    QUEST_STATE_OFFSET  = 1,
-    QUEST_TIME_OFFSET   = 2
+    QUEST_ID_OFFSET           = 0,
+    QUEST_COUNT_STATE_OFFSET  = 1,                          // including counters 6bits+6bits+6bits+6bits + state 8bits
+    QUEST_TIME_OFFSET         = 2
 };
 
 #define MAX_QUEST_OFFSET 3
@@ -1133,16 +1133,18 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint16 FindQuestSlot( uint32 quest_id ) const;
         uint32 GetQuestSlotQuestId(uint16 slot) const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_ID_OFFSET); }
-        uint32 GetQuestSlotState(uint16 slot)   const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_STATE_OFFSET); }
+        uint8 GetQuestSlotState(uint16 slot)   const { return GetByteValue(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_COUNT_STATE_OFFSET, 3); }
+        uint8 GetQuestSlotCounter(uint16 slot, uint8 counter) const { return (GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_COUNT_STATE_OFFSET) >> (counter*6)) & 0x3F; }
         uint32 GetQuestSlotTime(uint16 slot)    const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_TIME_OFFSET); }
         void SetQuestSlot(uint16 slot,uint32 quest_id, uint32 timer = 0)
         {
             SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_ID_OFFSET,quest_id);
-            SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_STATE_OFFSET,0);
+            SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_COUNT_STATE_OFFSET,0);
             SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_TIME_OFFSET,timer);
         }
-        void SetQuestSlotState(uint16 slot,uint32 state) { SetFlag(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_STATE_OFFSET,state); }
-        void RemoveQuestSlotState(uint16 slot,uint32 state) { RemoveFlag(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_STATE_OFFSET,state); }
+        void SetQuestSlotCounter(uint16 slot,uint8 counter,uint8 count) { SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_COUNT_STATE_OFFSET, (count & 0x3F) << (counter*6)); }
+        void SetQuestSlotState(uint16 slot, uint8 state) { SetByteFlag(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_COUNT_STATE_OFFSET, 3, state); }
+        void RemoveQuestSlotState(uint16 slot,uint8 state) { RemoveByteFlag(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_COUNT_STATE_OFFSET, 3, state); }
         void SetQuestSlotTimer(uint16 slot,uint32 timer) { SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_TIME_OFFSET,timer); }
         void SwapQuestSlot(uint16 slot1,uint16 slot2)
         {
@@ -1171,7 +1173,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateForQuestWorldObjects();
         bool CanShareQuest(uint32 quest_id) const;
 
-        void SendQuestComplete( uint32 quest_id );
+        void SendQuestCompleteEvent(uint32 quest_id);
         void SendQuestReward( Quest const *pQuest, uint32 XP, Object* questGiver );
         void SendQuestFailed( uint32 quest_id );
         void SendQuestTimerFailed( uint32 quest_id );

@@ -12059,18 +12059,12 @@ void Player::CompleteQuest(uint32 quest_id)
 
         uint16 log_slot = FindQuestSlot(quest_id);
         if (log_slot < MAX_QUEST_LOG_SIZE)
-        {
-            uint32 state = GetQuestSlotState(log_slot);
-            state |= 1 << 24;
-            SetQuestSlotState(log_slot,state);
-        }
+            SetQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
 
         if (Quest const* qInfo = sObjectMgr.GetQuestTemplate(quest_id))
         {
             if (qInfo->HasFlag(QUEST_FLAGS_AUTO_REWARDED))
                 RewardQuest(qInfo, 0, this, false);
-            else
-                SendQuestComplete(quest_id);
         }
     }
 }
@@ -12719,7 +12713,10 @@ void Player::AreaExploredOrEventHappens( uint32 questId )
 
             if(!q_status.m_explored)
             {
+                SetQuestSlotState(log_slot, QUEST_STATE_COMPLETE);
+                SendQuestCompleteEvent(questId);
                 q_status.m_explored = true;
+
                 if (q_status.uState != QUEST_NEW)
                     q_status.uState = QUEST_CHANGED;
             }
@@ -13139,14 +13136,15 @@ bool Player::HasQuestForItem( uint32 itemid ) const
     return false;
 }
 
-void Player::SendQuestComplete( uint32 quest_id )
+// Used for quests having some event (explore, escort, "external event") as quest objective.
+void Player::SendQuestCompleteEvent(uint32 quest_id)
 {
-    if( quest_id )
+    if (quest_id)
     {
-        WorldPacket data( SMSG_QUESTUPDATE_COMPLETE, 4 );
+        WorldPacket data(SMSG_QUESTUPDATE_COMPLETE, 4);
         data << uint32(quest_id);
-        GetSession()->SendPacket( &data );
-        DEBUG_LOG( "WORLD: Sent SMSG_QUESTUPDATE_COMPLETE quest = %u", quest_id );
+        GetSession()->SendPacket(&data);
+        DEBUG_LOG("WORLD: Sent SMSG_QUESTUPDATE_COMPLETE quest = %u", quest_id);
     }
 }
 
@@ -13282,7 +13280,7 @@ void Player::SendQuestUpdateAddCreatureOrGo( Quest const* pQuest, ObjectGuid gui
 
     uint16 log_slot = FindQuestSlot( pQuest->GetQuestId() );
     if( log_slot < MAX_QUEST_LOG_SIZE)
-        SetUInt32Value(PLAYER_QUEST_LOG_1_1 + log_slot*MAX_QUEST_OFFSET + QUEST_STATE_OFFSET,GetQuestSlotState(log_slot)+(add_count << ( 6 * creatureOrGO_idx )));
+        SetQuestSlotCounter(log_slot,creatureOrGO_idx,GetQuestSlotCounter(log_slot,creatureOrGO_idx)+add_count);
 }
 
 /*********************************************************/
@@ -14391,22 +14389,19 @@ void Player::_LoadQuestStatus(QueryResult *result)
                 {
                     SetQuestSlot(slot, quest_id, uint32(quest_time));
 
-                    uint32 state = 0;
-                    if (questStatusData.m_status == QUEST_STATUS_COMPLETE)
-                    {
-                        state |= 1 << 24;
+                    if (questStatusData.m_explored)
                         SetQuestSlotState(slot, QUEST_STATE_COMPLETE);
-                    }
+
+                    if (questStatusData.m_status == QUEST_STATUS_COMPLETE)
+                        SetQuestSlotState(slot, QUEST_STATE_COMPLETE);
 
                     if (questStatusData.m_status == QUEST_STATUS_FAILED)
                         SetQuestSlotState(slot, QUEST_STATE_FAIL);
 
                     for(uint8 idx = 0; idx < QUEST_OBJECTIVES_COUNT; ++idx)
                         if(questStatusData.m_creatureOrGOcount[idx])
-                            //[-ZERO] SetQuestSlotCounter(slot, idx, questStatusData.m_creatureOrGOcount[idx]);
-                            state += (questStatusData.m_creatureOrGOcount[idx] << ( 6 * idx ));
+                            SetQuestSlotCounter(slot, idx, questStatusData.m_creatureOrGOcount[idx]);
 
-                    SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_STATE_OFFSET,state);
                     ++slot;
                 }
 
