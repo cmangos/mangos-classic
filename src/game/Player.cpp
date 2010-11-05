@@ -9525,7 +9525,7 @@ uint8 Player::CanUseItem( Item *pItem, bool not_loading ) const
             if (pItem->IsBindedNotWith(this))
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
 
-            uint8 msg = CanUseItem(pProto, not_loading);
+            uint8 msg = CanUseItem(pProto);
             if (msg != EQUIP_ERR_OK)
                 return msg;
 
@@ -9544,7 +9544,7 @@ uint8 Player::CanUseItem( Item *pItem, bool not_loading ) const
     return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
-uint8 Player::CanUseItem( ItemPrototype const *pProto, bool not_loading ) const
+uint8 Player::CanUseItem( ItemPrototype const *pProto ) const
 {
     // Used by group, function NeedBeforeGreed, to know if a prototype can be used by a player
 
@@ -9563,9 +9563,6 @@ uint8 Player::CanUseItem( ItemPrototype const *pProto, bool not_loading ) const
 
         if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
-
-        if (not_loading && GetHonorHighestRankInfo().rank < (uint8)pProto->RequiredHonorRank)
-            return EQUIP_ERR_CANT_EQUIP_RANK;
 
         if( getLevel() < pProto->RequiredLevel )
             return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
