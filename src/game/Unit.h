@@ -749,6 +749,28 @@ struct CleanDamage
     MeleeHitOutcome hitOutCome;
 };
 
+// Struct for use in Unit::CalculateMeleeDamage
+// Need create structure like in SMSG_ATTACKERSTATEUPDATE opcode
+struct CalcDamageInfo
+{
+    Unit  *attacker;             // Attacker
+    Unit  *target;               // Target for damage
+    SpellSchoolMask damageSchoolMask;
+    uint32 damage;
+    uint32 absorb;
+    uint32 resist;
+    uint32 blocked_amount;
+    uint32 HitInfo;
+    uint32 TargetState;
+    // Helper
+    WeaponAttackType attackType; //
+    uint32 procAttacker;
+    uint32 procVictim;
+    uint32 procEx;
+    uint32 cleanDamage;          // Used only fo rage calcultion
+    MeleeHitOutcome hitOutCome;  // TODO: remove this field (need use TargetState)
+};
+
 // Spell damage info structure based on structure sending in SMSG_SPELLNONMELEEDAMAGELOG opcode
 struct SpellNonMeleeDamage{
     SpellNonMeleeDamage(Unit *_attacker, Unit *_target, uint32 _SpellID, SpellSchools _school)
@@ -782,6 +804,8 @@ struct SpellPeriodicAuraLogInfo
     uint32 resist;
     float  multiplier;
 };
+
+uint32 createProcExtendMask(SpellNonMeleeDamage *damageInfo, SpellMissInfo missCondition);
 
 enum CurrentSpellTypes
 {
@@ -847,30 +871,6 @@ enum CommandStates
 #define UNIT_ACTION_BUTTON_TYPE(X)   ((uint32(X) & 0xFF000000) >> 24)
 #define MAX_UNIT_ACTION_BUTTON_ACTION_VALUE (0x00FFFFFF+1)
 #define MAKE_UNIT_ACTION_BUTTON(A,T) (uint32(A) | (uint32(T) << 24))
-
-// Struct for use in Unit::CalculateMeleeDamage
-// Need create structure like in SMSG_ATTACKERSTATEUPDATE opcode
-struct CalcDamageInfo
-{
-    Unit  *attacker;             // Attacker
-    Unit  *target;               // Target for damage
-    SpellSchoolMask damageSchoolMask;
-    uint32 damage;
-    uint32 absorb;
-    uint32 resist;
-    uint32 blocked_amount;
-    uint32 HitInfo;
-    uint32 TargetState;
-// Helper
-    WeaponAttackType attackType; //
-    uint32 procAttacker;
-    uint32 procVictim;
-    uint32 procEx;
-    uint32 cleanDamage;          // Used only fo rage calcultion
-    MeleeHitOutcome hitOutCome;  // TODO: remove this field (need use TargetState)
-};
-
-uint32 createProcExtendMask(SpellNonMeleeDamage *damageInfo, SpellMissInfo missCondition);
 
 struct UnitActionBarEntry
 {
