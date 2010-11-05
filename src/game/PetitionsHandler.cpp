@@ -619,21 +619,21 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandlePetitionShowListOpcode(WorldPacket & recv_data)
 {
-    DEBUG_LOG("Received CMSG_PETITION_SHOWLIST");       // ok
+    DEBUG_LOG("Received CMSG_PETITION_SHOWLIST");
     //recv_data.hexlike();
 
-    uint64 guid;
+    ObjectGuid guid;
     recv_data >> guid;
 
     SendPetitionShowList(guid);
 }
 
-void WorldSession::SendPetitionShowList(uint64 guid)
+void WorldSession::SendPetitionShowList(ObjectGuid guid)
 {
     Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_PETITIONER);
     if (!pCreature)
     {
-        DEBUG_LOG("WORLD: HandlePetitionShowListOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)));
+        DEBUG_LOG("WORLD: HandlePetitionShowListOpcode - %s not found or you can't interact with him.", guid.GetString().c_str());
         return;
     }
 
@@ -644,14 +644,14 @@ void WorldSession::SendPetitionShowList(uint64 guid)
     uint8 count = 1;
 
     WorldPacket data(SMSG_PETITION_SHOWLIST, 8+1+4*6);
-    data << guid;                                           // npc guid
+    data << ObjectGuid(guid);                               // npc guid
     data << count;                                          // count
-    data << uint32(1);                                  // index
-    data << uint32(GUILD_CHARTER);                      // charter entry
-    data << uint32(CHARTER_DISPLAY_ID);                 // charter display id
-    data << uint32(GUILD_CHARTER_COST);                 // charter cost
-    data << uint32(1);                                  // unknown
-    data << uint32(9);                                  // required signs?
+    data << uint32(1);                                      // index
+    data << uint32(GUILD_CHARTER);                          // charter entry
+    data << uint32(CHARTER_DISPLAY_ID);                     // charter display id
+    data << uint32(GUILD_CHARTER_COST);                     // charter cost
+    data << uint32(1);                                      // unknown
+    data << uint32(9);                                      // required signs?
     //for(uint8 i = 0; i < count; ++i)
     //{
     //    data << uint32(i);                        // index

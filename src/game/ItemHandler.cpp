@@ -26,6 +26,7 @@
 #include "Player.h"
 #include "Item.h"
 #include "UpdateData.h"
+#include "Chat.h"
 
 void WorldSession::HandleSplitItemOpcode( WorldPacket & recv_data )
 {
@@ -464,7 +465,7 @@ void WorldSession::HandlePageQuerySkippedOpcode( WorldPacket & recv_data )
 
     recv_data >> itemid >> guid;
 
-    DETAIL_LOG( "Packet Info: itemid: %u guid: %s", itemid, guid.GetString().c_str());
+    DETAIL_LOG("Packet Info: itemid: %u guid: %s", itemid, guid.GetString().c_str());
 }
 
 void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
@@ -677,26 +678,26 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
 {
-    uint64 guid;
+    ObjectGuid guid;
 
     recv_data >> guid;
 
-    if(!GetPlayer()->isAlive())
+    if (!GetPlayer()->isAlive())
         return;
 
-    DEBUG_LOG( "WORLD: Recvd CMSG_LIST_INVENTORY" );
+    DEBUG_LOG("WORLD: Recvd CMSG_LIST_INVENTORY");
 
     SendListInventory( guid );
 }
 
-void WorldSession::SendListInventory( uint64 vendorguid )
+void WorldSession::SendListInventory(ObjectGuid vendorguid)
 {
     DEBUG_LOG("WORLD: Sent SMSG_LIST_INVENTORY");
 
     Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(vendorguid,UNIT_NPC_FLAG_VENDOR);
     if (!pCreature)
     {
-        DEBUG_LOG("WORLD: SendListInventory - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(vendorguid)));
+        DEBUG_LOG("WORLD: SendListInventory - %s not found or you can't interact with him.", vendorguid.GetString().c_str());
         _player->SendSellError(SELL_ERR_CANT_FIND_VENDOR, NULL, 0, 0);
         return;
     }
@@ -712,7 +713,7 @@ void WorldSession::SendListInventory( uint64 vendorguid )
     if(!vItems)
     {
         WorldPacket data( SMSG_LIST_INVENTORY, (8+1+1) );
-        data << uint64(vendorguid);
+        data << ObjectGuid(vendorguid);
         data << uint8(0);                                   // count==0, next will be error code
         data << uint8(0);                                   // "Vendor has no inventory"
         SendPacket(&data);
@@ -723,7 +724,7 @@ void WorldSession::SendListInventory( uint64 vendorguid )
     uint8 count = 0;
 
     WorldPacket data( SMSG_LIST_INVENTORY, (8+1+numitems*7*4) );
-    data << uint64(vendorguid);
+    data << ObjectGuid(vendorguid);
 
     size_t count_pos = data.wpos();
     data << uint8(count);
@@ -830,22 +831,41 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
     _player->StoreItem( dest, pItem, true );
 }
 
+
+bool WorldSession::CheckBanker(ObjectGuid guid)
+{
+    // GM case
+    if (guid == GetPlayer()->GetObjectGuid())
+    {
+        // command case will return only if player have real access to command
+        if (!ChatHandler(GetPlayer()).FindCommand("bank"))
+        {
+            DEBUG_LOG("%s attempt open bank in cheating way.", guid.GetString().c_str());
+            return false;
+        }
+    }
+    // banker case
+    else
+    {
+        if (!GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_BANKER))
+        {
+            DEBUG_LOG("Banker %s not found or you can't interact with him.", guid.GetString().c_str());
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: CMSG_BUY_BANK_SLOT");
 
-    uint64 guid;
+    ObjectGuid guid;
     recvPacket >> guid;
 
-    // cheating protection
-    /* not critical if "cheated", and check skip allow by slots in bank windows open by .bank command.
-    Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_BANKER);
-    if(!pCreature)
-    {
-        DEBUG_LOG( "WORLD: HandleBuyBankSlotOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
+    if (!CheckBanker(guid))
         return;
-    }
-    */
 
     uint32 slot = _player->GetBankBagSlotCount();
 

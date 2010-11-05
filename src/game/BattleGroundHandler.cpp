@@ -565,7 +565,7 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode( WorldPacket & recv_data )
     if (!bg)
         return;
 
-    uint64 guid;
+    ObjectGuid guid;
     recv_data >> guid;
 
     Creature *unit = GetPlayer()->GetMap()->GetCreature(guid);
@@ -586,7 +586,7 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode( WorldPacket & recv_data )
     if (!bg)
         return;
 
-    uint64 guid;
+    ObjectGuid guid;
     recv_data >> guid;
 
     Creature *unit = GetPlayer()->GetMap()->GetCreature(guid);

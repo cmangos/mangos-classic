@@ -601,7 +601,7 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket &recv_data)
 {
     DETAIL_LOG("WORLD: Received CMSG_RECLAIM_CORPSE");
 
-    uint64 guid;
+    ObjectGuid guid;
     recv_data >> guid;
 
     if (GetPlayer()->isAlive())
@@ -634,7 +634,7 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 {
     DETAIL_LOG("WORLD: Received CMSG_RESURRECT_RESPONSE");
 
-    uint64 guid;
+    ObjectGuid guid;
     uint8 status;
     recv_data >> guid;
     recv_data >> status;
@@ -830,7 +830,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
     recv_data >> Unused<uint64>();
     recv_data >> Unused<uint32>();
     /*
-        uint64 guid;
+        ObjectGuid guid;
         uint32 time_skipped;
         recv_data >> guid;
         recv_data >> time_skipped;
@@ -857,7 +857,7 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
     // no used
     recv_data.rpos(recv_data.wpos());                       // prevent warnings spam
 /*
-    uint64 guid;
+    ObjectGuid guid;
     recv_data >> guid;
 
     // now can skip not our packet
@@ -881,11 +881,11 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
     // no used
     recv_data.rpos(recv_data.wpos());                       // prevent warnings spam
 /*
-    uint64 guid;
+    ObjectGuid guid;
     recv_data >> guid;
 
     // now can skip not our packet
-    if(_player->GetGUID() != guid)
+    if(_player->GetObjectGuid() != guid)
     {
         recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
         return;
@@ -953,12 +953,11 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 {
-    Player *pl;
-    uint64 guid;
+    ObjectGuid guid;
     recv_data >> guid;
     // DEBUG_LOG("Party Stats guid is " I64FMTD,guid);
 
-    pl = sObjectMgr.GetPlayer(guid);
+    Player *pl = sObjectMgr.GetPlayer(guid);
     if(pl)
     {
         WorldPacket data( MSG_INSPECT_HONOR_STATS, (8+1+4+4+4+4+4+4+4+4+4+4+1) );
@@ -989,7 +988,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
         SendPacket(&data);
     }
     else
-        DEBUG_LOG("Player %u not found!", GUID_LOPART(guid));
+        DEBUG_LOG("%s not found!", guid.GetString().c_str());
 }
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)

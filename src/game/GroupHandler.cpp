@@ -772,14 +772,14 @@ bool WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
 void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 {
     DEBUG_LOG("WORLD: Received CMSG_REQUEST_PARTY_MEMBER_STATS");
-    uint64 Guid;
-    recv_data >> Guid;
+    ObjectGuid guid;
+    recv_data >> guid;
 
-    Player *player = sObjectMgr.GetPlayer(Guid);
+    Player *player = sObjectMgr.GetPlayer(guid);
     if(!player)
     {
         WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3+4+2);
-        data.appendPackGUID(Guid);
+        data << guid.WriteAsPacked();
         data << uint32(GROUP_UPDATE_FLAG_STATUS);
         data << uint8(MEMBER_STATUS_OFFLINE);
         SendPacket(&data);

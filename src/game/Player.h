@@ -1094,11 +1094,11 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 GetQuestLevel( Quest const* pQuest ) const { return pQuest && pQuest->GetQuestLevel() ? pQuest->GetQuestLevel() : getLevel(); }
 
-        void PrepareQuestMenu( uint64 guid );
-        void SendPreparedQuest( uint64 guid );
+        void PrepareQuestMenu(ObjectGuid guid );
+        void SendPreparedQuest(ObjectGuid guid);
         bool IsActiveQuest( uint32 quest_id ) const;        // can be taken or taken
         bool IsCurrentQuest( uint32 quest_id ) const;       // taken and not yet rewarded
-        Quest const *GetNextQuest( uint64 guid, Quest const *pQuest );
+        Quest const *GetNextQuest(ObjectGuid guid, Quest const *pQuest );
         bool CanSeeStartQuest( Quest const *pQuest ) const;
         bool CanTakeQuest( Quest const *pQuest, bool msg ) const;
         bool CanAddQuest( Quest const *pQuest, bool msg ) const;
@@ -1229,8 +1229,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendPetTameFailure(PetTameFailureReason reason);
 
-        void SetBindPoint(uint64 guid);
-        void SendTalentWipeConfirm(uint64 guid);
+        void SetBindPoint(ObjectGuid guid);
+        void SendTalentWipeConfirm(ObjectGuid guid);
         void RewardRage( uint32 damage, uint32 weaponSpeedHitFactor, bool attacker );
         void SendPetSkillWipeConfirm();
         void CalcRage( uint32 damage,bool attacker );
@@ -1354,7 +1354,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool resetTalents(bool no_cost = false);
         uint32 resetTalentsCost() const;
         void InitTalentForLevel();
-
         void LearnTalent(uint32 talentId, uint32 talentRank);
         uint32 CalculateTalentsPoints() const;
 
@@ -1399,19 +1398,19 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadSpellCooldowns(QueryResult *result);
         void _SaveSpellCooldowns();
 
-        void setResurrectRequestData(uint64 guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
+        void setResurrectRequestData(ObjectGuid guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
         {
-            m_resurrectGUID = guid;
+            m_resurrectGuid = guid;
             m_resurrectMap = mapId;
             m_resurrectX = X;
             m_resurrectY = Y;
             m_resurrectZ = Z;
             m_resurrectHealth = health;
             m_resurrectMana = mana;
-        };
-        void clearResurrectRequestData() { setResurrectRequestData(0,0,0.0f,0.0f,0.0f,0,0); }
-        bool isRessurectRequestedBy(uint64 guid) const { return m_resurrectGUID == guid; }
-        bool isRessurectRequested() const { return m_resurrectGUID != 0; }
+        }
+        void clearResurrectRequestData() { setResurrectRequestData(ObjectGuid(), 0, 0.0f, 0.0f, 0.0f, 0, 0); }
+        bool isRessurectRequestedBy(ObjectGuid guid) const { return m_resurrectGuid == guid; }
+        bool isRessurectRequested() const { return !m_resurrectGuid.IsEmpty(); }
         void ResurectUsingRequestData();
 
         int getCinematic()
@@ -2169,7 +2168,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;
 
-        uint64 m_resurrectGUID;
+        ObjectGuid m_resurrectGuid;
         uint32 m_resurrectMap;
         float m_resurrectX, m_resurrectY, m_resurrectZ;
         uint32 m_resurrectHealth, m_resurrectMana;

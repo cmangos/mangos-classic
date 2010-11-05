@@ -716,7 +716,7 @@ void WorldSession::HandleShowingCloakOpcode( WorldPacket & /*recv_data*/ )
 
 void WorldSession::HandleCharRenameOpcode(WorldPacket& recv_data)
 {
-    uint64 guid;
+    ObjectGuid guid;
     std::string newname;
 
     recv_data >> guid;
@@ -757,7 +757,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket& recv_data)
     CharacterDatabase.AsyncPQuery(&WorldSession::HandleChangePlayerNameOpcodeCallBack,
         GetAccountId(), newname,
         "SELECT guid, name FROM characters WHERE guid = %d AND account = %d AND (at_login & %d) = %d AND NOT EXISTS (SELECT NULL FROM characters WHERE name = '%s')",
-        GUID_LOPART(guid), GetAccountId(), AT_LOGIN_RENAME, AT_LOGIN_RENAME, escaped_newname.c_str()
+        guid.GetCounter(), GetAccountId(), AT_LOGIN_RENAME, AT_LOGIN_RENAME, escaped_newname.c_str()
     );
 }
 
