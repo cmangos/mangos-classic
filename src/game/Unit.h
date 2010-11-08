@@ -767,7 +767,7 @@ struct CalcDamageInfo
     uint32 procAttacker;
     uint32 procVictim;
     uint32 procEx;
-    uint32 cleanDamage;          // Used only fo rage calcultion
+    uint32 cleanDamage;          // Used only for rage calculation
     MeleeHitOutcome hitOutCome;  // TODO: remove this field (need use TargetState)
 };
 

@@ -4879,25 +4879,28 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
 
 void Aura::PeriodicTick()
 {
+    Unit *target = GetTarget();
+    SpellEntry const* spellProto = GetSpellProto();
+
     switch(m_modifier.m_auraname)
     {
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
         {
             // don't damage target if not alive, possible death persistent effects
-            if (!m_target->isAlive())
+            if (!target->isAlive())
                 return;
 
             Unit *pCaster = GetCaster();
             if(!pCaster)
                 return;
 
-            if( GetSpellProto()->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-                pCaster->SpellHitResult(m_target, GetSpellProto(), false) != SPELL_MISS_NONE)
+            if( spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
+                pCaster->SpellHitResult(target, spellProto, false) != SPELL_MISS_NONE)
                 return;
 
             // Check for immune (not use charges)
-            if(m_target->IsImmunedToDamage(GetSpellSchoolMask(GetSpellProto())))
+            if(target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
                 return;
 
             // some auras remove at specific health level or more
@@ -4907,21 +4910,21 @@ void Aura::PeriodicTick()
                 {
                     case 43093: case 31956: case 38801:
                     case 35321: case 38363: case 39215:
-                        if(m_target->GetHealth() == m_target->GetMaxHealth() )
+                        if(target->GetHealth() == target->GetMaxHealth() )
                         {
-                            m_target->RemoveAurasDueToSpell(GetId());
+                            target->RemoveAurasDueToSpell(GetId());
                             return;
                         }
                         break;
                     case 38772:
                     {
                         uint32 percent =
-                            GetEffIndex() < EFFECT_INDEX_2 && GetSpellProto()->Effect[GetEffIndex()] == SPELL_EFFECT_DUMMY ?
-                            pCaster->CalculateSpellDamage(m_target, GetSpellProto(), SpellEffectIndex(GetEffIndex() + 1)) :
+                            GetEffIndex() < EFFECT_INDEX_2 && spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_DUMMY ?
+                            pCaster->CalculateSpellDamage(target, spellProto, SpellEffectIndex(GetEffIndex() + 1)) :
                             100;
-                        if(m_target->GetHealth() * 100 >= m_target->GetMaxHealth() * percent )
+                        if(target->GetHealth() * 100 >= target->GetMaxHealth() * percent )
                         {
-                            m_target->RemoveAurasDueToSpell(GetId());
+                            target->RemoveAurasDueToSpell(GetId());
                             return;
                         }
                         break;
@@ -4946,18 +4949,18 @@ void Aura::PeriodicTick()
 
                 // Calculate armor mitigation if it is a physical spell
                 // But not for bleed mechanic spells
-                if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_NORMAL &&
-                    GetEffectMechanic(GetSpellProto(), m_effIndex) != MECHANIC_BLEED)
+                if (GetSpellSchoolMask(spellProto) & SPELL_SCHOOL_MASK_NORMAL &&
+                    GetEffectMechanic(spellProto, m_effIndex) != MECHANIC_BLEED)
                 {
-                    uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(m_target, pdamage);
+                    uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(target, pdamage);
                     cleanDamage.damage += pdamage - pdamageReductedArmor;
                     pdamage = pdamageReductedArmor;
                 }
 
-                pdamage = pCaster->SpellDamageBonus(m_target, GetSpellProto(), pdamage, DOT, GetStackAmount());
+                pdamage = pCaster->SpellDamageBonus(target, spellProto, pdamage, DOT, GetStackAmount());
 
                 // Curse of Agony damage-per-tick calculation
-                if (GetSpellProto()->SpellFamilyName==SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000400)) && GetSpellProto()->SpellIconID==544)
+                if (spellProto->SpellFamilyName==SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000400)) && spellProto->SpellIconID==544)
                 {
                     // 1..4 ticks, 1/2 from normal tick damage
                     if (GetAuraTicks() <= 4)
@@ -4971,34 +4974,35 @@ void Aura::PeriodicTick()
             else
                 pdamage = uint32(m_target->GetMaxHealth()*amount/100);
 
-            pCaster->CalcAbsorbResist(m_target, GetSpellSchoolMask(GetSpellProto()), DOT, pdamage, &absorb, &resist, !(GetSpellProto()->AttributesEx2 & SPELL_ATTR_EX2_CANT_REFLECTED));
+            pCaster->CalcAbsorbResist(target, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !(spellProto->AttributesEx2 & SPELL_ATTR_EX2_CANT_REFLECTED));
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u",
-                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
+                GetCasterGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
 
-            pCaster->DealDamageMods(m_target, pdamage, &absorb);
+            pCaster->DealDamageMods(target, pdamage, &absorb);
 
             // Set trigger flag
-            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;//   | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
+            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC; //  | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
             uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
+
             pdamage = (pdamage <= absorb + resist) ? 0 : (pdamage - absorb - resist);
 
             SpellPeriodicAuraLogInfo pInfo(this, pdamage, absorb, resist, 0.0f);
-            m_target->SendPeriodicAuraLog(&pInfo);
+            target->SendPeriodicAuraLog(&pInfo);
 
             if (pdamage)
                 procVictim|=PROC_FLAG_TAKEN_ANY_DAMAGE;
 
-            pCaster->ProcDamageAndSpell(m_target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, GetSpellProto());
+            pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto);
 
-            pCaster->DealDamage(m_target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), true);
+            pCaster->DealDamage(target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, true);
             break;
         }
         case SPELL_AURA_PERIODIC_LEECH:
         case SPELL_AURA_PERIODIC_HEALTH_FUNNEL:
         {
             // don't damage target if not alive, possible death persistent effects
-            if (!m_target->isAlive())
+            if (!target->isAlive())
                 return;
 
             Unit *pCaster = GetCaster();
@@ -5008,12 +5012,12 @@ void Aura::PeriodicTick()
             if(!pCaster->isAlive())
                 return;
 
-            if( GetSpellProto()->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-                pCaster->SpellHitResult(m_target, GetSpellProto(), false) != SPELL_MISS_NONE)
+            if( spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
+                pCaster->SpellHitResult(target, spellProto, false) != SPELL_MISS_NONE)
                 return;
 
             // Check for immune
-            if(m_target->IsImmunedToDamage(GetSpellSchoolMask(GetSpellProto())))
+            if(target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
                 return;
 
             uint32 absorb=0;
@@ -5023,57 +5027,59 @@ void Aura::PeriodicTick()
             uint32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
             //Calculate armor mitigation if it is a physical spell
-            if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_NORMAL)
+            if (GetSpellSchoolMask(spellProto) & SPELL_SCHOOL_MASK_NORMAL)
             {
-                uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(m_target, pdamage);
+                uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(target, pdamage);
                 cleanDamage.damage += pdamage - pdamageReductedArmor;
                 pdamage = pdamageReductedArmor;
             }
 
-            pdamage = pCaster->SpellDamageBonus(m_target, GetSpellProto(), pdamage, DOT);
+            pdamage = pCaster->SpellDamageBonus(target, spellProto, pdamage, DOT);
 
-            pCaster->CalcAbsorbResist(m_target, GetSpellSchoolMask(GetSpellProto()), DOT, pdamage, &absorb, &resist, !(GetSpellProto()->AttributesEx2 & SPELL_ATTR_EX2_CANT_REFLECTED));
+            pCaster->CalcAbsorbResist(target, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !(spellProto->AttributesEx2 & SPELL_ATTR_EX2_CANT_REFLECTED));
 
-            if(m_target->GetHealth() < pdamage)
-                pdamage = uint32(m_target->GetHealth());
+            if(target->GetHealth() < pdamage)
+                pdamage = uint32(target->GetHealth());
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s health leech of %s for %u dmg inflicted by %u abs is %u",
-                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId(),absorb);
+                GetCasterGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str(), pdamage, GetId(),absorb);
 
-            pCaster->DealDamageMods(m_target, pdamage, &absorb);
+            pCaster->DealDamageMods(target, pdamage, &absorb);
 
-            pCaster->SendSpellNonMeleeDamageLog(m_target, GetId(), pdamage, GetSpellSchoolMask(GetSpellProto()), absorb, resist, false, 0);
+            pCaster->SendSpellNonMeleeDamageLog(target, GetId(), pdamage, GetSpellSchoolMask(spellProto), absorb, resist, false, 0);
 
-            float multiplier = GetSpellProto()->EffectMultipleValue[GetEffIndex()] > 0 ? GetSpellProto()->EffectMultipleValue[GetEffIndex()] : 1;
+            float multiplier = spellProto->EffectMultipleValue[GetEffIndex()] > 0 ? spellProto->EffectMultipleValue[GetEffIndex()] : 1;
 
             // Set trigger flag
             uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;  // | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
             uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
+
             pdamage = (pdamage <= absorb + resist) ? 0 : (pdamage - absorb - resist);
             if (pdamage)
                 procVictim|=PROC_FLAG_TAKEN_ANY_DAMAGE;
-            pCaster->ProcDamageAndSpell(m_target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, GetSpellProto());
-            int32 new_damage = pCaster->DealDamage(m_target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), false);            if (!m_target->isAlive() && pCaster->IsNonMeleeSpellCasted(false))
+
+            pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto);
+            int32 new_damage = pCaster->DealDamage(target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, false);
+            if (!target->isAlive() && pCaster->IsNonMeleeSpellCasted(false))
                 for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
                     if (Spell* spell = pCaster->GetCurrentSpell(CurrentSpellTypes(i)))
                         if (spell->m_spellInfo->Id == GetId())
                             spell->cancel();
 
-
             if(Player *modOwner = pCaster->GetSpellModOwner())
                 modOwner->ApplySpellMod(GetId(), SPELLMOD_MULTIPLE_VALUE, multiplier);
 
-            uint32 heal = pCaster->SpellHealingBonus(pCaster, GetSpellProto(), uint32(new_damage * multiplier), DOT);
+            uint32 heal = pCaster->SpellHealingBonus(pCaster, spellProto, uint32(new_damage * multiplier), DOT);
 
-            int32 gain = pCaster->DealHeal(pCaster, heal, GetSpellProto());
-            pCaster->getHostileRefManager().threatAssist(pCaster, gain * 0.5f, GetSpellProto());
+            int32 gain = pCaster->DealHeal(pCaster, heal, spellProto);
+            pCaster->getHostileRefManager().threatAssist(pCaster, gain * 0.5f, spellProto);
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
         case SPELL_AURA_OBS_MOD_HEALTH:
         {
             // don't heal target if not alive, mostly death persistent effects from items
-            if (!m_target->isAlive())
+            if (!target->isAlive())
                 return;
 
             Unit *pCaster = GetCaster();
@@ -5081,7 +5087,7 @@ void Aura::PeriodicTick()
                 return;
 
             // heal for caster damage (must be alive)
-            if(m_target != pCaster && GetSpellProto()->SpellVisual==163 && !pCaster->isAlive())
+            if(target != pCaster && spellProto->SpellVisual==163 && !pCaster->isAlive())
                 return;
 
             // ignore non positive values (can be result apply spellmods to aura damage
@@ -5090,29 +5096,27 @@ void Aura::PeriodicTick()
             uint32 pdamage;
 
             if(m_modifier.m_auraname==SPELL_AURA_OBS_MOD_HEALTH)
-                pdamage = uint32(m_target->GetMaxHealth() * amount / 100);
+                pdamage = uint32(target->GetMaxHealth() * amount / 100);
             else
                 pdamage = amount;
 
-            pdamage = pCaster->SpellHealingBonus(m_target, GetSpellProto(), pdamage, DOT, GetStackAmount());
+            pdamage = pCaster->SpellHealingBonus(target, spellProto, pdamage, DOT, GetStackAmount());
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health inflicted by %u",
-                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
+                GetCasterGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
 
             SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
-            m_target->SendPeriodicAuraLog(&pInfo);
+            target->SendPeriodicAuraLog(&pInfo);
 
-            int32 gain = m_target->ModifyHealth(pdamage);
+            int32 gain = target->ModifyHealth(pdamage);
 
             //Do check before because m_modifier.auraName can be invalidate by DealDamage.
             bool procSpell = (m_modifier.m_auraname == SPELL_AURA_PERIODIC_HEAL && m_target != pCaster);
 
-            m_target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f, GetSpellProto());
-
-            SpellEntry const* spellProto = GetSpellProto();
+            target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f, spellProto);
 
             // heal for caster damage
-            if(m_target != pCaster && spellProto->SpellVisual==163)
+            if(target != pCaster && spellProto->SpellVisual==163)
             {
                 uint32 dmg = spellProto->manaPerSecond;
                 if(pCaster->GetHealth() <= dmg && pCaster->GetTypeId()==TYPEID_PLAYER)
@@ -5128,10 +5132,10 @@ void Aura::PeriodicTick()
                     uint32 damage = gain;
                     uint32 absorb = 0;
                     pCaster->DealDamageMods(pCaster, damage, &absorb);
-                    pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(GetSpellProto()), absorb, 0, false, 0, false);
+                    pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(spellProto), absorb, 0, false, 0, false);
 
                     CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
-                    pCaster->DealDamage(pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), true);
+                    pCaster->DealDamage(pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
                 }
             }
 
@@ -5142,7 +5146,7 @@ void Aura::PeriodicTick()
         case SPELL_AURA_PERIODIC_MANA_LEECH:
         {
             // don't damage target if not alive, possible death persistent effects
-            if (!m_target->isAlive())
+            if (!target->isAlive())
                 return;
 
             if(m_modifier.m_miscvalue < 0 || m_modifier.m_miscvalue >= MAX_POWERS)
@@ -5151,7 +5155,7 @@ void Aura::PeriodicTick()
             Powers power = Powers(m_modifier.m_miscvalue);
 
             // power type might have changed between aura applying and tick (druid's shapeshift)
-            if(m_target->getPowerType() != power)
+            if(target->getPowerType() != power)
                 return;
 
             Unit *pCaster = GetCaster();
@@ -5161,105 +5165,105 @@ void Aura::PeriodicTick()
             if(!pCaster->isAlive())
                 return;
 
-            if( GetSpellProto()->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-                pCaster->SpellHitResult(m_target, GetSpellProto(), false) != SPELL_MISS_NONE)
+            if( spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
+                pCaster->SpellHitResult(m_target, spellProto, false) != SPELL_MISS_NONE)
                 return;
 
             // Check for immune (not use charges)
-            if(m_target->IsImmunedToDamage(GetSpellSchoolMask(GetSpellProto())))
+            if(target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
                 return;
 
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s power leech of %s for %u dmg inflicted by %u",
-                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
+                GetCasterGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
 
-            int32 drain_amount = m_target->GetPower(power) > pdamage ? pdamage : m_target->GetPower(power);
+            int32 drain_amount = target->GetPower(power) > pdamage ? pdamage : target->GetPower(power);
 
-            m_target->ModifyPower(power, -drain_amount);
+            target->ModifyPower(power, -drain_amount);
 
             float gain_multiplier = 0;
 
             if(pCaster->GetMaxPower(power) > 0)
             {
-                gain_multiplier = GetSpellProto()->EffectMultipleValue[GetEffIndex()];
+                gain_multiplier = spellProto->EffectMultipleValue[GetEffIndex()];
 
                 if(Player *modOwner = pCaster->GetSpellModOwner())
                     modOwner->ApplySpellMod(GetId(), SPELLMOD_MULTIPLE_VALUE, gain_multiplier);
             }
 
             SpellPeriodicAuraLogInfo pInfo(this, drain_amount, 0, 0, gain_multiplier);
-            m_target->SendPeriodicAuraLog(&pInfo);
+            target->SendPeriodicAuraLog(&pInfo);
 
             int32 gain_amount = int32(drain_amount * gain_multiplier);
 
             if(gain_amount)
             {
                 int32 gain = pCaster->ModifyPower(power, gain_amount);
-                m_target->AddThreat(pCaster, float(gain) * 0.5f, false, GetSpellSchoolMask(GetSpellProto()), GetSpellProto());
+                target->AddThreat(pCaster, float(gain) * 0.5f, false, GetSpellSchoolMask(spellProto), spellProto);
             }
             break;
         }
         case SPELL_AURA_PERIODIC_ENERGIZE:
         {
             // don't energize target if not alive, possible death persistent effects
-            if (!m_target->isAlive())
+            if (!target->isAlive())
                 return;
 
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s energize %s for %u dmg inflicted by %u",
-                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
+                GetCasterGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
 
             if(m_modifier.m_miscvalue < 0 || m_modifier.m_miscvalue >= MAX_POWERS)
                 break;
 
             Powers power = Powers(m_modifier.m_miscvalue);
 
-            if(m_target->GetMaxPower(power) == 0)
+            if(target->GetMaxPower(power) == 0)
                 break;
 
             SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
-            m_target->SendPeriodicAuraLog(&pInfo);
+            target->SendPeriodicAuraLog(&pInfo);
 
-            int32 gain = m_target->ModifyPower(power,pdamage);
+            int32 gain = target->ModifyPower(power,pdamage);
 
             if(Unit* pCaster = GetCaster())
-                m_target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f, GetSpellProto());
+                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f, spellProto);
             break;
         }
         case SPELL_AURA_OBS_MOD_MANA:
         {
             // don't energize target if not alive, possible death persistent effects
-            if (!m_target->isAlive())
+            if (!target->isAlive())
                 return;
 
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
-            uint32 pdamage = uint32(m_target->GetMaxPower(POWER_MANA) * amount / 100);
+            uint32 pdamage = uint32(target->GetMaxPower(POWER_MANA) * amount / 100);
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s energize %s for %u mana inflicted by %u",
-                GetCasterGuid().GetString().c_str(), m_target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
+                GetCasterGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str(), pdamage, GetId());
 
-            if(m_target->GetMaxPower(POWER_MANA) == 0)
+            if(target->GetMaxPower(POWER_MANA) == 0)
                 break;
 
             SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
-            m_target->SendPeriodicAuraLog(&pInfo);
+            target->SendPeriodicAuraLog(&pInfo);
 
-            int32 gain = m_target->ModifyPower(POWER_MANA, pdamage);
+            int32 gain = target->ModifyPower(POWER_MANA, pdamage);
 
             if(Unit* pCaster = GetCaster())
-                m_target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f, GetSpellProto());
+                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f, spellProto);
             break;
         }
         case SPELL_AURA_POWER_BURN_MANA:
         {
             // don't mana burn target if not alive, possible death persistent effects
-            if (!m_target->isAlive())
+            if (!target->isAlive())
                 return;
 
             Unit *pCaster = GetCaster();
@@ -5267,21 +5271,20 @@ void Aura::PeriodicTick()
                 return;
 
             // Check for immune (not use charges)
-            if(m_target->IsImmunedToDamage(GetSpellSchoolMask(GetSpellProto())))
+            if(target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
                 return;
 
             int32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
             Powers powerType = Powers(m_modifier.m_miscvalue);
 
-            if(!m_target->isAlive() || m_target->getPowerType() != powerType)
+            if(!target->isAlive() || target->getPowerType() != powerType)
                 return;
 
-            uint32 gain = uint32(-m_target->ModifyPower(powerType, -pdamage));
+            uint32 gain = uint32(-target->ModifyPower(powerType, -pdamage));
 
-            gain = uint32(gain * GetSpellProto()->EffectMultipleValue[GetEffIndex()]);
+            gain = uint32(gain * spellProto->EffectMultipleValue[GetEffIndex()]);
 
-            SpellEntry const* spellProto = GetSpellProto();
             //maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
             SpellNonMeleeDamage damageInfo(pCaster, m_target, spellProto->Id, SpellSchools(spellProto->School));
             pCaster->CalculateSpellDamage(&damageInfo, gain, spellProto);
@@ -5291,7 +5294,7 @@ void Aura::PeriodicTick()
             pCaster->SendSpellNonMeleeDamageLog(&damageInfo);
 
             // Set trigger flag
-            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;//   | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
+            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC; //  | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
             uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
             uint32 procEx       = createProcExtendMask(&damageInfo, SPELL_MISS_NONE);
             if (damageInfo.damage)
@@ -5304,33 +5307,33 @@ void Aura::PeriodicTick()
         }
         case SPELL_AURA_MOD_REGEN:
         {
-            int32 gain = m_target->ModifyHealth(m_modifier.m_amount);
+            int32 gain = target->ModifyHealth(m_modifier.m_amount);
             if (Unit *caster = GetCaster())
-                m_target->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f, GetSpellProto());
+                target->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto);
             break;
         }
         case SPELL_AURA_MOD_POWER_REGEN:
         {
-            Powers pt = m_target->getPowerType();
+            Powers pt = target->getPowerType();
             if(int32(pt) != m_modifier.m_miscvalue)
                 return;
 
-            if ( GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED )
+            if ( spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED )
             {
                 // eating anim
-                m_target->HandleEmoteCommand(EMOTE_ONESHOT_EAT);
+                target->HandleEmoteCommand(EMOTE_ONESHOT_EAT);
             }
             else if( GetId() == 20577 )
             {
                 // cannibalize anim
-                m_target->HandleEmoteCommand(EMOTE_STATE_CANNIBALIZE);
+                target->HandleEmoteCommand(EMOTE_STATE_CANNIBALIZE);
             }
 
             // Anger Management
             // amount = 1+ 16 = 17 = 3,4*5 = 10,2*5/3 
             // so 17 is rounded amount for 5 sec tick grow ~ 1 range grow in 3 sec
             if(pt == POWER_RAGE)
-                m_target->ModifyPower(pt, m_modifier.m_amount*3/5);
+                target->ModifyPower(pt, m_modifier.m_amount * 3 / 5);
             break;
         }
         // Here tick dummy auras
