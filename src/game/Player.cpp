@@ -5863,9 +5863,9 @@ void Player::UpdateHonor()
 
     //NEXT RANK BAR
     //PLAYER_FIELD_HONOR_BAR
-    SetInt32Value(PLAYER_FIELD_BYTES2, RP);
+    SetByteValue(PLAYER_FIELD_BYTES2, 0, RP);
     //RANK (Patent)
-    SetUInt32Value(PLAYER_BYTES_3, ( GetHonorRankInfo().rank << 24) + (m_drunk & 0xFFFE) + getGender());
+    SetByteValue(PLAYER_BYTES_3, 3, GetHonorRankInfo().rank);
     //TODAY
     SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (today_dishonorableKills << 16) + today_honorableKills );
     //YESTERDAY
@@ -5882,7 +5882,7 @@ void Player::UpdateHonor()
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, total_honorableKills);
     SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, total_dishonorableKills);
     //TODO: Into what field we need to set it? Fix it!
-    SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRankInfo().visualRank << 24) + 0x040F0001);
+    SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRankInfo().rank << 24) | 0x0F0001);
 }
 
 void Player::ResetHonor()

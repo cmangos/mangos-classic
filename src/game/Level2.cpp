@@ -3965,9 +3965,18 @@ bool ChatHandler::HandleModifyHonorCommand (char* args)
 
     // hack code
     if (hasStringAbbr(field, "points"))
-       target->SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)amount);
+    {
+        if (amount < 0 || amount > 255)
+            return false;
+        // rank points is sent to client with same size of uint8(255) for each rank
+        target->SetByteValue(PLAYER_FIELD_BYTES2, 0, amount);
+    }
     else if (hasStringAbbr(field, "rank"))
-       target->SetInt32Value(PLAYER_BYTES_3, ( amount << 24) + (target->GetDrunkValue() & 0xFFFE) + target->getGender());
+    {
+        if (amount < 0 || amount >= HONOR_RANK_COUNT)
+            return false;
+        target->SetByteValue(PLAYER_BYTES_3, 3, amount);
+    }
     else if (hasStringAbbr(field, "todaykills"))
        target->SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, ((uint32)amount << 16) + (uint32)amount );
     else if (hasStringAbbr(field, "yesterdaykills"))
