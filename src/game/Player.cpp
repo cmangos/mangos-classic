@@ -10059,7 +10059,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                 DestroyItem(slot, i, update);
         }
 
-        if(pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED))
+        if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED))
             CharacterDatabase.PExecute("DELETE FROM character_gifts WHERE item_guid = '%u'", pItem->GetGUIDLow());
 
         RemoveEnchantmentDurations(pItem);
@@ -14090,7 +14090,7 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
             }
 
             // "Conjured items disappear if you are logged out for more than 15 minutes"
-            if ((timediff > 15*60) && (item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_CONJURED)))
+            if (timediff > 15*MINUTE && (item->GetProto()->Flags & ITEM_FLAG_CONJURED))
             {
                 CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE item = '%u'", item_guid);
                 item->FSetState(ITEM_REMOVED);
@@ -17339,7 +17339,7 @@ void Player::SendInstanceResetWarning(uint32 mapid, uint32 time)
 
 void Player::ApplyEquipCooldown( Item * pItem )
 {
-    if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_NO_EQUIP_COOLDOWN))
+    if (pItem->GetProto()->Flags & ITEM_FLAG_NO_EQUIP_COOLDOWN)
         return;
 
     for(int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
@@ -18472,7 +18472,7 @@ uint8 Player::CanEquipUniqueItem(Item* pItem, uint8 eslot) const
 uint8 Player::CanEquipUniqueItem( ItemPrototype const* itemProto, uint8 except_slot) const
 {
     // check unique-equipped on item
-    if (itemProto->Flags & ITEM_FLAGS_UNIQUE_EQUIPPED)
+    if (itemProto->Flags & ITEM_FLAG_UNIQUE_EQUIPPED)
     {
         // there is an equip limit on this item
         if(HasItemWithIdEquipped(itemProto->ItemId,1,except_slot))

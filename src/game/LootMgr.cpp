@@ -38,8 +38,8 @@ static eConfigFloatValues const qualityToRate[MAX_ITEM_QUALITY] = {
 LootStore LootTemplates_Creature(     "creature_loot_template",     "creature entry",                 true);
 LootStore LootTemplates_Disenchant(   "disenchant_loot_template",   "item disenchant id",             true);
 LootStore LootTemplates_Fishing(      "fishing_loot_template",      "area id",                        true);
-LootStore LootTemplates_Gameobject(   "gameobject_loot_template",   "gameobject entry",               true);
-LootStore LootTemplates_Item(         "item_loot_template",         "item entry",                     true);
+LootStore LootTemplates_Gameobject(   "gameobject_loot_template",   "gameobject lootid",              true);
+LootStore LootTemplates_Item(         "item_loot_template",         "item entry with ITEM_FLAG_LOOTABLE", true);
 LootStore LootTemplates_Mail(         "mail_loot_template",         "mail template id",               false);
 LootStore LootTemplates_Pickpocketing("pickpocketing_loot_template","creature pickpocket lootid",     true);
 LootStore LootTemplates_Reference(    "reference_loot_template",    "reference id",                   false);
@@ -317,7 +317,7 @@ LootItem::LootItem(LootStoreItem const& li)
     conditionId = li.conditionId;
 
     ItemPrototype const* proto = ObjectMgr::GetItemPrototype(itemid);
-    freeforall  = proto && (proto->Flags & ITEM_FLAGS_PARTY_LOOT);
+    freeforall  = proto && (proto->Flags & ITEM_FLAG_PARTY_LOOT);
 
     needs_quest = li.needs_quest;
 
@@ -375,10 +375,10 @@ void Loot::AddItem(LootStoreItem const & item)
         // non-conditional one-player only items are counted here,
         // free for all items are counted in FillFFALoot(),
         // non-ffa conditionals are counted in FillNonQuestNonFFAConditionalLoot()
-        if( !item.conditionId )
+        if (!item.conditionId)
         {
             ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item.itemid);
-            if( !proto || (proto->Flags & ITEM_FLAGS_PARTY_LOOT)==0 )
+            if (!proto || !(proto->Flags & ITEM_FLAG_PARTY_LOOT))
                 ++unlootedCount;
         }
     }
@@ -1178,9 +1178,19 @@ void LoadLootTemplates_Item()
 
     // remove real entries and check existence loot
     for(uint32 i = 1; i < sItemStorage.MaxEntry; ++i )
+    {
         if(ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(i))
-            if (ids_set.find(proto->ItemId) != ids_set.end())
+        {
+            if  (!(proto->Flags & ITEM_FLAG_LOOTABLE))
+                continue;
+
+            if (ids_set.find(proto->ItemId) != ids_set.end() || proto->MaxMoneyLoot > 0)
                 ids_set.erase(proto->ItemId);
+            // wdb have wrong data cases, so skip by default
+            else if ((sLog.getLogFilter() & LOG_FILTER_DB_STRICTED_CHECK) == 0)
+                LootTemplates_Item.ReportNotExistedId(proto->ItemId);
+        }
+    }
 
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Item.ReportUnusedIds(ids_set);

@@ -1471,10 +1471,19 @@ void ObjectMgr::LoadItemPrototypes()
             const_cast<ItemPrototype*>(proto)->Stackable = 255;
         }
 
-        if(proto->ContainerSlots > MAX_BAG_SIZE)
+        if (proto->ContainerSlots)
         {
-            sLog.outErrorDb("Item (Entry: %u) has too large value in ContainerSlots (%u), replace by hardcoded limit (%u).",i,proto->ContainerSlots,MAX_BAG_SIZE);
-            const_cast<ItemPrototype*>(proto)->ContainerSlots = MAX_BAG_SIZE;
+            if(proto->ContainerSlots > MAX_BAG_SIZE)
+            {
+                sLog.outErrorDb("Item (Entry: %u) has too large value in ContainerSlots (%u), replace by hardcoded limit (%u).",i,proto->ContainerSlots,MAX_BAG_SIZE);
+                const_cast<ItemPrototype*>(proto)->ContainerSlots = MAX_BAG_SIZE;
+            }
+
+            if(proto->Flags & ITEM_FLAG_LOOTABLE)
+            {
+                sLog.outErrorDb("Item container (Entry: %u) has not allowed for containers flag ITEM_FLAG_LOOTABLE (%u), flag removed.",i,ITEM_FLAG_LOOTABLE);
+                const_cast<ItemPrototype*>(proto)->Flags &= ~ITEM_FLAG_LOOTABLE;
+            }
         }
 
         for (int j = 0; j < MAX_ITEM_PROTO_STATS; ++j)
@@ -1528,8 +1537,11 @@ void ObjectMgr::LoadItemPrototypes()
         if(proto->Bonding >= MAX_BIND_TYPE)
             sLog.outErrorDb("Item (Entry: %u) has wrong Bonding value (%u)",i,proto->Bonding);
 
-        if(proto->PageText && !sPageTextStore.LookupEntry<PageText>(proto->PageText))
-            sLog.outErrorDb("Item (Entry: %u) has non existing first page (Id:%u)", i,proto->PageText);
+        if(proto->PageText)
+        {
+            if(!sPageTextStore.LookupEntry<PageText>(proto->PageText))
+                sLog.outErrorDb("Item (Entry: %u) has non existing first page (Id:%u)", i,proto->PageText);
+        }
 
         if(proto->LockID && !sLockStore.LookupEntry(proto->LockID))
             sLog.outErrorDb("Item (Entry: %u) has wrong LockID (%u)",i,proto->LockID);

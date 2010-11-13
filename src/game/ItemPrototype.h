@@ -64,27 +64,29 @@ enum ItemBondingType
 
 #define MAX_BIND_TYPE                             6
 
-// masks for ITEM_FIELD_FLAGS field
-enum ItemFlags
+// Mask for ItemPrototype.Flags field
+enum ItemPrototypeFlags
 {
-    ITEM_FLAGS_BINDED                         = 0x00000001, // set in game at binding, not set in template
-    ITEM_FLAGS_CONJURED                       = 0x00000002,
-    ITEM_FLAGS_OPENABLE                       = 0x00000004,
-    ITEM_FLAGS_WRAPPED                        = 0x00000008,
-    ITEM_FLAGS_BROKEN                         = 0x00000010, // appears red icon (like when item durability==0)
-    ITEM_FLAGS_INDESTRUCTIBLE                 = 0x00000020, // used for totem. Item can not be destroyed, except by using spell (item can be reagent for spell and then allowed)
-    ITEM_FLAGS_USABLE                         = 0x00000040, // ?
-    ITEM_FLAGS_NO_EQUIP_COOLDOWN              = 0x00000080, // ?
-    ITEM_FLAGS_UNK3                           = 0x00000100,
-    ITEM_FLAGS_WRAPPER                        = 0x00000200, // used or not used wrapper
-    ITEM_FLAGS_PARTY_LOOT                     = 0x00000800, // determines if item is party loot or not
-    ITEM_FLAGS_CHARTER                        = 0x00002000, // guild charter
-    ITEM_FLAGS_UNIQUE_EQUIPPED                = 0x00080000,
-    //ITEM_FLAGS_USEABLE_IN_ARENA               = 0x00200000,
-    ITEM_FLAGS_THROWABLE                      = 0x00400000, // not used in game for check trow possibility, only for item in game tooltip
-    ITEM_FLAGS_SPECIALUSE                     = 0x00800000,
-    ITEM_FLAGS_BOA                            = 0x08000000, // bind on account (set in template for items that can binded in like way)
-    ITEM_FLAGS_MILLABLE                       = 0x20000000
+    ITEM_FLAG_UNK0                            = 0x00000001, // not used
+    ITEM_FLAG_CONJURED                        = 0x00000002,
+    ITEM_FLAG_LOOTABLE                        = 0x00000004, // affect only non container items that can be "open" for loot. It or lockid set enable for client show "Right click to open". See also ITEM_DYNFLAG_UNLOCKED
+    ITEM_FLAG_UNK3                            = 0x00000008, // not used in pre-3.x
+    /**/ITEM_FLAG_UNK4                            = 0x00000010, // can't repeat old note: appears red icon (like when item durability==0)
+    ITEM_FLAG_INDESTRUCTIBLE                  = 0x00000020, // used for totem. Item can not be destroyed, except by using spell (item can be reagent for spell and then allowed)
+    ITEM_FLAG_UNK6                            = 0x00000040, // ? old note: usable
+    ITEM_FLAG_NO_EQUIP_COOLDOWN               = 0x00000080,
+    ITEM_FLAG_UNK8                            = 0x00000100,
+    ITEM_FLAG_WRAPPER                         = 0x00000200, // used or not used wrapper
+    ITEM_FLAG_IGNORE_BAG_SPACE                = 0x00000400, // ignore bag space at new item creation?
+    ITEM_FLAG_PARTY_LOOT                      = 0x00000800, // determines if item is party loot or not
+    ITEM_FLAG_UNK12                           = 0x00001000, // not used in pre-3.x
+    ITEM_FLAG_CHARTER                         = 0x00002000, // guild charter
+    ITEM_FLAG_UNK14                           = 0x00004000,
+    ITEM_FLAG_UNK15                           = 0x00008000, // a lot of items have this
+    ITEM_FLAG_UNK16                           = 0x00010000, // a lot of items have this
+    ITEM_FLAG_UNK17                           = 0x00020000, // last used flag in 1.12.1
+
+    ITEM_FLAG_UNIQUE_EQUIPPED                 = 0x00080000, // custom server side check, in client added in 2.x
 };
 
 enum BagFamily
@@ -523,7 +525,7 @@ struct ItemPrototype
     uint32 GetMaxStackSize() const { return Stackable; }
 
     bool IsPotion() const { return Class==ITEM_CLASS_CONSUMABLE && SubClass==ITEM_SUBCLASS_POTION; }
-    bool IsConjuredConsumable() const { return Class == ITEM_CLASS_CONSUMABLE && (Flags & ITEM_FLAGS_CONJURED); }
+    bool IsConjuredConsumable() const { return Class == ITEM_CLASS_CONSUMABLE && (Flags & ITEM_FLAG_CONJURED); }
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform

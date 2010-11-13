@@ -262,7 +262,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
     }
 
     // checked at client side and not have server side appropriate error output
-    if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_INDESTRUCTIBLE))
+    if (pItem->GetProto()->Flags & ITEM_FLAG_INDESTRUCTIBLE)
     {
         _player->SendEquipError( EQUIP_ERR_CANT_DROP_SOULBOUND, NULL, NULL );
         return;
@@ -1068,7 +1068,8 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!gift->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPER))// cheating: non-wrapper wrapper
+    // cheating: non-wrapper wrapper (all empty wrappers is stackable)
+    if (!(gift->GetProto()->Flags & ITEM_FLAG_WRAPPER) || gift->GetMaxStackCount() == 1)
     {
         _player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, gift, NULL );
         return;
@@ -1094,7 +1095,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!item->GetGuidValue(ITEM_FIELD_GIFTCREATOR).IsEmpty())// HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED);
+    if (!item->GetGuidValue(ITEM_FIELD_GIFTCREATOR).IsEmpty())// HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED);
     {
         _player->SendEquipError( EQUIP_ERR_WRAPPED_CANT_BE_WRAPPED, item, NULL );
         return;
@@ -1139,7 +1140,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         case 21830: item->SetEntry(21831); break;
     }
     item->SetGuidValue(ITEM_FIELD_GIFTCREATOR, _player->GetObjectGuid());
-    item->SetUInt32Value(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED);
+    item->SetUInt32Value(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED);
     item->SetState(ITEM_CHANGED, _player);
 
     if(item->GetState()==ITEM_NEW)                          // save new item, to have alway for `character_gifts` record in `item_instance`
