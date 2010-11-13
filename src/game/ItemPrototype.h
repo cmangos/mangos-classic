@@ -71,7 +71,7 @@ enum ItemPrototypeFlags
     ITEM_FLAG_CONJURED                        = 0x00000002,
     ITEM_FLAG_LOOTABLE                        = 0x00000004, // affect only non container items that can be "open" for loot. It or lockid set enable for client show "Right click to open". See also ITEM_DYNFLAG_UNLOCKED
     ITEM_FLAG_UNK3                            = 0x00000008, // not used in pre-3.x
-    /**/ITEM_FLAG_UNK4                            = 0x00000010, // can't repeat old note: appears red icon (like when item durability==0)
+    ITEM_FLAG_UNK4                            = 0x00000010, // can't repeat old note: appears red icon (like when item durability==0)
     ITEM_FLAG_INDESTRUCTIBLE                  = 0x00000020, // used for totem. Item can not be destroyed, except by using spell (item can be reagent for spell and then allowed)
     ITEM_FLAG_UNK6                            = 0x00000040, // ? old note: usable
     ITEM_FLAG_NO_EQUIP_COOLDOWN               = 0x00000080,
