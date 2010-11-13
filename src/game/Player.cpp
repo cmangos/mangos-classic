@@ -389,7 +389,6 @@ Player::Player (WorldSession *session): Unit(), m_reputationMgr(this), m_mover(t
     if(GetSession()->GetSecurity() == SEC_PLAYER)
         SetAcceptWhispers(true);
 
-    m_comboTarget = 0;
     m_comboPoints = 0;
 
     m_usedTalentCount = 0;
@@ -6292,14 +6291,14 @@ void Player::DuelComplete(DuelCompleteType type)
         RemoveAurasDueToSpell(auras2remove[i]);
 
     // cleanup combo points
-    if(GetComboTarget()==duel->opponent->GetGUID())
+    if (GetComboTargetGuid() == duel->opponent->GetObjectGuid())
         ClearComboPoints();
-    else if(GetComboTarget()==duel->opponent->GetPetGUID())
+    else if (GetComboTargetGuid().GetRawValue() == duel->opponent->GetPetGUID())
         ClearComboPoints();
 
-    if(duel->opponent->GetComboTarget()==GetGUID())
+    if (duel->opponent->GetComboTargetGuid() == GetObjectGuid())
         duel->opponent->ClearComboPoints();
-    else if(duel->opponent->GetComboTarget()==GetPetGUID())
+    else if (duel->opponent->GetComboTargetGuid().GetRawValue() == GetPetGUID())
         duel->opponent->ClearComboPoints();
 
     //cleanups
@@ -17141,7 +17140,7 @@ void Player::InitPrimaryProfessions()
 
 void Player::SetComboPoints()
 {
-    Unit *combotarget = ObjectAccessor::GetUnit(*this, m_comboTarget);
+    Unit *combotarget = ObjectAccessor::GetUnit(*this, m_comboTargetGuid);
     if (combotarget)
     {
          SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,combotarget->GetGUID());
@@ -17157,17 +17156,17 @@ void Player::AddComboPoints(Unit* target, int8 count)
     // without combo points lost (duration checked in aura)
     RemoveSpellsCausingAura(SPELL_AURA_RETAIN_COMBO_POINTS);
 
-    if(target->GetGUID() == m_comboTarget)
+    if(target->GetObjectGuid() == m_comboTargetGuid)
     {
         m_comboPoints += count;
     }
     else
     {
-        if(m_comboTarget)
-            if(Unit* target2 = ObjectAccessor::GetUnit(*this,m_comboTarget))
+        if (!m_comboTargetGuid.IsEmpty())
+            if(Unit* target2 = ObjectAccessor::GetUnit(*this, m_comboTargetGuid))
                 target2->RemoveComboPointHolder(GetGUIDLow());
 
-        m_comboTarget = target->GetGUID();
+        m_comboTargetGuid = target->GetObjectGuid();
         m_comboPoints = count;
 
         target->AddComboPointHolder(GetGUIDLow());
@@ -17181,7 +17180,7 @@ void Player::AddComboPoints(Unit* target, int8 count)
 
 void Player::ClearComboPoints()
 {
-    if(!m_comboTarget)
+    if (m_comboTargetGuid.IsEmpty())
         return;
 
     // without combopoints lost (duration checked in aura)
@@ -17191,10 +17190,10 @@ void Player::ClearComboPoints()
 
     SetComboPoints();
 
-    if(Unit* target = ObjectAccessor::GetUnit(*this,m_comboTarget))
+    if(Unit* target = ObjectAccessor::GetUnit(*this,m_comboTargetGuid))
         target->RemoveComboPointHolder(GetGUIDLow());
 
-    m_comboTarget = 0;
+    m_comboTargetGuid.Clear();
 }
 
 void Player::SetGroup(Group *group, int8 subgroup)

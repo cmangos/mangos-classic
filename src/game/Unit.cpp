@@ -8041,8 +8041,9 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
     }
 
     int32 value = basePoints;
-    //random damage
-    if(comboDamage != 0 && unitPlayer && target && (target->GetGUID() == unitPlayer->GetComboTarget()))
+
+    // random damage
+    if (comboDamage != 0 && unitPlayer && target && (target->GetObjectGuid() == unitPlayer->GetComboTargetGuid()))
         value += (int32)(comboDamage * comboPoints);
 
     if(Player* modOwner = GetSpellModOwner())
@@ -9494,7 +9495,7 @@ void Unit::ClearComboPointHolders()
         uint32 lowguid = *m_ComboPointHolders.begin();
 
         Player* plr = sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, lowguid));
-        if(plr && plr->GetComboTarget()==GetGUID())         // recheck for safe
+        if (plr && plr->GetComboTargetGuid() == GetObjectGuid())// recheck for safe
             plr->ClearComboPoints();                        // remove also guid from m_ComboPointHolders;
         else
             m_ComboPointHolders.erase(lowguid);             // or remove manually

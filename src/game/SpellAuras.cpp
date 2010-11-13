@@ -4759,8 +4759,8 @@ void Aura::HandleAuraRetainComboPoints(bool apply, bool Real)
 
     // combo points was added in SPELL_EFFECT_ADD_COMBO_POINTS handler
     // remove only if aura expire by time (in case combo points amount change aura removed without combo points lost)
-    if( !apply && m_duration==0 && target->GetComboTarget())
-        if(Unit* unit = ObjectAccessor::GetUnit(*m_target,target->GetComboTarget()))
+    if (!apply && m_duration==0 && target->GetComboTargetGuid().IsEmpty())
+        if (Unit* unit = ObjectAccessor::GetUnit(*GetTarget(),target->GetComboTargetGuid()))
             target->AddComboPoints(unit, -m_modifier.m_amount);
 }
 
