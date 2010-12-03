@@ -1316,23 +1316,21 @@ void World::Update(uint32 diff)
     /// <li> Handle weather updates when the timer has passed
     if (m_timers[WUPDATE_WEATHERS].Passed())
     {
-        m_timers[WUPDATE_WEATHERS].Reset();
-
         ///- Send an update signal to Weather objects
-        WeatherMap::iterator itr, next;
-        for (itr = m_weathers.begin(); itr != m_weathers.end(); itr = next)
+        for (WeatherMap::iterator itr = m_weathers.begin(); itr != m_weathers.end(); )
         {
-            next = itr;
-            ++next;
-
             ///- and remove Weather objects for zones with no player
                                                             //As interval > WorldTick
             if(!itr->second->Update(m_timers[WUPDATE_WEATHERS].GetInterval()))
             {
                 delete itr->second;
-                m_weathers.erase(itr);
+                m_weathers.erase(itr++);
             }
+            else
+                ++itr;
         }
+
+        m_timers[WUPDATE_WEATHERS].SetCurrent(0);
     }
     /// <li> Update uptime table
     if (m_timers[WUPDATE_UPTIME].Passed())
