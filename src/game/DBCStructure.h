@@ -223,15 +223,31 @@ struct EmotesTextEntry
 
 struct FactionEntry
 {
-    uint32      ID;                                         // 0
-    int32       reputationListID;                           // 1
-    uint32      BaseRepRaceMask[4];                         // 2-5 Base reputation race masks (see enum Races)
-    uint32      BaseRepClassMask[4];                        // 6-9 Base reputation class masks (see enum Classes)
-    int32       BaseRepValue[4];                            // 10-13 Base reputation values
-    uint32      ReputationFlags[4];                         // 14-17 Default flags to apply
-    uint32      team;                                       // 18 enum Team
-    char*       name[8];
-    //char*     description[8 ];
+    uint32      ID;                                         // 0        m_ID
+    int32       reputationListID;                           // 1        m_reputationIndex
+    uint32      BaseRepRaceMask[4];                         // 2-5      m_reputationRaceMask
+    uint32      BaseRepClassMask[4];                        // 6-9      m_reputationClassMask
+    int32       BaseRepValue[4];                            // 10-13    m_reputationBase
+    uint32      ReputationFlags[4];                         // 14-17    m_reputationFlags
+    uint32      team;                                       // 18       m_parentFactionID
+    char*       name[8];                                    // 19-26    m_name_lang
+                                                            // 27   string flags, unused
+    //char*     description[8];                             // 28-35    m_description_lang
+                                                            // 36   string flags, unused
+
+    // helpers
+
+    int GetIndexFitTo(uint32 raceMask, uint32 classMask) const
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            if ((BaseRepRaceMask[i] == 0 || (BaseRepRaceMask[i] & raceMask)) &&
+                (BaseRepClassMask[i] == 0 || (BaseRepClassMask[i] & classMask)))
+                return i;
+        }
+
+        return -1;
+    }
 };
 
 struct FactionTemplateEntry
