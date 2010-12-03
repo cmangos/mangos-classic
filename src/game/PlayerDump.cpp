@@ -49,15 +49,16 @@ static DumpTable dumpTables[] =
     { "character_ticket",                 DTT_CHAR_TABLE },
     { "character_honor_cp",               DTT_CHAR_TABLE },
     { "character_inventory",              DTT_INVENTORY  },
-    { "mail",                             DTT_MAIL       },
-    { "mail_items",                       DTT_MAIL_ITEM  },
-    { "item_instance",                    DTT_ITEM       },
-    { "character_gifts",                  DTT_ITEM_GIFT  },
+    { "mail",                             DTT_MAIL       }, // -> mail guids
+    { "mail_items",                       DTT_MAIL_ITEM  }, // -> item guids    <- mail guids
+    { "item_instance",                    DTT_ITEM       }, //                  <- item guids
+    { "item_loot",                        DTT_ITEM_LOOT  }, //                  <- item guids
+    { "character_gifts",                  DTT_ITEM_GIFT  }, //                  <- item guids
     { "item_text",                        DTT_ITEM_TEXT  },
     { "character_pet",                    DTT_PET        },
-    { "pet_aura",                         DTT_PET_TABLE  },
-    { "pet_spell",                        DTT_PET_TABLE  },
-    { "pet_spell_cooldown",               DTT_PET_TABLE  },
+    { "pet_aura",                         DTT_PET_TABLE  }, //                  <- pet number
+    { "pet_spell",                        DTT_PET_TABLE  }, //                  <- pet number
+    { "pet_spell_cooldown",               DTT_PET_TABLE  }, //                  <- pet number
     { NULL,                               DTT_CHAR_TABLE }, // end marker
 };
 
@@ -280,6 +281,7 @@ void PlayerDumpWriter::DumpTableContent(std::string& dump, uint32 guid, char con
     {
         case DTT_ITEM:      fieldname = "guid";      guids = &items; break;
         case DTT_ITEM_GIFT: fieldname = "item_guid"; guids = &items; break;
+        case DTT_ITEM_LOOT: fieldname = "guid";      guids = &items; break;
         case DTT_PET:       fieldname = "owner";                     break;
         case DTT_PET_TABLE: fieldname = "guid";      guids = &pets;  break;
         case DTT_MAIL:      fieldname = "receiver";                  break;
@@ -602,7 +604,16 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
                     ROLLBACK(DUMP_FILE_BROKEN);
                 break;
             }
-            case DTT_PET:                                   // character_pet t
+            case DTT_ITEM_LOOT:
+            {
+                // item, owner
+                if (!changeGuid(line, 1, items, sObjectMgr.m_ItemGuids.GetNextAfterMaxUsed()))
+                    ROLLBACK(DUMP_FILE_BROKEN);             // item_loot.guid update
+                if (!changenth(line, 2, newguid))           // item_Loot.owner_guid update
+                    ROLLBACK(DUMP_FILE_BROKEN);
+                break;
+            }
+            case DTT_PET:
             {
                 //store a map of old pet id to new inserted pet id for use by type 5 tables
                 snprintf(currpetid, 20, "%s", getnth(line, 1).c_str());

@@ -1405,6 +1405,23 @@ void ObjectMgr::LoadItemPrototypes()
             const_cast<ItemPrototype*>(proto)->InventoryType = INVTYPE_NON_EQUIP;
         }
 
+        if (proto->InventoryType != INVTYPE_NON_EQUIP)
+        {
+            if(proto->Flags & ITEM_FLAG_LOOTABLE)
+            {
+                sLog.outErrorDb("Item container (Entry: %u) has not allowed for containers flag ITEM_FLAG_LOOTABLE (%u), flag removed.", i, ITEM_FLAG_LOOTABLE);
+                const_cast<ItemPrototype*>(proto)->Flags &= ~ITEM_FLAG_LOOTABLE;
+            }
+        }
+        else if (proto->InventoryType != INVTYPE_BAG)
+        {
+            if (proto->ContainerSlots > 0)
+            {
+                sLog.outErrorDb("Non-container item (Entry: %u) has ContainerSlots (%u), set to 0.", i, proto->ContainerSlots);
+                const_cast<ItemPrototype*>(proto)->ContainerSlots = 0;
+            }
+        }
+
         if(proto->RequiredSkill >= MAX_SKILL_TYPE)
         {
             sLog.outErrorDb("Item (Entry: %u) has wrong RequiredSkill value (%u)",i,proto->RequiredSkill);
@@ -1473,16 +1490,10 @@ void ObjectMgr::LoadItemPrototypes()
 
         if (proto->ContainerSlots)
         {
-            if(proto->ContainerSlots > MAX_BAG_SIZE)
+            if (proto->ContainerSlots > MAX_BAG_SIZE)
             {
                 sLog.outErrorDb("Item (Entry: %u) has too large value in ContainerSlots (%u), replace by hardcoded limit (%u).",i,proto->ContainerSlots,MAX_BAG_SIZE);
                 const_cast<ItemPrototype*>(proto)->ContainerSlots = MAX_BAG_SIZE;
-            }
-
-            if(proto->Flags & ITEM_FLAG_LOOTABLE)
-            {
-                sLog.outErrorDb("Item container (Entry: %u) has not allowed for containers flag ITEM_FLAG_LOOTABLE (%u), flag removed.",i,ITEM_FLAG_LOOTABLE);
-                const_cast<ItemPrototype*>(proto)->Flags &= ~ITEM_FLAG_LOOTABLE;
             }
         }
 

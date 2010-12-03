@@ -39,6 +39,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     ObjectGuid lguid = player->GetLootGUID();
     Loot    *loot;
     uint8    lootSlot;
+    Item* pItem = NULL;
 
     recv_data >> lootSlot;
 
@@ -60,9 +61,9 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         }
         case HIGHGUID_ITEM:
         {
-            Item *pItem = player->GetItemByGuid( lguid );
+            pItem = player->GetItemByGuid( lguid );
 
-            if (!pItem)
+            if (!pItem || !pItem->HasGeneratedLoot())
             {
                 player->SendLootRelease(lguid);
                 return;
@@ -123,6 +124,9 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         return;
     }
 
+    if (pItem)
+        pItem->SetLootState(ITEM_LOOT_CHANGED);
+
     ItemPosCountVec dest;
     uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count );
     if ( msg == EQUIP_ERR_OK )
@@ -177,6 +181,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & /*recv_data*/ )
         return;
 
     Loot *pLoot = NULL;
+    Item* pItem = NULL;
 
     switch(guid.GetHigh())
     {
@@ -201,8 +206,11 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & /*recv_data*/ )
         }
         case HIGHGUID_ITEM:
         {
-            if(Item *item = GetPlayer()->GetItemByGuid(guid))
-                pLoot = &item->loot;
+            pItem = GetPlayer()->GetItemByGuid(guid);
+            if (!pItem || !pItem->HasGeneratedLoot())
+                return;
+
+            pLoot = &pItem->loot;
             break;
         }
         case HIGHGUID_UNIT:
@@ -249,7 +257,12 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & /*recv_data*/ )
         }
         else
             player->ModifyMoney( pLoot->gold );
+
         pLoot->gold = 0;
+
+        if (pItem)
+            pItem->SetLootState(ITEM_LOOT_CHANGED);
+
         pLoot->NotifyMoneyRemoved();
     }
 }
@@ -394,12 +407,36 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
         case HIGHGUID_ITEM:
         {
             Item *pItem = player->GetItemByGuid(lguid );
-            if(!pItem)
+            if (!pItem)
                 return;
 
-            // FIXME: item don't must be deleted in case not fully looted state. But this pre-request implement loot saving in DB at item save. Or checting possible.
-            player->DestroyItem( pItem->GetBagSlot(),pItem->GetSlot(), true);
-            return;                                             // item can be looted only single player
+            ItemPrototype const* proto = pItem->GetProto();
+
+            switch (pItem->loot.loot_type)
+            {
+                // temporary loot, auto loot move
+                case LOOT_DISENCHANTING:
+                {
+                    if (!pItem->loot.isLooted())
+                        player->AutoStoreLoot(pItem->loot); // can be lost if no space
+                    pItem->loot.clear();
+                    pItem->SetLootState(ITEM_LOOT_REMOVED);
+                    player->DestroyItem( pItem->GetBagSlot(),pItem->GetSlot(), true);
+                    break;
+                }
+                // normal persistence loot
+                default:
+                {
+                    // must be destroyed only if no loot 
+                    if (pItem->loot.isLooted())
+                    {
+                        pItem->SetLootState(ITEM_LOOT_REMOVED);
+                        player->DestroyItem( pItem->GetBagSlot(),pItem->GetSlot(), true);
+                    }
+                    break;
+                }
+            }
+            return;                                         // item can be looted only single player
         }
         case HIGHGUID_UNIT:
         {

@@ -95,6 +95,8 @@ struct LootItem
     // Should be called for non-reference LootStoreItem entries only (mincountOrRef > 0)
     explicit LootItem(LootStoreItem const& li);
 
+    LootItem(uint32 itemid_, uint32 count_, int32 randomPropertyId_ = 0);
+
     // Basic checks for player/item compatibility - if false no chance to see the item in the loot
     bool AllowedForPlayer(Player const * player) const;
 };
@@ -223,6 +225,7 @@ struct Loot
     LootItemList items;
     uint32 gold;
     uint8 unlootedCount;
+    LootType loot_type;                                     // required for for proper item loot finish (store internal loot types in different from 3.x version, in fact this meaning that it send same loot types for interesting cases like 3.x version code, skip pre-3.x client loot type limitaitons)
 
     Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0) {}
     ~Loot() { clear(); }

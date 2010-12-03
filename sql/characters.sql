@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z0889_s0224_02_characters_gameobject_respawn` bit(1) default NULL
+  `required_z1014_s0386_01_characters_item_loot` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1024,6 +1024,28 @@ LOCK TABLES `item_instance` WRITE;
 /*!40000 ALTER TABLE `item_instance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `item_instance` ENABLE KEYS */;
 UNLOCK TABLES;
+
+-- Table structure for table `item_loot`
+--
+
+DROP TABLE IF EXISTS `item_loot`;
+CREATE TABLE `item_loot` (
+  `guid` int(11) unsigned NOT NULL default '0',
+  `owner_guid` int(11) unsigned NOT NULL default '0',
+  `itemid` int(11) unsigned NOT NULL default '0',
+  `amount` int(11) unsigned NOT NULL default '0',
+  `property` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`guid`,`itemid`),
+  KEY `idx_owner_guid` (`owner_guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Item System';
+
+--
+-- Dumping data for table `item_loot`
+--
+
+LOCK TABLES `item_loot` WRITE;
+/*!40000 ALTER TABLE `item_loot` DISABLE KEYS */;
+/*!40000 ALTER TABLE `item_loot` ENABLE KEYS */;
 
 --
 -- Table structure for table `item_text`
