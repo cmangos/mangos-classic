@@ -41,8 +41,8 @@ Quest::Quest(Field * questRecord)
     RequiredMaxRepValue = questRecord[15].GetInt32();
     SuggestedPlayers = questRecord[16].GetUInt32();
     LimitTime = questRecord[17].GetUInt32();
-    QuestFlags = questRecord[18].GetUInt16();
-    uint32 SpecialFlags = questRecord[19].GetUInt16();
+    m_QuestFlags = questRecord[18].GetUInt16();
+    m_SpecialFlags = questRecord[19].GetUInt16();
     PrevQuestId = questRecord[20].GetInt32();
     NextQuestId = questRecord[21].GetInt32();
     ExclusiveGroup = questRecord[22].GetInt32();
@@ -127,8 +127,6 @@ Quest::Quest(Field * questRecord)
 
     QuestStartScript = questRecord[123].GetUInt32();
     QuestCompleteScript = questRecord[124].GetUInt32();
-
-    QuestFlags |= SpecialFlags << 16;
 
     m_reqitemscount = 0;
     m_reqCreatureOrGOcount = 0;

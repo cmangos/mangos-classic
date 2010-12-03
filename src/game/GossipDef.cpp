@@ -594,12 +594,9 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     data << uint32(pQuest->GetRewMoneyMaxLevel());          // used in XP calculation at client
 
     data << uint32(pQuest->GetRewSpell());                  // reward spell, this spell will display (icon) (casted if RewSpellCast==0)
-    //data << uint32(0);
 
-   //[-ZERO] data << uint32(pQuest->GetRewSpellCast());              // casted spell
-
-    data << uint32(pQuest->GetSrcItemId());
-    data << uint32(pQuest->GetFlags() & 0xFFFF);
+    data << uint32(pQuest->GetSrcItemId());                 // source item id
+    data << uint32(pQuest->GetQuestFlags());                // quest flags
 
     int iI;
 

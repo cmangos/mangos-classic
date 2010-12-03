@@ -124,7 +124,7 @@ enum QuestTypes
     QUEST_TYPE_ESCORT              = 84,
 };
 
-enum __QuestFlags
+enum QuestFlags
 {
     // Flags used at server and sent to client
     QUEST_FLAGS_STAY_ALIVE     = 0x00000001,                // Not used currently
@@ -138,18 +138,23 @@ enum __QuestFlags
     QUEST_FLAGS_UNK2           = 0x00000100,                // Not used currently: _DELIVER_MORE Quest needs more than normal _q-item_ drops from mobs
     QUEST_FLAGS_HIDDEN_REWARDS = 0x00000200,                // Items and money rewarded only sent in SMSG_QUESTGIVER_OFFER_REWARD (not in SMSG_QUESTGIVER_QUEST_DETAILS or in client quest log(SMSG_QUEST_QUERY_RESPONSE))
     QUEST_FLAGS_AUTO_REWARDED  = 0x00000400,                // These quests are automatically rewarded on quest complete and they will never appear in quest log client side.
+};
 
+enum QuestSpecialFlags
+{
     // Mangos flags for set SpecialFlags in DB if required but used only at server
-    QUEST_MANGOS_FLAGS_REPEATABLE           = 0x010000,     // Set by 1 in SpecialFlags from DB
-    QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT = 0x020000,     // Set by 2 in SpecialFlags from DB (if required area explore, spell SPELL_EFFECT_QUEST_COMPLETE casting, table `*_script` command SCRIPT_COMMAND_QUEST_EXPLORED use, set from script DLL)
-    QUEST_MANGOS_FLAGS_DB_ALLOWED = 0xFFFF | QUEST_MANGOS_FLAGS_REPEATABLE | QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT,
+    QUEST_SPECIAL_FLAG_REPEATABLE           = 0x001,        // |1 in SpecialFlags from DB
+    QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT = 0x002,        // |2 in SpecialFlags from DB (if required area explore, spell SPELL_EFFECT_QUEST_COMPLETE casting, table `*_script` command SCRIPT_COMMAND_QUEST_EXPLORED use, set from script DLL)
+    // reserved for future versions           0x004,        // |4 in SpecialFlags.
 
     // Mangos flags for internal use only
-    QUEST_MANGOS_FLAGS_DELIVER              = 0x040000,     // Internal flag computed only
-    QUEST_MANGOS_FLAGS_SPEAKTO              = 0x080000,     // Internal flag computed only
-    QUEST_MANGOS_FLAGS_KILL_OR_CAST         = 0x100000,     // Internal flag computed only
-    QUEST_MANGOS_FLAGS_TIMED                = 0x200000,     // Internal flag computed only
+    QUEST_SPECIAL_FLAG_DELIVER              = 0x008,        // Internal flag computed only
+    QUEST_SPECIAL_FLAG_SPEAKTO              = 0x010,        // Internal flag computed only
+    QUEST_SPECIAL_FLAG_KILL_OR_CAST         = 0x020,        // Internal flag computed only
+    QUEST_SPECIAL_FLAG_TIMED                = 0x040,        // Internal flag computed only
 };
+
+#define QUEST_SPECIAL_FLAG_DB_ALLOWED (QUEST_SPECIAL_FLAG_REPEATABLE | QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT)
 
 struct QuestLocale
 {
@@ -174,8 +179,10 @@ class Quest
         Quest(Field * questRecord);
         uint32 XPValue( Player *pPlayer ) const;
 
-        bool HasQuestFlag(uint32 flag) const { return (QuestFlags & flag) != 0; }
-        void SetFlag( uint32 flag ) { QuestFlags |= flag; }
+        uint32 GetQuestFlags() const { return m_QuestFlags; }
+        bool HasQuestFlag(QuestFlags flag) const { return (m_QuestFlags & flag) != 0; }
+        bool HasSpecialFlag(QuestSpecialFlags flag) const { return (m_SpecialFlags & flag) != 0; }
+        void SetSpecialFlag(QuestSpecialFlags flag) { m_SpecialFlags |= flag; }
 
         // table data accessors:
         uint32 GetQuestId() const { return QuestId; }
@@ -225,9 +232,9 @@ class Quest
         uint32 GetCompleteEmote() const { return CompleteEmote; }
         uint32 GetQuestStartScript() const { return QuestStartScript; }
         uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
-        bool   IsRepeatable() const { return QuestFlags & QUEST_MANGOS_FLAGS_REPEATABLE; }
+
+        bool   IsRepeatable() const { return m_SpecialFlags & QUEST_SPECIAL_FLAG_REPEATABLE; }
         bool   IsAutoComplete() const { return QuestMethod ? false : true; }
-        uint32 GetFlags() const { return QuestFlags; }
         bool   IsAllowedInRaid() const;
 
         // multiple values
@@ -287,7 +294,8 @@ class Quest
         int32  RequiredMaxRepValue;
         uint32 SuggestedPlayers;
         uint32 LimitTime;
-        uint32 QuestFlags;
+        uint32 m_QuestFlags;
+        uint32 m_SpecialFlags;
         int32  PrevQuestId;
         int32  NextQuestId;
         int32  ExclusiveGroup;
