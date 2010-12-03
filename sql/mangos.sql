@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1009_s0379_01_mangos_game_event_creature_quest` bit(1) default NULL
+  `required_z1011_s0382_01_mangos_game_event_quest` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1578,30 +1578,6 @@ LOCK TABLES `game_event_creature` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `game_event_creature_quest`
---
-
-DROP TABLE IF EXISTS `game_event_creature_quest`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `game_event_creature_quest` (
-  `id` mediumint(8) unsigned NOT NULL default '0',
-  `quest` mediumint(8) unsigned NOT NULL default '0',
-  `event` smallint(5) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`id`,`quest`,`event`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `game_event_creature_quest`
---
-
-LOCK TABLES `game_event_creature_quest` WRITE;
-/*!40000 ALTER TABLE `game_event_creature_quest` DISABLE KEYS */;
-/*!40000 ALTER TABLE `game_event_creature_quest` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `game_event_gameobject`
 --
 
@@ -1650,26 +1626,23 @@ LOCK TABLES `game_event_model_equip` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `game_event_pool`
+-- Table structure for table `game_event_quest`
 --
 
-DROP TABLE IF EXISTS `game_event_pool`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `game_event_pool` (
-  `pool_entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Id of the pool',
-  `event` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Put negatives values to remove during event',
-  PRIMARY KEY (`pool_entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `game_event_quest`;
+CREATE TABLE `game_event_quest` (
+  `quest` mediumint(8) unsigned NOT NULL default '0' COMMENT 'entry from quest_template',
+  `event` smallint(5) unsigned NOT NULL default '0' COMMENT 'entry from game_event',
+  PRIMARY KEY  (`quest`,`event`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Game event system';
 
 --
--- Dumping data for table `game_event_pool`
+-- Dumping data for table `game_event_quest`
 --
 
-LOCK TABLES `game_event_pool` WRITE;
-/*!40000 ALTER TABLE `game_event_pool` DISABLE KEYS */;
-/*!40000 ALTER TABLE `game_event_pool` ENABLE KEYS */;
+LOCK TABLES `game_event_quest` WRITE;
+/*!40000 ALTER TABLE `game_event_quest` DISABLE KEYS */;
+/*!40000 ALTER TABLE `game_event_quest` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

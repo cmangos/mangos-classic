@@ -566,11 +566,14 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
         uint32 result2 = 0;
         uint32 quest_id = itr->second;
         Quest const *pQuest = sObjectMgr.GetQuestTemplate(quest_id);
-        if ( !pQuest ) continue;
+
+        if (!pQuest || !pQuest->IsActive())
+            continue;
 
         QuestStatus status = pPlayer->GetQuestStatus( quest_id );
-        if( (status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id)) ||
-            (pQuest->IsAutoComplete() && pPlayer->CanTakeQuest(pQuest, false)) )
+
+        if ((status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id)) ||
+            (pQuest->IsAutoComplete() && pPlayer->CanTakeQuest(pQuest, false)))
         {
             if ( pQuest->IsAutoComplete() && pQuest->IsRepeatable() )
                 result2 = DIALOG_STATUS_REWARD_REP;
@@ -589,7 +592,8 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
         uint32 result2 = 0;
         uint32 quest_id = itr->second;
         Quest const *pQuest = sObjectMgr.GetQuestTemplate(quest_id);
-        if ( !pQuest )
+
+        if (!pQuest || !pQuest->IsActive())
             continue;
 
         QuestStatus status = pPlayer->GetQuestStatus( quest_id );

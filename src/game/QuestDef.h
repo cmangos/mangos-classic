@@ -237,6 +237,10 @@ class Quest
         bool   IsAutoComplete() const { return QuestMethod ? false : true; }
         bool   IsAllowedInRaid() const;
 
+        // quest can be fully deactivated and will not be available for any player
+        void SetQuestActiveState(bool state) { m_isActive = state; }
+        bool IsActive() const { return m_isActive; }
+
         // multiple values
         std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
         uint32 ReqItemId[QUEST_OBJECTIVES_COUNT];
@@ -273,6 +277,8 @@ class Quest
         uint32 m_reqCreatureOrGOcount;
         uint32 m_rewchoiceitemscount;
         uint32 m_rewitemscount;
+
+        bool m_isActive;
 
         // table data
     protected:
