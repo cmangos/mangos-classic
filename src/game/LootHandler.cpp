@@ -410,8 +410,6 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
             if (!pItem)
                 return;
 
-            ItemPrototype const* proto = pItem->GetProto();
-
             switch (pItem->loot.loot_type)
             {
                 // temporary loot, auto loot move

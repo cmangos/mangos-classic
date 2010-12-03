@@ -250,22 +250,22 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
         return;
     }
 
-    int32 mapid = corpse->GetMapId();
+    uint32 corpsemapid = corpse->GetMapId();
     float x = corpse->GetPositionX();
     float y = corpse->GetPositionY();
     float z = corpse->GetPositionZ();
-    int32 corpsemapid = mapid;
+    int32 mapid = corpsemapid;
 
     // if corpse at different map
-    if(mapid != _player->GetMapId())
+    if (corpsemapid != _player->GetMapId())
     {
         // search entrance map for proper show entrance
-        if(InstanceTemplate const* temp = sObjectMgr.GetInstanceTemplate(mapid))
+        if (InstanceTemplate const* temp = sObjectMgr.GetInstanceTemplate(mapid))
         {
             if (temp->ghostEntranceMap >= 0)
             {
                 // if corpse map have entrance
-                if(Map const* entranceMap = sMapMgr.CreateBaseMap(temp->ghostEntranceMap))
+                if (Map const* entranceMap = sMapMgr.CreateBaseMap(temp->ghostEntranceMap))
                 {
                     mapid = temp->ghostEntranceMap;
                     x = temp->ghostEntranceX;
@@ -282,7 +282,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
     data << float(x);
     data << float(y);
     data << float(z);
-    data << int32(corpsemapid);
+    data << uint32(corpsemapid);
     SendPacket(&data);
 }
 

@@ -815,13 +815,13 @@ void World::SetInitialWorldSettings()
     sObjectMgr.SetHighestGuids();
 
     ///- Check the existence of the map files for all races' startup areas.
-    if(   !MapManager::ExistMapAndVMap(0,-6240.32f, 331.033f)
-        ||!MapManager::ExistMapAndVMap(0,-8949.95f,-132.493f)
-        ||!MapManager::ExistMapAndVMap(0,-8949.95f,-132.493f)
-        ||!MapManager::ExistMapAndVMap(1,-618.518f,-4251.67f)
-        ||!MapManager::ExistMapAndVMap(0, 1676.35f, 1677.45f)
-        ||!MapManager::ExistMapAndVMap(1, 10311.3f, 832.463f)
-        ||!MapManager::ExistMapAndVMap(1,-2917.58f,-257.98f))
+    if (!MapManager::ExistMapAndVMap(0,-6240.32f, 331.033f) ||
+        !MapManager::ExistMapAndVMap(0,-8949.95f,-132.493f) ||
+        !MapManager::ExistMapAndVMap(0,-8949.95f,-132.493f) ||
+        !MapManager::ExistMapAndVMap(1,-618.518f,-4251.67f) ||
+        !MapManager::ExistMapAndVMap(0, 1676.35f, 1677.45f) ||
+        !MapManager::ExistMapAndVMap(1, 10311.3f, 832.463f) ||
+        !MapManager::ExistMapAndVMap(1,-2917.58f,-257.98f))
     {
         sLog.outError("Correct *.map files not found in path '%smaps' or *.vmap/*vmdir files in '%svmaps'. Please place *.map/*.vmap/*.vmdir files in appropriate directories or correct the DataDir value in the mangosd.conf file.",m_dataPath.c_str(),m_dataPath.c_str());
         Log::WaitBeforeContinueIfNeed();
@@ -1232,7 +1232,7 @@ void World::DetectDBCLang()
 {
     uint32 m_lang_confid = sConfig.GetIntDefault("DBC.Locale", 255);
 
-    if(m_lang_confid != 255 && m_lang_confid >= MAX_LOCALE)
+    if (m_lang_confid != 255 && m_lang_confid >= MAX_LOCALE)
     {
         sLog.outError("Incorrect DBC.Locale! Must be >= 0 and < %d (set to 0)",MAX_LOCALE);
         m_lang_confid = LOCALE_enUS;
@@ -1242,10 +1242,10 @@ void World::DetectDBCLang()
 
     std::string availableLocalsStr;
 
-    int default_locale = MAX_LOCALE;
+    uint32 default_locale = MAX_LOCALE;
     for (int i = MAX_LOCALE-1; i >= 0; --i)
     {
-        if ( strlen(race->name[i]) > 0)                     // check by race names
+        if (strlen(race->name[i]) > 0)                      // check by race names
         {
             default_locale = i;
             m_availableDbcLocaleMask |= (1 << i);
@@ -1254,13 +1254,13 @@ void World::DetectDBCLang()
         }
     }
 
-    if( default_locale != m_lang_confid && m_lang_confid < MAX_LOCALE &&
+    if (default_locale != m_lang_confid && m_lang_confid < MAX_LOCALE &&
         (m_availableDbcLocaleMask & (1 << m_lang_confid)) )
     {
         default_locale = m_lang_confid;
     }
 
-    if(default_locale >= MAX_LOCALE)
+    if (default_locale >= MAX_LOCALE)
     {
         sLog.outError("Unable to determine your DBC Locale! (corrupt DBC?)");
         Log::WaitBeforeContinueIfNeed();
