@@ -7487,6 +7487,10 @@ bool PlayerCondition::Meets(Player const * player) const
                 return true;
             return false;
         }
+        case CONDITION_ITEM_WITH_BANK:
+            return player->HasItemCount(value1, value2, true);
+        case CONDITION_NOITEM_WITH_BANK:
+            return !player->HasItemCount(value1, value2, true);
         default:
             return false;
     }
@@ -7520,6 +7524,8 @@ bool PlayerCondition::IsValid(ConditionType condition, uint32 value1, uint32 val
         }
         case CONDITION_ITEM:
         case CONDITION_NOITEM:
+        case CONDITION_ITEM_WITH_BANK:
+        case CONDITION_NOITEM_WITH_BANK:
         {
             ItemPrototype const *proto = ObjectMgr::GetItemPrototype(value1);
             if (!proto)
