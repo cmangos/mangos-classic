@@ -345,7 +345,7 @@ void Item::SaveToDB()
                     continue;
 
                 CharacterDatabase.PExecute("INSERT INTO item_loot (guid,owner_guid,itemid,amount,property) "
-                    "VALUES (%u, %u, %u, %u, %u, %i)",
+                    "VALUES (%u, %u, %u, %u, %i)",
                     GetGUIDLow(), owner->GetGUIDLow(), item->itemid, item->count, item->randomPropertyId);
             }
         }
