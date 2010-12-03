@@ -710,7 +710,9 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
     pCreature->StopMoving();
 
     VendorItemData const* vItems = pCreature->GetVendorItems();
-    if(!vItems)
+    VendorItemData const* tItems = pCreature->GetVendorTemplateItems();
+
+    if (!vItems && !tItems)
     {
         WorldPacket data( SMSG_LIST_INVENTORY, (8+1+1) );
         data << ObjectGuid(vendorguid);
@@ -720,7 +722,9 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
         return;
     }
 
-    uint8 numitems = vItems->GetItemCount();
+    uint8 customitems = vItems ? vItems->GetItemCount() : 0;
+    uint8 numitems = customitems + (tItems ? tItems->GetItemCount() : 0);
+
     uint8 count = 0;
 
     WorldPacket data( SMSG_LIST_INVENTORY, (8+1+numitems*7*4) );
@@ -733,7 +737,9 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
 
     for(int i = 0; i < numitems; ++i )
     {
-        if (VendorItem const* crItem = vItems->GetItem(i))
+        VendorItem const* crItem = i < customitems ? vItems->GetItem(i) : tItems->GetItem(i - customitems);
+
+        if (crItem)
         {
             if (ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(crItem->item))
             {
