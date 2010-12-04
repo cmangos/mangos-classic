@@ -1475,7 +1475,6 @@ void ObjectMgr::LoadItemPrototypes()
         }
 
         {
-
             // can be used in equip slot, as page read use in inventory, or spell casting at use
             bool req = proto->InventoryType!=INVTYPE_NON_EQUIP || proto->PageText;
             if(!req)
@@ -1523,7 +1522,7 @@ void ObjectMgr::LoadItemPrototypes()
         // else if(proto->RequiredReputationRank > MIN_REPUTATION_RANK)
         //    sLog.outErrorDb("Item (Entry: %u) has RequiredReputationFaction ==0 but RequiredReputationRank > 0, rank setting is useless.",i);
 
-        if(proto->Stackable==0)
+        if(proto->Stackable == 0)
         {
             sLog.outErrorDb("Item (Entry: %u) has wrong value in stackable (%u), replace by default 1.",i,proto->Stackable);
             const_cast<ItemPrototype*>(proto)->Stackable = 1;
