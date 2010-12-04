@@ -105,6 +105,8 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
 
 bool UpdateData::BuildPacket(WorldPacket *packet, bool hasTransport)
 {
+    MANGOS_ASSERT(packet->empty());                         // shouldn't happen
+
     ByteBuffer buf(4 + 1 + (m_outOfRangeGUIDs.empty() ? 0 : 1 + 4 + m_outOfRangeGUIDs.size()*9)+m_data.size());
 
     buf << (uint32) (!m_outOfRangeGUIDs.empty() ? m_blockCount + 1 : m_blockCount);
