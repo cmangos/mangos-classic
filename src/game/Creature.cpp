@@ -209,7 +209,6 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
         return false;
     }
 
-    uint32 actualEntry = Entry;
     CreatureInfo const *cinfo = normalInfo;
 
     SetEntry(Entry);                                        // normal entry always
