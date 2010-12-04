@@ -2716,11 +2716,10 @@ void Aura::HandleModCharm(bool apply, bool Real)
                     // creature with pet number expected have class set
                     if(target->GetByteValue(UNIT_FIELD_BYTES_0, 1)==0)
                     {
-                        CreatureDataAddon const *cainfo = ((Creature*)target)->GetCreatureAddon();
-                        if(!cainfo || (cainfo->bytes0 & 0x0000FF00) == 0)
-                            sLog.outErrorDb("Creature (Entry: %u) not have creature addon or have bytes0 class byte = 0 but used in charmed spell, that will be result client crash.",cinfo->Entry);
+                        if(cinfo->unit_class==0)
+                            sLog.outErrorDb("Creature (Entry: %u) have unit_class = 0 but used in charmed spell, that will be result client crash.",cinfo->Entry);
                         else
-                            sLog.outError("Creature (Entry: %u) have creature addon with bytes0 = %u but at charming have class 0!!! that will be result client crash.",cinfo->Entry,cainfo->bytes0);
+                            sLog.outError("Creature (Entry: %u) have unit_class = %u but at charming have class 0!!! that will be result client crash.",cinfo->Entry,cinfo->unit_class);
 
                         target->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
                     }
@@ -2761,8 +2760,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
             if(cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->type == CREATURE_TYPE_DEMON)
             {
                 // DB must have proper class set in field at loading, not req. restore, including workaround case at apply
-                //if(CreatureDataAddon const *cainfo = ((Creature*)target)->GetCreatureAddon())
-                //    target->SetByteValue(UNIT_FIELD_BYTES_0, 1, (cainfo->bytes0 & 0x0000FF00) >> 8);
+                // m_target->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->unit_class);
 
                 if(target->GetCharmInfo())
                     target->GetCharmInfo()->SetPetNumber(0, true);
