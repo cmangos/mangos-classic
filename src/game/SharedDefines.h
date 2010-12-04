@@ -2117,6 +2117,15 @@ enum SummonType
     SUMMON_TYPE_POSESSED2   = 428
 };
 
+enum InstanceResetMethod
+{
+    INSTANCE_RESET_ALL,
+    INSTANCE_RESET_GLOBAL,
+    INSTANCE_RESET_GROUP_DISBAND,
+    INSTANCE_RESET_GROUP_JOIN,
+    INSTANCE_RESET_RESPAWN_DELAY
+};
+
 enum ResponseCodes
 {
     RESPONSE_SUCCESS                                       = 0x00,
