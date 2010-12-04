@@ -403,9 +403,10 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
 
     //    sLog.outDetail("    Generated %lu waypoints, total time %u.", (unsigned long)m_WayPoints.size(), timer);
 
-    m_curr = m_WayPoints.begin();
-    m_curr = GetNextWayPoint();
-    m_next = GetNextWayPoint();
+    m_next = m_WayPoints.begin();                           // will used in MoveToNextWayPoint for init m_curr
+    MoveToNextWayPoint();                                   // m_curr -> first point
+    MoveToNextWayPoint();                                   // skip first point 
+
     m_pathTime = timer;
 
     m_nextNodeTime = m_curr->first;
@@ -413,13 +414,13 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
     return true;
 }
 
-Transport::WayPointMap::const_iterator Transport::GetNextWayPoint()
+void Transport::MoveToNextWayPoint()
 {
-    WayPointMap::const_iterator iter = m_curr;
-    ++iter;
-    if (iter == m_WayPoints.end())
-        iter = m_WayPoints.begin();
-    return iter;
+    m_curr = m_next;
+
+    ++m_next;
+    if (m_next == m_WayPoints.end())
+        m_next = m_WayPoints.begin();
 }
 
 void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
@@ -488,8 +489,7 @@ void Transport::Update(uint32 /*p_time*/)
     m_timer = getMSTime() % m_period;
     while (((m_timer - m_curr->first) % m_pathTime) > ((m_next->first - m_curr->first) % m_pathTime))
     {
-        m_curr = GetNextWayPoint();
-        m_next = GetNextWayPoint();
+        MoveToNextWayPoint();
 
         // first check help in case client-server transport coordinates de-synchronization
         if (m_curr->second.mapid != GetMapId() || m_curr->second.teleport)
