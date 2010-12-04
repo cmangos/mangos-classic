@@ -2686,7 +2686,7 @@ void Map::ScriptsProcess()
                 if (step.script->talk.flags & 0x02)
                     target = source;
 
-                uint64 unit_target = target ? target->GetGUID() : 0;
+                Unit* unitTarget = target && target->isType(TYPEMASK_UNIT) ? static_cast<Unit*>(target) : NULL;
                 int32 textId = step.script->talk.textId[0];
 
                 // May have text for random
@@ -2706,35 +2706,35 @@ void Map::ScriptsProcess()
                 switch(step.script->talk.chatType)
                 {
                     case CHAT_TYPE_SAY:
-                        pSource->MonsterSay(textId, step.script->talk.language, unit_target);
+                        pSource->MonsterSay(textId, step.script->talk.language, unitTarget);
                         break;
                     case CHAT_TYPE_YELL:
-                        pSource->MonsterYell(textId, step.script->talk.language, unit_target);
+                        pSource->MonsterYell(textId, step.script->talk.language, unitTarget);
                         break;
                     case CHAT_TYPE_TEXT_EMOTE:
-                        pSource->MonsterTextEmote(textId, unit_target);
+                        pSource->MonsterTextEmote(textId, unitTarget);
                         break;
                     case CHAT_TYPE_BOSS_EMOTE:
-                        pSource->MonsterTextEmote(textId, unit_target, true);
+                        pSource->MonsterTextEmote(textId, unitTarget, true);
                         break;
                     case CHAT_TYPE_WHISPER:
-                        if (!unit_target || !IS_PLAYER_GUID(unit_target))
+                        if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         {
-                            sLog.outError("SCRIPT_COMMAND_TALK (script id %u) attempt to whisper (%u) 0-guid or non-player, skipping.", step.script->id, step.script->talk.chatType);
+                            sLog.outError("SCRIPT_COMMAND_TALK (script id %u) attempt to whisper (%u) to %s, skipping.", step.script->id, step.script->talk.chatType, unitTarget ? unitTarget->GetObjectGuid().GetString().c_str() : "<no target>");
                             break;
                         }
-                        pSource->MonsterWhisper(textId, unit_target);
+                        pSource->MonsterWhisper(textId, unitTarget);
                         break;
                     case CHAT_TYPE_BOSS_WHISPER:
-                        if (!unit_target || !IS_PLAYER_GUID(unit_target))
+                        if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         {
-                            sLog.outError("SCRIPT_COMMAND_TALK (script id %u) attempt to whisper (%u) 0-guid or non-player, skipping.", step.script->id, step.script->talk.chatType);
+                            sLog.outError("SCRIPT_COMMAND_TALK (script id %u) attempt to whisper (%u) to %s, skipping.", step.script->id, step.script->talk.chatType, unitTarget ? unitTarget->GetObjectGuid().GetString().c_str() : "<no target>");
                             break;
                         }
-                        pSource->MonsterWhisper(textId, unit_target, true);
+                        pSource->MonsterWhisper(textId, unitTarget, true);
                         break;
                     case CHAT_TYPE_ZONE_YELL:
-                        pSource->MonsterYellToZone(textId, step.script->talk.language, unit_target);
+                        pSource->MonsterYellToZone(textId, step.script->talk.language, unitTarget);
                         break;
                     default:
                         break;                              // must be already checked at load

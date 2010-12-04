@@ -430,16 +430,16 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         virtual void SendMessageToSetInRange(WorldPacket *data, float dist, bool self);
         void SendMessageToSetExcept(WorldPacket *data, Player const* skipped_receiver);
 
-        void MonsterSay(const char* text, uint32 language, uint64 TargetGuid);
-        void MonsterYell(const char* text, uint32 language, uint64 TargetGuid);
-        void MonsterTextEmote(const char* text, uint64 TargetGuid, bool IsBossEmote = false);
-        void MonsterWhisper(const char* text, uint64 receiver, bool IsBossWhisper = false);
-        void MonsterSay(int32 textId, uint32 language, uint64 TargetGuid);
-        void MonsterYell(int32 textId, uint32 language, uint64 TargetGuid);
-        void MonsterTextEmote(int32 textId, uint64 TargetGuid, bool IsBossEmote = false);
-        void MonsterWhisper(int32 textId, uint64 receiver, bool IsBossWhisper = false);
-        void MonsterYellToZone(int32 textId, uint32 language, uint64 TargetGuid);
-        void BuildMonsterChat(WorldPacket *data, uint8 msgtype, char const* text, uint32 language, char const* name, uint64 TargetGuid) const;
+        void MonsterSay(const char* text, uint32 language, Unit* target = NULL);
+        void MonsterYell(const char* text, uint32 language, Unit* target = NULL);
+        void MonsterTextEmote(const char* text, Unit* target, bool IsBossEmote = false);
+        void MonsterWhisper(const char* text, Unit* target, bool IsBossWhisper = false);
+        void MonsterSay(int32 textId, uint32 language, Unit* target = NULL);
+        void MonsterYell(int32 textId, uint32 language, Unit* target = NULL);
+        void MonsterTextEmote(int32 textId, Unit* target, bool IsBossEmote = false);
+        void MonsterWhisper(int32 textId, Unit* receiver, bool IsBossWhisper = false);
+        void MonsterYellToZone(int32 textId, uint32 language, Unit* target);
+        void BuildMonsterChat(WorldPacket *data, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName) const;
 
         void PlayDistanceSound(uint32 sound_id, Player* target = NULL);
         void PlayDirectSound(uint32 sound_id, Player* target = NULL);
