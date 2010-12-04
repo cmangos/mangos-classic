@@ -61,11 +61,13 @@ class ByteBuffer
         {
             _storage.reserve(DEFAULT_SIZE);
         }
+
         // constructor
         ByteBuffer(size_t res): _rpos(0), _wpos(0)
         {
             _storage.reserve(res);
         }
+
         // copy constructor
         ByteBuffer(const ByteBuffer &buf): _rpos(buf._rpos), _wpos(buf._wpos), _storage(buf._storage) { }
 
@@ -86,16 +88,19 @@ class ByteBuffer
             append<uint8>(value);
             return *this;
         }
+
         ByteBuffer &operator<<(uint16 value)
         {
             append<uint16>(value);
             return *this;
         }
+
         ByteBuffer &operator<<(uint32 value)
         {
             append<uint32>(value);
             return *this;
         }
+
         ByteBuffer &operator<<(uint64 value)
         {
             append<uint64>(value);
@@ -108,16 +113,19 @@ class ByteBuffer
             append<int8>(value);
             return *this;
         }
+
         ByteBuffer &operator<<(int16 value)
         {
             append<int16>(value);
             return *this;
         }
+
         ByteBuffer &operator<<(int32 value)
         {
             append<int32>(value);
             return *this;
         }
+
         ByteBuffer &operator<<(int64 value)
         {
             append<int64>(value);
@@ -130,17 +138,20 @@ class ByteBuffer
             append<float>(value);
             return *this;
         }
+
         ByteBuffer &operator<<(double value)
         {
             append<double>(value);
             return *this;
         }
+
         ByteBuffer &operator<<(const std::string &value)
         {
             append((uint8 const *)value.c_str(), value.length());
             append((uint8)0);
             return *this;
         }
+
         ByteBuffer &operator<<(const char *str)
         {
             append((uint8 const *)str, str ? strlen(str) : 0);
@@ -159,16 +170,19 @@ class ByteBuffer
             value = read<uint8>();
             return *this;
         }
+
         ByteBuffer &operator>>(uint16 &value)
         {
             value = read<uint16>();
             return *this;
         }
+
         ByteBuffer &operator>>(uint32 &value)
         {
             value = read<uint32>();
             return *this;
         }
+
         ByteBuffer &operator>>(uint64 &value)
         {
             value = read<uint64>();
@@ -181,16 +195,19 @@ class ByteBuffer
             value = read<int8>();
             return *this;
         }
+
         ByteBuffer &operator>>(int16 &value)
         {
             value = read<int16>();
             return *this;
         }
+
         ByteBuffer &operator>>(int32 &value)
         {
             value = read<int32>();
             return *this;
         }
+
         ByteBuffer &operator>>(int64 &value)
         {
             value = read<int64>();
@@ -202,20 +219,22 @@ class ByteBuffer
             value = read<float>();
             return *this;
         }
+
         ByteBuffer &operator>>(double &value)
         {
             value = read<double>();
             return *this;
         }
+
         ByteBuffer &operator>>(std::string& value)
         {
             value.clear();
             while (rpos() < size())                         // prevent crash at wrong string format in packet
             {
-                char c=read<char>();
-                if (c==0)
+                char c = read<char>();
+                if (c == 0)
                     break;
-                value+=c;
+                value += c;
             }
             return *this;
         }
@@ -239,7 +258,7 @@ class ByteBuffer
         {
             _rpos = rpos_;
             return _rpos;
-        };
+        }
 
         size_t wpos() const { return _wpos; }
 
@@ -261,10 +280,11 @@ class ByteBuffer
 
         template <typename T> T read()
         {
-            T r=read<T>(_rpos);
+            T r = read<T>(_rpos);
             _rpos += sizeof(T);
             return r;
-        };
+        }
+
         template <typename T> T read(size_t pos) const
         {
             if(pos + sizeof(T) > size())
@@ -288,13 +308,13 @@ class ByteBuffer
             uint8 guidmark = 0;
             (*this) >> guidmark;
 
-            for(int i=0;i<8;i++)
+            for(int i = 0; i < 8; ++i)
             {
                 if(guidmark & (uint8(1) << i))
                 {
                     uint8 bit;
                     (*this) >> bit;
-                    guid |= (uint64(bit) << (i*8));
+                    guid |= (uint64(bit) << (i * 8));
                 }
             }
 
@@ -311,28 +331,33 @@ class ByteBuffer
             _storage.resize(newsize);
             _rpos = 0;
             _wpos = size();
-        };
+        }
+
         void reserve(size_t ressize)
         {
-            if (ressize > size()) _storage.reserve(ressize);
-        };
+            if (ressize > size())
+                _storage.reserve(ressize);
+        }
 
         void append(const std::string& str)
         {
-            append((uint8 const*)str.c_str(),str.size() + 1);
+            append((uint8 const*)str.c_str(), str.size() + 1);
         }
+
         void append(const char *src, size_t cnt)
         {
             return append((const uint8 *)src, cnt);
         }
-        template<class T>
-        void append(const T *src, size_t cnt)
+
+        template<class T> void append(const T *src, size_t cnt)
         {
-            return append((const uint8 *)src, cnt*sizeof(T));
+            return append((const uint8 *)src, cnt * sizeof(T));
         }
+
         void append(const uint8 *src, size_t cnt)
         {
-            if (!cnt) return;
+            if (!cnt)
+                return;
 
             MANGOS_ASSERT(size() < 10000000);
 
@@ -341,9 +366,11 @@ class ByteBuffer
             memcpy(&_storage[_wpos], src, cnt);
             _wpos += cnt;
         }
+
         void append(const ByteBuffer& buffer)
         {
-            if(buffer.size()) append(buffer.contents(),buffer.size());
+            if(buffer.wpos())
+                append(buffer.contents(), buffer.wpos());
         }
 
         void appendPackGUID(uint64 guid)
@@ -372,13 +399,14 @@ class ByteBuffer
                 throw ByteBufferException(true, pos, cnt, size());
             memcpy(&_storage[pos], src, cnt);
         }
+
         void print_storage() const
         {
             if (!sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))   // optimize disabled debug output
                 return;
 
             sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
-            for(uint32 i = 0; i < size(); i++)
+            for(uint32 i = 0; i < size(); ++i)
                 sLog.outDebugInLine("%u - ", read<uint8>(i) );
             sLog.outDebug(" ");
         }
@@ -389,7 +417,7 @@ class ByteBuffer
                 return;
 
             sLog.outDebug("STORAGE_SIZE: %lu", (unsigned long)size() );
-            for(uint32 i = 0; i < size(); i++)
+            for(uint32 i = 0; i < size(); ++i)
                 sLog.outDebugInLine("%c", read<uint8>(i) );
             sLog.outDebug(" ");
         }
@@ -405,14 +433,14 @@ class ByteBuffer
             if (sLog.IsIncludeTime())
                 sLog.outDebugInLine("         ");
 
-            for(uint32 i = 0; i < size(); i++)
+            for(uint32 i = 0; i < size(); ++i)
             {
-                if ((i == (j*8)) && ((i != (k*16))))
+                if ((i == (j * 8)) && ((i != (k * 16))))
                 {
                     sLog.outDebugInLine("| %02X ", read<uint8>(i));
                     ++j;
                 }
-                else if (i == (k*16))
+                else if (i == (k * 16))
                 {
                     sLog.outDebugInLine("\n");
                     if(sLog.IsIncludeTime())
@@ -447,7 +475,7 @@ template <typename T>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> const& v)
 {
     b << (uint32)v.size();
-    for (typename std::vector<T>::iterator i = v.begin(); i != v.end(); i++)
+    for (typename std::vector<T>::iterator i = v.begin(); i != v.end(); ++i)
     {
         b << *i;
     }
@@ -473,7 +501,7 @@ template <typename T>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::list<T> const& v)
 {
     b << (uint32)v.size();
-    for (typename std::list<T>::iterator i = v.begin(); i != v.end(); i++)
+    for (typename std::list<T>::iterator i = v.begin(); i != v.end(); ++i)
     {
         b << *i;
     }
@@ -499,7 +527,7 @@ template <typename K, typename V>
 inline ByteBuffer &operator<<(ByteBuffer &b, std::map<K, V> &m)
 {
     b << (uint32)m.size();
-    for (typename std::map<K, V>::iterator i = m.begin(); i != m.end(); i++)
+    for (typename std::map<K, V>::iterator i = m.begin(); i != m.end(); ++i)
     {
         b << i->first << i->second;
     }
