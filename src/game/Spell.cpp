@@ -66,10 +66,6 @@ SpellCastTargets::SpellCastTargets()
     m_itemTarget = NULL;
     m_GOTarget   = NULL;
 
-    m_unitTargetGUID   = 0;
-    m_GOTargetGUID     = 0;
-    m_CorpseTargetGUID = 0;
-    m_itemTargetGUID   = 0;
     m_itemTargetEntry  = 0;
 
     m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0.0f;
@@ -192,14 +188,14 @@ void SpellCastTargets::read( ByteBuffer& data, Unit *caster )
     if(( m_targetMask & ( TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM )) && caster->GetTypeId() == TYPEID_PLAYER)
         data >> m_itemTargetGUID.ReadAsPacked();
 
-    if( m_targetMask & TARGET_FLAG_SOURCE_LOCATION )
+    if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
     {
         data >> m_srcX >> m_srcY >> m_srcZ;
         if(!MaNGOS::IsValidMapCoord(m_srcX, m_srcY, m_srcZ))
             throw ByteBufferException(false, data.rpos(), 0, data.size());
     }
 
-    if( m_targetMask & TARGET_FLAG_DEST_LOCATION )
+    if (m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
         data >> m_destX >> m_destY >> m_destZ;
         if(!MaNGOS::IsValidMapCoord(m_destX, m_destY, m_destZ))
@@ -250,10 +246,10 @@ void SpellCastTargets::write( ByteBuffer& data ) const
             data << uint8(0);
     }
 
-    if( m_targetMask & TARGET_FLAG_SOURCE_LOCATION )
+    if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
         data << m_srcX << m_srcY << m_srcZ;
 
-    if( m_targetMask & TARGET_FLAG_DEST_LOCATION )
+    if (m_targetMask & TARGET_FLAG_DEST_LOCATION)
         data << m_destX << m_destY << m_destZ;
 
     if( m_targetMask & TARGET_FLAG_STRING )
