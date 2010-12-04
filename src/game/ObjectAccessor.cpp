@@ -175,7 +175,7 @@ ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* ma
 {
     Guard guard(i_corpseGuard);
     for(Player2CorpsesMapType::iterator iter = i_player2corpse.begin(); iter != i_player2corpse.end(); ++iter)
-        if(iter->second->GetGrid()==gridpair)
+        if(iter->second->GetGrid() == gridpair)
     {
         // verify, if the corpse in our instance (add only corpses which are)
         if (map->Instanceable())
@@ -209,10 +209,11 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
     // remove corpse from player_guid -> corpse map
     RemoveCorpse(corpse);
 
-    // remove resurrectble corpse from grid object registry (loaded state checked into call)
+    // remove resurrectable corpse from grid object registry (loaded state checked into call)
     // do not load the map if it's not loaded
     Map *map = sMapMgr.FindMap(corpse->GetMapId(), corpse->GetInstanceId());
-    if(map) map->Remove(corpse,false);
+    if (map)
+        map->Remove(corpse, false);
 
     // remove corpse from DB
     corpse->DeleteFromDB();
@@ -228,7 +229,7 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
         bones = new Corpse;
         bones->Create(corpse->GetGUIDLow());
 
-        for (int i = 3; i < CORPSE_END; i++)                    // don't overwrite guid and object type
+        for (int i = 3; i < CORPSE_END; ++i)                    // don't overwrite guid and object type
             bones->SetUInt32Value(i, corpse->GetUInt32Value(i));
 
         bones->SetGrid(corpse->GetGrid());
@@ -240,7 +241,7 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
         bones->SetUInt32Value(CORPSE_FIELD_FLAGS, CORPSE_FLAG_UNK2 | CORPSE_FLAG_BONES);
         bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
 
-        for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
+        for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
         {
             if(corpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
                 bones->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
