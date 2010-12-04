@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1022_s0117_01_mangos_creature_ai_scripts` bit(1) default NULL
+  `required_z1034_s0407_01_mangos_gossip_menu_option` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2000,7 +2000,7 @@ CREATE TABLE gossip_menu_option (
   option_text text,
   option_id tinyint(3) unsigned NOT NULL default '0',
   npc_option_npcflag int(10) unsigned NOT NULL default '0',
-  action_menu_id mediumint(8) unsigned NOT NULL default '0',
+  action_menu_id mediumint(8) NOT NULL default '0',
   action_poi_id mediumint(8) unsigned NOT NULL default '0',
   action_script_id mediumint(8) unsigned NOT NULL default '0',
   box_coded tinyint(3) unsigned NOT NULL default '0',
