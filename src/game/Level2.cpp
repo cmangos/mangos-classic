@@ -3532,8 +3532,8 @@ bool ChatHandler::HandleWpShowCommand(char* args)
 
     if(show == "off")
     {
-        QueryResult *result = WorldDatabase.PQuery("SELECT guid FROM creature WHERE id = '%d'", VISUAL_WAYPOINT);
-        if(!result)
+        QueryResult *result = WorldDatabase.PQuery("SELECT guid FROM creature WHERE id = '%u'", VISUAL_WAYPOINT);
+        if (!result)
         {
             SendSysMessage(LANG_WAYPOINT_VP_NOTFOUND);
             SetSentErrorMessage(true);
