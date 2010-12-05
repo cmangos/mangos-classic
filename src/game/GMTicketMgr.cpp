@@ -19,7 +19,7 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "Database/SQLStorage.h"
+#include "SQLStorages.h"
 #include "GMTicketMgr.h"
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"

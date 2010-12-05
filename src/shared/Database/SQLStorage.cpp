@@ -20,36 +20,6 @@
 #include "SQLStorage.h"
 #include "SQLStorageImpl.h"
 
-#ifdef DO_POSTGRESQL
-extern DatabasePostgre  WorldDatabase;
-#else
-extern DatabaseMysql  WorldDatabase;
-#endif
-
-const char CreatureInfosrcfmt[]="iiiiissiiiiiiiiiiifffiffiifiiiiiiiiiiffiiiiiiiiiiiiiiiiiiisiiilliiiis";
-const char CreatureInfodstfmt[]="iiiiissiiiiiiiiiiifffiffiifiiiiiiiiiiffiiiiiiiiiiiiiiiiiiisiiilliiiii";
-const char CreatureDataAddonInfofmt[]="iiiiiis";
-const char CreatureModelfmt[]="iffbii";
-const char CreatureInfoAddonInfofmt[]="iiiiiis";
-const char EquipmentInfofmt[]="iiiiiiiiii";
-const char GameObjectInfosrcfmt[]="iiisiifiiiiiiiiiiiiiiiiiiiiiiiiiis";
-const char GameObjectInfodstfmt[]="iiisiifiiiiiiiiiiiiiiiiiiiiiiiiiii";
-const char ItemPrototypesrcfmt[]="iiisiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiifiiiiiifiiiiiifiiiiiifiiiiiifiiiisiiiiiiiiiiiiiisiiiiii";
-const char ItemPrototypedstfmt[]="iiisiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiifiiiiiifiiiiiifiiiiiifiiiiiifiiiisiiiiiiiiiiiiiiiiiiiii";
-const char PageTextfmt[]="isi";
-const char InstanceTemplatesrcfmt[]="iiiiiiiffs";
-const char InstanceTemplatedstfmt[]="iiiiiiiffi";
-
-SQLStorage sCreatureStorage(CreatureInfosrcfmt, CreatureInfodstfmt, "entry","creature_template");
-SQLStorage sCreatureDataAddonStorage(CreatureDataAddonInfofmt,"guid","creature_addon");
-SQLStorage sCreatureModelStorage(CreatureModelfmt,"modelid","creature_model_info");
-SQLStorage sCreatureInfoAddonStorage(CreatureInfoAddonInfofmt,"entry","creature_template_addon");
-SQLStorage sEquipmentStorage(EquipmentInfofmt,"entry","creature_equip_template");
-SQLStorage sGOStorage(GameObjectInfosrcfmt, GameObjectInfodstfmt, "entry","gameobject_template");
-SQLStorage sItemStorage(ItemPrototypesrcfmt, ItemPrototypedstfmt, "entry","item_template");
-SQLStorage sPageTextStore(PageTextfmt,"entry","page_text");
-SQLStorage sInstanceTemplate(InstanceTemplatesrcfmt, InstanceTemplatedstfmt, "map","instance_template");
-
 void SQLStorage::EraseEntry(uint32 id)
 {
     uint32 offset=0;
