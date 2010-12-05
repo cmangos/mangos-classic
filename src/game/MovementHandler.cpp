@@ -72,9 +72,6 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     GetPlayer()->SetMap(sMapMgr.CreateMap(loc.mapid, GetPlayer()));
     GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
 
-    // check this before Map::Add(player), because that will create the instance save!
-    bool reset_notify = (GetPlayer()->GetBoundInstance(GetPlayer()->GetMapId()) == NULL);
-
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     // the CanEnter checks are done in TeleporTo but conditions may change
     // while the player is in transit, for example the map may get full
@@ -97,7 +94,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         // cleanup seting if outdated
         if(!mEntry->IsBattleGround())
         {
-            _player->SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE); // We're not in BG.
+            // We're not in BG
+            _player->SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE);
             // reset destination bg team
             _player->SetBGTeam(0);
         }
@@ -140,10 +138,10 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     if(mEntry->IsRaid() && mInstance)
     {
-        if(reset_notify)
+        if (time_t timeReset = sInstanceSaveMgr.GetScheduler().GetResetTimeFor(GetPlayer()->GetMapId()))
         {
-            uint32 timeleft = sInstanceSaveMgr.GetScheduler().GetResetTimeFor(GetPlayer()->GetMapId()) - time(NULL);
-            GetPlayer()->SendInstanceResetWarning(GetPlayer()->GetMapId(), timeleft); // greeting at the entrance of the resort raid instance
+            uint32 timeleft = uint32(timeReset - time(NULL));
+            GetPlayer()->SendInstanceResetWarning(GetPlayer()->GetMapId(), timeleft);
         }
     }
 
