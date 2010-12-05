@@ -319,6 +319,8 @@ enum DrunkenState
     DRUNKEN_SMASHED = 3
 };
 
+#define MAX_DRUNKEN   4
+
 enum TYPE_OF_HONOR
 {
     HONORABLE    = 1,
