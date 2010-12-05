@@ -519,7 +519,7 @@ void Creature::Update(uint32 diff)
 
             RegenerateMana();
 
-            m_regenTimer = 2000;
+            m_regenTimer = REGEN_TIME_FULL;
             break;
         }
         case CORPSE_FALLING:

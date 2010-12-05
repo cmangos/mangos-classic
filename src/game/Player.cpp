@@ -1899,7 +1899,6 @@ void Player::RegenerateAll()
 {
     if (m_regenTimer != 0)
         return;
-    uint32 regenDelay = 2000;
 
     // Not in combat or they have regeneration
     if( !isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
@@ -1914,7 +1913,7 @@ void Player::RegenerateAll()
 
     Regenerate( POWER_MANA );
 
-    m_regenTimer = regenDelay;
+    m_regenTimer = REGEN_TIME_FULL;
 }
 
 void Player::Regenerate(Powers power)
