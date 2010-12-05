@@ -1273,8 +1273,7 @@ void Aura::TriggerSpell()
                         if (int32 mana = triggerTarget->GetMaxPower(POWER_MANA))
                         {
                             mana /= 10;
-                            triggerTarget->ModifyPower(POWER_MANA, mana);
-                            triggerTarget->SendEnergizeSpellLog(triggerTarget, 23493, mana, POWER_MANA);
+                            triggerTarget->EnergizeBySpell(triggerTarget, 23493, mana, POWER_MANA);
                         }
                         return;
                     }
