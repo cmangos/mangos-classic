@@ -1794,8 +1794,8 @@ bool Creature::LoadCreatureAddon(bool reload)
 
         SetByteValue(UNIT_FIELD_BYTES_1, 0, uint8(cainfo->bytes1 & 0xFF));
         //SetByteValue(UNIT_FIELD_BYTES_1, 1, uint8((cainfo->bytes1 >> 8) & 0xFF));
-        SetByteValue(UNIT_FIELD_BYTES_1, 1, 0);
-        SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
+        //SetByteValue(UNIT_FIELD_BYTES_1, 1, 0);
+        //SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
         SetByteValue(UNIT_FIELD_BYTES_1, 3, uint8((cainfo->bytes1 >> 24) & 0xFF));
     }
 
@@ -1807,9 +1807,8 @@ bool Creature::LoadCreatureAddon(bool reload)
 
         SetByteValue(UNIT_FIELD_BYTES_2, 0, uint8(cainfo->bytes2 & 0xFF));
         SetByteValue(UNIT_FIELD_BYTES_2, 1, uint8((cainfo->bytes2 >> 8) & 0xFF));
-        //SetByteValue(UNIT_FIELD_BYTES_2, 2, uint8((cainfo->bytes2 >> 16) & 0xFF));
-        SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
-        //SetByteValue(UNIT_FIELD_BYTES_2, 3, uint8((cainfo->bytes2 >> 24) & 0xFF));
+        //SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
+        //SetByteValue(UNIT_FIELD_BYTES_2, 3, 0);
     }
 
     if (cainfo->emote != 0)

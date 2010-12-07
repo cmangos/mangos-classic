@@ -621,22 +621,6 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
 
     uint8 powertype = cEntry->powerType;
 
-    uint32 unitfield;
-
-    switch(powertype)
-    {
-        case POWER_ENERGY:
-        case POWER_MANA:
-            unitfield = 0x00000000;
-            break;
-        case POWER_RAGE:
-            unitfield = 0x00110000;
-            break;
-        default:
-            sLog.outError("Invalid default powertype %u for player (class %u)",powertype,class_);
-            return false;
-    }
-
     setFactionForRace(race);
 
     SetByteValue(UNIT_FIELD_BYTES_0, 0, race);
@@ -646,7 +630,10 @@ bool Player::Create( uint32 guidlow, const std::string& name, uint8 race, uint8 
 
     InitDisplayIds();                                       // model, scale and model data
 
-    SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield);
+    // is it need, only in pre-2.x used and field byte removed later?
+    if(powertype == POWER_RAGE || powertype == POWER_MANA)
+        SetByteValue(UNIT_FIELD_BYTES_1, 1, 0xEE);
+
     SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_UNK5 );
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE );
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);               // fix cast time showed in spell tooltip on client
@@ -1399,7 +1386,7 @@ void Player::SetDeathState(DeathState s)
         clearResurrectRequestData();
 
         // remove form before other mods to prevent incorrect stats calculation
-        RemoveAurasDueToSpell(m_ShapeShiftFormSpellId);
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
 
         //FIXME: is pet dismissed at dying or releasing spirit? if second, add SetDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
         RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
@@ -2557,7 +2544,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // cleanup player flags (will be re-applied if need at aura load), to avoid have ghost flag without ghost aura, for example.
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK | PLAYER_FLAGS_DND | PLAYER_FLAGS_GM | PLAYER_FLAGS_GHOST | PLAYER_FLAGS_FFA_PVP);
 
-    RemoveStandFlags(UNIT_BYTE1_FLAG_ALL);                 // one form stealth modified bytes
+    // one form stealth modified bytes
+    RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALL);
 
     // restore if need some important flags
     SetUInt32Value(PLAYER_FIELD_BYTES2, 0 );                // flags empty by default
@@ -3064,17 +3052,18 @@ bool Player::IsNeedCastPassiveSpellAtLearn(SpellEntry const* spellInfo) const
 {
     bool need_cast =  false;
 
+    ShapeshiftForm form = GetShapeshiftForm();
     switch(spellInfo->Id)
     {
         // some spells not have stance data expected cast at form change or present
-        case  5420: need_cast = (m_form == FORM_TREE);            break;
-        case  5419: need_cast = (m_form == FORM_TRAVEL);          break;
-        case  7376: need_cast = (m_form == FORM_DEFENSIVESTANCE); break;
-        case  7381: need_cast = (m_form == FORM_BERSERKERSTANCE); break;
-        case 21156: need_cast = (m_form == FORM_BATTLESTANCE);    break;
-        case 21178: need_cast = (m_form == FORM_BEAR || m_form == FORM_DIREBEAR); break;
+        case  5420: need_cast = (form == FORM_TREE);            break;
+        case  5419: need_cast = (form == FORM_TRAVEL);          break;
+        case  7376: need_cast = (form == FORM_DEFENSIVESTANCE); break;
+        case  7381: need_cast = (form == FORM_BERSERKERSTANCE); break;
+        case 21156: need_cast = (form == FORM_BATTLESTANCE);    break;
+        case 21178: need_cast = (form == FORM_BEAR || form == FORM_DIREBEAR); break;
         // another spells have proper stance data
-        default: need_cast = !spellInfo->Stances || m_form != 0 && (spellInfo->Stances & (1<<(m_form-1))); break;
+        default: need_cast = !spellInfo->Stances || form != 0 && (spellInfo->Stances & (1<<(form-1))); break;
     }
 
     //Check CasterAuraStates
@@ -4983,10 +4972,10 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
     if(pVictim && pVictim->IsCharmerOrOwnerPlayerOrPlayerItself())
         return;
 
-    if(IsInFeralForm())
+    if (IsInFeralForm())
         return;                                             // always maximized SKILL_FERAL_COMBAT in fact
 
-    if(m_form == FORM_TREE)
+    if (GetShapeshiftForm() == FORM_TREE)
         return;                                             // use weapon but not skill up
 
     uint32 weapon_skill_gain = sWorld.getConfig(CONFIG_UINT32_SKILL_GAIN_WEAPON);
@@ -6580,10 +6569,10 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
     if(apply)
     {
         // Cannot be used in this stance/form
-        if(GetErrorAtShapeshiftedCast(spellInfo, m_form) != SPELL_CAST_OK)
+        if (GetErrorAtShapeshiftedCast(spellInfo, GetShapeshiftForm()) != SPELL_CAST_OK)
             return;
 
-        if(form_change)                                     // check aura active state from other form
+        if (form_change)                                    // check aura active state from other form
         {
             bool found = false;
             for (int k=0; k < MAX_EFFECT_INDEX; ++k)
@@ -6611,14 +6600,14 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
     }
     else
     {
-        if(form_change)                                     // check aura compatibility
+        if (form_change)                                    // check aura compatibility
         {
             // Cannot be used in this stance/form
-            if(GetErrorAtShapeshiftedCast(spellInfo, m_form)==SPELL_CAST_OK)
+            if (GetErrorAtShapeshiftedCast(spellInfo, GetShapeshiftForm()) == SPELL_CAST_OK)
                 return;                                     // and remove only not compatible at form change
         }
 
-        if(item)
+        if (item)
             RemoveAurasDueToItemSpell(item,spellInfo->Id);  // un-apply all spells , not only at-equipped
         else
             RemoveAurasDueToSpell(spellInfo->Id);           // un-apply spell (item set case)
@@ -16271,10 +16260,10 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
         return false;
 
     // taximaster case
-    if(npc)
+    if (npc)
     {
         // not let cheating with start flight mounted
-        if(IsMounted())
+        if (IsMounted())
         {
             WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
             data << uint32(ERR_TAXIPLAYERALREADYMOUNTED);
@@ -16282,7 +16271,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
             return false;
         }
 
-        if( m_ShapeShiftFormSpellId && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_SHADOW )
+        if (IsInDisallowedMountForm())
         {
             WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
             data << uint32(ERR_TAXIPLAYERSHAPESHIFTED);
@@ -16304,8 +16293,8 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     {
         RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
-        if( m_ShapeShiftFormSpellId && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_SHADOW )
-            RemoveAurasDueToSpell(m_ShapeShiftFormSpellId);
+        if (IsInDisallowedMountForm())
+            RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
 
         if (Spell* spell = GetCurrentSpell(CURRENT_GENERIC_SPELL))
             if (spell->m_spellInfo->Id != spellid)
@@ -16544,7 +16533,9 @@ void Player::ProhibitSpellSchool(SpellSchoolMask idSchoolMask, uint32 unTimeMs )
 
 void Player::InitDataForForm(bool reapplyMods)
 {
-    switch(m_form)
+    ShapeshiftForm form = GetShapeshiftForm();
+
+    switch(form)
     {
         case FORM_CAT:
         {

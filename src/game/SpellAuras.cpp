@@ -1970,7 +1970,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     Unit *target = GetTarget();
 
-    SpellShapeshiftEntry const* ssEntry = sSpellShapeshiftStore.LookupEntry(form);
+    SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(form);
     if (!ssEntry)
     {
         sLog.outError("Unknown shapeshift form %u in spell %u", form, GetId());
@@ -2056,7 +2056,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_MOONKIN:
         {
             // remove movement affects
-            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
+            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT, this);
             Unit::AuraList const& slowingAuras = target->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
             for (Unit::AuraList::const_iterator iter = slowingAuras.begin(); iter != slowingAuras.end();)
             {
@@ -2092,10 +2092,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     if(apply)
     {
         // remove other shapeshift before applying a new one
-        if(target->m_ShapeShiftFormSpellId)
-            target->RemoveAurasDueToSpell(target->m_ShapeShiftFormSpellId, this);
-
-        target->SetByteValue(UNIT_FIELD_BYTES_1, 2, form);
+        target->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT, this);
 
         if(modelid > 0)
             target->SetDisplayId(modelid);
@@ -2171,18 +2168,15 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             }
         }
 
-        target->m_ShapeShiftFormSpellId = GetId();
-        target->m_form = form;
+        target->SetShapeshiftForm(form);
     }
     else
     {
         if(modelid > 0)
             target->SetDisplayId(target->GetNativeDisplayId());
-        target->SetByteValue(UNIT_FIELD_BYTES_1, 2, FORM_NONE);
         if(target->getClass() == CLASS_DRUID)
             target->setPowerType(POWER_MANA);
-        target->m_ShapeShiftFormSpellId = 0;
-        target->m_form = FORM_NONE;
+        target->SetShapeshiftForm(FORM_NONE);
 
         switch(form)
         {
@@ -2685,11 +2679,9 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
     if( apply )
     {
-        if (!target->GetCharmerGuid().IsEmpty())
-        {
-            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
-            target->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
-        }
+        // is it really need after spell check checks?
+        target->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM, this);
+        target->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS, this);
 
         target->SetCharmerGuid(GetCasterGuid());
         target->setFaction(caster->getFaction());
@@ -2970,7 +2962,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
         // only at real aura add
         if (Real)
         {
-            m_target->SetStandFlags(UNIT_BYTE1_FLAGS_CREEP);
+            m_target->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAGS_CREEP);
             if(m_target->GetTypeId()==TYPEID_PLAYER)
                 m_target->SetFlag(PLAYER_FIELD_BYTES2, PLAYER_FIELD_BYTE2_STEALTH);
 
@@ -3015,7 +3007,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
             // if no GM invisibility
             if (m_target->GetVisibility()!=VISIBILITY_OFF)
             {
-                m_target->RemoveStandFlags(UNIT_BYTE1_FLAGS_CREEP);
+                m_target->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAGS_CREEP);
                 if(m_target->GetTypeId()==TYPEID_PLAYER)
                     m_target->RemoveFlag(PLAYER_FIELD_BYTES2, PLAYER_FIELD_BYTE2_STEALTH);
 

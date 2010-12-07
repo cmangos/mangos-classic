@@ -3419,7 +3419,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     if( strict && !m_IsTriggeredSpell)
     {
         // Cannot be used in this stance/form
-        SpellCastResult shapeError = GetErrorAtShapeshiftedCast(m_spellInfo, m_caster->m_form);
+        SpellCastResult shapeError = GetErrorAtShapeshiftedCast(m_spellInfo, m_caster->GetShapeshiftForm());
         if(shapeError != SPELL_CAST_OK)
             return shapeError;
 
@@ -4330,10 +4330,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->GetAreaId()==35)
                     return SPELL_FAILED_NO_MOUNTS_ALLOWED;
 
-                ShapeshiftForm form = m_caster->m_form;
-                if( form == FORM_CAT          || form == FORM_TREE      || form == FORM_TRAVEL   ||
-                    form == FORM_AQUA         || form == FORM_BEAR      || form == FORM_DIREBEAR ||
-                    form == FORM_CREATUREBEAR || form == FORM_GHOSTWOLF || form == FORM_MOONKIN )
+                if (m_caster->IsInDisallowedMountForm())
                     return SPELL_FAILED_NOT_SHAPESHIFT;
 
                 break;

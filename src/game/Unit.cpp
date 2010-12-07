@@ -192,7 +192,6 @@ Unit::Unit()
     m_extraAttacks = 0;
 
     m_state = 0;
-    m_form = FORM_NONE;
     m_deathState = ALIVE;
 
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
@@ -217,7 +216,6 @@ Unit::Unit()
     m_detectInvisibilityMask = 0;
     m_invisibilityMask = 0;
     m_transform = 0;
-    m_ShapeShiftFormSpellId = 0;
     m_canModifyStats = false;
 
     for (int i = 0; i < MAX_SPELL_IMMUNITY; ++i)
@@ -456,21 +454,26 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
 
 void Unit::RemoveSpellsCausingAura(AuraType auraType)
 {
-    if (auraType >= TOTAL_AURAS) return;
-    AuraList::const_iterator iter, next;
-    for (iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end(); iter = next)
+    for (AuraList::const_iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
     {
-        next = iter;
-        ++next;
+        RemoveAurasDueToSpell((*iter)->GetId());
+        iter = m_modAuras[auraType].begin();
+    }
+}
 
-        if (*iter)
+void Unit::RemoveSpellsCausingAura(AuraType auraType, Aura* except)
+{
+    for (AuraList::const_iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
+    {
+        // skip `except` aura
+        if (*iter == except)
         {
-            RemoveAurasDueToSpell((*iter)->GetId());
-            if (!m_modAuras[auraType].empty())
-                next = m_modAuras[auraType].begin();
-            else
-                return;
+            ++iter;
+            continue;
         }
+
+        RemoveAurasDueToSpell((*iter)->GetId(), except);
+        iter = m_modAuras[auraType].begin();
     }
 }
 
@@ -8185,7 +8188,7 @@ uint32 Unit::GetCreatureType() const
 {
     if(GetTypeId() == TYPEID_PLAYER)
     {
-        SpellShapeshiftEntry const* ssEntry = sSpellShapeshiftStore.LookupEntry(m_form);
+        SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(GetShapeshiftForm());
         if(ssEntry && ssEntry->creatureType > 0)
             return ssEntry->creatureType;
         else

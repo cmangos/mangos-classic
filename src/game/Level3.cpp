@@ -4172,22 +4172,9 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
 
     uint8 powertype = cEntry->powerType;
 
-    uint32 unitfield;
-    if(powertype == POWER_RAGE)
-        unitfield = 0x1100EE00;
-    else if(powertype == POWER_ENERGY)
-        unitfield = 0x00000000;
-    else if(powertype == POWER_MANA)
-        unitfield = 0x0000EE00;
-    else
-    {
-        sLog.outError("Invalid default powertype %u for player (class %u)",powertype,player->getClass());
-        return false;
-    }
-
     // reset m_form if no aura
-    if(!player->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
-        player->m_form = FORM_NONE;
+    if (!player->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
+        player->SetShapeshiftForm(FORM_NONE);
 
     player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE );
     player->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
@@ -4197,13 +4184,14 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
     player->SetByteValue(UNIT_FIELD_BYTES_0, 3, powertype);
 
     // reset only if player not in some form;
-    if(player->m_form==FORM_NONE)
+    if (player->GetShapeshiftForm() == FORM_NONE)
         player->InitDisplayIds();
 
-    // set UNIT_FIELD_BYTES_1 to init state but preserve m_form value
-    player->SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield);
+    // is it need, only in pre-2.x used and field byte removed later?
+    if(powertype == POWER_RAGE || powertype == POWER_MANA)
+        player->SetByteValue(UNIT_FIELD_BYTES_1, 1, 0xEE);
+
     player->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_UNK5 );
-    player->SetByteValue(UNIT_FIELD_BYTES_1, 2, player->m_form);
 
     player->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
