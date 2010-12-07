@@ -571,6 +571,16 @@ struct SpellEntry
     // helpers
     int32 CalculateSimpleValue(SpellEffectIndex eff) const { return EffectBasePoints[eff] + int32(EffectBaseDice[eff]); }
 
+    bool IsFitToFamilyMask(uint64 familyFlags) const
+    {
+        return SpellFamilyFlags & familyFlags;
+    }
+
+    bool IsFitToFamily(SpellFamily family, uint64 familyFlags) const
+    {
+        return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(familyFlags);
+    }
+
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation
