@@ -12182,7 +12182,7 @@ void Player::RewardQuest(Quest const *pQuest, uint32 reward, Object* questGiver,
         ModifyMoney( int32(pQuest->GetRewMoneyMaxLevel() * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY)) );
 
     // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
-    ModifyMoney( pQuest->GetRewOrReqMoney() );
+    ModifyMoney(pQuest->GetRewOrReqMoney());
 
     // Send reward mail
     if (uint32 mail_template_id = pQuest->GetRewMailTemplateId())
