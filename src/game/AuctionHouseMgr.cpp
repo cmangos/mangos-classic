@@ -153,7 +153,7 @@ void AuctionHouseMgr::SendAuctionWonMail( AuctionEntry *auction )
         // will delete item or place to receiver mail list
         MailDraft(msgAuctionWonSubject.str(), msgAuctionWonBody.str())
             .AddItem(pItem)
-            .SendMailTo(MailReceiver(bidder,auction->bidder), auction, MAIL_CHECK_MASK_COPIED);
+            .SendMailTo(MailReceiver(bidder, bidder_guid), auction, MAIL_CHECK_MASK_COPIED);
     }
     // receiver not exist
     else
@@ -189,7 +189,7 @@ void AuctionHouseMgr::SendAuctionSalePendingMail( AuctionEntry * auction )
         DEBUG_LOG("AuctionSalePending body string : %s", msgAuctionSalePendingBody.str().c_str());
 
         MailDraft(msgAuctionSalePendingSubject.str(), msgAuctionSalePendingBody.str())
-            .SendMailTo(MailReceiver(owner,auction->owner), auction, MAIL_CHECK_MASK_COPIED);
+            .SendMailTo(MailReceiver(owner, owner_guid), auction, MAIL_CHECK_MASK_COPIED);
     }
 }
 
@@ -229,7 +229,7 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
 
         MailDraft(msgAuctionSuccessfulSubject.str(), auctionSuccessfulBody.str())
             .AddMoney(profit)
-            .SendMailTo(MailReceiver(owner,auction->owner), auction, MAIL_CHECK_MASK_COPIED, HOUR);
+            .SendMailTo(MailReceiver(owner, owner_guid), auction, MAIL_CHECK_MASK_COPIED, HOUR);
     }
 }
 
@@ -264,7 +264,7 @@ void AuctionHouseMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         // will delete item or place to receiver mail list
         MailDraft(subject.str())
             .AddItem(pItem)
-            .SendMailTo(MailReceiver(owner,auction->owner), auction, MAIL_CHECK_MASK_COPIED);
+            .SendMailTo(MailReceiver(owner, owner_guid), auction, MAIL_CHECK_MASK_COPIED);
     }
     // owner not found
     else
@@ -412,7 +412,7 @@ void AuctionHouseMgr::LoadAuctions()
             // item will deleted or added to received mail list
             MailDraft(msgAuctionCanceledOwner.str(), "")    // TODO: fix body
                 .AddItem(pItem)
-                .SendMailTo(MailReceiver(auction->owner), auction, MAIL_CHECK_MASK_COPIED);
+                .SendMailTo(MailReceiver(ObjectGuid(HIGHGUID_PLAYER, auction->owner)), auction, MAIL_CHECK_MASK_COPIED);
 
             RemoveAItem(auction->item_guidlow);
             auction->DeleteFromDB();
