@@ -1737,7 +1737,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _ApplyAllItemMods();
         void _ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply);
         void _ApplyAmmoBonuses();
-        bool EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot);
         void InitDataForForm(bool reapplyMods = false);
 
         void ApplyItemEquipSpell(Item *item, bool apply, bool form_change = false);
