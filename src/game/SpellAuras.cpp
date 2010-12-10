@@ -3596,49 +3596,8 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
 
         switch (m_spellProto->SpellFamilyName)
         {
-            case SPELLFAMILY_GENERIC:
-            {
-                // Pounce Bleed
-                if ( m_spellProto->SpellIconID == 147 && m_spellProto->SpellVisual == 0 )
-                {
-                    // $AP*0.18/6 bonus per tick
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 3 / 100);
-                    return;
-                }
-                break;
-            }
-            case SPELLFAMILY_WARRIOR:
-            {
-                // Rend
-                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000020))
-                {
-                    // 0.00743*(($MWB+$mwb)/2+$AP/14*$MWS) bonus per tick
-                    float ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    int32 mws = caster->GetAttackTime(BASE_ATTACK);
-                    float mwb_min = caster->GetWeaponDamageRange(BASE_ATTACK,MINDAMAGE);
-                    float mwb_max = caster->GetWeaponDamageRange(BASE_ATTACK,MAXDAMAGE);
-                    // WARNING! in 3.0 multiplier 0.00743f change to 0.6
-                    m_modifier.m_amount+=int32(((mwb_min+mwb_max)/2+ap*mws/14000)*0.00743f);
-                    return;
-                }
-                break;
-            }
             case SPELLFAMILY_DRUID:
             {
-                // Rake
-                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000001000))
-                {
-                    // $AP*0.06/3 bonus per tick
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * 2 / 100);
-                    return;
-                }
-                // Lacerate
-                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x000000010000000000))
-                {
-                    // $AP*0.05/5 bonus per tick
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
-                    return;
-                }
                 // Rip
                 if (m_spellProto->SpellFamilyFlags & UI64LIT(0x000000000000800000))
                 {
@@ -3646,17 +3605,6 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     if (caster->GetTypeId() == TYPEID_PLAYER)
                     {
                         uint8 cp = ((Player*)caster)->GetComboPoints();
-
-                        // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
-                        Unit::AuraList const& dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
-                        for(Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
-                        {
-                            if((*itr)->GetId()==34241)
-                            {
-                                m_modifier.m_amount += cp * (*itr)->GetModifier()->m_amount;
-                                break;
-                            }
-                        }
 
                         if (cp > 4) cp = 4;
                         m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
@@ -3688,34 +3636,9 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 }
                 break;
             }
-            case SPELLFAMILY_HUNTER:
-            {
-                // Serpent Sting
-                if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000004000))
-                {
-                    // $RAP*0.1/5 bonus per tick
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 10 / 500);
-                    return;
-                }
-                // Immolation Trap
-                if ((m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000004)) && m_spellProto->SpellIconID == 678)
-                {
-                    // $RAP*0.1/5 bonus per tick
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 10 / 500);
-                    return;
-                }
-                break;
-            }
             default:
                 break;
         }
-    }
-    // remove time effects
-    else
-    {
-        // Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
-        if(m_spellProto->Id == 41917)
-            m_target->CastSpell(m_target, 41915, true);
     }
 }
 
