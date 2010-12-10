@@ -601,7 +601,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!itemTarget && m_caster->GetTypeId()!=TYPEID_PLAYER)
                         return;
 
-                    uint32 spell_id = roll_chance_i(50) ? 17269 : 17270;
+                    uint32 spell_id = roll_chance_i(50)
+                        ? 17269                             // Create Resonating Skull
+                        : 17270;                            // Create Bone Dust
 
                     m_caster->CastSpell(m_caster, spell_id, true, NULL);
                     return;
@@ -700,7 +702,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         m_caster->CastSpell(m_caster, 23444, true);
                     else if (r < 100)                       // Evil Twin               - 4/6 evil twin
                         m_caster->CastSpell(m_caster, 23445, true);
-                    else                                    // 1/6 miss the target
+                    else                                    // Transporter Malfunction - 1/6 miss the target
                         m_caster->CastSpell(m_caster, 36902, true);
 
                     return;
@@ -709,13 +711,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (roll_chance_i(50))                  // Gadgetzan Transporter         - success
                         m_caster->CastSpell(m_caster, 23441, true);
-                    else                                    // failure
+                    else                                    // Gadgetzan Transporter Failure - failure
                         m_caster->CastSpell(m_caster, 23446, true);
 
                     return;
                 }
                 case 23645:                                 // Hourglass Sand
-                    m_caster->RemoveAurasDueToSpell(23170);
+                    m_caster->RemoveAurasDueToSpell(23170); // Brood Affliction: Bronze
                     return;
                 case 23725:                                 // Gift of Life (warrior bwl trinket)
                     m_caster->CastSpell(m_caster, 23782, true);
@@ -749,15 +751,18 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (speed >= 2.0f)
                         m_caster->CastSpell(m_caster, 25859, true); //100% ground Reindeer
                     else
+                        // Reindeer
                         m_caster->CastSpell(m_caster, 25858, true); //60% ground Reindeer
 
                     return;
                 }
-                //case 26074:                               // Holiday Cheer
-                //    return; -- implemented at client side
+                case 26074:                                 // Holiday Cheer
+                    // implemented at client side
+                    return;
                 case 28006:                                 // Arcane Cloaking
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER )
+                        // Naxxramas Entry Flag Effect DND
                         m_caster->CastSpell(unitTarget, 29294, true);
 
                     return;
