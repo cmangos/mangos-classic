@@ -100,7 +100,7 @@ void LoadSkillDiscoveryTable()
             {
                 if (reportedReqSpells.find(reqSkillOrSpell) == reportedReqSpells.end())
                 {
-                    sLog.outErrorDb("Spell (ID: %u) not have have MECHANIC_DISCOVERY (28) value in Mechanic field in spell.dbc but listed for spellId %u (and maybe more) in `skill_discovery_template` table",reqSkillOrSpell,spellId);
+                    sLog.outErrorDb("Spell (ID: %u) not have MECHANIC_DISCOVERY (28) value in Mechanic field in spell.dbc but listed for spellId %u (and maybe more) in `skill_discovery_template` table",reqSkillOrSpell,spellId);
                     reportedReqSpells.insert(reqSkillOrSpell);
                 }
                 continue;
