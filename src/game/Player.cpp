@@ -4150,7 +4150,7 @@ void Player::KillPlayer()
     //SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP );
 
     SetFlag(UNIT_DYNAMIC_FLAGS, 0x00);
-    ApplyModFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTE_RELEASE_TIMER, !sMapStore.LookupEntry(GetMapId())->Instanceable());
+    ApplyModByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER, !sMapStore.LookupEntry(GetMapId())->Instanceable());
 
     // 6 minutes until repop at graveyard
     m_deathTimer = 6*MINUTE*IN_MILLISECONDS;
@@ -5888,7 +5888,9 @@ void Player::UpdateHonor()
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, total_honorableKills);
     SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, total_dishonorableKills);
     //TODO: Into what field we need to set it? Fix it!
-    SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRankInfo().rank << 24) | 0x0F0001);
+    //SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRankInfo().rank << 24) | 0x0F0001);
+    // ITEM FIELD RANK REQUIRED
+    SetByteValue(PLAYER_FIELD_BYTES, 3, GetHonorHighestRankInfo().rank);
 }
 
 void Player::ResetHonor()
@@ -14062,7 +14064,7 @@ void Player::LoadCorpse()
     {
         if(Corpse *corpse = GetCorpse())
         {
-            ApplyModFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTE_RELEASE_TIMER, corpse && !sMapStore.LookupEntry(corpse->GetMapId())->Instanceable() );
+            ApplyModByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER, corpse && !sMapStore.LookupEntry(corpse->GetMapId())->Instanceable() );
         }
         else
         {
@@ -17126,7 +17128,7 @@ void Player::SetComboPoints()
     if (combotarget)
     {
          SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,combotarget->GetGUID());
-         SetUInt32Value(PLAYER_FIELD_BYTES,((GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (m_comboPoints << 8)));
+         SetByteValue(PLAYER_FIELD_BYTES, 1, m_comboPoints);
     }
 }
 
