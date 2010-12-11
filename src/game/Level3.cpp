@@ -3062,7 +3062,7 @@ bool ChatHandler::HandleGuildInviteCommand(char *args)
     char* nameStr = ExtractOptNotLastArg(&args);
 
     // if not guild name only (in "") then player name
-    uint64 target_guid;
+    ObjectGuid target_guid;
     if (!ExtractPlayerTarget(&nameStr, NULL, &target_guid))
         return false;
 
@@ -3085,7 +3085,7 @@ bool ChatHandler::HandleGuildInviteCommand(char *args)
 bool ChatHandler::HandleGuildUninviteCommand(char *args)
 {
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     if (!ExtractPlayerTarget(&args, &target, &target_guid))
         return false;
 
@@ -3106,7 +3106,7 @@ bool ChatHandler::HandleGuildRankCommand(char *args)
     char* nameStr = ExtractOptNotLastArg(&args);
 
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     std::string target_name;
     if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
         return false;
@@ -3201,7 +3201,7 @@ bool ChatHandler::HandleDieCommand(char* /*args*/)
 
     if(target->GetTypeId()==TYPEID_PLAYER)
     {
-        if(HasLowerSecurity((Player*)target,0,false))
+        if (HasLowerSecurity((Player*)target, ObjectGuid(), false))
             return false;
     }
 
@@ -3293,7 +3293,7 @@ bool ChatHandler::HandleDamageCommand(char* args)
 bool ChatHandler::HandleReviveCommand(char* args)
 {
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     if (!ExtractPlayerTarget(&args, &target, &target_guid))
         return false;
 
@@ -3716,7 +3716,7 @@ bool ChatHandler::HandleHoverCommand(char* args)
     return true;
 }
 
-void ChatHandler::HandleCharacterLevel(Player* player, uint64 player_guid, uint32 oldlevel, uint32 newlevel)
+void ChatHandler::HandleCharacterLevel(Player* player, ObjectGuid player_guid, uint32 oldlevel, uint32 newlevel)
 {
     if(player)
     {
@@ -3737,7 +3737,7 @@ void ChatHandler::HandleCharacterLevel(Player* player, uint64 player_guid, uint3
     else
     {
         // update level and XP at level, all other will be updated at loading
-        CharacterDatabase.PExecute("UPDATE characters SET level = '%u', xp = 0 WHERE guid = '%u'", newlevel, GUID_LOPART(player_guid));
+        CharacterDatabase.PExecute("UPDATE characters SET level = '%u', xp = 0 WHERE guid = '%u'", newlevel, player_guid.GetCounter());
     }
 }
 
@@ -3763,7 +3763,7 @@ bool ChatHandler::HandleCharacterLevelCommand(char* args)
     }
 
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     std::string target_name;
     if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
         return false;
@@ -3809,7 +3809,7 @@ bool ChatHandler::HandleLevelUpCommand(char* args)
     }
 
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     std::string target_name;
     if (!ExtractPlayerTarget(&nameStr, &target, &target_guid, &target_name))
         return false;
@@ -3823,7 +3823,7 @@ bool ChatHandler::HandleLevelUpCommand(char* args)
     if (newlevel > STRONG_MAX_LEVEL)                        // hardcoded maximum level
         newlevel = STRONG_MAX_LEVEL;
 
-    HandleCharacterLevel(target,target_guid,oldlevel,newlevel);
+    HandleCharacterLevel(target, target_guid, oldlevel, newlevel);
 
     if (!m_session || m_session->GetPlayer() != target)     // including chr==NULL
     {
@@ -4245,7 +4245,7 @@ bool ChatHandler::HandleResetStatsCommand(char* args)
 bool ChatHandler::HandleResetSpellsCommand(char* args)
 {
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     std::string target_name;
     if (!ExtractPlayerTarget(&args, &target, &target_guid, &target_name))
         return false;
@@ -4260,7 +4260,7 @@ bool ChatHandler::HandleResetSpellsCommand(char* args)
     }
     else
     {
-        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'",uint32(AT_LOGIN_RESET_SPELLS), GUID_LOPART(target_guid));
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'",uint32(AT_LOGIN_RESET_SPELLS), target_guid.GetCounter());
         PSendSysMessage(LANG_RESET_SPELLS_OFFLINE,target_name.c_str());
     }
 
@@ -4270,7 +4270,7 @@ bool ChatHandler::HandleResetSpellsCommand(char* args)
 bool ChatHandler::HandleResetTalentsCommand(char* args)
 {
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     std::string target_name;
     if (!ExtractPlayerTarget(&args, &target, &target_guid, &target_name))
         return false;
@@ -4283,9 +4283,10 @@ bool ChatHandler::HandleResetTalentsCommand(char* args)
         if (!m_session || m_session->GetPlayer() != target)
             PSendSysMessage(LANG_RESET_TALENTS_ONLINE,GetNameLink(target).c_str());
     }
-    else
+    else if (!target_guid.IsEmpty())
     {
-        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'", uint32(AT_LOGIN_RESET_TALENTS), GUID_LOPART(target_guid) );
+        uint32 at_flags = AT_LOGIN_RESET_TALENTS;
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'", at_flags, target_guid.GetCounter());
         std::string nameLink = playerLink(target_name);
         PSendSysMessage(LANG_RESET_TALENTS_OFFLINE, nameLink.c_str());
     }
@@ -4769,7 +4770,7 @@ bool ChatHandler::HandleBanInfoAccountCommand(char* args)
 bool ChatHandler::HandleBanInfoCharacterCommand(char* args)
 {
     Player* target;
-    uint64 target_guid;
+    ObjectGuid target_guid;
     if (!ExtractPlayerTarget(&args, &target, &target_guid))
         return false;
 
@@ -5858,7 +5859,7 @@ bool ChatHandler::HandleSendItemsCommand(char* args)
 {
     // format: name "subject text" "mail text" item1[:count1] item2[:count2] ... item12[:count12]
     Player* receiver;
-    uint64 receiver_guid;
+    ObjectGuid receiver_guid;
     std::string receiver_name;
     if (!ExtractPlayerTarget(&args, &receiver, &receiver_guid, &receiver_name))
         return false;
@@ -5956,7 +5957,7 @@ bool ChatHandler::HandleSendMoneyCommand(char* args)
     /// format: name "subject text" "mail text" money
 
     Player* receiver;
-    uint64 receiver_guid;
+    ObjectGuid receiver_guid;
     std::string receiver_name;
     if (!ExtractPlayerTarget(&args, &receiver, &receiver_guid, &receiver_name))
         return false;
