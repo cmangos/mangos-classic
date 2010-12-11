@@ -667,7 +667,7 @@ typedef std::map<uint32, uint32> SpellFacingFlagMap;
 
 class SpellMgr
 {
-    friend struct DoSpellBonusess;
+    friend struct DoSpellBonuses;
     friend struct DoSpellProcEvent;
 
     // Constructors
@@ -939,7 +939,7 @@ class SpellMgr
         void LoadSpellAffects();
         void LoadSpellElixirs();
         void LoadSpellProcEvents();
-        void LoadSpellBonusess();
+        void LoadSpellBonuses();
         void LoadSpellTargetPositions();
         void LoadSpellThreats();
         void LoadSkillLineAbilityMap();

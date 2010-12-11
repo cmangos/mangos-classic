@@ -508,10 +508,10 @@ bool ChatHandler::HandleReloadSpellAreaCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadSpellBonusesCommand(char* /*args*/)
 {
-     sLog.outString( "Re-Loading Spell Bonus Data..." );
-     sSpellMgr.LoadSpellBonusess();
-     SendGlobalSysMessage("DB table `spell_bonus_data` (spell damage/healing coefficients) reloaded.");
-     return true;
+    sLog.outString( "Re-Loading Spell Bonus Data..." );
+    sSpellMgr.LoadSpellBonuses();
+    SendGlobalSysMessage("DB table `spell_bonus_data` (spell damage/healing coefficients) reloaded.");
+    return true;
 }
 
 bool ChatHandler::HandleReloadSpellChainCommand(char* /*args*/)

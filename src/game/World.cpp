@@ -899,7 +899,7 @@ void World::SetInitialWorldSettings()
     sSpellMgr.LoadSpellProcEvents();
 
     sLog.outString( "Loading Spell Bonus Data..." );
-    sSpellMgr.LoadSpellBonusess();
+    sSpellMgr.LoadSpellBonuses();
 
     sLog.outString( "Loading Aggro Spells Definitions...");
     sSpellMgr.LoadSpellThreats();
