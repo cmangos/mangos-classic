@@ -749,7 +749,7 @@ enum SpellCastResult
     SPELL_FAILED_MIN_SKILL                      = 0x90,
     SPELL_FAILED_UNKNOWN                        = 0x91,
 
-    SPELL_CAST_OK                               = 0xFF,      // custom value, don't must be send to client
+    SPELL_CAST_OK                               = 0xFF      // custom value, don't must be send to client
 };
 
 // Spell aura states
