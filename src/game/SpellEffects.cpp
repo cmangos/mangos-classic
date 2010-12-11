@@ -1020,7 +1020,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
             switch(m_spellInfo->Id)
             {
-                case 23989:                                 //Readiness talent
+                case 23989:                                 // Readiness talent
                 {
                     if (m_caster->GetTypeId()!=TYPEID_PLAYER)
                         return;
@@ -1170,8 +1170,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_SHAMAN:
         {
-            //Shaman Rockbiter Weapon
-            if (m_spellInfo->SpellFamilyFlags == UI64LIT(0x400000))
+            // Rockbiter Weapon
+            if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x400000))
             {
                 uint32 spell_id = 0;
                 switch(m_spellInfo->Id)
@@ -1222,7 +1222,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 return;
             }
-
             if (m_spellInfo->Id == 39610)                   // Mana-Tide Totem effect
             {
                 if (!unitTarget || unitTarget->getPowerType() != POWER_MANA)
