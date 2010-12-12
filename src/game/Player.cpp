@@ -4079,6 +4079,8 @@ void Player::SendDelayResponse(const uint32 ml_seconds)
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
 {
+    // remove death flag + set aura
+    SetByteValue(UNIT_FIELD_BYTES_1, 3, 0x00);
     if(getRace() == RACE_NIGHTELF)
         RemoveAurasDueToSpell(20584);                       // speed bonuses
     RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
