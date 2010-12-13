@@ -678,7 +678,8 @@ bool WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
     {
         const uint64& auramask = player->GetAuraUpdateMask();
         *data << uint32(auramask);
-        for(uint32 i = 0; i < MAX_AURAS; ++i)
+        // In all checked pre-2.x data of packets included only positive auras
+        for(uint32 i = 0; i < MAX_POSITIVE_AURAS; ++i)
         {
             if(auramask & (uint64(1) << i))
             {
@@ -753,7 +754,8 @@ bool WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
         {
             const uint64& auramask = pet->GetAuraUpdateMask();
             *data << uint32(auramask);
-            for(uint32 i = 0; i < MAX_AURAS; ++i)
+            // In all checked pre-2.x data of packets included only positive auras
+            for(uint32 i = 0; i < MAX_POSITIVE_AURAS; ++i)
             {
                 if(auramask & (uint64(1) << i))
                 {
