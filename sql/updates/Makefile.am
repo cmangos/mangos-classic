@@ -176,7 +176,9 @@ pkgdata_DATA = \
 	z1034_s0407_01_mangos_gossip_menu_option.sql \
 	z1040_s0418_01_mangos_creature_template.sql \
 	z1040_s0418_02_mangos_creature_addon.sql \
-	z1040_s0418_03_mangos_creature_template_addon.sql
+	z1040_s0418_03_mangos_creature_template_addon.sql \
+	z1101_s0498_01_mangos_npc_trainer_template.sql \
+	z1101_s0498_02_mangos_creature_template.sql
 
 ## Additional files to include when running 'make dist'
 #  SQL update files, to upgrade database schema from older revisions
@@ -331,4 +333,6 @@ EXTRA_DIST = \
 	z1034_s0407_01_mangos_gossip_menu_option.sql \
 	z1040_s0418_01_mangos_creature_template.sql \
 	z1040_s0418_02_mangos_creature_addon.sql \
-	z1040_s0418_03_mangos_creature_template_addon.sql
+	z1040_s0418_03_mangos_creature_template_addon.sql \
+	z1101_s0498_01_mangos_npc_trainer_template.sql \
+	z1101_s0498_02_mangos_creature_template.sql

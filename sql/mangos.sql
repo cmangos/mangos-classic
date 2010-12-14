@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1040_s0418_03_mangos_creature_template_addon` bit(1) default NULL
+  `required_z1101_s0498_02_mangos_creature_template` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1158,6 +1158,7 @@ CREATE TABLE `creature_template` (
   `RacialLeader` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `RegenHealth` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `equipment_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `trainer_id` mediumint(8) unsigned NOT NULL default '0',
   `vendor_id` mediumint(8) unsigned NOT NULL default '0',
   `mechanic_immune_mask` int(10) unsigned NOT NULL DEFAULT '0',
   `flags_extra` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1173,7 +1174,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,0,0,10045,0,'Waypoint(Only GM can see it)','Visual',0,1,1,64,64,0,0,0,35,35,0,0.91,1.14286,1,0,14,15,0,100,1,2000,2200,8,4096,0,0,0,0,0,0,1.76,2.42,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,0,1,0,0,0,130,'');
+(1,0,0,10045,0,'Waypoint(Only GM can see it)','Visual',0,1,1,64,64,0,0,0,35,35,0,0.91,1.14286,1,0,14,15,0,100,1,2000,2200,8,4096,0,0,0,0,0,0,1.76,2.42,100,8,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,0,1,0,0,0,0,130,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3826,6 +3827,30 @@ CREATE TABLE `npc_trainer` (
 LOCK TABLES `npc_trainer` WRITE;
 /*!40000 ALTER TABLE `npc_trainer` DISABLE KEYS */;
 /*!40000 ALTER TABLE `npc_trainer` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `npc_trainer_template`
+--
+
+DROP TABLE IF EXISTS `npc_trainer_template`;
+CREATE TABLE `npc_trainer_template` (
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `spell` mediumint(8) unsigned NOT NULL default '0',
+  `spellcost` int(10) unsigned NOT NULL default '0',
+  `reqskill` smallint(5) unsigned NOT NULL default '0',
+  `reqskillvalue` smallint(5) unsigned NOT NULL default '0',
+  `reqlevel` tinyint(3) unsigned NOT NULL default '0',
+  UNIQUE KEY `entry_spell` (`entry`,`spell`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `npc_trainer_template`
+--
+
+LOCK TABLES `npc_trainer_template` WRITE;
+/*!40000 ALTER TABLE `npc_trainer_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `npc_trainer_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
