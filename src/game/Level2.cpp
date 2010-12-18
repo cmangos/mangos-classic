@@ -1559,14 +1559,7 @@ bool ChatHandler::HandleNpcChangeLevelCommand(char* args)
     }
 
     if (pCreature->IsPet())
-    {
-        if (((Pet*)pCreature)->getPetType()==HUNTER_PET)
-        {
-            pCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(lvl));
-            pCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-        }
         ((Pet*)pCreature)->GivePetLevel(lvl);
-    }
     else
     {
         pCreature->SetMaxHealth(100 + 30*lvl);
