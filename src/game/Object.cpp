@@ -1333,8 +1333,6 @@ void WorldObject::MonsterWhisper(int32 textId, Unit* target, bool IsBossWhisper)
 
 void WorldObject::BuildMonsterChat(WorldPacket *data, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName) const
 {
-    bool pre = (msgtype==CHAT_MSG_MONSTER_EMOTE || msgtype==CHAT_MSG_RAID_BOSS_EMOTE);
-
     *data << uint8(msgtype);
     *data << uint32(language);
     *data << ObjectGuid(GetObjectGuid());
@@ -1346,9 +1344,7 @@ void WorldObject::BuildMonsterChat(WorldPacket *data, uint8 msgtype, char const*
         *data << uint32(strlen(targetName)+1);              // target name length
         *data << targetName;                                // target name
     }
-    *data << (uint32)(strlen(text)+1+(pre?3:0));
-    if(pre)
-        data->append("%s ",3);
+    *data << (uint32)(strlen(text)+1);
     *data << text;
     *data << (uint8)0;                                      // ChatTag
 }
