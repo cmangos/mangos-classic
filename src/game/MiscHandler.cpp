@@ -47,7 +47,7 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 
     // recv_data.read_skip<uint8>(); client crash
 
-    if(GetPlayer()->isAlive()||GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    if(GetPlayer()->isAlive() || GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
 
     // the world update order is sessions, players, creatures
@@ -372,8 +372,8 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 
     // use server size data
     uint32 newzone, newarea;
-    GetPlayer()->GetZoneAndAreaId(newzone,newarea);
-    GetPlayer()->UpdateZone(newzone,newarea);
+    GetPlayer()->GetZoneAndAreaId(newzone, newarea);
+    GetPlayer()->UpdateZone(newzone, newarea);
 }
 
 void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
@@ -908,8 +908,8 @@ void WorldSession::HandleSetActionBarTogglesOpcode(WorldPacket& recv_data)
 
     if(!GetPlayer())                                        // ignore until not logged (check needed because STATUS_AUTHED)
     {
-        if(ActionBar!=0)
-            sLog.outError("WorldSession::HandleSetActionBarToggles in not logged state with value: %u, ignored",uint32(ActionBar));
+        if(ActionBar != 0)
+            sLog.outError("WorldSession::HandleSetActionBarToggles in not logged state with value: %u, ignored", uint32(ActionBar));
         return;
     }
 
