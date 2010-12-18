@@ -1147,6 +1147,78 @@ void SpellMgr::LoadSpellProcEvents()
     sLog.outString( ">> Loaded %u extra spell proc event conditions +%u custom proc (inc. +%u custom ranks)",  count, customProc, customRank );
 }
 
+struct DoSpellProcItemEnchant
+{
+    DoSpellProcItemEnchant(SpellProcItemEnchantMap& _procMap, float _ppm) : procMap(_procMap), ppm(_ppm) {}
+    void operator() (uint32 spell_id) { procMap[spell_id] = ppm; }
+
+    SpellProcItemEnchantMap& procMap;
+    float ppm;
+};
+
+void SpellMgr::LoadSpellProcItemEnchant()
+{
+    mSpellProcItemEnchantMap.clear();                       // need for reload case
+
+    uint32 count = 0;
+
+    //                                                0      1
+    QueryResult *result = WorldDatabase.Query("SELECT entry, ppmRate FROM spell_proc_item_enchant");
+    if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outString( ">> Loaded %u proc item enchant definitions", count );
+        return;
+    }
+
+    barGoLink bar( (int)result->GetRowCount() );
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+        float ppmRate = fields[1].GetFloat();
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry);
+
+        if (!spellInfo)
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_proc_item_enchant` does not exist", entry);
+            continue;
+        }
+
+        uint32 first_id = GetFirstSpellInChain(entry);
+
+        if ( first_id != entry )
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_proc_item_enchant` is not first rank (%u) in chain", entry, first_id);
+            // prevent loading since it won't have an effect anyway
+            continue;
+        }
+
+        mSpellProcItemEnchantMap[entry] = ppmRate;
+
+        // also add to high ranks
+        DoSpellProcItemEnchant worker(mSpellProcItemEnchantMap, ppmRate);
+        doForHighRanks(entry,worker);
+
+        ++count;
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u proc item enchant definitions", count );
+}
+
 struct DoSpellBonuses
 {
     DoSpellBonuses(SpellBonusMap& _spellBonusMap, SpellBonusEntry const& _spellBonus) : spellBonusMap(_spellBonusMap), spellBonus(_spellBonus) {}
@@ -1171,7 +1243,7 @@ void SpellMgr::LoadSpellBonuses()
         return;
     }
 
-    barGoLink bar( result->GetRowCount() );
+    barGoLink bar( (int)result->GetRowCount() );
     do
     {
         Field *fields = result->Fetch();

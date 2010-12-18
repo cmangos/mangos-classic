@@ -178,7 +178,10 @@ pkgdata_DATA = \
 	z1040_s0418_02_mangos_creature_addon.sql \
 	z1040_s0418_03_mangos_creature_template_addon.sql \
 	z1101_s0498_01_mangos_npc_trainer_template.sql \
-	z1101_s0498_02_mangos_creature_template.sql
+	z1101_s0498_02_mangos_creature_template.sql \
+	z1108_s0481_01_mangos_spell_proc_item_enchant.sql \
+	z1108_s0481_02_mangos_spell_chain.sql \
+	z1108_s0481_03_mangos_spell_bonus_data.sql
 
 ## Additional files to include when running 'make dist'
 #  SQL update files, to upgrade database schema from older revisions
@@ -335,4 +338,7 @@ EXTRA_DIST = \
 	z1040_s0418_02_mangos_creature_addon.sql \
 	z1040_s0418_03_mangos_creature_template_addon.sql \
 	z1101_s0498_01_mangos_npc_trainer_template.sql \
-	z1101_s0498_02_mangos_creature_template.sql
+	z1101_s0498_02_mangos_creature_template.sql \
+	z1108_s0481_01_mangos_spell_proc_item_enchant.sql \
+	z1108_s0481_02_mangos_spell_chain.sql \
+	z1108_s0481_03_mangos_spell_bonus_data.sql

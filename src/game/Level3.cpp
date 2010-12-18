@@ -151,11 +151,12 @@ bool ChatHandler::HandleReloadAllSpellCommand(char* /*args*/)
     HandleReloadSkillExtraItemTemplateCommand((char*)"a");
     HandleReloadSpellAffectCommand((char*)"a");
     HandleReloadSpellAreaCommand((char*)"a");
-    HandleReloadSpellBonusesCommand((char*)"a");
     HandleReloadSpellChainCommand((char*)"a");
     HandleReloadSpellElixirCommand((char*)"a");
     HandleReloadSpellLearnSpellCommand((char*)"a");
     HandleReloadSpellProcEventCommand((char*)"a");
+    HandleReloadSpellBonusesCommand((char*)"a");
+    HandleReloadSpellProcItemEnchantCommand((char*)"a");
     HandleReloadSpellScriptTargetCommand((char*)"a");
     HandleReloadSpellTargetPositionCommand((char*)"a");
     HandleReloadSpellThreatsCommand((char*)"a");
@@ -547,6 +548,14 @@ bool ChatHandler::HandleReloadSpellProcEventCommand(char* /*args*/)
     sLog.outString( "Re-Loading Spell Proc Event conditions..." );
     sSpellMgr.LoadSpellProcEvents();
     SendGlobalSysMessage("DB table `spell_proc_event` (spell proc trigger requirements) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSpellProcItemEnchantCommand(char* /*args*/)
+{
+    sLog.outString( "Re-Loading Spell Proc Item Enchant..." );
+    sSpellMgr.LoadSpellProcItemEnchant();
+    SendGlobalSysMessage("DB table `spell_proc_item_enchant` (item enchantment ppm) reloaded.");
     return true;
 }
 

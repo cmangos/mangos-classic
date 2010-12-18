@@ -9964,7 +9964,9 @@ bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura* aura, SpellEntry con
     }
     // Apply chance modifer aura
     if(Player* modOwner = GetSpellModOwner())
+    {
         modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_CHANCE_OF_SUCCESS,chance);
+    }
 
     return roll_chance_f(chance);
 }

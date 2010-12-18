@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1101_s0498_02_mangos_creature_template` bit(1) default NULL
+  `required_z1108_s0481_03_mangos_spell_bonus_data` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10191,12 +10191,30 @@ INSERT INTO `spell_chain` VALUES
 -- ------------------
 -- (0) Not associated with skills
 -- ------------------
+/* Frostbrand Attack */
+(8034,0,8034,1,0),
+(8037,8034,8034,2,0),
+(10458,8037,8034,3,0),
+(16352,10458,8034,4,0),
+(16353,16352,8034,5,0),
 /* Healing Stream totem spell */
 (5672,0,5672, 1,0),
 (6371,5672,5672,2,0),
 (6372,6371,5672,3,0),
 (10460,6372,5672,4,0),
 (10461,10460,5672,5,0),
+/* Instant Poison */
+(8680,0,8680,1,0),
+(8685,8680,8680,2,0),
+(8689,8685,8680,3,0),
+(11335,8689,8680,4,0),
+(11336,11335,8680,5,0),
+(11337,11336,8680,6,0),
+/* Wound Poison */
+(13218,0,13218,1,0),
+(13222,13218,13218,2,0),
+(13223,13222,13218,3,0),
+(13224,13223,13218,4,0),
 -- ------------------
 -- (6) Frost
 -- ------------------
@@ -12929,10 +12947,6 @@ INSERT INTO `spell_bonus_data` VALUES
 (16344, 0.1,    0,       0,     'Shaman - Flametongue Weapon Proc Rank 6'),
 (8056,  0.3858, 0,       0,     'Shaman - Frost Shock'),
 (8034,  0.1,    0,       0,     'Shaman - Frostbrand Attack Rank 1'),
-(8037,  0.1,    0,       0,     'Shaman - Frostbrand Attack Rank 2'),
-(10458, 0.1,    0,       0,     'Shaman - Frostbrand Attack Rank 3'),
-(16352, 0.1,    0,       0,     'Shaman - Frostbrand Attack Rank 4'),
-(16353, 0.1,    0,       0,     'Shaman - Frostbrand Attack Rank 5'),
 (5672,  0,      0.0450,  0,     'Shaman - Healing Stream Totem'),
 (331,   0.8571, 0,       0,     'Shaman - Healing Wave'),
 (8004,  0.4286, 0,       0,     'Shaman - Lesser Healing Wave'),
@@ -12978,6 +12992,28 @@ INSERT INTO `spell_bonus_data` VALUES
 (18265, 0,      0.1,     0,     'Warlock - Siphon Life'),
 (6353,  1.15,   0,       0,     'Warlock - Soul Fire');
 /*!40000 ALTER TABLE `spell_bonus_data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for spell_proc_item_enchant
+--
+
+DROP TABLE IF EXISTS `spell_proc_item_enchant`;
+CREATE TABLE `spell_proc_item_enchant` (
+  `entry` mediumint unsigned NOT NULL,
+  `ppmRate` float NOT NULL default '0',
+  PRIMARY KEY  (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `spell_proc_item_enchant`
+--
+
+LOCK TABLES `spell_proc_item_enchant` WRITE;
+/*!40000 ALTER TABLE `spell_proc_item_enchant` DISABLE KEYS */;
+INSERT INTO `spell_proc_item_enchant` (`entry`, `ppmRate`) VALUES
+(8034, 9);        -- Frostbrand Weapon
+/*!40000 ALTER TABLE `spell_proc_item_enchant` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

@@ -6688,7 +6688,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
 
         if(spellData.SpellPPMRate)
         {
-            uint32 WeaponSpeed = GetAttackTime(attType);
+            uint32 WeaponSpeed = proto->Delay;
             chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate);
         }
         else if(chance > 100.0f)
@@ -6718,7 +6718,16 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
                 continue;
             }
 
-            float chance = pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
+            // Use first rank to access spell item enchant procs
+            float ppmRate = sSpellMgr.GetItemEnchantProcChance(spellInfo->Id);
+
+            float chance = ppmRate
+                ? GetPPMProcChance(proto->Delay, ppmRate)
+                : pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
+
+
+            ApplySpellMod(spellInfo->Id,SPELLMOD_CHANCE_OF_SUCCESS,chance);
+
             if (roll_chance_f(chance))
             {
                 if(IsPositiveSpell(pEnchant->spellid[s]))
