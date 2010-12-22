@@ -49,7 +49,7 @@ uint32 PlayerSocial::GetNumberOfSocialsWithFlag(SocialFlag flag)
     return counter;
 }
 
-bool PlayerSocial::AddToSocialList(uint32 friend_lowguid, bool ignore)
+bool PlayerSocial::AddToSocialList(ObjectGuid friend_guid, bool ignore)
 {
     // check client limits
     if(ignore)
@@ -67,25 +67,25 @@ bool PlayerSocial::AddToSocialList(uint32 friend_lowguid, bool ignore)
     if(ignore)
         flag = SOCIAL_FLAG_IGNORED;
 
-    PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_lowguid);
+    PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if(itr != m_playerSocialMap.end())
     {
-        CharacterDatabase.PExecute("UPDATE character_social SET flags = (flags | %u) WHERE guid = '%u' AND friend = '%u'", flag, m_playerLowGuid, friend_lowguid);
-        m_playerSocialMap[friend_lowguid].Flags |= flag;
+        CharacterDatabase.PExecute("UPDATE character_social SET flags = (flags | %u) WHERE guid = '%u' AND friend = '%u'", flag, m_playerLowGuid, friend_guid.GetCounter());
+        m_playerSocialMap[friend_guid.GetCounter()].Flags |= flag;
     }
     else
     {
-        CharacterDatabase.PExecute("INSERT INTO character_social (guid, friend, flags) VALUES ('%u', '%u', '%u')", m_playerLowGuid, friend_lowguid, flag);
+        CharacterDatabase.PExecute("INSERT INTO character_social (guid, friend, flags) VALUES ('%u', '%u', '%u')", m_playerLowGuid, friend_guid.GetCounter(), flag);
         FriendInfo fi;
         fi.Flags |= flag;
-        m_playerSocialMap[friend_lowguid] = fi;
+        m_playerSocialMap[friend_guid.GetCounter()] = fi;
     }
     return true;
 }
 
-void PlayerSocial::RemoveFromSocialList(uint32 friend_lowguid, bool ignore)
+void PlayerSocial::RemoveFromSocialList(ObjectGuid friend_guid, bool ignore)
 {
-    PlayerSocialMap::iterator itr = m_playerSocialMap.find(friend_lowguid);
+    PlayerSocialMap::iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if(itr == m_playerSocialMap.end())                      // not exist
         return;
 
@@ -96,12 +96,12 @@ void PlayerSocial::RemoveFromSocialList(uint32 friend_lowguid, bool ignore)
     itr->second.Flags &= ~flag;
     if(itr->second.Flags == 0)
     {
-        CharacterDatabase.PExecute("DELETE FROM character_social WHERE guid = '%u' AND friend = '%u'", m_playerLowGuid, friend_lowguid);
+        CharacterDatabase.PExecute("DELETE FROM character_social WHERE guid = '%u' AND friend = '%u'", m_playerLowGuid, friend_guid.GetCounter());
         m_playerSocialMap.erase(itr);
     }
     else
     {
-        CharacterDatabase.PExecute("UPDATE character_social SET flags = (flags & ~%u) WHERE guid = '%u' AND friend = '%u'", flag, m_playerLowGuid, friend_lowguid);
+        CharacterDatabase.PExecute("UPDATE character_social SET flags = (flags & ~%u) WHERE guid = '%u' AND friend = '%u'", flag, m_playerLowGuid, friend_guid.GetCounter());
     }
 }
 
@@ -160,17 +160,17 @@ void PlayerSocial::SendIgnoreList()
     DEBUG_LOG("WORLD: Sent SMSG_IGNORE_LIST");
 }
 
-bool PlayerSocial::HasFriend(uint32 friend_guid)
+bool PlayerSocial::HasFriend(ObjectGuid friend_guid)
 {
-    PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_guid);
+    PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(friend_guid.GetCounter());
     if(itr != m_playerSocialMap.end())
         return itr->second.Flags & SOCIAL_FLAG_FRIEND;
     return false;
 }
 
-bool PlayerSocial::HasIgnore(uint32 ignore_guid)
+bool PlayerSocial::HasIgnore(ObjectGuid ignore_guid)
 {
-    PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(ignore_guid);
+    PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(ignore_guid.GetCounter());
     if(itr != m_playerSocialMap.end())
         return itr->second.Flags & SOCIAL_FLAG_IGNORED;
     return false;
@@ -233,8 +233,10 @@ void SocialMgr::MakeFriendStatusPacket(FriendsResult result, uint32 guid, WorldP
     *data << ObjectGuid(HIGHGUID_PLAYER, guid);
 }
 
-void SocialMgr::SendFriendStatus(Player *player, FriendsResult result, uint32 friend_lowguid, bool broadcast)
+void SocialMgr::SendFriendStatus(Player *player, FriendsResult result, ObjectGuid friend_guid, bool broadcast)
 {
+    uint32 friend_lowguid = friend_guid.GetCounter();
+
     FriendInfo fi;
 
     WorldPacket data;
