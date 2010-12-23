@@ -14877,23 +14877,8 @@ void Player::SaveToDB()
         return;
     }
 
-    int is_save_resting = HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0;
-                                                            //save, far from tavern/city
-                                                            //save, but in tavern/city
     DEBUG_FILTER_LOG(LOG_FILTER_PLAYER_STATS, "The value of player %s at save: ", m_name.c_str());
     outDebugStatsValues();
-
-    // save state (after auras removing), if aura remove some flags then it must set it back by self)
-    uint32 tmp_bytes = GetUInt32Value(UNIT_FIELD_BYTES_1);
-    uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
-    uint32 tmp_displayid = GetDisplayId();
-
-    // Set player sit state to standing on save, also stealth and shifted form
-    SetByteValue(UNIT_FIELD_BYTES_1, 0, UNIT_STAND_STATE_STAND);
-    SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);                 // stand flags?
-    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-
-    bool inworld = IsInWorld();
 
     CharacterDatabase.BeginTransaction();
 
@@ -14952,7 +14937,7 @@ void Player::SaveToDB()
 
     ss << m_taxi << ", ";                                   // string with TaxiMaskSize numbers
 
-    ss << (inworld ? 1 : 0) << ", ";
+    ss << (IsInWorld() ? 1 : 0) << ", ";
 
     ss << m_cinematic << ", ";
 
@@ -14961,8 +14946,9 @@ void Player::SaveToDB()
 
     ss << finiteAlways(m_rest_bonus) << ", ";
     ss << (uint64)time(NULL) << ", ";
-    ss << is_save_resting << ", ";
-
+    ss << (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0) << ", ";
+                                                            //save, far from tavern/city
+                                                            //save, but in tavern/city
     ss << m_resetTalentsCost << ", ";
     ss << (uint64)m_resetTalentsTime << ", ";
 
@@ -14974,7 +14960,6 @@ void Player::SaveToDB()
         ss << m_transport->GetGUIDLow();
     else
         ss << "0";
-
     ss << ", ";
 
     ss << m_ExtraFlags << ", ";
@@ -14982,6 +14967,7 @@ void Player::SaveToDB()
     ss << uint32(m_stableSlots) << ", ";                    // to prevent save uint8 as char
 
     ss << uint32(m_atLoginFlags) << ", ";
+
     ss << GetZoneId() << ", ";
 
     ss << (uint64)m_deathExpireTime << ", '";
@@ -15023,12 +15009,8 @@ void Player::SaveToDB()
 
     // check if stats should only be saved on logout
     // save stats can be out of transaction
-    if(m_session->isLogingOut() || !sWorld.getConfig(CONFIG_BOOL_STATS_SAVE_ONLY_ON_LOGOUT))
+    if (m_session->isLogingOut() || !sWorld.getConfig(CONFIG_BOOL_STATS_SAVE_ONLY_ON_LOGOUT))
         _SaveStats();
-
-    // restore state (before aura apply, if aura remove flag then aura must set it ack by self)
-    SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
-    SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
 
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
