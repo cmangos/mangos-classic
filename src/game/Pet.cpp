@@ -257,6 +257,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     if(owner->IsPvP())
         SetPvP(true);
 
+    SetCanModifyStats(true);
     InitStatsForLevel(petlevel);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL)));
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[5].GetUInt32());
@@ -310,7 +311,6 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     delete result;
 
     //load spells/cooldowns/auras
-    SetCanModifyStats(true);
     _LoadAuras(timediff);
 
     //init AB
