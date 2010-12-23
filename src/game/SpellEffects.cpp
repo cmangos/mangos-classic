@@ -1248,9 +1248,9 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
     // So called only for not processed cases
     if (gameObjTarget)
         Script->EffectDummyGameObj(m_caster, m_spellInfo->Id, eff_idx, gameObjTarget);
-    else if(unitTarget && unitTarget->GetTypeId()==TYPEID_UNIT)
+    else if (unitTarget && unitTarget->GetTypeId()==TYPEID_UNIT)
         Script->EffectDummyCreature(m_caster, m_spellInfo->Id, eff_idx, (Creature*)unitTarget);
-    else if(itemTarget)
+    else if (itemTarget)
         Script->EffectDummyItem(m_caster, m_spellInfo->Id, eff_idx, itemTarget);
 }
 
@@ -1774,7 +1774,7 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
         else
             addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL);
 
-        m_healing+=addhealth;
+        m_healing += addhealth;
     }
 }
 
@@ -1821,8 +1821,6 @@ void Spell::EffectHealthLeech(SpellEffectIndex eff_idx)
         new_damage = m_caster->SpellHealingBonus(m_caster, m_spellInfo, new_damage, HEAL);
         m_caster->DealHeal(m_caster, uint32(new_damage), m_spellInfo);
     }
-//    m_healthLeech+=tmpvalue;
-//    m_damage+=new_damage;
 }
 
 void Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype)
