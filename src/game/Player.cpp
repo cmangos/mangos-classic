@@ -6146,35 +6146,31 @@ void Player::UpdateArea(uint32 newArea)
 
 void Player::UpdateZone(uint32 newZone, uint32 newArea)
 {
-    if(m_zoneUpdateId != newZone)
-        SendInitWorldStates(newZone);                       // only if really enters to new zone, not just area change, works strange...
-
-    m_zoneUpdateId    = newZone;
-    m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
-
-    // zone changed, so area changed as well, update it
-    UpdateArea(newArea);
-
     AreaTableEntry const* zone = GetAreaEntryByAreaID(newZone);
     if(!zone)
         return;
 
-    if (sWorld.getConfig(CONFIG_BOOL_WEATHER))
+    if(m_zoneUpdateId != newZone)
     {
-        Weather *wth = sWorld.FindWeather(zone->ID);
-        if(wth)
+        SendInitWorldStates(newZone);                       // only if really enters to new zone, not just area change, works strange...
+
+        if (sWorld.getConfig(CONFIG_BOOL_WEATHER))
         {
-            wth->SendWeatherUpdateToPlayer(this);
-        }
-        else
-        {
-            if(!sWorld.AddWeather(zone->ID))
+            if(Weather *wth = sWorld.FindWeather(zone->ID))
+                wth->SendWeatherUpdateToPlayer(this);
+            else if(!sWorld.AddWeather(zone->ID))
             {
                 // send fine weather packet to remove old zone's weather
                 Weather::SendFineWeatherUpdateToPlayer(this);
             }
         }
     }
+
+    m_zoneUpdateId    = newZone;
+    m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
+
+    // zone changed, so area changed as well, update it
+    UpdateArea(newArea);
 
     // in PvP, any not controlled zone (except zone->team == 6, default case)
     // in PvE, only opposition team capital
@@ -6208,19 +6204,16 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     if(zone->flags & AREA_FLAG_CAPITAL)                     // in capital city
         SetRestType(REST_TYPE_IN_CITY);
-    else                                                    // anywhere else
+    else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))   // but resting (walk from city or maybe in tavern or leave tavern recently)
     {
-        if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))    // but resting (walk from city or maybe in tavern or leave tavern recently)
+        if (GetRestType()==REST_TYPE_IN_TAVERN)         // has been in tavern. Is still in?
         {
-            if (GetRestType()==REST_TYPE_IN_TAVERN)         // has been in tavern. Is still in?
-            {
-                AreaTriggerEntry const* at = sAreaTriggerStore.LookupEntry(inn_trigger_id);
-                if (!at || !IsPointInAreaTriggerZone(at, GetMapId(), GetPositionX(), GetPositionY(), GetPositionY()))
-                    SetRestType(REST_TYPE_NO);
-            }
-            else                                            // not in tavern (leave city then)
+            AreaTriggerEntry const* at = sAreaTriggerStore.LookupEntry(inn_trigger_id);
+            if (!at || !IsPointInAreaTriggerZone(at, GetMapId(), GetPositionX(), GetPositionY(), GetPositionY()))
                 SetRestType(REST_TYPE_NO);
         }
+        else                                            // not in tavern (leave city then)
+            SetRestType(REST_TYPE_NO);
     }
 
     // remove items with area/map limitations (delete only for alive player to allow back in ghost mode)
@@ -17257,11 +17250,6 @@ void Player::SendInitialPacketsBeforeAddToMap()
     m_reputationMgr.SendInitialReputations();
     UpdateHonor();
 
-    // update zone
-    uint32 newzone, newarea;
-    GetZoneAndAreaId(newzone,newarea);
-    UpdateZone(newzone,newarea);                            // also call SendInitWorldStates();
-
     // SMSG_SET_AURA_SINGLE
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 4 + 4);
@@ -17278,6 +17266,11 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
 void Player::SendInitialPacketsAfterAddToMap()
 {
+    // update zone
+    uint32 newzone, newarea;
+    GetZoneAndAreaId(newzone,newarea);
+    UpdateZone(newzone,newarea);                            // also call SendInitWorldStates();
+
     CastSpell(this, 836, true);                             // LOGINEFFECT
 
     // set some aura effects that send packet to player client after add player to map
