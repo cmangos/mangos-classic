@@ -440,11 +440,11 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data )
                     // can be calculated early
                     sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
 
-                    if(!sObjectMgr.GetPlayerNameByGUID(sender_guid,sender_name))
+                    if(!sObjectMgr.GetPlayerNameByGUID(sender_guid, sender_name))
                         sender_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
                 }
-                sLog.outCommand(GetAccountId(),"GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
-                    GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),it->GetCount(),m->COD,sender_name.c_str(),sender_accId);
+                sLog.outCommand(GetAccountId(), "GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
+                    GetPlayerName(), GetAccountId(), it->GetProto()->Name1, it->GetEntry(), it->GetCount(), m->COD, sender_name.c_str(), sender_accId);
             }
             else if(!sender)
                 sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
@@ -534,7 +534,7 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
     data << uint8(0);                                       // mail's count
     time_t cur_time = time(NULL);
 
-    for(PlayerMails::iterator itr = _player->GetmailBegin(); itr != _player->GetmailEnd(); ++itr)
+    for(PlayerMails::iterator itr = _player->GetMailBegin(); itr != _player->GetMailEnd(); ++itr)
     {
         // packet send mail count as uint8, prevent overflow
         if(mailsCount >= 254)
@@ -613,8 +613,8 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
 void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 {
     uint32 itemTextId;
-    uint32 mailId;                                          //this value can be item id in bag, but it is also mail id
-    uint32 unk;                                             //maybe something like state - 0x70000000
+    uint32 mailId;                                          // this value can be item id in bag, but it is also mail id
+    uint32 unk;                                             // maybe something like state - 0x70000000
 
     recv_data >> itemTextId >> mailId >> unk;
 
@@ -697,12 +697,12 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket & /**recv_data*/ )
 
     if( _player->unReadMails > 0 )
     {
-        data << (uint32) 0;                                 // float
-        data << (uint32) 0;                                 // count
+        data << uint32(0);                                  // float
+        data << uint32(0);                                  // count
 
         uint32 count = 0;
         time_t now = time(NULL);
-        for(PlayerMails::iterator itr = _player->GetmailBegin(); itr != _player->GetmailEnd(); ++itr)
+        for(PlayerMails::iterator itr = _player->GetMailBegin(); itr != _player->GetMailEnd(); ++itr)
         {
             Mail *m = (*itr);
             // must be not checked yet
@@ -738,8 +738,8 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket & /**recv_data*/ )
     }
     else
     {
-        data << (uint32) 0xC7A8C000;
-        data << (uint32) 0x00000000;
+        data << uint32(0xC7A8C000);
+        data << uint32(0x00000000);
     }
     SendPacket(&data);
 }
@@ -941,6 +941,7 @@ void MailDraft::SendMailTo(MailReceiver const& receiver, MailSender const& sende
 
     time_t deliver_time = time(NULL) + deliver_delay;
 
+    // expire time if COD 3 days, if no COD 30 days, if auction sale pending 1 hour
     uint32 expire_delay;
     // auction mail without any items and money (auction sale note) pending 1 hour
     if (sender.GetMailMessageType() == MAIL_AUCTION && m_items.empty() && !m_money)

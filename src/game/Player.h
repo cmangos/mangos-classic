@@ -722,7 +722,7 @@ class MANGOS_DLL_SPEC PlayerTaxi
             else
                 return false;
         }
-        void AppendTaximaskTo(ByteBuffer& data,bool all);
+        void AppendTaximaskTo(ByteBuffer& data, bool all);
 
         // Destinations
         bool LoadTaxiDestinationsFromString(const std::string& values, uint32 team);
@@ -880,8 +880,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool ToggleAFK();
         bool ToggleDND();
-        bool isAFK() const { return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); };
-        bool isDND() const { return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); };
+        bool isAFK() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK); }
+        bool isDND() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND); }
         uint8 chatTag() const;
         std::string afkMsg;
         std::string dndMsg;
@@ -930,8 +930,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         time_t m_logintime;
         time_t m_Last_tick;
         uint32 m_Played_time[MAX_PLAYED_TIME_INDEX];
-        uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; };
-        uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; };
+        uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; }
+        uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; }
 
         void SetDeathState(DeathState s);                   // overwrite Unit::SetDeathState
 
@@ -976,12 +976,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* GetShield(bool useable = false) const;
         static uint32 GetAttackBySlot( uint8 slot );        // MAX_ATTACK if not weapon slot
         std::vector<Item *> &GetItemUpdateQueue() { return m_itemUpdateQueue; }
-        static bool IsInventoryPos( uint16 pos ) { return IsInventoryPos(pos >> 8,pos & 255); }
+        static bool IsInventoryPos( uint16 pos ) { return IsInventoryPos(pos >> 8, pos & 255); }
         static bool IsInventoryPos( uint8 bag, uint8 slot );
-        static bool IsEquipmentPos( uint16 pos ) { return IsEquipmentPos(pos >> 8,pos & 255); }
+        static bool IsEquipmentPos( uint16 pos ) { return IsEquipmentPos(pos >> 8, pos & 255); }
         static bool IsEquipmentPos( uint8 bag, uint8 slot );
         static bool IsBagPos( uint16 pos );
-        static bool IsBankPos( uint16 pos ) { return IsBankPos(pos >> 8,pos & 255); }
+        static bool IsBankPos( uint16 pos ) { return IsBankPos(pos >> 8, pos & 255); }
         static bool IsBankPos( uint8 bag, uint8 slot );
         bool IsValidPos( uint16 pos, bool explicit_pos ) const { return IsValidPos(pos >> 8, pos & 255, explicit_pos); }
         bool IsValidPos( uint8 bag, uint8 slot, bool explicit_pos ) const;
@@ -991,8 +991,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item const* ignoreItem = NULL);
         bool CanNoReagentCast(SpellEntry const* spellInfo) const;
         bool HasItemWithIdEquipped( uint32 item, uint32 count, uint8 except_slot = NULL_SLOT) const;
-        uint8 CanTakeMoreSimilarItems(Item* pItem) const { return _CanTakeMoreSimilarItems(pItem->GetEntry(),pItem->GetCount(),pItem); }
-        uint8 CanTakeMoreSimilarItems(uint32 entry, uint32 count) const { return _CanTakeMoreSimilarItems(entry,count,NULL); }
+        uint8 CanTakeMoreSimilarItems(Item* pItem) const { return _CanTakeMoreSimilarItems(pItem->GetEntry(), pItem->GetCount(), pItem); }
+        uint8 CanTakeMoreSimilarItems(uint32 entry, uint32 count) const { return _CanTakeMoreSimilarItems(entry, count, NULL); }
         uint8 CanStoreNewItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 item, uint32 count, uint32* no_space_count = NULL ) const
         {
             return _CanStoreItem(bag, slot, dest, item, count, NULL, false, no_space_count );
@@ -1215,12 +1215,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendQuestUpdateAddItem( Quest const* pQuest, uint32 item_idx, uint32 count );
         void SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, ObjectGuid guid, uint32 creatureOrGO_idx, uint32 count);
 
-        uint64 GetDivider() { return m_divider; };
-        void SetDivider( uint64 guid ) { m_divider = guid; };
+        uint64 GetDivider() { return m_divider; }
+        void SetDivider( uint64 guid ) { m_divider = guid; }
 
-        uint32 GetInGameTime() { return m_ingametime; };
+        uint32 GetInGameTime() { return m_ingametime; }
 
-        void SetInGameTime( uint32 time ) { m_ingametime = time; };
+        void SetInGameTime( uint32 time ) { m_ingametime = time; }
 
         void AddTimedQuest( uint32 quest_id ) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest( uint32 quest_id ) { m_timedquests.erase(quest_id); }
@@ -1321,15 +1321,14 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateNextMailTimeAndUnreads();
         void AddNewMailDeliverTime(time_t deliver_time);
 
-        //void SetMail(Mail *m);
         void RemoveMail(uint32 id);
 
         void AddMail(Mail* mail) { m_mail.push_front(mail);}// for call from WorldSession::SendMailTo
-        uint32 GetMailSize() { return m_mail.size();};
+        uint32 GetMailSize() { return m_mail.size(); }
         Mail* GetMail(uint32 id);
 
-        PlayerMails::iterator GetmailBegin() { return m_mail.begin();};
-        PlayerMails::iterator GetmailEnd() { return m_mail.end();};
+        PlayerMails::iterator GetMailBegin() { return m_mail.begin();}
+        PlayerMails::iterator GetMailEnd() { return m_mail.end();}
 
         /*********************************************************/
         /*** MAILED ITEMS SYSTEM ***/
@@ -1340,7 +1339,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         typedef UNORDERED_MAP<uint32, Item*> ItemMap;
 
-        ItemMap mMitems;                                    //template defined in objectmgr.cpp
+        ItemMap mMitems;                                    // template defined in objectmgr.cpp
 
         Item* GetMItem(uint32 id)
         {
@@ -1896,8 +1895,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool isRested() const { return GetRestTime() >= 10*IN_MILLISECONDS; }
         uint32 GetXPRestBonus(uint32 xp);
-        uint32 GetRestTime() const { return m_restTime;};
-        void SetRestTime(uint32 v) { m_restTime = v;};
+        uint32 GetRestTime() const { return m_restTime; }
+        void SetRestTime(uint32 v) { m_restTime = v; }
 
         /*********************************************************/
         /***              ENVIRONMENTAL SYSTEM                  ***/
