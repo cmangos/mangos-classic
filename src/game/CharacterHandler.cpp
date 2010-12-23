@@ -160,13 +160,13 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & /*recv_data*/ )
         "FROM characters LEFT JOIN character_pet ON characters.guid=character_pet.owner AND character_pet.slot='%u' "
         "LEFT JOIN guild_member ON characters.guid = guild_member.guid "
         "WHERE characters.account = '%u' ORDER BY characters.guid",
-        PET_SAVE_AS_CURRENT,GetAccountId());
+        PET_SAVE_AS_CURRENT, GetAccountId());
 }
 
 void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 {
     std::string name;
-    uint8 race_,class_;
+    uint8 race_, class_;
 
     recv_data >> name;
 
@@ -184,8 +184,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
             uint32 team = Player::TeamForRace(race_);
             switch(team)
             {
-                case ALLIANCE: disabled = mask & (1<<0); break;
-                case HORDE:    disabled = mask & (1<<1); break;
+                case ALLIANCE: disabled = mask & (1 << 0); break;
+                case HORDE:    disabled = mask & (1 << 1); break;
             }
 
             if(disabled)
@@ -213,12 +213,12 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     {
         data << (uint8)CHAR_NAME_NO_NAME;
         SendPacket( &data );
-        sLog.outError("Account:[%d] but tried to Create character with empty [name] ",GetAccountId());
+        sLog.outError("Account:[%d] but tried to Create character with empty [name]", GetAccountId());
         return;
     }
 
     // check name limitations
-    uint8 res = ObjectMgr::CheckPlayerName(name,true);
+    uint8 res = ObjectMgr::CheckPlayerName(name, true);
     if (res != CHAR_NAME_SUCCESS)
     {
         data << uint8(res);
@@ -259,7 +259,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     uint8 charcount = 0;
     if ( result )
     {
-        Field *fields=result->Fetch();
+        Field *fields = result->Fetch();
         charcount = fields[0].GetUInt8();
         delete result;
 
@@ -290,7 +290,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
             // TODO: what to if account already has characters of both races?
             if (!AllowTwoSideAccounts)
             {
-                uint32 acc_team=0;
+                uint32 acc_team = 0;
                 if(acc_race > 0)
                     acc_team = Player::TeamForRace(acc_race);
 
@@ -324,7 +324,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     recv_data >> gender >> skin >> face;
     recv_data >> hairStyle >> hairColor >> facialHair >> outfitId;
 
-    Player * pNewChar = new Player(this);
+    Player *pNewChar = new Player(this);
     if(!pNewChar->Create( sObjectMgr.GenerateLowGuid(HIGHGUID_PLAYER), name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId ))
     {
         // Player not create (race/class problem?)
@@ -341,7 +341,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     // Player created, save it now
     pNewChar->SaveToDB();
-    charcount+=1;
+    charcount += 1;
 
     LoginDatabase.PExecute("DELETE FROM realmcharacters WHERE acctid= '%u' AND realmid = '%u'", GetAccountId(), realmID);
     LoginDatabase.PExecute("INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (%u, %u, %u)",  charcount, GetAccountId(), realmID);
@@ -413,7 +413,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 {
     if(PlayerLoading() || GetPlayer() != NULL)
     {
-        sLog.outError("Player tryes to login again, AccountId = %d",GetAccountId());
+        sLog.outError("Player tryes to login again, AccountId = %d", GetAccountId());
         return;
     }
 
@@ -435,11 +435,11 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, holder);
 }
 
-void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
+void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
 {
     uint64 playerGuid = holder->GetGuid();
 
-    Player* pCurrChar = new Player(this);
+    Player *pCurrChar = new Player(this);
     pCurrChar->GetMotionMaster()->Initialize();
 
     // "GetAccountId()==db stored account id" checked in LoadFromDB (prevent login not own character using cheating tools)
@@ -467,7 +467,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         data << uint32(0);
     SendPacket(&data);
 
-    // Send MOTD
+    // Send MOTD (1.12.1 not have SMSG_MOTD, so do it in another way)
     {
         uint32 linecount=0;
         std::string str_motd = sWorld.GetMotd();
@@ -482,10 +482,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
                 ChatHandler(pCurrChar).PSendSysMessage(str_motd.substr(pos,nextpos-pos).c_str());
                 ++linecount;
             }
-            pos = nextpos+1;
+            pos = nextpos + 1;
         }
 
-        if (pos<str_motd.length())
+        if (pos < str_motd.length())
         {
             ChatHandler(pCurrChar).PSendSysMessage(str_motd.substr(pos).c_str());
             ++linecount;
@@ -647,7 +647,7 @@ void WorldSession::HandleSetFactionAtWarOpcode( WorldPacket & recv_data )
     recv_data >> repListID;
     recv_data >> flag;
 
-    GetPlayer()->GetReputationMgr().SetAtWar(repListID,flag);
+    GetPlayer()->GetReputationMgr().SetAtWar(repListID, flag);
 }
 
 void WorldSession::HandleMeetingStoneInfoOpcode( WorldPacket & /*recv_data*/ )
