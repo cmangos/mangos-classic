@@ -4408,8 +4408,6 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             break;
         case FORM_MOONKIN:
             spellId1 = 24905;
-            // aura from effect trigger spell
-            spellId2 = 24907;
             break;
         case FORM_SPIRITOFREDEMPTION:
             spellId1 = 27792;
@@ -4422,14 +4420,15 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         case FORM_STEALTH:
         case FORM_CREATURECAT:
         case FORM_CREATUREBEAR:
-            spellId1 = 0;
             break;
     }
 
     if(apply)
     {
-        if (spellId1) m_target->CastSpell(m_target, spellId1, true, NULL, this );
-        if (spellId2) m_target->CastSpell(m_target, spellId2, true, NULL, this);
+        if (spellId1)
+            m_target->CastSpell(m_target, spellId1, true, NULL, this );
+        if (spellId2)
+            m_target->CastSpell(m_target, spellId2, true, NULL, this);
 
         if (m_target->GetTypeId() == TYPEID_PLAYER)
         {
@@ -4474,8 +4473,10 @@ void Aura::HandleShapeshiftBoosts(bool apply)
     }
     else
     {
-        m_target->RemoveAurasDueToSpell(spellId1);
-        m_target->RemoveAurasDueToSpell(spellId2);
+        if(spellId1)
+            m_target->RemoveAurasDueToSpell(spellId1);
+        if(spellId2)
+            m_target->RemoveAurasDueToSpell(spellId2);
 
         Unit::AuraMap& tAuras = m_target->GetAuras();
         for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
