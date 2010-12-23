@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z1014_s0386_01_characters_item_loot` bit(1) default NULL
+  `required_z1126_s0507_02_characters_character_battleground_data` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -144,13 +144,6 @@ CREATE TABLE `characters` (
   `stored_honor_rating` FLOAT NOT NULL DEFAULT '0',
   `stored_dishonorable_kills` INT(11) NOT NULL DEFAULT '0',
   `stored_honorable_kills` INT(11) NOT NULL DEFAULT '0',
-  `bgid` int(10) unsigned NOT NULL default '0',
-  `bgteam` int(10) unsigned NOT NULL default '0',
-  `bgmap` int(10) unsigned NOT NULL default '0',
-  `bgx` float NOT NULL default '0',
-  `bgy` float NOT NULL default '0',
-  `bgz` float NOT NULL default '0',
-  `bgo` float NOT NULL default '0',
   `deleteInfos_Account` int(11) UNSIGNED default NULL,
   `deleteInfos_Name` varchar(12) default NULL,
   `deleteDate` bigint(20) default NULL,
@@ -224,6 +217,32 @@ CREATE TABLE `character_aura` (
 LOCK TABLES `character_aura` WRITE;
 /*!40000 ALTER TABLE `character_aura` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_aura` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_battleground_data`
+--
+
+DROP TABLE IF EXISTS `character_battleground_data`;
+CREATE TABLE `character_battleground_data` (
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `instance_id` int(11) unsigned NOT NULL default '0',
+  `team` int(11) unsigned NOT NULL default '0',
+  `join_x` float NOT NULL default '0',
+  `join_y` float NOT NULL default '0',
+  `join_z` float NOT NULL default '0',
+  `join_o` float NOT NULL default '0',
+  `join_map` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+
+--
+-- Dumping data for table `character_battleground_data`
+--
+
+LOCK TABLES `character_battleground_data` WRITE;
+/*!40000 ALTER TABLE `character_battleground_data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_battleground_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
