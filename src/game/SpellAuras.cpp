@@ -545,6 +545,7 @@ void AreaAura::Update(uint32 diff)
 
             for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
             {
+                // not allow stacking area auras
                 if((*tIter)->HasAura(GetId(), m_effIndex))
                     continue;
 
@@ -579,7 +580,7 @@ void AreaAura::Update(uint32 diff)
             caster->IsFriendlyTo(target) != needFriendly
            )
         {
-            target->RemoveAura(GetId(), GetEffIndex());
+            target->RemoveAurasByCasterSpell(GetId(), GetEffIndex(), GetCasterGUID());
         }
         else if( m_areaAuraType == AREA_AURA_PARTY)         // check if in same sub group
         {
@@ -602,7 +603,7 @@ void AreaAura::Update(uint32 diff)
         else if (m_areaAuraType == AREA_AURA_PET)
         {
             if (target->GetObjectGuid() != caster->GetCharmerOrOwnerGuid())
-                target->RemoveAura(GetId(), GetEffIndex());
+                target->RemoveAurasByCasterSpell(GetId(), GetEffIndex(), GetCasterGUID());
         }
     }
 }
@@ -779,8 +780,7 @@ void Aura::_AddAura()
         }
     }
 
-    SetAuraSlot( slot );
-
+    SetAuraSlot(slot);
 
     // Not update fields for not first spell's aura, all data already in fields
     if (slot < MAX_AURAS)                                   // slot found

@@ -527,7 +527,7 @@ enum UnitFlags2
     UNIT_FLAG2_COMPREHEND_LANG      = 0x00000008,
     UNIT_FLAG2_FORCE_MOVE           = 0x00000040,
     UNIT_FLAG2_DISARM               = 0x00000400,           // disarm or something
-    UNIT_FLAG2_REGENERATE_POWER     = 0x00000800,
+    //UNIT_FLAG2_REGENERATE_POWER     = 0x00000800,         // added in 3.x
 };
 
 /// Non Player Character flags
