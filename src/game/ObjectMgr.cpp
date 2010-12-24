@@ -789,16 +789,32 @@ void ObjectMgr::LoadCreatureModelInfo()
             const_cast<CreatureModelInfo*>(minfo)->gender = GENDER_MALE;
         }
 
-        if (minfo->modelid_other_gender && !sCreatureDisplayInfoStore.LookupEntry(minfo->modelid_other_gender))
+        if (minfo->modelid_other_gender)
         {
-            sLog.outErrorDb("Table `creature_model_info` has nonexistent modelid_other_gender model (%u) defined for model id %u.", minfo->modelid_other_gender, minfo->modelid);
-            const_cast<CreatureModelInfo*>(minfo)->modelid_other_gender = 0;
+            if (minfo->modelid_other_gender == minfo->modelid)
+            {
+                sLog.outErrorDb("Table `creature_model_info` has redundant modelid_other_gender model (%u) defined for model id %u.", minfo->modelid_other_gender, minfo->modelid);
+                const_cast<CreatureModelInfo*>(minfo)->modelid_other_gender = 0;
+            }
+            else if (!sCreatureDisplayInfoStore.LookupEntry(minfo->modelid_other_gender))
+            {
+                sLog.outErrorDb("Table `creature_model_info` has nonexistent modelid_other_gender model (%u) defined for model id %u.", minfo->modelid_other_gender, minfo->modelid);
+                const_cast<CreatureModelInfo*>(minfo)->modelid_other_gender = 0;
+            }
         }
 
-        if (minfo->modelid_other_team && !sCreatureDisplayInfoStore.LookupEntry(minfo->modelid_other_team))
+        if (minfo->modelid_other_team)
         {
-            sLog.outErrorDb("Table `creature_model_info` has nonexistent modelid_other_team model (%u) defined for model id %u.", minfo->modelid_other_team, minfo->modelid);
-            const_cast<CreatureModelInfo*>(minfo)->modelid_other_team = 0;
+            if (minfo->modelid_other_team == minfo->modelid)
+            {
+                sLog.outErrorDb("Table `creature_model_info` has redundant modelid_other_team model (%u) defined for model id %u.", minfo->modelid_other_team, minfo->modelid);
+                const_cast<CreatureModelInfo*>(minfo)->modelid_other_team = 0;
+            }
+            else if (!sCreatureDisplayInfoStore.LookupEntry(minfo->modelid_other_team))
+            {
+                sLog.outErrorDb("Table `creature_model_info` has nonexistent modelid_other_team model (%u) defined for model id %u.", minfo->modelid_other_team, minfo->modelid);
+                const_cast<CreatureModelInfo*>(minfo)->modelid_other_team = 0;
+            }
         }
     }
 
