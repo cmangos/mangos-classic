@@ -716,7 +716,7 @@ void GameObject::Respawn()
     }
 }
 
-bool GameObject::ActivateToQuest(Player *pTarget)const
+bool GameObject::ActivateToQuest(Player *pTarget) const
 {
     // if GO is ReqCreatureOrGoN for quest
     if (pTarget->HasQuestForGO(GetEntry()))
@@ -808,7 +808,6 @@ void GameObject::SummonLinkedTrapIfAny()
          GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, GO_ANIMPROGRESS_DEFAULT, GO_STATE_READY))
     {
         delete linkedGO;
-        linkedGO = NULL;
         return;
     }
 
@@ -824,10 +823,15 @@ void GameObject::SummonLinkedTrapIfAny()
     GetMap()->Add(linkedGO);
 }
 
-void GameObject::TriggeringLinkedGameObject( uint32 trapEntry, Unit* target)
+void GameObject::TriggerLinkedGameObject(Unit* target)
 {
+    uint32 trapEntry = GetGOInfo()->GetLinkedGameObjectEntry();
+
+    if (!trapEntry)
+        return;
+
     GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(trapEntry);
-    if(!trapInfo || trapInfo->type!=GAMEOBJECT_TYPE_TRAP)
+    if (!trapInfo || trapInfo->type != GAMEOBJECT_TYPE_TRAP)
         return;
 
     SpellEntry const* trapSpell = sSpellStore.LookupEntry(trapInfo->trap.spellId);
@@ -912,7 +916,7 @@ void GameObject::Use(Unit* user)
 
     switch(GetGoType())
     {
-        case GAMEOBJECT_TYPE_DOOR:                          //0
+        case GAMEOBJECT_TYPE_DOOR:                          // 0
         {
             //doors never really despawn, only reset to default state/flags
             UseDoorOrButton();
@@ -921,7 +925,7 @@ void GameObject::Use(Unit* user)
             GetMap()->ScriptsStart(sGameObjectScripts, GetDBTableGUIDLow(), spellCaster, this);
             return;
         }
-        case GAMEOBJECT_TYPE_BUTTON:                        //1
+        case GAMEOBJECT_TYPE_BUTTON:                        // 1
         {
             //buttons never really despawn, only reset to default state/flags
             UseDoorOrButton();
@@ -929,13 +933,10 @@ void GameObject::Use(Unit* user)
             // activate script
             GetMap()->ScriptsStart(sGameObjectScripts, GetDBTableGUIDLow(), spellCaster, this);
 
-            // triggering linked GO
-            if (uint32 trapEntry = GetGOInfo()->button.linkedTrapId)
-                TriggeringLinkedGameObject(trapEntry, user);
-
+            TriggerLinkedGameObject(user);
             return;
         }
-        case GAMEOBJECT_TYPE_QUESTGIVER:                    //2
+        case GAMEOBJECT_TYPE_QUESTGIVER:                    // 2
         {
             if (user->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -950,7 +951,7 @@ void GameObject::Use(Unit* user)
 
             return;
         }
-        case GAMEOBJECT_TYPE_CHEST:
+        case GAMEOBJECT_TYPE_CHEST:                         // 3
         {
             if (user->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -964,16 +965,27 @@ void GameObject::Use(Unit* user)
                     GetMap()->ScriptsStart(sEventScripts, GetGOInfo()->chest.eventId, user, this);
             }
 
-            // triggering linked GO
-            if (uint32 trapEntry = GetGOInfo()->chest.linkedTrapId)
-                TriggeringLinkedGameObject(trapEntry, user);
-
+            TriggerLinkedGameObject(user);
             return;
         }
         case GAMEOBJECT_TYPE_GENERIC:                       // 5
         {
             // No known way to exclude some - only different approach is to select despawnable GOs by Entry
             SetLootState(GO_JUST_DEACTIVATED);
+            return;
+        }
+        case GAMEOBJECT_TYPE_TRAP:                          // 6
+        {
+            // Currently we do not expect trap code below to be Use()
+            // directly (except from spell effect). Code here will be called by TriggerLinkedGameObject.
+
+            // FIXME: when GO casting will be implemented trap must cast spell to target
+            if (uint32 spellId = GetGOInfo()->trap.spellId)
+                user->CastSpell(user, spellId, true, NULL, NULL, GetGUID());
+
+            // TODO: all traps can be activated, also those without spell.
+            // Some may have have animation and/or are expected to despawn.
+
             return;
         }
         case GAMEOBJECT_TYPE_CHAIR:                         //7 Sitting: Wooden bench, chairs
@@ -1036,11 +1048,9 @@ void GameObject::Use(Unit* user)
             player->SetStandState(UNIT_STAND_STATE_SIT_LOW_CHAIR+info->chair.height);
             return;
         }
-        case GAMEOBJECT_TYPE_SPELL_FOCUS:
+        case GAMEOBJECT_TYPE_SPELL_FOCUS:                   // 8
         {
-            // triggering linked GO
-            if (uint32 trapEntry = GetGOInfo()->spellFocus.linkedTrapId)
-                TriggeringLinkedGameObject(trapEntry, user);
+            TriggerLinkedGameObject(user);
 
             // some may be activated in addition? Conditions for this? (ex: entry 181616)
             break;
@@ -1095,8 +1105,7 @@ void GameObject::Use(Unit* user)
                 player->RewardPlayerAndGroupAtCast(this);
             }
 
-            if (uint32 trapEntry = info->goober.linkedTrapId)
-                TriggeringLinkedGameObject(trapEntry, user);
+            TriggerLinkedGameObject(user);
 
             SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
             SetLootState(GO_ACTIVATED);
@@ -1439,7 +1448,7 @@ void GameObject::Use(Unit* user)
         return;
     }
 
-    Spell *spell = new Spell(spellCaster, spellInfo, triggered, GetGUID());
+    Spell *spell = new Spell(spellCaster, spellInfo, triggered, GetObjectGuid());
 
     // spell target is user of GO
     SpellCastTargets targets;
