@@ -3056,18 +3056,6 @@ void SpellMgr::LoadSpellAreas()
 
 SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const *spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player)
 {
-    // normal case
-/*[-ZERO]    if( spellInfo->AreaId > 0 && spellInfo->AreaId != zone_id && spellInfo->AreaId != area_id )
-        return SPELL_FAILED_REQUIRES_AREA;
-
-    // raid instance limitation
-    if (spellInfo->AttributesEx6 & SPELL_ATTR_EX6_NOT_IN_RAID_INSTANCE)
-    {
-        MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
-        if (!mapEntry || mapEntry->IsRaid())
-            return SPELL_FAILED_REQUIRES_AREA;
-    }
-*/
     // DB base check (if non empty then must fit at least single for allow)
     SpellAreaMapBounds saBounds = GetSpellAreaMapBounds(spellInfo->Id);
     if (saBounds.first != saBounds.second)
