@@ -186,7 +186,8 @@ pkgdata_DATA = \
 	z1126_s0507_02_characters_character_battleground_data.sql \
 	z1135_s0540_01_mangos_spell_learn_spell.sql \
 	z1135_s0540_02_characters_character_spell.sql \
-	z1135_xxxxx_03_mangos_playercreateinfo_spell.sql
+	z1135_xxxxx_03_mangos_playercreateinfo_spell.sql \
+	z1142_s0531_01_characters_bugreport.sql
 
 ## Additional files to include when running 'make dist'
 #  SQL update files, to upgrade database schema from older revisions
@@ -351,4 +352,5 @@ EXTRA_DIST = \
 	z1126_s0507_02_characters_character_battleground_data.sql \
 	z1135_s0540_01_mangos_spell_learn_spell.sql \
 	z1135_s0540_02_characters_character_spell.sql \
-	z1135_xxxxx_03_mangos_playercreateinfo_spell.sql
+	z1135_xxxxx_03_mangos_playercreateinfo_spell.sql \
+	z1142_s0531_01_characters_bugreport.sql

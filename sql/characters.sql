@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z1135_s0540_02_characters_character_spell` bit(1) default NULL
+  `required_z1142_s0531_01_characters_bugreport` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -76,10 +76,10 @@ DROP TABLE IF EXISTS `bugreport`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `bugreport` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Identifier',
-  `type` varchar(255) NOT NULL DEFAULT '',
-  `content` varchar(255) NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`)
+  `id` int(11) NOT NULL auto_increment COMMENT 'Identifier',
+  `type` longtext NOT NULL default '',
+  `content` longtext NOT NULL default '',
+  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Debug System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 

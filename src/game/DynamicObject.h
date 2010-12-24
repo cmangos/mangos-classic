@@ -65,7 +65,6 @@ class DynamicObject : public WorldObject
         uint32 m_spellId;
         SpellEffectIndex m_effIndex;
         int32 m_aliveDuration;
-        time_t m_nextThinkTime;
         float m_radius;                                     // radius apply persistent effect, 0 = no persistent effect
         AffectedSet m_affected;
     private:
