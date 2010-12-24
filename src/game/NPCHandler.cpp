@@ -347,7 +347,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
     uint32 gossipListId;
     ObjectGuid guid;
-    std::string code = "";
+    std::string code;
 
     recv_data >> guid >> gossipListId;
 
@@ -361,7 +361,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    if (guid.IsCreatureOrPet())
+    if (guid.IsAnyTypeCreature())
     {
         Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
 
@@ -382,7 +382,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
                 _player->OnGossipSelect(pCreature, gossipListId);
         }
     }
-    else if (guid.IsGameobject())
+    else if (guid.IsGameObject())
     {
         GameObject *pGo = GetPlayer()->GetGameObjectIfCanInteractWith(guid);
 

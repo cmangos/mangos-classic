@@ -655,7 +655,7 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
             data << uint8(questStatus);
             ++count;
         }
-        else if (itr->IsGameobject())
+        else if (itr->IsGameObject())
         {
             GameObject *questgiver = GetPlayer()->GetMap()->GetGameObject(*itr);
             if(!questgiver)
