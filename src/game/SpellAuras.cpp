@@ -1167,7 +1167,6 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             m_procCharges);
     }
 
-    // unapply spell mod (including deleting m_spellmod)
     ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
 
     ReapplyAffectedPassiveAuras();

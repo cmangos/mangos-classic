@@ -806,7 +806,6 @@ namespace MaNGOS
             WorldObject const* i_obj;
             WorldObject const* i_originalCaster;
             float i_range;
-            bool i_hitHidden;
     };
 
     class AnyAoETargetUnitInObjectRangeCheck
