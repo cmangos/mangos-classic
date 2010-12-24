@@ -456,9 +456,8 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 
     Pet* pet = _player->GetMap()->GetPet(petguid);
                                                             // check it!
-    if( !pet || pet->getPetType() != HUNTER_PET ||
-        pet->GetByteValue(UNIT_FIELD_BYTES_2, 2) != UNIT_RENAME_ALLOWED ||
-        pet->GetOwnerGuid() != _player->GetObjectGuid() || !pet->GetCharmInfo() )
+    if (!pet || pet->getPetType() != HUNTER_PET || !pet->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME) ||
+        pet->GetOwnerGuid() != _player->GetObjectGuid() || !pet->GetCharmInfo())
         return;
 
     PetNameInvalidReason res = ObjectMgr::CheckPetName(name);
@@ -479,7 +478,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     if(_player->GetGroup())
         _player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_NAME);
 
-    pet->SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_NOT_ALLOWED);
+    pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME);
 
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.escape_string(name);

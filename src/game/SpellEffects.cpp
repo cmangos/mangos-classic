@@ -3191,7 +3191,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     // this enables popup window (pet dismiss, cancel), hunter pet additional flags set later
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_PVP_ATTACKABLE);
+        NewSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
     if(m_caster->IsPvP())
         NewSummon->SetPvP(true);
@@ -3220,7 +3220,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
             NewSummon->SetName(new_name);
     }
     else if(NewSummon->getPetType()==HUNTER_PET)
-        NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_NOT_ALLOWED);
+        NewSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME);
 
     NewSummon->AIM_Initialize();
     NewSummon->SetHealth(NewSummon->GetMaxHealth());

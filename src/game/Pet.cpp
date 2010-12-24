@@ -241,10 +241,12 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
 
             SetSheath(SHEATH_STATE_MELEE);
             SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5 );
-            SetByteValue(UNIT_FIELD_BYTES_2, 2, fields[12].GetBool() ? UNIT_RENAME_NOT_ALLOWED : UNIT_RENAME_ALLOWED);
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
+                                                             // this enables popup window (pet abandon, cancel)
 
-            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-                                                            // this enables popup window (pet abandon, cancel)
+            if (!fields[12].GetBool())
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME);
+
             SetTP(fields[9].GetInt32());
             SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
             SetPower(   POWER_HAPPINESS,fields[15].GetUInt32());
@@ -442,7 +444,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
             << m_TrainingPoints << ", "
             << uint32(mode) << ", '"
             << name.c_str() << "', "
-            << uint32((GetByteValue(UNIT_FIELD_BYTES_2, 2) == UNIT_RENAME_ALLOWED)?0:1) << ", "
+            << uint32(HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME) ? 0 : 1) << ", "
             << (curhealth<1?1:curhealth) << ", "
             << curmana << ", "
             << GetPower(POWER_HAPPINESS) << ", '";
@@ -966,7 +968,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
         SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_FOCUS);
         SetSheath(SHEATH_STATE_MELEE);
         SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5 );
-        SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_ALLOWED);
+        SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING | UNIT_FLAG_RENAME);
 
         SetUInt32Value(UNIT_MOD_CAST_SPEED, creature->GetUInt32Value(UNIT_MOD_CAST_SPEED));
         SetLoyaltyLevel(REBELLIOUS);

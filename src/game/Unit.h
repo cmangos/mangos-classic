@@ -204,13 +204,6 @@ enum UnitBytes2_Flags
     UNIT_BYTE2_FLAG_UNK7        = 0x80
 };
 
-// byte (2 from 0..3) of UNIT_FIELD_BYTES_2
-enum UnitRename
-{
-    UNIT_RENAME_NOT_ALLOWED = 0x02,
-    UNIT_RENAME_ALLOWED     = 0x03
-};
-
 #define CREATURE_MAX_SPELLS     4
 
 enum Swing
@@ -482,11 +475,11 @@ enum UnitFlags
 {
     UNIT_FLAG_NONE           = 0x00000000,
     UNIT_FLAG_DISABLE_MOVE   = 0x00000004,
-    UNIT_FLAG_PVP_ATTACKABLE = 0x00000008,                // allow apply pvp rules to attackable state in addition to faction dependent state, UNIT_FLAG_UNKNOWN1 in pre-bc mangos
-    UNIT_FLAG_RENAME         = 0x00000010,                // rename creature
-    UNIT_FLAG_PREPARATION    = 0x00000020,                // don't take reagents for spells with SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP   // UNIT_FLAG_RESTING in pre-bc mangos
+    UNIT_FLAG_PVP_ATTACKABLE = 0x00000008,                  // allow apply pvp rules to attackable state in addition to faction dependent state, UNIT_FLAG_UNKNOWN1 in pre-bc mangos
+    UNIT_FLAG_RENAME         = 0x00000010,                  // rename creature
+    UNIT_FLAG_RESTING        = 0x00000020,
     UNIT_FLAG_PVP            = 0x00001000,
-    UNIT_FLAG_MOUNT          = 0x00002000,                // to check
+    UNIT_FLAG_MOUNT          = 0x00002000,                  // to check
     UNIT_FLAG_DISABLE_ROTATE = 0x00040000,
     UNIT_FLAG_IN_COMBAT      = 0x00080000,
     UNIT_FLAG_SKINNABLE      = 0x04000000,
