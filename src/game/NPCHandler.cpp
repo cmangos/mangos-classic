@@ -256,7 +256,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
     // not found, cheat?
     TrainerSpell const* trainer_spell = cSpells->Find(spellId);
-    if (!trainer_spell)
+    if (!trainer_spell && tSpells)
         trainer_spell = tSpells->Find(spellId);
 
     if (!trainer_spell)
