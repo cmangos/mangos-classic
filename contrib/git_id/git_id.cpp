@@ -54,8 +54,8 @@
 #define NUM_DATABASES 3
 
 char remotes[NUM_REMOTES][MAX_REMOTE] = {
-    "git@github.com:mangoszero/mangoszero.git",
-    "git://github.com/mangoszero/mangoszero.git"            // used for fetch if present
+    "git@github.com:mangos/zero.git",
+    "git://github.com/mangos/zero.git"                      // used for fetch if present
 };
 
 char remote_branch[MAX_REMOTE] = "master";
