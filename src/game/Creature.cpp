@@ -422,7 +422,8 @@ void Creature::Update(uint32 diff)
                     ((BattleGroundMap*)GetMap())->GetBG()->OnCreatureRespawn(this); // for alterac valley needed to adjust the correct level again
 
                 //Call AI respawn virtual function
-                i_AI->JustRespawned();
+                if (AI())
+                    AI()->JustRespawned();
 
                 GetMap()->Add(this);
             }
@@ -495,10 +496,13 @@ void Creature::Update(uint32 diff)
 
             if(!IsInEvadeMode())
             {
-                // do not allow the AI to be changed during update
-                m_AI_locked = true;
-                i_AI->UpdateAI(diff);
-                m_AI_locked = false;
+                if (AI())
+                {
+                    // do not allow the AI to be changed during update
+                    m_AI_locked = true;
+                    i_AI->UpdateAI(diff);
+                    m_AI_locked = false;
+                }
             }
 
             // creature can be dead after UpdateAI call
