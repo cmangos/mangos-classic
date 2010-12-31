@@ -3410,11 +3410,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
     bonus = int32(bonus*totalDamagePercentMod);
 
     // prevent negative damage
-    uint32 eff_damage = uint32(bonus > 0 ? bonus : 0);
-
-    // Add melee damage bonuses (also check for negative)
-    m_caster->MeleeDamageBonus(unitTarget, &eff_damage, m_attackType, m_spellInfo);
-    m_damage+= eff_damage;
+    m_damage+= uint32(bonus > 0 ? bonus : 0);
 
     // Hemorrhage
     if (m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE && (m_spellInfo->SpellFamilyFlags & UI64LIT(0x2000000)))

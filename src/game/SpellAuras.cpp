@@ -4851,6 +4851,16 @@ void Aura::PeriodicTick()
             {
                 pdamage = amount;
 
+                // SpellDamageBonus for magic spells
+                if(GetSpellProto()->DmgClass == SPELL_DAMAGE_CLASS_NONE || GetSpellProto()->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
+                    pdamage = pCaster->SpellDamageBonus(m_target, GetSpellProto(), pdamage, DOT, GetStackAmount());
+                // MeleeDamagebonus for weapon based spells
+                else
+                {
+                    WeaponAttackType attackType = GetWeaponAttackType(GetSpellProto());
+                    pdamage = pCaster->MeleeDamageBonus(m_target, pdamage, attackType, GetSpellProto(), DOT, GetStackAmount());
+                }
+
                 // Calculate armor mitigation if it is a physical spell
                 // But not for bleed mechanic spells
                 if (GetSpellSchoolMask(spellProto) & SPELL_SCHOOL_MASK_NORMAL &&
@@ -4860,8 +4870,6 @@ void Aura::PeriodicTick()
                     cleanDamage.damage += pdamage - pdamageReductedArmor;
                     pdamage = pdamageReductedArmor;
                 }
-
-                pdamage = pCaster->SpellDamageBonus(target, spellProto, pdamage, DOT, GetStackAmount());
 
                 // Curse of Agony damage-per-tick calculation
                 if (spellProto->SpellFamilyName==SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000400)) && spellProto->SpellIconID==544)
