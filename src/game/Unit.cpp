@@ -1246,10 +1246,10 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage *damageInfo, int32 damage, S
     }
 
     // damage mitigation
-    if(damage > 0)
+    if (damage > 0)
     {
         // physical damage => armor
-        if ( damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL )
+        if (damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL)
             damage = CalcArmorReducedDamage(pVictim, damage);
 
         // block (only for damage class ranged and -melee, also non-physical damage possible)
@@ -1355,7 +1355,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
     }
 
     // Physical Immune check
-    if(damageInfo->target->IsImmunedToDamage(damageInfo->damageSchoolMask))
+    if (damageInfo->target->IsImmunedToDamage(damageInfo->damageSchoolMask))
     {
        damageInfo->HitInfo       |= HITINFO_NORMALSWING;
        damageInfo->TargetState    = VICTIMSTATE_IS_IMMUNE;
@@ -1375,7 +1375,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
     damageInfo->hitOutCome = RollMeleeOutcomeAgainst(damageInfo->target, damageInfo->attackType);
 
     // Disable parry or dodge for ranged attack
-    if(damageInfo->attackType == RANGED_ATTACK)
+    if (damageInfo->attackType == RANGED_ATTACK)
     {
         if (damageInfo->hitOutCome == MELEE_HIT_PARRY) damageInfo->hitOutCome = MELEE_HIT_NORMAL;
         if (damageInfo->hitOutCome == MELEE_HIT_DODGE) damageInfo->hitOutCome = MELEE_HIT_MISS;
@@ -1527,6 +1527,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
     if(int32(damageInfo->damage) > 0)
     {
         damageInfo->procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
+
         // Calculate absorb & resists
         CalcAbsorbResist(damageInfo->target, damageInfo->damageSchoolMask, DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, true);
         damageInfo->damage-=damageInfo->absorb + damageInfo->resist;
