@@ -33,7 +33,7 @@
 #include "UpdateData.h"
 #include "LootMgr.h"
 #include "Chat.h"
-#include "ScriptCalls.h"
+#include "ScriptMgr.h"
 #include <zlib/zlib.h>
 #include "ObjectAccessor.h"
 #include "Object.h"
@@ -687,7 +687,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if(Script->scriptAreaTrigger(pl, atEntry))
+    if (sScriptMgr.OnAreaTrigger(pl, atEntry))
         return;
 
     uint32 quest_id = sObjectMgr.GetQuestForAreaTrigger( Trigger_ID );

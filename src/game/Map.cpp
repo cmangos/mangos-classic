@@ -30,7 +30,6 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "World.h"
-#include "ScriptCalls.h"
 #include "ScriptMgr.h"
 #include "Group.h"
 #include "MapRefManager.h"
@@ -2273,7 +2272,7 @@ void InstanceMap::CreateInstanceData(bool load)
     if (mInstance)
     {
         i_script_id = mInstance->script_id;
-        i_data = Script->CreateInstanceData(this);
+        i_data = sScriptMgr.CreateInstanceData(this);
     }
 
     if(!i_data)

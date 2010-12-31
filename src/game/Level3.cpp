@@ -34,7 +34,7 @@
 #include "Guild.h"
 #include "ObjectAccessor.h"
 #include "MapManager.h"
-#include "ScriptCalls.h"
+#include "ScriptMgr.h"
 #include "Language.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -844,7 +844,10 @@ bool ChatHandler::HandleReloadLocalesQuestCommand(char* /*args*/)
 
 bool ChatHandler::HandleLoadScriptsCommand(char* args)
 {
-    if (!LoadScriptingModule(args))
+    if (!*args)
+        return false;
+
+    if (!sScriptMgr.LoadScriptLibrary(args))
         return true;
 
     sWorld.SendWorldText(LANG_SCRIPTS_RELOADED);

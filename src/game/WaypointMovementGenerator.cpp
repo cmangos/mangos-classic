@@ -40,7 +40,6 @@ alter table creature_movement add `wpguid` int(11) default '0';
 #include "CreatureAI.h"
 #include "WaypointManager.h"
 #include "WorldPacket.h"
-#include "ScriptCalls.h"
 
 #include <cassert>
 
