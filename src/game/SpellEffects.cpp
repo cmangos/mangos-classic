@@ -403,18 +403,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         {
             switch(m_spellInfo->Id)
             {
-                case 13535:                                 // Tame Beast
+                case 7671:                                  // Transformation (human<->worgen)
                 {
-                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
+                    if (!unitTarget)
                         return;
 
-                    if (!m_originalCaster || m_originalCaster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    m_originalCaster->CastSpell(unitTarget,13481,true);
+                    // Transform Visual
+                    unitTarget->CastSpell(unitTarget, 24085, true);
                     return;
                 }
-
                 case 8063:                                  // Deviate Fish
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -519,6 +516,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         spell_id = 13099;
 
                     m_caster->CastSpell(unitTarget,spell_id,true,NULL);
+                    return;
+                }
+                case 13535:                                 // Tame Beast
+                {
+                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (!m_originalCaster || m_originalCaster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_originalCaster->CastSpell(unitTarget, 13481, true);
                     return;
                 }
                 case 13567:                                 // Dummy Trigger
