@@ -4281,7 +4281,7 @@ void ObjectMgr::LoadGossipText()
     delete result;
 }
 
-void ObjectMgr::LoadNpcTextLocales()
+void ObjectMgr::LoadGossipTextLocales()
 {
     mNpcTextLocaleMap.clear();                              // need for reload case
 
@@ -7507,7 +7507,7 @@ void ObjectMgr::LoadVendorTemplates()
         sLog.outErrorDb("Table `npc_vendor_template` has vendor template %u not used by any vendors ", *vItr);
 }
 
-void ObjectMgr::LoadNpcTextId()
+void ObjectMgr::LoadNpcGossips()
 {
 
     m_mCacheNpcTextIdMap.clear();
