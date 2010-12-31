@@ -6905,7 +6905,7 @@ uint32 Unit::MeleeDamageBonus(Unit *pVictim, uint32 pdamage,WeaponAttackType att
             DoneFlat *= (CastingTime / 3500.0f) * DotFactor * LvlPenalty;
             TakenFlat*= (CastingTime / 3500.0f) * DotFactor * LvlPenalty;
         }
-	}
+    }
     // weapon damage based spells
     else if( APbonus || DoneFlat )
     {
