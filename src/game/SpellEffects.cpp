@@ -3332,13 +3332,6 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
     // prevent negative damage
     m_damage+= uint32(bonus > 0 ? bonus : 0);
 
-    // Hemorrhage
-    if (m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE && (m_spellInfo->SpellFamilyFlags & UI64LIT(0x2000000)))
-    {
-        if(m_caster->GetTypeId()==TYPEID_PLAYER)
-            ((Player*)m_caster)->AddComboPoints(unitTarget, 1);
-    }
-
     // Mangle (Cat): CP
     if (m_spellInfo->SpellFamilyName==SPELLFAMILY_DRUID && (m_spellInfo->SpellFamilyFlags==UI64LIT(0x0000040000000000)))
     {
