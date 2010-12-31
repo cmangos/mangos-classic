@@ -158,8 +158,6 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         LockType i_corpseGuard;
 };
 
-#define sObjectAccessor ObjectAccessor::Instance()
-
 inline Unit* ObjectAccessor::GetUnitInWorld(WorldObject const& obj, ObjectGuid guid)
 {
     if(guid.IsEmpty())
@@ -173,5 +171,7 @@ inline Unit* ObjectAccessor::GetUnitInWorld(WorldObject const& obj, ObjectGuid g
 
     return GetCreatureInWorld(guid);
 }
+
+#define sObjectAccessor ObjectAccessor::Instance()
 
 #endif
