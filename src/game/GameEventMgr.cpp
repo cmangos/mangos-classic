@@ -27,6 +27,7 @@
 #include "Log.h"
 #include "MapManager.h"
 #include "BattleGroundMgr.h"
+#include "SpellMgr.h"
 #include "Policies/SingletonImp.h"
 
 INSTANTIATE_SINGLETON_1(GameEventMgr);
@@ -334,12 +335,14 @@ void GameEventMgr::LoadFromDB()
         sPoolMgr.CheckEventLinkAndReport(pool_id, event_id, creature2event, go2event);
     }
 
-    mGameEventModelEquip.resize(mGameEvent.size());
+    mGameEventCreatureData.resize(mGameEvent.size());
     //                                   0              1                             2
-    result = WorldDatabase.Query("SELECT creature.guid, game_event_model_equip.event, game_event_model_equip.modelid,"
-    //   3
-        "game_event_model_equip.equipment_id "
-        "FROM creature JOIN game_event_model_equip ON creature.guid=game_event_model_equip.guid");
+    result = WorldDatabase.Query("SELECT creature.guid, game_event_creature_data.event, game_event_creature_data.modelid,"
+    //   3                                      4
+        "game_event_creature_data.equipment_id, game_event_creature_data.entry_id, "
+    //   5                                     6
+        "game_event_creature_data.spell_start, game_event_creature_data.spell_end "
+        "FROM creature JOIN game_event_creature_data ON creature.guid=game_event_creature_data.guid");
 
     count = 0;
     if( !result )
@@ -348,7 +351,7 @@ void GameEventMgr::LoadFromDB()
         bar.step();
 
         sLog.outString();
-        sLog.outString(">> Loaded %u model/equipment changes in game events", count );
+        sLog.outString(">> Loaded %u creature reactions at game events", count );
     }
     else
     {
@@ -362,36 +365,59 @@ void GameEventMgr::LoadFromDB()
             uint32 guid     = fields[0].GetUInt32();
             uint16 event_id = fields[1].GetUInt16();
 
-            if(event_id >= mGameEventModelEquip.size())
+            if(event_id==0)
             {
-                sLog.outErrorDb("`game_event_model_equip` game event id (%u) is out of range compared to max event id in `game_event`",event_id);
+                sLog.outErrorDb("`game_event_creature_data` game event id (%i) is reserved and can't be used.",event_id);
+                continue;
+            }
+
+            if(event_id >= mGameEventCreatureData.size())
+            {
+                sLog.outErrorDb("`game_event_creature_data` game event id (%u) is out of range compared to max event id in `game_event`",event_id);
                 continue;
             }
 
             ++count;
-            ModelEquipList& equiplist = mGameEventModelEquip[event_id];
-            ModelEquip newModelEquipSet;
-            newModelEquipSet.modelid = fields[2].GetUInt32();
-            newModelEquipSet.equipment_id = fields[3].GetUInt32();
-            newModelEquipSet.equipement_id_prev = 0;
-            newModelEquipSet.modelid_prev = 0;
+            GameEventCreatureDataList& equiplist = mGameEventCreatureData[event_id];
+            GameEventCreatureData newData;
+            newData.modelid = fields[2].GetUInt32();
+            newData.equipment_id = fields[3].GetUInt32();
+            newData.entry_id = fields[4].GetUInt32();
+            newData.spell_id_start = fields[5].GetUInt32();
+            newData.spell_id_end = fields[6].GetUInt32();
 
-            if(newModelEquipSet.equipment_id > 0)
+            if (newData.equipment_id && !sObjectMgr.GetEquipmentInfo(newData.equipment_id))
             {
-                if(!sObjectMgr.GetEquipmentInfo(newModelEquipSet.equipment_id))
-                {
-                    sLog.outErrorDb("Table `game_event_model_equip` have creature (Guid: %u) with equipment_id %u not found in table `creature_equip_template`, set to no equipment.", guid, newModelEquipSet.equipment_id);
-                    continue;
-                }
+                sLog.outErrorDb("Table `game_event_creature_data` have creature (Guid: %u) with equipment_id %u not found in table `creature_equip_template`, set to no equipment.", guid, newData.equipment_id);
+                newData.equipment_id = 0;
             }
 
-            equiplist.push_back(std::pair<uint32, ModelEquip>(guid, newModelEquipSet));
+            if (newData.entry_id && !sObjectMgr.GetCreatureTemplate(newData.entry_id))
+            {
+                sLog.outErrorDb("Table `game_event_creature_data` have creature (Guid: %u) with event time entry %u not found in table `creature_template`, set to no 0.", guid, newData.entry_id);
+                newData.entry_id = 0;
+            }
+
+            if (newData.spell_id_start && !sSpellStore.LookupEntry(newData.spell_id_start))
+            {
+                sLog.outErrorDb("Table `game_event_creature_data` have creature (Guid: %u) with nonexistent spell_start %u, set to no start spell.", guid, newData.spell_id_start);
+                newData.spell_id_start = 0;
+            }
+
+            if (newData.spell_id_end && !sSpellStore.LookupEntry(newData.spell_id_end))
+            {
+                sLog.outErrorDb("Table `game_event_creature_data` have creature (Guid: %u) with nonexistent spell_end %u, set to no end spell.", guid, newData.spell_id_end);
+                newData.spell_id_end = 0;
+            }
+
+            equiplist.push_back(GameEventCreatureDataPair(guid, newData));
+            mGameEventCreatureDataPerGuid.insert(GameEventCreatureDataPerGuidMap::value_type(guid, event_id));
 
         } while( result->NextRow() );
         delete result;
 
         sLog.outString();
-        sLog.outString( ">> Loaded %u model/equipment changes in game events", count );
+        sLog.outString(">> Loaded %u creature reactions at game events", count );
     }
 
     mGameEventQuests.resize(mGameEvent.size());
@@ -503,7 +529,7 @@ void GameEventMgr::UnApplyEvent(uint16 event_id)
     int16 event_nid = (-1) * event_id;
     GameEventSpawn(event_nid);
     // restore equipment or model
-    ChangeEquipOrModel(event_id, false);
+    UpdateCreatureData(event_id, false);
     // Remove quests that are events only to non event npc
     UpdateEventQuests(event_id, false);
 }
@@ -520,7 +546,7 @@ void GameEventMgr::ApplyNewEvent(uint16 event_id)
     int16 event_nid = (-1) * event_id;
     GameEventUnspawn(event_nid);
     // Change equipement or model
-    ChangeEquipOrModel(event_id, true);
+    UpdateCreatureData(event_id, true);
     // Add quests that are events only to non event npc
     UpdateEventQuests(event_id, true);
 }
@@ -711,9 +737,33 @@ void GameEventMgr::GameEventUnspawn(int16 event_id)
     }
 }
 
-void GameEventMgr::ChangeEquipOrModel(int16 event_id, bool activate)
+GameEventCreatureData const* GameEventMgr::GetCreatureUpdateDataForActiveEvent(uint32 lowguid) const
 {
-    for(ModelEquipList::iterator itr = mGameEventModelEquip[event_id].begin();itr != mGameEventModelEquip[event_id].end();++itr)
+    // only for active event, creature can be listed for many so search all
+    uint32 event_id = 0;
+    GameEventCreatureDataPerGuidBounds bounds = mGameEventCreatureDataPerGuid.equal_range(lowguid);
+    for(GameEventCreatureDataPerGuidMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+    {
+        if (IsActiveEvent(itr->second))
+        {
+            event_id = itr->second;
+            break;
+        }
+    }
+
+    if (!event_id)
+        return NULL;
+
+    for(GameEventCreatureDataList::const_iterator itr = mGameEventCreatureData[event_id].begin();itr != mGameEventCreatureData[event_id].end();++itr)
+        if (itr->first == lowguid)
+            return &itr->second;
+
+    return NULL;
+}
+
+void GameEventMgr::UpdateCreatureData(int16 event_id, bool activate)
+{
+    for(GameEventCreatureDataList::iterator itr = mGameEventCreatureData[event_id].begin();itr != mGameEventCreatureData[event_id].end();++itr)
     {
         // Remove the creature from grid
         CreatureData const* data = sObjectMgr.GetCreatureData(itr->first);
@@ -723,65 +773,11 @@ void GameEventMgr::ChangeEquipOrModel(int16 event_id, bool activate)
         // Update if spawned
         if (Creature* pCreature = ObjectAccessor::GetCreatureInWorld(ObjectGuid(HIGHGUID_UNIT, data->id, itr->first)))
         {
-            if (activate)
-            {
-                itr->second.equipement_id_prev = pCreature->GetCurrentEquipmentId();
-                itr->second.modelid_prev = pCreature->GetDisplayId();
-                pCreature->LoadEquipment(itr->second.equipment_id, true);
-                if (itr->second.modelid >0 && itr->second.modelid_prev != itr->second.modelid)
-                {
-                    CreatureModelInfo const *minfo = sObjectMgr.GetCreatureModelInfo(itr->second.modelid);
-                    if (minfo)
-                    {
-                        pCreature->SetDisplayId(itr->second.modelid);
-                        pCreature->SetNativeDisplayId(itr->second.modelid);
-                    }
-                }
-            }
-            else
-            {
-                pCreature->LoadEquipment(itr->second.equipement_id_prev, true);
-                if (itr->second.modelid_prev >0 && itr->second.modelid_prev != itr->second.modelid)
-                {
-                    CreatureModelInfo const *minfo = sObjectMgr.GetCreatureModelInfo(itr->second.modelid_prev);
-                    if (minfo)
-                    {
-                        pCreature->SetDisplayId(itr->second.modelid_prev);
-                        pCreature->SetNativeDisplayId(itr->second.modelid_prev);
-                    }
-                }
-            }
-        }
-        else                                                // If not spawned
-        {
-            CreatureData const* data2 = sObjectMgr.GetCreatureData(itr->first);
-            if (data2 && activate)
-            {
-                CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(data2->id);
-                uint32 display_id = Creature::ChooseDisplayId(cinfo,data2);
-                CreatureModelInfo const *minfo = sObjectMgr.GetCreatureModelRandomGender(display_id);
-                if (minfo)
-                    display_id = minfo->modelid;
+            pCreature->UpdateEntry(data->id, 0, data, activate ? &itr->second : NULL);
 
-                if (data2->equipmentId == 0)
-                    itr->second.equipement_id_prev = cinfo->equipmentId;
-                else if (data2->equipmentId != -1)
-                    itr->second.equipement_id_prev = data->equipmentId;
-                itr->second.modelid_prev = display_id;
-            }
-        }
-        // now last step: put in data
-                                                            // just to have write access to it
-        CreatureData& data2 = sObjectMgr.NewOrExistCreatureData(itr->first);
-        if (activate)
-        {
-            data2.modelid_override = itr->second.modelid;
-            data2.equipmentId = itr->second.equipment_id;
-        }
-        else
-        {
-            data2.modelid_override = itr->second.modelid_prev;
-            data2.equipmentId = itr->second.equipement_id_prev;
+            // spells not casted for event remove case (sent NULL into update), do it
+            if (!activate)
+                pCreature->ApplyGameEventSpells(&itr->second, false);
         }
     }
 }

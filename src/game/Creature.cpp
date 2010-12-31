@@ -28,6 +28,7 @@
 #include "QuestDef.h"
 #include "GossipDef.h"
 #include "Player.h"
+#include "GameEventMgr.h"
 #include "PoolManager.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -201,8 +202,12 @@ void Creature::RemoveCorpse()
 /**
  * change the entry of creature until respawn
  */
-bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
+bool Creature::InitEntry(uint32 Entry, uint32 team, CreatureData const* data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/ )
 {
+    // use game event entry if any instead default suggested
+    if (eventData && eventData->entry_id)
+        Entry = eventData->entry_id;
+
     CreatureInfo const *normalInfo = ObjectMgr::GetCreatureTemplate(Entry);
     if(!normalInfo)
     {
@@ -223,7 +228,7 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
     // known valid are: CLASS_WARRIOR,CLASS_PALADIN,CLASS_ROGUE,CLASS_MAGE
     SetByteValue(UNIT_FIELD_BYTES_0, 1, uint8(cinfo->unit_class));
 
-    uint32 display_id = ChooseDisplayId(GetCreatureInfo(), data);
+    uint32 display_id = ChooseDisplayId(GetCreatureInfo(), data, eventData);
     if (!display_id)                                        // Cancel load if no display id
     {
         sLog.outErrorDb("Creature (Entry: %u) has no model defined in table `creature_template`, can't load.", Entry);
@@ -254,7 +259,11 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
     SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
 
     // Load creature equipment
-    if(!data || data->equipmentId == 0)
+    if (eventData && eventData->equipment_id)
+    {
+        LoadEquipment(eventData->equipment_id);             // use event equipment if any for active event
+    }
+    else if (!data || data->equipmentId == 0)
     {                                                       // use default from the template
         LoadEquipment(cinfo->equipmentId);
     }
@@ -277,9 +286,9 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
     return true;
 }
 
-bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data, bool preserveHPAndPower)
+bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/, bool preserveHPAndPower /*=true*/)
 {
-    if (!InitEntry(Entry, team, data))
+    if (!InitEntry(Entry, team, data, eventData))
         return false;
 
     m_regenHealth = GetCreatureInfo()->RegenHealth;
@@ -337,11 +346,19 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data, 
     for(int i = 0; i < CREATURE_MAX_SPELLS; ++i)
         m_spells[i] = GetCreatureInfo()->spells[i];
 
+    // if eventData set then event active and need apply spell_start
+    if (eventData)
+        ApplyGameEventSpells(eventData, true);
+
     return true;
 }
 
-uint32 Creature::ChooseDisplayId(const CreatureInfo *cinfo, const CreatureData *data /*= NULL*/)
+uint32 Creature::ChooseDisplayId(const CreatureInfo *cinfo, const CreatureData *data /*= NULL*/, GameEventCreatureData const* eventData /*=NULL*/)
 {
+    // Use creature event model explicit, override any other static models
+    if (eventData && eventData->modelid)
+        return eventData->modelid;
+
     // Use creature model explicit, override template (creature.modelid)
     if (data && data->modelid_override)
         return data->modelid_override;
@@ -401,7 +418,11 @@ void Creature::Update(uint32 diff)
                 lootForSkin         = false;
 
                 if(m_originalEntry != GetEntry())
-                    UpdateEntry(m_originalEntry);
+                {
+                    // need preserver gameevent state
+                    GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetDBTableGUIDLow());
+                    UpdateEntry(m_originalEntry, 0, NULL, eventData);
+                }
 
                 CreatureInfo const *cinfo = GetCreatureInfo();
 
@@ -652,13 +673,13 @@ bool Creature::AIM_Initialize()
     return true;
 }
 
-bool Creature::Create(uint32 guidlow, Map *map, uint32 Entry, uint32 team, const CreatureData *data)
+bool Creature::Create(uint32 guidlow, Map *map, uint32 Entry, uint32 team, const CreatureData *data /*= NULL*/, GameEventCreatureData const* eventData /*= NULL*/)
 {
     MANGOS_ASSERT(map);
     SetMap(map);
 
     //oX = x;     oY = y;    dX = x;    dY = y;    m_moveTime = 0;    m_startMove = 0;
-    const bool bResult = CreateFromProto(guidlow, Entry, team, data);
+    const bool bResult = CreateFromProto(guidlow, Entry, team, data, eventData);
 
     if (bResult)
     {
@@ -1126,7 +1147,7 @@ float Creature::GetSpellDamageMod(int32 Rank)
     }
 }
 
-bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const CreatureData *data)
+bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const CreatureData *data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/)
 {
     CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(Entry);
     if(!cinfo)
@@ -1138,7 +1159,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
 
     Object::_Create(guidlow, Entry, HIGHGUID_UNIT);
 
-    if (!UpdateEntry(Entry, team, data, false))
+    if (!UpdateEntry(Entry, team, data, eventData, false))
         return false;
 
     return true;
@@ -1154,6 +1175,8 @@ bool Creature::LoadFromDB(uint32 guidlow, Map *map)
         return false;
     }
 
+    GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(guidlow);
+
     m_DBTableGuid = guidlow;
     if (map->GetInstanceId() == 0)
     {
@@ -1167,8 +1190,7 @@ bool Creature::LoadFromDB(uint32 guidlow, Map *map)
     else
         guidlow = sObjectMgr.GenerateLowGuid(HIGHGUID_UNIT);
 
-    uint16 team = 0;
-    if (!Create(guidlow, map, data->id, team, data))
+    if (!Create(guidlow, map, data->id, 0, data, eventData))
         return false;
 
     Relocate(data->posX, data->posY, data->posZ, data->orientation);
@@ -1290,7 +1312,7 @@ void Creature::DeleteFromDB()
     WorldDatabase.PExecuteLog("DELETE FROM creature_addon WHERE guid = '%u'", m_DBTableGuid);
     WorldDatabase.PExecuteLog("DELETE FROM creature_movement WHERE id = '%u'", m_DBTableGuid);
     WorldDatabase.PExecuteLog("DELETE FROM game_event_creature WHERE guid = '%u'", m_DBTableGuid);
-    WorldDatabase.PExecuteLog("DELETE FROM game_event_model_equip WHERE guid = '%u'", m_DBTableGuid);
+    WorldDatabase.PExecuteLog("DELETE FROM game_event_creature_data WHERE guid = '%u'", m_DBTableGuid);
     WorldDatabase.PExecuteLog("DELETE FROM creature_battleground WHERE guid = '%u'", m_DBTableGuid);
     WorldDatabase.CommitTransaction();
 }
@@ -2260,4 +2282,18 @@ void Creature::RelocationNotify()
     MaNGOS::CreatureRelocationNotifier relocationNotifier(*this);
     float radius = MAX_CREATURE_ATTACK_RADIUS * sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
     Cell::VisitAllObjects(this, relocationNotifier, radius);
+}
+
+void Creature::ApplyGameEventSpells(GameEventCreatureData const* eventData, bool activated)
+{
+    uint32 cast_spell = activated ? eventData->spell_id_start : eventData->spell_id_end;
+    uint32 remove_spell = activated ? eventData->spell_id_end : eventData->spell_id_start;
+
+    if (remove_spell)
+        if (SpellEntry const* spellEntry = sSpellStore.LookupEntry(remove_spell))
+            if (IsSpellAppliesAura(spellEntry))
+                RemoveAurasDueToSpell(remove_spell);
+
+    if (cast_spell)
+        CastSpell(this, cast_spell, true);
 }
