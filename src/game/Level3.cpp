@@ -273,7 +273,7 @@ bool ChatHandler::HandleReloadGossipScriptsCommand(char* args)
     if (*args!='a')
         sLog.outString( "Re-Loading Scripts from `gossip_scripts`...");
 
-    sObjectMgr.LoadGossipScripts();
+    sScriptMgr.LoadGossipScripts();
 
     if (*args!='a')
         SendGlobalSysMessage("DB table `gossip_scripts` reloaded.");
@@ -635,7 +635,7 @@ bool ChatHandler::HandleReloadGameObjectScriptsCommand(char* args)
     if (*args!='a')
         sLog.outString( "Re-Loading Scripts from `gameobject_scripts`...");
 
-    sObjectMgr.LoadGameObjectScripts();
+    sScriptMgr.LoadGameObjectScripts();
 
     if (*args!='a')
         SendGlobalSysMessage("DB table `gameobject_scripts` reloaded.");
@@ -655,7 +655,7 @@ bool ChatHandler::HandleReloadEventScriptsCommand(char* args)
     if (*args!='a')
         sLog.outString( "Re-Loading Scripts from `event_scripts`...");
 
-    sObjectMgr.LoadEventScripts();
+    sScriptMgr.LoadEventScripts();
 
     if (*args!='a')
         SendGlobalSysMessage("DB table `event_scripts` reloaded.");
@@ -700,7 +700,7 @@ bool ChatHandler::HandleReloadQuestEndScriptsCommand(char* args)
     if (*args != 'a')
         sLog.outString( "Re-Loading Scripts from `quest_end_scripts`...");
 
-    sObjectMgr.LoadQuestEndScripts();
+    sScriptMgr.LoadQuestEndScripts();
 
     if (*args != 'a')
         SendGlobalSysMessage("DB table `quest_end_scripts` reloaded.");
@@ -720,7 +720,7 @@ bool ChatHandler::HandleReloadQuestStartScriptsCommand(char* args)
     if (*args != 'a')
         sLog.outString( "Re-Loading Scripts from `quest_start_scripts`...");
 
-    sObjectMgr.LoadQuestStartScripts();
+    sScriptMgr.LoadQuestStartScripts();
 
     if (*args != 'a')
         SendGlobalSysMessage("DB table `quest_start_scripts` reloaded.");
@@ -740,7 +740,7 @@ bool ChatHandler::HandleReloadSpellScriptsCommand(char* args)
     if (*args != 'a')
         sLog.outString( "Re-Loading Scripts from `spell_scripts`...");
 
-    sObjectMgr.LoadSpellScripts();
+    sScriptMgr.LoadSpellScripts();
 
     if (*args != 'a')
         SendGlobalSysMessage("DB table `spell_scripts` reloaded.");
@@ -751,7 +751,7 @@ bool ChatHandler::HandleReloadSpellScriptsCommand(char* args)
 bool ChatHandler::HandleReloadDbScriptStringCommand(char* /*args*/)
 {
     sLog.outString( "Re-Loading Script strings from `db_script_string`...");
-    sObjectMgr.LoadDbScriptStrings();
+    sScriptMgr.LoadDbScriptStrings();
     SendGlobalSysMessage("DB table `db_script_string` reloaded.");
     return true;
 }

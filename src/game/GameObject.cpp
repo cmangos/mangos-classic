@@ -37,6 +37,7 @@
 #include "BattleGroundAV.h"
 #include "Util.h"
 #include "ScriptCalls.h"
+#include "ScriptMgr.h"
 
 GameObject::GameObject() : WorldObject()
 {

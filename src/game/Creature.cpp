@@ -22,6 +22,7 @@
 #include "WorldPacket.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "ScriptMgr.h"
 #include "ObjectGuid.h"
 #include "SpellMgr.h"
 #include "QuestDef.h"
@@ -2095,7 +2096,7 @@ std::string Creature::GetAIName() const
 
 std::string Creature::GetScriptName() const
 {
-    return sObjectMgr.GetScriptName(GetScriptId());
+    return sScriptMgr.GetScriptName(GetScriptId());
 }
 
 uint32 Creature::GetScriptId() const
