@@ -1109,63 +1109,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     return;
                 }
             }
-
-            switch(m_spellInfo->Id)
-            {
-                case 31789:                                 // Righteous Defense (step 1)
-                {
-                    // 31989 -> dummy effect (step 1) + dummy effect (step 2) -> 31709 (taunt like spell for each target)
-
-                    // non-standard cast requirement check
-                    if (!unitTarget || unitTarget->getAttackers().empty())
-                    {
-                        if (m_caster->GetTypeId()==TYPEID_PLAYER)
-                            ((Player*)m_caster)->RemoveSpellCooldown(m_spellInfo->Id,true);
-                        SendCastResult(SPELL_FAILED_TARGET_AFFECTING_COMBAT);
-                        return;
-                    }
-
-                    // Righteous Defense (step 2) (in old version 31980 dummy effect)
-                    // Clear targets for eff 1
-                    for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
-                        ihit->effectMask &= ~(1<<1);
-
-                    // not empty (checked)
-                    Unit::AttackerSet const& attackers = unitTarget->getAttackers();
-
-                    // chance to be selected from list
-                    float chance = 100.0f/attackers.size();
-                    uint32 count=0;
-                    for(Unit::AttackerSet::const_iterator aItr = attackers.begin(); aItr != attackers.end() && count < 3; ++aItr)
-                    {
-                        if (!roll_chance_f(chance))
-                            continue;
-                        ++count;
-                        AddUnitTarget((*aItr), EFFECT_INDEX_1);
-                    }
-
-                    // now let next effect cast spell at each target.
-                    return;
-                }
-                case 37877:                                 // Blessing of Faith
-                {
-                    if (!unitTarget)
-                        return;
-
-                    uint32 spell_id = 0;
-                    switch(unitTarget->getClass())
-                    {
-                        case CLASS_DRUID:   spell_id = 37878; break;
-                        case CLASS_PALADIN: spell_id = 37879; break;
-                        case CLASS_PRIEST:  spell_id = 37880; break;
-                        case CLASS_SHAMAN:  spell_id = 37881; break;
-                        default: return;                    // ignore for not healing classes
-                    }
-
-                    m_caster->CastSpell(m_caster, spell_id, true);
-                    return;
-                }
-            }
             break;
         }
         case SPELLFAMILY_SHAMAN:
@@ -1337,37 +1280,6 @@ void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
 
             for (uint32 j=0; j < spell->StackAmount; ++j)
                 m_caster->CastSpell(unitTarget, spell->Id, true, m_CastItem, NULL, m_originalCasterGUID);
-            return;
-        }
-        // Righteous Defense
-        case 31980:
-        {
-            m_caster->CastSpell(unitTarget, 31790, true, m_CastItem, NULL, m_originalCasterGUID);
-            return;
-        }
-        // Cloak of Shadows
-        case 35729:
-        {
-            Unit::AuraMap& Auras = unitTarget->GetAuras();
-            for(Unit::AuraMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
-            {
-                // remove all harmful spells on you...
-                if( // ignore positive and passive auras
-                    !iter->second->IsPositive() && !iter->second->IsPassive() &&
-                    // ignore physical auras
-                    (GetSpellSchoolMask(iter->second->GetSpellProto()) & SPELL_SCHOOL_MASK_NORMAL)==0 )
-                {
-                    m_caster->RemoveAurasDueToSpell(iter->second->GetSpellProto()->Id);
-                    iter = Auras.begin();
-                }
-            }
-            return;
-        }
-        // Priest Shadowfiend (34433) need apply mana gain trigger aura on pet
-        case 41967:
-        {
-            if (Unit *pet = unitTarget->GetPet())
-                pet->CastSpell(pet, 28305, true);
             return;
         }
     }
