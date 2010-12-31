@@ -149,7 +149,6 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         static std::list<Map*> i_mapList;
 
-        friend struct WorldObjectChangeAccumulator;
         Player2CorpsesMapType   i_player2corpse;
 
         typedef ACE_Thread_Mutex LockType;
