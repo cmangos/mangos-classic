@@ -340,11 +340,12 @@ struct ItemDisplayInfoEntry
 
 struct ItemRandomPropertiesEntry
 {
-    uint32    ID;                                           // 0
-    //char*     internalName                                // 1   unused
-    uint32    enchant_id[3];                                // 2-4
-                                                            // 5-6 unused, 0 only values, reserved for additional enchantments?
-    // char*     nameSuffix[8];
+    uint32    ID;                                           // 0        m_ID
+    //char*     internalName                                // 1        m_Name
+    uint32    enchant_id[3];                                // 2-4      m_Enchantment
+                                                            // 5-6 unused, 0 only values, reserved for additional enchantments
+    // char*     nameSuffix[8];                             // 7-14     m_name_lang
+                                                            // 15 name flags
 };
 
 struct ItemSetEntry
