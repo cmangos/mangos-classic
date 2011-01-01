@@ -871,7 +871,7 @@ bool Aura::_RemoveAura()
 
     // unregister aura diminishing (and store last time)
     if (getDiminishGroup() != DIMINISHING_NONE )
-        m_target->ApplyDiminishingAura(getDiminishGroup(),false);
+        m_target->ApplyDiminishingAura(getDiminishGroup(), false);
 
     SetAura(slot, true);
     SetAuraFlag(slot, false);
