@@ -296,6 +296,13 @@ extern ScriptMapMap sEventScripts;
 extern ScriptMapMap sGossipScripts;
 extern ScriptMapMap sCreatureMovementScripts;
 
+enum ScriptLoadResult
+{
+    SCRIPT_LOAD_OK,
+    SCRIPT_LOAD_ERR_NOT_FOUND,
+    SCRIPT_LOAD_ERR_WRONG_API
+};
+
 class ScriptMgr
 {
     public:
@@ -322,7 +329,7 @@ class ScriptMgr
         const char* GetScriptName(uint32 id) const { return id < m_scriptNames.size() ? m_scriptNames[id].c_str() : ""; }
         uint32 GetScriptId(const char *name) const;
 
-        bool LoadScriptLibrary(const char* libName);
+        ScriptLoadResult LoadScriptLibrary(const char* libName);
         void UnloadScriptLibrary();
 
         CreatureAI* GetCreatureAI(Creature* pCreature);

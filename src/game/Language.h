@@ -368,7 +368,7 @@ enum MangosStrings
     // Room for more level 2              376-399 not used
 
     // level 3 chat
-    LANG_SCRIPTS_RELOADED               = 400,
+    LANG_SCRIPTS_RELOADED_ANNOUNCE      = 400,
     LANG_YOU_CHANGE_SECURITY            = 401,
     LANG_YOURS_SECURITY_CHANGED         = 402,
     LANG_YOURS_SECURITY_IS_LOW          = 403,
@@ -883,7 +883,11 @@ enum MangosStrings
     //                                    1162 used in master branch
     //                                    1163 used in master branch
     //                                    1164 used in master branch
-    // Room for more level 3              1165-1199 not used
+    //                                    1165 used in master branch
+    LANG_SCRIPTS_NOT_FOUND              = 1166,
+    LANG_SCRIPTS_WRONG_API              = 1167,
+    LANG_SCRIPTS_RELOADED_OK            = 1168,
+    // Room for more level 3              1169-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
