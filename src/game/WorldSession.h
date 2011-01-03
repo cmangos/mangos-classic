@@ -303,6 +303,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleSetActionButtonOpcode(WorldPacket& recvPacket);
 
         void HandleGameObjectUseOpcode(WorldPacket& recPacket);
+        void HandleMeetingStoneJoinOpcode(WorldPacket& recPacket);
         void HandleMeetingStoneInfoOpcode(WorldPacket& recPacket);
 
         void HandleNameQueryOpcode(WorldPacket& recvPacket);
