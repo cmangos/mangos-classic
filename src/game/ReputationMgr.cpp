@@ -121,7 +121,7 @@ void ReputationMgr::SendForceReactions()
     m_player->SendDirectMessage(&data);
 }
 
-void ReputationMgr::SendState(FactionState const* faction) const
+void ReputationMgr::SendState(FactionState const* faction)
 {
     if(faction->Flags & FACTION_FLAG_VISIBLE)               //If faction is visible then update it
     {
@@ -135,13 +135,17 @@ void ReputationMgr::SendState(FactionState const* faction) const
         data << (uint32) faction->ReputationListID;
         data << (uint32) faction->Standing;
 
-        for(FactionStateList::const_iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+        for(FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
         {
-            if (itr->second.Changed && itr->second.ReputationListID != faction->ReputationListID)
+            if (itr->second.needSend)
             {
-                data << (uint32) itr->second.ReputationListID;
-                data << (uint32) itr->second.Standing;
-                ++count;
+                itr->second.needSend = false;
+                if (itr->second.ReputationListID != faction->ReputationListID)
+                {
+                    data << (uint32) itr->second.ReputationListID;
+                    data << (uint32) itr->second.Standing;
+                    ++count;
+                }
             }
         }
 
@@ -209,7 +213,8 @@ void ReputationMgr::Initialize()
             newFaction.ReputationListID = factionEntry->reputationListID;
             newFaction.Standing = 0;
             newFaction.Flags = GetDefaultStateFlags(factionEntry);
-            newFaction.Changed = true;
+            newFaction.needSend = true;
+            newFaction.needSave = true;
 
             m_factions[newFaction.ReputationListID] = newFaction;
         }
@@ -287,7 +292,8 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
             standing = Reputation_Bottom;
 
         itr->second.Standing = standing - BaseRep;
-        itr->second.Changed = true;
+        itr->second.needSend = true;
+        itr->second.needSave = true;
 
         SetVisible(&itr->second);
 
@@ -333,7 +339,8 @@ void ReputationMgr::SetVisible(FactionState* faction)
         return;
 
     faction->Flags |= FACTION_FLAG_VISIBLE;
-    faction->Changed = true;
+    faction->needSend = true;
+    faction->needSave = true;
 
     SendVisible(faction);
 }
@@ -366,7 +373,8 @@ void ReputationMgr::SetAtWar(FactionState* faction, bool atWar)
     else
         faction->Flags &= ~FACTION_FLAG_AT_WAR;
 
-    faction->Changed = true;
+    faction->needSend = true;
+    faction->needSave = true;
 }
 
 void ReputationMgr::SetInactive( RepListID repListID, bool on )
@@ -393,7 +401,8 @@ void ReputationMgr::SetInactive(FactionState* faction, bool inactive)
     else
         faction->Flags &= ~FACTION_FLAG_INACTIVE;
 
-    faction->Changed = true;
+    faction->needSend = true;
+    faction->needSave = true;
 }
 
 void ReputationMgr::LoadFromDB(QueryResult *result)
@@ -440,7 +449,10 @@ void ReputationMgr::LoadFromDB(QueryResult *result)
 
                 // reset changed flag if values similar to saved in DB
                 if(faction->Flags==dbFactionFlags)
-                    faction->Changed = false;
+                {
+                    faction->needSend = false;
+                    faction->needSave = false;
+                }
             }
         }
         while( result->NextRow() );
@@ -453,11 +465,11 @@ void ReputationMgr::SaveToDB()
 {
     for(FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
-        if (itr->second.Changed)
+        if (itr->second.needSave)
         {
             CharacterDatabase.PExecute("DELETE FROM character_reputation WHERE guid = '%u' AND faction='%u'", m_player->GetGUIDLow(), itr->second.ID);
             CharacterDatabase.PExecute("INSERT INTO character_reputation (guid,faction,standing,flags) VALUES ('%u', '%u', '%i', '%u')", m_player->GetGUIDLow(), itr->second.ID, itr->second.Standing, itr->second.Flags);
-            itr->second.Changed = false;
+            itr->second.needSave = false;
         }
     }
 }
