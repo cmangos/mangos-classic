@@ -695,6 +695,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
     DEBUG_LOG("WORLD: Sent SMSG_LIST_INVENTORY");
 
     Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);
+
     if (!pCreature)
     {
         DEBUG_LOG("WORLD: SendListInventory - %s not found or you can't interact with him.", vendorguid.GetString().c_str());
@@ -703,11 +704,12 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
     }
 
     // remove fake death
-    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     // Stop the npc if moving
-    pCreature->StopMoving();
+    if (!pCreature->IsStopped())
+        pCreature->StopMoving();
 
     VendorItemData const* vItems = pCreature->GetVendorItems();
     VendorItemData const* tItems = pCreature->GetVendorTemplateItems();

@@ -308,7 +308,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     spell->prepare(&targets);
 }
 
-void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
+void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
 {
     DEBUG_LOG("WORLD: Received CMSG_GOSSIP_HELLO");
 
@@ -323,13 +323,11 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     }
 
     // remove fake death
-    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    if( pCreature->isArmorer() || (pCreature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_AGGRO) || pCreature->isQuestGiver() || pCreature->isServiceProvider())
-    {
+    if (!pCreature->IsStopped())
         pCreature->StopMoving();
-    }
 
     if (pCreature->isSpiritGuide())
         pCreature->SendAreaSpiritHealerQueryOpcode(_player);
