@@ -104,7 +104,7 @@ void MapManager::LoadTransports()
             m_TransportsByMap[*i].insert(t);
 
         //If we someday decide to use the grid to track transports, here:
-        t->SetMap(MapManager::Instance().CreateMap(mapid, t));
+        t->SetMap(sMapMgr.CreateMap(mapid, t));
 
         //t->GetMap()->Add<GameObject>((GameObject *)t);
         ++count;
@@ -453,7 +453,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
     //we need to create and save new Map object with 'newMapid' because if not done -> lead to invalid Map object reference...
     //player far teleport would try to create same instance, but we need it NOW for transport...
     //correct me if I'm wrong O.o
-    Map * newMap = MapManager::Instance().CreateMap(newMapid, this);
+    Map * newMap = sMapMgr.CreateMap(newMapid, this);
     SetMap(newMap);
 
     if(oldMap != newMap)
