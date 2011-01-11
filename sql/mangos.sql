@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1205_s0624_01_mangos_mangos_string` bit(1) default NULL
+  `required_z1217_s0636_03_mangos_game_event_mail` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -651,8 +651,11 @@ INSERT INTO `command` VALUES
 ('revive',3,'Syntax: .revive\r\n\r\nRevive the selected player. If no player is selected, it will revive you.'),
 ('save',0,'Syntax: .save\r\n\r\nSaves your character.'),
 ('saveall',1,'Syntax: .saveall\r\n\r\nSave all characters in game.'),
-('send items',3,'Syntax: .send items #playername \"#subject\" \"#text\" itemid1[:count1] itemid2[:count2] ... itemidN[:countN]\r\n\r\nSend a mail to a player. Subject and mail text must be in \"\". If for itemid not provided related count values then expected 1, if count > max items in stack then items will be send in required amount stacks. All stacks amount in mail limited to 12.'),
-('send mail',1,'Syntax: .send mail #playername \"#subject\" \"#text\"\r\n\r\nSend a mail to a player. Subject and mail text must be in \"\".'),
+('send items',3,'Syntax: .send items #playername "#subject" "#text" itemid1[:count1] itemid2[:count2] ... itemidN[:countN]\r\n\r\nSend a mail to a player. Subject and mail text must be in "". If for itemid not provided related count values then expected 1, if count > max items in stack then items will be send in required amount stacks. All stacks amount in mail limited to 12.'),
+('send mail',1,'Syntax: .send mail #playername "#subject" "#text"\r\n\r\nSend a mail to a player. Subject and mail text must be in "".'),
+('send mass items',3,'Syntax: .send mass items #racemask|$racename|alliance|horde|all "#subject" "#text" itemid1[:count1] itemid2[:count2] ... itemidN[:countN]\r\n\r\nSend a mail to players. Subject and mail text must be in "". If for itemid not provided related count values then expected 1, if count > max items in stack then items will be send in required amount stacks. All stacks amount in mail limited to 12.'),
+('send mass mail',1,'Syntax: .send mass mail #racemask|$racename|alliance|horde|all "#subject" "#text"\r\n\r\nSend a mail to players. Subject and mail text must be in "".'),
+('send mass money','3','Syntax: .send mass money #racemask|$racename|alliance|horde|all "#subject" "#text" #money\r\n\r\nSend mail with money to players. Subject and mail text must be in "".'),
 ('send message',3,'Syntax: .send message $playername $message\r\n\r\nSend screen message to player from ADMINISTRATOR.'),
 ('send money',3,'Syntax: .send money #playername \"#subject\" \"#text\" #money\r\n\r\nSend mail with money to a player. Subject and mail text must be in \"\".'),
 ('server corpses',2,'Syntax: .server corpses\r\n\r\nTriggering corpses expire check in world.'),
@@ -1625,6 +1628,29 @@ CREATE TABLE `game_event_gameobject` (
 LOCK TABLES `game_event_gameobject` WRITE;
 /*!40000 ALTER TABLE `game_event_gameobject` DISABLE KEYS */;
 /*!40000 ALTER TABLE `game_event_gameobject` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `game_event_mail`
+--
+
+DROP TABLE IF EXISTS `game_event_mail`;
+CREATE TABLE `game_event_mail` (
+  `event` smallint(6) NOT NULL default '0' COMMENT 'Negatives value to send at event stop, positive value for send at event start.',
+  `raceMask` mediumint(8) unsigned NOT NULL default '0',
+  `quest`    mediumint(8) unsigned NOT NULL default '0',
+  `mailTemplateId` mediumint(8) unsigned NOT NULL default '0',
+  `senderEntry`    mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`event`,`raceMask`,`quest`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Game event system';
+
+--
+-- Dumping data for table `game_event_mail`
+--
+
+LOCK TABLES `game_event_mail` WRITE;
+/*!40000 ALTER TABLE `game_event_mail` DISABLE KEYS */;
+/*!40000 ALTER TABLE `game_event_mail` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

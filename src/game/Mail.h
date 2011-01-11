@@ -19,9 +19,11 @@
 
 /**
  * @addtogroup mailing The mail system
- * The mailing system in MaNGOS consists of mostly two files:
+ * The mailing system in MaNGOS consists of mostly 4 files:
  * - Mail.h
  * - Mail.cpp
+ * - MassMailMgr.h
+ * - MassMailMgr.cpp
  *
  * @{
  *
@@ -228,7 +230,8 @@ class MailDraft
     public:                                                 // modifiers
 
         // this two modifiers expected to be applied in normal case to blank draft and exclusively, It DON'T must overwrite already set itemTextId, in other cases it will work and with mixed cases but this will be not normal way use.
-        MailDraft& SetSubjectAndBodyId(std::string subject, uint32 itemTextId) { m_subject = subject; MANGOS_ASSERT(!m_bodyId); m_bodyId = m_bodyId; return *this; }
+        MailDraft& SetSubjectAndBodyId(std::string subject, uint32 itemTextId) { m_subject = subject; MANGOS_ASSERT(!m_bodyId); m_bodyId = itemTextId; return *this; }
+        MailDraft& SetSubjectAndBody(std::string subject, std::string text);
         MailDraft& SetMailTemplate(uint16 mailTemplateId, bool need_items = true) { m_mailTemplateId = mailTemplateId, m_mailTemplateItemsNeed = need_items; return *this; }
 
         MailDraft& AddItem(Item* item);
@@ -244,6 +247,8 @@ class MailDraft
          * @param COD the amount to which the cod should be set.
          */
         MailDraft& SetCOD(uint32 COD) { m_COD = COD; return *this; }
+
+        void CloneFrom(MailDraft const& draft);
     public:                                                 // finishers
         void SendReturnToSender(uint32 sender_acc, ObjectGuid sender_guid, ObjectGuid receiver_guid);
         void SendMailTo(MailReceiver const& receiver, MailSender const& sender, MailCheckMask checked = MAIL_CHECK_MASK_NONE, uint32 deliver_delay = 0);

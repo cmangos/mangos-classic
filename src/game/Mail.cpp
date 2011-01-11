@@ -820,6 +820,16 @@ m_bodyId(!text.empty() ? sObjectMgr.CreateItemText(text) : 0), m_money(0), m_COD
 
 }
 
+MailDraft& MailDraft::SetSubjectAndBody(std::string subject, std::string text)
+{
+    m_subject = subject;
+
+    MANGOS_ASSERT(!m_bodyId);
+    m_bodyId = !text.empty() ? sObjectMgr.CreateItemText(text) : 0;
+
+    return *this;
+}
+
 /**
  * Adds an item to the MailDraft.
  *
@@ -878,6 +888,40 @@ void MailDraft::deleteIncludedItems( bool inDB /**= false*/ )
 
     m_items.clear();
 }
+/**
+ * Clone MailDraft from another MailDraft.
+ *
+ * @param draft Point to source for draft cloning.
+ */
+void MailDraft::CloneFrom(MailDraft const& draft)
+{
+    m_mailTemplateId = draft.GetMailTemplateId();
+    m_mailTemplateItemsNeed = draft.m_mailTemplateItemsNeed;
+
+    m_subject = draft.GetSubject();
+
+    MANGOS_ASSERT(!m_bodyId);
+    if (uint32 bodyId = draft.GetBodyId())
+    {
+        std::string text = sObjectMgr.GetItemText(bodyId);
+        m_bodyId = sObjectMgr.CreateItemText(text);
+    }
+
+    m_money = draft.GetMoney();
+    m_COD = draft.GetCOD();
+
+    for(MailItemMap::const_iterator mailItemIter = draft.m_items.begin(); mailItemIter != draft.m_items.end(); ++mailItemIter)
+    {
+        Item* item = mailItemIter->second;
+
+        if(Item* newitem = item->CloneItem(item->GetCount()))
+        {
+            newitem->SaveToDB();
+            AddItem(newitem);
+        }
+    }
+}
+
 /*
  * Returns a mail to its sender.
  * @param sender_acc           The id of the account of the sender.

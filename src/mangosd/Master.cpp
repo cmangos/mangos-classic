@@ -38,6 +38,7 @@
 #include "Util.h"
 #include "revision_sql.h"
 #include "MaNGOSsoap.h"
+#include "MassMailMgr.h"
 #include "DBCStores.h"
 
 #include <ace/OS_NS_signal.h>
@@ -342,6 +343,9 @@ int Master::Run()
 
     ///- Clean account database before leaving
     clearOnlineAccounts();
+
+    // send all still queued mass mails (before DB connections shutdown)
+    sMassMailMgr.Update(true);
 
     ///- Wait for DB delay threads to end
     CharacterDatabase.HaltDelayThread();

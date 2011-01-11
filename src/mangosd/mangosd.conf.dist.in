@@ -611,6 +611,11 @@ LogColors = ""
 #        Mail delivery delay time for item sending
 #        Default: 3600 sec (1 hour)
 #
+#    MassMailer.SendPerTick
+#        Max amount mail send each tick from mails list scheduled for mass mailer proccesing.
+#        More mails increase server load but speedup mass mail proccess. Normal tick length: 50 msecs, so 20 ticks in sec and 200 mails in sec by default.
+#        Default: 10
+#
 #    PetUnsummonAtMount
 #        Persmanent pet will unsummoned at player mount
 #        Default: 0 - not unsummon
@@ -686,6 +691,7 @@ MaxPrimaryTradeSkill = 2
 MinPetitionSigns = 9
 MaxGroupXPDistance = 74
 MailDeliveryDelay = 3600
+MassMailer.SendPerTick = 10
 PetUnsummonAtMount = 0
 Event.Announce = 0
 BeepAtStart = 1
