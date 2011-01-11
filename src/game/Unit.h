@@ -148,6 +148,15 @@ enum UnitStandStateType
 enum UnitStandFlags
 */
 
+// byte flags value (UNIT_FIELD_BYTES_1,3)
+enum UnitBytes1_Flags
+{
+    UNIT_BYTE1_FLAG_ALWAYS_STAND = 0x01,
+    UNIT_BYTE1_FLAGS_CREEP       = 0x02,
+    UNIT_BYTE1_FLAG_UNTRACKABLE  = 0x04,
+    UNIT_BYTE1_FLAG_ALL          = 0xFF
+};
+
 // byte flags  value (UNIT_FIELD_BYTES_1,2) (SpellShapeshiftForm.dbc, checked for 1.12.1)
 enum ShapeshiftForm
 {
@@ -170,15 +179,6 @@ enum ShapeshiftForm
     FORM_STEALTH            = 0x1E,
     FORM_MOONKIN            = 0x1F,
     FORM_SPIRITOFREDEMPTION = 0x20
-};
-
-// byte flags value (UNIT_FIELD_BYTES_1,3)
-enum UnitBytes1_Flags
-{
-    UNIT_BYTE1_FLAG_ALWAYS_STAND = 0x01,
-    UNIT_BYTE1_FLAGS_CREEP       = 0x02,
-    UNIT_BYTE1_FLAG_UNTRACKABLE  = 0x04,
-    UNIT_BYTE1_FLAG_ALL          = 0xFF
 };
 
 // low byte ( 0 from 0..3 ) of UNIT_FIELD_BYTES_2
