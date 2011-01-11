@@ -2785,17 +2785,14 @@ void Aura::HandleAuraModDisarm(bool apply, bool Real)
     if(!Real)
         return;
 
-    if(!apply && m_target->HasAuraType(SPELL_AURA_MOD_DISARM))
+    Unit *target = GetTarget();
+
+    if(!apply && target->HasAuraType(GetModifier()->m_auraname))
         return;
 
-    // not sure for it's correctness
-    if(apply)
-        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED);
-    else
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED);
+    target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED, apply);
 
-    // only at real add/remove aura
-    if (m_target->GetTypeId() != TYPEID_PLAYER)
+    if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
     // main-hand attack speed already set to special value for feral form already and don't must change and reset at remove.
@@ -2803,11 +2800,11 @@ void Aura::HandleAuraModDisarm(bool apply, bool Real)
         return;
 
     if (apply)
-        m_target->SetAttackTime(BASE_ATTACK,BASE_ATTACK_TIME);
+        target->SetAttackTime(BASE_ATTACK,BASE_ATTACK_TIME);
     else
         ((Player *)m_target)->SetRegularAttackTime();
 
-    m_target->UpdateDamagePhysical(BASE_ATTACK);
+    target->UpdateDamagePhysical(BASE_ATTACK);
 }
 
 void Aura::HandleAuraModStun(bool apply, bool Real)
