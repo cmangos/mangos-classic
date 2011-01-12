@@ -17066,10 +17066,10 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
     {
         if(!target->isVisibleForInState(this, viewPoint, true))
         {
+            ObjectGuid t_guid = target->GetObjectGuid();
+
             if (target->GetTypeId()==TYPEID_UNIT)
                 BeforeVisibilityDestroy<Creature>((Creature*)target,this);
-
-            ObjectGuid t_guid = target->GetGUID();
 
             target->DestroyForPlayer(this);
             m_clientGUIDs.erase(t_guid);
