@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1225_s0654_01_mangos_mangos_string` bit(1) default NULL
+  `required_z1227_s0658_01_mangos_spell_bonus_data` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10301,7 +10301,10 @@ INSERT INTO `spell_bonus_data` VALUES
 (6229,  0.3,    0,       0,     'Warlock - Shadow Ward'),
 (17877, 0.4286, 0,       0,     'Warlock - Shadowburn'),
 (18265, 0,      0.1,     0,     'Warlock - Siphon Life'),
-(6353,  1.15,   0,       0,     'Warlock - Soul Fire');
+(6353,  1.15,   0,       0,     'Warlock - Soul Fire'),
+/* Item */
+(17712, 0,      0,       0,     'Item - Lifestone Healing'),
+(5707,  0,      0,       0,     'Item - Lifestone Regeneration');
 /*!40000 ALTER TABLE `spell_bonus_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
