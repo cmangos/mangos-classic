@@ -302,7 +302,7 @@ class MANGOS_DLL_SPEC Aura
 
         void UpdateAura(uint32 diff) { SetInUse(true); Update(diff); SetInUse(false); }
         void _AddAura();
-        bool _RemoveAura();
+        void _RemoveAura();
 
         bool IsSingleTarget() {return m_isSingleTargetAura;}
         void SetIsSingleTarget(bool val) { m_isSingleTargetAura = val;}

@@ -16089,6 +16089,15 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
     }
 }
 
+SpellModifier* Player::GetSpellMod(SpellModOp op, uint32 spellId) const
+{
+    for (SpellModList::const_iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
+        if ((*itr)->spellId == spellId)
+            return *itr;
+
+    return NULL;
+}
+
 void Player::RemoveSpellMods(Spell const* spell)
 {
     if(!spell || (m_SpellModRemoveCount == 0))

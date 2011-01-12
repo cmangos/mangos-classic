@@ -3905,12 +3905,11 @@ void Unit::RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode)
     else
         Aur->ApplyModifier(false,true);
 
-    if (Aur->_RemoveAura())
-    {
-        // last aura in stack removed
-        if (mode != AURA_REMOVE_BY_DELETE && IsSpellLastAuraEffect(Aur->GetSpellProto(),Aur->GetEffIndex()))
-            Aur->HandleSpellSpecificBoosts(false);
-    }
+    Aur->_RemoveAura();
+
+    // last aura in stack removed
+    if (mode != AURA_REMOVE_BY_DELETE && IsSpellLastAuraEffect(Aur->GetSpellProto(),Aur->GetEffIndex()))
+        Aur->HandleSpellSpecificBoosts(false);
 
     // If aura in use (removed from code that plan access to it data after return)
     // store it in aura list with delayed deletion

@@ -818,7 +818,7 @@ void Aura::_AddAura()
     }
 }
 
-bool Aura::_RemoveAura()
+void Aura::_RemoveAura()
 {
     // Remove all triggered by aura spells vs unlimited duration
     // except same aura replace case
@@ -842,10 +842,10 @@ bool Aura::_RemoveAura()
     uint8 slot = GetAuraSlot();
 
     if(slot >= MAX_AURAS)                                   // slot not set
-        return false;
+        return;
 
     if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
-        return false;
+        return;
 
     bool lastaura = true;
 
@@ -867,7 +867,7 @@ bool Aura::_RemoveAura()
 
     // only remove icon when the last aura of the spell is removed (current aura already removed from list)
     if (!lastaura)
-        return false;
+        return;
 
     // unregister aura diminishing (and store last time)
     if (getDiminishGroup() != DIMINISHING_NONE )
@@ -926,8 +926,6 @@ bool Aura::_RemoveAura()
                 ((Player*)caster)->SendCooldownEvent(GetSpellProto());
         }
     }
-
-    return true;
 }
 
 void Aura::SetAuraFlag(uint32 slot, bool add)
@@ -4476,6 +4474,26 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
 
     switch(GetSpellProto()->SpellFamilyName)
     {
+        case SPELLFAMILY_MAGE:
+        {
+            switch(GetId())
+            {
+                case 11189:                                 // Frost Warding
+                case 28332:
+                {
+                    if(m_target->GetTypeId()==TYPEID_PLAYER && !apply)
+                    {
+                        // reflection chance (effect 1) of Frost Ward, applied in dummy effect
+                        if (SpellModifier *mod = ((Player*)m_target)->GetSpellMod(SPELLMOD_EFFECT2, GetId()))
+                            ((Player*)m_target)->AddSpellMod(mod, false);
+                    }
+                    return;
+                }
+                default:
+                    return;
+            }
+            break;
+        }
         case SPELLFAMILY_WARRIOR:
         {
             if(!apply)
@@ -4495,6 +4513,8 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
                 spellId1 = 30069;                           // Blood Frenzy (Rank 1)
                 spellId2 = 30070;                           // Blood Frenzy (Rank 2)
             }
+            else
+                return;
             break;
         }
         case SPELLFAMILY_HUNTER:
