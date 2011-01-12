@@ -4492,8 +4492,8 @@ void Aura::HandleSpellSpecificBoosts(bool apply)
                         (*i)->GetSpellProto()->Mechanic == MECHANIC_BLEED)
                         return;
 
-                spellId1 = 30069;
-                spellId2 = 30070;
+                spellId1 = 30069;                           // Blood Frenzy (Rank 1)
+                spellId2 = 30070;                           // Blood Frenzy (Rank 2)
             }
             break;
         }
