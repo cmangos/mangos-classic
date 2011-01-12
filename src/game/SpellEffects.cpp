@@ -1279,28 +1279,12 @@ void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
             return;
         // Brittle Armor - (need add max stack of 24575 Brittle Armor)
         case 29284:
-        {
-            // Brittle Armor
-            SpellEntry const* spell = sSpellStore.LookupEntry(24575);
-            if (!spell)
-                return;
-
-            for (uint32 j=0; j < spell->StackAmount; ++j)
-                m_caster->CastSpell(unitTarget, spell->Id, true, m_CastItem, NULL, m_originalCasterGUID);
+            m_caster->CastSpell(unitTarget, 24575, true, m_CastItem, NULL, m_originalCasterGUID);
             return;
-        }
         // Mercurial Shield - (need add max stack of 26464 Mercurial Shield)
         case 29286:
-        {
-            // Mercurial Shield
-            SpellEntry const* spell = sSpellStore.LookupEntry(26464);
-            if (!spell)
-                return;
-
-            for (uint32 j=0; j < spell->StackAmount; ++j)
-                m_caster->CastSpell(unitTarget, spell->Id, true, m_CastItem, NULL, m_originalCasterGUID);
+            m_caster->CastSpell(unitTarget, 26464, true, m_CastItem, NULL, m_originalCasterGUID);
             return;
-        }
     }
 
     // normal case

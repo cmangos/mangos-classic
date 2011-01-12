@@ -316,6 +316,18 @@ m_isRemovedOnShapeLost(true), m_in_use(false), m_deleted(false)
     if(modOwner)
         modOwner->ApplySpellMod(GetId(), SPELLMOD_CHARGES, m_procCharges);
 
+    // some custom stack values at aura holder create
+    switch (m_spellProto->Id)
+    {
+        // some auras applied with max stack
+        case 24575:                                         // Brittle Armor
+        case 24662:                                         // Restless Strength
+        case 24659:                                         // Unstable Power
+        case 26464:                                         // Mercurial Shield
+            m_stackAmount = m_spellProto->StackAmount;
+            break;
+    }
+
     m_isRemovedOnShapeLost = (m_caster_guid==m_target->GetGUID() &&
                               m_spellProto->Stances &&
                             !(m_spellProto->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) &&
@@ -1161,7 +1173,9 @@ void Aura::HandleAddModifier(bool apply, bool Real)
             SpellModType(m_modifier.m_auraname),            // SpellModType value == spell aura types
             m_modifier.m_amount,
             this,
-            m_procCharges);
+            // prevent expire spell mods with (charges > 0 && m_stackAmount > 1)
+            // all this spell expected expire not at use but at spell proc event check
+            GetSpellProto()->StackAmount > 1 ? 0 : m_procCharges);
     }
 
     ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
@@ -1722,37 +1736,30 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 case 24658:                                 // Unstable Power
                 {
-                    uint32 spellId = 24659;
                     if (apply)
                     {
-                        SpellEntry const *spell = sSpellStore.LookupEntry(spellId);
                         Unit* caster = GetCaster();
-                        if (!spell || !caster)
+                        if (!caster)
                             return;
 
-                        for (uint32 i = 0; i < spell->StackAmount; ++i)
-                            caster->CastSpell(m_target, spellId, true, NULL, NULL, GetCasterGUID());
-                        return;
+                        caster->CastSpell(target, 24659, true, NULL, NULL, GetCasterGuid());
                     }
-                    m_target->RemoveAurasDueToSpell(spellId);
+                    else
+                        target->RemoveAurasDueToSpell(24659);
                     return;
                 }
                 case 24661:                                 // Restless Strength
                 {
-                    uint32 spellId = 24662;
                     if (apply)
                     {
-                        SpellEntry const* spell = sSpellStore.LookupEntry(spellId);
                         Unit* caster = GetCaster();
-                        if (!spell || !caster)
+                        if (!caster)
                             return;
 
-                        for (uint32 i=0; i < spell->StackAmount; ++i)
-                            caster->CastSpell(m_target, spell->Id, true, NULL, NULL, GetCasterGUID());
-
-                        return;
+                        caster->CastSpell(target, 24662, true, NULL, NULL, GetCasterGuid());
                     }
-                    m_target->RemoveAurasDueToSpell(spellId);
+                    else
+                        target->RemoveAurasDueToSpell(24662);
                     return;
                 }
                 case 29266:                                 // Permanent Feign Death
