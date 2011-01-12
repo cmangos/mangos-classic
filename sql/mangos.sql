@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1228_s0660_01_mangos_loot_template` bit(1) default NULL
+  `required_z1230_s0663_01_mangos_spell_bonus_data` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10280,7 +10280,7 @@ INSERT INTO `spell_bonus_data` VALUES
 (10436, 0.1667, 0,       0,     'Shaman - Searing Totem Attack Rank 6'),
 /* Warlock */
 (17962, 0.4286, 0,       0,     'Warlock - Conflagrate'),
-(172,   0,      0.3,     0,     'Warlock - Corruption'),
+(172,   0,      0.156,   0,     'Warlock - Corruption'),
 (980,   0,      0.1,     0,     'Warlock - Curse of Agony'),
 (603,   0,      2,       0,     'Warlock - Curse of Doom'),
 (18220, 0.96,   0,       0,     'Warlock - Dark Pact'),
