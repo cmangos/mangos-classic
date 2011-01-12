@@ -23,6 +23,7 @@
 #include "Common.h"
 #include "Policies/Singleton.h"
 #include "BattleGround.h"
+#include "ace/Recursive_Thread_Mutex.h"
 
 typedef std::map<uint32, BattleGround*> BattleGroundSet;
 
@@ -45,7 +46,7 @@ struct PlayerQueueInfo                                      // stores informatio
 struct GroupQueueInfo                                       // stores information about the group in queue (also used when joined as solo!)
 {
     std::map<uint64, PlayerQueueInfo*> Players;             // player queue info map
-    uint32  Team;                                           // Player team (ALLIANCE/HORDE)
+    Team  GroupTeam;                                        // Player team (ALLIANCE/HORDE)
     BattleGroundTypeId BgTypeId;                            // battleground type id
     uint32  JoinTime;                                       // time when group was added
     uint32  RemoveInviteTime;                               // time when we will remove invite for players in group
@@ -73,14 +74,17 @@ class BattleGroundQueue
         void FillPlayersToBG(BattleGround* bg, BattleGroundBracketId bracket_id);
         bool CheckPremadeMatch(BattleGroundBracketId bracket_id, uint32 MaxPlayersPerTeam, uint32 MinPlayersPerTeam);
         bool CheckNormalMatch(BattleGroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers);
-        GroupQueueInfo * AddGroup(Player* leader, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id, bool isPremade);
-        void AddPlayer(Player *plr, GroupQueueInfo *ginfo);
+        GroupQueueInfo * AddGroup(Player* leader, Group* group, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracketId, bool isPremade);
         void RemovePlayer(const uint64& guid, bool decreaseInvitedCount);
         void PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id);
         uint32 GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id);
+        bool IsPlayerInvited(const uint64& pl_guid, const uint32 bgInstanceGuid, const uint32 removeTime);
+        bool GetPlayerGroupInfoData(const uint64& guid, GroupQueueInfo* ginfo);
 
-        void DecreaseGroupLength(uint32 queueId, uint32 AsGroup);
-        void AnnounceWorld(GroupQueueInfo *ginfo, const uint64& playerGUID, bool isAddedToQueue);
+    private:
+        //mutex that should not allow changing private data, nor allowing to update Queue during private data change.
+        ACE_Recursive_Thread_Mutex  m_Lock;
+
 
         typedef std::map<uint64, PlayerQueueInfo> QueuedPlayersMap;
         QueuedPlayersMap m_QueuedPlayers;
@@ -116,9 +120,7 @@ class BattleGroundQueue
         //one selection pool for horde, other one for alliance
         SelectionPool m_SelectionPools[BG_TEAMS_COUNT];
 
-    private:
-
-        bool InviteGroupToBG(GroupQueueInfo * ginfo, BattleGround * bg, uint32 side);
+        bool InviteGroupToBG(GroupQueueInfo * ginfo, BattleGround * bg, Team side);
         uint32 m_WaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME];
         uint32 m_WaitTimeLastPlayer[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
         uint32 m_SumOfWaitTimes[BG_TEAMS_COUNT][MAX_BATTLEGROUND_BRACKETS];
@@ -212,6 +214,7 @@ class BattleGroundMgr
 
         BGFreeSlotQueueType BGFreeSlotQueue[MAX_BATTLEGROUND_TYPE_ID];
 
+        void ScheduleQueueUpdate(BattleGroundQueueTypeId bgQueueTypeId, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id);
         uint32 GetPrematureFinishTime() const;
 
         void ToggleTesting();
@@ -250,12 +253,14 @@ class BattleGroundMgr
         static BattleGroundTypeId WeekendHolidayIdToBGType(HolidayIds holiday);
         static bool IsBGWeekend(BattleGroundTypeId bgTypeId);
     private:
+        ACE_Thread_Mutex    SchedulerLock;
         BattleMastersMap    mBattleMastersMap;
         CreatureBattleEventIndexesMap m_CreatureBattleEventIndexMap;
         GameObjectBattleEventIndexesMap m_GameObjectBattleEventIndexMap;
 
         /* Battlegrounds */
         BattleGroundSet m_BattleGrounds[MAX_BATTLEGROUND_TYPE_ID];
+        std::vector<uint32> m_QueueUpdateScheduler;
         std::set<uint32> m_ClientBattleGroundIds[MAX_BATTLEGROUND_TYPE_ID][MAX_BATTLEGROUND_BRACKETS]; //the instanceids just visible for the client
         bool   m_Testing;
 };

@@ -202,7 +202,7 @@ void Creature::RemoveCorpse()
 /**
  * change the entry of creature until respawn
  */
-bool Creature::InitEntry(uint32 Entry, uint32 team, CreatureData const* data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/ )
+bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/ )
 {
     // use game event entry if any instead default suggested
     if (eventData && eventData->entry_id)
@@ -286,7 +286,7 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, CreatureData const* data /*=
     return true;
 }
 
-bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/, bool preserveHPAndPower /*=true*/)
+bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData *data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/, bool preserveHPAndPower /*=true*/)
 {
     if (!InitEntry(Entry, team, data, eventData))
         return false;
@@ -420,7 +420,7 @@ void Creature::Update(uint32 diff)
                 {
                     // need preserver gameevent state
                     GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetDBTableGUIDLow());
-                    UpdateEntry(m_originalEntry, 0, NULL, eventData);
+                    UpdateEntry(m_originalEntry, TEAM_NONE, NULL, eventData);
                 }
 
                 CreatureInfo const *cinfo = GetCreatureInfo();
@@ -437,9 +437,6 @@ void Creature::Update(uint32 diff)
                 }
                 else
                     SetDeathState( JUST_ALIVED );
-
-                if (GetMap()->IsBattleGround() && ((BattleGroundMap*)GetMap())->GetBG())
-                    ((BattleGroundMap*)GetMap())->GetBG()->OnCreatureRespawn(this); // for alterac valley needed to adjust the correct level again
 
                 //Call AI respawn virtual function
                 if (AI())
@@ -672,7 +669,7 @@ bool Creature::AIM_Initialize()
     return true;
 }
 
-bool Creature::Create(uint32 guidlow, Map *map, uint32 Entry, uint32 team, const CreatureData *data /*= NULL*/, GameEventCreatureData const* eventData /*= NULL*/)
+bool Creature::Create(uint32 guidlow, Map *map, uint32 Entry, Team team, const CreatureData *data /*= NULL*/, GameEventCreatureData const* eventData /*= NULL*/)
 {
     MANGOS_ASSERT(map);
     SetMap(map);
@@ -1146,7 +1143,7 @@ float Creature::GetSpellDamageMod(int32 Rank)
     }
 }
 
-bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const CreatureData *data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/)
+bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, Team team, const CreatureData *data /*=NULL*/, GameEventCreatureData const* eventData /*=NULL*/)
 {
     CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(Entry);
     if(!cinfo)
@@ -1189,7 +1186,7 @@ bool Creature::LoadFromDB(uint32 guidlow, Map *map)
     else
         guidlow = sObjectMgr.GenerateLowGuid(HIGHGUID_UNIT);
 
-    if (!Create(guidlow, map, data->id, 0, data, eventData))
+    if (!Create(guidlow, map, data->id, TEAM_NONE, data, eventData))
         return false;
 
     Relocate(data->posX, data->posY, data->posZ, data->orientation);
@@ -1876,7 +1873,7 @@ bool Creature::LoadCreatureAddon(bool reload)
 /// Send a message to LocalDefense channel for players opposition team in the zone
 void Creature::SendZoneUnderAttackMessage(Player* attacker)
 {
-    uint32 enemy_team = attacker->GetTeam();
+    Team enemy_team = attacker->GetTeam();
 
     WorldPacket data(SMSG_ZONE_UNDER_ATTACK, 4);
     data << uint32(GetZoneId());

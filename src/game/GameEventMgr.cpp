@@ -884,7 +884,7 @@ void GameEventMgr::UpdateCreatureData(int16 event_id, bool activate)
         // Update if spawned
         if (Creature* pCreature = ObjectAccessor::GetCreatureInWorld(ObjectGuid(HIGHGUID_UNIT, data->id, itr->first)))
         {
-            pCreature->UpdateEntry(data->id, 0, data, activate ? &itr->second : NULL);
+            pCreature->UpdateEntry(data->id, TEAM_NONE, data, activate ? &itr->second : NULL);
 
             // spells not casted for event remove case (sent NULL into update), do it
             if (!activate)

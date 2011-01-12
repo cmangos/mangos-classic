@@ -1436,7 +1436,7 @@ uint32 Group::CanJoinBattleGroundQueue(BattleGroundTypeId bgTypeId, BattleGround
         return BG_JOIN_ERR_OFFLINE_MEMBER;
 
     BattleGroundBracketId bracket_id = reference->GetBattleGroundBracketIdFromLevel(bgTypeId);
-    uint32 team = reference->GetTeam();
+    Team team = reference->GetTeam();
 
     // check every member of the group to be able to join
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
