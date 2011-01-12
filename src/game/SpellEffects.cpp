@@ -1718,23 +1718,23 @@ void Spell::EffectHealthLeech(SpellEffectIndex eff_idx)
     if (damage < 0)
         return;
 
-    DEBUG_LOG("HealthLeech :%i", damage);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "HealthLeech :%i", damage);
+
+    uint32 curHealth = unitTarget->GetHealth();
+    damage = m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage );
+    if ((int32)curHealth < damage)
+        damage = curHealth;
 
     float multiplier = m_spellInfo->EffectMultipleValue[eff_idx];
 
     if (Player *modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
-    int32 new_damage = int32(damage*multiplier);
-    uint32 curHealth = unitTarget->GetHealth();
-    new_damage = m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage);
-    if ((int32)curHealth < new_damage)
-        new_damage = curHealth;
-
+    uint32 heal = uint32(damage*multiplier);
     if (m_caster->isAlive())
     {
-        new_damage = m_caster->SpellHealingBonus(m_caster, m_spellInfo, new_damage, HEAL);
-        m_caster->DealHeal(m_caster, uint32(new_damage), m_spellInfo);
+        heal = m_caster->SpellHealingBonus(m_caster, m_spellInfo, heal, HEAL);
+        m_caster->DealHeal(m_caster, heal, m_spellInfo);
     }
 }
 
