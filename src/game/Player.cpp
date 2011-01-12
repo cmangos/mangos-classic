@@ -18845,3 +18845,22 @@ void Player::SendDuelCountdown(uint32 counter)
     data << uint32(counter);                                // seconds
     GetSession()->SendPacket(&data);
 }
+
+bool Player::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
+{
+    switch(spellInfo->Effect[index])
+    {
+        case SPELL_EFFECT_ATTACK_ME:
+            return true;
+        default:
+            break;
+    }
+    switch(spellInfo->EffectApplyAuraName[index])
+    {
+        case SPELL_AURA_MOD_TAUNT:
+            return true;
+        default:
+            break;
+    }
+    return Unit::IsImmuneToSpellEffect(spellInfo, index);
+}
