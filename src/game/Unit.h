@@ -485,6 +485,7 @@ enum UnitFlags
     UNIT_FLAG_IN_COMBAT             = 0x00080000,
     UNIT_FLAG_NOT_SELECTABLE        = 0x02000000,
     UNIT_FLAG_SKINNABLE             = 0x04000000,
+    UNIT_FLAG_AURAS_VISIBLE         = 0x08000000,           // magic detect
     UNIT_FLAG_SHEATHE               = 0x40000000,
     //UNIT_FLAG_UNK_31              = 0x80000000            // no affect in 1.12.1
 

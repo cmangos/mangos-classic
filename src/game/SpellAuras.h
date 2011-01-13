@@ -164,6 +164,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModSkill(bool Apply, bool Real);
         void HandleModDamagePercentDone(bool Apply, bool Real);
         void HandleModPercentStat(bool Apply, bool Real);
+        void HandleAurasVisible(bool Apply, bool Real);
         void HandleModResistancePercent(bool Apply, bool Real);
         void HandleAuraModBaseResistancePCT(bool Apply, bool Real);
         void HandleModShieldBlockPCT(bool Apply, bool Real);

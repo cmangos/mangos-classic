@@ -151,7 +151,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleManaShield,                                // 97 SPELL_AURA_MANA_SHIELD implemented in Unit::CalcAbsorbResist
     &Aura::HandleAuraModSkill,                              // 98 SPELL_AURA_MOD_SKILL_TALENT
     &Aura::HandleAuraModAttackPower,                        // 99 SPELL_AURA_MOD_ATTACK_POWER
-    &Aura::HandleUnused,                                    //100 SPELL_AURA_AURAS_VISIBLE obsolete? all player can see all auras now
+    &Aura::HandleAurasVisible,                              //100 SPELL_AURA_AURAS_VISIBLE
     &Aura::HandleModResistancePercent,                      //101 SPELL_AURA_MOD_RESISTANCE_PCT
     &Aura::HandleNoImmediateEffect,                         //102 SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS implemented in Unit::MeleeDamageBonus
     &Aura::HandleAuraModTotalThreat,                        //103 SPELL_AURA_MOD_TOTAL_THREAT
@@ -3702,6 +3702,11 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply, bool /*Real*/)
                 m_target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_PCT, float(m_modifier.m_amount), apply);
         }
     }
+}
+
+void Aura::HandleAurasVisible(bool apply, bool /*Real*/)
+{
+    m_target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_AURAS_VISIBLE, apply);
 }
 
 void Aura::HandleModResistancePercent(bool apply, bool /*Real*/)
