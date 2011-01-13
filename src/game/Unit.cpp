@@ -4733,7 +4733,19 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura* triggeredByAu
             break;
         }
         case SPELLFAMILY_ROGUE:
+        {
+            switch(dummySpell->Id)
+            {
+                // Clean Escape
+                case 23582:
+                    // triggered spell have same masks and etc with main Vanish spell
+                    if (!procSpell || procSpell->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_NONE)
+                        return false;
+                    triggered_spell_id = 23583;
+                    break;
+            }
             break;
+        }
         case SPELLFAMILY_HUNTER:
             break;
         case SPELLFAMILY_PALADIN:
