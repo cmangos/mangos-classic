@@ -2308,7 +2308,7 @@ void Spell::cast(bool skipCheck)
             // Bandages
             if (m_spellInfo->Mechanic == MECHANIC_BANDAGE)
                 AddPrecastSpell(11196);                     // Recently Bandaged
-            // Divine Shield, Divine Protection, Blessing of Protection
+            // Divine Shield, Divine Protection (Blessing of Protection in paladin switch case)
             else if(m_spellInfo->Mechanic == MECHANIC_INVULNERABILITY)
                 AddPrecastSpell(25771);                     // Forbearance
             break;
@@ -2332,6 +2332,13 @@ void Spell::cast(bool skipCheck)
                 case 25331: AddTriggeredSpell(25329); break;// Holy Nova, rank 7
                 default:break;
             }
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Blessing of Protection (Divine Shield, Divine Protection in generic switch case)
+            if(m_spellInfo->Mechanic == MECHANIC_INVULNERABILITY && m_spellInfo->Id != 25771)
+                AddPrecastSpell(25771);                     // Forbearance
             break;
         }
         default:
