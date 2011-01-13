@@ -2337,6 +2337,11 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
     if (!unitTarget)
         return;
 
+    // Shield Slam 50% chance dispel
+    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000100000000)) &&
+        !roll_chance_i(50))
+        return;
+
     // Fill possible dispell list
     std::vector <Aura *> dispel_list;
 
