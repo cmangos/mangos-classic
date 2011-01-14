@@ -329,7 +329,8 @@ m_isRemovedOnShapeLost(true), m_in_use(false), m_deleted(false)
     }
 
     m_isRemovedOnShapeLost = (m_caster_guid==m_target->GetGUID() &&
-                              m_spellProto->Stances &&
+                            // Feline Swiftness Passive 2a not have 0x1 mask in Stance field in spell data as expected
+                              (m_spellProto->Stances || m_spellProto->Id == 24864) &&
                             !(m_spellProto->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) &&
                             !(m_spellProto->Attributes & SPELL_ATTR_NOT_SHAPESHIFT));
 }
@@ -4326,7 +4327,9 @@ void Aura::HandleShapeshiftBoosts(bool apply)
     uint32 spellId2 = 0;
     uint32 HotWSpellId = 0;
 
-    uint32 form = GetModifier()->m_miscvalue;
+    ShapeshiftForm form = ShapeshiftForm(GetModifier()->m_miscvalue);
+
+    Unit *target = GetTarget();
 
     switch(form)
     {
@@ -4382,36 +4385,35 @@ void Aura::HandleShapeshiftBoosts(bool apply)
     if(apply)
     {
         if (spellId1)
-            m_target->CastSpell(m_target, spellId1, true, NULL, this );
+            target->CastSpell(target, spellId1, true, NULL, this );
         if (spellId2)
-            m_target->CastSpell(m_target, spellId2, true, NULL, this);
+            target->CastSpell(target, spellId2, true, NULL, this);
 
-        if (m_target->GetTypeId() == TYPEID_PLAYER)
+        if (target->GetTypeId() == TYPEID_PLAYER)
         {
-            const PlayerSpellMap& sp_list = ((Player *)m_target)->GetSpellMap();
+            const PlayerSpellMap& sp_list = ((Player *)target)->GetSpellMap();
             for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
             {
                 if (itr->second.state == PLAYERSPELL_REMOVED) continue;
                 if (itr->first==spellId1 || itr->first==spellId2) continue;
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
-                if (!spellInfo || !(spellInfo->Attributes & (SPELL_ATTR_PASSIVE | (1<<7))))
+                if (!spellInfo || !IsNeedCastSpellAtFormApply(spellInfo, form))
                     continue;
-                if (spellInfo->Stances & (1<<(form-1)))
-                    m_target->CastSpell(m_target, itr->first, true, NULL, this);
+                target->CastSpell(target, itr->first, true, NULL, this);
             }
 
             // Leader of the Pack
-            if (((Player*)m_target)->HasSpell(17007))
+            if (((Player*)target)->HasSpell(17007))
             {
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(24932);
                 if (spellInfo && spellInfo->Stances & (1<<(form-1)))
-                    m_target->CastSpell(m_target, 24932, true, NULL, this);
+                    target->CastSpell(target, 24932, true, NULL, this);
             }
 
             // Heart of the Wild
             if (HotWSpellId)
             {
-                Unit::AuraList const& mModTotalStatPct = m_target->GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
+                Unit::AuraList const& mModTotalStatPct = target->GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
                 for(Unit::AuraList::const_iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
                 {
                     if ((*i)->GetSpellProto()->SpellIconID == 240 && (*i)->GetModifier()->m_miscvalue == 3)
@@ -4420,7 +4422,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                         if(GetModifier()->m_miscvalue == FORM_CAT)
                             HotWMod /= 2;
 
-                        m_target->CastCustomSpell(m_target, HotWSpellId, &HotWMod, NULL, NULL, true, NULL, this);
+                        target->CastCustomSpell(target, HotWSpellId, &HotWMod, NULL, NULL, true, NULL, this);
                         break;
                     }
                 }
@@ -4430,16 +4432,16 @@ void Aura::HandleShapeshiftBoosts(bool apply)
     else
     {
         if(spellId1)
-            m_target->RemoveAurasDueToSpell(spellId1);
+            target->RemoveAurasDueToSpell(spellId1);
         if(spellId2)
-            m_target->RemoveAurasDueToSpell(spellId2);
+            target->RemoveAurasDueToSpell(spellId2);
 
-        Unit::AuraMap& tAuras = m_target->GetAuras();
+        Unit::AuraMap& tAuras = target->GetAuras();
         for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
         {
             if (itr->second->IsRemovedOnShapeLost())
             {
-                m_target->RemoveAurasDueToSpell(itr->second->GetId());
+                target->RemoveAurasDueToSpell(itr->second->GetId());
                 itr = tAuras.begin();
             }
             else

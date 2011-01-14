@@ -345,6 +345,18 @@ inline bool IsChanneledSpell(SpellEntry const* spellInfo)
     return (spellInfo->AttributesEx & (SPELL_ATTR_EX_CHANNELED_1 | SPELL_ATTR_EX_CHANNELED_2));
 }
 
+inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftForm form)
+{
+    if (!(spellInfo->Attributes & (SPELL_ATTR_PASSIVE | SPELL_ATTR_UNK7)) || !form)
+        return false;
+
+    // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
+    // Feline Swiftness Passive 2a not have 0x1 mask in Stance field in spell data as expected
+    return ((spellInfo->Stances & (1<<(form-1))  || spellInfo->Id == 24864 && form == FORM_CAT) &&
+        !(spellInfo->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
+}
+
+
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
 {
     return (spellInfo->AttributesEx & (SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS | SPELL_ATTR_EX_REQ_COMBO_POINTS));
