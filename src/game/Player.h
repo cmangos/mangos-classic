@@ -1465,6 +1465,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void UpdateZone(uint32 newZone,uint32 newArea);
         void UpdateArea(uint32 newArea);
+        uint32 GetCachedZoneId() const { return m_zoneUpdateId; }
 
         void UpdateZoneDependentAuras( uint32 zone_id );    // zones
         void UpdateAreaDependentAuras( uint32 area_id );    // subzones
