@@ -1084,6 +1084,7 @@ CREATE TABLE `item_loot` (
 LOCK TABLES `item_loot` WRITE;
 /*!40000 ALTER TABLE `item_loot` DISABLE KEYS */;
 /*!40000 ALTER TABLE `item_loot` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `item_text`
