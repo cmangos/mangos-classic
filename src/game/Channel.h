@@ -191,7 +191,6 @@ class Channel
         void MakeThrottled(WorldPacket *data);                                  //? 0x1F
 
         void SendToAll(WorldPacket *data, uint64 p = 0);
-        void SendToAllButOne(WorldPacket *data, uint64 who);
         void SendToOne(WorldPacket *data, uint64 who);
 
         bool IsOn(uint64 who) const { return players.find(who) != players.end(); }
