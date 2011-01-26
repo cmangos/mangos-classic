@@ -5192,7 +5192,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     if (m_extraAttacks && IsSpellHaveEffect(triggerEntry, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
         return false;
 
-    // Costum basepoints/target for exist spell
+    // Custom basepoints/target for exist spell
     // dummy basepoints or other customs
     switch(trigger_spell_id)
     {
