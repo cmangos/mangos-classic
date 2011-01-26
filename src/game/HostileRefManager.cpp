@@ -41,12 +41,11 @@ HostileRefManager::~HostileRefManager()
 void HostileRefManager::threatAssist(Unit *pVictim, float pThreat, SpellEntry const *pThreatSpell, bool pSingleTarget)
 {
     uint32 size = pSingleTarget ? 1 : getSize();            // if pSingleTarget do not devide threat
+    float threat = pThreat/size;
     HostileReference* ref = getFirst();
-    while(ref != NULL)
+    while (ref)
     {
-        float threat = ThreatCalcHelper::calcThreat(pVictim, iOwner, pThreat, false, (pThreatSpell ? GetSpellSchoolMask(pThreatSpell) : SPELL_SCHOOL_MASK_NORMAL), pThreatSpell);
-
-        ref->getSource()->addThreat(pVictim, float (threat) / size);
+        ref->getSource()->addThreat(pVictim, threat, false, (pThreatSpell ? GetSpellSchoolMask(pThreatSpell) : SPELL_SCHOOL_MASK_NORMAL), pThreatSpell);
 
         ref = ref->next();
     }
