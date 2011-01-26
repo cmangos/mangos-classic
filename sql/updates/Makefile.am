@@ -205,7 +205,8 @@ pkgdata_DATA = \
 	z1228_s0660_01_mangos_loot_template.sql \
 	z1230_s0663_01_mangos_spell_bonus_data.sql \
 	z1240_s0671_01_mangos_spell_proc_event.sql \
-	z1247_s0693_01_mangos_command.sql
+	z1247_s0693_01_mangos_command.sql \
+	z1263_s0696_01_mangos_spell_threat.sql
 
 ## Additional files to include when running 'make dist'
 #  SQL update files, to upgrade database schema from older revisions
@@ -389,4 +390,5 @@ EXTRA_DIST = \
 	z1228_s0660_01_mangos_loot_template.sql \
 	z1230_s0663_01_mangos_spell_bonus_data.sql \
 	z1240_s0671_01_mangos_spell_proc_event.sql \
-	z1247_s0693_01_mangos_command.sql
+	z1247_s0693_01_mangos_command.sql \
+	z1263_s0696_01_mangos_spell_threat.sql
