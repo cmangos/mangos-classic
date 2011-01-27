@@ -2643,7 +2643,10 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
         if(Creature *summon = m_caster->SummonCreature(creature_entry, px, py, pz, m_caster->GetOrientation(), summonType, duration))
         {
             summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-            summon->SetCreatorGuid(m_caster->GetObjectGuid());
+
+            // UNIT_FIELD_CREATEDBY are not set for these kind of spells.
+            // Does exceptions exist? If so, what are they?
+            // summon->SetCreatorGuid(m_caster->GetObjectGuid());
         }
     }
 }
