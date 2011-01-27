@@ -1467,7 +1467,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             break;
         }
         case TARGET_ALL_ENEMY_IN_AREA:
-            FillAreaTargets(targetUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             break;
         case TARGET_AREAEFFECT_INSTANT:
         {
@@ -1476,7 +1476,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             if (IsPositiveEffect(m_spellInfo->Id, effIndex))
                 targetB = SPELL_TARGETS_FRIENDLY;
 
-            FillAreaTargets(targetUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius, PUSH_DEST_CENTER, targetB);
+            FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_DEST_CENTER, targetB);
 
             // exclude caster
             targetUnitMap.remove(m_caster);
@@ -1542,7 +1542,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     targetUnitMap.push_back(m_caster);
                     break;
                 default:
-                    FillAreaTargets(targetUnitMap,m_targets.m_destX, m_targets.m_destY,radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+                    FillAreaTargets(targetUnitMap, m_targets.m_destX, m_targets.m_destY, radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
                     break;
             }
             break;
@@ -1646,14 +1646,14 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_IN_FRONT_OF_CASTER:
         {
             bool inFront = m_spellInfo->SpellVisual != 3879;
-            FillAreaTargets(targetUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius,inFront ? PUSH_IN_FRONT : PUSH_IN_BACK,SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, inFront ? PUSH_IN_FRONT : PUSH_IN_BACK, SPELL_TARGETS_AOE_DAMAGE);
             break;
         }
         case TARGET_LARGE_FRONTAL_CONE:
-            FillAreaTargets(targetUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_90, SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_90, SPELL_TARGETS_AOE_DAMAGE);
             break;
         case TARGET_NARROW_FRONTAL_CONE:
-            FillAreaTargets(targetUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_15, SPELL_TARGETS_AOE_DAMAGE);
+            FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_IN_FRONT_15, SPELL_TARGETS_AOE_DAMAGE);
             break;
         case TARGET_DUELVSPLAYER:
         {
@@ -1688,7 +1688,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
             // targets the ground, not the units in the area
             if (m_spellInfo->Effect[effIndex]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
-                FillAreaTargets(targetUnitMap,m_caster->GetPositionX(), m_caster->GetPositionY(),radius,PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+                FillAreaTargets(targetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), radius, PUSH_DEST_CENTER, SPELL_TARGETS_AOE_DAMAGE);
             break;
         case TARGET_MINION:
             if(m_spellInfo->Effect[effIndex] != SPELL_EFFECT_DUEL)
@@ -1784,27 +1784,27 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 unMaxTargets = EffectChainTarget;
                 float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
-                UnitList tempUnitMap;
+                UnitList tempTargetUnitMap;
 
-                FillAreaTargets(tempUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), max_range, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
+                FillAreaTargets(tempTargetUnitMap, m_caster->GetPositionX(), m_caster->GetPositionY(), max_range, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
 
-                if(m_caster != pUnitTarget && std::find(tempUnitMap.begin(),tempUnitMap.end(), m_caster) == tempUnitMap.end() )
-                    tempUnitMap.push_front(m_caster);
+                if (m_caster != pUnitTarget && std::find(tempTargetUnitMap.begin(), tempTargetUnitMap.end(), m_caster) == tempTargetUnitMap.end())
+                    tempTargetUnitMap.push_front(m_caster);
 
-                tempUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+                tempTargetUnitMap.sort(TargetDistanceOrder(pUnitTarget));
 
-                if(tempUnitMap.empty())
+                if (tempTargetUnitMap.empty())
                     break;
 
-                if(*tempUnitMap.begin() == pUnitTarget)
-                    tempUnitMap.erase(tempUnitMap.begin());
+                if (*tempTargetUnitMap.begin() == pUnitTarget)
+                    tempTargetUnitMap.erase(tempTargetUnitMap.begin());
 
                 targetUnitMap.push_back(pUnitTarget);
                 uint32 t = unMaxTargets - 1;
                 Unit *prev = pUnitTarget;
-                std::list<Unit*>::iterator next = tempUnitMap.begin();
+                std::list<Unit*>::iterator next = tempTargetUnitMap.begin();
 
-                while(t && next != tempUnitMap.end() )
+                while(t && next != tempTargetUnitMap.end())
                 {
                     if(!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
                         break;
@@ -1817,15 +1817,15 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                     if((*next)->GetHealth() == (*next)->GetMaxHealth())
                     {
-                        next = tempUnitMap.erase(next);
+                        next = tempTargetUnitMap.erase(next);
                         continue;
                     }
 
                     prev = *next;
                     targetUnitMap.push_back(prev);
-                    tempUnitMap.erase(next);
-                    tempUnitMap.sort(TargetDistanceOrder(prev));
-                    next = tempUnitMap.begin();
+                    tempTargetUnitMap.erase(next);
+                    tempTargetUnitMap.sort(TargetDistanceOrder(prev));
+                    next = tempTargetUnitMap.begin();
 
                     --t;
                 }
@@ -1934,7 +1934,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                                         break;
                                     case TYPEID_CORPSE:
                                         m_targets.setCorpseTarget((Corpse*)result);
-                                        if(Player* owner = ObjectAccessor::FindPlayer(((Corpse*)result)->GetOwnerGUID()))
+                                        if (Player* owner = ObjectAccessor::FindPlayer(((Corpse*)result)->GetOwnerGUID()))
                                             targetUnitMap.push_back(owner);
                                         break;
                                 }
@@ -1950,7 +1950,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                             break;
                         }
                         default:
-                            if(m_targets.getUnitTarget())
+                            if (m_targets.getUnitTarget())
                                 targetUnitMap.push_back(m_targets.getUnitTarget());
                             break;
                     }
@@ -1972,10 +1972,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case SPELL_EFFECT_REPUTATION:
                 case SPELL_EFFECT_ADD_HONOR:
                 case SPELL_EFFECT_SEND_TAXI:
-                    if(m_targets.getUnitTarget())
+                    if (m_targets.getUnitTarget())
                         targetUnitMap.push_back(m_targets.getUnitTarget());
                     // Triggered spells have additional spell targets - cast them even if no explicit unit target is given (required for spell 50516 for example)
-                    else if(m_spellInfo->Effect[effIndex] == SPELL_EFFECT_TRIGGER_SPELL)
+                    else if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_TRIGGER_SPELL)
                         targetUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_SUMMON_PLAYER:
@@ -1984,9 +1984,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                             targetUnitMap.push_back(target);
                     break;
                 case SPELL_EFFECT_RESURRECT_NEW:
-                    if(m_targets.getUnitTarget())
+                    if (m_targets.getUnitTarget())
                         targetUnitMap.push_back(m_targets.getUnitTarget());
-                    if(m_targets.getCorpseTargetGUID())
+                    if (m_targets.getCorpseTargetGUID())
                     {
                         Corpse *corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGUID());
                         if(corpse)
@@ -2019,7 +2019,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     targetUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_LEARN_PET_SPELL:
-                    if(Pet* pet = m_caster->GetPet())
+                    if (Pet* pet = m_caster->GetPet())
                         targetUnitMap.push_back(pet);
                     break;
                 case SPELL_EFFECT_ENCHANT_ITEM:
@@ -2037,7 +2037,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                             targetUnitMap.push_back(m_caster);
                             break;
                         default:                            // apply to target in other case
-                            if(m_targets.getUnitTarget())
+                            if (m_targets.getUnitTarget())
                                 targetUnitMap.push_back(m_targets.getUnitTarget());
                             break;
                     }
@@ -2048,10 +2048,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                         SetTargetMap(effIndex, TARGET_AREAEFFECT_PARTY, targetUnitMap);
                     break;
                 case SPELL_EFFECT_SKIN_PLAYER_CORPSE:
-                    if(m_targets.getUnitTarget())
-                    {
+                    if (m_targets.getUnitTarget())
                         targetUnitMap.push_back(m_targets.getUnitTarget());
-                    }
                     else if (m_targets.getCorpseTargetGUID())
                     {
                         if (Corpse *corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGUID()))
