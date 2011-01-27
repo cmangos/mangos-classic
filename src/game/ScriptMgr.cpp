@@ -880,7 +880,7 @@ char const* ScriptMgr::GetScriptLibraryVersion() const
 {
     if (!m_pGetScriptLibraryVersion)
         return "";
-    
+
     return m_pGetScriptLibraryVersion();
 }
 

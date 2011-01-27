@@ -161,8 +161,8 @@ void GameEventMgr::LoadFromDB()
         sLog.outString( ">> Loaded %u game events", count );
     }
 
-    std::map<uint16,int16> pool2event;                      // for check unique spawn event associated with pool 
-    std::map<uint32,int16> creature2event;                  // for check unique spawn event associated with creature 
+    std::map<uint16,int16> pool2event;                      // for check unique spawn event associated with pool
+    std::map<uint32,int16> creature2event;                  // for check unique spawn event associated with creature
     std::map<uint32,int16> go2event;                        // for check unique spawn event associated with gameobject
 
     // list only positive event top pools, filled at creature/gameobject loading
@@ -212,7 +212,7 @@ void GameEventMgr::LoadFromDB()
             ++count;
 
             // spawn objects at event can be grouped in pools and then affected pools have stricter requirements for this case
-            if (event_id > 0)                   
+            if (event_id > 0)
             {
                 creature2event[guid] = event_id;
 
@@ -290,7 +290,7 @@ void GameEventMgr::LoadFromDB()
             ++count;
 
             // spawn objects at event can be grouped in pools and then affected pools have stricter requirements for this case
-            if (event_id > 0)                   
+            if (event_id > 0)
             {
                 go2event[guid] = event_id;
 
@@ -678,7 +678,7 @@ void GameEventMgr::GameEventSpawn(int16 event_id)
         CreatureData const* data = sObjectMgr.GetCreatureData(*itr);
         if (data)
         {
-            // negative event id for pool element meaning allow be used in next pool spawn 
+            // negative event id for pool element meaning allow be used in next pool spawn
             if (event_id < 0)
             {
                 if (uint16 pool_id = sPoolMgr.IsPartOfAPool<Creature>(*itr))
@@ -723,7 +723,7 @@ void GameEventMgr::GameEventSpawn(int16 event_id)
         GameObjectData const* data = sObjectMgr.GetGOData(*itr);
         if (data)
         {
-            // negative event id for pool element meaning allow be used in next pool spawn 
+            // negative event id for pool element meaning allow be used in next pool spawn
             if (event_id < 0)
             {
                 if (uint16 pool_id = sPoolMgr.IsPartOfAPool<GameObject>(*itr))
