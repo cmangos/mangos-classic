@@ -1244,6 +1244,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             switch(m_spellInfo->Id)
             {
+                case 802:                                   // Mutate Bug
+                case 804:                                   // Explode Bug
+                case 23138:                                 // Gate of Shazzrah
+                    unMaxTargets = 1;
+                    break;
                 case 28542:                                 // Life Drain
                     unMaxTargets = 2;
                     break;
