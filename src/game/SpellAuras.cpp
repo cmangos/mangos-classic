@@ -1162,9 +1162,9 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         // Add custom charges for some mod aura
         switch (m_spellProto->Id)
         {
-            case 17941:    // Shadow Trance
-            case 22008:    // Netherwind Focus
-            case 34936:    // Backlash
+            case 17941:                                     // Shadow Trance
+            case 22008:                                     // Netherwind Focus
+            case 34936:                                     // Backlash
                 SetAuraCharges(1);
                 break;
         }
