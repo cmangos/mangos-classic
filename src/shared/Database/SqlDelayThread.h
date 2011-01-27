@@ -27,6 +27,7 @@
 
 class Database;
 class SqlOperation;
+class SqlConnection;
 
 class SqlDelayThread : public ACE_Based::Runnable
 {
@@ -35,10 +36,14 @@ class SqlDelayThread : public ACE_Based::Runnable
     private:
         SqlQueue m_sqlQueue;                                ///< Queue of SQL statements
         Database* m_dbEngine;                               ///< Pointer to used Database engine
+        SqlConnection * m_dbConnection;                     ///< Pointer to DB connection
         volatile bool m_running;
 
+        //process all enqueued requests
+        void ProcessRequests();
+
     public:
-        SqlDelayThread(Database* db);
+        SqlDelayThread(Database* db, SqlConnection* conn);
         ~SqlDelayThread();
 
         ///< Put sql statement to delay queue
