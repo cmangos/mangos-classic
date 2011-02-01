@@ -546,14 +546,12 @@ void Creature::Update(uint32 diff)
         }
         case CORPSE_FALLING:
         {
-            if (!FallGround())
-                SetDeathState(JUST_DIED);
+            SetDeathState(CORPSE);
         }
         default:
             break;
     }
 }
-
 
 void Creature::StartGroupLoot( Group* group, uint32 timer )
 {
@@ -1363,13 +1361,8 @@ void Creature::SetDeathState(DeathState s)
         // always save boss respawn time at death to prevent crash cheating
         if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY) || IsWorldBoss())
             SaveRespawnTime();
-
-        if (CanFly() && FallGround())
-            return;
-
-        if (!IsStopped())
-            StopMoving();
     }
+
     Unit::SetDeathState(s);
 
     if (s == JUST_DIED)
@@ -1377,17 +1370,19 @@ void Creature::SetDeathState(DeathState s)
         SetTargetGuid(ObjectGuid());                        // remove target selection in any cases (can be set at aura remove in Unit::SetDeathState)
         SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
-        if (CanFly() && FallGround())
-            return;
-
         if (HasSearchedAssistance())
         {
             SetNoSearchAssistance(false);
             UpdateSpeed(MOVE_RUN, false);
         }
 
+        // return, since we promote to DEAD_FALLING. DEAD_FALLING is promoted to CORPSE at next update.
+        if (CanFly() && FallGround())
+            return;
+
         Unit::SetDeathState(CORPSE);
     }
+
     if (s == JUST_ALIVED)
     {
         SetHealth(GetMaxHealth());
@@ -1407,12 +1402,18 @@ void Creature::SetDeathState(DeathState s)
 
 bool Creature::FallGround()
 {
-    // Let's abort after we called this function one time
-    if (getDeathState() == CORPSE_FALLING)
+    // Only if state is JUST_DIED. DEAD_FALLING is set below and promoted to CORPSE later
+    if (getDeathState() != JUST_DIED)
         return false;
 
-    // Let's do with no vmap because no way to get far distance with vmap high call
-    float tz = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ(), false);
+    // use larger distance for vmap height search than in most other cases
+    float tz = GetMap()->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ(), true, MAX_FALL_DISTANCE);
+
+    if (tz < INVALID_HEIGHT)
+    {
+        DEBUG_LOG("FallGround: creature %u at map %u (x: %f, y: %f, z: %f), not able to retrive a proper GetHeight (z: %f).",
+            GetEntry(), GetMap()->GetId(), GetPositionX(), GetPositionX(), GetPositionZ(), tz);
+    }
 
     float Z = fabs(GetPositionZ() - tz);
     // Abort too if the ground is very near
@@ -1421,8 +1422,25 @@ bool Creature::FallGround()
 
     Unit::SetDeathState(CORPSE_FALLING);
 
-    GetMotionMaster()->MovePoint(0, GetPositionX(), GetPositionY(), tz);
-    Relocate(GetPositionX(), GetPositionY(), tz);
+    float dz = tz - GetPositionZ();
+    float distance = sqrt(dz*dz);
+
+    // flight speed * 2 explicit, not verified though but result looks proper
+    double speed = baseMoveSpeed[MOVE_RUN] * 2;
+
+    speed *= 0.001;                                         // to milliseconds
+
+    uint32 travelTime = uint32(distance/speed);
+
+    DEBUG_LOG("FallGround: traveltime: %u, distance: %f, speed: %f, from %f to %f", travelTime, distance, speed, GetPositionZ(), tz);
+
+    // For creatures that are moving towards target and dies, the visual effect is not nice.
+    // It is possibly caused by a xyz mismatch in DestinationHolder's GetLocationNow and the location
+    // of the mob in client. For mob that are already reached target or dies while not moving
+    // the visual appear to be fairly close to the expected.
+
+    GetMap()->CreatureRelocation(this, GetPositionX(), GetPositionY(), tz, GetOrientation());
+    SendMonsterMove(GetPositionX(), GetPositionY(), tz, SPLINETYPE_NORMAL, SPLINEFLAG_FALLING, travelTime);
     return true;
 }
 
