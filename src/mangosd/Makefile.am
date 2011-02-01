@@ -42,11 +42,11 @@ mangos_worldd_SOURCES = \
 ## Link world daemon against the shared library
 mangos_worldd_LDADD = \
 	../game/libmangosgame.a \
+	../game/vmap/libmangosvmaps.a \
 	../shared/Database/libmangosdatabase.a \
 	../shared/Config/libmangosconfig.a \
 	../shared/Auth/libmangosauth.a \
 	../shared/libmangosshared.a \
-	../shared/vmap/libmangosvmaps.a \
 	../framework/libmangosframework.a \
 	../../dep/src/g3dlite/libg3dlite.a \
 	../../dep/src/gsoap/libgsoap.a
