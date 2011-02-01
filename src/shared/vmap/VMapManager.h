@@ -104,7 +104,7 @@ namespace VMAP
 
             bool isInLineOfSight(const G3D::Vector3& pos1, const G3D::Vector3& pos2);
             bool getObjectHitPos(const G3D::Vector3& pos1, const G3D::Vector3& pos2, G3D::Vector3& pResultHitPos, float pModifyDist);
-            float getHeight(const G3D::Vector3& pPos, float maxSearchDist);
+            float getHeight(const G3D::Vector3& pPos);
 
             bool PrepareTree();
             bool loadMap(const std::string& pDirFileName, unsigned int pMapTileIdent);
@@ -164,7 +164,7 @@ namespace VMAP
             fill the hit pos and return true, if an object was hit
             */
             bool getObjectHitPos(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float pModifyDist);
-            float getHeight(unsigned int pMapId, float x, float y, float z, float maxSearchDist);
+            float getHeight(unsigned int pMapId, float x, float y, float z);
 
             bool processCommand(char *pCommand);            // for debug and extensions
 

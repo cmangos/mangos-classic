@@ -449,14 +449,14 @@ namespace VMAP
     */
 
     //int gGetHeightCounter = 0;
-    float VMapManager::getHeight(unsigned int pMapId, float x, float y, float z, float maxSearchDist)
+    float VMapManager::getHeight(unsigned int pMapId, float x, float y, float z)
     {
         float height = VMAP_INVALID_HEIGHT_VALUE;           //no height
         if(isHeightCalcEnabled() && iInstanceMapTrees.containsKey(pMapId))
         {
             Vector3 pos = convertPositionToInternalRep(x,y,z);
             MapTree* mapTree = iInstanceMapTrees.get(pMapId);
-            height = mapTree->getHeight(pos, maxSearchDist);
+            height = mapTree->getHeight(pos);
             if(!(height < inf()))
             {
                 height = VMAP_INVALID_HEIGHT_VALUE;         //no height
@@ -641,12 +641,12 @@ namespace VMAP
 
     //=========================================================
 
-    float MapTree::getHeight(const Vector3& pPos, float maxSearchDist)
+    float MapTree::getHeight(const Vector3& pPos)
     {
         float height = inf();
         Vector3 dir = Vector3(0,-1,0);
         Ray ray = Ray::fromOriginAndDirection(pPos, dir);   // direction with length of 1
-        float maxDist = maxSearchDist;
+        float maxDist = VMapDefinitions::getMaxCanFallDistance();
         float dist = getIntersectionTime(ray, maxDist, false);
         if(dist < inf())
         {
