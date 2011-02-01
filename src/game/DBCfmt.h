@@ -66,8 +66,9 @@ const char TalentTabEntryfmt[]="nxxxxxxxxxxxiix";
 const char TaxiNodesEntryfmt[]="nifffssssssssxii";
 const char TaxiPathEntryfmt[]="niii";
 const char TaxiPathNodeEntryfmt[]="diiifffii";
+const char WMOAreaTableEntryfmt[]="niiixxxxxiixxxxxxxxx";
 const char WorldMapAreaEntryfmt[]="xinxffff";
-const char WorldMapOverlayEntryfmt[]="nxiiiixxxxxxxxxxx";
+//const char WorldMapOverlayEntryfmt[]="nxiiiixxxxxxxxxxx";
 const char WorldSafeLocsEntryfmt[]="nifffxxxxxxxxx";
 
 #endif

@@ -1649,7 +1649,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetSemaphoreTeleportFar(bool semphsetting) { mSemaphoreTeleport_Far = semphsetting; }
         void ProcessDelayedOperations();
 
-        void CheckExploreSystem(void);
+        void CheckAreaExploreAndOutdoor(void);
 
         static Team TeamForRace(uint8 race);
         Team GetTeam() const { return m_team; }

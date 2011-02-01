@@ -63,7 +63,7 @@ Map::~Map()
 void Map::LoadVMap(int gx,int gy)
 {
                                                             // x and y are swapped !!
-    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld.GetDataPath()+ "vmaps").c_str(),  GetId(), gx,gy);
+    VMAP::VMAPLoadResult vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld.GetDataPath()+ "vmaps").c_str(),  GetId(), gx,gy);
     switch(vmapLoadResult)
     {
         case VMAP::VMAP_LOAD_RESULT_OK:
@@ -1017,43 +1017,108 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps) const
     }
 }
 
-uint16 Map::GetAreaFlag(float x, float y, float z) const
+inline bool IsOutdoorWMO(uint32 mogpFlags, int32 adtId, int32 rootId, int32 groupId,
+                              WMOAreaTableEntry const* wmoEntry, AreaTableEntry const* atEntry)
 {
-    uint16 areaflag;
-    if(GridMap *gmap = const_cast<Map*>(this)->GetGrid(x, y))
-        areaflag = gmap->getArea(x, y);
-    // this used while not all *.map files generated (instances)
-    else
-        areaflag = GetAreaFlagByMapId(i_id);
+    bool outdoor = true;
 
-    //FIXME: some hacks for areas above or underground for ground area
-    //       required for area specific spells/etc, until map/vmap data
-    //       not provided correct areaflag with this hacks
-    switch(areaflag)
+    /* FIXME: 2.4.3 areas not have this flags
+    if(wmoEntry && atEntry)
     {
-        // Undercity (sewers enter and path)
-        case 179:                                           // Tirisfal Glades
-            if (x > 1595.0f && x < 1699.0f && y > 535.0f && y < 643.5f && z < 30.5f) areaflag = 685; break;
-        // Undercity (Royal Quarter)
-        case 210:                                           // Silverpine Forest
-        case 316:                                           // The Shining Strand (Silverpine Forest)
-        case 438:                                           // Lordamere Lake (Silverpine Forest)
-            if (x > 1237.0f && x < 1401.0f && y > 284.0f && y < 440.0f && z < -40.0f) areaflag = 685; break;
-        // Undercity (cave and ground zone, part of royal quarter)
-        case 607:                                           // Ruins of Lordaeron (Tirisfal Glades)
-            // ground and near to ground (by city walls)
-            if(z > 0.0f)
-            {
-                if (x > 1510.0f && x < 1839.0f && y > 29.77f && y < 433.0f) areaflag = 685;
-            }
-            // more wide underground, part of royal quarter
-            else
-            {
-                if (x > 1299.0f && x < 1839.0f && y > 10.0f && y < 440.0f) areaflag = 685;
-            }
-            break;
+        if(atEntry->flags & AREA_FLAG_OUTSIDE)
+            return true;
+        if(atEntry->flags & AREA_FLAG_INSIDE)
+            return false;
+    }
+    */
+
+    outdoor = mogpFlags&0x8;
+
+    if(wmoEntry)
+    {
+        if(wmoEntry->Flags & 4)
+            return true;
+
+        if((wmoEntry->Flags & 2)!=0)
+            outdoor = false;
+    }
+    return outdoor;
+}
+
+bool Map::IsOutdoors(float x, float y, float z) const
+{
+    uint32 mogpFlags;
+    int32 adtId, rootId, groupId;
+
+    // no wmo found? -> outside by default
+    if(!GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
+        return true;
+
+    AreaTableEntry const* atEntry = 0;
+    WMOAreaTableEntry const* wmoEntry= GetWMOAreaTableEntryByTripple(rootId, adtId, groupId);
+    if(wmoEntry)
+    {
+        DEBUG_LOG("Got WMOAreaTableEntry! flag %u, areaid %u", wmoEntry->Flags, wmoEntry->areaId);
+
+        atEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
     }
 
+    return IsOutdoorWMO(mogpFlags, adtId, rootId, groupId, wmoEntry, atEntry);
+}
+
+bool Map::GetAreaInfo(float x, float y, float z, uint32 &flags, int32 &adtId, int32 &rootId, int32 &groupId) const
+{
+    float vmap_z = z;
+    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
+    if (vmgr->getAreaInfo(GetId(), x, y, vmap_z, flags, adtId, rootId, groupId))
+    {
+        // check if there's terrain between player height and object height
+        if(GridMap *gmap = const_cast<Map*>(this)->GetGrid(x, y))
+        {
+            float _mapheight = gmap->getHeight(x,y);
+            // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
+            if(z + 2.0f > _mapheight &&  _mapheight > vmap_z)
+                return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+uint16 Map::GetAreaFlag(float x, float y, float z, bool *isOutdoors) const
+{
+    uint32 mogpFlags;
+    int32 adtId, rootId, groupId;
+    WMOAreaTableEntry const* wmoEntry = 0;
+    AreaTableEntry const* atEntry = 0;
+    bool haveAreaInfo = false;
+
+    if(GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
+    {
+        haveAreaInfo = true;
+        if(wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId))
+            atEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
+    }
+
+    uint16 areaflag;
+    if (atEntry)
+        areaflag = atEntry->exploreFlag;
+    else
+    {
+        if(GridMap *gmap = const_cast<Map*>(this)->GetGrid(x, y))
+            areaflag = gmap->getArea(x, y);
+        // this used while not all *.map files generated (instances)
+        else
+            areaflag = GetAreaFlagByMapId(i_id);
+    }
+
+    if (isOutdoors)
+    {
+        if (haveAreaInfo)
+            *isOutdoors = IsOutdoorWMO(mogpFlags, adtId, rootId, groupId, wmoEntry, atEntry);
+        else
+            *isOutdoors = true;
+    }
     return areaflag;
 }
 
@@ -1067,10 +1132,50 @@ uint8 Map::GetTerrainType(float x, float y ) const
 
 GridMapLiquidStatus Map::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData *data) const
 {
+    GridMapLiquidStatus result = LIQUID_MAP_NO_WATER;
+    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
+    float liquid_level, ground_level = INVALID_HEIGHT;
+    uint32 liquid_type;
+    if (vmgr->GetLiquidLevel(GetId(), x, y, z, ReqLiquidType, liquid_level, ground_level, liquid_type))
+    {
+        DEBUG_LOG("getLiquidStatus(): vmap liquid level: %f ground: %f type: %u", liquid_level, ground_level, liquid_type);
+        // Check water level and ground level
+        if (liquid_level > ground_level && z > ground_level - 2)
+        {
+            // All ok in water -> store data
+            if (data)
+            {
+                data->type  = liquid_type;
+                data->level = liquid_level;
+                data->depth_level = ground_level;
+            }
+
+            // For speed check as int values
+            int delta = int((liquid_level - z) * 10);
+
+            // Get position delta
+            if (delta > 20)                   // Under water
+                return LIQUID_MAP_UNDER_WATER;
+            if (delta > 0 )                   // In water
+                return LIQUID_MAP_IN_WATER;
+            if (delta > -1)                   // Walk on water
+                return LIQUID_MAP_WATER_WALK;
+            result = LIQUID_MAP_ABOVE_WATER;
+        }
+    }
     if(GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
-        return gmap->getLiquidStatus(x, y, z, ReqLiquidType, data);
-    else
-        return LIQUID_MAP_NO_WATER;
+    {
+        GridMapLiquidData map_data;
+        GridMapLiquidStatus map_result = gmap->getLiquidStatus(x, y, z, ReqLiquidType, &map_data);
+        // Not override LIQUID_MAP_ABOVE_WATER with LIQUID_MAP_NO_WATER:
+        if (map_result != LIQUID_MAP_NO_WATER && (map_data.level > ground_level))
+        {
+            if (data)
+                *data = map_data;
+            return map_result;
+        }
+    }
+    return result;
 }
 
 float Map::GetWaterLevel(float x, float y ) const
@@ -1109,15 +1214,16 @@ void Map::GetZoneAndAreaIdByAreaFlag(uint32& zoneid, uint32& areaid, uint16 area
     zoneid = entry ? (( entry->zone != 0 ) ? entry->zone : entry->ID) : 0;
 }
 
-bool Map::IsInWater(float x, float y, float pZ) const
+bool Map::IsInWater(float x, float y, float pZ, GridMapLiquidData *data) const
 {
     // Check surface in x, y point for liquid
     if (const_cast<Map*>(this)->GetGrid(x, y))
     {
         GridMapLiquidData liquid_status;
-        if (getLiquidStatus(x, y, pZ, MAP_ALL_LIQUIDS, &liquid_status))
+        GridMapLiquidData *liquid_ptr = data ? data : &liquid_status;
+        if (getLiquidStatus(x, y, pZ, MAP_ALL_LIQUIDS, liquid_ptr))
         {
-            if (liquid_status.level - liquid_status.depth_level > 2)
+            //if (liquid_prt->level - liquid_prt->depth_level > 2) //???
                 return true;
         }
     }
