@@ -150,9 +150,9 @@ BindIP = "0.0.0.0"
 #
 #    vmap.enableIndoorCheck
 #        Enable/Disable VMap based indoor check to remove outdoor-only auras (mounts etc.).
-#        Requires VMaps enabled to work. FIXME: disabled until fixing check work
-#        	  1 (Enabled)
-#        Default: 0 (Disabled)
+#        Requires VMaps enabled to work.
+#        Default: 1 (Enabled)
+#                 0 (Disabled)
 #
 #
 #    DetectPosCollision
