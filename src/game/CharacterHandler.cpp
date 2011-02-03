@@ -336,6 +336,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     if ((have_same_race && skipCinematics == CINEMATICS_SKIP_SAME_RACE) || skipCinematics == CINEMATICS_SKIP_ALL)
         pNewChar->setCinematic(1);                          // not show intro
 
+    pNewChar->SetAtLoginFlag(AT_LOGIN_FIRST);               // First login
+
     // Player created, save it now
     pNewChar->SaveToDB();
     charcount += 1;
@@ -609,6 +611,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder *holder)
         pCurrChar->resetTalents(true);
         SendNotification(LANG_RESET_TALENTS);               // we can use SMSG_TALENTS_INVOLUNTARILY_RESET here
     }
+
+    if (pCurrChar->HasAtLoginFlag(AT_LOGIN_FIRST))
+        pCurrChar->RemoveAtLoginFlag(AT_LOGIN_FIRST);
 
     // show time before shutdown if shutdown planned.
     if (sWorld.IsShutdowning())
