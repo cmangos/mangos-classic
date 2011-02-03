@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z1217_s0636_02_characters_game_event_status` bit(1) default NULL
+  `required_z1322_s0738_01_characters_character` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -144,6 +144,14 @@ CREATE TABLE `characters` (
   `stored_honor_rating` FLOAT NOT NULL DEFAULT '0',
   `stored_dishonorable_kills` INT(11) NOT NULL DEFAULT '0',
   `stored_honorable_kills` INT(11) NOT NULL DEFAULT '0',
+  `watchedFaction` int(10) UNSIGNED NOT NULL default '0',
+  `drunk` smallint(5) UNSIGNED NOT NULL default '0',
+  `health` int(10) UNSIGNED NOT NULL default '0',
+  `power1` int(10) UNSIGNED NOT NULL default '0',
+  `power2` int(10) UNSIGNED NOT NULL default '0',
+  `power3` int(10) UNSIGNED NOT NULL default '0',
+  `power4` int(10) UNSIGNED NOT NULL default '0',
+  `power5` int(10) UNSIGNED NOT NULL default '0',
   `deleteInfos_Account` int(11) UNSIGNED default NULL,
   `deleteInfos_Name` varchar(12) default NULL,
   `deleteDate` bigint(20) default NULL,

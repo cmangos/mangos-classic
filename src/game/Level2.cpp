@@ -3792,8 +3792,8 @@ bool ChatHandler::HandleHonorShow(char* /*args*/)
     int8 highest_rank               = target->GetHonorHighestRankInfo().visualRank;
     uint32 dishonorable_kills       = target->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
     uint32 honorable_kills          = target->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
-    uint32 today_honorable_kills    = target->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
-    uint32 today_dishonorable_kills = target->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS)>>16;
+    uint32 today_honorable_kills    = target->GetUInt16Value(PLAYER_FIELD_SESSION_KILLS, 0);
+    uint32 today_dishonorable_kills = target->GetUInt16Value(PLAYER_FIELD_SESSION_KILLS, 1);
     uint32 yesterday_kills          = target->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
     uint32 yesterday_honor          = target->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
     uint32 this_week_kills          = target->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
@@ -3970,7 +3970,7 @@ bool ChatHandler::HandleModifyHonorCommand (char* args)
         target->SetByteValue(PLAYER_BYTES_3, 3, amount);
     }
     else if (hasStringAbbr(field, "todaykills"))
-       target->SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, ((uint32)amount << 16) + (uint32)amount );
+       target->SetUInt16Value(PLAYER_FIELD_SESSION_KILLS, 0, (uint32)amount );
     else if (hasStringAbbr(field, "yesterdaykills"))
        target->SetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS, (uint32)amount);
     else if (hasStringAbbr(field, "yesterdayhonor"))
