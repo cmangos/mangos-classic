@@ -131,7 +131,7 @@ void GameEventMgr::LoadFromDB()
             bar.step();
 
             uint16 event_id = fields[0].GetUInt16();
-            if(event_id==0)
+            if (event_id == 0)
             {
                 sLog.outErrorDb("`game_event` game event id (%i) is reserved and can't be used.",event_id);
                 continue;
@@ -197,17 +197,17 @@ void GameEventMgr::LoadFromDB()
 
             if (event_id == 0)
             {
-                sLog.outErrorDb("`game_event_creature` game event id (%i) not allowed",event_id);
+                sLog.outErrorDb("`game_event_creature` game event id (%i) not allowed", event_id);
+                continue;
+            }
+
+            if (!IsValidEvent(std::abs(event_id)))
+            {
+                sLog.outErrorDb("`game_event_creature` game event id (%i) not exist in `game_event`", event_id);
                 continue;
             }
 
             int32 internal_event_id = mGameEvent.size() + event_id - 1;
-
-            if(internal_event_id < 0 || (size_t)internal_event_id >= mGameEventCreatureGuids.size())
-            {
-                sLog.outErrorDb("`game_event_creature` game event id (%i) is out of range compared to max event id in `game_event`",event_id);
-                continue;
-            }
 
             ++count;
 
@@ -275,17 +275,17 @@ void GameEventMgr::LoadFromDB()
 
             if (event_id == 0)
             {
-                sLog.outErrorDb("`game_event_gameobject` game event id (%i) not allowed",event_id);
+                sLog.outErrorDb("`game_event_gameobject` game event id (%i) not allowed", event_id);
+                continue;
+            }
+
+            if (!IsValidEvent(std::abs(event_id)))
+            {
+                sLog.outErrorDb("`game_event_gameobject` game event id (%i) not exist in `game_event`", event_id);
                 continue;
             }
 
             int32 internal_event_id = mGameEvent.size() + event_id - 1;
-
-            if(internal_event_id < 0 || (size_t)internal_event_id >= mGameEventGameobjectGuids.size())
-            {
-                sLog.outErrorDb("`game_event_gameobject` game event id (%i) is out of range compared to max event id in `game_event`",event_id);
-                continue;
-            }
 
             ++count;
 
@@ -363,15 +363,15 @@ void GameEventMgr::LoadFromDB()
             uint32 guid     = fields[0].GetUInt32();
             uint16 event_id = fields[1].GetUInt16();
 
-            if(event_id==0)
+            if (event_id == 0)
             {
-                sLog.outErrorDb("`game_event_creature_data` game event id (%i) is reserved and can't be used.",event_id);
+                sLog.outErrorDb("`game_event_creature_data` game event id (%i) is reserved and can't be used." ,event_id);
                 continue;
             }
 
-            if(event_id >= mGameEventCreatureData.size())
+            if (!IsValidEvent(event_id))
             {
-                sLog.outErrorDb("`game_event_creature_data` game event id (%u) is out of range compared to max event id in `game_event`",event_id);
+                sLog.outErrorDb("`game_event_creature_data` game event id (%u) not exist in `game_event`", event_id);
                 continue;
             }
 
@@ -443,9 +443,15 @@ void GameEventMgr::LoadFromDB()
             uint32 quest    = fields[0].GetUInt32();
             uint16 event_id = fields[1].GetUInt16();
 
-            if(event_id >= mGameEventQuests.size())
+            if (event_id == 0)
             {
-                sLog.outErrorDb("`game_event_quest` game event id (%u) is out of range compared to max event id in `game_event`",event_id);
+                sLog.outErrorDb("`game_event_quest` game event id (%i) is reserved and can't be used.", event_id);
+                continue;
+            }
+
+            if (!IsValidEvent(event_id))
+            {
+                sLog.outErrorDb("`game_event_quest` game event id (%u) not exist in `game_event`", event_id);
                 continue;
             }
 
@@ -508,13 +514,13 @@ void GameEventMgr::LoadFromDB()
                 continue;
             }
 
-            int32 internal_event_id = mGameEvent.size() + event_id - 1;
-
-            if (internal_event_id < 0 || (size_t)internal_event_id >= mGameEventMails.size())
+            if (!IsValidEvent(event_id))
             {
-                sLog.outErrorDb("`game_event_mail` game event id (%i) is out of range compared to max event id in `game_event`", event_id);
+                sLog.outErrorDb("`game_event_mail` game event id (%u) not exist in `game_event`", event_id);
                 continue;
             }
+
+            int32 internal_event_id = mGameEvent.size() + event_id - 1;
 
             if (!(mail.raceMask & RACEMASK_ALL_PLAYABLE))
             {
@@ -972,17 +978,19 @@ GameEventMgr::GameEventMgr()
     m_IsGameEventsInit = false;
 }
 
-MANGOS_DLL_SPEC bool IsHolidayActive( HolidayIds id )
+bool GameEventMgr::IsActiveHoliday( HolidayIds id )
 {
     if (id == HOLIDAY_NONE)
         return false;
 
-    GameEventMgr::GameEventDataMap const& events = sGameEventMgr.GetEventMap();
-    GameEventMgr::ActiveEvents const& ae = sGameEventMgr.GetActiveEventList();
-
-    for(GameEventMgr::ActiveEvents::const_iterator itr = ae.begin(); itr != ae.end(); ++itr)
-        if(events[*itr].holiday_id==id)
+    for(GameEventMgr::ActiveEvents::const_iterator itr = m_ActiveEvents.begin(); itr != m_ActiveEvents.end(); ++itr)
+        if (mGameEvent[*itr].holiday_id == id)
             return true;
 
     return false;
+}
+
+MANGOS_DLL_SPEC bool IsHolidayActive( HolidayIds id )
+{
+    return sGameEventMgr.IsActiveHoliday(id);
 }
