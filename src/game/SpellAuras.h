@@ -245,7 +245,7 @@ class MANGOS_DLL_SPEC Aura
                 return;
             m_procCharges = charges;
 
-            UpdateAuraCharges();
+            UpdateAuraApplication();
         }
 
         bool DropAuraCharge()                               // return true if last charge dropped
@@ -254,17 +254,8 @@ class MANGOS_DLL_SPEC Aura
                 return false;
 
             m_procCharges--;
-            UpdateAuraCharges();
+            UpdateAuraApplication();
             return m_procCharges == 0;
-        }
-
-        void UpdateAuraCharges()
-        {
-            uint8 slot = GetAuraSlot();
-
-            // only aura in slot with charges and without stack limitation
-            if (slot < MAX_AURAS && m_procCharges > 0 && GetSpellProto()->StackAmount==0)
-                SetAuraApplication(slot, m_procCharges - 1);// field expect count-1 for proper amount show
         }
 
         void UnregisterSingleCastAura();
@@ -381,7 +372,7 @@ class MANGOS_DLL_SPEC Aura
         void SetAura(uint32 slot, bool remove) { m_target->SetUInt32Value(UNIT_FIELD_AURA + slot, remove ? 0 : GetId()); }
         void SetAuraFlag(uint32 slot, bool add);
         void SetAuraLevel(uint32 slot, uint32 level);
-        void SetAuraApplication(uint32 slot, int8 count);
+        void UpdateAuraApplication();                       // called at charges or stack changes
         void ReapplyAffectedPassiveAuras(Unit* target);
 };
 

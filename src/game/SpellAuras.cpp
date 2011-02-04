@@ -802,7 +802,7 @@ void Aura::_AddAura()
             SetAura(slot, false);
             SetAuraFlag(slot, true);
             SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
-            UpdateAuraCharges();
+            UpdateAuraApplication();
 
             // update for out of range group members
             m_target->UpdateAuraForGroup(slot);
@@ -890,7 +890,9 @@ void Aura::_RemoveAura()
     SetAuraFlag(slot, false);
     SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
 
-    SetAuraApplication(slot, 0);
+    m_procCharges = 0;
+    m_stackAmount = 1;
+    UpdateAuraApplication();
 
     if (m_removeMode != AURA_REMOVE_BY_DELETE)
     {
@@ -964,13 +966,19 @@ void Aura::SetAuraLevel(uint32 slot,uint32 level)
     m_target->SetUInt32Value(UNIT_FIELD_AURALEVELS + index, val);
 }
 
-void Aura::SetAuraApplication(uint32 slot, int8 count)
+void Aura::UpdateAuraApplication()
 {
-    uint32 index    = slot / 4;
-    uint32 byte     = (slot % 4) * 8;
+    if (m_auraSlot >= MAX_AURAS)
+        return;
+
+    // field expect count-1 for proper amount show
+    uint8 count = m_procCharges > 0 ? m_procCharges*m_stackAmount : m_stackAmount;
+
+    uint32 index    = m_auraSlot / 4;
+    uint32 byte     = (m_auraSlot % 4) * 8;
     uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS + index);
     val &= ~(0xFF << byte);
-    val |= ((uint8(count)) << byte);
+    val |= ((uint8(count -1)) << byte);                     // field expect count-1 for proper amount show
     m_target->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS + index, val);
 }
 
@@ -985,8 +993,7 @@ void Aura::SetStackAmount(uint8 stackAmount)
     if (stackAmount != m_stackAmount)
     {
         m_stackAmount = stackAmount;
-        if (m_auraSlot < MAX_AURAS)
-            SetAuraApplication(m_auraSlot, m_stackAmount-1);// field expect count-1 for proper amount show
+        UpdateAuraApplication();
 
         int32 amount = m_stackAmount * caster->CalculateSpellDamage(target, m_spellProto, m_effIndex, &m_currentBasePoints);
         // Reapply if amount change
