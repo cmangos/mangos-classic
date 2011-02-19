@@ -724,13 +724,13 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket & /**recv_data*/ )
                     data << uint32(MAIL_AUCTION);           // message type
                     break;
                 default:
-                    data << (uint32) 0;
-                    data << (uint32) 0;
+                    data << uint32(0);
+                    data << uint32(0);
                     break;
             }
 
-            data << (uint32) m->stationery;
-            data << (uint32) 0xC6000000;                    // float unk, time or something
+            data << uint32(m->stationery);
+            data << uint32(0xC6000000);                     // float unk, time or something
 
             ++count;
             if(count == 2)                                  // do not display more than 2 mails
