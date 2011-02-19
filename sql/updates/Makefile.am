@@ -208,7 +208,8 @@ pkgdata_DATA = \
 	z1247_s0693_01_mangos_command.sql \
 	z1263_s0696_01_mangos_spell_threat.sql \
 	z1322_s0738_01_characters_character.sql \
-	z1327_s0658_01_mangos_spell_bonus_data.sql
+	z1327_s0658_01_mangos_spell_bonus_data.sql \
+	z1347_s0794_01_mangos_spell_threat.sql
 
 ## Additional files to include when running 'make dist'
 #  SQL update files, to upgrade database schema from older revisions
@@ -395,4 +396,5 @@ EXTRA_DIST = \
 	z1247_s0693_01_mangos_command.sql \
 	z1263_s0696_01_mangos_spell_threat.sql \
 	z1322_s0738_01_characters_character.sql \
-	z1327_s0658_01_mangos_spell_bonus_data.sql
+	z1327_s0658_01_mangos_spell_bonus_data.sql \
+	z1347_s0794_01_mangos_spell_threat.sql
