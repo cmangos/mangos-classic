@@ -5344,7 +5344,9 @@ bool Spell::IsNeedSendToClient() const
 
 bool Spell::IsTriggeredSpellWithRedundentData() const
 {
-    return m_IsTriggeredSpell && (m_spellInfo->manaCost || m_spellInfo->ManaCostPercentage);
+    return m_triggeredByAuraSpell || m_triggeredBySpellInfo ||
+        // possible not need after above check?
+        m_IsTriggeredSpell && (m_spellInfo->manaCost || m_spellInfo->ManaCostPercentage);
 }
 
 bool Spell::HaveTargetsForEffect(SpellEffectIndex effect) const
