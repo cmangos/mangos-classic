@@ -38,20 +38,13 @@ class Group;
 
 class MapPersistentStateManager;
 
-/*
-    Holds the information necessary for creating a new map for non-instanceable maps
-
-    As object Used for non-instanceable Map only
-*/
 class MapPersistentState
 {
     friend class MapPersistentStateManager;
-    public:
-        /* Created either when:
-           - any new instance is being generated
-           - the first time a player bound to InstanceId logs in
-           - when a group bound to the instance is loaded */
+    protected:
         MapPersistentState(uint16 MapId, uint32 InstanceId);
+
+    public:
 
         /* Unloaded when m_playerList and m_groupList become empty
            or when the instance is reset */
@@ -87,9 +80,15 @@ class MapPersistentState
         void SaveGORespawnTime(uint32 loguid, time_t t);
 
     protected:
-        virtual bool CanBeUnload() const;
+        virtual bool CanBeUnload() const =0
+        {
+            // prevent unload if used for loaded map
+            return !m_usedByMap;
+        }
+
         bool UnloadIfEmpty();
         void ClearRespawnTimes();
+        bool HasRespawnTimes() const { return m_creatureRespawnTimes.empty() && m_goRespawnTimes.empty(); }
 
     private:
         void SetCreatureRespawnTime(uint32 loguid, time_t t);
@@ -105,6 +104,21 @@ class MapPersistentState
         // persistent data
         RespawnTimes m_creatureRespawnTimes;                // lock MapPersistentState from unload, for example for temporary bound dungeon unload delay
         RespawnTimes m_goRespawnTimes;                      // lock MapPersistentState from unload, for example for temporary bound dungeon unload delay
+};
+
+class WorldPersistentState : public MapPersistentState
+{
+    public:
+        /* Created either when:
+           - any new non-instanceable map created
+           - respawn data loading for non-instanceable map
+        */
+        explicit WorldPersistentState(uint16 MapId) : MapPersistentState(MapId, 0) {}
+
+        ~WorldPersistentState() {}
+
+    protected:
+        bool CanBeUnload() const;                           // overwrite MapPersistentState::CanBeUnload
 };
 
 /*
@@ -161,6 +175,7 @@ class DungeonPersistentState : public MapPersistentState
 
     protected:
         bool CanBeUnload() const;                           // overwrite MapPersistentState::CanBeUnload
+        bool HasBounds() const { return m_playerList.empty() && m_groupList.empty(); }
 
     private:
         typedef std::list<Player*> PlayerListType;
@@ -190,7 +205,6 @@ class BattleGroundPersistentState : public MapPersistentState
     protected:
         bool CanBeUnload() const;                           // overwrite MapPersistentState::CanBeUnload
 };
-
 
 enum ResetEventType
 {

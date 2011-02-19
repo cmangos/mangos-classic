@@ -57,13 +57,6 @@ MapEntry const* MapPersistentState::GetMapEntry() const
     return sMapStore.LookupEntry(m_mapid);
 }
 
-bool MapPersistentState::CanBeUnload() const
-{
-    // prevent unload if used for loaded map
-    // prevent unload if respawn data still exist (will not prevent reset by scheduler)
-    return !m_usedByMap && m_creatureRespawnTimes.empty() && m_goRespawnTimes.empty();
-}
-
 /* true if the instance state is still valid */
 bool MapPersistentState::UnloadIfEmpty()
 {
@@ -136,7 +129,14 @@ void MapPersistentState::ClearRespawnTimes()
     UnloadIfEmpty();
 }
 
+//== WorldPersistentState functions ========================
 
+bool WorldPersistentState::CanBeUnload() const
+{
+    // prevent unload if used for loaded map
+    // prevent unload if respawn data still exist (will not prevent reset by scheduler)
+    return MapPersistentState::CanBeUnload() && HasRespawnTimes();
+}
 
 //== DungeonPersistentState functions =====================
 
@@ -162,7 +162,7 @@ DungeonPersistentState::~DungeonPersistentState()
 bool DungeonPersistentState::CanBeUnload() const
 {
     // prevent unload if any bounded groups or online bounded player still exists
-    return MapPersistentState::CanBeUnload() && m_playerList.empty() && m_groupList.empty();
+    return MapPersistentState::CanBeUnload() && HasBounds() && HasRespawnTimes();
 }
 
 /*
@@ -223,7 +223,7 @@ bool BattleGroundPersistentState::CanBeUnload() const
 {
     // prevent unload if used for loaded map
     // BGs/Arenas not locked by respawn data/etc
-    return !IsUsedByMap();
+    return MapPersistentState::CanBeUnload();
 }
 
 //== DungeonResetScheduler functions ======================
@@ -509,7 +509,7 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
     else if (mapEntry->IsBattleGround())
         state = new BattleGroundPersistentState(mapEntry->MapID, instanceId);
     else
-        state = new MapPersistentState(mapEntry->MapID, instanceId);
+        state = new WorldPersistentState(mapEntry->MapID);
 
     if (instanceId)
         m_instanceSaveByInstanceId[instanceId] = state;

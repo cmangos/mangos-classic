@@ -110,11 +110,11 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
     }
     else
     {
-        //create regular Continent map
+        //create regular non-instanceable map
         m = FindMap(id);
         if( m == NULL )
         {
-            m = new Map(id, i_gridCleanUpDelay, 0);
+            m = new WorldMap(id, i_gridCleanUpDelay);
             //add map into container
             i_maps[MapID(id)] = m;
 
