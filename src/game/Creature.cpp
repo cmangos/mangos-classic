@@ -1298,6 +1298,19 @@ bool Creature::HasInvolvedQuest(uint32 quest_id) const
     return false;
 }
 
+
+struct CreatureRespawnDeleteWorker
+{
+    explicit CreatureRespawnDeleteWorker(uint32 guid) : i_guid(guid) {}
+
+    void operator() (MapPersistentState* state)
+    {
+        state->SaveCreatureRespawnTime(i_guid, 0);
+    }
+
+    uint32 i_guid;
+};
+
 void Creature::DeleteFromDB()
 {
     if (!m_DBTableGuid)
@@ -1306,9 +1319,8 @@ void Creature::DeleteFromDB()
         return;
     }
 
-    // FIXME: this not safe for another map copies can be
-    if (MapPersistentState* save = sMapPersistentStateMgr.GetPersistentState(GetMapId(), GetInstanceId()))
-        save->SaveCreatureRespawnTime(m_DBTableGuid, 0);
+    CreatureRespawnDeleteWorker worker (m_DBTableGuid);
+    sMapPersistentStateMgr.DoForAllStatesWithMapId(GetMapId(), worker);
 
     sObjectMgr.DeleteCreatureData(m_DBTableGuid);
 
