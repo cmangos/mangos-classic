@@ -94,7 +94,7 @@ bool ChatHandler::HandleDebugSendEquipErrorCommand(char* args)
         return false;
 
     uint8 msg = atoi(args);
-    m_session->GetPlayer()->SendEquipError(msg, 0, 0);
+    m_session->GetPlayer()->SendEquipError(msg, NULL, NULL);
     return true;
 }
 
