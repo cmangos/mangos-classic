@@ -128,14 +128,7 @@ AggressorAI::UpdateAI(const uint32 /*diff*/)
 
     i_victimGuid = m_creature->getVictim()->GetGUID();
 
-    if( m_creature->isAttackReady() )
-    {
-        if( m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE))
-        {
-            m_creature->AttackerStateUpdate(m_creature->getVictim());
-            m_creature->resetAttackTimer();
-        }
-    }
+    DoMeleeAttackIfReady();
 }
 
 bool
