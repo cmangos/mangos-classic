@@ -118,7 +118,7 @@ uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo)
     if(DotDuration > 30000)
         DotDuration = 30000;
 
-    for (int j = 0; j < 3; ++j)
+    for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
     {
         if (spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA && (
             spellInfo->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_DAMAGE ||
