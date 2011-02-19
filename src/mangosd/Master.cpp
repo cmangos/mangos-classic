@@ -75,7 +75,7 @@ public:
         {
             ACE_Based::Thread::Sleep(1000);
 
-            uint32 curtime = getMSTime();
+            uint32 curtime = WorldTimer::getMSTime();
             //DEBUG_LOG("anti-freeze: time=%u, counters=[%u; %u]",curtime,Master::m_masterLoopCounter,World::m_worldLoopCounter);
 
             // normal work
@@ -85,7 +85,7 @@ public:
                 w_loops = World::m_worldLoopCounter;
             }
             // possible freeze
-            else if (getMSTimeDiff(w_lastchange, curtime) > _delaytime)
+            else if (WorldTimer::getMSTimeDiff(w_lastchange, curtime) > _delaytime)
             {
                 sLog.outError("World Thread hangs, kicking out server!");
                 *((uint32 volatile*)NULL) = 0;              // bang crash

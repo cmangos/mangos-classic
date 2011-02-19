@@ -103,7 +103,7 @@ bool PostgreSQLConnection::_Query(const char *sql, PGresult** pResult, uint64* p
     if (!mPGconn)
         return false;
 
-    uint32 _s = getMSTime();
+    uint32 _s = WorldTimer::getMSTime();
     // Send the query
     *pResult = PQexec(mPGconn, sql);
     if(!*pResult )
@@ -118,7 +118,7 @@ bool PostgreSQLConnection::_Query(const char *sql, PGresult** pResult, uint64* p
     }
     else
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", getMSTimeDiff(_s,getMSTime()), sql );
+        DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", WorldTimer::getMSTimeDiff(_s,WorldTimer::getMSTime()), sql );
     }
 
     *pRowCount = PQntuples(*pResult);
@@ -179,7 +179,7 @@ bool PostgreSQLConnection::Execute(const char *sql)
     if (!mPGconn)
         return false;
 
-    uint32 _s = getMSTime();
+    uint32 _s = WorldTimer::getMSTime();
 
     PGresult *res = PQexec(mPGconn, sql);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -190,7 +190,7 @@ bool PostgreSQLConnection::Execute(const char *sql)
     }
     else
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", getMSTimeDiff(_s,getMSTime()), sql );
+        DEBUG_FILTER_LOG(LOG_FILTER_SQL_TEXT, "[%u ms] SQL: %s", WorldTimer::getMSTimeDiff(_s,WorldTimer::getMSTime()), sql );
     }
 
     PQclear(res);

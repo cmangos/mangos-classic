@@ -232,8 +232,8 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint8 updateFlags) const
             moveFlags |= MOVEFLAG_ONTRANSPORT;
         }
 
-        *data << uint32(moveFlags);
-        *data << uint32(getMSTime());
+        *data << uint32(moveFlags);                         // movement flags
+        *data << uint32(WorldTimer::getMSTime());           // time (in milliseconds)
     }
 
     if (updateFlags & UPDATEFLAG_HAS_POSITION)                     // 0x40
@@ -317,7 +317,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint8 updateFlags) const
     // 0x2
     if(updateFlags & UPDATEFLAG_TRANSPORT)
     {
-        *data << uint32(getMSTime());                       // ms time
+        *data << uint32(WorldTimer::getMSTime());                       // ms time
     }
 }
 
