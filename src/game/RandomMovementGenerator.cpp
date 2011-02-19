@@ -59,8 +59,7 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
         // Limit height change
         const float distanceZ = rand_norm_f() * sqrtf(travelDistZ)/2.0f;
         destZ = respZ + distanceZ;
-        // Map check only, vmap needed here but need to alter vmaps checks for height.
-        float levelZ = std::max(map->GetHeight(destX, destY, destZ-2.0f, false), map->GetWaterLevel(destX, destY));
+        float levelZ = map->GetWaterOrGroundLevel(destX, destY, destZ-2.0f);
 
         // Problem here, we must fly above the ground and water, not under. Let's try on next tick
         if (levelZ >= destZ)
