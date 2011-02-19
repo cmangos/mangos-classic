@@ -88,7 +88,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
     friend class ObjectGridLoader;
     friend class ObjectWorldLoader;
     public:
-        Map(uint32 id, time_t, uint32 InstanceId, Map* _parent = NULL);
+        Map(uint32 id, time_t, uint32 InstanceId);
         virtual ~Map();
 
         // currently unused for normal maps
@@ -149,39 +149,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         time_t GetGridExpiry(void) const { return i_gridExpiry; }
         uint32 GetId(void) const { return i_id; }
 
-        Map const * GetParent() const { return m_parentMap; }
-
         // some calls like isInWater should not use vmaps due to processor power
         // can return INVALID_HEIGHT if under z+2 z coord not found height
-        float GetHeight(float x, float y, float z, bool pCheckVMap=true, float maxSearchDist=DEFAULT_HEIGHT_SEARCH) const;
-        float GetWaterLevel(float x, float y, float z, float* pGround = NULL) const;
-        float GetWaterOrGroundLevel(float x, float y, float z, float* pGround = NULL, bool swim = false) const;
-        bool IsInWater(float x, float y, float z, GridMapLiquidData *data = 0) const;
-        bool IsUnderWater(float x, float y, float z) const;
-
-        GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData *data = 0) const;
-
-        uint16 GetAreaFlag(float x, float y, float z, bool *isOutdoors=0) const;
-        uint8 GetTerrainType(float x, float y ) const;
-
-        static uint32 GetAreaIdByAreaFlag(uint16 areaflag,uint32 map_id);
-        static uint32 GetZoneIdByAreaFlag(uint16 areaflag,uint32 map_id);
-        static void GetZoneAndAreaIdByAreaFlag(uint32& zoneid, uint32& areaid, uint16 areaflag,uint32 map_id);
-
-        uint32 GetAreaId(float x, float y, float z) const
-        {
-            return GetAreaIdByAreaFlag(GetAreaFlag(x,y,z),i_id);
-        }
-
-        uint32 GetZoneId(float x, float y, float z) const
-        {
-            return GetZoneIdByAreaFlag(GetAreaFlag(x,y,z),i_id);
-        }
-
-        void GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, float y, float z) const
-        {
-            GetZoneAndAreaIdByAreaFlag(zoneid,areaid,GetAreaFlag(x,y,z),i_id);
-        }
 
         virtual void RemoveAllObjectsInRemoveList();
 
@@ -252,13 +221,12 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         // DynObjects currently
         uint32 GenerateLocalLowGuid(HighGuid guidhigh);
-        bool GetAreaInfo(float x, float y, float z, uint32 &mogpflags, int32 &adtId, int32 &rootId, int32 &groupId) const;
-        bool IsOutdoors(float x, float y, float z) const;
+
+        //get corresponding TerrainData object for this particular map
+        const TerrainInfo * GetTerrain() const { return m_TerrainData; }
+
     private:
         void LoadMapAndVMap(int gx, int gy);
-        void LoadVMap(int gx, int gy);
-        void LoadMap(int gx, int gy, bool reload = false);
-        GridMap *GetGrid(float x, float y);
 
         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }
 
@@ -297,8 +265,6 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         void SendObjectUpdates();
         std::set<Object *> i_objectsToClientUpdate;
     protected:
-        void SetUnloadReferenceLock(const GridPair &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadReferenceLock(on); }
-
         typedef MaNGOS::ObjectLevelLockable<Map, ACE_Thread_Mutex>::Lock Guard;
 
         MapEntry const* i_mapEntry;
@@ -318,12 +284,12 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
     private:
         time_t i_gridExpiry;
 
-        //used for fast base_map (e.g. MapInstanced class object) search for
-        //InstanceMaps and BattleGroundMaps...
-        Map* m_parentMap;
-
         NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-        GridMap *GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+
+        //Shared geodata object with map coord info...
+        TerrainInfo * const m_TerrainData;
+        bool m_bLoadedGrids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
 
         std::set<WorldObject *> i_objectsToRemove;
@@ -347,7 +313,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 class MANGOS_DLL_SPEC InstanceMap : public Map
 {
     public:
-        InstanceMap(uint32 id, time_t, uint32 InstanceId, Map* _parent);
+        InstanceMap(uint32 id, time_t, uint32 InstanceId);
         ~InstanceMap();
         bool Add(Player *);
         void Remove(Player *, bool);
@@ -374,7 +340,7 @@ class MANGOS_DLL_SPEC InstanceMap : public Map
 class MANGOS_DLL_SPEC BattleGroundMap : public Map
 {
     public:
-        BattleGroundMap(uint32 id, time_t, uint32 InstanceId, Map* _parent);
+        BattleGroundMap(uint32 id, time_t, uint32 InstanceId);
         ~BattleGroundMap();
 
         void Update(const uint32&);

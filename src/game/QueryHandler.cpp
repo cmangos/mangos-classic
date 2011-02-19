@@ -262,7 +262,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
             if (temp->ghostEntranceMap >= 0)
             {
                 // if corpse map have entrance
-                if (Map const* entranceMap = sMapMgr.CreateBaseMap(temp->ghostEntranceMap))
+                if(TerrainInfo const* entranceMap = sTerrainMgr.LoadTerrain(temp->ghostEntranceMap))
                 {
                     mapid = temp->ghostEntranceMap;
                     x = temp->ghostEntranceX;

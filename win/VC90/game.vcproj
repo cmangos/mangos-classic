@@ -743,14 +743,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\MapInstanced.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\MapInstanced.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\MapManager.cpp"
 				>
 			</File>

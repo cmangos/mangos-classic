@@ -27,7 +27,6 @@
 #include "CellImpl.h"
 #include "Map.h"
 #include "MapManager.h"
-#include "MapInstanced.h"
 #include "Timer.h"
 #include "GridNotifiersImpl.h"
 #include "Transports.h"
@@ -549,25 +548,26 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
 void InstanceSaveManager::_ResetInstance(uint32 mapid, uint32 instanceId)
 {
     DEBUG_LOG("InstanceSaveMgr::_ResetInstance %u, %u", mapid, instanceId);
-    Map *map = (MapInstanced*)sMapMgr.CreateBaseMap(mapid);
-    if(!map->Instanceable())
+    MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
+    if (!mapEntry || !mapEntry->Instanceable())
         return;
 
     InstanceSaveHashMap::iterator itr = m_instanceSaveById.find(instanceId);
     if(itr != m_instanceSaveById.end()) _ResetSave(itr);
     DeleteInstanceFromDB(instanceId);                       // even if save not loaded
 
-    Map* iMap = ((MapInstanced*)map)->FindMap(instanceId);
-    if(iMap && iMap->IsDungeon()) ((InstanceMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
-    else sObjectMgr.DeleteRespawnTimeForInstance(instanceId);   // even if map is not loaded
+    Map * iMap = sMapMgr.FindMap(mapid, instanceId);
+    if (iMap && iMap->IsDungeon())
+        ((InstanceMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
+    else
+        sObjectMgr.DeleteRespawnTimeForInstance(instanceId);// even if map is not loaded
 }
 
 void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeLeft)
 {
     // global reset for all instances of the given map
-    // note: this isn't fast but it's meant to be executed very rarely
-    Map const *map = sMapMgr.CreateBaseMap(mapid);
-    if(!map->Instanceable())
+    MapEntry const *mapEntry = sMapStore.LookupEntry(mapid);
+    if (!mapEntry->Instanceable())
         return;
 
     time_t now = time(NULL);
@@ -604,13 +604,15 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeLe
         CharacterDatabase.PExecute("UPDATE instance_reset SET resettime = '"UI64FMTD"' WHERE mapid = '%u'", (uint64)next_reset, mapid);
     }
 
-    MapInstanced::InstancedMaps &instMaps = ((MapInstanced*)map)->GetInstancedMaps();
-    MapInstanced::InstancedMaps::iterator mitr;
-    for(mitr = instMaps.begin(); mitr != instMaps.end(); ++mitr)
+    // note: this isn't fast but it's meant to be executed very rarely
+    const MapManager::MapMapType& maps = sMapMgr.Maps();
+
+    MapManager::MapMapType::const_iterator iter_last = maps.lower_bound(MapID(mapid + 1));
+    for(MapManager::MapMapType::const_iterator mitr = maps.lower_bound(MapID(mapid)); mitr != iter_last; ++mitr)
     {
         Map *map2 = mitr->second;
-        if (!map2->IsDungeon())
-            continue;
+        if(map2->GetId() != mapid)
+            break;
 
         if (warn)
             ((InstanceMap*)map2)->SendResetWarnings(timeLeft);
