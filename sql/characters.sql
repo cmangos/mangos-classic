@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z1322_s0738_01_characters_character` bit(1) default NULL
+  `required_z1363_s0817_02_characters_world` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1332,6 +1332,25 @@ LOCK TABLES `saved_variables` WRITE;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+--
+-- Table structure for table `world`
+--
+
+DROP TABLE IF EXISTS `world`;
+CREATE TABLE `world` (
+  `map` int(11) unsigned NOT NULL default '0',
+  `data` longtext,
+  PRIMARY KEY  (`map`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `world`
+--
+
+LOCK TABLES `world` WRITE;
+/*!40000 ALTER TABLE `world` DISABLE KEYS */;
+/*!40000 ALTER TABLE `world` ENABLE KEYS */;
+UNLOCK TABLES;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
