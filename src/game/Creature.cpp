@@ -39,6 +39,7 @@
 #include "Formulas.h"
 #include "WaypointMovementGenerator.h"
 #include "InstanceData.h"
+#include "InstanceSaveMgr.h"
 #include "BattleGroundMgr.h"
 #include "Spell.h"
 #include "Util.h"
@@ -1206,7 +1207,8 @@ bool Creature::LoadFromDB(uint32 guidlow, Map *map)
     m_isDeadByDefault = data->is_dead;
     m_deathState = m_isDeadByDefault ? DEAD : ALIVE;
 
-    m_respawnTime  = sObjectMgr.GetCreatureRespawnTime(m_DBTableGuid, GetInstanceId());
+    m_respawnTime  = map->GetInstanceSave()->GetCreatureRespawnTime(m_DBTableGuid);
+
     if(m_respawnTime > time(NULL))                          // not ready to respawn
     {
         m_deathState = DEAD;
@@ -1220,7 +1222,8 @@ bool Creature::LoadFromDB(uint32 guidlow, Map *map)
     else if(m_respawnTime)                                  // respawn time set but expired
     {
         m_respawnTime = 0;
-        sObjectMgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
+
+        GetMap()->GetInstanceSave()->SaveCreatureRespawnTime(m_DBTableGuid, 0);
     }
 
     uint32 curhealth = data->curhealth;
@@ -1303,7 +1306,10 @@ void Creature::DeleteFromDB()
         return;
     }
 
-    sObjectMgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
+    // FIXME: this not safe for another map copies can be
+    if (InstanceSave* save = sInstanceSaveMgr.GetInstanceSave(GetMapId(), GetInstanceId()))
+        save->SaveCreatureRespawnTime(m_DBTableGuid, 0);
+
     sObjectMgr.DeleteCreatureData(m_DBTableGuid);
 
     WorldDatabase.BeginTransaction();
@@ -1462,7 +1468,7 @@ void Creature::Respawn()
     if (IsDespawned())
     {
         if (m_DBTableGuid)
-            sObjectMgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(), 0);
+            GetMap()->GetInstanceSave()->SaveCreatureRespawnTime(m_DBTableGuid, 0);
         m_respawnTime = time(NULL);                         // respawn at next tick
     }
 }
@@ -1761,9 +1767,9 @@ void Creature::SaveRespawnTime()
         return;
 
     if(m_respawnTime > time(NULL))                          // dead (no corpse)
-        sObjectMgr.SaveCreatureRespawnTime(m_DBTableGuid, GetInstanceId(), m_respawnTime);
+        GetMap()->GetInstanceSave()->SaveCreatureRespawnTime(m_DBTableGuid, m_respawnTime);
     else if (m_corpseDecayTimer > 0)                        // dead (corpse)
-        sObjectMgr.SaveCreatureRespawnTime(m_DBTableGuid, GetInstanceId(), time(NULL) + m_respawnDelay + m_corpseDecayTimer / IN_MILLISECONDS);
+        GetMap()->GetInstanceSave()->SaveCreatureRespawnTime(m_DBTableGuid, time(NULL) + m_respawnDelay + m_corpseDecayTimer / IN_MILLISECONDS);
 }
 
 bool Creature::IsOutOfThreatArea(Unit* pVictim) const

@@ -70,8 +70,7 @@ void InstanceSave::SaveToDB()
     // save instance data too
     std::string data;
 
-    Map *map = sMapMgr.FindMap(GetMapId(),m_instanceid);
-    if(map)
+    if (Map *map = sMapMgr.FindMap(GetMapId(),m_instanceid))
     {
         InstanceData *iData = map->GetInstanceData();
         if(iData && iData->Save())
@@ -81,7 +80,8 @@ void InstanceSave::SaveToDB()
         }
     }
 
-    CharacterDatabase.PExecute("INSERT INTO instance VALUES ('%u', '%u', '"UI64FMTD"', '%s')", m_instanceid, GetMapId(), (uint64)GetResetTimeForDB(), data.c_str());
+    if (GetMapEntry()->IsDungeon())
+        CharacterDatabase.PExecute("INSERT INTO instance VALUES ('%u', '%u', '"UI64FMTD"', '%s')", m_instanceid, GetMapId(), (uint64)GetResetTimeForDB(), data.c_str());
 }
 
 time_t InstanceSave::GetResetTimeForDB() const
@@ -107,19 +107,91 @@ MapEntry const* InstanceSave::GetMapEntry() const
 
 void InstanceSave::DeleteFromDB()
 {
-    InstanceSaveManager::DeleteInstanceFromDB(GetInstanceId());
+    if (GetMapEntry()->IsDungeon())
+        InstanceSaveManager::DeleteInstanceFromDB(GetInstanceId());
+}
+
+void InstanceSave::DeleteRespawnTimes()
+{
+    // possible reset for instanceable map only
+    if (!GetMapEntry()->IsDungeon())
+        return;
+
+    m_goRespawnTimes.clear();
+    m_creatureRespawnTimes.clear();
+
+    CharacterDatabase.BeginTransaction();
+    CharacterDatabase.PExecute("DELETE FROM creature_respawn WHERE instance = '%u'", m_instanceid);
+    CharacterDatabase.PExecute("DELETE FROM gameobject_respawn WHERE instance = '%u'", m_instanceid);
+    CharacterDatabase.CommitTransaction();
 }
 
 /* true if the instance save is still valid */
 bool InstanceSave::UnloadIfEmpty()
 {
-    if (m_playerList.empty() && m_groupList.empty() && !m_usedByMap)
+    // prevent unload if any bounded groups or online bounded player still exists
+    // also prevent unload if respawn data still exist (will not prevent reset by scheduler)
+    // BGs/Arenas not locked by respawn data
+    if (m_playerList.empty() && m_groupList.empty() && !m_usedByMap &&
+        (GetMapEntry()->IsBattleGround() || m_creatureRespawnTimes.empty() && m_goRespawnTimes.empty()))
     {
-        sInstanceSaveMgr.RemoveInstanceSave(GetInstanceId());
+        sInstanceSaveMgr.RemoveInstanceSave(GetMapId(), GetInstanceId());
         return false;
     }
     else
         return true;
+}
+
+void InstanceSave::SaveCreatureRespawnTime(uint32 loguid, time_t t)
+{
+    SetCreatureRespawnTime(loguid, t);
+
+    // BGs/Arenas always reset at server restart/unload, so no reason store in DB
+    if (GetMapEntry()->IsBattleGround())
+        return;
+
+    CharacterDatabase.BeginTransaction();
+    CharacterDatabase.PExecute("DELETE FROM creature_respawn WHERE guid = '%u' AND instance = '%u'", loguid, m_instanceid);
+    if(t > sWorld.GetGameTime())
+        CharacterDatabase.PExecute("INSERT INTO creature_respawn VALUES ( '%u', '" UI64FMTD "', '%u' )", loguid, uint64(t), m_instanceid);
+    CharacterDatabase.CommitTransaction();
+}
+
+void InstanceSave::SaveGORespawnTime(uint32 loguid, time_t t)
+{
+    SetGORespawnTime(loguid, t);
+
+    // BGs/Arenas always reset at server restart/unload, so no reason store in DB
+    if (GetMapEntry()->IsBattleGround())
+        return;
+
+    CharacterDatabase.BeginTransaction();
+    CharacterDatabase.PExecute("DELETE FROM gameobject_respawn WHERE guid = '%u' AND instance = '%u'", loguid, m_instanceid);
+    if(t > sWorld.GetGameTime())
+        CharacterDatabase.PExecute("INSERT INTO gameobject_respawn VALUES ( '%u', '" UI64FMTD "', '%u' )", loguid, uint64(t), m_instanceid);
+    CharacterDatabase.CommitTransaction();
+}
+
+void InstanceSave::SetCreatureRespawnTime( uint32 loguid, time_t t )
+{
+    if (t > sWorld.GetGameTime())
+        m_creatureRespawnTimes[loguid] = t;
+    else
+    {
+        m_creatureRespawnTimes.erase(loguid);
+        UnloadIfEmpty();
+    }
+}
+
+void InstanceSave::SetGORespawnTime( uint32 loguid, time_t t )
+{
+    if (t > sWorld.GetGameTime())
+        m_goRespawnTimes[loguid] = t;
+    else
+    {
+        m_goRespawnTimes.erase(loguid);
+        UnloadIfEmpty();
+    }
 }
 
 //== InstanceResetScheduler functions ======================
@@ -346,7 +418,9 @@ InstanceSaveManager::~InstanceSaveManager()
     // it is undefined whether this or objectmgr will be unloaded first
     // so we must be prepared for both cases
     lock_instLists = true;
-    for (InstanceSaveHashMap::iterator itr = m_instanceSaveById.begin(); itr != m_instanceSaveById.end(); ++itr)
+    for (InstanceSaveHashMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end(); ++itr)
+        delete  itr->second;
+    for (InstanceSaveHashMap::iterator itr = m_instanceSaveByMapId.begin(); itr != m_instanceSaveByMapId.end(); ++itr)
         delete  itr->second;
 }
 
@@ -354,70 +428,93 @@ InstanceSaveManager::~InstanceSaveManager()
 - adding instance into manager
 - called from InstanceMap::Add, _LoadBoundInstances, LoadGroups
 */
-InstanceSave* InstanceSaveManager::AddInstanceSave(uint32 mapId, uint32 instanceId, time_t resetTime, bool canReset, bool load)
+InstanceSave* InstanceSaveManager::AddInstanceSave(MapEntry const* mapEntry, uint32 instanceId, time_t resetTime, bool canReset, bool load)
 {
-    InstanceSave *save = GetInstanceSave(instanceId);
-    if(save) return save;
+    if (InstanceSave *old_save = GetInstanceSave(mapEntry->MapID, instanceId))
+        return old_save;
 
-    const MapEntry* entry = sMapStore.LookupEntry(mapId);
-    if(!entry || instanceId == 0)
+    if (mapEntry->IsDungeon())
     {
-        sLog.outError("InstanceSaveManager::AddInstanceSave: wrong mapid = %d, instanceid = %d!", mapId, instanceId);
-        return NULL;
-    }
-
-    if(!resetTime)
-    {
-        // initialize reset time
-        // for normal instances if no creatures are killed the instance will reset in two hours
-        if(entry->map_type == MAP_RAID)
-            resetTime = m_Scheduler.GetResetTimeFor(mapId);
-        else
+        if (!resetTime)
         {
-            resetTime = time(NULL) + 2 * HOUR;
-            // normally this will be removed soon after in InstanceMap::Add, prevent error
-            m_Scheduler.ScheduleReset(true, resetTime, InstanceResetEvent(RESET_EVENT_DUNGEON, mapId, instanceId));
+            // initialize reset time
+            // for normal instances if no creatures are killed the instance will reset in two hours
+            if(mapEntry->map_type == MAP_RAID)
+                resetTime = m_Scheduler.GetResetTimeFor(mapEntry->MapID);
+            else
+            {
+                resetTime = time(NULL) + 2 * HOUR;
+                // normally this will be removed soon after in InstanceMap::Add, prevent error
+                m_Scheduler.ScheduleReset(true, resetTime, InstanceResetEvent(RESET_EVENT_DUNGEON, mapEntry->MapID, instanceId));
+            }
         }
     }
 
-    DEBUG_LOG("InstanceSaveManager::AddInstanceSave: mapid = %d, instanceid = %d", mapId, instanceId);
+    DEBUG_LOG("InstanceSaveManager::AddInstanceSave: mapid = %d, instanceid = %d, reset time = %u, canRset = %u", mapEntry->MapID, instanceId, resetTime, canReset ? 1 : 0);
 
-    save = new InstanceSave(mapId, instanceId, resetTime, canReset);
-    if(!load) save->SaveToDB();
+    InstanceSave *save = new InstanceSave(mapEntry->MapID, instanceId, resetTime, canReset);
+    if (!load)
+        save->SaveToDB();
 
-    m_instanceSaveById[instanceId] = save;
+    if (mapEntry->Instanceable())
+        m_instanceSaveByInstanceId[instanceId] = save;
+    else
+        m_instanceSaveByMapId[mapEntry->MapID] = save;
+
     return save;
 }
 
-InstanceSave *InstanceSaveManager::GetInstanceSave(uint32 InstanceId)
+InstanceSave *InstanceSaveManager::GetInstanceSave(uint32 mapId, uint32 instanceId)
 {
-    InstanceSaveHashMap::iterator itr = m_instanceSaveById.find(InstanceId);
-    return itr != m_instanceSaveById.end() ? itr->second : NULL;
+    if (instanceId)
+    {
+        InstanceSaveHashMap::iterator itr = m_instanceSaveByInstanceId.find(instanceId);
+        return itr != m_instanceSaveByInstanceId.end() ? itr->second : NULL;
+    }
+    else
+    {
+        InstanceSaveHashMap::iterator itr = m_instanceSaveByMapId.find(mapId);
+        return itr != m_instanceSaveByMapId.end() ? itr->second : NULL;
+    }
 }
 
 void InstanceSaveManager::DeleteInstanceFromDB(uint32 instanceid)
 {
-    CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM instance WHERE id = '%u'", instanceid);
-    CharacterDatabase.PExecute("DELETE FROM character_instance WHERE instance = '%u'", instanceid);
-    CharacterDatabase.PExecute("DELETE FROM group_instance WHERE instance = '%u'", instanceid);
-    CharacterDatabase.CommitTransaction();
-    // respawn times should be deleted only when the map gets unloaded
+    if (instanceid)
+    {
+        CharacterDatabase.BeginTransaction();
+        CharacterDatabase.PExecute("DELETE FROM instance WHERE id = '%u'", instanceid);
+        CharacterDatabase.PExecute("DELETE FROM character_instance WHERE instance = '%u'", instanceid);
+        CharacterDatabase.PExecute("DELETE FROM group_instance WHERE instance = '%u'", instanceid);
+        CharacterDatabase.PExecute("DELETE FROM creature_respawn WHERE instance = '%u'", instanceid);
+        CharacterDatabase.PExecute("DELETE FROM gameobject_respawn WHERE instance = '%u'", instanceid);
+        CharacterDatabase.CommitTransaction();
+    }
 }
 
-void InstanceSaveManager::RemoveInstanceSave(uint32 InstanceId)
+void InstanceSaveManager::RemoveInstanceSave(uint32 mapId, uint32 instanceId)
 {
     if (lock_instLists)
         return;
 
-    InstanceSaveHashMap::iterator itr = m_instanceSaveById.find( InstanceId );
-    if(itr != m_instanceSaveById.end())
+    if (instanceId)
     {
-        // save the resettime for normal instances only when they get unloaded
-        if(time_t resettime = itr->second->GetResetTimeForDB())
-            CharacterDatabase.PExecute("UPDATE instance SET resettime = '"UI64FMTD"' WHERE id = '%u'", (uint64)resettime, InstanceId);
+        InstanceSaveHashMap::iterator itr = m_instanceSaveByInstanceId.find(instanceId);
+        if (itr != m_instanceSaveByInstanceId.end())
+        {
+            // save the resettime for normal instances only when they get unloaded
+            if (itr->second->GetMapEntry()->IsDungeon())
+                if (time_t resettime = itr->second->GetResetTimeForDB())
+                    CharacterDatabase.PExecute("UPDATE instance SET resettime = '"UI64FMTD"' WHERE id = '%u'", (uint64)resettime, instanceId);
 
-        _ResetSave(itr);
+            _ResetSave(m_instanceSaveByInstanceId, itr);
+        }
+    }
+    else
+    {
+        InstanceSaveHashMap::iterator itr = m_instanceSaveByMapId.find(mapId);
+        if (itr != m_instanceSaveByMapId.end())
+            _ResetSave(m_instanceSaveByMapId, itr);
     }
 }
 
@@ -534,13 +631,13 @@ void InstanceSaveManager::PackInstances()
     sLog.outString();
 }
 
-void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
+void InstanceSaveManager::_ResetSave(InstanceSaveHashMap& holder, InstanceSaveHashMap::iterator &itr)
 {
     // unbind all players bound to the instance
     // do not allow UnbindInstance to automatically unload the InstanceSaves
     lock_instLists = true;
     delete itr->second;
-    m_instanceSaveById.erase(itr++);
+    holder.erase(itr++);
     lock_instLists = false;
 }
 
@@ -551,15 +648,15 @@ void InstanceSaveManager::_ResetInstance(uint32 mapid, uint32 instanceId)
     if (!mapEntry || !mapEntry->Instanceable())
         return;
 
-    InstanceSaveHashMap::iterator itr = m_instanceSaveById.find(instanceId);
-    if(itr != m_instanceSaveById.end()) _ResetSave(itr);
+    InstanceSaveHashMap::iterator itr = m_instanceSaveByInstanceId.find(instanceId);
+    if (itr != m_instanceSaveByInstanceId.end())
+        _ResetSave(m_instanceSaveByInstanceId, itr);
+
     DeleteInstanceFromDB(instanceId);                       // even if save not loaded
 
     Map * iMap = sMapMgr.FindMap(mapid, instanceId);
     if (iMap && iMap->IsDungeon())
         ((InstanceMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
-    else
-        sObjectMgr.DeleteRespawnTimeForInstance(instanceId);// even if map is not loaded
 }
 
 void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeLeft)
@@ -582,10 +679,10 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeLe
         }
 
         // remove all binds to instances of the given map
-        for(InstanceSaveHashMap::iterator itr = m_instanceSaveById.begin(); itr != m_instanceSaveById.end();)
+        for(InstanceSaveHashMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end();)
         {
             if(itr->second->GetMapId() == mapid)
-                _ResetSave(itr);
+                _ResetSave(m_instanceSaveByInstanceId, itr);
             else
                 ++itr;
         }
@@ -625,7 +722,8 @@ void InstanceSaveManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeLe
 uint32 InstanceSaveManager::GetNumBoundPlayersTotal()
 {
     uint32 ret = 0;
-    for(InstanceSaveHashMap::iterator itr = m_instanceSaveById.begin(); itr != m_instanceSaveById.end(); ++itr)
+    // only instanceable maps have bounds
+    for(InstanceSaveHashMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end(); ++itr)
         ret += itr->second->GetPlayerCount();
     return ret;
 }
@@ -633,7 +731,8 @@ uint32 InstanceSaveManager::GetNumBoundPlayersTotal()
 uint32 InstanceSaveManager::GetNumBoundGroupsTotal()
 {
     uint32 ret = 0;
-    for(InstanceSaveHashMap::iterator itr = m_instanceSaveById.begin(); itr != m_instanceSaveById.end(); ++itr)
+    // only instanceable maps have bounds
+    for(InstanceSaveHashMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end(); ++itr)
         ret += itr->second->GetGroupCount();
     return ret;
 }
@@ -641,4 +740,123 @@ uint32 InstanceSaveManager::GetNumBoundGroupsTotal()
 void InstanceSaveManager::_CleanupExpiredInstancesAtTime( time_t t )
 {
     _DelHelper(CharacterDatabase, "id, map", "instance", "LEFT JOIN instance_reset ON mapid = map WHERE (instance.resettime < '"UI64FMTD"' AND instance.resettime > '0') OR (NOT instance_reset.resettime IS NULL AND instance_reset.resettime < '"UI64FMTD"')",  (uint64)t, (uint64)t);
+}
+
+void InstanceSaveManager::LoadCreatureRespawnTimes()
+{
+    // remove outdated data
+    CharacterDatabase.DirectExecute("DELETE FROM creature_respawn WHERE respawntime <= UNIX_TIMESTAMP(NOW())");
+
+    uint32 count = 0;
+
+    QueryResult *result = CharacterDatabase.Query("SELECT guid, respawntime, instance FROM creature_respawn");
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outString(">> Loaded 0 creature respawn time.");
+        return;
+    }
+
+    barGoLink bar((int)result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 loguid       = fields[0].GetUInt32();
+        uint64 respawn_time = fields[1].GetUInt64();
+        uint32 instanceId   = fields[2].GetUInt32();
+
+        CreatureData const* data = sObjectMgr.GetCreatureData(loguid);
+        if (!data)
+            continue;
+
+        MapEntry const* mapEntry = sMapStore.LookupEntry(data->mapid);
+        if (!mapEntry || (mapEntry->Instanceable() != (instanceId != 0)))
+            continue;
+
+        // instances loaded early and respawn data must exist only for existed instances (save loaded) or non-instanced maps
+        InstanceSave* save = instanceId
+            ? GetInstanceSave(data->mapid, instanceId)
+            : AddInstanceSave(mapEntry, 0, 0, false, true);
+
+        if (!save)
+            continue;
+
+        save->SetCreatureRespawnTime(loguid, time_t(respawn_time));
+
+        ++count;
+
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString(">> Loaded %u creature respawn times", count);
+    sLog.outString();
+}
+
+void InstanceSaveManager::LoadGameobjectRespawnTimes()
+{
+    // remove outdated data
+    CharacterDatabase.DirectExecute("DELETE FROM gameobject_respawn WHERE respawntime <= UNIX_TIMESTAMP(NOW())");
+
+    uint32 count = 0;
+
+    QueryResult *result = CharacterDatabase.Query("SELECT guid, respawntime, instance FROM gameobject_respawn");
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outString(">> Loaded 0 gameobject respawn time.");
+        return;
+    }
+
+    barGoLink bar((int)result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 loguid       = fields[0].GetUInt32();
+        uint64 respawn_time = fields[1].GetUInt64();
+        uint32 instanceId   = fields[2].GetUInt32();
+
+
+        GameObjectData const* data = sObjectMgr.GetGOData(loguid);
+        if (!data)
+            continue;
+
+        MapEntry const* mapEntry = sMapStore.LookupEntry(data->mapid);
+        if (!mapEntry || (mapEntry->Instanceable() != (instanceId != 0)))
+            continue;
+
+        // instances loaded early and respawn data must exist only for existed instances (save loaded) or non-instanced maps
+        InstanceSave* save = instanceId
+            ? GetInstanceSave(data->mapid, instanceId)
+            : AddInstanceSave(mapEntry, 0, 0, false, true);
+
+        if (!save)
+            continue;
+
+        save->SetGORespawnTime(loguid, time_t(respawn_time));
+
+        ++count;
+
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString(">> Loaded %u gameobject respawn times", count);
+    sLog.outString();
 }
