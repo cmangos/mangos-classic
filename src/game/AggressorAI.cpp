@@ -21,9 +21,10 @@
 #include "Errors.h"
 #include "Creature.h"
 #include "SharedDefines.h"
-#include "ObjectAccessor.h"
 #include "VMapFactory.h"
 #include "World.h"
+#include "DBCStores.h"
+#include "Map.h"
 
 #include <list>
 

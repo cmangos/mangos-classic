@@ -36,6 +36,7 @@ struct InstanceTemplate;
 struct MapEntry;
 class Player;
 class Group;
+class Map;
 
 class MapPersistentStateManager;
 

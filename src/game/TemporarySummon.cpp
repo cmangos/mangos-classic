@@ -19,7 +19,6 @@
 
 #include "TemporarySummon.h"
 #include "Log.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 
 TemporarySummon::TemporarySummon( ObjectGuid summoner ) :

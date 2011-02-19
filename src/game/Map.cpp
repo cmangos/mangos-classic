@@ -50,7 +50,6 @@ struct ScriptAction
 
 Map::~Map()
 {
-    ObjectAccessor::DelinkMap(this);
     UnloadAll(true);
 
     if(!m_scriptSchedule.empty())
@@ -88,6 +87,9 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
   i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
   i_data(NULL), i_script_id(0)
 {
+    m_CreatureGuids.Set(sObjectMgr.GetFirstCreatureLowGuid());
+    m_GameObjectGuids.Set(sObjectMgr.GetFirstGameObjectLowGuid());
+
     for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
     {
         for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
@@ -97,7 +99,6 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
             setNGrid(NULL, idx, j);
         }
     }
-    ObjectAccessor::LinkMap(this);
 
     //lets initialize visibility distance for map
     Map::InitVisibilityDistance();
@@ -2985,6 +2986,10 @@ uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
     // TODO: for map local guid counters possible force reload map instead shutdown server at guid counter overflow
     switch(guidhigh)
     {
+        case HIGHGUID_UNIT:
+            return m_CreatureGuids.Generate();
+        case HIGHGUID_GAMEOBJECT:
+            return m_GameObjectGuids.Generate();
         case HIGHGUID_DYNAMICOBJECT:
             return m_DynObjectGuids.Generate();
         case HIGHGUID_PET:
