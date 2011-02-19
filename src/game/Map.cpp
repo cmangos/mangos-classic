@@ -1008,7 +1008,6 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps, float maxSearchD
                 return vmapHeight;
             else
                 return mapHeight;                           // better use .map surface height
-
         }
         else
             return vmapHeight;                              // we have only vmapHeight (if have)

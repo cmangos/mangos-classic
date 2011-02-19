@@ -1499,7 +1499,7 @@ void Unit::CalculateMeleeDamage(Unit *pVictim, uint32 damage, CalcDamageInfo *da
             if(lowEnd > highEnd)                            // prevent negative range size
                 lowEnd = highEnd;
 
-            reducePercent = lowEnd + rand_norm() * ( highEnd - lowEnd );
+            reducePercent = lowEnd + rand_norm_f() * ( highEnd - lowEnd );
 
             damageInfo->cleanDamage += damageInfo->damage-uint32(reducePercent *  damageInfo->damage);
             damageInfo->damage   = uint32(reducePercent *  damageInfo->damage);
@@ -1579,7 +1579,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
         }
         else
         {
-            float percent20 = pVictim->GetAttackTime(BASE_ATTACK) * 0.20;
+            float percent20 = pVictim->GetAttackTime(BASE_ATTACK) * 0.20f;
             float percent60 = 3.0f * percent20;
             if(basetime > percent20 && basetime <= percent60)
             {
@@ -4313,7 +4313,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo *damageInfo)
     SendMessageToSet( &data, true );/**/
 }
 
-void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount)
+void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 /*SwingType*/, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount)
 {
     CalcDamageInfo dmgInfo;
     dmgInfo.HitInfo = HitInfo;

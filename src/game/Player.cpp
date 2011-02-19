@@ -1244,7 +1244,7 @@ void Player::Update( uint32 p_time )
             if (time_inn >= 10)                             //freeze update
             {
                 float bubble = 0.125f*sWorld.getConfig(CONFIG_FLOAT_RATE_REST_INGAME);
-                //speed collect rest bonus (section/in hour)
+                                                            //speed collect rest bonus (section/in hour)
                 SetRestBonus( float(GetRestBonus()+ time_inn*(GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/72000)*bubble ));
                 UpdateInnerTime(time(NULL));
             }
