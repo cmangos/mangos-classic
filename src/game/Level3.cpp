@@ -50,7 +50,7 @@
 #include "Util.h"
 #include "ItemEnchantmentMgr.h"
 #include "BattleGroundMgr.h"
-#include "InstanceSaveMgr.h"
+#include "MapPersistentStateMgr.h"
 #include "InstanceData.h"
 #include "DBCStores.h"
 #include "CreatureEventAIMgr.h"

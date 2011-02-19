@@ -39,7 +39,7 @@
 #include "Formulas.h"
 #include "WaypointMovementGenerator.h"
 #include "InstanceData.h"
-#include "InstanceSaveMgr.h"
+#include "MapPersistentStateMgr.h"
 #include "BattleGroundMgr.h"
 #include "Spell.h"
 #include "Util.h"

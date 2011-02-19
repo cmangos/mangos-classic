@@ -32,7 +32,7 @@
 #include "ObjectAccessor.h"
 #include "Language.h"
 #include "CellImpl.h"
-#include "InstanceSaveMgr.h"
+#include "MapPersistentStateMgr.h"
 #include "Mail.h"
 #include "Util.h"
 #ifdef _DEBUG_VMAPS
