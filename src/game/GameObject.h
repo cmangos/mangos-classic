@@ -598,6 +598,12 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32 GetRespawnDelay() const { return m_respawnDelayTime; }
         void Refresh();
         void Delete();
+
+        // Functions spawn/remove gameobject with DB guid in all loaded map copies (if point grid loaded in map)
+        // FIXME: it will work for for instanceable maps only after switch to use static guids)
+        static void AddToRemoveListInMaps(uint32 db_guid, GameObjectData const* data);
+        static void SpawnInMaps(uint32 db_guid, GameObjectData const* data);
+
         void getFishLoot(Loot *loot, Player* loot_owner);
         GameobjectTypes GetGoType() const { return GameobjectTypes(GetUInt32Value(GAMEOBJECT_TYPE_ID)); }
         void SetGoType(GameobjectTypes type) { SetUInt32Value(GAMEOBJECT_TYPE_ID, type); }
