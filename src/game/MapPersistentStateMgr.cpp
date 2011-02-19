@@ -44,7 +44,7 @@ static uint32 resetEventTypeDelay[MAX_RESET_EVENT_TYPE] = { 0, 3600, 900, 300, 6
 
 MapPersistentState::MapPersistentState(uint16 MapId, uint32 InstanceId)
 : m_instanceid(InstanceId), m_mapid(MapId),
-  m_usedByMap(false)
+  m_usedByMap(NULL)
 {
 }
 
@@ -135,7 +135,7 @@ bool WorldPersistentState::CanBeUnload() const
 {
     // prevent unload if used for loaded map
     // prevent unload if respawn data still exist (will not prevent reset by scheduler)
-    return MapPersistentState::CanBeUnload() && HasRespawnTimes();
+    return MapPersistentState::CanBeUnload() && !HasRespawnTimes();
 }
 
 //== DungeonPersistentState functions =====================
@@ -162,7 +162,7 @@ DungeonPersistentState::~DungeonPersistentState()
 bool DungeonPersistentState::CanBeUnload() const
 {
     // prevent unload if any bounded groups or online bounded player still exists
-    return MapPersistentState::CanBeUnload() && HasBounds() && HasRespawnTimes();
+    return MapPersistentState::CanBeUnload() && !HasBounds() && !HasRespawnTimes();
 }
 
 /*
@@ -173,7 +173,7 @@ void DungeonPersistentState::SaveToDB()
     // state instance data too
     std::string data;
 
-    if (Map *map = sMapMgr.FindMap(GetMapId(), GetInstanceId()))
+    if (Map *map = GetMap())
     {
         InstanceData *iData = map->GetInstanceData();
         if(iData && iData->Save())
@@ -193,7 +193,7 @@ void DungeonPersistentState::DeleteRespawnTimes()
     CharacterDatabase.PExecute("DELETE FROM gameobject_respawn WHERE instance = '%u'", GetInstanceId());
     CharacterDatabase.CommitTransaction();
 
-    ClearRespawnTimes();
+    ClearRespawnTimes();                                    // state can be deleted at call if only respawn data prevent unload
 }
 
 void DungeonPersistentState::DeleteFromDB()
@@ -698,20 +698,25 @@ void MapPersistentStateManager::_ResetSave(PersistentStateMap& holder, Persisten
 
 void MapPersistentStateManager::_ResetInstance(uint32 mapid, uint32 instanceId)
 {
-    DEBUG_LOG("InstanceSaveMgr::_ResetInstance %u, %u", mapid, instanceId);
-    MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
-    if (!mapEntry || !mapEntry->Instanceable())
-        return;
+    DEBUG_LOG("MapPersistentStateManager::_ResetInstance %u, %u", mapid, instanceId);
 
     PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.find(instanceId);
     if (itr != m_instanceSaveByInstanceId.end())
+    {
+        // delay reset until map unload for loaded map
+        if (Map * iMap = itr->second->GetMap())
+        {
+            MANGOS_ASSERT(iMap->IsDungeon());
+
+            ((DungeonMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
+            return;
+        }
+
         _ResetSave(m_instanceSaveByInstanceId, itr);
+    }
+
 
     DeleteInstanceFromDB(instanceId);                       // even if state not loaded
-
-    Map * iMap = sMapMgr.FindMap(mapid, instanceId);
-    if (iMap && iMap->IsDungeon())
-        ((DungeonMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
 }
 
 void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeLeft)
