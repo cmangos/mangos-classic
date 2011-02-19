@@ -3255,10 +3255,10 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
             PlayerSpellMap::iterator prev_itr = m_spells.find(prev_id);
             if (prev_itr != m_spells.end())
             {
-                if(prev_itr->second.dependent != cur_dependent)
+                if (prev_itr->second.dependent != cur_dependent)
                 {
                     prev_itr->second.dependent = cur_dependent;
-                    if(prev_itr->second.state != PLAYERSPELL_NEW)
+                    if (prev_itr->second.state != PLAYERSPELL_NEW)
                         prev_itr->second.state = PLAYERSPELL_CHANGED;
                 }
 
