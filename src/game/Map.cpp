@@ -37,6 +37,7 @@
 #include "MapInstanced.h"
 #include "InstanceSaveMgr.h"
 #include "VMapFactory.h"
+#include "BattleGroundMgr.h"
 
 #define MAX_GRID_LOAD_TIME      50
 
@@ -1817,6 +1818,13 @@ void InstanceMap::Update(const uint32& t_diff)
 
     if(i_data)
         i_data->Update(t_diff);
+}
+
+void BattleGroundMap::Update(const uint32& diff)
+{
+    Map::Update(diff);
+
+    GetBG()->Update(diff);
 }
 
 void InstanceMap::Remove(Player *player, bool remove)

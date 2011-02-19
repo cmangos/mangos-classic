@@ -22,6 +22,7 @@
 
 #include "Common.h"
 #include "SharedDefines.h"
+#include "Map.h"
 #include "ByteBuffer.h"
 #include "ObjectGuid.h"
 
@@ -263,7 +264,9 @@ class BattleGround
         char const* GetName() const         { return m_Name; }
         BattleGroundTypeId GetTypeID() const { return m_TypeID; }
         BattleGroundBracketId GetBracketId() const { return m_BracketId; }
-        uint32 GetInstanceID() const        { return m_InstanceID; }
+        // the instanceId check is also used to determine a bg-template
+        // that's why the m_map hack is here..
+        uint32 GetInstanceID()              { return m_Map?GetBgMap()->GetInstanceId():0; }
         BattleGroundStatus GetStatus() const { return m_Status; }
         uint32 GetClientInstanceID() const  { return m_ClientInstanceID; }
         uint32 GetStartTime() const         { return m_StartTime; }
@@ -286,7 +289,6 @@ class BattleGround
         void SetName(char const* Name)      { m_Name = Name; }
         void SetTypeID(BattleGroundTypeId TypeID) { m_TypeID = TypeID; }
         void SetBracketId(BattleGroundBracketId ID) { m_BracketId = ID; }
-        void SetInstanceID(uint32 InstanceID) { m_InstanceID = InstanceID; }
         void SetStatus(BattleGroundStatus Status) { m_Status = Status; }
         void SetClientInstanceID(uint32 InstanceID) { m_ClientInstanceID = InstanceID; }
         void SetStartTime(uint32 Time)      { m_StartTime = Time; }
@@ -464,8 +466,6 @@ class BattleGround
         static BattleGroundTeamIndex GetOtherTeamIndex(BattleGroundTeamIndex teamIdx){ return teamIdx == BG_TEAM_ALLIANCE ? BG_TEAM_HORDE : BG_TEAM_ALLIANCE; }
         bool IsPlayerInBattleGround(uint64 guid);
 
-        void SetDeleteThis() {m_SetDeleteThis = true;}
-
         /* virtual score-array - get's used in bg-subclasses */
         int32 m_TeamScores[BG_TEAMS_COUNT];
 
@@ -512,14 +512,12 @@ class BattleGround
     private:
         /* Battleground */
         BattleGroundTypeId m_TypeID;
-        uint32 m_InstanceID;                                //BattleGround Instance's GUID!
         BattleGroundStatus m_Status;
         uint32 m_ClientInstanceID;                          //the instance-id which is sent to the client and without any other internal use
         uint32 m_StartTime;
         int32 m_EndTime;                                    // it is set to 120000 when bg is ending and it decreases itself
         BattleGroundBracketId m_BracketId;
         bool   m_InBGFreeSlotQueue;                         // used to make sure that BG is only once inserted into the BattleGroundMgr.BGFreeSlotQueue[bgTypeId] deque
-        bool   m_SetDeleteThis;                             // used for safe deletion of the bg after end / all players leave
         uint8  m_Winner;                                    // 0=alliance, 1=horde, 2=none
         int32  m_StartDelayTime;
         bool   m_PrematureCountDown;
