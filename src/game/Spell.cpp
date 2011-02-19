@@ -846,7 +846,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     // FIXME: in case wild GO heal/damage spells will be used target bonuses
     Unit *caster = real_caster ? real_caster : m_caster;
 
-
     SpellMissInfo missInfo = target->missCondition;
     // Need init unitTarget by default unit (can changed in code on reflect)
     // Or on missInfo!=SPELL_MISS_NONE unitTarget undefined (but need in trigger subsystem)
@@ -878,7 +877,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     // Do healing and triggers
     if (m_healing)
     {
-        bool crit = real_caster && real_caster->isSpellCrit(NULL, m_spellInfo, m_spellSchoolMask);
+        bool crit = real_caster && real_caster->isSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask);
         uint32 addhealth = m_healing;
         if (crit)
         {
@@ -920,6 +919,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
 
         // Add bonuses and fill damageInfo struct
         caster->CalculateSpellDamage(&damageInfo, m_damage, m_spellInfo, m_attackType);
+
         caster->DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
 
         // Send log damage message to client
