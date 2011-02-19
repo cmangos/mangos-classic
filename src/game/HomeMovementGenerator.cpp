@@ -73,7 +73,8 @@ HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time_diff
         // restore orientation of not moving creature at returning to home
         if(owner.GetDefaultMovementType()==IDLE_MOTION_TYPE)
         {
-            if(CreatureData const* data = sObjectMgr.GetCreatureData(owner.GetDBTableGUIDLow()))
+            // such a mob might need very exact spawning point, hence relocate to spawn-position
+            if (CreatureData const* data = sObjectMgr.GetCreatureData(owner.GetGUIDLow()))
             {
                 owner.SetOrientation(data->orientation);
                 WorldPacket packet;
