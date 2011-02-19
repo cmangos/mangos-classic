@@ -16085,7 +16085,7 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
 {
     uint16 Opcode= (mod->type == SPELLMOD_FLAT) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
 
-    for(int eff=0;eff<64;++eff)
+    for(int eff = 0; eff < 64; ++eff)
     {
         uint64 _mask = uint64(1) << eff;
         if (mod->mask & _mask)
