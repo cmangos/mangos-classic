@@ -104,7 +104,7 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
     if(entry->Instanceable())
     {
         MANGOS_ASSERT(obj->GetTypeId() == TYPEID_PLAYER);
-        //create InstanceMap object
+        //create DungeonMap object
         if(obj->GetTypeId() == TYPEID_PLAYER)
             m = CreateInstance(id, (Player*)obj);
     }
@@ -370,14 +370,14 @@ Map* MapManager::CreateInstance(uint32 id, Player * player)
         map = FindMap(id, NewInstanceId);
         MANGOS_ASSERT(map);
     }
-    else if (InstanceSave* pSave = player->GetBoundInstanceSaveForSelfOrGroup(id))
+    else if (DungeonPersistentState* pSave = player->GetBoundInstanceSaveForSelfOrGroup(id))
     {
         // solo/perm/group
         NewInstanceId = pSave->GetInstanceId();
         map = FindMap(id, NewInstanceId);
         // it is possible that the save exists but the map doesn't
         if (!map)
-            pNewMap = CreateInstanceMap(id, NewInstanceId, pSave);
+            pNewMap = CreateDungeonMap(id, NewInstanceId, pSave);
     }
     else
     {
@@ -385,7 +385,7 @@ Map* MapManager::CreateInstance(uint32 id, Player * player)
         // the instance will be created for the first time
         NewInstanceId = GenerateInstanceId();
 
-        pNewMap = CreateInstanceMap(id, NewInstanceId);
+        pNewMap = CreateDungeonMap(id, NewInstanceId);
     }
 
     //add a new map object into the registry
@@ -398,25 +398,24 @@ Map* MapManager::CreateInstance(uint32 id, Player * player)
     return map;
 }
 
-InstanceMap* MapManager::CreateInstanceMap(uint32 id, uint32 InstanceId, InstanceSave *save)
+DungeonMap* MapManager::CreateDungeonMap(uint32 id, uint32 InstanceId, DungeonPersistentState *save)
 {
     // make sure we have a valid map id
     const MapEntry* entry = sMapStore.LookupEntry(id);
     if (!entry)
     {
-        sLog.outError("CreateInstanceMap: no entry for map %d", id);
+        sLog.outError("CreateDungeonMap: no entry for map %d", id);
         MANGOS_ASSERT(false);
     }
     if (!ObjectMgr::GetInstanceTemplate(id))
     {
-        sLog.outError("CreateInstanceMap: no instance template for map %d", id);
+        sLog.outError("CreateDungeonMap: no instance template for map %d", id);
         MANGOS_ASSERT(false);
     }
 
     DEBUG_LOG("MapInstanced::CreateInstanceMap: %s map instance %d for %d created", save?"":"new ", InstanceId, id);
 
-    InstanceMap *map = new InstanceMap(id, i_gridCleanUpDelay, InstanceId);
-    MANGOS_ASSERT(map->IsDungeon());
+    DungeonMap *map = new DungeonMap(id, i_gridCleanUpDelay, InstanceId);
 
     // Dungeons can have saved instance data
     bool load_data = save != NULL;

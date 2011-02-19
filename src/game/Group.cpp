@@ -79,9 +79,9 @@ Group::~Group()
 
     // it is undefined whether objectmgr (which stores the groups) or instancesavemgr
     // will be unloaded first so we must be prepared for both cases
-    // this may unload some instance saves
+    // this may unload some dungeon persistent state
     for(BoundInstancesMap::iterator itr2 = m_boundInstances.begin(); itr2 != m_boundInstances.end(); ++itr2)
-        itr2->second.save->RemoveGroup(this);
+        itr2->second.state->RemoveGroup(this);
 
     // Sub group counters clean up
     if (m_subGroupsCounts)
@@ -1048,11 +1048,11 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
 
     SubGroupCounterIncrease(group);
 
-    if(player)
+    if (player)
     {
         player->SetGroupInvite(NULL);
         //if player is in group and he is being added to BG raid group, then call SetBattleGroundRaid()
-        if( player->GetGroup() && isBGGroup() )
+        if (player->GetGroup() && isBGGroup())
             player->SetBattleGroundRaid(this, group);
         //if player is in bg raid and we are adding him to normal group, then call SetOriginalGroup()
         else if ( player->GetGroup() )
@@ -1060,19 +1060,20 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
         //if player is not in group, then call set group
         else
             player->SetGroup(this, group);
+
         // if the same group invites the player back, cancel the homebind timer
-        InstanceGroupBind *bind = GetBoundInstance(player->GetMapId());
-        if(bind && bind->save->GetInstanceId() == player->GetInstanceId())
-            player->m_InstanceValid = true;
+        if (InstanceGroupBind *bind = GetBoundInstance(player->GetMapId()))
+            if (bind->state->GetInstanceId() == player->GetInstanceId())
+                player->m_InstanceValid = true;
     }
 
-    if(!isRaidGroup())                                      // reset targetIcons for non-raid-groups
+    if (!isRaidGroup())                                     // reset targetIcons for non-raid-groups
     {
         for(int i = 0; i < TARGET_ICON_COUNT; ++i)
             m_targetIcons[i].Clear();
     }
 
-    if(!isBGGroup())
+    if (!isBGGroup())
     {
         // insert into group table
         CharacterDatabase.PExecute("INSERT INTO group_member(groupId,memberGuid,assistant,subgroup) VALUES('%u','%u','%u','%u')",
@@ -1156,7 +1157,7 @@ void Group::_setLeader(ObjectGuid guid)
             {
                 if(itr->second.perm)
                 {
-                    itr->second.save->RemoveGroup(this);
+                    itr->second.state->RemoveGroup(this);
                     m_boundInstances.erase(itr++);
                 }
                 else
@@ -1483,9 +1484,9 @@ void Group::ResetInstances(InstanceResetMethod method, Player* SendMsgTo)
 
     for(BoundInstancesMap::iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end();)
     {
-        InstanceSave *p = itr->second.save;
+        DungeonPersistentState *state = itr->second.state;
         const MapEntry *entry = sMapStore.LookupEntry(itr->first);
-        if (!entry || (!p->CanReset() && method != INSTANCE_RESET_GROUP_DISBAND))
+        if (!entry || (!state->CanReset() && method != INSTANCE_RESET_GROUP_DISBAND))
         {
             ++itr;
             continue;
@@ -1503,31 +1504,31 @@ void Group::ResetInstances(InstanceResetMethod method, Player* SendMsgTo)
 
         bool isEmpty = true;
         // if the map is loaded, reset it
-        Map *map = sMapMgr.FindMap(p->GetMapId(), p->GetInstanceId());
-        if(map && map->IsDungeon() && !(method == INSTANCE_RESET_GROUP_DISBAND && !p->CanReset()))
-            isEmpty = ((InstanceMap*)map)->Reset(method);
+        if (Map *map = sMapMgr.FindMap(state->GetMapId(), state->GetInstanceId()))
+            if (map->IsDungeon() && !(method == INSTANCE_RESET_GROUP_DISBAND && !state->CanReset()))
+                isEmpty = ((DungeonMap*)map)->Reset(method);
 
-        if(SendMsgTo)
+        if (SendMsgTo)
         {
-            if(isEmpty)
-                SendMsgTo->SendResetInstanceSuccess(p->GetMapId());
+            if (isEmpty)
+                SendMsgTo->SendResetInstanceSuccess(state->GetMapId());
             else
-                SendMsgTo->SendResetInstanceFailed(0, p->GetMapId());
+                SendMsgTo->SendResetInstanceFailed(0, state->GetMapId());
         }
 
-        if(isEmpty || method == INSTANCE_RESET_GROUP_DISBAND)
+        if (isEmpty || method == INSTANCE_RESET_GROUP_DISBAND)
         {
             // do not reset the instance, just unbind if others are permanently bound to it
-            if(p->CanReset())
-                p->DeleteFromDB();
+            if (state->CanReset())
+                state->DeleteFromDB();
             else
-                CharacterDatabase.PExecute("DELETE FROM group_instance WHERE instance = '%u'", p->GetInstanceId());
+                CharacterDatabase.PExecute("DELETE FROM group_instance WHERE instance = '%u'", state->GetInstanceId());
             // i don't know for sure if hash_map iterators
             m_boundInstances.erase(itr);
             itr = m_boundInstances.begin();
             // this unloads the instance save unless online players are bound to it
             // (eg. permanent binds or GM solo binds)
-            p->RemoveGroup(this);
+            state->RemoveGroup(this);
         }
         else
             ++itr;
@@ -1537,7 +1538,7 @@ void Group::ResetInstances(InstanceResetMethod method, Player* SendMsgTo)
 InstanceGroupBind* Group::GetBoundInstance(uint32 mapid)
 {
     MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
-    if(!mapEntry)
+    if (!mapEntry)
         return NULL;
 
     BoundInstancesMap::iterator itr = m_boundInstances.find(mapid);
@@ -1547,35 +1548,35 @@ InstanceGroupBind* Group::GetBoundInstance(uint32 mapid)
         return NULL;
 }
 
-InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, bool load)
+InstanceGroupBind* Group::BindToInstance(DungeonPersistentState *state, bool permanent, bool load)
 {
-    if (save && !isBGGroup())
+    if (state && !isBGGroup())
     {
-        InstanceGroupBind& bind = m_boundInstances[save->GetMapId()];
-        if (bind.save)
+        InstanceGroupBind& bind = m_boundInstances[state->GetMapId()];
+        if (bind.state)
         {
             // when a boss is killed or when copying the players's binds to the group
-            if (permanent != bind.perm || save != bind.save)
+            if (permanent != bind.perm || state != bind.state)
                 if (!load)
                     CharacterDatabase.PExecute("UPDATE group_instance SET instance = '%u', permanent = '%u' WHERE leaderGuid = '%u' AND instance = '%u'",
-                        save->GetInstanceId(), permanent, GetLeaderGuid().GetCounter(), bind.save->GetInstanceId());
+                        state->GetInstanceId(), permanent, GetLeaderGuid().GetCounter(), bind.state->GetInstanceId());
         }
         else if (!load)
             CharacterDatabase.PExecute("INSERT INTO group_instance (leaderGuid, instance, permanent) VALUES ('%u', '%u', '%u')",
-                GetLeaderGuid().GetCounter(), save->GetInstanceId(), permanent);
+                GetLeaderGuid().GetCounter(), state->GetInstanceId(), permanent);
 
-        if(bind.save != save)
+        if (bind.state != state)
         {
-            if(bind.save)
-                bind.save->RemoveGroup(this);
-            save->AddGroup(this);
+            if (bind.state)
+                bind.state->RemoveGroup(this);
+            state->AddGroup(this);
         }
 
-        bind.save = save;
+        bind.state = state;
         bind.perm = permanent;
         if (!load)
             DEBUG_LOG("Group::BindToInstance: Group (Id: %d) is now bound to map %d, instance %d",
-                GetId(), save->GetMapId(), save->GetInstanceId());
+                GetId(), state->GetMapId(), state->GetInstanceId());
         return &bind;
     }
     else
@@ -1589,8 +1590,8 @@ void Group::UnbindInstance(uint32 mapid, bool unload)
     {
         if (!unload)
             CharacterDatabase.PExecute("DELETE FROM group_instance WHERE leaderGuid = '%u' AND instance = '%u'",
-                GetLeaderGuid().GetCounter(), itr->second.save->GetInstanceId());
-        itr->second.save->RemoveGroup(this);                // save can become invalid
+                GetLeaderGuid().GetCounter(), itr->second.state->GetInstanceId());
+        itr->second.state->RemoveGroup(this);               // save can become invalid
         m_boundInstances.erase(itr);
     }
 }
