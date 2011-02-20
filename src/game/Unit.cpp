@@ -7301,11 +7301,6 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         if (!IsWithinDistInMap(viewPoint,World::GetMaxVisibleDistanceInFlight()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), is3dDistance))
             return false;
     }
-    else if(!isAlive())                                     // distance for show body
-    {
-        if (!IsWithinDistInMap(viewPoint,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), is3dDistance))
-            return false;
-    }
     else if(!at_same_transport)                             // distance for show player/pet/creature (no transport case)
     {
         // Any units far than max visible distance for viewer or not in our map are not visible too

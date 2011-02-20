@@ -42,7 +42,7 @@ ConfVersion=2010100901
 #	CharacterDatabaseConnections
 #		 Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
 #		 Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
-#		 So formula to find out how many connections will be established: X = ¹_connections + 1
+#		 So formula to find out how many connections will be established: X = ï¿½_connections + 1
 #		 Default: 1 connection for SELECT statements
 #
 #    MaxPingTime
@@ -1027,10 +1027,6 @@ GM.LowerSecurity         = 0
 #        Max limited by active player zone: ~ 333
 #        Min limit is max aggro radius (45) * Rate.Creature.Aggro
 #
-#    Visibility.Distance.Object
-#        Visible distance for gameobject, dynobject, bodies, corpses, bones
-#        Min limit is iteraction distance (5)
-#
 #    Visibility.Distance.InFlight
 #        Visible distance for player in flight
 #        Min limit is 0 (not show any objects)
@@ -1053,8 +1049,7 @@ Visibility.GroupMode = 0
 Visibility.Distance.Continents    = 90
 Visibility.Distance.Instances     = 120
 Visibility.Distance.BG            = 180
-Visibility.Distance.Object        = 66
-Visibility.Distance.InFlight      = 66
+Visibility.Distance.InFlight      = 100
 Visibility.Distance.Grey.Unit   = 1
 Visibility.Distance.Grey.Object = 10
 

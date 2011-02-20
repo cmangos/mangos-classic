@@ -518,7 +518,6 @@ class World
         static float GetMaxVisibleDistanceOnContinents()    { return m_MaxVisibleDistanceOnContinents; }
         static float GetMaxVisibleDistanceInInstances()     { return m_MaxVisibleDistanceInInstances;  }
         static float GetMaxVisibleDistanceInBG()            { return m_MaxVisibleDistanceInBG;         }
-        static float GetMaxVisibleDistanceForObject()       { return m_MaxVisibleDistanceForObject;   }
 
         static float GetMaxVisibleDistanceInFlight()        { return m_MaxVisibleDistanceInFlight;    }
         static float GetVisibleUnitGreyDistance()           { return m_VisibleUnitGreyDistance;       }
@@ -606,7 +605,6 @@ class World
         static float m_MaxVisibleDistanceOnContinents;
         static float m_MaxVisibleDistanceInInstances;
         static float m_MaxVisibleDistanceInBG;
-        static float m_MaxVisibleDistanceForObject;
 
         static float m_MaxVisibleDistanceInFlight;
         static float m_VisibleUnitGreyDistance;
