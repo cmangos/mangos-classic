@@ -270,6 +270,7 @@ class ChatHandler
         bool HandleLookupPlayerIpCommand(char* args);
         bool HandleLookupPlayerAccountCommand(char* args);
         bool HandleLookupPlayerEmailCommand(char* args);
+        bool HandleLookupPoolCommand(char* args);
         bool HandleLookupQuestCommand(char* args);
         bool HandleLookupSkillCommand(char* args);
         bool HandleLookupSpellCommand(char* args);
@@ -328,6 +329,10 @@ class ChatHandler
 
         bool HandlePDumpLoadCommand(char* args);
         bool HandlePDumpWriteCommand(char* args);
+
+        bool HandlePoolListCommand(char* args);
+        bool HandlePoolSpawnsCommand(char* args);
+        bool HandlePoolInfoCommand(char* args);
 
         bool HandleQuestAddCommand(char* args);
         bool HandleQuestRemoveCommand(char* args);
@@ -584,6 +589,7 @@ class ChatHandler
         void ShowQuestListHelper(uint32 questId, int32 loc_idx, Player* target = NULL);
         bool ShowPlayerListHelper(QueryResult* result, uint32* limit = NULL, bool title = true, bool error = true);
         void ShowSpellListHelper(Player* target, SpellEntry const* spellInfo, LocaleConstant loc);
+        void ShowPoolListHelper(uint16 pool_id);
         void ShowTicket(GMTicket const* ticket);
         void ShowTriggerListHelper(AreaTriggerEntry const * atEntry);
         void ShowTriggerTargetListHelper(uint32 id, AreaTrigger const* at, bool subpart = false);
