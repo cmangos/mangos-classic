@@ -31,6 +31,7 @@
 #include "DBCEnums.h"
 #include "DBCStores.h"
 #include "ObjectGuid.h"
+#include "PoolManager.h"
 
 struct InstanceTemplate;
 struct MapEntry;
@@ -95,6 +96,13 @@ class MapPersistentState
         }
         void SaveGORespawnTime(uint32 loguid, time_t t);
 
+        // pool system
+        void InitPools();
+        virtual SpawnedPoolData& GetSpawnedPoolData() =0;
+
+        template<typename T>
+        bool IsSpawnedPoolObject(uint32 db_guid_or_pool_id) { return GetSpawnedPoolData().IsSpawnedObject<T>(db_guid_or_pool_id); }
+
         // grid objects (Dynamic map/instance specific added/removed grid spawns from pool system/etc)
         MapCellObjectGuids const& GetCellObjectGuids(uint32 cell_id) { return m_gridObjectGuids[cell_id]; }
         void AddCreatureToGrid(uint32 guid, CreatureData const* data);
@@ -142,8 +150,12 @@ class WorldPersistentState : public MapPersistentState
 
         ~WorldPersistentState() {}
 
+        SpawnedPoolData& GetSpawnedPoolData() { return m_sharedSpawnedPoolData; }
     protected:
         bool CanBeUnload() const;                           // overwrite MapPersistentState::CanBeUnload
+
+    private:
+        static SpawnedPoolData m_sharedSpawnedPoolData;     // Pools spawns state for map, shared by all non-instanced maps
 };
 
 /*
@@ -165,6 +177,8 @@ class DungeonPersistentState : public MapPersistentState
         DungeonPersistentState(uint16 MapId, uint32 InstanceId, time_t resetTime, bool canReset);
 
         ~DungeonPersistentState();
+
+        SpawnedPoolData& GetSpawnedPoolData() { return m_spawnedPoolData; }
 
         InstanceTemplate const* GetTemplate() const;
 
@@ -214,6 +228,8 @@ class DungeonPersistentState : public MapPersistentState
            TODO: maybe it's enough to just store the number of players/groups */
         PlayerListType m_playerList;                        // lock MapPersistentState from unload
         GroupListType m_groupList;                          // lock MapPersistentState from unload
+
+        SpawnedPoolData m_spawnedPoolData;                  // Pools spawns state for map copy
 };
 
 class BattleGroundPersistentState : public MapPersistentState
@@ -227,8 +243,12 @@ class BattleGroundPersistentState : public MapPersistentState
 
         ~BattleGroundPersistentState() {}
 
+        SpawnedPoolData& GetSpawnedPoolData() { return m_spawnedPoolData; }
     protected:
         bool CanBeUnload() const;                           // overwrite MapPersistentState::CanBeUnload
+
+    private:
+        SpawnedPoolData m_spawnedPoolData;                  // Pools spawns state for map copy
 };
 
 enum ResetEventType
@@ -297,12 +317,15 @@ class MANGOS_DLL_DECL MapPersistentStateManager : public MaNGOS::Singleton<MapPe
         ~MapPersistentStateManager();
 
     public:                                                 // common for all MapPersistentState (sub)classes
+        // For proper work pool systems with shared pools state for non-instanceable maps need
+        // load persistent map states for any non-instanceable maps before init pool system
+        void InitWorldMaps();
         void LoadCreatureRespawnTimes();
         void LoadGameobjectRespawnTimes();
 
         // auto select appropriate MapPersistentState (sub)class by MapEntry, and autoselect appropriate way store (by instance/map id)
         // always return != NULL
-        MapPersistentState* AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, time_t resetTime, bool canReset, bool load = false);
+        MapPersistentState* AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, time_t resetTime, bool canReset, bool load = false, bool initPools = true);
 
         // search stored state, can be NULL in result
         MapPersistentState *GetPersistentState(uint32 mapId, uint32 InstanceId);
