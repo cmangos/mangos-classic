@@ -917,7 +917,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
 
     for(BattleGround::BattleGroundScoreMap::const_iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
     {
-        *data << uint64(itr->first);
+        *data << ObjectGuid(itr->first);
 
         Player *plr = sObjectMgr.GetPlayer(itr->first);
 
@@ -981,10 +981,10 @@ void BattleGroundMgr::BuildPlaySoundPacket(WorldPacket *data, uint32 soundid)
     *data << uint32(soundid);
 }
 
-void BattleGroundMgr::BuildPlayerLeftBattleGroundPacket(WorldPacket *data, const uint64& guid)
+void BattleGroundMgr::BuildPlayerLeftBattleGroundPacket(WorldPacket *data, ObjectGuid guid)
 {
     data->Initialize(SMSG_BATTLEGROUND_PLAYER_LEFT, 8);
-    *data << uint64(guid);
+    *data << ObjectGuid(guid);
 }
 
 void BattleGroundMgr::BuildPlayerJoinedBattleGroundPacket(WorldPacket *data, Player *plr)

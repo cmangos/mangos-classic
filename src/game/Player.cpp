@@ -13611,7 +13611,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     {
         BattleGround *currentBg = sBattleGroundMgr.GetBattleGround(m_bgData.bgInstanceID, BATTLEGROUND_TYPE_NONE);
 
-        bool player_at_bg = currentBg && currentBg->IsPlayerInBattleGround(GetGUID());
+        bool player_at_bg = currentBg && currentBg->IsPlayerInBattleGround(GetObjectGuid());
 
         if(player_at_bg && currentBg->GetStatus() != STATUS_WAIT_LEAVE)
         {
@@ -13621,8 +13621,8 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
             m_bgData.bgTypeID = currentBg->GetTypeID();     // bg data not marked as modified
 
             //join player to battleground group
-            currentBg->EventPlayerLoggedIn(this, GetGUID());
-            currentBg->AddOrSetPlayerToCorrectBgGroup(this, GetGUID(), m_bgData.bgTeam);
+            currentBg->EventPlayerLoggedIn(this, GetObjectGuid());
+            currentBg->AddOrSetPlayerToCorrectBgGroup(this, GetObjectGuid(), m_bgData.bgTeam);
 
             SetInviteForBattleGroundQueueType(bgQueueTypeId,currentBg->GetInstanceID());
         }
@@ -13630,7 +13630,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         {
             // leave bg
             if (player_at_bg)
-                currentBg->RemovePlayerAtLeave(GetGUID(), false, true);
+                currentBg->RemovePlayerAtLeave(GetObjectGuid(), false, true);
 
             // move to bg enter point
             const WorldLocation& _loc = GetBattleGroundEntryPoint();
@@ -17017,7 +17017,7 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
 {
     if(BattleGround *bg = GetBattleGround())
     {
-        bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
+        bg->RemovePlayerAtLeave(GetObjectGuid(), teleportToEntryPoint, true);
 
         // call after remove to be sure that player resurrected for correct cast
         if( !isGameMaster() && sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CAST_DESERTER) )
