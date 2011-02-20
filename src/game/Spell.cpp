@@ -885,6 +885,24 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     {
         if (real_caster)
             real_caster->SendSpellMiss(unit, m_spellInfo->Id, missInfo);
+
+        if(missInfo == SPELL_MISS_MISS || missInfo == SPELL_MISS_RESIST)
+        {
+            if(real_caster && real_caster != unit)
+            {
+                // can cause back attack (if detected)
+                if (!(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->Id) &&
+                    m_caster->isVisibleForOrDetect(unit, unit, false))
+                {
+                    if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
+                        ((Creature*)unit)->AI()->AttackedBy(real_caster);
+
+                    unit->AddThreat(real_caster);
+                    unit->SetInCombatWith(real_caster);
+                    real_caster->SetInCombatWith(unit);
+                }
+            }
+        }
     }
 
     // All calculated do it!
