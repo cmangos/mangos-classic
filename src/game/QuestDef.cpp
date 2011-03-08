@@ -179,17 +179,17 @@ uint32 Quest::XPValue( Player *pPlayer ) const
                 fullxp = RewMoneyMaxLevel / 0.6f;
 
             if( pLevel <= qLevel +  5 )
-                return (uint32)fullxp;
+                return uint32(ceilf(fullxp));
             else if( pLevel == qLevel +  6 )
-                return (uint32)(fullxp * 0.8f);
+                return uint32(ceilf(fullxp * 0.8f));
             else if( pLevel == qLevel +  7 )
-                return (uint32)(fullxp * 0.6f);
+                return uint32(ceilf(fullxp * 0.6f));
             else if( pLevel == qLevel +  8 )
-                return (uint32)(fullxp * 0.4f);
+                return uint32(ceilf(fullxp * 0.4f));
             else if( pLevel == qLevel +  9 )
-                return (uint32)(fullxp * 0.2f);
+                return uint32(ceilf(fullxp * 0.2f));
             else
-                return (uint32)(fullxp * 0.1f);
+                return uint32(ceilf(fullxp * 0.1f));
         }
     }
     return 0;
