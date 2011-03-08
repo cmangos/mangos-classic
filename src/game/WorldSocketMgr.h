@@ -30,6 +30,8 @@
 #include <ace/Singleton.h>
 #include <ace/Thread_Mutex.h>
 
+#include <string>
+
 class WorldSocket;
 class ReactorRunnable;
 class ACE_Event_Handler;
@@ -42,7 +44,7 @@ public:
   friend class ACE_Singleton<WorldSocketMgr,ACE_Thread_Mutex>;
 
   /// Start network, listen at address:port .
-  int StartNetwork (ACE_UINT16 port, const char* address);
+  int StartNetwork (ACE_UINT16 port, std::string& address);
 
   /// Stops all network threads, It will wait for all running threads .
   void StopNetwork ();
