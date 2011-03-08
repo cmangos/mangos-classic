@@ -826,6 +826,8 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     m_Crypt.SetKey (K.AsByteArray(), 40 );
     m_Crypt.Init ();
 
+    m_Session->LoadTutorialsData();
+
     // In case needed sometime the second arg is in microseconds 1 000 000 = 1 sec
     ACE_OS::sleep (ACE_Time_Value (0, 10000));
 

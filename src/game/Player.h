@@ -661,7 +661,6 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADSPELLS,
     PLAYER_LOGIN_QUERY_LOADQUESTSTATUS,
     PLAYER_LOGIN_QUERY_LOADHONORCP,
-    PLAYER_LOGIN_QUERY_LOADTUTORIALS,                       // common for all characters for some account at specific realm
     PLAYER_LOGIN_QUERY_LOADREPUTATION,
     PLAYER_LOGIN_QUERY_LOADINVENTORY,
     PLAYER_LOGIN_QUERY_LOADITEMLOOT,
@@ -1284,22 +1283,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             SetUInt32Value (PLAYER_FIELD_COINAGE, value);
             MoneyChanged( value );
-        }
-
-        uint32 GetTutorialInt(uint32 intId )
-        {
-            MANGOS_ASSERT( (intId < 8) );
-            return m_Tutorials[intId];
-        }
-
-        void SetTutorialInt(uint32 intId, uint32 value)
-        {
-            MANGOS_ASSERT( (intId < 8) );
-            if(m_Tutorials[intId]!=value)
-            {
-                m_Tutorials[intId] = value;
-                m_TutorialsChanged = true;
-            }
         }
 
         QuestStatusMap& getQuestStatusMap() { return mQuestStatus; };
@@ -2099,7 +2082,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadGroup(QueryResult *result);
         void _LoadSkills(QueryResult *result);
         void _LoadSpells(QueryResult *result);
-        void _LoadTutorials(QueryResult *result);
         void _LoadFriendList(QueryResult *result);
         bool _LoadHomeBind(QueryResult *result);
         void _LoadBGData(QueryResult* result);
@@ -2117,7 +2099,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveQuestStatus();
         void _SaveSkills();
         void _SaveSpells();
-        void _SaveTutorials();
         void _SaveBGData();
         void _SaveStats();
 
@@ -2203,9 +2184,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         int m_cinematic;
 
         TradeData* m_trade;
-
-        uint32 m_Tutorials[8];
-        bool   m_TutorialsChanged;
 
         uint32 m_drunkTimer;
         uint16 m_drunk;

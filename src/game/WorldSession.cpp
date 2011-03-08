@@ -43,7 +43,8 @@ WorldSession::WorldSession(uint32 id, WorldSocket *sock, AccountTypes sec, time_
 LookingForGroup_auto_join(false), LookingForGroup_auto_add(false), m_muteTime(mute_time),
 _player(NULL), m_Socket(sock),_security(sec), _accountId(id),
 m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
-_logoutTime(0), m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false), m_latency(0)
+_logoutTime(0), m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
+m_latency(0), m_tutorialState(TUTORIALDATA_UNCHANGED)
 {
     if (sock)
     {
@@ -569,6 +570,58 @@ void WorldSession::SendAuthWaitQue(uint32 position)
         packet << uint32 (position);
         SendPacket(&packet);
     }
+}
+
+void WorldSession::LoadTutorialsData()
+{
+    for ( int aX = 0 ; aX < 8 ; ++aX )
+        m_Tutorials[ aX ] = 0;
+
+    QueryResult *result = CharacterDatabase.PQuery("SELECT tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7 FROM character_tutorial WHERE account = '%u'", GetAccountId());
+
+    if(!result)
+    {
+        m_tutorialState = TUTORIALDATA_NEW;
+        return;
+    }
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        for (int iI = 0; iI < 8; ++iI)
+            m_Tutorials[iI] = fields[iI].GetUInt32();
+    }
+    while( result->NextRow() );
+
+    delete result;
+
+    m_tutorialState = TUTORIALDATA_UNCHANGED;
+}
+
+void WorldSession::SendTutorialsData()
+{
+    WorldPacket data(SMSG_TUTORIAL_FLAGS, 4*8);
+    for(uint32 i = 0; i < 8; ++i)
+        data << m_Tutorials[i];
+    SendPacket(&data);
+}
+
+void WorldSession::SaveTutorialsData()
+{
+    switch(m_tutorialState)
+    {
+        case TUTORIALDATA_CHANGED:
+            CharacterDatabase.PExecute("UPDATE character_tutorial SET tut0='%u', tut1='%u', tut2='%u', tut3='%u', tut4='%u', tut5='%u', tut6='%u', tut7='%u' WHERE account = '%u'",
+                m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7], GetAccountId());
+            break;
+        case TUTORIALDATA_NEW:
+            CharacterDatabase.PExecute("INSERT INTO character_tutorial (account,tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
+                GetAccountId(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
+            break;
+    }
+
+    m_tutorialState = TUTORIALDATA_UNCHANGED;
 }
 
 void WorldSession::ExecuteOpcode( OpcodeHandler const& opHandle, WorldPacket* packet )

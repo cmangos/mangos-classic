@@ -69,6 +69,13 @@ enum PartyResult
     ERR_INVITE_RESTRICTED               = 13,
 };
 
+enum TutorialDataState
+{
+    TUTORIALDATA_UNCHANGED = 0,
+    TUTORIALDATA_CHANGED   = 1,
+    TUTORIALDATA_NEW       = 2
+};
+
 /// Player session in the World
 class MANGOS_DLL_SPEC WorldSession
 {
@@ -158,6 +165,24 @@ class MANGOS_DLL_SPEC WorldSession
         void SendStablePet(ObjectGuid guid);
         void SendStableResult(uint8 res);
         bool CheckStableMaster(ObjectGuid guid);
+
+        void LoadTutorialsData();
+        void SendTutorialsData();
+        void SaveTutorialsData();
+        uint32 GetTutorialInt(uint32 intId )
+        {
+            return m_Tutorials[intId];
+        }
+
+        void SetTutorialInt(uint32 intId, uint32 value)
+        {
+            if(m_Tutorials[intId] != value)
+            {
+                m_Tutorials[intId] = value;
+                if(m_tutorialState == TUTORIALDATA_UNCHANGED)
+                    m_tutorialState = TUTORIALDATA_CHANGED;
+            }
+        }
 
         bool SendItemInfo( uint32 itemid, WorldPacket data );
 
@@ -605,6 +630,8 @@ class MANGOS_DLL_SPEC WorldSession
         LocaleConstant m_sessionDbcLocale;
         int m_sessionDbLocaleIndex;
         uint32 m_latency;
+        uint32 m_Tutorials[8];
+        TutorialDataState m_tutorialState;
         ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
 };
 #endif
