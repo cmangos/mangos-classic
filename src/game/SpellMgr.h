@@ -722,8 +722,10 @@ class SpellMgr
         uint64 GetSpellAffectMask(uint32 spellId, SpellEffectIndex effectId) const
         {
             SpellAffectMap::const_iterator itr = mSpellAffectMap.find((spellId<<8) + effectId);
-            if( itr != mSpellAffectMap.end( ) )
+            if (itr != mSpellAffectMap.end())
                 return itr->second;
+            if (SpellEntry const* spellEntry=sSpellStore.LookupEntry(spellId))
+                return spellEntry->EffectItemType[effectId];
             return 0;
         }
 
