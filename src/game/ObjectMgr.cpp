@@ -4077,7 +4077,7 @@ void ObjectMgr::LoadInstanceTemplate()
 
     for(uint32 i = 0; i < sInstanceTemplate.MaxEntry; i++)
     {
-        InstanceTemplate * temp = const_cast<InstanceTemplate*>(GetInstanceTemplate(i));
+        InstanceTemplate const* temp = GetInstanceTemplate(i);
         if (!temp)
             continue;
 
@@ -4104,7 +4104,7 @@ void ObjectMgr::LoadInstanceTemplate()
             {
                 sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad parent map id %u for instance template %d template!",
                     parentEntry->MapID, temp->map);
-                temp->parent = 0;
+                const_cast<InstanceTemplate*>(temp)->parent = 0;
                 continue;
             }
 
@@ -4112,7 +4112,7 @@ void ObjectMgr::LoadInstanceTemplate()
             {
                 sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: parent point to continent map id %u for instance template %d template, ignored, need be set only for non-continent parents!",
                     parentEntry->MapID,temp->map);
-                temp->parent = 0;
+                const_cast<InstanceTemplate*>(temp)->parent = 0;
                 continue;
             }
         }
@@ -4145,7 +4145,7 @@ void ObjectMgr::LoadInstanceTemplate()
 
         // the reset_delay must be at least one day
         if (temp->reset_delay)
-            temp->reset_delay = std::max((uint32)1, (uint32)(temp->reset_delay * sWorld.getConfig(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME)));
+            const_cast<InstanceTemplate*>(temp)->reset_delay = std::max((uint32)1, (uint32)(temp->reset_delay * sWorld.getConfig(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME)));
     }
 
     sLog.outString( ">> Loaded %u Instance Template definitions", sInstanceTemplate.RecordCount );
