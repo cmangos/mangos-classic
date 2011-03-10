@@ -6914,6 +6914,8 @@ uint32 Unit::MeleeDamageBonusDone(Unit *pVictim, uint32 pdamage,WeaponAttackType
     // final calculation
     // =================
 
+    float DoneTotal = 0.0f;
+
     // scaling of non weapon based spells
     if (!isWeaponDamageBasedSpell)
     {
@@ -6931,19 +6933,19 @@ uint32 Unit::MeleeDamageBonusDone(Unit *pVictim, uint32 pdamage,WeaponAttackType
             coeff =  damagetype == DOT ? bonus->dot_damage : bonus->direct_damage;
 
             if (bonus->ap_bonus)
-                DoneFlat += bonus->ap_bonus * (GetTotalAttackPowerValue(BASE_ATTACK) + APbonus);
+                DoneTotal += bonus->ap_bonus * (GetTotalAttackPowerValue(BASE_ATTACK) + APbonus);
         }
         // Default calculation
         else if (DoneFlat)
             coeff = CalculateDefaultCoefficient(spellProto, damagetype);
 
-        DoneFlat  *= coeff * LvlPenalty;
+        DoneTotal += DoneFlat * coeff * LvlPenalty;
     }
     // weapon damage based spells
     else if( APbonus || DoneFlat )
     {
         bool normalized = spellProto ? IsSpellHaveEffect(spellProto, SPELL_EFFECT_NORMALIZED_WEAPON_DMG) : false;
-        DoneFlat += int32(APbonus / 14.0f * GetAPMultiplier(attType,normalized));
+        DoneTotal += int32(APbonus / 14.0f * GetAPMultiplier(attType,normalized));
 
         // for weapon damage based spells we still have to apply damage done percent mods
         // (that are already included into pdamage) to not-yet included DoneFlat
@@ -6957,10 +6959,12 @@ uint32 Unit::MeleeDamageBonusDone(Unit *pVictim, uint32 pdamage,WeaponAttackType
             case RANGED_ATTACK: unitMod = UNIT_MOD_DAMAGE_RANGED;   break;
         }
 
-        DoneFlat *= GetModifierValue(unitMod, TOTAL_PCT);
+        DoneTotal += DoneFlat;
+
+        DoneTotal *= GetModifierValue(unitMod, TOTAL_PCT);
     }
 
-    float tmpDamage = float(int32(pdamage) + DoneFlat * int32(stack)) * DonePercent;
+    float tmpDamage = float(int32(pdamage) + DoneTotal * int32(stack)) * DonePercent;
 
     // apply spellmod to Done damage
     if(spellProto)
