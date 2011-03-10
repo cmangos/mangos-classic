@@ -921,7 +921,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 if (Player* modOwner = m_caster->GetSpellModOwner())
                     modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost,this);
 
-                int32 dmg = m_caster->SpellDamageBonus(m_caster, m_spellInfo,uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
+                int32 dmg = m_caster->SpellDamageBonusDone(m_caster, m_spellInfo, uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
+                dmg = m_caster->SpellDamageBonusTaken(m_caster, m_spellInfo, dmg, SPELL_DIRECT_DAMAGE);
 
                 if (int32(m_caster->GetHealth()) > dmg)
                 {
@@ -1605,7 +1606,8 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
     int32 curPower = unitTarget->GetPower(drain_power);
 
     //add spell damage bonus
-    damage = m_caster->SpellDamageBonus(unitTarget,m_spellInfo,uint32(damage),SPELL_DIRECT_DAMAGE);
+    damage = m_caster->SpellDamageBonusDone(unitTarget,m_spellInfo,uint32(damage),SPELL_DIRECT_DAMAGE);
+    damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage),SPELL_DIRECT_DAMAGE);
 
     int32 new_damage;
     if(curPower < damage)
@@ -1713,14 +1715,14 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
                 idx++;
             }
 
-            int32 tickheal = caster->SpellHealingBonus(unitTarget, targetAura->GetSpellProto(), targetAura->GetModifier()->m_amount, DOT);
-            int32 tickcount = GetSpellDuration(targetAura->GetSpellProto()) / targetAura->GetSpellProto()->EffectAmplitude[idx];
-            unitTarget->RemoveAurasDueToSpell(targetAura->GetId());
+            int32 tickheal = targetAura->GetModifier()->m_amount;
+            int32 tickcount = GetSpellDuration(targetAura->GetSpellProto()) / targetAura->GetSpellProto()->EffectAmplitude[idx] - 1;
 
             addhealth += tickheal * tickcount;
         }
-        else
-            addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, addhealth, HEAL);
+
+        addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
 
         m_healing += addhealth;
     }
@@ -1736,7 +1738,9 @@ void Spell::EffectHealMechanical(SpellEffectIndex /*eff_idx*/)
         if (!caster)
             return;
 
-        uint32 addhealth = caster->SpellHealingBonus(unitTarget, m_spellInfo, uint32(damage), HEAL);
+        uint32 addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, damage, HEAL);
+        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+
         caster->DealHeal(unitTarget, addhealth, m_spellInfo);
     }
 }
@@ -1766,7 +1770,8 @@ void Spell::EffectHealthLeech(SpellEffectIndex eff_idx)
     uint32 heal = uint32(damage*multiplier);
     if (m_caster->isAlive())
     {
-        heal = m_caster->SpellHealingBonus(m_caster, m_spellInfo, heal, HEAL);
+        heal = m_caster->SpellHealingBonusTaken(m_caster, m_spellInfo, heal, HEAL);
+
         m_caster->DealHeal(m_caster, heal, m_spellInfo);
     }
 }
@@ -3309,8 +3314,8 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
             // Seal of Command - receive benefit from Spell Damage and Healing
             if(m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000002000000))
             {
-                spell_bonus += int32(0.20f*m_caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellInfo)));
-                spell_bonus += int32(0.29f*m_caster->SpellBaseDamageBonusForVictim(GetSpellSchoolMask(m_spellInfo), unitTarget));
+                spell_bonus += int32(0.20f*m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo)));
+                spell_bonus += int32(0.29f*unitTarget->SpellBaseDamageBonusTaken(GetSpellSchoolMask(m_spellInfo)));
             }
             break;
         }
