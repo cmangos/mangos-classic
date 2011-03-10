@@ -13290,7 +13290,7 @@ void Player::SendQuestConfirmAccept(const Quest* pQuest, Player* pReceiver)
         data << GetObjectGuid();
         pReceiver->GetSession()->SendPacket(&data);
 
-        sLog.outDebug("WORLD: Sent SMSG_QUEST_CONFIRM_ACCEPT");
+        DEBUG_LOG("WORLD: Sent SMSG_QUEST_CONFIRM_ACCEPT");
     }
 }
 
