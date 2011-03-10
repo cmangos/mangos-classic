@@ -918,7 +918,13 @@ enum MangosStrings
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,
-    // Room for more debug                1201-1299 not used
+    //                                    1201 used in master branch
+    LANG_SPELLCOEFS                     = 1202,
+    LANG_DIRECT_HEAL                    = 1203,
+    LANG_DIRECT_DAMAGE                  = 1204,
+    LANG_DOT_HEAL                       = 1205,
+    LANG_DOT_DAMAGE                     = 1206,
+    // Room for more debug                1207-1299 not used
 
     // Reserved for old client release branches specific strings
     // Room for old clients 2.x           1300-1399 not used

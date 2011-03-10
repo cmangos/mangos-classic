@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1398_s0859_02_mangos_pool_gameobject_template` bit(1) default NULL
+  `required_z1428_s0902_02_mangos_command` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -479,6 +479,7 @@ INSERT INTO `command` VALUES
 ('debug play sound',1,'Syntax: .debug play sound #soundid\r\n\r\nPlay sound with #soundid.\r\nSound will be play only for you. Other players do not hear this.\r\nWarning: client may have more 5000 sounds...'),
 ('debug setitemvalue',3,'Syntax: .debug setitemvalue #guid #field [int|hex|bit|float] #value\r\n\r\nSet the field #field of the item #itemguid in your inventroy to value #value.\r\n\r\nUse type arg for set input format: int (decimal number), hex (hex value), bit (bitstring), float. By default expect integer input format.'),
 ('debug setvalue',3,'Syntax: .debug setvalue #field [int|hex|bit|float] #value\r\n\r\nSet the field #field of the selected target to value #value. If no target is selected, set the content of your field.\r\n\r\nUse type arg for set input format: int (decimal number), hex (hex value), bit (bitstring), float. By default expect integer input format.'),
+('debug spellcoefs',3,'Syntax: .debug spellcoefs #spellid\r\n\r\nShow default calculated and DB stored coefficients for direct/dot heal/damage.'),
 ('debug spellmods',3,'Syntax: .debug spellmods (flat|pct) #spellMaskBitIndex #spellModOp #value\r\n\r\nSet at client side spellmod affect for spell that have bit set with index #spellMaskBitIndex in spell family mask for values dependent from spellmod #spellModOp to #value.'),
 ('delticket',2,'Syntax: .delticket all\r\n        .delticket #num\r\n        .delticket $character_name\r\n\rall to dalete all tickets at server, $character_name to delete ticket of this character, #num to delete ticket #num.'),
 ('demorph',2,'Syntax: .demorph\r\n\r\nDemorph the selected player.'),
@@ -3691,6 +3692,11 @@ INSERT INTO `mangos_string` VALUES
 (1168,'Scripting library reloaded.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1169,'Scripting library build for different mangosd revision.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1200,'You try to view cinemitic %u but it doesn\'t exist.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1202,'Spell %u %s = %f (*1.88 = %f) DB = %f AP = %f',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1203,'direct heal',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1204,'direct damage',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1205,'dot heal',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(1206,'dot damage',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1400,'Private ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1401,'Corporal ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1402,'Sergeant ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
