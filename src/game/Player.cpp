@@ -11239,8 +11239,11 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId)
 
     GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(menuId);
 
-    // if default menuId and no menu options exist for this, use options from default options
-    if (pMenuItemBounds.first == pMenuItemBounds.second && menuId == GetDefaultGossipMenuForSource(pSource))
+    // prepares quest menu when true
+    bool canSeeQuests = menuId == GetDefaultGossipMenuForSource(pSource);
+
+    // if canSeeQuests (the default, top level menu) and no menu options exist for this, use options from default options
+    if (pMenuItemBounds.first == pMenuItemBounds.second && canSeeQuests)
         pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(0);
 
     bool canTalkToCredit = pSource->GetTypeId() == TYPEID_UNIT;
@@ -11250,13 +11253,25 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId)
         bool hasMenuItem = true;
 
         if (itr->second.cond_1 && !sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_1))
+        {
+            if (itr->second.option_id == GOSSIP_OPTION_QUESTGIVER)
+                canSeeQuests = false;
             continue;
+        }
 
         if (itr->second.cond_2 && !sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_2))
+        {
+            if (itr->second.option_id == GOSSIP_OPTION_QUESTGIVER)
+                canSeeQuests = false;
             continue;
+        }
 
         if (itr->second.cond_3 && !sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_3))
+        {
+            if (itr->second.option_id == GOSSIP_OPTION_QUESTGIVER)
+                canSeeQuests = false;
             continue;
+        }
 
         if (pSource->GetTypeId() == TYPEID_UNIT)
         {
@@ -11274,7 +11289,6 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId)
                         canTalkToCredit = false;
                     break;
                 case GOSSIP_OPTION_QUESTGIVER:
-                    PrepareQuestMenu(pSource->GetObjectGuid());
                     hasMenuItem = false;
                     break;
                 case GOSSIP_OPTION_ARMORER:
@@ -11339,8 +11353,6 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId)
             switch(itr->second.option_id)
             {
                 case GOSSIP_OPTION_QUESTGIVER:
-                    if (pGo->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER)
-                        PrepareQuestMenu(pSource->GetObjectGuid());
                     hasMenuItem = false;
                     break;
                 case GOSSIP_OPTION_GOSSIP:
@@ -11378,6 +11390,9 @@ void Player::PrepareGossipMenu(WorldObject *pSource, uint32 menuId)
             pMenu->GetGossipMenu().AddGossipMenuItemData(itr->second.action_menu_id, itr->second.action_poi_id, itr->second.action_script_id);
         }
     }
+
+    if (canSeeQuests)
+        PrepareQuestMenu(pSource->GetObjectGuid());
 
     if (canTalkToCredit)
     {
