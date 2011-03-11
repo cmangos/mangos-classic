@@ -9856,43 +9856,6 @@ void Unit::RemovePetAura(PetAura const* petSpell)
         pet->RemoveAurasDueToSpell(petSpell->GetAura(pet->GetEntry()));
 }
 
-Pet* Unit::CreateTamedPetFrom(Creature* creatureTarget,uint32 spell_id)
-{
-    Pet* pet = new Pet(HUNTER_PET);
-
-    if(!pet->CreateBaseAtCreature(creatureTarget))
-    {
-        delete pet;
-        return NULL;
-    }
-
-    pet->SetOwnerGuid(GetObjectGuid());
-    pet->SetCreatorGuid(GetObjectGuid());
-    pet->setFaction(getFaction());
-    pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, spell_id);
-
-    if(GetTypeId()==TYPEID_PLAYER)
-        pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-
-    if(IsPvP())
-        pet->SetPvP(true);
-
-    if(!pet->InitStatsForLevel(creatureTarget->getLevel()))
-    {
-        sLog.outError("Pet::InitStatsForLevel() failed for creature (Entry: %u)!",creatureTarget->GetEntry());
-        delete pet;
-        return NULL;
-    }
-
-    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
-    // this enables pet details window (Shift+P)
-    pet->AIM_Initialize();
-    pet->InitPetCreateSpells();
-    pet->SetHealth(pet->GetMaxHealth());
-
-    return pet;
-}
-
 bool Unit::IsTriggeredAtSpellProcEvent(Unit *pVictim, Aura* aura, SpellEntry const* procSpell, uint32 procFlag, uint32 procExtra, WeaponAttackType attType, bool isVictim, bool active, SpellProcEventEntry const*& spellProcEvent )
 {
     SpellEntry const* spellProto = aura->GetSpellProto();

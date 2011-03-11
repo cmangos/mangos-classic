@@ -3024,9 +3024,36 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     //SendChannelUpdate(0);
     finish();
 
-    Pet* pet = plr->CreateTamedPetFrom(creatureTarget, m_spellInfo->Id);
-    if(!pet)                                                // in versy specific state like near world end/etc.
+    Pet* pet = new Pet(HUNTER_PET);
+
+    if(!pet->CreateBaseAtCreature(creatureTarget))
+    {
+        delete pet;
         return;
+    }
+
+    pet->SetOwnerGuid(plr->GetObjectGuid());
+    pet->SetCreatorGuid(plr->GetObjectGuid());
+    pet->setFaction(plr->getFaction());
+    pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+
+    pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
+    if (plr->IsPvP())
+        pet->SetPvP(true);
+
+    if (!pet->InitStatsForLevel(creatureTarget->getLevel()))
+    {
+        sLog.outError("Pet::InitStatsForLevel() failed for creature (Entry: %u)!",creatureTarget->GetEntry());
+        delete pet;
+        return;
+    }
+
+    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
+    // this enables pet details window (Shift+P)
+    pet->AIM_Initialize();
+    pet->InitPetCreateSpells();
+    pet->SetHealth(pet->GetMaxHealth());
 
     // "kill" original creature
     creatureTarget->ForcedDespawn();
