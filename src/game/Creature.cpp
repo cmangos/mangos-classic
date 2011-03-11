@@ -1860,18 +1860,15 @@ bool Creature::LoadCreatureAddon(bool reload)
                 continue;
             }
 
-            // skip already applied aura
-            if(HasAura(cAura->spell_id,cAura->effect_idx))
+            if (HasAura(cAura->spell_id))
             {
                 if(!reload)
-                    sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has duplicate aura (spell %u effect %u) in `auras` field.",GetGUIDLow(),GetEntry(),cAura->spell_id,cAura->effect_idx);
+                    sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u) has duplicate spell %u in `auras` field.", GetGUIDLow(), GetEntry(), cAura->spell_id);
 
                 continue;
             }
 
-            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, cAura->effect_idx, NULL, this, this, 0);
-            AddAura(AdditionalAura);
-            DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell: %u with Aura %u added to creature (GUIDLow: %u Entry: %u )", cAura->spell_id, AdditionalSpellInfo->EffectApplyAuraName[EFFECT_INDEX_0],GetGUIDLow(),GetEntry());
+            CastSpell(this, AdditionalSpellInfo, true);
         }
     }
     return true;
