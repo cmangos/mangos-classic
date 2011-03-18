@@ -64,8 +64,8 @@ void SQLStorage::Free ()
     delete [] data;
 }
 
-void SQLStorage::Load()
+void SQLStorage::Load(bool error_at_empty /*= true*/)
 {
     SQLStorageLoader loader;
-    loader.Load(*this);
+    loader.Load(*this, error_at_empty);
 }

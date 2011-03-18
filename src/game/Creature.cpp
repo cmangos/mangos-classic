@@ -1277,13 +1277,18 @@ void Creature::LoadEquipment(uint32 equip_entry, bool force)
         return;
     }
 
-    EquipmentInfo const *einfo = sObjectMgr.GetEquipmentInfo(equip_entry);
-    if (!einfo)
-        return;
-
-    m_equipmentId = equip_entry;
-    for (uint8 i = 0; i < MAX_VIRTUAL_ITEM_SLOT; ++i)
-        SetVirtualItemRaw(VirtualItemSlot(i), einfo->equipmodel[i], einfo->equipinfo[i], einfo->equipslot[i]);
+    if (EquipmentInfo const *einfo = sObjectMgr.GetEquipmentInfo(equip_entry))
+    {
+        m_equipmentId = equip_entry;
+        for (uint8 i = 0; i < MAX_VIRTUAL_ITEM_SLOT; ++i)
+            SetVirtualItem(VirtualItemSlot(i), einfo->equipentry[i]);
+    }
+    else if (EquipmentInfoRaw const *einfo = sObjectMgr.GetEquipmentInfoRaw(equip_entry))
+    {
+        m_equipmentId = equip_entry;
+        for (uint8 i = 0; i < MAX_VIRTUAL_ITEM_SLOT; ++i)
+            SetVirtualItemRaw(VirtualItemSlot(i), einfo->equipmodel[i], einfo->equipinfo[i], einfo->equipslot[i]);
+    }
 }
 
 bool Creature::HasQuest(uint32 quest_id) const
