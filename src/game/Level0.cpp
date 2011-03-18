@@ -169,9 +169,9 @@ bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
     std::list< std::pair<std::string, bool> > names;
 
     {
-        HashMapHolder<Player>::MapType &m = HashMapHolder<Player>::GetContainer();
-        HashMapHolder<Player>::MapType::const_iterator itr = m.begin();
-        for(; itr != m.end(); ++itr)
+        HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
+        HashMapHolder<Player>::MapType &m = sObjectAccessor.GetPlayers();
+        for(HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
         {
             AccountTypes itr_sec = itr->second->GetSession()->GetSecurity();
             if ((itr->second->isGameMaster() || (itr_sec > SEC_PLAYER && itr_sec <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&
