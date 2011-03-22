@@ -546,7 +546,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (!m_originalCaster || m_originalCaster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    m_originalCaster->CastSpell(unitTarget, 13481, true);
+                    m_originalCaster->CastSpell(unitTarget, 13481, true, NULL, NULL, m_originalCasterGUID, m_spellInfo);
                     return;
                 }
                 case 13567:                                 // Dummy Trigger
