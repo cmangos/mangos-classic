@@ -216,7 +216,7 @@ class MANGOS_DLL_SPEC WorldSession
         bool LookingForGroup_auto_join;
         bool LookingForGroup_auto_add;
 
-        bool BuildPartyMemberStatsChangedPacket(Player *player, WorldPacket *data);
+        void BuildPartyMemberStatsChangedPacket(Player *player, WorldPacket *data);
 
         void DoLootRelease(ObjectGuid lguid);
 
