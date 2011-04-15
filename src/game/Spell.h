@@ -426,6 +426,8 @@ class Spell
         void CastTriggerSpells();
 
         void CleanupTargetList();
+        void ClearCastItem();
+
     protected:
         bool HasGlobalCooldown();
         void TriggerGlobalCooldown();
