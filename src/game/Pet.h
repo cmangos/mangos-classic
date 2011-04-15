@@ -184,6 +184,7 @@ class Pet : public Creature
                 return m_autospells[pos];
         }
 
+        void RegenerateAll(uint32 update_diff);             // overwrite Creature::RegenerateAll
         void RegenerateFocus();
         void LooseHappiness();
         void TickLoyaltyChange();

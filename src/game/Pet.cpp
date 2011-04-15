@@ -562,35 +562,6 @@ void Pet::Update(uint32 update_diff, uint32 diff)
                     return;
                 }
             }
-
-            if(getPetType() != HUNTER_PET)
-                break;
-
-            //regenerate Focus
-            if(m_regenTimer <= update_diff)
-            {
-                RegenerateFocus();
-                m_regenTimer = 4000;
-            }
-            else
-                m_regenTimer -= update_diff;
-
-            if(m_happinessTimer <= update_diff)
-            {
-                LooseHappiness();
-                m_happinessTimer = 7500;
-            }
-            else
-                m_happinessTimer -= update_diff;
-
-            if(m_loyaltyTimer <= diff)
-            {
-                TickLoyaltyChange();
-                m_loyaltyTimer = 12000;
-            }
-            else
-                m_loyaltyTimer -= diff;
-
             break;
         }
         default:
@@ -598,6 +569,46 @@ void Pet::Update(uint32 update_diff, uint32 diff)
     }
 
     Creature::Update(update_diff, diff);
+}
+
+void Pet::RegenerateAll( uint32 update_diff )
+{
+    //regenerate Focus
+    if(m_regenTimer <= update_diff)
+    {
+        if(getPetType() == HUNTER_PET)
+            RegenerateFocus();
+
+        if (!isInCombat() || IsPolymorphed())
+            RegenerateHealth();
+
+        RegenerateMana();
+
+
+        m_regenTimer = 4000;
+    }
+    else
+        m_regenTimer -= update_diff;
+
+    if(getPetType() != HUNTER_PET)
+        return;
+
+    if(m_happinessTimer <= update_diff)
+    {
+        LooseHappiness();
+        m_happinessTimer = 7500;
+    }
+    else
+        m_happinessTimer -= update_diff;
+
+    if(m_loyaltyTimer <= update_diff)
+    {
+        TickLoyaltyChange();
+        m_loyaltyTimer = 12000;
+    }
+    else
+        m_loyaltyTimer -= update_diff;
+
 }
 
 void Pet::RegenerateFocus()
