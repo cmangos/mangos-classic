@@ -53,7 +53,7 @@ Map::~Map()
     UnloadAll(true);
 
     if(!m_scriptSchedule.empty())
-        sWorld.DecreaseScheduledScriptCount(m_scriptSchedule.size());
+        sScriptMgr.DecreaseScheduledScriptCount(m_scriptSchedule.size());
 
     if (m_persistentState)
         m_persistentState->SetUsedByMapState(NULL);         // field pointer can be deleted after this
@@ -1714,11 +1714,11 @@ void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, O
         sa.ownerGUID  = ownerGUID;
 
         sa.script = &iter->second;
-        m_scriptSchedule.insert(std::pair<time_t, ScriptAction>(time_t(sWorld.GetGameTime() + iter->first), sa));
+        m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(sWorld.GetGameTime() + iter->first), sa));
         if (iter->first == 0)
             immedScript = true;
 
-        sWorld.IncreaseScheduledScriptsCount();
+        sScriptMgr.IncreaseScheduledScriptsCount();
     }
     ///- If one of the effects should be immediate, launch the script execution
     if (immedScript)
@@ -1740,9 +1740,9 @@ void Map::ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* sou
     sa.ownerGUID  = ownerGUID;
 
     sa.script = &script;
-    m_scriptSchedule.insert(std::pair<time_t, ScriptAction>(time_t(sWorld.GetGameTime() + delay), sa));
+    m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(sWorld.GetGameTime() + delay), sa));
 
-    sWorld.IncreaseScheduledScriptsCount();
+    sScriptMgr.IncreaseScheduledScriptsCount();
 
     ///- If effects should be immediate, launch the script execution
     if(delay == 0)
@@ -1756,7 +1756,7 @@ void Map::ScriptsProcess()
         return;
 
     ///- Process overdue queued scripts
-    std::multimap<time_t, ScriptAction>::iterator iter = m_scriptSchedule.begin();
+    ScriptScheduleMap::iterator iter = m_scriptSchedule.begin();
     // ok as multimap is a *sorted* associative container
     while (!m_scriptSchedule.empty() && (iter->first <= sWorld.GetGameTime()))
     {
@@ -2838,9 +2838,9 @@ void Map::ScriptsProcess()
         }
 
         m_scriptSchedule.erase(iter);
-        sWorld.DecreaseScheduledScriptCount();
-
         iter = m_scriptSchedule.begin();
+
+        sScriptMgr.DecreaseScheduledScriptCount();
     }
 }
 
