@@ -8067,118 +8067,12 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
         if (GetTypeId() == TYPEID_PLAYER && spellProcEvent && spellProcEvent->cooldown)
             cooldown = spellProcEvent->cooldown;
 
-        switch(auraModifier->m_auraname)
+        bool procResult = (*this.*AuraProcHandler[auraModifier->m_auraname])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
+
+        if (!procResult)
         {
-            case SPELL_AURA_PROC_TRIGGER_SPELL:
-            {
-                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: casting spell %u (triggered by %s aura of spell %u)", spellInfo->Id,(isVictim?"a victim's":"an attacker's"), triggeredByAura->GetId());
-                // Don`t drop charge or add cooldown for not started trigger
-                if (!HandleProcTriggerSpell(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown))
-                {
-                    triggeredByAura->SetInUse(false);
-                    continue;
-                }
-                break;
-            }
-            case SPELL_AURA_PROC_TRIGGER_DAMAGE:
-            {
-                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: doing %u damage from spell id %u (triggered by %s aura of spell %u)", auraModifier->m_amount, spellInfo->Id, (isVictim?"a victim's":"an attacker's"), triggeredByAura->GetId());
-                SpellNonMeleeDamage damageInfo(this, pTarget, spellInfo->Id, SpellSchools(spellInfo->School));
-                CalculateSpellDamage(&damageInfo, auraModifier->m_amount, spellInfo);
-                damageInfo.target->CalculateAbsorbResistBlock(this, &damageInfo, spellInfo);
-                DealDamageMods(damageInfo.target,damageInfo.damage,&damageInfo.absorb);
-                SendSpellNonMeleeDamageLog(&damageInfo);
-                DealSpellDamage(&damageInfo, true);
-                break;
-            }
-            case SPELL_AURA_MANA_SHIELD:
-            case SPELL_AURA_DUMMY:
-            {
-                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: casting spell id %u (triggered by %s dummy aura of spell %u)", spellInfo->Id,(isVictim?"a victim's":"an attacker's"), triggeredByAura->GetId());
-                if (!HandleDummyAuraProc(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown))
-                {
-                    triggeredByAura->SetInUse(false);
-                    continue;
-                }
-                break;
-            }
-            case SPELL_AURA_MOD_HASTE:
-            {
-                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: casting spell id %u (triggered by %s haste aura of spell %u)", spellInfo->Id,(isVictim?"a victim's":"an attacker's"), triggeredByAura->GetId());
-                if (!HandleHasteAuraProc(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown))
-                {
-                    triggeredByAura->SetInUse(false);
-                    continue;
-                }
-                break;
-            }
-            case SPELL_AURA_OVERRIDE_CLASS_SCRIPTS:
-            {
-                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: casting spell id %u (triggered by %s aura of spell %u)", spellInfo->Id,(isVictim?"a victim's":"an attacker's"), triggeredByAura->GetId());
-                if (!HandleOverrideClassScriptAuraProc(pTarget, triggeredByAura, procSpell, cooldown))
-                {
-                    triggeredByAura->SetInUse(false);
-                    continue;
-                }
-                break;
-            }
-            case SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS:
-            case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
-                // Hunter's Mark (1-4 Rangs)
-                if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && (spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000400)))
-                {
-                    int32 basevalue = triggeredByAura->GetBasePoints();
-                    auraModifier->m_amount += basevalue/10;
-                    if (auraModifier->m_amount > basevalue*4)
-                        auraModifier->m_amount = basevalue*4;
-                }
-                break;
-            case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK:
-                // Skip melee hits or instant cast spells
-                if (procSpell == NULL || GetSpellCastTime(procSpell) == 0)
-                {
-                    triggeredByAura->SetInUse(false);
-                    continue;
-                }
-                break;
-            case SPELL_AURA_REFLECT_SPELLS_SCHOOL:
-                // Skip Melee hits and spells ws wrong school
-                if (procSpell == NULL || (auraModifier->m_miscvalue & GetSchoolMask(procSpell->School)) == 0)
-                {
-                    triggeredByAura->SetInUse(false);
-                    continue;
-                }
-                break;
-            case SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT:
-            case SPELL_AURA_MOD_POWER_COST_SCHOOL:
-                // Skip melee hits and spells ws wrong school or zero cost
-                if (procSpell == NULL ||
-                    (procSpell->manaCost == 0 && procSpell->ManaCostPercentage == 0) || // Cost check
-                    (auraModifier->m_miscvalue & GetSchoolMask(procSpell->School)) == 0)// School check
-                {
-                    triggeredByAura->SetInUse(false);
-                    continue;
-                }
-                break;
-            case SPELL_AURA_MECHANIC_IMMUNITY:
-                // Compare mechanic
-                if (procSpell==NULL || procSpell->Mechanic != auraModifier->m_miscvalue)
-                {
-                    triggeredByAura->SetInUse(false);
-                    continue;
-                }
-                break;
-            case SPELL_AURA_MOD_MECHANIC_RESISTANCE:
-                // Compare mechanic
-                if (procSpell==NULL || procSpell->Mechanic != auraModifier->m_miscvalue)
-                {
-                    triggeredByAura->SetInUse(false);
-                    continue;
-                }
-                break;
-            default:
-                // nothing do, just charges counter
-                break;
+            triggeredByAura->SetInUse(false);
+            continue;
         }
 
         // Remove charge (aura can be removed by triggers)
