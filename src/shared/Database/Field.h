@@ -36,7 +36,7 @@ class Field
         };
 
         Field() : mValue(NULL), mType(DB_TYPE_UNKNOWN) {}
-        Field(const char *value, enum DataTypes type) : mType(type) { mValue = const_cast<char * >(value); }
+        Field(const char* value, enum DataTypes type) : mValue(value), mType(type) {}
 
         ~Field() {}
 
@@ -70,13 +70,13 @@ class Field
         void SetType(enum DataTypes type) { mType = type; }
         //no need for memory allocations to store resultset field strings
         //all we need is to cache pointers returned by different DBMS APIs
-        void SetValue(const char *value) { mValue = const_cast<char * >(value); };
+        void SetValue(const char* value) { mValue = value; };
 
     private:
-        Field(Field &f);
-        Field& operator=(const Field& );
+        Field(Field const&);
+        Field& operator=(Field const&);
 
-        char *mValue;
+        const char* mValue;
         enum DataTypes mType;
 };
 #endif
