@@ -297,7 +297,7 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=NU
     {                                                       // use default from the template
         LoadEquipment(cinfo->equipmentId);
     }
-    else if(data && data->equipmentId != -1)
+    else if (data && data->equipmentId != -1)
     {                                                       // override, -1 means no equipment
         LoadEquipment(data->equipmentId);
     }
