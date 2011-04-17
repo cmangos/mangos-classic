@@ -8039,7 +8039,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             continue;
 
         SpellProcEventEntry const* spellProcEvent = NULL;
-        if(!IsTriggeredAtSpellProcEvent(pTarget, itr->second, procSpell, procFlag, procExtra, attType, isVictim, (damage > 0), spellProcEvent))
+        if(!IsTriggeredAtSpellProcEvent(pTarget, itr->second, procSpell, procFlag, procExtra, attType, isVictim, spellProcEvent))
            continue;
 
         itr->second->SetInUse(true);                        // prevent aura deletion
@@ -8066,6 +8066,22 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
         uint32 cooldown = 0;
         if (GetTypeId() == TYPEID_PLAYER && spellProcEvent && spellProcEvent->cooldown)
             cooldown = spellProcEvent->cooldown;
+
+        if (procSpell)
+        {
+            if (spellProcEvent)
+            {
+                if (spellProcEvent->spellFamilyMask)
+                {
+                    if ((spellProcEvent->spellFamilyMask & procSpell->SpellFamilyFlags) == 0)
+                        continue;
+                }
+                else if (!spellProcEvent->schoolMask && !triggeredByAura->isAffectedOnSpell(procSpell))
+                    continue;
+            }
+            else if (!triggeredByAura->isAffectedOnSpell(procSpell))
+                continue;
+        }
 
         bool procResult = (*this.*AuraProcHandler[auraModifier->m_auraname])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
 
