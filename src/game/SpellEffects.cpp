@@ -1564,15 +1564,15 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[eff_idx]);
 
-    Aura* Aur = CreateAura(m_spellInfo, eff_idx, &m_currentBasePoints[eff_idx], unitTarget, caster, m_CastItem);
+    Aura* Aur = CreateAura(m_spellInfo, eff_idx, &m_currentBasePoints[eff_idx], spellAuraHolder, unitTarget, caster, m_CastItem);
 
     // Now Reduce spell duration using data received at spell hit
     int32 duration = Aur->GetAuraMaxDuration();
     unitTarget->ApplyDiminishingToDuration(m_diminishGroup, duration, m_caster, m_diminishLevel);
-    Aur->setDiminishGroup(m_diminishGroup);
+    spellAuraHolder->setDiminishGroup(m_diminishGroup);
 
     // if Aura removed and deleted, do not continue.
-    if(duration== 0 && !(Aur->IsPermanent()))
+    if(duration== 0 && !(spellAuraHolder->IsPermanent()))
     {
         delete Aur;
         return;
@@ -1584,7 +1584,7 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
         Aur->SetAuraDuration(duration);
     }
 
-    unitTarget->AddAura(Aur);
+    spellAuraHolder->AddAura(Aur, eff_idx);
 }
 
 void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
@@ -1958,8 +1958,8 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
     {
         // find elixirs on target
         uint32 elixir_mask = 0;
-        Unit::AuraMap& Auras = unitTarget->GetAuras();
-        for(Unit::AuraMap::iterator itr = Auras.begin(); itr != Auras.end(); ++itr)
+        Unit::SpellAuraHolderMap& Auras = unitTarget->GetSpellAuraHolderMap();
+        for(Unit::SpellAuraHolderMap::iterator itr = Auras.begin(); itr != Auras.end(); ++itr)
         {
             uint32 spell_id = itr->second->GetId();
             if(uint32 mask = sSpellMgr.GetSpellElixirMask(spell_id))
@@ -2236,8 +2236,8 @@ void Spell::EffectApplyAreaAura(SpellEffectIndex eff_idx)
     if (!unitTarget->isAlive())
         return;
 
-    AreaAura* Aur = new AreaAura(m_spellInfo, eff_idx, &m_currentBasePoints[eff_idx], unitTarget, m_caster, m_CastItem);
-    unitTarget->AddAura(Aur);
+    AreaAura* Aur = new AreaAura(m_spellInfo, eff_idx, &m_currentBasePoints[eff_idx], spellAuraHolder, unitTarget, m_caster, m_CastItem);
+    spellAuraHolder->AddAura(Aur, eff_idx);
 }
 
 void Spell::EffectSummon(SpellEffectIndex eff_idx)
@@ -2364,38 +2364,37 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
         return;
 
     // Fill possible dispell list
-    std::vector <Aura *> dispel_list;
+    std::list <std::pair<SpellAuraHolder* ,uint32> > dispel_list;
 
     // Create dispel mask by dispel type
     uint32 dispel_type = m_spellInfo->EffectMiscValue[eff_idx];
     uint32 dispelMask  = GetDispellMask( DispelType(dispel_type) );
-    Unit::AuraMap const& auras = unitTarget->GetAuras();
-    for(Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+    Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
+    for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        Aura *aur = (*itr).second;
-        if (aur && (1<<aur->GetSpellProto()->Dispel) & dispelMask)
+        SpellAuraHolder *holder = itr->second;
+        if ((1<<holder->GetSpellProto()->Dispel) & dispelMask)
         {
-            if(aur->GetSpellProto()->Dispel == DISPEL_MAGIC)
+            if(holder->GetSpellProto()->Dispel == DISPEL_MAGIC)
             {
                 bool positive = true;
-                if (!aur->IsPositive())
+                if (!holder->IsPositive())
                     positive = false;
                 else
-                    positive = (aur->GetSpellProto()->AttributesEx & SPELL_ATTR_EX_NEGATIVE)==0;
+                    positive = (holder->GetSpellProto()->AttributesEx & SPELL_ATTR_EX_NEGATIVE)==0;
 
                 // do not remove positive auras if friendly target
                 //               negative auras if non-friendly target
                 if (positive == unitTarget->IsFriendlyTo(m_caster))
                     continue;
             }
-            // Add aura to dispel list
-            dispel_list.push_back(aur);
+            dispel_list.push_back(std::pair<SpellAuraHolder* ,uint32>(holder, holder->GetStackAmount()));
         }
     }
     // Ok if exist some buffs for dispel try dispel it
     if (!dispel_list.empty())
     {
-        std::list < std::pair<uint32,uint64> > success_list;// (spell_id,casterGuid)
+        std::list<std::pair<SpellAuraHolder* ,uint32> > success_list;// (spell_id,casterGuid)
         std::list < uint32 > fail_list;                     // spell_id
 
         // some spells have effect value = 0 and all from its by meaning expect 1
@@ -2406,20 +2405,23 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
         for (int32 count=0; count < damage && !dispel_list.empty(); ++count)
         {
             // Random select buff for dispel
-            std::vector<Aura*>::iterator dispel_itr = dispel_list.begin();
+            std::list<std::pair<SpellAuraHolder* ,uint32> >::iterator dispel_itr = dispel_list.begin();
             std::advance(dispel_itr,urand(0, dispel_list.size()-1));
 
-            Aura *aur = *dispel_itr;
+            SpellAuraHolder *holder = dispel_itr->first;
 
-            // remove entry from dispel_list
-            dispel_list.erase(dispel_itr);
+            dispel_itr->second -= 1;
 
-            SpellEntry const* spellInfo = aur->GetSpellProto();
+            // remove entry from dispel_list if nothing left in stack
+            if (dispel_itr->second == 0)
+                dispel_list.erase(dispel_itr);
+
+            SpellEntry const* spellInfo = holder->GetSpellProto();
             // Base dispel chance
             // TODO: possible chance depend from spell level??
             int32 miss_chance = 0;
             // Apply dispel mod from aura caster
-            if (Unit *caster = aur->GetCaster())
+            if (Unit *caster = holder->GetCaster())
             {
                 if ( Player* modOwner = caster->GetSpellModOwner() )
                     modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_RESIST_DISPEL_CHANCE, miss_chance, this);
@@ -2428,7 +2430,20 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
             if (roll_chance_i(miss_chance))
                 fail_list.push_back(spellInfo->Id);
             else
-                success_list.push_back(std::pair<uint32,uint64>(aur->GetId(),aur->GetCasterGUID()));
+            {
+                bool foundDispelled = false;
+                for (std::list<std::pair<SpellAuraHolder* ,uint32> >::iterator success_iter = success_list.begin(); success_iter != success_list.end(); ++success_iter)
+                {
+                    if (success_iter->first->GetId() == holder->GetId() && success_iter->first->GetCasterGUID() == holder->GetCasterGUID())
+                    {
+                        success_iter->second += 1;
+                        foundDispelled = true;
+                        break;
+                    }
+                }
+                if (!foundDispelled)
+                    success_list.push_back(std::pair<SpellAuraHolder* ,uint32>(holder, 1));
+            }
         }
         // Send success log and really remove auras
         if (!success_list.empty())
@@ -2440,12 +2455,12 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
             data << uint32(m_spellInfo->Id);                // Dispel spell id
             data << uint8(0);                               // not used
             data << uint32(count);                          // count
-            for (std::list<std::pair<uint32,uint64> >::iterator j = success_list.begin(); j != success_list.end(); ++j)
+            for (std::list<std::pair<SpellAuraHolder* ,uint32> >::iterator j = success_list.begin(); j != success_list.end(); ++j)
             {
-                SpellEntry const* spellInfo = sSpellStore.LookupEntry(j->first);
-                data << uint32(spellInfo->Id);              // Spell Id
+                SpellAuraHolder* dispelledHolder = j->first;
+                data << uint32(dispelledHolder->GetId());   // Spell Id
                 data << uint8(0);                           // 0 - dispeled !=0 cleansed
-                unitTarget->RemoveSingleAuraDueToSpellByDispel(spellInfo->Id, j->second);
+                unitTarget->RemoveAuraHolderDueToSpellByDispel(dispelledHolder->GetId(), j->second, dispelledHolder->GetCasterGUID(), m_caster);
             }
             m_caster->SendMessageToSet(&data, true);
 
@@ -2561,7 +2576,7 @@ void Spell::EffectAddFarsight(SpellEffectIndex eff_idx)
         delete dynObj;
         return;
     }
-    
+
     // DYNAMICOBJECT_BYTES is apparently different from the default bytes set in ::Create
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x80000002);
 
@@ -3546,7 +3561,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 24590:                                 // Brittle Armor - need remove one 24575 Brittle Armor aura
-                    unitTarget->RemoveSingleSpellAurasFromStack(24575);
+                    unitTarget->RemoveAuraHolderFromStack(24575);
                     return;
                 case 24717:                                 // Pirate Costume
                 {
@@ -3659,7 +3674,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 26465:                                 // Mercurial Shield - need remove one 26464 Mercurial Shield aura
-                    unitTarget->RemoveSingleAuraFromStack(26464,EFFECT_INDEX_0);
+                    unitTarget->RemoveAuraHolderFromStack(26464);
                     return;
                 case 22539:                                 // Shadow Flame (All script effects, not just end ones to
                 case 22972:                                 // prevent player from dodging the last triggered spell)
@@ -4634,13 +4649,13 @@ void Spell::EffectDispelMechanic(SpellEffectIndex eff_idx)
 
     uint32 mechanic = m_spellInfo->EffectMiscValue[eff_idx];
 
-    Unit::AuraMap& Auras = unitTarget->GetAuras();
-    for(Unit::AuraMap::iterator iter = Auras.begin(), next; iter != Auras.end(); iter = next)
+    Unit::SpellAuraHolderMap& Auras = unitTarget->GetSpellAuraHolderMap();
+    for(Unit::SpellAuraHolderMap::iterator iter = Auras.begin(), next; iter != Auras.end(); iter = next)
     {
         next = iter;
         ++next;
         SpellEntry const *spell = iter->second->GetSpellProto();
-        if (spell->Mechanic == mechanic || spell->EffectMechanic[iter->second->GetEffIndex()] == mechanic)
+        if (iter->second->HasMechanic(mechanic))
         {
             unitTarget->RemoveAurasDueToSpell(spell->Id);
             if (Auras.empty())

@@ -106,7 +106,7 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, SpellE
 Unit* DynamicObject::GetCaster() const
 {
     // can be not found in some cases
-    return ObjectAccessor::GetUnit(*this, GetCasterGUID());
+    return ObjectAccessor::GetUnit(*this, GetCasterGuid());
 }
 
 void DynamicObject::Update(uint32 update_diff, uint32 p_time)
@@ -155,7 +155,30 @@ void DynamicObject::Delay(int32 delaytime)
         Unit *target = GetMap()->GetUnit((*iter));
         if (target)
         {
-            target->DelayAura(m_spellId, m_effIndex, delaytime);
+            SpellAuraHolder *holder = target->GetSpellAuraHolder(m_spellId, GetCasterGuid().GetRawValue());
+            if (!holder)
+            {
+                ++iter;
+                continue;
+            }
+
+            bool foundAura = false;
+            for (int32 i = m_effIndex + 1; i < MAX_EFFECT_INDEX; ++i)
+            {
+                if ((holder->GetSpellProto()->Effect[i] == SPELL_EFFECT_PERSISTENT_AREA_AURA || holder->GetSpellProto()->Effect[i] == SPELL_EFFECT_ADD_FARSIGHT) && holder->m_auras[i])
+                {
+                    foundAura = true;
+                    break;
+                }
+            }
+
+            if (foundAura)
+            {
+                ++iter;
+                continue;
+            }
+
+            target->DelaySpellAuraHolder(m_spellId, delaytime, GetCasterGuid().GetRawValue());
             ++iter;
         }
         else
@@ -169,7 +192,7 @@ bool DynamicObject::isVisibleForInState(Player const* u, WorldObject const* view
         return false;
 
     // always seen by owner
-    if(GetCasterGUID()==u->GetGUID())
+    if(GetCasterGuid()==u->GetObjectGuid())
         return true;
 
     // normal case

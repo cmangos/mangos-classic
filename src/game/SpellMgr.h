@@ -156,7 +156,7 @@ inline bool IsSpellLastAuraEffect(SpellEntry const *spellInfo, SpellEffectIndex 
     return true;
 }
 
-bool IsNoStackAuraDueToAura(uint32 spellId_1, SpellEffectIndex effIndex_1, uint32 spellId_2, SpellEffectIndex effIndex_2);
+bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2);
 
 inline bool IsSealSpell(SpellEntry const *spellInfo)
 {
@@ -171,7 +171,7 @@ inline bool IsElementalShield(SpellEntry const *spellInfo)
     return (spellInfo->SpellFamilyFlags & UI64LIT(0x00000000400)) || spellInfo->Id == 23552;
 }
 
-int32 CompareAuraRanks(uint32 spellId_1, SpellEffectIndex effIndex_1, uint32 spellId_2, SpellEffectIndex effIndex_2);
+int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2);
 
 // order from less to more strict
 bool IsSingleFromSpellSpecificPerTargetPerCaster(SpellSpecific spellSpec1,SpellSpecific spellSpec2);
@@ -337,6 +337,29 @@ inline bool IsAreaAuraEffect(uint32 effect)
     if( effect == SPELL_EFFECT_APPLY_AREA_AURA_PARTY    ||
         effect == SPELL_EFFECT_APPLY_AREA_AURA_PET)
         return true;
+    return false;
+}
+
+inline bool HasAreaAuraEffect(SpellEntry const *spellInfo)
+{
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (IsAreaAuraEffect(spellInfo->Effect[i]))
+            return true;
+    return false;
+}
+
+inline bool HasAuraWithTriggerEffect(SpellEntry const *spellInfo)
+{
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        switch(spellInfo->Effect[i])
+        {
+            case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
+            case SPELL_AURA_PROC_TRIGGER_SPELL:
+            case SPELL_AURA_PROC_TRIGGER_DAMAGE:
+                return true;
+        }
+    }
     return false;
 }
 
