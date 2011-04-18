@@ -1,6 +1,6 @@
 -- Query let convert characters DB from format
--- MaNGOS Zero characters DB `required_z1401_s0860_01_characters_corpse` to
--- MaNGOS One characters DB `required_s0863_xxxxx_01_characters_characters`.
+-- MaNGOS Zero characters DB `required_z1478_s0963_02_characters_pet_aura` to
+-- MaNGOS One characters DB `required_s0963_10156_02_characters_pet_aura`.
 
 -- Expected that in case Mangos Zero characters DB changes it will updated for more up-to-date versions.
 -- For targeted MaNGOS Master characters DB you can after convertion apply MaNGOS SQL updates in normal
@@ -8,7 +8,7 @@
 
 -- Note: ALWAYS DO BACKUP before use it. You will CAN NOT easy restore original DB state after tool use.
 
-ALTER TABLE character_db_version CHANGE COLUMN `required_z1401_s0860_01_characters_corpse` `required_s0863_xxxxx_01_characters_characters` bit;
+ALTER TABLE character_db_version CHANGE COLUMN `required_z1478_s0963_02_characters_pet_aura` `required_s0963_10156_02_characters_pet_aura` bit;
 
 
 -- MODIFID TABLES
@@ -127,18 +127,45 @@ WHERE SUBSTRING_INDEX(data,' ',106) = data AND SUBSTRING_INDEX(data,' ',106-1) <
 
 DROP TABLE IF EXISTS `character_aura`;
 CREATE TABLE `character_aura` (
-  `guid` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `caster_guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Full Global Unique Identifier',
   `item_guid` int(11) unsigned NOT NULL default '0',
   `spell` int(11) unsigned NOT NULL default '0',
-  `effect_index` int(11) unsigned NOT NULL default '0',
   `stackcount` int(11) NOT NULL default '1',
-  `amount` int(11) NOT NULL default '0',
-  `maxduration` int(11) NOT NULL default '0',
-  `remaintime` int(11) NOT NULL default '0',
   `remaincharges` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`guid`,`caster_guid`,`item_guid`,`spell`,`effect_index`)
+  `basepoints0` INT(11) NOT NULL DEFAULT '0',
+  `basepoints1` INT(11) NOT NULL DEFAULT '0',
+  `basepoints2` INT(11) NOT NULL DEFAULT '0',
+  `maxduration0` INT(11) NOT NULL DEFAULT '0',
+  `maxduration1` INT(11) NOT NULL DEFAULT '0',
+  `maxduration2` INT(11) NOT NULL DEFAULT '0',
+  `remaintime0` INT(11) NOT NULL DEFAULT '0',
+  `remaintime1` INT(11) NOT NULL DEFAULT '0',
+  `remaintime2` INT(11) NOT NULL DEFAULT '0',
+  `effIndexMask` INT(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`,`caster_guid`,`item_guid`,`spell`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+
+DROP TABLE IF EXISTS `pet_aura`;
+CREATE TABLE `pet_aura` (
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `caster_guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Full Global Unique Identifier',
+  `item_guid` int(11) unsigned NOT NULL default '0',
+  `spell` int(11) unsigned NOT NULL default '0',
+  `stackcount` int(11) NOT NULL default '1',
+  `remaincharges` int(11) NOT NULL default '0',
+  `basepoints0` INT(11) NOT NULL DEFAULT '0',
+  `basepoints1` INT(11) NOT NULL DEFAULT '0',
+  `basepoints2` INT(11) NOT NULL DEFAULT '0',
+  `maxduration0` INT(11) NOT NULL DEFAULT '0',
+  `maxduration1` INT(11) NOT NULL DEFAULT '0',
+  `maxduration2` INT(11) NOT NULL DEFAULT '0',
+  `remaintime0` INT(11) NOT NULL DEFAULT '0',
+  `remaintime1` INT(11) NOT NULL DEFAULT '0',
+  `remaintime2` INT(11) NOT NULL DEFAULT '0',
+  `effIndexMask` INT(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`,`caster_guid`,`item_guid`,`spell`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
 
 -- NEW TABLES with non critical info drop
 
