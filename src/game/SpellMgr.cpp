@@ -1040,115 +1040,6 @@ void SpellMgr::LoadSpellTargetPositions()
     sLog.outString( ">> Loaded %u spell teleport coordinates", count );
 }
 
-void SpellMgr::LoadSpellAffects()
-{
-    mSpellAffectMap.clear();                                // need for reload case
-
-    uint32 count = 0;
-
-    //                                                0      1         2
-    QueryResult *result = WorldDatabase.Query("SELECT entry, effectId, SpellFamilyMask FROM spell_affect");
-    if( !result )
-    {
-
-        barGoLink bar( 1 );
-
-        bar.step();
-
-        sLog.outString();
-        sLog.outString( ">> Loaded %u spell affect definitions", count );
-        return;
-    }
-
-    barGoLink bar( (int)result->GetRowCount() );
-
-    do
-    {
-        Field *fields = result->Fetch();
-
-        bar.step();
-
-        uint32 entry = fields[0].GetUInt32();
-        uint8 effectId = fields[1].GetUInt8();
-
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry);
-
-        if (!spellInfo)
-        {
-            sLog.outErrorDb("Spell %u listed in `spell_affect` does not exist", entry);
-            continue;
-        }
-
-        if (effectId >= MAX_EFFECT_INDEX)
-        {
-            sLog.outErrorDb("Spell %u listed in `spell_affect` have invalid effect index (%u)", entry,effectId);
-            continue;
-        }
-
-        if (spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA || (
-            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
-            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
-            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER &&
-            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_OVERRIDE_CLASS_SCRIPTS))
-        {
-            sLog.outErrorDb("Spell %u listed in `spell_affect` have not SPELL_AURA_ADD_FLAT_MODIFIER (%u) or SPELL_AURA_ADD_PCT_MODIFIER (%u) or SPELL_AURA_ADD_TARGET_TRIGGER (%u) or SPELL_AURA_OVERRIDE_CLASS_SCRIPTS (%u) for effect index (%u)", entry,SPELL_AURA_ADD_FLAT_MODIFIER,SPELL_AURA_ADD_PCT_MODIFIER,SPELL_AURA_ADD_TARGET_TRIGGER,SPELL_AURA_OVERRIDE_CLASS_SCRIPTS,effectId);
-            continue;
-        }
-
-        uint64 spellAffectMask = fields[2].GetUInt64();
-
-        // Spell.dbc have own data for low part of SpellFamilyMask
-        if (spellInfo->EffectItemType[effectId])
-        {
-            if (static_cast<uint64>(spellInfo->EffectItemType[effectId]) == spellAffectMask)
-            {
-                sLog.outErrorDb("Spell %u listed in `spell_affect` have redundant (same with EffectItemType%d) data for effect index (%u) and not needed, skipped.", entry,effectId+1,effectId);
-                continue;
-            }
-
-            // 24429 have wrong data in EffectItemType and overwrites by DB, possible bug in client
-            if (spellInfo->Id!=24429 && spellInfo->EffectItemType[effectId] != static_cast<uint32>(spellAffectMask))
-            {
-                sLog.outErrorDb("Spell %u listed in `spell_affect` have different low part from EffectItemType%d for effect index (%u) and not needed, skipped.", entry,effectId+1,effectId);
-                continue;
-            }
-        }
-
-        mSpellAffectMap.insert(SpellAffectMap::value_type((entry<<8) + effectId,spellAffectMask));
-
-        ++count;
-    } while( result->NextRow() );
-
-    delete result;
-
-    sLog.outString();
-    sLog.outString( ">> Loaded %u spell affect definitions", count );
-
-    for (uint32 id = 0; id < sSpellStore.GetNumRows(); ++id)
-    {
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(id);
-        if (!spellInfo)
-            continue;
-
-        for (int effectId = 0; effectId < MAX_EFFECT_INDEX; ++effectId)
-        {
-            if (spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA || (
-                spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
-                spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
-                spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER))
-                continue;
-
-            if (spellInfo->EffectItemType[effectId] != 0)
-                continue;
-
-            if (mSpellAffectMap.find((id<<8) + effectId) !=  mSpellAffectMap.end())
-                continue;
-
-            sLog.outErrorDb("Spell %u (%s) misses spell_affect for effect %u",id,spellInfo->SpellName[sWorld.GetDefaultDbcLocale()], effectId);
-        }
-    }
-}
-
 template <typename EntryType, typename WorkerType, typename StorageType>
 struct SpellRankHelper
 {
@@ -3907,6 +3798,115 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
     }
 
     return true;
+}
+
+void SpellMgr::LoadSpellAffects()
+{
+    mSpellAffectMap.clear();                                // need for reload case
+
+    uint32 count = 0;
+
+    //                                                0      1         2
+    QueryResult *result = WorldDatabase.Query("SELECT entry, effectId, SpellFamilyMask FROM spell_affect");
+    if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outString( ">> Loaded %u spell affect definitions", count );
+        return;
+    }
+
+    barGoLink bar( (int)result->GetRowCount() );
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+        uint8 effectId = fields[1].GetUInt8();
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry);
+
+        if (!spellInfo)
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_affect` does not exist", entry);
+            continue;
+        }
+
+        if (effectId >= MAX_EFFECT_INDEX)
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_affect` have invalid effect index (%u)", entry,effectId);
+            continue;
+        }
+
+        if (spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA || (
+            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
+            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
+            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER &&
+            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_OVERRIDE_CLASS_SCRIPTS))
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_affect` have not SPELL_AURA_ADD_FLAT_MODIFIER (%u) or SPELL_AURA_ADD_PCT_MODIFIER (%u) or SPELL_AURA_ADD_TARGET_TRIGGER (%u) or SPELL_AURA_OVERRIDE_CLASS_SCRIPTS (%u) for effect index (%u)", entry,SPELL_AURA_ADD_FLAT_MODIFIER,SPELL_AURA_ADD_PCT_MODIFIER,SPELL_AURA_ADD_TARGET_TRIGGER,SPELL_AURA_OVERRIDE_CLASS_SCRIPTS,effectId);
+            continue;
+        }
+
+        uint64 spellAffectMask = fields[2].GetUInt64();
+
+        // Spell.dbc have own data for low part of SpellFamilyMask
+        if (spellInfo->EffectItemType[effectId])
+        {
+            if (static_cast<uint64>(spellInfo->EffectItemType[effectId]) == spellAffectMask)
+            {
+                sLog.outErrorDb("Spell %u listed in `spell_affect` have redundant (same with EffectItemType%d) data for effect index (%u) and not needed, skipped.", entry,effectId+1,effectId);
+                continue;
+            }
+
+            // 24429 have wrong data in EffectItemType and overwrites by DB, possible bug in client
+            if (spellInfo->Id!=24429 && spellInfo->EffectItemType[effectId] != static_cast<uint32>(spellAffectMask))
+            {
+                sLog.outErrorDb("Spell %u listed in `spell_affect` have different low part from EffectItemType%d for effect index (%u) and not needed, skipped.", entry,effectId+1,effectId);
+                continue;
+            }
+        }
+
+        mSpellAffectMap.insert(SpellAffectMap::value_type((entry<<8) + effectId,spellAffectMask));
+
+        ++count;
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u spell affect definitions", count );
+
+    for (uint32 id = 0; id < sSpellStore.GetNumRows(); ++id)
+    {
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(id);
+        if (!spellInfo)
+            continue;
+
+        for (int effectId = 0; effectId < MAX_EFFECT_INDEX; ++effectId)
+        {
+            if (spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA || (
+                spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
+                spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
+                spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER))
+                continue;
+
+            if (spellInfo->EffectItemType[effectId] != 0)
+                continue;
+
+            if (mSpellAffectMap.find((id<<8) + effectId) !=  mSpellAffectMap.end())
+                continue;
+
+            sLog.outErrorDb("Spell %u (%s) misses spell_affect for effect %u",id,spellInfo->SpellName[sWorld.GetDefaultDbcLocale()], effectId);
+        }
+    }
 }
 
 void SpellMgr::LoadFacingCasterFlags()
