@@ -798,7 +798,7 @@ float TerrainInfo::GetHeight(float x, float y, float z, bool pUseVmaps, float ma
 
 inline bool IsOutdoorWMO(uint32 mogpFlags)
 {
-    return mogpFlags & 0x8000;
+    return mogpFlags & 0x8008;
 }
 
 bool TerrainInfo::IsOutdoors(float x, float y, float z) const
