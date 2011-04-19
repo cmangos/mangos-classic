@@ -1228,6 +1228,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         {
             return SpellAuraHolderBounds(m_spellAuraHolders.lower_bound(spell_id), m_spellAuraHolders.upper_bound(spell_id));
         }
+        SpellAuraHolderConstBounds GetSpellAuraHolderBounds(uint32 spell_id) const
+        {
+            return SpellAuraHolderConstBounds(m_spellAuraHolders.lower_bound(spell_id), m_spellAuraHolders.upper_bound(spell_id));
+        }
 
         bool HasAuraType(AuraType auraType) const;
         bool HasAura(uint32 spellId, SpellEffectIndex effIndex) const;

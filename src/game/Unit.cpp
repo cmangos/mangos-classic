@@ -4088,7 +4088,8 @@ Aura* Unit::GetAura(AuraType type, SpellFamily family, uint64 familyFlag, Object
 
 bool Unit::HasAura(uint32 spellId, SpellEffectIndex effIndex) const
 {
-    for(SpellAuraHolderMap::const_iterator i_holder = m_spellAuraHolders.lower_bound(spellId); i_holder != m_spellAuraHolders.upper_bound(spellId); ++i_holder)
+    SpellAuraHolderConstBounds spair = GetSpellAuraHolderBounds(spellId);
+    for(SpellAuraHolderMap::const_iterator i_holder = spair.first; i_holder != spair.second; ++i_holder)
         if (i_holder->second->GetAuraByEffectIndex(effIndex))
             return true;
 
