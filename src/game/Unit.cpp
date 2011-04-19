@@ -1279,7 +1279,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage *damageInfo, bool durabilityLoss)
     // update at damage Judgement aura duration that applied by attacker at victim
     if(damageInfo->damage && spellProto->Id == 35395)
     {
-        SpellAuraHolderMap const& vAuras = GetSpellAuraHolderMap();
+        SpellAuraHolderMap const& vAuras = pVictim->GetSpellAuraHolderMap();
         for (SpellAuraHolderMap::const_iterator itr = vAuras.begin(); itr != vAuras.end(); ++itr)
         {
             SpellEntry const *spellInfo = (*itr).second->GetSpellProto();
@@ -1615,7 +1615,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo *damageInfo, bool durabilityLoss)
     // update at damage Judgement aura duration that applied by attacker at victim
     if(damageInfo->damage)
     {
-        SpellAuraHolderMap const& vAuras = GetSpellAuraHolderMap();
+        SpellAuraHolderMap const& vAuras = pVictim->GetSpellAuraHolderMap();
         for (SpellAuraHolderMap::const_iterator itr = vAuras.begin(); itr != vAuras.end(); ++itr)
         {
             SpellEntry const *spellInfo = (*itr).second->GetSpellProto();
