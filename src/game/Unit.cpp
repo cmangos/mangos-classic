@@ -8135,9 +8135,9 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             {
                 if (spellProcEvent)
                 {
-                    if (spellProcEvent->spellFamilyMask)
+                    if (spellProcEvent->spellFamilyMask[i])
                     {
-                        if ((spellProcEvent->spellFamilyMask & procSpell->SpellFamilyFlags) == 0)
+                        if ((spellProcEvent->spellFamilyMask[i] & procSpell->SpellFamilyFlags) == 0)
                             continue;
                     }
                     // don't check FamilyFlags if schoolMask exists

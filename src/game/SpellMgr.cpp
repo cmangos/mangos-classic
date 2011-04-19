@@ -1117,8 +1117,14 @@ struct DoSpellProcEvent
             if (spe.spellFamilyName != r_spe.spellFamilyName)
                 sLog.outErrorDb("Spell %u listed in `spell_proc_event` as custom rank have different spellFamilyName from first rank in chain", spell_id);
 
-            if (spe.spellFamilyMask != r_spe.spellFamilyMask)
-                sLog.outErrorDb("Spell %u listed in `spell_proc_event` as custom rank have different spellFamilyMask from first rank in chain", spell_id);
+            for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            {
+                if (spe.spellFamilyMask[i] != r_spe.spellFamilyMask[i])
+                {
+                    sLog.outErrorDb("Spell %u listed in `spell_proc_event` as custom rank have different spellFamilyMask from first rank in chain", spell_id);
+                    break;
+                }
+            }
 
             if (spe.procFlags != r_spe.procFlags)
                 sLog.outErrorDb("Spell %u listed in `spell_proc_event` as custom rank have different procFlags from first rank in chain", spell_id);
@@ -1183,10 +1189,20 @@ struct DoSpellProcEvent
         }
 
         // totally redundant record
-        if (!spe.schoolMask && !spe.spellFamilyMask && !spe.procFlags &&
+        if (!spe.schoolMask && !spe.procFlags &&
             !spe.procEx && !spe.ppmRate && !spe.customChance && !spe.cooldown)
         {
-            sLog.outErrorDb("Spell %u listed in `spell_proc_event` not have any useful data", spell->Id);
+            bool empty = !spe.spellFamilyName ? true : false;
+            for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            {
+                if (spe.spellFamilyMask[i])
+                {
+                    empty = false;
+                    break;
+                }
+            }
+            if (empty)
+                sLog.outErrorDb("Spell %u listed in `spell_proc_event` not have any useful data", spell->Id);
         }
 
         if (isCustom)
@@ -1208,8 +1224,8 @@ void SpellMgr::LoadSpellProcEvents()
 {
     mSpellProcEventMap.clear();                             // need for reload case
 
-    //                                                0      1           2                3                4          5       6        7             8
-    QueryResult *result = WorldDatabase.Query("SELECT entry, SchoolMask, SpellFamilyName, SpellFamilyMask, procFlags, procEx, ppmRate, CustomChance, Cooldown FROM spell_proc_event");
+    //                                                0      1           2                3                 4                 5                 6          7       8        9             10
+    QueryResult *result = WorldDatabase.Query("SELECT entry, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, procFlags, procEx, ppmRate, CustomChance, Cooldown FROM spell_proc_event");
     if( !result )
     {
         barGoLink bar( 1 );
@@ -1234,12 +1250,15 @@ void SpellMgr::LoadSpellProcEvents()
 
         spe.schoolMask      = fields[1].GetUInt32();
         spe.spellFamilyName = fields[2].GetUInt32();
-        spe.spellFamilyMask = fields[3].GetUInt64();
-        spe.procFlags       = fields[4].GetUInt32();
-        spe.procEx          = fields[5].GetUInt32();
-        spe.ppmRate         = fields[6].GetFloat();
-        spe.customChance    = fields[7].GetFloat();
-        spe.cooldown        = fields[8].GetUInt32();
+
+        for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+            spe.spellFamilyMask[i] = fields[3+i].GetUInt64();
+
+        spe.procFlags       = fields[6].GetUInt32();
+        spe.procEx          = fields[7].GetUInt32();
+        spe.ppmRate         = fields[8].GetFloat();
+        spe.customChance    = fields[9].GetFloat();
+        spe.cooldown        = fields[10].GetUInt32();
 
         rankHelper.RecordRank(spe, entry);
 
