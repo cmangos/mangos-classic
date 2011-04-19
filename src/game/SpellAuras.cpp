@@ -880,8 +880,9 @@ void Aura::TriggerSpell()
 //                    case 25540:
 //                    case 25544:
 //                        break;
-                    // Thaumaturgy Channel
-                    case 9712: trigger_spell_id = 21029; break;
+                    case 9712:                              // Thaumaturgy Channel
+                        trigger_spell_id = 21029;
+                        break;
 //                    // Egan's Blaster
 //                    case 17368: break;
 //                    // Haunted
@@ -896,16 +897,14 @@ void Aura::TriggerSpell()
 //                    case 21866: break;
 //                    // Celebras Waiting
 //                    case 21916: break;
-                    // Brood Affliction: Bronze
-                    case 23170:
+                    case 23170:                             // Brood Affliction: Bronze
                     {
                         target->CastSpell(target, 23171, true, NULL, this);
                         return;
                     }
 //                    // Mark of Frost
 //                    case 23184: break;
-                    // Restoration
-                    case 23493:
+                    case 23493:                             // Restoration
                     {
                         int32 heal = triggerTarget->GetMaxHealth() / 10;
                         triggerTarget->DealHeal(triggerTarget, heal, auraSpellInfo);
@@ -931,8 +930,7 @@ void Aura::TriggerSpell()
 //                    case 24780: break;
 //                    // Cannon Prep
 //                    case 24832: break;
-                    // Shadow Bolt Whirl
-                    case 24834:
+                    case 24834:                             // Shadow Bolt Whirl
                     {
                         uint32 spellForTick[8] = { 24820, 24821, 24822, 24823, 24835, 24836, 24837, 24838 };
                         uint32 tick = GetAuraTicks();
@@ -955,8 +953,7 @@ void Aura::TriggerSpell()
 //                    case 25041: break;
 //                    // Agro Drones
 //                    case 25152: break;
-                    // Consume
-                    case 25371:
+                    case 25371:                             // Consume
                     {
                         int32 bpDamage = triggerTarget->GetMaxHealth()*10/100;
                         triggerTarget->CastCustomSpell(triggerTarget, 25373, &bpDamage, NULL, NULL, true, NULL, this, casterGUID);
@@ -982,8 +979,7 @@ void Aura::TriggerSpell()
 //                    case 27746: break;
 //                    // Steam Tank Passive
 //                    case 27747: break;
-                    // Frost Blast
-                    case 27808:
+                    case 27808:                             // Frost Blast
                     {
                         int32 bpDamage = triggerTarget->GetMaxHealth()*26/100;
                         triggerTarget->CastCustomSpell(triggerTarget, 29879, &bpDamage, NULL, NULL, true, NULL, this, casterGUID);
@@ -1057,8 +1053,8 @@ void Aura::TriggerSpell()
 //                    default:
 //                        break;
 //                }
- //               break;
- //           }
+//                break;
+//            }
             case SPELLFAMILY_DRUID:
             {
                 switch(auraId)
@@ -1074,7 +1070,7 @@ void Aura::TriggerSpell()
                         int32 LifePerRage = GetModifier()->m_amount;
 
                         int32 lRage = target->GetPower(POWER_RAGE);
-                        if(lRage > 100)                                     // rage stored as rage*10
+                        if (lRage > 100)                    // rage stored as rage*10
                             lRage = 100;
                         target->ModifyPower(POWER_RAGE, -lRage);
                         int32 FRTriggerBasePoints = int32(lRage*LifePerRage/10);
@@ -1123,15 +1119,14 @@ void Aura::TriggerSpell()
             {
                 switch(auraId)
                 {
-                    // Lightning Shield (The Earthshatterer set trigger after cast Lighting Shield)
-                    case 28820:
+                    case 28820:                             // Lightning Shield (The Earthshatterer set trigger after cast Lighting Shield)
                     {
                         // Need remove self if Lightning Shield not active
                         Unit::SpellAuraHolderMap const& auras = triggerTarget->GetSpellAuraHolderMap();
                         for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                         {
                             SpellEntry const* spell = itr->second->GetSpellProto();
-                            if( spell->SpellFamilyName == SPELLFAMILY_SHAMAN &&
+                            if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN &&
                                 (spell->SpellFamilyFlags & UI64LIT(0x0000000000000400)))
                                 return;
                         }
@@ -1170,8 +1165,7 @@ void Aura::TriggerSpell()
 
                 break;
             }
-            // Curse of Idiocy
-            case 1010:
+            case 1010:                                      // Curse of Idiocy
             {
                 // TODO: spell casted by result in correct way mostly
                 // BUT:
@@ -1201,13 +1195,12 @@ void Aura::TriggerSpell()
                     }
                 }
 
-                if(intelectLoss <= -90 && spiritLoss <= -90)
+                if (intelectLoss <= -90 && spiritLoss <= -90)
                     return;
 
                 break;
             }
-            // Mana Tide
-            case 16191:
+            case 16191:                                     // Mana Tide
             {
                 triggerTarget->CastCustomSpell(triggerTarget, trigger_spell_id, &m_modifier.m_amount, NULL, NULL, true, NULL, this);
                 return;
