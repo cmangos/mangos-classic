@@ -6714,7 +6714,6 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
                     case 15569: proc_spell_id = 10445; break; // Rank 4
                     case 16311: proc_spell_id = 16343; break; // Rank 5
                     case 16312: proc_spell_id = 16344; break; // Rank 6
-                    case 16313: proc_spell_id = 25488; break; // Rank 7
                     default:
                         continue;
                 }
