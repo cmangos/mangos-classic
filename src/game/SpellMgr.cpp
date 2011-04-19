@@ -1399,7 +1399,7 @@ void SpellMgr::LoadSpellBonuses()
 
         bool need_dot = false;
         bool need_direct = false;
-        uint32 x = 0;                                       // count all, including empty, meaning: not all existed effect is DoTs/HoTs
+        uint32 x = 0;                                       // count all, including empty, meaning: not all existing effect is DoTs/HoTs
         for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
             if (!spell->Effect[i])
