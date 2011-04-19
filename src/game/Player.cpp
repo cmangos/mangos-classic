@@ -6701,13 +6701,31 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
         if(!pEnchant) continue;
         for (int s = 0; s < 3; ++s)
         {
-            if (pEnchant->type[s]!=ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+            uint32 proc_spell_id = pEnchant->spellid[s];
+
+            // Flametongue Weapon (Passive), Ranks (used not existed equip spell id in pre-3.x spell.dbc)
+            if (pEnchant->type[s] == ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL)
+            {
+                switch (proc_spell_id)
+                {
+                    case 10400: proc_spell_id =  8026; break; // Rank 1
+                    case 15567: proc_spell_id =  8028; break; // Rank 2
+                    case 15568: proc_spell_id =  8029; break; // Rank 3
+                    case 15569: proc_spell_id = 10445; break; // Rank 4
+                    case 16311: proc_spell_id = 16343; break; // Rank 5
+                    case 16312: proc_spell_id = 16344; break; // Rank 6
+                    case 16313: proc_spell_id = 25488; break; // Rank 7
+                    default:
+                        continue;
+                }
+            }
+            else if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
                 continue;
 
-            SpellEntry const *spellInfo = sSpellStore.LookupEntry(pEnchant->spellid[s]);
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(proc_spell_id);
             if (!spellInfo)
             {
-                sLog.outError("Player::CastItemCombatSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->spellid[s]);
+                sLog.outError("Player::CastItemCombatSpell Enchant %i, cast unknown spell %i", pEnchant->ID, proc_spell_id);
                 continue;
             }
 
@@ -6719,14 +6737,14 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
                 : pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
 
 
-            ApplySpellMod(spellInfo->Id,SPELLMOD_CHANCE_OF_SUCCESS,chance);
+            ApplySpellMod(spellInfo->Id,SPELLMOD_CHANCE_OF_SUCCESS, chance);
 
             if (roll_chance_f(chance))
             {
-                if(IsPositiveSpell(pEnchant->spellid[s]))
-                    CastSpell(this, pEnchant->spellid[s], true, item);
+                if (IsPositiveSpell(spellInfo->Id))
+                    CastSpell(this, spellInfo->Id, true, item);
                 else
-                    CastSpell(Target, pEnchant->spellid[s], true, item);
+                    CastSpell(Target, spellInfo->Id, true, item);
             }
         }
     }
@@ -11081,6 +11099,28 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                         HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
                     break;
                 case ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL:
+                {
+
+                    // Flametongue Weapon (Passive), Ranks (used not existed equip spell id in pre-3.x spell.dbc)
+                    // See Player::CastItemCombatSpell for workaround implementation
+                    if (enchant_spell_id && apply)
+                    {
+                        switch (enchant_spell_id)
+                        {
+                            case 10400:                     // Rank 1
+                            case 15567:                     // Rank 2
+                            case 15568:                     // Rank 3
+                            case 15569:                     // Rank 4
+                            case 16311:                     // Rank 5
+                            case 16312:                     // Rank 6
+                            case 16313:                     // Rank 7
+                                enchant_spell_id = 0;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
                     if (enchant_spell_id)
                     {
                         if (apply)
@@ -11089,6 +11129,7 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                             RemoveAurasDueToItemSpell(item, enchant_spell_id);
                     }
                     break;
+                }
                 case ITEM_ENCHANTMENT_TYPE_RESISTANCE:
                     HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + enchant_spell_id), TOTAL_VALUE, float(enchant_amount), apply);
                     break;
