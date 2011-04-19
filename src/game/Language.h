@@ -909,7 +909,7 @@ enum MangosStrings
     //                                    1162 used in master branch
     //                                    1163 used in master branch
     //                                    1164 used in master branch
-    //                                    1165 used in master branch
+    LANG_SPELL_NO_HAVE_AURAS            = 1165,
     LANG_SCRIPTS_NOT_FOUND              = 1166,
     LANG_SCRIPTS_WRONG_API              = 1167,
     LANG_SCRIPTS_RELOADED_OK            = 1168,
