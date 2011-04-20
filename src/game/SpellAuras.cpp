@@ -5030,13 +5030,11 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
 void SpellAuraHolder::AddAura(Aura *aura, SpellEffectIndex index)
 {
     m_auras[index] = aura;
-    m_auraFlags |= (1 << index);
 }
 
 void SpellAuraHolder::RemoveAura(SpellEffectIndex index)
 {
     m_auras[index] = NULL;
-    m_auraFlags &= ~(1 << index);
 }
 
 void SpellAuraHolder::ApplyAuraModifiers(bool apply, bool real)
@@ -5585,7 +5583,7 @@ bool SpellAuraHolder::IsPositive() const
 bool SpellAuraHolder::IsEmptyHolder() const
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        if (Aura *aur = m_auras[i])
+        if (m_auras[i])
             return false;
     return true;
 }

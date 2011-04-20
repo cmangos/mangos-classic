@@ -8111,7 +8111,6 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             continue;
 
         SpellProcEventEntry const *spellProcEvent = i->spellProcEvent;
-        SpellEntry const *spellInfo = triggeredByHolder->GetSpellProto();
         bool useCharges = triggeredByHolder->GetAuraCharges() > 0;
         bool procSuccess = true;
         bool anyAuraProc = false;
