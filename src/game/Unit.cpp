@@ -5315,17 +5315,14 @@ uint32 Unit::SpellDamageBonusTaken(Unit *pCaster, SpellEntry const *spellProto, 
     if(!spellProto || !pCaster || damagetype==DIRECT_DAMAGE )
         return pdamage;
 
+    uint32 schoolMask = GetSpellSchoolMask(spellProto);
+
     // Taken total percent damage auras
     float TakenTotalMod = 1.0f;
     int32 TakenTotal = 0;
 
     // ..taken
-    AuraList const& mModDamagePercentTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
-    for(AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
-    {
-        if ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto))
-            TakenTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
-    }
+    TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, schoolMask);
 
     // Taken fixed damage bonus auras
     int32 TakenAdvertisedBenefit = SpellBaseDamageBonusTaken(GetSpellSchoolMask(spellProto));
