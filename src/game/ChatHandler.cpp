@@ -337,10 +337,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             // if player is in battleground, he cannot say to battleground members by /ra
             Group *group = GetPlayer()->GetOriginalGroup();
-            if(!group)
+            if (!group)
             {
                 group = GetPlayer()->GetGroup();
-                if(!group || group->isBGGroup() || !group->isRaidGroup() || !group->IsLeader(_player->GetGUID()))
+                if (!group || group->isBGGroup() || !group->isRaidGroup() || !group->IsLeader(_player->GetObjectGuid()))
                     return;
             }
 
