@@ -216,7 +216,7 @@ void Object::DestroyForPlayer( Player *target ) const
 
     WorldPacket data(SMSG_DESTROY_OBJECT, 8);
     data << GetObjectGuid();
-    target->GetSession()->SendPacket( &data );
+    target->GetSession()->SendPacket(&data);
 }
 
 void Object::BuildMovementUpdate(ByteBuffer * data, uint8 updateFlags) const
