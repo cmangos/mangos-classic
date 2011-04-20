@@ -73,7 +73,7 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, SpellE
     SetEntry(spellId);
     SetObjectScale(DEFAULT_OBJECT_SCALE);
 
-    SetUInt64Value(DYNAMICOBJECT_CASTER, caster->GetGUID());
+    SetGuidValue(DYNAMICOBJECT_CASTER, caster->GetObjectGuid());
 
     /* Bytes field, so it's really 4 bit fields. These flags are unknown, but we do know that 0x00000001 is set for most.
        Farsight for example, does not have this flag, instead it has 0x80000002.
@@ -188,11 +188,11 @@ void DynamicObject::Delay(int32 delaytime)
 
 bool DynamicObject::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const
 {
-    if(!IsInWorld() || !u->IsInWorld())
+    if (!IsInWorld() || !u->IsInWorld())
         return false;
 
     // always seen by owner
-    if(GetCasterGuid()==u->GetObjectGuid())
+    if (GetCasterGuid() == u->GetObjectGuid())
         return true;
 
     // normal case

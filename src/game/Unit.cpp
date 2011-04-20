@@ -4044,7 +4044,7 @@ void Unit::DelaySpellAuraHolder(uint32 spellId, int32 delaytime, uint64 casterGU
                 else
                     aur->SetAuraDuration(aur->GetAuraDuration() - delaytime);
 
-                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u partially interrupted on unit %u, new duration: %u ms",spellId, GetGUIDLow(), aur->GetAuraDuration());
+                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u, EffectIndex %u partially interrupted on unit %u, new duration: %u ms",spellId, i, GetGUIDLow(), aur->GetAuraDuration());
             }
         }
         iter->second->UpdateAuraDuration();
