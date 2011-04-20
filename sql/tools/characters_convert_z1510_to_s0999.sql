@@ -1,6 +1,6 @@
 -- Query let convert characters DB from format
--- MaNGOS Zero characters DB `required_z1478_s0963_02_characters_pet_aura` to
--- MaNGOS One characters DB `required_s0963_10156_02_characters_pet_aura`.
+-- MaNGOS Zero characters DB `required_z1510_s0999_01_characters_character_tutorial` to
+-- MaNGOS One characters DB `required_s0999_10568_01_characters_character_tutorial`.
 
 -- Expected that in case Mangos Zero characters DB changes it will updated for more up-to-date versions.
 -- For targeted MaNGOS Master characters DB you can after convertion apply MaNGOS SQL updates in normal
@@ -8,7 +8,7 @@
 
 -- Note: ALWAYS DO BACKUP before use it. You will CAN NOT easy restore original DB state after tool use.
 
-ALTER TABLE character_db_version CHANGE COLUMN `required_z1478_s0963_02_characters_pet_aura` `required_s0963_10156_02_characters_pet_aura` bit;
+ALTER TABLE character_db_version CHANGE COLUMN `required_z1510_s0999_01_characters_character_tutorial` `required_s0999_10568_01_characters_character_tutorial` bit;
 
 
 -- MODIFID TABLES
@@ -99,6 +99,7 @@ ALTER TABLE saved_variables
 
 DELETE FROM `character_spell_cooldown`;
 DELETE FROM `pet_spell_cooldown`;
+DELETE FROM `character_tutorial`;
 
 -- FIELD VALUES CONVERT
 

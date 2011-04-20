@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `character_db_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_db_version` (
-  `required_z1478_s0963_02_characters_pet_aura` bit(1) default NULL
+  `required_z1510_s0999_01_characters_character_tutorial` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -681,7 +681,6 @@ DROP TABLE IF EXISTS `character_tutorial`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `character_tutorial` (
   `account` bigint(20) unsigned NOT NULL auto_increment COMMENT 'Account Identifier',
-  `realmid` int(11) unsigned NOT NULL default '0' COMMENT 'Realm Identifier',
   `tut0` int(11) unsigned NOT NULL default '0',
   `tut1` int(11) unsigned NOT NULL default '0',
   `tut2` int(11) unsigned NOT NULL default '0',
@@ -690,8 +689,7 @@ CREATE TABLE `character_tutorial` (
   `tut5` int(11) unsigned NOT NULL default '0',
   `tut6` int(11) unsigned NOT NULL default '0',
   `tut7` int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY (`account`,`realmid`),
-  KEY `acc_key` (`account`)
+  PRIMARY KEY  (`account`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
