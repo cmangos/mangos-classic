@@ -71,15 +71,13 @@ HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time_diff
         owner.AddSplineFlag(SPLINEFLAG_WALKMODE);
 
         // restore orientation of not moving creature at returning to home
-        if(owner.GetDefaultMovementType()==IDLE_MOTION_TYPE)
+        if (owner.GetDefaultMovementType() == IDLE_MOTION_TYPE)
         {
             // such a mob might need very exact spawning point, hence relocate to spawn-position
             if (CreatureData const* data = sObjectMgr.GetCreatureData(owner.GetGUIDLow()))
             {
                 owner.SetOrientation(data->orientation);
-                WorldPacket packet;
-                owner.BuildHeartBeatMsg(&packet);
-                owner.SendMessageToSet(&packet, false);
+                owner.SendHeartBeat(false);
             }
         }
 
