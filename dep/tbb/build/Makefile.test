@@ -194,7 +194,7 @@ endif
 test_tbb_plain: $(TEST_TBB_PLAIN.EXE)
 	$(run_cmd) ./test_assembly.$(TEST_EXT)
 	$(run_cmd) ./test_compiler.$(TEST_EXT)
-        # Yes, 4:8 is intended on the next line. 
+        # Yes, 4:8 is intended on the next line.
 	$(run_cmd) ./test_yield.$(TEST_EXT) 4:8
 	$(run_cmd) ./test_handle_perror.$(TEST_EXT)
 	$(run_cmd) ./test_task_auto_init.$(TEST_EXT)
@@ -223,7 +223,7 @@ test_tbb_plain: $(TEST_TBB_PLAIN.EXE)
 	$(run_cmd) ./test_mutex.$(TEST_EXT) 4
 	$(run_cmd) ./test_mutex_native_threads.$(TEST_EXT) 1:4
 	$(run_cmd) ./test_rwm_upgrade_downgrade.$(TEST_EXT) 4
-        # Yes, 4:8 is intended on the next line. 
+        # Yes, 4:8 is intended on the next line.
 	$(run_cmd) ./test_halt.$(TEST_EXT) 4:8
 	$(run_cmd) ./test_pipeline.$(TEST_EXT) 1:4
 	$(run_cmd) ./test_pipeline_with_tbf.$(TEST_EXT) 1:4
@@ -300,7 +300,7 @@ time_%: time_%.$(TEST_EXT) $(AUX_TEST_DEPENDENCIES)
 	$(run_cmd) ./$< $(args)
 
 
-clean_%: 
+clean_%:
 	$(RM) $*.$(OBJ) $*.exe $*.$(DLL) $*.$(LIBEXT) $*.res $*.map $*.ilk $*.pdb $*.exp $*.*manifest $*.tmp $*.d
 
 clean:

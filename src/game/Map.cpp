@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <http://github.com/mangoszero/mangoszero/>
+ * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2859,7 +2859,7 @@ Player* Map::GetPlayer(ObjectGuid guid)
 }
 
 /**
- * Function return creature (non-pet and then most summoned by spell creatures) that in world at CURRENT map 
+ * Function return creature (non-pet and then most summoned by spell creatures) that in world at CURRENT map
  *
  * @param guid must be creature guid (HIGHGUID_UNIT)
  */
@@ -2869,7 +2869,7 @@ Creature* Map::GetCreature(ObjectGuid guid)
 }
 
 /**
- * Function return pet that in world at CURRENT map 
+ * Function return pet that in world at CURRENT map
  *
  * @param guid must be pet guid (HIGHGUID_PET)
  */

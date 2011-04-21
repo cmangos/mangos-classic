@@ -100,15 +100,15 @@ tbb_debug: mkdir_debug
 	$(MAKE) -C "$(work_dir)_debug"  -r -f $(tbb_root)/build/Makefile.tbb cfg=debug tbb_root=$(tbb_root)
 
 test_release: $(call cross_cfg,mkdir_release) $(call cross_cfg,tbb_release) test_release_no_depends
-test_release_no_depends: 
-	-$(MAKE) -C "$(call cross_cfg,$(work_dir)_release)"  -r -f $(tbb_root)/build/Makefile.test cfg=release tbb_root=$(tbb_root) 
+test_release_no_depends:
+	-$(MAKE) -C "$(call cross_cfg,$(work_dir)_release)"  -r -f $(tbb_root)/build/Makefile.test cfg=release tbb_root=$(tbb_root)
 
 test_debug: $(call cross_cfg,mkdir_debug) $(call cross_cfg,tbb_debug) test_debug_no_depends
 test_debug_no_depends:
 	-$(MAKE) -C "$(call cross_cfg,$(work_dir)_debug)"  -r -f $(tbb_root)/build/Makefile.test cfg=debug tbb_root=$(tbb_root)
 
-test_release_ni: 
-	$(MAKE) -C "$(call cross_cfg,$(work_dir)_release)"  -r -f $(tbb_root)/build/Makefile.test cfg=release tbb_root=$(tbb_root) 
+test_release_ni:
+	$(MAKE) -C "$(call cross_cfg,$(work_dir)_release)"  -r -f $(tbb_root)/build/Makefile.test cfg=release tbb_root=$(tbb_root)
 
 test_debug_ni:
 	$(MAKE) -C "$(call cross_cfg,$(work_dir)_debug)"  -r -f $(tbb_root)/build/Makefile.test cfg=debug tbb_root=$(tbb_root)

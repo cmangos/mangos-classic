@@ -31,4 +31,3 @@ catch (Exception $e)
     echo "Command failed! Reason:<br />\n";
     echo $e->getMessage();
 }
-?>

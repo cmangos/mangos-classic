@@ -1,4 +1,3 @@
-
 ** HOW TO SCRIPT IN C++ **
 
 1 - create a file myscript.cpp in scripts folder.

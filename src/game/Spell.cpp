@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <http://github.com/mangoszero/mangoszero/>
+ * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -3748,7 +3748,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
         else if (m_caster == target)
         {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->IsInWorld())     
+            if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->IsInWorld())
             {
                 // Additional check for some spells
                 // If 0 spell effect empty - client not send target data (need use selection)

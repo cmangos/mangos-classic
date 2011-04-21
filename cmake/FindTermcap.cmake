@@ -1,4 +1,4 @@
-# find Terrmcap (terminal input library) includes and library
+# find Termcap (terminal input library) includes and library
 #
 # TERMCAP_INCLUDE_DIR - where the directory containing the TERMCAP headers can be found
 # TERMCAP_LIBRARY     - full path to the TERMCAP library

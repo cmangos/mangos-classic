@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2011 MaNGOSZero <http://github.com/mangoszero/mangoszero/>
+ * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,6 @@ void ModClass::getSpellCastTime(const SpellEntry *spellInfo, const Spell *spell,
 {
     // [workaround] holy light need script effect, but 19968 spell for it have 2.5 cast time sec
     // it should be instant instead
-    if(spellInfo->Id == 19968) 
+    if(spellInfo->Id == 19968)
         castTime = 0;
 }

@@ -10,10 +10,10 @@ cls
 echo.
 echo.
 echo.
-IF EXIST buildings\dir (ECHO The buildings folder already exist do you want to delete it?
+IF EXIST Buildings\dir (ECHO The Buildings folder already exist do you want to delete it?
 echo If YES hit Enter to continue if no CLOSE the program now! . . .
 pause>nul
-DEL /S /Q buildings)
+DEL /S /Q Buildings)
 vmapExtractor3.exe
 cls
 echo.

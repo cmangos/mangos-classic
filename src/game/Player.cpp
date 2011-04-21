@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <http://github.com/mangoszero/mangoszero/>
+ * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -5772,7 +5772,7 @@ void Player::RewardReputation(Quest const *pQuest)
         if (!pQuest->RewRepFaction[i])
             continue;
 
-        if (pQuest->RewRepValue[i])           
+        if (pQuest->RewRepValue[i])
         {
             int32 rep = CalculateReputationGain(REPUTATION_SOURCE_QUEST,  pQuest->RewRepValue[i], pQuest->RewRepFaction[i], GetQuestLevelForPlayer(pQuest));
 
@@ -9304,7 +9304,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                     if (!CanDualWield())
                         return EQUIP_ERR_CANT_DUAL_WIELD;
                 }
-                else if (type == INVTYPE_2HWEAPON) 
+                else if (type == INVTYPE_2HWEAPON)
                 {
                     return EQUIP_ERR_CANT_DUAL_WIELD;
                 }

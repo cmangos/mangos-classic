@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2011 MaNGOSZero <http://github.com/mangoszero/mangoszero/>
+ * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,4 +103,3 @@ class MANGOS_DLL_SPEC ModClass
 #define sMod MaNGOS::Singleton<ModClass>::Instance()
 
 #endif
-

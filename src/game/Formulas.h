@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <http://github.com/mangoszero/mangoszero/>
+ * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ namespace MaNGOS
 
         inline HonorRankInfo CalculateRankInfo(HonorRankInfo prk)
         {
-   
+
             if (prk.rank != 0)
             {
                 int8 rank = prk.positive ? prk.rank - NEGATIVE_HONOR_RANK_COUNT -1 : prk.rank - NEGATIVE_HONOR_RANK_COUNT;

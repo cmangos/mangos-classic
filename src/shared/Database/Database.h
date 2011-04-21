@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <http://github.com/mangoszero/mangoszero/>
+ * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -191,7 +191,7 @@ class MANGOS_DLL_SPEC Database
         void AllowAsyncTransactions() { m_bAllowAsyncTransactions = true; }
 
     protected:
-        Database() : m_pAsyncConn(NULL), m_pResultQueue(NULL), m_threadBody(NULL), m_delayThread(NULL), 
+        Database() : m_pAsyncConn(NULL), m_pResultQueue(NULL), m_threadBody(NULL), m_delayThread(NULL),
             m_logSQL(false), m_pingIntervallms(0), m_nQueryConnPoolSize(1), m_bAllowAsyncTransactions(false)
         {
             m_nQueryCounter = -1;
@@ -212,7 +212,7 @@ class MANGOS_DLL_SPEC Database
 
                 //initializes new SqlTransaction object
                 SqlTransaction * init();
-                //gets pointer on current transaction object. Returns NULL if transaction was not initiated 
+                //gets pointer on current transaction object. Returns NULL if transaction was not initiated
                 SqlTransaction * get() const { return m_pTrans; }
                 //detaches SqlTransaction object allocated by init() function
                 //next call to get() function will return NULL!

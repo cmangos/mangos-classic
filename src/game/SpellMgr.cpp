@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <http://github.com/mangoszero/mangoszero/>
+ * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -842,8 +842,8 @@ bool IsSingleTargetSpell(SpellEntry const *spellInfo)
         case 5530:                                          // Mace Stun Effect
         case 5648:                                          // Stunning Blast, rank 1
         case 5649:                                          // Stunning Blast, rank 2
-        case 5726:                                          // Stunning Blow, Rank 1 
-        case 5727:                                          // Stunning Blow, Rank 2 
+        case 5726:                                          // Stunning Blow, Rank 1
+        case 5727:                                          // Stunning Blow, Rank 2
         case 6927:                                          // Shadowstalker Slash, Rank 1
         case 8399:                                          // Sleep (group targets)
         case 9159:                                          // Sleep (armor triggred affect)

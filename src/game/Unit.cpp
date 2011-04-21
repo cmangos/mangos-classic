@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <http://github.com/mangoszero/mangoszero/>
+ * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -5421,7 +5421,7 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
                         continue;
                     switch((*i)->GetModifier()->m_miscvalue)
                     {
-                        // Shatter 
+                        // Shatter
                         case 849: if (pVictim->isFrozen()) crit_chance+= 10.0f; break;
                         case 910: if (pVictim->isFrozen()) crit_chance+= 20.0f; break;
                         case 911: if (pVictim->isFrozen()) crit_chance+= 30.0f; break;

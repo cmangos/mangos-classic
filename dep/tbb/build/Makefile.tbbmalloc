@@ -76,7 +76,7 @@ tbb_misc_malloc.$(OBJ): tbb_misc.cpp version_string.tmp
 	$(CPLUS) $(COMPILE_ONLY) $(subst -strict_ansi,-ansi,$(M_CPLUS_FLAGS)) $(PIC_KEY) $(OUTPUTOBJ_KEY)$@ $(INCLUDE_KEY). $(INCLUDES) $<
 
 MALLOC_LINK_FLAGS = $(LIB_LINK_FLAGS)
-PROXY_LINK_FLAGS = $(LIB_LINK_FLAGS) 
+PROXY_LINK_FLAGS = $(LIB_LINK_FLAGS)
 
 ifneq (,$(MALLOC.DEF))
 tbbmalloc.def: $(MALLOC.DEF)
@@ -118,7 +118,7 @@ endif
 
 malloc: $(MALLOC.DLL) $(MALLOCPROXY.DLL)
 
-malloc_dll: $(MALLOC.DLL) 
+malloc_dll: $(MALLOC.DLL)
 
 malloc_proxy_dll: $(MALLOCPROXY.DLL)
 
