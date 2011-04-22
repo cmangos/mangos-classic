@@ -4996,7 +4996,7 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
     m_isDeathPersist = IsDeathPersistentSpell(m_spellProto);
     m_isSingleTarget = IsSingleTargetSpell(spellproto);
 
-    if(GetSpellMaxDuration(m_spellProto) == -1 || m_isPassive && m_spellProto->DurationIndex == 0)
+    if (GetSpellMaxDuration(m_spellProto) == -1 || (m_isPassive && m_spellProto->DurationIndex == 0))
         m_permanent = true;
 
     m_isRemovedOnShapeLost = (m_casterGuid == m_target->GetObjectGuid() &&
@@ -5235,8 +5235,8 @@ void SpellAuraHolder::CleanupTriggeredSpells()
 
         // needed for spell 43680, maybe others
         // TODO: is there a spell flag, which can solve this in a more sophisticated way?
-        if(m_spellProto->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_TRIGGER_SPELL &&
-            GetSpellDuration(m_spellProto) == m_spellProto->EffectAmplitude[i])
+        if (m_spellProto->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_TRIGGER_SPELL &&
+            GetSpellDuration(m_spellProto) == int32(m_spellProto->EffectAmplitude[i]))
             continue;
 
         m_target->RemoveAurasDueToSpell(tSpellId);
