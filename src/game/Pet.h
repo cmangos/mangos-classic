@@ -34,8 +34,6 @@ enum PetType
     MAX_PET_TYPE            = 4
 };
 
-extern char const* petTypeSuffix[MAX_PET_TYPE];
-
 #define MAX_PET_STABLES         2
 
 // stored in character_pet.slot
