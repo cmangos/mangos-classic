@@ -489,7 +489,6 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     return SPELL_NORMAL;
 }
 
-
 // target not allow have more one spell specific from same caster
 bool IsSingleFromSpellSpecificPerTargetPerCaster(SpellSpecific spellSpec1,SpellSpecific spellSpec2)
 {
@@ -819,7 +818,7 @@ bool IsPositiveSpell(uint32 spellId)
     if (!spellproto)
         return false;
 
-    // spells with atleast one negative effect are considered negative
+    // spells with at least one negative effect are considered negative
     // some self-applied spells have negative effects but in self casting case negative check ignored.
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (spellproto->Effect[i] && !IsPositiveEffect(spellproto, SpellEffectIndex(i)))
@@ -965,7 +964,6 @@ void SpellMgr::LoadSpellTargetPositions()
     QueryResult *result = WorldDatabase.Query("SELECT id, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM spell_target_position");
     if (!result)
     {
-
         barGoLink bar( 1 );
 
         bar.step();
@@ -2761,7 +2759,7 @@ void SpellMgr::LoadSpellLearnSpells()
                 dbc_node.spell       = entry->EffectTriggerSpell[i];
                 dbc_node.active      = true;                // all dbc based learned spells is active (show in spell book or hide by client itself)
 
-                // ignore learning nonexistent spells (broken/outdated/or generic learnig spell 483
+                // ignore learning nonexistent spells (broken/outdated/or generic learning spell 483
                 if (!sSpellStore.LookupEntry(dbc_node.spell))
                     continue;
 
@@ -3602,7 +3600,7 @@ void SpellMgr::CheckUsedSpells(char const* table)
                     if (effectType >=0 && spellEntry->Effect[effectIdx] != uint32(effectType))
                         continue;
 
-                    if (auraType >=0 && spellEntry->EffectApplyAuraName[effectIdx] !=uint32(auraType))
+                    if (auraType >=0 && spellEntry->EffectApplyAuraName[effectIdx] != uint32(auraType))
                         continue;
                 }
                 else

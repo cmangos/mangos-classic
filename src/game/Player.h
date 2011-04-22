@@ -372,25 +372,26 @@ typedef std::list<HonorCP> HonorCPMap;
 
 enum PlayerFlags
 {
-    PLAYER_FLAGS_GROUP_LEADER   = 0x00000001,
-    PLAYER_FLAGS_AFK            = 0x00000002,
-    PLAYER_FLAGS_DND            = 0x00000004,
-    PLAYER_FLAGS_GM             = 0x00000008,
-    PLAYER_FLAGS_GHOST          = 0x00000010,
-    PLAYER_FLAGS_RESTING        = 0x00000020,
-    PLAYER_FLAGS_UNK7           = 0x00000040,
-    PLAYER_FLAGS_FFA_PVP        = 0x00000080,
-    PLAYER_FLAGS_CONTESTED_PVP  = 0x00000100,               // Player has been involved in a PvP combat and will be attacked by contested guards
-    PLAYER_FLAGS_IN_PVP         = 0x00000200,
-    PLAYER_FLAGS_HIDE_HELM      = 0x00000400,
-    PLAYER_FLAGS_HIDE_CLOAK     = 0x00000800,
-    PLAYER_FLAGS_UNK13          = 0x00001000,               // played long time
-    PLAYER_FLAGS_UNK14          = 0x00002000,               // played too long time
-    PLAYER_FLAGS_UNK15          = 0x00004000,
-    PLAYER_FLAGS_UNK16          = 0x00008000,               // strange visual effect (2.0.1), looks like PLAYER_FLAGS_GHOST flag
-    PLAYER_FLAGS_SANCTUARY      = 0x00010000,               // player entered sanctuary
-    PLAYER_FLAGS_UNK18          = 0x00020000,               // taxi benchmark mode (on/off) (2.0.1)
-    PLAYER_FLAGS_PVP_TIMER      = 0x00040000,               // 3.0.2, pvp timer active (after you disable pvp manually)
+    PLAYER_FLAGS_NONE              = 0x00000000,
+    PLAYER_FLAGS_GROUP_LEADER      = 0x00000001,
+    PLAYER_FLAGS_AFK               = 0x00000002,
+    PLAYER_FLAGS_DND               = 0x00000004,
+    PLAYER_FLAGS_GM                = 0x00000008,
+    PLAYER_FLAGS_GHOST             = 0x00000010,
+    PLAYER_FLAGS_RESTING           = 0x00000020,
+    PLAYER_FLAGS_UNK7              = 0x00000040,
+    PLAYER_FLAGS_FFA_PVP           = 0x00000080,
+    PLAYER_FLAGS_CONTESTED_PVP     = 0x00000100,            // Player has been involved in a PvP combat and will be attacked by contested guards
+    PLAYER_FLAGS_IN_PVP            = 0x00000200,
+    PLAYER_FLAGS_HIDE_HELM         = 0x00000400,
+    PLAYER_FLAGS_HIDE_CLOAK        = 0x00000800,
+    PLAYER_FLAGS_UNK13             = 0x00001000,            // played long time
+    PLAYER_FLAGS_UNK14             = 0x00002000,            // played too long time
+    PLAYER_FLAGS_UNK15             = 0x00004000,
+    PLAYER_FLAGS_UNK16             = 0x00008000,            // strange visual effect (2.0.1), looks like PLAYER_FLAGS_GHOST flag
+    PLAYER_FLAGS_SANCTUARY         = 0x00010000,            // player entered sanctuary
+    PLAYER_FLAGS_UNK18             = 0x00020000,            // taxi benchmark mode (on/off) (2.0.1)
+    PLAYER_FLAGS_PVP_TIMER         = 0x00040000,            // 3.0.2, pvp timer active (after you disable pvp manually)
 };
 
 // used in (PLAYER_FIELD_BYTES, 0) byte values
@@ -593,11 +594,11 @@ enum TradeSlots
 // [-ZERO] Need fix, or maybe not exists
 enum TransferAbortReason
 {
-    TRANSFER_ABORT_ERROR                    = 0x00,
-    TRANSFER_ABORT_MAX_PLAYERS              = 0x01,         // Transfer Aborted: instance is full
-    TRANSFER_ABORT_NOT_FOUND                = 0x02,         // Transfer Aborted: instance not found
-    TRANSFER_ABORT_TOO_MANY_INSTANCES       = 0x03,         // You have entered too many instances recently.
-    TRANSFER_ABORT_ZONE_IN_COMBAT           = 0x05,         // Unable to zone in while an encounter is in progress.
+    TRANSFER_ABORT_NONE                         = 0x00,
+    TRANSFER_ABORT_MAX_PLAYERS                  = 0x01,     // Transfer Aborted: instance is full
+    TRANSFER_ABORT_NOT_FOUND                    = 0x02,     // Transfer Aborted: instance not found
+    TRANSFER_ABORT_TOO_MANY_INSTANCES           = 0x03,     // You have entered too many instances recently.
+    TRANSFER_ABORT_ZONE_IN_COMBAT               = 0x05,     // Unable to zone in while an encounter is in progress.
 };
 
 enum InstanceResetWarningType
@@ -1214,7 +1215,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendQuestCompleteEvent(uint32 quest_id);
         void SendQuestReward( Quest const *pQuest, uint32 XP, Object* questGiver );
-        void SendQuestFailed( uint32 quest_id );
+        void SendQuestFailed( uint32 quest_id);
         void SendQuestTimerFailed( uint32 quest_id );
         void SendCanTakeQuestResponse( uint32 msg ) const;
         void SendQuestConfirmAccept(Quest const* pQuest, Player* pReceiver);

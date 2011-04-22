@@ -4441,7 +4441,6 @@ void Aura::PeriodicTick()
             else
                 pdamage = uint32(target->GetMaxHealth()*amount/100);
 
-
             // SpellDamageBonus for magic spells
             if(spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
                 pdamage = target->SpellDamageBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
@@ -5245,14 +5244,16 @@ void SpellAuraHolder::CleanupTriggeredSpells()
 
 bool SpellAuraHolder::ModStackAmount(int32 num)
 {
+    uint32 protoStackAmount = m_spellProto->StackAmount;
+
     // Can`t mod
-    if (!m_spellProto->StackAmount)
+    if (!protoStackAmount)
         return true;
 
     // Modify stack but limit it
     int32 stackAmount = m_stackAmount + num;
-    if (stackAmount > (int32)m_spellProto->StackAmount)
-        stackAmount = m_spellProto->StackAmount;
+    if (stackAmount > (int32)protoStackAmount)
+        stackAmount = protoStackAmount;
     else if (stackAmount <=0) // Last aura from stack removed
     {
         m_stackAmount = 0;

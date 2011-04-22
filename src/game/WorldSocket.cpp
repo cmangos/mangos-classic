@@ -636,10 +636,8 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     LocaleConstant locale;
     std::string account;
     Sha1Hash sha1;
-    BigNumber v, s, g, N;
+    BigNumber v, s, g, N, K;
     WorldPacket packet, SendAddonPacked;
-
-    BigNumber K;
 
     // Read the content of the packet
     recvPacket >> BuiltNumberClient;
