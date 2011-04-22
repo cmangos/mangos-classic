@@ -1417,7 +1417,7 @@ void Creature::SetDeathState(DeathState s)
             UpdateSpeed(MOVE_RUN, false);
         }
 
-        // return, since we promote to DEAD_FALLING. DEAD_FALLING is promoted to CORPSE at next update.
+        // return, since we promote to CORPSE_FALLING. CORPSE_FALLING is promoted to CORPSE at next update.
         if (CanFly() && FallGround())
             return;
 
@@ -1443,7 +1443,7 @@ void Creature::SetDeathState(DeathState s)
 
 bool Creature::FallGround()
 {
-    // Only if state is JUST_DIED. DEAD_FALLING is set below and promoted to CORPSE later
+    // Only if state is JUST_DIED. CORPSE_FALLING is set below and promoted to CORPSE later
     if (getDeathState() != JUST_DIED)
         return false;
 
