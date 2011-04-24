@@ -3530,7 +3530,7 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
                     if(pl->GetTeam() == team)
                         team = HORDE;
 
-                    ((BattleGroundWS*)bg)->SetDroppedFlagGUID(pGameObj->GetGUID(), team);
+                    ((BattleGroundWS*)bg)->SetDroppedFlagGuid(pGameObj->GetObjectGuid(), team);
                 }
                 break;
             }

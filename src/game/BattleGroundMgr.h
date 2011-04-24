@@ -43,9 +43,11 @@ struct PlayerQueueInfo                                      // stores informatio
     GroupQueueInfo * GroupInfo;                             // pointer to the associated groupqueueinfo
 };
 
+typedef std::map<ObjectGuid, PlayerQueueInfo*> GroupQueueInfoPlayers;
+
 struct GroupQueueInfo                                       // stores information about the group in queue (also used when joined as solo!)
 {
-    std::map<uint64, PlayerQueueInfo*> Players;             // player queue info map
+    GroupQueueInfoPlayers Players;                          // player queue info map
     Team  GroupTeam;                                        // Player team (ALLIANCE/HORDE)
     BattleGroundTypeId BgTypeId;                            // battleground type id
     uint32  JoinTime;                                       // time when group was added
@@ -75,18 +77,18 @@ class BattleGroundQueue
         bool CheckPremadeMatch(BattleGroundBracketId bracket_id, uint32 MaxPlayersPerTeam, uint32 MinPlayersPerTeam);
         bool CheckNormalMatch(BattleGroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers);
         GroupQueueInfo * AddGroup(Player* leader, Group* group, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracketId, bool isPremade);
-        void RemovePlayer(const uint64& guid, bool decreaseInvitedCount);
+        void RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount);
         void PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id);
         uint32 GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id);
-        bool IsPlayerInvited(const uint64& pl_guid, const uint32 bgInstanceGuid, const uint32 removeTime);
-        bool GetPlayerGroupInfoData(const uint64& guid, GroupQueueInfo* ginfo);
+        bool IsPlayerInvited(ObjectGuid guid, const uint32 bgInstanceGuid, const uint32 removeTime);
+        bool GetPlayerGroupInfoData(ObjectGuid guid, GroupQueueInfo* ginfo);
 
     private:
         //mutex that should not allow changing private data, nor allowing to update Queue during private data change.
         ACE_Recursive_Thread_Mutex  m_Lock;
 
 
-        typedef std::map<uint64, PlayerQueueInfo> QueuedPlayersMap;
+        typedef std::map<ObjectGuid, PlayerQueueInfo> QueuedPlayersMap;
         QueuedPlayersMap m_QueuedPlayers;
 
         //we need constant add to begin and constant remove / add from the end, therefore deque suits our problem well
@@ -133,7 +135,7 @@ class BattleGroundQueue
 class BGQueueInviteEvent : public BasicEvent
 {
     public:
-        BGQueueInviteEvent(const uint64& pl_guid, uint32 BgInstanceGUID, BattleGroundTypeId BgTypeId, uint32 removeTime) :
+        BGQueueInviteEvent(ObjectGuid pl_guid, uint32 BgInstanceGUID, BattleGroundTypeId BgTypeId, uint32 removeTime) :
           m_PlayerGuid(pl_guid), m_BgInstanceGUID(BgInstanceGUID), m_BgTypeId(BgTypeId), m_RemoveTime(removeTime)
           {
           };
@@ -142,7 +144,7 @@ class BGQueueInviteEvent : public BasicEvent
         virtual bool Execute(uint64 e_time, uint32 p_time);
         virtual void Abort(uint64 e_time);
     private:
-        uint64 m_PlayerGuid;
+        ObjectGuid m_PlayerGuid;
         uint32 m_BgInstanceGUID;
         BattleGroundTypeId m_BgTypeId;
         uint32 m_RemoveTime;

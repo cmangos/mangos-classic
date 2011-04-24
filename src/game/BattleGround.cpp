@@ -1186,13 +1186,13 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
 */
     // add to world, so it can be later looked up from HashMapHolder
     go->AddToWorld();
-    m_BgObjects[type] = go->GetGUID();
+    m_BgObjects[type] = go->GetObjectGuid();
     return true;
 }
 
 //some doors aren't despawned so we cannot handle their closing in gameobject::update()
 //it would be nice to correctly implement GO_ACTIVATED state and open/close doors in gameobject code
-void BattleGround::DoorClose(uint64 const& guid)
+void BattleGround::DoorClose(ObjectGuid guid)
 {
     GameObject *obj = GetBgMap()->GetGameObject(guid);
     if (obj)
@@ -1206,12 +1206,10 @@ void BattleGround::DoorClose(uint64 const& guid)
         }
     }
     else
-    {
-        sLog.outError("BattleGround: Door object not found (cannot close doors)");
-    }
+        sLog.outError("BattleGround: Door %s not found (cannot close doors)", guid.GetString().c_str());
 }
 
-void BattleGround::DoorOpen(uint64 const& guid)
+void BattleGround::DoorOpen(ObjectGuid guid)
 {
     GameObject *obj = GetBgMap()->GetGameObject(guid);
     if (obj)
@@ -1221,9 +1219,7 @@ void BattleGround::DoorOpen(uint64 const& guid)
         obj->UseDoorOrButton(RESPAWN_ONE_DAY);
     }
     else
-    {
-        sLog.outError("BattleGround: Door object not found! - doors will be closed.");
-    }
+        sLog.outError("BattleGround: Door %s not found! - doors will be closed.", guid.GetString().c_str());
 }
 
 void BattleGround::OnObjectDBLoad(Creature* creature)
@@ -1231,17 +1227,17 @@ void BattleGround::OnObjectDBLoad(Creature* creature)
     const BattleGroundEventIdx eventId = sBattleGroundMgr.GetCreatureEventIndex(creature->GetGUIDLow());
     if (eventId.event1 == BG_EVENT_NONE)
         return;
-    m_EventObjects[MAKE_PAIR32(eventId.event1, eventId.event2)].creatures.push_back(creature->GetGUID());
+    m_EventObjects[MAKE_PAIR32(eventId.event1, eventId.event2)].creatures.push_back(creature->GetObjectGuid());
     if (!IsActiveEvent(eventId.event1, eventId.event2))
-        SpawnBGCreature(creature->GetGUID(), RESPAWN_ONE_DAY);
+        SpawnBGCreature(creature->GetObjectGuid(), RESPAWN_ONE_DAY);
 }
 
-uint64 BattleGround::GetSingleCreatureGuid(uint8 event1, uint8 event2)
+ObjectGuid BattleGround::GetSingleCreatureGuid(uint8 event1, uint8 event2)
 {
     BGCreatures::const_iterator itr = m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
     if (itr != m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.end())
         return *itr;
-    return 0;
+    return ObjectGuid();
 }
 
 void BattleGround::OnObjectDBLoad(GameObject* obj)
@@ -1249,16 +1245,16 @@ void BattleGround::OnObjectDBLoad(GameObject* obj)
     const BattleGroundEventIdx eventId = sBattleGroundMgr.GetGameObjectEventIndex(obj->GetGUIDLow());
     if (eventId.event1 == BG_EVENT_NONE)
         return;
-    m_EventObjects[MAKE_PAIR32(eventId.event1, eventId.event2)].gameobjects.push_back(obj->GetGUID());
+    m_EventObjects[MAKE_PAIR32(eventId.event1, eventId.event2)].gameobjects.push_back(obj->GetObjectGuid());
     if (!IsActiveEvent(eventId.event1, eventId.event2))
     {
-        SpawnBGObject(obj->GetGUID(), RESPAWN_ONE_DAY);
+        SpawnBGObject(obj->GetObjectGuid(), RESPAWN_ONE_DAY);
     }
     else
     {
         // it's possible, that doors aren't spawned anymore (wsg)
         if (GetStatus() >= STATUS_IN_PROGRESS && IsDoor(eventId.event1, eventId.event2))
-            DoorOpen(obj->GetGUID());
+            DoorOpen(obj->GetObjectGuid());
     }
 }
 
@@ -1318,7 +1314,7 @@ void BattleGround::SpawnEvent(uint8 event1, uint8 event2, bool spawn)
         SpawnBGObject(*itr2, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY);
 }
 
-void BattleGround::SpawnBGObject(uint64 const& guid, uint32 respawntime)
+void BattleGround::SpawnBGObject(ObjectGuid guid, uint32 respawntime)
 {
     Map* map = GetBgMap();
 
@@ -1341,7 +1337,7 @@ void BattleGround::SpawnBGObject(uint64 const& guid, uint32 respawntime)
     }
 }
 
-void BattleGround::SpawnBGCreature(uint64 const& guid, uint32 respawntime)
+void BattleGround::SpawnBGCreature(ObjectGuid guid, uint32 respawntime)
 {
     Map* map = GetBgMap();
 
@@ -1364,19 +1360,19 @@ void BattleGround::SpawnBGCreature(uint64 const& guid, uint32 respawntime)
 
 bool BattleGround::DelObject(uint32 type)
 {
-    if (!m_BgObjects[type])
+    if (m_BgObjects[type].IsEmpty())
         return true;
 
     GameObject *obj = GetBgMap()->GetGameObject(m_BgObjects[type]);
     if (!obj)
     {
-        sLog.outError("Can't find gobject guid: %u",GUID_LOPART(m_BgObjects[type]));
+        sLog.outError("Can't find gobject: %s", m_BgObjects[type].GetString().c_str());
         return false;
     }
 
     obj->SetRespawnTime(0);                                 // not save respawn time
     obj->Delete();
-    m_BgObjects[type] = 0;
+    m_BgObjects[type].Clear();
     return true;
 }
 
@@ -1387,7 +1383,7 @@ void BattleGround::SendMessageToAll(int32 entry, ChatMsg type, Player const* sou
     BroadcastWorker(bg_do);
 }
 
-void BattleGround::SendYellToAll(int32 entry, uint32 language, uint64 const& guid)
+void BattleGround::SendYellToAll(int32 entry, uint32 language, ObjectGuid guid)
 {
     Creature* source = GetBgMap()->GetCreature(guid);
     if(!source)
@@ -1416,7 +1412,7 @@ void BattleGround::SendMessage2ToAll(int32 entry, ChatMsg type, Player const* so
     BroadcastWorker(bg_do);
 }
 
-void BattleGround::SendYell2ToAll(int32 entry, uint32 language, uint64 const& guid, int32 arg1, int32 arg2)
+void BattleGround::SendYell2ToAll(int32 entry, uint32 language, ObjectGuid guid, int32 arg1, int32 arg2)
 {
     Creature* source = GetBgMap()->GetCreature(guid);
     if(!source)
@@ -1438,7 +1434,7 @@ important notice:
 buffs aren't spawned/despawned when players captures anything
 buffs are in their positions when battleground starts
 */
-void BattleGround::HandleTriggerBuff(uint64 const& go_guid)
+void BattleGround::HandleTriggerBuff(ObjectGuid go_guid)
 {
     GameObject *obj = GetBgMap()->GetGameObject(go_guid);
     if (!obj || obj->GetGoType() != GAMEOBJECT_TYPE_TRAP || !obj->isSpawned())
@@ -1459,7 +1455,8 @@ void BattleGround::HandleTriggerBuff(uint64 const& go_guid)
         index--;
     if (index < 0)
     {
-        sLog.outError("BattleGround (Type: %u) has buff gameobject (Guid: %u Entry: %u Type:%u) but it hasn't that object in its internal data",GetTypeID(),GUID_LOPART(go_guid),obj->GetEntry(),obj->GetGoType());
+        sLog.outError("BattleGround (Type: %u) has buff trigger %s GOType: %u but it hasn't that object in its internal data",
+            GetTypeID(), go_guid.GetString().c_str(), obj->GetGoType());
         return;
     }
 
