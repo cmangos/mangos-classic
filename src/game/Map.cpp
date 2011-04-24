@@ -42,9 +42,9 @@
 
 struct ScriptAction
 {
-    uint64 sourceGUID;
-    uint64 targetGUID;
-    uint64 ownerGUID;                                       // owner of source if source is item
+    ObjectGuid sourceGuid;
+    ObjectGuid targetGuid;
+    ObjectGuid ownerGuid;                                   // owner of source if source is item
     ScriptInfo const* script;                               // pointer to static script data
 };
 
@@ -1699,8 +1699,8 @@ void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, O
         return;
 
     // prepare static data
-    uint64 sourceGUID = source->GetGUID();
-    uint64 targetGUID = target ? target->GetGUID() : (uint64)0;
+    ObjectGuid sourceGuid = source->GetObjectGuid();
+    ObjectGuid targetGuid = target ? target->GetObjectGuid() : ObjectGuid();
     ObjectGuid ownerGuid  = (source->GetTypeId()==TYPEID_ITEM) ? ((Item*)source)->GetOwnerGuid() : ObjectGuid();
 
     ///- Schedule script execution for all scripts in the script map
@@ -1709,9 +1709,9 @@ void Map::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source, O
     for (ScriptMap::const_iterator iter = s2->begin(); iter != s2->end(); ++iter)
     {
         ScriptAction sa;
-        sa.sourceGUID = sourceGUID;
-        sa.targetGUID = targetGUID;
-        sa.ownerGUID  = ownerGuid.GetRawValue();
+        sa.sourceGuid = sourceGuid;
+        sa.targetGuid = targetGuid;
+        sa.ownerGuid  = ownerGuid;
 
         sa.script = &iter->second;
         m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(sWorld.GetGameTime() + iter->first), sa));
@@ -1730,14 +1730,14 @@ void Map::ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* sou
     // NOTE: script record _must_ exist until command executed
 
     // prepare static data
-    uint64 sourceGUID = source->GetGUID();
-    uint64 targetGUID = target ? target->GetGUID() : (uint64)0;
+    ObjectGuid sourceGuid = source->GetObjectGuid();
+    ObjectGuid targetGuid = target ? target->GetObjectGuid() : ObjectGuid();
     ObjectGuid ownerGuid  = (source->GetTypeId()==TYPEID_ITEM) ? ((Item*)source)->GetOwnerGuid() : ObjectGuid();
 
     ScriptAction sa;
-    sa.sourceGUID = sourceGUID;
-    sa.targetGUID = targetGUID;
-    sa.ownerGUID  = ownerGuid.GetRawValue();
+    sa.sourceGuid = sourceGuid;
+    sa.targetGuid = targetGuid;
+    sa.ownerGuid  = ownerGuid;
 
     sa.script = &script;
     m_scriptSchedule.insert(ScriptScheduleMap::value_type(time_t(sWorld.GetGameTime() + delay), sa));
@@ -1764,35 +1764,34 @@ void Map::ScriptsProcess()
 
         Object* source = NULL;
 
-        if (step.sourceGUID)
+        if (!step.sourceGuid.IsEmpty())
         {
-            switch(GUID_HIPART(step.sourceGUID))
+            switch(step.sourceGuid.GetHigh())
             {
                 case HIGHGUID_ITEM:
                 // case HIGHGUID_CONTAINER: ==HIGHGUID_ITEM
                 {
-                    Player* player = HashMapHolder<Player>::Find(step.ownerGUID);
-                    if(player)
-                        source = player->GetItemByGuid(step.sourceGUID);
+                    if (Player* player = HashMapHolder<Player>::Find(step.ownerGuid))
+                        source = player->GetItemByGuid(step.sourceGuid);
                     break;
                 }
                 case HIGHGUID_UNIT:
-                    source = GetCreature(step.sourceGUID);
+                    source = GetCreature(step.sourceGuid);
                     break;
                 case HIGHGUID_PET:
-                    source = GetPet(step.sourceGUID);
+                    source = GetPet(step.sourceGuid);
                     break;
                 case HIGHGUID_PLAYER:
-                    source = HashMapHolder<Player>::Find(step.sourceGUID);
+                    source = HashMapHolder<Player>::Find(step.sourceGuid);
                     break;
                 case HIGHGUID_GAMEOBJECT:
-                    source = GetGameObject(step.sourceGUID);
+                    source = GetGameObject(step.sourceGuid);
                     break;
                 case HIGHGUID_CORPSE:
-                    source = HashMapHolder<Corpse>::Find(step.sourceGUID);
+                    source = HashMapHolder<Corpse>::Find(step.sourceGuid);
                     break;
                 default:
-                    sLog.outError("*_script source with unsupported high guid value %u",GUID_HIPART(step.sourceGUID));
+                    sLog.outError("*_script source with unsupported guid %s", step.sourceGuid.GetString().c_str());
                     break;
             }
         }
@@ -1802,27 +1801,27 @@ void Map::ScriptsProcess()
 
         Object* target = NULL;
 
-        if (step.targetGUID)
+        if (!step.targetGuid.IsEmpty())
         {
-            switch(GUID_HIPART(step.targetGUID))
+            switch(step.targetGuid.GetHigh())
             {
                 case HIGHGUID_UNIT:
-                    target = GetCreature(step.targetGUID);
+                    target = GetCreature(step.targetGuid);
                     break;
                 case HIGHGUID_PET:
-                    target = GetPet(step.targetGUID);
+                    target = GetPet(step.targetGuid);
                     break;
-                case HIGHGUID_PLAYER:                       // empty GUID case also
-                    target = HashMapHolder<Player>::Find(step.targetGUID);
+                case HIGHGUID_PLAYER:
+                    target = HashMapHolder<Player>::Find(step.targetGuid);
                     break;
                 case HIGHGUID_GAMEOBJECT:
-                    target = GetGameObject(step.targetGUID);
+                    target = GetGameObject(step.targetGuid);
                     break;
                 case HIGHGUID_CORPSE:
-                    target = HashMapHolder<Corpse>::Find(step.targetGUID);
+                    target = HashMapHolder<Corpse>::Find(step.targetGuid);
                     break;
                 default:
-                    sLog.outError("*_script source with unsupported high guid value %u",GUID_HIPART(step.targetGUID));
+                    sLog.outError("*_script target with unsupported guid %s", step.targetGuid.GetString().c_str());
                     break;
             }
         }
