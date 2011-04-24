@@ -251,7 +251,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint8 updateFlags) const
             *data << float(((Player*)this)->GetTransOffsetZ());
             *data << float(((Player*)this)->GetTransOffsetO());
         }
-        else if(GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT)
+        else if (GetObjectGuid().GetHigh() == HIGHGUID_TRANSPORT)
         {
             *data << float(0);
             *data << float(0);
