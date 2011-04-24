@@ -193,15 +193,15 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     DEBUG_LOG("WORLD: HandleAuctionSellItem");
 
     ObjectGuid auctioneerGuid;
-    uint64 item;
+    ObjectGuid itemGuid;
     uint32 etime, bid, buyout;
     recv_data >> auctioneerGuid;
-    recv_data >> item;
+    recv_data >> itemGuid;
     recv_data >> bid;
     recv_data >> buyout;
     recv_data >> etime;
 
-    if (!item || !bid || !etime)
+    if (itemGuid.IsEmpty() || !bid || !etime)
         return;                                             // check for cheaters
 
     Player *pl = GetPlayer();
@@ -231,11 +231,11 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    Item *it = pl->GetItemByGuid( item );
+    Item *it = pl->GetItemByGuid(itemGuid);
     // do not allow to sell already auctioned items
-    if(sAuctionMgr.GetAItem(GUID_LOPART(item)))
+    if (sAuctionMgr.GetAItem(itemGuid.GetCounter()))
     {
-        sLog.outError("AuctionError, player %s is sending item id: %u, but item is already in another auction", pl->GetName(), GUID_LOPART(item));
+        sLog.outError("AuctionError, %s is sending %s, but item is already in another auction", pl->GetGuidStr().c_str(), itemGuid.GetString().c_str());
         SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_INTERNAL_ERROR);
         return;
     }
@@ -278,7 +278,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 
     AuctionEntry *AH = new AuctionEntry;
     AH->Id = sObjectMgr.GenerateAuctionID();
-    AH->item_guidlow = GUID_LOPART(item);
+    AH->item_guidlow = itemGuid.GetCounter();
     AH->item_template = it->GetEntry();
     AH->owner = pl->GetGUIDLow();
     AH->startbid = bid;
@@ -289,8 +289,8 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     AH->deposit = deposit;
     AH->auctionHouseEntry = auctionHouseEntry;
 
-    DETAIL_LOG("selling item %u to auctioneer %s with initial bid %u with buyout %u and with time %u (in sec) in auctionhouse %u",
-        GUID_LOPART(item), auctioneerGuid.GetString().c_str(), bid, buyout, auction_time, AH->GetHouseId());
+    DETAIL_LOG("selling %s to auctioneer %s with initial bid %u with buyout %u and with time %u (in sec) in auctionhouse %u",
+        itemGuid.GetString().c_str(), auctioneerGuid.GetString().c_str(), bid, buyout, auction_time, AH->GetHouseId());
     auctionHouse->AddAuction(AH);
 
     sAuctionMgr.AddAItem(it);
