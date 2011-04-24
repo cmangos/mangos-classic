@@ -94,7 +94,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
     ObjectAccessor& operator=(const ObjectAccessor &);
 
     public:
-        typedef UNORDERED_MAP<uint64, Corpse* >      Player2CorpsesMapType;
+        typedef UNORDERED_MAP<ObjectGuid, Corpse*> Player2CorpsesMapType;
 
         // Search player at any map in world and other objects at same map with `obj`
         // Note: recommended use Map::GetUnit version if player also expected at same map only
