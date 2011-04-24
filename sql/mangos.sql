@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1529_s1024_01_mangos_mangos_string` bit(1) default NULL
+  `required_z1539_s1035_01_mangos_spell_proc_item_enchant` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -13119,7 +13119,10 @@ CREATE TABLE `spell_proc_item_enchant` (
 LOCK TABLES `spell_proc_item_enchant` WRITE;
 /*!40000 ALTER TABLE `spell_proc_item_enchant` DISABLE KEYS */;
 INSERT INTO `spell_proc_item_enchant` (`entry`, `ppmRate`) VALUES
-(8034, 9);        -- Frostbrand Weapon
+(8034, 9),        -- Frostbrand Weapon
+(13897, 6.0),     -- Enchant Weapon - Fiery Weapon
+(20004, 6.0),     -- Enchant Weapon - Lifestealing
+(20005, 1.6);     -- Enchant Weapon - Icy Chill
 /*!40000 ALTER TABLE `spell_proc_item_enchant` ENABLE KEYS */;
 UNLOCK TABLES;
 
