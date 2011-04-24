@@ -123,35 +123,31 @@ void ReputationMgr::SendForceReactions()
 
 void ReputationMgr::SendState(FactionState const* faction)
 {
-    if(faction->Flags & FACTION_FLAG_VISIBLE)               //If faction is visible then update it
+    uint32 count = 1;
+
+    WorldPacket data(SMSG_SET_FACTION_STANDING, (16));      // last check 2.4.0
+    size_t p_count = data.wpos();
+    data << (uint32) count;                                 // placeholder
+
+    data << (uint32) faction->ReputationListID;
+    data << (uint32) faction->Standing;
+
+    for(FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
-        uint32 count = 1;
-
-        WorldPacket data(SMSG_SET_FACTION_STANDING, (16));  // last check 2.4.0
-
-        size_t p_count = data.wpos();
-        data << (uint32) count;                             // placeholder
-
-        data << (uint32) faction->ReputationListID;
-        data << (uint32) faction->Standing;
-
-        for(FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+        if (itr->second.needSend)
         {
-            if (itr->second.needSend)
+            itr->second.needSend = false;
+            if (itr->second.ReputationListID != faction->ReputationListID)
             {
-                itr->second.needSend = false;
-                if (itr->second.ReputationListID != faction->ReputationListID)
-                {
-                    data << (uint32) itr->second.ReputationListID;
-                    data << (uint32) itr->second.Standing;
-                    ++count;
-                }
+                data << (uint32) itr->second.ReputationListID;
+                data << (uint32) itr->second.Standing;
+                ++count;
             }
         }
-
-        data.put<uint32>(p_count, count);
-        m_player->SendDirectMessage(&data);
     }
+
+    data.put<uint32>(p_count, count);
+    m_player->SendDirectMessage(&data);
 }
 
 void ReputationMgr::SendInitialReputations()
@@ -223,57 +219,32 @@ void ReputationMgr::Initialize()
 
 bool ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standing, bool incremental)
 {
-    if (SimpleFactionsList const* flist = GetFactionTeamList(factionEntry->ID))
+    bool res = false;
+    // if spillover definition exists in DB
+    if (const RepSpilloverTemplate *repTemplate = sObjectMgr.GetRepSpilloverTemplate(factionEntry->ID))
     {
-        bool res = false;
-        for (SimpleFactionsList::const_iterator itr = flist->begin();itr != flist->end();++itr)
+        for (uint32 i = 0; i < MAX_SPILLOVER_FACTIONS; ++i)
         {
-            if (FactionEntry const *factionEntryCalc = sFactionStore.LookupEntry(*itr))
+            if (repTemplate->faction[i])
             {
-                res = SetOneFactionReputation(factionEntryCalc, standing, incremental);
-
-                if (res)
+                if (m_player->GetReputationRank(repTemplate->faction[i]) <= ReputationRank(repTemplate->faction_rank[i]))
                 {
-                    FactionStateList::iterator itrstate = m_factions.find(factionEntryCalc->reputationListID);
-                    if (itrstate != m_factions.end())
-                        SendState(&itrstate->second);
+                    // bonuses are already given, so just modify standing by rate
+                    int32 spilloverRep = standing * repTemplate->faction_rate[i];
+                    SetOneFactionReputation(sFactionStore.LookupEntry(repTemplate->faction[i]), spilloverRep, incremental);
                 }
             }
         }
-        return res;
     }
-    else
+    // spillover done, update faction itself
+    FactionStateList::iterator faction = m_factions.find(factionEntry->reputationListID);
+    if (faction != m_factions.end())
     {
-        // update for the actual faction first
-        bool res = SetOneFactionReputation(factionEntry, standing, incremental);
-
-        if (res)
-        {
-            // then some spillover calculation here if it exist
-            if (const RepSpilloverTemplate *repTemplate = sObjectMgr.GetRepSpilloverTemplate(factionEntry->ID))
-            {
-                for (uint32 i = 0; i < MAX_SPILLOVER_FACTIONS; ++i)
-                {
-                    if (repTemplate->faction[i])
-                    {
-                        if (m_player->GetReputationRank(repTemplate->faction[i]) <= ReputationRank(repTemplate->faction_rank[i]))
-                        {
-                            // bonuses are already given, so just modify standing by rate
-                            int32 spilloverRep = standing * repTemplate->faction_rate[i];
-                            SetOneFactionReputation(sFactionStore.LookupEntry(repTemplate->faction[i]), spilloverRep, incremental);
-                        }
-                    }
-                }
-            }
-
-            // now we can send it
-            FactionStateList::iterator itr = m_factions.find(factionEntry->reputationListID);
-            if (itr != m_factions.end())
-                SendState(&itr->second);
-        }
-
-        return res;
+        res = SetOneFactionReputation(factionEntry, standing, incremental);
+        // only this faction gets reported to client, even if it has no own visible standing
+        SendState(&faction->second);
     }
+    return res;
 }
 
 bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, int32 standing, bool incremental)
