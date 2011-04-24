@@ -4992,10 +4992,10 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
     if (GetSpellMaxDuration(m_spellProto) == -1 || (m_isPassive && m_spellProto->DurationIndex == 0))
         m_permanent = true;
 
-    m_isRemovedOnShapeLost = (m_casterGuid == m_target->GetObjectGuid() &&
-        m_spellProto->Stances &&
-        !(m_spellProto->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) &&
-        !(m_spellProto->Attributes & SPELL_ATTR_NOT_SHAPESHIFT));
+    m_isRemovedOnShapeLost = (GetCasterGuid() == m_target->GetObjectGuid() &&
+                              m_spellProto->Stances &&
+                            !(m_spellProto->AttributesEx2 & SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) &&
+                            !(m_spellProto->Attributes & SPELL_ATTR_NOT_SHAPESHIFT));
 
     Player* modOwner = caster && caster->GetObjectGuid().IsUnit() ? ((Unit*)caster)->GetSpellModOwner() : NULL;
 
@@ -5402,7 +5402,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 // If target still has one of Warrior's bleeds, do nothing
                 Unit::AuraList const& PeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
                 for(Unit::AuraList::const_iterator i = PeriodicDamage.begin(); i != PeriodicDamage.end(); ++i)
-                    if( (*i)->GetCasterGUID() == GetCasterGUID() &&
+                    if( (*i)->GetCasterGuid() == GetCasterGuid() &&
                         (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR &&
                         (*i)->GetSpellProto()->Mechanic == MECHANIC_BLEED)
                         return;
@@ -5489,7 +5489,7 @@ void SpellAuraHolder::Update(uint32 diff)
             aura->UpdateAura(diff);
 
     // Channeled aura required check distance from caster
-    if(IsChanneledSpell(m_spellProto) && m_casterGuid != m_target->GetObjectGuid())
+    if(IsChanneledSpell(m_spellProto) && GetCasterGuid() != m_target->GetObjectGuid())
     {
         Unit* caster = GetCaster();
         if(!caster)
