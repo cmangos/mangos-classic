@@ -975,9 +975,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetVirtualItemSlot( uint8 i, Item* item);
         void SetSheath( SheathState sheathed );             // overwrite Unit version
-        uint8 FindEquipSlot( ItemPrototype const* proto, uint32 slot, bool swap ) const;
-        uint32 GetItemCount( uint32 item, bool inBankAlso = false, Item* skipItem = NULL ) const;
-        Item* GetItemByGuid(ObjectGuid uint64) const;
+        uint8 FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) const;
+        uint32 GetItemCount(uint32 item, bool inBankAlso = false, Item* skipItem = NULL) const;
+        Item* GetItemByGuid(ObjectGuid guid) const;
         Item* GetItemByPos( uint16 pos ) const;
         Item* GetItemByPos( uint8 bag, uint8 slot ) const;
         Item* GetWeaponForAttack(WeaponAttackType attackType) const { return GetWeaponForAttack(attackType,false,false); }
@@ -1085,7 +1085,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             return mainItem && mainItem->GetProto()->InventoryType == INVTYPE_2HWEAPON;
         }
         void SendNewItem( Item *item, uint32 count, bool received, bool created, bool broadcast = false );
-        bool BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint8 bag, uint8 slot);
+        bool BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, uint8 bag, uint8 slot);
 
         float GetReputationPriceDiscount( Creature const* pCreature ) const;
 
@@ -1486,7 +1486,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetGuildId() { return GetUInt32Value(PLAYER_GUILDID);  }
         static uint32 GetGuildIdFromDB(ObjectGuid guid);
         uint32 GetRank(){ return GetUInt32Value(PLAYER_GUILDRANK); }
-        static uint32 GetRankFromDB(uint64 guid);
+        static uint32 GetRankFromDB(ObjectGuid guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
         static void RemovePetitionsAndSigns(ObjectGuid guid);
 

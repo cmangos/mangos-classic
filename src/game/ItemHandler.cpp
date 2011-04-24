@@ -631,16 +631,17 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
 void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
 {
     DEBUG_LOG( "WORLD: Received CMSG_BUY_ITEM_IN_SLOT" );
-    uint64 vendorguid, bagguid;
+    ObjectGuid vendorGuid;
+    ObjectGuid bagGuid;
     uint32 item;
     uint8 bagslot, count;
 
-    recv_data >> vendorguid >> item >> bagguid >> bagslot >> count;
+    recv_data >> vendorGuid >> item >> bagGuid >> bagslot >> count;
 
     uint8 bag = NULL_BAG;                                   // init for case invalid bagGUID
 
     // find bag slot by bag guid
-    if (bagguid == _player->GetGUID())
+    if (bagGuid == _player->GetObjectGuid())
         bag = INVENTORY_SLOT_BAG_0;
     else
     {
@@ -648,7 +649,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
         {
             if (Bag *pBag = (Bag*)_player->GetItemByPos(INVENTORY_SLOT_BAG_0,i))
             {
-                if (bagguid == pBag->GetGUID())
+                if (bagGuid == pBag->GetObjectGuid())
                 {
                     bag = i;
                     break;
@@ -661,19 +662,19 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     if (bag == NULL_BAG)
         return;
 
-    GetPlayer()->BuyItemFromVendor(vendorguid,item,count,bag,bagslot);
+    GetPlayer()->BuyItemFromVendor(vendorGuid, item, count, bag, bagslot);
 }
 
 void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
 {
     DEBUG_LOG( "WORLD: Received CMSG_BUY_ITEM" );
-    uint64 vendorguid;
+    ObjectGuid vendorGuid;
     uint32 item;
     uint8 count, unk1;
 
-    recv_data >> vendorguid >> item >> count >> unk1;
+    recv_data >> vendorGuid >> item >> count >> unk1;
 
-    GetPlayer()->BuyItemFromVendor(vendorguid,item,count,NULL_BAG,NULL_SLOT);
+    GetPlayer()->BuyItemFromVendor(vendorGuid, item, count, NULL_BAG, NULL_SLOT);
 }
 
 void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )

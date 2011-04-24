@@ -39,7 +39,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     DEBUG_LOG("Received opcode CMSG_PETITION_BUY");
     recv_data.hexlike();
 
-    uint64 guidNPC;
+    ObjectGuid guidNPC;
     uint32 unk2;
     std::string name;
 
@@ -63,13 +63,13 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     recv_data >> unk2;                                      // index
     recv_data.read_skip<uint32>();                          // 0
 
-    DEBUG_LOG("Petitioner with GUID %u tried sell petition: name %s", GUID_LOPART(guidNPC), name.c_str());
+    DEBUG_LOG("Petitioner %s tried sell petition: name %s", guidNPC.GetString().c_str(), name.c_str());
 
     // prevent cheating
-    Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guidNPC,UNIT_NPC_FLAG_PETITIONER);
+    Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guidNPC, UNIT_NPC_FLAG_PETITIONER);
     if (!pCreature)
     {
-        DEBUG_LOG("WORLD: HandlePetitionBuyOpcode - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(guidNPC));
+        DEBUG_LOG("WORLD: HandlePetitionBuyOpcode - %s not found or you can't interact with him.", guidNPC.GetString().c_str());
         return;
     }
 
@@ -169,11 +169,11 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket & recv_data)
     //recv_data.hexlike();
 
     uint8 signs = 0;
-    uint64 petitionguid;
+    ObjectGuid petitionguid;
     recv_data >> petitionguid;                              // petition guid
 
     // solve (possible) some strange compile problems with explicit use GUID_LOPART(petitionguid) at some GCC versions (wrong code optimization in compiler?)
-    uint32 petitionguid_low = GUID_LOPART(petitionguid);
+    uint32 petitionguid_low = petitionguid.GetCounter();
 
     // if guild petition and has guild => error, return;
     if(_player->GetGuildId())
@@ -185,10 +185,10 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket & recv_data)
     if(result)
         signs = (uint8)result->GetRowCount();
 
-    DEBUG_LOG("CMSG_PETITION_SHOW_SIGNATURES petition entry: '%u'", petitionguid_low);
+    DEBUG_LOG("CMSG_PETITION_SHOW_SIGNATURES petition: %s", petitionguid.GetString().c_str());
 
     WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, (8+8+4+1+signs*12));
-    data << uint64(petitionguid);                           // petition guid
+    data << ObjectGuid(petitionguid);                       // petition guid
     data << _player->GetObjectGuid();                       // owner guid
     data << uint32(petitionguid_low);                       // guild guid (in mangos always same as GUID_LOPART(petitionguid)
     data << uint8(signs);                                   // sign's count
@@ -196,9 +196,9 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket & recv_data)
     for(uint8 i = 1; i <= signs; ++i)
     {
         Field *fields2 = result->Fetch();
-        uint64 plguid = fields2[0].GetUInt64();
+        ObjectGuid signerGuid = ObjectGuid(HIGHGUID_PLAYER, fields2[0].GetUInt32());
 
-        data << uint64(plguid);                             // Player GUID
+        data << ObjectGuid(signerGuid);                     // Player GUID
         data << uint32(0);                                  // there 0 ...
 
         result->NextRow();
@@ -225,7 +225,7 @@ void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
 {
     uint32 petitionLowGuid = petitionguid.GetCounter();
 
-    ObjectGuid ownerguid;
+    ObjectGuid ownerGuid;
     std::string name = "NO_NAME_FOR_GUID";
     uint8 signs = 0;
 
@@ -237,7 +237,7 @@ void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
     if (result)
     {
         Field* fields = result->Fetch();
-        ownerguid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
+        ownerGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
         name      = fields[1].GetCppString();
         signs     = fields[2].GetUInt8();
         delete result;
@@ -250,8 +250,8 @@ void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid)
 
     WorldPacket data(SMSG_PETITION_QUERY_RESPONSE, (4+8+name.size()+1+2+4*11));
     data << uint32(petitionLowGuid);                        // guild/team guid (in mangos always same as GUID_LOPART(petition guid)
-    data << ownerguid;                                      // charter owner guid
-    data << name;                                           // name (guild)
+    data << ObjectGuid(ownerGuid);                          // charter owner guid
+    data << name;                                           // name (guild/arena team)
     data << uint8(0);                                       // 1
     data << uint32(1);
     data << uint32(9);
@@ -273,13 +273,13 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recv_data)
     DEBUG_LOG("Received opcode MSG_PETITION_RENAME");   // ok
     //recv_data.hexlike();
 
-    uint64 petitionguid;
+    ObjectGuid petitionGuid;
     std::string newname;
 
-    recv_data >> petitionguid;                              // guid
+    recv_data >> petitionGuid;                              // guid
     recv_data >> newname;                                   // new name
 
-    Item *item = _player->GetItemByGuid(petitionguid);
+    Item *item = _player->GetItemByGuid(petitionGuid);
     if(!item)
         return;
 
@@ -297,12 +297,12 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recv_data)
     std::string db_newname = newname;
     CharacterDatabase.escape_string(db_newname);
     CharacterDatabase.PExecute("UPDATE petition SET name = '%s' WHERE petitionguid = '%u'",
-        db_newname.c_str(), GUID_LOPART(petitionguid));
+        db_newname.c_str(), petitionGuid.GetCounter());
 
-    DEBUG_LOG("Petition (GUID: %u) renamed to '%s'", GUID_LOPART(petitionguid), newname.c_str());
+    DEBUG_LOG("Petition %s renamed to '%s'", petitionGuid.GetString().c_str(), newname.c_str());
 
     WorldPacket data(MSG_PETITION_RENAME, (8+newname.size()+1));
-    data << uint64(petitionguid);
+    data << ObjectGuid(petitionGuid);
     data << newname;
     SendPacket(&data);
 }
@@ -333,17 +333,17 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
 
     fields = result->Fetch();
     uint32 ownerLowGuid = fields[0].GetUInt32();
-    ObjectGuid ownerguid = ObjectGuid(HIGHGUID_PLAYER, ownerLowGuid);
+    ObjectGuid ownerGuid = ObjectGuid(HIGHGUID_PLAYER, ownerLowGuid);
     uint8 signs = fields[1].GetUInt8();
 
     delete result;
 
-    if (ownerguid == _player->GetObjectGuid())
+    if (ownerGuid == _player->GetObjectGuid())
         return;
 
     // not let enemies sign guild charter
     if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GUILD) &&
-        GetPlayer()->GetTeam() != sObjectMgr.GetPlayerTeamByGUID(ownerguid))
+        GetPlayer()->GetTeam() != sObjectMgr.GetPlayerTeamByGUID(ownerGuid))
     {
         SendGuildCommandResult(GUILD_CREATE_S, "", ERR_GUILD_NOT_ALLIED);
         return;
@@ -371,15 +371,15 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
     {
         delete result;
         WorldPacket data(SMSG_PETITION_SIGN_RESULTS, (8+8+4));
-        data << petitionGuid;
-        data << _player->GetObjectGuid();
+        data << ObjectGuid(petitionGuid);
+        data << ObjectGuid(_player->GetObjectGuid());
         data << uint32(PETITION_SIGN_ALREADY_SIGNED);
 
         // close at signer side
         SendPacket(&data);
 
         // update for owner if online
-        if(Player *owner = sObjectMgr.GetPlayer(ownerguid))
+        if(Player *owner = sObjectMgr.GetPlayer(ownerGuid))
             owner->GetSession()->SendPacket(&data);
         return;
     }
@@ -387,12 +387,11 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
     CharacterDatabase.PExecute("INSERT INTO petition_sign (ownerguid,petitionguid, playerguid, player_account) VALUES ('%u', '%u', '%u','%u')",
         ownerLowGuid, petitionLowGuid, _player->GetGUIDLow(), GetAccountId());
 
-    DEBUG_LOG("PETITION SIGN: GUID %u by player: %s (GUID: %u Account: %u)",
-        petitionLowGuid, _player->GetName(), _player->GetGUIDLow(), GetAccountId());
+    DEBUG_LOG("PETITION SIGN: %s by %s", petitionGuid.GetString().c_str(), _player->GetGuidStr().c_str());
 
     WorldPacket data(SMSG_PETITION_SIGN_RESULTS, (8+8+4));
-    data << petitionGuid;
-    data << _player->GetObjectGuid();
+    data << ObjectGuid(petitionGuid);
+    data << ObjectGuid(_player->GetObjectGuid());
     data << uint32(PETITION_SIGN_OK);
 
     // close at signer side
@@ -404,7 +403,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
     //    item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+1, signs);
 
     // update for owner if online
-    if(Player *owner = sObjectMgr.GetPlayer(ownerguid))
+    if(Player *owner = sObjectMgr.GetPlayer(ownerGuid))
         owner->GetSession()->SendPacket(&data);
 }
 
@@ -442,17 +441,16 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recv_data)
     DEBUG_LOG("Received opcode CMSG_OFFER_PETITION");   // ok
     //recv_data.hexlike();
 
-    uint8 signs = 0;
-    uint64 petitionguid, plguid;
-    Player *player;                                     // this is not petition type!
-    recv_data >> petitionguid;                              // petition guid
-    recv_data >> plguid;                                    // player guid
+    ObjectGuid petitionGuid;
+    ObjectGuid playerGuid;
+    recv_data >> petitionGuid;                              // petition guid
+    recv_data >> playerGuid;                                // player guid
 
-    player = ObjectAccessor::FindPlayer(plguid);
+    Player *player = ObjectAccessor::FindPlayer(playerGuid);
     if (!player)
         return;
 
-    DEBUG_LOG("OFFER PETITION: GUID1 %u, to player id: %u", GUID_LOPART(petitionguid), GUID_LOPART(plguid));
+    DEBUG_LOG("OFFER PETITION: petition %s to %s", petitionGuid.GetString().c_str(), playerGuid.GetString().c_str());
 
     if (!sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GUILD) && GetPlayer()->GetTeam() != player->GetTeam() )
     {
@@ -472,23 +470,26 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recv_data)
         return;
     }
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
+    /// Get petition signs count
+    uint8 signs = 0;
+    QueryResult* result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", petitionGuid.GetCounter());
     // result==NULL also correct charter without signs
     if(result)
         signs = (uint8)result->GetRowCount();
 
+    /// Send response
     WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, (8+8+4+signs+signs*12));
-    data << uint64(petitionguid);                           // petition guid
-    data << _player->GetObjectGuid();                       // owner guid
-    data << uint32(GUID_LOPART(petitionguid));              // guild guid (in mangos always same as GUID_LOPART(petition guid)
+    data << ObjectGuid(petitionGuid);                       // petition guid
+    data << ObjectGuid(_player->GetObjectGuid());           // owner guid
+    data << uint32(petitionGuid.GetCounter());              // guild guid (in mangos always same as low part of petition guid)
     data << uint8(signs);                                   // sign's count
 
     for(uint8 i = 1; i <= signs; ++i)
     {
         Field *fields2 = result->Fetch();
-        plguid = fields2[0].GetUInt64();
+        ObjectGuid signerGuid = ObjectGuid(HIGHGUID_PLAYER, fields2[0].GetUInt32());
 
-        data << uint64(plguid);                             // Player GUID
+        data << ObjectGuid(signerGuid);                     // Player GUID
         data << uint32(0);                                  // there 0 ...
 
         result->NextRow();
@@ -503,22 +504,22 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     DEBUG_LOG("Received opcode CMSG_TURN_IN_PETITION"); // ok
     //recv_data.hexlike();
 
-    WorldPacket data;
-    uint64 petitionguid;
+    ObjectGuid petitionGuid;
 
-    uint32 ownerguidlo;
+    recv_data >> petitionGuid;
+
+    DEBUG_LOG("Petition %s turned in by %s", petitionGuid.GetString().c_str(), _player->GetGuidStr().c_str());
+
+    /// Collect petition info data
+    ObjectGuid ownerGuid;
     std::string name;
 
-    recv_data >> petitionguid;
-
-    DEBUG_LOG("Petition %u turned in by %u", GUID_LOPART(petitionguid), _player->GetGUIDLow());
-
     // data
-    QueryResult *result = CharacterDatabase.PQuery("SELECT ownerguid, name FROM petition WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
-    if(result)
+    QueryResult *result = CharacterDatabase.PQuery("SELECT ownerguid, name FROM petition WHERE petitionguid = '%u'", petitionGuid.GetCounter());
+    if (result)
     {
         Field *fields = result->Fetch();
-        ownerguidlo = fields[0].GetUInt32();
+        ownerGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
         name = fields[1].GetCppString();
         delete result;
     }
@@ -530,28 +531,23 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
 
     if(_player->GetGuildId())
     {
-        data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
-        data << uint32(PETITION_TURN_ALREADY_IN_GUILD);     // already in guild
+        WorldPacket data(SMSG_TURN_IN_PETITION_RESULTS, 4);
+        data << uint32(PETITION_TURN_ALREADY_IN_GUILD); // already in guild
         _player->GetSession()->SendPacket(&data);
         return;
     }
 
-    if(_player->GetGUIDLow() != ownerguidlo)
+    if (_player->GetObjectGuid() != ownerGuid)
         return;
 
     // signs
-    uint8 signs;
-    result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
-    if(result)
-        signs = (uint8)result->GetRowCount();
-    else
-        signs = 0;
+    result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", petitionGuid.GetCounter());
+    uint8 signs = result ? (uint8)result->GetRowCount() : 0;
 
     uint32 count = sWorld.getConfig(CONFIG_UINT32_MIN_PETITION_SIGNS);
-
-    if(signs < count)
+    if (signs < count)
     {
-        data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
+        WorldPacket data(SMSG_TURN_IN_PETITION_RESULTS, 4);
         data << uint32(PETITION_TURN_NEED_MORE_SIGNATURES); // need more signatures...
         SendPacket(&data);
         delete result;
@@ -566,8 +562,8 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     }
 
     // and at last charter item check
-    Item *item = _player->GetItemByGuid(petitionguid);
-    if(!item)
+    Item *item = _player->GetItemByGuid(petitionGuid);
+    if (!item)
     {
         delete result;
         return;
@@ -594,25 +590,25 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     {
         Field* fields = result->Fetch();
 
-        ObjectGuid signguid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
-        if (signguid.IsEmpty())
+        ObjectGuid signGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
+        if (signGuid.IsEmpty())
             continue;
 
-        guild->AddMember(signguid, guild->GetLowestRank());
+        guild->AddMember(signGuid, guild->GetLowestRank());
         result->NextRow();
     }
 
     delete result;
 
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM petition WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
-    CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE petitionguid = '%u'", GUID_LOPART(petitionguid));
+    CharacterDatabase.PExecute("DELETE FROM petition WHERE petitionguid = '%u'", petitionGuid.GetCounter());
+    CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE petitionguid = '%u'", petitionGuid.GetCounter());
     CharacterDatabase.CommitTransaction();
 
     // created
-    DEBUG_LOG("TURN IN PETITION GUID %u", GUID_LOPART(petitionguid));
+    DEBUG_LOG("TURN IN PETITION %s", petitionGuid.GetString().c_str());
 
-    data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
+    WorldPacket data(SMSG_TURN_IN_PETITION_RESULTS, 4);
     data << uint32(PETITION_TURN_OK);
     SendPacket(&data);
 }
