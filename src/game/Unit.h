@@ -485,23 +485,6 @@ enum UnitFlags
     UNIT_FLAG_UNK_29                = 0x20000000,           // used in Feing Death spell
 };
 
-// Value masks for UNIT_FIELD_FLAGS_2
-enum UnitFlags2
-{
-    UNIT_FLAG2_FEIGN_DEATH          = 0x00000001,
-    UNIT_FLAG2_UNK1                 = 0x00000002,           // Hides body and body armor. Weapons and shoulder and head armor still visible
-    UNIT_FLAG2_UNK2                 = 0x00000004,
-    UNIT_FLAG2_COMPREHEND_LANG      = 0x00000008,
-    UNIT_FLAG2_UNK4                 = 0x00000010,
-    UNIT_FLAG2_UNK5                 = 0x00000020,
-    UNIT_FLAG2_FORCE_MOVE           = 0x00000040,
-    //UNIT_FLAG2_DISARM_OFFHAND       = 0x00000080,         // also shield case - added in 3.x, possible all later not used in pre-3.x
-    //UNIT_FLAG2_UNK8                 = 0x00000100,
-    //UNIT_FLAG2_UNK9                 = 0x00000200,
-    //UNIT_FLAG2_DISARM_RANGED        = 0x00000400,         // added in 3.x
-    //UNIT_FLAG2_REGENERATE_POWER     = 0x00000800,         // added in 3.x
-};
-
 /// Non Player Character flags
 enum NPCFlags
 {
