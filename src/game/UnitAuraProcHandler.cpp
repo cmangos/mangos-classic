@@ -612,7 +612,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                 if( mod->m_amount <= (int32)damage || GetHealth() <= damage )
                 {
                     // remember guid before aura delete
-                    uint64 casterGuid = triggeredByAura->GetCasterGUID();
+                    ObjectGuid casterGuid = triggeredByAura->GetCasterGuid();
 
                     // Remove aura (before cast for prevent infinite loop handlers)
                     RemoveAurasDueToSpell(triggeredByAura->GetId());
@@ -634,7 +634,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, Aura
                 if( mod->m_amount <= (int32)damage )
                 {
                     // remember guid before aura delete
-                    uint64 casterGuid = triggeredByAura->GetCasterGUID();
+                    ObjectGuid casterGuid = triggeredByAura->GetCasterGuid();
 
                     // Remove aura (before cast for prevent infinite loop handlers)
                     RemoveAurasDueToSpell(triggeredByAura->GetId());

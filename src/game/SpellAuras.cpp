@@ -2123,7 +2123,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
     Unit *target = GetTarget();
 
     // not possess yourself
-    if(GetCasterGUID() == target->GetGUID())
+    if (GetCasterGuid() == target->GetObjectGuid())
         return;
 
     Unit* caster = GetCaster();
@@ -2297,7 +2297,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
     Unit *target = GetTarget();
 
     // not charm yourself
-    if(GetCasterGUID() == target->GetGUID())
+    if (GetCasterGuid() == target->GetObjectGuid())
         return;
 
     Unit* caster = GetCaster();
@@ -2410,7 +2410,7 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     if(!Real)
         return;
 
-    GetTarget()->SetConfused(apply, GetCasterGUID(), GetId());
+    GetTarget()->SetConfused(apply, GetCasterGuid(), GetId());
 }
 
 void Aura::HandleModFear(bool apply, bool Real)
@@ -2418,7 +2418,7 @@ void Aura::HandleModFear(bool apply, bool Real)
     if (!Real)
         return;
 
-    GetTarget()->SetFeared(apply, GetCasterGUID(), GetId());
+    GetTarget()->SetFeared(apply, GetCasterGuid(), GetId());
 }
 
 void Aura::HandleFeignDeath(bool apply, bool Real)
@@ -2426,7 +2426,7 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
     if(!Real)
         return;
 
-    GetTarget()->SetFeignDeath(apply, GetCasterGUID(), GetId());
+    GetTarget()->SetFeignDeath(apply, GetCasterGuid(), GetId());
 }
 
 void Aura::HandleAuraModDisarm(bool apply, bool Real)
@@ -2473,7 +2473,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         target->SetTargetGuid(ObjectGuid());
 
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-        target->CastStop(target->GetGUID() == GetCasterGUID() ? GetId() : 0);
+        target->CastStop(target->GetObjectGuid() == GetCasterGuid() ? GetId() : 0);
 
         // Creature specific
         if(target->GetTypeId() != TYPEID_PLAYER)
@@ -4906,7 +4906,7 @@ void Aura::HandlePreventFleeing(bool apply, bool Real)
     if( !fearAuras.empty() )
     {
         if (apply)
-            GetTarget()->SetFeared(false, fearAuras.front()->GetCasterGUID());
+            GetTarget()->SetFeared(false, fearAuras.front()->GetCasterGuid());
         else
             GetTarget()->SetFeared(true);
     }
