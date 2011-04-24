@@ -192,13 +192,14 @@ struct CreatureDataAddonAura
     uint32 spell_id;
 };
 
-// from `creature_addon` table
+// from `creature_addon` and `creature_template_addon`tables
 struct CreatureDataAddon
 {
     uint32 guidOrEntry;
     uint32 mount;
     uint32 bytes1;
-    uint32 bytes2;
+    uint8  sheath_state;                                    // SheathState
+    uint8  flags;                                           // UnitBytes2_Flags
     uint32 emote;
     uint32 move_flags;
     CreatureDataAddonAura const* auras;                     // loaded as char* "spell1 spell2 ... "

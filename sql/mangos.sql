@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1539_s1035_01_mangos_spell_proc_item_enchant` bit(1) default NULL
+  `required_z1540_s1036_02_mangos_creature_template_addon` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -759,11 +759,12 @@ DROP TABLE IF EXISTS `creature_addon`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_addon` (
   `guid` int(10) unsigned NOT NULL default '0',
-  `mount` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `bytes1` int(10) unsigned NOT NULL DEFAULT '0',
-  `bytes2` int(10) unsigned NOT NULL DEFAULT '0',
-  `emote` int(10) unsigned NOT NULL DEFAULT '0',
-  `moveflags` int(10) unsigned NOT NULL DEFAULT '0',
+  `mount` mediumint(8) unsigned NOT NULL default '0',
+  `bytes1` int(10) unsigned NOT NULL default '0',
+  `b2_0_sheath` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `b2_1_flags` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `emote` int(10) unsigned NOT NULL default '0',
+  `moveflags` int(10) unsigned NOT NULL default '0',
   `auras` text,
   PRIMARY KEY (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -1217,12 +1218,13 @@ DROP TABLE IF EXISTS `creature_template_addon`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_template_addon` (
-  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `mount` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `bytes1` int(10) unsigned NOT NULL DEFAULT '0',
-  `bytes2` int(10) unsigned NOT NULL DEFAULT '0',
-  `emote` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `moveflags` int(10) unsigned NOT NULL DEFAULT '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `mount` mediumint(8) unsigned NOT NULL default '0',
+  `bytes1` int(10) unsigned NOT NULL default '0',
+  `b2_0_sheath` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `b2_1_flags` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `emote` mediumint(8) unsigned NOT NULL default '0',
+  `moveflags` int(10) unsigned NOT NULL default '0',
   `auras` text,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
