@@ -824,6 +824,14 @@ void WorldObject::Relocate(float x, float y, float z)
         ((Player*)this)->m_movementInfo.ChangePosition(x, y, z, GetOrientation());
 }
 
+void WorldObject::SetOrientation(float orientation)
+{
+    m_orientation = orientation;
+
+    if(GetTypeId() == TYPEID_PLAYER)                        //FIXME: to Unit at move moveinfor to Unit
+        ((Player*)this)->m_movementInfo.ChangeOrientation(orientation);
+}
+
 uint32 WorldObject::GetZoneId() const
 {
     return GetTerrain()->GetZoneId(m_positionX, m_positionY, m_positionZ);
