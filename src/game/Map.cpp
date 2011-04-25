@@ -463,7 +463,6 @@ void Map::Update(const uint32 &t_diff)
         Player* plr = m_mapRefIter->getSource();
         if(plr && plr->IsInWorld())
         {
-            //plr->Update(t_diff);
             WorldSession * pSession = plr->GetSession();
             MapSessionFilter updater(pSession);
 

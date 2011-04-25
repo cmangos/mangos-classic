@@ -6772,8 +6772,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
         }
 
         data << GetPackGUID();
-        data << uint32(0);                                  //movement flags
-        data << uint8(0);                                   //unk
+        data << uint32(MOVEFLAG_NONE);                      // movement flags
         data << uint32(WorldTimer::getMSTime());
         data << float(GetPositionX());
         data << float(GetPositionY());
