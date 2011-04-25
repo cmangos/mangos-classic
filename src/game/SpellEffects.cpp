@@ -3574,6 +3574,67 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 22539:                                 // Shadow Flame (All script effects, not just end ones to
+                case 22972:                                 // prevent player from dodging the last triggered spell)
+                case 22975:
+                case 22976:
+                case 22977:
+                case 22978:
+                case 22979:
+                case 22980:
+                case 22981:
+                case 22982:
+                case 22983:
+                case 22984:
+                case 22985:
+                {
+                    if (!unitTarget || !unitTarget->isAlive())
+                        return;
+
+                    // Onyxia Scale Cloak
+                    if (unitTarget->GetDummyAura(22683))
+                        return;
+
+                    // Shadow Flame
+                    m_caster->CastSpell(unitTarget, 22682, true);
+                    return;
+                }
+                case 24194:                                 // Uther's Tribute
+                case 24195:                                 // Grom's Tribute
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint8 race = m_caster->getRace();
+                    uint32 spellId = 0;
+
+                    switch(m_spellInfo->Id)
+                    {
+                        case 24194:
+                            switch(race)
+                            {
+                                case RACE_HUMAN:            spellId = 24105; break;
+                                case RACE_DWARF:            spellId = 24107; break;
+                                case RACE_NIGHTELF:         spellId = 24108; break;
+                                case RACE_GNOME:            spellId = 24106; break;
+                            }
+                            break;
+                        case 24195:
+                            switch(race)
+                            {
+                                case RACE_ORC:              spellId = 24104; break;
+                                case RACE_UNDEAD:           spellId = 24103; break;
+                                case RACE_TAUREN:           spellId = 24102; break;
+                                case RACE_TROLL:            spellId = 24101; break;
+                            }
+                            break;
+                    }
+
+                    if (spellId)
+                        m_caster->CastSpell(m_caster, spellId, true);
+
+                    return;
+                }
                 case 24590:                                 // Brittle Armor - need remove one 24575 Brittle Armor aura
                     unitTarget->RemoveAuraHolderFromStack(24575);
                     return;
@@ -3671,6 +3732,16 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 26218:                                 // Mistletoe
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 spells[3] = {26206, 26207, 45036};
+
+                    m_caster->CastSpell(unitTarget, spells[urand(0, 2)], true);
+                    return;
+                }
                 case 26275:                                 // PX-238 Winter Wondervolt TRAP
                 {
                     uint32 spells[4] = { 26272, 26157, 26273, 26274 };
@@ -3690,67 +3761,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 26465:                                 // Mercurial Shield - need remove one 26464 Mercurial Shield aura
                     unitTarget->RemoveAuraHolderFromStack(26464);
                     return;
-                case 22539:                                 // Shadow Flame (All script effects, not just end ones to
-                case 22972:                                 // prevent player from dodging the last triggered spell)
-                case 22975:
-                case 22976:
-                case 22977:
-                case 22978:
-                case 22979:
-                case 22980:
-                case 22981:
-                case 22982:
-                case 22983:
-                case 22984:
-                case 22985:
-                {
-                    if (!unitTarget || !unitTarget->isAlive())
-                        return;
-
-                    // Onyxia Scale Cloak
-                    if (unitTarget->GetDummyAura(22683))
-                        return;
-
-                    // Shadow Flame
-                    m_caster->CastSpell(unitTarget, 22682, true);
-                    return;
-                }
-                case 24194:                                 // Uther's Tribute
-                case 24195:                                 // Grom's Tribute
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    uint8 race = m_caster->getRace();
-                    uint32 spellId = 0;
-
-                    switch(m_spellInfo->Id)
-                    {
-                        case 24194:
-                            switch(race)
-                            {
-                                case RACE_HUMAN:            spellId = 24105; break;
-                                case RACE_DWARF:            spellId = 24107; break;
-                                case RACE_NIGHTELF:         spellId = 24108; break;
-                                case RACE_GNOME:            spellId = 24106; break;
-                            }
-                            break;
-                        case 24195:
-                            switch(race)
-                            {
-                                case RACE_ORC:              spellId = 24104; break;
-                                case RACE_UNDEAD:           spellId = 24103; break;
-                                case RACE_TAUREN:           spellId = 24102; break;
-                                case RACE_TROLL:            spellId = 24101; break;
-                            }
-                            break;
-                    }
-
-                    if (spellId)
-                        m_caster->CastSpell(m_caster, spellId, true);
-
-                    return;
-                }
                 case 26656:                                 // Summon Black Qiraji Battle Tank
                 {
                     if (!unitTarget)
