@@ -958,12 +958,20 @@ enum SessionStatus
     STATUS_UNHANDLED                                        ///< We don' handle this opcode yet
 };
 
+enum PacketProcessing
+{
+    PROCESS_INPLACE = 0,                                    //process packet whenever we receive it - mostly for non-handled or non-implemented packets
+    PROCESS_THREADUNSAFE,                                   //packet is not thread-safe - process it in World::UpdateSessions()
+    PROCESS_THREADSAFE                                      //packet is thread-safe - process it in Map::Update()
+};
+
 class WorldPacket;
 
 struct OpcodeHandler
 {
     char const* name;
     SessionStatus status;
+    PacketProcessing packetProcessing;
     void (WorldSession::*handler)(WorldPacket& recvPacket);
 };
 
@@ -976,28 +984,46 @@ class Opcodes
         ~Opcodes();
     public:
         void BuildOpcodeList();
-        void StoreOpcode(uint16 Opcode,char const* name, SessionStatus status, void (WorldSession::*handler)(WorldPacket& recvPacket))
-        { mOpcodeMap[Opcode].name = name; mOpcodeMap[Opcode].status = status ; mOpcodeMap[Opcode].handler = handler; };
+        void StoreOpcode(uint16 Opcode,char const* name, SessionStatus status, PacketProcessing process, void (WorldSession::*handler)(WorldPacket& recvPacket))
+        {
+            OpcodeHandler& ref = mOpcodeMap[Opcode];
+            ref.name = name;
+            ref.status = status;
+            ref.packetProcessing = process;
+            ref.handler = handler;
+        }
 
         /// Lookup opcode
-        inline OpcodeHandler const* LookupOpcode(uint16 id)
+        inline OpcodeHandler const* LookupOpcode(uint16 id) const
         {
-            OpcodeMap::iterator itr = mOpcodeMap.find(id);
+            OpcodeMap::const_iterator itr = mOpcodeMap.find(id);
             if (itr != mOpcodeMap.end())
-                return &mOpcodeMap[id];
+                return &itr->second;
             return NULL;
         }
+
+        /// compatible with other mangos branches access
+
+        inline OpcodeHandler const& operator[] (uint16 id) const
+        {
+            OpcodeMap::const_iterator itr = mOpcodeMap.find(id);
+            if (itr != mOpcodeMap.end())
+                return itr->second;
+            return emptyHandler;
+        }
+
+        static OpcodeHandler const emptyHandler;
 
         OpcodeMap mOpcodeMap;
 
 };
 
-#define opCodes MaNGOS::Singleton<Opcodes>::Instance()
+#define opcodeTable MaNGOS::Singleton<Opcodes>::Instance()
 
 /// Lookup opcode name for human understandable logging
 inline char const* LookupOpcodeName(uint16 id)
 {
-    if (OpcodeHandler const* op = opCodes.LookupOpcode(id))
+    if (OpcodeHandler const* op = opcodeTable.LookupOpcode(id))
         return op->name;
     return "Received unknown opcode, it's more than max!";
 }
