@@ -850,17 +850,19 @@ void GameObject::TriggerLinkedGameObject(Unit* target)
 
     SpellEntry const* trapSpell = sSpellStore.LookupEntry(trapInfo->trap.spellId);
 
-    // TODO: allow all traps to be activated, some are without spell
-    // but will have animation and/or are expected to despawn
-    if(!trapSpell)                                          // checked at load already
-        return;
+    // The range to search for linked trap is weird. We set 0.5 as default. Most (all?)
+    // traps are probably expected to be pretty much at the same location as the used GO,
+    // so it appears that using range from spell is obsolete.
+    float range = 0.5f;
 
-    float range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(trapSpell->rangeIndex));
+    if (trapSpell)                                          // checked at load already
+        range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(trapSpell->rangeIndex));
 
     // search nearest linked GO
     GameObject* trapGO = NULL;
+
     {
-        // search closest with base of used GO, using max range of trap spell as search radius
+        // search closest with base of used GO, using max range of trap spell as search radius (why? See above)
         MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*this, trapEntry, range);
         MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> checker(trapGO, go_check);
 
@@ -868,12 +870,8 @@ void GameObject::TriggerLinkedGameObject(Unit* target)
     }
 
     // found correct GO
-
-    // TODO: handle the GO with Use()
-
-    // FIXME: when GO casting will be implemented trap must cast spell to target
-    if(trapGO)
-        target->CastSpell(target, trapSpell, true, NULL, NULL, GetGUID());
+    if (trapGO)
+        trapGO->Use(target);
 }
 
 GameObject* GameObject::LookupFishingHoleAround(float range)
