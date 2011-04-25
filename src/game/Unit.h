@@ -1313,6 +1313,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         ObjectGuid const& GetChannelObjectGuid() const { return GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT); }
         void SetChannelObjectGuid(ObjectGuid targetGuid) { SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, targetGuid); }
 
+        virtual Pet* GetMiniPet() const { return NULL; }    // overwrited in Player
+
         ObjectGuid const& GetCharmerOrOwnerGuid() const { return !GetCharmerGuid().IsEmpty() ? GetCharmerGuid() : GetOwnerGuid(); }
         ObjectGuid const& GetCharmerOrOwnerOrOwnGuid() const
         {
@@ -1795,8 +1797,8 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
         if (Pet* pet = GetPet())
             func(pet);
 
-    if ((controlledMask & CONTROLLED_MINIPET) && GetTypeId() == TYPEID_PLAYER)
-        if (Unit* mini = ((Player*)this)->GetMiniPet())
+    if (controlledMask & CONTROLLED_MINIPET)
+        if (Unit* mini = GetMiniPet())
             func(mini);
 
     if (controlledMask & CONTROLLED_GUARDIANS)
@@ -1827,8 +1829,8 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
             if (func(pet))
                 return true;
 
-    if ((controlledMask & CONTROLLED_MINIPET) && GetTypeId() == TYPEID_PLAYER)
-        if (Unit* mini = ((Player*)this)->GetMiniPet())
+    if (controlledMask & CONTROLLED_MINIPET)
+        if (Unit* mini = GetMiniPet())
             if (func(mini))
                 return true;
 
