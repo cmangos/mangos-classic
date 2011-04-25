@@ -411,7 +411,7 @@ class MANGOS_DLL_SPEC Aura
 
         // more limited that used in future versions (spell_affect table based only), so need be careful with backporting uses
         bool isAffectedOnSpell(SpellEntry const *spell) const;
-        bool CanProcFrom(SpellEntry const *spell, uint32 EventProcEx, uint32 procEx, bool active) const;
+        bool CanProcFrom(SpellEntry const *spell, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const;
 
         //SpellAuraHolder const* GetHolder() const { return m_spellHolder; }
         SpellAuraHolder* GetHolder() { return m_spellAuraHolder; }
