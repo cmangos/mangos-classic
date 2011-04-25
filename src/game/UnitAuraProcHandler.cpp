@@ -172,7 +172,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS]=
     &Unit::HandleNULLProc,                                  //135 SPELL_AURA_MOD_HEALING_DONE
     &Unit::HandleNULLProc,                                  //136 SPELL_AURA_MOD_HEALING_DONE_PERCENT
     &Unit::HandleNULLProc,                                  //137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE
-    &Unit::HandleHasteAuraProc,                             //138 SPELL_AURA_MOD_HASTE
+    &Unit::HandleHasteAuraProc,                             //138 SPELL_AURA_MOD_MELEE_HASTE
     &Unit::HandleNULLProc,                                  //139 SPELL_AURA_FORCE_REACTION
     &Unit::HandleNULLProc,                                  //140 SPELL_AURA_MOD_RANGED_HASTE
     &Unit::HandleNULLProc,                                  //141 SPELL_AURA_MOD_RANGED_AMMO_HASTE
