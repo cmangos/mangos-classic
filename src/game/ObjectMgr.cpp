@@ -636,12 +636,6 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
             continue;
         }
 
-        if (!IsSpellAppliesAura(AdditionalSpellInfo))
-        {
-            sLog.outErrorDb("Creature (%s: %u) has spell %u defined in `auras` field in `%s` but spell doesn't apply any auras.", guidEntryStr, addon->guidOrEntry, cAura.spell_id, table);
-            continue;
-        }
-
         ++i;
     }
 
