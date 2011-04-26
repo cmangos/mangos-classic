@@ -648,6 +648,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastCustomSpell(m_caster, 23234, &damage, NULL, NULL, true, NULL);
                     return;
                 }
+                case 19411:                                 // Lava Bomb
+                case 20474:                                 // Lava Bomb
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 20494, true);
+                    return;
+                }
                 case 20577:                                 // Cannibalize
                 {
                     if (unitTarget)
