@@ -301,7 +301,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     case 26789:                             // Shard of the Fallen Star
                     {
                         uint32 count = 0;
-                        for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
+                        for(TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
                             if(ihit->effectMask & (1<<effect_idx))
                                 ++count;
 
