@@ -63,10 +63,10 @@
     <ClCompile Include="..\..\src\shared\Auth\BigNumber.cpp">
       <Filter>Auth</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\shared\Auth\HMACSHA1.cpp">
+    <ClCompile Include="..\..\src\shared\Auth\Hmac.cpp">
       <Filter>Auth</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\shared\Auth\SARC4.cpp">
+    <ClCompile Include="..\..\src\shared\Auth\md5.c">
       <Filter>Auth</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\shared\Auth\Sha1.cpp">
@@ -152,10 +152,10 @@
     <ClInclude Include="..\..\src\shared\Auth\BigNumber.h">
       <Filter>Auth</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\shared\Auth\HMACSHA1.h">
+    <ClInclude Include="..\..\src\shared\Auth\Hmac.h">
       <Filter>Auth</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\shared\Auth\SARC4.h">
+    <ClInclude Include="..\..\src\shared\Auth\md5.h">
       <Filter>Auth</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\shared\Auth\Sha1.h">

@@ -429,7 +429,8 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\shared\Auth\AuthCrypt.cpp" />
     <ClCompile Include="..\..\src\shared\Auth\BigNumber.cpp" />
-    <ClCompile Include="..\..\src\shared\Auth\HMAC.cpp" />
+    <ClCompile Include="..\..\src\shared\Auth\Hmac.cpp" />
+    <ClCompile Include="..\..\src\shared\Auth\md5.c" />
     <ClCompile Include="..\..\src\shared\Auth\Sha1.cpp" />
     <ClCompile Include="..\..\src\shared\Common.cpp" />
     <ClCompile Include="..\..\src\shared\Config\Config.cpp" />
@@ -451,8 +452,8 @@
     <ClInclude Include="..\..\dep\include\mersennetwister\MersenneTwister.h" />
     <ClInclude Include="..\..\src\shared\Auth\AuthCrypt.h" />
     <ClInclude Include="..\..\src\shared\Auth\BigNumber.h" />
-    <ClInclude Include="..\..\src\shared\Auth\HMAC.h" />
-    <ClInclude Include="..\..\src\shared\Auth\SARC4.h" />
+    <ClInclude Include="..\..\src\shared\Auth\Hmac.h" />
+    <ClInclude Include="..\..\src\shared\Auth\md5.h" />
     <ClInclude Include="..\..\src\shared\Auth\Sha1.h" />
     <ClInclude Include="..\..\src\shared\ByteBuffer.h" />
     <ClInclude Include="..\..\src\shared\WorldPacket.h" />
