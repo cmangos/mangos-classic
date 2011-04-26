@@ -368,10 +368,6 @@ if(WIN32)
     CONFIGURATIONS Debug
   )
   if(PLATFORM MATCHES X86)
-    # Special thing for debug and 32-bit
-    set(WIN_DEBUGLIBS
-      ${CMAKE_SOURCE_DIR}/dep/lib/win32_debug/vld.lib
-    )
     # Copy dll's Windows needs
     install(
       FILES
@@ -381,7 +377,6 @@ if(WIN32)
     )
     install(
       FILES
-        ${CMAKE_SOURCE_DIR}/dep/lib/win32_debug/vld.dll
         ${CMAKE_SOURCE_DIR}/dep/lib/win32_debug/dbghelp.dll
       DESTINATION ${LIBS_DIR}
       CONFIGURATIONS Debug
