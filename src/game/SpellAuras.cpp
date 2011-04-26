@@ -5052,7 +5052,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     // will be < MAX_AURAS slot (if find free) with !secondaura
     if (IsNeedVisibleSlot(caster))
     {
-        if (IsPositive())                               // empty positive slot
+        if (IsPositive())                                   // empty positive slot
         {
             for (uint8 i = 0; i < MAX_POSITIVE_AURAS; i++)
             {
@@ -5063,7 +5063,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
                 }
             }
         }
-        else                                            // empty negative slot
+        else                                                // empty negative slot
         {
             for (uint8 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; i++)
             {
@@ -5267,8 +5267,8 @@ void SpellAuraHolder::SetStackAmount(uint32 stackAmount)
     if (!target || !caster)
         return;
 
-    bool refresh = stackAmount >= uint32(m_stackAmount);
-    if (stackAmount != uint32(m_stackAmount))
+    bool refresh = stackAmount >= m_stackAmount;
+    if (stackAmount != m_stackAmount)
     {
         m_stackAmount = stackAmount;
         UpdateAuraApplication();
@@ -5622,14 +5622,14 @@ void SpellAuraHolder::UpdateAuraApplication()
     if (m_auraSlot >= MAX_AURAS)
         return;
 
-    // field expect count-1 for proper amount show
-    uint8 count = m_procCharges > 0 ? m_procCharges*m_stackAmount : m_stackAmount;
+    uint32 stackCount = m_procCharges > 0 ? m_procCharges*m_stackAmount : m_stackAmount;
 
     uint32 index    = m_auraSlot / 4;
     uint32 byte     = (m_auraSlot % 4) * 8;
     uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS + index);
     val &= ~(0xFF << byte);
-    val |= ((uint8(count -1)) << byte);                     // field expect count-1 for proper amount show
+    // field expect count-1 for proper amount show, also prevent overflow at client side
+    val |= ((uint8(stackCount <= 255 ? stackCount-1 : 255-1)) << byte);
     m_target->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS + index, val);
 }
 

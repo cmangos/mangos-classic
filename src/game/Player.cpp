@@ -14078,20 +14078,20 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
         {
             Field *fields = result->Fetch();
             ObjectGuid caster_guid = fields[0].GetUInt64();
-            uint32 item_lowguid = fields[1].GetUInt64();
+            uint32 item_lowguid = fields[1].GetUInt32();
             uint32 spellid = fields[2].GetUInt32();
             uint32 stackcount = fields[3].GetUInt32();
-            int32 remaincharges = (int32)fields[4].GetUInt32();
+            uint32 remaincharges = fields[4].GetUInt32();
             int32 damage[MAX_EFFECT_INDEX];
             int32 maxduration[MAX_EFFECT_INDEX];
             int32 remaintime[MAX_EFFECT_INDEX];
             for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
             {
-                damage[i]  = (int32)fields[i+5].GetUInt32();
-                maxduration[i] = (int32)fields[i+8].GetUInt32();
-                remaintime[i] = (int32)fields[i+11].GetUInt32();
+                damage[i] = fields[i+5].GetInt32();
+                maxduration[i] = fields[i+8].GetInt32();
+                remaintime[i] = fields[i+11].GetInt32();
             }
-            uint32 effIndexMask = (int32)fields[14].GetUInt32();
+            uint32 effIndexMask = fields[14].GetUInt32();
 
             SpellEntry const* spellproto = sSpellStore.LookupEntry(spellid);
             if (!spellproto)
@@ -14103,7 +14103,7 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
             // prevent wrong values of remaincharges
             if (spellproto->procCharges)
             {
-                if (remaincharges <= 0 || remaincharges > (int32)spellproto->procCharges)
+                if (remaincharges <= 0 || remaincharges > spellproto->procCharges)
                     remaincharges = spellproto->procCharges;
             }
             else
@@ -17494,7 +17494,7 @@ void Player::SendAuraDurationsForTarget(Unit* target)
     {
         SpellAuraHolder *holder = itr->second;
 
-        if(holder->GetAuraSlot() >= MAX_AURAS || holder->IsPassive() || holder->GetCasterGuid() != GetObjectGuid())
+        if (holder->GetAuraSlot() >= MAX_AURAS || holder->IsPassive() || holder->GetCasterGuid() != GetObjectGuid())
             continue;
 
         holder->SendAuraDurationForCaster(this);
