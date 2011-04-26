@@ -1698,7 +1698,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // Movement info
         //MovementInfo m_movementInfo; -- BIG TODO backport
 
-        void SheduleAINotify(uint32 delay);
+        void ScheduleAINotify(uint32 delay);
         bool IsAINotifySheduled() const { return m_AINotifySheduled;}
         void _SetAINotifySheduled(bool on) { m_AINotifySheduled = on;}       // only for call from RelocationNotifyEvent class code
         void OnRelocated();
