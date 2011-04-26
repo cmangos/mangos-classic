@@ -37,7 +37,8 @@ enum PermissionTypes
     ALL_PERMISSION    = 0,
     GROUP_PERMISSION  = 1,
     MASTER_PERMISSION = 2,
-    NONE_PERMISSION   = 3
+    OWNER_PERMISSION  = 3,                                  // for single player only loots
+    NONE_PERMISSION   = 4
 };
 
 enum LootType
@@ -53,6 +54,18 @@ enum LootType
     LOOT_FISHING_FAIL           = 21,                       // unsupported by client, sending LOOT_FISHING instead
     LOOT_INSIGNIA               = 22                        // unsupported by client, sending LOOT_CORPSE instead
 };
+
+enum LootSlotType
+{
+    LOOT_SLOT_NORMAL  = 0,                                  // can be looted
+    LOOT_SLOT_VIEW    = 1,                                  // can be only view (ignore any loot attempts)
+    LOOT_SLOT_MASTER  = 2,                                  // can be looted only master (error message)
+    LOOT_SLOT_REQS    = 3,                                  // can't be looted (error message about missing reqs)
+    LOOT_SLOT_OWNER   = 4,                                  // ignore binding confirmation and etc, for single player looting
+    MAX_LOOT_SLOT_TYPE                                      // custom, use for mark skipped from show items
+};
+
+
 
 class Player;
 class LootStore;
@@ -100,6 +113,7 @@ struct LootItem
 
     // Basic checks for player/item compatibility - if false no chance to see the item in the loot
     bool AllowedForPlayer(Player const * player) const;
+    LootSlotType GetSlotTypeForSharedLoot(PermissionTypes permission, Player* viewer, bool condition_ok = false) const;
 };
 
 typedef std::vector<LootItem> LootItemList;
