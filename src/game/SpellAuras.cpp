@@ -5008,8 +5008,8 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
     {
         // some auras applied with max stack
         case 24575:                                         // Brittle Armor
-        case 24662:                                         // Restless Strength
         case 24659:                                         // Unstable Power
+        case 24662:                                         // Restless Strength
         case 26464:                                         // Mercurial Shield
             m_stackAmount = m_spellProto->StackAmount;
             break;
