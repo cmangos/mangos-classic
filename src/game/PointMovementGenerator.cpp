@@ -45,6 +45,9 @@ template<class T>
 void PointMovementGenerator<T>::Finalize(T &unit)
 {
     unit.clearUnitState(UNIT_STAT_ROAMING|UNIT_STAT_ROAMING_MOVE);
+
+    if (i_destinationHolder.HasArrived())
+        MovementInform(unit);
 }
 
 template<class T>
@@ -83,16 +86,8 @@ bool PointMovementGenerator<T>::Update(T &unit, const uint32 &diff)
             return true;                                    // not expire now, but already lost
     }
 
-    if(i_destinationHolder.HasArrived())
-    {
-        unit.clearUnitState(UNIT_STAT_ROAMING_MOVE);
-        MovementInform(unit);
-
-        if (!IsActive(unit))
-            return true;
-
+    if (i_destinationHolder.HasArrived())
         return false;
-    }
 
     return true;
 }
