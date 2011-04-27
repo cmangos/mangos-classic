@@ -200,11 +200,6 @@ struct CreatureData
     ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(GetHighGuid(), id, lowguid); }
 };
 
-struct CreatureDataAddonAura
-{
-    uint32 spell_id;
-};
-
 // from `creature_addon` and `creature_template_addon`tables
 struct CreatureDataAddon
 {
@@ -215,7 +210,7 @@ struct CreatureDataAddon
     uint8  flags;                                           // UnitBytes2_Flags
     uint32 emote;
     uint32 move_flags;
-    CreatureDataAddonAura const* auras;                     // loaded as char* "spell1 spell2 ... "
+    uint32 const* auras;                                    // loaded as char* "spell1 spell2 ... "
 };
 
 struct CreatureModelInfo
