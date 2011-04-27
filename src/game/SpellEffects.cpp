@@ -1586,7 +1586,7 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
     Unit* caster = GetAffectiveCaster();
     if(!caster)
     {
-        // FIXME: currently we can't have auras applied explIcitly by gameobjects
+        // FIXME: currently we can't have auras applied explicitly by gameobjects
         // so for auras from wild gameobjects (no owner) target used
         if (m_originalCasterGUID.IsGameObject())
             caster = unitTarget;
@@ -1596,27 +1596,8 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[eff_idx]);
 
-    Aura* Aur = CreateAura(m_spellInfo, eff_idx, &m_currentBasePoints[eff_idx], spellAuraHolder, unitTarget, caster, m_CastItem);
-
-    // Now Reduce spell duration using data received at spell hit
-    int32 duration = Aur->GetAuraMaxDuration();
-    unitTarget->ApplyDiminishingToDuration(m_diminishGroup, duration, m_caster, m_diminishLevel);
-    spellAuraHolder->setDiminishGroup(m_diminishGroup);
-
-    // if Aura removed and deleted, do not continue.
-    if(duration== 0 && !(spellAuraHolder->IsPermanent()))
-    {
-        delete Aur;
-        return;
-    }
-
-    if(duration != Aur->GetAuraMaxDuration())
-    {
-        Aur->SetAuraMaxDuration(duration);
-        Aur->SetAuraDuration(duration);
-    }
-
-    spellAuraHolder->AddAura(Aur, eff_idx);
+    Aura* aur = CreateAura(m_spellInfo, eff_idx, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, caster, m_CastItem);
+    m_spellAuraHolder->AddAura(aur, eff_idx);
 }
 
 void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
@@ -2268,8 +2249,8 @@ void Spell::EffectApplyAreaAura(SpellEffectIndex eff_idx)
     if (!unitTarget->isAlive())
         return;
 
-    AreaAura* Aur = new AreaAura(m_spellInfo, eff_idx, &m_currentBasePoints[eff_idx], spellAuraHolder, unitTarget, m_caster, m_CastItem);
-    spellAuraHolder->AddAura(Aur, eff_idx);
+    AreaAura* Aur = new AreaAura(m_spellInfo, eff_idx, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, m_caster, m_CastItem);
+    m_spellAuraHolder->AddAura(Aur, eff_idx);
 }
 
 void Spell::EffectSummon(SpellEffectIndex eff_idx)
@@ -2285,10 +2266,7 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
     uint32 level = m_caster->getLevel();
     Pet* spawnCreature = new Pet(SUMMON_PET);
 
-    int32 duration = GetSpellDuration(m_spellInfo);
-    if (duration > 0)
-        if(Player* modOwner = m_caster->GetSpellModOwner())
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
+    int32 duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
     if (m_caster->GetTypeId()==TYPEID_PLAYER && spawnCreature->LoadPetFromDB((Player*)m_caster,pet_entry))
     {
@@ -2701,7 +2679,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         return;
 
     // set timer for unsummon
-    int32 duration = GetSpellDuration(m_spellInfo);
+    int32 duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
     // Search old Guardian only for players (if casted spell not have duration or cooldown)
     // FIXME: some guardians have control spell applied and controlled by player and anyway player can't summon in this time
@@ -2733,10 +2711,6 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
     float center_z = m_targets.m_destZ;
 
     float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
-
-    if (duration > 0)
-        if(Player* modOwner = m_caster->GetSpellModOwner())
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
 
     int32 amount = damage > 0 ? damage : 1;
 
@@ -4179,10 +4153,7 @@ void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)
     pTotem->SetOwner(m_caster);
     pTotem->SetTypeBySummonSpell(m_spellInfo);              // must be after Create call where m_spells initialized
 
-    int32 duration=GetSpellDuration(m_spellInfo);
-    if (duration > 0)
-        if (Player* modOwner = m_caster->GetSpellModOwner())
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
+    int32 duration = CalculateSpellDuration(m_spellInfo, m_caster);
     pTotem->SetDuration(duration);
 
     if (damage)                                             // if not spell info, DB values used

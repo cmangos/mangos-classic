@@ -1055,7 +1055,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         ((Creature*)m_caster)->AI()->SpellHitTarget(unit, m_spellInfo);
 }
 
-void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
+void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask)
 {
     if (!unit || !effectMask)
         return;
@@ -1160,9 +1160,12 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     CastPreCastSpells(unit);
 
     if (IsSpellAppliesAura(m_spellInfo, effectMask))
-        spellAuraHolder = CreateSpellAuraHolder(m_spellInfo, unit, realCaster, m_CastItem);
+    {
+        m_spellAuraHolder = CreateSpellAuraHolder(m_spellInfo, unit, realCaster, m_CastItem);
+        m_spellAuraHolder->setDiminishGroup(m_diminishGroup);
+    }
     else
-        spellAuraHolder = NULL;
+        m_spellAuraHolder = NULL;
 
     for(int effectNumber = 0; effectNumber < MAX_EFFECT_INDEX; ++effectNumber)
     {
@@ -1183,13 +1186,36 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     }
 
     // now apply all created auras
-    if (spellAuraHolder)
+    if (m_spellAuraHolder)
     {
         // normally shouldn't happen
-        if (!spellAuraHolder->IsEmptyHolder())
-            unit->AddSpellAuraHolder(spellAuraHolder);
+        if (!m_spellAuraHolder->IsEmptyHolder())
+        {
+            int32 duration = m_spellAuraHolder->GetAuraMaxDuration();
+            int32 originalDuration = duration;
+
+            if (duration > 0)
+            {
+                unit->ApplyDiminishingToDuration(m_diminishGroup, duration, m_caster, m_diminishLevel);
+
+                // Fully diminished
+                if (duration == 0)
+                {
+                    delete m_spellAuraHolder;
+                    return;
+                }
+            }
+
+            if (duration != originalDuration)
+            {
+                m_spellAuraHolder->SetAuraMaxDuration(duration);
+                m_spellAuraHolder->SetAuraDuration(duration);
+            }
+
+            unit->AddSpellAuraHolder(m_spellAuraHolder);
+        }
         else
-            delete spellAuraHolder;
+            delete m_spellAuraHolder;
     }
 }
 
@@ -2397,7 +2423,7 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
         if(triggeredByAura)
         {
             SendChannelUpdate(0);
-            triggeredByAura->SetAuraDuration(0);
+            triggeredByAura->GetHolder()->SetAuraDuration(0);
         }
         SendCastResult(result);
         finish(false);
@@ -2651,12 +2677,10 @@ void Spell::handle_immediate()
     // start channeling if applicable
     if(IsChanneledSpell(m_spellInfo))
     {
-        int32 duration = GetSpellDuration(m_spellInfo);
-        if (duration)
+        int32 duration = CalculateSpellDuration(m_spellInfo, m_caster);
+
+        if (duration > 0)
         {
-            // Apply duration mod
-            if(Player* modOwner = m_caster->GetSpellModOwner())
-                modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
             m_spellState = SPELL_STATE_CASTING;
             SendChannelStart(duration);
         }
@@ -4854,7 +4878,7 @@ SpellCastResult Spell::CheckCasterAuras() const
                 {
                     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
                     {
-                        if (GetSpellMechanicMask(itr->second->GetSpellProto(), i) & mechanic_immune)
+                        if (GetSpellMechanicMask(itr->second->GetSpellProto(), 1 << i) & mechanic_immune)
                             continue;
                         if (GetSpellSchoolMask(itr->second->GetSpellProto()) & school_immune)
                             continue;

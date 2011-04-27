@@ -36,6 +36,7 @@
 
 class Player;
 class Spell;
+class Unit;
 struct SpellModifier;
 
 // only used in code
@@ -96,6 +97,7 @@ inline float GetSpellMaxRange(SpellRangeEntry const *range) { return (range ? ra
 inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 int32 GetSpellDuration(SpellEntry const *spellInfo);
 int32 GetSpellMaxDuration(SpellEntry const *spellInfo);
+int32 CalculateSpellDuration(SpellEntry const *spellInfo, Unit const* caster = NULL);
 uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo);
 WeaponAttackType GetWeaponAttackType(SpellEntry const *spellInfo);
 
@@ -207,6 +209,7 @@ inline bool IsNonCombatSpell(SpellEntry const *spellInfo)
 }
 
 bool IsPositiveSpell(uint32 spellId);
+bool IsPositiveSpell(SpellEntry const *spellproto);
 bool IsPositiveEffect(SpellEntry const *spellInfo, SpellEffectIndex effIndex);
 bool IsPositiveTarget(uint32 targetA, uint32 targetB);
 
@@ -412,13 +415,21 @@ inline SpellSchoolMask GetSpellSchoolMask(SpellEntry const* spellInfo)
     return GetSchoolMask(spellInfo->School);
 }
 
-inline uint32 GetSpellMechanicMask(SpellEntry const* spellInfo, int32 effect)
+inline uint32 GetSpellMechanicMask(SpellEntry const* spellInfo, uint32 effectMask)
 {
     uint32 mask = 0;
     if (spellInfo->Mechanic)
         mask |= 1 << (spellInfo->Mechanic - 1);
-    if (spellInfo->EffectMechanic[effect])
-        mask |= 1 << (spellInfo->EffectMechanic[effect] - 1);
+
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (!(effectMask & (1 << i)))
+            continue;
+
+        if (spellInfo->EffectMechanic[i])
+            mask |= 1 << (spellInfo->EffectMechanic[i]-1);
+    }
+
     return mask;
 }
 

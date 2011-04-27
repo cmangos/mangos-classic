@@ -795,6 +795,9 @@ enum Mechanics
     MECHANIC_SAPPED           = 30
 };
 
+#define FIRST_MECHANIC          1
+#define MAX_MECHANIC            31
+
 #define IMMUNE_TO_ROOT_AND_SNARE_MASK ( \
     (1<<(MECHANIC_ROOT-1))|(1<<(MECHANIC_SNARE-1)))
 

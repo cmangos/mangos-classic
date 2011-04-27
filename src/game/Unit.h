@@ -1325,7 +1325,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         }
         bool isCharmedOwnedByPlayerOrPlayer() const { return GetCharmerOrOwnerOrOwnGuid().IsPlayer(); }
 
-        Player* GetSpellModOwner();
+        Player* GetSpellModOwner() const;
 
         Unit* GetOwner() const;
         Pet* GetPet() const;
@@ -1654,7 +1654,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void _ApplyAllAuraMods();
 
         int32 CalculateSpellDamage(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* basePoints = NULL);
-        int32 CalculateSpellDuration(SpellEntry const* spellProto, SpellEffectIndex effect_index, Unit const* target);
+
         float CalculateLevelPenalty(SpellEntry const* spellProto) const;
 
         void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }

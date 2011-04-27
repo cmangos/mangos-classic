@@ -2853,31 +2853,11 @@ void Unit::_UpdateSpells( uint32 time )
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
     {
         SpellAuraHolder *holder = iter->second;
-        if (holder)
-        {
-            if (!(holder->IsPermanent() || holder->IsPassive()) )
-            {
-                bool removedAura = false;
-                for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-                {
-                    if (Aura *aura = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
-                    {
-                        if (!aura->GetAuraDuration())
-                        {
-                            RemoveSingleAuraFromSpellAuraHolder(holder, aura->GetEffIndex(), AURA_REMOVE_BY_EXPIRE);
-                            removedAura = true;
-                            break;
-                        }
-                    }
-                }
 
-                if (!removedAura)
-                    ++iter;
-                else
-                    iter = m_spellAuraHolders.begin();
-            }
-            else
-                ++iter;
+        if (!(holder->IsPermanent() || holder->IsPassive()) && holder->GetAuraDuration() == 0)
+        {
+            RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_EXPIRE);
+            iter = m_spellAuraHolders.begin();
         }
         else
             ++iter;
@@ -3726,6 +3706,14 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
     SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
     SpellAuraHolder *new_holder = CreateSpellAuraHolder(spellProto, stealer, this);
 
+    // set its duration and maximum duration
+    // max duration 2 minutes (in msecs)
+    int32 dur = holder->GetAuraDuration();
+    int32 max_dur = 2*MINUTE*IN_MILLISECONDS;
+    int32 new_max_dur = max_dur > dur ? dur : max_dur;
+    new_holder->SetAuraMaxDuration(new_max_dur);
+    new_holder->SetAuraDuration(new_max_dur);
+
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         Aura *aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i));
@@ -3737,14 +3725,6 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit 
         // construct the new aura for the attacker - will never return NULL, it's just a wrapper for
         // some different constructors
         Aura * new_aur = CreateAura(aur->GetSpellProto(), aur->GetEffIndex(), &basePoints, new_holder, stealer, this);
-
-        // set its duration and maximum duration
-        // max duration 2 minutes (in msecs)
-        int32 dur = aur->GetAuraDuration();
-        int32 max_dur = 2*MINUTE*IN_MILLISECONDS;
-        int32 new_max_dur = max_dur > dur ? dur : max_dur;
-        new_aur->SetAuraMaxDuration( new_max_dur );
-        new_aur->SetAuraDuration( new_max_dur );
 
         // set periodic to do at least one tick (for case when original aura has been at last tick preparing)
         int32 periodic = aur->GetModifier()->periodictime;
@@ -4052,22 +4032,19 @@ void Unit::DelaySpellAuraHolder(uint32 spellId, int32 delaytime, uint64 casterGU
     SpellAuraHolderBounds bounds = GetSpellAuraHolderBounds(spellId);
     for (SpellAuraHolderMap::iterator iter = bounds.first; iter != bounds.second; ++iter)
     {
-        if (casterGUID != iter->second->GetCasterGUID())
+        SpellAuraHolder* holder = iter->second;
+
+        if (casterGUID != holder->GetCasterGUID())
             continue;
 
-        for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        {
-            if (Aura *aur = iter->second->GetAuraByEffectIndex(SpellEffectIndex(i)))
-            {
-                if (aur->GetAuraDuration() < delaytime)
-                    aur->SetAuraDuration(0);
-                else
-                    aur->SetAuraDuration(aur->GetAuraDuration() - delaytime);
+        if (holder->GetAuraDuration() < delaytime)
+            holder->SetAuraDuration(0);
+        else
+            holder->SetAuraDuration(holder->GetAuraDuration() - delaytime);
 
-                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u, EffectIndex %u partially interrupted on unit %u, new duration: %u ms",spellId, i, GetGUIDLow(), aur->GetAuraDuration());
-            }
-        }
-        iter->second->UpdateAuraDuration();
+        holder->UpdateAuraDuration();
+
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u partially interrupted on %s, new duration: %u ms", spellId, GetObjectGuid().GetString().c_str(), holder->GetAuraDuration());
     }
 }
 
@@ -7147,25 +7124,6 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
     return value;
 }
 
-int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto, SpellEffectIndex effect_index, Unit const* target)
-{
-    Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
-
-    uint8 comboPoints = unitPlayer ? unitPlayer->GetComboPoints() : 0;
-
-    int32 minduration = GetSpellDuration(spellProto);
-    int32 maxduration = GetSpellMaxDuration(spellProto);
-
-    int32 duration;
-
-    if( minduration != -1 && minduration != maxduration )
-        duration = minduration + int32((maxduration - minduration) * comboPoints / 5);
-    else
-        duration = minduration;
-
-    return duration;
-}
-
 DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
 {
     for(Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
@@ -8167,7 +8125,7 @@ SpellSchoolMask Unit::GetMeleeDamageSchoolMask() const
     return SPELL_SCHOOL_MASK_NORMAL;
 }
 
-Player* Unit::GetSpellModOwner()
+Player* Unit::GetSpellModOwner() const
 {
     if(GetTypeId()==TYPEID_PLAYER)
         return (Player*)this;
