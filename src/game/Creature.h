@@ -592,6 +592,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
                                                             // overwrited in Pet
         virtual void SaveToDB(uint32 mapid);
         virtual void DeleteFromDB();                        // overwrited in Pet
+        static void DeleteFromDB(uint32 lowguid, CreatureData const* data);
 
         Loot loot;
         bool lootForPickPocketed;

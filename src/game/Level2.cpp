@@ -21,8 +21,11 @@
 #include "Database/DatabaseEnv.h"
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
-#include "Player.h"
 #include "Item.h"
+#include "Player.h"
+#include "TemporarySummon.h"
+#include "Totem.h"
+#include "Pet.h"
 #include "GameObject.h"
 #include "Opcodes.h"
 #include "Chat.h"
@@ -1628,17 +1631,39 @@ bool ChatHandler::HandleNpcDeleteCommand(char* args)
     else
         unit = getSelectedCreature();
 
-    if (!unit || unit->IsPet() || unit->IsTotem())
+    if (!unit)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
         SetSentErrorMessage(true);
         return false;
     }
 
-    // Delete the creature
-    unit->CombatStop();
-    unit->DeleteFromDB();
-    unit->AddObjectToRemoveList();
+    switch (unit->GetSubtype())
+    {
+        case CREATURE_SUBTYPE_GENERIC:
+        {
+            unit->CombatStop();
+            if (CreatureData const* data = sObjectMgr.GetCreatureData(unit->GetGUIDLow()))
+            {
+                Creature::AddToRemoveListInMaps(unit->GetGUIDLow(), data);
+                Creature::DeleteFromDB(unit->GetGUIDLow(), data);
+            }
+            else
+                unit->AddObjectToRemoveList();
+            break;
+        }
+        case CREATURE_SUBTYPE_PET:
+            ((Pet*)unit)->Unsummon(PET_SAVE_AS_CURRENT);
+            break;
+        case CREATURE_SUBTYPE_TOTEM:
+            ((Totem*)unit)->UnSummon();
+            break;
+        case CREATURE_SUBTYPE_TEMPORARY_SUMMON:
+            ((TemporarySummon*)unit)->UnSummon();
+            break;
+        default:
+            return false;
+    }
 
     SendSysMessage(LANG_COMMAND_DELCREATMESSAGE);
 
