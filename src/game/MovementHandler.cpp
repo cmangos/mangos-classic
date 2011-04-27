@@ -384,7 +384,7 @@ void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket &recv_data)
     ObjectGuid old_mover_guid;
     MovementInfo mi;
 
-    recv_data >> old_mover_guid.ReadAsPacked();
+    recv_data >> old_mover_guid;
     recv_data >> mi;
 
     if(_player->GetMover()->GetObjectGuid() == old_mover_guid)
