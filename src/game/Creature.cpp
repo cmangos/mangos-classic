@@ -2067,18 +2067,21 @@ void Creature::GetRespawnCoord( float &x, float &y, float &z, float* ori, float*
             *ori = data->orientation;
         if (dist)
             *dist = GetRespawnRadius();
+    }
+    else
+    {
+        float orient;
 
-        return;
+        GetSummonPoint(x, y, z, orient);
+
+        if (ori)
+            *ori = orient;
+        if (dist)
+            *dist = GetRespawnRadius();
     }
 
-    float orient;
-
-    GetSummonPoint(x, y, z, orient);
-
-    if (ori)
-        *ori = orient;
-    if (dist)
-        *dist = GetRespawnRadius();
+    //lets check if our creatures have valid spawn coordinates
+    MANGOS_ASSERT(MaNGOS::IsValidMapCoord(x, y, z) || PrintCoordinatesError(x, y, z, "respawn"));
 }
 
 void Creature::AllLootRemovedFromCorpse()
