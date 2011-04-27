@@ -3221,7 +3221,14 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
         }
     }
 
-    PSendSysMessage(LANG_DISTANCE, m_session->GetPlayer()->GetDistance(obj), m_session->GetPlayer()->GetDistance2d(obj));
+    Player* player = m_session->GetPlayer();
+    // Calculate point-to-point distance
+    float dx, dy, dz;
+    dx = player->GetPositionX() - obj->GetPositionX();
+    dy = player->GetPositionY() - obj->GetPositionY();
+    dz = player->GetPositionZ() - obj->GetPositionZ();
+
+    PSendSysMessage(LANG_DISTANCE, player->GetDistance(obj), player->GetDistance2d(obj), sqrt(dx*dx + dy*dy + dz*dz));
 
     return true;
 }
