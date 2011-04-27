@@ -12915,7 +12915,8 @@ void Player::ItemAddedQuestCheck( uint32 entry, uint32 count )
                 {
                     uint32 additemcount = ( curitemcount + count <= reqitemcount ? count : reqitemcount - curitemcount);
                     q_status.m_itemcount[j] += additemcount;
-                    if (q_status.uState != QUEST_NEW) q_status.uState = QUEST_CHANGED;
+                    if (q_status.uState != QUEST_NEW)
+                        q_status.uState = QUEST_CHANGED;
 
                     SendQuestUpdateAddItem( qInfo, j, additemcount );
                 }
