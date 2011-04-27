@@ -34,13 +34,13 @@ Totem::Totem() : Creature(CREATURE_SUBTYPE_TOTEM)
     m_type = TOTEM_PASSIVE;
 }
 
-bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, uint32 Entry, Unit* owner)
+bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Unit* owner)
 {
     SetMap(cPos.GetMap());
 
     Team team = owner->GetTypeId() == TYPEID_PLAYER ? ((Player*)owner)->GetTeam() : TEAM_NONE;
 
-    if (!CreateFromProto(guidlow, Entry, team))
+    if (!CreateFromProto(guidlow, cinfo, team))
         return false;
 
     cPos.SelectFinalPoint(this);

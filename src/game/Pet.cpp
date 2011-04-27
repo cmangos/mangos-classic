@@ -136,6 +136,15 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
         return false;
     }
 
+    CreatureInfo const *creatureInfo = ObjectMgr::GetCreatureTemplate(petentry);
+    if (!creatureInfo)
+    {
+        sLog.outError("Pet entry %u does not exist but used at pet load (owner: %s).", petentry, owner->GetGuidStr().c_str());
+        delete result;
+        return false;
+    }
+
+
     uint32 summon_spell_id = fields[21].GetUInt32();
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
 
@@ -151,8 +160,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     PetType pet_type = PetType(fields[22].GetUInt8());
     if(pet_type==HUNTER_PET)
     {
-        CreatureInfo const* creatureInfo = ObjectMgr::GetCreatureTemplate(petentry);
-        if(!creatureInfo || !creatureInfo->isTameable())
+        if (!creatureInfo->isTameable())
         {
             delete result;
             return false;
@@ -172,7 +180,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     CreatureCreatePos pos(owner, owner->GetOrientation(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 
     uint32 guid = pos.GetMap()->GenerateLocalLowGuid(HIGHGUID_PET);
-    if (!Create(guid, pos, petentry, pet_number))
+    if (!Create(guid, pos, creatureInfo, pet_number))
     {
         delete result;
         return false;
@@ -182,6 +190,7 @@ bool Pet::LoadPetFromDB( Player* owner, uint32 petentry, uint32 petnumber, bool 
     setFaction(owner->getFaction());
     SetUInt32Value(UNIT_CREATED_BY_SPELL, summon_spell_id);
 
+    // reget for sure use real creature info selected for Pet at load/creating
     CreatureInfo const *cinfo = GetCreatureInfo();
     if (cinfo->type == CREATURE_TYPE_CRITTER)
     {
@@ -1011,7 +1020,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     BASIC_LOG("Create pet");
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
-    if (!Create(guid, pos, creature->GetEntry(), pet_number))
+    if (!Create(guid, pos, creature->GetCreatureInfo(), pet_number))
         return false;
 
     CreatureInfo const *cinfo = GetCreatureInfo();
@@ -1929,15 +1938,15 @@ bool Pet::IsPermanentPetFor(Player* owner)
     }
 }
 
-bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, uint32 Entry, uint32 pet_number)
+bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number)
 {
     SetMap(cPos.GetMap());
 
     Object::_Create(guidlow, pet_number, HIGHGUID_PET);
 
-    m_originalEntry = Entry;
+    m_originalEntry = cinfo->Entry;
 
-    if (!InitEntry(Entry))
+    if (!InitEntry(cinfo->Entry))
         return false;
 
     cPos.SelectFinalPoint(this);
@@ -1948,7 +1957,7 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, uint32 Entry, uint32 p
     SetSheath(SHEATH_STATE_MELEE);
     SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5 );
 
-    if(getPetType() == MINI_PET)                            // always non-attackable
+    if (getPetType() == MINI_PET)                           // always non-attackable
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
     return true;
