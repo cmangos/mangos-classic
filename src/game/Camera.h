@@ -82,7 +82,9 @@ class MANGOS_DLL_SPEC ViewPoint
 {
     friend class Camera;
 
-    std::list<Camera*> m_cameras;
+    typedef std::list<Camera*> CameraList;
+
+    CameraList m_cameras;
     GridType * m_grid;
 
     void Attach(Camera* c) { m_cameras.push_back(c); }
@@ -92,7 +94,7 @@ class MANGOS_DLL_SPEC ViewPoint
     {
         if (!m_cameras.empty())
         {
-            for(std::list<Camera*>::iterator itr = m_cameras.begin(); itr != m_cameras.end();)
+            for(CameraList::iterator itr = m_cameras.begin(); itr != m_cameras.end();)
             {
                 Camera *c = *(itr++);
                 (c->*handler)();

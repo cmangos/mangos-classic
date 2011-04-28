@@ -393,7 +393,7 @@ void AreaAura::Update(uint32 diff)
             Unit* owner = caster->GetCharmerOrOwner();
             if (!owner)
                 owner = caster;
-            std::list<Unit *> targets;
+            Spell::UnitList targets;
 
             switch(m_areaAuraType)
             {
@@ -440,7 +440,7 @@ void AreaAura::Update(uint32 diff)
                 }
             }
 
-            for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
+            for(Spell::UnitList::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
             {
                 // flag for seelction is need apply aura to current iteration target
                 bool apply = true;

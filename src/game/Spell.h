@@ -584,13 +584,13 @@ namespace MaNGOS
 {
     struct MANGOS_DLL_DECL SpellNotifierPlayer
     {
-        std::list<Unit*> &i_data;
+        Spell::UnitList &i_data;
         Spell &i_spell;
         const uint32& i_index;
         float i_radius;
         WorldObject* i_originalCaster;
 
-        SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i, float radius)
+        SpellNotifierPlayer(Spell &spell, Spell::UnitList &data, const uint32 &i, float radius)
             : i_data(data), i_spell(spell), i_index(i), i_radius(radius)
         {
             i_originalCaster = i_spell.GetAffectiveCasterObject();
@@ -619,7 +619,7 @@ namespace MaNGOS
 
     struct MANGOS_DLL_DECL SpellNotifierCreatureAndPlayer
     {
-        std::list<Unit*> *i_data;
+        Spell::UnitList *i_data;
         Spell &i_spell;
         SpellNotifyPushType i_push_type;
         float i_radius;
@@ -627,7 +627,7 @@ namespace MaNGOS
         WorldObject* i_originalCaster;
         bool i_playerControlled;
 
-        SpellNotifierCreatureAndPlayer(Spell &spell, std::list<Unit*> &data, float radius, SpellNotifyPushType type,
+        SpellNotifierCreatureAndPlayer(Spell &spell, Spell::UnitList &data, float radius, SpellNotifyPushType type,
             SpellTargets TargetType = SPELL_TARGETS_NOT_FRIENDLY, WorldObject* originalCaster = NULL)
             : i_data(&data), i_spell(spell), i_push_type(type), i_radius(radius), i_TargetType(TargetType),
             i_originalCaster(originalCaster)
