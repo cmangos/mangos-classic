@@ -6916,13 +6916,7 @@ bool PlayerCondition::Meets(Player const * player) const
 // Verification of condition values validity
 bool PlayerCondition::IsValid(ConditionType condition, uint32 value1, uint32 value2)
 {
-    if (condition >= MAX_CONDITION)                         // Wrong condition type
-    {
-        sLog.outErrorDb("Condition has bad type of %u, skipped ", condition );
-        return false;
-    }
-
-    switch (condition)
+    switch(condition)
     {
         case CONDITION_AURA:
         {
@@ -7173,6 +7167,9 @@ bool PlayerCondition::IsValid(ConditionType condition, uint32 value1, uint32 val
         }
         case CONDITION_NONE:
             break;
+        default:
+            sLog.outErrorDb("Condition has bad type of %u, skipped ", condition);
+            return false;
     }
     return true;
 }
