@@ -54,7 +54,7 @@ struct AreaTableEntry
     char*     area_name[8];                                 // 11-18    m_AreaName_lang
                                                             // 19 string flags
     uint32  team;                                           // 20       m_factionGroupMask
-                                                            //          m_liquidTypeID, m_minElevation, m_ambient_multiplier, m_lightid...
+                                                            // 21-24    m_liquidTypeID[4]
 };
 
 struct AreaTriggerEntry
