@@ -40,7 +40,8 @@
 #include "Util.h"
 #include "ScriptMgr.h"
 
-GameObject::GameObject() : WorldObject()
+GameObject::GameObject() : WorldObject(),
+    m_goInfo(NULL)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -54,7 +55,6 @@ GameObject::GameObject() : WorldObject()
     m_useTimes = 0;
     m_spellId = 0;
     m_cooldownTime = 0;
-    m_goInfo = NULL;
 }
 
 GameObject::~GameObject()
@@ -141,8 +141,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, float x, float
         SetFlag(GAMEOBJECT_FLAGS, (GO_FLAG_TRANSPORT | GO_FLAG_NODESPAWN));
 
     SetEntry(goinfo->id);
-
-    SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
+    SetDisplayId(goinfo->displayId);
 
     SetGoState(go_state);
     SetGoType(GameobjectTypes(goinfo->type));
@@ -1690,6 +1689,11 @@ bool GameObject::IsFriendlyTo(Unit const* unit) const
 
     // common faction based case (GvC,GvP)
     return tester_faction->IsFriendlyTo(*target_faction);
+}
+
+void GameObject::SetDisplayId(uint32 modelId)
+{
+    SetUInt32Value(GAMEOBJECT_DISPLAYID, modelId);
 }
 
 float GameObject::GetObjectBoundingRadius() const
