@@ -80,7 +80,7 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature &creature)
     CreatureTraveller traveller(creature);
 
     if (creature.CanFly())
-        creature.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+        creature.AddSplineFlag(SPLINEFLAG_FLYING);
 
     const WaypointNode &node = i_path->at(i_currentNode);
     i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
@@ -157,7 +157,7 @@ bool WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint3
             creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
 
             if (creature.CanFly())
-                creature.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+                creature.AddSplineFlag(SPLINEFLAG_FLYING);
 
             // Now we re-set destination to same node and start travel
             const WaypointNode &node = i_path->at(i_currentNode);
@@ -255,7 +255,7 @@ bool WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint3
             creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
 
             if (creature.CanFly())
-                creature.AddSplineFlag(SPLINEFLAG_UNKNOWN7);
+                creature.AddSplineFlag(SPLINEFLAG_FLYING);
 
             if (WaypointBehavior *behavior = i_path->at(i_currentNode).behavior)
             {
