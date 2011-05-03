@@ -39,7 +39,7 @@ struct ItemSetEffect
 };
 
 // [-ZERO] Need fix, possible uptodate in mangos-0.6
-enum InventoryChangeFailure
+enum InventoryResult
 {
     EQUIP_ERR_OK                                 = 0,
     EQUIP_ERR_CANT_EQUIP_LEVEL_I                 = 1,       // ERR_CANT_EQUIP_LEVEL_I
@@ -82,7 +82,7 @@ enum InventoryChangeFailure
     EQUIP_ERR_YOU_ARE_DEAD                       = 38,      // ERR_PLAYER_DEAD
     EQUIP_ERR_CANT_DO_RIGHT_NOW                  = 39,      // ERR_CLIENT_LOCKED_OUT
     EQUIP_ERR_INT_BAG_ERROR                      = 40,      // ERR_INTERNAL_BAG_ERROR
-    EQUIP_ERR_CAN_EQUIP_ONLY1_QUIVER2            = 41,      // ERR_ONLY_ONE_BOLT
+    EQUIP_ERR_CAN_EQUIP_ONLY1_BOLT               = 41,      // ERR_ONLY_ONE_BOLT
     EQUIP_ERR_CAN_EQUIP_ONLY1_AMMOPOUCH          = 42,      // ERR_ONLY_ONE_AMMO
     EQUIP_ERR_STACKABLE_CANT_BE_WRAPPED          = 43,      // ERR_CANT_WRAP_STACKABLE
     EQUIP_ERR_EQUIPPED_CANT_BE_WRAPPED           = 44,      // ERR_CANT_WRAP_EQUIPPED
@@ -111,7 +111,7 @@ enum InventoryChangeFailure
     // any greater values show as "bag full"
 };
 
-enum BuyFailure
+enum BuyResult
 {
     BUY_ERR_CANT_FIND_ITEM                      = 0,
     BUY_ERR_ITEM_ALREADY_SOLD                   = 1,
@@ -124,7 +124,7 @@ enum BuyFailure
     BUY_ERR_REPUTATION_REQUIRE                  = 12
 };
 
-enum SellFailure
+enum SellResult
 {
     SELL_ERR_CANT_FIND_ITEM                      = 1,
     SELL_ERR_CANT_SELL_ITEM                      = 2,       // merchant doesn't like that item
@@ -267,7 +267,7 @@ class MANGOS_DLL_SPEC Item : public Object
         uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
         void SetCount(uint32 value) { SetUInt32Value (ITEM_FIELD_STACK_COUNT, value); }
         uint32 GetMaxStackCount() const { return GetProto()->GetMaxStackSize(); }
-        uint8 CanBeMergedPartlyWith(ItemPrototype const* proto) const;
+        InventoryResult CanBeMergedPartlyWith(ItemPrototype const* proto) const;
 
         uint8 GetSlot() const {return m_slot;}
         Bag *GetContainer() { return m_container; }

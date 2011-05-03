@@ -593,7 +593,7 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
         data << uint32((*itr)->money);                      // copper
         data << uint32((*itr)->COD);                        // Cash on delivery
         data << uint32((*itr)->checked);                    // flags
-        data << float(((*itr)->expire_time-time(NULL))/DAY);// Time
+        data << float(float((*itr)->expire_time - time(NULL)) / float(DAY));// Time
         data << uint32((*itr)->mailTemplateId);             // mail template (MailTemplate.dbc)
 
         mailsCount += 1;

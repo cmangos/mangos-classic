@@ -178,6 +178,11 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     recv_data >> race_;
     recv_data >> class_;
 
+    // extract other data required for player creating
+    uint8 gender, skin, face, hairStyle, hairColor, facialHair, outfitId;
+    recv_data >> gender >> skin >> face;
+    recv_data >> hairStyle >> hairColor >> facialHair >> outfitId;
+
     WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
 
     if(GetSecurity() == SEC_PLAYER)
@@ -319,11 +324,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
             delete result2;
         }
     }
-
-    // extract other data required for player creating
-    uint8 gender, skin, face, hairStyle, hairColor, facialHair, outfitId;
-    recv_data >> gender >> skin >> face;
-    recv_data >> hairStyle >> hairColor >> facialHair >> outfitId;
 
     Player *pNewChar = new Player(this);
     if (!pNewChar->Create(sObjectMgr.GeneratePlayerLowGuid(), name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId))
