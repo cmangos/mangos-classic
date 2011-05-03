@@ -1882,8 +1882,7 @@ bool Creature::LoadCreatureAddon(bool reload)
     // 1 Bytes2Flags, in 3.x used UnitPVPStateFlags, that have different meaning
     // 2 UnitRename         Pet only, so always 0 for default creature
     // 3 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
-    if (cainfo->sheath_state != 0)
-        SetByteValue(UNIT_FIELD_BYTES_2, 0, cainfo->sheath_state);
+    SetByteValue(UNIT_FIELD_BYTES_2, 0, cainfo->sheath_state);
 
     if (cainfo->flags != 0)
         SetByteValue(UNIT_FIELD_BYTES_2, 1, cainfo->flags);
