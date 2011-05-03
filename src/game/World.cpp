@@ -1212,8 +1212,6 @@ void World::SetInitialWorldSettings()
     LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, startstring, uptime) VALUES('%u', " UI64FMTD ", '%s', 0)",
         realmID, uint64(m_startTime), isoDate);
 
-    m_timers[WUPDATE_OBJECTS].SetInterval(0);
-    m_timers[WUPDATE_SESSIONS].SetInterval(0);
     m_timers[WUPDATE_WEATHERS].SetInterval(1*IN_MILLISECONDS);
     m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE*IN_MILLISECONDS);
     m_timers[WUPDATE_UPTIME].SetInterval(getConfig(CONFIG_UINT32_UPTIME_UPDATE)*MINUTE*IN_MILLISECONDS);
@@ -1347,13 +1345,8 @@ void World::Update(uint32 diff)
         sAuctionMgr.Update();
     }
 
-    /// <li> Handle session updates when the timer has passed
-    if (m_timers[WUPDATE_SESSIONS].Passed())
-    {
-        m_timers[WUPDATE_SESSIONS].Reset();
-
-        UpdateSessions(diff);
-    }
+    /// <li> Handle session updates
+    UpdateSessions(diff);
 
     /// <li> Handle weather updates when the timer has passed
     if (m_timers[WUPDATE_WEATHERS].Passed())
@@ -1385,14 +1378,9 @@ void World::Update(uint32 diff)
     }
 
     /// <li> Handle all other objects
-    if (m_timers[WUPDATE_OBJECTS].Passed())
-    {
-        m_timers[WUPDATE_OBJECTS].Reset();
-        ///- Update objects when the timer has passed (maps, transport, creatures,...)
-        sMapMgr.Update(diff);                // As interval = 0
-
-        sBattleGroundMgr.Update(diff);
-    }
+    ///- Update objects (maps, transport, creatures,...)
+    sMapMgr.Update(diff);
+    sBattleGroundMgr.Update(diff);
 
     ///- Delete all characters which have been deleted X days before
     if (m_timers[WUPDATE_DELETECHARS].Passed())
@@ -1818,7 +1806,7 @@ void World::UpdateSessions( uint32 diff )
         WorldSession * pSession = itr->second;
         WorldSessionFilter updater(pSession);
 
-        if(!pSession->Update(diff, updater))    // As interval = 0
+        if(!pSession->Update(updater))
         {
             RemoveQueuedSession(pSession);
             m_sessions.erase(itr);
