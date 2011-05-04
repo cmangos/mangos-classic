@@ -1043,13 +1043,14 @@ uint32 BattleGroundMgr::CreateClientVisibleInstanceId(BattleGroundTypeId bgTypeI
     // the following works, because std::set is default ordered with "<"
     // the optimalization would be to use as bitmask std::vector<uint32> - but that would only make code unreadable
     uint32 lastId = 0;
-    for(std::set<uint32>::iterator itr = m_ClientBattleGroundIds[bgTypeId][bracket_id].begin(); itr != m_ClientBattleGroundIds[bgTypeId][bracket_id].end();)
+    ClientBattleGroundIdSet& ids = m_ClientBattleGroundIds[bgTypeId][bracket_id];
+    for(ClientBattleGroundIdSet::const_iterator itr = ids.begin(); itr != ids.end();)
     {
         if( (++lastId) != *itr)                             //if there is a gap between the ids, we will break..
             break;
         lastId = *itr;
     }
-    m_ClientBattleGroundIds[bgTypeId][bracket_id].insert(lastId + 1);
+    ids.insert(lastId + 1);
     return lastId + 1;
 }
 
@@ -1248,7 +1249,8 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, ObjectGuid 
         *data << uint32(0);                                 // number of bg instances
 
         uint32 bracket_id = plr->GetBattleGroundBracketIdFromLevel(bgTypeId);
-        for(std::set<uint32>::iterator itr = m_ClientBattleGroundIds[bgTypeId][bracket_id].begin(); itr != m_ClientBattleGroundIds[bgTypeId][bracket_id].end();++itr)
+        ClientBattleGroundIdSet const& ids = m_ClientBattleGroundIds[bgTypeId][bracket_id];
+        for(std::set<uint32>::iterator itr = ids.begin(); itr != ids.end();++itr)
         {
             *data << uint32(*itr);
             ++count;

@@ -206,8 +206,7 @@ class BattleGroundMgr
         uint32 CreateClientVisibleInstanceId(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id);
         void DeleteClientVisibleInstanceId(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id, uint32 clientInstanceID)
         {
-            if (!m_ClientBattleGroundIds[bgTypeId][bracket_id].empty())
-                m_ClientBattleGroundIds[bgTypeId][bracket_id].erase(clientInstanceID);
+            m_ClientBattleGroundIds[bgTypeId][bracket_id].erase(clientInstanceID);
         }
 
         void CreateInitialBattleGrounds();
@@ -268,7 +267,8 @@ class BattleGroundMgr
         /* Battlegrounds */
         BattleGroundSet m_BattleGrounds[MAX_BATTLEGROUND_TYPE_ID];
         std::vector<uint32> m_QueueUpdateScheduler;
-        std::set<uint32> m_ClientBattleGroundIds[MAX_BATTLEGROUND_TYPE_ID][MAX_BATTLEGROUND_BRACKETS]; //the instanceids just visible for the client
+        typedef std::set<uint32> ClientBattleGroundIdSet;
+        ClientBattleGroundIdSet m_ClientBattleGroundIds[MAX_BATTLEGROUND_TYPE_ID][MAX_BATTLEGROUND_BRACKETS]; //the instanceids just visible for the client
         bool   m_Testing;
 };
 
