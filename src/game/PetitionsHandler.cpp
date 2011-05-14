@@ -26,6 +26,7 @@
 #include "Log.h"
 #include "Opcodes.h"
 #include "Guild.h"
+#include "GuildMgr.h"
 #include "GossipDef.h"
 #include "SocialMgr.h"
 
@@ -88,7 +89,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     uint32 charterid = GUILD_CHARTER;
     uint32 cost = GUILD_CHARTER_COST;
 
-    if(sObjectMgr.GetGuildByName(name))
+    if (sGuildMgr.GetGuildByName(name))
     {
         SendGuildCommandResult(GUILD_CREATE_S, name, ERR_GUILD_NAME_EXISTS_S);
         return;
@@ -283,12 +284,12 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recv_data)
     if(!item)
         return;
 
-    if(sObjectMgr.GetGuildByName(newname))
+    if (sGuildMgr.GetGuildByName(newname))
     {
         SendGuildCommandResult(GUILD_CREATE_S, newname, ERR_GUILD_NAME_EXISTS_S);
         return;
     }
-    if(sObjectMgr.IsReservedName(newname) || !ObjectMgr::IsValidCharterName(newname))
+    if (sObjectMgr.IsReservedName(newname) || !ObjectMgr::IsValidCharterName(newname))
     {
         SendGuildCommandResult(GUILD_CREATE_S, newname, ERR_GUILD_NAME_INVALID);
         return;
@@ -554,7 +555,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if(sObjectMgr.GetGuildByName(name))
+    if (sGuildMgr.GetGuildByName(name))
     {
         SendGuildCommandResult(GUILD_CREATE_S, name, ERR_GUILD_NAME_EXISTS_S);
         delete result;
@@ -583,7 +584,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     }
 
     // register guild and add guildmaster
-    sObjectMgr.AddGuild(guild);
+    sGuildMgr.AddGuild(guild);
 
     // add members
     for(uint8 i = 0; i < signs; ++i)

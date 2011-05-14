@@ -44,7 +44,6 @@
 #include <limits>
 
 class Group;
-class Guild;
 class Item;
 
 struct GameTele
@@ -412,8 +411,6 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, Group*> GroupMap;
 
-        typedef UNORDERED_MAP<uint32, Guild*> GuildMap;
-
         typedef UNORDERED_MAP<uint32, Quest*> QuestMap;
 
         typedef UNORDERED_MAP<uint32, AreaTrigger> AreaTriggerMap;
@@ -440,13 +437,6 @@ class ObjectMgr
         Group* GetGroupById(uint32 id) const;
         void AddGroup(Group* group);
         void RemoveGroup(Group* group);
-
-        Guild* GetGuildByLeader(ObjectGuid guid) const;
-        Guild* GetGuildById(uint32 GuildId) const;
-        Guild* GetGuildByName(const std::string& guildname) const;
-        std::string GetGuildNameById(uint32 GuildId) const;
-        void AddGuild(Guild* guild);
-        void RemoveGuild(uint32 Id);
 
         static CreatureInfo const *GetCreatureTemplate( uint32 id );
         CreatureModelInfo const *GetCreatureModelInfo( uint32 modelid );
@@ -590,7 +580,6 @@ class ObjectMgr
             return NULL;
         }
 
-        void LoadGuilds();
         void LoadGroups();
         void LoadQuests();
         void LoadQuestRelations()
@@ -1016,7 +1005,6 @@ class ObjectMgr
         typedef std::set<uint32> GameObjectForQuestSet;
 
         GroupMap            mGroupMap;
-        GuildMap            mGuildMap;
 
         ItemTextMap         mItemTexts;
 

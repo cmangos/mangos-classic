@@ -31,7 +31,6 @@
 #include "UpdateMask.h"
 #include "World.h"
 #include "Group.h"
-#include "Guild.h"
 #include "Transports.h"
 #include "ProgressBar.h"
 #include "Language.h"
@@ -149,11 +148,8 @@ ObjectMgr::~ObjectMgr()
         for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
             delete[] playerInfo[race][class_].levelInfo;
 
-    // free group and guild objects
+    // free objects
     for (GroupMap::iterator itr = mGroupMap.begin(); itr != mGroupMap.end(); ++itr)
-        delete itr->second;
-
-    for (GuildMap::iterator itr = mGuildMap.begin(); itr != mGuildMap.end(); ++itr)
         delete itr->second;
 
     for (CacheVendorItemMap::iterator itr = m_mCacheVendorTemplateItemMap.begin(); itr != m_mCacheVendorTemplateItemMap.end(); ++itr)
@@ -171,42 +167,6 @@ Group* ObjectMgr::GetGroupById(uint32 id) const
     GroupMap::const_iterator itr = mGroupMap.find(id);
     if (itr != mGroupMap.end())
         return itr->second;
-
-    return NULL;
-}
-
-Guild* ObjectMgr::GetGuildById(uint32 GuildId) const
-{
-    GuildMap::const_iterator itr = mGuildMap.find(GuildId);
-    if (itr != mGuildMap.end())
-        return itr->second;
-
-    return NULL;
-}
-
-Guild * ObjectMgr::GetGuildByName(const std::string& guildname) const
-{
-    for(GuildMap::const_iterator itr = mGuildMap.begin(); itr != mGuildMap.end(); ++itr)
-        if (itr->second->GetName() == guildname)
-            return itr->second;
-
-    return NULL;
-}
-
-std::string ObjectMgr::GetGuildNameById(uint32 GuildId) const
-{
-    GuildMap::const_iterator itr = mGuildMap.find(GuildId);
-    if (itr != mGuildMap.end())
-        return itr->second->GetName();
-
-    return "";
-}
-
-Guild* ObjectMgr::GetGuildByLeader(ObjectGuid guid) const
-{
-    for(GuildMap::const_iterator itr = mGuildMap.begin(); itr != mGuildMap.end(); ++itr)
-        if (itr->second->GetLeaderGuid() == guid)
-            return itr->second;
 
     return NULL;
 }
@@ -2808,75 +2768,6 @@ void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, Play
                 info->stats[STAT_SPIRIT]    += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
         }
     }
-}
-
-void ObjectMgr::LoadGuilds()
-{
-    Guild *newGuild;
-    uint32 count = 0;
-
-    //                                                    0             1          2          3           4           5           6
-    QueryResult *result = CharacterDatabase.Query("SELECT guild.guildid,guild.name,leaderguid,EmblemStyle,EmblemColor,BorderStyle,BorderColor,"
-    //   7               8    9    10
-        "BackgroundColor,info,motd,createdate FROM guild ORDER BY guildid ASC");
-
-    if( !result )
-    {
-
-        barGoLink bar( 1 );
-
-        bar.step();
-
-        sLog.outString();
-        sLog.outString( ">> Loaded %u guild definitions", count );
-        return;
-    }
-
-    // load guild ranks
-    //                                                                0       1   2     3
-    QueryResult *guildRanksResult   = CharacterDatabase.Query("SELECT guildid,rid,rname,rights FROM guild_rank ORDER BY guildid ASC, rid ASC");
-
-    // load guild members
-    //                                                                0       1                 2    3     4
-    QueryResult *guildMembersResult = CharacterDatabase.Query("SELECT guildid,guild_member.guid,rank,pnote,offnote,"
-    //   5                6                 7                 8                9                       10
-        "characters.name, characters.level, characters.class, characters.zone, characters.logout_time, characters.account "
-        "FROM guild_member LEFT JOIN characters ON characters.guid = guild_member.guid ORDER BY guildid ASC");
-
-    barGoLink bar( (int)result->GetRowCount() );
-
-    do
-    {
-        //Field *fields = result->Fetch();
-
-        bar.step();
-        ++count;
-
-        newGuild = new Guild;
-        if (!newGuild->LoadGuildFromDB(result) ||
-            !newGuild->LoadRanksFromDB(guildRanksResult) ||
-            !newGuild->LoadMembersFromDB(guildMembersResult) ||
-            !newGuild->CheckGuildStructure()
-            )
-        {
-            newGuild->Disband();
-            delete newGuild;
-            continue;
-        }
-        newGuild->LoadGuildEventLogFromDB();
-        AddGuild(newGuild);
-    } while( result->NextRow() );
-
-    delete result;
-    delete guildRanksResult;
-    delete guildMembersResult;
-
-    //delete unused LogGuid records in guild_eventlog table
-    //you can comment these lines if you don't plan to change CONFIG_UINT32_GUILD_EVENT_LOG_COUNT
-    CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE LogGuid > '%u'", sWorld.getConfig(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT));
-
-    sLog.outString();
-    sLog.outString( ">> Loaded %u guild definitions", count );
 }
 
 void ObjectMgr::LoadGroups()
@@ -8051,16 +7942,6 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
     }
 
     return true;
-}
-
-void ObjectMgr::AddGuild( Guild* guild )
-{
-    mGuildMap[guild->GetId()] = guild ;
-}
-
-void ObjectMgr::RemoveGuild( uint32 Id )
-{
-    mGuildMap.erase(Id);
 }
 
 void ObjectMgr::AddGroup( Group* group )

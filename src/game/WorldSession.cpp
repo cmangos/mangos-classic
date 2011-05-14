@@ -32,6 +32,7 @@
 #include "ObjectMgr.h"
 #include "Group.h"
 #include "Guild.h"
+#include "GuildMgr.h"
 #include "World.h"
 #include "ObjectAccessor.h"
 #include "BattleGroundMgr.h"
@@ -425,7 +426,7 @@ void WorldSession::LogoutPlayer(bool Save)
         stmt.PExecute(uint32(0), GetAccountId());
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
-        if (Guild *guild = sObjectMgr.GetGuildById(_player->GetGuildId()))
+        if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
         {
             if (MemberSlot* slot = guild->GetMemberSlot(_player->GetObjectGuid()))
             {

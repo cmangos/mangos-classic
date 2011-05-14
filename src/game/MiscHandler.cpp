@@ -26,6 +26,7 @@
 #include "Log.h"
 #include "Player.h"
 #include "World.h"
+#include "GuildMgr.h"
 #include "ObjectMgr.h"
 #include "WorldSession.h"
 #include "Auth/BigNumber.h"
@@ -204,7 +205,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         if (!(wplayer_name.empty() || wpname.find(wplayer_name) != std::wstring::npos))
             continue;
 
-        std::string gname = sObjectMgr.GetGuildNameById(itr->second->GetGuildId());
+        std::string gname = sGuildMgr.GetGuildNameById(itr->second->GetGuildId());
         std::wstring wgname;
         if(!Utf8toWStr(gname,wgname))
             continue;

@@ -34,6 +34,7 @@
 #include "Pet.h"
 #include "Guild.h"
 #include "Spell.h"
+#include "GuildMgr.h"
 #include "Chat.h"
 
 enum StableResultCode

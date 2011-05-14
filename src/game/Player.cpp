@@ -45,6 +45,7 @@
 #include "Formulas.h"
 #include "Group.h"
 #include "Guild.h"
+#include "GuildMgr.h"
 #include "Pet.h"
 #include "Util.h"
 #include "Transports.h"
@@ -3780,7 +3781,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
 
     // remove from guild
     if (uint32 guildId = GetGuildIdFromDB(playerguid))
-        if (Guild* guild = sObjectMgr.GetGuildById(guildId))
+        if (Guild* guild = sGuildMgr.GetGuildById(guildId))
             guild->DelMember(playerguid);
 
     // the player was uninvited already on logout so just remove from group
