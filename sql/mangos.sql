@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1661_s1188_01_mangos_item_template` bit(1) default NULL
+  `required_z1671_s1201_01_mangos_spell_bonus_data` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10392,8 +10392,10 @@ INSERT INTO `spell_bonus_data` VALUES
 /* Item */
 (18764, 0,      0,       0,     0,     'Item - Fungal Regrowth'),
 (17712, 0,      0,       0,     0,     'Item - Lifestone Healing'),
-(5707,  0,      0,       0,     0,     'Item - Lifestone Regeneration');
-
+(5707,  0,      0,       0,     0,     'Item - Lifestone Regeneration'),
+(21179, 0,      0,       0,     0,     'Item - Six Demon Bag - Chain Lightning'),
+(15662, 0,      0,       0,     0,     'Item - Six Demon Bag - Fireball'),
+(11538, 0,      0,       0,     0,     'Item - Six Demon Bag - Frostbolt');
 /*!40000 ALTER TABLE `spell_bonus_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
