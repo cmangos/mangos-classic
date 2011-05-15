@@ -189,7 +189,6 @@ Item* Bag::GetItemByEntry(uint32 item) const
 
 uint32 Bag::GetItemCount(uint32 item, Item* eItem) const
 {
-    Item *pItem;
     uint32 count = 0;
 
     for (uint32 i = 0; i < GetBagSize(); ++i)
@@ -200,11 +199,11 @@ uint32 Bag::GetItemCount(uint32 item, Item* eItem) const
     return count;
 }
 
-uint8 Bag::GetSlotByItemGUID(uint64 guid) const
+uint8 Bag::GetSlotByItemGUID(ObjectGuid guid) const
 {
     for (uint32 i = 0; i < GetBagSize(); ++i)
         if (m_bagslot[i] != 0)
-            if (m_bagslot[i]->GetGUID() == guid)
+            if (m_bagslot[i]->GetObjectGuid() == guid)
                 return i;
 
     return NULL_SLOT;

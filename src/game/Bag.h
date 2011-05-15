@@ -47,7 +47,7 @@ class Bag : public Item
         Item* GetItemByEntry(uint32 item) const;
         uint32 GetItemCount(uint32 item, Item* eItem = NULL) const;
 
-        uint8 GetSlotByItemGUID(uint64 guid) const;
+        uint8 GetSlotByItemGUID(ObjectGuid guid) const;
         bool IsEmpty() const;
         uint32 GetFreeSlots() const;
         uint32 GetBagSize() const { return GetUInt32Value(CONTAINER_FIELD_NUM_SLOTS); }

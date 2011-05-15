@@ -281,7 +281,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket & recv_data)
     if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    if (itemGuid.IsEmpty())
+    if (!itemGuid)
         return;
 
     Item *it = pl->GetItemByGuid(itemGuid);

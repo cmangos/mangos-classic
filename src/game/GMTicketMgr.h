@@ -160,7 +160,7 @@ class GMTicketMgr
         void Create(ObjectGuid guid, const char* text)
         {
             GMTicket& ticket = m_GMTicketMap[guid];
-            if (!ticket.GetPlayerGuid().IsEmpty())          // overwrite ticket
+            if (ticket.GetPlayerGuid())                     // overwrite ticket
             {
                 ticket.DeleteFromDB();
                 m_GMTicketListByCreatingOrder.remove(&ticket);

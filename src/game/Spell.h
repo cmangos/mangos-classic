@@ -119,26 +119,34 @@ class SpellCastTargets
             return *this;
         }
 
-        uint64 getUnitTargetGUID() const { return m_unitTargetGUID.GetRawValue(); }
+        ObjectGuid getUnitTargetGuid() const { return m_unitTargetGUID; }
         Unit *getUnitTarget() const { return m_unitTarget; }
         void setUnitTarget(Unit *target);
         void setDestination(float x, float y, float z);
         void setSource(float x, float y, float z);
 
-        uint64 getGOTargetGUID() const { return m_GOTargetGUID.GetRawValue(); }
+        ObjectGuid getGOTargetGuid() const { return m_GOTargetGUID; }
         GameObject *getGOTarget() const { return m_GOTarget; }
         void setGOTarget(GameObject *target);
 
-        uint64 getCorpseTargetGUID() const { return m_CorpseTargetGUID.GetRawValue(); }
+        ObjectGuid getCorpseTargetGuid() const { return m_CorpseTargetGUID; }
         void setCorpseTarget(Corpse* corpse);
-        uint64 getItemTargetGUID() const { return m_itemTargetGUID.GetRawValue(); }
+
+        ObjectGuid getItemTargetGuid() const { return m_itemTargetGUID; }
         Item* getItemTarget() const { return m_itemTarget; }
         uint32 getItemTargetEntry() const { return m_itemTargetEntry; }
         void setItemTarget(Item* item);
         void setTradeItemTarget(Player* caster);
-        void updateTradeSlotItem();
+        void updateTradeSlotItem()
+        {
+            if(m_itemTarget && (m_targetMask & TARGET_FLAG_TRADE_ITEM))
+            {
+                m_itemTargetGUID = m_itemTarget->GetObjectGuid();
+                m_itemTargetEntry = m_itemTarget->GetEntry();
+            }
+        }
 
-        bool IsEmpty() const { return m_GOTargetGUID.IsEmpty() && m_unitTargetGUID.IsEmpty() && m_itemTarget==NULL && m_CorpseTargetGUID.IsEmpty(); }
+        bool IsEmpty() const { return !m_GOTargetGUID && !m_unitTargetGUID && !m_itemTarget && !m_CorpseTargetGUID; }
 
         void Update(Unit* caster);
 
@@ -408,7 +416,7 @@ class Spell
         // real source of cast affects, explicit caster, or DoT/HoT applier, or GO owner, or wild GO itself. Can be NULL
         WorldObject* GetAffectiveCasterObject() const;
         // limited version returning NULL in cases wild gameobject caster object, need for Aura (auras currently not support non-Unit caster)
-        Unit* GetAffectiveCaster() const { return !m_originalCasterGUID.IsEmpty() ? m_originalCaster : m_caster; }
+        Unit* GetAffectiveCaster() const { return m_originalCasterGUID ? m_originalCaster : m_caster; }
         // m_originalCasterGUID can store GO guid, and in this case this is visual caster
         WorldObject* GetCastingObject() const;
 
@@ -433,7 +441,7 @@ class Spell
         void TriggerGlobalCooldown();
         void CancelGlobalCooldown();
 
-        void SendLoot(uint64 guid, LootType loottype);
+        void SendLoot(ObjectGuid guid, LootType loottype);
         bool IgnoreItemRequirements() const;                        // some item use spells have unexpected reagent data
         void UpdateOriginalCasterPointer();
 
@@ -537,9 +545,9 @@ class Spell
         ItemTargetList m_UniqueItemInfo;
 
         void AddUnitTarget(Unit* target, SpellEffectIndex effIndex);
-        void AddUnitTarget(uint64 unitGUID, SpellEffectIndex effIndex);
+        void AddUnitTarget(ObjectGuid unitGuid, SpellEffectIndex effIndex);
         void AddGOTarget(GameObject* target, SpellEffectIndex effIndex);
-        void AddGOTarget(uint64 goGUID, SpellEffectIndex effIndex);
+        void AddGOTarget(ObjectGuid goGuid, SpellEffectIndex effIndex);
         void AddItemTarget(Item* target, SpellEffectIndex effIndex);
         void DoAllEffectOnTarget(TargetInfo *target);
         void HandleDelayedSpellLaunch(TargetInfo *target);

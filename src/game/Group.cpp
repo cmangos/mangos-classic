@@ -667,7 +667,7 @@ void Group::StartLootRool(Creature* lootTarget, LootMethod method, Loot* loot, u
 
     ItemPrototype const* item = ObjectMgr::GetItemPrototype(lootItem.itemid);
 
-    Roll* r = new Roll(lootTarget->GetGUID(), lootItem);
+    Roll* r = new Roll(lootTarget->GetObjectGuid(), lootItem);
 
     //a vector is filled with only near party members
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
@@ -834,7 +834,7 @@ void Group::SetTargetIcon(uint8 id, ObjectGuid targetGuid)
         return;
 
     // clean other icons
-    if (!targetGuid.IsEmpty())
+    if (targetGuid)
         for(int i = 0; i < TARGET_ICON_COUNT; ++i)
             if (m_targetIcons[i] == targetGuid)
                 SetTargetIcon(i, ObjectGuid());
@@ -899,7 +899,7 @@ void Group::SendTargetIconList(WorldSession *session)
 
     for(int i = 0; i < TARGET_ICON_COUNT; ++i)
     {
-        if (m_targetIcons[i].IsEmpty())
+        if (!m_targetIcons[i])
             continue;
 
         data << uint8(i);
@@ -972,7 +972,7 @@ void Group::BroadcastPacket(WorldPacket *packet, bool ignorePlayersInBGRaid, int
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player *pl = itr->getSource();
-        if (!pl || (!ignore.IsEmpty() && pl->GetObjectGuid() == ignore) || (ignorePlayersInBGRaid && pl->GetGroup() != this) )
+        if (!pl || (ignore && pl->GetObjectGuid() == ignore) || (ignorePlayersInBGRaid && pl->GetGroup() != this) )
             continue;
 
         if (pl->GetSession() && (group == -1 || itr->getSubGroup() == group))
@@ -1034,7 +1034,7 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
     if(IsFull())
         return false;
 
-    if (guid.IsEmpty())
+    if (!guid)
         return false;
 
     Player *player = sObjectMgr.GetPlayer(guid);
@@ -1244,7 +1244,7 @@ bool Group::_setMainTank(ObjectGuid guid)
     if (m_mainTankGuid == guid)
         return false;
 
-    if (!guid.IsEmpty())
+    if (guid)
     {
         member_citerator slot = _getMemberCSlot(guid);
         if (slot == m_memberSlots.end())
@@ -1267,7 +1267,7 @@ bool Group::_setMainAssistant(ObjectGuid guid)
     if (m_mainAssistantGuid == guid)
         return false;
 
-    if (!guid.IsEmpty())
+    if (guid)
     {
         member_witerator slot = _getMemberWSlot(guid);
         if (slot == m_memberSlots.end())
@@ -1382,7 +1382,7 @@ void Group::UpdateLooterGuid( Creature* creature, bool ifneed )
             {
                 if (pl->IsWithinDist(creature, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
                 {
-                    bool refresh = pl->GetLootGUID() == creature->GetGUID();
+                    bool refresh = pl->GetLootGuid() == creature->GetObjectGuid();
 
                     //if(refresh)                           // update loot for new looter
                     //    pl->GetSession()->DoLootRelease(pl->GetLootGUID());
@@ -1403,7 +1403,7 @@ void Group::UpdateLooterGuid( Creature* creature, bool ifneed )
         {
             if (pl->IsWithinDist(creature, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
             {
-                bool refresh = pl->GetLootGUID()==creature->GetGUID();
+                bool refresh = pl->GetLootGuid() == creature->GetObjectGuid();
 
                 //if(refresh)                               // update loot for new looter
                 //    pl->GetSession()->DoLootRelease(pl->GetLootGUID());

@@ -144,46 +144,48 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
     // TODO: Guard Player map
     HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
-    for(HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+    for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
     {
+        Player* pl = itr->second;
+
         if (security == SEC_PLAYER)
         {
             // player can see member of other team only if CONFIG_BOOL_ALLOW_TWO_SIDE_WHO_LIST
-            if (itr->second->GetTeam() != team && !allowTwoSideWhoList )
+            if (pl->GetTeam() != team && !allowTwoSideWhoList )
                 continue;
 
             // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
-            if (itr->second->GetSession()->GetSecurity() > gmLevelInWhoList)
+            if (pl->GetSession()->GetSecurity() > gmLevelInWhoList)
                 continue;
         }
 
         // do not process players which are not in world
-        if(!(itr->second->IsInWorld()))
+        if (!pl->IsInWorld())
             continue;
 
         // check if target is globally visible for player
-        if (!(itr->second->IsVisibleGloballyFor(_player)))
+        if (!pl->IsVisibleGloballyFor(_player))
             continue;
 
         // check if target's level is in level range
-        uint32 lvl = itr->second->getLevel();
+        uint32 lvl = pl->getLevel();
         if (lvl < level_min || lvl > level_max)
             continue;
 
         // check if class matches classmask
-        uint32 class_ = itr->second->getClass();
+        uint32 class_ = pl->getClass();
         if (!(classmask & (1 << class_)))
             continue;
 
         // check if race matches racemask
-        uint32 race = itr->second->getRace();
+        uint32 race = pl->getRace();
         if (!(racemask & (1 << race)))
             continue;
 
-        uint32 pzoneid = itr->second->GetZoneId();
+        uint32 pzoneid = pl->GetZoneId();
 
         bool z_show = true;
-        for(uint32 i = 0; i < zones_count; ++i)
+        for (uint32 i = 0; i < zones_count; ++i)
         {
             if(zoneids[i] == pzoneid)
             {
@@ -196,7 +198,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         if (!z_show)
             continue;
 
-        std::string pname = itr->second->GetName();
+        std::string pname = pl->GetName();
         std::wstring wpname;
         if(!Utf8toWStr(pname,wpname))
             continue;
@@ -205,9 +207,9 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         if (!(wplayer_name.empty() || wpname.find(wplayer_name) != std::wstring::npos))
             continue;
 
-        std::string gname = sGuildMgr.GetGuildNameById(itr->second->GetGuildId());
+        std::string gname = sGuildMgr.GetGuildNameById(pl->GetGuildId());
         std::wstring wgname;
-        if(!Utf8toWStr(gname,wgname))
+        if (!Utf8toWStr(gname,wgname))
             continue;
         wstrToLower(wgname);
 
@@ -215,11 +217,11 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
             continue;
 
         std::string aname;
-        if(AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(itr->second->GetZoneId()))
+        if (AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(pzoneid))
             aname = areaEntry->area_name[GetSessionDbcLocale()];
 
         bool s_show = true;
-        for(uint32 i = 0; i < str_count; ++i)
+        for (uint32 i = 0; i < str_count; ++i)
         {
             if (!str[i].empty())
             {
@@ -260,8 +262,8 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
 {
     DEBUG_LOG( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message, security - %u", GetSecurity() );
 
-    if (uint64 lguid = GetPlayer()->GetLootGUID())
-        DoLootRelease(lguid);
+    if (ObjectGuid lootGuid = GetPlayer()->GetLootGuid())
+        DoLootRelease(lootGuid);
 
     //Can not logout if...
     if( GetPlayer()->isInCombat() ||                        //...is in combat
@@ -460,7 +462,7 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult *result, uint32 acc
         return;
 
     FriendsResult friendResult = FRIEND_NOT_FOUND;
-    if (!friendGuid.IsEmpty())
+    if (friendGuid)
     {
         if (friendGuid == session->GetPlayer()->GetObjectGuid())
             friendResult = FRIEND_SELF;
@@ -491,7 +493,7 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult *result, uint32 acc
 
 void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
 {
-    uint64 friendGuid;
+    ObjectGuid friendGuid;
 
     DEBUG_LOG( "WORLD: Received CMSG_DEL_FRIEND" );
 
@@ -538,7 +540,7 @@ void WorldSession::HandleAddIgnoreOpcodeCallBack(QueryResult *result, uint32 acc
         return;
 
     FriendsResult ignoreResult = FRIEND_IGNORE_NOT_FOUND;
-    if (!ignoreGuid.IsEmpty())
+    if (ignoreGuid)
     {
         if (ignoreGuid == session->GetPlayer()->GetObjectGuid())
             ignoreResult = FRIEND_IGNORE_SELF;
@@ -561,7 +563,7 @@ void WorldSession::HandleAddIgnoreOpcodeCallBack(QueryResult *result, uint32 acc
 
 void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
 {
-    uint64 ignoreGuid;
+    ObjectGuid ignoreGuid;
 
     DEBUG_LOG( "WORLD: Received CMSG_DEL_IGNORE" );
 

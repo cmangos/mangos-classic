@@ -461,11 +461,11 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
 {
-    if(!_player->isAlive() || _player->isInCombat() )
+    if (!_player->isAlive() || _player->isInCombat())
         return;
 
-    uint64 summoner_guid;
-    recv_data >> summoner_guid;
+    ObjectGuid summonerGuid;
+    recv_data >> summonerGuid;
 
     _player->SummonIfPossible(true);
 }

@@ -21,6 +21,7 @@
 #define MANGOS_GUARDAI_H
 
 #include "CreatureAI.h"
+#include "ObjectGuid.h"
 #include "Timer.h"
 
 class Creature;
@@ -47,7 +48,7 @@ class MANGOS_DLL_DECL GuardAI : public CreatureAI
         static int Permissible(const Creature *);
 
     private:
-        uint64 i_victimGuid;
+        ObjectGuid i_victimGuid;
         GuardState i_state;
         TimeTracker i_tracker;
 };

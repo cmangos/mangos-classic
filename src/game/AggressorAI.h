@@ -22,6 +22,7 @@
 
 #include "CreatureAI.h"
 #include "Timer.h"
+#include "ObjectGuid.h"
 
 class Creature;
 
@@ -46,8 +47,9 @@ class MANGOS_DLL_DECL AggressorAI : public CreatureAI
         static int Permissible(const Creature *);
 
     private:
-        uint64 i_victimGuid;
+        ObjectGuid i_victimGuid;
         AggressorState i_state;
         TimeTracker i_tracker;
 };
+
 #endif

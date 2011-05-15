@@ -217,7 +217,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
             uint32 entry = fields[0].GetUInt32();
             uint32 flags = fields[1].GetUInt32();
 
-            pItem->SetUInt64Value(ITEM_FIELD_GIFTCREATOR, 0);
+            pItem->SetGuidValue(ITEM_FIELD_GIFTCREATOR, ObjectGuid());
             pItem->SetEntry(entry);
             pItem->SetUInt32Value(ITEM_FIELD_FLAGS, flags);
             pItem->SetState(ITEM_CHANGED, pUser);
@@ -421,7 +421,7 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
     SpellAuraHolder *holder = _player->GetSpellAuraHolder(spellId);
 
     // not own area auras can't be cancelled (note: maybe need to check for aura on holder and not general on spell)
-    if (holder && holder->GetCasterGUID() != _player->GetGUID() && HasAreaAuraEffect(holder->GetSpellProto()))
+    if (holder && holder->GetCasterGuid() != _player->GetObjectGuid() && HasAreaAuraEffect(holder->GetSpellProto()))
         return;
 
     // non channeled case

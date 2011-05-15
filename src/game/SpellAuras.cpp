@@ -473,7 +473,7 @@ void AreaAura::Update(uint32 diff)
                     if(actualSpellInfo != GetSpellProto())
                         actualBasePoints = actualSpellInfo->CalculateSimpleValue(m_effIndex);
 
-                    SpellAuraHolder *holder = (*tIter)->GetSpellAuraHolder(actualSpellInfo->Id, GetCasterGUID());
+                    SpellAuraHolder *holder = (*tIter)->GetSpellAuraHolder(actualSpellInfo->Id, GetCasterGuid());
 
                     bool addedToExisting = true;
                     if (!holder)
@@ -518,7 +518,7 @@ void AreaAura::Update(uint32 diff)
             caster->IsFriendlyTo(target) != needFriendly
            )
         {
-            target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(),GetCasterGUID());
+            target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGuid());
         }
         else if( m_areaAuraType == AREA_AURA_PARTY)         // check if in same sub group
         {
@@ -532,16 +532,16 @@ void AreaAura::Update(uint32 diff)
                 {
                     Player* checkTarget = target->GetCharmerOrOwnerPlayerOrPlayerItself();
                     if(!checkTarget || !pGroup->SameSubGroup(check, checkTarget))
-                        target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(),GetCasterGUID());
+                        target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGuid());
                 }
                 else
-                    target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(),GetCasterGUID());
+                    target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGuid());
             }
         }
         else if (m_areaAuraType == AREA_AURA_PET)
         {
             if (target->GetObjectGuid() != caster->GetCharmerOrOwnerGuid())
-                target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGUID());
+                target->RemoveSingleAuraFromSpellAuraHolder(GetId(), GetEffIndex(), GetCasterGuid());
         }
     }
 }
@@ -655,7 +655,7 @@ void Aura::ReapplyAffectedPassiveAuras( Unit* target )
             // non deleted and not same aura (any with same spell id)
             !itr->second->IsDeleted() && itr->second->GetId() != GetId() &&
             // and affected by aura
-            itr->second->GetCasterGUID() == target->GetGUID() &&
+            itr->second->GetCasterGuid() == target->GetObjectGuid() &&
             // and affected by spellmod
             isAffectedOnSpell(itr->second->GetSpellProto()))
         {
@@ -669,7 +669,7 @@ void Aura::ReapplyAffectedPassiveAuras( Unit* target )
 
         for(std::map<uint32, ObjectGuid>::const_iterator map_itr = affectedSelf.begin(); map_itr != affectedSelf.end(); ++map_itr)
         {
-            Item* item = pTarget && !map_itr->second.IsEmpty() ? pTarget->GetItemByGuid(map_itr->second) : NULL;
+            Item* item = pTarget && map_itr->second ? pTarget->GetItemByGuid(map_itr->second) : NULL;
             target->RemoveAurasDueToSpell(map_itr->first);
             target->CastSpell(target, map_itr->first, true, item);
         }
@@ -753,7 +753,7 @@ void Aura::TriggerSpell()
     ObjectGuid casterGUID = GetCasterGuid();
     Unit* triggerTarget = GetTriggerTarget();
 
-    if (casterGUID.IsEmpty() || !triggerTarget)
+    if (!casterGUID || !triggerTarget)
         return;
 
     // generic casting code with custom spells and target/caster customs
@@ -4235,7 +4235,7 @@ void Aura::HandleAuraRetainComboPoints(bool apply, bool Real)
 
     // combo points was added in SPELL_EFFECT_ADD_COMBO_POINTS handler
     // remove only if aura expire by time (in case combo points amount change aura removed without combo points lost)
-    if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE && !target->GetComboTargetGuid().IsEmpty())
+    if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE && target->GetComboTargetGuid())
         if (Unit* unit = ObjectAccessor::GetUnit(*GetTarget(),target->GetComboTargetGuid()))
             target->AddComboPoints(unit, -m_modifier.m_amount);
 }
@@ -5043,7 +5043,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
     {
         if (m_spellProto->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
         {
-            Item* castItem = !m_castItemGuid.IsEmpty() ? ((Player*)caster)->GetItemByGuid(m_castItemGuid) : NULL;
+            Item* castItem = m_castItemGuid ? ((Player*)caster)->GetItemByGuid(m_castItemGuid) : NULL;
             ((Player*)caster)->AddSpellAndCategoryCooldowns(m_spellProto,castItem ? castItem->GetEntry() : 0, NULL,true);
         }
     }
@@ -5268,7 +5268,7 @@ Unit* SpellAuraHolder::GetCaster() const
 bool SpellAuraHolder::IsWeaponBuffCoexistableWith(SpellAuraHolder const* ref) const
 {
     // only item casted spells
-    if (GetCastItemGuid().IsEmpty())
+    if (!GetCastItemGuid())
         return false;
 
     // Exclude Debuffs
@@ -5297,7 +5297,7 @@ bool SpellAuraHolder::IsWeaponBuffCoexistableWith(SpellAuraHolder const* ref) co
         return false;
 
     // form different weapons
-    return !ref->GetCastItemGuid().IsEmpty() && ref->GetCastItemGuid() != GetCastItemGuid();
+    return ref->GetCastItemGuid() && ref->GetCastItemGuid() != GetCastItemGuid();
 }
 
 bool SpellAuraHolder::IsNeedVisibleSlot(Unit const* caster) const
@@ -5416,13 +5416,13 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
     else
     {
         if (spellId1)
-            m_target->RemoveAurasByCasterSpell(spellId1, GetCasterGUID());
+            m_target->RemoveAurasByCasterSpell(spellId1, GetCasterGuid());
         if (spellId2)
-            m_target->RemoveAurasByCasterSpell(spellId2, GetCasterGUID());
+            m_target->RemoveAurasByCasterSpell(spellId2, GetCasterGuid());
         if (spellId3)
-            m_target->RemoveAurasByCasterSpell(spellId3, GetCasterGUID());
+            m_target->RemoveAurasByCasterSpell(spellId3, GetCasterGuid());
         if (spellId4)
-            m_target->RemoveAurasByCasterSpell(spellId4, GetCasterGUID());
+            m_target->RemoveAurasByCasterSpell(spellId4, GetCasterGuid());
     }
 
     SetInUse(false);
@@ -5484,7 +5484,7 @@ void SpellAuraHolder::Update(uint32 diff)
         Unit* caster = GetCaster();
         if(!caster)
         {
-            m_target->RemoveAurasByCasterSpell(GetId(), GetCasterGUID());
+            m_target->RemoveAurasByCasterSpell(GetId(), GetCasterGuid());
             return;
         }
 

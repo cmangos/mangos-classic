@@ -236,12 +236,12 @@ void MotionMaster::MoveTargetedHome()
 
     Clear(false);
 
-    if (m_owner->GetTypeId() == TYPEID_UNIT && ((Creature*)m_owner)->GetCharmerOrOwnerGuid().IsEmpty())
+    if (m_owner->GetTypeId() == TYPEID_UNIT && !((Creature*)m_owner)->GetCharmerOrOwnerGuid())
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted home", m_owner->GetGuidStr().c_str());
         Mutate(new HomeMovementGenerator<Creature>());
     }
-    else if (m_owner->GetTypeId() == TYPEID_UNIT && !((Creature*)m_owner)->GetCharmerOrOwnerGuid().IsEmpty())
+    else if (m_owner->GetTypeId() == TYPEID_UNIT && ((Creature*)m_owner)->GetCharmerOrOwnerGuid())
     {
         if (Unit *target = ((Creature*)m_owner)->GetCharmerOrOwner())
         {
@@ -346,13 +346,13 @@ void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s flee from %s", m_owner->GetGuidStr().c_str(), enemy->GetGuidStr().c_str());
 
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
-        Mutate(new FleeingMovementGenerator<Player>(enemy->GetGUID()));
+        Mutate(new FleeingMovementGenerator<Player>(enemy->GetObjectGuid()));
     else
     {
         if (time)
-            Mutate(new TimedFleeingMovementGenerator(enemy->GetGUID(), time));
+            Mutate(new TimedFleeingMovementGenerator(enemy->GetObjectGuid(), time));
         else
-            Mutate(new FleeingMovementGenerator<Creature>(enemy->GetGUID()));
+            Mutate(new FleeingMovementGenerator<Creature>(enemy->GetObjectGuid()));
     }
 }
 

@@ -348,7 +348,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                             // Immolate
                             ((*i)->GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000004)))
                         {
-                            unitTarget->RemoveAurasByCasterSpell((*i)->GetId(), m_caster->GetGUID());
+                            unitTarget->RemoveAurasByCasterSpell((*i)->GetId(), m_caster->GetObjectGuid());
                             break;
                         }
                     }
@@ -739,7 +739,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     map->Add(pGameObj);
 
                     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
-                    data << uint64(pGameObj->GetGUID());
+                    data << ObjectGuid(pGameObj->GetObjectGuid());
                     m_caster->SendMessageToSet(&data, true);
 
                     return;
@@ -2057,7 +2057,7 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
     }
 }
 
-void Spell::SendLoot(uint64 guid, LootType loottype)
+void Spell::SendLoot(ObjectGuid guid, LootType loottype)
 {
     if (gameObjTarget)
     {
@@ -2100,7 +2100,7 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
     Player* player = (Player*)m_caster;
 
     uint32 lockId = 0;
-    uint64 guid = 0;
+    ObjectGuid guid;
 
     // Get lockId
     if (gameObjTarget)
@@ -2128,12 +2128,12 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
                 return;
         }
         lockId = goInfo->GetLockId();
-        guid = gameObjTarget->GetGUID();
+        guid = gameObjTarget->GetObjectGuid();
     }
     else if (itemTarget)
     {
         lockId = itemTarget->GetProto()->LockID;
-        guid = itemTarget->GetGUID();
+        guid = itemTarget->GetObjectGuid();
     }
     else
     {
@@ -2498,7 +2498,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
                 bool foundDispelled = false;
                 for (std::list<std::pair<SpellAuraHolder* ,uint32> >::iterator success_iter = success_list.begin(); success_iter != success_list.end(); ++success_iter)
                 {
-                    if (success_iter->first->GetId() == holder->GetId() && success_iter->first->GetCasterGUID() == holder->GetCasterGUID())
+                    if (success_iter->first->GetId() == holder->GetId() && success_iter->first->GetCasterGuid() == holder->GetCasterGuid())
                     {
                         success_iter->second += 1;
                         foundDispelled = true;
@@ -2524,7 +2524,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
                 SpellAuraHolder* dispelledHolder = j->first;
                 data << uint32(dispelledHolder->GetId());   // Spell Id
                 data << uint8(0);                           // 0 - dispelled !=0 cleansed
-                unitTarget->RemoveAuraHolderDueToSpellByDispel(dispelledHolder->GetId(), j->second, dispelledHolder->GetCasterGUID(), m_caster);
+                unitTarget->RemoveAuraHolderDueToSpellByDispel(dispelledHolder->GetId(), j->second, dispelledHolder->GetCasterGuid(), m_caster);
             }
             m_caster->SendMessageToSet(&data, true);
 
@@ -4111,8 +4111,8 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
     duel2->startTimer = 0;
     target->duel      = duel2;
 
-    caster->SetUInt64Value(PLAYER_DUEL_ARBITER, pGameObj->GetGUID());
-    target->SetUInt64Value(PLAYER_DUEL_ARBITER, pGameObj->GetGUID());
+    caster->SetGuidValue(PLAYER_DUEL_ARBITER, pGameObj->GetObjectGuid());
+    target->SetGuidValue(PLAYER_DUEL_ARBITER, pGameObj->GetObjectGuid());
 }
 
 void Spell::EffectStuck(SpellEffectIndex /*eff_idx*/)
@@ -4380,7 +4380,7 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
     uint32 go_id = m_spellInfo->EffectMiscValue[eff_idx];
 
     uint8 slot = 0;
-    switch(m_spellInfo->Effect[eff_idx])
+    switch (m_spellInfo->Effect[eff_idx])
     {
         case SPELL_EFFECT_SUMMON_OBJECT_SLOT1: slot = 0; break;
         case SPELL_EFFECT_SUMMON_OBJECT_SLOT2: slot = 1; break;
@@ -4389,11 +4389,11 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
         default: return;
     }
 
-    if(uint64 guid = m_caster->m_ObjectSlot[slot])
+    if (ObjectGuid guid = m_caster->m_ObjectSlotGuid[slot])
     {
-        if(GameObject* obj = m_caster ? m_caster->GetMap()->GetGameObject(guid) : NULL)
+        if (GameObject* obj = m_caster ? m_caster->GetMap()->GetGameObject(guid) : NULL)
             obj->SetLootState(GO_JUST_DEACTIVATED);
-        m_caster->m_ObjectSlot[slot] = 0;
+        m_caster->m_ObjectSlotGuid[slot].Clear();
     }
 
     GameObject* pGameObj = new GameObject;
@@ -4426,10 +4426,10 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
 
     map->Add(pGameObj);
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
-    data << uint64(pGameObj->GetGUID());
+    data << ObjectGuid(pGameObj->GetObjectGuid());
     m_caster->SendMessageToSet(&data, true);
 
-    m_caster->m_ObjectSlot[slot] = pGameObj->GetGUID();
+    m_caster->m_ObjectSlotGuid[slot] = pGameObj->GetObjectGuid();
 
     pGameObj->SummonLinkedTrapIfAny();
 

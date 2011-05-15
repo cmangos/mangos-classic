@@ -113,7 +113,7 @@ void Totem::Summon(Unit* owner)
 
 void Totem::UnSummon()
 {
-    SendObjectDeSpawnAnim(GetGUID());
+    SendObjectDeSpawnAnim(GetObjectGuid());
 
     CombatStop();
     RemoveAurasDueToSpell(GetSpell());
@@ -159,10 +159,10 @@ void Totem::SetOwner(Unit* owner)
 
 Unit *Totem::GetOwner()
 {
-    ObjectGuid ownerGuid = GetOwnerGuid();
-    if (ownerGuid.IsEmpty())
-        return NULL;
-    return ObjectAccessor::GetUnit(*this, ownerGuid);
+    if (ObjectGuid ownerGuid = GetOwnerGuid())
+        return ObjectAccessor::GetUnit(*this, ownerGuid);
+
+    return NULL;
 }
 
 void Totem::SetTypeBySummonSpell(SpellEntry const * spellProto)

@@ -244,7 +244,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if (sObjectMgr.GetPlayerGUIDByName(name))
+    if (sObjectMgr.GetPlayerGuidByName(name))
     {
         data << (uint8)CHAR_CREATE_NAME_IN_USE;
         SendPacket( &data );

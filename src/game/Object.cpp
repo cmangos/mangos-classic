@@ -207,7 +207,7 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
 void Object::BuildOutOfRangeUpdateBlock(UpdateData * data) const
 {
-    data->AddOutOfRangeGUID(GetGUID());
+    data->AddOutOfRangeGUID(GetObjectGuid());
 }
 
 void Object::DestroyForPlayer( Player *target ) const
@@ -245,7 +245,7 @@ void Object::BuildMovementUpdate(ByteBuffer * data, uint8 updateFlags) const
             *data << float(((Player *)this)->GetTransport()->GetPositionZ());
             *data << float(((Player *)this)->GetTransport()->GetOrientation());
 
-            *data << uint64(((Player*)this)->GetTransport()->GetGUID());
+            *data << ObjectGuid(((Player*)this)->GetTransport()->GetObjectGuid());
             *data << float(((Player*)this)->GetTransOffsetX());
             *data << float(((Player*)this)->GetTransOffsetY());
             *data << float(((Player*)this)->GetTransOffsetZ());
@@ -1317,7 +1317,7 @@ void WorldObject::BuildMonsterChat(WorldPacket *data, uint8 msgtype, char const*
     *data << uint32(strlen(name)+1);
     *data << name;
     *data << ObjectGuid(targetGuid);                        // Unit Target
-    if (!targetGuid.IsEmpty() && !targetGuid.IsPlayer())
+    if (targetGuid && !targetGuid.IsPlayer())
     {
         *data << uint32(strlen(targetName)+1);              // target name length
         *data << targetName;                                // target name
@@ -1351,17 +1351,17 @@ void WorldObject::SendMessageToSetExcept(WorldPacket *data, Player const* skippe
     }
 }
 
-void WorldObject::SendObjectDeSpawnAnim(uint64 guid)
+void WorldObject::SendObjectDeSpawnAnim(ObjectGuid guid)
 {
     WorldPacket data(SMSG_GAMEOBJECT_DESPAWN_ANIM, 8);
-    data << uint64(guid);
+    data << ObjectGuid(guid);
     SendMessageToSet(&data, true);
 }
 
-void WorldObject::SendGameObjectCustomAnim(uint64 guid)
+void WorldObject::SendGameObjectCustomAnim(ObjectGuid guid)
 {
     WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM, 8+4);
-    data << uint64(guid);
+    data << ObjectGuid(guid);
     data << uint32(0);                                      // not known what this is
     SendMessageToSet(&data, true);
 }

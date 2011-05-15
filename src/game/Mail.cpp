@@ -62,11 +62,13 @@
  */
 void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
-    uint64 mailbox, unk3, item_guid;
+    ObjectGuid mailboxGuid;
+    ObjectGuid itemGuid;
+    uint64 unk3;
     std::string receiver, subject, body;
     uint32 unk1, unk2, money, COD;
     uint8 unk4;
-    recv_data >> mailbox;
+    recv_data >> mailboxGuid;
     recv_data >> receiver;
 
     recv_data >> subject;
@@ -76,7 +78,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     recv_data >> unk1;                                      // stationery?
     recv_data >> unk2;                                      // 0x00000000
 
-    recv_data >> item_guid;
+    recv_data >> itemGuid;
 
     recv_data >> money >> COD;                              // money and cod
     recv_data >> unk3;                                      // const 0
@@ -84,7 +86,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     // packet read complete, now do check
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
         return;
 
     if (receiver.empty())
@@ -94,18 +96,18 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     ObjectGuid rc;
     if (normalizePlayerName(receiver))
-        rc = sObjectMgr.GetPlayerGUIDByName(receiver);
+        rc = sObjectMgr.GetPlayerGuidByName(receiver);
 
     if (rc.IsEmpty())
     {
         DETAIL_LOG("%s is sending mail to %s (GUID: nonexistent!) with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u",
-            pl->GetGuidStr().c_str(), receiver.c_str(), subject.c_str(), body.c_str(), item_guid ? 1 : 0, money, COD, unk1, unk2);
+            pl->GetGuidStr().c_str(), receiver.c_str(), subject.c_str(), body.c_str(), itemGuid ? 1 : 0, money, COD, unk1, unk2);
         pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_RECIPIENT_NOT_FOUND);
         return;
     }
 
     DETAIL_LOG("%s is sending mail to %s with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u",
-        pl->GetGuidStr().c_str(), rc.GetString().c_str(), subject.c_str(), body.c_str(), item_guid ? 1 : 0, money, COD, unk1, unk2);
+        pl->GetGuidStr().c_str(), rc.GetString().c_str(), subject.c_str(), body.c_str(), itemGuid ? 1 : 0, money, COD, unk1, unk2);
 
     if (pl->GetObjectGuid() == rc)
     {
@@ -162,9 +164,9 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     Item* item = NULL;
 
-    if (item_guid)
+    if (itemGuid)
     {
-        item = pl->GetItemByGuid(item_guid);
+        item = pl->GetItemByGuid(itemGuid);
 
         // prevent sending bag with items (cheat: can be placed in bag after adding equipped empty bag to mail)
         if(!item)
@@ -200,7 +202,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     MailDraft draft(subject, body);
 
-    if (item_guid > 0 || money > 0)
+    if (itemGuid || money > 0)
     {
         uint32 rc_account = 0;
         if(receive)
@@ -264,12 +266,12 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
  */
 void WorldSession::HandleMailMarkAsRead(WorldPacket & recv_data )
 {
-    uint64 mailbox;
+    ObjectGuid mailboxGuid;
     uint32 mailId;
-    recv_data >> mailbox;
+    recv_data >> mailboxGuid;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
         return;
 
     Player *pl = _player;
@@ -294,12 +296,12 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket & recv_data )
  */
 void WorldSession::HandleMailDelete(WorldPacket & recv_data )
 {
-    uint64 mailbox;
+    ObjectGuid mailboxGuid;
     uint32 mailId;
-    recv_data >> mailbox;
+    recv_data >> mailboxGuid;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
         return;
 
     Player* pl = _player;
@@ -329,12 +331,12 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
  */
 void WorldSession::HandleMailReturnToSender(WorldPacket & recv_data )
 {
-    uint64 mailbox;
+    ObjectGuid mailboxGuid;
     uint32 mailId;
-    recv_data >> mailbox;
+    recv_data >> mailboxGuid;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
         return;
 
     Player *pl = _player;
@@ -386,12 +388,12 @@ void WorldSession::HandleMailReturnToSender(WorldPacket & recv_data )
  */
 void WorldSession::HandleMailTakeItem(WorldPacket & recv_data )
 {
-    uint64 mailbox;
+    ObjectGuid mailboxGuid;
     uint32 mailId;
-    recv_data >> mailbox;
+    recv_data >> mailboxGuid;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
         return;
 
     Player* pl = _player;
@@ -484,12 +486,12 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data )
  */
 void WorldSession::HandleMailTakeMoney(WorldPacket & recv_data )
 {
-    uint64 mailbox;
+    ObjectGuid mailboxGuid;
     uint32 mailId;
-    recv_data >> mailbox;
+    recv_data >> mailboxGuid;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
         return;
 
     Player *pl = _player;
@@ -521,10 +523,10 @@ void WorldSession::HandleMailTakeMoney(WorldPacket & recv_data )
  */
 void WorldSession::HandleGetMailList(WorldPacket & recv_data )
 {
-    uint64 mailbox;
-    recv_data >> mailbox;
+    ObjectGuid mailboxGuid;
+    recv_data >> mailboxGuid;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
         return;
 
     // client can't work with packets > max int16 value
@@ -639,14 +641,14 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
  */
 void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 {
-    uint64 mailbox;
+    ObjectGuid mailboxGuid;
     uint32 mailId;
 
-    recv_data >> mailbox;
+    recv_data >> mailboxGuid;
     recv_data >> mailId;
     recv_data.read_skip<uint32>();                          // mailTemplateId, non need, Mail store own 100% correct value anyway
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailbox, GAMEOBJECT_TYPE_MAILBOX))
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
         return;
 
     Player *pl = _player;

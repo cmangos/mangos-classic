@@ -64,11 +64,11 @@ namespace MaNGOS
         private:
             void do_helper(WorldPacket& data, char const* text)
             {
-                uint64 target_guid = i_source  ? i_source ->GetGUID() : 0;
+                ObjectGuid targetGuid = i_source ? i_source ->GetObjectGuid() : ObjectGuid();
 
                 data << uint8(i_msgtype);
                 data << uint32(LANG_UNIVERSAL);
-                data << uint64(target_guid);                // there 0 for BG messages
+                data << ObjectGuid(targetGuid);             // there 0 for BG messages
                 data << uint32(strlen(text)+1);
                 data << text;
                 data << uint8(i_source ? i_source->chatTag() : uint8(0));
@@ -108,15 +108,15 @@ namespace MaNGOS
             void do_helper(WorldPacket& data, char const* text)
             {
                 //copyied from BuildMonsterChat
-                data << (uint8)CHAT_MSG_MONSTER_YELL;
-                data << (uint32)i_language;
-                data << (uint64)i_source->GetGUID();
-                data << (uint32)(strlen(i_source->GetName())+1);
+                data << uint8(CHAT_MSG_MONSTER_YELL);
+                data << uint32(i_language);
+                data << ObjectGuid(i_source->GetObjectGuid());
+                data << uint32(strlen(i_source->GetName())+1);
                 data << i_source->GetName();
-                data << (uint64)0;                            //Unit Target - isn't important for bgs
-                data << (uint32)strlen(text)+1;
+                data << ObjectGuid();                       // Unit Target - isn't important for bgs
+                data << uint32(strlen(text)+1);
                 data << text;
-                data << (uint8)0;                                      // ChatTag - for bgs allways 0?
+                data << uint8(0);                                      // ChatTag - for bgs allways 0?
             }
 
             uint32 i_language;
@@ -140,11 +140,11 @@ namespace MaNGOS
                 char str [2048];
                 snprintf(str,2048,text, arg1str, arg2str );
 
-                uint64 target_guid = i_source  ? i_source ->GetGUID() : 0;
+                ObjectGuid targetGuid = i_source  ? i_source ->GetObjectGuid() : ObjectGuid();
 
                 data << uint8(i_msgtype);
                 data << uint32(LANG_UNIVERSAL);
-                data << uint64(target_guid);                // there 0 for BG messages
+                data << ObjectGuid(targetGuid);             // there 0 for BG messages
                 data << uint32(strlen(str)+1);
                 data << str;
                 data << uint8(i_source ? i_source->chatTag() : uint8(0));
@@ -170,17 +170,17 @@ namespace MaNGOS
                 char const* arg2str = i_arg2 ? sObjectMgr.GetMangosString(i_arg2,loc_idx) : "";
 
                 char str [2048];
-                snprintf(str,2048,text, arg1str, arg2str );
+                snprintf(str, 2048, text, arg1str, arg2str);
                 //copyied from BuildMonsterChat
-                data << (uint8)CHAT_MSG_MONSTER_YELL;
-                data << (uint32)i_language;
-                data << (uint64)i_source->GetGUID();
-                data << (uint32)(strlen(i_source->GetName())+1);
+                data << uint8(CHAT_MSG_MONSTER_YELL);
+                data << uint32(i_language);
+                data << ObjectGuid(i_source->GetObjectGuid());
+                data << uint32(strlen(i_source->GetName())+1);
                 data << i_source->GetName();
-                data << (uint64)0;                            //Unit Target - isn't important for bgs
-                data << (uint32)strlen(str)+1;
+                data << ObjectGuid();                       // Unit Target - isn't important for bgs
+                data << uint32(strlen(str)+1);
                 data << str;
-                data << (uint8)0;                                      // ChatTag - for bgs allways 0?
+                data << uint8(0);                           // ChatTag - for bgs allways 0?
             }
         private:
 
@@ -1360,7 +1360,7 @@ void BattleGround::SpawnBGCreature(ObjectGuid guid, uint32 respawntime)
 
 bool BattleGround::DelObject(uint32 type)
 {
-    if (m_BgObjects[type].IsEmpty())
+    if (!m_BgObjects[type])
         return true;
 
     GameObject *obj = GetBgMap()->GetGameObject(m_BgObjects[type]);

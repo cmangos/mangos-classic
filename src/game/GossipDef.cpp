@@ -149,25 +149,25 @@ bool PlayerMenu::GossipOptionCoded( unsigned int Selection )
     return mGossipMenu.MenuItemCoded( Selection );
 }
 
-void PlayerMenu::SendGossipMenu(uint32 TitleTextId, uint64 objectGUID)
+void PlayerMenu::SendGossipMenu(uint32 TitleTextId, ObjectGuid objectGuid)
 {
     WorldPacket data(SMSG_GOSSIP_MESSAGE, (100));           // guess size
-    data << uint64(objectGUID);
+    data << ObjectGuid(objectGuid);
     data << uint32(TitleTextId);
     data << uint32(mGossipMenu.MenuItemCount());            // max count 0x20
 
     for (uint32 iI = 0; iI < mGossipMenu.MenuItemCount(); ++iI )
     {
         GossipMenuItem const& gItem = mGossipMenu.GetItem(iI);
-        data << uint32( iI );
-        data << uint8( gItem.m_gIcon );
-        data << uint8( gItem.m_gCoded );                    // makes pop up box password
-        data << gItem.m_gMessage;                           // text for gossip item
+        data << uint32(iI);
+        data << uint8(gItem.m_gIcon);
+        data << uint8(gItem.m_gCoded);                      // makes pop up box password
+        data << gItem.m_gMessage;                           // text for gossip item, max 0x800
     }
 
-    data << uint32( mQuestMenu.MenuItemCount() );           // max count 0x20
+    data << uint32(mQuestMenu.MenuItemCount());             // max count 0x20
 
-    for (uint32 iI = 0; iI < mQuestMenu.MenuItemCount(); ++iI )
+    for (uint32 iI = 0; iI < mQuestMenu.MenuItemCount(); ++iI)
     {
         QuestMenuItem const& qItem = mQuestMenu.GetItem(iI);
         uint32 questID = qItem.m_qId;

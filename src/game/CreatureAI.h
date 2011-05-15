@@ -25,6 +25,7 @@
 #include "Policies/Singleton.h"
 #include "Dynamic/ObjectRegistry.h"
 #include "Dynamic/FactoryHolder.h"
+#include "ObjectGuid.h"
 
 class WorldObject;
 class GameObject;
@@ -157,7 +158,7 @@ class MANGOS_DLL_SPEC CreatureAI
 
         ///== Helper functions =============================
         bool DoMeleeAttackIfReady();
-        CanCastResult DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32 uiCastFlags = 0, uint64 uiOriginalCasterGUID = 0);
+        CanCastResult DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32 uiCastFlags = 0, ObjectGuid uiOriginalCasterGUID = ObjectGuid());
 
         ///== Fields =======================================
 

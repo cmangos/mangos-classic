@@ -104,7 +104,7 @@ bool ChatHandler::HandleDebugSendSellErrorCommand(char* args)
         return false;
 
     uint8 msg = atoi(args);
-    m_session->GetPlayer()->SendSellError(SellResult(msg), 0, 0, 0);
+    m_session->GetPlayer()->SendSellError(SellResult(msg), 0, ObjectGuid(), 0);
     return true;
 }
 
@@ -252,10 +252,10 @@ bool ChatHandler::HandleDebugPlaySoundCommand(char* args)
         return false;
     }
 
-    if (!m_session->GetPlayer()->GetSelectionGuid().IsEmpty())
-        unit->PlayDistanceSound(dwSoundId,m_session->GetPlayer());
+    if (m_session->GetPlayer()->GetSelectionGuid())
+        unit->PlayDistanceSound(dwSoundId, m_session->GetPlayer());
     else
-        unit->PlayDirectSound(dwSoundId,m_session->GetPlayer());
+        unit->PlayDirectSound(dwSoundId, m_session->GetPlayer());
 
     PSendSysMessage(LANG_YOU_HEAR_SOUND, dwSoundId);
     return true;
@@ -289,7 +289,7 @@ bool ChatHandler::HandleDebugSendChatMsgCommand(char* args)
         return false;
 
     WorldPacket data;
-    ChatHandler::FillMessageData(&data, m_session, type, 0, "chan", m_session->GetPlayer()->GetGUID(), msg, m_session->GetPlayer());
+    ChatHandler::FillMessageData(&data, m_session, type, 0, "chan", m_session->GetPlayer()->GetObjectGuid(), msg, m_session->GetPlayer());
     m_session->SendPacket(&data);
     return true;
 }
@@ -511,7 +511,7 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
                         error = true; continue;
                     }
 
-                    if (item2->GetOwnerGuid() != player->GetGUID())
+                    if (item2->GetOwnerGuid() != player->GetObjectGuid())
                     {
                         PSendSysMessage("%s in bag %u at slot %u owner (%s) and inventory owner (%s) don't match!",
                             item2->GetGuidStr().c_str(), bag->GetSlot(), item2->GetSlot(),
