@@ -23,19 +23,19 @@
 #include "Log.h"
 #include "UpdateData.h"
 
-Bag::Bag( ): Item()
+Bag::Bag(): Item()
 {
     m_objectType |= (TYPEMASK_ITEM | TYPEMASK_CONTAINER);
     m_objectTypeId = TYPEID_CONTAINER;
 
     m_valuesCount = CONTAINER_END;
 
-    memset(m_bagslot, 0, sizeof(Item *) * MAX_BAG_SIZE);
+    memset(m_bagslot, 0, sizeof(Item*) * MAX_BAG_SIZE);
 }
 
 Bag::~Bag()
 {
-    for(int i = 0; i < MAX_BAG_SIZE; ++i)
+    for (int i = 0; i < MAX_BAG_SIZE; ++i)
         if (m_bagslot[i])
             delete m_bagslot[i];
 }
@@ -44,15 +44,15 @@ void Bag::AddToWorld()
 {
     Item::AddToWorld();
 
-    for(uint32 i = 0;  i < GetBagSize(); ++i)
-        if(m_bagslot[i])
+    for (uint32 i = 0;  i < GetBagSize(); ++i)
+        if (m_bagslot[i])
             m_bagslot[i]->AddToWorld();
 }
 
 void Bag::RemoveFromWorld()
 {
-    for(uint32 i = 0; i < GetBagSize(); ++i)
-        if(m_bagslot[i])
+    for (uint32 i = 0; i < GetBagSize(); ++i)
+        if (m_bagslot[i])
             m_bagslot[i]->RemoveFromWorld();
 
     Item::RemoveFromWorld();
@@ -60,12 +60,12 @@ void Bag::RemoveFromWorld()
 
 bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 {
-    ItemPrototype const * itemProto = ObjectMgr::GetItemPrototype(itemid);
+    ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(itemid);
 
-    if(!itemProto || itemProto->ContainerSlots > MAX_BAG_SIZE)
+    if (!itemProto || itemProto->ContainerSlots > MAX_BAG_SIZE)
         return false;
 
-    Object::_Create( guidlow, 0, HIGHGUID_CONTAINER );
+    Object::_Create(guidlow, 0, HIGHGUID_CONTAINER);
 
     SetEntry(itemid);
     SetObjectScale(DEFAULT_OBJECT_SCALE);
@@ -83,7 +83,7 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     // Cleaning 20 slots
     for (uint8 i = 0; i < MAX_BAG_SIZE; ++i)
     {
-        SetGuidValue(CONTAINER_FIELD_SLOT_1 + (i*2), ObjectGuid());
+        SetGuidValue(CONTAINER_FIELD_SLOT_1 + (i * 2), ObjectGuid());
         m_bagslot[i] = NULL;
     }
 
@@ -95,7 +95,7 @@ void Bag::SaveToDB()
     Item::SaveToDB();
 }
 
-bool Bag::LoadFromDB(uint32 guidLow, Field *fields, ObjectGuid ownerGuid)
+bool Bag::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
 {
     if (!Item::LoadFromDB(guidLow, fields, ownerGuid))
         return false;
@@ -103,7 +103,7 @@ bool Bag::LoadFromDB(uint32 guidLow, Field *fields, ObjectGuid ownerGuid)
     // cleanup bag content related item value fields (its will be filled correctly from `character_inventory`)
     for (int i = 0; i < MAX_BAG_SIZE; ++i)
     {
-        SetGuidValue(CONTAINER_FIELD_SLOT_1 + (i*2), ObjectGuid());
+        SetGuidValue(CONTAINER_FIELD_SLOT_1 + (i * 2), ObjectGuid());
         if (m_bagslot[i])
         {
             delete m_bagslot[i];
@@ -126,14 +126,14 @@ void Bag::DeleteFromDB()
 uint32 Bag::GetFreeSlots() const
 {
     uint32 slots = 0;
-    for (uint32 i=0; i < GetBagSize(); ++i)
+    for (uint32 i = 0; i < GetBagSize(); ++i)
         if (!m_bagslot[i])
             ++slots;
 
     return slots;
 }
 
-void Bag::RemoveItem( uint8 slot, bool /*update*/ )
+void Bag::RemoveItem(uint8 slot, bool /*update*/)
 {
     MANGOS_ASSERT(slot < MAX_BAG_SIZE);
 
@@ -141,14 +141,14 @@ void Bag::RemoveItem( uint8 slot, bool /*update*/ )
         m_bagslot[slot]->SetContainer(NULL);
 
     m_bagslot[slot] = NULL;
-    SetGuidValue(CONTAINER_FIELD_SLOT_1 + (slot*2), ObjectGuid());
+    SetGuidValue(CONTAINER_FIELD_SLOT_1 + (slot * 2), ObjectGuid());
 }
 
-void Bag::StoreItem( uint8 slot, Item *pItem, bool /*update*/ )
+void Bag::StoreItem(uint8 slot, Item* pItem, bool /*update*/)
 {
     MANGOS_ASSERT(slot < MAX_BAG_SIZE);
 
-    if( pItem )
+    if (pItem)
     {
         m_bagslot[slot] = pItem;
         SetGuidValue(CONTAINER_FIELD_SLOT_1 + (slot * 2), pItem->GetObjectGuid());
@@ -159,52 +159,60 @@ void Bag::StoreItem( uint8 slot, Item *pItem, bool /*update*/ )
     }
 }
 
-void Bag::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const
+void Bag::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const
 {
-    Item::BuildCreateUpdateBlockForPlayer( data, target );
+    Item::BuildCreateUpdateBlockForPlayer(data, target);
 
     for (uint32 i = 0; i < GetBagSize(); ++i)
-        if(m_bagslot[i])
-            m_bagslot[i]->BuildCreateUpdateBlockForPlayer( data, target );
+        if (m_bagslot[i])
+            m_bagslot[i]->BuildCreateUpdateBlockForPlayer(data, target);
 }
 
 // If the bag is empty returns true
 bool Bag::IsEmpty() const
 {
-    for(uint32 i = 0; i < GetBagSize(); ++i)
+    for (uint32 i = 0; i < GetBagSize(); ++i)
         if (m_bagslot[i])
             return false;
 
     return true;
 }
 
-uint32 Bag::GetItemCount( uint32 item, Item* eItem ) const
+Item* Bag::GetItemByEntry(uint32 item) const
+{
+    for (uint32 i = 0; i < GetBagSize(); ++i)
+        if (m_bagslot[i] && m_bagslot[i]->GetEntry() == item)
+            return m_bagslot[i];
+
+    return NULL;
+}
+
+uint32 Bag::GetItemCount(uint32 item, Item* eItem) const
 {
     Item *pItem;
     uint32 count = 0;
-    for(uint32 i=0; i < GetBagSize(); ++i)
-    {
-        pItem = m_bagslot[i];
-        if( pItem && pItem != eItem && pItem->GetEntry() == item )
-            count += pItem->GetCount();
-    }
+
+    for (uint32 i = 0; i < GetBagSize(); ++i)
+        if (m_bagslot[i])
+            if (m_bagslot[i] != eItem && m_bagslot[i]->GetEntry() == item)
+                count += m_bagslot[i]->GetCount();
 
     return count;
 }
 
 uint8 Bag::GetSlotByItemGUID(uint64 guid) const
 {
-    for(uint32 i = 0; i < GetBagSize(); ++i)
-        if(m_bagslot[i] != 0)
-            if(m_bagslot[i]->GetGUID() == guid)
+    for (uint32 i = 0; i < GetBagSize(); ++i)
+        if (m_bagslot[i] != 0)
+            if (m_bagslot[i]->GetGUID() == guid)
                 return i;
 
     return NULL_SLOT;
 }
 
-Item* Bag::GetItemByPos( uint8 slot ) const
+Item* Bag::GetItemByPos(uint8 slot) const
 {
-    if( slot < GetBagSize() )
+    if (slot < GetBagSize())
         return m_bagslot[slot];
 
     return NULL;
