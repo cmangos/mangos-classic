@@ -33,6 +33,7 @@ class ObjectMgr;
 #define MAX_QUEST_LOG_SIZE 20
 
 #define QUEST_OBJECTIVES_COUNT 4
+#define QUEST_ITEM_OBJECTIVES_COUNT QUEST_OBJECTIVES_COUNT
 #define QUEST_SOURCE_ITEM_IDS_COUNT 4
 #define QUEST_REWARD_CHOICES_COUNT 6
 #define QUEST_REWARDS_COUNT 4
@@ -244,8 +245,8 @@ class Quest
 
         // multiple values
         std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
-        uint32 ReqItemId[QUEST_OBJECTIVES_COUNT];
-        uint32 ReqItemCount[QUEST_OBJECTIVES_COUNT];
+        uint32 ReqItemId[QUEST_ITEM_OBJECTIVES_COUNT];
+        uint32 ReqItemCount[QUEST_ITEM_OBJECTIVES_COUNT];
         uint32 ReqSourceId[QUEST_SOURCE_ITEM_IDS_COUNT];
         uint32 ReqSourceCount[QUEST_SOURCE_ITEM_IDS_COUNT];
         int32  ReqCreatureOrGOId[QUEST_OBJECTIVES_COUNT];   // >0 Creature <0 Gameobject
