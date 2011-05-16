@@ -1000,7 +1000,7 @@ void SpellMgr::LoadSpellTargetPositions()
         bar.step();
 
         sLog.outString();
-        sLog.outString( ">> Loaded %u spell target coordinates", count );
+        sLog.outString(">> Loaded %u spell target destination coordinates", count);
         return;
     }
 
@@ -1065,7 +1065,7 @@ void SpellMgr::LoadSpellTargetPositions()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u spell teleport coordinates", count );
+    sLog.outString(">> Loaded %u spell target destination coordinates", count);
 }
 
 template <typename EntryType, typename WorkerType, typename StorageType>
