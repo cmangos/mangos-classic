@@ -180,19 +180,6 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
             if ( _player->CanCompleteQuest( quest ) )
                 _player->CompleteQuest( quest );
 
-            switch(pObject->GetTypeId())
-            {
-                case TYPEID_UNIT:
-                    sScriptMgr.OnQuestAccept(_player, (Creature*)pObject, qInfo);
-                    break;
-                case TYPEID_ITEM:
-                case TYPEID_CONTAINER:
-                    sScriptMgr.OnQuestAccept(_player, (Item*)pObject, qInfo);
-                    break;
-                case TYPEID_GAMEOBJECT:
-                    sScriptMgr.OnQuestAccept(_player, (GameObject*)pObject, qInfo);
-                    break;
-            }
             _player->PlayerTalkClass->CloseGossip();
 
             if( qInfo->GetSrcSpell() > 0 )
