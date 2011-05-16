@@ -433,6 +433,20 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
+    template<class Check>
+    struct MANGOS_DLL_DECL PlayerListSearcher
+    {
+        std::list<Player*> &i_objects;
+        Check& i_check;
+
+        PlayerListSearcher(std::list<Player*> &objects, Check & check)
+            : i_objects(objects),i_check(check) {}
+
+        void Visit(PlayerMapType &m);
+
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+    };
+
     template<class Do>
     struct MANGOS_DLL_DECL PlayerWorker
     {
@@ -1049,6 +1063,8 @@ namespace MaNGOS
             NearestCreatureEntryWithLiveStateInObjectRangeCheck(NearestCreatureEntryWithLiveStateInObjectRangeCheck const&);
     };
 
+    // Player checks and do
+
     class AnyPlayerInObjectRangeCheck
     {
         public:
@@ -1066,7 +1082,23 @@ namespace MaNGOS
             float i_range;
     };
 
-    // Player checks and do
+    class AnyPlayerInObjectRangeWithAuraCheck
+    {
+        public:
+            AnyPlayerInObjectRangeWithAuraCheck(WorldObject const* obj, float range, uint32 spellId)
+                : i_obj(obj), i_range(range), i_spellId(spellId) {}
+            WorldObject const& GetFocusObject() const { return *i_obj; }
+            bool operator()(Player* u)
+            {
+                return u->isAlive()
+                    && i_obj->IsWithinDistInMap(u, i_range)
+                    && u->HasAura(i_spellId);
+            }
+        private:
+            WorldObject const* i_obj;
+            float i_range;
+            uint32 i_spellId;
+    };
 
     // Prepare using Builder localized packets with caching and send to player
     template<class Builder>
