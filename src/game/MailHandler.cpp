@@ -92,7 +92,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     if (normalizePlayerName(receiver))
         rc = sObjectMgr.GetPlayerGuidByName(receiver);
 
-    if (rc.IsEmpty())
+    if (!rc)
     {
         DETAIL_LOG("%s is sending mail to %s (GUID: nonexistent!) with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u",
             pl->GetGuidStr().c_str(), receiver.c_str(), subject.c_str(), body.c_str(), itemGuid ? 1 : 0, money, COD, unk1, unk2);
