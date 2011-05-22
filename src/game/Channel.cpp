@@ -563,6 +563,7 @@ void Channel::Say(ObjectGuid p, const char *what, uint32 lang)
         data << uint8(CHAT_MSG_CHANNEL);
         data << uint32(lang);
         data << m_name;
+        data << uint32(0);
         data << ObjectGuid(p);
         data << uint32(messageLength);
         data << what;
