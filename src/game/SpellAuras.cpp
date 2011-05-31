@@ -4370,7 +4370,7 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                     break;
                 case SPELLFAMILY_MAGE:
                     // Frost ward, Fire ward
-                    if (spellProto->SpellFamilyFlags & UI64LIT(0x0000000100080108))
+                    if (spellProto->IsFitToFamilyMask(UI64LIT(0x0000000100080108)))
                     {
                         //+10% from +spd bonus
                         DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto)) * 0.1f;
@@ -5210,8 +5210,7 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
             for (Unit::SpellAuraHolderMap::const_iterator i = holders.begin(); i != holders.end(); ++i)
             {
                 SpellEntry const *auraSpellInfo = (*i).second->GetSpellProto();
-                if(auraSpellInfo->SpellFamilyName  == m_spellProto->SpellFamilyName &&
-                    auraSpellInfo->SpellFamilyFlags & removeFamilyFlag)
+                if (auraSpellInfo->IsFitToFamily(SpellFamily(m_spellProto->SpellFamilyName), removeFamilyFlag))
                 {
                     found = true;
                     break;

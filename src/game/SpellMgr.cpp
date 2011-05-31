@@ -468,10 +468,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (IsSealSpell(spellInfo))
                 return SPELL_SEAL;
 
-            if (spellInfo->SpellFamilyFlags & UI64LIT(0x10000100))
+            if (spellInfo->IsFitToFamilyMask(UI64LIT(0x0000000010000100)))
                 return SPELL_BLESSING;
 
-            if ((spellInfo->SpellFamilyFlags & UI64LIT(0x00000020180400)) && spellInfo->baseLevel != 0)
+            if ((spellInfo->IsFitToFamilyMask(UI64LIT(0x0000000020180400))) && spellInfo->baseLevel != 0)
                 return SPELL_JUDGEMENT;
 
             for (int i = 0; i < 3; ++i)
