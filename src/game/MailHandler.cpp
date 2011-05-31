@@ -36,6 +36,18 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
+#include "Chat.h"
+
+bool WorldSession::CheckMailBox(ObjectGuid guid)
+{
+    if (!GetPlayer()->GetGameObjectIfCanInteractWith(guid, GAMEOBJECT_TYPE_MAILBOX))
+    {
+        DEBUG_LOG("Mailbox %s not found or you can't interact with him.", guid.GetString().c_str());
+        return false;
+    }
+
+    return true;
+}
 
 /**
  * Handles the Packet sent by the client when sending a mail.
@@ -80,7 +92,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     // packet read complete, now do check
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
+    if (!CheckMailBox(mailboxGuid))
         return;
 
     if (receiver.empty())
@@ -265,7 +277,7 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket & recv_data )
     recv_data >> mailboxGuid;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
+    if (!CheckMailBox(mailboxGuid))
         return;
 
     Player *pl = _player;
@@ -295,7 +307,7 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
     recv_data >> mailboxGuid;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
+    if (!CheckMailBox(mailboxGuid))
         return;
 
     Player* pl = _player;
@@ -330,7 +342,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket & recv_data )
     recv_data >> mailboxGuid;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
+    if (!CheckMailBox(mailboxGuid))
         return;
 
     Player *pl = _player;
@@ -387,7 +399,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data )
     recv_data >> mailboxGuid;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
+    if (!CheckMailBox(mailboxGuid))
         return;
 
     Player* pl = _player;
@@ -485,7 +497,7 @@ void WorldSession::HandleMailTakeMoney(WorldPacket & recv_data )
     recv_data >> mailboxGuid;
     recv_data >> mailId;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
+    if (!CheckMailBox(mailboxGuid))
         return;
 
     Player *pl = _player;
@@ -520,7 +532,7 @@ void WorldSession::HandleGetMailList(WorldPacket & recv_data )
     ObjectGuid mailboxGuid;
     recv_data >> mailboxGuid;
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
+    if (!CheckMailBox(mailboxGuid))
         return;
 
     // client can't work with packets > max int16 value
@@ -642,7 +654,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     recv_data >> mailId;
     recv_data.read_skip<uint32>();                          // mailTemplateId, non need, Mail store own 100% correct value anyway
 
-    if (!GetPlayer()->GetGameObjectIfCanInteractWith(mailboxGuid, GAMEOBJECT_TYPE_MAILBOX))
+    if (!CheckMailBox(mailboxGuid))
         return;
 
     Player *pl = _player;
