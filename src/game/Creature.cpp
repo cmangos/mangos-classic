@@ -1212,7 +1212,7 @@ bool Creature::LoadFromDB(uint32 guidlow, Map *map)
     GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(guidlow);
 
     // Creature can be loaded already in map if grid has been unloaded while creature walk to another grid
-    if (map->GetCreature(data->GetObjectGuid(guidlow)))
+    if (map->GetCreature(cinfo->GetObjectGuid(guidlow)))
         return false;
 
     CreatureCreatePos pos(map, data->posX, data->posY, data->posZ, data->orientation);

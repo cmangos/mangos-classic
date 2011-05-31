@@ -137,10 +137,12 @@ struct CreatureInfo
     uint32  ScriptID;
 
     // helpers
-    HighGuid GetHighGuid() const
+    static HighGuid GetHighGuid()
     {
         return HIGHGUID_UNIT;                               // in pre-3.x always HIGHGUID_UNIT
     }
+
+    ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(GetHighGuid(), Entry, lowguid); }
 
     SkillType GetRequiredLootSkill() const
     {
@@ -193,12 +195,7 @@ struct CreatureData
     uint8 movementType;
 
     // helper function
-    HighGuid GetHighGuid() const
-    {
-        return HIGHGUID_UNIT;                               // in pre-3.x always HIGHGUID_UNIT
-    }
-
-    ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(GetHighGuid(), id, lowguid); }
+    ObjectGuid GetObjectGuid(uint32 lowguid) const { return ObjectGuid(CreatureInfo::GetHighGuid(), id, lowguid); }
 };
 
 // from `creature_addon` and `creature_template_addon`tables
