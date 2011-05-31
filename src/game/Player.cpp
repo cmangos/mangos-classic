@@ -17347,6 +17347,13 @@ void Player::SetComboPoints()
          SetGuidValue(PLAYER_FIELD_COMBO_TARGET, combotarget->GetObjectGuid());
          SetByteValue(PLAYER_FIELD_BYTES, 1, m_comboPoints);
     }
+    /*else
+    {
+        // can be NULL, and then points=0. Use unknown; to reset points of some sort?
+        data << PackedGuid();
+        data << uint8(0);
+        GetSession()->SendPacket(&data);
+    }*/
 }
 
 void Player::AddComboPoints(Unit* target, int8 count)
