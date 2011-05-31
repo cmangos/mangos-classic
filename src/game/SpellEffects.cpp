@@ -114,7 +114,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonPet,                                // 56 SPELL_EFFECT_SUMMON_PET
     &Spell::EffectLearnPetSpell,                            // 57 SPELL_EFFECT_LEARN_PET_SPELL
     &Spell::EffectWeaponDmg,                                // 58 SPELL_EFFECT_WEAPON_DAMAGE
-    &Spell::EffectOpenSecretSafe,                           // 59 SPELL_EFFECT_OPEN_LOCK_ITEM
+    &Spell::EffectOpenLock,                                 // 59 SPELL_EFFECT_OPEN_LOCK_ITEM
     &Spell::EffectProficiency,                              // 60 SPELL_EFFECT_PROFICIENCY
     &Spell::EffectSendEvent,                                // 61 SPELL_EFFECT_SEND_EVENT
     &Spell::EffectPowerBurn,                                // 62 SPELL_EFFECT_POWER_BURN
@@ -2072,7 +2072,7 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
     }
 }
 
-void Spell::SendLoot(ObjectGuid guid, LootType loottype)
+void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
 {
     if (gameObjTarget)
     {
@@ -2091,8 +2091,16 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype)
                 // Don't return, let loots been taken
                 break;
 
+            case GAMEOBJECT_TYPE_TRAP:
+                if (lockType == LOCKTYPE_DISARM_TRAP)
+                {
+                    gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
+                    return;
+                }
+                sLog.outError("Spell::SendLoot unhandled locktype %u for GameObject trap (entry %u) for spell %u.", lockType, gameObjTarget->GetEntry(), m_spellInfo->Id);
+                return;
             default:
-                sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u).", gameObjTarget->GetGoType(), gameObjTarget->GetEntry());
+                sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u).", gameObjTarget->GetGoType(), gameObjTarget->GetEntry(), m_spellInfo->Id);
                 return;
         }
     }
@@ -2171,7 +2179,7 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
     if (itemTarget)
         itemTarget->SetFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED);
 
-    SendLoot(guid, LOOT_SKINNING);
+    SendLoot(guid, LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]));
 
     // not allow use skill grow at item base open
     if (!m_CastItem && skillId != SKILL_NONE)
@@ -2281,11 +2289,6 @@ void Spell::EffectSummonChangeItem(SpellEffectIndex eff_idx)
 
     // fail
     delete pNewItem;
-}
-
-void Spell::EffectOpenSecretSafe(SpellEffectIndex eff_idx)
-{
-    EffectOpenLock(eff_idx);                                //no difference for now
 }
 
 void Spell::EffectProficiency(SpellEffectIndex /*eff_idx*/)

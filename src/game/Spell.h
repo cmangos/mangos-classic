@@ -235,7 +235,6 @@ class Spell
         void EffectEnergize(SpellEffectIndex eff_idx);
         void EffectOpenLock(SpellEffectIndex eff_idx);
         void EffectSummonChangeItem(SpellEffectIndex eff_idx);
-        void EffectOpenSecretSafe(SpellEffectIndex eff_idx);
         void EffectProficiency(SpellEffectIndex eff_idx);
         void EffectApplyAreaAura(SpellEffectIndex eff_idx);
         void EffectSummon(SpellEffectIndex eff_idx);
@@ -441,7 +440,7 @@ class Spell
         void TriggerGlobalCooldown();
         void CancelGlobalCooldown();
 
-        void SendLoot(ObjectGuid guid, LootType loottype);
+        void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                        // some item use spells have unexpected reagent data
         void UpdateOriginalCasterPointer();
 
