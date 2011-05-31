@@ -592,7 +592,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
     // duel ends when player has 1 or less hp
     bool duel_hasEnded = false;
-    if(pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->duel && damage >= (health-1))
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->duel && damage >= (health-1))
     {
         // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
         if(((Player*)pVictim)->duel->opponent==this || ((Player*)pVictim)->duel->opponent->GetObjectGuid() == GetOwnerGuid())
@@ -4467,15 +4467,15 @@ FactionTemplateEntry const* Unit::getFactionTemplateEntry() const
 bool Unit::IsHostileTo(Unit const* unit) const
 {
     // always non-hostile to self
-    if(unit==this)
+    if (unit == this)
         return false;
 
     // always non-hostile to GM in GM mode
-    if(unit->GetTypeId()==TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
+    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
         return false;
 
     // always hostile to enemy
-    if(getVictim()==unit || unit->getVictim()==this)
+    if (getVictim() == unit || unit->getVictim() == this)
         return true;
 
     // test pet/charm masters instead pers/charmeds
@@ -4483,49 +4483,49 @@ bool Unit::IsHostileTo(Unit const* unit) const
     Unit const* targetOwner = unit->GetCharmerOrOwner();
 
     // always hostile to owner's enemy
-    if(testerOwner && (testerOwner->getVictim()==unit || unit->getVictim()==testerOwner))
+    if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
         return true;
 
     // always hostile to enemy owner
-    if(targetOwner && (getVictim()==targetOwner || targetOwner->getVictim()==this))
+    if (targetOwner && (getVictim() == targetOwner || targetOwner->getVictim() == this))
         return true;
 
     // always hostile to owner of owner's enemy
-    if(testerOwner && targetOwner && (testerOwner->getVictim()==targetOwner || targetOwner->getVictim()==testerOwner))
+    if (testerOwner && targetOwner && (testerOwner->getVictim() == targetOwner || targetOwner->getVictim() == testerOwner))
         return true;
 
     Unit const* tester = testerOwner ? testerOwner : this;
     Unit const* target = targetOwner ? targetOwner : unit;
 
     // always non-hostile to target with common owner, or to owner/pet
-    if(tester==target)
+    if (tester == target)
         return false;
 
     // special cases (Duel, etc)
-    if(tester->GetTypeId()==TYPEID_PLAYER && target->GetTypeId()==TYPEID_PLAYER)
+    if (tester->GetTypeId() == TYPEID_PLAYER && target->GetTypeId() == TYPEID_PLAYER)
     {
         Player const* pTester = (Player const*)tester;
         Player const* pTarget = (Player const*)target;
 
         // Duel
-        if(pTester->duel && pTester->duel->opponent == pTarget && pTester->duel->startTime != 0)
+        if (pTester->IsInDuelWith(pTarget))
             return true;
 
         // Group
-        if(pTester->GetGroup() && pTester->GetGroup()==pTarget->GetGroup())
+        if (pTester->GetGroup() && pTester->GetGroup() == pTarget->GetGroup())
             return false;
 
         // Sanctuary
-        if(pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
+        if (pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
             return false;
 
         // PvP FFA state
-        if(pTester->IsFFAPvP() && pTarget->IsFFAPvP())
+        if (pTester->IsFFAPvP() && pTarget->IsFFAPvP())
             return true;
 
         //= PvP states
         // Green/Blue (can't attack)
-        if(pTester->GetTeam()==pTarget->GetTeam())
+        if (pTester->GetTeam() == pTarget->GetTeam())
             return false;
 
         // Red (can attack) if true, Blue/Yellow (can't attack) in another case
@@ -4579,15 +4579,15 @@ bool Unit::IsHostileTo(Unit const* unit) const
 bool Unit::IsFriendlyTo(Unit const* unit) const
 {
     // always friendly to self
-    if(unit==this)
+    if (unit == this)
         return true;
 
     // always friendly to GM in GM mode
-    if(unit->GetTypeId()==TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
+    if (unit->GetTypeId() == TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
         return true;
 
     // always non-friendly to enemy
-    if(getVictim()==unit || unit->getVictim()==this)
+    if (getVictim() == unit || unit->getVictim() == this)
         return false;
 
     // test pet/charm masters instead pers/charmeds
@@ -4595,49 +4595,49 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     Unit const* targetOwner = unit->GetCharmerOrOwner();
 
     // always non-friendly to owner's enemy
-    if(testerOwner && (testerOwner->getVictim()==unit || unit->getVictim()==testerOwner))
+    if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
         return false;
 
     // always non-friendly to enemy owner
-    if(targetOwner && (getVictim()==targetOwner || targetOwner->getVictim()==this))
+    if (targetOwner && (getVictim() == targetOwner || targetOwner->getVictim() == this))
         return false;
 
     // always non-friendly to owner of owner's enemy
-    if(testerOwner && targetOwner && (testerOwner->getVictim()==targetOwner || targetOwner->getVictim()==testerOwner))
+    if (testerOwner && targetOwner && (testerOwner->getVictim() == targetOwner || targetOwner->getVictim() == testerOwner))
         return false;
 
     Unit const* tester = testerOwner ? testerOwner : this;
     Unit const* target = targetOwner ? targetOwner : unit;
 
     // always friendly to target with common owner, or to owner/pet
-    if(tester==target)
+    if (tester == target)
         return true;
 
     // special cases (Duel)
-    if(tester->GetTypeId()==TYPEID_PLAYER && target->GetTypeId()==TYPEID_PLAYER)
+    if (tester->GetTypeId() == TYPEID_PLAYER && target->GetTypeId() == TYPEID_PLAYER)
     {
         Player const* pTester = (Player const*)tester;
         Player const* pTarget = (Player const*)target;
 
         // Duel
-        if(pTester->duel && pTester->duel->opponent == target && pTester->duel->startTime != 0)
+        if (pTester->IsInDuelWith(pTarget))
             return false;
 
         // Group
-        if(pTester->GetGroup() && pTester->GetGroup()==pTarget->GetGroup())
+        if (pTester->GetGroup() && pTester->GetGroup() == pTarget->GetGroup())
             return true;
 
         // Sanctuary
-        if(pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
+        if (pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
             return true;
 
         // PvP FFA state
-        if(pTester->IsFFAPvP() && pTarget->IsFFAPvP())
+        if (pTester->IsFFAPvP() && pTarget->IsFFAPvP())
             return false;
 
         //= PvP states
         // Green/Blue (non-attackable)
-        if(pTester->GetTeam()==pTarget->GetTeam())
+        if (pTester->GetTeam() == pTarget->GetTeam())
             return true;
 
         // Blue (friendly/non-attackable) if not PVP, or Yellow/Red in another case (attackable)
@@ -4967,6 +4967,15 @@ Player* Unit::GetCharmerOrOwnerPlayerOrPlayerItself()
         return ObjectAccessor::FindPlayer(guid);
 
     return GetTypeId()==TYPEID_PLAYER ? (Player*)this : NULL;
+}
+
+Player const* Unit::GetCharmerOrOwnerPlayerOrPlayerItself() const
+{
+    ObjectGuid guid = GetCharmerOrOwnerGuid();
+    if (guid.IsPlayer())
+        return ObjectAccessor::FindPlayer(guid);
+
+    return GetTypeId() == TYPEID_PLAYER ? (Player const*)this : NULL;
 }
 
 Pet* Unit::GetPet() const
@@ -6107,18 +6116,20 @@ void Unit::SetInCombatWith(Unit* enemy)
     Unit* eOwner = enemy->GetCharmerOrOwnerOrSelf();
     if (eOwner->IsPvP())
     {
-        SetInCombatState(true,enemy);
+        SetInCombatState(true, enemy);
         return;
     }
 
     //check for duel
     if (eOwner->GetTypeId() == TYPEID_PLAYER && ((Player*)eOwner)->duel)
     {
-        Unit const* myOwner = GetCharmerOrOwnerOrSelf();
-        if(((Player const*)eOwner)->duel->opponent == myOwner)
+        if (Player const* myOwner = GetCharmerOrOwnerPlayerOrPlayerItself())
         {
-            SetInCombatState(true,enemy);
-            return;
+            if (myOwner->IsInDuelWith((Player const*)eOwner))
+            {
+                SetInCombatState(true,enemy);
+                return;
+            }
         }
     }
 
@@ -8654,7 +8665,7 @@ void Unit::SetContestedPvP(Player *attackedPlayer)
 {
     Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
 
-    if (!player || (attackedPlayer && (attackedPlayer == player || (player->duel && player->duel->opponent == attackedPlayer))))
+    if (!player || (attackedPlayer && (attackedPlayer == player || player->IsInDuelWith(attackedPlayer))))
         return;
 
     player->SetContestedPvPTimer(30000);
