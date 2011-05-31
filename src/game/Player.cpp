@@ -3776,8 +3776,16 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
 
     // remove from guild
     if (uint32 guildId = GetGuildIdFromDB(playerguid))
+    {
         if (Guild* guild = sGuildMgr.GetGuildById(guildId))
-            guild->DelMember(playerguid);
+        {
+            if (guild->DelMember(playerguid))
+            {
+                guild->Disband();
+                delete guild;
+            }
+        }
+    }
 
     // the player was uninvited already on logout so just remove from group
     QueryResult *resultGroup = CharacterDatabase.PQuery("SELECT groupId FROM group_member WHERE memberGuid='%u'", lowguid);
