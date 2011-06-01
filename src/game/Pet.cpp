@@ -1088,7 +1088,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             SetSheath(SHEATH_STATE_MELEE);
             SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5 );
 
-            // this enables popup window (pet abandon, cancel)
+            // this enables popup window (pet abandon, cancel), original value set in CreateBaseAtCreature
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
             break;
     }
