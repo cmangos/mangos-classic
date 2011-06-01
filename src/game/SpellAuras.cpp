@@ -3675,6 +3675,8 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
     // Special case with temporary increase max/current health
     switch(GetId())
     {
+        case 1178:                                          // Bear Form (Passive)
+        case 9635:                                          // Dire Bear Form (Passive)
         case 12976:                                         // Warrior Last Stand triggered spell
         case 28726:                                         // Nightmare Seed ( Nightmare Seed )
         case 34511:                                         // Valor (Bulwark of Kings, Bulwark of the Ancient Kings)
