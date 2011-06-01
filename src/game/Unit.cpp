@@ -3370,7 +3370,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder *holder)
                 switch(aurNameReal)
                 {
                     // DoT/HoT/etc
-                    case SPELL_AURA_DUMMY:                  // allow stack
+                    case SPELL_AURA_DUMMY:                  // allow stack (HoTs checked later)
                     case SPELL_AURA_PERIODIC_DAMAGE:
                     case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
                     case SPELL_AURA_PERIODIC_LEECH:
@@ -3507,6 +3507,27 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder *holder)
             return true;
     }
 
+    uint32 firstHoT = 0;
+    for (int eff = 0; eff < MAX_EFFECT_INDEX; ++eff)
+    {
+        if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(eff)))
+        {
+            switch(aura->GetModifier()->m_auraname)
+            {
+                case SPELL_AURA_PERIODIC_HEAL:
+                case SPELL_AURA_OBS_MOD_HEALTH:
+                {
+                    firstHoT = sSpellMgr.GetFirstSpellInChain(holder->GetId());
+                    break;
+                }
+                default: break;
+            }
+        }
+
+        if (firstHoT)
+            break;
+    }
+
     SpellSpecific spellId_spec = GetSpellSpecific(spellId);
 
     SpellAuraHolderMap::iterator i,next;
@@ -3555,7 +3576,13 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder *holder)
 
         // single allowed spell specific from same caster or from any caster at target
         bool is_spellSpecPerTargetPerCaster = IsSingleFromSpellSpecificPerTargetPerCaster(spellId_spec,i_spellId_spec);
+
         bool is_spellSpecPerTarget = IsSingleFromSpellSpecificPerTarget(spellId_spec,i_spellId_spec);
+
+        // HoTs in 1.x must be per target also
+        if (!is_spellSpecPerTarget && firstHoT && firstHoT == sSpellMgr.GetFirstSpellInChain(i_spellId))
+            is_spellSpecPerTarget = true;
+
         if (is_spellSpecPerTarget || (is_spellSpecPerTargetPerCaster && holder->GetCasterGuid() == (*i).second->GetCasterGuid()))
         {
             // cannot remove higher rank
