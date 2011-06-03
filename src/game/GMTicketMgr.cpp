@@ -39,7 +39,7 @@ void GMTicketMgr::LoadGMTickets()
 
     if( !result )
     {
-        barGoLink bar( 1 );
+        BarGoLink bar(1);
 
         bar.step();
 
@@ -48,7 +48,7 @@ void GMTicketMgr::LoadGMTickets()
         return;
     }
 
-    barGoLink bar( (int)result->GetRowCount() );
+    BarGoLink bar(result->GetRowCount());
 
     do
     {

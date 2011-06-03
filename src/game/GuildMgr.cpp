@@ -95,8 +95,7 @@ void GuildMgr::LoadGuilds()
 
     if( !result )
     {
-
-        barGoLink bar( 1 );
+        BarGoLink bar(1);
 
         bar.step();
 
@@ -116,7 +115,7 @@ void GuildMgr::LoadGuilds()
         "characters.name, characters.level, characters.class, characters.zone, characters.logout_time, characters.account "
         "FROM guild_member LEFT JOIN characters ON characters.guid = guild_member.guid ORDER BY guildid ASC");
 
-    barGoLink bar( (int)result->GetRowCount() );
+    BarGoLink bar(result->GetRowCount());
 
     do
     {

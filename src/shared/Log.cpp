@@ -861,7 +861,7 @@ void Log::WaitBeforeContinueIfNeed()
     else if (mode > 0)
     {
         printf("\nWait %u secs for continue.\n",mode);
-        barGoLink bar(mode);
+        BarGoLink bar(mode);
         for(int i = 0; i < mode; ++i)
         {
             bar.step();

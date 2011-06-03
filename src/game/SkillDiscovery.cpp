@@ -63,7 +63,7 @@ void LoadSkillDiscoveryTable()
         return;
     }
 
-    barGoLink bar((int)result->GetRowCount());
+    BarGoLink bar(result->GetRowCount());
 
     std::ostringstream ssNonDiscoverableEntries;
     std::set<uint32> reportedReqSpells;
