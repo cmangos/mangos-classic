@@ -539,13 +539,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 13535:                                 // Tame Beast
                 {
-                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
-                        return;
-
                     if (!m_originalCaster || m_originalCaster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    m_originalCaster->CastSpell(unitTarget, 13481, true, NULL, NULL, m_originalCasterGUID, m_spellInfo);
+                    Creature* channelTarget = m_originalCaster->GetMap()->GetCreature(m_originalCaster->GetChannelObjectGuid());
+
+                    if (!channelTarget)
+                        return;
+
+                    m_originalCaster->CastSpell(channelTarget, 13481, true, NULL, NULL, m_originalCasterGUID, m_spellInfo);
                     return;
                 }
                 case 13567:                                 // Dummy Trigger
