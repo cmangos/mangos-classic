@@ -145,6 +145,8 @@ enum UnitStandStateType
     UNIT_STAND_STATE_KNEEL             = 8
 };
 
+#define MAX_UNIT_STAND_STATE             9
+
 /* byte flag value not exist in 1.12, moved/merged in (UNIT_FIELD_BYTES_1,3), in post-1.x it's in (UNIT_FIELD_BYTES_1,2)
 enum UnitStandFlags
 */
