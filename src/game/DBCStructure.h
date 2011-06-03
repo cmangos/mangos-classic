@@ -469,17 +469,17 @@ struct QuestSortEntry
     uint32    displayOrder;                                 // 10       m_sortIndex
 };*/
 
-/*struct SkillRaceClassInfoEntry
+struct SkillRaceClassInfoEntry
 {
-    uint32    id;                                           // 0        m_ID
+    //uint32    id;                                         // 0        m_ID
     uint32    skillId;                                      // 1        m_skillID
     uint32    raceMask;                                     // 2        m_raceMask
     uint32    classMask;                                    // 3        m_classMask
     uint32    flags;                                        // 4        m_flags
     uint32    reqLevel;                                     // 5        m_minLevel
-    uint32    skillTierId;                                  // 6        m_skillTierID
-    uint32    skillCostID;                                  // 7        m_skillCostIndex
-};*/
+    //uint32    skillTierId;                                // 6        m_skillTierID
+    //uint32    skillCostID;                                // 7        m_skillCostIndex
+};
 
 /*struct SkillTiersEntry{
     uint32    id;                                           // 0        m_ID

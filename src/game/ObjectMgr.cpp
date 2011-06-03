@@ -7278,7 +7278,7 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         SpellEntry const *spellinfo = sSpellStore.LookupEntry(spell);
         if (!spellinfo)
         {
-            sLog.outErrorDb("Table `%s` for trainer (Entry: %u ) has non existing spell %u, ignore", tableName, entry, spell);
+            sLog.outErrorDb("Table `%s` (Entry: %u ) has non existing spell %u, ignore", tableName, entry, spell);
             continue;
         }
 
@@ -7301,7 +7301,7 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
 
         if (!SpellMgr::IsSpellValid(spellinfo))
         {
-            sLog.outErrorDb("Table `%s` for trainer (Entry: %u) has broken learning spell %u, ignore", tableName, entry, spell);
+            sLog.outErrorDb("Table `%s` (Entry: %u) has broken learning spell %u, ignore", tableName, entry, spell);
             continue;
         }
 
@@ -7339,7 +7339,7 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
             {
                 if (tSpells->spellList.find(spell) != tSpells->spellList.end())
                 {
-                    sLog.outErrorDb("Table `%s` for trainer (Entry: %u) has spell %u listed in trainer template %u, ignore", tableName, entry, spell, cInfo->trainerId);
+                    sLog.outErrorDb("Table `%s` (Entry: %u) has spell %u listed in trainer template %u, ignore", tableName, entry, spell, cInfo->trainerId);
                     continue;
                 }
             }
@@ -7354,10 +7354,15 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         trainerSpell.reqSkillValue = fields[4].GetUInt32();
         trainerSpell.reqLevel      = fields[5].GetUInt32();
 
-        if(!trainerSpell.reqLevel)
+        if (trainerSpell.reqLevel)
+        {
+            if (trainerSpell.reqLevel == spellinfo->spellLevel)
+                ERROR_DB_STRICT_LOG("Table `%s` (Entry: %u) has redundant reqlevel %u (=spell level) for spell %u", tableName, entry, trainerSpell.reqLevel, spell);
+        }
+        else
             trainerSpell.reqLevel = spellinfo->spellLevel;
 
-        if(SpellMgr::IsProfessionSpell(spellinfo->EffectTriggerSpell[0]))
+        if (SpellMgr::IsProfessionSpell(spellinfo->EffectTriggerSpell[0]))
             data.trainerType = 2;
 
         ++count;

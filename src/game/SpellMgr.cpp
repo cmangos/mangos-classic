@@ -3426,6 +3426,33 @@ void SpellMgr::LoadSkillLineAbilityMap()
     sLog.outString(">> Loaded %u SkillLineAbility MultiMap Data", count);
 }
 
+void SpellMgr::LoadSkillRaceClassInfoMap()
+{
+    mSkillRaceClassInfoMap.clear();
+
+    barGoLink bar( (int)sSkillRaceClassInfoStore.GetNumRows() );
+    uint32 count = 0;
+
+    for (uint32 i = 0; i < sSkillRaceClassInfoStore.GetNumRows(); ++i)
+    {
+        bar.step();
+        SkillRaceClassInfoEntry const *skillRCInfo = sSkillRaceClassInfoStore.LookupEntry(i);
+        if (!skillRCInfo)
+            continue;
+
+        // not all skills really listed in ability skills list
+        if (!sSkillLineStore.LookupEntry(skillRCInfo->skillId))
+            continue;
+
+        mSkillRaceClassInfoMap.insert(SkillRaceClassInfoMap::value_type(skillRCInfo->skillId,skillRCInfo));
+
+        ++count;
+    }
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u SkillRaceClassInfo MultiMap Data", count);
+}
+
 void SpellMgr::CheckUsedSpells(char const* table)
 {
     uint32 countSpells = 0;

@@ -745,6 +745,9 @@ typedef std::pair<SpellLearnSpellMap::const_iterator,SpellLearnSpellMap::const_i
 typedef std::multimap<uint32, SkillLineAbilityEntry const*> SkillLineAbilityMap;
 typedef std::pair<SkillLineAbilityMap::const_iterator,SkillLineAbilityMap::const_iterator> SkillLineAbilityMapBounds;
 
+typedef std::multimap<uint32, SkillRaceClassInfoEntry const*> SkillRaceClassInfoMap;
+typedef std::pair<SkillRaceClassInfoMap::const_iterator,SkillRaceClassInfoMap::const_iterator> SkillRaceClassInfoMapBounds;
+
 inline bool IsPrimaryProfessionSkill(uint32 skill)
 {
     SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(skill);
@@ -1014,6 +1017,11 @@ class SpellMgr
             return mSkillLineAbilityMap.equal_range(spell_id);
         }
 
+        SkillRaceClassInfoMapBounds GetSkillRaceClassInfoMapBounds(uint32 skill_id) const
+        {
+            return mSkillRaceClassInfoMap.equal_range(skill_id);
+        }
+
         PetAura const* GetPetAura(uint32 spell_id)
         {
             SpellPetAuraMap::const_iterator itr = mSpellPetAuraMap.find(spell_id);
@@ -1072,6 +1080,7 @@ class SpellMgr
         void LoadSpellTargetPositions();
         void LoadSpellThreats();
         void LoadSkillLineAbilityMap();
+        void LoadSkillRaceClassInfoMap();
         void LoadSpellPetAuras();
         void LoadSpellAreas();
         void LoadFacingCasterFlags();
@@ -1090,6 +1099,7 @@ class SpellMgr
         SpellProcItemEnchantMap mSpellProcItemEnchantMap;
         SpellBonusMap      mSpellBonusMap;
         SkillLineAbilityMap mSkillLineAbilityMap;
+        SkillRaceClassInfoMap mSkillRaceClassInfoMap;
         SpellPetAuraMap     mSpellPetAuraMap;
         SpellAreaMap         mSpellAreaMap;
         SpellAreaForQuestMap mSpellAreaForQuestMap;

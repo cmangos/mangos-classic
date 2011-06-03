@@ -94,6 +94,7 @@ extern DBCStorage <MapEntry>                     sMapStore;
 extern DBCStorage <QuestSortEntry>               sQuestSortStore;
 extern DBCStorage <SkillLineEntry>               sSkillLineStore;
 extern DBCStorage <SkillLineAbilityEntry>        sSkillLineAbilityStore;
+extern DBCStorage <SkillRaceClassInfoEntry>      sSkillRaceClassInfoStore;
 extern DBCStorage <SoundEntriesEntry>            sSoundEntriesStore;
 extern DBCStorage <SpellCastTimesEntry>          sSpellCastTimesStore;
 extern DBCStorage <SpellDurationEntry>           sSpellDurationStore;
