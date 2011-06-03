@@ -391,9 +391,8 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(PermissionTypes permission, Play
         case GROUP_PERMISSION:
             return (is_blocked || is_underthreshold) ? LOOT_SLOT_NORMAL : LOOT_SLOT_VIEW;
         case ALL_PERMISSION:
-            return LOOT_SLOT_NORMAL;
         case OWNER_PERMISSION:
-            return LOOT_SLOT_OWNER;
+            return LOOT_SLOT_NORMAL;
         case MASTER_PERMISSION:
             return !is_underthreshold ? LOOT_SLOT_MASTER : LOOT_SLOT_NORMAL;
     }
@@ -781,7 +780,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
     }
 
     // in next cases used same slot type for all items
-    LootSlotType slot_type = lv.permission == OWNER_PERMISSION ? LOOT_SLOT_OWNER : LOOT_SLOT_NORMAL;
+    LootSlotType slot_type = LOOT_SLOT_NORMAL;
 
     QuestItemMap const& lootPlayerQuestItems = l.GetPlayerQuestItems();
     QuestItemMap::const_iterator q_itr = lootPlayerQuestItems.find(lv.viewer->GetGUIDLow());

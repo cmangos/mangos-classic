@@ -62,7 +62,6 @@ enum LootSlotType
     LOOT_SLOT_VIEW    = 1,                                  // can be only view (ignore any loot attempts)
     LOOT_SLOT_MASTER  = 2,                                  // can be looted only master (error message)
     LOOT_SLOT_REQS    = 3,                                  // can't be looted (error message about missing reqs)
-    LOOT_SLOT_OWNER   = 4,                                  // ignore binding confirmation and etc, for single player looting
     MAX_LOOT_SLOT_TYPE                                      // custom, use for mark skipped from show items
 };
 
