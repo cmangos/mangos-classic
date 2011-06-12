@@ -554,7 +554,7 @@ struct SpellProcEventEntry
 {
     uint32      schoolMask;
     uint32      spellFamilyName;                            // if nonzero - for matching proc condition based on candidate spell's SpellFamilyNamer value
-    uint64      spellFamilyMask[MAX_EFFECT_INDEX];          // if nonzero - for matching proc condition based on candidate spell's SpellFamilyFlags  (like auras 107 and 108 do)
+    ClassFamilyMask spellFamilyMask[MAX_EFFECT_INDEX];      // if nonzero - for matching proc condition based on candidate spell's SpellFamilyFlags  (like auras 107 and 108 do)
     uint32      procFlags;                                  // bitmask for matching proc event
     uint32      procEx;                                     // proc Extend info (see ProcFlagsEx)
     float       ppmRate;                                    // for melee (ranged?) damage spells - proc rate per minute. if zero, falls back to flat chance from Spell.dbc
@@ -774,14 +774,14 @@ class SpellMgr
     // Accessors (const or static functions)
     public:
         // Spell affects
-        uint64 GetSpellAffectMask(uint32 spellId, SpellEffectIndex effectId) const
+        ClassFamilyMask GetSpellAffectMask(uint32 spellId, SpellEffectIndex effectId) const
         {
             SpellAffectMap::const_iterator itr = mSpellAffectMap.find((spellId<<8) + effectId);
             if (itr != mSpellAffectMap.end())
-                return itr->second;
+                return ClassFamilyMask(itr->second);
             if (SpellEntry const* spellEntry=sSpellStore.LookupEntry(spellId))
-                return spellEntry->EffectItemType[effectId];
-            return 0;
+                return ClassFamilyMask(spellEntry->EffectItemType[effectId]);
+            return ClassFamilyMask();
         }
 
         SpellElixirMap const& GetSpellElixirMap() const { return mSpellElixirs; }

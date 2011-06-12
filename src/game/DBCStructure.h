@@ -532,6 +532,40 @@ struct SoundEntriesEntry
                                                             // 28       m_EAXDef
 };
 
+
+struct ClassFamilyMask
+{
+    uint64 Flags;
+
+    ClassFamilyMask() : Flags(0) {}
+    explicit ClassFamilyMask(uint64 familyFlags) : Flags(familyFlags) {}
+
+    bool Empty() const { return Flags == 0; }
+    bool operator! () const { return Empty(); }
+    operator void const* () const { return Empty() ? NULL : this; }// for allow normal use in if(mask)
+
+    bool IsFitToFamilyMask(uint64 familyFlags) const
+    {
+        return Flags & familyFlags;
+    }
+
+    bool IsFitToFamilyMask(ClassFamilyMask const& mask) const
+    {
+        return Flags & mask.Flags;
+    }
+
+    uint64 operator& (uint64 mask) const                     // possible will removed at finish convertion code use IsFitToFamilyMask
+    {
+        return Flags & mask;
+    }
+
+    ClassFamilyMask& operator|= (ClassFamilyMask const& mask)
+    {
+        Flags |= mask.Flags;
+        return *this;
+    }
+};
+
 #define MAX_SPELL_REAGENTS 8
 #define MAX_SPELL_TOTEMS 2
 
@@ -619,7 +653,7 @@ struct SpellEntry
     uint32    StartRecoveryTime;                            // 158
     uint32    MaxTargetLevel;                               // 159
     uint32    SpellFamilyName;                              // 160
-    uint64    SpellFamilyFlags;                             // 161+162
+    ClassFamilyMask SpellFamilyFlags;                       // 161+162
     uint32    MaxAffectedTargets;                           // 163
     uint32    DmgClass;                                     // 164 defenseType
     uint32    PreventionType;                               // 165
@@ -634,12 +668,22 @@ struct SpellEntry
 
     bool IsFitToFamilyMask(uint64 familyFlags) const
     {
-        return SpellFamilyFlags & familyFlags;
+        return SpellFamilyFlags.IsFitToFamilyMask(familyFlags);
     }
 
     bool IsFitToFamily(SpellFamily family, uint64 familyFlags) const
     {
         return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(familyFlags);
+    }
+
+    bool IsFitToFamilyMask(ClassFamilyMask const& mask) const
+    {
+        return SpellFamilyFlags.IsFitToFamilyMask(mask);
+    }
+
+    bool IsFitToFamily(SpellFamily family, ClassFamilyMask const& mask) const
+    {
+        return SpellFamily(SpellFamilyName) == family && IsFitToFamilyMask(mask);
     }
 
     private:

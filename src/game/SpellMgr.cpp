@@ -1282,7 +1282,7 @@ void SpellMgr::LoadSpellProcEvents()
         spe.spellFamilyName = fields[2].GetUInt32();
 
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-            spe.spellFamilyMask[i] = fields[3+i].GetUInt64();
+            spe.spellFamilyMask[i] = ClassFamilyMask(fields[3+i].GetUInt64());
 
         spe.procFlags       = fields[6].GetUInt32();
         spe.procEx          = fields[7].GetUInt32();
@@ -1780,19 +1780,14 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     SpellEntry const *spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
     SpellEntry const *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
 
-    if(!spellInfo_1 || !spellInfo_2)
+    if (!spellInfo_1 || !spellInfo_2)
         return false;
 
-    if(spellId_1 == spellId_2)
-        return false;
-
-    //I think we don't check this correctly because i need a exception for spell:
-    //72,11327,18461...(called from 1856,1857...) Call Aura 16,31, after trigger another spell who call aura 77 and 77 remove 16 and 31, this should not happen.
-    if(spellInfo_2->SpellFamilyFlags == 2048)
+    if (spellId_1 == spellId_2)
         return false;
 
     // Resurrection sickness
-    if((spellInfo_1->Id == SPELL_ID_PASSIVE_RESURRECTION_SICKNESS) != (spellInfo_2->Id==SPELL_ID_PASSIVE_RESURRECTION_SICKNESS))
+    if ((spellInfo_1->Id == SPELL_ID_PASSIVE_RESURRECTION_SICKNESS) != (spellInfo_2->Id==SPELL_ID_PASSIVE_RESURRECTION_SICKNESS))
         return false;
 
     // Allow stack passive and not passive spells
@@ -2109,7 +2104,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             {
                 // Windfury weapon
                 if (spellInfo_1->SpellIconID==220 && spellInfo_2->SpellIconID==220 &&
-                    spellInfo_1->SpellFamilyFlags != spellInfo_2->SpellFamilyFlags)
+                    !spellInfo_1->IsFitToFamilyMask(spellInfo_2->SpellFamilyFlags))
                     return false;
             }
             // Bloodlust and Bloodthirst (multi-family check)
@@ -3557,7 +3552,7 @@ void SpellMgr::CheckUsedSpells(char const* table)
             {
                 if(familyMask == UI64LIT(0x0000000000000000))
                 {
-                    if(spellEntry->SpellFamilyFlags != 0)
+                    if (spellEntry->SpellFamilyFlags)
                     {
                         sLog.outError("Spell %u '%s' not fit to (" UI64FMTD ") but used in %s.",
                             spell, name.c_str(), familyMask, code.c_str());
@@ -3567,7 +3562,7 @@ void SpellMgr::CheckUsedSpells(char const* table)
                 }
                 else
                 {
-                    if((spellEntry->SpellFamilyFlags & familyMask)==0)
+                    if (!spellEntry->IsFitToFamilyMask(familyMask))
                     {
                         sLog.outError("Spell %u '%s' not fit to (" I64FMT ") but used in %s.",spell,name.c_str(),familyMask,code.c_str());
                         continue;
@@ -3642,12 +3637,12 @@ void SpellMgr::CheckUsedSpells(char const* table)
                 {
                     if(familyMask == UI64LIT(0x0000000000000000))
                     {
-                        if(spellEntry->SpellFamilyFlags != 0)
+                        if (spellEntry->SpellFamilyFlags)
                             continue;
                     }
                     else
                     {
-                        if ((spellEntry->SpellFamilyFlags & familyMask)==0)
+                        if (!spellEntry->IsFitToFamilyMask(familyMask))
                             continue;
                     }
                 }
