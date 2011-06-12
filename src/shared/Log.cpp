@@ -347,31 +347,6 @@ std::string Log::GetTimestampStr()
     return std::string(buf);
 }
 
-void Log::outTitle( const char * str)
-{
-    if (!str)
-        return;
-
-    if (m_colored)
-        SetColor(true,WHITE);
-
-    // not expected utf8 and then send as-is
-    printf("%s", str);
-
-    if (m_colored)
-        ResetColor(true);
-
-    printf("\n");
-    if (logfile)
-    {
-        fprintf(logfile, "%s", str);
-        fprintf(logfile, "\n" );
-        fflush(logfile);
-    }
-
-    fflush(stdout);
-}
-
 void Log::outString()
 {
     if (m_includeTime)
@@ -615,34 +590,6 @@ void Log::outDetail( const char * str, ... )
     fflush(stdout);
 }
 
-void Log::outDebugInLine( const char * str, ... )
-{
-    if (!str)
-        return;
-
-    if (m_logLevel >= LOG_LVL_DEBUG)
-    {
-        if (m_colored)
-            SetColor(true,m_colors[LogDebug]);
-
-        va_list ap;
-        va_start(ap, str);
-        vutf8printf(stdout, str, &ap);
-        va_end(ap);
-
-        if (m_colored)
-            ResetColor(true);
-    }
-
-    if (logfile && m_logFileLevel >= LOG_LVL_DEBUG)
-    {
-        va_list ap;
-        va_start(ap, str);
-        vfprintf(logfile, str, ap);
-        va_end(ap);
-    }
-}
-
 void Log::outDebug( const char * str, ... )
 {
     if (!str)
@@ -794,38 +741,6 @@ void Log::outCharDump( const char * str, uint32 account_id, uint32 guid, const c
         fprintf(charLogfile, "== START DUMP == (account: %u guid: %u name: %s )\n%s\n== END DUMP ==\n",account_id,guid,name,str );
         fflush(charLogfile);
     }
-}
-
-void Log::outMenu( const char * str, ... )
-{
-    if (!str)
-        return;
-
-    SetColor(true,m_colors[LogNormal]);
-
-    if (m_includeTime)
-        outTime();
-
-    va_list ap;
-
-    va_start(ap, str);
-    vutf8printf(stdout, str, &ap);
-    va_end(ap);
-
-    ResetColor(true);
-
-    if (logfile)
-    {
-        outTimestamp(logfile);
-
-        va_start(ap, str);
-        vfprintf(logfile, str, ap);
-        va_end(ap);
-
-        fprintf(logfile, "\n" );
-        fflush(logfile);
-    }
-    fflush(stdout);
 }
 
 void Log::outRALog(    const char * str, ... )
