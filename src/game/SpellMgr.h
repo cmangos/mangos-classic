@@ -46,17 +46,6 @@ enum SpellCategories
     SPELLCATEGORY_DEVOUR_MAGIC        = 12
 };
 
-//Some SpellFamilyFlags
-#define SPELLFAMILYFLAG_ROGUE_VANISH            UI64LIT(0x0000000000000800)
-#define SPELLFAMILYFLAG_ROGUE_STEALTH           UI64LIT(0x0000000000400000)
-#define SPELLFAMILYFLAG_ROGUE_BACKSTAB          UI64LIT(0x0000000000800004)
-#define SPELLFAMILYFLAG_ROGUE_SAP               UI64LIT(0x0000000000000080)
-#define SPELLFAMILYFLAG_ROGUE_FEINT             UI64LIT(0x0000000008000000)
-#define SPELLFAMILYFLAG_ROGUE_KIDNEYSHOT        UI64LIT(0x0000000000200000)
-#define SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE   UI64LIT(0x00000009003E0000)
-
-#define SPELLFAMILYFLAG_PALADIN_SEALS           UI64LIT(0x000000000A000200)
-
 // Spell clasification
 enum SpellSpecific
 {
@@ -163,8 +152,7 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2);
 inline bool IsSealSpell(SpellEntry const *spellInfo)
 {
     //Collection of all the seal family flags. No other paladin spell has any of those.
-    return spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-        ( spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_PALADIN_SEALS );
+    return spellInfo->IsFitToFamily(SPELLFAMILY_PALADIN, UI64LIT(0x000000000A000200));
 }
 
 inline bool IsElementalShield(SpellEntry const *spellInfo)
