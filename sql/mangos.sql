@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1730_xxxxx_01_mangos_instance_template` bit(1) default NULL
+  `required_z1756_s1308_01_mangos_instance_template` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2149,7 +2149,7 @@ CREATE TABLE `instance_template` (
   `levelMin` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `levelMax` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `maxPlayers` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `reset_delay` int(10) unsigned NOT NULL DEFAULT '0',
+  `reset_delay` int(10) unsigned NOT NULL default '0' COMMENT 'Reset time in days',
   `ghostEntranceMap` smallint(5) unsigned NOT NULL,
   `ghostEntranceX` float NOT NULL,
   `ghostEntranceY` float NOT NULL,

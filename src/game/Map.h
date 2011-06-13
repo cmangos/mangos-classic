@@ -70,7 +70,7 @@ struct InstanceTemplate
     uint32 levelMin;
     uint32 levelMax;
     uint32 maxPlayers;
-    uint32 reset_delay;
+    uint32 reset_delay;                                     // in days
     int32 ghostEntranceMap;                                 // < 0 if not entrance coordinates
     float ghostEntranceX;
     float ghostEntranceY;
