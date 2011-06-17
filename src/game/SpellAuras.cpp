@@ -2646,51 +2646,12 @@ void Aura::HandleModStealth(bool apply, bool Real)
     }
     else
     {
-        if (!Real)
-            return;
-
-        // Vanish (triggered, normal stealth need apply before remove advanced stealth)
-        if (target->GetTypeId() == TYPEID_PLAYER && m_removeMode == AURA_REMOVE_BY_EXPIRE &&
-            GetSpellProto()->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0x000000000800)))
-        {
-            // get highest rank of the Stealth spell
-            uint32 spellId = 0;
-            const PlayerSpellMap& sp_list = ((Player*)target)->GetSpellMap();
-            for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
-            {
-                // only highest rank is shown in spell book, so simply check if shown in spell book
-                if (!itr->second.active || itr->second.disabled || itr->second.state == PLAYERSPELL_REMOVED)
-                    continue;
-
-                SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
-                if (!spellInfo)
-                    continue;
-
-                // Stealth
-                if (spellInfo->IsFitToFamily(SPELLFAMILY_ROGUE, UI64LIT(0x0000000000400000)))
-                {
-                    spellId = spellInfo->Id;
-                    break;
-                }
-            }
-
-            // if Stealth rank found
-            if (spellId)
-            {
-                // reset cooldown on it if needed
-                if (((Player*)target)->HasSpellCooldown(spellId))
-                    ((Player*)target)->RemoveSpellCooldown(spellId);
-
-                target->CastSpell(target, spellId, true);
-            }
-        }
-
         // for RACE_NIGHTELF stealth
-        if (target->GetTypeId()==TYPEID_PLAYER && GetId() == 20580)
+        if (Real && target->GetTypeId()==TYPEID_PLAYER && GetId() == 20580)
             target->RemoveAurasDueToSpell(21009);
 
         // only at real aura remove of _last_ SPELL_AURA_MOD_STEALTH
-        if (!target->HasAuraType(SPELL_AURA_MOD_STEALTH))
+        if (Real && !target->HasAuraType(SPELL_AURA_MOD_STEALTH))
         {
             // if no GM invisibility
             if (target->GetVisibility()!=VISIBILITY_OFF)
