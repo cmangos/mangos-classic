@@ -3746,7 +3746,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
     // only check at first call, Stealth auras are already removed at second call
     // for now, ignore triggered spells
-    if( strict && !m_IsTriggeredSpell)
+    if (strict && !m_IsTriggeredSpell)
     {
         // Cannot be used in this stance/form
         SpellCastResult shapeError = GetErrorAtShapeshiftedCast(m_spellInfo, m_caster->GetShapeshiftForm());
