@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1756_s1308_01_mangos_instance_template` bit(1) default NULL
+  `required_z1765_xxxxx_01_mangos_spell_affect` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10163,14 +10163,19 @@ INSERT INTO `spell_affect` VALUES
 (18218,0,6447531034),
 (18219,0,6447531034),
 (18271,0,12884993161),
+(18271,1,4295492618),
 (18271,2,0),
 (18272,0,12884993161),
+(18272,1,4295492618),
 (18272,2,0),
 (18273,0,12884993161),
+(18273,1,4295492618),
 (18273,2,0),
 (18274,0,12884993161),
+(18274,1,4295492618),
 (18274,2,0),
 (18275,0,12884993161),
+(18275,1,4295492618),
 (18275,2,0),
 (20101,0,142606336),
 (20102,0,142606336),
