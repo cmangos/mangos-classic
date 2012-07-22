@@ -394,10 +394,10 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_UNK4                         = 0x00000010,            // 4 This will no longer cause guards to attack on use??
     SPELL_ATTR_EX4_UNK5                         = 0x00000020,            // 5
     SPELL_ATTR_EX4_NOT_STEALABLE                = 0x00000040,            // 6 although such auras might be dispellable, they cannot be stolen
-    SPELL_ATTR_EX4_UNK7                         = 0x00000080,            // 7
-    SPELL_ATTR_EX4_UNK8                         = 0x00000100,            // 8
+    SPELL_ATTR_EX4_TRIGGERED                    = 0x00000080,            // 7 spells forced to be triggered
+    SPELL_ATTR_EX4_STACK_DOT_MODIFIER           = 0x00000100,            // 8 no effect on non DoTs?
     SPELL_ATTR_EX4_UNK9                         = 0x00000200,            // 9
-    SPELL_ATTR_EX4_SPELL_VS_EXTEND_COST         = 0x00000400,            // 10
+    SPELL_ATTR_EX4_SPELL_VS_EXTEND_COST         = 0x00000400,            // 10 Rogue Shiv have this flag
     SPELL_ATTR_EX4_UNK11                        = 0x00000800,            // 11
     SPELL_ATTR_EX4_UNK12                        = 0x00001000,            // 12
     SPELL_ATTR_EX4_UNK13                        = 0x00002000,            // 13
