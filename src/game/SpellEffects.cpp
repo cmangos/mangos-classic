@@ -670,23 +670,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spell_id, true, NULL);
                     return;
                 }
-                case 20572:                                 // Blood Fury
-                {
-                    if(m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    m_caster->CastSpell(m_caster, 23230, true);
-
-                    damage = uint32(damage * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) / 100);
-                    m_caster->CastCustomSpell(m_caster, 23234, &damage, NULL, NULL, true, NULL);
-                    return;
-                }
                 case 17770:                                 // Wolfshead Helm Energy
                 {
                     m_caster->CastSpell(m_caster, 29940, true, NULL);
                     return;
                 }
-                case 17950:
+                case 17950:                                 // Shadow Portal
                 {
                     if (!unitTarget)
                         return;
@@ -704,6 +693,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->CastSpell(unitTarget, 20494, true);
+                    return;
+                }
+                case 20572:                                 // Blood Fury
+                {
+                    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(m_caster, 23230, true);
+
+                    damage = uint32(damage * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) / 100);
+                    m_caster->CastCustomSpell(m_caster, 23234, &damage, NULL, NULL, true, NULL);
                     return;
                 }
                 case 20577:                                 // Cannibalize
