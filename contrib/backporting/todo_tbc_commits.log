@@ -10,10 +10,6 @@
 ##
 ####################################################################################################
 
-TBC_COMMIT fbce87f  by VladimirMangos (commiter TheLuda) " [s1316] Implement TradeSkill.GMIgnore.* config options "
-  79.2% src/game/
-  18.8% src/mangosd/
-
 TBC_COMMIT 9514ed3  by VladimirMangos (commiter TheLuda) " [s1319] Fixed work EffectSummonChangeItem, for example, for item. 17223 "
   99.4% src/game/
 
