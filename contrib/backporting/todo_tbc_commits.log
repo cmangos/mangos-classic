@@ -10,10 +10,6 @@
 ##
 ####################################################################################################
 
-TBC_COMMIT a5cc853  by VladimirMangos (commiter TheLuda) " [s1325] Check at EventAI scripts load diff reqs for event ai real call "
-  93.3% src/game/
-   6.6% src/shared/
-
 TBC_COMMIT 237f9ab  by VladimirMangos (commiter TheLuda) " [s1326] Implement in proper way ITEM_SPELLTRIGGER_ON_STORE (5) "
   99.0% src/game/
 
