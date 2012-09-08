@@ -837,6 +837,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 23782, true);
                     m_caster->CastSpell(m_caster, 23783, true);
                     return;
+                case 24781:                                 // Dream Fog
+                {
+                    if (m_caster->GetTypeId() != TYPEID_UNIT || !unitTarget)
+                        return;
+                    // TODO Note: Should actually not only AttackStart, but fixate on the target
+                    ((Creature*)m_caster)->AI()->AttackStart(unitTarget);
+                    return;
+                }
                 case 24930:                                 // Hallow's End Treat
                 {
                     uint32 spell_id = 0;

@@ -16,10 +16,6 @@ TBC_COMMIT 237f9ab  by VladimirMangos (commiter TheLuda) " [s1326] Implement in 
 DestroyItemWithOnStoreSpell does not exist in Classic - Missing another backport?
 TBC_COMMIT 6605f7a  by VladimirMangos (commiter TheLuda) " [s1327] More consitence use m_target for DestroyItemWithOnStoreSpell call in aura. "
 
-TBC_COMMIT 4679a0f  by Schmoozerd (commiter TheLuda) " [s1332] Implement spell 24780 (switching target every 10s) "
-  95.6% src/game/
-   4.3% src/shared/
-
 TBC_COMMIT af4440f  by stfx (commiter TheLuda) " Fix lava/slime liquid extraction from WMO data. Re-extraction of vmaps required for it to work "
   97.0% contrib/vmap_extract_assembler_bin/
 
