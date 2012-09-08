@@ -1,0 +1,1584 @@
+####################################################################################################
+##
+## This file stores commits that should be backported from MaNGOS-TBC to CMaNGOS-Classic
+## The content of this file is created with the update-commit-log.sh helper file
+##
+## Just delete the commits that are not required for backporting.
+## Also feel free to paste notes here about other missing backports
+##
+## You are welcome to clean the commits that are successfully backported :)
+##
+####################################################################################################
+
+TBC_COMMIT e80994b  by zergtmn (commiter TheLuda) " [s1315] Code cleanup in BattleGround::RemovePlayerAtLeave "
+  92.1% src/game/
+   7.8% src/shared/
+
+TBC_COMMIT fbce87f  by VladimirMangos (commiter TheLuda) " [s1316] Implement TradeSkill.GMIgnore.* config options "
+  79.2% src/game/
+  18.8% src/mangosd/
+
+TBC_COMMIT 9514ed3  by VladimirMangos (commiter TheLuda) " [s1319] Fixed work EffectSummonChangeItem, for example, for item. 17223 "
+  99.4% src/game/
+
+TBC_COMMIT 12568a4  by VladimirMangos (commiter TheLuda) " [s1320] Group members see same group member ghosts. "
+  95.1% src/game/
+   4.8% src/shared/
+
+TBC_COMMIT f6e18fb  by elecyb (commiter TheLuda) " [s1322] Cleanups in diminishing returns code. "
+  94.7% src/game/
+   5.2% src/shared/
+
+TBC_COMMIT 845678a  by VladimirMangos (commiter TheLuda) " [s1323] Rewrite object pos selector. "
+  99.7% src/game/
+
+TBC_COMMIT ab55787  by VladimirMangos (commiter TheLuda) " [s1324] Spell 37433 targeting only non-swiming players. "
+  84.4% src/game/
+  15.5% src/shared/
+
+TBC_COMMIT a5cc853  by VladimirMangos (commiter TheLuda) " [s1325] Check at EventAI scripts load diff reqs for event ai real call "
+  93.3% src/game/
+   6.6% src/shared/
+
+TBC_COMMIT 237f9ab  by VladimirMangos (commiter TheLuda) " [s1326] Implement in proper way ITEM_SPELLTRIGGER_ON_STORE (5) "
+  99.0% src/game/
+
+TBC_COMMIT 6605f7a  by VladimirMangos (commiter TheLuda) " [s1327] More consitence use m_target for DestroyItemWithOnStoreSpell call in aura. "
+  88.2% src/game/
+  11.7% src/shared/
+
+TBC_COMMIT 2faa3d5  by VladimirMangos (commiter TheLuda) " [s1328] Fixed names of pets summoned by npc. "
+  93.5% src/game/
+   6.4% src/shared/
+
+TBC_COMMIT 5e7f26d  by Laise (commiter TheLuda) " [s1329] allow 31785 and ranks proc from periodic heals "
+  42.1% sql/updates/
+  32.3% sql/
+  25.4% src/shared/
+
+TBC_COMMIT dca4e7d  by VladimirMangos (commiter TheLuda) " [s1330] Some code cleanups and possible useful function backport. "
+  94.6% src/game/
+   5.3% src/shared/
+
+TBC_COMMIT 4462f86  by VladimirMangos (commiter TheLuda) " [s1330] Fixed money reward for max level and repeatable quests "
+ 100.0% src/game/
+
+TBC_COMMIT b684428  by Schmoozerd (commiter TheLuda) " [s1331] Implement spell 28560 "
+  89.3% src/game/
+  10.6% src/shared/
+
+TBC_COMMIT 4679a0f  by Schmoozerd (commiter TheLuda) " [s1332] Implement spell 24780 (switching target every 10s) "
+  95.6% src/game/
+   4.3% src/shared/
+
+TBC_COMMIT e280e48  by Lynx3d (commiter TheLuda) " [s1333] Partly revert quest money reward recent changes. "
+  94.4% src/game/
+   5.5% src/shared/
+
+TBC_COMMIT af4440f  by stfx (commiter TheLuda) " Fix lava/slime liquid extraction from WMO data. Re-extraction of vmaps required for it to work "
+  97.0% contrib/vmap_extract_assembler_bin/
+
+TBC_COMMIT 338d666  by Laise (commiter TheLuda) " [s1334] fix damage and duration of reflected spells "
+  95.2% src/game/
+   4.7% src/shared/
+
+TBC_COMMIT 77c3daf  by Amaru (commiter TheLuda) " [s1335] fix reflect damage if caster can reflect too "
+  77.0% src/game/
+  22.9% src/shared/
+
+TBC_COMMIT a4305bc  by VladimirMangos (commiter TheLuda) " [s1336] Implement SPELL_AURA_DETECT_AMORE (170) "
+  88.4% src/game/
+  11.5% src/shared/
+
+TBC_COMMIT fe27289  by stfx (commiter TheLuda) " [s1337] Use master way of SPELL_AURA_DETECT_AMORE "
+  93.2% src/game/
+   6.7% src/shared/
+
+TBC_COMMIT 5419fca  by Oniryck (commiter TheLuda) " [s1338] Fix unlearning talents of hunter pets "
+  70.6% src/game/
+  29.3% src/shared/
+
+TBC_COMMIT 0a56109  by VladimirMangos (commiter TheLuda) " [s1339] Command .auction item and support auction without owner. "
+   4.4% sql/updates/
+   3.6% sql/
+  90.3% src/game/
+
+TBC_COMMIT 6358461  by VladimirMangos (commiter TheLuda) " [s1340] Proper way create items in Item::CreateItem/CloneItem for items not for inventory "
+  82.1% src/game/
+  17.8% src/shared/
+
+TBC_COMMIT 2a8c517  by VladimirMangos (commiter TheLuda) " [s1341] Alsways attempt generate randomProperty for item in at create if value not pre-selected. "
+  99.0% src/game/
+
+TBC_COMMIT 21c2ab4  by VladimirMangos (commiter TheLuda) " [s1342] Resolve possible crash in auction code for paiment pending state "
+   5.4% sql/updates/
+   3.3% sql/
+  89.0% src/game/
+
+TBC_COMMIT 244fd7f  by VladimirMangos (commiter TheLuda) " [s1343] Allow have auction bid generated by server "
+  99.3% src/game/
+
+TBC_COMMIT 08cf46f  by VladimirMangos (commiter TheLuda) " [s1344] Use proper text structure in auction mail subject/text "
+  95.0% src/game/
+   4.9% src/shared/
+
+TBC_COMMIT fa661b4  by VladimirMangos (commiter TheLuda) " [s1345] Add enum AuctionHouseType and let use it for more direct access to auction houses in AuctionHouseMgr "
+  95.0% src/game/
+   4.9% src/shared/
+
+TBC_COMMIT 55bdf3a  by VladimirMangos (commiter TheLuda) " [s1346] Move empty guid check into GetPlayerAccountIdByGUID code. "
+  94.4% src/game/
+   5.5% src/shared/
+
+TBC_COMMIT 9589967  by VladimirMangos (commiter TheLuda) " [s1347] Fixed auction ordering functions assert fails. "
+  95.5% src/game/
+   4.4% src/shared/
+
+TBC_COMMIT 985e7d9  by VladimirMangos (commiter TheLuda) " [s1348] Load ItemClass.dbc "
+  93.5% src/game/
+   6.4% src/shared/
+
+TBC_COMMIT 985053c  by VladimirMangos (commiter TheLuda) " [s1349] Remove World::setConfigPos for uint32 and move check to all uint32 config values. "
+  98.8% src/game/
+
+TBC_COMMIT 82d8d75  by VladimirMangos (commiter TheLuda) " [s1350] Always use _unsigned_ BIGINT fields in DB for time store "
+  55.0% sql/updates/
+  35.6% sql/
+   5.5% src/game/
+   3.7% src/shared/
+
+TBC_COMMIT 57e9823  by VladimirMangos (commiter TheLuda) " [s1351] Fixed chat command parse with explicit literal check. "
+  72.8% src/game/
+  27.1% src/shared/
+
+TBC_COMMIT 6d4ee15  by zergtmn (commiter TheLuda) " [s1352] Use vector instead of list for sorting auction items "
+  96.3% src/game/
+   3.6% src/shared/
+
+TBC_COMMIT ad5816f  by VladimirMangos (commiter TheLuda) " [s1353] Fixed possible crash after auction loading with wrong houseid field value. "
+  92.0% src/game/
+   7.9% src/shared/
+
+TBC_COMMIT 0ee01d0  by VladimirMangos (commiter TheLuda) " [s1354] Fixed auction crash in case missing localization for only some items "
+  99.7% src/game/
+
+TBC_COMMIT 1810629  by antiroot (commiter TheLuda) " [s1355] Auction House Bot (AHBot) patch applied "
+  94.4% src/game/AuctionHouseBot/
+   3.8% src/
+
+TBC_COMMIT f19b076  by VladimirMangos (commiter TheLuda) " [s1356] AHBot chat/console commands. "
+  17.3% sql/updates/
+  14.5% sql/
+  27.1% src/game/AuctionHouseBot/
+  40.2% src/game/
+
+TBC_COMMIT 9de8c3f  by VladimirMangos (commiter TheLuda) " [s1357] Implement option for set ahbot config file in mangosd command line "
+  55.7% src/game/AuctionHouseBot/
+  39.7% src/mangosd/
+   4.5% src/shared/
+
+TBC_COMMIT a49b2bd  by Lynx3d (commiter TheLuda) " [s1358] Improve fishing bobber placement and send more correct error messages. "
+  97.2% src/game/
+
+TBC_COMMIT 87ed863  by VladimirMangos (commiter TheLuda) " [s1359] Hide passwords from logs "
+  38.0% src/game/
+   9.2% src/mangosd/
+  49.6% src/shared/Database/
+   3.0% src/
+
+TBC_COMMIT a6b6dbf  by kid 10 (commiter TheLuda) " [s1360] Fixed use ".gobject move" with implicit player coordinates. "
+  35.6% src/game/
+  64.3% src/shared/
+
+TBC_COMMIT 9103c1f  by Schmoozerd (commiter TheLuda) " [s1361] Implement npc spells 28096 and 28111 "
+  97.8% src/game/
+
+TBC_COMMIT 95cc864  by virusav (commiter TheLuda) " [s1362] Implement dummy effect of spell 40962 "
+  94.1% src/game/
+   5.8% src/shared/
+
+TBC_COMMIT 2896d81  by Vinolentus (commiter TheLuda) " [s1363] Avoid happines overflow in HandlePetAbandon :) "
+  81.3% src/game/
+  18.6% src/shared/
+
+TBC_COMMIT fae35ed  by Schmoozerd (commiter TheLuda) " [s1364] Add documention for CreatureAI API "
+  99.4% src/game/
+
+TBC_COMMIT 8d5e70d  by VladimirMangos (commiter TheLuda) " [s1365] Fixed resurrection for released ghost case. "
+  65.6% src/game/
+  34.3% src/shared/
+
+TBC_COMMIT ba2d18d  by Schmoozerd (commiter TheLuda) " [s1366] Let scripting library decide if an encounter is in progress in instances "
+  88.3% src/game/
+  11.6% src/shared/
+
+TBC_COMMIT 375e94b  by stfx (commiter TheLuda) " [s1367] Add missing characters.sql version bump of s1350 "
+  70.0% sql/
+  29.9% src/shared/
+
+TBC_COMMIT 3afd90c  by Laise (commiter TheLuda) " [s1368] add negative auras, channeled and regeneration spells immunity for totems "
+  94.2% src/game/
+   5.7% src/shared/
+
+TBC_COMMIT 555ebe3  by stfx (commiter TheLuda) " [s1369] Add missing files of previous commit "
+  97.4% src/game/
+
+TBC_COMMIT 1b5ebd4  by rowman (commiter TheLuda) " [s1370] Restore spellmod charges used by fail spell cast "
+  98.2% src/game/
+
+TBC_COMMIT 165030d  by stfx (commiter TheLuda) " [s1371] Add more features to SelectAttackingTarget "
+  99.0% src/game/
+
+TBC_COMMIT 20ece56  by Vinolentus (commiter TheLuda) " [s1372] Do not remove item on unrelated auraholder remove "
+  86.9% src/game/
+  13.0% src/shared/
+
+TBC_COMMIT 2752350  by bastili (commiter TheLuda) " [s1373] Implement spell 29395 "
+  95.4% src/game/
+   4.5% src/shared/
+
+TBC_COMMIT e105cbc  by zergtmn (commiter TheLuda) " [s1374] Drop support for VC 2005 "
+   7.0% contrib/
+  87.9% win/VC80/
+   3.4% win/
+
+TBC_COMMIT d2e405a  by stfx (commiter TheLuda) " [s1375] Fix build in VS11 Developer Preview "
+  10.1% src/framework/Utilities/
+  10.4% src/game/
+  77.9% win/VC100/
+
+TBC_COMMIT a070544  by Laise (commiter TheLuda) " [s1376] make armor bonuses from certain items be unaffected by base armor mods "
+  90.1% src/game/
+   9.8% src/shared/
+
+TBC_COMMIT 52d6be0  by SilverIce (commiter TheLuda) " [s1377] Cleanup, simplify random and targeted movement generator code "
+  98.6% src/game/
+
+TBC_COMMIT 60ce2cc  by SilverIce (commiter TheLuda) " [s1378] Rewrite WaypointMovementGenerator "
+  99.4% src/game/
+
+TBC_COMMIT eb3d1d6  by SilverIce (commiter TheLuda) " [s1379] Don't finalize movement generators in motion master destuctor "
+  89.0% src/game/
+  10.9% src/shared/
+
+TBC_COMMIT f1b0dfd  by TOM_RUS (commiter TheLuda) " [s1380] Move movementInfo field to Unit, rename movement flags to fit 3.3.5 naming 'standart' "
+  99.6% src/game/
+
+TBC_COMMIT 2aecefe  by TOM_RUS (commiter TheLuda) " [s1381] Added appendPackXYZ to ByteBuffer class. "
+ 100.0% src/shared/
+
+TBC_COMMIT 7dd81f9  by SilverIce (commiter TheLuda) " [s1382] Implement spline movement subsystem "
+  40.3% src/game/movement/
+  33.4% src/game/
+  23.3% win/VC80/
+
+TBC_COMMIT e8e3062  by SilverIce (commiter TheLuda) " [s1383] Simplify walk/run movement mode selection code "
+  97.8% src/game/
+
+TBC_COMMIT a417046  by SilverIce (commiter TheLuda) " [s1384] correct monster_move packet structure "
+  31.7% src/game/movement/
+  68.2% src/shared/
+
+TBC_COMMIT 9302932  by SilverIce (commiter TheLuda) " [s1385] Rename Walkmode into Runmode - in 2.x walk flag meaning reversed. Thanks to vladimir "
+  89.3% src/game/movement/
+  10.6% src/shared/
+
+TBC_COMMIT 48639a5  by SilverIce (commiter TheLuda) " [s1386] fix the issue that HomeMovementGenerator finalize code wasn't executed in real meaning "
+  87.7% src/game/
+  12.2% src/shared/
+
+TBC_COMMIT b3f8228  by MaxXx2021 (commiter TheLuda) " [s1387] Set walking as a default creature movement mode "
+  56.2% src/game/
+  43.7% src/shared/
+
+TBC_COMMIT fe63c5c  by SilverIce (commiter TheLuda) " [s1388] fix the issue in FlightPathMovementGenerator that event for last path point was not processed "
+  93.1% src/game/
+   6.8% src/shared/
+
+TBC_COMMIT 557da90  by SilverIce (commiter TheLuda) " [s1389] Add fake Runmode flag at monster movement packet building. Client has strange issues without that flag "
+  70.0% src/game/movement/
+  29.9% src/shared/
+
+TBC_COMMIT 9f64021  by stfx (commiter TheLuda) " [s1390] Rename MOVEMENTFLAG for master compatibility "
+  13.8% src/game/movement/
+  85.7% src/game/
+
+TBC_COMMIT 073c1f3  by stfx (commiter TheLuda) " [s1391] Shutdown messages are now sent in blizzlike intervals. Author: Shauren "
+  96.5% src/game/
+   3.4% src/shared/
+
+TBC_COMMIT f6935de  by Xfurry (commiter TheLuda) " [s1392] Implement spell 43498 "
+  95.7% src/game/
+   4.2% src/shared/
+
+TBC_COMMIT 0dda2a4  by Lightguard (commiter TheLuda) " [s1393] Make SPELL_EFFECT_QUEST_COMPLETE always positive "
+  42.8% src/game/
+  57.1% src/shared/
+
+TBC_COMMIT 5fb8538  by Midna (commiter TheLuda) " [s1394] Send unit movement speeds in the proper order, correct baseMoveSpeed value order "
+   3.4% src/game/
+  96.5% src/shared/
+
+TBC_COMMIT 14a4724  by SilverIce (commiter TheLuda) " [s1395] A bit gameobject code refactoring "
+  97.1% src/game/
+
+TBC_COMMIT 89880e9  by Schmoozerd (commiter TheLuda) " [s1396] Fix an old bug related to GO spawnmask check "
+  82.5% src/game/
+  17.5% src/shared/
+
+TBC_COMMIT db418d0  by Schmoozerd (commiter TheLuda) " [s1397] Fix a bug preventing displaying correct instance reset time "
+  98.1% src/game/
+
+TBC_COMMIT d0ed6d6  by stfx (commiter TheLuda) " [s1398] Add possibility to send sound only to a zone in Map::PlayDirectSoundToMap "
+  89.5% src/game/
+  10.4% src/shared/
+
+TBC_COMMIT 495749a  by stfx (commiter TheLuda) " [s1399] Receiving whispers while being dnd "
+  14.2% sql/updates/
+   6.0% sql/
+  71.0% src/game/
+   8.6% src/shared/
+
+TBC_COMMIT e0c5a4e  by stfx (commiter TheLuda) " [s1400] Use the same variable to store the message for AFK and DND "
+  97.8% src/game/
+
+TBC_COMMIT eb9db03  by stfx (commiter TheLuda) " [s1401] Update git_id tool for new repo location "
+  81.7% contrib/git_id/
+  18.2% src/shared/
+
+TBC_COMMIT 67b3f06  by stfx (commiter TheLuda) " [s1402] Fix sending custom GO animation for Type10 GOs "
+  83.9% src/game/
+  16.0% src/shared/
+
+TBC_COMMIT c070ea7  by stfx (commiter TheLuda) " [s1403] Add missing change of 91d22fe "
+  78.5% sql/
+  21.4% src/shared/
+
+TBC_COMMIT fe54e43  by Schmoozerd (commiter TheLuda) " [s1404] Improve db error log output for *_addon auras "
+  92.1% src/game/
+   7.8% src/shared/
+
+TBC_COMMIT 445103a  by SilverIce (commiter TheLuda) " [s1405] update creature's unit part(update spell events, auras, movement) while in death. thanks to rsa for making tests "
+  93.3% src/game/
+   6.6% src/shared/
+
+TBC_COMMIT 138b934  by SilverIce (commiter TheLuda) " [s1406] move SetActiveObjectState to WorldObject level "
+  96.1% src/game/
+   3.8% src/shared/
+
+TBC_COMMIT fb81b06  by SilverIce (commiter TheLuda) " [s1407] Cleanup spline flag code. "
+  23.2% src/game/movement/
+  72.9% src/game/
+   3.7% src/shared/
+
+TBC_COMMIT 961574e  by PSZ (commiter TheLuda) " [s1408] Add more functionality to CONDITION_QUESTTAKEN "
+  96.2% src/game/
+   3.7% src/shared/
+
+TBC_COMMIT 06b3fab  by Schmoozerd (commiter TheLuda) " [s1409] Add SCRIPT_COMMAND_MODIFY_NPC_FLAG to change NPC flags by db-script "
+   7.0% doc/
+  91.9% src/game/
+
+TBC_COMMIT b804f53  by Schmoozerd (commiter TheLuda) " [s1410] Note meaning of second value for CONDITION_QUESTTAKEN "
+  75.9% src/game/
+  24.0% src/shared/
+
+TBC_COMMIT b3c9ec8  by SilverIce (commiter TheLuda) " [s1411] Implement creature offhand attack. based on patch from maxxx2021 "
+  99.2% src/game/
+
+TBC_COMMIT 6c5c25f  by SilverIce (commiter TheLuda) " [s1412] remove no more needed CORPSE_FALLING state, move FallGround method to more appropriate place "
+  97.6% src/game/
+
+TBC_COMMIT 9b0a068  by Schmoozerd (commiter TheLuda) " [s1413] Implement Creature Linking via database "
+   5.8% sql/
+  91.6% src/game/
+
+TBC_COMMIT a8b20d8  by Schmoozerd (commiter TheLuda) " [s1414] Do not allow referenced loot with negative chance, bug found by crackm "
+  96.8% src/game/
+   3.1% src/shared/
+
+TBC_COMMIT 75aac69  by SilverIce (commiter TheLuda) " [s1415] Implement jump (parabolic movement) effect "
+  12.1% sql/updates/
+   9.0% sql/
+   5.0% src/game/movement/
+  64.7% src/game/
+   9.0% src/shared/
+
+TBC_COMMIT 656c55e  by stfx (commiter TheLuda) " [s1416] In 2.4.3 knockbacks are not available for creatures "
+   3.2% src/game/movement/
+  95.2% src/game/
+
+TBC_COMMIT b8c5a44  by stfx (commiter TheLuda) " [s1417] Remove trailing whitespaces "
+  53.9% src/game/movement/
+  37.5% src/game/
+   3.9% src/shared/Database/
+   4.5% src/shared/
+
+TBC_COMMIT db1f8d8  by stfx (commiter TheLuda) " [s1418] Cleanup some battleground related code based on master "
+  95.5% src/game/
+   4.4% src/shared/
+
+TBC_COMMIT 82e033a  by stfx (commiter TheLuda) " [s1419] Fix spell 12162 after 5a793da "
+  96.9% src/game/
+   3.0% src/shared/
+
+TBC_COMMIT f877915  by Vinolentus (commiter TheLuda) " [s1420] Fix SqlStatement::addBool "
+  89.9% src/shared/Database/
+  10.0% src/shared/
+
+TBC_COMMIT 0612a80  by Nighoo (commiter TheLuda) " [s1421] Some more documentation and information for soap example "
+  76.5% contrib/soap/
+  23.4% src/shared/
+
+TBC_COMMIT 515602b  by kaelima (commiter TheLuda) " [s1422] Small code cleanup in Player::UpdateWeaponSkill "
+  96.2% src/game/
+   3.7% src/shared/
+
+TBC_COMMIT f30bd15  by Schmoozerd (commiter TheLuda) " [s1423] Add support to send custom gameobject anim for a few traps "
+  84.4% src/game/
+  15.5% src/shared/
+
+TBC_COMMIT c8a4620  by Schmoozerd (commiter TheLuda) " [s1424] Fix script command modify_npc_flag "
+  62.6% doc/
+  23.6% src/game/
+  13.6% src/shared/
+
+TBC_COMMIT 87768b5  by Schmoozerd (commiter TheLuda) " [s1425] Add spell difficulty selection for creature*_addon auras "
+  78.7% src/game/
+  21.2% src/shared/
+
+TBC_COMMIT 8cb8980  by Xfurry (commiter TheLuda) " [s1426] Implement spells 45976, 46177, 45989 for M'uru encounter "
+  93.7% src/game/
+   6.2% src/shared/
+
+TBC_COMMIT 060c569  by Xfurry (commiter TheLuda) " [s1427] Implement ScriptEffects for spells 45141, 45151, 45206 for Brutallus "
+  94.6% src/game/
+   5.3% src/shared/
+
+TBC_COMMIT b54587d  by stfx (commiter TheLuda) " [s1428] Fix SMSG_MONSTER_MOVE_TRANSPORT for 2.4.3 "
+  49.5% src/game/movement/
+  50.4% src/shared/
+
+TBC_COMMIT e3c59f7  by Schmoozerd (commiter TheLuda) " [s1429] Changes to default target selection "
+  99.2% src/game/
+
+TBC_COMMIT 616d234  by Schmoozerd (commiter TheLuda) " [s1430] Fix teleport spells with TargetType (TARGET_TABLE_X_Y_Z_COORDINATES, NO_TARGET) "
+  86.9% src/game/
+  13.0% src/shared/
+
+TBC_COMMIT cbe1b8b  by stfx (commiter TheLuda) " [s1431] Prevent removing template bgs from visible bg list "
+  92.9% src/game/
+   7.0% src/shared/
+
+TBC_COMMIT 969a102  by stfx (commiter TheLuda) " [s1432] Fix detecting a few indoor locations in 2.4.3 "
+  89.7% src/game/
+  10.2% src/shared/
+
+TBC_COMMIT d744ee7  by stfx (commiter TheLuda) " [s1433] Remove outdated VS 2005 project file "
+  99.8% win/VC80/
+
+TBC_COMMIT 5a1be24  by stfx (commiter TheLuda) " [s1434] Totem/Relic swapping should not trigger GCD "
+  84.6% src/game/
+  15.3% src/shared/
+
+TBC_COMMIT 67b241d  by Schmoozerd (commiter TheLuda) " [s1435] Change use of ScriptLibrary OnGOUse return value in GO::Use "
+  98.5% src/game/
+
+TBC_COMMIT a61794e  by Schmoozerd (commiter TheLuda) " [s1436] Add missing pointer check for spell 45989. "
+  55.5% src/game/
+  44.4% src/shared/
+
+TBC_COMMIT 04ee75a  by Schmoozerd (commiter TheLuda) " [s1437] Implement Condition CONDITION_SKILL_BELOW to be able to check if a player has a skill lower than a given value "
+  92.0% src/game/
+   7.9% src/shared/
+
+TBC_COMMIT 0fc97b5  by Sergey (commiter TheLuda) " [s1438] Update src/game/SpellEffects.cpp "
+  82.4% src/game/
+  17.5% src/shared/
+
+TBC_COMMIT ac8ec23  by PSZ (commiter TheLuda) " [s1439] Add additional flag SELECT_FLAG_NOT_IN_MELEE_RANGE "
+  93.1% src/game/
+   6.8% src/shared/
+
+TBC_COMMIT f630721  by Xfurry (commiter TheLuda) " [s1440] Implement spell effects for Kalecgos "
+   9.3% sql/updates/
+   7.2% sql/
+  77.3% src/game/
+   6.0% src/shared/
+
+TBC_COMMIT 0c3c10d  by Schmoozerd (commiter TheLuda) " [s1441] Add support for db scripts assigned to gossip menus "
+   8.0% sql/updates/
+   6.0% sql/
+  82.3% src/game/
+   3.6% src/shared/
+
+TBC_COMMIT 3b9ebe4  by Schmoozerd (commiter TheLuda) " [s1442] Add new flag_extra NO_TALKTO_CREDIT "
+  81.0% src/game/
+  18.9% src/shared/
+
+TBC_COMMIT b899032  by Schmoozerd (commiter TheLuda) " [s1443] Comment structure of script storage "
+  80.0% src/game/
+  19.9% src/shared/
+
+TBC_COMMIT 0b844ea  by mns (commiter TheLuda) " [s1444] Update forgotten comment in mangosd.conf.dist.in "
+  73.0% src/mangosd/
+  26.9% src/shared/
+
+TBC_COMMIT 0a63b27  by Schmoozerd (commiter TheLuda) " [s1445] Fix sent level in trainer spell list - this fixes problems especially with druid trainers "
+  97.1% src/game/
+
+TBC_COMMIT 4176d19  by Schmoozerd (commiter TheLuda) " [s1446] Enable script command MOVE_TO to also change the orientation "
+  23.9% doc/
+  70.5% src/game/
+   5.5% src/shared/
+
+TBC_COMMIT 34ec5f3  by evil-at-wow (commiter TheLuda) " [s1447] Do not log item moves in guild bank log "
+  95.1% src/game/
+   4.8% src/shared/
+
+TBC_COMMIT 30b3867  by Schmoozerd (commiter TheLuda) " [s1448] Fix vendor items sold by vendor_template "
+  51.3% src/game/
+  48.6% src/shared/
+
+TBC_COMMIT 6f57454  by Reamer (commiter TheLuda) " [s1449] Do not overwrite channel spells with other channel spells "
+  75.1% src/game/
+  24.8% src/shared/
+
+TBC_COMMIT bc82c90  by Vinolentus (commiter TheLuda) " [s1450] Fix possible SQL injection for .tele add command "
+  94.4% src/game/
+   5.5% src/shared/
+
+TBC_COMMIT e991068  by Funkybit (commiter TheLuda) " [s1451] Fix spell 32770 not increasing healing if not casted onto self. "
+  97.3% src/game/
+
+TBC_COMMIT 8bd1e2d  by stfx (commiter TheLuda) " [s1452] Revert "[s1434] Totem/Relic swapping should not trigger GCD" "
+  84.6% src/game/
+  15.3% src/shared/
+
+TBC_COMMIT 8f41fee  by VladimirMangos (commiter TheLuda) " [s1453] Remove one obsolete variable and fix a comment "
+  78.7% src/game/
+  21.2% src/shared/
+
+TBC_COMMIT 26f5109  by Klark20 (commiter TheLuda) " [s1454] Fix SCRIPT_COMMAND_SET_FACTION to check for expected Faction Templates and not factions "
+  91.3% src/game/
+   8.6% src/shared/
+
+TBC_COMMIT 61bd65c  by Schmoozerd (commiter TheLuda) " [s1455] Update Copyright notice to year 2012 "
+   3.2% contrib/vmap_extractor_v3/vmapextract/
+   6.5% src/framework/
+   3.6% src/game/vmap/
+  59.2% src/game/
+   6.2% src/shared/Database/
+   6.8% src/shared/
+   7.9% src/
+
+TBC_COMMIT 19f646e  by virusav (commiter TheLuda) " [s1456] Fix table layout for `creature_linking_template` "
+  34.8% sql/updates/
+  55.6% sql/
+   9.6% src/shared/
+
+TBC_COMMIT 580808c  by virusav (commiter TheLuda) " [s1457] Remove check for quest_template if QuestSort and SkillId match "
+  95.5% src/game/
+   4.4% src/shared/
+
+TBC_COMMIT a757357  by darkstalker (commiter TheLuda) " [s1458] Add group looting rules for gameobjects (chests) "
+  99.4% src/game/
+
+TBC_COMMIT 869f314  by Schmoozerd (commiter TheLuda) " [s1459] Ensure that db saved values and values in memory are in sync "
+  96.4% src/game/
+   3.5% src/shared/
+
+TBC_COMMIT fb31683  by C:/Program Files (x86)/git/dev/rsa (commiter TheLuda) " [s1460] Improve a few functions related to Angle calculation "
+  95.0% src/game/
+   4.9% src/shared/
+
+TBC_COMMIT 05dfece  by Schmoozerd (commiter TheLuda) " [s1461] Inform AI function of original caster in some cases "
+  97.1% src/game/
+
+TBC_COMMIT 7a6c023  by faramir118 (commiter TheLuda) " [s1462] Fix some combat behaviour of NPC-Pets "
+  96.8% src/game/
+   3.1% src/shared/
+
+TBC_COMMIT 0ba76ec  by Xfurry (commiter TheLuda) " [s1463] Implement spells 32300, 32301 "
+  92.1% src/game/
+   7.8% src/shared/
+
+TBC_COMMIT d32360f  by Schmoozerd (commiter TheLuda) " [s1464] Fix missing cast from changes of 11880 "
+  79.7% src/game/
+  20.2% src/shared/
+
+TBC_COMMIT 85a6a98  by rsa (commiter TheLuda) " [s1465] Fix spell targeting for pet spells with target-type (0,0) "
+  91.6% src/game/
+   8.3% src/shared/
+
+TBC_COMMIT 53d6247  by Schmoozerd (commiter TheLuda) " [s1466] Implement FLAG_DESPAWN_ON_EVADE for creature_linking. "
+  88.0% src/game/
+  11.9% src/shared/
+
+TBC_COMMIT 835d7c8  by pasdVn (commiter TheLuda) " [s1467] Improve handling of target mode TARGET_RANDOM_NEARBY_DEST "
+  97.6% src/game/
+
+TBC_COMMIT a846bc3  by Schmoozerd (commiter TheLuda) " [s1468] Fix faction check for EventAI command ACTION_T_SET_FACTION to also check for faction template. "
+  68.8% src/game/
+  31.1% src/shared/
+
+TBC_COMMIT c4ae8cd  by DaC (commiter TheLuda) " [s1469] Fix battleground kick for inactive players. Close pull request #29 "
+  82.8% src/game/
+  17.1% src/shared/
+
+TBC_COMMIT a8481fc  by Salja (commiter TheLuda) " [s1470] Edit src/game/SpellAuras.cpp - Fix spell name comment "
+  17.6% src/game/
+  82.3% src/shared/
+
+TBC_COMMIT b5879eb  by NeatElves (commiter TheLuda) " [s1471] Implement GOSSIP_OPTION_MAILBOX "
+  98.6% src/game/
+
+TBC_COMMIT cb32ae8  by Schmoozerd (commiter TheLuda) " [s1472] Reorder caster/target selection for normal case in Aura::TriggerSpell "
+  98.2% src/game/
+
+TBC_COMMIT 179ae4d  by Klark20 (commiter TheLuda) " [s1473] Enable gossip_menu_option scripts for all gossip options "
+  95.3% src/game/
+   4.6% src/shared/
+
+TBC_COMMIT 7bd3da2  by Salja (commiter TheLuda) " [s1474] fix typo in comment "
+  69.7% src/game/
+  30.2% src/shared/
+
+TBC_COMMIT fee5580  by Salja (commiter TheLuda) " [s1475] Revert "[s1470] Edit src/game/SpellAuras.cpp - Fix spell name comment" "
+  17.6% src/game/
+  82.3% src/shared/
+
+TBC_COMMIT 10b1539  by Salja (commiter TheLuda) " [s1476] Revert "[s1469] Fix battleground kick for inactive players. Close pull request #29" "
+  82.8% src/game/
+  17.1% src/shared/
+
+TBC_COMMIT cad7e8f  by Schmoozerd (commiter TheLuda) " [s1477] Fix caster of triggered spell of 44883 - seems to be unique combination "
+  84.2% src/game/
+  15.7% src/shared/
+
+TBC_COMMIT 67fa09d  by stfx (commiter TheLuda) " [s1478] Revert "[s1471] Implement GOSSIP_OPTION_MAILBOX" "
+  83.9% src/game/
+  16.0% src/shared/
+
+TBC_COMMIT 416cf7f  by Quriq14 (commiter TheLuda) " [s1479] Prevent EVENT_T_TIMER_OCC to expire while evading "
+  52.5% doc/
+  39.2% src/game/
+   8.2% src/shared/
+
+TBC_COMMIT 155a797  by faramir118 (commiter TheLuda) " [s1480] Import Recast Navigation "
+   3.5% dep/recastnavigation/Detour/
+   3.1% dep/recastnavigation/Recast/
+   7.6% dep/recastnavigation/RecastDemo/Bin/Meshes/
+  16.2% dep/recastnavigation/RecastDemo/Bin/Recast.app/Contents/MacOS/
+  21.7% dep/recastnavigation/RecastDemo/Bin/
+   4.0% dep/recastnavigation/RecastDemo/Build/Xcode/Recast.xcodeproj/
+   4.1% dep/recastnavigation/RecastDemo/Build/Xcode/
+  13.2% dep/recastnavigation/RecastDemo/Contrib/SDL/docs/html/
+   8.3% dep/recastnavigation/RecastDemo/Contrib/SDL/include/
+   5.8% dep/recastnavigation/RecastDemo/Contrib/SDL/lib/
+   4.2% dep/recastnavigation/RecastDemo/Contrib/
+   5.1% dep/recastnavigation/RecastDemo/Source/
+
+TBC_COMMIT 4761fa5  by faramir118 (commiter TheLuda) " [s1481] Add MoveMapGen tool to generate MMaps "
+  71.3% contrib/mmap/src/
+   8.2% contrib/mmap/win/VC100/
+   4.6% contrib/mmap/win/VC90/
+   7.8% contrib/mmap/win/
+   7.9% contrib/mmap/
+
+TBC_COMMIT c685eb1  by faramir118 (commiter TheLuda) " [s1482] Fix Liquid Extraction and better hole support "
+  12.0% contrib/extractor/loadlib/
+  79.5% contrib/extractor/
+   3.7% src/game/
+   4.5% src/shared/
+
+TBC_COMMIT 55f2eec  by faramir118 (commiter TheLuda) " [s1483] Add recastnavigation to dependencies "
+  13.7% dep/lib/win32_debug/
+  13.7% dep/lib/win32_release/
+  13.7% dep/lib/x64_Debug/
+  13.7% dep/lib/x64_release/
+  17.2% dep/
+  27.5% src/shared/
+
+TBC_COMMIT 07300a9  by sixsixnine (commiter TheLuda) " [s1484] Ignore RecastDemo/Build directory with git "
+  39.7% src/shared/
+
+TBC_COMMIT a0cb359  by sixsixnine (commiter TheLuda) " [s1485] Add files for MMaps Implementation "
+  47.0% src/game/
+  11.0% win/VC100/
+  20.1% win/VC90/
+  21.1% win/
+
+TBC_COMMIT 3f3ef4a  by faramir118 (commiter TheLuda) " [s1486] Add a pathfinding log-filter "
+  97.6% src/shared/
+
+TBC_COMMIT c38130d  by sixsixnine (commiter TheLuda) " [s1487] Implement Pathfinder class to handle the actual pathfinding "
+  99.2% src/game/
+
+TBC_COMMIT aebce97  by faramir118 (commiter TheLuda) " [s1488] Implement loading for MMap Generator "
+  63.8% src/game/vmap/
+  32.4% src/game/
+   3.6% src/shared/
+
+TBC_COMMIT cabd6b3  by sixsixnine (commiter TheLuda) " [s1489] Use mmaps for Spline Movement "
+  52.5% src/game/movement/
+  45.4% src/game/
+
+TBC_COMMIT 2645d27  by sixsixnine (commiter TheLuda) " [s1490] Use mmaps for MovementGenerators "
+  99.8% src/game/
+
+TBC_COMMIT 2aaba50  by faramir118 (commiter TheLuda) " [s1491] Add commands for MMaps "
+  99.4% src/game/
+
+TBC_COMMIT 5dead66  by Schmoozerd (commiter TheLuda) " [s1492] Add new scripts and windows binary files for extraction "
+  99.9% contrib/extractor_binary/
+
+TBC_COMMIT 1c989fe  by Schmoozerd (commiter TheLuda) " [s1493] Update ad.exe "
+  99.9% contrib/extractor/
+
+TBC_COMMIT d76cad2  by Schmoozerd (commiter TheLuda) " [s1494] Remove old binaries for extraction "
+  99.8% contrib/vmap_extract_assembler_bin/
+
+TBC_COMMIT b7e36c5  by faramir118 (commiter TheLuda) " [s1495] Increment map version magic. You have to re-extract maps, vmaps and mmaps "
+  28.3% contrib/extractor/
+  30.7% contrib/mmap/src/
+  24.0% src/game/
+  16.8% src/shared/
+
+TBC_COMMIT cfdca9b  by sixsixnine (commiter TheLuda) " [s1496] Let creatures evade when the enemy is unreachable "
+  95.7% src/game/
+   4.2% src/shared/
+
+TBC_COMMIT f428789  by faramir118 (commiter TheLuda) " [s1497] Improve GetNearPoint "
+  91.0% src/game/
+   8.9% src/shared/
+
+TBC_COMMIT 3d2dd1f  by Salja (commiter TheLuda) " [s1498] Update extractors for MaNGOS-One. "
+  19.9% contrib/extractor/
+  77.3% contrib/extractor_binary/
+
+TBC_COMMIT 900bf93  by stfx (commiter TheLuda) " [s1499] Sync default range for Say and TextEmote "
+  39.6% src/game/
+  36.2% src/mangosd/
+  24.1% src/shared/
+
+TBC_COMMIT e48eaf6  by Schmoozerd (commiter TheLuda) " [s1500] Improve MoveMapGen script to create mmaps directory if not exists - thanks to Bobi for pointing "
+  83.1% contrib/extractor_binary/
+  16.8% src/shared/
+
+TBC_COMMIT f408d35  by Schmoozerd (commiter TheLuda) " [s1501] Add ASSERT helper function to print entry and guid info "
+  93.7% src/game/
+   6.2% src/shared/
+
+TBC_COMMIT 5b97803  by SilverIce (commiter TheLuda) " [s1502] simplify HandleMmapTestArea code a bit "
+  89.5% src/game/
+  10.4% src/shared/
+
+TBC_COMMIT 343958d  by SilverIce (commiter TheLuda) " [s1503] fix MoveMapGen vc90 build problems (add missing project dependencies) thx Thermaltake "
+  80.6% contrib/mmap/win/
+  19.3% src/shared/
+
+TBC_COMMIT 568029a  by Schmoozerd (commiter TheLuda) " [s1504] Let Waypoints fly. Thanks to qsa for the idea "
+  30.0% sql/updates/
+  37.7% sql/
+  32.2% src/shared/
+
+TBC_COMMIT 44a39df  by Schmoozerd (commiter TheLuda) " [s1505] Fix Player::GetNPCIfCanInteractWith to consider forced reactions "
+  98.5% src/game/
+
+TBC_COMMIT d0a7b97  by Schmoozerd (commiter TheLuda) " [s1506] Really fix [1505]. This basicly reverts commit 1505 "
+  99.1% src/game/
+
+TBC_COMMIT 07da828  by rsa (commiter TheLuda) " [s1507] Fix copy&paste error from last commit - otherwise server will crash with first loaded player pet "
+  89.4% src/game/
+  10.5% src/shared/
+
+TBC_COMMIT b1c30b4  by Velvet (commiter TheLuda) " fix healing stream and mana spring totem, closes #20 "
+  86.7% src/game/
+  13.2% src/shared/
+
+TBC_COMMIT 12825ed  by Schmoozerd (commiter TheLuda) " [s1509] Improve interaction checks related to quests "
+  99.0% src/game/
+
+TBC_COMMIT 45ecb60  by Schmoozerd (commiter TheLuda) " [s1510] Fix typo, also use shiny wrapper for ObjectGuid.GetString. Thanks to tyrnon for pointing "
+  98.1% src/game/
+
+TBC_COMMIT fff7042  by Nighoo (commiter TheLuda) " [s1511] add dummy aura 10848, from previous commit "
+  33.3% src/game/
+  66.6% src/shared/
+
+TBC_COMMIT f811fd0  by Schmoozerd (commiter TheLuda) " [s1512] Implement spell 21056 "
+  96.2% src/game/
+   3.7% src/shared/
+
+TBC_COMMIT 6a3cd37  by Forusim (commiter TheLuda) " [s1513] Implement spell 31447 "
+  90.4% src/game/
+   9.5% src/shared/
+
+TBC_COMMIT 7d954e2  by Hundekuchen (commiter TheLuda) " [s1514] Implement spell 32960 "
+  94.2% src/game/
+   5.7% src/shared/
+
+TBC_COMMIT e757006  by zergtmn (commiter TheLuda) " [s1515] Some warning fixes "
+  84.2% src/game/
+   9.3% src/shared/Database/
+   6.3% src/shared/
+
+TBC_COMMIT ab1390d  by stfx (commiter TheLuda) " Uncomment a needed change of 2654c01. "
+ 100.0% src/game/
+
+TBC_COMMIT 29f7f57  by faramir118 (commiter TheLuda) " [s1516] fix compile, correct path in Detour project "
+  91.6% dep/recastnavigation/Detour/win/VC90/
+   8.3% src/shared/
+
+TBC_COMMIT fe528f9  by Schmoozerd (commiter TheLuda) " [s1517] Fix Pet behaviour for environmental damage "
+  67.6% src/game/
+  32.3% src/shared/
+
+TBC_COMMIT 4771e0e  by Den (commiter TheLuda) " [s1518] Remove some obsolete defines "
+  69.2% src/game/
+  30.7% src/shared/
+
+TBC_COMMIT 9bcd1c9  by Xfurry (commiter TheLuda) " [s1519] Implement spell 37125 periodic trigger code. "
+  96.2% src/game/
+   3.7% src/shared/
+
+TBC_COMMIT 902cc75  by Reamer (commiter TheLuda) " [s1520] Show Combat log entries for heals from NPCs "
+  92.2% src/game/
+   7.7% src/shared/
+
+TBC_COMMIT f2e9497  by Klark20 (commiter TheLuda) " [s1521] Fix spell of Orb of Translocation, spells 25140 29128 "
+  81.3% src/game/
+  18.6% src/shared/
+
+TBC_COMMIT da80ff4  by MacWarriors (commiter TheLuda) " [s1522] Check display Id for .modify morph command "
+  87.6% src/game/
+  12.3% src/shared/
+
+TBC_COMMIT 41cfe00  by Nighoo (commiter TheLuda) " [s1523] Add git_id (*nix version) to .gitignore "
+  11.1% contrib/git_id/
+  88.8% src/shared/
+
+TBC_COMMIT 53bdc2e  by cyberium (commiter TheLuda) " [s1524] Fix possible crash when trying to add playerto group who is not in world "
+  97.0% src/game/
+
+TBC_COMMIT fc240f1  by Schmoozerd (commiter TheLuda) " [s1525] Replace use of HashMapFolder.Find<Player> with ObjectAccessor::FindPlayer wrapper "
+  87.0% src/game/
+  12.9% src/shared/
+
+TBC_COMMIT 6642d01  by Schmoozerd (commiter TheLuda) " [s1526] Make binary_extracting scripts compatible to bourne shell. Thanks to nighoo for pointing "
+  94.3% contrib/extractor_binary/
+   5.6% src/shared/
+
+TBC_COMMIT d724d9a  by Schmoozerd (commiter TheLuda) " [s1527] Add a bunch of unMaxTargets spell target limits from  R2-fork. "
+  87.1% src/game/
+  12.8% src/shared/
+
+TBC_COMMIT b6b9efd  by Schmoozerd (commiter TheLuda) " [s1528] Rewrite and cleanup DB Script Engine "
+   5.9% doc/
+  13.2% sql/updates/
+  79.7% src/game/
+
+TBC_COMMIT 4922531  by Xfurry (commiter TheLuda) " [s1529] Implement effects for spells 27687, 27695 "
+  13.0% contrib/extractor_binary/
+  83.3% src/game/
+   3.5% src/shared/
+
+TBC_COMMIT 1abd9bc  by Schmoozerd (commiter TheLuda) " [s1530] Add option to NearestCreatureEntryWithLiveState.. GridSearcher to be able to also search for both alive and corpse creatures "
+  94.6% src/game/
+   5.3% src/shared/
+
+TBC_COMMIT 4575164  by Schmoozerd (commiter TheLuda) " [s1531] Fix non-pch compile, thanks to NeatElves for pointing "
+  48.6% src/game/
+  51.3% src/shared/
+
+TBC_COMMIT b781a08  by stfx (commiter TheLuda) " [s1532] Some whitespace cleanup in SpellAuras (around Shape-Shifting) "
+  94.9% src/game/
+   5.0% src/shared/
+
+TBC_COMMIT f8b69e2  by Xfurry (commiter TheLuda) " [s1533] Improve SCRIPT_COMMAND_MOVE_TO "
+   3.8% doc/
+  62.1% sql/updates/
+   3.0% sql/
+  26.4% src/game/
+   4.5% src/shared/
+
+TBC_COMMIT 6f701b5  by Nighoo (commiter TheLuda) " [s1534] delete wrong backported sql file "
+  96.1% sql/updates/
+   3.8% src/shared/
+
+TBC_COMMIT 0027b67  by stfx (commiter TheLuda) " [s1535] Check group id of group loot timer when timer is started. Close pull request #39 "
+  88.6% src/game/
+  11.3% src/shared/
+
+TBC_COMMIT 42a60c0  by michalpolko (commiter TheLuda) " [s1536] Implement spell 27819, thanks to stfx for research "
+  92.2% src/game/
+   7.7% src/shared/
+
+TBC_COMMIT a292c7f  by stfx (commiter TheLuda) " [s1537] Unify loot related code and fix engrish. "
+  95.6% src/game/
+   4.3% src/shared/
+
+TBC_COMMIT 6fc1baf  by stfx (commiter TheLuda) " [s1538] Add support to send the anim for SMSG_TAMEOBJECT_CUSTOM_ANIM "
+  87.3% src/game/
+  12.6% src/shared/
+
+TBC_COMMIT 5766a41  by Reamer (commiter TheLuda) " [s1539] Do not calculate targets for different effects with same targeting multiple times "
+  99.7% src/game/
+
+TBC_COMMIT 2ca6c39  by Nighoo (commiter TheLuda) " add missing part of recent commit "
+ 100.0% src/game/
+
+TBC_COMMIT bf6fde5  by machiavelli (commiter TheLuda) " [s1540] Remove .hover command "
+  19.0% sql/updates/
+  23.1% sql/
+  47.1% src/game/
+  10.5% src/shared/
+
+TBC_COMMIT 6d5a69c  by przemratajczak (commiter TheLuda) " [s1541] Implement spell (Decimate) "
+  89.0% src/game/
+  10.9% src/shared/
+
+TBC_COMMIT 1b21403  by Schmoozerd (commiter TheLuda) " [s1542] Aura 10848 should not cause UNIT_AURAFLAG_ALIVE_INVISIBLE "
+  33.3% src/game/
+  66.6% src/shared/
+
+TBC_COMMIT b40b20e  by stfx (commiter TheLuda) " [s1543] Implement spell effect 131 - SPELL_EFFECT_PLAY_SOUND "
+  96.4% src/game/
+   3.5% src/shared/
+
+TBC_COMMIT 2406371  by PSZ (commiter TheLuda) " [s1544] Implement custom overwrite for range of some spell effects "
+  94.7% src/game/
+   5.2% src/shared/
+
+TBC_COMMIT 4df9c5a  by Schmoozerd (commiter TheLuda) " [s1545] Fix logic bug in s1539 "
+  29.1% src/game/
+  70.8% src/shared/
+
+TBC_COMMIT d9e3441  by Schmoozerd (commiter TheLuda) " [s1546] Add support for Creature List of Entry in Range grid searcher "
+  93.4% src/game/
+   6.5% src/shared/
+
+TBC_COMMIT e5b08f1  by Schmoozerd (commiter TheLuda) " [s1547] Add additional check for game_events, invalid occurence "
+  93.8% src/game/
+   6.1% src/shared/
+
+TBC_COMMIT 758b591  by Nighoo (commiter TheLuda) " change modifier for spell 28374 (decimate) "
+  53.7% src/game/
+  46.2% src/shared/
+
+TBC_COMMIT 85b39f5  by Schmoozerd (commiter TheLuda) " [s1549] Implement new conditions system "
+  31.2% contrib/convertConditions/
+  12.6% sql/updates/
+   3.7% sql/
+  51.9% src/game/
+
+TBC_COMMIT a2e6cf6  by Schmoozerd (commiter TheLuda) " [s1550] Tweak comment about default config values "
+  67.0% src/mangosd/
+  32.9% src/shared/
+
+TBC_COMMIT 71d4d60  by Schmoozerd (commiter TheLuda) " [s1551] Replace an ASSERT to prevent unnecessairy crashes "
+  87.0% src/game/
+  12.9% src/shared/
+
+TBC_COMMIT af1a80d  by Schmoozerd (commiter TheLuda) " [s1552] Add support for range dependend slave/master "
+   3.6% sql/updates/
+   4.3% sql/
+  88.9% src/game/
+   3.0% src/shared/
+
+TBC_COMMIT ec9a12f  by Xfurry (commiter TheLuda) " [s1553] Implement aura 24210 (overwrite for removed spell 24311 "
+  94.6% src/game/
+   5.3% src/shared/
+
+TBC_COMMIT 857bc84  by Schmoozerd (commiter TheLuda) " [s1554] Add wrapper HasAttribute to check if a spell has an attribute "
+  99.8% src/game/
+
+TBC_COMMIT 219e60b  by Xfurry (commiter TheLuda) " [s1555] Remove partial DummyEffect implementation of spells 8593, 31225 "
+  89.1% src/game/
+  10.8% src/shared/
+
+TBC_COMMIT d1c7707  by stfx (commiter TheLuda) " [s1556] Backport misc changes from master "
+  97.4% src/game/
+
+TBC_COMMIT 87fcf29  by stfx (commiter TheLuda) " [s1557] Sync code style with master. "
+  99.9% src/game/
+
+TBC_COMMIT 361cfd0  by stfx (commiter TheLuda) " [s1558] Partially port [9704] "
+  69.2% src/game/
+  30.7% src/shared/
+
+TBC_COMMIT 6ab41a9  by stfx (commiter TheLuda) " [s1559] Breath/fatigue/fire damage timers tick each 2 sec. "
+  87.5% src/game/
+  12.4% src/shared/
+
+TBC_COMMIT 9e4d221  by stfx (commiter TheLuda) " [s1560] Backport second part of [9083] "
+  97.8% src/game/
+
+TBC_COMMIT c326c66  by Reamer (commiter TheLuda) " [s1561] Fix spell targeting for some spells like 20243 "
+  74.1% src/game/
+  25.8% src/shared/
+
+TBC_COMMIT ea134b9  by Schmoozerd (commiter TheLuda) " [s1562] Use a few more enums instead of magic numbers "
+  88.3% src/game/
+  11.6% src/shared/
+
+TBC_COMMIT 6d7bb95  by Schmoozerd (commiter TheLuda) " [s1563] Fix some spell visuals (for spells like 39179) "
+  84.1% src/game/
+  15.8% src/shared/
+
+TBC_COMMIT 8f76b67  by Schmoozerd (commiter TheLuda) " [s1564] More uses of wrappers introduced in s1554 "
+  98.9% src/game/
+
+TBC_COMMIT 32537cd  by Den (commiter TheLuda) " [s1565] Remove outdated comment "
+  92.7% src/game/
+   7.2% src/shared/
+
+TBC_COMMIT 19586eb  by Schmoozerd (commiter TheLuda) " [s1566] Fix mangos.sql. Thanks to NicolasQuasar for pointing. "
+  93.4% sql/
+   6.5% src/shared/
+
+TBC_COMMIT b06e341  by virusav (commiter TheLuda) " [s1567] Remove ReqSourceItems when rewarding or abandoning a quest "
+  99.3% src/game/
+
+TBC_COMMIT 0261dce  by Nighoo (commiter TheLuda) " [s1568] Revert "Uncomment a needed change of 2654c01." "
+  69.0% src/game/
+  30.9% src/shared/
+
+TBC_COMMIT 90d0eb1  by stfx (commiter TheLuda) " [s1569] Revert duration attribute move of [s1557] as SQLStorage expects the struct and db to have the same order. "
+  83.4% src/game/
+  16.5% src/shared/
+
+TBC_COMMIT 320a28b  by stfx (commiter TheLuda) " Downgrade mechanic of spell 27819 to TBC times "
+ 100.0% src/game/
+
+TBC_COMMIT e0017e0  by Schmoozerd (commiter TheLuda) " [s1570] Improve support for wild summoned GOs "
+  97.2% src/game/
+
+TBC_COMMIT 4cbbe1f  by Den (commiter TheLuda) " [s1571] Fix targeting of most pet spells. They expect to target alive pets "
+  91.1% src/game/
+   8.8% src/shared/
+
+TBC_COMMIT 69b63af  by virusav (commiter TheLuda) " [s1572] Fix DB_STRICTED_CHECK output for gossip "
+  90.7% src/game/
+   9.2% src/shared/
+
+TBC_COMMIT 9d68ba7  by Schmoozerd (commiter TheLuda) " [s1573] Add new SCRIPT_COMMAND_SEND_TAXI_PATH to trigger a taxi path "
+   6.3% doc/
+  91.4% src/game/
+
+TBC_COMMIT d786598  by Schmoozerd (commiter TheLuda) " [s1574] Implement support for go_template_scripts "
+  32.3% sql/updates/
+  32.4% sql/
+  29.8% src/game/
+   5.3% src/shared/
+
+TBC_COMMIT 86dbb29  by Schmoozerd (commiter TheLuda) " [s1575] Improve targeting for spells with TARGET_TOTEM_* targets "
+  94.3% src/game/
+   5.6% src/shared/
+
+TBC_COMMIT 57a9652  by Schmoozerd (commiter TheLuda) " [s1576] Fix possible memory leak in .gameobject add command "
+  94.6% src/game/
+   5.3% src/shared/
+
+TBC_COMMIT f267d0c  by Schmoozerd (commiter TheLuda) " [s1577] Fix a bug in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE "
+  92.7% src/game/
+   7.2% src/shared/
+
+TBC_COMMIT d8b4191  by Schmoozerd (commiter TheLuda) " [s1578] Add support to call spell_scripts in more cases "
+   6.3% doc/
+  92.5% src/game/
+
+TBC_COMMIT 4dd23f1  by Schmoozerd (commiter TheLuda) " [s1579] More db-script command changes "
+  98.7% src/game/
+
+TBC_COMMIT 6de0587  by Schmoozerd (commiter TheLuda) " [s1580] Use unMaxTargets for GO-target fills "
+  97.0% src/game/
+
+TBC_COMMIT 1a9f23a  by Schmoozerd (commiter TheLuda) " [s1581] Fix some spell targeting "
+  97.6% src/game/
+
+TBC_COMMIT d23ba06  by Schmoozerd (commiter TheLuda) " [s1582] Implement creature_linking by guid "
+   4.0% sql/updates/
+   5.4% sql/
+  89.0% src/game/
+
+TBC_COMMIT 9940379  by Schmoozerd (commiter TheLuda) " [s1583] Fix following for guid linked npcs on evade "
+  95.9% src/game/
+   4.0% src/shared/
+
+TBC_COMMIT 48e7438  by boxa (commiter TheLuda) " [s1584] cleanup EffectResurrect "
+  96.1% src/game/
+   3.8% src/shared/
+
+TBC_COMMIT 7593215  by rsa (commiter TheLuda) " [s1585] Implement spell 45204 "
+  84.6% src/game/
+  15.3% src/shared/
+
+TBC_COMMIT 38bccf9  by Lillecarl (commiter TheLuda) " [s1586] remove unused enumeration "
+  76.4% src/game/
+  23.5% src/shared/
+
+TBC_COMMIT 26722ca  by TheLuda (commiter TheLuda) " - Readded git attributes without rules for Visual Studio files. "
+
+TBC_COMMIT 7c3d798  by Salja (commiter Salja) " [s1587] Support loading tables with default filling into SQL-Loader "
+  99.1% src/shared/Database/
+
+TBC_COMMIT 257b37b  by Kid10 (commiter Salja) " [s1588] Implement server side spells "
+  22.3% sql/updates/
+  27.4% sql/
+  46.1% src/game/
+   4.0% src/shared/
+
+TBC_COMMIT ca88aa3  by NeatElves (commiter Salja) " [s1589] Add new CONDITION_REPUTATION_RANK_MAX (30) "
+  94.7% src/game/
+   5.2% src/shared/
+
+TBC_COMMIT 623d884  by michalpolko (commiter Salja) " [s1590] Implement spells 28832 28833 28834 28835 (Naxxramas Four Horsemen Marks) "
+  95.4% src/game/
+   4.5% src/shared/
+
+TBC_COMMIT 90d4bf4  by Xfurry (commiter Salja) " [s1591] Implement spell 33326 "
+  79.7% src/game/
+  20.2% src/shared/
+
+TBC_COMMIT 2b373be  by Xfurry (commiter Salja) " [s1592] Add to vanilla spells as server-side spells (23263, 25192) "
+  40.4% sql/updates/
+  41.7% sql/
+  17.8% src/shared/
+
+TBC_COMMIT 095d8df  by stfx (commiter Salja) " [s1593] Do some smaller cleanups "
+  32.0% sql/
+  64.8% src/game/
+   3.0% src/shared/
+
+TBC_COMMIT ba7c44f  by Reamer (commiter Salja) " [s1594] Add pullrequest #47 for improvements with mmap generator debug output "
+  71.4% contrib/mmap/src/
+  28.5% src/shared/
+
+TBC_COMMIT 81b4e75  by Reamer (commiter Salja) " [s1595] Implement targeting for spell 30843 "
+  90.4% src/game/
+   9.5% src/shared/
+
+TBC_COMMIT 21d5dc0  by Schmoozerd (commiter Salja) " [s1596] Enable SQL-Storage to work with entries of value zero "
+  97.3% src/shared/Database/
+
+TBC_COMMIT e8760c3  by Schmoozerd (commiter Salja) " [s1597] Fix Targetpair (87, 8) to use TARGET_FLAG_DEST_LOCATION "
+  92.2% src/game/
+   7.7% src/shared/
+
+TBC_COMMIT 392063a  by Schmoozerd (commiter Salja) " [s1598] Replace std containers of ObjectGuids with some predefined types "
+  99.2% src/game/
+
+TBC_COMMIT 159797f  by Reamer (commiter Salja) " [s1599] Add some VMap LoS checking functions to Map scope "
+  97.3% src/game/
+
+TBC_COMMIT 32368a5  by Xfurry (commiter Salja) " [s1600] Implement spell 35865 "
+  90.9% src/game/
+   9.0% src/shared/
+
+TBC_COMMIT 0b9b189  by Reamer (commiter Salja) " [s1601] Support Random Movement around a point "
+   6.5% doc/
+  91.8% src/game/
+
+TBC_COMMIT 86d8cf0  by Schmoozerd (commiter Salja) " [s1602] Change way location targeting is handled "
+  98.0% src/game/
+
+TBC_COMMIT f6a6235  by Xfurry (commiter Salja) " [s1603] Implement spells 33923 and 38796 "
+  87.5% src/game/
+  12.4% src/shared/
+
+TBC_COMMIT 1eaf46d  by stfx (commiter Salja) " [s1604] Use enum for rest state "
+  92.8% src/game/
+   7.1% src/shared/
+
+TBC_COMMIT b0b5be2  by kaelima (commiter Salja) " [s1605] Use bitmask for chat tag. "
+  95.8% src/game/
+   4.1% src/shared/
+
+TBC_COMMIT 733d695  by TheLuda (commiter TheLuda) " - Compile fixes for the map extractor, and g3dlite. "
+  44.1% contrib/extractor/
+  55.8% dep/include/g3dlite/G3D/
+
+TBC_COMMIT 7fd7d49  by Schmoozerd (commiter Nighoo) " [s1606] Fix a bug to not display usability for weapons correctly "
+  42.8% src/game/
+  57.1% src/shared/
+
+TBC_COMMIT 9c20d88  by Nay (commiter Salja) " [s1607] When GM is invisible use a transparency visual aura "
+  79.5% src/game/
+  16.3% src/mangosd/
+   4.1% src/shared/
+
+TBC_COMMIT 88aa8bf  by Schmoozerd (commiter Salja) " [s1608] Add some comments to SummonProperty enums "
+  97.4% src/game/
+
+TBC_COMMIT 6e3c590  by codels (commiter Salja) " [s1609] Add CONDITION_NOT (-3) to conditions system "
+  97.4% src/game/
+
+TBC_COMMIT 7d7c3dd  by stfx (commiter Salja) " [s1610] Some more warning fixes "
+  98.2% src/game/
+
+TBC_COMMIT d99858b  by Schmoozerd (commiter Salja) " [s1611] Fix an error with debug output for MoveFall. Thx to stfx for pointing "
+  94.1% src/game/
+   5.8% src/shared/
+
+TBC_COMMIT d04ec93  by Salja (commiter Salja) " [s1612] Fixup recent commit :( thx for pointing "
+  84.6% src/game/
+  15.3% src/shared/
+
+TBC_COMMIT 5fcfabf  by darkstalker (commiter Salja) " [s1613] Fix some warnings "
+   4.3% src/game/AuctionHouseBot/
+   8.2% src/game/movement/
+  86.0% src/game/
+
+TBC_COMMIT 2d5ec46  by TheLuda (commiter TheLuda) " - Corrected typo in RealmList message. "
+ 100.0% src/realmd/
+
+TBC_COMMIT 08a66b8  by Salja (commiter Salja) " [s1614] Fix Typo in mangos.sql "
+  42.2% sql/
+  57.7% src/shared/
+
+TBC_COMMIT 4af1dc7  by Schmoozerd (commiter Nighoo) " [s1615] Add some defines for hard-coded field-indexes that need special convertion on SQL-Storage loading - Idea by Vladimir "
+  91.6% src/game/
+   8.3% src/shared/
+
+TBC_COMMIT b116c0b  by Nighoo (commiter Nighoo) " [s1616] Correct SQL field indexes for spell templates "
+  93.5% src/game/
+   6.4% src/shared/
+
+TBC_COMMIT ac2fc81  by Schmoozerd (commiter Nighoo) " [s1617] Refactor Unit kills Creature case "
+  99.1% src/game/
+
+TBC_COMMIT 595cc87  by GriffonHeart (commiter Nighoo) " [s1618] Implement SummonPossessed "
+  97.9% src/game/
+
+TBC_COMMIT 100e2f1  by Schmoozerd (commiter Nighoo) " [s1619] Let PossessedSummons despawn on Channeled-Aura interrupt "
+  96.4% src/game/
+   3.5% src/shared/
+
+TBC_COMMIT 831844f  by Schmoozerd (commiter Nighoo) " [s1620] Interrupt possessed channeling when possessed dies "
+  93.5% src/game/
+   6.4% src/shared/
+
+TBC_COMMIT 8fa70ee  by boxa (commiter Nighoo) " [s1621] Fixup commit 12043, My bad. Thx to Reamer for pointing "
+  72.2% src/game/
+  27.7% src/shared/
+
+TBC_COMMIT 8dd09e9  by stfx (commiter Nighoo) " [s1622] Add grayard linking/ unlinking support "
+  98.8% src/game/
+
+TBC_COMMIT e199dfb  by Velvet (commiter Nighoo) " [s1623] Fix a bug of [s1411] that causes wrong offhand attack times for players. "
+  98.6% src/game/
+
+TBC_COMMIT 2bdcf88  by Sergey (commiter stfx) " Don't use reference for ObjectGuid in WorldSession::CanInteractWithQuestGiver "
+ 100.0% src/game/
+
+TBC_COMMIT 656e880  by Schmoozerd (commiter Nighoo) " [s1624] Add some static wrappers for Lookup access to SQLStorages "
+  98.5% src/game/
+
+TBC_COMMIT 58a1ac0  by Schmoozerd (commiter Nighoo) " [s1625] Remove more header includes "
+  98.7% src/game/
+
+TBC_COMMIT 5a735b6  by stfx (commiter Nighoo) " [s1626] Add grid searcher for OPvP Capture Points "
+  98.2% src/game/
+
+TBC_COMMIT d11cc5c  by Nighoo (commiter Nighoo) " [s1627] fix build and close #40 "
+  29.1% src/game/
+  70.8% src/shared/
+
+TBC_COMMIT cc922d4  by Morenn (commiter Nighoo) " [s1628] dont gain spell crit/haste/hit rating by melee/ranged mods "
+  89.8% src/game/
+  10.1% src/shared/
+
+TBC_COMMIT cf57450  by Xfurry (commiter Nighoo) " [s1629] Implement GO_TYPE_CAPTURE_POINT support "
+  99.6% src/game/
+
+TBC_COMMIT 230f0cd  by stfx (commiter Nighoo) " [s1630] Assert correct loading of GO_TYPE_CAPTURE_POINT "
+  91.1% src/game/
+   8.8% src/shared/
+
+TBC_COMMIT 66f640b  by Schmoozerd (commiter Nighoo) " Various Cleanups (game A-B) "
+  42.3% src/game/AuctionHouseBot/
+  57.6% src/game/
+
+TBC_COMMIT 8144c42  by Schmoozerd (commiter Nighoo) " Various Cleanups (game C-E) "
+ 100.0% src/game/
+
+TBC_COMMIT ad05927  by Schmoozerd (commiter Nighoo) " Various Cleanups (game F-K) "
+ 100.0% src/game/
+
+TBC_COMMIT 42da739  by Schmoozerd (commiter Nighoo) " Various Cleanups (game L-M) "
+ 100.0% src/game/
+
+TBC_COMMIT 2d0c893  by Schmoozerd (commiter Nighoo) " Various Cleanups (game N-O) "
+ 100.0% src/game/
+
+TBC_COMMIT a0d58f4  by Schmoozerd (commiter Nighoo) " Various Cleanups (game P) "
+ 100.0% src/game/
+
+TBC_COMMIT 5df8a16  by Schmoozerd (commiter Nighoo) " Various Cleanups (game Q-R) "
+ 100.0% src/game/
+
+TBC_COMMIT efe46a0  by Schmoozerd (commiter Nighoo) " Various Cleanups (game S) "
+ 100.0% src/game/
+
+TBC_COMMIT f12dd46  by Schmoozerd (commiter Nighoo) " Various Cleanups (game T-Z) "
+ 100.0% src/game/
+
+TBC_COMMIT ca30c9b  by Schmoozerd (commiter Nighoo) " Various Cleanups (movement/) "
+ 100.0% src/game/movement/
+
+TBC_COMMIT e7b5fae  by Schmoozerd (commiter Nighoo) " Various Cleanups (vmap/) "
+ 100.0% src/game/vmap/
+
+TBC_COMMIT f8aaf3f  by Schmoozerd (commiter Nighoo) " Various Cleanups (framework/) "
+   7.0% src/framework/Dynamic/
+  37.1% src/framework/GameSystem/
+  10.7% src/framework/Policies/
+   4.8% src/framework/Utilities/LinkedReference/
+  40.1% src/framework/Utilities/
+
+TBC_COMMIT bf9f058  by Schmoozerd (commiter Nighoo) " Various Cleanups (shared/Database/) "
+ 100.0% src/shared/Database/
+
+TBC_COMMIT 268cdee  by Schmoozerd (commiter Nighoo) " Various Cleanups (realmd/) "
+ 100.0% src/realmd/
+
+TBC_COMMIT a62c68d  by Schmoozerd (commiter Nighoo) " [s1631] Cleanup MaNGOS sources "
+   5.7% src/game/
+  49.2% src/mangosd/
+  41.8% src/shared/
+   3.0% src/tools/genrevision/
+
+TBC_COMMIT 9586b30  by Lillecarl (commiter Nighoo) " [s1632] Fix Typo in SpellTemplate storage checks "
+  69.7% src/game/
+  30.2% src/shared/
+
+TBC_COMMIT 7fcebe8  by Schmoozerd (commiter Nighoo) " Cleanup Operator padding "
+  10.1% src/bindings/universal/
+   3.7% src/framework/
+   7.5% src/game/vmap/
+  78.6% src/game/
+
+TBC_COMMIT 878c8e0  by Schmoozerd (commiter Nighoo) " [s1633] Fix various warnings "
+   6.4% src/game/movement/
+  92.9% src/game/
+
+TBC_COMMIT 64c4017  by Schmoozerd (commiter Nighoo) " [s1634] Rename a virtual to usual coding style "
+  69.5% src/game/
+  30.4% src/shared/
+
+TBC_COMMIT 7626717  by stfx (commiter Nighoo) " [s1635] Optimize some parts for ++C "
+   7.7% src/game/vmap/
+  67.7% src/game/
+  11.5% src/mangosd/
+   6.7% src/shared/Database/
+   5.9% src/shared/
+
+TBC_COMMIT 6adff45  by Shyax (commiter Nighoo) " [s1636] Use world state enum for adding/ remove a state in bg and various cleanups "
+  99.8% src/game/
+
+TBC_COMMIT a311f9c  by bugeyedcreepy (commiter Nighoo) " [s1637] Fix another engrish line and improve the lines output "
+  95.9% src/realmd/
+   4.0% src/shared/
+
+TBC_COMMIT e91a2a9  by Schmoozerd (commiter Nighoo) " [s1638] Add some override correctness "
+  89.1% src/game/
+   7.4% src/shared/Database/
+   3.4% src/
+
+TBC_COMMIT bdcc26d  by Schmoozerd (commiter Nighoo) " [s1639] Cleanup comment style "
+  91.4% src/game/
+   4.3% src/shared/Database/
+   4.1% src/
+
+TBC_COMMIT 4767b92  by Schmoozerd (commiter Nighoo) " [s1640] Improve recent commits. Thanks to Reamer and stfx for pointing "
+  54.6% src/game/
+  33.6% src/realmd/
+  11.7% src/shared/
+
+TBC_COMMIT 6c7c470  by antiroot (commiter Nighoo) " [s1641] Apply ACE patches for FreeBSD "
+   7.2% dep/ACE_wrappers/ace/os_include/
+  88.1% dep/ACE_wrappers/ace/
+   4.5% src/shared/
+
+TBC_COMMIT 65d2193  by antiroot (commiter Nighoo) " [s1642] ACE Remove sys/param.h includes "
+  46.1% dep/ACE_wrappers/ace/
+  53.8% src/shared/
+
+TBC_COMMIT 7a81abe  by LordJZ (commiter Nighoo) " [s1643] Eliminate race condition in World Log. In has been introduced with multithreaded packet processing, and prevents the dump from being written correctly, e.g. with tools. "
+ 100.0% src/shared/
+
+TBC_COMMIT 17b4b8b  by LordJZ (commiter Nighoo) " [s1644] Print stack trace in ByteBufferException::PrintPosError. "
+ 100.0% src/shared/
+
+TBC_COMMIT 3199098  by stfx (commiter Nighoo) " [s1645] Improve OS detection for windows crash reporting "
+ 100.0% src/shared/
+
+TBC_COMMIT a4ab42b  by Machiavelli (commiter Nighoo) " [s1646] Don't check registry for game folder on windows, use relative "Data" dir, similar to linux. "
+  91.8% contrib/vmap_extractor_v3/vmapextract/
+   8.1% src/shared/
+
+TBC_COMMIT b62cea4  by stfx (commiter Nighoo) " [s1647] Remove redundant casts in Player.cpp "
+  99.1% src/game/
+
+TBC_COMMIT 2741321  by Silinoron (commiter Nighoo) " [s1648] Send SMSG_GROUP_INVITE also when the invite fails due to the invitee already being in a group "
+  92.0% src/game/
+   7.9% src/shared/
+
+TBC_COMMIT facde9b  by LordJZ (commiter Nighoo) " [s1649] Possibly fix ByteBuffer when no ACE_Stack_Trace available. "
+ 100.0% src/shared/
+
+TBC_COMMIT 3c9920b  by Machiavelli (commiter Nighoo) " [s1650] Remove some redundant explicit NULL checks for pointers before delete or delete[] calls since this check is done implicitly when deleting "
+   6.0% src/game/vmap/
+  55.5% src/game/
+  34.4% src/shared/Database/
+   3.9% src/shared/
+
+TBC_COMMIT ab174a2  by zergtmn (commiter Nighoo) " [s1651] Move some methods from .h to .cpp "
+  95.6% src/shared/
+   4.3% win/
+
+TBC_COMMIT ea53b37  by Nay (commiter Nighoo) " [s1652] Use a single method to send SMSG_ACTIVATETAXIREPLY "
+  98.4% src/game/
+
+TBC_COMMIT cb633e9  by LordJZ (commiter Nighoo) " [s1653] Remove unused file MySQLDelayThread.h. "
+  76.6% src/shared/Database/
+   3.7% src/shared/
+  13.5% win/VC100/
+   6.0% win/VC90/
+
+TBC_COMMIT 66c0489  by stfx (commiter Nighoo) " [s1654] Implement SMSG_DEFENSE_MESSAGE for the upcoming opvp system "
+  97.3% src/game/
+
+TBC_COMMIT d279009  by Nay (commiter Nighoo) " [s1655] Fix sending an incorrect value in BuildPlayerChat "
+  72.6% src/game/
+  27.3% src/shared/
+
+TBC_COMMIT 40806da  by Shauren (commiter Nighoo) " [s1656] Use fabs instead of abs for float type. "
+  77.3% src/game/vmap/
+  22.6% src/shared/
+
+TBC_COMMIT 8949023  by stfx (commiter Nighoo) " [s1657] Send SMSG_DEFENSE_MESSAGE, SMSG_ZONE_UNDER_ATTACK only to players outside of instances "
+  98.8% src/game/
+
+TBC_COMMIT 47a8cf0  by Schmoozerd (commiter Nighoo) " [s1658] Fix a bug with SCRIPT_COMMAND_KILL_CREDIT "
+  93.5% src/game/
+   6.4% src/shared/
+
+TBC_COMMIT 7101bbc  by LordJZ (commiter Nighoo) " [s1659] Fix some unintended custom literals. "
+  82.2% src/game/
+  17.7% src/shared/
+
+TBC_COMMIT caedfad  by bugeyedcreepy (commiter Nighoo) " [s1660] Improve some mangos_string texts and command help texts "
+  37.1% sql/updates/
+  53.3% sql/
+   9.5% src/shared/
+
+TBC_COMMIT 2aff94e  by LordJZ (commiter Nighoo) " [s1661] Fix a bad override, blame VC for this "
+  53.3% src/game/
+  46.6% src/shared/
+
+TBC_COMMIT 8b506a3  by LordJZ (commiter Nighoo) " [s1662] Make use of C++11's static_assert if possible. "
+  59.2% src/framework/Platform/
+  31.9% src/game/movement/
+   8.7% src/shared/
+
+TBC_COMMIT 367d781  by Xfurry (commiter Nighoo) " [s1663] Implement some spells for AQ40 "
+  12.2% sql/updates/
+   9.1% sql/
+  70.4% src/game/
+   8.2% src/shared/
+
+TBC_COMMIT f34d8eb  by crackm (commiter Nighoo) " [s1664] Add some visual server side spells "
+  46.0% sql/updates/
+  47.0% sql/
+   6.9% src/shared/
+
+TBC_COMMIT 3fa3914  by Schmoozerd (commiter Nighoo) " [s1665] Apply CREATURE_FLAG_EXTRA_NO_TALKTO_CREDIT to all creatures "
+  35.8% sql/updates/
+  25.9% sql/
+  38.2% src/shared/
+
+TBC_COMMIT 6dd85d8  by stfx (commiter Nighoo) " [s1666] Prevent unloading go before all players left capture point zone "
+  87.9% src/game/
+  12.0% src/shared/
+
+TBC_COMMIT 7ff12b8  by stfx (commiter Nighoo) " [s1667] Add Outdoor PvP placeholders and string texts "
+  15.0% sql/updates/
+  14.7% sql/
+  45.7% src/game/OutdoorPvP/
+   7.2% src/game/
+  11.3% win/VC100/
+   5.1% win/VC90/
+
+TBC_COMMIT 4fe9f9f  by stfx (commiter Nighoo) " [s1668] Add OutdoorPvP class "
+  99.2% src/game/OutdoorPvP/
+
+TBC_COMMIT 801ac22  by stfx (commiter Nighoo) " [s1669] Add OutdoorPvPMgr class "
+  99.1% src/game/OutdoorPvP/
+
+TBC_COMMIT a0862d0  by stfx (commiter Nighoo) " [s1670] Use OutdoorPvPMgr to save/load capture point data when grid unloads "
+  90.1% src/game/
+   9.8% src/shared/
+
+TBC_COMMIT d95b3e4  by Xfurry (commiter Nighoo) " [s1671] Add Outdoor PvP handlers to various files "
+  98.3% src/game/
+
+TBC_COMMIT 00ab3d5  by stfx (commiter Nighoo) " [s1672] Implement sending initial world states from Outdoor PvP scripts "
+  99.7% src/game/
+
+TBC_COMMIT 5db4fba  by Xfurry (commiter Nighoo) " [s1673] Implement Silithus Outdoor PvP script "
+  99.3% src/game/OutdoorPvP/
+
+TBC_COMMIT 98c36b3  by Xfurry (commiter Nighoo) " [s1674] Implement Eastern Plaguelands Outdoor PvP script "
+  99.7% src/game/OutdoorPvP/
+
+TBC_COMMIT f5f6ede  by Xfurry (commiter Nighoo) " [s1675] Implement Hellfire Peninsula Outdoor PvP script "
+  99.6% src/game/OutdoorPvP/
+
+TBC_COMMIT 18cb0d9  by Xfurry (commiter Nighoo) " [s1676] Implement Zangarmarsh Outdoor PvP script "
+  99.7% src/game/OutdoorPvP/
+
+TBC_COMMIT 81ee75c  by Xfurry (commiter Nighoo) " [s1677] Implement Terokkar Forest Outdoor PvP script "
+  99.7% src/game/OutdoorPvP/
+
+TBC_COMMIT ff5b6f7  by Xfurry (commiter Nighoo) " [s1678] Implement Nagrand - Halaa Outdoor PvP script "
+  99.8% src/game/OutdoorPvP/
+
+TBC_COMMIT 6b8285c  by stfx (commiter Nighoo) " [s1679] Finalize Outdoor PvP Implementation "
+  77.1% src/game/
+  22.8% src/shared/
+
+TBC_COMMIT c835bc4  by cyberium (commiter Nighoo) " [s1680] Implement spell 36677 "
+  92.3% src/game/
+   7.6% src/shared/
+
+TBC_COMMIT 2b23c82  by Schmoozerd (commiter Nighoo) " [s1681] Implement ACTION_T_CHANCED_TEXT "
+  39.3% doc/
+  59.3% src/game/
+
+TBC_COMMIT 3cdf4a6  by Schmoozerd (commiter Nighoo) " [s1682] Add config options to enable/ disable Outdoor PvP zones "
+  34.0% src/game/OutdoorPvP/
+  30.6% src/game/
+  33.2% src/mangosd/
+
+TBC_COMMIT 02afc5e  by Schmoozerd (commiter Nighoo) " [s1683] Fix some bugs, thanks to LordPsyan for pointing "
+  57.0% src/game/OutdoorPvP/
+  31.4% src/game/
+  11.5% src/shared/
+
+TBC_COMMIT 4b597a3  by Nighoo (commiter Nighoo) " [s1684] revert s1648, no tbc feature "
+  92.0% src/game/
+   7.9% src/shared/
+
+TBC_COMMIT 776aaa6  by Xfurry (commiter Salja) " [s1685] Implement some spells used in the Shade of Aran encounter "
+  94.7% src/game/
+   5.2% src/shared/
+
+TBC_COMMIT d91eed0  by Xfurry (commiter Salja) " [s1686] Implement spell 30835 "
+  87.6% src/game/
+  12.3% src/shared/
+
+FILE LAST UPDATE BASED ON d91eed0 (by Xfurry) " [s1686] Implement spell 30835 "
+

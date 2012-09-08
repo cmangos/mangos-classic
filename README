@@ -1,8 +1,8 @@
-= MaNGOS -- README =
+= C(ontinued)-MaNGOS (Classic) -- README =
 
-Copyright (C) 2005-2011 MaNGOS project <http://getmangos.com/>
+Copyright (C) 2005-2012 C(ontinued)-MaNGOS project
 
-  MaNGOS is free software; you can redistribute it and/or modify
+  CMaNGOS is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 2 of the License, or
   (at your option) any later version.
@@ -16,7 +16,59 @@ Copyright (C) 2005-2011 MaNGOS project <http://getmangos.com/>
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  In addition, as a special exception, the MaNGOS project
+  Exceptions where the GPL does not apply are below
+
+=== Welcome to C(ontinued)-MaNGOS ===
+
+C(ontinued)-MaNGOS is a project with the goal:
+
+            Doing WoW-Emulation Right!
+
+This means, we want to focus on:
+
+* WoW-Emulation:
+    This project is about developing a server software to be able to
+    emulate some well known MMORPG service
+
+* Doing:
+  - This project is focused about developing content!
+  - Also there are many more aspects that need to be done and are
+    considered equally important.
+    So anybody who wants to do stuff is very welcome to do so!
+
+* Right:
+  - Our goal always must be to provide the best code we can
+  - Being 'right' is defined by the behavior of the system
+    we want to emulate
+  - Developing things right also contains documenting and discussing
+    _how_ to do things better, hence
+  - Learning and Teaching are very important in our view, and must
+    always be part of what we do.
+
+To be able to provide for these goals, we assert:
+
+* Freedom
+  - for our developers and contributers on things that interest them.
+    No one here is telling anybody _what_ to do.
+    If you want somebody to do something for you, pay him,
+    but we are here to enjoy.
+  - to have FUN with developing.
+
+* A friendly environment
+  - we try to let personal issues behind us
+  - we only argue about content, and not about thin air!
+  - we follow the Netiquette <insert link when found>
+
+Documentation can be found in the doc/ subdirectory.
+
+-- The C(ontinued)-MaNGOS Team!
+
+== Exceptions to GPL ==
+
+  Some third-party libraries CMaNGOS uses have other licenses, that must be uphold.
+  These libraries are located within the dep/ directory
+
+  In addition, as a special exception, the CMaNGOS project
   gives permission to link the code of its release of MaNGOS with the
   OpenSSL project's "OpenSSL" library (or with modified versions of it
   that use the same license as the "OpenSSL" library), and distribute
@@ -25,28 +77,3 @@ Copyright (C) 2005-2011 MaNGOS project <http://getmangos.com/>
   modify this file, you may extend this exception to your version of the
   file, but you are not obligated to do so.  If you do not wish to do
   so, delete this exception statement from your version.
-
-Comments are welcome.
-
-	- theluda <theluda@getmangos.com>
-
-== Welcome to MaNGOS ==
-
-MaNGOS (the Massive Network Game Object Server) is an Open Source reference
-implementation for a MMORPG server system. Please see the file COPYING for
-license details.
-
-For further information on the MaNGOS project, please visit our project web
-site at <http://getmangos.com/>
-
-Documentation on various development related topics can be found in the doc/
-subdirectory, including Doxygen-generated API documentation.
-
-The required SQL files for creating the database backend are included in the
-sql/ subdirectory. In case you are upgrading from an older MaNGOS release,
-make sure you as well take a look at the SQL files in the sql/updates/ sub-
-directory.
-
-In order to build and install MaNGOS under Windows, simply use the delivered
-project files under win/. If you use a different system use CMake to generate
-the appropriate build files for your system.
