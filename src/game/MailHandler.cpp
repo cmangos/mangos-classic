@@ -424,8 +424,8 @@ void WorldSession::HandleMailTakeItem(WorldPacket & recv_data )
     Item *it = pl->GetMItem(itemGuid);
 
     ItemPosCountVec dest;
-    uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, it, false );
-    if( msg == EQUIP_ERR_OK )
+    InventoryResult msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, it, false );
+    if (msg == EQUIP_ERR_OK)
     {
         m->RemoveItem(itemGuid);
         m->removedItems.push_back(itemGuid);
@@ -681,8 +681,8 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     DETAIL_LOG("HandleMailCreateTextItem mailid=%u", mailId);
 
     ItemPosCountVec dest;
-    uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, bodyItem, false );
-    if( msg == EQUIP_ERR_OK )
+    InventoryResult msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, bodyItem, false );
+    if (msg == EQUIP_ERR_OK)
     {
         m->checked = m->checked | MAIL_CHECK_MASK_COPIED;
         m->state = MAIL_STATE_CHANGED;

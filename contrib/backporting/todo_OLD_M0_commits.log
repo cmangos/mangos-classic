@@ -143,9 +143,6 @@ M0_COMMIT 7b57246  by Salja (commiter TheLuda) " [z1792] Shutdown messages are n
   96.5% src/game/
    3.4% src/shared/
 
-M0_COMMIT 6379e67  by Salja (commiter TheLuda) " [z1793] Fixed work EffectSummonChangeItem, for example, for item. 17223 Also * Move item comvert code from spell effect to new function. * Some code style cleanups. "
-  99.4% src/game/
-
 M0_COMMIT a1337da  by VladimirMangos (commiter TheLuda) " [z1794] Group members see same group member ghosts. "
   95.1% src/game/
    4.8% src/shared/
