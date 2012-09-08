@@ -10,13 +10,6 @@
 ##
 ####################################################################################################
 
-TBC_COMMIT 845678a  by VladimirMangos (commiter TheLuda) " [s1323] Rewrite object pos selector. "
-  99.7% src/game/
-
-TBC_COMMIT ab55787  by VladimirMangos (commiter TheLuda) " [s1324] Spell 37433 targeting only non-swiming players. "
-  84.4% src/game/
-  15.5% src/shared/
-
 TBC_COMMIT a5cc853  by VladimirMangos (commiter TheLuda) " [s1325] Check at EventAI scripts load diff reqs for event ai real call "
   93.3% src/game/
    6.6% src/shared/
