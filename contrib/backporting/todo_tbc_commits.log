@@ -16,9 +16,6 @@ TBC_COMMIT 237f9ab  by VladimirMangos (commiter TheLuda) " [s1326] Implement in 
 DestroyItemWithOnStoreSpell does not exist in Classic - Missing another backport?
 TBC_COMMIT 6605f7a  by VladimirMangos (commiter TheLuda) " [s1327] More consitence use m_target for DestroyItemWithOnStoreSpell call in aura. "
 
-TBC_COMMIT 4462f86  by VladimirMangos (commiter TheLuda) " [s1330] Fixed money reward for max level and repeatable quests "
- 100.0% src/game/
-
 TBC_COMMIT b684428  by Schmoozerd (commiter TheLuda) " [s1331] Implement spell 28560 "
   89.3% src/game/
   10.6% src/shared/
@@ -26,10 +23,6 @@ TBC_COMMIT b684428  by Schmoozerd (commiter TheLuda) " [s1331] Implement spell 2
 TBC_COMMIT 4679a0f  by Schmoozerd (commiter TheLuda) " [s1332] Implement spell 24780 (switching target every 10s) "
   95.6% src/game/
    4.3% src/shared/
-
-TBC_COMMIT e280e48  by Lynx3d (commiter TheLuda) " [s1333] Partly revert quest money reward recent changes. "
-  94.4% src/game/
-   5.5% src/shared/
 
 TBC_COMMIT af4440f  by stfx (commiter TheLuda) " Fix lava/slime liquid extraction from WMO data. Re-extraction of vmaps required for it to work "
   97.0% contrib/vmap_extract_assembler_bin/
