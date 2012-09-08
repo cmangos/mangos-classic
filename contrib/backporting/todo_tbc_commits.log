@@ -10,10 +10,6 @@
 ##
 ####################################################################################################
 
-TBC_COMMIT f6e18fb  by elecyb (commiter TheLuda) " [s1322] Cleanups in diminishing returns code. "
-  94.7% src/game/
-   5.2% src/shared/
-
 TBC_COMMIT 845678a  by VladimirMangos (commiter TheLuda) " [s1323] Rewrite object pos selector. "
   99.7% src/game/
 

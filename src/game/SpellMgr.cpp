@@ -3705,34 +3705,34 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         case SPELLFAMILY_ROGUE:
         {
             // Kidney Shot
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x00000200000))
+            if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000200000)))
                 return DIMINISHING_KIDNEYSHOT;
             // Blind
-            else if (spellproto->SpellFamilyFlags & UI64LIT(0x00001000000))
+            else if (spellproto->IsFitToFamilyMask(UI64LIT(0x00001000000)))
                 return DIMINISHING_BLIND;
             break;
         }
         case SPELLFAMILY_HUNTER:
         {
             // Freezing trap
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x00000000008))
+            if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000000008)))
                 return DIMINISHING_FREEZE;
             break;
         }
         case SPELLFAMILY_WARLOCK:
         {
             // Fear
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x0000000080000000) && spellproto->Mechanic==MECHANIC_FEAR)
+            if (spellproto->IsFitToFamilyMask(UI64LIT(0x0000000080000000)) && spellproto->Mechanic==MECHANIC_FEAR)
                 return DIMINISHING_WARLOCK_FEAR;
             // Curses/etc
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x0000000080000000))
+            if (spellproto->IsFitToFamilyMask(UI64LIT(0x0000000080000000)))
                 return DIMINISHING_LIMITONLY;
             break;
         }
         case SPELLFAMILY_WARRIOR:
         {
             // Hamstring - limit duration to 10s in PvP
-            if (spellproto->SpellFamilyFlags & UI64LIT(0x00000000002))
+            if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000000002)))
                 return DIMINISHING_LIMITONLY;
             break;
         }
