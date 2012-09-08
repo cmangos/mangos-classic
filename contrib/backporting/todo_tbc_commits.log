@@ -10,10 +10,6 @@
 ##
 ####################################################################################################
 
-TBC_COMMIT e80994b  by zergtmn (commiter TheLuda) " [s1315] Code cleanup in BattleGround::RemovePlayerAtLeave "
-  92.1% src/game/
-   7.8% src/shared/
-
 TBC_COMMIT fbce87f  by VladimirMangos (commiter TheLuda) " [s1316] Implement TradeSkill.GMIgnore.* config options "
   79.2% src/game/
   18.8% src/mangosd/
