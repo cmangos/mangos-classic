@@ -10,16 +10,11 @@
 ##
 ####################################################################################################
 
+This has no application in classic content. Keep it here as reference in case it was needed to get code in sync!
 TBC_COMMIT 237f9ab  by VladimirMangos (commiter TheLuda) " [s1326] Implement in proper way ITEM_SPELLTRIGGER_ON_STORE (5) "
-  99.0% src/game/
 
+DestroyItemWithOnStoreSpell does not exist in Classic - Missing another backport?
 TBC_COMMIT 6605f7a  by VladimirMangos (commiter TheLuda) " [s1327] More consitence use m_target for DestroyItemWithOnStoreSpell call in aura. "
-  88.2% src/game/
-  11.7% src/shared/
-
-TBC_COMMIT 2faa3d5  by VladimirMangos (commiter TheLuda) " [s1328] Fixed names of pets summoned by npc. "
-  93.5% src/game/
-   6.4% src/shared/
 
 TBC_COMMIT 5e7f26d  by Laise (commiter TheLuda) " [s1329] allow 31785 and ranks proc from periodic heals "
   42.1% sql/updates/
