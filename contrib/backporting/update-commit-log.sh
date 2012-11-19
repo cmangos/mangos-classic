@@ -3,9 +3,9 @@
 # Simple helper script to create SD2-Backporting Lists
 
 # By user defined (remote/branch to the to-be-backported history)
-COMPARE_PATH="mangos-one/master"
+COMPARE_PATH="tbc_cleaned"
 TODO_FILE="contrib/backporting/todo_tbc_commits.log"
-COMPARE_NAME="TBC"
+COMPARE_NAME="TBC(cleaned)"
 
 # param1 must be the commit hash of last backported commit (of original commit)
 if [ "$#" != "1" ]
