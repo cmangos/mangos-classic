@@ -546,7 +546,7 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pet->getPetType() != HUNTER_PET || pet->m_spells.size())
+    if (pet->getPetType() != HUNTER_PET || pet->m_spells.size() <= 1)
         return;
 
     CharmInfo* charmInfo = pet->GetCharmInfo();
