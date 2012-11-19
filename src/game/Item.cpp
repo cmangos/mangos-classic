@@ -634,7 +634,7 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
     if (!itemProto)
         return 0;
 
-    // RandomProperty case
+    // Random Property case
     if (itemProto->RandomProperty)
     {
         uint32 randomPropId = GetItemEnchantMod(itemProto->RandomProperty);
@@ -919,7 +919,7 @@ void Item::SendTimeUpdate(Player* owner)
     owner->GetSession()->SendPacket(&data);
 }
 
-Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
+Item* Item::CreateItem(uint32 item, uint32 count, Player const* player, uint32 randomPropertyId)
 {
     if (count < 1)
         return NULL;                                        //don't create item at zero count
@@ -935,6 +935,9 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
         if (pItem->Create(sObjectMgr.GenerateItemLowGuid(), item, player))
         {
             pItem->SetCount(count);
+            if (uint32 randId = randomPropertyId ? randomPropertyId : Item::GenerateItemRandomPropertyId(item))
+                pItem->SetItemRandomProperties(randId);
+
             return pItem;
         }
         else
@@ -945,7 +948,7 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player)
 
 Item* Item::CloneItem(uint32 count, Player const* player) const
 {
-    Item* newItem = CreateItem(GetEntry(), count, player);
+    Item* newItem = CreateItem(GetEntry(), count, player, GetItemRandomPropertyId());
     if (!newItem)
         return NULL;
 
@@ -953,7 +956,6 @@ Item* Item::CloneItem(uint32 count, Player const* player) const
     newItem->SetGuidValue(ITEM_FIELD_GIFTCREATOR, GetGuidValue(ITEM_FIELD_GIFTCREATOR));
     newItem->SetUInt32Value(ITEM_FIELD_FLAGS,     GetUInt32Value(ITEM_FIELD_FLAGS));
     newItem->SetUInt32Value(ITEM_FIELD_DURATION,  GetUInt32Value(ITEM_FIELD_DURATION));
-    newItem->SetItemRandomProperties(GetItemRandomPropertyId());
     return newItem;
 }
 
