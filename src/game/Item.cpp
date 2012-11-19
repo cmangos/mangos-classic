@@ -677,7 +677,8 @@ void Item::SetState(ItemUpdateState state, Player* forplayer)
     if (uState == ITEM_NEW && state == ITEM_REMOVED)
     {
         // pretend the item never existed
-        RemoveFromUpdateQueueOf(forplayer);
+        if (forplayer || GetOwnerGuid())
+            RemoveFromUpdateQueueOf(forplayer);
         delete this;
         return;
     }
@@ -686,7 +687,9 @@ void Item::SetState(ItemUpdateState state, Player* forplayer)
     {
         // new items must stay in new state until saved
         if (uState != ITEM_NEW) uState = state;
-        AddToUpdateQueueOf(forplayer);
+
+        if (forplayer || GetOwnerGuid())
+            AddToUpdateQueueOf(forplayer);
     }
     else
     {
