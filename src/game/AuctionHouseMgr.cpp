@@ -89,6 +89,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
 
     uint32 bidder_accId = 0;
 
+    ObjectGuid ownerGuid = ObjectGuid(HIGHGUID_PLAYER, auction->owner);
     // data for gm.log
     if (sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE))
     {
@@ -114,12 +115,11 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
 
         if (bidder_security > SEC_PLAYER)
         {
-            ObjectGuid owner_guid = ObjectGuid(HIGHGUID_PLAYER, auction->owner);
             std::string owner_name;
-            if (!sObjectMgr.GetPlayerNameByGUID(owner_guid, owner_name))
+            if (ownerGuid && !sObjectMgr.GetPlayerNameByGUID(ownerGuid, owner_name))
                 owner_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
 
-            uint32 owner_accid = sObjectMgr.GetPlayerAccountIdByGUID(owner_guid);
+            uint32 owner_accid = ownerGuid ? sObjectMgr.GetPlayerAccountIdByGUID(ownerGuid) : 0;
 
             sLog.outCommand(bidder_accId, "GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %u. Original owner %s (Account: %u)",
                             bidder_name.c_str(), bidder_accId, pItem->GetProto()->Name1, pItem->GetEntry(), pItem->GetCount(), auction->bid, owner_name.c_str(), owner_accid);
@@ -171,7 +171,7 @@ void AuctionHouseMgr::SendAuctionSuccessfulMail(AuctionEntry* auction)
     Player* owner = sObjectMgr.GetPlayer(owner_guid);
 
     uint32 owner_accId = 0;
-    if (!owner)
+    if (!owner && owner_guid)
         owner_accId = sObjectMgr.GetPlayerAccountIdByGUID(owner_guid);
 
     // owner exist
@@ -626,6 +626,46 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
 
         ++totalcount;
     }
+}
+
+AuctionEntry* AuctionHouseObject::AddAuction(AuctionHouseEntry const* auctionHouseEntry, Item* it, uint32 etime, uint32 bid, uint32 buyout, uint32 deposit, Player* pl /*= NULL*/)
+{
+    uint32 auction_time = uint32(etime * sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_TIME));
+
+    AuctionEntry* AH = new AuctionEntry;
+    AH->Id = sObjectMgr.GenerateAuctionID();
+    AH->itemGuidLow = it->GetObjectGuid().GetCounter();
+    AH->itemTemplate = it->GetEntry();
+    AH->owner = pl ? pl->GetGUIDLow() : 0;
+    AH->startbid = bid;
+    AH->bidder = 0;
+    AH->bid = 0;
+    AH->buyout = buyout;
+    AH->expireTime = time(NULL) + auction_time;
+    AH->deposit = deposit;
+    AH->auctionHouseEntry = auctionHouseEntry;
+
+    AddAuction(AH);
+
+    sAuctionMgr.AddAItem(it);
+
+    if (pl)
+        pl->MoveItemFromInventory(it->GetBagSlot(), it->GetSlot(), true);
+
+    CharacterDatabase.BeginTransaction();
+
+    if (pl)
+        it->DeleteFromInventoryDB();
+
+    it->SaveToDB();
+    AH->SaveToDB();
+
+    if (pl)
+        pl->SaveInventoryAndGoldToDB();
+
+    CharacterDatabase.CommitTransaction();
+
+    return AH;
 }
 
 // this function inserts to WorldPacket auction's data

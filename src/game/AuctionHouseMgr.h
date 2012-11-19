@@ -57,7 +57,7 @@ struct AuctionEntry
     uint32 Id;
     uint32 itemGuidLow;
     uint32 itemTemplate;
-    uint32 owner;
+    uint32 owner;                                           // player low guid, can be 0 for server generated auction
     uint32 startbid;                                        // maybe useless
     uint32 bid;
     uint32 buyout;
@@ -118,6 +118,7 @@ class AuctionHouseObject
                                    std::wstring const& searchedname, uint32 listfrom, uint32 levelmin, uint32 levelmax, uint32 usable,
                                    uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
                                    uint32& count, uint32& totalcount);
+        AuctionEntry* AddAuction(AuctionHouseEntry const* auctionHouseEntry, Item* newItem, uint32 etime, uint32 bid, uint32 buyout = 0, uint32 deposit = 0, Player* pl = NULL);
     private:
         AuctionEntryMap AuctionsMap;
 };
