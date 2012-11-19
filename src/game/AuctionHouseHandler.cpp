@@ -107,11 +107,7 @@ void WorldSession::SendAuctionBidderNotification(AuctionEntry* auction, bool won
     data << uint32(won ? 0 : auction->bid);
     data << uint32(auction->GetAuctionOutBid());            // AuctionOutBid?
     data << uint32(auction->itemTemplate);
-
-    Item* item = sAuctionMgr.GetAItem(auction->itemGuidLow);
-    uint32 randomId = item ? item->GetItemRandomPropertyId() : 0;
-
-    data << uint32(randomId);                               // random property (value > 0) or suffix (value < 0)
+    data << int32(auction->itemRandomPropertyId);
 
     SendPacket(&data);
 }
@@ -131,11 +127,8 @@ void WorldSession::SendAuctionOwnerNotification(AuctionEntry* auction, bool sold
     // if guid!=0, client updates auctions with new bid, outbid and bidderGuid, else it shows error messages as described above
     data << guid;                                           // bidder guid
     data << uint32(auction->itemTemplate);                  // item entry
+    data << uint32(auction->itemRandomPropertyId);
 
-    Item* item = sAuctionMgr.GetAItem(auction->itemGuidLow);
-    uint32 randomId = item ? item->GetItemRandomPropertyId() : 0;
-
-    data << uint32(randomId);                               // random property (value > 0) or suffix (value < 0)
     SendPacket(&data);
 }
 
@@ -145,11 +138,7 @@ void WorldSession::SendAuctionRemovedNotification(AuctionEntry* auction)
     WorldPacket data(SMSG_AUCTION_REMOVED_NOTIFICATION, (3 * 4));
     data << uint32(auction->Id);
     data << uint32(auction->itemTemplate);
-
-    Item* item = sAuctionMgr.GetAItem(auction->itemGuidLow);
-    uint32 randomId = item ? item->GetItemRandomPropertyId() : 0;
-
-    data << uint32(randomId);                               // random property (value > 0) or suffix (value < 0)
+    data << uint32(auction->itemRandomPropertyId);
 
     SendPacket(&data);
 }
@@ -427,13 +416,13 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recv_data)
         auction->bidder = pl->GetGUIDLow();
         auction->bid = price;
 
+        SendAuctionCommandResult(auction, AUCTION_BID_PLACED, AUCTION_OK);
+
         if (auction_owner)
             auction_owner->GetSession()->SendAuctionOwnerNotification(auction, false);
 
         // after this update we should save player's money ...
         CharacterDatabase.PExecute("UPDATE auction SET buyguid = '%u', lastbid = '%u' WHERE id = '%u'", auction->bidder, auction->bid, auction->Id);
-
-        SendAuctionCommandResult(auction, AUCTION_BID_PLACED, AUCTION_OK);
     }
     else                                                    // buyout
     {
@@ -453,8 +442,6 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recv_data)
 
         sAuctionMgr.SendAuctionSuccessfulMail(auction);
         sAuctionMgr.SendAuctionWonMail(auction);
-
-        SendAuctionCommandResult(auction, AUCTION_BID_PLACED, AUCTION_OK);
 
         sAuctionMgr.RemoveAItem(auction->itemGuidLow);
         auctionHouse->RemoveAuction(auction->Id);

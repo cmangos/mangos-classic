@@ -1,4 +1,4 @@
-ALTER TABLE db_version CHANGE COLUMN required_s1329_11679_01_mangos_spell_proc_event required_z1784_s1339_11701_01_mangos_command bit;
+ALTER TABLE db_version CHANGE COLUMN required_z1765_xxxxx_01_mangos_spell_affect required_z1784_s1339_11701_01_mangos_command bit;
 
 DELETE FROM command WHERE name = 'auction item';
 

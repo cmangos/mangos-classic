@@ -47,6 +47,8 @@ CREATE TABLE `auction` (
   `houseid` int(11) unsigned NOT NULL default '0',
   `itemguid` int(11) unsigned NOT NULL default '0',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
+  `item_count` int(11) unsigned NOT NULL default '0',
+  `item_randompropertyid` int(11) NOT NULL default '0',
   `itemowner` int(11) unsigned NOT NULL default '0',
   `buyoutprice` int(11) NOT NULL default '0',
   `time` bigint(40) NOT NULL default '0',
@@ -54,8 +56,7 @@ CREATE TABLE `auction` (
   `lastbid` int(11) NOT NULL default '0',
   `startbid` int(11) NOT NULL default '0',
   `deposit` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`id`),
-  UNIQUE KEY `item_guid` (`itemguid`)
+  PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
