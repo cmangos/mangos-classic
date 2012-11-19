@@ -27,10 +27,10 @@ using G3D::Ray;
 
 namespace VMAP
 {
-    ModelInstance::ModelInstance(const ModelSpawn &spawn, WorldModel *model): ModelSpawn(spawn), iModel(model)
+    ModelInstance::ModelInstance(const ModelSpawn& spawn, WorldModel* model): ModelSpawn(spawn), iModel(model)
     {
-        iInvRot = G3D::Matrix3::fromEulerAnglesZYX(G3D::pi()*iRot.y/180.f, G3D::pi()*iRot.x/180.f, G3D::pi()*iRot.z/180.f).inverse();
-        iInvScale = 1.f/iScale;
+        iInvRot = G3D::Matrix3::fromEulerAnglesZYX(G3D::pi() * iRot.y / 180.f, G3D::pi() * iRot.x / 180.f, G3D::pi() * iRot.z / 180.f).inverse();
+        iInvScale = 1.f / iScale;
     }
 
     bool ModelInstance::intersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const
@@ -55,7 +55,7 @@ namespace VMAP
         Ray modRay(p, iInvRot * pRay.direction());
         float distance = pMaxDist * iInvScale;
         bool hit = iModel->IntersectRay(modRay, distance, pStopAtFirstHit);
-        if(hit)
+        if (hit)
         {
             distance *= iScale;
             pMaxDist = distance;
@@ -63,7 +63,7 @@ namespace VMAP
         return hit;
     }
 
-    void ModelInstance::intersectPoint(const G3D::Vector3& p, AreaInfo &info) const
+    void ModelInstance::intersectPoint(const G3D::Vector3& p, AreaInfo& info) const
     {
         if (!iModel)
         {
@@ -97,7 +97,7 @@ namespace VMAP
         }
     }
 
-    bool ModelInstance::GetLocationInfo(const G3D::Vector3& p, LocationInfo &info) const
+    bool ModelInstance::GetLocationInfo(const G3D::Vector3& p, LocationInfo& info) const
     {
         if (!iModel)
         {
@@ -133,7 +133,7 @@ namespace VMAP
         return false;
     }
 
-    bool ModelInstance::GetLiquidLevel(const G3D::Vector3& p, LocationInfo &info, float &liqHeight) const
+    bool ModelInstance::GetLiquidLevel(const G3D::Vector3& p, LocationInfo& info, float& liqHeight) const
     {
         // child bounds are defined in object space:
         Vector3 pModel = iInvRot * (p - iPos) * iInvScale;
@@ -151,9 +151,9 @@ namespace VMAP
         return false;
     }
 
-    bool ModelSpawn::readFromFile(FILE *rf, ModelSpawn &spawn)
+    bool ModelSpawn::readFromFile(FILE* rf, ModelSpawn& spawn)
     {
-        uint32 check=0, nameLen;
+        uint32 check = 0, nameLen;
         check += fread(&spawn.flags, sizeof(uint32), 1, rf);
         // EoF?
         if (!check)
@@ -176,13 +176,13 @@ namespace VMAP
             spawn.iBound = G3D::AABox(bLow, bHigh);
         }
         check += fread(&nameLen, sizeof(uint32), 1, rf);
-        if(check != (has_bound ? 17 : 11))
+        if (check != (has_bound ? 17 : 11))
         {
             ERROR_LOG("Error reading ModelSpawn!");
             return false;
         }
         char nameBuff[500];
-        if (nameLen>500) // file names should never be that long, must be file error
+        if (nameLen > 500) // file names should never be that long, must be file error
         {
             ERROR_LOG("Error reading ModelSpawn, file name too long!");
             return false;
@@ -197,9 +197,9 @@ namespace VMAP
         return true;
     }
 
-    bool ModelSpawn::writeToFile(FILE *wf, const ModelSpawn &spawn)
+    bool ModelSpawn::writeToFile(FILE* wf, const ModelSpawn& spawn)
     {
-        uint32 check=0;
+        uint32 check = 0;
         check += fwrite(&spawn.flags, sizeof(uint32), 1, wf);
         check += fwrite(&spawn.adtId, sizeof(uint16), 1, wf);
         check += fwrite(&spawn.ID, sizeof(uint32), 1, wf);
@@ -207,16 +207,16 @@ namespace VMAP
         check += fwrite(&spawn.iRot, sizeof(float), 3, wf);
         check += fwrite(&spawn.iScale, sizeof(float), 1, wf);
         bool has_bound = (spawn.flags & MOD_HAS_BOUND);
-        if(has_bound) // only WMOs have bound in MPQ, only available after computation
+        if (has_bound) // only WMOs have bound in MPQ, only available after computation
         {
             check += fwrite(&spawn.iBound.low(), sizeof(float), 3, wf);
             check += fwrite(&spawn.iBound.high(), sizeof(float), 3, wf);
         }
         uint32 nameLen = spawn.name.length();
         check += fwrite(&nameLen, sizeof(uint32), 1, wf);
-        if(check != (has_bound ? 17 : 11)) return false;
+        if (check != (has_bound ? 17 : 11)) return false;
         check = fwrite(spawn.name.c_str(), sizeof(char), nameLen, wf);
-        if(check != nameLen) return false;
+        if (check != nameLen) return false;
         return true;
     }
 

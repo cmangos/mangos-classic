@@ -27,28 +27,28 @@
 
 template<class T>
 class MANGOS_DLL_SPEC FleeingMovementGenerator
-: public MovementGeneratorMedium< T, FleeingMovementGenerator<T> >
+    : public MovementGeneratorMedium< T, FleeingMovementGenerator<T> >
 {
     public:
         FleeingMovementGenerator(ObjectGuid fright) : i_frightGuid(fright), i_nextCheckTime(0) {}
 
-        void Initialize(T &);
-        void Finalize(T &);
-        void Interrupt(T &);
-        void Reset(T &);
-        bool Update(T &, const uint32 &);
+        void Initialize(T&);
+        void Finalize(T&);
+        void Interrupt(T&);
+        void Reset(T&);
+        bool Update(T&, const uint32&);
 
         MovementGeneratorType GetMovementGeneratorType() const { return FLEEING_MOTION_TYPE; }
 
     private:
-        void _setTargetLocation(T &owner);
-        bool _getPoint(T &owner, float &x, float &y, float &z);
-        bool _setMoveData(T &owner);
-        void _Init(T &);
+        void _setTargetLocation(T& owner);
+        bool _getPoint(T& owner, float& x, float& y, float& z);
+        bool _setMoveData(T& owner);
+        void _Init(T&);
 
-        bool is_water_ok   :1;
-        bool is_land_ok    :1;
-        bool i_only_forward:1;
+        bool is_water_ok   : 1;
+        bool is_land_ok    : 1;
+        bool i_only_forward: 1;
 
         float i_caster_x;
         float i_caster_y;
@@ -63,7 +63,7 @@ class MANGOS_DLL_SPEC FleeingMovementGenerator
 };
 
 class MANGOS_DLL_SPEC TimedFleeingMovementGenerator
-: public FleeingMovementGenerator<Creature>
+    : public FleeingMovementGenerator<Creature>
 {
     public:
         TimedFleeingMovementGenerator(ObjectGuid fright, uint32 time) :
@@ -71,8 +71,8 @@ class MANGOS_DLL_SPEC TimedFleeingMovementGenerator
             i_totalFleeTime(time) {}
 
         MovementGeneratorType GetMovementGeneratorType() const { return TIMED_FLEEING_MOTION_TYPE; }
-        bool Update(Unit &, const uint32 &);
-        void Finalize(Unit &);
+        bool Update(Unit&, const uint32&);
+        void Finalize(Unit&);
 
     private:
         TimeTracker i_totalFleeTime;

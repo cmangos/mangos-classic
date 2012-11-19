@@ -984,7 +984,7 @@ class Opcodes
         ~Opcodes();
     public:
         void BuildOpcodeList();
-        void StoreOpcode(uint16 Opcode,char const* name, SessionStatus status, PacketProcessing process, void (WorldSession::*handler)(WorldPacket& recvPacket))
+        void StoreOpcode(uint16 Opcode, char const* name, SessionStatus status, PacketProcessing process, void (WorldSession::*handler)(WorldPacket& recvPacket))
         {
             OpcodeHandler& ref = mOpcodeMap[Opcode];
             ref.name = name;
@@ -1004,7 +1004,7 @@ class Opcodes
 
         /// compatible with other mangos branches access
 
-        inline OpcodeHandler const& operator[] (uint16 id) const
+        inline OpcodeHandler const& operator[](uint16 id) const
         {
             OpcodeMap::const_iterator itr = mOpcodeMap.find(id);
             if (itr != mOpcodeMap.end())

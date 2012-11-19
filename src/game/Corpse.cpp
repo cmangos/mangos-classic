@@ -50,7 +50,7 @@ Corpse::~Corpse()
 void Corpse::AddToWorld()
 {
     ///- Register the corpse for guid lookup
-    if(!IsInWorld())
+    if (!IsInWorld())
         sObjectAccessor.AddObject(this);
 
     Object::AddToWorld();
@@ -59,19 +59,19 @@ void Corpse::AddToWorld()
 void Corpse::RemoveFromWorld()
 {
     ///- Remove the corpse from the accessor
-    if(IsInWorld())
+    if (IsInWorld())
         sObjectAccessor.RemoveObject(this);
 
     Object::RemoveFromWorld();
 }
 
-bool Corpse::Create( uint32 guidlow )
+bool Corpse::Create(uint32 guidlow)
 {
     Object::_Create(guidlow, 0, HIGHGUID_CORPSE);
     return true;
 }
 
-bool Corpse::Create( uint32 guidlow, Player *owner)
+bool Corpse::Create(uint32 guidlow, Player* owner)
 {
     MANGOS_ASSERT(owner);
 
@@ -82,10 +82,10 @@ bool Corpse::Create( uint32 guidlow, Player *owner)
     //in other way we will get a crash in Corpse::SaveToDB()
     SetMap(owner->GetMap());
 
-    if(!IsPositionValid())
+    if (!IsPositionValid())
     {
         sLog.outError("Corpse (guidlow %d, owner %s) not created. Suggested coordinates isn't valid (X: %f Y: %f)",
-            guidlow, owner->GetName(), owner->GetPositionX(), owner->GetPositionY());
+                      guidlow, owner->GetName(), owner->GetPositionX(), owner->GetPositionY());
         return false;
     }
 
@@ -119,10 +119,10 @@ void Corpse::SaveToDB()
         << GetPositionZ() << ", "
         << GetOrientation() << ", "
         << GetMapId() << ", "
-        << uint64(m_time) <<", "
+        << uint64(m_time) << ", "
         << uint32(GetType()) << ", "
         << int(GetInstanceId()) << ")";
-    CharacterDatabase.Execute( ss.str().c_str() );
+    CharacterDatabase.Execute(ss.str().c_str());
     CharacterDatabase.CommitTransaction();
 }
 
@@ -152,13 +152,13 @@ void Corpse::DeleteFromDB()
     stmt.PExecute(GetOwnerGuid().GetCounter());
 }
 
-bool Corpse::LoadFromDB(uint32 lowguid, Field *fields)
+bool Corpse::LoadFromDB(uint32 lowguid, Field* fields)
 {
     ////                                                    0            1       2                  3                  4                  5                   6
     //QueryResult *result = CharacterDatabase.Query("SELECT corpse.guid, player, corpse.position_x, corpse.position_y, corpse.position_z, corpse.orientation, corpse.map,"
     ////   7     8            9         10      11    12     13           14            15              16       17
     //    "time, corpse_type, instance, gender, race, class, playerBytes, playerBytes2, equipmentCache, guildId, playerFlags FROM corpse"
-    uint32 playerLowGuid= fields[1].GetUInt32();
+    uint32 playerLowGuid = fields[1].GetUInt32();
     float positionX     = fields[2].GetFloat();
     float positionY     = fields[3].GetFloat();
     float positionZ     = fields[4].GetFloat();
@@ -170,7 +170,7 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field *fields)
     m_time = time_t(fields[7].GetUInt64());
     m_type = CorpseType(fields[8].GetUInt32());
 
-    if(m_type >= MAX_CORPSE_TYPE)
+    if (m_type >= MAX_CORPSE_TYPE)
     {
         sLog.outError("%s Owner %s have wrong corpse type (%i), not load.", GetGuidStr().c_str(), GetOwnerGuid().GetString().c_str(), m_type);
         return false;
@@ -194,8 +194,8 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field *fields)
 
     SetObjectScale(DEFAULT_OBJECT_SCALE);
 
-    PlayerInfo const *info = sObjectMgr.GetPlayerInfo(race, _class);
-    if(!info)
+    PlayerInfo const* info = sObjectMgr.GetPlayerInfo(race, _class);
+    if (!info)
     {
         sLog.outError("Player %u has incorrect race/class pair.", GetGUIDLow());
         return false;
@@ -208,8 +208,8 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field *fields)
     {
         uint32 visualbase = slot * 2;
         uint32 item_id = GetUInt32ValueFromArray(data, visualbase);
-        const ItemPrototype * proto = ObjectMgr::GetItemPrototype(item_id);
-        if(!proto)
+        const ItemPrototype* proto = ObjectMgr::GetItemPrototype(item_id);
+        if (!proto)
         {
             SetUInt32Value(CORPSE_FIELD_ITEM + slot, 0);
             continue;
@@ -223,17 +223,17 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field *fields)
     uint8 hairstyle  = (uint8)(playerBytes >> 16);
     uint8 haircolor  = (uint8)(playerBytes >> 24);
     uint8 facialhair = (uint8)(playerBytes2);
-    SetUInt32Value( CORPSE_FIELD_BYTES_1, ((0x00) | (race << 8) | (gender << 16) | (skin << 24)) );
-    SetUInt32Value( CORPSE_FIELD_BYTES_2, ((face) | (hairstyle << 8) | (haircolor << 16) | (facialhair << 24)) );
+    SetUInt32Value(CORPSE_FIELD_BYTES_1, ((0x00) | (race << 8) | (gender << 16) | (skin << 24)));
+    SetUInt32Value(CORPSE_FIELD_BYTES_2, ((face) | (hairstyle << 8) | (haircolor << 16) | (facialhair << 24)));
 
     SetUInt32Value(CORPSE_FIELD_GUILD, guildId);
 
     uint32 flags = CORPSE_FLAG_UNK2;
-    if(playerFlags & PLAYER_FLAGS_HIDE_HELM)
+    if (playerFlags & PLAYER_FLAGS_HIDE_HELM)
         flags |= CORPSE_FLAG_HIDE_HELM;
-    if(playerFlags & PLAYER_FLAGS_HIDE_CLOAK)
+    if (playerFlags & PLAYER_FLAGS_HIDE_CLOAK)
         flags |= CORPSE_FLAG_HIDE_CLOAK;
-    SetUInt32Value( CORPSE_FIELD_FLAGS, flags );
+    SetUInt32Value(CORPSE_FIELD_FLAGS, flags);
 
     // no need to mark corpse as lootable, because corpses are not saved in battle grounds
 
@@ -242,10 +242,10 @@ bool Corpse::LoadFromDB(uint32 lowguid, Field *fields)
     SetLocationMapId(mapid);
     Relocate(positionX, positionY, positionZ, orientation);
 
-    if(!IsPositionValid())
+    if (!IsPositionValid())
     {
         sLog.outError("%s Owner %s not created. Suggested coordinates isn't valid (X: %f Y: %f)",
-            GetGuidStr().c_str(), GetOwnerGuid().GetString().c_str(), GetPositionX(), GetPositionY());
+                      GetGuidStr().c_str(), GetOwnerGuid().GetString().c_str(), GetPositionX(), GetPositionY());
         return false;
     }
 
@@ -259,7 +259,7 @@ bool Corpse::isVisibleForInState(Player const* u, WorldObject const* viewPoint, 
     return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }
 
-bool Corpse::IsHostileTo( Unit const* unit ) const
+bool Corpse::IsHostileTo(Unit const* unit) const
 {
     if (Player* owner = sObjectMgr.GetPlayer(GetOwnerGuid()))
         return owner->IsHostileTo(unit);
@@ -267,7 +267,7 @@ bool Corpse::IsHostileTo( Unit const* unit ) const
         return false;
 }
 
-bool Corpse::IsFriendlyTo( Unit const* unit ) const
+bool Corpse::IsFriendlyTo(Unit const* unit) const
 {
     if (Player* owner = sObjectMgr.GetPlayer(GetOwnerGuid()))
         return owner->IsFriendlyTo(unit);
@@ -277,8 +277,8 @@ bool Corpse::IsFriendlyTo( Unit const* unit ) const
 
 bool Corpse::IsExpired(time_t t) const
 {
-    if(m_type == CORPSE_BONES)
-        return m_time < t - 60*MINUTE;
+    if (m_type == CORPSE_BONES)
+        return m_time < t - 60 * MINUTE;
     else
-        return m_time < t - 3*DAY;
+        return m_time < t - 3 * DAY;
 }

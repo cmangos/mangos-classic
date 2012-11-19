@@ -38,7 +38,7 @@ class GMTicket
             m_guid = guid;
             m_text = text;
             m_responseText = responsetext;
-            m_lastUpdate =update;
+            m_lastUpdate = update;
         }
 
         ObjectGuid const& GetPlayerGuid() const
@@ -122,7 +122,7 @@ class GMTicketMgr
         GMTicket* GetGMTicket(ObjectGuid guid)
         {
             GMTicketMap::iterator itr = m_GMTicketMap.find(guid);
-            if(itr == m_GMTicketMap.end())
+            if (itr == m_GMTicketMap.end())
                 return NULL;
             return &(itr->second);
         }
@@ -139,7 +139,7 @@ class GMTicketMgr
 
             GMTicketList::iterator itr = m_GMTicketListByCreatingOrder.begin();
             std::advance(itr, pos);
-            if(itr == m_GMTicketListByCreatingOrder.end())
+            if (itr == m_GMTicketListByCreatingOrder.end())
                 return NULL;
             return *itr;
         }
@@ -148,7 +148,7 @@ class GMTicketMgr
         void Delete(ObjectGuid guid)
         {
             GMTicketMap::iterator itr = m_GMTicketMap.find(guid);
-            if(itr == m_GMTicketMap.end())
+            if (itr == m_GMTicketMap.end())
                 return;
             itr->second.DeleteFromDB();
             m_GMTicketListByCreatingOrder.remove(&itr->second);

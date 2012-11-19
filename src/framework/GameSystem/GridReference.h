@@ -61,7 +61,7 @@ class MANGOS_DLL_SPEC GridReference : public Reference<GridRefManager<OBJECT>, O
             this->unlink();
         }
 
-        GridReference *next()
+        GridReference* next()
         {
             return (GridReference*)Reference<GridRefManager<OBJECT>, OBJECT>::next();
         }

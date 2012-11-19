@@ -23,20 +23,20 @@
 #include "Policies/SingletonImp.h"
 
 
-INSTANTIATE_SINGLETON_1( ModClass );
+INSTANTIATE_SINGLETON_1(ModClass);
 
 ModClass::ModClass()
 {
-    for(int i = 0; i < MODCONFIG_UINT32_VALUE_COUNT; ++i)
+    for (int i = 0; i < MODCONFIG_UINT32_VALUE_COUNT; ++i)
         m_modConfigUint32Values[i] = 0;
 
-    for(int i = 0; i < MODCONFIG_INT32_VALUE_COUNT; ++i)
+    for (int i = 0; i < MODCONFIG_INT32_VALUE_COUNT; ++i)
         m_modConfigInt32Values[i] = 0;
 
-    for(int i = 0; i < MODCONFIG_FLOAT_VALUE_COUNT; ++i)
+    for (int i = 0; i < MODCONFIG_FLOAT_VALUE_COUNT; ++i)
         m_modConfigFloatValues[i] = 0.0f;
 
-    for(int i = 0; i < MODCONFIG_BOOL_VALUE_COUNT; ++i)
+    for (int i = 0; i < MODCONFIG_BOOL_VALUE_COUNT; ++i)
         m_modConfigBoolValues[i] = false;
 }
 
@@ -52,11 +52,11 @@ void ModClass::ModInit()
 void ModClass::LoadModConfSettings(bool reload)
 {
     bool loaded = true;
-    if(reload)
+    if (reload)
     {
-        if(!ModConfig.Reload())
+        if (!ModConfig.Reload())
         {
-            sLog.outError("Mod settings reload fail: can't read settings from %s.",ModConfig.GetFilename().c_str());
+            sLog.outError("Mod settings reload fail: can't read settings from %s.", ModConfig.GetFilename().c_str());
             loaded = false;
             return;
         }
@@ -70,14 +70,14 @@ void ModClass::LoadModConfSettings(bool reload)
             error_log("MODS: Unable to open configuration file. Configuration values will use default.");
         }
         else
-            outstring_log("MODS: Using configuration file %s",_MODS_CONFIG);
+            outstring_log("MODS: Using configuration file %s", _MODS_CONFIG);
     }
 
-        ///- Read the version of the configuration file and warn the user in case of emptiness or mismatch
+    ///- Read the version of the configuration file and warn the user in case of emptiness or mismatch
 
-    if(loaded)
+    if (loaded)
     {
-       if (ModConfig.GetIntDefault("ConfVersion", 0) < _MODSCONFVERSION)
+        if (ModConfig.GetIntDefault("ConfVersion", 0) < _MODSCONFVERSION)
         {
             sLog.outError("*****************************************************************************");
             sLog.outError(" WARNING: Your mod.conf version indicates your conf file is out of date!");
@@ -88,5 +88,5 @@ void ModClass::LoadModConfSettings(bool reload)
         }
     }
 
-    setModConfig(MODCONFIG_BOOL_TBC_DIMINISHING_DURATION,"Mod.Tbc.DiminishingDuration",false);
+    setModConfig(MODCONFIG_BOOL_TBC_DIMINISHING_DURATION, "Mod.Tbc.DiminishingDuration", false);
 }

@@ -58,14 +58,14 @@ enum MMCleanFlag
     MMCF_RESET  = 2                                         // Flag if need top()->Reset()
 };
 
-class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
+class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator*>
 {
     private:
-        typedef std::stack<MovementGenerator *> Impl;
-        typedef std::vector<MovementGenerator *> ExpireList;
+        typedef std::stack<MovementGenerator*> Impl;
+        typedef std::vector<MovementGenerator*> ExpireList;
     public:
 
-        explicit MotionMaster(Unit *unit) : m_owner(unit), m_expList(NULL), m_cleanFlag(MMCF_NONE) {}
+        explicit MotionMaster(Unit* unit) : m_owner(unit), m_expList(NULL), m_cleanFlag(MMCF_NONE) {}
         ~MotionMaster();
 
         void Initialize();
@@ -102,8 +102,8 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
         void MoveChase(Unit* target, float dist = 0.0f, float angle = 0.0f);
         void MoveConfused();
         void MoveFleeing(Unit* enemy, uint32 timeLimit = 0);
-        void MovePoint(uint32 id, float x,float y,float z);
-        void MoveSeekAssistance(float x,float y,float z);
+        void MovePoint(uint32 id, float x, float y, float z);
+        void MoveSeekAssistance(float x, float y, float z);
         void MoveSeekAssistanceDistract(uint32 timer);
         void MoveWaypoint();
         void MoveTaxiFlight(uint32 path, uint32 pathnode);
@@ -116,9 +116,9 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
         // will only work in MMgens where we have a target (TARGETED_MOTION_TYPE)
         void UpdateFinalDistanceToTarget(float fDistance);
 
-        bool GetDestination(float &x, float &y, float &z);
+        bool GetDestination(float& x, float& y, float& z);
     private:
-        void Mutate(MovementGenerator *m);                  // use Move* functions instead
+        void Mutate(MovementGenerator* m);                  // use Move* functions instead
 
         void DirectClean(bool reset, bool all);
         void DelayedClean(bool reset, bool all);
@@ -126,8 +126,8 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
         void DirectExpire(bool reset);
         void DelayedExpire(bool reset);
 
-        Unit       *m_owner;
-        ExpireList *m_expList;
+        Unit*       m_owner;
+        ExpireList* m_expList;
         uint8       m_cleanFlag;
 };
 #endif

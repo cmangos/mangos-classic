@@ -36,8 +36,8 @@ namespace VMAP
     enum ModelFlags
     {
         MOD_M2 = 1,
-        MOD_WORLDSPAWN = 1<<1,
-        MOD_HAS_BOUND = 1<<2
+        MOD_WORLDSPAWN = 1 << 1,
+        MOD_HAS_BOUND = 1 << 2
     };
 
     class ModelSpawn
@@ -52,30 +52,30 @@ namespace VMAP
             float iScale;
             G3D::AABox iBound;
             std::string name;
-            bool operator==(const ModelSpawn &other) const { return ID == other.ID; }
+            bool operator==(const ModelSpawn& other) const { return ID == other.ID; }
             //uint32 hashCode() const { return ID; }
             // temp?
             const G3D::AABox& getBounds() const { return iBound; }
 
 
-            static bool readFromFile(FILE *rf, ModelSpawn &spawn);
-            static bool writeToFile(FILE *rw, const ModelSpawn &spawn);
+            static bool readFromFile(FILE* rf, ModelSpawn& spawn);
+            static bool writeToFile(FILE* rw, const ModelSpawn& spawn);
     };
 
     class ModelInstance: public ModelSpawn
     {
         public:
             ModelInstance(): iModel(0) {}
-            ModelInstance(const ModelSpawn &spawn, WorldModel *model);
+            ModelInstance(const ModelSpawn& spawn, WorldModel* model);
             void setUnloaded() { iModel = 0; }
             bool intersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const;
-            void intersectPoint(const G3D::Vector3& p, AreaInfo &info) const;
-            bool GetLocationInfo(const G3D::Vector3& p, LocationInfo &info) const;
-            bool GetLiquidLevel(const G3D::Vector3& p, LocationInfo &info, float &liqHeight) const;
+            void intersectPoint(const G3D::Vector3& p, AreaInfo& info) const;
+            bool GetLocationInfo(const G3D::Vector3& p, LocationInfo& info) const;
+            bool GetLiquidLevel(const G3D::Vector3& p, LocationInfo& info, float& liqHeight) const;
         protected:
             G3D::Matrix3 iInvRot;
             float iInvScale;
-            WorldModel *iModel;
+            WorldModel* iModel;
     };
 } // namespace VMAP
 

@@ -44,15 +44,15 @@ class WorldObject;
 enum eScriptCommand
 {
     SCRIPT_COMMAND_TALK                     = 0,            // source = WorldObject, target = any/none, datalong (see enum ChatType for supported CHAT_TYPE_'s)
-                                                            // datalong2 = creature entry (searching for a buddy, closest to source), datalong3 = creature search radius, datalong4 = language
-                                                            // data_flags = flag_target_player_as_source    = 0x01
-                                                            //              flag_original_source_as_target  = 0x02
-                                                            //              flag_buddy_as_target            = 0x04
-                                                            // dataint = text entry from db_script_string -table. dataint2-4 optional for random selected text.
+    // datalong2 = creature entry (searching for a buddy, closest to source), datalong3 = creature search radius, datalong4 = language
+    // data_flags = flag_target_player_as_source    = 0x01
+    //              flag_original_source_as_target  = 0x02
+    //              flag_buddy_as_target            = 0x04
+    // dataint = text entry from db_script_string -table. dataint2-4 optional for random selected text.
     SCRIPT_COMMAND_EMOTE                    = 1,            // source = Unit (or WorldObject when creature entry defined), target = Unit (or none)
-                                                            // datalong = emote_id
-                                                            // datalong2 = creature entry (searching for a buddy, closest to source), datalong3 = creature search radius
-                                                            // data_flags = flag_target_as_source           = 0x01
+    // datalong = emote_id
+    // datalong2 = creature entry (searching for a buddy, closest to source), datalong3 = creature search radius
+    // data_flags = flag_target_as_source           = 0x01
     SCRIPT_COMMAND_FIELD_SET                = 2,            // source = any, datalong = field_id, datalong2 = value
     SCRIPT_COMMAND_MOVE_TO                  = 3,            // source = Creature, datalong2 = time, x/y/z
     SCRIPT_COMMAND_FLAG_SET                 = 4,            // source = any, datalong = field_id, datalong2 = bitmask
@@ -67,39 +67,39 @@ enum eScriptCommand
     SCRIPT_COMMAND_ACTIVATE_OBJECT          = 13,           // source = unit, target=GO
     SCRIPT_COMMAND_REMOVE_AURA              = 14,           // source (datalong2!=0) or target (datalong==0) unit, datalong = spell_id
     SCRIPT_COMMAND_CAST_SPELL               = 15,           // source/target cast spell at target/source
-                                                            // datalong2: 0: s->t 1: s->s 2: t->t 3: t->s (this values in 2 bits), and 0x4 mask for cast triggered can be added to
+    // datalong2: 0: s->t 1: s->s 2: t->t 3: t->s (this values in 2 bits), and 0x4 mask for cast triggered can be added to
     SCRIPT_COMMAND_PLAY_SOUND               = 16,           // source = any object, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=anyone/target, 0/2=with distance dependent, so 1|2 = 3 is target with distance dependent)
     SCRIPT_COMMAND_CREATE_ITEM              = 17,           // source or target must be player, datalong = item entry, datalong2 = amount
     SCRIPT_COMMAND_DESPAWN_SELF             = 18,           // source or target must be creature, datalong = despawn delay
     SCRIPT_COMMAND_PLAY_MOVIE               = 19,           // target can only be a player, datalog = movie id
     SCRIPT_COMMAND_MOVEMENT                 = 20,           // source or target must be creature. datalong = MovementType (0:idle, 1:random or 2:waypoint)
-                                                            // datalong2 = creature entry (searching for a buddy, closest to source), datalong3 = creature search radius
+    // datalong2 = creature entry (searching for a buddy, closest to source), datalong3 = creature search radius
     SCRIPT_COMMAND_SET_ACTIVEOBJECT         = 21,           // source=any, target=creature
-                                                            // datalong=bool 0=off, 1=on
-                                                            // datalong2=creature entry, datalong3=search radius
+    // datalong=bool 0=off, 1=on
+    // datalong2=creature entry, datalong3=search radius
     SCRIPT_COMMAND_SET_FACTION              = 22,           // source=any, target=creature
-                                                            // datalong=factionId,
-                                                            // datalong2=creature entry, datalong3=search radius
+    // datalong=factionId,
+    // datalong2=creature entry, datalong3=search radius
     SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL  = 23,           // source=any, target=creature
-                                                            // datalong=creature entry/modelid (depend on data_flags)
-                                                            // datalong2=creature entry, datalong3=search radius
-                                                            // dataflags= 0x01 to use datalong value as modelid explicit
+    // datalong=creature entry/modelid (depend on data_flags)
+    // datalong2=creature entry, datalong3=search radius
+    // dataflags= 0x01 to use datalong value as modelid explicit
     SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL  = 24,           // source=any, target=creature
-                                                            // datalong=creature entry/modelid (depend on data_flags)
-                                                            // datalong2=creature entry, datalong3=search radius
-                                                            // dataflags= 0x01 to use datalong value as modelid explicit
+    // datalong=creature entry/modelid (depend on data_flags)
+    // datalong2=creature entry, datalong3=search radius
+    // dataflags= 0x01 to use datalong value as modelid explicit
     SCRIPT_COMMAND_SET_RUN                  = 25,           // source=any, target=creature
-                                                            // datalong= bool 0=off, 1=on
-                                                            // datalong2=creature entry, datalong3=search radius
+    // datalong= bool 0=off, 1=on
+    // datalong2=creature entry, datalong3=search radius
     SCRIPT_COMMAND_ATTACK_START             = 26,           // source = Creature (or WorldObject when creature entry are defined), target = Player
-                                                            // datalong2 = creature entry (searching for a buddy, closest to source), datalong3 = creature search radius
+    // datalong2 = creature entry (searching for a buddy, closest to source), datalong3 = creature search radius
     SCRIPT_COMMAND_GO_LOCK_STATE            = 27,           // source or target must be WorldObject
-                                                            // datalong= 1=lock, 2=unlock, 4=set not-interactable, 8=set interactable
-                                                            // datalong2= go entry, datalong3= go search radius
+    // datalong= 1=lock, 2=unlock, 4=set not-interactable, 8=set interactable
+    // datalong2= go entry, datalong3= go search radius
     SCRIPT_COMMAND_STAND_STATE              = 28,           // source = Unit (or WorldObject when creature entry defined), target = Unit (or none)
-                                                            // datalong = stand state (enum UnitStandStateType)
-                                                            // datalong2 = creature entry (searching for a buddy, closest to source), datalong3 = creature search radius
-                                                            // data_flags = flag_target_as_source           = 0x01
+    // datalong = stand state (enum UnitStandStateType)
+    // datalong2 = creature entry (searching for a buddy, closest to source), datalong3 = creature search radius
+    // data_flags = flag_target_as_source           = 0x01
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
@@ -199,7 +199,7 @@ struct ScriptInfo
             int32 resetDelay;                               // datalong2
         } closeDoor;
 
-                                                            // SCRIPT_COMMAND_ACTIVATE_OBJECT (13)
+        // SCRIPT_COMMAND_ACTIVATE_OBJECT (13)
 
         struct                                              // SCRIPT_COMMAND_REMOVE_AURA (14)
         {
@@ -322,7 +322,7 @@ struct ScriptInfo
     // helpers
     uint32 GetGOGuid() const
     {
-        switch(command)
+        switch (command)
         {
             case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT: return respawnGo.goGuid;
             case SCRIPT_COMMAND_OPEN_DOOR: return openDoor.goGuid;
@@ -383,7 +383,7 @@ class ScriptMgr
         uint32 GetEventIdScriptId(uint32 eventId) const;
 
         const char* GetScriptName(uint32 id) const { return id < m_scriptNames.size() ? m_scriptNames[id].c_str() : ""; }
-        uint32 GetScriptId(const char *name) const;
+        uint32 GetScriptId(const char* name) const;
         uint32 GetScriptIdsCount() const { return m_scriptNames.size(); }
 
         ScriptLoadResult LoadScriptLibrary(const char* libName);
@@ -446,37 +446,37 @@ class ScriptMgr
         void (MANGOS_IMPORT* m_pOnFreeScriptLibrary)();
         const char* (MANGOS_IMPORT* m_pGetScriptLibraryVersion)();
 
-        CreatureAI* (MANGOS_IMPORT* m_pGetCreatureAI) (Creature*);
-        InstanceData* (MANGOS_IMPORT* m_pCreateInstanceData) (Map*);
+        CreatureAI* (MANGOS_IMPORT* m_pGetCreatureAI)(Creature*);
+        InstanceData* (MANGOS_IMPORT* m_pCreateInstanceData)(Map*);
 
-        bool (MANGOS_IMPORT* m_pOnGossipHello) (Player*, Creature*);
-        bool (MANGOS_IMPORT* m_pOnGOGossipHello) (Player*, GameObject*);
-        bool (MANGOS_IMPORT* m_pOnGossipSelect) (Player*, Creature*, uint32, uint32);
-        bool (MANGOS_IMPORT* m_pOnGOGossipSelect) (Player*, GameObject*, uint32, uint32);
-        bool (MANGOS_IMPORT* m_pOnGossipSelectWithCode) (Player*, Creature*, uint32, uint32, const char*);
-        bool (MANGOS_IMPORT* m_pOnGOGossipSelectWithCode) (Player*, GameObject*, uint32, uint32, const char*);
-        bool (MANGOS_IMPORT* m_pOnQuestAccept) (Player*, Creature*, Quest const*);
-        bool (MANGOS_IMPORT* m_pOnGOQuestAccept) (Player*, GameObject*, Quest const*);
-        bool (MANGOS_IMPORT* m_pOnItemQuestAccept) (Player*, Item*, Quest const*);
-        bool (MANGOS_IMPORT* m_pOnQuestRewarded) (Player*, Creature*, Quest const*);
-        bool (MANGOS_IMPORT* m_pOnGOQuestRewarded) (Player*, GameObject*, Quest const*);
-        uint32 (MANGOS_IMPORT* m_pGetNPCDialogStatus) (Player*, Creature*);
-        uint32 (MANGOS_IMPORT* m_pGetGODialogStatus) (Player*, GameObject*);
-        bool (MANGOS_IMPORT* m_pOnGOUse) (Player*, GameObject*);
-        bool (MANGOS_IMPORT* m_pOnItemUse) (Player*, Item*, SpellCastTargets const&);
-        bool (MANGOS_IMPORT* m_pOnAreaTrigger) (Player*, AreaTriggerEntry const*);
-        bool (MANGOS_IMPORT* m_pOnProcessEvent) (uint32, Object*, Object*, bool);
-        bool (MANGOS_IMPORT* m_pOnEffectDummyCreature) (Unit*, uint32, SpellEffectIndex, Creature*);
-        bool (MANGOS_IMPORT* m_pOnEffectDummyGO) (Unit*, uint32, SpellEffectIndex, GameObject*);
-        bool (MANGOS_IMPORT* m_pOnEffectDummyItem) (Unit*, uint32, SpellEffectIndex, Item*);
-        bool (MANGOS_IMPORT* m_pOnAuraDummy) (Aura const*, bool);
+        bool (MANGOS_IMPORT* m_pOnGossipHello)(Player*, Creature*);
+        bool (MANGOS_IMPORT* m_pOnGOGossipHello)(Player*, GameObject*);
+        bool (MANGOS_IMPORT* m_pOnGossipSelect)(Player*, Creature*, uint32, uint32);
+        bool (MANGOS_IMPORT* m_pOnGOGossipSelect)(Player*, GameObject*, uint32, uint32);
+        bool (MANGOS_IMPORT* m_pOnGossipSelectWithCode)(Player*, Creature*, uint32, uint32, const char*);
+        bool (MANGOS_IMPORT* m_pOnGOGossipSelectWithCode)(Player*, GameObject*, uint32, uint32, const char*);
+        bool (MANGOS_IMPORT* m_pOnQuestAccept)(Player*, Creature*, Quest const*);
+        bool (MANGOS_IMPORT* m_pOnGOQuestAccept)(Player*, GameObject*, Quest const*);
+        bool (MANGOS_IMPORT* m_pOnItemQuestAccept)(Player*, Item*, Quest const*);
+        bool (MANGOS_IMPORT* m_pOnQuestRewarded)(Player*, Creature*, Quest const*);
+        bool (MANGOS_IMPORT* m_pOnGOQuestRewarded)(Player*, GameObject*, Quest const*);
+        uint32(MANGOS_IMPORT* m_pGetNPCDialogStatus)(Player*, Creature*);
+        uint32(MANGOS_IMPORT* m_pGetGODialogStatus)(Player*, GameObject*);
+        bool (MANGOS_IMPORT* m_pOnGOUse)(Player*, GameObject*);
+        bool (MANGOS_IMPORT* m_pOnItemUse)(Player*, Item*, SpellCastTargets const&);
+        bool (MANGOS_IMPORT* m_pOnAreaTrigger)(Player*, AreaTriggerEntry const*);
+        bool (MANGOS_IMPORT* m_pOnProcessEvent)(uint32, Object*, Object*, bool);
+        bool (MANGOS_IMPORT* m_pOnEffectDummyCreature)(Unit*, uint32, SpellEffectIndex, Creature*);
+        bool (MANGOS_IMPORT* m_pOnEffectDummyGO)(Unit*, uint32, SpellEffectIndex, GameObject*);
+        bool (MANGOS_IMPORT* m_pOnEffectDummyItem)(Unit*, uint32, SpellEffectIndex, Item*);
+        bool (MANGOS_IMPORT* m_pOnAuraDummy)(Aura const*, bool);
 };
 
 #define sScriptMgr MaNGOS::Singleton<ScriptMgr>::Instance()
 
 MANGOS_DLL_SPEC uint32 GetAreaTriggerScriptId(uint32 triggerId);
 MANGOS_DLL_SPEC uint32 GetEventIdScriptId(uint32 eventId);
-MANGOS_DLL_SPEC uint32 GetScriptId(const char *name);
+MANGOS_DLL_SPEC uint32 GetScriptId(const char* name);
 MANGOS_DLL_SPEC char const* GetScriptName(uint32 id);
 MANGOS_DLL_SPEC uint32 GetScriptIdsCount();
 

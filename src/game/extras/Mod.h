@@ -56,41 +56,41 @@ class Unit;
 
 class MANGOS_DLL_SPEC ModClass
 {
-	public:
-		ModClass();
-		~ModClass();
+    public:
+        ModClass();
+        ~ModClass();
 
         void ModInit();
         void LoadModConfSettings(bool reload = false);
 
         // Getters and Setters
-        void setModConfig(ModConfigUint32Values index, char const* fieldname, uint32 defvalue) { m_modConfigUint32Values[index] = ModConfig.GetIntDefault(fieldname,defvalue); }
+        void setModConfig(ModConfigUint32Values index, char const* fieldname, uint32 defvalue) { m_modConfigUint32Values[index] = ModConfig.GetIntDefault(fieldname, defvalue); }
         uint32 getModConfig(ModConfigUint32Values index) const { return m_modConfigUint32Values[index]; }
 
-        void setModConfig(ModConfigInt32Values index, char const* fieldname, int32 defvalue) { m_modConfigInt32Values[index] = ModConfig.GetIntDefault(fieldname,defvalue); }
+        void setModConfig(ModConfigInt32Values index, char const* fieldname, int32 defvalue) { m_modConfigInt32Values[index] = ModConfig.GetIntDefault(fieldname, defvalue); }
         int32 getModConfig(ModConfigInt32Values index) const { return m_modConfigInt32Values[index]; }
 
-        void setModConfig(ModConfigFloatValues index, char const* fieldname, float defvalue) { m_modConfigFloatValues[index] = ModConfig.GetFloatDefault(fieldname,defvalue); }
+        void setModConfig(ModConfigFloatValues index, char const* fieldname, float defvalue) { m_modConfigFloatValues[index] = ModConfig.GetFloatDefault(fieldname, defvalue); }
         float getModConfig(ModConfigFloatValues rate) const { return m_modConfigFloatValues[rate]; }
 
-        void setModConfig(ModConfigBoolValues index, char const* fieldname, bool defvalue) { m_modConfigBoolValues[index] = ModConfig.GetBoolDefault(fieldname,defvalue); }
+        void setModConfig(ModConfigBoolValues index, char const* fieldname, bool defvalue) { m_modConfigBoolValues[index] = ModConfig.GetBoolDefault(fieldname, defvalue); }
         bool getModConfig(ModConfigBoolValues index) const { return m_modConfigBoolValues[index]; }
 
         // ==== Spell mods ==== //
         // you can add modifications, workarounds and hack code for spell prepare
-        void spellPrepare(Spell* spell,Unit *caster);
+        void spellPrepare(Spell* spell, Unit* caster);
         // you can add modifications, workarounds and hack code for spell effect
         void spellEffect(Spell* spell, uint8 eff, SpellEffectIndex i);
-        void auraApplyModifier(Aura* aura,AuraType aType,bool apply,bool real);
-        void getSpellCastTime(SpellEntry const* spellInfo, Spell const* spell, int32 &castTime);
+        void auraApplyModifier(Aura* aura, AuraType aType, bool apply, bool real);
+        void getSpellCastTime(SpellEntry const* spellInfo, Spell const* spell, int32& castTime);
 
         // ==== Unit mods ==== //
 
-        void applyDiminishingToDuration(Unit* unit,Unit* caster,int32 &duration, DiminishingGroup group);
+        void applyDiminishingToDuration(Unit* unit, Unit* caster, int32& duration, DiminishingGroup group);
 
-	protected:
+    protected:
 
-	private:
+    private:
         Config ModConfig;
 
         uint32 m_modConfigUint32Values[MODCONFIG_UINT32_VALUE_COUNT];

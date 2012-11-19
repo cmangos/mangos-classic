@@ -176,10 +176,10 @@ struct QuestLocale
 // xp to give
 class Quest
 {
-    friend class ObjectMgr;
+        friend class ObjectMgr;
     public:
-        Quest(Field * questRecord);
-        uint32 XPValue( Player *pPlayer ) const;
+        Quest(Field* questRecord);
+        uint32 XPValue(Player* pPlayer) const;
 
         uint32 GetQuestFlags() const { return m_QuestFlags; }
         bool HasQuestFlag(QuestFlags flag) const { return (m_QuestFlags & flag) != 0; }
@@ -221,7 +221,7 @@ class Quest
         std::string GetEndText() const { return EndText; }
         int32  GetRewOrReqMoney() const;
         uint32 GetRewMoneyMaxLevel() const { return RewMoneyMaxLevel; }
-                                                            // use in XP calculation at client
+        // use in XP calculation at client
         uint32 GetRewSpell() const { return RewSpell; }
         uint32 GetRewSpellCast() const { return RewSpellCast; }
         uint32 GetRewMailTemplateId() const { return RewMailTemplateId; }
@@ -343,8 +343,8 @@ enum QuestUpdateState
 struct QuestStatusData
 {
     QuestStatusData()
-        : m_status(QUEST_STATUS_NONE),m_rewarded(false),
-        m_explored(false), m_timer(0), uState(QUEST_NEW)
+        : m_status(QUEST_STATUS_NONE), m_rewarded(false),
+          m_explored(false), m_timer(0), uState(QUEST_NEW)
     {
         memset(m_itemcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
         memset(m_creatureOrGOcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));

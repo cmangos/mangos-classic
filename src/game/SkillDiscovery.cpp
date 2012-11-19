@@ -54,12 +54,12 @@ void LoadSkillDiscoveryTable()
     uint32 count = 0;
 
     //                                                 0        1         2
-    QueryResult *result = WorldDatabase.Query("SELECT spellId, reqSpell, chance FROM skill_discovery_template");
+    QueryResult* result = WorldDatabase.Query("SELECT spellId, reqSpell, chance FROM skill_discovery_template");
 
     if (!result)
     {
         sLog.outString();
-        sLog.outString( ">> Loaded 0 skill discovery definitions. DB table `skill_discovery_template` is empty." );
+        sLog.outString(">> Loaded 0 skill discovery definitions. DB table `skill_discovery_template` is empty.");
         return;
     }
 
@@ -70,7 +70,7 @@ void LoadSkillDiscoveryTable()
 
     do
     {
-        Field *fields = result->Fetch();
+        Field* fields = result->Fetch();
         bar.step();
 
         uint32 spellId         = fields[0].GetUInt32();
@@ -90,7 +90,7 @@ void LoadSkillDiscoveryTable()
             {
                 if (reportedReqSpells.find(reqSkillOrSpell) == reportedReqSpells.end())
                 {
-                    sLog.outErrorDb("Spell (ID: %u) have nonexistent spell (ID: %i) in `reqSpell` field in `skill_discovery_template` table",spellId,reqSkillOrSpell);
+                    sLog.outErrorDb("Spell (ID: %u) have nonexistent spell (ID: %i) in `reqSpell` field in `skill_discovery_template` table", spellId, reqSkillOrSpell);
                     reportedReqSpells.insert(reqSkillOrSpell);
                 }
                 continue;
@@ -100,42 +100,43 @@ void LoadSkillDiscoveryTable()
             {
                 if (reportedReqSpells.find(reqSkillOrSpell) == reportedReqSpells.end())
                 {
-                    sLog.outErrorDb("Spell (ID: %u) not have MECHANIC_DISCOVERY (28) value in Mechanic field in spell.dbc but listed for spellId %u (and maybe more) in `skill_discovery_template` table",reqSkillOrSpell,spellId);
+                    sLog.outErrorDb("Spell (ID: %u) not have MECHANIC_DISCOVERY (28) value in Mechanic field in spell.dbc but listed for spellId %u (and maybe more) in `skill_discovery_template` table", reqSkillOrSpell, spellId);
                     reportedReqSpells.insert(reqSkillOrSpell);
                 }
                 continue;
             }
 
-            SkillDiscoveryStore[reqSkillOrSpell].push_back( SkillDiscoveryEntry(spellId, chance) );
+            SkillDiscoveryStore[reqSkillOrSpell].push_back(SkillDiscoveryEntry(spellId, chance));
         }
         else if (reqSkillOrSpell == 0)                      // skill case
         {
             SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(spellId);
 
-            if (bounds.first==bounds.second)
+            if (bounds.first == bounds.second)
             {
-                sLog.outErrorDb("Spell (ID: %u) not listed in `SkillLineAbility.dbc` but listed with `reqSpell`=0 in `skill_discovery_template` table",spellId);
+                sLog.outErrorDb("Spell (ID: %u) not listed in `SkillLineAbility.dbc` but listed with `reqSpell`=0 in `skill_discovery_template` table", spellId);
                 continue;
             }
 
-            for(SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
-                SkillDiscoveryStore[-int32(_spell_idx->second->skillId)].push_back( SkillDiscoveryEntry(spellId, chance) );
+            for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
+                SkillDiscoveryStore[-int32(_spell_idx->second->skillId)].push_back(SkillDiscoveryEntry(spellId, chance));
         }
         else
         {
-            sLog.outErrorDb("Spell (ID: %u) have negative value in `reqSpell` field in `skill_discovery_template` table",spellId);
+            sLog.outErrorDb("Spell (ID: %u) have negative value in `reqSpell` field in `skill_discovery_template` table", spellId);
             continue;
         }
 
         ++count;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u skill discovery definitions", count );
+    sLog.outString(">> Loaded %u skill discovery definitions", count);
     if (!ssNonDiscoverableEntries.str().empty())
-        sLog.outErrorDb("Some items can't be successfully discovered: have in chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n%s",ssNonDiscoverableEntries.str().c_str());
+        sLog.outErrorDb("Some items can't be successfully discovered: have in chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n%s", ssNonDiscoverableEntries.str().c_str());
 }
 
 uint32 GetSkillDiscoverySpell(uint32 skillId, uint32 spellId, Player* player)
@@ -145,10 +146,10 @@ uint32 GetSkillDiscoverySpell(uint32 skillId, uint32 spellId, Player* player)
 
     if (tab != SkillDiscoveryStore.end())
     {
-        for(SkillDiscoveryList::const_iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
+        for (SkillDiscoveryList::const_iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
         {
             if (roll_chance_f(item_iter->chance * sWorld.getConfig(CONFIG_FLOAT_RATE_SKILL_DISCOVERY)) &&
-                !player->HasSpell(item_iter->spellId))
+                    !player->HasSpell(item_iter->spellId))
                 return item_iter->spellId;
         }
 
@@ -162,10 +163,10 @@ uint32 GetSkillDiscoverySpell(uint32 skillId, uint32 spellId, Player* player)
     tab = SkillDiscoveryStore.find(-(int32)skillId);
     if (tab != SkillDiscoveryStore.end())
     {
-        for(SkillDiscoveryList::const_iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
+        for (SkillDiscoveryList::const_iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
         {
             if (roll_chance_f(item_iter->chance * sWorld.getConfig(CONFIG_FLOAT_RATE_SKILL_DISCOVERY)) &&
-                !player->HasSpell(item_iter->spellId))
+                    !player->HasSpell(item_iter->spellId))
                 return item_iter->spellId;
         }
 

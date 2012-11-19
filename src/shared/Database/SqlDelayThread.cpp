@@ -33,9 +33,9 @@ SqlDelayThread::~SqlDelayThread()
 
 void SqlDelayThread::run()
 {
-    #ifndef DO_POSTGRESQL
+#ifndef DO_POSTGRESQL
     mysql_thread_init();
-    #endif
+#endif
 
     const uint32 loopSleepms = 10;
 
@@ -50,16 +50,16 @@ void SqlDelayThread::run()
 
         ProcessRequests();
 
-        if((loopCounter++) >= pingEveryLoop)
+        if ((loopCounter++) >= pingEveryLoop)
         {
             loopCounter = 0;
             m_dbEngine->Ping();
         }
     }
 
-    #ifndef DO_POSTGRESQL
+#ifndef DO_POSTGRESQL
     mysql_thread_end();
-    #endif
+#endif
 }
 
 void SqlDelayThread::Stop()

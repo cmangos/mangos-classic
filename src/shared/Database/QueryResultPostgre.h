@@ -75,7 +75,7 @@
 class QueryResultPostgre : public QueryResult
 {
     public:
-        QueryResultPostgre(PGresult *result, uint64 rowCount, uint32 fieldCount);
+        QueryResultPostgre(PGresult* result, uint64 rowCount, uint32 fieldCount);
 
         ~QueryResultPostgre();
 
@@ -85,7 +85,7 @@ class QueryResultPostgre : public QueryResult
         enum Field::DataTypes ConvertNativeType(Oid pOid) const;
         void EndQuery();
 
-        PGresult *mResult;
+        PGresult* mResult;
         uint32 mTableIndex;
 };
 #endif

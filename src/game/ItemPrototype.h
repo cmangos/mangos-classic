@@ -381,7 +381,7 @@ const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] =
 
 inline uint8 ItemSubClassToDurabilityMultiplierId(uint32 ItemClass, uint32 ItemSubClass)
 {
-    switch(ItemClass)
+    switch (ItemClass)
     {
         case ITEM_CLASS_WEAPON: return ItemSubClass;
         case ITEM_CLASS_ARMOR:  return ItemSubClass + 21;
@@ -504,7 +504,7 @@ struct ItemPrototype
     // helpers
     bool CanChangeEquipStateInCombat() const
     {
-        switch(InventoryType)
+        switch (InventoryType)
         {
             case INVTYPE_RELIC:
             case INVTYPE_SHIELD:
@@ -512,7 +512,7 @@ struct ItemPrototype
                 return true;
         }
 
-        switch(Class)
+        switch (Class)
         {
             case ITEM_CLASS_WEAPON:
             case ITEM_CLASS_PROJECTILE:
@@ -524,7 +524,7 @@ struct ItemPrototype
 
     uint32 GetMaxStackSize() const { return Stackable; }
 
-    bool IsPotion() const { return Class==ITEM_CLASS_CONSUMABLE && SubClass==ITEM_SUBCLASS_POTION; }
+    bool IsPotion() const { return Class == ITEM_CLASS_CONSUMABLE && SubClass == ITEM_SUBCLASS_POTION; }
     bool IsConjuredConsumable() const { return Class == ITEM_CLASS_CONSUMABLE && (Flags & ITEM_FLAG_CONJURED); }
 };
 

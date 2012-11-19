@@ -106,13 +106,13 @@ namespace VMAP
     //=========================================================
     // load one tile (internal use only)
 
-    bool VMapManager2::_loadMap(unsigned int pMapId, const std::string &basePath, uint32 tileX, uint32 tileY)
+    bool VMapManager2::_loadMap(unsigned int pMapId, const std::string& basePath, uint32 tileX, uint32 tileY)
     {
         InstanceTreeMap::iterator instanceTree = iInstanceMapTrees.find(pMapId);
         if (instanceTree == iInstanceMapTrees.end())
         {
             std::string mapFileName = getMapFileName(pMapId);
-            StaticMapTree *newTree = new StaticMapTree(pMapId, basePath);
+            StaticMapTree* newTree = new StaticMapTree(pMapId, basePath);
             if (!newTree->InitMap(mapFileName, this))
                 return false;
             instanceTree = iInstanceMapTrees.insert(InstanceTreeMap::value_type(pMapId, newTree)).first;
@@ -161,8 +161,8 @@ namespace VMAP
         InstanceTreeMap::iterator instanceTree = iInstanceMapTrees.find(pMapId);
         if (instanceTree != iInstanceMapTrees.end())
         {
-            Vector3 pos1 = convertPositionToInternalRep(x1,y1,z1);
-            Vector3 pos2 = convertPositionToInternalRep(x2,y2,z2);
+            Vector3 pos1 = convertPositionToInternalRep(x1, y1, z1);
+            Vector3 pos2 = convertPositionToInternalRep(x2, y2, z2);
             if (pos1 != pos2)
             {
                 result = instanceTree->second->isInLineOfSight(pos1, pos2);
@@ -175,22 +175,22 @@ namespace VMAP
     get the hit position and return true if we hit something
     otherwise the result pos will be the dest pos
     */
-    bool VMapManager2::getObjectHitPos(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float pModifyDist)
+    bool VMapManager2::getObjectHitPos(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float& ry, float& rz, float pModifyDist)
     {
         bool result = false;
-        rx=x2;
-        ry=y2;
-        rz=z2;
+        rx = x2;
+        ry = y2;
+        rz = z2;
         if (isLineOfSightCalcEnabled())
         {
             InstanceTreeMap::iterator instanceTree = iInstanceMapTrees.find(pMapId);
             if (instanceTree != iInstanceMapTrees.end())
             {
-                Vector3 pos1 = convertPositionToInternalRep(x1,y1,z1);
-                Vector3 pos2 = convertPositionToInternalRep(x2,y2,z2);
+                Vector3 pos1 = convertPositionToInternalRep(x1, y1, z1);
+                Vector3 pos2 = convertPositionToInternalRep(x2, y2, z2);
                 Vector3 resultPos;
                 result = instanceTree->second->getObjectHitPos(pos1, pos2, resultPos, pModifyDist);
-                resultPos = convertPositionToMangosRep(resultPos.x,resultPos.y,resultPos.z);
+                resultPos = convertPositionToMangosRep(resultPos.x, resultPos.y, resultPos.z);
                 rx = resultPos.x;
                 ry = resultPos.y;
                 rz = resultPos.z;
@@ -212,7 +212,7 @@ namespace VMAP
             InstanceTreeMap::iterator instanceTree = iInstanceMapTrees.find(pMapId);
             if (instanceTree != iInstanceMapTrees.end())
             {
-                Vector3 pos = convertPositionToInternalRep(x,y,z);
+                Vector3 pos = convertPositionToInternalRep(x, y, z);
                 height = instanceTree->second->getHeight(pos, maxSearchDist);
                 if (!(height < G3D::inf()))
                 {
@@ -225,9 +225,9 @@ namespace VMAP
 
     //=========================================================
 
-    bool VMapManager2::getAreaInfo(unsigned int pMapId, float x, float y, float &z, uint32 &flags, int32 &adtId, int32 &rootId, int32 &groupId) const
+    bool VMapManager2::getAreaInfo(unsigned int pMapId, float x, float y, float& z, uint32& flags, int32& adtId, int32& rootId, int32& groupId) const
     {
-        bool result=false;
+        bool result = false;
         InstanceTreeMap::const_iterator instanceTree = iInstanceMapTrees.find(pMapId);
         if (instanceTree != iInstanceMapTrees.end())
         {
@@ -239,7 +239,7 @@ namespace VMAP
         return(result);
     }
 
-    bool VMapManager2::GetLiquidLevel(uint32 pMapId, float x, float y, float z, uint8 ReqLiquidType, float &level, float &floor, uint32 &type) const
+    bool VMapManager2::GetLiquidLevel(uint32 pMapId, float x, float y, float z, uint8 ReqLiquidType, float& level, float& floor, uint32& type) const
     {
         InstanceTreeMap::const_iterator instanceTree = iInstanceMapTrees.find(pMapId);
         if (instanceTree != iInstanceMapTrees.end())
@@ -261,12 +261,12 @@ namespace VMAP
 
     //=========================================================
 
-    WorldModel* VMapManager2::acquireModelInstance(const std::string &basepath, const std::string &filename)
+    WorldModel* VMapManager2::acquireModelInstance(const std::string& basepath, const std::string& filename)
     {
         ModelFileMap::iterator model = iLoadedModelFiles.find(filename);
         if (model == iLoadedModelFiles.end())
         {
-            WorldModel *worldmodel = new WorldModel();
+            WorldModel* worldmodel = new WorldModel();
             if (!worldmodel->readFile(basepath + filename + ".vmo"))
             {
                 ERROR_LOG("VMapManager2: could not load '%s%s.vmo'!", basepath.c_str(), filename.c_str());
@@ -281,7 +281,7 @@ namespace VMAP
         return model->second.getModel();
     }
 
-    void VMapManager2::releaseModelInstance(const std::string &filename)
+    void VMapManager2::releaseModelInstance(const std::string& filename)
     {
         ModelFileMap::iterator model = iLoadedModelFiles.find(filename);
         if (model == iLoadedModelFiles.end())
@@ -289,7 +289,7 @@ namespace VMAP
             ERROR_LOG("VMapManager2: trying to unload non-loaded file '%s'!", filename.c_str());
             return;
         }
-        if( model->second.decRefCount() == 0)
+        if (model->second.decRefCount() == 0)
         {
             DEBUG_LOG("VMapManager2: unloading file '%s'", filename.c_str());
             delete model->second.getModel();

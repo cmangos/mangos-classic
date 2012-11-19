@@ -69,7 +69,7 @@ typedef GridRefManager<DynamicObject>   DynamicObjectMapType;
 typedef GridRefManager<GameObject>      GameObjectMapType;
 typedef GridRefManager<Player>          PlayerMapType;
 
-typedef Grid<Player, AllWorldObjectTypes,AllGridObjectTypes> GridType;
+typedef Grid<Player, AllWorldObjectTypes, AllGridObjectTypes> GridType;
 typedef NGrid<MAX_NUMBER_OF_CELLS, Player, AllWorldObjectTypes, AllGridObjectTypes> NGridType;
 
 typedef TypeMapContainer<AllGridObjectTypes> GridTypeMapContainer;
@@ -78,11 +78,11 @@ typedef TypeMapContainer<AllWorldObjectTypes> WorldTypeMapContainer;
 template<const unsigned int LIMIT>
 struct MANGOS_DLL_DECL CoordPair
 {
-    CoordPair(uint32 x=0, uint32 y=0) : x_coord(x), y_coord(y) {}
-    CoordPair(const CoordPair<LIMIT> &obj) : x_coord(obj.x_coord), y_coord(obj.y_coord) {}
-    bool operator==(const CoordPair<LIMIT> &obj) const { return (obj.x_coord == x_coord && obj.y_coord == y_coord); }
-    bool operator!=(const CoordPair<LIMIT> &obj) const { return !operator==(obj); }
-    CoordPair<LIMIT>& operator=(const CoordPair<LIMIT> &obj)
+    CoordPair(uint32 x = 0, uint32 y = 0) : x_coord(x), y_coord(y) {}
+    CoordPair(const CoordPair<LIMIT>& obj) : x_coord(obj.x_coord), y_coord(obj.y_coord) {}
+    bool operator==(const CoordPair<LIMIT>& obj) const { return (obj.x_coord == x_coord && obj.y_coord == y_coord); }
+    bool operator!=(const CoordPair<LIMIT>& obj) const { return !operator==(obj); }
+    CoordPair<LIMIT>& operator=(const CoordPair<LIMIT>& obj)
     {
         x_coord = obj.x_coord;
         y_coord = obj.y_coord;
@@ -91,7 +91,7 @@ struct MANGOS_DLL_DECL CoordPair
 
     void operator<<(const uint32 val)
     {
-        if( x_coord > val )
+        if (x_coord > val)
             x_coord -= val;
         else
             x_coord = 0;
@@ -99,7 +99,7 @@ struct MANGOS_DLL_DECL CoordPair
 
     void operator>>(const uint32 val)
     {
-        if( x_coord+val < LIMIT )
+        if (x_coord + val < LIMIT)
             x_coord += val;
         else
             x_coord = LIMIT - 1;
@@ -107,7 +107,7 @@ struct MANGOS_DLL_DECL CoordPair
 
     void operator-=(const uint32 val)
     {
-        if( y_coord > val )
+        if (y_coord > val)
             y_coord -= val;
         else
             y_coord = 0;
@@ -115,7 +115,7 @@ struct MANGOS_DLL_DECL CoordPair
 
     void operator+=(const uint32 val)
     {
-        if( y_coord+val < LIMIT )
+        if (y_coord + val < LIMIT)
             y_coord += val;
         else
             y_coord = LIMIT - 1;
@@ -123,8 +123,8 @@ struct MANGOS_DLL_DECL CoordPair
 
     CoordPair& normalize()
     {
-        x_coord = std::min(x_coord, LIMIT-1);
-        y_coord = std::min(y_coord, LIMIT-1);
+        x_coord = std::min(x_coord, LIMIT - 1);
+        y_coord = std::min(y_coord, LIMIT - 1);
         return *this;
     }
 
@@ -138,14 +138,14 @@ typedef CoordPair<TOTAL_NUMBER_OF_CELLS_PER_MAP> CellPair;
 namespace MaNGOS
 {
     template<class RET_TYPE, int CENTER_VAL>
-        inline RET_TYPE Compute(float x, float y, float center_offset, float size)
+    inline RET_TYPE Compute(float x, float y, float center_offset, float size)
     {
         // calculate and store temporary values in double format for having same result as same mySQL calculations
-        double x_offset = (double(x) - center_offset)/size;
-        double y_offset = (double(y) - center_offset)/size;
+        double x_offset = (double(x) - center_offset) / size;
+        double y_offset = (double(y) - center_offset) / size;
 
-        int x_val = int(x_offset+CENTER_VAL + 0.5);
-        int y_val = int(y_offset+CENTER_VAL + 0.5);
+        int x_val = int(x_offset + CENTER_VAL + 0.5);
+        int y_val = int(y_offset + CENTER_VAL + 0.5);
         return RET_TYPE(x_val, y_val);
     }
 
@@ -159,11 +159,11 @@ namespace MaNGOS
         return Compute<CellPair, CENTER_GRID_CELL_ID>(x, y, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL);
     }
 
-    inline void NormalizeMapCoord(float &c)
+    inline void NormalizeMapCoord(float& c)
     {
-        if(c > MAP_HALFSIZE - 0.5)
+        if (c > MAP_HALFSIZE - 0.5)
             c = MAP_HALFSIZE - 0.5;
-        else if(c < -(MAP_HALFSIZE - 0.5))
+        else if (c < -(MAP_HALFSIZE - 0.5))
             c = -(MAP_HALFSIZE - 0.5);
     }
 
@@ -179,12 +179,12 @@ namespace MaNGOS
 
     inline bool IsValidMapCoord(float x, float y, float z)
     {
-        return IsValidMapCoord(x,y) && finite(z);
+        return IsValidMapCoord(x, y) && finite(z);
     }
 
     inline bool IsValidMapCoord(float x, float y, float z, float o)
     {
-        return IsValidMapCoord(x,y,z) && finite(o);
+        return IsValidMapCoord(x, y, z) && finite(o);
     }
 }
 #endif

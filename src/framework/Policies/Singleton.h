@@ -33,10 +33,10 @@ namespace MaNGOS
     template
     <
     typename T,
-    class ThreadingModel = MaNGOS::SingleThreaded<T>,
-    class CreatePolicy = MaNGOS::OperatorNew<T>,
-    class LifeTimePolicy = MaNGOS::ObjectLifeTime<T>
-    >
+             class ThreadingModel = MaNGOS::SingleThreaded<T>,
+             class CreatePolicy = MaNGOS::OperatorNew<T>,
+             class LifeTimePolicy = MaNGOS::ObjectLifeTime<T>
+             >
     class MANGOS_DLL_DECL Singleton
     {
         public:
@@ -60,7 +60,7 @@ namespace MaNGOS
 
             // data structure
             typedef typename ThreadingModel::Lock Guard;
-            static T *si_instance;
+            static T* si_instance;
             static bool si_destroyed;
     };
 }

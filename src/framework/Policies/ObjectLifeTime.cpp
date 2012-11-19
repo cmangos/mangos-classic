@@ -22,7 +22,7 @@
 
 namespace MaNGOS
 {
-    extern "C" void external_wrapper(void *p)
+    extern "C" void external_wrapper(void* p)
     {
         std::atexit((void (*)())p);
     }

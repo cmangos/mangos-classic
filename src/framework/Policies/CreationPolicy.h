@@ -38,7 +38,7 @@ namespace MaNGOS
                 return (new T);
             }
 
-            static void Destroy(T *obj)
+            static void Destroy(T* obj)
             {
                 delete obj;
             }
@@ -51,19 +51,19 @@ namespace MaNGOS
     template<class T>
     class MANGOS_DLL_DECL LocalStaticCreation
     {
-        union MaxAlign
-        {
-            char t_[sizeof(T)];
-            short int shortInt_;
-            int int_;
-            long int longInt_;
-            float float_;
-            double double_;
-            long double longDouble_;
-            struct Test;
-            int Test::* pMember_;
-            int (Test::*pMemberFn_)(int);
-        };
+            union MaxAlign
+            {
+                char t_[sizeof(T)];
+                short int shortInt_;
+                int int_;
+                long int longInt_;
+                float float_;
+                double double_;
+                long double longDouble_;
+                struct Test;
+                int Test::* pMember_;
+                int (Test::*pMemberFn_)(int);
+            };
 
         public:
 
@@ -73,7 +73,7 @@ namespace MaNGOS
                 return new(&si_localStatic) T;
             }
 
-            static void Destroy(T *obj)
+            static void Destroy(T* obj)
             {
                 obj->~T();
             }
@@ -116,7 +116,7 @@ namespace MaNGOS
                 return CALL_BACK::createCallBack();
             }
 
-            static void Destroy(T *p)
+            static void Destroy(T* p)
             {
                 CALL_BACK::destroyCallBack(p);
             }

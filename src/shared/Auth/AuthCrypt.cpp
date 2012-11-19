@@ -31,7 +31,7 @@ void AuthCrypt::Init()
     _initialized = true;
 }
 
-void AuthCrypt::DecryptRecv(uint8 *data, size_t len)
+void AuthCrypt::DecryptRecv(uint8* data, size_t len)
 {
     if (!_initialized) return;
     if (len < CRYPTED_RECV_LEN) return;
@@ -46,7 +46,7 @@ void AuthCrypt::DecryptRecv(uint8 *data, size_t len)
     }
 }
 
-void AuthCrypt::EncryptSend(uint8 *data, size_t len)
+void AuthCrypt::EncryptSend(uint8* data, size_t len)
 {
     if (!_initialized) return;
     if (len < CRYPTED_SEND_LEN) return;
@@ -60,7 +60,7 @@ void AuthCrypt::EncryptSend(uint8 *data, size_t len)
     }
 }
 
-void AuthCrypt::SetKey(uint8 *key, size_t len)
+void AuthCrypt::SetKey(uint8* key, size_t len)
 {
     _key.resize(len);
     std::copy(key, key + len, _key.begin());
@@ -82,7 +82,7 @@ AuthCrypt::~AuthCrypt()
 {
 }
 
-void AuthCrypt::GenerateKey(uint8 *key, BigNumber *bn)
+void AuthCrypt::GenerateKey(uint8* key, BigNumber* bn)
 {
     HmacHash hash;
     hash.UpdateBigNumber(bn);

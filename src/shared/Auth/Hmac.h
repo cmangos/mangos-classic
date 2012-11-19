@@ -33,11 +33,11 @@ class HmacHash
     public:
         HmacHash();
         ~HmacHash();
-        void UpdateBigNumber(BigNumber *bn);
-        void UpdateData(const uint8 *data, int length);
+        void UpdateBigNumber(BigNumber* bn);
+        void UpdateData(const uint8* data, int length);
         void Initialize();
         void Finalize();
-        uint8 *GetDigest() { return m_digest; };
+        uint8* GetDigest() { return m_digest; };
         int GetLength() { return SHA_DIGEST_LENGTH; };
     private:
         HMAC_CTX m_ctx;

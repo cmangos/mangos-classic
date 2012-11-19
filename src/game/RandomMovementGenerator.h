@@ -26,20 +26,20 @@
 
 template<class T>
 class MANGOS_DLL_SPEC RandomMovementGenerator
-: public MovementGeneratorMedium< T, RandomMovementGenerator<T> >
+    : public MovementGeneratorMedium< T, RandomMovementGenerator<T> >
 {
     public:
-        explicit RandomMovementGenerator(const Unit &) : i_nextMoveTime(0) {}
+        explicit RandomMovementGenerator(const Unit&) : i_nextMoveTime(0) {}
 
-        void _setRandomLocation(T &);
-        void Initialize(T &);
-        void Finalize(T &);
-        void Interrupt(T &);
-        void Reset(T &);
-        bool Update(T &, const uint32 &);
-        void UpdateMapPosition(uint32 mapid, float &x ,float &y, float &z)
+        void _setRandomLocation(T&);
+        void Initialize(T&);
+        void Finalize(T&);
+        void Interrupt(T&);
+        void Reset(T&);
+        bool Update(T&, const uint32&);
+        void UpdateMapPosition(uint32 mapid, float& x , float& y, float& z)
         {
-            i_destinationHolder.GetLocationNow(mapid, x,y,z);
+            i_destinationHolder.GetLocationNow(mapid, x, y, z);
         }
         MovementGeneratorType GetMovementGeneratorType() const { return RANDOM_MOTION_TYPE; }
 

@@ -167,11 +167,11 @@ inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
 enum TimeConstants
 {
     MINUTE = 60,
-    HOUR   = MINUTE*60,
-    DAY    = HOUR*24,
-    WEEK   = DAY*7,
-    MONTH  = DAY*30,
-    YEAR   = MONTH*12,
+    HOUR   = MINUTE * 60,
+    DAY    = HOUR * 24,
+    WEEK   = DAY * 7,
+    MONTH  = DAY * 30,
+    YEAR   = MONTH * 12,
     IN_MILLISECONDS = 1000
 };
 
@@ -226,9 +226,9 @@ struct LocaleNameStr
 extern LocaleNameStr const fullLocaleNameList[];
 
 //operator new[] based version of strdup() function! Release memory by using operator delete[] !
-inline char * mangos_strdup(const char * source)
+inline char* mangos_strdup(const char* source)
 {
-    char * dest = new char[strlen(source) + 1];
+    char* dest = new char[strlen(source) + 1];
     strcpy(dest, source);
     return dest;
 }

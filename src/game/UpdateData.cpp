@@ -33,21 +33,21 @@ UpdateData::UpdateData() : m_blockCount(0)
 
 void UpdateData::AddOutOfRangeGUID(ObjectGuidSet& guids)
 {
-    m_outOfRangeGUIDs.insert(guids.begin(),guids.end());
+    m_outOfRangeGUIDs.insert(guids.begin(), guids.end());
 }
 
-void UpdateData::AddOutOfRangeGUID(ObjectGuid const &guid)
+void UpdateData::AddOutOfRangeGUID(ObjectGuid const& guid)
 {
     m_outOfRangeGUIDs.insert(guid);
 }
 
-void UpdateData::AddUpdateBlock(const ByteBuffer &block)
+void UpdateData::AddUpdateBlock(const ByteBuffer& block)
 {
     m_data.append(block);
     ++m_blockCount;
 }
 
-void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
+void UpdateData::Compress(void* dst, uint32* dst_size, void* src, int src_size)
 {
     z_stream c_stream;
 
@@ -59,7 +59,7 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
     int z_res = deflateInit(&c_stream, sWorld.getConfig(CONFIG_UINT32_COMPRESSION));
     if (z_res != Z_OK)
     {
-        sLog.outError("Can't compress update packet (zlib: deflateInit) Error code: %i (%s)",z_res,zError(z_res));
+        sLog.outError("Can't compress update packet (zlib: deflateInit) Error code: %i (%s)", z_res, zError(z_res));
         *dst_size = 0;
         return;
     }
@@ -72,7 +72,7 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
     z_res = deflate(&c_stream, Z_NO_FLUSH);
     if (z_res != Z_OK)
     {
-        sLog.outError("Can't compress update packet (zlib: deflate) Error code: %i (%s)",z_res,zError(z_res));
+        sLog.outError("Can't compress update packet (zlib: deflate) Error code: %i (%s)", z_res, zError(z_res));
         *dst_size = 0;
         return;
     }
@@ -87,7 +87,7 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
     z_res = deflate(&c_stream, Z_FINISH);
     if (z_res != Z_STREAM_END)
     {
-        sLog.outError("Can't compress update packet (zlib: deflate should report Z_STREAM_END instead %i (%s)",z_res,zError(z_res));
+        sLog.outError("Can't compress update packet (zlib: deflate should report Z_STREAM_END instead %i (%s)", z_res, zError(z_res));
         *dst_size = 0;
         return;
     }
@@ -95,7 +95,7 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
     z_res = deflateEnd(&c_stream);
     if (z_res != Z_OK)
     {
-        sLog.outError("Can't compress update packet (zlib: deflateEnd) Error code: %i (%s)",z_res,zError(z_res));
+        sLog.outError("Can't compress update packet (zlib: deflateEnd) Error code: %i (%s)", z_res, zError(z_res));
         *dst_size = 0;
         return;
     }
@@ -103,21 +103,21 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
     *dst_size = c_stream.total_out;
 }
 
-bool UpdateData::BuildPacket(WorldPacket *packet, bool hasTransport)
+bool UpdateData::BuildPacket(WorldPacket* packet, bool hasTransport)
 {
     MANGOS_ASSERT(packet->empty());                         // shouldn't happen
 
     ByteBuffer buf(4 + 1 + (m_outOfRangeGUIDs.empty() ? 0 : 1 + 4 + 9 * m_outOfRangeGUIDs.size()) + m_data.wpos());
 
-    buf << (uint32) (!m_outOfRangeGUIDs.empty() ? m_blockCount + 1 : m_blockCount);
-    buf << (uint8) (hasTransport ? 1 : 0);
+    buf << (uint32)(!m_outOfRangeGUIDs.empty() ? m_blockCount + 1 : m_blockCount);
+    buf << (uint8)(hasTransport ? 1 : 0);
 
-    if(!m_outOfRangeGUIDs.empty())
+    if (!m_outOfRangeGUIDs.empty())
     {
         buf << (uint8) UPDATETYPE_OUT_OF_RANGE_OBJECTS;
         buf << (uint32) m_outOfRangeGUIDs.size();
 
-        for(ObjectGuidSet::const_iterator i = m_outOfRangeGUIDs.begin(); i != m_outOfRangeGUIDs.end(); ++i)
+        for (ObjectGuidSet::const_iterator i = m_outOfRangeGUIDs.begin(); i != m_outOfRangeGUIDs.end(); ++i)
             buf << i->WriteAsPacked();
     }
 
@@ -125,23 +125,23 @@ bool UpdateData::BuildPacket(WorldPacket *packet, bool hasTransport)
 
     size_t pSize = buf.wpos();                              // use real used data size
 
-    if (pSize > 100 )                                       // compress large packets
+    if (pSize > 100)                                        // compress large packets
     {
         uint32 destsize = compressBound(pSize);
-        packet->resize( destsize + sizeof(uint32) );
+        packet->resize(destsize + sizeof(uint32));
 
         packet->put<uint32>(0, pSize);
         Compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32), &destsize, (void*)buf.contents(), pSize);
         if (destsize == 0)
             return false;
 
-        packet->resize( destsize + sizeof(uint32) );
-        packet->SetOpcode( SMSG_COMPRESSED_UPDATE_OBJECT );
+        packet->resize(destsize + sizeof(uint32));
+        packet->SetOpcode(SMSG_COMPRESSED_UPDATE_OBJECT);
     }
     else                                                    // send small packets without compression
     {
-        packet->append( buf );
-        packet->SetOpcode( SMSG_UPDATE_OBJECT );
+        packet->append(buf);
+        packet->SetOpcode(SMSG_UPDATE_OBJECT);
     }
 
     return true;

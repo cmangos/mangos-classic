@@ -44,16 +44,16 @@ ThreadPriority::ThreadPriority()
         pr_iter.next();
     }
 
-    MANGOS_ASSERT (!_tmp.empty());
+    MANGOS_ASSERT(!_tmp.empty());
 
-    if(_tmp.size() >= MAXPRIORITYNUM)
+    if (_tmp.size() >= MAXPRIORITYNUM)
     {
         const size_t max_pos = _tmp.size();
         size_t min_pos = 1;
         size_t norm_pos = 0;
         for (size_t i = 0; i < max_pos; ++i)
         {
-            if(_tmp[i] == ACE_THR_PRI_OTHER_DEF)
+            if (_tmp[i] == ACE_THR_PRI_OTHER_DEF)
             {
                 norm_pos = i + 1;
                 break;
@@ -66,7 +66,7 @@ ThreadPriority::ThreadPriority()
         //into ¹ piesces
         const size_t _divider = 4;
         size_t _div = (norm_pos - min_pos) / _divider;
-        if(_div == 0)
+        if (_div == 0)
             _div = 1;
 
         min_pos = (norm_pos - 1);
@@ -75,7 +75,7 @@ ThreadPriority::ThreadPriority()
         m_priority[Lowest] = _tmp[min_pos -= _div ];
 
         _div = (max_pos - norm_pos) / _divider;
-        if(_div == 0)
+        if (_div == 0)
             _div = 1;
 
         min_pos = norm_pos - 1;
@@ -87,10 +87,10 @@ ThreadPriority::ThreadPriority()
 
 int ThreadPriority::getPriority(Priority p) const
 {
-    if(p < Idle)
+    if (p < Idle)
         p = Idle;
 
-    if(p > Realtime)
+    if (p > Realtime)
         p = Realtime;
 
     return m_priority[p];
@@ -114,7 +114,7 @@ Thread::Thread(Runnable* instance) : m_iThreadId(0), m_hThreadHandle(0), m_task(
         m_task->incReference();
 
     bool _start = start();
-    MANGOS_ASSERT (_start);
+    MANGOS_ASSERT(_start);
 }
 
 Thread::~Thread()
@@ -182,9 +182,9 @@ void Thread::resume()
     ACE_Thread::resume(m_hThreadHandle);
 }
 
-ACE_THR_FUNC_RETURN Thread::ThreadTask(void * param)
+ACE_THR_FUNC_RETURN Thread::ThreadTask(void* param)
 {
-    Runnable * _task = (Runnable*)param;
+    Runnable* _task = (Runnable*)param;
     _task->run();
 
     // task execution complete, free referecne added at
@@ -206,17 +206,17 @@ ACE_hthread_t Thread::currentHandle()
     return _handle;
 }
 
-Thread * Thread::current()
+Thread* Thread::current()
 {
-    Thread * _thread = m_ThreadStorage.ts_object();
-    if(!_thread)
+    Thread* _thread = m_ThreadStorage.ts_object();
+    if (!_thread)
     {
         _thread = new Thread();
         _thread->m_iThreadId = Thread::currentId();
         _thread->m_hThreadHandle = Thread::currentHandle();
 
-        Thread * _oldValue = m_ThreadStorage.ts_object(_thread);
-        if(_oldValue)
+        Thread* _oldValue = m_ThreadStorage.ts_object(_thread);
+        if (_oldValue)
             delete _oldValue;
     }
 
@@ -229,7 +229,7 @@ void Thread::setPriority(Priority type)
     int _priority = m_TpEnum.getPriority(type);
     int _ok = ACE_Thread::setprio(m_hThreadHandle, _priority);
     //remove this ASSERT in case you don't want to know is thread priority change was successful or not
-    MANGOS_ASSERT (_ok == 0);
+    MANGOS_ASSERT(_ok == 0);
 #endif
 }
 

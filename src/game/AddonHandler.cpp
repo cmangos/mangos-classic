@@ -24,7 +24,7 @@
 #include "Policies/SingletonImp.h"
 #include "zlib/zlib.h"
 
-INSTANTIATE_SINGLETON_1( AddonHandler );
+INSTANTIATE_SINGLETON_1(AddonHandler);
 
 AddonHandler::AddonHandler()
 {
@@ -34,7 +34,7 @@ AddonHandler::~AddonHandler()
 {
 }
 
-bool AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target)
+bool AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target)
 {
     ByteBuffer AddOnPacked;
     uLongf AddonRealSize;
@@ -68,10 +68,10 @@ bool AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target)
     *Source >> TempValue;                                   // get real size of the packed structure
 
     // empty addon packet, nothing process, can't be received from real client
-    if(!TempValue)
+    if (!TempValue)
         return false;
 
-    if(TempValue > 0xFFFFF)
+    if (TempValue > 0xFFFFF)
     {
         sLog.outError("WorldSession::ReadAddonsInfo addon info too big, size %u", TempValue);
         return false;
@@ -83,11 +83,11 @@ bool AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target)
 
     AddOnPacked.resize(AddonRealSize);                      // resize target for zlib action
 
-    if (!uncompress(const_cast<uint8*>(AddOnPacked.contents()), &AddonRealSize, const_cast<uint8*>((*Source).contents() + CurrentPosition), (*Source).size() - CurrentPosition)!= Z_OK)
+    if (!uncompress(const_cast<uint8*>(AddOnPacked.contents()), &AddonRealSize, const_cast<uint8*>((*Source).contents() + CurrentPosition), (*Source).size() - CurrentPosition) != Z_OK)
     {
         Target->Initialize(SMSG_ADDON_INFO);
 
-        while(AddOnPacked.rpos() < AddOnPacked.size())
+        while (AddOnPacked.rpos() < AddOnPacked.size())
         {
             std::string AddonNames;
             uint8 unk6;

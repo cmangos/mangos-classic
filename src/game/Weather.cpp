@@ -33,16 +33,16 @@
 /// Weather sound defines ( only for 1.12 )
 enum WeatherSounds
 {
-     WEATHER_NOSOUND                = 0,
-     WEATHER_RAINLIGHT              = 8533,
-     WEATHER_RAINMEDIUM             = 8534,
-     WEATHER_RAINHEAVY              = 8535,
-     WEATHER_SNOWLIGHT              = 8536,
-     WEATHER_SNOWMEDIUM             = 8537,
-     WEATHER_SNOWHEAVY              = 8538,
-     WEATHER_SANDSTORMLIGHT         = 8556,
-     WEATHER_SANDSTORMMEDIUM        = 8557,
-     WEATHER_SANDSTORMHEAVY         = 8558
+    WEATHER_NOSOUND                = 0,
+    WEATHER_RAINLIGHT              = 8533,
+    WEATHER_RAINMEDIUM             = 8534,
+    WEATHER_RAINHEAVY              = 8535,
+    WEATHER_SNOWLIGHT              = 8536,
+    WEATHER_SNOWMEDIUM             = 8537,
+    WEATHER_SNOWHEAVY              = 8538,
+    WEATHER_SANDSTORMLIGHT         = 8556,
+    WEATHER_SANDSTORMMEDIUM        = 8557,
+    WEATHER_SANDSTORMHEAVY         = 8558
 };
 
 /// Create the Weather object
@@ -52,7 +52,7 @@ Weather::Weather(uint32 zone, WeatherZoneChances const* weatherChances) : m_zone
     m_type = WEATHER_TYPE_FINE;
     m_grade = 0;
 
-    DETAIL_FILTER_LOG(LOG_FILTER_WEATHER, "WORLD: Starting weather system for zone %u (change every %u minutes).", m_zone, (m_timer.GetInterval() / (MINUTE*IN_MILLISECONDS)) );
+    DETAIL_FILTER_LOG(LOG_FILTER_WEATHER, "WORLD: Starting weather system for zone %u (change every %u minutes).", m_zone, (m_timer.GetInterval() / (MINUTE * IN_MILLISECONDS)));
 }
 
 /// Launch a weather update
@@ -61,14 +61,14 @@ bool Weather::Update(time_t diff)
     m_timer.Update(diff);
 
     ///- If the timer has passed, ReGenerate the weather
-    if(m_timer.Passed())
+    if (m_timer.Passed())
     {
         m_timer.Reset();
         // update only if Regenerate has changed the weather
-        if(ReGenerate())
+        if (ReGenerate())
         {
             ///- Weather will be removed if not updated (no players in zone anymore)
-            if(!UpdateWeather())
+            if (!UpdateWeather())
                 return false;
         }
     }
@@ -102,8 +102,8 @@ bool Weather::ReGenerate()
     //78 days between January 1st and March 20nd; 365/4=91 days by season
     // season source http://aa.usno.navy.mil/data/docs/EarthSeasons.html
     time_t gtime = sWorld.GetGameTime();
-    struct tm * ltime = localtime(&gtime);
-    uint32 season = ((ltime->tm_yday - 78 + 365)/91)%4;
+    struct tm* ltime = localtime(&gtime);
+    uint32 season = ((ltime->tm_yday - 78 + 365) / 91) % 4;
 
     static char const* seasonName[WEATHER_SEASONS] = { "spring", "summer", "fall", "winter" };
 
@@ -143,8 +143,8 @@ bool Weather::ReGenerate()
         {
             if (m_grade > 0.6666667f)
             {
-                                                            // Severe change, but how severe?
-                uint32 rnd = urand(0,99);
+                // Severe change, but how severe?
+                uint32 rnd = urand(0, 99);
                 if (rnd < 50)
                 {
                     m_grade -= 0.6666667f;
@@ -158,15 +158,15 @@ bool Weather::ReGenerate()
 
     // At this point, only weather that isn't doing anything remains but that have weather data
     uint32 chance1 =          m_weatherChances->data[season].rainChance;
-    uint32 chance2 = chance1+ m_weatherChances->data[season].snowChance;
-    uint32 chance3 = chance2+ m_weatherChances->data[season].stormChance;
+    uint32 chance2 = chance1 + m_weatherChances->data[season].snowChance;
+    uint32 chance3 = chance2 + m_weatherChances->data[season].stormChance;
 
     uint32 rnd = urand(0, 99);
-    if(rnd <= chance1)
+    if (rnd <= chance1)
         m_type = WEATHER_TYPE_RAIN;
-    else if(rnd <= chance2)
+    else if (rnd <= chance2)
         m_type = WEATHER_TYPE_SNOW;
-    else if(rnd <= chance3)
+    else if (rnd <= chance3)
         m_type = WEATHER_TYPE_STORM;
     else
         m_type = WEATHER_TYPE_FINE;
@@ -199,28 +199,28 @@ bool Weather::ReGenerate()
     return m_type != old_type || m_grade != old_grade;
 }
 
-void Weather::SendWeatherUpdateToPlayer(Player *player)
+void Weather::SendWeatherUpdateToPlayer(Player* player)
 {
     uint32 sound = GetSound();                              // for 1.12
-    WorldPacket data( SMSG_WEATHER, (4+4+4) );
+    WorldPacket data(SMSG_WEATHER, (4 + 4 + 4));
 
     data << (uint32)m_type << (float)m_grade << (uint32)sound;
-    player->GetSession()->SendPacket( &data );
+    player->GetSession()->SendPacket(&data);
 }
 
-void Weather::SendFineWeatherUpdateToPlayer(Player *player)
+void Weather::SendFineWeatherUpdateToPlayer(Player* player)
 {
-    WorldPacket data( SMSG_WEATHER, (4+4+4) );
+    WorldPacket data(SMSG_WEATHER, (4 + 4 + 4));
 
     data << (uint32)WEATHER_STATE_FINE << (float)0.0f << uint8(0); // no sound
-    player->GetSession()->SendPacket( &data );
+    player->GetSession()->SendPacket(&data);
 }
 
 /// Send the new weather to all players in the zone
 bool Weather::UpdateWeather()
 {
     Player* player = sWorld.FindPlayerInZone(m_zone);
-    if(!player)
+    if (!player)
         return false;
 
     ///- Send the weather packet to all players in this zone
@@ -232,13 +232,13 @@ bool Weather::UpdateWeather()
         m_grade = 0.0001f;
 
 
-    WorldPacket data( SMSG_WEATHER, (4+4+4) );
+    WorldPacket data(SMSG_WEATHER, (4 + 4 + 4));
     data << (uint32)m_type << (float)m_grade << (uint32)sound;
-    player->SendMessageToSet( &data, true );
+    player->SendMessageToSet(&data, true);
 
     ///- Log the event
     char const* wthstr;
-    switch(sound)
+    switch (sound)
     {
         case WEATHER_RAINLIGHT:
             wthstr = "light rain";
@@ -281,7 +281,7 @@ bool Weather::UpdateWeather()
 /// Set the weather
 void Weather::SetWeather(WeatherType type, float grade)
 {
-    if(m_type == type && m_grade == grade)
+    if (m_type == type && m_grade == grade)
         return;
 
     m_type = type;
@@ -293,28 +293,28 @@ void Weather::SetWeather(WeatherType type, float grade)
 uint32 Weather::GetSound()
 {
     uint32 sound;
-    switch(m_type)
+    switch (m_type)
     {
         case WEATHER_TYPE_RAIN:                                             //rain
-            if(m_grade<0.33333334f)
+            if (m_grade < 0.33333334f)
                 sound = WEATHER_RAINLIGHT;
-            else if(m_grade<0.6666667f)
+            else if (m_grade < 0.6666667f)
                 sound = WEATHER_RAINMEDIUM;
             else
                 sound = WEATHER_RAINHEAVY;
             break;
         case WEATHER_TYPE_SNOW:                                             //snow
-            if(m_grade<0.33333334f)
+            if (m_grade < 0.33333334f)
                 sound = WEATHER_SNOWLIGHT;
-            else if(m_grade<0.6666667f)
+            else if (m_grade < 0.6666667f)
                 sound = WEATHER_SNOWMEDIUM;
             else
                 sound = WEATHER_SNOWHEAVY;
             break;
         case WEATHER_TYPE_STORM:                                             //storm
-            if(m_grade<0.33333334f)
+            if (m_grade < 0.33333334f)
                 sound = WEATHER_SANDSTORMLIGHT;
-            else if(m_grade<0.6666667f)
+            else if (m_grade < 0.6666667f)
                 sound = WEATHER_SANDSTORMMEDIUM;
             else
                 sound = WEATHER_SANDSTORMHEAVY;
@@ -326,9 +326,9 @@ uint32 Weather::GetSound()
     }
     return sound;
 
-  /*[-ZERO] tbc [?]
-            case WEATHER_TYPE_BLACKRAIN:
-            return WEATHER_STATE_BLACKRAIN;
-        case WEATHER_TYPE_THUNDERS:
-            return WEATHER_STATE_THUNDERS; */
+    /*[-ZERO] tbc [?]
+              case WEATHER_TYPE_BLACKRAIN:
+              return WEATHER_STATE_BLACKRAIN;
+          case WEATHER_TYPE_THUNDERS:
+              return WEATHER_STATE_THUNDERS; */
 }

@@ -25,17 +25,17 @@
 #include "ObjectMgr.h"
 #include "WorldPacket.h"
 
-void HomeMovementGenerator<Creature>::Initialize(Creature & owner)
+void HomeMovementGenerator<Creature>::Initialize(Creature& owner)
 {
     owner.RemoveSplineFlag(SPLINEFLAG_WALKMODE);
     _setTargetLocation(owner);
 }
 
-void HomeMovementGenerator<Creature>::Reset(Creature &)
+void HomeMovementGenerator<Creature>::Reset(Creature&)
 {
 }
 
-void HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
+void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
 {
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
@@ -43,7 +43,7 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
     float x, y, z;
 
     // at apply we can select more nice return points base at current movegen
-    if (owner.GetMotionMaster()->empty() || !owner.GetMotionMaster()->top()->GetResetPosition(owner,x,y,z))
+    if (owner.GetMotionMaster()->empty() || !owner.GetMotionMaster()->top()->GetResetPosition(owner, x, y, z))
         owner.GetRespawnCoord(x, y, z);
 
     CreatureTraveller traveller(owner);
@@ -53,9 +53,9 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
     owner.clearUnitState(UNIT_STAT_ALL_STATE);
 }
 
-bool HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time_diff)
+bool HomeMovementGenerator<Creature>::Update(Creature& owner, const uint32& time_diff)
 {
-    CreatureTraveller traveller( owner);
+    CreatureTraveller traveller(owner);
     if (i_destinationHolder.UpdateTraveller(traveller, time_diff, false))
     {
         if (!IsActive(owner))                               // force stop processing (movement can move out active zone with cleanup movegens list)

@@ -50,13 +50,13 @@ struct MapCellObjectGuids
     CellGuidSet gameobjects;
 };
 
-typedef UNORDERED_MAP<uint32/*cell_id*/,MapCellObjectGuids> MapCellObjectGuidsMap;
+typedef UNORDERED_MAP < uint32/*cell_id*/, MapCellObjectGuids > MapCellObjectGuidsMap;
 
 class MapPersistentStateManager;
 
 class MapPersistentState
 {
-    friend class MapPersistentStateManager;
+        friend class MapPersistentStateManager;
     protected:
         MapPersistentState(uint16 MapId, uint32 InstanceId);
 
@@ -98,7 +98,7 @@ class MapPersistentState
 
         // pool system
         void InitPools();
-        virtual SpawnedPoolData& GetSpawnedPoolData() =0;
+        virtual SpawnedPoolData& GetSpawnedPoolData() = 0;
 
         template<typename T>
         bool IsSpawnedPoolObject(uint32 db_guid_or_pool_id) { return GetSpawnedPoolData().IsSpawnedObject<T>(db_guid_or_pool_id); }
@@ -110,7 +110,7 @@ class MapPersistentState
         void AddGameobjectToGrid(uint32 guid, GameObjectData const* data);
         void RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data);
     protected:
-        virtual bool CanBeUnload() const =0;                // body provided for subclasses
+        virtual bool CanBeUnload() const = 0;               // body provided for subclasses
 
         bool UnloadIfEmpty();
         void ClearRespawnTimes();
@@ -187,11 +187,11 @@ class DungeonPersistentState : public MapPersistentState
 
         /* online players bound to the instance (perm/solo)
            does not include the members of the group unless they have permanent saves */
-        void AddPlayer(Player *player) { m_playerList.push_back(player); }
-        bool RemovePlayer(Player *player) { m_playerList.remove(player); return UnloadIfEmpty(); }
+        void AddPlayer(Player* player) { m_playerList.push_back(player); }
+        bool RemovePlayer(Player* player) { m_playerList.remove(player); return UnloadIfEmpty(); }
         /* all groups bound to the instance */
-        void AddGroup(Group *group) { m_groupList.push_back(group); }
-        bool RemoveGroup(Group *group) { m_groupList.remove(group); return UnloadIfEmpty(); }
+        void AddGroup(Group* group) { m_groupList.push_back(group); }
+        bool RemoveGroup(Group* group) { m_groupList.remove(group); return UnloadIfEmpty(); }
 
         /* for normal instances this corresponds to max(creature respawn time) + X hours
            for raid instances this caches the global respawn time for the map */
@@ -266,7 +266,7 @@ enum ResetEventType
     all instances of that map reset at the same time */
 struct DungeonResetEvent
 {
-    ResetEventType type   :8;                               // if RESET_EVENT_DUNGEON then InstanceID == 0 and applied to all instances for map)
+    ResetEventType type   : 8;                              // if RESET_EVENT_DUNGEON then InstanceID == 0 and applied to all instances for map)
     uint16 mapid;                                           // used with mapid used as for select reset for global cooldown instances (instanceid==0 for event)
     uint32 instanceId;                                      // used for select reset for normal dungeons
 
@@ -302,16 +302,16 @@ class DungeonResetScheduler
         MapPersistentStateManager& m_InstanceSaves;
 
         // fast lookup for reset times (always use existing functions for access/set)
-        typedef std::vector<time_t /*resetTime*/> ResetTimeVector;
+        typedef std::vector < time_t /*resetTime*/ > ResetTimeVector;
         ResetTimeVector m_resetTimeByMapId;
 
-        typedef std::multimap<time_t /*resetTime*/, DungeonResetEvent> ResetTimeQueue;
+        typedef std::multimap < time_t /*resetTime*/, DungeonResetEvent > ResetTimeQueue;
         ResetTimeQueue m_resetTimeQueue;
 };
 
 class MANGOS_DLL_DECL MapPersistentStateManager : public MaNGOS::Singleton<MapPersistentStateManager, MaNGOS::ClassLevelLockable<MapPersistentStateManager, ACE_Thread_Mutex> >
 {
-    friend class DungeonResetScheduler;
+        friend class DungeonResetScheduler;
     public:                                                 // constructors
         MapPersistentStateManager();
         ~MapPersistentStateManager();
@@ -328,7 +328,7 @@ class MANGOS_DLL_DECL MapPersistentStateManager : public MaNGOS::Singleton<MapPe
         MapPersistentState* AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, time_t resetTime, bool canReset, bool load = false, bool initPools = true);
 
         // search stored state, can be NULL in result
-        MapPersistentState *GetPersistentState(uint32 mapId, uint32 InstanceId);
+        MapPersistentState* GetPersistentState(uint32 mapId, uint32 InstanceId);
 
         void RemovePersistentState(uint32 mapId, uint32 instanceId);
 
@@ -347,15 +347,15 @@ class MANGOS_DLL_DECL MapPersistentStateManager : public MaNGOS::Singleton<MapPe
 
         void Update() { m_Scheduler.Update(); }
     private:
-        typedef UNORDERED_MAP<uint32 /*InstanceId or MapId*/, MapPersistentState*> PersistentStateMap;
+        typedef UNORDERED_MAP < uint32 /*InstanceId or MapId*/, MapPersistentState* > PersistentStateMap;
 
         //  called by scheduler for DungeonPersistentStates
         void _ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeleft);
         void _ResetInstance(uint32 mapid, uint32 instanceId);
         void _CleanupExpiredInstancesAtTime(time_t t);
 
-        void _ResetSave(PersistentStateMap& holder, PersistentStateMap::iterator &itr);
-        void _DelHelper(DatabaseType &db, const char *fields, const char *table, const char *queryTail,...);
+        void _ResetSave(PersistentStateMap& holder, PersistentStateMap::iterator& itr);
+        void _DelHelper(DatabaseType& db, const char* fields, const char* table, const char* queryTail, ...);
         // used during global instance resets
         bool lock_instLists;
         // fast lookup by instance id for instanceable maps
@@ -375,7 +375,7 @@ inline void MapPersistentStateManager::DoForAllStatesWithMapId(uint32 mapId, Do&
 
     if (mapEntry->Instanceable())
     {
-        for(PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end();)
+        for (PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end();)
         {
             if (itr->second->GetMapId() == mapId)
                 _do((itr++)->second);

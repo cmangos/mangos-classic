@@ -43,7 +43,7 @@ class AuthSocket: public BufferedSocket
         void OnAccept();
         void OnRead();
         void SendProof(Sha1Hash sha);
-        void LoadRealmlist(ByteBuffer &pkt, uint32 acctid);
+        void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
 
         bool _HandleLogonChallenge();
         bool _HandleLogonProof();
