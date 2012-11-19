@@ -904,7 +904,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     else if (missInfo == SPELL_MISS_REFLECT)                // In case spell reflect from target, do all effect on caster (if hit)
     {
         if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
-            DoSpellHitOnUnit(m_caster, mask);
+        {
+            DoSpellHitOnUnit(m_caster, mask, true);
+            unitTarget = m_caster;
+        }
     }
     else                                                    // in 1.12.1 we need explicit miss info
     {
@@ -1051,7 +1054,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         ((Creature*)m_caster)->AI()->SpellHitTarget(unit, m_spellInfo);
 }
 
-void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
+void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
 {
     if (!unit || !effectMask)
         return;
@@ -1192,7 +1195,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
 
             if (duration > 0)
             {
-                unit->ApplyDiminishingToDuration(m_diminishGroup, duration, m_caster, m_diminishLevel);
+                unit->ApplyDiminishingToDuration(m_diminishGroup, duration, m_caster, m_diminishLevel, isReflected);
 
                 // Fully diminished
                 if (duration == 0)
@@ -1279,7 +1282,8 @@ void Spell::HandleDelayedSpellLaunch(TargetInfo* target)
     // Fill base damage struct (unitTarget - is real spell target)
     SpellNonMeleeDamage damageInfo(caster, unitTarget, m_spellInfo->Id, GetFirstSchoolInMask(m_spellSchoolMask));
 
-    if (missInfo == SPELL_MISS_NONE)
+    // keep damage amount for reflected spells
+    if (missInfo == SPELL_MISS_NONE || missInfo == SPELL_MISS_REFLECT)
     {
         for (int32 effectNumber = 0; effectNumber < MAX_EFFECT_INDEX; ++effectNumber)
         {
