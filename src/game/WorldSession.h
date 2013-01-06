@@ -233,7 +233,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendAuctionBidderNotification(AuctionEntry* auction, bool won);
         void SendAuctionOwnerNotification(AuctionEntry* auction, bool sold);
         void SendAuctionRemovedNotification(AuctionEntry* auction);
-        void SendAuctionOutbiddedMail(AuctionEntry* auction);
+        static void SendAuctionOutbiddedMail(AuctionEntry* auction);
         void SendAuctionCancelledToBidderMail(AuctionEntry* auction);
         AuctionHouseEntry const* GetCheckedAuctionHouseForAuctioneer(ObjectGuid guid);
 
@@ -484,6 +484,8 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleAuctionRemoveItem(WorldPacket& recv_data);
         void HandleAuctionListOwnerItems(WorldPacket& recv_data);
         void HandleAuctionPlaceBid(WorldPacket& recv_data);
+
+        void AuctionBind( uint32 price, AuctionEntry * auction, Player * pl, Player* auction_owner );
 
         void HandleGetMailList(WorldPacket& recv_data);
         void HandleSendMail(WorldPacket& recv_data);

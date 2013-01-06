@@ -93,7 +93,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
     // data for gm.log
     if (sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE))
     {
-        uint32 bidder_security = 0;
+        AccountTypes bidder_security = SEC_PLAYER;
         std::string bidder_name;
         if (bidder)
         {
@@ -103,8 +103,8 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
         }
         else
         {
-            bidder_accId = sObjectMgr.GetPlayerAccountIdByGUID(bidder_guid);
-            bidder_security = sAccountMgr.GetSecurity(bidder_accId);
+            bidder_accId = bidder_guid ? sObjectMgr.GetPlayerAccountIdByGUID(bidder_guid) : 0;
+            bidder_security = bidder_accId ? sAccountMgr.GetSecurity(bidder_accId) : SEC_PLAYER;
 
             if (bidder_security > SEC_PLAYER)               // not do redundant DB requests
             {
@@ -125,7 +125,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
                             bidder_name.c_str(), bidder_accId, auction->itemTemplate, auction->itemCount, auction->bid, owner_name.c_str(), owner_accid);
         }
     }
-    else if (!bidder)
+    else if (!bidder && bidder_guid)
         bidder_accId = sObjectMgr.GetPlayerAccountIdByGUID(bidder_guid);
 
     // receiver exist
@@ -539,25 +539,19 @@ void AuctionHouseObject::Update()
 
         if (curTime > itr->second->expireTime)
         {
-            ///- Either cancel the auction if there was no bidder
-            if (!itr->second->bidder)
-            {
-                sAuctionMgr.SendAuctionExpiredMail(itr->second);
-            }
-            ///- Or perform the transaction
+            ///- perform the transaction if there was bidder
+            if (itr->second->bid)
+                itr->second->AuctionBidWinning();
+            ///- cancel the auction if there was no bidder and clear the auction
             else
             {
-                //we send the item to the winner
-                //we send the money to the seller
-                sAuctionMgr.SendAuctionSuccessfulMail(itr->second);
-                sAuctionMgr.SendAuctionWonMail(itr->second);
-            }
+                sAuctionMgr.SendAuctionExpiredMail(itr->second);
 
-            ///- In any case clear the auction
-            itr->second->DeleteFromDB();
-            sAuctionMgr.RemoveAItem(itr->second->itemGuidLow);
-            delete itr->second;
-            RemoveAuction(itr->first);
+                itr->second->DeleteFromDB();
+                sAuctionMgr.RemoveAItem(itr->second->itemGuidLow);
+                delete itr->second;
+                RemoveAuction(itr->first);
+            }
         }
     }
 }
@@ -756,4 +750,65 @@ void AuctionEntry::SaveToDB() const
     CharacterDatabase.PExecute("INSERT INTO auction (id,houseid,itemguid,item_template,item_count,item_randompropertyid,itemowner,buyoutprice,time,buyguid,lastbid,startbid,deposit) "
                                "VALUES ('%u', '%u', '%u', '%u', '%u', '%i', '%u', '%u', '" UI64FMTD "', '%u', '%u', '%u', '%u')",
                                Id, auctionHouseEntry->houseId, itemGuidLow, itemTemplate, itemCount, itemRandomPropertyId, owner, buyout, (uint64)expireTime, bidder, bid, startbid, deposit);
+}
+
+void AuctionEntry::AuctionBidWinning(Player* newbidder)
+{
+    sAuctionMgr.SendAuctionSuccessfulMail(this);
+    sAuctionMgr.SendAuctionWonMail(this);
+
+    sAuctionMgr.RemoveAItem(this->itemGuidLow);
+    sAuctionMgr.GetAuctionsMap(this->auctionHouseEntry)->RemoveAuction(this->Id);
+
+    CharacterDatabase.BeginTransaction();
+    this->DeleteFromDB();
+    if (newbidder)
+        newbidder->SaveInventoryAndGoldToDB();
+    CharacterDatabase.CommitTransaction();
+
+    delete this;
+}
+
+bool AuctionEntry::UpdateBid(uint32 newbid, Player* newbidder /*=NULL*/)
+{
+    Player* auction_owner = owner ? sObjectMgr.GetPlayer(ObjectGuid(HIGHGUID_PLAYER, owner)) : NULL;
+
+    // bid can't be greater buyout
+    if (buyout && newbid > buyout)
+        newbid = buyout;
+
+    if (newbidder && newbidder->GetGUIDLow() == bidder)
+    {
+        newbidder->ModifyMoney(-int32(newbid - bid));
+    }
+    else
+    {
+        if (newbidder)
+            newbidder->ModifyMoney(-int32(newbid));
+
+        if (bidder)                                     // return money to old bidder if present
+            WorldSession::SendAuctionOutbiddedMail(this);
+    }
+
+    bidder = newbidder ? newbidder->GetGUIDLow() : 0;
+    bid = newbid;
+
+    if ((newbid < buyout) || (buyout == 0))                 // bid
+    {
+        if (auction_owner)
+            auction_owner->GetSession()->SendAuctionOwnerNotification(this, false);
+
+        // after this update we should save player's money ...
+        CharacterDatabase.BeginTransaction();
+        CharacterDatabase.PExecute("UPDATE auction SET buyguid = '%u', lastbid = '%u' WHERE id = '%u'", bidder, bid, Id);
+        if (newbidder)
+            newbidder->SaveInventoryAndGoldToDB();
+        CharacterDatabase.CommitTransaction();
+        return true;
+    }
+    else                                                    // buyout
+    {
+        AuctionBidWinning(newbidder);
+        return false;
+    }
 }
