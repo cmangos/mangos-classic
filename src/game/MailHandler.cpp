@@ -445,7 +445,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recv_data)
                     sender_accId = sender->GetSession()->GetAccountId();
                     sender_name = sender->GetName();
                 }
-                else
+                else if (sender_guid)
                 {
                     // can be calculated early
                     sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
