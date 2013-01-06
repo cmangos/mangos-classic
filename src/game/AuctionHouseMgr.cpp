@@ -391,7 +391,7 @@ void AuctionHouseMgr::LoadAuctions()
 
         auction->auctionHouseEntry = sAuctionHouseStore.LookupEntry(houseid);
 
-        if (!houseid)
+        if (!auction->auctionHouseEntry)
         {
             // need for send mail, use goblin auctionhouse
             auction->auctionHouseEntry = sAuctionHouseStore.LookupEntry(7);
@@ -530,12 +530,8 @@ void AuctionHouseObject::Update()
 {
     time_t curTime = sWorld.GetGameTime();
     ///- Handle expired auctions
-    AuctionEntryMap::iterator next;
-    for (AuctionEntryMap::iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); itr = next)
+    for (AuctionEntryMap::iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); )
     {
-        next = itr;
-        ++next;
-
         if (curTime > itr->second->expireTime)
         {
             ///- perform the transaction if there was bidder
@@ -549,9 +545,12 @@ void AuctionHouseObject::Update()
                 itr->second->DeleteFromDB();
                 sAuctionMgr.RemoveAItem(itr->second->itemGuidLow);
                 delete itr->second;
-                RemoveAuction(itr->first);
+                AuctionsMap.erase(itr++);
+                continue;
             }
         }
+
+        ++itr;
     }
 }
 
@@ -560,7 +559,7 @@ void AuctionHouseObject::BuildListBidderItems(WorldPacket& data, Player* player,
     for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
     {
         AuctionEntry* Aentry = itr->second;
-        if (Aentry && Aentry->bidder == player->GetGUIDLow())
+        if (Aentry->bidder == player->GetGUIDLow())
         {
             if (itr->second->BuildAuctionInfo(data))
                 ++count;
@@ -574,7 +573,7 @@ void AuctionHouseObject::BuildListOwnerItems(WorldPacket& data, Player* player, 
     for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
     {
         AuctionEntry* Aentry = itr->second;
-        if (Aentry && Aentry->owner == player->GetGUIDLow())
+        if (Aentry->owner == player->GetGUIDLow())
         {
             if (Aentry->BuildAuctionInfo(data))
                 ++count;
