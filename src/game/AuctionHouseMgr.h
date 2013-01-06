@@ -95,7 +95,7 @@ class AuctionHouseObject
 
         uint32 GetCount() { return AuctionsMap.size(); }
 
-        AuctionEntryMap* GetAuctions() { return &AuctionsMap; }
+        AuctionEntryMap const& GetAuctions() const { return AuctionsMap; }
 
         void AddAuction(AuctionEntry* ah)
         {
