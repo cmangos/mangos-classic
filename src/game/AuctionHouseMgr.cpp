@@ -356,7 +356,7 @@ void AuctionHouseMgr::LoadAuctions()
         auction->itemRandomPropertyId = fields[5].GetUInt32();
         auction->owner = fields[6].GetUInt32();
         auction->buyout = fields[7].GetUInt32();
-        auction->expireTime = fields[8].GetUInt32();
+        auction->expireTime = time_t(fields[8].GetUInt64());
         auction->bidder = fields[9].GetUInt32();
         auction->bid = fields[10].GetUInt32();
         auction->startbid = fields[11].GetUInt32();

@@ -273,7 +273,7 @@ bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
     m_BackgroundColor = fields[7].GetUInt32();
     GINFO             = fields[8].GetCppString();
     MOTD              = fields[9].GetCppString();
-    time_t time       = fields[10].GetUInt64();
+    time_t time       = time_t(fields[10].GetUInt64());
 
     if (time > 0)
     {
