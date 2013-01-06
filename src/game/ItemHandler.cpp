@@ -290,28 +290,20 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(item);
     if (pProto)
     {
-        std::string Name        = pProto->Name1;
-        std::string Description = pProto->Description;
-
         int loc_idx = GetSessionDbLocaleIndex();
-        if (loc_idx >= 0)
-        {
-            ItemLocale const* il = sObjectMgr.GetItemLocale(pProto->ItemId);
-            if (il)
-            {
-                if (il->Name.size() > size_t(loc_idx) && !il->Name[loc_idx].empty())
-                    Name = il->Name[loc_idx];
-                if (il->Description.size() > size_t(loc_idx) && !il->Description[loc_idx].empty())
-                    Description = il->Description[loc_idx];
-            }
-        }
+        
+        std::string name = pProto->Name1;
+        std::string description = pProto->Description;
+        sObjectMgr.GetItemLocaleStrings(pProto->ItemId, loc_idx, &name, &description);
+
+        
         // guess size
         WorldPacket data(SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);
         data << pProto->ItemId;
         data << pProto->Class;
         // client known only 0 subclass (and 1-2 obsolute subclasses)
         data << (pProto->Class == ITEM_CLASS_CONSUMABLE ? uint32(0) : pProto->SubClass);
-        data << Name;
+        data << name;
         data << uint8(0x00);                                //pProto->Name2; // blizz not send name there, just uint8(0x00); <-- \0 = empty string = empty name...
         data << uint8(0x00);                                //pProto->Name3; // blizz not send name there, just uint8(0x00);
         data << uint8(0x00);                                //pProto->Name4; // blizz not send name there, just uint8(0x00);
@@ -397,7 +389,7 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
             }
         }
         data << pProto->Bonding;
-        data << Description;
+        data << description;
         data << pProto->PageText;
         data << pProto->LanguageID;
         data << pProto->PageMaterial;
@@ -1032,26 +1024,17 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket& recv_data)
     recv_data.read_skip<uint64>();                          // guid
 
     DEBUG_LOG("WORLD: CMSG_ITEM_NAME_QUERY %u", itemid);
-    ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid);
-    if (pProto)
+    if (ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid))
     {
-        std::string Name;
-        Name = pProto->Name1;
-
         int loc_idx = GetSessionDbLocaleIndex();
-        if (loc_idx >= 0)
-        {
-            ItemLocale const* il = sObjectMgr.GetItemLocale(pProto->ItemId);
-            if (il)
-            {
-                if (il->Name.size() > size_t(loc_idx) && !il->Name[loc_idx].empty())
-                    Name = il->Name[loc_idx];
-            }
-        }
+        
+        std::string name = pProto->Name1;
+        sObjectMgr.GetItemLocaleStrings(pProto->ItemId, loc_idx, &name);
+        
         // guess size
         WorldPacket data(SMSG_ITEM_NAME_QUERY_RESPONSE, (4 + 10));
         data << uint32(pProto->ItemId);
-        data << Name;
+        data << name;
         data << uint32(pProto->InventoryType);
         SendPacket(&data);
         return;

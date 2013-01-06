@@ -618,19 +618,7 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
                 continue;
 
             std::string name = proto->Name1;
-            if (name.empty())
-                continue;
-
-            // local name
-            if (loc_idx >= 0)
-            {
-                ItemLocale const* il = sObjectMgr.GetItemLocale(proto->ItemId);
-                if (il)
-                {
-                    if (il->Name.size() > size_t(loc_idx) && !il->Name[loc_idx].empty())
-                        name = il->Name[loc_idx];
-                }
-            }
+            sObjectMgr.GetItemLocaleStrings(proto->ItemId, loc_idx, &name);
 
             if (!wsearchedname.empty() && !Utf8FitTo(name, wsearchedname))
                 continue;
