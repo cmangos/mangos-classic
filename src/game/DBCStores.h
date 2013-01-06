@@ -85,6 +85,7 @@ extern DBCStorage <FactionTemplateEntry>         sFactionTemplateStore;
 extern DBCStorage <GameObjectDisplayInfoEntry>   sGameObjectDisplayInfoStore;
 
 extern DBCStorage <ItemBagFamilyEntry>           sItemBagFamilyStore;
+extern DBCStorage <ItemClassEntry>               sItemClassStore;
 //extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
 extern DBCStorage <ItemRandomPropertiesEntry>    sItemRandomPropertiesStore;
 extern DBCStorage <ItemSetEntry>                 sItemSetStore;

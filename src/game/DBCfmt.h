@@ -42,6 +42,7 @@ const char FactionEntryfmt[] = "niiiiiiiiiiiiiiiiiissssssssxxxxxxxxxx";
 const char FactionTemplateEntryfmt[] = "niiiiiiiiiiiii";
 const char GameObjectDisplayInfofmt[] = "nxxxxxxxxxxx";
 const char ItemBagFamilyfmt[] = "nxxxxxxxxx";
+const char ItemClassfmt[]="nxxsssssssss";
 //const char ItemDisplayTemplateEntryfmt[]="nxxxxxxxxxxixxxxxxxxxxx";
 const char ItemRandomPropertiesfmt[] = "nxiiixxxxxxxxxxx";
 const char ItemSetEntryfmt[] = "dssssssssxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";

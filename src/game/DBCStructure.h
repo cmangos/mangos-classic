@@ -369,6 +369,14 @@ struct ItemBagFamilyEntry
     //                                                      // 9        name flags
 };
 
+struct ItemClassEntry
+{
+    uint32   ID;                                            // 0        m_ID
+    //uint32   unk1;                                        // 1
+    //uint32   unk2;                                        // 2        only weapon have 1 in field, other 0
+    char*    name[9];                                       // 3-12     m_name_lang
+};
+
 struct ItemDisplayInfoEntry
 {
     uint32      ID;
