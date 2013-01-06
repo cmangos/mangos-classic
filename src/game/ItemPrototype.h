@@ -155,7 +155,7 @@ enum ItemClass
     ITEM_CLASS_QUEST                            = 12,
     ITEM_CLASS_KEY                              = 13,
     ITEM_CLASS_PERMANENT                        = 14,
-    ITEM_CLASS_JUNK                             = 15
+    ITEM_CLASS_MISC                             = 15
 };
 
 #define MAX_ITEM_CLASS                            16
