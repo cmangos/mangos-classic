@@ -202,16 +202,16 @@ COMMIT_HASH=$(git show -s --pretty=format:'%h' ${ORIG_REF})
 # subject (with removed revision number)
 COMMIT_SUBJECT=$(git show -s --pretty=format:'%s' ${ORIG_REF} | sed -r 's/\[[a-z]?[0-9]*\] //')
 [[ $? != 0 ]] && exit 1
-COMMIT_REVISION=$(git show -s --pretty=format:'%s' ${ORIG_REF} | sed -r 's/\[([a-z]?[0-9]*).*/\1/')
+COMMIT_REVISION=$(git show -s --pretty=format:'%s' ${ORIG_REF} | sed -nr 's/^\[([a-z]?[0-9]*).*/\1/p')
 [[ $? != 0 ]] && exit 1
-if [ "$COMMIT_REVISION" != "" ]; then COMMIT_REVISION="[$COMMIT_REVISION] -"; fi
+if [ "$COMMIT_REVISION" != "" ]; then COMMIT_REVISION="[$COMMIT_REVISION] - "; fi
 
 # body
 COMMIT_BODY=$(git show -s --pretty=format:'%b' ${ORIG_REF})
 [[ $? != 0 ]] && exit 1
 
 # whole message (yea, it could be done without echo)
-COMMIT_MESSAGE=$(echo -e "${COMMIT_SUBJECT}\n\n${COMMIT_BODY}\n\n(based on commit $COMMIT_REVISION ${COMMIT_HASH})")
+COMMIT_MESSAGE=$(echo -e "${COMMIT_SUBJECT}\n\n${COMMIT_BODY}\n\n(based on commit $COMMIT_REVISION${COMMIT_HASH})")
 [[ $? != 0 ]] && exit 1
 
 ## new empty commit ready, so create it
