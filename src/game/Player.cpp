@@ -16298,6 +16298,31 @@ void Player::RemoveSpellMods(Spell const* spell)
     }
 }
 
+void Player::ResetSpellModsDueToCanceledSpell (Spell const* spell)
+{
+    for(int i = 0; i < MAX_SPELLMOD; ++i )
+    {
+        for (SpellModList::const_iterator itr = m_spellMods[i].begin(); itr != m_spellMods[i].end(); ++itr)
+        {
+            SpellModifier *mod = *itr;
+
+            if (mod->lastAffected != spell)
+                continue;
+
+            mod->lastAffected = NULL;
+
+            if (mod->charges == -1)
+            {
+                mod->charges = 1;
+                if (m_SpellModRemoveCount > 0)
+                    --m_SpellModRemoveCount;
+            }
+            else if (mod->charges > 0)
+                ++mod->charges;
+        }
+    }
+}
+
 // send Proficiency
 void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask)
 {
