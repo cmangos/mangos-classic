@@ -3795,6 +3795,13 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (!m_IsTriggeredSpell && IsDeathOnlySpell(m_spellInfo) && target->isAlive())
             return SPELL_FAILED_TARGET_NOT_DEAD;
 
+        // totem immunity for channeled spells(needs to be before spell cast)
+        // spell attribs for player channeled spells
+        if ((m_spellInfo->AttributesEx & SPELL_ATTR_EX_UNK14)
+            && target->GetTypeId() == TYPEID_UNIT
+            && ((Creature*)target)->IsTotem())
+            return SPELL_FAILED_IMMUNE;
+
         bool non_caster_target = target != m_caster && !IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
 
         if (non_caster_target)

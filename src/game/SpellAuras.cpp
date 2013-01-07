@@ -302,8 +302,6 @@ AreaAura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* cu
     {
         case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
             m_areaAuraType = AREA_AURA_PARTY;
-            if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsTotem())
-                m_modifier.m_auraname = SPELL_AURA_NONE;
             break;
         case SPELL_EFFECT_APPLY_AREA_AURA_PET:
             m_areaAuraType = AREA_AURA_PET;
@@ -313,6 +311,10 @@ AreaAura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* cu
             MANGOS_ASSERT(false);
             break;
     }
+
+    // totems are immune to any kind of area auras
+    if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsTotem())
+        m_modifier.m_auraname = SPELL_AURA_NONE;
 }
 
 AreaAura::~AreaAura()
