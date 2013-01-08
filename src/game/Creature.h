@@ -510,8 +510,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         void SetWalk(bool enable);
         void SetLevitate(bool enable);
-        bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_LEVITATING);}
-        bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALK_MODE);}
 
         uint32 GetShieldBlockValue() const                  // dunno mob block value
         {

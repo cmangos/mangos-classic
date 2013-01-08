@@ -83,6 +83,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner)
 
     Movement::MoveSplineInit init(owner);
     init.MoveTo(x, y, z);
+    init.SetWalk(((D*)this)->EnableWalking());
     init.Launch();
 }
 
@@ -217,15 +218,15 @@ void ChaseMovementGenerator<T>::Reset(T& owner)
 
 //-----------------------------------------------//
 template<>
-void FollowMovementGenerator<Creature>::_updateWalkMode(Creature& u)
+bool FollowMovementGenerator<Creature>::EnableWalking() const
 {
-    if (i_target.isValid() && u.IsPet())
-        u.UpdateWalkMode(i_target.getTarget());
+    return i_target.isValid() && i_target->IsWalking();
 }
 
 template<>
-void FollowMovementGenerator<Player>::_updateWalkMode(Player&)
+bool FollowMovementGenerator<Player>::EnableWalking() const
 {
+    return false;
 }
 
 template<>
@@ -250,7 +251,6 @@ template<>
 void FollowMovementGenerator<Player>::Initialize(Player& owner)
 {
     owner.addUnitState(UNIT_STAT_FOLLOW | UNIT_STAT_FOLLOW_MOVE);
-    _updateWalkMode(owner);
     _updateSpeed(owner);
     _setTargetLocation(owner);
 }
@@ -259,7 +259,6 @@ template<>
 void FollowMovementGenerator<Creature>::Initialize(Creature& owner)
 {
     owner.addUnitState(UNIT_STAT_FOLLOW | UNIT_STAT_FOLLOW_MOVE);
-    _updateWalkMode(owner);
     _updateSpeed(owner);
     _setTargetLocation(owner);
 }
@@ -268,7 +267,6 @@ template<class T>
 void FollowMovementGenerator<T>::Finalize(T& owner)
 {
     owner.clearUnitState(UNIT_STAT_FOLLOW | UNIT_STAT_FOLLOW_MOVE);
-    _updateWalkMode(owner);
     _updateSpeed(owner);
 }
 
@@ -276,7 +274,6 @@ template<class T>
 void FollowMovementGenerator<T>::Interrupt(T& owner)
 {
     owner.clearUnitState(UNIT_STAT_FOLLOW | UNIT_STAT_FOLLOW_MOVE);
-    _updateWalkMode(owner);
     _updateSpeed(owner);
 }
 
