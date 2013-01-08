@@ -986,7 +986,7 @@ void World::SetInitialWorldSettings()
     sLog.outString();
 
     sLog.outString("Loading Gameobject Data...");
-    sObjectMgr.LoadGameobjects();
+    sObjectMgr.LoadGameObjects();
 
     sLog.outString("Loading Objects Pooling Data...");
     sPoolMgr.LoadFromDB();
@@ -1015,7 +1015,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature Respawn Data...");     // must be after LoadCreatures(), and sMapPersistentStateMgr.InitWorldMaps()
     sMapPersistentStateMgr.LoadCreatureRespawnTimes();
 
-    sLog.outString("Loading Gameobject Respawn Data...");   // must be after LoadGameobjects(), and sMapPersistentStateMgr.InitWorldMaps()
+    sLog.outString("Loading Gameobject Respawn Data...");   // must be after LoadGameObjects(), and sMapPersistentStateMgr.InitWorldMaps()
     sMapPersistentStateMgr.LoadGameobjectRespawnTimes();
 
     sLog.outString("Loading SpellArea Data...");            // must be after quest load

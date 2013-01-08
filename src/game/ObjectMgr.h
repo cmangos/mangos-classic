@@ -606,7 +606,7 @@ class ObjectMgr
         void LoadCreatureModelInfo();
         void LoadEquipmentTemplates();
         void LoadGameObjectLocales();
-        void LoadGameobjects();
+        void LoadGameObjects();
         void LoadItemPrototypes();
         void LoadItemRequiredTarget();
         void LoadItemLocales();
