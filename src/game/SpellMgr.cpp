@@ -669,6 +669,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
         case SPELL_EFFECT_HEAL:
         case SPELL_EFFECT_LEARN_SPELL:
         case SPELL_EFFECT_SKILL_STEP:
+        case SPELL_EFFECT_QUEST_COMPLETE:
             return true;
 
             // non-positive aura use
