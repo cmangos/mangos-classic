@@ -20,8 +20,6 @@
 #include "MotionMaster.h"
 #include "CreatureAISelector.h"
 #include "Creature.h"
-#include "Traveller.h"
-
 #include "ConfusedMovementGenerator.h"
 #include "FleeingMovementGenerator.h"
 #include "HomeMovementGenerator.h"
@@ -30,6 +28,7 @@
 #include "TargetedMovementGenerator.h"
 #include "WaypointMovementGenerator.h"
 #include "RandomMovementGenerator.h"
+#include "movement/MoveSpline.h"
 
 #include <cassert>
 
@@ -455,10 +454,14 @@ MovementGeneratorType MotionMaster::GetCurrentMovementGeneratorType() const
 
 bool MotionMaster::GetDestination(float& x, float& y, float& z)
 {
-    if (empty())
+    if (m_owner->movespline->Finalized())
         return false;
 
-    return top()->GetDestination(x, y, z);
+    const G3D::Vector3& dest = m_owner->movespline->FinalDestination();
+    x = dest.x;
+    y = dest.y;
+    z = dest.z;
+    return true;
 }
 
 void MotionMaster::UpdateFinalDistanceToTarget(float fDistance)

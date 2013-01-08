@@ -1585,6 +1585,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
     m_movementInfo.SetMovementFlags(MOVEMENTFLAG_NONE);
+    DisableSpline();
 
     if ((GetMapId() == mapid) && (!m_transport))
     {
@@ -17304,9 +17305,6 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
             // send data at target visibility change (adding to client)
             if (target != this && target->isType(TYPEMASK_UNIT))
                 SendAuraDurationsForTarget((Unit*)target);
-
-            if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->isAlive())
-                ((Creature*)target)->SendMonsterMoveWithSpeedToCurrentDestination(this);
         }
     }
 }

@@ -21,8 +21,6 @@
 #define MANGOS_FLEEINGMOVEMENTGENERATOR_H
 
 #include "MovementGenerator.h"
-#include "DestinationHolder.h"
-#include "Traveller.h"
 #include "ObjectGuid.h"
 
 template<class T>
@@ -58,8 +56,6 @@ class MANGOS_DLL_SPEC FleeingMovementGenerator
         float i_cur_angle;
         ObjectGuid i_frightGuid;
         TimeTracker i_nextCheckTime;
-
-        DestinationHolder< Traveller<T> > i_destinationHolder;
 };
 
 class MANGOS_DLL_SPEC TimedFleeingMovementGenerator

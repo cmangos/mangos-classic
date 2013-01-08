@@ -39,10 +39,9 @@
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
-
 #include "ObjectPosSelector.h"
-
 #include "TemporarySummon.h"
+#include "movement/packet_builder.h"
 
 Object::Object()
 {

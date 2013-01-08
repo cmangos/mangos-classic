@@ -28,7 +28,6 @@
 #include "UpdateMask.h"
 #include "Path.h"
 #include "WaypointMovementGenerator.h"
-#include "DestinationHolderImp.h"
 
 void WorldSession::HandleTaxiNodeStatusQueryOpcode(WorldPacket& recv_data)
 {
