@@ -6711,7 +6711,7 @@ bool PlayerCondition::Meets(Player const* player) const
             return player->GetQuestRewardStatus(value1);
         case CONDITION_QUESTTAKEN:
         {
-            return player->IsCurrentQuest(value1);
+            return player->IsCurrentQuest(value1, value2);
         }
         case CONDITION_AD_COMMISSION_AURA:
         {
@@ -6962,7 +6962,7 @@ bool PlayerCondition::IsValid(ConditionType condition, uint32 value1, uint32 val
                 return false;
             }
 
-            if (value2)
+            if (value2 && condition != CONDITION_QUESTTAKEN)
                 sLog.outErrorDb("Quest condition (%u) has useless data in value2 (%u)!", condition, value2);
             break;
         }
