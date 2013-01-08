@@ -553,29 +553,6 @@ MovementFlags const movementOrTurningFlagsMask = MovementFlags(
             movementFlagsMask | MOVEFLAG_TURN_LEFT | MOVEFLAG_TURN_RIGHT
         );
 
-// used in SMSG_MONSTER_MOVE
-// only some values known as correct for 2.4.3
-enum SplineFlags
-{
-    SPLINEFLAG_NONE         = 0x00000000,
-    SPLINEFLAG_WALKMODE     = 0x00000100,
-    SPLINEFLAG_FLYING       = 0x00000200,
-    // backported flag to preserve compatibility not confirmed by data, but causes no problems
-    SPLINEFLAG_NO_SPLINE    = 0x00000400,               // former: SPLINEFLAG_LEVITATING
-    SPLINEFLAG_FALLING      = 0x00001000,
-    SPLINEFLAG_SPLINE       = 0x00002000,               // spline n*(float x,y,z)
-    SPLINEFLAG_UNKNOWN7     = 0x02000000,               // swimming/flying (depends on mob?)
-};
-
-enum SplineType
-{
-    SPLINETYPE_NORMAL       = 0,
-    SPLINETYPE_STOP         = 1,
-    SPLINETYPE_FACINGSPOT   = 2,
-    SPLINETYPE_FACINGTARGET = 3,
-    SPLINETYPE_FACINGANGLE  = 4
-};
-
 class MovementInfo
 {
     public:

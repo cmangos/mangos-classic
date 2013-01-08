@@ -313,7 +313,7 @@ void FlightPathMovementGenerator::Reset(Player& player)
 
 bool FlightPathMovementGenerator::Update(Player& player, const uint32& diff)
 {
-    int32 pointId = (uint32)player.movespline->currentPathIdx();
+    uint32 pointId = (uint32)player.movespline->currentPathIdx();
     if (pointId > i_currentNode)
     {
         bool departureEvent = true;

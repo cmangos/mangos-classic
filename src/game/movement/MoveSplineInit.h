@@ -114,12 +114,6 @@ namespace Movement
         args.path[1] = dest;
     }
 
-    inline void MoveSplineInit::SetFacing(float o)
-    {
-        args.facing.angle = G3D::wrap(o, 0.f, (float)G3D::twoPi());
-        args.flags.EnableFacingAngle();
-    }
-
     inline void MoveSplineInit::SetFacing(Vector3 const& spot)
     {
         args.facing.f.x = spot.x;

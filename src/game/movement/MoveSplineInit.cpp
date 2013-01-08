@@ -96,4 +96,10 @@ namespace Movement
         args.flags.EnableFacingTarget();
         args.facing.target = target->GetObjectGuid().GetRawValue();
     }
+
+    void MoveSplineInit::SetFacing(float angle)
+    {
+        args.facing.angle = G3D::wrap(angle, 0.f, (float)G3D::twoPi());
+        args.flags.EnableFacingAngle();
+    }
 }
