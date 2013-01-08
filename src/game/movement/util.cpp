@@ -163,7 +163,7 @@ namespace Movement
         STR(Unknown6),         // 0x00000020,
         STR(Unknown7),         // 0x00000040,
         STR(Unknown8),         // 0x00000080,
-        STR(Walkmode),         // 0x00000100,
+        STR(Runmode),          // 0x00000100,
         STR(Flying),           // 0x00000200,
         STR(No_Spline),        // 0x00000400,
         STR(Unknown12),        // 0x00000800,

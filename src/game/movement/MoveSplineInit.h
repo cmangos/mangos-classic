@@ -90,7 +90,7 @@ namespace Movement
     };
 
     inline void MoveSplineInit::SetFly() { args.flags.flying = true;}
-    inline void MoveSplineInit::SetWalk(bool enable) { args.flags.walkmode = enable;}
+    inline void MoveSplineInit::SetWalk(bool enable) { args.flags.runmode = !enable;}
     inline void MoveSplineInit::SetCyclic() { args.flags.cyclic = true;}
     inline void MoveSplineInit::SetFall() { args.flags.falling = true;}
     inline void MoveSplineInit::SetVelocity(float vel) { args.velocity = vel;}

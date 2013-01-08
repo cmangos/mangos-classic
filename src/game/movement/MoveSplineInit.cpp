@@ -62,10 +62,10 @@ namespace Movement
         // corrent first vertex
         args.path[0] = real_position;
         uint32 moveFlags = unit.m_movementInfo.GetMovementFlags();
-        if (args.flags.walkmode)
-            moveFlags |= MOVEMENTFLAG_WALK_MODE;
-        else
+        if (args.flags.runmode)
             moveFlags &= ~MOVEMENTFLAG_WALK_MODE;
+        else
+            moveFlags |= MOVEMENTFLAG_WALK_MODE;
 
         moveFlags |= (MOVEMENTFLAG_SPLINE_ENABLED | MOVEMENTFLAG_FORWARD);
 
@@ -87,7 +87,7 @@ namespace Movement
     MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)
     {
         // mix existing state into new
-        args.flags.walkmode = unit.m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALK_MODE);
+        args.flags.runmode = !unit.m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALK_MODE);
         args.flags.flying = unit.m_movementInfo.HasMovementFlag((MovementFlags)(MOVEMENTFLAG_FLYING | MOVEMENTFLAG_LEVITATING));
     }
 
