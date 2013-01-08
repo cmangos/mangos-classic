@@ -52,7 +52,6 @@ namespace Movement
             data << int8(mov.m_unused.transport_seat);
         }*/
 
-        data << uint8(0);
         data << move_spline.spline.getPoint(move_spline.spline.first());
         data << move_spline.GetId();
 
