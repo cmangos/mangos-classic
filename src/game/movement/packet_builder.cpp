@@ -76,7 +76,8 @@ namespace Movement
 
         // add fake Enter_Cycle flag - needed for client-side cyclic movement (client will erase first spline vertex after first cycle done)
         splineflags.enter_cycle = move_spline.isCyclic();
-        data << uint32(splineflags & ~MoveSplineFlag::Mask_No_Monster_Move);
+        // add fake Runmode flag - client has strange issues without that flag
+        data << uint32(splineflags & ~MoveSplineFlag::Mask_No_Monster_Move | MoveSplineFlag::Runmode);
         data << move_spline.Duration();
     }
 
