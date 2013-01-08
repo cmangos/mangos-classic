@@ -1108,6 +1108,11 @@ void ObjectMgr::LoadGameObjects()
         data.rotation2      = fields[ 9].GetFloat();
         data.rotation3      = fields[10].GetFloat();
         data.spawntimesecs  = fields[11].GetInt32();
+        data.animprogress   = fields[12].GetUInt32();
+        uint32 go_state     = fields[13].GetUInt32();
+        int16 gameEvent     = fields[14].GetInt16();
+        int16 GuidPoolId    = fields[15].GetInt16();
+        int16 EntryPoolId   = fields[16].GetInt16();
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -1121,19 +1126,12 @@ void ObjectMgr::LoadGameObjects()
             sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with `spawntimesecs` (0) value, but gameobejct marked as despawnable at action.", guid, data.id);
         }
 
-        data.animprogress   = fields[12].GetUInt32();
-
-        uint32 go_state     = fields[13].GetUInt32();
         if (go_state >= MAX_GO_STATE)
         {
             sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with invalid `state` (%u) value, skip", guid, data.id, go_state);
             continue;
         }
         data.go_state       = GOState(go_state);
-
-        int16 gameEvent     = fields[14].GetInt16();
-        int16 GuidPoolId    = fields[15].GetInt16();
-        int16 EntryPoolId   = fields[16].GetInt16();
 
         if (data.rotation0 < -1.0f || data.rotation0 > 1.0f)
         {
@@ -1167,6 +1165,7 @@ void ObjectMgr::LoadGameObjects()
 
         if (gameEvent == 0 && GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
             AddGameobjectToGrid(guid, &data);
+
         ++count;
 
     }
