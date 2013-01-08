@@ -354,8 +354,10 @@ void DungeonResetScheduler::LoadResetTimes()
             do
             {
                 Field* fields = result->Fetch();
-                uint32 instance = fields[1].GetUInt32();
-                time_t resettime = time_t(fields[0].GetUInt64() + 2 * HOUR);
+
+                time_t resettime    = time_t(fields[0].GetUInt64() + 2 * HOUR);
+                uint32 instance     = fields[1].GetUInt32();
+
                 ResetTimeMapType::iterator itr = InstResetTime.find(instance);
                 if (itr != InstResetTime.end() && itr->second.second != resettime)
                 {
@@ -382,7 +384,8 @@ void DungeonResetScheduler::LoadResetTimes()
         do
         {
             Field* fields = result->Fetch();
-            uint32 mapid = fields[0].GetUInt32();
+
+            uint32 mapid            = fields[0].GetUInt32();
 
             MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
 
@@ -908,6 +911,7 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
 
     uint32 count = 0;
 
+    //
     QueryResult* result = CharacterDatabase.Query("SELECT guid, respawntime, map, instance, resettime FROM creature_respawn LEFT JOIN instance ON instance = id");
     if (!result)
     {
@@ -927,12 +931,11 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
         Field* fields = result->Fetch();
         bar.step();
 
-        uint32 loguid       = fields[0].GetUInt32();
-        uint64 respawn_time = fields[1].GetUInt64();
-        uint32 mapId        = fields[2].GetUInt32();
-        uint32 instanceId   = fields[3].GetUInt32();
-
-        time_t resetTime = (time_t)fields[4].GetUInt64();
+        uint32 loguid               = fields[0].GetUInt32();
+        uint64 respawn_time         = fields[1].GetUInt64();
+        uint32 mapId                = fields[2].GetUInt32();
+        uint32 instanceId           = fields[3].GetUInt32();
+        time_t resetTime            = (time_t)fields[4].GetUInt64();
 
         CreatureData const* data = sObjectMgr.GetCreatureData(loguid);
         if (!data)
@@ -969,6 +972,7 @@ void MapPersistentStateManager::LoadGameobjectRespawnTimes()
 
     uint32 count = 0;
 
+    //
     QueryResult* result = CharacterDatabase.Query("SELECT guid, respawntime, map, instance, resettime FROM gameobject_respawn LEFT JOIN instance ON instance = id");
 
     if (!result)
@@ -989,12 +993,11 @@ void MapPersistentStateManager::LoadGameobjectRespawnTimes()
         Field* fields = result->Fetch();
         bar.step();
 
-        uint32 loguid       = fields[0].GetUInt32();
-        uint64 respawn_time = fields[1].GetUInt64();
-        uint32 mapId        = fields[2].GetUInt32();
-        uint32 instanceId   = fields[3].GetUInt32();
-
-        time_t resetTime = (time_t)fields[4].GetUInt64();
+        uint32 loguid               = fields[0].GetUInt32();
+        uint64 respawn_time         = fields[1].GetUInt64();
+        uint32 mapId                = fields[2].GetUInt32();
+        uint32 instanceId           = fields[3].GetUInt32();
+        time_t resetTime            = (time_t)fields[4].GetUInt64();
 
         GameObjectData const* data = sObjectMgr.GetGOData(loguid);
         if (!data)
