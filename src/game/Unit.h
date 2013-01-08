@@ -514,57 +514,57 @@ enum NPCFlags
 // used in most movement packets (send and received)
 enum MovementFlags
 {
-    MOVEMENTFLAG_NONE               = 0x00000000,
-    MOVEMENTFLAG_FORWARD            = 0x00000001,
-    MOVEMENTFLAG_BACKWARD           = 0x00000002,
-    MOVEMENTFLAG_STRAFE_LEFT        = 0x00000004,
-    MOVEMENTFLAG_STRAFE_RIGHT       = 0x00000008,
-    MOVEMENTFLAG_TURN_LEFT          = 0x00000010,
-    MOVEMENTFLAG_TURN_RIGHT         = 0x00000020,
-    MOVEMENTFLAG_PITCH_UP           = 0x00000040,
-    MOVEMENTFLAG_PITCH_DOWN         = 0x00000080,
-    MOVEMENTFLAG_WALK_MODE          = 0x00000100,               // Walking
+    MOVEFLAG_NONE               = 0x00000000,
+    MOVEFLAG_FORWARD            = 0x00000001,
+    MOVEFLAG_BACKWARD           = 0x00000002,
+    MOVEFLAG_STRAFE_LEFT        = 0x00000004,
+    MOVEFLAG_STRAFE_RIGHT       = 0x00000008,
+    MOVEFLAG_TURN_LEFT          = 0x00000010,
+    MOVEFLAG_TURN_RIGHT         = 0x00000020,
+    MOVEFLAG_PITCH_UP           = 0x00000040,
+    MOVEFLAG_PITCH_DOWN         = 0x00000080,
+    MOVEFLAG_WALK_MODE          = 0x00000100,               // Walking
 
-    MOVEMENTFLAG_LEVITATING         = 0x00000400,
-    MOVEMENTFLAG_ROOT               = 0x00000800,               // [-ZERO] is it really need and correct value
-    MOVEMENTFLAG_FALLING            = 0x00002000,
-    MOVEMENTFLAG_FALLINGFAR         = 0x00004000,
-    MOVEMENTFLAG_SWIMMING           = 0x00200000,               // appears with fly flag also
-    MOVEMENTFLAG_ASCENDING          = 0x00400000,               // [-ZERO] is it really need and correct value
-    MOVEMENTFLAG_CAN_FLY            = 0x00800000,               // [-ZERO] is it really need and correct value
-    MOVEMENTFLAG_FLYING             = 0x01000000,               // [-ZERO] is it really need and correct value
+    MOVEFLAG_LEVITATING         = 0x00000400,
+    MOVEFLAG_ROOT               = 0x00000800,               // [-ZERO] is it really need and correct value
+    MOVEFLAG_FALLING            = 0x00002000,
+    MOVEFLAG_FALLINGFAR         = 0x00004000,
+    MOVEFLAG_SWIMMING           = 0x00200000,               // appears with fly flag also
+    MOVEFLAG_ASCENDING          = 0x00400000,               // [-ZERO] is it really need and correct value
+    MOVEFLAG_CAN_FLY            = 0x00800000,               // [-ZERO] is it really need and correct value
+    MOVEFLAG_FLYING             = 0x01000000,               // [-ZERO] is it really need and correct value
 
-    MOVEMENTFLAG_ONTRANSPORT        = 0x02000000,               // Used for flying on some creatures
-    MOVEMENTFLAG_SPLINE_ELEVATION   = 0x04000000,               // used for flight paths
-    MOVEMENTFLAG_SPLINE_ENABLED     = 0x08000000,               // used for flight paths
-    MOVEMENTFLAG_WATERWALKING       = 0x10000000,               // prevent unit from falling through water
-    MOVEMENTFLAG_SAFE_FALL          = 0x20000000,               // active rogue safe fall spell (passive)
-    MOVEMENTFLAG_HOVER              = 0x40000000
+    MOVEFLAG_ONTRANSPORT        = 0x02000000,               // Used for flying on some creatures
+    MOVEFLAG_SPLINE_ELEVATION   = 0x04000000,               // used for flight paths
+    MOVEFLAG_SPLINE_ENABLED     = 0x08000000,               // used for flight paths
+    MOVEFLAG_WATERWALKING       = 0x10000000,               // prevent unit from falling through water
+    MOVEFLAG_SAFE_FALL          = 0x20000000,               // active rogue safe fall spell (passive)
+    MOVEFLAG_HOVER              = 0x40000000
 };
 
 // flags that use in movement check for example at spell casting
 MovementFlags const movementFlagsMask = MovementFlags(
-        MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD  | MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT |
-        MOVEMENTFLAG_PITCH_UP | MOVEMENTFLAG_PITCH_DOWN | MOVEMENTFLAG_ROOT        |
-        MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLINGFAR | MOVEMENTFLAG_SPLINE_ELEVATION
+        MOVEFLAG_FORWARD | MOVEFLAG_BACKWARD  | MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT |
+        MOVEFLAG_PITCH_UP | MOVEFLAG_PITCH_DOWN | MOVEFLAG_ROOT        |
+        MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR | MOVEFLAG_SPLINE_ELEVATION
                                         );
 
 MovementFlags const movementOrTurningFlagsMask = MovementFlags(
-            movementFlagsMask | MOVEMENTFLAG_TURN_LEFT | MOVEMENTFLAG_TURN_RIGHT
+            movementFlagsMask | MOVEFLAG_TURN_LEFT | MOVEFLAG_TURN_RIGHT
         );
 
 // used in SMSG_MONSTER_MOVE
 // only some values known as correct for 2.4.3
 enum SplineFlags
 {
-    SPLINEFLAG_NONE           = 0x00000000,
-    SPLINEFLAG_WALKMODE       = 0x00000100,
-    SPLINEFLAG_FLYING         = 0x00000200,
+    SPLINEFLAG_NONE         = 0x00000000,
+    SPLINEFLAG_WALKMODE     = 0x00000100,
+    SPLINEFLAG_FLYING       = 0x00000200,
     // backported flag to preserve compatibility not confirmed by data, but causes no problems
-    SPLINEFLAG_NO_SPLINE      = 0x00000400,               // former: SPLINEFLAG_LEVITATING
-    SPLINEFLAG_FALLING        = 0x00001000,
-    SPLINEFLAG_UNKNOWN7       = 0x02000000,               // swimming/flying (depends on mob?)
-    SPLINEFLAG_SPLINE         = 0x00002000,               // spline n*(float x,y,z)
+    SPLINEFLAG_NO_SPLINE    = 0x00000400,               // former: SPLINEFLAG_LEVITATING
+    SPLINEFLAG_FALLING      = 0x00001000,
+    SPLINEFLAG_SPLINE       = 0x00002000,               // spline n*(float x,y,z)
+    SPLINEFLAG_UNKNOWN7     = 0x02000000,               // swimming/flying (depends on mob?)
 };
 
 enum SplineType
@@ -579,7 +579,7 @@ enum SplineType
 class MovementInfo
 {
     public:
-        MovementInfo() : moveFlags(MOVEMENTFLAG_NONE), time(0),
+        MovementInfo() : moveFlags(MOVEFLAG_NONE), time(0),
             t_time(0), s_pitch(0.0f), fallTime(0), u_unk1(0.0f) {}
 
         // Read/Write methods
@@ -628,23 +628,23 @@ class MovementInfo
         };
 
         JumpInfo const& GetJumpInfo() const { return jump; }
-        //private:
+    private:
         // common
-        uint32  moveFlags;                                  // see enum MovementFlags
-        uint32  time;
+        uint32   moveFlags;                                  // see enum MovementFlags
+        uint32   time;
         Position pos;
         // transport
         ObjectGuid t_guid;
         Position t_pos;
-        uint32  t_time;
+        uint32   t_time;
         // swimming and unknown
-        float   s_pitch;
+        float    s_pitch;
         // last fall time
-        uint32  fallTime;
+        uint32   fallTime;
         // jumping
         JumpInfo jump;
         // spline
-        float   u_unk1;
+        float    u_unk1;
 };
 
 inline ByteBuffer& operator<< (ByteBuffer& buf, MovementInfo const& mi)
@@ -1160,6 +1160,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType = BASE_ATTACK, bool extra = false);
 
         float MeleeMissChanceCalc(const Unit* pVictim, WeaponAttackType attType) const;
+
         void CalculateMeleeDamage(Unit* pVictim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType = BASE_ATTACK);
         void DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss);
 
@@ -1168,7 +1169,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         float  MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 skillDiff, SpellEntry const* spell);
         SpellMissInfo MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell);
-
         SpellMissInfo MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell);
         SpellMissInfo SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool canReflect = false);
 
@@ -1269,7 +1269,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void DeMorph();
 
         void SendAttackStateUpdate(CalcDamageInfo* damageInfo);
-
         void SendAttackStateUpdate(uint32 HitInfo, Unit* target, uint8 SwingType, SpellSchoolMask damageSchoolMask, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount);
         void SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log);
         void SendSpellNonMeleeDamageLog(Unit* target, uint32 SpellID, uint32 Damage, SpellSchoolMask damageSchoolMask, uint32 AbsorbedDamage, uint32 Resist, bool PhysicalDamage, uint32 Blocked, bool CriticalHit = false);
@@ -1281,8 +1280,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // recommend use MonsterMove/MonsterMoveWithSpeed for most case that correctly work with movegens
         // if used additional args in ... part then floats must explicitly casted to double
         void SendHeartBeat();
-        bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_LEVITATING);}
-        bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALK_MODE);}
+        bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING);}
+        bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE);}
 
         void SetInFront(Unit const* target);
         void SetFacingTo(float ori);
@@ -1703,7 +1702,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         explicit Unit();
 
         void _UpdateSpells(uint32 time);
-
         void _UpdateAutoRepeatSpell();
         bool m_AutoRepeatFirstCast;
 

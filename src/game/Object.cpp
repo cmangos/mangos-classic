@@ -183,7 +183,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     //DEBUG_LOG("BuildCreateUpdate: update-type: %u, object-type: %u got updateFlags: %X", updatetype, m_objectTypeId, updateFlags);
 
     ByteBuffer buf(500);
-    buf << (uint8)updatetype;
+    buf << uint8(updatetype);
     buf << GetPackGUID();
     buf << uint8(m_objectTypeId);
 
@@ -239,7 +239,7 @@ void Object::DestroyForPlayer(Player* target) const
 
 void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 {
-    uint32 moveFlags = MOVEMENTFLAG_NONE;
+    uint32 moveFlags = MOVEFLAG_NONE;
 
     *data << uint8(updateFlags);                            // update flags
 
@@ -247,7 +247,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
     {
         if (m_objectTypeId == TYPEID_PLAYER && ((Player*)this)->GetTransport())
         {
-            moveFlags |= MOVEMENTFLAG_ONTRANSPORT;
+            moveFlags |= MOVEFLAG_ONTRANSPORT;
         }
 
         *data << uint32(moveFlags);                         // movement flags
@@ -427,9 +427,9 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 else if (index == UNIT_DYNAMIC_FLAGS && GetTypeId() == TYPEID_UNIT)
                 {
                     if (!target->isAllowedToLoot((Creature*)this))
-                        *data << (m_uint32Values[ index ] & ~UNIT_DYNFLAG_LOOTABLE);
+                        *data << (m_uint32Values[index] & ~UNIT_DYNFLAG_LOOTABLE);
                     else
-                        *data << (m_uint32Values[ index ] & ~UNIT_DYNFLAG_TAPPED);
+                        *data << (m_uint32Values[index] & ~UNIT_DYNFLAG_TAPPED);
                 }
                 else
                 {
@@ -867,6 +867,7 @@ InstanceData* WorldObject::GetInstanceData() const
 {
     return GetMap()->GetInstanceData();
 }
+
 //slow
 float WorldObject::GetDistance(const WorldObject* obj) const
 {
@@ -1338,9 +1339,9 @@ void WorldObject::BuildMonsterChat(WorldPacket* data, ObjectGuid senderGuid, uin
         *data << uint32(strlen(targetName) + 1);            // target name length
         *data << targetName;                                // target name
     }
-    *data << (uint32)(strlen(text) + 1);
+    *data << uint32(strlen(text) + 1);
     *data << text;
-    *data << (uint8)0;                                      // ChatTag
+    *data << uint8(0);                                      // ChatTag
 }
 
 void WorldObject::SendMessageToSet(WorldPacket* data, bool /*bToSelf*/)

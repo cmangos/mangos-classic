@@ -77,7 +77,7 @@ void MovementInfo::Read(ByteBuffer& data)
     data >> pos.z;
     data >> pos.o;
 
-    if (HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+    if (HasMovementFlag(MOVEFLAG_ONTRANSPORT))
     {
         data >> t_guid;
         data >> t_pos.x;
@@ -85,14 +85,14 @@ void MovementInfo::Read(ByteBuffer& data)
         data >> t_pos.z;
         data >> t_pos.o;
     }
-    if (HasMovementFlag(MOVEMENTFLAG_SWIMMING))
+    if (HasMovementFlag(MOVEFLAG_SWIMMING))
     {
         data >> s_pitch;
     }
 
     data >> fallTime;
 
-    if (HasMovementFlag(MOVEMENTFLAG_FALLING))
+    if (HasMovementFlag(MOVEFLAG_FALLING))
     {
         data >> jump.velocity;
         data >> jump.sinAngle;
@@ -100,7 +100,7 @@ void MovementInfo::Read(ByteBuffer& data)
         data >> jump.xyspeed;
     }
 
-    if (HasMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION))
+    if (HasMovementFlag(MOVEFLAG_SPLINE_ELEVATION))
     {
         data >> u_unk1;                                     // unknown
     }
@@ -115,7 +115,7 @@ void MovementInfo::Write(ByteBuffer& data) const
     data << pos.z;
     data << pos.o;
 
-    if (HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
+    if (HasMovementFlag(MOVEFLAG_ONTRANSPORT))
     {
         data << t_guid;
         data << t_pos.x;
@@ -123,14 +123,14 @@ void MovementInfo::Write(ByteBuffer& data) const
         data << t_pos.z;
         data << t_pos.o;
     }
-    if (HasMovementFlag(MOVEMENTFLAG_SWIMMING))
+    if (HasMovementFlag(MOVEFLAG_SWIMMING))
     {
         data << s_pitch;
     }
 
     data << fallTime;
 
-    if (HasMovementFlag(MOVEMENTFLAG_FALLING))
+    if (HasMovementFlag(MOVEFLAG_FALLING))
     {
         data << jump.velocity;
         data << jump.sinAngle;
@@ -138,7 +138,7 @@ void MovementInfo::Write(ByteBuffer& data) const
         data << jump.xyspeed;
     }
 
-    if (HasMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION))
+    if (HasMovementFlag(MOVEFLAG_SPLINE_ELEVATION))
     {
         data << u_unk1;                                     // unknown
     }
@@ -559,6 +559,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 
     if (pVictim->GetTypeId() == TYPEID_UNIT && !((Creature*)pVictim)->IsPet() && !((Creature*)pVictim)->HasLootRecipient())
         ((Creature*)pVictim)->SetLootRecipient(this);
+
     if (health <= damage)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage: victim just died");
@@ -1386,8 +1387,8 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, uint32 damage, CalcDamageInfo* da
         }
         case MELEE_HIT_GLANCING:
         {
-            damageInfo->HitInfo     |= HITINFO_GLANCING;
-            damageInfo->TargetState  = VICTIMSTATE_NORMAL;
+            damageInfo->HitInfo |= HITINFO_GLANCING;
+            damageInfo->TargetState = VICTIMSTATE_NORMAL;
             damageInfo->procEx |= PROC_EX_NORMAL_HIT;
             float reducePercent = 1.0f;                     //damage factor
             // calculate base values and mods
@@ -8193,7 +8194,7 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid, uint32 /*spellID*/)
         if (GetTypeId() != TYPEID_PLAYER)
             StopMoving();
         else
-            ((Player*)this)->m_movementInfo.SetMovementFlags(MOVEMENTFLAG_NONE);
+            ((Player*)this)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
 
 
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
@@ -8875,6 +8876,6 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
 
 void Unit::DisableSpline()
 {
-    m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEMENTFLAG_SPLINE_ENABLED | MOVEMENTFLAG_FORWARD));
+    m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
     movespline->_Interrupt();
 }

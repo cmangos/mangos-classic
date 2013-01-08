@@ -1584,7 +1584,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             DuelComplete(DUEL_FLED);
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
-    m_movementInfo.SetMovementFlags(MOVEMENTFLAG_NONE);
+    m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
     DisableSpline();
 
     if ((GetMapId() == mapid) && (!m_transport))
@@ -17481,7 +17481,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // set fly flag if in fly form or taxi flight to prevent visually drop at ground in showup moment
     if (IsTaxiFlying())
-        m_movementInfo.AddMovementFlag(MOVEMENTFLAG_FLYING);
+        m_movementInfo.AddMovementFlag(MOVEFLAG_FLYING);
 
     SetMover(this);
 }
