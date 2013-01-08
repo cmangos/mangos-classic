@@ -121,7 +121,7 @@ inline float Traveller<Player>::Speed()
     if (i_traveller.IsTaxiFlying())
         return PLAYER_FLIGHT_SPEED;
     else
-        return i_traveller.GetSpeed(i_traveller.m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE) ? MOVE_WALK : MOVE_RUN);
+        return i_traveller.GetSpeed(i_traveller.m_movementInfo.HasMovementFlag(MOVEMENTFLAG_WALK_MODE) ? MOVE_WALK : MOVE_RUN);
 }
 
 template<>

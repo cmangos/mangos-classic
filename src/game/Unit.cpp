@@ -77,7 +77,7 @@ void MovementInfo::Read(ByteBuffer& data)
     data >> pos.z;
     data >> pos.o;
 
-    if (HasMovementFlag(MOVEFLAG_ONTRANSPORT))
+    if (HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
     {
         data >> t_guid;
         data >> t_pos.x;
@@ -85,14 +85,14 @@ void MovementInfo::Read(ByteBuffer& data)
         data >> t_pos.z;
         data >> t_pos.o;
     }
-    if (HasMovementFlag(MOVEFLAG_SWIMMING))
+    if (HasMovementFlag(MOVEMENTFLAG_SWIMMING))
     {
         data >> s_pitch;
     }
 
     data >> fallTime;
 
-    if (HasMovementFlag(MOVEFLAG_FALLING))
+    if (HasMovementFlag(MOVEMENTFLAG_FALLING))
     {
         data >> jump.velocity;
         data >> jump.sinAngle;
@@ -100,7 +100,7 @@ void MovementInfo::Read(ByteBuffer& data)
         data >> jump.xyspeed;
     }
 
-    if (HasMovementFlag(MOVEFLAG_SPLINE_ELEVATION))
+    if (HasMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION))
     {
         data >> u_unk1;                                     // unknown
     }
@@ -115,7 +115,7 @@ void MovementInfo::Write(ByteBuffer& data) const
     data << pos.z;
     data << pos.o;
 
-    if (HasMovementFlag(MOVEFLAG_ONTRANSPORT))
+    if (HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
     {
         data << t_guid;
         data << t_pos.x;
@@ -123,14 +123,14 @@ void MovementInfo::Write(ByteBuffer& data) const
         data << t_pos.z;
         data << t_pos.o;
     }
-    if (HasMovementFlag(MOVEFLAG_SWIMMING))
+    if (HasMovementFlag(MOVEMENTFLAG_SWIMMING))
     {
         data << s_pitch;
     }
 
     data << fallTime;
 
-    if (HasMovementFlag(MOVEFLAG_FALLING))
+    if (HasMovementFlag(MOVEMENTFLAG_FALLING))
     {
         data << jump.velocity;
         data << jump.sinAngle;
@@ -138,7 +138,7 @@ void MovementInfo::Write(ByteBuffer& data) const
         data << jump.xyspeed;
     }
 
-    if (HasMovementFlag(MOVEFLAG_SPLINE_ELEVATION))
+    if (HasMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION))
     {
         data << u_unk1;                                     // unknown
     }
@@ -412,26 +412,10 @@ void Unit::SendMonsterMoveWithSpeed(float x, float y, float z, uint32 transitTim
 
 void Unit::SendHeartBeat(bool toSelf)
 {
-    //FIXME: drop non-player case when m_movementInfo will be in Unit
-    if (GetTypeId() != TYPEID_PLAYER)
-    {
-        WorldPacket data(MSG_MOVE_HEARTBEAT, 31);
-        data << GetPackGUID();
-        data << uint32(MOVEFLAG_NONE);                      // movement flags
-        data << uint32(WorldTimer::getMSTime());            // time
-        data << float(GetPositionX());
-        data << float(GetPositionY());
-        data << float(GetPositionZ());
-        data << float(GetOrientation());
-        data << uint32(0);
-        SendMessageToSet(&data, toSelf);
-        return;
-    }
-
-    ((Player*)this)->m_movementInfo.UpdateTime(WorldTimer::getMSTime());
+    m_movementInfo.UpdateTime(WorldTimer::getMSTime());
     WorldPacket data(MSG_MOVE_HEARTBEAT, 31);
     data << GetPackGUID();
-    data << ((Player*)this)->m_movementInfo;
+    data << m_movementInfo;
     SendMessageToSet(&data, toSelf);
 }
 
@@ -6611,7 +6595,7 @@ void Unit::UpdateWalkMode(Unit* source, bool self)
     else if (self)
     {
         bool on = source->GetTypeId() == TYPEID_PLAYER
-                  ? ((Player*)source)->HasMovementFlag(MOVEFLAG_WALK_MODE)
+                  ? ((Player*)source)->HasMovementFlag(MOVEMENTFLAG_WALK_MODE)
                   : ((Creature*)source)->HasSplineFlag(SPLINEFLAG_WALKMODE);
 
         if (on)
@@ -6800,31 +6784,12 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
         }
         else
         {
-            //FIXME: drop non-player case when m_movementInfo will be in Unit
-            if (GetTypeId() != TYPEID_PLAYER)
-            {
-                WorldPacket data(SetSpeed2Opc_table[mtype][0], 31);
-                data << GetPackGUID();
-                data << uint32(MOVEFLAG_NONE);                      // movement flags
-                data << uint32(WorldTimer::getMSTime());
-                data << float(GetPositionX());
-                data << float(GetPositionY());
-                data << float(GetPositionZ());
-                data << float(GetOrientation());
-                data << uint32(0);                                  //flag unk
-                data << float(GetSpeed(mtype));
-                SendMessageToSet(&data, true);
-            }
-            else
-            {
-                ((Player*)this)->m_movementInfo.UpdateTime(WorldTimer::getMSTime());
-
-                WorldPacket data(SetSpeed2Opc_table[mtype][0], 31);
-                data << GetPackGUID();
-                data << ((Player*)this)->m_movementInfo;
-                data << float(GetSpeed(mtype));
-                SendMessageToSet(&data, true);
-            }
+            m_movementInfo.UpdateTime(WorldTimer::getMSTime());
+            WorldPacket data(SetSpeed2Opc_table[mtype][0], 31);
+            data << GetPackGUID();
+            data << m_movementInfo;
+            data << float(GetSpeed(mtype));
+            SendMessageToSet(&data, true);
         }
     }
 
@@ -8352,7 +8317,7 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid, uint32 /*spellID*/)
         if (GetTypeId() != TYPEID_PLAYER)
             StopMoving();
         else
-            ((Player*)this)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+            ((Player*)this)->m_movementInfo.SetMovementFlags(MOVEMENTFLAG_NONE);
 
 
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);

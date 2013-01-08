@@ -240,7 +240,7 @@ void Object::DestroyForPlayer(Player* target) const
 
 void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 {
-    uint32 moveFlags = MOVEFLAG_NONE;
+    uint32 moveFlags = MOVEMENTFLAG_NONE;
 
     *data << uint8(updateFlags);                            // update flags
 
@@ -248,7 +248,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
     {
         if (m_objectTypeId == TYPEID_PLAYER && ((Player*)this)->GetTransport())
         {
-            moveFlags |= MOVEFLAG_ONTRANSPORT;
+            moveFlags |= MOVEMENTFLAG_ONTRANSPORT;
         }
 
         *data << uint32(moveFlags);                         // movement flags
@@ -827,8 +827,8 @@ void WorldObject::Relocate(float x, float y, float z, float orientation)
     m_position.z = z;
     m_position.o = orientation;
 
-    if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->m_movementInfo.ChangePosition(x, y, z, orientation);
+    if (isType(TYPEMASK_UNIT))
+        ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, orientation);
 }
 
 void WorldObject::Relocate(float x, float y, float z)
@@ -837,16 +837,16 @@ void WorldObject::Relocate(float x, float y, float z)
     m_position.y = y;
     m_position.z = z;
 
-    if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->m_movementInfo.ChangePosition(x, y, z, GetOrientation());
+    if (isType(TYPEMASK_UNIT))
+        ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, GetOrientation());
 }
 
 void WorldObject::SetOrientation(float orientation)
 {
     m_position.o = orientation;
 
-    if (GetTypeId() == TYPEID_PLAYER)                       //FIXME: to Unit at move moveinfor to Unit
-        ((Player*)this)->m_movementInfo.ChangeOrientation(orientation);
+    if (isType(TYPEMASK_UNIT))
+        ((Unit*)this)->m_movementInfo.ChangeOrientation(orientation);
 }
 
 uint32 WorldObject::GetZoneId() const
@@ -868,7 +868,6 @@ InstanceData* WorldObject::GetInstanceData() const
 {
     return GetMap()->GetInstanceData();
 }
-
 //slow
 float WorldObject::GetDistance(const WorldObject* obj) const
 {

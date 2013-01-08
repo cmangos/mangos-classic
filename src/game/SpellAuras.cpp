@@ -2542,7 +2542,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             target->StopMoving();
         else
         {
-            ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+            ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEMENTFLAG_NONE);
             target->SetStandState(UNIT_STAND_STATE_STAND);// in 1.5 client
         }
 
@@ -2804,7 +2804,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             target->SendMessageToSet(&data, true);
 
             //Clear unit movement flags
-            ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+            ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEMENTFLAG_NONE);
         }
         else
             target->StopMoving();

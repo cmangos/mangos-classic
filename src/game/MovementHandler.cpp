@@ -484,7 +484,7 @@ bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo) const
     if (!MaNGOS::IsValidMapCoord(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z, movementInfo.GetPos()->o))
         return false;
 
-    if (movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
+    if (movementInfo.HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
     {
         // transports size limited
         // (also received at zeppelin/lift leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
@@ -509,11 +509,11 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
 
     if (Player* plMover = mover->GetTypeId() == TYPEID_PLAYER ? (Player*)mover : NULL)
     {
-        if (movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
+        if (movementInfo.HasMovementFlag(MOVEMENTFLAG_ONTRANSPORT))
         {
             if (!plMover->m_transport)
             {
-                // elevators also cause the client to send MOVEFLAG_ONTRANSPORT - just unmount if the guid can be found in the transport list
+                // elevators also cause the client to send MOVEMENTFLAG_ONTRANSPORT - just unmount if the guid can be found in the transport list
                 for (MapManager::TransportSet::const_iterator iter = sMapMgr.m_Transports.begin(); iter != sMapMgr.m_Transports.end(); ++iter)
                 {
                     if ((*iter)->GetObjectGuid() == movementInfo.GetTransportGuid())
@@ -532,7 +532,7 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
             movementInfo.ClearTransportData();
         }
 
-        if (movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING) != plMover->IsInWater())
+        if (movementInfo.HasMovementFlag(MOVEMENTFLAG_SWIMMING) != plMover->IsInWater())
         {
             // now client not include swimming flag in case jumping under water
             plMover->SetInWater(!plMover->IsInWater() || plMover->GetTerrain()->IsUnderWater(movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z));
