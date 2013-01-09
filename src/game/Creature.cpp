@@ -1067,21 +1067,21 @@ void Creature::SaveToDB(uint32 mapid)
     std::ostringstream ss;
     ss << "INSERT INTO creature VALUES ("
        << GetGUIDLow() << ","
-       << GetEntry() << ","
-       << mapid << ","
-       << displayId << ","
-       << GetEquipmentId() << ","
-       << GetPositionX() << ","
-       << GetPositionY() << ","
-       << GetPositionZ() << ","
-       << GetOrientation() << ","
-       << m_respawnDelay << ","                            //respawn time
-       << (float) m_respawnradius << ","                   //spawn distance (float)
-       << (uint32)(0) << ","                               //currentwaypoint
-       << GetHealth() << ","                               //curhealth
-       << GetPower(POWER_MANA) << ","                      //curmana
-       << (m_isDeadByDefault ? 1 : 0) << ","               //is_dead
-       << GetDefaultMovementType() << ")";                 //default movement generator type
+       << data.id << ","
+       << data.mapid << ","
+       << data.modelid_override << ","
+       << data.equipmentId << ","
+       << data.posX << ","
+       << data.posY << ","
+       << data.posZ << ","
+       << data.orientation << ","
+       << data.spawntimesecs << ","                        //respawn time
+       << (float) data.spawndist << ","                    //spawn distance (float)
+       << data.currentwaypoint << ","                      //currentwaypoint
+       << data.curhealth << ","                            //curhealth
+       << data.curmana << ","                              //curmana
+       << (data.is_dead  ? 1 : 0) << ","                   //is_dead
+       << data.movementType << ")";                        //default movement generator type
 
     WorldDatabase.PExecuteLog("%s", ss.str().c_str());
 
