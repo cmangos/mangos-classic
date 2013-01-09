@@ -6897,10 +6897,14 @@ void Unit::TauntApply(Unit* taunter)
     if (target && target == taunter)
         return;
 
-    SetInFront(taunter);
+    // Only attack taunter if this is a valid target
+    if (!hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED) && !IsSecondChoiceTarget(taunter, true))
+    {
+        SetInFront(taunter);
 
-    if (((Creature*)this)->AI())
-        ((Creature*)this)->AI()->AttackStart(taunter);
+        if (((Creature*)this)->AI())
+            ((Creature*)this)->AI()->AttackStart(taunter);
+    }
 
     m_ThreatManager.tauntApply(taunter);
 }
@@ -6950,6 +6954,18 @@ void Unit::TauntFadeOut(Unit* taunter)
 
 //======================================================================
 
+bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea)
+{
+    MANGOS_ASSERT(pTarget && GetTypeId() == TYPEID_UNIT);
+
+    return
+        pTarget->IsImmunedToDamage(GetMeleeDamageSchoolMask()) ||
+        pTarget->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) ||
+        checkThreatArea && ((Creature*)this)->IsOutOfThreatArea(pTarget);
+}
+
+//======================================================================
+
 bool Unit::SelectHostileTarget()
 {
     //function provides main threat functionality
@@ -6966,6 +6982,7 @@ bool Unit::SelectHostileTarget()
         return false;
 
     Unit* target = NULL;
+    Unit* oldTarget = getVictim();
 
     // First checking if we have some taunt on us
     const AuraList& tauntAuras = GetAurasByType(SPELL_AURA_MOD_TAUNT);
@@ -6973,27 +6990,17 @@ bool Unit::SelectHostileTarget()
     {
         Unit* caster;
 
-        // The last taunt aura caster is alive an we are happy to attack him
-        if ((caster = tauntAuras.back()->GetCaster()) && caster->isAlive())
-            return true;
-        else if (tauntAuras.size() > 1)
+        // Find first available taunter target
+        // Auras are pushed_back, last caster will be on the end
+        for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
         {
-            // We do not have last taunt aura caster but we have more taunt auras,
-            // so find first available target
-
-            // Auras are pushed_back, last caster will be on the end
-            AuraList::const_iterator aura = --tauntAuras.end();
-            do
+            if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
+                    caster->isTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
+                    !IsSecondChoiceTarget(caster, true))
             {
-                --aura;
-                if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
-                        caster->isTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this))
-                {
-                    target = caster;
-                    break;
-                }
+                target = caster;
+                break;
             }
-            while (aura != tauntAuras.begin());
         }
     }
 
@@ -7006,7 +7013,8 @@ bool Unit::SelectHostileTarget()
         if (!hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
         {
             SetInFront(target);
-            ((Creature*)this)->AI()->AttackStart(target);
+            if (oldTarget != target)
+                ((Creature*)this)->AI()->AttackStart(target);
         }
         return true;
     }
