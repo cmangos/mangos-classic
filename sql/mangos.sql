@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1854_s1415_11754_01_mangos_mangos_string` bit(1) default NULL
+  `required_z1873_s1441_11852_01_mangos_gossip_menu` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2066,13 +2066,14 @@ DROP TABLE IF EXISTS gossip_menu;
 CREATE TABLE gossip_menu (
   entry smallint(6) unsigned NOT NULL default '0',
   text_id mediumint(8) unsigned NOT NULL default '0',
+  script_id mediumint(8) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'script in `gossip_scripts` - will be executed on GossipHello',
   cond_1 tinyint(3) unsigned NOT NULL default '0',
   cond_1_val_1 mediumint(8) unsigned NOT NULL default '0',
   cond_1_val_2 mediumint(8) unsigned NOT NULL default '0',
   cond_2 tinyint(3) unsigned NOT NULL default '0',
   cond_2_val_1 mediumint(8) unsigned NOT NULL default '0',
   cond_2_val_2 mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY (entry, text_id)
+  PRIMARY KEY (entry, text_id, script_id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
