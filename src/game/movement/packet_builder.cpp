@@ -49,7 +49,6 @@ namespace Movement
         {
             data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
             data << mov.GetTransport()->Owner.GetPackGUID();
-            data << int8(mov.m_unused.transport_seat);
         }*/
 
         data << move_spline.spline.getPoint(move_spline.spline.first());
