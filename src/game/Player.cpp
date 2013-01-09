@@ -16769,7 +16769,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     uint32 tCount = tItems ? tItems->GetItemCount() : 0;
 
     size_t vendorslot = vItems ? vItems->FindItemSlot(item) : vCount;
-    if (vendorslot > vCount)
+    if (vendorslot >= vCount)
         vendorslot = vCount + (tItems ? tItems->FindItemSlot(item) : tCount);
 
     if (vendorslot >= vCount + tCount)
