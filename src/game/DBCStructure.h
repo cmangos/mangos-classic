@@ -374,7 +374,8 @@ struct ItemClassEntry
     uint32   ID;                                            // 0        m_ID
     //uint32   unk1;                                        // 1
     //uint32   unk2;                                        // 2        only weapon have 1 in field, other 0
-    char*    name[9];                                       // 3-12     m_name_lang
+    char*    name[8];                                       // 3-11     m_name_lang
+    //                                                      // 12       name flags
 };
 
 struct ItemDisplayInfoEntry
