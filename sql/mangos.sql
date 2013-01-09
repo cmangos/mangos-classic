@@ -897,6 +897,28 @@ LOCK TABLES `creature_involvedrelation` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `creature_linking_template`
+--
+
+DROP TABLE IF EXISTS creature_linking_template;
+CREATE TABLE creature_linking_template (
+  entry INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'creature_template.entry of the slave mob that is linked',
+  map MEDIUMINT(8) UNSIGNED NOT NULL COMMENT 'Id of map of the mobs',
+  master_entry INT(10) UNSIGNED NOT NULL COMMENT 'master to trigger events',
+  flag MEDIUMINT(8) UNSIGNED NOT NULL COMMENT 'flag - describing what should happen when',
+  PRIMARY KEY (entry, map)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature Linking System';
+
+--
+-- Dumping data for table `creature_linking_template`
+--
+
+LOCK TABLES `creature_linking_template` WRITE;
+/*!40000 ALTER TABLE `creature_linking_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_linking_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `creature_loot_template`
 --
 
