@@ -74,14 +74,14 @@ class BattleGroundQueue
         void Update(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id);
 
         void FillPlayersToBG(BattleGround* bg, BattleGroundBracketId bracket_id);
-        bool CheckPremadeMatch(BattleGroundBracketId bracket_id, uint32 MaxPlayersPerTeam, uint32 MinPlayersPerTeam);
+        bool CheckPremadeMatch(BattleGroundBracketId bracket_id, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam);
         bool CheckNormalMatch(BattleGroundBracketId bracket_id, uint32 minPlayers, uint32 maxPlayers);
         GroupQueueInfo* AddGroup(Player* leader, Group* group, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracketId, bool isPremade);
         void RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount);
+        bool IsPlayerInvited(ObjectGuid pl_guid, const uint32 bgInstanceGuid, const uint32 removeTime);
+        bool GetPlayerGroupInfoData(ObjectGuid guid, GroupQueueInfo* ginfo);
         void PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id);
         uint32 GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleGroundBracketId bracket_id);
-        bool IsPlayerInvited(ObjectGuid guid, const uint32 bgInstanceGuid, const uint32 removeTime);
-        bool GetPlayerGroupInfoData(ObjectGuid guid, GroupQueueInfo* ginfo);
 
     private:
         //mutex that should not allow changing private data, nor allowing to update Queue during private data change.

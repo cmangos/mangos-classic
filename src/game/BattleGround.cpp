@@ -277,6 +277,7 @@ BattleGround::~BattleGround()
     // map can be null at bg destruction
     if (m_Map)
         m_Map->SetUnload();
+
     // remove from bg free slot queue
     this->RemoveFromBGFreeSlotQueue();
 
