@@ -930,9 +930,6 @@ void GameObject::Use(Unit* user)
     uint32 spellId = 0;
     bool triggered = false;
 
-    if (user->GetTypeId() == TYPEID_PLAYER && sScriptMgr.OnGameObjectUse((Player*)user, this))
-        return;
-
     // test only for exist cooldown data (cooldown timer used for door/buttons reset that not have use cooldown)
     if (uint32 cooldown = GetGOInfo()->GetCooldown())
     {
@@ -942,6 +939,8 @@ void GameObject::Use(Unit* user)
         m_cooldownTime = sWorld.GetGameTime() + cooldown;
     }
 
+    bool scriptReturnValue = user->GetTypeId() == TYPEID_PLAYER && sScriptMgr.OnGameObjectUse((Player*)user, this);
+
     switch (GetGoType())
     {
         case GAMEOBJECT_TYPE_DOOR:                          // 0
@@ -950,7 +949,8 @@ void GameObject::Use(Unit* user)
             UseDoorOrButton();
 
             // activate script
-            GetMap()->ScriptsStart(sGameObjectScripts, GetGUIDLow(), spellCaster, this);
+            if (!scriptReturnValue)
+                GetMap()->ScriptsStart(sGameObjectScripts, GetGUIDLow(), spellCaster, this);
             return;
         }
         case GAMEOBJECT_TYPE_BUTTON:                        // 1
@@ -958,10 +958,12 @@ void GameObject::Use(Unit* user)
             //buttons never really despawn, only reset to default state/flags
             UseDoorOrButton();
 
-            // activate script
-            GetMap()->ScriptsStart(sGameObjectScripts, GetGUIDLow(), spellCaster, this);
-
             TriggerLinkedGameObject(user);
+
+            // activate script
+            if (!scriptReturnValue)
+                GetMap()->ScriptsStart(sGameObjectScripts, GetGUIDLow(), spellCaster, this);
+
             return;
         }
         case GAMEOBJECT_TYPE_QUESTGIVER:                    // 2
@@ -984,6 +986,8 @@ void GameObject::Use(Unit* user)
             if (user->GetTypeId() != TYPEID_PLAYER)
                 return;
 
+            TriggerLinkedGameObject(user);
+
             // TODO: possible must be moved to loot release (in different from linked triggering)
             if (GetGOInfo()->chest.eventId)
             {
@@ -993,11 +997,13 @@ void GameObject::Use(Unit* user)
                     GetMap()->ScriptsStart(sEventScripts, GetGOInfo()->chest.eventId, user, this);
             }
 
-            TriggerLinkedGameObject(user);
             return;
         }
         case GAMEOBJECT_TYPE_GENERIC:                       // 5
         {
+            if (scriptReturnValue)
+                return;
+
             // No known way to exclude some - only different approach is to select despawnable GOs by Entry
             SetLootState(GO_JUST_DEACTIVATED);
             return;
@@ -1007,8 +1013,11 @@ void GameObject::Use(Unit* user)
             // Currently we do not expect trap code below to be Use()
             // directly (except from spell effect). Code here will be called by TriggerLinkedGameObject.
 
+            if (scriptReturnValue)
+                return;
+
             // FIXME: when GO casting will be implemented trap must cast spell to target
-            if (uint32 spellId = GetGOInfo()->trap.spellId)
+            if (spellId = GetGOInfo()->trap.spellId)
                 user->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
 
             // TODO: all traps can be activated, also those without spell.
@@ -1020,7 +1029,7 @@ void GameObject::Use(Unit* user)
 
             return;
         }
-        case GAMEOBJECT_TYPE_CHAIR:                         //7 Sitting: Wooden bench, chairs
+        case GAMEOBJECT_TYPE_CHAIR:                         // 7 Sitting: Wooden bench, chairs
         {
             GameObjectInfo const* info = GetGOInfo();
             if (!info)
@@ -1085,11 +1094,24 @@ void GameObject::Use(Unit* user)
             TriggerLinkedGameObject(user);
 
             // some may be activated in addition? Conditions for this? (ex: entry 181616)
-            break;
+            return;
         }
-        case GAMEOBJECT_TYPE_GOOBER:                        //10
+        case GAMEOBJECT_TYPE_GOOBER:                        // 10
         {
             GameObjectInfo const* info = GetGOInfo();
+
+            TriggerLinkedGameObject(user);
+
+            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+            SetLootState(GO_ACTIVATED);
+
+            // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
+            if (info->goober.customAnim)
+                SendGameObjectCustomAnim(GetObjectGuid());
+            else
+                SetGoState(GO_STATE_ACTIVE);
+
+            m_cooldownTime = time(NULL) + info->GetAutoCloseTime();
 
             if (user->GetTypeId() == TYPEID_PLAYER)
             {
@@ -1137,25 +1159,15 @@ void GameObject::Use(Unit* user)
                 player->RewardPlayerAndGroupAtCast(this);
             }
 
-            TriggerLinkedGameObject(user);
-
-            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
-            SetLootState(GO_ACTIVATED);
-
-            // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
-            if (info->goober.customAnim)
-                SendGameObjectCustomAnim(GetObjectGuid());
-            else
-                SetGoState(GO_STATE_ACTIVE);
-
-            m_cooldownTime = time(NULL) + info->GetAutoCloseTime();
+            if (scriptReturnValue)
+                return;
 
             // cast this spell later if provided
             spellId = info->goober.spellId;
 
             break;
         }
-        case GAMEOBJECT_TYPE_CAMERA:                        //13
+        case GAMEOBJECT_TYPE_CAMERA:                        // 13
         {
             GameObjectInfo const* info = GetGOInfo();
             if (!info)
@@ -1177,7 +1189,7 @@ void GameObject::Use(Unit* user)
 
             return;
         }
-        case GAMEOBJECT_TYPE_FISHINGNODE:                   //17 fishing bobber
+        case GAMEOBJECT_TYPE_FISHINGNODE:                   // 17 fishing bobber
         {
             if (user->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -1275,7 +1287,7 @@ void GameObject::Use(Unit* user)
             player->FinishSpell(CURRENT_CHANNELED_SPELL);
             return;
         }
-        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:              //18
+        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:              // 18
         {
             if (user->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -1357,7 +1369,7 @@ void GameObject::Use(Unit* user)
             // go to end function to spell casting
             break;
         }
-        case GAMEOBJECT_TYPE_SPELLCASTER:                   //22
+        case GAMEOBJECT_TYPE_SPELLCASTER:                   // 22
         {
             SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
 
@@ -1380,7 +1392,7 @@ void GameObject::Use(Unit* user)
             AddUse();
             break;
         }
-        case GAMEOBJECT_TYPE_MEETINGSTONE:                  //23
+        case GAMEOBJECT_TYPE_MEETINGSTONE:                  // 23
         {
             GameObjectInfo const* info = GetGOInfo();
 
@@ -1557,7 +1569,7 @@ void GameObject::Use(Unit* user)
         }
         default:
             sLog.outError("GameObject::Use unhandled GameObject type %u (entry %u).", GetGoType(), GetEntry());
-            break;
+            return;
     }
 
     if (!spellId)
