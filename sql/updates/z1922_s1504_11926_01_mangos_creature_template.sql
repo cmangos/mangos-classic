@@ -1,0 +1,3 @@
+ALTER TABLE db_version CHANGE COLUMN required_z1884_s1456_11876_01_mangos_creature_linking_template required_z1922_s1504_11926_01_mangos_creature_template bit;
+
+UPDATE creature_template SET InhabitType=7 WHERE entry=1;
