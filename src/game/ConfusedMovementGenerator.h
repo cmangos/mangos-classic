@@ -23,8 +23,6 @@
 #include "MovementGenerator.h"
 #include "Timer.h"
 
-#define MAX_CONF_WAYPOINTS 24
-
 template<class T>
 class MANGOS_DLL_SPEC ConfusedMovementGenerator
     : public MovementGeneratorMedium< T, ConfusedMovementGenerator<T> >
@@ -40,9 +38,7 @@ class MANGOS_DLL_SPEC ConfusedMovementGenerator
 
         MovementGeneratorType GetMovementGeneratorType() const { return CONFUSED_MOTION_TYPE; }
     private:
-        void _InitSpecific(T&, bool&, bool&);
         TimeTracker i_nextMoveTime;
-        float i_waypoints[MAX_CONF_WAYPOINTS + 1][3];
-        uint32 i_nextMove;
+        float i_x, i_y, i_z;
 };
 #endif
