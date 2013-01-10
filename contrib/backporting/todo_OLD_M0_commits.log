@@ -1,243 +1,125 @@
-M0_COMMIT 33f4a56  by KuraiNeko (commiter KuraiNeko) " [z1766] Clean-up totem statue - BC content. "
- 100.0% src/game/
 
-M0_COMMIT 94cf855  by KuraiNeko (commiter KuraiNeko) " [z1767] Some spells and spell rank clean-up. "
- 100.0% src/game/
-
-M0_COMMIT 0ae5378  by KuraiNeko (commiter KuraiNeko) " [z1768] Added liquid extraction part. Now lava\slime damaged. "
-  89.7% contrib/vmap_extractor_v3/vmapextract/
-   8.1% src/game/
-
-M0_COMMIT 15f9bf7  by KuraiNeko (commiter KuraiNeko) " Vmap bin updated. "
- 100.0% contrib/vmap_extract_assembler_bin/
-
-M0_COMMIT bd66c3e  by KuraiNeko (commiter KuraiNeko) " typo "
- 100.0% src/game/
-
-M0_COMMIT 3c9a664  by Sidsukana (commiter Sidsukana) " [z1769] Drop dead code (non-existed spells) "
-  99.6% src/game/
-
-M0_COMMIT ce2074e  by Sidsukana (commiter Sidsukana) " re-typo "
- 100.0% src/game/
-
-M0_COMMIT 7746ed3  by Sidsukana (commiter Sidsukana) " [z1770] Fix spell Deep Wounds "
-  80.8% src/game/
-  19.1% src/shared/
-
-M0_COMMIT 0dba976  by Salja (commiter Salja) " [z1771] Fix compiling error. "
- 100.0% src/game/
-
-M0_COMMIT 0fd7f3f  by TheLuda (commiter TheLuda) " [z1772] Prevent creatues from falling under the map. "
-  91.9% src/game/
-   8.0% src/shared/
-
-M0_COMMIT c1eca3a  by TheLuda (commiter TheLuda) " [z1773] Drop support for VC 8.0. "
-   6.7% contrib/
-  89.6% win/VC80/
-   3.5% win/
-
-M0_COMMIT 5646d44  by TheLuda (commiter TheLuda) " - Removed outdated file from old autoconf based build system. "
- 100.0% contrib/
-
-M0_COMMIT c91c720  by TheLuda (commiter TheLuda) " - Updated github repository location. "
-   5.5% contrib/extractor/
-   3.0% contrib/git_id/
-   4.1% contrib/vmap_extractor_v3/vmapextract/
-   4.7% contrib/
-   4.3% dep/src/
-   3.9% src/bindings/
-   6.0% src/framework/
-  42.8% src/game/
-   3.1% src/mangosd/
-   3.0% src/realmd/
-   4.2% src/shared/Database/
-   6.0% src/shared/
-
-M0_COMMIT e620d2f  by TheLuda (commiter TheLuda) " - Add a nicely formatted (Markdown syntax) README to give users a few pointers. "
-
-M0_COMMIT 23f5ef7  by TheLuda (commiter TheLuda) " - Corrected typo. (Thanks, stfx). "
- 100.0% contrib/vmap_extractor_v3/vmapextract/
-
-M0_COMMIT 5a5169b  by Sidsukana (commiter Sidsukana) " [z1774] Fix speed modifiers for spells Permafrost, Improved Curse of Exhaustion, Camouflage, Pathfinding, Amplify Curse, Cheetah Sprint. "
-  95.8% src/game/
-   4.1% src/shared/
-
-M0_COMMIT c6735e8  by TheLuda (commiter TheLuda) " - Add missing change from mangos-one/server@ac072cee5282151fb5aa5c19ae24854d39e641b5 "
- 100.0% contrib/vmap_extractor_v3/vmapextract/
-
-M0_COMMIT 80c602b  by TheLuda (commiter TheLuda) " Add branch notice to README. **develop** may be unstable. "
-
-M0_COMMIT 3bf2f49  by Schmoozerd (commiter TheLuda) " [z1775] Implement spell 28560 "
-  89.3% src/game/
-  10.6% src/shared/
-
-M0_COMMIT 0558923  by Oniryck (commiter TheLuda) " [z1776] Fix unlearning talents of hunter pets "
-  70.6% src/game/
-  29.3% src/shared/
-
-M0_COMMIT 7aca453  by Schmoozerd (commiter TheLuda) " [z1777] Let scripting library decide if an encounter is in progress in instances "
-  88.3% src/game/
-  11.6% src/shared/
-
-M0_COMMIT b21952a  by Schmoozerd (commiter TheLuda) " [z1778] Implement npc spells 28096 and 28111 "
-  97.8% src/game/
-
-M0_COMMIT a578df9  by Salja (commiter TheLuda) " [z1779] Update zlib to v1.2.5. "
-  99.9% dep/src/zlib/
-
-M0_COMMIT 24720da  by Salja (commiter TheLuda) " [z1780] Update bzip2 to v1.0.6. "
-  98.1% dep/src/bzip2/
-
-M0_COMMIT 1fa35f3  by TheLuda (commiter TheLuda) " Use the internal rank number for battleground statistics. "
- 100.0% src/game/
-
-M0_COMMIT d93de5c  by TheLuda (commiter TheLuda) " Add missing include. "
- 100.0% dep/src/zlib/
-
-M0_COMMIT 964f694  by VladimirMangos (commiter TheLuda) " [z1781] Hide passwords from logs "
-  38.0% src/game/
-   9.2% src/mangosd/
-  49.6% src/shared/Database/
-   3.0% src/
-
-M0_COMMIT 71bfdfa  by kid 10 (commiter TheLuda) " [z1782] Fixed use ".gobject move" with implicit player coordinates. "
-  35.6% src/game/
-  64.3% src/shared/
-
-M0_COMMIT 6296f62  by Vinolentus (commiter TheLuda) " [z1783] Avoid happines overflow in HandlePetAbandon :) "
-  81.3% src/game/
-  18.6% src/shared/
-
-M0_COMMIT 3e560e7  by Schmoozerd (commiter TheLuda) " [z1784] Add documention for CreatureAI API "
-  99.4% src/game/
-
-M0_COMMIT ebe95e2  by VladimirMangos (commiter TheLuda) " [z1785] Fixed resurrection for released ghost case. "
-  65.6% src/game/
-  34.3% src/shared/
-
-M0_COMMIT ef4281b  by Lynx3d (commiter TheLuda) " [z1786] Improve fishing bobber placement and send more correct error messages. "
-  97.2% src/game/
-
-M0_COMMIT baa3152  by Laise (commiter TheLuda) " [z1787] fix damage and duration of reflected spells "
-  95.2% src/game/
-   4.7% src/shared/
-
-M0_COMMIT 6088478  by Amaru (commiter TheLuda) " [z1788] fix reflect damage if caster can reflect too "
-  77.0% src/game/
-  22.9% src/shared/
-
-M0_COMMIT 2e61995  by VladimirMangos (commiter TheLuda) " [z1789] Implement SPELL_AURA_DETECT_AMORE (170) "
-  88.4% src/game/
-  11.5% src/shared/
-
-M0_COMMIT 6c7c80d  by zergtmn (commiter TheLuda) " [z1790] Fix build in VS11 Developer Preview "
-  10.1% src/framework/Utilities/
-  10.5% src/game/
-  77.7% win/VC100/
-
-M0_COMMIT 950de40  by Salja (commiter TheLuda) " [z1791] Revert "[z1789] Implement SPELL_AURA_DETECT_AMORE (170)" "
-  88.4% src/game/
-  11.5% src/shared/
-
-M0_COMMIT 7b57246  by Salja (commiter TheLuda) " [z1792] Shutdown messages are now sent in blizzlike intervals. Author: Shauren "
-  96.5% src/game/
-   3.4% src/shared/
-
-M0_COMMIT c653a66  by Sidsukana (commiter Sidsukana) " [z1795] Fix take ammo for most ranged spells. "
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/c653a66: c653a66 * Sidsukana (committer Sidsukana)<pre><code>[z1795] Fix take ammo for most ranged spells.
   97.4% src/game/
 
-M0_COMMIT e829694  by Sidsukana (commiter Sidsukana) " [z1796] Return diminishing to core. Limit duration in pre-BC was 15 sec. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/e829694: e829694 * Sidsukana (committer Sidsukana)<pre><code>[z1796] Return diminishing to core. Limit duration in pre-BC was 15 sec.
   92.7% src/game/
    7.2% src/shared/
 
-M0_COMMIT 0f1b66c  by Salja (commiter Salja) " [z1797] Update ad.exe. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/0f1b66c: 0f1b66c * Salja (committer Salja)<pre><code>[z1797] Update ad.exe.
   99.9% contrib/extractor/
 
-M0_COMMIT 4d68c37  by Salja (commiter Salja) " [z1798] Combustion (remove main aura) and (remove triggered aura stack) by Unlern Talents. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/4d68c37: 4d68c37 * Salja (committer Salja)<pre><code>[z1798] Combustion (remove main aura) and (remove triggered aura stack) by Unlern Talents.
   91.2% src/game/
    8.7% src/shared/
 
-M0_COMMIT b7a8540  by Sidsukana (commiter Sidsukana) " [z1799] Remove extra mods code. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/b7a8540: b7a8540 * Sidsukana (committer Sidsukana)<pre><code>[z1799] Remove extra mods code.
   87.7% src/game/extras/
    5.3% src/game/
    6.3% src/mangosd/
 
-M0_COMMIT 139075f  by TheLuda (commiter TheLuda) " [z1800] Remove all remains of TBC spell modifications. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/139075f: 139075f * TheLuda (committer TheLuda)<pre><code>[z1800] Remove all remains of TBC spell modifications.
   37.3% src/game/
   43.9% win/VC100/
   18.7% win/VC90/
 
-M0_COMMIT 533c601  by Sidsukana (commiter Sidsukana) " Rever [z1801] "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/533c601: 533c601 * Sidsukana (committer Sidsukana)<pre><code>Rever [z1801]
   96.3% src/game/
    3.6% src/shared/
 
-M0_COMMIT 5b23e5f  by Sidsukana (commiter Sidsukana) " [z1801] Implement HealBy() AI method. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/5b23e5f: 5b23e5f * Sidsukana (committer Sidsukana)<pre><code>[z1801] Implement HealBy() AI method.
   89.4% src/game/
   10.5% src/shared/
 
-M0_COMMIT b800358  by Sidsukana (commiter Sidsukana) " [z1802] Correct way for spell 28560. Drop dead code. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/b800358: b800358 * Sidsukana (committer Sidsukana)<pre><code>[z1802] Correct way for spell 28560. Drop dead code.
   92.3% src/game/
    7.6% src/shared/
 
-M0_COMMIT 6761857  by TheLuda (commiter TheLuda) " Corrected repository URLs for git_id tool. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/6761857: 6761857 * TheLuda (committer TheLuda)<pre><code>Corrected repository URLs for git_id tool.
  100.0% contrib/git_id/
 
-M0_COMMIT 205862d  by Salja (commiter Sidsukana) " [z1803] Fix Nightfall with changes. Thx Salja. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/205862d: 205862d * Salja (committer Sidsukana)<pre><code>[z1803] Fix Nightfall with changes. Thx Salja.
   88.3% src/game/
   11.6% src/shared/
 
-M0_COMMIT 7962b72  by Sidsukana (commiter Sidsukana) " [z1804] Fix CMSG_CHAT_IGNORED. Also fixed kick players if ignored player writing to them. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/7962b72: 7962b72 * Sidsukana (committer Sidsukana)<pre><code>[z1804] Fix CMSG_CHAT_IGNORED. Also fixed kick players if ignored player writing to them.
   66.8% src/game/
   33.1% src/shared/
 
-M0_COMMIT 482ca12  by Sidsukana (commiter Sidsukana) " [z1805] Fix Improved Sprint. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/482ca12: 482ca12 * Sidsukana (committer Sidsukana)<pre><code>[z1805] Fix Improved Sprint.
   76.2% src/game/
   23.7% src/shared/
 
-M0_COMMIT e0a0426  by Sidsukana (commiter Sidsukana) " [z1806] Fix HP change in bear forms. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/e0a0426: e0a0426 * Sidsukana (committer Sidsukana)<pre><code>[z1806] Fix HP change in bear forms.
   84.3% src/game/
   15.6% src/shared/
 
-M0_COMMIT 84e3d1c  by Sidsukana (commiter Sidsukana) " [z1807] Fix spell 6346. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/84e3d1c: 84e3d1c * Sidsukana (committer Sidsukana)<pre><code>[z1807] Fix spell 6346.
   51.2% sql/updates/
   18.4% sql/
   30.2% src/shared/
 
-M0_COMMIT be82e81  by stfx (commiter stfx) " Fixes indoor check for Warsong flagroom, Alterac Valley cave entrance, Alterac Valley towers and others "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/be82e81: be82e81 * stfx (committer stfx)<pre><code>Fixes indoor check for Warsong flagroom, Alterac Valley cave entrance, Alterac Valley towers and others
  100.0% src/game/
 
-M0_COMMIT 023b81d  by TheLuda (commiter TheLuda) " Merge pull request #14 from stfx/patch-1 "
-M0_COMMIT a623e41  by Sidsukana (commiter Sidsukana) " [z1808] Fix talent Heart of the Wild. Actually for 1.12.x. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/023b81d: 023b81d * TheLuda (committer TheLuda)<pre><code>Merge pull request #14 from stfx/patch-1
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/a623e41: a623e41 * Sidsukana (committer Sidsukana)<pre><code>[z1808] Fix talent Heart of the Wild. Actually for 1.12.x.
   66.2% src/game/
   33.7% src/shared/
 
-M0_COMMIT b2d8643  by Sidsukana (commiter Sidsukana) " [z1809] Fix item 23197. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/b2d8643: b2d8643 * Sidsukana (committer Sidsukana)<pre><code>[z1809] Fix item 23197.
   27.7% sql/updates/
   18.0% sql/
   29.3% src/game/
   24.8% src/shared/
 
-M0_COMMIT 2416b43  by Yaroslav Bugaev (commiter Yaroslav Bugaev) " Fixed a crash on closing mangosd.exe "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/2416b43: 2416b43 * Yaroslav Bugaev (committer Yaroslav Bugaev)<pre><code>Fixed a crash on closing mangosd.exe
  100.0% src/game/
 
-M0_COMMIT 3384ee4  by Yaroslav Bugaev (commiter Yaroslav Bugaev) " Fixed a crash on closing mangosd.exe [2] "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/3384ee4: 3384ee4 * Yaroslav Bugaev (committer Yaroslav Bugaev)<pre><code>Fixed a crash on closing mangosd.exe [2]
  100.0% src/game/
 
-M0_COMMIT 862358c  by Yaroslav Bugaev (commiter Yaroslav Bugaev) " Fixed a crash on closing mangosd.exe [3] "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/862358c: 862358c * Yaroslav Bugaev (committer Yaroslav Bugaev)<pre><code>Fixed a crash on closing mangosd.exe [3]
  100.0% src/game/
 
-M0_COMMIT 696bcdd  by TheLuda (commiter TheLuda) " Merge pull request #15 from Psimage/develop "
-M0_COMMIT 1ced9b6  by TheLuda (commiter TheLuda) " - Removed file not needed. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/696bcdd: 696bcdd * TheLuda (committer TheLuda)<pre><code>Merge pull request #15 from Psimage/develop
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/1ced9b6: 1ced9b6 * TheLuda (committer TheLuda)<pre><code>- Removed file not needed.
  100.0% dep/ACE_wrappers/lib/
 
-M0_COMMIT 132cc18  by TheLuda (commiter TheLuda) " - Fixed compilation error. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/132cc18: 132cc18 * TheLuda (committer TheLuda)<pre><code>- Fixed compilation error.
   22.2% dep/include/g3dlite/G3D/
   77.7% src/game/
 
-M0_COMMIT 5dff2d3  by TheLuda (commiter TheLuda) " - Fix compilation issues in extractor. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/5dff2d3: 5dff2d3 * TheLuda (committer TheLuda)<pre><code>- Fix compilation issues in extractor.
  100.0% contrib/extractor/
 
-M0_COMMIT b773d9b  by TheLuda (commiter TheLuda) " - Updated year to 2012. A bite late. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/b773d9b: b773d9b * TheLuda (committer TheLuda)<pre><code>- Updated year to 2012. A bite late.
    4.0% contrib/vmap_extractor_v3/vmapextract/
    4.5% contrib/
    6.6% src/framework/
@@ -247,29 +129,178 @@ M0_COMMIT b773d9b  by TheLuda (commiter TheLuda) " - Updated year to 2012. A bit
    6.9% src/shared/
    8.1% src/
 
-M0_COMMIT e3f6884  by TheLuda (commiter TheLuda) " Revert "- Removed file not needed." "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/e3f6884: e3f6884 * TheLuda (committer TheLuda)<pre><code>Revert "- Removed file not needed."
  100.0% dep/ACE_wrappers/lib/
 
-M0_COMMIT 6c0854a  by TheLuda (commiter TheLuda) " - Rebuilt Windows solution files. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/6c0854a: 6c0854a * TheLuda (committer TheLuda)<pre><code>- Rebuilt Windows solution files.
   97.5% dep/ACE_wrappers/ace/
 
-M0_COMMIT 83d5cbe  by TheLuda (commiter TheLuda) " - Fixed vmap extraction for case-sensitive file systems. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/83d5cbe: 83d5cbe * TheLuda (committer TheLuda)<pre><code>- Fixed vmap extraction for case-sensitive file systems.
  100.0% contrib/vmap_extractor_v3/vmapextract/
 
-M0_COMMIT 42de9af  by TheLuda (commiter TheLuda) " - Corrected typo in RealmList message. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/42de9af: 42de9af * TheLuda (committer TheLuda)<pre><code>- Corrected typo in RealmList message.
  100.0% src/realmd/
 
-M0_COMMIT 85beb87  by TheLuda (commiter TheLuda) " - Corrected build definition for vmap_extractor to use proper include and   link paths to libmpq. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/85beb87: 85beb87 * TheLuda (committer TheLuda)<pre><code>- Corrected build definition for vmap_extractor to use proper include and   link paths to libmpq.
   73.3% contrib/vmap_extractor_v3/vmapextract/
   26.6% contrib/vmap_extractor_v3/
 
-M0_COMMIT ac8adb0  by TheLuda (commiter TheLuda) " - Removed duplicate line of code in VMAP export. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/ac8adb0: ac8adb0 * TheLuda (committer TheLuda)<pre><code>- Removed duplicate line of code in VMAP export.
   31.6% contrib/extractor/
   68.3% contrib/vmap_extractor_v3/vmapextract/
 
-M0_COMMIT 543f0ca  by TheLuda (commiter TheLuda) " - Sync dbcfile for extractor/vmap_extractor. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/543f0ca: 543f0ca * TheLuda (committer TheLuda)<pre><code>- Sync dbcfile for extractor/vmap_extractor.
   50.5% contrib/extractor/
   49.4% contrib/vmap_extractor_v3/vmapextract/
 
-FILE LAST UPDATE BASED ON 543f0ca (by TheLuda) " - Sync dbcfile for extractor/vmap_extractor. "
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/dc7e395: dc7e395 * Kupix (committer Kupix)<pre><code>added "CREATE TEMPORARY TABLES" privilege. it is required during start of mangosd. checked on mysql server v5.1.61
+ 100.0% sql/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/c90e75a: c90e75a * morphau (committer TheLuda)<pre><code>[z1815] Fix compile on *nix
+  28.2% src/game/
+  71.7% src/shared/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/49927cb: 49927cb * Schmoozerd (committer TheLuda)<pre><code>[z1816] Hopefully really fix *nix compile
+  42.8% src/game/
+  57.1% src/shared/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/4fedfb1: 4fedfb1 * Salja (committer TheLuda)<pre><code>[z1822] Fixes indoor check for Warsong flagroom, Alterac Valley cave entrance, Alterac Valley towers and others
+ 100.0% src/shared/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/b88568a: b88568a * Sidsukana (committer TheLuda)<pre><code>[z1823] Fix talent Heart of the Wild. Actually for 1.12.x.
+ 100.0% src/shared/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/621a2de: 621a2de * Sidsukana (committer TheLuda)<pre><code>[z1824] Fix item 23197.
+  40.2% sql/updates/
+  23.9% sql/
+  35.8% src/shared/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/2abc00e: 2abc00e * kaelima (committer TheLuda)<pre><code>[z1826] Small code cleanup in Player::UpdateWeaponSkill
+  96.2% src/game/
+   3.7% src/shared/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/078cfb2: 078cfb2 * Salja (committer TheLuda)<pre><code>[z1830] Fixed a crash on closing mangosd.exe
+  80.7% src/game/
+  19.2% src/shared/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/69fc67b: 69fc67b * Salja (committer TheLuda)<pre><code>[z1831] Fixed a crash on closing mangosd.exe [2]
+  86.0% src/game/
+  13.9% src/shared/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/089fd8f: 089fd8f * Salja (committer TheLuda)<pre><code>[z1832] Fixed a crash on closing mangosd.exe [3]
+  66.4% src/game/
+  33.5% src/shared/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/7b33275: 7b33275 * Nighoo (committer TheLuda)<pre><code>[z1833] Some more documentation and information for soap example
+  76.5% contrib/soap/
+  23.4% src/shared/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/cde62b6: cde62b6 * TheLuda (committer TheLuda)<pre><code>- Added missing database structure updated.
+ 100.0% sql/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/cd49252: cd49252 * TheLuda (committer TheLuda)<pre><code>- Build bindings after building mangos.
+ 100.0% src/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/a286692: a286692 * TheLuda (committer TheLuda)<pre><code>Merge pull request #22 from kokeszko/patch-1
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/be46a2d: be46a2d * Cala Haryon (committer Cala Haryon)<pre><code>Fix sent level in trainer spell list - this fixes problems especially with druid trainers
+ 100.0% src/game/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/738b250: 738b250 * TheLuda (committer TheLuda)<pre><code>Merge pull request #26 from cala/develop
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/2e17eba: 2e17eba * TheLuda (committer TheLuda)<pre><code>- Correct file permissions.
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/f026561: f026561 * Cala Haryon (committer Cala Haryon)<pre><code>Modify the mana regeneration rate to be correct for 1.12 and below.
+ 100.0% src/game/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/c041d59: c041d59 * Cala Haryon (committer Cala Haryon)<pre><code>Fix glancing blows formula for zero.
+ 100.0% src/game/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/223f292: 223f292 * Cala Haryon (committer Cala Haryon)<pre><code>Remove Stealth when looting.
+ 100.0% src/game/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/2fe0e28: 2fe0e28 * Cala Haryon (committer Cala Haryon)<pre><code>Change files permission.
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/49daa44: 49daa44 * TheLuda (committer TheLuda)<pre><code>[z1838] Dropped TBCisms.
+  97.4% src/game/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/feefb05: feefb05 * Cala Haryon (committer Cala Haryon)<pre><code>Merge remote-tracking branch 'upstream/develop' into develop
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/a132132: a132132 * TheLuda (committer TheLuda)<pre><code>- Removed SkillDiscovery and SkillExtraItem from Windows build.
+  69.1% win/VC100/
+  30.8% win/VC90/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/8f4f845: 8f4f845 * TheLuda (committer TheLuda)<pre><code>Merge pull request #27 from cala/develop
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/3468c7f: 3468c7f * TheLuda (committer TheLuda)<pre><code>- Code style applied.
+  95.8% sql/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/108775c: 108775c * TheLuda (committer TheLuda)<pre><code>[z1839] creature_linking_template updated.
+  58.3% sql/updates/
+  41.6% src/shared/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/01a6612: 01a6612 * TheLuda (committer TheLuda)<pre><code>- Removed ancient database updates.
+  14.7% sql/updates/0.10/
+   5.3% sql/updates/0.11/
+   3.6% sql/updates/0.12/
+   4.4% sql/updates/0.12_branch/
+  40.9% sql/updates/0.6/
+   8.4% sql/updates/0.7/
+  16.4% sql/updates/0.8/
+   3.7% sql/updates/0.9/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/26b0e53: 26b0e53 * TheLuda (committer TheLuda)<pre><code>[z1840] Cosmetic improvements for creature_template table.
+  99.9% sql/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/6ffe4b3: 6ffe4b3 * TheLuda (committer TheLuda)<pre><code>- Removed old universal bindings. - Removed old contrib projects.
+  58.2% contrib/dbcEditer/bin/
+  32.3% contrib/dbcEditer/
+   8.9% contrib/vmap_extract_assembler_bin/
+
+</code></pre>
+* "classic(master)":http://github.com/cmangos/mangos-classic/commit/9293a6d: 9293a6d * TheLuda (committer TheLuda)<pre><code>- Unified file headers.
+   4.1% contrib/vmap_extractor_v3/vmapextract/
+   4.6% contrib/
+   6.9% src/framework/
+   3.9% src/game/vmap/
+  56.7% src/game/
+   6.6% src/shared/Database/
+   7.3% src/shared/
+   6.4% src/
+
+</code></pre>FILE LAST UPDATED BASED ON... "classic(master)":http://github.com/cmangos/mangos-classic/commit/9293a6d: 9293a6d * TheLuda (committer TheLuda)
 
