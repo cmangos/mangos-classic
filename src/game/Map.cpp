@@ -3179,11 +3179,9 @@ uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
         case HIGHGUID_PET:
             return m_PetGuids.Generate();
         default:
-            MANGOS_ASSERT(0);
+            MANGOS_ASSERT(false);
+            return 0;
     }
-
-    MANGOS_ASSERT(0);
-    return 0;
 }
 
 /**
