@@ -146,9 +146,15 @@ void GameEventMgr::LoadFromDB()
             pGameEvent.length       = fields[4].GetUInt32();
             pGameEvent.holiday_id   = HolidayIds(fields[5].GetUInt32());
 
-            if (pGameEvent.length == 0)                         // length>0 is validity check
+            if (pGameEvent.length == 0)                            // length>0 is validity check
             {
                 sLog.outErrorDb("`game_event` game event id (%i) have length 0 and can't be used.", event_id);
+                continue;
+            }
+
+            if (pGameEvent.occurence < pGameEvent.length)   // occurence < length is useless. This also asserts that occurence > 0!
+            {
+                sLog.outErrorDb("`game_event` game event id (%i) has occurence %u  < length %u and can't be used.", event_id, pGameEvent.occurence, pGameEvent.length);
                 continue;
             }
 
