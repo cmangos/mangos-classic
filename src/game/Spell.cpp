@@ -1478,6 +1478,34 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             break;
     }
 
+    // custom radius cases
+    switch (m_spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_GENERIC:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 24811:                                 // Draw Spirit (Lethon)
+                {
+                    if (effIndex == EFFECT_INDEX_0)         // Copy range from EFF_1 to 0
+                        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_1]));
+                    break;
+                }
+                case 28241:                                 // Poison (Naxxramas, Grobbulus Cloud)
+                {
+                    if (SpellAuraHolder* auraHolder = m_caster->GetSpellAuraHolder(28158))
+                        radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
     switch (targetMode)
     {
         case TARGET_TOTEM_EARTH:
