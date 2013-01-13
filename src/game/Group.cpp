@@ -1041,7 +1041,7 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
     if (!guid)
         return false;
 
-    Player* player = sObjectMgr.GetPlayer(guid);
+    Player* player = sObjectMgr.GetPlayer(guid, false);
 
     MemberSlot member;
     member.guid      = guid;
@@ -1065,10 +1065,13 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
         else
             player->SetGroup(this, group);
 
-        // if the same group invites the player back, cancel the homebind timer
-        if (InstanceGroupBind* bind = GetBoundInstance(player->GetMapId()))
-            if (bind->state->GetInstanceId() == player->GetInstanceId())
-                player->m_InstanceValid = true;
+        if (player->IsInWorld())
+        {
+            // if the same group invites the player back, cancel the homebind timer
+            if (InstanceGroupBind* bind = GetBoundInstance(player->GetMapId()))
+                if (bind->state->GetInstanceId() == player->GetInstanceId())
+                    player->m_InstanceValid = true;
+        }
     }
 
     if (!isRaidGroup())                                     // reset targetIcons for non-raid-groups
