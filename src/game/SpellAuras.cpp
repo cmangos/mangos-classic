@@ -1667,11 +1667,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     if (!Real)
         return;
 
-    uint32 modelid = 0;
-    Powers PowerType = POWER_MANA;
     ShapeshiftForm form = ShapeshiftForm(m_modifier.m_miscvalue);
-
-    Unit* target = GetTarget();
 
     SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(form);
     if (!ssEntry)
@@ -1679,6 +1675,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         sLog.outError("Unknown shapeshift form %u in spell %u", form, GetId());
         return;
     }
+
+    uint32 modelid = 0;
+    Powers PowerType = POWER_MANA;
+    Unit* target = GetTarget();
 
     switch (form)
     {
@@ -1880,8 +1880,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     {
         if (modelid > 0)
             target->SetDisplayId(target->GetNativeDisplayId());
+
         if (target->getClass() == CLASS_DRUID)
             target->setPowerType(POWER_MANA);
+
         target->SetShapeshiftForm(FORM_NONE);
 
         switch (form)
