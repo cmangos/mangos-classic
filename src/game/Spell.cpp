@@ -405,6 +405,7 @@ void Spell::FillTargetMap()
                 // Add further conditions here if required
             {
                 effToIndex[i] = j;                          // effect i has same targeting list as effect j
+                break;
             }
         }
 
