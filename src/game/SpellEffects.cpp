@@ -1961,8 +1961,7 @@ void Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype)
             pItem->SetGuidValue(ITEM_FIELD_CREATOR, player->GetObjectGuid());
 
         // send info to the client
-        if (pItem)
-            player->SendNewItem(pItem, num_to_add, true, bgType == 0);
+        player->SendNewItem(pItem, num_to_add, true, bgType == 0);
 
         // we succeeded in creating at least one item, so a levelup is possible
         if (bgType == 0)

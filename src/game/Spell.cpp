@@ -3891,10 +3891,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 else
                     return SPELL_FAILED_BAD_TARGETS;
             }
-        }
 
-        if (non_caster_target)
-        {
             // simple cases
             bool explicit_target_mode = false;
             bool target_hostile = false;
