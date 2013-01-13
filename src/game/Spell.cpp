@@ -372,6 +372,8 @@ WorldObject* Spell::FindCorpseUsing()
 void Spell::FillTargetMap()
 {
     // TODO: ADD the correct target FILLS!!!!!!
+    UnitList tmpUnitLists[MAX_EFFECT_INDEX];                // Stores the temporary Target Lists for each effect
+    uint8 effToIndex[MAX_EFFECT_INDEX] = {0, 1, 2};         // Helper array, to link to another tmpUnitList, if the targets for both effects match
 
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
@@ -394,174 +396,187 @@ void Spell::FillTargetMap()
         if (IsAreaAuraEffect(m_spellInfo->Effect[i]))
             AddUnitTarget(m_caster, SpellEffectIndex(i));
 
-        UnitList tmpUnitMap;
-
-        // TargetA/TargetB dependent from each other, we not switch to full support this dependences
-        // but need it support in some know cases
-        switch (m_spellInfo->EffectImplicitTargetA[i])
+        // no double fill for same targets
+        for (int j = 0; j < i; ++j)
         {
-            case TARGET_NONE:
-                switch (m_spellInfo->EffectImplicitTargetB[i])
-                {
-                    case TARGET_NONE:
-                        if (m_caster->GetObjectGuid().IsPet())
-                            SetTargetMap(SpellEffectIndex(i), TARGET_SELF, tmpUnitMap);
-                        else
-                            SetTargetMap(SpellEffectIndex(i), TARGET_EFFECT_SELECT, tmpUnitMap);
-                        break;
-                    default:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        break;
-                }
-                break;
-            case TARGET_SELF:
-                switch (m_spellInfo->EffectImplicitTargetB[i])
-                {
-                    case TARGET_NONE:
-                        // Arcane Missiles have strange targeting for auras
-                        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000800))
-                        {
-                            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                                if (Unit* target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelectionGuid()))
-                                    if (!m_caster->IsFriendlyTo(target))
-                                        tmpUnitMap.push_back(target);
-                        }
-                        else
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        break;
-                    case TARGET_EFFECT_SELECT:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        break;
-                    case TARGET_AREAEFFECT_INSTANT:         // use B case that not dependent from from A in fact
-                        if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) == 0)
-                            m_targets.setDestination(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        break;
-                    default:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        break;
-                }
-                break;
-            case TARGET_EFFECT_SELECT:
-                switch (m_spellInfo->EffectImplicitTargetB[i])
-                {
-                    case TARGET_NONE:
-                    case TARGET_EFFECT_SELECT:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        break;
-                        // dest point setup required
-                    case TARGET_AREAEFFECT_INSTANT:
-                    case TARGET_AREAEFFECT_CUSTOM:
-                    case TARGET_ALL_ENEMY_IN_AREA:
-                    case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
-                    case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
-                    case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
-                        // triggered spells get dest point from default target set, ignore it
-                        if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) || m_IsTriggeredSpell)
-                            if (WorldObject* castObject = GetCastingObject())
-                                m_targets.setDestination(castObject->GetPositionX(), castObject->GetPositionY(), castObject->GetPositionZ());
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        break;
-                        // target pre-selection required
-                    case TARGET_INNKEEPER_COORDINATES:
-                    case TARGET_TABLE_X_Y_Z_COORDINATES:
-                    case TARGET_CASTER_COORDINATES:
-                    case TARGET_SCRIPT_COORDINATES:
-                    case TARGET_CURRENT_ENEMY_COORDINATES:
-                    case TARGET_DUELVSPLAYER_COORDINATES:
-                        // need some target for processing
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        break;
-                    default:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        break;
-                }
-                break;
-            case TARGET_CASTER_COORDINATES:
-                switch (m_spellInfo->EffectImplicitTargetB[i])
-                {
-                    case TARGET_ALL_ENEMY_IN_AREA:
-                        // Note: this hack with search required until GO casting not implemented
-                        // environment damage spells already have around enemies targeting but this not help in case nonexistent GO casting support
-                        // currently each enemy selected explicitly and self cast damage
-                        if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENVIRONMENTAL_DAMAGE)
-                        {
-                            if (m_targets.getUnitTarget())
-                                tmpUnitMap.push_back(m_targets.getUnitTarget());
-                        }
-                        else
-                        {
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        }
-                        break;
-                    case 0:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        tmpUnitMap.push_back(m_caster);
-                        break;
-                    default:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        break;
-                }
-                break;
-            case TARGET_TABLE_X_Y_Z_COORDINATES:
-                switch (m_spellInfo->EffectImplicitTargetB[i])
-                {
-                    case 0:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
+            // Check if same target, but handle i.e. AreaAuras different
+            if (m_spellInfo->EffectImplicitTargetA[i] == m_spellInfo->EffectImplicitTargetA[j] && m_spellInfo->EffectImplicitTargetB[i] == m_spellInfo->EffectImplicitTargetB[j]
+                    && !IsAreaAuraEffect(m_spellInfo->Effect[i]) && !IsAreaAuraEffect(m_spellInfo->Effect[j]))
+                // Add further conditions here if required
+            {
+                effToIndex[i] = j;                          // effect i has same targeting list as effect j
+            }
+        }
 
-                        // need some target for processing
-                        SetTargetMap(SpellEffectIndex(i), TARGET_EFFECT_SELECT, tmpUnitMap);
-                        break;
-                    case TARGET_AREAEFFECT_INSTANT:         // All 17/7 pairs used for dest teleportation, A processed in effect code
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        break;
-                    default:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        break;
-                }
-                break;
-            case TARGET_DUELVSPLAYER_COORDINATES:
-                switch (m_spellInfo->EffectImplicitTargetB[i])
-                {
-                    case 0:
-                    case TARGET_EFFECT_SELECT:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        if (Unit* currentTarget = m_targets.getUnitTarget())
-                            tmpUnitMap.push_back(currentTarget);
-                        break;
-                    default:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        break;
-                }
-                break;
-            default:
-                switch (m_spellInfo->EffectImplicitTargetB[i])
-                {
-                    case 0:
-                    case TARGET_EFFECT_SELECT:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        break;
-                    case TARGET_SCRIPT_COORDINATES:         // B case filled in CheckCast but we need fill unit list base at A case
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        break;
-                    default:
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitMap);
-                        SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitMap);
-                        break;
-                }
-                break;
+        if (effToIndex[i] == i)                             // New target combination
+        {
+            // TargetA/TargetB dependent from each other, we not switch to full support this dependences
+            // but need it support in some know cases
+            switch (m_spellInfo->EffectImplicitTargetA[i])
+            {
+                case TARGET_NONE:
+                    switch (m_spellInfo->EffectImplicitTargetB[i])
+                    {
+                        case TARGET_NONE:
+                            if (m_caster->GetObjectGuid().IsPet())
+                                SetTargetMap(SpellEffectIndex(i), TARGET_SELF, tmpUnitLists[i /*==effToIndex[i]*/]);
+                            else
+                                SetTargetMap(SpellEffectIndex(i), TARGET_EFFECT_SELECT, tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                        default:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                    }
+                    break;
+                case TARGET_SELF:
+                    switch (m_spellInfo->EffectImplicitTargetB[i])
+                    {
+                        case TARGET_NONE:
+                            // Arcane Missiles have strange targeting for auras
+                            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && m_spellInfo->SpellFamilyFlags & UI64LIT(0x00000800))
+                            {
+                                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                                    if (Unit* target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelectionGuid()))
+                                        if (!m_caster->IsFriendlyTo(target))
+                                            tmpUnitLists[i /*==effToIndex[i]*/].push_back(target);
+                            }
+                            else
+                                SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                        case TARGET_EFFECT_SELECT:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                        case TARGET_AREAEFFECT_INSTANT:         // use B case that not dependent from from A in fact
+                            if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) == 0)
+                                m_targets.setDestination(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                        default:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                    }
+                    break;
+                case TARGET_EFFECT_SELECT:
+                    switch (m_spellInfo->EffectImplicitTargetB[i])
+                    {
+                        case TARGET_NONE:
+                        case TARGET_EFFECT_SELECT:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                            // dest point setup required
+                        case TARGET_AREAEFFECT_INSTANT:
+                        case TARGET_AREAEFFECT_CUSTOM:
+                        case TARGET_ALL_ENEMY_IN_AREA:
+                        case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
+                        case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
+                        case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
+                        case TARGET_AREAEFFECT_GO_AROUND_DEST:
+                            // triggered spells get dest point from default target set, ignore it
+                            if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) || m_IsTriggeredSpell)
+                                if (WorldObject* castObject = GetCastingObject())
+                                    m_targets.setDestination(castObject->GetPositionX(), castObject->GetPositionY(), castObject->GetPositionZ());
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                            // target pre-selection required
+                        case TARGET_INNKEEPER_COORDINATES:
+                        case TARGET_TABLE_X_Y_Z_COORDINATES:
+                        case TARGET_CASTER_COORDINATES:
+                        case TARGET_SCRIPT_COORDINATES:
+                        case TARGET_CURRENT_ENEMY_COORDINATES:
+                        case TARGET_DUELVSPLAYER_COORDINATES:
+                            // need some target for processing
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                        default:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                    }
+                    break;
+                case TARGET_CASTER_COORDINATES:
+                    switch (m_spellInfo->EffectImplicitTargetB[i])
+                    {
+                        case TARGET_ALL_ENEMY_IN_AREA:
+                            // Note: this hack with search required until GO casting not implemented
+                            // environment damage spells already have around enemies targeting but this not help in case nonexistent GO casting support
+                            // currently each enemy selected explicitly and self cast damage
+                            if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENVIRONMENTAL_DAMAGE)
+                            {
+                                if (m_targets.getUnitTarget())
+                                    tmpUnitLists[i /*==effToIndex[i]*/].push_back(m_targets.getUnitTarget());
+                            }
+                            else
+                            {
+                                SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                                SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            }
+                            break;
+                        case 0:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            tmpUnitLists[i /*==effToIndex[i]*/].push_back(m_caster);
+                            break;
+                        default:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                    }
+                    break;
+                case TARGET_TABLE_X_Y_Z_COORDINATES:
+                    switch (m_spellInfo->EffectImplicitTargetB[i])
+                    {
+                        case 0:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            // need some target for processing
+                            SetTargetMap(SpellEffectIndex(i), TARGET_EFFECT_SELECT, tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                        case TARGET_AREAEFFECT_INSTANT:         // All 17/7 pairs used for dest teleportation, A processed in effect code
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                        default:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                    }
+                    break;
+                case TARGET_DUELVSPLAYER_COORDINATES:
+                    switch (m_spellInfo->EffectImplicitTargetB[i])
+                    {
+                        case 0:
+                        case TARGET_EFFECT_SELECT:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            if (Unit* currentTarget = m_targets.getUnitTarget())
+                                tmpUnitLists[i /*==effToIndex[i]*/].push_back(currentTarget);
+                            break;
+                        default:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                    }
+                    break;
+                default:
+                    switch (m_spellInfo->EffectImplicitTargetB[i])
+                    {
+                        case 0:
+                        case TARGET_EFFECT_SELECT:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                        case TARGET_SCRIPT_COORDINATES:         // B case filled in CheckCast but we need fill unit list base at A case
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                        default:
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+                            break;
+                    }
+                    break;
+            }
         }
 
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             Player* me = (Player*)m_caster;
-            for (UnitList::const_iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end(); ++itr)
+            for (UnitList::const_iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end(); ++itr)
             {
                 Player* targetOwner = (*itr)->GetCharmerOrOwnerPlayerOrPlayerItself();
                 if (targetOwner && targetOwner != me && targetOwner->IsPvP() && !me->IsInDuelWith(targetOwner))
@@ -573,18 +588,18 @@ void Spell::FillTargetMap()
             }
         }
 
-        for (UnitList::iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end();)
+        for (UnitList::iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end();)
         {
             if (!CheckTarget(*itr, SpellEffectIndex(i)))
             {
-                itr = tmpUnitMap.erase(itr);
+                itr = tmpUnitLists[effToIndex[i]].erase(itr);
                 continue;
             }
             else
                 ++itr;
         }
 
-        for (UnitList::const_iterator iunit = tmpUnitMap.begin(); iunit != tmpUnitMap.end(); ++iunit)
+        for (UnitList::const_iterator iunit = tmpUnitLists[effToIndex[i]].begin(); iunit != tmpUnitLists[effToIndex[i]].end(); ++iunit)
             AddUnitTarget((*iunit), SpellEffectIndex(i));
     }
 }
