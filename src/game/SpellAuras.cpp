@@ -1467,6 +1467,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     return;
                 }
                 case 27978:
+                case 40131:
                     if (apply)
                         target->m_AuraFlags |= UNIT_AURAFLAG_ALIVE_INVISIBLE;
                     else
