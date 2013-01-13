@@ -4752,6 +4752,18 @@ void Aura::PeriodicTick()
                 int32 gain = pCaster->ModifyPower(power, gain_amount);
                 target->AddThreat(pCaster, float(gain) * 0.5f, false, GetSpellSchoolMask(spellProto), spellProto);
             }
+
+            // Some special cases
+            switch (GetId())
+            {
+                case 21056:                                 // Mark of Kazzak
+                    if (target->GetTypeId() == TYPEID_PLAYER && target->GetPower(power) == 0)
+                    {
+                        target->CastSpell(target, 21058, true, NULL, this);
+                        target->RemoveAurasDueToSpell(GetId());
+                    }
+                    break;
+            }
             break;
         }
         case SPELL_AURA_PERIODIC_ENERGIZE:
