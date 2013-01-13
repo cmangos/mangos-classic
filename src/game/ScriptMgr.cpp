@@ -25,7 +25,9 @@
 #include "WaypointManager.h"
 #include "World.h"
 #include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "Cell.h"
+#include "CellImpl.h"
 
 #include "revision_nr.h"
 
