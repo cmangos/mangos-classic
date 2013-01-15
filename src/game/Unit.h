@@ -935,8 +935,6 @@ enum ReactiveType
 
 #define MAX_REACTIVE 6
 
-typedef std::set<ObjectGuid> GuardianPetList;
-
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
 #define MAX_PLAYER_STEALTH_DETECT_RANGE 45.0f               // max distance for detection targets by player
@@ -1700,8 +1698,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         SingleCastSpellTargetMap m_singleCastSpellTargets;  // casted by unit single per-caster auras
 
-        typedef std::list<ObjectGuid> DynObjectGUIDs;
-        DynObjectGUIDs m_dynObjGUIDs;
+        GuidList m_dynObjGUIDs;
 
         typedef std::list<GameObject*> GameObjectList;
         GameObjectList m_gameObj;
@@ -1758,7 +1755,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         ComboPointHolderSet m_ComboPointHolders;
 
-        GuardianPetList m_guardianPets;
+        GuidSet m_guardianPets;
 
         ObjectGuid m_TotemSlot[MAX_TOTEM_SLOT];
 
@@ -1792,7 +1789,7 @@ void Unit::CallForAllControlledUnits(Func const& func, uint32 controlledMask)
 
     if (controlledMask & CONTROLLED_GUARDIANS)
     {
-        for (GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
+        for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
             if (Pet* guardian = _GetPet(*(itr++)))
                 func(guardian);
     }
@@ -1825,7 +1822,7 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
 
     if (controlledMask & CONTROLLED_GUARDIANS)
     {
-        for (GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
+        for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end();)
             if (Pet const* guardian = _GetPet(*(itr++)))
                 if (func(guardian))
                     return true;
