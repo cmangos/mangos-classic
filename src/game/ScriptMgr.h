@@ -90,6 +90,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_MODIFY_NPC_FLAGS         = 29,           // resSource = Creature
     // datalong=NPCFlags
     // datalong2:0x00=toggle, 0x01=add, 0x02=remove
+    SCRIPT_COMMAND_SEND_TAXI_PATH           = 30,           // datalong = taxi path id (source or target must be player)
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
@@ -285,6 +286,12 @@ struct ScriptInfo
             uint32 flag;                                    // datalong
             uint32 change_flag;                             // datalong2
         } npcFlag;
+
+        struct
+        {
+            uint32 taxiPathId;                              // datalong
+            uint32 empty;
+        } sendTaxiPath;
 
         struct
         {
