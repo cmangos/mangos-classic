@@ -1979,7 +1979,7 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
         damageInfo->damage -= damageInfo->blocked;
     }
 
-    CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, !(spellProto->AttributesEx2 & SPELL_ATTR_EX2_CANT_REFLECTED));
+    CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), SPELL_DIRECT_DAMAGE, damageInfo->damage, &damageInfo->absorb, &damageInfo->resist, !spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
     damageInfo->damage -= damageInfo->absorb + damageInfo->resist;
 }
 
@@ -2321,7 +2321,7 @@ bool Unit::IsSpellBlocked(Unit* pCaster, SpellEntry const* spellEntry, WeaponAtt
     if (spellEntry)
     {
         // Some spells cannot be blocked
-        if (spellEntry->Attributes & SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK)
+        if (spellEntry->HasAttribute(SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK))
             return false;
     }
 
@@ -2397,7 +2397,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 
     uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, fullSkillDiff, spell) * 100.0f);
     // Roll miss
-    uint32 tmp = spell->AttributesEx3 & SPELL_ATTR_EX3_CANT_MISS ? 0 : missChance;
+    uint32 tmp = spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) ? 0 : missChance;
     if (roll < tmp)
         return SPELL_MISS_MISS;
 
@@ -2423,7 +2423,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
     bool canParry = true;
 
     // Same spells cannot be parry/dodge
-    if (spell->Attributes & SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK)
+    if (spell->HasAttribute(SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK))
         return SPELL_MISS_NONE;
 
     // Ranged attack cannot be parry/dodge
@@ -2532,7 +2532,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
     if (HitChance <  100) HitChance =  100;
     if (HitChance > 9900) HitChance = 9900;
 
-    int32 tmp = spell->AttributesEx3 & SPELL_ATTR_EX3_CANT_MISS ? 0 : (10000 - HitChance);
+    int32 tmp = spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) ? 0 : (10000 - HitChance);
 
     int32 rand = irand(0, 10000);
 
@@ -3851,7 +3851,7 @@ void Unit::RemoveAurasWithAttribute(uint32 flags)
 {
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
     {
-        if (iter->second->GetSpellProto()->Attributes & flags)
+        if (iter->second->GetSpellProto()->HasAttribute((SpellAttributes)flags))
         {
             RemoveSpellAuraHolder(iter->second);
             iter = m_spellAuraHolders.begin();
@@ -4215,7 +4215,7 @@ void Unit::AddGameObject(GameObject* gameObj)
     {
         SpellEntry const* createBySpell = sSpellStore.LookupEntry(gameObj->GetSpellId());
         // Need disable spell use for owner
-        if (createBySpell && createBySpell->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+        if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
             // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
             ((Player*)this)->AddSpellAndCategoryCooldowns(createBySpell, 0, NULL, true);
     }
@@ -4236,7 +4236,7 @@ void Unit::RemoveGameObject(GameObject* gameObj, bool del)
         {
             SpellEntry const* createBySpell = sSpellStore.LookupEntry(spellid);
             // Need activate spell use for owner
-            if (createBySpell && createBySpell->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+            if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
                 // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
                 ((Player*)this)->SendCooldownEvent(createBySpell);
         }
@@ -5446,7 +5446,7 @@ int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask)
 bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType)
 {
     // not critting spell
-    if ((spellProto->AttributesEx2 & SPELL_ATTR_EX2_CANT_CRIT))
+    if (spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_CRIT))
         return false;
 
     float crit_chance = 0.0f;
@@ -5776,8 +5776,8 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo)
         if (itr->type == spellInfo->Dispel)
             return true;
 
-    if (!(spellInfo->AttributesEx & SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE) &&         // unaffected by school immunity
-            !(spellInfo->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))              // can remove immune (by dispell or immune it)
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE) &&         // unaffected by school immunity
+            !spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))              // can remove immune (by dispell or immune it)
     {
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
         for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
@@ -5841,10 +5841,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
  */
 uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackType attType, SpellEntry const* spellProto, DamageEffectType damagetype, uint32 stack)
 {
-    if (!pVictim)
-        return pdamage;
-
-    if (pdamage == 0)
+    if (!pVictim || pdamage == 0)
         return pdamage;
 
     // differentiate for weapon damage based spells
@@ -6065,7 +6062,7 @@ void Unit::ApplySpellDispelImmunity(const SpellEntry* spellProto, DispelType typ
 {
     ApplySpellImmune(spellProto->Id, IMMUNITY_DISPEL, type, apply);
 
-    if (apply && spellProto->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
+    if (apply && spellProto->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
         RemoveAurasWithDispelType(type);
 }
 
@@ -7147,7 +7144,7 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
         }
     }
 
-    if (spellProto->Attributes & SPELL_ATTR_LEVEL_DAMAGE_CALCULATION && spellProto->spellLevel &&
+    if (spellProto->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION) && spellProto->spellLevel &&
             spellProto->Effect[effect_index] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
             spellProto->Effect[effect_index] != SPELL_EFFECT_KNOCK_BACK &&
             (spellProto->Effect[effect_index] != SPELL_EFFECT_APPLY_AURA || spellProto->EffectApplyAuraName[effect_index] != SPELL_AURA_MOD_DECREASE_SPEED))
@@ -8721,7 +8718,7 @@ void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, 
             ++iter;
         else if (non_positive && iter->second->IsPositive())
             ++iter;
-        else if (spell->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
+        else if (spell->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
             ++iter;
         else if (iter->second->HasMechanicMask(mechMask))
         {
