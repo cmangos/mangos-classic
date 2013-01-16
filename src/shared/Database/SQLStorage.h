@@ -59,6 +59,7 @@ class SQLStorage
         uint32 RecordCount;
         uint32 MaxEntry;
         uint32 iNumFields;
+        uint32 oNumFields;
 
         char const* GetTableName() const { return table; }
 
@@ -75,6 +76,7 @@ class SQLStorage
             data = NULL;
             pIndex = NULL;
             iNumFields = strlen(src_format);
+            oNumFields = strlen(dst_format);
             MaxEntry = 0;
         }
 
@@ -101,6 +103,9 @@ struct SQLStorageLoaderBase
         template<class D>
         void convert_from_str(uint32 field_pos, char const* src, D& dst);
         void convert_str_to_str(uint32 field_pos, char const* src, char*& dst);
+        template<class S, class D>
+        void default_fill(uint32 field_pos, S src, D& dst);
+        void default_fill_to_str(uint32 field_pos, char const* src, char*& dst);
 
         // trap, no body
         template<class D>
