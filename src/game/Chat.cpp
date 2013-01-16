@@ -1740,7 +1740,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
                     if (linkedSpell)
                     {
                         // spells with that flag have a prefix of "$PROFESSION: "
-                        if (linkedSpell->Attributes & SPELL_ATTR_TRADESPELL)
+                        if (linkedSpell->HasAttribute(SPELL_ATTR_TRADESPELL))
                         {
                             // lookup skillid
                             SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(linkedSpell->Id);
