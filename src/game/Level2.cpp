@@ -1065,7 +1065,6 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
         return false;
 
     const GameObjectInfo* gInfo = ObjectMgr::GetGameObjectInfo(id);
-
     if (!gInfo)
     {
         PSendSysMessage(LANG_GAMEOBJECT_NOT_EXIST, id);
@@ -1082,14 +1081,12 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
         return false;
     }
 
-    Player* chr = m_session->GetPlayer();
-    float x = float(chr->GetPositionX());
-    float y = float(chr->GetPositionY());
-    float z = float(chr->GetPositionZ());
-    float o = float(chr->GetOrientation());
-    Map* map = chr->GetMap();
-
-    GameObject* pGameObj = new GameObject;
+    Player* plr = m_session->GetPlayer();
+    float x = float(plr->GetPositionX());
+    float y = float(plr->GetPositionY());
+    float z = float(plr->GetPositionZ());
+    float o = float(plr->GetOrientation());
+    Map* map = plr->GetMap();
 
     // used guids from specially reserved range (can be 0 if no free values)
     uint32 db_lowGUID = sObjectMgr.GenerateStaticGameObjectLowGuid();
@@ -1100,6 +1097,7 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
         return false;
     }
 
+    GameObject* pGameObj = new GameObject;
     if (!pGameObj->Create(db_lowGUID, gInfo->id, map, x, y, z, o))
     {
         delete pGameObj;
