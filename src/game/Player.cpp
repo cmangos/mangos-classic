@@ -3008,7 +3008,7 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
         for (SpellChainMapNext::const_iterator i = nextMap.lower_bound(spell_id); i != nextMap.upper_bound(spell_id); ++i)
         {
             PlayerSpellMap::iterator iter = m_spells.find(i->second);
-            if (disabled && iter != m_spells.end() && iter->second.disabled)
+            if (iter != m_spells.end() && iter->second.disabled)
                 learnSpell(i->second, false);
         }
     }
@@ -8118,7 +8118,7 @@ Item* Player::GetItemByPos(uint16 pos) const
 
 Item* Player::GetItemByPos(uint8 bag, uint8 slot) const
 {
-    if (bag == INVENTORY_SLOT_BAG_0 && (slot < BANK_SLOT_BAG_END || slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_END))
+    if (bag == INVENTORY_SLOT_BAG_0 && (slot < BANK_SLOT_BAG_END || (slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_END)))
         return m_items[slot];
     else if ((bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END)
              || (bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END))
@@ -18491,7 +18491,7 @@ void Player::SetOriginalGroup(Group* group, int8 subgroup)
     else
     {
         // never use SetOriginalGroup without a subgroup unless you specify NULL for group
-        assert(subgroup >= 0);
+        MANGOS_ASSERT(subgroup >= 0);
         m_originalGroup.link(group, this);
         m_originalGroup.setSubGroup((uint8)subgroup);
     }

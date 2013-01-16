@@ -4538,6 +4538,7 @@ bool ChatHandler::HandleResetTalentsCommand(char* args)
         ChatHandler(target).SendSysMessage(LANG_RESET_TALENTS);
         if (!m_session || m_session->GetPlayer() != target)
             PSendSysMessage(LANG_RESET_TALENTS_ONLINE, GetNameLink(target).c_str());
+        return true;
     }
     else if (target_guid)
     {
@@ -4545,9 +4546,12 @@ bool ChatHandler::HandleResetTalentsCommand(char* args)
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'", at_flags, target_guid.GetCounter());
         std::string nameLink = playerLink(target_name);
         PSendSysMessage(LANG_RESET_TALENTS_OFFLINE, nameLink.c_str());
+        return true;
     }
 
-    return true;
+    SendSysMessage(LANG_NO_CHAR_SELECTED);
+    SetSentErrorMessage(true);
+    return false;
 }
 
 bool ChatHandler::HandleResetAllCommand(char* args)

@@ -7984,10 +7984,9 @@ bool ObjectMgr::RemoveVendorItem(uint32 entry, uint32 item)
     if (iter == m_mCacheVendorItemMap.end())
         return false;
 
-    if (!iter->second.FindItem(item))
+    if (!iter->second.RemoveItem(item))
         return false;
 
-    iter->second.RemoveItem(item);
     WorldDatabase.PExecuteLog("DELETE FROM npc_vendor WHERE entry='%u' AND item='%u'", entry, item);
     return true;
 }
@@ -8067,8 +8066,6 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
         else
             sLog.outErrorDb("Table `%s` has duplicate items %u for %s %u, ignoring",
                             tableName, item_id, idStr, vendor_entry);
-        sLog.outErrorDb("Table `npc_vendor` has duplicate items %u for vendor (Entry: %u), ignoring",
-                        item_id, vendor_entry);
         return false;
     }
 

@@ -874,7 +874,7 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket* data, BattleGro
         return;
     }
 
-    data->Initialize(SMSG_BATTLEFIELD_STATUS, (4 + 1 + 1 + 4 + 2 + 4 + 1 + 4 + 4 + 4));
+    data->Initialize(SMSG_BATTLEFIELD_STATUS, (4 + 8 + 4 + 1 + 4 + 4 + 4));
     *data << uint32(QueueSlot);                             // queue id (0...2) - player can be in 3 queues in time
     // uint64 in client
     *data << uint32(bg->GetMapId());                        // MapID
