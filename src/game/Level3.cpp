@@ -1069,7 +1069,7 @@ bool ChatHandler::HandleAccountSetGmLevelCommand(char* args)
     }
 
     /// can set security level only for target with less security and to less security that we have
-    /// This is also reject self apply in fact
+    /// This will reject self apply by specify account name
     if (HasLowerSecurityAccount(NULL, targetAccountId, true))
         return false;
 

@@ -349,7 +349,7 @@ void ObjectMgr::LoadPointOfInterestLocales()
 
         bar.step();
 
-        sLog.outString("");
+        sLog.outString();
         sLog.outString(">> Loaded 0 points_of_interest locale strings. DB table `locales_points_of_interest` is empty.");
         return;
     }
@@ -1017,6 +1017,7 @@ void ObjectMgr::LoadCreatures()
 
         if (gameEvent == 0 && GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
             AddCreatureToGrid(guid, &data);
+
         ++count;
 
     }
@@ -3438,11 +3439,8 @@ void ObjectMgr::LoadQuests()
             if (qinfo->RewRepFaction[j])
             {
                 if (!qinfo->RewRepValue[j])
-                {
                     sLog.outErrorDb("Quest %u has `RewRepFaction%d` = %u but `RewRepValue%d` = 0, quest will not reward this reputation.",
                                     qinfo->GetQuestId(), j + 1, qinfo->RewRepValue[j], j + 1);
-                    // no changes
-                }
 
                 if (!sFactionStore.LookupEntry(qinfo->RewRepFaction[j]))
                 {
@@ -5612,7 +5610,7 @@ void ObjectMgr::LoadCorpses()
     uint32 count = 0;
     //                                                    0            1       2                  3                  4                  5                   6
     QueryResult* result = CharacterDatabase.Query("SELECT corpse.guid, player, corpse.position_x, corpse.position_y, corpse.position_z, corpse.orientation, corpse.map, "
-                          //   7     8            9     10      11    12     13           14            15              16       17
+                          //   7     8            9         10      11    12     13           14            15              16       17
                           "time, corpse_type, instance, gender, race, class, playerBytes, playerBytes2, equipmentCache, guildId, playerFlags FROM corpse "
                           "JOIN characters ON player = characters.guid "
                           "LEFT JOIN guild_member ON player=guild_member.guid WHERE corpse_type <> 0");

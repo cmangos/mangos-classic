@@ -25,7 +25,6 @@
 #include "GameObject.h"
 #include "Language.h"
 #include "WorldPacket.h"
-#include "ObjectMgr.h"
 
 BattleGroundAV::BattleGroundAV()
 {

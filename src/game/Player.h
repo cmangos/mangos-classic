@@ -948,6 +948,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         // Played Time Stuff
         time_t m_logintime;
         time_t m_Last_tick;
+
         uint32 m_Played_time[MAX_PLAYED_TIME_INDEX];
         uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; }
         uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; }
@@ -1200,7 +1201,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetQuestSlotTimer(uint16 slot, uint32 timer) { SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_TIME_OFFSET, timer); }
         void SwapQuestSlot(uint16 slot1, uint16 slot2)
         {
-            for (int i = 0; i < MAX_QUEST_OFFSET ; ++i)
+            for (int i = 0; i < MAX_QUEST_OFFSET; ++i)
             {
                 uint32 temp1 = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET * slot1 + i);
                 uint32 temp2 = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET * slot2 + i);
@@ -1459,7 +1460,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdatePvP(bool state, bool ovrride = false);
         bool IsFFAPvP() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP); }
         void SetFFAPvP(bool state);
-
 
         void UpdateZone(uint32 newZone, uint32 newArea);
         void UpdateArea(uint32 newArea);

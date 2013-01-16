@@ -634,16 +634,16 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
     }
 }
 
-AuctionEntry* AuctionHouseObject::AddAuction(AuctionHouseEntry const* auctionHouseEntry, Item* it, uint32 etime, uint32 bid, uint32 buyout, uint32 deposit, Player* pl /*= NULL*/)
+AuctionEntry* AuctionHouseObject::AddAuction(AuctionHouseEntry const* auctionHouseEntry, Item* newItem, uint32 etime, uint32 bid, uint32 buyout, uint32 deposit, Player* pl /*= NULL*/)
 {
     uint32 auction_time = uint32(etime * sWorld.getConfig(CONFIG_FLOAT_RATE_AUCTION_TIME));
 
     AuctionEntry* AH = new AuctionEntry;
     AH->Id = sObjectMgr.GenerateAuctionID();
-    AH->itemGuidLow = it->GetObjectGuid().GetCounter();
-    AH->itemTemplate = it->GetEntry();
-    AH->itemCount = it->GetCount();
-    AH->itemRandomPropertyId = it->GetItemRandomPropertyId();
+    AH->itemGuidLow = newItem->GetObjectGuid().GetCounter();
+    AH->itemTemplate = newItem->GetEntry();
+    AH->itemCount = newItem->GetCount();
+    AH->itemRandomPropertyId = newItem->GetItemRandomPropertyId();
     AH->owner = pl ? pl->GetGUIDLow() : 0;
     AH->startbid = bid;
     AH->bidder = 0;
@@ -655,17 +655,17 @@ AuctionEntry* AuctionHouseObject::AddAuction(AuctionHouseEntry const* auctionHou
 
     AddAuction(AH);
 
-    sAuctionMgr.AddAItem(it);
+    sAuctionMgr.AddAItem(newItem);
 
     if (pl)
-        pl->MoveItemFromInventory(it->GetBagSlot(), it->GetSlot(), true);
+        pl->MoveItemFromInventory(newItem->GetBagSlot(), newItem->GetSlot(), true);
 
     CharacterDatabase.BeginTransaction();
 
     if (pl)
-        it->DeleteFromInventoryDB();
+        newItem->DeleteFromInventoryDB();
 
-    it->SaveToDB();
+    newItem->SaveToDB();
     AH->SaveToDB();
 
     if (pl)

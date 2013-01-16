@@ -141,6 +141,7 @@ void ReputationMgr::SendState(FactionState const* faction)
             {
                 data << (uint32) itr->second.ReputationListID;
                 data << (uint32) itr->second.Standing;
+
                 ++count;
             }
         }

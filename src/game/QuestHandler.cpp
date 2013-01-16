@@ -65,8 +65,10 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recv_data)
         {
             GameObject* go_questgiver = (GameObject*)questgiver;
             dialogStatus = sScriptMgr.GetDialogStatus(_player, go_questgiver);
+
             if (dialogStatus > 6)
                 dialogStatus = getDialogStatus(_player, go_questgiver, DIALOG_STATUS_NONE);
+
             break;
         }
         default:
@@ -597,8 +599,10 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
 
             if (!questgiver || questgiver->IsHostileTo(_player))
                 continue;
+
             if (!questgiver->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
                 continue;
+
             dialogStatus = sScriptMgr.GetDialogStatus(_player, questgiver);
 
             if (dialogStatus > 6)
@@ -611,8 +615,10 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
         else if (itr->IsGameObject())
         {
             GameObject* questgiver = GetPlayer()->GetMap()->GetGameObject(*itr);
+
             if (!questgiver)
                 continue;
+
             if (questgiver->GetGoType() != GAMEOBJECT_TYPE_QUESTGIVER)
                 continue;
 

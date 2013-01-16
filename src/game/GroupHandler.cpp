@@ -80,11 +80,13 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_PLAYER_WRONG_FACTION);
         return;
     }
+
     if (GetPlayer()->GetInstanceId() != 0 && player->GetInstanceId() != 0 && GetPlayer()->GetInstanceId() != player->GetInstanceId() && GetPlayer()->GetMapId() == player->GetMapId())
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_TARGET_NOT_IN_INSTANCE_S);
         return;
     }
+
     // just ignore us
     if (player->GetSocial()->HasIgnore(GetPlayer()->GetObjectGuid()))
     {

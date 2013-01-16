@@ -629,10 +629,9 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 {
     // NOTE: ATM the socket is singlethread, have this in mind ...
     uint8 digest[20];
-    uint32 clientSeed;
+    uint32 clientSeed, id, security;
     uint32 unk2;
     uint32 BuiltNumberClient;
-    uint32 id, security;
     LocaleConstant locale;
     std::string account;
     Sha1Hash sha1;
@@ -643,7 +642,6 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     recvPacket >> BuiltNumberClient;
     recvPacket >> unk2;
     recvPacket >> account;
-
     recvPacket >> clientSeed;
     recvPacket.read(digest, 20);
 

@@ -68,7 +68,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleNoImmediateEffect,                         // 14 SPELL_AURA_MOD_DAMAGE_TAKEN   implemented in Unit::MeleeDamageBonusTaken and Unit::SpellBaseDamageBonusTaken
     &Aura::HandleNoImmediateEffect,                         // 15 SPELL_AURA_DAMAGE_SHIELD      implemented in Unit::DealMeleeDamage
     &Aura::HandleModStealth,                                // 16 SPELL_AURA_MOD_STEALTH
-    &Aura::HandleNoImmediateEffect,                         // 17 SPELL_AURA_MOD_STEALTH_DETECT
+    &Aura::HandleNoImmediateEffect,                         // 17 SPELL_AURA_MOD_STEALTH_DETECT implemented in Unit::isVisibleForOrDetect
     &Aura::HandleInvisibility,                              // 18 SPELL_AURA_MOD_INVISIBILITY
     &Aura::HandleInvisibilityDetect,                        // 19 SPELL_AURA_MOD_INVISIBILITY_DETECTION
     &Aura::HandleAuraModTotalHealthPercentRegen,            // 20 SPELL_AURA_OBS_MOD_HEALTH
@@ -126,7 +126,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleModPowerCostPCT,                           // 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT
     &Aura::HandleModPowerCost,                              // 73 SPELL_AURA_MOD_POWER_COST_SCHOOL
     &Aura::HandleNoImmediateEffect,                         // 74 SPELL_AURA_REFLECT_SPELLS_SCHOOL  implemented in Unit::SpellHitResult
-    &Aura::HandleNoImmediateEffect,                         // 75 SPELL_AURA_MOD_LANGUAGE
+    &Aura::HandleNoImmediateEffect,                         // 75 SPELL_AURA_MOD_LANGUAGE           implemented in WorldSession::HandleMessagechatOpcode
     &Aura::HandleFarSight,                                  // 76 SPELL_AURA_FAR_SIGHT
     &Aura::HandleModMechanicImmunity,                       // 77 SPELL_AURA_MECHANIC_IMMUNITY
     &Aura::HandleAuraMounted,                               // 78 SPELL_AURA_MOUNTED
@@ -195,12 +195,12 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleRangedAmmoHaste,                           //141 SPELL_AURA_MOD_RANGED_AMMO_HASTE
     &Aura::HandleAuraModBaseResistancePCT,                  //142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT
     &Aura::HandleAuraModResistanceExclusive,                //143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE
-    &Aura::HandleAuraSafeFall,                              //144 SPELL_AURA_SAFE_FALL                         implemented in WorldSession::HandleMovementOpcodes
+    &Aura::HandleAuraSafeFall,                              //144 SPELL_AURA_SAFE_FALL                  implemented in WorldSession::HandleMovementOpcodes
     &Aura::HandleUnused,                                    //145 SPELL_AURA_CHARISMA obsolete?
     &Aura::HandleUnused,                                    //146 SPELL_AURA_PERSUADED obsolete?
-    &Aura::HandleModMechanicImmunityMask,                   //147 SPELL_AURA_MECHANIC_IMMUNITY_MASK            implemented in Unit::IsImmuneToSpell and Unit::IsImmuneToSpellEffect (check part)
+    &Aura::HandleModMechanicImmunityMask,                   //147 SPELL_AURA_MECHANIC_IMMUNITY_MASK     implemented in Unit::IsImmuneToSpell and Unit::IsImmuneToSpellEffect (check part)
     &Aura::HandleAuraRetainComboPoints,                     //148 SPELL_AURA_RETAIN_COMBO_POINTS
-    &Aura::HandleNoImmediateEffect,                         //149 SPELL_AURA_RESIST_PUSHBACK
+    &Aura::HandleNoImmediateEffect,                         //149 SPELL_AURA_RESIST_PUSHBACK            implemented in Spell::Delayed and Spell::DelayedChannel
     &Aura::HandleShieldBlockValue,                          //150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT
     &Aura::HandleAuraTrackStealthed,                        //151 SPELL_AURA_TRACK_STEALTHED
     &Aura::HandleNoImmediateEffect,                         //152 SPELL_AURA_MOD_DETECTED_RANGE         implemented in Creature::GetAttackDistance
@@ -210,9 +210,9 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleNoImmediateEffect,                         //156 SPELL_AURA_MOD_REPUTATION_GAIN        implemented in Player::CalculateReputationGain
     &Aura::HandleUnused,                                    //157 SPELL_AURA_PET_DAMAGE_MULTI (single test like spell 20782, also single for 214 aura)
     &Aura::HandleShieldBlockValue,                          //158 SPELL_AURA_MOD_SHIELD_BLOCKVALUE
-    &Aura::HandleNoImmediateEffect,                         //159 SPELL_AURA_NO_PVP_CREDIT      only for Honorless Target spell
-    &Aura::HandleNoImmediateEffect,                         //160 SPELL_AURA_MOD_AOE_AVOIDANCE                 implemented in Unit::MagicSpellHitResult
-    &Aura::HandleNoImmediateEffect,                         //161 SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT
+    &Aura::HandleNoImmediateEffect,                         //159 SPELL_AURA_NO_PVP_CREDIT              implemented in Player::RewardHonor
+    &Aura::HandleNoImmediateEffect,                         //160 SPELL_AURA_MOD_AOE_AVOIDANCE          implemented in Unit::MagicSpellHitResult
+    &Aura::HandleNoImmediateEffect,                         //161 SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT implemented in Player::RegenerateAll and Player::RegenerateHealth
     &Aura::HandleAuraPowerBurn,                             //162 SPELL_AURA_POWER_BURN_MANA
     &Aura::HandleUnused,                                    //163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
     &Aura::HandleUnused,                                    //164 useless, only one test spell
@@ -3066,7 +3066,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
         // The Beast Within cast on owner if talent present
         if (Unit* owner = target->GetOwner())
         {
-            // Search talent
+            // Search talent The Beast Within
             Unit::AuraList const& dummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
             for (Unit::AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
             {
@@ -3325,13 +3325,12 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 // Rupture
                 if (spellProto->SpellFamilyFlags & UI64LIT(0x000000000000100000))
                 {
+                    if (caster->GetTypeId() != TYPEID_PLAYER)
+                        break;
                     // Dmg/tick = $AP*min(0.01*$cp, 0.03) [Like Rip: only the first three CP increase the contribution from AP]
-                    if (caster->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        uint8 cp = ((Player*)caster)->GetComboPoints();
-                        if (cp > 3) cp = 3;
-                        m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
-                    }
+                    uint8 cp = ((Player*)caster)->GetComboPoints();
+                    if (cp > 3) cp = 3;
+                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
                 }
                 break;
             }
@@ -4403,22 +4402,16 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                     }
                     break;
                 case SPELLFAMILY_MAGE:
-                    // Frost ward, Fire ward
+                    // Frost Ward, Fire Ward
                     if (spellProto->IsFitToFamilyMask(UI64LIT(0x0000000100080108)))
-                    {
-                        //+10% from +spd bonus
+                        //+10% from +spell bonus
                         DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto)) * 0.1f;
-                        break;
-                    }
                     break;
                 case SPELLFAMILY_WARLOCK:
+                    // Shadow Ward
                     if (spellProto->SpellFamilyFlags == UI64LIT(0x00))
-                    {
-                        //shadow ward
-                        //+10% from +spd bonus
+                        //+10% from +spell bonus
                         DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto)) * 0.1f;
-                        break;
-                    }
                     break;
                 default:
                     break;
@@ -5205,10 +5198,10 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
             dynObj->RemoveAffected(m_target);
     }
 
-    //passive auras do not get put in slots
+    //passive auras do not get put in slots - said who? ;)
     // Note: but totem can be not accessible for aura target in time remove (to far for find in grid)
-    //if(m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem()))
-    //    return false;
+    //if(m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTotem()))
+    //    return;
 
     uint8 slot = GetAuraSlot();
 

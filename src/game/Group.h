@@ -167,7 +167,6 @@ class MANGOS_DLL_SPEC Group
     protected:
         typedef MemberSlotList::iterator member_witerator;
         typedef std::set<Player*> InvitesList;
-
         typedef std::vector<Roll*> Rolls;
 
     public:

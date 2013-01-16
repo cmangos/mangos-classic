@@ -387,7 +387,8 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* pAttacker, Hostile
 //=================== ThreatManager ==========================
 //============================================================
 
-ThreatManager::ThreatManager(Unit* owner) : iCurrentVictim(NULL), iOwner(owner)
+ThreatManager::ThreatManager(Unit* owner)
+    : iCurrentVictim(NULL), iOwner(owner)
 {
 }
 

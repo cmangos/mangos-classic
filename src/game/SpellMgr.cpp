@@ -1246,7 +1246,7 @@ struct DoSpellProcEvent
                 }
             }
             if (empty)
-                sLog.outErrorDb("Spell %u listed in `spell_proc_event` not have any useful data", spell->Id);
+                sLog.outErrorDb("Spell %u listed in `spell_proc_event` doesn't have any useful data", spell->Id);
         }
 
         if (isCustom)
@@ -2186,10 +2186,10 @@ bool SpellMgr::IsProfessionOrRidingSpell(uint32 spellId)
     if (!spellInfo)
         return false;
 
-    if (spellInfo->Effect[1] != SPELL_EFFECT_SKILL)
+    if (spellInfo->Effect[EFFECT_INDEX_1] != SPELL_EFFECT_SKILL)
         return false;
 
-    uint32 skill = spellInfo->EffectMiscValue[1];
+    uint32 skill = spellInfo->EffectMiscValue[EFFECT_INDEX_1];
 
     return IsProfessionOrRidingSkill(skill);
 }
@@ -3739,7 +3739,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         }
         case SPELLFAMILY_HUNTER:
         {
-            // Freezing trap
+            // Freezing Trap
             if (spellproto->IsFitToFamilyMask(UI64LIT(0x00000000008)))
                 return DIMINISHING_FREEZE;
             break;

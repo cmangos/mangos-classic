@@ -296,8 +296,6 @@ void World::AddQueuedSession(WorldSession* sess)
     packet << uint32(0);                                    // BillingTimeRested
     packet << uint32(GetQueuedSessionPos(sess));            // position in queue
     sess->SendPacket(&packet);
-
-    //sess->SendAuthWaitQue (GetQueuePos (sess));
 }
 
 bool World::RemoveQueuedSession(WorldSession* sess)
@@ -1549,7 +1547,7 @@ void World::SendWorldText(int32 string_id, ...)
 
     MaNGOS::WorldWorldTextBuilder wt_builder(string_id, &ap);
     MaNGOS::LocalizedPacketListDo<MaNGOS::WorldWorldTextBuilder> wt_do(wt_builder);
-    for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
         if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
             continue;
@@ -1969,6 +1967,7 @@ void World::LoadDBVersion()
 
         m_DBVersion              = fields[0].GetCppString();
         m_CreatureEventAIVersion = fields[1].GetCppString();
+
         delete result;
     }
 

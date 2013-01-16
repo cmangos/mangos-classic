@@ -986,7 +986,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 m_caster->SetPower(POWER_RAGE, 0);
                 return;
             }
-            if (m_spellInfo->Id == 21977)                   //Warrior's Wrath
+            // Warrior's Wrath
+            if (m_spellInfo->Id == 21977)
             {
                 if (!unitTarget)
                     return;
@@ -1016,15 +1017,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     int32 mana = dmg;
 
+                    // Improved Life Tap mod
                     Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                     for (Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
-                    {
-                        // only Imp. Life Tap have this in combination with dummy aura
                         if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 208)
                             mana = ((*itr)->GetModifier()->m_amount + 100) * mana / 100;
-                    }
 
-                    m_caster->CastCustomSpell(m_caster, 31818, &mana, NULL, NULL, true, NULL);
+                    m_caster->CastCustomSpell(m_caster, 31818, &mana, NULL, NULL, true);
 
                     // Mana Feed
                     int32 manaFeedVal = m_caster->CalculateSpellDamage(m_caster, m_spellInfo, EFFECT_INDEX_1);
@@ -1302,7 +1301,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 m_caster->CastCustomSpell(unitTarget, 10444, &totalDamage, NULL, NULL, true, m_CastItem);
                 return;
             }
-            if (m_spellInfo->Id == 39610)                   // Mana-Tide Totem effect
+            if (m_spellInfo->Id == 39610)                   // Mana Tide Totem effect
             {
                 if (!unitTarget || unitTarget->getPowerType() != POWER_MANA)
                     return;
@@ -1715,15 +1714,15 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
     }
 }
 
-void Spell::EffectSendEvent(SpellEffectIndex eff_idx)
+void Spell::EffectSendEvent(SpellEffectIndex effectIndex)
 {
     /*
     we do not handle a flag dropping or clicking on flag in battleground by sendevent system
     */
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart %u for spellid %u in EffectSendEvent ", m_spellInfo->EffectMiscValue[eff_idx], m_spellInfo->Id);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart %u for spellid %u in EffectSendEvent ", m_spellInfo->EffectMiscValue[effectIndex], m_spellInfo->Id);
 
-    if (!sScriptMgr.OnProcessEvent(m_spellInfo->EffectMiscValue[eff_idx], m_caster, focusObject, true))
-        m_caster->GetMap()->ScriptsStart(sEventScripts, m_spellInfo->EffectMiscValue[eff_idx], m_caster, focusObject);
+    if (!sScriptMgr.OnProcessEvent(m_spellInfo->EffectMiscValue[effectIndex], m_caster, focusObject, true))
+        m_caster->GetMap()->ScriptsStart(sEventScripts, m_spellInfo->EffectMiscValue[effectIndex], m_caster, focusObject);
 }
 
 void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
@@ -1953,10 +1952,10 @@ void Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype)
             pItem->SetGuidValue(ITEM_FIELD_CREATOR, player->GetObjectGuid());
 
         // send info to the client
-        player->SendNewItem(pItem, num_to_add, true, bgType == 0);
+        player->SendNewItem(pItem, num_to_add, true, !bgType);
 
         // we succeeded in creating at least one item, so a levelup is possible
-        if (bgType == 0)
+        if (!bgType)
             player->UpdateCraftSkill(m_spellInfo->Id);
     }
 
@@ -2272,11 +2271,12 @@ void Spell::EffectApplyAreaAura(SpellEffectIndex eff_idx)
 
 void Spell::EffectSummon(SpellEffectIndex eff_idx)
 {
-    if (!m_caster->GetPetGuid().IsEmpty())
+    if (m_caster->GetPetGuid())
         return;
 
     if (!unitTarget)
         return;
+
     uint32 pet_entry = m_spellInfo->EffectMiscValue[eff_idx];
     if (!pet_entry)
         return;
@@ -2899,24 +2899,23 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
 {
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
-
-    Player* p_caster = (Player*)m_caster;
-
     if (!itemTarget)
         return;
+
+    Player* p_caster = (Player*)m_caster;
 
     uint32 enchant_id = m_spellInfo->EffectMiscValue[eff_idx];
 
     // Shaman Rockbiter Weapon
     if (eff_idx == EFFECT_INDEX_0 && m_spellInfo->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_DUMMY)
     {
-        int32 enchnting_damage = m_currentBasePoints[EFFECT_INDEX_1];
+        int32 enchanting_damage = m_currentBasePoints[EFFECT_INDEX_1];
 
         // enchanting id selected by calculated damage-per-sec stored in Effect[1] base value
         // with already applied percent bonus from Elemental Weapons talent
         // Note: damage calculated (correctly) with rounding int32(float(v)) but
         // RW enchantments applied damage int32(float(v)+0.5), this create  0..1 difference sometime
-        switch (enchnting_damage)
+        switch (enchanting_damage)
         {
                 // Rank 1
             case  2: enchant_id =   29; break;              //  0% [ 7% ==  2, 14% == 2, 20% == 2]
@@ -2956,7 +2955,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
             case 70: enchant_id = 3019; break;              // 14%
             case 74: enchant_id = 3020; break;              // 20%
             default:
-                sLog.outError("Spell::EffectEnchantItemTmp: Damage %u not handled in S'RW", enchnting_damage);
+                sLog.outError("Spell::EffectEnchantItemTmp: Damage %u not handled in S'RW", enchanting_damage);
                 return;
         }
     }
@@ -2978,7 +2977,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
     uint32 duration;
 
     // rogue family enchantments exception by duration
-    if (m_spellInfo->Id == 38615)                           // Poison
+    if (m_spellInfo->Id == 38615)
         duration = 1800;                                    // 30 mins
     // other rogue family enchantments always 1 hour (some have spell damage=0, but some have wrong data in EffBasePoints)
     else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE)
@@ -2995,9 +2994,9 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
     // shaman rockbiter enchantments
     else if (m_spellInfo->SpellVisual == 0)
         duration = 1800;                                    // 30 mins
-    else if (m_spellInfo->Id == 29702)                      // Greater Ward of Shielding
+    else if (m_spellInfo->Id == 29702)
         duration = 300;                                     // 5 mins
-    else if (m_spellInfo->Id == 37360)                      // Consecrated Weapon
+    else if (m_spellInfo->Id == 37360)
         duration = 300;                                     // 5 mins
     // default case
     else
@@ -3322,6 +3321,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
     bool normalized = false;
 
     int32 spell_bonus = 0;                                  // bonus specific for spell
+
     switch (m_spellInfo->SpellFamilyName)
     {
         case SPELLFAMILY_ROGUE:
@@ -3471,6 +3471,7 @@ void Spell::EffectHealMaxHealth(SpellEffectIndex /*eff_idx*/)
         return;
     if (!unitTarget->isAlive())
         return;
+
     uint32 heal = m_caster->GetMaxHealth();
 
     m_healing += heal;
@@ -3548,9 +3549,7 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
             {
                 if (bg && bg->GetTypeID() == BATTLEGROUND_WS && bg->GetStatus() == STATUS_IN_PROGRESS)
                 {
-                    Team team = ALLIANCE;
-                    if (pl->GetTeam() == team)
-                        team = HORDE;
+                    Team team = pl->GetTeam() == ALLIANCE ? HORDE : ALLIANCE;
 
                     ((BattleGroundWS*)bg)->SetDroppedFlagGuid(pGameObj->GetObjectGuid(), team);
                 }
@@ -3954,6 +3953,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
             {
                 if (!unitTarget || !unitTarget->isAlive())
                     return;
+
                 uint32 spellId2 = 0;
 
                 // all seals have aura dummy
@@ -3998,6 +3998,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
 
                 m_caster->CastSpell(unitTarget, spellId2, true);
+
                 return;
             }
             break;
@@ -4073,7 +4074,8 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
     uint32 gameobject_id = m_spellInfo->EffectMiscValue[eff_idx];
 
     Map* map = m_caster->GetMap();
-    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, map,
+    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,
+                          map,
                           m_caster->GetPositionX() + (unitTarget->GetPositionX() - m_caster->GetPositionX()) / 2 ,
                           m_caster->GetPositionY() + (unitTarget->GetPositionY() - m_caster->GetPositionY()) / 2 ,
                           m_caster->GetPositionZ(),
@@ -4289,7 +4291,7 @@ void Spell::EffectEnchantHeldItem(SpellEffectIndex eff_idx)
         uint32 enchant_id = m_spellInfo->EffectMiscValue[eff_idx];
         int32 duration = GetSpellDuration(m_spellInfo);     // Try duration index first...
         if (!duration)
-            duration = m_currentBasePoints[eff_idx];        //Base points after ..
+            duration = m_currentBasePoints[eff_idx];        // Base points after...
         if (!duration)
             duration = 10;                                  // 10 seconds for enchants which don't have listed duration
 

@@ -310,7 +310,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     focusObject = NULL;
     m_triggeredByAuraSpell  = NULL;
 
-    //Auto Shot & Shoot
+    //Auto Shot & Shoot (wand)
     m_autoRepeat = IsAutoRepeatRangedSpell(m_spellInfo);
 
     m_powerCost = 0;                                        // setup to correct value in Spell::prepare, don't must be used before.
@@ -372,9 +372,9 @@ WorldObject* Spell::FindCorpseUsing()
 void Spell::FillTargetMap()
 {
     // TODO: ADD the correct target FILLS!!!!!!
+
     UnitList tmpUnitLists[MAX_EFFECT_INDEX];                // Stores the temporary Target Lists for each effect
     uint8 effToIndex[MAX_EFFECT_INDEX] = {0, 1, 2};         // Helper array, to link to another tmpUnitList, if the targets for both effects match
-
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         // not call for empty effect.
@@ -528,6 +528,7 @@ void Spell::FillTargetMap()
                     {
                         case 0:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/]);
+
                             // need some target for processing
                             SetTargetMap(SpellEffectIndex(i), TARGET_EFFECT_SELECT, tmpUnitLists[i /*==effToIndex[i]*/]);
                             break;
@@ -617,13 +618,13 @@ void Spell::prepareDataForTriggerSystem()
     m_canTrigger = false;
 
     if (m_CastItem)
-        m_canTrigger = false;         // Do not trigger from item cast spell
+        m_canTrigger = false;                               // Do not trigger from item cast spell
     else if (!m_IsTriggeredSpell)
-        m_canTrigger = true;          // Normal cast - can trigger
+        m_canTrigger = true;                                // Normal cast - can trigger
     else if (!m_triggeredByAuraSpell)
-        m_canTrigger = true;          // Triggered from SPELL_EFFECT_TRIGGER_SPELL - can trigger
+        m_canTrigger = true;                                // Triggered from SPELL_EFFECT_TRIGGER_SPELL - can trigger
 
-    if (!m_canTrigger)                // Exceptions (some periodic triggers)
+    if (!m_canTrigger)                                      // Exceptions (some periodic triggers)
     {
         switch (m_spellInfo->SpellFamilyName)
         {
@@ -740,7 +741,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
     // Get spell hit result on target
     TargetInfo target;
     target.targetGUID = targetGUID;                         // Store target GUID
-    target.effectMask = immuned ? 0 : 1 << effIndex;        // Store index of effect if not immuned
+    target.effectMask = immuned ? 0 : (1 << effIndex);      // Store index of effect if not immuned
     target.processed  = false;                              // Effects not apply on target
 
     // Calculate hit result
@@ -1447,6 +1448,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         }
     }
 
+    // Get spell max affected targets
     uint32 unMaxTargets = m_spellInfo->MaxAffectedTargets;
 
     // custom target amount cases
@@ -1670,17 +1672,16 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
                 UnitList tempTargetUnitMap;
-
                 {
                     MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range);
                     MaNGOS::UnitListSearcher<MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
                     Cell::VisitAllObjects(m_caster, searcher, max_range);
                 }
 
-                tempTargetUnitMap.sort(TargetDistanceOrderNear(pUnitTarget));
-
                 if (tempTargetUnitMap.empty())
                     break;
+
+                tempTargetUnitMap.sort(TargetDistanceOrderNear(pUnitTarget));
 
                 if (*tempTargetUnitMap.begin() == pUnitTarget)
                     tempTargetUnitMap.erase(tempTargetUnitMap.begin());
@@ -1877,11 +1878,15 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_ALL_PARTY_AROUND_CASTER:
         case TARGET_ALL_PARTY_AROUND_CASTER_2:
         case TARGET_ALL_PARTY:
+        {
             FillRaidOrPartyTargets(targetUnitMap, m_caster, radius, false, true, true);
             break;
+        }
         case TARGET_ALL_RAID_AROUND_CASTER:
+        {
             FillRaidOrPartyTargets(targetUnitMap, m_caster, radius, true, true, false);
             break;
+        }
         case TARGET_SINGLE_FRIEND:
         case TARGET_SINGLE_FRIEND_2:
             if (m_targets.getUnitTarget())
@@ -2193,7 +2198,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             SpellTargetPosition const* st = sSpellMgr.GetSpellTargetPosition(m_spellInfo->Id);
             if (st)
             {
-                // teleportspells are handled in another way
+                // teleport spells are handled in another way
                 if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_TELEPORT_UNITS)
                     break;
                 if (st->target_mapId == m_caster->GetMapId())
@@ -2621,7 +2626,7 @@ void Spell::cast(bool skipCheck)
         }
     }
 
-    // different triggred (for caster) and precast (casted before apply effect to target) cases
+    // different triggered (for caster) and pre-cast (casted before apply effect to each target) cases
     switch (m_spellInfo->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
@@ -2992,7 +2997,6 @@ void Spell::finish(bool ok)
     }
 
     m_spellState = SPELL_STATE_FINISHED;
-
 
     // other code related only to successfully finished spells
     if (!ok)
@@ -3540,7 +3544,7 @@ void Spell::TakeCastItem()
                 if (charges)
                 {
                     (charges > 0) ? --charges : ++charges;  // abs(charges) less at 1 after use
-                    if (proto->Stackable < 2)
+                    if (proto->Stackable == 1)
                         m_CastItem->SetSpellCharges(i, charges);
                     m_CastItem->SetState(ITEM_CHANGED, (Player*)m_caster);
                 }
@@ -4000,15 +4004,13 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
 
         if (IsPositiveSpell(m_spellInfo->Id))
-        {
             if (target->IsImmuneToSpell(m_spellInfo))
                 return SPELL_FAILED_TARGET_AURASTATE;
-        }
 
         //Must be behind the target.
         if (m_spellInfo->AttributesEx2 == SPELL_ATTR_EX2_UNK20 && m_spellInfo->HasAttribute(SPELL_ATTR_EX_UNK9) && target->HasInArc(M_PI_F, m_caster))
         {
-            //Exclusion for Pounce: Facing Limitation was removed in 2.0.1, but it still uses the same, old Ex-Flags
+            // Exclusion for Pounce: Facing Limitation was removed in 2.0.1, but it still uses the same, old Ex-Flags
             if (!m_spellInfo->IsFitToFamily(SPELLFAMILY_DRUID, UI64LIT(0x0000000000020000)))
             {
                 SendInterrupted(2);
@@ -5398,6 +5400,7 @@ SpellCastResult Spell::CheckItems()
             return SPELL_FAILED_TOTEM_CATEGORY;                 //0x7B
         */
     }
+
     // special checks for spell effects
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
@@ -5560,7 +5563,7 @@ void Spell::Delayed()
         return;
 
     //check resist chance
-    int32 resistChance = 100;                               //must be initialized to 100 for percent modifiers
+    int32 resistChance = 100;                               // must be initialized to 100 for percent modifiers
     ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_NOT_LOSE_CASTING_TIME, resistChance, this);
     resistChance += m_caster->GetTotalAuraModifier(SPELL_AURA_RESIST_PUSHBACK) - 100;
     if (roll_chance_i(resistChance))
@@ -6062,6 +6065,12 @@ WorldObject* Spell::GetCastingObject() const
         return m_caster;
 }
 
+void Spell::ResetEffectDamageAndHeal()
+{
+    m_damage = 0;
+    m_healing = 0;
+}
+
 void Spell::ClearCastItem()
 {
     if (m_CastItem == m_targets.getItemTarget())
@@ -6122,10 +6131,4 @@ void Spell::CancelGlobalCooldown()
         m_caster->GetCharmInfo()->GetGlobalCooldownMgr().CancelGlobalCooldown(m_spellInfo);
     else if (m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player*)m_caster)->GetGlobalCooldownMgr().CancelGlobalCooldown(m_spellInfo);
-}
-
-void Spell::ResetEffectDamageAndHeal()
-{
-    m_damage = 0;
-    m_healing = 0;
 }

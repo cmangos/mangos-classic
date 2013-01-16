@@ -580,10 +580,8 @@ void WorldSession::HandleDelIgnoreOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleBugOpcode(WorldPacket& recv_data)
 {
-    uint32 suggestion, contentlen;
-    std::string content;
-    uint32 typelen;
-    std::string type;
+    uint32 suggestion, contentlen, typelen;
+    std::string content, type;
 
     recv_data >> suggestion >> contentlen >> content;
 
@@ -881,6 +879,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
 
     recv_data >> Unused<uint64>();
     recv_data >> Unused<uint32>();
+
     /*
         ObjectGuid guid;
         uint32 time_skipped;

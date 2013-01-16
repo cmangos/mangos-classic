@@ -548,6 +548,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 triggered_spell_id = 29077;
                 break;
             }
+
             switch (dummySpell->Id)
             {
                     // Ignite
@@ -1144,19 +1145,19 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
             {
                 switch (auraSpellInfo->Id)
                 {
-                    case 324:                               // Rank 1
+                    case 324:                           // Rank 1
                         trigger_spell_id = 26364; break;
-                    case 325:                               // Rank 2
+                    case 325:                           // Rank 2
                         trigger_spell_id = 26365; break;
-                    case 905:                               // Rank 3
+                    case 905:                           // Rank 3
                         trigger_spell_id = 26366; break;
-                    case 945:                               // Rank 4
+                    case 945:                           // Rank 4
                         trigger_spell_id = 26367; break;
-                    case 8134:                              // Rank 5
+                    case 8134:                          // Rank 5
                         trigger_spell_id = 26369; break;
-                    case 10431:                             // Rank 6
+                    case 10431:                         // Rank 6
                         trigger_spell_id = 26370; break;
-                    case 10432:                             // Rank 7
+                    case 10432:                         // Rank 7
                         trigger_spell_id = 26363; break;
                     default:
                         sLog.outError("Unit::HandleProcTriggerSpellAuraProc: Spell %u not handled in LShield", auraSpellInfo->Id);

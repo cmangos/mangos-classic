@@ -2102,7 +2102,6 @@ bool ChatHandler::HandleNpcSetDeathStateCommand(char* args)
         pCreature->SetDeadByDefault(false);
 
     pCreature->SaveToDB();
-
     pCreature->Respawn();
 
     return true;
@@ -3651,7 +3650,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         Field* fields = result->Fetch();
 
         outfile << "INSERT INTO creature_movement ";
-        outfile << "( id, point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, textid1, textid2, textid3, textid4, textid5 ) VALUES ";
+        outfile << "(id, point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, textid1, textid2, textid3, textid4, textid5) VALUES ";
 
         outfile << "( ";
         outfile << fields[15].GetUInt32();                  // id
@@ -4310,7 +4309,8 @@ bool ChatHandler::HandleLearnAllRecipesCommand(char* args)
         if (!skillInfo)
             continue;
 
-        if (skillInfo->categoryId != SKILL_CATEGORY_PROFESSION && skillInfo->categoryId != SKILL_CATEGORY_SECONDARY)
+        if (skillInfo->categoryId != SKILL_CATEGORY_PROFESSION &&
+                skillInfo->categoryId != SKILL_CATEGORY_SECONDARY)
             continue;
 
         int loc = GetSessionDbcLocale();

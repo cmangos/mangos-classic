@@ -226,7 +226,7 @@ void MailDraft::CloneFrom(MailDraft const& draft)
  * Returns a mail to its sender.
  * @param sender_acc           The id of the account of the sender.
  * @param sender_guid          The low part of the GUID of the sender.
- * @param receiver_guid        The low part of the GUID of the reciever.
+ * @param receiver_guid        The low part of the GUID of the receiver.
  */
 void MailDraft::SendReturnToSender(uint32 sender_acc, ObjectGuid sender_guid, ObjectGuid receiver_guid)
 {

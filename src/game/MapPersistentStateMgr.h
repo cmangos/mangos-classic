@@ -356,6 +356,7 @@ class MANGOS_DLL_DECL MapPersistentStateManager : public MaNGOS::Singleton<MapPe
 
         void _ResetSave(PersistentStateMap& holder, PersistentStateMap::iterator& itr);
         void _DelHelper(DatabaseType& db, const char* fields, const char* table, const char* queryTail, ...);
+
         // used during global instance resets
         bool lock_instLists;
         // fast lookup by instance id for instanceable maps

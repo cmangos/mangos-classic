@@ -1373,6 +1373,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, uint32 damage, CalcDamageInfo* da
     // Add melee damage bonus
     damage = MeleeDamageBonusDone(damageInfo->target, damage, damageInfo->attackType);
     damage = damageInfo->target->MeleeDamageBonusTaken(this, damage, damageInfo->attackType);
+
     // Calculate armor reduction
     damageInfo->damage = CalcArmorReducedDamage(damageInfo->target, damage);
     damageInfo->cleanDamage += damage - damageInfo->damage;
@@ -2454,7 +2455,6 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 
         if (dodgeChance < 0)
             dodgeChance = 0;
-
 
         tmp += dodgeChance;
         if (roll < tmp)
@@ -5473,7 +5473,7 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
                     crit_chance += pVictim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE, schoolMask);
                 }
 
-                // scripted (increase crit chance ... against ... target by x%
+                // scripted (increase crit chance ... against ... target by x%)
                 AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
                 for (AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
                 {
@@ -5822,8 +5822,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
                 return true;
     }
 
-    uint32 aura = spellInfo->EffectApplyAuraName[index];
-    if (aura)
+    if (uint32 aura = spellInfo->EffectApplyAuraName[index])
     {
         SpellImmuneList const& list = m_spellImmune[IMMUNITY_STATE];
         for (SpellImmuneList::const_iterator itr = list.begin(); itr != list.end(); ++itr)
@@ -6766,6 +6765,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
         else
         {
             m_movementInfo.UpdateTime(WorldTimer::getMSTime());
+            
             WorldPacket data(SetSpeed2Opc_table[mtype][0], 31);
             data << GetPackGUID();
             data << m_movementInfo;
@@ -7321,14 +7321,14 @@ bool Unit::HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, f
         case UNIT_MOD_RAGE:
         case UNIT_MOD_FOCUS:
         case UNIT_MOD_ENERGY:
-        case UNIT_MOD_HAPPINESS:           UpdateMaxPower(GetPowerTypeByAuraGroup(unitMod));         break;
+        case UNIT_MOD_HAPPINESS:           UpdateMaxPower(GetPowerTypeByAuraGroup(unitMod)); break;
 
         case UNIT_MOD_RESISTANCE_HOLY:
         case UNIT_MOD_RESISTANCE_FIRE:
         case UNIT_MOD_RESISTANCE_NATURE:
         case UNIT_MOD_RESISTANCE_FROST:
         case UNIT_MOD_RESISTANCE_SHADOW:
-        case UNIT_MOD_RESISTANCE_ARCANE:   UpdateResistances(GetSpellSchoolByAuraGroup(unitMod));      break;
+        case UNIT_MOD_RESISTANCE_ARCANE:   UpdateResistances(GetSpellSchoolByAuraGroup(unitMod)); break;
 
         case UNIT_MOD_ATTACK_POWER:        UpdateAttackPowerAndDamage();         break;
         case UNIT_MOD_ATTACK_POWER_RANGED: UpdateAttackPowerAndDamage(true);     break;
@@ -8124,6 +8124,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
 
             anyAuraProc = true;
         }
+
         // Remove charge (aura can be removed by triggers)
         if (useCharges && procSuccess && anyAuraProc && !triggeredByHolder->IsDeleted())
         {
@@ -8446,7 +8447,6 @@ void Unit::ClearComboPointHolders()
 
 void Unit::ClearAllReactives()
 {
-
     for (int i = 0; i < MAX_REACTIVE; ++i)
         m_reactiveTimer[i] = 0;
 

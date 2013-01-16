@@ -168,6 +168,7 @@ void WorldSession::HandleChannelUnmuteOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("Opcode %u", recvPacket.GetOpcode());
     //recvPacket.hexlike();
+
     std::string channelname, otp;
     recvPacket >> channelname;
 
@@ -235,6 +236,7 @@ void WorldSession::HandleChannelUnbanOpcode(WorldPacket& recvPacket)
 {
     DEBUG_LOG("Opcode %u", recvPacket.GetOpcode());
     //recvPacket.hexlike();
+
     std::string channelname, otp;
     recvPacket >> channelname;
 

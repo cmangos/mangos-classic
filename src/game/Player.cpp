@@ -864,8 +864,8 @@ uint32 Player::EnvironmentalDamage(EnvironmentalDamageType type, uint32 damage)
     data << GetObjectGuid();
     data << uint8(type != DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);
     data << uint32(damage);
-    data << (uint32)absorb; // absorb
-    data << (uint32)resist; // resist
+    data << uint32(absorb);
+    data << uint32(resist);
     SendMessageToSet(&data, true);
 
     uint32 final_damage = DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
@@ -961,7 +961,6 @@ void Player::HandleDrowning(uint32 time_diff)
             SendMirrorTimer(BREATH_TIMER, UnderWaterTime, m_MirrorTimer[BREATH_TIMER], 10);
     }
 
-
     // In dark water
     if (m_MirrorTimerFlags & UNDERWATER_INDARKWATER)
     {
@@ -989,9 +988,7 @@ void Player::HandleDrowning(uint32 time_diff)
             else if (!(m_MirrorTimerFlagsLast & UNDERWATER_INDARKWATER))
                 SendMirrorTimer(FATIGUE_TIMER, getMaxTimer(FATIGUE_TIMER), m_MirrorTimer[FATIGUE_TIMER], -1);
         }
-
     }
-
     else if (m_MirrorTimer[FATIGUE_TIMER] != DISABLED_MIRROR_TIMER)       // Regen timer
     {
         int32 DarkWaterTime = getMaxTimer(FATIGUE_TIMER);
@@ -1446,6 +1443,7 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
         *p_data << uint32(proto->DisplayInfoID);
         *p_data << uint8(proto->InventoryType);
     }
+
     *p_data << uint32(0);                                   // first bag display id
     *p_data << uint8(0);                                    // first bag inventory type
 
@@ -3182,7 +3180,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
                     if (addSpell(prev_id, true, false, prev_itr->second.dependent, prev_itr->second.disabled))
                     {
                         // downgrade spell ranks in spellbook and action bar
-                        WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
+                        WorldPacket data(SMSG_SUPERCEDED_SPELL, 4);
                         data << uint16(spell_id);
                         data << uint16(prev_id);
                         GetSession()->SendPacket(&data);
@@ -3364,7 +3362,8 @@ bool Player::resetTalents(bool no_cost)
     {
         TalentEntry const* talentInfo = sTalentStore.LookupEntry(i);
 
-        if (!talentInfo) continue;
+        if (!talentInfo)
+            continue;
 
         TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
 
@@ -3447,36 +3446,28 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(OBJECT_FIELD_GUID);
     updateVisualBits.SetBit(OBJECT_FIELD_TYPE);
     updateVisualBits.SetBit(OBJECT_FIELD_SCALE_X);
-
-    updateVisualBits.SetBit(UNIT_FIELD_CHARM);
+    updateVisualBits.SetBit(UNIT_FIELD_CHARM + 0);
     updateVisualBits.SetBit(UNIT_FIELD_CHARM + 1);
-
-    updateVisualBits.SetBit(UNIT_FIELD_SUMMON);
+    updateVisualBits.SetBit(UNIT_FIELD_SUMMON + 0);
     updateVisualBits.SetBit(UNIT_FIELD_SUMMON + 1);
-
-    updateVisualBits.SetBit(UNIT_FIELD_CHARMEDBY);
+    updateVisualBits.SetBit(UNIT_FIELD_CHARMEDBY + 0);
     updateVisualBits.SetBit(UNIT_FIELD_CHARMEDBY + 1);
-
-    updateVisualBits.SetBit(UNIT_FIELD_TARGET);
+    updateVisualBits.SetBit(UNIT_FIELD_TARGET + 0);
     updateVisualBits.SetBit(UNIT_FIELD_TARGET + 1);
-
-    updateVisualBits.SetBit(UNIT_FIELD_CHANNEL_OBJECT);
+    updateVisualBits.SetBit(UNIT_FIELD_CHANNEL_OBJECT + 0);
     updateVisualBits.SetBit(UNIT_FIELD_CHANNEL_OBJECT + 1);
-
     updateVisualBits.SetBit(UNIT_FIELD_HEALTH);
     updateVisualBits.SetBit(UNIT_FIELD_POWER1);
     updateVisualBits.SetBit(UNIT_FIELD_POWER2);
     updateVisualBits.SetBit(UNIT_FIELD_POWER3);
     updateVisualBits.SetBit(UNIT_FIELD_POWER4);
     updateVisualBits.SetBit(UNIT_FIELD_POWER5);
-
     updateVisualBits.SetBit(UNIT_FIELD_MAXHEALTH);
     updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER1);
     updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER2);
     updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER3);
     updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER4);
     updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER5);
-
     updateVisualBits.SetBit(UNIT_FIELD_LEVEL);
     updateVisualBits.SetBit(UNIT_FIELD_FACTIONTEMPLATE);
     updateVisualBits.SetBit(UNIT_FIELD_BYTES_0);
@@ -3485,7 +3476,7 @@ void Player::InitVisibleBits()
     for (uint16 i = UNIT_FIELD_AURA; i < UNIT_FIELD_AURASTATE; ++i)
         updateVisualBits.SetBit(i);
     updateVisualBits.SetBit(UNIT_FIELD_AURASTATE);
-    updateVisualBits.SetBit(UNIT_FIELD_BASEATTACKTIME);
+    updateVisualBits.SetBit(UNIT_FIELD_BASEATTACKTIME + 0);
     updateVisualBits.SetBit(UNIT_FIELD_BASEATTACKTIME + 1);
     updateVisualBits.SetBit(UNIT_FIELD_BOUNDINGRADIUS);
     updateVisualBits.SetBit(UNIT_FIELD_COMBATREACH);
@@ -3500,7 +3491,7 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(UNIT_MOD_CAST_SPEED);
     updateVisualBits.SetBit(UNIT_FIELD_BYTES_2);
 
-    updateVisualBits.SetBit(PLAYER_DUEL_ARBITER);
+    updateVisualBits.SetBit(PLAYER_DUEL_ARBITER + 0);
     updateVisualBits.SetBit(PLAYER_DUEL_ARBITER + 1);
     updateVisualBits.SetBit(PLAYER_FLAGS);
     updateVisualBits.SetBit(PLAYER_GUILDID);
@@ -3515,7 +3506,7 @@ void Player::InitVisibleBits()
     for (uint16 i = PLAYER_QUEST_LOG_1_1; i < PLAYER_QUEST_LOG_LAST_3; i += MAX_QUEST_OFFSET)
         updateVisualBits.SetBit(i);
 
-    //Players visible items are not inventory stuff
+    // Players visible items are not inventory stuff
     //431) = 884 (0x374) = main weapon
     for (uint16 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
@@ -3774,6 +3765,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
                     if (has_items)
                     {
                         // data needs to be at first place for Item::LoadFromDB
+                        //                                                          0    1         2
                         QueryResult* resultItems = CharacterDatabase.PQuery("SELECT data,item_guid,item_template FROM mail_items JOIN item_instance ON item_guid = guid WHERE mail_id='%u'", mail_id);
                         if (resultItems)
                         {
@@ -4580,7 +4572,8 @@ float Player::GetDodgeFromAgility()
 
     /* [-ZERO]
     // Table for base dodge values
-    float dodge_base[MAX_CLASSES] = {
+    const float dodge_base[MAX_CLASSES] =
+    {
          0.0075f,   // Warrior
          0.00652f,  // Paladin
         -0.0545f,   // Hunter
@@ -4594,7 +4587,8 @@ float Player::GetDodgeFromAgility()
         -0.0187f    // Druid
     };
     // Crit/agility to dodge/agility coefficient multipliers
-    float crit_to_dodge[MAX_CLASSES] = {
+    const float crit_to_dodge[MAX_CLASSES] =
+    {
          1.1f,      // Warrior
          1.0f,      // Paladin
          1.6f,      // Hunter
@@ -5051,7 +5045,7 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
 
     SkillStatusMap::iterator itr = mSkillStatus.find(id);
 
-    //has skill
+    // has skill
     if (itr != mSkillStatus.end() && itr->second.uState != SKILL_DELETED)
     {
         if (currVal)
@@ -5242,7 +5236,7 @@ void Player::SendInitialActionButtons() const
     DETAIL_LOG("Initializing Action Buttons for '%u'", GetGUIDLow());
 
     WorldPacket data(SMSG_ACTION_BUTTONS, (MAX_ACTION_BUTTONS * 4));
-    for (int button = 0; button < MAX_ACTION_BUTTONS; ++button)
+    for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
     {
         ActionButtonList::const_iterator itr = m_actionButtons.find(button);
         if (itr != m_actionButtons.end() && itr->second.uState != ACTIONBUTTON_DELETED)
@@ -5325,7 +5319,6 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Pl
 
 ActionButton* Player::addActionButton(uint8 button, uint32 action, uint8 type)
 {
-
     if (!IsActionButtonDataValid(button, action, type, this))
         return NULL;
 
@@ -12064,6 +12057,7 @@ bool Player::CanRewardQuest(Quest const* pQuest, bool msg) const
             {
                 if (msg)
                     SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, pQuest->ReqItemId[i]);
+
                 return false;
             }
         }
@@ -13357,12 +13351,12 @@ void Player::SendQuestReward(Quest const* pQuest, uint32 XP, Object* questGiver)
     uint32 questid = pQuest->GetQuestId();
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", questid);
     WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, (4 + 4 + 4 + 4 + 4 + pQuest->GetRewItemsCount() * 8));
-    data << questid;
+    data << uint32(questid);
     data << uint32(0x03);
 
     if (getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
     {
-        data << XP;
+        data << uint32(XP);
         data << uint32(pQuest->GetRewOrReqMoney());
     }
     else
@@ -13387,7 +13381,7 @@ void Player::SendQuestFailed(uint32 quest_id)
     if (quest_id)
     {
         WorldPacket data(SMSG_QUESTGIVER_QUEST_FAILED, 4);
-        data << quest_id;
+        data << uint32(quest_id);
         GetSession()->SendPacket(&data);
         DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_FAILED");
     }
@@ -14565,7 +14559,7 @@ void Player::_LoadMails(QueryResult* result)
 
 void Player::LoadPet()
 {
-    //fixme: the pet should still be loaded if the player is not in world
+    // fixme: the pet should still be loaded if the player is not in world
     // just not added to the map
     if (IsInWorld())
     {
@@ -16889,7 +16883,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         return false;
     }
 
-    uint32 price  = pProto->BuyPrice * count;
+    uint32 price = pProto->BuyPrice * count;
 
     // reputation discount
     price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));
@@ -17557,6 +17551,7 @@ void Player::SendInstanceResetWarning(uint32 mapid, uint32 time)
         type = RAID_INSTANCE_WARNING_MIN;
     else
         type = RAID_INSTANCE_WARNING_MIN_SOON;
+
     WorldPacket data(SMSG_RAID_INSTANCE_MESSAGE, 4 + 4 + 4);
     data << uint32(type);
     data << uint32(mapid);

@@ -177,6 +177,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     }
 
     Map* map = owner->GetMap();
+
     CreatureCreatePos pos(owner, owner->GetOrientation(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
 
     uint32 guid = pos.GetMap()->GenerateLocalLowGuid(HIGHGUID_PET);
@@ -594,7 +595,7 @@ void Pet::Update(uint32 update_diff, uint32 diff)
 
 void Pet::RegenerateAll(uint32 update_diff)
 {
-    //regenerate Focus
+    //regenerate focus
     if (m_regenTimer <= update_diff)
     {
         if (getPetType() == HUNTER_PET)
@@ -604,7 +605,6 @@ void Pet::RegenerateAll(uint32 update_diff)
             RegenerateHealth();
 
         RegenerateMana();
-
 
         m_regenTimer = 4000;
     }
@@ -642,6 +642,7 @@ void Pet::RegenerateFocus()
 
     float addvalue = 24 * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
 
+    // Apply modifiers (if any).
     AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
         if ((*i)->GetModifier()->m_miscvalue == int32(POWER_FOCUS))

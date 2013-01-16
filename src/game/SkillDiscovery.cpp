@@ -31,8 +31,8 @@
 
 struct SkillDiscoveryEntry
 {
-    uint32  spellId;
-    float   chance;
+    uint32  spellId;                                        // discavered spell
+    float   chance;                                         // chance
 
     SkillDiscoveryEntry()
         : spellId(0), chance(0) {}
@@ -53,7 +53,7 @@ void LoadSkillDiscoveryTable()
 
     uint32 count = 0;
 
-    //                                                 0        1         2
+    //                                                0        1         2
     QueryResult* result = WorldDatabase.Query("SELECT spellId, reqSpell, chance FROM skill_discovery_template");
 
     if (!result)
@@ -79,7 +79,8 @@ void LoadSkillDiscoveryTable()
 
         if (chance <= 0)                                    // chance
         {
-            ssNonDiscoverableEntries << "spellId = " << spellId << " reqSkillOrSpell = " << reqSkillOrSpell << " chance = " << chance << "\n";
+            ssNonDiscoverableEntries << "spellId = " << spellId << " reqSkillOrSpell = " << reqSkillOrSpell
+                                     << " chance = " << chance << "\n";
             continue;
         }
 

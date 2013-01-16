@@ -139,6 +139,7 @@ Quest::Quest(Field* questRecord)
     {
         if (ReqItemId[i])
             ++m_reqitemscount;
+
         if (ReqCreatureOrGOId[i])
             ++m_reqCreatureOrGOcount;
     }
@@ -192,6 +193,7 @@ uint32 Quest::XPValue(Player* pPlayer) const
                 return uint32(ceilf(fullxp * 0.1f));
         }
     }
+
     return 0;
 }
 

@@ -1694,7 +1694,8 @@ bool ChatHandler::HandleTeleNameCommand(char* args)
         std::string nameLink = playerLink(target_name);
 
         PSendSysMessage(LANG_TELEPORTING_TO, nameLink.c_str(), GetMangosString(LANG_OFFLINE), tele->name.c_str());
-        Player::SavePositionInDB(target_guid, tele->mapId, tele->position_x, tele->position_y, tele->position_z, tele->orientation,
+        Player::SavePositionInDB(target_guid, tele->mapId,
+                                 tele->position_x, tele->position_y, tele->position_z, tele->orientation,
                                  sTerrainMgr.GetZoneId(tele->mapId, tele->position_x, tele->position_y, tele->position_z));
     }
 

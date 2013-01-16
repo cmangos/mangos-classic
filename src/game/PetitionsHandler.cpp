@@ -141,7 +141,6 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
 
     if (result)
     {
-
         do
         {
             Field* fields = result->Fetch();

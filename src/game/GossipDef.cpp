@@ -518,6 +518,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS - for %s of %s, questid = %u", GetMenuSession()->GetPlayer()->GetGuidStr().c_str(), guid.GetString().c_str(), pQuest->GetQuestId());
 }
 
+// send only static data in this packet!
 void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
 {
     std::string Title, Details, Objectives, EndText;
@@ -526,6 +527,7 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest)
     Details = pQuest->GetDetails();
     Objectives = pQuest->GetObjectives();
     EndText = pQuest->GetEndText();
+
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
         ObjectiveText[i] = pQuest->ObjectiveText[i];
 
