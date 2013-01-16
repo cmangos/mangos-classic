@@ -958,6 +958,8 @@ void GameObject::Use(Unit* user)
     }
 
     bool scriptReturnValue = user->GetTypeId() == TYPEID_PLAYER && sScriptMgr.OnGameObjectUse((Player*)user, this);
+    if (!scriptReturnValue)
+        GetMap()->ScriptsStart(sGameObjectTemplateScripts, GetEntry(), spellCaster, this);
 
     switch (GetGoType())
     {

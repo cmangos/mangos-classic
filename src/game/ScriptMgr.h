@@ -392,6 +392,7 @@ extern ScriptMapMapName sQuestEndScripts;
 extern ScriptMapMapName sQuestStartScripts;
 extern ScriptMapMapName sSpellScripts;
 extern ScriptMapMapName sGameObjectScripts;
+extern ScriptMapMapName sGameObjectTemplateScripts;
 extern ScriptMapMapName sEventScripts;
 extern ScriptMapMapName sGossipScripts;
 extern ScriptMapMapName sCreatureMovementScripts;
@@ -411,6 +412,7 @@ class ScriptMgr
         ~ScriptMgr();
 
         void LoadGameObjectScripts();
+        void LoadGameObjectTemplateScripts();
         void LoadQuestEndScripts();
         void LoadQuestStartScripts();
         void LoadEventScripts();
