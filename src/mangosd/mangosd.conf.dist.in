@@ -1038,6 +1038,11 @@ Channel.SilentlyGMJoin = 0
 #        Default: 0 (disable)
 #                 1 (enable)
 #
+#    GM.InvisibleAura
+#        A spell that will be cast when a gm uses ".gm visible off" (Must be aura spell)
+#        Default: 31748 (Spirit Particles, big)
+#                 0 (Disabled)
+#
 ###################################################################################################################
 
 GM.LoginState            = 2
@@ -1050,6 +1055,7 @@ GM.InWhoList.Level       = 3
 GM.LogTrade              = 1
 GM.StartLevel            = 1
 GM.LowerSecurity         = 0
+GM.InvisibleAura         = 31748
 
 ###################################################################################################################
 # VISIBILITY AND RADIUSES
