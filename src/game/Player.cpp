@@ -11329,25 +11329,34 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
 
         if (!isGameMaster())                                // Let GM always see menu items regardless of conditions
         {
-            if (itr->second.cond_1 && !sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_1))
+            if (itr->second.conditionId && !sObjectMgr.IsPlayerMeetToNEWCondition(this, itr->second.conditionId))
             {
                 if (itr->second.option_id == GOSSIP_OPTION_QUESTGIVER)
                     canSeeQuests = false;
                 continue;
             }
-
-            if (itr->second.cond_2 && !sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_2))
+            else if (!itr->second.conditionId)
             {
-                if (itr->second.option_id == GOSSIP_OPTION_QUESTGIVER)
-                    canSeeQuests = false;
-                continue;
-            }
+                if (itr->second.cond_1 && !sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_1))
+                {
+                    if (itr->second.option_id == GOSSIP_OPTION_QUESTGIVER)
+                        canSeeQuests = false;
+                    continue;
+                }
 
-            if (itr->second.cond_3 && !sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_3))
-            {
-                if (itr->second.option_id == GOSSIP_OPTION_QUESTGIVER)
-                    canSeeQuests = false;
-                continue;
+                if (itr->second.cond_2 && !sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_2))
+                {
+                    if (itr->second.option_id == GOSSIP_OPTION_QUESTGIVER)
+                        canSeeQuests = false;
+                    continue;
+                }
+
+                if (itr->second.cond_3 && !sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_3))
+                {
+                    if (itr->second.option_id == GOSSIP_OPTION_QUESTGIVER)
+                        canSeeQuests = false;
+                    continue;
+                }
             }
         }
 
@@ -11671,7 +11680,7 @@ uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
 
     for (GossipMenusMap::const_iterator itr = pMenuBounds.first; itr != pMenuBounds.second; ++itr)
     {
-        if (sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_1) && sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_2))
+        if (itr->second.conditionId && sObjectMgr.IsPlayerMeetToNEWCondition(this, itr->second.conditionId))
         {
             textId = itr->second.text_id;
 
@@ -11679,6 +11688,18 @@ uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
             if (itr->second.script_id)
                 GetMap()->ScriptsStart(sGossipScripts, itr->second.script_id, this, pSource);
             break;
+        }
+        else if (!itr->second.conditionId)
+        {
+            if (sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_1) && sObjectMgr.IsPlayerMeetToCondition(this, itr->second.cond_2))
+            {
+                textId = itr->second.text_id;
+
+                // Start related script
+                if (itr->second.script_id)
+                    GetMap()->ScriptsStart(sGossipScripts, itr->second.script_id, this, pSource);
+                break;
+            }
         }
     }
 

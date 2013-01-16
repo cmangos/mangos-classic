@@ -38,6 +38,8 @@ const char InstanceTemplatesrcfmt[] = "iiiiiiiffs";
 const char InstanceTemplatedstfmt[] = "iiiiiiiffi";
 const char WorldTemplatesrcfmt[] = "is";
 const char WorldTemplatedstfmt[] = "ii";
+const char ConditionsSrcFmt[] = "iiii";
+const char ConditionsDstFmt[] = "iiii";
 
 SQLStorage sCreatureStorage(CreatureInfosrcfmt, CreatureInfodstfmt, "entry", "creature_template");
 SQLStorage sCreatureDataAddonStorage(CreatureDataAddonInfofmt, "guid", "creature_addon");
@@ -50,3 +52,4 @@ SQLStorage sItemStorage(ItemPrototypesrcfmt, ItemPrototypedstfmt, "entry", "item
 SQLStorage sPageTextStore(PageTextfmt, "entry", "page_text");
 SQLStorage sInstanceTemplate(InstanceTemplatesrcfmt, InstanceTemplatedstfmt, "map", "instance_template");
 SQLStorage sWorldTemplate(WorldTemplatesrcfmt, WorldTemplatedstfmt, "map", "world_template");
+SQLStorage sConditionStorage(ConditionsSrcFmt, ConditionsDstFmt, "condition_entry", "conditions");

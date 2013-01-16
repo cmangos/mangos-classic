@@ -95,8 +95,8 @@ void LootStore::LoadLootTable()
 
     sLog.outString("%s :", GetName());
 
-    //                                                 0      1     2                    3        4              5         6              7                 8
-    QueryResult* result = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, groupid, mincountOrRef, maxcount, lootcondition, condition_value1, condition_value2 FROM %s", GetName());
+    //                                                 0      1     2                    3        4              5         6
+    QueryResult* result = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, groupid, mincountOrRef, maxcount, condition_id FROM %s", GetName());
 
     if (result)
     {
@@ -113,9 +113,7 @@ void LootStore::LoadLootTable()
             uint8  group               = fields[3].GetUInt8();
             int32  mincountOrRef       = fields[4].GetInt32();
             uint32 maxcount            = fields[5].GetUInt32();
-            ConditionType condition    = (ConditionType)fields[6].GetUInt8();
-            uint32 cond_value1         = fields[7].GetUInt32();
-            uint32 cond_value2         = fields[8].GetUInt32();
+            uint16 conditionId         = fields[6].GetUInt16();
 
             if (maxcount > std::numeric_limits<uint8>::max())
             {
@@ -123,20 +121,21 @@ void LootStore::LoadLootTable()
                 continue;                                   // error already printed to log/console.
             }
 
-            if (mincountOrRef < 0 && condition != CONDITION_NONE)
+            if (mincountOrRef < 0 && conditionId)
             {
                 sLog.outErrorDb("Table '%s' entry %u mincountOrRef %i < 0 and not allowed has condition, skipped", GetName(), entry, mincountOrRef);
                 continue;
             }
 
-            if (!PlayerCondition::IsValid(condition, cond_value1, cond_value2))
+            if (conditionId)
             {
-                sLog.outErrorDb("... in table '%s' entry %u item %u", GetName(), entry, item);
-                continue;                                   // error already printed to log/console.
+                const PlayerCondition* condition = sConditionStorage.LookupEntry<PlayerCondition>(conditionId);
+                if (!condition)
+                {
+                    sLog.outErrorDb("Table `%s` for entry %u, item %u has condition_id %u that does not exist in `conditions`, ignoring", GetName(), entry, item, conditionId);
+                    conditionId = 0;
+                }
             }
-
-            // (condition + cond_value1/2) are converted into single conditionId
-            uint16 conditionId = sObjectMgr.GetConditionId(condition, cond_value1, cond_value2);
 
             LootStoreItem storeitem = LootStoreItem(item, chanceOrQuestChance, group, conditionId, mincountOrRef, maxcount);
 
@@ -360,7 +359,7 @@ LootItem::LootItem(uint32 itemid_, uint32 count_, int32 randomPropertyId_)
 bool LootItem::AllowedForPlayer(Player const* player) const
 {
     // DB conditions check
-    if (!sObjectMgr.IsPlayerMeetToCondition(player, conditionId))
+    if (conditionId && !sObjectMgr.IsPlayerMeetToNEWCondition(player, conditionId))
         return false;
 
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid);
@@ -386,7 +385,7 @@ bool LootItem::AllowedForPlayer(Player const* player) const
 LootSlotType LootItem::GetSlotTypeForSharedLoot(PermissionTypes permission, Player* viewer, bool condition_ok /*= false*/) const
 {
     // ignore looted, FFA (each player get own copy) and not allowed items
-    if (is_looted || freeforall || conditionId && !condition_ok || !AllowedForPlayer(viewer))
+    if (is_looted || freeforall || (conditionId && !condition_ok) || !AllowedForPlayer(viewer))
         return MAX_LOOT_SLOT_TYPE;
 
     switch (permission)

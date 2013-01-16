@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z1951_s1540_11955_02_mangos_command` bit(1) default NULL
+  `required_z1961_s1549_11964_01_mangos_conditions` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -728,6 +728,27 @@ INSERT INTO `command` VALUES
 UNLOCK TABLES;
 
 --
+-- Table structure for table `conditions`
+--
+DROP TABLE IF EXISTS `conditions`;
+CREATE TABLE `conditions` (
+  `condition_entry` mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Identifier',
+  `type` tinyint(3) signed NOT NULL DEFAULT '0' COMMENT 'Type of the condition',
+  `value1` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'data field one for the condition',
+  `value2` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'data field two for the condition',
+  PRIMARY KEY  (`condition_entry`),
+  CONSTRAINT unique_conditions UNIQUE (type,value1,value2)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Condition System';
+
+--
+-- Dumping data for table `conditions`
+--
+LOCK TABLES `conditions` WRITE;
+/*!40000 ALTER TABLE `conditions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `conditions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `creature`
 --
 
@@ -935,6 +956,7 @@ CREATE TABLE `creature_loot_template` (
   `lootcondition` tinyint(3) unsigned NOT NULL default '0',
   `condition_value1` mediumint(8) unsigned NOT NULL default '0',
   `condition_value2` mediumint(8) unsigned NOT NULL default '0',
+  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1326,6 +1348,7 @@ CREATE TABLE `disenchant_loot_template` (
   `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1586,6 +1609,7 @@ CREATE TABLE `fishing_loot_template` (
   `lootcondition` tinyint(3) unsigned NOT NULL default '0',
   `condition_value1` mediumint(8) unsigned NOT NULL default '0',
   `condition_value2` mediumint(8) unsigned NOT NULL default '0',
+  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1929,6 +1953,7 @@ CREATE TABLE `gameobject_loot_template` (
   `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2073,6 +2098,7 @@ CREATE TABLE gossip_menu (
   cond_2 tinyint(3) unsigned NOT NULL default '0',
   cond_2_val_1 mediumint(8) unsigned NOT NULL default '0',
   cond_2_val_2 mediumint(8) unsigned NOT NULL default '0',
+  condition_id MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (entry, text_id, script_id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -2112,6 +2138,7 @@ CREATE TABLE gossip_menu_option (
   cond_3 tinyint(3) unsigned NOT NULL default '0',
   cond_3_val_1 mediumint(8) unsigned NOT NULL default '0',
   cond_3_val_2 mediumint(8) unsigned NOT NULL default '0',
+  condition_id MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (menu_id, id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -2274,6 +2301,7 @@ CREATE TABLE `item_loot_template` (
   `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -3004,6 +3032,7 @@ CREATE TABLE `mail_loot_template` (
   `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -4442,6 +4471,7 @@ CREATE TABLE `pickpocketing_loot_template` (
   `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -9803,6 +9833,7 @@ CREATE TABLE `reference_loot_template` (
   `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -10020,6 +10051,7 @@ CREATE TABLE `skinning_loot_template` (
   `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -10338,7 +10370,7 @@ LOCK TABLES `spell_area` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for spell_bonus_data
+-- Table structure for `spell_bonus_data`
 --
 DROP TABLE IF EXISTS `spell_bonus_data`;
 CREATE TABLE `spell_bonus_data` (
