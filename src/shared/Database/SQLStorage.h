@@ -29,7 +29,6 @@ class SQLStorage
         friend struct SQLStorageLoaderBase;
 
     public:
-
         SQLStorage(const char* fmt, const char* _entry_field, const char* sqlname)
         {
             src_format = fmt;
@@ -44,7 +43,6 @@ class SQLStorage
             init(_entry_field, sqlname);
         }
 
-
         ~SQLStorage()
         {
             Free();
@@ -53,8 +51,6 @@ class SQLStorage
         template<class T>
         T const* LookupEntry(uint32 id) const
         {
-            if (id == 0)
-                return NULL;
             if (id >= MaxEntry)
                 return NULL;
             return reinterpret_cast<T const*>(pIndex[id]);
@@ -70,6 +66,7 @@ class SQLStorage
         void Free();
 
         void EraseEntry(uint32 id);
+
     private:
         void init(const char* _entry_field, const char* sqlname)
         {
@@ -109,6 +106,7 @@ struct SQLStorageLoaderBase
         template<class D>
         void convert_from_str(uint32 field_pos, char* src, D& dst);
         void convert_str_to_str(uint32 field_pos, char* src, char*& dst);
+
     private:
         template<class V>
         void storeValue(V value, SQLStorage& store, char* p, uint32 x, uint32& offset);
