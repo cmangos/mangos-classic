@@ -172,13 +172,6 @@ enum ScoreType
     SCORE_SECONDARY_OBJECTIVES  = 15
 };
 
-enum BattleGroundWinner
-{
-    WINNER_HORDE            = 0,
-    WINNER_ALLIANCE         = 1,
-    WINNER_NONE             = 2
-};
-
 enum BattleGroundTeamIndex
 {
     BG_TEAM_ALLIANCE        = 0,
@@ -281,7 +274,7 @@ class BattleGround
         uint32 GetMinPlayersPerTeam() const { return m_MinPlayersPerTeam; }
 
         int32 GetStartDelayTime() const     { return m_StartDelayTime; }
-        uint8 GetWinner() const             { return m_Winner; }
+        Team GetWinner() const              { return m_Winner; }
         uint32 GetBattlemasterEntry() const;
         uint32 GetBonusHonorFromKill(uint32 kills) const;
 
@@ -296,7 +289,7 @@ class BattleGround
         void SetMaxPlayers(uint32 MaxPlayers) { m_MaxPlayers = MaxPlayers; }
         void SetMinPlayers(uint32 MinPlayers) { m_MinPlayers = MinPlayers; }
         void SetLevelRange(uint32 min, uint32 max) { m_LevelMin = min; m_LevelMax = max; }
-        void SetWinner(uint8 winner)        { m_Winner = winner; }
+        void SetWinner(Team winner)         { m_Winner = winner; }
 
         void ModifyStartDelayTime(int diff) { m_StartDelayTime -= diff; }
         void SetStartDelayTime(int Time)    { m_StartDelayTime = Time; }
@@ -515,7 +508,7 @@ class BattleGround
         int32 m_EndTime;                                    // it is set to 120000 when bg is ending and it decreases itself
         BattleGroundBracketId m_BracketId;
         bool   m_InBGFreeSlotQueue;                         // used to make sure that BG is only once inserted into the BattleGroundMgr.BGFreeSlotQueue[bgTypeId] deque
-        uint8  m_Winner;                                    // 0=alliance, 1=horde, 2=none
+        Team   m_Winner;                                    // 0=alliance, 1=horde, 2=none
         int32  m_StartDelayTime;
         bool   m_PrematureCountDown;
         uint32 m_PrematureCountDownTimer;
