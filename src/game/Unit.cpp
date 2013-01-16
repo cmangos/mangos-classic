@@ -4200,6 +4200,10 @@ GameObject* Unit::GetGameObject(uint32 spellId) const
         if ((*i)->GetSpellId() == spellId)
             return *i;
 
+    WildGameObjectMap::const_iterator find = m_wildGameObjs.find(spellId);
+    if (find != m_wildGameObjs.end())
+        return GetMap()->GetGameObject(find->second);       // Can be NULL
+
     return NULL;
 }
 
@@ -4216,6 +4220,24 @@ void Unit::AddGameObject(GameObject* gameObj)
         if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
             // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
             ((Player*)this)->AddSpellAndCategoryCooldowns(createBySpell, 0, NULL, true);
+    }
+}
+
+void Unit::AddWildGameObject(GameObject* gameObj)
+{
+    MANGOS_ASSERT(gameObj && gameObj->GetOwnerGuid().IsEmpty());
+    m_wildGameObjs[gameObj->GetSpellId()] = gameObj->GetObjectGuid();
+
+    // As of 335 there are no wild-summon spells with SPELL_ATTR_DISABLED_WHILE_ACTIVE
+
+    // Remove outdated wild summoned GOs
+    for (WildGameObjectMap::iterator itr = m_wildGameObjs.begin(); itr != m_wildGameObjs.end();)
+    {
+        GameObject* pGo = GetMap()->GetGameObject(itr->second);
+        if (pGo)
+            ++itr;
+        else
+            m_wildGameObjs.erase(itr++);
     }
 }
 
@@ -4253,6 +4275,7 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
 {
     if (m_gameObj.empty())
         return;
+
     GameObjectList::iterator i, next;
     for (i = m_gameObj.begin(); i != m_gameObj.end(); i = next)
     {
@@ -4283,6 +4306,9 @@ void Unit::RemoveAllGameObjects()
         (*i)->Delete();
         i = m_gameObj.erase(i);
     }
+
+    // wild summoned GOs - only remove references, do not remove GOs
+    m_wildGameObjs.clear();
 }
 
 void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
