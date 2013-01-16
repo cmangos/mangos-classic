@@ -422,7 +422,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
     HandleMoverRelocation(movementInfo);
 
     WorldPacket data(MSG_MOVE_KNOCK_BACK, recv_data.size() + 15);
-    data << ObjectGuid(mover->GetObjectGuid());
+    data << mover->GetObjectGuid();
     data << movementInfo;
     data << movementInfo.GetJumpInfo().sinAngle;
     data << movementInfo.GetJumpInfo().cosAngle;
