@@ -171,21 +171,21 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Summons(bool check_entry_use)
 
             CreatureEventAI_Summon temp;
 
-            uint32 i = fields[0].GetUInt32();
-            temp.position_x = fields[1].GetFloat();
-            temp.position_y = fields[2].GetFloat();
-            temp.position_z = fields[3].GetFloat();
-            temp.orientation = fields[4].GetFloat();
-            temp.SpawnTimeSecs = fields[5].GetUInt32();
+            temp.id             = fields[0].GetUInt32();
+            temp.position_x     = fields[1].GetFloat();
+            temp.position_y     = fields[2].GetFloat();
+            temp.position_z     = fields[3].GetFloat();
+            temp.orientation    = fields[4].GetFloat();
+            temp.SpawnTimeSecs  = fields[5].GetUInt32();
 
             if (!MaNGOS::IsValidMapCoord(temp.position_x, temp.position_y, temp.position_z, temp.orientation))
             {
-                sLog.outErrorDb("CreatureEventAI:  Summon id %u have wrong coordinates (%f,%f,%f,%f), skipping.", i, temp.position_x, temp.position_y, temp.position_z, temp.orientation);
+                sLog.outErrorDb("CreatureEventAI:  Summon id %u have wrong coordinates (%f, %f, %f, %f), skipping.", temp.id, temp.position_x, temp.position_y, temp.position_z, temp.orientation);
                 continue;
             }
 
             //Add to map
-            m_CreatureEventAI_Summon_Map[i] = temp;
+            m_CreatureEventAI_Summon_Map[temp.id] = temp;
             ++Count;
         }
         while (result->NextRow());

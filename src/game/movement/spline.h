@@ -40,7 +40,6 @@ namespace Movement
                 ModesEnd
             };
 
-            #pragma region fields
         protected:
             ControlArray points;
 
@@ -86,10 +85,9 @@ namespace Movement
 
             void UninitializedSpline() const { MANGOS_ASSERT(false);}
 
-            #pragma endregion
         public:
 
-            explicit SplineBase() : m_mode(UninitializedMode), index_lo(0), index_hi(0), cyclic(false) {}
+            explicit SplineBase() : index_lo(0), index_hi(0), m_mode(UninitializedMode), cyclic(false) {}
 
             /** Caclulates the position for given segment Idx, and percent of segment length t
                 @param t - percent of segment length, assumes that t in range [0, 1]
@@ -140,13 +138,11 @@ namespace Movement
         public:
             typedef length_type LengthType;
             typedef std::vector<length_type> LengthArray;
-            #pragma region fields
         protected:
 
             LengthArray lengths;
 
             index_type computeIndexInBounds(length_type length) const;
-            #pragma endregion
         public:
 
             explicit Spline() {}

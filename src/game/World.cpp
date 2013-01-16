@@ -129,7 +129,7 @@ World::~World()
 
     m_weathers.clear();
 
-    CliCommandHolder* command;
+    CliCommandHolder* command = NULL;
     while (cliCmdQueue.next(command))
         delete command;
 

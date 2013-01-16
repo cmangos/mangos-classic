@@ -1438,12 +1438,12 @@ bool ChatHandler::isValidChatMessage(const char* message)
     std::istringstream reader(message);
     char buffer[256];
 
-    uint32 color;
+    uint32 color = 0;
 
-    ItemPrototype const* linkedItem;
-    Quest const* linkedQuest;
-    SpellEntry const* linkedSpell;
-    ItemRandomPropertiesEntry const* itemProperty;
+    ItemPrototype const* linkedItem = NULL;
+    Quest const* linkedQuest = NULL;
+    SpellEntry const* linkedSpell = NULL;
+    ItemRandomPropertiesEntry const* itemProperty = NULL;
 
     while (!reader.eof())
     {
