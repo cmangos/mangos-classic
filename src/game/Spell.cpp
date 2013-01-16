@@ -6003,14 +6003,14 @@ void Spell::FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPu
     Cell::VisitAllObjects(notifier.GetCenterX(), notifier.GetCenterY(), m_caster->GetMap(), notifier, radius);
 }
 
-void Spell::FillRaidOrPartyTargets(UnitList& TagUnitMap, Unit* target, float radius, bool raid, bool withPets, bool withcaster)
+void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float radius, bool raid, bool withPets, bool withcaster)
 {
-    Player* pTarget = target->GetCharmerOrOwnerPlayerOrPlayerItself();
-    Group* pGroup = pTarget ? pTarget->GetGroup() : NULL;
+    Player* pMember = member->GetCharmerOrOwnerPlayerOrPlayerItself();
+    Group* pGroup = pMember ? pMember->GetGroup() : NULL;
 
     if (pGroup)
     {
-        uint8 subgroup = pTarget->GetSubGroup();
+        uint8 subgroup = pMember->GetSubGroup();
 
         for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
         {
@@ -6022,28 +6022,28 @@ void Spell::FillRaidOrPartyTargets(UnitList& TagUnitMap, Unit* target, float rad
             {
                 if (Target == m_caster && withcaster ||
                         Target != m_caster && m_caster->IsWithinDistInMap(Target, radius))
-                    TagUnitMap.push_back(Target);
+                    targetUnitMap.push_back(Target);
 
                 if (withPets)
                     if (Pet* pet = Target->GetPet())
                         if (pet == m_caster && withcaster ||
                                 pet != m_caster && m_caster->IsWithinDistInMap(pet, radius))
-                            TagUnitMap.push_back(pet);
+                            targetUnitMap.push_back(pet);
             }
         }
     }
     else
     {
-        Unit* ownerOrSelf = pTarget ? pTarget : target->GetCharmerOrOwnerOrSelf();
+        Unit* ownerOrSelf = pMember ? pMember : member->GetCharmerOrOwnerOrSelf();
         if (ownerOrSelf == m_caster && withcaster ||
                 ownerOrSelf != m_caster && m_caster->IsWithinDistInMap(ownerOrSelf, radius))
-            TagUnitMap.push_back(ownerOrSelf);
+            targetUnitMap.push_back(ownerOrSelf);
 
         if (withPets)
             if (Pet* pet = ownerOrSelf->GetPet())
                 if (pet == m_caster && withcaster ||
                         pet != m_caster && m_caster->IsWithinDistInMap(pet, radius))
-                    TagUnitMap.push_back(pet);
+                    targetUnitMap.push_back(pet);
     }
 }
 
