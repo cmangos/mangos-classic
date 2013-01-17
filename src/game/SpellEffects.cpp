@@ -2292,7 +2292,7 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
     if (!pet_entry)
         return;
 
-    CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(pet_entry);
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
         sLog.outErrorDb("Spell::DoSummon: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->Id);
@@ -2710,7 +2710,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
     if (!pet_entry)
         return;
 
-    CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(pet_entry);
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
         sLog.outErrorDb("Spell::DoSummonGuardian: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->Id);
@@ -3131,7 +3131,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
             return;
     }
 
-    CreatureInfo const* cInfo = petentry ? sCreatureStorage.LookupEntry<CreatureInfo>(petentry) : NULL;
+    CreatureInfo const* cInfo = petentry ? ObjectMgr::GetCreatureTemplate(petentry) : NULL;
 
     // == 0 in case call current pet, check only real summon case
     if (petentry && !cInfo)
@@ -4287,7 +4287,7 @@ void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)
 void Spell::EffectSummonPossessed(SpellEffectIndex eff_idx)
 {
     uint32 creatureEntry = m_spellInfo->EffectMiscValue[eff_idx];
-    CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(creatureEntry);
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creatureEntry);
     if (!cInfo)
     {
         sLog.outErrorDb("Spell::DoSummonPossessed: creature entry %u not found for spell %u.", creatureEntry, m_spellInfo->Id);
@@ -4726,7 +4726,7 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
     if (!pet_entry)
         return;
 
-    CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(pet_entry);
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
         sLog.outErrorDb("Spell::DoSummonCritter: creature entry %u not found for spell %u.", pet_entry, m_spellInfo->Id);

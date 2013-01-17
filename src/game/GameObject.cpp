@@ -39,6 +39,7 @@
 #include "BattleGroundAV.h"
 #include "Util.h"
 #include "ScriptMgr.h"
+#include "SQLStorages.h"
 
 GameObject::GameObject() : WorldObject(),
     m_goInfo(NULL)

@@ -24,6 +24,8 @@
 #include "World.h"
 #include "Util.h"
 #include "SharedDefines.h"
+#include "DBCStores.h"
+#include "SQLStorages.h"
 
 static eConfigFloatValues const qualityToRate[MAX_ITEM_QUALITY] =
 {

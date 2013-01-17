@@ -27,6 +27,7 @@
 #include "SkillDiscovery.h"
 #include "SpellMgr.h"
 #include "Player.h"
+#include "DBCStores.h"
 #include <map>
 
 struct SkillDiscoveryEntry

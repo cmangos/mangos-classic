@@ -57,6 +57,7 @@
 #include "DBCStores.h"
 #include "CreatureEventAIMgr.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
+#include "SQLStorages.h"
 #include "extras/Mod.h"
 
 static uint32 ahbotQualityIds[MAX_AUCTION_QUALITY] =

@@ -22,6 +22,8 @@
 #include "Log.h"
 #include "ProgressBar.h"
 #include "Player.h"
+#include "DBCStores.h"
+
 #include <map>
 
 // some type definitions

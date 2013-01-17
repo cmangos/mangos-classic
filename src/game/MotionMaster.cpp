@@ -30,6 +30,7 @@
 #include "RandomMovementGenerator.h"
 #include "movement/MoveSpline.h"
 #include "movement/MoveSplineInit.h"
+#include "DBCStores.h"
 
 #include <cassert>
 

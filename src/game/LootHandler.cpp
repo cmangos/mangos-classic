@@ -31,6 +31,7 @@
 #include "Group.h"
 #include "World.h"
 #include "Util.h"
+#include "DBCStores.h"
 
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 {

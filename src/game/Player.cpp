@@ -59,6 +59,8 @@
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
 #include "Mail.h"
+#include "DBCStores.h"
+#include "SQLStorages.h"
 
 #include <cmath>
 
