@@ -7549,54 +7549,45 @@ static WorldStatePair AB_world_states[] =
     { 0x0,   0x0 }
 };
 
-static WorldStatePair EPL_world_states[] =
+static WorldStatePair SI_world_states[] =                   // Silithus
 {
-    { 0x97a, 0x0 },                                         // 2426 10
-    { 0x917, 0x0 },                                         // 2327 11
-    { 0x918, 0x0 },                                         // 2328 12
-    { 0x97b, 0x32 },                                        // 2427 13
-    { 0x97c, 0x32 },                                        // 2428 14
-    { 0x933, 0x1 },                                         // 2355 15
-    { 0x946, 0x0 },                                         // 2374 16
-    { 0x947, 0x0 },                                         // 2375 17
-    { 0x948, 0x0 },                                         // 2376 18
-    { 0x949, 0x0 },                                         // 2377 19
-    { 0x94a, 0x0 },                                         // 2378 20
-    { 0x94b, 0x0 },                                         // 2379 21
-    { 0x932, 0x0 },                                         // 2354 22
-    { 0x934, 0x0 },                                         // 2356 23
-    { 0x935, 0x0 },                                         // 2357 24
-    { 0x936, 0x0 },                                         // 2358 25
-    { 0x937, 0x0 },                                         // 2359 26
-    { 0x938, 0x0 },                                         // 2360 27
-    { 0x939, 0x1 },                                         // 2361 28
-    { 0x930, 0x1 },                                         // 2352 29
-    { 0x93a, 0x0 },                                         // 2362 30
-    { 0x93b, 0x0 },                                         // 2363 31
-    { 0x93c, 0x0 },                                         // 2364 32
-    { 0x93d, 0x0 },                                         // 2365 33
-    { 0x944, 0x0 },                                         // 2372 34
-    { 0x945, 0x0 },                                         // 2373 35
-    { 0x931, 0x1 },                                         // 2353 36
-    { 0x93e, 0x0 },                                         // 2366 37
-    { 0x931, 0x1 },                                         // 2367 38 ??  grey horde not in dbc! send for consistency's sake, and to match field count
-    { 0x940, 0x0 },                                         // 2368 39
-    { 0x941, 0x0 },                                         // 2369 7
-    { 0x942, 0x0 },                                         // 2370 8
-    { 0x943, 0x0 },                                         // 2371 9
-    { 0x0,   0x0 }
+    { 2313, 0 },                                            // WORLD_STATE_SI_GATHERED_A
+    { 2314, 0 },                                            // WORLD_STATE_SI_GATHERED_H
+    { 2317, 0 },                                            // WORLD_STATE_SI_SILITHYST_MAX
 };
 
-static WorldStatePair SIL_world_states[] =
+static WorldStatePair EP_world_states[] =                   // Eastern Plaguelands
 {
-    { 0x909, 0x0 },                                         // 2313 7 ally silityst gathered
-    { 0x90A, 0x0 },                                         // 2314 8 horde silityst gathered
-    { 0x90D, 0x0C8 },                                       // 2317 9 max silithyst
-    { 0x912, 0x0 },                                         // 2322 10 sandworm N
-    { 0x913, 0x0 },                                         // 2323 11 sandworm S
-    { 0x914, 0x0 },                                         // 2324 12 sandworm SW
-    { 0x915, 0x0 },                                         // 2325 13 sandworm E
-    { 0x0,   0x0 }
+    { 2327, 0 },                                            // WORLD_STATE_EP_TOWER_COUNT_ALLIANCE
+    { 2328, 0 },                                            // WORLD_STATE_EP_TOWER_COUNT_HORDE
+    { 2355, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_NEUTRAL
+    { 2374, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_CONTEST_ALLIANCE
+    { 2375, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_CONTEST_HORDE
+    { 2376, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_PROGRESS_ALLIANCE
+    { 2377, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_PROGRESS_HORDE
+    { 2378, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_ALLIANCE
+    { 2379, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_HORDE
+    { 2354, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_ALLIANCE
+    { 2356, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_HORDE
+    { 2357, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_PROGRESS_ALLIANCE
+    { 2358, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_PROGRESS_HORDE
+    { 2359, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_CONTEST_ALLIANCE
+    { 2360, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_CONTEST_HORDE
+    { 2361, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_NEUTRAL
+    { 2352, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_NEUTRAL
+    { 2362, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_CONTEST_ALLIANCE
+    { 2363, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_CONTEST_HORDE
+    { 2364, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_PROGRESS_ALLIANCE
+    { 2365, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_PROGRESS_HORDE
+    { 2372, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_ALLIANCE
+    { 2373, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_HORDE
+    { 2353, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_NEUTRAL
+    { 2366, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_CONTEST_ALLIANCE
+    { 2367, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_CONTEST_HORDE - not in dbc! sent for consistency's sake, and to match field count
+    { 2368, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_PROGRESS_ALLIANCE
+    { 2369, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_PROGRESS_HORDE
+    { 2370, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_ALLIANCE
+    { 2371, WORLD_STATE_REMOVE }                            // WORLD_STATE_EP_PLAGUEWOOD_HORDE
 };
 
 void Player::SendInitWorldStates(uint32 zoneid)
@@ -7680,11 +7671,17 @@ void Player::SendInitWorldStates(uint32 zoneid)
             case 1537:
             case 2257:
                 break;
-            case 139:                                           // EPL
-                FillInitialWorldState(data, count, EPL_world_states);
+            case 139:                                           // Eastern Plaguelands
+                if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
+                    outdoorPvP->FillInitialWorldStates(data, count);
+                else
+                    FillInitialWorldState(data, count, EP_world_states);
                 break;
             case 1377:                                          // Silithus
-                FillInitialWorldState(data, count, SIL_world_states);
+                if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
+                    outdoorPvP->FillInitialWorldStates(data, count);
+                else
+                    FillInitialWorldState(data, count, SI_world_states);
                 break;
             case 2597:                                          // AV
                 if (bg && bg->GetTypeID() == BATTLEGROUND_AV)
