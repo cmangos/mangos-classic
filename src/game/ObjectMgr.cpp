@@ -19,7 +19,6 @@
 
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
-#include "Database/SQLStorageImpl.h"
 #include "Policies/SingletonImp.h"
 
 #include "SQLStorages.h"
@@ -169,11 +168,6 @@ Group* ObjectMgr::GetGroupById(uint32 id) const
         return itr->second;
 
     return NULL;
-}
-
-CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id)
-{
-    return sCreatureStorage.LookupEntry<CreatureInfo>(id);
 }
 
 void ObjectMgr::LoadCreatureLocales()
@@ -667,16 +661,6 @@ void ObjectMgr::LoadCreatureAddons()
                 sLog.outErrorDb("Creature (GUID: %u) does not exist but has a record in `creature_addon`", addon->guidOrEntry);
 }
 
-EquipmentInfo const* ObjectMgr::GetEquipmentInfo(uint32 entry)
-{
-    return sEquipmentStorage.LookupEntry<EquipmentInfo>(entry);
-}
-
-EquipmentInfoRaw const* ObjectMgr::GetEquipmentInfoRaw(uint32 entry)
-{
-    return sEquipmentStorageRaw.LookupEntry<EquipmentInfoRaw>(entry);
-}
-
 void ObjectMgr::LoadEquipmentTemplates()
 {
     sEquipmentStorage.Load(true);
@@ -731,13 +715,8 @@ void ObjectMgr::LoadEquipmentTemplates()
     sLog.outString();
 }
 
-CreatureModelInfo const* ObjectMgr::GetCreatureModelInfo(uint32 modelid)
-{
-    return sCreatureModelStorage.LookupEntry<CreatureModelInfo>(modelid);
-}
-
 // generally for models having another model for the other team (totems)
-uint32 ObjectMgr::GetCreatureModelOtherTeamModel(uint32 modelId)
+uint32 ObjectMgr::GetCreatureModelOtherTeamModel(uint32 modelId) const
 {
     if (const CreatureModelInfo* modelInfo = GetCreatureModelInfo(modelId))
         return modelInfo->modelid_other_team;
@@ -745,7 +724,7 @@ uint32 ObjectMgr::GetCreatureModelOtherTeamModel(uint32 modelId)
     return 0;
 }
 
-CreatureModelInfo const* ObjectMgr::GetCreatureModelRandomGender(uint32 display_id)
+CreatureModelInfo const* ObjectMgr::GetCreatureModelRandomGender(uint32 display_id) const
 {
     CreatureModelInfo const* minfo = GetCreatureModelInfo(display_id);
     if (!minfo)
@@ -2796,6 +2775,25 @@ void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, Play
     }
 }
 
+/* ********************************************************************************************* */
+/* *                                Static Wrappers                                              */
+/* ********************************************************************************************* */
+GameObjectInfo const* ObjectMgr::GetGameObjectInfo(uint32 id) { return sGOStorage.LookupEntry<GameObjectInfo>(id); }
+Player* ObjectMgr::GetPlayer(const char* name) { return ObjectAccessor::FindPlayerByName(name); }
+Player* ObjectMgr::GetPlayer(ObjectGuid guid, bool inWorld /*=true*/) { return ObjectAccessor::FindPlayer(guid, inWorld); }
+CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id) { return sCreatureStorage.LookupEntry<CreatureInfo>(id); }
+CreatureModelInfo const* ObjectMgr::GetCreatureModelInfo(uint32 modelid) { return sCreatureModelStorage.LookupEntry<CreatureModelInfo>(modelid); }
+EquipmentInfo const* ObjectMgr::GetEquipmentInfo(uint32 entry) { return sEquipmentStorage.LookupEntry<EquipmentInfo>(entry); }
+EquipmentInfoRaw const* ObjectMgr::GetEquipmentInfoRaw(uint32 entry) { return sEquipmentStorageRaw.LookupEntry<EquipmentInfoRaw>(entry); }
+CreatureDataAddon const* ObjectMgr::GetCreatureAddon(uint32 lowguid) { return sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(lowguid); }
+CreatureDataAddon const* ObjectMgr::GetCreatureTemplateAddon(uint32 entry) { return sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(entry); }
+ItemPrototype const* ObjectMgr::GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
+InstanceTemplate const* ObjectMgr::GetInstanceTemplate(uint32 map) { return sInstanceTemplate.LookupEntry<InstanceTemplate>(map); }
+WorldTemplate const* ObjectMgr::GetWorldTemplate(uint32 map) { return sWorldTemplate.LookupEntry<WorldTemplate>(map); }
+
+/* ********************************************************************************************* */
+/* *                                Loading Functions                                            */
+/* ********************************************************************************************* */
 void ObjectMgr::LoadGroups()
 {
     // -- loading groups --
@@ -6695,6 +6693,18 @@ uint16 ObjectMgr::GetConditionId(ConditionType condition, uint32 value1, uint32 
     }
 
     return mConditions.size() - 1;
+}
+
+// Check if a player meets condition conditionId
+bool ObjectMgr::IsPlayerMeetToNEWCondition(Player const* pPlayer, uint16 conditionId) const
+{
+    if (!pPlayer)
+        return false;                                       // player not present, return false
+
+    if (const PlayerCondition* condition = sConditionStorage.LookupEntry<PlayerCondition>(conditionId))
+        return condition->Meets(pPlayer);
+
+    return false;
 }
 
 // Checks if player meets the condition

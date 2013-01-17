@@ -37,7 +37,6 @@
 #include "ObjectAccessor.h"
 #include "ObjectGuid.h"
 #include "Policies/Singleton.h"
-#include "SQLStorages.h"
 
 #include <string>
 #include <map>
@@ -45,6 +44,7 @@
 
 class Group;
 class Item;
+class SQLStorage;
 
 struct GameTele
 {
@@ -447,11 +447,6 @@ class ObjectMgr
 
         typedef UNORDERED_MAP<uint32, PetCreateSpellEntry> PetCreateSpellMap;
 
-        static Player* GetPlayer(const char* name) { return ObjectAccessor::FindPlayerByName(name);}
-        static Player* GetPlayer(ObjectGuid guid, bool inWorld = true) { return ObjectAccessor::FindPlayer(guid, inWorld); }
-
-        static GameObjectInfo const* GetGameObjectInfo(uint32 id) { return sGOStorage.LookupEntry<GameObjectInfo>(id); }
-
         void LoadGameobjectInfo();
         void AddGameobjectInfo(GameObjectInfo* goinfo);
 
@@ -460,34 +455,8 @@ class ObjectMgr
         void AddGroup(Group* group);
         void RemoveGroup(Group* group);
 
-        static CreatureInfo const* GetCreatureTemplate(uint32 id);
-        CreatureModelInfo const* GetCreatureModelInfo(uint32 modelid);
-        CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id);
-        uint32 GetCreatureModelOtherTeamModel(uint32 modelId);
-
-        EquipmentInfo const* GetEquipmentInfo(uint32 entry);
-        EquipmentInfoRaw const* GetEquipmentInfoRaw(uint32 entry);
-        static CreatureDataAddon const* GetCreatureAddon(uint32 lowguid)
-        {
-            return sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(lowguid);
-        }
-
-        static CreatureDataAddon const* GetCreatureTemplateAddon(uint32 entry)
-        {
-            return sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(entry);
-        }
-
-        static ItemPrototype const* GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
-
-        static InstanceTemplate const* GetInstanceTemplate(uint32 map)
-        {
-            return sInstanceTemplate.LookupEntry<InstanceTemplate>(map);
-        }
-
-        static WorldTemplate const* GetWorldTemplate(uint32 map)
-        {
-            return sWorldTemplate.LookupEntry<WorldTemplate>(map);
-        }
+        CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id) const;
+        uint32 GetCreatureModelOtherTeamModel(uint32 modelId) const;
 
         PetLevelInfo const* GetPetLevelInfo(uint32 creature_id, uint32 level) const;
 
@@ -601,6 +570,20 @@ class ObjectMgr
                 return &itr->second;
             return NULL;
         }
+
+        // Static wrappers for various accessors
+        static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
+        static Player* GetPlayer(const char* name);                                 ///< Wrapper for ObjectAccessor::FindPlayerByName
+        static Player* GetPlayer(ObjectGuid guid, bool inWorld = true);             ///< Wrapper for ObjectAccessor::FindPlayer
+        static CreatureInfo const* GetCreatureTemplate(uint32 id);                  ///< Wrapper for sCreatureStorage.LookupEntry
+        static CreatureModelInfo const* GetCreatureModelInfo(uint32 modelid);       ///< Wrapper for sCreatureModelStorage.LookupEntry
+        static EquipmentInfo const* GetEquipmentInfo(uint32 entry);                 ///< Wrapper for sEquipmentStorage.LookupEntry
+        static EquipmentInfoRaw const* GetEquipmentInfoRaw(uint32 entry);           ///< Wrapper for sEquipmentStorageRaw.LookupEntry
+        static CreatureDataAddon const* GetCreatureAddon(uint32 lowguid);           ///< Wrapper for sCreatureDataAddonStorage.LookupEntry
+        static CreatureDataAddon const* GetCreatureTemplateAddon(uint32 entry);     ///< Wrapper for sCreatureInfoAddonStorage.LookupEntry
+        static ItemPrototype const* GetItemPrototype(uint32 id);                    ///< Wrapper for sItemStorage.LookupEntry
+        static InstanceTemplate const* GetInstanceTemplate(uint32 map);             ///< Wrapper for sInstanceTemplate.LookupEntry
+        static WorldTemplate const* GetWorldTemplate(uint32 map);                   ///< Wrapper for sWorldTemplate.LookupEntry
 
         void LoadGroups();
         void LoadQuests();
@@ -902,17 +885,7 @@ class ObjectMgr
             return mConditions[condition_id].Meets(player);
         }
 
-        // Check if a player meets condition conditionId
-        bool IsPlayerMeetToNEWCondition(Player const* pPlayer, uint16 conditionId) const
-        {
-            if (!pPlayer)
-                return false;                               // player not present, return false
-
-            if (const PlayerCondition* condition = sConditionStorage.LookupEntry<PlayerCondition>(conditionId))
-                return condition->Meets(pPlayer);
-
-            return false;
-        }
+        bool IsPlayerMeetToNEWCondition(Player const* pPlayer, uint16 conditionId) const;
 
         GameTele const* GetGameTele(uint32 id) const
         {
