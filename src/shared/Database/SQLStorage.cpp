@@ -37,7 +37,7 @@ void SQLStorage::EraseEntry(uint32 id)
             case FT_STRING:
             {
                 if (pIndex[id])
-                    delete [] *(char**)((char*)(pIndex[id]) + offset);
+                    delete[] *(char**)((char*)(pIndex[id]) + offset);
 
                 offset += sizeof(char*);
                 break;
@@ -82,7 +82,7 @@ void SQLStorage::Free()
             {
                 for (uint32 y = 0; y < MaxEntry; ++y)
                     if (pIndex[y])
-                        delete [] *(char**)((char*)(pIndex[y]) + offset);
+                        delete[] *(char**)((char*)(pIndex[y]) + offset);
 
                 offset += sizeof(char*);
                 break;
@@ -105,8 +105,8 @@ void SQLStorage::Free()
         }
     }
 
-    delete [] pIndex;
-    delete [] data;
+    delete[] pIndex;
+    delete[] data;
 }
 
 void SQLStorage::Load(bool error_at_empty /*= true*/)

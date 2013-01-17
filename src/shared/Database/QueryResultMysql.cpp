@@ -60,11 +60,8 @@ bool QueryResultMysql::NextRow()
 
 void QueryResultMysql::EndQuery()
 {
-    if (mCurrentRow)
-    {
-        delete [] mCurrentRow;
-        mCurrentRow = 0;
-    }
+    delete[] mCurrentRow;
+    mCurrentRow = 0;
 
     if (mResult)
     {

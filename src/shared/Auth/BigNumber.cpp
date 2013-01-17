@@ -170,11 +170,7 @@ uint8* BigNumber::AsByteArray(int minSize)
 {
     int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
 
-    if (_array)
-    {
-        delete[] _array;
-        _array = NULL;
-    }
+    delete[] _array;
     _array = new uint8[length];
 
     // If we need more bytes than length of BigNumber set the rest to 0

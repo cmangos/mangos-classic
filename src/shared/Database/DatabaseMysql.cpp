@@ -445,8 +445,8 @@ void MySqlPreparedStatement::RemoveBinds()
     if (!m_stmt)
         return;
 
-    delete [] m_pInputArgs;
-    delete [] m_pResult;
+    delete[] m_pInputArgs;
+    delete[] m_pResult;
 
     mysql_free_result(m_pResultMetadata);
     mysql_stmt_close(m_stmt);
