@@ -3552,7 +3552,7 @@ bool ChatHandler::HandleLinkGraveCommand(char* args)
 
     Team g_team;
     if (!teamStr)
-        g_team = TEAM_NONE;
+        g_team = TEAM_BOTH_ALLOWED;
     else if (strncmp(teamStr, "horde", strlen(teamStr)) == 0)
         g_team = HORDE;
     else if (strncmp(teamStr, "alliance", strlen(teamStr)) == 0)
@@ -3560,8 +3560,7 @@ bool ChatHandler::HandleLinkGraveCommand(char* args)
     else
         return false;
 
-    WorldSafeLocsEntry const* graveyard =  sWorldSafeLocsStore.LookupEntry(g_id);
-
+    WorldSafeLocsEntry const* graveyard = sWorldSafeLocsStore.LookupEntry(g_id);
     if (!graveyard)
     {
         PSendSysMessage(LANG_COMMAND_GRAVEYARDNOEXIST, g_id);
@@ -3596,7 +3595,7 @@ bool ChatHandler::HandleNearGraveCommand(char* args)
     size_t argslen = strlen(args);
 
     if (!*args)
-        g_team = TEAM_NONE;
+        g_team = TEAM_BOTH_ALLOWED;
     else if (strncmp(args, "horde", argslen) == 0)
         g_team = HORDE;
     else if (strncmp(args, "alliance", argslen) == 0)
@@ -3607,8 +3606,7 @@ bool ChatHandler::HandleNearGraveCommand(char* args)
     Player* player = m_session->GetPlayer();
     uint32 zone_id = player->GetZoneId();
 
-    WorldSafeLocsEntry const* graveyard = sObjectMgr.GetClosestGraveYard(
-            player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), g_team);
+    WorldSafeLocsEntry const* graveyard = sObjectMgr.GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), g_team);
 
     if (graveyard)
     {
@@ -3622,16 +3620,16 @@ bool ChatHandler::HandleNearGraveCommand(char* args)
             return false;
         }
 
-        g_team = data->team;
+        std::string team_name;
 
-        std::string team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_NOTEAM);
-
-        if (g_team == 0)
+        if (data->team == TEAM_BOTH_ALLOWED)
             team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_ANY);
-        else if (g_team == HORDE)
+        else if (data->team == HORDE)
             team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_HORDE);
-        else if (g_team == ALLIANCE)
+        else if (data->team == ALLIANCE)
             team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_ALLIANCE);
+        else                                                                // Actually, this case cannot happen
+            team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_NOTEAM);
 
         PSendSysMessage(LANG_COMMAND_GRAVEYARDNEAREST, g_id, team_name.c_str(), zone_id);
     }
@@ -3639,14 +3637,14 @@ bool ChatHandler::HandleNearGraveCommand(char* args)
     {
         std::string team_name;
 
-        if (g_team == 0)
+        if (g_team == TEAM_BOTH_ALLOWED)
             team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_ANY);
         else if (g_team == HORDE)
             team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_HORDE);
         else if (g_team == ALLIANCE)
             team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_ALLIANCE);
 
-        if (g_team == ~uint32(0))
+        if (g_team == TEAM_BOTH_ALLOWED)
             PSendSysMessage(LANG_COMMAND_ZONENOGRAVEYARDS, zone_id);
         else
             PSendSysMessage(LANG_COMMAND_ZONENOGRAFACTION, zone_id, team_name.c_str());
