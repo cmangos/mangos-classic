@@ -128,7 +128,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectPull,                                     // 70 SPELL_EFFECT_PULL                     one spell: Distract Move
     &Spell::EffectPickPocket,                               // 71 SPELL_EFFECT_PICKPOCKET
     &Spell::EffectAddFarsight,                              // 72 SPELL_EFFECT_ADD_FARSIGHT
-    &Spell::EffectSummonGuardian,                           // 73 SPELL_EFFECT_SUMMON_POSSESSED
+    &Spell::EffectSummonPossessed,                          // 73 SPELL_EFFECT_SUMMON_POSSESSED
     &Spell::EffectSummonTotem,                              // 74 SPELL_EFFECT_SUMMON_TOTEM
     &Spell::EffectHealMechanical,                           // 75 SPELL_EFFECT_HEAL_MECHANICAL          one spell: Mechanical Patch Kit
     &Spell::EffectSummonObjectWild,                         // 76 SPELL_EFFECT_SUMMON_OBJECT_WILD
@@ -4282,6 +4282,58 @@ void Spell::EffectSummonTotem(SpellEffectIndex eff_idx)
     }
 
     pTotem->Summon(m_caster);
+}
+
+void Spell::EffectSummonPossessed(SpellEffectIndex eff_idx)
+{
+    uint32 creatureEntry = m_spellInfo->EffectMiscValue[eff_idx];
+    CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(creatureEntry);
+    if (!cInfo)
+    {
+        sLog.outErrorDb("Spell::DoSummonPossessed: creature entry %u not found for spell %u.", creatureEntry, m_spellInfo->Id);
+        return;
+    }
+
+    Creature* spawnCreature = m_caster->SummonCreature(creatureEntry, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_caster->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 0);
+    if (!spawnCreature)
+    {
+        sLog.outError("Spell::DoSummonPossessed: creature entry %u for spell %u could not be summoned.", creatureEntry, m_spellInfo->Id);
+        return;
+    }
+
+    // Changes to be sent
+    spawnCreature->SetCharmerGuid(m_caster->GetObjectGuid());
+    spawnCreature->SetCreatorGuid(m_caster->GetObjectGuid());
+    spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+    spawnCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+    spawnCreature->SetLevel(m_caster->getLevel());
+
+    spawnCreature->SetWalk(m_caster->IsWalking());
+    // TODO: Set Fly
+
+    // Internal changes
+    spawnCreature->addUnitState(UNIT_STAT_CONTROLLED);
+
+    // Changes to owner
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* player = (Player*)m_caster;
+
+        player->GetCamera().SetView(spawnCreature);
+
+        player->SetCharm(spawnCreature);
+        player->SetClientControl(spawnCreature, 1);
+        player->SetMover(spawnCreature);
+
+        if (CharmInfo* charmInfo = spawnCreature->InitCharmInfo(spawnCreature))
+            charmInfo->InitPossessCreateSpells();
+        player->PossessSpellInitialize();
+    }
+
+    // Notify Summoner
+    if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
+        ((Creature*)m_originalCaster)->AI()->JustSummoned(spawnCreature);
 }
 
 void Spell::EffectEnchantHeldItem(SpellEffectIndex eff_idx)

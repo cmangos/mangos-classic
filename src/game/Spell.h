@@ -239,6 +239,7 @@ class Spell
         void EffectDualWield(SpellEffectIndex eff_idx);
         void EffectPickPocket(SpellEffectIndex eff_idx);
         void EffectAddFarsight(SpellEffectIndex eff_idx);
+        void EffectSummonPossessed(SpellEffectIndex eff_idx);
         void EffectSummonWild(SpellEffectIndex eff_idx);
         void EffectSummonGuardian(SpellEffectIndex eff_idx);
         void EffectHealMechanical(SpellEffectIndex eff_idx);
