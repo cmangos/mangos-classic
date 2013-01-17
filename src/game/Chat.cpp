@@ -2234,7 +2234,7 @@ char* ChatHandler::ExtractQuotedArg(char** args, bool asis /*= false*/)
     if (!*args || !** args)
         return NULL;
 
-    if (**args != '\'' &&** args != '"' &&** args != '[')
+    if (**args != '\'' &&**  args != '"' &&**  args != '[')
         return NULL;
 
     char guard = (*args)[0];
@@ -2529,7 +2529,7 @@ char* ChatHandler::ExtractOptNotLastArg(char** args)
     char* arg = ExtractArg(args, true);
 
     // have more data
-    if (*args &&** args)
+    if (*args &&**  args)
         return arg;
 
     // optional name not found
@@ -3060,7 +3060,7 @@ std::string ChatHandler::ExtractPlayerNameFromLink(char** text)
  */
 bool ChatHandler::ExtractPlayerTarget(char** args, Player** player /*= NULL*/, ObjectGuid* player_guid /*= NULL*/, std::string* player_name /*= NULL*/)
 {
-    if (*args &&** args)
+    if (*args &&**  args)
     {
         std::string name = ExtractPlayerNameFromLink(args);
         if (name.empty())

@@ -49,7 +49,7 @@ struct null { null() {} };
 
 namespace MaNGOS
 {
-    template<class Class, typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void, typename ParamType4 = void>
+    template < class Class, typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void, typename ParamType4 = void >
     class _Callback
     {
         protected:
@@ -181,7 +181,7 @@ namespace MaNGOS
 
     /// ---- Statics ----
 
-    template<typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void, typename ParamType4 = void>
+    template < typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void, typename ParamType4 = void >
     class _SCallback
     {
         protected:
@@ -330,7 +330,7 @@ namespace MaNGOS
             void Execute() { CB::_Execute(); }
     };
 
-    template<class Class, typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void, typename ParamType4 = void>
+    template < class Class, typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void, typename ParamType4 = void >
     class Callback : public _ICallback<_Callback<Class, ParamType1, ParamType2, ParamType3, ParamType4> >
     {
         private:
@@ -433,7 +433,7 @@ namespace MaNGOS
             QueryResult* GetResult() { return CB::m_param1; }
     };
 
-    template<class Class, typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void>
+    template < class Class, typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void >
     class QueryCallback : public _IQueryCallback<_Callback<Class, QueryResult*, ParamType1, ParamType2, ParamType3> >
     {
         private:
@@ -494,7 +494,7 @@ namespace MaNGOS
 
     /// ---- Statics ----
 
-    template<typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void>
+    template < typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void >
     class SQueryCallback : public _IQueryCallback<_SCallback<QueryResult*, ParamType1, ParamType2, ParamType3> >
     {
         private:
