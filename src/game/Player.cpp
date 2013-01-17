@@ -1077,7 +1077,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     if (!IsInWorld())
         return;
 
-    // undelivered mail
+    // Undelivered mail
     if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
     {
         SendNewMail();
@@ -1087,21 +1087,14 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         m_nextMailDelivereTime = 0;
     }
 
-    //used to implement delayed far teleports
+    // Used to implement delayed far teleports
     SetCanDelayTeleport(true);
     Unit::Update(update_diff, p_time);
     SetCanDelayTeleport(false);
 
-    // update player only attacks
+    // Update player only attacks
     if (uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
-    {
         setAttackTimer(RANGED_ATTACK, (update_diff >= ranged_att ? 0 : ranged_att - update_diff));
-    }
-
-    if (uint32 off_att = getAttackTimer(OFF_ATTACK))
-    {
-        setAttackTimer(OFF_ATTACK, (update_diff >= off_att ? 0 : off_att - update_diff));
-    }
 
     time_t now = time(NULL);
 
@@ -1126,7 +1119,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             if (q_status.m_timer <= update_diff)
             {
                 uint32 quest_id  = *iter;
-                ++iter;                                     // current iter will be removed in FailQuest
+                ++iter;                                     // Current iter will be removed in FailQuest
                 FailQuest(quest_id);
             }
             else
@@ -1156,14 +1149,14 @@ void Player::Update(uint32 update_diff, uint32 p_time)
 
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if (roll_chance_i(3) && GetTimeInnEnter() > 0)      //freeze update
+        if (roll_chance_i(3) && GetTimeInnEnter() > 0)      // Freeze update
         {
             time_t time_inn = time(NULL) - GetTimeInnEnter();
-            if (time_inn >= 10)                             //freeze update
+            if (time_inn >= 10)                             // Freeze update
             {
                 float bubble = 0.125f * sWorld.getConfig(CONFIG_FLOAT_RATE_REST_INGAME);
-                //speed collect rest bonus (section/in hour)
-                SetRestBonus(float(GetRestBonus() + time_inn * (GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 72000)*bubble));
+                // Speed collect rest bonus (section/in hour)
+                SetRestBonus(float(GetRestBonus() + time_inn * (GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 72000) * bubble));
                 UpdateInnerTime(time(NULL));
             }
         }
@@ -1193,10 +1186,10 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             GetZoneAndAreaId(newzone, newarea);
 
             if (m_zoneUpdateId != newzone)
-                UpdateZone(newzone, newarea);               // also update area
+                UpdateZone(newzone, newarea);               // Also update area
             else
             {
-                // use area updates as well
+                // Use area updates as well
                 if (m_areaUpdateId != newarea)
                     UpdateArea(newarea);
 
@@ -1227,10 +1220,10 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             m_nextSave -= update_diff;
     }
 
-    //Handle Water/drowning
+    // Handle Water/drowning
     HandleDrowning(update_diff);
 
-    //Handle detect stealth players
+    // Handle detect stealth players
     if (m_DetectInvTimer > 0)
     {
         if (update_diff >= m_DetectInvTimer)
@@ -1259,7 +1252,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             HandleSobering();
     }
 
-    // not auto-free ghost from body in instances
+    // Not auto-free ghost from body in instances
     if (m_deathTimer > 0  && !GetMap()->Instanceable())
     {
         if (p_time >= m_deathTimer)
@@ -1275,7 +1268,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     UpdateEnchantTime(update_diff);
     UpdateHomebindTime(update_diff);
 
-    // group update
+    // Group update
     SendUpdateToOutOfRangeGroupMembers();
 
     Pet* pet = GetPet();
