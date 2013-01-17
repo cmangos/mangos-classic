@@ -754,7 +754,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     case 20291: spellId = 25736; break;     // Rank 6
                     case 20292: spellId = 25735; break;     // Rank 7
                     case 20293: spellId = 25713; break;     // Rank 8
-                    case 27155: spellId = 27156; break;     // Rank 9
                     default:
                         sLog.outError("Unit::HandleDummyAuraProc: non handled possibly SoR (Id = %u)", triggeredByAura->GetId());
                         return SPELL_AURA_PROC_FAILED;

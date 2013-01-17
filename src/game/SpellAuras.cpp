@@ -776,103 +776,14 @@ void Aura::TriggerSpell()
             {
                 switch (auraId)
                 {
-                        // Firestone Passive (1-5 ranks)
-                    case 758:
-                    case 17945:
-                    case 17947:
-                    case 17949:
-                    case 27252:
-                    {
-                        if (triggerTarget->GetTypeId() != TYPEID_PLAYER)
-                            return;
-                        Item* item = ((Player*)triggerTarget)->GetWeaponForAttack(BASE_ATTACK);
-                        if (!item)
-                            return;
-                        uint32 enchant_id = 0;
-                        switch (GetId())
-                        {
-                            case   758: enchant_id = 1803; break;   // Rank 1
-                            case 17945: enchant_id = 1823; break;   // Rank 2
-                            case 17947: enchant_id = 1824; break;   // Rank 3
-                            case 17949: enchant_id = 1825; break;   // Rank 4
-                            case 27252: enchant_id = 2645; break;   // Rank 5
-                            default:
-                                return;
-                        }
-                        // remove old enchanting before applying new
-                        ((Player*)triggerTarget)->ApplyEnchantment(item, TEMP_ENCHANTMENT_SLOT, false);
-                        item->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, m_modifier.periodictime + 1000, 0);
-                        // add new enchanting
-                        ((Player*)triggerTarget)->ApplyEnchantment(item, TEMP_ENCHANTMENT_SLOT, true);
-                        return;
-                    }
-                    case 812:                               // Periodic Mana Burn
-                    {
-                        trigger_spell_id = 25779;           // Mana Burn
-
-                        if (GetTarget()->GetTypeId() != TYPEID_UNIT)
-                            return;
-
-                        triggerTarget = ((Creature*)GetTarget())->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, trigger_spell_id, SELECT_FLAG_POWER_MANA);
-                        if (!triggerTarget)
-                            return;
-
-                        break;
-                    }
 //                    // Polymorphic Ray
 //                    case 6965: break;
-//                    // Fire Nova (1-7 ranks)
-//                    case 8350:
-//                    case 8508:
-//                    case 8509:
-//                    case 11312:
-//                    case 11313:
-//                    case 25540:
-//                    case 25544:
-//                        break;
                     case 9712:                              // Thaumaturgy Channel
                         trigger_spell_id = 21029;
                         break;
-//                    // Egan's Blaster
-//                    case 17368: break;
-//                    // Haunted
-//                    case 18347: break;
-//                    // Ranshalla Waiting
-//                    case 18953: break;
-//                    // Inferno
-//                    case 19695: break;
-//                    // Frostwolf Muzzle DND
-//                    case 21794: break;
-//                    // Alterac Ram Collar DND
-//                    case 21866: break;
-//                    // Celebras Waiting
-//                    case 21916: break;
                     case 23170:                             // Brood Affliction: Bronze
                     {
                         target->CastSpell(target, 23171, true, NULL, this);
-                        return;
-                    }
-                    case 23184:                             // Mark of Frost
-                    case 25041:                             // Mark of Nature
-                    {
-                        std::list<Player*> targets;
-
-                        // spells existed in 1.x.x; 23183 - mark of frost; 25042 - mark of nature; both had radius of 100.0 yards in 1.x.x DBC
-                        // spells are used by Azuregos and the Emerald dragons in order to put a stun debuff on the players which resurrect during the encounter
-                        // in order to implement the missing spells we need to make a grid search for hostile players and check their auras; if they are marked apply debuff
-
-                        // Mark of Frost or Mark of Nature
-                        uint32 markSpellId = auraId == 23184 ? 23182 : 25040;
-                        // Aura of Frost or Aura of Nature
-                        uint32 debufSpellId = auraId == 23184 ? 23186 : 25043;
-
-                        MaNGOS::AnyPlayerInObjectRangeWithAuraCheck u_check(GetTarget(), 100.0f, markSpellId);
-                        MaNGOS::PlayerListSearcher<MaNGOS::AnyPlayerInObjectRangeWithAuraCheck > checker(targets, u_check);
-                        Cell::VisitWorldObjects(GetTarget(), checker, 100.0f);
-
-                        for (std::list<Player*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
-                            (*itr)->CastSpell((*itr), debufSpellId, true, NULL, NULL, casterGUID);
-
                         return;
                     }
                     case 23493:                             // Restoration
@@ -887,16 +798,8 @@ void Aura::TriggerSpell()
                         }
                         return;
                     }
-//                    // Stoneclaw Totem Passive TEST
-//                    case 23792: break;
-//                    // Axe Flurry
-//                    case 24018: break;
-//                    // Mark of Arlokk
-//                    case 24210: break;
 //                    // Restoration
 //                    case 24379: break;
-//                    // Happy Pet
-//                    case 24716: break;
 //                    // Cannon Prep
 //                    case 24832: break;
                     case 24834:                             // Shadow Bolt Whirl
@@ -918,28 +821,20 @@ void Aura::TriggerSpell()
                     }
 //                    // Stink Trap
 //                    case 24918: break;
-//                    // Agro Drones
-//                    case 25152: break;
                     case 25371:                             // Consume
                     {
                         int32 bpDamage = triggerTarget->GetMaxHealth() * 10 / 100;
                         triggerTarget->CastCustomSpell(triggerTarget, 25373, &bpDamage, NULL, NULL, true, NULL, this, casterGUID);
                         return;
                     }
-//                    // Pain Spike
-//                    case 25572: break;
 //                    // Rotate 360
 //                    case 26009: break;
 //                    // Rotate -360
 //                    case 26136: break;
 //                    // Consume
 //                    case 26196: break;
-//                    // Berserk
-//                    case 26615: break;
 //                    // Defile
 //                    case 27177: break;
-//                    // Teleport: IF/UC
-//                    case 27601: break;
 //                    // Five Fat Finger Exploding Heart Technique
 //                    case 27673: break;
 //                    // Nitrous Boost
@@ -961,8 +856,6 @@ void Aura::TriggerSpell()
                         triggerTarget->CastCustomSpell(triggerTarget, 27820, &bpDamage, NULL, NULL, true, NULL, this, triggerTarget->GetObjectGuid());
                         return;
                     }
-//                    // Controller Timer
-//                    case 28095: break;
                     // Stalagg Chain and Feugen Chain
                     case 28096:
                     case 28111:
@@ -978,48 +871,12 @@ void Aura::TriggerSpell()
                         }
                         return;
                     }
-                    // Stalagg Tesla Passive and Feugen Tesla Passive
-                    case 28097:
-                    case 28109:
-                    {
-                        // X-Tesla-Passive is casted by Tesla on Tesla with original caster X, so: caster = X, target = Tesla
-                        Unit* pCaster = GetCaster();
-                        if (pCaster && pCaster->GetTypeId() == TYPEID_UNIT)
-                        {
-                            if (pCaster->getVictim() && !pCaster->IsWithinDistInMap(target, 60.0f))
-                            {
-                                if (Unit* pTarget = ((Creature*)pCaster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                                    target->CastSpell(pTarget, 28099, false);// Shock
-                            }
-                            else
-                            {
-                                // "Evade"
-                                target->RemoveAurasDueToSpell(auraId);
-                                target->DeleteThreatList();
-                                target->CombatStop(true);
-                                // Recast chain (Stalagg Chain or Feugen Chain
-                                target->CastSpell(pCaster, auraId == 28097 ? 28096 : 28111, false);
-                            }
-                        }
-                        return;
-                    }
-//                    // Mark of Didier
-//                    case 28114: break;
-//                    // Communique Timer, camp
-//                    case 28346: break;
 //                    // Icebolt
 //                    case 28522: break;
-//                    // Silithyst
-//                    case 29519: break;
 //                    // Guardian of Icecrown Passive
 //                    case 29897: break;
 //                    // Mind Exhaustion Passive
 //                    case 30025: break;
-//                    // Regeneration
-//                    case 30799:
-//                    case 30800:
-//                    case 30801:
-//                        break;
                     default:
                         break;
                 }
@@ -1029,9 +886,6 @@ void Aura::TriggerSpell()
             {
                 switch (auraId)
                 {
-                    case 66:                                // Invisibility
-                        // Here need periodic trigger reducing threat spell (or do it manually)
-                        return;
                     default:
                         break;
                 }
@@ -1043,8 +897,6 @@ void Aura::TriggerSpell()
 //                {
 //                    // Wild Magic
 //                    case 23410: break;
-//                    // Corrupted Totems
-//                    case 23425: break;
 //                    default:
 //                        break;
 //                }
@@ -1054,8 +906,6 @@ void Aura::TriggerSpell()
 //            {
 //                switch(auraId)
 //                {
-//                    // Blue Beam
-//                    case 32930: break;
 //                    default:
 //                        break;
 //                }
@@ -1071,7 +921,6 @@ void Aura::TriggerSpell()
                     case 22842:                             // Frenzied Regeneration
                     case 22895:
                     case 22896:
-                    case 26999:
                     {
                         int32 LifePerRage = GetModifier()->m_amount;
 
@@ -1088,62 +937,24 @@ void Aura::TriggerSpell()
                 }
                 break;
             }
-
 //            case SPELLFAMILY_HUNTER:
 //            {
 //                switch(auraId)
 //                {
-//                    //Frost Trap Aura
-//                    case 13810:
-//                        return;
-//                    // Tame spells
-//                    case 19597:         // Tame Ice Claw Bear
-//                    case 19676:         // Tame Snow Leopard
-//                    case 19677:         // Tame Large Crag Boar
-//                    case 19678:         // Tame Adult Plainstrider
-//                    case 19679:         // Tame Prairie Stalker
-//                    case 19680:         // Tame Swoop
-//                    case 19681:         // Tame Dire Mottled Boar
-//                    case 19682:         // Tame Surf Crawler
-//                    case 19683:         // Tame Armored Scorpid
-//                    case 19684:         // Tame Webwood Lurker
-//                    case 19685:         // Tame Nightsaber Stalker
-//                    case 19686:         // Tame Strigid Screecher
-//                    case 30100:         // Tame Crazed Dragonhawk
-//                    case 30103:         // Tame Elder Springpaw
-//                    case 30104:         // Tame Mistbat
-//                    case 30647:         // Tame Barbed Crawler
-//                    case 30648:         // Tame Greater Timberstrider
-//                    case 30652:         // Tame Nightstalker
-//                        return;
 //                    default:
 //                        break;
 //                }
 //                break;
 //            }
-            case SPELLFAMILY_SHAMAN:
-            {
-                switch (auraId)
-                {
-                    case 28820:                             // Lightning Shield (The Earthshatterer set trigger after cast Lighting Shield)
-                    {
-                        // Need remove self if Lightning Shield not active
-                        Unit::SpellAuraHolderMap const& auras = triggerTarget->GetSpellAuraHolderMap();
-                        for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-                        {
-                            SpellEntry const* spell = itr->second->GetSpellProto();
-                            if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN &&
-                                    (spell->SpellFamilyFlags & UI64LIT(0x0000000000000400)))
-                                return;
-                        }
-                        triggerTarget->RemoveAurasDueToSpell(28820);
-                        return;
-                    }
-                    default:
-                        break;
-                }
-                break;
-            }
+//            case SPELLFAMILY_SHAMAN:
+//            {
+//                switch (auraId)
+//                {
+//                    default:
+//                        break;
+//                }
+//                break;
+//            }
             default:
                 break;
         }
@@ -1301,6 +1112,24 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (Unit* caster = GetCaster())
                             caster->CastSpell(caster, 13138, true, NULL, this);
                         return;
+                    case 23183:                             // Mark of Frost
+                    {
+                        if (Unit* target = GetTarget())
+                        {
+                            if (target->HasAura(23182))
+                                target->CastSpell(target, 23186, true, NULL, NULL, GetCaster()->GetObjectGuid());
+                        }
+                        return;
+                    }
+                    case 25042:                             // Mark of Nature
+                    {
+                        if (Unit* target = GetTarget())
+                        {
+                            if (target->HasAura(25040))
+                                target->CastSpell(target, 25043, true, NULL, NULL, GetCaster()->GetObjectGuid());
+                        }
+                        return;
+                    }
                     case 28832:                             // Mark of Korth'azz
                     case 28833:                             // Mark of Blaumeux
                     case 28834:                             // Mark of Rivendare

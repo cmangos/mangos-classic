@@ -697,11 +697,6 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     {
                         case 13139:                         // net-o-matic special effect
                         case 23445:                         // evil twin
-                        case 35679:                         // Protectorate Demolitionist
-                        case 38637:                         // Nether Exhaustion (red)
-                        case 38638:                         // Nether Exhaustion (green)
-                        case 38639:                         // Nether Exhaustion (blue)
-                        case 44689:                         // Relay Race Accept Hidden Debuff - DND
                             return false;
                             // some spells have unclear target modes for selection, so just make effect positive
                         case 27184:
@@ -795,26 +790,20 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     if (spellproto->HasAttribute(SPELL_ATTR_UNK26) && effIndex == EFFECT_INDEX_0)
                         return false;
                     break;
-                case SPELL_AURA_TRANSFORM:
-                    // some spells negative
-                    switch (spellproto->Id)
-                    {
-                        case 36897:                         // Transporter Malfunction (race mutation to horde)
-                        case 36899:                         // Transporter Malfunction (race mutation to alliance)
-                            return false;
-                    }
-                    break;
+//                case SPELL_AURA_TRANSFORM:
+//                    // some spells negative
+//                    switch (spellproto->Id)
+//                    {
+//                        default
+//                            break;
+//                    }
+//                    break;
                 case SPELL_AURA_MOD_SCALE:
                     // some spells negative
                     switch (spellproto->Id)
                     {
                         case 802:                           // Mutate Bug, wrongly negative by target modes
                             return true;
-                        case 36900:                         // Soul Split: Evil!
-                        case 36901:                         // Soul Split: Good
-                        case 36893:                         // Transporter Malfunction (decrease size case)
-                        case 36895:                         // Transporter Malfunction (increase size case)
-                            return false;
                     }
                     break;
                 case SPELL_AURA_MECHANIC_IMMUNITY:
@@ -2063,20 +2052,8 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if (spellInfo_1->Id == 24932 && spellInfo_2->SpellIconID == 312 && spellInfo_2->SpellVisual == 216)
                 return false;
 
-            // Dragonmaw Illusion (multi-family check)
-            if (spellId_1 == 42016 && spellId_2 == 40216)
-                return false;
-
             break;
         case SPELLFAMILY_ROGUE:
-            if (spellInfo_2->SpellFamilyName == SPELLFAMILY_ROGUE)
-            {
-                // Master of Subtlety
-                if ((spellId_1 == 31665 && spellId_2 == 31666) ||
-                        (spellId_1 == 31666 && spellId_2 == 31665))
-                    return false;
-            }
-
             // Garrote -> Garrote-Silence (multi-family check)
             if (spellInfo_1->SpellIconID == 498 && spellInfo_2->SpellIconID == 498 && spellInfo_2->SpellVisual == 0)
                 return false;
@@ -2124,10 +2101,6 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
 
             // *Sanctity Aura -> Unstable Currents and other (multi-family check)
             if (spellInfo_1->SpellIconID == 502 && spellInfo_2->SpellFamilyName == SPELLFAMILY_GENERIC && spellInfo_2->SpellIconID == 502 && spellInfo_2->SpellVisual == 969)
-                return false;
-
-            // *Seal of Command and Band of Eternal Champion (multi-family check)
-            if (spellInfo_1->SpellIconID == 561 && spellInfo_1->SpellVisual == 7992 && spellId_2 == 35081)
                 return false;
             break;
         case SPELLFAMILY_SHAMAN:

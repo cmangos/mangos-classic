@@ -678,6 +678,23 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, spell_list[urand(0, 5)], true);
                     return;
                 }
+                case 18350:                                 // Dummy Trigger
+                {
+                    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // Need remove self if Lightning Shield not active
+                    Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
+                    for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                    {
+                        SpellEntry const* spell = itr->second->GetSpellProto();
+                        if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN &&
+                            (spell->SpellFamilyFlags & UI64LIT(0x0000000000000400)))
+                            return;
+                    }
+                    unitTarget->RemoveAurasDueToSpell(28820);
+                    return;
+                }
                 case 19411:                                 // Lava Bomb
                 case 20474:                                 // Lava Bomb
                 {
@@ -728,33 +745,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (creatureTarget->IsPet())
                         return;
 
-                    GameObject* pGameObj = new GameObject;
-
-                    Map* map = creatureTarget->GetMap();
-
-                    // create before death for get proper coordinates
-                    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 179644, map,
-                                          creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(),
-                                          creatureTarget->GetOrientation()))
-                    {
-                        delete pGameObj;
-                        return;
-                    }
-
-                    pGameObj->SetRespawnTime(creatureTarget->GetRespawnTime() - time(NULL));
-                    pGameObj->SetOwnerGuid(m_caster->GetObjectGuid());
-                    pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel());
-                    pGameObj->SetSpellId(m_spellInfo->Id);
-
+                    creatureTarget->CastSpell(creatureTarget, 23022, true);
                     creatureTarget->ForcedDespawn();
-
-                    DEBUG_LOG("AddObject at SpellEfects.cpp EffectDummy");
-                    map->Add(pGameObj);
-
-                    WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
-                    data << ObjectGuid(pGameObj->GetObjectGuid());
-                    m_caster->SendMessageToSet(&data, true);
-
                     return;
                 }
                 case 23074:                                 // Arcanite Dragonling
@@ -873,12 +865,43 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 26074:                                 // Holiday Cheer
                     // implemented at client side
                     return;
+                case 26626:                                 // Mana Burn Area
+                {
+                    if (unitTarget->GetTypeId() != TYPEID_UNIT || unitTarget->getPowerType() != POWER_MANA)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 25779, true);
+                    return;
+                }
                 case 28006:                                 // Arcane Cloaking
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
                         // Naxxramas Entry Flag Effect DND
                         m_caster->CastSpell(unitTarget, 29294, true);
 
+                    return;
+                }
+                case 28098:                                 // Stalagg Tesla Effect
+                case 28110:                                 // Feugen Tesla Effect
+                {
+                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (m_caster->getVictim() && !m_caster->IsWithinDistInMap(unitTarget, 60.0f))
+                    {
+                        // Cast Shock on nearby targets
+                        if (Unit* pTarget = ((Creature*)m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                            unitTarget->CastSpell(pTarget, 28099, false);
+                    }
+                    else
+                    {
+                        // "Evade"
+                        unitTarget->RemoveAurasDueToSpell(m_spellInfo->Id == 28098 ? 28097 : 28109);
+                        unitTarget->DeleteThreatList();
+                        unitTarget->CombatStop(true);
+                        // Recast chain (Stalagg Chain or Feugen Chain
+                        unitTarget->CastSpell(m_caster, m_spellInfo->Id == 28098 ? 28096 : 28111, false);
+                    }
                     return;
                 }
             }
@@ -942,24 +965,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         }
                         else
                             ++itr;
-                    }
-                    return;
-                }
-                case 32826:                                 // Polymorph Cast Visual
-                {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
-                    {
-                        //Polymorph Cast Visual Rank 1
-                        const uint32 spell_list[6] =
-                        {
-                            32813,                          // Squirrel Form
-                            32816,                          // Giraffe Form
-                            32817,                          // Serpent Form
-                            32818,                          // Dragonhawk Form
-                            32819,                          // Worgen Form
-                            32820                           // Sheep Form
-                        };
-                        unitTarget->CastSpell(unitTarget, spell_list[urand(0, 5)], true);
                     }
                     return;
                 }
@@ -1157,17 +1162,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
-                case 37506:                                 // Scatter Shot
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // break Auto Shot and autohit
-                    m_caster->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-                    m_caster->AttackStop();
-                    ((Player*)m_caster)->SendAttackSwingCancelAttack();
-                    return;
-                }
             }
             break;
         }
@@ -1232,58 +1226,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_SHAMAN:
         {
-            // Rockbiter Weapon
-            if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x400000))
-            {
-                uint32 spell_id = 0;
-                switch (m_spellInfo->Id)
-                {
-                    case  8017: spell_id = 36494; break;    // Rank 1
-                    case  8018: spell_id = 36750; break;    // Rank 2
-                    case  8019: spell_id = 36755; break;    // Rank 3
-                    case 10399: spell_id = 36759; break;    // Rank 4
-                    case 16314: spell_id = 36763; break;    // Rank 5
-                    case 16315: spell_id = 36766; break;    // Rank 6
-                    case 16316: spell_id = 36771; break;    // Rank 7
-                    case 25479: spell_id = 36775; break;    // Rank 8
-                    case 25485: spell_id = 36499; break;    // Rank 9
-                    default:
-                        sLog.outError("Spell::EffectDummy: Spell %u not handled in RW", m_spellInfo->Id);
-                        return;
-                }
-
-                SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
-
-                if (!spellInfo)
-                {
-                    sLog.outError("WORLD: unknown spell id %i", spell_id);
-                    return;
-                }
-
-                if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                for (int j = BASE_ATTACK; j <= OFF_ATTACK; ++j)
-                {
-                    if (Item* item = ((Player*)m_caster)->GetWeaponForAttack(WeaponAttackType(j)))
-                    {
-                        if (item->IsFitToSpellRequirements(m_spellInfo))
-                        {
-                            Spell* spell = new Spell(m_caster, spellInfo, true);
-
-                            // enchanting spell selected by calculated damage-per-sec in enchanting effect
-                            // at calculation applied affect from Elemental Weapons talent
-                            // real enchantment damage
-                            spell->m_currentBasePoints[1] = damage;
-
-                            SpellCastTargets targets;
-                            targets.setItemTarget(item);
-                            spell->prepare(&targets);
-                        }
-                    }
-                }
-                return;
-            }
             // Flametongue Weapon Proc, Ranks
             if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000200000))
             {
@@ -1299,16 +1241,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 int32 totalDamage = int32((damage + 3.85f * spellDamage) * 0.01 * weaponSpeed);
 
                 m_caster->CastCustomSpell(unitTarget, 10444, &totalDamage, NULL, NULL, true, m_CastItem);
-                return;
-            }
-            if (m_spellInfo->Id == 39610)                   // Mana Tide Totem effect
-            {
-                if (!unitTarget || unitTarget->getPowerType() != POWER_MANA)
-                    return;
-
-                // Regenerate 6% of Total Mana Every 3 secs
-                int32 EffectBasePoints0 = unitTarget->GetMaxPower(POWER_MANA)  * damage / 100;
-                m_caster->CastCustomSpell(unitTarget, 39609, &EffectBasePoints0, NULL, NULL, true, NULL, NULL, m_originalCasterGUID);
                 return;
             }
 
