@@ -21,6 +21,7 @@
   \ingroup realmd
   */
 
+#include "Common.h"
 #include "BufferedSocket.h"
 
 #include <ace/OS_NS_string.h>

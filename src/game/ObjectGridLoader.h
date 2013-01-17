@@ -107,4 +107,5 @@ class MANGOS_DLL_DECL ObjectGridStoper
 };
 
 typedef GridLoader<Player, AllWorldObjectTypes, AllGridObjectTypes> GridLoaderType;
+
 #endif

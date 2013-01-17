@@ -22,6 +22,6 @@
 
 namespace AIRegistry
 {
-    void Initialize(void);
+    void Initialize(void) override;
 }
 #endif

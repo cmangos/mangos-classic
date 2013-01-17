@@ -79,11 +79,11 @@ class QueryResultPostgre : public QueryResult
 
         ~QueryResultPostgre();
 
-        bool NextRow();
+        bool NextRow() override;
 
     private:
         enum Field::DataTypes ConvertNativeType(Oid pOid) const;
-        void EndQuery();
+        void EndQuery() override;
 
         PGresult* mResult;
         uint32 mTableIndex;

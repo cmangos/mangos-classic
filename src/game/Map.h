@@ -363,13 +363,13 @@ class MANGOS_DLL_SPEC DungeonMap : public Map
     public:
         DungeonMap(uint32 id, time_t, uint32 InstanceId);
         ~DungeonMap();
-        bool Add(Player*);
-        void Remove(Player*, bool);
-        void Update(const uint32&);
+        bool Add(Player*) override;
+        void Remove(Player*, bool) override;
+        void Update(const uint32&) override;
         bool Reset(InstanceResetMethod method);
         void PermBindAllPlayers(Player* player);
-        void UnloadAll(bool pForce);
-        bool CanEnter(Player* player);
+        void UnloadAll(bool pForce) override;
+        bool CanEnter(Player* player) override;
         void SendResetWarnings(uint32 timeLeft) const;
         void SetResetSchedule(bool on);
         uint32 GetMaxPlayers() const;
@@ -377,7 +377,7 @@ class MANGOS_DLL_SPEC DungeonMap : public Map
         // can't be NULL for loaded map
         DungeonPersistentState* GetPersistanceState() const;
 
-        virtual void InitVisibilityDistance();
+        virtual void InitVisibilityDistance() override;
     private:
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
@@ -391,14 +391,14 @@ class MANGOS_DLL_SPEC BattleGroundMap : public Map
         BattleGroundMap(uint32 id, time_t, uint32 InstanceId);
         ~BattleGroundMap();
 
-        void Update(const uint32&);
-        bool Add(Player*);
-        void Remove(Player*, bool);
-        bool CanEnter(Player* player);
+        void Update(const uint32&) override;
+        bool Add(Player*) override;
+        void Remove(Player*, bool) override;
+        bool CanEnter(Player* player) override;
         void SetUnload();
-        void UnloadAll(bool pForce);
+        void UnloadAll(bool pForce) override;
 
-        virtual void InitVisibilityDistance();
+        virtual void InitVisibilityDistance() override;
         BattleGround* GetBG() { return m_bg; }
         void SetBG(BattleGround* bg) { m_bg = bg; }
 

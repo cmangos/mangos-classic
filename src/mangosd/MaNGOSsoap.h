@@ -36,7 +36,7 @@ class MaNGOSsoapRunnable: public ACE_Based::Runnable
 {
     public:
         MaNGOSsoapRunnable() { }
-        void run();
+        void run() override;
         void setListenArguments(std::string host, uint16 port)
         {
             m_host = host;
@@ -53,7 +53,7 @@ class SOAPWorkingThread : public ACE_Task<ACE_MT_SYNCH>
         SOAPWorkingThread()
         { }
 
-        virtual int svc(void)
+        virtual int svc(void) override
         {
             while (1)
             {

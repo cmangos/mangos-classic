@@ -86,9 +86,9 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
 
     private:
 
-        void Stop(int32 time) { i_nextMoveTime.Reset(time);}
+        void Stop(int32 time) { i_nextMoveTime.Reset(time); }
 
-        bool Stopped() { return !i_nextMoveTime.Passed();}
+        bool Stopped() { return !i_nextMoveTime.Passed(); }
 
         bool CanMove(int32 diff)
         {
@@ -127,7 +127,7 @@ class MANGOS_DLL_SPEC FlightPathMovementGenerator
         void Interrupt(Player&);
         void Reset(Player&);
         bool Update(Player&, const uint32&);
-        MovementGeneratorType GetMovementGeneratorType() const { return FLIGHT_MOTION_TYPE; }
+        MovementGeneratorType GetMovementGeneratorType() const override { return FLIGHT_MOTION_TYPE; }
 
         TaxiPathNodeList const& GetPath() { return *i_path; }
         uint32 GetPathAtMapEnd() const;
@@ -136,4 +136,5 @@ class MANGOS_DLL_SPEC FlightPathMovementGenerator
         void SkipCurrentNode() { ++i_currentNode; }
         bool GetResetPosition(Player&, float& x, float& y, float& z);
 };
+
 #endif

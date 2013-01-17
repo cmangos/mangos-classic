@@ -558,8 +558,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         explicit GameObject();
         ~GameObject();
 
-        void AddToWorld();
-        void RemoveFromWorld();
+        void AddToWorld() override;
+        void RemoveFromWorld() override;
 
         bool Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang,
                     float rotation0 = 0.0f, float rotation1 = 0.0f, float rotation2 = 0.0f, float rotation3 = 0.0f, uint32 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY);
@@ -573,7 +573,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void UpdateRotationFields(float rotation2 = 0.0f, float rotation3 = 0.0f);
 
         // overwrite WorldObject function for proper name localization
-        const char* GetNameForLocaleIdx(int32 locale_idx) const;
+        const char* GetNameForLocaleIdx(int32 locale_idx) const override;
 
         void SaveToDB();
         void SaveToDB(uint32 mapid);
@@ -637,7 +637,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
         void SetDisplayId(uint32 modelId);
 
-        float GetObjectBoundingRadius() const;              // overwrite WorldObject version
+        float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
 
         void Use(Unit* user);
 
@@ -661,12 +661,12 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32 GetUseCount() const { return m_useTimes; }
         uint32 GetUniqueUseCount() const { return m_UniqueUsers.size(); }
 
-        void SaveRespawnTime();
+        void SaveRespawnTime() override;
 
         // Loot System
         Loot loot;
         void getFishLoot(Loot* loot, Player* loot_owner);
-        void StartGroupLoot(Group* group, uint32 timer);
+        void StartGroupLoot(Group* group, uint32 timer) override;
 
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
@@ -677,20 +677,20 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SetLootRecipient(Unit* pUnit);
         Player* GetOriginalLootRecipient() const;           // ignore group changes/etc, not for looting
 
-        bool HasQuest(uint32 quest_id) const;
-        bool HasInvolvedQuest(uint32 quest_id) const;
+        bool HasQuest(uint32 quest_id) const override;
+        bool HasInvolvedQuest(uint32 quest_id) const override;
         bool ActivateToQuest(Player* pTarget) const;
         void UseDoorOrButton(uint32 time_to_restore = 0, bool alternative = false);
         // 0 = use `gameobject`.`spawntimesecs`
         void ResetDoorOrButton();
 
-        bool IsHostileTo(Unit const* unit) const;
-        bool IsFriendlyTo(Unit const* unit) const;
+        bool IsHostileTo(Unit const* unit) const override;
+        bool IsFriendlyTo(Unit const* unit) const override;
 
         void SummonLinkedTrapIfAny();
         void TriggerLinkedGameObject(Unit* target);
 
-        bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const;
+        bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
 
         GameObject* LookupFishingHoleAround(float range);
 
@@ -724,7 +724,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         // Loot System
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
         uint32 m_groupLootId;                               // used to find group which is looting
-        void StopGroupLoot();
+        void StopGroupLoot() override;
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
 

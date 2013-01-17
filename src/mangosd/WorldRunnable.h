@@ -31,7 +31,7 @@
 class WorldRunnable : public ACE_Based::Runnable
 {
     public:
-        void run();
+        void run() override;
 };
 #endif
 /// @}

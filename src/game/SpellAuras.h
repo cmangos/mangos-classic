@@ -464,7 +464,7 @@ class MANGOS_DLL_SPEC AreaAura : public Aura
         AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = NULL, Item* castItem = NULL);
         ~AreaAura();
     protected:
-        void Update(uint32 diff);
+        void Update(uint32 diff) override;
     private:
         float m_radius;
         AreaAuraType m_areaAuraType;
@@ -476,7 +476,7 @@ class MANGOS_DLL_SPEC PersistentAreaAura : public Aura
         PersistentAreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = NULL, Item* castItem = NULL);
         ~PersistentAreaAura();
     protected:
-        void Update(uint32 diff);
+        void Update(uint32 diff) override;
 };
 
 class MANGOS_DLL_SPEC SingleEnemyTargetAura : public Aura
@@ -485,7 +485,7 @@ class MANGOS_DLL_SPEC SingleEnemyTargetAura : public Aura
 
     public:
         ~SingleEnemyTargetAura();
-        Unit* GetTriggerTarget() const;
+        Unit* GetTriggerTarget() const override;
 
     protected:
         SingleEnemyTargetAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster  = NULL, Item* castItem = NULL);
