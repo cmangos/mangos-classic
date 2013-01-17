@@ -53,6 +53,7 @@
 #include "BattleGround.h"
 #include "BattleGroundAV.h"
 #include "BattleGroundMgr.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 #include "Chat.h"
 #include "Database/DatabaseImpl.h"
 #include "Spell.h"
@@ -560,6 +561,10 @@ void Player::CleanupsBeforeDelete()
         TradeCancel(false);
         DuelComplete(DUEL_INTERUPTED);
     }
+
+    // notify zone scripts for player logout
+    sOutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+
     Unit::CleanupsBeforeDelete();
 }
 
@@ -6061,6 +6066,10 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
     if (m_zoneUpdateId != newZone)
     {
+        // handle outdoor pvp zones
+        sOutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+        sOutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
+
         SendInitWorldStates(newZone);                       // only if really enters to new zone, not just area change, works strange...
 
         if (sWorld.getConfig(CONFIG_BOOL_WEATHER))

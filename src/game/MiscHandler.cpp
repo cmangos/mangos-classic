@@ -39,6 +39,7 @@
 #include "ObjectAccessor.h"
 #include "Object.h"
 #include "BattleGround.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 #include "Pet.h"
 #include "SocialMgr.h"
 
@@ -718,6 +719,12 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
         if (BattleGround* bg = pl->GetBattleGround())
             bg->HandleAreaTrigger(pl, Trigger_ID);
         return;
+    }
+
+    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(pl->GetCachedZoneId()))
+    {
+        if (outdoorPvP->HandleAreaTrigger(pl, Trigger_ID))
+            return;
     }
 
     // NULL if all values default (non teleport trigger)
