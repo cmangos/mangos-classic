@@ -246,6 +246,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTaxiMenu(Creature* unit);
         void SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode = 0);
         bool SendLearnNewTaxiNode(Creature* unit);
+        void SendActivateTaxiReply(ActivateTaxiReply reply);
 
         // Guild Team
         void SendGuildCommandResult(uint32 typecmd, const std::string& str, uint32 cmdresult);
