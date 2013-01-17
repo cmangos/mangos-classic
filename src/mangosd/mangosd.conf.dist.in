@@ -1371,7 +1371,19 @@ BattleGround.PrematureFinishTimer = 300000
 BattleGround.PremadeGroupWaitForMatch = 0
 
 ###################################################################################################################
+# OUTDOOR PVP CONFIG
 #
+#    OutdoorPvp.SIEnabled               #Enable Silithus Outdoor pvp
+#    OutdoorPvp.EPEnabled               #Enable Eastern Plaguelands Outdoor pvp
+#        Default: 1 (enable)
+#                 0 (disable)
+#
+###################################################################################################################
+
+OutdoorPvp.SIEnabled = 1
+OutdoorPvp.EPEnabled = 1
+
+###################################################################################################################
 # NETWORK CONFIG
 #
 #    Network.Threads
