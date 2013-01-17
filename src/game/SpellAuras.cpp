@@ -882,15 +882,15 @@ void Aura::TriggerSpell()
                 }
                 break;
             }
-            case SPELLFAMILY_MAGE:
-            {
-                switch (auraId)
-                {
-                    default:
-                        break;
-                }
-                break;
-            }
+//            case SPELLFAMILY_MAGE:
+//            {
+//                switch (auraId)
+//                {
+//                    default:
+//                        break;
+//                }
+//                break;
+//            }
 //            case SPELLFAMILY_WARRIOR:
 //            {
 //                switch(auraId)
