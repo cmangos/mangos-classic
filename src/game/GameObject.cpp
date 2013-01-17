@@ -37,6 +37,7 @@
 #include "MapPersistentStateMgr.h"
 #include "BattleGround.h"
 #include "BattleGroundAV.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 #include "Util.h"
 #include "ScriptMgr.h"
 #include "SQLStorages.h"
@@ -66,6 +67,10 @@ GameObject::GameObject() : WorldObject(),
 
 GameObject::~GameObject()
 {
+    // store the capture point slider value (for non visual, non locked capture points)
+    GameObjectInfo const* goInfo = GetGOInfo();
+    if (goInfo && goInfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT && goInfo->capturePoint.radius && m_lootState == GO_ACTIVATED)
+        sOutdoorPvPMgr.SetCapturePointSlider(GetEntry(), m_captureSlider);
 }
 
 void GameObject::AddToWorld()
@@ -156,7 +161,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
 
     // set initial data and activate non visual-only capture points
     if (goinfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT && goinfo->capturePoint.radius)
-        SetCapturePointSlider(CAPTURE_SLIDER_NEUTRAL);
+        SetCapturePointSlider(sOutdoorPvPMgr.GetCapturePointSliderValue(goinfo->id));
 
     //Notify the map's instance data.
     //Only works if you create the object in it, not if it is moves to that map.
