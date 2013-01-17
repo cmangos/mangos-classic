@@ -6046,6 +6046,15 @@ void Player::UpdateArea(uint32 newArea)
     UpdateAreaDependentAuras();
 }
 
+bool Player::CanUseOutdoorCapturePoint()
+{
+    return CanUseCapturePoint() &&
+           (IsPvP() || sWorld.IsPvPRealm()) &&
+           !HasMovementFlag(MOVEFLAG_FLYING) &&
+           !IsTaxiFlying() &&
+           !isGameMaster();
+}
+
 void Player::UpdateZone(uint32 newZone, uint32 newArea)
 {
     AreaTableEntry const* zone = GetAreaEntryByAreaID(newZone);
@@ -18560,23 +18569,18 @@ bool Player::CanUseBattleGroundObject()
 {
     // TODO : some spells gives player ForceReaction to one faction (ReputationMgr::ApplyForceReaction)
     // maybe gameobject code should handle that ForceReaction usage
-    return ( //InBattleGround() &&                          // in battleground - not need, check in other cases
-               //!IsMounted() && - not correct, player is dismounted when he clicks on flag
-               //player cannot use object when he is invulnerable (immune)
-               !isTotalImmune() &&                            // not totally immune
-               //i'm not sure if these two are correct, because invisible players should get visible when they click on flag
-               !HasStealthAura() &&                           // not stealthed
-               !HasInvisibilityAura() &&                      // not invisible
-               isAlive()                                      // live player
-           );
+    return (isAlive() &&                                    // living
+            // the following two are incorrect, because invisible/stealthed players should get visible when they click on flag
+            !HasStealthAura() &&                            // not stealthed
+            !HasInvisibilityAura() &&                       // visible
+            !isTotalImmune());                              // vulnerable (not immune)
 }
 
-bool Player::CanCaptureTowerPoint()
+bool Player::CanUseCapturePoint()
 {
-    return (!HasStealthAura() &&                            // not stealthed
-            !HasInvisibilityAura() &&                      // not invisible
-            isAlive()                                      // live player
-           );
+    return (isAlive() &&                                    // living
+            !HasStealthAura() &&                            // not stealthed
+            !HasInvisibilityAura());                        // visible
 }
 
 bool Player::isTotalImmune()
