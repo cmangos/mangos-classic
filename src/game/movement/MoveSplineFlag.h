@@ -99,9 +99,9 @@ namespace Movement
             void operator &= (uint32 f) { raw() &= f;}
             void operator |= (uint32 f) { raw() |= f;}
 
-            void EnableFacingPoint() { raw() = raw() & ~Mask_Final_Facing | Final_Point;}
-            void EnableFacingAngle() { raw() = raw() & ~Mask_Final_Facing | Final_Angle;}
-            void EnableFacingTarget() { raw() = raw() & ~Mask_Final_Facing | Final_Target;}
+            void EnableFacingPoint()    { raw() = (raw() & ~Mask_Final_Facing) | Final_Point;}
+            void EnableFacingAngle()    { raw() = (raw() & ~Mask_Final_Facing) | Final_Angle;}
+            void EnableFacingTarget()   { raw() = (raw() & ~Mask_Final_Facing) | Final_Target;}
 
             bool done          : 1;
             bool falling       : 1;

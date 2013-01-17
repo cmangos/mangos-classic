@@ -448,7 +448,7 @@ void DungeonResetScheduler::LoadResetTimes()
         // schedule the global reset/warning
         ResetEventType type = RESET_EVENT_INFORM_1;
         for (; type < RESET_EVENT_INFORM_LAST; type = ResetEventType(type + 1))
-            if (t - resetEventTypeDelay[type] > now)
+            if (t > time_t(now + resetEventTypeDelay[type]))
                 break;
 
         ScheduleReset(true, t - resetEventTypeDelay[type], DungeonResetEvent(type, temp->map, 0));
@@ -528,7 +528,7 @@ void DungeonResetScheduler::Update()
 
                 ResetEventType type = RESET_EVENT_INFORM_1;
                 for (; type < RESET_EVENT_INFORM_LAST; type = ResetEventType(type + 1))
-                    if (next_reset - resetEventTypeDelay[type] > now)
+                    if (next_reset > time_t(now + resetEventTypeDelay[type]))
                         break;
 
                 // add new scheduler event to the queue
@@ -583,7 +583,7 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
         }
     }
 
-    DEBUG_LOG("MapPersistentStateManager::AddPersistentState: mapid = %d, instanceid = %d, reset time = %u, canRset = %u", mapEntry->MapID, instanceId, resetTime, canReset ? 1 : 0);
+    DEBUG_LOG("MapPersistentStateManager::AddPersistentState: mapid = %d, instanceid = %d, reset time = '" UI64FMTD "', canRset = %u", mapEntry->MapID, instanceId, uint64(resetTime), canReset ? 1 : 0);
 
     MapPersistentState* state;
     if (mapEntry->IsDungeon())

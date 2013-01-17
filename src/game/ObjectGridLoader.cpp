@@ -108,7 +108,7 @@ template<> void addUnitState(Creature* obj, CellPair const& cell_pair)
 }
 
 template <class T>
-void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& m, uint32& count, Map* map, GridType& grid)
+void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& /*m*/, uint32& count, Map* map, GridType& grid)
 {
     BattleGround* bg = map->IsBattleGround() ? ((BattleGroundMap*)map)->GetBG() : NULL;
 
@@ -141,7 +141,7 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
     }
 }
 
-void LoadHelper(CellCorpseSet const& cell_corpses, CellPair& cell, CorpseMapType& m, uint32& count, Map* map, GridType& grid)
+void LoadHelper(CellCorpseSet const& cell_corpses, CellPair& cell, CorpseMapType& /*m*/, uint32& count, Map* map, GridType& grid)
 {
     if (cell_corpses.empty())
         return;
