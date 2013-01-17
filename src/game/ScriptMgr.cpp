@@ -1996,7 +1996,7 @@ ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
         }
 
     // let check used mangosd revision for build library (unsafe use with different revision because changes in inline functions, define and etc)
-    char const* (MANGOS_IMPORT * pGetMangosRevStr)();
+    char const*(MANGOS_IMPORT * pGetMangosRevStr)();
 
     GET_SCRIPT_HOOK_PTR(pGetMangosRevStr,              "GetMangosRevStr");
 
