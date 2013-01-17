@@ -30,7 +30,7 @@ struct PathNode
     float x, y, z;
 };
 
-template<typename PathElem, typename PathNode = PathElem>
+template < typename PathElem, typename PathNode = PathElem >
 class Path
 {
     public:
