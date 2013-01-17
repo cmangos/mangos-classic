@@ -1014,9 +1014,22 @@ enum MangosStrings
     LANG_NPC_EVENTAI_COMBAT             = 1508,
     // Room for more Level 2              1509-1599 not used
 
-    // FREE IDS                           1600-9999
+    // Outdoor PvP
+    LANG_OPVP_EP_CAPTURE_NPT_H          = 1600,
+    LANG_OPVP_EP_CAPTURE_NPT_A          = 1601,
+    LANG_OPVP_EP_CAPTURE_CGT_H          = 1602,
+    LANG_OPVP_EP_CAPTURE_CGT_A          = 1603,
+    LANG_OPVP_EP_CAPTURE_EWT_H          = 1604,
+    LANG_OPVP_EP_CAPTURE_EWT_A          = 1605,
+    LANG_OPVP_EP_CAPTURE_PWT_H          = 1606,
+    LANG_OPVP_EP_CAPTURE_PWT_A          = 1607,
 
-    // Use for not-in-offcial-sources patches
+    LANG_OPVP_SI_CAPTURE_H              = 1608,
+    LANG_OPVP_SI_CAPTURE_A              = 1609,
+
+    // FREE IDS                           1700-9999
+
+    // Use for not-in-official-sources patches
     //                                    10000-10999
 
     // Use for custom patches             11000-11999
