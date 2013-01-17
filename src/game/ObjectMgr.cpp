@@ -3914,7 +3914,7 @@ void ObjectMgr::LoadItemTexts()
 
         fields = result->Fetch();
 
-        mItemTexts[ fields[0].GetUInt32() ] = fields[1].GetCppString();
+        mItemTexts[ fields[0].GetUInt32()] = fields[1].GetCppString();
 
         ++count;
 
