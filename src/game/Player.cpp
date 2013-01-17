@@ -2132,7 +2132,7 @@ bool Player::IsGroupVisibleFor(Player* p) const
 bool Player::IsInSameGroupWith(Player const* p) const
 {
     return (p == this || (GetGroup() != NULL &&
-                          GetGroup()->SameSubGroup((Player*)this, (Player*)p)));
+                          GetGroup()->SameSubGroup(this, p)));
 }
 
 ///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
