@@ -322,9 +322,9 @@ PlayerSocial* SocialMgr::LoadFromDB(QueryResult* result, ObjectGuid guid)
         social->m_playerSocialMap[friend_guid] = FriendInfo(flags);
 
         if (flags & SOCIAL_FLAG_IGNORED)
-            ignoreCounter++;
+            ++ignoreCounter;
         else
-            friendCounter++;
+            ++friendCounter;
     }
     while (result->NextRow());
     delete result;

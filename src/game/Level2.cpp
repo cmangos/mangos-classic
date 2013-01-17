@@ -1274,7 +1274,7 @@ bool ChatHandler::HandleLookupFactionCommand(char* args)
             {
                 FactionState const* repState = target ? target->GetReputationMgr().GetState(factionEntry) : NULL;
                 ShowFactionListHelper(factionEntry, LocaleConstant(loc), repState, target);
-                counter++;
+                ++counter;
             }
         }
     }
@@ -2167,7 +2167,7 @@ bool ChatHandler::HandleNpcSubNameCommand(char* /*args*/)
         return true;
     }
 
-    for (uint8 i = 0; i < strlen(args); i++)
+    for (uint8 i = 0; i < strlen(args); ++i)
     {
         if (!isalpha(args[i]) && args[i]!=' ')
         {

@@ -59,7 +59,7 @@ void AddItemsSetItem(Player* player, Item* item)
         eff->setid = setid;
 
         size_t x = 0;
-        for (; x < player->ItemSetEff.size(); x++)
+        for (; x < player->ItemSetEff.size(); ++x)
             if (!player->ItemSetEff[x])
                 break;
 
@@ -71,7 +71,7 @@ void AddItemsSetItem(Player* player, Item* item)
 
     ++eff->item_count;
 
-    for (uint32 x = 0; x < 8; x++)
+    for (uint32 x = 0; x < 8; ++x)
     {
         if (!set->spells[x])
             continue;
@@ -80,7 +80,7 @@ void AddItemsSetItem(Player* player, Item* item)
             continue;
 
         uint32 z = 0;
-        for (; z < 8; z++)
+        for (; z < 8; ++z)
             if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
                 break;
 
@@ -88,7 +88,7 @@ void AddItemsSetItem(Player* player, Item* item)
             continue;
 
         // new spell
-        for (uint32 y = 0; y < 8; y++)
+        for (uint32 y = 0; y < 8; ++y)
         {
             if (!eff->spells[y])                             // free slot
             {
@@ -122,7 +122,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
 
     ItemSetEffect* eff = NULL;
     size_t setindex = 0;
-    for (; setindex < player->ItemSetEff.size(); setindex++)
+    for (; setindex < player->ItemSetEff.size(); ++setindex)
     {
         if (player->ItemSetEff[setindex] && player->ItemSetEff[setindex]->setid == setid)
         {
@@ -137,7 +137,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
 
     --eff->item_count;
 
-    for (uint32 x = 0; x < 8; x++)
+    for (uint32 x = 0; x < 8; ++x)
     {
         if (!set->spells[x])
             continue;
@@ -146,7 +146,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
         if (set->items_to_triggerspell[x] <= eff->item_count)
             continue;
 
-        for (uint32 z = 0; z < 8; z++)
+        for (uint32 z = 0; z < 8; ++z)
         {
             if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
             {
