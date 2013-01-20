@@ -6037,9 +6037,11 @@ void Player::UpdateArea(uint32 newArea)
     UpdateAreaDependentAuras();
 }
 
-bool Player::CanUseOutdoorCapturePoint()
+bool Player::CanUseCapturePoint()
 {
-    return CanUseCapturePoint() &&
+    return isAlive() &&                                     // living
+           !HasStealthAura() &&                             // not stealthed
+           !HasInvisibilityAura() &&                        // visible
            (IsPvP() || sWorld.IsPvPRealm()) &&
            !HasMovementFlag(MOVEFLAG_FLYING) &&
            !IsTaxiFlying() &&
@@ -18545,13 +18547,6 @@ bool Player::CanUseBattleGroundObject()
             !HasStealthAura() &&                            // not stealthed
             !HasInvisibilityAura() &&                       // visible
             !isTotalImmune());                              // vulnerable (not immune)
-}
-
-bool Player::CanUseCapturePoint()
-{
-    return (isAlive() &&                                    // living
-            !HasStealthAura() &&                            // not stealthed
-            !HasInvisibilityAura());                        // visible
 }
 
 bool Player::isTotalImmune()
