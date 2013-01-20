@@ -42,7 +42,7 @@ OutdoorPvPMgr::~OutdoorPvPMgr()
 #define LOAD_OPVP_ZONE(a)                                           \
     if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_##a##_ENABLED))     \
     {                                                               \
-        m_scripts[OPVP_ID_##a##] = new OutdoorPvP##a##();           \
+        m_scripts[OPVP_ID_##a] = new OutdoorPvP##a();               \
         ++counter;                                                  \
     }
 /**
@@ -124,7 +124,8 @@ void OutdoorPvPMgr::Update(uint32 diff)
         return;
 
     for (uint8 i = 0; i < MAX_OPVP_ID; ++i)
-        (*m_scripts[i]).Update(m_updateTimer.GetCurrent());
+        if (m_scripts[i])
+            m_scripts[i]->Update(m_updateTimer.GetCurrent());
 
     m_updateTimer.Reset();
 }
