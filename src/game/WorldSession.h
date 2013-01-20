@@ -120,6 +120,7 @@ class WorldSessionFilter : public PacketFilter
 class MANGOS_DLL_SPEC WorldSession
 {
         friend class CharacterHandler;
+
     public:
         WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_t mute_time, LocaleConstant locale);
         ~WorldSession();
@@ -270,6 +271,11 @@ class MANGOS_DLL_SPEC WorldSession
         void SetLatency(uint32 latency) { m_latency = latency; }
         uint32 getDialogStatus(Player* pPlayer, Object* questgiver, uint32 defstatus);
 
+        // Misc
+        void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed);
+        void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit);
+        void SendItemPageInfo(ItemPrototype* itemProto);
+
     public:                                                 // opcodes handlers
 
         void Handle_NULL(WorldPacket& recvPacket);          // not used
@@ -313,7 +319,6 @@ class MANGOS_DLL_SPEC WorldSession
 
         // Knockback
         void HandleMoveKnockBackAck(WorldPacket& recvPacket);
-        void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed);
 
         void HandleMoveTeleportAckOpcode(WorldPacket& recvPacket);
         void HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data);
@@ -451,6 +456,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleBuyBankSlotOpcode(WorldPacket& recvPacket);
         void HandleTrainerListOpcode(WorldPacket& recvPacket);
         void HandleTrainerBuySpellOpcode(WorldPacket& recvPacket);
+
         void HandlePetitionShowListOpcode(WorldPacket& recvPacket);
         void HandleGossipHelloOpcode(WorldPacket& recvPacket);
         void HandleGossipSelectOptionOpcode(WorldPacket& recvPacket);
@@ -501,7 +507,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleQueryNextMailTime(WorldPacket& recv_data);
         void HandleCancelChanneling(WorldPacket& recv_data);
 
-        void SendItemPageInfo(ItemPrototype* itemProto);
         void HandleSplitItemOpcode(WorldPacket& recvPacket);
         void HandleSwapInvItemOpcode(WorldPacket& recvPacket);
         void HandleDestroyItemOpcode(WorldPacket& recvPacket);

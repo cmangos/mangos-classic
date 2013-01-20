@@ -706,3 +706,11 @@ void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* pac
     if (packet->rpos() < packet->wpos() && sLog.HasLogLevelOrHigher(LOG_LVL_DEBUG))
         LogUnprocessedTail(packet);
 }
+
+void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit)
+{
+    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 8+4);          // visual effect on guid
+    data << guid;
+    data << spellArtKit;                                    // index from SpellVisualKit.dbc
+    SendPacket(&data);
+}
