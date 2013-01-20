@@ -1802,7 +1802,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                     break;
             }
         }
-        else
+        else                                                // m_modifier.m_miscvalue != 0
         {
             uint32 model_id;
 
@@ -1817,16 +1817,16 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
 
             target->SetDisplayId(model_id);
 
-            // creature case, need to update equipment
+            // creature case, need to update equipment if additional provided
             if (ci && target->GetTypeId() == TYPEID_UNIT)
-                ((Creature*)target)->LoadEquipment(ci->equipmentId, true);
+                ((Creature*)target)->LoadEquipment(ci->equipmentId, false);
         }
 
         // update active transform spell only not set or not overwriting negative by positive case
         if (!target->getTransForm() || !IsPositiveSpell(GetId()) || IsPositiveSpell(target->getTransForm()))
             target->setTransForm(GetId());
     }
-    else
+    else                                                    // !apply
     {
         // ApplyModifier(true) will reapply it if need
         target->setTransForm(0);
