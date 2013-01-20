@@ -473,6 +473,20 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType, SpellAuraHolder* except)
     }
 }
 
+void Unit::RemoveSpellsCausingAura(AuraType auraType, ObjectGuid casterGuid)
+{
+    for (AuraList::const_iterator iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end();)
+    {
+        if ((*iter)->GetCasterGuid() == casterGuid)
+        {
+            RemoveAuraHolderFromStack((*iter)->GetId(), 1, casterGuid);
+            iter = m_modAuras[auraType].begin();
+        }
+        else
+            ++iter;
+    }
+}
+
 /* Called by DealDamage for auras that have a chance to be dispelled on damage taken. */
 void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage)
 {
