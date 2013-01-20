@@ -236,7 +236,7 @@ void ObjectMgr::LoadCreatureLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu creature locale strings", (unsigned long)mCreatureLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " creature locale strings", mCreatureLocaleMap.size());
 }
 
 void ObjectMgr::LoadGossipMenuItemsLocales()
@@ -327,7 +327,7 @@ void ObjectMgr::LoadGossipMenuItemsLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu gossip_menu_option locale strings", (unsigned long)mGossipMenuItemsLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " gossip_menu_option locale strings", mGossipMenuItemsLocaleMap.size());
 }
 
 void ObjectMgr::LoadPointOfInterestLocales()
@@ -1004,7 +1004,7 @@ void ObjectMgr::LoadCreatures()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu creatures", (unsigned long)mCreatureDataMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " creatures", mCreatureDataMap.size());
 }
 
 void ObjectMgr::AddCreatureToGrid(uint32 guid, CreatureData const* data)
@@ -1153,7 +1153,7 @@ void ObjectMgr::LoadGameObjects()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu gameobjects", (unsigned long)mGameObjectDataMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " gameobjects", mGameObjectDataMap.size());
 }
 
 void ObjectMgr::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)
@@ -1339,7 +1339,7 @@ void ObjectMgr::LoadItemLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu Item locale strings", (unsigned long)mItemLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " Item locale strings", mItemLocaleMap.size());
 }
 
 struct SQLItemLoader : public SQLStorageLoaderBase<SQLItemLoader>
@@ -3604,7 +3604,7 @@ void ObjectMgr::LoadQuests()
     }
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu quests definitions", (unsigned long)mQuestTemplates.size());
+    sLog.outString(">> Loaded " SIZEFMTD " quests definitions", mQuestTemplates.size());
 }
 
 void ObjectMgr::LoadQuestLocales()
@@ -3923,7 +3923,7 @@ void ObjectMgr::LoadItemTexts()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %u item texts", count);
+    sLog.outString(">> Loaded " SIZEFMTD " item texts", count);
 }
 
 void ObjectMgr::LoadPageTexts()
@@ -4026,7 +4026,7 @@ void ObjectMgr::LoadPageTextLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu PageText locale strings", (unsigned long)mPageTextLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " PageText locale strings", mPageTextLocaleMap.size());
 }
 
 struct SQLInstanceLoader : public SQLStorageLoaderBase<SQLInstanceLoader>
@@ -4329,7 +4329,7 @@ void ObjectMgr::LoadGossipTextLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu NpcText locale strings", (unsigned long)mNpcTextLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " NpcText locale strings", mNpcTextLocaleMap.size());
 }
 
 // not very fast function but it is called only once a day, or on starting-up
@@ -5253,7 +5253,7 @@ void ObjectMgr::LoadGameObjectLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %lu gameobject locale strings", (unsigned long)mGameObjectLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " gameobject locale strings", mGameObjectLocaleMap.size());
 }
 
 struct SQLGameObjectLoader : public SQLStorageLoaderBase<SQLGameObjectLoader>
