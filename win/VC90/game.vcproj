@@ -859,22 +859,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\SkillDiscovery.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\SkillDiscovery.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\SkillExtraItems.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\SkillExtraItems.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\SkillHandler.cpp"
 				>
 			</File>

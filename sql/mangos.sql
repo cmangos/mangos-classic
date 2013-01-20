@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z2067_sxxxx_xxxxx_01_mangos_mangos_string` bit(1) default NULL
+  `required_z2069_sxxxx_xxxxx_01_mangos_skill_discovery` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -9993,55 +9993,6 @@ CREATE TABLE `scripted_event_id` (
 LOCK TABLES `scripted_event_id` WRITE;
 /*!40000 ALTER TABLE `scripted_event_id` DISABLE KEYS */;
 /*!40000 ALTER TABLE `scripted_event_id` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `skill_discovery_template`
---
-
-DROP TABLE IF EXISTS `skill_discovery_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `skill_discovery_template` (
-  `spellId` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'SpellId of the discoverable spell',
-  `reqSpell` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'spell requirement',
-  `chance` float NOT NULL DEFAULT '0' COMMENT 'chance to discover',
-  PRIMARY KEY (`spellId`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Skill Discovery System';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `skill_discovery_template`
---
-
-LOCK TABLES `skill_discovery_template` WRITE;
-/*!40000 ALTER TABLE `skill_discovery_template` DISABLE KEYS */;
-/*!40000 ALTER TABLE `skill_discovery_template` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `skill_extra_item_template`
---
-
-DROP TABLE IF EXISTS `skill_extra_item_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `skill_extra_item_template` (
-  `spellId` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'SpellId of the item creation spell',
-  `requiredSpecialization` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Specialization spell id',
-  `additionalCreateChance` float NOT NULL DEFAULT '0' COMMENT 'chance to create add',
-  `additionalMaxNum` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'max num of adds',
-  PRIMARY KEY (`spellId`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Skill Specialization System';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `skill_extra_item_template`
---
-
-LOCK TABLES `skill_extra_item_template` WRITE;
-/*!40000 ALTER TABLE `skill_extra_item_template` DISABLE KEYS */;
-/*!40000 ALTER TABLE `skill_extra_item_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
