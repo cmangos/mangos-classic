@@ -539,50 +539,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\BattleGround.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGround.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAB.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAB.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAV.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundAV.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundHandler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundMgr.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundMgr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundWS.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BattleGroundWS.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\Cell.h"
 				>
 			</File>
@@ -1708,6 +1664,54 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\OutdoorPvP\OutdoorPvPSI.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="BattleGround"
+			>
+			<File
+				RelativePath="..\..\src\game\BattleGround\BattleGround.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround\BattleGround.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround\BattleGroundAB.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround\BattleGroundAB.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround\BattleGroundAV.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround\BattleGroundAV.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround\BattleGroundHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround\BattleGroundMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround\BattleGroundMgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround\BattleGroundWS.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround\BattleGroundWS.h"
 				>
 			</File>
 		</Filter>

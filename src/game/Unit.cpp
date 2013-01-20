@@ -40,7 +40,7 @@
 #include "Pet.h"
 #include "Util.h"
 #include "Totem.h"
-#include "BattleGround.h"
+#include "BattleGround/BattleGround.h"
 #include "InstanceData.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "MapPersistentStateMgr.h"

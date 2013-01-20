@@ -36,7 +36,7 @@
 #include "MapPersistentStateMgr.h"
 #include "VMapFactory.h"
 #include "MoveMap.h"
-#include "BattleGroundMgr.h"
+#include "BattleGround/BattleGroundMgr.h"
 
 #define MAX_GRID_LOAD_TIME      50
 

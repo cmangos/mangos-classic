@@ -37,6 +37,9 @@
     <Filter Include="OutdoorPvP">
       <UniqueIdentifier>{c25f76ed-c7d6-495a-a647-1f97b1261fa7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="BattleGround">
+      <UniqueIdentifier>{0af4d063-6d01-4546-a429-59bd828ab270}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\game\AccountMgr.cpp">
@@ -45,23 +48,23 @@
     <ClCompile Include="..\..\src\game\AuctionHouseHandler.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround.cpp">
-      <Filter>World/Handlers</Filter>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGround.cpp">
+      <Filter>BattleGround</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGroundAB.cpp">
-      <Filter>World/Handlers</Filter>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAB.cpp">
+      <Filter>BattleGround</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGroundAV.cpp">
-      <Filter>World/Handlers</Filter>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAV.cpp">
+      <Filter>BattleGround</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGroundHandler.cpp">
-      <Filter>World/Handlers</Filter>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundHandler.cpp">
+      <Filter>BattleGround</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGroundMgr.cpp">
-      <Filter>World/Handlers</Filter>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundMgr.cpp">
+      <Filter>BattleGround</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGroundWS.cpp">
-      <Filter>World/Handlers</Filter>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundWS.cpp">
+      <Filter>BattleGround</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\Channel.cpp">
       <Filter>World/Handlers</Filter>
@@ -483,20 +486,23 @@
     <ClInclude Include="..\..\src\game\AccountMgr.h">
       <Filter>World/Handlers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround.h">
-      <Filter>World/Handlers</Filter>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGround.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGroundAB.h">
-      <Filter>World/Handlers</Filter>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAB.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGroundAV.h">
-      <Filter>World/Handlers</Filter>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAV.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGroundMgr.h">
-      <Filter>World/Handlers</Filter>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAV.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGroundWS.h">
-      <Filter>World/Handlers</Filter>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundMgr.h">
+      <Filter>BattleGround</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundWS.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\Cell.h">
       <Filter>World/Handlers</Filter>

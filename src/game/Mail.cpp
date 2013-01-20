@@ -22,7 +22,7 @@
  * @{
  *
  * @file Mail.cpp
- * This file contains the the code needed for MaNGOS to handle mails.
+ * This file contains the code needed for MaNGOS to handle mails.
  *
  */
 
@@ -39,7 +39,7 @@
 #include "Unit.h"
 #include "Language.h"
 #include "DBCStores.h"
-#include "BattleGroundMgr.h"
+#include "BattleGround/BattleGroundMgr.h"
 #include "Item.h"
 #include "AuctionHouseMgr.h"
 

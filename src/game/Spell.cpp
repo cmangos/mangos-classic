@@ -42,7 +42,7 @@
 #include "SharedDefines.h"
 #include "LootMgr.h"
 #include "VMapFactory.h"
-#include "BattleGround.h"
+#include "BattleGround/BattleGround.h"
 #include "extras/Mod.h"
 #include "Util.h"
 #include "Chat.h"
