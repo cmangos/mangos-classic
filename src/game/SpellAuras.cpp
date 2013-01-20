@@ -731,7 +731,6 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         {
             case 17941:                                     // Shadow Trance
             case 22008:                                     // Netherwind Focus
-            case 34936:                                     // Backlash
                 GetHolder()->SetAuraCharges(1);
                 break;
         }
@@ -1172,24 +1171,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
                 break;
             }
-            case SPELLFAMILY_SHAMAN:
-            {
-                // Earth Shield
-                if ((GetSpellProto()->SpellFamilyFlags & UI64LIT(0x40000000000)))
-                {
-                    // prevent double apply bonuses
-                    if (target->GetTypeId() != TYPEID_PLAYER || !((Player*)target)->GetSession()->PlayerLoading())
-                    {
-                        if (Unit* caster = GetCaster())
-                        {
-                            m_modifier.m_amount = caster->SpellHealingBonusDone(target, GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE);
-                            m_modifier.m_amount = target->SpellHealingBonusTaken(caster, GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE);
-                        }
-                    }
-                    return;
-                }
-                break;
-            }
         }
     }
     // AT REMOVE
@@ -1216,12 +1197,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 19697: finalSpellId = 19683; break;
                 case 19699: finalSpellId = 19685; break;
                 case 19700: finalSpellId = 19686; break;
-                case 30646: finalSpellId = 30647; break;
-                case 30653: finalSpellId = 30648; break;
-                case 30654: finalSpellId = 30652; break;
-                case 30099: finalSpellId = 30100; break;
-                case 30102: finalSpellId = 30103; break;
-                case 30105: finalSpellId = 30104; break;
             }
 
             if (finalSpellId)
@@ -1761,24 +1736,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             target->setPowerType(POWER_MANA);
 
         target->SetShapeshiftForm(FORM_NONE);
-
-        switch (form)
-        {
-                // Nordrassil Harness - bonus
-            case FORM_BEAR:
-            case FORM_DIREBEAR:
-            case FORM_CAT:
-                if (Aura* dummy = target->GetDummyAura(37315))
-                    target->CastSpell(target, 37316, true, NULL, dummy);
-                break;
-                // Nordrassil Regalia - bonus
-            case FORM_MOONKIN:
-                if (Aura* dummy = target->GetDummyAura(37324))
-                    target->CastSpell(target, 37325, true, NULL, dummy);
-                break;
-            default:
-                break;
-        }
     }
 
     // adding/removing linked auras
@@ -2420,22 +2377,6 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         data << target->GetPackGUID();
         data << uint32(0);
         target->SendMessageToSet(&data, true);
-
-        // Summon the Naj'entus Spine GameObject on target if spell is Impaling Spine
-        if (GetId() == 39837)
-        {
-            GameObject* pObj = new GameObject;
-            if (pObj->Create(target->GetMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 185584, target->GetMap(),
-                             target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation()))
-            {
-                pObj->SetRespawnTime(GetAuraDuration() / IN_MILLISECONDS);
-                pObj->SetSpellId(GetId());
-                target->AddGameObject(pObj);
-                target->GetMap()->Add(pObj);
-            }
-            else
-                delete pObj;
-        }
     }
     else
     {
@@ -2743,26 +2684,6 @@ void Aura::HandleAuraModSilence(bool apply, bool Real)
                 if (spell->m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
                     // Stop spells on prepare or casting state
                     target->InterruptSpell(CurrentSpellTypes(i), false);
-
-        switch (GetId())
-        {
-                // Arcane Torrent (Energy)
-            case 25046:
-            {
-                Unit* caster = GetCaster();
-                if (!caster)
-                    return;
-
-                // Search Mana Tap auras on caster
-                Aura* dummy = caster->GetDummyAura(28734);
-                if (dummy)
-                {
-                    int32 bp = dummy->GetStackAmount() * 10;
-                    caster->CastCustomSpell(caster, 25048, &bp, NULL, NULL, true);
-                    caster->RemoveAurasDueToSpell(28734);
-                }
-            }
-        }
     }
     else
     {
@@ -2927,28 +2848,6 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
     }
 
     target->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, misc, apply);
-
-    // Bestial Wrath
-    if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1680)
-    {
-        // The Beast Within cast on owner if talent present
-        if (Unit* owner = target->GetOwner())
-        {
-            // Search talent The Beast Within
-            Unit::AuraList const& dummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
-            for (Unit::AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
-            {
-                if ((*i)->GetSpellProto()->SpellIconID == 2229)
-                {
-                    if (apply)
-                        owner->CastSpell(owner, 34471, true, NULL, this);
-                    else
-                        owner->RemoveAurasDueToSpell(34471);
-                    break;
-                }
-            }
-        }
-    }
 }
 
 void Aura::HandleModMechanicImmunityMask(bool apply, bool /*Real*/)
@@ -3576,9 +3475,6 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
         case 1178:                                          // Bear Form (Passive)
         case 9635:                                          // Dire Bear Form (Passive)
         case 12976:                                         // Warrior Last Stand triggered spell
-        case 28726:                                         // Nightmare Seed ( Nightmare Seed )
-        case 34511:                                         // Valor (Bulwark of Kings, Bulwark of the Ancient Kings)
-        case 44055:                                         // Tremendous Fortitude (Battlemaster's Alacrity)
         {
             if (Real)
             {
@@ -4319,37 +4215,6 @@ void Aura::PeriodicTick()
             // Check for immune (not use charges)
             if (target->IsImmunedToDamage(GetSpellSchoolMask(spellProto)))
                 return;
-
-            // some auras remove at specific health level or more
-            if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
-            {
-                switch (GetId())
-                {
-                    case 43093: case 31956: case 38801:
-                    case 35321: case 38363: case 39215:
-                        if (target->GetHealth() == target->GetMaxHealth())
-                        {
-                            target->RemoveAurasDueToSpell(GetId());
-                            return;
-                        }
-                        break;
-                    case 38772:
-                    {
-                        uint32 percent =
-                            GetEffIndex() < EFFECT_INDEX_2 && spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_DUMMY ?
-                            pCaster->CalculateSpellDamage(target, spellProto, SpellEffectIndex(GetEffIndex() + 1)) :
-                            100;
-                        if (target->GetHealth() * 100 >= target->GetMaxHealth() * percent)
-                        {
-                            target->RemoveAurasDueToSpell(GetId());
-                            return;
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
 
             uint32 absorb = 0;
             uint32 resist = 0;
@@ -5324,29 +5189,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             }
             break;
         }
-        case SPELLFAMILY_WARRIOR:
-        {
-            if (!apply)
-            {
-                // Remove Blood Frenzy only if target no longer has any Deep Wound or Rend (applying is handled by procs)
-                if (GetSpellProto()->Mechanic != MECHANIC_BLEED)
-                    return;
-
-                // If target still has one of Warrior's bleeds, do nothing
-                Unit::AuraList const& PeriodicDamage = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                for (Unit::AuraList::const_iterator i = PeriodicDamage.begin(); i != PeriodicDamage.end(); ++i)
-                    if ((*i)->GetCasterGuid() == GetCasterGuid() &&
-                            (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR &&
-                            (*i)->GetSpellProto()->Mechanic == MECHANIC_BLEED)
-                        return;
-
-                spellId1 = 30069;                           // Blood Frenzy (Rank 1)
-                spellId2 = 30070;                           // Blood Frenzy (Rank 2)
-            }
-            else
-                return;
-            break;
-        }
         case SPELLFAMILY_HUNTER:
         {
             switch (GetId())
@@ -5401,10 +5243,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 void Aura::HandleAuraSafeFall(bool Apply, bool Real)
 {
     // implemented in WorldSession::HandleMovementOpcodes
-
-    // only special case
-    if (Apply && Real && GetId() == 32474 && GetTarget()->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)GetTarget())->ActivateTaxiPathTo(506, GetId());
 }
 
 SpellAuraHolder::~SpellAuraHolder()

@@ -240,7 +240,6 @@ void Spell::EffectInstaKill(SpellEffectIndex /*eff_idx*/)
             case   417: spellID = 18792; break;             //fellhunter
             case  1860: spellID = 18790; break;             //void
             case  1863: spellID = 18791; break;             //succubus
-            case 17252: spellID = 35701; break;             //fellguard
             default:
                 sLog.outError("EffectInstaKill: Unhandled creature entry (%u) case.", entry);
                 return;
@@ -288,12 +287,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
         {
             case SPELLFAMILY_GENERIC:
             {
-                //Gore
-                if (m_spellInfo->SpellIconID == 2269)
-                {
-                    damage += rand() % 2 ? damage : 0;
-                }
-
                 switch (m_spellInfo->Id)                    // better way to check unknown
                 {
                         // Meteor like spells (divided damage to targets)
@@ -973,13 +966,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_WARRIOR:
         {
-            // Charge
-            if ((m_spellInfo->SpellFamilyFlags & UI64LIT(0x1)) && m_spellInfo->SpellVisual == 867)
-            {
-                int32 chargeBasePoints0 = damage;
-                m_caster->CastCustomSpell(m_caster, 34846, &chargeBasePoints0, NULL, NULL, true);
-                return;
-            }
             // Execute
             if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x20000000))
             {
@@ -1503,84 +1489,6 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)
             }
             return;
         }
-        // Ultrasafe Transporter: Toshley's Station
-        case 36941:
-        {
-            if (roll_chance_i(50))                          // 50% success
-            {
-                int32 rand_eff = urand(1, 7);
-                switch (rand_eff)
-                {
-                    case 1:
-                        // soul split - evil
-                        m_caster->CastSpell(m_caster, 36900, true);
-                        break;
-                    case 2:
-                        // soul split - good
-                        m_caster->CastSpell(m_caster, 36901, true);
-                        break;
-                    case 3:
-                        // Increase the size
-                        m_caster->CastSpell(m_caster, 36895, true);
-                        break;
-                    case 4:
-                        // Decrease the size
-                        m_caster->CastSpell(m_caster, 36893, true);
-                        break;
-                    case 5:
-                        // Transform
-                    {
-                        if (((Player*)m_caster)->GetTeam() == ALLIANCE)
-                            m_caster->CastSpell(m_caster, 36897, true);
-                        else
-                            m_caster->CastSpell(m_caster, 36899, true);
-                        break;
-                    }
-                    case 6:
-                        // chicken
-                        m_caster->CastSpell(m_caster, 36940, true);
-                        break;
-                    case 7:
-                        // evil twin
-                        m_caster->CastSpell(m_caster, 23445, true);
-                        break;
-                }
-            }
-            return;
-        }
-        // Dimensional Ripper - Area 52
-        case 36890:
-        {
-            if (roll_chance_i(50))                          // 50% success
-            {
-                int32 rand_eff = urand(1, 4);
-                switch (rand_eff)
-                {
-                    case 1:
-                        // soul split - evil
-                        m_caster->CastSpell(m_caster, 36900, true);
-                        break;
-                    case 2:
-                        // soul split - good
-                        m_caster->CastSpell(m_caster, 36901, true);
-                        break;
-                    case 3:
-                        // Increase the size
-                        m_caster->CastSpell(m_caster, 36895, true);
-                        break;
-                    case 4:
-                        // Transform
-                    {
-                        if (((Player*)m_caster)->GetTeam() == ALLIANCE)
-                            m_caster->CastSpell(m_caster, 36897, true);
-                        else
-                            m_caster->CastSpell(m_caster, 36899, true);
-                        break;
-                    }
-                }
-            }
-            return;
-        }
     }
 }
 
@@ -1982,46 +1890,6 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
         return;
 
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo->Id, damage, power);
-
-    // Mad Alchemist's Potion
-    if (m_spellInfo->Id == 45051)
-    {
-        // find elixirs on target
-        uint32 elixir_mask = 0;
-        Unit::SpellAuraHolderMap& Auras = unitTarget->GetSpellAuraHolderMap();
-        for (Unit::SpellAuraHolderMap::iterator itr = Auras.begin(); itr != Auras.end(); ++itr)
-        {
-            uint32 spell_id = itr->second->GetId();
-            if (uint32 mask = sSpellMgr.GetSpellElixirMask(spell_id))
-                elixir_mask |= mask;
-        }
-
-        // get available elixir mask any not active type from battle/guardian (and flask if no any)
-        elixir_mask = (elixir_mask & ELIXIR_FLASK_MASK) ^ ELIXIR_FLASK_MASK;
-
-        // get all available elixirs by mask and spell level
-        std::vector<uint32> elixirs;
-        SpellElixirMap const& m_spellElixirs = sSpellMgr.GetSpellElixirMap();
-        for (SpellElixirMap::const_iterator itr = m_spellElixirs.begin(); itr != m_spellElixirs.end(); ++itr)
-        {
-            if (itr->second & elixir_mask)
-            {
-
-                SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
-                if (spellInfo && (spellInfo->spellLevel < m_spellInfo->spellLevel || spellInfo->spellLevel > unitTarget->getLevel()))
-                    continue;
-
-                elixirs.push_back(itr->first);
-            }
-        }
-
-        if (!elixirs.empty())
-        {
-            // cast random elixir on target
-            uint32 rand_spell = urand(0, elixirs.size() - 1);
-            m_caster->CastSpell(unitTarget, elixirs[rand_spell], true, m_CastItem);
-        }
-    }
 }
 
 void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
@@ -2449,8 +2317,6 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
                     case 19731: heal_spell = 19732; break;
                     case 19734: heal_spell = 19733; break;
                     case 19736: heal_spell = 19735; break;
-                    case 27276: heal_spell = 27278; break;
-                    case 27277: heal_spell = 27279; break;
                     default:
                         DEBUG_LOG("Spell for Devour Magic %d not handled in Spell::EffectDispel", m_spellInfo->Id);
                         break;
@@ -3287,24 +3153,6 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
             }
             break;
         }
-        case SPELLFAMILY_SHAMAN:
-        {
-            // Skyshatter Harness item set bonus
-            // Stormstrike
-            if (m_spellInfo->SpellFamilyFlags & UI64LIT(0x001000000000))
-            {
-                Unit::AuraList const& m_OverrideClassScript = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                for (Unit::AuraList::const_iterator citr = m_OverrideClassScript.begin(); citr != m_OverrideClassScript.end(); ++citr)
-                {
-                    // Stormstrike AP Buff
-                    if ((*citr)->GetModifier()->m_miscvalue == 5634)
-                    {
-                        m_caster->CastSpell(m_caster, 38430, true, NULL, *citr);
-                        break;
-                    }
-                }
-            }
-        }
     }
 
     int32 fixed_bonus = 0;
@@ -3825,7 +3673,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case  5699:
                 case 11729:
                 case 11730:
-                case 27230:
                 {
                     if (!unitTarget)
                         return;
@@ -3847,14 +3694,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         }
                     }
 
-                    static uint32 const itypes[6][3] =
+                    static uint32 const itypes[5][3] =
                     {
                         { 5512, 19004, 19005},              // Minor Healthstone
                         { 5511, 19006, 19007},              // Lesser Healthstone
                         { 5509, 19008, 19009},              // Healthstone
                         { 5510, 19010, 19011},              // Greater Healthstone
-                        { 9421, 19012, 19013},              // Major Healthstone
-                        {22103, 22104, 22105}               // Master Healthstone
+                        { 9421, 19012, 19013}               // Major Healthstone
                     };
 
                     switch (m_spellInfo->Id)
@@ -3869,8 +3715,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                             itemtype = itypes[3][rank]; break; // Greater Healthstone
                         case 11730:
                             itemtype = itypes[4][rank]; break; // Major Healthstone
-                        case 27230:
-                            itemtype = itypes[5][rank]; break; // Master Healthstone
                         default:
                             return;
                     }
@@ -3925,25 +3769,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // found, remove seal
                     m_caster->RemoveAurasDueToSpell((*itr)->GetId());
-
-                    // Sanctified Judgement
-                    Unit::AuraList const& m_auras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                    for (Unit::AuraList::const_iterator i = m_auras.begin(); i != m_auras.end(); ++i)
-                    {
-                        if ((*i)->GetSpellProto()->SpellIconID == 205 && (*i)->GetSpellProto()->Attributes == UI64LIT(0x01D0))
-                        {
-                            int32 chance = (*i)->GetModifier()->m_amount;
-                            if (roll_chance_i(chance))
-                            {
-                                int32 mana = spellInfo->manaCost;
-                                if (Player* modOwner = m_caster->GetSpellModOwner())
-                                    modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_COST, mana);
-                                mana = int32(mana * 0.8f);
-                                m_caster->CastCustomSpell(m_caster, 31930, &mana, NULL, NULL, true, NULL, *i);
-                            }
-                            break;
-                        }
-                    }
 
                     break;
                 }
