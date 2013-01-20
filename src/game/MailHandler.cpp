@@ -353,8 +353,8 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recv_data)
         return;
     }
 
-    //we can return mail now
-    //so firstly delete the old one
+    // we can return mail now
+    // so firstly delete the old one
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("DELETE FROM mail WHERE id = '%u'", mailId);
     // needed?
@@ -628,7 +628,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket& recv_data)
 
     recv_data >> itemTextId >> mailId >> unk;
 
-    ///TODO: some check needed, if player has item with guid mailId, or has mail with id mailId
+    /// TODO: some check needed, if player has item with guid mailId, or has mail with id mailId
 
     DEBUG_LOG("CMSG_ITEM_TEXT_QUERY itemguid: %u, mailId: %u, unk: %u", itemTextId, mailId, unk);
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -171,7 +171,7 @@ Group* ObjectMgr::GetGroupById(uint32 id) const
 
 void ObjectMgr::LoadCreatureLocales()
 {
-    mCreatureLocaleMap.clear();                              // need for reload case
+    mCreatureLocaleMap.clear();                             // need for reload case
 
     QueryResult* result = WorldDatabase.Query("SELECT entry,name_loc1,subname_loc1,name_loc2,subname_loc2,name_loc3,subname_loc3,name_loc4,subname_loc4,name_loc5,subname_loc5,name_loc6,subname_loc6,name_loc7,subname_loc7,name_loc8,subname_loc8 FROM locales_creature");
 
@@ -332,7 +332,7 @@ void ObjectMgr::LoadGossipMenuItemsLocales()
 
 void ObjectMgr::LoadPointOfInterestLocales()
 {
-    mPointOfInterestLocaleMap.clear();                              // need for reload case
+    mPointOfInterestLocaleMap.clear();                      // need for reload case
 
     QueryResult* result = WorldDatabase.Query("SELECT entry,icon_name_loc1,icon_name_loc2,icon_name_loc3,icon_name_loc4,icon_name_loc5,icon_name_loc6,icon_name_loc7,icon_name_loc8 FROM locales_points_of_interest");
 
@@ -2415,7 +2415,7 @@ void ObjectMgr::LoadPlayerInfo()
                 }
                 continue;
             }
-            //PlayerXPperLevel
+            // PlayerXPperLevel
             mPlayerXPperLevel[current_level] = current_xp;
             bar.step();
             ++count;
@@ -2501,7 +2501,7 @@ void ObjectMgr::LoadStandingList()
     uint32 LastWeekBegin = sWorld.GetDateLastMaintenanceDay() - 7;
     LoadStandingList(LastWeekBegin);
 
-    //distribution of RP earning without flushing table
+    // distribution of RP earning without flushing table
     DistributeRankPoints(ALLIANCE, LastWeekBegin);
     DistributeRankPoints(HORDE, LastWeekBegin);
 
@@ -3087,14 +3087,14 @@ void ObjectMgr::LoadQuests()
                 // no changes, quest not dependent from this value but can have problems at client (note some may be 0, we must allow this so no check)
             }
 
-            //check for proper RequiredSkill value (skill case)
+            // check for proper RequiredSkill value (skill case)
             if (uint32 skill_id = SkillByQuestSort(-int32(qinfo->ZoneOrSort)))
             {
                 if (qinfo->RequiredSkill != skill_id)
                 {
                     sLog.outErrorDb("Quest %u has `ZoneOrSort` = %i but `RequiredSkill` does not have a corresponding value (%u).",
                                     qinfo->GetQuestId(), qinfo->ZoneOrSort, skill_id);
-                    //override, and force proper value here?
+                    // override, and force proper value here?
                 }
             }
         }
@@ -3760,7 +3760,7 @@ void ObjectMgr::LoadPetCreateSpells()
 
         sLog.outString();
         sLog.outString(">> Loaded 0 pet create spells");
-        //sLog.outErrorDb("`petcreateinfo_spell` table is empty!");
+        // sLog.outErrorDb("`petcreateinfo_spell` table is empty!");
         return;
     }
 
@@ -4332,12 +4332,12 @@ void ObjectMgr::LoadGossipTextLocales()
     sLog.outString(">> Loaded %lu NpcText locale strings", (unsigned long)mNpcTextLocaleMap.size());
 }
 
-//not very fast function but it is called only once a day, or on starting-up
+// not very fast function but it is called only once a day, or on starting-up
 void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
 {
     time_t basetime = time(NULL);
     DEBUG_LOG("Returning mails current time: hour: %d, minute: %d, second: %d ", localtime(&basetime)->tm_hour, localtime(&basetime)->tm_min, localtime(&basetime)->tm_sec);
-    //delete all old mails without item and without body immediately, if starting server
+    // delete all old mails without item and without body immediately, if starting server
     if (!serverUp)
         CharacterDatabase.PExecute("DELETE FROM mail WHERE expire_time < '" UI64FMTD "' AND has_items = '0' AND itemTextId = 0", (uint64)basetime);
     //                                                     0  1           2      3        4          5         6           7   8       9
@@ -4351,10 +4351,10 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
         return;                                             // any mails need to be returned or deleted
     }
 
-    //std::ostringstream delitems, delmails; //will be here for optimization
-    //bool deletemail = false, deleteitem = false;
-    //delitems << "DELETE FROM item_instance WHERE guid IN ( ";
-    //delmails << "DELETE FROM mail WHERE id IN ( "
+    // std::ostringstream delitems, delmails; // will be here for optimization
+    // bool deletemail = false, deleteitem = false;
+    // delitems << "DELETE FROM item_instance WHERE guid IN ( ";
+    // delmails << "DELETE FROM mail WHERE id IN ( "
 
     BarGoLink bar(result->GetRowCount());
     uint32 count = 0;
@@ -4382,12 +4382,12 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             pl = GetPlayer(m->receiverGuid);
         if (pl)
         {
-            //this code will run very improbably (the time is between 4 and 5 am, in game is online a player, who has old mail
-            //his in mailbox and he has already listed his mails )
+            // this code will run very improbably (the time is between 4 and 5 am, in game is online a player, who has old mail
+            // his in mailbox and he has already listed his mails )
             delete m;
             continue;
         }
-        //delete or return mail:
+        // delete or return mail:
         if (has_items)
         {
             QueryResult* resultItems = CharacterDatabase.PQuery("SELECT item_guid,item_template FROM mail_items WHERE mail_id='%u'", m->messageID);
@@ -5185,14 +5185,14 @@ void ObjectMgr::SetHighestGuids()
 uint32 ObjectMgr::CreateItemText(std::string text)
 {
     uint32 newItemTextId = GenerateItemTextID();
-    //insert new itempage to container
+    // insert new itempage to container
     mItemTexts[ newItemTextId ] = text;
-    //save new itempage
+    // save new itempage
     CharacterDatabase.escape_string(text);
-    //any Delete query needed, itemTextId is maximum of all ids
+    // any Delete query needed, itemTextId is maximum of all ids
     std::ostringstream query;
     query << "INSERT INTO item_text (id,text) VALUES ( '" << newItemTextId << "', '" << text << "')";
-    CharacterDatabase.Execute(query.str().c_str());         //needs to be run this way, because mail body may be more than 1024 characters
+    CharacterDatabase.Execute(query.str().c_str());         // needs to be run this way, because mail body may be more than 1024 characters
     return newItemTextId;
 }
 
@@ -5365,41 +5365,41 @@ void ObjectMgr::LoadGameobjectInfo()
 
         switch (goInfo->type)
         {
-            case GAMEOBJECT_TYPE_DOOR:                      //0
+            case GAMEOBJECT_TYPE_DOOR:                      // 0
             {
                 if (goInfo->door.lockId)
                     CheckGOLockId(goInfo, goInfo->door.lockId, 1);
                 CheckGONoDamageImmuneId(goInfo, goInfo->door.noDamageImmune, 3);
                 break;
             }
-            case GAMEOBJECT_TYPE_BUTTON:                    //1
+            case GAMEOBJECT_TYPE_BUTTON:                    // 1
             {
                 if (goInfo->button.lockId)
                     CheckGOLockId(goInfo, goInfo->button.lockId, 1);
-                if (goInfo->button.linkedTrapId)              // linked trap
+                if (goInfo->button.linkedTrapId)            // linked trap
                     CheckGOLinkedTrapId(goInfo, goInfo->button.linkedTrapId, 3);
                 CheckGONoDamageImmuneId(goInfo, goInfo->button.noDamageImmune, 4);
                 break;
             }
-            case GAMEOBJECT_TYPE_QUESTGIVER:                //2
+            case GAMEOBJECT_TYPE_QUESTGIVER:                // 2
             {
                 if (goInfo->questgiver.lockId)
                     CheckGOLockId(goInfo, goInfo->questgiver.lockId, 0);
                 CheckGONoDamageImmuneId(goInfo, goInfo->questgiver.noDamageImmune, 5);
                 break;
             }
-            case GAMEOBJECT_TYPE_CHEST:                     //3
+            case GAMEOBJECT_TYPE_CHEST:                     // 3
             {
                 if (goInfo->chest.lockId)
                     CheckGOLockId(goInfo, goInfo->chest.lockId, 0);
 
                 CheckGOConsumable(goInfo, goInfo->chest.consumable, 3);
 
-                if (goInfo->chest.linkedTrapId)              // linked trap
+                if (goInfo->chest.linkedTrapId)             // linked trap
                     CheckGOLinkedTrapId(goInfo, goInfo->chest.linkedTrapId, 7);
                 break;
             }
-            case GAMEOBJECT_TYPE_TRAP:                      //6
+            case GAMEOBJECT_TYPE_TRAP:                      // 6
             {
                 if (goInfo->trap.lockId)
                     CheckGOLockId(goInfo, goInfo->trap.lockId, 0);
@@ -5409,10 +5409,10 @@ void ObjectMgr::LoadGameobjectInfo()
                 */
                 break;
             }
-            case GAMEOBJECT_TYPE_CHAIR:                     //7
+            case GAMEOBJECT_TYPE_CHAIR:                     // 7
                 CheckAndFixGOChairHeightId(goInfo, goInfo->chair.height, 1);
                 break;
-            case GAMEOBJECT_TYPE_SPELL_FOCUS:               //8
+            case GAMEOBJECT_TYPE_SPELL_FOCUS:               // 8
             {
                 if (goInfo->spellFocus.focusId)
                 {
@@ -5425,7 +5425,7 @@ void ObjectMgr::LoadGameobjectInfo()
                     CheckGOLinkedTrapId(goInfo, goInfo->spellFocus.linkedTrapId, 2);
                 break;
             }
-            case GAMEOBJECT_TYPE_GOOBER:                    //10
+            case GAMEOBJECT_TYPE_GOOBER:                    // 10
             {
                 if (goInfo->goober.lockId)
                     CheckGOLockId(goInfo, goInfo->goober.lockId, 0);
@@ -5447,19 +5447,19 @@ void ObjectMgr::LoadGameobjectInfo()
                     CheckGOLinkedTrapId(goInfo, goInfo->goober.linkedTrapId, 12);
                 break;
             }
-            case GAMEOBJECT_TYPE_AREADAMAGE:                //12
+            case GAMEOBJECT_TYPE_AREADAMAGE:                // 12
             {
                 if (goInfo->areadamage.lockId)
                     CheckGOLockId(goInfo, goInfo->areadamage.lockId, 0);
                 break;
             }
-            case GAMEOBJECT_TYPE_CAMERA:                    //13
+            case GAMEOBJECT_TYPE_CAMERA:                    // 13
             {
                 if (goInfo->camera.lockId)
                     CheckGOLockId(goInfo, goInfo->camera.lockId, 0);
                 break;
             }
-            case GAMEOBJECT_TYPE_MO_TRANSPORT:              //15
+            case GAMEOBJECT_TYPE_MO_TRANSPORT:              // 15
             {
                 if (goInfo->moTransport.taxiPathId)
                 {
@@ -5469,7 +5469,7 @@ void ObjectMgr::LoadGameobjectInfo()
                 }
                 break;
             }
-            case GAMEOBJECT_TYPE_SUMMONING_RITUAL:          //18
+            case GAMEOBJECT_TYPE_SUMMONING_RITUAL:          // 18
             {
                 /* disable check for while, too many nonexistent spells
                 // always must have spell
@@ -5477,33 +5477,33 @@ void ObjectMgr::LoadGameobjectInfo()
                 */
                 break;
             }
-            case GAMEOBJECT_TYPE_SPELLCASTER:               //22
+            case GAMEOBJECT_TYPE_SPELLCASTER:               // 22
             {
                 // always must have spell
                 CheckGOSpellId(goInfo, goInfo->spellcaster.spellId, 0);
                 break;
             }
-            case GAMEOBJECT_TYPE_FLAGSTAND:                 //24
+            case GAMEOBJECT_TYPE_FLAGSTAND:                 // 24
             {
                 if (goInfo->flagstand.lockId)
                     CheckGOLockId(goInfo, goInfo->flagstand.lockId, 0);
                 CheckGONoDamageImmuneId(goInfo, goInfo->flagstand.noDamageImmune, 5);
                 break;
             }
-            case GAMEOBJECT_TYPE_FISHINGHOLE:               //25
+            case GAMEOBJECT_TYPE_FISHINGHOLE:               // 25
             {
                 if (goInfo->fishinghole.lockId)
                     CheckGOLockId(goInfo, goInfo->fishinghole.lockId, 4);
                 break;
             }
-            case GAMEOBJECT_TYPE_FLAGDROP:                  //26
+            case GAMEOBJECT_TYPE_FLAGDROP:                  // 26
             {
                 if (goInfo->flagdrop.lockId)
                     CheckGOLockId(goInfo, goInfo->flagdrop.lockId, 0);
                 CheckGONoDamageImmuneId(goInfo, goInfo->flagdrop.noDamageImmune, 3);
                 break;
             }
-            case GAMEOBJECT_TYPE_CAPTURE_POINT:             //29
+            case GAMEOBJECT_TYPE_CAPTURE_POINT:             // 29
             {
                 CheckAndFixGOCaptureMinTime(goInfo, goInfo->capturePoint.minTime, 16);
                 break;
@@ -6504,7 +6504,7 @@ void ObjectMgr::LoadGameObjectForQuests()
             }
             case GAMEOBJECT_TYPE_GOOBER:
             {
-                if (goInfo->goober.questId)                 //quests objects
+                if (goInfo->goober.questId)                 // quests objects
                 {
                     mGameObjectForQuestSet.insert(go_entry);
                     ++count;
@@ -7271,8 +7271,8 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)
             else
                 return SKILL_RANGE_MONO;
         default:
-        case SKILL_CATEGORY_ATTRIBUTES:                     //not found in dbc
-        case SKILL_CATEGORY_GENERIC:                        //only GENERIC(DND)
+        case SKILL_CATEGORY_ATTRIBUTES:                     // not found in dbc
+        case SKILL_CATEGORY_GENERIC:                        // only GENERIC(DND)
             return SKILL_RANGE_NONE;
     }
 }
@@ -7898,7 +7898,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
         gMenuItem.action_poi_id         = fields[7].GetUInt32();
         gMenuItem.action_script_id      = fields[8].GetUInt32();
         gMenuItem.box_coded             = fields[9].GetUInt8() != 0;
-        //gMenuItem.box_money             = fields[10].GetUInt32();
+        // gMenuItem.box_money             = fields[10].GetUInt32();
         gMenuItem.box_text              = fields[11].GetCppString();
 
         ConditionType cond_1            = (ConditionType)fields[12].GetUInt32();

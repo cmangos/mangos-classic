@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ namespace VMAP
     class ModelSpawn
     {
         public:
-            //mapID, tileX, tileY, Flags, ID, Pos, Rot, Scale, Bound_lo, Bound_hi, name
+            // mapID, tileX, tileY, Flags, ID, Pos, Rot, Scale, Bound_lo, Bound_hi, name
             uint32 flags;
             uint16 adtId;
             uint32 ID;
@@ -53,7 +53,7 @@ namespace VMAP
             G3D::AABox iBound;
             std::string name;
             bool operator==(const ModelSpawn& other) const { return ID == other.ID; }
-            //uint32 hashCode() const { return ID; }
+            // uint32 hashCode() const { return ID; }
             // temp?
             const G3D::AABox& getBounds() const { return iBound; }
 

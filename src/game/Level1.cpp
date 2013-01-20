@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ bool ChatHandler::HandleNpcYellCommand(char* args)
     return true;
 }
 
-//show text emote by creature in chat
+// show text emote by creature in chat
 bool ChatHandler::HandleNpcTextEmoteCommand(char* args)
 {
     if (!*args)
@@ -133,7 +133,7 @@ bool ChatHandler::HandleAnnounceCommand(char* args)
     return true;
 }
 
-//notification player at the screen
+// notification player at the screen
 bool ChatHandler::HandleNotifyCommand(char* args)
 {
     if (!*args)
@@ -149,7 +149,7 @@ bool ChatHandler::HandleNotifyCommand(char* args)
     return true;
 }
 
-//Enable\Dissable GM Mode
+// Enable\Dissable GM Mode
 bool ChatHandler::HandleGMCommand(char* args)
 {
     if (!*args)
@@ -217,7 +217,7 @@ bool ChatHandler::HandleGMChatCommand(char* args)
     return true;
 }
 
-//Enable\Dissable Invisible mode
+// Enable\Dissable Invisible mode
 bool ChatHandler::HandleGMVisibleCommand(char* args)
 {
     if (!*args)
@@ -353,7 +353,7 @@ bool ChatHandler::HandleGPSCommand(char* args)
     return true;
 }
 
-//Summon Player
+// Summon Player
 bool ChatHandler::HandleNamegoCommand(char* args)
 {
     Player* target;
@@ -473,7 +473,7 @@ bool ChatHandler::HandleNamegoCommand(char* args)
     return true;
 }
 
-//Teleport to Player
+// Teleport to Player
 bool ChatHandler::HandleGonameCommand(char* args)
 {
     Player* target;
@@ -636,7 +636,7 @@ bool ChatHandler::HandleRecallCommand(char* args)
     return HandleGoHelper(target, target->m_recallMap, target->m_recallX, target->m_recallY, &target->m_recallZ, &target->m_recallO);
 }
 
-//Edit Player HP
+// Edit Player HP
 bool ChatHandler::HandleModifyHPCommand(char* args)
 {
     if (!*args)
@@ -674,7 +674,7 @@ bool ChatHandler::HandleModifyHPCommand(char* args)
     return true;
 }
 
-//Edit Player Mana
+// Edit Player Mana
 bool ChatHandler::HandleModifyManaCommand(char* args)
 {
     if (!*args)
@@ -712,7 +712,7 @@ bool ChatHandler::HandleModifyManaCommand(char* args)
     return true;
 }
 
-//Edit Player Energy
+// Edit Player Energy
 bool ChatHandler::HandleModifyEnergyCommand(char* args)
 {
     if (!*args)
@@ -752,7 +752,7 @@ bool ChatHandler::HandleModifyEnergyCommand(char* args)
     return true;
 }
 
-//Edit Player Rage
+// Edit Player Rage
 bool ChatHandler::HandleModifyRageCommand(char* args)
 {
     if (!*args)
@@ -790,7 +790,7 @@ bool ChatHandler::HandleModifyRageCommand(char* args)
     return true;
 }
 
-//Edit Player Faction
+// Edit Player Faction
 bool ChatHandler::HandleModifyFactionCommand(char* args)
 {
     Creature* chr = getSelectedCreature();
@@ -854,7 +854,7 @@ bool ChatHandler::HandleModifyFactionCommand(char* args)
     return true;
 }
 
-//Edit Player TP
+// Edit Player TP
 bool ChatHandler::HandleModifyTalentCommand(char* args)
 {
     if (!*args)
@@ -880,7 +880,7 @@ bool ChatHandler::HandleModifyTalentCommand(char* args)
     return true;
 }
 
-//Enable On\OFF all taxi paths
+// Enable On\OFF all taxi paths
 bool ChatHandler::HandleTaxiCheatCommand(char* args)
 {
     bool value;
@@ -916,7 +916,7 @@ bool ChatHandler::HandleTaxiCheatCommand(char* args)
     return true;
 }
 
-//Edit Player Aspeed
+// Edit Player Aspeed
 bool ChatHandler::HandleModifyASpeedCommand(char* args)
 {
     if (!*args)
@@ -959,11 +959,11 @@ bool ChatHandler::HandleModifyASpeedCommand(char* args)
     chr->UpdateSpeed(MOVE_WALK,   true, modSpeed);
     chr->UpdateSpeed(MOVE_RUN,    true, modSpeed);
     chr->UpdateSpeed(MOVE_SWIM,   true, modSpeed);
-    //chr->UpdateSpeed(MOVE_TURN,   true, modSpeed);
+    // chr->UpdateSpeed(MOVE_TURN,   true, modSpeed);
     return true;
 }
 
-//Edit Player Speed
+// Edit Player Speed
 bool ChatHandler::HandleModifySpeedCommand(char* args)
 {
     if (!*args)
@@ -1008,7 +1008,7 @@ bool ChatHandler::HandleModifySpeedCommand(char* args)
     return true;
 }
 
-//Edit Player Swim Speed
+// Edit Player Swim Speed
 bool ChatHandler::HandleModifySwimCommand(char* args)
 {
     if (!*args)
@@ -1053,7 +1053,7 @@ bool ChatHandler::HandleModifySwimCommand(char* args)
     return true;
 }
 
-//Edit Player Walk Speed
+// Edit Player Walk Speed
 bool ChatHandler::HandleModifyBWalkCommand(char* args)
 {
     if (!*args)
@@ -1098,7 +1098,7 @@ bool ChatHandler::HandleModifyBWalkCommand(char* args)
     return true;
 }
 
-//Edit Player Scale
+// Edit Player Scale
 bool ChatHandler::HandleModifyScaleCommand(char* args)
 {
     if (!*args)
@@ -1137,7 +1137,7 @@ bool ChatHandler::HandleModifyScaleCommand(char* args)
     return true;
 }
 
-//Enable Player mount
+// Enable Player mount
 bool ChatHandler::HandleModifyMountCommand(char* args)
 {
     if (!*args)
@@ -1395,7 +1395,7 @@ bool ChatHandler::HandleModifyMountCommand(char* args)
     return true;
 }
 
-//Edit Player money
+// Edit Player money
 bool ChatHandler::HandleModifyMoneyCommand(char* args)
 {
     if (!*args)
@@ -1544,7 +1544,7 @@ bool ChatHandler::HandleLookupAreaCommand(char* args)
     return true;
 }
 
-//Find tele in game_tele order by name
+// Find tele in game_tele order by name
 bool ChatHandler::HandleLookupTeleCommand(char* args)
 {
     if (!*args)
@@ -1587,7 +1587,7 @@ bool ChatHandler::HandleLookupTeleCommand(char* args)
     return true;
 }
 
-//Enable\Dissable accept whispers (for GM)
+// Enable\Dissable accept whispers (for GM)
 bool ChatHandler::HandleWhispersCommand(char* args)
 {
     if (!*args)
@@ -1620,7 +1620,7 @@ bool ChatHandler::HandleWhispersCommand(char* args)
     return true;
 }
 
-//Save all players in the world
+// Save all players in the world
 bool ChatHandler::HandleSaveAllCommand(char* /*args*/)
 {
     sObjectAccessor.SaveAllPlayers();
@@ -1628,7 +1628,7 @@ bool ChatHandler::HandleSaveAllCommand(char* /*args*/)
     return true;
 }
 
-//Send mail by command
+// Send mail by command
 bool ChatHandler::HandleSendMailCommand(char* args)
 {
     // format: name "subject text" "mail text"
@@ -1712,7 +1712,7 @@ bool ChatHandler::HandleTeleNameCommand(char* args)
     return true;
 }
 
-//Teleport group to given game_tele.entry
+// Teleport group to given game_tele.entry
 bool ChatHandler::HandleTeleGroupCommand(char* args)
 {
     if (!*args)
@@ -1788,7 +1788,7 @@ bool ChatHandler::HandleTeleGroupCommand(char* args)
     return true;
 }
 
-//Summon group of player
+// Summon group of player
 bool ChatHandler::HandleGroupgoCommand(char* args)
 {
     Player* target;
@@ -1986,7 +1986,7 @@ bool ChatHandler::HandleGoCommand(char* args)
 
 
 
-//teleport at coordinates
+// teleport at coordinates
 bool ChatHandler::HandleGoXYCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -2006,7 +2006,7 @@ bool ChatHandler::HandleGoXYCommand(char* args)
     return HandleGoHelper(_player, mapid, x, y);
 }
 
-//teleport at coordinates, including Z
+// teleport at coordinates, including Z
 bool ChatHandler::HandleGoXYZCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -2030,7 +2030,7 @@ bool ChatHandler::HandleGoXYZCommand(char* args)
     return HandleGoHelper(_player, mapid, x, y, &z);
 }
 
-//teleport at coordinates
+// teleport at coordinates
 bool ChatHandler::HandleGoZoneXYCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -2085,7 +2085,7 @@ bool ChatHandler::HandleGoZoneXYCommand(char* args)
     return HandleGoHelper(_player, mapEntry->MapID, x, y);
 }
 
-//teleport to grid
+// teleport to grid
 bool ChatHandler::HandleGoGridCommand(char* args)
 {
     Player* _player = m_session->GetPlayer();

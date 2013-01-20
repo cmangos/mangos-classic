@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,25 +119,25 @@ enum EventAI_ActionType
 
 enum Target
 {
-    //Self (m_creature)
-    TARGET_T_SELF = 0,                                      //Self cast
+    // Self (m_creature)
+    TARGET_T_SELF = 0,                                      // Self cast
 
-    //Hostile targets (if pet then returns pet owner)
-    TARGET_T_HOSTILE,                                       //Our current target (ie: highest aggro)
-    TARGET_T_HOSTILE_SECOND_AGGRO,                          //Second highest aggro (generaly used for cleaves and some special attacks)
-    TARGET_T_HOSTILE_LAST_AGGRO,                            //Dead last on aggro (no idea what this could be used for)
-    TARGET_T_HOSTILE_RANDOM,                                //Just any random target on our threat list
-    TARGET_T_HOSTILE_RANDOM_NOT_TOP,                        //Any random target except top threat
+    // Hostile targets (if pet then returns pet owner)
+    TARGET_T_HOSTILE,                                       // Our current target (ie: highest aggro)
+    TARGET_T_HOSTILE_SECOND_AGGRO,                          // Second highest aggro (generaly used for cleaves and some special attacks)
+    TARGET_T_HOSTILE_LAST_AGGRO,                            // Dead last on aggro (no idea what this could be used for)
+    TARGET_T_HOSTILE_RANDOM,                                // Just any random target on our threat list
+    TARGET_T_HOSTILE_RANDOM_NOT_TOP,                        // Any random target except top threat
 
-    //Invoker targets (if pet then returns pet owner)
-    TARGET_T_ACTION_INVOKER,                                //Unit who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
+    // Invoker targets (if pet then returns pet owner)
+    TARGET_T_ACTION_INVOKER,                                // Unit who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
 
-    //Hostile targets (including pets)
-    TARGET_T_HOSTILE_WPET,                                  //Current target (can be a pet)
-    TARGET_T_HOSTILE_WPET_SECOND_AGGRO,                     //Second highest aggro (generaly used for cleaves and some special attacks)
-    TARGET_T_HOSTILE_WPET_LAST_AGGRO,                       //Dead last on aggro (no idea what this could be used for)
-    TARGET_T_HOSTILE_WPET_RANDOM,                           //Just any random target on our threat list
-    TARGET_T_HOSTILE_WPET_RANDOM_NOT_TOP,                   //Any random target except top threat
+    // Hostile targets (including pets)
+    TARGET_T_HOSTILE_WPET,                                  // Current target (can be a pet)
+    TARGET_T_HOSTILE_WPET_SECOND_AGGRO,                     // Second highest aggro (generaly used for cleaves and some special attacks)
+    TARGET_T_HOSTILE_WPET_LAST_AGGRO,                       // Dead last on aggro (no idea what this could be used for)
+    TARGET_T_HOSTILE_WPET_RANDOM,                           // Just any random target on our threat list
+    TARGET_T_HOSTILE_WPET_RANDOM_NOT_TOP,                   // Any random target except top threat
 
     TARGET_T_ACTION_INVOKER_WPET,
 
@@ -146,14 +146,14 @@ enum Target
 
 enum EventFlags
 {
-    EFLAG_REPEATABLE            = 0x01,                     //Event repeats
+    EFLAG_REPEATABLE            = 0x01,                     // Event repeats
     EFLAG_RESERVED_1            = 0x02,
     EFLAG_RESERVED_2            = 0x04,
     EFLAG_RESERVED_3            = 0x08,
     EFLAG_RESERVED_4            = 0x10,
-    EFLAG_RANDOM_ACTION         = 0x20,                     //Event only execute one from existed actions instead each action.
+    EFLAG_RANDOM_ACTION         = 0x20,                     // Event only execute one from existed actions instead each action.
     EFLAG_RESERVED_6            = 0x40,
-    EFLAG_DEBUG_ONLY            = 0x80,                     //Event only occurs in debug build
+    EFLAG_DEBUG_ONLY            = 0x80,                     // Event only occurs in debug build
     // no free bits, uint8 field
 };
 
@@ -506,8 +506,8 @@ struct CreatureEventAI_Event
             uint32 repeatMax;
         } friendly_buff;
         // EVENT_T_SUMMONED_UNIT                            = 17
-        //EVENT_T_SUMMONED_JUST_DIED                        = 25
-        //EVENT_T_SUMMONED_JUST_DESPAWN                     = 26
+        // EVENT_T_SUMMONED_JUST_DIED                        = 25
+        // EVENT_T_SUMMONED_JUST_DESPAWN                     = 26
         struct
         {
             uint32 creatureId;
@@ -551,7 +551,7 @@ struct CreatureEventAI_Event
 
     CreatureEventAI_Action action[MAX_ACTIONS];
 };
-//Event_Map
+// Event_Map
 typedef std::vector<CreatureEventAI_Event> CreatureEventAI_Event_Vec;
 typedef UNORDERED_MAP<uint32, CreatureEventAI_Event_Vec > CreatureEventAI_Event_Map;
 
@@ -566,7 +566,7 @@ struct CreatureEventAI_Summon
     uint32 SpawnTimeSecs;
 };
 
-//EventSummon_Map
+// EventSummon_Map
 typedef UNORDERED_MAP<uint32, CreatureEventAI_Summon> CreatureEventAI_Summon_Map;
 
 struct CreatureEventAIHolder
@@ -628,13 +628,13 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void DoFindFriendlyCC(std::list<Creature*>& _list, float range);
 
     protected:
-        uint32 m_EventUpdateTime;                           //Time between event updates
-        uint32 m_EventDiff;                                 //Time between the last event call
+        uint32 m_EventUpdateTime;                           // Time between event updates
+        uint32 m_EventDiff;                                 // Time between the last event call
         bool   m_bEmptyList;
 
-        //Variables used by Events themselves
+        // Variables used by Events themselves
         typedef std::vector<CreatureEventAIHolder> CreatureEventAIList;
-        CreatureEventAIList m_CreatureEventAIList;          //Holder for events (stores enabled, time, and eventid)
+        CreatureEventAIList m_CreatureEventAIList;          // Holder for events (stores enabled, time, and eventid)
 
         uint8  m_Phase;                                     // Current phase, max 32 phases
         bool   m_CombatMovementEnabled;                     // If we allow targeted movment gen (movement twoards top threat)

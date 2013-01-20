@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,7 +97,7 @@ bool AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target)
 
             AddOnPacked >> crc >> unk7 >> unk6;
 
-            //sLog.outDebug("ADDON: Name:%s CRC:%x Unknown1 :%x Unknown2 :%x", AddonNames.c_str(), crc, unk7, unk6);
+            // sLog.outDebug("ADDON: Name:%s CRC:%x Unknown1 :%x Unknown2 :%x", AddonNames.c_str(), crc, unk7, unk6);
 
             *Target << (uint8)2;
 
@@ -105,7 +105,7 @@ bool AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target)
             *Target << (uint8)unk1;
             if (unk1)
             {
-                uint8 unk2 = crc != UI64LIT(0x1c776d01);           //If addon is Standard addon CRC
+                uint8 unk2 = crc != UI64LIT(0x1c776d01);    // If addon is Standard addon CRC
                 *Target << (uint8)unk2;
                 if (unk2)
                     Target->append(tdata, sizeof(tdata));
@@ -137,17 +137,17 @@ void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, ui
     uint32 CurrentPosition;
     uint32 TempValue;
 
-    *Source >> TempValue;                                   //get real size of the packed structure
+    *Source >> TempValue;                                   // get real size of the packed structure
 
-    AddonRealSize = TempValue;                              //temp value becouse ZLIB only excepts uLongf
+    AddonRealSize = TempValue;                              // temp value becouse ZLIB only excepts uLongf
 
-    CurrentPosition = Source->rpos();                       //get the position of the pointer in the structure
+    CurrentPosition = Source->rpos();                       // get the position of the pointer in the structure
 
-    AddOnPacked.resize(AddonRealSize);                      //resize target for zlib action
+    AddOnPacked.resize(AddonRealSize);                      // resize target for zlib action
 
     if (!uncompress((uint8*)AddOnPacked.contents(), &AddonRealSize, (uint8*)(*Source).contents() + CurrentPosition, (*Source).size() - CurrentPosition)!= Z_OK)
     {
-        bool* AddonAllowed = new bool;                      //handle addon check and enable-ing
+        bool* AddonAllowed = new bool;                      // handle addon check and enable-ing
 
         uint32 Unknown1;
         uint8 Unknown0;
@@ -157,7 +157,7 @@ void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, ui
 
         Target->Initialize(SMSG_ADDON_INFO);
 
-        uint32 i = 5;                                       //offset for addon extraction
+        uint32 i = 5;                                       // offset for addon extraction
         while(i != AddOnPacked.size())
         {
             std::string AddonNames;
@@ -166,12 +166,12 @@ void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, ui
             uint64 CRCCHECK;
             AddOnPacked >> AddonNames >> CRCCHECK >> unk6;
 
-            //sLog.outDebug("ADDON:    Name:%s CRC:%x Unknown:%x",AddonNames.c_str(), CRCCHECK,unk6);
+            // sLog.outDebug("ADDON:    Name:%s CRC:%x Unknown:%x",AddonNames.c_str(), CRCCHECK,unk6);
 
             Addonstr->Name = AddonNames;
             Addonstr->CRC = CRCCHECK;
 
-            //if not allowed but unknown added to list
+            // if not allowed but unknown added to list
             if (GetAddonStatus(Addonstr, AddonAllowed))     // If addon is new
             {
                 Addonstr->Enabled = m_Addon_Default;        // by default new addons are set from Config file
@@ -180,28 +180,28 @@ void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, ui
                 sLog.outDetail("Found new Addon, Name:%s CRC:%x Unknown:%x",AddonNames.c_str(), CRCCHECK, unk6);
             }
 
-            if (CRCCHECK == UI64LIT(0x4C1C776D01))          //If addon is Standard addon CRC
+            if (CRCCHECK == UI64LIT(0x4C1C776D01))          // If addon is Standard addon CRC
             {
-                                                            //value's standard Addons
+                                                            // value's standard Addons
                 *Target << uint8(0) << uint8(2) << uint8(1) << uint8(0) << uint32(0);
             }
-            else if (*AddonAllowed)                         //if addon is Custom addons
-                                                            //value's enable addon
+            else if (*AddonAllowed)                         // if addon is Custom addons
+                                                            // value's enable addon
                 *Target << uint8(0x00) << uint8(0x01) << uint8(0x00) << uint8(0x01);
             else
-                                                            //value's disable addom
+                                                            // value's disable addom
                 *Target << uint8(0x00) << uint8(0x0) << uint8(0x00) << uint8(0x0);
 
             i += AddonNames.size() + 10;
         }
         *Target << uint8(0x0);
 
-        //delete mem allocation
+        // delete mem allocation
         delete AddonAllowed;
     }
     else
     {
-        //handle uncompress error
+        // handle uncompress error
     }
 }
 */

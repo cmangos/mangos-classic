@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -138,7 +138,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         }
         // check if already in queue
         if (_player->GetBattleGroundQueueIndex(bgQueueTypeId) < PLAYER_MAX_BATTLEGROUND_QUEUES)
-            //player is already in this queue
+            // player is already in this queue
             return;
         // check if has free queue slots
         if (!_player->HasFreeBattleGroundQueueId())
@@ -259,7 +259,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
         case BATTLEGROUND_AB:
         case BATTLEGROUND_AV:
         {
-            //for other BG types - send default
+            // for other BG types - send default
             WorldPacket data(MSG_BATTLEGROUND_PLAYER_POSITIONS, (4 + 4));
             data << uint32(0);
             data << uint32(0);
@@ -267,7 +267,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
         }
         break;
         default:
-            //maybe it is sent also in arena - do nothing
+            // maybe it is sent also in arena - do nothing
             break;
     }
 }
@@ -329,10 +329,10 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
         return;
     }
 
-    //get GroupQueueInfo from BattleGroundQueue
+    // get GroupQueueInfo from BattleGroundQueue
     BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(bgTypeId);
     BattleGroundQueue& bgQueue = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId];
-    //we must use temporary variable, because GroupQueueInfo pointer can be deleted in BattleGroundQueue::RemovePlayer() function
+    // we must use temporary variable, because GroupQueueInfo pointer can be deleted in BattleGroundQueue::RemovePlayer() function
     GroupQueueInfo ginfo;
     if (!bgQueue.GetPlayerGroupInfoData(_player->GetObjectGuid(), &ginfo))
     {
@@ -357,20 +357,20 @@ void WorldSession::HandleBattleFieldPortOpcode(WorldPacket& recv_data)
         return;
     }
 
-    //some checks if player isn't cheating - it is not exactly cheating, but we cannot allow it
+    // some checks if player isn't cheating - it is not exactly cheating, but we cannot allow it
     if (action == 1)
     {
-        //if player is trying to enter battleground and he has deserter debuff, we must just remove him from queue
+        // if player is trying to enter battleground and he has deserter debuff, we must just remove him from queue
         if (!_player->CanJoinToBattleground())
         {
-            //send bg command result to show nice message
+            // send bg command result to show nice message
             WorldPacket data2(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
             data2 << uint32(0xFFFFFFFE);
             _player->GetSession()->SendPacket(&data2);
             action = 0;
             DEBUG_LOG("Battleground: player %s (%u) has a deserter debuff, do not port him to battleground!", _player->GetName(), _player->GetGUIDLow());
         }
-        //if player don't match battleground max level, then do not allow him to enter! (this might happen when player leveled up during his waiting in queue
+        // if player don't match battleground max level, then do not allow him to enter! (this might happen when player leveled up during his waiting in queue
         if (_player->getLevel() > bg->GetMaxLevel())
         {
             sLog.outError("Battleground: Player %s (%u) has level (%u) higher than maxlevel (%u) of battleground (%u)! Do not port him to battleground!",
@@ -441,7 +441,7 @@ void WorldSession::HandleLeaveBattlefieldOpcode(WorldPacket& recv_data)
     recv_data.read_skip<uint8>();                           // BattleGroundTypeId-1 ?
     recv_data.read_skip<uint16>();                          // unk2 0
 
-    //if(bgTypeId >= MAX_BATTLEGROUND_TYPES)                  // cheating? but not important in this case
+    // if(bgTypeId >= MAX_BATTLEGROUND_TYPES)               // cheating? but not important in this case
     //    return;
 
     // not allow leave battleground in combat
@@ -471,7 +471,7 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket& /*recv_data*/)
         if (bgTypeId == _player->GetBattleGroundTypeId())
         {
             bg = _player->GetBattleGround();
-            //so i must use bg pointer to get that information
+            // so i must use bg pointer to get that information
             if (bg)
             {
                 // this line is checked, i only don't know if GetStartTime is changing itself after bg end!
@@ -481,8 +481,8 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket& /*recv_data*/)
                 continue;
             }
         }
-        //we are sending update to player about queue - he can be invited there!
-        //get GroupQueueInfo for queue status
+        // we are sending update to player about queue - he can be invited there!
+        // get GroupQueueInfo for queue status
         BattleGroundQueue& bgQueue = sBattleGroundMgr.m_BattleGroundQueues[bgQueueTypeId];
         GroupQueueInfo ginfo;
         if (!bgQueue.GetPlayerGroupInfoData(_player->GetObjectGuid(), &ginfo))
@@ -581,7 +581,7 @@ void WorldSession::SendBattleGroundJoinError(uint8 err)
             msg = LANG_BG_GROUP_MEMBER_NO_FREE_QUEUE_SLOTS;
             break;
         case BG_JOIN_ERR_GROUP_NOT_ENOUGH:
-            //case BG_JOIN_ERR_MIXED_ARENATEAM:
+            // case BG_JOIN_ERR_MIXED_ARENATEAM:
         default:
             return;
             break;

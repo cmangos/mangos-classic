@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,9 +34,9 @@ enum ChatNotify
 {
     CHAT_JOINED_NOTICE                = 0x00,               //+ "%s joined channel.";
     CHAT_LEFT_NOTICE                  = 0x01,               //+ "%s left channel.";
-    //CHAT_SUSPENDED_NOTICE             = 0x01,             // "%s left channel.";
+    // CHAT_SUSPENDED_NOTICE             = 0x01,            // "%s left channel.";
     CHAT_YOU_JOINED_NOTICE            = 0x02,               //+ "Joined Channel: [%s]"; -- You joined
-    //CHAT_YOU_CHANGED_NOTICE           = 0x02,             // "Changed Channel: [%s]";
+    // CHAT_YOU_CHANGED_NOTICE           = 0x02,            // "Changed Channel: [%s]";
     CHAT_YOU_LEFT_NOTICE              = 0x03,               //+ "Left Channel: [%s]"; -- You left
     CHAT_WRONG_PASSWORD_NOTICE        = 0x04,               //+ "Wrong password for %s.";
     CHAT_NOT_MEMBER_NOTICE            = 0x05,               //+ "Not on channel %s.";
@@ -91,15 +91,15 @@ class Channel
         enum ChannelDBCFlags
         {
             CHANNEL_DBC_FLAG_NONE       = 0x00000,
-            CHANNEL_DBC_FLAG_INITIAL    = 0x00001,              // General, Trade, LocalDefense, LFG
-            CHANNEL_DBC_FLAG_ZONE_DEP   = 0x00002,              // General, Trade, LocalDefense, GuildRecruitment
-            CHANNEL_DBC_FLAG_GLOBAL     = 0x00004,              // WorldDefense
-            CHANNEL_DBC_FLAG_TRADE      = 0x00008,              // Trade
-            CHANNEL_DBC_FLAG_CITY_ONLY  = 0x00010,              // Trade, GuildRecruitment
-            CHANNEL_DBC_FLAG_CITY_ONLY2 = 0x00020,              // Trade, GuildRecruitment
-            CHANNEL_DBC_FLAG_DEFENSE    = 0x10000,              // LocalDefense, WorldDefense
-            CHANNEL_DBC_FLAG_GUILD_REQ  = 0x20000,              // GuildRecruitment
-            CHANNEL_DBC_FLAG_LFG        = 0x40000               // LookingForGroup
+            CHANNEL_DBC_FLAG_INITIAL    = 0x00001,          // General, Trade, LocalDefense, LFG
+            CHANNEL_DBC_FLAG_ZONE_DEP   = 0x00002,          // General, Trade, LocalDefense, GuildRecruitment
+            CHANNEL_DBC_FLAG_GLOBAL     = 0x00004,          // WorldDefense
+            CHANNEL_DBC_FLAG_TRADE      = 0x00008,          // Trade
+            CHANNEL_DBC_FLAG_CITY_ONLY  = 0x00010,          // Trade, GuildRecruitment
+            CHANNEL_DBC_FLAG_CITY_ONLY2 = 0x00020,          // Trade, GuildRecruitment
+            CHANNEL_DBC_FLAG_DEFENSE    = 0x10000,          // LocalDefense, WorldDefense
+            CHANNEL_DBC_FLAG_GUILD_REQ  = 0x20000,          // GuildRecruitment
+            CHANNEL_DBC_FLAG_LFG        = 0x40000           // LookingForGroup
         };
 
         enum ChannelMemberFlags
@@ -178,45 +178,45 @@ class Channel
         void Invite(ObjectGuid p, const char* newp);
         void Voice(ObjectGuid guid1, ObjectGuid guid2);
         void DeVoice(ObjectGuid guid1, ObjectGuid guid2);
-        void JoinNotify(ObjectGuid guid);                                       // invisible notify
-        void LeaveNotify(ObjectGuid guid);                                      // invisible notify
+        void JoinNotify(ObjectGuid guid);                   // invisible notify
+        void LeaveNotify(ObjectGuid guid);                  // invisible notify
 
     private:
         // initial packet data (notify type and channel name)
         void MakeNotifyPacket(WorldPacket* data, uint8 notify_type);
         // type specific packet data
-        void MakeJoined(WorldPacket* data, ObjectGuid guid);                    //+ 0x00
-        void MakeLeft(WorldPacket* data, ObjectGuid guid);                      //+ 0x01
-        void MakeYouJoined(WorldPacket* data);                                  //+ 0x02
-        void MakeYouLeft(WorldPacket* data);                                    //+ 0x03
-        void MakeWrongPassword(WorldPacket* data);                              //? 0x04
-        void MakeNotMember(WorldPacket* data);                                  //? 0x05
-        void MakeNotModerator(WorldPacket* data);                               //? 0x06
+        void MakeJoined(WorldPacket* data, ObjectGuid guid);//+ 0x00
+        void MakeLeft(WorldPacket* data, ObjectGuid guid);  //+ 0x01
+        void MakeYouJoined(WorldPacket* data);              //+ 0x02
+        void MakeYouLeft(WorldPacket* data);                //+ 0x03
+        void MakeWrongPassword(WorldPacket* data);          //? 0x04
+        void MakeNotMember(WorldPacket* data);              //? 0x05
+        void MakeNotModerator(WorldPacket* data);           //? 0x06
         void MakePasswordChanged(WorldPacket* data, ObjectGuid guid);           //+ 0x07
         void MakeOwnerChanged(WorldPacket* data, ObjectGuid guid);              //? 0x08
         void MakePlayerNotFound(WorldPacket* data, const std::string& name);    //+ 0x09
-        void MakeNotOwner(WorldPacket* data);                                   //? 0x0A
-        void MakeChannelOwner(WorldPacket* data);                               //? 0x0B
+        void MakeNotOwner(WorldPacket* data);               //? 0x0A
+        void MakeChannelOwner(WorldPacket* data);           //? 0x0B
         void MakeModeChange(WorldPacket* data, ObjectGuid guid, uint8 oldflags);//+ 0x0C
         void MakeAnnouncementsOn(WorldPacket* data, ObjectGuid guid);           //+ 0x0D
         void MakeAnnouncementsOff(WorldPacket* data, ObjectGuid guid);          //+ 0x0E
         void MakeModerationOn(WorldPacket* data, ObjectGuid guid);              //+ 0x0F
         void MakeModerationOff(WorldPacket* data, ObjectGuid guid);             //+ 0x10
-        void MakeMuted(WorldPacket* data);                                      //? 0x11
+        void MakeMuted(WorldPacket* data);                  //? 0x11
         void MakePlayerKicked(WorldPacket* data, ObjectGuid bad, ObjectGuid good);//? 0x12
-        void MakeBanned(WorldPacket* data);                                     //? 0x13
+        void MakeBanned(WorldPacket* data);                 //? 0x13
         void MakePlayerBanned(WorldPacket* data, ObjectGuid bad, ObjectGuid good);//? 0x14
         void MakePlayerUnbanned(WorldPacket* data, ObjectGuid bad, ObjectGuid good);//? 0x15
         void MakePlayerNotBanned(WorldPacket* data, ObjectGuid guid);           //? 0x16
         void MakePlayerAlreadyMember(WorldPacket* data, ObjectGuid guid);       //+ 0x17
-        void MakeInvite(WorldPacket* data, ObjectGuid guid);                    //? 0x18
-        void MakeInviteWrongFaction(WorldPacket* data);                         //? 0x19
-        void MakeWrongFaction(WorldPacket* data);                               //? 0x1A
-        void MakeInvalidName(WorldPacket* data);                                //? 0x1B
-        void MakeNotModerated(WorldPacket* data);                               //? 0x1C
+        void MakeInvite(WorldPacket* data, ObjectGuid guid);//? 0x18
+        void MakeInviteWrongFaction(WorldPacket* data);     //? 0x19
+        void MakeWrongFaction(WorldPacket* data);           //? 0x1A
+        void MakeInvalidName(WorldPacket* data);            //? 0x1B
+        void MakeNotModerated(WorldPacket* data);           //? 0x1C
         void MakePlayerInvited(WorldPacket* data, const std::string& name);     //+ 0x1D
         void MakePlayerInviteBanned(WorldPacket* data, ObjectGuid guid);        //? 0x1E
-        void MakeThrottled(WorldPacket* data);                                  //? 0x1F
+        void MakeThrottled(WorldPacket* data);              //? 0x1F
 
         void SendToAll(WorldPacket* data, ObjectGuid p = ObjectGuid());
         void SendToOne(WorldPacket* data, ObjectGuid who);

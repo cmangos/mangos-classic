@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ bool Weather::ReGenerate()
     WeatherType old_type = m_type;
     float old_grade = m_grade;
 
-    //78 days between January 1st and March 20nd; 365/4=91 days by season
+    // 78 days between January 1st and March 20nd; 365/4=91 days by season
     // season source http://aa.usno.navy.mil/data/docs/EarthSeasons.html
     time_t gtime = sWorld.GetGameTime();
     struct tm* ltime = localtime(&gtime);
@@ -295,7 +295,7 @@ uint32 Weather::GetSound()
     uint32 sound;
     switch (m_type)
     {
-        case WEATHER_TYPE_RAIN:                                             //rain
+        case WEATHER_TYPE_RAIN:                             // rain
             if (m_grade < 0.33333334f)
                 sound = WEATHER_RAINLIGHT;
             else if (m_grade < 0.6666667f)
@@ -303,7 +303,7 @@ uint32 Weather::GetSound()
             else
                 sound = WEATHER_RAINHEAVY;
             break;
-        case WEATHER_TYPE_SNOW:                                             //snow
+        case WEATHER_TYPE_SNOW:                             // snow
             if (m_grade < 0.33333334f)
                 sound = WEATHER_SNOWLIGHT;
             else if (m_grade < 0.6666667f)
@@ -311,7 +311,7 @@ uint32 Weather::GetSound()
             else
                 sound = WEATHER_SNOWHEAVY;
             break;
-        case WEATHER_TYPE_STORM:                                             //storm
+        case WEATHER_TYPE_STORM:                            // storm
             if (m_grade < 0.33333334f)
                 sound = WEATHER_SANDSTORMLIGHT;
             else if (m_grade < 0.6666667f)
@@ -319,7 +319,7 @@ uint32 Weather::GetSound()
             else
                 sound = WEATHER_SANDSTORMHEAVY;
             break;
-        case WEATHER_TYPE_FINE:                                             //fine
+        case WEATHER_TYPE_FINE:                             // fine
         default:
             sound = WEATHER_NOSOUND;
             break;

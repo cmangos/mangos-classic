@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -579,7 +579,7 @@ bool GridMap::ExistMap(uint32 mapid, int gx, int gy)
     {
         sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.", tmp);
         delete[] tmp;
-        fclose(pf);                                         //close file before return
+        fclose(pf);                                         // close file before return
         return false;
     }
 
@@ -620,9 +620,9 @@ TerrainInfo::TerrainInfo(uint32 mapid) : m_mapId(mapid)
         }
     }
 
-    //clean up GridMap objects every minute
+    // clean up GridMap objects every minute
     const uint32 iCleanUpInterval = 60;
-    //schedule start randlomly
+    // schedule start randlomly
     const uint32 iRandomStart = urand(20, 40);
 
     i_timer.SetInterval(iCleanUpInterval * 1000);
@@ -644,10 +644,10 @@ GridMap* TerrainInfo::Load(const uint32 x, const uint32 y)
     MANGOS_ASSERT(x < MAX_NUMBER_OF_GRIDS);
     MANGOS_ASSERT(y < MAX_NUMBER_OF_GRIDS);
 
-    //reference grid as a first step
+    // reference grid as a first step
     RefGrid(x, y);
 
-    //quick check if GridMap already loaded
+    // quick check if GridMap already loaded
     GridMap* pMap = m_GridMaps[x][y];
     if (!pMap)
         pMap = LoadMapAndVMap(x, y);
@@ -655,7 +655,7 @@ GridMap* TerrainInfo::Load(const uint32 x, const uint32 y)
     return pMap;
 }
 
-//schedule lazy GridMap object cleanup
+// schedule lazy GridMap object cleanup
 void TerrainInfo::Unload(const uint32 x, const uint32 y)
 {
     MANGOS_ASSERT(x < MAX_NUMBER_OF_GRIDS);
@@ -663,17 +663,17 @@ void TerrainInfo::Unload(const uint32 x, const uint32 y)
 
     if (m_GridMaps[x][y])
     {
-        //decrease grid reference count...
+        // decrease grid reference count...
         if (UnrefGrid(x, y) == 0)
         {
-            //TODO: add your additional logic here
+            // TODO: add your additional logic here
 
         }
     }
 }
 
 
-//call this method only
+// call this method only
 void TerrainInfo::CleanUpGrids(const uint32 diff)
 {
     i_timer.Update(diff);
@@ -687,18 +687,18 @@ void TerrainInfo::CleanUpGrids(const uint32 diff)
             const int16& iRef = m_GridRef[x][y];
             GridMap* pMap = m_GridMaps[x][y];
 
-            //delete those GridMap objects which have refcount = 0
+            // delete those GridMap objects which have refcount = 0
             if (pMap && iRef == 0)
             {
                 m_GridMaps[x][y] = NULL;
-                //delete grid data if reference count == 0
+                // delete grid data if reference count == 0
                 pMap->unloadData();
                 delete pMap;
 
-                //unload VMAPS...
+                // unload VMAPS...
                 VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(m_mapId, x, y);
 
-                //unload mmap...
+                // unload mmap...
                 MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(m_mapId, x, y);
             }
         }
@@ -948,7 +948,7 @@ bool TerrainInfo::IsInWater(float x, float y, float pZ, GridMapLiquidData* data)
         GridMapLiquidData* liquid_ptr = data ? data : &liquid_status;
         if (getLiquidStatus(x, y, pZ, MAP_ALL_LIQUIDS, liquid_ptr))
         {
-            //if (liquid_prt->level - liquid_prt->depth_level > 2) //???
+            // if (liquid_prt->level - liquid_prt->depth_level > 2) //???
             return true;
         }
     }
@@ -998,10 +998,10 @@ float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float* pGrou
 GridMap* TerrainInfo::GetGrid(const float x, const float y)
 {
     // half opt method
-    int gx = (int)(32 - x / SIZE_OF_GRIDS);                 //grid x
-    int gy = (int)(32 - y / SIZE_OF_GRIDS);                 //grid y
+    int gx = (int)(32 - x / SIZE_OF_GRIDS);                 // grid x
+    int gy = (int)(32 - y / SIZE_OF_GRIDS);                 // grid y
 
-    //quick check if GridMap already loaded
+    // quick check if GridMap already loaded
     GridMap* pMap = m_GridMaps[gx][gy];
     if (!pMap)
         pMap = LoadMapAndVMap(gx, gy);
@@ -1011,7 +1011,7 @@ GridMap* TerrainInfo::GetGrid(const float x, const float y)
 
 GridMap* TerrainInfo::LoadMapAndVMap(const uint32 x, const uint32 y)
 {
-    //double checked lock pattern
+    // double checked lock pattern
     if (!m_GridMaps[x][y])
     {
         LOCK_GUARD lock(m_mutex);
@@ -1030,13 +1030,13 @@ GridMap* TerrainInfo::LoadMapAndVMap(const uint32 x, const uint32 y)
             if (!map->loadData(tmp))
             {
                 sLog.outError("Error load map file: \n %s\n", tmp);
-                //ASSERT(false);
+                // ASSERT(false);
             }
 
             delete[] tmp;
             m_GridMaps[x][y] = map;
 
-            //load VMAPs for current map/grid...
+            // load VMAPs for current map/grid...
             const MapEntry* i_mapEntry = sMapStore.LookupEntry(m_mapId);
             const char* mapName = i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
 
@@ -1127,7 +1127,7 @@ void TerrainManager::UnloadTerrain(const uint32 mapId)
     if (iter != i_TerrainMap.end())
     {
         TerrainInfo* ptr = (*iter).second;
-        //lets check if this object can be actually freed
+        // lets check if this object can be actually freed
         if (ptr->IsReferenced() == false)
         {
             i_TerrainMap.erase(iter);
@@ -1138,7 +1138,7 @@ void TerrainManager::UnloadTerrain(const uint32 mapId)
 
 void TerrainManager::Update(const uint32 diff)
 {
-    //global garbage collection for GridMap objects and VMaps
+    // global garbage collection for GridMap objects and VMaps
     for (TerrainDataMap::iterator iter = i_TerrainMap.begin(); iter != i_TerrainMap.end(); ++iter)
         iter->second->CleanUpGrids(diff);
 }

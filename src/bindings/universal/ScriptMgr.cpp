@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include "../../game/ScriptMgr.h"
 #include "../../game/SpellAuras.h"
 
-//uint8 loglevel = 0;
+// uint8 loglevel = 0;
 int nrscripts;
 Script* m_scripts[MAX_SCRIPTS];
 
@@ -377,10 +377,10 @@ bool EffectAuraDummy(const Aura* pAura, bool apply)
 
 void ScriptedAI::UpdateAI(const uint32)
 {
-    //Check if we have a current target
+    // Check if we have a current target
     if (m_creature->isAlive() && m_creature->SelectHostileTarget() && m_creature->getVictim())
     {
-        //If we are within range melee the target
+        // If we are within range melee the target
         if (m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE))
         {
             if (m_creature->isAttackReady())

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ enum Classes
     CLASS_HUNTER        = 3,
     CLASS_ROGUE         = 4,
     CLASS_PRIEST        = 5,
-    //CLASS_DEATH_KNIGHT  = 6,                              // not listed in DBC, will be in 3.0
+    // CLASS_DEATH_KNIGHT  = 6,                             // not listed in DBC, will be in 3.0
     CLASS_SHAMAN        = 7,
     CLASS_MAGE          = 8,
     CLASS_WARLOCK       = 9,
@@ -201,26 +201,26 @@ inline SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
 
 enum ItemQualities
 {
-    ITEM_QUALITY_POOR                  = 0,                 //GREY
-    ITEM_QUALITY_NORMAL                = 1,                 //WHITE
-    ITEM_QUALITY_UNCOMMON              = 2,                 //GREEN
-    ITEM_QUALITY_RARE                  = 3,                 //BLUE
-    ITEM_QUALITY_EPIC                  = 4,                 //PURPLE
-    ITEM_QUALITY_LEGENDARY             = 5,                 //ORANGE
-    ITEM_QUALITY_ARTIFACT              = 6                  //LIGHT YELLOW
+    ITEM_QUALITY_POOR                  = 0,                 // GREY
+    ITEM_QUALITY_NORMAL                = 1,                 // WHITE
+    ITEM_QUALITY_UNCOMMON              = 2,                 // GREEN
+    ITEM_QUALITY_RARE                  = 3,                 // BLUE
+    ITEM_QUALITY_EPIC                  = 4,                 // PURPLE
+    ITEM_QUALITY_LEGENDARY             = 5,                 // ORANGE
+    ITEM_QUALITY_ARTIFACT              = 6                  // LIGHT YELLOW
 };
 
 #define MAX_ITEM_QUALITY                 7
 
 const uint32 ItemQualityColors[MAX_ITEM_QUALITY] =
 {
-    0xff9d9d9d,        //GREY
-    0xffffffff,        //WHITE
-    0xff1eff00,        //GREEN
-    0xff0070dd,        //BLUE
-    0xffa335ee,        //PURPLE
-    0xffff8000,        //ORANGE
-    0xffe6cc80         //LIGHT YELLOW
+    0xff9d9d9d,        // GREY
+    0xffffffff,        // WHITE
+    0xff1eff00,        // GREEN
+    0xff0070dd,        // BLUE
+    0xffa335ee,        // PURPLE
+    0xffff8000,        // ORANGE
+    0xffe6cc80         // LIGHT YELLOW
 };
 
 // ***********************************
@@ -622,7 +622,7 @@ enum SpellCastResult
     SPELL_FAILED_ALREADY_HAVE_SUMMON            = 0x05,
     SPELL_FAILED_ALREADY_OPEN                   = 0x06,
     SPELL_FAILED_MORE_POWERFUL_SPELL_ACTIVE     = 0x07,
-    //SPELL_FAILED_AUTOTRACK_INTERRUPTED          = 0x08, old commented CAST_FAIL_FAILED = 8,-> 29
+    // SPELL_FAILED_AUTOTRACK_INTERRUPTED          = 0x08, old commented CAST_FAIL_FAILED = 8,-> 29
     SPELL_FAILED_BAD_IMPLICIT_TARGETS           = 0x09,
     SPELL_FAILED_BAD_TARGETS                    = 0x0A,
     SPELL_FAILED_CANT_BE_CHARMED                = 0x0B,
@@ -647,7 +647,7 @@ enum SpellCastResult
     SPELL_FAILED_FLEEING                        = 0x1E,
     SPELL_FAILED_FOOD_LOWLEVEL                  = 0x1F,
     SPELL_FAILED_HIGHLEVEL                      = 0x20,
-    //SPELL_FAILED_HUNGER_SATIATED                = 0x21,
+    // SPELL_FAILED_HUNGER_SATIATED                = 0x21,
     SPELL_FAILED_IMMUNE                         = 0x22,
     SPELL_FAILED_INTERRUPTED                    = 0x23,
     SPELL_FAILED_INTERRUPTED_COMBAT             = 0x24,
@@ -773,7 +773,7 @@ enum AuraState
     AURA_STATE_BERSERKING                   = 3,            // C   |
     AURA_STATE_FROZEN                       = 4,            //     | frozen target (but not used for any spells in 1.12.1 at client side)
     AURA_STATE_JUDGEMENT                    = 5,            // C   |
-    //AURA_STATE_UNKNOWN6                   = 6,            //     | not used
+    // AURA_STATE_UNKNOWN6                   = 6,           //     | not used
     AURA_STATE_HUNTER_PARRY                 = 7,            // C   |
     AURA_STATE_ROGUE_ATTACK_FROM_STEALTH    = 7,            // C   | FIX ME: not implemented yet!
 };
@@ -789,7 +789,7 @@ enum Mechanics
     MECHANIC_FEAR             = 5,
     MECHANIC_FUMBLE           = 6,
     MECHANIC_ROOT             = 7,
-    MECHANIC_PACIFY           = 8,                          //0 spells use this mechanic
+    MECHANIC_PACIFY           = 8,                          // 0 spells use this mechanic
     MECHANIC_SILENCE          = 9,
     MECHANIC_SLEEP            = 10,
     MECHANIC_SNARE            = 11,
@@ -803,7 +803,7 @@ enum Mechanics
     MECHANIC_SHIELD           = 19,
     MECHANIC_SHACKLE          = 20,
     MECHANIC_MOUNT            = 21,
-    MECHANIC_PERSUADE         = 22,                         //0 spells use this mechanic
+    MECHANIC_PERSUADE         = 22,                         // 0 spells use this mechanic
     MECHANIC_TURN             = 23,
     MECHANIC_HORROR           = 24,
     MECHANIC_INVULNERABILITY  = 25,
@@ -848,10 +848,10 @@ enum DispelType
 
 #define DISPEL_ALL_MASK ( (1<<DISPEL_MAGIC) | (1<<DISPEL_CURSE) | (1<<DISPEL_DISEASE) | (1<<DISPEL_POISON) )
 
-//To all Immune system,if target has immunes,
-//some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
-//some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
-//some aura(related to Mechanics or ImmuneToState<aura>) can't apply to it.
+// To all Immune system,if target has immunes,
+// some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
+// some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
+// some aura(related to Mechanics or ImmuneToState<aura>) can't apply to it.
 enum SpellImmunity
 {
     IMMUNITY_EFFECT                = 0,                     // enum SpellEffects
@@ -1027,13 +1027,13 @@ enum GameobjectTypes
 
 enum GameObjectFlags
 {
-    GO_FLAG_IN_USE          = 0x00000001,                   //disables interaction while animated
-    GO_FLAG_LOCKED          = 0x00000002,                   //require key, spell, event, etc to be opened. Makes "Locked" appear in tooltip
-    GO_FLAG_INTERACT_COND   = 0x00000004,                   //cannot interact (condition to interact)
-    GO_FLAG_TRANSPORT       = 0x00000008,                   //any kind of transport? Object can transport (elevator, boat, car)
-    GO_FLAG_NO_INTERACT     = 0x00000010,                   //players cannot interact with this go (often need to remove flag in event)
-    GO_FLAG_NODESPAWN       = 0x00000020,                   //never despawn, typically for doors, they just change state
-    GO_FLAG_TRIGGERED       = 0x00000040                    //typically, summoned objects. Triggered by spell or other events
+    GO_FLAG_IN_USE          = 0x00000001,                   // disables interaction while animated
+    GO_FLAG_LOCKED          = 0x00000002,                   // require key, spell, event, etc to be opened. Makes "Locked" appear in tooltip
+    GO_FLAG_INTERACT_COND   = 0x00000004,                   // cannot interact (condition to interact)
+    GO_FLAG_TRANSPORT       = 0x00000008,                   // any kind of transport? Object can transport (elevator, boat, car)
+    GO_FLAG_NO_INTERACT     = 0x00000010,                   // players cannot interact with this go (often need to remove flag in event)
+    GO_FLAG_NODESPAWN       = 0x00000020,                   // never despawn, typically for doors, they just change state
+    GO_FLAG_TRIGGERED       = 0x00000040                    // typically, summoned objects. Triggered by spell or other events
 };
 
 enum GameObjectDynamicLowFlags
@@ -2037,20 +2037,20 @@ enum ChatMsg
 
     // [-ZERO] Need find correct values
     CHAT_MSG_REPLY                  = 0x09,
-    CHAT_MSG_MONSTER_PARTY          = 0x30, //0x0D, just selected some free random value for avoid duplicates with really existed values
-    CHAT_MSG_MONSTER_WHISPER        = 0x31, //0x0F, just selected some free random value for avoid duplicates with really existed values
-    //CHAT_MSG_MONEY                  = 0x1C,
-    //CHAT_MSG_OPENING                = 0x1D,
-    //CHAT_MSG_TRADESKILLS            = 0x1E,
-    //CHAT_MSG_PET_INFO               = 0x1F,
-    //CHAT_MSG_COMBAT_MISC_INFO       = 0x20,
-    //CHAT_MSG_COMBAT_XP_GAIN         = 0x21,
-    //CHAT_MSG_COMBAT_HONOR_GAIN      = 0x22,
-    //CHAT_MSG_COMBAT_FACTION_CHANGE  = 0x23,
+    CHAT_MSG_MONSTER_PARTY          = 0x30, // 0x0D, just selected some free random value for avoid duplicates with really existed values
+    CHAT_MSG_MONSTER_WHISPER        = 0x31, // 0x0F, just selected some free random value for avoid duplicates with really existed values
+    // CHAT_MSG_MONEY                  = 0x1C,
+    // CHAT_MSG_OPENING                = 0x1D,
+    // CHAT_MSG_TRADESKILLS            = 0x1E,
+    // CHAT_MSG_PET_INFO               = 0x1F,
+    // CHAT_MSG_COMBAT_MISC_INFO       = 0x20,
+    // CHAT_MSG_COMBAT_XP_GAIN         = 0x21,
+    // CHAT_MSG_COMBAT_HONOR_GAIN      = 0x22,
+    // CHAT_MSG_COMBAT_FACTION_CHANGE  = 0x23,
     CHAT_MSG_RAID_BOSS_WHISPER      = 0x29,
     CHAT_MSG_RAID_BOSS_EMOTE        = 0x2A,
-    //CHAT_MSG_FILTERED               = 0x2B,
-    //CHAT_MSG_RESTRICTED             = 0x2E,
+    // CHAT_MSG_FILTERED               = 0x2B,
+    // CHAT_MSG_RESTRICTED             = 0x2E,
 };
 
 #define MAX_CHAT_MSG_TYPE 0x5E
@@ -2268,8 +2268,8 @@ enum ResponseCodes
     CHAR_LOGIN_FAILED                                      = 0x40,
     CHAR_LOGIN_DISABLED                                    = 0x41,
     CHAR_LOGIN_NO_CHARACTER                                = 0x42,
-    CHAR_LOGIN_LOCKED_FOR_TRANSFER                         = 0x40, ///UNSURE
-    CHAR_LOGIN_LOCKED_BY_BILLING                           = 0x40, ///UNSURE
+    CHAR_LOGIN_LOCKED_FOR_TRANSFER                         = 0x40, /// UNSURE
+    CHAR_LOGIN_LOCKED_BY_BILLING                           = 0x40, /// UNSURE
 
     CHAR_NAME_SUCCESS                                      = 0x50,
     CHAR_NAME_FAILURE                                      = 0x4F,
@@ -2285,9 +2285,9 @@ enum ResponseCodes
     CHAR_NAME_THREE_CONSECUTIVE                            = 0x4C,
     CHAR_NAME_INVALID_SPACE                                = 0x4D,
     CHAR_NAME_CONSECUTIVE_SPACES                           = 0x4E,
-    CHAR_NAME_RUSSIAN_CONSECUTIVE_SILENT_CHARACTERS        = 0x4E,///UNSURE
-    CHAR_NAME_RUSSIAN_SILENT_CHARACTER_AT_BEGINNING_OR_END = 0x4E,///UNSURE
-    CHAR_NAME_DECLENSION_DOESNT_MATCH_BASE_NAME            = 0x4E,///UNSURE
+    CHAR_NAME_RUSSIAN_CONSECUTIVE_SILENT_CHARACTERS        = 0x4E,/// UNSURE
+    CHAR_NAME_RUSSIAN_SILENT_CHARACTER_AT_BEGINNING_OR_END = 0x4E,/// UNSURE
+    CHAR_NAME_DECLENSION_DOESNT_MATCH_BASE_NAME            = 0x4E,/// UNSURE
 };
 
 /// Ban function modes
@@ -2334,7 +2334,7 @@ inline uint32 GetBattleGrounMapIdByTypeId(BattleGroundTypeId bgTypeId)
         case BATTLEGROUND_AV:   return 30;
         case BATTLEGROUND_WS:   return 489;
         case BATTLEGROUND_AB:   return 529;
-        default:                return 0;   //none
+        default:                return 0;   // none
     }
 
     // impossible, just make compiler happy

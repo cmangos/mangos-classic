@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,19 +69,19 @@ bool WinServiceInstall()
     std::strcat(path, " -s run");
 
     SC_HANDLE service = CreateService(serviceControlManager,
-                                      serviceName,                                // name of service
-                                      serviceLongName,                            // service name to display
-                                      SERVICE_ALL_ACCESS,                         // desired access
+                                      serviceName,          // name of service
+                                      serviceLongName,      // service name to display
+                                      SERVICE_ALL_ACCESS,   // desired access
                                       // service type
                                       SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
-                                      SERVICE_AUTO_START,                         // start type
-                                      SERVICE_ERROR_IGNORE,                       // error control type
-                                      path,                                       // service's binary
-                                      0,                                          // no load ordering group
-                                      0,                                          // no tag identifier
-                                      0,                                          // no dependencies
-                                      0,                                          // LocalSystem account
-                                      0);                                         // no password
+                                      SERVICE_AUTO_START,   // start type
+                                      SERVICE_ERROR_IGNORE, // error control type
+                                      path,                 // service's binary
+                                      0,                    // no load ordering group
+                                      0,                    // no tag identifier
+                                      0,                    // no dependencies
+                                      0,                    // LocalSystem account
+                                      0);                   // no password
 
     if (!service)
     {

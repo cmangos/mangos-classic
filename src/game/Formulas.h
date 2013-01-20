@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ namespace MaNGOS
             return prk;
         }
 
-        //What is Player's rank... private, scout...
+        // What is Player's rank... private, scout...
         inline HonorRankInfo CalculateHonorRank(float honor_points)
         {
             HonorRankInfo prk;
@@ -221,10 +221,10 @@ namespace MaNGOS
             uint32 today = sWorld.GetDateToday();
 
             int total_kills  = killer->CalculateTotalKills(victim, today, today);
-            //int k_rank       = killer->CalculateHonorRank( killer->GetTotalHonor() );
+            // int k_rank       = killer->CalculateHonorRank( killer->GetTotalHonor() );
             uint32 v_rank    = victim->GetHonorRankInfo().visualRank;
             uint32 k_level   = killer->getLevel();
-            //int v_level      = victim->getLevel();
+            // int v_level      = victim->getLevel();
             float diff_honor = (victim->GetRankPoints() / (killer->GetRankPoints() + 1)) + 1;
             float diff_level = (victim->getLevel() * (1.0 / (killer->getLevel())));
 

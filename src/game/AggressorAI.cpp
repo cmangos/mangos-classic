@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -101,8 +101,8 @@ void AggressorAI::EnterEvadeMode()
     else
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim out run him [guid=%u]", m_creature->GetGUIDLow());
-        //i_state = STATE_LOOK_AT_VICTIM;
-        //i_tracker.Reset(TIME_INTERVAL_LOOK);
+        // i_state = STATE_LOOK_AT_VICTIM;
+        // i_tracker.Reset(TIME_INTERVAL_LOOK);
     }
 
     if (!m_creature->isCharmed())

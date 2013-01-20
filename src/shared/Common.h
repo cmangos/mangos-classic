@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,25 +24,25 @@
 #ifdef HAVE_CONFIG_H
 #ifdef PACKAGE
 #undef PACKAGE
-#endif //PACKAGE
+#endif // PACKAGE
 #ifdef PACKAGE_BUGREPORT
 #undef PACKAGE_BUGREPORT
-#endif //PACKAGE_BUGREPORT
+#endif // PACKAGE_BUGREPORT
 #ifdef PACKAGE_NAME
 #undef PACKAGE_NAME
-#endif //PACKAGE_NAME
+#endif // PACKAGE_NAME
 #ifdef PACKAGE_STRING
 #undef PACKAGE_STRING
-#endif //PACKAGE_STRING
+#endif // PACKAGE_STRING
 #ifdef PACKAGE_TARNAME
 #undef PACKAGE_TARNAME
-#endif //PACKAGE_TARNAME
+#endif // PACKAGE_TARNAME
 #ifdef PACKAGE_VERSION
 #undef PACKAGE_VERSION
-#endif //PACKAGE_VERSION
+#endif // PACKAGE_VERSION
 #ifdef VERSION
 #undef VERSION
-#endif //VERSION
+#endif // VERSION
 # include "config.h"
 #undef PACKAGE
 #undef PACKAGE_BUGREPORT
@@ -51,7 +51,7 @@
 #undef PACKAGE_TARNAME
 #undef PACKAGE_VERSION
 #undef VERSION
-#endif //HAVE_CONFIG_H
+#endif // HAVE_CONFIG_H
 
 #include "Platform/Define.h"
 
@@ -225,7 +225,7 @@ struct LocaleNameStr
 // used for iterate all names including alternative
 extern LocaleNameStr const fullLocaleNameList[];
 
-//operator new[] based version of strdup() function! Release memory by using operator delete[] !
+// operator new[] based version of strdup() function! Release memory by using operator delete[] !
 inline char* mangos_strdup(const char* source)
 {
     char* dest = new char[strlen(source) + 1];

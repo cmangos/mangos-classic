@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ class FreezeDetectorRunnable : public ACE_Based::Runnable
                 ACE_Based::Thread::Sleep(1000);
 
                 uint32 curtime = WorldTimer::getMSTime();
-                //DEBUG_LOG("anti-freeze: time=%u, counters=[%u; %u]",curtime,Master::m_masterLoopCounter,World::m_worldLoopCounter);
+                // DEBUG_LOG("anti-freeze: time=%u, counters=[%u; %u]",curtime,Master::m_masterLoopCounter,World::m_worldLoopCounter);
 
                 // normal work
                 if (w_loops != World::m_worldLoopCounter)
@@ -92,7 +92,7 @@ class FreezeDetectorRunnable : public ACE_Based::Runnable
                 else if (WorldTimer::getMSTimeDiff(w_lastchange, curtime) > _delaytime)
                 {
                     sLog.outError("World Thread hangs, kicking out server!");
-                    *((uint32 volatile*)NULL) = 0;              // bang crash
+                    *((uint32 volatile*)NULL) = 0;          // bang crash
                 }
             }
             sLog.outString("Anti-freeze thread exiting without problems.");
@@ -205,8 +205,8 @@ int Master::Run()
 #ifndef WIN32
     detachDaemon();
 #endif
-    //server loaded successfully => enable async DB requests
-    //this is done to forbid any async transactions during server startup!
+    // server loaded successfully => enable async DB requests
+    // this is done to forbid any async transactions during server startup!
     CharacterDatabase.AllowAsyncTransactions();
     WorldDatabase.AllowAsyncTransactions();
     LoginDatabase.AllowAsyncTransactions();

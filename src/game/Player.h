@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -443,8 +443,8 @@ enum AtLoginFlags
     AT_LOGIN_RENAME            = 0x01,
     AT_LOGIN_RESET_SPELLS      = 0x02,
     AT_LOGIN_RESET_TALENTS     = 0x04,
-    //AT_LOGIN_CUSTOMIZE         = 0x08, -- used in post-3.x
-    //AT_LOGIN_RESET_PET_TALENTS = 0x10, -- used in post-3.x
+    // AT_LOGIN_CUSTOMIZE         = 0x08, -- used in post-3.x
+    // AT_LOGIN_RESET_PET_TALENTS = 0x10, -- used in post-3.x
     AT_LOGIN_FIRST             = 0x20,
 };
 
@@ -943,7 +943,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; }
         uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; }
 
-        void SetDeathState(DeathState s) override;                   // overwrite Unit::SetDeathState
+        void SetDeathState(DeathState s) override;          // overwrite Unit::SetDeathState
 
         float GetRestBonus() const { return m_rest_bonus; }
         void SetRestBonus(float rest_bonus_new);
@@ -1337,7 +1337,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddMItem(Item* it)
         {
             MANGOS_ASSERT(it);
-            //ASSERT deleted, because items can be added before loading
+            // ASSERT deleted, because items can be added before loading
             mMitems[it->GetGUIDLow()] = it;
         }
 
@@ -1667,26 +1667,26 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ResetHonor();
         void ClearHonorInfo();
         bool RewardHonor(Unit* pVictim, uint32 groupsize);
-        //Assume only Players and Units as kills
-        //TYPEID_OBJECT used for CP from BG,quests etc.
+        // Assume only Players and Units as kills
+        // TYPEID_OBJECT used for CP from BG,quests etc.
         bool isKill(uint8 victimType) { return (victimType == TYPEID_UNIT || victimType == TYPEID_PLAYER); }
         uint32 CalculateTotalKills(Unit* Victim, uint32 fromDate, uint32 toDate) const;
-        //Acessors of honor rank
+        // Acessors of honor rank
         HonorRankInfo GetHonorRankInfo() const { return m_honor_rank; }
         void SetHonorRankInfo(HonorRankInfo rank) { m_honor_rank = rank; }
-        //Acessors of total honor points
+        // Acessors of total honor points
         void SetRankPoints(float rankPoints) { m_rank_points = rankPoints; }
         float GetRankPoints(void) const { return m_rank_points; }
-        //Acessors of highest rank
+        // Acessors of highest rank
         HonorRankInfo GetHonorHighestRankInfo() const { return m_highest_rank; }
         void SetHonorHighestRankInfo(HonorRankInfo hr) { m_highest_rank = hr; }
-        //Acessors of rating
+        // Acessors of rating
         float GetStoredHonor() const { return m_stored_honor; }
         void SetStoredHonor(float rating) { m_stored_honor = rating; }
-        //Acessors of lifetime
+        // Acessors of lifetime
         uint32 GetHonorStoredKills(bool honorable) const { return honorable ? m_stored_honorableKills : m_stored_dishonorableKills; }
         void SetHonorStoredKills(uint32 kills, bool honorable) { if (honorable) m_stored_honorableKills = kills; else m_stored_dishonorableKills = kills; }
-        //Acessors of last week standing
+        // Acessors of last week standing
         int32 GetHonorLastWeekStandingPos() const { return m_standing_pos; }
         void SetHonorLastWeekStandingPos(int32 standingPos) { m_standing_pos = standingPos; }
 
@@ -1694,7 +1694,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                  PVP SYSTEM                       ***/
         /*********************************************************/
 
-        //End of PvP System
+        // End of PvP System
 
         void SetDrunkValue(uint16 newDrunkValue, uint32 itemid = 0);
         uint16 GetDrunkValue() const { return m_drunk; }
@@ -2072,7 +2072,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                    QUEST SYSTEM                   ***/
         /*********************************************************/
 
-        //We allow only one timed quest active at the same time. Below can then be simple value instead of set.
+        // We allow only one timed quest active at the same time. Below can then be simple value instead of set.
         typedef std::set<uint32> QuestSet;
         QuestSet m_timedquests;
 
@@ -2216,12 +2216,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 m_swingErrorMsg;
         float m_ammoDPS;
 
-        ////////////////////Rest System/////////////////////
+        //////////////////// Rest System/////////////////////
         time_t time_inn_enter;
         uint32 inn_trigger_id;
         float m_rest_bonus;
         RestType rest_type;
-        ////////////////////Rest System/////////////////////
+        //////////////////// Rest System/////////////////////
 
         // Transports
         Transport* m_transport;

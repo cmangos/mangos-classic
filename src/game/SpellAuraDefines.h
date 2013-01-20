@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ enum AuraType
     SPELL_AURA_MOD_STEALTH_DETECT = 17,
     SPELL_AURA_MOD_INVISIBILITY = 18,
     SPELL_AURA_MOD_INVISIBILITY_DETECTION = 19,
-    SPELL_AURA_OBS_MOD_HEALTH = 20,                         //20,21 unofficial
+    SPELL_AURA_OBS_MOD_HEALTH = 20,                         // 20,21 unofficial
     SPELL_AURA_OBS_MOD_MANA = 21,
     SPELL_AURA_MOD_RESISTANCE = 22,
     SPELL_AURA_PERIODIC_TRIGGER_SPELL = 23,

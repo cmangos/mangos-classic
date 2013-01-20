@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-//lets use Intel scalable_allocator by default and
-//switch to OS specific allocator only when _STANDARD_MALLOC is defined
+// lets use Intel scalable_allocator by default and
+// switch to OS specific allocator only when _STANDARD_MALLOC is defined
 #ifndef USE_STANDARD_MALLOC
 
 #include "../../dep/tbb/include/tbb/scalable_allocator.h"

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ void PetAI::AttackStart(Unit* u)
         // TMGs call CreatureRelocation which via MoveInLineOfSight can call this function
         // thus with the following clear the original TMG gets invalidated and crash, doh
         // hope it doesn't start to leak memory without this :-/
-        //i_pet->Clear();
+        // i_pet->Clear();
         m_creature->GetMotionMaster()->MoveChase(u);
         inCombat = true;
     }
@@ -165,7 +165,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 if (!m_creature->getVictim())
                     return;
 
-                //if pet misses its target, it will also be the first in threat list
+                // if pet misses its target, it will also be the first in threat list
                 m_creature->getVictim()->AddThreat(m_creature);
 
                 if (_needToStop())
@@ -255,7 +255,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 {
                     Unit* Target = m_creature->GetMap()->GetUnit(*tar);
 
-                    //only buff targets that are in combat, unless the spell can only be cast while out of combat
+                    // only buff targets that are in combat, unless the spell can only be cast while out of combat
                     if (!Target)
                         continue;
 
@@ -271,7 +271,7 @@ void PetAI::UpdateAI(const uint32 diff)
             }
         }
 
-        //found units to cast on to
+        // found units to cast on to
         if (!targetSpellStore.empty())
         {
             uint32 index = urand(0, targetSpellStore.size() - 1);
@@ -318,23 +318,23 @@ void PetAI::UpdateAllies()
     Unit* owner = m_creature->GetCharmerOrOwner();
     Group* pGroup = NULL;
 
-    m_updateAlliesTimer = 10 * IN_MILLISECONDS;              //update friendly targets every 10 seconds, lesser checks increase performance
+    m_updateAlliesTimer = 10 * IN_MILLISECONDS;             // update friendly targets every 10 seconds, lesser checks increase performance
 
     if (!owner)
         return;
     else if (owner->GetTypeId() == TYPEID_PLAYER)
         pGroup = ((Player*)owner)->GetGroup();
 
-    //only pet and owner/not in group->ok
+    // only pet and owner/not in group->ok
     if (m_AllySet.size() == 2 && !pGroup)
         return;
-    //owner is in group; group members filled in already (no raid -> subgroupcount = whole count)
+    // owner is in group; group members filled in already (no raid -> subgroupcount = whole count)
     if (pGroup && !pGroup->isRaidGroup() && m_AllySet.size() == (pGroup->GetMembersCount() + 2))
         return;
 
     m_AllySet.clear();
     m_AllySet.insert(m_creature->GetObjectGuid());
-    if (pGroup)                                             //add group
+    if (pGroup)                                             // add group
     {
         for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
         {
@@ -348,13 +348,13 @@ void PetAI::UpdateAllies()
             m_AllySet.insert(target->GetObjectGuid());
         }
     }
-    else                                                    //remove group
+    else                                                    // remove group
         m_AllySet.insert(owner->GetObjectGuid());
 }
 
 void PetAI::AttackedBy(Unit* attacker)
 {
-    //when attacked, fight back in case 1)no victim already AND 2)not set to passive AND 3)not set to stay, unless can it can reach attacker with melee attack anyway
+    // when attacked, fight back in case 1)no victim already AND 2)not set to passive AND 3)not set to stay, unless can it can reach attacker with melee attack anyway
     if (!m_creature->getVictim() && m_creature->GetCharmInfo() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) &&
             (!m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY) || m_creature->CanReachWithMeleeAttack(attacker)))
         AttackStart(attacker);

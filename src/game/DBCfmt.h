@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ const char BankBagSlotPricesEntryfmt[] = "ni";
 const char ChrClassesEntryfmt[] = "nxxixssssssssxxix";
 const char ChrRacesEntryfmt[] = "nxixiixxixxxxxixissssssssxxxx";
 const char CharStartOutfitEntryfmt[] = "diiiiiiiiiiiiixxxxxxxxxxxxxxxxxxxxxxxxxxx";
-const char ChatChannelsEntryfmt[] = "iixssssssssxxxxxxxxxx";               // ChatChannelsEntryfmt, index not used (more compact store)
+const char ChatChannelsEntryfmt[] = "iixssssssssxxxxxxxxxx";// ChatChannelsEntryfmt, index not used (more compact store)
 const char CinematicSequencesEntryfmt[] = "nxxxxxxxxx";
 const char CreatureDisplayInfofmt[] = "nxxifxxxxxxx";
 const char CreatureDisplayInfoExtrafmt[] = "nixxxxxxxxxxxxxxxxx";
@@ -43,7 +43,7 @@ const char FactionTemplateEntryfmt[] = "niiiiiiiiiiiii";
 const char GameObjectDisplayInfofmt[] = "nxxxxxxxxxxx";
 const char ItemBagFamilyfmt[] = "nxxxxxxxxx";
 const char ItemClassfmt[]="nxxssssssssx";
-//const char ItemDisplayTemplateEntryfmt[]="nxxxxxxxxxxixxxxxxxxxxx";
+// const char ItemDisplayTemplateEntryfmt[]="nxxxxxxxxxxixxxxxxxxxxx";
 const char ItemRandomPropertiesfmt[] = "nxiiixxxxxxxxxxx";
 const char ItemSetEntryfmt[] = "dssssssssxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
 const char LockEntryfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
@@ -70,7 +70,7 @@ const char TaxiPathEntryfmt[] = "niii";
 const char TaxiPathNodeEntryfmt[] = "diiifffii";
 const char WMOAreaTableEntryfmt[] = "niiixxxxxiixxxxxxxxx";
 const char WorldMapAreaEntryfmt[] = "xinxffff";
-//const char WorldMapOverlayEntryfmt[]="nxiiiixxxxxxxxxxx";
+// const char WorldMapOverlayEntryfmt[]="nxiiiixxxxxxxxxxx";
 const char WorldSafeLocsEntryfmt[] = "nifffxxxxxxxxx";
 
 #endif

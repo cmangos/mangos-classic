@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -175,7 +175,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         }
     }
 
-    //DEBUG_LOG("BuildCreateUpdate: update-type: %u, object-type: %u got updateFlags: %X", updatetype, m_objectTypeId, updateFlags);
+    // DEBUG_LOG("BuildCreateUpdate: update-type: %u, object-type: %u got updateFlags: %X", updatetype, m_objectTypeId, updateFlags);
 
     ByteBuffer buf(500);
     buf << uint8(updatetype);
@@ -249,7 +249,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
         *data << uint32(WorldTimer::getMSTime());           // time (in milliseconds)
     }
 
-    if (updateFlags & UPDATEFLAG_HAS_POSITION)                     // 0x40
+    if (updateFlags & UPDATEFLAG_HAS_POSITION)              // 0x40
     {
         if (m_objectTypeId == TYPEID_PLAYER && ((Player*)this)->GetTransport())
         {
@@ -286,7 +286,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 
         *data << (float)0;
 
-        if (moveFlags & 0x2000)                             //update self
+        if (moveFlags & 0x2000)                             // update self
         {
             *data << (float)0;
             *data << (float)1.0;
@@ -314,9 +314,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
                 *data << (uint32)PosCount;
                 for (int i = 0; i < PosCount + 1; i++)
                 {
-                    *data << (float)0;                      //x
-                    *data << (float)0;                      //y
-                    *data << (float)0;                      //z
+                    *data << (float)0;                      // x
+                    *data << (float)0;                      // y
+                    *data << (float)0;                      // z
                 }
             }
         }
@@ -330,7 +330,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
     // 0x2
     if (updateFlags & UPDATEFLAG_TRANSPORT)
     {
-        *data << uint32(WorldTimer::getMSTime());                       // ms time
+        *data << uint32(WorldTimer::getMSTime());           // ms time
     }
 }
 
@@ -874,7 +874,7 @@ InstanceData* WorldObject::GetInstanceData() const
     return GetMap()->GetInstanceData();
 }
 
-//slow
+// slow
 float WorldObject::GetDistance(const WorldObject* obj) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
@@ -1072,7 +1072,7 @@ float WorldObject::GetAngle(const WorldObject* obj) const
         return 0.0f;
 
     // Rework the assert, when more cases where such a call can happen have been fixed
-    //MANGOS_ASSERT(obj != this || PrintEntryError("GetAngle (for self)"));
+    // MANGOS_ASSERT(obj != this || PrintEntryError("GetAngle (for self)"));
     if (obj == this)
     {
         sLog.outError("INVALID CALL for GetAngle for %s", obj->GetGuidStr().c_str());
@@ -1360,21 +1360,21 @@ void WorldObject::BuildMonsterChat(WorldPacket* data, ObjectGuid senderGuid, uin
 
 void WorldObject::SendMessageToSet(WorldPacket* data, bool /*bToSelf*/)
 {
-    //if object is in world, map for it already created!
+    // if object is in world, map for it already created!
     if (IsInWorld())
         GetMap()->MessageBroadcast(this, data);
 }
 
 void WorldObject::SendMessageToSetInRange(WorldPacket* data, float dist, bool /*bToSelf*/)
 {
-    //if object is in world, map for it already created!
+    // if object is in world, map for it already created!
     if (IsInWorld())
         GetMap()->MessageDistBroadcast(this, data, dist);
 }
 
 void WorldObject::SendMessageToSetExcept(WorldPacket* data, Player const* skipped_receiver)
 {
-    //if object is in world, map for it already created!
+    // if object is in world, map for it already created!
     if (IsInWorld())
     {
         MaNGOS::MessageDelivererExcept notifier(data, skipped_receiver);
@@ -1401,7 +1401,7 @@ void WorldObject::SetMap(Map* map)
 {
     MANGOS_ASSERT(map);
     m_currMap = map;
-    //lets save current map's Id/instanceId
+    // lets save current map's Id/instanceId
     m_mapId = map->GetId();
     m_InstanceId = map->GetInstanceId();
 }
@@ -1597,7 +1597,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     float angle;                                            // candidate of angle for free pos
 
     // select in positions after current nodes (selection one by one)
-    while (selector.NextAngle(angle))                        // angle for free pos
+    while (selector.NextAngle(angle))                       // angle for free pos
     {
         GetNearPoint2D(x, y, distance2d + searcher_bounding_radius, absAngle + angle);
         z = GetPositionZ();

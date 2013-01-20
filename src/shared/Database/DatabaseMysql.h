@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,24 +35,24 @@
 #include <mysql.h>
 #endif
 
-//MySQL prepared statement class
+// MySQL prepared statement class
 class MANGOS_DLL_SPEC MySqlPreparedStatement : public SqlPreparedStatement
 {
     public:
         MySqlPreparedStatement(const std::string& fmt, SqlConnection& conn, MYSQL* mysql);
         ~MySqlPreparedStatement();
 
-        //prepare statement
+        // prepare statement
         virtual bool prepare() override;
 
-        //bind input parameters
+        // bind input parameters
         virtual void bind(const SqlStmtParameters& holder) override;
 
-        //execute DML statement
+        // execute DML statement
         virtual bool execute() override;
 
     protected:
-        //bind parameters
+        // bind parameters
         void addParam(unsigned int nIndex, const SqlStmtFieldData& data);
 
         static enum_field_types ToMySQLType(const SqlStmtFieldData& data, my_bool& bUnsigned);

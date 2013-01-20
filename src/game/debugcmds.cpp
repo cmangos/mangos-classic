@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -228,7 +228,7 @@ bool ChatHandler::HandleDebugPlayCinematicCommand(char* args)
     return true;
 }
 
-//Play sound
+// Play sound
 bool ChatHandler::HandleDebugPlaySoundCommand(char* args)
 {
     // USAGE: .debug playsound #soundid
@@ -261,7 +261,7 @@ bool ChatHandler::HandleDebugPlaySoundCommand(char* args)
     return true;
 }
 
-//Send notification in channel
+// Send notification in channel
 bool ChatHandler::HandleDebugSendChannelNotifyCommand(char* args)
 {
     const char* name = "test";
@@ -279,7 +279,7 @@ bool ChatHandler::HandleDebugSendChannelNotifyCommand(char* args)
     return true;
 }
 
-//Send notification in chat
+// Send notification in chat
 bool ChatHandler::HandleDebugSendChatMsgCommand(char* args)
 {
     const char* msg = "testtest";
@@ -628,7 +628,7 @@ bool ChatHandler::HandleDebugSpellCheckCommand(char* /*args*/)
     return true;
 }
 
-//show animation
+// show animation
 bool ChatHandler::HandleDebugAnimCommand(char* args)
 {
     uint32 emote_id;

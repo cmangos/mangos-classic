@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ void ModClass::LoadModConfSettings(bool reload)
     }
     else
     {
-        //Get configuration file
+        // Get configuration file
         if (!ModConfig.SetSource(_MODS_CONFIG))
         {
             loaded = false;

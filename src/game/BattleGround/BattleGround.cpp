@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,7 +107,7 @@ namespace MaNGOS
         private:
             void do_helper(WorldPacket& data, char const* text)
             {
-                //copyied from BuildMonsterChat
+                // copyied from BuildMonsterChat
                 data << uint8(CHAT_MSG_MONSTER_YELL);
                 data << uint32(i_language);
                 data << ObjectGuid(i_source->GetObjectGuid());
@@ -116,7 +116,7 @@ namespace MaNGOS
                 data << ObjectGuid();                       // Unit Target - isn't important for bgs
                 data << uint32(strlen(text) + 1);
                 data << text;
-                data << uint8(0);                                      // ChatTag - for bgs allways 0?
+                data << uint8(0);                           // ChatTag - for bgs allways 0?
             }
 
             uint32 i_language;
@@ -171,7 +171,7 @@ namespace MaNGOS
 
                 char str [2048];
                 snprintf(str, 2048, text, arg1str, arg2str);
-                //copyied from BuildMonsterChat
+                // copyied from BuildMonsterChat
                 data << uint8(CHAT_MSG_MONSTER_YELL);
                 data << uint32(i_language);
                 data << ObjectGuid(i_source->GetObjectGuid());
@@ -254,7 +254,7 @@ BattleGround::BattleGround()
     m_StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_1M;
     m_StartDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_30S;
     m_StartDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
-    //we must set to some default existing values
+    // we must set to some default existing values
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_WS_START_ONE_MINUTE;
     m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_WS_START_HALF_MINUTE;
@@ -319,7 +319,7 @@ void BattleGround::Update(uint32 diff)
             {
                 RemovePlayerAtLeave(itr->first, true, true);// remove player from BG
                 m_OfflineQueue.pop_front();                 // remove from offline queue
-                //do not use itr for anything, because it is erased in RemovePlayerAtLeave()
+                // do not use itr for anything, because it is erased in RemovePlayerAtLeave()
             }
         }
     }
@@ -359,7 +359,7 @@ void BattleGround::Update(uint32 diff)
             }
             else
             {
-                //announce every 15 seconds
+                // announce every 15 seconds
                 if (newtime / (15 * IN_MILLISECONDS) != m_PrematureCountDownTimer / (15 * IN_MILLISECONDS))
                     PSendMessageToAll(LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING_SECS, CHAT_MSG_SYSTEM, NULL, (uint32)(m_PrematureCountDownTimer / IN_MILLISECONDS));
             }
@@ -391,7 +391,7 @@ void BattleGround::Update(uint32 diff)
 
             StartingEventCloseDoors();
             SetStartDelayTime(m_StartDelayTimes[BG_STARTING_EVENT_FIRST]);
-            //first start warning - 2 or 1 minute, only if defined
+            // first start warning - 2 or 1 minute, only if defined
             if (m_StartMessageIds[BG_STARTING_EVENT_FIRST])
                 SendMessageToAll(m_StartMessageIds[BG_STARTING_EVENT_FIRST], CHAT_MSG_BG_SYSTEM_NEUTRAL);
         }
@@ -422,7 +422,7 @@ void BattleGround::Update(uint32 diff)
 
                 PlaySoundToAll(SOUND_BG_START);
 
-                //Announce BG starting
+                // Announce BG starting
                 if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_START))
                 {
                     sWorld.SendWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), GetMinLevel(), GetMaxLevel());
@@ -447,14 +447,14 @@ void BattleGround::Update(uint32 diff)
             {
                 next = itr;
                 ++next;
-                //itr is erased here!
+                // itr is erased here!
                 RemovePlayerAtLeave(itr->first, true, true);// remove player from BG
                 // do not change any battleground's private variables
             }
         }
     }
 
-    //update start time
+    // update start time
     m_StartTime += diff;
 }
 
@@ -653,7 +653,7 @@ void BattleGround::EndBattleGround(Team winner)
     SetWinner(winner);
 
     SetStatus(STATUS_WAIT_LEAVE);
-    //we must set it this way, because end time is sent in packet!
+    // we must set it this way, because end time is sent in packet!
     m_EndTime = TIME_TO_AUTOREMOVE;
 
     for (BattleGroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
@@ -681,13 +681,13 @@ void BattleGround::EndBattleGround(Team winner)
         }
         else
         {
-            //needed cause else in av some creatures will kill the players at the end
+            // needed cause else in av some creatures will kill the players at the end
             plr->CombatStop();
             plr->getHostileRefManager().deleteReferences();
         }
 
-        //this line is obsolete - team is set ALWAYS
-        //if(!team) team = plr->GetTeam();
+        // this line is obsolete - team is set ALWAYS
+        // if(!team) team = plr->GetTeam();
 
         if (team == winner)
         {
@@ -715,7 +715,7 @@ void BattleGround::EndBattleGround(Team winner)
 
 uint32 BattleGround::GetBonusHonorFromKill(uint32 kills) const
 {
-    //variable kills means how many honorable kills you scored (so we need kills * honor_for_one_kill)
+    // variable kills means how many honorable kills you scored (so we need kills * honor_for_one_kill)
     return (uint32)MaNGOS::Honor::hk_honor_at_level(GetMaxLevel(), kills);
 }
 
@@ -917,7 +917,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
             }
         }
         DecreaseInvitedCount(team);
-        //we should update battleground queue, but only if bg isn't ending
+        // we should update battleground queue, but only if bg isn't ending
         if (GetStatus() < STATUS_WAIT_LEAVE)
         {
             // a player has left the battleground, so there are free slots -> add to queue
@@ -944,7 +944,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
         DETAIL_LOG("BATTLEGROUND: Removed player %s from BattleGround.", plr->GetName());
     }
 
-    //battleground object will be deleted next BattleGround::Update() call
+    // battleground object will be deleted next BattleGround::Update() call
 }
 
 // this method is called when no players remains in battleground
@@ -1106,7 +1106,7 @@ void BattleGround::RemoveFromBGFreeSlotQueue()
 // returns the number how many players can join battleground to MaxPlayersPerTeam
 uint32 BattleGround::GetFreeSlotsForTeam(Team team) const
 {
-    //return free slot count to MaxPlayerPerTeam
+    // return free slot count to MaxPlayerPerTeam
     if (GetStatus() == STATUS_WAIT_JOIN || GetStatus() == STATUS_IN_PROGRESS)
         return (GetInvitedCount(team) < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - GetInvitedCount(team) : 0;
 
@@ -1120,7 +1120,7 @@ bool BattleGround::HasFreeSlots() const
 
 void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
 {
-    //this procedure is called from virtual function implemented in bg subclass
+    // this procedure is called from virtual function implemented in bg subclass
     BattleGroundScoreMap::const_iterator itr = m_PlayerScores.find(Source->GetObjectGuid());
 
     if (itr == m_PlayerScores.end())                        // player not found...
@@ -1190,17 +1190,17 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
     return true;
 }
 
-//some doors aren't despawned so we cannot handle their closing in gameobject::update()
-//it would be nice to correctly implement GO_ACTIVATED state and open/close doors in gameobject code
+// some doors aren't despawned so we cannot handle their closing in gameobject::update()
+// it would be nice to correctly implement GO_ACTIVATED state and open/close doors in gameobject code
 void BattleGround::DoorClose(ObjectGuid guid)
 {
     GameObject* obj = GetBgMap()->GetGameObject(guid);
     if (obj)
     {
-        //if doors are open, close it
+        // if doors are open, close it
         if (obj->getLootState() == GO_ACTIVATED && obj->GetGoState() != GO_STATE_READY)
         {
-            //change state to allow door to be closed
+            // change state to allow door to be closed
             obj->SetLootState(GO_READY);
             obj->UseDoorOrButton(RESPAWN_ONE_DAY);
         }
@@ -1214,7 +1214,7 @@ void BattleGround::DoorOpen(ObjectGuid guid)
     GameObject* obj = GetBgMap()->GetGameObject(guid);
     if (obj)
     {
-        //change state to be sure they will be opened
+        // change state to be sure they will be opened
         obj->SetLootState(GO_READY);
         obj->UseDoorOrButton(RESPAWN_ONE_DAY);
     }
@@ -1323,7 +1323,7 @@ void BattleGround::SpawnBGObject(ObjectGuid guid, uint32 respawntime)
         return;
     if (respawntime == 0)
     {
-        //we need to change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
+        // we need to change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
         if (obj->getLootState() == GO_JUST_DEACTIVATED)
             obj->SetLootState(GO_READY);
         obj->SetRespawnTime(0);
@@ -1460,14 +1460,14 @@ void BattleGround::HandleTriggerBuff(ObjectGuid go_guid)
         return;
     }
 
-    //randomly select new buff
+    // randomly select new buff
     uint8 buff = urand(0, 2);
     uint32 entry = obj->GetEntry();
     if (m_BuffChange && entry != Buff_Entries[buff])
     {
-        //despawn current buff
+        // despawn current buff
         SpawnBGObject(m_BgObjects[index], RESPAWN_ONE_DAY);
-        //set index for new one
+        // set index for new one
         for (uint8 currBuffTypeIndex = 0; currBuffTypeIndex < 3; ++currBuffTypeIndex)
         {
             if (entry == Buff_Entries[currBuffTypeIndex])

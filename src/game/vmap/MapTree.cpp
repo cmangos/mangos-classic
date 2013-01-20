@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ namespace VMAP
         std::stringstream tilefilename;
         tilefilename.fill('0');
         tilefilename << std::setw(3) << mapID << "_";
-        //tilefilename << std::setw(2) << tileX << "_" << std::setw(2) << tileY << ".vmtile";
+        // tilefilename << std::setw(2) << tileX << "_" << std::setw(2) << tileY << ".vmtile";
         tilefilename << std::setw(2) << tileY << "_" << std::setw(2) << tileX << ".vmtile";
         return tilefilename.str();
     }
@@ -281,7 +281,7 @@ namespace VMAP
         else
         {
             char chunk[8];
-            //general info
+            // general info
             if (!readChunk(rf, chunk, VMAP_MAGIC, 8)) success = false;
             char tiled;
             if (success && fread(&tiled, sizeof(char), 1, rf) != 1) success = false;

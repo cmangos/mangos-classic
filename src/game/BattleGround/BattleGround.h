@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -158,13 +158,13 @@ enum ScoreType
     SCORE_DEATHS                = 2,
     SCORE_HONORABLE_KILLS       = 3,
     SCORE_BONUS_HONOR           = 4,
-    //WS
+    // WS
     SCORE_FLAG_CAPTURES         = 7,
     SCORE_FLAG_RETURNS          = 8,
-    //AB
+    // AB
     SCORE_BASES_ASSAULTED       = 9,
     SCORE_BASES_DEFENDED        = 10,
-    //AV
+    // AV
     SCORE_GRAVEYARDS_ASSAULTED  = 11,
     SCORE_GRAVEYARDS_DEFENDED   = 12,
     SCORE_TOWERS_ASSAULTED      = 13,
@@ -205,7 +205,7 @@ enum BattleGroundJoinError
     BG_JOIN_ERR_GROUP_TOO_MANY = 2,
     BG_JOIN_ERR_MIXED_FACTION = 3,
     BG_JOIN_ERR_MIXED_LEVELS = 4,
-    //BG_JOIN_ERR_MIXED_ARENATEAM = 5,
+    // BG_JOIN_ERR_MIXED_ARENATEAM = 5,
     BG_JOIN_ERR_GROUP_MEMBER_ALREADY_IN_QUEUE = 6,
     BG_JOIN_ERR_GROUP_DESERTER = 7,
     BG_JOIN_ERR_ALL_QUEUES_USED = 8,
@@ -218,7 +218,7 @@ class BattleGroundScore
         BattleGroundScore() : KillingBlows(0), Deaths(0), HonorableKills(0),
             DishonorableKills(0), BonusHonor(0)
         {}
-        virtual ~BattleGroundScore() {}                     //virtual destructor is used when deleting score from scores map
+        virtual ~BattleGroundScore() {}                     // virtual destructor is used when deleting score from scores map
 
         uint32 KillingBlows;
         uint32 Deaths;
@@ -297,8 +297,8 @@ class BattleGround
         void SetMaxPlayersPerTeam(uint32 MaxPlayers) { m_MaxPlayersPerTeam = MaxPlayers; }
         void SetMinPlayersPerTeam(uint32 MinPlayers) { m_MinPlayersPerTeam = MinPlayers; }
 
-        void AddToBGFreeSlotQueue();                        //this queue will be useful when more battlegrounds instances will be available
-        void RemoveFromBGFreeSlotQueue();                   //this method could delete whole BG instance, if another free is available
+        void AddToBGFreeSlotQueue();                        // this queue will be useful when more battlegrounds instances will be available
+        void RemoveFromBGFreeSlotQueue();                   // this method could delete whole BG instance, if another free is available
 
         void DecreaseInvitedCount(Team team)      { (team == ALLIANCE) ? --m_InvitedAlliance : --m_InvitedHorde; }
         void IncreaseInvitedCount(Team team)      { (team == ALLIANCE) ? ++m_InvitedAlliance : ++m_InvitedHorde; }
@@ -476,7 +476,7 @@ class BattleGround
 
 
     protected:
-        //this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround
+        // this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround
         void EndNow();
         void PlayerAddedToBGCheckIfBGIsRunning(Player* plr);
 
@@ -494,7 +494,7 @@ class BattleGround
         */
         uint8 m_Events;
         BattleGroundStartTimeIntervals  m_StartDelayTimes[BG_STARTING_EVENT_COUNT];
-        //this must be filled in constructors!
+        // this must be filled in constructors!
         uint32 m_StartMessageIds[BG_STARTING_EVENT_COUNT];
 
         bool   m_BuffChange;
@@ -503,7 +503,7 @@ class BattleGround
         /* Battleground */
         BattleGroundTypeId m_TypeID;
         BattleGroundStatus m_Status;
-        uint32 m_ClientInstanceID;                          //the instance-id which is sent to the client and without any other internal use
+        uint32 m_ClientInstanceID;                          // the instance-id which is sent to the client and without any other internal use
         uint32 m_StartTime;
         int32 m_EndTime;                                    // it is set to 120000 when bg is ending and it decreases itself
         BattleGroundBracketId m_BracketId;
@@ -525,7 +525,7 @@ class BattleGround
         uint32 m_InvitedHorde;
 
         /* Raid Group */
-        Group* m_BgRaids[BG_TEAMS_COUNT];                                // 0 - alliance, 1 - horde
+        Group* m_BgRaids[BG_TEAMS_COUNT];                   // 0 - alliance, 1 - horde
 
         /* Players count by team */
         uint32 m_PlayersCount[BG_TEAMS_COUNT];

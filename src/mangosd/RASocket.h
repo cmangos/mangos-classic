@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,15 +79,15 @@ class RASocket: protected RAHandler
 
         uint32 accId;
         AccountTypes accAccessLevel;
-        bool bSecure;                                       //kick on wrong pass, non exist. user OR user with no priv
-        //will protect from DOS, bruteforce attacks
+        bool bSecure;                                       // kick on wrong pass, non exist. user OR user with no priv
+        // will protect from DOS, bruteforce attacks
         bool bStricted;                                     // not allow execute console only commands (SEC_CONSOLE) remotly
         AccountTypes iMinLevel;
         enum
         {
-            NONE,                                           //initial value
-            LG,                                             //only login was entered
-            OK,                                             //both login and pass were given, they were correct and user has enough priv.
+            NONE,                                           // initial value
+            LG,                                             // only login was entered
+            OK,                                             // both login and pass were given, they were correct and user has enough priv.
         } stage;
 
         static void zprint(void* callbackArg, const char* szText);

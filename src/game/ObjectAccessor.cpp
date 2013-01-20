@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -194,9 +194,9 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
     Corpse* corpse = GetCorpseForPlayerGUID(player_guid);
     if (!corpse)
     {
-        //in fact this function is called from several places
-        //even when player doesn't have a corpse, not an error
-        //sLog.outError("Try remove corpse that not in map for GUID %ul", player_guid);
+        // in fact this function is called from several places
+        // even when player doesn't have a corpse, not an error
+        // sLog.outError("Try remove corpse that not in map for GUID %ul", player_guid);
         return NULL;
     }
 
@@ -225,13 +225,13 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
         bones = new Corpse;
         bones->Create(corpse->GetGUIDLow());
 
-        for (int i = 3; i < CORPSE_END; ++i)                    // don't overwrite guid and object type
+        for (int i = 3; i < CORPSE_END; ++i)                // don't overwrite guid and object type
             bones->SetUInt32Value(i, corpse->GetUInt32Value(i));
 
         bones->SetGrid(corpse->GetGrid());
-        // bones->m_time = m_time;                              // don't overwrite time
-        // bones->m_inWorld = m_inWorld;                        // don't overwrite world state
-        // bones->m_type = m_type;                              // don't overwrite type
+        // bones->m_time = m_time;                          // don't overwrite time
+        // bones->m_inWorld = m_inWorld;                    // don't overwrite world state
+        // bones->m_type = m_type;                          // don't overwrite type
         bones->Relocate(corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetOrientation());
 
         bones->SetUInt32Value(CORPSE_FIELD_FLAGS, CORPSE_FLAG_UNK2 | CORPSE_FLAG_BONES);

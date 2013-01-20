@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ TotemAI::UpdateAI(const uint32 /*diff*/)
         i_victimGuid = victim->GetObjectGuid();
 
         // attack
-        m_creature->SetInFront(victim);                      // client change orientation by self
+        m_creature->SetInFront(victim);                     // client change orientation by self
         m_creature->CastSpell(victim, getTotem().GetSpell(), false);
     }
     else

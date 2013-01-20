@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ struct AuctionEntry
     bool UpdateBid(uint32 newbid, Player* newbidder = NULL);// true if normal bid, false if buyout, bidder==NULL for generated bid
 };
 
-//this class is used as auctionhouse instance
+// this class is used as auctionhouse instance
 class AuctionHouseObject
 {
     public:
@@ -159,7 +159,7 @@ class AuctionHouseMgr
             return NULL;
         }
 
-        //auction messages
+        // auction messages
         void SendAuctionWonMail(AuctionEntry* auction);
         void SendAuctionSuccessfulMail(AuctionEntry* auction);
         void SendAuctionExpiredMail(AuctionEntry* auction);
@@ -169,7 +169,7 @@ class AuctionHouseMgr
         static AuctionHouseEntry const* GetAuctionHouseEntry(Unit* unit);
 
     public:
-        //load first auction items, because of check if item exists, when loading
+        // load first auction items, because of check if item exists, when loading
         void LoadAuctionItems();
         void LoadAuctions();
 

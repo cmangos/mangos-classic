@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1271,10 +1271,10 @@ void ScriptAction::HandleScriptStep()
             }
 
             if (pGo->isSpawned())
-                break;                                      //gameobject already spawned
+                break;                                      // gameobject already spawned
 
             pGo->SetLootState(GO_READY);
-            pGo->SetRespawnTime(time_to_despawn);           //despawn object in ? seconds
+            pGo->SetRespawnTime(time_to_despawn);           // despawn object in ? seconds
             pGo->Refresh();
             break;
         }
@@ -1371,7 +1371,7 @@ void ScriptAction::HandleScriptStep()
             if (LogIfNotUnit(pTarget))
                 break;
 
-            //TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
+            // TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
             ((Unit*)pSource)->CastSpell(((Unit*)pTarget), m_script->castSpell.spellId, (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) != 0);
 
             break;

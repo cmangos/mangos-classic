@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,8 +61,8 @@ class GridInfo
     private:
 
         TimeTracker i_timer;
-        uint16 i_unloadActiveLockCount : 16;                    // lock from active object spawn points (prevent clone loading)
-        bool i_unloadExplicitLock      : 1;                     // explicit manual lock or config setting
+        uint16 i_unloadActiveLockCount : 16;                // lock from active object spawn points (prevent clone loading)
+        bool i_unloadExplicitLock      : 1;                 // explicit manual lock or config setting
 };
 
 typedef enum

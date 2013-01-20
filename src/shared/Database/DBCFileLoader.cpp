@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2005-2011 MaNGOS <http://getmangos.com/>
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,14 +159,14 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
     if (strlen(format) != fieldCount)
         return NULL;
 
-    //get struct size and index pos
+    // get struct size and index pos
     int32 i;
     uint32 recordsize = GetFormatRecordSize(format, &i);
 
     if (i >= 0)
     {
         uint32 maxi = 0;
-        //find max index
+        // find max index
         for (uint32 y = 0; y < recordCount; ++y)
         {
             uint32 ind = getRecord(y).getUInt(i);

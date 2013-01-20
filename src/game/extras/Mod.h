@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2011 MaNGOSZero <https://github.com/mangos/zero>
+ * Copyright (C) 2009-2011 MaNGOSZero <https:// github.com/mangos/zero>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,19 +27,19 @@
 
 enum ModConfigUint32Values
 {
-    MODCONFIG_UINT32_EMPTY = 0,  //overwrite with new conf
+    MODCONFIG_UINT32_EMPTY = 0,  // overwrite with new conf
     MODCONFIG_UINT32_VALUE_COUNT
 };
 
 enum ModConfigInt32Values
 {
-    MODCONFIG_INT32_EMPTY = 0,  //overwrite with new conf
+    MODCONFIG_INT32_EMPTY = 0,  // overwrite with new conf
     MODCONFIG_INT32_VALUE_COUNT
 };
 
 enum ModConfigFloatValues
 {
-    MODCONFIG_FLOAT_EMPTY = 0,  //overwrite with new conf
+    MODCONFIG_FLOAT_EMPTY = 0,  // overwrite with new conf
     MODCONFIG_FLOAT_VALUE_COUNT
 };
 
