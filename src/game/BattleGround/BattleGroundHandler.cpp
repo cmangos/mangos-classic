@@ -19,19 +19,19 @@
 
 #include "Common.h"
 #include "WorldPacket.h"
-#include "../Opcodes.h"
+#include "Opcodes.h"
 #include "Log.h"
-#include "../Player.h"
-#include "../ObjectMgr.h"
-#include "../WorldSession.h"
-#include "../Object.h"
-#include "../Chat.h"
+#include "Player.h"
+#include "ObjectMgr.h"
+#include "WorldSession.h"
+#include "Object.h"
+#include "Chat.h"
 #include "BattleGroundMgr.h"
 #include "BattleGroundWS.h"
 #include "BattleGround.h"
-#include "../Language.h"
-#include "../ScriptMgr.h"
-#include "../World.h"
+#include "Language.h"
+#include "ScriptMgr.h"
+#include "World.h"
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recv_data)
 {
