@@ -793,7 +793,7 @@ float TerrainInfo::GetHeight(float x, float y, float z, bool pUseVmaps, float ma
     return mapHeight;
 }
 
-inline bool IsOutdoorWMO(uint32 mogpFlags, uint32 mapId)
+inline bool IsOutdoorWMO(uint32 mogpFlags)
 {
     return mogpFlags & 0x8000;
 }
@@ -807,7 +807,7 @@ bool TerrainInfo::IsOutdoors(float x, float y, float z) const
     if (!GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
         return true;
 
-    return IsOutdoorWMO(mogpFlags, GetMapId());
+    return IsOutdoorWMO(mogpFlags);
 }
 
 bool TerrainInfo::GetAreaInfo(float x, float y, float z, uint32& flags, int32& adtId, int32& rootId, int32& groupId) const
@@ -860,7 +860,7 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
     if (isOutdoors)
     {
         if (haveAreaInfo)
-            *isOutdoors = IsOutdoorWMO(mogpFlags, GetMapId());
+            *isOutdoors = IsOutdoorWMO(mogpFlags);
         else
             *isOutdoors = true;
     }

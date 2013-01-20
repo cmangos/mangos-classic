@@ -1024,8 +1024,10 @@ enum MangosStrings
     LANG_OPVP_EP_CAPTURE_PWT_H          = 1606,
     LANG_OPVP_EP_CAPTURE_PWT_A          = 1607,
 
-    LANG_OPVP_SI_CAPTURE_H              = 1608,
-    LANG_OPVP_SI_CAPTURE_A              = 1609,
+    //                                    1608-1634 used in master branch
+
+    LANG_OPVP_SI_CAPTURE_H              = 1635,
+    LANG_OPVP_SI_CAPTURE_A              = 1636,
 
     // FREE IDS                           1700-9999
 
