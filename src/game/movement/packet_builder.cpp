@@ -84,17 +84,17 @@ namespace Movement
     {
         uint32 last_idx = spline.getPointCount() - 3;
         const Vector3* real_path = &spline.getPoint(1);
+        Vector3 destination = real_path[last_idx];
 
         data << last_idx;
-        data << real_path[last_idx];   // destination
+        data << destination;
         if (last_idx > 1)
         {
-            Vector3 middle = (real_path[0] + real_path[last_idx]) / 2.f;
             Vector3 offset;
             // first and last points already appended
             for (uint32 i = 1; i < last_idx; ++i)
             {
-                offset = middle - real_path[i];
+                offset = destination - real_path[i];
                 data.appendPackXYZ(offset.x, offset.y, offset.z);
             }
         }
