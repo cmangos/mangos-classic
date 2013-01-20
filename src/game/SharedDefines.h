@@ -2453,10 +2453,28 @@ enum ActivateTaxiReply
     ERR_TAXINOTSTANDING             = 12
 };
 
+enum AreaLockStatus
+{
+    AREA_LOCKSTATUS_OK                          = 0,
+    AREA_LOCKSTATUS_UNKNOWN_ERROR               = 1,
+    AREA_LOCKSTATUS_TOO_LOW_LEVEL               = 2,
+    AREA_LOCKSTATUS_TOO_HIGH_LEVEL              = 3,
+    AREA_LOCKSTATUS_RAID_LOCKED                 = 4,
+    AREA_LOCKSTATUS_QUEST_NOT_COMPLETED         = 5,
+    AREA_LOCKSTATUS_MISSING_ITEM                = 6,
+    AREA_LOCKSTATUS_ZONE_IN_COMBAT              = 7,
+    AREA_LOCKSTATUS_INSTANCE_IS_FULL            = 8,
+    AREA_LOCKSTATUS_NOT_ALLOWED                 = 9,
+    AREA_LOCKSTATUS_HAS_BIND                    = 10,
+};
+
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
 // will only support 1.12.1 client (build 5875) and 1.12.2 client (build 6005)..
 
 #define EXPECTED_MANGOSD_CLIENT_BUILD        {5875,6005, 0}
+
+// Maxlevel for expansion
+#define MAX_LEVEL_CLASSIC                    60
 
 #endif

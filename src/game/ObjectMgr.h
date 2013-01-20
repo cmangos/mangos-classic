@@ -65,7 +65,6 @@ struct AreaTrigger
     uint32 requiredItem;
     uint32 requiredItem2;
     uint32 requiredQuest;
-    std::string requiredFailedText;
     uint32 target_mapId;
     float  target_X;
     float  target_Y;

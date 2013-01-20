@@ -55,6 +55,8 @@ class DungeonPersistentState;
 class Spell;
 class Item;
 
+struct AreaTrigger;
+
 typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS           127
@@ -2012,6 +2014,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendSavedInstances();
         static void ConvertInstancesToGroup(Player* player, Group* group = NULL, ObjectGuid player_guid = ObjectGuid());
         DungeonPersistentState* GetBoundInstanceSaveForSelfOrGroup(uint32 mapid);
+
+        AreaLockStatus GetAreaLockStatus(uint32 mapId, uint32& miscRequirement);
+        AreaLockStatus GetAreaTriggerLockStatus(AreaTrigger const* at, uint32& miscRequirement);
 
         /*********************************************************/
         /***                   GROUP SYSTEM                    ***/

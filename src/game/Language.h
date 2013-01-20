@@ -811,7 +811,8 @@ enum MangosStrings
     LANG_GUILD_INITIATE                 = 815,
     //                                    816 used in master branch
     //                                    817 used in master branch
-    // Room for in-game strings           818-999 not used
+    //                                    818 used in master branch
+    // Room for in-game strings           819-999 not used
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,

@@ -666,42 +666,42 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
 
     recv_data >> Trigger_ID;
     DEBUG_LOG("Trigger ID: %u", Trigger_ID);
+    Player* player = GetPlayer();
 
-    if (GetPlayer()->IsTaxiFlying())
+    if (player->IsTaxiFlying())
     {
-        DEBUG_LOG("Player '%s' (GUID: %u) in flight, ignore Area Trigger ID: %u", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), Trigger_ID);
+        DEBUG_LOG("Player '%s' (GUID: %u) in flight, ignore Area Trigger ID: %u", player->GetName(), player->GetGUIDLow(), Trigger_ID);
         return;
     }
 
     AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
     if (!atEntry)
     {
-        DEBUG_LOG("Player '%s' (GUID: %u) send unknown (by DBC) Area Trigger ID: %u", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), Trigger_ID);
+        DEBUG_LOG("Player '%s' (GUID: %u) send unknown (by DBC) Area Trigger ID: %u", player->GetName(), player->GetGUIDLow(), Trigger_ID);
         return;
     }
 
     // delta is safe radius
     const float delta = 5.0f;
-    // check if player in the range of areatrigger
-    Player* pl = GetPlayer();
 
-    if (!IsPointInAreaTriggerZone(atEntry, pl->GetMapId(), pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), delta))
+    // check if player in the range of areatrigger
+    if (!IsPointInAreaTriggerZone(atEntry, player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), delta))
     {
-        DEBUG_LOG("Player '%s' (GUID: %u) too far, ignore Area Trigger ID: %u", pl->GetName(), pl->GetGUIDLow(), Trigger_ID);
+        DEBUG_LOG("Player '%s' (GUID: %u) too far, ignore Area Trigger ID: %u", player->GetName(), player->GetGUIDLow(), Trigger_ID);
         return;
     }
 
-    if (sScriptMgr.OnAreaTrigger(pl, atEntry))
+    if (sScriptMgr.OnAreaTrigger(player, atEntry))
         return;
 
     uint32 quest_id = sObjectMgr.GetQuestForAreaTrigger(Trigger_ID);
-    if (quest_id && pl->isAlive() && pl->IsActiveQuest(quest_id))
+    if (quest_id && player->isAlive() && player->IsActiveQuest(quest_id))
     {
         Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest_id);
         if (pQuest)
         {
-            if (pl->GetQuestStatus(quest_id) == QUEST_STATUS_INCOMPLETE)
-                pl->AreaExploredOrEventHappens(quest_id);
+            if (player->GetQuestStatus(quest_id) == QUEST_STATUS_INCOMPLETE)
+                player->AreaExploredOrEventHappens(quest_id);
         }
     }
 
@@ -709,19 +709,19 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
     if (sObjectMgr.IsTavernAreaTrigger(Trigger_ID))
     {
         // set resting flag we are in the inn
-        if (pl->GetRestType() != REST_TYPE_IN_CITY)
-            pl->SetRestType(REST_TYPE_IN_TAVERN, Trigger_ID);
+        if (player->GetRestType() != REST_TYPE_IN_CITY)
+            player->SetRestType(REST_TYPE_IN_TAVERN, Trigger_ID);
         return;
     }
 
-    if (BattleGround* bg = pl->GetBattleGround())
+    if (BattleGround* bg = player->GetBattleGround())
     {
-        bg->HandleAreaTrigger(pl, Trigger_ID);
+        bg->HandleAreaTrigger(player, Trigger_ID);
         return;
     }
-    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(pl->GetCachedZoneId()))
+    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
     {
-        if (outdoorPvP->HandleAreaTrigger(pl, Trigger_ID))
+        if (outdoorPvP->HandleAreaTrigger(player, Trigger_ID))
             return;
     }
 
@@ -734,86 +734,82 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
     if (!targetMapEntry)
         return;
 
-    if (!pl->isGameMaster())
+    // ghost resurrected at enter attempt to dungeon with corpse (including fail enter cases)
+    if (!player->isAlive() && targetMapEntry->IsDungeon())
     {
-        // ghost resurrected at enter attempt to dungeon with corpse (including fail enter cases)
-        if (!pl->isAlive() && targetMapEntry->IsDungeon())
+        int32 corpseMapId = 0;
+        if (Corpse* corpse = player->GetCorpse())
+            corpseMapId = corpse->GetMapId();
+
+        // check back way from corpse to entrance
+        uint32 instance_map = corpseMapId;
+        do
         {
-            int32 corpseMapId = 0;
-            if (Corpse* corpse = pl->GetCorpse())
-                corpseMapId = corpse->GetMapId();
+            // most often fast case
+            if (instance_map == targetMapEntry->MapID)
+                break;
 
-            // check back way from corpse to entrance
-            uint32 instance_map = corpseMapId;
-            do
-            {
-                // most often fast case
-                if (instance_map == targetMapEntry->MapID)
-                    break;
-
-                InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(instance_map);
-                instance_map = instance ? instance->parent : 0;
-            }
-            while (instance_map);
-
-            // corpse not in dungeon or some linked deep dungeons
-            if (!instance_map)
-            {
-                pl->GetSession()->SendAreaTriggerMessage("You cannot enter %s while in a ghost mode",
-                        targetMapEntry->name[pl->GetSession()->GetSessionDbcLocale()]);
-                return;
-            }
-
-            // need find areatrigger to inner dungeon for landing point
-            if (at->target_mapId != corpseMapId)
-            {
-                if (AreaTrigger const* corpseAt = sObjectMgr.GetMapEntranceTrigger(corpseMapId))
-                {
-                    at = corpseAt;
-                    targetMapEntry = sMapStore.LookupEntry(at->target_mapId);
-                }
-            }
-
-            // now we can resurrect player, and then check teleport requirements
-            pl->ResurrectPlayer(0.5f);
-            pl->SpawnCorpseBones();
+            InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(instance_map);
+            instance_map = instance ? instance->parent : 0;
         }
+        while (instance_map);
 
-        uint32 missingLevel = 0;
-        if (GetPlayer()->getLevel() < at->requiredLevel && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_LEVEL))
-            missingLevel = at->requiredLevel;
-
-        // must have one or the other, report the first one that's missing
-        uint32 missingItem = 0;
-        if (at->requiredItem)
+        // corpse not in dungeon or some linked deep dungeons
+        if (!instance_map)
         {
-            if (!pl->HasItemCount(at->requiredItem, 1) &&
-                    (!at->requiredItem2 || !GetPlayer()->HasItemCount(at->requiredItem2, 1)))
-                missingItem = at->requiredItem;
-        }
-        else if (at->requiredItem2 && !GetPlayer()->HasItemCount(at->requiredItem2, 1))
-            missingItem = at->requiredItem2;
-
-        uint32 missingQuest = 0;
-        if (at->requiredQuest && !GetPlayer()->GetQuestRewardStatus(at->requiredQuest))
-            missingQuest = at->requiredQuest;
-
-        if (missingLevel || missingItem || missingQuest)
-        {
-            // TODO: all this is probably wrong
-            if (missingItem)
-                SendAreaTriggerMessage(GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM), at->requiredLevel, ObjectMgr::GetItemPrototype(missingItem)->Name1);
-            /*[-ZERO] else if(missingKey)
-                GetPlayer()->SendTransferAborted(at->target_mapId,0); */
-            else if (missingQuest)
-                SendAreaTriggerMessage("%s", at->requiredFailedText.c_str());
-            else if (missingLevel)
-                SendAreaTriggerMessage(GetMangosString(LANG_LEVEL_MINREQUIRED), missingLevel);
+            player->GetSession()->SendAreaTriggerMessage("You cannot enter %s while in a ghost mode",
+                    targetMapEntry->name[player->GetSession()->GetSessionDbcLocale()]);
             return;
         }
+
+        // need find areatrigger to inner dungeon for landing point
+        if (at->target_mapId != corpseMapId)
+        {
+            if (AreaTrigger const* corpseAt = sObjectMgr.GetMapEntranceTrigger(corpseMapId))
+            {
+                at = corpseAt;
+                targetMapEntry = sMapStore.LookupEntry(at->target_mapId);
+            }
+        }
+
+        // now we can resurrect player, and then check teleport requirements
+        player->ResurrectPlayer(0.5f);
+        player->SpawnCorpseBones();
     }
 
-    GetPlayer()->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, at->target_Orientation, TELE_TO_NOT_LEAVE_TRANSPORT);
+    // check trigger requirements
+    uint32 miscRequirement = 0;
+    AreaLockStatus lockStatus = player->GetAreaTriggerLockStatus(at, miscRequirement);
+    switch (lockStatus)
+    {
+        case AREA_LOCKSTATUS_OK:
+            player->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, at->target_Orientation, TELE_TO_NOT_LEAVE_TRANSPORT);
+            break;
+        case AREA_LOCKSTATUS_TOO_LOW_LEVEL:
+            SendAreaTriggerMessage(GetMangosString(LANG_LEVEL_MINREQUIRED), miscRequirement);
+            break;
+        case AREA_LOCKSTATUS_ZONE_IN_COMBAT:
+            player->SendTransferAborted(at->target_mapId, TRANSFER_ABORT_ZONE_IN_COMBAT);
+            break;
+        case AREA_LOCKSTATUS_INSTANCE_IS_FULL:
+            player->SendTransferAborted(at->target_mapId, TRANSFER_ABORT_MAX_PLAYERS);
+            break;
+        case AREA_LOCKSTATUS_RAID_LOCKED:
+        case AREA_LOCKSTATUS_QUEST_NOT_COMPLETED:
+            if (targetMapEntry->IsContinent())         // do not report anything for quest areatrigge
+            {
+                DEBUG_LOG("HandleAreaTriggerOpcode: LockAreaStatus %u, do not teleport, no message sent (trigger %u)", lockStatus, Trigger_ID);
+                break;
+            }
+            // ToDo: SendAreaTriggerMessage or Transfer Abort for these cases!
+            break;
+        case AREA_LOCKSTATUS_MISSING_ITEM:
+            SendAreaTriggerMessage(GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM), at->requiredLevel, ObjectMgr::GetItemPrototype(miscRequirement)->Name1);
+            break;
+        default:
+            sLog.outError("HandleAreaTriggerOpcode: unhandled LockAreaStatus %u, when %s attempts to use area-trigger %u", lockStatus, player->GetGuidStr().c_str(), Trigger_ID);
+            break;
+    }
 }
 
 void WorldSession::HandleUpdateAccountData(WorldPacket& recv_data)

@@ -19142,3 +19142,89 @@ void Player::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSp
     float angle = this == target ? GetOrientation() + M_PI_F : target->GetAngle(this);
     GetSession()->SendKnockBack(angle, horizontalSpeed, verticalSpeed);
 }
+
+AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, uint32& miscRequirement)
+{
+    miscRequirement = 0;
+
+    if (!at)
+        return AREA_LOCKSTATUS_UNKNOWN_ERROR;
+
+    MapEntry const* mapEntry = sMapStore.LookupEntry(at->target_mapId);
+    if (!mapEntry)
+        return AREA_LOCKSTATUS_UNKNOWN_ERROR;
+
+    // Gamemaster can always enter
+    if (isGameMaster())
+        return AREA_LOCKSTATUS_OK;
+
+    // Level Requirements
+    if (getLevel() < at->requiredLevel && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_LEVEL))
+    {
+        miscRequirement = at->requiredLevel;
+        return AREA_LOCKSTATUS_TOO_LOW_LEVEL;
+    }
+    if (!sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_LEVEL) && getLevel() < uint32(MAX_LEVEL_CLASSIC))
+    {
+        miscRequirement = uint32(MAX_LEVEL_CLASSIC);
+        return AREA_LOCKSTATUS_TOO_LOW_LEVEL;
+    }
+
+    // Raid Requirements
+    if (mapEntry->IsRaid() && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_RAID))
+        if (!GetGroup() || !GetGroup()->isRaidGroup())
+            return AREA_LOCKSTATUS_RAID_LOCKED;
+
+    // Item Requirements: must have requiredItem OR requiredItem2, report the first one that's missing
+    if (at->requiredItem)
+    {
+        if (!HasItemCount(at->requiredItem, 1) &&
+             (!at->requiredItem2 || !HasItemCount(at->requiredItem2, 1)))
+        {
+            miscRequirement = at->requiredItem;
+            return AREA_LOCKSTATUS_MISSING_ITEM;
+        }
+    }
+    else if (at->requiredItem2 && !HasItemCount(at->requiredItem2, 1))
+    {
+        miscRequirement = at->requiredItem2;
+        return AREA_LOCKSTATUS_MISSING_ITEM;
+    }
+
+    // Quest Requirements
+    if (at->requiredQuest && !GetQuestRewardStatus(at->requiredQuest))
+    {
+        miscRequirement = at->requiredQuest;
+        return AREA_LOCKSTATUS_QUEST_NOT_COMPLETED;
+    }
+
+    // If the map is not created, assume it is possible to enter it.
+    DungeonPersistentState* state = GetBoundInstanceSaveForSelfOrGroup(at->target_mapId);
+    Map* map = sMapMgr.FindMap(at->target_mapId, state ? state->GetInstanceId() : 0);
+
+    // Map's state check
+    if (map && map->IsDungeon())
+    {
+        // cannot enter if the instance is full (player cap), GMs don't count
+        if (((DungeonMap*)map)->GetPlayersCountExceptGMs() >= ((DungeonMap*)map)->GetMaxPlayers())
+            return AREA_LOCKSTATUS_INSTANCE_IS_FULL;
+
+        // In Combat check
+        if (map && map->GetInstanceData() && map->GetInstanceData()->IsEncounterInProgress())
+            return AREA_LOCKSTATUS_ZONE_IN_COMBAT;
+
+        // Bind Checks
+        InstancePlayerBind* pBind = GetBoundInstance(at->target_mapId);
+        if (pBind && pBind->perm && pBind->state != state)
+            return AREA_LOCKSTATUS_HAS_BIND;
+        if (pBind && pBind->perm && pBind->state != map->GetPersistentState())
+            return AREA_LOCKSTATUS_HAS_BIND;
+    }
+
+    return AREA_LOCKSTATUS_OK;
+};
+
+AreaLockStatus Player::GetAreaLockStatus(uint32 mapId, uint32& miscRequirement)
+{
+    return GetAreaTriggerLockStatus(sObjectMgr.GetMapEntranceTrigger(mapId), miscRequirement);
+};

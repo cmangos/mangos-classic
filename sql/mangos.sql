@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z2069_sxxxx_xxxxx_01_mangos_skill_discovery` bit(1) default NULL
+  `required_z2102_s1723_12148_01_mangos_areatrigger_teleport` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -99,7 +99,6 @@ CREATE TABLE `areatrigger_teleport` (
   `required_item` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `required_item2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `required_quest_done` int(11) unsigned NOT NULL DEFAULT '0',
-  `required_failed_text` text,
   `target_map` smallint(5) unsigned NOT NULL DEFAULT '0',
   `target_position_x` float NOT NULL DEFAULT '0',
   `target_position_y` float NOT NULL DEFAULT '0',
