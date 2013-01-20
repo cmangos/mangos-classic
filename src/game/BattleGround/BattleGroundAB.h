@@ -137,10 +137,10 @@ enum BG_AB_Sounds
     BG_AB_SOUND_NEAR_VICTORY            = 8456
 };
 
-#define BG_AB_NotABBGWeekendHonorTicks      330
-#define BG_AB_ABBGWeekendHonorTicks         200
-#define BG_AB_NotABBGWeekendReputationTicks 330
-#define BG_AB_ABBGWeekendReputationTicks    200
+#define AB_NORMAL_HONOR_INTERVAL        330
+#define AB_WEEKEND_HONOR_INTERVAL       200
+#define AB_NORMAL_REPUTATION_INTERVAL   330
+#define AB_WEEKEND_REPUTATION_INTERVAL  200
 
 // Tick intervals and given points: case 0,1,2,3,4,5 captured nodes
 const uint32 BG_AB_TickIntervals[6] = {0, 12000, 9000, 6000, 3000, 1000};
