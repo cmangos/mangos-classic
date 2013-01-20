@@ -117,15 +117,14 @@ template uint32 IdGenerator<uint32>::Generate();
 template uint64 IdGenerator<uint64>::Generate();
 
 ObjectMgr::ObjectMgr() :
-    m_FirstTemporaryCreatureGuid(1),
-    m_FirstTemporaryGameObjectGuid(1),
-
     m_AuctionIds("Auction ids"),
     m_GuildIds("Guild ids"),
     m_ItemTextIds("Item text ids"),
     m_MailIds("Mail ids"),
     m_PetNumbers("Pet numbers"),
-    m_GroupIds("Group ids")
+    m_GroupIds("Group ids"),
+    m_FirstTemporaryCreatureGuid(1),
+    m_FirstTemporaryGameObjectGuid(1)
 {
     // Only zero condition left, others will be added while loading DB tables
     mConditions.resize(1);
