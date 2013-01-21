@@ -3448,26 +3448,46 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
         }
     }
 
-    // update single target auras list (before aura add to aura list, to prevent unexpected remove recently added aura)
-    if (holder->IsSingleTarget())
+    // update tracked aura targets list (before aura add to aura list, to prevent unexpected remove recently added aura)
+    if (TrackedAuraType trackedType = holder->GetTrackedAuraType())
     {
         if (Unit* caster = holder->GetCaster())             // caster not in world
         {
-            SingleCastSpellTargetMap& scTargets = caster->GetSingleCastSpellTargets();
-            for (SingleCastSpellTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end();)
+            // Only compare TrackedAuras of same tracking type
+            TrackedAuraTargetMap& scTargets = caster->GetTrackedAuraTargets(trackedType);
+            for (TrackedAuraTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end();)
             {
                 SpellEntry const* itr_spellEntry = itr->first;
-                ObjectGuid itr_targetGuid = itr->second;
+                ObjectGuid itr_targetGuid = itr->second;    // Target on whom the tracked aura is
 
-                if (itr_targetGuid != GetObjectGuid() &&
-                        IsSingleTargetSpells(itr_spellEntry, aurSpellInfo))
+                if (itr_targetGuid == GetObjectGuid())      // Note: I don't understand this check (based on old aura concepts, kept when adding holders)
                 {
-                    scTargets.erase(itr);                   // remove for caster in any case
+                    ++itr;
+                    continue;
+                }
 
-                    // remove from target if target found
-                    if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
-                        itr_target->RemoveAurasDueToSpell(itr_spellEntry->Id);
+                bool removed = false;
+                switch (trackedType)
+                {
+                    case TRACK_AURA_TYPE_SINGLE_TARGET:
+                        if (IsSingleTargetSpells(itr_spellEntry, aurSpellInfo))
+                        {
+                            removed = true;
+                            // remove from target if target found
+                            if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
+                                itr_target->RemoveAurasDueToSpell(itr_spellEntry->Id); // TODO AURA_REMOVE_BY_TRACKING (might require additional work elsewhere)
+                            else                            // Normally the tracking will be removed by the AuraRemoval
+                                scTargets.erase(itr);
+                        }
+                        break;
+                    case TRACK_AURA_TYPE_NOT_TRACKED:       // These two can never happen
+                    case MAX_TRACKED_AURA_TYPES:
+                        MANGOS_ASSERT(false);
+                        break;
+                }
 
+                if (removed)
+                {
                     itr = scTargets.begin();                // list can be chnaged at remove aura
                     continue;
                 }
@@ -3475,8 +3495,12 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 ++itr;
             }
 
-            // register spell holder single target
-            scTargets[aurSpellInfo] = GetObjectGuid();
+            switch (trackedType)
+            {
+                case TRACK_AURA_TYPE_SINGLE_TARGET:         // Register spell holder single target
+                    scTargets[aurSpellInfo] = GetObjectGuid();
+                    break;
+            }
         }
     }
 
@@ -3488,7 +3512,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
         if (Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
             AddAuraToModList(aur);
 
-    holder->ApplyAuraModifiers(true, true);
+    holder->ApplyAuraModifiers(true, true);                 // This is the place where auras are actually applied onto the target
     DEBUG_LOG("Holder of spell %u now is in use", holder->GetId());
 
     // if aura deleted before boosts apply ignore
@@ -3737,7 +3761,7 @@ void Unit::RemoveAura(uint32 spellId, SpellEffectIndex effindex, Aura* except)
             ++iter;
     }
 }
-void Unit::RemoveAurasByCasterSpell(uint32 spellId, ObjectGuid casterGuid)
+void Unit::RemoveAurasByCasterSpell(uint32 spellId, ObjectGuid casterGuid, AuraRemoveMode mode /*=AURA_REMOVE_BY_DEFAULT*/)
 {
     SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellId);
     for (SpellAuraHolderMap::iterator iter = spair.first; iter != spair.second;)
@@ -3814,7 +3838,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, U
         RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DISPEL);
 
     // strange but intended behaviour: Stolen single target auras won't be treated as single targeted
-    new_holder->SetIsSingleTarget(false);
+    new_holder->SetTrackedAuraType(TRACK_AURA_TYPE_NOT_TRACKED);
 
     stealer->AddSpellAuraHolder(new_holder);
 }
@@ -3926,12 +3950,19 @@ void Unit::RemoveAurasWithAttribute(uint32 flags)
     }
 }
 
-void Unit::RemoveNotOwnSingleTargetAuras()
+void Unit::RemoveNotOwnTrackedTargetAuras()
 {
-    // single target auras from other casters
+    // tracked aura targets from other casters are removed if the phase does no more fit
     for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
     {
-        if (iter->second->GetCasterGuid() != GetObjectGuid() && iter->second->IsSingleTarget())
+        TrackedAuraType trackedType = iter->second->GetTrackedAuraType();
+        if (!trackedType)
+        {
+            ++iter;
+            continue;
+        }
+
+        if (iter->second->GetCasterGuid() != GetObjectGuid())
         {
             RemoveSpellAuraHolder(iter->second);
             iter = m_spellAuraHolders.begin();
@@ -3941,28 +3972,30 @@ void Unit::RemoveNotOwnSingleTargetAuras()
         ++iter;
     }
 
-    // single target auras at other targets
-    SingleCastSpellTargetMap& scTargets = GetSingleCastSpellTargets();
-    for (SingleCastSpellTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end();)
+    // tracked aura targets at other targets
+    for (uint8 type = TRACK_AURA_TYPE_SINGLE_TARGET; type < MAX_TRACKED_AURA_TYPES; ++type)
     {
-        SpellEntry const* itr_spellEntry = itr->first;
-        ObjectGuid itr_targetGuid = itr->second;
-
-        if (itr_targetGuid != GetObjectGuid())
+        TrackedAuraTargetMap& scTargets = GetTrackedAuraTargets(TrackedAuraType(type));
+        for (TrackedAuraTargetMap::iterator itr = scTargets.begin(); itr != scTargets.end();)
         {
-            scTargets.erase(itr);                           // remove for caster in any case
+            SpellEntry const* itr_spellEntry = itr->first;
+            ObjectGuid itr_targetGuid = itr->second;
 
-            // remove from target if target found
-            if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
-                itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetObjectGuid());
+            if (itr_targetGuid != GetObjectGuid())
+            {
+                scTargets.erase(itr);                           // remove for caster in any case
 
-            itr = scTargets.begin();                        // list can be changed at remove aura
-            continue;
+                // remove from target if target found
+                if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
+                    itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetObjectGuid());
+
+                itr = scTargets.begin();                        // list can be changed at remove aura
+                continue;
+            }
+
+            ++itr;
         }
-
-        ++itr;
     }
-
 }
 
 void Unit::RemoveSpellAuraHolder(SpellAuraHolder* holder, AuraRemoveMode mode)
@@ -3989,7 +4022,7 @@ void Unit::RemoveSpellAuraHolder(SpellAuraHolder* holder, AuraRemoveMode mode)
     }
 
     holder->SetRemoveMode(mode);
-    holder->UnregisterSingleCastHolder();
+    holder->UnregisterAndCleanupTrackedAuras();
 
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
@@ -7776,7 +7809,7 @@ void Unit::RemoveFromWorld()
     if (IsInWorld())
     {
         Uncharm();
-        RemoveNotOwnSingleTargetAuras();
+        RemoveNotOwnTrackedTargetAuras();
         RemoveGuardians();
         RemoveAllGameObjects();
         RemoveAllDynObjects();

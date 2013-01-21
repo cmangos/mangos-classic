@@ -2468,6 +2468,13 @@ enum AreaLockStatus
     AREA_LOCKSTATUS_HAS_BIND                    = 10,
 };
 
+enum TrackedAuraType
+{
+    TRACK_AURA_TYPE_NOT_TRACKED                 = 0,        // relation - caster : target is n:m (usual case)
+    TRACK_AURA_TYPE_SINGLE_TARGET               = 1,        // relation - caster : target is 1:1. Might get stolen
+    MAX_TRACKED_AURA_TYPES
+};
+
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
 // will only support 1.12.1 client (build 5875) and 1.12.2 client (build 6005)..

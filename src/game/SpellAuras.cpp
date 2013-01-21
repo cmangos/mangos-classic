@@ -4783,7 +4783,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     m_applyTime      = time(NULL);
     m_isPassive      = IsPassiveSpell(spellproto);
     m_isDeathPersist = IsDeathPersistentSpell(spellproto);
-    m_isSingleTarget = IsSingleTargetSpell(spellproto);
+    m_trackedAuraType= IsSingleTargetSpell(spellproto) ? TRACK_AURA_TYPE_SINGLE_TARGET : TRACK_AURA_TYPE_NOT_TRACKED;
     m_procCharges    = spellproto->procCharges;
 
     m_isRemovedOnShapeLost = (GetCasterGuid() == m_target->GetObjectGuid() &&
@@ -5391,15 +5391,19 @@ bool SpellAuraHolder::IsEmptyHolder() const
     return true;
 }
 
-void SpellAuraHolder::UnregisterSingleCastHolder()
+void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
 {
-    if (IsSingleTarget())
+    TrackedAuraType trackedType = GetTrackedAuraType();
+    if (!trackedType)
+        return;
+
+    if (trackedType == TRACK_AURA_TYPE_SINGLE_TARGET)
     {
         if (Unit* caster = GetCaster())
-            caster->GetSingleCastSpellTargets().erase(GetSpellProto());
-
-        m_isSingleTarget = false;
+            caster->GetTrackedAuraTargets(trackedType).erase(GetSpellProto());
     }
+
+    m_trackedAuraType = TRACK_AURA_TYPE_NOT_TRACKED;
 }
 
 void SpellAuraHolder::SetAuraFlag(uint32 slot, bool add)
