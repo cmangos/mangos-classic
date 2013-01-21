@@ -5005,16 +5005,21 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
     if (!temp)
         return NULL;
 
+    AreaTrigger const* compareTrigger = NULL;
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
         if (itr->second.target_mapId == uint32(temp->ghostEntranceMap))
         {
-            AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
-            if (atEntry && atEntry->mapid == map_id)
-                return &itr->second;
+            if (!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger))
+            {
+                if (itr->second.IsMinimal())
+                    return &itr->second;
+
+                compareTrigger = &itr->second;
+            }
         }
     }
-    return NULL;
+    return compareTrigger;
 }
 
 /**
@@ -5022,16 +5027,32 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
  */
 AreaTrigger const* ObjectMgr::GetMapEntranceTrigger(uint32 Map) const
 {
+    AreaTrigger const* compareTrigger = NULL;
+    MapEntry const* mEntry = sMapStore.LookupEntry(Map);
+
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
         if (itr->second.target_mapId == Map)
         {
-            AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
-            if (atEntry)
-                return &itr->second;
+            if (mEntry->Instanceable())
+            {
+                // Remark that IsLessOrEqualThan is no total order, and a->IsLeQ(b) != !b->IsLeQ(a)
+                if (!compareTrigger || compareTrigger->IsLessOrEqualThan(&itr->second))
+                    compareTrigger = &itr->second;
+            }
+            else
+            {
+                if (!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger))
+                {
+                    if (itr->second.IsMinimal())
+                        return &itr->second;
+
+                    compareTrigger = &itr->second;
+                }
+            }
         }
     }
-    return NULL;
+    return compareTrigger;
 }
 
 void ObjectMgr::PackGroupIds()
