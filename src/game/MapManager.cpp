@@ -151,50 +151,6 @@ Map* MapManager::FindMap(uint32 mapid, uint32 instanceId) const
     return iter->second;
 }
 
-/*
-    checks that do not require a map to be created
-    will send transfer error messages on fail
-*/
-bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
-{
-    const MapEntry* entry = sMapStore.LookupEntry(mapid);
-    if (!entry)
-        return false;
-
-    const char* mapName = entry->name[player->GetSession()->GetSessionDbcLocale()];
-
-    if (entry->IsDungeon())
-    {
-        if (entry->IsRaid())
-        {
-            // GMs can avoid raid limitations
-            if (!player->isGameMaster() && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_RAID))
-            {
-                // can only enter in a raid group
-                Group* group = player->GetGroup();
-                if (!group || !group->isRaidGroup())
-                {
-                    // probably there must be special opcode, because client has this string constant in GlobalStrings.lua
-                    // TODO: this is not a good place to send the message
-                    player->GetSession()->SendAreaTriggerMessage("You must be in a raid group to enter %s instance", mapName);
-                    DEBUG_LOG("MAP: Player '%s' must be in a raid group to enter instance of '%s'", player->GetName(), mapName);
-                    return false;
-                }
-            }
-        }
-
-        // TODO: move this to a map dependent location
-        /*if(i_data && i_data->IsEncounterInProgress())
-        {
-            DEBUG_LOG("MAP: Player '%s' can't enter instance '%s' while an encounter is in progress.", player->GetName(), GetMapName());
-            player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
-            return(false);
-        }*/
-    }
-
-    return true;
-}
-
 void MapManager::DeleteInstance(uint32 mapid, uint32 instanceId)
 {
     Guard _guard(*this);
@@ -213,8 +169,7 @@ void MapManager::DeleteInstance(uint32 mapid, uint32 instanceId)
     }
 }
 
-void
-MapManager::Update(uint32 diff)
+void MapManager::Update(uint32 diff)
 {
     i_timer.Update(diff);
     if (!i_timer.Passed())

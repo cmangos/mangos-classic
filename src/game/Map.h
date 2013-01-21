@@ -172,7 +172,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         bool CheckGridIntegrity(Creature* c, bool moved) const;
 
         uint32 GetInstanceId() const { return i_InstanceId; }
-        virtual bool CanEnter(Player* /*player*/) { return true; }
+        virtual bool CanEnter(Player* player);
         const char* GetMapName() const;
 
         bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }
@@ -369,7 +369,6 @@ class MANGOS_DLL_SPEC DungeonMap : public Map
         bool Reset(InstanceResetMethod method);
         void PermBindAllPlayers(Player* player);
         void UnloadAll(bool pForce) override;
-        bool CanEnter(Player* player) override;
         void SendResetWarnings(uint32 timeLeft) const;
         void SetResetSchedule(bool on);
         uint32 GetMaxPlayers() const;

@@ -1227,37 +1227,6 @@ void DungeonMap::InitVisibilityDistance()
 }
 
 /*
-    Do map specific checks to see if the player can enter
-*/
-bool DungeonMap::CanEnter(Player* player)
-{
-    if (player->GetMapRef().getTarget() == this)
-    {
-        sLog.outError("InstanceMap::CanEnter - player %s(%u) already in map %d,%d!", player->GetName(), player->GetGUIDLow(), GetId(), GetInstanceId());
-        MANGOS_ASSERT(false);
-        return false;
-    }
-
-    // cannot enter if the instance is full (player cap), GMs don't count
-    uint32 maxPlayers = GetMaxPlayers();
-    if (!player->isGameMaster() && GetPlayersCountExceptGMs() >= maxPlayers)
-    {
-        DETAIL_LOG("MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' rejected", GetInstanceId(), GetMapName(), maxPlayers, player->GetName());
-        player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
-        return false;
-    }
-
-    // cannot enter while an encounter in the instance is in progress
-    if (!player->isGameMaster() && GetInstanceData() && GetInstanceData()->IsEncounterInProgress() && player->GetMapId() != GetId())
-    {
-        player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
-        return false;
-    }
-
-    return Map::CanEnter(player);
-}
-
-/*
     Do map specific checks and add the player to the map if successful.
 */
 bool DungeonMap::Add(Player* player)
@@ -1538,19 +1507,14 @@ void BattleGroundMap::InitVisibilityDistance()
 
 bool BattleGroundMap::CanEnter(Player* player)
 {
-    if (player->GetMapRef().getTarget() == this)
-    {
-        sLog.outError("BGMap::CanEnter - player %u already in map!", player->GetGUIDLow());
-        MANGOS_ASSERT(false);
+    if (!Map::CanEnter(player))
         return false;
-    }
 
     if (player->GetBattleGroundId() != GetInstanceId())
         return false;
 
     // player number limit is checked in bgmgr, no need to do it here
-
-    return Map::CanEnter(player);
+    return true;
 }
 
 bool BattleGroundMap::Add(Player* player)
@@ -1590,6 +1554,18 @@ void BattleGroundMap::UnloadAll(bool pForce)
     }
 
     Map::UnloadAll(pForce);
+}
+
+bool Map::CanEnter(Player* player)
+{
+    if (player->GetMapRef().getTarget() == this)
+    {
+        sLog.outError("Map::CanEnter -%s already in map!", player->GetGuidStr().c_str());
+        MANGOS_ASSERT(false);
+        return false;
+    }
+
+    return true;
 }
 
 /// Put scripts in the execution queue

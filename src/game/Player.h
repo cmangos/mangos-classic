@@ -852,7 +852,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddToWorld() override;
         void RemoveFromWorld() override;
 
-        bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
+        bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0, AreaTrigger const* at = NULL);
 
         bool TeleportTo(WorldLocation const& loc, uint32 options = 0)
         {
@@ -884,7 +884,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
-        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
         void SendInstanceResetWarning(uint32 mapid, uint32 time);
 
         Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask);
@@ -2015,8 +2014,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         static void ConvertInstancesToGroup(Player* player, Group* group = NULL, ObjectGuid player_guid = ObjectGuid());
         DungeonPersistentState* GetBoundInstanceSaveForSelfOrGroup(uint32 mapid);
 
-        AreaLockStatus GetAreaLockStatus(uint32 mapId, uint32& miscRequirement);
         AreaLockStatus GetAreaTriggerLockStatus(AreaTrigger const* at, uint32& miscRequirement);
+        void SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockStatus lockStatus, uint32 miscRequirement = 0);
 
         /*********************************************************/
         /***                   GROUP SYSTEM                    ***/

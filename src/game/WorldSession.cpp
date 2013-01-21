@@ -683,6 +683,16 @@ void WorldSession::SaveTutorialsData()
     m_tutorialState = TUTORIALDATA_UNCHANGED;
 }
 
+// Send chat information about aborted transfer (mostly used by Player::SendTransferAbortedByLockstatus())
+void WorldSession::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg)
+{
+    WorldPacket data(SMSG_TRANSFER_ABORTED, 4 + 2);
+    data << uint32(mapid);
+    data << uint8(reason);                                  // transfer abort reason
+    data << uint8(0);                                       // arg. not used
+    SendPacket(&data);
+}
+
 void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* packet)
 {
     // need prevent do internal far teleports in handlers because some handlers do lot steps
