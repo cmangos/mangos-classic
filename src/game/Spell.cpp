@@ -1459,20 +1459,20 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             switch (m_spellInfo->Id)
             {
-                case 802:                                   // Mutate Bug
-                case 804:                                   // Explode Bug
-                case 23138:                                 // Gate of Shazzrah
-                case 24781:                                 // Dream Fog
-                case 28560:                                 // Summon Blizzard
+                case 802:                                   // Mutate Bug (AQ40, Emperor Vek'nilash)
+                case 804:                                   // Explode Bug (AQ40, Emperor Vek'lor)
+                case 23138:                                 // Gate of Shazzrah (MC, Shazzrah)
+                case 24781:                                 // Dream Fog (Emerald Dragons)
+                case 28560:                                 // Summon Blizzard (Naxx, Sapphiron)
                     unMaxTargets = 1;
                     break;
-                case 28542:                                 // Life Drain
+                case 28542:                                 // Life Drain (Naxx, Sapphiron)
                     unMaxTargets = 2;
                     break;
-                case 28796:                                 // Poison Bolt Volley
+                case 28796:                                 // Poison Bolt Volley (Naxx, Faerlina)
                     unMaxTargets = 10;
                     break;
-                case 25991:                                 // Poison Bolt Volley (Pincess Huhuran)
+                case 25991:                                 // Poison Bolt Volley (AQ40, Pincess Huhuran)
                     unMaxTargets = 15;
                     break;
             }
