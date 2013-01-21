@@ -72,7 +72,10 @@ struct AreaTrigger
     float  target_Orientation;
 
     // Operators
-    bool IsMinimal() const { return requiredLevel == 0 && requiredItem == 0 && requiredItem2 == 0 && requiredQuest == 0; }
+    bool IsMinimal() const
+    {
+        return requiredLevel == 0 && requiredItem == 0 && requiredItem2 == 0 && requiredQuest == 0;
+    }
 
     bool IsLessOrEqualThan(AreaTrigger const* l) const      // Expected to have same map
     {
