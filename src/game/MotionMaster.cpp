@@ -472,12 +472,6 @@ bool MotionMaster::GetDestination(float& x, float& y, float& z)
     return true;
 }
 
-void MotionMaster::UpdateFinalDistanceToTarget(float fDistance)
-{
-    if (!empty())
-        top()->UpdateFinalDistance(fDistance);
-}
-
 void MotionMaster::MoveFall()
 {
     // use larger distance for vmap height search than in most other cases
