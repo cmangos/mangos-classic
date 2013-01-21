@@ -36,4 +36,6 @@ extern SQLStorage sInstanceTemplate;
 extern SQLStorage sWorldTemplate;
 extern SQLStorage sConditionStorage;
 
+extern SQLHashStorage sCreatureTemplateSpellsStorage;
+
 #endif

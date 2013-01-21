@@ -120,7 +120,6 @@ struct CreatureInfo
     int32   resistance4;
     int32   resistance5;
     int32   resistance6;
-    uint32  spells[CREATURE_MAX_SPELLS];
     uint32  PetSpellDataId;
     uint32  mingold;
     uint32  maxgold;
@@ -159,6 +158,12 @@ struct CreatureInfo
     {
         return type == CREATURE_TYPE_BEAST && family != 0 && (type_flags & CREATURE_TYPEFLAGS_TAMEABLE);
     }
+};
+
+struct CreatureTemplateSpells
+{
+    uint32 entry;
+    uint32 spells[CREATURE_MAX_SPELLS];
 };
 
 struct EquipmentInfo
