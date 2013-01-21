@@ -65,20 +65,20 @@ typedef std::deque<Mail*> PlayerMails;
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
 {
-    SPELLMOD_FLAT         = 107,                            // SPELL_AURA_ADD_FLAT_MODIFIER
-    SPELLMOD_PCT          = 108                             // SPELL_AURA_ADD_PCT_MODIFIER
+    SPELLMOD_FLAT               = 107,                      // SPELL_AURA_ADD_FLAT_MODIFIER
+    SPELLMOD_PCT                = 108                       // SPELL_AURA_ADD_PCT_MODIFIER
 };
 
 // 2^n internal values, they are never sent to the client
 enum PlayerUnderwaterState
 {
-    UNDERWATER_NONE                     = 0x00,
-    UNDERWATER_INWATER                  = 0x01,             // terrain type is water and player is afflicted by it
-    UNDERWATER_INLAVA                   = 0x02,             // terrain type is lava and player is afflicted by it
-    UNDERWATER_INSLIME                  = 0x04,             // terrain type is lava and player is afflicted by it
-    UNDERWATER_INDARKWATER              = 0x08,             // terrain type is dark water and player is afflicted by it
+    UNDERWATER_NONE             = 0x00,
+    UNDERWATER_INWATER          = 0x01,                     // terrain type is water and player is afflicted by it
+    UNDERWATER_INLAVA           = 0x02,                     // terrain type is lava and player is afflicted by it
+    UNDERWATER_INSLIME          = 0x04,                     // terrain type is lava and player is afflicted by it
+    UNDERWATER_INDARKWATER      = 0x08,                     // terrain type is dark water and player is afflicted by it
 
-    UNDERWATER_EXIST_TIMERS             = 0x10
+    UNDERWATER_EXIST_TIMERS     = 0x10
 };
 
 enum BuyBankSlotResult
@@ -91,10 +91,10 @@ enum BuyBankSlotResult
 
 enum PlayerSpellState
 {
-    PLAYERSPELL_UNCHANGED = 0,
-    PLAYERSPELL_CHANGED   = 1,
-    PLAYERSPELL_NEW       = 2,
-    PLAYERSPELL_REMOVED   = 3
+    PLAYERSPELL_UNCHANGED       = 0,
+    PLAYERSPELL_CHANGED         = 1,
+    PLAYERSPELL_NEW             = 2,
+    PLAYERSPELL_REMOVED         = 3
 };
 
 struct PlayerSpell
@@ -147,27 +147,27 @@ typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 
 enum TrainerSpellState
 {
-    TRAINER_SPELL_GREEN = 0,
-    TRAINER_SPELL_RED   = 1,
-    TRAINER_SPELL_GRAY  = 2,
+    TRAINER_SPELL_GREEN         = 0,
+    TRAINER_SPELL_RED           = 1,
+    TRAINER_SPELL_GRAY          = 2,
     TRAINER_SPELL_GREEN_DISABLED = 10                       // custom value, not send to client: formally green but learn not allowed
 };
 
 enum ActionButtonUpdateState
 {
-    ACTIONBUTTON_UNCHANGED = 0,
-    ACTIONBUTTON_CHANGED   = 1,
-    ACTIONBUTTON_NEW       = 2,
-    ACTIONBUTTON_DELETED   = 3
+    ACTIONBUTTON_UNCHANGED      = 0,
+    ACTIONBUTTON_CHANGED        = 1,
+    ACTIONBUTTON_NEW            = 2,
+    ACTIONBUTTON_DELETED        = 3
 };
 
 enum ActionButtonType
 {
-    ACTION_BUTTON_SPELL     = 0x00,
-    ACTION_BUTTON_C         = 0x01,                         // click?
-    ACTION_BUTTON_MACRO     = 0x40,
-    ACTION_BUTTON_CMACRO    = ACTION_BUTTON_C | ACTION_BUTTON_MACRO,
-    ACTION_BUTTON_ITEM      = 0x80
+    ACTION_BUTTON_SPELL         = 0x00,
+    ACTION_BUTTON_C             = 0x01,                     // click?
+    ACTION_BUTTON_MACRO         = 0x40,
+    ACTION_BUTTON_CMACRO        = ACTION_BUTTON_C | ACTION_BUTTON_MACRO,
+    ACTION_BUTTON_ITEM          = 0x80
 };
 
 #define ACTION_BUTTON_ACTION(X) (uint32(X) & 0x00FFFFFF)
@@ -320,13 +320,13 @@ enum RaidGroupError
 
 enum DrunkenState
 {
-    DRUNKEN_SOBER   = 0,
-    DRUNKEN_TIPSY   = 1,
-    DRUNKEN_DRUNK   = 2,
-    DRUNKEN_SMASHED = 3
+    DRUNKEN_SOBER               = 0,
+    DRUNKEN_TIPSY               = 1,
+    DRUNKEN_DRUNK               = 2,
+    DRUNKEN_SMASHED             = 3
 };
 
-#define MAX_DRUNKEN   4
+#define MAX_DRUNKEN             4
 
 enum TYPE_OF_HONOR
 {
@@ -414,11 +414,11 @@ enum PlayerFieldByte2Flags
 
 enum MirrorTimerType
 {
-    FATIGUE_TIMER      = 0,
-    BREATH_TIMER       = 1,
-    FIRE_TIMER         = 2
+    FATIGUE_TIMER               = 0,
+    BREATH_TIMER                = 1,
+    FIRE_TIMER                  = 2
 };
-#define MAX_TIMERS      3
+#define MAX_TIMERS              3
 #define DISABLED_MIRROR_TIMER   -1
 
 // 2^n values
@@ -441,39 +441,39 @@ enum PlayerExtraFlags
 // 2^n values
 enum AtLoginFlags
 {
-    AT_LOGIN_NONE              = 0x00,
-    AT_LOGIN_RENAME            = 0x01,
-    AT_LOGIN_RESET_SPELLS      = 0x02,
-    AT_LOGIN_RESET_TALENTS     = 0x04,
+    AT_LOGIN_NONE                 = 0x00,
+    AT_LOGIN_RENAME               = 0x01,
+    AT_LOGIN_RESET_SPELLS         = 0x02,
+    AT_LOGIN_RESET_TALENTS        = 0x04,
     // AT_LOGIN_CUSTOMIZE         = 0x08, -- used in post-3.x
     // AT_LOGIN_RESET_PET_TALENTS = 0x10, -- used in post-3.x
-    AT_LOGIN_FIRST             = 0x20,
+    AT_LOGIN_FIRST                = 0x20,
 };
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
 
 enum QuestSlotOffsets
 {
-    QUEST_ID_OFFSET           = 0,
-    QUEST_COUNT_STATE_OFFSET  = 1,                          // including counters 6bits+6bits+6bits+6bits + state 8bits
-    QUEST_TIME_OFFSET         = 2
+    QUEST_ID_OFFSET             = 0,
+    QUEST_COUNT_STATE_OFFSET    = 1,                        // including counters 6bits+6bits+6bits+6bits + state 8bits
+    QUEST_TIME_OFFSET           = 2
 };
 
 #define MAX_QUEST_OFFSET 3
 
 enum QuestSlotStateMask
 {
-    QUEST_STATE_NONE     = 0x0000,
-    QUEST_STATE_COMPLETE = 0x0001,
-    QUEST_STATE_FAIL     = 0x0002
+    QUEST_STATE_NONE            = 0x0000,
+    QUEST_STATE_COMPLETE        = 0x0001,
+    QUEST_STATE_FAIL            = 0x0002
 };
 
 enum SkillUpdateState
 {
-    SKILL_UNCHANGED     = 0,
-    SKILL_CHANGED       = 1,
-    SKILL_NEW           = 2,
-    SKILL_DELETED       = 3
+    SKILL_UNCHANGED             = 0,
+    SKILL_CHANGED               = 1,
+    SKILL_NEW                   = 2,
+    SKILL_DELETED               = 3
 };
 
 struct SkillStatusData
@@ -596,16 +596,16 @@ enum InstanceResetWarningType
 
 enum RestType
 {
-    REST_TYPE_NO        = 0,
-    REST_TYPE_IN_TAVERN = 1,
-    REST_TYPE_IN_CITY   = 2
+    REST_TYPE_NO                = 0,
+    REST_TYPE_IN_TAVERN         = 1,
+    REST_TYPE_IN_CITY           = 2
 };
 
 enum DuelCompleteType
 {
-    DUEL_INTERUPTED = 0,
-    DUEL_WON        = 1,
-    DUEL_FLED       = 2
+    DUEL_INTERRUPTED            = 0,
+    DUEL_WON                    = 1,
+    DUEL_FLED                   = 2
 };
 
 enum TeleportToOptions
@@ -620,30 +620,30 @@ enum TeleportToOptions
 /// Type of environmental damages
 enum EnvironmentalDamageType
 {
-    DAMAGE_EXHAUSTED = 0,
-    DAMAGE_DROWNING  = 1,
-    DAMAGE_FALL      = 2,
-    DAMAGE_LAVA      = 3,
-    DAMAGE_SLIME     = 4,
-    DAMAGE_FIRE      = 5,
-    DAMAGE_FALL_TO_VOID = 6                                 // custom case for fall without durability loss
+    DAMAGE_EXHAUSTED            = 0,
+    DAMAGE_DROWNING             = 1,
+    DAMAGE_FALL                 = 2,
+    DAMAGE_LAVA                 = 3,
+    DAMAGE_SLIME                = 4,
+    DAMAGE_FIRE                 = 5,
+    DAMAGE_FALL_TO_VOID         = 6                         // custom case for fall without durability loss
 };
 
 enum PlayerChatTag
 {
-    CHAT_TAG_NONE       = 0x00,
-    CHAT_TAG_AFK        = 0x01,
-    CHAT_TAG_DND        = 0x02,
-    CHAT_TAG_GM         = 0x04,
+    CHAT_TAG_NONE               = 0x00,
+    CHAT_TAG_AFK                = 0x01,
+    CHAT_TAG_DND                = 0x02,
+    CHAT_TAG_GM                 = 0x04,
 };
 
 enum PlayedTimeIndex
 {
-    PLAYED_TIME_TOTAL = 0,
-    PLAYED_TIME_LEVEL = 1
+    PLAYED_TIME_TOTAL           = 0,
+    PLAYED_TIME_LEVEL           = 1
 };
 
-#define MAX_PLAYED_TIME_INDEX 2
+#define MAX_PLAYED_TIME_INDEX   2
 
 // used at player loading query list preparing, and later result selection
 enum PlayerLoginQueryIndex
@@ -687,8 +687,8 @@ enum ReputationSource
 };
 
 // Player summoning auto-decline time (in secs)
-#define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
-#define MAX_MONEY_AMOUNT                       (0x7FFFFFFF-1)
+#define MAX_PLAYER_SUMMON_DELAY (2*MINUTE)
+#define MAX_MONEY_AMOUNT        (0x7FFFFFFF-1)
 
 struct InstancePlayerBind
 {
@@ -702,9 +702,9 @@ struct InstancePlayerBind
 
 enum PlayerRestState
 {
-    REST_STATE_RESTED       = 0x01,
-    REST_STATE_NORMAL       = 0x02,
-    REST_STATE_RAF_LINKED   = 0x04                          // Exact use unknown
+    REST_STATE_RESTED           = 0x01,
+    REST_STATE_NORMAL           = 0x02,
+    REST_STATE_RAF_LINKED       = 0x04                      // Exact use unknown
 };
 
 class MANGOS_DLL_SPEC PlayerTaxi

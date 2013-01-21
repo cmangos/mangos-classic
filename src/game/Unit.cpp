@@ -782,7 +782,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             he->duel->opponent->CombatStopWithPets(true);
             he->CombatStopWithPets(true);
 
-            he->DuelComplete(DUEL_INTERUPTED);
+            he->DuelComplete(DUEL_INTERRUPTED);
         }
 
         // handle player/npc kill in battleground or outdoor pvp script
