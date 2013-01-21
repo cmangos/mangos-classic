@@ -722,7 +722,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
         return;
 
     // Check for effect immune skip if immuned
-    bool immuned = pVictim->IsImmuneToSpellEffect(m_spellInfo, effIndex);
+    bool immuned = pVictim->IsImmuneToSpellEffect(m_spellInfo, effIndex, pVictim == m_caster);
 
     ObjectGuid targetGUID = pVictim->GetObjectGuid();
 
@@ -1085,7 +1085,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
     // Recheck immune (only for delayed spells)
     if (m_spellInfo->speed && (
                 unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo)) ||
-                unit->IsImmuneToSpell(m_spellInfo)))
+                unit->IsImmuneToSpell(m_spellInfo, unit == realCaster)))
     {
         if (realCaster)
             realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
@@ -4099,7 +4099,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
 
         if (IsPositiveSpell(m_spellInfo->Id))
-            if (target->IsImmuneToSpell(m_spellInfo))
+            if (target->IsImmuneToSpell(m_spellInfo, target == m_caster))
                 return SPELL_FAILED_TARGET_AURASTATE;
 
         // Must be behind the target.
