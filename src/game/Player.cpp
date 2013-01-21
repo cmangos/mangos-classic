@@ -17537,8 +17537,12 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
                 DEBUG_LOG("SendTransferAbortedByLockStatus: LockAreaStatus %u, do not teleport, no message sent (mapId %u)", lockStatus, mapEntry->MapID);
                 break;
             }
-            // No break here!
+            // ToDo: SendAreaTriggerMessage or Transfer Abort for these cases!
+            break;
         case AREA_LOCKSTATUS_MISSING_ITEM:
+            if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(mapEntry->MapID))
+                GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM), at->requiredLevel, sObjectMgr.GetItemPrototype(miscRequirement)->Name1);
+            break;
         case AREA_LOCKSTATUS_NOT_ALLOWED:
         case AREA_LOCKSTATUS_RAID_LOCKED:
         case AREA_LOCKSTATUS_UNKNOWN_ERROR:
