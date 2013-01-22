@@ -46,6 +46,7 @@ const char ItemClassfmt[]="nxxssssssssx";
 // const char ItemDisplayTemplateEntryfmt[]="nxxxxxxxxxxixxxxxxxxxxx";
 const char ItemRandomPropertiesfmt[] = "nxiiixxxxxxxxxxx";
 const char ItemSetEntryfmt[] = "dssssssssxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
+const char LiquidTypefmt[] = "nxxixixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char LockEntryfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
 const char MailTemplateEntryfmt[] = "nxxxxxxxxx";
 const char MapEntryfmt[] = "nxixssssssssxxxxxxxixxxxxxxxxxxxxxxxxxixxx";

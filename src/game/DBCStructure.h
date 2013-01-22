@@ -55,7 +55,7 @@ struct AreaTableEntry
     char*     area_name[8];                                 // 11-18    m_AreaName_lang
     // 19 string flags
     uint32  team;                                           // 20       m_factionGroupMask
-    // 21-24    m_liquidTypeID[4]
+    uint32  LiquidTypeOverride[4];                          // 21-24    m_liquidTypeID[4]
 };
 
 struct AreaTriggerEntry
@@ -405,6 +405,29 @@ struct ItemSetEntry
     uint32    items_to_triggerspell[8];                     // 35-42    m_setThreshold
     uint32    required_skill_id;                            // 43       m_requiredSkill
     uint32    required_skill_value;                         // 44       m_requiredSkillRank
+};
+
+struct LiquidTypeEntry
+{
+    uint32 Id;                                              // 0
+    //char* Name;                                           // 1
+    //uint32 Flags;                                         // 2 Water: 1|2|4|8, Magma: 8|16|32|64, Slime: 2|64|256, WMO Ocean: 1|2|4|8|512
+    uint32 Type;                                            // 3 0: Water, 1: Ocean, 2: Magma, 3: Slime
+    //uint32 SoundId;                                       // 4 Reference to SoundEntries.dbc
+    uint32 SpellId;                                         // 5 Reference to Spell.dbc
+    //float MaxDarkenDepth;                                 // 6 Only oceans got values here!
+    //float FogDarkenIntensity;                             // 7 Only oceans got values here!
+    //float AmbDarkenIntensity;                             // 8 Only oceans got values here!
+    //float DirDarkenIntensity;                             // 9 Only oceans got values here!
+    //uint32 LightID;                                       // 10 Only Slime (6) and Magma (7)
+    //float ParticleScale;                                  // 11 0: Slime, 1: Water/Ocean, 4: Magma
+    //uint32 ParticleMovement;                              // 12
+    //uint32 ParticleTexSlots;                              // 13
+    //uint32 LiquidMaterialID;                              // 14
+    //char* Texture[6];                                     // 15-20
+    //uint32 Color[2];                                      // 21-22
+    //float Unk1[18];                                       // 23-40 Most likely these are attributes for the shaders. Water: (23, TextureTilesPerBlock),(24, Rotation) Magma: (23, AnimationX),(24, AnimationY)
+    //uint32 Unk2[4];                                       // 41-44
 };
 
 #define MAX_LOCK_CASE 8

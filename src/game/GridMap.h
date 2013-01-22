@@ -110,7 +110,8 @@ enum GridMapLiquidStatus
 
 struct GridMapLiquidData
 {
-    uint32 type;
+    uint32 type_flags;
+    uint32 entry;
     float level;
     float depth_level;
 };
@@ -148,7 +149,8 @@ class GridMap
         uint8 m_liquid_width;
         uint8 m_liquid_height;
         float m_liquidLevel;
-        uint8* m_liquid_type;
+        uint16* m_liquidEntry;
+        uint8* m_liquidFlags;
         float* m_liquid_map;
 
         bool loadAreaData(FILE* in, uint32 offset, uint32 size);
