@@ -1,3 +1,40 @@
+MaNGOS 0.12.2   (22 January 2013)
+ 
+ MaNGOS 0.12.2 - adds further improvements to the
+ server core as well as to the majority of game classes and the game content
+ database.
+
+==== Game Features ====
+* Add Auction House Bot
+* Add Creature linking
+* Add Pathfinding
+* Add Outdoor PvP for zones Eastern Plaguelands and Silithus
+* Add support for Gameobject group loot
+* Improve liquid handling
+* Add support for dynamic collision
+
+==== Server Features ====
+* Add Prepared SQL-Statements
+* Add a bunch of new commands for DB scripts and rewrite the engine
+* Map system re-engineered. Instance maps are updated normally like non instance maps, memory usage reduced
+* Optimize server performance by reducing frequency of visibility update calls
+* Multiple MySQL connections to database.
+* New system for parallelizing client packet processing
+* Move vmaps to vmap version 3.0 and then to 4.0
+* Add PersistantState system
+* Implement proper work pool/gameevent spawns in Map instances
+* Implement a new conditions system that is more flexible
+* Improve overall spell targeting and implement many spells
+* Generic code style fixes
+
+* Updated MySQL client libs to 5.1.49.
+* Updated ACE framework to 5.8.3.
+* Updated G3DLite library to 8.0.1
+
+==== Statistics ====
+* Total number of changes: 2187 revisions
+* Lots of bugs from forum and issues from github fixed
+
 MaNGOS 0.12   (Dec 22 2008)
 
  MaNGOS 0.12 - adds further improvements to the
