@@ -258,7 +258,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
                     mapid = temp->ghostEntranceMap;
                     x = temp->ghostEntranceX;
                     y = temp->ghostEntranceY;
-                    z = entranceMap->GetHeight(x, y, MAX_HEIGHT);
+                    z = entranceMap->GetHeightStatic(x, y, MAX_HEIGHT);
                 }
             }
         }

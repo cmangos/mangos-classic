@@ -770,7 +770,7 @@ int TerrainInfo::UnrefGrid(const uint32& x, const uint32& y)
     return 0;
 }
 
-float TerrainInfo::GetHeight(float x, float y, float z, bool pUseVmaps, float maxSearchDist) const
+float TerrainInfo::GetHeightStatic(float x, float y, float z, bool pUseVmaps, float maxSearchDist) const
 {
     // find raw .map surface under Z coordinates
     float mapHeight;
@@ -938,7 +938,7 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
     float liquid_level = INVALID_HEIGHT_VALUE;
     float ground_level = INVALID_HEIGHT_VALUE;
     uint32 liquid_type = 0;
-    ground_level = GetHeight(x, y, z, true, DEFAULT_WATER_SEARCH);
+    ground_level = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
 
     if (vmgr->GetLiquidLevel(GetMapId(), x, y, z, ReqLiquidType, liquid_level, ground_level, liquid_type))
     {
@@ -1060,7 +1060,7 @@ float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float* pGrou
     if (const_cast<TerrainInfo*>(this)->GetGrid(x, y))
     {
         // we need ground level (including grid height version) for proper return water level in point
-        float ground_z = GetHeight(x, y, z, true, DEFAULT_WATER_SEARCH);
+        float ground_z = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
         if (pGround)
             *pGround = ground_z;
 
@@ -1145,7 +1145,7 @@ float TerrainInfo::GetWaterLevel(float x, float y, float z, float* pGround /*= N
     if (const_cast<TerrainInfo*>(this)->GetGrid(x, y))
     {
         // we need ground level (including grid height version) for proper return water level in point
-        float ground_z = GetHeight(x, y, z, true, DEFAULT_WATER_SEARCH);
+        float ground_z = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
         if (pGround)
             *pGround = ground_z;
 
