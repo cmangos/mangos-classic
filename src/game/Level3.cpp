@@ -3033,16 +3033,12 @@ bool ChatHandler::HandleLookupObjectCommand(char* args)
 
     uint32 counter = 0;
 
-    for (uint32 id = 0; id < sGOStorage.GetMaxEntry(); ++id)
+    for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
     {
-        GameObjectInfo const* gInfo = sGOStorage.LookupEntry<GameObjectInfo>(id);
-        if (!gInfo)
-            continue;
-
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
         {
-            GameObjectLocale const* gl = sObjectMgr.GetGameObjectLocale(id);
+            GameObjectLocale const* gl = sObjectMgr.GetGameObjectLocale(itr->id);
             if (gl)
             {
                 if ((int32)gl->Name.size() > loc_idx && !gl->Name[loc_idx].empty())
@@ -3052,9 +3048,9 @@ bool ChatHandler::HandleLookupObjectCommand(char* args)
                     if (Utf8FitTo(name, wnamepart))
                     {
                         if (m_session)
-                            PSendSysMessage(LANG_GO_ENTRY_LIST_CHAT, id, id, name.c_str());
+                            PSendSysMessage(LANG_GO_ENTRY_LIST_CHAT, itr->id, itr->id, name.c_str());
                         else
-                            PSendSysMessage(LANG_GO_ENTRY_LIST_CONSOLE, id, name.c_str());
+                            PSendSysMessage(LANG_GO_ENTRY_LIST_CONSOLE, itr->id, name.c_str());
                         ++counter;
                         continue;
                     }
@@ -3062,16 +3058,16 @@ bool ChatHandler::HandleLookupObjectCommand(char* args)
             }
         }
 
-        std::string name = gInfo->name;
+        std::string name = itr->name;
         if (name.empty())
             continue;
 
         if (Utf8FitTo(name, wnamepart))
         {
             if (m_session)
-                PSendSysMessage(LANG_GO_ENTRY_LIST_CHAT, id, id, name.c_str());
+                PSendSysMessage(LANG_GO_ENTRY_LIST_CHAT, itr->id, itr->id, name.c_str());
             else
-                PSendSysMessage(LANG_GO_ENTRY_LIST_CONSOLE, id, name.c_str());
+                PSendSysMessage(LANG_GO_ENTRY_LIST_CONSOLE, itr->id, name.c_str());
             ++counter;
         }
     }

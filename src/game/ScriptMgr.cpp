@@ -717,26 +717,23 @@ void ScriptMgr::LoadEventScripts()
 {
     LoadScripts(sEventScripts, "event_scripts");
 
-    std::set<uint32> evt_scripts;
+    std::set<uint32> eventIds;                              // Store possible event ids
     // Load all possible script entries from gameobjects
-    for (uint32 i = 1; i < sGOStorage.GetMaxEntry(); ++i)
+    for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
     {
-        if (GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
-        {
-            if (uint32 eventId = goInfo->GetEventScriptId())
-                evt_scripts.insert(eventId);
+        if (uint32 eventId = itr->GetEventScriptId())
+            eventIds.insert(eventId);
 
-            if (goInfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
-            {
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID1);
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID2);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID1);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID2);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID1);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID2);
-                evt_scripts.insert(goInfo->capturePoint.winEventID1);
-                evt_scripts.insert(goInfo->capturePoint.winEventID2);
-            }
+        if (itr->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
+        {
+            eventIds.insert(itr->capturePoint.neutralEventID1);
+            eventIds.insert(itr->capturePoint.neutralEventID2);
+            eventIds.insert(itr->capturePoint.contestedEventID1);
+            eventIds.insert(itr->capturePoint.contestedEventID2);
+            eventIds.insert(itr->capturePoint.progressEventID1);
+            eventIds.insert(itr->capturePoint.progressEventID2);
+            eventIds.insert(itr->capturePoint.winEventID1);
+            eventIds.insert(itr->capturePoint.winEventID2);
         }
     }
 
@@ -751,7 +748,7 @@ void ScriptMgr::LoadEventScripts()
                 if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
                 {
                     if (spell->EffectMiscValue[j])
-                        evt_scripts.insert(spell->EffectMiscValue[j]);
+                        eventIds.insert(spell->EffectMiscValue[j]);
                 }
             }
         }
@@ -759,8 +756,8 @@ void ScriptMgr::LoadEventScripts()
     // Then check if all scripts are in above list of possible script entries
     for (ScriptMapMap::const_iterator itr = sEventScripts.second.begin(); itr != sEventScripts.second.end(); ++itr)
     {
-        std::set<uint32>::const_iterator itr2 = evt_scripts.find(itr->first);
-        if (itr2 == evt_scripts.end())
+        std::set<uint32>::const_iterator itr2 = eventIds.find(itr->first);
+        if (itr2 == eventIds.end())
             sLog.outErrorDb("Table `event_scripts` has script (Id: %u) not referring to any gameobject_template type 10 data2 field, type 3 data6 field, type 13 data 2 field, type 29 or any spell effect %u",
                             itr->first, SPELL_EFFECT_SEND_EVENT);
     }
@@ -1693,31 +1690,27 @@ void ScriptMgr::LoadEventIdScripts()
     BarGoLink bar(result->GetRowCount());
 
     // TODO: remove duplicate code below, same way to collect event id's used in LoadEventScripts()
-    std::set<uint32> evt_scripts;
-
-    // Load all possible event entries from gameobjects
-    for (uint32 i = 1; i < sGOStorage.GetMaxEntry(); ++i)
+    std::set<uint32> eventIds;                              // Store possible event ids
+    // Load all possible script entries from gameobjects
+    for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
     {
-        if (GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
-        {
-            if (uint32 eventId = goInfo->GetEventScriptId())
-                evt_scripts.insert(eventId);
+        if (uint32 eventId = itr->GetEventScriptId())
+            eventIds.insert(eventId);
 
-            if (goInfo->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
-            {
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID1);
-                evt_scripts.insert(goInfo->capturePoint.neutralEventID2);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID1);
-                evt_scripts.insert(goInfo->capturePoint.contestedEventID2);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID1);
-                evt_scripts.insert(goInfo->capturePoint.progressEventID2);
-                evt_scripts.insert(goInfo->capturePoint.winEventID1);
-                evt_scripts.insert(goInfo->capturePoint.winEventID2);
-            }
+        if (itr->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
+        {
+            eventIds.insert(itr->capturePoint.neutralEventID1);
+            eventIds.insert(itr->capturePoint.neutralEventID2);
+            eventIds.insert(itr->capturePoint.contestedEventID1);
+            eventIds.insert(itr->capturePoint.contestedEventID2);
+            eventIds.insert(itr->capturePoint.progressEventID1);
+            eventIds.insert(itr->capturePoint.progressEventID2);
+            eventIds.insert(itr->capturePoint.winEventID1);
+            eventIds.insert(itr->capturePoint.winEventID2);
         }
     }
 
-    // Load all possible event entries from spells
+    // Load all possible script entries from spells
     for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
     {
         SpellEntry const* spell = sSpellStore.LookupEntry(i);
@@ -1728,7 +1721,7 @@ void ScriptMgr::LoadEventIdScripts()
                 if (spell->Effect[j] == SPELL_EFFECT_SEND_EVENT)
                 {
                     if (spell->EffectMiscValue[j])
-                        evt_scripts.insert(spell->EffectMiscValue[j]);
+                        eventIds.insert(spell->EffectMiscValue[j]);
                 }
             }
         }
@@ -1744,8 +1737,8 @@ void ScriptMgr::LoadEventIdScripts()
         uint32 eventId          = fields[0].GetUInt32();
         const char* scriptName  = fields[1].GetString();
 
-        std::set<uint32>::const_iterator itr = evt_scripts.find(eventId);
-        if (itr == evt_scripts.end())
+        std::set<uint32>::const_iterator itr = eventIds.find(eventId);
+        if (itr == eventIds.end())
             sLog.outErrorDb("Table `scripted_event_id` has id %u not referring to any gameobject_template type 10 data2 field, type 3 data6 field, type 13 data 2 field, type 29 or any spell effect %u or path taxi node data",
                             eventId, SPELL_EFFECT_SEND_EVENT);
 

@@ -1184,17 +1184,14 @@ void LoadLootTemplates_Gameobject()
     LootTemplates_Gameobject.LoadAndCollectLootIds(ids_set);
 
     // remove real entries and check existence loot
-    for (uint32 i = 1; i < sGOStorage.GetMaxEntry(); ++i)
+    for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
     {
-        if (GameObjectInfo const* gInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
+        if (uint32 lootid = itr->GetLootId())
         {
-            if (uint32 lootid = gInfo->GetLootId())
-            {
-                if (ids_set.find(lootid) == ids_set.end())
-                    LootTemplates_Gameobject.ReportNotExistedId(lootid);
-                else
-                    ids_setUsed.insert(lootid);
-            }
+            if (ids_set.find(lootid) == ids_set.end())
+                LootTemplates_Gameobject.ReportNotExistedId(lootid);
+            else
+                ids_setUsed.insert(lootid);
         }
     }
     for (LootIdSet::const_iterator itr = ids_setUsed.begin(); itr != ids_setUsed.end(); ++itr)

@@ -29,13 +29,13 @@ extern SQLStorage sCreatureInfoAddonStorage;
 extern SQLStorage sCreatureModelStorage;
 extern SQLStorage sEquipmentStorage;
 extern SQLStorage sEquipmentStorageRaw;
-extern SQLStorage sGOStorage;
 extern SQLStorage sPageTextStore;
 extern SQLStorage sItemStorage;
 extern SQLStorage sInstanceTemplate;
 extern SQLStorage sWorldTemplate;
 extern SQLStorage sConditionStorage;
 
+extern SQLHashStorage sGOStorage;
 extern SQLHashStorage sCreatureTemplateSpellsStorage;
 
 #endif
