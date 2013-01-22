@@ -20,6 +20,11 @@
 #ifndef VMAPEXPORT_H
 #define VMAPEXPORT_H
 
+#include <string>
+#include <set>
+
+typedef std::set<std::string> StringSet;
+
 enum ModelFlags
 {
     MOD_M2 = 1,
@@ -29,5 +34,13 @@ enum ModelFlags
 
 extern const char* szWorkDirWmo;
 extern const char* szRawVMAPMagic;                          // vmap magic string for extracted raw vmap data
+
+bool FileExists(const char* file);
+void strToLower(char* str);
+
+bool ExtractSingleWmo(std::string& fname);
+bool ExtractSingleModel(std::string& fname, StringSet& failedPaths);
+
+void ExtractGameobjectModels();
 
 #endif

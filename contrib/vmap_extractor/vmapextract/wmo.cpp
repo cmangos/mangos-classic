@@ -41,7 +41,7 @@ bool WMORoot::open()
     MPQFile f(filename.c_str());
     if (f.isEof())
     {
-        printf("No such file.\n");
+        printf("No such file %s.\n", filename.c_str());
         return false;
     }
 
