@@ -1073,10 +1073,8 @@ void GameObject::Use(Unit* user)
             // TODO: possible must be moved to loot release (in different from linked triggering)
             if (GetGOInfo()->chest.eventId)
             {
-                DEBUG_LOG("Chest ScriptStart id %u for GO %u", GetGOInfo()->chest.eventId, GetGUIDLow());
-
-                if (!sScriptMgr.OnProcessEvent(GetGOInfo()->chest.eventId, user, this, true))
-                    GetMap()->ScriptsStart(sEventScripts, GetGOInfo()->chest.eventId, user, this);
+                DEBUG_LOG("Chest ScriptStart id %u for %s (opened by %s)", GetGOInfo()->chest.eventId, GetGuidStr().c_str(), user->GetGuidStr().c_str());
+                StartEvents_Event(GetMap(), GetGOInfo()->chest.eventId, user, this);
             }
 
             return;
@@ -1233,10 +1231,8 @@ void GameObject::Use(Unit* user)
 
                 if (info->goober.eventId)
                 {
-                    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Goober ScriptStart id %u for GO entry %u (GUID %u).", info->goober.eventId, GetEntry(), GetGUIDLow());
-
-                    if (!sScriptMgr.OnProcessEvent(info->goober.eventId, player, this, true))
-                        GetMap()->ScriptsStart(sEventScripts, info->goober.eventId, player, this);
+                    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Goober ScriptStart id %u for %s (Used by %s).", info->goober.eventId, GetGuidStr().c_str(), player->GetGuidStr().c_str());
+                    StartEvents_Event(GetMap(), info->goober.eventId, player, this);
                 }
 
                 // possible quest objective for active quests
@@ -1273,10 +1269,7 @@ void GameObject::Use(Unit* user)
                 player->SendCinematicStart(info->camera.cinematicId);
 
             if (info->camera.eventID)
-            {
-                if (!sScriptMgr.OnProcessEvent(info->camera.eventID, player, this, true))
-                    GetMap()->ScriptsStart(sEventScripts, info->camera.eventID, player, this);
-            }
+                StartEvents_Event(GetMap(), info->camera.eventID, player, this);
 
             return;
         }
@@ -2114,23 +2107,5 @@ void GameObject::TickCapturePoint()
     }
 
     if (eventId)
-    {
-        // Notify the battleground or outdoor pvp script
-        if (BattleGround* bg = (*capturingPlayers.begin())->GetBattleGround())
-        {
-            // Allow only certain events to be handled by other script engines
-            if (bg->HandleEvent(eventId, this))
-                return;
-        }
-        else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
-        {
-            // Allow only certain events to be handled by other script engines
-            if (outdoorPvP->HandleEvent(eventId, this))
-                return;
-        }
-
-        // Send script event to SD2 and database as well - this can be used for summoning creatures, casting specific spells or spawning GOs
-        if (!sScriptMgr.OnProcessEvent(eventId, this, this, true))
-            GetMap()->ScriptsStart(sEventScripts, eventId, this, this);
-    }
+        StartEvents_Event(GetMap(), eventId, this, this, true, *capturingPlayers.begin());
 }

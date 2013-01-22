@@ -522,6 +522,9 @@ class ScriptMgr
         bool (MANGOS_IMPORT* m_pOnAuraDummy)(Aura const*, bool);
 };
 
+// Starters for events
+bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart = true, Unit* forwardToPvp = NULL);
+
 #define sScriptMgr MaNGOS::Singleton<ScriptMgr>::Instance()
 
 MANGOS_DLL_SPEC uint32 GetAreaTriggerScriptId(uint32 triggerId);

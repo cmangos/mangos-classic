@@ -29,6 +29,8 @@
 #include "Cell.h"
 #include "CellImpl.h"
 #include "SQLStorages.h"
+#include "BattleGround/BattleGround.h"
+#include "OutdoorPvP/OutdoorPvP.h"
 
 #include "revision_nr.h"
 
@@ -2052,6 +2054,43 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
     }
 }
 
+// Starters for events
+bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart/*=true*/, Unit* forwardToPvp/*=NULL*/)
+{
+    // Handle SD2 script
+    if (sScriptMgr.OnProcessEvent(id, source, target, isStart))
+        return true;
+
+    // Handle PvP Calls
+    if (forwardToPvp && source && source->GetTypeId() == TYPEID_GAMEOBJECT)
+    {
+        BattleGround* bg = NULL;
+        OutdoorPvP* opvp = NULL;
+        if (forwardToPvp->GetTypeId() == TYPEID_PLAYER)
+        {
+            bg = ((Player*)forwardToPvp)->GetBattleGround();
+            if (!bg)
+                opvp = sOutdoorPvPMgr.GetScript(((Player*)forwardToPvp)->GetCachedZoneId());
+        }
+        else
+        {
+            if (map->IsBattleGround())
+                bg = ((BattleGroundMap*)map)->GetBG();
+            else                                            // Use the go, because GOs don't move
+                opvp = sOutdoorPvPMgr.GetScript(((GameObject*)source)->GetZoneId());
+        }
+
+        if (bg && bg->HandleEvent(id, static_cast<GameObject*>(source)))
+            return true;
+
+        if (opvp && opvp->HandleEvent(id, static_cast<GameObject*>(source)))
+            return true;
+    }
+
+    return map->ScriptsStart(sEventScripts, id, source, target);
+}
+
+// Wrappers
 uint32 GetAreaTriggerScriptId(uint32 triggerId)
 {
     return sScriptMgr.GetAreaTriggerScriptId(triggerId);
