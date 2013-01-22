@@ -165,7 +165,7 @@ void WaypointManager::Load()
             {
                 if (sCreatureMovementScripts.second.find(node.script_id) == sCreatureMovementScripts.second.end())
                 {
-                    sLog.outErrorDb("Table creature_movement for id %u, point %u have script_id %u that does not exist in `creature_movement_scripts`, ignoring", id, point, node.script_id);
+                    sLog.outErrorDb("Table creature_movement for id %u, point %u have script_id %u that does not exist in `dbscripts_on_creature_movement`, ignoring", id, point, node.script_id);
                     continue;
                 }
 
@@ -330,7 +330,7 @@ void WaypointManager::Load()
             {
                 if (sCreatureMovementScripts.second.find(node.script_id) == sCreatureMovementScripts.second.end())
                 {
-                    sLog.outErrorDb("Table creature_movement_template for entry %u, point %u have script_id %u that does not exist in `creature_movement_scripts`, ignoring", entry, point, node.script_id);
+                    sLog.outErrorDb("Table creature_movement_template for entry %u, point %u have script_id %u that does not exist in `dbscripts_on_creature_movement`, ignoring", entry, point, node.script_id);
                     continue;
                 }
 
@@ -391,7 +391,7 @@ void WaypointManager::Load()
     if (!movementScriptSet.empty())
     {
         for (std::set<uint32>::const_iterator itr = movementScriptSet.begin(); itr != movementScriptSet.end(); ++itr)
-            sLog.outErrorDb("Table `creature_movement_scripts` contain unused script, id %u.", *itr);
+            sLog.outErrorDb("Table `dbscripts_on_creature_movement` contain unused script, id %u.", *itr);
     }
 }
 

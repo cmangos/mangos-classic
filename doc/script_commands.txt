@@ -78,10 +78,10 @@ Map coordinates for commands that need it.
 ## origin of script and source/target in scripts
 -- --------------------------
 
-creature_movement_scripts
+dbscripts_on_creature_movement
                             `creature_movement` `creature_movement_template`
                                 Source: creature. Target: creature
-event_scripts
+dbscripts_on_event
                             Flight path
                                 Source: player. Target: player
                             Transport path
@@ -90,21 +90,21 @@ event_scripts
                                 Source: User (player/creature). Target: GO
                             Spell (effect 61)
                                 Source: caster. Target: Target
-gameobject_scripts
-gameobject_template_scripts
+dbscripts_on_go_use
+dbscripts_on_go_template_use
                             Gameobject use
                                 Source: user: Target: GO
-gossip_scripts
-                            `gossip_menu_option`
+dbscripts_on_gossip
+                            `gossip_menu_option`, `gossip_menu`
                                 Source: creature. Target: player (in case of NPC-Gossip)
                                 Source: player. Target: GO (in case of GO-Gossip)
-quest_end_scripts
+dbscripts_on_quest_end
                             `quest_template`
                                 Source: quest taker (creature/GO). Target: player
-quest_start_scripts
+dbscripts_on_quest_start
                             `quest_template`
                                 Source: quest giver (creature/GO). Target: player
-spell_scripts
+dbscripts_on_spell
                             Spell (effect 77 - SCRIPT_EFFECT)
                             Spell (effect  3 - DUMMY)
                             Spell (effect 64 - TRIGGER_SPELL, with non-existing triggered spell)
