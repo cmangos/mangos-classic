@@ -28,11 +28,16 @@
 template<class T>
 void ConfusedMovementGenerator<T>::Initialize(T& unit)
 {
+    unit.addUnitState(UNIT_STAT_CONFUSED);
+
     // set initial position
     unit.GetPosition(i_x, i_y, i_z);
 
+    if (!unit.isAlive() || unit.hasUnitState(UNIT_STAT_NOT_MOVE))
+        return;
+
     unit.StopMoving();
-    unit.addUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
+    unit.addUnitState(UNIT_STAT_CONFUSED_MOVE);
 }
 
 template<class T>
@@ -46,6 +51,10 @@ template<class T>
 void ConfusedMovementGenerator<T>::Reset(T& unit)
 {
     i_nextMoveTime.Reset(0);
+
+    if (!unit.isAlive() || unit.hasUnitState(UNIT_STAT_NOT_MOVE))
+        return;
+
     unit.StopMoving();
     unit.addUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
 }

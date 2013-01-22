@@ -76,14 +76,18 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature)
             return;
         }
     }
-
-    StartMoveNow(creature);
 }
 
 void WaypointMovementGenerator<Creature>::Initialize(Creature& creature)
 {
+    creature.addUnitState(UNIT_STAT_ROAMING);
     LoadPath(creature);
-    creature.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+
+    if (!creature.isAlive() || creature.hasUnitState(UNIT_STAT_NOT_MOVE))
+        return;
+
+    creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
+    StartMoveNow(creature);
 }
 
 void WaypointMovementGenerator<Creature>::Finalize(Creature& creature)

@@ -66,10 +66,11 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
 template<>
 void RandomMovementGenerator<Creature>::Initialize(Creature& creature)
 {
-    if (!creature.isAlive())
+    creature.addUnitState(UNIT_STAT_ROAMING);               // _MOVE set in _setRandomLocation
+
+    if (!creature.isAlive() || creature.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
 
-    creature.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
     _setRandomLocation(creature);
 }
 
