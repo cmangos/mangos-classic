@@ -55,7 +55,8 @@ struct AreaTableEntry
     char*   area_name[8];                                   // 11-18    m_AreaName_lang
     // 19 string flags
     uint32  team;                                           // 20       m_factionGroupMask
-    uint32  LiquidTypeOverride[4];                          // 21-24    m_liquidTypeID[4]
+    // 21-23    uknown/unused
+    uint32  LiquidTypeOverride;                             // 24       m_liquidTypeID override for water type
 };
 
 struct AreaTriggerEntry

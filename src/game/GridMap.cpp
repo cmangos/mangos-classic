@@ -512,8 +512,10 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
 
     // Check water type in cell
     int idx = (x_int >> 3) * 16 + (y_int >> 3);
-    uint8 type = m_liquidFlags ? m_liquidFlags[idx] : m_liquidType;
+    uint8 type = m_liquidFlags ? m_liquidFlags[idx] : 1 << m_liquidType;
     uint32 entry = 0;
+
+    // ToDo: check if this part requires update for 1.12.1
     if (m_liquidEntry)
     {
         if (LiquidTypeEntry const* liquidEntry = sLiquidTypeStore.LookupEntry(m_liquidEntry[idx]))
@@ -521,16 +523,18 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
             entry = liquidEntry->Id;
             type &= MAP_LIQUID_TYPE_DARK_WATER;
             uint32 liqTypeIdx = liquidEntry->Type;
-            if (entry < 21)
+            if ((entry < 21) && (type & MAP_LIQUID_TYPE_WATER))
             {
+                // only basic liquid stored in maps actualy so in some case we need to override type depend on area
+                // actualy only Naxxramas raid be overrided here
                 if (AreaTableEntry const* area = sAreaStore.LookupEntry(getArea(x, y)))
                 {
-                    uint32 overrideLiquid = area->LiquidTypeOverride[liquidEntry->Type];
+                    uint32 overrideLiquid = area->LiquidTypeOverride;
                     if (!overrideLiquid && area->zone)
                     {
                         area = GetAreaEntryByAreaID(area->zone);
                         if (area)
-                            overrideLiquid = area->LiquidTypeOverride[liquidEntry->Type];
+                            overrideLiquid = area->LiquidTypeOverride;
                     }
 
                     if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
@@ -541,7 +545,7 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
                 }
             }
 
-            type |= 1 << liqTypeIdx;
+            type |= (1 << liqTypeIdx) | (type & MAP_LIQUID_TYPE_DARK_WATER);
         }
     }
 
@@ -930,7 +934,6 @@ void TerrainInfo::GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, floa
     TerrainManager::GetZoneAndAreaIdByAreaFlag(zoneid, areaid, GetAreaFlag(x, y, z), m_mapId);
 }
 
-
 GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data) const
 {
     GridMapLiquidStatus result = LIQUID_MAP_NO_WATER;
@@ -949,39 +952,15 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
             // All ok in water -> store data
             if (data)
             {
-                // hardcoded in client like this
-                if (GetMapId() == 530 && liquid_type == 2)
-                    liquid_type = 15;
-
                 uint32 liquidFlagType = 0;
                 if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(liquid_type))
-                    liquidFlagType = liq->Type;
-
-                if (liquid_type && liquid_type < 21)
-                {
-                    if (AreaTableEntry const* area = GetAreaEntryByAreaFlagAndMap(GetAreaFlag(x, y, z), GetMapId()))
-                    {
-                        uint32 overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
-                        if (!overrideLiquid && area->zone)
-                        {
-                            area = GetAreaEntryByAreaID(area->zone);
-                            if (area)
-                                overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
-                        }
-
-                        if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
-                        {
-                            liquid_type = overrideLiquid;
-                            liquidFlagType = liq->Type;
-                        }
-                    }
-                }
+                    liquidFlagType = 1 << liq->Type;
 
                 data->level = liquid_level;
                 data->depth_level = ground_level;
 
                 data->entry = liquid_type;
-                data->type_flags = 1 << liquidFlagType;
+                data->type_flags = liquidFlagType;
             }
 
             // For speed check as int values
@@ -1005,12 +984,8 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
         if (map_result != LIQUID_MAP_NO_WATER && (map_data.level > ground_level))
         {
             if (data)
-            {
-                // hardcoded in client like this
-                if (GetMapId() == 530 && map_data.entry == 2)
-                    map_data.entry = 15;
                 *data = map_data;
-            }
+
             return map_result;
         }
     }

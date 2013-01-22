@@ -435,16 +435,21 @@ int WMOGroup::ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPrecis
             switch (((uint8)liquidEntry - 1) & 3)
             {
                 case 0:
-                    liquidEntry = ((mogpFlags & 0x80000) != 0) + 13;
+                    liquidEntry = ((mogpFlags & 0x80000) != 0) + 1;
                     break;
                 case 1:
-                    liquidEntry = 14;
+                    liquidEntry = 2;        // ocean
                     break;
                 case 2:
-                    liquidEntry = 19;
+                    liquidEntry = 3;        // magma
                     break;
                 case 3:
-                    liquidEntry = 20;
+                    if (filename.find("Stratholme_raid") != string::npos)
+                    {
+                        liquidEntry = 21;   // Naxxramas slime
+                    }
+                    else
+                        liquidEntry = 4;    // Normal slime
                     break;
                 default:
                     break;

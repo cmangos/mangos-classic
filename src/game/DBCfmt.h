@@ -20,7 +20,7 @@
 #ifndef MANGOS_DBCSFRM_H
 #define MANGOS_DBCSFRM_H
 
-const char AreaTableEntryfmt[] = "niiiixxxxxissssssssxiiiii";
+const char AreaTableEntryfmt[] = "niiiixxxxxissssssssxixxxi";
 const char AreaTriggerEntryfmt[] = "niffffffff";
 const char AuctionHouseEntryfmt[] = "niiixxxxxxxxx";
 const char BankBagSlotPricesEntryfmt[] = "ni";
