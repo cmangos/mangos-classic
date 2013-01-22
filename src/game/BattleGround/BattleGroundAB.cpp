@@ -32,9 +32,6 @@
 
 BattleGroundAB::BattleGroundAB()
 {
-    m_BuffChange = true;
-    m_BgObjects.resize(BG_AB_OBJECT_MAX);
-
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_AB_START_ONE_MINUTE;
     m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_AB_START_HALF_MINUTE;
@@ -153,21 +150,8 @@ void BattleGroundAB::Update(uint32 diff)
     }
 }
 
-void BattleGroundAB::StartingEventCloseDoors()
-{
-    // despawn buffs
-    for (uint8 i = 0; i < BG_AB_NODES_MAX * 3; ++i)
-        SpawnBGObject(m_BgObjects[BG_AB_OBJECT_SPEEDBUFF_STABLES + i], RESPAWN_ONE_DAY);
-}
-
 void BattleGroundAB::StartingEventOpenDoors()
 {
-    for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
-    {
-        // randomly select buff to spawn
-        uint8 buff = urand(0, 2);
-        SpawnBGObject(m_BgObjects[BG_AB_OBJECT_SPEEDBUFF_STABLES + buff + i * 3], RESPAWN_IMMEDIATELY);
-    }
     OpenDoorEvent(BG_EVENT_DOOR);
 }
 
@@ -430,21 +414,6 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player* source, GameObject* target
             SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_HORDE, NULL, LANG_BG_HORDE, _GetNodeNameId(node));
     }
     PlaySoundToAll(sound);
-}
-
-bool BattleGroundAB::SetupBattleGround()
-{
-    // buffs
-    for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
-    {
-        if (!AddObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + 3 * i, Buff_Entries[0], BG_AB_BuffPositions[i][0], BG_AB_BuffPositions[i][1], BG_AB_BuffPositions[i][2], BG_AB_BuffPositions[i][3], 0, 0, sin(BG_AB_BuffPositions[i][3] / 2), cos(BG_AB_BuffPositions[i][3] / 2), RESPAWN_ONE_DAY)
-                || !AddObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + 3 * i + 1, Buff_Entries[1], BG_AB_BuffPositions[i][0], BG_AB_BuffPositions[i][1], BG_AB_BuffPositions[i][2], BG_AB_BuffPositions[i][3], 0, 0, sin(BG_AB_BuffPositions[i][3] / 2), cos(BG_AB_BuffPositions[i][3] / 2), RESPAWN_ONE_DAY)
-                || !AddObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + 3 * i + 2, Buff_Entries[2], BG_AB_BuffPositions[i][0], BG_AB_BuffPositions[i][1], BG_AB_BuffPositions[i][2], BG_AB_BuffPositions[i][3], 0, 0, sin(BG_AB_BuffPositions[i][3] / 2), cos(BG_AB_BuffPositions[i][3] / 2), RESPAWN_ONE_DAY)
-           )
-            sLog.outErrorDb("BatteGroundAB: Failed to spawn buff object!");
-    }
-
-    return true;
 }
 
 void BattleGroundAB::Reset()
