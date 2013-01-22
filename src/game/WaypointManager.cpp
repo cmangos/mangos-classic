@@ -182,14 +182,14 @@ void WaypointManager::Load()
 
             for (int i = 0; i < MAX_WAYPOINT_TEXT; ++i)
             {
-                be.textid[i]    = fields[7 + i].GetUInt32();
+                be.textid[i]    = fields[7 + i].GetInt32();
 
                 if (be.textid[i])
                 {
                     if (be.textid[i] < MIN_DB_SCRIPT_STRING_ID || be.textid[i] >= MAX_DB_SCRIPT_STRING_ID)
                     {
-                        sLog.outErrorDb("Table `db_script_string` not have string id  %u", be.textid[i]);
-                        continue;
+                        sLog.outErrorDb("Table `creature_movement` Id %u, point %u has textid%u has value %d out of range. Must be in %u-%u", id, point, i + 1, be.textid[i], MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID - 1);
+                        be.textid[i] = 0;
                     }
                 }
             }
@@ -351,8 +351,8 @@ void WaypointManager::Load()
                 {
                     if (be.textid[i] < MIN_DB_SCRIPT_STRING_ID || be.textid[i] >= MAX_DB_SCRIPT_STRING_ID)
                     {
-                        sLog.outErrorDb("Table `db_script_string` not have string id %u", be.textid[i]);
-                        continue;
+                        sLog.outErrorDb("Table `creature_movement_template` Entry %u, point %u has textid%u has value %d out of range. Must be in %u-%u", entry, point, i + 1, be.textid[i], MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID - 1);
+                        be.textid[i] = 0;
                     }
                 }
             }
@@ -557,93 +557,49 @@ void WaypointManager::SetNodeText(uint32 id, uint32 point, const char* text_fiel
     }
 }
 
-void WaypointManager::CheckTextsExistance(std::set<int32>& ids)
+inline void CheckWPText(bool isTemplate, uint32 entryOrGuid, size_t point, WaypointBehavior* be, std::set<int32>& ids)
 {
-    WaypointPathMap::const_iterator pmItr = m_pathMap.begin();
-    for (; pmItr != m_pathMap.end(); ++pmItr)
+    int zeroCount = 0;                                      // Counting leading zeros for futher textid shift
+    for (int j = 0; j < MAX_WAYPOINT_TEXT; ++j)
     {
-        for (size_t i = 0; i < pmItr->second.size(); ++i)
+        if (!be->textid[j])
         {
-            WaypointBehavior* be = pmItr->second[i].behavior;
-            if (!be)
-                continue;
+            ++zeroCount;
+            continue;
+        }
+        if (!sObjectMgr.GetMangosStringLocale(be->textid[j]))
+        {
+            sLog.outErrorDb("Table `creature_movement%s %u, PointId %u has textid%u with non existing textid %i.",
+                            isTemplate ? "_template` Entry:" : "` Id:", entryOrGuid, point + 1, j, be->textid[j]);
+            be->textid[j] = 0;
+            ++zeroCount;
+            continue;
+        }
+        ids.erase(uint32(be->textid[j]));
 
-            // Now we check text existence and put all zero texts ids to the end of array
-
-            // Counting leading zeros for futher textid shift
-            int zeroCount = 0;
-            for (int j = 0; j < MAX_WAYPOINT_TEXT; ++j)
-            {
-                if (!be->textid[j])
-                {
-                    ++zeroCount;
-                    continue;
-                }
-                else
-                {
-                    if (!sObjectMgr.GetMangosStringLocale(be->textid[j]))
-                    {
-                        sLog.outErrorDb("Some waypoint has textid%u with not existing %u text.", j, be->textid[j]);
-                        be->textid[j] = 0;
-                        ++zeroCount;
-                        continue;
-                    }
-                    else
-                        ids.erase(be->textid[j]);
-
-                    // Shifting check
-                    if (zeroCount)
-                    {
-                        // Correct textid but some zeros leading, so move it forward.
-                        be->textid[j - zeroCount] = be->textid[j];
-                        be->textid[j] = 0;
-                    }
-                }
-            }
+        // Shifting check
+        if (zeroCount)
+        {
+            // Correct textid but some zeros leading, so move it forward.
+            be->textid[j - zeroCount] = be->textid[j];
+            be->textid[j] = 0;
         }
     }
+}
 
-    WaypointPathTemplateMap::const_iterator wptItr = m_pathTemplateMap.begin();
-    for (; wptItr != m_pathTemplateMap.end(); ++wptItr)
+void WaypointManager::CheckTextsExistance(std::set<int32>& ids)
+{
+    for (WaypointPathMap::const_iterator pmItr = m_pathMap.begin(); pmItr != m_pathMap.end(); ++pmItr)
+    {
+        for (size_t i = 0; i < pmItr->second.size(); ++i)
+            if (pmItr->second[i].behavior)
+                CheckWPText(false, pmItr->first, i, pmItr->second[i].behavior, ids);
+    }
+
+    for (WaypointPathMap::const_iterator wptItr = m_pathTemplateMap.begin(); wptItr != m_pathTemplateMap.end(); ++wptItr)
     {
         for (size_t i = 0; i < wptItr->second.size(); ++i)
-        {
-            WaypointBehavior* be = wptItr->second[i].behavior;
-            if (!be)
-                continue;
-
-            // Now we check text existence and put all zero texts ids to the end of array
-
-            // Counting leading zeros for futher textid shift
-            int zeroCount = 0;
-            for (int j = 0; j < MAX_WAYPOINT_TEXT; ++j)
-            {
-                if (!be->textid[j])
-                {
-                    ++zeroCount;
-                    continue;
-                }
-                else
-                {
-                    if (!sObjectMgr.GetMangosStringLocale(be->textid[j]))
-                    {
-                        sLog.outErrorDb("Some waypoint has textid%u with not existing %u text.", j, be->textid[j]);
-                        be->textid[j] = 0;
-                        ++zeroCount;
-                        continue;
-                    }
-                    else
-                        ids.erase(be->textid[j]);
-
-                    // Shifting check
-                    if (zeroCount)
-                    {
-                        // Correct textid but some zeros leading, so move it forward.
-                        be->textid[j - zeroCount] = be->textid[j];
-                        be->textid[j] = 0;
-                    }
-                }
-            }
-        }
+            if (wptItr->second[i].behavior)
+                CheckWPText(true, wptItr->first, i, wptItr->second[i].behavior, ids);
     }
 }
