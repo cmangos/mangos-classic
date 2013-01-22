@@ -61,7 +61,7 @@ typedef vector<string> T_TableList;
 typedef map< string, T_Table > TDataBase;
 
 static
-void pg_notice(void *arg, const char *message)
+void pg_notice(void* arg, const char* message)
 {
     /// Do nothing
     //printf("%s\n", message);
@@ -91,19 +91,19 @@ string ConvertNativeType(enum_field_types mysqlType, uint32 length)
             return "integer";
         case FIELD_TYPE_LONGLONG:
         case FIELD_TYPE_LONG:
+        {
+            string temp;
+            char str[10];
+            temp = "numeric";
+            if (length)
             {
-                string temp;
-                char str[10];
-                temp = "numeric";
-                if (length)
-                {
-                    temp.append("(");
-                    sprintf(str,"%d",length);
-                    temp.append(str);
-                    temp.append(")");
-                }
-                return temp;
+                temp.append("(");
+                sprintf(str, "%d", length);
+                temp.append(str);
+                temp.append(")");
             }
+            return temp;
+        }
         case FIELD_TYPE_DECIMAL:
         case FIELD_TYPE_FLOAT:
         case FIELD_TYPE_DOUBLE:
@@ -116,7 +116,7 @@ string ConvertNativeType(enum_field_types mysqlType, uint32 length)
             if (length)
             {
                 temp.append("(");
-                sprintf(str,"%d",length);
+                sprintf(str, "%d", length);
                 temp.append(str);
                 temp.append(")");
             }
@@ -130,7 +130,7 @@ string ConvertNativeType(enum_field_types mysqlType, uint32 length)
             if (length)
             {
                 temp.append("(");
-                sprintf(str,"%d",length);
+                sprintf(str, "%d", length);
                 temp.append(str);
                 temp.append(")");
             }
@@ -145,7 +145,7 @@ string ConvertNativeType(enum_field_types mysqlType, uint32 length)
 inline
 bool IsNeeedEscapeString(enum_field_types mysqlType)
 {
-    switch(mysqlType)
+    switch (mysqlType)
     {
         case FIELD_TYPE_VAR_STRING:
         case FIELD_TYPE_STRING:
@@ -161,22 +161,22 @@ bool IsNeeedEscapeString(enum_field_types mysqlType)
 }
 
 inline
-void PG_Exec_str(string sql, PGconn *mPGconn)
+void PG_Exec_str(string sql, PGconn* mPGconn)
 {
-    PGresult *res = PQexec (mPGconn, sql.c_str());
+    PGresult* res = PQexec(mPGconn, sql.c_str());
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-        printf( "SQL: %s", sql.c_str() );
-        printf( "SQL %s", PQerrorMessage(mPGconn) );
+        printf("SQL: %s", sql.c_str());
+        printf("SQL %s", PQerrorMessage(mPGconn));
     }
 }
 
 void PG_Escape_Str(string& str)
 {
-    if(str.empty())
+    if (str.empty())
         return;
-    char* buf = new char[str.size()*2+1];
-    PQescapeString(buf,str.c_str(),str.size());
+    char* buf = new char[str.size() * 2 + 1];
+    PQescapeString(buf, str.c_str(), str.size());
     str = buf;
     delete[] buf;
 }

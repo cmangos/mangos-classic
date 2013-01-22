@@ -19,11 +19,11 @@ FileLoader::~FileLoader()
     free();
 }
 
-bool FileLoader::loadFile(char *filename, bool log)
+bool FileLoader::loadFile(char* filename, bool log)
 {
     free();
     MPQFile mf(filename);
-    if(mf.isEof())
+    if (mf.isEof())
     {
         if (log)
             printf("No such file %s\n", filename);
@@ -49,7 +49,7 @@ bool FileLoader::loadFile(char *filename, bool log)
 bool FileLoader::prepareLoadedData()
 {
     // Check version
-    version = (file_MVER *) data;
+    version = (file_MVER*) data;
     if (version->fcc != 'MVER')
         return false;
     if (version->ver != FILE_FORMAT_VERSION)
