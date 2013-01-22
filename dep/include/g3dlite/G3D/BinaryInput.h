@@ -1,12 +1,12 @@
 /**
  @file BinaryInput.h
  
- @maintainer Morgan McGuire, graphics3d.com
+ @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  
  @created 2001-08-09
- @edited  2006-07-19
+ @edited  2010-03-19
 
- Copyright 2000-2009, Morgan McGuire.
+ Copyright 2000-2010, Morgan McGuire.
  All rights reserved.
  */
 
@@ -369,6 +369,9 @@ public:
      Reads until NULL or the end of the file is encountered.
      */
     std::string readString();
+
+    /** Reads until \r, \r\n, \n\r, \n or the end of the file is encountered. Consumes the newline.*/
+    std::string readStringNewline();
 
     /**
      Reads until NULL or the end of the file is encountered.

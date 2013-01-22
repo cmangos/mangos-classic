@@ -7,7 +7,7 @@
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
 
  @created 2001-08-25
- @edited  2010-01-30
+ @edited  2010-03-20
 
  Copyright 2000-2010, Morgan McGuire.
  All rights reserved.
@@ -44,6 +44,7 @@
 #include "G3D/Matrix4.h"
 #include "G3D/CoordinateFrame.h"
 #include "G3D/PhysicsFrame.h"
+#include "G3D/PhysicsFrameSpline.h"
 #include "G3D/Plane.h"
 #include "G3D/Line.h"
 #include "G3D/Ray.h"
@@ -57,6 +58,7 @@
 #include "G3D/stringutils.h"
 #include "G3D/prompt.h"
 #include "G3D/Table.h"
+#include "G3D/FileSystem.h"
 #include "G3D/Set.h"
 #include "G3D/GUniqueID.h"
 #include "G3D/BinaryFormat.h"
@@ -118,6 +120,7 @@ template<class T> struct HashTrait< G3D::ReferenceCountedPointer<T> > {
 #include "G3D/ThreadSet.h"
 #include "G3D/RegistryUtil.h"
 #include "G3D/Any.h"
+#include "G3D/XML.h"
 #include "G3D/PointHashGrid.h"
 #include "G3D/Map2D.h"
 #include "G3D/Image1.h"

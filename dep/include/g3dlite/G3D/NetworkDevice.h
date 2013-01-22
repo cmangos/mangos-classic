@@ -258,8 +258,8 @@ public:
     ~ReliableConduit();
 
 
-    // The message is actually copied from the socket to an internal buffer during
-    // this call.  Receive only deserializes.
+    /** The message is actually copied from the socket to an internal buffer during
+     this call.  Receive only deserializes.*/
     virtual bool messageWaiting();
 
     /**
@@ -348,6 +348,7 @@ public:
         messageWaiting();
     }
 
+    /** The address of the other end of the conduit */
     NetAddress address() const;
 };
 

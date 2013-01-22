@@ -4,7 +4,7 @@
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
   
  @created 2001-07-09
- @edited  2009-11-29
+ @edited  2010-07-05
  */
 
 #include <stdlib.h>
@@ -69,12 +69,7 @@ const Vector4& Vector4::nan() {
 
 
 size_t Vector4::hashCode() const {
-    unsigned int xhash = (*(int*)(void*)(&x));
-    unsigned int yhash = (*(int*)(void*)(&y));
-    unsigned int zhash = (*(int*)(void*)(&z));
-    unsigned int whash = (*(int*)(void*)(&w));
-
-    return xhash + (yhash * 37) + (zhash * 101) + (whash * 241);
+    return HashTrait<uint128>::hashCode(*((uint128*)this));
 }
 
 

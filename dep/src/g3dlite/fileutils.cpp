@@ -17,12 +17,11 @@
 #include "G3D/stringutils.h"
 #include "G3D/Set.h"
 #include "G3D/g3dfnmatch.h"
+#include "G3D/FileSystem.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
-#if _HAVE_ZIP
-    #include "zip.h"
-#endif
+#include "zip.h"
 
 #ifdef G3D_WIN32
    // Needed for _getcwd
@@ -104,17 +103,18 @@ std::string readWholeFile(
     std::string s;
 
     debugAssert(filename != "");
-    if (fileExists(filename, false)) {
+    debugAssertM(FileSystem::exists(filename), filename + " not found");
 
-        int64 length = fileLength(filename);
+    if (! FileSystem::inZipfile(filename)) {
+        int64 length = FileSystem::size(filename);
 
         char* buffer = (char*)System::alignedMalloc(length + 1, 16);
         debugAssert(buffer);
-        FILE* f = fopen(filename.c_str(), "rb");
+        FILE* f = FileSystem::fopen(filename.c_str(), "rb");
         debugAssert(f);
         int ret = fread(buffer, 1, length, f);
 	    debugAssert(ret == length);(void)ret;
-        fclose(f);
+        FileSystem::fclose(f);
 
         buffer[length] = '\0';    
         s = std::string(buffer);
@@ -134,8 +134,6 @@ std::string readWholeFile(
         buffer[length] = '\0';
         s = std::string(buffer);
         System::alignedFree(buffer);
-    } else {
-        debugAssertM(false, filename + " not found");
     }
 
     return s;
@@ -146,7 +144,7 @@ void zipRead(const std::string& file,
              void*& data,
              size_t& length) {
     std::string zip, desiredFile;
-#if _HAVE_ZIP    
+    
     if (zipfileExists(file, zip, desiredFile)) {
         struct zip *z = zip_open( zip.c_str(), ZIP_CHECKCONS, NULL );
         {
@@ -169,9 +167,6 @@ void zipRead(const std::string& file,
     } else {
         data = NULL;
     }
-#else
-    data = NULL;
-#endif
 }
 
 
@@ -185,7 +180,6 @@ int64 fileLength(const std::string& filename) {
     int result = _stat(filename.c_str(), &st);
     
     if (result == -1) {
-#if _HAVE_ZIP
 		std::string zip, contents;
 		if(zipfileExists(filename, zip, contents)){
 			int64 requiredMem;
@@ -196,6 +190,7 @@ int64 fileLength(const std::string& filename) {
                                 struct zip_stat info;
                                 zip_stat_init( &info );    // TODO: Docs unclear if zip_stat_init is required.
                                 int success = zip_stat( z, contents.c_str(), ZIP_FL_NOCASE, &info );
+				(void)success;
                                 debugAssertM(success == 0, zip + ": " + contents + ": zip stat failed.");
                                 requiredMem = info.size;
 			}
@@ -204,130 +199,9 @@ int64 fileLength(const std::string& filename) {
 		} else {
         return -1;
 		}
-#else
-        return -1;
-#endif
     }
 
     return st.st_size;
-}
-
-/** Used by robustTmpfile.  Returns nonzero if fread, fwrite, and fseek all
-succeed on the file.
-  @author Morgan McGuire, http://graphics.cs.williams.edu  */
-static int isFileGood(FILE* f) {
-
-	int x, n, result;
-
-	/* Must be a valid file handle */
-	if (f == NULL) {
-		return 0;
-	}
-
-	/* Try to write */
-	x = 1234;
-	n = fwrite(&x, sizeof(int), 1, f);
-
-	if (n != 1) {
-		return 0;
-	}
-
-	/* Seek back to the beginning */
-	result = fseek(f, 0, SEEK_SET);
-	if (result != 0) {
-		return 0;
-	}
-
-	/* Read */
-	n =	fread(&x, sizeof(int), 1, f);
-	if (n != 1) {
-		return 0;
-	}
-
-	/* Seek back to the beginning again */
-	fseek(f, 0, SEEK_SET);
-
-	return 1;
-}
-
-FILE* createTempFile() {
-    FILE* t = NULL;
-
-//#   ifdef G3D_WIN32
-        t = tmpfile();
-//#   else
-//        // On Unix, tmpfile generates a warning for any code that links against it.
-//        const char* tempfilename = "/tmp/g3dtemp.XXXXXXXX";
-//        mktemp(tempfilename);
-//        t = fopen(tempfilename, "w");    
-//#   endif
-
-#	ifdef _WIN32
-		char* n = NULL;
-#	endif
-	char name[256];
-
-    if (isFileGood(t)) {
-        return t;
-    }
-
-#   ifdef G3D_WIN32
-    /* tmpfile failed; try the tmpnam routine */
-    t = fopen(tmpnam(NULL), "w+");
-    if (isFileGood(t)) {
-        return t;
-    }
-
-    n = _tempnam("c:/tmp/", "t");
-    /* Try to create something in C:\tmp */
-    t = fopen(n, "w+");
-    if (isFileGood(t)) {
-        return t;
-    }
-
-    /* Try c:\temp */
-    n = _tempnam("c:/temp/", "t");
-    t = fopen(n, "w+");
-    if (isFileGood(t)) {
-        return t;
-    }
-
-    /* try the current directory */
-    n = _tempnam("./", "t");
-    t = fopen(n, "w+");
-    if (isFileGood(t)) {
-        return t;
-    }
-
-    sprintf(name, "%s/tmp%d", "c:/temp", rand());
-    t = fopen(name, "w+");
-    if (isFileGood(t)) {
-        return t;
-    }
-
-    /* Try some hardcoded paths */
-    sprintf(name, "%s/tmp%d", "c:/tmp", rand());
-    t = fopen(name, "w+");
-    if (isFileGood(t)) {
-        return t;
-    }
-#   else
-    sprintf(name, "%s/tmp%d", "/tmp", rand());
-    t = fopen(name, "w+");
-    if (isFileGood(t)) {
-        return t;
-    }
-#endif
-
-    sprintf(name, "tmp%d", rand());
-    t = fopen(name, "w+");
-    if (isFileGood(t)) {
-        return t;
-    }
-
-    fprintf(stderr, "Unable to create a temporary file; robustTmpfile returning NULL\n");
-
-    return NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -342,11 +216,11 @@ void writeWholeFile(
     parseFilename(filename, root, pathArray, base, ext); 
 
     path = root + stringJoin(pathArray, '/');
-    if (! fileExists(path, false)) {
-        createDirectory(path);
+    if (! FileSystem::exists(path, false)) {
+        FileSystem::createDirectory(path);
     }
 
-    FILE* file = fopen(filename.c_str(), "wb");
+    FILE* file = FileSystem::fopen(filename.c_str(), "wb");
 
     debugAssert(file);
 
@@ -355,7 +229,8 @@ void writeWholeFile(
     if (flush) {
         fflush(file);
     }
-    fclose(file);
+
+    FileSystem::fclose(file);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -385,7 +260,7 @@ void createDirectory(
     }
 
     // If it already exists, do nothing
-    if (fileExists(d.substr(0, d.size() - 1)), false) {
+    if (FileSystem::exists(d.substr(0, d.size() - 1))) {
         return;
     }
 
@@ -405,129 +280,21 @@ void createDirectory(
     // Create any intermediate that doesn't exist
     for (int i = 0; i < path.size(); ++i) {
         p += "/" + path[i];
-        if (! fileExists(p, false)) {
+        if (! FileSystem::exists(p)) {
             // Windows only requires one argument to mkdir,
             // where as unix also requires the permissions.
 #           ifndef G3D_WIN32
                 mkdir(p.c_str(), 0777);
-#	    else
+#	        else
                 _mkdir(p.c_str());
-#	    endif
+#	        endif
         }
     }
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class FileSystemCache {
-private:
-
-    Table<std::string, Array<std::string> > m_files;
-
-public:
-
-    bool fileExists(const std::string& filename) {
-        const std::string& path = resolveFilename(filenamePath(filename));
-        const std::string& name = filenameBaseExt(filename);
-        
-        bool neverBeforeSeen = false;
-        Array<std::string>& fileList = m_files.getCreate(path, neverBeforeSeen);
-        if (neverBeforeSeen) {
-            if (! G3D::fileExists(path, true, false)) {
-                // The path itself doesn't exist... back out our insertion (which makes fileList& invalid) 
-                m_files.remove(path);
-                return false;
-            }
-
-            std::string spec = pathConcat(path, "*");
-
-            // Will automatically recurse into zipfiles
-            getFiles(spec, fileList);
-            getDirs(spec, fileList);
-
-#           ifdef G3D_WIN32 
-            {
-                // Case insensitive
-                for (int i = 0; i < fileList.size(); ++i) {
-                    fileList[i] = toLower(fileList[i]);
-                }
-            }
-#           endif
-        }
-
-        if (filenameContainsWildcards(name)) {
-            // See if anything matches
-            for (int i = 0; i < fileList.size(); ++i) {
-                if (g3dfnmatch(name.c_str(), fileList[i].c_str(), 0) == 0) {
-                    return true;
-                }
-            }
-            return false;
-        } else {
-            // On windows, this is a lower-lower comparison, so it is case insensitive
-            return fileList.contains(name);
-        }
-    }
-
-    void clear() {
-        m_files.clear();
-    }
-
-    static FileSystemCache& instance() {
-        static FileSystemCache i;
-        return i;
-    }
-};
-
-
-void clearFileSystemCache() {
-    FileSystemCache::instance().clear();
-}
-
-bool fileExists
-(const std::string&	_filename,
- bool                   lookInZipfiles,
- bool                   trustCache) {
-    
-    if (_filename.empty()) {
-        return false;
-    }
-
-    // Remove trailing slash from directories
-    const std::string& filename = (endsWith(_filename, "/") || endsWith(_filename, "\\")) ? _filename.substr(0, _filename.length() - 1) : _filename;
-
-    if (trustCache && lookInZipfiles) {
-#       ifdef G3D_WIN32
-            // Case insensitive
-            return FileSystemCache::instance().fileExists(toLower(filename));
-#       else
-            return FileSystemCache::instance().fileExists(filename);
-#       endif
-    }
-
-    // Useful for debugging
-    //char curdir[1024]; _getcwd(curdir, 1024); 
-
-    struct _stat st;
-    int ret = _stat(filename.c_str(), &st);
-
-    // _stat returns zero on success
-    bool exists = (ret == 0);
-
-    if (! exists && lookInZipfiles) {
-		// Does not exist standalone, but might exist in a zipfile
-
-		// These output arguments will be ignored
-		std::string zipDir, internalPath;
-		return zipfileExists(filename, zipDir, internalPath);
-    } else {
-    	return exists;
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-#if _HAVE_ZIP
 /* Helper methods for zipfileExists()*/
 // Given a string (the drive) and an array (the path), computes the directory
 static void _zip_resolveDirectory(std::string& completeDir, const std::string& drive, const Array<std::string>& path, const int length){
@@ -561,12 +328,12 @@ static bool _zip_zipContains(const std::string& zipDir, const std::string& desir
 	}
 	return true;
 }
-#endif
+
 
 // If no zipfile exists, outZipfile and outInternalFile are unchanged
 bool zipfileExists(const std::string& filename, std::string& outZipfile,
                    std::string& outInternalFile){
-#if _HAVE_ZIP
+   
     Array<std::string> path;
     std::string drive, base, ext, zipfile, infile;
     parseFilename(filename, drive, path, base, ext);
@@ -607,12 +374,12 @@ bool zipfileExists(const std::string& filename, std::string& outZipfile,
             return false;
         }
         
-        if (fileExists(zipfile, false)) {
+        if (FileSystem::exists(zipfile)) {
             // test if it actually is a zipfile
             // if not, return false, a bad
             // directory structure has been given,
             // not a .zip
-            if (isZipfile(zipfile)){
+            if (FileSystem::isZipfile(zipfile)){
                 
                 if (_zip_zipContains(zipfile, infile)){
                     outZipfile = zipfile;
@@ -628,7 +395,7 @@ bool zipfileExists(const std::string& filename, std::string& outZipfile,
         }
         
     }
-#endif
+    
     // not a valid directory structure ever, 
     // obviously no .zip was found within the path 
     return false;
@@ -641,7 +408,7 @@ std::string generateFilenameBase(const std::string& prefix, const std::string& s
 
     // Note "template" is a reserved word in C++
     std::string templat = prefix + System::currentDateString() + "_";
-    getFiles(templat + "*", exist);
+    FileSystem::getFiles(templat + "*", exist);
     
     // Remove extensions
     for (int i = 0; i < exist.size(); ++i) {
@@ -910,7 +677,7 @@ static void getFileOrDirListNormal
 #   endif
 }
 
-#if _HAVE_ZIP
+
 /**
  @param path   The zipfile name (no trailing slash)
  @param prefix Directory inside the zipfile. No leading slash, must have trailing slash if non-empty.
@@ -961,14 +728,13 @@ static void _zip_addEntry(const std::string& path,
         }
     }
 }
-#endif
+
 
 static void getFileOrDirListZip(const std::string& path,
                                 const std::string& prefix,
                                 Array<std::string>& files,
                                 bool wantFiles,
                                 bool includePath){
-#if _HAVE_ZIP
     struct zip *z = zip_open( path.c_str(), ZIP_CHECKCONS, NULL );
 
     Set<std::string> fileSet;
@@ -984,7 +750,6 @@ static void getFileOrDirListZip(const std::string& path,
     zip_close( z );
     
     fileSet.getMembers(files);
-#endif
 }
 
 
@@ -1004,8 +769,8 @@ static void determineFileOrDirList(
         path = path.substr(0, path.length() -1);
     }
     
-    if ((path == "") || fileExists(path, false)) {
-        if ((path != "") && isZipfile(path)) {
+    if ((path == "") || FileSystem::exists(path)) {
+        if ((path != "") && FileSystem::isZipfile(path)) {
             // .zip should only work if * is specified as the Base + Ext
             // Here, we have been asked for the root's contents
             debugAssertM(filenameBaseExt(filespec) == "*", "Can only call getFiles/getDirs on zipfiles using '*' wildcard");

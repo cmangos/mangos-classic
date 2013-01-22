@@ -209,9 +209,9 @@ public:
      */
     inline Vector3 directionOrZero() const {
         float mag = magnitude();
-        if (G3D::fuzzyEq(mag, 0.0f)) {
+        if (mag < 0.0000001f) {
             return Vector3::zero();
-        } else if (G3D::fuzzyEq(mag, 1.0f)) {
+        } else if (mag < 1.00001f && mag > 0.99999f) {
             return *this;
         } else {
             return *this * (1.0f / mag);

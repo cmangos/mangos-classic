@@ -1,21 +1,26 @@
 /**
  @file BinaryOutput.cpp
  
- @author Morgan McGuire, graphics3d.com
- Copyright 2002-2007, Morgan McGuire, All rights reserved.
+ @author Morgan McGuire, http://graphics.cs.williams.edu
+ Copyright 2002-2010, Morgan McGuire, All rights reserved.
  
  @created 2002-02-20
- @edited  2008-01-07
+ @edited  2010-03-17
  */
 
 #include "G3D/platform.h"
 #include "G3D/BinaryOutput.h"
 #include "G3D/fileutils.h"
+#include "G3D/FileSystem.h"
 #include "G3D/stringutils.h"
 #include "G3D/Array.h"
 #include <zlib.h>
-
+#include "G3D/Log.h"
 #include <cstring>
+
+#ifdef G3D_LINUX
+#    include <errno.h>
+#endif
 
 // Largest memory buffer that the system will use for writing to
 // disk.  After this (or if the system runs out of memory)
@@ -155,7 +160,7 @@ void BinaryOutput::reserveBytesWhenOutOfMemory(size_t bytes) {
         //debugPrintf("Writing %d bytes to disk\n", writeBytes);
 
         const char* mode = (m_alreadyWritten > 0) ? "ab" : "wb";
-        FILE* file = fopen(m_filename.c_str(), mode);
+        FILE* file = FileSystem::fopen(m_filename.c_str(), mode);
         debugAssert(file);
 
         size_t count = fwrite(m_buffer, 1, writeBytes, file);
@@ -317,14 +322,17 @@ void BinaryOutput::commit(bool flush) {
     parseFilename(m_filename, root, pathArray, base, ext); 
 
     path = root + stringJoin(pathArray, '/');
-    if (! fileExists(path, false)) {
-        createDirectory(path);
+    if (! FileSystem::exists(path, false)) {
+        FileSystem::createDirectory(path);
     }
 
     const char* mode = (m_alreadyWritten > 0) ? "ab" : "wb";
 
-    FILE* file = fopen(m_filename.c_str(), mode);
+    FILE* file = FileSystem::fopen(m_filename.c_str(), mode);
 
+    if (! file) {
+        logPrintf("Error %d while trying to open \"%s\"\n", errno, m_filename.c_str());
+    }
     m_ok = (file != NULL) && m_ok;
 
     if (m_ok) {
@@ -340,7 +348,7 @@ void BinaryOutput::commit(bool flush) {
         if (flush) {
             fflush(file);
         }
-        fclose(file);
+        FileSystem::fclose(file);
         file = NULL;
     }
 }

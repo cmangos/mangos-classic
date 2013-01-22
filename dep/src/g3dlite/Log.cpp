@@ -3,7 +3,7 @@
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
   @created 2001-08-04
-  @edited  2009-01-15
+  @edited  2010-01-15
  */
 
 #include "G3D/platform.h"
@@ -11,6 +11,7 @@
 #include "G3D/format.h"
 #include "G3D/Array.h"
 #include "G3D/fileutils.h"
+#include "G3D/FileSystem.h"
 #include <time.h>
 
 #ifdef G3D_WIN32
@@ -43,7 +44,7 @@ Log::Log(const std::string& filename, int stripFromStackBottom) :
 
     this->filename = filename;
 
-    logFile = fopen(filename.c_str(), "w");
+    logFile = FileSystem::fopen(filename.c_str(), "w");
 
     if (logFile == NULL) {
         std::string drive, base, ext;
@@ -58,7 +59,7 @@ Log::Log(const std::string& filename, int stripFromStackBottom) :
             logName = std::string("/tmp/") + logName;
         #endif
 
-        logFile = fopen(logName.c_str(), "w");
+        logFile = FileSystem::fopen(logName.c_str(), "w");
     }
 
     // Use a large buffer (although we flush in logPrintf)

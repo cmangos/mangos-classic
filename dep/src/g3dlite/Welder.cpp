@@ -74,7 +74,7 @@ namespace G3D { namespace _internal {
 
 class WeldHelper {
 private:
-    /** Used by getIndex and updateTriLists */
+    /** Used by getIndex and updateTriLists. Deallocating this is slow. */
     PointHashGrid<VNTi>     weldGrid;
 
     Array<Vector3>*         outputVertexArray;
@@ -157,23 +157,25 @@ private:
         int numTriLists = indexArrayArray.size();
         int u = 0;
         for (int t = 0; t < numTriLists; ++t) {
-            Array<int>& triList = *(indexArrayArray[t]);
+            if (indexArrayArray[t] != NULL) {
+                Array<int>& triList = *(indexArrayArray[t]);
 
-            // For all vertices in this list
-            for (int v = 0; v < triList.size(); ++v) {
-                // This vertex mapped to u in the flatVertexArray
-                triList[v] = getIndex(vertexArray[u], normalArray[u], texCoordArray[u]);
+                // For all vertices in this list
+                for (int v = 0; v < triList.size(); ++v) {
+                    // This vertex mapped to u in the flatVertexArray
+                    triList[v] = getIndex(vertexArray[u], normalArray[u], texCoordArray[u]);
 
-                /*
-#           ifdef G3D_DEBUG
-            {
-                int i = triList[v];
-                Vector3 N = normalArray[i];
-                debugAssertM(N.length() > 0.9f, "Produced non-unit normal");
-            }
-#           endif
-            */
-                ++u;
+                    /*
+    #           ifdef G3D_DEBUG
+                {
+                    int i = triList[v];
+                    Vector3 N = normalArray[i];
+                    debugAssertM(N.length() > 0.9f, "Produced non-unit normal");
+                }
+    #           endif
+                */
+                    ++u;
+                }
             }
         }
     }
@@ -190,11 +192,13 @@ private:
 
         int numTriLists = indexArrayArray.size();
         for (int t = 0; t < numTriLists; ++t) {
-            const Array<int>& triList = *(indexArrayArray[t]);
-            for (int v = 0; v < triList.size(); ++v) {
-                int i = triList[v];
-                unrolledVertexArray.append(vertexArray[i]);
-                unrolledTexCoordArray.append(texCoordArray[i]);
+            if (indexArrayArray[t] != NULL) {
+                const Array<int>& triList = *(indexArrayArray[t]);
+                for (int v = 0; v < triList.size(); ++v) {
+                    int i = triList[v];
+                    unrolledVertexArray.append(vertexArray[i]);
+                    unrolledTexCoordArray.append(texCoordArray[i]);
+                }
             }
         }
     }
@@ -214,8 +218,9 @@ private:
             const Vector3& e1 = vertexArray[v + 2] - vertexArray[v];
 
             // Note that the length may be zero in the case of sliver polygons, e.g.,
-            // those correcting a T-junction.
-            const Vector3& n  = e0.cross(e1).directionOrZero(); 
+            // those correcting a T-junction.  Scale up by 256 to avoid underflow when
+            // multiplying very small edges
+            const Vector3& n  = (e0.cross(e1 * 256.0f)).directionOrZero();
 
             // Append the normal once per vertex.
             faceNormalArray.append(n, n, n);
@@ -230,14 +235,15 @@ private:
         const Array<Vector3>& vertexArray, 
         const Array<Vector3>& normalArray, 
         Array<Vector3>&       smoothNormalArray) {
-
-        // Create an area memory manager for fast deallocation
-        MemoryManager::Ref mm = AreaMemoryManager::create(iRound(sizeof(VN) * normalArray.size() * 1.5));
         
         if (normalSmoothingAngle <= 0) {
             smoothNormalArray = normalArray;
             return;
         }
+
+        
+        // Create an area memory manager for fast deallocation
+        MemoryManager::Ref mm = AreaMemoryManager::create(iRound(sizeof(VN) * normalArray.size() * 1.5));
 
         const float cosThresholdAngle = (float)cos(normalSmoothingAngle);
 
@@ -250,6 +256,7 @@ private:
             grid.insert(VN(vertexArray[v], normalArray[v]));
         }
 
+        // TODO: this step could be done on multiple threads
         for (int v = 0; v < normalArray.size(); ++v) {            
             // Compute the sum of all nearby normals within the cutoff angle.
             // Search within the vertexWeldRadius, since those are the vertices
@@ -265,8 +272,8 @@ private:
                 const float cosAngle = N.dot(original);
 
                 if (cosAngle > cosThresholdAngle) {
-                    // This normal is close enough to consider
-                    sum += N;
+                    // This normal is close enough to consider.  Avoid underflow by scaling up
+                    sum += (N * 256.0f);
                 }
                 ++it;
             }
@@ -366,8 +373,9 @@ public:
     }
 
     WeldHelper(float vertRadius) :
-        weldGrid(vertRadius),
-        vertexWeldRadius(vertRadius) {}
+        weldGrid(vertRadius, AreaMemoryManager::create()),
+        vertexWeldRadius(vertRadius) {
+    }
 
 };
 } // Internal
@@ -382,6 +390,7 @@ void Welder::weld(
     _internal::WeldHelper(settings.vertexWeldRadius).process(
         vertexArray, texCoordArray, normalArray, indexArrayArray, 
         settings.normalSmoothingAngle, settings.textureWeldRadius, settings.normalWeldRadius);
+        
 }
 
 

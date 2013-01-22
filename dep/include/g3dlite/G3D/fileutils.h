@@ -4,14 +4,14 @@
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  
  @author  2002-06-06
- @edited  2010-02-06
+ @edited  2010-03-06
 
  Copyright 2000-2010, Morgan McGuire.
  All rights reserved.
  */
 
-#ifndef G3D_fileUtils_h
-#define G3D_fileUtils_h
+#ifndef G3D_fileutils_h
+#define G3D_fileutils_h
 
 #include "G3D/platform.h"
 #include <string>
@@ -68,97 +68,11 @@ void writeWholeFile(
     const std::string& str, 
     bool    flush = true);
 
-/**
- Creates the directory (which may optionally end in a /)
- and any parents needed to reach it.
- */
-void createDirectory(
-    const std::string&          dir);
-
-/**
- Fully qualifies a filename.  The filename may contain wildcards,
- in which case the wildcards will be preserved in the returned value.
- */
-std::string resolveFilename(const std::string& filename);
-
-/**
- Appends all files matching filespec to the files array.  The names
- will not contain paths unless includePath == true.  These may be
- relative to the current directory unless the filespec is fully qualified
- (can be done with resolveFilename).
- Wildcards can only appear to the right of the last slash in filespec.
- Works with .zip files used as paths, if filespec is passed in the form
- C:\\...\\something.zip\\*  Does not work recursively with zipfiles (a
- .zip within a .zip will not work)
- */
-void getFiles(
-	const std::string&			filespec,
-	Array<std::string>&			files,
-	bool						includePath    = false);
-
-/**
- Appends all directories matching filespec to the files array. The names
- will not contain paths unless includePath == true.  These may be
- relative to the current directory unless the filespec is fully qualified
- (can be done with resolveFilename).
- Does not append special directories "." or "..".
- Works with .zip files used as paths, if filespec is passed in the form
- C:\\...\\something.zip\\*  Does not work recursively with zipfiles (a
- .zip within a .zip will not work)
- */
-void getDirs(
-	const std::string&			filespec,
-	Array<std::string>&			files,
-	bool						includePath = false);
-
-
-/** Returns true if the specified path exists and is a directory */
-bool isDirectory(const std::string& filespec);
-
-
-/** Returns true if the specified filename exists and is a zipfile */
-bool isZipfile(const std::string& filename);
-
-
-/** Returns the length of the file.  If 
-	filename specifies a path that contains a zipfile, but the 
-	contents within are specified correctly, returns the 
-	uncompressed size of the requested file.  Returns -1 if
-	the file does not exist. 
-	
-	@param filename the path to test, may contain .zip
-*/
-int64 fileLength(const std::string& filename);
-
-/**
- Copies the file
- */
-void copyFile(
-    const std::string&          source,
-    const std::string&          dest);
 
 /** Returns a temporary file that is open for read/write access.  This
     tries harder than the ANSI tmpfile, so it may succeed when that fails. */
 FILE* createTempFile();
 
-/**
- Returns true if the given file (or directory) exists.
-
- \param filename the path to test. must not end in a trailing slash.
- \param lookInZipfiles if the path does not exist, calls zipfileExists()
- \param trustCache If true and \a lookInZipfiles is true, cache directory and zipfile contents
-  so that subsequent calls to the same directory are fast.
-
- \sa G3D::clearFileSystemCache, G3D::zipfileExists
- */
-bool fileExists
-(const std::string&          filename,
- bool	                     lookInZipfiles = true,
- bool                        trustCache = true);
-
-
-/** Clears the cache used by fileExists */
-void clearFileSystemCache();
 
 /**
  Returns true if the given file (or directory) exists
@@ -242,10 +156,7 @@ std::string filenamePath(const std::string& filename);
 /** Returns true if '*' or '?' appears in the string */
 bool filenameContainsWildcards(const std::string& filename);
 
-/** Returns true if dst does not exist or src is newer than dst.  Works on both files and directories. */
-bool fileIsNewer(const std::string& src, const std::string& dst);
-
-/** Appends file onto dirname, ensuring a / if needed. */
+/** Appends file onto dirname, ensuring a / if needed. \deprecated Use FilePath::concat */
 std::string pathConcat(const std::string& dirname, const std::string& file);
 
 } // namespace

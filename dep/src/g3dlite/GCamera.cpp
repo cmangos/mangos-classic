@@ -5,7 +5,7 @@
   @author Jeff Marsceill, 08jcm@williams.edu
  
   @created 2005-07-20
-  @edited  2009-11-24
+  @edited  2010-02-22
 */
 #include "G3D/GCamera.h"
 #include "G3D/platform.h"
@@ -45,6 +45,8 @@ GCamera::GCamera(const Any& any) {
             m_nearPlaneZ = it->value;
         } else if (k == "FARPLANEZ") {
             m_farPlaneZ = it->value;
+        } else if (k == "PIXELOFFSET") {
+            m_pixelOffset = it->value;
         } else {
             any.verify(false, std::string("Illegal key in table: ") + it->key);
         }
@@ -61,6 +63,7 @@ GCamera::operator Any() const {
     any.set("nearPlaneZ", nearPlaneZ());
     any.set("farPlaneZ", farPlaneZ());
     any.set("coordinateFrame", coordinateFrame());
+    any.set("pixelOffset", pixelOffset());
 
     return any;
 }
@@ -68,7 +71,7 @@ GCamera::operator Any() const {
 
 GCamera::GCamera() {
     setNearPlaneZ(-0.2f);
-    setFarPlaneZ(-100.0f);
+    setFarPlaneZ(-150.0f);
     setFieldOfView((float)toRadians(90.0f), HORIZONTAL);
 }
 
@@ -171,8 +174,8 @@ void GCamera::getProjectPixelMatrix(const Rect2D& viewport, Matrix4& P) const {
     float sx = screenWidth / 2.0;
     float sy = screenHeight / 2.0;
 
-    P = Matrix4(sx, 0, 0, sx + viewport.x0(),
-                0, -sy, 0, sy + viewport.y0(),
+    P = Matrix4(sx, 0, 0, sx + viewport.x0() - m_pixelOffset.x,
+                0, -sy, 0, sy + viewport.y0() + m_pixelOffset.y,
                 0, 0,  1, 0,
                 0, 0,  0, 1) * P;
 }
@@ -185,23 +188,27 @@ void GCamera::getProjectUnitMatrix(const Rect2D& viewport, Matrix4& P) const {
 
     float r, l, t, b, n, f, x, y;
 
+    float s = 1.0f;
     if (m_direction == VERTICAL) {
         y = -m_nearPlaneZ * tan(m_fieldOfView / 2);
         x = y * (screenWidth / screenHeight);
+        s = screenHeight;
     } else { //m_direction == HORIZONTAL
         x = -m_nearPlaneZ * tan(m_fieldOfView / 2);
         y = x * (screenHeight / screenWidth);
+        s = screenWidth;
     }
 
     n = -m_nearPlaneZ;
     f = -m_farPlaneZ;
-    r = x;
-    l = -x;
-    t = y;
-    b = -y;
+    r = x  - m_pixelOffset.x/s;
+    l = -x - m_pixelOffset.x/s;
+    t = y  + m_pixelOffset.y/s;
+    b = -y + m_pixelOffset.y/s;
 
     P = Matrix4::perspectiveProjection(l, r, b, t, n, f);
 }
+
 
 Vector3 GCamera::projectUnit(const Vector3& point, const Rect2D& viewport) const {
     Matrix4 M;
@@ -244,7 +251,7 @@ Vector3 GCamera::unproject(const Vector3& v, const Rect2D& viewport) const {
         z = 1.0f / ((((1.0f / f) - (1.0f / n)) * v.z) + 1.0f / n);
     }
 
-    const Ray& ray = worldRay(v.x, v.y, viewport);
+    const Ray& ray = worldRay(v.x - m_pixelOffset.x, v.y - m_pixelOffset.y, viewport);
 
     // Find out where the ray reaches the specified depth.
     const Vector3& out = ray.origin() + ray.direction() * -z / (ray.direction().dot(m_cframe.lookVector()));
@@ -481,6 +488,7 @@ void GCamera::serialize(BinaryOutput& bo) const {
     bo.writeFloat32(farPlaneZ());
     m_cframe.serialize(bo);
     bo.writeInt8(m_direction);
+    m_pixelOffset.serialize(bo);
 }
 
 
@@ -492,6 +500,7 @@ void GCamera::deserialize(BinaryInput& bi) {
     debugAssert(m_farPlaneZ < 0.0f);
     m_cframe.deserialize(bi);
     m_direction = (FOVDirection)bi.readInt8();
+    m_pixelOffset.deserialize(bi);
 }
 
 

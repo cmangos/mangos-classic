@@ -94,6 +94,20 @@ void GImage::encodeTGA(
     out.writeString("TRUEVISION-XFILE ");
 }
 
+inline static void readBGR(uint8* byte, BinaryInput& bi) {
+    int b = bi.readUInt8();
+    int g = bi.readUInt8();
+    int r = bi.readUInt8();
+
+    byte[0] = r;
+    byte[1] = g;
+    byte[2] = b;
+}
+
+inline static void readBGRA(uint8* byte, BinaryInput& bi) {
+    readBGR(byte, bi);
+    byte[3] = bi.readUInt8();
+}
 
 void GImage::decodeTGA(
     BinaryInput&        input) {
@@ -117,8 +131,8 @@ void GImage::decodeTGA(
     (void)colorMapType;
 	
     // 2 is the type supported by this routine.
-    if (imageType != 2) {
-        throw Error("TGA images must be type 2 (Uncompressed truecolor)", input.getFilename());
+    if (imageType != 2 && imageType != 10) {
+        throw Error("TGA images must be type 2 (Uncompressed truecolor) or 10 (Run-length truecolor)", input.getFilename());
     }
 	
     // Color map specification
@@ -159,34 +173,63 @@ void GImage::decodeTGA(
     int x;
     int y;
 
-    if (m_channels == 3) {
+    if (imageType == 2) {
+        // Uncompressed
+        if (m_channels == 3) {
+            for (y = m_height - 1; y >= 0; --y) {
+              for (x = 0; x < m_width; ++x) {
+                int i = (x + y * m_width) * 3;
+                readBGR(m_byte + i, input);
+              }
+            }
+        } else {
+            for (y = m_height - 1; y >= 0; --y) {
+              for (x = 0; x < m_width; ++x) {
+                 int i = (x + y * m_width) * 4;
+                 readBGRA(m_byte + i, input);
+              }
+            }
+        }
+    } else if (imageType == 10) {
+
+        // Run-length encoded 
         for (y = m_height - 1; y >= 0; --y) {
-          for (x = 0; x < m_width; ++x) {
-            int b = input.readUInt8();
-            int g = input.readUInt8();
-            int r = input.readUInt8();
-		    
-            int i = (x + y * m_width) * 3;
-            m_byte[i + 0] = r;
-            m_byte[i + 1] = g;
-            m_byte[i + 2] = b;
-          }
+            for (int x = 0; x < m_width; /* intentionally no x increment */) {
+                // The specification guarantees that no packet will wrap past the end of a row
+                const uint8 repetitionCount = input.readUInt8();
+                const uint8 numValues = (repetitionCount & (~128)) + 1;
+                int byteOffset = (x + y * m_width) * 3;
+
+                if (repetitionCount & 128) {
+                    // When the high bit is 1, this is a run-length packet
+                    if (m_channels == 3) {
+                        Color3uint8 value;
+                        readBGR((uint8*)(&value), input);
+                        for (int i = 0; i < numValues; ++i, ++x) {
+                            for (int b = 0; b < 3; ++b, ++byteOffset) {
+                                m_byte[byteOffset] = value[b];
+                            }
+                        }
+                    } else {
+                        Color4uint8 value;
+                        readBGRA((uint8*)(&value), input);
+                        for (int i = 0; i < numValues; ++i, ++x) {
+                            for (int b = 0; b < 3; ++b, ++byteOffset) {
+                                m_byte[byteOffset] = value[b];
+                            }
+                        }
+                    }
+
+                } else {
+                    // When the high bit is 0, this is a raw packet
+                    for (int i = 0; i < numValues; ++i, ++x, byteOffset += m_channels) {
+                        readBGR(m_byte + byteOffset, input);
+                    }
+                }
+            }
         }
     } else {
-        for (y = m_height - 1; y >= 0; --y) {
-          for (x = 0; x < m_width; ++x) {
-            int b = input.readUInt8();
-            int g = input.readUInt8();
-            int r = input.readUInt8();
-            int a = input.readUInt8();
-		    
-            int i = (x + y * m_width) * 4;
-            m_byte[i + 0] = r;
-            m_byte[i + 1] = g;
-            m_byte[i + 2] = b;
-            m_byte[i + 3] = a;
-          }
-        }
+        alwaysAssertM(false, "Unsupported type");
     }
 }
 

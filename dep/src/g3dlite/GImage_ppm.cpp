@@ -183,7 +183,7 @@ void GImage::decodePPM(
     int w, h;
 
     input.readBytes(head, 2);
-    if (head[0] != 'P' || (head[1] != '6') && (head[1] != '5')) {
+    if (head[0] != 'P' || ((head[1] != '6') && (head[1] != '5'))) {
         throw GImage::Error("Invalid PPM Header.", input.getFilename());
     }
 

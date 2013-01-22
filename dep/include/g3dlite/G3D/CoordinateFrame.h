@@ -68,6 +68,8 @@ public:
         - CFrame((matrix3 expr), (vector3 expr))
         - CFrame::fromXYZYPRDegrees(#, #, #, #, #, #)
         - CFrame {  rotation = (matrix3 expr), translation = (vector3 expr) }
+        - Vector3( ... )
+        - Matrix3( ... )
         */
     CoordinateFrame(const Any& any);
     
@@ -108,6 +110,8 @@ public:
     CoordinateFrame(const class UprightFrame& f);
 
     static CoordinateFrame fromXYZYPRRadians(float x, float y, float z, float yaw = 0.0f, float pitch = 0.0f, float roll = 0.0f);
+
+    std::string toXYZYPRDegreesString() const;
 
     /** Construct a coordinate frame from translation = (x,y,z) and
      rotations (in that order) about Y, object space X, object space

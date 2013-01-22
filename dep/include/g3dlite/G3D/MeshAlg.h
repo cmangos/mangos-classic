@@ -600,7 +600,7 @@ public:
             outIndices.resize(N + (inSize - 2) * 3);
 
             bool atEven = false;
-            for (IndexType i = 0, outIndex = N; i <= (inSize - 2); ++i, outIndex += 3) {
+            for (IndexType i = 0, outIndex = N; i < (inSize - 2); ++i, outIndex += 3) {
                 if (atEven) {
                     outIndices[outIndex] = inIndices[i + 1];
                     outIndices[outIndex + 1] = inIndices[i];

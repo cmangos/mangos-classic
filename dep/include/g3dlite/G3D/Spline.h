@@ -100,7 +100,7 @@ public:
  See Real Time Rendering, 2nd edition, ch 12 for a general discussion
  of splines and their properties.
 
- @sa G3D::UprightSpline, G3D::QuatSpline
+ \sa G3D::UprightSpline
  */
 template<typename Control>
 class Spline : public SplineBase {
@@ -270,7 +270,7 @@ protected:
     }
 
     /**
-       Mutates the array of N control points. It is useful to override this
+       Mutates the array of N control points that begins at \a A. It is useful to override this
        method by one that wraps the values if they are angles or quaternions
        for which "shortest path" interpolation is significant.
      */
@@ -333,10 +333,6 @@ public:
         const Control& p2 = p[2];
         const Control& p3 = p[3];
 
-        const Control& dp0 = p1 + (p0*-1.0f);
-        const Control& dp1 = p2 + (p1*-1.0f);
-        const Control& dp2 = p3 + (p2*-1.0f);
-
         // The factor of 1/2 from averaging two time intervals is 
         // already factored into the basis
         
@@ -346,12 +342,17 @@ public:
         float n0 = x / dt0;
         float n1 = x / dt1;
         float n2 = x / dt2;
+
+        const Control& dp0 = p1 + (p0*-1.0f);
+        const Control& dp1 = p2 + (p1*-1.0f);
+        const Control& dp2 = p3 + (p2*-1.0f);
+
         const Control& dp1n1 = dp1 * n1;
         const Control& tan1 = dp0 * n0 + dp1n1;
         const Control& tan2 = dp1n1 + dp2 * n2;
 
         sum = 
-            tan1 * weights[0]+
+            tan1 * weights[0] +
              p1  * weights[1] +
              p2  * weights[2] +
             tan2 * weights[3]; 

@@ -37,10 +37,8 @@ AssertionHook _debugHook = _handleDebugAssert_;
 AssertionHook _failureHook = _handleErrorCheck_;
 
 #ifdef G3D_LINUX
-#if SOMEONE_MADE_THIS_USEFUL
     Display*      x11Display = NULL;
     Window        x11Window  = 0;
-#endif
 #endif
 
 
@@ -252,7 +250,6 @@ void _releaseInputGrab_() {
         ClipCursor(NULL);
         
     #elif defined(G3D_LINUX)
-#if SOMEONE_MADE_THIS_USEFUL
         if (x11Display != NULL) {
             XUngrabPointer(x11Display, CurrentTime);
             XUngrabKeyboard(x11Display, CurrentTime);
@@ -267,7 +264,6 @@ void _releaseInputGrab_() {
             XAllowEvents(x11Display, AsyncPointer, CurrentTime);
             XFlush(x11Display);
         }
-#endif
     #elif defined(G3D_OSX)
         // TODO: OS X
     #endif

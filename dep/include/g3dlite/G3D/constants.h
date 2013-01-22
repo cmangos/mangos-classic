@@ -3,13 +3,14 @@
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
   @created 2009-05-20
-  @edited  2009-05-20
+  @edited  2010-05-20
 */
 #ifndef G3D_constants_h
 #define G3D_constants_h
 
 #include "G3D/platform.h"
 #include "G3D/enumclass.h"
+#include "G3D/Any.h"
 
 namespace G3D {
 
@@ -29,6 +30,16 @@ public:
     };
 
 private:
+    
+    static const char* toString(int i, Value& v) {
+        static const char* str[] = {"POINTS", "LINES", "LINE_STRIP", "TRIANGLES", "TRIANGLE_FAN", "QUADS", "QUAD_STRIP", NULL}; 
+        static const Value val[] = {POINTS, LINES, LINE_STRIP, TRIANGLES, TRIANGLE_FAN, QUADS, QUAD_STRIP};
+        const char* s = str[i];
+        if (s) {
+            v = val[i];
+        }
+        return s;
+    }
 
     Value value;
 
@@ -66,18 +77,21 @@ public:
 
 private:
 
-    /** Used for to/from string conversion.  Last is the emtpy string as a sentinel */
-    static const std::string    str[7];
-    static const Value          enm[6];
+    static const char* toString(int i, Value& v) {
+        static const char* str[] = {"NONE", "STATIC_ENV", "DYNAMIC_FLAT", "DYNAMIC_FLAT_MULTILAYER", "DYNAMIC_ENV", "BEST", NULL}; 
+        static const Value val[] = {NONE, STATIC_ENV, DYNAMIC_FLAT, DYNAMIC_FLAT_MULTILAYER, DYNAMIC_ENV, BEST};
+        const char* s = str[i];
+        if (s) {
+            v = val[i];
+        }
+        return s;
+    }
+
     Value value;
 
 public:
     G3D_DECLARE_ENUM_CLASS_METHODS(RefractionQuality);
 
-    RefractionQuality(const class Any&);
-    RefractionQuality& operator=(const Any&);
-    operator Any() const;
-    const std::string& toString() const;
 };
 
 
@@ -105,18 +119,20 @@ public:
 
 private:
 
-    /** Used for to/from string conversion.  Last is the emtpy string as a sentinel */
-    static const std::string    str[6];
-    static const Value          enm[5];
+    static const char* toString(int i, Value& v) {
+        static const char* str[] = {"NONE", "STATIC_ENV", "DYNAMIC_PLANAR", "DYNAMIC_ENV", "BEST", NULL}; 
+        static const Value val[] = {NONE, STATIC_ENV, DYNAMIC_PLANAR, DYNAMIC_ENV, BEST};
+        const char* s = str[i];
+        if (s) {
+            v = val[i];
+        }
+        return s;
+    }
 
     Value value;
 
 public:
     G3D_DECLARE_ENUM_CLASS_METHODS(MirrorQuality);
-    MirrorQuality(const class Any&);
-    MirrorQuality& operator=(const Any&);
-    operator Any() const;
-    const std::string& toString() const;
 };
 
 } // namespace G3D

@@ -6,7 +6,7 @@
  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
 
  @created 2001-06-02
- @edited  2009-11-13
+ @edited  2010-03-13
 
  Copyright 2000-2010, Morgan McGuire.
  All rights reserved.
@@ -26,23 +26,52 @@
 #include "G3D/UprightFrame.h"
 #include "G3D/Any.h"
 #include "G3D/stringutils.h"
+#include "G3D/PhysicsFrame.h"
+#include "G3D/UprightFrame.h"
 
 namespace G3D {
 
+
+std::string CoordinateFrame::toXYZYPRDegreesString() const {
+    UprightFrame uframe(*this);
+    
+    return format("CFrame::fromXYZYPRDegrees(% 5.1ff, % 5.1ff, % 5.1ff, % 5.1ff, % 5.1ff, % 5.1ff)", 
+                  uframe.translation.x, uframe.translation.y, uframe.translation.z, 
+                  toDegrees(uframe.yaw), toDegrees(uframe.pitch), 0.0f);
+}
+
+
 CoordinateFrame::CoordinateFrame(const Any& any) {
-    any.verifyName("CFrame");
-    if (toUpper(any.name()) == "CFRAME") {
+    *this = CFrame();
+
+    const std::string& n = toUpper(any.name());
+
+    if (beginsWith(n, "VECTOR3")) {
+        translation = any;
+    } else if (beginsWith(n, "MATRIX3")) {
+        rotation = any;
+    } else if ((n == "CFRAME") || (n == "COORDINATEFRAME")) {
         any.verifyType(Any::TABLE, Any::ARRAY);
-        if (any.type() == Any::TABLE) {
-            rotation    = any["rotation"];
-            translation = any["translation"];
-        } else {
+        if (any.type() == Any::ARRAY) {
             any.verifySize(2);
             rotation    = any[0];
             translation = any[1];
+        } else {
+            for (Any::AnyTable::Iterator it = any.table().begin(); it.hasMore(); ++it) {
+                const std::string& n = toLower(it->key);
+                if (n == "translation") {
+                    translation = Vector3(it->value);
+                } else if (n == "rotation") {
+                    rotation = Matrix3(it->value);
+                } else {
+                    any.verify(false, "Illegal table key: " + it->key);
+                }
+            }
         }
+    } else if (beginsWith(n, "PHYSICSFRAME") || beginsWith(n, "PFRAME")) {
+        *this = PhysicsFrame(any);
     } else {
-        any.verifyName("CFrame::fromXYZYPRDegrees");
+        any.verifyName("CFrame::fromXYZYPRDegrees", "CoordinateFrame::fromXYZYPRDegrees");
         any.verifyType(Any::ARRAY);
         any.verifySize(3, 6);
 
@@ -370,12 +399,12 @@ CoordinateFrame CoordinateFrame::lerp(
     } else if (alpha == 0.0f) {
         return *this;
     } else {
-        Quat q1 = Quat(this->rotation);
-        Quat q2 = Quat(other.rotation);
+        const Quat q1(this->rotation);
+        const Quat q2(other.rotation);
 
         return CoordinateFrame(
             q1.slerp(q2, alpha).toRotationMatrix(),
-            this->translation * (1 - alpha) + other.translation * alpha);
+            translation * (1 - alpha) + other.translation * alpha);
     }
 } 
 
@@ -383,7 +412,7 @@ CoordinateFrame CoordinateFrame::lerp(
 void CoordinateFrame::pointToWorldSpace(const Array<Vector3>& v, Array<Vector3>& vout) const {
     vout.resize(v.size());
 
-    for (int i = v.size() - 1; i >= 0; --i) {
+    for (int i = 0; i < v.size(); ++i) {
         vout[i] = pointToWorldSpace(v[i]);
     }
 }
@@ -392,7 +421,7 @@ void CoordinateFrame::pointToWorldSpace(const Array<Vector3>& v, Array<Vector3>&
 void CoordinateFrame::normalToWorldSpace(const Array<Vector3>& v, Array<Vector3>& vout) const  {
     vout.resize(v.size());
 
-    for (int i = v.size() - 1; i >= 0; --i) {
+    for (int i = 0; i < v.size(); ++i) {
         vout[i] = normalToWorldSpace(v[i]);
     }
 }

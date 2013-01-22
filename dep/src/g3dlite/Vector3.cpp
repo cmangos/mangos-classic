@@ -25,6 +25,7 @@
 #include "G3D/Vector2.h"
 #include "G3D/Color3.h"
 #include "G3D/Vector4int8.h"
+#include "G3D/Vector4.h"
 #include "G3D/Vector3int32.h"
 #include "G3D/Any.h"
  
@@ -104,11 +105,7 @@ Vector3::Axis Vector3::primaryAxis() const {
 
 
 size_t Vector3::hashCode() const {
-    unsigned int xhash = (*(int*)(void*)(&x));
-    unsigned int yhash = (*(int*)(void*)(&y));
-    unsigned int zhash = (*(int*)(void*)(&z));
-
-    return xhash + (yhash * 37) + (zhash * 101);
+    return Vector4(*this, 0.0f).hashCode();
 }
 
 std::ostream& operator<<(std::ostream& os, const Vector3& v) {

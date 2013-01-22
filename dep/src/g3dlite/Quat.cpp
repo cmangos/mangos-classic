@@ -6,10 +6,12 @@
   @author Morgan McGuire, graphics3d.com
   
   @created 2002-01-23
-  @edited  2006-01-31
+  @edited  2010-03-31
  */
 
 #include "G3D/Quat.h"
+#include "G3D/Any.h"
+#include "G3D/stringutils.h"
 #include "G3D/BinaryInput.h"
 #include "G3D/BinaryOutput.h"
 
@@ -28,8 +30,22 @@ Quat Quat::fromAxisAngleRotation(
 }
 
 
-Quat::Quat(
-    const Matrix3& rot) {
+Quat::Quat(const class Any& a) {
+    *this = Quat();
+    if (beginsWith(toLower(a.name()), "matrix3")) {
+        *this = a;
+    } else {
+        a.verifyName("Quat");
+        a.verifyType(Any::ARRAY);
+        x = a[0];
+        y = a[1];
+        z = a[2];
+        w = a[3];
+    }
+}
+
+
+Quat::Quat(const Matrix3& rot) {
 
     static const int plus1mod3[] = {1, 2, 0};
 

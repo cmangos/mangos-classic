@@ -5,7 +5,7 @@
    @created 2008-07-01
    @edited  2009-05-28
 
-   Copyright 2000-2009, Morgan McGuire.
+   Copyright 2000-2010, Morgan McGuire.
    All rights reserved.
 */
 #ifndef G3D_PointHashGrid_h
@@ -30,18 +30,44 @@ namespace G3D {
     approximately uniform density (with respect to the radius hint),
     the time cost of searching for neighbors is O(1).
 
-    <i>Value</i> must be supported by a G3D::PositionTrait,
-    G3D::EqualsTrait, and G3D::HashFunc.  overrides are provided for
-    common G3D classes like G3D::Vector3.
+    <i>Value</i> must be supported by a G3D::PositionTrait and
+    G3D::EqualsTrait.  Overloads are provided for
+    common G3D classes like G3D::Vector3.  For example:
+
+   <pre>
+    class EqualsFunc {
+    public:
+        static bool equals(const Data& p, const Data& q) {
+            return p == q;
+        }
+    };
+    
+    class PosFunc {
+    public:
+        static void getPosition(const Data& d, Vector3& pos) {
+            pos = d.location;
+        }
+    };
+
+    PointHashGrid<Data, Data::PosFunc, Data::EqualsFunc> grid;
+   </pre>
+
+   If the Value class defines operator==, the Equalsfunc is optional:
+
+   <pre>
+    PointHashGrid<Data, Data::PosFunc> grid;
+   </pre>
+
 */
 template<class Value,
          class PosFunc    = PositionTrait<Value>, 
-         class EqualsFunc = EqualsTrait<Value>, 
-         class HashFunc   = HashTrait<Vector3int32> >
+         class EqualsFunc = EqualsTrait<Value> >
 class PointHashGrid {
 private:
 
-#define ThisType PointHashGrid<Value, PosFunc, EqualsFunc, HashFunc>
+#   define expectedCellSize (3)
+
+#   define ThisType PointHashGrid<Value, PosFunc, EqualsFunc>
 
     /** A value annotated with precomputed position and hash code.*/
     class Entry {
@@ -51,8 +77,8 @@ private:
     };
 
     /** One cell of the grid. */
-    typedef Array<Entry> Cell;
-    typedef Table<Vector3int32, Cell, HashFunc> CellTable;
+    typedef SmallArray<Entry, expectedCellSize> Cell;
+    typedef Table<Vector3int32, Cell >          CellTable;
 
     /** The cube of +/-1 along each dimension. Initialized by initOffsetArray.*/
     Vector3int32        m_offsetArray[3*3*3];
@@ -182,11 +208,11 @@ public:
         Array<Entry> entry(init.size());
         for (int i = 0; i < entry.size(); ++i) {
             const Value& value = init[i];
-            Vector3 pos        = m_posFunc(value);
+            Vector3 pos;
 
             entry[i].value     = value;
             entry[i].hashCode  = m_hashFunc(value);
-            entry[i].position  = pos;
+            PosFunc::getPosition(value, entry[i].position);
 
             lo = lo.min(pos);
             hi = hi.max(pos);
@@ -334,7 +360,7 @@ public:
                      m_arrayIndex(0), m_epoch(0) {}
 
         Iterator(const ThisType* grid) : 
-            m_isEnd(false),
+            m_isEnd(grid->size() == 0),
             m_grid(grid),
             m_tableIterator( grid->m_data.begin() ),
             m_arrayIndex(0),
@@ -359,6 +385,10 @@ public:
                     (m_tableIterator != other.m_tableIterator) || 
                     (m_arrayIndex    != other.m_arrayIndex);
             }
+        }
+
+        bool hasMore() const {
+            return ! m_isEnd;
         }
 
         bool operator==(const Iterator& other) const {

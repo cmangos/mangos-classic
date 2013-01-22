@@ -5,7 +5,7 @@
  Copyright 2001-2007, Morgan McGuire.  All rights reserved.
  
  @created 2001-08-09
- @edited  2005-02-24
+ @edited  2010-03-05
 
 
   <PRE>
@@ -37,8 +37,9 @@
 #include "G3D/Array.h"
 #include "G3D/fileutils.h"
 #include "G3D/Log.h"
+#include "G3D/FileSystem.h"
 #include <zlib.h>
-
+#include "zip.h"
 #include <cstring>
 
 namespace G3D {
@@ -272,28 +273,40 @@ BinaryInput::BinaryInput(
     _internal::currentFilesUsed.insert(m_filename);
     
 
-    if (! fileExists(m_filename, false)) {
-        std::string zipfile;
-        std::string internalfile;
-        if (zipfileExists(m_filename, zipfile, internalfile)) {
-            // Load from zipfile
-            void* v;
-            size_t s;
-            zipRead(filename, v, s);
-            m_buffer = reinterpret_cast<uint8*>(v);
-            m_bufferLength = m_length = s;
-            if (compressed) {
-                decompress();
+    std::string zipfile;
+    if (FileSystem::inZipfile(m_filename, zipfile)) {
+        // Load from zipfile
+//        zipRead(filename, v, s);
+
+        std::string internalFile = m_filename.substr(zipfile.length() + 1);
+        struct zip* z = zip_open(zipfile.c_str(), ZIP_CHECKCONS, NULL);
+        {
+            struct zip_stat info;
+            zip_stat_init( &info );    // TODO: Docs unclear if zip_stat_init is required.
+            zip_stat(z, internalFile.c_str(), ZIP_FL_NOCASE, &info);
+            m_bufferLength = m_length = info.size;
+            // sets machines up to use MMX, if they want
+            m_buffer = reinterpret_cast<uint8*>(System::alignedMalloc(m_length, 16));
+            struct zip_file* zf = zip_fopen( z, internalFile.c_str(), ZIP_FL_NOCASE );
+            {
+                int64 test = zip_fread( zf, m_buffer, m_length );
+                debugAssertM(test == m_length,
+                             internalFile + " was corrupt because it unzipped to the wrong size.");
+                (void)test;
             }
-            m_freeBuffer = true;
-        } else {
-            Log::common()->printf("Warning: File not found: %s\n", m_filename.c_str());
+            zip_fclose( zf );
         }
+        zip_close( z );
+
+        if (compressed) {
+            decompress();
+        }
+        m_freeBuffer = true;
         return;
     }
 
     // Figure out how big the file is and verify that it exists.
-    m_length = fileLength(m_filename);
+    m_length = FileSystem::size(m_filename);
 
     // Read the file into memory
     FILE* file = fopen(m_filename.c_str(), "rb");
@@ -458,6 +471,42 @@ std::string BinaryInput::readString() {
     ++n;
 
     return readString(n);
+}
+
+static bool isNewline(char c) {
+    return c == '\n' || c == '\r';
+}
+
+std::string BinaryInput::readStringNewline() {
+    int64 n = 0;
+
+    if ((m_pos + m_alreadyRead + n) < (m_length - 1)) {
+        prepareToRead(1);
+    }
+
+    if ( ((m_pos + m_alreadyRead + n) < (m_length - 1)) &&
+         ! isNewline(m_buffer[m_pos + n])) {
+
+        ++n;
+        while ( ((m_pos + m_alreadyRead + n) < (m_length - 1)) &&
+                ! isNewline(m_buffer[m_pos + n])) {
+
+            prepareToRead(1);
+            ++n;
+        }
+    }
+
+    const std::string s = readString(n);
+
+    // Consume the newline
+    char firstNLChar = readUInt8();
+
+    // Consume the 2nd newline
+    if (isNewline(m_buffer[m_pos + 1]) && (m_buffer[m_pos + 1] != firstNLChar)) {
+        readUInt8();
+    }
+
+    return s;
 }
 
 

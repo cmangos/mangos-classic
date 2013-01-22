@@ -43,9 +43,9 @@ class BinaryOutput;
   Interface to image compression & file formats. 
  
   Supported formats (decode and encode): Color JPEG, PNG,
-  (Uncompressed)TGA 24, (Uncompressed)TGA 32, BMP 1, BMP 4, BMP 8, BMP
+  (Uncompressed) TGA 24, (Uncompressed) TGA 32, BMP 1, BMP 4, BMP 8, BMP
   24, PPM (P6), and PPM ASCII (P1, P2, P3), which includes PPM, PGM,
-  and PBM.  8-bit paletted PCX, 24-bit PCX, and ICO are supported for
+  and PBM.  (Compressed) TGA 24, (Compressed) TGA 32, 8-bit paletted PCX, 24-bit PCX, and ICO are supported for
   decoding only.
 
   Sample usage:
@@ -77,6 +77,10 @@ class BinaryOutput;
   API for image manipulation and wider set of image load/save formats.  It is 
   recommended over GImage (we don't include it directly in G3D because their license
   is more restrictive than the BSD one).
+
+  \cite http://tfcduke.developpez.com/tutoriel/format/tga/fichiers/tga_specs.pdf
+
+  \sa Image3, Image3uint8, Image4, Image4uint8, Image1, Image1uint8, Texture, Map2D
 
   */
 class GImage {

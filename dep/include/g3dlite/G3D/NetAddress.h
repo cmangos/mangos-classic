@@ -1,33 +1,9 @@
-#ifndef G3D_NETADDRESS_H
-#define G3D_NETADDRESS_H
+#ifndef G3D_NetAddress_h
+#define G3D_NetAddress_h
 
 #include "G3D/platform.h"
 #include "G3D/Table.h"
-
-/** These control the version of Winsock used by G3D.
-    Version 2.0 is standard for G3D 6.09 and later.
-    Version 1.1 is standard for G3D 6.08 and earlier.
- */
-#define G3D_WINSOCK_MAJOR_VERSION 2
-#define G3D_WINSOCK_MINOR_VERSION 0
-
-#ifdef G3D_WIN32
-#   if (G3D_WINSOCK_MAJOR_VERSION == 2)
-#       include <winsock2.h>
-#   elif (G3D_WINSOCK_MAJOR_VERSION == 1)
-#       include <winsock.h>
-#   endif
-#else
-#   include <sys/types.h>
-#   include <sys/socket.h>
-#   include <netinet/in.h>
-#   ifndef SOCKADDR_IN
-#       define SOCKADDR_IN struct sockaddr_in
-#   endif
-#   ifndef SOCKET
-#       define SOCKET int
-#   endif
-#endif
+#include "G3D/netheaders.h"
 
 #include "G3D/g3dmath.h"
 

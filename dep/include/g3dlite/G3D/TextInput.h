@@ -8,9 +8,9 @@
  @cite Based on a lexer written by Aaron Orenstein. 
 
  @created 2002-11-27
- @edited  2009-11-24
+ @edited  2010-07-03
 
- Copyright 2000-2009, Morgan McGuire.
+ Copyright 2000-2010, Morgan McGuire.
  All rights reserved.
  */
 
@@ -76,6 +76,7 @@ private:
     bool                    _bool;
     int                     _line;
     int                     _character;
+    uint64                  _bytePosition;
     Type                    _type;
     ExtendedType            _extendedType;
 
@@ -86,14 +87,15 @@ public:
         _bool(false),
         _line(0), 
         _character(0), 
+        _bytePosition(0),
         _type(END), 
         _extendedType(END_TYPE) {}
 
-    Token(Type t, ExtendedType e, const std::string& s, int L, int c)
-        : _string(s), _bool(false), _line(L), _character(c), _type(t), _extendedType(e) {}
+    Token(Type t, ExtendedType e, const std::string& s, int L, int c, uint64 byte)
+        : _string(s), _bool(false), _line(L), _character(c), _bytePosition(byte), _type(t), _extendedType(e) {}
 
-    Token(Type t, ExtendedType e, const std::string& s, bool b, int L, int c)
-        : _string(s), _bool(b), _line(L), _character(c), _type(t), _extendedType(e) {}
+    Token(Type t, ExtendedType e, const std::string& s, bool b, int L, int c, uint64 byte)
+        : _string(s), _bool(b), _line(L), _character(c), _bytePosition(byte), _type(t), _extendedType(e) {}
 
     Type type() const {
         return _type;
@@ -130,6 +132,12 @@ public:
      */
     int character() const {
         return _character;
+    }
+
+    /** Number of bytes from the beginning of the buffer that this token was parsed from. 
+      Begins at 0 */
+    uint64 bytePosition() const {
+        return _bytePosition;
     }
 
     /** Return the numeric value for a number type, or zero if this is
@@ -212,6 +220,12 @@ public:
  */
 class TextInput {
 public:
+    /** Includes MSVC specials parsing */
+    static double parseNumber(const std::string& _string);
+
+    /** toLower(_string) == "true" */
+    static bool parseBoolean(const std::string& _string);
+
 
     /** Tokenizer configuration options.  */
     class Settings {
@@ -316,12 +330,13 @@ public:
 
         /** 
           Parse -1.#IND00 as the floating point number returned by
-          nan(), -1.#INF00 as -inf(), and 1.#INF00 as inf().  Note
-          that the C99 standard specifies that a variety of formats
-          like "NaN" and "nan" are to be used; these are easier to
-          parse yourself and not currently supported by readNumber.
+          nan(), -1.#INF00 as -G3D::inf(), and 1.#INF00 as G3D::inf().  
+          
+          Note that the C99 standard specifies that a variety of formats
+          like "nan" are to be used; these are supported by 
+          G3D::TextInput::Settings::simpleFloatSpecials.
 
-          An alternative to specifying msvcSpecials is to read numbers as:
+          An alternative to specifying msvcFloatSpecials is to read numbers as:
           <pre>
             Token x = t.read();
             Token y = t.peek();
@@ -339,10 +354,14 @@ public:
           special format overrides the comment and will be parsed
           instead.
 
-          If signedNumbers is false msvcSpecials will not be parsed.
+          If signedNumbers is false msvcFloatSpecials will not be parsed.
 
           Default is true. */
-        bool                msvcSpecials;
+        bool                msvcFloatSpecials;
+
+        /** Parses "+inf', "-inf", "inf", "nan" as floats instead of symbols. 
+            Defaults to true.*/
+        bool                simpleFloatSpecials;
 
         /**
          Parse the following set of useful proof symbols:
@@ -362,7 +381,7 @@ public:
         bool                proofSymbols;
 
         /**
-         When parsing booleans and msvcSpecials, is case significant?
+         When parsing booleans and msvcFloatSpecials, is case significant?
          Default is {true}
         */
         bool                caseSensitive;
@@ -623,8 +642,16 @@ public:
         is not a string.  WrongString will be thrown if the next token in the
         input stream is a string but does not match the @p s parameter.  When
         an exception is thrown, no tokens are consumed.
+
+        \sa readString(), readStringToken(), readUntilNewlineAsString()
       */
     void readString(const std::string& s);
+
+    /** Read from the beginning of the next token until the following newline 
+      and return the result as a string, ignoring all parsing in between. The newline 
+      is not returned in the string, and the following token read will be a newline or
+      end of file token (if they are enabled for parsing).*/
+    std::string readUntilNewlineAsString();
 
     /** Reads a comment token or throws WrongTokenType, and returns the token.
 
@@ -733,13 +760,13 @@ public:
 
 
     /** Read a series of two specific symbols.  See readSymbol.  */
-    inline void readSymbols(const std::string& s1, const std::string& s2) {
+    void readSymbols(const std::string& s1, const std::string& s2) {
         readSymbol(s1);
         readSymbol(s2);
     }
 
     /** Read a series of three specific symbols.  See readSymbol.  */
-    inline void readSymbols(
+    void readSymbols(
         const std::string& s1, 
         const std::string& s2, 
         const std::string& s3) {
@@ -749,7 +776,7 @@ public:
     }
 
     /** Read a series of four specific symbols.  See readSymbol.  */
-    inline void readSymbols(
+    void readSymbols(
         const std::string& s1, 
         const std::string& s2, 
         const std::string& s3,     

@@ -3,15 +3,16 @@
 
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
   @created 2004-06-21
-  @edited  2006-08-14
+  @edited  2010-03-14
 
-  Copyright 2000-2006, Morgan McGuire.
+  Copyright 2000-2010, Morgan McGuire.
   All rights reserved.
  */
 
 #include "G3D/TextOutput.h"
 #include "G3D/Log.h"
 #include "G3D/fileutils.h"
+#include "G3D/FileSystem.h"
 
 namespace G3D {
 
@@ -392,17 +393,17 @@ void TextOutput::vprintf(const char* formatString, va_list argPtr) {
 
 void TextOutput::commit(bool flush) {
     std::string p = filenamePath(filename);
-    if (! fileExists(p, false)) {
-        createDirectory(p);
+    if (! FileSystem::exists(p, false)) {
+        FileSystem::createDirectory(p);
     }
 
-    FILE* f = fopen(filename.c_str(), "wb");
+    FILE* f = FileSystem::fopen(filename.c_str(), "wb");
     debugAssertM(f, "Could not open \"" + filename + "\"");
     fwrite(data.getCArray(), 1, data.size(), f);
     if (flush) {
         fflush(f);
     }
-    fclose(f);
+    FileSystem::fclose(f);
 }
 
 

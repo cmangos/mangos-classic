@@ -6,7 +6,7 @@
  @cite Based on a lexer written by Aaron Orenstein. 
  
  @created 2001-11-27
- @edited  2008-07-14
+ @edited  2010-07-03
  */
 
 #include "G3D/fileutils.h"
@@ -33,36 +33,45 @@ Token TextInput::readSignificant() {
 
 double Token::number() const {
     if (_type == NUMBER) {
-        std::string s = toLower(_string);
-        if (s == "-1.#ind00") {
-            return nan();
-        }
-
-        if (s == "1.#inf00") {
-            return inf();
-        }
-
-        if (s == "-1.#inf00") {
-            return -inf();
-        }
-
-        double n;
-        if ((_string.length() > 2) &&
-            (_string[0] == '0') &&
-            (_string[1] == 'x')) {
-            // Hex
-            uint32 i;
-            sscanf(_string.c_str(), "%x", &i);
-            n = i;
-        } else {
-            sscanf(_string.c_str(), "%lg", &n);
-        }
-        return n;
+        return TextInput::parseNumber(_string);
     } else {
         return 0.0;
     }
 }
 
+
+bool TextInput::parseBoolean(const std::string& _string) {
+     return toLower(_string) == "true";
+}
+
+double TextInput::parseNumber(const std::string& _string) {
+    std::string s = toLower(_string);
+    if (s == "-1.#ind00" || s == "nan") {
+        return nan();
+    }
+    
+    if (s == "1.#inf00" || s == "inf" || s == "+inf") {
+        return inf();
+    }
+    
+    if (s == "-1.#inf00" || s == "-inf") {
+        return -inf();
+    }
+    
+    double n;
+    if ((_string.length() > 2) &&
+        (_string[0] == '0') &&
+        (_string[1] == 'x')) {
+        // Hex
+        uint32 i;
+        sscanf(_string.c_str(), "%x", &i);
+        n = i;
+    } else {
+        sscanf(_string.c_str(), "%lg", &n);
+    }
+
+    return n;
+}
 
 TextInput::Settings::Settings () :
     cppBlockComments(true),
@@ -78,7 +87,8 @@ TextInput::Settings::Settings () :
     singleQuoteCharacter('\''),
     sourceFileName(),
     startingLineNumberOffset(0),
-    msvcSpecials(true),
+    msvcFloatSpecials(true),
+    simpleFloatSpecials(true),
     proofSymbols(false),
     caseSensitive(true)
 { 
@@ -116,6 +126,41 @@ Token TextInput::read() {
         return nextToken();
     }
 }
+
+
+
+std::string TextInput::readUntilNewlineAsString() {
+/*
+    // Reset the read position back to the start of that token
+    currentCharOffset = t.bytePosition();
+    lineNumber = t.line();
+    charNumber = t.character();
+    stack.clear();
+
+    if (currentCharOffset == buffer.size()) {
+        // End of file
+        return "";
+    }
+    */
+    std::string s;
+
+    // Read until newline or eof
+    char c = '\0';
+    do {
+        c = buffer[currentCharOffset];
+        if (c == '\r' || c == '\n') {
+            // Done
+            break;
+        } else {
+            s += c;
+            ++currentCharOffset;
+            ++charNumber;
+        }
+    } while (currentCharOffset < buffer.size());
+
+    return s;    
+}
+
 
 static void toUpper(Set<std::string>& set) {
     Array<std::string> symbols;
@@ -198,6 +243,7 @@ int TextInput::peekInputChar(int distance) {
 Token TextInput::nextToken() {
     Token t;
 
+    t._bytePosition = currentCharOffset;
     t._line         = lineNumber;
     t._character    = charNumber;
     t._type         = Token::END;
@@ -215,21 +261,24 @@ Token TextInput::nextToken() {
         whitespaceDone = true;
 
         // generate newlines tokens for '\n' and '\r' and '\r\n'
-        if (options.generateNewlineTokens && isNewline(c)) {
-            t._type         = Token::NEWLINE;
-            t._extendedType = Token::NEWLINE_TYPE;
-            t._string       = c;
+        while (isWhiteSpace(c)) {
+            if (options.generateNewlineTokens && isNewline(c)) {
+                t._type         = Token::NEWLINE;
+                t._extendedType = Token::NEWLINE_TYPE;
+                t._bytePosition = currentCharOffset;
+                t._line         = lineNumber;
+                t._character    = charNumber;
+                t._string       = c;
 
-            int c2 = peekInputChar(1);
-            if (c == '\r' && c2 == '\n') {
-                t._string  += c2;
-            }
+                int c2 = peekInputChar(1);
+                if (c == '\r' && c2 == '\n') {
+                    t._string  += c2;
+                }
 
-            eatInputChar();
-            return t;
-        } else {
-            // Consume whitespace
-            while (isWhiteSpace(c)) {
+                eatInputChar();
+                return t;
+            } else {
+                // Consume the single whitespace
                 c = eatAndPeekInputChar();
             }
         }
@@ -237,6 +286,7 @@ Token TextInput::nextToken() {
         // update line and character number to include discarded whitespace
         t._line         = lineNumber;
         t._character    = charNumber;
+        t._bytePosition = currentCharOffset;
 
         int c2 = peekInputChar(1);
 
@@ -293,13 +343,16 @@ Token TextInput::nextToken() {
             eatInputChar();
             eatInputChar();
 
+            // c is the next character we'll read, c2 is the one after *that*
             c = peekInputChar();
             c2 = peekInputChar(1);
             while (! ((c == '*') && (c2 == '/')) && (c != EOF)) {
                 commentString += c;
 
+                // Eat input char may consume more than one character if there is a newline
                 eatInputChar();
-                c = c2;
+
+                c = peekInputChar();
                 c2 = peekInputChar(1);
             }
             eatInputChar();      // eat closing '*'
@@ -324,6 +377,7 @@ Token TextInput::nextToken() {
 
     t._line      = lineNumber;
     t._character = charNumber;
+    t._bytePosition = currentCharOffset;
 
     // handle EOF
     if (c == EOF) {
@@ -380,14 +434,28 @@ Token TextInput::nextToken() {
             return t;
         }
 
-        if (options.signedNumbers
-            && (isDigit(c) || (c == '.' && isDigit(peekInputChar(1))))) {
+        if (options.signedNumbers) {
+            if (isDigit(c) || (c == '.' && isDigit(peekInputChar(1)))) {
+                // Negative number.  'c' is still the first digit, and is
+                // the next input char.
 
-            // Negative number.  'c' is still the first digit, and is
-            // the next input char.
-
-            goto numLabel;
+                goto numLabel;
+            } else {
+                char terminal = peekInputChar(3);
+                if (options.simpleFloatSpecials && (c == 'i') && (peekInputChar(1) == 'n') && (peekInputChar(2) == 'f') && 
+                    ! isLetter(terminal) && (terminal != '_')) {
+                    // negative infinity
+                    t._type = Token::NUMBER;
+                    t._extendedType = Token::FLOATING_POINT_TYPE;
+                    t._string = "-inf";
+                    eatInputChar(); // i
+                    eatInputChar(); // n
+                    eatInputChar(); // f
+                    return t;
+                }
+            }
         }
+
 
         // plain -
         return t;
@@ -403,13 +471,26 @@ Token TextInput::nextToken() {
             return t;
         }
 
-        if (options.signedNumbers
-            && (isDigit(c) || (c == '.' && isDigit(peekInputChar(1))))) {
+        if (options.signedNumbers) {
+            if (isDigit(c) || (c == '.' && isDigit(peekInputChar(1)))) {
+                // Positive number.  'c' is still the first digit, and is
+                // the next input char.
 
-            // Positive number.  'c' is still the first digit, and is
-            // the next input char.
-
-            goto numLabel;
+                goto numLabel;
+            } else {
+                char terminal = peekInputChar(3);
+                if (options.simpleFloatSpecials && (c == 'i') && (peekInputChar(1) == 'n') && (peekInputChar(2) == 'f') && 
+                    ! isLetter(terminal) && (terminal != '_')) {
+                    // positive infinity
+                    t._type = Token::NUMBER;
+                    t._extendedType = Token::FLOATING_POINT_TYPE;
+                    t._string = "+inf";
+                    eatInputChar(); // i
+                    eatInputChar(); // n
+                    eatInputChar(); // f
+                    return t;
+                }
+            }
         }
 
         return t;
@@ -596,7 +677,7 @@ numLabel:
                 c = eatAndPeekInputChar();
 
                 // Floating point specials (msvc format only)
-                if (options.msvcSpecials && (c == '#')) {
+                if (options.msvcFloatSpecials && (c == '#')) {
                     isSpecial = true;
                     // We are reading a floating point special value
                     // of the form -1.#IND00, -1.#INF00, or 1.#INF00
@@ -607,8 +688,7 @@ numLabel:
                     }
                     if (test != 'I') {
                         throw BadMSVCSpecial
-                            (
-                             "Incorrect floating-point special (inf or nan) "
+                            ("Incorrect floating-point special (inf or nan) "
                              "format.",
                             t.line(), charNumber);
                     }
@@ -714,6 +794,10 @@ numLabel:
             }
         }
 
+        if (options.simpleFloatSpecials && ((t._string == "nan") || (t._string == "inf"))) {
+            t._type = Token::NUMBER;
+            t._extendedType = Token::FLOATING_POINT_TYPE;
+        }
         return t;
 
     } else if (c == '\"') {
@@ -1052,6 +1136,8 @@ static const char* tokenTypeToString(Token::Type t) {
         return "Token::NUMBER";
     case Token::END:
         return "Token::END";
+    case Token::NEWLINE:
+        return "Token::NEWLINE";
     default:
         debugAssertM(false, "Fell through switch");
         return "?";

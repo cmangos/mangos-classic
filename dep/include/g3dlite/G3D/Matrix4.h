@@ -119,6 +119,15 @@ public:
     }
 
     Matrix4 operator*(const Matrix4& other) const;
+    Matrix4 operator+(const Matrix4& other) const {
+        Matrix4 result;
+        for (int r = 0; r < 4; ++r) {
+            for (int c = 0; c < 4; ++c) {
+                result.elt[r][c] = elt[r][c] + other.elt[r][c];
+            }
+        }
+        return result;
+    }
 
     class Matrix3 upper3x3() const;
 

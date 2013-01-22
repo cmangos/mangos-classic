@@ -1,12 +1,12 @@
 /** 
   @file Color4uint8.h
  
-  @maintainer Morgan McGuire, graphics3d.com
+  @maintainer Morgan McGuire, http://graphics.cs.williams.edu
  
   @created 2003-04-07
-  @edited  2006-03-24
+  @edited  2010-03-24
 
-  Copyright 2000-2006, Morgan McGuire.
+  Copyright 2000-2010, Morgan McGuire.
   All rights reserved.
  */
 
@@ -49,6 +49,14 @@ public:
     Color4uint8() : r(0), g(0), b(0), a(0) {}
 
     Color4uint8(const class Color4& c);
+
+    Color4uint8 max(const Color4uint8 x) const {
+        return Color4uint8(G3D::max(r, x.r), G3D::max(g, x.g), G3D::max(b, x.b), G3D::max(a, x.a));
+    }
+
+    Color4uint8 min(const Color4uint8 x) const {
+        return Color4uint8(G3D::min(r, x.r), G3D::min(g, x.g), G3D::min(b, x.b), G3D::min(a, x.a));
+    }
 
     Color4uint8(const uint8 _r, const uint8 _g, const uint8 _b, const uint8 _a) : r(_r), g(_g), b(_b), a(_a) {}
 

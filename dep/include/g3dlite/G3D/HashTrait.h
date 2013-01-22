@@ -52,7 +52,7 @@ template <> struct HashTrait <G3D::uint32> {
     static size_t hashCode(G3D::uint32 k) { return static_cast<size_t>(k); }
 };
 
-#if 0
+#ifdef G3D_OSX
 template <> struct HashTrait <long unsigned int> {
     static size_t hashCode(G3D::uint32 k) { return static_cast<size_t>(k); }
 };

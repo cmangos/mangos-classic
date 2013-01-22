@@ -29,11 +29,17 @@ const float Matrix3::EPSILON = 1e-06f;
 Matrix3::Matrix3(const Any& any) {
     any.verifyName("Matrix3");
     any.verifyType(Any::ARRAY);
-    any.verifySize(9);
 
-    for (int r = 0; r < 3; ++r) {
-        for (int c = 0; c < 3; ++c) {
-            elt[r][c] = any[r * 3 + c];
+    if (any.nameEquals("Matrix3::fromAxisAngle")) {
+        any.verifySize(2);
+        *this = Matrix3::fromAxisAngle(any[0], any[1].number());
+    } else {
+        any.verifySize(9);
+
+        for (int r = 0; r < 3; ++r) {
+            for (int c = 0; c < 3; ++c) {
+                elt[r][c] = any[r * 3 + c];
+            }
         }
     }
 }

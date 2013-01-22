@@ -21,7 +21,6 @@
 #    define _getch getchar
 #endif
 
-#if 0 /* MANGOS exclude for disabled gui prompt */
 #ifdef G3D_OSX
 
 /*#ifdef __LP64__
@@ -38,11 +37,9 @@
 */
 
 #endif
-#endif /* MANGOS exclude for disabled gui prompt */
 
 namespace G3D {
 
-#if 0 /* MANGOS exclude for disabled gui prompt */
 #ifdef G3D_WIN32
 
 namespace _internal {
@@ -472,7 +469,6 @@ static int guiPrompt(
 }
 
 #endif
-#endif /* MANGOS exclude for disabled gui prompt */
 
 
 /**
@@ -534,8 +530,6 @@ static int textPrompt(
     printf("\n___________________________________________________\n");
     return c;
 }
-
-#if 0 /* MANGOS exclude for disabled gui prompt */
 
 #ifdef G3D_OSX
 
@@ -695,15 +689,13 @@ static int guiPrompt
 
 #endif
 
-#endif /* MANGOS exclude for disabled gui prompt */
-
 int prompt(
     const char*      windowTitle,
     const char*      prompt, 
     const char**     choice,
     int              numChoices,
     bool             useGui) {
-#if 0 /* MANGOS: disable guid prompt at all platforms, MacOS case have build problems, other just useless */
+
     #ifdef G3D_WIN32
         if (useGui) {
             // Build the message box
@@ -717,7 +709,6 @@ int prompt(
                         return guiPrompt(windowTitle, prompt, choice, numChoices);
                 }
         #endif
-#endif /* MANGOS exclude for disabled gui prompt */
     return textPrompt(windowTitle, prompt, choice, numChoices);
 }
 
