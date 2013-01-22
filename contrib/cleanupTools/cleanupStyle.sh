@@ -76,6 +76,9 @@ then
         mv temp "$BASEPATH/src/bindings/ScriptDev2/sd2_revision_nr.h"
       fi
   fi
+
+  echo "Processing $DO on $DO_ON done"
+  exit 0
 fi
 
 
@@ -87,10 +90,10 @@ if [ $DO = COMMENT_STYLE ]
 then
   if [ "$DO_ON" = "MANGOS_SRC" ]
   then
-    LIST=`find src/ -path "src/bindings/ScriptDev2" -prune -o -type f -iname "*.cpp" -print -o -iname "*.h" -print `
+    LIST=`find ${BASEPATH}/src/ -path "${BASEPATH}/src/bindings/ScriptDev2" -prune -o -type f -iname "*.cpp" -print -o -iname "*.h" -print `
   elif [ "$DO_ON" = "SD2" ]
   then
-    LIST=`find src/bindings/ScriptDev2 -type f -iname "*.cpp" -o -iname "*.h" `
+    LIST=`find ${BASEPATH}/src/bindings/ScriptDev2 -type f -iname "*.cpp" -o -iname "*.h" `
   else
     echo "Unsupported combination with DO and DO_ON"
     exit 1
@@ -110,6 +113,9 @@ then
 
     mv temp $l
   done
+
+  echo "Processing $DO on $DO_ON done"
+  exit 0
 fi
 
 ####################################################################################################
@@ -118,20 +124,22 @@ fi
 # use OVERRIDE_CORRECTNESS  to create helper file listing all virtual methods
 # use OVERRIDE_CORRECTNESS2 to add the word "override" after all functions with virtual names
 
-if [ "$DO_ON" != "MANGOS_SRC" ]
+if [ "$DO_ON" != "MANGOS_SRC" -a "$DO_ON" != "SD2" ]
 then
-  echo "OVERRIDE atm only supported for MANGOS_SRC target"
+  echo "OVERRIDE atm only supported for MANGOS_SRC or SD2 target"
   exit 0
 fi
 
 if [ $DO = OVERRIDE_CORRECTNESS ]
 then
   #Create a list of all virtual functions in mangos (class scope)
-  HEADERLIST=`find src/ -path "src/bindings/ScriptDev2" -prune -o -type f -iname "*.h" -print`
-  ##Add CreatureAI.h for SD2 purpose
-  if [ "$FILEPATH" = "scripts" ]
+  if [ $DO_ON = MANGOS_SRC ]
   then
-    HEADERLIST="$HEADERLIST\n../../game/CreatureAI.h"
+    HEADERLIST=`find ${BASEPATH}/src/ -path "${BASEPATH}/src/bindings/ScriptDev2" -prune -o -type f -iname "*.h" -print`
+  else
+    HEADERLIST=`find ${BASEPATH}/src/bindings/ScriptDev2 -type f -iname "*.h"`
+    HEADERLIST="${HEADERLIST} ${BASEPATH}/src/game/CreatureAI.h"
+    HEADERLIST="${HEADERLIST} ${BASEPATH}/src/game/InstanceData.h"
   fi
 
   rm virtuals
@@ -155,34 +163,41 @@ then
 
   echo "Check file virtualNames for inconsitencies!"
   rm virtuals
+
+  echo "Processing $DO on $DO_ON done"
   exit 0
 fi
+
 if [ $DO = OVERRIDE_CORRECTNESS2 ]
 then
-  ## Asszne virtualNames is good
-  HEADERLIST=`find src/ -path "src/bindings/ScriptDev2" -prune -o -type f -iname "*.h" -print`
-  ##Add CreatureAI.h for SD2 purpose
-  if [ "$FILEPATH" = "scripts" ]
+  ## Assume virtualNames is good
+  if [ $DO_ON = MANGOS_SRC ]
   then
-    HEADERLIST="$HEADERLIST\n../../game/CreatureAI.h"
+    FILELIST=`find ${BASEPATH}/src/ -path "${BASEPATH}/src/bindings/ScriptDev2" -prune -o -type f -iname "*.h" -print`
+  else
+    FILELIST=`find ${BASEPATH}/src/bindings/ScriptDev2 -type f -iname "*.cpp" -o -iname "*.h"`
   fi
 
-  for h in $HEADERLIST
+  for h in $FILELIST
   do
     echo "Progress file $h"
     while read f
     do
       # basic pattern: NAME(..)...[;]
-      PARSE="s/("$f"\(.*\)[ ]*const[\*]*);/\1 override;/g; t
-             s/("$f"\(.*\));/\1 override;/g; t
-             s/("$f"\(.*\)[ ]*const[\*]*)$/\1 override/g; t
-             s/("$f"\(.*\))$/\1 override/g; t
-             s/("$f"\(.*\)[ ]*const[\*]*)([ ].*)/\1 override\2/g; t
-             s/("$f"\(.*\))([ ].*)/\1 override\2/g"
+      PARSE="s/( "$f"\(.*\)[ ]*const[\*]*);/\1 override;/g; t
+             s/( "$f"\(.*\));/\1 override;/g; t
+             s/( "$f"\(.*\)[ ]*const[\*]*)$/\1 override/g; t
+             s/( "$f"\(.*\))$/\1 override/g; t
+             s/( "$f"\(.*\)[ ]*const[\*]*)([ ].*)/\1 override\2/g; t
+             s/( "$f"\(.*\))([ ].*)/\1 override\2/g"
       sed -r "$PARSE" $h > temp
       mv temp $h
     done < virtualNames
   done
+
+  echo "Processing $DO on $DO_ON done"
+  exit 0
+
 fi
 
 exit 0
