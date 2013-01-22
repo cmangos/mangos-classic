@@ -80,13 +80,26 @@ struct AABound
 
 class BIH
 {
+    private:
+        void init_empty()
+        {
+            tree.clear();
+            objects.clear();
+            // create space for the first node
+            tree.push_back(3 << 30); // dummy leaf
+            tree.insert(tree.end(), 2, 0);
+        }
+
     public:
-        BIH() {};
-        template< class T, class BoundsFunc >
-        void build(const std::vector<T>& primitives, BoundsFunc& getBounds, uint32 leafSize = 3, bool printStats = false)
+        BIH() {init_empty();}
+        template< class BoundsFunc, class PrimArray >
+        void build(const PrimArray& primitives, BoundsFunc& getBounds, uint32 leafSize = 3, bool printStats = false)
         {
             if (primitives.size() == 0)
+            {
+                init_empty();
                 return;
+            }
             buildData dat;
             dat.maxPrims = leafSize;
             dat.numPrims = primitives.size();

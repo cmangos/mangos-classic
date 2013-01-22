@@ -176,7 +176,7 @@ namespace VMAP
             spawn.iBound = G3D::AABox(bLow, bHigh);
         }
         check += fread(&nameLen, sizeof(uint32), 1, rf);
-        if (check != (has_bound ? 17 : 11))
+        if (check != uint32(has_bound ? 17 : 11))
         {
             ERROR_LOG("Error reading ModelSpawn!");
             return false;
@@ -214,7 +214,7 @@ namespace VMAP
         }
         uint32 nameLen = spawn.name.length();
         check += fwrite(&nameLen, sizeof(uint32), 1, wf);
-        if (check != (has_bound ? 17 : 11)) return false;
+        if (check != uint32(has_bound ? 17 : 11)) return false;
         check = fwrite(spawn.name.c_str(), sizeof(char), nameLen, wf);
         if (check != nameLen) return false;
         return true;

@@ -70,23 +70,22 @@ namespace VMAP
             InstanceTreeMap iInstanceMapTrees;
 
             bool _loadMap(uint32 pMapId, const std::string& basePath, uint32 tileX, uint32 tileY);
-            /* void _unloadMap(uint32 pMapId, uint32 x, uint32 y) override override; */
+            /* void _unloadMap(uint32 pMapId, uint32 x, uint32 y); */
 
         public:
             // public for debug
             G3D::Vector3 convertPositionToInternalRep(float x, float y, float z) const;
-            G3D::Vector3 convertPositionToMangosRep(float x, float y, float z) const;
             static std::string getMapFileName(unsigned int pMapId);
 
             VMapManager2();
-            ~VMapManager2(void);
+            ~VMapManager2();
 
             VMAPLoadResult loadMap(const char* pBasePath, unsigned int pMapId, int x, int y) override;
 
             void unloadMap(unsigned int pMapId, int x, int y) override;
             void unloadMap(unsigned int pMapId) override;
 
-            bool isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2) override ;
+            bool isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2) override;
             /**
             fill the hit pos and return true, if an object was hit
             */
@@ -102,11 +101,11 @@ namespace VMAP
             void releaseModelInstance(const std::string& filename);
 
             // what's the use of this? o.O
-            virtual std::string getDirFileName(unsigned int pMapId, int x, int y) const override
+            std::string getDirFileName(unsigned int pMapId, int x, int y) const override
             {
                 return getMapFileName(pMapId);
             }
-            virtual bool existsMap(const char* pBasePath, unsigned int pMapId, int x, int y) override;
+            bool existsMap(const char* pBasePath, unsigned int pMapId, int x, int y) override;
 
 #ifdef MMAP_GENERATOR
         public:
