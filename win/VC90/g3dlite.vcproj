@@ -562,15 +562,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\g3dlite\PhysicsFrame.h"
+				RelativePath="..\..\dep\include\g3dlite\G3D\PhysicsFrame.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\g3dlite\FileSystem.h"
+				RelativePath="..\..\dep\include\g3dlite\G3D\FileSystem.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\g3dlite\uint128.h"
+				RelativePath="..\..\dep\include\g3dlite\G3D\uint128.h"
 				>
 			</File>
 		</Filter>
