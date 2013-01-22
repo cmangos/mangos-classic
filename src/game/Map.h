@@ -250,9 +250,9 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void PlayDirectSoundToMap(uint32 soundId, uint32 zoneId = 0);
 
         // Dynamic VMaps
-        float GetHeight(uint32 phasemask, float x, float y, float z, bool pCheckVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
-        bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
-        bool GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, uint32 phasemask, float modifyDist) const;
+        float GetHeight(float x, float y, float z, bool pCheckVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
+        bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2) const;
+        bool GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, float modifyDist) const;
 
         // Object Model insertion/remove/test for dynamic vmaps use
         void InsertGameObjectModel(const GameObjectModel& mdl);

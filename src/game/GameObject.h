@@ -634,7 +634,6 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SetGoAnimProgress(uint32 animprogress) { SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, animprogress); }
         uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
         void SetDisplayId(uint32 modelId);
-        void SetPhaseMask(uint32 newPhaseMask, bool update);
 
         float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
 

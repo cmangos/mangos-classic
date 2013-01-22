@@ -95,7 +95,7 @@ bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDi
 
     name = it->second.name;
     iPos = Vector3(pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ());
-    phasemask = pGo->GetPhaseMask();
+    collision_enabled = true;
     iScale = pGo->GetObjectScale();
     iInvScale = 1.f / iScale;
 
@@ -141,9 +141,9 @@ GameObjectModel* GameObjectModel::construct(const GameObject* const pGo)
     return mdl;
 }
 
-bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const
+bool GameObjectModel::intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit) const
 {
-    if (!(phasemask & ph_mask))
+    if (!collision_enabled)
         return false;
 
     float time = ray.intersectionTime(iBound);

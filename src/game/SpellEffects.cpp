@@ -4348,7 +4348,7 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         float ox, oy, oz;
         unitTarget->GetPosition(ox, oy, oz);
 
-        if (unitTarget->GetMap()->GetHitPosition(ox, oy, oz + 0.5f, fx, fy, fz, unitTarget->GetPhaseMask(), -0.5f))
+        if (unitTarget->GetMap()->GetHitPosition(ox, oy, oz + 0.5f, fx, fy, fz, -0.5f))
             unitTarget->UpdateAllowedPositionZ(fx, fy, fz);
 
         unitTarget->NearTeleportTo(fx, fy, fz, unitTarget->GetOrientation(), unitTarget == m_caster);
