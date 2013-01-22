@@ -178,7 +178,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
 
-    SetWalk(true);
+    SetWalk(true, true);
 }
 
 Creature::~Creature()
@@ -1482,7 +1482,7 @@ void Creature::SetDeathState(DeathState s)
 
         SetHealth(GetMaxHealth());
         SetLootRecipient(NULL);
-        SetWalk(true);
+        SetWalk(true, true);
 
         if (GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_RESPAWN)
             ClearTemporaryFaction();
@@ -2482,12 +2482,25 @@ void Creature::SetVirtualItemRaw(VirtualItemSlot slot, uint32 display_id, uint32
     SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + (slot * 2) + 1, info1);
 }
 
-void Creature::SetWalk(bool enable)
+void Creature::SetWalk(bool enable, bool asDefault)
 {
+    if (asDefault)
+    {
+        if (enable)
+            clearUnitState(UNIT_STAT_RUNNING);
+        else
+            addUnitState(UNIT_STAT_RUNNING);
+    }
+
+    // Nothing changed?
+    if (enable == m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE))
+        return;
+
     if (enable)
         m_movementInfo.AddMovementFlag(MOVEFLAG_WALK_MODE);
     else
         m_movementInfo.RemoveMovementFlag(MOVEFLAG_WALK_MODE);
+
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_WALK_MODE : SMSG_SPLINE_MOVE_SET_RUN_MODE, 9);
     data << GetPackGUID();
     SendMessageToSet(&data, true);
