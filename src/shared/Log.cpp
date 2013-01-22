@@ -66,7 +66,7 @@ const int LogType_count = int(LogError) + 1;
 
 Log::Log() :
     raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL),
-    dberLogfile(NULL), m_colored(false), m_includeTime(false), m_gmlog_per_account(false)
+    dberLogfile(NULL), scriptErrLogFile(NULL), worldLogfile(NULL), m_colored(false), m_includeTime(false), m_gmlog_per_account(false), m_scriptLibName(NULL)
 {
     Initialize();
 }
@@ -713,6 +713,87 @@ void Log::outChar(const char* str, ...)
     }
 }
 
+void Log::outErrorScriptLib()
+{
+    if (m_includeTime)
+        outTime();
+
+    fprintf(stderr, "\n");
+
+    if (logfile)
+    {
+        outTimestamp(logfile);
+        if (m_scriptLibName)
+            fprintf(logfile, "<%s ERROR:> ", m_scriptLibName);
+        else
+            fprintf(logfile, "<Scripting Library ERROR>: ");
+        fflush(logfile);
+    }
+
+    if (scriptErrLogFile)
+    {
+        outTimestamp(scriptErrLogFile);
+        fprintf(scriptErrLogFile, "\n");
+        fflush(scriptErrLogFile);
+    }
+
+    fflush(stderr);
+}
+
+void Log::outErrorScriptLib(const char* err, ...)
+{
+    if (!err)
+        return;
+
+    if (m_colored)
+        SetColor(false, m_colors[LogError]);
+
+    if (m_includeTime)
+        outTime();
+
+    va_list ap;
+
+    va_start(ap, err);
+    vutf8printf(stderr, err, &ap);
+    va_end(ap);
+
+    if (m_colored)
+        ResetColor(false);
+
+    fprintf(stderr, "\n");
+
+    if (logfile)
+    {
+        outTimestamp(logfile);
+        if (m_scriptLibName)
+            fprintf(logfile, "<%s ERROR>: ", m_scriptLibName);
+        else
+            fprintf(logfile, "<Scripting Library ERROR>: ");
+
+        va_start(ap, err);
+        vfprintf(logfile, err, ap);
+        va_end(ap);
+
+        fprintf(logfile, "\n");
+        fflush(logfile);
+    }
+
+    if (scriptErrLogFile)
+    {
+        outTimestamp(scriptErrLogFile);
+
+        va_list ap;
+        va_start(ap, err);
+        vfprintf(scriptErrLogFile, err, ap);
+        va_end(ap);
+
+        fprintf(scriptErrLogFile, "\n");
+        fflush(scriptErrLogFile);
+    }
+
+    fflush(stderr);
+}
+
 void Log::outWorldPacketDump(uint32 socket, uint32 opcode, char const* opcodeName, ByteBuffer const* packet, bool incoming)
 {
     if (!worldLogfile)
@@ -790,6 +871,24 @@ void Log::WaitBeforeContinueIfNeed()
     }
 }
 
+void Log::setScriptLibraryErrorFile(char const* fname, char const* libName)
+{
+    m_scriptLibName = libName;
+
+    if (scriptErrLogFile)
+        fclose(scriptErrLogFile);
+
+    if (!fname)
+    {
+        scriptErrLogFile = NULL;
+        return;
+    }
+
+    std::string fileName = m_logsDir;
+    fileName.append(fname);
+    scriptErrLogFile = fopen(fileName.c_str(), "a");
+}
+
 void outstring_log(const char* str, ...)
 {
     if (!str)
@@ -858,4 +957,23 @@ void error_db_log(const char* str, ...)
     va_end(ap);
 
     sLog.outErrorDb("%s", buf);
+}
+
+void setScriptLibraryErrorFile(char const* fname, char const* libName)
+{
+    sLog.setScriptLibraryErrorFile(fname, libName);
+}
+
+void script_error_log(const char* str, ...)
+{
+    if (!str)
+        return;
+
+    char buf[256];
+    va_list ap;
+    va_start(ap, str);
+    vsnprintf(buf, 256, str, ap);
+    va_end(ap);
+
+    sLog.outErrorScriptLib("%s", buf);
 }
