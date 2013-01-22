@@ -1934,10 +1934,13 @@ bool Map::GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float
     return result0 || result1;
 }
 
-float Map::GetHeight(float x, float y, float z, bool pCheckVMap/*=true*/, float maxSearchDist/*=DEFAULT_HEIGHT_SEARCH*/) const
+float Map::GetHeight(float x, float y, float z) const
 {
-    return std::max<float>(m_TerrainData->GetHeightStatic(x, y, z, pCheckVMap, maxSearchDist),
-                           m_dyn_tree.getHeight(x, y, z, maxSearchDist));
+    float staticHeight = m_TerrainData->GetHeightStatic(x, y, z);
+
+    // Get Dynamic Height around static Height (if valid)
+    float dynSearchHeight = 2.0f + (z < staticHeight ? staticHeight : z);
+    return std::max<float>(staticHeight, m_dyn_tree.getHeight(x, y, dynSearchHeight, dynSearchHeight - staticHeight));
 }
 
 void Map::InsertGameObjectModel(const GameObjectModel& mdl)

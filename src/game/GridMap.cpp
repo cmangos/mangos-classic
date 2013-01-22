@@ -716,7 +716,6 @@ void TerrainInfo::Unload(const uint32 x, const uint32 y)
     }
 }
 
-
 // call this method only
 void TerrainInfo::CleanUpGrids(const uint32 diff)
 {
@@ -774,26 +773,18 @@ int TerrainInfo::UnrefGrid(const uint32& x, const uint32& y)
     return 0;
 }
 
-float TerrainInfo::GetHeightStatic(float x, float y, float z, bool pUseVmaps, float maxSearchDist) const
+float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=true*/, float maxSearchDist/*=DEFAULT_HEIGHT_SEARCH*/) const
 {
-    // find raw .map surface under Z coordinates
-    float mapHeight;
+    float mapHeight = VMAP_INVALID_HEIGHT_VALUE;            // Store Height obtained by maps
+    float vmapHeight = VMAP_INVALID_HEIGHT_VALUE;           // Store Height obtained by vmaps (in "corridor" of z (or slightly above z)
+
     float z2 = z + 2.f;
+
+    // find raw .map surface under Z coordinates (or well-defined above)
     if (GridMap* gmap = const_cast<TerrainInfo*>(this)->GetGrid(x, y))
-    {
-        float _mapheight = gmap->getHeight(x, y);
+        mapHeight = gmap->getHeight(x, y);
 
-        // look from a bit higher pos to find the floor, ignore under surface case
-        if (z2 > _mapheight)
-            mapHeight = _mapheight;
-        else
-            mapHeight = VMAP_INVALID_HEIGHT_VALUE;
-    }
-    else
-        mapHeight = VMAP_INVALID_HEIGHT_VALUE;
-
-    float vmapHeight;
-    if (pUseVmaps)
+    if (useVmaps)
     {
         VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
         if (vmgr->isHeightCalcEnabled())
@@ -806,16 +797,19 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool pUseVmaps, fl
 
             // look from a bit higher pos to find the floor
             vmapHeight = vmgr->getHeight(GetMapId(), x, y, z2, maxSearchDist);
+
+            // if not found in expected range, look for infinity range (case of far above floor, but below terrain-height)
+            if (vmapHeight <= INVALID_HEIGHT)
+                vmapHeight = vmgr->getHeight(GetMapId(), x, y, z2, 10000.0f);
+
+            // still not found, look near terrain height
+            if (vmapHeight <= INVALID_HEIGHT && mapHeight > INVALID_HEIGHT && z2 < mapHeight)
+                vmapHeight = vmgr->getHeight(GetMapId(), x, y, mapHeight + 2.0f, DEFAULT_HEIGHT_SEARCH);
         }
-        else
-            vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
     }
-    else
-        vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
 
     // mapHeight set for any above raw ground Z or <= INVALID_HEIGHT
     // vmapheight set for any under Z value or <= INVALID_HEIGHT
-
     if (vmapHeight > INVALID_HEIGHT)
     {
         if (mapHeight > INVALID_HEIGHT)
@@ -823,12 +817,10 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool pUseVmaps, fl
             // we have mapheight and vmapheight and must select more appropriate
 
             // we are already under the surface or vmap height above map heigt
-            // or if the distance of the vmap height is less the land height distance
-            if (z < mapHeight || vmapHeight > mapHeight || fabs(mapHeight - z) > fabs(vmapHeight - z))
+            if (z < mapHeight || vmapHeight > mapHeight)
                 return vmapHeight;
             else
                 return mapHeight;                           // better use .map surface height
-
         }
         else
             return vmapHeight;                              // we have only vmapHeight (if have)
@@ -864,7 +856,7 @@ bool TerrainInfo::GetAreaInfo(float x, float y, float z, uint32& flags, int32& a
         if (GridMap* gmap = const_cast<TerrainInfo*>(this)->GetGrid(x, y))
         {
             float _mapheight = gmap->getHeight(x, y);
-            // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
+            // z + 2.0f condition taken from GetHeightStatic(), not sure if it's such a great choice...
             if (z + 2.0f > _mapheight &&  _mapheight > vmap_z)
                 return false;
         }
