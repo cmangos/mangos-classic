@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z2186_s1819_12268_01_mangos_dbscripts` bit(1) default NULL
+  `required_z2187_s1820_12269_11_mangos_gossip_menu_option` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -975,9 +975,6 @@ CREATE TABLE `creature_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL default '0',
   `mincountOrRef` mediumint(9) NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `lootcondition` tinyint(3) unsigned NOT NULL default '0',
-  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
-  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
   `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
@@ -1400,9 +1397,6 @@ CREATE TABLE `disenchant_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
@@ -1625,9 +1619,6 @@ CREATE TABLE `fishing_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL default '0',
   `mincountOrRef` mediumint(9) NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `lootcondition` tinyint(3) unsigned NOT NULL default '0',
-  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
-  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
   `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
@@ -1969,9 +1960,6 @@ CREATE TABLE `gameobject_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
@@ -2075,12 +2063,6 @@ CREATE TABLE gossip_menu (
   entry smallint(6) unsigned NOT NULL default '0',
   text_id mediumint(8) unsigned NOT NULL default '0',
   script_id mediumint(8) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'script in `dbscripts_on_gossip` - will be executed on GossipHello',
-  cond_1 tinyint(3) unsigned NOT NULL default '0',
-  cond_1_val_1 mediumint(8) unsigned NOT NULL default '0',
-  cond_1_val_2 mediumint(8) unsigned NOT NULL default '0',
-  cond_2 tinyint(3) unsigned NOT NULL default '0',
-  cond_2_val_1 mediumint(8) unsigned NOT NULL default '0',
-  cond_2_val_2 mediumint(8) unsigned NOT NULL default '0',
   condition_id MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (entry, text_id, script_id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -2112,15 +2094,6 @@ CREATE TABLE gossip_menu_option (
   box_coded tinyint(3) unsigned NOT NULL default '0',
   box_money int(11) unsigned NOT NULL default '0',
   box_text text,
-  cond_1 tinyint(3) unsigned NOT NULL default '0',
-  cond_1_val_1 mediumint(8) unsigned NOT NULL default '0',
-  cond_1_val_2 mediumint(8) unsigned NOT NULL default '0',
-  cond_2 tinyint(3) unsigned NOT NULL default '0',
-  cond_2_val_1 mediumint(8) unsigned NOT NULL default '0',
-  cond_2_val_2 mediumint(8) unsigned NOT NULL default '0',
-  cond_3 tinyint(3) unsigned NOT NULL default '0',
-  cond_3_val_1 mediumint(8) unsigned NOT NULL default '0',
-  cond_3_val_2 mediumint(8) unsigned NOT NULL default '0',
   condition_id MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (menu_id, id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -2132,22 +2105,22 @@ CREATE TABLE gossip_menu_option (
 LOCK TABLES `gossip_menu_option` WRITE;
 /*!40000 ALTER TABLE `gossip_menu_option` DISABLE KEYS */;
 INSERT INTO gossip_menu_option VALUES
-(0, 0,0,'GOSSIP_OPTION_QUESTGIVER',       2,0x000002,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0, 1,1,'GOSSIP_OPTION_VENDOR',           3,0x000004,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0, 2,2,'GOSSIP_OPTION_TAXIVENDOR',       4,0x000008,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0, 3,3,'GOSSIP_OPTION_TRAINER',          5,0x000010,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0, 4,4,'GOSSIP_OPTION_SPIRITHEALER',     6,0x000020,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0, 5,4,'GOSSIP_OPTION_SPIRITGUIDE',      7,0x000040,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0, 6,5,'GOSSIP_OPTION_INNKEEPER',        8,0x000080,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0, 7,6,'GOSSIP_OPTION_BANKER',           9,0x000100,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0, 8,7,'GOSSIP_OPTION_PETITIONER',      10,0x000200,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0, 9,8,'GOSSIP_OPTION_TABARDDESIGNER',  11,0x000400,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0,10,9,'GOSSIP_OPTION_BATTLEFIELD',     12,0x000800,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0,11,6,'GOSSIP_OPTION_AUCTIONEER',      13,0x001000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0,12,0,'GOSSIP_OPTION_STABLEPET',       14,0x002000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0,13,1,'GOSSIP_OPTION_ARMORER',         15,0x004000,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0,14,0,'GOSSIP_OPTION_UNLEARNTALENTS',  16,0x000010,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0),
-(0,15,2,'GOSSIP_OPTION_UNLEARNPETSKILLS',17,0x000010,0,0,0,0,0,NULL,0,0,0,0,0,0,0,0,0,0);
+(0, 0,0,'GOSSIP_OPTION_QUESTGIVER',       2,0x000002,0,0,0,0,0,NULL,0),
+(0, 1,1,'GOSSIP_OPTION_VENDOR',           3,0x000004,0,0,0,0,0,NULL,0),
+(0, 2,2,'GOSSIP_OPTION_TAXIVENDOR',       4,0x000008,0,0,0,0,0,NULL,0),
+(0, 3,3,'GOSSIP_OPTION_TRAINER',          5,0x000010,0,0,0,0,0,NULL,0),
+(0, 4,4,'GOSSIP_OPTION_SPIRITHEALER',     6,0x000020,0,0,0,0,0,NULL,0),
+(0, 5,4,'GOSSIP_OPTION_SPIRITGUIDE',      7,0x000040,0,0,0,0,0,NULL,0),
+(0, 6,5,'GOSSIP_OPTION_INNKEEPER',        8,0x000080,0,0,0,0,0,NULL,0),
+(0, 7,6,'GOSSIP_OPTION_BANKER',           9,0x000100,0,0,0,0,0,NULL,0),
+(0, 8,7,'GOSSIP_OPTION_PETITIONER',      10,0x000200,0,0,0,0,0,NULL,0),
+(0, 9,8,'GOSSIP_OPTION_TABARDDESIGNER',  11,0x000400,0,0,0,0,0,NULL,0),
+(0,10,9,'GOSSIP_OPTION_BATTLEFIELD',     12,0x000800,0,0,0,0,0,NULL,0),
+(0,11,6,'GOSSIP_OPTION_AUCTIONEER',      13,0x001000,0,0,0,0,0,NULL,0),
+(0,12,0,'GOSSIP_OPTION_STABLEPET',       14,0x002000,0,0,0,0,0,NULL,0),
+(0,13,1,'GOSSIP_OPTION_ARMORER',         15,0x004000,0,0,0,0,0,NULL,0),
+(0,14,0,'GOSSIP_OPTION_UNLEARNTALENTS',  16,0x000010,0,0,0,0,0,NULL,0),
+(0,15,2,'GOSSIP_OPTION_UNLEARNPETSKILLS',17,0x000010,0,0,0,0,0,NULL,0);
 /*!40000 ALTER TABLE `gossip_menu_option` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2248,9 +2221,6 @@ CREATE TABLE `item_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
@@ -2979,9 +2949,6 @@ CREATE TABLE `mail_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
@@ -4431,9 +4398,6 @@ CREATE TABLE `pickpocketing_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
@@ -9719,9 +9683,6 @@ CREATE TABLE `reference_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
@@ -9888,9 +9849,6 @@ CREATE TABLE `skinning_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `condition_value1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `condition_value2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
