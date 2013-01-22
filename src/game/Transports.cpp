@@ -177,7 +177,9 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
 
     SetEntry(goinfo->id);
 
-    SetDisplayId(goinfo->displayId);
+    //SetDisplayId(goinfo->displayId);
+    // Use SetDisplayId only if we have the GO assigned to a proper map!
+    SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
 
     SetGoState(GO_STATE_READY);
     SetGoType(GameobjectTypes(goinfo->type));
