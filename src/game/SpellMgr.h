@@ -388,7 +388,7 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
             default:
                 return false;
         }
-        switch (spellInfo->EffectImplicitTargetA[i])
+        switch (spellInfo->EffectImplicitTargetB[i])
         {
             case TARGET_SELF:
             case TARGET_NONE:
