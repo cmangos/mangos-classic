@@ -561,6 +561,18 @@
 				RelativePath="..\..\dep\include\g3dlite\G3D\Vector4.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\dep\src\g3dlite\PhysicsFrame.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\g3dlite\FileSystem.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\g3dlite\uint128.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Source Files"
@@ -719,6 +731,18 @@
 			</File>
 			<File
 				RelativePath="..\..\dep\src\g3dlite\Vector2.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\g3dlite\PhysicsFrame.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\g3dlite\FileSystem.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\g3dlite\uint128.cpp"
 				>
 			</File>
 		</Filter>

@@ -133,7 +133,7 @@
 // TODO: remove
 #   pragma warning (disable : 4244)
 
-#   define ZLIB_WINAPI
+// #   define ZLIB_WINAPI /* G3DFIX: caused some unresolved external errors with MSVC */
 
 #   define restrict
 
