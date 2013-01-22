@@ -491,6 +491,8 @@
     <ClCompile Include="..\..\src\game\WorldSocket.cpp" />
     <ClCompile Include="..\..\src\game\WorldSocketMgr.cpp" />
     <ClCompile Include="..\..\src\game\vmap\BIH.cpp" />
+    <ClCompile Include="..\..\src\game\vmap\DynamicTree.cpp" />
+    <ClCompile Include="..\..\src\game\vmap\GameObjectModel.cpp" />
     <ClCompile Include="..\..\src\game\vmap\MapTree.cpp" />
     <ClCompile Include="..\..\src\game\vmap\ModelInstance.cpp" />
     <ClCompile Include="..\..\src\game\vmap\TileAssembler.cpp" />
@@ -634,9 +636,13 @@
     <ClInclude Include="..\..\src\game\WorldSocket.h" />
     <ClInclude Include="..\..\src\game\WorldSocketMgr.h" />
     <ClInclude Include="..\..\src\game\vmap\BIH.h" />
+    <ClInclude Include="..\..\src\game\vmap\BIHWrap.h" />
+    <ClInclude Include="..\..\src\game\vmap\DynamicTree.h" />
+    <ClInclude Include="..\..\src\game\vmap\GameObjectModel.h" />
     <ClInclude Include="..\..\src\game\vmap\IVMapManager.h" />
     <ClInclude Include="..\..\src\game\vmap\MapTree.h" />
     <ClInclude Include="..\..\src\game\vmap\ModelInstance.h" />
+    <ClInclude Include="..\..\src\game\vmap\RegularGrid.h" />
     <ClInclude Include="..\..\src\game\vmap\TileAssembler.h" />
     <ClInclude Include="..\..\src\game\vmap\VMapDefinitions.h" />
     <ClInclude Include="..\..\src\game\vmap\VMapFactory.h" />
