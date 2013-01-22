@@ -375,10 +375,12 @@ public:
      // count now contains the cycle count for the intervening operation.
      </PRE>
      */
+#if SOMEONE_MADE_THIS_USEFUL /* G3DFIX: Not required and not portable to Win64 */
     static void beginCycleCount(uint64& cycleCount);
     static void endCycleCount(uint64& cycleCount);
 
     static uint64 getCycleCount();
+#endif /* G3DFIX: Not required and not portable to Win64 */
 
     inline static void setOutOfMemoryCallback(OutOfMemoryCallback c) {
         instance().m_outOfMemoryCallback = c;
@@ -438,6 +440,7 @@ public:
 
 };
 
+#if SOMEONE_MADE_THIS_USEFUL /* G3DFIX: Not required and not portable to Win64 */
 
 #ifdef _MSC_VER
     inline uint64 System::getCycleCount() {
@@ -501,6 +504,7 @@ inline void System::endCycleCount(uint64& cycleCount) {
 #endif
 }
 
+#endif /* G3DFIX: Not required and not portable to Win64 */
 
 } // namespace
 

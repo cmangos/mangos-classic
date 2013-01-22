@@ -78,6 +78,8 @@ inline double __fastcall drand48() {
    provided "as is" without express or implied warranty.
 */
 
+
+#if !defined(_WIN64)
 __inline long int lrint (double flt) {
     int intgr;
 
@@ -99,6 +101,18 @@ __inline long int lrintf(float flt) {
 
     return intgr;
 }
+#else
+
+    __inline long int lrint (double flt) {
+        return (long int)floor(flt+0.5f);
+    }
+
+    __inline long int lrintf(float flt) {
+        return (long int)floorf(flt+0.5f);
+    }
+
+#endif
+
 #endif
 
 

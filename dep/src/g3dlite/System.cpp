@@ -81,8 +81,9 @@
 #endif
 
 // SIMM include
+#ifdef __SSE__ /* G3DFIX: Only Intel Vector Extension enabled */
 #include <xmmintrin.h>
-
+#endif /* G3DFIX: Only Intel Vector Extension enabled */
 
 namespace G3D {
 
@@ -563,7 +564,7 @@ void System::getStandardProcessorExtensions() {
 #endif
 }
 
-#if defined(G3D_WIN32)
+#if defined(G3D_WIN32) && !defined(G3D_64BIT) /* G3DFIX: Don't check if on 64-bit Windows platforms */
     #pragma message("Port System::memcpy SIMD to all platforms")
 /** Michael Herf's fast memcpy */
 void memcpyMMX(void* dst, const void* src, int nbytes) {
@@ -614,7 +615,7 @@ void memcpyMMX(void* dst, const void* src, int nbytes) {
 #endif
 
 void System::memcpy(void* dst, const void* src, size_t numBytes) {
-#if defined(G3D_WIN32)
+#if defined(G3D_WIN32) && !defined(G3D_64BIT) /* G3DFIX: Don't check if on 64-bit Windows platforms */
     memcpyMMX(dst, src, numBytes);
 #else
     ::memcpy(dst, src, numBytes);
@@ -624,7 +625,7 @@ void System::memcpy(void* dst, const void* src, size_t numBytes) {
 
 /** Michael Herf's fastest memset. n32 must be filled with the same
     character repeated. */
-#if defined(G3D_WIN32)
+#if defined(G3D_WIN32) && !defined(G3D_64BIT) /* G3DFIX: Don't check if on 64-bit Windows platforms */
     #pragma message("Port System::memfill SIMD to all platforms")
 
 // On x86 processors, use MMX
@@ -663,7 +664,7 @@ void memfill(void *dst, int n32, unsigned long i) {
 
 
 void System::memset(void* dst, uint8 value, size_t numBytes) {
-#if defined(G3D_WIN32)
+#if defined(G3D_WIN32) && !defined(G3D_64BIT) /* G3DFIX: Don't check if on 64-bit Windows platforms */
     uint32 v = value;
     v = v + (v << 8) + (v << 16) + (v << 24); 
     G3D::memfill(dst, v, numBytes);
@@ -1691,6 +1692,7 @@ std::string System::currentDateString() {
 
 // VC on Intel
 void System::cpuid(CPUIDFunction func, uint32& areg, uint32& breg, uint32& creg, uint32& dreg) {
+#if !defined(G3D_64BIT) /* G3DFIX: Don't check if on 64-bit platform */
     // Can't copy from assembler direct to a function argument (which is on the stack) in VC.
     uint32 a,b,c,d;
 
@@ -1708,6 +1710,14 @@ void System::cpuid(CPUIDFunction func, uint32& areg, uint32& breg, uint32& creg,
     breg = b; 
     creg = c;
     dreg = d;
+#else /* G3DFIX: Don't check if on 64-bit platform */
+ int CPUInfo[4];
+ __cpuid(CPUInfo, func);
+ memcpy(&areg, &CPUInfo[0], 4);
+ memcpy(&breg, &CPUInfo[1], 4);
+ memcpy(&creg, &CPUInfo[2], 4);
+ memcpy(&dreg, &CPUInfo[3], 4);
+#endif /* G3DFIX: Don't check if on 64-bit platform */
 }
 
 #elif defined(G3D_OSX) && ! defined(G3D_OSX_INTEL)
