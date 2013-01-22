@@ -37,6 +37,8 @@
 #include "loadlib/wdt.h"
 #include <fcntl.h>
 
+#include "unistd.h"
+
 #if defined( __GNUC__ )
 #define _open   open
 #define _close close
