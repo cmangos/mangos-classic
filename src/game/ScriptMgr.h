@@ -469,6 +469,7 @@ class ScriptMgr
         bool OnAuraDummy(Aura const* pAura, bool apply);
 
     private:
+        void CollectPossibleEventIds(std::set<uint32>& eventIds);
         void LoadScripts(ScriptMapMapName& scripts, const char* tablename);
         void CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32>& ids);
 
