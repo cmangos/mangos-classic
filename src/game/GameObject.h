@@ -689,6 +689,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
 
+        bool IsCollisionEnabled() const;                    // Check if a go should collide. Like if a door is closed
+
         GameObject* LookupFishingHoleAround(float range);
 
         void SetCapturePointSlider(float value);

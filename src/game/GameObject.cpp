@@ -935,6 +935,22 @@ GameObject* GameObject::LookupFishingHoleAround(float range)
     return ok;
 }
 
+bool GameObject::IsCollisionEnabled() const
+{
+    if (!isSpawned())
+        return false;
+
+    // TODO: Possible that this function must consider multiple checks
+    switch (GetGoType())
+    {
+        case GAMEOBJECT_TYPE_DOOR:
+            return GetGoState() != GO_STATE_ACTIVE && GetGoState() != GO_STATE_ACTIVE_ALTERNATIVE;
+
+        default:
+            return true;
+    }
+}
+
 void GameObject::ResetDoorOrButton()
 {
     if (m_lootState == GO_READY || m_lootState == GO_JUST_DEACTIVATED)
