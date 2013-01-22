@@ -111,9 +111,9 @@ namespace VMAP
         iFlags = new uint8[width * height];
     }
 
-    WmoLiquid::WmoLiquid(const WmoLiquid& other): iHeight(0), iFlags(0)
+    WmoLiquid::WmoLiquid(const WmoLiquid& other): iHeight(NULL), iFlags(NULL)
     {
-        *this = other; // use assignment operator...
+        *this = other;                                      // use assignment operator defined below
     }
 
     WmoLiquid::~WmoLiquid()
@@ -126,26 +126,29 @@ namespace VMAP
     {
         if (this == &other)
             return *this;
+
         iTilesX = other.iTilesX;
         iTilesY = other.iTilesY;
         iCorner = other.iCorner;
         iType = other.iType;
-        delete iHeight;
-        delete iFlags;
+        delete[] iHeight;
+        delete[] iFlags;
+
         if (other.iHeight)
         {
             iHeight = new float[(iTilesX + 1) * (iTilesY + 1)];
-            memcpy(iHeight, other.iHeight, (iTilesX + 1) * (iTilesY + 1)*sizeof(float));
+            memcpy(iHeight, other.iHeight, (iTilesX + 1) * (iTilesY + 1) * sizeof(float));
         }
         else
-            iHeight = 0;
+            iHeight = NULL;
         if (other.iFlags)
         {
             iFlags = new uint8[iTilesX * iTilesY];
-            memcpy(iFlags, other.iFlags, iTilesX * iTilesY);
+            memcpy(iFlags, other.iFlags, iTilesX * iTilesY * sizeof(uint8));
         }
         else
-            iFlags = 0;
+            iFlags = NULL;
+
         return *this;
     }
 
@@ -282,7 +285,8 @@ namespace VMAP
         chunkSize = sizeof(uint32) + sizeof(MeshTriangle) * count;
         if (result && fwrite(&chunkSize, sizeof(uint32), 1, wf) != 1) result = false;
         if (result && fwrite(&count, sizeof(uint32), 1, wf) != 1) result = false;
-        if (result && fwrite(&triangles[0], sizeof(MeshTriangle), count, wf) != count) result = false;
+        if (count)
+            if (result && fwrite(&triangles[0], sizeof(MeshTriangle), count, wf) != count) result = false;
 
         // write mesh BIH
         if (result && fwrite("MBIH", 1, 4, wf) != 4) result = false;
@@ -290,15 +294,10 @@ namespace VMAP
 
         // write liquid data
         if (result && fwrite("LIQU", 1, 4, wf) != 4) result = false;
-        if (!iLiquid)
-        {
-            chunkSize = 0;
-            if (result && fwrite(&chunkSize, sizeof(uint32), 1, wf) != 1) result = false;
-            return result;
-        }
-        chunkSize = iLiquid->GetFileSize();
+        chunkSize = iLiquid ? iLiquid->GetFileSize() : 0;
         if (result && fwrite(&chunkSize, sizeof(uint32), 1, wf) != 1) result = false;
-        if (result) result = iLiquid->writeToFile(wf);
+        if (chunkSize)
+            if (result) result = iLiquid->writeToFile(wf);
 
         return result;
     }
@@ -330,14 +329,17 @@ namespace VMAP
         if (result && !readChunk(rf, chunk, "TRIM", 4)) result = false;
         if (result && fread(&chunkSize, sizeof(uint32), 1, rf) != 1) result = false;
         if (result && fread(&count, sizeof(uint32), 1, rf) != 1) result = false;
-        if (result) triangles.resize(count);
-        if (result && fread(&triangles[0], sizeof(MeshTriangle), count, rf) != count) result = false;
+        if (count)
+        {
+            if (result) triangles.resize(count);
+            if (result && fread(&triangles[0], sizeof(MeshTriangle), count, rf) != count) result = false;
+        }
 
         // read mesh BIH
         if (result && !readChunk(rf, chunk, "MBIH", 4)) result = false;
         if (result) result = meshTree.readFromFile(rf);
 
-        // write liquid data
+        // read liquid data
         if (result && !readChunk(rf, chunk, "LIQU", 4)) result = false;
         if (result && fread(&chunkSize, sizeof(uint32), 1, rf) != 1) result = false;
         if (result && chunkSize > 0)
