@@ -54,7 +54,7 @@ GameObject::GameObject() : WorldObject(),
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTime = 0;
     m_respawnDelayTime = 25;
-    m_lootState = GO_NOT_READY;
+    m_lootState = GO_READY;
     m_spawnedByDefault = true;
     m_useTimes = 0;
     m_spellId = 0;
@@ -171,6 +171,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
 
     SetGoAnimProgress(animprogress);
 
+    // Initialize Traps and Fishingnode delayed in ::Update
+    if (GetGoType() == GAMEOBJECT_TYPE_TRAP || GAMEOBJECT_TYPE_TRAP == GAMEOBJECT_TYPE_FISHINGNODE)
+        m_lootState = GO_NOT_READY;
+
     // Notify the battleground or outdoor pvp script
     if (map->IsBattleGround())
         ((BattleGroundMap*)map)->GetBG()->HandleGameObjectCreate(this);
@@ -200,16 +204,16 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
         {
             switch (GetGoType())
             {
-                case GAMEOBJECT_TYPE_TRAP:
+                case GAMEOBJECT_TYPE_TRAP:                  // Initialized delayed to be able to use GetOwner()
                 {
                     // Arming Time for GAMEOBJECT_TYPE_TRAP (6)
                     Unit* owner = GetOwner();
-                    if (owner && ((Player*)owner)->isInCombat())
+                    if (owner && owner->isInCombat())
                         m_cooldownTime = time(NULL) + GetGOInfo()->trap.startDelay;
                     m_lootState = GO_READY;
                     break;
                 }
-                case GAMEOBJECT_TYPE_FISHINGNODE:
+                case GAMEOBJECT_TYPE_FISHINGNODE:           // Keep not ready for some delay
                 {
                     // fishing code (bobber ready)
                     if (time(NULL) > m_respawnTime - FISHING_BOBBER_READY_TIME)
@@ -228,13 +232,10 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
                         m_lootState = GO_READY;             // can be successfully open with some chance
                     }
-                    return;
-                }
-                default:
-                    m_lootState = GO_READY;                 // for other GO is same switched without delay to GO_READY
                     break;
+                }
             }
-            // NO BREAK for switch (m_lootState)
+            break;
         }
         case GO_READY:
         {
