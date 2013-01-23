@@ -249,7 +249,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         const TerrainInfo* GetTerrain() const { return m_TerrainData; }
 
         void CreateInstanceData(bool load);
-        InstanceData* GetInstanceData() { return i_data; }
+        InstanceData* GetInstanceData() const { return i_data; }
         uint32 GetScriptId() const { return i_script_id; }
 
         void MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit* target);

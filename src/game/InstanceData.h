@@ -29,6 +29,22 @@ class Player;
 class GameObject;
 class Creature;
 
+enum ConditionSource;
+
+enum InstanceConditionIDs                                   // Suggested values used with CONDITION_INSTANCE_SCRIPT for some generic uses
+{
+    // for hard-mode loot (0 normal; 1,2... hard,harder... mode)
+    INSTANCE_CONDITION_ID_NORMAL_MODE       = 0,
+    INSTANCE_CONDITION_ID_HARD_MODE         = 1,
+    INSTANCE_CONDITION_ID_HARD_MODE_2       = 2,
+    INSTANCE_CONDITION_ID_HARD_MODE_3       = 3,
+    INSTANCE_CONDITION_ID_HARD_MODE_4       = 4,
+
+    // to check for which team the instance is doing scripts
+    INSTANCE_CONDITION_ID_TEAM_HORDE        = 67,
+    INSTANCE_CONDITION_ID_TEAM_ALLIANCE     = 469,
+};
+
 class MANGOS_DLL_SPEC InstanceData
 {
     public:
@@ -93,7 +109,7 @@ class MANGOS_DLL_SPEC InstanceData
 
         // Condition criteria additional requirements check
         // This is used for such things are heroic loot
-        virtual bool CheckConditionCriteriaMeet(Player const* source, uint32 map_id, uint32 instance_condition_id);
+        virtual bool CheckConditionCriteriaMeet(Player const* source, uint32 instance_condition_id, WorldObject const* conditionSource, ConditionSource conditionSourceType);
 };
 
 #endif
