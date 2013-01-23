@@ -96,6 +96,7 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // datalong2= search distance
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: terminate steps of this script if npc found
                                                             //                                        ELSE: terminate steps of this script if npc not found
+                                                            // dataint=diff to change a waittime of current Waypoint Movement
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
@@ -300,8 +301,9 @@ struct ScriptInfo
 
         struct                                              // SCRIPT_COMMAND_TERMINATE_SCRIPT (31)
         {
-            uint32 npcEntry;
-            uint32 searchDist;
+            uint32 npcEntry;                                // datalong
+            uint32 searchDist;                              // datalong2
+            // changeWaypointWaitTime                       // dataint
         } terminateScript;
 
         struct

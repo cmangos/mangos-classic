@@ -31,6 +31,7 @@
 #include "SQLStorages.h"
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
+#include "WaypointMovementGenerator.h"
 
 #include "revision_nr.h"
 
@@ -1596,6 +1597,7 @@ bool ScriptAction::HandleScriptStep()
         }
         case SCRIPT_COMMAND_TERMINATE_SCRIPT:               // 31
         {
+            bool result = false;
             if (m_script->terminateScript.npcEntry)
             {
                 WorldObject* pSearcher = pSource ? pSource : pTarget;
@@ -1609,17 +1611,29 @@ bool ScriptAction::HandleScriptStep()
 
                 if (!(m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) && !pCreatureBuddy)
                 {
-                    sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc %u was not found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
-                    return true;
+                    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc %u was not found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
+                    result = true;
                 }
                 else if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && pCreatureBuddy)
                 {
-                    sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc %u was found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
-                    return true;
+                    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc %u was found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
+                    result = true;
                 }
             }
             else
+                result = true;
+
+            if (result)                                    // Terminate further steps of this script
+            {
+                 if (m_script->textId[0] && !LogIfNotCreature(pSource))
+                 {
+                     Creature* cSource = static_cast<Creature*>(pSource);
+                     if (cSource->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                         (static_cast<WaypointMovementGenerator<Creature>* >(cSource->GetMotionMaster()->top()))->AddToWaypointPauseTime(m_script->textId[0]);
+                 }
+
                 return true;
+            }
 
             break;
         }

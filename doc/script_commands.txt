@@ -66,7 +66,8 @@ Detailed meaning described below!
 -- --------------------------
 
 4 multipurpose fields, store raw data as signed values
-Note: currently used only for text ids
+Note: currently used only for text ids SCRIPT_COMMAND_TALK (0),
+      and in relation with SCRIPT_COMMAND_TERMINATE_SCRIPT (31)
 
 -- --------------------------
 ## x y z o
@@ -267,3 +268,4 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * datalong2= search distance
                                             * !(data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL): if npc not alive found, terminate script
                                                 data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL:  if npc alive found, terminate script
+                                            * dataint  = change of waittime (MILLIESECONDS) of a current waypoint movement type (negative values will decrease time)
