@@ -26,6 +26,7 @@
 #include "Dynamic/ObjectRegistry.h"
 #include "Dynamic/FactoryHolder.h"
 #include "MotionMaster.h"
+#include "Timer.h"
 
 class Unit;
 class Creature;

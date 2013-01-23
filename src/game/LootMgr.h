@@ -28,6 +28,10 @@
 #include <map>
 #include <vector>
 
+class Player;
+class LootStore;
+class WorldObject;
+
 #define MAX_NR_LOOT_ITEMS 16
 // note: the client cannot show more than 16 items total
 #define MAX_NR_QUEST_ITEMS 32
@@ -64,11 +68,6 @@ enum LootSlotType
     LOOT_SLOT_REQS    = 3,                                  // can't be looted (error message about missing reqs)
     MAX_LOOT_SLOT_TYPE                                      // custom, use for mark skipped from show items
 };
-
-
-
-class Player;
-class LootStore;
 
 struct LootStoreItem
 {
