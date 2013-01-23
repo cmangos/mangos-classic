@@ -123,19 +123,19 @@ void LootStore::LoadLootTable()
                 continue;                                   // error already printed to log/console.
             }
 
-            if (mincountOrRef < 0 && conditionId)
-            {
-                sLog.outErrorDb("Table '%s' entry %u mincountOrRef %i < 0 and not allowed has condition, skipped", GetName(), entry, mincountOrRef);
-                continue;
-            }
-
             if (conditionId)
             {
                 const PlayerCondition* condition = sConditionStorage.LookupEntry<PlayerCondition>(conditionId);
                 if (!condition)
                 {
                     sLog.outErrorDb("Table `%s` for entry %u, item %u has condition_id %u that does not exist in `conditions`, ignoring", GetName(), entry, item, conditionId);
-                    conditionId = 0;
+                    continue;
+                }
+
+                if (mincountOrRef < 0 && !PlayerCondition::CanBeUsedWithoutPlayer(conditionId))
+                {
+                    sLog.outErrorDb("Table '%s' entry %u mincountOrRef %i < 0 and has condition %u that requires a player and is not supported, skipped", GetName(), entry, mincountOrRef, conditionId);
+                    continue;
                 }
             }
 
@@ -998,6 +998,10 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, bool rate, uint8 
 
             if (!Referenced)
                 continue;                                   // Error message already printed at loading stage
+
+            // Check condition
+            if (i->conditionId && !sObjectMgr.IsPlayerMeetToCondition(i->conditionId, NULL, NULL, NULL, CONDITION_FROM_REFERING_LOOT))
+                continue;
 
             for (uint32 loop = 0; loop < i->maxcount; ++loop) // Ref multiplicator
                 Referenced->Process(loot, store, rate, i->group);
