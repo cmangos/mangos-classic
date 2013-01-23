@@ -263,3 +263,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * datalong2= 0x00=toggle, 0x01=add, 0x02=remove
 30 SCRIPT_COMMAND_SEND_TAXI_PATH            resultingTarget or Source must be Player
                                             * datalong = taxi path id
+31 SCRIPT_COMMAND_TERMINATE_SCRIPT          * datalong = search for npc entry if provided
+                                            * datalong2= search distance
+                                            * !(data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL): if npc not alive found, terminate script
+                                                data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL:  if npc alive found, terminate script

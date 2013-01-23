@@ -45,13 +45,13 @@ class WorldObject;
 enum ScriptCommand                                          // resSource, resTarget are the resulting Source/ Target after buddy search is done
 {
     SCRIPT_COMMAND_TALK                     = 0,            // resSource = WorldObject, resTarget = Unit/none
-    // datalong1 (see enum ChatType for supported CHAT_TYPE_'s), datalong2 = language
-    // dataint = text entry from db_script_string -table. dataint2-4 optional for random selected texts.
+                                                            // datalong1 (see enum ChatType for supported CHAT_TYPE_'s), datalong2 = language
+                                                            // dataint = text entry from db_script_string -table. dataint2-4 optional for random selected texts.
     SCRIPT_COMMAND_EMOTE                    = 1,            // resSource = Unit, resTarget = Unit/none
-    // datalong1 = emote_id
+                                                            // datalong1 = emote_id
     SCRIPT_COMMAND_FIELD_SET                = 2,            // source = any, datalong = field_id, datalong2 = value
     SCRIPT_COMMAND_MOVE_TO                  = 3,            // resSource = Creature, datalong2 = travel_speed*100, x/y/z
-    // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
     SCRIPT_COMMAND_FLAG_SET                 = 4,            // source = any, datalong = field_id, datalong2 = bitmask
     SCRIPT_COMMAND_FLAG_REMOVE              = 5,            // source = any, datalong = field_id, datalong2 = bitmask
     SCRIPT_COMMAND_TELEPORT_TO              = 6,            // source or target with Player, datalong2 = map_id, x/y/z
@@ -59,39 +59,43 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_KILL_CREDIT              = 8,            // source or target with Player, datalong = creature entry (or 0 for target-entry), datalong2 = bool (0=personal credit, 1=group credit)
     SCRIPT_COMMAND_RESPAWN_GAMEOBJECT       = 9,            // source = any, datalong=db_guid, datalong2=despawn_delay
     SCRIPT_COMMAND_TEMP_SUMMON_CREATURE     = 10,           // source = any, datalong=creature entry, datalong2=despawn_delay
-    // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL = summon active
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL = summon active
     SCRIPT_COMMAND_OPEN_DOOR                = 11,           // datalong=db_guid (or not provided), datalong2=reset_delay
     SCRIPT_COMMAND_CLOSE_DOOR               = 12,           // datalong=db_guid (or not provided), datalong2=reset_delay
     SCRIPT_COMMAND_ACTIVATE_OBJECT          = 13,           // source = unit, target=GO
     SCRIPT_COMMAND_REMOVE_AURA              = 14,           // resSource = Unit, datalong = spell_id
     SCRIPT_COMMAND_CAST_SPELL               = 15,           // resSource = Unit, cast spell at resTarget = Unit
-    // datalong=spellid
-    // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = cast triggered
+                                                            // datalong=spellid
+                                                            // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = cast triggered
     SCRIPT_COMMAND_PLAY_SOUND               = 16,           // resSource = WorldObject, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=anyone/target, 0/2=with distance dependent, so 1|2 = 3 is target with distance dependent)
     SCRIPT_COMMAND_CREATE_ITEM              = 17,           // source or target must be player, datalong = item entry, datalong2 = amount
     SCRIPT_COMMAND_DESPAWN_SELF             = 18,           // resSource = Creature, datalong = despawn delay
     SCRIPT_COMMAND_PLAY_MOVIE               = 19,           // target can only be a player, datalog = movie id
     SCRIPT_COMMAND_MOVEMENT                 = 20,           // resSource = Creature. datalong = MovementType (0:idle, 1:random or 2:waypoint), datalong2 = wander-distance
-    // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = Random-movement around current position
+                                                            // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = Random-movement around current position
     SCRIPT_COMMAND_SET_ACTIVEOBJECT         = 21,           // resSource = Creature
-    // datalong=bool 0=off, 1=on
+                                                            // datalong=bool 0=off, 1=on
     SCRIPT_COMMAND_SET_FACTION              = 22,           // resSource = Creature
-    // datalong=factionId, datalong2=faction_flags
+                                                            // datalong=factionId, datalong2=faction_flags
     SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL  = 23,           // resSource = Creature, datalong=creature entry/modelid
-    // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = use datalong value as modelid explicit
+                                                            // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = use datalong value as modelid explicit
     SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL  = 24,           // resSource = Creature, datalong=creature entry/modelid
-    // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = use datalong value as modelid explicit
+                                                            // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = use datalong value as modelid explicit
     SCRIPT_COMMAND_SET_RUN                  = 25,           // resSource = Creature
-    // datalong= bool 0=off, 1=on
+                                                            // datalong= bool 0=off, 1=on
     SCRIPT_COMMAND_ATTACK_START             = 26,           // resSource = Creature, resTarget = Unit
     SCRIPT_COMMAND_GO_LOCK_STATE            = 27,           // resSource = GameObject
-    // datalong= 1=lock, 2=unlock, 4=set not-interactable, 8=set interactable
+                                                            // datalong= 1=lock, 2=unlock, 4=set not-interactable, 8=set interactable
     SCRIPT_COMMAND_STAND_STATE              = 28,           // resSource = Creature
-    // datalong = stand state (enum UnitStandStateType)
+                                                            // datalong = stand state (enum UnitStandStateType)
     SCRIPT_COMMAND_MODIFY_NPC_FLAGS         = 29,           // resSource = Creature
-    // datalong=NPCFlags
-    // datalong2:0x00=toggle, 0x01=add, 0x02=remove
+                                                            // datalong=NPCFlags
+                                                            // datalong2:0x00=toggle, 0x01=add, 0x02=remove
     SCRIPT_COMMAND_SEND_TAXI_PATH           = 30,           // datalong = taxi path id (source or target must be player)
+    SCRIPT_COMMAND_TERMINATE_SCRIPT         = 31,           // datalong = search for npc entry if provided
+                                                            // datalong2= search distance
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: terminate steps of this script if npc found
+                                                            //                                        ELSE: terminate steps of this script if npc not found
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
@@ -288,11 +292,17 @@ struct ScriptInfo
             uint32 change_flag;                             // datalong2
         } npcFlag;
 
-        struct
+        struct                                              // SCRIPT_COMMAND_SEND_TAXI_PATH (30)
         {
             uint32 taxiPathId;                              // datalong
             uint32 empty;
         } sendTaxiPath;
+
+        struct                                              // SCRIPT_COMMAND_TERMINATE_SCRIPT (31)
+        {
+            uint32 npcEntry;
+            uint32 searchDist;
+        } terminateScript;
 
         struct
         {
@@ -352,6 +362,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_MOVEMENT:
             case SCRIPT_COMMAND_MORPH_TO_ENTRY_OR_MODEL:
             case SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL:
+            case SCRIPT_COMMAND_TERMINATE_SCRIPT:
                 return true;
             default:
                 return false;
@@ -366,7 +377,21 @@ class ScriptAction
             m_table(_table), m_map(_map), m_sourceGuid(_sourceGuid), m_targetGuid(_targetGuid), m_ownerGuid(_ownerGuid), m_script(_script)
         {}
 
-        void HandleScriptStep();
+        bool HandleScriptStep();                            // return true IF AND ONLY IF the script should be terminated
+
+        const char* GetTableName() const { return m_table; }
+        uint32 GetId() const { return m_script->id; }
+        ObjectGuid GetSourceGuid() const { return m_sourceGuid; }
+        ObjectGuid GetTargetGuid() const { return m_targetGuid; }
+        ObjectGuid GetOwnerGuid() const { return m_ownerGuid; }
+
+        bool IsSameScript(const char* table, uint32 id, ObjectGuid sourceGuid, ObjectGuid targetGuid, ObjectGuid ownerGuid) const
+        {
+            return table == m_table && id == GetId() &&
+                (sourceGuid == m_sourceGuid || !sourceGuid) &&
+                (targetGuid == m_targetGuid || !targetGuid) &&
+                (ownerGuid == m_ownerGuid || !ownerGuid);
+        }
 
     private:
         const char* m_table;                                // of which table the script was started
