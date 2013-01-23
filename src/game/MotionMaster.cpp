@@ -457,7 +457,7 @@ void MotionMaster::propagateSpeedChange()
 
 uint32 MotionMaster::getLastReachedWaypoint() const
 {
-    for (Impl::container_type::const_reverse_iterator rItr = Impl::c.crbegin(); rItr != Impl::c.crend(); ++rItr)
+    for (Impl::container_type::const_reverse_iterator rItr = Impl::c.rbegin(); rItr != Impl::c.rend(); ++rItr)
     {
         if ((*rItr)->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
             return (static_cast<WaypointMovementGenerator<Creature>*>(*rItr))->getLastReachedWaypoint();
