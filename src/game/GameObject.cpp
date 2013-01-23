@@ -319,9 +319,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                         }
                     }
 
-                    // Note: this hack with search required until GO casting not implemented
-                    // search unfriendly creature
-                    if (owner && goInfo->trap.charges > 0)  // hunter trap
+                    // Should trap trigger?
+                    if (owner)                              // We have an owner, trigger if there is any unfriendly nearby
                     {
                         MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, owner, radius);
                         MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
@@ -329,14 +328,11 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                         if (!ok)
                             Cell::VisitWorldObjects(this, checker, radius);
                     }
-                    else                                    // environmental trap
+                    else                                    // Environmental traps
                     {
-                        // environmental damage spells already have around enemies targeting but this not help in case nonexistent GO casting support
-
-                        // affect only players
                         Player* p_ok = NULL;
                         MaNGOS::AnyPlayerInObjectRangeCheck p_check(this, radius);
-                        MaNGOS::PlayerSearcher<MaNGOS::AnyPlayerInObjectRangeCheck>  checker(p_ok, p_check);
+                        MaNGOS::PlayerSearcher<MaNGOS::AnyPlayerInObjectRangeCheck> checker(p_ok, p_check);
                         Cell::VisitWorldObjects(this, checker, radius);
                         ok = p_ok;
                     }
@@ -344,6 +340,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     if (ok)
                     {
                         Unit* caster =  owner ? owner : ok;
+
+                        // Code below should be refactored into GO::Use, but not clear how to handle caster/victim for non AoE spells
 
                         caster->CastSpell(ok, goInfo->trap.spellId, true, NULL, NULL, GetObjectGuid());
                         // use template cooldown if provided
