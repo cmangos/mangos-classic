@@ -97,6 +97,8 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: terminate steps of this script if npc found
                                                             //                                        ELSE: terminate steps of this script if npc not found
                                                             // dataint=diff to change a waittime of current Waypoint Movement
+    SCRIPT_COMMAND_PAUSE_WAYPOINTS          = 32,           // resSource = Creature
+                                                            // datalong = 0: unpause waypoint 1: pause waypoint
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
@@ -305,6 +307,12 @@ struct ScriptInfo
             uint32 searchDist;                              // datalong2
             // changeWaypointWaitTime                       // dataint
         } terminateScript;
+
+        struct                                              // SCRIPT_COMMAND_PAUSE_WAYPOINTS (32)
+        {
+            uint32 doPause;                                 // datalong
+            uint32 empty;
+        } pauseWaypoint;
 
         struct
         {

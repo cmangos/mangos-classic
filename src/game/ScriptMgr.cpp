@@ -614,7 +614,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
-            case SCRIPT_COMMAND_TERMINATE_SCRIPT:
+            case SCRIPT_COMMAND_TERMINATE_SCRIPT:           // 31
             {
                 if (tmp.terminateScript.npcEntry && !ObjectMgr::GetCreatureTemplate(tmp.terminateScript.npcEntry))
                 {
@@ -623,6 +623,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_PAUSE_WAYPOINTS:            // 32
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -1635,6 +1637,16 @@ bool ScriptAction::HandleScriptStep()
                 return true;
             }
 
+            break;
+        }
+        case SCRIPT_COMMAND_PAUSE_WAYPOINTS:                // 32
+        {
+            if (LogIfNotCreature(pSource))
+                return false;
+            if (m_script->pauseWaypoint.doPause)
+                ((Creature*)pSource)->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+            else
+                ((Creature*)pSource)->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
             break;
         }
         default:

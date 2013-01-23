@@ -269,3 +269,5 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * !(data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL): if npc not alive found, terminate script
                                                 data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL:  if npc alive found, terminate script
                                             * dataint  = change of waittime (MILLIESECONDS) of a current waypoint movement type (negative values will decrease time)
+32 SCRIPT_COMMAND_PAUSE_WAYPOINTS           resultingSource must be Creature
+                                            * datalong: 0/1 unpause/pause waypoint movement
