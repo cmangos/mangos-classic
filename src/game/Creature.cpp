@@ -158,6 +158,7 @@ bool CreatureCreatePos::Relocate(Creature* cr) const
 
 Creature::Creature(CreatureSubtype subtype) : Unit(),
     i_AI(NULL),
+    loot(this),
     lootForPickPocketed(false), lootForBody(false), lootForSkin(false),
     m_groupLootTimer(0), m_groupLootId(0),
     m_lootMoney(0), m_lootGroupRecipientId(0),

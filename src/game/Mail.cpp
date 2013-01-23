@@ -149,7 +149,7 @@ bool MailDraft::prepareItems(Player* receiver)
 
     m_mailTemplateItemsNeed = false;
 
-    Loot mailLoot;
+    Loot mailLoot(NULL);
 
     // can be empty
     mailLoot.FillLoot(m_mailTemplateId, LootTemplates_Mail, receiver, true, true);
@@ -387,7 +387,7 @@ void Mail::prepareTemplateItems(Player* receiver)
 
     has_items = true;
 
-    Loot mailLoot;
+    Loot mailLoot(NULL);
 
     // can be empty
     mailLoot.FillLoot(mailTemplateId, LootTemplates_Mail, receiver, true, true);

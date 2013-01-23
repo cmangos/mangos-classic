@@ -215,7 +215,8 @@ bool ItemCanGoIntoBag(ItemPrototype const* pProto, ItemPrototype const* pBagProt
     return false;
 }
 
-Item::Item()
+Item::Item() :
+    loot(NULL)
 {
     m_objectType |= TYPEMASK_ITEM;
     m_objectTypeId = TYPEID_ITEM;

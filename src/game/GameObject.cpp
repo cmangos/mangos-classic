@@ -45,6 +45,7 @@
 
 GameObject::GameObject() : WorldObject(),
     m_goInfo(NULL),
+    loot(this),
     m_model(NULL)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
@@ -519,19 +520,6 @@ void GameObject::Delete()
         sPoolMgr.UpdatePool<GameObject>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
     else
         AddObjectToRemoveList();
-}
-
-void GameObject::getFishLoot(Loot* fishloot, Player* loot_owner)
-{
-    fishloot->clear();
-
-    uint32 zone, subzone;
-    GetZoneAndAreaId(zone, subzone);
-
-    // if subzone loot exist use it
-    if (!fishloot->FillLoot(subzone, LootTemplates_Fishing, loot_owner, true, (subzone != zone)) && subzone != zone)
-        // else use zone loot (if zone diff. from subzone, must exist in like case)
-        fishloot->FillLoot(zone, LootTemplates_Fishing, loot_owner, true);
 }
 
 void GameObject::SaveToDB()
