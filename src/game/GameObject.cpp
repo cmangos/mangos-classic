@@ -171,9 +171,13 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float
 
     SetGoAnimProgress(animprogress);
 
-    // Initialize Traps and Fishingnode delayed in ::Update
-    if (GetGoType() == GAMEOBJECT_TYPE_TRAP || GAMEOBJECT_TYPE_TRAP == GAMEOBJECT_TYPE_FISHINGNODE)
-        m_lootState = GO_NOT_READY;
+    switch (GetGoType())
+    {
+        case GAMEOBJECT_TYPE_TRAP:
+        case GAMEOBJECT_TYPE_FISHINGNODE:
+            m_lootState = GO_NOT_READY;                     // Initialize Traps and Fishingnode delayed in ::Update
+            break;
+    }
 
     // Notify the battleground or outdoor pvp script
     if (map->IsBattleGround())
