@@ -58,7 +58,7 @@ int CreatureEventAI::Permissible(const Creature* creature)
 void CreatureEventAI::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage(LANG_NPC_EVENTAI_PHASE, (uint32)m_Phase);
-    reader.PSendSysMessage(LANG_NPC_EVENTAI_MOVE, reader.GetOnOffStr(m_CombatMovementEnabled));
+    reader.PSendSysMessage(LANG_NPC_EVENTAI_MOVE, reader.GetOnOffStr(m_isCombatMovement));
     reader.PSendSysMessage(LANG_NPC_EVENTAI_COMBAT, reader.GetOnOffStr(m_MeleeEnabled));
 }
 
@@ -102,10 +102,7 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c)
 
     m_bEmptyList = m_CreatureEventAIList.empty();
     m_Phase = 0;
-    m_CombatMovementEnabled = true;
     m_MeleeEnabled = true;
-    m_AttackDistance = 0.0f;
-    m_AttackAngle = 0.0f;
 
     m_InvinceabilityHpLevel = 0;
 
@@ -532,11 +529,11 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                         {
                             case CHASE_MOTION_TYPE:
                             case FOLLOW_MOTION_TYPE:
-                                m_AttackDistance = 0.0f;
-                                m_AttackAngle = 0.0f;
+                                m_attackDistance = 0.0f;
+                                m_attackAngle = 0.0f;
 
                                 m_creature->GetMotionMaster()->Clear(false);
-                                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_AttackDistance, m_AttackAngle);
+                                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle);
                                 break;
                             default:
                                 break;
@@ -615,37 +612,15 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             break;
         case ACTION_T_COMBAT_MOVEMENT:
             // ignore no affect case
-            if (m_CombatMovementEnabled == (action.combat_movement.state != 0))
+            if (m_isCombatMovement == (action.combat_movement.state != 0))
                 return;
 
-            m_CombatMovementEnabled = action.combat_movement.state != 0;
+            SetCombatMovement(action.combat_movement.state != 0, true);
 
-            // Allow movement (create new targeted movement gen only if idle)
-            if (m_CombatMovementEnabled)
-            {
-                if (action.combat_movement.melee && m_creature->isInCombat())
-                    if (Unit* victim = m_creature->getVictim())
-                        m_creature->SendMeleeAttackStart(victim);
-
-                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
-                {
-                    m_creature->GetMotionMaster()->Clear(false);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_AttackDistance, m_AttackAngle);
-                }
-            }
-            else
-            {
-                if (action.combat_movement.melee && m_creature->isInCombat())
-                    if (Unit* victim = m_creature->getVictim())
-                        m_creature->SendMeleeAttackStop(victim);
-
-                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-                {
-                    m_creature->GetMotionMaster()->Clear(false);
-                    m_creature->GetMotionMaster()->MoveIdle();
-                    m_creature->StopMoving();
-                }
-            }
+            if (m_isCombatMovement && action.combat_movement.melee && m_creature->isInCombat() && m_creature->getVictim())
+                m_creature->SendMeleeAttackStart(m_creature->getVictim());
+            else if (action.combat_movement.melee && m_creature->isInCombat() && m_creature->getVictim())
+                m_creature->SendMeleeAttackStop(m_creature->getVictim());
             break;
         case ACTION_T_SET_PHASE:
             m_Phase = action.set_phase.phase;
@@ -691,16 +666,16 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 target->RemoveAurasDueToSpell(action.remove_aura.spellId);
             break;
         case ACTION_T_RANGED_MOVEMENT:
-            m_AttackDistance = (float)action.ranged_movement.distance;
-            m_AttackAngle = action.ranged_movement.angle / 180.0f * M_PI_F;
+            m_attackDistance = (float)action.ranged_movement.distance;
+            m_attackAngle = action.ranged_movement.angle / 180.0f * M_PI_F;
 
-            if (m_CombatMovementEnabled)
+            if (m_isCombatMovement)
             {
                 if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
                 {
                     // Drop current movement gen
                     m_creature->GetMotionMaster()->Clear(false);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_AttackDistance, m_AttackAngle);
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle);
                 }
             }
             break;
@@ -1055,15 +1030,7 @@ void CreatureEventAI::AttackStart(Unit* who)
         m_creature->SetInCombatWith(who);
         who->SetInCombatWith(m_creature);
 
-        if (m_CombatMovementEnabled)
-        {
-            m_creature->GetMotionMaster()->MoveChase(who, m_AttackDistance, m_AttackAngle);
-        }
-        else
-        {
-            m_creature->GetMotionMaster()->MoveIdle();
-            m_creature->StopMoving();
-        }
+        HandleMovementOnAttackStart(who);
     }
 }
 

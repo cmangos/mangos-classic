@@ -639,10 +639,7 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         CreatureEventAIList m_CreatureEventAIList;          // Holder for events (stores enabled, time, and eventid)
 
         uint8  m_Phase;                                     // Current phase, max 32 phases
-        bool   m_CombatMovementEnabled;                     // If we allow targeted movment gen (movement twoards top threat)
         bool   m_MeleeEnabled;                              // If we allow melee auto attack
-        float  m_AttackDistance;                            // Distance to attack from
-        float  m_AttackAngle;                               // Angle of attack
         uint32 m_InvinceabilityHpLevel;                     // Minimal health level allowed at damage apply
 };
 

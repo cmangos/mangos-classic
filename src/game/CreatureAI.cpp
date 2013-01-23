@@ -123,3 +123,32 @@ bool CreatureAI::DoMeleeAttackIfReady()
 {
     return m_creature->UpdateMeleeAttackingState();
 }
+
+void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=false*/)
+{
+    m_isCombatMovement = enable;
+
+    if (enable)
+        m_creature->clearUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
+    else
+        m_creature->addUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
+
+    if (stopOrStartMovement && m_creature->getVictim())     // Only change current movement while in combat
+    {
+        if (enable)
+            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle);
+        else if (!enable && m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+            m_creature->StopMoving();
+    }
+}
+
+void CreatureAI::HandleMovementOnAttackStart(Unit* victim)
+{
+    if (m_isCombatMovement)
+        m_creature->GetMotionMaster()->MoveChase(victim, m_attackDistance, m_attackAngle);
+    else
+    {
+        m_creature->GetMotionMaster()->MoveIdle();
+        m_creature->StopMoving();
+    }
+}

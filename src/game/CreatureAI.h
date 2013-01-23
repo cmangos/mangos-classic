@@ -63,7 +63,12 @@ enum CastFlags
 class MANGOS_DLL_SPEC CreatureAI
 {
     public:
-        explicit CreatureAI(Creature* creature) : m_creature(creature) {}
+        explicit CreatureAI(Creature* creature) :
+            m_creature(creature),
+            m_isCombatMovement(true),
+            m_attackDistance(0.0f),
+            m_attackAngle(0.0f)
+        {}
 
         virtual ~CreatureAI();
 
@@ -265,10 +270,23 @@ class MANGOS_DLL_SPEC CreatureAI
          */
         CanCastResult DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32 uiCastFlags = 0, ObjectGuid OriginalCasterGuid = ObjectGuid());
 
+        /// Set combat movement (on/off), also sets UNIT_STAT_NO_COMBAT_MOVEMENT
+        void SetCombatMovement(bool enable, bool stopOrStartMovement = false);
+        bool IsCombatMovement() const { return m_isCombatMovement; }
+
+    protected:
+        void HandleMovementOnAttackStart(Unit* victim);
+
         ///== Fields =======================================
 
         /// Pointer to the Creature controlled by this AI
         Creature* const m_creature;
+
+        /// Combat movement currently enabled
+        bool m_isCombatMovement;
+        /// How should an enemy be chased
+        float m_attackDistance;
+        float m_attackAngle;
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>
