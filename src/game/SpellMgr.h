@@ -669,9 +669,10 @@ typedef UNORDERED_MAP<uint32, SpellTargetPosition> SpellTargetPositionMap;
 class PetAura
 {
     public:
-        PetAura()
+        PetAura() :
+            removeOnChangePet(false),
+            damage(0)
         {
-            auras.clear();
         }
 
         PetAura(uint32 petEntry, uint32 aura, bool _removeOnChangePet, int _damage) :

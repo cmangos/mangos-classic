@@ -252,12 +252,12 @@ void BIH::subdivide(int left, int right, std::vector<uint32>& tempTree, buildDat
 bool BIH::writeToFile(FILE* wf) const
 {
     uint32 treeSize = tree.size();
-    uint32 check = 0, count = 0;
+    uint32 check = 0;
+    uint32 count = objects.size();
     check += fwrite(&bounds.low(), sizeof(float), 3, wf);
     check += fwrite(&bounds.high(), sizeof(float), 3, wf);
     check += fwrite(&treeSize, sizeof(uint32), 1, wf);
     check += fwrite(&tree[0], sizeof(uint32), treeSize, wf);
-    count = objects.size();
     check += fwrite(&count, sizeof(uint32), 1, wf);
     check += fwrite(&objects[0], sizeof(uint32), count, wf);
     return check == (3 + 3 + 2 + treeSize + count);

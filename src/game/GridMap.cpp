@@ -930,10 +930,9 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
 {
     GridMapLiquidStatus result = LIQUID_MAP_NO_WATER;
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-    float liquid_level = INVALID_HEIGHT_VALUE;
-    float ground_level = INVALID_HEIGHT_VALUE;
     uint32 liquid_type = 0;
-    ground_level = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
+    float liquid_level = INVALID_HEIGHT_VALUE;
+    float ground_level = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
 
     if (vmgr->GetLiquidLevel(GetMapId(), x, y, z, ReqLiquidType, liquid_level, ground_level, liquid_type))
     {
@@ -1066,9 +1065,8 @@ GridMap* TerrainInfo::LoadMapAndVMap(const uint32 x, const uint32 y)
             GridMap* map = new GridMap();
 
             // map file name
-            char* tmp = NULL;
             int len = sWorld.GetDataPath().length() + strlen("maps/%03u%02u%02u.map") + 1;
-            tmp = new char[len];
+            char* tmp = new char[len];
             snprintf(tmp, len, (char*)(sWorld.GetDataPath() + "maps/%03u%02u%02u.map").c_str(), m_mapId, x, y);
             sLog.outDetail("Loading map %s", tmp);
 

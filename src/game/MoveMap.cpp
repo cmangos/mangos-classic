@@ -173,6 +173,7 @@ namespace MMAP
         if (fileHeader.mmapMagic != MMAP_MAGIC)
         {
             sLog.outError("MMAP:loadMap: Bad header in mmap %03u%02i%02i.mmtile", mapId, x, y);
+            fclose(file);
             return false;
         }
 
@@ -180,6 +181,7 @@ namespace MMAP
         {
             sLog.outError("MMAP:loadMap: %03u%02i%02i.mmtile was built with generator v%i, expected v%i",
                           mapId, x, y, fileHeader.mmapVersion, MMAP_VERSION);
+            fclose(file);
             return false;
         }
 
