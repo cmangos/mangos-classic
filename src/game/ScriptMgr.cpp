@@ -2098,12 +2098,14 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
 // Starters for events
 bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart/*=true*/, Unit* forwardToPvp/*=NULL*/)
 {
+    MANGOS_ASSERT(source);
+
     // Handle SD2 script
     if (sScriptMgr.OnProcessEvent(id, source, target, isStart))
         return true;
 
     // Handle PvP Calls
-    if (forwardToPvp && source && source->GetTypeId() == TYPEID_GAMEOBJECT)
+    if (forwardToPvp && source->GetTypeId() == TYPEID_GAMEOBJECT)
     {
         BattleGround* bg = NULL;
         OutdoorPvP* opvp = NULL;
@@ -2128,7 +2130,13 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
             return true;
     }
 
-    return map->ScriptsStart(sEventScripts, id, source, target);
+    Map::ScriptExecutionParam execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET;
+    if (source->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
+        execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE;
+    else if (target && target->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
+        execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET;
+
+    return map->ScriptsStart(sEventScripts, id, source, target, execParam);
 }
 
 // Wrappers
