@@ -8631,7 +8631,7 @@ Unit* Unit::SelectRandomUnfriendlyTarget(Unit* except /*= NULL*/, float radius /
 {
     std::list<Unit*> targets;
 
-    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, this, radius);
+    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
     MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
     Cell::VisitAllObjects(this, searcher, radius);
 

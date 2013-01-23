@@ -320,22 +320,9 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
 
                     // Should trap trigger?
-                    if (owner)                              // We have an owner, trigger if there is any unfriendly nearby
-                    {
-                        MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, owner, radius);
-                        MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
-                        Cell::VisitGridObjects(this, checker, radius);
-                        if (!ok)
-                            Cell::VisitWorldObjects(this, checker, radius);
-                    }
-                    else                                    // Environmental traps
-                    {
-                        Player* p_ok = NULL;
-                        MaNGOS::AnyPlayerInObjectRangeCheck p_check(this, radius);
-                        MaNGOS::PlayerSearcher<MaNGOS::AnyPlayerInObjectRangeCheck> checker(p_ok, p_check);
-                        Cell::VisitWorldObjects(this, checker, radius);
-                        ok = p_ok;
-                    }
+                    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
+                    MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
+                    Cell::VisitAllObjects(this, checker, radius);
 
                     if (ok)
                     {
@@ -1645,9 +1632,9 @@ bool GameObject::IsHostileTo(Unit const* unit) const
     if (Unit const* targetOwner = unit->GetCharmerOrOwner())
         return IsHostileTo(targetOwner);
 
-    // for not set faction case (wild object) use hostile case
+    // for not set faction case: be hostile towards player, not hostile towards not-players
     if (!GetGOInfo()->faction)
-        return true;
+        return unit->IsControlledByPlayer();
 
     // faction base cases
     FactionTemplateEntry const* tester_faction = sFactionTemplateStore.LookupEntry(GetGOInfo()->faction);
