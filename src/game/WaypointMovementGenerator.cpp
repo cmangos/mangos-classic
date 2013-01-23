@@ -249,7 +249,11 @@ bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, 
 void WaypointMovementGenerator<Creature>::AddToWaypointPauseTime(int32 waitTimeDiff)
 {
     if (Stopped())
-        i_nextMoveTime.Reset(i_nextMoveTime.GetExpiry() + waitTimeDiff);
+    {
+        // Prevent <= 0, the code in Update requires to catch the change from moving to not moving
+        int32 newWaitTime = i_nextMoveTime.GetExpiry() + waitTimeDiff;
+        i_nextMoveTime.Reset(newWaitTime > 0 ? newWaitTime : 1);
+    }
 }
 
 //----------------------------------------------------//
