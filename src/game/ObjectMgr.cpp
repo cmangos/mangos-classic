@@ -6949,6 +6949,15 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             FactionEntry const* faction = sFactionStore.LookupEntry(m_value1);
             return faction && player->GetReputationMgr().GetRank(faction) <= ReputationRank(m_value2);
         }
+        case CONDITION_SOURCE_AURA:
+        {
+            if (!source->isType(TYPEMASK_UNIT))
+            {
+                sLog.outErrorDb("CONDITION_SOURCE_AURA (entry %u) is used for non unit source (source %s) by %s", m_entry, source->GetGuidStr().c_str(), player->GetGuidStr().c_str());
+                return false;
+            }
+            return ((Unit*)source)->HasAura(m_value1, SpellEffectIndex(m_value2));
+        }
         default:
             return false;
     }
@@ -7053,6 +7062,7 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             break;
         }
         case CONDITION_AURA:
+        case CONDITION_SOURCE_AURA:
         {
             if (!sSpellStore.LookupEntry(value1))
             {
