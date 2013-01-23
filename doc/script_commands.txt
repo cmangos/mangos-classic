@@ -8,14 +8,14 @@ Copyright (c) 2009-2011 MaNGOS <http://getmangos.com/>
 ## id
 -- --------------------------
 
-creature_movement_scripts       DB project self defined id
-event_scripts                   Event id. Several sources: spell effect 61, taxi/transport nodes, gameobject_template data
-gameobject_scripts              Gameobject guid
-gameobject_template_scripts     Gameobject entry
-gossip_scripts                  DB project self defined id
-quest_end_scripts               DB project self defined id (generally quest entry)
-quest_start_scripts             DB project self defined id (generally quest entry)
-spell_scripts                   Spell id
+dbscripts_on_creature_movement      DB project self defined id
+dbscripts_on_event                  Event id. Several sources: spell effect 61, taxi/transport nodes, gameobject_template data
+dbscripts_on_go_use                 Gameobject guid
+dbscripts_on_go_template_use        Gameobject entry
+dbscripts_on_gossip                 DB project self defined id
+dbscripts_on_quest_end              DB project self defined id (generally quest entry)
+dbscripts_on_quest_start            DB project self defined id (generally quest entry)
+dbscripts_on_spell                  Spell id
 
 -- --------------------------
 ## delay
