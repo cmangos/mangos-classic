@@ -29,8 +29,6 @@ class Player;
 class GameObject;
 class Creature;
 
-enum ConditionSource;
-
 enum InstanceConditionIDs                                   // Suggested values used with CONDITION_INSTANCE_SCRIPT for some generic uses
 {
     // for hard-mode loot (0 normal; 1,2... hard,harder... mode)
@@ -61,9 +59,9 @@ class MANGOS_DLL_SPEC InstanceData
         virtual void Load(const char* /*data*/) {}
 
         // When save is needed, this function generates the data
-        virtual const char* Save() { return ""; }
+        virtual const char* Save() const { return ""; }
 
-        void SaveToDB();
+        void SaveToDB() const;
 
         // Called every map update
         virtual void Update(uint32 /*diff*/) {}
@@ -96,20 +94,21 @@ class MANGOS_DLL_SPEC InstanceData
         virtual void OnCreatureDeath(Creature* /*creature*/) {}
 
         // All-purpose data storage 64 bit
-        virtual uint64 GetData64(uint32 /*Data*/) { return 0; }
+        virtual uint64 GetData64(uint32 /*Data*/) const { return 0; }
         virtual void SetData64(uint32 /*Data*/, uint64 /*Value*/) { }
 
         // Guid data storage (wrapper for set/get from uint64 storage
-        ObjectGuid GetGuid(uint32 dataIdx) { return ObjectGuid(GetData64(dataIdx)); }
+        ObjectGuid GetGuid(uint32 dataIdx) const { return ObjectGuid(GetData64(dataIdx)); }
         void SetGuid(uint32 dataIdx, ObjectGuid value) { SetData64(dataIdx, value.GetRawValue()); }
 
         // All-purpose data storage 32 bit
-        virtual uint32 GetData(uint32 /*Type*/) { return 0; }
+        virtual uint32 GetData(uint32 /*Type*/) const { return 0; }
         virtual void SetData(uint32 /*Type*/, uint32 /*Data*/) {}
 
         // Condition criteria additional requirements check
         // This is used for such things are heroic loot
-        virtual bool CheckConditionCriteriaMeet(Player const* source, uint32 instance_condition_id, WorldObject const* conditionSource, ConditionSource conditionSourceType);
+        // See ObjectMgr.h enum ConditionSource for possible values of conditionSourceType
+        virtual bool CheckConditionCriteriaMeet(Player const* source, uint32 instance_condition_id, WorldObject const* conditionSource, uint32 conditionSourceType) const;
 };
 
 #endif
