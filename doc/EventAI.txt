@@ -540,6 +540,7 @@ Parameter 2: Target - The Target Type defining who the creature should cast the 
 Parameter 3: CastFlags - See Table Below for Cast Flag Bitmask Values. If you are unsure what to set this value at leave it at 0.
 
 The creature will cast a spell specified by a spell ID on a target specified by the target type.
+If the spell is normal cast, random target types will select only targets within LOS and in spell range
 This is commonly used for NPC's who cast spells.
 
 ---------------------
@@ -875,6 +876,10 @@ Target types are used by certain actions and may effect actions differently
 4    TARGET_T_HOSTILE_RANDOM            Random Target on The Threat List
 5    TARGET_T_HOSTILE_RANDOM_NOT_TOP    Any Random Target Except Top Threat
 6    TARGET_T_ACTION_INVOKER            Unit Who Caused This Event to Occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP)
+7    TARGET_T_ACTION_INVOKER_OWNER      Unit who is responsible for Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
+8    TARGET_T_HOSTILE_RANDOM_PLAYER          Random Player on The Threat List
+9    TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER  Any Random Player Except Top Threat
+
 
 =========================================
 Cast Flags

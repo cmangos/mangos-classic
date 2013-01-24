@@ -122,24 +122,20 @@ enum Target
     // Self (m_creature)
     TARGET_T_SELF = 0,                                      // Self cast
 
-    // Hostile targets (if pet then returns pet owner)
+    // Hostile targets
     TARGET_T_HOSTILE,                                       // Our current target (ie: highest aggro)
     TARGET_T_HOSTILE_SECOND_AGGRO,                          // Second highest aggro (generaly used for cleaves and some special attacks)
     TARGET_T_HOSTILE_LAST_AGGRO,                            // Dead last on aggro (no idea what this could be used for)
     TARGET_T_HOSTILE_RANDOM,                                // Just any random target on our threat list
     TARGET_T_HOSTILE_RANDOM_NOT_TOP,                        // Any random target except top threat
 
-    // Invoker targets (if pet then returns pet owner)
+    // Invoker targets
     TARGET_T_ACTION_INVOKER,                                // Unit who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
+    TARGET_T_ACTION_INVOKER_OWNER,                          // Unit who is responsible for Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
 
-    // Hostile targets (including pets)
-    TARGET_T_HOSTILE_WPET,                                  // Current target (can be a pet)
-    TARGET_T_HOSTILE_WPET_SECOND_AGGRO,                     // Second highest aggro (generaly used for cleaves and some special attacks)
-    TARGET_T_HOSTILE_WPET_LAST_AGGRO,                       // Dead last on aggro (no idea what this could be used for)
-    TARGET_T_HOSTILE_WPET_RANDOM,                           // Just any random target on our threat list
-    TARGET_T_HOSTILE_WPET_RANDOM_NOT_TOP,                   // Any random target except top threat
-
-    TARGET_T_ACTION_INVOKER_WPET,
+    // Hostile players
+    TARGET_T_HOSTILE_RANDOM_PLAYER,                         // Just any random player on our threat list
+    TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER,                 // Any random player from threat list except top threat
 
     TARGET_T_END
 };
@@ -617,10 +613,9 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker);
         inline uint32 GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3);
         inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3);
-        inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker);
+        inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, uint32 forSpellId = 0, uint32 selectFlags = 0);
 
         void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target);
-        bool CanCast(Unit* Target, SpellEntry const* Spell, bool Triggered);
 
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event);
 
