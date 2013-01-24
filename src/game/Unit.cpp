@@ -568,12 +568,10 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage critter, critter dies");
 
-        pVictim->SetDeathState(JUST_DIED);
-        pVictim->SetHealth(0);
-
         ((Creature*)pVictim)->SetLootRecipient(this);
 
-        JustKilledCreature((Creature*)pVictim);
+        JustKilledCreature((Creature*)pVictim, NULL);
+        pVictim->SetHealth(0);
 
         return damage;
     }
@@ -642,10 +640,12 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 
     if (health <= damage)
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage: victim just died");
+        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage %s Killed %s", GetGuidStr().c_str(), pVictim->GetGuidStr().c_str());
 
-        // find player: owner of controlled `this` or `this` itself maybe
-        // for loot will be sued only if group_tap==NULL
+        /*
+         *                      Preparation: Who gets credit for killing whom, invoke SpiritOfRedemtion?
+         */
+        // for loot will be used only if group_tap == NULL
         Player* player_tap = GetCharmerOrOwnerPlayerOrPlayerItself();
         Group* group_tap = NULL;
 
@@ -664,38 +664,8 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                 group_tap = player_tap->GetGroup();
         }
 
-        // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
-        if (player_tap && player_tap != pVictim)
-        {
-            player_tap->ProcDamageAndSpell(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0);
-
-            WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL
-            data << player_tap->GetObjectGuid();            // player with killing blow
-            data << pVictim->GetObjectGuid();              // victim
-
-            if (group_tap)
-                group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()), player_tap->GetObjectGuid());
-
-            player_tap->SendDirectMessage(&data);
-        }
-
-        // Reward player, his pets, and group/raid members
-        if (player_tap != pVictim)
-        {
-            if (group_tap)
-                group_tap->RewardGroupAtKill(pVictim, player_tap);
-            else if (player_tap)
-                player_tap->RewardSinglePlayerAtKill(pVictim);
-        }
-
-        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAttackStop");
-
-        // stop combat
-        pVictim->CombatStop();
-        pVictim->getHostileRefManager().deleteReferences();
-
+        // Spirit of Redemtion Talent
         bool damageFromSpiritOfRedemtionTalent = spellProto && spellProto->Id == 27795;
-
         // if talent known but not triggered (check priest class for speedup check)
         Aura* spiritOfRedemtionTalentReady = NULL;
         if (!damageFromSpiritOfRedemtionTalent &&           // not called from SPELL_AURA_SPIRIT_OF_REDEMPTION
@@ -712,16 +682,45 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
 
-        if (!spiritOfRedemtionTalentReady)
+        /*
+         *                      Generic Actions (ProcEvents, Combat-Log, Kill Rewards, Stop Combat)
+         */
+        // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
+        if (player_tap && player_tap != pVictim)
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "SET JUST_DIED");
-            pVictim->SetDeathState(JUST_DIED);
+            player_tap->ProcDamageAndSpell(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0);
+
+            WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL
+            data << player_tap->GetObjectGuid();            // player with killing blow
+            data << pVictim->GetObjectGuid();               // victim
+
+            if (group_tap)
+                group_tap->BroadcastPacket(&data, false, group_tap->GetMemberGroup(player_tap->GetObjectGuid()), player_tap->GetObjectGuid());
+
+            player_tap->SendDirectMessage(&data);
         }
 
-        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageHealth1");
+        // Reward player, his pets, and group/raid members
+        if (player_tap != pVictim)
+        {
+            if (group_tap)
+                group_tap->RewardGroupAtKill(pVictim, player_tap);
+            else if (player_tap)
+                player_tap->RewardSinglePlayerAtKill(pVictim);
+        }
 
+        // stop combat
+        DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAttackStop");
+        pVictim->CombatStop();
+        pVictim->getHostileRefManager().deleteReferences();
+
+        /*
+         *                      Actions for the killer
+         */
         if (spiritOfRedemtionTalentReady)
         {
+            DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage: Spirit of Redemtion ready");
+
             // save value before aura remove
             uint32 ressSpellId = pVictim->GetUInt32Value(PLAYER_SELF_RES_SPELL);
             if (!ressSpellId)
@@ -739,11 +738,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         else
             pVictim->SetHealth(0);
 
-        // remember victim PvP death for corpse type and corpse reclaim delay
-        // at original death (not at SpiritOfRedemtionTalent timeout)
-        if (pVictim->GetTypeId() == TYPEID_PLAYER && !damageFromSpiritOfRedemtionTalent)
-            ((Player*)pVictim)->SetPvPDeath(player_tap != NULL);
-
         // Call KilledUnit for creatures
         if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
             ((Creature*)this)->AI()->KilledUnit(pVictim);
@@ -751,64 +745,62 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         // Call AI OwnerKilledUnit (for any current summoned minipet/guardian/protector)
         PetOwnerKilledUnit(pVictim);
 
-        // 10% durability loss on death
-        // clean InHateListOf
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+        /*
+         *                      Actions for the victim
+         */
+        if (pVictim->GetTypeId() == TYPEID_PLAYER)          // Killed player
         {
+            Player* playerVictim = (Player*)pVictim;
+
+            // remember victim PvP death for corpse type and corpse reclaim delay
+            // at original death (not at SpiritOfRedemtionTalent timeout)
+            if (!damageFromSpiritOfRedemtionTalent)
+                playerVictim->SetPvPDeath(player_tap != NULL);
+
+            // 10% durability loss on death
             // only if not player and not controlled by player pet. And not at BG
-            if (durabilityLoss && !player_tap && !((Player*)pVictim)->InBattleGround())
+            if (durabilityLoss && !player_tap && !playerVictim->InBattleGround())
             {
-                DEBUG_LOG("We are dead, loosing 10 percents durability");
-                ((Player*)pVictim)->DurabilityLossAll(0.10f, false);
+                DEBUG_LOG("DealDamage: Killed %s, looing 10 percents durability", pVictim->GetGuidStr().c_str());
+                playerVictim->DurabilityLossAll(0.10f, false);
                 // durability lost message
                 WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
-                ((Player*)pVictim)->GetSession()->SendPacket(&data);
+                playerVictim->GetSession()->SendPacket(&data);
             }
-        }
-        else                                                // creature died
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage Killed NPC");
-            JustKilledCreature((Creature*)pVictim);
-        }
 
-        // last damage from non duel opponent or opponent controlled creature
-        if (duel_hasEnded)
-        {
-            MANGOS_ASSERT(pVictim->GetTypeId() == TYPEID_PLAYER);
-            Player* he = (Player*)pVictim;
-
-            MANGOS_ASSERT(he->duel);
-
-            he->duel->opponent->CombatStopWithPets(true);
-            he->CombatStopWithPets(true);
-
-            he->DuelComplete(DUEL_INTERRUPTED);
-        }
-
-        // handle player/npc kill in battleground or outdoor pvp script
-        if (player_tap)
-        {
-            if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            if (!spiritOfRedemtionTalentReady)              // Before informing Battleground
             {
-                Player* killed = (Player*)pVictim;
-                if (killed->InBattleGround())
+                DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "SET JUST_DIED");
+                pVictim->SetDeathState(JUST_DIED);
+            }
+
+            // playerVictim was in duel, duel must be interrupted
+            // last damage from non duel opponent or non opponent controlled creature
+            if (duel_hasEnded)
+            {
+                playerVictim->duel->opponent->CombatStopWithPets(true);
+                playerVictim->CombatStopWithPets(true);
+
+                playerVictim->DuelComplete(DUEL_INTERRUPTED);
+            }
+
+            if (player_tap)                                 // PvP kill
+            {
+                if (playerVictim->InBattleGround())
                 {
-                    if (BattleGround* bg = killed->GetBattleGround())
-                        bg->HandleKillPlayer(killed, player_tap);
+                    if (BattleGround* bg = playerVictim->GetBattleGround())
+                        bg->HandleKillPlayer(playerVictim, player_tap);
                 }
                 else if (pVictim != this)
                 {
                     // selfkills are not handled in outdoor pvp scripts
                     if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player_tap->GetCachedZoneId()))
-                        outdoorPvP->HandlePlayerKill(player_tap, killed);
+                        outdoorPvP->HandlePlayerKill(player_tap, playerVictim);
                 }
             }
-            else if (pVictim->GetTypeId() == TYPEID_UNIT)
-            {
-                if (BattleGround* bg = player_tap->GetBattleGround())
-                    bg->HandleKillUnit((Creature*)pVictim, player_tap);
-            }
         }
+        else                                                // Killed creature
+            JustKilledCreature((Creature*)pVictim, player_tap);
     }
     else                                                    // if (health <= damage)
     {
@@ -989,16 +981,10 @@ struct PetOwnerKilledUnitHelper
     Unit* m_victim;
 };
 
-void Unit::JustKilledCreature(Creature* victim)
+void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
 {
-    if (!victim->IsPet())                                   // Prepare loot if can
-    {
-        victim->DeleteThreatList();
-        // only lootable if it has loot or can drop gold
-        victim->PrepareBodyLootState();
-        // may have no loot, so update death timer if allowed
-        victim->AllLootRemovedFromCorpse();
-    }
+    victim->m_deathState = DEAD;                            // so that isAlive, isDead return expected results in the called hooks of JustKilledCreature
+                                                            // must be used only shortly before SetDeathState(JUST_DIED) and only for Creatures or Pets
 
     // some critters required for quests (need normal entry instead possible heroic in any cases)
     if (victim->GetCreatureType() == CREATURE_TYPE_CRITTER && GetTypeId() == TYPEID_PLAYER)
@@ -1045,8 +1031,12 @@ void Unit::JustKilledCreature(Creature* victim)
     if (InstanceData* mapInstance = victim->GetInstanceData())
         mapInstance->OnCreatureDeath(victim);
 
+    if (responsiblePlayer)                                  // killedby Player, inform BG
+        if (BattleGround* bg = responsiblePlayer->GetBattleGround())
+            bg->HandleKillUnit(victim, responsiblePlayer);
+
     // Notify the outdoor pvp script
-    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(responsiblePlayer ? responsiblePlayer->GetCachedZoneId() : GetZoneId()))
         outdoorPvP->HandleCreatureDeath(victim);
 
     if (victim->IsLinkingEventTrigger())
@@ -1077,6 +1067,22 @@ void Unit::JustKilledCreature(Creature* victim)
             }
         }
     }
+
+    bool isPet = victim->IsPet();
+
+    /* ********************************* Set Death finally ************************************* */
+    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "SET JUST_DIED");
+    victim->SetDeathState(JUST_DIED);                       // if !spiritOfRedemtionTalentReady always true for unit
+
+    if (isPet)
+        return;                                             // Pets might have been unsummoned at this place, do not handle them further!
+
+    /* ******************************** Prepare loot if can ************************************ */
+    victim->DeleteThreatList();
+    // only lootable if it has loot or can drop gold
+    victim->PrepareBodyLootState();
+    // may have no loot, so update death timer if allowed, must be after SetDeathState(JUST_DIED)
+    victim->AllLootRemovedFromCorpse();
 }
 
 void Unit::PetOwnerKilledUnit(Unit* pVictim)
