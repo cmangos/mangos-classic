@@ -940,11 +940,8 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
         if (!data)
             continue;
 
-        if (mapId != data->mapid)
-            continue;
-
-        MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-        if (!mapEntry || (mapEntry->Instanceable() != (instanceId != 0)))
+        MapEntry const* mapEntry = sMapStore.LookupEntry(data->mapid);
+        if (!mapEntry || (instanceId && (mapId != data->mapid || mapEntry->Instanceable())))
             continue;
 
         MapPersistentState* state = AddPersistentState(mapEntry, instanceId, resetTime, mapEntry->IsDungeon(), true);
@@ -1002,11 +999,8 @@ void MapPersistentStateManager::LoadGameobjectRespawnTimes()
         if (!data)
             continue;
 
-        if (mapId != data->mapid)
-            continue;
-
-        MapEntry const* mapEntry = sMapStore.LookupEntry(mapId);
-        if (!mapEntry || (mapEntry->Instanceable() != (instanceId != 0)))
+        MapEntry const* mapEntry = sMapStore.LookupEntry(data->mapid);
+        if (!mapEntry || (instanceId && (mapId != data->mapid || mapEntry->Instanceable())))
             continue;
 
         MapPersistentState* state = AddPersistentState(mapEntry, instanceId, resetTime, mapEntry->IsDungeon(), true);
