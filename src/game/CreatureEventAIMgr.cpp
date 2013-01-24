@@ -26,6 +26,7 @@
 #include "Policies/SingletonImp.h"
 #include "ObjectGuid.h"
 #include "GridDefines.h"
+#include "SpellMgr.h"
 
 INSTANTIATE_SINGLETON_1(CreatureEventAIMgr);
 
@@ -629,6 +630,20 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
 
                         if (action.cast.target >= TARGET_T_END)
                             sLog.outErrorDb("CreatureEventAI:  Event %u Action %u uses incorrect Target type", i, j + 1);
+
+                        // Some Advanced target type checks - Can have false positives
+                        if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK) && spell)
+                        {
+                            // used TARGET_T_ACTION_INVOKER, but likely should be _INVOKER_OWNER instead
+                            if (action.cast.target == TARGET_T_ACTION_INVOKER &&
+                                    (IsSpellHaveEffect(spell, SPELL_EFFECT_QUEST_COMPLETE) || IsSpellHaveEffect(spell, SPELL_EFFECT_DUMMY)))
+                                sLog.outErrorDb("CreatureEventAI: Event %u Action %u has TARGET_T_ACTION_INVOKER(%u) target type, but should have TARGET_T_ACTION_INVOKER_OWNER(%u).", i, j + 1, TARGET_T_ACTION_INVOKER, TARGET_T_ACTION_INVOKER_OWNER);
+
+                            // Spell that should only target players, but could get any
+                            if (spell->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER) &&
+                                  (action.cast.target == TARGET_T_ACTION_INVOKER || action.cast.target == TARGET_T_HOSTILE_RANDOM || action.cast.target == TARGET_T_HOSTILE_RANDOM_NOT_TOP))
+                                sLog.outErrorDb("CreatureEventAI:  Event %u Action %u uses Target type %u for a spell (%u) that should only target players. This could be wrong.", i, j + 1, action.cast.target, action.cast.spellId);
+                        }
                         break;
                     }
                     case ACTION_T_SUMMON:
