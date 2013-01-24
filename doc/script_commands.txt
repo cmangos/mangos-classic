@@ -2,7 +2,7 @@
 ## Script processing
 -- --------------------------
 
-Copyright (c) 2009-2011 MaNGOS <http://getmangos.com/>
+This file is part of the Continued-MaNGOS Project
 
 -- --------------------------
 ## id

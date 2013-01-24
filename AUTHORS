@@ -1,20 +1,17 @@
-The AUTHORS file:
+This file contains authorship information related to the Continued-MaNGOS Project
 
-This file should collect a trace of all the legal paperwork that you have
-exchanged with contributors for your particular package. This information is
-very useful for registering the copyright of your package. The file might
-have an introductory blurb similar to this one:
+The code of C-MaNGOS is shipped as it is without any form of warenty,
+and - except for third party libraries - licensed under the GPL 2.0,
+which you can read from the file "COPYING"
 
- Authors of PACKAGE
+* The authors are assigned to by git commit authorship information,
+ listed within the git commit messages, or if forgotten before mentioned in the github comments related to a commit.
 
- The following contributions warranted legal paper exchanges
- with [the Free Software Foundation | Your Name].
- Also see files ChangeLog and THANKS
+* The most recent history can be checked at https://github.com/cmangos/mangos-wotlk
 
-Then, list who the contributors are and what files they have worked on.
-Indicate whether they created the file, or whether they modified it. For
-example:
+* The older history (from svn times) is backed up and can be checked at https://github.com/cmangos/mangos-svn
 
- Random J. Hacker:
-   entire files  -> foo1.c , foo2.c , foo3.c
-   modifications -> foo4.c , foo5.c
+* Initially the code for this project was written by Wow Daemon team.
+
+The third party libraries have their own way of addressing authorship, and the authorship of commits importing/ updating
+a third party library reflects who did the importing instead of who wrote the code within the commit.
