@@ -52,6 +52,16 @@ do
   ## Catch differences
   git diff --binary history_cleanup..history_cleanup_tmp > history_cleanup_tmp.patch
 
+  # Get committer information to store it
+  COMMITTER_N=$(git show -s --pretty=format:'%cn' ${commit})
+  [[ $? != 0 ]] && exit 1
+  COMMITTER_M=$(git show -s --pretty=format:'%ce' ${commit})
+  [[ $? != 0 ]] && exit 1
+  COMMITTER_D=$(git show -s --pretty=format:'%cd' ${commit})
+  [[ $? != 0 ]] && exit 1
+  GIT_COMMITTER_NAME=$COMMITTER_N; GIT_COMMITTER_EMAIL=$COMMITTER_M; GIT_COMMITTER_DATE=$COMMITTER_D;
+  export GIT_COMMITTER_NAME; export GIT_COMMITTER_EMAIL; export GIT_COMMITTER_DATE;
+
   # Two cases: either diff is identical to original commit, or not
   git diff --binary $commit^..$commit > history_cleanup_compare.patch
   DIFF_COUNT=`diff history_cleanup_tmp.patch history_cleanup_compare.patch | grep ">" | grep -v "> index " | wc -l`
@@ -118,3 +128,6 @@ done
 
 rm history_cleanup_tmp.patch
 rm history_cleanup_compare.patch
+
+GIT_COMMITTER_NAME=""; GIT_COMMITTER_EMAIL=""; GIT_COMMITTER_DATE="";
+export GIT_COMMITTER_NAME; export GIT_COMMITTER_EMAIL; export GIT_COMMITTER_DATE;
