@@ -53,9 +53,11 @@ enum LogFilters
     LOG_FILTER_AHBOT_SELLER       = 0x004000,               // 14 Auction House Bot seller part
     LOG_FILTER_AHBOT_BUYER        = 0x008000,               // 15 Auction House Bot buyer part
     LOG_FILTER_PATHFINDING        = 0x010000,               // 16 Pathfinding
+    LOG_FILTER_MAP_LOADING        = 0x020000,               // 17 Map loading/unloading (MAP, VMAPS, MMAP)
+    LOG_FILTER_EVENT_AI_DEV       = 0x040000,               // 18 Event AI actions
 };
 
-#define LOG_FILTER_COUNT            17
+#define LOG_FILTER_COUNT            19
 
 struct LogFilterData
 {

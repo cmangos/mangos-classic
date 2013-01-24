@@ -51,6 +51,8 @@ LogFilterData logFilterData[LOG_FILTER_COUNT] =
     { "ahbot_seller",        "LogFilter_AhbotSeller",        true  },
     { "ahbot_buyer",         "LogFilter_AhbotBuyer",         true  },
     { "pathfinding",         "LogFilter_Pathfinding",        true  },
+    { "map_loading",         "LogFilter_MapLoading",         true  },
+    { "event_ai_dev",        "LogFilter_EventAiDev",         true  },
 };
 
 enum LogType

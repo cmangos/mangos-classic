@@ -273,6 +273,8 @@ CleanCharacterDB = 1
 #    LogFilter_DbStrictedCheck
 #    LogFilter_SQLText
 #    LogFilter_Pathfinding
+#    LogFilter_MapsLoading
+#    LogFilter_EventAiDev
 #        Log filters (active by default - meaning: the filter is active, hence the log is not displayed)
 #        Default: 1 - not include with any log level
 #                 0 - include in log if log level permit
@@ -361,6 +363,8 @@ LogFilter_VisibilityChanges = 1
 LogFilter_Weather = 1
 LogFilter_DbStrictedCheck = 1
 LogFilter_Pathfinding = 1
+LogFilter_MapLoading = 1
+LogFilter_EventAiDev = 1
 LogFilter_PeriodicAffects = 0
 LogFilter_PlayerMoves = 1
 LogFilter_SQLText = 1
