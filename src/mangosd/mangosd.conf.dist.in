@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2010100901
+ConfVersion=2013012201
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -303,6 +303,10 @@ CleanCharacterDB = 1
 #        Log file of DB errors detected at server run
 #        Default: "DBErrors.log"
 #
+#    EventAIErrorLogFile
+#        Log file of EventAI errors detected at server run
+#        Default: "EventAIErrors.log"
+#
 #    CharLogFile
 #        Character operations logfile name
 #        Default: "Char.log"
@@ -376,6 +380,7 @@ LogFilter_SpellCast = 0
 WorldLogFile = ""
 WorldLogTimestamp = 0
 DBErrorLogFile = "DBErrors.log"
+EventAIErrorLogFile = "EventAIErrors.log"
 CharLogFile = "Char.log"
 CharLogTimestamp = 0
 CharLogDump = 0
