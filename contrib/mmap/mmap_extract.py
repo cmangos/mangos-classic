@@ -22,7 +22,7 @@ import os, sys, threading, time, subprocess
 from multiprocessing import cpu_count
 from collections import deque
 
-mapList = deque([0,1,530,571,13,25,30,33,34,35,36,37,42,43,44,47,48,70,90,109,129,169,189,209,229,230,249,269,289,309,329,349,369,
+mapList = deque([0,1,13,25,30,33,34,35,36,37,42,43,44,47,48,70,90,109,129,169,189,209,229,230,249,269,289,309,329,349,369,
     389,409,429,449,450,451,469,489,509,529,531,533])
 
 class workerThread(threading.Thread):
