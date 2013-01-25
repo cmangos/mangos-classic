@@ -19205,11 +19205,6 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, uint32& m
         miscRequirement = at->requiredLevel;
         return AREA_LOCKSTATUS_TOO_LOW_LEVEL;
     }
-    if (!sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_LEVEL) && getLevel() < uint32(MAX_LEVEL_CLASSIC))
-    {
-        miscRequirement = uint32(MAX_LEVEL_CLASSIC);
-        return AREA_LOCKSTATUS_TOO_LOW_LEVEL;
-    }
 
     // Raid Requirements
     if (mapEntry->IsRaid() && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_RAID))
