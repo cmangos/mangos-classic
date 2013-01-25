@@ -98,7 +98,8 @@ namespace MMAP
         FILE* file = fopen(fileName, "rb");
         if (!file)
         {
-            sLog.outError("MMAP:loadMapData: Error: Could not open mmap file '%s'", fileName);
+            if (MMapFactory::IsPathfindingEnabled(mapId))
+                sLog.outError("MMAP:loadMapData: Error: Could not open mmap file '%s'", fileName);
             delete[] fileName;
             return false;
         }
@@ -160,7 +161,7 @@ namespace MMAP
         FILE* file = fopen(fileName, "rb");
         if (!file)
         {
-            sLog.outError("MMAP:loadMap: Could not open mmtile file '%s'", fileName);
+            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "ERROR: MMAP:loadMap: Could not open mmtile file '%s'", fileName);
             delete[] fileName;
             return false;
         }
