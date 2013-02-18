@@ -294,6 +294,7 @@ bool ChatHandler::HandleReloadAllScriptsCommand(char* /*args*/)
     }
 
     sLog.outString("Re-Loading Scripts...");
+    HandleReloadDBScriptsOnCreatureDeathCommand((char*)"a");
     HandleReloadDBScriptsOnGoUseCommand((char*)"a");
     HandleReloadDBScriptsOnGossipCommand((char*)"a");
     HandleReloadDBScriptsOnEventCommand((char*)"a");
@@ -909,6 +910,26 @@ bool ChatHandler::HandleReloadDBScriptsOnGoUseCommand(char* args)
 
     if (*args != 'a')
         SendGlobalSysMessage("DB table `dbscripts_on_go[_template]_use` reloaded.");
+
+    return true;
+}
+
+bool ChatHandler::HandleReloadDBScriptsOnCreatureDeathCommand(char* args)
+{
+    if (sScriptMgr.IsScriptScheduled())
+    {
+        SendSysMessage("DB scripts used currently, please attempt reload later.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (*args != 'a')
+        sLog.outString("Re-Loading Scripts from `dbscripts_on_creature_death`...");
+
+    sScriptMgr.LoadCreatureDeathScripts();
+
+    if (*args != 'a')
+        SendGlobalSysMessage("DB table `dbscripts_on_creature_death` reloaded.");
 
     return true;
 }

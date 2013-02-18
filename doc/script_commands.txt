@@ -8,6 +8,7 @@ This file is part of the Continued-MaNGOS Project
 ## id
 -- --------------------------
 
+dbscripts_on_creature_death         Creature entry
 dbscripts_on_creature_movement      DB project self defined id
 dbscripts_on_event                  Event id. Several sources: spell effect 61, taxi/transport nodes, gameobject_template data
 dbscripts_on_go_use                 Gameobject guid
@@ -79,6 +80,9 @@ Map coordinates for commands that need it.
 ## origin of script and source/target in scripts
 -- --------------------------
 
+dbscripts_on_creature_death
+                            Creature death
+                                Source: creature. Target: Unit (player/creature)
 dbscripts_on_creature_movement
                             `creature_movement` `creature_movement_template`
                                 Source: creature. Target: creature

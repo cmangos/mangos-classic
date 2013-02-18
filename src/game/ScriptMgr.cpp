@@ -41,6 +41,7 @@ ScriptMapMapName sGameObjectScripts;
 ScriptMapMapName sGameObjectTemplateScripts;
 ScriptMapMapName sEventScripts;
 ScriptMapMapName sGossipScripts;
+ScriptMapMapName sCreatureDeathScripts;
 ScriptMapMapName sCreatureMovementScripts;
 
 INSTANTIATE_SINGLETON_1(ScriptMgr);
@@ -757,6 +758,18 @@ void ScriptMgr::LoadCreatureMovementScripts()
     // checks are done in WaypointManager::Load
 }
 
+void ScriptMgr::LoadCreatureDeathScripts()
+{
+    LoadScripts(sCreatureDeathScripts, "dbscripts_on_creature_death");
+
+    // check ids
+    for(ScriptMapMap::const_iterator itr = sCreatureDeathScripts.second.begin(); itr != sCreatureDeathScripts.second.end(); ++itr)
+    {
+        if (!sObjectMgr.GetCreatureTemplate(itr->first))
+            sLog.outErrorDb("Table `dbscripts_on_creature_death` has not existing creature (Entry: %u) as script id", itr->first);
+    }
+}
+
 void ScriptMgr::LoadDbScriptStrings()
 {
     sObjectMgr.LoadMangosStrings(WorldDatabase, "db_script_string", MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID);
@@ -774,6 +787,7 @@ void ScriptMgr::LoadDbScriptStrings()
     CheckScriptTexts(sGameObjectTemplateScripts, ids);
     CheckScriptTexts(sEventScripts, ids);
     CheckScriptTexts(sGossipScripts, ids);
+    CheckScriptTexts(sCreatureDeathScripts, ids);
     CheckScriptTexts(sCreatureMovementScripts, ids);
 
     sWaypointMgr.CheckTextsExistance(ids);
