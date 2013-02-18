@@ -479,9 +479,9 @@ bool find_sql_updates()
     pclose(cmd_pipe);
 
     // Add last milestone's file information
-    last_sql_rev[0] = 11785;
-    last_sql_nr[0] = 2;
-    sscanf("11785_02_characters_instance", "%s", last_sql_update[0]);
+    last_sql_rev[0] = 1794;
+    last_sql_nr[0] = 9;
+    sscanf("z1794_s1350_11716_09_characters_auction", "%s", last_sql_update[0]);
     last_sql_rev[2] = 10008;
     last_sql_nr[2] = 1;
     sscanf("10008_01_realmd_realmd_db_version", "%s", last_sql_update[2]);
