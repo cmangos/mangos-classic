@@ -57,7 +57,7 @@ enum TempSummonType
     TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN     = 2,             // despawns after a specified time OR when the creature dies
     // New types, currently same mechanics as old types
     TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN   = TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,             // despawns after a specified time (OOC) OR when the creature disappears
-    TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN = TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN,             // despawns after a specified time OR when the creature dies
+    TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN = TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN,             // despawns after a specified time (OOC) OR when the creature dies
 };
 
 class WorldPacket;
