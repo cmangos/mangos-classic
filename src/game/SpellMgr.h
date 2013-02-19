@@ -648,7 +648,9 @@ struct SpellTargetEntry
     uint32 spellId;
     uint32 type;
     uint32 targetEntry;
-    //uint32 inverseEffectMask;
+    uint32 inverseEffectMask;
+
+    bool CanNotHitWithSpellEffect(SpellEffectIndex effect) const { return inverseEffectMask & (1 << effect); }
 };
 
 // coordinates for spells (accessed using SpellMgr functions)
