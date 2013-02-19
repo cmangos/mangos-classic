@@ -37,6 +37,8 @@ const char WorldTemplatedstfmt[] = "ii";
 const char ConditionsSrcFmt[] = "iiii";
 const char ConditionsDstFmt[] = "iiii";
 const char CreatureTemplateSpellsFmt[] = "iiiii";
+const char SpellScriptTargetFmt[] = "iii";
+
 SQLStorage sCreatureStorage(CreatureInfosrcfmt, CreatureInfodstfmt, "entry", "creature_template");
 SQLStorage sCreatureDataAddonStorage(CreatureDataAddonInfofmt, "guid", "creature_addon");
 SQLStorage sCreatureModelStorage(CreatureModelfmt, "modelid", "creature_model_info");
@@ -51,3 +53,5 @@ SQLStorage sConditionStorage(ConditionsSrcFmt, ConditionsDstFmt, "condition_entr
 
 SQLHashStorage sGOStorage(GameObjectInfosrcfmt, GameObjectInfodstfmt, "entry", "gameobject_template");
 SQLHashStorage sCreatureTemplateSpellsStorage(CreatureTemplateSpellsFmt, "entry", "creature_template_spells");
+
+SQLMultiStorage sSpellScriptTargetStorage(SpellScriptTargetFmt, "entry", "spell_script_target");

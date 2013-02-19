@@ -204,6 +204,7 @@ class SQLMultiStorage : public SQLStorageBase
                 T const* operator *() const { return getValue(); }
                 T const* operator ->() const { return getValue(); }
                 bool operator !=(const SQLMultiSIterator& r) const { return citerator != r.citerator; }
+                bool operator ==(const SQLMultiSIterator& r) const { return citerator == r.citerator; }
 
             private:
                 SQLMultiSIterator(RecordMultiMap::const_iterator _itr) : citerator(_itr) {}
