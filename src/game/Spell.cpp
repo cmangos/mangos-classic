@@ -45,6 +45,7 @@
 #include "extras/Mod.h"
 #include "Util.h"
 #include "Chat.h"
+#include "SQLStorages.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
