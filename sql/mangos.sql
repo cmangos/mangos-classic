@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z2253_s1890_12357_01_mangos_spell_script_target` bit(1) default NULL
+  `required_z2258_s1896_12363_02_mangos_npc_vendor_template` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3980,6 +3980,7 @@ CREATE TABLE `npc_vendor` (
   `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `incrtime` int(10) unsigned NOT NULL DEFAULT '0',
+  `condition_id` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Npc System';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -4003,6 +4004,7 @@ CREATE TABLE `npc_vendor_template` (
   `item` mediumint(8) unsigned NOT NULL default '0',
   `maxcount` tinyint(3) unsigned NOT NULL default '0',
   `incrtime` int(10) unsigned NOT NULL default '0',
+  `condition_id` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Npc System';
 

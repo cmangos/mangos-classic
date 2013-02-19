@@ -330,6 +330,8 @@ enum ConditionSource                                        // From where was th
     CONDITION_FROM_GOSSIP_MENU      = 2,                    // Used to check a gossip menu menu-text
     CONDITION_FROM_GOSSIP_OPTION    = 3,                    // Used to check a gossip menu option-item
     CONDITION_FROM_EVENTAI          = 4,                    // Used to check EventAI Event "On Receive Emote"
+    CONDITION_FROM_HARDCODED        = 5,                    // Used to check a hardcoded event - not actually a condition
+    CONDITION_FROM_VENDOR           = 6,                    // Used to check a condition from a vendor
 };
 
 class PlayerCondition
@@ -958,7 +960,7 @@ class ObjectMgr
 
         void AddVendorItem(uint32 entry, uint32 item, uint32 maxcount, uint32 incrtime);
         bool RemoveVendorItem(uint32 entry, uint32 item);
-        bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item, uint32 maxcount, uint32 ptime, Player* pl = NULL, std::set<uint32>* skip_vendors = NULL) const;
+        bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item, uint32 maxcount, uint32 ptime, uint16 conditionId, Player* pl = NULL, std::set<uint32>* skip_vendors = NULL) const;
 
         int GetOrNewIndexForLocale(LocaleConstant loc);
 

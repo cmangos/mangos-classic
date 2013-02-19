@@ -16844,6 +16844,12 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         return false;
     }
 
+    if (crItem->conditionId && !isGameMaster() && !sObjectMgr.IsPlayerMeetToCondition(crItem->conditionId, this, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+        return false;
+    }
+
     uint32 price = pProto->BuyPrice * count;
 
     // reputation discount
