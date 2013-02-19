@@ -809,18 +809,17 @@ void Aura::TriggerSpell()
                     case 24834:                             // Shadow Bolt Whirl
                     {
                         uint32 spellForTick[8] = { 24820, 24821, 24822, 24823, 24835, 24836, 24837, 24838 };
-                        uint32 tick = GetAuraTicks();
-                        if (tick < 8)
-                        {
-                            trigger_spell_id = spellForTick[tick];
+                        uint32 tick = (GetAuraTicks() + 7/*-1*/) % 8;
 
-                            // casted in left/right (but triggered spell have wide forward cone)
-                            float forward = target->GetOrientation();
-                            float angle = target->GetOrientation() + (tick % 2 == 0 ? M_PI_F / 2 : - M_PI_F / 2);
-                            target->SetOrientation(angle);
-                            triggerTarget->CastSpell(triggerTarget, trigger_spell_id, true, NULL, this, casterGUID);
-                            target->SetOrientation(forward);
-                        }
+                        // casted in left/right (but triggered spell have wide forward cone)
+                        float forward = target->GetOrientation();
+                        if (tick <= 3)
+                            target->SetOrientation(forward + 0.75f * M_PI_F - tick * M_PI_F / 8);       // Left
+                        else
+                            target->SetOrientation(forward - 0.75f * M_PI_F + (8 - tick) * M_PI_F / 8); // Right
+
+                        triggerTarget->CastSpell(triggerTarget, spellForTick[tick], true, NULL, this, casterGUID);
+                        target->SetOrientation(forward);
                         return;
                     }
 //                    // Stink Trap
