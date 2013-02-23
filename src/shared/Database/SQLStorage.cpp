@@ -21,15 +21,15 @@
 // -----------------------------------  SQLStorageBase  ---------------------------------------- //
 
 SQLStorageBase::SQLStorageBase() :
-    m_recordCount(0),
-    m_maxEntry(0),
-    m_dstFieldCount(0),
-    m_srcFieldCount(0),
-    m_recordSize(0),
     m_tableName(NULL),
     m_entry_field(NULL),
     m_src_format(NULL),
     m_dst_format(NULL),
+    m_dstFieldCount(0),
+    m_srcFieldCount(0),
+    m_recordCount(0),
+    m_maxEntry(0),
+    m_recordSize(0),
     m_data(NULL)
 {}
 
