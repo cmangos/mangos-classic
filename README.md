@@ -54,6 +54,7 @@ To be able to accomplish these goals, we support and promote:
   * CMaNGOS IRC channel: #cmangos on irc.rizon.net
   * [GitHub repositories](https://github.com/cmangos/)
   * [Issue tracker](https://github.com/cmangos/mangos-classic/issues)
+  * [Current build status on Travis CI](https://travis-ci.org/cmangos/mangos-classic/)
   * [Wiki](https://github.com/cmangos/mangos-classic/wiki) with additional information on installation
   * Documentation can be found in the doc/ subdirectory and on the github wiki
 

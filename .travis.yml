@@ -1,0 +1,23 @@
+language: cpp
+
+branches:
+  only:
+    - master
+
+compiler:
+  - gcc
+  - clang
+
+script:
+  - test -d _build || mkdir _build
+  - test -d _install || mkdir _install
+  - cd _build
+  - cmake -DPREFIX=../_install ..
+  - make -j4
+
+notifications:
+  irc:
+    channels:
+      - "irc.rizon.net#cmangos"
+    on_success: never
+    on_failure: always
