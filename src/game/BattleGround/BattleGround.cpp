@@ -375,13 +375,6 @@ void BattleGround::Update(uint32 diff)
         {
             m_Events |= BG_STARTING_EVENT_1;
 
-            // setup here, only when at least one player has ported to the map
-            if (!SetupBattleGround())
-            {
-                EndNow();
-                return;
-            }
-
             StartingEventCloseDoors();
             SetStartDelayTime(m_StartDelayTimes[BG_STARTING_EVENT_FIRST]);
             // first start warning - 2 or 1 minute, only if defined

@@ -243,10 +243,6 @@ class BattleGround
         /*BattleGround(const BattleGround& bg);*/
         virtual ~BattleGround();
         virtual void Update(uint32 diff);                   // must be implemented in BG subclass of BG specific update code, but must in begginning call parent version
-        virtual bool SetupBattleGround()                    // must be implemented in BG subclass
-        {
-            return true;
-        }
         virtual void Reset();                               // resets all common properties for battlegrounds, must be implemented and called in BG subclass
         virtual void StartingEventCloseDoors() {}
         virtual void StartingEventOpenDoors() {}

@@ -320,18 +320,15 @@ class BattleGroundAV : public BattleGround
 
     public:
         BattleGroundAV();
-        ~BattleGroundAV();
         void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player* plr) override;
 
-        virtual void StartingEventCloseDoors() override;
         virtual void StartingEventOpenDoors() override;
         // world states
         virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
-        void RemovePlayer(Player* plr, ObjectGuid guid) override;
         void HandleAreaTrigger(Player* source, uint32 trigger) override;
         virtual void Reset() override;
 

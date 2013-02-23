@@ -100,12 +100,10 @@ class BattleGroundWS : public BattleGround
     public:
         /* Construction */
         BattleGroundWS();
-        ~BattleGroundWS();
         void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player* plr) override;
-        virtual void StartingEventCloseDoors() override;
         virtual void StartingEventOpenDoors() override;
 
         /* BG Flags */
@@ -133,7 +131,6 @@ class BattleGroundWS : public BattleGround
         void RemovePlayer(Player* plr, ObjectGuid guid) override;
         void HandleAreaTrigger(Player* source, uint32 trigger) override;
         void HandleKillPlayer(Player* player, Player* killer) override;
-        bool SetupBattleGround() override;
         virtual void Reset() override;
         void EndBattleGround(Team winner) override;
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
