@@ -853,13 +853,12 @@ void World::SetInitialWorldSettings()
     sMod.ModInit();
 
     ///- Check the existence of the map files for all races start areas.
-    if (!MapManager::ExistMapAndVMap(0, -6240.32f, 331.033f) ||
-            !MapManager::ExistMapAndVMap(0, -8949.95f, -132.493f) ||
-            !MapManager::ExistMapAndVMap(0, -8949.95f, -132.493f) ||
-            !MapManager::ExistMapAndVMap(1, -618.518f, -4251.67f) ||
-            !MapManager::ExistMapAndVMap(0, 1676.35f, 1677.45f) ||
-            !MapManager::ExistMapAndVMap(1, 10311.3f, 832.463f) ||
-            !MapManager::ExistMapAndVMap(1, -2917.58f, -257.98f))
+    if (!MapManager::ExistMapAndVMap(0, -6240.32f, 331.033f) ||                     // Dwarf/ Gnome
+            !MapManager::ExistMapAndVMap(0, -8949.95f, -132.493f) ||                // Human
+            !MapManager::ExistMapAndVMap(1, -618.518f, -4251.67f) ||                // Orc
+            !MapManager::ExistMapAndVMap(0, 1676.35f, 1677.45f) ||                  // Scourge
+            !MapManager::ExistMapAndVMap(1, 10311.3f, 832.463f) ||                  // NightElf
+            !MapManager::ExistMapAndVMap(1, -2917.58f, -257.98f))                   // Tauren
     {
         sLog.outError("Correct *.map files not found in path '%smaps' or *.vmtree/*.vmtile files in '%svmaps'. Please place *.map and vmap files in appropriate directories or correct the DataDir value in the mangosd.conf file.", m_dataPath.c_str(), m_dataPath.c_str());
         Log::WaitBeforeContinueIfNeed();
