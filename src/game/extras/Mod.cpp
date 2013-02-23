@@ -20,7 +20,7 @@
 
 #include "Log.h"
 #include "SystemConfig.h"
-#include "Policies/SingletonImp.h"
+#include "Policies/Singleton.h"
 
 
 INSTANTIATE_SINGLETON_1(ModClass);
