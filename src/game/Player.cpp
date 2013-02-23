@@ -392,6 +392,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     m_zoneUpdateId = 0;
     m_zoneUpdateTimer = 0;
+    m_positionStatusUpdateTimer = 0;
 
     m_areaUpdateId = 0;
 
@@ -1173,6 +1174,14 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             m_regenTimer = 0;
         else
             m_regenTimer -= update_diff;
+    }
+
+    if (m_positionStatusUpdateTimer)
+    {
+        if (update_diff >= m_positionStatusUpdateTimer)
+            m_positionStatusUpdateTimer = 0;
+        else
+            m_positionStatusUpdateTimer -= update_diff;
     }
 
     if (m_weaponChangeTimer > 0)
@@ -5384,9 +5393,14 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
             GetSession()->SendCancelTrade();   // will close both side trade windows
     }
 
+    if (m_positionStatusUpdateTimer)                        // Update position's state only on interval
+        return true;
+    m_positionStatusUpdateTimer = 100;
+
     // code block for underwater state update
     UpdateUnderwaterState(m, x, y, z);
 
+    // code block for outdoor state and area-explore check
     CheckAreaExploreAndOutdoor();
 
     return true;
