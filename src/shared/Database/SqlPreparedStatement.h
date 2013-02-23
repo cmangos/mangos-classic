@@ -145,12 +145,12 @@ class MANGOS_DLL_SPEC SqlStmtParameters
         typedef std::vector<SqlStmtFieldData> ParameterContainer;
 
         // reserve memory to contain all input parameters of stmt
-        explicit SqlStmtParameters(int nParams);
+        explicit SqlStmtParameters(uint32 nParams);
 
         ~SqlStmtParameters() {}
 
         // get amount of bound parameters
-        int boundParams() const { return int(m_params.size()); }
+        uint32 boundParams() const { return m_params.size(); }
         // add parameter
         void addParam(const SqlStmtFieldData& data) { m_params.push_back(data); }
         // empty SQL statement parameters. In case nParams > 1 - reserve memory for parameters
@@ -175,15 +175,15 @@ class SqlStatementID
         SqlStatementID() : m_bInitialized(false) {}
 
         int ID() const { return m_nIndex; }
-        int arguments() const { return m_nArguments; }
+        uint32 arguments() const { return m_nArguments; }
         bool initialized() const { return m_bInitialized; }
 
     private:
         friend class Database;
-        void init(int nID, int nArgs) { m_nIndex = nID; m_nArguments = nArgs; m_bInitialized = true; }
+        void init(int nID, uint32 nArgs) { m_nIndex = nID; m_nArguments = nArgs; m_bInitialized = true; }
 
         int m_nIndex;
-        int m_nArguments;
+        uint32 m_nArguments;
         bool m_bInitialized;
 };
 
@@ -202,7 +202,7 @@ class MANGOS_DLL_SPEC SqlStatement
         SqlStatement& operator=(const SqlStatement& index);
 
         int ID() const { return m_index.ID(); }
-        int arguments() const { return m_index.arguments(); }
+        uint32 arguments() const { return m_index.arguments(); }
 
         bool Execute();
         bool DirectExecute();

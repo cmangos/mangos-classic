@@ -45,11 +45,8 @@ void SqlConnection::FreePreparedStatements()
     m_holder.clear();
 }
 
-SqlPreparedStatement* SqlConnection::GetStmt(int nIndex)
+SqlPreparedStatement* SqlConnection::GetStmt(uint32 nIndex)
 {
-    if (nIndex < 0)
-        return NULL;
-
     // resize stmt container
     if (m_holder.size() <= nIndex)
         m_holder.resize(nIndex + 1, NULL);
