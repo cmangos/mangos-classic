@@ -3192,7 +3192,7 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, SpellCas
     if (result != SPELL_CAST_OK)
     {
         data << uint8(2); // status = fail
-        data << uint8(result);                              // problem
+        data << uint8(!IsPassiveSpell(spellInfo) ? result : SPELL_FAILED_DONT_REPORT); // do not report failed passive spells
         switch (result)
         {
             case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
