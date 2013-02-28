@@ -68,7 +68,6 @@ class PatchCache
     private:
         void LoadPatchesInfo();
         Patches patches_;
-
 };
 
 class PatchHandler: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
@@ -87,7 +86,7 @@ class PatchHandler: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
 
     private:
         ACE_HANDLE patch_fd_;
-
 };
 
 #endif /* _BK_PATCHHANDLER_H__ */
+

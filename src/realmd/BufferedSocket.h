@@ -72,7 +72,7 @@ class BufferedSocket: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
 
     protected:
         std::string remote_address_;
-
 };
 
 #endif /* _BUFFEREDSOCKET_H_ */
+

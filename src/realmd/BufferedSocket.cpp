@@ -265,3 +265,4 @@ void BufferedSocket::close_connection(void)
 
     reactor()->remove_handler(this, ACE_Event_Handler::DONT_CALL | ACE_Event_Handler::ALL_EVENTS_MASK);
 }
+

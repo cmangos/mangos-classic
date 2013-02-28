@@ -1089,3 +1089,4 @@ void AuthSocket::InitPatch()
         close_connection();
     }
 }
+
