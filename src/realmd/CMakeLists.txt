@@ -17,12 +17,23 @@
 #
 
 set(EXECUTABLE_NAME realmd)
-file(GLOB_RECURSE EXECUTABLE_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.h)
+
+set(EXECUTABLE_SRCS
+    AuthCodes.h
+    AuthSocket.cpp
+    AuthSocket.h
+    BufferedSocket.cpp
+    BufferedSocket.h
+    Main.cpp
+    PatchHandler.cpp
+    PatchHandler.h
+    RealmList.cpp
+    RealmList.h
+   )
 
 if(WIN32)
-  list(APPEND EXECUTABLE_SRCS
-    realmd.rc
-  )
+  # add resource file to windows build
+  set(EXECUTABLE_SRCS ${EXECUTABLE_SRCS} realmd.rc)
 endif()
 
 include_directories(

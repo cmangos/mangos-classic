@@ -15,9 +15,37 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# include(${CMAKE_SOURCE_DIR}/dep/tbb/tbbinclude.cmake)
+set(LIBRARY_NAME framework)
 
-file(GLOB_RECURSE framework_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.h)
+set(LIBRARY_SRCS
+    Dynamic/FactoryHolder.h
+    Dynamic/ObjectRegistry.h
+    GameSystem/Grid.h
+    GameSystem/GridLoader.h
+    GameSystem/GridReference.h
+    GameSystem/GridRefManager.h
+    GameSystem/NGrid.h
+    GameSystem/TypeContainer.h
+    GameSystem/TypeContainerFunctions.h
+    GameSystem/TypeContainerVisitor.h
+    Platform/CompilerDefs.h
+    Platform/Define.h
+    Policies/CreationPolicy.h
+    Policies/MemoryManagement.cpp
+    Policies/ObjectLifeTime.cpp
+    Policies/ObjectLifeTime.h
+    Policies/Singleton.h
+    Policies/ThreadingModel.h
+    Utilities/ByteConverter.h
+    Utilities/Callback.h
+    Utilities/EventProcessor.cpp
+    Utilities/EventProcessor.h
+    Utilities/LinkedList.h
+    Utilities/LinkedReference/Reference.h
+    Utilities/LinkedReference/RefManager.h
+    Utilities/TypeList.h
+    Utilities/UnorderedMapSet.h
+   )
 
 source_group("Other"
   REGULAR_EXPRESSION .*
@@ -52,20 +80,17 @@ include_directories(
   ${ACE_INCLUDE_DIR}
 )
 
-add_library(framework STATIC
-  ${framework_SRCS}
+add_library(${LIBRARY_NAME} STATIC
+  ${LIBRARY_SRCS}
 )
 
 if(NOT TBB_USE_EXTERNAL)
-  add_dependencies(framework TBB_Project)
-# add_dependencies(framework tbb)
-# add_dependencies(framework tbbmalloc)
+  add_dependencies(${LIBRARY_NAME} TBB_Project)
 endif()
 if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(framework ACE_Project)
-# add_dependencies(framework ace)
+  add_dependencies(${LIBRARY_NAME} ACE_Project)
 endif()
 
-target_link_libraries(framework
+target_link_libraries(${LIBRARY_NAME}
   ${TBB_LIBRARIES}
 )

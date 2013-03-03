@@ -15,29 +15,92 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# Glob only and not recurse, there are other libs for that
-file(GLOB_RECURSE shared_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.h)
+set(LIBRARY_NAME shared)
 
-# Exclude Win32 files
+set(LIBRARY_SRCS
+    Auth/AuthCrypt.cpp
+    Auth/AuthCrypt.h
+    Auth/BigNumber.cpp
+    Auth/BigNumber.h
+    Auth/Hmac.cpp
+    Auth/Hmac.h
+    Auth/md5.h
+    Auth/Sha1.cpp
+    Auth/Sha1.h
+    ByteBuffer.cpp
+    ByteBuffer.h
+    Common.cpp
+    Common.h
+    Config/Config.cpp
+    Config/Config.h
+    Config/ConfigEnv.h
+    Database/Database.cpp
+    Database/Database.h
+    Database/DatabaseEnv.h
+    Database/DatabaseImpl.h
+    Database/DatabaseMysql.cpp
+    Database/DatabaseMysql.h
+    Database/DatabasePostgre.cpp
+    Database/DatabasePostgre.h
+    Database/DBCFileLoader.cpp
+    Database/DBCFileLoader.h
+    Database/DBCStore.h
+    Database/Field.cpp
+    Database/Field.h
+    Database/PGSQLDelayThread.h
+    Database/QueryResult.h
+    Database/QueryResultMysql.cpp
+    Database/QueryResultMysql.h
+    Database/QueryResultPostgre.cpp
+    Database/QueryResultPostgre.h
+    Database/SqlDelayThread.cpp
+    Database/SqlDelayThread.h
+    Database/SqlOperations.cpp
+    Database/SqlOperations.h
+    Database/SqlPreparedStatement.cpp
+    Database/SqlPreparedStatement.h
+    Database/SQLStorage.cpp
+    Database/SQLStorage.h
+    Database/SQLStorageImpl.h
+    Errors.h
+    LockedQueue.h
+    Log.cpp
+    Log.h
+    ProgressBar.cpp
+    ProgressBar.h
+    revision_nr.h
+    revision_sql.h
+    Threading.cpp
+    Threading.h
+    Timer.h
+    Util.cpp
+    Util.h
+    WorldPacket.h
+   )
+
+# OS specific files
 if(WIN32)
-  list(REMOVE_ITEM shared_SRCS
-    PosixDaemon.h
-    PosixDaemon.cpp
-  )
+  set(LIBRARY_SRCS
+      ${LIBRARY_SRCS}
+      WheatyExceptionReport.cpp
+      WheatyExceptionReport.h
+      ServiceWin32.cpp
+      ServiceWin32.h
+     )
 else()
-  list(REMOVE_ITEM shared_SRCS
-    WheatyExceptionReport.cpp
-    WheatyExceptionReport.h
-    ServiceWin32.cpp
-    ServiceWin32.h
-  )
+  set(LIBRARY_SRCS
+      ${LIBRARY_SRCS}
+      PosixDaemon.cpp
+      PosixDaemon.h
+     )
 endif()
 
 source_group("Util"
   REGULAR_EXPRESSION .*
 )
 
-foreach(SRC ${shared_SRCS})
+# TODO: really needed?
+foreach(SRC ${LIBRARY_SRCS})
   get_filename_component(PTH ${SRC} PATH)
   if(PTH)
     if(NOT XCODE) # FIXME: Xcode Generator has bug with nested dirs
@@ -66,12 +129,11 @@ include_directories(
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h)
 
-add_library(shared STATIC
-  ${shared_SRCS}
+add_library(${LIBRARY_NAME} STATIC
+  ${LIBRARY_SRCS}
 )
 
-add_dependencies(shared revision.h)
+add_dependencies(${LIBRARY_NAME} revision.h)
 if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(shared ACE_Project)
-# add_dependencies(shared ace)
+  add_dependencies(${LIBRARY_NAME} ACE_Project)
 endif()
