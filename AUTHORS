@@ -6,7 +6,7 @@ The code of CMaNGOS is shipped as it is without any form of warrenty,
 and - except for third party libraries - licensed under the GPL 2.0,
 which you can read from the file "COPYING"
 
-Development of this project dates back to 2004, and was developped under various umbrellas over time:
+Development of this project dates back to 2004, and was developed under various umbrellas over time:
 * WoW Daemon Team, 2004
 * MaNGOS project, 2005-2008, located at http://www.mangosproject.org
 * MaNGOS project, 2008-2012, located at http://getmangos.com
@@ -30,9 +30,7 @@ Authors List:
 
 WoW Daemon Team (mentioned here as one, until we have proper details)
 
-(no author)
 123qwe
-@
 a1ien
 AbsoluteZero
 aerione_alt
@@ -390,8 +388,7 @@ Stillhard
 supervendy
 Syn
 Tanatos
-Tassadar (a.k.a. Tasssadar)
-Tassader (a.k.a. Tassader2)
+Tassadar (a.k.a. Tasssadar, Tassader, Tassader2)
 tehmarto
 Tequila
 TERRANZ
