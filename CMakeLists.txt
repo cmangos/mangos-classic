@@ -58,11 +58,11 @@ endif()
 message(
   "\nThis script builds the MaNGOS server.
   Options that can be used in order to configure the process:
-    PREFIX: Path where the server should be installed to
+    CMAKE_INSTALL_PREFIX: Path where the server should be installed to
     PCH: Use precompiled headers
     DEBUG: Debug mode
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
-  For example: cmake .. -DDEBUG=1 -DPREFIX=/opt/mangos\n"
+  For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos\n"
 ) # TODO: PLATFORM: Sets the architecture for compile (X86,X64)
 
 # Override configuration-types - we don't use anything else than debug and release
@@ -118,19 +118,9 @@ endif()
 # option(SQL "Copy SQL files" 0)
 # option(TOOLS "Build tools" 0)
 
-# Set up the install-prefix
-if(CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
-  get_filename_component(PREFIX_ABSOLUTE "../mangos-server" ABSOLUTE)
-  set(CMAKE_INSTALL_PREFIX ${PREFIX_ABSOLUTE} CACHE PATH "Install path prefix." FORCE)
-endif()
+# TODO: remove this in the future! it has only been added to make the switch easier for end users
 if(PREFIX)
-  if(!WIN32)
-    string(REGEX REPLACE "^~" "$ENV{HOME}" PREFIX ${PREFIX})
-  endif()
-  get_filename_component(PREFIX_ABSOLUTE ${PREFIX} ABSOLUTE)
-  set(CMAKE_INSTALL_PREFIX ${PREFIX_ABSOLUTE} CACHE PATH "Install path prefix." FORCE)
-else()
-  set(PREFIX ${CMAKE_INSTALL_PREFIX} CACHE PATH "Install path prefix.")
+  message(FATAL_ERROR "The parameter PREFIX has been removed. Please re-run CMake and use CMAKE_INSTALL_PREFIX instead to define your installation location!")
 endif()
 
 set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
