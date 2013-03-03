@@ -62,11 +62,10 @@ Map::~Map()
 
 void Map::LoadMapAndVMap(int gx, int gy)
 {
-    if (m_bLoadedGrids[gx][gx])
+    if (m_bLoadedGrids[gx][gy])
         return;
 
-    GridMap* pInfo = m_TerrainData->Load(gx, gy);
-    if (pInfo)
+    if (m_TerrainData->Load(gx, gy))
         m_bLoadedGrids[gx][gy] = true;
 }
 
