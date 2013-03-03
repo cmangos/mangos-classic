@@ -1,6 +1,6 @@
 # C(ontinued)-MaNGOS -- README
 
-This file is part of the Continued-MaNGOS Project
+This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
 
 ## Welcome to C(ontinued)-MaNGOS
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# This file is part of the Continued-MaNGOS Project
+# This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
