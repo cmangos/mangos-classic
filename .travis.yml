@@ -18,6 +18,10 @@
 
 language: cpp
 
+# reduce clone time by only getting the latest commit and not the whole history (default for travis is 100)
+git:
+  depth: 1
+
 # only run travis on the master branch
 branches:
   only:
