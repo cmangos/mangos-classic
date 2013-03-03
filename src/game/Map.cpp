@@ -784,7 +784,7 @@ bool Map::UnloadGrid(const uint32& x, const uint32& y, bool pForce)
         if (!pForce && ActiveObjectsNearGrid(x, y))
             return false;
 
-        DEBUG_LOG("Unloading grid[%u,%u] for map %u", x, y, i_id);
+        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Unloading grid[%u,%u] for map %u", x, y, i_id);
         ObjectGridUnloader unloader(*grid);
 
         // Finish remove and delete all creatures with delayed remove before moving to respawn grids
@@ -813,7 +813,7 @@ bool Map::UnloadGrid(const uint32& x, const uint32& y, bool pForce)
         m_TerrainData->Unload(gx, gy);
     }
 
-    DEBUG_LOG("Unloading grid[%u,%u] for map %u finished", x, y, i_id);
+    DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Unloading grid[%u,%u] for map %u finished", x, y, i_id);
     return true;
 }
 
