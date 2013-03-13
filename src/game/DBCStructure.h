@@ -23,6 +23,7 @@
 #include "Path.h"
 #include "Platform/Define.h"
 #include "SharedDefines.h"
+#include "SpellClassMask.h"
 
 #include <map>
 #include <set>
@@ -549,12 +550,39 @@ struct SoundEntriesEntry
     // 28       m_EAXDef
 };
 
+// template arguments for declaration
+#define CFM_ARGS_1  ClassFlag N1
+#define CFM_ARGS_2  CFM_ARGS_1, ClassFlag N2
+#define CFM_ARGS_3  CFM_ARGS_2, ClassFlag N3
+#define CFM_ARGS_4  CFM_ARGS_3, ClassFlag N4
+#define CFM_ARGS_5  CFM_ARGS_4, ClassFlag N5
+#define CFM_ARGS_6  CFM_ARGS_5, ClassFlag N6
+#define CFM_ARGS_7  CFM_ARGS_6, ClassFlag N7
+#define CFM_ARGS_8  CFM_ARGS_7, ClassFlag N8
+#define CFM_ARGS_9  CFM_ARGS_8, ClassFlag N9
+#define CFM_ARGS_10 CFM_ARGS_9, ClassFlag N10
+
+// template values for function calls
+#define CFM_VALUES_1  N1
+#define CFM_VALUES_2  CFM_VALUES_1, N2
+#define CFM_VALUES_3  CFM_VALUES_2, N3
+#define CFM_VALUES_4  CFM_VALUES_3, N4
+#define CFM_VALUES_5  CFM_VALUES_4, N5
+#define CFM_VALUES_6  CFM_VALUES_5, N6
+#define CFM_VALUES_7  CFM_VALUES_6, N7
+#define CFM_VALUES_8  CFM_VALUES_7, N8
+#define CFM_VALUES_9  CFM_VALUES_8, N9
+#define CFM_VALUES_10 CFM_VALUES_9, N10
+
 struct ClassFamilyMask
 {
     uint64 Flags;
 
     ClassFamilyMask() : Flags(0) {}
     explicit ClassFamilyMask(uint64 familyFlags) : Flags(familyFlags) {}
+    ClassFamilyMask(uint32 f0, uint32 f1) : Flags(uint64(f0) | (uint64(f1) << 32)) {}
+
+    static ClassFamilyMask const Null;
 
     bool Empty() const { return Flags == 0; }
     bool operator!() const { return Empty(); }
@@ -568,11 +596,203 @@ struct ClassFamilyMask
         return Flags & mask;
     }
 
-    ClassFamilyMask& operator|= (ClassFamilyMask const& mask)
+    bool test(size_t offset) const
     {
-        Flags |= mask.Flags;
+        return Flags & (uint64(1) << offset);
+    }
+
+    template <CFM_ARGS_1>
+    bool test() const
+    {
+        return Flags & BitMask<uint64, CFM_VALUES_1>::value;
+    }
+
+    template <CFM_ARGS_2>
+    bool test() const
+    {
+        return Flags & BitMask<uint64, CFM_VALUES_2>::value;
+    }
+
+    template <CFM_ARGS_3>
+    bool test() const
+    {
+        return Flags & BitMask<uint64, CFM_VALUES_3>::value;
+    }
+
+    template <CFM_ARGS_4>
+    bool test() const
+    {
+        return Flags & BitMask<uint64, CFM_VALUES_4>::value;
+    }
+
+    template <CFM_ARGS_5>
+    bool test() const
+    {
+        return Flags & BitMask<uint64, CFM_VALUES_5>::value;
+    }
+
+    template <CFM_ARGS_6>
+    bool test() const
+    {
+        return Flags & BitMask<uint64, CFM_VALUES_6>::value;
+    }
+
+    template <CFM_ARGS_7>
+    bool test() const
+    {
+        return Flags & BitMask<uint64, CFM_VALUES_7>::value;
+    }
+
+    template <CFM_ARGS_8>
+    bool test() const
+    {
+        return Flags & BitMask<uint64, CFM_VALUES_8>::value;
+    }
+
+    template <CFM_ARGS_9>
+    bool test() const
+    {
+        return Flags & BitMask<uint64, CFM_VALUES_9>::value;
+    }
+
+    template <CFM_ARGS_10>
+    bool test() const
+    {
+        return Flags & BitMask<uint64, CFM_VALUES_10>::value;
+    }
+
+    template <CFM_ARGS_1>
+    static ClassFamilyMask create()
+    {
+        return ClassFamilyMask(BitMask<uint64, CFM_VALUES_1>::value);
+    }
+
+    template <CFM_ARGS_2>
+    static ClassFamilyMask create()
+    {
+        return ClassFamilyMask(BitMask<uint64, CFM_VALUES_2>::value);
+    }
+
+    template <CFM_ARGS_3>
+    static ClassFamilyMask create()
+    {
+        return ClassFamilyMask(BitMask<uint64, CFM_VALUES_3>::value);
+    }
+
+    template <CFM_ARGS_4>
+    static ClassFamilyMask create()
+    {
+        return ClassFamilyMask(BitMask<uint64, CFM_VALUES_4>::value);
+    }
+
+    template <CFM_ARGS_5>
+    static ClassFamilyMask create()
+    {
+        return ClassFamilyMask(BitMask<uint64, CFM_VALUES_5>::value);
+    }
+
+    template <CFM_ARGS_6>
+    static ClassFamilyMask create()
+    {
+        return ClassFamilyMask(BitMask<uint64, CFM_VALUES_6>::value);
+    }
+
+    template <CFM_ARGS_7>
+    static ClassFamilyMask create()
+    {
+        return ClassFamilyMask(BitMask<uint64, CFM_VALUES_7>::value);
+    }
+
+    template <CFM_ARGS_8>
+    static ClassFamilyMask create()
+    {
+        return ClassFamilyMask(BitMask<uint64, CFM_VALUES_8>::value);
+    }
+
+    template <CFM_ARGS_9>
+    static ClassFamilyMask create()
+    {
+        return ClassFamilyMask(BitMask<uint64, CFM_VALUES_9>::value);
+    }
+
+    template <CFM_ARGS_10>
+    static ClassFamilyMask create()
+    {
+        return ClassFamilyMask(BitMask<uint64, CFM_VALUES_10>::value);
+    }
+
+    bool operator== (ClassFamilyMask const& rhs) const
+    {
+        return Flags == rhs.Flags;
+    }
+
+    bool operator!= (ClassFamilyMask const& rhs) const
+    {
+        return Flags != rhs.Flags;
+    }
+
+    ClassFamilyMask operator& (ClassFamilyMask const& rhs) const
+    {
+        return ClassFamilyMask(Flags & rhs.Flags);
+    }
+
+    ClassFamilyMask operator| (ClassFamilyMask const& rhs) const
+    {
+        return ClassFamilyMask(Flags | rhs.Flags);
+    }
+
+    ClassFamilyMask operator^ (ClassFamilyMask const& rhs) const
+    {
+        return ClassFamilyMask(Flags ^ rhs.Flags);
+    }
+
+    ClassFamilyMask operator~ () const
+    {
+        return ClassFamilyMask(~Flags);
+    }
+
+    ClassFamilyMask& operator= (ClassFamilyMask const& rhs)
+    {
+        Flags  = rhs.Flags;
         return *this;
     }
+    
+    ClassFamilyMask& operator&= (ClassFamilyMask const& rhs)
+    {
+        Flags  &= rhs.Flags;
+        return *this;
+    }
+
+    ClassFamilyMask& operator|= (ClassFamilyMask const& rhs)
+    {
+        Flags  |= rhs.Flags;
+        return *this;
+    }
+
+    ClassFamilyMask& operator^= (ClassFamilyMask const& rhs)
+    {
+        Flags  ^= rhs.Flags;
+        return *this;
+    }
+
+    private: 
+        template <typename T, int Val>
+        struct Shift
+        {
+            static T const value = T(1) << Val;
+        };
+
+        template <typename T, int N1, int N2 = -1, int N3 = -1, int N4 = -1, int N5 = -1, int N6 = -1, int N7 = -1, int N8 = -1, int N9 = -1, int N10 = -1>
+        struct BitMask
+        {
+            static T const value = Shift<T, N1>::value | BitMask<T, N2, N3, N4, N5, N6, N7, N8, N9, N10, -1>::value;
+        };
+
+        template <typename T>
+        struct BitMask<T, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1>
+        {
+            static T const value = 0;
+        };
 };
 
 #define MAX_SPELL_REAGENTS 8
@@ -709,6 +929,77 @@ struct SpellEntry
 
             return SPELL_EFFECT_NONE;
         }
+
+        template <SpellFamily family, CFM_ARGS_1>
+        bool IsFitToFamily() const
+        {
+            return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_1>();
+        }
+        
+        template <SpellFamily family, CFM_ARGS_2>
+        bool IsFitToFamily() const
+        {
+            return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_2>();
+        }
+        
+        template <SpellFamily family, CFM_ARGS_3>
+        bool IsFitToFamily() const
+        {
+            return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_3>();
+        }
+        
+        template <SpellFamily family, CFM_ARGS_4>
+        bool IsFitToFamily() const
+        {
+            return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_4>();
+        }
+        
+        template <SpellFamily family, CFM_ARGS_5>
+        bool IsFitToFamily() const
+        {
+            return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_5>();
+        }
+        
+        template <SpellFamily family, CFM_ARGS_6>
+        bool IsFitToFamily() const
+        {
+            return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_6>();
+        }
+        
+        template <SpellFamily family, CFM_ARGS_7>
+        bool IsFitToFamily() const
+        {
+            return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_7>();
+        }
+        
+        template <SpellFamily family, CFM_ARGS_8>
+        bool IsFitToFamily() const
+        {
+            return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_8>();
+        }
+        
+        template <SpellFamily family, CFM_ARGS_9>
+        bool IsFitToFamily() const
+        {
+            return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_9>();
+        }
+        
+        template <SpellFamily family, CFM_ARGS_10>
+        bool IsFitToFamily() const
+        {
+            return SpellFamily(SpellFamilyName) == family && GetSpellFamilyFlags().test<CFM_VALUES_10>();
+        }
+
+        inline uint32 GetMechanic() const { return Mechanic; };
+        inline uint32 GetManaCost() const { return manaCost; };
+        inline uint32 GetSpellFamilyName() const { return SpellFamilyName; };
+        inline uint32 GetAuraInterruptFlags() const { return AuraInterruptFlags; };
+        inline uint32 GetStackAmount() const { return StackAmount; };
+        inline uint32 GetEffectImplicitTargetAByIndex(SpellEffectIndex j) const { return EffectImplicitTargetA[j];};
+        inline uint32 GetEffectImplicitTargetBByIndex(SpellEffectIndex j) const { return EffectImplicitTargetB[j];};
+        inline uint32 GetEffectApplyAuraNameByIndex(SpellEffectIndex j) const { return EffectApplyAuraName[j];};
+        inline uint32 GetEffectMiscValue(SpellEffectIndex j) const { return EffectMiscValue[j];};
+        inline ClassFamilyMask GetSpellFamilyFlags() const { return SpellFamilyFlags; };
 
     private:
         // prevent creating custom entries (copy data from original in fact)
