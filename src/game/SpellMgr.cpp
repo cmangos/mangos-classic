@@ -434,9 +434,12 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             else
             {
                 // Well Fed buffs (must be exclusive with Food / Drink replenishment effects, or else Well Fed will cause them to be removed)
-                // SpellIcon 2560 is Spell 46687, does not have this flag
                 if (spellInfo->HasAttribute(SPELL_ATTR_EX2_FOOD_BUFF))
                     return SPELL_WELL_FED;
+
+                if (spellInfo->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MOD_STAT && spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC &&
+                    spellInfo->School == SPELL_SCHOOL_NATURE && spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && spellInfo->Attributes == SPELL_ATTR_NOT_SHAPESHIFT)
+                    return SPELL_SCROLL;
             }
             break;
         }
@@ -535,6 +538,51 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         return sp;
 
     return SPELL_NORMAL;
+}
+
+SpellBuffType GetSpellBuffType(uint32 spellId)
+{
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+
+    if (!spellInfo)
+        return SPELL_BUFF_NONE;
+
+    if (GetSpellSpecific(spellId) == SPELL_SCROLL)
+    {
+        switch (spellInfo->EffectMiscValue[EFFECT_INDEX_0])
+        {
+            case UNIT_MOD_STAT_STRENGTH:
+                return SPELL_BUFF_STRENGTH;
+            case UNIT_MOD_STAT_AGILITY:
+                return SPELL_BUFF_AGILITY;
+            case UNIT_MOD_STAT_STAMINA:
+                return SPELL_BUFF_STAMINA;
+            case UNIT_MOD_STAT_INTELLECT:
+                return SPELL_BUFF_INTELLECT;
+            case UNIT_MOD_STAT_SPIRIT:
+                return SPELL_BUFF_SPIRIT;
+            default:
+                return SPELL_BUFF_NONE;
+        }
+
+        return SPELL_BUFF_NONE;
+    }
+
+    if (spellInfo->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_POWER_WORD_FORTITUDE>())
+        return SPELL_BUFF_STAMINA;
+
+    if (spellInfo->IsFitToFamily<SPELLFAMILY_MAGE, CF_MAGE_ARCANE_INT>())
+        return SPELL_BUFF_INTELLECT;
+
+    if (spellInfo->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_MISC2>() &&
+        spellInfo->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MOD_STAT)
+        return SPELL_BUFF_SPIRIT;
+
+    if (spellInfo->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_SHADOW_PROTECTION>() ||
+        (spellInfo->IsFitToFamily<SPELLFAMILY_PALADIN, CF_PALADIN_AURAS>() && spellInfo->EffectMiscValue[EFFECT_INDEX_0] == 32))
+        return SPELL_BUFF_SHADOW_RESISTANCE;
+
+    return SPELL_BUFF_NONE;
 }
 
 // target not allow have more one spell specific from same caster
@@ -1786,21 +1834,16 @@ bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
 
 bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) const
 {
+    if (spellId_1 == spellId_2)
+        return false;
+
+    if (GetSpellBuffType(spellId_1) != SPELL_BUFF_NONE && GetSpellBuffType(spellId_1) == GetSpellBuffType(spellId_2))
+        return true;
+
     SpellEntry const* spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
     SpellEntry const* spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
 
     if (!spellInfo_1 || !spellInfo_2)
-        return false;
-
-    if (spellId_1 == spellId_2)
-        return false;
-
-    // Resurrection sickness
-    if ((spellInfo_1->Id == SPELL_ID_PASSIVE_RESURRECTION_SICKNESS) != (spellInfo_2->Id == SPELL_ID_PASSIVE_RESURRECTION_SICKNESS))
-        return false;
-
-    // Allow stack passive and not passive spells
-    if (spellInfo_1->HasAttribute(SPELL_ATTR_PASSIVE) != spellInfo_2->HasAttribute(SPELL_ATTR_PASSIVE))
         return false;
 
     // Specific spell family spells
@@ -2081,90 +2124,30 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             // Wing Clip -> Improved Wing Clip (multi-family check)
             if ((spellInfo_1->SpellFamilyFlags & uint64(0x40)) && spellInfo_2->Id == 19229)
                 return false;
-
-            // Concussive Shot and Imp. Concussive Shot (multi-family check)
-            if (spellInfo_2->Id == 19410 && spellInfo_1->Id == 5116)
-                return false;
-            break;
-        case SPELLFAMILY_PALADIN:
-            if (spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN)
-            {
-                // Paladin Seals
-                if (IsSealSpell(spellInfo_1) && IsSealSpell(spellInfo_2))
-                    return true;
-                // Concentration Aura and Improved Concentration Aura and Aura Mastery
-                if ((spellInfo_1->SpellIconID == 1487) && (spellInfo_2->SpellIconID == 1487))
-                    return false;
-            }
-
-            // Combustion and Fire Protection Aura (multi-family check)
-            if (spellInfo_2->Id == 11129 && spellInfo_1->SpellIconID == 33 && spellInfo_1->SpellVisual == 321)
-                return false;
-
-            // *Sanctity Aura -> Unstable Currents and other (multi-family check)
-            if (spellInfo_1->SpellIconID == 502 && spellInfo_2->SpellFamilyName == SPELLFAMILY_GENERIC && spellInfo_2->SpellIconID == 502 && spellInfo_2->SpellVisual == 969)
-                return false;
-            break;
-        case SPELLFAMILY_SHAMAN:
-            if (spellInfo_2->SpellFamilyName == SPELLFAMILY_SHAMAN)
-            {
-                // Windfury weapon
-                if (spellInfo_1->SpellIconID == 220 && spellInfo_2->SpellIconID == 220 &&
-                        !spellInfo_1->IsFitToFamilyMask(spellInfo_2->SpellFamilyFlags))
-                    return false;
-            }
-            // Bloodlust and Bloodthirst (multi-family check)
-            if (spellInfo_1->Id == 2825 && spellInfo_2->SpellIconID == 38 && spellInfo_2->SpellVisual == 0)
-                return false;
-            break;
-        default:
             break;
     }
 
-    // more generic checks
-    if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
-            spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
-    {
-        bool isModifier = false;
-        for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-        {
-            if (spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER ||
-                    spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_ADD_PCT_MODIFIER  ||
-                    spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER ||
-                    spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_PCT_MODIFIER)
-                isModifier = true;
-        }
+    if (IsSealSpell(spellInfo_1) && IsSealSpell(spellInfo_2))
+        return true;
 
-        if (!isModifier)
-            return true;
-    }
+    if (spellInfo_1->IsFitToFamily<SPELLFAMILY_DRUID, CF_DRUID_MARK_OF_THE_WILD>() &&
+        spellInfo_2->IsFitToFamily<SPELLFAMILY_DRUID, CF_DRUID_MARK_OF_THE_WILD>())
+        return true;
+
+    if ((spellInfo_1->IsFitToFamily<SPELLFAMILY_WARRIOR, CF_WARRIOR_SUNDER_ARMOR>() ||
+         spellInfo_1->IsFitToFamily<SPELLFAMILY_ROGUE,   CF_ROGUE_EXPOSE_ARMOR>()) &&
+        (spellInfo_2->IsFitToFamily<SPELLFAMILY_WARRIOR, CF_WARRIOR_SUNDER_ARMOR>() ||
+         spellInfo_2->IsFitToFamily<SPELLFAMILY_ROGUE,   CF_ROGUE_EXPOSE_ARMOR>()))
+        return true;
+
+    if (spellInfo_1->IsFitToFamily<SPELLFAMILY_MAGE, CF_MAGE_D_A_MAGIC>() &&
+        spellInfo_2->IsFitToFamily<SPELLFAMILY_MAGE, CF_MAGE_D_A_MAGIC>())
+        return true;
 
     if (IsRankSpellDueToSpell(spellInfo_1, spellId_2))
         return true;
 
-    if (spellInfo_1->SpellFamilyName == 0 || spellInfo_2->SpellFamilyName == 0)
-        return false;
-
-    if (spellInfo_1->SpellFamilyName != spellInfo_2->SpellFamilyName)
-        return false;
-
-    bool dummy_only = true;
-    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-    {
-        if (spellInfo_1->Effect[i] != spellInfo_2->Effect[i] ||
-                spellInfo_1->EffectItemType[i] != spellInfo_2->EffectItemType[i] ||
-                spellInfo_1->EffectMiscValue[i] != spellInfo_2->EffectMiscValue[i] ||
-                spellInfo_1->EffectApplyAuraName[i] != spellInfo_2->EffectApplyAuraName[i])
-            return false;
-
-        // ignore dummy only spells
-        if (spellInfo_1->Effect[i] && spellInfo_1->Effect[i] != SPELL_EFFECT_DUMMY && spellInfo_1->EffectApplyAuraName[i] != SPELL_AURA_DUMMY)
-            dummy_only = false;
-    }
-    if (dummy_only)
-        return false;
-
-    return true;
+    return false;
 }
 
 bool SpellMgr::IsProfessionOrRidingSpell(uint32 spellId)

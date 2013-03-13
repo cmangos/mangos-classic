@@ -68,9 +68,22 @@ enum SpellSpecific
     SPELL_FOOD              = 20,
     SPELL_DRINK             = 21,
     SPELL_FOOD_AND_DRINK    = 22,
+    SPELL_SCROLL            = 23
+};
+
+enum SpellBuffType
+{
+    SPELL_BUFF_NONE                 = 0,
+    SPELL_BUFF_STRENGTH             = 1,
+    SPELL_BUFF_AGILITY              = 2,
+    SPELL_BUFF_STAMINA              = 3,
+    SPELL_BUFF_INTELLECT            = 4,
+    SPELL_BUFF_SPIRIT               = 5,
+    SPELL_BUFF_SHADOW_RESISTANCE    = 6
 };
 
 SpellSpecific GetSpellSpecific(uint32 spellId);
+SpellBuffType GetSpellBuffType(uint32 spellId);
 
 // Different spell properties
 inline float GetSpellRadius(SpellRadiusEntry const* radius) { return (radius ? radius->Radius : 0); }
