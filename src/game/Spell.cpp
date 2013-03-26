@@ -1447,82 +1447,10 @@ struct TargetDistanceOrderNear : public std::binary_function<const Unit, const U
 void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap)
 {
     float radius;
-    if (m_spellInfo->EffectRadiusIndex[effIndex])
-        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
-    else
-        radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
-
     uint32 EffectChainTarget = m_spellInfo->EffectChainTarget[effIndex];
+    uint32 unMaxTargets = m_spellInfo->MaxAffectedTargets;  // Get spell max affected targets
 
-    if (Unit* realCaster = GetAffectiveCaster())
-    {
-        if (Player* modOwner = realCaster->GetSpellModOwner())
-        {
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius, this);
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
-        }
-    }
-
-    // Get spell max affected targets
-    uint32 unMaxTargets = m_spellInfo->MaxAffectedTargets;
-
-    // custom target amount cases
-    switch (m_spellInfo->SpellFamilyName)
-    {
-        case SPELLFAMILY_GENERIC:
-        {
-            switch (m_spellInfo->Id)
-            {
-                case 802:                                   // Mutate Bug (AQ40, Emperor Vek'nilash)
-                case 804:                                   // Explode Bug (AQ40, Emperor Vek'lor)
-                case 23138:                                 // Gate of Shazzrah (MC, Shazzrah)
-                case 24781:                                 // Dream Fog (Emerald Dragons)
-                case 28560:                                 // Summon Blizzard (Naxx, Sapphiron)
-                    unMaxTargets = 1;
-                    break;
-                case 28542:                                 // Life Drain (Naxx, Sapphiron)
-                    unMaxTargets = 2;
-                    break;
-                case 28796:                                 // Poison Bolt Volley (Naxx, Faerlina)
-                    unMaxTargets = 10;
-                    break;
-                case 25991:                                 // Poison Bolt Volley (AQ40, Pincess Huhuran)
-                    unMaxTargets = 15;
-                    break;
-            }
-            break;
-        }
-        default:
-            break;
-    }
-
-    // custom radius cases
-    switch (m_spellInfo->SpellFamilyName)
-    {
-        case SPELLFAMILY_GENERIC:
-        {
-            switch (m_spellInfo->Id)
-            {
-                case 24811:                                 // Draw Spirit (Lethon)
-                {
-                    if (effIndex == EFFECT_INDEX_0)         // Copy range from EFF_1 to 0
-                        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_1]));
-                    break;
-                }
-                case 28241:                                 // Poison (Naxxramas, Grobbulus Cloud)
-                {
-                    if (SpellAuraHolder* auraHolder = m_caster->GetSpellAuraHolder(28158))
-                        radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
-                    break;
-                }
-                default:
-                    break;
-            }
-            break;
-        }
-        default:
-            break;
-    }
+    GetSpellRangeAndRadius(effIndex, radius, EffectChainTarget, unMaxTargets);
 
     std::list<GameObject*> tempTargetGOList;
 
@@ -6299,4 +6227,79 @@ void Spell::CancelGlobalCooldown()
         m_caster->GetCharmInfo()->GetGlobalCooldownMgr().CancelGlobalCooldown(m_spellInfo);
     else if (m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player*)m_caster)->GetGlobalCooldownMgr().CancelGlobalCooldown(m_spellInfo);
+}
+
+void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uint32& EffectChainTarget, uint32& unMaxTargets) const
+{
+    if (m_spellInfo->EffectRadiusIndex[effIndex])
+        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
+    else
+        radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+
+    if (Unit* realCaster = GetAffectiveCaster())
+    {
+        if (Player* modOwner = realCaster->GetSpellModOwner())
+        {
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius, this);
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
+        }
+    }
+
+    // custom target amount cases
+    switch (m_spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_GENERIC:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 802:                                   // Mutate Bug (AQ40, Emperor Vek'nilash)
+                case 804:                                   // Explode Bug (AQ40, Emperor Vek'lor)
+                case 23138:                                 // Gate of Shazzrah (MC, Shazzrah)
+                case 24781:                                 // Dream Fog (Emerald Dragons)
+                case 28560:                                 // Summon Blizzard (Naxx, Sapphiron)
+                    unMaxTargets = 1;
+                    break;
+                case 28542:                                 // Life Drain (Naxx, Sapphiron)
+                    unMaxTargets = 2;
+                    break;
+                case 28796:                                 // Poison Bolt Volley (Naxx, Faerlina)
+                    unMaxTargets = 10;
+                    break;
+                case 25991:                                 // Poison Bolt Volley (AQ40, Pincess Huhuran)
+                    unMaxTargets = 15;
+                    break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    // custom radius cases
+    switch (m_spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_GENERIC:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 24811:                                 // Draw Spirit (Lethon)
+                {
+                    if (effIndex == EFFECT_INDEX_0)         // Copy range from EFF_1 to 0
+                        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_1]));
+                    break;
+                }
+                case 28241:                                 // Poison (Naxxramas, Grobbulus Cloud)
+                {
+                    if (SpellAuraHolder* auraHolder = m_caster->GetSpellAuraHolder(28158))
+                        radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
 }

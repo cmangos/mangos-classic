@@ -348,16 +348,6 @@ class Spell
         void WriteSpellGoTargets(WorldPacket* data);
         void WriteAmmoToPacket(WorldPacket* data);
 
-        typedef std::list<Unit*> UnitList;
-        void FillTargetMap();
-        void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap);
-
-        void FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = NULL);
-        void FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float radius, bool raid, bool withPets, bool withcaster);
-
-        // Returns a target that was filled by SPELL_SCRIPT_TARGET (or selected victim) Can return NULL
-        Unit* GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const;
-
         template<typename T> WorldObject* FindCorpseUsing();
 
         bool CheckTarget(Unit* target, SpellEffectIndex eff);
@@ -439,6 +429,8 @@ class Spell
         void CleanupTargetList();
         void ClearCastItem();
 
+        typedef std::list<Unit*> UnitList;
+
     protected:
         bool HasGlobalCooldown();
         void TriggerGlobalCooldown();
@@ -507,6 +499,19 @@ class Spell
         uint32 m_procAttacker;                              // Attacker trigger flags
         uint32 m_procVictim;                                // Victim   trigger flags
         void   prepareDataForTriggerSystem();
+
+        //*****************************************
+        // Spell target filling
+        //*****************************************
+        void FillTargetMap();
+        void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap);
+
+        void FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = NULL);
+        void FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float radius, bool raid, bool withPets, bool withcaster);
+
+        // Returns a target that was filled by SPELL_SCRIPT_TARGET (or selected victim) Can return NULL
+        Unit* GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const;
+        void GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uint32& EffectChainTarget, uint32& unMaxTargets) const;
 
         //*****************************************
         // Spell target subsystem
