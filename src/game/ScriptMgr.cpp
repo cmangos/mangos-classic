@@ -631,6 +631,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             }
             case SCRIPT_COMMAND_PAUSE_WAYPOINTS:            // 32
                 break;
+            case SCRIPT_COMMAND_RESERVED_1:                 // 33
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -1667,6 +1669,11 @@ bool ScriptAction::HandleScriptStep()
                 ((Creature*)pSource)->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
             else
                 ((Creature*)pSource)->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+            break;
+        }
+        case SCRIPT_COMMAND_RESERVED_1:                     // 33
+        {
+            sLog.outError(" DB-SCRIPTS: Process table `%s` id %u, command %u not supported.", m_table, m_script->id, m_script->command);
             break;
         }
         default:

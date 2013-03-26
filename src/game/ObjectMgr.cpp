@@ -6881,6 +6881,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         case CONDITION_RESERVED_1:
         case CONDITION_RESERVED_2:
         case CONDITION_RESERVED_3:
+        case CONDITION_RESERVED_4:
             return false;
         case CONDITION_QUEST_NONE:
         {
@@ -7308,6 +7309,7 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
         case CONDITION_RESERVED_1:
         case CONDITION_RESERVED_2:
         case CONDITION_RESERVED_3:
+        case CONDITION_RESERVED_4:
         {
             sLog.outErrorDb("Condition (%u) reserved for later versions, skipped", condition);
             return false;

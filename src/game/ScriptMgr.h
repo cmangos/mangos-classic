@@ -98,6 +98,8 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // dataint=diff to change a waittime of current Waypoint Movement
     SCRIPT_COMMAND_PAUSE_WAYPOINTS          = 32,           // resSource = Creature
                                                             // datalong = 0: unpause waypoint 1: pause waypoint
+    SCRIPT_COMMAND_RESERVED_1               = 33,           // reserved for 3.x and later
+
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
