@@ -104,14 +104,14 @@ then
     echo "Converting comments in $l"
     sed '/http:/ !s:\//\([a-zA-Z0-9]\):// \1:g;
          s#^\(............................................................\) [ ]*//#\1//#g;
-         /^..............................................\/[\/]*$/ !s#^\(..................................................\)//#\1          //#g; ' $l > temp
+         /^..............................................\/[\/]*$/ !s#^\(..................................................\)//#\1          //#g; ' "$l" > temp
     if [ "$?" != "0" ]
     then
       echo "An error HAPPENED"
       exit 1
     fi
 
-    mv temp $l
+    mv temp "$l"
   done
 
   echo "Processing $DO on $DO_ON done"
@@ -145,7 +145,7 @@ then
   rm virtuals
   for h in $HEADERLIST
   do
-    grep "virtual" $h >> virtuals
+    grep "virtual" "$h" >> virtuals
   done
 
   #Filter comment lines
@@ -190,8 +190,8 @@ then
              s/( "$f"\(.*\))$/\1 override/g; t
              s/( "$f"\(.*\)[ ]*const[\*]*)([ ].*)/\1 override\2/g; t
              s/( "$f"\(.*\))([ ].*)/\1 override\2/g"
-      sed -r "$PARSE" $h > temp
-      mv temp $h
+      sed -r "$PARSE" "$h" > temp
+      mv temp "$h"
     done < virtualNames
   done
 
