@@ -1464,10 +1464,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             float angle = m_caster->GetOrientation();
             switch (targetMode)
             {
-                case TARGET_TOTEM_EARTH:                         break;
-                case TARGET_TOTEM_WATER: angle += M_PI_F;        break;
-                case TARGET_TOTEM_AIR:   angle += M_PI_F * 0.5f; break;
-                case TARGET_TOTEM_FIRE:  angle += M_PI_F * 1.5f; break;
+                case TARGET_TOTEM_FIRE:  angle += M_PI_F * 0.25f; break;            // front - left
+                case TARGET_TOTEM_AIR:   angle += M_PI_F * 0.75f; break;            // back  - left
+                case TARGET_TOTEM_WATER: angle += M_PI_F * 1.25f; break;            // back  - right
+                case TARGET_TOTEM_EARTH: angle += M_PI_F * 1.75f; break;            // front - right
             }
 
             float x, y;
