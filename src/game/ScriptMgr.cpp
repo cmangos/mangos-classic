@@ -768,7 +768,7 @@ void ScriptMgr::LoadCreatureDeathScripts()
     LoadScripts(sCreatureDeathScripts, "dbscripts_on_creature_death");
 
     // check ids
-    for(ScriptMapMap::const_iterator itr = sCreatureDeathScripts.second.begin(); itr != sCreatureDeathScripts.second.end(); ++itr)
+    for (ScriptMapMap::const_iterator itr = sCreatureDeathScripts.second.begin(); itr != sCreatureDeathScripts.second.end(); ++itr)
     {
         if (!sObjectMgr.GetCreatureTemplate(itr->first))
             sLog.outErrorDb("Table `dbscripts_on_creature_death` has not existing creature (Entry: %u) as script id", itr->first);
@@ -1646,12 +1646,12 @@ bool ScriptAction::HandleScriptStep()
 
             if (result)                                    // Terminate further steps of this script
             {
-                 if (m_script->textId[0] && !LogIfNotCreature(pSource))
-                 {
-                     Creature* cSource = static_cast<Creature*>(pSource);
-                     if (cSource->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
-                         (static_cast<WaypointMovementGenerator<Creature>* >(cSource->GetMotionMaster()->top()))->AddToWaypointPauseTime(m_script->textId[0]);
-                 }
+                if (m_script->textId[0] && !LogIfNotCreature(pSource))
+                {
+                    Creature* cSource = static_cast<Creature*>(pSource);
+                    if (cSource->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                        (static_cast<WaypointMovementGenerator<Creature>* >(cSource->GetMotionMaster()->top()))->AddToWaypointPauseTime(m_script->textId[0]);
+                }
 
                 return true;
             }

@@ -397,9 +397,9 @@ class ScriptAction
         bool IsSameScript(const char* table, uint32 id, ObjectGuid sourceGuid, ObjectGuid targetGuid, ObjectGuid ownerGuid) const
         {
             return table == m_table && id == GetId() &&
-                (sourceGuid == m_sourceGuid || !sourceGuid) &&
-                (targetGuid == m_targetGuid || !targetGuid) &&
-                (ownerGuid == m_ownerGuid || !ownerGuid);
+                   (sourceGuid == m_sourceGuid || !sourceGuid) &&
+                   (targetGuid == m_targetGuid || !targetGuid) &&
+                   (ownerGuid == m_ownerGuid || !ownerGuid);
         }
 
     private:

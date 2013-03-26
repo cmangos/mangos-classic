@@ -2947,7 +2947,7 @@ void SpellMgr::LoadSpellScriptTarget()
                     if (bounds.first == bounds.second)
                     {
                         sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = %u (TARGET_SCRIPT), but does not have record in `spell_script_target`", spellInfo->Id, TARGET_SCRIPT);
-                        break;                                  // effects of spell
+                        break;                              // effects of spell
                     }
                 }
             }
