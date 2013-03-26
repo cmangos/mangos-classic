@@ -1976,6 +1976,11 @@ bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex ef
     return m_pOnEffectDummyItem != NULL && m_pOnEffectDummyItem(pCaster, spellId, effIndex, pTarget);
 }
 
+bool ScriptMgr::OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget)
+{
+    return m_pOnEffectScriptEffectCreature != NULL && m_pOnEffectScriptEffectCreature(pCaster, spellId, effIndex, pTarget);
+}
+
 bool ScriptMgr::OnAuraDummy(Aura const* pAura, bool apply)
 {
     return m_pOnAuraDummy != NULL && m_pOnAuraDummy(pAura, apply);
