@@ -211,7 +211,8 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 
 16 SCRIPT_COMMAND_PLAY_SOUND                source = any object, target=any/player
                                             * datalong = sound_id
-                                            * datalong2 (bitmask: 0/1=anyone/target, 0/2=with distance dependent, so 1|2 = 3 is target with distance dependent)
+                                            * datalong2 (bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide;
+                                                                  so 1|2 = 3 is target with distance dependent)
 
 17 SCRIPT_COMMAND_CREATE_ITEM               source or target must be player
                                             * datalong = item entry

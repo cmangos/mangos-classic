@@ -458,6 +458,11 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                                     tablename, tmp.playSound.soundId, tmp.id);
                     continue;
                 }
+                // bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide
+                if (tmp.playSound.flags & ~(1 | 2 | 4 | 8))
+                    sLog.outErrorDb("Table `%s` using unsupported sound flags (datalong2: %u) in SCRIPT_COMMAND_PLAY_SOUND for script id %u, unsupported flags will be ignored", tablename, tmp.playSound.flags, tmp.id);
+                if ((tmp.playSound.flags & (1 | 2)) > 0 && (tmp.playSound.flags & (4 | 8)) > 0)
+                    sLog.outErrorDb("Table `%s` uses sound flags (datalong2: %u) in SCRIPT_COMMAND_PLAY_SOUND for script id %u, combining (1|2) with (4|8) makes no sense", tablename, tmp.playSound.flags, tmp.id);
                 break;
             }
             case SCRIPT_COMMAND_CREATE_ITEM:                // 17
@@ -1378,7 +1383,7 @@ bool ScriptAction::HandleScriptStep()
                 break;
             }
 
-            // bitmask: 0/1=anyone/target, 0/2=with distance dependent
+            // bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide
             Player* pSoundTarget = NULL;
             if (m_script->playSound.flags & 1)
             {
@@ -1387,9 +1392,10 @@ bool ScriptAction::HandleScriptStep()
                     break;
             }
 
-            // bitmask: 0/1=anyone/target, 0/2=with distance dependent
             if (m_script->playSound.flags & 2)
                 pSource->PlayDistanceSound(m_script->playSound.soundId, pSoundTarget);
+            else if (m_script->playSound.flags & (4 | 8))
+                m_map->PlayDirectSoundToMap(m_script->playSound.soundId, m_script->playSound.flags & 8 ? pSource->GetZoneId() : 0);
             else
                 pSource->PlayDirectSound(m_script->playSound.soundId, pSoundTarget);
 
