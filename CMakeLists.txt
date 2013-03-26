@@ -15,11 +15,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+cmake_minimum_required(VERSION 2.8)
+
 project(MaNGOS)
 set(MANGOS_VERSION 0.12.2)
-
-# CMake policies
-cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH}
@@ -27,10 +26,9 @@ set(CMAKE_MODULE_PATH
 )
 
 # Force out-of-source build
-string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" BUILDING_IN_SOURCE)
-if(BUILDING_IN_SOURCE)
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
   message(FATAL_ERROR
-    "This project requires an out of source build. Remove the file 'CMakeCache.txt' found in this directory before continuing, create a separate build directory and run 'cmake <srcs> [options]' from there."
+    "This project requires an out of source build. Remove the file 'CMakeCache.txt' found in this directory before continuing, create a separate build directory and run 'cmake [options] <srcs>' from there."
   )
 endif()
 
@@ -81,20 +79,6 @@ if(WIN32)
     set(DEP_ARCH x64)
   endif()
 endif()
-
-# if(WIN32)
-#   if(PLATFORM MATCHES X86)
-#     set(ARCH_FLAGS "/MACHINE:X86")
-#   else()
-#     set(ARCH_FLAGS "/MACHINE:X64")
-#   endif()
-# elseif(UNIX)
-#   if(PLATFORM MATCHES X86)
-#     set(ARCH_FLAGS "-m32")
-#   else()
-#     set(ARCH_FLAGS "-m64")
-#   endif()
-# endif()
 
 option(DEBUG "Debug mode" 0)
 # option(CLI "With CLI" 1) # Not used by MaNGOS so far
@@ -321,22 +305,6 @@ add_executable(genrev
   ${GENREV_SRC}
 )
 
-# if(WIN32)
-#   set_target_properties(genrev PROPERTIES
-#     COMPILE_FLAGS "/MACHINE:X86"
-#   )
-# elseif(UNIX)
-#   set_target_properties(genrev PROPERTIES
-#     COMPILE_FLAGS "-m32"
-#     LINK_FLAGS "-m32"
-#   )
-# endif()
-# if(XCODE)
-#   set_target_properties(genrev PROPERTIES
-#     XCODE_ATTRIBUTE_ARCHS "i386"
-#   )
-# endif()
-
 get_target_property(GENERATE_EXE genrev LOCATION)
 add_custom_target("revision.h" ALL
   COMMAND ${GENERATE_EXE} ${CMAKE_SOURCE_DIR}
@@ -376,9 +344,6 @@ if(WIN32)
   endif()
 endif()
 
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ARCH_FLAGS}")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARCH_FLAGS}")
-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ARCH_FLAGS}")
 if(XCODE)
   if(PLATFORM MATCHES X86)
     set(CMAKE_OSX_ARCHITECTURES i386)
