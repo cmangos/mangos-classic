@@ -1495,7 +1495,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         SpellImmuneList m_spellImmune[MAX_SPELL_IMMUNITY];
 
         // Threat related methods
-        bool CanHaveThreatList() const;
+        bool CanHaveThreatList(bool ignoreAliveState = false) const;
         void AddThreat(Unit* pVictim, float threat = 0.0f, bool crit = false, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NONE, SpellEntry const* threatSpell = NULL);
         float ApplyTotalThreatModifier(float threat, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NORMAL);
         void DeleteThreatList();

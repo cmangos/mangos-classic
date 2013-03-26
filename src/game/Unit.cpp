@@ -6980,14 +6980,14 @@ void Unit::SetDeathState(DeathState s)
 ########                          ########
 ########################################*/
 
-bool Unit::CanHaveThreatList() const
+bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
 {
     // only creatures can have threat list
     if (GetTypeId() != TYPEID_UNIT)
         return false;
 
     // only alive units can have threat list
-    if (!isAlive())
+    if (!isAlive() && !ignoreAliveState)
         return false;
 
     Creature const* creature = ((Creature const*)this);
