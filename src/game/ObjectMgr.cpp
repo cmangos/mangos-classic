@@ -165,7 +165,6 @@ Group* ObjectMgr::GetGroupById(uint32 id) const
 
     return NULL;
 }
-
 void ObjectMgr::LoadCreatureLocales()
 {
     mCreatureLocaleMap.clear();                             // need for reload case
