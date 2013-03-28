@@ -18,7 +18,8 @@ which is hosted at https://github.com/cmangos
 
 * Make sure you have a [Forum account](http://cmangos.net)
 * Make sure you have a [GitHub account](https://github.com/signup/free)
-* Fork the CMaNGOS repository on Github (This way you will get informed about changes by github)
+* Watch the CMaNGOS repository on GitHub (This way you will get informed about changes by GitHub)
+* Optionally: Fork the CMaNGOS repository on GitHub in order to be able to publish own changes and create pull requests with them (see below for details)
 
 You can help us developing the core by (at least!)
 * Giving Feedback on Bugs
@@ -27,7 +28,7 @@ You can help us developing the core by (at least!)
 
 # Bug-Reports
 
-If you spot a bug, you can either report it on our forums (cmangos.net) or by opening an issue in one of our github repositories.
+If you spot a bug, please report it by opening an issue on our centralized GitHub issue tracking repository: [cmangos/issues](https://github.com/cmangos/issues/issues).
 Before you do so, please consider the following points:
 
 * The bug happens on a clean core
@@ -36,18 +37,18 @@ Before you do so, please consider the following points:
 
 When you decide to create a new bug report, please make sure that this report includes:
 
-* On which revision the bug happens
-* Revisions of additional parts of the CMaNGOS familiy (SD2-version, Database Name and Version, and such)
-* What you need to do do trigger the bug, be as detailed as possible.
-  Please use spell-ids in your description, and try to use .cast commands to reproduce your bug. This makes reproducing much easier!
-* What IS happening WHEN doing your actions
-* What SHOULD happen when doing your actions - if possible also add a source why you think this should happen
-
-* Please report only one bug per issue/thread!
+* Revision on which you encountered this bug (if known, also the revision or timeframe where it first appeared) - you can also post the link to the commit on the upstream repository
+* Revisions of additional parts of the CMaNGOS familiy (SD2 version, database name and version, and such)
+* A detailed step-by-step report how this bug can be reproduced
+* A detailed explenation of what DOES happen
+* A detailed explenation of what SHOULD happen  - if possible also add a source why you think this should happen
+* When reporting spell-related bugs, please use spell-IDs in your description, and try to use .cast commands to reproduce your bug. This makes reproducing much easier!
+* When reporting crashes, please include a crash-log (as detailed as possible - we like GDB logs from debug builds!)
+* Only report one bug per issue/thread
 
 # Testing features in development
 ## Importing pull-requests
-Merging pull-requests into your branch for testing can be done by the GUIs provided by Github.
+Merging pull-requests into your branch for testing can be done by the GUIs provided by GitHub.
 For people not wanting to use them, we have a "MergeHelper.sh" script shipped in contrib/
 
 You can - also on Windows within a Git Bash - start the script by using
@@ -67,7 +68,7 @@ which will simply merge pull-request 37 from your origin repository
 
   This should be especially reasonable, if you yourself use topic branches like described in the next section!
 
-Please be sure to feedback your test-results through proper channels -- this means commenting on the pull-requests, commenting on issues and commits on github.
+Please be sure to feedback your test-results through proper channels -- this means commenting on the pull-requests, commenting on issues and commits on GitHub.
 
 
 ## Importing features from third-party repos
@@ -109,20 +110,21 @@ This code style is automatically enforced by the helper scripts in contrib/clean
 
 You can publish and share your contribution projects via forum or by pull-requests
 
-### Via Forum
-Using the our forum for sharing patches is perfectly fine, but for complicated features we strongly suggest to use topic branches and pull-requests
-If you want to use the forum, please consider _also_ [Forum Patch submission Guidelines](http://cmangos.net/thread-42.html)
-
-### Via Pull-Requests on Github
 When you have created your topic-branch and pushed it to your local repository, you can easily create a pull-request to our repo from this!
+Please always create the pull request on the repository containing the CMaNGOS code you were working on.
 
-Here is the [Github Information on Pull-Requests](https://help.github.com/articles/using-pull-requests)
+Here is the [GitHub Information on Pull-Requests](https://help.github.com/articles/using-pull-requests)
 
 This has these advantages:
 * Your code will be read and commented on by many people
 * Your code will be fetched by people willing to help testing
 * Once you have opened a pull-request for a branch, every change of the branch (like a new commit) will automatically be added to the pull-request.
   So you won't have any additional overhead in maintaining the pull-request :)
+* Travis CI will automatically test the build of your pull request and report the status just as it does for our commits
+
+If it is only a minor change and you do not want to create a topic-branch and a pull request (though you should, it's fast and easy to do!),
+you can also open a normal issue and paste the diff in there (but please use the Markdown tags to mark it as a code!). Rule of thumb is that
+more than 20 lines should most definitely be posted as a pull request instead of an issue with a simple diff.
 
 # Additional Resources
 
