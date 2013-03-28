@@ -3425,6 +3425,9 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                     case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
                     case SPELL_AURA_PERIODIC_LEECH:
                     case SPELL_AURA_PERIODIC_HEAL:
+						RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
+                        stop = true;
+                        break;
                     case SPELL_AURA_OBS_MOD_HEALTH:
                     case SPELL_AURA_PERIODIC_MANA_LEECH:
                     case SPELL_AURA_OBS_MOD_MANA:
