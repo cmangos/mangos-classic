@@ -578,6 +578,7 @@ class MovementInfo
         void AddMovementFlag(MovementFlags f) { moveFlags |= f; }
         void RemoveMovementFlag(MovementFlags f) { moveFlags &= ~f; }
         bool HasMovementFlag(MovementFlags f) const { return moveFlags & f; }
+
         MovementFlags GetMovementFlags() const { return MovementFlags(moveFlags); }
         void SetMovementFlags(MovementFlags f) { moveFlags = f; }
 
@@ -967,7 +968,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::map<SpellEntry const*, ObjectGuid /*targetGuid*/> TrackedAuraTargetMap;
 
         virtual ~Unit();
-
+		void HeartBeatResist();
         void AddToWorld() override;
         void RemoveFromWorld() override;
 
