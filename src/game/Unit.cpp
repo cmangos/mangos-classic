@@ -332,10 +332,33 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
 
     // update abilities available only for fraction of time
     UpdateReactives(update_diff);
-
+	HeartBeatResist();
     ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth() * 0.20f);
     UpdateSplineMovement(p_time);
     i_motionMaster.UpdateMotion(p_time);
+}
+
+void Unit::HeartBeatResist() {
+
+	if(GetTypeId() == TYPEID_UNIT) {
+	if((HasAuraType(SPELL_AURA_MOD_CONFUSE) || HasAuraType(SPELL_AURA_MOD_STUN)) || HasAuraType(SPELL_AURA_MOD_FEAR) || HasAuraType(SPELL_AURA_MOD_ROOT) || isFrozen() || HasAuraType(SPELL_AURA_MOD_POSSESS)) {
+			for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
+		{
+			SpellAuraHolder* holder = iter->second;
+			int32 auraMax = holder->GetAuraMaxDuration();
+				if(holder->GetAuraDuration() == floor(auraMax*0.125+0.5) || holder->GetAuraDuration() == floor(auraMax*0.25+0.5) ||  holder->GetAuraDuration() == floor(auraMax*0.50+0.5)) {
+				DEBUG_LOG("Heartbeat Resist chance on Aura %u", holder->GetId());
+				if(urand(0,4) == 2) {
+						RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_EXPIRE);
+						iter = m_spellAuraHolders.begin();
+						DEBUG_LOG("Creature %u Heartbeat Resisted at %u", GetGUIDLow(), holder->GetAuraDuration());
+					}
+				}
+				iter++;
+			}
+
+		}
+	}
 }
 
 bool Unit::UpdateMeleeAttackingState()
