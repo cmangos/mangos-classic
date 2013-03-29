@@ -346,6 +346,10 @@ void Unit::HeartBeatResist() {
 		{
 			SpellAuraHolder* holder = iter->second;
 			int32 auraMax = holder->GetAuraMaxDuration();
+			const SpellEntry* se = holder->GetSpellProto();
+			uint32 school = se->School;
+			
+			
 				if(holder->GetAuraDuration() == floor(auraMax*0.125+0.5) || holder->GetAuraDuration() == floor(auraMax*0.25+0.5) ||  holder->GetAuraDuration() == floor(auraMax*0.50+0.5)) {
 				DEBUG_LOG("Heartbeat Resist chance on Aura %u", holder->GetId());
 				if(urand(0,4) == 2) {
