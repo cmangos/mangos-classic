@@ -487,6 +487,9 @@
     <ClCompile Include="..\..\src\game\CreatureLinkingMgr.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\LFGHandler\LFGHandler.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\AccountMgr.h">
@@ -930,6 +933,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\CreatureLinkingMgr.h">
       <Filter>World/Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\LFGHandler\LFGHandler.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
