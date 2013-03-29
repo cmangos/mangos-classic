@@ -345,14 +345,14 @@ void Unit::HeartBeatResist() {
 			for (SpellAuraHolderMap::iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end();)
 		{
 			SpellAuraHolder* holder = iter->second;
-			int32 auraMax = holder->GetAuraMaxDuration();
-			const SpellEntry* se = holder->GetSpellProto();
-			uint32 school = se->School;
-			
-			
+				int32 auraMax = holder->GetAuraMaxDuration();
+				const SpellEntry* se = holder->GetSpellProto();
+				uint32 school = se->School;
+				float aura_res = GetResistance(SpellSchools(school));
+				int addResistance = aura_res * 0.5;
 				if(holder->GetAuraDuration() == floor(auraMax*0.125+0.5) || holder->GetAuraDuration() == floor(auraMax*0.25+0.5) ||  holder->GetAuraDuration() == floor(auraMax*0.50+0.5)) {
-				DEBUG_LOG("Heartbeat Resist chance on Aura %u", holder->GetId());
-				if(urand(0,4) == 2) {
+					DEBUG_LOG("Heartbeat Resist chance on Aura %u", holder->GetId());
+					if (rand() % 100 < (25 + addResistance)) {
 						RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_EXPIRE);
 						iter = m_spellAuraHolders.begin();
 						DEBUG_LOG("Creature %u Heartbeat Resisted at %u", GetGUIDLow(), holder->GetAuraDuration());
