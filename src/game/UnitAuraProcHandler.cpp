@@ -604,60 +604,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
         }
         case SPELLFAMILY_WARLOCK:
         {
-            // Seed of Corruption
-            if (dummySpell->SpellFamilyFlags & UI64LIT(0x0000001000000000))
-            {
-                Modifier* mod = triggeredByAura->GetModifier();
-                // if damage is more than need or target die from damage deal finish spell
-                if (mod->m_amount <= (int32)damage || GetHealth() <= damage)
-                {
-                    // remember guid before aura delete
-                    ObjectGuid casterGuid = triggeredByAura->GetCasterGuid();
-
-                    // Remove aura (before cast for prevent infinite loop handlers)
-                    RemoveAurasDueToSpell(triggeredByAura->GetId());
-
-                    // Cast finish spell (triggeredByAura already not exist!)
-                    CastSpell(this, 27285, true, castItem, NULL, casterGuid);
-                    return SPELL_AURA_PROC_OK;              // no hidden cooldown
-                }
-
-                // Damage counting
-                mod->m_amount -= damage;
-                return SPELL_AURA_PROC_OK;
-            }
-            // Seed of Corruption (Mobs cast) - no die req
-            if (dummySpell->SpellFamilyFlags == UI64LIT(0x0) && dummySpell->SpellIconID == 1932)
-            {
-                Modifier* mod = triggeredByAura->GetModifier();
-                // if damage is more than need deal finish spell
-                if (mod->m_amount <= (int32)damage)
-                {
-                    // remember guid before aura delete
-                    ObjectGuid casterGuid = triggeredByAura->GetCasterGuid();
-
-                    // Remove aura (before cast for prevent infinite loop handlers)
-                    RemoveAurasDueToSpell(triggeredByAura->GetId());
-
-                    // Cast finish spell (triggeredByAura already not exist!)
-                    CastSpell(this, 32865, true, castItem, NULL, casterGuid);
-                    return SPELL_AURA_PROC_OK;              // no hidden cooldown
-                }
-                // Damage counting
-                mod->m_amount -= damage;
-                return SPELL_AURA_PROC_OK;
-            }
-            switch (dummySpell->Id)
-            {
-                    // Nightfall
-                case 18094:
-                case 18095:
-                {
-                    target = this;
-                    triggered_spell_id = 17941;
-                    break;
-                }
-            }
             break;
         }
         case SPELLFAMILY_PRIEST:
@@ -1324,6 +1270,11 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit* pVictim, uint3
                 return SPELL_AURA_PROC_FAILED;
 
             triggered_spell_id = 24406;
+            break;
+        }
+        case 4309:
+        {
+            triggered_spell_id = 17941;                     // Shadow Trance (Warlock Nightfall)
             break;
         }
         case 4533:                                          // Dreamwalker Raiment 2 pieces bonus
