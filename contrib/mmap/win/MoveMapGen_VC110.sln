@@ -1,6 +1,5 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MoveMapGen", "VC110\MoveMapGen_VC110.vcxproj", "{8028C1F8-4C3E-44D4-96D7-1D6F51B7AB47}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2} = {8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}
