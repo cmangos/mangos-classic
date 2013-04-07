@@ -1798,7 +1798,7 @@ void Player::RemoveFromWorld()
     Unit::RemoveFromWorld();
 }
 
-void Player::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker)
+void Player::RewardRage(uint32 damage, bool attacker)
 {
     float addRage;
 
@@ -1806,7 +1806,7 @@ void Player::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacke
 
     if (attacker)
     {
-        addRage = ((damage / rageconversion * 7.5f + weaponSpeedHitFactor) / 2.0f);
+        addRage = damage / rageconversion * 7.5f;
     }
     else
     {
