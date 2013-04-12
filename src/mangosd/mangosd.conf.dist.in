@@ -561,6 +561,11 @@ LogColors = ""
 #                 0 (no limit)
 #        Default: 10
 #
+#   RabbitDay
+#        Set to Rabbit Day (date in unix time), only the day and month are considered, the year is not important
+#        Default: 0 (off)
+#        Suggested: 954547200 (April 1st, 2000)
+#
 #    Instance.IgnoreLevel
 #        Ignore level requirement to enter instance
 #        Default: 0 (false)
@@ -721,6 +726,7 @@ AlwaysMaxSkillForLevel = 0
 ActivateWeather = 1
 CastUnstuck = 1
 MaxSpellCastsInChain = 10
+RabbitDay = 0
 Instance.IgnoreLevel = 0
 Instance.IgnoreRaid = 0
 Instance.ResetTimeHour = 4

@@ -1325,6 +1325,17 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
     if (m_isCreatureLinkingTrigger && isAlive())
         GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_RESPAWN, this);
 
+    // check if it is rabbit day
+    if (isAlive() && sWorld.getConfig(CONFIG_UINT32_RABBIT_DAY))
+    {
+        time_t rabbit_day = time_t(sWorld.getConfig(CONFIG_UINT32_RABBIT_DAY));
+        tm rabbit_day_tm = *localtime(&rabbit_day);
+        tm now_tm = *localtime(&sWorld.GetGameTime());
+
+        if (now_tm.tm_mon == rabbit_day_tm.tm_mon && now_tm.tm_mday == rabbit_day_tm.tm_mday)
+            CastSpell(this, 10710 + urand(0, 2), true);
+    }
+
     return true;
 }
 
