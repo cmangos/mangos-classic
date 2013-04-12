@@ -145,7 +145,8 @@ void CreatureAI::HandleMovementOnAttackStart(Unit* victim)
 {
     if (m_isCombatMovement)
         m_creature->GetMotionMaster()->MoveChase(victim, m_attackDistance, m_attackAngle);
-    else
+    // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
+    else if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
     {
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->StopMoving();
