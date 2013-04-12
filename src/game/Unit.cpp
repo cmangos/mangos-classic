@@ -6902,31 +6902,27 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
             {MSG_MOVE_SET_TURN_RATE,        SMSG_FORCE_TURN_RATE_CHANGE},
         };
 
-        if (forced)
+        if (forced && GetTypeId() == TYPEID_PLAYER)
         {
-            if (GetTypeId() == TYPEID_PLAYER)
-            {
-                // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
-                // and do it only for real sent packets and use run for run/mounted as client expected
-                ++((Player*)this)->m_forced_speed_changes[mtype];
-            }
+            // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
+            // and do it only for real sent packets and use run for run/mounted as client expected
+            ++((Player*)this)->m_forced_speed_changes[mtype];
 
             WorldPacket data(SetSpeed2Opc_table[mtype][1], 18);
             data << GetPackGUID();
             data << (uint32)0;                              // moveEvent, NUM_PMOVE_EVTS = 0x39
             data << float(GetSpeed(mtype));
-            SendMessageToSet(&data, true);
+            ((Player*)this)->GetSession()->SendPacket(&data);
         }
-        else
-        {
-            m_movementInfo.UpdateTime(WorldTimer::getMSTime());
-            
-            WorldPacket data(SetSpeed2Opc_table[mtype][0], 31);
-            data << GetPackGUID();
-            data << m_movementInfo;
-            data << float(GetSpeed(mtype));
-            SendMessageToSet(&data, true);
-        }
+
+        m_movementInfo.UpdateTime(WorldTimer::getMSTime());
+
+        // TODO: Actually such opcodes should (always?) be packed with SMSG_COMPRESSED_MOVES
+        WorldPacket data(SetSpeed2Opc_table[mtype][0], 31);
+        data << GetPackGUID();
+        data << m_movementInfo;
+        data << float(GetSpeed(mtype));
+        SendMessageToSet(&data, false);
     }
 
     CallForAllControlledUnits(SetSpeedRateHelper(mtype, forced), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_MINIPET);
