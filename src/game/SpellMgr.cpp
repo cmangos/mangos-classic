@@ -673,6 +673,7 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
             {
                 case 28441:                                 // AB Effect 000
                     return false;
+                case 10258:                                 // Awaken Vault Warder
                 case 18153:                                 // Kodo Kombobulator
                     return true;
                 default:

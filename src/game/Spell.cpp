@@ -6259,6 +6259,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 28560:                                 // Summon Blizzard (Naxx, Sapphiron)
                     unMaxTargets = 1;
                     break;
+                case 10258:                                 // Awaken Vault Warder (Uldaman)
                 case 28542:                                 // Life Drain (Naxx, Sapphiron)
                     unMaxTargets = 2;
                     break;
