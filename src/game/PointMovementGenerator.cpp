@@ -160,7 +160,6 @@ void FlyOrLandMovementGenerator::Initialize(Unit& unit)
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
     Movement::MoveSplineInit init(unit);
     init.SetFly();
-    init.SetAnimation((m_liftOff ? Movement::FlyToGround : Movement::ToGround));
     init.MoveTo(x, y, z, false);
     init.Launch();
 }
