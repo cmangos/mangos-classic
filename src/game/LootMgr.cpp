@@ -303,12 +303,12 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
     {
         if (needs_quest)
         {
-            sLog.outErrorDb("Table '%s' entry %d item %d: negative chance is specified for a reference, skipped", store.GetName(), entry, itemid);
+            sLog.outErrorDb("Table '%s' entry %d item %d: negative chance is given for a reference, skipped", store.GetName(), entry, itemid);
             return false;
         }
         else if (chance == 0)                               // no chance for the reference
         {
-            sLog.outErrorDb("Table '%s' entry %d item %d: zero chance is specified for a reference, skipped", store.GetName(), entry, itemid);
+            sLog.outErrorDb("Table '%s' entry %d item %d: zero chance is given for a reference, reference will never be used, skipped", store.GetName(), entry, itemid);
             return false;
         }
     }
