@@ -1504,6 +1504,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void TauntApply(Unit* pVictim);
         void TauntFadeOut(Unit* taunter);
         void FixateTarget(Unit* pVictim);
+        ObjectGuid GetFixateTargetGuid() const { return m_fixateTargetGuid; }
         ThreatManager& getThreatManager() { return m_ThreatManager; }
         ThreatManager const& getThreatManager() const { return m_ThreatManager; }
         void addHatedBy(HostileReference* pHostileReference) { m_HostileRefManager.insertFirst(pHostileReference); };
