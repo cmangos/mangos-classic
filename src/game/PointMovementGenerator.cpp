@@ -146,3 +146,21 @@ void EffectMovementGenerator::Finalize(Unit& unit)
             unit.GetMotionMaster()->Initialize();
     }
 }
+
+void FlyOrLandMovementGenerator::Initialize(Unit& unit)
+{
+    if (unit.hasUnitState(UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE))
+        return;
+
+    if (!unit.IsStopped())
+        unit.StopMoving();
+
+    float x, y, z;
+    GetDestination(x, y, z);
+    unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    Movement::MoveSplineInit init(unit);
+    init.SetFly();
+    init.SetAnimation((m_liftOff ? Movement::FlyToGround : Movement::ToGround));
+    init.MoveTo(x, y, z, false);
+    init.Launch();
+}

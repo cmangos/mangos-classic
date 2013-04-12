@@ -72,4 +72,16 @@ class EffectMovementGenerator : public MovementGenerator
         uint32 m_Id;
 };
 
+class MANGOS_DLL_SPEC FlyOrLandMovementGenerator : public PointMovementGenerator<Creature>
+{
+    public:
+        FlyOrLandMovementGenerator(uint32 _id, float _x, float _y, float _z, bool liftOff) :
+            PointMovementGenerator<Creature>(_id, _x, _y, _z, false),
+            m_liftOff(liftOff) {}
+
+        void Initialize(Unit& unit) override;
+    private:
+        bool m_liftOff;
+};
+
 #endif
