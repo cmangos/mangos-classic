@@ -107,8 +107,12 @@ class MANGOS_DLL_SPEC CreatureAI
          */
         virtual void JustReachedHome() {}
 
-        // Called at any heal cast/item used (call non implemented)
-        // virtual void HealBy(Unit * /*healer*/, uint32 /*amount_healed*/) {}
+        /**
+         * Called at any Heal received from any Unit
+         * @param pHealer Unit* which deals the heal
+         * @param uiHealedAmount Amount of healing received
+         */
+        virtual void HealedBy(Unit * /*pHealer*/, uint32& /*uiHealedAmount*/) {}
 
         /**
          * Called at any Damage to any victim (before damage apply)
