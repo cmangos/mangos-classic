@@ -213,6 +213,7 @@ DungeonPersistentState::DungeonPersistentState(uint16 MapId, uint32 InstanceId, 
 
 DungeonPersistentState::~DungeonPersistentState()
 {
+    DEBUG_LOG("Unloading DungeonPersistantState of map %u instance %u", GetMapId(), GetInstanceId());
     while (!m_playerList.empty())
     {
         Player* player = *(m_playerList.begin());
