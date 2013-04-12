@@ -1860,6 +1860,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                             (spellInfo_2->Id == 8326 && spellInfo_1->Id == 20584))
                         return false;
 
+                    // Possess visual and Possess
+                    if ((spellInfo_1->Id == 23014 && spellInfo_2->Id == 19832) ||
+                            (spellInfo_2->Id == 23014 && spellInfo_1->Id == 19832))
+                        return false;
+
                     break;
                 }
                 case SPELLFAMILY_MAGE:
