@@ -6991,6 +6991,37 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         }
         case CONDITION_GENDER:
             return player->getGender() == m_value1;
+        case CONDITION_DEAD_OR_AWAY:
+            switch (m_value1)
+            {
+                case 0:                                     // Player dead or out of range
+                    return !player || !player->isAlive() || (m_value2 && source && !source->IsWithinDistInMap(player, m_value2));
+                case 1:                                     // All players in Group dead or out of range
+                    if (!player)
+                        return true;
+                    if (Group const* grp = player->GetGroup())
+                    {
+                        for (GroupReference const* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
+                        {
+                            Player const* pl = itr->getSource();
+                            if (pl && pl->isAlive() && !pl->isGameMaster() && (!m_value2 || !source || source->IsWithinDistInMap(pl, m_value2)))
+                                return false;
+                        }
+                        return true;
+                    }
+                    else
+                        return !player->isAlive() || (m_value2 && source && !source->IsWithinDistInMap(player, m_value2));
+                case 2:                                     // All players in instance dead or out of range
+                    for (Map::PlayerList::const_iterator itr = map->GetPlayers().begin(); itr != map->GetPlayers().end(); ++itr)
+                    {
+                        Player const* plr = itr->getSource();
+                        if (plr && plr->isAlive() && !plr->isGameMaster() && (!m_value2 || !source || source->IsWithinDistInMap(plr, m_value2)))
+                            return false;
+                    }
+                    return true;
+                case 3:                                     // Creature source is dead
+                    return !source || source->GetTypeId() != TYPEID_UNIT || !((Unit*)source)->isAlive();
+            }
         default:
             return false;
     }
@@ -7034,6 +7065,31 @@ bool PlayerCondition::CheckParamRequirements(Player const* pPlayer, Map const* m
                 sLog.outErrorDb("CONDITION %u type %u used with bad parameters, called from %s, used with plr: %s, map %i, src %s",
                                 m_entry, m_condition, conditionSourceToStr[conditionSourceType], pPlayer ? pPlayer->GetGuidStr().c_str() : "NULL", map ? map->GetId() : -1, source ? source->GetGuidStr().c_str() : "NULL");
                 return false;
+            }
+            break;
+        case CONDITION_DEAD_OR_AWAY:
+            switch (m_value1)
+            {
+                case 0:                                     // Player dead or out of range
+                case 1:                                     // All players in Group dead or out of range
+                case 2:                                     // All players in instance dead or out of range
+                    if (m_value2 && !source)
+                    {
+                        sLog.outErrorDb("CONDITION_DEAD_OR_AWAY %u - called from %s without source, but source expected for range check", m_entry, conditionSourceToStr[conditionSourceType]);
+                        return false;
+                    }
+                    if (m_value1 != 2)
+                        return true;
+                    // Case 2 (Instance map only)
+                    if (!map && (pPlayer || source))
+                        map = source ? source->GetMap() : pPlayer->GetMap();
+                    if (!map || !map->Instanceable())
+                    {
+                        sLog.outErrorDb("CONDITION_DEAD_OR_AWAY %u (Player in instance case) - called from %s without map param or from non-instanceable map %i", m_entry,  conditionSourceToStr[conditionSourceType], map ? map->GetId() : -1);
+                        return false;
+                    }
+                case 3:                                     // Creature source is dead
+                    return true;
             }
             break;
         default:
@@ -7357,6 +7413,15 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             if (value1 >= MAX_GENDER)
             {
                 sLog.outErrorDb("Gender condition (entry %u, type %u) has an invalid value in value1. (Has %u, must be smaller than %u), skipping.", entry, condition, value1, MAX_GENDER);
+                return false;
+            }
+            break;
+        }
+        case CONDITION_DEAD_OR_AWAY:
+        {
+            if (value1 >= 4)
+            {
+                sLog.outErrorDb("Dead condition (entry %u, type %u) has an invalid value in value1. (Has %u, must be smaller than 4), skipping.", entry, condition, value1);
                 return false;
             }
             break;
