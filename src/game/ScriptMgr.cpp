@@ -1706,9 +1706,9 @@ bool ScriptAction::HandleScriptStep()
 
             bool terminateResult;
             if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                terminateResult = !sObjectMgr.IsPlayerMeetToCondition(m_script->terminateCond.conditionId, player, m_map, second, CONDTION_FROM_DBSCRIPTS);
+                terminateResult = !sObjectMgr.IsPlayerMeetToCondition(m_script->terminateCond.conditionId, player, m_map, second, CONDITION_FROM_DBSCRIPTS);
             else
-                terminateResult = sObjectMgr.IsPlayerMeetToCondition(m_script->terminateCond.conditionId, player, m_map, second, CONDTION_FROM_DBSCRIPTS);
+                terminateResult = sObjectMgr.IsPlayerMeetToCondition(m_script->terminateCond.conditionId, player, m_map, second, CONDITION_FROM_DBSCRIPTS);
 
             if (terminateResult && m_script->terminateCond.failQuest && player)
             {

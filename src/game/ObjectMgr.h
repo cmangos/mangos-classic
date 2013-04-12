@@ -339,7 +339,7 @@ enum ConditionSource                                        // From where was th
     CONDITION_FROM_VENDOR           = 6,                    // Used to check a condition from a vendor
     CONDITION_FROM_SPELL_AREA       = 7,                    // Used to check a condition from spell_area table
     CONDITION_FROM_RESERVED_1       = 8,                    // reserved for 3.x and later
-    CONDTION_FROM_DBSCRIPTS         = 9,                    // Used to check a condition from DB Scripts Engine
+    CONDITION_FROM_DBSCRIPTS        = 9,                    // Used to check a condition from DB Scripts Engine
 };
 
 class PlayerCondition
