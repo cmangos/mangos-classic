@@ -1398,7 +1398,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         return;
     }
 
-    if (GetEffIndex() == EFFECT_INDEX_0 && target->GetTypeId() == TYPEID_PLAYER)
+    if (target->GetTypeId() == TYPEID_PLAYER)
     {
         SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAuraMapBounds(GetId());
         if (saBounds.first != saBounds.second)
@@ -1407,17 +1407,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             target->GetZoneAndAreaId(zone, area);
 
             for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
-            {
-                // some auras remove at aura remove
-                if (!itr->second->IsFitToRequirements((Player*)target, zone, area))
-                    target->RemoveAurasDueToSpell(itr->second->spellId);
-                // some auras applied at aura apply
-                else if (itr->second->autocast)
-                {
-                    if (!target->HasAura(itr->second->spellId, EFFECT_INDEX_0))
-                        target->CastSpell(target, itr->second->spellId, true);
-                }
-            }
+                itr->second->ApplyOrRemoveSpellIfCan((Player*)target, zone, area, false);
         }
     }
 

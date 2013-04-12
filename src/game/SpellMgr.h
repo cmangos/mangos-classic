@@ -729,6 +729,7 @@ struct SpellArea
     uint32 areaId;                                          // zone/subzone/or 0 is not limited to zone
     uint32 questStart;                                      // quest start (quest must be active or rewarded for spell apply)
     uint32 questEnd;                                        // quest end (quest don't must be rewarded for spell apply)
+    uint16 conditionId;                                     // conditionId - will replace questStart, questEnd, raceMask, gender and questStartCanActive
     int32  auraSpell;                                       // spell aura must be applied for spell apply )if possitive) and it don't must be applied in other case
     uint32 raceMask;                                        // can be applied only to races
     Gender gender;                                          // can be applied only to gender
@@ -737,14 +738,13 @@ struct SpellArea
 
     // helpers
     bool IsFitToRequirements(Player const* player, uint32 newZone, uint32 newArea) const;
+    void ApplyOrRemoveSpellIfCan(Player* player, uint32 newZone, uint32 newArea, bool onlyApply) const;
 };
 
-typedef std::multimap<uint32, SpellArea> SpellAreaMap;
-typedef std::multimap<uint32, SpellArea const*> SpellAreaForQuestMap;
-typedef std::multimap<uint32, SpellArea const*> SpellAreaForAuraMap;
-typedef std::multimap<uint32, SpellArea const*> SpellAreaForAreaMap;
+typedef std::multimap<uint32 /*applySpellId*/, SpellArea> SpellAreaMap;
+typedef std::multimap<uint32 /*auraSpellId*/, SpellArea const*> SpellAreaForAuraMap;
+typedef std::multimap<uint32 /*areaOrZoneId*/, SpellArea const*> SpellAreaForAreaMap;
 typedef std::pair<SpellAreaMap::const_iterator, SpellAreaMap::const_iterator> SpellAreaMapBounds;
-typedef std::pair<SpellAreaForQuestMap::const_iterator, SpellAreaForQuestMap::const_iterator> SpellAreaForQuestMapBounds;
 typedef std::pair<SpellAreaForAuraMap::const_iterator, SpellAreaForAuraMap::const_iterator>  SpellAreaForAuraMapBounds;
 typedef std::pair<SpellAreaForAreaMap::const_iterator, SpellAreaForAreaMap::const_iterator>  SpellAreaForAreaMapBounds;
 
@@ -1061,19 +1061,6 @@ class SpellMgr
             return mSpellAreaMap.equal_range(spell_id);
         }
 
-        SpellAreaForQuestMapBounds GetSpellAreaForQuestMapBounds(uint32 quest_id, bool active) const
-        {
-            if (active)
-                return mSpellAreaForActiveQuestMap.equal_range(quest_id);
-            else
-                return mSpellAreaForQuestMap.equal_range(quest_id);
-        }
-
-        SpellAreaForQuestMapBounds GetSpellAreaForQuestEndMapBounds(uint32 quest_id) const
-        {
-            return mSpellAreaForQuestEndMap.equal_range(quest_id);
-        }
-
         SpellAreaForAuraMapBounds GetSpellAreaForAuraMapBounds(uint32 spell_id) const
         {
             return mSpellAreaForAuraMap.equal_range(spell_id);
@@ -1124,9 +1111,6 @@ class SpellMgr
         SkillRaceClassInfoMap mSkillRaceClassInfoMap;
         SpellPetAuraMap     mSpellPetAuraMap;
         SpellAreaMap         mSpellAreaMap;
-        SpellAreaForQuestMap mSpellAreaForQuestMap;
-        SpellAreaForQuestMap mSpellAreaForActiveQuestMap;
-        SpellAreaForQuestMap mSpellAreaForQuestEndMap;
         SpellAreaForAuraMap  mSpellAreaForAuraMap;
         SpellAreaForAreaMap  mSpellAreaForAreaMap;
         SpellFacingFlagMap  mSpellFacingFlagMap;

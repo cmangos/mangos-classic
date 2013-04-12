@@ -335,6 +335,7 @@ enum ConditionSource                                        // From where was th
     CONDITION_FROM_EVENTAI          = 4,                    // Used to check EventAI Event "On Receive Emote"
     CONDITION_FROM_HARDCODED        = 5,                    // Used to check a hardcoded event - not actually a condition
     CONDITION_FROM_VENDOR           = 6,                    // Used to check a condition from a vendor
+    CONDITION_FROM_SPELL_AREA       = 7,                    // Used to check a condition from spell_area table
 };
 
 class PlayerCondition

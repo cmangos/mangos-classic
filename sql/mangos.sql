@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) default NULL,
   `creature_ai_version` varchar(120) default NULL,
-  `required_z2258_s1896_12363_02_mangos_npc_vendor_template` bit(1) default NULL
+  `required_z2319_s1896_12363_02_mangos_npc_vendor_template` bit(1) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -10150,6 +10150,7 @@ CREATE TABLE `spell_area` (
   `quest_start` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `quest_start_active` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `quest_end` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `aura_spell` mediumint(8) NOT NULL DEFAULT '0',
   `racemask` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `gender` tinyint(1) unsigned NOT NULL DEFAULT '2',
