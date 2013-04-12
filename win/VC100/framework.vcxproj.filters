@@ -60,9 +60,6 @@
     <ClInclude Include="..\..\src\framework\Policies\Singleton.h">
       <Filter>Policies</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\framework\Policies\SingletonImp.h">
-      <Filter>Policies</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\framework\Policies\ThreadingModel.h">
       <Filter>Policies</Filter>
     </ClInclude>

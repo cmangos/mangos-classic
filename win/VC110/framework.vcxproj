@@ -313,7 +313,6 @@
     <ClInclude Include="..\..\src\framework\Policies\CreationPolicy.h" />
     <ClInclude Include="..\..\src\framework\Policies\ObjectLifeTime.h" />
     <ClInclude Include="..\..\src\framework\Policies\Singleton.h" />
-    <ClInclude Include="..\..\src\framework\Policies\SingletonImp.h" />
     <ClInclude Include="..\..\src\framework\Policies\ThreadingModel.h" />
     <ClInclude Include="..\..\src\framework\Utilities\ByteConverter.h" />
     <ClInclude Include="..\..\src\framework\Utilities\Callback.h" />

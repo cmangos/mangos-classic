@@ -548,10 +548,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\SingletonImp.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\framework\Policies\ThreadingModel.h"
 				>
 			</File>
