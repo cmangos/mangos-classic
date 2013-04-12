@@ -101,6 +101,7 @@ typedef UNORDERED_MAP < uint32/*mapid*/, CellObjectGuidsMap > MapObjectGuids;
 #define MAX_DB_SCRIPT_STRING_ID        2000010000
 #define MIN_CREATURE_AI_TEXT_STRING_ID (-1)                 // 'creature_ai_texts'
 #define MAX_CREATURE_AI_TEXT_STRING_ID (-1000000)
+// Anything below MAX_CREATURE_AI_TEXT_STRING_ID is handled by the external script lib
 
 static_assert(MAX_DB_SCRIPT_STRING_ID < ACE_INT32_MAX, "Must scope with int32 range");
 
