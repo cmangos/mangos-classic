@@ -8397,6 +8397,21 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
     init.Launch();
 }
 
+void Unit::InterruptMoving(bool forceSendStop /*=false*/)
+{
+    bool isMoving = false;
+
+    if (!movespline->Finalized())
+    {
+        Movement::Location loc = movespline->ComputePosition();
+        movespline->_Interrupt();
+        Relocate(loc.x, loc.y, loc.z, loc.orientation);
+        isMoving = true;
+    }
+
+    StopMoving(forceSendStop || isMoving);
+}
+
 void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 time)
 {
     if (apply)

@@ -210,6 +210,7 @@ void ChaseMovementGenerator<T>::Finalize(T& owner)
 template<class T>
 void ChaseMovementGenerator<T>::Interrupt(T& owner)
 {
+    owner.InterruptMoving();
     owner.clearUnitState(UNIT_STAT_CHASE | UNIT_STAT_CHASE_MOVE);
 }
 
@@ -281,6 +282,7 @@ void FollowMovementGenerator<T>::Finalize(T& owner)
 template<class T>
 void FollowMovementGenerator<T>::Interrupt(T& owner)
 {
+    owner.InterruptMoving();
     owner.clearUnitState(UNIT_STAT_FOLLOW | UNIT_STAT_FOLLOW_MOVE);
     _updateSpeed(owner);
 }
