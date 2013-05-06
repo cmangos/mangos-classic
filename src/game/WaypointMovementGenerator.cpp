@@ -247,14 +247,16 @@ void WaypointMovementGenerator<Creature>::MovementInform(Creature& creature)
         creature.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
 }
 
-bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, float& y, float& z)
+bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, float& y, float& z) const
 {
     // prevent a crash at empty waypoint path.
     if (!i_path || i_path->empty())
         return false;
 
-    const WaypointNode& node = i_path->at(i_currentNode);
-    x = node.x; y = node.y; z = node.z;
+    WaypointPath::const_iterator currPoint = i_path->find(i_currentNode);
+    MANGOS_ASSERT(currPoint != i_path->end());
+
+    x = currPoint->second.x; y = currPoint->second.y; z = currPoint->second.z;
     return true;
 }
 
@@ -387,7 +389,7 @@ void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
     }
 }
 
-bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z)
+bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z) const
 {
     const TaxiPathNodeEntry& node = (*i_path)[i_currentNode];
     x = node.x; y = node.y; z = node.z;
