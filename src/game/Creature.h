@@ -752,20 +752,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         CreatureInfo const* m_creatureInfo;
 };
 
-class AssistDelayEvent : public BasicEvent
-{
-    public:
-        AssistDelayEvent(ObjectGuid victim, Unit& owner, std::list<Creature*> const& assistants);
-
-        bool Execute(uint64 e_time, uint32 p_time) override;
-    private:
-        AssistDelayEvent();
-
-        ObjectGuid m_victimGuid;
-        GuidVector m_assistantGuids;
-        Unit&      m_owner;
-};
-
 class ForcedDespawnDelayEvent : public BasicEvent
 {
     public:
