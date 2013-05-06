@@ -27,6 +27,7 @@
 #include "ObjectGuid.h"
 #include "GridDefines.h"
 #include "SpellMgr.h"
+#include "World.h"
 
 INSTANTIATE_SINGLETON_1(CreatureEventAIMgr);
 
@@ -489,7 +490,22 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         sLog.outErrorEventAI("Creature %u are using repeatable event(%u) with param4 < param3 (RepeatMax < RepeatMin). Event will never repeat.", temp.creature_id, i);
                     break;
                 }
-
+                case EVENT_T_RECEIVE_AI_EVENT:
+                {
+                    // Sender-Creature does not exist in database
+                    if (temp.receiveAIEvent.senderEntry && !sCreatureStorage.LookupEntry<CreatureInfo>(temp.receiveAIEvent.senderEntry))
+                    {
+                        sLog.outErrorDb("CreatureEventAI:  Event %u has nonexisting creature (%u) defined for event RECEIVE_AI_EVENT, skipping.", i, temp.receiveAIEvent.senderEntry);
+                        continue;
+                    }
+                    // Event-Type is not defined
+                    if (temp.receiveAIEvent.eventType >= MAXIMAL_AI_EVENT_EVENTAI)
+                    {
+                        sLog.outErrorDb("CreatureEventAI:  Event %u has unfitting event-type (%u) defined for event RECEIVE_AI_EVENT (must be less than %u), skipping.", i, temp.receiveAIEvent.eventType, MAXIMAL_AI_EVENT_EVENTAI);
+                        continue;
+                    }
+                    break;
+                }
                 default:
                     sLog.outErrorEventAI("Creature %u using not checked at load event (%u) in event %u. Need check code update?", temp.creature_id, temp.event_id, i);
                     break;
@@ -829,6 +845,24 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_RANDOM_TEXTEMOTE:
                         sLog.outErrorEventAI("Event %u Action %u currently unused ACTION type. Did you forget to update database?", i, j + 1);
                         break;
+
+                    case ACTION_T_THROW_AI_EVENT:
+                        if (action.throwEvent.eventType >= MAXIMAL_AI_EVENT_EVENTAI)
+                        {
+                            sLog.outErrorDb("CreatureEventAI:  Event %u Action %u uses invalid event type %u (must be less than %u), skipping", i, j + 1, action.throwEvent.eventType, MAXIMAL_AI_EVENT_EVENTAI);
+                            continue;
+                        }
+                        if (action.throwEvent.radius > SIZE_OF_GRIDS)
+                            sLog.outErrorDb("CreatureEventAI:  Event %u Action %u uses unexpectedly huge radius %u (expected to be less than %f)", i, j + 1, action.throwEvent.radius, SIZE_OF_GRIDS);
+
+                        if (action.throwEvent.radius == 0)
+                        {
+                            sLog.outErrorDb("CreatureEventAI:  Event %u Action %u uses unexpected radius 0 (set to %f of CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS)", i, j + 1, sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
+                            action.throwEvent.radius = uint32(sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_ASSISTANCE_RADIUS));
+                        }
+
+                        break;
+
                     default:
                         sLog.outErrorEventAI("Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j + 1, temp.action[j].type);
                         break;
