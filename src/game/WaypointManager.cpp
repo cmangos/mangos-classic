@@ -51,8 +51,6 @@ WaypointBehavior::WaypointBehavior(const WaypointBehavior& b)
 
 void WaypointManager::Load()
 {
-    Cleanup();
-
     uint32 total_paths = 0;
     uint32 total_nodes = 0;
     uint32 total_behaviors = 0;
@@ -85,7 +83,6 @@ void WaypointManager::Load()
             uint32 id       = fields[0].GetUInt32();
             uint32 count    = fields[1].GetUInt32();
 
-            m_pathMap[id].resize(count);
             total_nodes += count;
         }
         while (result->NextRow());
@@ -124,11 +121,7 @@ void WaypointManager::Load()
                 creatureNoMoveType.insert(id);
 
             WaypointPath& path  = m_pathMap[id];
-
-            // the cleanup queries make sure the following is true
-            MANGOS_ASSERT(point >= 1 && point <= path.size());
-
-            WaypointNode& node  = path[point - 1];
+            WaypointNode& node  = path[point];
 
             node.x              = fields[2].GetFloat();
             node.y              = fields[3].GetFloat();
@@ -263,7 +256,6 @@ void WaypointManager::Load()
             uint32 entry    = fields[0].GetUInt32();
             uint32 count    = fields[1].GetUInt32();
 
-            m_pathTemplateMap[entry].resize(count);
             total_nodes += count;
         }
         while (result->NextRow());
@@ -297,11 +289,7 @@ void WaypointManager::Load()
             }
 
             WaypointPath& path  = m_pathTemplateMap[entry];
-
-            // the cleanup queries make sure the following is true
-            MANGOS_ASSERT(point >= 1 && point <= path.size());
-
-            WaypointNode& node  = path[point - 1];
+            WaypointNode& node  = path[point];
 
             node.x              = fields[2].GetFloat();
             node.y              = fields[3].GetFloat();
@@ -394,40 +382,6 @@ void WaypointManager::Load()
     }
 }
 
-void WaypointManager::Cleanup()
-{
-    // check if points need to be renumbered and do it
-    if (QueryResult* result = WorldDatabase.Query("SELECT 1 from creature_movement As T WHERE point <> (SELECT COUNT(*) FROM creature_movement WHERE id = T.id AND point <= T.point) LIMIT 1"))
-    {
-        delete result;
-        WorldDatabase.DirectExecute("CREATE TEMPORARY TABLE temp LIKE creature_movement");
-        WorldDatabase.DirectExecute("INSERT INTO temp SELECT * FROM creature_movement");
-        WorldDatabase.DirectExecute("ALTER TABLE creature_movement DROP PRIMARY KEY");
-        WorldDatabase.DirectExecute("UPDATE creature_movement AS T SET point = (SELECT COUNT(*) FROM temp WHERE id = T.id AND point <= T.point)");
-        WorldDatabase.DirectExecute("ALTER TABLE creature_movement ADD PRIMARY KEY (id, point)");
-        WorldDatabase.DirectExecute("DROP TABLE temp");
-
-        sLog.outErrorDb("Table `creature_movement` was auto corrected for using points out of order (invalid or points missing)");
-
-        MANGOS_ASSERT(!(result = WorldDatabase.Query("SELECT 1 from creature_movement As T WHERE point <> (SELECT COUNT(*) FROM creature_movement WHERE id = T.id AND point <= T.point) LIMIT 1")));
-    }
-
-    if (QueryResult* result = WorldDatabase.Query("SELECT 1 from creature_movement_template As T WHERE point <> (SELECT COUNT(*) FROM creature_movement_template WHERE entry = T.entry AND point <= T.point) LIMIT 1"))
-    {
-        delete result;
-        WorldDatabase.DirectExecute("CREATE TEMPORARY TABLE temp LIKE creature_movement_template");
-        WorldDatabase.DirectExecute("INSERT INTO temp SELECT * FROM creature_movement_template");
-        WorldDatabase.DirectExecute("ALTER TABLE creature_movement_template DROP PRIMARY KEY");
-        WorldDatabase.DirectExecute("UPDATE creature_movement_template AS T SET point = (SELECT COUNT(*) FROM temp WHERE entry = T.entry AND point <= T.point)");
-        WorldDatabase.DirectExecute("ALTER TABLE creature_movement_template ADD PRIMARY KEY (entry, point)");
-        WorldDatabase.DirectExecute("DROP TABLE temp");
-
-        sLog.outErrorDb("Table `creature_movement_template` was auto corrected for using points out of order (invalid or points missing)");
-
-        MANGOS_ASSERT(!(result = WorldDatabase.Query("SELECT 1 from creature_movement_template As T WHERE point <> (SELECT COUNT(*) FROM creature_movement_template WHERE entry = T.entry AND point <= T.point) LIMIT 1")));
-    }
-}
-
 void WaypointManager::Unload()
 {
     for (WaypointPathMap::iterator itr = m_pathMap.begin(); itr != m_pathMap.end(); ++itr)
@@ -442,7 +396,7 @@ void WaypointManager::Unload()
 void WaypointManager::_clearPath(WaypointPath& path)
 {
     for (WaypointPath::const_iterator itr = path.begin(); itr != path.end(); ++itr)
-        delete itr->behavior;
+        delete itr->second.behavior;
     path.clear();
 }
 
@@ -464,39 +418,31 @@ void WaypointManager::AddAfterNode(uint32 id, uint32 point, float x, float y, fl
 /// - Insert without checking for collision
 void WaypointManager::_addNode(uint32 id, uint32 point, float x, float y, float z, float o, uint32 delay, uint32 wpGuid)
 {
-    if (point == 0) return;                                 // counted from 1 in the DB
     WorldDatabase.PExecuteLog("INSERT INTO creature_movement (id,point,position_x,position_y,position_z,orientation,wpguid,waittime) "
                               "VALUES (%u,%u, %f,%f,%f,%f, %u,%u)",
                               id, point, x, y, z, o, wpGuid, delay);
-    WaypointPathMap::iterator itr = m_pathMap.find(id);
-    if (itr == m_pathMap.end())
-        itr = m_pathMap.insert(WaypointPathMap::value_type(id, WaypointPath())).first;
-    itr->second.insert(itr->second.begin() + (point - 1), WaypointNode(x, y, z, o, delay, 0, NULL));
+
+    m_pathMap[id][point] = WaypointNode(x, y, z, o, delay, 0, NULL);
 }
 
 uint32 WaypointManager::GetLastPoint(uint32 id, uint32 default_notfound)
 {
-    uint32 point = default_notfound;
-    /*QueryResult *result = WorldDatabase.PQuery( "SELECT MAX(point) FROM creature_movement WHERE id = '%u'", id);
-    if( result )
-    {
-        point = (*result)[0].GetUInt32()+1;
-        delete result;
-    }*/
     WaypointPathMap::const_iterator itr = m_pathMap.find(id);
-    if (itr != m_pathMap.end() && itr->second.size() != 0)
-        point = itr->second.size();
-    return point;
+    if (itr != m_pathMap.end() && itr->second.rbegin() != itr->second.rend())
+        default_notfound = itr->second.rbegin()->first;
+
+    return default_notfound;
 }
 
 void WaypointManager::DeleteNode(uint32 id, uint32 point)
 {
-    if (point == 0) return;                                 // counted from 1 in the DB
     WorldDatabase.PExecuteLog("DELETE FROM creature_movement WHERE id=%u AND point=%u", id, point);
     WorldDatabase.PExecuteLog("UPDATE creature_movement SET point=point-1 WHERE id=%u AND point>%u", id, point);
     WaypointPathMap::iterator itr = m_pathMap.find(id);
-    if (itr != m_pathMap.end() && point <= itr->second.size())
-        itr->second.erase(itr->second.begin() + (point - 1));
+    if (itr == m_pathMap.end())
+        return;
+
+    itr->second.erase(point);
 }
 
 void WaypointManager::DeletePath(uint32 id)
@@ -513,20 +459,22 @@ void WaypointManager::DeletePath(uint32 id)
 
 void WaypointManager::SetNodePosition(uint32 id, uint32 point, float x, float y, float z)
 {
-    if (point == 0) return;                                 // counted from 1 in the DB
     WorldDatabase.PExecuteLog("UPDATE creature_movement SET position_x=%f, position_y=%f, position_z=%f WHERE id=%u AND point=%u", x, y, z, id, point);
     WaypointPathMap::iterator itr = m_pathMap.find(id);
-    if (itr != m_pathMap.end() && point <= itr->second.size())
+    if (itr == m_pathMap.end())
+        return;
+
+    WaypointPath::iterator find = itr->second.find(point);
+    if (find != itr->second.end())
     {
-        itr->second[point - 1].x = x;
-        itr->second[point - 1].y = y;
-        itr->second[point - 1].z = z;
+        find->second.x = x;
+        find->second.y = y;
+        find->second.z = z;
     }
 }
 
 void WaypointManager::SetNodeText(uint32 id, uint32 point, const char* text_field, const char* text)
 {
-    if (point == 0) return;                                 // counted from 1 in the DB
     if (!text_field) return;
     std::string field = text_field;
     WorldDatabase.escape_string(field);
@@ -543,9 +491,13 @@ void WaypointManager::SetNodeText(uint32 id, uint32 point, const char* text_fiel
     }
 
     WaypointPathMap::iterator itr = m_pathMap.find(id);
-    if (itr != m_pathMap.end() && point <= itr->second.size())
+    if (itr == m_pathMap.end())
+        return;
+
+    WaypointPath::iterator find = itr->second.find(point);
+    if (find != itr->second.end())
     {
-        WaypointNode& node = itr->second[point - 1];
+        WaypointNode& node = find->second;
         if (!node.behavior) node.behavior = new WaypointBehavior();
 
 //        if(field == "text1") node.behavior->text[0] = text ? text : "";
@@ -560,7 +512,7 @@ void WaypointManager::SetNodeText(uint32 id, uint32 point, const char* text_fiel
     }
 }
 
-inline void CheckWPText(bool isTemplate, uint32 entryOrGuid, size_t point, WaypointBehavior* be, std::set<int32>& ids)
+inline void CheckWPText(bool isTemplate, uint32 entryOrGuid, uint32 point, WaypointBehavior* be, std::set<int32>& ids)
 {
     int zeroCount = 0;                                      // Counting leading zeros for futher textid shift
     for (int j = 0; j < MAX_WAYPOINT_TEXT; ++j)
@@ -573,7 +525,7 @@ inline void CheckWPText(bool isTemplate, uint32 entryOrGuid, size_t point, Waypo
         if (!sObjectMgr.GetMangosStringLocale(be->textid[j]))
         {
             sLog.outErrorDb("Table `creature_movement%s %u, PointId %u has textid%u with non existing textid %i.",
-                            isTemplate ? "_template` Entry:" : "` Id:", entryOrGuid, point + 1, j, be->textid[j]);
+                            isTemplate ? "_template` Entry:" : "` Id:", entryOrGuid, point, j, be->textid[j]);
             be->textid[j] = 0;
             ++zeroCount;
             continue;
@@ -594,15 +546,15 @@ void WaypointManager::CheckTextsExistance(std::set<int32>& ids)
 {
     for (WaypointPathMap::const_iterator pmItr = m_pathMap.begin(); pmItr != m_pathMap.end(); ++pmItr)
     {
-        for (size_t i = 0; i < pmItr->second.size(); ++i)
-            if (pmItr->second[i].behavior)
-                CheckWPText(false, pmItr->first, i, pmItr->second[i].behavior, ids);
+        for (WaypointPath::const_iterator pItr = pmItr->second.begin(); pItr != pmItr->second.end(); ++pItr)
+            if (pItr->second.behavior)
+                CheckWPText(false, pmItr->first, pItr->first, pItr->second.behavior, ids);
     }
 
-    for (WaypointPathMap::const_iterator wptItr = m_pathTemplateMap.begin(); wptItr != m_pathTemplateMap.end(); ++wptItr)
+    for (WaypointPathMap::const_iterator pmItr = m_pathTemplateMap.begin(); pmItr != m_pathTemplateMap.end(); ++pmItr)
     {
-        for (size_t i = 0; i < wptItr->second.size(); ++i)
-            if (wptItr->second[i].behavior)
-                CheckWPText(true, wptItr->first, i, wptItr->second[i].behavior, ids);
+        for (WaypointPath::const_iterator pItr = pmItr->second.begin(); pItr != pmItr->second.end(); ++pItr)
+            if (pItr->second.behavior)
+                CheckWPText(false, pmItr->first, pItr->first, pItr->second.behavior, ids);
     }
 }
