@@ -291,16 +291,11 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
             {
                 // traps can have time and can not have
                 GameObjectInfo const* goInfo = GetGOInfo();
-                if (goInfo->type == GAMEOBJECT_TYPE_TRAP)
+                if (goInfo->type == GAMEOBJECT_TYPE_TRAP)   // traps
                 {
                     if (m_cooldownTime >= time(NULL))
                         return;
 
-                    // traps
-                    Unit* owner = GetOwner();
-                    Unit* ok = NULL;                        // pointer to appropriate target if found any
-
-                    bool IsBattleGroundTrap = false;
                     // FIXME: this is activation radius (in different casting radius that must be selected from spell data)
                     // TODO: move activated state code (cast itself) to GO_ACTIVATED, in this place only check activating and set state
                     float radius = float(goInfo->trap.radius);
@@ -315,36 +310,16 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
                             // battlegrounds gameobjects has data2 == 0 && data5 == 3
                             radius = float(goInfo->trap.cooldown);
-                            IsBattleGroundTrap = true;
                         }
                     }
 
                     // Should trap trigger?
+                    Unit* enemy = NULL;                     // pointer to appropriate target if found any
                     MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
-                    MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
+                    MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(enemy, u_check);
                     Cell::VisitAllObjects(this, checker, radius);
-
-                    if (ok)
-                    {
-                        Unit* caster =  owner ? owner : ok;
-
-                        // Code below should be refactored into GO::Use, but not clear how to handle caster/victim for non AoE spells
-
-                        caster->CastSpell(ok, goInfo->trap.spellId, true, NULL, NULL, GetObjectGuid());
-                        // use template cooldown if provided
-                        m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));
-
-                        // count charges
-                        if (goInfo->trap.charges > 0)
-                            AddUse();
-
-                        if (IsBattleGroundTrap && ok->GetTypeId() == TYPEID_PLAYER)
-                        {
-                            // BattleGround gameobjects case
-                            if (BattleGround* bg = ((Player*)ok)->GetBattleGround())
-                                bg->HandleTriggerBuff(GetObjectGuid());
-                        }
-                    }
+                    if (enemy)
+                        Use(enemy);
                 }
 
                 if (uint32 max_charges = goInfo->GetCharges())
@@ -1067,23 +1042,41 @@ void GameObject::Use(Unit* user)
         }
         case GAMEOBJECT_TYPE_TRAP:                          // 6
         {
-            // Currently we do not expect trap code below to be Use()
-            // directly (except from spell effect). Code here will be called by TriggerLinkedGameObject.
-
             if (scriptReturnValue)
                 return;
 
+            Unit* owner = GetOwner();
+            Unit* caster = owner ? owner : user;
+
+            GameObjectInfo const* goInfo = GetGOInfo();
+            float radius = float(goInfo->trap.radius);
+            bool IsBattleGroundTrap = !radius && goInfo->trap.cooldown == 3 && m_respawnTime == 0;
+
             // FIXME: when GO casting will be implemented trap must cast spell to target
-            if (spellId = GetGOInfo()->trap.spellId)
-                user->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
+            if (spellId = goInfo->trap.spellId)
+                caster->CastSpell(user, spellId, true, NULL, NULL, GetObjectGuid());
+            // use template cooldown if provided
+            m_cooldownTime = time(NULL) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));
+
+            // count charges
+            if (goInfo->trap.charges > 0)
+                AddUse();
+
+            if (IsBattleGroundTrap && user->GetTypeId() == TYPEID_PLAYER)
+            {
+                // BattleGround gameobjects case
+                if (BattleGround* bg = ((Player*)user)->GetBattleGround())
+                    bg->HandleTriggerBuff(GetObjectGuid());
+            }
 
             // TODO: all traps can be activated, also those without spell.
             // Some may have have animation and/or are expected to despawn.
 
-            // TODO: Improve this when more information is available, currently these traps are known that must send the anim (Onyxia/ Heigan Fissures)
-            if (GetDisplayId() == 4392 || GetDisplayId() == 4472 || GetDisplayId() == 6785)
+            // TODO: Improve this when more information is available, currently these traps are known that must send the anim (Onyxia/ Heigan Fissures/ Trap in DireMaul)
+            if (GetDisplayId() == 4392 || GetDisplayId() == 4472 || GetDisplayId() == 6785 || GetDisplayId() == 3073)
                 SendGameObjectCustomAnim(GetObjectGuid());
 
+            // TODO: Despawning of traps? (Also related to code in ::Update)
             return;
         }
         case GAMEOBJECT_TYPE_CHAIR:                         // 7 Sitting: Wooden bench, chairs
