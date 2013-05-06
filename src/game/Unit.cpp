@@ -8381,9 +8381,12 @@ void Unit::SendPetAIReaction()
 
 ///----------End of Pet responses methods----------
 
-void Unit::StopMoving()
+void Unit::StopMoving(bool forceSendStop /*=false*/)
 {
     clearUnitState(UNIT_STAT_MOVING);
+
+    if (IsStopped() && !forceSendStop)
+        return;
 
     // not need send any packets if not in world
     if (!IsInWorld())
