@@ -5461,7 +5461,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
     for (AuraList::const_iterator i = mDamageDoneCreature.begin(); i != mDamageDoneCreature.end(); ++i)
     {
         if (creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
-            DoneTotalMod += ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+            DoneTotal += ((*i)->GetModifier()->m_amount);
     }
 
     // done scripted mod (take it from owner)
