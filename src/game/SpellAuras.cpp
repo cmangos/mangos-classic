@@ -737,6 +737,35 @@ void Aura::HandleAddModifier(bool apply, bool Real)
                 GetHolder()->SetAuraCharges(1);
                 break;
         }
+        
+        // In pre-TBC wrong spellmods in DBC
+        switch (GetSpellProto()->SpellIconID)
+        {
+            case 143:       // Permafrost Speed Decrease
+                if (GetEffIndex() == EFFECT_INDEX_1)
+                    m_modifier.m_miscvalue = SPELLMOD_EFFECT1;
+                break;
+            case 228:       // Improved Curse of Exhaustion Speed Decrease
+                if (GetEffIndex() == EFFECT_INDEX_0)
+                    m_modifier.m_miscvalue = SPELLMOD_EFFECT1;
+                break;
+            case 250:       // Camouflage Speed Decrease
+                if (GetEffIndex() == EFFECT_INDEX_0)
+                    m_modifier.m_miscvalue = SPELLMOD_EFFECT3;
+                break;
+            case 1181:       // Pathfinding Speed Increase
+                if (GetEffIndex() == EFFECT_INDEX_0)
+                    m_modifier.m_miscvalue = SPELLMOD_EFFECT1;
+                break;
+            case 1494:       // Amplify Curse Speed Decrease
+                if (GetEffIndex() == EFFECT_INDEX_1)
+                    m_modifier.m_miscvalue = SPELLMOD_EFFECT1;
+                break;
+            case 1563:       // Cheetah Sprint
+                if (GetEffIndex() == EFFECT_INDEX_0)
+                    m_modifier.m_miscvalue = SPELLMOD_EFFECT1;
+                break;
+        }
 
         m_spellmod = new SpellModifier(
             SpellModOp(m_modifier.m_miscvalue),
