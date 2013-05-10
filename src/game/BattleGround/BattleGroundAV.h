@@ -121,7 +121,6 @@ enum BG_AV_Nodes
 };
 #define BG_AV_NODES_MAX                 15
 
-
 // for nodeevents we will use event1=node
 // event2 is related to BG_AV_States
 // 0 = alliance assaulted
@@ -303,15 +302,13 @@ inline BG_AV_Nodes& operator++(BG_AV_Nodes& i)
 class BattleGroundAVScore : public BattleGroundScore
 {
     public:
-        BattleGroundAVScore() : GraveyardsAssaulted(0), GraveyardsDefended(0), TowersAssaulted(0), TowersDefended(0), SecondaryObjectives(0), LieutnantCount(0), SecondaryNPC(0) {};
+        BattleGroundAVScore() : GraveyardsAssaulted(0), GraveyardsDefended(0), TowersAssaulted(0), TowersDefended(0), SecondaryObjectives(0) {};
         virtual ~BattleGroundAVScore() {};
         uint32 GraveyardsAssaulted;
         uint32 GraveyardsDefended;
         uint32 TowersAssaulted;
         uint32 TowersDefended;
         uint32 SecondaryObjectives;
-        uint32 LieutnantCount;
-        uint32 SecondaryNPC;
 };
 
 class BattleGroundAV : public BattleGround
