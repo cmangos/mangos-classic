@@ -316,15 +316,6 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
     char path[512];
 
     // open expansion and common files
-    pArchiveNames.push_back(input_path + string("common.MPQ"));
-
-    // now, scan for the patch levels in the core dir
-    printf("Scanning patch levels from data directory.\n");
-    sprintf(path, "%spatch", input_path);
-    if (!scan_patches(path, pArchiveNames))
-        return(false);
-
-    // open expansion and common files
     printf("Opening data files from data directory.\n");
     sprintf(path, "%sterrain.mpq", input_path);
     pArchiveNames.push_back(path);
@@ -337,7 +328,14 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
     pArchiveNames.push_back(path);
 	sprintf(path, "%sbase.mpq", input_path);
     pArchiveNames.push_back(path);
-	sprintf(path, "%smisc.mpq", input_path);
+    sprintf(path, "%smisc.mpq", input_path);
+
+    // now, scan for the patch levels in the core dir
+    printf("Scanning patch levels from data directory.\n");
+    sprintf(path, "%spatch", input_path);
+    if (!scan_patches(path, pArchiveNames))
+        return(false);
+
     printf("\n");
 
     return true;
