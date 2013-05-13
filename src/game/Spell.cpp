@@ -5877,11 +5877,9 @@ bool Spell::IsNeedSendToClient() const
            m_spellInfo->speed > 0.0f || (!m_triggeredByAuraSpell && !m_IsTriggeredSpell);
 }
 
-bool Spell::IsTriggeredSpellWithRedundentData() const
+bool Spell::IsTriggeredSpellWithRedundentCastTime() const
 {
-    return m_triggeredByAuraSpell || m_triggeredBySpellInfo ||
-           // possible not need after above check?
-           m_IsTriggeredSpell && (m_spellInfo->manaCost || m_spellInfo->ManaCostPercentage);
+    return m_IsTriggeredSpell && (m_spellInfo->manaCost || m_spellInfo->ManaCostPercentage);
 }
 
 bool Spell::HaveTargetsForEffect(SpellEffectIndex effect) const

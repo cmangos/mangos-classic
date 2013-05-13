@@ -1159,6 +1159,10 @@ void ObjectMgr::LoadGameObjects()
         if (gameEvent == 0 && GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
             AddGameobjectToGrid(guid, &data);
 
+        //uint32 zoneId, areaId;
+        //sTerrainMgr.LoadTerrain(data.mapid)->GetZoneAndAreaId(zoneId, areaId, data.posX, data.posY, data.posZ);
+        //sLog.outErrorDb("UPDATE gameobject SET zone_id=%u, area_id=%u WHERE guid=%u;", zoneId, areaId, guid);
+
         ++count;
 
     }
@@ -8031,7 +8035,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
                               "SELECT menu_id, id, option_icon, option_text, option_id, npc_option_npcflag, "
                               "action_menu_id, action_poi_id, action_script_id, box_coded, box_money, box_text, "
                               "condition_id "
-                              "FROM gossip_menu_option");
+                              "FROM gossip_menu_option ORDER BY menu_id, id");
 
     if (!result)
     {

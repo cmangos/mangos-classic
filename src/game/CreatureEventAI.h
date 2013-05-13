@@ -63,6 +63,7 @@ enum EventAI_Type
     EVENT_T_MISSING_AURA            = 27,                   // Param1 = SpellID, Param2 = Number of time stacked expected, Param3/4 Repeat Min/Max
     EVENT_T_TARGET_MISSING_AURA     = 28,                   // Param1 = SpellID, Param2 = Number of time stacked expected, Param3/4 Repeat Min/Max
     EVENT_T_TIMER_GENERIC           = 29,                   // InitialMin, InitialMax, RepeatMin, RepeatMax
+    EVENT_T_RECEIVE_AI_EVENT        = 30,                   // AIEventType, Sender-Entry, unused, unused
 
     EVENT_T_END,
 };
@@ -114,28 +115,31 @@ enum EventAI_ActionType
     ACTION_T_SET_INVINCIBILITY_HP_LEVEL = 42,               // MinHpValue, format(0-flat,1-percent from max health)
     ACTION_T_MOUNT_TO_ENTRY_OR_MODEL    = 43,               // Creature_template entry(param1) OR ModelId (param2) (or 0 for both to unmount)
     ACTION_T_CHANCED_TEXT               = 44,               // Chance to display the text, TextId1, optionally TextId2. If more than just -TextId1 is defined, randomize. Negative values.
+    ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, unused
+
     ACTION_T_END,
 };
 
 enum Target
 {
     // Self (m_creature)
-    TARGET_T_SELF = 0,                                      // Self cast
+    TARGET_T_SELF                           = 0,            // Self cast
 
     // Hostile targets
-    TARGET_T_HOSTILE,                                       // Our current target (ie: highest aggro)
-    TARGET_T_HOSTILE_SECOND_AGGRO,                          // Second highest aggro (generaly used for cleaves and some special attacks)
-    TARGET_T_HOSTILE_LAST_AGGRO,                            // Dead last on aggro (no idea what this could be used for)
-    TARGET_T_HOSTILE_RANDOM,                                // Just any random target on our threat list
-    TARGET_T_HOSTILE_RANDOM_NOT_TOP,                        // Any random target except top threat
+    TARGET_T_HOSTILE                        = 1,            // Our current target (ie: highest aggro)
+    TARGET_T_HOSTILE_SECOND_AGGRO           = 2,            // Second highest aggro (generaly used for cleaves and some special attacks)
+    TARGET_T_HOSTILE_LAST_AGGRO             = 3,            // Dead last on aggro (no idea what this could be used for)
+    TARGET_T_HOSTILE_RANDOM                 = 4,            // Just any random target on our threat list
+    TARGET_T_HOSTILE_RANDOM_NOT_TOP         = 5,            // Any random target except top threat
 
     // Invoker targets
-    TARGET_T_ACTION_INVOKER,                                // Unit who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
-    TARGET_T_ACTION_INVOKER_OWNER,                          // Unit who is responsible for Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
+    TARGET_T_ACTION_INVOKER                 = 6,            // Unit who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
+    TARGET_T_ACTION_INVOKER_OWNER           = 7,            // Unit who is responsible for Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
+    TARGET_T_EVENT_SENDER                   = 10,           // Unit who sent an AIEvent that was received with EVENT_T_RECEIVE_AI_EVENT
 
     // Hostile players
-    TARGET_T_HOSTILE_RANDOM_PLAYER,                         // Just any random player on our threat list
-    TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER,                 // Any random player from threat list except top threat
+    TARGET_T_HOSTILE_RANDOM_PLAYER          = 8,            // Just any random player on our threat list
+    TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER  = 9,            // Any random player from threat list except top threat
 
     TARGET_T_END
 };
@@ -384,13 +388,19 @@ struct CreatureEventAI_Action
             uint32 creatureId;                              // set one from fields (or 0 for both to dismount)
             uint32 modelId;
         } mount;
-
         // ACTION_T_CHANCED_TEXT                            = 44
         struct
         {
             uint32 chance;
             int32 TextId[2];
         } chanced_text;
+        // ACTION_T_THROW_AI_EVENT                          = 45
+        struct
+        {
+            uint32 eventType;
+            uint32 radius;
+            uint32 unused;
+        } throwEvent;
         // RAW
         struct
         {
@@ -503,8 +513,8 @@ struct CreatureEventAI_Event
             uint32 repeatMax;
         } friendly_buff;
         // EVENT_T_SUMMONED_UNIT                            = 17
-        // EVENT_T_SUMMONED_JUST_DIED                        = 25
-        // EVENT_T_SUMMONED_JUST_DESPAWN                     = 26
+        // EVENT_T_SUMMONED_JUST_DIED                       = 25
+        // EVENT_T_SUMMONED_JUST_DESPAWN                    = 26
         struct
         {
             uint32 creatureId;
@@ -536,6 +546,14 @@ struct CreatureEventAI_Event
             uint32 repeatMin;
             uint32 repeatMax;
         } buffed;
+        // EVENT_T_RECEIVE_AI_EVENT                         = 30
+        struct
+        {
+            uint32 eventType;                               // See CreatureAI.h enum AIEventType - Receive only events of this type
+            uint32 senderEntry;                             // Optional npc from only whom this event can be received
+            uint32 unused1;
+            uint32 unused2;
+        } receiveAIEvent;
         // RAW
         struct
         {
@@ -606,14 +624,15 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void ReceiveEmote(Player* pPlayer, uint32 text_emote) override;
         void SummonedCreatureJustDied(Creature* unit) override;
         void SummonedCreatureDespawn(Creature* unit) override;
+        void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker) override;
 
         static int Permissible(const Creature*);
 
-        bool ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker = NULL);
-        void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker);
+        bool ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker = NULL, Creature* pAIEventSender = NULL);
+        void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender);
         inline uint32 GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3);
         inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3);
-        inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, uint32 forSpellId = 0, uint32 selectFlags = 0);
+        inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, uint32 forSpellId = 0, uint32 selectFlags = 0);
 
         void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target);
 

@@ -59,6 +59,37 @@ enum CastFlags
     CAST_AURA_NOT_PRESENT       = 0x20,                     // Only casts the spell if the target does not have an aura from the spell
 };
 
+enum AIEventType
+{
+    // Usable with Event AI
+    AI_EVENT_JUST_DIED          = 0,                        // Sender = Killed Npc, Invoker = Killer
+    AI_EVENT_CRITICAL_HEALTH    = 1,                        // Sender = Hurt Npc, Invoker = DamageDealer
+    AI_EVENT_LOST_HEALTH        = 2,                        // Sender = Hurt Npc, Invoker = DamageDealer
+    AI_EVENT_GOT_CCED           = 3,                        // Sender = CCed Npc, Invoker = Caster that CCed
+    AI_EVENT_GOT_FULL_HEALTH    = 4,                        // Sender = Healed Npc, Invoker = Healer
+    AI_EVENT_CUSTOM_EVENTAI_A   = 5,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
+    AI_EVENT_CUSTOM_EVENTAI_B   = 6,                        // Sender = Npc that throws custom event, Invoker = TARGET_T_ACTION_INVOKER (if exists)
+    MAXIMAL_AI_EVENT_EVENTAI    = 7,
+
+    // Internal Use
+    AI_EVENT_CALL_ASSISTANCE    = 10,                       // Sender = Attacked Npc, Invoker = Enemy
+
+    // Predefined for SD2
+    AI_EVENT_START_ESCORT       = 100,                      // Invoker = Escorting Player
+    AI_EVENT_START_ESCORT_B     = 101,                      // Invoker = Escorting Player
+    AI_EVENT_START_EVENT        = 102,                      // Invoker = EventStarter
+    AI_EVENT_START_EVENT_A      = 103,                      // Invoker = EventStarter
+    AI_EVENT_START_EVENT_B      = 104,                      // Invoker = EventStarter
+
+    // Some IDs for special cases in SD2
+    AI_EVENT_CUSTOM_A           = 1000,
+    AI_EVENT_CUSTOM_B           = 1001,
+    AI_EVENT_CUSTOM_C           = 1002,
+    AI_EVENT_CUSTOM_D           = 1003,
+    AI_EVENT_CUSTOM_E           = 1004,
+    AI_EVENT_CUSTOM_F           = 1005,
+};
+
 class MANGOS_DLL_SPEC CreatureAI
 {
     public:
@@ -276,6 +307,33 @@ class MANGOS_DLL_SPEC CreatureAI
         /// Set combat movement (on/off), also sets UNIT_STAT_NO_COMBAT_MOVEMENT
         void SetCombatMovement(bool enable, bool stopOrStartMovement = false);
         bool IsCombatMovement() const { return m_isCombatMovement; }
+
+        ///== Event Handling ===============================
+
+        /**
+         * Send an AI Event to nearby Creatures around
+         * @param uiType number to specify the event, default cases listed in enum AIEventType
+         * @param pInvoker Unit that triggered this event (like an attacker)
+         * @param uiDelay  delay time until the Event will be triggered
+         * @param fRadius  range in which for receiver is searched
+         */
+        void SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius) const;
+
+        /**
+         * Send an AI Event to a Creature
+         * @param eventType to specify the event, default cases listed in enum AIEventType
+         * @param pInvoker Unit that triggered this event (like an attacker)
+         * @param pReceiver Creature to receive this event
+         */
+        void SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver) const;
+
+        /**
+         * Called when an AI Event is received
+         * @param eventType to specify the event, default cases listed in enum AIEventType
+         * @param pSender Creature that sent this event
+         * @param pInvoker Unit that triggered this event (like an attacker)
+         */
+        virtual void ReceiveAIEvent(AIEventType /*eventType*/, Creature* /*pSender*/, Unit* /*pInvoker*/) {}
 
     protected:
         void HandleMovementOnAttackStart(Unit* victim);
