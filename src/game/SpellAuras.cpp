@@ -3441,6 +3441,15 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
     {
         case 1178:                                          // Bear Form (Passive)
         case 9635:                                          // Dire Bear Form (Passive)
+        {
+            if(Real)
+            {
+                float pct = target->GetHealthPercent();
+                target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
+                target->SetHealthPercent(pct);
+            }
+            return;
+        }
         case 12976:                                         // Warrior Last Stand triggered spell
         {
             if (Real)
