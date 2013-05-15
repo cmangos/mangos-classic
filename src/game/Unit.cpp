@@ -5472,13 +5472,18 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
     {
         if (!(*i)->isAffectedOnSpell(spellProto))
             continue;
+            
         switch ((*i)->GetModifier()->m_miscvalue)
         {
             case 4418: // Increased Shock Damage
             case 4554: // Increased Lightning Damage
-            case 4555: // Improved Moonfire
             {
                 DoneTotal += (*i)->GetModifier()->m_amount;
+                break;
+            }
+            case 4555: // Improved Moonfire
+            {
+                DoneTotalMod *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
                 break;
             }
         }
