@@ -535,7 +535,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE &&
                                 spellInfo->Id != m_spellInfo->Id && GetSpellRecoveryTime(spellInfo) > 0)
                             ((Player*)m_caster)->RemoveSpellCooldown((itr++)->first, true);
-                        ++itr;
+                        else
+                            ++itr;
                     }
                     return;
                 }
