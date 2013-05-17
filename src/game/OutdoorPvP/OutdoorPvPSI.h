@@ -50,7 +50,7 @@ enum
 
     // misc
     FACTION_CENARION_CIRCLE             = 609,
-    HONOR_REWARD_SILITHYST              = 19,
+    HONOR_REWARD_SILITHYST              = 199,
     REPUTATION_REWARD_SILITHYST         = 20,
     MAX_SILITHYST                       = 200,
 
