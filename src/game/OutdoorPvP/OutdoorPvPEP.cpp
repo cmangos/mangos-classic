@@ -171,15 +171,14 @@ void OutdoorPvPEP::HandleObjectiveComplete(uint32 eventId, std::list<Player*> pl
             return;
     }
 
-    // ToDo: fix this! Maybe uses spells 31885 or 31929
-    /*for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
+    for (std::list<Player*>::iterator itr = players.begin(); itr != players.end(); ++itr)
     {
         if ((*itr) && (*itr)->GetTeam() == team)
         {
             (*itr)->KilledMonsterCredit(credit);
-            (*itr)->RewardHonor(NULL, 1, HONOR_REWARD_PLAGUELANDS);
+            (*itr)->AddHonorCP(HONOR_REWARD_PLAGUELANDS, HONORABLE, 0, 0);
         }
-    }*/
+    }
 }
 
 // process the capture events
