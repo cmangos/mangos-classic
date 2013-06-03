@@ -67,17 +67,16 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature)
     if (i_path->empty())
         return;
     i_currentNode = i_path->begin()->first;
+    m_lastReachedWaypoint = 0;
 }
 
 void WaypointMovementGenerator<Creature>::Initialize(Creature& creature)
 {
     creature.addUnitState(UNIT_STAT_ROAMING);
+    creature.clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+
     LoadPath(creature);
 
-    if (!creature.isAlive() || creature.hasUnitState(UNIT_STAT_NOT_MOVE))
-        return;
-
-    creature.addUnitState(UNIT_STAT_ROAMING_MOVE);
     StartMoveNow(creature);
 }
 
@@ -96,14 +95,16 @@ void WaypointMovementGenerator<Creature>::Interrupt(Creature& creature)
 
 void WaypointMovementGenerator<Creature>::Reset(Creature& creature)
 {
-    creature.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
-    StartMoveNow(creature);
+    creature.addUnitState(UNIT_STAT_ROAMING);
+    StartMove(creature);
 }
 
 void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
 {
     if (!i_path || i_path->empty())
         return;
+
+    m_lastReachedWaypoint = i_currentNode;
 
     if (m_isArrivalDone)
         return;
@@ -161,7 +162,6 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
 void WaypointMovementGenerator<Creature>::StartMoveNow(Creature& creature)
 {
     i_nextMoveTime.Reset(0);
-    creature.clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
     StartMove(creature);
 }
 
@@ -171,6 +171,9 @@ void WaypointMovementGenerator<Creature>::StartMove(Creature& creature)
         return;
 
     if (Stopped(creature))
+        return;
+
+    if (!creature.isAlive() || creature.hasUnitState(UNIT_STAT_NOT_MOVE))
         return;
 
     WaypointPath::const_iterator currPoint = i_path->find(i_currentNode);
@@ -253,10 +256,14 @@ bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, 
     if (!i_path || i_path->empty())
         return false;
 
-    WaypointPath::const_iterator currPoint = i_path->find(i_currentNode);
-    MANGOS_ASSERT(currPoint != i_path->end());
+    WaypointPath::const_iterator lastPoint = i_path->find(m_lastReachedWaypoint);
+    // Special case: Before the first waypoint is reached, m_lastReachedWaypoint is set to 0 (which may not be contained in i_path)
+    if (!m_lastReachedWaypoint && lastPoint == i_path->end())
+        return false;
 
-    x = currPoint->second.x; y = currPoint->second.y; z = currPoint->second.z;
+    MANGOS_ASSERT(lastPoint != i_path->end());
+
+    x = lastPoint->second.x; y = lastPoint->second.y; z = lastPoint->second.z;
     return true;
 }
 
