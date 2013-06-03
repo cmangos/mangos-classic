@@ -4371,8 +4371,11 @@ void Player::RepopAtGraveyard()
     // if no grave found, stay at the current location
     // and don't show spirit healer location
     if (ClosestGrave)
+    {
+        bool updateVisibility = IsInWorld() && GetMapId() == ClosestGrave->map_id;
         TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, GetOrientation());
-        UpdateVisibilityAndView();
+        if (updateVisibility && IsInWorld())
+            UpdateVisibilityAndView();
     }
 }
 
