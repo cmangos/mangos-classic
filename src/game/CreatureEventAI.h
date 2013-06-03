@@ -116,6 +116,7 @@ enum EventAI_ActionType
     ACTION_T_MOUNT_TO_ENTRY_OR_MODEL    = 43,               // Creature_template entry(param1) OR ModelId (param2) (or 0 for both to unmount)
     ACTION_T_CHANCED_TEXT               = 44,               // Chance to display the text, TextId1, optionally TextId2. If more than just -TextId1 is defined, randomize. Negative values.
     ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, unused
+    ACTION_T_SET_THROW_MASK             = 46,               // EventTypeMask, unused, unused
 
     ACTION_T_END,
 };
@@ -401,6 +402,13 @@ struct CreatureEventAI_Action
             uint32 radius;
             uint32 unused;
         } throwEvent;
+        // ACTION_T_SET_THROW_MASK                          = 46
+        struct
+        {
+            uint32 eventTypeMask;
+            uint32 unused1;
+            uint32 unused2;
+        } setThrowMask;
         // RAW
         struct
         {
@@ -566,6 +574,9 @@ struct CreatureEventAI_Event
 
     CreatureEventAI_Action action[MAX_ACTIONS];
 };
+
+#define AIEVENT_DEFAULT_THROW_RADIUS    30.0f
+
 // Event_Map
 typedef std::vector<CreatureEventAI_Event> CreatureEventAI_Event_Vec;
 typedef UNORDERED_MAP<uint32, CreatureEventAI_Event_Vec > CreatureEventAI_Event_Map;
@@ -619,6 +630,7 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void MoveInLineOfSight(Unit* who) override;
         void SpellHit(Unit* pUnit, const SpellEntry* pSpell) override;
         void DamageTaken(Unit* done_by, uint32& damage) override;
+        void HealedBy(Unit* healer, uint32& healedAmount) override;
         void UpdateAI(const uint32 diff) override;
         bool IsVisible(Unit*) const override;
         void ReceiveEmote(Player* pPlayer, uint32 text_emote) override;
@@ -655,6 +667,11 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         uint8  m_Phase;                                     // Current phase, max 32 phases
         bool   m_MeleeEnabled;                              // If we allow melee auto attack
         uint32 m_InvinceabilityHpLevel;                     // Minimal health level allowed at damage apply
+
+        uint32 m_throwAIEventMask;                          // Automatically throw AIEvents that are encoded into this mask
+        // Note that Step 100 means that AI_EVENT_GOT_FULL_HEALTH was sent
+        // Steps 0..2 correspond to AI_EVENT_LOST_SOME_HEALTH(90%), AI_EVENT_LOST_HEALTH(50%), AI_EVENT_CRITICAL_HEALTH(10%)
+        uint32 m_throwAIEventStep;                          // Used for damage taken/ received heal
 };
 
 #endif

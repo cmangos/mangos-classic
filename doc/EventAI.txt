@@ -150,6 +150,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 43   ACTION_T_MOUNT_TO_ENTRY_OR_MODEL       CreatureEntry, ModelId          Set mount model from creature_template.entry (Param1) OR explicit modelId (Param2). If (Param1) AND (Param2) are both 0, unmount.
 44   ACTION_T_CHANCED_TEXT                  Chance, -TextId1, -TextId2      Displays by Chance (1..100) the specified -TextId. When -TextId2 is specified, the selection will be randomized. Text types are defined, along with other options for the text, in a table below. Param2 and Param3 needs to be negative.
 45   ACTION_T_THROW_AI_EVENT                EventType, Radius               Throws an AIEvent of type (Param1) to nearby friendly Npcs in range of (Param2)
+46   ACTION_T_SET_THROW_MASK                EventTypeMask                   Marks for which AIEvents the npc will throw AIEvents on its own.
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -875,6 +876,20 @@ Read at bottom for documentation of creature_ai_texts-table.
 Parameter 1: EventType - What AIEvent to throw, supported types see CreatureAI.h enum AIEventType
 Parameter 2: Radius    - Throw the AIEvent to nearby friendly creatures within this range
 
+-----------------------------
+46 = ACTION_T_SET_THROW_MASK:
+-----------------------------
+Parameter 1: EventTypeMask - Which AIEvents to throw, supported types see CreatureAI.h enum AIEventType (mask-value is 2^type)
+
+This action sets which AIEvents a npc will throw automatically.
+Currently supported are:
+    AI_EVENT_JUST_DIED         |  MaskValue: 0x01  |  Sender = Killed Npc, Invoker = Killer      |  Sent when npc dies
+    AI_EVENT_CRITICAL_HEALTH   |  MaskValue: 0x02  |  Sender = Hurt Npc, Invoker = DamageDealer  |  Sent when damaged below 10% health
+    AI_EVENT_LOST_HEALTH       |  MaskValue: 0x04  |  Sender = Hurt Npc, Invoker = DamageDealer  |  Sent when damaged below 50% health
+    AI_EVENT_LOST_SOME_HEALTH  |  MaskValue: 0x08  |  Sender = Hurt Npc, Invoker = DamageDealer  |  Sent when damaged below 90% health
+    AI_EVENT_GOT_FULL_HEALTH   |  MaskValue: 0x10  |  Sender = Healed Npc, Invoker = Healer      |  Sent when healed to full health
+
+So if you want an npc to throw AIEvents automatically on death and on critical health, you would set its EventTypeMask to 0x03
 
 =========================================
 Target Types

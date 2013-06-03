@@ -61,7 +61,12 @@ void CreatureEventAI::GetAIInformation(ChatHandler& reader)
     reader.PSendSysMessage(LANG_NPC_EVENTAI_COMBAT, reader.GetOnOffStr(m_MeleeEnabled));
 }
 
-CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c)
+CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
+    m_Phase(0),
+    m_MeleeEnabled(true),
+    m_InvinceabilityHpLevel(0),
+    m_throwAIEventMask(0),
+    m_throwAIEventStep(0)
 {
     // Need make copy for filter unneeded steps and safe in case table reload
     CreatureEventAI_Event_Map::const_iterator creatureEventsItr = sEventAIMgr.GetCreatureEventAIMap().find(m_creature->GetEntry());
@@ -99,10 +104,6 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c)
         sLog.outErrorEventAI("EventMap for Creature %u is empty but creature is using CreatureEventAI.", m_creature->GetEntry());
 
     m_bEmptyList = m_CreatureEventAIList.empty();
-    m_Phase = 0;
-    m_MeleeEnabled = true;
-
-    m_InvinceabilityHpLevel = 0;
 
     // Handle Spawned Events, also calls Reset()
     JustRespawned();
@@ -918,6 +919,11 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             SendAIEvent(AIEventType(action.throwEvent.eventType), pActionInvoker, 0, action.throwEvent.radius);
             break;
         }
+        case ACTION_T_SET_THROW_MASK:
+        {
+            m_throwAIEventMask = action.setThrowMask.eventTypeMask;
+            break;
+        }
     }
 }
 
@@ -946,6 +952,7 @@ void CreatureEventAI::Reset()
 {
     m_EventUpdateTime = EVENT_UPDATE_TIME;
     m_EventDiff = 0;
+    m_throwAIEventStep = 0;
 
     if (m_bEmptyList)
         return;
@@ -1019,10 +1026,13 @@ void CreatureEventAI::JustDied(Unit* killer)
             m_creature->SendZoneUnderAttackMessage(pKiller);
     }
 
+    if (m_throwAIEventMask & (1 << AI_EVENT_JUST_DIED))
+        SendAIEvent(AI_EVENT_JUST_DIED, killer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
+
     if (m_bEmptyList)
         return;
 
-    // Handle Evade events
+    // Handle On Death events
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
     {
         if ((*i).Event.event_type == EVENT_T_DEATH)
@@ -1501,7 +1511,9 @@ void CreatureEventAI::ReceiveEmote(Player* pPlayer, uint32 text_emote)
     }
 }
 
-void CreatureEventAI::DamageTaken(Unit* /*done_by*/, uint32& damage)
+#define HEALTH_STEPS            3
+
+void CreatureEventAI::DamageTaken(Unit* dealer, uint32& damage)
 {
     if (m_InvinceabilityHpLevel > 0 && m_creature->GetHealth() < m_InvinceabilityHpLevel + damage)
     {
@@ -1509,6 +1521,46 @@ void CreatureEventAI::DamageTaken(Unit* /*done_by*/, uint32& damage)
             damage = 0;
         else
             damage = m_creature->GetHealth() - m_InvinceabilityHpLevel;
+    }
+
+    uint32 step = m_throwAIEventStep != 100 ? m_throwAIEventStep : 0;
+    if (step < HEALTH_STEPS)
+    {
+        // Throw at 90%, 50% and 10% health
+        float healthSteps[HEALTH_STEPS] = { 90.0f, 50.0f, 10.0f };
+        float newHealthPercent = (m_creature->GetHealth() - damage) * 100.0f / m_creature->GetMaxHealth();
+        AIEventType sendEvent[HEALTH_STEPS] = { AI_EVENT_LOST_SOME_HEALTH, AI_EVENT_LOST_HEALTH, AI_EVENT_CRITICAL_HEALTH };
+
+        if (newHealthPercent > healthSteps[step])
+            return;                                         // Not reached the next mark
+
+        // search for highest reached mark (with actual event attached)
+        for (uint32 i = HEALTH_STEPS - 1; i > step; --i)
+        {
+            if (newHealthPercent < healthSteps[i] && (m_throwAIEventMask & (1 << sendEvent[i])))
+            {
+                step = i;
+                break;
+            }
+        }
+
+        if (m_throwAIEventMask & (1 << sendEvent[step]))
+            SendAIEvent(sendEvent[step], dealer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
+
+        m_throwAIEventStep = step + 1;
+    }
+}
+
+void CreatureEventAI::HealedBy(Unit* healer, uint32& healedAmount)
+{
+    if (m_throwAIEventStep == 100)
+        return;
+
+    if (m_creature->GetHealth() + healedAmount >= m_creature->GetMaxHealth())
+    {
+        if (m_throwAIEventMask & (1 << AI_EVENT_GOT_FULL_HEALTH))
+            SendAIEvent(AI_EVENT_GOT_FULL_HEALTH, healer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
+        m_throwAIEventStep = 100;
     }
 }
 
