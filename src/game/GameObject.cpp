@@ -277,6 +277,13 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                             {
                                 // can be despawned or destroyed
                                 SetLootState(GO_JUST_DEACTIVATED);
+                                // Remove Wild-Summoned GO on timer expire
+                                if (!HasStaticDBSpawnData())
+                                {
+                                    if (Unit* owner = GetOwner())
+                                        owner->RemoveGameObject(this, false);
+                                    Delete();
+                                }
                                 return;
                             }
 
@@ -409,13 +416,11 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     break;
             }
 
-            if (!HasStaticDBSpawnData())                    // Remove wild summoned after use
+            // Remove wild summoned after use
+            if (!HasStaticDBSpawnData() && (!GetSpellId() || GetGOInfo()->GetDespawnPossibility()))
             {
-                if (GetOwnerGuid())
-                    if (Unit* owner = GetOwner())
-                        owner->RemoveGameObject(this, false);
-
-                SetRespawnTime(0);
+                if (Unit* owner = GetOwner())
+                    owner->RemoveGameObject(this, false);
                 Delete();
                 return;
             }

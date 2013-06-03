@@ -68,10 +68,9 @@ void CreatureLinkingMgr::LoadFromDB()
     m_eventTriggers.clear();                              // master
     m_eventGuidTriggers.clear();
 
-    QueryResult* result = WorldDatabase.Query("SELECT entry, map, master_entry, flag, search_range FROM creature_linking_template");
-
+    // Load `creature_linking_template`
     uint32 count = 0;
-
+    QueryResult* result = WorldDatabase.Query("SELECT entry, map, master_entry, flag, search_range FROM creature_linking_template");
     if (!result)
     {
         BarGoLink bar(1);
@@ -79,58 +78,57 @@ void CreatureLinkingMgr::LoadFromDB()
 
         sLog.outString(">> Table creature_linking_template is empty.");
         sLog.outString();
-
-        return;
     }
-
-    BarGoLink bar((int)result->GetRowCount());
-    do
+    else
     {
-        bar.step();
-
-        Field* fields = result->Fetch();
-        CreatureLinkingInfo tmp;
-
-        uint32 entry            = fields[0].GetUInt32();
-        tmp.mapId               = fields[1].GetUInt32();
-        tmp.masterId            = fields[2].GetUInt32();
-        tmp.linkingFlag         = fields[3].GetUInt16();
-        tmp.searchRange         = fields[4].GetUInt16();
-        tmp.masterDBGuid        = 0;                        // Will be initialized for unique mobs later (only for spawning dependend)
-
-        if (!IsLinkingEntryValid(entry, &tmp, true))
-            continue;
-
-        // Store db-guid for master of whom pTmp is spawn dependend (only non-local bosses)
-        if (tmp.searchRange == 0 && tmp.linkingFlag & (FLAG_CANT_SPAWN_IF_BOSS_DEAD | FLAG_CANT_SPAWN_IF_BOSS_ALIVE))
+        BarGoLink bar((int)result->GetRowCount());
+        do
         {
-            if (QueryResult* guid_result = WorldDatabase.PQuery("SELECT guid FROM creature WHERE id=%u AND map=%u LIMIT 1", tmp.masterId, tmp.mapId))
+            bar.step();
+
+            Field* fields = result->Fetch();
+            CreatureLinkingInfo tmp;
+
+            uint32 entry            = fields[0].GetUInt32();
+            tmp.mapId               = fields[1].GetUInt32();
+            tmp.masterId            = fields[2].GetUInt32();
+            tmp.linkingFlag         = fields[3].GetUInt16();
+            tmp.searchRange         = fields[4].GetUInt16();
+            tmp.masterDBGuid        = 0;                        // Will be initialized for unique mobs later (only for spawning dependend)
+
+            if (!IsLinkingEntryValid(entry, &tmp, true))
+                continue;
+
+            // Store db-guid for master of whom pTmp is spawn dependend (only non-local bosses)
+            if (tmp.searchRange == 0 && tmp.linkingFlag & (FLAG_CANT_SPAWN_IF_BOSS_DEAD | FLAG_CANT_SPAWN_IF_BOSS_ALIVE))
             {
-                tmp.masterDBGuid = (*guid_result)[0].GetUInt32();
+                if (QueryResult* guid_result = WorldDatabase.PQuery("SELECT guid FROM creature WHERE id=%u AND map=%u LIMIT 1", tmp.masterId, tmp.mapId))
+                {
+                    tmp.masterDBGuid = (*guid_result)[0].GetUInt32();
 
-                delete guid_result;
+                    delete guid_result;
+                }
             }
+
+            ++count;
+
+            // Add it to the map
+            m_creatureLinkingMap.insert(CreatureLinkingMap::value_type(entry, tmp));
+
+            // Store master_entry
+            m_eventTriggers.insert(tmp.masterId);
         }
+        while (result->NextRow());
 
-        ++count;
+        sLog.outString();
+        sLog.outString(">> Loaded creature linking for %u creature-entries", count);
 
-        // Add it to the map
-        m_creatureLinkingMap.insert(CreatureLinkingMap::value_type(entry, tmp));
-
-        // Store master_entry
-        m_eventTriggers.insert(tmp.masterId);
+        delete result;
     }
-    while (result->NextRow());
 
-    sLog.outString();
-    sLog.outString(">> Loaded creature linking for %u creature-entries", count);
-
-    delete result;
-
-    result = WorldDatabase.Query("SELECT guid, master_guid, flag FROM creature_linking");
-
+    // Load `creature_linking`
     count = 0;
-
+    result = WorldDatabase.Query("SELECT guid, master_guid, flag FROM creature_linking");
     if (!result)
     {
         BarGoLink bar(1);
