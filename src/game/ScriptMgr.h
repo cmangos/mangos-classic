@@ -113,8 +113,9 @@ enum ScriptInfoDataFlags
     SCRIPT_FLAG_SOURCE_TARGETS_SELF         = 0x04,         // s* -> s* (* result after previous flag is evaluated)
     SCRIPT_FLAG_COMMAND_ADDITIONAL          = 0x08,         // command dependend
     SCRIPT_FLAG_BUDDY_BY_GUID               = 0x10,         // take the buddy by guid
+    SCRIPT_FLAG_BUDDY_IS_PET                = 0x20,         // buddy is a pet
 };
-#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_BY_GUID - 1)
+#define MAX_SCRIPT_FLAG_VALID               (2 * SCRIPT_FLAG_BUDDY_IS_PET - 1)
 
 struct ScriptInfo
 {
