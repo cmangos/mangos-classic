@@ -71,7 +71,6 @@ void GMTicketMgr::LoadGMTickets()
 
         ticket.Init(guid, fields[1].GetCppString(), fields[2].GetCppString(), time_t(fields[3].GetUInt64()));
         m_GMTicketListByCreatingOrder.push_back(&ticket);
-
     }
     while (result->NextRow());
     delete result;

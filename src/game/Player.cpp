@@ -3129,7 +3129,6 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
                 SetSkill(prevSkill->skill, skill_value, skill_max_value, prevSkill->step);
             }
         }
-
     }
     else
     {
@@ -4394,7 +4393,6 @@ void Player::CleanupChannels()
         ch->Leave(GetObjectGuid(), false);                  // not send to client, not remove from player's channel list
         if (ChannelMgr* cMgr = channelMgr(GetTeam()))
             cMgr->LeftChannel(ch->GetName());               // deleted channel if empty
-
     }
     DEBUG_LOG("Player: channels cleaned up!");
 }
@@ -9962,7 +9960,6 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
         }
 
         ApplyEquipCooldown(pItem);
-
     }
     else
     {
@@ -11177,7 +11174,6 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                     break;
                 case ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL:
                 {
-
                     // Flametongue Weapon (Passive), Ranks (used not existed equip spell id in pre-3.x spell.dbc)
                     // See Player::CastItemCombatSpell for workaround implementation
                     if (enchant_spell_id && apply)
@@ -14465,7 +14461,6 @@ void Player::_LoadItemLoot(QueryResult* result)
             }
 
             item->LoadLootFromDB(fields);
-
         }
         while (result->NextRow());
 
@@ -14561,7 +14556,6 @@ void Player::_LoadMails(QueryResult* result)
 
         if (m->mailTemplateId && !m->has_items)
             m->prepareTemplateItems(this);
-
     }
     while (result->NextRow());
     delete result;
@@ -15456,7 +15450,6 @@ void Player::_SaveHonorCP()
 
     for (HonorCPMap::iterator itr = m_honorCP.begin(); itr != m_honorCP.end() ; ++itr)
     {
-
         switch (itr->state)
         {
             case HK_OLD:
@@ -15689,7 +15682,6 @@ void Player::_SaveSpells()
             itr->second.state = PLAYERSPELL_UNCHANGED;
             ++itr;
         }
-
     }
 }
 
@@ -16366,7 +16358,6 @@ void Player::RemovePetitionsAndSigns(ObjectGuid guid)
             Player* owner = sObjectMgr.GetPlayer(ownerguid);
             if (owner)
                 owner->GetSession()->SendPetitionQueryOpcode(petitionguid);
-
         }
         while (result->NextRow());
 

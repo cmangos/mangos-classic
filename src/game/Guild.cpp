@@ -449,7 +449,6 @@ bool Guild::LoadMembersFromDB(QueryResult* guildMembersResult)
         }
 
         members[lowguid]      = newmember;
-
     }
     while (guildMembersResult->NextRow());
 
@@ -857,7 +856,6 @@ void Guild::LoadGuildEventLogFromDB()
 
         // Add entry to list
         m_GuildEventLog.push_front(NewEvent);
-
     }
     while (result->NextRow());
     delete result;

@@ -49,7 +49,6 @@ namespace MaNGOS
 
         inline HonorRankInfo CalculateRankInfo(HonorRankInfo prk)
         {
-
             if (prk.rank != 0)
             {
                 int8 rank = prk.positive ? prk.rank - NEGATIVE_HONOR_RANK_COUNT - 1 : prk.rank - NEGATIVE_HONOR_RANK_COUNT;
@@ -231,7 +230,6 @@ namespace MaNGOS
             int honor_points = int(((float)(f * 0.25) * (float)((k_level + (v_rank * 5 + 1)) * (1 + 0.05 * diff_honor) * diff_level)));
             return (honor_points <= 400 ? honor_points : 400) / groupsize;
         }
-
     }
 
 

@@ -93,5 +93,4 @@ namespace Movement
         SplineBase::clear();
         lengths.clear();
     }
-
 }

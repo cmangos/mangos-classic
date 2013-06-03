@@ -1878,7 +1878,6 @@ void World::InitServerMaintenanceCheck()
     QueryResult* result = CharacterDatabase.Query("SELECT NextMaintenanceDate FROM saved_variables");
     if (!result)
     {
-
         DEBUG_LOG("Maintenance date not found in SavedVariables, reseting it now.");
         uint32 mDate = GetDateLastMaintenanceDay();
         m_NextMaintenanceDate = mDate == GetDateToday() ?  mDate : mDate + 7;

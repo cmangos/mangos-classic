@@ -576,7 +576,6 @@ WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid
     if (i == sWMOAreaInfoByTripple.end())
         return NULL;
     return i->second;
-
 }
 
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)

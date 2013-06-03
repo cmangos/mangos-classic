@@ -60,7 +60,6 @@ struct MassMailerQueryHandler
         {
             Field* fields = result->Fetch();
             recievers.insert(fields[0].GetUInt32());
-
         }
         while (result->NextRow());
         delete result;

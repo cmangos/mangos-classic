@@ -636,7 +636,6 @@ void Log::outDetail(const char* str, ...)
 
     if (m_logLevel >= LOG_LVL_DETAIL)
     {
-
         if (m_colored)
             SetColor(true, m_colors[LogDetails]);
 

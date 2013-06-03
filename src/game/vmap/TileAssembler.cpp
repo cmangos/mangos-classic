@@ -534,5 +534,4 @@ namespace VMAP
     // drop of temporary use defines
 #undef READ_OR_RETURN
 #undef CMP_OR_RETURN
-
 }

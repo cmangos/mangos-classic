@@ -863,7 +863,6 @@ void ObjectMgr::LoadCreatureModelInfo()
         }
         else
             sLog.outErrorDb("Table `creature_model_info` expect have data for character race %u male model id %u", race, raceEntry->model_m);
-
     }
 
     sLog.outString(">> Loaded %u creature model based info", sCreatureModelStorage.GetRecordCount());
@@ -1011,7 +1010,6 @@ void ObjectMgr::LoadCreatures()
             AddCreatureToGrid(guid, &data);
 
         ++count;
-
     }
     while (result->NextRow());
 
@@ -1164,7 +1162,6 @@ void ObjectMgr::LoadGameObjects()
         //sLog.outErrorDb("UPDATE gameobject SET zone_id=%u, area_id=%u WHERE guid=%u;", zoneId, areaId, guid);
 
         ++count;
-
     }
     while (result->NextRow());
 
@@ -2500,7 +2497,6 @@ void ObjectMgr::LoadStandingList(uint32 dateBegin)
                 HordeHonorStandingList.push_back(Standing);
 
             bar.step();
-
         }
         while (result->NextRow());
 
@@ -2582,7 +2578,6 @@ void ObjectMgr::FlushRankPoints(uint32 dateTop)
                 CharacterDatabase.PExecute("UPDATE characters SET stored_honorable_kills = stored_honorable_kills + %u WHERE guid = %u", kills, guid);
             else if (type == DISHONORABLE)
                 CharacterDatabase.PExecute("UPDATE characters SET stored_dishonorable_kills = stored_dishonorable_kills + %u WHERE guid = %u", kills, guid);
-
         }
         while (result->NextRow());
     }
@@ -3934,7 +3929,6 @@ void ObjectMgr::LoadItemTexts()
         mItemTexts[ fields[0].GetUInt32()] = fields[1].GetCppString();
 
         ++count;
-
     }
     while (result->NextRow());
 
@@ -4035,7 +4029,6 @@ void ObjectMgr::LoadPageTextLocales()
                 data.Text[idx] = str;
             }
         }
-
     }
     while (result->NextRow());
 
@@ -4516,7 +4509,6 @@ void ObjectMgr::LoadQuestAreaTriggers()
         }
 
         mQuestAreaTriggerMap[trigger_ID] = quest_ID;
-
     }
     while (result->NextRow());
 
@@ -4917,7 +4909,6 @@ void ObjectMgr::LoadAreaTriggerTeleports()
     QueryResult* result = WorldDatabase.Query("SELECT id, required_level, required_item, required_item2, required_quest_done, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport");
     if (!result)
     {
-
         BarGoLink bar(1);
 
         bar.step();
@@ -5002,7 +4993,6 @@ void ObjectMgr::LoadAreaTriggerTeleports()
         }
 
         mAreaTriggers[Trigger_ID] = at;
-
     }
     while (result->NextRow());
 
@@ -5300,7 +5290,6 @@ void ObjectMgr::LoadGameObjectLocales()
                 }
             }
         }
-
     }
     while (result->NextRow());
 
@@ -7766,7 +7755,6 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
             data.trainerType = 2;
 
         ++count;
-
     }
     while (result->NextRow());
     delete result;
@@ -7847,7 +7835,6 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
 
         vList.AddItem(item_id, maxcount, incrtime, conditionId);
         ++count;
-
     }
     while (result->NextRow());
     delete result;
@@ -7928,7 +7915,6 @@ void ObjectMgr::LoadNpcGossips()
 
         m_mCacheNpcTextIdMap[guid] = textid ;
         ++count;
-
     }
     while (result->NextRow());
     delete result;
@@ -8184,7 +8170,6 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
         m_mGossipMenuItemsMap.insert(GossipMenuItemsMap::value_type(gMenuItem.menu_id, gMenuItem));
 
         ++count;
-
     }
     while (result->NextRow());
 

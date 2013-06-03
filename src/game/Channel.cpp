@@ -667,12 +667,10 @@ void Channel::SendToOne(WorldPacket* data, ObjectGuid who)
 
 void Channel::Voice(ObjectGuid /*guid1*/, ObjectGuid /*guid2*/)
 {
-
 }
 
 void Channel::DeVoice(ObjectGuid /*guid1*/, ObjectGuid /*guid2*/)
 {
-
 }
 
 // done

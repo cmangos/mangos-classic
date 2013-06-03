@@ -1014,7 +1014,6 @@ class Opcodes
         static OpcodeHandler const emptyHandler;
 
         OpcodeMap mOpcodeMap;
-
 };
 
 #define opcodeTable MaNGOS::Singleton<Opcodes>::Instance()

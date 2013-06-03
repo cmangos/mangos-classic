@@ -815,5 +815,4 @@ void BattleGroundAV::Reset()
         InitNode(i, BG_AV_TEAM_HORDE, true);
 
     InitNode(BG_AV_NODES_SNOWFALL_GRAVE, BG_AV_TEAM_NEUTRAL, false);                            // give snowfall neutral owner
-
 }

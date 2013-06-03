@@ -605,7 +605,6 @@ void PoolManager::LoadFromDB()
         pPoolTemplate.MaxLimit    = fields[1].GetUInt32();
         pPoolTemplate.description = fields[2].GetCppString();
         pPoolTemplate.AutoSpawn = true;          // will update and later data loading
-
     }
     while (result->NextRow());
 
@@ -633,7 +632,6 @@ void PoolManager::LoadFromDB()
     }
     else
     {
-
         BarGoLink bar2(result->GetRowCount());
         do
         {
@@ -675,7 +673,6 @@ void PoolManager::LoadFromDB()
             cregroup.AddEntry(plObject, pPoolTemplate->MaxLimit);
             SearchPair p(guid, pool_id);
             mCreatureSearchMap.insert(p);
-
         }
         while (result->NextRow());
         sLog.outString();
@@ -748,7 +745,6 @@ void PoolManager::LoadFromDB()
             cregroup.AddEntry(plObject, pPoolTemplate->MaxLimit);
             SearchPair p(guid, pool_id);
             mCreatureSearchMap.insert(p);
-
         }
         while (result->NextRow());
         sLog.outString();
@@ -774,7 +770,6 @@ void PoolManager::LoadFromDB()
     }
     else
     {
-
         BarGoLink bar2(result->GetRowCount());
         do
         {
@@ -825,7 +820,6 @@ void PoolManager::LoadFromDB()
             gogroup.AddEntry(plObject, pPoolTemplate->MaxLimit);
             SearchPair p(guid, pool_id);
             mGameobjectSearchMap.insert(p);
-
         }
         while (result->NextRow());
         sLog.outString();
@@ -847,7 +841,6 @@ void PoolManager::LoadFromDB()
     }
     else
     {
-
         BarGoLink bar2(result->GetRowCount());
         do
         {
@@ -909,7 +902,6 @@ void PoolManager::LoadFromDB()
             gogroup.AddEntry(plObject, pPoolTemplate->MaxLimit);
             SearchPair p(guid, pool_id);
             mGameobjectSearchMap.insert(p);
-
         }
         while (result->NextRow());
         sLog.outString();
@@ -933,7 +925,6 @@ void PoolManager::LoadFromDB()
     }
     else
     {
-
         BarGoLink bar2(result->GetRowCount());
         do
         {
@@ -979,7 +970,6 @@ void PoolManager::LoadFromDB()
 
             // update top independent pool flag
             mPoolTemplate[child_pool_id].AutoSpawn = false;
-
         }
         while (result->NextRow());
 

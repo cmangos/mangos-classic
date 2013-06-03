@@ -24,7 +24,6 @@
 
 HostileRefManager::HostileRefManager(Unit* pOwner) : iOwner(pOwner)
 {
-
 }
 
 HostileRefManager::~HostileRefManager()

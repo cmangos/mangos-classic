@@ -583,7 +583,6 @@ void WheatyExceptionReport::WriteStackDetails(
                     &sip.si))                               // Address of the SYMBOL_INFO structure (inside "sip" object)
         {
             _tprintf(_T("%hs+%I64X"), sip.si.Name, symDisplacement);
-
         }
         else                                                // No symbol found.  Print out the logical address instead.
         {
@@ -626,7 +625,6 @@ void WheatyExceptionReport::WriteStackDetails(
             _tprintf(_T("\r\n"));
         }
     }
-
 }
 
 //////////////////////////////////////////////////////////////////////////////

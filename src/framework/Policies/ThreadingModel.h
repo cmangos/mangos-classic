@@ -146,7 +146,6 @@ namespace MaNGOS
 
             static MUTEX si_mtx;
     };
-
 }
 
 template<class T, class MUTEX> MUTEX MaNGOS::ClassLevelLockable<T, MUTEX>::si_mtx;

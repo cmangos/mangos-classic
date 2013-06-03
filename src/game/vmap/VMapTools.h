@@ -62,7 +62,6 @@ namespace VMAP
                 G3D::Vector3&           location,
                 bool&                   Inside)
             {
-
                 // Integer representation of a floating-point value.
 #define IR(x)   (reinterpret_cast<G3D::uint32 const&>(x))
 

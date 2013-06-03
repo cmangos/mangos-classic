@@ -218,5 +218,4 @@ namespace VMAP
         if (check != nameLen) return false;
         return true;
     }
-
 }

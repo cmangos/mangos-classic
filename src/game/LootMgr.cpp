@@ -161,7 +161,6 @@ void LootStore::LoadLootTable()
             // Adds current row to the template
             tab->second->AddEntry(storeitem);
             ++count;
-
         }
         while (result->NextRow());
 
@@ -297,7 +296,6 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
             sLog.outErrorDb("Table '%s' entry %d item %d: max count (%u) less that min count (%i) - skipped", store.GetName(), entry, itemid, uint32(maxcount), mincountOrRef);
             return false;
         }
-
     }
     else                                                    // mincountOrRef < 0
     {

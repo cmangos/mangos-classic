@@ -467,5 +467,4 @@ namespace VMAP
         }
         iLoadedTiles.erase(tile);
     }
-
 }

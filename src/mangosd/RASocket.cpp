@@ -275,7 +275,6 @@ int RASocket::handle_input(ACE_HANDLE)
                 break;
                 ///</ul>
         };
-
     }
     // no enter yet? wait for next input...
     return 0;

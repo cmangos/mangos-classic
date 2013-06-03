@@ -393,7 +393,6 @@ void Item::SaveToDB()
                 stmt.Execute();
             }
         }
-
     }
 
     if (m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_TEMPORARY)

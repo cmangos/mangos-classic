@@ -581,7 +581,6 @@ bool ChatHandler::HandleGonameCommand(char* args)
                         _player->BindToInstance(save, !save->CanReset());
                 }
             }
-
         }
 
         PSendSysMessage(LANG_APPEARING_AT, chrNameLink.c_str());

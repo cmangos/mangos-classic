@@ -86,7 +86,6 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c)
             m_CreatureEventAIList.reserve(events_count);
             for (CreatureEventAI_Event_Vec::const_iterator i = (*creatureEventsItr).second.begin(); i != (*creatureEventsItr).second.end(); ++i)
             {
-
                 // Debug check
 #ifndef MANGOS_DEBUG
                 if ((*i).event_flags & EFLAG_DEBUG_ONLY)
@@ -821,7 +820,6 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         case ACTION_T_UPDATE_TEMPLATE:
             if (m_creature->GetEntry() == action.update_template.creatureId)
             {
-
                 sLog.outErrorEventAI("Event %d ACTION_T_UPDATE_TEMPLATE call with param1 == current entry. Creature %d", EventId, m_creature->GetEntry());
                 return;
             }
@@ -831,7 +829,6 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         case ACTION_T_DIE:
             if (m_creature->isDead())
             {
-
                 sLog.outErrorEventAI("Event %d ACTION_T_DIE on dead creature. Creature %d", EventId, m_creature->GetEntry());
                 return;
             }
