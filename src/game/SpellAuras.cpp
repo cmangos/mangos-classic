@@ -3465,21 +3465,16 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 {
     Unit* target = GetTarget();
 
-    // Special case with temporary increase max/current health
     switch (GetId())
     {
-        case 1178:                                          // Bear Form (Passive)
-        case 9635:                                          // Dire Bear Form (Passive)
-        {
-            if(Real)
-            {
-                float pct = target->GetHealthPercent();
-                target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
-                target->SetHealthPercent(pct);
-            }
-            return;
-        }
-        case 12976:                                         // Warrior Last Stand triggered spell
+        // Special case with temporary increase max/current health
+            // Cases where we need to manually calculate the amount for the spell (by percentage)
+            // recalculate to full amount at apply for proper remove
+        // Backport notive TBC: no cases yet
+            // no break here
+
+            // Cases where m_amount already has the correct value (spells cast with CastCustomSpell or absolute values)
+        case 12976:                                         // Warrior Last Stand triggered spell (Cast with percentage-value by CastCustomSpell)
         {
             if (Real)
             {
@@ -3499,10 +3494,22 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
             }
             return;
         }
+        // Case with temp increase health, where total percentage is kept
+        case 1178:                                          // Bear Form (Passive)
+        case 9635:                                          // Dire Bear Form (Passive)
+        {
+            if (Real)
+            {
+                float pct = target->GetHealthPercent();
+                target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
+                target->SetHealthPercent(pct);
+            }
+            return;
+        }
+        // generic case
+        default:
+            target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
     }
-
-    // generic case
-    target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
 }
 
 void Aura::HandleAuraModIncreaseEnergy(bool apply, bool /*Real*/)
