@@ -1,6 +1,6 @@
 # C(ontinued)-MaNGOS -- README
 
-This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
+This file is part of the CMaNGOS Project. See [AUTHORS](AUTHORS.md) file for Copyright information
 
 ## Welcome to C(ontinued)-MaNGOS
 
@@ -57,6 +57,7 @@ To be able to accomplish these goals, we support and promote:
   * [Pull Requests](https://github.com/cmangos/mangos-classic/pulls)
   * [Current build status on Travis CI](https://travis-ci.org/cmangos/mangos-classic/)
   * [Wiki](https://github.com/cmangos/issues/wiki) with additional information on installation
+  * [Contributing Guidelines](CONTRIBUTING.md)
   * Documentation can be found in the doc/ subdirectory and on the github wiki
 
 ## License
@@ -76,7 +77,7 @@ To be able to accomplish these goals, we support and promote:
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-  You can find the full license text in the file COPYING delivered with this package.
+  You can find the full license text in the file [COPYING](COPYING) delivered with this package.
 
 ### Exceptions to GPL
 

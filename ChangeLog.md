@@ -1,10 +1,12 @@
-MaNGOS 0.12.2   (22 January 2013)
+# Changelog of CMaNGOS
+
+## MaNGOS 0.12.2   (22 January 2013)
  
  MaNGOS 0.12.2 - adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
 
-==== Game Features ====
+### Game Features ###
 * Add Auction House Bot
 * Add Creature linking
 * Add Pathfinding
@@ -13,7 +15,7 @@ MaNGOS 0.12.2   (22 January 2013)
 * Improve liquid handling
 * Add support for dynamic collision
 
-==== Server Features ====
+### Server Features ###
 * Add Prepared SQL-Statements
 * Add a bunch of new commands for DB scripts and rewrite the engine
 * Map system re-engineered. Instance maps are updated normally like non instance maps, memory usage reduced
@@ -31,7 +33,7 @@ MaNGOS 0.12.2   (22 January 2013)
 * Updated ACE framework to 5.8.3.
 * Updated G3DLite library to 8.0.1
 
-==== Statistics ====
+### Statistics ###
 * Total number of changes: 2187 revisions
 * Lots of bugs from forum and issues from github fixed
 
@@ -41,7 +43,7 @@ MaNGOS 0.12   (Dec 22 2008)
  server core as well as to the majority of game classes and the game content
  database.
 
- ==== Game Features ====
+### Game Features ###
 
  * Added: Support for different difficult instances, proper instances reset and proper group/player binding to instances.
  * Added: Support for arena system.
@@ -84,7 +86,7 @@ MaNGOS 0.12   (Dec 22 2008)
  * Improved: More correct way of calculating fall damage by using fall distance and not fall time.
  * plus lots of fixes for auras, effects, spells, talents, and more.
 
- ==== Server Features ====
+### Server Features ###
 
  * Added: Support for load and use multiply DBC locales data at server.
  * Added: Store in `spell_chain` additional spell dependences from another spell chain for learning possibility checks.
@@ -104,17 +106,17 @@ MaNGOS 0.12   (Dec 22 2008)
  * Improved: New revisions numbering and sql updates names scheme  with tools support used after switch to GIT.
  * Improved: Use DBC data for creating initial character items.
 
- ==== Statistics ====
+### Statistics ###
  * Fixed Bugs: many :)
  * Total number of changes: 731 (323 in git)
 
-MaNGOS 0.11   (Jul 22 2008)
+## MaNGOS 0.11   (Jul 22 2008)
 
  MaNGOS 0.11 - adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
 
- ==== Game Features ====
+### Game Features ###
 
  * Added: Support for show possible blocked damage, armor penetration, negative stats and other data in client.
  * Added: Support for show aura charges in client.
@@ -158,7 +160,7 @@ MaNGOS 0.11   (Jul 22 2008)
  * Improved: Many items and item set effects start work.
  * plus lots of fixes for auras, effects, spells, talents, and more.
 
- ==== Server Features ====
+### Server Features ###
 
  * Added: New sql/tools directory for useful SQL queries for check and restore DB integrity.
  * Added: Own counter for HIGHGUID_PET low guids. Use it for pets. This let have lot more range for pet guids, and then more creature guid for instances spawns/totems.
@@ -177,17 +179,17 @@ MaNGOS 0.11   (Jul 22 2008)
  * Improved: Many improvements in config options.
  * Improved: Better scripting support (DB base and C++ based scripts).
 
- ==== Statistics ====
+### Statistics ###
  * Fixed Bugs: 194
  * Total number of changes: 708
 
-MaNGOS 0.10   (Apr 18 2008)
+## MaNGOS 0.10   (Apr 18 2008)
 
  MaNGOS 0.10 - adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
 
- ==== Game Features ====
+### Game Features ###
 
  * Added: Implement talent inspecting.
  * Added: Implement unique equipped items support, including gems.
@@ -233,7 +235,7 @@ MaNGOS 0.10   (Apr 18 2008)
  * Improved: Implement default open doors/pushed buttons support.
  * plus lots of fixes for auras, effects, spells, talents, and more.
 
- ==== Server Features ====
+### Server Features ###
 
  * Added: broken spells check at use and loading.
  * Added: Implement pid file support.
@@ -252,17 +254,17 @@ MaNGOS 0.10   (Apr 18 2008)
  * Improved: Fixed/finish PostgreSql support.
  * Improved: Better scripting support (DB base and C++ based scripts).
 
- ==== Statistics ====
+### Statistics ###
  * Fixed Bugs: 784
  * Total number of changes: 804
 
-MaNGOS 0.9    (Dec 14 2007)
+## MaNGOS 0.9    (Dec 14 2007)
 
  MaNGOS 0.9 - Codename "Flight Master" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
 
- ==== Game Features ====
+### Game Features ###
  * Added: support for recipe discovery,
  * Added: support for allowing use of an item only in a specific map or area,
  * Added: support for free-for-all quest/non-quest loot items, additional loot conditions,
@@ -276,7 +278,7 @@ MaNGOS 0.9    (Dec 14 2007)
  * Improved: better support for simple database scripts (quest-start/end, buttons, spells)
  * plus lots of fixes for auras, effects, spells, talents, and more.
 
- ==== Server Features ====
+### Server Features ###
  * Added: support for running mangosd/realmd as Windows services,
  * Added: support for auto-generation of mangosd/realmd crash reports (Windows version only),
  * Added: support for Visual Studio 2008 Express and Pro,
@@ -287,11 +289,11 @@ MaNGOS 0.9    (Dec 14 2007)
  * Improved: better support for older autoconf / automake versions,
  * Improved: existing chat and console commands for server gamemasters/administrators, and added new commands.
 
- ==== Statistics ====
+### Statistics ###
  * Fixed Bugs: 161
  * Total number of changes: 228
 
-MaNGOS 0.8    (Oct 16, 2007)
+## MaNGOS 0.8    (Oct 16, 2007)
 
  MaNGOS 0.8 - Codename "Innkeeper" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
@@ -301,7 +303,7 @@ MaNGOS 0.8    (Oct 16, 2007)
  of the GPL v2, but we now have added an exception to officially allow our
  users to link MaNGOS against the OpenSSL libraries.
 
- ==== Game Features ====
+### Game Features ###
  * Added: a new threat manager was introduced,
  * Added: log more GM activities,
  * Added: many new features for creatures and game objects working,
@@ -324,7 +326,7 @@ MaNGOS 0.8    (Oct 16, 2007)
  * Rewritten: invisibility detection,
  * plus lots of fixes for auras, effects, spells, talents, and more.
 
- ==== Server Features ====
+### Server Features ###
  * Added: support for database transactions,
  * Added: support for height maps -- named vmaps -- to tackle the LOS issue,
  * Added: support for OpenBSD and FreeBSD building,
@@ -332,17 +334,17 @@ MaNGOS 0.8    (Oct 16, 2007)
  * Fixed: Numerous bug fixes to the core,
  * Improved: database queries adding performance boosts here and there,
 
- ==== Statistics ====
+### Statistics ###
  * Fixed Bugs: 528
  * Total number of changes: 558
 
-MaNGOS 0.7    (Jul 9, 2007)
+## MaNGOS 0.7    (Jul 9, 2007)
 
  MaNGOS 0.7 - Codename "Eye of the Storm" -adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
 
-==== Game Features ====
+### Game Features ###
  * Fixed: random item enchantment display in the auction/mail/group loot dialogs. The item properties are also properly applied to the items at creation.
  * Added: support for opening gameobjects/items using their specific keys. Implemented key requirements for entering instances.
  * Added: a threat based aggro system along with threat bonuses from spells.
@@ -373,7 +375,7 @@ MaNGOS 0.7    (Jul 9, 2007)
  * Added: a new, more correct visibility system, invisibility is also implemented correctly now.
  * Improved: durability cost calculation.
 
- ==== Server Features ====
+### Server Features ###
  * Added: full support for 2.0.x client branch.
  * Added/improved: many GM-commands.
  * Added: many checks for DB data at server load to simplify detecting problems and DB development.
@@ -388,17 +390,17 @@ MaNGOS 0.7    (Jul 9, 2007)
  * Fixed: many memory leaks and crases sources.
  * Added: DBC locale support that can be set from mangosd.conf.
 
- ==== Statistics ====
+### Statistics ###
  * Fixed Bugs: 390
  * Total number of changes: 923
 
-MaNGOS 0.6    (Jan 29, 2007)
+## MaNGOS 0.6    (Jan 29, 2007)
 
  MaNGOS 0.6 - Codename "Black Dragonflight" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
 
- ==== Game Features ====
+### Game Features ###
  * Creature and game object respawning has finally been fixed and is considered finished.
  * Many improvements to decrease time for saving player data, and transaction support for save operations has been added.
  * Many item fixes for using / equipping/ enhancing function (some errors still remain and have to be resolved).
@@ -421,18 +423,18 @@ MaNGOS 0.6    (Jan 29, 2007)
  * Enchanting in trade slot implemented as last not implemented part of trade system. Many other fixes.
  * Rogue stealth for other players implemented and many fixes in druid forms.
 
- ==== Server Features ====
+### Server Features ###
  * Full support for 1.12.x client branch has been implemented.
  * Many GM-commands added and improved including GM mode state and GM invisibility.
  * Many cheating preventing checks added and code rewrites.
  * DB-based scripting support added for quest emote scripts and spell event scripts.
  * Many improvements in less client-server data amount transferring.
 
- ==== Statistics ====
+### Statistics ###
  * Fixed Bugs: 306
  * Total number of changes: 874
 
-MaNGOS 0.5    (Sep 20, 2006)
+## MaNGOS 0.5    (Sep 20, 2006)
 
  MaNGOS 0.5 - Codename "Stable Master" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
@@ -446,17 +448,17 @@ MaNGOS 0.5    (Sep 20, 2006)
  Feature-wise, support for pets, totems, more spells, talents, etc. have been
  added, as well as lots of quest related features.
 
- ==== Statistics ====
+### Statistics ###
  * Fixed Bugs: 544
  * Total number of changes: 1828.
 
-MaNGOS 0.1    (Dec 04, 2005)
+## MaNGOS 0.1    (Dec 04, 2005)
 
  MaNGOS 0.1 - Codename "Lightbringer" -adds further improvements to the server
  core as well as to the majority of game classes and the game content database.
  A complete list of all updated items follows below:
 
- === Game Features ===
+### Game Features ###
  * Add all AI files to the build process on Windows
  * Added: Better item information updates.
  * Added: Check on death for invalid duel status.
@@ -571,28 +573,28 @@ MaNGOS 0.1    (Dec 04, 2005)
  * Updated: The Grid System (TGS) is now on by default.  Not support grid off. Next, (1) deliver phase 2 stuff and (2) remove ifdef and ALL old classes.
  * Updated: TRUNCATE is faster than DELETE
 
- === Server Features ===
+### Server Features ###
  * Added CLI interface for server. Needs to be enabled on compile-time.
  * Reorganized Spell System, separated effects to a diferent file, for better fixing.
 
- ==== Statistics ====
+### Statistics ###
  * Fixed Bugs: #14, #17, #20, #22, #23, #24, #25, #26
  * Total number of changes: 193.
 
-MaNGOS 0.0.3  (Nov 15, 2005)
+## MaNGOS 0.0.3  (Nov 15, 2005)
 
  MaNGOS 0.0.3 - Codename "Mango Carpet" - was mainly a bug fix release, which
  never was published on the web, and just marks a point in development where
  a damn lot of bugs had been fixed, but we still felt the need for further work
  to be done before a release could be pushed to the world.
 
-MaNGOS 0.0.2  (Oct 31, 2005)
+## MaNGOS 0.0.2  (Oct 31, 2005)
 
  MaNGOS 0.0.2 - Codename "Library" - adds another bunch of improvements, bug
  fixes and major enhancements to the overall functionality of the daemon. A
  complete list of all updated items follows below:
 
- ==== Game Features ====
+### Game Features ###
  * Added support for area exploration.
  * Added support for duels.
  * Added support for ticket system.
@@ -610,7 +612,7 @@ MaNGOS 0.0.2  (Oct 31, 2005)
  * Updated command descriptions to be more meaningful.
  * Updated default data for player creation. Actions, items, skills and spells moved to database.
 
- ==== Server Features ====
+### Server Features ###
  * Added support for building with Intel C++ compiler on Windows.
  * Added support for building with debug info on Linux. Use --with-debug-info switch to include debug info.
  * Added support for building with 1.8.x protocol as default protocol. Use the 1.8.x build configurations in Visual Studio or --enable-18x switch on Linux.
@@ -625,11 +627,11 @@ MaNGOS 0.0.2  (Oct 31, 2005)
  * Fixed segmentation fault on zone map test due to access of array out of bound. Also, change m_ZoneIDmap to use bitset instead of the 4 bytes bool.
  * Fixed memory leak problems. The creation of new TYPE[] must delete with [] for correctness otherwise n-1 members are leaked.
 
- ==== Statistics ====
+### Statistics ###
  * Fixed Bugs: #4, #7, #12, #13, #16, #18, #19
  * Total number of changes: 225.
 
-MaNGOS 0.0.1  (Sept 13, 2005)
+## MaNGOS 0.0.1  (Sept 13, 2005)
 
  MaNGOS 0.0.1 - Codename "Endeavour" - contains a great number of new features,
  improvements and bug fixes. The following list contains all of them:
@@ -653,6 +655,6 @@ MaNGOS 0.0.1  (Sept 13, 2005)
  * Applied MaNGOS code indention schema.
  * Initial code checked into repository.
 
- ==== Statistics ====
+### Statistics ###
  * Fixed Bugs: #2, #3, #9, #10, #11
  * Total number of changes: 53.
