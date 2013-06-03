@@ -4372,6 +4372,8 @@ void Player::RepopAtGraveyard()
     // and don't show spirit healer location
     if (ClosestGrave)
         TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, GetOrientation());
+        UpdateVisibilityAndView();
+    }
 }
 
 void Player::JoinedChannel(Channel* c)
