@@ -165,17 +165,6 @@ enum SpawnedEventMode
     SPAWNED_EVENT_ZONE  = 2
 };
 
-// String text additional data, used in (CreatureEventAI)
-struct StringTextData
-{
-    uint32 SoundId;
-    uint8  Type;
-    uint32 Language;
-    uint32 Emote;
-};
-// Text Maps
-typedef UNORDERED_MAP<int32, StringTextData> CreatureEventAI_TextMap;
-
 struct CreatureEventAI_Action
 {
     EventAI_ActionType type: 16;
@@ -646,8 +635,6 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3);
         /// If the bool& param is true, an error should be reported
         inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, bool& isError, uint32 forSpellId = 0, uint32 selectFlags = 0);
-
-        void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target);
 
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event);
 

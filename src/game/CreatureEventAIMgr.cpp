@@ -34,123 +34,46 @@ INSTANTIATE_SINGLETON_1(CreatureEventAIMgr);
 // -------------------
 void CreatureEventAIMgr::LoadCreatureEventAI_Texts(bool check_entry_use)
 {
-    // Drop Existing Text Map, only done once and we are ready to add data from multiple sources.
-    m_CreatureEventAI_TextMap.clear();
-
     // Load EventAI Text
-    sObjectMgr.LoadMangosStrings(WorldDatabase, "creature_ai_texts", MIN_CREATURE_AI_TEXT_STRING_ID, MAX_CREATURE_AI_TEXT_STRING_ID, false);
-
-    // Gather Additional data from EventAI Texts
-    QueryResult* result = WorldDatabase.Query("SELECT entry, sound, type, language, emote FROM creature_ai_texts");
-
-    sLog.outString("Loading EventAI Texts additional data...");
-    if (result)
-    {
-        BarGoLink bar(result->GetRowCount());
-        uint32 count = 0;
-
-        do
-        {
-            bar.step();
-            Field* fields = result->Fetch();
-            StringTextData temp;
-
-            int32 i             = fields[0].GetInt32();
-            temp.SoundId        = fields[1].GetInt32();
-            temp.Type           = fields[2].GetInt32();
-            temp.Language       = fields[3].GetInt32();
-            temp.Emote          = fields[4].GetInt32();
-
-            // range negative
-            if (i > MIN_CREATURE_AI_TEXT_STRING_ID || i <= MAX_CREATURE_AI_TEXT_STRING_ID)
-            {
-                sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` is not in valid range(%d-%d)", i, MIN_CREATURE_AI_TEXT_STRING_ID, MAX_CREATURE_AI_TEXT_STRING_ID);
-                continue;
-            }
-
-            // range negative (don't must be happen, loaded from same table)
-            if (!sObjectMgr.GetMangosStringLocale(i))
-            {
-                sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` not found", i);
-                continue;
-            }
-
-            if (temp.SoundId)
-            {
-                if (!sSoundEntriesStore.LookupEntry(temp.SoundId))
-                    sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` has Sound %u but sound does not exist.", i, temp.SoundId);
-            }
-
-            if (!GetLanguageDescByID(temp.Language))
-                sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` using Language %u but Language does not exist.", i, temp.Language);
-
-            if (temp.Type > CHAT_TYPE_ZONE_YELL)
-                sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` has Type %u but this Chat Type does not exist.", i, temp.Type);
-
-            if (temp.Emote)
-            {
-                if (!sEmotesStore.LookupEntry(temp.Emote))
-                    sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` has Emote %u but emote does not exist.", i, temp.Emote);
-            }
-
-            m_CreatureEventAI_TextMap[i] = temp;
-            ++count;
-        }
-        while (result->NextRow());
-
-        delete result;
-
-        if (check_entry_use)
-            CheckUnusedAITexts();
-
-        sLog.outString();
-        sLog.outString(">> Loaded %u additional CreatureEventAI Texts data.", count);
-    }
-    else
-    {
-        BarGoLink bar(1);
-        bar.step();
-        sLog.outString();
-        sLog.outString(">> Loaded 0 additional CreatureEventAI Texts data. DB table `creature_ai_texts` is empty.");
-    }
+    sObjectMgr.LoadMangosStrings(WorldDatabase, "creature_ai_texts", MIN_CREATURE_AI_TEXT_STRING_ID, MAX_CREATURE_AI_TEXT_STRING_ID, true);
 }
 
 void CreatureEventAIMgr::CheckUnusedAITexts()
 {
     std::set<int32> idx_set;
+    // ToDo: fix this!!!
     // check not used strings this is negative range
-    for (CreatureEventAI_TextMap::const_iterator itr = m_CreatureEventAI_TextMap.begin(); itr != m_CreatureEventAI_TextMap.end(); ++itr)
-        idx_set.insert(itr->first);
+    //for (MangosStringLocaleMap::const_iterator itr = m_CreatureEventAI_TextMap.begin(); itr != m_CreatureEventAI_TextMap.end(); ++itr)
+    //    idx_set.insert(itr->first);
 
-    for (CreatureEventAI_Event_Map::const_iterator itr = m_CreatureEventAI_Event_Map.begin(); itr != m_CreatureEventAI_Event_Map.end(); ++itr)
-    {
-        for (size_t i = 0; i < itr->second.size(); ++i)
-        {
-            CreatureEventAI_Event const& event = itr->second[i];
+    //for (CreatureEventAI_Event_Map::const_iterator itr = m_CreatureEventAI_Event_Map.begin(); itr != m_CreatureEventAI_Event_Map.end(); ++itr)
+    //{
+    //    for (size_t i = 0; i < itr->second.size(); ++i)
+    //    {
+    //        CreatureEventAI_Event const& event = itr->second[i];
 
-            for (int j = 0; j < MAX_ACTIONS; ++j)
-            {
-                CreatureEventAI_Action const& action = event.action[j];
-                switch (action.type)
-                {
-                    case ACTION_T_TEXT:
-                    case ACTION_T_CHANCED_TEXT:
-                    {
-                        // ACTION_T_CHANCED_TEXT contains a chance value in first param
-                        int k = action.type == ACTION_T_TEXT ? 0 : 1;
-                        for (; k < 3; ++k)
-                            if (action.text.TextId[k])
-                                idx_set.erase(action.text.TextId[k]);
-                        break;
-                    }
-                    default: break;
-                }
-            }
-        }
-    }
-
-    for (std::set<int32>::const_iterator itr = idx_set.begin(); itr != idx_set.end(); ++itr)
-        sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` but not used in EventAI scripts.", *itr);
+    //        for (int j = 0; j < MAX_ACTIONS; ++j)
+    //        {
+    //            CreatureEventAI_Action const& action = event.action[j];
+    //            switch (action.type)
+    //            {
+    //                case ACTION_T_TEXT:
+    //                case ACTION_T_CHANCED_TEXT:
+    //                {
+    //                    // ACTION_T_CHANCED_TEXT contains a chance value in first param
+    //                    int k = action.type == ACTION_T_TEXT ? 0 : 1;
+    //                    for (; k < 3; ++k)
+    //                        if (action.text.TextId[k])
+    //                            idx_set.erase(action.text.TextId[k]);
+    //                    break;
+    //                }
+    //                default: break;
+    //            }
+    //        }
+    //    }
+    //}
+    //for (std::set<int32>::const_iterator itr = idx_set.begin(); itr != idx_set.end(); ++itr)
+    //    sLog.outErrorEventAI("Entry %i in table `creature_ai_texts` but not used in EventAI scripts.", *itr);
 }
 
 // -------------------
@@ -557,7 +480,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                                     sLog.outErrorEventAI("Event %u Action %u param%d references out-of-range entry (%i) in texts table.", i, j + 1, k + 1, action.text.TextId[k]);
                                     action.text.TextId[k] = 0;
                                 }
-                                else if (m_CreatureEventAI_TextMap.find(action.text.TextId[k]) == m_CreatureEventAI_TextMap.end())
+                                else if (!sObjectMgr.GetMangosStringLocale(action.text.TextId[k]))
                                 {
                                     sLog.outErrorEventAI("Event %u Action %u param%d references non-existing entry (%i) in texts table.", i, j + 1, k + 1, action.text.TextId[k]);
                                     action.text.TextId[k] = 0;

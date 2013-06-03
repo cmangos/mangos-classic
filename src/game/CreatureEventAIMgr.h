@@ -34,7 +34,6 @@ class CreatureEventAIMgr
 
         CreatureEventAI_Event_Map  const& GetCreatureEventAIMap()       const { return m_CreatureEventAI_Event_Map; }
         CreatureEventAI_Summon_Map const& GetCreatureEventAISummonMap() const { return m_CreatureEventAI_Summon_Map; }
-        CreatureEventAI_TextMap    const& GetCreatureEventAITextMap()   const { return m_CreatureEventAI_TextMap; }
 
     private:
         void CheckUnusedAITexts();
@@ -42,7 +41,6 @@ class CreatureEventAIMgr
 
         CreatureEventAI_Event_Map  m_CreatureEventAI_Event_Map;
         CreatureEventAI_Summon_Map m_CreatureEventAI_Summon_Map;
-        CreatureEventAI_TextMap    m_CreatureEventAI_TextMap;
 };
 
 #define sEventAIMgr MaNGOS::Singleton<CreatureEventAIMgr>::Instance()
