@@ -1570,10 +1570,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool SetPosition(float x, float y, float z, float orientation, bool teleport = false);
         void UpdateUnderwaterState(Map* m, float x, float y, float z);
 
-        void SendMessageToSet(WorldPacket* data, bool self) override;// overwrite Object::SendMessageToSet
-        void SendMessageToSetInRange(WorldPacket* data, float fist, bool self) override;
+        void SendMessageToSet(WorldPacket* data, bool self) const override;// overwrite Object::SendMessageToSet
+        void SendMessageToSetInRange(WorldPacket* data, float fist, bool self) const override;
         // overwrite Object::SendMessageToSetInRange
-        void SendMessageToSetInRange(WorldPacket* data, float dist, bool self, bool own_team_only);
+        void SendMessageToSetInRange(WorldPacket* data, float dist, bool self, bool own_team_only) const;
 
         Corpse* GetCorpse() const;
         void SpawnCorpseBones();
@@ -1759,7 +1759,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendInitWorldStates(uint32 zone);
         void SendUpdateWorldState(uint32 Field, uint32 Value);
-        void SendDirectMessage(WorldPacket* data);
+        void SendDirectMessage(WorldPacket* data) const;
 
         void SendAuraDurationsForTarget(Unit* target);
 
