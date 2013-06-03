@@ -632,7 +632,8 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender);
         inline uint32 GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3);
         inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3);
-        inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, uint32 forSpellId = 0, uint32 selectFlags = 0);
+        /// If the bool& param is true, an error should be reported
+        inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, bool& isError, uint32 forSpellId = 0, uint32 selectFlags = 0);
 
         void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target);
 
