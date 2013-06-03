@@ -116,13 +116,13 @@ namespace ACE_Based
             //! Locks the queue for access.
             void lock()
             {
-                _lock.acquire();
+                _lock.lock();
             }
 
             //! Unlocks the queue.
             void unlock()
             {
-                _lock.release();
+                _lock.unlock();
             }
 
             ///! Checks if we're empty or not with locks held

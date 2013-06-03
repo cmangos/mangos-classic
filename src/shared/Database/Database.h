@@ -22,7 +22,6 @@
 #include "Threading.h"
 #include "Utilities/UnorderedMapSet.h"
 #include "Database/SqlDelayThread.h"
-#include <ace/Recursive_Thread_Mutex.h>
 #include "Policies/ThreadingModel.h"
 #include <ace/TSS_T.h>
 #include "SqlPreparedStatement.h"
@@ -69,8 +68,8 @@ class MANGOS_DLL_SPEC SqlConnection
         class Lock
         {
             public:
-                Lock(SqlConnection* conn) : m_pConn(conn) { m_pConn->m_mutex.acquire(); }
-                ~Lock() { m_pConn->m_mutex.release(); }
+                Lock(SqlConnection* conn) : m_pConn(conn) { m_pConn->m_mutex.lock(); }
+                ~Lock() { m_pConn->m_mutex.unlock(); }
 
                 SqlConnection* operator->() const { return m_pConn; }
 
@@ -94,8 +93,7 @@ class MANGOS_DLL_SPEC SqlConnection
         void FreePreparedStatements();
 
     private:
-        typedef ACE_Recursive_Thread_Mutex LOCK_TYPE;
-        LOCK_TYPE m_mutex;
+        std::recursive_mutex m_mutex;
 
         typedef std::vector<SqlPreparedStatement* > StmtHolder;
         StmtHolder m_holder;
@@ -289,13 +287,13 @@ class MANGOS_DLL_SPEC Database
 
         SqlResultQueue*     m_pResultQueue;                 ///< Transaction queues from diff. threads
         SqlDelayThread*     m_threadBody;                   ///< Pointer to delay sql executer (owned by m_delayThread)
-        ACE_Based::Thread* m_delayThread;                   ///< Pointer to executer thread
+        MaNGOS::Thread*     m_delayThread;                  ///< Pointer to executer thread
 
         bool m_bAllowAsyncTransactions;                     ///< flag which specifies if async transactions are enabled
 
         // PREPARED STATEMENT REGISTRY
-        typedef ACE_Thread_Mutex LOCK_TYPE;
-        typedef ACE_Guard<LOCK_TYPE> LOCK_GUARD;
+        typedef std::mutex LOCK_TYPE;
+        typedef std::lock_guard<LOCK_TYPE> LOCK_GUARD;
 
         mutable LOCK_TYPE m_stmtGuard;
 
