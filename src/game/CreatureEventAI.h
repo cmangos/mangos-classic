@@ -658,7 +658,6 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
     protected:
         uint32 m_EventUpdateTime;                           // Time between event updates
         uint32 m_EventDiff;                                 // Time between the last event call
-        bool   m_bEmptyList;
 
         // Variables used by Events themselves
         typedef std::vector<CreatureEventAIHolder> CreatureEventAIList;
