@@ -1055,7 +1055,7 @@ void CreatureEventAI::SummonedCreatureDespawn(Creature* pUnit)
     }
 }
 
-void CreatureEventAI::ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker)
+void CreatureEventAI::ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*miscValue*/)
 {
     if (m_bEmptyList || !pSender)
         return;

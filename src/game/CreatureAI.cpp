@@ -163,11 +163,12 @@ void CreatureAI::HandleMovementOnAttackStart(Unit* victim)
 class AiDelayEventAround : public BasicEvent
 {
     public:
-        AiDelayEventAround(AIEventType eventType, ObjectGuid invokerGuid, Creature& owner, std::list<Creature*> const& receivers) :
+        AiDelayEventAround(AIEventType eventType, ObjectGuid invokerGuid, Creature& owner, std::list<Creature*> const& receivers, uint32 miscValue) :
             BasicEvent(),
             m_eventType(eventType),
             m_invokerGuid(invokerGuid),
-            m_owner(owner)
+            m_owner(owner),
+            m_miscValue(miscValue)
         {
             // Pushing guids because in delay can happen some creature gets despawned => invalid pointer
             m_receiverGuids.reserve(receivers.size());
@@ -183,7 +184,7 @@ class AiDelayEventAround : public BasicEvent
             {
                 if (Creature* pReceiver = m_owner.GetMap()->GetAnyTypeCreature(*itr))
                 {
-                    pReceiver->AI()->ReceiveAIEvent(m_eventType, &m_owner, pInvoker);
+                    pReceiver->AI()->ReceiveAIEvent(m_eventType, &m_owner, pInvoker, m_miscValue);
                     // Special case for type 0 (call-assistance)
                     if (m_eventType == AI_EVENT_CALL_ASSISTANCE && pInvoker && pReceiver->CanAssistTo(&m_owner, pInvoker))
                     {
@@ -205,9 +206,10 @@ class AiDelayEventAround : public BasicEvent
         Creature&  m_owner;
 
         AIEventType m_eventType;
+        uint32 m_miscValue;
 };
 
-void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius) const
+void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue /*=0*/) const
 {
     if (fRadius > 0)
     {
@@ -220,14 +222,14 @@ void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDel
 
         if (!receiverList.empty())
         {
-            AiDelayEventAround* e = new AiDelayEventAround(eventType, pInvoker ? pInvoker->GetObjectGuid() : ObjectGuid(), *m_creature, receiverList);
+            AiDelayEventAround* e = new AiDelayEventAround(eventType, pInvoker ? pInvoker->GetObjectGuid() : ObjectGuid(), *m_creature, receiverList, miscValue);
             m_creature->m_Events.AddEvent(e, m_creature->m_Events.CalculateTime(uiDelay));
         }
     }
 }
 
-void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver) const
+void CreatureAI::SendAIEvent(AIEventType eventType, Unit* pInvoker, Creature* pReceiver, uint32 miscValue /*=0*/) const
 {
     MANGOS_ASSERT(pReceiver);
-    pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker);
+    pReceiver->AI()->ReceiveAIEvent(eventType, m_creature, pInvoker, miscValue);
 }
