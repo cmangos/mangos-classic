@@ -44,7 +44,6 @@ class WorldObject;
 enum ScriptCommand                                          // resSource, resTarget are the resulting Source/ Target after buddy search is done
 {
     SCRIPT_COMMAND_TALK                     = 0,            // resSource = WorldObject, resTarget = Unit/none
-                                                            // datalong1 (see enum ChatType for supported CHAT_TYPE_'s), datalong2 = language
                                                             // dataint = text entry from db_script_string -table. dataint2-4 optional for random selected texts.
     SCRIPT_COMMAND_EMOTE                    = 1,            // resSource = Unit, resTarget = Unit/none
                                                             // datalong1 = emote_id
@@ -125,11 +124,7 @@ struct ScriptInfo
 
     union
     {
-        struct                                              // SCRIPT_COMMAND_TALK (0)
-        {
-            uint32 chatType;                                // datalong
-            uint32 language;                                // datalong2
-        } talk;
+        // datalong unused                                  // SCRIPT_COMMAND_TALK (0)
 
         struct                                              // SCRIPT_COMMAND_EMOTE (1)
         {
@@ -191,7 +186,8 @@ struct ScriptInfo
             uint32 despawnDelay;                            // datalong2
         } summonCreature;
 
-        // SCRIPT_COMMAND_OPEN_DOOR (11)
+        // datalong unused                                  // SCRIPT_COMMAND_OPEN_DOOR (11)
+
         struct                                              // SCRIPT_COMMAND_CLOSE_DOOR (12)
         {
             uint32 goGuid;                                  // datalong
@@ -276,11 +272,7 @@ struct ScriptInfo
             uint32 empty;                                   // datalong2
         } run;
 
-        struct                                              // SCRIPT_COMMAND_ATTACK_START (26)
-        {
-            uint32 empty1;                                  // datalong
-            uint32 empty2;                                  // datalong2
-        } attack;
+        // datalong unused                                  // SCRIPT_COMMAND_ATTACK_START (26)
 
         struct                                              // SCRIPT_COMMAND_GO_LOCK_STATE (27)
         {

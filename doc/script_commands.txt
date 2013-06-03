@@ -150,8 +150,6 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 -- --------------------------
 
  0 SCRIPT_COMMAND_TALK                      resultingSource = WorldObject, resultingTarget = Unit/none
-                                            * datalong (see enum ChatType for supported CHAT_TYPE_'s)
-                                            * datalong2 = language
                                             * dataint = text entry from db_script_string -table. dataint2-dataint4 optionally, for random selection of text
 
  1 SCRIPT_COMMAND_EMOTE                     resultingSource = Unit, resultingTarget = Unit/none

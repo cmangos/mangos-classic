@@ -253,18 +253,6 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
         {
             case SCRIPT_COMMAND_TALK:                       // 0
             {
-                if (tmp.talk.chatType > CHAT_TYPE_ZONE_YELL)
-                {
-                    sLog.outErrorDb("Table `%s` has invalid CHAT_TYPE_ (datalong = %u) in SCRIPT_COMMAND_TALK for script id %u", tablename, tmp.talk.chatType, tmp.id);
-                    continue;
-                }
-
-                if (!GetLanguageDescByID(tmp.talk.language))
-                {
-                    sLog.outErrorDb("Table `%s` has datalong2 = %u in SCRIPT_COMMAND_TALK for script id %u, but this language does not exist.", tablename, tmp.talk.language, tmp.id);
-                    continue;
-                }
-
                 if (tmp.textId[0] == 0)
                 {
                     sLog.outErrorDb("Table `%s` has invalid talk text id (dataint = %i) in SCRIPT_COMMAND_TALK for script id %u", tablename, tmp.textId[0], tmp.id);
@@ -825,7 +813,7 @@ void ScriptMgr::LoadCreatureDeathScripts()
 
 void ScriptMgr::LoadDbScriptStrings()
 {
-    sObjectMgr.LoadMangosStrings(WorldDatabase, "db_script_string", MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID);
+    sObjectMgr.LoadMangosStrings(WorldDatabase, "db_script_string", MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID, true);
 
     std::set<int32> ids;
 
@@ -1124,42 +1112,8 @@ bool ScriptAction::HandleScriptStep()
                 textId = m_script->textId[urand(0, i - 1)];
             }
 
-            switch (m_script->talk.chatType)
-            {
-                case CHAT_TYPE_SAY:
-                    pSource->MonsterSay(textId, m_script->talk.language, unitTarget);
-                    break;
-                case CHAT_TYPE_YELL:
-                    pSource->MonsterYell(textId, m_script->talk.language, unitTarget);
-                    break;
-                case CHAT_TYPE_TEXT_EMOTE:
-                    pSource->MonsterTextEmote(textId, unitTarget);
-                    break;
-                case CHAT_TYPE_BOSS_EMOTE:
-                    pSource->MonsterTextEmote(textId, unitTarget, true);
-                    break;
-                case CHAT_TYPE_WHISPER:
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                    {
-                        sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u attempt to whisper (%u) to %s, skipping.", m_table, m_script->id, m_script->command, m_script->talk.chatType, unitTarget ? unitTarget->GetGuidStr().c_str() : "<no target>");
-                        break;
-                    }
-                    pSource->MonsterWhisper(textId, unitTarget);
-                    break;
-                case CHAT_TYPE_BOSS_WHISPER:
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                    {
-                        sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u attempt to whisper (%u) to %s, skipping.", m_table, m_script->id, m_script->command, m_script->talk.chatType, unitTarget ? unitTarget->GetGuidStr().c_str() : "<no target>");
-                        break;
-                    }
-                    pSource->MonsterWhisper(textId, unitTarget, true);
-                    break;
-                case CHAT_TYPE_ZONE_YELL:
-                    pSource->MonsterYellToZone(textId, m_script->talk.language, unitTarget);
-                    break;
-                default:
-                    break;                                  // must be already checked at load
-            }
+            if (!DoDisplayText(pSource, textId, unitTarget))
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, could not display text %i properly", m_table, m_script->id, textId);
             break;
         }
         case SCRIPT_COMMAND_EMOTE:                          // 1
