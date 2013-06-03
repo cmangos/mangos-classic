@@ -972,7 +972,7 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
             {
                 Creature* pCreatureBuddy = NULL;
 
-                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->buddyEntry, true, false, m_script->searchRadiusOrGuid);
+                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->buddyEntry, true, false, m_script->searchRadiusOrGuid, true);
                 MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
 
                 if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_PET)
@@ -981,6 +981,13 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
                     Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
 
                 pBuddy = pCreatureBuddy;
+
+                // TODO: Remove this extra check output after a while - it might have false effects
+                if (!pBuddy && pSearcher->GetEntry() == m_script->buddyEntry)
+                {
+                    sLog.outErrorDb(" DB-SCRIPTS: WARNING: Process table `%s` id %u, command %u has no OTHER buddy %u found - maybe you need to update the script?", m_table, m_script->id, m_script->command, m_script->buddyEntry);
+                    pBuddy = pSearcher;
+                }
             }
             else
             {
@@ -1714,18 +1721,18 @@ bool ScriptAction::HandleScriptStep()
                     pSearcher = pTarget;
 
                 Creature* pCreatureBuddy = NULL;
-                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, true, false, m_script->terminateScript.searchDist);
+                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, true, false, m_script->terminateScript.searchDist, true);
                 MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
                 Cell::VisitGridObjects(pSearcher, searcher, m_script->terminateScript.searchDist);
 
                 if (!(m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) && !pCreatureBuddy)
                 {
-                    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc %u was not found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
+                    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched other npc %u was not found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
                     result = true;
                 }
                 else if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && pCreatureBuddy)
                 {
-                    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc %u was found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
+                    DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched other npc %u was found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
                     result = true;
                 }
             }
@@ -2348,4 +2355,3 @@ uint32 GetScriptIdsCount()
 {
     return sScriptMgr.GetScriptIdsCount();
 }
-
