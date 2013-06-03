@@ -316,6 +316,7 @@ class Spell
         void cast(bool skipCheck = false);
         void finish(bool ok = true);
         void TakePower();
+        void TakeAmmo();
         void TakeReagents();
         void TakeCastItem();
 
