@@ -182,6 +182,15 @@ class MANGOS_DLL_SPEC Pet : public Creature
                 return m_autospells[pos];
         }
 
+        bool CanSwim() const override
+        {
+            Unit const* owner = GetOwner();
+            if (owner)
+                return owner->GetTypeId() == TYPEID_PLAYER ? true : ((Creature const*)owner)->CanSwim();
+            else
+                return Creature::CanSwim();
+        }
+
         void RegenerateAll(uint32 update_diff) override;    // overwrite Creature::RegenerateAll
         void RegenerateFocus();
         void LooseHappiness();
