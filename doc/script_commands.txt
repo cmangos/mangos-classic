@@ -48,6 +48,7 @@ The action to execute.
 -- --------------------------
 
 Range in which the buddy defined in buddy_entry will be searched
+In case of SCRIPT_FLAG_BUDDY_BY_GUID this field is the buddy's guid!
 
 -- --------------------------
 ## data_flags
@@ -59,6 +60,7 @@ Field which holds a combination of these flags:
     SCRIPT_FLAG_REVERSE_DIRECTION           = 0x02
     SCRIPT_FLAG_SOURCE_TARGETS_SELF         = 0x04
     SCRIPT_FLAG_COMMAND_ADDITIONAL          = 0x08      (Only for some commands possible)
+    SCRIPT_FLAG_BUDDY_BY_GUID               = 0x10      (Interpret search_radius as buddy's guid)
 
 Detailed meaning described below!
 
