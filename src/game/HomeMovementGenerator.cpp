@@ -52,7 +52,7 @@ void HomeMovementGenerator<Creature>::_setTargetLocation(Creature& owner)
     init.Launch();
 
     arrived = false;
-    owner.clearUnitState(UNIT_STAT_ALL_STATE);
+    owner.clearUnitState(UNIT_STAT_ALL_DYN_STATES);
 }
 
 bool HomeMovementGenerator<Creature>::Update(Creature& owner, const uint32& time_diff)
