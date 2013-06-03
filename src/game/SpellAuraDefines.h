@@ -15,6 +15,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+/**
+ * \addtogroup game
+ * @{
+ * \file
+ */
 
 #ifndef MANGOS_SPELLAURADEFINES_H
 #define MANGOS_SPELLAURADEFINES_H
@@ -27,35 +32,132 @@ enum AuraFlags
     AFLAG_MASK              = 0x09
 };
 
+/**
+ * This is what's used in a Modifier by the Aura class
+ * to tell what the Aura should modify.
+ */
 enum AuraType
 {
     SPELL_AURA_NONE = 0,
     SPELL_AURA_BIND_SIGHT = 1,
     SPELL_AURA_MOD_POSSESS = 2,
+    /**
+     * The aura should do periodic damage, the function that handles
+     * this is Aura::HandlePeriodicDamage, the amount is usually decided
+     * by the Unit::SpellDamageBonusDone or Unit::MeleeDamageBonusDone
+     * which increases/decreases the Modifier::m_amount
+     */
     SPELL_AURA_PERIODIC_DAMAGE = 3,
+    /**
+     * Used by Aura::HandleAuraDummy
+     */
     SPELL_AURA_DUMMY = 4,
+    /**
+     * Used by Aura::HandleModConfuse, will either confuse or unconfuse
+     * the target depending on whether the apply flag is set
+     */
     SPELL_AURA_MOD_CONFUSE = 5,
     SPELL_AURA_MOD_CHARM = 6,
     SPELL_AURA_MOD_FEAR = 7,
+    /**
+     * The aura will do periodic heals of a target, handled by
+     * Aura::HandlePeriodicHeal, uses Unit::SpellHealingBonusDone
+     * to calculate whether to increase or decrease Modifier::m_amount
+     */
     SPELL_AURA_PERIODIC_HEAL = 8,
+    /**
+     * Changes the attackspeed, the Modifier::m_amount decides
+     * how much we change in percent, ie, if the m_amount is
+     * 50 the attackspeed will increase by 50%
+     */
     SPELL_AURA_MOD_ATTACKSPEED = 9,
+    /**
+     * Modifies the threat that the Aura does in percent,
+     * the Modifier::m_miscvalue decides which of the SpellSchools
+     * it should affect threat for.
+     * \see SpellSchoolMask
+     */
     SPELL_AURA_MOD_THREAT = 10,
+    /**
+     * Just applies a taunt which will change the threat a mob has
+     * Taken care of in Aura::HandleModThreat
+     */
     SPELL_AURA_MOD_TAUNT = 11,
+    /**
+     * Stuns targets in different ways, taken care of in
+     * Aura::HandleAuraModStun
+     */
     SPELL_AURA_MOD_STUN = 12,
+    /**
+     * Changes the damage done by a weapon in any hand, the Modifier::m_miscvalue
+     * will tell what school the damage is from, it's used as a bitmask
+     * \see SpellSchoolMask
+     */
     SPELL_AURA_MOD_DAMAGE_DONE = 13,
+    /**
+     * Not handled by the Aura class but instead this is implemented in
+     * Unit::MeleeDamageBonusTaken and Unit::SpellBaseDamageBonusTaken
+     */
     SPELL_AURA_MOD_DAMAGE_TAKEN = 14,
+    /**
+     * Not handled by the Aura class, implemented in Unit::DealMeleeDamage
+     */
     SPELL_AURA_DAMAGE_SHIELD = 15,
+    /**
+     * Taken care of in Aura::HandleModStealth, take note that this
+     * is not the same thing as invisibility
+     */
     SPELL_AURA_MOD_STEALTH = 16,
+    /**
+     * Not handled by the Aura class, implemented in Unit::isVisibleForOrDetect
+     * which does a lot of checks to determine whether the person is visible or not,
+     * the SPELL_AURA_MOD_STEALTH seems to determine how in/visible ie a rogue is.
+     */
     SPELL_AURA_MOD_STEALTH_DETECT = 17,
+    /**
+     * Handled by Aura::HandleInvisibility, the Modifier::m_miscvalue in the struct
+     * seems to decide what kind of invisibility it is with a bitflag. the miscvalue
+     * decides which bit is set, ie: 3 would make the 3rd bit be set.
+     */
     SPELL_AURA_MOD_INVISIBILITY = 18,
+    /**
+     * Adds one of the kinds of detections to the possible detections.
+     * As in SPEALL_AURA_MOD_INVISIBILITY the Modifier::m_miscvalue seems to decide
+     * what kind of invisibility the Unit should be able to detect.
+     */
     SPELL_AURA_MOD_INVISIBILITY_DETECTION = 19,
     SPELL_AURA_OBS_MOD_HEALTH = 20,                         // 20,21 unofficial
     SPELL_AURA_OBS_MOD_MANA = 21,
+    /**
+     * Handled by Aura::HandleAuraModResistance, changes the resistance for a unit
+     * the field Modifier::m_miscvalue decides which kind of resistance that should
+     * be changed, for possible values see SpellSchools.
+     * \see SpellSchools
+     */
     SPELL_AURA_MOD_RESISTANCE = 22,
+    /**
+     * Currently just sets Aura::m_isPeriodic to apply and has a special case
+     * for Curse of the Plaguebringer.
+     */
     SPELL_AURA_PERIODIC_TRIGGER_SPELL = 23,
+    /**
+     * Just sets Aura::m_isPeriodic to apply
+     */
     SPELL_AURA_PERIODIC_ENERGIZE = 24,
+    /**
+     * Changes whether the target is pacified or not depending on the apply flag.
+     * Pacify makes the target silenced and have all it's attack skill disabled.
+     * See: http://www.wowhead.com/spell=6462/pacified
+     */
     SPELL_AURA_MOD_PACIFY = 25,
+    /**
+     * Roots or unroots the target
+     */
     SPELL_AURA_MOD_ROOT = 26,
+    /**
+     * Silences the target and stops and spell casts that should be stopped,
+     * they have the flag SpellPreventionType::SPELL_PREVENTION_TYPE_SILENCE
+     */
     SPELL_AURA_MOD_SILENCE = 27,
     SPELL_AURA_REFLECT_SPELLS = 28,
     SPELL_AURA_MOD_STAT = 29,
@@ -229,4 +331,5 @@ enum AreaAuraType
     AREA_AURA_PARTY,
     AREA_AURA_PET
 };
+/** @} */
 #endif

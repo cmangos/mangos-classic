@@ -141,9 +141,17 @@ enum Powers
 
 #define MAX_POWERS                        5
 
+/**
+ * The different spell schools that are available, used in both damage calculation
+ * and spell casting to decide what should be affected, the SPELL_SCHOOL_NORMAL
+ * is the armor, others should be self explanatory.
+ *
+ * Note that these are the values to use for changing ie, the armor via a
+ * Modifier, and it is the Modifier::m_miscValue that should be set.
+ */
 enum SpellSchools
 {
-    SPELL_SCHOOL_NORMAL                 = 0,
+    SPELL_SCHOOL_NORMAL                 = 0,                //< Physical, Armor
     SPELL_SCHOOL_HOLY                   = 1,
     SPELL_SCHOOL_FIRE                   = 2,
     SPELL_SCHOOL_NATURE                 = 3,
@@ -154,6 +162,9 @@ enum SpellSchools
 
 #define MAX_SPELL_SCHOOL                  7
 
+/**
+ * A bitmask of the available SpellSchools. Used for convenience
+ */
 enum SpellSchoolMask
 {
     SPELL_SCHOOL_MASK_NONE    = 0x00,                       // not exist
@@ -863,11 +874,11 @@ enum SpellImmunity
 
 #define MAX_SPELL_IMMUNITY           6
 
-enum WeaponAttackType
+enum WeaponAttackType                                       //< The different weapon attack-types
 {
-    BASE_ATTACK   = 0,
-    OFF_ATTACK    = 1,
-    RANGED_ATTACK = 2
+    BASE_ATTACK   = 0,                                      //< Main-hand weapon
+    OFF_ATTACK    = 1,                                      //< Off-hand weapon
+    RANGED_ATTACK = 2                                       //< Ranged weapon, bow/wand etc.
 };
 
 #define MAX_ATTACK  3
@@ -973,21 +984,21 @@ enum SpellPreventionType
     SPELL_PREVENTION_TYPE_PACIFY    = 2
 };
 
-// indexes from SpellRange.dbc, listed only special and used in code
+/// indexes from SpellRange.dbc, listed only special and used in code
 enum SpellRangeIndex
 {
-    SPELL_RANGE_IDX_SELF_ONLY = 1,                          // 0.0
-    SPELL_RANGE_IDX_COMBAT    = 2,                          // 5.5 (but dynamic)
-    SPELL_RANGE_IDX_ANYWHERE  = 13,                         // 500000 (anywhere)
+    SPELL_RANGE_IDX_SELF_ONLY = 1,                          //< 0.0
+    SPELL_RANGE_IDX_COMBAT    = 2,                          //< often ~5.5 (but infact dynamic melee combat range)
+    SPELL_RANGE_IDX_ANYWHERE  = 13,                         //< 500000 (anywhere)
 };
 
 enum DamageEffectType
 {
-    DIRECT_DAMAGE           = 0,                            // used for normal weapon damage (not for class abilities or spells)
-    SPELL_DIRECT_DAMAGE     = 1,                            // spell/class abilities damage
+    DIRECT_DAMAGE           = 0,                            //< Used for normal weapon damage (not for class abilities or spells)
+    SPELL_DIRECT_DAMAGE     = 1,                            //< spell/class abilities damage
     DOT                     = 2,
     HEAL                    = 3,
-    NODAMAGE                = 4,                            // used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
+    NODAMAGE                = 4,                            //< used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
     SELF_DAMAGE             = 5
 };
 
