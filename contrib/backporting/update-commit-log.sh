@@ -3,7 +3,7 @@
 # Simple helper script to create backport lists
 
 # By user defined (remote/branch to the to-be-backported history)
-COMPARE_PATH="cmangos-tbc/cleaned_tbc_history"
+COMPARE_PATH="cmangos-tbc/master"
 OUTPUT_FILE="contrib/backporting/todo_tbc_commits.log"
 
 # By user defined (text format)
@@ -12,9 +12,9 @@ OUTPUT_FILE="contrib/backporting/todo_tbc_commits.log"
 #FOOTER_FORMAT="FILE LAST UPDATED BASED ON... ${SMALL_FORMAT}"
 
 # By user defined (Textile markup based wiki format)
-SMALL_FORMAT="\"tbc(cleaned)\":http://github.com/cmangos/mangos-tbc/commit/%h: %h * %an (committer %cn)"
-FULL_FORMAT="</code></pre>%n* ${SMALL_FORMAT}<pre><code>%s"
-FOOTER_FORMAT="</code></pre>FILE LAST UPDATED BASED ON... ${SMALL_FORMAT}"
+SMALL_FORMAT="\"tbc\":http://github.com/cmangos/mangos-tbc/commit/%h: %h * %an (committer %cn)"
+FULL_FORMAT="</code></pre>%n%n%n* ${SMALL_FORMAT}<pre><code>%s"
+FOOTER_FORMAT="</code></pre>%n%n%nFILE LAST UPDATED BASED ON... ${SMALL_FORMAT}"
 
 # param1 must be the commit hash of last backported commit (of original commit)
 if [ "$#" != "1" ]
