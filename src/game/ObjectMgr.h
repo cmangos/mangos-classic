@@ -879,6 +879,13 @@ class ObjectMgr
             if (itr == mMangosStringLocaleMap.end()) return NULL;
             return &itr->second;
         }
+        uint32 GetLoadedStringsCount(int32 minEntry) const
+        {
+            std::map<int32, uint32>::const_iterator itr = m_loadedStringCount.find(minEntry);
+            if (itr != m_loadedStringCount.end())
+                return itr->second;
+            return 0;
+        }
 
         const char* GetMangosString(int32 entry, int locale_idx) const;
         const char* GetMangosStringForDBCLocale(int32 entry) const { return GetMangosString(entry, DBCLocaleIndex); }
@@ -1140,6 +1147,7 @@ class ObjectMgr
         NpcTextLocaleMap mNpcTextLocaleMap;
         PageTextLocaleMap mPageTextLocaleMap;
         MangosStringLocaleMap mMangosStringLocaleMap;
+        std::map<int32 /*minEntryOfBracket*/, uint32 /*count*/> m_loadedStringCount;
         GossipMenuItemsLocaleMap mGossipMenuItemsLocaleMap;
         PointOfInterestLocaleMap mPointOfInterestLocaleMap;
 

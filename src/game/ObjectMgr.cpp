@@ -6721,11 +6721,13 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
 
     delete result;
 
-    sLog.outString();
     if (min_value == MIN_MANGOS_STRING_ID)
         sLog.outString(">> Loaded %u MaNGOS strings from table %s", count, table);
     else
         sLog.outString(">> Loaded %u %s templates from %s", count, extra_content ? "text" : "string", table);
+    sLog.outString();
+
+    m_loadedStringCount[min_value] = count;
 
     return true;
 }

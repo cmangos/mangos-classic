@@ -25,7 +25,7 @@
 class CreatureEventAIMgr
 {
     public:
-        CreatureEventAIMgr() {};
+        CreatureEventAIMgr() : m_usedTextsAmount(0) {};
         ~CreatureEventAIMgr() {};
 
         void LoadCreatureEventAI_Texts(bool check_entry_use);
@@ -41,6 +41,8 @@ class CreatureEventAIMgr
 
         CreatureEventAI_Event_Map  m_CreatureEventAI_Event_Map;
         CreatureEventAI_Summon_Map m_CreatureEventAI_Summon_Map;
+
+        uint32 m_usedTextsAmount;
 };
 
 #define sEventAIMgr MaNGOS::Singleton<CreatureEventAIMgr>::Instance()
