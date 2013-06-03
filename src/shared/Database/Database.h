@@ -35,7 +35,7 @@ class SqlStmtParameters;
 class SqlParamBinder;
 class Database;
 
-#define MAX_QUERY_LEN   32*1024
+#define MAX_QUERY_LEN   (32*1024)
 
 //
 class MANGOS_DLL_SPEC SqlConnection
