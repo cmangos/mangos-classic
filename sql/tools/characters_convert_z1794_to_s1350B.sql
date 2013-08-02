@@ -1,14 +1,14 @@
 -- Query let convert characters DB from format
--- MaNGOS Zero characters DB `required_z1597_s1099_02_characters_pet_aura` to
--- MaNGOS One characters DB `required_s1099_11299_02_characters_pet_aura`.
+-- CMaNGOS Classic characters DB `required_z1794_s1350_11716_09_characters_auction` (copy-paste typo in quard name in fact) to
+-- CMaNGOS TBC characters DB `required_s1350_11716_09_characters_mail`.
 
--- Expected that in case Mangos Zero characters DB changes it will updated for more up-to-date versions.
--- For targeted MaNGOS Master characters DB you can after convertion apply MaNGOS SQL updates in normal
+-- Expected that in case CMangos Classic characters DB changes it will updated for more up-to-date versions.
+-- For targeted CMaNGOS Master characters DB you can after convertion apply CMaNGOS SQL updates in normal
 -- way for update characters DB to more recent revision.
 
 -- Note: ALWAYS DO BACKUP before use it. You will CAN NOT easy restore original DB state after tool use.
 
-ALTER TABLE character_db_version CHANGE COLUMN `required_z1597_s1099_02_characters_pet_aura` `required_s1099_11299_02_characters_pet_aura` bit;
+ALTER TABLE character_db_version CHANGE COLUMN `required_z1794_s1350_11716_09_characters_auction` `required_s1350_11716_09_characters_mail` bit;
 
 
 -- MODIFID TABLES
@@ -51,7 +51,7 @@ ALTER TABLE groups
   ADD COLUMN `difficulty` tinyint(3) unsigned NOT NULL default '0' AFTER isRaid;
 
 ALTER TABLE guild
-  ADD COLUMN `BankMoney` bigint(20) NOT NULL default '0' AFTER `createdate`;
+  ADD COLUMN `BankMoney` bigint(20) unsigned NOT NULL default '0' AFTER `createdate`;
 
 ALTER TABLE guild_member
   ADD COLUMN `BankResetTimeMoney` int(11) unsigned NOT NULL default '0' AFTER `offnote`,
