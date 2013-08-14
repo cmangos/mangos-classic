@@ -182,5 +182,5 @@ INNER JOIN dbscripts_on_spell B ON (A.entry = B.dataint OR A.entry = B.dataint2 
 
 -- Clean dbscript_string and insert the new updated values
 DELETE FROM db_script_string WHERE entry IN (SELECT DISTINCT entry FROM db_script_temp);
-INSERT INTO db_script_string SELECT DISTINCT * FROM db_script_temp;
+INSERT INTO db_script_string SELECT * FROM db_script_temp GROUP BY entry;
 DROP TABLE IF EXISTS db_script_temp;
