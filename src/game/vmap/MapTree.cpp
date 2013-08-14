@@ -227,7 +227,7 @@ namespace VMAP
         {
             height = pPos.z - maxDist;
         }
-        return(height);
+        return height;
     }
 
     //=========================================================

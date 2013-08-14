@@ -48,7 +48,7 @@ namespace VMAP
     {
         Vector3 out = pIn * iScale;
         out = iRotation * out;
-        return(out);
+        return out;
     }
 
     //=================================================================

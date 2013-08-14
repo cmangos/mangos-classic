@@ -144,7 +144,7 @@ class MANGOS_DLL_SPEC CreatureAI
          * @param pHealer Unit* which deals the heal
          * @param uiHealedAmount Amount of healing received
          */
-        virtual void HealedBy(Unit * /*pHealer*/, uint32& /*uiHealedAmount*/) {}
+        virtual void HealedBy(Unit* /*pHealer*/, uint32& /*uiHealedAmount*/) {}
 
         /**
          * Called at any Damage to any victim (before damage apply)

@@ -445,8 +445,6 @@ enum UnitMoveType
 
 #define MAX_MOVE_TYPE     6
 
-extern float baseMoveSpeed[MAX_MOVE_TYPE];
-
 /// internal used flags for marking special auras - for example some dummy-auras
 enum UnitAuraFlags
 {

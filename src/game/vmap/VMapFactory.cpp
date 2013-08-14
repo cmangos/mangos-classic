@@ -77,7 +77,7 @@ namespace VMAP
             pId = atoi(idString.c_str());
             result = true;
         }
-        return(result);
+        return result;
     }
 
     //===============================================
@@ -106,7 +106,7 @@ namespace VMAP
 
     bool VMapFactory::checkSpellForLoS(unsigned int pSpellId)
     {
-        return(!iIgnoreSpellIds->containsKey(pSpellId));
+        return !iIgnoreSpellIds->containsKey(pSpellId);
     }
 
     //===============================================

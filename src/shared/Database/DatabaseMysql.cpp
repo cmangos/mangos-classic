@@ -304,7 +304,7 @@ unsigned long MySQLConnection::escape_string(char* to, const char* from, unsigne
     if (!mMysql || !to || !from || !length)
         return 0;
 
-    return(mysql_real_escape_string(mMysql, to, from, length));
+    return (mysql_real_escape_string(mMysql, to, from, length));
 }
 
 //////////////////////////////////////////////////////////////////////////
