@@ -128,6 +128,8 @@ include_directories(
 
 if(POSTGRESQL)
   include_directories( ${PostgreSQL_INCLUDE_DIRS} )
+else()
+  include_directories( ${MYSQL_INCLUDE_DIR} )
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h)
