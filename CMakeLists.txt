@@ -30,6 +30,8 @@ option(DEBUG                "Debug mode"                            OFF)
 option(TBB_USE_EXTERNAL     "Use external TBB"                      OFF)
 option(USE_STD_MALLOC       "Use standard malloc instead of TBB"    OFF)
 option(ACE_USE_EXTERNAL     "Use external ACE"                      OFF)
+option(POSTGRESQL           "Use PostgreSQL"                        OFF)
+
 if(PCHSupport_FOUND AND WIN32) # TODO: why only enable it on windows by default?
   option(PCH                "Use precompiled headers"               ON)
 else()
@@ -181,7 +183,17 @@ endif()
 
 # *nix-specific packages
 if(UNIX)
-  find_package(MySQL REQUIRED)
+  if(POSTGRESQL)
+    find_package(PostgreSQL REQUIRED)
+
+    if(POSTGRESQL_FOUND)
+      include_directories(${POSTGRESQL_INCLUDE_DIRS})
+    endif(POSTGRESQL_FOUND)
+
+  else()
+    find_package(MySQL REQUIRED)
+  endif()
+
   find_package(OpenSSL REQUIRED)
   find_package(ZLIB REQUIRED)
 endif()
@@ -375,17 +387,24 @@ add_subdirectory(dep) # TODO: add vmap extractor build support
 # Add definitions for all build types
 # Don't place this above 'dep' subdirectory! Because of defines build will crash.
 set(DEFINITIONS
-  DO_MYSQL
   HAVE_CONFIG_H
   VERSION="${MANGOS_VERSION}"
   SYSCONFDIR="${CONF_DIR}/"
 )
+
+if(POSTGRESQL)
+  set(DEFINITIONS ${DEFINITIONS} DO_POSTGRESQL)
+else()
+  set(DEFINITIONS ${DEFINITIONS} DO_MYSQL)
+endif()
+
 set(DEFINITIONS_RELEASE NDEBUG)
 set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
 if(WIN32)
   set(DEFINITIONS ${DEFINITIONS} WIN32 _WIN32)
   set(DEFINITIONS_RELEASE ${DEFINITIONS_RELEASE} _CRT_SECURE_NO_WARNINGS)
 endif()
+
 if(USE_STD_MALLOC)
   set(DEFINITIONS ${DEFINITIONS} USE_STANDARD_MALLOC)
 endif()
