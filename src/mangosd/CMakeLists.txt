@@ -48,15 +48,14 @@ include_directories(
   ${CMAKE_BINARY_DIR}
   ${CMAKE_BINARY_DIR}/src/shared
   ${ACE_INCLUDE_DIR}
-
-  if(POSTGRESQL)
-    ${PGSQL_INCLUDE_DIR}
-  else()
-    ${MYSQL_INCLUDE_DIR}
-  endif()
-  
   ${OPENSSL_INCLUDE_DIR}
 )
+
+if(POSTGRESQL)
+  include_directories(${PGSQL_INCLUDE_DIR})
+else()
+  include_directories(${MYSQL_INCLUDE_DIR})
+endif()
 
 add_executable(${EXECUTABLE_NAME}
   ${EXECUTABLE_SRCS}
