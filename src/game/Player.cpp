@@ -1473,16 +1473,15 @@ void Player::ToggleDND()
 
 uint8 Player::GetChatTag() const
 {
-    uint8 tag = CHAT_TAG_NONE;
+    if (isGMChat())
+        return CHAT_TAG_GM;
 
     if (isAFK())
-        tag |= CHAT_TAG_AFK;
+        return CHAT_TAG_AFK;
     if (isDND())
-        tag |= CHAT_TAG_DND;
-    if (isGMChat())
-        tag |= CHAT_TAG_GM;
+        return CHAT_TAG_DND;
 
-    return tag;
+    return CHAT_TAG_NONE;
 }
 
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options /*=0*/, AreaTrigger const* at /*=NULL*/)
