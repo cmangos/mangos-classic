@@ -1,7 +1,8 @@
--- MySQL dump 10.13  Distrib 5.1.40, for Win32 (ia32)
+-- MySQL dump 10.13
 --
--- Host: localhost    Database: mangos-- ------------------------------------------------------
--- Server version	5.1.40-community
+-- Host: localhost    Database: mangos
+-- ------------------------------------------------------
+-- Server version	5.5.32
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -19,14 +20,11 @@
 --
 
 DROP TABLE IF EXISTS `db_version`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `db_version` (
-  `version` varchar(120) default NULL,
-  `creature_ai_version` varchar(120) default NULL,
-  `required_z2381_s2034_12522_01_mangos_db_script_string` bit(1) default NULL
+  `version` varchar(120) DEFAULT NULL,
+  `creature_ai_version` varchar(120) DEFAULT NULL,
+  `required_z2381_s2034_12522_01_mangos_db_script_string` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `db_version`
@@ -44,14 +42,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `areatrigger_involvedrelation`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `areatrigger_involvedrelation` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Identifier',
   `quest` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Quest Identifier',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `areatrigger_involvedrelation`
@@ -67,14 +62,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `areatrigger_tavern`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `areatrigger_tavern` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Identifier',
   `name` text,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `areatrigger_tavern`
@@ -90,8 +82,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `areatrigger_teleport`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `areatrigger_teleport` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Identifier',
   `name` text,
@@ -106,7 +96,6 @@ CREATE TABLE `areatrigger_teleport` (
   `target_orientation` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `areatrigger_teleport`
@@ -122,8 +111,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `battleground_events`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `battleground_events` (
   `map` smallint(5) NOT NULL,
   `event1` tinyint(3) unsigned NOT NULL,
@@ -131,7 +118,6 @@ CREATE TABLE `battleground_events` (
   `description` varchar(255) NOT NULL,
   PRIMARY KEY (`map`,`event1`,`event2`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `battleground_events`
@@ -139,208 +125,174 @@ CREATE TABLE `battleground_events` (
 
 LOCK TABLES `battleground_events` WRITE;
 /*!40000 ALTER TABLE `battleground_events` DISABLE KEYS */;
-INSERT INTO battleground_events (map, event1, event2, description) VALUES
--- WS
-(489, 0, 0, 'Alliance Flag'),
-(489, 1, 0, 'Horde Flag'),
-(489, 2, 0, 'Spirit Guides'),
-(489, 254, 0, 'Doors'),
--- AB
-(529, 0, 0, 'Stables - neutral'),
-(529, 0, 1, 'Stables - alliance contested'),
-(529, 0, 2, 'Stables - horde contested'),
-(529, 0, 3, 'Stables - alliance owned'),
-(529, 0, 4, 'Stables - horde owned'),
-(529, 1, 0, 'Blacksmith - neutral'),
-(529, 1, 1, 'Blacksmith - alliance contested'),
-(529, 1, 2, 'Blacksmith - horde contested'),
-(529, 1, 3, 'Blacksmith - alliance owned'),
-(529, 1, 4, 'Blacksmith - horde owned'),
-(529, 2, 0, 'Farm - neutral'),
-(529, 2, 1, 'Farm - alliance contested'),
-(529, 2, 2, 'Farm - horde contested'),
-(529, 2, 3, 'Farm - alliance owned'),
-(529, 2, 4, 'Farm - horde owned'),
-(529, 3, 0, 'Lumber Mill - neutral'),
-(529, 3, 1, 'Lumber Mill - alliance contested'),
-(529, 3, 2, 'Lumber Mill - horde contested'),
-(529, 3, 3, 'Lumber Mill - alliance owned'),
-(529, 3, 4, 'Lumber Mill - horde owned'),
-(529, 4, 0, 'Gold Mine - neutral'),
-(529, 4, 1, 'Gold Mine - alliance contested'),
-(529, 4, 2, 'Gold Mine - horde contested'),
-(529, 4, 3, 'Gold Mine - alliance owned'),
-(529, 4, 4, 'Gold Mine - horde owned'),
-(529, 254, 0, 'doors'),
--- alterac valley
-(30, 254, 0, 'Doors'),
-
-(30, 0, 0, 'Firstaid Station - Alliance assaulted'),
-(30, 0, 1, 'Firstaid Station - ALliance control'),
-(30, 0, 2, 'Firstaid Station - Horde assaulted'),
-(30, 0, 3, 'Firstaid Station - Horde control'),
-
-(30, 1, 0, 'Stormpike Grave - Alliance assaulted'),
-(30, 1, 1, 'Stormpike Grave - ALliance control'),
-(30, 1, 2, 'Stormpike Grave - Horde assaulted'),
-(30, 1, 3, 'Stormpike Grave - Horde control'),
-
-(30, 2, 0, 'Stoneheart Grave - Alliance assaulted'),
-(30, 2, 1, 'Stoneheart Grave - ALliance control'),
-(30, 2, 2, 'Stoneheart Grave - Horde assaulted'),
-(30, 2, 3, 'Stoneheart Grave - Horde control'),
-
-(30, 3, 0, 'Snowfall Grave - Alliance assaulted'),
-(30, 3, 1, 'Snowfall Grave - ALliance control'),
-(30, 3, 2, 'Snowfall Grave - Horde assaulted'),
-(30, 3, 3, 'Snowfall Grave - Horde control'),
-(30, 3, 5, 'Snowfall Grave - Neutral control'),
-
-(30, 4, 0, 'Iceblood Grave - Alliance assaulted'),
-(30, 4, 1, 'Iceblood Grave - ALliance control'),
-(30, 4, 2, 'Iceblood Grave - Horde assaulted'),
-(30, 4, 3, 'Iceblood Grave - Horde control'),
-
-(30, 5, 0, 'Frostwolf Grave - Alliance assaulted'),
-(30, 5, 1, 'Frostwolf Grave - ALliance control'),
-(30, 5, 2, 'Frostwolf Grave - Horde assaulted'),
-(30, 5, 3, 'Frostwolf Grave - Horde control'),
-
-(30, 6, 0, 'Frostwolf Hut - Alliance assaulted'),
-(30, 6, 1, 'Frostwolf Hut - ALliance control'),
-(30, 6, 2, 'Frostwolf Hut - Horde assaulted'),
-(30, 6, 3, 'Frostwolf Hut - Horde control'),
-
-(30, 7, 1, 'Dunbaldar South - ALliance control'),
-(30, 7, 2, 'Dunbaldar South - Horde assaulted'),
-(30, 7, 3, 'Dunbaldar South - Horde control'),
-
-(30, 8, 1, 'Dunbaldar North - ALliance control'),
-(30, 8, 2, 'Dunbaldar North - Horde assaulted'),
-(30, 8, 3, 'Dunbaldar North - Horde control'),
-
-(30, 9, 1, 'Icewing Bunker - ALliance control'),
-(30, 9, 2, 'Icewing Bunker - Horde assaulted'),
-(30, 9, 3, 'Icewing Bunker - Horde control'),
-
-(30, 10, 1, 'Stoneheart Bunker - ALliance control'),
-(30, 10, 2, 'Stoneheart Bunker - Horde assaulted'),
-(30, 10, 3, 'Stoneheart Bunker - Horde control'),
-
-(30, 11, 0, 'Iceblood Tower - Alliance assaulted'),
-(30, 11, 1, 'Iceblood Tower - ALliance control'),
-(30, 11, 3, 'Iceblood Tower - Horde control'),
-
-(30, 12, 0, 'Tower Point - Alliance assaulted'),
-(30, 12, 1, 'Tower Point - ALliance control'),
-(30, 12, 3, 'Tower Point - Horde control'),
-
-(30, 13, 0, 'Frostwolf east Tower - Alliance assaulted'),
-(30, 13, 1, 'Frostwolf east Tower - ALliance control'),
-(30, 13, 3, 'Frostwolf east Tower - Horde control'),
-
-(30, 14, 0, 'Frostwolf west Tower - Alliance assaulted'),
-(30, 14, 1, 'Frostwolf west Tower - ALliance control'),
-(30, 14, 3, 'Frostwolf west Tower - Horde control'),
-
-
-(30, 15, 0, 'Firstaid Station - Alliance Defender Quest0'),
-(30, 15, 1, 'Firstaid Station - Alliance Defender Quest1'),
-(30, 15, 2, 'Firstaid Station - Alliance Defender Quest2'),
-(30, 15, 3, 'Firstaid Station - Alliance Defender Quest3'),
-(30, 15, 4, 'Firstaid Station - Horde Defender Quest0'),
-(30, 15, 5, 'Firstaid Station - Horde Defender Quest1'),
-(30, 15, 6, 'Firstaid Station - Horde Defender Quest2'),
-(30, 15, 7, 'Firstaid Station - Horde Defender Quest3'),
-
-(30, 16, 0, 'Stormpike Grave - Alliance Defender Quest0'),
-(30, 16, 1, 'Stormpike Grave - Alliance Defender Quest1'),
-(30, 16, 2, 'Stormpike Grave - Alliance Defender Quest2'),
-(30, 16, 3, 'Stormpike Grave - Alliance Defender Quest3'),
-(30, 16, 4, 'Stormpike Grave - Horde Defender Quest0'),
-(30, 16, 5, 'Stormpike Grave - Horde Defender Quest1'),
-(30, 16, 6, 'Stormpike Grave - Horde Defender Quest2'),
-(30, 16, 7, 'Stormpike Grave - Horde Defender Quest3'),
-
-(30, 17, 0, 'Stoneheart Grave - Alliance Defender Quest0'),
-(30, 17, 1, 'Stoneheart Grave - Alliance Defender Quest1'),
-(30, 17, 2, 'Stoneheart Grave - Alliance Defender Quest2'),
-(30, 17, 3, 'Stoneheart Grave - Alliance Defender Quest3'),
-(30, 17, 4, 'Stoneheart Grave - Horde Defender Quest0'),
-(30, 17, 5, 'Stoneheart Grave - Horde Defender Quest1'),
-(30, 17, 6, 'Stoneheart Grave - Horde Defender Quest2'),
-(30, 17, 7, 'Stoneheart Grave - Horde Defender Quest3'),
-
-(30, 18, 0, 'Snowfall Grave - Alliance Defender Quest0'),
-(30, 18, 1, 'Snowfall Grave - Alliance Defender Quest1'),
-(30, 18, 2, 'Snowfall Grave - Alliance Defender Quest2'),
-(30, 18, 3, 'Snowfall Grave - Alliance Defender Quest3'),
-(30, 18, 4, 'Snowfall Grave - Horde Defender Quest0'),
-(30, 18, 5, 'Snowfall Grave - Horde Defender Quest1'),
-(30, 18, 6, 'Snowfall Grave - Horde Defender Quest2'),
-(30, 18, 7, 'Snowfall Grave - Horde Defender Quest3'),
-
-(30, 19, 0, 'Iceblood Grave - Alliance Defender Quest0'),
-(30, 19, 1, 'Iceblood Grave - Alliance Defender Quest1'),
-(30, 19, 2, 'Iceblood Grave - Alliance Defender Quest2'),
-(30, 19, 3, 'Iceblood Grave - Alliance Defender Quest3'),
-(30, 19, 4, 'Iceblood Grave - Horde Defender Quest0'),
-(30, 19, 5, 'Iceblood Grave - Horde Defender Quest1'),
-(30, 19, 6, 'Iceblood Grave - Horde Defender Quest2'),
-(30, 19, 7, 'Iceblood Grave - Horde Defender Quest3'),
-
-(30, 20, 0, 'Frostwolf Grave - Alliance Defender Quest0'),
-(30, 20, 1, 'Frostwolf Grave - Alliance Defender Quest1'),
-(30, 20, 2, 'Frostwolf Grave - Alliance Defender Quest2'),
-(30, 20, 3, 'Frostwolf Grave - Alliance Defender Quest3'),
-(30, 20, 4, 'Frostwolf Grave - Horde Defender Quest0'),
-(30, 20, 5, 'Frostwolf Grave - Horde Defender Quest1'),
-(30, 20, 6, 'Frostwolf Grave - Horde Defender Quest2'),
-(30, 20, 7, 'Frostwolf Grave - Horde Defender Quest3'),
-
-(30, 21, 0, 'Frostwolf Hut - Alliance Defender Quest0'),
-(30, 21, 1, 'Frostwolf Hut - Alliance Defender Quest1'),
-(30, 21, 2, 'Frostwolf Hut - Alliance Defender Quest2'),
-(30, 21, 3, 'Frostwolf Hut - Alliance Defender Quest3'),
-(30, 21, 4, 'Frostwolf Hut - Horde Defender Quest0'),
-(30, 21, 5, 'Frostwolf Hut - Horde Defender Quest1'),
-(30, 21, 6, 'Frostwolf Hut - Horde Defender Quest2'),
-(30, 21, 7, 'Frostwolf Hut - Horde Defender Quest3'),
-
-(30, 46, 0, 'North Mine - Alliance Boss'),
-(30, 46, 1, 'North Mine - Horde Boss'),
-(30, 46, 2, 'North Mine - Neutral Boss'),
-(30, 47, 0, 'South Mine - Alliance Boss'),
-(30, 47, 1, 'South Mine - Horde Boss'),
-(30, 47, 2, 'South Mine - Neutral Boss'),
-
-(30, 48, 0, 'Alliance Captain'),
-(30, 49, 0, 'Horde Captain'),
-
-(30, 50, 0, 'North Mine - Alliance Control'),
-(30, 50, 1, 'North Mine - Horde Control'),
-(30, 50, 2, 'North Mine - Neutral Control'),
-(30, 51, 0, 'South Mine - Alliance Control'),
-(30, 51, 1, 'South Mine - Horde Control'),
-(30, 51, 2, 'South Mine - Neutral Control'),
-
-(30, 52, 0, 'Alliance Marshal - Dunbaldar South'),
-(30, 53, 0, 'Alliance Marshal - Dunbaldar North'),
-(30, 54, 0, 'Alliance Marshal - Icewing Bunker'),
-(30, 55, 0, 'Alliance Marshal - Stoneheart Bunker'),
-
-(30, 56, 0, 'Horde Marshal - Iceblood Tower'),
-(30, 57, 0, 'Horde Marshal - Towerpoint'),
-(30, 58, 0, 'Horde Marshal - East Frostwolf Tower'),
-(30, 59, 0, 'Horde Marshal - West Frostwolf Tower'),
-
-(30, 60, 0, 'Herald - that guy who yells all the time ;)'),
-
-(30, 61, 0, 'Alliance - Boss'),
-(30, 62, 0, 'Horde - Boss'),
-
-(30, 63, 0, 'Alliance - Captain Dead'),
-(30, 64, 0, 'Horde - Captain Dead');
+INSERT INTO `battleground_events` VALUES
+(489,0,0,'Alliance Flag'),
+(489,1,0,'Horde Flag'),
+(489,2,0,'Spirit Guides'),
+(489,254,0,'Doors'),
+(529,0,0,'Stables - neutral'),
+(529,0,1,'Stables - alliance contested'),
+(529,0,2,'Stables - horde contested'),
+(529,0,3,'Stables - alliance owned'),
+(529,0,4,'Stables - horde owned'),
+(529,1,0,'Blacksmith - neutral'),
+(529,1,1,'Blacksmith - alliance contested'),
+(529,1,2,'Blacksmith - horde contested'),
+(529,1,3,'Blacksmith - alliance owned'),
+(529,1,4,'Blacksmith - horde owned'),
+(529,2,0,'Farm - neutral'),
+(529,2,1,'Farm - alliance contested'),
+(529,2,2,'Farm - horde contested'),
+(529,2,3,'Farm - alliance owned'),
+(529,2,4,'Farm - horde owned'),
+(529,3,0,'Lumber Mill - neutral'),
+(529,3,1,'Lumber Mill - alliance contested'),
+(529,3,2,'Lumber Mill - horde contested'),
+(529,3,3,'Lumber Mill - alliance owned'),
+(529,3,4,'Lumber Mill - horde owned'),
+(529,4,0,'Gold Mine - neutral'),
+(529,4,1,'Gold Mine - alliance contested'),
+(529,4,2,'Gold Mine - horde contested'),
+(529,4,3,'Gold Mine - alliance owned'),
+(529,4,4,'Gold Mine - horde owned'),
+(529,254,0,'doors'),
+(30,254,0,'Doors'),
+(30,0,0,'Firstaid Station - Alliance assaulted'),
+(30,0,1,'Firstaid Station - ALliance control'),
+(30,0,2,'Firstaid Station - Horde assaulted'),
+(30,0,3,'Firstaid Station - Horde control'),
+(30,1,0,'Stormpike Grave - Alliance assaulted'),
+(30,1,1,'Stormpike Grave - ALliance control'),
+(30,1,2,'Stormpike Grave - Horde assaulted'),
+(30,1,3,'Stormpike Grave - Horde control'),
+(30,2,0,'Stoneheart Grave - Alliance assaulted'),
+(30,2,1,'Stoneheart Grave - ALliance control'),
+(30,2,2,'Stoneheart Grave - Horde assaulted'),
+(30,2,3,'Stoneheart Grave - Horde control'),
+(30,3,0,'Snowfall Grave - Alliance assaulted'),
+(30,3,1,'Snowfall Grave - ALliance control'),
+(30,3,2,'Snowfall Grave - Horde assaulted'),
+(30,3,3,'Snowfall Grave - Horde control'),
+(30,3,5,'Snowfall Grave - Neutral control'),
+(30,4,0,'Iceblood Grave - Alliance assaulted'),
+(30,4,1,'Iceblood Grave - ALliance control'),
+(30,4,2,'Iceblood Grave - Horde assaulted'),
+(30,4,3,'Iceblood Grave - Horde control'),
+(30,5,0,'Frostwolf Grave - Alliance assaulted'),
+(30,5,1,'Frostwolf Grave - ALliance control'),
+(30,5,2,'Frostwolf Grave - Horde assaulted'),
+(30,5,3,'Frostwolf Grave - Horde control'),
+(30,6,0,'Frostwolf Hut - Alliance assaulted'),
+(30,6,1,'Frostwolf Hut - ALliance control'),
+(30,6,2,'Frostwolf Hut - Horde assaulted'),
+(30,6,3,'Frostwolf Hut - Horde control'),
+(30,7,1,'Dunbaldar South - ALliance control'),
+(30,7,2,'Dunbaldar South - Horde assaulted'),
+(30,7,3,'Dunbaldar South - Horde control'),
+(30,8,1,'Dunbaldar North - ALliance control'),
+(30,8,2,'Dunbaldar North - Horde assaulted'),
+(30,8,3,'Dunbaldar North - Horde control'),
+(30,9,1,'Icewing Bunker - ALliance control'),
+(30,9,2,'Icewing Bunker - Horde assaulted'),
+(30,9,3,'Icewing Bunker - Horde control'),
+(30,10,1,'Stoneheart Bunker - ALliance control'),
+(30,10,2,'Stoneheart Bunker - Horde assaulted'),
+(30,10,3,'Stoneheart Bunker - Horde control'),
+(30,11,0,'Iceblood Tower - Alliance assaulted'),
+(30,11,1,'Iceblood Tower - ALliance control'),
+(30,11,3,'Iceblood Tower - Horde control'),
+(30,12,0,'Tower Point - Alliance assaulted'),
+(30,12,1,'Tower Point - ALliance control'),
+(30,12,3,'Tower Point - Horde control'),
+(30,13,0,'Frostwolf east Tower - Alliance assaulted'),
+(30,13,1,'Frostwolf east Tower - ALliance control'),
+(30,13,3,'Frostwolf east Tower - Horde control'),
+(30,14,0,'Frostwolf west Tower - Alliance assaulted'),
+(30,14,1,'Frostwolf west Tower - ALliance control'),
+(30,14,3,'Frostwolf west Tower - Horde control'),
+(30,15,0,'Firstaid Station - Alliance Defender Quest0'),
+(30,15,1,'Firstaid Station - Alliance Defender Quest1'),
+(30,15,2,'Firstaid Station - Alliance Defender Quest2'),
+(30,15,3,'Firstaid Station - Alliance Defender Quest3'),
+(30,15,4,'Firstaid Station - Horde Defender Quest0'),
+(30,15,5,'Firstaid Station - Horde Defender Quest1'),
+(30,15,6,'Firstaid Station - Horde Defender Quest2'),
+(30,15,7,'Firstaid Station - Horde Defender Quest3'),
+(30,16,0,'Stormpike Grave - Alliance Defender Quest0'),
+(30,16,1,'Stormpike Grave - Alliance Defender Quest1'),
+(30,16,2,'Stormpike Grave - Alliance Defender Quest2'),
+(30,16,3,'Stormpike Grave - Alliance Defender Quest3'),
+(30,16,4,'Stormpike Grave - Horde Defender Quest0'),
+(30,16,5,'Stormpike Grave - Horde Defender Quest1'),
+(30,16,6,'Stormpike Grave - Horde Defender Quest2'),
+(30,16,7,'Stormpike Grave - Horde Defender Quest3'),
+(30,17,0,'Stoneheart Grave - Alliance Defender Quest0'),
+(30,17,1,'Stoneheart Grave - Alliance Defender Quest1'),
+(30,17,2,'Stoneheart Grave - Alliance Defender Quest2'),
+(30,17,3,'Stoneheart Grave - Alliance Defender Quest3'),
+(30,17,4,'Stoneheart Grave - Horde Defender Quest0'),
+(30,17,5,'Stoneheart Grave - Horde Defender Quest1'),
+(30,17,6,'Stoneheart Grave - Horde Defender Quest2'),
+(30,17,7,'Stoneheart Grave - Horde Defender Quest3'),
+(30,18,0,'Snowfall Grave - Alliance Defender Quest0'),
+(30,18,1,'Snowfall Grave - Alliance Defender Quest1'),
+(30,18,2,'Snowfall Grave - Alliance Defender Quest2'),
+(30,18,3,'Snowfall Grave - Alliance Defender Quest3'),
+(30,18,4,'Snowfall Grave - Horde Defender Quest0'),
+(30,18,5,'Snowfall Grave - Horde Defender Quest1'),
+(30,18,6,'Snowfall Grave - Horde Defender Quest2'),
+(30,18,7,'Snowfall Grave - Horde Defender Quest3'),
+(30,19,0,'Iceblood Grave - Alliance Defender Quest0'),
+(30,19,1,'Iceblood Grave - Alliance Defender Quest1'),
+(30,19,2,'Iceblood Grave - Alliance Defender Quest2'),
+(30,19,3,'Iceblood Grave - Alliance Defender Quest3'),
+(30,19,4,'Iceblood Grave - Horde Defender Quest0'),
+(30,19,5,'Iceblood Grave - Horde Defender Quest1'),
+(30,19,6,'Iceblood Grave - Horde Defender Quest2'),
+(30,19,7,'Iceblood Grave - Horde Defender Quest3'),
+(30,20,0,'Frostwolf Grave - Alliance Defender Quest0'),
+(30,20,1,'Frostwolf Grave - Alliance Defender Quest1'),
+(30,20,2,'Frostwolf Grave - Alliance Defender Quest2'),
+(30,20,3,'Frostwolf Grave - Alliance Defender Quest3'),
+(30,20,4,'Frostwolf Grave - Horde Defender Quest0'),
+(30,20,5,'Frostwolf Grave - Horde Defender Quest1'),
+(30,20,6,'Frostwolf Grave - Horde Defender Quest2'),
+(30,20,7,'Frostwolf Grave - Horde Defender Quest3'),
+(30,21,0,'Frostwolf Hut - Alliance Defender Quest0'),
+(30,21,1,'Frostwolf Hut - Alliance Defender Quest1'),
+(30,21,2,'Frostwolf Hut - Alliance Defender Quest2'),
+(30,21,3,'Frostwolf Hut - Alliance Defender Quest3'),
+(30,21,4,'Frostwolf Hut - Horde Defender Quest0'),
+(30,21,5,'Frostwolf Hut - Horde Defender Quest1'),
+(30,21,6,'Frostwolf Hut - Horde Defender Quest2'),
+(30,21,7,'Frostwolf Hut - Horde Defender Quest3'),
+(30,46,0,'North Mine - Alliance Boss'),
+(30,46,1,'North Mine - Horde Boss'),
+(30,46,2,'North Mine - Neutral Boss'),
+(30,47,0,'South Mine - Alliance Boss'),
+(30,47,1,'South Mine - Horde Boss'),
+(30,47,2,'South Mine - Neutral Boss'),
+(30,48,0,'Alliance Captain'),
+(30,49,0,'Horde Captain'),
+(30,50,0,'North Mine - Alliance Control'),
+(30,50,1,'North Mine - Horde Control'),
+(30,50,2,'North Mine - Neutral Control'),
+(30,51,0,'South Mine - Alliance Control'),
+(30,51,1,'South Mine - Horde Control'),
+(30,51,2,'South Mine - Neutral Control'),
+(30,52,0,'Alliance Marshal - Dunbaldar South'),
+(30,53,0,'Alliance Marshal - Dunbaldar North'),
+(30,54,0,'Alliance Marshal - Icewing Bunker'),
+(30,55,0,'Alliance Marshal - Stoneheart Bunker'),
+(30,56,0,'Horde Marshal - Iceblood Tower'),
+(30,57,0,'Horde Marshal - Towerpoint'),
+(30,58,0,'Horde Marshal - East Frostwolf Tower'),
+(30,59,0,'Horde Marshal - West Frostwolf Tower'),
+(30,60,0,'Herald - that guy who yells all the time ;)'),
+(30,61,0,'Alliance - Boss'),
+(30,62,0,'Horde - Boss'),
+(30,63,0,'Alliance - Captain Dead'),
+(30,64,0,'Horde - Captain Dead');
 /*!40000 ALTER TABLE `battleground_events` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -349,8 +301,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `battleground_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `battleground_template` (
   `id` mediumint(8) unsigned NOT NULL,
   `MinPlayersPerTeam` smallint(5) unsigned NOT NULL DEFAULT '0',
@@ -363,7 +313,6 @@ CREATE TABLE `battleground_template` (
   `HordeStartO` float NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `battleground_template`
@@ -383,14 +332,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `battlemaster_entry`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `battlemaster_entry` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Entry of a creature',
   `bg_template` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Battleground template id',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `battlemaster_entry`
@@ -406,15 +352,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `command`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `command` (
   `name` varchar(50) NOT NULL DEFAULT '',
   `security` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `help` longtext,
   PRIMARY KEY (`name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Chat System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `command`
@@ -431,7 +374,7 @@ INSERT INTO `command` VALUES
 ('account onlinelist',4,'Syntax: .account onlinelist\r\n\r\nShow list of online accounts.'),
 ('account password',0,'Syntax: .account password $old_password $new_password $new_password\r\n\r\nChange your account password.'),
 ('account set addon',3,'Syntax: .account set addon [#accountId|$accountName] #addon\r\n\r\nSet user (possible targeted) expansion addon level allowed. Addon values: 0 - normal, 1 - tbc, 2 - wotlk.'),
-('account set gmlevel',4,'Syntax: .account set gmlevel [#accountId|$accountName] #level\r\n\r\nSet the security level for targeted player (can''t be used at self) or for #accountId or $accountName to a level of #level.\r\n\r\n#level may range from 0 to 3.'),
+('account set gmlevel',4,'Syntax: .account set gmlevel [#accountId|$accountName] #level\r\n\r\nSet the security level for targeted player (can\'t be used at self) or for #accountId or $accountName to a level of #level.\r\n\r\n#level may range from 0 to 3.'),
 ('account set password',4,'Syntax: .account set password (#accountId|$accountName) $password $password\r\n\r\nSet password for account.'),
 ('additem',3,'Syntax: .additem #itemid/[#itemname]/#shift-click-item-link #itemcount\r\n\r\nAdds the specified number of items of id #itemid (or exact (!) name $itemname in brackets, or link created by shift-click at item in inventory or recipe) to your or selected character inventory. If #itemcount is omitted, only one item will be added.\r\n.'),
 ('additemset',3,'Syntax: .additemset #itemsetid\r\n\r\nAdd items from itemset of id #itemsetid to your or selected character inventory. Will add by one example each item from itemset.'),
@@ -447,9 +390,9 @@ INSERT INTO `command` VALUES
 ('ahbot items ratio alliance',3,'Syntax: .ahbot items ratio alliance $allianceratio\r\n\r\nSet ratio of items in alliance auction house.'),
 ('ahbot items ratio horde',3,'Syntax: .ahbot items ratio horde $horderatio\r\n\r\nSet ratio of items in horde auction house.'),
 ('ahbot items ratio neutral',3,'Syntax: .ahbot items ratio neutral $neutralratio\r\n\r\nSet ratio of items in $neutral auction house.'),
-('ahbot rebuild',3,'Syntax: .ahbot rebuild [all]\r\n\r\nExpire all actual auction of ahbot except bided by player. Binded auctions included to expire if "all" option used. Ahbot re-fill auctions base at current settings then.'),
+('ahbot rebuild',3,'Syntax: .ahbot rebuild [all]\r\n\r\nExpire all actual auction of ahbot except bided by player. Binded auctions included to expire if \"all\" option used. Ahbot re-fill auctions base at current settings then.'),
 ('ahbot reload',3,'Syntax: .ahbot reload\r\n\r\nReload AHBot settings from configuration file.'),
-('ahbot status',3,'Syntax: .ahbot status [all]\r\n\r\nShow current ahbot state data in short form, and with "all" with details.'),
+('ahbot status',3,'Syntax: .ahbot status [all]\r\n\r\nShow current ahbot state data in short form, and with \"all\" with details.'),
 ('announce',1,'Syntax: .announce $MessageToBroadcast\r\n\r\nSend a global message to all players online in chat log.'),
 ('auction',3,'Syntax: .auction\r\n\r\nShow your team auction store.'),
 ('auction alliance',3,'Syntax: .auction alliance\r\n\r\nShow alliance auction store independent from your team.'),
@@ -472,10 +415,10 @@ INSERT INTO `command` VALUES
 ('cast dist',3,'Syntax: .cast dist #spellid [#dist [triggered]]\r\n  You will cast spell to pint at distance #dist. If \'trigered\' or part provided then spell casted with triggered flag. Not all spells can be casted as area spells.'),
 ('cast self',3,'Syntax: .cast self #spellid [triggered]\r\nCast #spellid by target at target itself. If \'trigered\' or part provided then spell casted with triggered flag.'),
 ('cast target',3,'Syntax: .cast target #spellid [triggered]\r\n  Selected target will cast #spellid to his victim. If \'trigered\' or part provided then spell casted with triggered flag.'),
-('character deleted delete', 4, 'Syntax: .character deleted delete #guid|$name\r\n\r\nCompletely deletes the selected characters.\r\nIf $name is supplied, only characters with that string in their name will be deleted, if #guid is supplied, only the character with that GUID will be deleted.'),
-('character deleted list', 3, 'Syntax: .character deleted list [#guid|$name]\r\n\r\nShows a list with all deleted characters.\r\nIf $name is supplied, only characters with that string in their name will be selected, if #guid is supplied, only the character with that GUID will be selected.'),
-('character deleted old', 4, 'Syntax: .character deleted old [#keepDays]\r\n\r\nCompletely deletes all characters with deleted time longer #keepDays. If #keepDays not provided the  used value from mangosd.conf option \'CharDelete.KeepDays\'. If referenced config option disabled (use 0 value) then command can\'t be used without #keepDays.'),
-('character deleted restore', 3, 'Syntax: .character deleted restore #guid|$name [$newname] [#new account]\r\n\r\nRestores deleted characters.\r\nIf $name is supplied, only characters with that string in their name will be restored, if $guid is supplied, only the character with that GUID will be restored.\r\nIf $newname is set, the character will be restored with that name instead of the original one. If #newaccount is set, the character will be restored to specific account character list. This works only with one character!'),
+('character deleted delete',4,'Syntax: .character deleted delete #guid|$name\r\n\r\nCompletely deletes the selected characters.\r\nIf $name is supplied, only characters with that string in their name will be deleted, if #guid is supplied, only the character with that GUID will be deleted.'),
+('character deleted list',3,'Syntax: .character deleted list [#guid|$name]\r\n\r\nShows a list with all deleted characters.\r\nIf $name is supplied, only characters with that string in their name will be selected, if #guid is supplied, only the character with that GUID will be selected.'),
+('character deleted old',4,'Syntax: .character deleted old [#keepDays]\r\n\r\nCompletely deletes all characters with deleted time longer #keepDays. If #keepDays not provided the  used value from mangosd.conf option \'CharDelete.KeepDays\'. If referenced config option disabled (use 0 value) then command can\'t be used without #keepDays.'),
+('character deleted restore',3,'Syntax: .character deleted restore #guid|$name [$newname] [#new account]\r\n\r\nRestores deleted characters.\r\nIf $name is supplied, only characters with that string in their name will be restored, if $guid is supplied, only the character with that GUID will be restored.\r\nIf $newname is set, the character will be restored with that name instead of the original one. If #newaccount is set, the character will be restored to specific account character list. This works only with one character!'),
 ('character erase',4,'Syntax: .character erase $name\r\n\r\nDelete character $name. Character finally deleted in case any deleting options.'),
 ('character level',3,'Syntax: .character level [$playername] [#level]\r\n\r\nSet the level of character with $playername (or the selected if not name provided) by #numberoflevels Or +1 if no #numberoflevels provided). If #numberoflevels is omitted, the level will be increase by 1. If #numberoflevels is 0, the same level will be restarted. If no character is selected and name not provided, increase your level. Command can be used for offline character. All stats and dependent values recalculated. At level decrease talents can be reset if need. Also at level decrease equipped items with greater level requirement can be lost.'),
 ('character rename',2,'Syntax: .character rename [$name]\r\n\r\nMark selected in game or by $name in command character for rename at next login.'),
@@ -519,7 +462,7 @@ INSERT INTO `command` VALUES
 ('go grid',1,'Syntax: .go grid #gridX #gridY [#mapId]\r\n\r\nTeleport the gm to center of grid with provided indexes at map #mapId (or current map if it not provided).'),
 ('go object',1,'Syntax: .go object (#gameobject_guid|$gameobject_name|id #gameobject_id)\r\nTeleport your character to gameobject with guid #gameobject_guid, or teleport your character to gameobject with name including as part $gameobject_name substring, or teleport your character to a gameobject that was spawned from the template with this entry #gameobject_id.'),
 ('go taxinode',1,'Syntax: .go taxinode #taxinode\r\n\r\nTeleport player to taxinode coordinates. You can look up zone using .lookup taxinode $namepart'),
-('go trigger',1,'Syntax: .go trigger (#trigger_id|$trigger_shift-link|$trigger_target_shift-link) [target]\r\n\r\nTeleport your character to areatrigger with id #trigger_id or trigger id associated with shift-link. If additional arg "target" provided then character will teleported to areatrigger target point.'),
+('go trigger',1,'Syntax: .go trigger (#trigger_id|$trigger_shift-link|$trigger_target_shift-link) [target]\r\n\r\nTeleport your character to areatrigger with id #trigger_id or trigger id associated with shift-link. If additional arg \"target\" provided then character will teleported to areatrigger target point.'),
 ('go xy',1,'Syntax: .go xy #x #y [#mapid]\r\n\r\nTeleport player to point with (#x,#y) coordinates at ground(water) level at map #mapid or same map if #mapid not provided.'),
 ('go xyz',1,'Syntax: .go xyz #x #y #z [#mapid]\r\n\r\nTeleport player to point with (#x,#y,#z) coordinates at ground(water) level at map #mapid or same map if #mapid not provided.'),
 ('go zonexy',1,'Syntax: .go zonexy #x #y [#zone]\r\n\r\nTeleport player to point with (#x,#y) client coordinates at ground(water) level in zone #zoneid or current zone if #zoneid not provided. You can look up zone using .lookup area $namepart'),
@@ -592,7 +535,7 @@ INSERT INTO `command` VALUES
 ('modify drunk',1,'Syntax: .modify drunk #value\r\n Set drunk level to #value (0..100). Value 0 remove drunk state, 100 is max drunked state.'),
 ('modify energy',1,'Syntax: .modify energy #energy\r\n\r\nModify the energy of the selected player. If no player is selected, modify your energy.'),
 ('modify faction',1,'Syntax: .modify faction #factionid #flagid #npcflagid #dynamicflagid\r\n\r\nModify the faction and flags of the selected creature. Without arguments, display the faction and flags of the selected creature.'),
-('modify fly', 1, 'Syntax: .modify fly #rate\r\n.fly #rate\r\n\r\nModify the flying speed of the selected player to \"normal base fly speed\"*rate. If no player is selected, modify your fly.\r\n\r\n #rate may range from 0.1 to 10.'),
+('modify fly',1,'Syntax: .modify fly #rate\r\n.fly #rate\r\n\r\nModify the flying speed of the selected player to \"normal base fly speed\"*rate. If no player is selected, modify your fly.\r\n\r\n #rate may range from 0.1 to 10.'),
 ('modify gender',2,'Syntax: .modify gender male/female\r\n\r\nChange gender of selected player.'),
 ('modify honor',2,'Syntax: .modify honor $field $value\r\n\r\nAdd $value to an honor $field (it\'s just for debug , values won\'t be saved at player logout)\r\nField list: points / rank / todaykills / yesterdaykills / yesterdayhonor /\r\nthisweekkills / thisweekhonor / lastweekkills / lastweekhonor /\r\nlastweekstanding / lifetimedishonorablekills / lifetimehonorablekills '),
 ('modify hp',1,'Syntax: .modify hp #newhp\r\n\r\nModify the hp of the selected player. If no player is selected, modify your hp.'),
@@ -627,7 +570,7 @@ INSERT INTO `command` VALUES
 ('npc move',2,'Syntax: .npc move [#creature_guid]\r\n\r\nMove the targeted creature spawn point to your coordinates.'),
 ('npc name',2,'Syntax: .npc name $name\r\n\r\nChange the name of the selected creature or character to $name.\r\n\r\nCommand disabled.'),
 ('npc playemote',3,'Syntax: .npc playemote #emoteid\r\n\r\nMake the selected creature emote with an emote of id #emoteid.'),
-('npc say', 1, 'Syntax: .npc say #text\r\nMake the selected npc says #text.'),
+('npc say',1,'Syntax: .npc say #text\r\nMake the selected npc says #text.'),
 ('npc setdeathstate',2,'Syntax: .npc setdeathstate on/off\r\n\r\nSet default death state (dead/alive) for npc at spawn.'),
 ('npc setmodel',2,'Syntax: .npc setmodel #displayid\r\n\r\nChange the model id of the selected creature to #displayid.'),
 ('npc setmovetype',2,'Syntax: .npc setmovetype [#creature_guid] stay/random/way [NODEL]\r\n\r\nSet for creature pointed by #creature_guid (or selected if #creature_guid not provided) movement type and move it to respawn position (if creature alive). Any existing waypoints for creature will be removed from the database if you do not use NODEL. If the creature is dead then movement type will applied at creature respawn.\r\nMake sure you use NODEL, if you want to keep the waypoints.'),
@@ -638,7 +581,7 @@ INSERT INTO `command` VALUES
 ('npc textemote',1,'Syntax: .npc textemote #emoteid\r\n\r\nMake the selected creature to do textemote with an emote of id #emoteid.'),
 ('npc whisper',1,'Syntax: .npc whisper #playerguid #text\r\nMake the selected npc whisper #text to  #playerguid.'),
 ('npc unfollow',2,'Syntax: .npc unfollow\r\n\r\nSelected creature (non pet) stop follow you.'),
-('npc yell', 1, 'Syntax: .npc yell #text\r\nMake the selected npc yells #text.'),
+('npc yell',1,'Syntax: .npc yell #text\r\nMake the selected npc yells #text.'),
 ('pdump write',3,'Syntax: .pdump write $filename $playerNameOrGUID\r\nWrite character dump with name/guid $playerNameOrGUID to file $filename.'),
 ('pdump load',3,'Syntax: .pdump load $filename $account [$newname] [$newguid]\r\nLoad character dump from dump file into character list of $account with saved or $newname, with saved (or first free) or $newguid guid.'),
 ('pinfo',2,'Syntax: .pinfo [$player_name]\r\n\r\nOutput account information for selected player or player find by $player_name.'),
@@ -672,11 +615,11 @@ INSERT INTO `command` VALUES
 ('revive',3,'Syntax: .revive\r\n\r\nRevive the selected player. If no player is selected, it will revive you.'),
 ('save',0,'Syntax: .save\r\n\r\nSaves your character.'),
 ('saveall',1,'Syntax: .saveall\r\n\r\nSave all characters in game.'),
-('send items',3,'Syntax: .send items #playername "#subject" "#text" itemid1[:count1] itemid2[:count2] ... itemidN[:countN]\r\n\r\nSend a mail to a player. Subject and mail text must be in "". If for itemid not provided related count values then expected 1, if count > max items in stack then items will be send in required amount stacks. All stacks amount in mail limited to 12.'),
-('send mail',1,'Syntax: .send mail #playername "#subject" "#text"\r\n\r\nSend a mail to a player. Subject and mail text must be in "".'),
-('send mass items',3,'Syntax: .send mass items #racemask|$racename|alliance|horde|all "#subject" "#text" itemid1[:count1] itemid2[:count2] ... itemidN[:countN]\r\n\r\nSend a mail to players. Subject and mail text must be in "". If for itemid not provided related count values then expected 1, if count > max items in stack then items will be send in required amount stacks. All stacks amount in mail limited to 12.'),
-('send mass mail',3,'Syntax: .send mass mail #racemask|$racename|alliance|horde|all "#subject" "#text"\r\n\r\nSend a mail to players. Subject and mail text must be in "".'),
-('send mass money','3','Syntax: .send mass money #racemask|$racename|alliance|horde|all "#subject" "#text" #money\r\n\r\nSend mail with money to players. Subject and mail text must be in "".'),
+('send items',3,'Syntax: .send items #playername \"#subject\" \"#text\" itemid1[:count1] itemid2[:count2] ... itemidN[:countN]\r\n\r\nSend a mail to a player. Subject and mail text must be in \"\". If for itemid not provided related count values then expected 1, if count > max items in stack then items will be send in required amount stacks. All stacks amount in mail limited to 12.'),
+('send mail',1,'Syntax: .send mail #playername \"#subject\" \"#text\"\r\n\r\nSend a mail to a player. Subject and mail text must be in \"\".'),
+('send mass items',3,'Syntax: .send mass items #racemask|$racename|alliance|horde|all \"#subject\" \"#text\" itemid1[:count1] itemid2[:count2] ... itemidN[:countN]\r\n\r\nSend a mail to players. Subject and mail text must be in \"\". If for itemid not provided related count values then expected 1, if count > max items in stack then items will be send in required amount stacks. All stacks amount in mail limited to 12.'),
+('send mass mail',3,'Syntax: .send mass mail #racemask|$racename|alliance|horde|all \"#subject\" \"#text\"\r\n\r\nSend a mail to players. Subject and mail text must be in \"\".'),
+('send mass money',3,'Syntax: .send mass money #racemask|$racename|alliance|horde|all \"#subject\" \"#text\" #money\r\n\r\nSend mail with money to players. Subject and mail text must be in \"\".'),
 ('send message',3,'Syntax: .send message $playername $message\r\n\r\nSend screen message to player from ADMINISTRATOR.'),
 ('send money',3,'Syntax: .send money #playername \"#subject\" \"#text\" #money\r\n\r\nSend mail with money to a player. Subject and mail text must be in \"\".'),
 ('server corpses',2,'Syntax: .server corpses\r\n\r\nTriggering corpses expire check in world.'),
@@ -686,7 +629,7 @@ INSERT INTO `command` VALUES
 ('server idleshutdown cancel',3,'Syntax: .server idleshutdown cancel\r\n\r\nCancel the restart/shutdown timer if any.'),
 ('server idlerestart',3,'Syntax: .server idlerestart #delay\r\n\r\nRestart the server after #delay seconds if no active connections are present (no players). Use #exist_code or 2 as program exist code.'),
 ('server idlerestart cancel',3,'Syntax: .server idlerestart cancel\r\n\r\nCancel the restart/shutdown timer if any.'),
-('server log filter',4,'Syntax: .server log filter [($filtername|all) (on|off)]\r\n\r\nShow or set server log filters. If used "all" then all filters will be set to on/off state.'),
+('server log filter',4,'Syntax: .server log filter [($filtername|all) (on|off)]\r\n\r\nShow or set server log filters. If used \"all\" then all filters will be set to on/off state.'),
 ('server log level',4,'Syntax: .server log level [#level]\r\n\r\nShow or set server log level (0 - errors only, 1 - basic, 2 - detail, 3 - debug).'),
 ('server motd',0,'Syntax: .server motd\r\n\r\nShow server Message of the day.'),
 ('server plimit',3,'Syntax: .server plimit [#num|-1|-2|-3|reset|player|moderator|gamemaster|administrator]\r\n\r\nWithout arg show current player amount and security level limitations for login to server, with arg set player linit ($num > 0) or securiti limitation ($num < 0 or security leme name. With `reset` sets player limit to the one in the config file'),
@@ -729,19 +672,21 @@ UNLOCK TABLES;
 --
 -- Table structure for table `conditions`
 --
+
 DROP TABLE IF EXISTS `conditions`;
 CREATE TABLE `conditions` (
-  `condition_entry` mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Identifier',
-  `type` tinyint(3) signed NOT NULL DEFAULT '0' COMMENT 'Type of the condition',
+  `condition_entry` mediumint(8) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Identifier',
+  `type` tinyint(3) NOT NULL DEFAULT '0' COMMENT 'Type of the condition',
   `value1` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'data field one for the condition',
   `value2` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'data field two for the condition',
-  PRIMARY KEY  (`condition_entry`),
-  CONSTRAINT unique_conditions UNIQUE (type,value1,value2)
+  PRIMARY KEY (`condition_entry`),
+  UNIQUE KEY `unique_conditions` (`type`,`value1`,`value2`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Condition System';
 
 --
 -- Dumping data for table `conditions`
 --
+
 LOCK TABLES `conditions` WRITE;
 /*!40000 ALTER TABLE `conditions` DISABLE KEYS */;
 /*!40000 ALTER TABLE `conditions` ENABLE KEYS */;
@@ -752,8 +697,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature` (
   `guid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Global Unique Identifier',
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Creature Identifier',
@@ -775,7 +718,6 @@ CREATE TABLE `creature` (
   KEY `idx_map` (`map`),
   KEY `index_id` (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature`
@@ -791,20 +733,17 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature_addon`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_addon` (
-  `guid` int(10) unsigned NOT NULL default '0',
-  `mount` mediumint(8) unsigned NOT NULL default '0',
-  `bytes1` int(10) unsigned NOT NULL default '0',
+  `guid` int(10) unsigned NOT NULL DEFAULT '0',
+  `mount` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `bytes1` int(10) unsigned NOT NULL DEFAULT '0',
   `b2_0_sheath` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `b2_1_flags` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `emote` int(10) unsigned NOT NULL default '0',
-  `moveflags` int(10) unsigned NOT NULL default '0',
+  `emote` int(10) unsigned NOT NULL DEFAULT '0',
+  `moveflags` int(10) unsigned NOT NULL DEFAULT '0',
   `auras` text,
   PRIMARY KEY (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_addon`
@@ -816,19 +755,115 @@ LOCK TABLES `creature_addon` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `creature_ai_scripts`
+--
+
+DROP TABLE IF EXISTS `creature_ai_scripts`;
+CREATE TABLE `creature_ai_scripts` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Identifier',
+  `creature_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Creature Template Identifier',
+  `event_type` tinyint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Event Type',
+  `event_inverse_phase_mask` int(11) NOT NULL DEFAULT '0' COMMENT 'Mask which phases this event will not trigger in',
+  `event_chance` int(3) unsigned NOT NULL DEFAULT '100',
+  `event_flags` int(3) unsigned NOT NULL DEFAULT '0',
+  `event_param1` int(11) NOT NULL DEFAULT '0',
+  `event_param2` int(11) NOT NULL DEFAULT '0',
+  `event_param3` int(11) NOT NULL DEFAULT '0',
+  `event_param4` int(11) NOT NULL DEFAULT '0',
+  `action1_type` tinyint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Action Type',
+  `action1_param1` int(11) NOT NULL DEFAULT '0',
+  `action1_param2` int(11) NOT NULL DEFAULT '0',
+  `action1_param3` int(11) NOT NULL DEFAULT '0',
+  `action2_type` tinyint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Action Type',
+  `action2_param1` int(11) NOT NULL DEFAULT '0',
+  `action2_param2` int(11) NOT NULL DEFAULT '0',
+  `action2_param3` int(11) NOT NULL DEFAULT '0',
+  `action3_type` tinyint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Action Type',
+  `action3_param1` int(11) NOT NULL DEFAULT '0',
+  `action3_param2` int(11) NOT NULL DEFAULT '0',
+  `action3_param3` int(11) NOT NULL DEFAULT '0',
+  `comment` varchar(255) NOT NULL DEFAULT '' COMMENT 'Event Comment',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='EventAI Scripts';
+
+--
+-- Dumping data for table `creature_ai_scripts`
+--
+
+LOCK TABLES `creature_ai_scripts` WRITE;
+/*!40000 ALTER TABLE `creature_ai_scripts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_ai_scripts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_ai_summons`
+--
+
+DROP TABLE IF EXISTS `creature_ai_summons`;
+CREATE TABLE `creature_ai_summons` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Location Identifier',
+  `position_x` float NOT NULL DEFAULT '0',
+  `position_y` float NOT NULL DEFAULT '0',
+  `position_z` float NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
+  `spawntimesecs` int(11) unsigned NOT NULL DEFAULT '120',
+  `comment` varchar(255) NOT NULL DEFAULT '' COMMENT 'Summon Comment',
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='EventAI Summoning Locations';
+
+--
+-- Dumping data for table `creature_ai_summons`
+--
+
+LOCK TABLES `creature_ai_summons` WRITE;
+/*!40000 ALTER TABLE `creature_ai_summons` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_ai_summons` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_ai_texts`
+--
+
+DROP TABLE IF EXISTS `creature_ai_texts`;
+CREATE TABLE `creature_ai_texts` (
+  `entry` mediumint(8) NOT NULL,
+  `content_default` text NOT NULL,
+  `content_loc1` text,
+  `content_loc2` text,
+  `content_loc3` text,
+  `content_loc4` text,
+  `content_loc5` text,
+  `content_loc6` text,
+  `content_loc7` text,
+  `content_loc8` text,
+  `sound` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `language` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `emote` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `comment` text,
+  PRIMARY KEY (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Script Texts';
+
+--
+-- Dumping data for table `creature_ai_texts`
+--
+
+LOCK TABLES `creature_ai_texts` WRITE;
+/*!40000 ALTER TABLE `creature_ai_texts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_ai_texts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `creature_battleground`
 --
 
 DROP TABLE IF EXISTS `creature_battleground`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_battleground` (
   `guid` int(10) unsigned NOT NULL COMMENT 'Creature''s GUID',
   `event1` tinyint(3) unsigned NOT NULL COMMENT 'main event',
   `event2` tinyint(3) unsigned NOT NULL COMMENT 'sub event',
   PRIMARY KEY (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature battleground indexing system';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_battleground`
@@ -844,14 +879,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature_equip_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_equip_template` (
-  `entry` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Unique entry',
-  `equipentry1` mediumint(8) unsigned NOT NULL default '0',
-  `equipentry2` mediumint(8) unsigned NOT NULL default '0',
-  `equipentry3` mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`entry`)
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Unique entry',
+  `equipentry1` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `equipentry2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `equipentry3` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Creature System (Equipment)';
 
 --
@@ -869,19 +902,18 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_equip_template_raw`;
 CREATE TABLE `creature_equip_template_raw` (
-  `entry` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Unique entry',
-  `equipmodel1` mediumint(8) unsigned NOT NULL default '0',
-  `equipmodel2` mediumint(8) unsigned NOT NULL default '0',
-  `equipmodel3` mediumint(8) unsigned NOT NULL default '0',
-  `equipinfo1` int(10) unsigned NOT NULL default '0',
-  `equipinfo2` int(10) unsigned NOT NULL default '0',
-  `equipinfo3` int(10) unsigned NOT NULL default '0',
-  `equipslot1` int(11) NOT NULL default '0',
-  `equipslot2` int(11) NOT NULL default '0',
-  `equipslot3` int(11) NOT NULL default '0',
-  PRIMARY KEY  (`entry`)
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Unique entry',
+  `equipmodel1` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `equipmodel2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `equipmodel3` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `equipinfo1` int(10) unsigned NOT NULL DEFAULT '0',
+  `equipinfo2` int(10) unsigned NOT NULL DEFAULT '0',
+  `equipinfo3` int(10) unsigned NOT NULL DEFAULT '0',
+  `equipslot1` int(11) NOT NULL DEFAULT '0',
+  `equipslot2` int(11) NOT NULL DEFAULT '0',
+  `equipslot3` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Creature System (Equipment)';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_equip_template_raw`
@@ -897,14 +929,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature_involvedrelation`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_involvedrelation` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Identifier',
   `quest` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Quest Identifier',
   PRIMARY KEY (`id`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_involvedrelation`
@@ -919,14 +948,13 @@ UNLOCK TABLES;
 -- Table structure for table `creature_linking`
 --
 
-DROP TABLE IF EXISTS creature_linking;
+DROP TABLE IF EXISTS `creature_linking`;
 CREATE TABLE `creature_linking` (
-  `guid` int(10) UNSIGNED NOT NULL COMMENT 'creature.guid of the slave mob that is linked',
-  `master_guid` int(10) UNSIGNED NOT NULL COMMENT 'master to trigger events',
-  `flag` mediumint(8) UNSIGNED NOT NULL COMMENT 'flag - describing what should happen when',
-  PRIMARY KEY  (`guid`)
+  `guid` int(10) unsigned NOT NULL COMMENT 'creature.guid of the slave mob that is linked',
+  `master_guid` int(10) unsigned NOT NULL COMMENT 'master to trigger events',
+  `flag` mediumint(8) unsigned NOT NULL COMMENT 'flag - describing what should happen when',
+  PRIMARY KEY (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature Linking System';
-
 
 --
 -- Dumping data for table `creature_linking`
@@ -941,16 +969,15 @@ UNLOCK TABLES;
 -- Table structure for table `creature_linking_template`
 --
 
-DROP TABLE IF EXISTS creature_linking_template;
+DROP TABLE IF EXISTS `creature_linking_template`;
 CREATE TABLE `creature_linking_template` (
-  `entry` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'creature_template.entry of the slave mob that is linked',
-  `map` SMALLINT(5) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Id of map of the mobs',
-  `master_entry` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'master to trigger events',
-  `flag` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'flag - describing what should happen when',
-  `search_range` mediumint(8) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'search_range - describing in which range (spawn-coords) master and slave are linked together',
-  PRIMARY KEY  (`entry`,`map`)
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'creature_template.entry of the slave mob that is linked',
+  `map` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Id of map of the mobs',
+  `master_entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'master to trigger events',
+  `flag` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'flag - describing what should happen when',
+  `search_range` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'search_range - describing in which range (spawn-coords) master and slave are linked together',
+  PRIMARY KEY (`entry`,`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature Linking System';
-
 
 --
 -- Dumping data for table `creature_linking_template`
@@ -966,19 +993,16 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature_loot_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_loot_template` (
-  `entry` mediumint(8) unsigned NOT NULL default '0' COMMENT 'entry 0 used for player insignia loot',
-  `item` mediumint(8) unsigned NOT NULL default '0',
-  `ChanceOrQuestChance` float NOT NULL default '100',
-  `groupid` tinyint(3) unsigned NOT NULL default '0',
-  `mincountOrRef` mediumint(9) NOT NULL default '1',
-  `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`entry`,`item`)
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'entry 0 used for player insignia loot',
+  `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `ChanceOrQuestChance` float NOT NULL DEFAULT '100',
+  `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
+  `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_loot_template`
@@ -994,18 +1018,15 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature_model_info`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_model_info` (
-  `modelid` mediumint(8) unsigned NOT NULL default '0',
-  `bounding_radius` float NOT NULL default '0',
-  `combat_reach` float NOT NULL default '0',
-  `gender` tinyint(3) unsigned NOT NULL default '2',
-  `modelid_other_gender` mediumint(8) unsigned NOT NULL default '0',
-  `modelid_other_team` mediumint(8) unsigned NOT NULL default '0',
+  `modelid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `bounding_radius` float NOT NULL DEFAULT '0',
+  `combat_reach` float NOT NULL DEFAULT '0',
+  `gender` tinyint(3) unsigned NOT NULL DEFAULT '2',
+  `modelid_other_gender` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `modelid_other_team` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`modelid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Creature System (Model related info)';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_model_info`
@@ -1014,23 +1035,23 @@ CREATE TABLE `creature_model_info` (
 LOCK TABLES `creature_model_info` WRITE;
 /*!40000 ALTER TABLE `creature_model_info` DISABLE KEYS */;
 INSERT INTO `creature_model_info` VALUES
-(49, 0.3060, 1.5, 0, 50, 0),
-(50, 0.2080, 1.5, 1, 49, 0),
-(51, 0.3720, 1.5, 0, 52, 0),
-(52, 0.2360, 1.5, 1, 51, 0),
-(53, 0.3470, 1.5, 0, 54, 0),
-(54, 0.3470, 1.5, 1, 53, 0),
-(55, 0.3890, 1.5, 0, 56, 0),
-(56, 0.3060, 1.5, 1, 55, 0),
-(57, 0.3830, 1.5, 0, 58, 0),
-(58, 0.3830, 1.5, 1, 57, 0),
-(59, 0.9747, 1.5, 0, 60, 0),
-(60, 0.8725, 1.5, 1, 59, 0),
-(1478, 0.3060, 1.5, 0, 1479, 0),
-(1479, 0.3060, 1.5, 1, 1478, 0),
-(1563, 0.3519, 1.5, 0, 1564, 0),
-(1564, 0.3519, 1.5, 1, 1563, 0),
-(10045, 1.0000, 1.5, 2, 0, 0);
+(49,0.306,1.5,0,50,0),
+(50,0.208,1.5,1,49,0),
+(51,0.372,1.5,0,52,0),
+(52,0.236,1.5,1,51,0),
+(53,0.347,1.5,0,54,0),
+(54,0.347,1.5,1,53,0),
+(55,0.389,1.5,0,56,0),
+(56,0.306,1.5,1,55,0),
+(57,0.383,1.5,0,58,0),
+(58,0.383,1.5,1,57,0),
+(59,0.9747,1.5,0,60,0),
+(60,0.8725,1.5,1,59,0),
+(1478,0.306,1.5,0,1479,0),
+(1479,0.306,1.5,1,1478,0),
+(1563,0.3519,1.5,0,1564,0),
+(1564,0.3519,1.5,1,1563,0),
+(10045,1,1.5,2,0,0);
 /*!40000 ALTER TABLE `creature_model_info` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1039,30 +1060,27 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature_movement`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_movement` (
   `id` int(10) unsigned NOT NULL COMMENT 'Creature GUID',
-  `point` mediumint(8) unsigned NOT NULL default '0',
-  `position_x` float NOT NULL default '0',
-  `position_y` float NOT NULL default '0',
-  `position_z` float NOT NULL default '0',
-  `waittime` int(10) unsigned NOT NULL default '0',
-  `script_id` mediumint(8) unsigned NOT NULL default '0',
-  `textid1` int(11) NOT NULL default '0',
-  `textid2` int(11) NOT NULL default '0',
-  `textid3` int(11) NOT NULL default '0',
-  `textid4` int(11) NOT NULL default '0',
-  `textid5` int(11) NOT NULL default '0',
-  `emote` mediumint(8) unsigned NOT NULL default '0',
-  `spell` mediumint(8) unsigned NOT NULL default '0',
-  `wpguid` int(11) NOT NULL default '0',
-  `orientation` float NOT NULL default '0',
-  `model1` mediumint(9) NOT NULL default '0',
-  `model2` mediumint(9) NOT NULL default '0',
-  PRIMARY KEY  (`id`,`point`)
+  `point` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `position_x` float NOT NULL DEFAULT '0',
+  `position_y` float NOT NULL DEFAULT '0',
+  `position_z` float NOT NULL DEFAULT '0',
+  `waittime` int(10) unsigned NOT NULL DEFAULT '0',
+  `script_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `textid1` int(11) NOT NULL DEFAULT '0',
+  `textid2` int(11) NOT NULL DEFAULT '0',
+  `textid3` int(11) NOT NULL DEFAULT '0',
+  `textid4` int(11) NOT NULL DEFAULT '0',
+  `textid5` int(11) NOT NULL DEFAULT '0',
+  `emote` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spell` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `wpguid` int(11) NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
+  `model1` mediumint(9) NOT NULL DEFAULT '0',
+  `model2` mediumint(9) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_movement`
@@ -1073,7 +1091,6 @@ LOCK TABLES `creature_movement` WRITE;
 /*!40000 ALTER TABLE `creature_movement` ENABLE KEYS */;
 UNLOCK TABLES;
 
-
 --
 -- Table structure for table `creature_movement_template`
 --
@@ -1081,24 +1098,24 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_movement_template`;
 CREATE TABLE `creature_movement_template` (
   `entry` mediumint(8) unsigned NOT NULL COMMENT 'Creature entry',
-  `point` mediumint(8) unsigned NOT NULL default '0',
-  `position_x` float NOT NULL default '0',
-  `position_y` float NOT NULL default '0',
-  `position_z` float NOT NULL default '0',
-  `waittime` int(10) unsigned NOT NULL default '0',
-  `script_id` mediumint(8) unsigned NOT NULL default '0',
-  `textid1` int(11) NOT NULL default '0',
-  `textid2` int(11) NOT NULL default '0',
-  `textid3` int(11) NOT NULL default '0',
-  `textid4` int(11) NOT NULL default '0',
-  `textid5` int(11) NOT NULL default '0',
-  `emote` mediumint(8) unsigned NOT NULL default '0',
-  `spell` mediumint(8) unsigned NOT NULL default '0',
-  `wpguid` int(11) NOT NULL default '0',
-  `orientation` float NOT NULL default '0',
-  `model1` mediumint(9) NOT NULL default '0',
-  `model2` mediumint(9) NOT NULL default '0',
-  PRIMARY KEY  (`entry`,`point`)
+  `point` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `position_x` float NOT NULL DEFAULT '0',
+  `position_y` float NOT NULL DEFAULT '0',
+  `position_z` float NOT NULL DEFAULT '0',
+  `waittime` int(10) unsigned NOT NULL DEFAULT '0',
+  `script_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `textid1` int(11) NOT NULL DEFAULT '0',
+  `textid2` int(11) NOT NULL DEFAULT '0',
+  `textid3` int(11) NOT NULL DEFAULT '0',
+  `textid4` int(11) NOT NULL DEFAULT '0',
+  `textid5` int(11) NOT NULL DEFAULT '0',
+  `emote` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spell` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `wpguid` int(11) NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
+  `model1` mediumint(9) NOT NULL DEFAULT '0',
+  `model2` mediumint(9) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature waypoint system';
 
 --
@@ -1115,8 +1132,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature_onkill_reputation`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_onkill_reputation` (
   `creature_id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Creature Identifier',
   `RewOnKillRepFaction1` smallint(6) NOT NULL DEFAULT '0',
@@ -1130,7 +1145,6 @@ CREATE TABLE `creature_onkill_reputation` (
   `TeamDependent` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`creature_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature OnKill Reputation gain';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_onkill_reputation`
@@ -1146,14 +1160,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature_questrelation`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_questrelation` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Identifier',
   `quest` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Quest Identifier',
   PRIMARY KEY (`id`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_questrelation`
@@ -1169,17 +1180,15 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_template` (
-  `entry` mediumint(8) unsigned NOT NULL default '0',
-  `KillCredit1` int(11) unsigned NOT NULL default '0',
-  `KillCredit2` int(11) unsigned NOT NULL default '0',
-  `modelid_1` mediumint(8) unsigned NOT NULL default '0',
-  `modelid_2` mediumint(8) unsigned NOT NULL default '0',
-  `name` char(100) NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `KillCredit1` int(11) unsigned NOT NULL DEFAULT '0',
+  `KillCredit2` int(11) unsigned NOT NULL DEFAULT '0',
+  `modelid_1` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `modelid_2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `name` char(100) NOT NULL DEFAULT '0',
   `subname` char(100) DEFAULT NULL,
-  `gossip_menu_id` mediumint(8) unsigned NOT NULL default '0',
+  `gossip_menu_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `minlevel` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `maxlevel` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `minhealth` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1190,18 +1199,18 @@ CREATE TABLE `creature_template` (
   `faction_A` smallint(5) unsigned NOT NULL DEFAULT '0',
   `faction_H` smallint(5) unsigned NOT NULL DEFAULT '0',
   `npcflag` int(10) unsigned NOT NULL DEFAULT '0',
-  `speed_walk` float NOT NULL default '1' COMMENT 'Result of 2.5/2.5, most common value',
-  `speed_run` float NOT NULL default '1.14286' COMMENT 'Result of 8.0/7.0, most common value',
+  `speed_walk` float NOT NULL DEFAULT '1' COMMENT 'Result of 2.5/2.5, most common value',
+  `speed_run` float NOT NULL DEFAULT '1.14286' COMMENT 'Result of 8.0/7.0, most common value',
   `scale` float NOT NULL DEFAULT '1',
   `rank` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mindmg` float NOT NULL DEFAULT '0',
   `maxdmg` float NOT NULL DEFAULT '0',
   `dmgschool` tinyint(4) NOT NULL DEFAULT '0',
   `attackpower` int(10) unsigned NOT NULL DEFAULT '0',
-  `dmg_multiplier` float NOT NULL default '1',
+  `dmg_multiplier` float NOT NULL DEFAULT '1',
   `baseattacktime` int(10) unsigned NOT NULL DEFAULT '0',
   `rangeattacktime` int(10) unsigned NOT NULL DEFAULT '0',
-  `unit_class` tinyint(3) unsigned NOT NULL default '0',
+  `unit_class` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `unit_flags` int(10) unsigned NOT NULL DEFAULT '0',
   `dynamicflags` int(10) unsigned NOT NULL DEFAULT '0',
   `family` tinyint(4) NOT NULL DEFAULT '0',
@@ -1233,14 +1242,13 @@ CREATE TABLE `creature_template` (
   `RacialLeader` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `RegenHealth` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `equipment_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `trainer_id` mediumint(8) unsigned NOT NULL default '0',
-  `vendor_id` mediumint(8) unsigned NOT NULL default '0',
+  `trainer_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `vendor_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `mechanic_immune_mask` int(10) unsigned NOT NULL DEFAULT '0',
   `flags_extra` int(10) unsigned NOT NULL DEFAULT '0',
   `ScriptName` char(64) NOT NULL DEFAULT '',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_template`
@@ -1258,24 +1266,22 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `creature_template_addon`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_template_addon` (
-  `entry` mediumint(8) unsigned NOT NULL default '0',
-  `mount` mediumint(8) unsigned NOT NULL default '0',
-  `bytes1` int(10) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `mount` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `bytes1` int(10) unsigned NOT NULL DEFAULT '0',
   `b2_0_sheath` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `b2_1_flags` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `emote` mediumint(8) unsigned NOT NULL default '0',
-  `moveflags` int(10) unsigned NOT NULL default '0',
+  `emote` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `moveflags` int(10) unsigned NOT NULL DEFAULT '0',
   `auras` text,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `creature_template_addon`
 --
+
 LOCK TABLES `creature_template_addon` WRITE;
 /*!40000 ALTER TABLE `creature_template_addon` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_template_addon` ENABLE KEYS */;
@@ -1284,19 +1290,21 @@ UNLOCK TABLES;
 --
 -- Table structure for table `creature_template_spells`
 --
+
 DROP TABLE IF EXISTS `creature_template_spells`;
 CREATE TABLE `creature_template_spells` (
   `entry` mediumint(8) unsigned NOT NULL,
   `spell1` mediumint(8) unsigned NOT NULL,
-  `spell2` mediumint(8) unsigned NOT NULL default '0',
-  `spell3` mediumint(8) unsigned NOT NULL default '0',
-  `spell4` mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`entry`)
+  `spell2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spell3` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spell4` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System (Spells used by creature)';
 
 --
 -- Dumping data for table `creature_template_spells`
 --
+
 LOCK TABLES `creature_template_spells` WRITE;
 /*!40000 ALTER TABLE `creature_template_spells` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_template_spells` ENABLE KEYS */;
@@ -1307,10 +1315,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `db_script_string`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `db_script_string` (
-  `entry` int(11) unsigned NOT NULL default '0',
+  `entry` int(11) unsigned NOT NULL DEFAULT '0',
   `content_default` text NOT NULL,
   `content_loc1` text,
   `content_loc2` text,
@@ -1327,7 +1333,6 @@ CREATE TABLE `db_script_string` (
   `comment` text,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `db_script_string`
@@ -1338,31 +1343,39 @@ LOCK TABLES `db_script_string` WRITE;
 /*!40000 ALTER TABLE `db_script_string` ENABLE KEYS */;
 UNLOCK TABLES;
 
-
 --
 -- Table structure for table `dbscripts_on_creature_movement`
 --
 
 DROP TABLE IF EXISTS `dbscripts_on_creature_movement`;
 CREATE TABLE `dbscripts_on_creature_movement` (
-  `id` mediumint(8) unsigned NOT NULL default '0',
-  `delay` int(10) unsigned NOT NULL default '0',
-  `command` mediumint(8) unsigned NOT NULL default '0',
-  `datalong` mediumint(8) unsigned NOT NULL default '0',
-  `datalong2` int(10) unsigned NOT NULL default '0',
-  `buddy_entry` int(10) unsigned NOT NULL default '0',
-  `search_radius` int(10) unsigned NOT NULL default '0',
-  `data_flags` tinyint(3) unsigned NOT NULL default '0',
-  `dataint` int(11) NOT NULL default '0',
-  `dataint2` int(11) NOT NULL default '0',
-  `dataint3` int(11) NOT NULL default '0',
-  `dataint4` int(11) NOT NULL default '0',
-  `x` float NOT NULL default '0',
-  `y` float NOT NULL default '0',
-  `z` float NOT NULL default '0',
-  `o` float NOT NULL default '0',
+  `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `delay` int(10) unsigned NOT NULL DEFAULT '0',
+  `command` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `datalong` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `datalong2` int(10) unsigned NOT NULL DEFAULT '0',
+  `buddy_entry` int(10) unsigned NOT NULL DEFAULT '0',
+  `search_radius` int(10) unsigned NOT NULL DEFAULT '0',
+  `data_flags` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `dataint` int(11) NOT NULL DEFAULT '0',
+  `dataint2` int(11) NOT NULL DEFAULT '0',
+  `dataint3` int(11) NOT NULL DEFAULT '0',
+  `dataint4` int(11) NOT NULL DEFAULT '0',
+  `x` float NOT NULL DEFAULT '0',
+  `y` float NOT NULL DEFAULT '0',
+  `z` float NOT NULL DEFAULT '0',
+  `o` float NOT NULL DEFAULT '0',
   `comments` varchar(255) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `dbscripts_on_creature_movement`
+--
+
+LOCK TABLES `dbscripts_on_creature_movement` WRITE;
+/*!40000 ALTER TABLE `dbscripts_on_creature_movement` DISABLE KEYS */;
+/*!40000 ALTER TABLE `dbscripts_on_creature_movement` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure of `dbscripts_on_event`, `dbscripts_on_go_use`, `dbscripts_on_go_template_use`,
@@ -1385,14 +1398,11 @@ CREATE TABLE dbscripts_on_spell LIKE dbscripts_on_creature_movement;
 DROP TABLE IF EXISTS dbscripts_on_creature_death;
 CREATE TABLE dbscripts_on_creature_death LIKE dbscripts_on_creature_movement;
 
-
 --
 -- Table structure for table `disenchant_loot_template`
 --
 
 DROP TABLE IF EXISTS `disenchant_loot_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `disenchant_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Recommended id selection: item_level*100 + item_quality',
   `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -1400,10 +1410,9 @@ CREATE TABLE `disenchant_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `disenchant_loot_template`
@@ -1415,127 +1424,15 @@ LOCK TABLES `disenchant_loot_template` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `creature_ai_scripts`
---
-
-DROP TABLE IF EXISTS `creature_ai_scripts`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `creature_ai_scripts` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Identifier',
-  `creature_id` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Creature Template Identifier',
-  `event_type` tinyint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Event Type',
-  `event_inverse_phase_mask` int(11) NOT NULL DEFAULT '0' COMMENT 'Mask which phases this event will not trigger in',
-  `event_chance` int(3) unsigned NOT NULL DEFAULT '100',
-  `event_flags` int(3) unsigned NOT NULL DEFAULT '0',
-  `event_param1` int(11) NOT NULL DEFAULT '0',
-  `event_param2` int(11) NOT NULL DEFAULT '0',
-  `event_param3` int(11) NOT NULL DEFAULT '0',
-  `event_param4` int(11) NOT NULL DEFAULT '0',
-  `action1_type` tinyint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Action Type',
-  `action1_param1` int(11) NOT NULL DEFAULT '0',
-  `action1_param2` int(11) NOT NULL DEFAULT '0',
-  `action1_param3` int(11) NOT NULL DEFAULT '0',
-  `action2_type` tinyint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Action Type',
-  `action2_param1` int(11) NOT NULL DEFAULT '0',
-  `action2_param2` int(11) NOT NULL DEFAULT '0',
-  `action2_param3` int(11) NOT NULL DEFAULT '0',
-  `action3_type` tinyint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Action Type',
-  `action3_param1` int(11) NOT NULL DEFAULT '0',
-  `action3_param2` int(11) NOT NULL DEFAULT '0',
-  `action3_param3` int(11) NOT NULL DEFAULT '0',
-  `comment` varchar(255) NOT NULL DEFAULT '' COMMENT 'Event Comment',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='EventAI Scripts';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `creature_ai_scripts`
---
-
-LOCK TABLES `creature_ai_scripts` WRITE;
-/*!40000 ALTER TABLE `creature_ai_scripts` DISABLE KEYS */;
-/*!40000 ALTER TABLE `creature_ai_scripts` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `creature_ai_summons`
---
-
-DROP TABLE IF EXISTS `creature_ai_summons`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `creature_ai_summons` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Location Identifier',
-  `position_x` float NOT NULL DEFAULT '0',
-  `position_y` float NOT NULL DEFAULT '0',
-  `position_z` float NOT NULL DEFAULT '0',
-  `orientation` float NOT NULL DEFAULT '0',
-  `spawntimesecs` int(11) unsigned NOT NULL DEFAULT '120',
-  `comment` varchar(255) NOT NULL DEFAULT '' COMMENT 'Summon Comment',
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='EventAI Summoning Locations';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `creature_ai_summons`
---
-
-LOCK TABLES `creature_ai_summons` WRITE;
-/*!40000 ALTER TABLE `creature_ai_summons` DISABLE KEYS */;
-/*!40000 ALTER TABLE `creature_ai_summons` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `creature_ai_texts`
---
-
-DROP TABLE IF EXISTS `creature_ai_texts`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `creature_ai_texts` (
-  `entry` mediumint(8) NOT NULL,
-  `content_default` text NOT NULL,
-  `content_loc1` text,
-  `content_loc2` text,
-  `content_loc3` text,
-  `content_loc4` text,
-  `content_loc5` text,
-  `content_loc6` text,
-  `content_loc7` text,
-  `content_loc8` text,
-  `sound` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `language` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `emote` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `comment` text,
-  PRIMARY KEY (`entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Script Texts';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `creature_ai_texts`
---
-
-LOCK TABLES `creature_ai_texts` WRITE;
-/*!40000 ALTER TABLE `creature_ai_texts` DISABLE KEYS */;
-/*!40000 ALTER TABLE `creature_ai_texts` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
---
 -- Table structure for table `exploration_basexp`
 --
 
 DROP TABLE IF EXISTS `exploration_basexp`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `exploration_basexp` (
   `level` tinyint(4) NOT NULL DEFAULT '0',
   `basexp` mediumint(9) NOT NULL DEFAULT '0',
   PRIMARY KEY (`level`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Exploration System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `exploration_basexp`
@@ -1613,19 +1510,16 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `fishing_loot_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `fishing_loot_template` (
-  `entry` mediumint(8) unsigned NOT NULL default '0' COMMENT 'entry 0 used for junk loot at fishing fail (if allowed by config option)',
-  `item` mediumint(8) unsigned NOT NULL default '0',
-  `ChanceOrQuestChance` float NOT NULL default '100',
-  `groupid` tinyint(3) unsigned NOT NULL default '0',
-  `mincountOrRef` mediumint(9) NOT NULL default '1',
-  `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`entry`,`item`)
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'entry 0 used for junk loot at fishing fail (if allowed by config option)',
+  `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `ChanceOrQuestChance` float NOT NULL DEFAULT '100',
+  `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
+  `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `fishing_loot_template`
@@ -1641,19 +1535,16 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `game_event`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `game_event` (
   `entry` mediumint(8) unsigned NOT NULL COMMENT 'Entry of the game event',
-  `start_time` timestamp NOT NULL default '0000-00-00 00:00:00' COMMENT 'Absolute start date, the event will never start before',
-  `end_time` timestamp NOT NULL default '0000-00-00 00:00:00' COMMENT 'Absolute end date, the event will never start afler',
-  `occurence` bigint(20) unsigned NOT NULL default '86400' COMMENT 'Delay in minutes between occurences of the event',
-  `length` bigint(20) unsigned NOT NULL default '43200' COMMENT 'Length in minutes of the event',
-  `holiday` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Client side holiday id',
-  `description` varchar(255) default NULL COMMENT 'Description of the event displayed in console',
-  PRIMARY KEY  (`entry`)
+  `start_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Absolute start date, the event will never start before',
+  `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Absolute end date, the event will never start afler',
+  `occurence` bigint(20) unsigned NOT NULL DEFAULT '86400' COMMENT 'Delay in minutes between occurences of the event',
+  `length` bigint(20) unsigned NOT NULL DEFAULT '43200' COMMENT 'Length in minutes of the event',
+  `holiday` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Client side holiday id',
+  `description` varchar(255) DEFAULT NULL COMMENT 'Description of the event displayed in console',
+  PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `game_event`
@@ -1669,14 +1560,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `game_event_creature`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `game_event_creature` (
   `guid` int(10) unsigned NOT NULL,
-  `event` smallint(6) NOT NULL default '0' COMMENT 'Negatives value to remove during event and ignore pool grouping, positive value for spawn during event and if guid is part of pool then al pool memebers must be listed as part of event spawn.',
-  PRIMARY KEY  (`guid`)
+  `event` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Negatives value to remove during event and ignore pool grouping, positive value for spawn during event and if guid is part of pool then al pool memebers must be listed as part of event spawn.',
+  PRIMARY KEY (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `game_event_creature`
@@ -1693,16 +1581,15 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `game_event_creature_data`;
 CREATE TABLE `game_event_creature_data` (
-  `guid` int(10) unsigned NOT NULL default '0',
-  `entry_id` mediumint(8) unsigned NOT NULL default '0',
-  `modelid` mediumint(8) unsigned NOT NULL default '0',
-  `equipment_id` mediumint(8) unsigned NOT NULL default '0',
-  `spell_start` mediumint(8) unsigned NOT NULL default '0',
-  `spell_end` mediumint(8) unsigned NOT NULL default '0',
-  `event` smallint(5) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`guid`,`event`)
+  `guid` int(10) unsigned NOT NULL DEFAULT '0',
+  `entry_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `modelid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `equipment_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spell_start` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spell_end` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `event` smallint(5) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`,`event`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `game_event_creature_data`
@@ -1718,14 +1605,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `game_event_gameobject`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `game_event_gameobject` (
   `guid` int(10) unsigned NOT NULL,
-  `event` smallint(6) NOT NULL default '0' COMMENT 'Negatives value to remove during event and ignore pool grouping, positive value for spawn during event and if guid is part of pool then al pool memebers must be listed as part of event spawn.',
-  PRIMARY KEY  (`guid`)
+  `event` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Negatives value to remove during event and ignore pool grouping, positive value for spawn during event and if guid is part of pool then al pool memebers must be listed as part of event spawn.',
+  PRIMARY KEY (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `game_event_gameobject`
@@ -1742,12 +1626,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `game_event_mail`;
 CREATE TABLE `game_event_mail` (
-  `event` smallint(6) NOT NULL default '0' COMMENT 'Negatives value to send at event stop, positive value for send at event start.',
-  `raceMask` mediumint(8) unsigned NOT NULL default '0',
-  `quest`    mediumint(8) unsigned NOT NULL default '0',
-  `mailTemplateId` mediumint(8) unsigned NOT NULL default '0',
-  `senderEntry`    mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`event`,`raceMask`,`quest`)
+  `event` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Negatives value to send at event stop, positive value for send at event start.',
+  `raceMask` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `quest` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `mailTemplateId` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `senderEntry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`event`,`raceMask`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Game event system';
 
 --
@@ -1765,9 +1649,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `game_event_quest`;
 CREATE TABLE `game_event_quest` (
-  `quest` mediumint(8) unsigned NOT NULL default '0' COMMENT 'entry from quest_template',
-  `event` smallint(5) unsigned NOT NULL default '0' COMMENT 'entry from game_event',
-  PRIMARY KEY  (`quest`,`event`)
+  `quest` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'entry from quest_template',
+  `event` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'entry from game_event',
+  PRIMARY KEY (`quest`,`event`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Game event system';
 
 --
@@ -1784,15 +1668,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `game_graveyard_zone`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `game_graveyard_zone` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ghost_zone` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `faction` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`,`ghost_zone`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Trigger System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `game_graveyard_zone`
@@ -1808,8 +1689,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `game_tele`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `game_tele` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `position_x` float NOT NULL DEFAULT '0',
@@ -1820,7 +1699,6 @@ CREATE TABLE `game_tele` (
   `name` varchar(100) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Tele Command';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `game_tele`
@@ -1836,8 +1714,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `game_weather`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `game_weather` (
   `zone` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `spring_rain_chance` tinyint(3) unsigned NOT NULL DEFAULT '25',
@@ -1854,7 +1730,6 @@ CREATE TABLE `game_weather` (
   `winter_storm_chance` tinyint(3) unsigned NOT NULL DEFAULT '25',
   PRIMARY KEY (`zone`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Weather System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `game_weather`
@@ -1870,8 +1745,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `gameobject`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `gameobject` (
   `guid` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Global Unique Identifier',
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Gameobject Identifier',
@@ -1887,11 +1760,10 @@ CREATE TABLE `gameobject` (
   `spawntimesecs` int(11) NOT NULL DEFAULT '0',
   `animprogress` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `state` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY  (`guid`),
+  PRIMARY KEY (`guid`),
   KEY `idx_map` (`map`),
   KEY `idx_id` (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Gameobject System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `gameobject`
@@ -1907,15 +1779,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `gameobject_battleground`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `gameobject_battleground` (
   `guid` int(10) unsigned NOT NULL COMMENT 'GameObject''s GUID',
   `event1` tinyint(3) unsigned NOT NULL COMMENT 'main event',
   `event2` tinyint(3) unsigned NOT NULL COMMENT 'sub event',
   PRIMARY KEY (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='GameObject battleground indexing system';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `gameobject_battleground`
@@ -1931,14 +1800,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `gameobject_involvedrelation`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `gameobject_involvedrelation` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `quest` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Quest Identifier',
   PRIMARY KEY (`id`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `gameobject_involvedrelation`
@@ -1954,8 +1820,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `gameobject_loot_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `gameobject_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -1963,10 +1827,9 @@ CREATE TABLE `gameobject_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `gameobject_loot_template`
@@ -1982,14 +1845,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `gameobject_questrelation`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `gameobject_questrelation` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `quest` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Quest Identifier',
   PRIMARY KEY (`id`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `gameobject_questrelation`
@@ -2000,53 +1860,49 @@ LOCK TABLES `gameobject_questrelation` WRITE;
 /*!40000 ALTER TABLE `gameobject_questrelation` ENABLE KEYS */;
 UNLOCK TABLES;
 
-
 --
 -- Table structure for table `gameobject_template`
 --
 
 DROP TABLE IF EXISTS `gameobject_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `gameobject_template` (
-  `entry` mediumint(8) unsigned NOT NULL default '0',
-  `type` tinyint(3) unsigned NOT NULL default '0',
-  `displayId` mediumint(8) unsigned NOT NULL default '0',
-  `name` varchar(100) NOT NULL default '',
-  `castBarCaption` varchar(100) NOT NULL default '',
-  `faction` smallint(5) unsigned NOT NULL default '0',
-  `flags` int(10) unsigned NOT NULL default '0',
-  `size` float NOT NULL default '1',
-  `data0` int(10) unsigned NOT NULL default '0',
-  `data1` int(10) unsigned NOT NULL default '0',
-  `data2` int(10) unsigned NOT NULL default '0',
-  `data3` int(10) unsigned NOT NULL default '0',
-  `data4` int(10) unsigned NOT NULL default '0',
-  `data5` int(10) unsigned NOT NULL default '0',
-  `data6` int(10) unsigned NOT NULL default '0',
-  `data7` int(10) unsigned NOT NULL default '0',
-  `data8` int(10) unsigned NOT NULL default '0',
-  `data9` int(10) unsigned NOT NULL default '0',
-  `data10` int(10) unsigned NOT NULL default '0',
-  `data11` int(10) unsigned NOT NULL default '0',
-  `data12` int(10) unsigned NOT NULL default '0',
-  `data13` int(10) unsigned NOT NULL default '0',
-  `data14` int(10) unsigned NOT NULL default '0',
-  `data15` int(10) unsigned NOT NULL default '0',
-  `data16` int(10) unsigned NOT NULL default '0',
-  `data17` int(10) unsigned NOT NULL default '0',
-  `data18` int(10) unsigned NOT NULL default '0',
-  `data19` int(10) unsigned NOT NULL default '0',
-  `data20` int(10) unsigned NOT NULL default '0',
-  `data21` int(10) unsigned NOT NULL default '0',
-  `data22` int(10) unsigned NOT NULL default '0',
-  `data23` int(10) unsigned NOT NULL default '0',
-  `mingold` mediumint(8) unsigned NOT NULL default '0',
-  `maxgold` mediumint(8) unsigned NOT NULL default '0',
-  `ScriptName` varchar(64) NOT NULL default '',
-  PRIMARY KEY  (`entry`)
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `displayId` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `name` varchar(100) NOT NULL DEFAULT '',
+  `castBarCaption` varchar(100) NOT NULL DEFAULT '',
+  `faction` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `flags` int(10) unsigned NOT NULL DEFAULT '0',
+  `size` float NOT NULL DEFAULT '1',
+  `data0` int(10) unsigned NOT NULL DEFAULT '0',
+  `data1` int(10) unsigned NOT NULL DEFAULT '0',
+  `data2` int(10) unsigned NOT NULL DEFAULT '0',
+  `data3` int(10) unsigned NOT NULL DEFAULT '0',
+  `data4` int(10) unsigned NOT NULL DEFAULT '0',
+  `data5` int(10) unsigned NOT NULL DEFAULT '0',
+  `data6` int(10) unsigned NOT NULL DEFAULT '0',
+  `data7` int(10) unsigned NOT NULL DEFAULT '0',
+  `data8` int(10) unsigned NOT NULL DEFAULT '0',
+  `data9` int(10) unsigned NOT NULL DEFAULT '0',
+  `data10` int(10) unsigned NOT NULL DEFAULT '0',
+  `data11` int(10) unsigned NOT NULL DEFAULT '0',
+  `data12` int(10) unsigned NOT NULL DEFAULT '0',
+  `data13` int(10) unsigned NOT NULL DEFAULT '0',
+  `data14` int(10) unsigned NOT NULL DEFAULT '0',
+  `data15` int(10) unsigned NOT NULL DEFAULT '0',
+  `data16` int(10) unsigned NOT NULL DEFAULT '0',
+  `data17` int(10) unsigned NOT NULL DEFAULT '0',
+  `data18` int(10) unsigned NOT NULL DEFAULT '0',
+  `data19` int(10) unsigned NOT NULL DEFAULT '0',
+  `data20` int(10) unsigned NOT NULL DEFAULT '0',
+  `data21` int(10) unsigned NOT NULL DEFAULT '0',
+  `data22` int(10) unsigned NOT NULL DEFAULT '0',
+  `data23` int(10) unsigned NOT NULL DEFAULT '0',
+  `mingold` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `maxgold` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `ScriptName` varchar(64) NOT NULL DEFAULT '',
+  PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Gameobject System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `gameobject_template`
@@ -2061,13 +1917,13 @@ UNLOCK TABLES;
 -- Table structure for table `gossip_menu`
 --
 
-DROP TABLE IF EXISTS gossip_menu;
-CREATE TABLE gossip_menu (
-  entry smallint(6) unsigned NOT NULL default '0',
-  text_id mediumint(8) unsigned NOT NULL default '0',
-  script_id mediumint(8) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'script in `dbscripts_on_gossip` - will be executed on GossipHello',
-  condition_id MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
-  PRIMARY KEY (entry, text_id, script_id)
+DROP TABLE IF EXISTS `gossip_menu`;
+CREATE TABLE `gossip_menu` (
+  `entry` smallint(6) unsigned NOT NULL DEFAULT '0',
+  `text_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `script_id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'script in `dbscripts_on_gossip` - will be executed on GossipHello',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`,`text_id`,`script_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -2083,22 +1939,22 @@ UNLOCK TABLES;
 -- Table structure for table `gossip_menu_option`
 --
 
-DROP TABLE IF EXISTS gossip_menu_option;
-CREATE TABLE gossip_menu_option (
-  menu_id smallint(6) unsigned NOT NULL default '0',
-  id smallint(6) unsigned NOT NULL default '0',
-  option_icon mediumint(8) unsigned NOT NULL default '0',
-  option_text text,
-  option_id tinyint(3) unsigned NOT NULL default '0',
-  npc_option_npcflag int(10) unsigned NOT NULL default '0',
-  action_menu_id mediumint(8) NOT NULL default '0',
-  action_poi_id mediumint(8) unsigned NOT NULL default '0',
-  action_script_id mediumint(8) unsigned NOT NULL default '0',
-  box_coded tinyint(3) unsigned NOT NULL default '0',
-  box_money int(11) unsigned NOT NULL default '0',
-  box_text text,
-  condition_id MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
-  PRIMARY KEY (menu_id, id)
+DROP TABLE IF EXISTS `gossip_menu_option`;
+CREATE TABLE `gossip_menu_option` (
+  `menu_id` smallint(6) unsigned NOT NULL DEFAULT '0',
+  `id` smallint(6) unsigned NOT NULL DEFAULT '0',
+  `option_icon` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `option_text` text,
+  `option_id` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `npc_option_npcflag` int(10) unsigned NOT NULL DEFAULT '0',
+  `action_menu_id` mediumint(8) NOT NULL DEFAULT '0',
+  `action_poi_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `action_script_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `box_coded` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `box_money` int(11) unsigned NOT NULL DEFAULT '0',
+  `box_text` text,
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`menu_id`,`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -2107,48 +1963,44 @@ CREATE TABLE gossip_menu_option (
 
 LOCK TABLES `gossip_menu_option` WRITE;
 /*!40000 ALTER TABLE `gossip_menu_option` DISABLE KEYS */;
-INSERT INTO gossip_menu_option VALUES
-(0, 0,0,'GOSSIP_OPTION_QUESTGIVER',       2,0x000002,0,0,0,0,0,NULL,0),
-(0, 1,1,'GOSSIP_OPTION_VENDOR',           3,0x000004,0,0,0,0,0,NULL,0),
-(0, 2,2,'GOSSIP_OPTION_TAXIVENDOR',       4,0x000008,0,0,0,0,0,NULL,0),
-(0, 3,3,'GOSSIP_OPTION_TRAINER',          5,0x000010,0,0,0,0,0,NULL,0),
-(0, 4,4,'GOSSIP_OPTION_SPIRITHEALER',     6,0x000020,0,0,0,0,0,NULL,0),
-(0, 5,4,'GOSSIP_OPTION_SPIRITGUIDE',      7,0x000040,0,0,0,0,0,NULL,0),
-(0, 6,5,'GOSSIP_OPTION_INNKEEPER',        8,0x000080,0,0,0,0,0,NULL,0),
-(0, 7,6,'GOSSIP_OPTION_BANKER',           9,0x000100,0,0,0,0,0,NULL,0),
-(0, 8,7,'GOSSIP_OPTION_PETITIONER',      10,0x000200,0,0,0,0,0,NULL,0),
-(0, 9,8,'GOSSIP_OPTION_TABARDDESIGNER',  11,0x000400,0,0,0,0,0,NULL,0),
-(0,10,9,'GOSSIP_OPTION_BATTLEFIELD',     12,0x000800,0,0,0,0,0,NULL,0),
-(0,11,6,'GOSSIP_OPTION_AUCTIONEER',      13,0x001000,0,0,0,0,0,NULL,0),
-(0,12,0,'GOSSIP_OPTION_STABLEPET',       14,0x002000,0,0,0,0,0,NULL,0),
-(0,13,1,'GOSSIP_OPTION_ARMORER',         15,0x004000,0,0,0,0,0,NULL,0),
-(0,14,0,'GOSSIP_OPTION_UNLEARNTALENTS',  16,0x000010,0,0,0,0,0,NULL,0),
-(0,15,2,'GOSSIP_OPTION_UNLEARNPETSKILLS',17,0x000010,0,0,0,0,0,NULL,0);
+INSERT INTO `gossip_menu_option` VALUES
+(0,0,0,'GOSSIP_OPTION_QUESTGIVER',2,2,0,0,0,0,0,NULL,0),
+(0,1,1,'GOSSIP_OPTION_VENDOR',3,4,0,0,0,0,0,NULL,0),
+(0,2,2,'GOSSIP_OPTION_TAXIVENDOR',4,8,0,0,0,0,0,NULL,0),
+(0,3,3,'GOSSIP_OPTION_TRAINER',5,16,0,0,0,0,0,NULL,0),
+(0,4,4,'GOSSIP_OPTION_SPIRITHEALER',6,32,0,0,0,0,0,NULL,0),
+(0,5,4,'GOSSIP_OPTION_SPIRITGUIDE',7,64,0,0,0,0,0,NULL,0),
+(0,6,5,'GOSSIP_OPTION_INNKEEPER',8,128,0,0,0,0,0,NULL,0),
+(0,7,6,'GOSSIP_OPTION_BANKER',9,256,0,0,0,0,0,NULL,0),
+(0,8,7,'GOSSIP_OPTION_PETITIONER',10,512,0,0,0,0,0,NULL,0),
+(0,9,8,'GOSSIP_OPTION_TABARDDESIGNER',11,1024,0,0,0,0,0,NULL,0),
+(0,10,9,'GOSSIP_OPTION_BATTLEFIELD',12,2048,0,0,0,0,0,NULL,0),
+(0,11,6,'GOSSIP_OPTION_AUCTIONEER',13,4096,0,0,0,0,0,NULL,0),
+(0,12,0,'GOSSIP_OPTION_STABLEPET',14,8192,0,0,0,0,0,NULL,0),
+(0,13,1,'GOSSIP_OPTION_ARMORER',15,16384,0,0,0,0,0,NULL,0),
+(0,14,0,'GOSSIP_OPTION_UNLEARNTALENTS',16,16,0,0,0,0,0,NULL,0),
+(0,15,2,'GOSSIP_OPTION_UNLEARNPETSKILLS',17,16,0,0,0,0,0,NULL,0);
 /*!40000 ALTER TABLE `gossip_menu_option` ENABLE KEYS */;
 UNLOCK TABLES;
-
 
 --
 -- Table structure for table `instance_template`
 --
 
 DROP TABLE IF EXISTS `instance_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `instance_template` (
   `map` smallint(5) unsigned NOT NULL,
-  `parent` smallint(5) unsigned NOT NULL default '0',
+  `parent` smallint(5) unsigned NOT NULL DEFAULT '0',
   `levelMin` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `levelMax` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `maxPlayers` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `reset_delay` int(10) unsigned NOT NULL default '0' COMMENT 'Reset time in days',
+  `reset_delay` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Reset time in days',
   `ghostEntranceMap` smallint(5) unsigned NOT NULL,
   `ghostEntranceX` float NOT NULL,
   `ghostEntranceY` float NOT NULL,
-  `ScriptName` varchar(128) NOT NULL default '',
+  `ScriptName` varchar(128) NOT NULL DEFAULT '',
   PRIMARY KEY (`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `instance_template`
@@ -2182,7 +2034,7 @@ INSERT INTO `instance_template` VALUES
 (469,0,60,0,40,7,0,-7663.41,-1218.67,''),
 (509,0,60,0,20,3,1,-8114.46,1526.37,''),
 (531,0,60,0,40,7,1,-8111.72,1526.79,''),
-(533,0,60,0,40,7,-1,0,0,'');
+(533,0,60,0,40,7,0,0,0,'');
 /*!40000 ALTER TABLE `instance_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2191,15 +2043,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `item_enchantment_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `item_enchantment_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ench` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `chance` float unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`ench`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item Random Enchantment System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `item_enchantment_template`
@@ -2215,8 +2064,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `item_loot_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `item_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -2224,10 +2071,9 @@ CREATE TABLE `item_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `item_loot_template`
@@ -2243,15 +2089,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `item_required_target`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `item_required_target` (
   `entry` mediumint(8) unsigned NOT NULL,
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `targetEntry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   UNIQUE KEY `entry_type_target` (`entry`,`type`,`targetEntry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `item_required_target`
@@ -2267,8 +2110,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `item_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `item_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `class` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -2396,12 +2237,11 @@ CREATE TABLE `item_template` (
   `FoodType` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `minMoneyLoot` int(10) unsigned NOT NULL DEFAULT '0',
   `maxMoneyLoot` int(10) unsigned NOT NULL DEFAULT '0',
-  `Duration` int(11) unsigned NOT NULL default '0' COMMENT 'Duration in seconds',
-  `ExtraFlags` tinyint(1) UNSIGNED NOT NULL default '0',
-  PRIMARY KEY  (`entry`),
+  `Duration` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Duration in seconds',
+  `ExtraFlags` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`),
   KEY `items_index` (`class`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `item_template`
@@ -2492,8 +2332,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `locales_creature`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `locales_creature` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `name_loc1` varchar(100) NOT NULL DEFAULT '',
@@ -2514,7 +2352,6 @@ CREATE TABLE `locales_creature` (
   `subname_loc8` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `locales_creature`
@@ -2530,8 +2367,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `locales_gameobject`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `locales_gameobject` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `name_loc1` varchar(100) NOT NULL DEFAULT '',
@@ -2544,7 +2379,6 @@ CREATE TABLE `locales_gameobject` (
   `name_loc8` varchar(100) NOT NULL DEFAULT '',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `locales_gameobject`
@@ -2561,8 +2395,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `locales_gossip_menu_option`;
 CREATE TABLE `locales_gossip_menu_option` (
-  `menu_id` smallint(6) unsigned NOT NULL default '0',
-  `id` smallint(6) unsigned NOT NULL default '0',
+  `menu_id` smallint(6) unsigned NOT NULL DEFAULT '0',
+  `id` smallint(6) unsigned NOT NULL DEFAULT '0',
   `option_text_loc1` text,
   `option_text_loc2` text,
   `option_text_loc3` text,
@@ -2579,7 +2413,7 @@ CREATE TABLE `locales_gossip_menu_option` (
   `box_text_loc6` text,
   `box_text_loc7` text,
   `box_text_loc8` text,
-  PRIMARY KEY  (`menu_id`, `id`)
+  PRIMARY KEY (`menu_id`,`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -2596,8 +2430,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `locales_item`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `locales_item` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `name_loc1` varchar(100) NOT NULL DEFAULT '',
@@ -2618,7 +2450,6 @@ CREATE TABLE `locales_item` (
   `description_loc8` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `locales_item`
@@ -2634,8 +2465,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `locales_npc_text`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `locales_npc_text` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `Text0_0_loc1` longtext,
@@ -2768,7 +2597,6 @@ CREATE TABLE `locales_npc_text` (
   `Text7_1_loc8` longtext,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `locales_npc_text`
@@ -2784,8 +2612,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `locales_page_text`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `locales_page_text` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `Text_loc1` longtext,
@@ -2798,7 +2624,6 @@ CREATE TABLE `locales_page_text` (
   `Text_loc8` longtext,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `locales_page_text`
@@ -2815,7 +2640,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `locales_points_of_interest`;
 CREATE TABLE `locales_points_of_interest` (
-  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `icon_name_loc1` text,
   `icon_name_loc2` text,
   `icon_name_loc3` text,
@@ -2824,7 +2649,7 @@ CREATE TABLE `locales_points_of_interest` (
   `icon_name_loc6` text,
   `icon_name_loc7` text,
   `icon_name_loc8` text,
-  PRIMARY KEY  (`entry`)
+  PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -2841,8 +2666,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `locales_quest`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `locales_quest` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `Title_loc1` text,
@@ -2927,7 +2750,6 @@ CREATE TABLE `locales_quest` (
   `ObjectiveText4_loc8` text,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `locales_quest`
@@ -2943,8 +2765,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `mail_loot_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `mail_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -2952,10 +2772,9 @@ CREATE TABLE `mail_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `mail_loot_template`
@@ -2971,8 +2790,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `mangos_string`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `mangos_string` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `content_default` text NOT NULL,
@@ -2986,7 +2803,6 @@ CREATE TABLE `mangos_string` (
   `content_loc8` text,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `mangos_string`
@@ -3056,8 +2872,8 @@ INSERT INTO `mangos_string` VALUES
 (59,'Using creature EventAI: %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (61,'Username: ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (62,'Password: ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(63,"Accepts whispers", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(64,"Doesn't accept whispers", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(63,'Accepts whispers',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(64,'Doesn\'t accept whispers',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (65,'Using script library: <Unknown Script Library>',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (66,'Using script library: <No Script Library Loaded>',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (100,'Global notify: ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -3292,9 +3108,9 @@ INSERT INTO `mangos_string` VALUES
 (374,'Tickets count: %i\n',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (375,'Player %s not have tickets.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (376,'%u - |cffffffff|Hpool:%u|h[%s]|h|r AutoSpawn: %u MaxLimit: %u Creatures: %u GameObjecs: %u Pools %u',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(377,"No pools found for map '%s' (Id:%u)",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(378,"You can't use this command at non-instanceable map '%s' (Id:%u). Use .lookup pool command instead.",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(379,"You can't use this command without args at non-instanceable map '%s' (Id:%u).",NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(377,'No pools found for map \'%s\' (Id:%u)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(378,'You can\'t use this command at non-instanceable map \'%s\' (Id:%u). Use .lookup pool command instead.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(379,'You can\'t use this command without args at non-instanceable map \'%s\' (Id:%u).',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (380,'%d%s - |cffffffff|Hcreature:%d|h[%s X:%f Y:%f Z:%f MapId:%d]|h|r Chance:%f %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (381,'%d%s - [%s] X:%f Y:%f Z:%f MapId:%d Chance:%f %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (382,'%d%s - |cffffffff|Hcreature:%d|h[%s X:%f Y:%f Z:%f MapId:%d]|h|r %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -3572,7 +3388,7 @@ INSERT INTO `mangos_string` VALUES
 (759,'%s was destroyed by the %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (760,'The %s is under attack! If left unchecked, the %s will destroy it!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (761,'The %s was taken by the %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(762,'The %s was taken by the %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL), -- WTF? why 3 same strings?
+(762,'The %s was taken by the %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (763,'The %s was taken by the %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (764,'The %s is under attack! If left unchecked, the %s will capture it!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (765,'The %s has taken the %s! Its supplies will now be used for reinforcements!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -3793,7 +3609,6 @@ INSERT INTO `mangos_string` VALUES
 (1607,'|cffffff00The Plaguewood Tower has been taken by the Alliance!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1635,'|cffffff00The Horde has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1636,'|cffffff00The Alliance has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-
 /*!40000 ALTER TABLE `mangos_string` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3802,14 +3617,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `npc_gossip`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `npc_gossip` (
   `npc_guid` int(10) unsigned NOT NULL DEFAULT '0',
   `textid` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`npc_guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `npc_gossip`
@@ -3825,8 +3637,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `npc_text`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `npc_text` (
   `ID` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `text0_0` longtext,
@@ -3911,7 +3721,6 @@ CREATE TABLE `npc_text` (
   `em7_5` smallint(5) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `npc_text`
@@ -3927,8 +3736,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `npc_trainer`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `npc_trainer` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `spell` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -3938,7 +3745,6 @@ CREATE TABLE `npc_trainer` (
   `reqlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   UNIQUE KEY `entry_spell` (`entry`,`spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `npc_trainer`
@@ -3955,12 +3761,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_trainer_template`;
 CREATE TABLE `npc_trainer_template` (
-  `entry` mediumint(8) unsigned NOT NULL default '0',
-  `spell` mediumint(8) unsigned NOT NULL default '0',
-  `spellcost` int(10) unsigned NOT NULL default '0',
-  `reqskill` smallint(5) unsigned NOT NULL default '0',
-  `reqskillvalue` smallint(5) unsigned NOT NULL default '0',
-  `reqlevel` tinyint(3) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spell` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `spellcost` int(10) unsigned NOT NULL DEFAULT '0',
+  `reqskill` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `reqskillvalue` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `reqlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   UNIQUE KEY `entry_spell` (`entry`,`spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -3978,17 +3784,14 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `npc_vendor`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `npc_vendor` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `incrtime` int(10) unsigned NOT NULL DEFAULT '0',
-  `condition_id` mediumint(8) unsigned NOT NULL default '0',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Npc System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `npc_vendor`
@@ -4005,12 +3808,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_vendor_template`;
 CREATE TABLE `npc_vendor_template` (
-  `entry` mediumint(8) unsigned NOT NULL default '0',
-  `item` mediumint(8) unsigned NOT NULL default '0',
-  `maxcount` tinyint(3) unsigned NOT NULL default '0',
-  `incrtime` int(10) unsigned NOT NULL default '0',
-  `condition_id` mediumint(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`entry`,`item`)
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `incrtime` int(10) unsigned NOT NULL DEFAULT '0',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Npc System';
 
 --
@@ -4027,15 +3830,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `page_text`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `page_text` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `text` longtext NOT NULL,
   `next_page` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `page_text`
@@ -4051,8 +3851,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `pet_levelstats`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pet_levelstats` (
   `creature_entry` mediumint(8) unsigned NOT NULL,
   `level` tinyint(3) unsigned NOT NULL,
@@ -4066,7 +3864,6 @@ CREATE TABLE `pet_levelstats` (
   `spi` smallint(5) unsigned NOT NULL,
   PRIMARY KEY (`creature_entry`,`level`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 PACK_KEYS=0 COMMENT='Stores pet levels stats.';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `pet_levelstats`
@@ -4082,16 +3879,13 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `pet_name_generation`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pet_name_generation` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `word` tinytext NOT NULL,
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `half` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=261 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `pet_name_generation`
@@ -4099,267 +3893,267 @@ CREATE TABLE `pet_name_generation` (
 
 LOCK TABLES `pet_name_generation` WRITE;
 /*!40000 ALTER TABLE `pet_name_generation` DISABLE KEYS */;
-INSERT INTO `pet_name_generation` VALUES
-(1,'Aba',416,0),
-(2,'Az',416,0),
-(3,'Bel',416,0),
-(4,'Biz',416,0),
-(5,'Cho',416,0),
-(6,'Dag',416,0),
-(7,'Gak',416,0),
-(8,'Gar',416,0),
-(9,'Gel',416,0),
-(10,'Gho',416,0),
-(11,'Gob',416,0),
-(12,'Gra',416,0),
-(13,'Jak',416,0),
-(14,'Jub',416,0),
-(15,'Kar',416,0),
-(16,'Kup',416,0),
-(17,'Laz',416,0),
-(18,'Nal',416,0),
-(19,'Nok',416,0),
-(20,'Pag',416,0),
-(21,'Pig',416,0),
-(22,'Pip',416,0),
-(23,'Piz',416,0),
-(24,'Quz',416,0),
-(25,'Rui',416,0),
-(26,'Rul',416,0),
-(27,'Rup',416,0),
-(28,'Tar',416,0),
-(29,'Vol',416,0),
-(30,'Yaz',416,0),
-(31,'Zep',416,0),
-(32,'Zig',416,0),
-(33,'Zil',416,0),
-(34,'Zor',416,0),
-(35,'bis',416,1),
-(36,'fip',416,1),
-(37,'gup',416,1),
-(38,'ham',416,1),
-(39,'jub',416,1),
-(40,'kin',416,1),
-(41,'kol',416,1),
-(42,'lop',416,1),
-(43,'loz',416,1),
-(44,'mat',416,1),
-(45,'mir',416,1),
-(46,'nam',416,1),
-(47,'nar',416,1),
-(48,'nik',416,1),
-(49,'nip',416,1),
-(50,'pad',416,1),
-(51,'pep',416,1),
-(52,'pit',416,1),
-(53,'qua',416,1),
-(54,'rai',416,1),
-(55,'rin',416,1),
-(56,'rot',416,1),
-(57,'tai',416,1),
-(58,'tal',416,1),
-(59,'tik',416,1),
-(60,'tip',416,1),
-(61,'tog',416,1),
-(62,'tuk',416,1),
-(63,'uri',416,1),
-(64,'yal',416,1),
-(65,'yap',416,1),
-(66,'Bhee',417,0),
-(67,'Bruu',417,0),
-(68,'Czaa',417,0),
-(69,'Droo',417,0),
-(70,'Flaa',417,0),
-(71,'Fzuu',417,0),
-(72,'Ghaa',417,0),
-(73,'Gree',417,0),
-(74,'Gzaa',417,0),
-(75,'Haa',417,0),
-(76,'Haad',417,0),
-(77,'Haag',417,0),
-(78,'Haap',417,0),
-(79,'Jhaa',417,0),
-(80,'Jhuu',417,0),
-(81,'Khaa',417,0),
-(82,'Khii',417,0),
-(83,'Khuu',417,0),
-(84,'Kree',417,0),
-(85,'Luu',417,0),
-(86,'Maa',417,0),
-(87,'Nhee',417,0),
-(88,'Phuu',417,0),
-(89,'Pryy',417,0),
-(90,'Rhuu',417,0),
-(91,'Shaa',417,0),
-(92,'Sloo',417,0),
-(93,'Sruu',417,0),
-(94,'Thoo',417,0),
-(95,'Traa',417,0),
-(96,'Wraa',417,0),
-(97,'Zhaa',417,0),
-(98,'dhon',417,1),
-(99,'dhum',417,1),
-(100,'dhun',417,1),
-(101,'dom',417,1),
-(102,'don',417,1),
-(103,'drom',417,1),
-(104,'dym',417,1),
-(105,'fenn',417,1),
-(106,'fum',417,1),
-(107,'fun',417,1),
-(108,'ghon',417,1),
-(109,'ghun',417,1),
-(110,'grom',417,1),
-(111,'grym',417,1),
-(112,'hom',417,1),
-(113,'hon',417,1),
-(114,'hun',417,1),
-(115,'jhom',417,1),
-(116,'kun',417,1),
-(117,'lum',417,1),
-(118,'mmon',417,1),
-(119,'mon',417,1),
-(120,'myn',417,1),
-(121,'nam',417,1),
-(122,'nem',417,1),
-(123,'nhym',417,1),
-(124,'nom',417,1),
-(125,'num',417,1),
-(126,'phom',417,1),
-(127,'roon',417,1),
-(128,'rym',417,1),
-(129,'shon',417,1),
-(130,'thun',417,1),
-(131,'tom',417,1),
-(132,'zhem',417,1),
-(133,'zhum',417,1),
-(134,'zun',417,1),
-(135,'Bar',1860,0),
-(136,'Bel',1860,0),
-(137,'Char',1860,0),
-(138,'Grak\'',1860,0),
-(139,'Graz\'',1860,0),
-(140,'Grim',1860,0),
-(141,'Hath',1860,0),
-(142,'Hel',1860,0),
-(143,'Hok',1860,0),
-(144,'Huk',1860,0),
-(145,'Jhaz',1860,0),
-(146,'Jhom',1860,0),
-(147,'Juk\'',1860,0),
-(148,'Kal\'',1860,0),
-(149,'Klath',1860,0),
-(150,'Kon',1860,0),
-(151,'Krag',1860,0),
-(152,'Krak',1860,0),
-(153,'Mak',1860,0),
-(154,'Mezz',1860,0),
-(155,'Orm',1860,0),
-(156,'Phan',1860,0),
-(157,'Sar',1860,0),
-(158,'Tang',1860,0),
-(159,'Than',1860,0),
-(160,'Thog',1860,0),
-(161,'Thok',1860,0),
-(162,'Thul',1860,0),
-(163,'Zag\'',1860,0),
-(164,'Zang',1860,0),
-(165,'Zhar\'',1860,0),
-(166,'kath',1860,1),
-(167,'doc',1860,1),
-(168,'dok',1860,1),
-(169,'gak',1860,1),
-(170,'garth',1860,1),
-(171,'gore',1860,1),
-(172,'gorg',1860,1),
-(173,'grave',1860,1),
-(174,'gron',1860,1),
-(175,'juk',1860,1),
-(176,'krast',1860,1),
-(177,'kresh',1860,1),
-(178,'krit',1860,1),
-(179,'los',1860,1),
-(180,'mon',1860,1),
-(181,'mos',1860,1),
-(182,'moth',1860,1),
-(183,'nagma',1860,1),
-(184,'nak',1860,1),
-(185,'nar',1860,1),
-(186,'nos',1860,1),
-(187,'nuz',1860,1),
-(188,'phog',1860,1),
-(189,'rath',1860,1),
-(190,'tast',1860,1),
-(191,'taz',1860,1),
-(192,'thak',1860,1),
-(193,'thang',1860,1),
-(194,'thyk',1860,1),
-(195,'vhug',1860,1),
-(196,'zazt',1860,1),
-(197,'Ael',1863,0),
-(198,'Aez',1863,0),
-(199,'Ang',1863,0),
-(200,'Ban',1863,0),
-(201,'Bet',1863,0),
-(202,'Bro',1863,0),
-(203,'Bry',1863,0),
-(204,'Cat',1863,0),
-(205,'Dir',1863,0),
-(206,'Dis',1863,0),
-(207,'Dom',1863,0),
-(208,'Drus',1863,0),
-(209,'Fie',1863,0),
-(210,'Fier',1863,0),
-(211,'Gly',1863,0),
-(212,'Hel',1863,0),
-(213,'Hes',1863,0),
-(214,'Kal',1863,0),
-(215,'Lyn',1863,0),
-(216,'Mir',1863,0),
-(217,'Nim',1863,0),
-(218,'Sar',1863,0),
-(219,'Sel',1863,0),
-(220,'Vil',1863,0),
-(221,'Zah',1863,0),
-(222,'aith',1863,1),
-(223,'anda',1863,1),
-(224,'antia',1863,1),
-(225,'evere',1863,1),
-(226,'lia',1863,1),
-(227,'lissa',1863,1),
-(228,'neri',1863,1),
-(229,'neth',1863,1),
-(230,'nia',1863,1),
-(231,'nlissa',1863,1),
-(232,'nora',1863,1),
-(233,'nva',1863,1),
-(234,'nys',1863,1),
-(235,'ola',1863,1),
-(236,'ona',1863,1),
-(237,'ora',1863,1),
-(238,'rah',1863,1),
-(239,'riana',1863,1),
-(240,'riel',1863,1),
-(241,'rona',1863,1),
-(242,'tai',1863,1),
-(243,'tevere',1863,1),
-(244,'thea',1863,1),
-(245,'vina',1863,1),
-(246,'wena',1863,1),
-(247,'wyn',1863,1),
-(248,'xia',1863,1),
-(249,'yla',1863,1),
-(250,'yssa',1863,1),
-(251,'Flaa',17252,0),
-(252,'Haa',17252,0),
-(253,'Jhuu',17252,0),
-(254,'Shaa',17252,0),
-(255,'Thoo',17252,0),
-(256,'dhun',17252,1),
-(257,'ghun',17252,1),
-(258,'roon',17252,1),
-(259,'thun',17252,1),
-(260,'tom',17252,1);
+INSERT INTO `pet_name_generation` (`word`,`entry`,`half`) VALUES
+('Aba',416,0),
+('Az',416,0),
+('Bel',416,0),
+('Biz',416,0),
+('Cho',416,0),
+('Dag',416,0),
+('Gak',416,0),
+('Gar',416,0),
+('Gel',416,0),
+('Gho',416,0),
+('Gob',416,0),
+('Gra',416,0),
+('Jak',416,0),
+('Jub',416,0),
+('Kar',416,0),
+('Kup',416,0),
+('Laz',416,0),
+('Nal',416,0),
+('Nok',416,0),
+('Pag',416,0),
+('Pig',416,0),
+('Pip',416,0),
+('Piz',416,0),
+('Quz',416,0),
+('Rui',416,0),
+('Rul',416,0),
+('Rup',416,0),
+('Tar',416,0),
+('Vol',416,0),
+('Yaz',416,0),
+('Zep',416,0),
+('Zig',416,0),
+('Zil',416,0),
+('Zor',416,0),
+('bis',416,1),
+('fip',416,1),
+('gup',416,1),
+('ham',416,1),
+('jub',416,1),
+('kin',416,1),
+('kol',416,1),
+('lop',416,1),
+('loz',416,1),
+('mat',416,1),
+('mir',416,1),
+('nam',416,1),
+('nar',416,1),
+('nik',416,1),
+('nip',416,1),
+('pad',416,1),
+('pep',416,1),
+('pit',416,1),
+('qua',416,1),
+('rai',416,1),
+('rin',416,1),
+('rot',416,1),
+('tai',416,1),
+('tal',416,1),
+('tik',416,1),
+('tip',416,1),
+('tog',416,1),
+('tuk',416,1),
+('uri',416,1),
+('yal',416,1),
+('yap',416,1),
+('Bhee',417,0),
+('Bruu',417,0),
+('Czaa',417,0),
+('Droo',417,0),
+('Flaa',417,0),
+('Fzuu',417,0),
+('Ghaa',417,0),
+('Gree',417,0),
+('Gzaa',417,0),
+('Haa',417,0),
+('Haad',417,0),
+('Haag',417,0),
+('Haap',417,0),
+('Jhaa',417,0),
+('Jhuu',417,0),
+('Khaa',417,0),
+('Khii',417,0),
+('Khuu',417,0),
+('Kree',417,0),
+('Luu',417,0),
+('Maa',417,0),
+('Nhee',417,0),
+('Phuu',417,0),
+('Pryy',417,0),
+('Rhuu',417,0),
+('Shaa',417,0),
+('Sloo',417,0),
+('Sruu',417,0),
+('Thoo',417,0),
+('Traa',417,0),
+('Wraa',417,0),
+('Zhaa',417,0),
+('dhon',417,1),
+('dhum',417,1),
+('dhun',417,1),
+('dom',417,1),
+('don',417,1),
+('drom',417,1),
+('dym',417,1),
+('fenn',417,1),
+('fum',417,1),
+('fun',417,1),
+('ghon',417,1),
+('ghun',417,1),
+('grom',417,1),
+('grym',417,1),
+('hom',417,1),
+('hon',417,1),
+('hun',417,1),
+('jhom',417,1),
+('kun',417,1),
+('lum',417,1),
+('mmon',417,1),
+('mon',417,1),
+('myn',417,1),
+('nam',417,1),
+('nem',417,1),
+('nhym',417,1),
+('nom',417,1),
+('num',417,1),
+('phom',417,1),
+('roon',417,1),
+('rym',417,1),
+('shon',417,1),
+('thun',417,1),
+('tom',417,1),
+('zhem',417,1),
+('zhum',417,1),
+('zun',417,1),
+('Bar',1860,0),
+('Bel',1860,0),
+('Char',1860,0),
+('Grak\'',1860,0),
+('Graz\'',1860,0),
+('Grim',1860,0),
+('Hath',1860,0),
+('Hel',1860,0),
+('Hok',1860,0),
+('Huk',1860,0),
+('Jhaz',1860,0),
+('Jhom',1860,0),
+('Juk\'',1860,0),
+('Kal\'',1860,0),
+('Klath',1860,0),
+('Kon',1860,0),
+('Krag',1860,0),
+('Krak',1860,0),
+('Mak',1860,0),
+('Mezz',1860,0),
+('Orm',1860,0),
+('Phan',1860,0),
+('Sar',1860,0),
+('Tang',1860,0),
+('Than',1860,0),
+('Thog',1860,0),
+('Thok',1860,0),
+('Thul',1860,0),
+('Zag\'',1860,0),
+('Zang',1860,0),
+('Zhar\'',1860,0),
+('kath',1860,1),
+('doc',1860,1),
+('dok',1860,1),
+('gak',1860,1),
+('garth',1860,1),
+('gore',1860,1),
+('gorg',1860,1),
+('grave',1860,1),
+('gron',1860,1),
+('juk',1860,1),
+('krast',1860,1),
+('kresh',1860,1),
+('krit',1860,1),
+('los',1860,1),
+('mon',1860,1),
+('mos',1860,1),
+('moth',1860,1),
+('nagma',1860,1),
+('nak',1860,1),
+('nar',1860,1),
+('nos',1860,1),
+('nuz',1860,1),
+('phog',1860,1),
+('rath',1860,1),
+('tast',1860,1),
+('taz',1860,1),
+('thak',1860,1),
+('thang',1860,1),
+('thyk',1860,1),
+('vhug',1860,1),
+('zazt',1860,1),
+('Ael',1863,0),
+('Aez',1863,0),
+('Ang',1863,0),
+('Ban',1863,0),
+('Bet',1863,0),
+('Bro',1863,0),
+('Bry',1863,0),
+('Cat',1863,0),
+('Dir',1863,0),
+('Dis',1863,0),
+('Dom',1863,0),
+('Drus',1863,0),
+('Fie',1863,0),
+('Fier',1863,0),
+('Gly',1863,0),
+('Hel',1863,0),
+('Hes',1863,0),
+('Kal',1863,0),
+('Lyn',1863,0),
+('Mir',1863,0),
+('Nim',1863,0),
+('Sar',1863,0),
+('Sel',1863,0),
+('Vil',1863,0),
+('Zah',1863,0),
+('aith',1863,1),
+('anda',1863,1),
+('antia',1863,1),
+('evere',1863,1),
+('lia',1863,1),
+('lissa',1863,1),
+('neri',1863,1),
+('neth',1863,1),
+('nia',1863,1),
+('nlissa',1863,1),
+('nora',1863,1),
+('nva',1863,1),
+('nys',1863,1),
+('ola',1863,1),
+('ona',1863,1),
+('ora',1863,1),
+('rah',1863,1),
+('riana',1863,1),
+('riel',1863,1),
+('rona',1863,1),
+('tai',1863,1),
+('tevere',1863,1),
+('thea',1863,1),
+('vina',1863,1),
+('wena',1863,1),
+('wyn',1863,1),
+('xia',1863,1),
+('yla',1863,1),
+('yssa',1863,1),
+('Flaa',17252,0),
+('Haa',17252,0),
+('Jhuu',17252,0),
+('Shaa',17252,0),
+('Thoo',17252,0),
+('dhun',17252,1),
+('ghun',17252,1),
+('roon',17252,1),
+('thun',17252,1),
+('tom',17252,1);
 /*!40000 ALTER TABLE `pet_name_generation` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4368,8 +4162,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `petcreateinfo_spell`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `petcreateinfo_spell` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `Spell1` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -4378,7 +4170,6 @@ CREATE TABLE `petcreateinfo_spell` (
   `Spell4` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet Create Spells';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `petcreateinfo_spell`
@@ -4394,8 +4185,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `pickpocketing_loot_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pickpocketing_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -4403,10 +4192,9 @@ CREATE TABLE `pickpocketing_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `pickpocketing_loot_template`
@@ -4422,8 +4210,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `player_classlevelstats`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `player_classlevelstats` (
   `class` tinyint(3) unsigned NOT NULL,
   `level` tinyint(3) unsigned NOT NULL,
@@ -4431,7 +4217,6 @@ CREATE TABLE `player_classlevelstats` (
   `basemana` smallint(5) unsigned NOT NULL,
   PRIMARY KEY (`class`,`level`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 PACK_KEYS=0 COMMENT='Stores levels stats.';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `player_classlevelstats`
@@ -4439,7 +4224,6 @@ CREATE TABLE `player_classlevelstats` (
 
 LOCK TABLES `player_classlevelstats` WRITE;
 /*!40000 ALTER TABLE `player_classlevelstats` DISABLE KEYS */;
-
 INSERT INTO `player_classlevelstats` VALUES
 (1,1,20,0),
 (1,2,29,0),
@@ -4989,8 +4773,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `player_levelstats`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `player_levelstats` (
   `race` tinyint(3) unsigned NOT NULL,
   `class` tinyint(3) unsigned NOT NULL,
@@ -5002,7 +4784,6 @@ CREATE TABLE `player_levelstats` (
   `spi` tinyint(3) unsigned NOT NULL,
   PRIMARY KEY (`race`,`class`,`level`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 PACK_KEYS=0 COMMENT='Stores levels stats.';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `player_levelstats`
@@ -7414,14 +7195,15 @@ INSERT INTO `player_levelstats` VALUES
 /*!40000 ALTER TABLE `player_levelstats` ENABLE KEYS */;
 UNLOCK TABLES;
 
--- ----------------------------
--- Table structure for player_xp_for_level
--- ----------------------------
+--
+-- Table structure for table `player_xp_for_level`
+--
+
 DROP TABLE IF EXISTS `player_xp_for_level`;
 CREATE TABLE `player_xp_for_level` (
   `lvl` int(3) unsigned NOT NULL,
   `xp_for_next_level` int(10) unsigned NOT NULL,
-  PRIMARY KEY  (`lvl`)
+  PRIMARY KEY (`lvl`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -7431,65 +7213,65 @@ CREATE TABLE `player_xp_for_level` (
 LOCK TABLES `player_xp_for_level` WRITE;
 /*!40000 ALTER TABLE `player_xp_for_level` DISABLE KEYS */;
 INSERT INTO `player_xp_for_level` VALUES
-('1', '400'),
-('2', '900'),
-('3', '1400'),
-('4', '2100'),
-('5', '2800'),
-('6', '3600'),
-('7', '4500'),
-('8', '5400'),
-('9', '6500'),
-('10', '7600'),
-('11', '8800'),
-('12', '10100'),
-('13', '11400'),
-('14', '12900'),
-('15', '14400'),
-('16', '16000'),
-('17', '17700'),
-('18', '19400'),
-('19', '21300'),
-('20', '23200'),
-('21', '25200'),
-('22', '27300'),
-('23', '29400'),
-('24', '31700'),
-('25', '34000'),
-('26', '36400'),
-('27', '38900'),
-('28', '41400'),
-('29', '44300'),
-('30', '47400'),
-('31', '50800'),
-('32', '54500'),
-('33', '58600'),
-('34', '62800'),
-('35', '67100'),
-('36', '71600'),
-('37', '76100'),
-('38', '80800'),
-('39', '85700'),
-('40', '90700'),
-('41', '95800'),
-('42', '101000'),
-('43', '106300'),
-('44', '111800'),
-('45', '117500'),
-('46', '123200'),
-('47', '129100'),
-('48', '135100'),
-('49', '141200'),
-('50', '147500'),
-('51', '153900'),
-('52', '160400'),
-('53', '167100'),
-('54', '173900'),
-('55', '180800'),
-('56', '187900'),
-('57', '195000'),
-('58', '202300'),
-('59', '209800');
+(1,400),
+(2,900),
+(3,1400),
+(4,2100),
+(5,2800),
+(6,3600),
+(7,4500),
+(8,5400),
+(9,6500),
+(10,7600),
+(11,8800),
+(12,10100),
+(13,11400),
+(14,12900),
+(15,14400),
+(16,16000),
+(17,17700),
+(18,19400),
+(19,21300),
+(20,23200),
+(21,25200),
+(22,27300),
+(23,29400),
+(24,31700),
+(25,34000),
+(26,36400),
+(27,38900),
+(28,41400),
+(29,44300),
+(30,47400),
+(31,50800),
+(32,54500),
+(33,58600),
+(34,62800),
+(35,67100),
+(36,71600),
+(37,76100),
+(38,80800),
+(39,85700),
+(40,90700),
+(41,95800),
+(42,101000),
+(43,106300),
+(44,111800),
+(45,117500),
+(46,123200),
+(47,129100),
+(48,135100),
+(49,141200),
+(50,147500),
+(51,153900),
+(52,160400),
+(53,167100),
+(54,173900),
+(55,180800),
+(56,187900),
+(57,195000),
+(58,202300),
+(59,209800);
 /*!40000 ALTER TABLE `player_xp_for_level` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -7498,20 +7280,17 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `playercreateinfo`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `playercreateinfo` (
-  `race` tinyint(3) unsigned NOT NULL default '0',
-  `class` tinyint(3) unsigned NOT NULL default '0',
-  `map` smallint(5) unsigned NOT NULL default '0',
-  `zone` mediumint(8) unsigned NOT NULL default '0',
-  `position_x` float NOT NULL default '0',
-  `position_y` float NOT NULL default '0',
-  `position_z` float NOT NULL default '0',
-  `orientation` float NOT NULL default '0',
-  PRIMARY KEY  (`race`,`class`)
+  `race` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `class` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `map` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `zone` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `position_x` float NOT NULL DEFAULT '0',
+  `position_y` float NOT NULL DEFAULT '0',
+  `position_z` float NOT NULL DEFAULT '0',
+  `orientation` float NOT NULL DEFAULT '0',
+  PRIMARY KEY (`race`,`class`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `playercreateinfo`
@@ -7531,16 +7310,16 @@ INSERT INTO `playercreateinfo` VALUES
 (2,4,1,14,-618.518,-4251.67,38.718,0),
 (2,7,1,14,-618.518,-4251.67,38.718,0),
 (2,9,1,14,-618.518,-4251.67,38.718,0),
-(3,1,0,1,-6240.32,331.033,382.758,6.177156),
-(3,2,0,1,-6240.32,331.033,382.758,6.177156),
-(3,3,0,1,-6240.32,331.033,382.758,6.177156),
-(3,4,0,1,-6240.32,331.033,382.758,6.177156),
-(3,5,0,1,-6240.32,331.033,382.758,6.177156),
-(4,1,1,141,10311.3,832.463,1326.41,5.696318),
-(4,3,1,141,10311.3,832.463,1326.41,5.696318),
-(4,4,1,141,10311.3,832.463,1326.41,5.696318),
-(4,5,1,141,10311.3,832.463,1326.41,5.696318),
-(4,11,1,141,10311.3,832.463,1326.41,5.696318),
+(3,1,0,1,-6240.32,331.033,382.758,6.17716),
+(3,2,0,1,-6240.32,331.033,382.758,6.17716),
+(3,3,0,1,-6240.32,331.033,382.758,6.17716),
+(3,4,0,1,-6240.32,331.033,382.758,6.17716),
+(3,5,0,1,-6240.32,331.033,382.758,6.17716),
+(4,1,1,141,10311.3,832.463,1326.41,5.69632),
+(4,3,1,141,10311.3,832.463,1326.41,5.69632),
+(4,4,1,141,10311.3,832.463,1326.41,5.69632),
+(4,5,1,141,10311.3,832.463,1326.41,5.69632),
+(4,11,1,141,10311.3,832.463,1326.41,5.69632),
 (5,1,0,85,1676.71,1678.31,121.67,2.70526),
 (5,4,0,85,1676.71,1678.31,121.67,2.70526),
 (5,5,0,85,1676.71,1678.31,121.67,2.70526),
@@ -7568,8 +7347,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `playercreateinfo_action`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `playercreateinfo_action` (
   `race` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `class` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -7579,7 +7356,6 @@ CREATE TABLE `playercreateinfo_action` (
   PRIMARY KEY (`race`,`class`,`button`),
   KEY `playercreateinfo_race_class_index` (`race`,`class`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `playercreateinfo_action`
@@ -7813,8 +7589,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `playercreateinfo_item`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `playercreateinfo_item` (
   `race` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `class` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -7822,7 +7596,6 @@ CREATE TABLE `playercreateinfo_item` (
   `amount` tinyint(3) unsigned NOT NULL DEFAULT '1',
   KEY `playercreateinfo_race_class_index` (`race`,`class`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `playercreateinfo_item`
@@ -7838,8 +7611,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `playercreateinfo_spell`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `playercreateinfo_spell` (
   `race` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `class` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -7847,7 +7618,6 @@ CREATE TABLE `playercreateinfo_spell` (
   `Note` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`race`,`class`,`Spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `playercreateinfo_spell`
@@ -9362,14 +9132,14 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `points_of_interest`;
 CREATE TABLE `points_of_interest` (
-  `entry` mediumint(8) unsigned NOT NULL default '0',
-  `x` float NOT NULL default '0',
-  `y` float NOT NULL default '0',
-  `icon` mediumint(8) unsigned NOT NULL default '0',
-  `flags` mediumint(8) unsigned NOT NULL default '0',
-  `data` mediumint(8) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `x` float NOT NULL DEFAULT '0',
+  `y` float NOT NULL DEFAULT '0',
+  `icon` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `flags` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `data` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `icon_name` text NOT NULL,
-  PRIMARY KEY  (`entry`)
+  PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -9386,15 +9156,13 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `pool_creature`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pool_creature` (
   `guid` int(10) unsigned NOT NULL DEFAULT '0',
   `pool_entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `chance` float unsigned NOT NULL DEFAULT '0',
   `description` varchar(255) NOT NULL,
-  PRIMARY KEY  (`guid`),
-  INDEX `pool_idx` (pool_entry)
+  PRIMARY KEY (`guid`),
+  KEY `pool_idx` (`pool_entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -9412,12 +9180,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `pool_creature_template`;
 CREATE TABLE `pool_creature_template` (
-  `id` int(10) unsigned NOT NULL default '0',
-  `pool_entry` mediumint(8) unsigned NOT NULL default '0',
-  `chance` float unsigned NOT NULL default '0',
+  `id` int(10) unsigned NOT NULL DEFAULT '0',
+  `pool_entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `chance` float unsigned NOT NULL DEFAULT '0',
   `description` varchar(255) NOT NULL,
-  PRIMARY KEY  (`id`),
-  INDEX `pool_idx` (pool_entry)
+  PRIMARY KEY (`id`),
+  KEY `pool_idx` (`pool_entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -9434,17 +9202,14 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `pool_gameobject`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pool_gameobject` (
   `guid` int(10) unsigned NOT NULL DEFAULT '0',
   `pool_entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `chance` float unsigned NOT NULL DEFAULT '0',
   `description` varchar(255) NOT NULL,
-  PRIMARY KEY  (`guid`),
-  INDEX `pool_idx` (pool_entry)
+  PRIMARY KEY (`guid`),
+  KEY `pool_idx` (`pool_entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `pool_gameobject`
@@ -9461,12 +9226,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `pool_gameobject_template`;
 CREATE TABLE `pool_gameobject_template` (
-  `id` int(10) unsigned NOT NULL default '0',
-  `pool_entry` mediumint(8) unsigned NOT NULL default '0',
-  `chance` float unsigned NOT NULL default '0',
+  `id` int(10) unsigned NOT NULL DEFAULT '0',
+  `pool_entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `chance` float unsigned NOT NULL DEFAULT '0',
   `description` varchar(255) NOT NULL,
-  PRIMARY KEY  (`id`),
-  INDEX `pool_idx` (pool_entry)
+  PRIMARY KEY (`id`),
+  KEY `pool_idx` (`pool_entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -9483,17 +9248,14 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `pool_pool`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pool_pool` (
   `pool_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `mother_pool` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `chance` float NOT NULL DEFAULT '0',
   `description` varchar(255) NOT NULL,
-  PRIMARY KEY  (pool_id),
-  INDEX pool_idx (mother_pool)
+  PRIMARY KEY (`pool_id`),
+  KEY `pool_idx` (`mother_pool`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `pool_pool`
@@ -9509,15 +9271,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `pool_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pool_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Pool entry',
   `max_limit` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Max number of objects (0) is no limit',
   `description` varchar(255) NOT NULL,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `pool_template`
@@ -9533,8 +9292,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `quest_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `quest_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `Method` tinyint(3) unsigned NOT NULL DEFAULT '2',
@@ -9542,9 +9299,9 @@ CREATE TABLE `quest_template` (
   `MinLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `QuestLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `Type` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `RequiredClasses` smallint(5) unsigned NOT NULL default '0',
+  `RequiredClasses` smallint(5) unsigned NOT NULL DEFAULT '0',
   `RequiredRaces` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `RequiredSkill` smallint(5) unsigned NOT NULL default '0',
+  `RequiredSkill` smallint(5) unsigned NOT NULL DEFAULT '0',
   `RequiredSkillValue` smallint(5) unsigned NOT NULL DEFAULT '0',
   `RepObjectiveFaction` smallint(5) unsigned NOT NULL DEFAULT '0',
   `RepObjectiveValue` mediumint(9) NOT NULL DEFAULT '0',
@@ -9663,7 +9420,6 @@ CREATE TABLE `quest_template` (
   `CompleteScript` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Quest System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `quest_template`
@@ -9679,8 +9435,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `reference_loot_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `reference_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -9688,10 +9442,9 @@ CREATE TABLE `reference_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `reference_loot_template`
@@ -9708,11 +9461,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `reputation_reward_rate`;
 CREATE TABLE `reputation_reward_rate` (
-  `faction` mediumint(8) unsigned NOT NULL default '0',
-  `quest_rate` float NOT NULL default '1',
-  `creature_rate` float NOT NULL default '1',
-  `spell_rate` float NOT NULL default '1',
-  PRIMARY KEY  (`faction`)
+  `faction` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `quest_rate` float NOT NULL DEFAULT '1',
+  `creature_rate` float NOT NULL DEFAULT '1',
+  `spell_rate` float NOT NULL DEFAULT '1',
+  PRIMARY KEY (`faction`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -9730,20 +9483,20 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `reputation_spillover_template`;
 CREATE TABLE `reputation_spillover_template` (
-  `faction` smallint(6) unsigned NOT NULL default '0' COMMENT 'faction entry',
-  `faction1` smallint(6) unsigned NOT NULL default '0' COMMENT 'faction to give spillover for',
-  `rate_1` float NOT NULL default '0' COMMENT 'the given rep points * rate',
-  `rank_1` tinyint(3) unsigned NOT NULL default '0' COMMENT 'max rank, above this will not give any spillover',
-  `faction2` smallint(6) unsigned NOT NULL default '0',
-  `rate_2` float NOT NULL default '0',
-  `rank_2` tinyint(3) unsigned NOT NULL default '0',
-  `faction3` smallint(6) unsigned NOT NULL default '0',
-  `rate_3` float NOT NULL default '0',
-  `rank_3` tinyint(3) unsigned NOT NULL default '0',
-  `faction4` smallint(6) unsigned NOT NULL default '0',
-  `rate_4` float NOT NULL default '0',
-  `rank_4` tinyint(3) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`faction`)
+  `faction` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT 'faction entry',
+  `faction1` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT 'faction to give spillover for',
+  `rate_1` float NOT NULL DEFAULT '0' COMMENT 'the given rep points * rate',
+  `rank_1` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'max rank, above this will not give any spillover',
+  `faction2` smallint(6) unsigned NOT NULL DEFAULT '0',
+  `rate_2` float NOT NULL DEFAULT '0',
+  `rank_2` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `faction3` smallint(6) unsigned NOT NULL DEFAULT '0',
+  `rate_3` float NOT NULL DEFAULT '0',
+  `rank_3` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `faction4` smallint(6) unsigned NOT NULL DEFAULT '0',
+  `rate_4` float NOT NULL DEFAULT '0',
+  `rank_4` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`faction`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Reputation spillover reputation gain';
 
 --
@@ -9760,13 +9513,10 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `reserved_name`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `reserved_name` (
   `name` varchar(12) NOT NULL DEFAULT '',
   PRIMARY KEY (`name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player Reserved Names';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `reserved_name`
@@ -9783,10 +9533,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `scripted_areatrigger`;
 CREATE TABLE `scripted_areatrigger` (
-  `entry` MEDIUMINT( 8 ) NOT NULL ,
-  `ScriptName` CHAR( 64 ) NOT NULL ,
-  PRIMARY KEY ( `entry` )
-) ENGINE = MYISAM DEFAULT CHARSET=utf8;
+  `entry` mediumint(8) NOT NULL,
+  `ScriptName` char(64) NOT NULL,
+  PRIMARY KEY (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `scripted_areatrigger`
@@ -9805,7 +9555,7 @@ DROP TABLE IF EXISTS `scripted_event_id`;
 CREATE TABLE `scripted_event_id` (
   `id` mediumint(8) NOT NULL,
   `ScriptName` char(64) NOT NULL,
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Script library scripted events';
 
 --
@@ -9822,14 +9572,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `skill_fishing_base_level`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `skill_fishing_base_level` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Area identifier',
   `skill` smallint(6) NOT NULL DEFAULT '0' COMMENT 'Base skill level requirement',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Fishing system';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `skill_fishing_base_level`
@@ -9845,8 +9592,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `skinning_loot_template`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `skinning_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `item` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -9854,10 +9599,9 @@ CREATE TABLE `skinning_loot_template` (
   `groupid` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `mincountOrRef` mediumint(9) NOT NULL DEFAULT '1',
   `maxcount` tinyint(3) unsigned NOT NULL DEFAULT '1',
-  `condition_id` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
+  `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `skinning_loot_template`
@@ -9873,15 +9617,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `spell_affect`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_affect` (
   `entry` smallint(5) unsigned NOT NULL DEFAULT '0',
   `effectId` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `SpellFamilyMask` bigint(20) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`,`effectId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `spell_affect`
@@ -9929,216 +9670,216 @@ INSERT INTO `spell_affect` VALUES
 (13743,0,0x0000000000000040),
 (13872,0,0x0000000000000060),
 (13875,0,0x0000000000000040),
-(13975,1,4194304),
-(13976,0,1792),
-(13979,0,1792),
-(13980,0,1792),
-(13981,0,16779264),
-(14062,1,4194304),
-(14063,1,4194304),
-(14064,1,4194304),
-(14065,1,4194304),
-(14066,0,16779264),
-(14067,0,16779264),
-(14082,0,1280),
-(14083,0,1280),
-(14113,0,268558336),
-(14114,0,268558336),
-(14115,0,268558336),
-(14116,0,268558336),
-(14117,0,268558336),
-(14143,0,67109382),
-(14149,0,67109382),
-(14168,0,524288),
-(14169,0,524288),
-(14174,0,2097152),
-(14175,0,2097152),
-(14176,0,2097152),
-(14909,1,1048704),
-(15017,1,1048704),
-(15058,0,2233056),
-(15059,0,2233056),
-(15060,0,2233056),
-(16035,0,2416967683),
-(16038,0,1073741824),
-(16039,0,2416967683),
-(16041,0,3),
-(16043,0,8),
-(16043,1,536870912),
-(16086,0,32),
-(16086,1,134217728),
-(16086,2,4),
-(16089,0,20723008519),
-(16105,0,2416967683),
-(16106,0,2416967683),
-(16106,1,268435456),
-(16107,0,2416967683),
-(16108,0,2416967683),
-(16109,0,2416967683),
-(16110,0,2416967683),
-(16111,0,2416967683),
-(16112,0,2416967683),
-(16117,0,3),
-(16118,0,3),
-(16119,0,3),
-(16120,0,3),
-(16130,0,8),
-(16130,1,536870912),
-(16160,0,1073741824),
-(16161,0,1073741824),
-(16166,0,2416967683),
-(16166,1,2416967683),
-(16173,0,537395200),
-(16181,0,448),
-(16183,0,256),
-(16184,0,512),
-(16184,1,512),
-(16187,0,24576),
-(16189,0,67362816),
-(16205,0,24576),
-(16206,0,24576),
-(16207,0,24576),
-(16208,0,24576),
-(16209,1,512),
-(16222,0,537395200),
-(16223,0,537395200),
-(16224,0,537395200),
-(16225,0,537395200),
-(16230,0,448),
-(16232,0,448),
-(16233,0,448),
-(16234,0,448),
-(16258,0,32768),
-(16258,1,262144),
-(16259,0,65536),
-(16259,1,131072),
-(16266,0,4194304),
-(16266,1,16777216),
-(16266,2,8388608),
-(16293,0,32768),
-(16293,1,262144),
-(16295,0,65536),
-(16295,1,131072),
-(16513,0,34359861248),
-(16513,1,122880),
-(16513,2,122880),
-(16514,0,34359861248),
-(16514,1,122880),
-(16514,2,122880),
-(16515,0,34359861248),
-(16515,1,122880),
-(16515,2,122880),
-(16544,2,4),
-(16719,0,34359861248),
-(16719,1,122880),
-(16719,2,122880),
-(16720,0,34359861248),
-(16720,1,122880),
-(16720,2,122880),
-(16870,0,4512331310825215),
-(17123,0,128),
-(17124,0,128),
-(17904,0,0),
-(17912,0,0),
-(17913,0,0),
-(17914,0,0),
-(17915,0,0),
-(17916,0,0),
-(17954,1,824633725796),
-(17955,1,824633725796),
-(17956,1,824633725796),
-(17957,1,824633725796),
-(17958,1,824633725796),
-(18174,0,6447531034),
-(18175,0,6447531034),
-(18176,0,6447531034),
-(18177,0,6447531034),
-(18178,0,6447531034),
-(18218,0,6447531034),
-(18219,0,6447531034),
-(18271,0,12884993161),
-(18271,1,4295492618),
-(18271,2,0),
-(18272,0,12884993161),
-(18272,1,4295492618),
-(18272,2,0),
-(18273,0,12884993161),
-(18273,1,4295492618),
-(18273,2,0),
-(18274,0,12884993161),
-(18274,1,4295492618),
-(18274,2,0),
-(18275,0,12884993161),
-(18275,1,4295492618),
-(18275,2,0),
-(20101,0,142606336),
-(20102,0,142606336),
-(20103,0,142606336),
-(20104,0,142606336),
-(20105,0,142606336),
-(20575,1,67108864),
-(21942,1,134217728),
-(23300,0,536870912),
-(26118,0,67108864),
-(26118,1,67108864),
-(28539,0,4096),
-(28682,0,4194327),
-(28743,0,240),
-(28746,1,66566),
-(28751,0,135168),
-(28755,0,32),
-(28763,0,67108864),
-(28774,0,32768),
-(28787,0,8589934592),
-(28807,0,64),
-(28808,0,17465351744),
-(28811,0,8388608),
-(28814,0,131072),
-(28815,0,33554438),
-(28818,0,537395200),
-(28821,0,1024),
-(28829,0,2),
-(28830,0,262144),
-(28831,0,1),
-(28842,0,4294984768),
-(28843,0,557056),
-(28844,0,1024),
-(28852,0,512),
-(28852,1,536870912),
-(28855,0,2048),
-(28999,0,3),
-(29000,0,3),
-(29005,0,2416967683),
-(29063,0,2499),
-(29079,0,4194304),
-(29079,1,16777216),
-(29079,2,8388608),
-(29080,0,4194304),
-(29080,1,16777216),
-(29080,2,8388608),
-(29171,0,16384),
-(29187,0,448),
-(29189,0,448),
-(29191,0,448),
-(29192,0,8388608),
-(29192,1,2097152),
-(29193,0,8388608),
-(29193,1,2097152),
-(29202,0,64),
-(29205,0,64),
-(29206,0,64),
-(29438,0,4195063),
-(29439,0,4195063),
-(29440,0,4195063),
-(30440,0,557056),
-(30441,0,34359738368),
-(30640,0,256),
-(30812,0,2954368024),
-(30813,0,2954368024),
-(30814,0,2954368024),
-(30872,0,256),
-(30892,0,134217728),
-(30893,0,134217728);
+(13975,1,0x0000000000400000),
+(13976,0,0x0000000000000700),
+(13979,0,0x0000000000000700),
+(13980,0,0x0000000000000700),
+(13981,0,0x0000000001000800),
+(14062,1,0x0000000000400000),
+(14063,1,0x0000000000400000),
+(14064,1,0x0000000000400000),
+(14065,1,0x0000000000400000),
+(14066,0,0x0000000001000800),
+(14067,0,0x0000000001000800),
+(14082,0,0x0000000000000500),
+(14083,0,0x0000000000000500),
+(14113,0,0x000000001001E000),
+(14114,0,0x000000001001E000),
+(14115,0,0x000000001001E000),
+(14116,0,0x000000001001E000),
+(14117,0,0x000000001001E000),
+(14143,0,0x0000000004000206),
+(14149,0,0x0000000004000206),
+(14168,0,0x0000000000080000),
+(14169,0,0x0000000000080000),
+(14174,0,0x0000000000200000),
+(14175,0,0x0000000000200000),
+(14176,0,0x0000000000200000),
+(14909,1,0x0000000000100080),
+(15017,1,0x0000000000100080),
+(15058,0,0x00000000002212E0),
+(15059,0,0x00000000002212E0),
+(15060,0,0x00000000002212E0),
+(16035,0,0x0000000090100003),
+(16038,0,0x0000000040000000),
+(16039,0,0x0000000090100003),
+(16041,0,0x0000000000000003),
+(16043,0,0x0000000000000008),
+(16043,1,0x0000000020000000),
+(16086,0,0x0000000000000020),
+(16086,1,0x0000000008000000),
+(16086,2,0x0000000000000004),
+(16089,0,0x00000004D3300407),
+(16105,0,0x0000000090100003),
+(16106,0,0x0000000090100003),
+(16106,1,0x0000000010000000),
+(16107,0,0x0000000090100003),
+(16108,0,0x0000000090100003),
+(16109,0,0x0000000090100003),
+(16110,0,0x0000000090100003),
+(16111,0,0x0000000090100003),
+(16112,0,0x0000000090100003),
+(16117,0,0x0000000000000003),
+(16118,0,0x0000000000000003),
+(16119,0,0x0000000000000003),
+(16120,0,0x0000000000000003),
+(16130,0,0x0000000000000008),
+(16130,1,0x0000000020000000),
+(16160,0,0x0000000040000000),
+(16161,0,0x0000000040000000),
+(16166,0,0x0000000090100003),
+(16166,1,0x0000000090100003),
+(16173,0,0x0000000020080000),
+(16181,0,0x00000000000001C0),
+(16183,0,0x0000000000000100),
+(16184,0,0x0000000000000200),
+(16184,1,0x0000000000000200),
+(16187,0,0x0000000000006000),
+(16189,0,0x000000000403E000),
+(16205,0,0x0000000000006000),
+(16206,0,0x0000000000006000),
+(16207,0,0x0000000000006000),
+(16208,0,0x0000000000006000),
+(16209,1,0x0000000000000200),
+(16222,0,0x0000000020080000),
+(16223,0,0x0000000020080000),
+(16224,0,0x0000000020080000),
+(16225,0,0x0000000020080000),
+(16230,0,0x00000000000001C0),
+(16232,0,0x00000000000001C0),
+(16233,0,0x00000000000001C0),
+(16234,0,0x00000000000001C0),
+(16258,0,0x0000000000008000),
+(16258,1,0x0000000000040000),
+(16259,0,0x0000000000010000),
+(16259,1,0x0000000000020000),
+(16266,0,0x0000000000400000),
+(16266,1,0x0000000001000000),
+(16266,2,0x0000000000800000),
+(16293,0,0x0000000000008000),
+(16293,1,0x0000000000040000),
+(16295,0,0x0000000000010000),
+(16295,1,0x0000000000020000),
+(16513,0,0x000000080001E000),
+(16513,1,0x000000000001E000),
+(16513,2,0x000000000001E000),
+(16514,0,0x000000080001E000),
+(16514,1,0x000000000001E000),
+(16514,2,0x000000000001E000),
+(16515,0,0x000000080001E000),
+(16515,1,0x000000000001E000),
+(16515,2,0x000000000001E000),
+(16544,2,0x0000000000000004),
+(16719,0,0x000000080001E000),
+(16719,1,0x000000000001E000),
+(16719,2,0x000000000001E000),
+(16720,0,0x000000080001E000),
+(16720,1,0x000000000001E000),
+(16720,2,0x000000000001E000),
+(16870,0,0x001007F100E3FEFF),
+(17123,0,0x0000000000000080),
+(17124,0,0x0000000000000080),
+(17904,0,0x0000000000000000),
+(17912,0,0x0000000000000000),
+(17913,0,0x0000000000000000),
+(17914,0,0x0000000000000000),
+(17915,0,0x0000000000000000),
+(17916,0,0x0000000000000000),
+(17954,1,0x000000C000001364),
+(17955,1,0x000000C000001364),
+(17956,1,0x000000C000001364),
+(17957,1,0x000000C000001364),
+(17958,1,0x000000C000001364),
+(18174,0,0x00000001804D841A),
+(18175,0,0x00000001804D841A),
+(18176,0,0x00000001804D841A),
+(18177,0,0x00000001804D841A),
+(18178,0,0x00000001804D841A),
+(18218,0,0x00000001804D841A),
+(18219,0,0x00000001804D841A),
+(18271,0,0x0000000300016489),
+(18271,1,0x000000010008040A),
+(18271,2,0x0000000000000000),
+(18272,0,0x0000000300016489),
+(18272,1,0x000000010008040A),
+(18272,2,0x0000000000000000),
+(18273,0,0x0000000300016489),
+(18273,1,0x000000010008040A),
+(18273,2,0x0000000000000000),
+(18274,0,0x0000000300016489),
+(18274,1,0x000000010008040A),
+(18274,2,0x0000000000000000),
+(18275,0,0x0000000300016489),
+(18275,1,0x000000010008040A),
+(18275,2,0x0000000000000000),
+(20101,0,0x0000000008800000),
+(20102,0,0x0000000008800000),
+(20103,0,0x0000000008800000),
+(20104,0,0x0000000008800000),
+(20105,0,0x0000000008800000),
+(20575,1,0x0000000004000000),
+(21942,1,0x0000000008000000),
+(23300,0,0x0000000020000000),
+(26118,0,0x0000000004000000),
+(26118,1,0x0000000004000000),
+(28539,0,0x0000000000001000),
+(28682,0,0x0000000000400017),
+(28743,0,0x00000000000000F0),
+(28746,1,0x0000000000010406),
+(28751,0,0x0000000000021000),
+(28755,0,0x0000000000000020),
+(28763,0,0x0000000004000000),
+(28774,0,0x0000000000008000),
+(28787,0,0x0000000200000000),
+(28807,0,0x0000000000000040),
+(28808,0,0x0000000411041E40),
+(28811,0,0x0000000000800000),
+(28814,0,0x0000000000020000),
+(28815,0,0x0000000002000006),
+(28818,0,0x0000000020080000),
+(28821,0,0x0000000000000400),
+(28829,0,0x0000000000000002),
+(28830,0,0x0000000000040000),
+(28831,0,0x0000000000000001),
+(28842,0,0x0000000100004440),
+(28843,0,0x0000000000088000),
+(28844,0,0x0000000000000400),
+(28852,0,0x0000000000000200),
+(28852,1,0x0000000020000000),
+(28855,0,0x0000000000000800),
+(28999,0,0x0000000000000003),
+(29000,0,0x0000000000000003),
+(29005,0,0x0000000090100003),
+(29063,0,0x00000000000009C3),
+(29079,0,0x0000000000400000),
+(29079,1,0x0000000001000000),
+(29079,2,0x0000000000800000),
+(29080,0,0x0000000000400000),
+(29080,1,0x0000000001000000),
+(29080,2,0x0000000000800000),
+(29171,0,0x0000000000004000),
+(29187,0,0x00000000000001C0),
+(29189,0,0x00000000000001C0),
+(29191,0,0x00000000000001C0),
+(29192,0,0x0000000000800000),
+(29192,1,0x0000000000200000),
+(29193,0,0x0000000000800000),
+(29193,1,0x0000000000200000),
+(29202,0,0x0000000000000040),
+(29205,0,0x0000000000000040),
+(29206,0,0x0000000000000040),
+(29438,0,0x00000000004002F7),
+(29439,0,0x00000000004002F7),
+(29440,0,0x00000000004002F7),
+(30440,0,0x0000000000088000),
+(30441,0,0x0000000800000000),
+(30640,0,0x0000000000000100),
+(30812,0,0x00000000B0181418),
+(30813,0,0x00000000B0181418),
+(30814,0,0x00000000B0181418),
+(30872,0,0x0000000000000100),
+(30892,0,0x0000000008000000),
+(30893,0,0x0000000008000000);
 /*!40000 ALTER TABLE `spell_affect` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10147,8 +9888,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `spell_area`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_area` (
   `spell` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `area` mediumint(8) unsigned NOT NULL DEFAULT '0',
@@ -10162,7 +9901,6 @@ CREATE TABLE `spell_area` (
   `autocast` tinyint(1) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`spell`,`area`,`quest_start`,`quest_start_active`,`aura_spell`,`racemask`,`gender`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `spell_area`
@@ -10174,18 +9912,23 @@ LOCK TABLES `spell_area` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for `spell_bonus_data`
+-- Table structure for table `spell_bonus_data`
 --
+
 DROP TABLE IF EXISTS `spell_bonus_data`;
 CREATE TABLE `spell_bonus_data` (
   `entry` smallint(5) unsigned NOT NULL,
-  `direct_bonus` float NOT NULL default '0',
-  `dot_bonus` float NOT NULL default '0',
-  `ap_bonus` float NOT NULL default '0',
-  `ap_dot_bonus` float NOT NULL default '0',
-  `comments` varchar(255) default NULL,
-  PRIMARY KEY  (`entry`)
+  `direct_bonus` float NOT NULL DEFAULT '0',
+  `dot_bonus` float NOT NULL DEFAULT '0',
+  `ap_bonus` float NOT NULL DEFAULT '0',
+  `ap_dot_bonus` float NOT NULL DEFAULT '0',
+  `comments` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `spell_bonus_data`
+--
 
 LOCK TABLES `spell_bonus_data` WRITE;
 /*!40000 ALTER TABLE `spell_bonus_data` DISABLE KEYS */;
@@ -10311,8 +10054,6 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `spell_chain`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_chain` (
   `spell_id` mediumint(9) NOT NULL DEFAULT '0',
   `prev_spell` mediumint(9) NOT NULL DEFAULT '0',
@@ -10321,7 +10062,6 @@ CREATE TABLE `spell_chain` (
   `req_spell` mediumint(9) NOT NULL DEFAULT '0',
   PRIMARY KEY (`spell_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Spell Additinal Data';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `spell_chain`
@@ -11666,14 +11406,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `spell_elixir`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_elixir` (
   `entry` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'SpellId of potion',
   `mask` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Mask 0x1 battle 0x2 guardian 0x3 flask 0x7 unstable flasks 0xB shattrath flasks',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Spell System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `spell_elixir`
@@ -11682,66 +11419,66 @@ CREATE TABLE `spell_elixir` (
 LOCK TABLES `spell_elixir` WRITE;
 /*!40000 ALTER TABLE `spell_elixir` DISABLE KEYS */;
 INSERT INTO `spell_elixir` VALUES
-(17624,3),
-(17626,3),
-(17627,3),
-(17629,3),
-(17628,3),
-(2367,1),
-(2374,1),
-(3160,1),
-(3164,1),
-(7844,1),
-(8212,1),
-(10667,1),
-(10669,1),
-(11328,1),
-(11334,1),
-(11390,1),
-(11405,1),
-(11406,1),
-(11474,1),
-(16322,1),
-(16323,1),
-(16329,1),
-(17038,1),
-(17537,1),
-(17538,1),
-(17539,1),
-(21920,1),
-(26276,1),
-(673,2),
-(2378,2),
-(2380,2),
-(3166,2),
-(3219,2),
-(3220,2),
-(3222,2),
-(3223,2),
-(3593,2),
-(10668,2),
-(10692,2),
-(10693,2),
-(11319,2),
-(11348,2),
-(11349,2),
-(16321,2),
-(11364,2),
-(11371,2),
-(11396,2),
-(15231,2),
-(15233,2),
-(16325,2),
-(16326,2),
-(16327,2),
-(17535,2),
-(24361,2),
-(24363,2),
-(24382,2),
-(24383,2),
-(24417,2),
-(27652,2),
-(27653,2);
+(  673,0x2),
+( 2367,0x1),
+( 2374,0x1),
+( 2378,0x2),
+( 2380,0x2),
+( 3160,0x1),
+( 3164,0x1),
+( 3166,0x2),
+( 3219,0x2),
+( 3220,0x2),
+( 3222,0x2),
+( 3223,0x2),
+( 3593,0x2),
+( 7844,0x1),
+( 8212,0x1),
+(10667,0x1),
+(10668,0x2),
+(10669,0x1),
+(10692,0x2),
+(10693,0x2),
+(11319,0x2),
+(11328,0x1),
+(11334,0x1),
+(11348,0x2),
+(11349,0x2),
+(11364,0x2),
+(11371,0x2),
+(11390,0x1),
+(11396,0x2),
+(11405,0x1),
+(11406,0x1),
+(11474,0x1),
+(15231,0x2),
+(15233,0x2),
+(16321,0x2),
+(16322,0x1),
+(16323,0x1),
+(16325,0x2),
+(16326,0x2),
+(16327,0x2),
+(16329,0x1),
+(17038,0x1),
+(17535,0x2),
+(17537,0x1),
+(17538,0x1),
+(17539,0x1),
+(17624,0x3),
+(17626,0x3),
+(17627,0x3),
+(17628,0x3),
+(17629,0x3),
+(21920,0x1),
+(24361,0x2),
+(24363,0x2),
+(24382,0x2),
+(24383,0x2),
+(24417,0x2),
+(26276,0x1),
+(27652,0x2),
+(27653,0x2);
 /*!40000 ALTER TABLE `spell_elixir` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -11750,14 +11487,11 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `spell_facing`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_facing` (
-  `entry` INT(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell ID',
-  `facingcasterflag` TINYINT(1) NOT NULL DEFAULT '1' COMMENT 'flag for facing state, usually 1',
+  `entry` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Spell ID',
+  `facingcasterflag` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'flag for facing state, usually 1',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `spell_facing`
@@ -12745,15 +12479,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `spell_learn_spell`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_learn_spell` (
   `entry` smallint(5) unsigned NOT NULL DEFAULT '0',
   `SpellID` smallint(5) unsigned NOT NULL DEFAULT '0',
   `Active` tinyint(3) unsigned NOT NULL DEFAULT '1',
   PRIMARY KEY (`entry`,`SpellID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `spell_learn_spell`
@@ -12777,15 +12508,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `spell_pet_auras`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_pet_auras` (
   `spell` mediumint(8) unsigned NOT NULL COMMENT 'dummy spell id',
   `pet` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'pet id; 0 = all',
   `aura` mediumint(8) unsigned NOT NULL COMMENT 'pet aura id',
   PRIMARY KEY (`spell`,`pet`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `spell_pet_auras`
@@ -12826,15 +12554,13 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `spell_proc_event`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_proc_event` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `SchoolMask` tinyint(4) unsigned NOT NULL DEFAULT '0',
   `SpellFamilyName` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `SpellFamilyMask0` bigint(40) unsigned NOT NULL default '0',
-  `SpellFamilyMask1` bigint(40) unsigned NOT NULL default '0',
-  `SpellFamilyMask2` bigint(40) unsigned NOT NULL default '0',
+  `SpellFamilyMask0` bigint(40) unsigned NOT NULL DEFAULT '0',
+  `SpellFamilyMask1` bigint(40) unsigned NOT NULL DEFAULT '0',
+  `SpellFamilyMask2` bigint(40) unsigned NOT NULL DEFAULT '0',
   `procFlags` int(10) unsigned NOT NULL DEFAULT '0',
   `procEx` int(10) unsigned NOT NULL DEFAULT '0',
   `ppmRate` float NOT NULL DEFAULT '0',
@@ -12842,7 +12568,6 @@ CREATE TABLE `spell_proc_event` (
   `Cooldown` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `spell_proc_event`
@@ -13014,14 +12739,14 @@ INSERT INTO `spell_proc_event` VALUES
 UNLOCK TABLES;
 
 --
--- Table structure for spell_proc_item_enchant
+-- Table structure for table `spell_proc_item_enchant`
 --
 
 DROP TABLE IF EXISTS `spell_proc_item_enchant`;
 CREATE TABLE `spell_proc_item_enchant` (
-  `entry` mediumint unsigned NOT NULL,
-  `ppmRate` float NOT NULL default '0',
-  PRIMARY KEY  (`entry`)
+  `entry` mediumint(8) unsigned NOT NULL,
+  `ppmRate` float NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -13043,16 +12768,13 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `spell_script_target`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_script_target` (
   `entry` mediumint(8) unsigned NOT NULL,
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `targetEntry` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `inverseEffectMask` mediumint(8) unsigned NOT NULL default '0',
+  `inverseEffectMask` mediumint(8) unsigned NOT NULL DEFAULT '0',
   UNIQUE KEY `entry_type_target` (`entry`,`type`,`targetEntry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Spell System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `spell_script_target`
@@ -13063,14 +12785,11 @@ LOCK TABLES `spell_script_target` WRITE;
 /*!40000 ALTER TABLE `spell_script_target` ENABLE KEYS */;
 UNLOCK TABLES;
 
-
 --
 -- Table structure for table `spell_target_position`
 --
 
 DROP TABLE IF EXISTS `spell_target_position`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_target_position` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Identifier',
   `target_map` smallint(5) unsigned NOT NULL DEFAULT '0',
@@ -13080,7 +12799,6 @@ CREATE TABLE `spell_target_position` (
   `target_orientation` float NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Spell System';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `spell_target_position`
@@ -13187,16 +12905,13 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `spell_threat`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `spell_threat` (
   `entry` mediumint(8) unsigned NOT NULL,
   `Threat` smallint(6) NOT NULL,
-  `multiplier` float NOT NULL default '1' COMMENT 'threat multiplier for damage/healing',
-  `ap_bonus` float NOT NULL default '0' COMMENT 'additional threat bonus from attack power',
-  PRIMARY KEY  (`entry`)
+  `multiplier` float NOT NULL DEFAULT '1' COMMENT 'threat multiplier for damage/healing',
+  `ap_bonus` float NOT NULL DEFAULT '0' COMMENT 'additional threat bonus from attack power',
+  PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `spell_threat`
@@ -13285,15 +13000,12 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `transports`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `transports` (
   `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `name` text,
   `period` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Transports';
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Dumping data for table `transports`
@@ -13311,8 +13023,8 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `world_template`;
 CREATE TABLE `world_template` (
   `map` smallint(5) unsigned NOT NULL,
-  `ScriptName` varchar(128) NOT NULL default '',
-  PRIMARY KEY  (`map`)
+  `ScriptName` varchar(128) NOT NULL DEFAULT '',
+  PRIMARY KEY (`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -13323,8 +13035,8 @@ LOCK TABLES `world_template` WRITE;
 /*!40000 ALTER TABLE `world_template` DISABLE KEYS */;
 /*!40000 ALTER TABLE `world_template` ENABLE KEYS */;
 UNLOCK TABLES;
-
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
@@ -13333,4 +13045,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2008-03-30 15:34:54
+-- Dump completed on 2013-09-10  0:00:00
