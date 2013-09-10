@@ -633,7 +633,7 @@ enum PlayerChatTag
     CHAT_TAG_NONE               = 0x00,
     CHAT_TAG_AFK                = 0x01,
     CHAT_TAG_DND                = 0x02,
-    CHAT_TAG_GM                 = 0x04,
+    CHAT_TAG_GM                 = 0x03,
 };
 
 enum PlayedTimeIndex
