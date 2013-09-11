@@ -588,11 +588,9 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recv_data)
 void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data)
 {
     ObjectGuid iguid;
-    uint8 unk;
     // DEBUG_LOG("WORLD: Received opcode CMSG_CHAT_IGNORED");
 
     recv_data >> iguid;
-    recv_data >> unk;                                       // probably related to spam reporting
 
     Player* player = sObjectMgr.GetPlayer(iguid);
     if (!player || !player->GetSession())
