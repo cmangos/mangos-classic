@@ -17,9 +17,12 @@
 
 set(LIBRARY_NAME framework)
 
-set(LIBRARY_SRCS
+set(SRC_GRP_DYNAMIC
     Dynamic/FactoryHolder.h
     Dynamic/ObjectRegistry.h
+)
+
+set(SRC_GRP_GAMESYSTEM
     GameSystem/Grid.h
     GameSystem/GridLoader.h
     GameSystem/GridReference.h
@@ -28,51 +31,74 @@ set(LIBRARY_SRCS
     GameSystem/TypeContainer.h
     GameSystem/TypeContainerFunctions.h
     GameSystem/TypeContainerVisitor.h
+)
+
+set(SRC_GRP_PLATFORM
     Platform/CompilerDefs.h
     Platform/Define.h
+)
+
+set(SRC_GRP_POLICIES
     Policies/CreationPolicy.h
     Policies/MemoryManagement.cpp
     Policies/ObjectLifeTime.cpp
     Policies/ObjectLifeTime.h
     Policies/Singleton.h
     Policies/ThreadingModel.h
+)
+
+set(SRC_GRP_UTIL
     Utilities/ByteConverter.h
     Utilities/Callback.h
     Utilities/EventProcessor.cpp
     Utilities/EventProcessor.h
     Utilities/LinkedList.h
-    Utilities/LinkedReference/Reference.h
-    Utilities/LinkedReference/RefManager.h
     Utilities/TypeList.h
     Utilities/UnorderedMapSet.h
-   )
-
-source_group("Other"
-  REGULAR_EXPRESSION .*
 )
 
-source_group("GameSystem"
-  REGULAR_EXPRESSION GameSystem
+set(SRC_GRP_LINKED_REFERENCE
+    Utilities/LinkedReference/Reference.h
+    Utilities/LinkedReference/RefManager.h
 )
 
-source_group("Platform"
-  REGULAR_EXPRESSION Platform
-)
-
-source_group("Policies"
-  REGULAR_EXPRESSION Policies
-)
-
-source_group("Utilities"
-  REGULAR_EXPRESSION Utilities
-)
-
-source_group("LinkedReference"
-  REGULAR_EXPRESSION LinkedReference
+set(LIBRARY_SRCS
+    ${SRC_GRP_DYNAMIC}
+    ${SRC_GRP_GAMESYSTEM}
+    ${SRC_GRP_PLATFORM}
+    ${SRC_GRP_POLICIES}
+    ${SRC_GRP_UTIL}
+    ${SRC_GRP_LINKED_REFERENCE}
 )
 
 source_group("Dynamic"
-  REGULAR_EXPRESSION Dynamic
+  FILES
+    ${SRC_GRP_DYNAMIC}
+)
+
+source_group("GameSystem"
+  FILES
+    ${SRC_GRP_GAMESYSTEM}
+)
+
+source_group("Platform"
+  FILES
+    ${SRC_GRP_PLATFORM}
+)
+
+source_group("Policies"
+  FILES
+    ${SRC_GRP_POLICIES}
+)
+
+source_group("Utilities"
+  FILES
+    ${SRC_GRP_UTIL}
+)
+
+source_group("Utilities\\LinkedReference"
+  FILES
+    ${SRC_GRP_LINKED_REFERENCE}
 )
 
 include_directories(
