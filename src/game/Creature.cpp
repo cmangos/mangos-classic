@@ -186,8 +186,17 @@ void Creature::RemoveFromWorld()
 
 void Creature::RemoveCorpse()
 {
+    // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
+    if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(GetGUIDLow()))
+        sPoolMgr.UpdatePool<Creature>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
+
+    if (!IsInWorld())                                       // can be despawned by update pool
+        return;
+
     if ((getDeathState() != CORPSE && !m_isDeadByDefault) || (getDeathState() != ALIVE && m_isDeadByDefault))
         return;
+
+    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Removing corpse of %s ", GetGuidStr().c_str());
 
     m_corpseDecayTimer = 0;
     SetDeathState(DEAD);
@@ -482,26 +491,18 @@ void Creature::Update(uint32 update_diff, uint32 diff)
 
             if (m_corpseDecayTimer <= update_diff)
             {
-                // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
-                if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(GetGUIDLow()))
-                    sPoolMgr.UpdatePool<Creature>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
-
-                if (IsInWorld())                            // can be despawned by update pool
-                {
-                    RemoveCorpse();
-                    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Removing corpse... %u ", GetEntry());
-                }
+                RemoveCorpse();
+                break;
             }
             else
-            {
                 m_corpseDecayTimer -= update_diff;
-                if (m_groupLootId)
-                {
-                    if (m_groupLootTimer <= update_diff)
-                        StopGroupLoot();
-                    else
-                        m_groupLootTimer -= update_diff;
-                }
+
+            if (m_groupLootId)                              // Loot is stopped already if corpse got removed.
+            {
+                if (m_groupLootTimer <= update_diff)
+                    StopGroupLoot();
+                else
+                    m_groupLootTimer -= update_diff;
             }
 
             break;
@@ -512,22 +513,11 @@ void Creature::Update(uint32 update_diff, uint32 diff)
             {
                 if (m_corpseDecayTimer <= update_diff)
                 {
-                    // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
-                    if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(GetGUIDLow()))
-                        sPoolMgr.UpdatePool<Creature>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
-
-                    if (IsInWorld())                        // can be despawned by update pool
-                    {
-                        RemoveCorpse();
-                        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Removing alive corpse... %u ", GetEntry());
-                    }
-                    else
-                        return;
+                    RemoveCorpse();
+                    break;
                 }
                 else
-                {
                     m_corpseDecayTimer -= update_diff;
-                }
             }
 
             Unit::Update(update_diff, diff);
@@ -1503,6 +1493,8 @@ void Creature::SetDeathState(DeathState s)
 void Creature::Respawn()
 {
     RemoveCorpse();
+    if (!IsInWorld())                                       // Could be removed as part of a pool (in which case respawn-time is handled with pool-system)
+        return;
 
     if (IsDespawned())
     {
@@ -1522,10 +1514,14 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn)
         return;
     }
 
+    if (IsDespawned())
+        return;
+
     if (isAlive())
         SetDeathState(JUST_DIED);
 
-    m_corpseDecayTimer = 1;                                 // Properly remove corpse on next tick (also pool system requires Creature::Update call with CORPSE state
+    RemoveCorpse();
+
     SetHealth(0);                                           // just for nice GM-mode view
 }
 
