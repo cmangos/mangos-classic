@@ -49,6 +49,10 @@ message(
     CMAKE_INSTALL_PREFIX    Path where the server should be installed to
     PCH                     Use precompiled headers
     DEBUG                   Debug mode
+    INCLUDE_BINDINGS_DIR    Include a script library in src/bindings/ with the
+                            defined name. the name must corespond to the name of
+                            the folder and the folder must contain a valid
+                            CMakeLists.txt
     TBB_USE_EXTERNAL        Use external TBB
     USE_STD_MALLOC          Use standard malloc instead of TBB
     ACE_USE_EXTERNAL        Use external ACE
@@ -212,6 +216,20 @@ endif()
 
 message(STATUS "MaNGOS-Core revision  : ${GIT_REVISION}")
 message(STATUS "Install server to     : ${CMAKE_INSTALL_PREFIX}")
+
+if(DEFINED INCLUDE_BINDINGS_DIR AND INCLUDE_BINDINGS_DIR)
+  # check if the directory exists
+  if(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR})
+    message(FATAL_ERROR "Could not find the script library which was supposed to be: " ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR})
+  endif()
+  # check if it really contains a CMakeLists.txt
+  if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR}/CMakeLists.txt)
+    message(FATAL_ERROR "The script library does not contain a CMakeLists.txt!")
+  endif()
+  message(STATUS "Build script library  : Yes (using ${INCLUDE_BINDINGS_DIR})")
+else()
+  message(STATUS "Build script library  : No")
+endif()
 
 # if(CLI)
 #   message(STATUS "Build with CLI        : Yes (default)")
