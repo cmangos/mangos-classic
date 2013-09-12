@@ -2021,7 +2021,7 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest 
 uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
 {
     if (!m_pGetNPCDialogStatus)
-        return 100;
+        return DIALOG_STATUS_UNDEFINED;
 
     return m_pGetNPCDialogStatus(pPlayer, pCreature);
 }
@@ -2029,7 +2029,7 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
 uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
 {
     if (!m_pGetGODialogStatus)
-        return 100;
+        return DIALOG_STATUS_UNDEFINED;
 
     return m_pGetGODialogStatus(pPlayer, pGameObject);
 }

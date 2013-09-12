@@ -108,6 +108,7 @@ enum __QuestGiverStatus
     DIALOG_STATUS_REWARD_OLD               = 6,             // red dot on minimap
     DIALOG_STATUS_REWARD2                  = 7,             // yellow dot on minimap
     // [-ZERO] tbc?  DIALOG_STATUS_REWARD                   = 8              // yellow dot on minimap
+    DIALOG_STATUS_UNDEFINED                = 100            // Used as result for unassigned ScriptCall
 };
 
 // values based at QuestInfo.dbc
