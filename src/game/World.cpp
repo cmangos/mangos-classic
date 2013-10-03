@@ -62,7 +62,6 @@
 #include "Util.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "CharacterDatabaseCleaner.h"
-#include "extras/Mod.h"
 #include "CreatureLinkingMgr.h"
 
 INSTANTIATE_SINGLETON_1(World);
@@ -851,7 +850,6 @@ void World::SetInitialWorldSettings()
 
     ///- Initialize config settings
     LoadConfigSettings();
-    sMod.ModInit();
 
     ///- Check the existence of the map files for all races start areas.
     if (!MapManager::ExistMapAndVMap(0, -6240.32f, 331.033f) ||                     // Dwarf/ Gnome
