@@ -817,15 +817,18 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
 {
     ItemPrototype const* proto = GetProto();
 
-    if (spellInfo->EquippedItemClass != -1)                 // -1 == any item class
+    if (spellInfo->EquippedItemClass != -1)                          // -1 == any item class
     {
-        if (spellInfo->EquippedItemClass != int32(proto->Class))
-            return false;                                   //  wrong item class
+        if (spellInfo->Id == 13419 && int32(proto->Class) == 4)      // Special case for Enchant cloak minor Agility dbc file is wrong
+            return true;                                             // Field58 int EquippedItemClass ; Weapon(2) instead of Armor(4)
 
-        if (spellInfo->EquippedItemSubClassMask != 0)       // 0 == any subclass
+        if (spellInfo->EquippedItemClass != int32(proto->Class))
+            return false;                                            //  wrong item class
+
+        if (spellInfo->EquippedItemSubClassMask != 0)                // 0 == any subclass
         {
             if ((spellInfo->EquippedItemSubClassMask & (1 << proto->SubClass)) == 0)
-                return false;                               // subclass not present in mask
+                return false;                                        // subclass not present in mask
         }
     }
 
