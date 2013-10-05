@@ -3427,7 +3427,7 @@ void Spell::SendInterrupted(uint8 result)
     m_caster->SendMessageToSet(&data, true);
 
     data.Initialize(SMSG_SPELL_FAILED_OTHER, (8 + 4));
-    data << m_caster->GetPackGUID();
+    data << m_caster->GetObjectGuid();
     data << m_spellInfo->Id;
     m_caster->SendMessageToSet(&data, true);
 }
