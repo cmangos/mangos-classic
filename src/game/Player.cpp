@@ -4719,6 +4719,8 @@ float Player::OCTRegenMPPerSpirit()
         case CLASS_WARLOCK: addvalue = (Spirit / 5 + 15);   break;
     }
 
+    addvalue /= 2.0f;   // the above addvalue are given per tick which occurs every 2 seconds, hence this divide by 2
+
     return addvalue;
 }
 
