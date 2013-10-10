@@ -48,7 +48,6 @@
 #include "DBCStores.h"
 #include "VMapFactory.h"
 #include "MovementGenerator.h"
-#include "extras/Mod.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 #include "CreatureLinkingMgr.h"
@@ -7347,8 +7346,6 @@ void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, U
 {
     if (duration == -1 || group == DIMINISHING_NONE || (!isReflected && caster->IsFriendlyTo(this)))
         return;
-
-    sMod.applyDiminishingToDuration(this, caster, duration, group);
 
     float mod = 1.0f;
 

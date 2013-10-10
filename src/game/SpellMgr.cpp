@@ -17,7 +17,6 @@
  */
 
 #include "SpellMgr.h"
-#include "extras/Mod.h"
 #include "ObjectMgr.h"
 #include "SpellAuraDefines.h"
 #include "ProgressBar.h"
@@ -139,8 +138,6 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
 
     if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()))
         castTime += 500;
-
-    sMod.getSpellCastTime(spellInfo, spell, castTime);
 
     return (castTime > 0) ? uint32(castTime) : 0;
 }

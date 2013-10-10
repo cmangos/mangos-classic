@@ -489,8 +489,7 @@
     <ClCompile Include="..\..\src\game\vmap\VMapFactory.cpp" />
     <ClCompile Include="..\..\src\game\vmap\VMapManager2.cpp" />
     <ClCompile Include="..\..\src\game\vmap\WorldModel.cpp" />
-    <ClCompile Include="..\..\src\game\extras\Mod.cpp" />
-    <ClCompile Include="..\..\src\game\extras\SpellMod.cpp" />
+
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\AccountMgr.h" />
@@ -639,7 +638,6 @@
     <ClInclude Include="..\..\src\game\vmap\VMapManager2.h" />
     <ClInclude Include="..\..\src\game\vmap\VMapTools.h" />
     <ClInclude Include="..\..\src\game\vmap\WorldModel.h" />
-    <ClInclude Include="..\..\src\game\extras\Mod.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\dep\recastnavigation\Detour\win\VC110\Detour.vcxproj">
