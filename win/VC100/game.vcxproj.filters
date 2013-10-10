@@ -28,9 +28,6 @@
     <Filter Include="vmaps">
       <UniqueIdentifier>{948284d3-9d89-4609-8cdd-28a213edb53e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Extras">
-      <UniqueIdentifier>{781decf2-919b-4629-81af-89b85c6e7f29}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Movement">
       <UniqueIdentifier>{0ac140f9-89c1-4830-b673-514c5e8b4d37}</UniqueIdentifier>
     </Filter>
@@ -463,12 +460,6 @@
     <ClCompile Include="..\..\src\game\vmap\WorldModel.cpp">
       <Filter>vmaps</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\extras\Mod.cpp">
-      <Filter>Extras</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\extras\SpellMod.cpp">
-      <Filter>Extras</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\game\movement\MoveSplineInit.cpp">
       <Filter>Movement</Filter>
     </ClCompile>
@@ -900,9 +891,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\vmap\WorldModel.h">
       <Filter>vmaps</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\extras\Mod.h">
-      <Filter>Extras</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\movement\MoveSpline.h">
       <Filter>Movement</Filter>
