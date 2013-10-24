@@ -2774,7 +2774,20 @@ void Spell::handle_immediate()
     TakeCastItem();
 
     if (m_spellState != SPELL_STATE_CASTING)
+    {
         finish(true);                                       // successfully finish spell cast (not last in case autorepeat or channel spell)
+    }
+    else
+    {
+        for (TargetList::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+        {
+            if (ihit->missCondition != SPELL_MISS_NONE) 
+            {
+                cancel();
+                break;
+            }
+        }
+    }
 }
 
 uint64 Spell::handle_delayed(uint64 t_offset)
