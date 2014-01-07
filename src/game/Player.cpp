@@ -6680,22 +6680,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
         {
             uint32 proc_spell_id = pEnchant->spellid[s];
 
-            // Flametongue Weapon (Passive), Ranks (used not existed equip spell id in pre-3.x spell.dbc)
-            if (pEnchant->type[s] == ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL)
-            {
-                switch (proc_spell_id)
-                {
-                    case 10400: proc_spell_id =  8026; break; // Rank 1
-                    case 15567: proc_spell_id =  8028; break; // Rank 2
-                    case 15568: proc_spell_id =  8029; break; // Rank 3
-                    case 15569: proc_spell_id = 10445; break; // Rank 4
-                    case 16311: proc_spell_id = 16343; break; // Rank 5
-                    case 16312: proc_spell_id = 16344; break; // Rank 6
-                    default:
-                        continue;
-                }
-            }
-            else if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+            if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
                 continue;
 
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(proc_spell_id);
@@ -11167,26 +11152,6 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                     break;
                 case ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL:
                 {
-                    // Flametongue Weapon (Passive), Ranks (used not existed equip spell id in pre-3.x spell.dbc)
-                    // See Player::CastItemCombatSpell for workaround implementation
-                    if (enchant_spell_id && apply)
-                    {
-                        switch (enchant_spell_id)
-                        {
-                            case 10400:                     // Rank 1
-                            case 15567:                     // Rank 2
-                            case 15568:                     // Rank 3
-                            case 15569:                     // Rank 4
-                            case 16311:                     // Rank 5
-                            case 16312:                     // Rank 6
-                            case 16313:                     // Rank 7
-                                enchant_spell_id = 0;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-
                     if (enchant_spell_id)
                     {
                         if (apply)
