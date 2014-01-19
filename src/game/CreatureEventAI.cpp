@@ -915,7 +915,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         }
         case ACTION_T_THROW_AI_EVENT:
         {
-            SendAIEvent(AIEventType(action.throwEvent.eventType), pActionInvoker, 0, action.throwEvent.radius);
+            SendAIEventAround(AIEventType(action.throwEvent.eventType), pActionInvoker, 0, action.throwEvent.radius);
             break;
         }
         case ACTION_T_SET_THROW_MASK:
@@ -1014,7 +1014,7 @@ void CreatureEventAI::JustDied(Unit* killer)
     }
 
     if (m_throwAIEventMask & (1 << AI_EVENT_JUST_DIED))
-        SendAIEvent(AI_EVENT_JUST_DIED, killer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
+        SendAIEventAround(AI_EVENT_JUST_DIED, killer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
 
     // Handle On Death events
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
@@ -1432,7 +1432,7 @@ void CreatureEventAI::DamageTaken(Unit* dealer, uint32& damage)
         }
 
         if (m_throwAIEventMask & (1 << sendEvent[step]))
-            SendAIEvent(sendEvent[step], dealer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
+            SendAIEventAround(sendEvent[step], dealer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
 
         m_throwAIEventStep = step + 1;
     }
@@ -1446,7 +1446,7 @@ void CreatureEventAI::HealedBy(Unit* healer, uint32& healedAmount)
     if (m_creature->GetHealth() + healedAmount >= m_creature->GetMaxHealth())
     {
         if (m_throwAIEventMask & (1 << AI_EVENT_GOT_FULL_HEALTH))
-            SendAIEvent(AI_EVENT_GOT_FULL_HEALTH, healer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
+            SendAIEventAround(AI_EVENT_GOT_FULL_HEALTH, healer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
         m_throwAIEventStep = 100;
     }
 }
