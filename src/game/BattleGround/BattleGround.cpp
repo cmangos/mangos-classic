@@ -56,10 +56,10 @@ namespace MaNGOS
                     vsnprintf(str, 2048, text, ap);
                     va_end(ap);
 
-                    ChatHandler::BuildChatPacket(data, i_msgtype, &str[0], LANG_UNIVERSAL, i_source ? i_source ->GetObjectGuid() : ObjectGuid(), i_source ? i_source ->GetName() : "");
+                    ChatHandler::BuildChatPacket(data, i_msgtype, &str[0], LANG_UNIVERSAL, CHAT_TAG_NONE, i_source ? i_source ->GetObjectGuid() : ObjectGuid(), i_source ? i_source ->GetName() : "");
                 }
                 else
-                    ChatHandler::BuildChatPacket(data, i_msgtype, text, LANG_UNIVERSAL, i_source ? i_source ->GetObjectGuid() : ObjectGuid(), i_source ? i_source ->GetName() : "");
+                    ChatHandler::BuildChatPacket(data, i_msgtype, text, LANG_UNIVERSAL, CHAT_TAG_NONE, i_source ? i_source ->GetObjectGuid() : ObjectGuid(), i_source ? i_source ->GetName() : "");
             }
         private:
             ChatMsg i_msgtype;
@@ -87,10 +87,10 @@ namespace MaNGOS
                     vsnprintf(str, 2048, text, ap);
                     va_end(ap);
 
-                    ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, &str[0], i_language, i_source->GetObjectGuid(), i_source->GetName());
+                    ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, &str[0], i_language, CHAT_TAG_NONE, i_source->GetObjectGuid(), i_source->GetName());
                 }
                 else
-                    ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, text, i_language, i_source->GetObjectGuid(), i_source->GetName());
+                    ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, text, i_language, CHAT_TAG_NONE, i_source->GetObjectGuid(), i_source->GetName());
             }
         private:
             Language i_language;
@@ -121,7 +121,7 @@ namespace MaNGOS
                     guid = i_source->GetObjectGuid();
                     pName = i_source->GetName();
                 } 
-                ChatHandler::BuildChatPacket(data, i_msgtype, str, LANG_UNIVERSAL, ObjectGuid(), NULL, guid, pName);
+                ChatHandler::BuildChatPacket(data, i_msgtype, str, LANG_UNIVERSAL, CHAT_TAG_NONE, ObjectGuid(), NULL, guid, pName);
             }
         private:
             ChatMsg i_msgtype;
@@ -145,7 +145,7 @@ namespace MaNGOS
                 char str [2048];
                 snprintf(str, 2048, text, arg1str, arg2str);
 
-                ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, str, LANG_UNIVERSAL, i_source ? i_source ->GetObjectGuid() : ObjectGuid(), i_source ? i_source ->GetName() : "");
+                ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, str, LANG_UNIVERSAL, CHAT_TAG_NONE, i_source ? i_source ->GetObjectGuid() : ObjectGuid(), i_source ? i_source ->GetName() : "");
             }
         private:
 
