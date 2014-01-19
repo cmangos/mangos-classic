@@ -59,7 +59,12 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
         else
         {
             // to at i_offset distance from target and i_angle from target facing
-            i_target->GetClosePoint(x, y, z, owner.GetObjectBoundingRadius(), i_offset, i_angle, &owner);
+            if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE)
+            {
+                i_target->GetNearPoint(&owner, x, y, z, owner.GetObjectBoundingRadius(), i_offset, i_target->GetOrientation() + i_angle);
+            }
+            else
+                i_target->GetClosePoint(x, y, z, owner.GetObjectBoundingRadius(), i_offset, i_angle, &owner);
         }
     }
     else

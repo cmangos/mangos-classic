@@ -59,8 +59,7 @@ struct ObjectPosSelector
 
     float m_centerX;
     float m_centerY;
-    float m_searcherDist;                                   // distance for searching pos (including searcher size and target object size)
-    float m_searcherSize;                                   // searcher object radius
+    float m_searcherDist;                                   // distance for searching pos
     float m_searcherHalfSize;                               // angle size/2 of searcher object (at dist distance)
 
     UsedAreaList m_UsedAreaLists[2];                        // list left/right side used angles (with angle size)

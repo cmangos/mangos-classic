@@ -19,14 +19,14 @@
 #include "ObjectPosSelector.h"
 #include "Object.h"
 
-ObjectPosSelector::ObjectPosSelector(float x, float y, float dist, float searcher_size) :
-    m_centerX(x), m_centerY(y), m_searcherDist(dist), m_searcherSize(searcher_size)
+ObjectPosSelector::ObjectPosSelector(float x, float y, float dist, float searchedForSize) :
+    m_centerX(x), m_centerY(y), m_searcherDist(dist)
 {
     // if size == 0, m_anglestep will become 0 -> freeze
-    if (m_searcherSize == 0.0f)
-        m_searcherSize = DEFAULT_WORLD_OBJECT_SIZE;
+    if (searchedForSize == 0.0f)
+        searchedForSize = DEFAULT_WORLD_OBJECT_SIZE;
 
-    m_searcherHalfSize = asin(m_searcherSize / m_searcherDist);
+    m_searcherHalfSize = asin(searchedForSize / m_searcherDist);
 
     // Really init in InitilizeAngle
     m_nextUsedAreaItr[USED_POS_PLUS]  = m_UsedAreaLists[USED_POS_PLUS].begin();
@@ -49,7 +49,7 @@ ObjectPosSelector::ObjectPosSelector(float x, float y, float dist, float searche
  */
 void ObjectPosSelector::AddUsedArea(float size, float angle, float dist)
 {
-    float sr_dist = size + m_searcherSize;
+    float sr_dist = size /*+ m_searcherSize*/;
 
     //  by Law of cosines, angle of searcher/used centers
     float sr_angle = acos((m_searcherDist * m_searcherDist + dist * dist - sr_dist * sr_dist) / (2 * m_searcherDist * dist));
