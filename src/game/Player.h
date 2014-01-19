@@ -37,6 +37,7 @@
 #include "BattleGround/BattleGround.h"
 #include "DBCStores.h"
 #include "SharedDefines.h"
+#include "Chat.h"
 
 #include<string>
 #include<vector>
@@ -627,15 +628,6 @@ enum EnvironmentalDamageType
     DAMAGE_FIRE                 = 5,
     DAMAGE_FALL_TO_VOID         = 6                         // custom case for fall without durability loss
 };
-
-enum PlayerChatTag
-{
-    CHAT_TAG_NONE               = 0,
-    CHAT_TAG_AFK                = 1,
-    CHAT_TAG_DND                = 2,
-    CHAT_TAG_GM                 = 3,
-};
-typedef uint32 ChatTagFlags;
 
 enum PlayedTimeIndex
 {
