@@ -288,7 +288,6 @@ bool ChatHandler::HandleDebugSendChatMsgCommand(char* args)
         return false;
 
     WorldPacket data;
-    //ChatHandler::FillMessageData(&data, m_session, type, 0, "chan", m_session->GetPlayer()->GetObjectGuid(), msg, m_session->GetPlayer());
     ChatHandler::BuildChatPacket(data, ChatMsg(type), msg, LANG_UNIVERSAL, m_session->GetPlayer()->GetObjectGuid(), m_session->GetPlayerName());
     m_session->SendPacket(&data);
     return true;

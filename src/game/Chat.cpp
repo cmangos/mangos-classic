@@ -3313,10 +3313,10 @@ void ChatHandler::LogCommand(char const* fullcmd)
 }
 
 // Build message chat packet generic way
-void ChatHandler::BuildChatPacket( WorldPacket& data, ChatMsg msgtype, char const* message, Language language /*= LANG_UNIVERSAL*/,
+void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const* message, Language language /*= LANG_UNIVERSAL*/,
                                   ObjectGuid const& senderGuid /*= ObjectGuid()*/, char const* senderName /*= NULL*/,
                                   ObjectGuid const& targetGuid /*= ObjectGuid()*/, char const* targetName /*= NULL*/,
-                                  char const* channelName /*= NULL*/, uint32 achievementId /*= 0*/, bool GM /*= false*/, ChatTagFlags tag /*= CHAT_TAG_NONE*/ )
+                                  char const* channelName /*= NULL*/, uint32 achievementId /*= 0*/, bool GM /*= false*/, ChatTagFlags tag /*= CHAT_TAG_NONE*/)
 {
     data.Initialize(SMSG_MESSAGECHAT);
 
@@ -3326,51 +3326,49 @@ void ChatHandler::BuildChatPacket( WorldPacket& data, ChatMsg msgtype, char cons
 
     switch (msgtype)
     {
-    case CHAT_MSG_MONSTER_SAY:
-    case CHAT_MSG_MONSTER_PARTY:
-    case CHAT_MSG_MONSTER_YELL:
-    case CHAT_MSG_MONSTER_WHISPER:
-    case CHAT_MSG_MONSTER_EMOTE:
-    case CHAT_MSG_RAID_BOSS_WHISPER:
-    case CHAT_MSG_RAID_BOSS_EMOTE:
-        MANGOS_ASSERT(senderName);
-        MANGOS_ASSERT(targetName);
-        data << uint32(strlen(senderName) + 1);
-        data << senderName;
-        
-        data << ObjectGuid(targetGuid);                         // Unit Target
-        if (targetGuid && !targetGuid.IsPlayer() && !targetGuid.IsPet())
-        {
-            data << uint32(strlen(targetName) + 1);             // target name length
-            data << targetName;                                 // target name
-        }
-        break;
-    case CHAT_MSG_BG_SYSTEM_NEUTRAL:
-    case CHAT_MSG_BG_SYSTEM_ALLIANCE:
-    case CHAT_MSG_BG_SYSTEM_HORDE:
-        data << ObjectGuid(targetGuid);                         // Unit Target
-        if (targetGuid && !targetGuid.IsPlayer())
-        {
-            MANGOS_ASSERT(targetName);
-            data << uint32(strlen(targetName) + 1);             // target name length
-            data << targetName;                                 // target name
-        }
-        break;
-    default:
-        if (GM)
-        {
+        case CHAT_MSG_MONSTER_SAY:
+        case CHAT_MSG_MONSTER_PARTY:
+        case CHAT_MSG_MONSTER_YELL:
+        case CHAT_MSG_MONSTER_WHISPER:
+        case CHAT_MSG_MONSTER_EMOTE:
+        case CHAT_MSG_RAID_BOSS_WHISPER:
+        case CHAT_MSG_RAID_BOSS_EMOTE:
             MANGOS_ASSERT(senderName);
             data << uint32(strlen(senderName) + 1);
             data << senderName;
-        }
+            data << ObjectGuid(targetGuid);                         // Unit Target
+            if (targetGuid && !targetGuid.IsPlayer() && !targetGuid.IsPet())
+            {
+                data << uint32(strlen(targetName) + 1);             // target name length
+                data << targetName;                                 // target name
+            }
+            break;
+        case CHAT_MSG_BG_SYSTEM_NEUTRAL:
+        case CHAT_MSG_BG_SYSTEM_ALLIANCE:
+        case CHAT_MSG_BG_SYSTEM_HORDE:
+            data << ObjectGuid(targetGuid);                         // Unit Target
+            if (targetGuid && !targetGuid.IsPlayer())
+            {
+                MANGOS_ASSERT(targetName);
+                data << uint32(strlen(targetName) + 1);             // target name length
+                data << targetName;                                 // target name
+            }
+            break;
+        default:
+            if (GM)
+            {
+                MANGOS_ASSERT(senderName);
+                data << uint32(strlen(senderName) + 1);
+                data << senderName;
+            }
 
-        if (msgtype == CHAT_MSG_CHANNEL)
-        {
-            MANGOS_ASSERT(channelName);
-            data << channelName;
-        }
-        data << ObjectGuid(targetGuid);
-        break;
+            if (msgtype == CHAT_MSG_CHANNEL)
+            {
+                MANGOS_ASSERT(channelName);
+                data << channelName;
+            }
+            data << ObjectGuid(targetGuid);
+            break;
     }
     MANGOS_ASSERT(message);
     data << uint32(strlen(message) + 1);

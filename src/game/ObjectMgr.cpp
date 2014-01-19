@@ -6690,7 +6690,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
         {
             data.SoundId     = fields[10].GetUInt32();
             data.Type        = fields[11].GetUInt32();
-            data.LanguageId    = Language(fields[12].GetUInt32());
+            data.LanguageId  = Language(fields[12].GetUInt32());
             data.Emote       = fields[13].GetUInt32();
 
             if (data.SoundId && !sSoundEntriesStore.LookupEntry(data.SoundId))
