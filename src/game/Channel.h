@@ -206,7 +206,7 @@ class Channel
         void MakeBanned(WorldPacket* data);                 					//? 0x13
         void MakePlayerBanned(WorldPacket* data, ObjectGuid target, ObjectGuid source);//? 0x14
         void MakePlayerUnbanned(WorldPacket* data, ObjectGuid target, ObjectGuid source);//? 0x15
-        void MakePlayerNotBanned(WorldPacket* data, ObjectGuid guid);           //? 0x16
+        void MakePlayerNotBanned(WorldPacket* data, const std::string& name);   //? 0x16
         void MakePlayerAlreadyMember(WorldPacket* data, ObjectGuid guid);       //+ 0x17
         void MakeInvite(WorldPacket* data, ObjectGuid guid);					//? 0x18
         void MakeInviteWrongFaction(WorldPacket* data);     					//? 0x19
@@ -214,7 +214,7 @@ class Channel
         void MakeInvalidName(WorldPacket* data);            					//? 0x1B
         void MakeNotModerated(WorldPacket* data);          			 			//? 0x1C
         void MakePlayerInvited(WorldPacket* data, const std::string& name);     //+ 0x1D
-        void MakePlayerInviteBanned(WorldPacket* data, ObjectGuid guid);        //? 0x1E
+        void MakePlayerInviteBanned(WorldPacket* data, const std::string& name);//? 0x1E
         void MakeThrottled(WorldPacket* data);              					//? 0x1F
 
         void SendToAll(WorldPacket* data, ObjectGuid guid = ObjectGuid());

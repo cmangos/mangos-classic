@@ -257,7 +257,7 @@ void Channel::UnBan(Player* player, const char* targetName)
     if (!IsBanned(targetGuid))
     {
         WorldPacket data;
-        MakePlayerNotFound(&data, targetName);
+        MakePlayerNotBanned(&data, targetName);
         SendToOne(&data, guid);
         return;
     }
@@ -614,19 +614,27 @@ void Channel::Invite(Player* player, const char* targetName)
         return;
     }
 
-    if (target->GetTeam() != player->GetTeam() && !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
-    {
-        WorldPacket data;
-        MakeInviteWrongFaction(&data);
-        SendToOne(&data, guid);
-        return;
-    }
-
     ObjectGuid targetGuid = target->GetObjectGuid();
     if (IsOn(targetGuid))
     {
         WorldPacket data;
         MakePlayerAlreadyMember(&data, targetGuid);
+        SendToOne(&data, guid);
+        return;
+    }
+
+    if (IsBanned(targetGuid))
+    {
+        WorldPacket data;
+        MakePlayerInviteBanned(&data, targetName);
+        SendToOne(&data, guid);
+        return;
+    }
+
+    if (target->GetTeam() != player->GetTeam() && !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
+    {
+        WorldPacket data;
+        MakeInviteWrongFaction(&data);
         SendToOne(&data, guid);
         return;
     }
@@ -841,10 +849,10 @@ void Channel::MakePlayerUnbanned(WorldPacket* data, ObjectGuid target, ObjectGui
     *data << ObjectGuid(source);
 }
 
-void Channel::MakePlayerNotBanned(WorldPacket* data, ObjectGuid guid)
+void Channel::MakePlayerNotBanned(WorldPacket* data, const std::string& name)
 {
     MakeNotifyPacket(data, CHAT_PLAYER_NOT_BANNED_NOTICE);
-    *data << ObjectGuid(guid);                              // should be string!!
+    *data << name;
 }
 
 void Channel::MakePlayerAlreadyMember(WorldPacket* data, ObjectGuid guid)
@@ -885,10 +893,10 @@ void Channel::MakePlayerInvited(WorldPacket* data, const std::string& name)
     *data << name;
 }
 
-void Channel::MakePlayerInviteBanned(WorldPacket* data, ObjectGuid guid)
+void Channel::MakePlayerInviteBanned(WorldPacket* data, const std::string& name)
 {
     MakeNotifyPacket(data, CHAT_PLAYER_INVITE_BANNED_NOTICE);
-    *data << ObjectGuid(guid);                              // should be string!!
+    *data << name;
 }
 
 void Channel::MakeThrottled(WorldPacket* data)
