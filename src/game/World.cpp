@@ -1521,17 +1521,7 @@ namespace MaNGOS
                 while (char* line = lineFromMessage(pos))
                 {
                     WorldPacket* data = new WorldPacket();
-
-                    uint32 lineLength = (line ? strlen(line) : 0) + 1;
-
-                    data->Initialize(SMSG_MESSAGECHAT, 100);// guess size
-                    *data << uint8(CHAT_MSG_SYSTEM);
-                    *data << uint32(LANG_UNIVERSAL);
-                    *data << uint64(0);
-                    *data << uint32(lineLength);
-                    *data << line;
-                    *data << uint8(0);
-
+                    ChatHandler::BuildChatPacket(*data, CHAT_MSG_SYSTEM, line);
                     data_list.push_back(data);
                 }
             }

@@ -67,23 +67,6 @@ class MANGOS_DLL_SPEC ChatHandler
         explicit ChatHandler(Player* player);
         ~ChatHandler();
 
-        static void FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, const char* channelName, ObjectGuid targetGuid, const char* message, Unit* speaker);
-
-        static void FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, ObjectGuid targetGuid, const char* message)
-        {
-            FillMessageData(data, session, type, language, NULL, targetGuid, message, NULL);
-        }
-
-        static void FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, const char* message)
-        {
-            FillMessageData(data, session, type, language, NULL, ObjectGuid(), message, NULL);
-        }
-
-        void FillSystemMessageData(WorldPacket* data, const char* message)
-        {
-            FillMessageData(data, m_session, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, ObjectGuid(), message);
-        }
-
         static char* LineFromMessage(char*& pos) { char* start = strtok(pos, "\n"); pos = NULL; return start; }
 
         // function with different implementation for chat/console
@@ -101,6 +84,13 @@ class MANGOS_DLL_SPEC ChatHandler
 
         bool isValidChatMessage(const char* msg);
         bool HasSentErrorMessage() { return sentErrorMessage;}
+
+        // General method to send SMSG_MESSAGECHAT and SMSG_GM_MESSAGECHAT
+        static void BuildChatPacket(
+            WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL,
+            ObjectGuid const& senderGuid = ObjectGuid(), char const* senderName = NULL,
+            ObjectGuid const& targetGuid = ObjectGuid(), char const* targetName = NULL,
+            char const* channelName = NULL, uint32 achievementId = 0, bool GM = false, ChatTagFlags tag = CHAT_TAG_NONE);
     protected:
         explicit ChatHandler() : m_session(NULL) {}      // for CLI subclass
 

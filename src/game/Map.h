@@ -251,8 +251,8 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         InstanceData* GetInstanceData() const { return i_data; }
         uint32 GetScriptId() const { return i_script_id; }
 
-        void MonsterYellToMap(ObjectGuid guid, int32 textId, uint32 language, Unit const* target) const;
-        void MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, uint32 language, Unit const* target, uint32 senderLowGuid = 0) const;
+        void MonsterYellToMap(ObjectGuid guid, int32 textId, Language language, Unit const* target) const;
+        void MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, Language language, Unit const* target, uint32 senderLowGuid = 0) const;
         void PlayDirectSoundToMap(uint32 soundId, uint32 zoneId = 0) const;
 
         // Dynamic VMaps

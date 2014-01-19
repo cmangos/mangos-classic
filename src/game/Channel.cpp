@@ -20,6 +20,7 @@
 #include "ObjectMgr.h"
 #include "World.h"
 #include "SocialMgr.h"
+#include "chat.h"
 
 Channel::Channel(const std::string& name, uint32 channel_id)
     : m_announce(true), m_moderate(false), m_name(name), m_flags(0), m_channelId(channel_id)
@@ -576,20 +577,8 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
     // send channel message
     if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
         lang = LANG_UNIVERSAL;
-
-    uint32 messageLength = strlen(text) + 1;
-
-    WorldPacket data(SMSG_MESSAGECHAT, 1 + 4 + 8 + 4 + m_name.size() + 1 + 8 + 4 + messageLength + 1);
-    data << uint8(CHAT_MSG_CHANNEL);
-    data << uint32(lang);
-    data << ObjectGuid(guid);                               // 2.1.0
-    data << uint32(0);                                      // 2.1.0
-    data << m_name;
-    data << ObjectGuid(guid);
-    data << uint32(messageLength);
-    data << text;
-    data << uint8(player ? player->GetChatTag() : uint8(CHAT_TAG_NONE));
-
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_CHANNEL, text, Language(lang), guid, "", ObjectGuid(), "", m_name.c_str(), 0, player->isGMChat(), player->GetChatTag());
     SendToAll(&data, !m_players[guid].IsModerator() ? guid : ObjectGuid());
 }
 

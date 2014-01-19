@@ -553,7 +553,6 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void MonsterTextEmote(const char* text, Unit const* target, bool IsBossEmote = false) const;
         void MonsterWhisper(const char* text, Unit const* target, bool IsBossWhisper = false) const;
         void MonsterText(MangosStringLocale const* textData, Unit const* target) const;
-        static void BuildMonsterChat(WorldPacket* data, ObjectGuid senderGuid, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName);
 
         void PlayDistanceSound(uint32 sound_id, Player const* target = NULL) const;
         void PlayDirectSound(uint32 sound_id, Player const* target = NULL) const;

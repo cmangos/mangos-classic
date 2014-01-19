@@ -6690,7 +6690,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
         {
             data.SoundId     = fields[10].GetUInt32();
             data.Type        = fields[11].GetUInt32();
-            data.Language    = fields[12].GetUInt32();
+            data.LanguageId    = Language(fields[12].GetUInt32());
             data.Emote       = fields[13].GetUInt32();
 
             if (data.SoundId && !sSoundEntriesStore.LookupEntry(data.SoundId))
@@ -6699,10 +6699,10 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
                 data.SoundId = 0;
             }
 
-            if (!GetLanguageDescByID(data.Language))
+            if (!GetLanguageDescByID(data.LanguageId))
             {
-                _DoStringError(entry, "Entry %i in table `%s` using Language %u but Language does not exist.", entry, table, data.Language);
-                data.Language = LANG_UNIVERSAL;
+                _DoStringError(entry, "Entry %i in table `%s` using Language %u but Language does not exist.", entry, table, uint32(data.LanguageId));
+                data.LanguageId = LANG_UNIVERSAL;
             }
 
             if (data.Type > CHAT_TYPE_ZONE_YELL)
