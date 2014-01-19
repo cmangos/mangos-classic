@@ -41,7 +41,7 @@ double inf() {
 }
 
 bool isNaN(float x) {
-    static const float n = nan();
+    static const float n = static_cast<float>(nan());
     return memcmp(&x, &n, sizeof(float)) == 0;
 }
 
