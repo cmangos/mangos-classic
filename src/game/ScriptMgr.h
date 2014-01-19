@@ -46,7 +46,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_TALK                     = 0,            // resSource = WorldObject, resTarget = Unit/none
                                                             // dataint = text entry from db_script_string -table. dataint2-4 optional for random selected texts.
     SCRIPT_COMMAND_EMOTE                    = 1,            // resSource = Unit, resTarget = Unit/none
-                                                            // datalong1 = emote_id
+                                                            // datalong1 = emote_id, dataint1-4 optional for random selected emotes
     SCRIPT_COMMAND_FIELD_SET                = 2,            // source = any, datalong = field_id, datalong2 = value
     SCRIPT_COMMAND_MOVE_TO                  = 3,            // resSource = Creature, datalong2 = travel_speed*100, x/y/z
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
