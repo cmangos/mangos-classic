@@ -3701,19 +3701,18 @@ bool ChatHandler::HandleWpImportCommand(char* args)
     if (!arg_str)
         return false;
 
+    std::ifstream stream(arg_str);
+    if (!stream.is_open())
+        return false;
+
     std::string line;
-    std::ifstream infile(arg_str);
-    if (infile.is_open())
+    while (getline(stream, line))
     {
-        while (! infile.eof())
-        {
-            getline(infile, line);
-            // cout << line << endl;
-            QueryResult* result = WorldDatabase.Query(line.c_str());
-            delete result;
-        }
-        infile.close();
+        QueryResult* result = WorldDatabase.Query(line.c_str());
+        delete result;
     }
+    stream.close();
+
     PSendSysMessage(LANG_WAYPOINT_IMPORTED);
 
     return true;
