@@ -1489,6 +1489,9 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     return pCreature;
 }
 
+// how much space should be left in front of/ behind a mob that already uses a space
+#define OCCUPY_POS_DEPTH_FACTOR                          1.8f
+
 namespace MaNGOS
 {
     class NearUsedPosDo
@@ -1539,11 +1542,15 @@ namespace MaNGOS
                 float dy = i_object.GetPositionY() - y;
                 float dist2d = sqrt((dx * dx) + (dy * dy));
 
+                // It is ok for the objects to require a bit more space
                 float delta = u->GetObjectBoundingRadius();
+                if (i_selector.m_searchPosFor && i_selector.m_searchPosFor != u)
+                    delta += i_selector.m_searchPosFor->GetObjectBoundingRadius();
+
+                delta *= OCCUPY_POS_DEPTH_FACTOR;           // Increase by factor
 
                 // u is too near/far away from i_object. Do not consider it to occupy space
-                if (dist2d < i_selector.m_searcherDist - delta ||
-                        dist2d > i_selector.m_searcherDist + delta)
+                if (fabs(i_selector.m_searcherDist - dist2d) > delta)
                     return;
 
                 float angle = i_object.GetAngle(u) - i_absAngle;
@@ -1554,7 +1561,7 @@ namespace MaNGOS
                 else if (angle < -M_PI_F)
                     angle += 2.0f * M_PI_F;
 
-                i_selector.AddUsedArea(u->GetObjectBoundingRadius(), angle, dist2d);
+                i_selector.AddUsedArea(u, angle, dist2d);
             }
         private:
             WorldObject const& i_object;
@@ -1598,7 +1605,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     const float dist = distance2d + searcher_bounding_radius + GetObjectBoundingRadius();
 
     // prepare selector for work
-    ObjectPosSelector selector(GetPositionX(), GetPositionY(), distance2d, searcher_bounding_radius);
+    ObjectPosSelector selector(GetPositionX(), GetPositionY(), distance2d, searcher_bounding_radius, searcher);
 
     // adding used positions around object
     {
