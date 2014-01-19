@@ -766,7 +766,7 @@ bool change_sql_database()
             fputs(buffer, fout);
         }
 
-        fprintf(fout, "  `required_%s` bit(1) default NULL\n", last_sql_update[i]);
+        fprintf(fout, "  `required_%s` bit(1) DEFAULT NULL\n", last_sql_update[i]);
 
         while (fgets(buffer, MAX_BUF, fin))
             fputs(buffer, fout);
