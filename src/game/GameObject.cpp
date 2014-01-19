@@ -1880,18 +1880,15 @@ bool GameObject::HasStaticDBSpawnData() const
     return sObjectMgr.GetGOData(GetGUIDLow()) != NULL;
 }
 
-void GameObject::SetCapturePointSlider(float value)
+void GameObject::SetCapturePointSlider(float value, bool isLocked)
 {
     GameObjectInfo const* info = GetGOInfo();
 
+    m_captureSlider = value;
+
     // only activate non-locked capture point
-    if (value >= 0)
-    {
-        m_captureSlider = value;
+    if (!isLocked)
         SetLootState(GO_ACTIVATED);
-    }
-    else
-        m_captureSlider = -value;
 
     // set the state of the capture point based on the slider value
     if ((int)m_captureSlider == CAPTURE_SLIDER_ALLIANCE)

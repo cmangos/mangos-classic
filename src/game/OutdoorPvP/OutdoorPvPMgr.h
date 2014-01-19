@@ -48,10 +48,22 @@ enum OutdoorPvPZones
     ZONE_ID_SCHOLOMANCE             = 2057,
 };
 
+struct CapturePointSlider
+{
+    CapturePointSlider() : Value(0.0f), IsLocked(false) {}
+    CapturePointSlider(float value, bool isLocked) : Value(value), IsLocked(isLocked) {}
+
+    float Value;
+    bool IsLocked;
+};
+
+// forward declaration
 class Player;
 class GameObject;
 class Creature;
 class OutdoorPvP;
+
+typedef std::map<uint32 /*capture point entry*/, CapturePointSlider /*slider value and lock state*/> CapturePointSliderMap;
 
 class OutdoorPvPMgr
 {
@@ -73,9 +85,9 @@ class OutdoorPvPMgr
 
         void Update(uint32 diff);
 
-        // Save and load capture point slider values
-        float GetCapturePointSliderValue(uint32 entry, float defaultValue);
-        void SetCapturePointSlider(uint32 entry, float value) { m_capturePointSlider[entry] = value; }
+        // Save and load capture point slider
+        CapturePointSliderMap const* GetCapturePointSliderMap() const { return &m_capturePointSlider; }
+        void SetCapturePointSlider(uint32 entry, CapturePointSlider value) { m_capturePointSlider[entry] = value; }
 
     private:
         // return assigned outdoor pvp script
@@ -83,8 +95,6 @@ class OutdoorPvPMgr
 
         // contains all outdoor pvp scripts
         OutdoorPvP* m_scripts[MAX_OPVP_ID];
-
-        typedef std::map<uint32 /*capture point entry*/, float /*slider value*/> CapturePointSliderMap;
 
         CapturePointSliderMap m_capturePointSlider;
 
