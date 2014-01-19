@@ -8674,46 +8674,12 @@ bool DoDisplayText(WorldObject* source, int32 entry, Unit const* target /*=NULL*
         }
     }
 
-    switch (data->Type)
+    if ((data->Type == CHAT_TYPE_WHISPER || data->Type == CHAT_TYPE_BOSS_WHISPER) && (!target || target->GetTypeId() != TYPEID_PLAYER))
     {
-        case CHAT_TYPE_SAY:
-            source->MonsterSay(entry, data->Language, target);
-            break;
-        case CHAT_TYPE_YELL:
-            source->MonsterYell(entry, data->Language, target);
-            break;
-        case CHAT_TYPE_TEXT_EMOTE:
-            source->MonsterTextEmote(entry, target);
-            break;
-        case CHAT_TYPE_BOSS_EMOTE:
-            source->MonsterTextEmote(entry, target, true);
-            break;
-        case CHAT_TYPE_WHISPER:
-        {
-            if (target && target->GetTypeId() == TYPEID_PLAYER)
-                source->MonsterWhisper(entry, target);
-            else
-            {
-                _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).", entry);
-                return false;
-            }
-            break;
-        }
-        case CHAT_TYPE_BOSS_WHISPER:
-        {
-            if (target && target->GetTypeId() == TYPEID_PLAYER)
-                source->MonsterWhisper(entry, target, true);
-            else
-            {
-                _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).", entry);
-                return false;
-            }
-            break;
-        }
-        case CHAT_TYPE_ZONE_YELL:
-            source->MonsterYellToZone(entry, data->Language, target);
-            break;
+        _DoStringError(entry, "DoDisplayText entry %i cannot whisper without target unit (TYPEID_PLAYER).", entry);
+        return false;
     }
 
+    source->MonsterText(data, target);
     return true;
 }
