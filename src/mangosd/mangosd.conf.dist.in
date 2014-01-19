@@ -697,6 +697,11 @@ LogColors = ""
 #    Motd
 #        Message of the Day. Displayed at worldlogin for every user ('@' for a newline).
 #
+#    PlayerCommands
+#        Should player chat be parsed for GM commands.
+#        Default: 1 (parse commands)
+#                 0 (ignore commands)
+#
 ###################################################################################################################
 
 GameType = 1
@@ -755,6 +760,7 @@ BeepAtStart = 1
 ShowProgressBars = 1
 WaitAtStartupError = 0
 Motd = "Welcome to the Massive Network Game Object Server."
+PlayerCommands = 1
 
 ###################################################################################################################
 # PLAYER INTERACTION
