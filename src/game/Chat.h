@@ -118,7 +118,7 @@ class MANGOS_DLL_SPEC ChatHandler
             WorldPacket& data, ChatMsg msgtype, char const* message, Language language = LANG_UNIVERSAL, ChatTagFlags chatTag = CHAT_TAG_NONE,
             ObjectGuid const& senderGuid = ObjectGuid(), char const* senderName = NULL,
             ObjectGuid const& targetGuid = ObjectGuid(), char const* targetName = NULL,
-            char const* channelName = NULL, uint32 achievementId = 0);
+            char const* channelName = NULL);
     protected:
         explicit ChatHandler() : m_session(NULL) {}      // for CLI subclass
 
