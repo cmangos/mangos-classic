@@ -115,13 +115,10 @@ namespace MaNGOS
                 snprintf(str, 2048, text, arg1str, arg2str);
 
                 ObjectGuid guid;
-                char const* pName = NULL;
                 if (i_source)
-                {
                     guid = i_source->GetObjectGuid();
-                    pName = i_source->GetName();
-                } 
-                ChatHandler::BuildChatPacket(data, i_msgtype, str, LANG_UNIVERSAL, CHAT_TAG_NONE, ObjectGuid(), NULL, guid, pName);
+
+                ChatHandler::BuildChatPacket(data, i_msgtype, str, LANG_UNIVERSAL, CHAT_TAG_NONE, guid);
             }
         private:
             ChatMsg i_msgtype;

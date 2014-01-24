@@ -2041,18 +2041,20 @@ enum ChatMsg
     CHAT_MSG_IGNORED                = 0x16,
     CHAT_MSG_SKILL                  = 0x17,
     CHAT_MSG_LOOT                   = 0x18,
+    CHAT_MSG_MONSTER_WHISPER        = 0x1A,
     CHAT_MSG_BG_SYSTEM_NEUTRAL      = 0x52,
     CHAT_MSG_BG_SYSTEM_ALLIANCE     = 0x53,
     CHAT_MSG_BG_SYSTEM_HORDE        = 0x54,
     CHAT_MSG_RAID_LEADER            = 0x57,
     CHAT_MSG_RAID_WARNING           = 0x58,
+    CHAT_MSG_RAID_BOSS_WHISPER      = 0x59,
+    CHAT_MSG_RAID_BOSS_EMOTE        = 0x5A,
     CHAT_MSG_BATTLEGROUND           = 0x5C,
     CHAT_MSG_BATTLEGROUND_LEADER    = 0x5D,
 
     // [-ZERO] Need find correct values
-    CHAT_MSG_REPLY                  = 0x09,
+    // CHAT_MSG_REPLY                  = 0x09,
     CHAT_MSG_MONSTER_PARTY          = 0x30, // 0x0D, just selected some free random value for avoid duplicates with really existed values
-    CHAT_MSG_MONSTER_WHISPER        = 0x31, // 0x0F, just selected some free random value for avoid duplicates with really existed values
     // CHAT_MSG_MONEY                  = 0x1C,
     // CHAT_MSG_OPENING                = 0x1D,
     // CHAT_MSG_TRADESKILLS            = 0x1E,
@@ -2061,8 +2063,6 @@ enum ChatMsg
     // CHAT_MSG_COMBAT_XP_GAIN         = 0x21,
     // CHAT_MSG_COMBAT_HONOR_GAIN      = 0x22,
     // CHAT_MSG_COMBAT_FACTION_CHANGE  = 0x23,
-    CHAT_MSG_RAID_BOSS_WHISPER      = 0x29,
-    CHAT_MSG_RAID_BOSS_EMOTE        = 0x2A,
     // CHAT_MSG_FILTERED               = 0x2B,
     // CHAT_MSG_RESTRICTED             = 0x2E,
 };
