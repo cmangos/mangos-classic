@@ -3323,36 +3323,45 @@ void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const
 
     switch (msgtype)
     {
-        case CHAT_MSG_MONSTER_SAY:
-        case CHAT_MSG_MONSTER_YELL:
-            data << ObjectGuid(targetGuid);
         case CHAT_MSG_MONSTER_WHISPER:
-        case CHAT_MSG_MONSTER_EMOTE:
         case CHAT_MSG_RAID_BOSS_WHISPER:
         case CHAT_MSG_RAID_BOSS_EMOTE:
+        case CHAT_MSG_MONSTER_EMOTE:
             MANGOS_ASSERT(senderName);
             data << uint32(strlen(senderName) + 1);
             data << senderName;
+            data << ObjectGuid(targetGuid);
             break;
-
+    
         case CHAT_MSG_SAY:
         case CHAT_MSG_PARTY:
         case CHAT_MSG_YELL:
+            data << ObjectGuid(senderGuid);
+            data << ObjectGuid(senderGuid);
+            break;
+    
+        case CHAT_MSG_MONSTER_SAY:
+        case CHAT_MSG_MONSTER_YELL:
+            MANGOS_ASSERT(senderName);
+            data << ObjectGuid(senderGuid);
+            data << uint32(strlen(senderName) + 1);
+            data << senderName;
             data << ObjectGuid(targetGuid);
             break;
-
+    
         case CHAT_MSG_CHANNEL:
             MANGOS_ASSERT(channelName);
             data << channelName;
             data << uint32(0);
+            data << ObjectGuid(senderGuid);
             break;
-
+    
         default:
+            data << ObjectGuid(senderGuid);
             break;
     }
 
     MANGOS_ASSERT(message);
-    data << ObjectGuid(senderGuid);
     data << uint32(strlen(message) + 1);
     data << message;
     data << uint8(chatTag);
