@@ -3314,7 +3314,6 @@ void ChatHandler::LogCommand(char const* fullcmd)
 
 void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const* message, Language language /*= LANG_UNIVERSAL*/, ChatTagFlags chatTag /*= CHAT_TAG_NONE*/,
                                   ObjectGuid const& senderGuid /*= ObjectGuid()*/, char const* senderName /*= NULL*/,
-                                  ObjectGuid const& targetGuid /*= ObjectGuid()*/, char const* targetName /*= NULL*/,
                                   char const* channelName /*= NULL*/)
 {
     data.Initialize(SMSG_MESSAGECHAT);
@@ -3325,7 +3324,7 @@ void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const
     {
         case CHAT_MSG_MONSTER_SAY:
         case CHAT_MSG_MONSTER_YELL:
-            data << ObjectGuid(targetGuid);
+            data << ObjectGuid(senderGuid);
         case CHAT_MSG_MONSTER_WHISPER:
         case CHAT_MSG_MONSTER_EMOTE:
         case CHAT_MSG_RAID_BOSS_WHISPER:
@@ -3338,7 +3337,7 @@ void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const
         case CHAT_MSG_SAY:
         case CHAT_MSG_PARTY:
         case CHAT_MSG_YELL:
-            data << ObjectGuid(targetGuid);
+            data << ObjectGuid(senderGuid);
             break;
 
         case CHAT_MSG_CHANNEL:
