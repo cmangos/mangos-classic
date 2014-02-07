@@ -62,6 +62,12 @@ set(SRC_GRP_CHAT_COMMANDS
     Level3.cpp
 )
 
+set(SRC_GRP_EXTRAS
+    extras/Mod.cpp
+	extras/Mod.h
+	extras/SpellMod.cpp
+)
+
 set(SRC_GRP_MOTION_GEN
     ConfusedMovementGenerator.cpp
     ConfusedMovementGenerator.h
@@ -367,6 +373,7 @@ set(LIBRARY_SRCS
     ${SRC_GRP_AHBOT}
     ${SRC_GRP_BATTLEGROUND}
     ${SRC_GRP_CHAT_COMMANDS}
+	${SRC_GRP_EXTRAS}
     ${SRC_GRP_MOTION_GEN}
     ${SRC_GRP_MOVEMENT}
     ${SRC_GRP_OBJECT}
@@ -394,6 +401,11 @@ source_group("Chat Commands"
   FILES
     ${SRC_GRP_CHAT_COMMANDS}
 )
+
+source_group("Extras"
+  FILES
+     ${SRC_GRP_EXTRAS}
+ )
 
 source_group("Motion generators"
   FILES

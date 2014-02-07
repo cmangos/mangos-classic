@@ -55,6 +55,7 @@
 #include "CreatureEventAIMgr.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "SQLStorages.h"
+#include "extras/Mod.h"
 
 static uint32 ahbotQualityIds[MAX_AUCTION_QUALITY] =
 {
@@ -365,6 +366,7 @@ bool ChatHandler::HandleReloadConfigCommand(char* /*args*/)
 {
     sLog.outString("Re-Loading config settings...");
     sWorld.LoadConfigSettings(true);
+	sMod.LoadModConfSettings();
     sMapMgr.InitializeVisibilityDistanceInfo();
     SendGlobalSysMessage("World config settings reloaded.");
     return true;
