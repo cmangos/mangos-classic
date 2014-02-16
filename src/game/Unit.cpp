@@ -6897,15 +6897,6 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
             data << float(GetSpeed(mtype));
             ((Player*)this)->GetSession()->SendPacket(&data);
         }
-
-        m_movementInfo.UpdateTime(WorldTimer::getMSTime());
-
-        // TODO: Actually such opcodes should (always?) be packed with SMSG_COMPRESSED_MOVES
-        WorldPacket data(SetSpeed2Opc_table[mtype][0], 31);
-        data << GetPackGUID();
-        data << m_movementInfo;
-        data << float(GetSpeed(mtype));
-        SendMessageToSet(&data, false);
     }
 
     CallForAllControlledUnits(SetSpeedRateHelper(mtype, forced), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_MINIPET);
@@ -8375,9 +8366,12 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
     if (!IsInWorld())
         return;
 
-    Movement::MoveSplineInit init(*this);
-    init.SetFacing(GetOrientation());
-    init.Launch();
+    WorldPacket data(SMSG_MONSTER_MOVE, 9+4*3+4+1);
+    data << GetPackGUID();
+    data << GetPositionX() << GetPositionY() << GetPositionZ();
+    data << uint32(0); // Fall time
+    data << uint8(1); // MonsterMoveStop
+    SendMessageToSet(&data, true);
 }
 
 void Unit::InterruptMoving(bool forceSendStop /*=false*/)
