@@ -7173,7 +7173,7 @@ bool Unit::SelectHostileTarget()
 
     if (target)
     {
-        if (!hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
+        if (!hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
         {
             SetInFront(target);
             if (oldTarget != target)
