@@ -4327,12 +4327,15 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     if (!m_IsTriggeredSpell)
     {
-        if (!m_triggeredByAuraSpell)
-        {
-            SpellCastResult castResult = CheckRange(strict);
-            if (castResult != SPELL_CAST_OK)
-                return castResult;
-        }
+        SpellCastResult castResult = CheckRange(strict);
+        if (castResult != SPELL_CAST_OK)
+            return castResult;
+
+        if (Unit* target = m_targets.getUnitTarget())
+            if (m_caster->GetTypeId() == TYPEID_PLAYER &&
+                    (sSpellMgr.GetSpellFacingFlag(m_spellInfo->Id) & SPELL_FACING_FLAG_INFRONT) &&
+                    !m_caster->HasInArc(M_PI_F, target))
+                return SPELL_FAILED_UNIT_NOT_INFRONT;
     }
 
     {
@@ -5196,9 +5199,6 @@ SpellCastResult Spell::CheckRange(bool strict)
             return SPELL_FAILED_OUT_OF_RANGE;
         if (min_range && dist < min_range)
             return SPELL_FAILED_TOO_CLOSE;
-        if (m_caster->GetTypeId() == TYPEID_PLAYER &&
-                (sSpellMgr.GetSpellFacingFlag(m_spellInfo->Id) & SPELL_FACING_FLAG_INFRONT) && !m_caster->HasInArc(M_PI_F, target))
-            return SPELL_FAILED_UNIT_NOT_INFRONT;
     }
 
     // TODO verify that such spells really use bounding radius
