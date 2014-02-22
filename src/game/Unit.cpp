@@ -8357,6 +8357,14 @@ void Unit::SendPetAIReaction()
 
 void Unit::StopMoving(bool forceSendStop /*=false*/)
 {
+    if (!movespline->Finalized())
+    {
+        Movement::Location loc = movespline->ComputePosition();
+        movespline->_Interrupt();
+        Relocate(loc.x, loc.y, loc.z, loc.orientation);
+        forceSendStop = true;
+    }
+
     if (IsStopped() && !forceSendStop)
         return;
 
@@ -8366,27 +8374,15 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
     if (!IsInWorld())
         return;
 
-    WorldPacket data(SMSG_MONSTER_MOVE, 9+4*3+4+1);
-    data << GetPackGUID();
-    data << GetPositionX() << GetPositionY() << GetPositionZ();
-    data << uint32(0); // Fall time
-    data << uint8(1); // MonsterMoveStop
-    SendMessageToSet(&data, true);
-}
-
-void Unit::InterruptMoving(bool forceSendStop /*=false*/)
-{
-    bool isMoving = false;
-
-    if (!movespline->Finalized())
+    if (forceSendStop)
     {
-        Movement::Location loc = movespline->ComputePosition();
-        movespline->_Interrupt();
-        Relocate(loc.x, loc.y, loc.z, loc.orientation);
-        isMoving = true;
+        WorldPacket data(SMSG_MONSTER_MOVE, 9+4*3+4+1);
+        data << GetPackGUID();
+        data << GetPositionX() << GetPositionY() << GetPositionZ();
+        data << uint32(0); // Fall time
+        data << uint8(1); // MonsterMoveStop
+        SendMessageToSet(&data, true);
     }
-
-    StopMoving(forceSendStop || isMoving);
 }
 
 void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 time)
