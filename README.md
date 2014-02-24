@@ -1,4 +1,4 @@
-# C(ontinued)-MaNGOS -- README
+# C(ontinued)-MaNGOS -- README  ![Build status](https://api.travis-ci.org/eluna-dev-mangos/ElunaCoreClassic.png)
 
 This file is part of the CMaNGOS Project. See [AUTHORS](AUTHORS.md) file for Copyright information
 
@@ -54,11 +54,17 @@ To be able to accomplish these goals, we support and promote:
   * CMaNGOS IRC channel: #cmangos on irc.rizon.net
   * [GitHub repositories](https://github.com/cmangos/)
   * [Issue tracker](https://github.com/cmangos/issues/issues)
-  * [Pull Requests](https://github.com/cmangos/mangos-classic/pulls)
-  * [Current build status on Travis CI](https://travis-ci.org/cmangos/mangos-classic/)
+  * [Pull Requests](https://github.com/cmangos/mangos-tbc/pulls)
+  * [Current build status on Travis CI](https://travis-ci.org/cmangos/mangos-tbc/)
   * [Wiki](https://github.com/cmangos/issues/wiki) with additional information on installation
   * [Contributing Guidelines](CONTRIBUTING.md)
   * Documentation can be found in the doc/ subdirectory and on the github wiki
+
+# ![logo](https://dl.dropbox.com/u/98478761/eluna-DBCA-Designs.png)
+
+  You can find further information about Eluna at the following places:
+  * [Eluna Wiki](http://wiki.emudevs.com/doku.php?id=eluna)
+  * [Eluna Support Forum](http://emudevs.com)
 
 ## License
 
@@ -93,3 +99,7 @@ To be able to accomplish these goals, we support and promote:
   modify this file, you may extend this exception to your version of the
   file, but you are not obligated to do so.  If you do not wish to do
   so, delete this exception statement from your version.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/eluna-dev-mangos/elunacoreclassic/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
