@@ -2036,9 +2036,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool isAllowedToLoot(Creature* creature);
 
-        uint32 GetChampioningFaction() const { return m_ChampioningFaction; }
-        void SetChampioningFaction(uint32 faction) { m_ChampioningFaction = faction; }
-
     protected:
 
         uint32 m_contestedPvPTimer;
@@ -2160,8 +2157,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         PlayerMails m_mail;
         PlayerSpellMap m_spells;
         SpellCooldowns m_spellCooldowns;
-
-        uint32 m_ChampioningFaction;
 
         GlobalCooldownMgr m_GlobalCooldownMgr;
 

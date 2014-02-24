@@ -212,11 +212,11 @@ namespace LuaPlayer
         return 0;
     }
 
-    int GetChampioningFaction(lua_State* L, Player* player)
+    /*int GetChampioningFaction(lua_State* L, Player* player)
     {
         sEluna.Push(L, player->GetChampioningFaction());
         return 1;
-    }
+    }*/
 
     /*int ResetAchievements(lua_State* L, Player* player)
     {
