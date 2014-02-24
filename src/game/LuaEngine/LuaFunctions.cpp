@@ -244,7 +244,6 @@ ElunaRegister<Unit> UnitMethods[] =
     // {"SetConfused", &LuaUnit::SetConfused},              // :SetConfused([enable]) - Sets confused or removes confusion
     // {"SetFeared", &LuaUnit::SetFeared},                  // :SetFeared([enable]) - Fears or removes fear
     {"SetPvP", &LuaUnit::SetPvP},                           // :SetPvP([apply]) - Sets the units PvP on or off
-    // {"SetFFA", &LuaUnit::SetFFA},                        // :SetFFA([apply]) - Sets the units FFA tag on or off
     // {"SetSanctuary", &LuaUnit::SetSanctuary},            // :SetSanctuary([apply]) - Enables or disables units sanctuary flag
     // {"SetCanFly", &LuaUnit::SetCanFly},                  // :SetCanFly(apply)
     // {"SetVisible", &LuaUnit::SetVisible},                // :SetVisible(x)
@@ -473,6 +472,7 @@ ElunaRegister<Player> PlayerMethods[] =
     {"SetPlayerLock", &LuaPlayer::SetPlayerLock},           // :SetPlayerLock(on/off)
     {"SetGender", &LuaPlayer::SetGender},                   // :SetGender(value) - 0 = male 1 = female
     {"SetSheath", &LuaPlayer::SetSheath},                   // :SetSheath(SheathState) - Sets player's sheathstate
+    {"SetFFA", &LuaPlayer::SetFFA},                         // :SetFFA([apply]) - Sets the units FFA tag on or off
 
     // Boolean
     {"IsInGroup", &LuaPlayer::IsInGroup},                   // :IsInGroup()

@@ -239,18 +239,6 @@ namespace LuaUnit
         return 0;
     }
 
-    /*int SetFFA(lua_State* L, Unit* unit)
-    {
-        bool apply = sEluna.CHECKVAL<bool>(L, 2, true);
-
-        if (apply)
-            unit->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
-        else
-            unit->RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
-
-        return 0;
-    }*/
-
     /*int SetSanctuary(lua_State* L, Unit* unit)
     {
         bool apply = sEluna.CHECKVAL<bool>(L, 2, true);

@@ -2172,6 +2172,14 @@ namespace LuaPlayer
         return 0;
     }
 
+    int SetFFA(lua_State* L, Player* player)
+    {
+        bool apply = sEluna.CHECKVAL<bool>(L, 2, true);
+
+        player->SetFFAPvP(apply);
+        return 0;
+    }
+
     /*int CanFly(lua_State* L, Player* player)
     {
         sEluna.Push(L, player->CanFly());
