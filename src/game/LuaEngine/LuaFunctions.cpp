@@ -438,9 +438,9 @@ ElunaRegister<Player> PlayerMethods[] =
     {"GetGossipTextId", &LuaPlayer::GetGossipTextId},       // :GetGossipTextId(worldObject) - Returns the WorldObject's gossip textId
     {"GetQuestRewardStatus", &LuaPlayer::GetQuestRewardStatus},                                               // :GetQuestRewardStatus(questId) - Returns the true/false of the quest reward status
     {"GetShieldBlockValue", &LuaPlayer::GetShieldBlockValue}, // :GetShieldBlockValue() - Returns block value
-    {"GetHonorStoredKills", &LuaPlayer::GetHonorStoredKills},
-    {"GetRankPoints", &LuaPlayer::GetRankPoints},
-    {"GetHonorLastWeekStandingPos", &LuaPlayer::GetHonorLastWeekStandingPos},
+    {"GetHonorStoredKills", &LuaPlayer::GetHonorStoredKills}, // :GetHonorStoredKills(on/off)
+    {"GetRankPoints", &LuaPlayer::GetRankPoints},             // :GetRankPoints()
+    {"GetHonorLastWeekStandingPos", &LuaPlayer::GetHonorLastWeekStandingPos}, // :GetHonorLastWeekStandingPos()
 
     // Setters
     {"AdvanceSkillsToMax", &LuaPlayer::AdvanceSkillsToMax}, // :AdvanceSkillsToMax() - Advances all currently known skills to the currently known max level
@@ -453,9 +453,9 @@ ElunaRegister<Player> PlayerMethods[] =
     {"SetBindPoint", &LuaPlayer::SetBindPoint},             // :SetBindPoint(x, y, z, map, areaid) - sets home for hearthstone
     // {"SetArenaPoints", &LuaPlayer::SetArenaPoints},      // :SetArenaPoints(amount)
     // {"SetHonorPoints", &LuaPlayer::SetHonorPoints},      // :SetHonorPoints(amount)
-    {"SetHonorStoredKills", &LuaPlayer::SetHonorStoredKills},
-    {"SetRankPoints", &LuaPlayer::SetRankPoints},
-    {"SetHonorLastWeekStandingPos", &LuaPlayer::SetHonorLastWeekStandingPos},
+    {"SetHonorStoredKills", &LuaPlayer::SetHonorStoredKills}, // :SetHonorStoredKills(kills, [on/off])
+    {"SetRankPoints", &LuaPlayer::SetRankPoints},           // :SetRankPoints(rankPoints)
+    {"SetHonorLastWeekStandingPos", &LuaPlayer::SetHonorLastWeekStandingPos}, // :SetHonorLastWeekStandingPos(standingPos)
     // {"SetLifetimeKills", &LuaPlayer::SetLifetimeKills},  // :SetLifetimeKills(val) - Sets the overall lifetime (honorable) kills of the player
     {"SetGameMaster", &LuaPlayer::SetGameMaster},           // :SetGameMaster([on]) - Sets GM mode on or off
     {"SetGMChat", &LuaPlayer::SetGMChat},                   // :SetGMChat([on]) - Sets GM chat on or off
