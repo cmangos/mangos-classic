@@ -382,8 +382,8 @@ ElunaRegister<Player> PlayerMethods[] =
     {"GetAccountId", &LuaPlayer::GetAccountId},             // :GetAccountId()
     {"GetAccountName", &LuaPlayer::GetAccountName},         // :GetAccountName()
     // {"GetArenaPoints", &LuaPlayer::GetArenaPoints},      // :GetArenaPoints()
-	// {"GetHonorPoints", &LuaPlayer::GetHonorPoints},      // :GetHonorPoints()
-	// {"GetLifetimeKills", &LuaPlayer::GetLifetimeKills},  // :GetLifetimeKills() - Returns the player's lifetime (honorable) kills
+    // {"GetHonorPoints", &LuaPlayer::GetHonorPoints},      // :GetHonorPoints()
+    // {"GetLifetimeKills", &LuaPlayer::GetLifetimeKills},  // :GetLifetimeKills() - Returns the player's lifetime (honorable) kills
     {"GetPlayerIP", &LuaPlayer::GetPlayerIP},               // :GetPlayerIP() - Returns the player's IP Address
     {"GetLevelPlayedTime", &LuaPlayer::GetLevelPlayedTime}, // :GetLevelPlayedTime() - Returns the player's played time at that level
     {"GetTotalPlayedTime", &LuaPlayer::GetTotalPlayedTime}, // :GetTotalPlayedTime() - Returns the total played time of that player
@@ -438,6 +438,9 @@ ElunaRegister<Player> PlayerMethods[] =
     {"GetGossipTextId", &LuaPlayer::GetGossipTextId},       // :GetGossipTextId(worldObject) - Returns the WorldObject's gossip textId
     {"GetQuestRewardStatus", &LuaPlayer::GetQuestRewardStatus},                                               // :GetQuestRewardStatus(questId) - Returns the true/false of the quest reward status
     {"GetShieldBlockValue", &LuaPlayer::GetShieldBlockValue}, // :GetShieldBlockValue() - Returns block value
+    {"GetHonorStoredKills", &LuaPlayer::GetHonorStoredKills},
+    {"GetRankPoints", &LuaPlayer::GetRankPoints},
+    {"GetHonorLastWeekStandingPos", &LuaPlayer::GetHonorLastWeekStandingPos},
 
     // Setters
     {"AdvanceSkillsToMax", &LuaPlayer::AdvanceSkillsToMax}, // :AdvanceSkillsToMax() - Advances all currently known skills to the currently known max level
@@ -445,12 +448,15 @@ ElunaRegister<Player> PlayerMethods[] =
     {"AdvanceAllSkills", &LuaPlayer::AdvanceAllSkills},     // :AdvanceAllSkills(value) - Advances all current skills to your input(value)
 	// {"AddLifetimeKills", &LuaPlayer::AddLifetimeKills},  // :AddLifetimeKills(val) - Adds lifetime (honorable) kills to your current lifetime kills
     {"SetCoinage", &LuaPlayer::SetCoinage},                 // :SetCoinage(amount) - sets plr's coinage to this
-	// {"SetKnownTitle", &LuaPlayer::SetKnownTitle},        // :SetKnownTitle(id)
-	// {"UnsetKnownTitle", &LuaPlayer::UnsetKnownTitle},    // :UnsetKnownTitle(id)
+    // {"SetKnownTitle", &LuaPlayer::SetKnownTitle},        // :SetKnownTitle(id)
+    // {"UnsetKnownTitle", &LuaPlayer::UnsetKnownTitle},    // :UnsetKnownTitle(id)
     {"SetBindPoint", &LuaPlayer::SetBindPoint},             // :SetBindPoint(x, y, z, map, areaid) - sets home for hearthstone
-	// {"SetArenaPoints", &LuaPlayer::SetArenaPoints},      // :SetArenaPoints(amount)
-	// {"SetHonorPoints", &LuaPlayer::SetHonorPoints},      // :SetHonorPoints(amount)
-	// {"SetLifetimeKills", &LuaPlayer::SetLifetimeKills},  // :SetLifetimeKills(val) - Sets the overall lifetime (honorable) kills of the player
+    // {"SetArenaPoints", &LuaPlayer::SetArenaPoints},      // :SetArenaPoints(amount)
+    // {"SetHonorPoints", &LuaPlayer::SetHonorPoints},      // :SetHonorPoints(amount)
+    {"SetHonorStoredKills", &LuaPlayer::SetHonorStoredKills},
+    {"SetRankPoints", &LuaPlayer::SetRankPoints},
+    {"SetHonorLastWeekStandingPos", &LuaPlayer::SetHonorLastWeekStandingPos},
+    // {"SetLifetimeKills", &LuaPlayer::SetLifetimeKills},  // :SetLifetimeKills(val) - Sets the overall lifetime (honorable) kills of the player
     {"SetGameMaster", &LuaPlayer::SetGameMaster},           // :SetGameMaster([on]) - Sets GM mode on or off
     {"SetGMChat", &LuaPlayer::SetGMChat},                   // :SetGMChat([on]) - Sets GM chat on or off
     {"SetTaxiCheat", &LuaPlayer::SetTaxiCheat},             // :SetTaxiCheat([on]) - Sets taxi cheat on or off
@@ -480,11 +486,11 @@ ElunaRegister<Player> PlayerMethods[] =
     {"IsGM", &LuaPlayer::IsGM},                             // :IsGM()
     {"IsAlliance", &LuaPlayer::IsAlliance},                 // :IsAlliance()
     {"IsHorde", &LuaPlayer::IsHorde},                       // :IsHorde()
-	// {"HasTitle", &LuaPlayer::HasTitle},                  // :HasTitle(id)
+    // {"HasTitle", &LuaPlayer::HasTitle},                  // :HasTitle(id)
     {"HasItem", &LuaPlayer::HasItem},                       // :HasItem(itemId[, count, check_bank]) - Returns true if the player has the item(itemId) and specified count, else it will return false
     {"Teleport", &LuaPlayer::Teleport},                     // :Teleport(Map, X, Y, Z, O) - Teleports player to specified co - ordinates. Returns true if success and false if not
     {"AddItem", &LuaPlayer::AddItem},                       // :AddItem(id, amount) - Adds amount of item to player. Returns true if success and false if not
-	// {"IsInArenaTeam", &LuaPlayer::IsInArenaTeam},        // :IsInArenaTeam(type) - type : 0 = 2v2, 1 = 3v3, 2 = 5v5
+    // {"IsInArenaTeam", &LuaPlayer::IsInArenaTeam},        // :IsInArenaTeam(type) - type : 0 = 2v2, 1 = 3v3, 2 = 5v5
     {"CanEquipItem", &LuaPlayer::CanEquipItem},             // :CanEquipItem(entry/item, slot) - Returns true if the player can equip given item/item entry
     {"IsFalling", &LuaPlayer::IsFalling},                   // :IsFalling() - Returns true if the unit is falling
     {"ToggleAFK", &LuaPlayer::ToggleAFK},                   // :ToggleAFK() - Toggles AFK state for player
@@ -531,9 +537,9 @@ ElunaRegister<Player> PlayerMethods[] =
     {"HasSpell", &LuaPlayer::HasSpell},                     // :HasSpell(id)
     {"HasSpellCooldown", &LuaPlayer::HasSpellCooldown},     // :HasSpellCooldown(spellId) - Returns true if the spell is on cooldown
     {"IsInWater", &LuaPlayer::IsInWater},                   // :IsInWater() - Returns true if the player is in water
-	// {"CanFly", &LuaPlayer::CanFly},                      // :CanFly() - Returns true if the player can fly
+    // {"CanFly", &LuaPlayer::CanFly},                      // :CanFly() - Returns true if the player can fly
     {"IsMoving", &LuaPlayer::IsMoving},                     // :IsMoving()
-	// {"IsFlying", &LuaPlayer::IsFlying},                  // :IsFlying()
+    // {"IsFlying", &LuaPlayer::IsFlying},                  // :IsFlying()
 
     // Gossip
     {"GossipMenuAddItem", &LuaPlayer::GossipMenuAddItem},   // :GossipMenuAddItem(icon, msg, sender, intid[, code, popup, money])
@@ -555,7 +561,7 @@ ElunaRegister<Player> PlayerMethods[] =
     {"ModifyMoney", &LuaPlayer::ModifyMoney},               // :ModifyMoney(amount[, sendError]) - Modifies (does not set) money (copper count) of the player. Amount can be negative to remove copper
     {"LearnSpell", &LuaPlayer::LearnSpell},                 // :LearnSpell(id) - learns the given spell
     {"RemoveItem", &LuaPlayer::RemoveItem},                 // :RemoveItem(item/entry, amount) - Removes amount of item from player
-	// {"RemoveLifetimeKills", &LuaPlayer::RemoveLifetimeKills}, // :RemoveLifetimeKills(val) - Removes a specified amount(val) of the player's lifetime (honorable) kills
+    // {"RemoveLifetimeKills", &LuaPlayer::RemoveLifetimeKills}, // :RemoveLifetimeKills(val) - Removes a specified amount(val) of the player's lifetime (honorable) kills
     {"ResurrectPlayer", &LuaPlayer::ResurrectPlayer},       // :ResurrectPlayer([percent[, sickness(bool)]]) - Resurrects the player at percentage, player gets resurrection sickness if sickness set to true
     {"PlaySoundToPlayer", &LuaPlayer::PlaySoundToPlayer},   // :PlaySoundToPlayer(soundId) - Plays the specified sound to the player
     {"EquipItem", &LuaPlayer::EquipItem},                   // :EquipItem(entry/item, slot) - Equips given item or item entry for player to given slot. Returns the equipped item or nil
@@ -601,8 +607,8 @@ ElunaRegister<Player> PlayerMethods[] =
     {"DurabilityPointLossForEquipSlot", &LuaPlayer::DurabilityPointLossForEquipSlot},                         // :DurabilityPointLossForEquipSlot(slot) - Causes durability loss for the item in the given slot
     {"DurabilityRepairAll", &LuaPlayer::DurabilityRepairAll}, // :DurabilityRepairAll([has_cost, discount, guildBank]) - Repairs all durability
     {"DurabilityRepair", &LuaPlayer::DurabilityRepair},     // :DurabilityRepair(position[, has_cost, discount, guildBank]) - Repairs item durability of item in given position
-	// {"ModifyHonorPoints", &LuaPlayer::ModifyHonorPoints},// :ModifyHonorPoints(amount) - Modifies the player's honor points
-	// {"ModifyArenaPoints", &LuaPlayer::ModifyArenaPoints},// :ModifyArenaPoints(amount) - Modifies the player's arena points
+    // {"ModifyHonorPoints", &LuaPlayer::ModifyHonorPoints},// :ModifyHonorPoints(amount) - Modifies the player's honor points
+    // {"ModifyArenaPoints", &LuaPlayer::ModifyArenaPoints},// :ModifyArenaPoints(amount) - Modifies the player's arena points
     {"LeaveBattleground", &LuaPlayer::LeaveBattleground},   // :LeaveBattleground([teleToEntryPoint]) - The player leaves the battleground
     // {"BindToInstance", &LuaPlayer::BindToInstance},      // :BindToInstance() - Binds the player to the current instance
     {"UnbindInstance", &LuaPlayer::UnbindInstance},         // :UnbindInstance(map, difficulty) - Unbinds the player from an instance
@@ -891,7 +897,7 @@ ElunaRegister<Quest> QuestMethods[] =
 
     // Boolean
     {"HasFlag", &LuaQuest::HasFlag},                        // :HasFlag(flag) - Returns true or false if the quest has the specified flag
-	// {"IsDaily", &LuaQuest::IsDaily},                     // :IsDaily() - Returns true or false if the quest is a daily
+    // {"IsDaily", &LuaQuest::IsDaily},                     // :IsDaily() - Returns true or false if the quest is a daily
     {"IsRepeatable", &LuaQuest::IsRepeatable},              // :IsRepeatable() - Returns true or false if the quest is repeatable
 
     // Setters
@@ -952,7 +958,7 @@ ElunaRegister<Guild> GuildMethods[] =
     // {"GetMemberCount", &LuaGuild::GetMemberCount},       // :GetMemberCount() - Returns the amount of players in the guild
 
     // Setters
-	// {"SetBankTabText", &LuaGuild::SetBankTabText},       // :SetBankTabText(tabId, text)
+    // {"SetBankTabText", &LuaGuild::SetBankTabText},       // :SetBankTabText(tabId, text)
     {"SetMemberRank", &LuaGuild::ChangeMemberRank},         // :SetMemberRank(player, newRank) - Sets the player rank in the guild to the new rank
     {"SetLeader", &LuaGuild::SetLeader},                    // :SetLeader() - Sets the guild's leader
 
@@ -1042,11 +1048,11 @@ ElunaRegister<Map> MapMethods[] =
     {"GetHeight", &LuaMap::GetHeight},                      // :GetHeight(x, y) - Returns ground Z coordinate. UNDOCUMENTED
 
     // Booleans
-	// {"IsArena", &LuaMap::IsArena},                       // :IsArena() - Returns the true if the map is an arena, else false UNDOCUMENTED
+    // {"IsArena", &LuaMap::IsArena},                       // :IsArena() - Returns the true if the map is an arena, else false UNDOCUMENTED
     {"IsBattleground", &LuaMap::IsBattleground},            // :IsBattleground() - Returns the true if the map is a battleground, else false UNDOCUMENTED
     {"IsDungeon", &LuaMap::IsDungeon},                      // :IsDungeon() - Returns the true if the map is a dungeon , else false UNDOCUMENTED
     {"IsEmpty", &LuaMap::IsEmpty},                          // :IsEmpty() - Returns the true if the map is empty, else false UNDOCUMENTED
-	// {"IsHeroic", &LuaMap::IsHeroic},                     // :IsHeroic() - Returns the true if the map is a heroic dungeon, else false UNDOCUMENTED
+    // {"IsHeroic", &LuaMap::IsHeroic},                     // :IsHeroic() - Returns the true if the map is a heroic dungeon, else false UNDOCUMENTED
     {"IsRaid", &LuaMap::IsRaid},                            // :IsRaid() - Returns the true if the map is a raid map, else false UNDOCUMENTED
 
     {NULL, NULL},

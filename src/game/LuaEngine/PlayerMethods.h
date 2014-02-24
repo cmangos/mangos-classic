@@ -1623,6 +1623,31 @@ namespace LuaPlayer
         return 0;
     }*/
 
+    int SetHonorStoredKills(lua_State* L, Player* player)
+    {
+        uint32 kills = sEluna.CHECKVAL<uint32>(L, 2);
+        bool honorable = sEluna.CHECKVAL<bool>(L, 3, true);
+
+        player->SetHonorStoredKills(kills, honorable);
+        return 0;
+    }
+
+    int SetRankPoints(lua_State* L, Player* player)
+    {
+        float rankPoints = sEluna.CHECKVAL<float>(L, 2);
+
+        player->SetRankPoints(rankPoints);
+        return 0;
+    }
+
+    int SetHonorLastWeekStandingPos(lua_State* L, Player* player)
+    {
+        int32 standingPos = sEluna.CHECKVAL<int32>(L, 2);
+
+        player->SetHonorLastWeekStandingPos(standingPos);
+        return 0;
+    }
+
     /*int SetLifetimeKills(lua_State* L, Player* player)
     {
         uint32 val = sEluna.CHECKVAL<uint32>(L, 2);
@@ -2153,6 +2178,26 @@ namespace LuaPlayer
     int GetShieldBlockValue(lua_State* L, Player* player)
     {
         sEluna.Push(L, player->GetShieldBlockValue());
+        return 1;
+    }
+
+    int GetHonorStoredKills(lua_State* L, Player* player)
+    {
+        bool honorable = sEluna.CHECKVAL<bool>(L, 2, true);
+
+        sEluna.Push(L, player->GetHonorStoredKills(honorable));
+        return 0;
+    }
+
+    int GetRankPoints(lua_State* L, Player* player)
+    {
+        sEluna.Push(L, player->GetRankPoints());
+        return 1;
+    }
+
+    int GetHonorLastWeekStandingPos(lua_State* L, Player* player)
+    {
+        sEluna.Push(L, player->GetHonorLastWeekStandingPos());
         return 1;
     }
 
