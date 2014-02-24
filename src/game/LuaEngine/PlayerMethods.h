@@ -2242,5 +2242,17 @@ namespace LuaPlayer
         sEluna.Push(L, player->IsFlying());
         return 1;
     }*/
+
+    int UpdateHonor(lua_State* L, Player* player)
+    {
+        player->UpdateHonor();
+        return 0;
+    }
+
+    int ResetHonor(lua_State* L, Player* player)
+    {
+        player->ResetHonor();
+        return 0;
+    }
 };
 #endif
