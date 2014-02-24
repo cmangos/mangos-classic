@@ -983,6 +983,13 @@ class ObjectMgr
         bool RemoveVendorItem(uint32 entry, uint32 item);
         bool IsVendorItemValid(bool isTemplate, char const* tableName, uint32 vendor_entry, uint32 item, uint32 maxcount, uint32 ptime, uint16 conditionId, Player* pl = NULL, std::set<uint32>* skip_vendors = NULL) const;
 
+        static void AddLocaleString(std::string const& s, LocaleConstant locale, StringVector& data);
+        static inline void GetLocaleString(const StringVector& data, int loc_idx, std::string& value)
+        {
+            if (data.size() > size_t(loc_idx) && !data[loc_idx].empty())
+                value = data[loc_idx];
+        }
+
         int GetOrNewIndexForLocale(LocaleConstant loc);
 
         ItemRequiredTargetMapBounds GetItemRequiredTargetMapBounds(uint32 uiItemEntry) const

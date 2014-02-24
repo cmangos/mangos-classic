@@ -1231,7 +1231,16 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
         uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
+
+        bool IsFullHealth() const { return GetHealth() == GetMaxHealth(); }
+        bool HealthBelowPct(int32 pct) const { return GetHealth() < CountPctFromMaxHealth(pct); }
+        bool HealthBelowPctDamaged(int32 pct, uint32 damage) const { return int64(GetHealth()) - int64(damage) < int64(CountPctFromMaxHealth(pct)); }
+        bool HealthAbovePct(int32 pct) const { return GetHealth() > CountPctFromMaxHealth(pct); }
+        bool HealthAbovePctHealed(int32 pct, uint32 heal) const { return uint64(GetHealth()) + uint64(heal) > CountPctFromMaxHealth(pct); }
         float GetHealthPercent() const { return (GetHealth() * 100.0f) / GetMaxHealth(); }
+        uint32 CountPctFromMaxHealth(int32 pct) const { return (GetMaxHealth() * static_cast<float>(pct) / 100.0f); }
+        uint32 CountPctFromCurHealth(int32 pct) const { return (GetHealth() * static_cast<float>(pct) / 100.0f); }
+
         void SetHealth(uint32 val);
         void SetMaxHealth(uint32 val);
         void SetHealthPercent(float percent);
@@ -1437,6 +1446,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetFacingToObject(WorldObject* pObject);
 
         bool isAlive() const { return (m_deathState == ALIVE); };
+        bool isDying() const { return (m_deathState == JUST_DIED); }
         bool isDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); };
         DeathState getDeathState() const { return m_deathState; };
         virtual void SetDeathState(DeathState s);           // overwritten in Creature/Player/Pet
@@ -1572,6 +1582,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void InterruptNonMeleeSpells(bool withDelayed, uint32 spellid = 0);
 
         Spell* GetCurrentSpell(CurrentSpellTypes spellType) const { return m_currentSpells[spellType]; }
+        Spell* GetCurrentSpell(uint32 spellType) const { return m_currentSpells[spellType]; }
         Spell* FindCurrentSpellBySpellId(uint32 spell_id) const;
 
         bool CheckAndIncreaseCastCounter();

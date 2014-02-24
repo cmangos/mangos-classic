@@ -26,6 +26,7 @@
 #include "DBCStores.h"
 #include "CreatureAI.h"
 #include "InstanceData.h"
+#include "HookMgr.h"
 
 Totem::Totem() : Creature(CREATURE_SUBTYPE_TOTEM)
 {
@@ -93,6 +94,7 @@ void Totem::Summon(Unit* owner)
 
     if (owner->GetTypeId() == TYPEID_UNIT && ((Creature*)owner)->AI())
         ((Creature*)owner)->AI()->JustSummoned((Creature*)this);
+    sHookMgr.OnSummoned(this, owner);
 
     // there are some totems, which exist just for their visual appeareance
     if (!GetSpell())

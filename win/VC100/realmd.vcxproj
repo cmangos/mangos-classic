@@ -186,6 +186,9 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
     </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\src\realmd\realmd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
     <Midl>
@@ -229,6 +232,9 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\src\realmd\realmd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -273,6 +279,9 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
     </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\src\realmd\realmd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
     <Midl>
@@ -317,6 +326,9 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\src\realmd\realmd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">
     <Midl>
@@ -361,6 +373,9 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
     </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\src\realmd\realmd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">
     <Midl>
@@ -405,6 +420,9 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
+    <PostBuildEvent>
+      <Command>copy ..\..\src\realmd\realmd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\realmd\AuthCodes.h" />

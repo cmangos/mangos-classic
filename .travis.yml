@@ -23,9 +23,9 @@ git:
   depth: 1
 
 # only run travis on the master branch
-branches:
-  only:
-    - master
+# branches:
+#   only:
+#     - master
 
 compiler:
   - gcc
@@ -37,11 +37,3 @@ script:
   - cd _build
   - cmake -DCMAKE_INSTALL_PREFIX=../_install ..
   - make -j4
-
-# if this configuration file is not in one of the offical CMaNGOS repositories at http://github.com/cmangos/, PLEASE remove the notifications or point them to another IRC channel!
-notifications:
-  irc:
-    channels:
-      - "irc.rizon.net#cmangos"
-    on_success: never
-    on_failure: always

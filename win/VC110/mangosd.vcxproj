@@ -196,7 +196,8 @@
       <ImportLibrary>$(IntDir)mangosd.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\dep\lib\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>copy ..\..\dep\lib\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Platform)_$(Configuration)
+               copy ..\..\src\mangosd\mangosd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
@@ -245,7 +246,8 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\dep\lib\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>copy ..\..\dep\lib\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Platform)_$(Configuration)
+               copy ..\..\src\mangosd\mangosd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -296,7 +298,8 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\dep\lib\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>copy ..\..\dep\lib\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Platform)_$(Configuration)
+               copy ..\..\src\mangosd\mangosd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
@@ -346,7 +349,8 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\dep\lib\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>copy ..\..\dep\lib\$(Platform)_$(Configuration)\*.dll ..\..\bin\$(Platform)_$(Configuration)
+               copy ..\..\src\mangosd\mangosd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">
@@ -396,7 +400,8 @@
       <ImportLibrary>$(IntDir)mangosd.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\dep\lib\$(Platform)_debug\*.dll ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>copy ..\..\dep\lib\$(Platform)_debug\*.dll ..\..\bin\$(Platform)_$(Configuration)
+               copy ..\..\src\mangosd\mangosd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">
@@ -446,7 +451,8 @@
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy ..\..\dep\lib\$(Platform)_debug\*.dll ..\..\bin\$(Platform)_$(Configuration)</Command>
+      <Command>copy ..\..\dep\lib\$(Platform)_debug\*.dll ..\..\bin\$(Platform)_$(Configuration)
+               copy ..\..\src\mangosd\mangosd.conf.dist.in ..\..\bin\$(Platform)_$(Configuration)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

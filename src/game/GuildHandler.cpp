@@ -27,6 +27,7 @@
 #include "GuildMgr.h"
 #include "GossipDef.h"
 #include "SocialMgr.h"
+#include "HookMgr.h"
 
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 {
@@ -62,6 +63,17 @@ void WorldSession::HandleGuildCreateOpcode(WorldPacket& recvPacket)
     }
 
     sGuildMgr.AddGuild(guild);
+}
+
+void WorldSession::SendGuildInvite(Player* player, bool alreadyInGuild /*= false*/)
+{
+    Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
+    player->SetGuildIdInvited(GetPlayer()->GetGuildId());
+
+    WorldPacket data(SMSG_GUILD_INVITE, (8 + 10));          // guess size
+    data << GetPlayer()->GetName();
+    data << guild->GetName();
+    player->GetSession()->SendPacket(&data);                                  // unk
 }
 
 void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)

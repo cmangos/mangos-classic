@@ -23,5 +23,6 @@ if(NOT ACE_USE_EXTERNAL)
   add_subdirectory(ACE_wrappers)
 endif()
 
+add_subdirectory(lualib)
 add_subdirectory(recastnavigation)
 add_subdirectory(src)

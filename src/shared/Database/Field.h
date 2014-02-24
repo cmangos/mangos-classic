@@ -49,6 +49,8 @@ class Field
         }
         float GetFloat() const { return mValue ? static_cast<float>(atof(mValue)) : 0.0f; }
         bool GetBool() const { return mValue ? atoi(mValue) > 0 : false; }
+        double GetDouble() const { return mValue ? static_cast<double>(atof(mValue)) : 0.0f; }
+        int8 GetInt8() const { return mValue ? static_cast<int8>(atol(mValue)) : int8(0); }
         int32 GetInt32() const { return mValue ? static_cast<int32>(atol(mValue)) : int32(0); }
         uint8 GetUInt8() const { return mValue ? static_cast<uint8>(atol(mValue)) : uint8(0); }
         uint16 GetUInt16() const { return mValue ? static_cast<uint16>(atol(mValue)) : uint16(0); }
@@ -58,6 +60,15 @@ class Field
         {
             uint64 value = 0;
             if (!mValue || sscanf(mValue, UI64FMTD, &value) == -1)
+                return 0;
+
+            return value;
+        }
+
+        uint64 GetInt64() const
+        {
+            int64 value = 0;
+            if (!mValue || sscanf(mValue, SI64FMTD, &value) == -1)
                 return 0;
 
             return value;

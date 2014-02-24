@@ -24,6 +24,7 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Chat.h"
+#include "HookMgr.h"
 
 void WorldSession::SendGMTicketGetTicket(uint32 status, GMTicket* ticket /*= NULL*/)
 {
@@ -76,11 +77,17 @@ void WorldSession::HandleGMTicketUpdateTextOpcode(WorldPacket& recv_data)
         ticket->SetText(ticketText.c_str());
     else
         sLog.outError("Ticket update: Player %s (GUID: %u) doesn't have active ticket", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
+ 
+    // used by eluna
+    sHookMgr.OnGmTicketUpdate(_player, ticketText);
 }
 
 void WorldSession::HandleGMTicketDeleteTicketOpcode(WorldPacket& /*recv_data*/)
 {
     sTicketMgr.Delete(GetPlayer()->GetObjectGuid());
+
+    // used by eluna
+    sHookMgr.OnGmTicketDelete(_player);
 
     WorldPacket data(SMSG_GMTICKET_DELETETICKET, 4);
     data << uint32(9);
@@ -113,6 +120,9 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket& recv_data)
     }
 
     sTicketMgr.Create(_player->GetObjectGuid(), ticketText.c_str());
+
+    // used by eluna
+    sHookMgr.OnGmTicketCreate(_player, ticketText);
 
     SendQueryTimeResponse();
 

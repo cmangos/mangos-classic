@@ -152,6 +152,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
 
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
+    DisableReputationGain = false;
 
     SetWalk(true, true);
 }
@@ -986,6 +987,19 @@ void Creature::SetLootRecipient(Unit* unit)
         m_lootGroupRecipientId = group->GetId();
 
     SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
+}
+
+// return true if this creature is tapped by the player or by a member of his group.
+bool Creature::isTappedBy(Player const* player) const
+{
+    if (player == GetOriginalLootRecipient())
+        return true;
+
+    Group const* playerGroup = player->GetGroup();
+    if (!playerGroup || playerGroup != GetGroupLootRecipient()) // if we dont have a group we arent the recipient
+        return false;                                           // if creature doesnt have group bound it means it was solo killed by someone else
+
+    return true;
 }
 
 void Creature::SaveToDB()
@@ -2070,6 +2084,13 @@ bool Creature::HasCategoryCooldown(uint32 spell_id) const
 
     CreatureSpellCooldowns::const_iterator itr = m_CreatureCategoryCooldowns.find(spellInfo->Category);
     return (itr != m_CreatureCategoryCooldowns.end() && time_t(itr->second + (spellInfo->CategoryRecoveryTime / IN_MILLISECONDS)) > time(NULL));
+}
+
+uint32 Creature::GetCreatureSpellCooldownDelay(uint32 spellId) const
+{
+    CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spellId);
+    time_t t = time(NULL);
+    return uint32(itr != m_CreatureSpellCooldowns.end() && itr->second > t ? itr->second - t : 0);
 }
 
 bool Creature::HasSpellCooldown(uint32 spell_id) const

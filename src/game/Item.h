@@ -253,7 +253,12 @@ class MANGOS_DLL_SPEC Item : public Object
         void DeleteFromInventoryDB();
         void LoadLootFromDB(Field* fields);
 
+        Bag* ToBag() { if (IsBag()) return reinterpret_cast<Bag*>(this); else return NULL; }
+        const Bag* ToBag() const { if (IsBag()) return reinterpret_cast<const Bag*>(this); else return NULL; }
+
+        bool IsLocked() const { return !HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED); }
         bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
+        bool IsNotEmptyBag() const;
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
         bool CanBeTraded() const;
         void SetInTrade(bool b = true) { mb_in_trade = b; }
@@ -325,6 +330,8 @@ class MANGOS_DLL_SPEC Item : public Object
         bool HasInvolvedQuest(uint32 /*quest_id*/) const override { return false; }
         bool IsPotion() const { return GetProto()->IsPotion(); }
         bool IsConjuredConsumable() const { return GetProto()->IsConjuredConsumable(); }
+        bool IsWeaponVellum() const { return GetProto()->IsWeaponVellum(); }
+        bool IsArmorVellum() const { return GetProto()->IsArmorVellum(); }
 
         void AddToClientUpdateList() override;
         void RemoveFromClientUpdateList() override;

@@ -474,6 +474,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "all_spell",      SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleReloadAllSpellCommand,      "", NULL },
 
         { "config",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleReloadConfigCommand,        "", NULL },
+        { "eluna",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleReloadElunaCommand,         "", NULL },
 
         { "areatrigger_involvedrelation", SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadQuestAreaTriggersCommand,       "", NULL },
         { "areatrigger_tavern",          SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadAreaTriggerTavernCommand,       "", NULL },

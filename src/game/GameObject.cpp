@@ -40,7 +40,9 @@
 #include "Util.h"
 #include "ScriptMgr.h"
 #include "vmap/GameObjectModel.h"
+#include "CreatureAISelector.h"
 #include "SQLStorages.h"
+#include "HookMgr.h"
 
 GameObject::GameObject() : WorldObject(),
     loot(this),
@@ -115,6 +117,15 @@ void GameObject::RemoveFromWorld()
     }
 
     Object::RemoveFromWorld();
+}
+
+void GameObject::CleanupsBeforeDelete()
+{
+    if (m_uint32Values)
+    {
+        m_Events.KillAllEvents(false);
+    }
+    WorldObject::CleanupsBeforeDelete();
 }
 
 bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, GOState go_state)
@@ -201,6 +212,10 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
         //((Transport*)this)->Update(p_time);
         return;
     }
+
+    m_Events.Update(p_time);
+    // used by eluna
+    sHookMgr.UpdateAI(this, update_diff, p_time);
 
     switch (m_lootState)
     {
@@ -965,6 +980,12 @@ void GameObject::Use(Unit* user)
     Unit* spellCaster = user;
     uint32 spellId = 0;
     bool triggered = false;
+
+    if (Player* playerUser = user->ToPlayer())
+    {
+        if (sScriptMgr.OnGossipHello(playerUser, this))
+            return;
+    }
 
     // test only for exist cooldown data (cooldown timer used for door/buttons reset that not have use cooldown)
     if (uint32 cooldown = GetGOInfo()->GetCooldown())
