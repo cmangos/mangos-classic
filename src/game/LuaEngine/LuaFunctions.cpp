@@ -540,6 +540,7 @@ ElunaRegister<Player> PlayerMethods[] =
     // {"CanFly", &LuaPlayer::CanFly},                      // :CanFly() - Returns true if the player can fly
     {"IsMoving", &LuaPlayer::IsMoving},                     // :IsMoving()
     // {"IsFlying", &LuaPlayer::IsFlying},                  // :IsFlying()
+    {"IsFFA", &LuaPlayer::SetFFA},                          // :SetFFA
 
     // Gossip
     {"GossipMenuAddItem", &LuaPlayer::GossipMenuAddItem},   // :GossipMenuAddItem(icon, msg, sender, intid[, code, popup, money])
@@ -638,6 +639,7 @@ ElunaRegister<Player> PlayerMethods[] =
     {"SaveToDB", &LuaPlayer::SaveToDB},                     // :SaveToDB() - Saves to database
     {"UpdateHonor", &LuaPlayer::UpdateHonor},               // :UpdateHonor() - Updates Player Honor
     {"ResetHonor", &LuaPlayer::ResetHonor},                 // :ResetHonor() - Resets Player Honor
+    {"ClearHonorInfo", &LuaPlayer::ClearHonorInfo},         // :ClearHonorInfo() - Clear Player Honor Info
 
     {NULL, NULL},
 };

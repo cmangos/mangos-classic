@@ -2237,6 +2237,12 @@ namespace LuaPlayer
         return 1;
     }
 
+    int IsFFA(lua_State* L, Player* player)
+    {
+        sEluna.Push(L, player->IsFFAPvP());
+        return 1;
+    }
+
     /*int IsFlying(lua_State* L, Player* player) // enable for unit when mangos support it
     {
         sEluna.Push(L, player->IsFlying());
@@ -2252,6 +2258,12 @@ namespace LuaPlayer
     int ResetHonor(lua_State* L, Player* player)
     {
         player->ResetHonor();
+        return 0;
+    }
+
+    int ClearHonorInfo(lua_State* L, Player* player)
+    {
+        player->ClearHonorInfo();
         return 0;
     }
 };
