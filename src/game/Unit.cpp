@@ -8361,7 +8361,9 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
     {
         Movement::Location loc = movespline->ComputePosition();
         movespline->_Interrupt();
-        Relocate(loc.x, loc.y, loc.z, loc.orientation);
+        // loc.orientation may be wrong if creature shouldn't be able to turn (i.e. stunned);
+        // use current orientation instead.
+        Relocate(loc.x, loc.y, loc.z, hasUnitState(UNIT_STAT_STUNNED) ? GetOrientation() : loc.orientation);
         forceSendStop = true;
     }
 
