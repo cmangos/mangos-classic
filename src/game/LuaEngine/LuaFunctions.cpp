@@ -540,7 +540,7 @@ ElunaRegister<Player> PlayerMethods[] =
     // {"CanFly", &LuaPlayer::CanFly},                      // :CanFly() - Returns true if the player can fly
     {"IsMoving", &LuaPlayer::IsMoving},                     // :IsMoving()
     // {"IsFlying", &LuaPlayer::IsFlying},                  // :IsFlying()
-    {"IsFFA", &LuaPlayer::SetFFA},                          // :SetFFA
+    {"IsFFA", &LuaPlayer::IsFFA},                           // :IsFFA
 
     // Gossip
     {"GossipMenuAddItem", &LuaPlayer::GossipMenuAddItem},   // :GossipMenuAddItem(icon, msg, sender, intid[, code, popup, money])
