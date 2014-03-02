@@ -17096,13 +17096,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // tutorial stuff
     GetSession()->SendTutorialsData();
-
     SendInitialSpells();
-    //[-ZERO] SMSG_SEND_UNLEARN_SPELLS maybe not for 1.12
-    data.Initialize(SMSG_SEND_UNLEARN_SPELLS, 4);
-    data << uint32(0);                                      // count, for(count) uint32;
-    GetSession()->SendPacket(&data);
-
     SendInitialActionButtons();
     m_reputationMgr.SendInitialReputations();
     UpdateHonor();
