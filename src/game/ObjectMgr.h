@@ -639,6 +639,7 @@ class ObjectMgr
         void LoadPetCreateSpells();
         void LoadCreatureLocales();
         void LoadCreatureTemplates();
+        void LoadCreatureClassLvlStats();
         void LoadCreatures();
         void LoadCreatureAddons();
         void LoadCreatureModelInfo();
@@ -1026,6 +1027,19 @@ class ObjectMgr
         }
 
         QuestRelationsMap& GetCreatureQuestRelationsMap() { return m_CreatureQuestRelations; }
+
+        /**
+        * \brief: Data returned is used to compute health, mana, armor, damage of creatures. May not be NULL.
+        * \param uint32 index       creature class
+        * \param uint32 level       creature level
+        * \return: CreatureClassLvlStats const* or NULL
+        *
+        * Description: GetCreatureClassLvlStats give fast access to creature stats data.
+        * FullName: ObjectMgr::GetCreatureClassLvlStats
+        * Access: public
+        * Qualifier: const
+        **/
+        CreatureClassLvlStats const* GetCreatureClassLvlStats(uint32 index, uint32 level) const;
     protected:
 
         // first free id for selected id type
@@ -1136,6 +1150,9 @@ class ObjectMgr
         typedef std::map<uint32, std::vector<std::string> > HalfNameMap;
         HalfNameMap PetHalfName0;
         HalfNameMap PetHalfName1;
+
+        // Array to store creature stats, MAX_LEVEL_CLASSIC = 60, Max creature level is 65, + 1 (for data alignement with level)
+        CreatureClassLvlStats m_creatureClassLvlStats[MAX_CREATURE_CLASS][MAX_CREATURE_LEVEL_CLASSIC + 1];
 
         MapObjectGuids mMapObjectGuids;
         CreatureDataMap mCreatureDataMap;

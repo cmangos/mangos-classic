@@ -1163,7 +1163,7 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
         }
     }
 
-    if ((m_creature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_AGGRO) || m_creature->IsNeutralToAll())
+    if ((m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO) || m_creature->IsNeutralToAll())
         return;
 
     if (m_creature->CanInitiateAttack() && who->isTargetableForAttack() &&
