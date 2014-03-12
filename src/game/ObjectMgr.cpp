@@ -414,9 +414,9 @@ void ObjectMgr::LoadCreatureTemplates()
         if (!factionTemplate)
             sLog.outErrorDb("Creature (Entry: %u) has nonexistent faction_A template (%u)", cInfo->Entry, cInfo->FactionAlliance);
 
-        factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->Faction_Horde);
+        factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->FactionHorde);
         if (!factionTemplate)
-            sLog.outErrorDb("Creature (Entry: %u) has nonexistent faction_H template (%u)", cInfo->Entry, cInfo->Faction_Horde);
+            sLog.outErrorDb("Creature (Entry: %u) has nonexistent faction_H template (%u)", cInfo->Entry, cInfo->FactionHorde);
 
         for (int k = 0; k < MAX_KILL_CREDIT; ++k)
         {
@@ -1057,14 +1057,14 @@ void ObjectMgr::LoadCreatureClassLvlStats()
         uint32 classArrayIndex = 0;
         switch (Class)
         {
-        case CLASS_WARRIOR: classArrayIndex = 0; break;
-        case CLASS_PALADIN: classArrayIndex = 1; break;
-        case CLASS_MAGE:    classArrayIndex = 2; break;
+            case CLASS_WARRIOR: classArrayIndex = 0; break;
+            case CLASS_PALADIN: classArrayIndex = 1; break;
+            case CLASS_MAGE:    classArrayIndex = 2; break;
 
-        default:
-            sLog.outErrorDb("Found stats for creature class [%u], incorrect for this core. Skip!", Class);
-            continue;
-            break;
+            default:
+                sLog.outErrorDb("Found stats for creature class [%u], incorrect for this core. Skip!", Class);
+                continue;
+                break;
         }
 
         CreatureClassLvlStats cCLSExp0;

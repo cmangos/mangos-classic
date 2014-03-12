@@ -332,7 +332,7 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
     SelectLevel(GetCreatureInfo(), preserveHPAndPower ? GetHealthPercent() : 100.0f, 100.0f);
 
     if (team == HORDE)
-        setFaction(GetCreatureInfo()->Faction_Horde);
+        setFaction(GetCreatureInfo()->FactionHorde);
     else
         setFaction(GetCreatureInfo()->FactionAlliance);
 
@@ -1085,31 +1085,21 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     uint32 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
     SetLevel(level);
 
-    uint32 health = 0;
-    uint32 mana = 0;
-    uint32 armor = 0;
-    float mainMinDmg = 0;
-    float mainMaxDmg = 0;
-    float offMinDmg = 0;
-    float offMaxDmg = 0;
-    float minRangedDmg = 0;
-    float maxRangedDmg = 0;
-
     CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(cinfo->UnitClass, level);
-    health = cCLS->BaseHealth * cinfo->HealthMultiplier;
+    uint32 health = cCLS->BaseHealth * cinfo->HealthMultiplier;
     health = std::max(health, uint32(1));                   // set minimum health to 1 for little mob like cat
-    mana = cCLS->BaseMana * cinfo->ManaMultiplier;
-    armor = cCLS->BaseArmor * cinfo->ArmorMultiplier;
+    uint32 mana = cCLS->BaseMana * cinfo->ManaMultiplier;
+    uint32 armor = cCLS->BaseArmor * cinfo->ArmorMultiplier;
 
     // damage
-    mainMinDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseMeleeAttackPower/14.0f)) * (cinfo->MeleeBaseAttackTime/1000.0f) * cinfo->DamageMultiplier;
-    mainMaxDmg = ((cCLS->BaseDamage * cinfo->DamageVariance *1.5f) + (cCLS->BaseMeleeAttackPower/14.0f)) * (cinfo->MeleeBaseAttackTime/1000.0f) * cinfo->DamageMultiplier;
+    float mainMinDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseMeleeAttackPower/14.0f)) * (cinfo->MeleeBaseAttackTime/1000.0f) * cinfo->DamageMultiplier;
+    float mainMaxDmg = ((cCLS->BaseDamage * cinfo->DamageVariance *1.5f) + (cCLS->BaseMeleeAttackPower/14.0f)) * (cinfo->MeleeBaseAttackTime/1000.0f) * cinfo->DamageMultiplier;
 
-    offMinDmg = mainMinDmg / 2.0f;
-    offMaxDmg = mainMinDmg / 2.0f;
+    float offMinDmg = mainMinDmg / 2.0f;
+    float offMaxDmg = mainMinDmg / 2.0f;
 
-    minRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseRangedAttackPower/14.0f)) * (cinfo->RangedBaseAttackTime/1000.0f) * cinfo->DamageMultiplier;
-    maxRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance * 1.5f) + (cCLS->BaseRangedAttackPower/14.0f)) * (cinfo->RangedBaseAttackTime/1000.0f) * cinfo->DamageMultiplier;
+    float minRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance) + (cCLS->BaseRangedAttackPower/14.0f)) * (cinfo->RangedBaseAttackTime/1000.0f) * cinfo->DamageMultiplier;
+    float maxRangedDmg = ((cCLS->BaseDamage * cinfo->DamageVariance * 1.5f) + (cCLS->BaseRangedAttackPower/14.0f)) * (cinfo->RangedBaseAttackTime/1000.0f) * cinfo->DamageMultiplier;
 
     SetCreateHealth(health);
     SetMaxHealth(health);

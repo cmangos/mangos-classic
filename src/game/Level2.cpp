@@ -1926,7 +1926,7 @@ bool ChatHandler::HandleNpcFactionIdCommand(char* args)
     if (CreatureInfo const* cinfo = pCreature->GetCreatureInfo())
     {
         const_cast<CreatureInfo*>(cinfo)->FactionAlliance = factionId;
-        const_cast<CreatureInfo*>(cinfo)->Faction_Horde = factionId;
+        const_cast<CreatureInfo*>(cinfo)->FactionHorde = factionId;
     }
 
     // and DB

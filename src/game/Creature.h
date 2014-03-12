@@ -76,7 +76,7 @@ struct CreatureInfo
     uint32  MaxLevel;
     uint32  ModelId[MAX_CREATURE_MODEL];
     uint32  FactionAlliance;
-    uint32  Faction_Horde;
+    uint32  FactionHorde;
     float   Scale;
     uint32  Family;                                         // enum CreatureFamily values (optional)
     uint32  CreatureType;                                   // enum CreatureType values

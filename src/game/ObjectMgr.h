@@ -1029,10 +1029,10 @@ class ObjectMgr
         QuestRelationsMap& GetCreatureQuestRelationsMap() { return m_CreatureQuestRelations; }
 
         /**
-        * \brief: Data returned is used to compute health, mana, armor, damage of creatures. May not be NULL.
+        * \brief: Data returned is used to compute health, mana, armor, damage of creatures. Cannot be NULL.
         * \param uint32 index       creature class
         * \param uint32 level       creature level
-        * \return: CreatureClassLvlStats const* or NULL
+        * \return: CreatureClassLvlStats const* (return dummy data when error occur)
         *
         * Description: GetCreatureClassLvlStats give fast access to creature stats data.
         * FullName: ObjectMgr::GetCreatureClassLvlStats
