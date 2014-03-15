@@ -1078,7 +1078,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     case CLASS_DRUID: spellid = 29194; break;
                     default: break;
                 }
-                m_caster->CastSpell(unitTarget, spellid, true, NULL);
+                if (spellid != 0)
+                    m_caster->CastSpell(unitTarget, spellid, true, NULL);
             }
             break;
         }
