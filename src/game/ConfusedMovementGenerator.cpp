@@ -19,6 +19,7 @@
 #include "ConfusedMovementGenerator.h"
 #include "MapManager.h"
 #include "Creature.h"
+#include "CreatureAI.h"
 #include "Player.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
@@ -37,6 +38,8 @@ void ConfusedMovementGenerator<T>::Initialize(T& unit)
 
     unit.StopMoving();
     unit.addUnitState(UNIT_STAT_CONFUSED_MOVE);
+    if (unit.GetTypeId() != TYPEID_PLAYER)
+        unit.SetTargetGuid(ObjectGuid());
 }
 
 template<class T>
@@ -119,6 +122,14 @@ template<>
 void ConfusedMovementGenerator<Creature>::Finalize(Creature& unit)
 {
     unit.clearUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
+    if (Unit* victim = unit.getVictim())
+    {
+        if (unit.isAlive())
+        {
+            unit.AttackStop(true);
+            ((Creature*)&unit)->AI()->AttackStart(victim);
+        }
+    }
 }
 
 template void ConfusedMovementGenerator<Player>::Initialize(Player& player);
