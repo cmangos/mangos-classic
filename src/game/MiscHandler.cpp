@@ -771,9 +771,6 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
             }
         }
 
-        // used by eluna
-        sHookMgr.OnResurrect(player);
-
         // now we can resurrect player, and then check teleport requirements
         player->ResurrectPlayer(0.5f);
         player->SpawnCorpseBones();
