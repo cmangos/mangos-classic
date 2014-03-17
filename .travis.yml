@@ -31,6 +31,16 @@ compiler:
   - gcc
   - clang
 
+before_install:
+# Get Eluna
+# Go to Source/src/game/LuaEngine/
+    - cd src/game/LuaEngine/
+# init git and get latest eluna
+    - git init
+    - git pull https://github.com/Rochet2/Eluna.git master
+# Go to Source/
+    - cd ../../../
+
 script:
   - test -d _build || mkdir _build
   - test -d _install || mkdir _install
