@@ -143,7 +143,7 @@ int WorldSocket::SendPacket(const WorldPacket& pkt)
     // Dump outgoing packet.
     sLog.outWorldPacketDump(uint32(get_handle()), pct.GetOpcode(), pct.GetOpcodeName(), &pct, false);
 
-    if (!sHookMgr.OnPacketSend(m_Session, pct))
+    if (!sHookMgr->OnPacketSend(m_Session, pct))
         return 0;
 
     if (iSendPacket(pct) == -1)
@@ -579,13 +579,13 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                     return -1;
                 }
 
-                if (!sHookMgr.OnPacketReceive(m_Session, *new_pct))
+                if (!sHookMgr->OnPacketReceive(m_Session, *new_pct))
                     return 0;
                 return HandleAuthSession(*new_pct);
             case CMSG_KEEP_ALIVE:
                 DEBUG_LOG("CMSG_KEEP_ALIVE ,size: " SIZEFMTD " ", new_pct->size());
 
-                sHookMgr.OnPacketReceive(m_Session, *new_pct);
+                sHookMgr->OnPacketReceive(m_Session, *new_pct);
                 return 0;
             default:
             {
