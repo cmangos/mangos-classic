@@ -114,5 +114,5 @@ dep/ACE_wrappers/ace/config.h
 !dep/recastnavigation/RecastDemo/Build/
 
 # Eluna
-/src/LuaEngine/*
-!/src/LuaEngine/Includes.h
+/src/game/LuaEngine/*
+!/src/game/LuaEngine/Includes.h
