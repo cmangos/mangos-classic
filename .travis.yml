@@ -37,7 +37,7 @@ before_install:
     - cd src/game/LuaEngine/
 # init git and get latest eluna
     - git init
-    - git pull https://github.com/Rochet2/Eluna.git master
+    - git pull https://github.com/Rochet2/Eluna.git dev
 # Go to Source/
     - cd ../../../
 
