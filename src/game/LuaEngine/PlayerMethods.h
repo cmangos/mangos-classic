@@ -163,6 +163,28 @@ namespace LuaPlayer
     }
 #endif
 
+#ifdef CLASSIC
+    int GetHonorStoredKills(lua_State* L, Player* player)
+    {
+        bool honorable = sEluna->CHECKVAL<bool>(L, 2, true);
+
+        sEluna->Push(L, player->GetHonorStoredKills(honorable));
+        return 0;
+    }
+
+    int GetRankPoints(lua_State* L, Player* player)
+    {
+        sEluna->Push(L, player->GetRankPoints());
+        return 1;
+    }
+
+    int GetHonorLastWeekStandingPos(lua_State* L, Player* player)
+    {
+        sEluna->Push(L, player->GetHonorLastWeekStandingPos());
+        return 1;
+    }
+#endif
+
     int IsInWater(lua_State* L, Player* player)
     {
         sEluna->Push(L, player->IsInWater());
@@ -174,6 +196,26 @@ namespace LuaPlayer
         sEluna->Push(L, player->isMoving());
         return 1;
     }
+
+#ifdef CLASSIC
+    int UpdateHonor(lua_State* L, Player* player)
+    {
+        player->UpdateHonor();
+        return 0;
+    }
+
+    int ResetHonor(lua_State* L, Player* player)
+    {
+        player->ResetHonor();
+        return 0;
+    }
+
+    int ClearHonorInfo(lua_State* L, Player* player)
+    {
+        player->ClearHonorInfo();
+        return 0;
+    }
+#endif
 
 #ifndef CLASSIC
     int IsFlying(lua_State* L, Player* player) // enable for unit when mangos support it
@@ -1175,6 +1217,33 @@ namespace LuaPlayer
         return 0;
     }
 #endif
+#endif
+
+#ifdef CLASSIC
+    int SetHonorStoredKills(lua_State* L, Player* player)
+    {
+        uint32 kills = sEluna->CHECKVAL<uint32>(L, 2);
+        bool honorable = sEluna->CHECKVAL<bool>(L, 3, true);
+
+        player->SetHonorStoredKills(kills, honorable);
+        return 0;
+    }
+
+    int SetRankPoints(lua_State* L, Player* player)
+    {
+        float rankPoints = sEluna->CHECKVAL<float>(L, 2);
+
+        player->SetRankPoints(rankPoints);
+        return 0;
+    }
+
+    int SetHonorLastWeekStandingPos(lua_State* L, Player* player)
+    {
+        int32 standingPos = sEluna->CHECKVAL<int32>(L, 2);
+
+        player->SetHonorLastWeekStandingPos(standingPos);
+        return 0;
+    }
 #endif
 
     int SetLifetimeKills(lua_State* L, Player* player)

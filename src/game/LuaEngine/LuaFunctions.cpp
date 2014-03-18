@@ -450,6 +450,11 @@ ElunaRegister<Player> PlayerMethods[] =
 #ifndef CATA
     { "GetShieldBlockValue", &LuaPlayer::GetShieldBlockValue },                   // :GetShieldBlockValue() - Returns block value
 #endif
+#ifdef CLASSIC
+    {"GetHonorStoredKills", &LuaPlayer::GetHonorStoredKills},                     // :GetHonorStoredKills(on/off)
+    {"GetRankPoints", &LuaPlayer::GetRankPoints},                                 // :GetRankPoints()
+    {"GetHonorLastWeekStandingPos", &LuaPlayer::GetHonorLastWeekStandingPos},     // :GetHonorLastWeekStandingPos()
+#endif
 
     // Setters
     { "AdvanceSkillsToMax", &LuaPlayer::AdvanceSkillsToMax },     // :AdvanceSkillsToMax() - Advances all currently known skills to the currently known max level
@@ -467,6 +472,11 @@ ElunaRegister<Player> PlayerMethods[] =
     { "SetArenaPoints", &LuaPlayer::SetArenaPoints },             // :SetArenaPoints(amount)
     { "SetHonorPoints", &LuaPlayer::SetHonorPoints },             // :SetHonorPoints(amount)
 #endif
+#endif
+#ifdef CLASSIC
+    {"SetHonorStoredKills", &LuaPlayer::SetHonorStoredKills},     // :SetHonorStoredKills(kills, [on/off])
+    {"SetRankPoints", &LuaPlayer::SetRankPoints},                 // :SetRankPoints(rankPoints)
+    {"SetHonorLastWeekStandingPos", &LuaPlayer::SetHonorLastWeekStandingPos}, // :SetHonorLastWeekStandingPos(standingPos)
 #endif
     { "SetLifetimeKills", &LuaPlayer::SetLifetimeKills },         // :SetLifetimeKills(val) - Sets the overall lifetime (honorable) kills of the player
     { "SetGameMaster", &LuaPlayer::SetGameMaster },               // :SetGameMaster([on]) - Sets GM mode on or off
@@ -668,6 +678,11 @@ ElunaRegister<Player> PlayerMethods[] =
     { "Mute", &LuaPlayer::Mute },                                                         // :Mute(time[, reason]) - Mutes the player for given time in seconds.
     { "SummonPlayer", &LuaPlayer::SummonPlayer },                                         // :SummonPlayer(player, map, x, y, z, zoneId[, delay]) - Sends a popup to the player asking if he wants to be summoned if yes, teleported to coords. ZoneID defines the location name shown in the popup Delay is the time until the popup closes automatically.
     { "SaveToDB", &LuaPlayer::SaveToDB },                                                 // :SaveToDB() - Saves to database
+#ifdef CLASSIC
+    {"UpdateHonor", &LuaPlayer::UpdateHonor},                                             // :UpdateHonor() - Updates Player Honor
+    {"ResetHonor", &LuaPlayer::ResetHonor},                                               // :ResetHonor() - Resets Player Honor
+    {"ClearHonorInfo", &LuaPlayer::ClearHonorInfo},                                       // :ClearHonorInfo() - Clear Player Honor Info
+#endif
 
     { NULL, NULL },
 };
