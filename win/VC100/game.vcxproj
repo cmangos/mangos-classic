@@ -597,6 +597,7 @@
     <ClInclude Include="..\..\src\game\LuaEngine\QuestMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\SpellMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\UnitMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\VehicleMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\WorldObjectMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\WeatherMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\WorldPacketMethods.h" />

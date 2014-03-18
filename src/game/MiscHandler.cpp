@@ -64,7 +64,7 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket& recv_data)
     }
 
     // used by eluna
-    sHookMgr.OnRepop(GetPlayer());
+    sHookMgr->OnRepop(GetPlayer());
 
     // this is spirit release confirm?
     GetPlayer()->RemovePet(PET_SAVE_REAGENTS);

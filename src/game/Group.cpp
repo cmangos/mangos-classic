@@ -132,7 +132,7 @@ bool Group::Create(ObjectGuid guid, const char* name)
         CharacterDatabase.CommitTransaction();
 
     // used by eluna
-    sHookMgr.OnCreate(this, m_leaderGuid, m_groupType);
+    sHookMgr->OnCreate(this, m_leaderGuid, m_groupType);
 
     return true;
 }
@@ -217,7 +217,7 @@ bool Group::AddInvite(Player* player)
     player->SetGroupInvite(this);
 
     // used by eluna
-    sHookMgr.OnInviteMember(this, player->GetObjectGuid());
+    sHookMgr->OnInviteMember(this, player->GetObjectGuid());
 
     return true;
 }
@@ -286,7 +286,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
         UpdatePlayerOutOfRange(player);
 
         // used by eluna
-        sHookMgr.OnAddMember(this, player->GetObjectGuid());
+        sHookMgr->OnAddMember(this, player->GetObjectGuid());
 
         // quest related GO state dependent from raid membership
         if (isRaidGroup())
@@ -346,7 +346,7 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
         Disband(true);
 
     // used by eluna
-    sHookMgr.OnRemoveMember(this, guid, method, NULL, NULL); // Kicker and Reason not a part of Mangos, implement?
+    sHookMgr->OnRemoveMember(this, guid, method);
 
     return m_memberSlots.size();
 }
@@ -358,7 +358,7 @@ void Group::ChangeLeader(ObjectGuid guid)
         return;
 
     // used by eluna
-    sHookMgr.OnChangeLeader(this, guid, GetLeaderGuid());
+    sHookMgr->OnChangeLeader(this, guid, GetLeaderGuid());
 
     _setLeader(guid);
 
@@ -434,7 +434,7 @@ void Group::Disband(bool hideDestroy)
     }
 
     // used by eluna
-    sHookMgr.OnDisband(this);
+    sHookMgr->OnDisband(this);
 
     m_leaderGuid.Clear();
     m_leaderName = "";

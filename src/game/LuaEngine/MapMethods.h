@@ -1,125 +1,121 @@
 /*
- * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
- * Copyright (C) 2010 - 2014 Eluna Lua Engine <http://emudevs.com/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+* Copyright (C) 2010 - 2014 Eluna Lua Engine <http://emudevs.com/>
+* This program is free software licensed under GPL version 3
+* Please see the included DOCS/LICENSE.md for more information
+*/
 
 #ifndef MAPMETHODS_H
 #define MAPMETHODS_H
 
 namespace LuaMap
 {
-    // :GetName()
-    int GetName(lua_State* L, Map* map)
+    /* BOOLEAN */
+#ifndef CLASSIC
+    int IsArena(lua_State* L, Map* map)
     {
-        sEluna.Push(L, map->GetMapName());
+        sEluna->Push(L, map->IsBattleArena());
         return 1;
     }
+#endif
 
-    // GetHeight(x, y)
-    int GetHeight(lua_State* L, Map* map)
-    {
-        float x = sEluna.CHECKVAL<float>(L, 2);
-        float y = sEluna.CHECKVAL<float>(L, 3);
-
-        float z = map->GetHeight(x, y, MAX_HEIGHT);
-        if (z == INVALID_HEIGHT)
-            return 0;
-        sEluna.Push(L, z);
-        return 1;
-    }
-
-    // :GetDifficulty()
-	/*int GetDifficulty(lua_State* L, Map* map)
-    {
-        sEluna.Push(L, map->GetDifficulty());
-        return 1;
-    }*/
-
-    // :GetInstanceId()
-    int GetInstanceId(lua_State* L, Map* map)
-    {
-        sEluna.Push(L, map->GetInstanceId());
-        return 1;
-    }
-
-    // :GetPlayerCount()
-    int GetPlayerCount(lua_State* L, Map* map)
-    {
-        sEluna.Push(L, map->GetPlayersCountExceptGMs());
-        return 1;
-    }
-
-    // :GetMapId()
-    int GetMapId(lua_State* L, Map* map)
-    {
-        sEluna.Push(L, map->GetId());
-        return 1;
-    }
-
-    // :GetAreaId(x, y, z)
-    int GetAreaId(lua_State* L, Map* map)
-    {
-        float x = sEluna.CHECKVAL<float>(L, 2);
-        float y = sEluna.CHECKVAL<float>(L, 3);
-        float z = sEluna.CHECKVAL<float>(L, 4);
-
-        sEluna.Push(L, map->GetTerrain()->GetAreaId(x, y, z));
-        return 1;
-    }
-
-    // :IsArena()
-	/*int IsArena(lua_State* L, Map* map)
-    {
-        sEluna.Push(L, map->IsBattleArena());
-        return 1;
-    }*/
-
-    // :IsBattleground()
     int IsBattleground(lua_State* L, Map* map)
     {
-        sEluna.Push(L, map->IsBattleGround());
+#ifdef MANGOS
+        sEluna->Push(L, map->IsBattleGround());
+#else
+        sEluna->Push(L, map->IsBattleground());
+#endif
         return 1;
     }
 
-    // :IsDungeon()
     int IsDungeon(lua_State* L, Map* map)
     {
-        sEluna.Push(L, map->IsDungeon());
+        sEluna->Push(L, map->IsDungeon());
         return 1;
     }
 
-    // :IsEmpty()
     int IsEmpty(lua_State* L, Map* map)
     {
-        sEluna.Push(L, map->isEmpty());
+        sEluna->Push(L, map->isEmpty());
         return 1;
     }
 
-    // :IsHeroic()
-	/*int IsHeroic(lua_State* L, Map* map)
+#ifndef CLASSIC
+    int IsHeroic(lua_State* L, Map* map)
     {
-        sEluna.Push(L, map->IsHeroic());
+        sEluna->Push(L, map->IsHeroic());
         return 1;
-    }*/
+    }
+#endif
 
-    // :IsRaid()
     int IsRaid(lua_State* L, Map* map)
     {
-        sEluna.Push(L, map->IsRaid());
+        sEluna->Push(L, map->IsRaid());
+        return 1;
+    }
+
+    /* GETTERS */
+    int GetName(lua_State* L, Map* map)
+    {
+        sEluna->Push(L, map->GetMapName());
+        return 1;
+    }
+
+    int GetHeight(lua_State* L, Map* map)
+    {
+        float x = sEluna->CHECKVAL<float>(L, 2);
+        float y = sEluna->CHECKVAL<float>(L, 3);
+#if (defined(TBC) || defined(CLASSIC))
+        float z = map->GetHeight(x, y, MAX_HEIGHT);
+#else
+        uint32 phasemask = sEluna->CHECKVAL<uint32>(L, 4, 1);
+        float z = map->GetHeight(phasemask, x, y, MAX_HEIGHT);
+#endif
+        if (z == INVALID_HEIGHT)
+            return 0;
+        sEluna->Push(L, z);
+        return 1;
+    }
+
+    int GetDifficulty(lua_State* L, Map* map)
+    {
+#ifndef CLASSIC
+        sEluna->Push(L, map->GetDifficulty());
+#else
+        sEluna->Push(L, (Difficulty)0);
+#endif
+        return 1;
+    }
+
+    int GetInstanceId(lua_State* L, Map* map)
+    {
+        sEluna->Push(L, map->GetInstanceId());
+        return 1;
+    }
+
+    int GetPlayerCount(lua_State* L, Map* map)
+    {
+        sEluna->Push(L, map->GetPlayersCountExceptGMs());
+        return 1;
+    }
+
+    int GetMapId(lua_State* L, Map* map)
+    {
+        sEluna->Push(L, map->GetId());
+        return 1;
+    }
+
+    int GetAreaId(lua_State* L, Map* map)
+    {
+        float x = sEluna->CHECKVAL<float>(L, 2);
+        float y = sEluna->CHECKVAL<float>(L, 3);
+        float z = sEluna->CHECKVAL<float>(L, 4);
+
+#ifdef MANGOS
+        sEluna->Push(L, map->GetTerrain()->GetAreaId(x, y, z));
+#else
+        sEluna->Push(L, map->GetAreaId(x, y, z));
+#endif
         return 1;
     }
 };

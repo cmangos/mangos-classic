@@ -2705,7 +2705,7 @@ void Spell::cast(bool skipCheck)
 
     // used by eluna
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        sHookMgr.OnSpellCast(m_caster->ToPlayer(), this, skipCheck);
+        sHookMgr->OnSpellCast(m_caster->ToPlayer(), this, skipCheck);
 
     FillTargetMap();
 

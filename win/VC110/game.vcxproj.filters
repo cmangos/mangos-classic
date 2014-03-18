@@ -991,6 +991,9 @@
     <ClInclude Include="..\..\src\game\LuaEngine\UnitMethods.h">
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\VehicleMethods.h">
+      <Filter>LuaEngine\Methods</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\WeatherMethods.h">
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>

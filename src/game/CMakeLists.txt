@@ -78,6 +78,7 @@ set(SRC_GRP_LUAENGINE
     LuaEngine/QuestMethods.h
     LuaEngine/SpellMethods.h
     LuaEngine/UnitMethods.h
+    LuaEngine/VehicleMethods.h
     LuaEngine/WeatherMethods.h
     LuaEngine/WorldObjectMethods.h
     LuaEngine/WorldPacketMethods.h

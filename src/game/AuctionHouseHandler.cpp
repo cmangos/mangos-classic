@@ -327,7 +327,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
     SendAuctionCommandResult(AH, AUCTION_STARTED, AUCTION_OK);
 
     // used by eluna
-    sHookMgr.OnAdd(auctionHouse);
+    sHookMgr->OnAdd(auctionHouse);
 }
 
 // this function is called when client bids or buys out auction
@@ -478,7 +478,7 @@ void WorldSession::HandleAuctionRemoveItem(WorldPacket& recv_data)
     CharacterDatabase.CommitTransaction();
     sAuctionMgr.RemoveAItem(auction->itemGuidLow);
     // used by eluna
-    sHookMgr.OnRemove(auctionHouse);
+    sHookMgr->OnRemove(auctionHouse);
     auctionHouse->RemoveAuction(auction->Id);
     delete auction;
 }

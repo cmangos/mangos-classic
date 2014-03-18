@@ -143,7 +143,7 @@ bool Guild::Create(Player* leader, std::string gname)
     CreateDefaultGuildRanks(lSession->GetSessionDbLocaleIndex());
 
     // used by eluna
-    sHookMgr.OnCreate(this, leader, gname.c_str());
+    sHookMgr->OnCreate(this, leader, gname.c_str());
 
     return AddMember(m_LeaderGuid, (uint32)GR_GUILDMASTER);
 }
@@ -240,7 +240,7 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     UpdateAccountsNumber();
 
     // used by eluna
-    sHookMgr.OnAddMember(this, pl, newmember.RankId);
+    sHookMgr->OnAddMember(this, pl, newmember.RankId);
 
     return true;
 }
@@ -254,7 +254,7 @@ void Guild::SetMOTD(std::string motd)
     CharacterDatabase.PExecute("UPDATE guild SET motd='%s' WHERE guildid='%u'", motd.c_str(), m_Id);
 
     // used by eluna
-    sHookMgr.OnMOTDChanged(this, motd);
+    sHookMgr->OnMOTDChanged(this, motd);
 }
 
 void Guild::SetGINFO(std::string ginfo)
@@ -266,7 +266,7 @@ void Guild::SetGINFO(std::string ginfo)
     CharacterDatabase.PExecute("UPDATE guild SET info='%s' WHERE guildid='%u'", ginfo.c_str(), m_Id);
 
     // used by eluna
-    sHookMgr.OnInfoChanged(this, ginfo);
+    sHookMgr->OnInfoChanged(this, ginfo);
 }
 
 bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
@@ -552,7 +552,7 @@ bool Guild::DelMember(ObjectGuid guid, bool isDisbanding)
         UpdateAccountsNumber();
 
     // used by eluna
-    sHookMgr.OnRemoveMember(this, player, isDisbanding, true); // IsKicked not a part of Mangos, implement?
+    sHookMgr->OnRemoveMember(this, player, isDisbanding);
 
     return members.empty();
 }
@@ -718,7 +718,7 @@ void Guild::Disband()
     CharacterDatabase.CommitTransaction();
 
     // used by eluna
-    sHookMgr.OnDisband(this);
+    sHookMgr->OnDisband(this);
 
     sGuildMgr.RemoveGuild(m_Id);
 }

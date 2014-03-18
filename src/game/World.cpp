@@ -1442,7 +1442,7 @@ void World::Update(uint32 diff)
     sOutdoorPvPMgr.Update(diff);
 
     ///- used by eluna
-    sHookMgr.OnWorldUpdate(diff);
+    sHookMgr->OnWorldUpdate(diff);
 
     ///- Delete all characters which have been deleted X days before
     if (m_timers[WUPDATE_DELETECHARS].Passed())

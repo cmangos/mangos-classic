@@ -1,37 +1,45 @@
 /*
- * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
- * Copyright (C) 2010 - 2014 Eluna Lua Engine <http://emudevs.com/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+* Copyright (C) 2010 - 2014 Eluna Lua Engine <http://emudevs.com/>
+* This program is free software licensed under GPL version 3
+* Please see the included DOCS/LICENSE.md for more information
+*/
 
 #ifndef LUAHOOKS_H
 #define LUAHOOKS_H
 
-#include "Common.h"
-#include "Policies/Singleton.h"
-#include "ObjectGuid.h"
-#include "DBCEnums.h"
-#include "ace/Atomic_Op.h"
-
-// Linux requred includes for enums
 #include "Includes.h"
 
+// Base
+#include "Common.h"
+#include "SharedDefines.h"
+#include <ace/Singleton.h>
+#include <ace/Atomic_Op.h>
+// enums
+#ifdef MANGOS
+#include "Player.h"
+#else
+#include "GameObjectAI.h"
+#endif
+#include "Group.h"
+#include "Item.h"
+#include "Weather.h"
+
+#ifdef MANGOS
+#define ScriptedAI              ReactorAI
+#define SpellEffIndex           SpellEffectIndex
+#define ItemTemplate            ItemPrototype
+#define GetTemplate             GetProto
+#ifdef CLASSIC
+#define Difficulty              int
+#endif
+#endif
+
 struct AreaTriggerEntry;
-struct SpellEntry;
-class Aura;
+#ifdef MANGOS
+class ScriptedAI;
+#else
+struct ScriptedAI;
+#endif
 class AuctionHouseObject;
 class Channel;
 class Creature;
@@ -39,10 +47,7 @@ class CreatureAI;
 class GameObject;
 class Guild;
 class Group;
-class InstanceData;
 class Item;
-class Map;
-class Object;
 class Player;
 class Quest;
 class Spell;
@@ -50,9 +55,7 @@ class SpellCastTargets;
 class Transport;
 class Unit;
 class Weather;
-class WorldObject;
 class WorldPacket;
-class WorldSocket;
 
 enum RegisterTypes
 {
@@ -172,6 +175,7 @@ enum PlayerEvents
     PLAYER_EVENT_ON_GM_TICKET_CREATE        =     39,       // (event, player, ticketText)
     PLAYER_EVENT_ON_GM_TICKET_UPDATE        =     40,       // (event, player, ticketText)
     PLAYER_EVENT_ON_GM_TICKET_DELETE        =     41,       // (event, player)
+    PLAYER_EVENT_ON_COMMAND                 =     42,       // (event, player, command) - Can return false
 
     PLAYER_EVENT_COUNT
 };
@@ -181,7 +185,7 @@ enum GuildEventTypes
 {
     // Guild
     GUILD_EVENT_ON_ADD_MEMBER               =     1,       // (event, guild, player, rank)
-    GUILD_EVENT_ON_REMOVE_MEMBER            =     2,       // (event, guild, isDisbanding, isKicked)
+    GUILD_EVENT_ON_REMOVE_MEMBER            =     2,       // (event, guild, isDisbanding)
     GUILD_EVENT_ON_MOTD_CHANGE              =     3,       // (event, guild, newMotd)
     GUILD_EVENT_ON_INFO_CHANGE              =     4,       // (event, guild, newInfo)
     GUILD_EVENT_ON_CREATE                   =     5,       // (event, guild, leader, name)
@@ -207,6 +211,19 @@ enum GroupEvents
     GROUP_EVENT_ON_CREATE                   =     6,       // (event, group, leaderGuid, groupType)
 
     GROUP_EVENT_COUNT
+};
+
+// RegisterVehicleEvent(eventId, function)
+enum VehicleEvents
+{
+    VEHICLE_EVENT_ON_INSTALL                =     1,
+    VEHICLE_EVENT_ON_UNINSTALL              =     2,
+    VEHICLE_EVENT_ON_RESET                  =     3,
+    VEHICLE_EVENT_ON_INSTALL_ACCESSORY      =     4,
+    VEHICLE_EVENT_ON_ADD_PASSENGER          =     5,
+    VEHICLE_EVENT_ON_REMOVE_PASSENGER       =     6,
+
+    VEHICLE_EVENT_COUNT
 };
 
 // RegisterCreatureEvent(entry, EventId, function)
@@ -288,11 +305,17 @@ enum GossipEvents
     GOSSIP_EVENT_COUNT
 };
 
-struct HookMgr
+class HookMgr
 {
+public:
     CreatureAI* GetAI(Creature* creature);
 
-    /* Misc */
+#ifndef MANGOS
+    GameObjectAI* GetAI(GameObject* gameObject);
+#endif
+
+    /* Custom */
+    bool OnCommand(Player* player, const char* text);
     void OnWorldUpdate(uint32 diff);
     void OnLootItem(Player* pPlayer, Item* pItem, uint32 count, uint64 guid);
     void OnLootMoney(Player* pPlayer, uint32 amount);
@@ -300,22 +323,22 @@ struct HookMgr
     void OnEquip(Player* pPlayer, Item* pItem, uint8 bag, uint8 slot);
     void OnRepop(Player* pPlayer);
     void OnResurrect(Player* pPlayer);
-    void OnQuestAbandon(Player* pPlayer, uint32 questId);
-    void OnGmTicketCreate(Player* pPlayer, std::string& ticketText);
-    void OnGmTicketUpdate(Player* pPlayer, std::string& ticketText);
-    void OnGmTicketDelete(Player* pPlayer);
+    void OnQuestAbandon(Player* pPlayer, uint32 questId); // Not on TC
+    void OnGmTicketCreate(Player* pPlayer, std::string& ticketText); // Not on TC
+    void OnGmTicketUpdate(Player* pPlayer, std::string& ticketText); // Not on TC
+    void OnGmTicketDelete(Player* pPlayer); // Not on TC
     InventoryResult OnCanUseItem(const Player* pPlayer, uint32 itemEntry);
     void OnEngineRestart();
 
     /* Item */
-    bool OnDummyEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget);
+    bool OnDummyEffect(Unit* pCaster, uint32 spellId, SpellEffIndex effIndex, Item* pTarget);
     bool OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest);
     bool OnUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets);
-    bool OnExpire(Player* pPlayer, ItemPrototype const* pProto);
+    bool OnExpire(Player* pPlayer, ItemTemplate const* pProto);
     void HandleGossipSelectOption(Player* pPlayer, Item* item, uint32 sender, uint32 action, std::string code);
 
     /* Creature */
-    bool OnDummyEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget);
+    bool OnDummyEffect(Unit* pCaster, uint32 spellId, SpellEffIndex effIndex, Creature* pTarget);
     bool OnGossipHello(Player* pPlayer, Creature* pCreature);
     bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action);
     bool OnGossipSelectCode(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action, const char* code);
@@ -323,11 +346,11 @@ struct HookMgr
     bool OnQuestSelect(Player* pPlayer, Creature* pCreature, Quest const* pQuest);
     bool OnQuestComplete(Player* pPlayer, Creature* pCreature, Quest const* pQuest);
     bool OnQuestReward(Player* pPlayer, Creature* pCreature, Quest const* pQuest);
-    uint32 GetDialogStatus(Player* pPlayer, Creature* pCreature);
+    uint32 GetDialogStatus(Player* pPlayer, Creature* pCreature); // Not on TC
     void OnSummoned(Creature* creature, Unit* summoner);
 
     /* GameObject */
-    bool OnDummyEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget);
+    bool OnDummyEffect(Unit* pCaster, uint32 spellId, SpellEffIndex effIndex, GameObject* pTarget);
     bool OnGossipHello(Player* pPlayer, GameObject* pGameObject);
     bool OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 sender, uint32 action);
     bool OnGossipSelectCode(Player* pPlayer, GameObject* pGameObject, uint32 sender, uint32 action, const char* code);
@@ -340,7 +363,7 @@ struct HookMgr
     void OnDamaged(GameObject* pGameObject, Player* pPlayer); // TODO
     void OnLootStateChanged(GameObject* pGameObject, uint32 state, Unit* pUnit); // TODO
     void OnGameObjectStateChanged(GameObject* pGameObject, uint32 state); // TODO
-    void UpdateAI(GameObject* pGameObject, uint32 update_diff, uint32 p_time);
+    void UpdateAI(GameObject* pGameObject, uint32 diff);
 
     /* Packet */
     bool OnPacketSend(WorldSession* session, WorldPacket& packet);
@@ -374,10 +397,20 @@ struct HookMgr
     void OnCreate(Player* pPlayer);
     void OnDelete(uint32 guid);
     void OnSave(Player* pPlayer);
-    void OnBindToInstance(Player* pPlayer, uint32 mapid, bool permanent);
+    void OnBindToInstance(Player* pPlayer, Difficulty difficulty, uint32 mapid, bool permanent);
     void OnUpdateZone(Player* pPlayer, uint32 newZone, uint32 newArea);
     void OnMapChanged(Player* pPlayer); // TODO
     void HandleGossipSelectOption(Player* pPlayer, uint32 menuId, uint32 sender, uint32 action, std::string code);
+
+#ifndef MANGOS
+    /* Vehicle */
+    void OnInstall(Vehicle* vehicle);
+    void OnUninstall(Vehicle* vehicle);
+    void OnReset(Vehicle* vehicle);
+    void OnInstallAccessory(Vehicle* vehicle, Creature* accessory);
+    void OnAddPassenger(Vehicle* vehicle, Unit* passenger, int8 seatId);
+    void OnRemovePassenger(Vehicle* vehicle, Unit* passenger);
+#endif
 
     /* AreaTrigger */
     bool OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* pTrigger);
@@ -392,7 +425,6 @@ struct HookMgr
     void OnExpire(AuctionHouseObject* auctionHouse);
 
     /* Condition */
-    // bool OnConditionCheck(Condition* condition, ConditionSourceInfo& sourceInfo); // TODO ?
 
     /* Transport */
     void OnAddPassenger(Transport* transport, Player* player); // TODO
@@ -402,10 +434,10 @@ struct HookMgr
 
     /* Guild */
     void OnAddMember(Guild* guild, Player* player, uint32 plRank);
-    void OnRemoveMember(Guild* guild, Player* player, bool isDisbanding, bool isKicked); // IsKicked not a part of Mangos, implement?
+    void OnRemoveMember(Guild* guild, Player* player, bool isDisbanding);
     void OnMOTDChanged(Guild* guild, const std::string& newMotd);
     void OnInfoChanged(Guild* guild, const std::string& newInfo);
-    void OnCreate(Guild* guild, Player* leader, const std::string& name);
+    void OnCreate(Guild* guild, Player* leader, const std::string& name); // TODO: Implement to TC
     void OnDisband(Guild* guild);
     void OnMemberWitdrawMoney(Guild* guild, Player* player, uint32& amount, bool isRepair);
     void OnMemberDepositMoney(Guild* guild, Player* player, uint32& amount);
@@ -416,11 +448,15 @@ struct HookMgr
     /* Group */
     void OnAddMember(Group* group, uint64 guid);
     void OnInviteMember(Group* group, uint64 guid);
-    void OnRemoveMember(Group* group, uint64 guid, uint8 method, uint64 kicker, const char* reason); // Kicker and Reason not a part of Mangos, implement?
+    void OnRemoveMember(Group* group, uint64 guid, uint8 method);
     void OnChangeLeader(Group* group, uint64 newLeaderGuid, uint64 oldLeaderGuid);
     void OnDisband(Group* group);
     void OnCreate(Group* group, uint64 leaderGuid, GroupType groupType);
 };
-#define sHookMgr MaNGOS::Singleton<HookMgr>::Instance()
+#ifdef MANGOS
+#define sHookMgr (&MaNGOS::Singleton<HookMgr>::Instance())
+#else
+#define sHookMgr ACE_Singleton<HookMgr, ACE_Null_Mutex>::instance()
+#endif
 
 #endif
