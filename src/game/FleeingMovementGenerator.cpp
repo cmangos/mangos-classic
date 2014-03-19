@@ -113,23 +113,17 @@ bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float&
     return true;
 }
 
-template<>
-void FleeingMovementGenerator<Player>::Initialize(Player& owner)
+template<class T>
+void FleeingMovementGenerator<T>::Initialize(T& owner)
 {
     owner.addUnitState(UNIT_STAT_FLEEING | UNIT_STAT_FLEEING_MOVE);
     owner.StopMoving();
 
-    _setTargetLocation(owner);
-}
-
-template<>
-void FleeingMovementGenerator<Creature>::Initialize(Creature& owner)
-{
-    owner.addUnitState(UNIT_STAT_FLEEING | UNIT_STAT_FLEEING_MOVE);
-    owner.StopMoving();
-
-    owner.SetWalk(false, false);
-    owner.SetTargetGuid(ObjectGuid());
+    if (owner.GetTypeId() == TYPEID_UNIT)
+    {
+        ((Creature&)owner).SetWalk(false, false);
+        owner.SetTargetGuid(ObjectGuid());
+    }
 
     _setTargetLocation(owner);
 }
@@ -182,6 +176,8 @@ bool FleeingMovementGenerator<T>::Update(T& owner, const uint32& time_diff)
     return true;
 }
 
+template void FleeingMovementGenerator<Player>::Initialize(Player&);
+template void FleeingMovementGenerator<Creature>::Initialize(Creature&);
 template bool FleeingMovementGenerator<Player>::_getPoint(Player&, float&, float&, float&);
 template bool FleeingMovementGenerator<Creature>::_getPoint(Creature&, float&, float&, float&);
 template void FleeingMovementGenerator<Player>::_setTargetLocation(Player&);
