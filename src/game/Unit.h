@@ -1368,6 +1368,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
         void SetInCombatState(bool PvP, Unit* enemy = NULL);
+        void SetInDummyCombatState(bool state);
         void SetInCombatWith(Unit* enemy);
         void ClearInCombat();
         uint32 GetCombatTimer() const { return m_CombatTimer; }
@@ -1927,6 +1928,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
+        bool   m_dummyCombatState;                          // Used to keep combat state during some aura
 
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
         uint32 m_castCounter;                               // count casts chain of triggered spells for prevent infinity cast crashes
