@@ -86,6 +86,7 @@ namespace Movement
         const Vector3* real_path = &spline.getPoint(1);
         Vector3 destination = real_path[last_idx];
 
+        size_t lastIndexPos = data.wpos();
         data << last_idx;
         data << destination;
         if (last_idx > 1)
@@ -95,6 +96,14 @@ namespace Movement
             for (uint32 i = 1; i < last_idx; ++i)
             {
                 offset = destination - real_path[i];
+                // [-ZERO] The client freezes when it gets a zero offset.
+                // If the offset would be rounded to zero, skip it.
+                if (fabs(offset.x) < 0.25 && fabs(offset.y) < 0.25 && fabs(offset.z) < 0.25)
+                {
+                    last_idx--;
+                    data.put(lastIndexPos, last_idx);
+                    continue;
+                }
                 data.appendPackXYZ(offset.x, offset.y, offset.z);
             }
         }

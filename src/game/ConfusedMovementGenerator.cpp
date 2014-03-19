@@ -42,7 +42,7 @@ void ConfusedMovementGenerator<T>::Initialize(T& unit)
 template<class T>
 void ConfusedMovementGenerator<T>::Interrupt(T& unit)
 {
-    unit.InterruptMoving();
+    unit.StopMoving();
     // confused state still applied while movegen disabled
     unit.clearUnitState(UNIT_STAT_CONFUSED_MOVE);
 }

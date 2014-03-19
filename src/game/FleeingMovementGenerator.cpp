@@ -120,7 +120,10 @@ void FleeingMovementGenerator<T>::Initialize(T& owner)
     owner.StopMoving();
 
     if (owner.GetTypeId() == TYPEID_UNIT)
+    {
+        ((Creature&)owner).SetWalk(false, false);
         owner.SetTargetGuid(ObjectGuid());
+    }
 
     _setTargetLocation(owner);
 }
@@ -136,12 +139,13 @@ template<>
 void FleeingMovementGenerator<Creature>::Finalize(Creature& owner)
 {
     owner.clearUnitState(UNIT_STAT_FLEEING | UNIT_STAT_FLEEING_MOVE);
+    owner.SetWalk(!owner.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
 }
 
 template<class T>
 void FleeingMovementGenerator<T>::Interrupt(T& owner)
 {
-    owner.InterruptMoving();
+    owner.StopMoving();
     // flee state still applied while movegen disabled
     owner.clearUnitState(UNIT_STAT_FLEEING_MOVE);
 }
