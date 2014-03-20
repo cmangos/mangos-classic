@@ -1617,7 +1617,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         target->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT, GetHolder());
 
         if (modelid > 0)
+        {
+            target->SetObjectScale(DEFAULT_OBJECT_SCALE);
             target->SetDisplayId(modelid);
+        }
 
         if (PowerType != POWER_MANA)
         {
@@ -1695,7 +1698,18 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     else
     {
         if (modelid > 0)
+        {
+            // workaround for tauren scale appear too big
+            if (target->getRace() == RACE_TAUREN)
+            {
+                if (target->getGender() == GENDER_MALE)
+                    target->SetObjectScale(DEFAULT_TAUREN_MALE_SCALE);
+                else
+                    target->SetObjectScale(DEFAULT_TAUREN_FEMALE_SCALE);
+            }
+
             target->SetDisplayId(target->GetNativeDisplayId());
+        }
 
         if (target->getClass() == CLASS_DRUID)
             target->setPowerType(POWER_MANA);
@@ -4396,6 +4410,10 @@ void Aura::PeriodicTick()
 
             Unit* pCaster = GetCaster();
             if (!pCaster)
+                return;
+
+            // Don't heal target if it is already at max health
+            if (target->GetHealth() == target->GetMaxHealth())
                 return;
 
             // heal for caster damage (must be alive)
