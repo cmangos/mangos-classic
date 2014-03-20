@@ -1617,7 +1617,11 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         target->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT, GetHolder());
 
         if (modelid > 0)
+        {
             target->SetDisplayId(modelid);
+            // Set scale to default to fix Tauren druid size.
+            target->SetObjectScale(DEFAULT_OBJECT_SCALE);
+        }
 
         if (PowerType != POWER_MANA)
         {
@@ -1695,7 +1699,17 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     else
     {
         if (modelid > 0)
+        {
             target->SetDisplayId(target->GetNativeDisplayId());
+
+            if (target->getRace() == RACE_TAUREN)
+            {
+                if (target->getGender() == GENDER_MALE)
+                    target->SetObjectScale(DEFAULT_TAUREN_MALE_SCALE);
+                else
+                    target->SetObjectScale(DEFAULT_TAUREN_FEMALE_SCALE);
+            }
+        }
 
         if (target->getClass() == CLASS_DRUID)
             target->setPowerType(POWER_MANA);
