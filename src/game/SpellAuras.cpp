@@ -1703,7 +1703,12 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             target->SetDisplayId(target->GetNativeDisplayId());
 
             if (target->getRace() == RACE_TAUREN)
-                target->SetObjectScale(1.35f);
+            {
+                if (target->getGender() == GENDER_MALE)
+                    target->SetObjectScale(DEFAULT_TAUREN_MALE_SCALE);
+                else
+                    target->SetObjectScale(DEFAULT_TAUREN_FEMALE_SCALE);
+            }
         }
 
         if (target->getClass() == CLASS_DRUID)
