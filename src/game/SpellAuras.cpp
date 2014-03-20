@@ -4398,6 +4398,10 @@ void Aura::PeriodicTick()
             if (!pCaster)
                 return;
 
+            // Don't heal target if it is already at max health
+            if (target->GetHealth() == target->GetMaxHealth())
+                return;
+
             // heal for caster damage (must be alive)
             if (target != pCaster && spellProto->SpellVisual == 163 && !pCaster->isAlive())
                 return;
