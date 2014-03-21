@@ -6229,8 +6229,6 @@ void Unit::Mount(uint32 mount, uint32 spellId)
 
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, mount);
 
-    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT);
-
     if (GetTypeId() == TYPEID_PLAYER)
     {
         // Called by Taxi system / GM command
@@ -6262,7 +6260,6 @@ void Unit::Unmount(bool from_aura)
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_MOUNTED);
 
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
-    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT);
 
     // Called NOT by Taxi system / GM command
     if (from_aura)
