@@ -1,0 +1,3 @@
+[submodule "src/game/LuaEngine"]
+	path = src/game/LuaEngine
+	url = https://github.com/Rochet2/Eluna.git
