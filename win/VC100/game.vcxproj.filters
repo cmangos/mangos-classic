@@ -937,9 +937,6 @@
     <ClInclude Include="..\..\src\game\LuaEngine\HookMgr.h">
       <Filter>LuaEngine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\Includes.h">
-      <Filter>LuaEngine</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\LuaEngine.h">
       <Filter>LuaEngine</Filter>
     </ClInclude>
