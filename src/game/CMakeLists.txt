@@ -66,7 +66,6 @@ set(SRC_GRP_LUAENGINE
     LuaEngine/GuildMethods.h
     LuaEngine/HookMgr.cpp
     LuaEngine/HookMgr.h
-    LuaEngine/Includes.h
     LuaEngine/ItemMethods.h
     LuaEngine/LuaEngine.cpp
     LuaEngine/LuaEngine.h
