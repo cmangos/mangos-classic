@@ -17475,12 +17475,21 @@ float Player::GetReputationPriceDiscount(Creature const* pCreature) const
     FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
     if (!vendor_faction || !vendor_faction->faction)
         return 1.0f;
+    
+    uint32 discount = 100;
+    ReputationRank rank = GetReputationRank(vendor_faction->faction);   // get repution rank for that specific vendor faction
+    if (rank >= REP_HONORED)                                            // give 10% reduction if rank is at least honored
+        discount -= 10;
 
-    ReputationRank rank = GetReputationRank(vendor_faction->faction);
-    if (rank <= REP_NEUTRAL)
-        return 1.0f;
-
-    return 1.0f - 0.05f * (rank - REP_NEUTRAL);
+    if (GetHonorRankInfo().visualRank >= 3)                             // get pvp grade
+    {
+        if (FactionTemplateEntry const* player_faction = getFactionTemplateEntry())
+        {
+            if (player_faction->IsFriendlyTo(*vendor_faction))          // check if its friendly faction (not neutral)
+                discount -=10;                                          // give 10% discount if grade is at least sergent
+        }
+    }
+    return float (discount / 100.0f);
 }
 
 /**
