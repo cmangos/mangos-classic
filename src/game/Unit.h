@@ -1305,7 +1305,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         float MeleeMissChanceCalc(const Unit* pVictim, WeaponAttackType attType) const;
 
-        void CalculateMeleeDamage(Unit* pVictim, uint32 damage, CalcDamageInfo* damageInfo, WeaponAttackType attackType = BASE_ATTACK);
+        void CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, WeaponAttackType attackType = BASE_ATTACK);
         void DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss);
 
         void CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, SpellEntry const* spellInfo, WeaponAttackType attackType = BASE_ATTACK);
@@ -1720,7 +1720,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveGameObject(uint32 spellid, bool del);
         void RemoveAllGameObjects();
 
-        uint32 CalculateDamage(WeaponAttackType attType, bool normalized);
+        float CalculateDamage(WeaponAttackType attType, bool normalized);
         float GetAPMultiplier(WeaponAttackType attType, bool normalized);
         void ModifyAuraState(AuraState flag, bool apply);
         bool HasAuraState(AuraState flag) const { return HasFlag(UNIT_FIELD_AURASTATE, 1 << (flag - 1)); }
@@ -1736,8 +1736,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         int32 SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask);
         uint32 SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack = 1);
         uint32 SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack = 1);
-        uint32 MeleeDamageBonusDone(Unit* pVictim, uint32 damage, WeaponAttackType attType, SpellEntry const* spellProto = NULL, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1);
-        uint32 MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackType attType, SpellEntry const* spellProto = NULL, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1);
+        float MeleeDamageBonusDone(Unit* pVictim, float damage, WeaponAttackType attType, SpellEntry const* spellProto = NULL, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1);
+        float MeleeDamageBonusTaken(Unit* pCaster, float pdamage, WeaponAttackType attType, SpellEntry const* spellProto = NULL, DamageEffectType damagetype = DIRECT_DAMAGE, uint32 stack = 1);
 
         bool   IsSpellBlocked(Unit* pCaster, SpellEntry const* spellProto, WeaponAttackType attackType = BASE_ATTACK);
         bool   IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = BASE_ATTACK);
@@ -1781,7 +1781,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsImmunedToDamage(SpellSchoolMask meleeSchoolMask);
         virtual bool IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const;
 
-        uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage);
+        float CalcArmorReducedDamage(Unit* pVictim, const float damage);
         void CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, uint32* resist, bool canReflect = false);
         void CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damageInfo, SpellEntry const* spellProto, WeaponAttackType attType = BASE_ATTACK);
 
