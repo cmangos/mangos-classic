@@ -59,7 +59,13 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
     if (creature.CanFly())
         i_nextMoveTime.Reset(0);
     else
-        i_nextMoveTime.Reset(urand(500, 10000));
+        switch (urand (0 , 2))
+        {
+        case 0:
+            { i_nextMoveTime.Reset(urand(3000, 10000)); break; }
+        default:
+            { i_nextMoveTime.Reset(urand(50, 400)); break; }
+        }
 }
 
 template<>
