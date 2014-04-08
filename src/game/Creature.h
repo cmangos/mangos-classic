@@ -226,6 +226,17 @@ struct CreatureDataAddon
     uint32 const* auras;                                    // loaded as char* "spell1 spell2 ... "
 };
 
+// Bases values for given Level and UnitClass
+struct CreatureClassLvlStats
+{
+    uint32  BaseHealth;
+    uint32  BaseMana;
+    float   BaseDamage;
+    float   BaseMeleeAttackPower;
+    float   BaseRangedAttackPower;
+    uint32  BaseArmor;
+};
+
 struct CreatureModelInfo
 {
     uint32 modelid;
