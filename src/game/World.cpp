@@ -980,6 +980,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Equipment templates...");
     sObjectMgr.LoadEquipmentTemplates();
 
+    sLog.outString("Loading Creature Stats...");
+    sObjectMgr.LoadCreatureClassLvlStats();
+
     sLog.outString("Loading Creature templates...");
     sObjectMgr.LoadCreatureTemplates();
 
