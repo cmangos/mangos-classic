@@ -1798,7 +1798,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
 
             // creature case, need to update equipment if additional provided
             if (ci && target->GetTypeId() == TYPEID_UNIT)
-                ((Creature*)target)->LoadEquipment(ci->equipmentId, false);
+                ((Creature*)target)->LoadEquipment(ci->EquipmentTemplateId, false);
         }
 
         // update active transform spell only not set or not overwriting negative by positive case
@@ -1813,7 +1813,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
 
         // apply default equipment for creature case
         if (target->GetTypeId() == TYPEID_UNIT)
-            ((Creature*)target)->LoadEquipment(((Creature*)target)->GetCreatureInfo()->equipmentId, true);
+            ((Creature*)target)->LoadEquipment(((Creature*)target)->GetCreatureInfo()->EquipmentTemplateId, true);
 
         // re-apply some from still active with preference negative cases
         Unit::AuraList const& otherTransforms = target->GetAurasByType(SPELL_AURA_TRANSFORM);
@@ -2078,7 +2078,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
         else if (target->GetTypeId() == TYPEID_UNIT)
         {
             CreatureInfo const* cinfo = ((Creature*)target)->GetCreatureInfo();
-            target->setFaction(cinfo->faction_A);
+            target->setFaction(cinfo->FactionAlliance);
         }
 
         if (target->GetTypeId() == TYPEID_UNIT)
@@ -2197,15 +2197,15 @@ void Aura::HandleModCharm(bool apply, bool Real)
             if (caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK)
             {
                 CreatureInfo const* cinfo = ((Creature*)target)->GetCreatureInfo();
-                if (cinfo && cinfo->type == CREATURE_TYPE_DEMON)
+                if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON)
                 {
                     // creature with pet number expected have class set
                     if (target->GetByteValue(UNIT_FIELD_BYTES_0, 1) == 0)
                     {
-                        if (cinfo->unit_class == 0)
+                        if (cinfo->UnitClass == 0)
                             sLog.outErrorDb("Creature (Entry: %u) have unit_class = 0 but used in charmed spell, that will be result client crash.", cinfo->Entry);
                         else
-                            sLog.outError("Creature (Entry: %u) have unit_class = %u but at charming have class 0!!! that will be result client crash.", cinfo->Entry, cinfo->unit_class);
+                            sLog.outError("Creature (Entry: %u) have unit_class = %u but at charming have class 0!!! that will be result client crash.", cinfo->Entry, cinfo->UnitClass);
 
                         target->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
                     }
@@ -2237,13 +2237,13 @@ void Aura::HandleModCharm(bool apply, bool Real)
                 if (Unit* owner = target->GetOwner())
                     target->setFaction(owner->getFaction());
                 else if (cinfo)
-                    target->setFaction(cinfo->faction_A);
+                    target->setFaction(cinfo->FactionAlliance);
             }
             else if (cinfo)                             // normal creature
-                target->setFaction(cinfo->faction_A);
+                target->setFaction(cinfo->FactionAlliance);
 
             // restore UNIT_FIELD_BYTES_0
-            if (cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->type == CREATURE_TYPE_DEMON)
+            if (cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->CreatureType == CREATURE_TYPE_DEMON)
             {
                 // DB must have proper class set in field at loading, not req. restore, including workaround case at apply
                 // m_target->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->unit_class);
@@ -4070,7 +4070,7 @@ void Aura::HandleAuraEmpathy(bool apply, bool /*Real*/)
         return;
 
     CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(GetTarget()->GetEntry());
-    if (ci && ci->type == CREATURE_TYPE_BEAST)
+    if (ci && ci->CreatureType == CREATURE_TYPE_BEAST)
         GetTarget()->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
 }
 
