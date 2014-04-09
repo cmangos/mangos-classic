@@ -582,15 +582,4 @@ inline void FillInitialWorldState(ByteBuffer& data, uint32& count, WorldStatePai
     }
 }
 
-// [-ZERO] it's just a workaround , packet values in 1.12 aren't known
-inline void FillInitialDefWorldState(ByteBuffer& data, uint32& count, WorldStatePair const* array)
-{
-    for (WorldStatePair const* itr = array; itr->state; ++itr)
-    {
-        data << uint16(itr->state);
-        data << uint16(itr->value);
-        ++count;
-    }
-}
-
 #endif

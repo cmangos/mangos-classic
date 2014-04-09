@@ -697,6 +697,11 @@ LogColors = ""
 #    Motd
 #        Message of the Day. Displayed at worldlogin for every user ('@' for a newline).
 #
+#    PlayerCommands
+#        Should player chat be parsed for GM commands.
+#        Default: 1 (parse commands)
+#                 0 (ignore commands)
+#
 ###################################################################################################################
 
 GameType = 1
@@ -755,6 +760,7 @@ BeepAtStart = 1
 ShowProgressBars = 1
 WaitAtStartupError = 0
 Motd = "Welcome to the Massive Network Game Object Server."
+PlayerCommands = 1
 
 ###################################################################################################################
 # PLAYER INTERACTION
@@ -819,6 +825,10 @@ TalentsInspecting = 1
 #        Default: 1   - 100%
 #                 1.5 - 150%
 #                 0   - off (0%)
+#
+#    CreatureRespawnAggroDelay
+#        The delay between when a creature spawns and when it can be aggroed by nearby movement.
+#        Default: 5000 (5s)
 #
 #    CreatureFamilyFleeAssistanceRadius
 #        Radius which creature will use to seek for a near creature for assistance. Creature will flee to this creature.
@@ -907,6 +917,7 @@ TalentsInspecting = 1
 
 ThreatRadius = 100
 Rate.Creature.Aggro = 1
+CreatureRespawnAggroDelay = 5000
 CreatureFamilyFleeAssistanceRadius = 30
 CreatureFamilyAssistanceRadius = 10
 CreatureFamilyAssistanceDelay = 1500

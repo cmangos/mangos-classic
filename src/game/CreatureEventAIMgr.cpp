@@ -173,6 +173,73 @@ void CreatureEventAIMgr::CheckUnusedAISummons()
         sLog.outErrorEventAI("Entry %i in table `creature_ai_summons` but not used in EventAI scripts.", *itr);
 }
 
+/// Helper function to check if a target-suite is suitable for the event-type
+bool IsValidTargetType(EventAI_Type eventType, EventAI_ActionType actionType, uint32 targetType, uint32 eventId, uint8 action)
+{
+    switch (targetType)
+    {
+        case TARGET_T_SELF:
+            if (actionType == ACTION_T_QUEST_EVENT || actionType == ACTION_T_CAST_EVENT || actionType == ACTION_T_QUEST_EVENT_ALL || actionType == ACTION_T_KILLED_MONSTER)
+            {
+                sLog.outErrorEventAI("Event %u Action%u uses incorrect Target type %u for event-type %u (must target player)", eventId, action, targetType, eventType);
+                return false;
+            }
+            return true;                                    // Can always be used
+        case TARGET_T_HOSTILE_RANDOM:
+        case TARGET_T_HOSTILE_RANDOM_NOT_TOP:
+            if (actionType == ACTION_T_QUEST_EVENT || actionType == ACTION_T_CAST_EVENT || actionType == ACTION_T_QUEST_EVENT_ALL || actionType == ACTION_T_KILLED_MONSTER)
+                sLog.outErrorEventAI("Event %u Action%u uses LIKELY bad Target type %u for event-type %u (must target player)", eventId, action, targetType, eventType);
+            // no break, check if valid at all
+        case TARGET_T_HOSTILE:
+        case TARGET_T_HOSTILE_SECOND_AGGRO:
+        case TARGET_T_HOSTILE_LAST_AGGRO:
+        case TARGET_T_HOSTILE_RANDOM_PLAYER:
+        case TARGET_T_HOSTILE_RANDOM_NOT_TOP_PLAYER:
+            switch (eventType)
+            {
+                case EVENT_T_TIMER_OOC:
+                case EVENT_T_OOC_LOS:
+                case EVENT_T_REACHED_HOME:
+                    sLog.outErrorEventAI("Event %u Action%u uses incorrect Target type %u for event-type %u (cannot be used OOC)", eventId, action, targetType, eventType);
+                    return false;
+                case EVENT_T_TIMER_GENERIC:
+                    sLog.outErrorEventAI("Event %u Action%u uses LIKELY incorrect Target type %u for event-type %u (cannot be used OOC)", eventId, action, targetType, eventType);
+                    return true;                            // Does not need to be an error
+                default:
+                    return true;
+            }
+        case TARGET_T_ACTION_INVOKER:                       // Unit who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT)
+        case TARGET_T_ACTION_INVOKER_OWNER:                 // Unit who is responsible for Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF, EVENT_T_RECEIVE_EMOTE, EVENT_T_RECEIVE_AI_EVENT)
+            switch (eventType)
+            {
+                case EVENT_T_AGGRO:
+                case EVENT_T_KILL:
+                case EVENT_T_DEATH:
+                case EVENT_T_SPELLHIT:
+                case EVENT_T_OOC_LOS:
+                case EVENT_T_FRIENDLY_HP:
+                case EVENT_T_FRIENDLY_IS_CC:
+                case EVENT_T_FRIENDLY_MISSING_BUFF:
+                case EVENT_T_RECEIVE_EMOTE:
+                case EVENT_T_RECEIVE_AI_EVENT:
+                    return true;
+                default:
+                    sLog.outErrorEventAI("Event %u Action%u uses incorrect Target type %u for event-type %u", eventId, action, targetType, eventType);
+                    return false;
+            }
+        case TARGET_T_EVENT_SENDER:                         // Unit who sent an AIEvent that was received with EVENT_T_RECEIVE_AI_EVENT
+            if (eventType != EVENT_T_RECEIVE_AI_EVENT)
+            {
+                sLog.outErrorEventAI("Event %u Action%u uses incorrect Target type %u for event-type %u", eventId, action, targetType, eventType);
+                return false;
+            }
+            return true;
+        default:
+            sLog.outErrorEventAI("Event %u Action%u uses incorrect Target type", eventId, action);
+            return false;
+    }
+}
+
 // -------------------
 void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
 {
@@ -574,12 +641,17 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         if (action.cast.castFlags & CAST_FORCE_TARGET_SELF)
                             action.cast.castFlags |= CAST_TRIGGERED;
 
-                        if (action.cast.target >= TARGET_T_END)
-                            sLog.outErrorEventAI("Event %u Action %u uses incorrect Target type", i, j + 1);
+                        IsValidTargetType(temp.event_type, action.type, action.cast.target, i, j + 1);
 
                         // Some Advanced target type checks - Can have false positives
                         if (!sLog.HasLogFilter(LOG_FILTER_EVENT_AI_DEV) && spell)
                         {
+                            // spell must be cast on self, but is not
+                            if ((IsOnlySelfTargeting(spell) || spell->rangeIndex == SPELL_RANGE_IDX_SELF_ONLY) && action.cast.target != TARGET_T_SELF && !(action.cast.castFlags & CAST_FORCE_TARGET_SELF))
+                                sLog.outErrorEventAI("Event %u Action %u uses SpellID %u that must be self cast (target is %u)", i, j + 1, action.cast.spellId, action.cast.target);
+
+                            // TODO: spell must be cast on enemy, but is not
+
                             // used TARGET_T_ACTION_INVOKER, but likely should be _INVOKER_OWNER instead
                             if (action.cast.target == TARGET_T_ACTION_INVOKER &&
                                     (IsSpellHaveEffect(spell, SPELL_EFFECT_QUEST_COMPLETE) || IsSpellHaveEffect(spell, SPELL_EFFECT_DUMMY)))
@@ -596,14 +668,12 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         if (!sCreatureStorage.LookupEntry<CreatureInfo>(action.summon.creatureId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent creature entry %u.", i, j + 1, action.summon.creatureId);
 
-                        if (action.summon.target >= TARGET_T_END)
-                            sLog.outErrorEventAI("Event %u Action %u uses incorrect Target type", i, j + 1);
+                        IsValidTargetType(temp.event_type, action.type, action.summon.target, i, j + 1);
                         break;
                     case ACTION_T_THREAT_SINGLE_PCT:
                         if (std::abs(action.threat_single_pct.percent) > 100)
                             sLog.outErrorEventAI("Event %u Action %u uses invalid percent value %u.", i, j + 1, action.threat_single_pct.percent);
-                        if (action.threat_single_pct.target >= TARGET_T_END)
-                            sLog.outErrorEventAI("Event %u Action %u uses incorrect Target type", i, j + 1);
+                        IsValidTargetType(temp.event_type, action.type, action.threat_single_pct.target, i, j + 1);
                         break;
                     case ACTION_T_THREAT_ALL_PCT:
                         if (std::abs(action.threat_all_pct.percent) > 100)
@@ -618,28 +688,23 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         else
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent Quest entry %u.", i, j + 1, action.quest_event.questId);
 
-                        if (action.quest_event.target >= TARGET_T_END)
-                            sLog.outErrorEventAI("Event %u Action %u uses incorrect Target type", i, j + 1);
-
+                        IsValidTargetType(temp.event_type, action.type, action.quest_event.target, i, j + 1);
                         break;
                     case ACTION_T_CAST_EVENT:
                         if (!sCreatureStorage.LookupEntry<CreatureInfo>(action.cast_event.creatureId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent creature entry %u.", i, j + 1, action.cast_event.creatureId);
                         if (!sSpellStore.LookupEntry(action.cast_event.spellId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent SpellID %u.", i, j + 1, action.cast_event.spellId);
-                        if (action.cast_event.target >= TARGET_T_END)
-                            sLog.outErrorEventAI("Event %u Action %u uses incorrect Target type", i, j + 1);
+                        IsValidTargetType(temp.event_type, action.type, action.cast_event.target, i, j + 1);
                         break;
                     case ACTION_T_SET_UNIT_FIELD:
                         if (action.set_unit_field.field < OBJECT_END || action.set_unit_field.field >= UNIT_END)
                             sLog.outErrorEventAI("Event %u Action %u param1 (UNIT_FIELD*). Index out of range for intended use.", i, j + 1);
-                        if (action.set_unit_field.target >= TARGET_T_END)
-                            sLog.outErrorEventAI("Event %u Action %u uses incorrect Target type", i, j + 1);
+                        IsValidTargetType(temp.event_type, action.type, action.set_unit_field.target, i, j + 1);
                         break;
                     case ACTION_T_SET_UNIT_FLAG:
                     case ACTION_T_REMOVE_UNIT_FLAG:
-                        if (action.unit_flag.target >= TARGET_T_END)
-                            sLog.outErrorEventAI("Event %u Action %u uses incorrect Target type", i, j + 1);
+                        IsValidTargetType(temp.event_type, action.type, action.unit_flag.target, i, j + 1);
                         break;
                     case ACTION_T_SET_PHASE:
                         if (action.set_phase.phase >= MAX_PHASE)
@@ -669,8 +734,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_REMOVEAURASFROMSPELL:
                         if (!sSpellStore.LookupEntry(action.remove_aura.spellId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent SpellID %u.", i, j + 1, action.remove_aura.spellId);
-                        if (action.remove_aura.target >= TARGET_T_END)
-                            sLog.outErrorEventAI("Event %u Action %u uses incorrect Target type", i, j + 1);
+                        IsValidTargetType(temp.event_type, action.type, action.remove_aura.target, i, j + 1);
                         break;
                     case ACTION_T_RANDOM_PHASE:             // PhaseId1, PhaseId2, PhaseId3
                         if (action.random_phase.phase1 >= MAX_PHASE)
@@ -695,24 +759,21 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_SUMMON_ID:
                         if (!sCreatureStorage.LookupEntry<CreatureInfo>(action.summon_id.creatureId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent creature entry %u.", i, j + 1, action.summon_id.creatureId);
-                        if (action.summon_id.target >= TARGET_T_END)
-                            sLog.outErrorEventAI("Event %u Action %u uses incorrect Target type", i, j + 1);
+                        IsValidTargetType(temp.event_type, action.type, action.summon_id.target, i, j + 1);
                         if (m_CreatureEventAI_Summon_Map.find(action.summon_id.spawnId) == m_CreatureEventAI_Summon_Map.end())
                             sLog.outErrorEventAI("Event %u Action %u summons missing CreatureEventAI_Summon %u", i, j + 1, action.summon_id.spawnId);
                         break;
                     case ACTION_T_KILLED_MONSTER:
                         if (!sCreatureStorage.LookupEntry<CreatureInfo>(action.killed_monster.creatureId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent creature entry %u.", i, j + 1, action.killed_monster.creatureId);
-                        if (action.killed_monster.target >= TARGET_T_END)
-                            sLog.outErrorEventAI("Event %u Action %u uses incorrect Target type", i, j + 1);
+                        IsValidTargetType(temp.event_type, action.type, action.killed_monster.target, i, j + 1);
                         break;
                     case ACTION_T_SET_INST_DATA:
                         if (action.set_inst_data.value > 4/*SPECIAL*/)
                             sLog.outErrorEventAI("Event %u Action %u attempts to set instance data above encounter state 4. Custom case?", i, j + 1);
                         break;
                     case ACTION_T_SET_INST_DATA64:
-                        if (action.set_inst_data64.target >= TARGET_T_END)
-                            sLog.outErrorEventAI("Event %u Action %u uses incorrect Target type", i, j + 1);
+                        IsValidTargetType(temp.event_type, action.type, action.set_inst_data64.target, i, j + 1);
                         break;
                     case ACTION_T_UPDATE_TEMPLATE:
                         if (!sCreatureStorage.LookupEntry<CreatureInfo>(action.update_template.creatureId))

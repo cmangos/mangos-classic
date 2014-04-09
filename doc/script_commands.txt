@@ -154,6 +154,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 
  1 SCRIPT_COMMAND_EMOTE                     resultingSource = Unit, resultingTarget = Unit/none
                                             * datalong = emote_id
+                                            * dataint1-dataint4 optionally, for random selection of emote
 
  2 SCRIPT_COMMAND_FIELD_SET                 source = any
                                             * datalong = field_id

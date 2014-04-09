@@ -318,7 +318,7 @@ class MANGOS_DLL_SPEC CreatureAI
          * @param uiDelay  delay time until the Event will be triggered
          * @param fRadius  range in which for receiver is searched
          */
-        void SendAIEvent(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue = 0) const;
+        void SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32 uiDelay, float fRadius, uint32 miscValue = 0) const;
 
         /**
          * Send an AI Event to a Creature

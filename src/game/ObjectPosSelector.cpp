@@ -19,20 +19,25 @@
 #include "ObjectPosSelector.h"
 #include "Object.h"
 
-ObjectPosSelector::ObjectPosSelector(float x, float y, float dist, float searcher_size) :
-    m_centerX(x), m_centerY(y), m_searcherDist(dist), m_searcherSize(searcher_size)
+// The bigger this value, the more space npcs require around their target
+#define OCCUPY_POS_ANGLE_ATAN_FACTOR                      1.8f
+
+ObjectPosSelector::ObjectPosSelector(float x, float y, float dist, float searchedForSize, WorldObject const* searchPosFor) :
+    m_centerX(x), m_centerY(y), m_searcherDist(dist), m_searchPosFor(searchPosFor)
 {
     // if size == 0, m_anglestep will become 0 -> freeze
-    if (m_searcherSize == 0.0f)
-        m_searcherSize = DEFAULT_WORLD_OBJECT_SIZE;
+    if (searchedForSize == 0.0f)
+        searchedForSize = DEFAULT_WORLD_OBJECT_SIZE;
 
-    m_searcherHalfSize = asin(m_searcherSize / m_searcherDist);
+    // undefined behaviour
+    if (m_searcherDist == 0.0f)
+        m_searcherDist = DEFAULT_WORLD_OBJECT_SIZE;
+
+    m_searchedForReqHAngle = atan(OCCUPY_POS_ANGLE_ATAN_FACTOR * searchedForSize / m_searcherDist);
 
     // Really init in InitilizeAngle
     m_nextUsedAreaItr[USED_POS_PLUS]  = m_UsedAreaLists[USED_POS_PLUS].begin();
     m_nextUsedAreaItr[USED_POS_MINUS] = m_UsedAreaLists[USED_POS_MINUS].begin();
-    m_nextUsedAreaStart[USED_POS_PLUS] = 0.0f;
-    m_nextUsedAreaStart[USED_POS_MINUS] = 0.0f;
     m_stepAngle[USED_POS_PLUS]  = 0.0f;
     m_stepAngle[USED_POS_MINUS] = 0.0f;
 }
@@ -41,27 +46,27 @@ ObjectPosSelector::ObjectPosSelector(float x, float y, float dist, float searche
  * Add used area (circle) near target object excluded from possible searcher position
  *
  *
- * @param size  Size of used circle
+ * @param obj  Object that occupies area
  * @param angle Angle of used circle center point from target-searcher line
  * @param dist  Distance from target object center point to used circle center point
  *
  * Used circles data stored as projections to searcher dist size circle as angle coordinate and half angle size
  */
-void ObjectPosSelector::AddUsedArea(float size, float angle, float dist)
+void ObjectPosSelector::AddUsedArea(WorldObject const* obj, float angle, float dist)
 {
-    float sr_dist = size + m_searcherSize;
-
-    //  by Law of cosines, angle of searcher/used centers
-    float sr_angle = acos((m_searcherDist * m_searcherDist + dist * dist - sr_dist * sr_dist) / (2 * m_searcherDist * dist));
+    MANGOS_ASSERT(obj);
 
     // skip some unexpected results.
-    if (!finite(sr_angle) || sr_angle <= 0)
+    if (dist == 0.0f)
         return;
 
+    // (half) angle that obj occupies
+    float sr_angle = atan(OCCUPY_POS_ANGLE_ATAN_FACTOR * obj->GetObjectBoundingRadius() / dist);
+
     if (angle >= 0)
-        m_UsedAreaLists[USED_POS_PLUS].insert(UsedArea(angle, sr_angle));
+        m_UsedAreaLists[USED_POS_PLUS].insert(UsedArea(angle, OccupiedArea(sr_angle, obj)));
     else
-        m_UsedAreaLists[USED_POS_MINUS].insert(UsedArea(-angle, sr_angle));
+        m_UsedAreaLists[USED_POS_MINUS].insert(UsedArea(-angle, OccupiedArea(sr_angle, obj)));
 }
 
 /**
@@ -76,22 +81,9 @@ void ObjectPosSelector::AddUsedArea(float size, float angle, float dist)
 bool ObjectPosSelector::CheckAngle(UsedArea const& usedArea, UsedAreaSide side, float angle) const
 {
     float used_angle = usedArea.first * SignOf(side);
-    float used_offset = usedArea.second;
+    float used_offset = usedArea.second.angleOffset;
 
-    return fabs(used_angle - angle) > used_offset;
-}
-
-/**
- * Check searcher circle not intercepting with used circle at side (only start angle provided)
- *
- * @param side     Side of used circle
- * @param angle    Checked angle at side, positive always
- *
- * @return true, if used circle not intercepted with searcher circle in terms projection angles
- */
-bool ObjectPosSelector::CheckSideAngle(UsedAreaSide side, float angle) const
-{
-    return angle + m_searcherHalfSize < m_nextUsedAreaStart[side];
+    return fabs(used_angle - angle) > used_offset || (m_searchPosFor && usedArea.second.occupyingObj == m_searchPosFor);
 }
 
 /**
@@ -121,53 +113,18 @@ void ObjectPosSelector::InitializeAngle()
 void ObjectPosSelector::InitializeAngle(UsedAreaSide side)
 {
     m_nextUsedAreaItr[side] = m_UsedAreaLists[side].begin();
-    UpdateNextAreaStart(side);
 
-    // if another side not alow use 0.0f angle calculate possible value in 0..m_searcherHalfSize range
+    // if another side not alow use 0.0f angle calculate possible value in 0..m_searchedForReqHAngle range
     if (!m_UsedAreaLists[~side].empty())
     {
         UsedArea const& otherArea = *m_UsedAreaLists[~side].begin();
-
-        // if other are near start
-        if (otherArea.first < otherArea.second)
-            m_stepAngle[side] = otherArea.second - otherArea.first;
-        else
-            m_stepAngle[side] = 0.0f;
+        m_stepAngle[side] = std::max(m_searchedForReqHAngle + otherArea.second.angleOffset - otherArea.first, 0.0f);
     }
-    else
+    else                                                    // Other side empty. start from 0
         m_stepAngle[side] = 0.0f;
-}
 
-/**
- * Update next used area start angle for current m_nextUsedAreaItr value at side
- */
-void ObjectPosSelector::UpdateNextAreaStart(UsedAreaSide side)
-{
-    // not last next area at side
-    if (m_nextUsedAreaItr[side] != m_UsedAreaLists[side].end())
-    {
-        m_nextUsedAreaStart[side] = m_nextUsedAreaItr[side]->first - m_nextUsedAreaItr[side]->second + m_searcherHalfSize;
-        return;
-    }
-
-    // last area at side and not another side areas
-    if (m_UsedAreaLists[~side].empty())
-    {
-        m_nextUsedAreaStart[side] = M_PI_F + m_searcherHalfSize + 0.01f;
-        return;
-    }
-
-    UsedArea const& lastArea = *m_UsedAreaLists[~side].rbegin();
-
-    // another side have used area near to end (near to PI)
-    if (lastArea.first + lastArea.second > M_PI_F - m_searcherHalfSize)
-    {
-        m_nextUsedAreaStart[side] = M_PI_F + (M_PI_F - lastArea.first - lastArea.second) + m_searcherHalfSize;
-        return;
-    }
-
-    // last area and fail find any used area at another side, prepare fake data as stopper
-    m_nextUsedAreaStart[side] = M_PI_F + m_searcherHalfSize + 0.01f;
+    // As m_stepAngle will be incremented first in ::NextSideAngle
+    m_stepAngle[side] -= m_searchedForReqHAngle;
 }
 
 /**
@@ -215,33 +172,34 @@ bool ObjectPosSelector::NextAngle(float& angle)
 bool ObjectPosSelector::NextSideAngle(UsedAreaSide side, float& angle)
 {
     // next possible angle
-    m_stepAngle[side] += (m_searcherHalfSize + 0.01);
+    m_stepAngle[side] += (m_searchedForReqHAngle + 0.01);
 
     // prevent jump to another side
     if (m_stepAngle[side] > M_PI_F)
         return false;
 
-    // update angle at attempt jump after next used area
-    while (m_stepAngle[side] <= M_PI_F && m_stepAngle[side] + m_searcherHalfSize >= m_nextUsedAreaStart[side])
+    // no used area anymore on this side
+    if (m_nextUsedAreaItr[side] == m_UsedAreaLists[side].end())
     {
-        // no used area for pass
-        if (m_nextUsedAreaItr[side] == m_UsedAreaLists[side].end())
-        {
-            m_stepAngle[side] = M_PI_F + m_searcherHalfSize;// prevent continue search at side
-            return false;
-        }
-
-        // angle set at first possible pos after passed m_nextUsedAreaItr
-        m_stepAngle[side] = m_nextUsedAreaItr[side]->first + m_nextUsedAreaItr[side]->second;
-
-        ++m_nextUsedAreaItr[side];
-        UpdateNextAreaStart(side);
+        angle = m_stepAngle[side] * SignOf(side);
+        return true;
     }
 
-    angle = m_stepAngle[side] * SignOf(side);
+    // Already occupied and no better found
+    if ((m_searchPosFor && m_nextUsedAreaItr[side]->second.occupyingObj == m_searchPosFor) ||
+         // Next occupied is too far away
+        (m_stepAngle[side] + m_searchedForReqHAngle < m_nextUsedAreaItr[side]->first - m_nextUsedAreaItr[side]->second.angleOffset))
+    {
+        angle = m_stepAngle[side] * SignOf(side);
+        return true;
+    }
 
-    // if next node not allow use selected angle, mark and fail
-    return CheckSideAngle(side, m_stepAngle[side]);
+    // angle set at first possible pos after passed m_nextUsedAreaItr
+    m_stepAngle[side] = m_nextUsedAreaItr[side]->first + m_nextUsedAreaItr[side]->second.angleOffset;
+
+    ++m_nextUsedAreaItr[side];
+
+    return false;
 }
 
 /**

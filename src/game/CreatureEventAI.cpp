@@ -59,6 +59,20 @@ void CreatureEventAI::GetAIInformation(ChatHandler& reader)
     reader.PSendSysMessage(LANG_NPC_EVENTAI_PHASE, (uint32)m_Phase);
     reader.PSendSysMessage(LANG_NPC_EVENTAI_MOVE, reader.GetOnOffStr(m_isCombatMovement));
     reader.PSendSysMessage(LANG_NPC_EVENTAI_COMBAT, reader.GetOnOffStr(m_MeleeEnabled));
+
+    if (sLog.HasLogFilter(LOG_FILTER_EVENT_AI_DEV))         // Give some more details if in EventAI Dev Mode
+        return;
+
+    reader.PSendSysMessage("Current events of this creature:");
+    for (CreatureEventAIList::const_iterator itr = m_CreatureEventAIList.begin(); itr != m_CreatureEventAIList.end(); ++itr)
+    {
+        if (itr->Event.action[2].type != ACTION_T_NONE)
+            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) actions[type(param1)]: %2u(%5u)  --  %2u(%u)  --  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time/1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1, itr->Event.action[1].type, itr->Event.action[1].raw.param1, itr->Event.action[2].type, itr->Event.action[2].raw.param1);
+        else if (itr->Event.action[1].type != ACTION_T_NONE)
+            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) actions[type(param1)]: %2u(%5u)  --  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time/1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1, itr->Event.action[1].type, itr->Event.action[1].raw.param1);
+        else
+            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) action[type(param1)]:  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time/1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1);
+    }
 }
 
 CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
@@ -915,7 +929,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         }
         case ACTION_T_THROW_AI_EVENT:
         {
-            SendAIEvent(AIEventType(action.throwEvent.eventType), pActionInvoker, 0, action.throwEvent.radius);
+            SendAIEventAround(AIEventType(action.throwEvent.eventType), pActionInvoker, 0, action.throwEvent.radius);
             break;
         }
         case ACTION_T_SET_THROW_MASK:
@@ -1014,7 +1028,7 @@ void CreatureEventAI::JustDied(Unit* killer)
     }
 
     if (m_throwAIEventMask & (1 << AI_EVENT_JUST_DIED))
-        SendAIEvent(AI_EVENT_JUST_DIED, killer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
+        SendAIEventAround(AI_EVENT_JUST_DIED, killer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
 
     // Handle On Death events
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
@@ -1149,7 +1163,7 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
         }
     }
 
-    if ((m_creature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_AGGRO) || m_creature->IsNeutralToAll())
+    if ((m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO) || m_creature->IsNeutralToAll())
         return;
 
     if (m_creature->CanInitiateAttack() && who->isTargetableForAttack() &&
@@ -1432,7 +1446,7 @@ void CreatureEventAI::DamageTaken(Unit* dealer, uint32& damage)
         }
 
         if (m_throwAIEventMask & (1 << sendEvent[step]))
-            SendAIEvent(sendEvent[step], dealer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
+            SendAIEventAround(sendEvent[step], dealer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
 
         m_throwAIEventStep = step + 1;
     }
@@ -1446,7 +1460,7 @@ void CreatureEventAI::HealedBy(Unit* healer, uint32& healedAmount)
     if (m_creature->GetHealth() + healedAmount >= m_creature->GetMaxHealth())
     {
         if (m_throwAIEventMask & (1 << AI_EVENT_GOT_FULL_HEALTH))
-            SendAIEvent(AI_EVENT_GOT_FULL_HEALTH, healer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
+            SendAIEventAround(AI_EVENT_GOT_FULL_HEALTH, healer, 0, AIEVENT_DEFAULT_THROW_RADIUS);
         m_throwAIEventStep = 100;
     }
 }

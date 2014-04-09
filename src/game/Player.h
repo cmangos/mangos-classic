@@ -37,6 +37,7 @@
 #include "BattleGround/BattleGround.h"
 #include "DBCStores.h"
 #include "SharedDefines.h"
+#include "Chat.h"
 
 #include<string>
 #include<vector>
@@ -628,14 +629,6 @@ enum EnvironmentalDamageType
     DAMAGE_FALL_TO_VOID         = 6                         // custom case for fall without durability loss
 };
 
-enum PlayerChatTag
-{
-    CHAT_TAG_NONE               = 0,
-    CHAT_TAG_AFK                = 1,
-    CHAT_TAG_DND                = 2,
-    CHAT_TAG_GM                 = 3,
-};
-
 enum PlayedTimeIndex
 {
     PLAYED_TIME_TOTAL           = 0,
@@ -892,7 +885,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ToggleDND();
         bool isAFK() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK); }
         bool isDND() const { return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND); }
-        uint8 GetChatTag() const;
+        ChatTagFlags GetChatTag() const;
         std::string autoReplyMsg;
 
         PlayerSocial* GetSocial() { return m_social; }
@@ -965,7 +958,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void Yell(const std::string& text, const uint32 language);
         void TextEmote(const std::string& text);
         void Whisper(const std::string& text, const uint32 language, ObjectGuid receiver);
-        void BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std::string& text, uint32 language) const;
 
         /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/

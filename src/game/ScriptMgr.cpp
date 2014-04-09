@@ -263,7 +263,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 {
                     if (tmp.textId[i] && (tmp.textId[i] < MIN_DB_SCRIPT_STRING_ID || tmp.textId[i] >= MAX_DB_SCRIPT_STRING_ID))
                     {
-                        sLog.outErrorDb("Table `%s` has out of range text id (dataint = %i expected %u-%u) in SCRIPT_COMMAND_TALK for script id %u", tablename, tmp.textId[i], MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID, tmp.id);
+                        sLog.outErrorDb("Table `%s` has out of range text_id%u (dataint = %i expected %u-%u) in SCRIPT_COMMAND_TALK for script id %u", tablename, i + 1, tmp.textId[i], MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID, tmp.id);
                         continue;
                     }
                 }
@@ -277,6 +277,14 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 {
                     sLog.outErrorDb("Table `%s` has invalid emote id (datalong = %u) in SCRIPT_COMMAND_EMOTE for script id %u", tablename, tmp.emote.emoteId, tmp.id);
                     continue;
+                }
+                for (int i = 0; i < MAX_TEXT_ID; ++i)
+                {
+                    if (tmp.textId[i] && !sEmotesStore.LookupEntry(tmp.textId[i]))
+                    {
+                        sLog.outErrorDb("Table `%s` has invalid emote id (text_id%u = %u) in SCRIPT_COMMAND_EMOTE for script id %u", tablename, i + 1, tmp.textId[i], tmp.id);
+                        continue;
+                    }
                 }
                 break;
             }
@@ -1121,7 +1129,16 @@ bool ScriptAction::HandleScriptStep()
             if (LogIfNotUnit(pSource))
                 break;
 
-            ((Unit*)pSource)->HandleEmote(m_script->emote.emoteId);
+            std::vector<uint32> emotes;
+            emotes.push_back(m_script->emote.emoteId);
+            for (int i = 0; i < MAX_TEXT_ID; ++i)
+            {
+                if (!m_script->textId[i])
+                    break;
+                emotes.push_back(uint32(m_script->textId[i]));
+            }
+
+            ((Unit*)pSource)->HandleEmote(emotes[urand(0, emotes.size() - 1)]);
             break;
         }
         case SCRIPT_COMMAND_FIELD_SET:                      // 2

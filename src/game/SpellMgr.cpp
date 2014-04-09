@@ -139,6 +139,11 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
     if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()))
         castTime += 500;
 
+    // [workaround] holy light need script effect, but 19968 spell for it have 2.5 cast time sec
+    // it should be instant instead
+    if (spellInfo->Id == 19968)
+        castTime = 0;
+
     return (castTime > 0) ? uint32(castTime) : 0;
 }
 
@@ -2909,7 +2914,7 @@ void SpellMgr::LoadSpellScriptTarget()
                 }
                 if (const CreatureInfo* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(itr->targetEntry))
                 {
-                    if (itr->spellId == 30427 && !cInfo->SkinLootId)
+                    if (itr->spellId == 30427 && !cInfo->SkinningLootId)
                     {
                         sLog.outErrorDb("Table `spell_script_target` has creature %u as a target of spellid 30427, but this creature has no skinlootid. Gas extraction will not work!", cInfo->Entry);
                         sSpellScriptTargetStorage.EraseEntry(itr->spellId);

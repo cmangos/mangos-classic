@@ -38,7 +38,9 @@
 #define DEFAULT_VISIBILITY_BG       180.0f      // default visible distance in BG, 180 yards
 
 #define DEFAULT_WORLD_OBJECT_SIZE   0.388999998569489f      // currently used (correctly?) for any non Unit world objects. This is actually the bounding_radius, like player/creature from creature_model_data
-#define DEFAULT_OBJECT_SCALE        1.0f                    // player/item scale as default, npc/go from database, pets from dbc
+#define DEFAULT_OBJECT_SCALE        1.0f                    // non-Tauren player/item scale as default, npc/go from database, pets from dbc
+#define DEFAULT_TAUREN_MALE_SCALE   1.35f                   // Tauren male player scale by default
+#define DEFAULT_TAUREN_FEMALE_SCALE 1.25f                   // Tauren female player scale by default
 
 #define MAX_STEALTH_DETECT_RANGE    45.0f
 
@@ -67,6 +69,7 @@ class Map;
 class UpdateMask;
 class InstanceData;
 class TerrainInfo;
+struct MangosStringLocale;
 
 typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
 
@@ -447,17 +450,38 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void GetPosition(WorldLocation& loc) const
         { loc.mapid = m_mapId; GetPosition(loc.coord_x, loc.coord_y, loc.coord_z); loc.orientation = GetOrientation(); }
         float GetOrientation() const { return m_position.o; }
-        void GetNearPoint2D(float& x, float& y, float distance, float absAngle) const;
+
+        /// Gives a 2d-point in distance distance2d in direction absAngle around the current position (point-to-point)
+        void GetNearPoint2D(float& x, float& y, float distance2d, float absAngle) const;
+        /** Gives a "free" spot for searcher in distance distance2d in direction absAngle on "good" height
+         * @param searcher          -           for whom a spot is searched for
+         * @param x, y, z           -           position for the found spot of the searcher
+         * @param searcher_bounding_radius  -   how much space the searcher will require
+         * @param distance2d        -           distance between the middle-points
+         * @param absAngle          -           angle in which the spot is preferred
+         */
         void GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float searcher_bounding_radius, float distance2d, float absAngle) const;
-        void GetClosePoint(float& x, float& y, float& z, float bounding_radius, float distance2d = 0, float angle = 0, const WorldObject* obj = NULL) const
+        /** Gives a "free" spot for a searcher on the distance (including bounding-radius calculation)
+         * @param x, y, z           -           position for the found spot
+         * @param bounding_radius   -           radius for the searcher
+         * @param distance2d        -           range in which to find a free spot. Default = 0.0f (which usually means the units will have contact)
+         * @param angle             -           direction in which to look for a free spot. Default = 0.0f (direction in which 'this' is looking
+         * @param obj               -           for whom to look for a spot. Default = NULL
+         */
+        void GetClosePoint(float& x, float& y, float& z, float bounding_radius, float distance2d = 0.0f, float angle = 0.0f, const WorldObject* obj = NULL) const
         {
             // angle calculated from current orientation
-            GetNearPoint(obj, x, y, z, bounding_radius, distance2d, GetOrientation() + angle);
+            GetNearPoint(obj, x, y, z, bounding_radius, distance2d + GetObjectBoundingRadius() + bounding_radius, GetOrientation() + angle);
         }
+        /** Gives a "free" spot for a searcher in contact-range of "this" (including bounding-radius calculation)
+         * @param x, y, z           -           position for the found spot
+         * @param obj               -           for whom to find a contact position. The position will be searched in direction from 'this' towards 'obj'
+         * @param distance2d        -           distance which 'obj' and 'this' should have beetween their bounding radiuses. Default = CONTACT_DISTANCE
+         */
         void GetContactPoint(const WorldObject* obj, float& x, float& y, float& z, float distance2d = CONTACT_DISTANCE) const
         {
             // angle to face `obj` to `this` using distance includes size of `obj`
-            GetNearPoint(obj, x, y, z, obj->GetObjectBoundingRadius(), distance2d, GetAngle(obj));
+            GetNearPoint(obj, x, y, z, obj->GetObjectBoundingRadius(), distance2d + GetObjectBoundingRadius() + obj->GetObjectBoundingRadius(), GetAngle(obj));
         }
 
         virtual float GetObjectBoundingRadius() const { return DEFAULT_WORLD_OBJECT_SIZE; }
@@ -530,12 +554,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void MonsterYell(const char* text, uint32 language, Unit const* target = NULL) const;
         void MonsterTextEmote(const char* text, Unit const* target, bool IsBossEmote = false) const;
         void MonsterWhisper(const char* text, Unit const* target, bool IsBossWhisper = false) const;
-        void MonsterSay(int32 textId, uint32 language, Unit const* target = NULL) const;
-        void MonsterYell(int32 textId, uint32 language, Unit const* target = NULL) const;
-        void MonsterTextEmote(int32 textId, Unit const* target, bool IsBossEmote = false) const;
-        void MonsterWhisper(int32 textId, Unit const* receiver, bool IsBossWhisper = false) const;
-        void MonsterYellToZone(int32 textId, uint32 language, Unit const* target) const;
-        static void BuildMonsterChat(WorldPacket* data, ObjectGuid senderGuid, uint8 msgtype, char const* text, uint32 language, char const* name, ObjectGuid targetGuid, char const* targetName);
+        void MonsterText(MangosStringLocale const* textData, Unit const* target) const;
 
         void PlayDistanceSound(uint32 sound_id, Player const* target = NULL) const;
         void PlayDirectSound(uint32 sound_id, Player const* target = NULL) const;

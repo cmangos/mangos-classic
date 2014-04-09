@@ -37,7 +37,7 @@
 class MANGOS_DLL_SPEC PostgreSQLConnection : public SqlConnection
 {
     public:
-        PostgreSQLConnection() : mPGconn(NULL) {}
+        PostgreSQLConnection(Database &db) : SqlConnection(db), mPGconn(NULL) {}
         ~PostgreSQLConnection();
 
         bool Initialize(const char* infoString) override;

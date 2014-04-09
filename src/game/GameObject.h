@@ -522,7 +522,7 @@ enum CapturePointState
     CAPTURE_STATE_WIN_HORDE
 };
 
-enum CapturePointSlider
+enum CapturePointSliderValue
 {
     CAPTURE_SLIDER_ALLIANCE         = 100,                  // full alliance
     CAPTURE_SLIDER_HORDE            = 0,                    // full horde
@@ -681,8 +681,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         GameObject* LookupFishingHoleAround(float range);
 
-        void SetCapturePointSlider(float value);
-        float GetCapturePointSlider() const { return m_captureSlider; }
+        void SetCapturePointSlider(float value, bool isLocked);
+        float GetCapturePointSliderValue() const { return m_captureSlider; }
 
         GridReference<GameObject>& GetGridRef() { return m_gridRef; }
 

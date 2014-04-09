@@ -1424,7 +1424,7 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
             {
                 petDisplayId = fields[17].GetUInt32();
                 petLevel     = fields[18].GetUInt32();
-                petFamily    = cInfo->family;
+                petFamily    = cInfo->Family;
             }
         }
 
@@ -1471,7 +1471,7 @@ void Player::ToggleDND()
     ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
 }
 
-uint8 Player::GetChatTag() const
+ChatTagFlags Player::GetChatTag() const
 {
     if (isGMChat())
         return CHAT_TAG_GM;
@@ -2369,12 +2369,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // set default cast time multiplier
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 
-    // reset size before reapply auras
-    if (getRace() == RACE_TAUREN)
-        SetObjectScale(1.35f);
-    else
-        SetObjectScale(DEFAULT_OBJECT_SCALE);
-
     // save base values (bonuses already included in stored stats
     for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetCreateStat(Stats(i), info.stats[i]);
@@ -2470,7 +2464,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
                UNIT_FLAG_PET_IN_COMBAT  | UNIT_FLAG_SILENCED     | UNIT_FLAG_PACIFIED         |
                UNIT_FLAG_STUNNED        | UNIT_FLAG_IN_COMBAT    | UNIT_FLAG_DISARMED         |
                UNIT_FLAG_CONFUSED       | UNIT_FLAG_FLEEING      | UNIT_FLAG_NOT_SELECTABLE   |
-               UNIT_FLAG_SKINNABLE      | UNIT_FLAG_MOUNT        | UNIT_FLAG_TAXI_FLIGHT);
+               UNIT_FLAG_SKINNABLE      | UNIT_FLAG_TAXI_FLIGHT);
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);    // must be set
 
     // cleanup player flags (will be re-applied if need at aura load), to avoid have ghost flag without ghost aura, for example.
@@ -4394,7 +4388,7 @@ void Player::CleanupChannels()
     {
         Channel* ch = *m_channels.begin();
         m_channels.erase(m_channels.begin());               // remove from player's channel list
-        ch->Leave(GetObjectGuid(), false);                  // not send to client, not remove from player's channel list
+        ch->Leave(this, false);                             // not send to client, not remove from player's channel list
         if (ChannelMgr* cMgr = channelMgr(GetTeam()))
             cMgr->LeftChannel(ch->GetName());               // deleted channel if empty
     }
@@ -4438,10 +4432,10 @@ void Player::UpdateLocalChannels(uint32 newZone)
 
         if ((*i) != new_channel)
         {
-            new_channel->Join(GetObjectGuid(), "");         // will output Changed Channel: N. Name
+            new_channel->Join(this, "");                    // will output Changed Channel: N. Name
 
             // leave old channel
-            (*i)->Leave(GetObjectGuid(), false);            // not send leave channel, it already replaced at client
+            (*i)->Leave(this, false);                       // not send leave channel, it already replaced at client
             std::string name = (*i)->GetName();             // store name, (*i)erase in LeftChannel
             LeftChannel(*i);                                // remove from player's channel list
             cMgr->LeftChannel(name);                        // delete if empty
@@ -4456,7 +4450,7 @@ void Player::LeaveLFGChannel()
     {
         if ((*i)->IsLFG())
         {
-            (*i)->Leave(GetObjectGuid());
+            (*i)->Leave(this);
             break;
         }
     }
@@ -6360,20 +6354,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
     }
 
     if (proto->Armor)
-    {
-        switch (proto->InventoryType)
-        {
-            case INVTYPE_TRINKET:
-            case INVTYPE_NECK:
-            case INVTYPE_CLOAK:
-            case INVTYPE_FINGER:
-                HandleStatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(proto->Armor), apply);
-                break;
-            default:
-                HandleStatModifier(UNIT_MOD_ARMOR, BASE_VALUE, float(proto->Armor), apply);
-                break;
-        }
-    }
+        HandleStatModifier(UNIT_MOD_ARMOR, BASE_VALUE, float(proto->Armor), apply);
 
     if (proto->Block)
         HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(proto->Block), apply);
@@ -6693,22 +6674,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
         {
             uint32 proc_spell_id = pEnchant->spellid[s];
 
-            // Flametongue Weapon (Passive), Ranks (used not existed equip spell id in pre-3.x spell.dbc)
-            if (pEnchant->type[s] == ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL)
-            {
-                switch (proc_spell_id)
-                {
-                    case 10400: proc_spell_id =  8026; break; // Rank 1
-                    case 15567: proc_spell_id =  8028; break; // Rank 2
-                    case 15568: proc_spell_id =  8029; break; // Rank 3
-                    case 15569: proc_spell_id = 10445; break; // Rank 4
-                    case 16311: proc_spell_id = 16343; break; // Rank 5
-                    case 16312: proc_spell_id = 16344; break; // Rank 6
-                    default:
-                        continue;
-                }
-            }
-            else if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+            if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
                 continue;
 
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(proc_spell_id);
@@ -7191,7 +7157,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                     creature->lootForPickPocketed = true;
                     loot->clear();
 
-                    if (uint32 lootid = creature->GetCreatureInfo()->pickpocketLootId)
+                    if (uint32 lootid = creature->GetCreatureInfo()->PickpocketLootId)
                         loot->FillLoot(lootid, LootTemplates_Pickpocketing, this, false);
 
                     // Generate extra money for pick pocket loot
@@ -7222,10 +7188,10 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                     creature->lootForBody = true;
                     loot->clear();
 
-                    if (uint32 lootid = creature->GetCreatureInfo()->lootid)
+                    if (uint32 lootid = creature->GetCreatureInfo()->LootId)
                         loot->FillLoot(lootid, LootTemplates_Creature, recipient, false);
 
-                    loot->generateMoneyLoot(creature->GetCreatureInfo()->mingold, creature->GetCreatureInfo()->maxgold);
+                    loot->generateMoneyLoot(creature->GetCreatureInfo()->MinLootGold, creature->GetCreatureInfo()->MaxLootGold);
 
                     if (Group* group = creature->GetGroupLootRecipient())
                     {
@@ -7256,7 +7222,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                     {
                         creature->lootForSkin = true;
                         loot->clear();
-                        loot->FillLoot(creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, this, false);
+                        loot->FillLoot(creature->GetCreatureInfo()->SkinningLootId, LootTemplates_Skinning, this, false);
 
                         // let reopen skinning loot if will closed.
                         if (!loot->empty())
@@ -7353,290 +7319,6 @@ void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
     GetSession()->SendPacket(&data);
 }
 
-static WorldStatePair def_world_states[] =
-{
-    { 0x07AE, 0x01 },
-    { 0x0532, 0x01 },
-    { 0x0531, 0x00 },
-    { 0x052E, 0x00 },
-    { 0x06F9, 0x00 },
-    { 0x06F3, 0x00 },
-    { 0x06F1, 0x00 },
-    { 0x06EE, 0x00 },
-    { 0x06ED, 0x00 },
-    { 0x0571, 0x00 },
-    { 0x0570, 0x00 },
-    { 0x0567, 0x01 },
-    { 0x0566, 0x01 },
-    { 0x0550, 0x01 },
-    { 0x0544, 0x00 },
-    { 0x0536, 0x00 },
-    { 0x0535, 0x01 },
-    { 0x03C6, 0x00 },
-    { 0x03C4, 0x00 },
-    { 0x03C2, 0x00 },
-    { 0x07A8, 0x00 },
-    { 0x07A3, 0x270F },
-    { 0x0574, 0x00 },
-    { 0x0573, 0x00 },
-    { 0x0572, 0x00 },
-    { 0x056F, 0x00 },
-    { 0x056E, 0x00 },
-    { 0x056D, 0x00 },
-    { 0x056C, 0x00 },
-    { 0x056B, 0x00 },
-    { 0x056A, 0x01 },
-    { 0x0569, 0x01 },
-    { 0x0568, 0x01 },
-    { 0x0565, 0x00 },
-    { 0x0564, 0x00 },
-    { 0x0563, 0x00 },
-    { 0x0562, 0x00 },
-    { 0x0561, 0x00 },
-    { 0x0560, 0x00 },
-    { 0x055F, 0x00 },
-    { 0x055E, 0x00 },
-    { 0x055D, 0x00 },
-    { 0x055C, 0x00 },
-    { 0x055B, 0x00 },
-    { 0x055A, 0x00 },
-    { 0x0559, 0x00 },
-    { 0x0558, 0x00 },
-    { 0x0557, 0x00 },
-    { 0x0556, 0x00 },
-    { 0x0555, 0x00 },
-    { 0x0554, 0x01 },
-    { 0x0553, 0x01 },
-    { 0x0552, 0x01 },
-    { 0x0551, 0x01 },
-    { 0x054F, 0x00 },
-    { 0x054E, 0x00 },
-    { 0x054D, 0x01 },
-    { 0x054C, 0x00 },
-    { 0x054B, 0x00 },
-    { 0x0545, 0x00 },
-    { 0x0543, 0x01 },
-    { 0x0542, 0x00 },
-    { 0x0540, 0x00 },
-    { 0x053F, 0x00 },
-    { 0x053E, 0x00 },
-    { 0x053D, 0x00 },
-    { 0x053C, 0x00 },
-    { 0x053B, 0x00 },
-    { 0x053A, 0x01 },
-    { 0x0539, 0x00 },
-    { 0x0538, 0x00 },
-    { 0x0537, 0x00 },
-    { 0x0534, 0x00 },
-    { 0x0533, 0x00 },
-    { 0x0530, 0x00 },
-    { 0x052F, 0x00 },
-    { 0x052D, 0x01 },
-    { 0x0516, 0x01 },
-    { 0x0515, 0x00 },
-    { 0x03B6, 0x00 },
-    { 0x0745, 0x02 },
-    { 0x0736, 0x01 },
-    { 0x0735, 0x01 },
-    { 0x0734, 0x01 },
-    { 0x0733, 0x01 },
-    { 0x0732, 0x01 },
-    { 0x0702, 0x00 },
-    { 0x0701, 0x00 },
-    { 0x0700, 0x00 },
-    { 0x06FE, 0x00 },
-    { 0x06FD, 0x00 },
-    { 0x06FC, 0x00 },
-    { 0x06FB, 0x00 },
-    { 0x06F8, 0x00 },
-    { 0x06F7, 0x00 },
-    { 0x06F6, 0x00 },
-    { 0x06F4, 0x7D0 },
-    { 0x06F2, 0x00 },
-    { 0x06F0, 0x00 },
-    { 0x06EF, 0x00 },
-    { 0x06EC, 0x00 },
-    { 0x06EA, 0x00 },
-    { 0x06E9, 0x00 },
-    { 0x06E8, 0x00 },
-    { 0x06E7, 0x00 },
-    { 0x0518, 0x00 },
-    { 0x0517, 0x00 },
-    { 0x0703, 0x00 },
-    { 0x0,    0x0 }
-};
-
-static WorldStatePair AV_world_states[] =
-{
-    { 0x7ae, 0x1 },                                         // 1966  7 snowfall n
-    { 0x532, 0x1 },                                         // 1330  8 frostwolfhut hc
-    { 0x531, 0x0 },                                         // 1329  9 frostwolfhut ac
-    { 0x52e, 0x0 },                                         // 1326 10 stormpike firstaid a_a
-    { 0x571, 0x0 },                                         // 1393 11 east frostwolf tower horde assaulted -unused
-    { 0x570, 0x0 },                                         // 1392 12 west frostwolf tower horde assaulted - unused
-    { 0x567, 0x1 },                                         // 1383 13 frostwolfe c
-    { 0x566, 0x1 },                                         // 1382 14 frostwolfw c
-    { 0x550, 0x1 },                                         // 1360 15 irondeep (N) ally
-    { 0x544, 0x0 },                                         // 1348 16 ice grave a_a
-    { 0x536, 0x0 },                                         // 1334 17 stormpike grave h_c
-    { 0x535, 0x1 },                                         // 1333 18 stormpike grave a_c
-    { 0x518, 0x0 },                                         // 1304 19 stoneheart grave a_a
-    { 0x517, 0x0 },                                         // 1303 20 stoneheart grave h_a
-    { 0x574, 0x0 },                                         // 1396 21 unk
-    { 0x573, 0x0 },                                         // 1395 22 iceblood tower horde assaulted -unused
-    { 0x572, 0x0 },                                         // 1394 23 towerpoint horde assaulted - unused
-    { 0x56f, 0x0 },                                         // 1391 24 unk
-    { 0x56e, 0x0 },                                         // 1390 25 iceblood a
-    { 0x56d, 0x0 },                                         // 1389 26 towerp a
-    { 0x56c, 0x0 },                                         // 1388 27 frostwolfe a
-    { 0x56b, 0x0 },                                         // 1387 28 froswolfw a
-    { 0x56a, 0x1 },                                         // 1386 29 unk
-    { 0x569, 0x1 },                                         // 1385 30 iceblood c
-    { 0x568, 0x1 },                                         // 1384 31 towerp c
-    { 0x565, 0x0 },                                         // 1381 32 stoneh tower a
-    { 0x564, 0x0 },                                         // 1380 33 icewing tower a
-    { 0x563, 0x0 },                                         // 1379 34 dunn a
-    { 0x562, 0x0 },                                         // 1378 35 duns a
-    { 0x561, 0x0 },                                         // 1377 36 stoneheart bunker alliance assaulted - unused
-    { 0x560, 0x0 },                                         // 1376 37 icewing bunker alliance assaulted - unused
-    { 0x55f, 0x0 },                                         // 1375 38 dunbaldar south alliance assaulted - unused
-    { 0x55e, 0x0 },                                         // 1374 39 dunbaldar north alliance assaulted - unused
-    { 0x55d, 0x0 },                                         // 1373 40 stone tower d
-    { 0x3c6, 0x0 },                                         //  966 41 unk
-    { 0x3c4, 0x0 },                                         //  964 42 unk
-    { 0x3c2, 0x0 },                                         //  962 43 unk
-    { 0x516, 0x1 },                                         // 1302 44 stoneheart grave a_c
-    { 0x515, 0x0 },                                         // 1301 45 stonheart grave h_c
-    { 0x3b6, 0x0 },                                         //  950 46 unk
-    { 0x55c, 0x0 },                                         // 1372 47 icewing tower d
-    { 0x55b, 0x0 },                                         // 1371 48 dunn d
-    { 0x55a, 0x0 },                                         // 1370 49 duns d
-    { 0x559, 0x0 },                                         // 1369 50 unk
-    { 0x558, 0x0 },                                         // 1368 51 iceblood d
-    { 0x557, 0x0 },                                         // 1367 52 towerp d
-    { 0x556, 0x0 },                                         // 1366 53 frostwolfe d
-    { 0x555, 0x0 },                                         // 1365 54 frostwolfw d
-    { 0x554, 0x1 },                                         // 1364 55 stoneh tower c
-    { 0x553, 0x1 },                                         // 1363 56 icewing tower c
-    { 0x552, 0x1 },                                         // 1362 57 dunn c
-    { 0x551, 0x1 },                                         // 1361 58 duns c
-    { 0x54f, 0x0 },                                         // 1359 59 irondeep (N) horde
-    { 0x54e, 0x0 },                                         // 1358 60 irondeep (N) ally
-    { 0x54d, 0x1 },                                         // 1357 61 mine (S) neutral
-    { 0x54c, 0x0 },                                         // 1356 62 mine (S) horde
-    { 0x54b, 0x0 },                                         // 1355 63 mine (S) ally
-    { 0x545, 0x0 },                                         // 1349 64 iceblood h_a
-    { 0x543, 0x1 },                                         // 1347 65 iceblod h_c
-    { 0x542, 0x0 },                                         // 1346 66 iceblood a_c
-    { 0x540, 0x0 },                                         // 1344 67 snowfall h_a
-    { 0x53f, 0x0 },                                         // 1343 68 snowfall a_a
-    { 0x53e, 0x0 },                                         // 1342 69 snowfall h_c
-    { 0x53d, 0x0 },                                         // 1341 70 snowfall a_c
-    { 0x53c, 0x0 },                                         // 1340 71 frostwolf g h_a
-    { 0x53b, 0x0 },                                         // 1339 72 frostwolf g a_a
-    { 0x53a, 0x1 },                                         // 1338 73 frostwolf g h_c
-    { 0x539, 0x0 },                                         // l33t 74 frostwolf g a_c
-    { 0x538, 0x0 },                                         // 1336 75 stormpike grave h_a
-    { 0x537, 0x0 },                                         // 1335 76 stormpike grave a_a
-    { 0x534, 0x0 },                                         // 1332 77 frostwolf hut h_a
-    { 0x533, 0x0 },                                         // 1331 78 frostwolf hut a_a
-    { 0x530, 0x0 },                                         // 1328 79 stormpike first aid h_a
-    { 0x52f, 0x0 },                                         // 1327 80 stormpike first aid h_c
-    { 0x52d, 0x1 },                                         // 1325 81 stormpike first aid a_c
-    { 0x0,   0x0 }
-};
-
-static WorldStatePair WS_world_states[] =
-{
-    { 0x62d, 0x0 },                                         // 1581  7 alliance flag captures
-    { 0x62e, 0x0 },                                         // 1582  8 horde flag captures
-    { 0x609, 0x0 },                                         // 1545  9 unk, set to 1 on alliance flag pickup...
-    { 0x60a, 0x0 },                                         // 1546 10 unk, set to 1 on horde flag pickup, after drop it's -1
-    { 0x60b, 0x2 },                                         // 1547 11 unk
-    { 0x641, 0x3 },                                         // 1601 12 unk (max flag captures?)
-    { 0x922, 0x1 },                                         // 2338 13 horde (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
-    { 0x923, 0x1 },                                         // 2339 14 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
-    { 0x0,   0x0 }
-};
-
-static WorldStatePair AB_world_states[] =
-{
-    { 0x6e7, 0x0 },                                         // 1767  7 stables alliance
-    { 0x6e8, 0x0 },                                         // 1768  8 stables horde
-    { 0x6e9, 0x0 },                                         // 1769  9 unk, ST?
-    { 0x6ea, 0x0 },                                         // 1770 10 stables (show/hide)
-    { 0x6ec, 0x0 },                                         // 1772 11 farm (0 - horde controlled, 1 - alliance controlled)
-    { 0x6ed, 0x0 },                                         // 1773 12 farm (show/hide)
-    { 0x6ee, 0x0 },                                         // 1774 13 farm color
-    { 0x6ef, 0x0 },                                         // 1775 14 gold mine color, may be FM?
-    { 0x6f0, 0x0 },                                         // 1776 15 alliance resources
-    { 0x6f1, 0x0 },                                         // 1777 16 horde resources
-    { 0x6f2, 0x0 },                                         // 1778 17 horde bases
-    { 0x6f3, 0x0 },                                         // 1779 18 alliance bases
-    { 0x6f4, 0x7d0 },                                       // 1780 19 max resources (2000)
-    { 0x6f6, 0x0 },                                         // 1782 20 blacksmith color
-    { 0x6f7, 0x0 },                                         // 1783 21 blacksmith (show/hide)
-    { 0x6f8, 0x0 },                                         // 1784 22 unk, bs?
-    { 0x6f9, 0x0 },                                         // 1785 23 unk, bs?
-    { 0x6fb, 0x0 },                                         // 1787 24 gold mine (0 - horde contr, 1 - alliance contr)
-    { 0x6fc, 0x0 },                                         // 1788 25 gold mine (0 - conflict, 1 - horde)
-    { 0x6fd, 0x0 },                                         // 1789 26 gold mine (1 - show/0 - hide)
-    { 0x6fe, 0x0 },                                         // 1790 27 gold mine color
-    { 0x700, 0x0 },                                         // 1792 28 gold mine color, wtf?, may be LM?
-    { 0x701, 0x0 },                                         // 1793 29 lumber mill color (0 - conflict, 1 - horde contr)
-    { 0x702, 0x0 },                                         // 1794 30 lumber mill (show/hide)
-    { 0x703, 0x0 },                                         // 1795 31 lumber mill color color
-    { 0x732, 0x1 },                                         // 1842 32 stables (1 - uncontrolled)
-    { 0x733, 0x1 },                                         // 1843 33 gold mine (1 - uncontrolled)
-    { 0x734, 0x1 },                                         // 1844 34 lumber mill (1 - uncontrolled)
-    { 0x735, 0x1 },                                         // 1845 35 farm (1 - uncontrolled)
-    { 0x736, 0x1 },                                         // 1846 36 blacksmith (1 - uncontrolled)
-    { 0x745, 0x2 },                                         // 1861 37 unk
-    { 0x7a3, 0x708 },                                       // 1955 38 warning limit (1800)
-    { 0x0,   0x0 }
-};
-
-static WorldStatePair SI_world_states[] =                   // Silithus
-{
-    { 2313, 0 },                                            // WORLD_STATE_SI_GATHERED_A
-    { 2314, 0 },                                            // WORLD_STATE_SI_GATHERED_H
-    { 2317, 0 }                                             // WORLD_STATE_SI_SILITHYST_MAX
-};
-
-static WorldStatePair EP_world_states[] =                   // Eastern Plaguelands
-{
-    { 2327, 0 },                                            // WORLD_STATE_EP_TOWER_COUNT_ALLIANCE
-    { 2328, 0 },                                            // WORLD_STATE_EP_TOWER_COUNT_HORDE
-    { 2355, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_NEUTRAL
-    { 2374, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_CONTEST_ALLIANCE
-    { 2375, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_CONTEST_HORDE
-    { 2376, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_PROGRESS_ALLIANCE
-    { 2377, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_PROGRESS_HORDE
-    { 2378, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_ALLIANCE
-    { 2379, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_CROWNGUARD_HORDE
-    { 2354, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_ALLIANCE
-    { 2356, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_HORDE
-    { 2357, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_PROGRESS_ALLIANCE
-    { 2358, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_PROGRESS_HORDE
-    { 2359, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_CONTEST_ALLIANCE
-    { 2360, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_CONTEST_HORDE
-    { 2361, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_EASTWALL_NEUTRAL
-    { 2352, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_NEUTRAL
-    { 2362, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_CONTEST_ALLIANCE
-    { 2363, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_CONTEST_HORDE
-    { 2364, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_PROGRESS_ALLIANCE
-    { 2365, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_PROGRESS_HORDE
-    { 2372, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_ALLIANCE
-    { 2373, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_NORTHPASS_HORDE
-    { 2353, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_NEUTRAL
-    { 2366, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_CONTEST_ALLIANCE
-    { 2367, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_CONTEST_HORDE - not in dbc! sent for consistency's sake, and to match field count
-    { 2368, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_PROGRESS_ALLIANCE
-    { 2369, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_PROGRESS_HORDE
-    { 2370, WORLD_STATE_REMOVE },                           // WORLD_STATE_EP_PLAGUEWOOD_ALLIANCE
-    { 2371, WORLD_STATE_REMOVE }                            // WORLD_STATE_EP_PLAGUEWOOD_HORDE
-};
-
 void Player::SendInitWorldStates(uint32 zoneid)
 {
     // data depends on zoneid/mapid...
@@ -7645,121 +7327,38 @@ void Player::SendInitWorldStates(uint32 zoneid)
 
     DEBUG_LOG("Sending SMSG_INIT_WORLD_STATES to Map:%u, Zone: %u", mapid, zoneid);
 
-    bool defZone = false;
-
-    // may be exist better way to do this...
-    switch (zoneid)
-    {
-        case 0:
-        case 1:
-        case 4:
-        case 8:
-        case 10:
-        case 11:
-        case 12:
-        case 36:
-        case 38:
-        case 40:
-        case 41:
-        case 51:
-        case 267:
-        case 1519:
-        case 1537:
-        case 2257:
-        case 2918:
-        case 139:
-        case 1377:
-        case 2597:
-        case 3277:
-        case 3358:
-            break;
-        default:
-            defZone = true;
-            break;
-    }
-
     uint32 count = 0;                                       // count of world states in packet
 
-    if (defZone)
+    WorldPacket data(SMSG_INIT_WORLD_STATES, (4 + 4 + 2 + 6));
+    data << uint32(mapid);                              // mapid
+    data << uint32(zoneid);                             // zone id
+    size_t count_pos = data.wpos();
+    data << uint16(0);                                  // count of uint64 blocks, placeholder
+
+    switch (zoneid)
     {
-        WorldPacket data(SMSG_INIT_WORLD_STATES, (4 + 2 + 13));
-        data << uint32(mapid);                              // mapid
-        size_t count_pos = data.wpos();
-        data << uint16(0);                                  // count of uint32 blocks, placeholder
-        FillInitialDefWorldState(data, count, def_world_states);
-
-        data.put<uint16>(count_pos, count);                 // set actual world state amount
-        GetSession()->SendPacket(&data);
+        case 139:                                       // Eastern Plaguelands
+        case 1377:                                      // Silithus
+            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
+                outdoorPvP->FillInitialWorldStates(data, count);
+            break;
+        case 2597:                                      // AV
+            if (bg && bg->GetTypeID() == BATTLEGROUND_AV)
+                bg->FillInitialWorldStates(data, count);
+            break;
+        case 3277:                                      // WS
+            if (bg && bg->GetTypeID() == BATTLEGROUND_WS)
+                bg->FillInitialWorldStates(data, count);
+            break;
+        case 3358:                                      // AB
+            if (bg && bg->GetTypeID() == BATTLEGROUND_AB)
+                bg->FillInitialWorldStates(data, count);
+            break;
     }
-    else
-    {
-        WorldPacket data(SMSG_INIT_WORLD_STATES, (4 + 4 + 2 + 6));
-        data << uint32(mapid);                              // mapid
-        data << uint32(zoneid);                             // zone id
-        size_t count_pos = data.wpos();
-        data << uint16(0);                                  // count of uint32 blocks, placeholder
-        // common fields
-        FillInitialWorldState(data, count, 0x8d8, 0x0);     // 2264 1
-        FillInitialWorldState(data, count, 0x8d7, 0x0);     // 2263 2
-        FillInitialWorldState(data, count, 0x8d6, 0x0);     // 2262 3
-        FillInitialWorldState(data, count, 0x8d5, 0x0);     // 2261 4
-        FillInitialWorldState(data, count, 0x8d4, 0x0);     // 2260 5
-        FillInitialWorldState(data, count, 0x8d3, 0x0);     // 2259 6
 
-        switch (zoneid)
-        {
-            case 1:                                         // Dun Morogh
-            case 11:                                        // Wetlands
-            case 12:                                        // Elwynn Forest
-            case 38:                                        // Loch Modan
-            case 40:                                        // Westfall
-            case 51:                                        // Searing Gorge
-            case 1519:                                      // Stormwind City
-            case 1537:                                      // Ironforge
-            case 2257:                                      // Deeprun Tram
-                break;
-            case 139:                                       // Eastern Plaguelands
-                if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
-                    outdoorPvP->FillInitialWorldStates(data, count);
-                else
-                    FillInitialWorldState(data, count, EP_world_states);
-                break;
-            case 1377:                                      // Silithus
-                if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
-                    outdoorPvP->FillInitialWorldStates(data, count);
-                else
-                    FillInitialWorldState(data, count, SI_world_states);
-                break;
-            case 2597:                                      // AV
-                if (bg && bg->GetTypeID() == BATTLEGROUND_AV)
-                    bg->FillInitialWorldStates(data, count);
-                else
-                    FillInitialWorldState(data, count, AV_world_states);
-                break;
-            case 3277:                                      // WS
-                if (bg && bg->GetTypeID() == BATTLEGROUND_WS)
-                    bg->FillInitialWorldStates(data, count);
-                else
-                    FillInitialWorldState(data, count, WS_world_states);
-                break;
-            case 3358:                                      // AB
-                if (bg && bg->GetTypeID() == BATTLEGROUND_AB)
-                    bg->FillInitialWorldStates(data, count);
-                else
-                    FillInitialWorldState(data, count, AB_world_states);
-                break;
-            default:
-                FillInitialWorldState(data, count, 0x914, 0x0); // 2324 7
-                FillInitialWorldState(data, count, 0x913, 0x0); // 2323 8
-                FillInitialWorldState(data, count, 0x912, 0x0); // 2322 9
-                FillInitialWorldState(data, count, 0x915, 0x0); // 2325 10
-                break;
-        }
+    data.put<uint16>(count_pos, count);                 // set actual world state amount
 
-        data.put<uint16>(count_pos, count);                 // set actual world state amount
-
-        GetSession()->SendPacket(&data);
-    }
+    GetSession()->SendPacket(&data);
 }
 
 uint32 Player::GetXPRestBonus(uint32 xp)
@@ -11180,26 +10779,6 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                     break;
                 case ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL:
                 {
-                    // Flametongue Weapon (Passive), Ranks (used not existed equip spell id in pre-3.x spell.dbc)
-                    // See Player::CastItemCombatSpell for workaround implementation
-                    if (enchant_spell_id && apply)
-                    {
-                        switch (enchant_spell_id)
-                        {
-                            case 10400:                     // Rank 1
-                            case 15567:                     // Rank 2
-                            case 15568:                     // Rank 3
-                            case 15569:                     // Rank 4
-                            case 16311:                     // Rank 5
-                            case 16312:                     // Rank 6
-                            case 16313:                     // Rank 7
-                                enchant_spell_id = 0;
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-
                     if (enchant_spell_id)
                     {
                         if (apply)
@@ -11426,7 +11005,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                         hasMenuItem = false;
                     break;
                 case GOSSIP_OPTION_UNLEARNPETSKILLS:
-                    if (!GetPet() || GetPet()->getPetType() != HUNTER_PET || GetPet()->m_spells.size() <= 1 || pCreature->GetCreatureInfo()->trainer_type != TRAINER_TYPE_PETS || pCreature->GetCreatureInfo()->trainer_class != CLASS_HUNTER)
+                    if (!GetPet() || GetPet()->getPetType() != HUNTER_PET || GetPet()->m_spells.size() <= 1 || pCreature->GetCreatureInfo()->TrainerType != TRAINER_TYPE_PETS || pCreature->GetCreatureInfo()->TrainerClass != CLASS_HUNTER)
                         hasMenuItem = false;
                     break;
                 case GOSSIP_OPTION_TAXIVENDOR:
@@ -16007,36 +15586,24 @@ Pet* Player::GetMiniPet() const
     return GetMap()->GetPet(m_miniPetGuid);
 }
 
-void Player::BuildPlayerChat(WorldPacket* data, uint8 msgtype, const std::string& text, uint32 language) const
-{
-    *data << uint8(msgtype);
-    *data << uint32(language);
-    *data << ObjectGuid(GetObjectGuid());
-    if (msgtype == CHAT_MSG_SAY || msgtype == CHAT_MSG_YELL || msgtype == CHAT_MSG_PARTY)
-        *data << ObjectGuid(GetObjectGuid());
-    *data << uint32(text.length() + 1);
-    *data << text;
-    *data << uint8(GetChatTag());
-}
-
 void Player::Say(const std::string& text, const uint32 language)
 {
-    WorldPacket data(SMSG_MESSAGECHAT, 100);
-    BuildPlayerChat(&data, CHAT_MSG_SAY, text, language);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_SAY, text.c_str(), Language(language), GetChatTag(), GetObjectGuid(), GetName());
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);
 }
 
 void Player::Yell(const std::string& text, const uint32 language)
 {
-    WorldPacket data(SMSG_MESSAGECHAT, 100);
-    BuildPlayerChat(&data, CHAT_MSG_YELL, text, language);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_YELL, text.c_str(), Language(language), GetChatTag(), GetObjectGuid(), GetName());
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL), true);
 }
 
 void Player::TextEmote(const std::string& text)
 {
-    WorldPacket data(SMSG_MESSAGECHAT, 100);
-    BuildPlayerChat(&data, CHAT_MSG_EMOTE, text, LANG_UNIVERSAL);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_EMOTE, text.c_str(), LANG_UNIVERSAL, GetChatTag(), GetObjectGuid(), GetName());
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE), true, !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHAT));
 }
 
@@ -16047,15 +15614,15 @@ void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiv
 
     Player* rPlayer = sObjectMgr.GetPlayer(receiver);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 100);
-    BuildPlayerChat(&data, CHAT_MSG_WHISPER, text, language);
+    WorldPacket data;
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, text.c_str(), Language(language), GetChatTag(), GetObjectGuid(), GetName());
     rPlayer->GetSession()->SendPacket(&data);
 
     // not send confirmation for addon messages
     if (language != LANG_ADDON)
     {
-        data.Initialize(SMSG_MESSAGECHAT, 100);
-        rPlayer->BuildPlayerChat(&data, CHAT_MSG_WHISPER_INFORM, text, language);
+        data.clear();
+        ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER_INFORM, text.c_str(), Language(language), CHAT_TAG_NONE, rPlayer->GetObjectGuid());
         GetSession()->SendPacket(&data);
     }
 
@@ -16188,7 +15755,7 @@ void Player::CharmSpellInitialize()
     {
         CreatureInfo const* cinfo = ((Creature*)charm)->GetCreatureInfo();
 
-        if (cinfo && cinfo->type == CREATURE_TYPE_DEMON && getClass() == CLASS_WARLOCK)
+        if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON && getClass() == CLASS_WARLOCK)
         {
             for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
             {
@@ -16779,17 +16346,26 @@ void Player::InitDisplayIds()
         return;
     }
 
-    // reset scale before reapply auras
-    SetObjectScale(DEFAULT_OBJECT_SCALE);
-
     uint8 gender = getGender();
     switch (gender)
     {
         case GENDER_FEMALE:
+            // workaround for tauren scale
+            if (getRace() == RACE_TAUREN)
+                SetObjectScale(DEFAULT_TAUREN_FEMALE_SCALE);
+            else
+                SetObjectScale(DEFAULT_OBJECT_SCALE);
+
             SetDisplayId(info->displayId_f);
             SetNativeDisplayId(info->displayId_f);
             break;
         case GENDER_MALE:
+            // workaround for tauren scale
+            if (getRace() == RACE_TAUREN)
+                SetObjectScale(DEFAULT_TAUREN_MALE_SCALE);
+            else
+                SetObjectScale(DEFAULT_OBJECT_SCALE);
+
             SetDisplayId(info->displayId_m);
             SetNativeDisplayId(info->displayId_m);
             break;
@@ -17454,13 +17030,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     // tutorial stuff
     GetSession()->SendTutorialsData();
-
     SendInitialSpells();
-    //[-ZERO] SMSG_SEND_UNLEARN_SPELLS maybe not for 1.12
-    data.Initialize(SMSG_SEND_UNLEARN_SPELLS, 4);
-    data << uint32(0);                                      // count, for(count) uint32;
-    GetSession()->SendPacket(&data);
-
     SendInitialActionButtons();
     m_reputationMgr.SendInitialReputations();
     UpdateHonor();
@@ -17839,12 +17409,21 @@ float Player::GetReputationPriceDiscount(Creature const* pCreature) const
     FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
     if (!vendor_faction || !vendor_faction->faction)
         return 1.0f;
+    
+    uint32 discount = 100;
+    ReputationRank rank = GetReputationRank(vendor_faction->faction);   // get repution rank for that specific vendor faction
+    if (rank >= REP_HONORED)                                            // give 10% reduction if rank is at least honored
+        discount -= 10;
 
-    ReputationRank rank = GetReputationRank(vendor_faction->faction);
-    if (rank <= REP_NEUTRAL)
-        return 1.0f;
-
-    return 1.0f - 0.05f * (rank - REP_NEUTRAL);
+    if (GetHonorRankInfo().visualRank >= 3)                             // get pvp grade
+    {
+        if (FactionTemplateEntry const* player_faction = getFactionTemplateEntry())
+        {
+            if (player_faction->IsFriendlyTo(*vendor_faction))          // check if its friendly faction (not neutral)
+                discount -=10;                                          // give 10% discount if grade is at least sergent
+        }
+    }
+    return float (discount / 100.0f);
 }
 
 /**
@@ -18187,7 +17766,7 @@ bool Player::isHonorOrXPTarget(Unit* pVictim) const
     {
         if (((Creature*)pVictim)->IsTotem() ||
                 ((Creature*)pVictim)->IsPet() ||
-                ((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_XP_AT_KILL)
+                ((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_XP_AT_KILL)
             return false;
     }
     return true;

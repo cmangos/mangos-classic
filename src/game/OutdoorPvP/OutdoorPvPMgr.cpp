@@ -128,19 +128,3 @@ void OutdoorPvPMgr::Update(uint32 diff)
 
     m_updateTimer.Reset();
 }
-
-/**
-   Function that gets the capture point slider value
-
-   @param   capture point entry
-   @param   default value being returned if no saved value for the capture point was found
- */
-float OutdoorPvPMgr::GetCapturePointSliderValue(uint32 entry, float defaultValue)
-{
-    CapturePointSliderMap::const_iterator itr = m_capturePointSlider.find(entry);
-    if (itr != m_capturePointSlider.end())
-        return itr->second;
-
-    // return default value if we can't find any
-    return defaultValue;
-}
