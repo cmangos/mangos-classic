@@ -184,8 +184,7 @@ bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex 
     switch (spellInfo->SpellFamilyName)
     {
         case SPELLFAMILY_SHAMAN:
-            if (spellInfo->IsFitToFamilyMask(UI64LIT(0x00000002000)) ||
-                    spellInfo->IsFitToFamilyMask(UI64LIT(0x00000004000)))
+                     if (spellInfo->IsFitToFamilyMask(UI64LIT(0x00000002000)) || spellInfo->IsFitToFamilyMask(UI64LIT(0x00000004000)) || spellInfo->IsFitToFamilyMask(UI64LIT(0x00004000000)))
                 return false;
             break;
         default:
