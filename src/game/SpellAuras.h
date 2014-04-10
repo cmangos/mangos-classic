@@ -454,6 +454,7 @@ class MANGOS_DLL_SPEC Aura
         SpellAuraHolder const* GetHolder() const { return m_spellAuraHolder; }
 
         bool IsLastAuraOnHolder();
+        static bool ApplyTimeComparsion(const Aura * const &first, const Aura * const &second);
     protected:
         Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = NULL, Item* castItem = NULL);
 
