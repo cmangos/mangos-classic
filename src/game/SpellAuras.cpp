@@ -251,6 +251,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
 
 static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_STUN, SPELL_AURA_NONE };
 
+bool Aura::ApplyTimeComparsion(const Aura * const &first, const Aura * const &second)
+{
+    return first->m_applyTime < second->m_applyTime;
+}
+
 Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem) :
     m_spellmod(NULL), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
     m_effIndex(eff), m_positive(false), m_isPeriodic(false), m_isAreaAura(false),
@@ -2277,7 +2282,7 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     if (!Real)
         return;
 
-    GetTarget()->SetConfused(apply, GetCasterGuid(), GetId());
+    GetTarget()->UpdateMotionByAuras();
 }
 
 void Aura::HandleModFear(bool apply, bool Real)
@@ -2285,7 +2290,7 @@ void Aura::HandleModFear(bool apply, bool Real)
     if (!Real)
         return;
 
-    GetTarget()->SetFeared(apply, GetCasterGuid(), GetId());
+    GetTarget()->UpdateMotionByAuras();
 }
 
 void Aura::HandleFeignDeath(bool apply, bool Real)
@@ -4757,14 +4762,7 @@ void Aura::HandlePreventFleeing(bool apply, bool Real)
     if (!Real)
         return;
 
-    Unit::AuraList const& fearAuras = GetTarget()->GetAurasByType(SPELL_AURA_MOD_FEAR);
-    if (!fearAuras.empty())
-    {
-        if (apply)
-            GetTarget()->SetFeared(false, fearAuras.front()->GetCasterGuid());
-        else
-            GetTarget()->SetFeared(true);
-    }
+    GetTarget()->UpdateMotionByAuras();
 }
 
 void Aura::HandleManaShield(bool apply, bool Real)

@@ -656,6 +656,10 @@ void Creature::DoFleeToGetAssistance()
     if (!getVictim())
         return;
 
+    // do not flee if some aura prevents it
+    if (HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
+        return;
+
     float radius = sWorld.getConfig(CONFIG_FLOAT_CREATURE_FAMILY_FLEE_ASSISTANCE_RADIUS);
     if (radius > 0)
     {
@@ -669,7 +673,7 @@ void Creature::DoFleeToGetAssistance()
         // UpdateSpeed(MOVE_RUN, false); [-ZERO] not needed?
 
         if (!pCreature)
-            SetFeared(true, getVictim()->GetObjectGuid(), 0 , sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
+            GetMotionMaster()->MoveFleeing(getVictim(), sWorld.getConfig(CONFIG_UINT32_CREATURE_FAMILY_FLEE_DELAY));
         else
             GetMotionMaster()->MoveSeekAssistance(pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ());
     }

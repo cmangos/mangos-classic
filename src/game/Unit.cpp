@@ -8404,75 +8404,65 @@ void Unit::InterruptMoving(bool forceSendStop /*=false*/)
     StopMoving(forceSendStop || isMoving);
 }
 
-void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 time)
+void Unit::UpdateMotionByAuras()
 {
-    if (apply)
-    {
-        if (HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
-            return;
+    const Aura *fearAura = NULL;
+    const Aura *confuseAura = NULL;
 
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+    if (!HasAuraType(SPELL_AURA_PREVENTS_FLEEING)) {
+        AuraList const& fearAuras = GetAurasByType(SPELL_AURA_MOD_FEAR);
+        AuraList::const_iterator it = std::max_element(fearAuras.begin(), fearAuras.end(), Aura::ApplyTimeComparsion);
+        if (it != fearAuras.end()) {
+            fearAura = *it;
+        }
+    }
 
-        GetMotionMaster()->MovementExpired(false);
-        CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
+    AuraList const& confuseAuras = GetAurasByType(SPELL_AURA_MOD_CONFUSE);
+    AuraList::const_iterator it = std::max_element(confuseAuras.begin(), confuseAuras.end(), Aura::ApplyTimeComparsion);
+    if (it != confuseAuras.end()) {
+        confuseAura = *it;
+    }
 
+    const Aura *actualAura = NULL;
+    if ( fearAura && confuseAura ) {
+        actualAura = Aura::ApplyTimeComparsion(fearAura, confuseAura) ? confuseAura : fearAura;
+    } else {
+        actualAura = fearAura ? fearAura : confuseAura;
+    }
+
+    if (actualAura) {
+        ObjectGuid casterGuid = actualAura->GetCasterGuid();
+        CastStop(GetObjectGuid() == casterGuid ? actualAura->GetId() : 0);
         Unit* caster = IsInWorld() ?  GetMap()->GetUnit(casterGuid) : NULL;
+        if (GetTypeId() != TYPEID_PLAYER && isAlive() && caster)
+            ((Creature*)this)->AttackedBy(caster);
 
-        GetMotionMaster()->MoveFleeing(caster, time);       // caster==NULL processed in MoveFleeing
-    }
-    else
-    {
-        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+        if(GetTypeId() == TYPEID_PLAYER && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING) && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
+            ((Player*)this)->SetClientControl(this, false);
 
         GetMotionMaster()->MovementExpired(false);
-
-        if (GetTypeId() != TYPEID_PLAYER && isAlive())
-        {
-            Creature* c = ((Creature*)this);
-            // restore appropriate movement generator
-            if (getVictim())
-                GetMotionMaster()->MoveChase(getVictim());
-            else
-                GetMotionMaster()->Initialize();
-
-            // attack caster if can
-            if (Unit* caster = IsInWorld() ? GetMap()->GetUnit(casterGuid) : NULL)
-                c->AttackedBy(caster);
+        if(actualAura->GetModifier()->m_auraname == SPELL_AURA_MOD_CONFUSE) {
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+            GetMotionMaster()->MoveConfused();
+        } else {
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+            GetMotionMaster()->MoveFleeing(caster);
         }
-    }
-
-    if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->SetClientControl(this, !apply);
-}
-
-void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
-{
-    if (apply)
-    {
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
-
-        CastStop(GetObjectGuid() == casterGuid ? spellID : 0);
-
-        GetMotionMaster()->MoveConfused();
-    }
-    else
-    {
+    } else if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING)) {
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
-
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
         GetMotionMaster()->MovementExpired(false);
-
-        if (GetTypeId() != TYPEID_PLAYER && isAlive())
-        {
-            // restore appropriate movement generator
+        if (GetTypeId() != TYPEID_PLAYER && isAlive()) {
             if (getVictim())
                 GetMotionMaster()->MoveChase(getVictim());
             else
                 GetMotionMaster()->Initialize();
+        } else if (GetTypeId() == TYPEID_PLAYER) {
+            ((Player*)this)->SetClientControl(this, true);
         }
     }
-
-    if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->SetClientControl(this, !apply);
 }
 
 void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid, uint32 /*spellID*/)
