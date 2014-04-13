@@ -50,7 +50,7 @@ PathFinder::~PathFinder()
 
 bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest)
 {
-    Vector3 oldDest = getEndPosition();
+    // Vector3 oldDest = getEndPosition();
     Vector3 dest(destX, destY, destZ);
     setEndPosition(dest);
 

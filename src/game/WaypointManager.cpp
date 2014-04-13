@@ -60,7 +60,10 @@ void WaypointManager::Load()
     for (ScriptMapMap::const_iterator itr = sCreatureMovementScripts.second.begin(); itr != sCreatureMovementScripts.second.end(); ++itr)
         movementScriptSet.insert(itr->first);
 
+    // /////////////////////////////////////////////////////
     // creature_movement
+    // /////////////////////////////////////////////////////
+
     QueryResult* result = WorldDatabase.Query("SELECT id, COUNT(point) FROM creature_movement GROUP BY id");
 
     if (!result)
@@ -73,23 +76,17 @@ void WaypointManager::Load()
     else
     {
         total_paths = (uint32)result->GetRowCount();
-        BarGoLink bar(total_paths);
 
-        do
+        do                                                  // Count expected amount of nodes
         {
-            bar.step();
             Field* fields   = result->Fetch();
 
-            uint32 id       = fields[0].GetUInt32();
+            // uint32 id    = fields[0].GetUInt32();
             uint32 count    = fields[1].GetUInt32();
 
             total_nodes += count;
         }
         while (result->NextRow());
-
-        sLog.outString();
-        sLog.outString(">> Paths loaded");
-
         delete result;
 
         //                                   0   1      2           3           4           5         6
@@ -97,15 +94,16 @@ void WaypointManager::Load()
                                      //   7        8        9        10       11       12     13     14           15      16
                                      "textid1, textid2, textid3, textid4, textid5, emote, spell, orientation, model1, model2 FROM creature_movement");
 
-        BarGoLink barRow((int)result->GetRowCount());
+        BarGoLink bar(result->GetRowCount());
 
         // error after load, we check if creature guid corresponding to the path id has proper MovementType
         std::set<uint32> creatureNoMoveType;
 
         do
         {
-            barRow.step();
+            bar.step();
             Field* fields = result->Fetch();
+
             uint32 id           = fields[0].GetUInt32();
             uint32 point        = fields[1].GetUInt32();
 
@@ -231,7 +229,10 @@ void WaypointManager::Load()
         delete result;
     }
 
+    // /////////////////////////////////////////////////////
     // creature_movement_template
+    // /////////////////////////////////////////////////////
+
     result = WorldDatabase.Query("SELECT entry, COUNT(point) FROM creature_movement_template GROUP BY entry");
 
     if (!result)
@@ -246,24 +247,18 @@ void WaypointManager::Load()
         total_nodes = 0;
         total_behaviors = 0;
         total_paths = (uint32)result->GetRowCount();
-        BarGoLink barRow(total_paths);
 
-        do
+        do                                                  // Count expected amount of nodes
         {
-            barRow.step();
             Field* fields = result->Fetch();
 
-            uint32 entry    = fields[0].GetUInt32();
+            // uint32 entry = fields[0].GetUInt32();
             uint32 count    = fields[1].GetUInt32();
 
             total_nodes += count;
         }
         while (result->NextRow());
-
         delete result;
-
-        sLog.outString();
-        sLog.outString(">> Path templates loaded");
 
         //                                   0      1      2           3           4           5         6
         result = WorldDatabase.Query("SELECT entry, point, position_x, position_y, position_z, waittime, script_id,"

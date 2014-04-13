@@ -702,7 +702,6 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
 {
     MANGOS_ASSERT(CheckGridIntegrity(creature, false));
 
-    Cell old_cell = creature->GetCurrentCell();
     Cell new_cell(MaNGOS::ComputeCellPair(x, y));
 
     // do move or do move to respawn or remove creature if previous all fail

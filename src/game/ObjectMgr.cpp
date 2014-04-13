@@ -730,7 +730,6 @@ void ObjectMgr::LoadCreatureClassLvlStats()
     }
 
     BarGoLink bar(result->GetRowCount());
-    uint32 totalRow = result->GetRowCount();
     uint32 storedRow = 0;
 
     do
@@ -765,6 +764,7 @@ void ObjectMgr::LoadCreatureClassLvlStats()
         ++storedRow;
     }
     while (result->NextRow());
+
     delete result;
 
     sLog.outString();
