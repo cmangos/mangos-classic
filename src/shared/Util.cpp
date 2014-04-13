@@ -446,11 +446,11 @@ bool Utf8FitTo(const std::string& str, std::wstring search)
     return true;
 }
 
-void utf8printf(FILE* /*out*/, const char* str, ...)
+void utf8printf(FILE* out, const char* str, ...)
 {
     va_list ap;
     va_start(ap, str);
-    vutf8printf(stdout, str, &ap);
+    vutf8printf(out, str, &ap);
     va_end(ap);
 }
 
