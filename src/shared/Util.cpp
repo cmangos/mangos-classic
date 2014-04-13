@@ -52,7 +52,7 @@ uint32 WorldTimer::getMSTime()
     return getMSTime_internal();
 }
 
-uint32 WorldTimer::getMSTime_internal(bool savetime /*= false*/)
+uint32 WorldTimer::getMSTime_internal(bool /*savetime*/ /*= false*/)
 {
     // get current time
     const ACE_Time_Value currTime = ACE_OS::gettimeofday();
@@ -446,7 +446,7 @@ bool Utf8FitTo(const std::string& str, std::wstring search)
     return true;
 }
 
-void utf8printf(FILE* out, const char* str, ...)
+void utf8printf(FILE* /*out*/, const char* str, ...)
 {
     va_list ap;
     va_start(ap, str);

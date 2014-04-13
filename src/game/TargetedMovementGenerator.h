@@ -60,7 +60,7 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorMedium
     protected:
         void _setTargetLocation(T&, bool updateDestination);
         bool RequiresNewPosition(T& owner, float x, float y, float z) const;
-        virtual float GetDynamicTargetDistance(T& owner, bool forRangeCheck) const { return i_offset; }
+        virtual float GetDynamicTargetDistance(T& /*owner*/, bool /*forRangeCheck*/) const { return i_offset; }
 
         ShortTimeTracker i_recheckDistance;
         float i_offset;
