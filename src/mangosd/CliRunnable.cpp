@@ -34,7 +34,7 @@
 #include "Player.h"
 #include "Chat.h"
 
-void utf8print(void* arg, const char* str)
+void utf8print(void* /*arg*/, const char* str)
 {
 #if PLATFORM == PLATFORM_WINDOWS
     wchar_t wtemp_buf[6000];
@@ -50,7 +50,7 @@ void utf8print(void* arg, const char* str)
 #endif
 }
 
-void commandFinished(void*, bool sucess)
+void commandFinished(void*, bool /*sucess*/)
 {
     printf("mangos>");
     fflush(stdout);

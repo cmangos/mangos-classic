@@ -249,7 +249,7 @@ bool BufferedSocket::send(const char* buf, size_t len)
     return n == space ? 1 : 0;
 }
 
-/*virtual*/ int BufferedSocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask m)
+/*virtual*/ int BufferedSocket::handle_close(ACE_HANDLE /*h*/, ACE_Reactor_Mask /*m*/)
 {
     this->OnClose();
 
