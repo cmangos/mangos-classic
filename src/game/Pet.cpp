@@ -1653,8 +1653,6 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
             return false;
     }
 
-    uint32 oldspell_id = 0;
-
     PetSpell newspell;
     newspell.state = state;
     newspell.type = type;
@@ -1673,24 +1671,26 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
     {
         for (PetSpellMap::const_iterator itr2 = m_spells.begin(); itr2 != m_spells.end(); ++itr2)
         {
-            if (itr2->second.state == PETSPELL_REMOVED) continue;
+            if (itr2->second.state == PETSPELL_REMOVED)
+                continue;
 
-            if (sSpellMgr.IsRankSpellDueToSpell(spellInfo, itr2->first))
+            uint32 const oldspell_id = itr2->first;
+
+            if (sSpellMgr.IsRankSpellDueToSpell(spellInfo, oldspell_id))
             {
                 // replace by new high rank
-                if (sSpellMgr.IsHighRankOfSpell(spell_id, itr2->first))
+                if (sSpellMgr.IsHighRankOfSpell(spell_id, oldspell_id))
                 {
                     newspell.active = itr2->second.active;
 
                     if (newspell.active == ACT_ENABLED)
-                        ToggleAutocast(itr2->first, false);
+                        ToggleAutocast(oldspell_id, false);
 
-                    oldspell_id = itr2->first;
-                    unlearnSpell(itr2->first, false, false);
+                    unlearnSpell(oldspell_id, false, false);
                     break;
                 }
                 // ignore new lesser rank
-                else if (sSpellMgr.IsHighRankOfSpell(itr2->first, spell_id))
+                else if (sSpellMgr.IsHighRankOfSpell(oldspell_id, spell_id))
                     return false;
             }
         }
