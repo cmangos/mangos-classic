@@ -27900,14 +27900,16 @@ _ACEOF
 
     ACE_INT64=""
   ACE_UINT64=""
-                if test $ac_cv_sizeof_long = 8; then
-    ACE_INT64="signed long"
-    ACE_UINT64="unsigned long"
-    ace_u_long_long_typedef_set=yes
-  elif test $ac_cv_sizeof_long_long = 8; then
+  dnl MaNGOS modification: fix MacOS build by checking [long long] before [long]
+  if test $ac_cv_sizeof_long_long = 8; then
     ACE_INT64="signed long long"
     ACE_UINT64="unsigned long long"
     ace_u_long_long_typedef_set=yes
+  elif test $ac_cv_sizeof_long = 8; then
+    ACE_INT64="signed long"
+    ACE_UINT64="unsigned long"
+    ace_u_long_long_typedef_set=yes
+  dnl MaNGOS modification end
   else
     ace_u_long_long_typedef_set=no
   fi
