@@ -59,7 +59,12 @@ void RandomMovementGenerator<Creature>::_setRandomLocation(Creature& creature)
     if (creature.CanFly())
         i_nextMoveTime.Reset(0);
     else
-        i_nextMoveTime.Reset(urand(500, 10000));
+    {
+        if (roll_chance_i(MOVEMENT_RANDOM_MMGEN_CHANCE_NO_BREAK))
+            i_nextMoveTime.Reset(50);
+        else
+            i_nextMoveTime.Reset(urand(3000, 10000));       // keep a short wait time
+    }
 }
 
 template<>
