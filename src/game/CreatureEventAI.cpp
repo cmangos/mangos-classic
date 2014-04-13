@@ -937,6 +937,11 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_throwAIEventMask = action.setThrowMask.eventTypeMask;
             break;
         }
+        case ACTION_T_SET_STAND_STATE:
+        {
+            m_creature->SetStandState(action.setStandState.standState);
+            break;
+        }
     }
 }
 

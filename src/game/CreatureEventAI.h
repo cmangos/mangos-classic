@@ -117,6 +117,7 @@ enum EventAI_ActionType
     ACTION_T_CHANCED_TEXT               = 44,               // Chance to display the text, TextId1, optionally TextId2. If more than just -TextId1 is defined, randomize. Negative values.
     ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, unused
     ACTION_T_SET_THROW_MASK             = 46,               // EventTypeMask, unused, unused
+    ACTION_T_SET_STAND_STATE            = 47,               // StandState, unused, unused
 
     ACTION_T_END,
 };
@@ -396,6 +397,13 @@ struct CreatureEventAI_Action
             uint32 unused1;
             uint32 unused2;
         } setThrowMask;
+        // ACTION_T_SET_STAND_STATE                         = 47
+        struct
+        {
+            uint32 standState;
+            uint32 unused1;
+            uint32 unused2;
+        } setStandState;
         // RAW
         struct
         {
