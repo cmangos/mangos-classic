@@ -577,6 +577,17 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
     if (!spellProto || !(spellProto->Mechanic == MECHANIC_ROOT || IsAuraAddedBySpell(SPELL_AURA_MOD_ROOT, spellProto->Id)))
         pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_ROOT, damage);
 
+
+    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageStart");
+
+    uint32 health = pVictim->GetHealth();
+    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "deal dmg:%d to health:%d ", damage, health);
+
+
+    // Rage from Damage made (only from direct weapon damage)
+    if (cleanDamage && damagetype == DIRECT_DAMAGE && this != pVictim && GetTypeId() == TYPEID_PLAYER && getPowerType() == POWER_RAGE && cleanDamage->attackType != RANGED_ATTACK)
+        ((Player*)this)->RewardRage(damage, true);
+
     // no xp,health if type 8 /critters/
     if (pVictim->GetTypeId() == TYPEID_UNIT && pVictim->GetCreatureType() == CREATURE_TYPE_CRITTER)
     {
@@ -595,11 +606,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         return damage;
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageStart");
-
-    uint32 health = pVictim->GetHealth();
-    DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "deal dmg:%d to health:%d ", damage, health);
-
     // duel ends when player has 1 or less hp
     bool duel_hasEnded = false;
     if (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->duel && damage >= (health - 1))
@@ -610,6 +616,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 
         duel_hasEnded = true;
     }
+
     // Get in CombatState
     if (pVictim != this && damagetype != DOT)
     {
@@ -619,10 +626,6 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         if (Player* attackedPlayer = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
             SetContestedPvP(attackedPlayer);
     }
-
-    // Rage from Damage made (only from direct weapon damage)
-    if (cleanDamage && damagetype == DIRECT_DAMAGE && this != pVictim && GetTypeId() == TYPEID_PLAYER && getPowerType() == POWER_RAGE && cleanDamage->attackType != RANGED_ATTACK)
-        ((Player*)this)->RewardRage(damage, true);
 
     if (pVictim->GetTypeId() == TYPEID_UNIT && !((Creature*)pVictim)->IsPet() && !((Creature*)pVictim)->HasLootRecipient())
         ((Creature*)pVictim)->SetLootRecipient(this);
