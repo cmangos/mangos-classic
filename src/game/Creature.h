@@ -54,6 +54,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_NOT_TAUNTABLE   = 0x00000100,       // creature is immune to taunt auras and effect attack me
     CREATURE_EXTRA_FLAG_AGGRO_ZONE      = 0x00000200,       // creature sets itself in combat with zone on aggro
     CREATURE_EXTRA_FLAG_GUARD           = 0x00000400,       // creature is a guard
+    CREATURE_EXTRA_FLAG_NO_CALL_ASSIST  = 0x00000800,       // creature shouldn't call for assistance on aggro
 };
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
