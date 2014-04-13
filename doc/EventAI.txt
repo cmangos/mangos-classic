@@ -151,6 +151,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 44   ACTION_T_CHANCED_TEXT                  Chance, -TextId1, -TextId2      Displays by Chance (1..100) the specified -TextId. When -TextId2 is specified, the selection will be randomized. Text types are defined, along with other options for the text, in a table below. Param2 and Param3 needs to be negative.
 45   ACTION_T_THROW_AI_EVENT                EventType, Radius               Throws an AIEvent of type (Param1) to nearby friendly Npcs in range of (Param2)
 46   ACTION_T_SET_THROW_MASK                EventTypeMask                   Marks for which AIEvents the npc will throw AIEvents on its own.
+47   ACTION_T_SET_STAND_STATE               StandState                      Set the unit stand state (Param1) of the current creature.
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -890,6 +891,11 @@ Currently supported are:
     AI_EVENT_GOT_FULL_HEALTH   |  MaskValue: 0x10  |  Sender = Healed Npc, Invoker = Healer      |  Sent when healed to full health
 
 So if you want an npc to throw AIEvents automatically on death and on critical health, you would set its EventTypeMask to 0x03
+
+-----------------------------
+47 = ACTION_T_SET_STAND_STATE:
+-----------------------------
+Parameter 1: StandState - Stand state id to be used by the creature as defined in Unit.h file in the core.
 
 =========================================
 Target Types
