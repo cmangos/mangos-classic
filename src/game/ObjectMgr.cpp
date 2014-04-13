@@ -775,7 +775,7 @@ CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, u
 {
     CreatureClassLvlStats const* cCLS = &m_creatureClassLvlStats[level][classToIndex[unitClass]];
 
-    if (cCLS->BaseHealth != 0 && cCLS->BaseDamage != 0.0f)
+    if (cCLS->BaseHealth != 0 && cCLS->BaseDamage > 0.1f)
         return cCLS;
 
     return NULL;
