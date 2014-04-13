@@ -46,6 +46,9 @@ namespace MaNGOS
             {
                 char const* text = sObjectMgr.GetMangosString(i_textId, loc_idx);
 
+                ObjectGuid sourceGuid = i_source ? i_source ->GetObjectGuid() : ObjectGuid();
+                std::string sourceName = i_source ? i_source ->GetName() : "";
+
                 if (i_args)
                 {
                     // we need copy va_list before use or original va_list will corrupted
@@ -56,10 +59,10 @@ namespace MaNGOS
                     vsnprintf(str, 2048, text, ap);
                     va_end(ap);
 
-                    ChatHandler::BuildChatPacket(data, i_msgtype, &str[0], LANG_UNIVERSAL, CHAT_TAG_NONE, i_source ? i_source ->GetObjectGuid() : ObjectGuid(), i_source ? i_source ->GetName() : "");
+                    ChatHandler::BuildChatPacket(data, i_msgtype, &str[0], LANG_UNIVERSAL, CHAT_TAG_NONE, sourceGuid, sourceName.c_str());
                 }
                 else
-                    ChatHandler::BuildChatPacket(data, i_msgtype, text, LANG_UNIVERSAL, CHAT_TAG_NONE, i_source ? i_source ->GetObjectGuid() : ObjectGuid(), i_source ? i_source ->GetName() : "");
+                    ChatHandler::BuildChatPacket(data, i_msgtype, text, LANG_UNIVERSAL, CHAT_TAG_NONE, sourceGuid, sourceName.c_str(), sourceGuid, sourceName.c_str());
             }
         private:
             ChatMsg i_msgtype;
