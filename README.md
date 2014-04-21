@@ -65,6 +65,7 @@ To be able to accomplish these goals, we support and promote:
   You can find further information about Eluna at the following places:
   * [Eluna Wiki](http://wiki.emudevs.com/doku.php?id=eluna)
   * [Eluna Support Forum](http://emudevs.com)
+  * [Eluna Github](https://github.com/ElunaLuaEngine)
 
 ## License
 
