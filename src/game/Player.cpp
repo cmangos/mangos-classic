@@ -9841,6 +9841,7 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         RemoveItemDurations(pItem);
 
         ItemRemovedQuestCheck(pItem->GetEntry(), pItem->GetCount());
+        sHookMgr->OnRemove(this, pItem);
 
         if (bag == INVENTORY_SLOT_BAG_0)
         {

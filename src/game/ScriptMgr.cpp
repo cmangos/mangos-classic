@@ -2115,9 +2115,6 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
 
 bool ScriptMgr::OnGameObjectUse(Player* pPlayer, GameObject* pGameObject)
 {
-    // used by eluna
-    if (sHookMgr->OnGameObjectUse(pPlayer, pGameObject))
-        return true;
     return m_pOnGOUse != NULL && m_pOnGOUse(pPlayer, pGameObject);
 }
 
