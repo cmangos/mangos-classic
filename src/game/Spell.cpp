@@ -1606,9 +1606,20 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         }
         case TARGET_PET:
         {
-            Pet* tmpUnit = m_caster->GetPet();
-            if (!tmpUnit) break;
-            targetUnitMap.push_back(tmpUnit);
+            Unit* tmpUnit = m_caster->GetPet();
+            if (!tmpUnit) {
+                if(m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARLOCK) {
+                    tmpUnit = m_caster->GetCharm();
+                    if (tmpUnit && tmpUnit->GetTypeId() == TYPEID_UNIT) {
+                        CreatureInfo const* cinfo = ((Creature*)tmpUnit)->GetCreatureInfo();
+                        if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON) {
+                            targetUnitMap.push_back(tmpUnit);
+                        }
+                    }
+                }
+            } else {
+                targetUnitMap.push_back(tmpUnit);
+            }
             break;
         }
         case TARGET_CHAIN_DAMAGE:
@@ -4016,7 +4027,16 @@ SpellCastResult Spell::CheckCast(bool strict)
         {
             if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_PET)
             {
-                Pet* pet = m_caster->GetPet();
+                Unit* pet = m_caster->GetPet();
+                if(!pet && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARLOCK) {
+                    Unit* tmpUnit = m_caster->GetCharm();
+                    if (tmpUnit && tmpUnit->GetTypeId() == TYPEID_UNIT) {
+                        CreatureInfo const* cinfo = ((Creature*)tmpUnit)->GetCreatureInfo();
+                        if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON) {
+                            pet = tmpUnit;
+                        }
+                    }
+                }
                 if (!pet)
                 {
                     if (m_triggeredByAuraSpell)             // not report pet not existence for triggered spells
