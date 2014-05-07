@@ -19,6 +19,7 @@
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"
+#include "BattleGroundAV.h"
 #include "BattleGroundMgr.h"
 #include "Creature.h"
 #include "MapManager.h"
@@ -1214,9 +1215,13 @@ void BattleGround::SpawnEvent(uint8 event1, uint8 event2, bool spawn)
     else
         m_ActiveEvents[event1] = BG_EVENT_NONE;             // no event active if event2 gets despawned
 
-    GuidVector::const_iterator itr = m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
-    for (; itr != m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.end(); ++itr)
-        SpawnBGCreature(*itr, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY);
+    // In AV creature mustn't be despawned at point contest / capture (maybe towers bowmen must be despawned at tower destroy?), except for marshals at tower destroy
+    if (GetTypeID() != BATTLEGROUND_AV || (spawn || (event1 >= BG_AV_MARSHAL_A_SOUTH && event1 <= BG_AV_MARSHAL_H_WTOWER)))
+    {
+	GuidVector::const_iterator itr = m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
+	for (; itr != m_EventObjects[MAKE_PAIR32(event1, event2)].creatures.end(); ++itr)
+	    SpawnBGCreature(*itr, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY);
+    }
     GuidVector::const_iterator itr2 = m_EventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
     for (; itr2 != m_EventObjects[MAKE_PAIR32(event1, event2)].gameobjects.end(); ++itr2)
         SpawnBGObject(*itr2, (spawn) ? RESPAWN_IMMEDIATELY : RESPAWN_ONE_DAY);
