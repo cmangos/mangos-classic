@@ -4859,8 +4859,36 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->GetTransport())
                     return SPELL_FAILED_NO_MOUNTS_ALLOWED;
 
+                /// Specific case for Temple of Ahn'Qiraj mounts as they are usable only in AQ40 and are the only mounts allowed here
+                /// TBC and above handle this by using m_spellInfo->AreaId
+                bool isAQ40Mounted = false;
+
+                switch (m_spellInfo->Id)
+                {
+                    case 25863:    // spell used by ingame item for Black Qiraji mount (legendary reward)
+                    case 26655:    // spells also related to Black Qiraji mount but use/trigger unknown
+                    case 26656:
+                    case 31700:
+                        if (m_caster->GetMapId() == 531)
+                            isAQ40Mounted = true;
+                        break;
+                    case 25953:    // spells of the 4 regular AQ40 mounts
+                    case 26054:
+                    case 26055:
+                    case 26056:
+                        if (m_caster->GetMapId() == 531)
+                        {
+                            isAQ40Mounted = true;
+                            break;
+                        }
+                        else
+                            return SPELL_FAILED_NOT_HERE;
+                    default:
+                        break;
+                }
+
                 // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
-                if (m_caster->GetTypeId() == TYPEID_PLAYER && !sMapStore.LookupEntry(m_caster->GetMapId())->IsMountAllowed() && !m_IsTriggeredSpell) //[-ZERO] && !m_spellInfo->AreaId)
+                if (!isAQ40Mounted && m_caster->GetTypeId() == TYPEID_PLAYER && !sMapStore.LookupEntry(m_caster->GetMapId())->IsMountAllowed() && !m_IsTriggeredSpell) //[-ZERO] && !m_spellInfo->AreaId)
                     return SPELL_FAILED_NO_MOUNTS_ALLOWED;
 
                 if (m_caster->GetAreaId() == 35)
