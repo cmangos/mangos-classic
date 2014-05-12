@@ -45,30 +45,28 @@ enum SpellCategories
 // Spell clasification
 enum SpellSpecific
 {
-    SPELL_NORMAL            = 0,
-    SPELL_SEAL              = 1,
-    SPELL_BLESSING          = 2,
-    SPELL_AURA              = 3,
-    SPELL_STING             = 4,
-    SPELL_CURSE             = 5,
-    SPELL_ASPECT            = 6,
-    SPELL_TRACKER           = 7,
-    SPELL_WARLOCK_ARMOR     = 8,
-    SPELL_MAGE_ARMOR        = 9,
-    SPELL_ELEMENTAL_SHIELD  = 10,
-    SPELL_MAGE_POLYMORPH    = 11,
-    SPELL_POSITIVE_SHOUT    = 12,
-    SPELL_JUDGEMENT         = 13,
-    SPELL_BATTLE_ELIXIR     = 14,
-    SPELL_GUARDIAN_ELIXIR   = 15,
-    SPELL_FLASK_ELIXIR      = 16,
-    // SPELL_PRESENCE          = 17,                        // used in 3.x
-    // SPELL_HAND              = 18,                        // used in 3.x
-    SPELL_WELL_FED          = 19,
-    SPELL_FOOD              = 20,
-    SPELL_DRINK             = 21,
-    SPELL_FOOD_AND_DRINK    = 22,
-    SPELL_SCROLL            = 23
+    SPELL_SPECIFIC_NORMAL            = 0,
+    SPELL_SPECIFIC_SEAL              = 1,
+    SPELL_SPECIFIC_BLESSING          = 2,
+    SPELL_SPECIFIC_AURA              = 3,
+    SPELL_SPECIFIC_STING             = 4,
+    SPELL_SPECIFIC_CURSE             = 5,
+    SPELL_SPECIFIC_ASPECT            = 6,
+    SPELL_SPECIFIC_TRACKER           = 7,
+    SPELL_SPECIFIC_WARLOCK_ARMOR     = 8,
+    SPELL_SPECIFIC_MAGE_ARMOR        = 9,
+    SPELL_SPECIFIC_ELEMENTAL_SHIELD  = 10,
+    SPELL_SPECIFIC_MAGE_POLYMORPH    = 11,
+    SPELL_SPECIFIC_POSITIVE_SHOUT    = 12,
+    SPELL_SPECIFIC_JUDGEMENT         = 13,
+    SPELL_SPECIFIC_BATTLE_ELIXIR     = 14,
+    SPELL_SPECIFIC_GUARDIAN_ELIXIR   = 15,
+    SPELL_SPECIFIC_FLASK_ELIXIR      = 16,
+    SPELL_SPECIFIC_WELL_FED          = 19,
+    SPELL_SPECIFIC_FOOD              = 20,
+    SPELL_SPECIFIC_DRINK             = 21,
+    SPELL_SPECIFIC_FOOD_AND_DRINK    = 22,
+    SPELL_SPECIFIC_SCROLL            = 23
 };
 
 enum SpellBuffType
@@ -854,11 +852,11 @@ class SpellMgr
 
             // flasks must have all bits set from ELIXIR_FLASK_MASK
             if ((mask & ELIXIR_FLASK_MASK) == ELIXIR_FLASK_MASK)
-                return SPELL_FLASK_ELIXIR;
+                return SPELL_SPECIFIC_FLASK_ELIXIR;
             else if (mask & ELIXIR_WELL_FED)
-                return SPELL_WELL_FED;
+                return SPELL_SPECIFIC_WELL_FED;
             else
-                return SPELL_NORMAL;
+                return SPELL_SPECIFIC_NORMAL;
         }
 
         SpellThreatEntry const* GetSpellThreatEntry(uint32 spellid) const

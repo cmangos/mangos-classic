@@ -8549,7 +8549,7 @@ void Unit::SetStandState(uint8 state)
 
 bool Unit::IsPolymorphed() const
 {
-    return GetSpellSpecific(getTransForm()) == SPELL_MAGE_POLYMORPH;
+    return GetSpellSpecific(getTransForm()) == SPELL_SPECIFIC_MAGE_POLYMORPH;
 }
 
 void Unit::SetDisplayId(uint32 modelId)
