@@ -25,6 +25,7 @@
 #include <set>
 #include <list>
 #include <sstream>
+#include <algorithm>
 
 #ifdef WIN32
 #include <direct.h>
