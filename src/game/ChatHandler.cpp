@@ -166,16 +166,24 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (msg.empty())
                 break;
 
-            // used by eluna
-            if (!sHookMgr->OnChat(GetPlayer(), type, lang, msg))
-                return;
-
             if (type == CHAT_MSG_SAY)
+            {
+                if (!sHookMgr->OnChat(GetPlayer(), type, lang, msg))
+                    return;
                 GetPlayer()->Say(msg, lang);
+            }
             else if (type == CHAT_MSG_EMOTE)
+            {
+                if (!sHookMgr->OnChat(GetPlayer(), type, LANG_UNIVERSAL, msg))
+                    return;
                 GetPlayer()->TextEmote(msg);
+            }
             else if (type == CHAT_MSG_YELL)
+            {
+                if (!sHookMgr->OnChat(GetPlayer(), type, lang, msg))
+                    return;
                 GetPlayer()->Yell(msg, lang);
+            }
         } break;
 
         case CHAT_MSG_WHISPER:
