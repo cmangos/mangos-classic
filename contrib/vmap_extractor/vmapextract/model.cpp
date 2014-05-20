@@ -46,25 +46,20 @@ bool Model::open(StringSet& failedPaths)
     memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
     if (header.nBoundingTriangles > 0)
     {
-        origVertices = (ModelVertex*)(f.getBuffer() + header.ofsVertices);
-        vertices = new Vec3D[header.nVertices];
+        boundingVertices = (ModelBoundingVertex*)(f.getBuffer() + header.ofsBoundingVertices);
+        vertices = new Vec3D[header.nBoundingVertices];
 
-        for (size_t i = 0; i < header.nVertices; i++)
+        for (size_t i = 0; i < header.nBoundingVertices; i++)
         {
-            vertices[i] = fixCoordSystem(origVertices[i].pos);;
+            vertices[i] = fixCoordSystem(boundingVertices[i].pos);
         }
 
-        ModelView* view = (ModelView*)(f.getBuffer() + header.ofsViews);
+        uint16* triangles = (uint16*)(f.getBuffer() + header.ofsBoundingTriangles);
 
-        uint16* indexLookup = (uint16*)(f.getBuffer() + view->ofsIndex);
-        uint16* triangles = (uint16*)(f.getBuffer() + view->ofsTris);
-
-        nIndices = view->nTris;
+        nIndices = header.nBoundingTriangles; // refers to the number of int16's, not the number of triangles
         indices = new uint16[nIndices];
-        for (size_t i = 0; i < nIndices; i++)
-        {
-            indices[i] = indexLookup[triangles[i]];
-        }
+        memcpy(indices, triangles, nIndices * 2);
+
         f.close();
     }
     else
@@ -87,7 +82,8 @@ bool Model::ConvertToVMAPModel(const char* outfilename)
     }
     fwrite(szRawVMAPMagic, 8, 1, output);
     uint32 nVertices = 0;
-    nVertices = header.nVertices;
+    nVertices = header.nBoundingVertices;
+
     fwrite(&nVertices, sizeof(int), 1, output);
     uint32 nofgroups = 1;
     fwrite(&nofgroups, sizeof(uint32), 1, output);
@@ -108,6 +104,16 @@ bool Model::ConvertToVMAPModel(const char* outfilename)
     fwrite(&nIndexes, sizeof(uint32), 1, output);
     if (nIndexes > 0)
     {
+        for (uint32 i = 0; i < nIndices; ++i)
+        {
+            // index[0] -> x, index[1] -> y, index[2] -> z, index[3] -> x ...
+            if ((i % 3) - 1 == 0)
+            {
+                uint16 tmp = indices[i];
+                indices[i] = indices[i+1];
+                indices[i+1] = tmp;
+            }
+        }
         fwrite(indices, sizeof(unsigned short), nIndexes, output);
     }
     fwrite("VERT", 4, 1, output);
@@ -118,7 +124,9 @@ bool Model::ConvertToVMAPModel(const char* outfilename)
     {
         for (uint32 vpos = 0; vpos < nVertices; ++vpos)
         {
-            std::swap(vertices[vpos].y, vertices[vpos].z);
+            float tmp = vertices[vpos].y;
+            vertices[vpos].y = -vertices[vpos].z;
+            vertices[vpos].z = tmp;
         }
         fwrite(vertices, sizeof(float) * 3, nVertices, output);
     }
