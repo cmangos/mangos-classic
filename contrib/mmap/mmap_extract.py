@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 
 """
 This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
@@ -177,7 +177,10 @@ if __name__ == "__main__":
     if args.threads >= 1:
         num_threads = args.threads
     else:
-        num_threads = cpu_count() - 1
+        try:
+            num_threads = max(1, cpu_count() - 1)
+        except NotImplementedError:
+            num_threads = 1
 
     remaining_tiles = deque(get_tiles())
     remaining_maps = deque(MAPS_TO_EXTRACT)
