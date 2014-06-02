@@ -52,7 +52,7 @@ class Weather
 {
     public:
         Weather(uint32 zone, WeatherZoneChances const* weatherChances);
-        ~Weather() { };
+        ~Weather();
         bool ReGenerate();
         bool UpdateWeather();
         void SendWeatherUpdateToPlayer(Player* player);

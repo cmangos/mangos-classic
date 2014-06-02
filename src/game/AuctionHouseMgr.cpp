@@ -33,6 +33,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Mail.h"
+#include "LuaEngine.h"
 
 #include "Policies/Singleton.h"
 
@@ -523,6 +524,14 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(Unit* unit)
     }
 
     return sAuctionHouseStore.LookupEntry(houseid);
+}
+
+AuctionHouseObject::~AuctionHouseObject()
+{
+    Eluna::RemoveRef(this);
+
+    for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
+        delete itr->second;
 }
 
 void AuctionHouseObject::Update()

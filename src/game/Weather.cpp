@@ -28,7 +28,7 @@
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Util.h"
-#include "HookMgr.h"
+#include "LuaEngine.h"
 
 /// Weather sound defines ( only for 1.12 )
 enum WeatherSounds
@@ -54,6 +54,11 @@ Weather::Weather(uint32 zone, WeatherZoneChances const* weatherChances) : m_zone
 
     DETAIL_FILTER_LOG(LOG_FILTER_WEATHER, "WORLD: Starting weather system for zone %u (change every %u minutes).", m_zone, (m_timer.GetInterval() / (MINUTE * IN_MILLISECONDS)));
 }
+
+Weather::~Weather()
+{
+    Eluna::RemoveRef(this);
+};
 
 /// Launch a weather update
 bool Weather::Update(time_t diff)
@@ -274,7 +279,7 @@ bool Weather::UpdateWeather()
     }
 
     DETAIL_FILTER_LOG(LOG_FILTER_WEATHER, "Change the weather of zone %u to %s.", m_zone, wthstr);
-    sHookMgr->OnChange(this, (WeatherState)m_type, m_grade);
+    sEluna->OnChange(this, (WeatherState)m_type, m_grade);
     return true;
 }
 

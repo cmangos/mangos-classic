@@ -60,7 +60,7 @@
 #include "Mail.h"
 #include "DBCStores.h"
 #include "SQLStorages.h"
-#include "HookMgr.h"
+#include "LuaEngine.h"
 
 #include <cmath>
 
@@ -522,6 +522,8 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
 Player::~Player()
 {
+    Eluna::RemoveRef(this);
+
     CleanupsBeforeDelete();
 
     // it must be unloaded already in PlayerLogout and accessed only for loggined player
@@ -1229,7 +1231,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         {
             // m_nextSave reseted in SaveToDB call
             // used by eluna
-            sHookMgr->OnSave(this);
+            sEluna->OnSave(this);
             SaveToDB();
             DETAIL_LOG("Player '%s' (GUID: %u) saved", GetName(), GetGUIDLow());
         }
@@ -2225,7 +2227,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     uint32 level = getLevel();
 
     // used by eluna
-    sHookMgr->OnGiveXP(this, xp, victim);
+    sEluna->OnGiveXP(this, xp, victim);
 
     // XP to money conversion processed in Player::RewardQuest
     if (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
@@ -2318,13 +2320,13 @@ void Player::GiveLevel(uint32 level)
         pet->SynchronizeLevelWithOwner();
 
     // used by eluna
-    sHookMgr->OnLevelChanged(this, oldLevel);
+    sEluna->OnLevelChanged(this, oldLevel);
 }
 
 void Player::SetFreeTalentPoints(uint32 points)
 {
     // used by eluna
-    sHookMgr->OnFreeTalentPointsChanged(this, points);
+    sEluna->OnFreeTalentPointsChanged(this, points);
     SetUInt32Value(PLAYER_CHARACTER_POINTS1, points);
 }
 
@@ -3361,7 +3363,7 @@ uint32 Player::resetTalentsCost() const
 bool Player::resetTalents(bool no_cost)
 {
     // used by eluna
-    sHookMgr->OnTalentsReset(this, no_cost);
+    sEluna->OnTalentsReset(this, no_cost);
 
     // not need after this call
     if (HasAtLoginFlag(AT_LOGIN_RESET_TALENTS))
@@ -4052,7 +4054,7 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     // update visibility of player for nearby cameras
     UpdateObjectVisibility();
 
-    sHookMgr->OnResurrect(this);
+    sEluna->OnResurrect(this);
 
     if (!applySickness)
         return;
@@ -6137,7 +6139,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
     }
 
     // used by eluna
-    sHookMgr->OnUpdateZone(this, newZone, newArea);
+    sEluna->OnUpdateZone(this, newZone, newArea);
 
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
@@ -6257,7 +6259,7 @@ void Player::DuelComplete(DuelCompleteType type)
     }
 
     // used by eluna
-    sHookMgr->OnDuelEnd(duel->opponent, this, type);
+    sEluna->OnDuelEnd(duel->opponent, this, type);
 
     // Remove Duel Flag object
     if (GameObject* obj = GetMap()->GetGameObject(GetGuidValue(PLAYER_DUEL_ARBITER)))
@@ -9636,12 +9638,12 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
         ApplyEquipCooldown(pItem2);
 
         // used by eluna
-        sHookMgr->OnEquip(this, pItem2, bag, slot);
+        sEluna->OnEquip(this, pItem2, bag, slot);
         return pItem2;
     }
 
     // used by eluna
-    sHookMgr->OnEquip(this, pItem, bag, slot);
+    sEluna->OnEquip(this, pItem, bag, slot);
 
     return pItem;
 }
@@ -9841,7 +9843,7 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         RemoveItemDurations(pItem);
 
         ItemRemovedQuestCheck(pItem->GetEntry(), pItem->GetCount());
-        sHookMgr->OnRemove(this, pItem);
+        sEluna->OnRemove(this, pItem);
 
         if (bag == INVENTORY_SLOT_BAG_0)
         {
@@ -13033,11 +13035,11 @@ void Player::SendQuestReward(Quest const* pQuest, uint32 XP, Object* questGiver)
 
     // used by eluna
     if (Creature* pCreature = questGiver->ToCreature())
-        sHookMgr->OnQuestComplete(pPlayer, pCreature, pQuest);
+        sEluna->OnQuestComplete(pPlayer, pCreature, pQuest);
 
     // used by eluna
     if (GameObject* pGameObject = questGiver->ToGameObject())
-        sHookMgr->OnQuestComplete(pPlayer, pGameObject, pQuest);
+        sEluna->OnQuestComplete(pPlayer, pGameObject, pQuest);
 }
 
 void Player::SendQuestFailed(uint32 quest_id)
@@ -14479,7 +14481,7 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool p
             DEBUG_LOG("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d",
                       GetName(), GetGUIDLow(), state->GetMapId(), state->GetInstanceId());
         // used by eluna
-        sHookMgr->OnBindToInstance(this, (Difficulty)0, state->GetMapId(), permanent);
+        sEluna->OnBindToInstance(this, (Difficulty)0, state->GetMapId(), permanent);
         return &bind;
     }
     else
@@ -15622,7 +15624,7 @@ void Player::UpdateDuelFlag(time_t currTime)
         return;
 
     // used by eluna
-    sHookMgr->OnDuelStart(this, duel->opponent);
+    sEluna->OnDuelStart(this, duel->opponent);
 
     SetUInt32Value(PLAYER_DUEL_TEAM, 1);
     duel->opponent->SetUInt32Value(PLAYER_DUEL_TEAM, 2);
@@ -18731,7 +18733,7 @@ void Player::_SaveBGData()
 void Player::ModifyMoney(int32 d)
 {
     // used by eluna
-    sHookMgr->OnMoneyChanged(this, d);
+    sEluna->OnMoneyChanged(this, d);
 
     if (d < 0)
         SetMoney(GetMoney() > uint32(-d) ? GetMoney() + d : 0);

@@ -41,7 +41,7 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "Pet.h"
 #include "SocialMgr.h"
-#include "HookMgr.h"
+#include "LuaEngine.h"
 
 void WorldSession::HandleRepopRequestOpcode(WorldPacket& recv_data)
 {
@@ -64,7 +64,7 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket& recv_data)
     }
 
     // used by eluna
-    sHookMgr->OnRepop(GetPlayer());
+    sEluna->OnRepop(GetPlayer());
 
     // this is spirit release confirm?
     GetPlayer()->RemovePet(PET_SAVE_REAGENTS);

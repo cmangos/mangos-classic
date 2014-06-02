@@ -997,5 +997,8 @@
     <ClInclude Include="..\..\src\game\LuaEngine\WorldObjectMethods.h">
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\Includes.h">
+      <Filter>LuaEngine</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

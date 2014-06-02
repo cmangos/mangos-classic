@@ -27,7 +27,7 @@
 #include "GuildMgr.h"
 #include "GossipDef.h"
 #include "SocialMgr.h"
-#include "HookMgr.h"
+#include "LuaEngine.h"
 
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 {

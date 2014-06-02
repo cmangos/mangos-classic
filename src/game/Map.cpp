@@ -37,11 +37,12 @@
 #include "MoveMap.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "Chat.h"
-#include "HookMgr.h"
+#include "LuaEngine.h"
 
 Map::~Map()
 {
-    sHookMgr->OnDestroy(this);
+    sEluna->OnDestroy(this);
+    Eluna::RemoveRef(this);
 
     UnloadAll(true);
 
@@ -101,7 +102,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
     m_persistentState = sMapPersistentStateMgr.AddPersistentState(i_mapEntry, GetInstanceId(), 0, IsDungeon());
     m_persistentState->SetUsedByMapState(this);
 
-    sHookMgr->OnCreate(this);
+    sEluna->OnCreate(this);
 }
 
 void Map::InitVisibilityDistance()
@@ -304,8 +305,8 @@ bool Map::Add(Player* player)
     player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()));
     UpdateObjectVisibility(player, cell, p);
 
-    sHookMgr->OnMapChanged(player);
-    sHookMgr->OnPlayerEnter(this, player);
+    sEluna->OnMapChanged(player);
+    sEluna->OnPlayerEnter(this, player);
 
     if (i_data)
         i_data->OnPlayerEnter(player);
@@ -569,7 +570,7 @@ void Map::Update(const uint32& t_diff)
     if (!m_scriptSchedule.empty())
         ScriptsProcess();
 
-    sHookMgr->OnUpdate(this, t_diff);
+    sEluna->OnUpdate(this, t_diff);
 
     if (i_data)
         i_data->Update(t_diff);
@@ -577,7 +578,7 @@ void Map::Update(const uint32& t_diff)
 
 void Map::Remove(Player* player, bool remove)
 {
-    sHookMgr->OnPlayerLeave(this, player);
+    sEluna->OnPlayerLeave(this, player);
 
     if (i_data)
         i_data->OnPlayerLeave(player);
