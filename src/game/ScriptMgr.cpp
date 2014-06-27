@@ -2121,7 +2121,7 @@ bool ScriptMgr::OnGameObjectUse(Player* pPlayer, GameObject* pGameObject)
 bool ScriptMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
     // used by eluna
-    if(sEluna->OnUse(pPlayer, pItem, targets))
+    if(!sEluna->OnUse(pPlayer, pItem, targets))
         return true;
 
     return m_pOnItemUse != NULL && m_pOnItemUse(pPlayer, pItem, targets);
