@@ -172,9 +172,6 @@
     <ClCompile Include="..\..\dep\lualib\ltm.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\lualib\lua.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\dep\lualib\lundump.c">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -193,7 +193,6 @@
     <ClCompile Include="..\..\dep\lualib\ltable.c" />
     <ClCompile Include="..\..\dep\lualib\ltablib.c" />
     <ClCompile Include="..\..\dep\lualib\ltm.c" />
-    <ClCompile Include="..\..\dep\lualib\lua.c" />
     <ClCompile Include="..\..\dep\lualib\lundump.c" />
     <ClCompile Include="..\..\dep\lualib\lvm.c" />
     <ClCompile Include="..\..\dep\lualib\lzio.c" />
