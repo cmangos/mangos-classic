@@ -22,7 +22,7 @@
 #include "Platform/Define.h"
 #include <cassert>
 
-#define MANGOS
+#define CMANGOS
 #define CLASSIC
 
 enum Gender
