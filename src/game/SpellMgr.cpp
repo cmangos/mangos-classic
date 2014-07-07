@@ -630,17 +630,9 @@ bool IsSingleFromSpellSpecificPerTarget(SpellSpecific spellSpec1, SpellSpecific 
         case SPELL_SPECIFIC_ELEMENTAL_SHIELD:
         case SPELL_SPECIFIC_MAGE_POLYMORPH:
         case SPELL_SPECIFIC_WELL_FED:
-            return spellSpec1 == spellSpec2;
-        case SPELL_SPECIFIC_BATTLE_ELIXIR:
-            return spellSpec2 == SPELL_SPECIFIC_BATTLE_ELIXIR
-                   || spellSpec2 == SPELL_SPECIFIC_FLASK_ELIXIR;
-        case SPELL_SPECIFIC_GUARDIAN_ELIXIR:
-            return spellSpec2 == SPELL_SPECIFIC_GUARDIAN_ELIXIR
-                   || spellSpec2 == SPELL_SPECIFIC_FLASK_ELIXIR;
         case SPELL_SPECIFIC_FLASK_ELIXIR:
-            return spellSpec2 == SPELL_SPECIFIC_BATTLE_ELIXIR
-                   || spellSpec2 == SPELL_SPECIFIC_GUARDIAN_ELIXIR
-                   || spellSpec2 == SPELL_SPECIFIC_FLASK_ELIXIR;
+        case SPELL_SPECIFIC_ZANZA_ELIXIR:
+            return spellSpec1 == spellSpec2;
         case SPELL_SPECIFIC_FOOD:
             return spellSpec2 == SPELL_SPECIFIC_FOOD
                    || spellSpec2 == SPELL_SPECIFIC_FOOD_AND_DRINK;

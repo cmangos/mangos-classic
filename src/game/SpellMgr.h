@@ -59,14 +59,13 @@ enum SpellSpecific
     SPELL_SPECIFIC_MAGE_POLYMORPH    = 11,
     SPELL_SPECIFIC_POSITIVE_SHOUT    = 12,
     SPELL_SPECIFIC_JUDGEMENT         = 13,
-    SPELL_SPECIFIC_BATTLE_ELIXIR     = 14,
-    SPELL_SPECIFIC_GUARDIAN_ELIXIR   = 15,
-    SPELL_SPECIFIC_FLASK_ELIXIR      = 16,
-    SPELL_SPECIFIC_WELL_FED          = 19,
-    SPELL_SPECIFIC_FOOD              = 20,
-    SPELL_SPECIFIC_DRINK             = 21,
-    SPELL_SPECIFIC_FOOD_AND_DRINK    = 22,
-    SPELL_SPECIFIC_SCROLL            = 23
+    SPELL_SPECIFIC_ZANZA_ELIXIR      = 14,
+    SPELL_SPECIFIC_FLASK_ELIXIR      = 15,
+    SPELL_SPECIFIC_WELL_FED          = 16,
+    SPELL_SPECIFIC_FOOD              = 17,
+    SPELL_SPECIFIC_DRINK             = 18,
+    SPELL_SPECIFIC_FOOD_AND_DRINK    = 19,
+    SPELL_SPECIFIC_SCROLL            = 20
 };
 
 enum SpellBuffType
@@ -632,8 +631,11 @@ struct SpellBonusEntry
 typedef std::unordered_map<uint32, SpellProcEventEntry> SpellProcEventMap;
 typedef std::unordered_map<uint32, SpellBonusEntry>     SpellBonusMap;
 
-#define ELIXIR_FLASK_MASK     0x03                          // 2 bit mask for batter compatibility with more recent client version, flaks must have both bits set
-#define ELIXIR_WELL_FED       0x10                          // Some foods have SPELLFAMILY_POTION
+enum SpellElixir
+{
+    ELIXIR_FLASK = 0x01,
+    ELIXIR_ZANZA = 0x02
+};
 
 struct SpellThreatEntry
 {
@@ -850,13 +852,13 @@ class SpellMgr
         {
             uint32 mask = GetSpellElixirMask(spellid);
 
-            // flasks must have all bits set from ELIXIR_FLASK_MASK
-            if ((mask & ELIXIR_FLASK_MASK) == ELIXIR_FLASK_MASK)
+            if (mask & ELIXIR_FLASK)
                 return SPELL_SPECIFIC_FLASK_ELIXIR;
-            else if (mask & ELIXIR_WELL_FED)
-                return SPELL_SPECIFIC_WELL_FED;
-            else
-                return SPELL_SPECIFIC_NORMAL;
+
+            if (mask & ELIXIR_ZANZA)
+                return SPELL_SPECIFIC_ZANZA_ELIXIR;
+
+            return SPELL_SPECIFIC_NORMAL;
         }
 
         SpellThreatEntry const* GetSpellThreatEntry(uint32 spellid) const
