@@ -184,7 +184,7 @@ void Creature::AddToWorld()
 
 void Creature::RemoveFromWorld()
 {
-    if (!IsInWorld())
+    if (IsInWorld())
         sEluna->OnRemoveFromWorld(this);
 
     ///- Remove the creature from the accessor
