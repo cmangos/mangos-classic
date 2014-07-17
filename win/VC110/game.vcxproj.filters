@@ -78,9 +78,6 @@
     <ClCompile Include="..\..\src\game\LuaEngine\ElunaEventMgr.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\ElunaUtilitiy.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\HookMgr.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
@@ -498,6 +495,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\game\CreatureLinkingMgr.cpp">
       <Filter>World/Handlers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\ElunaUtility.cpp">
+      <Filter>LuaEngine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1018,10 +1018,10 @@
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaTemplate.h">
       <Filter>LuaEngine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\ElunaUtilitiy.h">
+    <ClInclude Include="..\..\src\game\LuaEngine\HookMgr.h">
       <Filter>LuaEngine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\HookMgr.h">
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaUtility.h">
       <Filter>LuaEngine</Filter>
     </ClInclude>
   </ItemGroup>

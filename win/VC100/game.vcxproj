@@ -433,7 +433,7 @@
     <ClCompile Include="..\..\src\game\LootHandler.cpp" />
     <ClCompile Include="..\..\src\game\LootMgr.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\ElunaEventMgr.cpp" />
-    <ClCompile Include="..\..\src\game\LuaEngine\ElunaUtilitiy.cpp" />
+    <ClCompile Include="..\..\src\game\LuaEngine\ElunaUtility.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\HookMgr.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\LuaEngine.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\LuaFunctions.cpp" />
@@ -594,7 +594,7 @@
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaEventMgr.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaIncludes.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaTemplate.h" />
-    <ClInclude Include="..\..\src\game\LuaEngine\ElunaUtilitiy.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaUtility.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\GameObjectMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\GlobalMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\GroupMethods.h" />
