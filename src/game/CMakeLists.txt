@@ -56,32 +56,9 @@ set(SRC_GRP_BATTLEGROUND
     BattleGround/BattleGroundWS.h
 )
 
+file(GLOB SRC_FILES_LUAENGINE LuaEngine/*.cpp LuaEngine/*.h)
 set(SRC_GRP_LUAENGINE
-    LuaEngine/AuraMethods.h
-    LuaEngine/CorpseMethods.h
-    LuaEngine/CreatureMethods.h
-    LuaEngine/GameObjectMethods.h
-    LuaEngine/GlobalMethods.h
-    LuaEngine/GroupMethods.h
-    LuaEngine/GuildMethods.h
-    LuaEngine/HookMgr.cpp
-    LuaEngine/HookMgr.h
-    LuaEngine/Includes.h
-    LuaEngine/ItemMethods.h
-    LuaEngine/LuaEngine.cpp
-    LuaEngine/LuaEngine.h
-    LuaEngine/LuaFunctions.cpp
-    LuaEngine/MapMethods.h
-    LuaEngine/ObjectMethods.h
-    LuaEngine/PlayerMethods.h
-    LuaEngine/QueryMethods.h
-    LuaEngine/QuestMethods.h
-    LuaEngine/SpellMethods.h
-    LuaEngine/UnitMethods.h
-    LuaEngine/VehicleMethods.h
-    LuaEngine/WeatherMethods.h
-    LuaEngine/WorldObjectMethods.h
-    LuaEngine/WorldPacketMethods.h
+  ${SRC_FILES_LUAENGINE}
 )
 
 set(SRC_GRP_CHAT_COMMANDS
