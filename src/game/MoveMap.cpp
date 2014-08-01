@@ -110,7 +110,8 @@ namespace MMAP
 
         dtNavMesh* mesh = dtAllocNavMesh();
         MANGOS_ASSERT(mesh);
-        if (DT_SUCCESS != mesh->init(&params))
+        dtStatus dtResult = mesh->init(&params);
+        if (dtStatusFailed(dtResult))
         {
             dtFreeNavMesh(mesh);
             sLog.outError("MMAP:loadMapData: Failed to initialize dtNavMesh for mmap %03u from file %s", mapId, fileName);
@@ -203,7 +204,8 @@ namespace MMAP
         dtTileRef tileRef = 0;
 
         // memory allocated for data is now managed by detour, and will be deallocated when the tile is removed
-        if (mmap->navMesh->addTile(data, fileHeader.size, DT_TILE_FREE_DATA, 0, &tileRef) != DT_SUCCESS)
+        dtStatus dtResult = mmap->navMesh->addTile(data, fileHeader.size, DT_TILE_FREE_DATA, 0, &tileRef);
+        if (dtStatusFailed(dtResult))
         {
             sLog.outError("MMAP:loadMap: Could not load %03u%02i%02i.mmtile into navmesh", mapId, x, y);
             dtFree(data);
@@ -240,7 +242,8 @@ namespace MMAP
         dtTileRef tileRef = mmap->mmapLoadedTiles[packedGridPos];
 
         // unload, and mark as non loaded
-        if (DT_SUCCESS != mmap->navMesh->removeTile(tileRef, NULL, NULL))
+        dtStatus dtResult = mmap->navMesh->removeTile(tileRef, NULL, NULL);
+        if (dtStatusFailed(dtResult))
         {
             // this is technically a memory leak
             // if the grid is later reloaded, dtNavMesh::addTile will return error but no extra memory is used
@@ -274,7 +277,8 @@ namespace MMAP
         {
             uint32 x = (i->first >> 16);
             uint32 y = (i->first & 0x0000FFFF);
-            if (DT_SUCCESS != mmap->navMesh->removeTile(i->second, NULL, NULL))
+            dtStatus dtResult = mmap->navMesh->removeTile(i->second, NULL, NULL);
+            if (dtStatusFailed(dtResult) )
                 sLog.outError("MMAP:unloadMap: Could not unload %03u%02i%02i.mmtile from navmesh", mapId, x, y);
             else
             {
@@ -335,7 +339,8 @@ namespace MMAP
             // allocate mesh query
             dtNavMeshQuery* query = dtAllocNavMeshQuery();
             MANGOS_ASSERT(query);
-            if (DT_SUCCESS != query->init(mmap->navMesh, 1024))
+            dtStatus dtResult = query->init(mmap->navMesh, 1024);
+            if (dtStatusFailed(dtResult))
             {
                 dtFreeNavMeshQuery(query);
                 sLog.outError("MMAP:GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId %03u instanceId %u", mapId, instanceId);
