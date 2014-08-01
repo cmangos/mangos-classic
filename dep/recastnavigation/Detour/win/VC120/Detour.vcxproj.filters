@@ -30,6 +30,12 @@
     <ClInclude Include="..\..\Include\DetourNavMeshQuery.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\DetourMath.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\DetourStatus.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\DetourAlloc.cpp">
