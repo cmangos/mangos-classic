@@ -76,7 +76,7 @@ bool preciseVectorData = false;
 
 //static const char * szWorkDirMaps = ".\\Maps";
 const char* szWorkDirWmo = "./Buildings";
-const char* szRawVMAPMagic = "VMAPz04";
+const char* szRawVMAPMagic = "VMAP005";
 
 // Local testing functions
 
@@ -322,11 +322,11 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames)
     sprintf(path, "%smodel.mpq", input_path);
     pArchiveNames.push_back(path);
     pArchiveNames.push_back(path);
-	sprintf(path, "%stexture.mpq", input_path);
+    sprintf(path, "%stexture.mpq", input_path);
     pArchiveNames.push_back(path);
-	sprintf(path, "%swmo.mpq", input_path);
+    sprintf(path, "%swmo.mpq", input_path);
     pArchiveNames.push_back(path);
-	sprintf(path, "%sbase.mpq", input_path);
+    sprintf(path, "%sbase.mpq", input_path);
     pArchiveNames.push_back(path);
     sprintf(path, "%smisc.mpq", input_path);
 
