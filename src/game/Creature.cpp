@@ -302,14 +302,14 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=NU
     switch (cinfo->UnitClass)
     {
         case CLASS_WARRIOR:
-            SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_RAGE);
+            SetPowerType(POWER_RAGE);
             break;
         case CLASS_PALADIN:
         case CLASS_MAGE:
-            SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_MANA);
+            SetPowerType(POWER_MANA);
             break;
         case CLASS_ROGUE:
-            SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_ENERGY);
+            SetPowerType(POWER_ENERGY);
             break;
         default:
             sLog.outErrorDb("Creature (Entry: %u) has unhandled unit class. Power type will not be set!", Entry);
@@ -628,7 +628,7 @@ void Creature::RegeneratePower()
     if (!IsRegeneratingPower())
         return;
 
-    Powers powerType = getPowerType();
+    Powers powerType = GetPowerType();
     uint32 curValue = GetPower(powerType);
     uint32 maxValue = GetMaxPower(powerType);
 
@@ -1234,9 +1234,8 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
         if (i == POWER_MANA)
             SetCreateMana(value);
 
-        // Do not use the wrappers for setting power, to avoid side-effects
-        SetStatInt32Value(UNIT_FIELD_MAXPOWER1 + i , maxValue);
-        SetStatInt32Value(UNIT_FIELD_POWER1 +i, value);
+        SetMaxPower(Powers(i), maxValue);
+        SetPower(Powers(i), value);
         SetModifierValue(UnitMods(UNIT_MOD_POWER_START + i), BASE_VALUE, float(value));
     }
 
@@ -2072,11 +2071,11 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
     if (selectFlags & SELECT_FLAG_PLAYER && pTarget->GetTypeId() != TYPEID_PLAYER)
         return false;
 
-    if (selectFlags & SELECT_FLAG_POWER_MANA && pTarget->getPowerType() != POWER_MANA)
+    if (selectFlags & SELECT_FLAG_POWER_MANA && pTarget->GetPowerType() != POWER_MANA)
         return false;
-    else if (selectFlags & SELECT_FLAG_POWER_RAGE && pTarget->getPowerType() != POWER_RAGE)
+    else if (selectFlags & SELECT_FLAG_POWER_RAGE && pTarget->GetPowerType() != POWER_RAGE)
         return false;
-    else if (selectFlags & SELECT_FLAG_POWER_ENERGY && pTarget->getPowerType() != POWER_ENERGY)
+    else if (selectFlags & SELECT_FLAG_POWER_ENERGY && pTarget->GetPowerType() != POWER_ENERGY)
         return false;
 
     if (selectFlags & SELECT_FLAG_IN_MELEE_RANGE && !CanReachWithMeleeAttack(pTarget))
