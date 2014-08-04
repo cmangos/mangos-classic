@@ -217,10 +217,20 @@ void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32
     {
         std::list<Creature*> receiverList;
 
-        // Use this check here to collect only assitable creatures in case of CALL_ASSISTANCE, else be less strict
-        MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_creature, eventType == AI_EVENT_CALL_ASSISTANCE ? pInvoker : NULL, fRadius);
-        MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(receiverList, u_check);
-        Cell::VisitGridObjects(m_creature, searcher, fRadius);
+        // Allow sending custom AI events to all units in range
+        if (eventType == AI_EVENT_CUSTOM_EVENTAI_A || eventType == AI_EVENT_CUSTOM_EVENTAI_B)
+        {
+            MaNGOS::AnyUnitInObjectRangeCheck u_check(m_creature, fRadius);
+            MaNGOS::CreatureListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(receiverList, u_check);
+            Cell::VisitGridObjects(m_creature, searcher, fRadius);
+        }
+        else
+        {
+            // Use this check here to collect only assitable creatures in case of CALL_ASSISTANCE, else be less strict
+            MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_creature, eventType == AI_EVENT_CALL_ASSISTANCE ? pInvoker : NULL, fRadius);
+            MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(receiverList, u_check);
+            Cell::VisitGridObjects(m_creature, searcher, fRadius);
+        }
 
         if (!receiverList.empty())
         {
