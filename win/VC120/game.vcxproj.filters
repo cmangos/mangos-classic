@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="World/Handlers">
       <UniqueIdentifier>{d75ae330-80de-4aaf-8274-ae85f49dbcd9}</UniqueIdentifier>
@@ -37,12 +37,6 @@
     <Filter Include="BattleGround">
       <UniqueIdentifier>{0af4d063-6d01-4546-a429-59bd828ab270}</UniqueIdentifier>
     </Filter>
-    <Filter Include="LuaEngine">
-      <UniqueIdentifier>{b0544e5e-62aa-4ec5-9ec2-c80f4e12925c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="LuaEngine\Methods">
-      <UniqueIdentifier>{ee816624-bdb0-47a5-8efc-f127b827f609}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\game\AccountMgr.cpp">
@@ -50,36 +44,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\game\AuctionHouseHandler.cpp">
       <Filter>World/Handlers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGround.cpp">
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAB.cpp">
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAV.cpp">
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundHandler.cpp">
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundMgr.cpp">
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundWS.cpp">
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\LuaEngine.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\LuaFunctions.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\ElunaEventMgr.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\HookMgr.cpp">
-      <Filter>LuaEngine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\Channel.cpp">
       <Filter>World/Handlers</Filter>
@@ -496,28 +460,28 @@
     <ClCompile Include="..\..\src\game\CreatureLinkingMgr.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\ElunaUtility.cpp">
-      <Filter>LuaEngine</Filter>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGround.cpp">
+      <Filter>BattleGround</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAB.cpp">
+      <Filter>BattleGround</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAV.cpp">
+      <Filter>BattleGround</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundHandler.cpp">
+      <Filter>BattleGround</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundMgr.cpp">
+      <Filter>BattleGround</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundWS.cpp">
+      <Filter>BattleGround</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\AccountMgr.h">
       <Filter>World/Handlers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround\BattleGround.h">
-      <Filter>BattleGround</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAB.h">
-      <Filter>BattleGround</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAV.h">
-      <Filter>BattleGround</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundMgr.h">
-      <Filter>BattleGround</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundWS.h">
-      <Filter>BattleGround</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\Cell.h">
       <Filter>World/Handlers</Filter>
@@ -937,89 +901,20 @@
     <ClInclude Include="..\..\src\game\CreatureLinkingMgr.h">
       <Filter>World/Handlers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\HookMgr.h">
-      <Filter>LuaEngine</Filter>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGround.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\LuaEngine.h">
-      <Filter>LuaEngine</Filter>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAB.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\WorldPacketMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAV.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\AuraMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundMgr.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\CorpseMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\CreatureMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\GameObjectMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\GlobalMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\GroupMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\GuildMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\ItemMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\MapMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\ObjectMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\PlayerMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\QueryMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\QuestMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\SpellMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\UnitMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\VehicleMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\WeatherMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\WorldObjectMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\LuaEngine.h">
-      <Filter>LuaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\ElunaBinding.h">
-      <Filter>LuaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\ElunaEventMgr.h">
-      <Filter>LuaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\ElunaIncludes.h">
-      <Filter>LuaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\ElunaTemplate.h">
-      <Filter>LuaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\HookMgr.h">
-      <Filter>LuaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\ElunaUtility.h">
-      <Filter>LuaEngine</Filter>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundWS.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
