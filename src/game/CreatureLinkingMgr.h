@@ -50,6 +50,7 @@ enum CreatureLinkingEvent
     LINKING_EVENT_EVADE         = 1,
     LINKING_EVENT_DIE           = 2,
     LINKING_EVENT_RESPAWN       = 3,
+    LINKING_EVENT_DESPAWN       = 4,
 };
 
 // enum describing possible flags action flags for NPCs linked to other NPCs
@@ -71,12 +72,13 @@ enum CreatureLinkingFlags
 
     // Dynamic behaviour, out of combat
     FLAG_FOLLOW                     = 0x0200,
+    FLAG_DESPAWN_ON_DESPAWN         = 0x2000,
 
     // Passive behaviour
     FLAG_CANT_SPAWN_IF_BOSS_DEAD    = 0x0400,
     FLAG_CANT_SPAWN_IF_BOSS_ALIVE   = 0x0800,
 
-    LINKING_FLAG_INVALID            = 0x2000,               // TODO adjust when other flags are implemented
+    LINKING_FLAG_INVALID            = 0x4000,               // TODO adjust when other flags are implemented
 };
 
 // Structure holding the information for an entry
