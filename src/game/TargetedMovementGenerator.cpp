@@ -310,11 +310,11 @@ void FollowMovementGenerator<T>::Reset(T& owner)
 
 // This factor defines how much of the bounding-radius (as measurement of size) will be used for recalculating a new following position
 //   The smaller, the more micro movement, the bigger, possibly no proper movement updates
-#define FOLLOW_RECALCULATE_FACTOR                         0.1f
+#define FOLLOW_RECALCULATE_FACTOR                         1.0f
 // This factor defines when the distance of a follower will have impact onto following-position updates
 #define FOLLOW_DIST_GAP_FOR_DIST_FACTOR                   3.0f
 // This factor defines how much of the follow-distance will be used as sloppyness value (if the above distance is exceeded)
-#define FOLLOW_DIST_RECALCULATE_FACTOR                    0.1f
+#define FOLLOW_DIST_RECALCULATE_FACTOR                    1.0f
 
 template<class T>
 float FollowMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
