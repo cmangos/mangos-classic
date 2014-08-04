@@ -245,7 +245,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     m_loyaltyPoints = fields[7].GetInt32();
 
     uint32 savedhealth = fields[13].GetUInt32();
-    uint32 savedmana = fields[14].GetUInt32();
+    uint32 savedpower = fields[14].GetUInt32();
 
     // set current pet as current
     // 0=current
@@ -309,15 +309,17 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         CastPetAuras(current);
     }
 
+    Powers powerType = getPowerType();
+
     if (getPetType() == SUMMON_PET && !current)             // all (?) summon pets come with full health when called, but not when they are current
     {
         SetHealth(GetMaxHealth());
-        SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+        SetPower(powerType, GetMaxPower(powerType));
     }
     else
     {
         SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
-        SetPower(POWER_MANA, savedmana > GetMaxPower(POWER_MANA) ? GetMaxPower(POWER_MANA) : savedmana);
+        SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
     }
 
     AIM_Initialize();
@@ -381,7 +383,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         }
 
         uint32 curhealth = GetHealth();
-        uint32 curmana = GetPower(POWER_MANA);
+        uint32 curpower = GetPower(getPowerType());
 
         // stable and not in slot saves
         if (mode != PET_SAVE_AS_CURRENT)
@@ -442,7 +444,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addString(m_name);
         savePet.addUInt32(uint32(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME) ? 0 : 1));
         savePet.addUInt32((curhealth < 1 ? 1 : curhealth));
-        savePet.addUInt32(curmana);
+        savePet.addUInt32(curpower);
         savePet.addUInt32(GetPower(POWER_HAPPINESS));
 
         std::ostringstream ss;
@@ -597,13 +599,10 @@ void Pet::RegenerateAll(uint32 update_diff)
     // regenerate focus
     if (m_regenTimer <= update_diff)
     {
-        if (getPetType() == HUNTER_PET)
-            RegenerateFocus();
-
         if (!isInCombat() || IsPolymorphed())
             RegenerateHealth();
 
-        RegenerateMana();
+        RegeneratePower();
 
         m_regenTimer = 4000;
     }
@@ -628,25 +627,6 @@ void Pet::RegenerateAll(uint32 update_diff)
     }
     else
         m_loyaltyTimer -= update_diff;
-}
-
-void Pet::RegenerateFocus()
-{
-    uint32 curValue = GetPower(POWER_FOCUS);
-    uint32 maxValue = GetMaxPower(POWER_FOCUS);
-
-    if (curValue >= maxValue)
-        return;
-
-    float addvalue = 24 * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
-
-    // Apply modifiers (if any).
-    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
-        if ((*i)->GetModifier()->m_miscvalue == int32(POWER_FOCUS))
-            addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
-
-    ModifyPower(POWER_FOCUS, (int32)addvalue);
 }
 
 void Pet::LooseHappiness()
@@ -1264,7 +1244,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
     UpdateAllStats();
 
     SetHealth(GetMaxHealth());
-    SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+    SetPower(getPowerType(), GetMaxPower(getPowerType()));
 
     return true;
 }

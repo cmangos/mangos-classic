@@ -748,8 +748,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         float m_respawnradius;
 
         CreatureSubtype m_subtype;                          // set in Creatures subclasses for fast it detect without dynamic_cast use
-
-        void RegenerateMana();
+        void RegeneratePower();
         void RegenerateHealth();
         MovementGeneratorType m_defaultMovementType;
         Cell m_currentCell;                                 // store current cell where creature listed
