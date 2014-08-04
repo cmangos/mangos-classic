@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="World/Handlers">
       <UniqueIdentifier>{d75ae330-80de-4aaf-8274-ae85f49dbcd9}</UniqueIdentifier>
@@ -44,24 +44,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\game\AuctionHouseHandler.cpp">
       <Filter>World/Handlers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGround.cpp">
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAB.cpp">
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAV.cpp">
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundHandler.cpp">
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundMgr.cpp">
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundWS.cpp">
-      <Filter>BattleGround</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\Channel.cpp">
       <Filter>World/Handlers</Filter>
@@ -478,25 +460,28 @@
     <ClCompile Include="..\..\src\game\CreatureLinkingMgr.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGround.cpp">
+      <Filter>BattleGround</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAB.cpp">
+      <Filter>BattleGround</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundAV.cpp">
+      <Filter>BattleGround</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundHandler.cpp">
+      <Filter>BattleGround</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundMgr.cpp">
+      <Filter>BattleGround</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\BattleGround\BattleGroundWS.cpp">
+      <Filter>BattleGround</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\AccountMgr.h">
       <Filter>World/Handlers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround\BattleGround.h">
-      <Filter>BattleGround</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAB.h">
-      <Filter>BattleGround</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAV.h">
-      <Filter>BattleGround</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundMgr.h">
-      <Filter>BattleGround</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundWS.h">
-      <Filter>BattleGround</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\Cell.h">
       <Filter>World/Handlers</Filter>
@@ -915,6 +900,21 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\CreatureLinkingMgr.h">
       <Filter>World/Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGround.h">
+      <Filter>BattleGround</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAB.h">
+      <Filter>BattleGround</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundAV.h">
+      <Filter>BattleGround</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundMgr.h">
+      <Filter>BattleGround</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\BattleGround\BattleGroundWS.h">
+      <Filter>BattleGround</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
