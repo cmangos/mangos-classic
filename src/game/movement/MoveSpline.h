@@ -24,6 +24,15 @@
 
 namespace Movement
 {
+    enum MonsterMoveType
+    {
+        MonsterMoveNormal = 0,
+        MonsterMoveStop = 1,
+        MonsterMoveFacingSpot = 2,
+        MonsterMoveFacingTarget = 3,
+        MonsterMoveFacingAngle = 4
+    };
+
     struct Location : public Vector3
     {
         Location() : orientation(0) {}
