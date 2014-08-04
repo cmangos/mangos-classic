@@ -1079,7 +1079,7 @@ void GameObject::Use(Unit* user)
             // Some may have have animation and/or are expected to despawn.
 
             // TODO: Improve this when more information is available, currently these traps are known that must send the anim (Onyxia/ Heigan Fissures/ Trap in DireMaul)
-            if (GetDisplayId() == 4392 || GetDisplayId() == 4472 || GetDisplayId() == 6785 || GetDisplayId() == 3073)
+            if (GetDisplayId() == 4392 || GetDisplayId() == 4472 || GetDisplayId() == 4491 || GetDisplayId() == 6785 || GetDisplayId() == 3073)
                 SendGameObjectCustomAnim(GetObjectGuid());
 
             // TODO: Despawning of traps? (Also related to code in ::Update)
