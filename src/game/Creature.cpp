@@ -140,8 +140,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_aggroDelay(0), m_respawnradius(5.0f),
     m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
     m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
-    m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
-    m_temporaryFactionFlags(TEMPFACTION_NONE),
+    m_AI_locked(false), m_isDeadByDefault(false), m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL), m_originalEntry(0),
     m_creatureInfo(NULL)
 {
@@ -332,8 +331,6 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
 {
     if (!InitEntry(Entry, team, data, eventData))
         return false;
-
-    m_regenHealth = GetCreatureInfo()->RegenerateHealth;
 
     // creatures always have melee weapon ready if any
     SetSheath(SHEATH_STATE_MELEE);
@@ -607,6 +604,9 @@ void Creature::RegenerateAll(uint32 update_diff)
 
 void Creature::RegenerateMana()
 {
+    if (!IsRegeneratingPower())
+        return;
+
     uint32 curValue = GetPower(POWER_MANA);
     uint32 maxValue = GetMaxPower(POWER_MANA);
 
@@ -1126,7 +1126,7 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
         health = cCLS->BaseHealth * cinfo->HealthMultiplier;
 
         // mana
-        mana = cCLS->BaseMana * cinfo->ManaMultiplier;
+        mana = cCLS->BaseMana * cinfo->PowerMultiplier;
     }
     else
     {
