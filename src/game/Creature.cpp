@@ -295,6 +295,24 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=NU
 
     SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
 
+    // set PowerType based on unit class
+    switch (cinfo->UnitClass)
+    {
+        case CLASS_WARRIOR:
+            SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_RAGE);
+            break;
+        case CLASS_PALADIN:
+        case CLASS_MAGE:
+            SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_MANA);
+            break;
+        case CLASS_ROGUE:
+            SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_ENERGY);
+            break;
+        default:
+            sLog.outErrorDb("Creature (Entry: %u) has unhandled unit class. Power type will not be set!", Entry);
+            break;
+    }
+
     // Load creature equipment
     if (eventData && eventData->equipment_id)
     {
@@ -1178,6 +1196,7 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     // Set values
     //////////////////////////////////////////////////////////////////////////
 
+    // health
     SetCreateHealth(health);
     SetMaxHealth(health);
 
@@ -1186,13 +1205,37 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     else
         SetHealthPercent(percentHealth);
 
-    SetCreateMana(mana);
-    SetMaxPower(POWER_MANA, mana);                          // MAX Mana
-    SetPower(POWER_MANA, mana);
-
-    // TODO: set UNIT_FIELD_POWER*, for some creature class case (energy, etc)
     SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
-    SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, float(mana));
+
+    // all power types
+    for (int i = POWER_MANA; i <= POWER_HAPPINESS; ++i)
+    {
+        uint32 maxValue;
+
+        switch (i)
+        {
+            case POWER_MANA:        maxValue = mana; break;
+            case POWER_RAGE:        maxValue = 0; break;
+            case POWER_FOCUS:       maxValue = POWER_FOCUS_DEFAULT; break;
+            case POWER_ENERGY:      maxValue = POWER_ENERGY_DEFAULT * cinfo->PowerMultiplier; break;
+            case POWER_HAPPINESS:   maxValue = POWER_HAPPINESS_DEFAULT; break;
+        }
+
+        uint32 value = maxValue;
+
+        // For non regenerating powers set 0
+        if ((i == POWER_ENERGY || i == POWER_MANA) && !IsRegeneratingPower())
+            value = 0;
+
+        // Mana requires an extra field to be set
+        if (i == POWER_MANA)
+            SetCreateMana(value);
+
+        // Do not use the wrappers for setting power, to avoid side-effects
+        SetStatInt32Value(UNIT_FIELD_MAXPOWER1 + i , maxValue);
+        SetStatInt32Value(UNIT_FIELD_POWER1 +i, value);
+        SetModifierValue(UnitMods(UNIT_MOD_POWER_START + i), BASE_VALUE, float(value));
+    }
 
     // damage
     float damagemod = _GetDamageMod(rank);
