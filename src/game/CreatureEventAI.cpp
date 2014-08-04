@@ -942,6 +942,22 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_creature->SetStandState(action.setStandState.standState);
             break;
         }
+        case ACTION_T_CHANGE_MOVEMENT:
+        {
+            switch (action.changeMovement.movementType)
+            {
+                case IDLE_MOTION_TYPE:
+                    m_creature->GetMotionMaster()->MoveIdle();
+                    break;
+                case RANDOM_MOTION_TYPE:
+                    m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), float(action.changeMovement.wanderDistance));
+                    break;
+                case WAYPOINT_MOTION_TYPE:
+                    m_creature->GetMotionMaster()->MoveWaypoint();
+                    break;
+            }
+            break;
+        }
     }
 }
 
