@@ -1054,9 +1054,9 @@ void ObjectMgr::LoadCreatures()
             }
         }
 
-        if (cInfo->RegenerateHealth && data.curhealth < cInfo->MinLevelHealth)
+        if (cInfo->RegenerateStats & REGEN_FLAG_HEALTH && data.curhealth < cInfo->MinLevelHealth)
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenHealth`=1 and low current health (%u), `creature_template`.`minhealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenerateStats` & REGEN_FLAG_HEALTH and low current health (%u), `creature_template`.`minhealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
             data.curhealth = cInfo->MinLevelHealth;
         }
 
