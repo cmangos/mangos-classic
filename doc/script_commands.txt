@@ -288,3 +288,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 34 SCRIPT_COMMAND_TERMINATE_COND            * datalong = condition_id, datalong2 = fail-quest (if provided this quest will be failed for a player)
                                             * !(data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL): terminate when condition is true
                                                 data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL:  terminate when condition is false
+
+35 SCRIPT_COMMAND_SEND_AI_EVENT_AROUND      * resultingSource = Creature, resultingTarget = Unit
+                                            * datalong = AIEventType - limited only to EventAI supported events
+                                            * datalong2 = radius
