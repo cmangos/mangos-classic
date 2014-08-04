@@ -226,7 +226,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             SetTP(fields[9].GetInt32());
             SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
             SetPower(POWER_HAPPINESS, fields[15].GetUInt32());
-            setPowerType(POWER_FOCUS);
+            SetPowerType(POWER_FOCUS);
             break;
         default:
             sLog.outError("Pet have incorrect type (%u) for pet loading.", getPetType());
@@ -309,7 +309,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         CastPetAuras(current);
     }
 
-    Powers powerType = getPowerType();
+    Powers powerType = GetPowerType();
 
     if (getPetType() == SUMMON_PET && !current)             // all (?) summon pets come with full health when called, but not when they are current
     {
@@ -383,7 +383,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         }
 
         uint32 curhealth = GetHealth();
-        uint32 curpower = GetPower(getPowerType());
+        uint32 curpower = GetPower(GetPowerType());
 
         // stable and not in slot saves
         if (mode != PET_SAVE_AS_CURRENT)
@@ -1006,7 +1006,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     SetNativeDisplayId(creature->GetNativeDisplayId());
     SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
     SetPower(POWER_HAPPINESS, 166500);
-    setPowerType(POWER_FOCUS);
+    SetPowerType(POWER_FOCUS);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(creature->getLevel()));
@@ -1244,7 +1244,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
     UpdateAllStats();
 
     SetHealth(GetMaxHealth());
-    SetPower(getPowerType(), GetMaxPower(getPowerType()));
+    SetPower(GetPowerType(), GetMaxPower(GetPowerType()));
 
     return true;
 }
