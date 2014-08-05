@@ -360,7 +360,6 @@ namespace MMAP
         FILE* file = fopen(fileName, "wb");
         if (!file)
         {
-            dtFreeNavMesh(navMesh);
             char message[1024];
             sprintf(message, "Failed to open %s for writing!\n", fileName);
             perror(message);
