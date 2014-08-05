@@ -8405,7 +8405,8 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
         return;
 
     Movement::MoveSplineInit init(*this);
-    init.Stop();
+    init.SetFacing(GetOrientation());
+    init.Launch();
 }
 
 void Unit::InterruptMoving(bool forceSendStop /*=false*/)
