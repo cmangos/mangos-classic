@@ -146,6 +146,13 @@ namespace Movement
         point_Idx_offset = args.path_Idx_offset;
         time_passed = 0;
 
+        // detect Stop command
+        if (splineflags.done)
+        {
+            spline.clear();
+            return;
+        }
+
         init_spline(args);
     }
 
