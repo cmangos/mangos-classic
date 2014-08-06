@@ -17,6 +17,8 @@
 
 set(LIBRARY_NAME game)
 
+add_definitions(-DDT_POLYREF64)
+
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/vmap
