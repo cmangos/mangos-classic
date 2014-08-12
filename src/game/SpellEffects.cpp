@@ -3644,7 +3644,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_PALADIN:
         {
-			Unit* caster = GetAffectiveCaster();
+            Unit* caster = GetAffectiveCaster();
 
             // Holy Light
             if (m_spellInfo->SpellIconID == 70)
@@ -3654,8 +3654,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 int32 heal = damage;
                 int32 spellid = m_spellInfo->Id;            // send main spell id as basepoints for not used effect
 
-				heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL); //Potential bug fix, added bonus healing from 
-				heal = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, heal, HEAL); //caster and source as in spelleffect HEAL 10
+                heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL); //Potential bug fix, added bonus healing from 
+                heal = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, heal, HEAL); //caster and source as in spelleffect HEAL 10
 
                 m_caster->CastCustomSpell(unitTarget, 19968, &heal, &spellid, NULL, true);
             }
@@ -3667,8 +3667,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 int32 heal = damage;
                 int32 spellid = m_spellInfo->Id;            // send main spell id as basepoints for not used effect
 
-				heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL); //Potential bug fix, added bonus healing from
-				heal = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, heal, HEAL); //caster and source as in spelleffect HEAL 10
+                heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL); //Potential bug fix, added bonus healing from
+                heal = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, heal, HEAL); //caster and source as in spelleffect HEAL 10
 
                 m_caster->CastCustomSpell(unitTarget, 19993, &heal, &spellid, NULL, true);
             }

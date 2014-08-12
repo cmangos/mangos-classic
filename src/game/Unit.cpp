@@ -4596,19 +4596,19 @@ void Unit::SetPowerType(Powers new_powertype)
     // special cases for power type switching (druid and pets only)
     if (GetTypeId() == TYPEID_PLAYER || (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet()))
     {
-		//Mana is handled internally
-		if (new_powertype != POWER_MANA)
-		{
-			uint32 maxValue = GetCreatePowers(new_powertype);
-			uint32 curValue = maxValue;
+        //Mana is handled internally
+        if (new_powertype != POWER_MANA)
+        {
+            uint32 maxValue = GetCreatePowers(new_powertype);
+            uint32 curValue = maxValue;
 
-			// special cases with current power = 0
-			if (new_powertype == POWER_RAGE)
-				curValue = 0;
+            // special cases with current power = 0
+            if (new_powertype == POWER_RAGE)
+                curValue = 0;
 
-			// set power
-			SetMaxPower(new_powertype, maxValue);
-			SetPower(new_powertype, curValue);
+            // set power
+            SetMaxPower(new_powertype, maxValue);
+            SetPower(new_powertype, curValue);
 		}
     }
 }
