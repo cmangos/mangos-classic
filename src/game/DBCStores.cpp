@@ -587,17 +587,20 @@ AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_
 {
     // 1.12.1 areatable have duplicates for areaflag
     AreaTableEntry const* aEntry = NULL;
-    for (uint32 i = 0 ; i <= sAreaStore.GetNumRows() ; i++)
+    for (uint32 i = 0; i <= sAreaStore.GetNumRows(); i++)
     {
-        if (AreaTableEntry const* AreaEntry = sAreaStore.LookupEntry(i))
+        if (area_flag != 0)
         {
-            if (AreaEntry->exploreFlag == area_flag)
+            if (AreaTableEntry const* AreaEntry = sAreaStore.LookupEntry(i))
             {
-                // area_flag found but it lets test map_id too
-                if (AreaEntry->mapid == map_id)
-                    return AreaEntry; // area_flag and map_id are ok so we can return value
-                // not same map_id so we store this entry and continue searching another better one
-                aEntry = AreaEntry;
+                if (AreaEntry->exploreFlag == area_flag)
+                {
+                    // area_flag found but it lets test map_id too
+                    if (AreaEntry->mapid == map_id)
+                        return AreaEntry; // area_flag and map_id are ok so we can return value
+                    // not same map_id so we store this entry and continue searching another better one
+                    aEntry = AreaEntry;
+                }
             }
         }
     }
