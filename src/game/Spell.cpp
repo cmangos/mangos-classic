@@ -6169,14 +6169,14 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float 
             if (Target && (raid || subgroup == Target->GetSubGroup())
                     && !m_caster->IsHostileTo(Target))
             {
-                if (Target == m_caster && withcaster ||
-                        Target != m_caster && m_caster->IsWithinDistInMap(Target, radius))
+                if ((Target == m_caster && withcaster) ||
+                        (Target != m_caster && m_caster->IsWithinDistInMap(Target, radius)))
                     targetUnitMap.push_back(Target);
 
                 if (withPets)
                     if (Pet* pet = Target->GetPet())
-                        if (pet == m_caster && withcaster ||
-                                pet != m_caster && m_caster->IsWithinDistInMap(pet, radius))
+                        if ((pet == m_caster && withcaster) ||
+                                (pet != m_caster && m_caster->IsWithinDistInMap(pet, radius)))
                             targetUnitMap.push_back(pet);
             }
         }
@@ -6184,14 +6184,14 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float 
     else
     {
         Unit* ownerOrSelf = pMember ? pMember : member->GetCharmerOrOwnerOrSelf();
-        if (ownerOrSelf == m_caster && withcaster ||
-                ownerOrSelf != m_caster && m_caster->IsWithinDistInMap(ownerOrSelf, radius))
+        if ((ownerOrSelf == m_caster && withcaster) ||
+                (ownerOrSelf != m_caster && m_caster->IsWithinDistInMap(ownerOrSelf, radius)))
             targetUnitMap.push_back(ownerOrSelf);
 
         if (withPets)
             if (Pet* pet = ownerOrSelf->GetPet())
-                if (pet == m_caster && withcaster ||
-                        pet != m_caster && m_caster->IsWithinDistInMap(pet, radius))
+                if ((pet == m_caster && withcaster) ||
+                        (pet != m_caster && m_caster->IsWithinDistInMap(pet, radius)))
                     targetUnitMap.push_back(pet);
     }
 }

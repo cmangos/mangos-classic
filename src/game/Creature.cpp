@@ -1188,7 +1188,7 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
 
     // all power types
-    for (int i = POWER_MANA; i <= POWER_HAPPINESS; ++i)
+    for (int i = POWER_MANA; i <= (signed int)POWER_HAPPINESS; ++i)
     {
         uint32 maxValue;
 

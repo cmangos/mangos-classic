@@ -56,8 +56,9 @@ namespace Movement
         (InitMethtod)& SplineBase::UninitializedSpline,
     };
 
-///////////
+#ifdef _MSC_VER
     #pragma region evaluation methtods
+#endif
 
     using G3D::Matrix4;
     static const Matrix4 s_catmullRomCoeffs(
@@ -200,7 +201,10 @@ namespace Movement
         }
         return length;
     }
+    
+#ifdef _MSC_VER
     #pragma endregion
+#endif
 
     void SplineBase::init_spline(const Vector3* controls, index_type count, EvaluationMode m)
     {

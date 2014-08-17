@@ -51,7 +51,7 @@ void ByteBuffer::print_storage() const
     for (size_t i = 0; i < size(); ++i)
         ss << uint32(read<uint8>(i)) << " - ";
 
-    sLog.outDebug(ss.str().c_str());
+    sLog.outDebug("%s", ss.str().c_str());
 }
 
 void ByteBuffer::textlike() const
@@ -68,7 +68,7 @@ void ByteBuffer::textlike() const
     for (size_t i = 0; i < size(); ++i)
         ss << read<uint8>(i);
 
-    sLog.outDebug(ss.str().c_str());
+    sLog.outDebug("%s", ss.str().c_str());
 }
 
 void ByteBuffer::hexlike() const
@@ -107,5 +107,5 @@ void ByteBuffer::hexlike() const
         ss << buf << " ";
     }
 
-    sLog.outDebug(ss.str().c_str());
+    sLog.outDebug("%s", ss.str().c_str());
 }
