@@ -1108,7 +1108,8 @@ void CreatureEventAI::ReceiveAIEvent(AIEventType eventType, Creature* pSender, U
     for (CreatureEventAIList::iterator itr = m_CreatureEventAIList.begin(); itr != m_CreatureEventAIList.end(); ++itr)
     {
         if (itr->Event.event_type == EVENT_T_RECEIVE_AI_EVENT &&
-                itr->Event.receiveAIEvent.eventType == eventType && (!itr->Event.receiveAIEvent.senderEntry || itr->Event.receiveAIEvent.senderEntry == pSender->GetEntry()))
+                itr->Event.receiveAIEvent.eventType == (unsigned int)eventType &&
+                (!itr->Event.receiveAIEvent.senderEntry || itr->Event.receiveAIEvent.senderEntry == pSender->GetEntry()))
             ProcessEvent(*itr, pInvoker, pSender);
     }
 }

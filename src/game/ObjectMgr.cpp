@@ -386,7 +386,7 @@ void ObjectMgr::LoadPointOfInterestLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded %u points_of_interest locale strings", mPointOfInterestLocaleMap.size());
+    sLog.outString(">> Loaded " SIZEFMTD " points_of_interest locale strings", mPointOfInterestLocaleMap.size());
 }
 
 struct SQLCreatureLoader : public SQLStorageLoaderBase<SQLCreatureLoader, SQLStorage>
@@ -2619,7 +2619,7 @@ void ObjectMgr::LoadStandingList()
     DistributeRankPoints(HORDE, LastWeekBegin);
 
     sLog.outString();
-    sLog.outString(">> Loaded %u Horde and %u Ally honor standing definitions", HordeHonorStandingList.size(), AllyHonorStandingList.size());
+    sLog.outString(">> Loaded " SIZEFMTD " Horde and " SIZEFMTD " Ally honor standing definitions", HordeHonorStandingList.size(), AllyHonorStandingList.size());
 }
 
 
@@ -4034,7 +4034,7 @@ void ObjectMgr::LoadItemTexts()
     delete result;
 
     sLog.outString();
-    sLog.outString(">> Loaded " SIZEFMTD " item texts", count);
+    sLog.outString(">> Loaded %u item texts", count);
 }
 
 void ObjectMgr::LoadPageTexts()

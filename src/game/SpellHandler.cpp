@@ -54,7 +54,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    DETAIL_LOG("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, spell_count: %u , Item: %u, data length = " SIZEFMTD, bagIndex, slot, spell_count, pItem->GetEntry(), (uint32)recvPacket.size());
+    DETAIL_LOG("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, spell_count: %u , Item: %u, data length = " SIZEFMTD, bagIndex, slot, spell_count, pItem->GetEntry(), recvPacket.size());
 
     ItemPrototype const* proto = pItem->GetProto();
     if (!proto)

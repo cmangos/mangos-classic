@@ -154,7 +154,7 @@ bool BufferedSocket::send(const char* buf, size_t len)
 
         if (n < 0)
             return false;
-        else if (n == len)
+        else if ((size_t)n == len)
             return true;
 
         // adjust how much bytes we sent
@@ -200,7 +200,7 @@ bool BufferedSocket::send(const char* buf, size_t len)
         mb->release();
         return -1;
     }
-    else if (n == mb->length())
+    else if ((size_t)n == mb->length())
     {
         mb->release();
         return 1;

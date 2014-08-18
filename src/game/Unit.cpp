@@ -3495,6 +3495,8 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 case TRACK_AURA_TYPE_SINGLE_TARGET:         // Register spell holder single target
                     scTargets[aurSpellInfo] = GetObjectGuid();
                     break;
+                default:
+                    break;
             }
         }
     }
@@ -5098,7 +5100,7 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
             for (Unit::SpellAuraHolderMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
             {
                 SpellEntry const* spellProto = (*itr).second->GetSpellProto();
-                if (spellProto->CasterAuraState == flag)
+                if (spellProto->CasterAuraState == (unsigned)flag)
                 {
                     // exceptions (applied at state but not removed at state change)
                     // Rampage
@@ -5981,7 +5983,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
     bool isWeaponDamageBasedSpell = !(spellProto && (damagetype == DOT || IsSpellHaveEffect(spellProto, SPELL_EFFECT_SCHOOL_DAMAGE)));
     Item*  pWeapon          = GetTypeId() == TYPEID_PLAYER ? ((Player*)this)->GetWeaponForAttack(attType, true, false) : NULL;
     uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
-    uint32 schoolMask       = spellProto ? GetSpellSchoolMask(spellProto) : uint32(GetMeleeDamageSchoolMask());
+    uint32 schoolMask       = spellProto ? GetSpellSchoolMask(spellProto) : GetMeleeDamageSchoolMask();
 
     // FLAT damage bonus auras
     // =======================
@@ -6116,7 +6118,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackTy
 
     // differentiate for weapon damage based spells
     bool isWeaponDamageBasedSpell = !(spellProto && (damagetype == DOT || IsSpellHaveEffect(spellProto, SPELL_EFFECT_SCHOOL_DAMAGE)));
-    uint32 schoolMask       = spellProto ? GetSpellSchoolMask(spellProto) : uint32(GetMeleeDamageSchoolMask());
+    uint32 schoolMask       = spellProto ? GetSpellSchoolMask(spellProto) : GetMeleeDamageSchoolMask();
 
     // FLAT damage bonus auras
     // =======================
@@ -7114,7 +7116,7 @@ bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea)
     return
         pTarget->IsImmunedToDamage(GetMeleeDamageSchoolMask()) ||
         pTarget->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) ||
-        checkThreatArea && ((Creature*)this)->IsOutOfThreatArea(pTarget);
+        (checkThreatArea && ((Creature*)this)->IsOutOfThreatArea(pTarget));
 }
 
 //======================================================================

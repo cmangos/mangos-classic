@@ -3986,6 +3986,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         case FORM_STEALTH:
         case FORM_CREATURECAT:
         case FORM_CREATUREBEAR:
+        case FORM_NONE:
             break;
     }
 
