@@ -3644,10 +3644,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_PALADIN:
         {
+            Unit* caster = GetAffectiveCaster();
+            
             // Holy Light
             if (m_spellInfo->SpellIconID == 70)
             {
-                Unit* caster = GetAffectiveCaster();
 
                 if (!unitTarget || !unitTarget->isAlive())
                     return;
