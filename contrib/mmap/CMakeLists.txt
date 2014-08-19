@@ -134,12 +134,12 @@ add_library(g3dlite
 )
 
 add_library(vmap
-	../../src/game/vmap/BIH.cpp
-	../../src/game/vmap/VMapManager2.cpp
-	../../src/game/vmap/MapTree.cpp
-	../../src/game/vmap/TileAssembler.cpp
-	../../src/game/vmap/WorldModel.cpp
-	../../src/game/vmap/ModelInstance.cpp
+    ../../src/game/vmap/BIH.cpp
+    ../../src/game/vmap/VMapManager2.cpp
+    ../../src/game/vmap/MapTree.cpp
+    ../../src/game/vmap/TileAssembler.cpp
+    ../../src/game/vmap/WorldModel.cpp
+    ../../src/game/vmap/ModelInstance.cpp
 )
 
 target_link_libraries(vmap g3dlite zlib)
