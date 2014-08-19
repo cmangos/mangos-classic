@@ -67,8 +67,10 @@ add_library(g3dlite ../../dep/src/g3dlite/AABox.cpp
 	../../dep/src/g3dlite/TextOutput.cpp
 	../../dep/src/g3dlite/UprightFrame.cpp
 	../../dep/src/g3dlite/Vector2.cpp
+    ../../dep/src/g3dlite/FileSystem.cpp
+    ../../dep/src/g3dlite/uint128.cpp
+    ../../dep/src/g3dlite/PhysicsFrame.cpp
 	)
-
 add_library(vmap
 	../../src/game/vmap/BIH.cpp
 	../../src/game/vmap/VMapManager2.cpp
@@ -77,7 +79,6 @@ add_library(vmap
 	../../src/game/vmap/WorldModel.cpp
 	../../src/game/vmap/ModelInstance.cpp
 	)
-
 target_link_libraries(vmap g3dlite z)
 
 add_executable(vmap_assembler vmap_assembler.cpp)
