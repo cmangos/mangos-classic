@@ -33,7 +33,7 @@ class ChannelMgr
         ChannelMgr() {}
         ~ChannelMgr();
 
-        Channel* GetJoinChannel(std::string name, uint32 channel_id);
+        Channel* GetJoinChannel(std::string name);
         Channel* GetChannel(std::string name, Player* p, bool pkt = true);
         void LeftChannel(std::string name);
     private:

@@ -44,7 +44,7 @@ ChannelMgr::~ChannelMgr()
     channels.clear();
 }
 
-Channel* ChannelMgr::GetJoinChannel(std::string name, uint32 channel_id)
+Channel* ChannelMgr::GetJoinChannel(std::string name)
 {
     std::wstring wname;
     Utf8toWStr(name, wname);
@@ -52,7 +52,7 @@ Channel* ChannelMgr::GetJoinChannel(std::string name, uint32 channel_id)
 
     if (channels.find(wname) == channels.end())
     {
-        Channel* nchan = new Channel(name, channel_id);
+        Channel* nchan = new Channel(name);
         channels[wname] = nchan;
         return nchan;
     }

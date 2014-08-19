@@ -4432,7 +4432,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
         //  new channel
         char new_channel_name_buf[100];
         snprintf(new_channel_name_buf, 100, ch->pattern[m_session->GetSessionDbcLocale()], current_zone_name.c_str());
-        Channel* new_channel = cMgr->GetJoinChannel(new_channel_name_buf, ch->ChannelID);
+        Channel* new_channel = cMgr->GetJoinChannel(new_channel_name_buf);
 
         if ((*i) != new_channel)
         {
