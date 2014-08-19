@@ -48,6 +48,8 @@ uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
 
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
 
+ChatChannelsEntry const* GetChannelEntryFor(const std::string& channel_id);
+
 // [-ZERO] bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
 
 bool Zone2MapCoordinates(float& x, float& y, uint32 zone);
