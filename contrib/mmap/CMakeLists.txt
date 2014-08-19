@@ -130,6 +130,7 @@ add_library(g3dlite
     ../../dep/src/g3dlite/Vector4int8.cpp
     ../../dep/src/g3dlite/Welder.cpp
     ../../dep/src/g3dlite/WinMain.cpp
+    ../../dep/src/g3dlite/FileSystem.cpp
 )
 
 add_library(vmap
