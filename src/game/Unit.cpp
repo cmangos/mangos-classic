@@ -52,6 +52,7 @@
 #include "movement/MoveSpline.h"
 #include "CreatureLinkingMgr.h"
 #include "LuaEngine.h"
+#include "ElunaEventMgr.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -290,6 +291,8 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     _UpdateAura();
     }else
     m_AurasCheck -= p_time;*/
+
+    elunaEvents->Update(update_diff);
 
     // WARNING! Order of execution here is important, do not change.
     // Spells must be processed with event system BEFORE they go to _UpdateSpells.

@@ -692,9 +692,6 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         GameObjectModel* m_model;
 
-        // Event handler
-        EventProcessor m_Events;
-
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),

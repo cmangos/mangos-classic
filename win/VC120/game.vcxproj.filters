@@ -943,6 +943,9 @@
     <ClInclude Include="..\..\src\game\LuaEngine\AuraMethods.h">
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\BattleGroundMethods.h">
+      <Filter>LuaEngine\Methods</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\CorpseMethods.h">
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
@@ -971,9 +974,6 @@
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\PlayerMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\QueryMethods.h">
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\QuestMethods.h">
@@ -1008,6 +1008,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaUtility.h">
       <Filter>LuaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaQueryMethods.h">
+      <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\HookMgr.h">
       <Filter>LuaEngine</Filter>
