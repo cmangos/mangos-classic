@@ -20,12 +20,17 @@
 #define FIELD_H
 
 #include "Common.h"
+#ifdef WIN32
+#include <mysql/mysql.h>
+#else
+#include <mysql.h>
+#endif
 
 class Field
 {
     public:
 
-        enum DataTypes
+        enum SimpleDataTypes
         {
             DB_TYPE_UNKNOWN = 0x00,
             DB_TYPE_STRING  = 0x01,
@@ -34,12 +39,12 @@ class Field
             DB_TYPE_BOOL    = 0x04
         };
 
-        Field() : mValue(NULL), mType(DB_TYPE_UNKNOWN) {}
-        Field(const char* value, enum DataTypes type) : mValue(value), mType(type) {}
+        Field() : mValue(NULL), mType(MYSQL_TYPE_NULL) {}
+        Field(const char* value, enum_field_types type) : mValue(value), mType(type) {}
 
         ~Field() {}
 
-        enum DataTypes GetType() const { return mType; }
+        enum enum_field_types GetType() const { return mType; }
         bool IsNULL() const { return mValue == NULL; }
 
         const char* GetString() const { return mValue; }
@@ -74,7 +79,7 @@ class Field
             return value;
         }
 
-        void SetType(enum DataTypes type) { mType = type; }
+        void SetType(enum_field_types type) { mType = type; }
         // no need for memory allocations to store resultset field strings
         // all we need is to cache pointers returned by different DBMS APIs
         void SetValue(const char* value) { mValue = value; };
@@ -84,6 +89,6 @@ class Field
         Field& operator=(Field const&);
 
         const char* mValue;
-        enum DataTypes mType;
+        enum_field_types mType;
 };
 #endif

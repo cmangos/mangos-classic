@@ -39,8 +39,9 @@ class QueryResultMysql : public QueryResult
 
         bool NextRow() override;
 
+        static Field::SimpleDataTypes GetSimpleType(enum_field_types type);
+
     private:
-        enum Field::DataTypes ConvertNativeType(enum_field_types mysqlType) const;
         void EndQuery();
 
         MYSQL_RES* mResult;
