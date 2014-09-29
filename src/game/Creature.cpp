@@ -1136,13 +1136,15 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
     SetLevel(level);
 
     //////////////////////////////////////////////////////////////////////////
-    // Calculate level dependend stats
+    // Calculate level dependent stats
     //////////////////////////////////////////////////////////////////////////
 
     uint32 health;
     uint32 mana;
 
-    if (CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass))
+    // TODO: Remove cinfo->ArmorMultiplier test workaround to disable classlevelstats when DB is ready
+    CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass);
+    if (cinfo->ArmorMultiplier > 0 && cCLS) 
     {
         // Use Creature Stats to calculate stat values
 
@@ -1168,7 +1170,7 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth, float
         mana = minmana + uint32(rellevel * (maxmana - minmana));
     }
 
-    health *= _GetHealthMod(rank); // Apply custom config settting
+    health *= _GetHealthMod(rank); // Apply custom config setting
     if (health < 1)
         health = 1;
 
