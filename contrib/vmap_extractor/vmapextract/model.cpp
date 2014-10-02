@@ -155,11 +155,7 @@ ModelInstance::ModelInstance(MPQFile& f, const char* ModelInstName, uint32 mapID
     pos = fixCoords(Vec3D(ff[0], ff[1], ff[2]));
     f.read(ff, 12);
     rot = Vec3D(ff[0], ff[1], ff[2]);
-
-    uint16 fFlags;      // dummy var
-    f.read(&scale, 2);
-    f.read(&fFlags, 2); // unknown but flag 1 is used for biodome in Outland, currently this value is not used
-
+    f.read(&scale, 4);
     // scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
     sc = scale / 1024.0f;
 
