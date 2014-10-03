@@ -1875,7 +1875,6 @@ CREATE TABLE `gameobject_template` (
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `displayId` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `name` varchar(100) NOT NULL DEFAULT '',
-  `castBarCaption` varchar(100) NOT NULL DEFAULT '',
   `faction` smallint(5) unsigned NOT NULL DEFAULT '0',
   `flags` int(10) unsigned NOT NULL DEFAULT '0',
   `size` float NOT NULL DEFAULT '1',
