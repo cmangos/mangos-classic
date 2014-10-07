@@ -398,7 +398,7 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_UNK7                         = 0x00000080,            // 7
     SPELL_ATTR_EX4_UNK8                         = 0x00000100,            // 8
     SPELL_ATTR_EX4_UNK9                         = 0x00000200,            // 9
-    SPELL_ATTR_EX4_SPELL_VS_EXTEND_COST         = 0x00000400,            // 10 Rogue Shiv have this flag
+    SPELL_ATTR_EX4_SPELL_VS_EXTEND_COST         = 0x00000400,            // 10
     SPELL_ATTR_EX4_UNK11                        = 0x00000800,            // 11
     SPELL_ATTR_EX4_UNK12                        = 0x00001000,            // 12
     SPELL_ATTR_EX4_UNK13                        = 0x00002000,            // 13
