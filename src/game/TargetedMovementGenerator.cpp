@@ -136,7 +136,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
         targetMoved = RequiresNewPosition(owner, dest.x, dest.y, dest.z);
     }
 
-    if (m_speedChanged || targetMoved)
+    if (targetMoved)
         _setTargetLocation(owner, targetMoved);
 
     if (owner.movespline->Finalized())
