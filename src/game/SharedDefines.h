@@ -2508,9 +2508,6 @@ enum TrackedAuraType
 
 #define EXPECTED_MANGOSD_CLIENT_BUILD        {5875, 6005, 6141, 0}
 
-// Maxlevel for expansion
-#define MAX_LEVEL_CLASSIC                    60
-
 // Max creature level (included some bosses and elite)
 #define DEFAULT_MAX_CREATURE_LEVEL 65
 
