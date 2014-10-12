@@ -40,6 +40,7 @@
 #include "Chat.h"
 #include "DBCStores.h"
 #include "MassMailMgr.h"
+#include "Group.h"
 #include "LootMgr.h"
 #include "ItemEnchantmentMgr.h"
 #include "MapManager.h"
@@ -713,7 +714,9 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_PLAYER_COMMANDS, "PlayerCommands", true);
 
     setConfig(CONFIG_UINT32_INSTANT_LOGOUT, "InstantLogout", SEC_MODERATOR);
-
+    
+    setConfig(CONFIG_UINT32_GROUPLEADER_RECONNECT_PERIOD, "GroupLeaderReconnectPeriod", 120);
+    
     setConfigMin(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT, "Guild.EventLogRecordsCount", GUILD_EVENTLOG_MAX_RECORDS, GUILD_EVENTLOG_MAX_RECORDS);
 
     setConfig(CONFIG_UINT32_TIMERBAR_FATIGUE_GMLEVEL, "TimerBar.Fatigue.GMLevel", SEC_CONSOLE);
@@ -1400,6 +1403,10 @@ void World::Update(uint32 diff)
 
     /// <li> Handle session updates
     UpdateSessions(diff);
+    
+    // Update groups
+    for (ObjectMgr::GroupMap::const_iterator itr = sObjectMgr.GetGroupSetBegin(); itr != sObjectMgr.GetGroupSetEnd(); ++itr)
+        itr->second->Update();
 
     /// <li> Handle weather updates when the timer has passed
     if (m_timers[WUPDATE_WEATHERS].Passed())

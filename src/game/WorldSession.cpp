@@ -451,12 +451,16 @@ void WorldSession::LogoutPlayer(bool Save)
 
         // remove player from the group if he is:
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
-        if (_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && m_Socket)
-            _player->RemoveFromGroup();
+        //if (_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && m_Socket)
+        //    _player->RemoveFromGroup();
+        
 
-        ///- Send update to group
+        ///- Inform the group about leaving and send update to other members
         if (_player->GetGroup())
+        {
+            _player->GetGroup()->CheckLeader(_player->GetGUID(), true); //logout check leader
             _player->GetGroup()->SendUpdate();
+        }
 
         ///- Broadcast a logout message to the player's friends
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
