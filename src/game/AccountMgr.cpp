@@ -207,6 +207,7 @@ bool AccountMgr::CheckPassword(uint32 accid, std::string passwd)
         return false;
 
     normalizeString(passwd);
+    normalizeString(username);
 
     QueryResult* result = LoginDatabase.PQuery("SELECT 1 FROM account WHERE id='%u' AND sha_pass_hash='%s'", accid, CalculateShaPassHash(username, passwd).c_str());
     if (result)
