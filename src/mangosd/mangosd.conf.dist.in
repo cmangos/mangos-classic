@@ -1176,6 +1176,7 @@ Visibility.AIRelocationNotifyDelay = 1000
 #         Default: 1
 #
 #    Rate.XP.Kill
+#    Rate.XP.PetKill
 #    Rate.XP.Quest
 #    Rate.XP.Explore
 #        XP rates
@@ -1320,6 +1321,7 @@ Rate.Drop.Item.Artifact = 1
 Rate.Drop.Item.Referenced = 1
 Rate.Drop.Money = 1
 Rate.XP.Kill    = 1
+Rate.XP.PetKill = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
 Rate.Rest.InGame = 1

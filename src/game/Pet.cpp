@@ -916,6 +916,8 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
 
 void Pet::GivePetXP(uint32 xp)
 {
+    xp *= sWorld.getConfig(CONFIG_FLOAT_RATE_XP_PETKILL);
+
     if (getPetType() != HUNTER_PET)
         return;
 
