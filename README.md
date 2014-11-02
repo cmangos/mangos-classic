@@ -1,4 +1,4 @@
-# C(ontinued)-MaNGOS -- README
+# C(ontinued)-MaNGOS -- README [![Build Status](https://travis-ci.org/cmangos/mangos-classic.svg?branch=master)](https://travis-ci.org/cmangos/mangos-classic)
 
 This file is part of the CMaNGOS Project. See [AUTHORS](AUTHORS.md) file for Copyright information
 
