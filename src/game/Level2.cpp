@@ -2030,7 +2030,7 @@ bool ChatHandler::HandleNpcUnFollowCommand(char* /*args*/)
     if (creature->GetMotionMaster()->empty() ||
             creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
     {
-        PSendSysMessage(LANG_CREATURE_NOT_FOLLOW_YOU);
+        PSendSysMessage(LANG_CREATURE_NOT_FOLLOW_YOU, creature->GetName());
         SetSentErrorMessage(true);
         return false;
     }
@@ -2040,7 +2040,7 @@ bool ChatHandler::HandleNpcUnFollowCommand(char* /*args*/)
 
     if (mgen->GetTarget() != player)
     {
-        PSendSysMessage(LANG_CREATURE_NOT_FOLLOW_YOU);
+        PSendSysMessage(LANG_CREATURE_NOT_FOLLOW_YOU, creature->GetName());
         SetSentErrorMessage(true);
         return false;
     }
