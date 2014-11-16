@@ -94,8 +94,6 @@ void LootStore::LoadLootTable()
     // Clearing store (for reloading case)
     Clear();
 
-    sLog.outString("%s :", GetName());
-
     //                                                 0      1     2                    3        4              5         6
     QueryResult* result = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, groupid, mincountOrRef, maxcount, condition_id FROM %s", GetName());
 
@@ -168,8 +166,8 @@ void LootStore::LoadLootTable()
 
         Verify();                                           // Checks validity of the loot store
 
+        sLog.outString(">> Loaded %u loot definitions (" SIZEFMTD " templates) from table %s", count, m_LootTemplates.size(), GetName());
         sLog.outString();
-        sLog.outString(">> Loaded %u loot definitions (" SIZEFMTD " templates)", count, m_LootTemplates.size());
     }
     else
     {
@@ -225,8 +223,12 @@ void LootStore::CheckLootRefs(LootIdSet* ref_set) const
 void LootStore::ReportUnusedIds(LootIdSet const& ids_set) const
 {
     // all still listed ids isn't referenced
-    for (LootIdSet::const_iterator itr = ids_set.begin(); itr != ids_set.end(); ++itr)
-        sLog.outErrorDb("Table '%s' entry %d isn't %s and not referenced from loot, and then useless.", GetName(), *itr, GetEntryName());
+    if (!ids_set.empty())
+    {
+        for (LootIdSet::const_iterator itr = ids_set.begin(); itr != ids_set.end(); ++itr)
+            sLog.outErrorDb("Table '%s' entry %d isn't %s and not referenced from loot, and then useless.", GetName(), *itr, GetEntryName());
+        sLog.outString();
+    }
 }
 
 void LootStore::ReportNotExistedId(uint32 id) const

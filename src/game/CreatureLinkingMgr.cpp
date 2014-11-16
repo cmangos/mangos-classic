@@ -69,13 +69,13 @@ void CreatureLinkingMgr::LoadFromDB()
     m_eventGuidTriggers.clear();
 
     // Load `creature_linking_template`
+    sLog.outString("> Loading table `creature_linking_template`");
     uint32 count = 0;
     QueryResult* result = WorldDatabase.Query("SELECT entry, map, master_entry, flag, search_range FROM creature_linking_template");
     if (!result)
     {
         BarGoLink bar(1);
         bar.step();
-
         sLog.outString(">> Table creature_linking_template is empty.");
         sLog.outString();
     }
@@ -120,13 +120,14 @@ void CreatureLinkingMgr::LoadFromDB()
         }
         while (result->NextRow());
 
-        sLog.outString();
         sLog.outString(">> Loaded creature linking for %u creature-entries", count);
+        sLog.outString();
 
         delete result;
     }
 
     // Load `creature_linking`
+    sLog.outString("> Loading table `creature_linking`");
     count = 0;
     result = WorldDatabase.Query("SELECT guid, master_guid, flag FROM creature_linking");
     if (!result)
@@ -168,8 +169,8 @@ void CreatureLinkingMgr::LoadFromDB()
     }
     while (result->NextRow());
 
-    sLog.outString();
     sLog.outString(">> Loaded creature linking for %u creature-Guids", count);
+    sLog.outString();
 
     delete result;
 }

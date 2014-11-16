@@ -39,11 +39,9 @@ void GMTicketMgr::LoadGMTickets()
     if (!result)
     {
         BarGoLink bar(1);
-
         bar.step();
-
-        sLog.outString();
         sLog.outString(">> Loaded `character_ticket`, table is empty.");
+        sLog.outString();
         return;
     }
 
@@ -75,8 +73,8 @@ void GMTicketMgr::LoadGMTickets()
     while (result->NextRow());
     delete result;
 
-    sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " GM tickets", GetTicketCount());
+    sLog.outString();
 }
 
 void GMTicketMgr::DeleteAll()
