@@ -652,7 +652,7 @@ void Creature::RegeneratePower()
                 }
             }
             else
-                addValue = maxValue / 3;
+                addValue = maxValue / 3.0f;
             break;
         case POWER_ENERGY:
             // ToDo: for vehicle this is different - NEEDS TO BE FIXED!

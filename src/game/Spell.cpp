@@ -68,7 +68,7 @@ SpellCastTargets::SpellCastTargets()
     m_itemTargetEntry  = 0;
 
     m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0.0f;
-    m_strTarget = "";
+    m_strTarget.clear();
     m_targetMask = 0;
 }
 

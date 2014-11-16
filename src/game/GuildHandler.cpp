@@ -494,7 +494,7 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
     if (!recvPacket.empty())
         recvPacket >> MOTD;
     else
-        MOTD = "";
+        MOTD.clear();
 
     Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId());
     if (!guild)
