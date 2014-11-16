@@ -624,6 +624,9 @@ void BattleGround::EndBattleGround(Team winner)
         uint8 battleground_bracket = GetMinLevel() / 10;
         uint8 battleground_type = (uint8)GetTypeID();
 
+        // winner team variable has reversed index for the bg score storage
+        winner_team = std::abs(int(winner_team - 1));
+
         // query next id
         result = CharacterDatabase.Query("SELECT MAX(id) FROM pvpstats_battlegrounds");
         if (result)
