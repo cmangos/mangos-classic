@@ -173,7 +173,7 @@ void CreatureEventAIMgr::CheckUnusedAISummons()
         sLog.outErrorEventAI("Entry %i in table `creature_ai_summons` but not used in EventAI scripts.", *itr);
 }
 
-/// Helper function to check if a target-suite is suitable for the event-type
+/// Helper function to check if a target-type is suitable for the event-type
 bool IsValidTargetType(EventAI_Type eventType, EventAI_ActionType actionType, uint32 targetType, uint32 eventId, uint8 action)
 {
     switch (targetType)
