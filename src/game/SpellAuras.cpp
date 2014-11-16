@@ -1499,6 +1499,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     }
 
     uint32 modelid = 0;
+    Powers PowerType = POWER_MANA;
     Unit* target = GetTarget();
 
     switch (form)
