@@ -151,6 +151,10 @@ class BattleGroundABScore : public BattleGroundScore
     public:
         BattleGroundABScore(): BasesAssaulted(0), BasesDefended(0) {};
         virtual ~BattleGroundABScore() {};
+
+        uint32 GetAttr1() const { return BasesAssaulted; }
+        uint32 GetAttr2() const { return BasesDefended; }
+
         uint32 BasesAssaulted;
         uint32 BasesDefended;
 };

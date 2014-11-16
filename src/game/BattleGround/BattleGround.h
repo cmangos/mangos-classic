@@ -219,6 +219,19 @@ class BattleGroundScore
         {}
         virtual ~BattleGroundScore() {}                     // virtual destructor is used when deleting score from scores map
 
+        uint32 GetKillingBlows() const      { return KillingBlows; }
+        uint32 GetDeaths() const            { return Deaths; }
+        uint32 GetHonorableKills() const    { return HonorableKills; }
+        uint32 GetBonusHonor() const        { return BonusHonor; }
+        uint32 GetDamageDone() const        { return 0; }
+        uint32 GetHealingDone() const       { return 0; }
+
+        virtual uint32 GetAttr1() const     { return 0; }
+        virtual uint32 GetAttr2() const     { return 0; }
+        virtual uint32 GetAttr3() const     { return 0; }
+        virtual uint32 GetAttr4() const     { return 0; }
+        virtual uint32 GetAttr5() const     { return 0; }
+
         uint32 KillingBlows;
         uint32 Deaths;
         uint32 HonorableKills;

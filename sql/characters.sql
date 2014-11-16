@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_z2410_s2063_12562_01_characters_various_tables` bit(1) DEFAULT NULL
+  `required_z2559_s2204_12756_01_characters_pvpstats` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Last applied sql update to DB';
 
 --
@@ -1210,6 +1210,60 @@ CREATE TABLE `petition_sign` (
 LOCK TABLES `petition_sign` WRITE;
 /*!40000 ALTER TABLE `petition_sign` DISABLE KEYS */;
 /*!40000 ALTER TABLE `petition_sign` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `pvpstats_battlegrounds`
+--
+
+DROP TABLE IF EXISTS `pvpstats_battlegrounds`;
+CREATE TABLE `pvpstats_battlegrounds` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `winner_team` TINYINT NOT NULL,
+  `bracket_id` TINYINT UNSIGNED NOT NULL,
+  `type` TINYINT UNSIGNED NOT NULL,
+  `date` DATETIME NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
+--
+-- Dumping data for table `pvpstats_battlegrounds`
+--
+
+LOCK TABLES `pvpstats_battlegrounds` WRITE;
+/*!40000 ALTER TABLE `pvpstats_battlegrounds` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pvpstats_battlegrounds` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `pvpstats_players`
+--
+
+DROP TABLE IF EXISTS `pvpstats_players`;
+CREATE TABLE `pvpstats_players` (
+  `battleground_id` BIGINT UNSIGNED NOT NULL,
+  `player_guid` INT UNSIGNED NOT NULL,
+  `score_killing_blows` MEDIUMINT UNSIGNED NOT NULL,
+  `score_deaths` MEDIUMINT UNSIGNED NOT NULL,
+  `score_honorable_kills` MEDIUMINT UNSIGNED NOT NULL,
+  `score_bonus_honor` MEDIUMINT UNSIGNED NOT NULL,
+  `score_damage_done` MEDIUMINT UNSIGNED NOT NULL,
+  `score_healing_done` MEDIUMINT UNSIGNED NOT NULL,
+  `attr_1` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+  `attr_2` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+  `attr_3` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+  `attr_4` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+  `attr_5` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`battleground_id`, `player_guid`)
+) ENGINE=InnoDB;
+
+--
+-- Dumping data for table `pvpstats_players`
+--
+
+LOCK TABLES `pvpstats_players` WRITE;
+/*!40000 ALTER TABLE `pvpstats_players` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pvpstats_players` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
