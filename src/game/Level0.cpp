@@ -123,23 +123,25 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
 
 bool ChatHandler::HandleDismountCommand(char* /*args*/)
 {
+    Player* player = m_session->GetPlayer();
+
     // If player is not mounted, so go out :)
-    if (!m_session->GetPlayer()->IsMounted())
+    if (!player->IsMounted())
     {
         SendSysMessage(LANG_CHAR_NON_MOUNTED);
         SetSentErrorMessage(true);
         return false;
     }
 
-    if (m_session->GetPlayer()->IsTaxiFlying())
+    if (player->IsTaxiFlying())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
         SetSentErrorMessage(true);
         return false;
     }
 
-    m_session->GetPlayer()->Unmount();
-    m_session->GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+    player->Unmount();
+    player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     return true;
 }
 

@@ -76,7 +76,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32
     uint32 lowguid      = fields[0].GetUInt32();
     std::string name = fields[1].GetCppString();
     uint8 pRace = 0, pGender = 0, pClass = 0;
-    if (name == "")
+    if (name.empty())
         name         = session->GetMangosString(LANG_NON_EXIST_CHARACTER);
     else
     {

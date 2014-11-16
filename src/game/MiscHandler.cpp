@@ -454,35 +454,39 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult* result, uint32 acc
     delete result;
 
     WorldSession* session = sWorld.FindSession(accountId);
-    if (!session || !session->GetPlayer())
+    if (!session)
+        return;
+
+    Player* player = session->GetPlayer();
+    if (!player)
         return;
 
     FriendsResult friendResult = FRIEND_NOT_FOUND;
     if (friendGuid)
     {
-        if (friendGuid == session->GetPlayer()->GetObjectGuid())
+        if (friendGuid == player->GetObjectGuid())
             friendResult = FRIEND_SELF;
-        else if (session->GetPlayer()->GetTeam() != team && !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_ADD_FRIEND) && session->GetSecurity() < SEC_MODERATOR)
+        else if (player->GetTeam() != team && !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_ADD_FRIEND) && session->GetSecurity() < SEC_MODERATOR)
             friendResult = FRIEND_ENEMY;
-        else if (session->GetPlayer()->GetSocial()->HasFriend(friendGuid))
+        else if (player->GetSocial()->HasFriend(friendGuid))
             friendResult = FRIEND_ALREADY;
         else
         {
             Player* pFriend = ObjectAccessor::FindPlayer(friendGuid);
-            if (pFriend && pFriend->IsInWorld() && pFriend->IsVisibleGloballyFor(session->GetPlayer()))
+            if (pFriend && pFriend->IsInWorld() && pFriend->IsVisibleGloballyFor(player))
                 friendResult = FRIEND_ADDED_ONLINE;
             else
                 friendResult = FRIEND_ADDED_OFFLINE;
 
-            if (!session->GetPlayer()->GetSocial()->AddToSocialList(friendGuid, false))
+            if (!player->GetSocial()->AddToSocialList(friendGuid, false))
             {
                 friendResult = FRIEND_LIST_FULL;
-                DEBUG_LOG("WORLD: %s's friend list is full.", session->GetPlayer()->GetName());
+                DEBUG_LOG("WORLD: %s's friend list is full.", player->GetName());
             }
         }
     }
 
-    sSocialMgr.SendFriendStatus(session->GetPlayer(), friendResult, friendGuid, false);
+    sSocialMgr.SendFriendStatus(player, friendResult, friendGuid, false);
 
     DEBUG_LOG("WORLD: Sent (SMSG_FRIEND_STATUS)");
 }
@@ -532,27 +536,31 @@ void WorldSession::HandleAddIgnoreOpcodeCallBack(QueryResult* result, uint32 acc
     delete result;
 
     WorldSession* session = sWorld.FindSession(accountId);
-    if (!session || !session->GetPlayer())
+    if (!session)
+        return;
+
+    Player* player = session->GetPlayer();
+    if (!player)
         return;
 
     FriendsResult ignoreResult = FRIEND_IGNORE_NOT_FOUND;
     if (ignoreGuid)
     {
-        if (ignoreGuid == session->GetPlayer()->GetObjectGuid())
+        if (ignoreGuid == player->GetObjectGuid())
             ignoreResult = FRIEND_IGNORE_SELF;
-        else if (session->GetPlayer()->GetSocial()->HasIgnore(ignoreGuid))
+        else if (player->GetSocial()->HasIgnore(ignoreGuid))
             ignoreResult = FRIEND_IGNORE_ALREADY;
         else
         {
             ignoreResult = FRIEND_IGNORE_ADDED;
 
             // ignore list full
-            if (!session->GetPlayer()->GetSocial()->AddToSocialList(ignoreGuid, true))
+            if (!player->GetSocial()->AddToSocialList(ignoreGuid, true))
                 ignoreResult = FRIEND_IGNORE_FULL;
         }
     }
 
-    sSocialMgr.SendFriendStatus(session->GetPlayer(), ignoreResult, ignoreGuid, false);
+    sSocialMgr.SendFriendStatus(player, ignoreResult, ignoreGuid, false);
 
     DEBUG_LOG("WORLD: Sent (SMSG_FRIEND_STATUS)");
 }
