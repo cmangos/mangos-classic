@@ -42,14 +42,14 @@ void BIH::subdivide(int left, int right, std::vector<uint32>& tempTree, buildDat
         return;
     }
     // calculate extents
-    int axis = -1, prevAxis, rightOrig;
+    int axis = -1, rightOrig;
     float clipL = G3D::fnan(), clipR = G3D::fnan(), prevClip = G3D::fnan();
-    float split = G3D::fnan(), prevSplit;
+    float split = G3D::fnan();
     bool wasLeft = true;
     while (true)
     {
-        prevAxis = axis;
-        prevSplit = split;
+        int prevAxis = axis;
+        float prevSplit = split;
         // perform quick consistency checks
         Vector3 d(gridBox.hi - gridBox.lo);
         if (d.x < 0 || d.y < 0 || d.z < 0)

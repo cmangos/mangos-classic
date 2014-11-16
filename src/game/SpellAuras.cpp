@@ -1499,7 +1499,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     }
 
     uint32 modelid = 0;
-    Powers PowerType = POWER_MANA;
     Unit* target = GetTarget();
 
     switch (form)
@@ -1616,6 +1615,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     if (apply)
     {
+        Powers PowerType = POWER_MANA;
+
         // remove other shapeshift before applying a new one
         target->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT, GetHolder());
 
