@@ -304,6 +304,13 @@ class BattleGroundAVScore : public BattleGroundScore
     public:
         BattleGroundAVScore() : GraveyardsAssaulted(0), GraveyardsDefended(0), TowersAssaulted(0), TowersDefended(0), SecondaryObjectives(0), LieutnantCount(0), SecondaryNPC(0) {};
         virtual ~BattleGroundAVScore() {};
+
+        uint32 GetAttr1() const { return GraveyardsAssaulted; }
+        uint32 GetAttr2() const { return GraveyardsDefended; }
+        uint32 GetAttr3() const { return TowersAssaulted; }
+        uint32 GetAttr4() const { return TowersDefended; }
+        uint32 GetAttr5() const { return SecondaryObjectives; }
+
         uint32 GraveyardsAssaulted;
         uint32 GraveyardsDefended;
         uint32 TowersAssaulted;
