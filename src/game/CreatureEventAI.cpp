@@ -87,7 +87,9 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     if (creatureEventsItr != sEventAIMgr.GetCreatureEventAIMap().end())
     {
         uint32 events_count = 0;
-        for (CreatureEventAI_Event_Vec::const_iterator i = (*creatureEventsItr).second.begin(); i != (*creatureEventsItr).second.end(); ++i)
+
+        const CreatureEventAI_Event_Vec &creatureEvent = creatureEventsItr->second;
+        for (CreatureEventAI_Event_Vec::const_iterator i = creatureEvent.begin(); i != creatureEvent.end(); ++i)
         {
             // Debug check
 #ifndef MANGOS_DEBUG
@@ -103,7 +105,7 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
         else
         {
             m_CreatureEventAIList.reserve(events_count);
-            for (CreatureEventAI_Event_Vec::const_iterator i = (*creatureEventsItr).second.begin(); i != (*creatureEventsItr).second.end(); ++i)
+            for (CreatureEventAI_Event_Vec::const_iterator i = creatureEvent.begin(); i != creatureEvent.end(); ++i)
             {
                 // Debug check
 #ifndef MANGOS_DEBUG

@@ -3388,8 +3388,9 @@ bool ChatHandler::HandleDamageCommand(char* args)
         return false;
 
     Unit* target = getSelectedUnit();
+    Player* player = m_session->GetPlayer();
 
-    if (!target || !m_session->GetPlayer()->GetSelectionGuid())
+    if (!target || !player->GetSelectionGuid())
     {
         SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
         SetSentErrorMessage(true);
@@ -3408,12 +3409,12 @@ bool ChatHandler::HandleDamageCommand(char* args)
 
     uint32 damage = damage_int;
 
-    // flat melee damage without resistence/etc reduction
+    // flat melee damage without resistance/etc reduction
     if (!*args)
     {
-        m_session->GetPlayer()->DealDamage(target, damage, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-        if (target != m_session->GetPlayer())
-            m_session->GetPlayer()->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, 1, SPELL_SCHOOL_MASK_NORMAL, damage, 0, 0, VICTIMSTATE_NORMAL, 0);
+        player->DealDamage(target, damage, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        if (target != player)
+            player->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, 1, SPELL_SCHOOL_MASK_NORMAL, damage, 0, 0, VICTIMSTATE_NORMAL, 0);
         return true;
     }
 
@@ -3427,7 +3428,7 @@ bool ChatHandler::HandleDamageCommand(char* args)
     SpellSchoolMask schoolmask = GetSchoolMask(school);
 
     if (schoolmask & SPELL_SCHOOL_MASK_NORMAL)
-        damage = m_session->GetPlayer()->CalcArmorReducedDamage(target, damage);
+        damage = player->CalcArmorReducedDamage(target, damage);
 
     // melee damage by specific school
     if (!*args)
@@ -3435,16 +3436,16 @@ bool ChatHandler::HandleDamageCommand(char* args)
         uint32 absorb = 0;
         uint32 resist = 0;
 
-        target->CalculateDamageAbsorbAndResist(m_session->GetPlayer(), schoolmask, SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
+        target->CalculateDamageAbsorbAndResist(player, schoolmask, SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
 
         if (damage <= absorb + resist)
             return true;
 
         damage -= absorb + resist;
 
-        m_session->GetPlayer()->DealDamageMods(target, damage, &absorb);
-        m_session->GetPlayer()->DealDamage(target, damage, NULL, DIRECT_DAMAGE, schoolmask, NULL, false);
-        m_session->GetPlayer()->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, 1, schoolmask, damage, absorb, resist, VICTIMSTATE_NORMAL, 0);
+        player->DealDamageMods(target, damage, &absorb);
+        player->DealDamage(target, damage, NULL, DIRECT_DAMAGE, schoolmask, NULL, false);
+        player->SendAttackStateUpdate(HITINFO_NORMALSWING2, target, 1, schoolmask, damage, absorb, resist, VICTIMSTATE_NORMAL, 0);
         return true;
     }
 
@@ -3455,7 +3456,7 @@ bool ChatHandler::HandleDamageCommand(char* args)
     if (!spellid || !sSpellStore.LookupEntry(spellid))
         return false;
 
-    m_session->GetPlayer()->SpellNonMeleeDamageLog(target, spellid, damage);
+    player->SpellNonMeleeDamageLog(target, spellid, damage);
     return true;
 }
 
@@ -6391,8 +6392,10 @@ bool ChatHandler::HandleSendMessageCommand(char* args)
     if (!*args)
         return false;
 
+    WorldSession* rPlayerSession = rPlayer->GetSession();
+
     ///- Check that he is not logging out.
-    if (rPlayer->GetSession()->isLogingOut())
+    if (rPlayerSession->isLogingOut())
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
         SetSentErrorMessage(true);
@@ -6401,8 +6404,8 @@ bool ChatHandler::HandleSendMessageCommand(char* args)
 
     ///- Send the message
     // Use SendAreaTriggerMessage for fastest delivery.
-    rPlayer->GetSession()->SendAreaTriggerMessage("%s", args);
-    rPlayer->GetSession()->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
+    rPlayerSession->SendAreaTriggerMessage("%s", args);
+    rPlayerSession->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
 
     // Confirmation message
     std::string nameLink = GetNameLink(rPlayer);

@@ -317,8 +317,11 @@ bool Guild::CheckGuildStructure()
 
     // Allow only 1 guildmaster, set other to officer
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
-        if (itr->second.RankId == GR_GUILDMASTER && m_LeaderGuid != itr->second.guid)
-            itr->second.ChangeRank(GR_OFFICER);
+    {
+        MemberSlot &member = itr->second;
+        if (member.RankId == GR_GUILDMASTER && m_LeaderGuid != member.guid)
+            member.ChangeRank(GR_OFFICER);
+    }
 
     return true;
 }

@@ -119,15 +119,16 @@ void PlayerSocial::SendFriendList()
     {
         if (itr->second.Flags & SOCIAL_FLAG_FRIEND)         // if IsFriend()
         {
-            sSocialMgr.GetFriendInfo(plr, itr->first, itr->second);
+            FriendInfo &friendInfo = itr->second;
+            sSocialMgr.GetFriendInfo(plr, itr->first, friendInfo);
 
             data << ObjectGuid(HIGHGUID_PLAYER, itr->first);// player guid
             data << uint8(itr->second.Status);              // online/offline/etc?
             if (itr->second.Status)                         // if online
             {
-                data << uint32(itr->second.Area);           // player area
-                data << uint32(itr->second.Level);          // player level
-                data << uint32(itr->second.Class);          // player class
+                data << uint32(friendInfo.Area);           // player area
+                data << uint32(friendInfo.Level);          // player level
+                data << uint32(friendInfo.Class);          // player class
             }
         }
     }
