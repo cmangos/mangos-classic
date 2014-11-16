@@ -2264,7 +2264,7 @@ SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, 
             break;
 
         // if found appropriate level
-        if (level + 10 >= spellInfo->spellLevel)
+        if (level + 10 >= nextSpellInfo->spellLevel)
             return nextSpellInfo;
 
         // one rank less then
