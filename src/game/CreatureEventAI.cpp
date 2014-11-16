@@ -454,7 +454,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         if (count)
         {
             // select action number from found amount
-            uint32 idx = urand(0, count - 1);
+            uint32 idx = rnd % count;
 
             // find selected action, skipping not used
             uint32 j = 0;
@@ -496,17 +496,17 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             if (action.type == ACTION_T_TEXT)
             {
                 if (action.text.TextId[1] && action.text.TextId[2])
-                    textId = action.text.TextId[urand(0, 2)];
-                else if (action.text.TextId[1] && urand(0, 1))
+                    textId = action.text.TextId[rnd % 3];
+                else if (action.text.TextId[1] && (rnd % 2))
                     textId = action.text.TextId[1];
                 else
                     textId = action.text.TextId[0];
             }
             // ACTION_T_CHANCED_TEXT, chance hits
-            else if (urand(0, 99) < action.chanced_text.chance)
+            else if ((rnd % 100) < action.chanced_text.chance)
             {
                 if (action.chanced_text.TextId[0] && action.chanced_text.TextId[1])
-                    textId = action.chanced_text.TextId[urand(0, 1)];
+                    textId = action.chanced_text.TextId[rnd % 2];
                 else
                     textId = action.chanced_text.TextId[0];
             }
