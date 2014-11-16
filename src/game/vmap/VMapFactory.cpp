@@ -24,7 +24,7 @@ using namespace G3D;
 
 namespace VMAP
 {
-    void chompAndTrim(std::string& str)
+    void VMapFactory::chompAndTrim(std::string& str)
     {
         while (str.length() > 0)
         {
@@ -58,7 +58,7 @@ namespace VMAP
     //===============================================
     // result false, if no more id are found
 
-    bool getNextId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId)
+    bool VMapFactory::getNextId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId)
     {
         bool result = false;
         unsigned int i;

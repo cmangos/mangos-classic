@@ -112,6 +112,12 @@ BindIP = "0.0.0.0"
 #        Default: 1 (unload grids)
 #                 0 (do not unload grids)
 #
+#    LoadAllGridsOnMaps
+#        Load grids of maps at server startup (if you have lot memory you can try it to have a living world always loaded)
+#        This also allow ALL creatures on the given maps to update their grid without any player around.
+#        Default: "" (don't load all grids at startup)
+#                 "mapId1[,mapId2[..]]" (DO load all grids on the given maps- Experimental and very resource consumming)
+#
 #    GridCleanUpDelay
 #        Grid clean up delay (in milliseconds)
 #        Default: 300000 (5 min)
@@ -206,6 +212,7 @@ PlayerLimit = 100
 SaveRespawnTimeImmediately = 1
 MaxOverspeedPings = 2
 GridUnload = 1
+LoadAllGridsOnMaps = ""
 GridCleanUpDelay = 300000
 MapUpdateInterval = 100
 ChangeWeatherInterval = 600000
