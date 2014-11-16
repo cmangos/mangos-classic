@@ -630,6 +630,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "log",            SEC_CONSOLE,        true,  NULL,                                           "", serverLogCommandTable },
         { "motd",           SEC_PLAYER,         true,  &ChatHandler::HandleServerMotdCommand,          "", NULL },
         { "plimit",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerPLimitCommand,        "", NULL },
+        { "resetallraid",   SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleServerResetAllRaidCommand,  "", NULL },
         { "restart",        SEC_ADMINISTRATOR,  true,  NULL,                                           "", serverRestartCommandTable },
         { "shutdown",       SEC_ADMINISTRATOR,  true,  NULL,                                           "", serverShutdownCommandTable },
         { "set",            SEC_ADMINISTRATOR,  true,  NULL,                                           "", serverSetCommandTable },
