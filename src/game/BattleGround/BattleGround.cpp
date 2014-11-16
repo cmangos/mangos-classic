@@ -590,37 +590,36 @@ void BattleGround::EndBattleGround(Team winner)
     WorldPacket data;
     int32 winmsg_id = 0;
 
-    uint32 winner_team = TEAM_INDEX_NEUTRAL;
+    uint32 bgScoresWinner = TEAM_INDEX_NEUTRAL;
     uint64 battleground_id = 1;
 
     if (winner == ALLIANCE)
     {
         winmsg_id = LANG_BG_A_WINS;
-        winner_team = TEAM_INDEX_ALLIANCE;
-
         PlaySoundToAll(SOUND_ALLIANCE_WINS);                // alliance wins sound
+
+        // reversed index for the bg score storage system
+        bgScoresWinner = TEAM_INDEX_HORDE;
     }
     else if (winner == HORDE)
     {
         winmsg_id = LANG_BG_H_WINS;
-        winner_team = TEAM_INDEX_HORDE;
-
         PlaySoundToAll(SOUND_HORDE_WINS);                   // horde wins sound
+
+        // reversed index for the bg score storage system
+        bgScoresWinner = TEAM_INDEX_ALLIANCE;
     }
 
     // store battleground scores
     if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_SCORE_STATISTICS))
     {
         static SqlStatementID insPvPstatsBattleground;
-        QueryResult * result;
+        QueryResult* result;
 
         SqlStatement stmt = CharacterDatabase.CreateStatement(insPvPstatsBattleground, "INSERT INTO pvpstats_battlegrounds (id, winner_team, bracket_id, type, date) VALUES (?, ?, ?, ?, NOW())");
 
         uint8 battleground_bracket = GetMinLevel() / 10;
         uint8 battleground_type = (uint8)GetTypeID();
-
-        // winner team variable has reversed index for the bg score storage
-        winner_team = std::abs(int(winner_team - 1));
 
         // query next id
         result = CharacterDatabase.Query("SELECT MAX(id) FROM pvpstats_battlegrounds");
@@ -631,7 +630,7 @@ void BattleGround::EndBattleGround(Team winner)
             delete result;
         }
 
-        stmt.PExecute(battleground_id, winner_team, battleground_bracket, battleground_type);
+        stmt.PExecute(battleground_id, bgScoresWinner, battleground_bracket, battleground_type);
     }
 
     SetWinner(winner);
