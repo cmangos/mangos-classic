@@ -735,7 +735,7 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
     MANGOS_ASSERT(CheckGridIntegrity(creature, true));
 }
 
-bool Map::CreatureCellRelocation(Creature* c, Cell new_cell)
+bool Map::CreatureCellRelocation(Creature* c, const Cell &new_cell)
 {
     Cell const& old_cell = c->GetCurrentCell();
     if (old_cell.DiffGrid(new_cell))

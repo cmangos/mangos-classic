@@ -1670,7 +1670,7 @@ void World::KickAllLess(AccountTypes sec)
 }
 
 /// Ban an account or ban an IP address, duration_secs if it is positive used, otherwise permban
-BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, std::string author)
+BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string &author)
 {
     LoginDatabase.escape_string(nameOrIP);
     LoginDatabase.escape_string(reason);

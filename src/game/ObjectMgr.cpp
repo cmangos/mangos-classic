@@ -6397,7 +6397,7 @@ static LanguageType GetRealmLanguageType(bool create)
     }
 }
 
-bool isValidString(std::wstring wstr, uint32 strictMask, bool numericOrSpace, bool create = false)
+bool isValidString(const std::wstring &wstr, uint32 strictMask, bool numericOrSpace, bool create = false)
 {
     if (strictMask == 0)                                    // any language, ignore realm
     {
