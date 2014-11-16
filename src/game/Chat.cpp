@@ -2350,9 +2350,7 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
     if (*tail == ':' && somethingPair)                      // optional data extraction
     {
         // :something...|h[name]|h|r
-
-        if (*tail == ':')
-            ++tail;
+        ++tail;
 
         // something|h[name]|h|r or something:something2...|h[name]|h|r
 
