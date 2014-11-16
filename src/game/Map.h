@@ -281,7 +281,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void SendInitTransports(Player* player);
         void SendRemoveTransports(Player* player);
 
-        bool CreatureCellRelocation(Creature* creature, Cell new_cell);
+        bool CreatureCellRelocation(Creature* creature, const Cell &new_cell);
 
         bool loaded(const GridPair&) const;
         void EnsureGridCreated(const GridPair&);

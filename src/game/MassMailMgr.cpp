@@ -35,7 +35,7 @@
 
 INSTANTIATE_SINGLETON_1(MassMailMgr);
 
-void MassMailMgr::AddMassMailTask(MailDraft* mailProto, MailSender sender, uint32 raceMask)
+void MassMailMgr::AddMassMailTask(MailDraft* mailProto, const MailSender &sender, uint32 raceMask)
 {
     if (RACEMASK_ALL_PLAYABLE & ~raceMask)                  // have races not included in mask
     {
@@ -66,7 +66,7 @@ struct MassMailerQueryHandler
     }
 } massMailerQueryHandler;
 
-void MassMailMgr::AddMassMailTask(MailDraft* mailProto, MailSender sender, char const* query)
+void MassMailMgr::AddMassMailTask(MailDraft* mailProto, const MailSender &sender, char const* query)
 {
     CharacterDatabase.AsyncPQuery(&massMailerQueryHandler, &MassMailerQueryHandler::HandleQueryCallback, mailProto, sender, query);
 }

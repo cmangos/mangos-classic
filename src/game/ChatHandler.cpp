@@ -601,7 +601,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data)
     player->GetSession()->SendPacket(&data);
 }
 
-void WorldSession::SendPlayerNotFoundNotice(std::string name)
+void WorldSession::SendPlayerNotFoundNotice(const std::string &name)
 {
     WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size() + 1);
     data << name;

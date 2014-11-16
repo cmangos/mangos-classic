@@ -96,9 +96,9 @@ class PathFinder
 
         dtQueryFilter m_filter;                     // use single filter for all movements, update it when needed
 
-        void setStartPosition(Vector3 point) { m_startPosition = point; }
-        void setEndPosition(Vector3 point) { m_actualEndPosition = point; m_endPosition = point; }
-        void setActualEndPosition(Vector3 point) { m_actualEndPosition = point; }
+        void setStartPosition(const Vector3 &point) { m_startPosition = point; }
+        void setEndPosition(const Vector3 &point) { m_actualEndPosition = point; m_endPosition = point; }
+        void setActualEndPosition(const Vector3 &point) { m_actualEndPosition = point; }
 
         void clear()
         {

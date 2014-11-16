@@ -235,7 +235,7 @@ class OutdoorPvPEP : public OutdoorPvP
         void SendRemoveWorldStates(Player* player) override;
 
         bool HandleEvent(uint32 eventId, GameObject* go) override;
-        void HandleObjectiveComplete(uint32 eventId, std::list<Player*> players, Team team) override;
+        void HandleObjectiveComplete(uint32 eventId, const std::list<Player*> &players, Team team) override;
 
         void HandleCreatureCreate(Creature* creature) override;
         void HandleGameObjectCreate(GameObject* go) override;
