@@ -177,10 +177,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         const char* GetMapName() const;
 
         bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }
-        // NOTE: this duplicate of Instanceable(), but Instanceable() can be changed when BG also will be instanceable
         bool IsDungeon() const { return i_mapEntry && i_mapEntry->IsDungeon(); }
         bool IsRaid() const { return i_mapEntry && i_mapEntry->IsRaid(); }
         bool IsBattleGround() const { return i_mapEntry && i_mapEntry->IsBattleGround(); }
+        bool IsContinent() const { return i_mapEntry && i_mapEntry->IsContinent(); }
 
         // can't be NULL for loaded map
         MapPersistentState* GetPersistentState() const { return m_persistentState; }
