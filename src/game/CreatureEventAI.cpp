@@ -238,6 +238,13 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             pHolder.UpdateRepeatTimer(m_creature, event.spell_hit.repeatMin, event.spell_hit.repeatMax);
             break;
         case EVENT_T_RANGE:
+            if (!m_creature->isInCombat() || !m_creature->getVictim() || !m_creature->IsInMap(m_creature->getVictim()))
+                return false;
+
+            // DISCUSS TODO - Likely replace IsInRange check with CombatReach checks (as used rather for such checks)
+            if (!m_creature->IsInRange(m_creature->getVictim(), (float)event.range.minDist, (float)event.range.maxDist))
+                return false;
+
             // Repeat Timers
             pHolder.UpdateRepeatTimer(m_creature, event.range.repeatMin, event.range.repeatMax);
             break;
@@ -356,6 +363,9 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             break;
         case EVENT_T_AURA:
         {
+            if (!m_creature->isInCombat())
+                return false;
+
             SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(event.buffed.spellId);
             if (!holder || holder->GetStackAmount() < event.buffed.amount)
                 return false;
@@ -381,6 +391,9 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         }
         case EVENT_T_MISSING_AURA:
         {
+            if (!m_creature->isInCombat())
+                return false;
+
             SpellAuraHolder* holder = m_creature->GetSpellAuraHolder(event.buffed.spellId);
             if (holder && holder->GetStackAmount() >= event.buffed.amount)
                 return false;
@@ -1243,42 +1256,17 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                     // Do not decrement timers if event cannot trigger in this phase
                     if (!((*i).Event.event_inverse_phase_mask & (1 << m_Phase)))
                         (*i).Time -= m_EventDiff;
-
-                    // Skip processing of events that have time remaining
-                    continue;
                 }
-                else (*i).Time = 0;
+                else
+                    (*i).Time = 0;
             }
 
-            // Events that are updated every EVENT_UPDATE_TIME
-            switch ((*i).Event.event_type)
-            {
-                case EVENT_T_TIMER_OOC:
-                case EVENT_T_TIMER_GENERIC:
-                    ProcessEvent(*i);
-                    break;
-                case EVENT_T_TIMER_IN_COMBAT:
-                case EVENT_T_MANA:
-                case EVENT_T_HP:
-                case EVENT_T_TARGET_HP:
-                case EVENT_T_TARGET_CASTING:
-                case EVENT_T_FRIENDLY_HP:
-                case EVENT_T_AURA:
-                case EVENT_T_TARGET_AURA:
-                case EVENT_T_MISSING_AURA:
-                case EVENT_T_TARGET_MISSING_AURA:
-                    if (Combat)
-                        ProcessEvent(*i);
-                    break;
-                case EVENT_T_RANGE:
-                    if (Combat)
-                    {
-                        if (m_creature->getVictim() && m_creature->IsInMap(m_creature->getVictim()))
-                            if (m_creature->IsInRange(m_creature->getVictim(), (float)(*i).Event.range.minDist, (float)(*i).Event.range.maxDist))
-                                ProcessEvent(*i);
-                    }
-                    break;
-            }
+            // Skip processing of events that have time remaining or are disabled
+            if (!(i->Enabled) || i->Time)
+                continue;
+
+            if (IsTimerBasedEvent(i->Event.event_type))
+                ProcessEvent(*i);
         }
 
         m_EventDiff = 0;
@@ -1290,8 +1278,8 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
         m_EventUpdateTime -= diff;
     }
 
-    // Melee Auto-Attack (recheck m_creature->getVictim in case of combat state was changed while processing events)
-    if (Combat && m_MeleeEnabled && m_creature->getVictim())
+    // Melee Auto-Attack (getVictim might be NULL as result of timer based events and actions)
+    if (Combat && m_creature->getVictim() && m_MeleeEnabled)
         DoMeleeAttackIfReady();
 }
 
