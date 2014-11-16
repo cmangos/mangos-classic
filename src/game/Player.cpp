@@ -563,7 +563,7 @@ void Player::CleanupsBeforeDelete()
     if (m_uint32Values)                                     // only for fully created Object
     {
         TradeCancel(false);
-        DuelComplete(DUEL_INTERRUPTED);
+        DuelComplete(DUEL_FLED);
     }
 
     // notify zone scripts for player logout
