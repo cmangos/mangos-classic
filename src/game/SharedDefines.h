@@ -492,6 +492,15 @@ enum Team
     ALLIANCE            = 469,
 };
 
+enum PvpTeamIndex
+{
+    TEAM_INDEX_ALLIANCE = 0,
+    TEAM_INDEX_HORDE    = 1,
+    TEAM_INDEX_NEUTRAL  = 2,
+};
+
+#define PVP_TEAM_COUNT    2
+
 enum SpellEffects
 {
     SPELL_EFFECT_NONE                      = 0,

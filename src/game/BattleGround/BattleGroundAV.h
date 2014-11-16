@@ -206,9 +206,9 @@ enum BG_AV_WorldStates
 // BattleGroundAVTeamIndex -> BattleGroundTeamIndex cast safe and array with BG_TEAMS_COUNT elements must checked != BG_AV_TEAM_NEUTRAL before used
 enum BattleGroundAVTeamIndex
 {
-    BG_AV_TEAM_ALLIANCE        = BG_TEAM_ALLIANCE,
-    BG_AV_TEAM_HORDE           = BG_TEAM_HORDE,
-    BG_AV_TEAM_NEUTRAL         = 2,                         // this is the neutral owner of snowfall
+    BG_AV_TEAM_ALLIANCE        = TEAM_INDEX_ALLIANCE,
+    BG_AV_TEAM_HORDE           = TEAM_INDEX_HORDE,
+    BG_AV_TEAM_NEUTRAL         = TEAM_INDEX_NEUTRAL,                         // this is the neutral owner of snowfall
 };
 
 #define BG_AV_TEAMS_COUNT 3
@@ -339,7 +339,7 @@ class BattleGroundAV : public BattleGround
         virtual void Reset() override;
 
         /*general stuff*/
-        void UpdateScore(BattleGroundTeamIndex teamIdx, int32 points);
+        void UpdateScore(PvpTeamIndex teamIdx, int32 points);
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
 
         /*handle stuff*/ // these are functions which get called from extern scripts
@@ -360,10 +360,10 @@ class BattleGroundAV : public BattleGround
         void EventPlayerDefendsPoint(Player* player, BG_AV_Nodes node);
         void EventPlayerDestroyedPoint(BG_AV_Nodes node);
 
-        void AssaultNode(BG_AV_Nodes node, BattleGroundTeamIndex teamIdx);
+        void AssaultNode(BG_AV_Nodes node, PvpTeamIndex teamIdx);
         void DestroyNode(BG_AV_Nodes node);
         void InitNode(BG_AV_Nodes node, BattleGroundAVTeamIndex teamIdx, bool tower);
-        void DefendNode(BG_AV_Nodes node, BattleGroundTeamIndex teamIdx);
+        void DefendNode(BG_AV_Nodes node, PvpTeamIndex teamIdx);
 
         void PopulateNode(BG_AV_Nodes node);
 
@@ -380,7 +380,7 @@ class BattleGroundAV : public BattleGround
         void UpdateNodeWorldState(BG_AV_Nodes node);
 
         /*variables */
-        uint32 m_Team_QuestStatus[BG_TEAMS_COUNT][9];       // [x][y] x=team y=questcounter
+        uint32 m_Team_QuestStatus[PVP_TEAM_COUNT][9];       // [x][y] x=team y=questcounter
 
         BG_AV_NodeInfo m_Nodes[BG_AV_NODES_MAX];
 
@@ -390,7 +390,7 @@ class BattleGroundAV : public BattleGround
         int32 m_Mine_Timer[BG_AV_MAX_MINES];
         uint32 m_Mine_Reclaim_Timer[BG_AV_MAX_MINES];
 
-        bool m_IsInformedNearLose[BG_TEAMS_COUNT];
+        bool m_IsInformedNearLose[PVP_TEAM_COUNT];
 
         uint32 m_HonorMapComplete;
         uint32 m_RepTowerDestruction;
