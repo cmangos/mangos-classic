@@ -485,6 +485,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleServerLogLevelCommand(char* args);
         bool HandleServerMotdCommand(char* args);
         bool HandleServerPLimitCommand(char* args);
+        bool HandleServerResetAllRaidCommand(char* args);
         bool HandleServerRestartCommand(char* args);
         bool HandleServerSetMotdCommand(char* args);
         bool HandleServerShutDownCommand(char* args);

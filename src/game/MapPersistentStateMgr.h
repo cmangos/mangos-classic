@@ -210,6 +210,8 @@ class DungeonPersistentState : public MapPersistentState
         void DeleteFromDB();
         /* Delete respawn data at dungeon reset */
         void DeleteRespawnTimes();
+        /* Remove players bind to this state */
+        void UnbindThisState();
 
     protected:
         bool CanBeUnload() const override;                  // overwrite MapPersistentState::CanBeUnload
@@ -252,14 +254,18 @@ class BattleGroundPersistentState : public MapPersistentState
 
 enum ResetEventType
 {
-    RESET_EVENT_NORMAL_DUNGEON = 0,                         // no fixed reset time
-    RESET_EVENT_INFORM_1       = 1,                         // raid/heroic warnings
-    RESET_EVENT_INFORM_2       = 2,
-    RESET_EVENT_INFORM_3       = 3,
-    RESET_EVENT_INFORM_LAST    = 4,
+    RESET_EVENT_NORMAL_DUNGEON      = 0,                    // no fixed reset time
+    RESET_EVENT_INFORM_1            = 1,                    // raid/heroic warnings
+    RESET_EVENT_INFORM_2            = 2,
+    RESET_EVENT_INFORM_3            = 3,
+    RESET_EVENT_INFORM_LAST         = 4,
+    RESET_EVENT_FORCED_INFORM_1     = 5,
+    RESET_EVENT_FORCED_INFORM_2     = 6,
+    RESET_EVENT_FORCED_INFORM_3     = 7,
+    RESET_EVENT_FORCED_INFORM_LAST  = 8,
 };
 
-#define MAX_RESET_EVENT_TYPE   5
+#define MAX_RESET_EVENT_TYPE   9
 
 /* resetTime is a global propery of each (raid/heroic) map
     all instances of that map reset at the same time */
@@ -297,6 +303,7 @@ class DungeonResetScheduler
 
         void Update();
 
+        void ResetAllRaid();
     private:                                                // fields
         MapPersistentStateManager& m_InstanceSaves;
 
