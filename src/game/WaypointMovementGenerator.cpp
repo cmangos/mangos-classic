@@ -267,7 +267,11 @@ bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, 
 
     MANGOS_ASSERT(lastPoint != i_path->end());
 
-    x = lastPoint->second.x; y = lastPoint->second.y; z = lastPoint->second.z;
+    const WaypointNode &waypoint = lastPoint->second;
+
+    x = waypoint.x;
+    y = waypoint.y;
+    z = waypoint.z;
     return true;
 }
 

@@ -542,20 +542,21 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
             ItemPrototype const *prototype = item->GetProto();
             if (prototype)
             {
-                ++config.SameItemInfo[item->GetEntry()].ItemCount;    // Structure constructor will make sure Element are correctly initialised if entry is created here.
-                config.SameItemInfo[item->GetEntry()].BuyPrice =config.SameItemInfo[item->GetEntry()].BuyPrice + (itr->second->buyout/item->GetCount());
-                config.SameItemInfo[item->GetEntry()].BidPrice =config.SameItemInfo[item->GetEntry()].BidPrice + (itr->second->startbid/item->GetCount());
-                if (itr->second->buyout != 0)
+                BuyerItemInfo& buyerItem = config.SameItemInfo[item->GetEntry()];    // Structure constructor will make sure Element are correctly initialised if entry is created here.
+                ++buyerItem.ItemCount;
+                buyerItem.BuyPrice = buyerItem.BuyPrice + (Aentry->buyout / item->GetCount());
+                buyerItem.BidPrice = buyerItem.BidPrice + (Aentry->startbid / item->GetCount());
+                if (Aentry->buyout != 0)
                 {
-                    if (itr->second->buyout/item->GetCount() < config.SameItemInfo[item->GetEntry()].MinBuyPrice)
-                        config.SameItemInfo[item->GetEntry()].MinBuyPrice = itr->second->buyout/item->GetCount();
-                    else if (config.SameItemInfo[item->GetEntry()].MinBuyPrice == 0)
-                        config.SameItemInfo[item->GetEntry()].MinBuyPrice = itr->second->buyout/item->GetCount();
+                    if (Aentry->buyout / item->GetCount() < buyerItem.MinBuyPrice)
+                        buyerItem.MinBuyPrice = Aentry->buyout / item->GetCount();
+                    else if (buyerItem.MinBuyPrice == 0)
+                        buyerItem.MinBuyPrice = Aentry->buyout / item->GetCount();
                 }
-                if (itr->second->startbid/item->GetCount() < config.SameItemInfo[item->GetEntry()].MinBidPrice)
-                    config.SameItemInfo[item->GetEntry()].MinBidPrice = itr->second->startbid/item->GetCount();
-                else if (config.SameItemInfo[item->GetEntry()].MinBidPrice == 0)
-                    config.SameItemInfo[item->GetEntry()].MinBidPrice = itr->second->startbid/item->GetCount();
+                if (Aentry->startbid / item->GetCount() < buyerItem.MinBidPrice)
+                    buyerItem.MinBidPrice = Aentry->startbid / item->GetCount();
+                else if (buyerItem.MinBidPrice == 0)
+                    buyerItem.MinBidPrice = Aentry->startbid / item->GetCount();
 
                 if (!Aentry->owner)
                 {
@@ -745,17 +746,18 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
 
     for (CheckEntryMap::iterator itr =config.CheckedEntry.begin(); itr != config.CheckedEntry.end();)
     {
-        AuctionEntry* auction = auctionHouse->GetAuction(itr->second.AuctionId);
+        BuyerAuctionEval& auctionEval = itr->second;
+        AuctionEntry* auction = auctionHouse->GetAuction(auctionEval.AuctionId);
         if (!auction)                                       // is auction not active now
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Entry %u on ah %u doesn't exists, perhaps bought already?",
-                itr->second.AuctionId, auction->GetHouseId());
+                             auctionEval.AuctionId, auction->GetHouseId());
 
             config.CheckedEntry.erase(itr++);
             continue;
         }
 
-        if ((itr->second.LastChecked != 0) && ((Now - itr->second.LastChecked) <= m_CheckInterval))
+        if ((auctionEval.LastChecked != 0) && ((Now - auctionEval.LastChecked) <= m_CheckInterval))
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: In time interval wait for entry %u!", auction->Id);
             ++itr;
@@ -779,14 +781,11 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
         uint32 BasePrice = sAuctionBotConfig.getConfig(CONFIG_BOOL_AHBOT_BUYPRICE_BUYER) ? prototype->BuyPrice : prototype->SellPrice;
         BasePrice *= item->GetCount();
 
-        double MaxBuyablePrice = ( BasePrice * config.BuyerPriceRatio )/100;
-        BuyerItemInfoMap::iterator sameitem_itr = config.SameItemInfo.find(item->GetEntry());
-        uint32 buyoutPrice = auction->buyout/item->GetCount();
-
+        double MaxBuyablePrice = (BasePrice * config.BuyerPriceRatio) / 100;
+        uint32 buyoutPrice = auction->buyout / item->GetCount();
         uint32 bidPrice;
         uint32 bidPriceByItem;
-        uint32 minBidPrice;
-        uint32 minBuyPrice;
+
         if (auction->bid >= auction->startbid)
         {
             bidPrice = auction->GetAuctionOutBid();
@@ -800,7 +799,11 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
 
         double InGame_BuyPrice;
         double InGame_BidPrice;
-        if (sameitem_itr==config.SameItemInfo.end())
+        uint32 minBidPrice;
+        uint32 minBuyPrice;
+
+        BuyerItemInfoMap::iterator sameitem_itr = config.SameItemInfo.find(item->GetEntry());
+        if (sameitem_itr == config.SameItemInfo.end())
         {
             InGame_BuyPrice=0;
             InGame_BidPrice=0;
@@ -809,18 +812,22 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
         }
         else
         {
-            if (sameitem_itr->second.ItemCount == 1) MaxBuyablePrice = MaxBuyablePrice * 5; // if only one item exist can be buyed if the price is high too.
-            InGame_BuyPrice=sameitem_itr->second.BuyPrice/sameitem_itr->second.ItemCount;
-            InGame_BidPrice=sameitem_itr->second.BidPrice/sameitem_itr->second.ItemCount;
-            minBidPrice = sameitem_itr->second.MinBidPrice;
-            minBuyPrice = sameitem_itr->second.MinBuyPrice;
+            const BuyerItemInfo& sameBuyerItem = sameitem_itr->second;
+
+            if (sameBuyerItem.ItemCount == 1)
+                MaxBuyablePrice = MaxBuyablePrice * 5;  // if only one item exist can be bought if the price is high too.
+
+            InGame_BuyPrice = sameBuyerItem.BuyPrice / sameBuyerItem.ItemCount;
+            InGame_BidPrice = sameBuyerItem.BidPrice / sameBuyerItem.ItemCount;
+            minBidPrice = sameBuyerItem.MinBidPrice;
+            minBuyPrice = sameBuyerItem.MinBuyPrice;
         }
 
         double MaxBidablePrice = MaxBuyablePrice - ( MaxBuyablePrice / 30); // Max Bidable price defined to 70% of max buyable price
 
         DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Auction added with data:");
-        DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: MaxPrice of Entry %u is %.1fg.", itr->second.AuctionId, MaxBuyablePrice / 10000);
-        DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: GamePrice buy=%.1fg, bid=%.1fg.",InGame_BuyPrice/10000, InGame_BidPrice / 10000);
+        DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: MaxPrice of Entry %u is %.1fg.", auctionEval.AuctionId, MaxBuyablePrice / 10000);
+        DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: GamePrice buy=%.1fg, bid=%.1fg.", InGame_BuyPrice / 10000, InGame_BidPrice / 10000);
         DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Minimal price see in AH Buy=%ug, Bid=%ug.",
             minBuyPrice / 10000, minBidPrice / 10000);
         DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Actual Entry price,  Buy=%ug, Bid=%ug.", buyoutPrice / 10000, bidPrice/ 10000);
@@ -848,7 +855,7 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
             if (IsBidableEntry(bidPriceByItem, InGame_BuyPrice, MaxBidablePrice, minBidPrice, MaxChance, config.FactionChance))
                 PlaceBidToEntry(auction, bidPrice);
 
-        itr->second.LastChecked = Now;
+        auctionEval.LastChecked = Now;
         --BuyCycles;
 
         ++itr;
@@ -1733,9 +1740,12 @@ void AuctionHouseBot::Rebuild(bool all)
     {
         AuctionHouseObject::AuctionEntryMapBounds bounds = sAuctionMgr.GetAuctionsMap(AuctionHouseType(i))->GetAuctionsBounds();
         for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
-            if (!itr->second->owner)                        // ahbot auction
-                if (all || itr->second->bid == 0)           // expire now auction if no bid or forced
-                    itr->second->expireTime = sWorld.GetGameTime();
+        {
+            AuctionEntry* entry = itr->second;
+            if (!entry->owner)                              // ahbot auction
+                if (all || entry->bid == 0)                 // expire now auction if no bid or forced
+                    entry->expireTime = sWorld.GetGameTime();
+        }
     }
 }
 

@@ -905,29 +905,30 @@ bool ChatHandler::HandlerDebugModValueHelper(Object* target, uint32 field, char*
             return false;
 
         uint32 value = target->GetUInt32Value(field);
+        const char* guidString = guid.GetString().c_str();
 
         switch (type)
         {
             default:
             case 1:                                         // int +
                 value = uint32(int32(value) + int32(iValue));
-                DEBUG_LOG(GetMangosString(LANG_CHANGE_INT32), guid.GetString().c_str(), field, iValue, value, value);
-                PSendSysMessage(LANG_CHANGE_INT32_FIELD, guid.GetString().c_str(), field, iValue, value, value);
+                DEBUG_LOG(GetMangosString(LANG_CHANGE_INT32), guidString, field, iValue, value, value);
+                PSendSysMessage(LANG_CHANGE_INT32_FIELD, guidString, field, iValue, value, value);
                 break;
             case 2:                                         // |= bit or
                 value |= iValue;
-                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guid.GetString().c_str(), field, typeStr, iValue, value);
-                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guid.GetString().c_str(), field, typeStr, iValue, value);
+                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guidString, field, typeStr, iValue, value);
+                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guidString, field, typeStr, iValue, value);
                 break;
             case 3:                                         // &= bit and
                 value &= iValue;
-                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guid.GetString().c_str(), field, typeStr, iValue, value);
-                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guid.GetString().c_str(), field, typeStr, iValue, value);
+                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guidString, field, typeStr, iValue, value);
+                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guidString, field, typeStr, iValue, value);
                 break;
             case 4:                                         // &=~ bit and not
                 value &= ~iValue;
-                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guid.GetString().c_str(), field, typeStr, iValue, value);
-                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guid.GetString().c_str(), field, typeStr, iValue, value);
+                DEBUG_LOG(GetMangosString(LANG_CHANGE_HEX), guidString, field, typeStr, iValue, value);
+                PSendSysMessage(LANG_CHANGE_HEX_FIELD, guidString, field, typeStr, iValue, value);
                 break;
         }
 

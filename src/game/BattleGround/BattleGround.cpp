@@ -1044,11 +1044,12 @@ void BattleGround::RemoveFromBGFreeSlotQueue()
 {
     // set to be able to re-add if needed
     m_InBGFreeSlotQueue = false;
-    for (BGFreeSlotQueueType::iterator itr = sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].begin(); itr != sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].end(); ++itr)
+    BGFreeSlotQueueType& bgFreeSlot = sBattleGroundMgr.BGFreeSlotQueue[m_TypeID];
+    for (BGFreeSlotQueueType::iterator itr = bgFreeSlot.begin(); itr != bgFreeSlot.end(); ++itr)
     {
         if ((*itr)->GetInstanceID() == GetInstanceID())
         {
-            sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].erase(itr);
+            bgFreeSlot.erase(itr);
             return;
         }
     }
