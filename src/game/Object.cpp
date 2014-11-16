@@ -1236,7 +1236,7 @@ void WorldObject::MonsterSay(const char* text, uint32 /*language*/, Unit const* 
 {
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_SAY, text, LANG_UNIVERSAL, CHAT_TAG_NONE, GetObjectGuid(), GetName(),
-        target ? target->GetObjectGuid() : ObjectGuid(),target ? target->GetName() : "");
+                                 target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);
 }
 
@@ -1244,7 +1244,7 @@ void WorldObject::MonsterYell(const char* text, uint32 /*language*/, Unit const*
 {
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_YELL, text, LANG_UNIVERSAL, CHAT_TAG_NONE, GetObjectGuid(), GetName(),
-        target ? target->GetObjectGuid() : ObjectGuid(),target ? target->GetName() : "");
+                                 target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL), true);
 }
 
@@ -1252,7 +1252,7 @@ void WorldObject::MonsterTextEmote(const char* text, Unit const* target, bool Is
 {
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, text, LANG_UNIVERSAL, CHAT_TAG_NONE, GetObjectGuid(), GetName(),
-        target ? target->GetObjectGuid() : ObjectGuid(),target ? target->GetName() : "");
+                                 target ? target->GetObjectGuid() : ObjectGuid(), target ? target->GetName() : "");
     SendMessageToSetInRange(&data, sWorld.getConfig(IsBossEmote ? CONFIG_FLOAT_LISTEN_RANGE_YELL : CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE), true);
 }
 
@@ -1263,7 +1263,7 @@ void WorldObject::MonsterWhisper(const char* text, Unit const* target, bool IsBo
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL, CHAT_TAG_NONE, GetObjectGuid(), GetName(),
-        target->GetObjectGuid(), target->GetName());
+                                 target->GetObjectGuid(), target->GetName());
     ((Player*)target)->GetSession()->SendPacket(&data);
 }
 
@@ -1283,7 +1283,7 @@ namespace MaNGOS
                     text = i_textData->Content[0].c_str();
 
                 ChatHandler::BuildChatPacket(data, i_msgtype, text, i_language, CHAT_TAG_NONE, i_object.GetObjectGuid(), i_object.GetNameForLocaleIdx(loc_idx),
-                    i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
+                                             i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
             }
 
         private:

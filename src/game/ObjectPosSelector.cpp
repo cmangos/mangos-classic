@@ -187,8 +187,8 @@ bool ObjectPosSelector::NextSideAngle(UsedAreaSide side, float& angle)
 
     // Already occupied and no better found
     if ((m_searchPosFor && m_nextUsedAreaItr[side]->second.occupyingObj == m_searchPosFor) ||
-         // Next occupied is too far away
-        (m_stepAngle[side] + m_searchedForReqHAngle < m_nextUsedAreaItr[side]->first - m_nextUsedAreaItr[side]->second.angleOffset))
+            // Next occupied is too far away
+            (m_stepAngle[side] + m_searchedForReqHAngle < m_nextUsedAreaItr[side]->first - m_nextUsedAreaItr[side]->second.angleOffset))
     {
         angle = m_stepAngle[side] * SignOf(side);
         return true;

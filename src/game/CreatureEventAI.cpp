@@ -67,11 +67,11 @@ void CreatureEventAI::GetAIInformation(ChatHandler& reader)
     for (CreatureEventAIList::const_iterator itr = m_CreatureEventAIList.begin(); itr != m_CreatureEventAIList.end(); ++itr)
     {
         if (itr->Event.action[2].type != ACTION_T_NONE)
-            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) actions[type(param1)]: %2u(%5u)  --  %2u(%u)  --  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time/1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1, itr->Event.action[1].type, itr->Event.action[1].raw.param1, itr->Event.action[2].type, itr->Event.action[2].raw.param1);
+            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) actions[type(param1)]: %2u(%5u)  --  %2u(%u)  --  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time / 1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1, itr->Event.action[1].type, itr->Event.action[1].raw.param1, itr->Event.action[2].type, itr->Event.action[2].raw.param1);
         else if (itr->Event.action[1].type != ACTION_T_NONE)
-            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) actions[type(param1)]: %2u(%5u)  --  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time/1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1, itr->Event.action[1].type, itr->Event.action[1].raw.param1);
+            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) actions[type(param1)]: %2u(%5u)  --  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time / 1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1, itr->Event.action[1].type, itr->Event.action[1].raw.param1);
         else
-            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) action[type(param1)]:  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time/1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1);
+            reader.PSendSysMessage("%u Type%3u (%s) Timer(%3us) action[type(param1)]:  %2u(%5u)", itr->Event.event_id, itr->Event.event_type, itr->Enabled ? "On" : "Off", itr->Time / 1000, itr->Event.action[0].type, itr->Event.action[0].raw.param1);
     }
 }
 

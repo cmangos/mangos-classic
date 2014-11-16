@@ -330,14 +330,14 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
         // generate suffix
         uint32 suffixPolyLength = 0;
         dtResult = m_navMeshQuery->findPath(
-                                suffixStartPoly,    // start polygon
-                                endPoly,            // end polygon
-                                suffixEndPoint,     // start position
-                                endPoint,           // end position
-                                &m_filter,            // polygon search filter
-                                m_pathPolyRefs + prefixPolyLength - 1,    // [out] path
-                                (int*)&suffixPolyLength,
-                                MAX_PATH_LENGTH - prefixPolyLength); // max number of polygons in output path
+                       suffixStartPoly,    // start polygon
+                       endPoly,            // end polygon
+                       suffixEndPoint,     // start position
+                       endPoint,           // end position
+                       &m_filter,            // polygon search filter
+                       m_pathPolyRefs + prefixPolyLength - 1,    // [out] path
+                       (int*)&suffixPolyLength,
+                       MAX_PATH_LENGTH - prefixPolyLength); // max number of polygons in output path
 
         if (!suffixPolyLength || dtStatusFailed(dtResult))
         {
@@ -364,14 +364,14 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
         clear();
 
         dtResult = m_navMeshQuery->findPath(
-                                startPoly,          // start polygon
-                                endPoly,            // end polygon
-                                startPoint,         // start position
-                                endPoint,           // end position
-                                &m_filter,           // polygon search filter
-                                m_pathPolyRefs,     // [out] path
-                                (int*)&m_polyLength,
-                                MAX_PATH_LENGTH);   // max number of polygons in output path
+                       startPoly,          // start polygon
+                       endPoly,            // end polygon
+                       startPoint,         // start position
+                       endPoint,           // end position
+                       &m_filter,           // polygon search filter
+                       m_pathPolyRefs,     // [out] path
+                       (int*)&m_polyLength,
+                       MAX_PATH_LENGTH);   // max number of polygons in output path
 
         if (!m_polyLength || dtStatusFailed(dtResult))
         {
