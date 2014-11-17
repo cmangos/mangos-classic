@@ -8015,7 +8015,7 @@ void ObjectMgr::LoadActiveEntities(Map* _map)
     // Special case on startup - load continents
     if (!_map)
     {
-        uint32 continents[] = {0, 1, 530, 571};
+        uint32 continents[] = {0, 1};
         for (int i = 0; i < countof(continents); ++i)
         {
             _map = sMapMgr.FindMap(continents[i]);
