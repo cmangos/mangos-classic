@@ -323,12 +323,25 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
 
                     // Should trap trigger?
-                    Unit* enemy = NULL;                     // pointer to appropriate target if found any
-                    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
-                    MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(enemy, u_check);
-                    Cell::VisitAllObjects(this, checker, radius);
-                    if (enemy)
-                        Use(enemy);
+		    // Some traps have positive spells (like Basic Campfire ->Cozy Fire)
+                    if(IsPositiveSpell(goInfo->trap.spellId))
+		    {
+			std::list<Unit*> lFriendlyUnits;
+			MaNGOS::AnyFriendlyUnitInObjectRangeCheck f_check(this,radius);
+			MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> checker(lFriendlyUnits,f_check);
+			Cell::VisitAllObjects(this,checker,radius);
+			for(std::list<Unit*>::iterator friendly=lFriendlyUnits.begin();friendly!=lFriendlyUnits.end();++friendly)
+			    Use(*friendly);
+		    }
+		    else
+		    {
+			Unit* enemy = NULL;                     // pointer to appropriate target if found any
+                	MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
+                	MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(enemy, u_check);
+                	Cell::VisitAllObjects(this, checker, radius);
+                	if (enemy)
+                    	    Use(enemy);
+		    }
                 }
 
                 if (uint32 max_charges = goInfo->GetCharges())
