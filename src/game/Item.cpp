@@ -233,7 +233,6 @@ Item::Item() :
 
 Item::~Item()
 {
-    Eluna::RemoveRef(this);
 }
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)

@@ -347,7 +347,6 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
 
 Spell::~Spell()
 {
-    Eluna::RemoveRef(this);
 }
 
 template<typename T>

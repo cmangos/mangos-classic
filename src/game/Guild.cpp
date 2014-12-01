@@ -99,7 +99,6 @@ Guild::Guild()
 
 Guild::~Guild()
 {
-    Eluna::RemoveRef(this);
 }
 
 bool Guild::Create(Player* leader, std::string gname)
