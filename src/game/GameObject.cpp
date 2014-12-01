@@ -324,14 +324,22 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
                     // Should trap trigger?
 		    // Some traps have positive spells (like Basic Campfire ->Cozy Fire)
-                    if(IsPositiveSpell(goInfo->trap.spellId))
+		    SpellEntry const* spellproto = sSpellStore.LookupEntry(goInfo->trap.spellId);
+		    bool isAOETrap = false;
+                    if(IsPositiveSpell(spellproto))
 		    {
-			std::list<Unit*> lFriendlyUnits;
-			MaNGOS::AnyFriendlyUnitInObjectRangeCheck f_check(this,radius);
-			MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> checker(lFriendlyUnits,f_check);
-			Cell::VisitAllObjects(this,checker,radius);
-			for(std::list<Unit*>::iterator friendly=lFriendlyUnits.begin();friendly!=lFriendlyUnits.end();++friendly)
-			    Use(*friendly);
+			for(int i=0;i<MAX_EFFECT_INDEX;i++)
+			    if((spellproto->EffectImplicitTargetA[i]==TARGET_CASTER_COORDINATES) && (spellproto->EffectImplicitTargetB[i]==TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER))
+				{
+				isAOETrap = true;
+				break;
+				}
+			    if(isAOETrap)
+			    {
+				MaNGOS::AnyFriendlyUnitInObjectRangeDo f_do(this,radius);
+				MaNGOS::PlayerWorker<MaNGOS::AnyFriendlyUnitInObjectRangeDo> worker(f_do);
+				Cell::VisitAllObjects(this,worker,radius);
+			    }
 		    }
 		    else
 		    {

@@ -794,6 +794,20 @@ namespace MaNGOS
             float i_range;
     };
 
+    class AnyFriendlyUnitInObjectRangeDo
+    {
+        public:
+            AnyFriendlyUnitInObjectRangeDo(GameObject* obj, float range) : i_obj(obj), i_range(range) {}
+	    void operator()(Unit* u)
+            {
+                if (u->isAlive() && i_obj->IsWithinDistInMap(u, i_range) && i_obj->IsFriendlyTo(u))
+                    i_obj->Use(u);
+            }
+        private:
+            GameObject* i_obj;
+            float i_range;
+    };
+
     class AnyUnitInObjectRangeCheck
     {
         public:
