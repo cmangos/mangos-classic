@@ -1424,19 +1424,15 @@ void WorldObject::SetMap(Map* map)
     m_mapId = map->GetId();
     m_InstanceId = map->GetInstanceId();
 
-#ifdef ELUNA
     delete elunaEvents;
     // On multithread replace this with a pointer to map's Eluna pointer stored in a map
     elunaEvents = new ElunaEventProcessor(&Eluna::GEluna, this);
-#endif
 }
 
 void WorldObject::ResetMap()
 {
-#ifdef ELUNA
     delete elunaEvents;
     elunaEvents = NULL;
-#endif
 
     m_currMap = NULL;
 }
