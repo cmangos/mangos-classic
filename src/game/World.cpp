@@ -1342,6 +1342,7 @@ void World::SetInitialWorldSettings()
     // in multithread foreach: run scripts
     sEluna->RunScripts();
     sEluna->OnConfigLoad(false); // Must be done after Eluna is initialized and scripts have run
+    sLog.outString();
 
     sLog.outString("---------------------------------------");
     sLog.outString("      CMANGOS: World initialized       ");
