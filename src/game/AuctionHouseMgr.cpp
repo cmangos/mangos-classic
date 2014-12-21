@@ -521,12 +521,6 @@ AuctionHouseEntry const* AuctionHouseMgr::GetAuctionHouseEntry(Unit* unit)
     return sAuctionHouseStore.LookupEntry(houseid);
 }
 
-AuctionHouseObject::~AuctionHouseObject()
-{
-    for (AuctionEntryMap::const_iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end(); ++itr)
-        delete itr->second;
-}
-
 void AuctionHouseObject::Update()
 {
     time_t curTime = sWorld.GetGameTime();
