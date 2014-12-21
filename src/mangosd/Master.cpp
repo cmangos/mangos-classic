@@ -43,7 +43,6 @@
 #include "MaNGOSsoap.h"
 #include "MassMailMgr.h"
 #include "DBCStores.h"
-#include "LuaEngine.h"
 
 #include <ace/OS_NS_signal.h>
 #include <ace/TP_Reactor.h>
