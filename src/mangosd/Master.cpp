@@ -319,13 +319,7 @@ int Master::Run()
         // go down and shutdown the server
     }
 
-    ///- Used by Eluna
-    sEluna->OnStartup();
-
     sWorldSocketMgr->Wait();
-
-    ///- Used by Eluna
-    sEluna->OnShutdown();
 
     ///- Stop freeze protection before shutdown tasks
     if (freeze_thread)
