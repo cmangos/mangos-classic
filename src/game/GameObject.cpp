@@ -985,12 +985,6 @@ void GameObject::Use(Unit* user)
     uint32 spellId = 0;
     bool triggered = false;
 
-    if (Player* playerUser = user->ToPlayer())
-    {
-        if (sScriptMgr.OnGossipHello(playerUser, this))
-            return;
-    }
-
     // test only for exist cooldown data (cooldown timer used for door/buttons reset that not have use cooldown)
     if (uint32 cooldown = GetGOInfo()->GetCooldown())
     {
