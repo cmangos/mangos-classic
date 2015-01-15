@@ -274,7 +274,7 @@ bool Weather::UpdateWeather()
     }
 
     DETAIL_FILTER_LOG(LOG_FILTER_WEATHER, "Change the weather of zone %u to %s.", m_zone, wthstr);
-    sEluna->OnChange(this, (WeatherState)m_type, m_grade);
+    //sEluna->OnChange(this, (WeatherState)m_type, m_grade);
     return true;
 }
 
