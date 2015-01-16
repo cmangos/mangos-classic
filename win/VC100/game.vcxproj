@@ -592,6 +592,7 @@
     <ClInclude Include="..\..\src\game\LuaEngine\CorpseMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\CreatureMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaBinding.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaCreatureAI.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaEventMgr.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaIncludes.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaTemplate.h" />

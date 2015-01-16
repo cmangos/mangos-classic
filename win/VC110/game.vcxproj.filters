@@ -943,6 +943,9 @@
     <ClInclude Include="..\..\src\game\LuaEngine\LuaEngine.h">
       <Filter>LuaEngine</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaCreatureAI.h">
+      <Filter>LuaEngine</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\WorldPacketMethods.h">
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
