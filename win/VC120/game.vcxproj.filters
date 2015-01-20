@@ -484,19 +484,43 @@
     <ClCompile Include="..\..\src\game\BattleGround\BattleGroundWS.cpp">
       <Filter>BattleGround</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\BattleGroundHooks.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\CreatureHooks.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\ElunaEventMgr.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\ElunaUtility.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\HookMgr.cpp">
+    <ClCompile Include="..\..\src\game\LuaEngine\GameObjectHooks.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\GroupHooks.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\GuildHooks.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\ItemHooks.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\LuaEngine.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\LuaFunctions.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\PlayerHooks.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\ServerHooks.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\VehicleHooks.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -937,6 +961,15 @@
     <ClInclude Include="..\..\src\game\BattleGround\BattleGroundWS.h">
       <Filter>BattleGround</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\HookHelpers.h">
+      <Filter>LuaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\Hooks.h">
+      <Filter>LuaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\LuaEngine.h">
+      <Filter>LuaEngine</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\WorldPacketMethods.h">
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
@@ -991,6 +1024,12 @@
     <ClInclude Include="..\..\src\game\LuaEngine\WorldObjectMethods.h">
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\HookMgr.h">
+      <Filter>LuaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\LuaEngine.h">
+      <Filter>LuaEngine</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaBinding.h">
       <Filter>LuaEngine</Filter>
     </ClInclude>
@@ -1008,12 +1047,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaQueryMethods.h">
       <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\HookMgr.h">
-      <Filter>LuaEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\LuaEngine.h">
-      <Filter>LuaEngine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaCreatureAI.h">
       <Filter>LuaEngine</Filter>
