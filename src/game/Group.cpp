@@ -31,19 +31,6 @@
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
 #include "Util.h"
-#include "LootMgr.h"
-
-#define LOOT_ROLL_TIMEOUT  (1*MINUTE*IN_MILLISECONDS)
-
-//===================================================
-//============== Roll ===============================
-//===================================================
-
-void Roll::targetObjectBuildLink()
-{
-    // called from link()
-    getTarget()->addLootValidatorRef(this);
-}
 
 //===================================================
 //============== Group ==============================
@@ -66,14 +53,6 @@ Group::~Group()
             m_bgGroup->SetBgRaid(HORDE, NULL);
         else
             sLog.outError("Group::~Group: battleground group is not linked to the correct battleground.");
-    }
-    Rolls::iterator itr;
-    while (!RollId.empty())
-    {
-        itr = RollId.begin();
-        Roll* r = *itr;
-        RollId.erase(itr);
-        delete(r);
     }
 
     // it is undefined whether objectmgr (which stores the groups) or instancesavemgr
@@ -98,7 +77,9 @@ bool Group::Create(ObjectGuid guid, const char* name)
 
     m_lootMethod = GROUP_LOOT;
     m_lootThreshold = ITEM_QUALITY_UNCOMMON;
-    m_looterGuid = guid;
+    m_masterLooterGuid = guid;
+    m_currentLooterGuid = guid;                                             // used for round robin looter
+
 
     if (!isBGGroup())
     {
@@ -116,7 +97,7 @@ bool Group::Create(ObjectGuid guid, const char* name)
         CharacterDatabase.PExecute("INSERT INTO groups(groupId,leaderGuid,mainTank,mainAssistant,lootMethod,looterGuid,lootThreshold,icon1,icon2,icon3,icon4,icon5,icon6,icon7,icon8,isRaid) "
                                    "VALUES('%u','%u','%u','%u','%u','%u','%u','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','" UI64FMTD "','%u')",
                                    m_Id, m_leaderGuid.GetCounter(), m_mainTankGuid.GetCounter(), m_mainAssistantGuid.GetCounter(), uint32(m_lootMethod),
-                                   m_looterGuid.GetCounter(), uint32(m_lootThreshold),
+                                   m_masterLooterGuid.GetCounter(), uint32(m_lootThreshold),
                                    m_targetIcons[0].GetRawValue(), m_targetIcons[1].GetRawValue(),
                                    m_targetIcons[2].GetRawValue(), m_targetIcons[3].GetRawValue(),
                                    m_targetIcons[4].GetRawValue(), m_targetIcons[5].GetRawValue(),
@@ -153,12 +134,13 @@ bool Group::LoadGroupFromDB(Field* fields)
     m_mainTankGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
     m_mainAssistantGuid = ObjectGuid(HIGHGUID_PLAYER, fields[1].GetUInt32());
     m_lootMethod = LootMethod(fields[2].GetUInt8());
-    m_looterGuid = ObjectGuid(HIGHGUID_PLAYER, fields[3].GetUInt32());
+    m_masterLooterGuid = ObjectGuid(HIGHGUID_PLAYER, fields[3].GetUInt32());
     m_lootThreshold = ItemQualities(fields[4].GetUInt16());
 
     for (int i = 0; i < TARGET_ICON_COUNT; ++i)
         m_targetIcons[i] = ObjectGuid(fields[5 + i].GetUInt64());
 
+    m_currentLooterGuid = m_masterLooterGuid;
     return true;
 }
 
@@ -403,7 +385,6 @@ void Group::Disband(bool hideDestroy)
 
         _homebindIfInstance(player);
     }
-    RollId.clear();
     m_memberSlots.clear();
 
     RemoveAllInvites();
@@ -419,415 +400,6 @@ void Group::Disband(bool hideDestroy)
 
     m_leaderGuid.Clear();
     m_leaderName.clear();
-}
-
-/*********************************************************/
-/***                   LOOT SYSTEM                     ***/
-/*********************************************************/
-
-void Group::SendLootStartRoll(uint32 CountDown, const Roll& r)
-{
-    WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4));
-    data << r.lootedTargetGUID;                             // creature guid what we're looting
-    data << uint32(r.itemSlot);                             // item slot in loot
-    data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
-    data << uint32(0);                                      // randomSuffix - not used ?
-    data << uint32(r.itemRandomPropId);                     // item random property ID
-    data << uint32(CountDown);                              // the countdown time to choose "need" or "greed"
-
-    for (Roll::PlayerVote::const_iterator itr = r.playerVote.begin(); itr != r.playerVote.end(); ++itr)
-    {
-        Player* p = sObjectMgr.GetPlayer(itr->first);
-        if (!p || !p->GetSession())
-            continue;
-
-        if (itr->second == ROLL_NOT_VALID)
-            continue;
-
-        p->GetSession()->SendPacket(&data);
-    }
-}
-
-void Group::SendLootRoll(ObjectGuid const& targetGuid, uint8 rollNumber, uint8 rollType, const Roll& r)
-{
-    WorldPacket data(SMSG_LOOT_ROLL, (8 + 4 + 8 + 4 + 4 + 4 + 1 + 1));
-    data << r.lootedTargetGUID;                             // creature guid what we're looting
-    data << uint32(r.itemSlot);                             // unknown, maybe amount of players, or item slot in loot
-    data << targetGuid;
-    data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
-    data << uint32(0);                                      // randomSuffix - not used?
-    data << uint32(r.itemRandomPropId);                     // Item random property ID
-    data << uint8(rollNumber);                              // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
-    data << uint8(rollType);                                // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
-
-    for (Roll::PlayerVote::const_iterator itr = r.playerVote.begin(); itr != r.playerVote.end(); ++itr)
-    {
-        Player* p = sObjectMgr.GetPlayer(itr->first);
-        if (!p || !p->GetSession())
-            continue;
-
-        if (itr->second != ROLL_NOT_VALID)
-            p->GetSession()->SendPacket(&data);
-    }
-}
-
-void Group::SendLootRollWon(ObjectGuid const& targetGuid, uint8 rollNumber, RollVote rollType, const Roll& r)
-{
-    WorldPacket data(SMSG_LOOT_ROLL_WON, (8 + 4 + 4 + 4 + 4 + 8 + 1 + 1));
-    data << r.lootedTargetGUID;                             // creature guid what we're looting
-    data << uint32(r.itemSlot);                             // item slot in loot
-    data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
-    data << uint32(0);                                      // randomSuffix - not used ?
-    data << uint32(r.itemRandomPropId);                     // Item random property
-    data << targetGuid;                                     // guid of the player who won.
-    data << uint8(rollNumber);                              // rollnumber related to SMSG_LOOT_ROLL
-    data << uint8(rollType);                                // Rolltype related to SMSG_LOOT_ROLL
-
-    for (Roll::PlayerVote::const_iterator itr = r.playerVote.begin(); itr != r.playerVote.end(); ++itr)
-    {
-        Player* p = sObjectMgr.GetPlayer(itr->first);
-        if (!p || !p->GetSession())
-            continue;
-
-        if (itr->second != ROLL_NOT_VALID)
-            p->GetSession()->SendPacket(&data);
-    }
-}
-
-void Group::SendLootAllPassed(Roll const& r)
-{
-    WorldPacket data(SMSG_LOOT_ALL_PASSED, (8 + 4 + 4 + 4 + 4));
-    data << r.lootedTargetGUID;                             // creature guid what we're looting
-    data << uint32(r.itemSlot);                             // item slot in loot
-    data << uint32(r.itemid);                               // The itemEntryId for the item that shall be rolled for
-    data << uint32(r.itemRandomPropId);                     // Item random property ID
-    data << uint32(0);                                      // Item random suffix ID - not used ?
-
-    for (Roll::PlayerVote::const_iterator itr = r.playerVote.begin(); itr != r.playerVote.end(); ++itr)
-    {
-        Player* p = sObjectMgr.GetPlayer(itr->first);
-        if (!p || !p->GetSession())
-            continue;
-
-        if (itr->second != ROLL_NOT_VALID)
-            p->GetSession()->SendPacket(&data);
-    }
-}
-
-void Group::GroupLoot(WorldObject* pSource, Loot* loot)
-{
-    for (uint8 itemSlot = 0; itemSlot < loot->items.size(); ++itemSlot)
-    {
-        LootItem& lootItem = loot->items[itemSlot];
-        ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(lootItem.itemid);
-        if (!itemProto)
-        {
-            DEBUG_LOG("Group::GroupLoot: missing item prototype for item with id: %d", lootItem.itemid);
-            continue;
-        }
-
-        // roll for over-threshold item if it's one-player loot
-        if (itemProto->Quality >= uint32(m_lootThreshold) && !lootItem.freeforall)
-            StartLootRoll(pSource, GROUP_LOOT, loot, itemSlot);
-        else
-            lootItem.is_underthreshold = 1;
-    }
-}
-
-void Group::NeedBeforeGreed(WorldObject* pSource, Loot* loot)
-{
-    for (uint8 itemSlot = 0; itemSlot < loot->items.size(); ++itemSlot)
-    {
-        LootItem& lootItem = loot->items[itemSlot];
-        ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(lootItem.itemid);
-        if (!itemProto)
-        {
-            DEBUG_LOG("Group::NeedBeforeGreed: missing item prototype for item with id: %d", lootItem.itemid);
-            continue;
-        }
-
-        // only roll for one-player items, not for ones everyone can get
-        if (itemProto->Quality >= uint32(m_lootThreshold) && !lootItem.freeforall)
-            StartLootRoll(pSource, NEED_BEFORE_GREED, loot, itemSlot);
-        else
-            lootItem.is_underthreshold = 1;
-    }
-}
-
-void Group::MasterLoot(WorldObject* pSource, Loot* loot)
-{
-    for (LootItemList::iterator i = loot->items.begin(); i != loot->items.end(); ++i)
-    {
-        ItemPrototype const* item = ObjectMgr::GetItemPrototype(i->itemid);
-        if (!item)
-            continue;
-        if (item->Quality < uint32(m_lootThreshold))
-            i->is_underthreshold = 1;
-    }
-
-    uint32 real_count = 0;
-
-    WorldPacket data(SMSG_LOOT_MASTER_LIST, 330);
-    data << uint8(GetMembersCount());
-
-    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
-    {
-        Player* looter = itr->getSource();
-        if (!looter->IsInWorld())
-            continue;
-
-        if (looter->IsWithinDist(pSource, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
-        {
-            data << looter->GetObjectGuid();
-            ++real_count;
-        }
-    }
-
-    data.put<uint8>(0, real_count);
-
-    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
-    {
-        Player* looter = itr->getSource();
-        if (looter->IsWithinDist(pSource, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
-            looter->GetSession()->SendPacket(&data);
-    }
-}
-
-bool Group::CountRollVote(Player* player, ObjectGuid const& lootedTarget, uint32 itemSlot, RollVote vote)
-{
-    Rolls::iterator rollI = RollId.begin();
-    for (; rollI != RollId.end(); ++rollI)
-        if ((*rollI)->isValid() && (*rollI)->lootedTargetGUID == lootedTarget && (*rollI)->itemSlot == itemSlot)
-            break;
-
-    if (rollI == RollId.end())
-        return false;
-
-    CountRollVote(player->GetObjectGuid(), rollI, vote);    // result not related this function result meaning, ignore
-    return true;
-}
-
-bool Group::CountRollVote(ObjectGuid const& playerGUID, Rolls::iterator& rollI, RollVote vote)
-{
-    Roll* roll = *rollI;
-
-    Roll::PlayerVote::iterator itr = roll->playerVote.find(playerGUID);
-    // this condition means that player joins to the party after roll begins
-    if (itr == roll->playerVote.end())
-        return true;                                        // result used for need iterator ++, so avoid for end of list
-
-    if (roll->getLoot())
-        if (roll->getLoot()->items.empty())
-            return false;
-
-    switch (vote)
-    {
-        case ROLL_PASS:                                     // Player choose pass
-        {
-            SendLootRoll(playerGUID, 128, 128, *roll);
-            ++roll->totalPass;
-            itr->second = ROLL_PASS;
-            break;
-        }
-        case ROLL_NEED:                                     // player choose Need
-        {
-            SendLootRoll(playerGUID, 0, 0, *roll);
-            ++roll->totalNeed;
-            itr->second = ROLL_NEED;
-            break;
-        }
-        case ROLL_GREED:                                    // player choose Greed
-        {
-            SendLootRoll(playerGUID, 128, 2, *roll);
-            ++roll->totalGreed;
-            itr->second = ROLL_GREED;
-            break;
-        }
-        default:                                            // Roll removed case
-            break;
-    }
-
-    if (roll->totalPass + roll->totalNeed + roll->totalGreed >= roll->totalPlayersRolling)
-    {
-        CountTheRoll(rollI);
-        return true;
-    }
-
-    return false;
-}
-
-void Group::StartLootRoll(WorldObject* lootTarget, LootMethod method, Loot* loot, uint8 itemSlot)
-{
-    if (itemSlot >= loot->items.size())
-        return;
-
-    LootItem const& lootItem = loot->items[itemSlot];
-
-    ItemPrototype const* item = ObjectMgr::GetItemPrototype(lootItem.itemid);
-
-    Roll* r = new Roll(lootTarget->GetObjectGuid(), lootItem);
-
-    // a vector is filled with only near party members
-    for (GroupReference* itr = GetFirstMember(); itr != NULL; itr = itr->next())
-    {
-        Player* playerToRoll = itr->getSource();
-        if (!playerToRoll || !playerToRoll->GetSession())
-            continue;
-
-        if ((method != NEED_BEFORE_GREED || playerToRoll->CanUseItem(item) == EQUIP_ERR_OK) && lootItem.AllowedForPlayer(playerToRoll, lootTarget))
-        {
-            if (playerToRoll->IsWithinDistInMap(lootTarget, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
-            {
-                r->playerVote[playerToRoll->GetObjectGuid()] = ROLL_NOT_EMITED_YET;
-                ++r->totalPlayersRolling;
-            }
-        }
-    }
-
-    if (r->totalPlayersRolling > 0)                         // has looters
-    {
-        r->setLoot(loot);
-        r->itemSlot = itemSlot;
-
-        if (r->totalPlayersRolling == 1)                    // single looter
-            r->playerVote.begin()->second = ROLL_NEED;
-        else
-        {
-            // Only GO-group looting and NPC-group looting possible
-            MANGOS_ASSERT(lootTarget->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT));
-
-            SendLootStartRoll(LOOT_ROLL_TIMEOUT, *r);
-            loot->items[itemSlot].is_blocked = true;
-
-            lootTarget->StartGroupLoot(this, LOOT_ROLL_TIMEOUT);
-        }
-
-        RollId.push_back(r);
-    }
-    else                                            // no looters??
-        delete r;
-}
-
-// called when roll timer expires
-void Group::EndRoll()
-{
-    while (!RollId.empty())
-    {
-        // need more testing here, if rolls disappear
-        Rolls::iterator itr = RollId.begin();
-        CountTheRoll(itr);                                  // i don't have to edit player votes, who didn't vote ... he will pass
-    }
-}
-
-void Group::CountTheRoll(Rolls::iterator& rollI)
-{
-    Roll* roll = *rollI;
-    if (!roll->isValid())                                   // is loot already deleted ?
-    {
-        rollI = RollId.erase(rollI);
-        delete roll;
-        return;
-    }
-
-    // end of the roll
-    if (roll->totalNeed > 0)
-    {
-        if (!roll->playerVote.empty())
-        {
-            uint8 maxresul = 0;
-            ObjectGuid maxguid  = (*roll->playerVote.begin()).first;
-            Player* player;
-
-            for (Roll::PlayerVote::const_iterator itr = roll->playerVote.begin(); itr != roll->playerVote.end(); ++itr)
-            {
-                if (itr->second != ROLL_NEED)
-                    continue;
-
-                uint8 randomN = urand(1, 100);
-                SendLootRoll(itr->first, randomN, ROLL_NEED, *roll);
-                if (maxresul < randomN)
-                {
-                    maxguid  = itr->first;
-                    maxresul = randomN;
-                }
-            }
-            SendLootRollWon(maxguid, maxresul, ROLL_NEED, *roll);
-            player = sObjectMgr.GetPlayer(maxguid);
-
-            if (player && player->GetSession())
-            {
-                ItemPosCountVec dest;
-                LootItem* item = &(roll->getLoot()->items[roll->itemSlot]);
-                InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, roll->itemid, item->count);
-                if (msg == EQUIP_ERR_OK)
-                {
-                    item->is_looted = true;
-                    roll->getLoot()->NotifyItemRemoved(roll->itemSlot);
-                    --roll->getLoot()->unlootedCount;
-                    player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId);
-                }
-                else
-                {
-                    item->is_blocked = false;
-                    player->SendEquipError(msg, NULL, NULL, roll->itemid);
-                }
-            }
-        }
-    }
-    else if (roll->totalGreed > 0)
-    {
-        if (!roll->playerVote.empty())
-        {
-            uint8 maxresul = 0;
-            ObjectGuid maxguid = (*roll->playerVote.begin()).first;
-            Player* player;
-            RollVote rollvote = ROLL_PASS;                  // Fixed: Using uninitialized memory 'rollvote'
-
-            Roll::PlayerVote::iterator itr;
-            for (itr = roll->playerVote.begin(); itr != roll->playerVote.end(); ++itr)
-            {
-                if (itr->second != ROLL_GREED)
-                    continue;
-
-                uint8 randomN = urand(1, 100);
-                SendLootRoll(itr->first, randomN, itr->second, *roll);
-                if (maxresul < randomN)
-                {
-                    maxguid  = itr->first;
-                    maxresul = randomN;
-                }
-            }
-            SendLootRollWon(maxguid, maxresul, ROLL_GREED, *roll);
-            player = sObjectMgr.GetPlayer(maxguid);
-
-            if (player && player->GetSession())
-            {
-                ItemPosCountVec dest;
-                LootItem* item = &(roll->getLoot()->items[roll->itemSlot]);
-                InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, roll->itemid, item->count);
-                if (msg == EQUIP_ERR_OK)
-                {
-                    item->is_looted = true;
-                    roll->getLoot()->NotifyItemRemoved(roll->itemSlot);
-                    --roll->getLoot()->unlootedCount;
-                    player->StoreNewItem(dest, roll->itemid, true, item->randomPropertyId);
-                }
-                else
-                {
-                    item->is_blocked = false;
-                    player->SendEquipError(msg, NULL, NULL, roll->itemid);
-                }
-            }
-        }
-    }
-    else
-    {
-        SendLootAllPassed(*roll);
-        LootItem* item = &(roll->getLoot()->items[roll->itemSlot]);
-        if (item) item->is_blocked = false;
-    }
-    rollI = RollId.erase(rollI);
-    delete roll;
 }
 
 void Group::SetTargetIcon(uint8 id, ObjectGuid targetGuid)
@@ -941,11 +513,12 @@ void Group::SendUpdate()
             data << (uint8)(citr2->group | (citr2->assistant ? 0x80 : 0));
         }
 
+        ObjectGuid masterLootGuid = (m_lootMethod == MASTER_LOOT) ? m_masterLooterGuid : ObjectGuid();
         data << m_leaderGuid;                               // leader guid
         if (GetMembersCount() - 1)
         {
             data << uint8(m_lootMethod);                    // loot method
-            data << m_looterGuid;                           // looter guid
+            data << masterLootGuid;                         // master loot guid
             data << uint8(m_lootThreshold);                 // loot threshold
         }
         player->GetSession()->SendPacket(&data);
@@ -1106,8 +679,6 @@ bool Group::_removeMember(ObjectGuid guid)
         }
     }
 
-    _removeRolls(guid);
-
     member_witerator slot = _getMemberWSlot(guid);
     if (slot != m_memberSlots.end())
     {
@@ -1186,34 +757,6 @@ void Group::_setLeader(ObjectGuid guid)
 
     m_leaderGuid = slot->guid;
     m_leaderName = slot->name;
-}
-
-void Group::_removeRolls(ObjectGuid guid)
-{
-    for (Rolls::iterator it = RollId.begin(); it != RollId.end();)
-    {
-        Roll* roll = *it;
-        Roll::PlayerVote::iterator itr2 = roll->playerVote.find(guid);
-        if (itr2 == roll->playerVote.end())
-        {
-            ++it;
-            continue;
-        }
-
-        if (itr2->second == ROLL_GREED)
-            --roll->totalGreed;
-        if (itr2->second == ROLL_NEED)
-            --roll->totalNeed;
-        if (itr2->second == ROLL_PASS)
-            --roll->totalPass;
-        if (itr2->second != ROLL_NOT_VALID)
-            --roll->totalPlayersRolling;
-
-        roll->playerVote.erase(itr2);
-
-        if (!CountRollVote(guid, it, ROLL_NOT_EMITED_YET))
-            ++it;
-    }
 }
 
 bool Group::_setMembersGroup(ObjectGuid guid, uint8 group)
@@ -1350,79 +893,6 @@ void Group::ChangeMembersGroup(Player* player, uint8 group)
 
         SendUpdate();
     }
-}
-
-void Group::UpdateLooterGuid(WorldObject* pSource, bool ifneed)
-{
-    switch (GetLootMethod())
-    {
-        case MASTER_LOOT:
-        case FREE_FOR_ALL:
-            return;
-        default:
-            // round robin style looting applies for all low
-            // quality items in each loot method except free for all and master loot
-            break;
-    }
-
-    member_citerator guid_itr = _getMemberCSlot(GetLooterGuid());
-    if (guid_itr != m_memberSlots.end())
-    {
-        if (ifneed)
-        {
-            // not update if only update if need and ok
-            Player* looter = ObjectAccessor::FindPlayer(guid_itr->guid);
-            if (looter && looter->IsWithinDist(pSource, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
-                return;
-        }
-        ++guid_itr;
-    }
-
-    // search next after current
-    if (guid_itr != m_memberSlots.end())
-    {
-        for (member_citerator itr = guid_itr; itr != m_memberSlots.end(); ++itr)
-        {
-            if (Player* pl = ObjectAccessor::FindPlayer(itr->guid))
-            {
-                if (pl->IsWithinDist(pSource, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
-                {
-                    bool refresh = pl->GetLootGuid() == pSource->GetObjectGuid();
-
-                    // if(refresh)                          // update loot for new looter
-                    //    pl->GetSession()->DoLootRelease(pl->GetLootGUID());
-                    SetLooterGuid(pl->GetObjectGuid());
-                    SendUpdate();
-                    if (refresh)                            // update loot for new looter
-                        pl->SendLoot(pSource->GetObjectGuid(), LOOT_CORPSE);
-                    return;
-                }
-            }
-        }
-    }
-
-    // search from start
-    for (member_citerator itr = m_memberSlots.begin(); itr != guid_itr; ++itr)
-    {
-        if (Player* pl = ObjectAccessor::FindPlayer(itr->guid))
-        {
-            if (pl->IsWithinDist(pSource, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
-            {
-                bool refresh = pl->GetLootGuid() == pSource->GetObjectGuid();
-
-                // if(refresh)                              // update loot for new looter
-                //    pl->GetSession()->DoLootRelease(pl->GetLootGUID());
-                SetLooterGuid(pl->GetObjectGuid());
-                SendUpdate();
-                if (refresh)                                // update loot for new looter
-                    pl->SendLoot(pSource->GetObjectGuid(), LOOT_CORPSE);
-                return;
-            }
-        }
-    }
-
-    SetLooterGuid(ObjectGuid());
-    SendUpdate();
 }
 
 uint32 Group::CanJoinBattleGroundQueue(BattleGroundTypeId bgTypeId, BattleGroundQueueTypeId bgQueueTypeId, uint32 MinPlayerCount, uint32 MaxPlayerCount)

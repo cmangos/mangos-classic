@@ -28,6 +28,7 @@
 #include "ScriptMgr.h"
 #include "Totem.h"
 #include "SpellAuras.h"
+#include "LootMgr.h"
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
@@ -235,7 +236,13 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         stmt.PExecute(pItem->GetGUIDLow());
     }
     else
-        pUser->SendLoot(pItem->GetObjectGuid(), LOOT_CORPSE);
+    {
+        Loot*& loot = pItem->loot;
+        if (!loot)
+            loot = new Loot(pUser, pItem, LOOT_PICKPOCKETING);
+
+        loot->ShowContentTo(pUser);
+    }
 }
 
 void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)

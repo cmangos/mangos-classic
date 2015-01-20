@@ -4631,10 +4631,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_TARGET_UNSKINNABLE;
 
                 Creature* creature = (Creature*)m_targets.getUnitTarget();
-                if (creature->GetCreatureType() != CREATURE_TYPE_CRITTER && (!creature->lootForBody || creature->lootForSkin || !creature->loot.empty()))
-                {
+
+                if (creature->isAlive())
+                    return SPELL_FAILED_TARGET_NOT_DEAD;
+
+                if (creature->GetLootStatus() != CREATURE_LOOT_STATUS_LOOTED)// || creature->GetCreatureType() != CREATURE_TYPE_CRITTER)
                     return SPELL_FAILED_TARGET_NOT_LOOTED;
-                }
 
                 uint32 skill = creature->GetCreatureInfo()->GetRequiredLootSkill();
 
@@ -4677,6 +4679,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                     lockId = go->GetGOInfo()->GetLockId();
                     if (!lockId)
                         return SPELL_FAILED_ALREADY_OPEN;
+
+                    // check if its in use only when cast is finished (called from spell::cast() with strict = false)
+                    if (!strict && go->IsInUse())
+                        return SPELL_FAILED_CHEST_IN_USE;
                 }
                 else if (Item* item = m_targets.getItemTarget())
                 {

@@ -24,7 +24,6 @@
 #include "SharedDefines.h"
 #include "DBCEnums.h"
 #include "ObjectGuid.h"
-#include "LootMgr.h"
 #include "Unit.h"
 #include "Player.h"
 

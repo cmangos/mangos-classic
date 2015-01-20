@@ -43,7 +43,6 @@
 #include "SQLStorages.h"
 
 GameObject::GameObject() : WorldObject(),
-    loot(this),
     m_model(NULL),
     m_goInfo(NULL)
 {
@@ -62,9 +61,11 @@ GameObject::GameObject() : WorldObject(),
 
     m_captureTimer = 0;
 
-    m_groupLootTimer = 0;
-    m_groupLootId = 0;
     m_lootGroupRecipientId = 0;
+
+    m_isInUse = false;
+    m_reStockTimer = 0;
+    m_despawnTimer = 0;
 }
 
 GameObject::~GameObject()
@@ -238,6 +239,29 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
                     break;
                 }
+                case GAMEOBJECT_TYPE_CHEST:
+                {
+                    if (m_goInfo->chest.chestRestockTime)
+                    {
+                        if (m_reStockTimer != 0)
+                        {
+                            if (m_reStockTimer <= time(NULL))
+                            {
+                                m_reStockTimer = 0;
+                                m_lootState = GO_READY;
+                                delete loot;
+                                loot = NULL;
+                                ForceValuesUpdateAtIndex(GAMEOBJECT_DYN_FLAGS);
+                            }
+                        }
+                        else
+                            m_lootState = GO_READY;
+
+                        return;
+                    }
+                    else
+                        m_lootState = GO_READY;
+                }
                 default:
                     break;
             }
@@ -352,12 +376,14 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                         ResetDoorOrButton();
                     break;
                 case GAMEOBJECT_TYPE_CHEST:
-                    if (m_groupLootId)
+                    if (loot)
                     {
-                        if (m_groupLootTimer <= update_diff)
-                            StopGroupLoot();
-                        else
-                            m_groupLootTimer -= update_diff;
+                        if (loot->IsChanged())
+                            m_despawnTimer = time(NULL) + 5 * MINUTE; // TODO:: need to add a define?
+                        else if (m_despawnTimer != 0 && m_despawnTimer <= time(NULL))
+                            m_lootState = GO_JUST_DEACTIVATED;
+
+                        loot->Update();
                     }
                     break;
                 case GAMEOBJECT_TYPE_GOOBER:
@@ -414,6 +440,16 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     m_UniqueUsers.clear();
                     SetLootState(GO_READY);
                     return; // SetLootState and return because go is treated as "burning flag" due to GetGoAnimProgress() being 100 and would be removed on the client
+                case GAMEOBJECT_TYPE_CHEST:
+                    m_despawnTimer = 0;
+                    if (m_goInfo->chest.chestRestockTime)
+                    {
+                        m_reStockTimer = time(NULL) + m_goInfo->chest.chestRestockTime;
+                        m_lootState = GO_NOT_READY;
+                        ForceValuesUpdateAtIndex(GAMEOBJECT_DYN_FLAGS);
+                        return;
+                    }
+                    break;
                 default:
                     break;
             }
@@ -442,7 +478,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
             }
 
-            loot.clear();
+            delete loot;
+            loot = NULL;
             SetLootRecipient(NULL);
             SetLootState(GO_READY);
 
@@ -1315,7 +1352,12 @@ void GameObject::Use(Unit* user)
                             SetLootState(GO_JUST_DEACTIVATED);
                         }
                         else
-                            player->SendLoot(GetObjectGuid(), success ? LOOT_FISHING : LOOT_FISHING_FAIL);
+                        {
+                            if (loot)
+                                delete loot;
+                            loot = new Loot(player, this, success ? LOOT_FISHING : LOOT_FISHING_FAIL);
+                            loot->ShowContentTo(player);
+                        }
                     }
                     else
                     {
@@ -1507,7 +1549,11 @@ void GameObject::Use(Unit* user)
 
             Player* player = (Player*)user;
 
-            player->SendLoot(GetObjectGuid(), LOOT_FISHINGHOLE);
+            if (loot)
+                delete loot;
+            loot = new Loot(player, this, LOOT_FISHINGHOLE);
+            loot->ShowContentTo(player);
+
             return;
         }
         case GAMEOBJECT_TYPE_FLAGDROP:                      // 26
@@ -1721,24 +1767,6 @@ void GameObject::UpdateModel()
     m_model = GameObjectModel::construct(this);
     if (m_model)
         GetMap()->InsertGameObjectModel(*m_model);
-}
-
-void GameObject::StartGroupLoot(Group* group, uint32 timer)
-{
-    m_groupLootId = group->GetId();
-    m_groupLootTimer = timer;
-}
-
-void GameObject::StopGroupLoot()
-{
-    if (!m_groupLootId)
-        return;
-
-    if (Group* group = sObjectMgr.GetGroupById(m_groupLootId))
-        group->EndRoll();
-
-    m_groupLootTimer = 0;
-    m_groupLootId = 0;
 }
 
 Player* GameObject::GetOriginalLootRecipient() const
@@ -2092,4 +2120,13 @@ float GameObject::GetInteractionDistance()
         default:
             return INTERACTION_DISTANCE;
     }
+}
+
+void GameObject::SetInUse(bool use)
+{
+    m_isInUse = use;
+    if (use)
+        SetGoState(GO_STATE_ACTIVE);
+    else
+        SetGoState(GO_STATE_READY);
 }

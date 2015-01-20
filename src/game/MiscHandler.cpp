@@ -31,7 +31,6 @@
 #include "Auth/BigNumber.h"
 #include "Auth/Sha1.h"
 #include "UpdateData.h"
-#include "LootMgr.h"
 #include "Chat.h"
 #include "ScriptMgr.h"
 #include <zlib/zlib.h>
@@ -264,9 +263,6 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
 void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_LOGOUT_REQUEST, security %u", GetSecurity());
-
-    if (ObjectGuid lootGuid = GetPlayer()->GetLootGuid())
-        DoLootRelease(lootGuid);
 
     // Can not logout if...
     if (GetPlayer()->isInCombat() ||                        //...is in combat

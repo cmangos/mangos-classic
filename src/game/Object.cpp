@@ -43,6 +43,7 @@
 #include "movement/packet_builder.h"
 #include "CreatureLinkingMgr.h"
 #include "Chat.h"
+#include "LootMgr.h"
 
 Object::Object()
 {
@@ -54,6 +55,7 @@ Object::Object()
 
     m_inWorld           = false;
     m_objectUpdated     = false;
+    loot              = NULL;
 }
 
 Object::~Object()
@@ -72,6 +74,8 @@ Object::~Object()
     }
 
     delete[] m_uint32Values;
+
+    delete loot;
 }
 
 void Object::_InitValues()
@@ -416,35 +420,66 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 {
                     *data << (m_uint32Values[index] & ~UNIT_FLAG_NOT_SELECTABLE);
                 }
-                // Hide special-info for non empathy-casters,
                 // Hide lootable animation for unallowed players
-                else if (index == UNIT_DYNAMIC_FLAGS)
+                // Handle tapped flag
+                else if (index == UNIT_DYNAMIC_FLAGS && GetTypeId() == TYPEID_UNIT)
                 {
+                    Creature* creature = (Creature*)this;
                     uint32 dynflagsValue = m_uint32Values[index];
+                    bool setTapFlags = false;
 
-                    // Checking SPELL_AURA_EMPATHY and caster
-                    if (dynflagsValue & UNIT_DYNFLAG_SPECIALINFO && ((Unit*)this)->isAlive())
+                    if (creature->isAlive())
                     {
-                        bool bIsEmpathy = false;
-                        bool bIsCaster = false;
-                        Unit::AuraList const& mAuraEmpathy = ((Unit*)this)->GetAurasByType(SPELL_AURA_EMPATHY);
-                        for (Unit::AuraList::const_iterator itr = mAuraEmpathy.begin(); !bIsCaster && itr != mAuraEmpathy.end(); ++itr)
+                        // creature is alive so, not lootable
+                        dynflagsValue = dynflagsValue & ~UNIT_DYNFLAG_LOOTABLE;
+
+                        if (creature->isInCombat())
                         {
-                            bIsEmpathy = true;              // Empathy by aura set
-                            if ((*itr)->GetCasterGuid() == target->GetObjectGuid())
-                                bIsCaster = true;           // target is the caster of an empathy aura
+                            // as creature is in combat we have to manage tap flags
+                            setTapFlags = true;
                         }
-                        if (bIsEmpathy && !bIsCaster)       // Empathy by aura, but target is not the caster
-                            dynflagsValue &= ~UNIT_DYNFLAG_SPECIALINFO;
+                        else
+                        {
+                            // creature is not in combat so its not tapped
+                            dynflagsValue = dynflagsValue & ~UNIT_DYNFLAG_TAPPED;
+                            //sLog.outString(">> %s is not in combat so not tapped by %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
+                        }
+                    }
+                    else
+                    {
+                        // check loot flag
+                        if (creature->loot && creature->loot->CanLoot(target))
+                        {
+                            // creature is dead and this player can loot it
+                            dynflagsValue = dynflagsValue | UNIT_DYNFLAG_LOOTABLE;
+                            //sLog.outString(">> %s is lootable for %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
+                        }
+                        else
+                        {
+                            // creature is dead but this player cannot loot it
+                            dynflagsValue = dynflagsValue & ~UNIT_DYNFLAG_LOOTABLE;
+                            //sLog.outString(">> %s is not lootable for %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
+                        }
+
+                        // as creature is died we have to manage tap flags
+                        setTapFlags = true;
                     }
 
-                    // Checking lootable
-                    if (GetTypeId() == TYPEID_UNIT)
+                    // check tap flags
+                    if (setTapFlags)
                     {
-                        if (!target->isAllowedToLoot((Creature*)this))
-                            dynflagsValue &= ~UNIT_DYNFLAG_LOOTABLE;
+                        if (creature->IsTappedBy(target))
+                        {
+                            // creature is in combat or died and tapped by this player
+                            dynflagsValue = dynflagsValue & ~UNIT_DYNFLAG_TAPPED;
+                            //sLog.outString(">> %s is tapped by %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
+                        }
                         else
-                            dynflagsValue &= ~UNIT_DYNFLAG_TAPPED;
+                        {
+                            // creature is in combat or died but not tapped by this player
+                            dynflagsValue = dynflagsValue | UNIT_DYNFLAG_TAPPED;
+                            //sLog.outString(">> %s is not tapped by %s", this->GetObjectGuid().GetString().c_str(), target->GetObjectGuid().GetString().c_str());
+                        }
                     }
 
                     *data << dynflagsValue;
@@ -468,10 +503,18 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 {
                     if (IsActivateToQuest)
                     {
+                        GameObject const* gameObject = static_cast<GameObject const*>(this);
                         switch (((GameObject*)this)->GetGoType())
                         {
                             case GAMEOBJECT_TYPE_QUESTGIVER:
                             case GAMEOBJECT_TYPE_CHEST:
+                                sLog.outString("Chest %s is updated, state is %u", gameObject->GetGuidStr().c_str(), uint32(gameObject->getLootState()));
+                                if (gameObject->getLootState() == GO_READY || gameObject->getLootState() == GO_ACTIVATED)
+                                    *data << uint16(GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
+                                else
+                                    *data << uint16(0);
+                                *data << uint16(0);
+                                break;
                             case GAMEOBJECT_TYPE_GENERIC:
                             case GAMEOBJECT_TYPE_SPELL_FOCUS:
                             case GAMEOBJECT_TYPE_GOOBER:
@@ -834,6 +877,16 @@ void Object::MarkForClientUpdate()
             AddToClientUpdateList();
             m_objectUpdated = true;
         }
+    }
+}
+
+void Object::ForceValuesUpdateAtIndex(uint32 index)
+{
+    m_changedValues[index] = true;
+    if (m_inWorld && !m_objectUpdated)
+    {
+        AddToClientUpdateList();
+        m_objectUpdated = true;
     }
 }
 

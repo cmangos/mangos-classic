@@ -23,7 +23,6 @@
 #include "Object.h"
 #include "Database/DatabaseEnv.h"
 #include "GridDefines.h"
-#include "LootMgr.h"
 
 enum CorpseType
 {
@@ -79,7 +78,6 @@ class Corpse : public WorldObject
 
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
 
-        Loot loot;                                          // remove insignia ONLY at BG
         Player* lootRecipient;
         bool lootForBody;
 

@@ -46,6 +46,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "MapManager.h"
+#include "LootMgr.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -1900,8 +1901,10 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
         if (spellInfo->EffectItemType[m_effIndex] == 6265)
         {
             // Only from non-grey units
-            if (!((Player*)caster)->isHonorOrXPTarget(victim) ||
-                    (victim->GetTypeId() == TYPEID_UNIT && !((Player*)caster)->isAllowedToLoot((Creature*)victim)))
+            if (!((Player*)caster)->isHonorOrXPTarget(victim))
+                return;
+            // Only if the creature is tapped by the player or his group
+            if (victim->GetTypeId() == TYPEID_UNIT && !((Creature*)victim)->IsTappedBy((Player*)caster))
                 return;
         }
 

@@ -132,10 +132,8 @@ bool CreatureCreatePos::Relocate(Creature* cr) const
 
 Creature::Creature(CreatureSubtype subtype) : Unit(),
     i_AI(NULL),
-    loot(this),
-    lootForPickPocketed(false), lootForBody(false), lootForSkin(false),
-    m_groupLootTimer(0), m_groupLootId(0),
     m_lootMoney(0), m_lootGroupRecipientId(0),
+    m_lootStatus(CREATURE_LOOT_STATUS_NONE),
     m_corpseDecayTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_aggroDelay(0), m_respawnradius(5.0f),
     m_subtype(subtype), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
     m_AlreadyCallAssistance(false), m_AlreadySearchedAssistance(false),
@@ -206,10 +204,9 @@ void Creature::RemoveCorpse()
     SetDeathState(DEAD);
     UpdateObjectVisibility();
 
-    // stop loot rolling before loot clear and for close client dialogs
-    StopGroupLoot();
-
-    loot.clear();
+    delete loot;
+    loot = NULL;
+    m_lootStatus = CREATURE_LOOT_STATUS_NONE;
     uint32 respawnDelay = 0;
 
     if (AI())
@@ -488,9 +485,8 @@ void Creature::Update(uint32 update_diff, uint32 diff)
                 DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Respawning...");
                 m_respawnTime = 0;
                 m_aggroDelay = sWorld.getConfig(CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY);
-                lootForPickPocketed = false;
-                lootForBody         = false;
-                lootForSkin         = false;
+                delete loot;
+                loot = NULL;
 
                 // Clear possible auras having IsDeathPersistent() attribute
                 RemoveAllAuras();
@@ -532,6 +528,8 @@ void Creature::Update(uint32 update_diff, uint32 diff)
         case CORPSE:
         {
             Unit::Update(update_diff, diff);
+            if (loot)
+                loot->Update();
 
             if (m_isDeadByDefault)
                 break;
@@ -543,14 +541,6 @@ void Creature::Update(uint32 update_diff, uint32 diff)
             }
             else
                 m_corpseDecayTimer -= update_diff;
-
-            if (m_groupLootId)                              // Loot is stopped already if corpse got removed.
-            {
-                if (m_groupLootTimer <= update_diff)
-                    StopGroupLoot();
-                else
-                    m_groupLootTimer -= update_diff;
-            }
 
             break;
         }
@@ -600,24 +590,6 @@ void Creature::Update(uint32 update_diff, uint32 diff)
         default:
             break;
     }
-}
-
-void Creature::StartGroupLoot(Group* group, uint32 timer)
-{
-    m_groupLootId = group->GetId();
-    m_groupLootTimer = timer;
-}
-
-void Creature::StopGroupLoot()
-{
-    if (!m_groupLootId)
-        return;
-
-    if (Group* group = sObjectMgr.GetGroupById(m_groupLootId))
-        group->EndRoll();
-
-    m_groupLootTimer = 0;
-    m_groupLootId = 0;
 }
 
 void Creature::RegenerateAll(uint32 update_diff)
@@ -962,33 +934,32 @@ bool Creature::CanTrainAndResetTalentsOf(Player* pPlayer) const
 
 void Creature::PrepareBodyLootState()
 {
-    loot.clear();
+    // loot may already exist (pickpocket case)
+    delete loot;
+    loot = NULL;
 
-    // if have normal loot then prepare it access
-    if (!lootForBody)
+    Player* killer = GetLootRecipient();
+
+    if (killer)
+        loot = new Loot(killer, this, LOOT_CORPSE);
+
+    uint32 corpseLootedDelay;
+    if (sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED) > 0.0f)
+        corpseLootedDelay = (uint32)((m_corpseDelay * IN_MILLISECONDS) * sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED));
+    else
+        corpseLootedDelay = (m_respawnDelay * IN_MILLISECONDS) / 3;
+
+    // if m_respawnDelay is larger than default corpse delay always use corpseLootedDelay
+    if (m_respawnDelay > m_corpseDelay)
     {
-        // have normal loot
-        if (GetCreatureInfo()->MaxLootGold > 0 || GetCreatureInfo()->LootId ||
-                // ... or can have skinning after
-                (GetCreatureInfo()->SkinningLootId && sWorld.getConfig(CONFIG_BOOL_CORPSE_EMPTY_LOOT_SHOW)))
-        {
-            SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            return;
-        }
+        m_corpseDecayTimer = corpseLootedDelay;
     }
-
-    lootForBody = true;                                     // pass this loot mode
-
-    // if not have normal loot allow skinning if need
-    if (!lootForSkin && GetCreatureInfo()->SkinningLootId)
+    else
     {
-        RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-        return;
+        // if m_respawnDelay is relatively short and corpseDecayTimer is larger than corpseLootedDelay
+        if (m_corpseDecayTimer > corpseLootedDelay)
+            m_corpseDecayTimer = corpseLootedDelay;
     }
-
-    RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 }
 
 /**
@@ -1054,7 +1025,7 @@ void Creature::SetLootRecipient(Unit* unit)
     {
         m_lootRecipientGuid.Clear();
         m_lootGroupRecipientId = 0;
-        RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
+        ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);       // needed to be sure tapping status is updated
         return;
     }
 
@@ -1069,7 +1040,7 @@ void Creature::SetLootRecipient(Unit* unit)
     if (Group* group = player->GetGroup())
         m_lootGroupRecipientId = group->GetId();
 
-    SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED);
+    ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);           // needed to be sure tapping status is updated
 }
 
 void Creature::SaveToDB()
@@ -2274,55 +2245,6 @@ void Creature::ResetRespawnCoord()
     }
 }
 
-void Creature::AllLootRemovedFromCorpse()
-{
-    if (lootForBody && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
-    {
-        uint32 corpseLootedDelay;
-
-        if (!lootForSkin)                                   // corpse was not skinned -> apply corpseLootedDelay
-        {
-            // use a static spawntimesecs/3 modifier (guessed/made up value) unless config are more than 0.0
-            // spawntimesecs=3min:  corpse decay after 1min
-            // spawntimesecs=4hour: corpse decay after 1hour 20min
-            if (sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED) > 0.0f)
-                corpseLootedDelay = (uint32)((m_corpseDelay * IN_MILLISECONDS) * sWorld.getConfig(CONFIG_FLOAT_RATE_CORPSE_DECAY_LOOTED));
-            else
-                corpseLootedDelay = (m_respawnDelay * IN_MILLISECONDS) / 3;
-        }
-        else                                                // corpse was skinned, corpse will despawn next update
-            corpseLootedDelay = 0;
-
-        // if m_respawnTime is not expired already
-        if (m_respawnTime >= time(NULL))
-        {
-            // if spawntimesecs is larger than default corpse delay always use corpseLootedDelay
-            if (m_respawnDelay > m_corpseDelay)
-            {
-                m_corpseDecayTimer = corpseLootedDelay;
-            }
-            else
-            {
-                // if m_respawnDelay is relatively short and corpseDecayTimer is larger than corpseLootedDelay
-                if (m_corpseDecayTimer > corpseLootedDelay)
-                    m_corpseDecayTimer = corpseLootedDelay;
-            }
-        }
-        else
-        {
-            m_corpseDecayTimer = 0;
-
-            // TODO: reaching here, means mob will respawn at next tick.
-            // This might be a place to set some aggro delay so creature has
-            // ~5 seconds before it can react to hostile surroundings.
-
-            // It's worth noting that it will not be fully correct either way.
-            // At this point another "instance" of the creature are presumably expected to
-            // be spawned already, while this corpse will not appear in respawned form.
-        }
-    }
-}
-
 uint32 Creature::GetLevelForTarget(Unit const* target) const
 {
     if (!IsWorldBoss())
@@ -2733,4 +2655,47 @@ void Creature::SetWaterWalk(bool enable)
     WorldPacket data(enable ? SMSG_SPLINE_MOVE_WATER_WALK : SMSG_SPLINE_MOVE_LAND_WALK, 9);
     data << GetPackGUID();
     SendMessageToSet(&data, true);
+}
+
+// Set loot status. Also handle remove corpse timer
+void Creature::SetLootStatus(CreatureLootStatus status)
+{
+    if (status <= m_lootStatus)
+        return;
+
+    m_lootStatus = status;
+    switch (status)
+    {
+        case CREATURE_LOOT_STATUS_LOOTED:
+            if (m_creatureInfo->SkinningLootId)
+                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            break;
+        case CREATURE_LOOT_STATUS_SKINNED:
+            m_corpseDecayTimer = 0; // remove corpse at next update
+            break;
+        default:
+            break;
+    }
+}
+
+// simple tap system return true if player or his group tapped the creature
+// TODO:: this is semi correct. For group situation need more work but its not a big issue
+bool Creature::IsTappedBy(Player* plr) const
+{
+    if (Player* recipient = GetLootRecipient())
+    {
+        if (recipient == plr)
+            return true;
+
+        if (Group* grp = recipient->GetGroup())
+        {
+            if (Group* plrGroup = plr->GetGroup())
+            {
+                if (plrGroup == grp)
+                    return true;
+            }
+        }
+        return false;
+    }
+    return false;
 }

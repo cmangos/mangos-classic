@@ -230,13 +230,6 @@ enum HitInfo
     HITINFO_SWINGNOHITSOUND     = 0x00080000
 };
 
-// i would like to remove this: (it is defined in item.h
-enum InventorySlot
-{
-    NULL_BAG                   = 0,
-    NULL_SLOT                  = 255
-};
-
 struct FactionTemplateEntry;
 struct Modifier;
 struct SpellEntry;

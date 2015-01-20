@@ -22,7 +22,6 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "Object.h"
-#include "LootMgr.h"
 #include "Database/DatabaseEnv.h"
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
@@ -643,6 +642,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         void AddUniqueUse(Player* player);
         void AddUse() { ++m_useTimes; }
+        bool IsInUse() const { return m_isInUse; }
+        void SetInUse(bool use);
 
         uint32 GetUseCount() const { return m_useTimes; }
         uint32 GetUniqueUseCount() const { return m_UniqueUsers.size(); }
@@ -650,9 +651,6 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SaveRespawnTime() override;
 
         // Loot System
-        Loot loot;
-        void StartGroupLoot(Group* group, uint32 timer) override;
-
         ObjectGuid GetLootRecipientGuid() const { return m_lootRecipientGuid; }
         uint32 GetLootGroupRecipientId() const { return m_lootGroupRecipientId; }
         Player* GetLootRecipient() const;                   // use group cases as prefered
@@ -714,11 +712,13 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         GameObjectInfo const* m_goInfo;
 
         // Loot System
-        uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
-        uint32 m_groupLootId;                               // used to find group which is looting
-        void StopGroupLoot() override;
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
+
+        // Used for chest type
+        bool m_isInUse;                                     // only one player at time are allowed to open chest
+        time_t m_reStockTimer;                              // timer to refill the chest
+        time_t m_despawnTimer;                              // timer to despawn the chest if something changed in it
 
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);

@@ -21,7 +21,6 @@
 
 #include "Common.h"
 #include "Object.h"
-#include "LootMgr.h"
 #include "ItemPrototype.h"
 
 struct SpellEntry;
@@ -29,6 +28,7 @@ class Bag;
 class Field;
 class QueryResult;
 class Unit;
+class Loot;
 
 struct ItemSetEffect
 {
@@ -301,11 +301,9 @@ class MANGOS_DLL_SPEC Item : public Object
         int32 GetSpellCharges(uint8 index/*0..5*/ = 0) const { return GetInt32Value(ITEM_FIELD_SPELL_CHARGES + index); }
         void SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, value); }
 
-        Loot loot;
-
         void SetLootState(ItemLootUpdateState state);
-        bool HasGeneratedLoot() const { return m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_REMOVED; }
-        bool HasTemporaryLoot() const { return m_lootState == ITEM_LOOT_TEMPORARY; }
+        bool HasGeneratedLoot() const { return loot && m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_REMOVED; }
+        bool HasTemporaryLoot() const { return loot && m_lootState == ITEM_LOOT_TEMPORARY; }
 
         bool HasSavedLoot() const { return m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_NEW && m_lootState != ITEM_LOOT_TEMPORARY; }
 

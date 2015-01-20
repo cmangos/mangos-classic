@@ -51,6 +51,7 @@
 #include "TemporarySummon.h"
 #include "ScriptMgr.h"
 #include "G3D/Vector3.h"
+#include "LootMgr.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
 {
@@ -1884,42 +1885,69 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
 
 void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
 {
-    if (gameObjTarget)
+    switch (guid.GetHigh())
     {
-        switch (gameObjTarget->GetGoType())
+        case HIGHGUID_GAMEOBJECT:
         {
-            case GAMEOBJECT_TYPE_DOOR:
-            case GAMEOBJECT_TYPE_BUTTON:
-            case GAMEOBJECT_TYPE_QUESTGIVER:
-            case GAMEOBJECT_TYPE_SPELL_FOCUS:
-            case GAMEOBJECT_TYPE_GOOBER:
-                gameObjTarget->Use(m_caster);
-                return;
-
-            case GAMEOBJECT_TYPE_CHEST:
-                gameObjTarget->Use(m_caster);
-                // Don't return, let loots been taken
-                break;
-
-            case GAMEOBJECT_TYPE_TRAP:
-                if (lockType == LOCKTYPE_DISARM_TRAP)
+            if (gameObjTarget)
+            {
+                switch (gameObjTarget->GetGoType())
                 {
-                    gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
-                    return;
+                    case GAMEOBJECT_TYPE_DOOR:
+                    case GAMEOBJECT_TYPE_BUTTON:
+                    case GAMEOBJECT_TYPE_QUESTGIVER:
+                    case GAMEOBJECT_TYPE_SPELL_FOCUS:
+                    case GAMEOBJECT_TYPE_GOOBER:
+                        gameObjTarget->Use(m_caster);
+                        return;
+
+                    case GAMEOBJECT_TYPE_CHEST:
+                        gameObjTarget->Use(m_caster);
+                        // Don't return, let loots been taken
+                        break;
+
+                    case GAMEOBJECT_TYPE_TRAP:
+                        if (lockType == LOCKTYPE_DISARM_TRAP)
+                        {
+                            gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
+                            return;
+                        }
+                        sLog.outError("Spell::SendLoot unhandled locktype %u for GameObject trap (entry %u) for spell %u.", lockType, gameObjTarget->GetEntry(), m_spellInfo->Id);
+                        return;
+                    default:
+                        sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u) for spell %u.", gameObjTarget->GetGoType(), gameObjTarget->GetEntry(), m_spellInfo->Id);
+                        return;
                 }
-                sLog.outError("Spell::SendLoot unhandled locktype %u for GameObject trap (entry %u) for spell %u.", lockType, gameObjTarget->GetEntry(), m_spellInfo->Id);
+
+                if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                Loot*& loot = gameObjTarget->loot;
+                if (!loot)
+                    loot = new Loot((Player*)m_caster, gameObjTarget, loottype);
+                loot->ShowContentTo((Player*)m_caster);
                 return;
-            default:
-                sLog.outError("Spell::SendLoot unhandled GameObject type %u (entry %u) for spell %u.", gameObjTarget->GetGoType(), gameObjTarget->GetEntry(), m_spellInfo->Id);
-                return;
+            }
+            break;
         }
+
+        case HIGHGUID_ITEM:
+        {
+            if (itemTarget)
+            {
+                Loot*& loot = itemTarget->loot;
+                if (!loot)
+                    loot = new Loot((Player*)m_caster, itemTarget, loottype);
+                loot->ShowContentTo((Player*)m_caster);
+                return;
+            }
+
+            break;
+        }
+        default:
+            sLog.outError("Spell::SendLoot unhandled Object type %s for spell %u.", guid.GetString().c_str(), m_spellInfo->Id);
+            break;
     }
-
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    // Send loot
-    ((Player*)m_caster)->SendLoot(guid, loottype);
 }
 
 void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
@@ -2378,7 +2406,18 @@ void Spell::EffectPickPocket(SpellEffectIndex /*eff_idx*/)
         {
             // Stealing successful
             // DEBUG_LOG("Sending loot from pickpocket");
-            ((Player*)m_caster)->SendLoot(unitTarget->GetObjectGuid(), LOOT_PICKPOCKETING);
+            Loot*& loot = unitTarget->loot;
+            if (!loot)
+                loot = new Loot((Player*)m_caster, (Creature*)unitTarget, LOOT_PICKPOCKETING);
+            else
+            {
+                if (loot->GetLootType() != LOOT_PICKPOCKETING)
+                {
+                    delete loot;
+                    loot = new Loot((Player*)m_caster, (Creature*)unitTarget, LOOT_PICKPOCKETING);
+                }
+            }
+            loot->ShowContentTo((Player*)m_caster);
         }
         else
         {
@@ -4142,7 +4181,19 @@ void Spell::EffectDisEnchant(SpellEffectIndex /*eff_idx*/)
 
     p_caster->UpdateCraftSkill(m_spellInfo->Id);
 
-    ((Player*)m_caster)->SendLoot(itemTarget->GetObjectGuid(), LOOT_DISENCHANTING);
+    Loot*& loot = itemTarget->loot;
+    if (!loot)
+        loot = new Loot(p_caster, itemTarget, LOOT_DISENCHANTING);
+    else
+    {
+        if (loot->GetLootType() != LOOT_DISENCHANTING)
+        {
+            delete loot;
+            loot = new Loot(p_caster, itemTarget, LOOT_DISENCHANTING);
+        }
+    }
+
+    loot->ShowContentTo(p_caster);
 
     // item will be removed at disenchanting end
 }
@@ -4569,7 +4620,19 @@ void Spell::EffectSkinning(SpellEffectIndex /*eff_idx*/)
 
     uint32 skill = creature->GetCreatureInfo()->GetRequiredLootSkill();
 
-    ((Player*)m_caster)->SendLoot(creature->GetObjectGuid(), LOOT_SKINNING);
+    Loot*& loot = unitTarget->loot;
+    if (!loot)
+        loot = new Loot((Player*)m_caster, creature, LOOT_SKINNING);
+    else
+    {
+        if (loot->GetLootType() != LOOT_SKINNING)
+        {
+            delete loot;
+            loot = new Loot((Player*)m_caster, creature, LOOT_SKINNING);
+        }
+    }
+
+    loot->ShowContentTo((Player*)m_caster);
     creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
     int32 reqValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel - 10) * 10 : targetLevel * 5;
