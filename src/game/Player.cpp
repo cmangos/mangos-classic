@@ -9343,6 +9343,10 @@ InventoryResult Player::CanUseItem(ItemPrototype const* pProto, bool direct_acti
         if (getLevel() < pProto->RequiredLevel)
             return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
 
+        InventoryResult eres = sEluna->OnCanUseItem(this, pProto->ItemId);
+        if (eres != EQUIP_ERR_OK)
+            return eres;
+
         return EQUIP_ERR_OK;
     }
     return EQUIP_ERR_ITEM_NOT_FOUND;
