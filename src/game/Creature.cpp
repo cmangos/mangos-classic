@@ -2669,9 +2669,13 @@ void Creature::SetLootStatus(CreatureLootStatus status)
         case CREATURE_LOOT_STATUS_LOOTED:
             if (m_creatureInfo->SkinningLootId)
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            else
+                RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             break;
         case CREATURE_LOOT_STATUS_SKINNED:
             m_corpseDecayTimer = 0; // remove corpse at next update
+            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+            RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             break;
         default:
             break;
