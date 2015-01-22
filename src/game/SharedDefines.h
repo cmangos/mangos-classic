@@ -2535,24 +2535,21 @@ enum LootMethod
     NOT_GROUP_TYPE_LOOT = 5                                 // internal use only
 };
 
+// internal loot type
 enum LootType
 {
-    LOOT_NONE           = 0,                                // for internal use only
     LOOT_CORPSE         = 1,
     LOOT_PICKPOCKETING  = 2,
     LOOT_FISHING        = 3,
     LOOT_DISENCHANTING  = 4,
-
-    // ignored always by client
     LOOT_SKINNING       = 6,
     LOOT_PROSPECTING    = 7,
     LOOT_MILLING        = 8,
-
-    LOOT_FISHINGHOLE    = 20,                               // unsupported by client, sending LOOT_FISHING instead
-    LOOT_FISHING_FAIL   = 21,                               // unsupported by client, sending LOOT_FISHING instead
-    LOOT_INSIGNIA       = 22,                               // unsupported by client, sending LOOT_CORPSE instead
-    LOOT_MAIL           = 23,                               // unsupported by client, not send at all (only used to generate loot)
-    LOOT_SPELL          = 24,                               // unsupported by client, not send at all (only used to generate loot)
+    LOOT_FISHINGHOLE    = 20,
+    LOOT_FISHING_FAIL   = 21,
+    LOOT_INSIGNIA       = 22,
+    LOOT_MAIL           = 23,
+    LOOT_SPELL          = 24,
 };
 
 #endif

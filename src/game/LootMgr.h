@@ -90,6 +90,16 @@ enum LootItemType
     LOOTITEM_TYPE_CONDITIONNAL  = 3
 };
 
+// loot type sent to clients
+enum ClientLootType
+{
+    CLIENT_LOOT_CORPSE          = 1,
+    CLIENT_LOOT_PICKPOCKETING   = 2,
+    CLIENT_LOOT_FISHING         = 3,
+    CLIENT_LOOT_DISENCHANTING   = 4
+};
+
+
 struct PlayerRollVote
 {
     PlayerRollVote() : vote(ROLL_NOT_VALID), number(0) {}
@@ -313,7 +323,8 @@ private:
     LootItemList     m_lootItems;                     // store of the items contained in loot
     uint32           m_gold;                          // amount of money contained in loot
     uint32           m_maxSlot;                       // used to increment slot index and get total items count
-    LootType         m_lootType;                      // required for achievement system
+    LootType         m_lootType;                      // internal loot type
+    ClientLootType   m_clientLootType;                // client loot type
     LootMethod       m_lootMethod;                    // used to know what kind of check must be done at loot time
     ItemQualities    m_threshold;                     // group threshold for items
     ObjectGuid       m_masterOwnerGuid;               // master loot player or round robin owner
