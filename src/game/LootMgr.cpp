@@ -1931,6 +1931,7 @@ void Loot::SendGold(Player* player)
 
     if (IsLootedFor(player))
         Release(player);
+    ForceLootAnimationCLientUpdate();
 }
 
 // fill in the bytebuffer with loot content for specified player (return false if no items/gold filled)
