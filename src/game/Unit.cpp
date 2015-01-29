@@ -8553,6 +8553,24 @@ void Unit::UpdateModelData()
     }
 }
 
+float Unit::GetObjectScaleMod() const
+{
+    int32 modValue = 0;
+    Unit::AuraList const& scaleAuraList = GetAurasByType(SPELL_AURA_MOD_SCALE);
+    for (Unit::AuraList::const_iterator itr = scaleAuraList.begin(); itr != scaleAuraList.end(); ++itr)
+        modValue += (*itr)->GetModifier()->m_amount;
+
+    float result = (100 + modValue) / 100.0f;
+
+    // TODO:: not sure we have to do this sanity check, less than /100 or more than *100 seem not reasonable
+    if (result < 0.01)
+        result = 0.01;
+    else if (result > 100)
+        result = 100;
+
+    return result;
+}
+
 void Unit::ClearComboPointHolders()
 {
     while (!m_ComboPointHolders.empty())

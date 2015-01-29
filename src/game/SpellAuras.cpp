@@ -1628,7 +1628,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
         if (modelid > 0)
         {
-            target->SetObjectScale(DEFAULT_OBJECT_SCALE);
+            target->SetObjectScale(DEFAULT_OBJECT_SCALE * target->GetObjectScaleMod());
             target->SetDisplayId(modelid);
         }
 
@@ -1713,9 +1713,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             if (target->getRace() == RACE_TAUREN)
             {
                 if (target->getGender() == GENDER_MALE)
-                    target->SetObjectScale(DEFAULT_TAUREN_MALE_SCALE);
+                    target->SetObjectScale(DEFAULT_TAUREN_MALE_SCALE * target->GetObjectScaleMod());
                 else
-                    target->SetObjectScale(DEFAULT_TAUREN_FEMALE_SCALE);
+                    target->SetObjectScale(DEFAULT_TAUREN_FEMALE_SCALE * target->GetObjectScaleMod());
             }
 
             target->SetDisplayId(target->GetNativeDisplayId());
