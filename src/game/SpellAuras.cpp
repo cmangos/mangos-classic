@@ -1598,9 +1598,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
                 // If spell that caused this aura has Croud Control or Daze effect
                 if ((aurMechMask & MECHANIC_NOT_REMOVED_BY_SHAPESHIFT) ||
-                        // some Daze spells have these parameters instead of MECHANIC_DAZE (skip snare spells)
-                        (aurSpellInfo->SpellIconID == 15 && aurSpellInfo->Dispel == 0 &&
-                         (aurMechMask & (1 << (MECHANIC_SNARE - 1))) == 0))
+                    // some Daze spells have these parameters instead of MECHANIC_DAZE (skip snare spells)
+                    (aurSpellInfo->SpellIconID == 15 && aurSpellInfo->Dispel == 0 &&
+                    (aurMechMask & (1 << (MECHANIC_SNARE - 1))) == 0))
                 {
                     ++iter;
                     continue;
@@ -1614,6 +1614,13 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             // and polymorphic affects
             if (target->IsPolymorphed())
                 target->RemoveAurasDueToSpell(target->getTransForm());
+
+            //no break here
+        }
+        case FORM_GHOSTWOLF:
+        {
+            // remove water walk aura. TODO:: there is probably better way to do this
+            target->RemoveSpellsCausingAura(SPELL_AURA_WATER_WALK);
 
             break;
         }
