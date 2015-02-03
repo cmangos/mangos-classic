@@ -496,7 +496,7 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
 // Send the roll for the whole group
 void GroupLootRoll::SendStartRoll()
 {
-    WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4));
+    WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4 + 1));
     data << m_loot->GetLootGuid();                          // creature guid what we're looting
     data << uint32(m_itemSlot);                             // item slot in loot
     data << uint32(m_lootItem->itemId);                     // the itemEntryId for the item that shall be rolled for
@@ -505,7 +505,7 @@ void GroupLootRoll::SendStartRoll()
     data << uint32(LOOT_ROLL_TIMEOUT);                      // the countdown time to choose "need" or "greed"
 
     size_t voteMaskPos = data.wpos();
-
+    data << uint8(0);
 
     for (RollVoteMap::const_iterator itr = m_rollVoteMap.begin(); itr != m_rollVoteMap.end(); ++itr)
     {
