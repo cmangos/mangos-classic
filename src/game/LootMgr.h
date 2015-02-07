@@ -132,7 +132,6 @@ private:
     Loot*                 m_loot;
     uint32                m_itemSlot;
     RollVoteMask          m_voteMask;
-    uint32                m_voteCount;
     time_t                m_endTime;
 };
 typedef UNORDERED_MAP<uint32, GroupLootRoll> GroupLootRollMap;
