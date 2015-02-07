@@ -881,7 +881,7 @@ bool Loot::IsLootedForAll() const
     return true;
 }
 
-bool Loot::CanLoot(Player const* player, bool onlyRightCheck /*= false*/)
+bool Loot::CanLoot(Player const* player)
 {
     ObjectGuid const& playerGuid = player->GetObjectGuid();
 
@@ -889,10 +889,6 @@ bool Loot::CanLoot(Player const* player, bool onlyRightCheck /*= false*/)
     GuidSet::const_iterator itr = m_ownerSet.find(playerGuid);
     if (itr == m_ownerSet.end())
         return false;
-
-    // only check if the player is on the loot list
-    if (onlyRightCheck)
-        return true;
 
     // is already looted?
     if (IsLootedFor(player))
