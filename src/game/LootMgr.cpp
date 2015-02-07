@@ -890,6 +890,10 @@ bool Loot::CanLoot(Player const* player)
     if (itr == m_ownerSet.end())
         return false;
 
+    // all player that have right too loot have right to loot dropped money
+    if (m_gold)
+        return true;
+
     // is already looted?
     if (IsLootedFor(player))
         return false;
