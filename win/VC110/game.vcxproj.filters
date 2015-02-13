@@ -105,9 +105,6 @@
     <ClCompile Include="..\..\src\game\LuaEngine\ServerHooks.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\VehicleHooks.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\game\Channel.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
