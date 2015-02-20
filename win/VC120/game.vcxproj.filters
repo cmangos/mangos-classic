@@ -43,6 +43,9 @@
     <Filter Include="LuaEngine\Methods">
       <UniqueIdentifier>{ee816624-bdb0-47a5-8efc-f127b827f609}</UniqueIdentifier>
     </Filter>
+    <Filter Include="LuaEngine\Hooks">
+      <UniqueIdentifier>{e6e6e455-076c-4690-a970-84e55ddc5542}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\game\AccountMgr.cpp">
@@ -484,28 +487,10 @@
     <ClCompile Include="..\..\src\game\BattleGround\BattleGroundWS.cpp">
       <Filter>BattleGround</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\BattleGroundHooks.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\CreatureHooks.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\ElunaEventMgr.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\ElunaUtility.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\GameObjectHooks.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\GroupHooks.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\GuildHooks.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\ItemHooks.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\LuaEngine.cpp">
@@ -514,11 +499,29 @@
     <ClCompile Include="..\..\src\game\LuaEngine\LuaFunctions.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\BattleGroundHooks.cpp">
+      <Filter>LuaEngine\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\CreatureHooks.cpp">
+      <Filter>LuaEngine\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\GameObjectHooks.cpp">
+      <Filter>LuaEngine\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\GroupHooks.cpp">
+      <Filter>LuaEngine\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\GuildHooks.cpp">
+      <Filter>LuaEngine\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\ItemHooks.cpp">
+      <Filter>LuaEngine\Hooks</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\PlayerHooks.cpp">
-      <Filter>LuaEngine</Filter>
+      <Filter>LuaEngine\Hooks</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\ServerHooks.cpp">
-      <Filter>LuaEngine</Filter>
+      <Filter>LuaEngine\Hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
