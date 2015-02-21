@@ -42,6 +42,7 @@
 
 class Unit;
 class Creature;
+class Map;
 
 // enum on which Events an action for linked NPCs can trigger
 enum CreatureLinkingEvent
@@ -112,10 +113,12 @@ class CreatureLinkingMgr
 
         // This function checks if the spawning of this NPC is dependend on other NPCs
         bool IsSpawnedByLinkedMob(Creature* pCreature) const;
+        bool IsSpawnedByLinkedMob(CreatureLinkingInfo const* pInfo) const;
 
         // This gives the information of a linked NPC (describes action when its ActionTrigger triggers)
         // Depends of the map
         CreatureLinkingInfo const* GetLinkedTriggerInformation(Creature* pCreature) const;
+        CreatureLinkingInfo const* GetLinkedTriggerInformation(uint32 entry, uint32 lowGuid, uint32 mapId) const;
 
     private:
         typedef std::multimap < uint32 /*slaveEntry*/, CreatureLinkingInfo > CreatureLinkingMap;
@@ -188,7 +191,12 @@ class CreatureLinkingHolder
         // Helper function to set following
         void SetFollowing(Creature* pWho, Creature* pWhom);
         // Helper function to return if a slave is in range of a boss
-        bool IsSlaveInRangeOfBoss(Creature* pSlave, Creature* pBoss, uint16 searchRange) const;
+        bool IsSlaveInRangeOfBoss(Creature const* pSlave, Creature const* pBoss, uint16 searchRange) const;
+        bool IsSlaveInRangeOfBoss(Creature const* pBoss, float slaveX, float slaveY, uint16 searchRange) const;
+        // Another helper function
+        bool IsRespawnReady(uint32 dbLowGuid, Map* _map) const;
+        // Helper function for recursive spawning-checks of an additional linked
+        bool CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingInfo const*  pInfo, float sx, float sy) const;
 
         // Storage of Data (boss, flag, searchRange, GuidList) for action triggering
         HolderMap m_holderMap;

@@ -298,8 +298,10 @@ bool CreatureLinkingMgr::IsLinkedMaster(Creature* pCreature) const
 // This function checks if the spawning of this NPC is dependend on other NPCs
 bool CreatureLinkingMgr::IsSpawnedByLinkedMob(Creature* pCreature) const
 {
-    CreatureLinkingInfo const* pInfo = GetLinkedTriggerInformation(pCreature);
-
+    return IsSpawnedByLinkedMob(GetLinkedTriggerInformation(pCreature));
+}
+bool CreatureLinkingMgr::IsSpawnedByLinkedMob(CreatureLinkingInfo const* pInfo) const
+{
     return pInfo && pInfo->linkingFlag & (FLAG_CANT_SPAWN_IF_BOSS_DEAD | FLAG_CANT_SPAWN_IF_BOSS_ALIVE) && (pInfo->masterDBGuid || pInfo->searchRange);
 }
 
@@ -307,16 +309,20 @@ bool CreatureLinkingMgr::IsSpawnedByLinkedMob(Creature* pCreature) const
 // Depends of the map
 CreatureLinkingInfo const* CreatureLinkingMgr::GetLinkedTriggerInformation(Creature* pCreature) const
 {
+    return GetLinkedTriggerInformation(pCreature->GetEntry(), pCreature->GetGUIDLow(), pCreature->GetMapId());
+}
+CreatureLinkingInfo const* CreatureLinkingMgr::GetLinkedTriggerInformation(uint32 entry, uint32 lowGuid, uint32 mapId) const
+{
     // guid case
-    CreatureLinkingMapBounds bounds = m_creatureLinkingGuidMap.equal_range(pCreature->GetGUIDLow());
+    CreatureLinkingMapBounds bounds = m_creatureLinkingGuidMap.equal_range(lowGuid);
     for (CreatureLinkingMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
         return &(iter->second);
 
     // entry case
-    bounds = m_creatureLinkingMap.equal_range(pCreature->GetEntry());
+    bounds = m_creatureLinkingMap.equal_range(entry);
     for (CreatureLinkingMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
     {
-        if (iter->second.mapId == pCreature->GetMapId())
+        if (iter->second.mapId == mapId)
             return &(iter->second);
     }
 
@@ -595,21 +601,32 @@ void CreatureLinkingHolder::SetFollowing(Creature* pWho, Creature* pWhom)
 }
 
 // Function to check if a slave belongs to a boss by range-issue
-bool CreatureLinkingHolder::IsSlaveInRangeOfBoss(Creature* pSlave, Creature* pBoss, uint16 searchRange) const
+bool CreatureLinkingHolder::IsSlaveInRangeOfBoss(Creature const* pSlave, Creature const* pBoss, uint16 searchRange) const
+{
+    float sX, sY, sZ;
+    pSlave->GetRespawnCoord(sX, sY, sZ);
+    return IsSlaveInRangeOfBoss(pBoss, sX, sY, searchRange);
+}
+bool CreatureLinkingHolder::IsSlaveInRangeOfBoss(Creature const* pBoss, float sX, float sY, uint16 searchRange) const
 {
     if (!searchRange)
         return true;
 
     // Do some calculations
-    float sX, sY, sZ, mX, mY, mZ;
-    pSlave->GetRespawnCoord(sX, sY, sZ);
+    float mX, mY, mZ, dx, dy;
     pBoss->GetRespawnCoord(mX, mY, mZ);
 
-    float dx, dy;
     dx = sX - mX;
     dy = sY - mY;
 
     return dx * dx + dy * dy < searchRange * searchRange;
+}
+
+// helper function to check if a lowguid can respawn
+bool CreatureLinkingHolder::IsRespawnReady(uint32 dbLowGuid, Map* _map) const
+{
+    time_t respawnTime = _map->GetPersistentState()->GetCreatureRespawnTime(dbLowGuid);
+    return (!respawnTime || respawnTime <= time(NULL)) && CanSpawn(dbLowGuid, _map, NULL, 0.0f, 0.0f);
 }
 
 // Function to check if a passive spawning condition is met
@@ -619,15 +636,48 @@ bool CreatureLinkingHolder::CanSpawn(Creature* pCreature) const
     if (!pInfo)
         return true;
 
+    float sx, sy, sz;
+    pCreature->GetRespawnCoord(sx, sy, sz);
+    return CanSpawn(0, pCreature->GetMap(), pInfo, sx, sy);
+}
+
+/** Worker function to check if a spawning condition is met
+ *
+ *  This function is used directly from above function, and for recursive use
+ *   in case of recursive use it is used only on _map with information of lowGuid.
+ *
+ *  @param lowGuid (only relevant in case of recursive uses) -- db-guid of the npc that is checked
+ *  @param _map Map on which things are checked
+ *  @param pInfo (only shipped in case of initial use) -- used as marker of first use, also in first use filled directly
+ *  @param sx, sy (spawn position of the checked npc with initial use)
+ */
+bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingInfo const*  pInfo, float sx, float sy) const
+{
+    if (!pInfo)                                             // Prepare data for recursive use
+    {
+        CreatureData const* data = sObjectMgr.GetCreatureData(lowGuid);
+        if (!data)
+            return true;
+        pInfo = sCreatureLinkingMgr.GetLinkedTriggerInformation(data->id, lowGuid, data->mapid);
+        if (!pInfo)
+            return true;
+        // Has lowGuid npc actually spawning linked?
+        if (!sCreatureLinkingMgr.IsSpawnedByLinkedMob(pInfo))
+            return true;
+
+        sx = data->posX;                                    // Fill position data
+        sy = data->posY;
+    }
+
     if (pInfo->searchRange == 0)                            // Map wide case
     {
         if (!pInfo->masterDBGuid)
             return false;                                   // This should never happen
 
         if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_DEAD)
-            return pCreature->GetMap()->GetPersistentState()->GetCreatureRespawnTime(pInfo->masterDBGuid) == 0;
+            return IsRespawnReady(pInfo->masterDBGuid, _map);
         else if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_ALIVE)
-            return pCreature->GetMap()->GetPersistentState()->GetCreatureRespawnTime(pInfo->masterDBGuid) > 0;
+            return !IsRespawnReady(pInfo->masterDBGuid, _map);
         else
             return true;
     }
@@ -636,8 +686,8 @@ bool CreatureLinkingHolder::CanSpawn(Creature* pCreature) const
     BossGuidMapBounds finds = m_masterGuid.equal_range(pInfo->masterId);
     for (BossGuidMap::const_iterator itr = finds.first; itr != finds.second; ++itr)
     {
-        Creature* pMaster = pCreature->GetMap()->GetCreature(itr->second);
-        if (pMaster && IsSlaveInRangeOfBoss(pCreature, pMaster, pInfo->searchRange))
+        Creature* pMaster = _map->GetCreature(itr->second);
+        if (pMaster && IsSlaveInRangeOfBoss(pMaster, sx, sy, pInfo->searchRange))
         {
             if (pInfo->linkingFlag & FLAG_CANT_SPAWN_IF_BOSS_DEAD)
                 return pMaster->isAlive();
