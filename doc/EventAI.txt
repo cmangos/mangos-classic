@@ -93,6 +93,7 @@ Some events such as EVENT_T_AGGRO, EVENT_T_DEATH, EVENT_T_SPAWNED, and EVENT_T_E
 28   EVENT_T_TARGET_MISSING_AURA   SpellID, AmmountInStack, RepeatMin, RepeatMax           Expires when a target unit not has spell (Param1) auras applied in a stack greater or equal to value provided in (Param2). Will repeat every (Param3) and (Param4).
 29   EVENT_T_TIMER_GENERIC         InitialMin, InitialMax, RepeatMin, RepeatMax            Expires at first between (Param1) and (Param2) and then will repeat between every (Param3) and (Param4).
 30   EVENT_T_RECEIVE_AI_EVENT      AIEventType, Sender-Entry, unused, unused               Expires when the creature receives an AIEvent of type (Param1), sent by creature (Param2 != 0). If (Param2 = 0) then sent by any creature
+31   EVENT_T_ENERGY                EnergyMax%, EnergyMin%, RepeatMin, RepeatMax            Expires when the NPC's Energy% is between (Param1) and (Param2). Will repeat between every (Param3) and (Param4) If Event Conditions Are Still Met.
 
 =========================================
 Action Types
@@ -459,6 +460,17 @@ Parameter 1: AIEventType  - Only expire when an AIEvent of this type is received
 Parameter 2: Sender-Entry - If != 0 then only expire when the AIEvent is received from a creature of this entry
 
 Note: This is the only EVENT where the target-type TARGET_T_EVENT_SENDER (10) is defined
+
+-----------------
+31 = EVENT_T_ENERGY:
+-----------------
+Parameter 1: EnergyMax% - Maximum Energy% That will trigger this Event to Expire
+Parameter 2: EnergyMin% - Minimum Energy% That will trigger this Event to Expire
+Parameter 3: RepeatMin - Minimum Time used to calculate Random Repeat Event Expire
+Parameter 4: RepeatMax - Maximum Time used to calculate Random Repeat Event Expire
+
+BOTH - Expires once Energy% is between (Param1) and (Param2). Will repeat every (Param3) and (Param4).
+This is commonly used for events where an NPC low on Energy will do something (Such as stop casting spells and switch to melee).
 
 =========================================
 Action Types

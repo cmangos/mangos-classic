@@ -64,6 +64,7 @@ enum EventAI_Type
     EVENT_T_TARGET_MISSING_AURA     = 28,                   // Param1 = SpellID, Param2 = Number of time stacked expected, Param3/4 Repeat Min/Max
     EVENT_T_TIMER_GENERIC           = 29,                   // InitialMin, InitialMax, RepeatMin, RepeatMax
     EVENT_T_RECEIVE_AI_EVENT        = 30,                   // AIEventType, Sender-Entry, unused, unused
+    EVENT_T_ENERGY                  = 31,                   // EnergyMax%, EnergyMin%, RepeatMin, RepeatMax
 
     EVENT_T_END,
 };
@@ -450,6 +451,7 @@ struct CreatureEventAI_Event
         // EVENT_T_MANA                                     = 3
         // EVENT_T_TARGET_HP                                = 12
         // EVENT_T_TARGET_MANA                              = 18
+        // EVENT_T_ENERGY                                   = 31
         struct
         {
             uint32 percentMax;
