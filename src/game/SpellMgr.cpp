@@ -1258,7 +1258,7 @@ struct DoSpellProcEvent
             ++count;
     }
 
-    bool HasEntry(uint32 spellId) { return spe_map.count(spellId) > 0; }
+    bool HasEntry(uint32 spellId) { return spe_map.find(spellId) != spe_map.end(); }
     bool SetStateToEntry(uint32 spellId) { return (state = spe_map.find(spellId)) != spe_map.end(); }
     SpellProcEventMap& spe_map;
     SpellProcEventMap::const_iterator state;
