@@ -105,17 +105,17 @@ class CreatureLinkingMgr
 
     public:                                                 // Accessors
         // This functions checks if the NPC triggers actions for other NPCs
-        bool IsLinkedEventTrigger(Creature* pCreature);
+        bool IsLinkedEventTrigger(Creature* pCreature) const;
 
         // This function checks if the NPC is a master NPC.
-        bool IsLinkedMaster(Creature* pCreature);
+        bool IsLinkedMaster(Creature* pCreature) const;
 
         // This function checks if the spawning of this NPC is dependend on other NPCs
-        bool IsSpawnedByLinkedMob(Creature* pCreature);
+        bool IsSpawnedByLinkedMob(Creature* pCreature) const;
 
         // This gives the information of a linked NPC (describes action when its ActionTrigger triggers)
         // Depends of the map
-        CreatureLinkingInfo const* GetLinkedTriggerInformation(Creature* pCreature);
+        CreatureLinkingInfo const* GetLinkedTriggerInformation(Creature* pCreature) const;
 
     private:
         typedef std::multimap < uint32 /*slaveEntry*/, CreatureLinkingInfo > CreatureLinkingMap;
@@ -131,7 +131,7 @@ class CreatureLinkingMgr
         UNORDERED_SET<uint32> m_eventGuidTriggers;          // master by guid
 
         // Check-routine
-        bool IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingInfo* pInfo, bool byEntry);
+        static bool IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingInfo* pInfo, bool byEntry);
 };
 
 /**
@@ -156,7 +156,7 @@ class CreatureLinkingHolder
         void DoCreatureLinkingEvent(CreatureLinkingEvent eventType, Creature* pSource, Unit* pEnemy = NULL);
 
         // Function to check if a passive spawning condition is met
-        bool CanSpawn(Creature* pCreature);
+        bool CanSpawn(Creature* pCreature) const;
 
         // This function lets a slave refollow his master
         bool TryFollowMaster(Creature* pCreature);
@@ -179,7 +179,7 @@ class CreatureLinkingHolder
         typedef std::multimap < uint32 /*masterEntryOrGuid*/, InfoAndGuids > HolderMap;
         typedef std::pair<HolderMap::iterator, HolderMap::iterator> HolderMapBounds;
         typedef std::multimap < uint32 /*Entry*/, ObjectGuid > BossGuidMap;
-        typedef std::pair<BossGuidMap::iterator, BossGuidMap::iterator> BossGuidMapBounds;
+        typedef std::pair<BossGuidMap::const_iterator, BossGuidMap::const_iterator> BossGuidMapBounds;
 
         // Helper function, to process a slave list
         void ProcessSlaveGuidList(CreatureLinkingEvent eventType, Creature* pSource, uint32 flag, uint16 searchRange, GuidList& slaveGuidList, Unit* pEnemy);
@@ -188,7 +188,7 @@ class CreatureLinkingHolder
         // Helper function to set following
         void SetFollowing(Creature* pWho, Creature* pWhom);
         // Helper function to return if a slave is in range of a boss
-        bool IsSlaveInRangeOfBoss(Creature* pSlave, Creature* pBoss, uint16 searchRange);
+        bool IsSlaveInRangeOfBoss(Creature* pSlave, Creature* pBoss, uint16 searchRange) const;
 
         // Storage of Data (boss, flag, searchRange, GuidList) for action triggering
         HolderMap m_holderMap;
