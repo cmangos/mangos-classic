@@ -320,6 +320,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                 case EVENT_T_MANA:
                 case EVENT_T_TARGET_HP:
                 case EVENT_T_TARGET_MANA:
+                case EVENT_T_ENERGY:
                     if (temp.percent_range.percentMax > 100)
                         sLog.outErrorEventAI("Creature %u are using percentage event(%u) with param2 (MinPercent) > 100. Event will never trigger! ", temp.creature_id, i);
 
