@@ -1928,7 +1928,7 @@ bool ChatHandler::HandleNpcFactionIdCommand(char* args)
     }
 
     // and DB
-    WorldDatabase.PExecuteLog("UPDATE creature_template SET faction_A = '%u', faction_H = '%u' WHERE entry = '%u'", factionId, factionId, pCreature->GetEntry());
+    WorldDatabase.PExecuteLog("UPDATE creature_template SET FactionAlliance = '%u', FactionHorde = '%u' WHERE entry = '%u'", factionId, factionId, pCreature->GetEntry());
 
     return true;
 }
