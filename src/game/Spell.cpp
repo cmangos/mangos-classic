@@ -4228,7 +4228,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // Database based targets from spell_target_script
-    if (m_UniqueTargetInfo.empty())                         // skip second CheckCast apply (for delayed spells for example)
+    if (m_UniqueTargetInfo.empty() && m_UniqueGOTargetInfo.empty()) // skip second CheckCast apply (for delayed spells for example)
     {
         for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
