@@ -25,7 +25,7 @@
 
 class Creature;
 
-class MANGOS_DLL_DECL AggressorAI : public CreatureAI
+class AggressorAI : public CreatureAI
 {
         enum AggressorState
         {

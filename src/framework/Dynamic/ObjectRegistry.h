@@ -29,8 +29,8 @@
 
 /** ObjectRegistry holds all registry item of the same type
  */
-template < class T, class Key = std::string >
-class MANGOS_DLL_DECL ObjectRegistry
+template<class T, class Key = std::string>
+class ObjectRegistry
 {
     public:
         typedef std::map<Key, T*> RegistryMapType;

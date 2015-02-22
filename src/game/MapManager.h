@@ -29,7 +29,7 @@
 class Transport;
 class BattleGround;
 
-struct MANGOS_DLL_DECL MapID
+struct MapID
 {
     explicit MapID(uint32 id) : nMapId(id), nInstanceId(0) {}
     MapID(uint32 id, uint32 instid) : nMapId(id), nInstanceId(instid) {}
@@ -48,7 +48,7 @@ struct MANGOS_DLL_DECL MapID
     uint32 nInstanceId;
 };
 
-class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ACE_Recursive_Thread_Mutex> >
+class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ACE_Recursive_Thread_Mutex> >
 {
         friend class MaNGOS::OperatorNew<MapManager>;
 

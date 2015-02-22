@@ -26,8 +26,8 @@
 
 /** FactoryHolder holds a factory object of a specific type
  */
-template < class T, class Key = std::string >
-class MANGOS_DLL_DECL FactoryHolder
+template<class T, class Key = std::string>
+class FactoryHolder
 {
     public:
         typedef ObjectRegistry<FactoryHolder<T, Key >, Key > FactoryHolderRegistry;
