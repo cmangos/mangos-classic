@@ -71,8 +71,10 @@ Detailed meaning described below!
 -- --------------------------
 
 4 multipurpose fields, store raw data as signed values
-Note: currently used only for text ids SCRIPT_COMMAND_TALK (0),
-      and in relation with SCRIPT_COMMAND_TERMINATE_SCRIPT (31)
+Note: used for text ids SCRIPT_COMMAND_TALK (0),
+      for emote ids in SCRIPT_COMMAND_EMOTE (1),
+      for spell ids in SCRIPT_COMMAND_CAST_SPELL (15)
+      and as waittime with SCRIPT_COMMAND_TERMINATE_SCRIPT (31)
 
 -- --------------------------
 ## x y z o
@@ -210,6 +212,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 
 15 SCRIPT_COMMAND_CAST_SPELL                resultingSource = Unit, cast spell at resultingTarget = Unit
                                             * datalong = spell id
+                                            * dataint1-dataint4 optional. If some of these are set to a spell id, a random spell out of datalong, datint1, ..,dataintX is cast.
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: cast triggered
 
 16 SCRIPT_COMMAND_PLAY_SOUND                source = any object, target=any/player
