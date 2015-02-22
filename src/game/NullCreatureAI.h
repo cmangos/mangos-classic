@@ -21,7 +21,7 @@
 
 #include "CreatureAI.h"
 
-class MANGOS_DLL_DECL NullCreatureAI : public CreatureAI
+class NullCreatureAI : public CreatureAI
 {
     public:
 

@@ -85,7 +85,7 @@ struct Script
 #define VISIBLE_RANGE (50.0f)
 
 // Read function descriptions in CreatureAI
-struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
+struct ScriptedAI : public CreatureAI
 {
     explicit ScriptedAI(Creature* creature) : CreatureAI(creature) {}
     ~ScriptedAI() {}
