@@ -1642,7 +1642,7 @@ bool ChatHandler::HandleNpcFlagCommand(char* args)
 
     pCreature->SetUInt32Value(UNIT_NPC_FLAGS, npcFlags);
 
-    WorldDatabase.PExecuteLog("UPDATE creature_template SET npcflag = '%u' WHERE entry = '%u'", npcFlags, pCreature->GetEntry());
+    WorldDatabase.PExecuteLog("UPDATE creature_template SET NpcFlags = '%u' WHERE entry = '%u'", npcFlags, pCreature->GetEntry());
 
     SendSysMessage(LANG_VALUE_SAVED_REJOIN);
 
