@@ -2220,9 +2220,9 @@ void Aura::HandleModCharm(bool apply, bool Real)
                     if (target->GetByteValue(UNIT_FIELD_BYTES_0, 1) == 0)
                     {
                         if (cinfo->UnitClass == 0)
-                            sLog.outErrorDb("Creature (Entry: %u) have unit_class = 0 but used in charmed spell, that will be result client crash.", cinfo->Entry);
+                            sLog.outErrorDb("Creature (Entry: %u) have UnitClass = 0 but used in charmed spell, that will be result client crash.", cinfo->Entry);
                         else
-                            sLog.outError("Creature (Entry: %u) have unit_class = %u but at charming have class 0!!! that will be result client crash.", cinfo->Entry, cinfo->UnitClass);
+                            sLog.outError("Creature (Entry: %u) have UnitClass = %u but at charming have class 0!!! that will be result client crash.", cinfo->Entry, cinfo->UnitClass);
 
                         target->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
                     }
