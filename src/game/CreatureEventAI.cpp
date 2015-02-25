@@ -114,6 +114,9 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
                     continue;
 #endif
                 m_CreatureEventAIList.push_back(CreatureEventAIHolder(*i));
+                // Cache for fast use
+                if (i->event_type == EVENT_T_OOC_LOS)
+                    m_HasOOCLoSEvent = true;
             }
         }
     }
