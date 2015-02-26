@@ -416,15 +416,40 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 {
                     *data << (m_uint32Values[index] & ~UNIT_FLAG_NOT_SELECTABLE);
                 }
-                // hide lootable animation for unallowed players
-                else if (index == UNIT_DYNAMIC_FLAGS && GetTypeId() == TYPEID_UNIT)
+                // Hide special-info for non empathy-casters,
+                // Hide lootable animation for unallowed players
+                else if (index == UNIT_DYNAMIC_FLAGS)
                 {
-                    if (!target->isAllowedToLoot((Creature*)this))
-                        *data << (m_uint32Values[index] & ~UNIT_DYNFLAG_LOOTABLE);
-                    else
-                        *data << (m_uint32Values[index] & ~UNIT_DYNFLAG_TAPPED);
+                    uint32 dynflagsValue = m_uint32Values[index];
+
+                    // Checking SPELL_AURA_EMPATHY and caster
+                    if (dynflagsValue & UNIT_DYNFLAG_SPECIALINFO && ((Unit*)this)->isAlive())
+                    {
+                        bool bIsEmpathy = false;
+                        bool bIsCaster = false;
+                        Unit::AuraList const& mAuraEmpathy = ((Unit*)this)->GetAurasByType(SPELL_AURA_EMPATHY);
+                        for (Unit::AuraList::const_iterator itr = mAuraEmpathy.begin(); !bIsCaster && itr != mAuraEmpathy.end(); ++itr)
+                        {
+                            bIsEmpathy = true;              // Empathy by aura set
+                            if ((*itr)->GetCasterGuid() == target->GetObjectGuid())
+                                bIsCaster = true;           // target is the caster of an empathy aura
+                        }
+                        if (bIsEmpathy && !bIsCaster)       // Empathy by aura, but target is not the caster
+                            dynflagsValue &= ~UNIT_DYNFLAG_SPECIALINFO;
+                    }
+
+                    // Checking lootable
+                    if (dynflagsValue & UNIT_DYNFLAG_LOOTABLE && GetTypeId() == TYPEID_UNIT)
+                    {
+                        if (!target->isAllowedToLoot((Creature*)this))
+                            dynflagsValue &= ~UNIT_DYNFLAG_LOOTABLE;
+                        else
+                            dynflagsValue &= ~UNIT_DYNFLAG_TAPPED;
+                    }
+
+                    *data << dynflagsValue;
                 }
-                else
+                else                                        // Unhandled index, just send
                 {
                     // send in current format (float as float, uint32 as uint32)
                     *data << m_uint32Values[index];
