@@ -234,6 +234,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
 
         void LearnPetPassives();
         void CastPetAuras(bool current);
+        void CastOwnerTalentAuras();
         void CastPetAura(PetAura const* aura);
 
         void _LoadSpellCooldowns();
