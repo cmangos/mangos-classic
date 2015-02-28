@@ -692,6 +692,15 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_SET_FACING:                 // 36
+                break;
+            case SCRIPT_COMMAND_MOVE_DYNAMIC:               // 37
+                if (tmp.moveDynamic.maxDist < tmp.moveDynamic.minDist)
+                {
+                    sLog.outErrorDb("Table `%s` has invalid min-dist (datalong2 = %u) less than max-dist (datalon = %u) in SCRIPT_COMMAND_MOVE_DYNAMIC for script id %u", tablename, tmp.moveDynamic.minDist, tmp.moveDynamic.maxDist, tmp.id);
+                    continue;
+                }
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -1813,6 +1822,54 @@ bool ScriptAction::HandleScriptStep()
                 break;
 
             ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
+            break;
+        }
+        case SCRIPT_COMMAND_SET_FACING:                     // 36
+        {
+            if (LogIfNotCreature(pSource))
+                return false;
+            Creature* pCSource = static_cast<Creature*>(pSource);
+            if (!pTarget)
+            {
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command _SET_FACING (%u): No target found.", m_table, m_script->id, m_script->command);
+                return false;
+            }
+            if (m_script->setFacing.resetFacing)
+            {
+                float x,y,z,o;
+                if (pCSource->GetMotionMaster()->empty() || !pCSource->GetMotionMaster()->top()->GetResetPosition(*pCSource, x, y, z, o))
+                    pCSource->GetRespawnCoord(x, y, z, &o);
+                pCSource->SetFacingTo(o);
+
+                if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && !pCSource->isInCombat())
+                    pCSource->SetTargetGuid(ObjectGuid());
+            }
+            else
+            {
+                pCSource->SetFacingToObject(pTarget);
+                if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && !LogIfNotUnit(pTarget) && !pCSource->isInCombat())
+                    pCSource->SetTargetGuid(pTarget->GetObjectGuid());
+            }
+            break;
+        }
+        case SCRIPT_COMMAND_MOVE_DYNAMIC:                   // 37
+        {
+            if (LogIfNotCreature(pSource))
+                return false;
+            if (LogIfNotUnit(pTarget))
+                return false;
+
+            float x,y,z;
+            if (m_script->moveDynamic.maxDist == 0)         // Move to pTarget
+                pTarget->GetContactPoint(pSource, x, y, z);
+            else                                            // Calculate position
+            {
+                pSource->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), m_script->moveDynamic.maxDist, x, y, z,
+                                        m_script->moveDynamic.minDist, (m_script->o == 0.0f ? NULL : &m_script->o));
+                z = std::max(z, pTarget->GetPositionZ());
+                pSource->UpdateAllowedPositionZ(x, y, z);
+            }
+            ((Creature*)pSource)->GetMotionMaster()->MovePoint(1, x, y, z);
             break;
         }
         default:
