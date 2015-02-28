@@ -21,13 +21,14 @@
 */
 
 #include "Weather.h"
-#include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Player.h"
+#include "Map.h"
 #include "World.h"
+#include "WorldPacket.h"
 #include "Log.h"
-#include "ObjectMgr.h"
 #include "Util.h"
+#include "ProgressBar.h"
 
 /// Weather sound defines ( only for 1.12 )
 enum WeatherSounds
@@ -45,17 +46,19 @@ enum WeatherSounds
 };
 
 /// Create the Weather object
-Weather::Weather(uint32 zone, WeatherZoneChances const* weatherChances) : m_zone(zone), m_weatherChances(weatherChances)
+Weather::Weather(uint32 zone, WeatherZoneChances const* weatherChances) :
+    m_zone(zone),
+    m_type(WEATHER_TYPE_FINE),
+    m_grade(0.0f),
+    m_weatherChances(weatherChances),
+    m_isPermanentWeather(false)
 {
     m_timer.SetInterval(sWorld.getConfig(CONFIG_UINT32_INTERVAL_CHANGEWEATHER));
-    m_type = WEATHER_TYPE_FINE;
-    m_grade = 0;
-
     DETAIL_FILTER_LOG(LOG_FILTER_WEATHER, "WORLD: Starting weather system for zone %u (change every %u minutes).", m_zone, (m_timer.GetInterval() / (MINUTE * IN_MILLISECONDS)));
 }
 
 /// Launch a weather update
-bool Weather::Update(time_t diff)
+bool Weather::Update(uint32 diff, Map const* _map)
 {
     m_timer.Update(diff);
 
@@ -67,21 +70,29 @@ bool Weather::Update(time_t diff)
         if (ReGenerate())
         {
             ///- Weather will be removed if not updated (no players in zone anymore)
-            if (!UpdateWeather())
+            if (!SendWeatherForPlayersInZone(_map))
                 return false;
         }
     }
     return true;
 }
 
-/// Calculate the new weather
+/// Calculate the new weather, returns true if and only if the weather changed
 bool Weather::ReGenerate()
 {
+    if (m_isPermanentWeather)
+        return false;
+
+    // remember old values
+    WeatherType old_type = m_type;
+    float old_grade = m_grade;
+
     if (!m_weatherChances)
     {
         m_type = WEATHER_TYPE_FINE;
         m_grade = 0.0f;
-        return false;
+        // No chanced calculation for this zone
+        return old_type != m_type || old_grade != m_grade;
     }
 
     /// Weather statistics:
@@ -93,10 +104,6 @@ bool Weather::ReGenerate()
 
     if (u < 30)
         return false;
-
-    // remember old values
-    WeatherType old_type = m_type;
-    float old_grade = m_grade;
 
     // 78 days between January 1st and March 20nd; 365/4=91 days by season
     // season source http://aa.usno.navy.mil/data/docs/EarthSeasons.html
@@ -194,50 +201,110 @@ bool Weather::ReGenerate()
             m_grade = rand_norm_f() * 0.3333f + 0.6667f;
     }
 
+    NormalizeGrade();
+
     // return true only in case weather changes
     return m_type != old_type || m_grade != old_grade;
 }
 
 void Weather::SendWeatherUpdateToPlayer(Player* player)
 {
+    NormalizeGrade();
+
     uint32 sound = GetSound();                              // for 1.12
     WorldPacket data(SMSG_WEATHER, (4 + 4 + 4));
 
     data << (uint32)m_type << (float)m_grade << (uint32)sound;
+
     player->GetSession()->SendPacket(&data);
 }
 
-void Weather::SendFineWeatherUpdateToPlayer(Player* player)
+// Send the new weather to all players in the zone
+bool Weather::SendWeatherForPlayersInZone(Map const* _map)
 {
+    NormalizeGrade();
+
+    WeatherState state = GetWeatherState();
+
+    // To be sent packet
     WorldPacket data(SMSG_WEATHER, (4 + 4 + 4));
-
-    data << (uint32)WEATHER_STATE_FINE << (float)0.0f << uint8(0); // no sound
-    player->GetSession()->SendPacket(&data);
-}
-
-/// Send the new weather to all players in the zone
-bool Weather::UpdateWeather()
-{
-    Player* player = sWorld.FindPlayerInZone(m_zone);
-    if (!player)
-        return false;
+    data << uint32(state) << (float)m_grade << uint32(0);    // no sound
 
     ///- Send the weather packet to all players in this zone
-    uint32 sound = GetSound();
+    if (!_map->SendToPlayersInZone(&data, m_zone))
+        return false;
 
+    ///- Log the event
+    LogWeatherState(state);
+    return true;
+}
+
+// Set the weather
+void Weather::SetWeather(WeatherType type, float grade, Map const* _map, bool isPermanent)
+{
+    m_isPermanentWeather = isPermanent;
+
+    if (m_type == type && m_grade == grade)
+        return;
+
+    m_type = type;
+    m_grade = grade;
+    SendWeatherForPlayersInZone(_map);
+}
+
+// Get the sound number associated with the current weather
+WeatherState Weather::GetWeatherState() const
+{
+    if (m_grade < 0.27f)
+        return WEATHER_STATE_FINE;
+
+    switch (m_type)
+    {
+        case WEATHER_TYPE_RAIN:
+            if (m_grade < 0.40f)
+                return WEATHER_STATE_LIGHT_RAIN;
+            else if (m_grade < 0.70f)
+                return WEATHER_STATE_MEDIUM_RAIN;
+            else
+                return WEATHER_STATE_HEAVY_RAIN;
+        case WEATHER_TYPE_SNOW:
+            if (m_grade < 0.40f)
+                return WEATHER_STATE_LIGHT_SNOW;
+            else if (m_grade < 0.70f)
+                return WEATHER_STATE_MEDIUM_SNOW;
+            else
+                return WEATHER_STATE_HEAVY_SNOW;
+        case WEATHER_TYPE_STORM:
+            if (m_grade < 0.40f)
+                return WEATHER_STATE_LIGHT_SANDSTORM;
+            else if (m_grade < 0.70f)
+                return WEATHER_STATE_MEDIUM_SANDSTORM;
+            else
+                return WEATHER_STATE_HEAVY_SANDSTORM;
+//  TBC weather
+//         case WEATHER_TYPE_BLACKRAIN:
+//             return WEATHER_STATE_BLACKRAIN;
+//         case WEATHER_TYPE_THUNDERS:
+//             return WEATHER_STATE_THUNDERS;
+        case WEATHER_TYPE_FINE:
+        default:
+            return WEATHER_STATE_FINE;
+    }
+}
+
+void Weather::NormalizeGrade()
+{
     if (m_grade >= 1)
         m_grade = 0.9999f;
     else if (m_grade < 0)
         m_grade = 0.0001f;
+}
 
-
-    WorldPacket data(SMSG_WEATHER, (4 + 4 + 4));
-    data << (uint32)m_type << (float)m_grade << (uint32)sound;
-    player->SendMessageToSet(&data, true);
-
-    ///- Log the event
+// Helper to log recent state
+void Weather::LogWeatherState(WeatherState state) const
+{
     char const* wthstr;
-    switch (sound)
+    switch (state)
     {
         case WEATHER_RAINLIGHT:
             wthstr = "light rain";
@@ -266,26 +333,67 @@ bool Weather::UpdateWeather()
         case WEATHER_SANDSTORMHEAVY:
             wthstr = "heavy sandstorm";
             break;
-        case WEATHER_NOSOUND:
+// TBC weather
+//         case WEATHER_STATE_THUNDERS:
+//             wthstr = "thunders";
+//             break;
+//         case WEATHER_STATE_BLACKRAIN:
+//             wthstr = "black rain";
+//             break;
+        case WEATHER_STATE_FINE:
         default:
             wthstr = "fine";
             break;
     }
 
-    DETAIL_FILTER_LOG(LOG_FILTER_WEATHER, "Change the weather of zone %u to %s.", m_zone, wthstr);
-
-    return true;
+    DETAIL_FILTER_LOG(LOG_FILTER_WEATHER, "Change the weather of zone %u (type %u, grade %f) to state %s.", m_zone, m_type, m_grade, wthstr);
 }
 
-/// Set the weather
-void Weather::SetWeather(WeatherType type, float grade)
-{
-    if (m_type == type && m_grade == grade)
-        return;
+// ---------------------------------------------------------
+//                  Weather System
+// ---------------------------------------------------------
 
-    m_type = type;
-    m_grade = grade;
-    UpdateWeather();
+WeatherSystem::WeatherSystem(Map const* _map) : m_map(_map)
+{}
+
+WeatherSystem::~WeatherSystem()
+{
+    ///- Empty the WeatherMap
+    for (WeatherMap::const_iterator itr = m_weathers.begin(); itr != m_weathers.end(); ++itr)
+        delete itr->second;
+
+    m_weathers.clear();
+}
+
+/// Find or Create a Weather object by the given zoneid
+Weather* WeatherSystem::FindOrCreateWeather(uint32 zoneId)
+{
+    WeatherMap::const_iterator itr = m_weathers.find(zoneId);
+    // Return if found
+    if (itr != m_weathers.end())
+        return itr->second;
+    // Create
+    Weather* w = new Weather(zoneId, sWeatherMgr.GetWeatherChances(zoneId));
+    m_weathers[zoneId] = w;
+    return w;
+}
+
+/// Update Weathers for the different zones
+void WeatherSystem::UpdateWeathers(uint32 diff)
+{
+    ///- Send an update signal to Weather objects
+    for (WeatherMap::iterator itr = m_weathers.begin(); itr != m_weathers.end();)
+    {
+        ///- and remove Weather objects for zones with no player
+        // As interval > WorldTick
+        if (!itr->second->Update(diff, m_map))
+        {
+            delete itr->second;
+            m_weathers.erase(itr++);
+        }
+        else
+            ++itr;
+    }
 }
 
 // Get the sound number associated with the current weather
@@ -295,25 +403,25 @@ uint32 Weather::GetSound()
     switch (m_type)
     {
         case WEATHER_TYPE_RAIN:                             // rain
-            if (m_grade < 0.33333334f)
+            if (m_grade < 0.40f)
                 sound = WEATHER_RAINLIGHT;
-            else if (m_grade < 0.6666667f)
+            else if (m_grade < 0.70f)
                 sound = WEATHER_RAINMEDIUM;
             else
                 sound = WEATHER_RAINHEAVY;
             break;
         case WEATHER_TYPE_SNOW:                             // snow
-            if (m_grade < 0.33333334f)
+            if (m_grade < 0.40f)
                 sound = WEATHER_SNOWLIGHT;
-            else if (m_grade < 0.6666667f)
+            else if (m_grade < 0.70f)
                 sound = WEATHER_SNOWMEDIUM;
             else
                 sound = WEATHER_SNOWHEAVY;
             break;
         case WEATHER_TYPE_STORM:                            // storm
-            if (m_grade < 0.33333334f)
+            if (m_grade < 0.40f)
                 sound = WEATHER_SANDSTORMLIGHT;
-            else if (m_grade < 0.6666667f)
+            else if (m_grade < 0.70f)
                 sound = WEATHER_SANDSTORMMEDIUM;
             else
                 sound = WEATHER_SANDSTORMHEAVY;
@@ -330,4 +438,67 @@ uint32 Weather::GetSound()
               return WEATHER_STATE_BLACKRAIN;
           case WEATHER_TYPE_THUNDERS:
               return WEATHER_STATE_THUNDERS; */
+}
+
+/// Load Weather chanced from table game_weather
+void WeatherMgr::LoadWeatherZoneChances()
+{
+    uint32 count = 0;
+
+    //                                                0     1                   2                   3                    4                   5                   6                    7                 8                 9                  10                  11                  12
+    QueryResult* result = WorldDatabase.Query("SELECT zone, spring_rain_chance, spring_snow_chance, spring_storm_chance, summer_rain_chance, summer_snow_chance, summer_storm_chance, fall_rain_chance, fall_snow_chance, fall_storm_chance, winter_rain_chance, winter_snow_chance, winter_storm_chance FROM game_weather");
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outErrorDb(">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
+        sLog.outString();
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field* fields = result->Fetch();
+        bar.step();
+
+        uint32 zone_id = fields[0].GetUInt32();
+
+        WeatherZoneChances& wzc = mWeatherZoneMap[zone_id];
+
+        for (int season = 0; season < WEATHER_SEASONS; ++season)
+        {
+            wzc.data[season].rainChance  = fields[season * (MAX_WEATHER_TYPE - 1) + 1].GetUInt32();
+            wzc.data[season].snowChance  = fields[season * (MAX_WEATHER_TYPE - 1) + 2].GetUInt32();
+            wzc.data[season].stormChance = fields[season * (MAX_WEATHER_TYPE - 1) + 3].GetUInt32();
+
+            if (wzc.data[season].rainChance > 100)
+            {
+                wzc.data[season].rainChance = 25;
+                sLog.outErrorDb("Weather for zone %u season %u has wrong rain chance > 100%%", zone_id, season);
+            }
+
+            if (wzc.data[season].snowChance > 100)
+            {
+                wzc.data[season].snowChance = 25;
+                sLog.outErrorDb("Weather for zone %u season %u has wrong snow chance > 100%%", zone_id, season);
+            }
+
+            if (wzc.data[season].stormChance > 100)
+            {
+                wzc.data[season].stormChance = 25;
+                sLog.outErrorDb("Weather for zone %u season %u has wrong storm chance > 100%%", zone_id, season);
+            }
+        }
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString(">> Loaded %u weather definitions", count);
+    sLog.outString();
 }

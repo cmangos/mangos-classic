@@ -4206,33 +4206,26 @@ bool ChatHandler::HandleChangeWeatherCommand(char* args)
     if (!ExtractUInt32(&args, type))
         return false;
 
-    // 0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
-    if (type > 3)
+    // see enum WeatherType
+    if (!Weather::IsValidWeatherType(type))
         return false;
 
     float grade;
     if (!ExtractFloat(&args, grade))
         return false;
 
-    // 0 to 1, sending -1 is instand good weather
+    // 0 to 1, sending -1 is instant good weather
     if (grade < 0.0f || grade > 1.0f)
         return false;
 
     Player* player = m_session->GetPlayer();
-    uint32 zoneid = player->GetZoneId();
-
-    Weather* wth = sWorld.FindWeather(zoneid);
-
-    if (!wth)
-        wth = sWorld.AddWeather(zoneid);
-    if (!wth)
+    uint32 zoneId = player->GetZoneId();
+    if (!sWeatherMgr.GetWeatherChances(zoneId))
     {
         SendSysMessage(LANG_NO_WEATHER);
         SetSentErrorMessage(true);
-        return false;
     }
-
-    wth->SetWeather(WeatherType(type), grade);
+    player->GetMap()->SetWeather(zoneId, (WeatherType)type, grade, false);
 
     return true;
 }
