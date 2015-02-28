@@ -1187,7 +1187,7 @@ bool WorldObject::isInBack(WorldObject const* target, float distance, float arc)
     return IsWithinDist(target, distance) && !HasInArc(2 * M_PI_F - arc, target);
 }
 
-void WorldObject::GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z) const
+void WorldObject::GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist /*=0.0f*/, float const* ori /*=NULL*/) const
 {
     if (distance == 0)
     {
@@ -1198,8 +1198,17 @@ void WorldObject::GetRandomPoint(float x, float y, float z, float distance, floa
     }
 
     // angle to face `obj` to `this`
-    float angle = rand_norm_f() * 2 * M_PI_F;
-    float new_dist = rand_norm_f() * distance;
+    float angle;
+    if (!ori)
+        angle = rand_norm_f() * 2 * M_PI_F;
+    else
+        angle = *ori;
+
+    float new_dist;
+    if (minDist == 0.0f)
+        new_dist = rand_norm_f() * distance;
+    else
+        new_dist = minDist + rand_norm_f() * (distance - minDist);
 
     rand_x = x + new_dist * cos(angle);
     rand_y = y + new_dist * sin(angle);

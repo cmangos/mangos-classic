@@ -254,7 +254,7 @@ void WaypointMovementGenerator<Creature>::MovementInform(Creature& creature)
         creature.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
 }
 
-bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, float& y, float& z) const
+bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, float& y, float& z, float& o) const
 {
     // prevent a crash at empty waypoint path.
     if (!i_path || i_path->empty())
@@ -267,11 +267,32 @@ bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, 
 
     MANGOS_ASSERT(lastPoint != i_path->end());
 
-    const WaypointNode &waypoint = lastPoint->second;
+    WaypointNode const* curWP = &(lastPoint->second);
 
-    x = waypoint.x;
-    y = waypoint.y;
-    z = waypoint.z;
+    x = curWP->x;
+    y = curWP->y;
+    z = curWP->z;
+
+    if (curWP->orientation != 100)
+        o = curWP->orientation;
+    else                                                    // Calculate the resulting angle based on positions between previous and current waypoint
+    {
+        WaypointNode const* prevWP;
+        if (lastPoint != i_path->begin())                   // Not the first waypoint
+        {
+            --lastPoint;
+            prevWP = &(lastPoint->second);
+        }
+        else                                                // Take the last waypoint (crbegin()) as previous
+            prevWP = &(i_path->rbegin()->second);
+
+        float dx = x - prevWP->x;
+        float dy = y - prevWP->y;
+        o = atan2(dy, dx);                                  // returns value between -Pi..Pi
+
+        o = (o >= 0) ? o : 2 * M_PI_F + o;
+    }
+
     return true;
 }
 
@@ -404,9 +425,12 @@ void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
     }
 }
 
-bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z) const
+bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z, float& o) const
 {
     const TaxiPathNodeEntry& node = (*i_path)[i_currentNode];
-    x = node.x; y = node.y; z = node.z;
+    x = node.x;
+    y = node.y;
+    z = node.z;
+
     return true;
 }
