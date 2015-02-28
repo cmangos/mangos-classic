@@ -31,6 +31,10 @@ void WorldSession::HandleLearnTalentOpcode(WorldPacket& recv_data)
     recv_data >> talent_id >> requested_rank;
 
     _player->LearnTalent(talent_id, requested_rank);
+
+    // if player has a pet, update owner talent auras
+    if (_player->GetPet())
+        _player->GetPet()->CastOwnerTalentAuras();
 }
 
 void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket& recv_data)
@@ -60,6 +64,9 @@ void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket& recv_data)
     }
 
     unit->CastSpell(_player, 14867, true);                  // spell: "Untalent Visual Effect"
+
+    if (_player->GetPet())
+        _player->GetPet()->CastOwnerTalentAuras();
 }
 
 void WorldSession::HandleUnlearnSkillOpcode(WorldPacket& recv_data)
