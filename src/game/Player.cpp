@@ -6262,13 +6262,8 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
 
         if (sWorld.getConfig(CONFIG_BOOL_WEATHER))
         {
-            if (Weather* wth = sWorld.FindWeather(zone->ID))
-                wth->SendWeatherUpdateToPlayer(this);
-            else if (!sWorld.AddWeather(zone->ID))
-            {
-                // send fine weather packet to remove old zone's weather
-                Weather::SendFineWeatherUpdateToPlayer(this);
-            }
+            Weather* wth = GetMap()->GetWeatherSystem()->FindOrCreateWeather(newZone);
+            wth->SendWeatherUpdateToPlayer(this);
         }
     }
 
