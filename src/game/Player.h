@@ -1927,6 +1927,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool isMoving() const { return m_movementInfo.HasMovementFlag(movementFlagsMask); }
         bool isMovingOrTurning() const { return m_movementInfo.HasMovementFlag(movementOrTurningFlagsMask); }
 
+        bool CanSwim() const { return true; }
+        bool CanFly() const { return false; }
+        bool IsFlying() const { return false; }
+        bool IsFreeFlying() const { return false; }
+
         void SetClientControl(Unit* target, uint8 allowMove);
         void SetMover(Unit* target) { m_mover = target ? target : this; }
         Unit* GetMover() const { return m_mover; }
