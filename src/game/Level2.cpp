@@ -52,6 +52,7 @@
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand
 #include "MoveMap.h"                                        // for mmap manager
 #include "PathFinder.h"                                     // for mmap commands
+#include "movement/MoveSplineInit.h"
 
 static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
 {
@@ -4933,15 +4934,48 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
     char* para = strtok(args, " ");
 
     bool useStraightPath = false;
-    if (para && strcmp(para, "true") == 0)
-        useStraightPath = true;
+    bool followPath = false;
+    bool unitToPlayer = false;
+    if (para)
+    {
+        if (strcmp(para, "go") == 0)
+        {
+            followPath = true;
+            para = strtok(NULL, " ");
+            if (para && strcmp(para, "straight") == 0)
+                useStraightPath = true;
+        }
+        else if (strcmp(para, "straight") == 0)
+            useStraightPath = true;
+        else if (strcmp(para, "to_me") == 0)
+            unitToPlayer = true;
+        else
+        {
+            PSendSysMessage("Use '.mmap path go' to move on target.");
+            PSendSysMessage("Use '.mmap path straight' to generate straight path.");
+            PSendSysMessage("Use '.mmap path to_me' to generate path from the target to you.");
+        }
+    }
+
+    Unit* destinationUnit;
+    Unit* originUnit;
+    if (unitToPlayer)
+    {
+        destinationUnit = player;
+        originUnit = target;
+    }
+    else
+    {
+        destinationUnit = target;
+        originUnit = player;
+    }
 
     // unit locations
     float x, y, z;
-    player->GetPosition(x, y, z);
+    destinationUnit->GetPosition(x, y, z);
 
     // path
-    PathFinder path(target);
+    PathFinder path(originUnit);
     path.setUseStrightPath(useStraightPath);
     path.calculate(x, y, z);
 
@@ -4963,6 +4997,14 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
 
     for (uint32 i = 0; i < pointPath.size(); ++i)
         player->SummonCreature(VISUAL_WAYPOINT, pointPath[i].x, pointPath[i].y, pointPath[i].z, 0, TEMPSUMMON_TIMED_DESPAWN, 9000);
+
+    if (followPath)
+    {
+        Movement::MoveSplineInit init(*player);
+        init.MovebyPath(pointPath);
+        init.SetWalk(false);
+        init.Launch();
+    }
 
     return true;
 }
