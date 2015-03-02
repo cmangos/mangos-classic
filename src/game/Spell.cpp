@@ -3723,6 +3723,7 @@ void Spell::TakeReagents()
                 }
 
                 m_CastItem = NULL;
+                m_CastItemGUID.Clear();
             }
         }
 
@@ -6261,6 +6262,7 @@ void Spell::ClearCastItem()
         m_targets.setItemTarget(NULL);
 
     m_CastItem = NULL;
+    m_CastItemGUID.Clear();
 }
 
 bool Spell::HasGlobalCooldown()
