@@ -15671,6 +15671,44 @@ bool Player::IsAffectedBySpellmod(SpellEntry const* spellInfo, SpellModifier* mo
     return mod->isAffectedOnSpell(spellInfo);
 }
 
+void Player::SendSpellMods()
+{     
+    for (uint8 modOp = 0; modOp < MAX_SPELLMOD; ++modOp)
+    {
+        if (m_spellMods[modOp].empty())
+            continue;
+
+        for (uint8 eff = 0; eff < 64; ++eff)
+        {
+            uint64 mask = uint64(1) << eff;
+
+            int32 val = 0;
+            // SPELLMOD_FLAT
+            for (SpellModList::const_iterator itr = m_spellMods[modOp].begin(); itr != m_spellMods[modOp].end(); ++itr)
+                if ((*itr)->type == SPELLMOD_FLAT && (*itr)->mask.IsFitToFamilyMask(mask))
+                    val += (*itr)->value;
+
+            WorldPacket data(SMSG_SET_FLAT_SPELL_MODIFIER, (1 + 1 + 4));
+            data << eff;
+            data << modOp;
+            data << val;
+            SendDirectMessage(&data);
+            
+            val = 0;
+            // SPELLMOD_PCT
+            for (SpellModList::const_iterator itr = m_spellMods[modOp].begin(); itr != m_spellMods[modOp].end(); ++itr)
+                if ((*itr)->type == SPELLMOD_PCT && (*itr)->mask.IsFitToFamilyMask(mask))
+                    val += (*itr)->value;
+
+            data.Initialize(SMSG_SET_PCT_SPELL_MODIFIER, (1 + 1 + 4));
+            data << eff;
+            data << modOp;
+            data << val;
+            SendDirectMessage(&data);
+        }
+    }
+}
+
 void Player::AddSpellMod(SpellModifier* mod, bool apply)
 {
     uint16 opcode = (mod->type == SPELLMOD_FLAT) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
@@ -16875,6 +16913,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
     // tutorial stuff
     GetSession()->SendTutorialsData();
     SendInitialSpells();
+    SendSpellMods();
     SendInitialActionButtons();
     m_reputationMgr.SendInitialReputations();
     UpdateHonor();
