@@ -1,0 +1,3 @@
+ALTER TABLE db_version CHANGE COLUMN required_z2621_s2263_12823_02_mangos_creature_movement required_z2621_s2263_12823_03_mangos_creature_movement_template bit;
+
+ALTER TABLE creature_movement_template DROP COLUMN wpguid;
