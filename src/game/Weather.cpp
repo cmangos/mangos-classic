@@ -212,9 +212,12 @@ void Weather::SendWeatherUpdateToPlayer(Player* player)
     NormalizeGrade();
 
     uint32 sound = GetSound();                              // for 1.12
-    WorldPacket data(SMSG_WEATHER, (4 + 4 + 4));
 
-    data << (uint32)m_type << (float)m_grade << (uint32)sound;
+    WorldPacket data(SMSG_WEATHER, 4 + 4 + 4 + 1);
+    data << uint32(m_type);
+    data << float(m_grade);
+    data << (uint32)sound; // 1.12 soundid
+    data << uint8(0);      // instant weather change: 0 = false, 1 = true
 
     player->GetSession()->SendPacket(&data);
 }
@@ -225,10 +228,14 @@ bool Weather::SendWeatherForPlayersInZone(Map const* _map)
     NormalizeGrade();
 
     WeatherState state = GetWeatherState();
+    uint32 sound = GetSound();
 
     // To be sent packet
-    WorldPacket data(SMSG_WEATHER, (4 + 4 + 4));
-    data << uint32(state) << (float)m_grade << uint32(0);    // no sound
+    WorldPacket data(SMSG_WEATHER, 4 + 4 + 4 + 1);
+    data << uint32(m_type);
+    data << float(m_grade);
+    data << (uint32)sound; // 1.12 soundid
+    data << uint8(0);      // instant weather change: 0 = false, 1 = true
 
     ///- Send the weather packet to all players in this zone
     if (!_map->SendToPlayersInZone(&data, m_zone))
@@ -281,11 +288,6 @@ WeatherState Weather::GetWeatherState() const
                 return WEATHER_STATE_MEDIUM_SANDSTORM;
             else
                 return WEATHER_STATE_HEAVY_SANDSTORM;
-//  TBC weather
-//         case WEATHER_TYPE_BLACKRAIN:
-//             return WEATHER_STATE_BLACKRAIN;
-//         case WEATHER_TYPE_THUNDERS:
-//             return WEATHER_STATE_THUNDERS;
         case WEATHER_TYPE_FINE:
         default:
             return WEATHER_STATE_FINE;
@@ -306,40 +308,33 @@ void Weather::LogWeatherState(WeatherState state) const
     char const* wthstr;
     switch (state)
     {
-        case WEATHER_RAINLIGHT:
+        case WEATHER_STATE_LIGHT_RAIN:
             wthstr = "light rain";
             break;
-        case WEATHER_RAINMEDIUM:
+        case WEATHER_STATE_MEDIUM_RAIN:
             wthstr = "medium rain";
             break;
-        case WEATHER_RAINHEAVY:
+        case WEATHER_STATE_HEAVY_RAIN:
             wthstr = "heavy rain";
             break;
-        case WEATHER_SNOWLIGHT:
+        case WEATHER_STATE_LIGHT_SNOW:
             wthstr = "light snow";
             break;
-        case WEATHER_SNOWMEDIUM:
+        case WEATHER_STATE_MEDIUM_SNOW:
             wthstr = "medium snow";
             break;
-        case WEATHER_SNOWHEAVY:
+        case WEATHER_STATE_HEAVY_SNOW:
             wthstr = "heavy snow";
             break;
-        case WEATHER_SANDSTORMLIGHT:
+        case WEATHER_STATE_LIGHT_SANDSTORM:
             wthstr = "light sandstorm";
             break;
-        case WEATHER_SANDSTORMMEDIUM:
+        case WEATHER_STATE_MEDIUM_SANDSTORM:
             wthstr = "medium sandstorm";
             break;
-        case WEATHER_SANDSTORMHEAVY:
+        case WEATHER_STATE_HEAVY_SANDSTORM:
             wthstr = "heavy sandstorm";
             break;
-// TBC weather
-//         case WEATHER_STATE_THUNDERS:
-//             wthstr = "thunders";
-//             break;
-//         case WEATHER_STATE_BLACKRAIN:
-//             wthstr = "black rain";
-//             break;
         case WEATHER_STATE_FINE:
         default:
             wthstr = "fine";
@@ -432,12 +427,6 @@ uint32 Weather::GetSound()
             break;
     }
     return sound;
-
-    /*[-ZERO] tbc [?]
-              case WEATHER_TYPE_BLACKRAIN:
-              return WEATHER_STATE_BLACKRAIN;
-          case WEATHER_TYPE_THUNDERS:
-              return WEATHER_STATE_THUNDERS; */
 }
 
 /// Load Weather chanced from table game_weather
