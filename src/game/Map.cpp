@@ -2010,7 +2010,8 @@ bool Map::GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float
 // Find an height within a reasonable range of provided Z. This method may fail so we have to handle that case.
 bool Map::GetHeightInRange(float x, float y, float &z, float maxSearchDist /*= 4.0f*/) const
 {
-    float height;
+    float height, vmapHeight, mapHeight;
+    vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
 
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
     if (!vmgr->isLineOfSightCalcEnabled())
@@ -2018,20 +2019,43 @@ bool Map::GetHeightInRange(float x, float y, float &z, float maxSearchDist /*= 4
 
     if (vmgr)
     {
-        height = VMAP_INVALID_HEIGHT_VALUE;
-
         // pure vmap search
-        height = vmgr->getHeight(i_id, x, y, z + 1.0f, maxSearchDist);
+        vmapHeight = vmgr->getHeight(i_id, x, y, z + 2.0f, maxSearchDist + 2.0f);
     }
 
-    if (height < INVALID_HEIGHT || fabs(fabs(z) - fabs(height)) > maxSearchDist)
-    {
-        // find raw height from .map file on X,Y coordinates
-        if (GridMap* gmap = const_cast<TerrainInfo*>(m_TerrainData)->GetGrid(x, y)) // TODO:: find a way to remove that const_cast
-            height = gmap->getHeight(x, y);
+    // find raw height from .map file on X,Y coordinates
+    if (GridMap* gmap = const_cast<TerrainInfo*>(m_TerrainData)->GetGrid(x, y)) // TODO:: find a way to remove that const_cast
+        mapHeight = gmap->getHeight(x, y);
 
-        if (fabs(fabs(z) - fabs(height)) > maxSearchDist)
-            return false; // not found any good height
+    float diffMaps = fabs(fabs(z) - fabs(mapHeight));
+    float diffVmaps = fabs(fabs(z) - fabs(vmapHeight));
+    if (diffVmaps < maxSearchDist)
+    {
+        if (diffMaps < maxSearchDist)
+        {
+            // here we often have to take vmap value but sometime we have to take map value.
+            if (vmapHeight > mapHeight || diffMaps > diffVmaps)
+                height = vmapHeight;
+            else
+                height = mapHeight;
+
+            //sLog.outString("vmap %5.4f, map %5.4f, height %5.4f", vmapHeight, mapHeight, height);
+        }
+        else
+        {
+            //sLog.outString("vmap %5.4f", vmapHeight);
+            height = vmapHeight;
+        }
+    }
+    else
+    {
+        if (diffMaps < maxSearchDist)
+        {
+            //sLog.outString("map %5.4f", mapHeight);
+            height = mapHeight;
+        }
+        else
+            return false;
     }
 
     z = std::max<float>(height, m_dyn_tree.getHeight(x, y, height + 1.0f, maxSearchDist));
