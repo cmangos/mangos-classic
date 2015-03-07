@@ -392,19 +392,7 @@ void WaypointManager::_clearPath(WaypointPath& path)
     path.clear();
 }
 
-/// - Insert after the last point
-void WaypointManager::AddLastNode(uint32 id, float x, float y, float z, float o, uint32 delay, uint32 wpGuid)
-{
-    uint32 point = GetLastPoint(id, 0) + 1;
-
-    WorldDatabase.PExecuteLog("INSERT INTO creature_movement (id,point,position_x,position_y,position_z,orientation,wpguid,waittime) "
-        "VALUES (%u,%u, %f,%f,%f,%f, %u,%u)",
-        id, point, x, y, z, o, wpGuid, delay);
-
-    m_pathMap[id][point] = WaypointNode(x, y, z, o, delay, 0, NULL);
-}
-
-/// - Insert after a certain point
+/// - Insert at a certain point, if pointId == 0 insert last. In this case pointId will be changed to the id to which the node was added
 WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32& pointId, WaypointPathOrigin wpDest, float x, float y, float z)
 {
     // Support only normal movement tables
@@ -450,15 +438,6 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
     WorldDatabase.PExecuteLog("INSERT INTO %s (%s,point,position_x,position_y,position_z,orientation) VALUES (%u,%u, %f,%f,%f, 100)", table, key_field, key, pointId, x, y, z);
 
     return &path[pointId];
-}
-
-uint32 WaypointManager::GetLastPoint(uint32 id, uint32 default_notfound)
-{
-    WaypointPathMap::const_iterator itr = m_pathMap.find(id);
-    if (itr != m_pathMap.end() && itr->second.rbegin() != itr->second.rend())
-        default_notfound = itr->second.rbegin()->first;
-
-    return default_notfound;
 }
 
 void WaypointManager::DeleteNode(uint32 entry, uint32 dbGuid, uint32 point, WaypointPathOrigin wpOrigin)

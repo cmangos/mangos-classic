@@ -127,8 +127,6 @@ class WaypointManager
             return find != wpMap->end() ? &find->second : NULL;
         }
 
-        void AddLastNode(uint32 id, float x, float y, float z, float o, uint32 delay, uint32 wpGuid);
-        uint32 GetLastPoint(uint32 id, uint32 default_notfound);
         void DeletePath(uint32 id);
         void CheckTextsExistance(std::set<int32>& ids);
 
