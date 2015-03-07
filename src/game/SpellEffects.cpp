@@ -50,6 +50,7 @@
 #include "Util.h"
 #include "TemporarySummon.h"
 #include "ScriptMgr.h"
+#include "G3D/Vector3.h"
 #include "LuaEngine.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
@@ -4327,24 +4328,138 @@ void Spell::EffectBlock(SpellEffectIndex /*eff_idx*/)
 
 void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
 {
-    if (unitTarget->IsTaxiFlying())
-        return;
+    float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
 
-    if (m_spellInfo->rangeIndex == SPELL_RANGE_IDX_SELF_ONLY)
+    G3D::Vector3 prevPos, nextPos;
+    float orientation = unitTarget->GetOrientation();
+
+    prevPos.x = unitTarget->GetPositionX();
+    prevPos.y = unitTarget->GetPositionY();
+    prevPos.z = unitTarget->GetPositionZ();
+
+    float groundZ = prevPos.z;
+
+    // falling case
+    if (unitTarget->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING) && !unitTarget->GetMap()->GetHeightInRange(prevPos.x, prevPos.y, groundZ, 3.0f))
     {
-        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
+        nextPos.x = prevPos.x + dist * cos(orientation);
+        nextPos.y = prevPos.y + dist * sin(orientation);
+        nextPos.z = prevPos.z - 2.0f; // little hack to avoid the impression to go up when teleporting instead of continue to fall. This value may need some tweak
 
-        // before caster
-        float fx, fy, fz;
-        unitTarget->GetClosePoint(fx, fy, fz, unitTarget->GetObjectBoundingRadius(), dis);
-        float ox, oy, oz;
-        unitTarget->GetPosition(ox, oy, oz);
+        //
+        GridMapLiquidData liquidData;
+        if (unitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z, &liquidData))
+        {
+            if (fabs(nextPos.z - liquidData.level) < 10.0f)
+                nextPos.z = liquidData.level;
+        }
+        else
+        {
+            // fix z to ground if near of it
+            unitTarget->GetMap()->GetHeightInRange(nextPos.x, nextPos.y, nextPos.z, 10.0f);
+        }
 
-        if (unitTarget->GetMap()->GetHitPosition(ox, oy, oz + 0.5f, fx, fy, fz, -0.5f))
-            unitTarget->UpdateAllowedPositionZ(fx, fy, fz);
+        // check any obstacle and fix coords
+        unitTarget->GetMap()->GetHitPosition(prevPos.x, prevPos.y, prevPos.z + 0.5f, nextPos.x, nextPos.y, nextPos.z, -0.5f);
 
-        unitTarget->NearTeleportTo(fx, fy, fz, unitTarget->GetOrientation(), unitTarget == m_caster);
+        // teleport
+        unitTarget->NearTeleportTo(nextPos.x, nextPos.y, nextPos.z, orientation, unitTarget == m_caster);
+
+        sLog.outDebug("Falling BLINK!");
+        return;
     }
+
+    // fix origin position if player was jumping and near of the ground but not in ground
+    if (fabs(prevPos.z - groundZ) > 0.5f)
+        prevPos.z = groundZ;
+
+    const float step = 2.0f;                                    // step length before next check slope/edge/water
+    const float maxSlope = 50.0f;                               // 50(degree) max seem best value for walkable slope
+    const float MAX_SLOPE_IN_RADIAN = maxSlope / 180.0f * M_PI_F;
+    float nextZPointEstimation = 1.0f;
+    float destx = prevPos.x + dist * cos(orientation);
+    float desty = prevPos.y + dist * sin(orientation);
+    const uint32 numChecks = ceil(fabs(dist / step));
+    const float DELTA_X = (destx - prevPos.x) / numChecks;
+    const float DELTA_Y = (desty - prevPos.y) / numChecks;
+
+    for (uint32 i = 1; i < numChecks + 1; ++i)
+    {
+        nextPos.x = prevPos.x + DELTA_X;
+        nextPos.y = prevPos.y + DELTA_Y;
+        nextPos.z = prevPos.z + nextZPointEstimation;
+        bool isInLiquid = false;
+        bool isInLiquidTested = false;
+        bool isOnGround = false;
+
+        // try fix height for next position
+        if (!unitTarget->GetMap()->GetHeightInRange(nextPos.x, nextPos.y, nextPos.z))
+        {
+            // we cant so test if we are on water
+            if (!unitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z))
+            {
+                // not in water and cannot get correct height, maybe flying?
+                sLog.outDebug("Can't get height of point %u, point value %s", i, nextPos.toString().c_str());
+                nextPos = prevPos;
+                break;
+            }
+            else
+            {
+                isInLiquid = true;
+                isInLiquidTested = true;
+            }
+        }
+        else
+            isOnGround = true;                                  // player is on ground
+
+        if (isInLiquid || (!isInLiquidTested && unitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z)))
+        {
+            nextPos.z = prevPos.z;
+            isInLiquid = true;
+
+            float ground = nextPos.z;
+            if (unitTarget->GetMap()->GetHeightInRange(nextPos.x, nextPos.y, ground))
+            {
+                if (nextPos.z < ground)
+                {
+                    nextPos.z = ground;
+                    isOnGround = true;                          // player is on ground of the water
+                }
+            }
+        }
+
+        //unitTarget->SummonCreature(VISUAL_WAYPOINT, nextPos.x, nextPos.y, nextPos.z, 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
+        float hitZ = nextPos.z + 1.5f;
+        if (unitTarget->GetMap()->GetHitPosition(prevPos.x, prevPos.y, prevPos.z + 1.5f, nextPos.x, nextPos.y, hitZ, -1.0f))
+        {
+            sLog.outDebug("Blink collision detected!");
+            nextPos = prevPos;
+            break;
+        }
+
+        if (isOnGround)
+        {
+            // project vector to get only positive value
+            float ac = fabs(prevPos.z - nextPos.z);
+
+            // compute slope (in radian)
+            float slope = atan(ac / step);
+
+            // check slope value
+            if (slope > MAX_SLOPE_IN_RADIAN)
+            {
+                sLog.outDebug("bad slope detected! %4.2f max %4.2f, ac(%4.2f)", slope * 180 / M_PI_F, maxSlope, ac);
+                nextPos = prevPos;
+                break;
+            }
+        }
+
+        sLog.outDebug("point %u is ok, coords %s", i, nextPos.toString().c_str());
+        nextZPointEstimation = (nextPos.z - prevPos.z) / 2.0f;
+        prevPos = nextPos;
+    }
+
+    unitTarget->NearTeleportTo(nextPos.x, nextPos.y, nextPos.z, orientation, unitTarget == m_caster);
 }
 
 void Spell::EffectReputation(SpellEffectIndex eff_idx)
