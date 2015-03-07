@@ -110,8 +110,6 @@ class WaypointManager
 
             switch (wpOrigin)
             {
-                case PATH_NO_PATH:
-                    return NULL;
                 case PATH_FROM_GUID:
                     key = lowGuid;
                     wpMap = &m_pathMap;
@@ -121,6 +119,9 @@ class WaypointManager
                     wpMap = &m_pathTemplateMap;
                     break;
                 case PATH_FROM_EXTERNAL:
+                    return NULL;
+                case PATH_NO_PATH:
+                default:
                     return NULL;
             }
             WaypointPathMap::iterator find = wpMap->find(key);
