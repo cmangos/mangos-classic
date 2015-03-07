@@ -120,6 +120,7 @@ class GridMap
 {
     private:
 
+        uint16 m_holes[16][16];
         uint32 m_flags;
 
         // Area data
@@ -156,6 +157,8 @@ class GridMap
         bool loadAreaData(FILE* in, uint32 offset, uint32 size);
         bool loadHeightData(FILE* in, uint32 offset, uint32 size);
         bool loadGridMapLiquidData(FILE* in, uint32 offset, uint32 size);
+        bool loadHolesData(FILE* in, uint32 offset, uint32 size);
+        bool isHole(int row, int col) const;
 
         // Get height functions and pointers
         typedef float(GridMap::*pGetHeightPtr)(float x, float y) const;
