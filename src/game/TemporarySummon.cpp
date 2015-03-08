@@ -211,3 +211,11 @@ void TemporarySummon::UnSummon()
 void TemporarySummon::SaveToDB()
 {
 }
+
+TemporarySummonWaypoint::TemporarySummonWaypoint(ObjectGuid summoner, uint32 waypoint_id, int32 path_id, uint32 pathOrigin) :
+    TemporarySummon(summoner),
+    m_waypoint_id(waypoint_id),
+    m_path_id(path_id),
+    m_pathOrigin(pathOrigin)
+{
+}

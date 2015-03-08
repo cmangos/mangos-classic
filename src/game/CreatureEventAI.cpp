@@ -114,6 +114,9 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
                     continue;
 #endif
                 m_CreatureEventAIList.push_back(CreatureEventAIHolder(*i));
+                // Cache for fast use
+                if (i->event_type == EVENT_T_OOC_LOS)
+                    m_HasOOCLoSEvent = true;
             }
         }
     }
@@ -145,6 +148,7 @@ inline bool IsTimerBasedEvent(EventAI_Type type)
         case EVENT_T_MISSING_AURA:
         case EVENT_T_TARGET_MISSING_AURA:
         case EVENT_T_RANGE:
+        case EVENT_T_ENERGY:
             return true;
         default:
             return false;
@@ -420,6 +424,21 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         }
         case EVENT_T_RECEIVE_AI_EVENT:
             break;
+        case EVENT_T_ENERGY:
+        {
+            if (!m_creature->isInCombat() || !m_creature->GetMaxPower(POWER_ENERGY))
+                return false;
+
+            uint32 perc = (m_creature->GetPower(POWER_ENERGY) * 100) / m_creature->GetMaxPower(POWER_ENERGY);
+
+            if (perc > event.percent_range.percentMax || perc < event.percent_range.percentMin)
+                return false;
+
+            LOG_PROCESS_EVENT;
+            // Repeat Timers
+            pHolder.UpdateRepeatTimer(m_creature, event.percent_range.repeatMin, event.percent_range.repeatMax);
+            break;
+        }
         default:
             sLog.outErrorEventAI("Creature %u using Event %u has invalid Event Type(%u), missing from ProcessEvent() Switch.", m_creature->GetEntry(), pHolder.Event.event_id, pHolder.Event.event_type);
             break;

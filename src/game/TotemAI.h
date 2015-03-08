@@ -26,7 +26,7 @@
 class Creature;
 class Totem;
 
-class MANGOS_DLL_DECL TotemAI : public CreatureAI
+class TotemAI : public CreatureAI
 {
     public:
 

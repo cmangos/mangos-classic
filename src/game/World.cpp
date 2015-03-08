@@ -29,7 +29,6 @@
 #include "Opcodes.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"
-#include "Weather.h"
 #include "Player.h"
 #include "AccountMgr.h"
 #include "AuctionHouseMgr.h"
@@ -63,6 +62,7 @@
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "CharacterDatabaseCleaner.h"
 #include "CreatureLinkingMgr.h"
+#include "Weather.h"
 
 INSTANTIATE_SINGLETON_1(World);
 
@@ -124,12 +124,6 @@ World::~World()
         m_sessions.erase(m_sessions.begin());
     }
 
-    ///- Empty the WeatherMap
-    for (WeatherMap::const_iterator itr = m_weathers.begin(); itr != m_weathers.end(); ++itr)
-        delete itr->second;
-
-    m_weathers.clear();
-
     CliCommandHolder* command = NULL;
     while (cliCmdQueue.next(command))
         delete command;
@@ -137,8 +131,7 @@ World::~World()
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
 
-    if (m_configForceLoadMapIds)
-        delete m_configForceLoadMapIds;
+    delete m_configForceLoadMapIds;
 
     // TODO free addSessQueue
 }
@@ -149,27 +142,6 @@ void World::CleanupsBeforeStop()
     KickAll();                                       // save and kick all players
     UpdateSessions(1);                               // real players unload required UpdateSessions call
     sBattleGroundMgr.DeleteAllBattleGrounds();       // unload battleground templates before different singletons destroyed
-}
-
-/// Find a player in a specified zone
-Player* World::FindPlayerInZone(uint32 zone)
-{
-    ///- circle through active sessions and return the first player found in the zone
-    SessionMap::const_iterator itr;
-    for (itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
-    {
-        if (!itr->second)
-            continue;
-        Player* player = itr->second->GetPlayer();
-        if (!player)
-            continue;
-        if (player->IsInWorld() && player->GetZoneId() == zone)
-        {
-            // Used by the weather system. We return the player to broadcast the change weather message to him and all players in the zone.
-            return player;
-        }
-    }
-    return NULL;
 }
 
 /// Find a session by its id
@@ -358,46 +330,6 @@ bool World::RemoveQueuedSession(WorldSession* sess)
         (*iter)->SendAuthWaitQue(position);
 
     return found;
-}
-
-/// Find a Weather object by the given zoneid
-Weather* World::FindWeather(uint32 id) const
-{
-    WeatherMap::const_iterator itr = m_weathers.find(id);
-
-    if (itr != m_weathers.end())
-        return itr->second;
-    else
-        return 0;
-}
-
-/// Remove a Weather object for the given zoneid
-void World::RemoveWeather(uint32 id)
-{
-    // not called at the moment. Kept for completeness
-    WeatherMap::iterator itr = m_weathers.find(id);
-
-    if (itr != m_weathers.end())
-    {
-        delete itr->second;
-        m_weathers.erase(itr);
-    }
-}
-
-/// Add a Weather object to the list
-Weather* World::AddWeather(uint32 zone_id)
-{
-    WeatherZoneChances const* weatherChances = sObjectMgr.GetWeatherChances(zone_id);
-
-    // zone not have weather, ignore
-    if (!weatherChances)
-        return NULL;
-
-    Weather* w = new Weather(zone_id, weatherChances);
-    m_weathers[w->GetZone()] = w;
-    w->ReGenerate();
-    w->UpdateWeather();
-    return w;
 }
 
 /// Initialize config values
@@ -1044,7 +976,7 @@ void World::SetInitialWorldSettings()
     sPoolMgr.LoadFromDB();
 
     sLog.outString("Loading Weather Data...");
-    sObjectMgr.LoadWeatherZoneChances();
+    sWeatherMgr.LoadWeatherZoneChances();
 
     sLog.outString("Loading Quests...");
     sObjectMgr.LoadQuests();                                // must be loaded after DBCs, creature_template, item_template, gameobject tables
@@ -1263,7 +1195,6 @@ void World::SetInitialWorldSettings()
     LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, startstring, uptime) VALUES('%u', " UI64FMTD ", '%s', 0)",
                            realmID, uint64(m_startTime), isoDate);
 
-    m_timers[WUPDATE_WEATHERS].SetInterval(1 * IN_MILLISECONDS);
     m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE * IN_MILLISECONDS);
     m_timers[WUPDATE_UPTIME].SetInterval(getConfig(CONFIG_UINT32_UPTIME_UPDATE)*MINUTE * IN_MILLISECONDS);
     // Update "uptime" table based on configuration entry in minutes.
@@ -1429,25 +1360,6 @@ void World::Update(uint32 diff)
     /// <li> Handle session updates
     UpdateSessions(diff);
 
-    /// <li> Handle weather updates when the timer has passed
-    if (m_timers[WUPDATE_WEATHERS].Passed())
-    {
-        ///- Send an update signal to Weather objects
-        for (WeatherMap::iterator itr = m_weathers.begin(); itr != m_weathers.end();)
-        {
-            ///- and remove Weather objects for zones with no player
-            // As interval > WorldTick
-            if (!itr->second->Update(m_timers[WUPDATE_WEATHERS].GetInterval()))
-            {
-                delete itr->second;
-                m_weathers.erase(itr++);
-            }
-            else
-                ++itr;
-        }
-
-        m_timers[WUPDATE_WEATHERS].SetCurrent(0);
-    }
     /// <li> Update uptime table
     if (m_timers[WUPDATE_UPTIME].Passed())
     {

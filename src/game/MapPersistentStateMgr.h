@@ -315,7 +315,7 @@ class DungeonResetScheduler
         ResetTimeQueue m_resetTimeQueue;
 };
 
-class MANGOS_DLL_DECL MapPersistentStateManager : public MaNGOS::Singleton<MapPersistentStateManager, MaNGOS::ClassLevelLockable<MapPersistentStateManager, ACE_Thread_Mutex> >
+class MapPersistentStateManager : public MaNGOS::Singleton<MapPersistentStateManager, MaNGOS::ClassLevelLockable<MapPersistentStateManager, ACE_Thread_Mutex> >
 {
         friend class DungeonResetScheduler;
     public:                                                 // constructors

@@ -218,6 +218,9 @@ void Creature::RemoveCorpse()
     if (m_isCreatureLinkingTrigger)
         GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_DESPAWN, this);
 
+    if (InstanceData* mapInstance = GetInstanceData())
+        mapInstance->OnCreatureDespawn(this);
+
     // script can set time (in seconds) explicit, override the original
     if (respawnDelay)
         m_respawnTime = time(NULL) + respawnDelay;
@@ -335,7 +338,13 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=NU
     UpdateSpeed(MOVE_WALK, false);
     UpdateSpeed(MOVE_RUN,  false);
 
-    SetLevitate(cinfo->InhabitType & INHABIT_AIR);
+    SetLevitate(cinfo->InhabitType & INHABIT_AIR); // TODO: may not be correct to send opcode at this point (already handled by UPDATE_OBJECT createObject)
+
+    // check if we need to add swimming movement. TODO: i thing movement flags should be computed automatically at each movement of creature so we need a sort of UpdateMovementFlags() method
+    if (cinfo->InhabitType & INHABIT_WATER &&                                   // check inhabit type water
+        data &&                                                                 // check if there is data to get creature spawn pos
+        GetMap()->GetTerrain()->IsInWater(data->posX, data->posY, data->posZ))  // check if creature is in water
+        m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);                      // add swimming movement
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
@@ -2634,6 +2643,55 @@ void Creature::SetLevitate(bool enable)
     // WorldPacket data(enable ? SMSG_SPLINE_MOVE_GRAVITY_DISABLE : SMSG_SPLINE_MOVE_GRAVITY_ENABLE, 9);
     // data << GetPackGUID();
     // SendMessageToSet(&data, true);
+}
+
+void Creature::SetSwim(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_START_SWIM : SMSG_SPLINE_MOVE_STOP_SWIM);
+    data << GetPackGUID();
+    SendMessageToSet(&data, true);
+}
+
+void Creature::SetCanFly(bool enable)
+{
+//     TODO: check if there is something similar for 1.12.x (dragons and other flying NPCs)
+//     if (enable)
+//         m_movementInfo.AddMovementFlag(MOVEFLAG_CAN_FLY);
+//     else
+//         m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
+// 
+//     WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_FLYING : SMSG_SPLINE_MOVE_UNSET_FLYING, 9);
+//     data << GetPackGUID();
+//     SendMessageToSet(&data, true);
+}
+
+void Creature::SetFeatherFall(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_SAFE_FALL);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_SAFE_FALL);
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_FEATHER_FALL : SMSG_SPLINE_MOVE_NORMAL_FALL);
+    data << GetPackGUID();
+    SendMessageToSet(&data, true);
+}
+
+void Creature::SetHover(bool enable)
+{
+    if (enable)
+        m_movementInfo.AddMovementFlag(MOVEFLAG_HOVER);
+    else
+        m_movementInfo.RemoveMovementFlag(MOVEFLAG_HOVER);
+
+    WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_HOVER : SMSG_SPLINE_MOVE_UNSET_HOVER, 9);
+    data << GetPackGUID();
+    SendMessageToSet(&data, false);
 }
 
 void Creature::SetRoot(bool enable)

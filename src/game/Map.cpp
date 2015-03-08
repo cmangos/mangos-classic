@@ -37,6 +37,7 @@
 #include "MoveMap.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "Chat.h"
+#include "Weather.h"
 
 Map::~Map()
 {
@@ -57,6 +58,9 @@ Map::~Map()
     // release reference count
     if (m_TerrainData->Release())
         sTerrainMgr.UnloadTerrain(m_TerrainData->GetMapId());
+
+    delete m_weatherSystem;
+    m_weatherSystem = NULL;
 }
 
 void Map::LoadMapAndVMap(int gx, int gy)
@@ -97,6 +101,8 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId)
 
     m_persistentState = sMapPersistentStateMgr.AddPersistentState(i_mapEntry, GetInstanceId(), 0, IsDungeon());
     m_persistentState->SetUsedByMapState(this);
+
+    m_weatherSystem = new WeatherSystem(this);
 }
 
 void Map::InitVisibilityDistance()
@@ -566,6 +572,8 @@ void Map::Update(const uint32& t_diff)
 
     if (i_data)
         i_data->Update(t_diff);
+
+    m_weatherSystem->UpdateWeathers(t_diff);
 }
 
 void Map::Remove(Player* player, bool remove)
@@ -1023,6 +1031,20 @@ void Map::SendToPlayers(WorldPacket const* data) const
         itr->getSource()->GetSession()->SendPacket(data);
 }
 
+bool Map::SendToPlayersInZone(WorldPacket const* data, uint32 zoneId) const
+{
+    bool foundPlayer = false;
+    for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
+    {
+        if (itr->getSource()->GetZoneId() == zoneId)
+        {
+            itr->getSource()->GetSession()->SendPacket(data);
+            foundPlayer = true;
+        }
+    }
+    return foundPlayer;
+}
+
 bool Map::ActiveObjectsNearGrid(uint32 x, uint32 y) const
 {
     MANGOS_ASSERT(x < MAX_NUMBER_OF_GRIDS);
@@ -1208,6 +1230,12 @@ void Map::TeleportAllPlayersTo(TeleportLocation loc)
             plr->GetMapRef().unlink();
         }
     }
+}
+
+void Map::SetWeather(uint32 zoneId, WeatherType type, float grade, bool permanently)
+{
+    Weather* wth = m_weatherSystem->FindOrCreateWeather(zoneId);
+    wth->SetWeather(WeatherType(type), grade, this, permanently);
 }
 
 template void Map::Add(Corpse*);
@@ -1979,6 +2007,37 @@ bool Map::GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float
     return result0 || result1;
 }
 
+// Find an height within a reasonable range of provided Z. This method may fail so we have to handle that case.
+bool Map::GetHeightInRange(float x, float y, float &z, float maxSearchDist /*= 4.0f*/) const
+{
+    float height;
+
+    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
+    if (!vmgr->isLineOfSightCalcEnabled())
+        vmgr = NULL;
+
+    if (vmgr)
+    {
+        height = VMAP_INVALID_HEIGHT_VALUE;
+
+        // pure vmap search
+        height = vmgr->getHeight(i_id, x, y, z + 1.0f, maxSearchDist);
+    }
+
+    if (height < INVALID_HEIGHT || fabs(fabs(z) - fabs(height)) > maxSearchDist)
+    {
+        // find raw height from .map file on X,Y coordinates
+        if (GridMap* gmap = const_cast<TerrainInfo*>(m_TerrainData)->GetGrid(x, y)) // TODO:: find a way to remove that const_cast
+            height = gmap->getHeight(x, y);
+
+        if (fabs(fabs(z) - fabs(height)) > maxSearchDist)
+            return false; // not found any good height
+    }
+
+    z = std::max<float>(height, m_dyn_tree.getHeight(x, y, height + 1.0f, maxSearchDist));
+    return true;
+}
+
 float Map::GetHeight(float x, float y, float z) const
 {
     float staticHeight = m_TerrainData->GetHeightStatic(x, y, z);
@@ -2001,4 +2060,176 @@ void Map::RemoveGameObjectModel(const GameObjectModel& mdl)
 bool Map::ContainsGameObjectModel(const GameObjectModel& mdl) const
 {
     return m_dyn_tree.contains(mdl);
+}
+
+// This will generate a random point to all directions in water for the provided point in radius range.
+bool Map::GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status)
+{
+    const float angle = rand_norm_f() * (M_PI_F * 2.0f);
+    const float range = rand_norm_f() * radius;
+
+    float i_x = x + range * cos(angle);
+    float i_y = y + range * sin(angle);
+
+    // get real ground of new point
+    // the code consider cylinder instead of sphere for possible z
+    float ground = GetHeight(i_x, i_y, z);
+    if (ground > INVALID_HEIGHT) // GetHeight can fail
+    {
+        float min_z = z - 0.7f * radius; // 0.7 to have a bit a "flat" cylinder, TODO which value looks nicest
+        if (min_z < ground)
+            min_z = ground + 0.5f; // Get some space to prevent under map
+        
+        float liquidLevel = liquid_status.level - 2.0f; // just to make the generated point is in water and not on surface or a bit above
+
+        // if not enough space to fit the creature better is to return from here
+        if (min_z > liquidLevel)
+            return false;
+
+        float max_z = std::max(z + 0.7f * radius, min_z);
+        max_z = std::min(max_z, liquidLevel);
+        x = i_x;
+        y = i_y;
+        z = min_z + rand_norm_f() * (max_z - min_z);
+        return true;
+    }
+    return false;
+}
+
+// This will generate a random point to all directions in air for the provided point in radius range.
+bool Map::GetRandomPointInTheAir(float& x, float& y, float& z, float radius)
+{
+    const float angle = rand_norm_f() * (M_PI_F * 2.0f);
+    const float range = rand_norm_f() * radius;
+
+    float i_x = x + range * cos(angle);
+    float i_y = y + range * sin(angle);
+
+    // get real ground of new point
+    // the code consider cylinder instead of sphere for possible z
+    float ground = GetHeight(i_x, i_y, z);
+    if (ground > INVALID_HEIGHT) // GetHeight can fail
+    {
+        float min_z = z - 0.7f * radius; // 0.7 to have a bit a "flat" cylinder, TODO which value looks nicest
+        if (min_z < ground)
+            min_z = ground + 2.5f; // Get some space to prevent landing
+        float max_z = std::max(z + 0.7f * radius, min_z);
+        x = i_x;
+        y = i_y;
+        z = min_z + rand_norm_f() * (max_z - min_z);
+        return true;
+    }
+    return false;
+}
+
+// supposed to be used for not big radius, usually less than 20.0f
+bool Map::GetReachableRandomPointOnGround(float& x, float& y, float& z, float radius)
+{
+    // Generate a random range and direction for the new point
+    const float angle = rand_norm_f() * (M_PI_F * 2.0f);
+    const float range = rand_norm_f() * radius;
+
+    float i_x = x + range * cos(angle);
+    float i_y = y + range * sin(angle);
+    float i_z = z + 1.0f;
+
+    GetHitPosition(x, y, z + 1.0f, i_x, i_y, i_z, -0.5f);
+    i_z = z; // reset i_z to z value to avoid too much difference from original point before GetHeightInRange
+    if (!GetHeightInRange(i_x, i_y, i_z)) // GetHeight can fail
+        return false;
+
+    // here we have a valid position but the point can have a big Z in some case
+    // next code will check angle from 2 points
+    //        c
+    //       /|
+    //      / |
+    //    b/__|a
+
+    // project vector to get only positive value
+    float ab = fabs(x - i_x);
+    float ac = fabs(z - i_z);
+
+    // slope represented by c angle (in radian)
+    float slope = 0;
+    const float MAX_SLOPE_IN_RADIAN = 50.0f / 180.0f * M_PI_F;  // 50(degree) max seem best value for walkable slope
+
+    // check ab vector to avoid divide by 0
+    if (ab > 0.0f)
+    {
+        // compute c angle and convert it from radian to degree
+        slope = atan(ac / ab);
+        if (slope < MAX_SLOPE_IN_RADIAN)
+        {
+            x = i_x;
+            y = i_y;
+            z = i_z;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+// Get random point by handling different situation depending of if the unit is flying/swimming/walking
+bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius)
+{
+
+    float i_x = x;
+    float i_y = y;
+    float i_z = z;
+
+    bool newDestAssigned = false;   // used to check if new random destination is found
+
+    bool isFlying = false;
+    bool isSwimming = true;
+    switch (unit->GetTypeId())
+    {
+        case TYPEID_UNIT:
+            isFlying = static_cast<Creature*>(unit)->IsFlying();
+            isSwimming = static_cast<Creature*>(unit)->IsSwimming();
+            break;
+        default:
+            sLog.outError("Map::GetReachableRandomPosition> Unsupported unit type is passed!");
+            return false;
+    }
+
+    if (radius < 0.1f)
+    {
+        sLog.outError("Map::GetReachableRandomPosition> Unsupported unit type is passed!");
+        return false;
+    }
+
+    if (isFlying)
+    {
+        newDestAssigned = GetRandomPointInTheAir(i_x, i_y, i_z, radius);
+        /*if (newDestAssigned)
+        sLog.outString("Generating air random point for %s", GetGuidStr().c_str());*/
+    }
+    else
+    {
+        GridMapLiquidData liquid_status;
+        GridMapLiquidStatus res = m_TerrainData->getLiquidStatus(i_x, i_y, i_z, MAP_ALL_LIQUIDS, &liquid_status);
+        if (isSwimming && (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER)))
+        {
+            newDestAssigned = GetRandomPointUnderWater(i_x, i_y, i_z, radius, liquid_status);
+            /*if (newDestAssigned)
+            sLog.outString("Generating swim random point for %s", GetGuidStr().c_str());*/
+        }
+        else
+        {
+            newDestAssigned = GetReachableRandomPointOnGround(i_x, i_y, i_z, radius);
+            /*if (newDestAssigned)
+            sLog.outString("Generating ground random point for %s", GetGuidStr().c_str());*/
+        }
+    }
+
+    if (newDestAssigned)
+    {
+        x = i_x;
+        y = i_y;
+        z = i_z;
+        return true;
+    }
+
+    return false;
 }

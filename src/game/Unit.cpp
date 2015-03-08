@@ -5322,6 +5322,16 @@ void Unit::EnergizeBySpell(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers 
     pVictim->ModifyPower(powertype, Damage);
 }
 
+/** Calculate spell coefficents and level penalties for spell/melee damage or heal
+ *
+ * this is the caster of the spell/ melee attacker
+ * @param spellProto SpellEntry of the used spell
+ * @param total current value onto which the Bonus and level penalty will be calculated
+ * @param benefit additional benefit from ie spellpower-auras
+ * @param ap_benefit additional melee attackpower benefit from auras
+ * @param damagetype what kind of damage
+ * @param donePart calculate for done or taken
+ */
 int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, int32 total, int32 benefit, int32 ap_benefit,  DamageEffectType damagetype, bool donePart)
 {
     // Distribute Damage over multiple effects, reduce by AoE
@@ -5479,7 +5489,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* pCaster, SpellEntry const* spellProto, 
     int32 TakenAdvertisedBenefit = SpellBaseDamageBonusTaken(GetSpellSchoolMask(spellProto));
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
-    TakenTotal = SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
+    TakenTotal = pCaster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
 
     float tmpDamage = (int32(pdamage) + TakenTotal * int32(stack)) * TakenTotalMod;
 
@@ -5734,7 +5744,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
  * Calculates target part of healing spell bonuses,
  * will be called on each tick for periodic damage over time auras
  */
-uint32 Unit::SpellHealingBonusTaken(Unit* /*pCaster*/, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack)
+uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack)
 {
     float  TakenTotalMod = 1.0f;
 
@@ -5780,7 +5790,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* /*pCaster*/, SpellEntry const* spellPr
     }
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
-    TakenTotal = SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
+    TakenTotal = pCaster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
 
     // Taken mods
     // Healing Wave cast
@@ -8551,6 +8561,24 @@ void Unit::UpdateModelData()
         else
             SetFloatValue(UNIT_FIELD_COMBATREACH, GetObjectScale() * modelInfo->combat_reach);
     }
+}
+
+float Unit::GetObjectScaleMod() const
+{
+    int32 modValue = 0;
+    Unit::AuraList const& scaleAuraList = GetAurasByType(SPELL_AURA_MOD_SCALE);
+    for (Unit::AuraList::const_iterator itr = scaleAuraList.begin(); itr != scaleAuraList.end(); ++itr)
+        modValue += (*itr)->GetModifier()->m_amount;
+
+    float result = (100 + modValue) / 100.0f;
+
+    // TODO:: not sure we have to do this sanity check, less than /100 or more than *100 seem not reasonable
+    if (result < 0.01)
+        result = 0.01;
+    else if (result > 100)
+        result = 100;
+
+    return result;
 }
 
 void Unit::ClearComboPointHolders()

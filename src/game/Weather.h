@@ -28,6 +28,11 @@
 #include "Timer.h"
 
 class Player;
+class Map;
+
+// ---------------------------------------------------------
+//            Actual Weather in one zone
+// ---------------------------------------------------------
 
 enum WeatherState
 {
@@ -40,9 +45,7 @@ enum WeatherState
     WEATHER_STATE_HEAVY_SNOW        = 8,
     WEATHER_STATE_LIGHT_SANDSTORM   = 22,
     WEATHER_STATE_MEDIUM_SANDSTORM  = 41,
-    WEATHER_STATE_HEAVY_SANDSTORM   = 42,
-    WEATHER_STATE_THUNDERS          = 86,
-    WEATHER_STATE_BLACKRAIN         = 90
+    WEATHER_STATE_HEAVY_SANDSTORM   = 42
 };
 
 struct WeatherZoneChances;
@@ -52,21 +55,110 @@ class Weather
 {
     public:
         Weather(uint32 zone, WeatherZoneChances const* weatherChances);
-        ~Weather() { };
-        bool ReGenerate();
-        bool UpdateWeather();
+        ~Weather() {};
+
+        /// Send Weather to one player
         void SendWeatherUpdateToPlayer(Player* player);
-        static void SendFineWeatherUpdateToPlayer(Player* player);
-        void SetWeather(WeatherType type, float grade);
-        /// For which zone is this weather?
-        uint32 GetZone() { return m_zone; };
-        bool Update(time_t diff);
+        /// Set the weather
+        void SetWeather(WeatherType type, float grade, Map const* _map, bool isPermanent);
+        /// Update the weather in this zone, when the timer is expired the weather will be rolled again
+        bool Update(uint32 diff, Map const* _map);
+        /// Check if a type is valid
+        static bool IsValidWeatherType(uint32 type)
+        {
+            switch (type)
+            {
+                case WEATHER_TYPE_FINE:
+                case WEATHER_TYPE_RAIN:
+                case WEATHER_TYPE_SNOW:
+                case WEATHER_TYPE_STORM:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
     private:
         uint32 GetSound();
+        /// Send SMSG_WEATHER to all players in the zone
+        bool SendWeatherForPlayersInZone(Map const* _map);
+        /// Calculate new weather
+        bool ReGenerate();
+        /// Calculate state based on type and grade
+        WeatherState GetWeatherState() const;
+        // Helper to get the grade between 0..1
+        void NormalizeGrade();
+        // Helper to log recent state
+        void LogWeatherState(WeatherState state) const;
+
         uint32 m_zone;
         WeatherType m_type;
         float m_grade;
         ShortIntervalTimer m_timer;
         WeatherZoneChances const* m_weatherChances;
+        bool m_isPermanentWeather;
 };
+
+// ---------------------------------------------------------
+//         Weather information hold on one map
+// ---------------------------------------------------------
+
+/// Weathers for one map
+class WeatherSystem
+{
+    public:
+        WeatherSystem(Map const* _map);
+        ~WeatherSystem();
+
+        Weather* FindOrCreateWeather(uint32 zoneId);
+        void UpdateWeathers(uint32 diff);
+
+    private:
+        Map const* const m_map;
+
+        typedef UNORDERED_MAP<uint32 /*zoneId*/, Weather*> WeatherMap;
+        WeatherMap m_weathers;
+};
+
+// ---------------------------------------------------------
+//              Global Weather Information
+// ---------------------------------------------------------
+
+#define WEATHER_SEASONS 4
+struct WeatherSeasonChances
+{
+    uint32 rainChance;
+    uint32 snowChance;
+    uint32 stormChance;
+};
+
+struct WeatherZoneChances
+{
+    WeatherSeasonChances data[WEATHER_SEASONS];
+};
+
+class WeatherMgr
+{
+    public:
+        WeatherMgr() {};
+        ~WeatherMgr() {};
+
+        void LoadWeatherZoneChances();
+
+        WeatherZoneChances const* GetWeatherChances(uint32 zone_id) const
+        {
+            WeatherZoneMap::const_iterator itr = mWeatherZoneMap.find(zone_id);
+            if (itr != mWeatherZoneMap.end())
+                return &itr->second;
+            else
+                return NULL;
+        }
+
+    private:
+        typedef UNORDERED_MAP<uint32 /*zoneId*/, WeatherZoneChances> WeatherZoneMap;
+        WeatherZoneMap      mWeatherZoneMap;
+};
+
+#define sWeatherMgr MaNGOS::Singleton<WeatherMgr>::Instance()
+
 #endif

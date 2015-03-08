@@ -4206,33 +4206,26 @@ bool ChatHandler::HandleChangeWeatherCommand(char* args)
     if (!ExtractUInt32(&args, type))
         return false;
 
-    // 0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
-    if (type > 3)
+    // see enum WeatherType
+    if (!Weather::IsValidWeatherType(type))
         return false;
 
     float grade;
     if (!ExtractFloat(&args, grade))
         return false;
 
-    // 0 to 1, sending -1 is instand good weather
+    // 0 to 1, sending -1 is instant good weather
     if (grade < 0.0f || grade > 1.0f)
         return false;
 
     Player* player = m_session->GetPlayer();
-    uint32 zoneid = player->GetZoneId();
-
-    Weather* wth = sWorld.FindWeather(zoneid);
-
-    if (!wth)
-        wth = sWorld.AddWeather(zoneid);
-    if (!wth)
+    uint32 zoneId = player->GetZoneId();
+    if (!sWeatherMgr.GetWeatherChances(zoneId))
     {
         SendSysMessage(LANG_NO_WEATHER);
         SetSentErrorMessage(true);
-        return false;
     }
-
-    wth->SetWeather(WeatherType(type), grade);
+    player->GetMap()->SetWeather(zoneId, (WeatherType)type, grade, false);
 
     return true;
 }
@@ -5364,6 +5357,7 @@ bool ChatHandler::HandleGMFlyCommand(char* args)
         SendSysMessage(LANG_USE_BOL);
         return false;
     }
+    target->SetCanFly(value);
     PSendSysMessage(LANG_COMMAND_FLYMODE_STATUS, GetNameLink(target).c_str(), args);
     return true;
 }
@@ -6533,6 +6527,67 @@ bool ChatHandler::HandleMmapTestArea(char* args)
         PSendSysMessage("No creatures in %f yard range.", radius);
     }
 
+    return true;
+}
+
+// use ".mmap testheight 10" selecting any creature/player
+bool ChatHandler::HandleMmapTestHeight(char* args)
+{
+    float radius = 0.0f;
+    ExtractFloat(&args, radius);
+    if (radius > 40.0f)
+        radius = 40.0f;
+    
+    Unit* unit = getSelectedUnit();
+    
+    Player* player = m_session->GetPlayer();
+    if (!unit)
+        unit = player;
+
+    if (unit->GetTypeId() == TYPEID_UNIT)
+    {
+        if (radius < 0.1f)
+            radius = static_cast<Creature*>(unit)->GetRespawnRadius();
+    }
+    else
+    {
+        if (unit->GetTypeId() != TYPEID_PLAYER)
+        {
+            PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+            return false;
+        }
+    }
+
+    if (radius < 0.1f)
+    {
+        if (unit->GetTypeId() == TYPEID_UNIT)
+            PSendSysMessage("Provided spawn radius in table for %s is too small. using 5.0f instead.");
+        else
+            PSendSysMessage("Provided spawn radius is too small. using 5.0f instead.");
+        radius = 5.0f;
+    }
+
+    float gx, gy, gz;
+    unit->GetPosition(gx, gy, gz);
+
+    Creature* summoned = unit->SummonCreature(VISUAL_WAYPOINT, gx, gy, gz + 0.5f, 0, TEMPSUMMON_TIMED_DESPAWN, 20000);
+    summoned->CastSpell(summoned, 8599, false); 
+    uint32 tryed = 1;
+    uint32 succeed = 0;
+    uint32 startTime = WorldTimer::getMSTime();
+    for (; tryed < 500; ++tryed)
+    {
+        unit->GetPosition(gx, gy, gz);
+        if (unit->GetMap()->GetReachableRandomPosition(unit, gx, gy, gz, radius))
+        {
+            unit->SummonCreature(VISUAL_WAYPOINT, gx, gy, gz, 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
+            ++succeed;
+            if (succeed >= 100)
+                break;
+        }
+    }
+    uint32 genTime = WorldTimer::getMSTimeDiff(startTime, WorldTimer::getMSTime());
+    PSendSysMessage("Generated %u valid points for %u try in %ums.", succeed, tryed, genTime);
     return true;
 }
 

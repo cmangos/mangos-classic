@@ -474,8 +474,8 @@ enum UnitFlags
     UNIT_FLAG_PASSIVE               = 0x00000200,           // makes you unable to attack everything. Almost identical to our "civilian"-term. Will ignore it's surroundings and not engage in combat unless "called upon" or engaged by another unit.
     UNIT_FLAG_PVP                   = 0x00001000,
     UNIT_FLAG_SILENCED              = 0x00002000,           // silenced, 2.1.1
-    UNIT_FLAG_UNK_14                = 0x00004000,
-    UNIT_FLAG_UNK_15                = 0x00008000,
+    UNIT_FLAG_UNK_14                = 0x00004000,           // 2.0.8
+    UNIT_FLAG_UNK_15                = 0x00008000,           // related to jerky movement in water?
     UNIT_FLAG_UNK_16                = 0x00010000,           // removes attackable icon
     UNIT_FLAG_PACIFIED              = 0x00020000,
     UNIT_FLAG_DISABLE_ROTATE        = 0x00040000,
@@ -1436,6 +1436,12 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING); }
         bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE); }
         bool IsRooted() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT); }
+
+        virtual void SetLevitate(bool /*enabled*/) {}
+        virtual void SetSwim(bool /*enabled*/) {}
+        virtual void SetCanFly(bool /*enabled*/) {}
+        virtual void SetFeatherFall(bool /*enabled*/) {}
+        virtual void SetHover(bool /*enabled*/) {}
         virtual void SetRoot(bool /*enabled*/) {}
         virtual void SetWaterWalk(bool /*enabled*/) {}
 
@@ -1712,6 +1718,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         // at any changes to scale and/or displayId
         void UpdateModelData();
+        float GetObjectScaleMod() const;
 
         DynamicObject* GetDynObject(uint32 spellId, SpellEffectIndex effIndex);
         DynamicObject* GetDynObject(uint32 spellId);
@@ -1858,6 +1865,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void OnRelocated();
 
         bool IsLinkingEventTrigger() { return m_isCreatureLinkingTrigger; }
+
+        virtual bool CanSwim() const = 0;
+        virtual bool CanFly() const = 0;
 
     protected:
         explicit Unit();

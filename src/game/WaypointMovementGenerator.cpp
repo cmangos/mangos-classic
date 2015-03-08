@@ -36,36 +36,17 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature)
 {
     DETAIL_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "LoadPath: loading waypoint path for %s", creature.GetGuidStr().c_str());
 
-    i_path = sWaypointMgr.GetPath(creature.GetGUIDLow());
-
-    // We may LoadPath() for several occasions:
-
-    // 1: When creature.MovementType=2
-    //    1a) Path is selected by creature.guid == creature_movement.id
-    //    1b) Path for 1a) does not exist and then use path from creature.GetEntry() == creature_movement_template.entry
-
-    // 2: When creature_template.MovementType=2
-    //    2a) Creature is summoned and has creature_template.MovementType=2
-    //        Creators need to be sure that creature_movement_template is always valid for summons.
-    //        Mob that can be summoned anywhere should not have creature_movement_template for example.
-
-    // No movement found for guid
+    i_path = sWaypointMgr.GetDefaultPath(creature.GetEntry(), creature.GetGUIDLow());
+    // No movement found for entry nor guid
     if (!i_path)
     {
-        i_path = sWaypointMgr.GetPathTemplate(creature.GetEntry());
-
-        // No movement found for entry
-        if (!i_path)
-        {
-            sLog.outErrorDb("WaypointMovementGenerator::LoadPath: creature %s (Entry: %u GUID: %u) doesn't have waypoint path",
-                            creature.GetName(), creature.GetEntry(), creature.GetGUIDLow());
-            return;
-        }
+        sLog.outErrorDb("WaypointMovementGenerator::LoadPath: %s doesn't have waypoint path", creature.GetGuidStr().c_str());
+        return;
     }
 
-    // Initialize the i_currentNode to point to the first node
     if (i_path->empty())
         return;
+    // Initialize the i_currentNode to point to the first node
     i_currentNode = i_path->begin()->first;
     m_lastReachedWaypoint = 0;
 }
@@ -254,7 +235,7 @@ void WaypointMovementGenerator<Creature>::MovementInform(Creature& creature)
         creature.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
 }
 
-bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, float& y, float& z) const
+bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, float& y, float& z, float& o) const
 {
     // prevent a crash at empty waypoint path.
     if (!i_path || i_path->empty())
@@ -267,11 +248,32 @@ bool WaypointMovementGenerator<Creature>::GetResetPosition(Creature&, float& x, 
 
     MANGOS_ASSERT(lastPoint != i_path->end());
 
-    const WaypointNode &waypoint = lastPoint->second;
+    WaypointNode const* curWP = &(lastPoint->second);
 
-    x = waypoint.x;
-    y = waypoint.y;
-    z = waypoint.z;
+    x = curWP->x;
+    y = curWP->y;
+    z = curWP->z;
+
+    if (curWP->orientation != 100)
+        o = curWP->orientation;
+    else                                                    // Calculate the resulting angle based on positions between previous and current waypoint
+    {
+        WaypointNode const* prevWP;
+        if (lastPoint != i_path->begin())                   // Not the first waypoint
+        {
+            --lastPoint;
+            prevWP = &(lastPoint->second);
+        }
+        else                                                // Take the last waypoint (crbegin()) as previous
+            prevWP = &(i_path->rbegin()->second);
+
+        float dx = x - prevWP->x;
+        float dy = y - prevWP->y;
+        o = atan2(dy, dx);                                  // returns value between -Pi..Pi
+
+        o = (o >= 0) ? o : 2 * M_PI_F + o;
+    }
+
     return true;
 }
 
@@ -404,9 +406,12 @@ void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
     }
 }
 
-bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z) const
+bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z, float& o) const
 {
     const TaxiPathNodeEntry& node = (*i_path)[i_currentNode];
-    x = node.x; y = node.y; z = node.z;
+    x = node.x;
+    y = node.y;
+    z = node.z;
+
     return true;
 }

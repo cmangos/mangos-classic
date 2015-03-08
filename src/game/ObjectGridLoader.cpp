@@ -28,7 +28,7 @@
 #include "CellImpl.h"
 #include "BattleGround/BattleGround.h"
 
-class MANGOS_DLL_DECL ObjectGridRespawnMover
+class ObjectGridRespawnMover
 {
     public:
         ObjectGridRespawnMover() {}

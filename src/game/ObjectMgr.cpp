@@ -1045,27 +1045,27 @@ void ObjectMgr::LoadCreatures()
 
         if (cInfo->RegenerateStats & REGEN_FLAG_HEALTH && data.curhealth < cInfo->MinLevelHealth)
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenerateStats` & REGEN_FLAG_HEALTH and low current health (%u), `creature_template`.`minhealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenerateStats` & REGEN_FLAG_HEALTH and low current health (%u), `creature_template`.`MinLevelHealth`=%u.", guid, data.id, data.curhealth, cInfo->MinLevelHealth);
             data.curhealth = cInfo->MinLevelHealth;
         }
 
         if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_INSTANCE_BIND)
         {
             if (!mapEntry || !mapEntry->IsDungeon())
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`flags_extra` including CREATURE_EXTRA_FLAG_INSTANCE_BIND (%u) but creature are not in instance.",
+                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_INSTANCE_BIND (%u) but creature are not in instance.",
                                 guid, data.id, CREATURE_EXTRA_FLAG_INSTANCE_BIND);
         }
 
         if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_AGGRO_ZONE)
         {
             if (!mapEntry || !mapEntry->IsDungeon())
-                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`flags_extra` including CREATURE_EXTRA_FLAG_AGGRO_ZONE (%u) but creature are not in instance.",
+                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`ExtraFlags` including CREATURE_FLAG_EXTRA_AGGRO_ZONE (%u) but creature are not in instance.",
                                 guid, data.id, CREATURE_EXTRA_FLAG_AGGRO_ZONE);
         }
 
         if (data.curmana < cInfo->MinLevelMana)
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with low current mana (%u), `creature_template`.`minmana`=%u.", guid, data.id, data.curmana, cInfo->MinLevelMana);
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with low current mana (%u), `creature_template`.`MinLevelMana`=%u.", guid, data.id, data.curmana, cInfo->MinLevelMana);
             data.curmana = cInfo->MinLevelMana;
         }
 
@@ -6098,68 +6098,6 @@ void ObjectMgr::LoadPointsOfInterest()
     sLog.outString();
 }
 
-void ObjectMgr::LoadWeatherZoneChances()
-{
-    uint32 count = 0;
-
-    //                                                0     1                   2                   3                    4                   5                   6                    7                 8                 9                  10                  11                  12
-    QueryResult* result = WorldDatabase.Query("SELECT zone, spring_rain_chance, spring_snow_chance, spring_storm_chance, summer_rain_chance, summer_snow_chance, summer_storm_chance, fall_rain_chance, fall_snow_chance, fall_storm_chance, winter_rain_chance, winter_snow_chance, winter_storm_chance FROM game_weather");
-
-    if (!result)
-    {
-        BarGoLink bar(1);
-        bar.step();
-        sLog.outErrorDb(">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
-        sLog.outString();
-        return;
-    }
-
-    BarGoLink bar(result->GetRowCount());
-
-    do
-    {
-        Field* fields = result->Fetch();
-        bar.step();
-
-        uint32 zone_id = fields[0].GetUInt32();
-
-        WeatherZoneChances& wzc = mWeatherZoneMap[zone_id];
-
-        for (int season = 0; season < WEATHER_SEASONS; ++season)
-        {
-            wzc.data[season].rainChance  = fields[season * (MAX_WEATHER_TYPE - 1) + 1].GetUInt32();
-            wzc.data[season].snowChance  = fields[season * (MAX_WEATHER_TYPE - 1) + 2].GetUInt32();
-            wzc.data[season].stormChance = fields[season * (MAX_WEATHER_TYPE - 1) + 3].GetUInt32();
-
-            if (wzc.data[season].rainChance > 100)
-            {
-                wzc.data[season].rainChance = 25;
-                sLog.outErrorDb("Weather for zone %u season %u has wrong rain chance > 100%%", zone_id, season);
-            }
-
-            if (wzc.data[season].snowChance > 100)
-            {
-                wzc.data[season].snowChance = 25;
-                sLog.outErrorDb("Weather for zone %u season %u has wrong snow chance > 100%%", zone_id, season);
-            }
-
-            if (wzc.data[season].stormChance > 100)
-            {
-                wzc.data[season].stormChance = 25;
-                sLog.outErrorDb("Weather for zone %u season %u has wrong storm chance > 100%%", zone_id, season);
-            }
-        }
-
-        ++count;
-    }
-    while (result->NextRow());
-
-    delete result;
-
-    sLog.outString(">> Loaded %u weather definitions", count);
-    sLog.outString();
-}
-
 void ObjectMgr::DeleteCreatureData(uint32 guid)
 {
     // remove mapid*cellid -> guid_set map
@@ -6279,7 +6217,7 @@ void ObjectMgr::LoadCreatureQuestRelations()
         if (!cInfo)
             sLog.outErrorDb("Table `creature_questrelation` have data for nonexistent creature entry (%u) and existing quest %u", itr->first, itr->second);
         else if (!(cInfo->NpcFlags & UNIT_NPC_FLAG_QUESTGIVER))
-            sLog.outErrorDb("Table `creature_questrelation` has creature entry (%u) for quest %u, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", itr->first, itr->second);
+            sLog.outErrorDb("Table `creature_questrelation` has creature entry (%u) for quest %u, but NpcFlags does not include UNIT_NPC_FLAG_QUESTGIVER", itr->first, itr->second);
     }
 }
 
@@ -6293,7 +6231,7 @@ void ObjectMgr::LoadCreatureInvolvedRelations()
         if (!cInfo)
             sLog.outErrorDb("Table `creature_involvedrelation` have data for nonexistent creature entry (%u) and existing quest %u", itr->first, itr->second);
         else if (!(cInfo->NpcFlags & UNIT_NPC_FLAG_QUESTGIVER))
-            sLog.outErrorDb("Table `creature_involvedrelation` has creature entry (%u) for quest %u, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER", itr->first, itr->second);
+            sLog.outErrorDb("Table `creature_involvedrelation` has creature entry (%u) for quest %u, but NpcFlags does not include UNIT_NPC_FLAG_QUESTGIVER", itr->first, itr->second);
     }
 }
 
@@ -7897,7 +7835,7 @@ void ObjectMgr::LoadTrainerTemplates()
                     trainer_ids.erase(cInfo->TrainerTemplateId);
                 else
                 {
-                    sLog.outErrorDb("Creature (Entry: %u) has trainer_id = %u for nonexistent trainer template", cInfo->Entry, cInfo->TrainerTemplateId);
+                    sLog.outErrorDb("Creature (Entry: %u) has TrainerTemplateId = %u for nonexistent trainer template", cInfo->Entry, cInfo->TrainerTemplateId);
                     hasErrored = true;
                 }
             }
@@ -7983,7 +7921,7 @@ void ObjectMgr::LoadVendorTemplates()
                 if (m_mCacheVendorTemplateItemMap.find(cInfo->VendorTemplateId) !=  m_mCacheVendorTemplateItemMap.end())
                     vendor_ids.erase(cInfo->VendorTemplateId);
                 else
-                    sLog.outErrorDb("Creature (Entry: %u) has vendor_id = %u for nonexistent vendor template", cInfo->Entry, cInfo->VendorTemplateId);
+                    sLog.outErrorDb("Creature (Entry: %u) has VendorTemplateId = %u for nonexistent vendor template", cInfo->Entry, cInfo->VendorTemplateId);
             }
         }
     }
@@ -8170,7 +8108,7 @@ void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
         if (CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
             if (cInfo->GossipMenuId)
                 if (m_mGossipMenusMap.find(cInfo->GossipMenuId) == m_mGossipMenusMap.end())
-                    sLog.outErrorDb("Creature (Entry: %u) has gossip_menu_id = %u for nonexistent menu", cInfo->Entry, cInfo->GossipMenuId);
+                    sLog.outErrorDb("Creature (Entry: %u) has GossipMenuId = %u for nonexistent menu", cInfo->Entry, cInfo->GossipMenuId);
     }
 
     if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
@@ -8306,7 +8244,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
             }
 
             if (found_menu_uses && !found_flags_uses)
-                sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u has `npc_option_npcflag` = %u but creatures using this menu does not have corresponding`npcflag`. Option will not accessible in game.", gMenuItem.menu_id, gMenuItem.id, gMenuItem.npc_option_npcflag);
+                sLog.outErrorDb("Table gossip_menu_option for menu %u, id %u has `npc_option_npcflag` = %u but creatures using this menu does not have corresponding `NpcFlags`. Option will not accessible in game.", gMenuItem.menu_id, gMenuItem.id, gMenuItem.npc_option_npcflag);
         }
 
         if (gMenuItem.action_poi_id && !GetPointOfInterest(gMenuItem.action_poi_id))

@@ -65,20 +65,6 @@ typedef ACE_SHLIB_HANDLE MANGOS_LIBRARY_HANDLE;
 #endif // PLATFORM
 
 #if PLATFORM == PLATFORM_WINDOWS
-#  ifdef MANGOS_WIN32_DLL_IMPORT
-#    define MANGOS_DLL_DECL __declspec(dllimport)
-#  else //!MANGOS_WIN32_DLL_IMPORT
-#    ifdef MANGOS_WIND_DLL_EXPORT
-#      define MANGOS_DLL_DECL __declspec(dllexport)
-#    else //!MANGOS_WIND_DLL_EXPORT
-#      define MANGOS_DLL_DECL
-#    endif // MANGOS_WIND_DLL_EXPORT
-#  endif // MANGOS_WIN32_DLL_IMPORT
-#else // PLATFORM != PLATFORM_WINDOWS
-#  define MANGOS_DLL_DECL
-#endif // PLATFORM
-
-#if PLATFORM == PLATFORM_WINDOWS
 #  define MANGOS_DLL_SPEC __declspec(dllexport)
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)

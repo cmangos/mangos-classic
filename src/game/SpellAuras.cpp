@@ -1453,19 +1453,8 @@ void Aura::HandleAuraFeatherFall(bool apply, bool Real)
     // only at real add/remove aura
     if (!Real)
         return;
-    Unit* target = GetTarget();
-    WorldPacket data;
-    if (apply)
-        data.Initialize(SMSG_MOVE_FEATHER_FALL, 8 + 4);
-    else
-        data.Initialize(SMSG_MOVE_NORMAL_FALL, 8 + 4);
-    data << target->GetPackGUID();
-    data << uint32(0);
-    target->SendMessageToSet(&data, true);
 
-    // start fall from current height
-    if (!apply && target->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)target)->SetFallInformation(0, target->GetPositionZ());
+    GetTarget()->SetFeatherFall(apply);
 }
 
 void Aura::HandleAuraHover(bool apply, bool Real)
@@ -1474,14 +1463,7 @@ void Aura::HandleAuraHover(bool apply, bool Real)
     if (!Real)
         return;
 
-    WorldPacket data;
-    if (apply)
-        data.Initialize(SMSG_MOVE_SET_HOVER, 8 + 4);
-    else
-        data.Initialize(SMSG_MOVE_UNSET_HOVER, 8 + 4);
-    data << GetTarget()->GetPackGUID();
-    data << uint32(0);
-    GetTarget()->SendMessageToSet(&data, true);
+    GetTarget()->SetHover(apply);
 }
 
 void Aura::HandleWaterBreathing(bool /*apply*/, bool /*Real*/)
@@ -1508,6 +1490,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     uint32 modelid = 0;
     Powers PowerType = POWER_MANA;
     Unit* target = GetTarget();
+
+    // remove SPELL_AURA_EMPATHY
+    target->RemoveSpellsCausingAura(SPELL_AURA_EMPATHY);
 
     switch (form)
     {
@@ -1598,9 +1583,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
                 // If spell that caused this aura has Croud Control or Daze effect
                 if ((aurMechMask & MECHANIC_NOT_REMOVED_BY_SHAPESHIFT) ||
-                        // some Daze spells have these parameters instead of MECHANIC_DAZE (skip snare spells)
-                        (aurSpellInfo->SpellIconID == 15 && aurSpellInfo->Dispel == 0 &&
-                         (aurMechMask & (1 << (MECHANIC_SNARE - 1))) == 0))
+                    // some Daze spells have these parameters instead of MECHANIC_DAZE (skip snare spells)
+                    (aurSpellInfo->SpellIconID == 15 && aurSpellInfo->Dispel == 0 &&
+                    (aurMechMask & (1 << (MECHANIC_SNARE - 1))) == 0))
                 {
                     ++iter;
                     continue;
@@ -1615,6 +1600,13 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             if (target->IsPolymorphed())
                 target->RemoveAurasDueToSpell(target->getTransForm());
 
+            //no break here
+        }
+        case FORM_GHOSTWOLF:
+        {
+            // remove water walk aura. TODO:: there is probably better way to do this
+            target->RemoveSpellsCausingAura(SPELL_AURA_WATER_WALK);
+
             break;
         }
         default:
@@ -1623,14 +1615,12 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     if (apply)
     {
-        Powers PowerType = POWER_MANA;
-
         // remove other shapeshift before applying a new one
         target->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT, GetHolder());
 
         if (modelid > 0)
         {
-            target->SetObjectScale(DEFAULT_OBJECT_SCALE);
+            target->SetObjectScale(DEFAULT_OBJECT_SCALE * target->GetObjectScaleMod());
             target->SetDisplayId(modelid);
         }
 
@@ -1715,9 +1705,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             if (target->getRace() == RACE_TAUREN)
             {
                 if (target->getGender() == GENDER_MALE)
-                    target->SetObjectScale(DEFAULT_TAUREN_MALE_SCALE);
+                    target->SetObjectScale(DEFAULT_TAUREN_MALE_SCALE * target->GetObjectScaleMod());
                 else
-                    target->SetObjectScale(DEFAULT_TAUREN_FEMALE_SCALE);
+                    target->SetObjectScale(DEFAULT_TAUREN_FEMALE_SCALE * target->GetObjectScaleMod());
             }
 
             target->SetDisplayId(target->GetNativeDisplayId());
@@ -2215,9 +2205,9 @@ void Aura::HandleModCharm(bool apply, bool Real)
                     if (target->GetByteValue(UNIT_FIELD_BYTES_0, 1) == 0)
                     {
                         if (cinfo->UnitClass == 0)
-                            sLog.outErrorDb("Creature (Entry: %u) have unit_class = 0 but used in charmed spell, that will be result client crash.", cinfo->Entry);
+                            sLog.outErrorDb("Creature (Entry: %u) have UnitClass = 0 but used in charmed spell, that will be result client crash.", cinfo->Entry);
                         else
-                            sLog.outError("Creature (Entry: %u) have unit_class = %u but at charming have class 0!!! that will be result client crash.", cinfo->Entry, cinfo->UnitClass);
+                            sLog.outError("Creature (Entry: %u) have UnitClass = %u but at charming have class 0!!! that will be result client crash.", cinfo->Entry, cinfo->UnitClass);
 
                         target->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
                     }
@@ -4067,12 +4057,12 @@ void Aura::HandleShapeshiftBoosts(bool apply)
 
 void Aura::HandleAuraEmpathy(bool apply, bool /*Real*/)
 {
-    if (GetTarget()->GetTypeId() != TYPEID_UNIT)
-        return;
+    Unit* target = GetTarget();
 
-    CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(GetTarget()->GetEntry());
-    if (ci && ci->CreatureType == CREATURE_TYPE_BEAST)
-        GetTarget()->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
+    // This aura is expected to only work with CREATURE_TYPE_BEAST or players
+    CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(target->GetEntry());
+    if (target->GetTypeId() == TYPEID_PLAYER || (target->GetTypeId() == TYPEID_UNIT && ci && ci->CreatureType == CREATURE_TYPE_BEAST))
+        target->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
 }
 
 void Aura::HandleAuraUntrackable(bool apply, bool /*Real*/)

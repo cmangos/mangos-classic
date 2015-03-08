@@ -32,7 +32,7 @@
 
 namespace MaNGOS
 {
-    struct MANGOS_DLL_DECL VisibleNotifier
+    struct VisibleNotifier
     {
         Camera& i_camera;
         UpdateData i_data;
@@ -45,7 +45,7 @@ namespace MaNGOS
         void Notify(void);
     };
 
-    struct MANGOS_DLL_DECL VisibleChangesNotifier
+    struct VisibleChangesNotifier
     {
         WorldObject& i_object;
 
@@ -54,7 +54,7 @@ namespace MaNGOS
         void Visit(CameraMapType&);
     };
 
-    struct MANGOS_DLL_DECL MessageDeliverer
+    struct MessageDeliverer
     {
         Player const& i_player;
         WorldPacket* i_message;
@@ -76,7 +76,7 @@ namespace MaNGOS
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
 
-    struct MANGOS_DLL_DECL ObjectMessageDeliverer
+    struct ObjectMessageDeliverer
     {
         WorldPacket* i_message;
         explicit ObjectMessageDeliverer(WorldPacket* msg) : i_message(msg) {}
@@ -84,7 +84,7 @@ namespace MaNGOS
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
 
-    struct MANGOS_DLL_DECL MessageDistDeliverer
+    struct MessageDistDeliverer
     {
         Player const& i_player;
         WorldPacket* i_message;
@@ -98,7 +98,7 @@ namespace MaNGOS
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
 
-    struct MANGOS_DLL_DECL ObjectMessageDistDeliverer
+    struct ObjectMessageDistDeliverer
     {
         WorldObject const& i_object;
         WorldPacket* i_message;
@@ -108,7 +108,7 @@ namespace MaNGOS
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
 
-    struct MANGOS_DLL_DECL ObjectUpdater
+    struct ObjectUpdater
     {
         uint32 i_timeDiff;
         explicit ObjectUpdater(const uint32& diff) : i_timeDiff(diff) {}
@@ -119,7 +119,7 @@ namespace MaNGOS
         void Visit(CreatureMapType&);
     };
 
-    struct MANGOS_DLL_DECL PlayerRelocationNotifier
+    struct PlayerRelocationNotifier
     {
         Player& i_player;
         PlayerRelocationNotifier(Player& pl) : i_player(pl) {}
@@ -127,7 +127,7 @@ namespace MaNGOS
         void Visit(CreatureMapType&);
     };
 
-    struct MANGOS_DLL_DECL CreatureRelocationNotifier
+    struct CreatureRelocationNotifier
     {
         Creature& i_creature;
         CreatureRelocationNotifier(Creature& c) : i_creature(c) {}
@@ -137,7 +137,7 @@ namespace MaNGOS
 #endif
     };
 
-    struct MANGOS_DLL_DECL DynamicObjectUpdater
+    struct DynamicObjectUpdater
     {
         DynamicObject& i_dynobject;
         Unit* i_check;
@@ -163,7 +163,7 @@ namespace MaNGOS
 
     /* Model Searcher class:
     template<class Check>
-    struct MANGOS_DLL_DECL SomeSearcher
+    struct SomeSearcher
     {
         ResultType& i_result;
         Check & i_check;
@@ -194,7 +194,7 @@ namespace MaNGOS
     // WorldObject searchers & workers
 
     template<class Check>
-    struct MANGOS_DLL_DECL WorldObjectSearcher
+    struct WorldObjectSearcher
     {
         WorldObject*& i_object;
         Check& i_check;
@@ -211,7 +211,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-    struct MANGOS_DLL_DECL WorldObjectListSearcher
+    struct WorldObjectListSearcher
     {
         std::list<WorldObject*>& i_objects;
         Check& i_check;
@@ -228,7 +228,7 @@ namespace MaNGOS
     };
 
     template<class Do>
-    struct MANGOS_DLL_DECL WorldObjectWorker
+    struct WorldObjectWorker
     {
         Do const& i_do;
 
@@ -269,7 +269,7 @@ namespace MaNGOS
     // Gameobject searchers
 
     template<class Check>
-    struct MANGOS_DLL_DECL GameObjectSearcher
+    struct GameObjectSearcher
     {
         GameObject*& i_object;
         Check& i_check;
@@ -283,7 +283,7 @@ namespace MaNGOS
 
     // Last accepted by Check GO if any (Check can change requirements at each call)
     template<class Check>
-    struct MANGOS_DLL_DECL GameObjectLastSearcher
+    struct GameObjectLastSearcher
     {
         GameObject*& i_object;
         Check& i_check;
@@ -296,7 +296,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-    struct MANGOS_DLL_DECL GameObjectListSearcher
+    struct GameObjectListSearcher
     {
         std::list<GameObject*>& i_objects;
         Check& i_check;
@@ -312,7 +312,7 @@ namespace MaNGOS
 
     // First accepted by Check Unit if any
     template<class Check>
-    struct MANGOS_DLL_DECL UnitSearcher
+    struct UnitSearcher
     {
         Unit*& i_object;
         Check& i_check;
@@ -327,7 +327,7 @@ namespace MaNGOS
 
     // Last accepted by Check Unit if any (Check can change requirements at each call)
     template<class Check>
-    struct MANGOS_DLL_DECL UnitLastSearcher
+    struct UnitLastSearcher
     {
         Unit*& i_object;
         Check& i_check;
@@ -342,7 +342,7 @@ namespace MaNGOS
 
     // All accepted by Check units if any
     template<class Check>
-    struct MANGOS_DLL_DECL UnitListSearcher
+    struct UnitListSearcher
     {
         std::list<Unit*>& i_objects;
         Check& i_check;
@@ -358,7 +358,7 @@ namespace MaNGOS
     // Creature searchers
 
     template<class Check>
-    struct MANGOS_DLL_DECL CreatureSearcher
+    struct CreatureSearcher
     {
         Creature*& i_object;
         Check& i_check;
@@ -372,7 +372,7 @@ namespace MaNGOS
 
     // Last accepted by Check Creature if any (Check can change requirements at each call)
     template<class Check>
-    struct MANGOS_DLL_DECL CreatureLastSearcher
+    struct CreatureLastSearcher
     {
         Creature*& i_object;
         Check& i_check;
@@ -385,7 +385,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-    struct MANGOS_DLL_DECL CreatureListSearcher
+    struct CreatureListSearcher
     {
         std::list<Creature*>& i_objects;
         Check& i_check;
@@ -398,7 +398,7 @@ namespace MaNGOS
     };
 
     template<class Do>
-    struct MANGOS_DLL_DECL CreatureWorker
+    struct CreatureWorker
     {
         Do& i_do;
 
@@ -416,7 +416,7 @@ namespace MaNGOS
     // Player searchers
 
     template<class Check>
-    struct MANGOS_DLL_DECL PlayerSearcher
+    struct PlayerSearcher
     {
         Player*& i_object;
         Check& i_check;
@@ -429,7 +429,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-    struct MANGOS_DLL_DECL PlayerListSearcher
+    struct PlayerListSearcher
     {
         std::list<Player*>& i_objects;
         Check& i_check;
@@ -443,7 +443,7 @@ namespace MaNGOS
     };
 
     template<class Do>
-    struct MANGOS_DLL_DECL PlayerWorker
+    struct PlayerWorker
     {
         Do& i_do;
 
@@ -459,7 +459,7 @@ namespace MaNGOS
     };
 
     template<class Do>
-    struct MANGOS_DLL_DECL CameraDistWorker
+    struct CameraDistWorker
     {
         WorldObject const* i_searcher;
         float i_dist;

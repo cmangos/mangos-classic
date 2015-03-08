@@ -64,6 +64,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_REMOVE_AURA              = 14,           // resSource = Unit, datalong = spell_id
     SCRIPT_COMMAND_CAST_SPELL               = 15,           // resSource = Unit, cast spell at resTarget = Unit
                                                             // datalong=spellid
+                                                            // dataint1-4 optional for random selected spell
                                                             // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = cast triggered
     SCRIPT_COMMAND_PLAY_SOUND               = 16,           // resSource = WorldObject, target=any/player, datalong (sound_id), datalong2 (bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide; so 1|2 = 3 is target with distance dependent)
     SCRIPT_COMMAND_CREATE_ITEM              = 17,           // source or target must be player, datalong = item entry, datalong2 = amount
@@ -103,9 +104,16 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_SEND_AI_EVENT_AROUND     = 35,           // resSource = Creature, resTarget = Unit
                                                             // datalong = AIEventType
                                                             // datalong2 = radius
+    SCRIPT_COMMAND_SET_FACING               = 36,           // resSource = Creature, resTarget WorldObject. Turn resSource towards Taget
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL also set TargetGuid of resSource to resTarget. In this case resTarget MUST be Creature/ Player
+                                                            // datalong != 0 Reset TargetGuid, Reset orientation
+    SCRIPT_COMMAND_MOVE_DYNAMIC             = 37,           // resSource = Creature, resTarget Worldobject.
+                                                            // datalong = 0: Move resSource towards resTarget
+                                                            // datalong != 0: Move resSource to a random point between datalong2..datalong around resTarget.
+                                                            //      orientation != 0: Obtain a random point around resTarget in direction of orientation
 };
 
-#define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK
+#define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
 
 enum ScriptInfoDataFlags
 {
@@ -326,6 +334,18 @@ struct ScriptInfo
             uint32 radius;                                  // datalong2
         } sendAIEvent;
 
+        struct                                              // SCRIPT_COMMAND_SET_FACING (36)
+        {
+            uint32 resetFacing;                             // datalong
+            uint32 empty;                                   // datalong2
+        } setFacing;
+
+        struct                                              // SCRIPT_COMMAND_MOVE_DYNAMIC (37)
+        {
+            uint32 maxDist;                                 // datalong
+            uint32 minDist;                                 // datalong2
+        } moveDynamic;
+
         struct
         {
             uint32 data[2];
@@ -386,6 +406,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_MOUNT_TO_ENTRY_OR_MODEL:
             case SCRIPT_COMMAND_TERMINATE_SCRIPT:
             case SCRIPT_COMMAND_TERMINATE_COND:
+            case SCRIPT_COMMAND_SET_FACING:
                 return true;
             default:
                 return false;
