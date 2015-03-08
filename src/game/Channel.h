@@ -29,6 +29,9 @@
 #include <map>
 #include <string>
 
+#define SPEAK_IN_LOCALDEFENSE_RANK 0
+#define SPEAK_IN_WORLDDEFENSE_RANK 11
+
 enum ChatNotify
 {
     CHAT_JOINED_NOTICE                = 0x00,               //+ "%s joined channel.";
@@ -65,6 +68,17 @@ enum ChatNotify
     CHAT_PLAYER_INVITED_NOTICE        = 0x1D,               //+ "[%s] You invited %s to join the channel";
     CHAT_PLAYER_INVITE_BANNED_NOTICE  = 0x1E,               //+ "[%s] %s has been banned.";
     CHAT_THROTTLED_NOTICE             = 0x1F,               //+ "[%s] The number of messages that can be sent to this channel is limited, please wait to send another message.";
+};
+
+// DBC Channel ID's
+enum ChannelId
+{
+    CHANNEL_ID_GENERAL              = 1,
+    CHANNEL_ID_TRADE                = 2,
+    CHANNEL_ID_LOCAL_DEFENSE        = 22,
+    CHANNEL_ID_WORLD_DEFENSE        = 23,
+    CHANNEL_ID_GUILD_RECRUITMENT    = 25,
+    CHANNEL_ID_LOOKING_FOR_GROUP    = 26
 };
 
 class Channel
