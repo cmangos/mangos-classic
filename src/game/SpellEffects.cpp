@@ -4310,6 +4310,7 @@ void Spell::EffectBlock(SpellEffectIndex /*eff_idx*/)
 void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
 {
     float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
+    const float IN_OR_UNDER_LIQUID_RANGE = 0.8f;                // range to make player under liquid or on liquid surface from liquid level
 
     G3D::Vector3 prevPos, nextPos;
     float orientation = unitTarget->GetOrientation();
@@ -4319,9 +4320,10 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
     prevPos.z = unitTarget->GetPositionZ();
 
     float groundZ = prevPos.z;
+    bool isPrevInLiquid = false;
 
     // falling case
-    if (unitTarget->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING) && !unitTarget->GetMap()->GetHeightInRange(prevPos.x, prevPos.y, groundZ, 3.0f))
+    if (!unitTarget->GetMap()->GetHeightInRange(prevPos.x, prevPos.y, groundZ, 3.0f) && unitTarget->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
     {
         nextPos.x = prevPos.x + dist * cos(orientation);
         nextPos.y = prevPos.y + dist * sin(orientation);
@@ -4332,7 +4334,7 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         if (unitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z, &liquidData))
         {
             if (fabs(nextPos.z - liquidData.level) < 10.0f)
-                nextPos.z = liquidData.level;
+                nextPos.z = liquidData.level - IN_OR_UNDER_LIQUID_RANGE;
         }
         else
         {
@@ -4346,13 +4348,16 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         // teleport
         unitTarget->NearTeleportTo(nextPos.x, nextPos.y, nextPos.z, orientation, unitTarget == m_caster);
 
-        sLog.outDebug("Falling BLINK!");
+        //sLog.outString("Falling BLINK!");
         return;
     }
 
     // fix origin position if player was jumping and near of the ground but not in ground
     if (fabs(prevPos.z - groundZ) > 0.5f)
         prevPos.z = groundZ;
+
+    //check if in liquid
+    isPrevInLiquid = unitTarget->GetMap()->GetTerrain()->IsInWater(prevPos.x, prevPos.y, prevPos.z);
 
     const float step = 2.0f;                                    // step length before next check slope/edge/water
     const float maxSlope = 50.0f;                               // 50(degree) max seem best value for walkable slope
@@ -4366,21 +4371,24 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
 
     for (uint32 i = 1; i < numChecks + 1; ++i)
     {
+        // compute next point average position
         nextPos.x = prevPos.x + DELTA_X;
         nextPos.y = prevPos.y + DELTA_Y;
         nextPos.z = prevPos.z + nextZPointEstimation;
+
         bool isInLiquid = false;
         bool isInLiquidTested = false;
         bool isOnGround = false;
+        GridMapLiquidData liquidData;
 
         // try fix height for next position
         if (!unitTarget->GetMap()->GetHeightInRange(nextPos.x, nextPos.y, nextPos.z))
         {
             // we cant so test if we are on water
-            if (!unitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z))
+            if (!unitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z, &liquidData))
             {
                 // not in water and cannot get correct height, maybe flying?
-                sLog.outDebug("Can't get height of point %u, point value %s", i, nextPos.toString().c_str());
+                //sLog.outString("Can't get height of point %u, point value %s", i, nextPos.toString().c_str());
                 nextPos = prevPos;
                 break;
             }
@@ -4393,9 +4401,21 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         else
             isOnGround = true;                                  // player is on ground
 
-        if (isInLiquid || (!isInLiquidTested && unitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z)))
+        if (isInLiquid || (!isInLiquidTested && unitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z, &liquidData)))
         {
-            nextPos.z = prevPos.z;
+            if (!isPrevInLiquid && fabs(liquidData.level - prevPos.z) > 2.0f)
+            {
+                // on edge of water with difference a bit to high to continue
+                //sLog.outString("Ground vs liquid edge detected!");
+                nextPos = prevPos;
+                break;
+            }
+
+            if ((liquidData.level - IN_OR_UNDER_LIQUID_RANGE) > nextPos.z)
+                nextPos.z = prevPos.z;                                      // we are under water so next z equal prev z
+            else
+                nextPos.z = liquidData.level - IN_OR_UNDER_LIQUID_RANGE;    // we are on water surface, so next z equal liquid level
+
             isInLiquid = true;
 
             float ground = nextPos.z;
@@ -4413,7 +4433,7 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         float hitZ = nextPos.z + 1.5f;
         if (unitTarget->GetMap()->GetHitPosition(prevPos.x, prevPos.y, prevPos.z + 1.5f, nextPos.x, nextPos.y, hitZ, -1.0f))
         {
-            sLog.outDebug("Blink collision detected!");
+            //sLog.outString("Blink collision detected!");
             nextPos = prevPos;
             break;
         }
@@ -4429,14 +4449,16 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
             // check slope value
             if (slope > MAX_SLOPE_IN_RADIAN)
             {
-                sLog.outDebug("bad slope detected! %4.2f max %4.2f, ac(%4.2f)", slope * 180 / M_PI_F, maxSlope, ac);
+                //sLog.outString("bad slope detected! %4.2f max %4.2f, ac(%4.2f)", slope * 180 / M_PI_F, maxSlope, ac);
                 nextPos = prevPos;
                 break;
             }
+            //sLog.outString("slope is ok! %4.2f max %4.2f, ac(%4.2f)", slope * 180 / M_PI_F, maxSlope, ac);
         }
 
-        sLog.outDebug("point %u is ok, coords %s", i, nextPos.toString().c_str());
+        //sLog.outString("point %u is ok, coords %s", i, nextPos.toString().c_str());
         nextZPointEstimation = (nextPos.z - prevPos.z) / 2.0f;
+        isPrevInLiquid = isInLiquid;
         prevPos = nextPos;
     }
 
