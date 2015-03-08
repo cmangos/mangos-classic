@@ -180,17 +180,11 @@ void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)
 
 bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
 {
-    // Check for Mana Spring & Healing Stream totems
-    switch (spellInfo->SpellFamilyName)
-    {
-        case SPELLFAMILY_SHAMAN:
-            if (spellInfo->IsFitToFamilyMask(UI64LIT(0x00000002000)) ||
-                    spellInfo->IsFitToFamilyMask(UI64LIT(0x00000004000)))
-                return false;
-            break;
-        default:
-            break;
-    }
+    // Totem may affected by some specific spells
+    // Mana Spring, Healing stream, Mana tide
+    // Flags : 0x00000002000 | 0x00000004000 | 0x00004000000 -> 0x00004006000
+    if (spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && spellInfo->IsFitToFamilyMask(UI64LIT(0x00004006000)))
+        return false;
 
     switch (spellInfo->Effect[index])
     {
