@@ -582,13 +582,19 @@
     <ClCompile Include="..\..\src\game\LuaEngine\ServerHooks.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\LuaEngine\VehicleHooks.cpp">
-      <Filter>LuaEngine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\GossipHooks.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\PacketHooks.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\ElunaInstanceAI.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\InstanceHooks.cpp">
+      <Filter>LuaEngine\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\lmarshal.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1089,9 +1095,6 @@
     <ClInclude Include="..\..\src\game\LuaEngine\UnitMethods.h">
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\LuaEngine\VehicleMethods.h">
-      <Filter>LuaEngine\Methods</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\WorldObjectMethods.h">
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
@@ -1099,6 +1102,12 @@
       <Filter>LuaEngine\Methods</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\LuaEngine\BindingMap.h">
+      <Filter>LuaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaInstanceAI.h">
+      <Filter>LuaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\LuaEngine\lmarshal.h">
       <Filter>LuaEngine</Filter>
     </ClInclude>
   </ItemGroup>

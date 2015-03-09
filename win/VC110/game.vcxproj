@@ -441,12 +441,15 @@
     <ClCompile Include="..\..\src\game\LuaEngine\BattleGroundHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\CreatureHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\ElunaEventMgr.cpp" />
+    <ClCompile Include="..\..\src\game\LuaEngine\ElunaInstanceAI.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\ElunaUtility.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\GameObjectHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\GossipHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\GroupHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\GuildHooks.cpp" />
+    <ClCompile Include="..\..\src\game\LuaEngine\InstanceHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\ItemHooks.cpp" />
+    <ClCompile Include="..\..\src\game\LuaEngine\lmarshal.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\LuaEngine.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\LuaFunctions.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\PacketHooks.cpp" />
@@ -609,6 +612,7 @@
     <ClInclude Include="..\..\src\game\LuaEngine\CreatureMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaCreatureAI.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaEventMgr.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\ElunaInstanceAI.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaIncludes.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaQueryMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaTemplate.h" />
@@ -620,6 +624,7 @@
     <ClInclude Include="..\..\src\game\LuaEngine\HookHelpers.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\Hooks.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ItemMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\lmarshal.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\LuaEngine.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\MapMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ObjectMethods.h" />
@@ -627,7 +632,6 @@
     <ClInclude Include="..\..\src\game\LuaEngine\QuestMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\SpellMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\UnitMethods.h" />
-    <ClInclude Include="..\..\src\game\LuaEngine\VehicleMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\WorldObjectMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\WorldPacketMethods.h" />
     <ClInclude Include="..\..\src\game\Mail.h" />

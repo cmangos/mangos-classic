@@ -538,6 +538,15 @@
     <ClCompile Include="..\..\src\game\LuaEngine\lmarshal.cpp">
       <Filter>LuaEngine</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\ElunaInstanceAI.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\lmarshal.cpp">
+      <Filter>LuaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\LuaEngine\InstanceHooks.cpp">
+      <Filter>LuaEngine\Hooks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\AccountMgr.h">
