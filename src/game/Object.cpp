@@ -439,7 +439,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     }
 
                     // Checking lootable
-                    if (dynflagsValue & UNIT_DYNFLAG_LOOTABLE && GetTypeId() == TYPEID_UNIT)
+                    if (GetTypeId() == TYPEID_UNIT)
                     {
                         if (!target->isAllowedToLoot((Creature*)this))
                             dynflagsValue &= ~UNIT_DYNFLAG_LOOTABLE;
