@@ -72,13 +72,11 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
         void Finalize(Creature&);
         void Reset(Creature& u);
         bool Update(Creature& u, const uint32& diff);
+        void InitializeWaypointPath(Creature& u, int32 id, WaypointPathOrigin wpSource, uint32 overwriteEntry);
 
         void MovementInform(Creature&);
 
         MovementGeneratorType GetMovementGeneratorType() const { return WAYPOINT_MOTION_TYPE; }
-
-        // now path movement implmementation
-        void LoadPath(Creature& c);
 
         bool GetResetPosition(Creature&, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const;
 
@@ -86,9 +84,11 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
 
         uint32 getLastReachedWaypoint() const { return m_lastReachedWaypoint; }
 
-        void GetPathInformation(int32& pathId, WaypointPathOrigin& wpOrigin) const { pathId = 0; wpOrigin = m_PathOrigin; }
+        void GetPathInformation(int32& pathId, WaypointPathOrigin& wpOrigin) const { pathId = m_pathId; wpOrigin = m_PathOrigin; }
 
     private:
+        void LoadPath(Creature& c, int32 id, WaypointPathOrigin wpOrigin, uint32 overwriteEntry);
+
         void Stop(int32 time) { i_nextMoveTime.Reset(time); }
         bool Stopped(Creature& u);
         bool CanMove(int32 diff, Creature& u);

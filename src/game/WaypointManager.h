@@ -67,7 +67,7 @@ typedef std::map<uint32 /*pointId*/, WaypointNode> WaypointPath;
 class WaypointManager
 {
     public:
-        WaypointManager() {}
+        WaypointManager() : m_externalTable("external.waypointTable") {}
         ~WaypointManager() { Unload(); }
 
         void Load();
@@ -103,7 +103,7 @@ class WaypointManager
         }
 
         // Helper function to get a path provided the required information
-        WaypointPath* GetPathFromOrigin(uint32 entry, uint32 lowGuid, WaypointPathOrigin wpOrigin)
+        WaypointPath* GetPathFromOrigin(uint32 entry, uint32 lowGuid, int32 pathId, WaypointPathOrigin wpOrigin)
         {
             WaypointPathMap* wpMap = NULL;
             uint32 key = 0;
@@ -115,11 +115,17 @@ class WaypointManager
                     wpMap = &m_pathMap;
                     break;
                 case PATH_FROM_ENTRY:
-                    key = entry;
+                    if (pathId >= 0xFF || pathId < 0)
+                        return NULL;
+                    key = (entry << 8) + pathId;
                     wpMap = &m_pathTemplateMap;
                     break;
                 case PATH_FROM_EXTERNAL:
-                    return NULL;
+                    if (pathId >= 0xFF || pathId < 0)
+                        return NULL;
+                    key = (entry << 8) + pathId;
+                    wpMap = &m_externalPathTemplateMap;
+                    break;
                 case PATH_NO_PATH:
                 default:
                     return NULL;
@@ -131,16 +137,22 @@ class WaypointManager
         void DeletePath(uint32 id);
         void CheckTextsExistance(std::set<int32>& ids);
 
+        /// Set external source table
+        void SetExternalWPTable(char const* tableName) { m_externalTable = std::string(tableName); }
+        std::string GetExternalWPTable() const { return m_externalTable; }
+        /// Add Nodes from external sources
+        bool AddExternalNode(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
+
         // Toolbox for .wp add command
         /// Add a node as position pointId. If pointId == 0 then as last point
         WaypointNode const* AddNode(uint32 entry, uint32 dbGuid, uint32& pointId, WaypointPathOrigin wpDest, float x, float y, float z);
 
         // Toolbox for .wp modify command
-        void DeleteNode(uint32 entry, uint32 dbGuid, uint32 point, WaypointPathOrigin wpOrigin);
-        void SetNodePosition(uint32 entry, uint32 dbGuid, uint32 point, WaypointPathOrigin wpOrigin, float x, float y, float z);
-        void SetNodeWaittime(uint32 entry, uint32 dbGuid, uint32 point, WaypointPathOrigin wpOrigin, uint32 waittime);
-        void SetNodeOrientation(uint32 entry, uint32 dbGuid, uint32 point, WaypointPathOrigin wpOrigin, float orientation);
-        bool SetNodeScriptId(uint32 entry, uint32 dbGuid, uint32 point, WaypointPathOrigin wpOrigin, uint32 scriptId);
+        void DeleteNode(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin);
+        void SetNodePosition(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, float x, float y, float z);
+        void SetNodeWaittime(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, uint32 waittime);
+        void SetNodeOrientation(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, float orientation);
+        bool SetNodeScriptId(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, uint32 scriptId);
 
         // Small Helper for nice output
         static std::string GetOriginString(WaypointPathOrigin origin)
@@ -164,7 +176,7 @@ class WaypointManager
 
         WaypointPath* GetPathTemplate(uint32 entry)
         {
-            WaypointPathMap::iterator itr = m_pathTemplateMap.find(entry);
+            WaypointPathMap::iterator itr = m_pathTemplateMap.find((entry << 8) /*+ pathId*/);
             return itr != m_pathTemplateMap.end() ? &itr->second : NULL;
         }
 
@@ -173,8 +185,13 @@ class WaypointManager
         typedef UNORDERED_MAP<uint32 /*guidOrEntry*/, WaypointPath> WaypointPathMap;
         WaypointPathMap m_pathMap;
         WaypointPathMap m_pathTemplateMap;
+        WaypointPathMap m_externalPathTemplateMap;
+        std::string m_externalTable;
 };
 
 #define sWaypointMgr MaNGOS::Singleton<WaypointManager>::Instance()
+
+/// Accessor for Scripting library
+MANGOS_DLL_SPEC bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
 
 #endif
