@@ -83,25 +83,21 @@ bool ConfusedMovementGenerator<T>::Update(T& unit, const uint32& diff)
             // start moving
             unit.addUnitState(UNIT_STAT_CONFUSED_MOVE);
 
-            float x = i_x + 10.0f * (rand_norm_f() - 0.5f);
-            float y = i_y + 10.0f * (rand_norm_f() - 0.5f);
-            float z = i_z;
+            float destX = i_x;
+            float destY = i_y;
+            float destZ = i_z;
 
-            unit.UpdateAllowedPositionZ(x, y, z);
-
-            PathFinder path(&unit);
-            path.setPathLengthLimit(30.0f);
-            path.calculate(x, y, z);
-            if (path.getPathType() & PATHFIND_NOPATH)
+            // check if new random position is assigned, GetReachableRandomPosition may fail
+            if (unit.GetMap()->GetReachableRandomPosition(&unit, destX, destY, destZ, 10.0f))
             {
-                i_nextMoveTime.Reset(urand(800, 1000));
-                return true;
+                Movement::MoveSplineInit init(unit);
+                init.MoveTo(destX, destY, destZ, true);
+                init.SetWalk(true);
+                init.Launch();
+                i_nextMoveTime.Reset(urand(800, 1000));             // Keep a short wait time
             }
-
-            Movement::MoveSplineInit init(unit);
-            init.MovebyPath(path.getPath());
-            init.SetWalk(true);
-            init.Launch();
+            else
+                i_nextMoveTime.Reset(50);                           // Retry later
         }
     }
 
