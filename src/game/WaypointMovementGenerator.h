@@ -86,6 +86,8 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
 
         uint32 getLastReachedWaypoint() const { return m_lastReachedWaypoint; }
 
+        void GetPathInformation(int32& pathId, WaypointPathOrigin& wpOrigin) const { pathId = 0; wpOrigin = m_PathOrigin; }
+
     private:
         void Stop(int32 time) { i_nextMoveTime.Reset(time); }
         bool Stopped(Creature& u);
@@ -99,6 +101,9 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
         ShortTimeTracker i_nextMoveTime;
         bool m_isArrivalDone;
         uint32 m_lastReachedWaypoint;
+
+        int32 m_pathId;
+        WaypointPathOrigin m_PathOrigin;
 };
 
 /** FlightPathMovementGenerator generates movement of the player for the paths
