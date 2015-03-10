@@ -36,7 +36,9 @@ void WaypointMovementGenerator<Creature>::LoadPath(Creature& creature)
 {
     DETAIL_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "LoadPath: loading waypoint path for %s", creature.GetGuidStr().c_str());
 
-    i_path = sWaypointMgr.GetDefaultPath(creature.GetEntry(), creature.GetGUIDLow());
+    i_path = sWaypointMgr.GetDefaultPath(creature.GetEntry(), creature.GetGUIDLow(), &m_PathOrigin);
+    m_pathId = 0;
+
     // No movement found for entry nor guid
     if (!i_path)
     {

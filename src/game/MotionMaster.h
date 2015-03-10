@@ -70,7 +70,7 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator*>
 
         void Initialize();
 
-        MovementGenerator* operator->(void) { return top(); }
+        MovementGenerator const* GetCurrent() const { return top(); }
 
         using Impl::top;
         using Impl::empty;

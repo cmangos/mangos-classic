@@ -7148,7 +7148,7 @@ bool Unit::SelectHostileTarget()
 
             // check if currently selected target is reachable
             // NOTE: path alrteady generated from AttackStart()
-            if (!GetMotionMaster()->operator->()->IsReachable())
+            if (!GetMotionMaster()->GetCurrent()->IsReachable())
             {
                 // remove all taunts
                 RemoveSpellsCausingAura(SPELL_AURA_MOD_TAUNT);
