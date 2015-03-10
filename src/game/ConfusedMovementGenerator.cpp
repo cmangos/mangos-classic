@@ -112,7 +112,7 @@ template<>
 void ConfusedMovementGenerator<Player>::Finalize(Player& unit)
 {
     unit.clearUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
-    unit.StopMoving();
+    unit.StopMoving(true);
 }
 
 template<>
