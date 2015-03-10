@@ -2418,3 +2418,13 @@ uint32 GetScriptIdsCount()
 {
     return sScriptMgr.GetScriptIdsCount();
 }
+
+void SetExternalWaypointTable(char const* tableName)
+{
+    sWaypointMgr.SetExternalWPTable(tableName);
+}
+
+bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime)
+{
+    return sWaypointMgr.AddExternalNode(entry, pathId, pointId, x, y, z, o, waittime);
+}

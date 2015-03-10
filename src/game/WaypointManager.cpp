@@ -281,7 +281,7 @@ void WaypointManager::Load()
                 continue;
             }
 
-            WaypointPath& path  = m_pathTemplateMap[entry];
+            WaypointPath& path  = m_pathTemplateMap[entry << 8];
             WaypointNode& node  = path[point];
 
             node.x              = fields[2].GetFloat();
@@ -383,6 +383,11 @@ void WaypointManager::Unload()
     for (WaypointPathMap::iterator itr = m_pathTemplateMap.begin(); itr != m_pathTemplateMap.end(); ++itr)
         _clearPath(itr->second);
     m_pathTemplateMap.clear();
+
+    for (WaypointPathMap::iterator itr = m_externalPathTemplateMap.begin(); itr != m_externalPathTemplateMap.end(); ++itr)
+        _clearPath(itr->second);
+    m_externalPathTemplateMap.clear();
+
 }
 
 void WaypointManager::_clearPath(WaypointPath& path)
@@ -390,6 +395,25 @@ void WaypointManager::_clearPath(WaypointPath& path)
     for (WaypointPath::const_iterator itr = path.begin(); itr != path.end(); ++itr)
         delete itr->second.behavior;
     path.clear();
+}
+
+/// Insert a node into the storage for external access
+bool WaypointManager::AddExternalNode(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime)
+{
+    if (pathId < 0 || pathId >= 0xFF)
+    {
+        sLog.outErrorScriptLib("WaypointManager::AddExternalNode: (Npc-Entry %u, PathId %i) Invalid pathId", entry, pathId);
+        return false;
+    }
+
+    if (!MaNGOS::IsValidMapCoord(x, y, z, o))
+    {
+        sLog.outErrorScriptLib("WaypointManager::AddExternalNode: (Npc-Entry %u, PathId %i) Invalid coordinates", entry, pathId);
+        return false;
+    }
+
+    m_externalPathTemplateMap[(entry << 8) + pathId][pointId] = WaypointNode(x, y, z, o, waittime, 0, NULL);
+    return true;
 }
 
 /// - Insert at a certain point, if pointId == 0 insert last. In this case pointId will be changed to the id to which the node was added
@@ -402,7 +426,7 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
     // Prepare information
     char const* const table     = wpDest == PATH_FROM_GUID ? "creature_movement" : "creature_movement_template";
     char const* const key_field = wpDest == PATH_FROM_GUID ? "id" : "entry";
-    uint32 const key            = wpDest == PATH_FROM_GUID ? dbGuid : entry;
+    uint32 const key            = wpDest == PATH_FROM_GUID ? dbGuid : ((entry << 8) /*+ pathId*/);
     WaypointPathMap* wpMap      = wpDest == PATH_FROM_GUID ? &m_pathMap : &m_pathTemplateMap;
 
     WaypointPath& path = (*wpMap)[key];
@@ -440,13 +464,13 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
     return &path[pointId];
 }
 
-void WaypointManager::DeleteNode(uint32 entry, uint32 dbGuid, uint32 point, WaypointPathOrigin wpOrigin)
+void WaypointManager::DeleteNode(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin)
 {
     // Support only normal movement tables
     if (wpOrigin != PATH_FROM_GUID && wpOrigin != PATH_FROM_ENTRY)
         return;
 
-    WaypointPath* path = GetPathFromOrigin(entry, dbGuid, wpOrigin);
+    WaypointPath* path = GetPathFromOrigin(entry, dbGuid, pathId, wpOrigin);
     if (!path)
         return;
 
@@ -470,13 +494,13 @@ void WaypointManager::DeletePath(uint32 id)
     // only meant to be called by GM commands
 }
 
-void WaypointManager::SetNodePosition(uint32 entry, uint32 dbGuid, uint32 point, WaypointPathOrigin wpOrigin, float x, float y, float z)
+void WaypointManager::SetNodePosition(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, float x, float y, float z)
 {
     // Support only normal movement tables
     if (wpOrigin != PATH_FROM_GUID && wpOrigin != PATH_FROM_ENTRY)
         return;
 
-    WaypointPath* path = GetPathFromOrigin(entry, dbGuid, wpOrigin);
+    WaypointPath* path = GetPathFromOrigin(entry, dbGuid, pathId, wpOrigin);
     if (!path)
         return;
 
@@ -494,13 +518,13 @@ void WaypointManager::SetNodePosition(uint32 entry, uint32 dbGuid, uint32 point,
     }
 }
 
-void WaypointManager::SetNodeWaittime(uint32 entry, uint32 dbGuid, uint32 point, WaypointPathOrigin wpOrigin, uint32 waittime)
+void WaypointManager::SetNodeWaittime(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, uint32 waittime)
 {
     // Support only normal movement tables
     if (wpOrigin != PATH_FROM_GUID && wpOrigin != PATH_FROM_ENTRY)
         return;
 
-    WaypointPath* path = GetPathFromOrigin(entry, dbGuid, wpOrigin);
+    WaypointPath* path = GetPathFromOrigin(entry, dbGuid, pathId, wpOrigin);
     if (!path)
         return;
 
@@ -514,13 +538,13 @@ void WaypointManager::SetNodeWaittime(uint32 entry, uint32 dbGuid, uint32 point,
         find->second.delay = waittime;
 }
 
-void WaypointManager::SetNodeOrientation(uint32 entry, uint32 dbGuid, uint32 point, WaypointPathOrigin wpOrigin, float orientation)
+void WaypointManager::SetNodeOrientation(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, float orientation)
 {
     // Support only normal movement tables
     if (wpOrigin != PATH_FROM_GUID && wpOrigin != PATH_FROM_ENTRY)
         return;
 
-    WaypointPath* path = GetPathFromOrigin(entry, dbGuid, wpOrigin);
+    WaypointPath* path = GetPathFromOrigin(entry, dbGuid, pathId, wpOrigin);
     if (!path)
         return;
 
@@ -535,13 +559,13 @@ void WaypointManager::SetNodeOrientation(uint32 entry, uint32 dbGuid, uint32 poi
 }
 
 /// return true if a valid scriptId is provided
-bool WaypointManager::SetNodeScriptId(uint32 entry, uint32 dbGuid, uint32 point, WaypointPathOrigin wpOrigin, uint32 scriptId)
+bool WaypointManager::SetNodeScriptId(uint32 entry, uint32 dbGuid, uint32 point, int32 pathId, WaypointPathOrigin wpOrigin, uint32 scriptId)
 {
     // Support only normal movement tables
     if (wpOrigin != PATH_FROM_GUID && wpOrigin != PATH_FROM_ENTRY)
         return false;
 
-    WaypointPath* path = GetPathFromOrigin(entry, dbGuid, wpOrigin);
+    WaypointPath* path = GetPathFromOrigin(entry, dbGuid, pathId, wpOrigin);
     if (!path)
         return false;
 

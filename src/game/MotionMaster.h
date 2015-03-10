@@ -49,6 +49,8 @@ enum MovementGeneratorType
     TIMED_FLEEING_MOTION_TYPE       = 13,                   // FleeingMovementGenerator.h (alt.second part of flee for assistance)
     FOLLOW_MOTION_TYPE              = 14,                   // TargetedMovementGenerator.h
     EFFECT_MOTION_TYPE              = 15,
+
+    EXTERNAL_WAYPOINT_MOVE          = 256,                  // Only used in CreatureAI::MovementInform. The pathId >= 0 is added as additonal value
 };
 
 enum MMCleanFlag
@@ -105,7 +107,7 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator*>
         void MovePoint(uint32 id, float x, float y, float z, bool generatePath = true);
         void MoveSeekAssistance(float x, float y, float z);
         void MoveSeekAssistanceDistract(uint32 timer);
-        void MoveWaypoint();
+        void MoveWaypoint(int32 id = 0, uint32 source = 0, uint32 overwriteEntry = 0);
         void MoveTaxiFlight(uint32 path, uint32 pathnode);
         void MoveDistract(uint32 timeLimit);
         void MoveFall();
