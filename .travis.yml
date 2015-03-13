@@ -31,13 +31,6 @@ compiler:
   - gcc
   - clang
 
-before_install:
-# Get Eluna
-    - git submodule init
-    - git submodule update
-# Get latest code for testing
-    - git submodule foreach git pull origin master
-
 script:
   - test -d _build || mkdir _build
   - test -d _install || mkdir _install
