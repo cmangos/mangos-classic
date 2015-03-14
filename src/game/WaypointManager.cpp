@@ -433,6 +433,8 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
 
     if (pointId == 0 && !path.empty())                      // Start with highest waypoint
         pointId = path.rbegin()->first + 1;
+    else if (pointId == 0)
+        pointId = 1;
 
     uint32 nextPoint = pointId;
     WaypointNode temp = WaypointNode(x, y, z, 100, 0, 0, NULL);
