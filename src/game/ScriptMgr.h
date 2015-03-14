@@ -111,6 +111,8 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // datalong = 0: Move resSource towards resTarget
                                                             // datalong != 0: Move resSource to a random point between datalong2..datalong around resTarget.
                                                             //      orientation != 0: Obtain a random point around resTarget in direction of orientation
+                                                            // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL Obtain a random point around resTarget in direction of resTarget->GetOrientation + orientation
+                                                            // for resTarget == resSource and orientation == 0 this will mean resSource moving forward
     SCRIPT_COMMAND_SEND_MAIL                = 38,           // resSource WorldObject, can be NULL, resTarget Player
                                                             // datalong: Send mailTemplateId from resSource (if provided) to player resTarget
                                                             // datalong2: AlternativeSenderEntry. Use as sender-Entry
@@ -417,6 +419,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_TERMINATE_SCRIPT:
             case SCRIPT_COMMAND_TERMINATE_COND:
             case SCRIPT_COMMAND_SET_FACING:
+            case SCRIPT_COMMAND_MOVE_DYNAMIC:
                 return true;
             default:
                 return false;
