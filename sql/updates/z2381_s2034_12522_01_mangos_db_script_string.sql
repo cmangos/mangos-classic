@@ -8,7 +8,7 @@ ALTER TABLE db_script_string ADD COLUMN emote smallint(5) unsigned NOT NULL DEFA
 ALTER TABLE db_script_string ADD COLUMN comment text AFTER emote;
 
 -- Update Dbscript_string with the type and language from Dbscripts_on_*
-CREATE TEMPORARY TABLE IF NOT EXISTS db_script_temp AS
+CREATE TABLE IF NOT EXISTS db_script_temp AS
 -- dbscripts_on_creature_death
 SELECT A.entry
     ,A.content_default
