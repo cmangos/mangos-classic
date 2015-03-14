@@ -389,8 +389,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
 
                 if (info->type == GAMEOBJECT_TYPE_FISHINGNODE ||
                         info->type == GAMEOBJECT_TYPE_FISHINGHOLE ||
-                        info->type == GAMEOBJECT_TYPE_DOOR        ||
-                        info->type == GAMEOBJECT_TYPE_BUTTON)
+                        info->type == GAMEOBJECT_TYPE_DOOR)
                 {
                     sLog.outErrorDb("Table `%s` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u", tablename, info->type, tmp.id);
                     continue;
@@ -1345,8 +1344,7 @@ bool ScriptAction::HandleScriptStep()
             }
 
             if (pGo->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE ||
-                    pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR        ||
-                    pGo->GetGoType() == GAMEOBJECT_TYPE_BUTTON)
+                    pGo->GetGoType() == GAMEOBJECT_TYPE_DOOR)
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u can not be used with gameobject of type %u (guid: %u, buddyEntry: %u).", m_table, m_script->id, m_script->command, uint32(pGo->GetGoType()), m_script->respawnGo.goGuid, m_script->buddyEntry);
                 break;
