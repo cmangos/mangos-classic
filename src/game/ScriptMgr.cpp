@@ -1883,11 +1883,24 @@ bool ScriptAction::HandleScriptStep()
 
             float x,y,z;
             if (m_script->moveDynamic.maxDist == 0)         // Move to pTarget
+            {
+                if (pTarget == pSource)
+                {
+                    sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, _MOVE_DYNAMIC called with maxDist == 0, but resultingSource == resultingTarget (== %s)", m_table, m_script->id, pSource->GetGuidStr().c_str());
+                    break;
+                }
                 pTarget->GetContactPoint(pSource, x, y, z);
+            }
             else                                            // Calculate position
             {
+                float orientation;
+                if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+                    orientation = pSource->GetOrientation() + m_script->o + 2*M_PI_F;
+                else
+                    orientation = m_script->o;
+
                 pSource->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), m_script->moveDynamic.maxDist, x, y, z,
-                                        m_script->moveDynamic.minDist, (m_script->o == 0.0f ? NULL : &m_script->o));
+                                        m_script->moveDynamic.minDist, (orientation == 0.0f ? NULL : &orientation));
                 z = std::max(z, pTarget->GetPositionZ());
                 pSource->UpdateAllowedPositionZ(x, y, z);
             }
