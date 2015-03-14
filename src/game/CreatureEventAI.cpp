@@ -143,6 +143,7 @@ inline bool IsTimerBasedEvent(EventAI_Type type)
         case EVENT_T_TARGET_HP:
         case EVENT_T_TARGET_CASTING:
         case EVENT_T_FRIENDLY_HP:
+        case EVENT_T_FRIENDLY_IS_CC:
         case EVENT_T_AURA:
         case EVENT_T_TARGET_AURA:
         case EVENT_T_MISSING_AURA:
@@ -313,6 +314,7 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             // We don't really care about the whole list, just return first available
             pActionInvoker = *(pList.begin());
 
+            LOG_PROCESS_EVENT;
             // Repeat Timers
             pHolder.UpdateRepeatTimer(m_creature, event.friendly_is_cc.repeatMin, event.friendly_is_cc.repeatMax);
             break;
