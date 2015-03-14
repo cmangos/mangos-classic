@@ -309,3 +309,8 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * datalong = 0:  Move resultingSource towards resultingTarget
                                             * datalong != 0: Move resultingSource to a random point between datalong2..datalong around resultingTarget.
                                               orientation != 0: Obtain a random point around resultingTarget in direction of orientation
+38 SCRIPT_COMMAND_SEND_MAIL                 Send a mail from resSource  to resTarget
+                                            * resultingSource = Creature OR NULL, resTarget must be Player
+                                            * datalong = mailTemplateId
+                                            * datalong2: AlternativeSenderEntry. Use as sender-Entry of the sent mail
+                                            * dataint1: Delay (>= 0) in Seconds
