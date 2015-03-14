@@ -2909,10 +2909,10 @@ void Spell::update(uint32 difftime)
         return;
     }
 
-    // check if the player caster has moved before the spell finished
-    if ((m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
-            (m_castPositionX != m_caster->GetPositionX() || m_castPositionY != m_caster->GetPositionY() || m_castPositionZ != m_caster->GetPositionZ()) &&
-            (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !((Player*)m_caster)->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)))
+    // check if the player or unit caster has moved before the spell finished (exclude casting on vehicles)
+    if (((m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->GetTypeId() == TYPEID_UNIT) && m_timer != 0) &&
+        (m_castPositionX != m_caster->GetPositionX() || m_castPositionY != m_caster->GetPositionY() || m_castPositionZ != m_caster->GetPositionZ()) &&
+        (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_caster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)))
     {
         // always cancel for channeled spells
         if (m_spellState == SPELL_STATE_CASTING)
@@ -2941,10 +2941,10 @@ void Spell::update(uint32 difftime)
         {
             if (m_timer > 0)
             {
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                if (m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->GetTypeId() == TYPEID_UNIT)
                 {
                     // check if player has jumped before the channeling finished
-                    if (((Player*)m_caster)->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
+                    if (m_caster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
                         cancel();
 
                     // check for incapacitating player states
