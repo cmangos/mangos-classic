@@ -111,6 +111,10 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // datalong = 0: Move resSource towards resTarget
                                                             // datalong != 0: Move resSource to a random point between datalong2..datalong around resTarget.
                                                             //      orientation != 0: Obtain a random point around resTarget in direction of orientation
+    SCRIPT_COMMAND_SEND_MAIL                = 38,           // resSource WorldObject, can be NULL, resTarget Player
+                                                            // datalong: Send mailTemplateId from resSource (if provided) to player resTarget
+                                                            // datalong2: AlternativeSenderEntry. Use as sender-Entry
+                                                            // dataint1: Delay (>= 0) in Seconds
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -346,6 +350,12 @@ struct ScriptInfo
             uint32 minDist;                                 // datalong2
         } moveDynamic;
 
+        struct                                              // SCRIPT_COMMAND_SEND_MAIL (38)
+        {
+            uint32 mailTemplateId;                          // datalong
+            uint32 altSender;                               // datalong2;
+        } sendMail;
+
         struct
         {
             uint32 data[2];
@@ -451,6 +461,7 @@ class ScriptAction
         bool LogIfNotCreature(WorldObject* pWorldObject);
         bool LogIfNotUnit(WorldObject* pWorldObject);
         bool LogIfNotGameObject(WorldObject* pWorldObject);
+        bool LogIfNotPlayer(WorldObject* pWorldObject);
         Player* GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldObject* pTarget);
 };
 
