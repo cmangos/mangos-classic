@@ -1867,6 +1867,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     break;
                 case SPELLFAMILY_WARRIOR:
                 {
+                    // Defensive State Dummy and Shield Block
+                    if (spellInfo_1->Id == 5302 && spellInfo_2->Id == 2565)
+                        return false;
+
                     // Scroll of Protection and Defensive Stance (multi-family check)
                     if (spellInfo_1->SpellIconID == 276 && spellInfo_1->SpellVisual == 196 && spellInfo_2->Id == 71)
                         return false;
@@ -1992,6 +1996,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                         (spellInfo_2->SpellIconID == 456 && spellInfo_1->SpellIconID == 2006))
                     return false;
             }
+
+            // Defensive State Dummy and Shield Block
+            if (spellInfo_2->Id == 5302 && spellInfo_1->Id == 2565)
+                return false;
 
             // Hamstring -> Improved Hamstring (multi-family check)
             if ((spellInfo_1->SpellFamilyFlags & UI64LIT(0x2)) && spellInfo_2->Id == 23694)
