@@ -2208,6 +2208,9 @@ bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, f
     bool isSwimming = true;
     switch (unit->GetTypeId())
     {
+        case TYPEID_PLAYER:
+            isFlying = static_cast<Player*>(unit)->IsFlying();
+            break;
         case TYPEID_UNIT:
             isFlying = static_cast<Creature*>(unit)->IsFlying();
             isSwimming = static_cast<Creature*>(unit)->IsSwimming();
