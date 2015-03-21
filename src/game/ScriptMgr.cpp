@@ -1482,12 +1482,12 @@ bool ScriptAction::HandleScriptStep()
 
             // Select Spell
             uint32 spell = m_script->castSpell.spellId;
-            uint32 i = 0;
-            while (i < MAX_TEXT_ID && m_script->textId[i])  // Count which dataint fields are filled
-                ++i;
-            if (i > 0)
-                if (uint32 rnd = urand(0, i))               // Random selection resulted in one of the dataint fields
-                    spell = m_script->textId[rnd - 1];
+            uint32 filledCount = 0;
+            while (filledCount < MAX_TEXT_ID && m_script->textId[filledCount])  // Count which dataint fields are filled
+                ++filledCount;
+            if (filledCount > 0)
+                if (uint32 randomField = urand(0, filledCount))               // Random selection resulted in one of the dataint fields
+                    spell = m_script->textId[randomField - 1];
 
             // TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
             if (pSource && pSource->GetTypeId() == TYPEID_GAMEOBJECT)
