@@ -211,13 +211,11 @@ void Weather::SendWeatherUpdateToPlayer(Player* player)
 {
     NormalizeGrade();
 
-    uint32 sound = GetSound();                              // for 1.12
-
     WorldPacket data(SMSG_WEATHER, 4 + 4 + 4 + 1);
     data << uint32(m_type);
     data << float(m_grade);
-    data << (uint32)sound; // 1.12 soundid
-    data << uint8(0);      // instant weather change: 0 = false, 1 = true
+    data << uint32(GetSound()); // 1.12 soundid
+    data << uint8(0);       // 1 = instant change, 0 = smooth change
 
     player->GetSession()->SendPacket(&data);
 }
@@ -227,22 +225,18 @@ bool Weather::SendWeatherForPlayersInZone(Map const* _map)
 {
     NormalizeGrade();
 
-    WeatherState state = GetWeatherState();
-    uint32 sound = GetSound();
-
-    // To be sent packet
     WorldPacket data(SMSG_WEATHER, 4 + 4 + 4 + 1);
     data << uint32(m_type);
     data << float(m_grade);
-    data << (uint32)sound; // 1.12 soundid
-    data << uint8(0);      // instant weather change: 0 = false, 1 = true
+    data << uint32(GetSound()); // 1.12 soundid
+    data << uint8(0);       // 1 = instant change, 0 = smooth change
 
     ///- Send the weather packet to all players in this zone
     if (!_map->SendToPlayersInZone(&data, m_zone))
         return false;
 
     ///- Log the event
-    LogWeatherState(state);
+    LogWeatherState(GetWeatherState());
     return true;
 }
 

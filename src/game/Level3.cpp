@@ -4214,9 +4214,11 @@ bool ChatHandler::HandleChangeWeatherCommand(char* args)
     if (!ExtractFloat(&args, grade))
         return false;
 
-    // 0 to 1, sending -1 is instant good weather
-    if (grade < 0.0f || grade > 1.0f)
-        return false;
+    // clamp grade from 0 to 1
+    if (grade < 0.0f)
+        grade = 0.0f;
+    else if (grade > 1.0f)
+        grade = 1.0f;
 
     Player* player = m_session->GetPlayer();
     uint32 zoneId = player->GetZoneId();
