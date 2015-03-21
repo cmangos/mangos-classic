@@ -55,7 +55,7 @@ class WorldTimer
         WorldTimer(const WorldTimer&);
 
         // analogue to getMSTime() but it persists m_SystemTickTime
-        static uint32 getMSTime_internal(bool savetime = false);
+        static uint32 getMSTime_internal();
 
         static MANGOS_DLL_SPEC uint32 m_iTime;
         static MANGOS_DLL_SPEC uint32 m_iPrevTime;

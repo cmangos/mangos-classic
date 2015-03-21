@@ -219,8 +219,8 @@ class AuctionBotSeller : public AuctionBotAgent
 
         void        LoadSellerValues(AHB_Seller_Config& config);
         uint32      SetStat(AHB_Seller_Config& config);
-        bool        getRandomArray( AHB_Seller_Config& config, RandomArray& ra, const std::vector<std::vector<uint32> >& addedItem  );
-        void        SetPricesOfItem(ItemPrototype const *itemProto, AHB_Seller_Config& config, uint32& buyp, uint32& bidp, uint32 stackcnt, ItemQualities itemQuality);
+        bool        getRandomArray(AHB_Seller_Config& config, RandomArray& ra, const std::vector<std::vector<uint32> >& addedItem);
+        void        SetPricesOfItem(AHB_Seller_Config& config, uint32& buyp, uint32& bidp, uint32 stackcnt, ItemQualities itemQuality);
         void        LoadItemsQuantity(AHB_Seller_Config& config);
 };
 
@@ -1469,7 +1469,7 @@ bool AuctionBotSeller::getRandomArray( AHB_Seller_Config& config, RandomArray& r
 }
 
 // Set items price. All important value are passed by address.
-void AuctionBotSeller::SetPricesOfItem(ItemPrototype const* /*itemProto*/, AHB_Seller_Config& config, uint32& buyp, uint32& bidp, uint32 stackcnt, ItemQualities itemQuality)
+void AuctionBotSeller::SetPricesOfItem(AHB_Seller_Config& config, uint32& buyp, uint32& bidp, uint32 stackcnt, ItemQualities itemQuality)
 {
     double temp_buyp = buyp * stackcnt *
         (itemQuality < MAX_AUCTION_QUALITY ? config.GetPriceRatioPerQuality(AuctionQuality(itemQuality)) : 1) ;
@@ -1609,7 +1609,7 @@ void AuctionBotSeller::addNewAuctions(AHB_Seller_Config& config)
         else
             buyoutPrice  = prototype->SellPrice * item->GetCount();
         // Price of items are set here
-        SetPricesOfItem(prototype, config, buyoutPrice, bidPrice, stackCount, ItemQualities(prototype->Quality));
+        SetPricesOfItem(config, buyoutPrice, bidPrice, stackCount, ItemQualities(prototype->Quality));
 
         auctionHouse->AddAuction(ahEntry, item, urand(config.GetMinTime(), config.GetMaxTime()) * HOUR, bidPrice, buyoutPrice);
     }
