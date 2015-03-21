@@ -22,22 +22,23 @@ fi
 ## Internal Stuff
 
 # Mangos Cleanup options for AStyle
-OPTIONS="--convert-tabs --align-pointer=type --suffix=none \
-          --keep-one-line-blocks --keep-one-line-statements \
-          --indent-classes --indent-switches --indent-namespaces \
-          --pad-header --unpad-paren --pad-oper --style=allman"
+OPTIONS="\
+--convert-tabs --align-pointer=type --suffix=none \
+--keep-one-line-blocks --keep-one-line-statements \
+--indent-classes --indent-switches --indent-namespaces \
+--pad-header --unpad-paren --pad-oper --style=allman"
 
 if [ "$DO_ON" = "MANGOS_SRC" ]
 then
   FILEPATH=$BASEPATH/src
-  OPTIONS="$OPTIONS --exclude=ScriptDev2"
+  OPTIONS="$OPTIONS --exclude=ScriptDev2 --ignore-exclude-errors"
 elif [ "$DO_ON" = "MANGOS_CONTRIB" ]
 then
   FILEPATH=$BASEPATH/contrib
 elif [ "$DO_ON" = "MANGOS_WHOLE" ]
 then
   FILEPATH=$BASEPATH
-  OPTIONS="$OPTIONS --exclude=ScriptDev2"
+  OPTIONS="$OPTIONS --exclude=ScriptDev2 --ignore-exclude-errors"
 elif [ "$DO_ON" = "SD2" ]
 then
   FILEPATH=$BASEPATH/src/bindings/ScriptDev2
