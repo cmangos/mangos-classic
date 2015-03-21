@@ -941,7 +941,7 @@ struct PetOwnerKilledUnitHelper
 void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
 {
     victim->m_deathState = DEAD;                            // so that isAlive, isDead return expected results in the called hooks of JustKilledCreature
-                                                            // must be used only shortly before SetDeathState(JUST_DIED) and only for Creatures or Pets
+    // must be used only shortly before SetDeathState(JUST_DIED) and only for Creatures or Pets
 
     // some critters required for quests (need normal entry instead possible heroic in any cases)
     if (victim->GetCreatureType() == CREATURE_TYPE_CRITTER && GetTypeId() == TYPEID_PLAYER)
@@ -1266,7 +1266,7 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
     // damage bonus (per damage class)
     switch (spellInfo->DmgClass)
     {
-            // Melee and Ranged Spells
+        // Melee and Ranged Spells
         case SPELL_DAMAGE_CLASS_RANGED:
         case SPELL_DAMAGE_CLASS_MELEE:
         {
@@ -1996,7 +1996,7 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
     // Get blocked status
     switch (spellProto->DmgClass)
     {
-            // Melee and Ranged Spells
+        // Melee and Ranged Spells
         case SPELL_DAMAGE_CLASS_RANGED:
         case SPELL_DAMAGE_CLASS_MELEE:
             blocked = IsSpellBlocked(pCaster, spellProto, attType);
@@ -2284,7 +2284,7 @@ uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized)
                 min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
                 max_damage = GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
                 break;
-                // Just for good manner
+            // Just for good manner
             default:
                 min_damage = 0.0f;
                 max_damage = 0.0f;
@@ -2795,7 +2795,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit* pVict
             case RANGED_ATTACK:
                 crit = GetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE);
                 break;
-                // Just for good manner
+            // Just for good manner
             default:
                 crit = 0.0f;
                 break;
@@ -3379,7 +3379,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
 
                 switch (aurNameReal)
                 {
-                        // DoT/HoT/etc
+                    // DoT/HoT/etc
                     case SPELL_AURA_DUMMY:                  // allow stack (HoTs checked later)
                     case SPELL_AURA_PERIODIC_DAMAGE:
                     case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
@@ -4059,7 +4059,7 @@ void Unit::RemoveAura(Aura* Aur, AuraRemoveMode mode)
     {
         switch (Aur->GetModifier()->m_auraname)
         {
-                // need properly undo any auras with player-caster mover set (or will crash at next caster move packet)
+            // need properly undo any auras with player-caster mover set (or will crash at next caster move packet)
             case SPELL_AURA_MOD_POSSESS:
             case SPELL_AURA_MOD_POSSESS_PET:
                 Aur->ApplyModifier(false, true);
@@ -5449,7 +5449,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
     {
         if (!(*i)->isAffectedOnSpell(spellProto))
             continue;
-            
+
         switch ((*i)->GetModifier()->m_miscvalue)
         {
             case 4418: // Increased Shock Damage
@@ -5600,7 +5600,7 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
                         continue;
                     switch ((*i)->GetModifier()->m_miscvalue)
                     {
-                            // Shatter
+                        // Shatter
                         case 849: if (pVictim->isFrozen()) crit_chance += 10.0f; break;
                         case 910: if (pVictim->isFrozen()) crit_chance += 20.0f; break;
                         case 911: if (pVictim->isFrozen()) crit_chance += 30.0f; break;

@@ -87,7 +87,7 @@ bool ChatHandler::HandleAHBotItemsAmountQualityCommand(char* args)
         return false;
     sAuctionBot.SetItemsAmountForQuality(AuctionQuality(Q), qVal);
     PSendSysMessage(LANG_AHBOT_ITEMS_AMOUNT, GetMangosString(ahbotQualityIds[Q]),
-        sAuctionBotConfig.getConfigItemQualityAmount(AuctionQuality(Q)));
+                    sAuctionBotConfig.getConfigItemQualityAmount(AuctionQuality(Q)));
     return true;
 }
 
@@ -182,22 +182,22 @@ bool ChatHandler::HandleAHBotStatusCommand(char* args)
     uint32 fmtId = m_session ? LANG_AHBOT_STATUS_FORMAT_CHAT : LANG_AHBOT_STATUS_FORMAT_CONSOLE;
 
     PSendSysMessage(fmtId, GetMangosString(LANG_AHBOT_STATUS_ITEM_COUNT),
-        statusInfo[AUCTION_HOUSE_ALLIANCE].ItemsCount,
-        statusInfo[AUCTION_HOUSE_HORDE].ItemsCount,
-        statusInfo[AUCTION_HOUSE_NEUTRAL].ItemsCount,
-        statusInfo[AUCTION_HOUSE_ALLIANCE].ItemsCount +
-        statusInfo[AUCTION_HOUSE_HORDE].ItemsCount +
-        statusInfo[AUCTION_HOUSE_NEUTRAL].ItemsCount);
+                    statusInfo[AUCTION_HOUSE_ALLIANCE].ItemsCount,
+                    statusInfo[AUCTION_HOUSE_HORDE].ItemsCount,
+                    statusInfo[AUCTION_HOUSE_NEUTRAL].ItemsCount,
+                    statusInfo[AUCTION_HOUSE_ALLIANCE].ItemsCount +
+                    statusInfo[AUCTION_HOUSE_HORDE].ItemsCount +
+                    statusInfo[AUCTION_HOUSE_NEUTRAL].ItemsCount);
 
     if (all)
     {
         PSendSysMessage(fmtId, GetMangosString(LANG_AHBOT_STATUS_ITEM_RATIO),
-            sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ALLIANCE_ITEM_AMOUNT_RATIO),
-            sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_HORDE_ITEM_AMOUNT_RATIO),
-            sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO),
-            sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ALLIANCE_ITEM_AMOUNT_RATIO) +
-            sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_HORDE_ITEM_AMOUNT_RATIO) +
-            sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO));
+                        sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ALLIANCE_ITEM_AMOUNT_RATIO),
+                        sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_HORDE_ITEM_AMOUNT_RATIO),
+                        sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO),
+                        sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_ALLIANCE_ITEM_AMOUNT_RATIO) +
+                        sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_HORDE_ITEM_AMOUNT_RATIO) +
+                        sAuctionBotConfig.getConfig(CONFIG_UINT32_AHBOT_NEUTRAL_ITEM_AMOUNT_RATIO));
 
         if (!m_session)
         {
@@ -210,10 +210,10 @@ bool ChatHandler::HandleAHBotStatusCommand(char* args)
 
         for (int i = 0; i < MAX_AUCTION_QUALITY; ++i)
             PSendSysMessage(fmtId, GetMangosString(ahbotQualityIds[i]),
-                statusInfo[AUCTION_HOUSE_ALLIANCE].QualityInfo[i],
-                statusInfo[AUCTION_HOUSE_HORDE].QualityInfo[i],
-                statusInfo[AUCTION_HOUSE_NEUTRAL].QualityInfo[i],
-                sAuctionBotConfig.getConfigItemQualityAmount(AuctionQuality(i)));
+                            statusInfo[AUCTION_HOUSE_ALLIANCE].QualityInfo[i],
+                            statusInfo[AUCTION_HOUSE_HORDE].QualityInfo[i],
+                            statusInfo[AUCTION_HOUSE_NEUTRAL].QualityInfo[i],
+                            sAuctionBotConfig.getConfigItemQualityAmount(AuctionQuality(i)));
     }
 
     if (!m_session)
@@ -1152,7 +1152,7 @@ bool ChatHandler::HandleAccountSetPasswordCommand(char* args)
 
     // OK, but avoid normal report for hide passwords, but log use command for anyone
     char msg[100];
-    snprintf( msg, 100, ".account set password %s *** ***", account_name.c_str());
+    snprintf(msg, 100, ".account set password %s *** ***", account_name.c_str());
     LogCommand(msg);
     SetSentErrorMessage(true);
     return false;
@@ -3034,9 +3034,9 @@ bool ChatHandler::HandleLookupCreatureCommand(char* args)
         }
 
         if (m_session)
-            PSendSysMessage (LANG_CREATURE_ENTRY_LIST_CHAT, id, id, name);
+            PSendSysMessage(LANG_CREATURE_ENTRY_LIST_CHAT, id, id, name);
         else
-            PSendSysMessage (LANG_CREATURE_ENTRY_LIST_CONSOLE, id, name);
+            PSendSysMessage(LANG_CREATURE_ENTRY_LIST_CONSOLE, id, name);
 
         ++counter;
     }
@@ -6539,9 +6539,9 @@ bool ChatHandler::HandleMmapTestHeight(char* args)
     ExtractFloat(&args, radius);
     if (radius > 40.0f)
         radius = 40.0f;
-    
+
     Unit* unit = getSelectedUnit();
-    
+
     Player* player = m_session->GetPlayer();
     if (!unit)
         unit = player;
@@ -6573,7 +6573,7 @@ bool ChatHandler::HandleMmapTestHeight(char* args)
     unit->GetPosition(gx, gy, gz);
 
     Creature* summoned = unit->SummonCreature(VISUAL_WAYPOINT, gx, gy, gz + 0.5f, 0, TEMPSUMMON_TIMED_DESPAWN, 20000);
-    summoned->CastSpell(summoned, 8599, false); 
+    summoned->CastSpell(summoned, 8599, false);
     uint32 tryed = 1;
     uint32 succeed = 0;
     uint32 startTime = WorldTimer::getMSTime();

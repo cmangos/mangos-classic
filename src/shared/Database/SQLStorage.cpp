@@ -155,7 +155,7 @@ void SQLStorage::prepareToLoad(uint32 maxRecordId, uint32 recordCount, uint32 re
     Free();
 
     // Set index array
-    m_Index = new char*[maxRecordId];
+    m_Index = new char* [maxRecordId];
     memset(m_Index, NULL, maxRecordId * sizeof(char*));
 
     SQLStorageBase::prepareToLoad(maxRecordId, recordCount, recordSize);

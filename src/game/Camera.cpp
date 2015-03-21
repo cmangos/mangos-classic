@@ -137,11 +137,11 @@ void Camera::UpdateVisibilityOf(T* target, UpdateData& data, std::set<WorldObjec
     m_owner.template UpdateVisibilityOf<T>(m_source, target, data, vis);
 }
 
-template void Camera::UpdateVisibilityOf(Player*        , UpdateData& , std::set<WorldObject*>&);
-template void Camera::UpdateVisibilityOf(Creature*      , UpdateData& , std::set<WorldObject*>&);
-template void Camera::UpdateVisibilityOf(Corpse*        , UpdateData& , std::set<WorldObject*>&);
-template void Camera::UpdateVisibilityOf(GameObject*    , UpdateData& , std::set<WorldObject*>&);
-template void Camera::UpdateVisibilityOf(DynamicObject* , UpdateData& , std::set<WorldObject*>&);
+template void Camera::UpdateVisibilityOf(Player*, UpdateData&, std::set<WorldObject*>&);
+template void Camera::UpdateVisibilityOf(Creature*, UpdateData&, std::set<WorldObject*>&);
+template void Camera::UpdateVisibilityOf(Corpse*, UpdateData&, std::set<WorldObject*>&);
+template void Camera::UpdateVisibilityOf(GameObject*, UpdateData&, std::set<WorldObject*>&);
+template void Camera::UpdateVisibilityOf(DynamicObject*, UpdateData&, std::set<WorldObject*>&);
 
 void Camera::UpdateVisibilityForOwner()
 {

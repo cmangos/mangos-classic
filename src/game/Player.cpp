@@ -2017,8 +2017,8 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameo
             float maxdist;
             switch (go->GetGoType())
             {
-                    // TODO: find out how the client calculates the maximal usage distance to spellless working
-                    // gameobjects like mailboxes - 10.0 is a just an abitrary choosen number
+                // TODO: find out how the client calculates the maximal usage distance to spellless working
+                // gameobjects like mailboxes - 10.0 is a just an abitrary choosen number
                 case GAMEOBJECT_TYPE_MAILBOX:
                     maxdist = 10.0f;
                     break;
@@ -2841,7 +2841,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         {
             for (PlayerSpellMap::iterator itr2 = m_spells.begin(); itr2 != m_spells.end(); ++itr2)
             {
-                PlayerSpell &playerSpell2 = itr2->second;
+                PlayerSpell& playerSpell2 = itr2->second;
 
                 if (playerSpell2.state == PLAYERSPELL_REMOVED) continue;
                 SpellEntry const* i_spellInfo = sSpellStore.LookupEntry(itr2->first);
@@ -3773,7 +3773,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
 
     switch (charDelete_method)
     {
-            // completely remove from the database
+        // completely remove from the database
         case 0:
         {
             // return back all mails with COD and Item                 0  1           2              3      4       5          6     7
@@ -4020,11 +4020,11 @@ void Player::SetCanFly(bool enable)
 //         data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);
 //     else
 //         data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
-// 
+//
 //     data << GetPackGUID();
 //     data << uint32(0);                                      // unk
 //     SendMessageToSet(&data, true);
-// 
+//
 //     data.Initialize(MSG_MOVE_UPDATE_CAN_FLY, 64);
 //     data << GetPackGUID();
 //     m_movementInfo.Write(data);
@@ -4857,7 +4857,7 @@ bool Player::UpdateSkill(uint32 skill_id, uint32 step)
     if (itr == mSkillStatus.end())
         return false;
 
-    SkillStatusData &skillStatus = itr->second;
+    SkillStatusData& skillStatus = itr->second;
     if (skillStatus.uState == SKILL_DELETED)
         return false;
 
@@ -4977,7 +4977,7 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
     if (itr == mSkillStatus.end())
         return false;
 
-    SkillStatusData &skillStatus = itr->second;
+    SkillStatusData& skillStatus = itr->second;
     if (skillStatus.uState == SKILL_DELETED)
         return false;
 
@@ -5101,7 +5101,7 @@ void Player::UpdateSkillsForLevel()
 
     for (SkillStatusMap::iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
     {
-        SkillStatusData &skillStatus = itr->second;
+        SkillStatusData& skillStatus = itr->second;
         if (skillStatus.uState == SKILL_DELETED)
             continue;
 
@@ -5143,7 +5143,7 @@ void Player::UpdateSkillsToMaxSkillsForLevel()
 {
     for (SkillStatusMap::iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
     {
-        SkillStatusData &skillStatus = itr->second;
+        SkillStatusData& skillStatus = itr->second;
         if (skillStatus.uState == SKILL_DELETED)
             continue;
 
@@ -5179,7 +5179,7 @@ void Player::SetSkill(uint16 id, uint16 currVal, uint16 maxVal, uint16 step /*=0
     // has skill
     if (itr != mSkillStatus.end() && itr->second.uState != SKILL_DELETED)
     {
-        SkillStatusData &skillStatus = itr->second;
+        SkillStatusData& skillStatus = itr->second;
         if (currVal)
         {
             if (step)                                      // need update step
@@ -9658,8 +9658,8 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
     {
         ItemPrototype const* itemProto = pItem2->GetProto();
         if (itemProto->Bonding == BIND_WHEN_PICKED_UP ||
-            itemProto->Bonding == BIND_QUEST_ITEM ||
-            (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
+                itemProto->Bonding == BIND_QUEST_ITEM ||
+                (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
         {
             pItem2->SetBinding(true);
         }
@@ -11491,7 +11491,7 @@ uint32 Player::GetGossipTextId(uint32 menuId, WorldObject* pSource)
         // Take the text that has the highest conditionId of all fitting
         // No condition and no text with condition found OR higher and fitting condition found
         if ((!gossipMenu.conditionId && !lastConditionId) ||
-            (gossipMenu.conditionId > lastConditionId && sObjectMgr.IsPlayerMeetToCondition(gossipMenu.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_MENU)))
+                (gossipMenu.conditionId > lastConditionId && sObjectMgr.IsPlayerMeetToCondition(gossipMenu.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_MENU)))
         {
             lastConditionId = gossipMenu.conditionId;
             textId = gossipMenu.text_id;
@@ -15371,7 +15371,7 @@ void Player::_SaveQuestStatus()
     // we don't need transactions here.
     for (QuestStatusMap::iterator i = mQuestStatus.begin(); i != mQuestStatus.end(); ++i)
     {
-        QuestStatusData &questStatus = i->second;
+        QuestStatusData& questStatus = i->second;
         switch (questStatus.uState)
         {
             case QUEST_NEW :
@@ -16111,13 +16111,13 @@ void Player::RemoveSpellMods(Spell const* spell)
     }
 }
 
-void Player::ResetSpellModsDueToCanceledSpell (Spell const* spell)
+void Player::ResetSpellModsDueToCanceledSpell(Spell const* spell)
 {
-    for(int i = 0; i < MAX_SPELLMOD; ++i )
+    for (int i = 0; i < MAX_SPELLMOD; ++i)
     {
         for (SpellModList::const_iterator itr = m_spellMods[i].begin(); itr != m_spellMods[i].end(); ++itr)
         {
-            SpellModifier *mod = *itr;
+            SpellModifier* mod = *itr;
 
             if (mod->lastAffected != spell)
                 continue;
@@ -17628,7 +17628,7 @@ float Player::GetReputationPriceDiscount(Creature const* pCreature) const
     FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
     if (!vendor_faction || !vendor_faction->faction)
         return 1.0f;
-    
+
     uint32 discount = 100;
     ReputationRank rank = GetReputationRank(vendor_faction->faction);   // get repution rank for that specific vendor faction
     if (rank >= REP_HONORED)                                            // give 10% reduction if rank is at least honored
@@ -17639,7 +17639,7 @@ float Player::GetReputationPriceDiscount(Creature const* pCreature) const
         if (FactionTemplateEntry const* player_faction = getFactionTemplateEntry())
         {
             if (player_faction->IsFriendlyTo(*vendor_faction))          // check if its friendly faction (not neutral)
-                discount -=10;                                          // give 10% discount if grade is at least sergent
+                discount -= 10;                                         // give 10% discount if grade is at least sergent
         }
     }
     return float (discount / 100.0f);

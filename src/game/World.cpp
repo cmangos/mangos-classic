@@ -1212,7 +1212,7 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_DELETECHARS].SetInterval(DAY * IN_MILLISECONDS); // check for chars to delete every day
 
     // for AhBot
-    m_timers[WUPDATE_AHBOT].SetInterval(20*IN_MILLISECONDS);// every 20 sec
+    m_timers[WUPDATE_AHBOT].SetInterval(20 * IN_MILLISECONDS); // every 20 sec
 
     // to set mailtimer to return mails every day between 4 and 5 am
     // mailtimer is increased when updating auctions
@@ -1605,7 +1605,7 @@ void World::KickAllLess(AccountTypes sec)
 }
 
 /// Ban an account or ban an IP address, duration_secs if it is positive used, otherwise permban
-BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string &author)
+BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string& author)
 {
     LoginDatabase.escape_string(nameOrIP);
     LoginDatabase.escape_string(reason);

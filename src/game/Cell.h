@@ -120,7 +120,7 @@ struct Cell
         template<class T> static void VisitAllObjects(float x, float y, Map* map, T& visitor, float radius, bool dont_load = true);
 
     private:
-        template<class T, class CONTAINER> void VisitCircle(TypeContainerVisitor<T, CONTAINER>&, Map&, const CellPair& , const CellPair&) const;
+        template<class T, class CONTAINER> void VisitCircle(TypeContainerVisitor<T, CONTAINER>&, Map&, const CellPair&, const CellPair&) const;
 };
 
 #endif

@@ -40,11 +40,11 @@ struct NodeCreator
 };
 
 template < class T,
-         class Node,
-         class NodeCreatorFunc = NodeCreator<Node>,
-         /*class BoundsFunc = BoundsTrait<T>,*/
-         class PositionFunc = PositionTrait<T>
-         >
+           class Node,
+           class NodeCreatorFunc = NodeCreator<Node>,
+           /*class BoundsFunc = BoundsTrait<T>,*/
+           class PositionFunc = PositionTrait<T>
+           >
 class RegularGrid2D
 {
     public:

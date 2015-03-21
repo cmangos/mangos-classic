@@ -31,11 +31,11 @@ namespace MaNGOS
 {
     template
     <
-    typename T,
-             class ThreadingModel = MaNGOS::SingleThreaded<T>,
-             class CreatePolicy = MaNGOS::OperatorNew<T>,
-             class LifeTimePolicy = MaNGOS::ObjectLifeTime<T>
-             >
+        typename T,
+        class ThreadingModel = MaNGOS::SingleThreaded<T>,
+        class CreatePolicy = MaNGOS::OperatorNew<T>,
+        class LifeTimePolicy = MaNGOS::ObjectLifeTime<T>
+        >
     class Singleton
     {
         public:

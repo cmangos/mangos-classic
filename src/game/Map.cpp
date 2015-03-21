@@ -745,7 +745,7 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
     MANGOS_ASSERT(CheckGridIntegrity(creature, true));
 }
 
-bool Map::CreatureCellRelocation(Creature* c, const Cell &new_cell)
+bool Map::CreatureCellRelocation(Creature* c, const Cell& new_cell)
 {
     Cell const& old_cell = c->GetCurrentCell();
     if (old_cell.DiffGrid(new_cell))
@@ -2025,7 +2025,7 @@ bool Map::GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float
 }
 
 // Find an height within a reasonable range of provided Z. This method may fail so we have to handle that case.
-bool Map::GetHeightInRange(float x, float y, float &z, float maxSearchDist /*= 4.0f*/) const
+bool Map::GetHeightInRange(float x, float y, float& z, float maxSearchDist /*= 4.0f*/) const
 {
     float height, vmapHeight, mapHeight;
     vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
@@ -2120,7 +2120,7 @@ bool Map::GetRandomPointUnderWater(float& x, float& y, float& z, float radius, G
         float min_z = z - 0.7f * radius; // 0.7 to have a bit a "flat" cylinder, TODO which value looks nicest
         if (min_z < ground)
             min_z = ground + 0.5f; // Get some space to prevent under map
-        
+
         float liquidLevel = liquid_status.level - 2.0f; // just to make the generated point is in water and not on surface or a bit above
 
         // if not enough space to fit the creature better is to return from here

@@ -290,12 +290,12 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
     if (pProto)
     {
         int loc_idx = GetSessionDbLocaleIndex();
-        
+
         std::string name = pProto->Name1;
         std::string description = pProto->Description;
         sObjectMgr.GetItemLocaleStrings(pProto->ItemId, loc_idx, &name, &description);
 
-        
+
         // guess size
         WorldPacket data(SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);
         data << pProto->ItemId;
@@ -1027,13 +1027,13 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket& recv_data)
     recv_data.read_skip<uint64>();                          // guid
 
     DEBUG_LOG("WORLD: CMSG_ITEM_NAME_QUERY %u", itemid);
-    if (ItemPrototype const *pProto = ObjectMgr::GetItemPrototype(itemid))
+    if (ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemid))
     {
         int loc_idx = GetSessionDbLocaleIndex();
-        
+
         std::string name = pProto->Name1;
         sObjectMgr.GetItemLocaleStrings(pProto->ItemId, loc_idx, &name);
-        
+
         // guess size
         WorldPacket data(SMSG_ITEM_NAME_QUERY_RESPONSE, (4 + 10));
         data << uint32(pProto->ItemId);

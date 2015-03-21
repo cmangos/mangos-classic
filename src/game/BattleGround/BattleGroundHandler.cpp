@@ -573,7 +573,7 @@ void WorldSession::SendBattleGroundJoinError(uint8 err)
             msg = LANG_BG_GROUP_MEMBER_NO_FREE_QUEUE_SLOTS;
             break;
         case BG_JOIN_ERR_GROUP_NOT_ENOUGH:
-            // case BG_JOIN_ERR_MIXED_ARENATEAM:
+        // case BG_JOIN_ERR_MIXED_ARENATEAM:
         default:
             return;
             break;

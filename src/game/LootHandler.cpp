@@ -418,7 +418,7 @@ void WorldSession::DoLootRelease(ObjectGuid lguid)
 
             switch (pItem->loot.loot_type)
             {
-                    // temporary loot, auto loot move
+                // temporary loot, auto loot move
                 case LOOT_DISENCHANTING:
                 {
                     if (!pItem->loot.isLooted())

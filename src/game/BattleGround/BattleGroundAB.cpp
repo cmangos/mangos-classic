@@ -190,7 +190,7 @@ void BattleGroundAB::HandleAreaTrigger(Player* source, uint32 trigger)
         case 3870:                                          // Black Smith
         case 4020:                                          // Unk1
         case 4021:                                          // Unk2
-            // break;
+        // break;
         default:
             // sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
             // source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", trigger);

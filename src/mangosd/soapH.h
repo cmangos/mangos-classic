@@ -13,9 +13,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap*, const void*, int);
-    SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap*, const void*, const char*, int, int);
-    SOAP_FMAC3 void* SOAP_FMAC4 soap_getelement(struct soap*, int*);
+SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap*, const void*, int);
+SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap*, const void*, const char*, int, int);
+SOAP_FMAC3 void* SOAP_FMAC4 soap_getelement(struct soap*, int*);
 
 #ifdef __cplusplus
 }

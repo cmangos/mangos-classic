@@ -493,7 +493,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleAuctionListOwnerItems(WorldPacket& recv_data);
         void HandleAuctionPlaceBid(WorldPacket& recv_data);
 
-        void AuctionBind( uint32 price, AuctionEntry * auction, Player * pl, Player* auction_owner );
+        void AuctionBind(uint32 price, AuctionEntry* auction, Player* pl, Player* auction_owner);
 
         void HandleGetMailList(WorldPacket& recv_data);
         void HandleSendMail(WorldPacket& recv_data);
@@ -561,7 +561,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleQuestPushResult(WorldPacket& recvPacket);
 
         bool processChatmessageFurtherAfterSecurityChecks(std::string&, uint32);
-        void SendPlayerNotFoundNotice(const std::string &name);
+        void SendPlayerNotFoundNotice(const std::string& name);
         void SendWrongFactionNotice();
         void SendChatRestrictedNotice();
         void HandleMessagechatOpcode(WorldPacket& recvPacket);
