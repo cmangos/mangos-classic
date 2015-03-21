@@ -134,6 +134,7 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
     if (utf8length(new_passwd) > MAX_ACCOUNT_STR)
         return AOR_PASS_TOO_LONG;
 
+    normalizeString(username);
     normalizeString(new_passwd);
 
     // also reset s and v to force update at next realmd login
@@ -206,6 +207,7 @@ bool AccountMgr::CheckPassword(uint32 accid, std::string passwd)
         return false;
 
     normalizeString(passwd);
+    normalizeString(username);
 
     QueryResult* result = LoginDatabase.PQuery("SELECT 1 FROM account WHERE id='%u' AND sha_pass_hash='%s'", accid, CalculateShaPassHash(username, passwd).c_str());
     if (result)
