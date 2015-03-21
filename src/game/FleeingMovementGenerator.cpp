@@ -113,7 +113,7 @@ bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float&
     // try to fix z
     if (!owner.GetMap()->GetHeightInRange(x, y, z))
         return false;
-    
+
     if (owner.GetTypeId() == TYPEID_PLAYER)
     {
         // check any collision

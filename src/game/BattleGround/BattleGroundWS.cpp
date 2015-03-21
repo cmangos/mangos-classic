@@ -488,11 +488,11 @@ void BattleGroundWS::HandleAreaTrigger(Player* source, uint32 trigger)
             else
                 source->LeaveBattleground();
             break;
-            /*case 3649:                                    // unk1
-              case 3688:                                    // unk2
-              case 4628:                                    // unk3
-              case 4629:                                    // unk4
-                  break; */
+        /*case 3649:                                    // unk1
+          case 3688:                                    // unk2
+          case 4628:                                    // unk3
+          case 4629:                                    // unk4
+              break; */
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
             source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", trigger);

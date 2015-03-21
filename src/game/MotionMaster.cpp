@@ -440,9 +440,9 @@ void MotionMaster::Mutate(MovementGenerator* m)
     {
         switch (top()->GetMovementGeneratorType())
         {
-                // HomeMovement is not that important, delete it if meanwhile a new comes
+            // HomeMovement is not that important, delete it if meanwhile a new comes
             case HOME_MOTION_TYPE:
-                // DistractMovement interrupted by any other movement
+            // DistractMovement interrupted by any other movement
             case DISTRACT_MOTION_TYPE:
                 MovementExpired(false);
             default:

@@ -342,8 +342,8 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=NU
 
     // check if we need to add swimming movement. TODO: i thing movement flags should be computed automatically at each movement of creature so we need a sort of UpdateMovementFlags() method
     if (cinfo->InhabitType & INHABIT_WATER &&                                   // check inhabit type water
-        data &&                                                                 // check if there is data to get creature spawn pos
-        GetMap()->GetTerrain()->IsInWater(data->posX, data->posY, data->posZ))  // check if creature is in water
+            data &&                                                                 // check if there is data to get creature spawn pos
+            GetMap()->GetTerrain()->IsInWater(data->posX, data->posY, data->posZ))  // check if creature is in water
         m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);                      // add swimming movement
 
     // checked at loading
@@ -1164,7 +1164,7 @@ void Creature::SelectLevel(const CreatureInfo* cinfo, float percentHealth /*= 10
 
     // TODO: Remove cinfo->ArmorMultiplier test workaround to disable classlevelstats when DB is ready
     CreatureClassLvlStats const* cCLS = sObjectMgr.GetCreatureClassLvlStats(level, cinfo->UnitClass);
-    if (cinfo->ArmorMultiplier > 0 && cCLS) 
+    if (cinfo->ArmorMultiplier > 0 && cCLS)
     {
         // Use Creature Stats to calculate stat values
 
@@ -2136,7 +2136,7 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
                         suitableUnits.push_back(pTarget);
 
             if (!suitableUnits.empty())
-                return suitableUnits[urand(0, suitableUnits.size()-1)];
+                return suitableUnits[urand(0, suitableUnits.size() - 1)];
 
             break;
         }
@@ -2664,7 +2664,7 @@ void Creature::SetCanFly(bool enable)
 //         m_movementInfo.AddMovementFlag(MOVEFLAG_CAN_FLY);
 //     else
 //         m_movementInfo.RemoveMovementFlag(MOVEFLAG_CAN_FLY);
-// 
+//
 //     WorldPacket data(enable ? SMSG_SPLINE_MOVE_SET_FLYING : SMSG_SPLINE_MOVE_UNSET_FLYING, 9);
 //     data << GetPackGUID();
 //     SendMessageToSet(&data, true);

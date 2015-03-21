@@ -157,75 +157,75 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_getindependent(struct soap* soap)
 #ifdef __cplusplus
 extern "C" {
 #endif
-    SOAP_FMAC3 void* SOAP_FMAC4 soap_getelement(struct soap* soap, int* type)
+SOAP_FMAC3 void* SOAP_FMAC4 soap_getelement(struct soap* soap, int* type)
+{
+    if (soap_peek_element(soap))
+        return NULL;
+    if (!*soap->id || !(*type = soap_lookup_type(soap, soap->id)))
+        * type = soap_lookup_type(soap, soap->href);
+    switch (*type)
     {
-        if (soap_peek_element(soap))
-            return NULL;
-        if (!*soap->id || !(*type = soap_lookup_type(soap, soap->id)))
-            * type = soap_lookup_type(soap, soap->href);
-        switch (*type)
+        case SOAP_TYPE_byte:
+            return soap_in_byte(soap, NULL, NULL, "xsd:byte");
+        case SOAP_TYPE_int:
+            return soap_in_int(soap, NULL, NULL, "xsd:int");
+        case SOAP_TYPE_ns1__executeCommand:
+            return soap_in_ns1__executeCommand(soap, NULL, NULL, "ns1:executeCommand");
+        case SOAP_TYPE_ns1__executeCommandResponse:
+            return soap_in_ns1__executeCommandResponse(soap, NULL, NULL, "ns1:executeCommandResponse");
+        case SOAP_TYPE_PointerTostring:
+            return soap_in_PointerTostring(soap, NULL, NULL, "xsd:string");
+        case SOAP_TYPE_string:
         {
-            case SOAP_TYPE_byte:
-                return soap_in_byte(soap, NULL, NULL, "xsd:byte");
-            case SOAP_TYPE_int:
-                return soap_in_int(soap, NULL, NULL, "xsd:int");
-            case SOAP_TYPE_ns1__executeCommand:
-                return soap_in_ns1__executeCommand(soap, NULL, NULL, "ns1:executeCommand");
-            case SOAP_TYPE_ns1__executeCommandResponse:
-                return soap_in_ns1__executeCommandResponse(soap, NULL, NULL, "ns1:executeCommandResponse");
-            case SOAP_TYPE_PointerTostring:
-                return soap_in_PointerTostring(soap, NULL, NULL, "xsd:string");
-            case SOAP_TYPE_string:
+            char** s;
+            s = soap_in_string(soap, NULL, NULL, "xsd:string");
+            return s ? *s : NULL;
+        }
+        default:
+        {
+            const char* t = soap->type;
+            if (!*t)
+                t = soap->tag;
+            if (!soap_match_tag(soap, t, "xsd:byte"))
+            {
+                *type = SOAP_TYPE_byte;
+                return soap_in_byte(soap, NULL, NULL, NULL);
+            }
+            if (!soap_match_tag(soap, t, "xsd:int"))
+            {
+                *type = SOAP_TYPE_int;
+                return soap_in_int(soap, NULL, NULL, NULL);
+            }
+            if (!soap_match_tag(soap, t, "ns1:executeCommand"))
+            {
+                *type = SOAP_TYPE_ns1__executeCommand;
+                return soap_in_ns1__executeCommand(soap, NULL, NULL, NULL);
+            }
+            if (!soap_match_tag(soap, t, "ns1:executeCommandResponse"))
+            {
+                *type = SOAP_TYPE_ns1__executeCommandResponse;
+                return soap_in_ns1__executeCommandResponse(soap, NULL, NULL, NULL);
+            }
+            if (!soap_match_tag(soap, t, "xsd:string"))
             {
                 char** s;
-                s = soap_in_string(soap, NULL, NULL, "xsd:string");
+                *type = SOAP_TYPE_string;
+                s = soap_in_string(soap, NULL, NULL, NULL);
                 return s ? *s : NULL;
             }
-            default:
+            t = soap->tag;
+            if (!soap_match_tag(soap, t, "xsd:QName"))
             {
-                const char* t = soap->type;
-                if (!*t)
-                    t = soap->tag;
-                if (!soap_match_tag(soap, t, "xsd:byte"))
-                {
-                    *type = SOAP_TYPE_byte;
-                    return soap_in_byte(soap, NULL, NULL, NULL);
-                }
-                if (!soap_match_tag(soap, t, "xsd:int"))
-                {
-                    *type = SOAP_TYPE_int;
-                    return soap_in_int(soap, NULL, NULL, NULL);
-                }
-                if (!soap_match_tag(soap, t, "ns1:executeCommand"))
-                {
-                    *type = SOAP_TYPE_ns1__executeCommand;
-                    return soap_in_ns1__executeCommand(soap, NULL, NULL, NULL);
-                }
-                if (!soap_match_tag(soap, t, "ns1:executeCommandResponse"))
-                {
-                    *type = SOAP_TYPE_ns1__executeCommandResponse;
-                    return soap_in_ns1__executeCommandResponse(soap, NULL, NULL, NULL);
-                }
-                if (!soap_match_tag(soap, t, "xsd:string"))
-                {
-                    char** s;
-                    *type = SOAP_TYPE_string;
-                    s = soap_in_string(soap, NULL, NULL, NULL);
-                    return s ? *s : NULL;
-                }
-                t = soap->tag;
-                if (!soap_match_tag(soap, t, "xsd:QName"))
-                {
-                    char** s;
-                    *type = SOAP_TYPE__QName;
-                    s = soap_in__QName(soap, NULL, NULL, NULL);
-                    return s ? *s : NULL;
-                }
+                char** s;
+                *type = SOAP_TYPE__QName;
+                s = soap_in__QName(soap, NULL, NULL, NULL);
+                return s ? *s : NULL;
             }
         }
-        soap->error = SOAP_TAG_MISMATCH;
-        return NULL;
     }
+    soap->error = SOAP_TAG_MISMATCH;
+    return NULL;
+}
 
 #ifdef __cplusplus
 }
@@ -286,27 +286,27 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_putindependent(struct soap* soap)
 #ifdef __cplusplus
 extern "C" {
 #endif
-    SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap* soap, const void* ptr, const char* tag, int id, int type)
+SOAP_FMAC3 int SOAP_FMAC4 soap_putelement(struct soap* soap, const void* ptr, const char* tag, int id, int type)
+{
+    switch (type)
     {
-        switch (type)
-        {
-            case SOAP_TYPE_byte:
-                return soap_out_byte(soap, tag, id, (const char*)ptr, "xsd:byte");
-            case SOAP_TYPE_int:
-                return soap_out_int(soap, tag, id, (const int*)ptr, "xsd:int");
-            case SOAP_TYPE_ns1__executeCommand:
-                return soap_out_ns1__executeCommand(soap, tag, id, (const struct ns1__executeCommand*)ptr, "ns1:executeCommand");
-            case SOAP_TYPE_ns1__executeCommandResponse:
-                return soap_out_ns1__executeCommandResponse(soap, tag, id, (const struct ns1__executeCommandResponse*)ptr, "ns1:executeCommandResponse");
-            case SOAP_TYPE_PointerTostring:
-                return soap_out_PointerTostring(soap, tag, id, (char** const*)ptr, "xsd:string");
-            case SOAP_TYPE__QName:
-                return soap_out_string(soap, "xsd:QName", id, (char * const*)&ptr, NULL);
-            case SOAP_TYPE_string:
-                return soap_out_string(soap, tag, id, (char * const*)&ptr, "xsd:string");
-        }
-        return SOAP_OK;
+        case SOAP_TYPE_byte:
+            return soap_out_byte(soap, tag, id, (const char*)ptr, "xsd:byte");
+        case SOAP_TYPE_int:
+            return soap_out_int(soap, tag, id, (const int*)ptr, "xsd:int");
+        case SOAP_TYPE_ns1__executeCommand:
+            return soap_out_ns1__executeCommand(soap, tag, id, (const struct ns1__executeCommand*)ptr, "ns1:executeCommand");
+        case SOAP_TYPE_ns1__executeCommandResponse:
+            return soap_out_ns1__executeCommandResponse(soap, tag, id, (const struct ns1__executeCommandResponse*)ptr, "ns1:executeCommandResponse");
+        case SOAP_TYPE_PointerTostring:
+            return soap_out_PointerTostring(soap, tag, id, (char** const*)ptr, "xsd:string");
+        case SOAP_TYPE__QName:
+            return soap_out_string(soap, "xsd:QName", id, (char* const*)&ptr, NULL);
+        case SOAP_TYPE_string:
+            return soap_out_string(soap, tag, id, (char* const*)&ptr, "xsd:string");
     }
+    return SOAP_OK;
+}
 
 #ifdef __cplusplus
 }
@@ -318,28 +318,28 @@ extern "C" {
 #ifdef __cplusplus
 extern "C" {
 #endif
-    SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap* soap, const void* ptr, int type)
+SOAP_FMAC3 void SOAP_FMAC4 soap_markelement(struct soap* soap, const void* ptr, int type)
+{
+    (void)soap; (void)ptr; (void)type; /* appease -Wall -Werror */
+    switch (type)
     {
-        (void)soap; (void)ptr; (void)type; /* appease -Wall -Werror */
-        switch (type)
-        {
-            case SOAP_TYPE_ns1__executeCommand:
-                soap_serialize_ns1__executeCommand(soap, (const struct ns1__executeCommand*)ptr);
-                break;
-            case SOAP_TYPE_ns1__executeCommandResponse:
-                soap_serialize_ns1__executeCommandResponse(soap, (const struct ns1__executeCommandResponse*)ptr);
-                break;
-            case SOAP_TYPE_PointerTostring:
-                soap_serialize_PointerTostring(soap, (char** const*)ptr);
-                break;
-            case SOAP_TYPE__QName:
-                soap_serialize_string(soap, (char * const*)&ptr);
-                break;
-            case SOAP_TYPE_string:
-                soap_serialize_string(soap, (char * const*)&ptr);
-                break;
-        }
+        case SOAP_TYPE_ns1__executeCommand:
+            soap_serialize_ns1__executeCommand(soap, (const struct ns1__executeCommand*)ptr);
+            break;
+        case SOAP_TYPE_ns1__executeCommandResponse:
+            soap_serialize_ns1__executeCommandResponse(soap, (const struct ns1__executeCommandResponse*)ptr);
+            break;
+        case SOAP_TYPE_PointerTostring:
+            soap_serialize_PointerTostring(soap, (char** const*)ptr);
+            break;
+        case SOAP_TYPE__QName:
+            soap_serialize_string(soap, (char* const*)&ptr);
+            break;
+        case SOAP_TYPE_string:
+            soap_serialize_string(soap, (char* const*)&ptr);
+            break;
     }
+}
 
 #ifdef __cplusplus
 }
@@ -549,7 +549,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_SOAP_ENV__Fault(struct soap* soap, const char
     const char* soap_tmp_faultcode = soap_QName2s(soap, a->faultcode);
     if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_SOAP_ENV__Fault), type))
         return soap->error;
-    if (soap_out__QName(soap, "faultcode", -1, (char * const*)&soap_tmp_faultcode, ""))
+    if (soap_out__QName(soap, "faultcode", -1, (char* const*)&soap_tmp_faultcode, ""))
         return soap->error;
     if (soap_out_string(soap, "faultstring", -1, &a->faultstring, ""))
         return soap->error;
@@ -991,7 +991,7 @@ SOAP_FMAC3 int SOAP_FMAC4 soap_out_SOAP_ENV__Code(struct soap* soap, const char*
     const char* soap_tmp_SOAP_ENV__Value = soap_QName2s(soap, a->SOAP_ENV__Value);
     if (soap_element_begin_out(soap, tag, soap_embedded_id(soap, id, a, SOAP_TYPE_SOAP_ENV__Code), type))
         return soap->error;
-    if (soap_out__QName(soap, "SOAP-ENV:Value", -1, (char * const*)&soap_tmp_SOAP_ENV__Value, ""))
+    if (soap_out__QName(soap, "SOAP-ENV:Value", -1, (char* const*)&soap_tmp_SOAP_ENV__Value, ""))
         return soap->error;
     if (soap_out_PointerToSOAP_ENV__Code(soap, "SOAP-ENV:Subcode", -1, &a->SOAP_ENV__Subcode, ""))
         return soap->error;

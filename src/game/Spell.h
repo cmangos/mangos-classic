@@ -159,7 +159,7 @@ class SpellCastTargets
         std::string m_strTarget;
 
         uint16 m_targetMask;
-        
+
     private:
         // objects (can be used at spell creating and after Update at casting
         Unit* m_unitTarget;

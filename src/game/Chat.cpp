@@ -88,9 +88,9 @@ ChatCommand* ChatHandler::getCommandTable()
         { "white",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_WHITE>, "", NULL },
         { "green",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_GREEN>, "", NULL },
         { "blue",           SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_BLUE>,  "", NULL },
-        { "purple",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_PURPLE>,"", NULL },
-        { "orange",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_ORANGE>,"", NULL },
-        { "yellow",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_YELLOW>,"", NULL },
+        { "purple",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_PURPLE>, "", NULL },
+        { "orange",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_ORANGE>, "", NULL },
+        { "yellow",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountQualityCommand<AUCTION_QUALITY_YELLOW>, "", NULL },
         { "",               SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotItemsAmountCommand,      "", NULL },
         { NULL,             0,                  true,  NULL,                                             "", NULL }
     };
@@ -489,7 +489,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "creature_questrelation",      SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadCreatureQuestRelationsCommand,  "", NULL },
         { "creature_template_classlevelstats", SEC_ADMINISTRATOR, true, &ChatHandler::HandleReloadCreaturesStatsCommand,     "", NULL },
         { "db_script_string",            SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDbScriptStringCommand,          "", NULL },
-        { "dbscripts_on_creature_death", SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDBScriptsOnCreatureDeathCommand,"", NULL },
+        { "dbscripts_on_creature_death", SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDBScriptsOnCreatureDeathCommand, "", NULL },
         { "dbscripts_on_event",          SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDBScriptsOnEventCommand,        "", NULL },
         { "dbscripts_on_gossip",         SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDBScriptsOnGossipCommand,       "", NULL },
         { "dbscripts_on_go_use",         SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadDBScriptsOnGoUseCommand,        "", NULL },
@@ -2084,10 +2084,10 @@ char* ChatHandler::ExtractLiteralArg(char** args, char const* lit /*= NULL*/)
     // reject quoted string or link (|-started text)
     switch (head[0])
     {
-            // reject quoted string
+        // reject quoted string
         case '[': case '\'': case '"':
             return NULL;
-            // reject link (|-started text)
+        // reject link (|-started text)
         case '|':
             // client replace all | by || in raw text
             if (head[1] != '|')
@@ -2102,7 +2102,7 @@ char* ChatHandler::ExtractLiteralArg(char** args, char const* lit /*= NULL*/)
         int l = strlen(lit);
 
         int largs = 0;
-        while(head[largs] && !isWhiteSpace(head[largs]))
+        while (head[largs] && !isWhiteSpace(head[largs]))
             ++largs;
 
         if (largs < l)
@@ -3301,14 +3301,14 @@ void ChatHandler::LogCommand(char const* fullcmd)
     {
         Player* p = m_session->GetPlayer();
         ObjectGuid sel_guid = p->GetSelectionGuid();
-        sLog.outCommand(GetAccountId(),"Command: %s [Player: %s (Account: %u) X: %f Y: %f Z: %f Map: %u Selected: %s]",
-            fullcmd, p->GetName(), GetAccountId(), p->GetPositionX(), p->GetPositionY(), p->GetPositionZ(), p->GetMapId(),
-            sel_guid.GetString().c_str());
+        sLog.outCommand(GetAccountId(), "Command: %s [Player: %s (Account: %u) X: %f Y: %f Z: %f Map: %u Selected: %s]",
+                        fullcmd, p->GetName(), GetAccountId(), p->GetPositionX(), p->GetPositionY(), p->GetPositionZ(), p->GetMapId(),
+                        sel_guid.GetString().c_str());
     }
     else                                        // 0 account -> console
     {
-        sLog.outCommand(GetAccountId(),"Command: %s [Account: %u from %s]",
-            fullcmd, GetAccountId(), GetAccountId() ? "RA-connection" : "Console");
+        sLog.outCommand(GetAccountId(), "Command: %s [Account: %u from %s]",
+                        fullcmd, GetAccountId(), GetAccountId() ? "RA-connection" : "Console");
     }
 }
 
@@ -3332,14 +3332,14 @@ void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const
             data << senderName;
             data << ObjectGuid(targetGuid);
             break;
-    
+
         case CHAT_MSG_SAY:
         case CHAT_MSG_PARTY:
         case CHAT_MSG_YELL:
             data << ObjectGuid(senderGuid);
             data << ObjectGuid(senderGuid);
             break;
-    
+
         case CHAT_MSG_MONSTER_SAY:
         case CHAT_MSG_MONSTER_YELL:
             MANGOS_ASSERT(senderName);
@@ -3348,14 +3348,14 @@ void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const
             data << senderName;
             data << ObjectGuid(targetGuid);
             break;
-    
+
         case CHAT_MSG_CHANNEL:
             MANGOS_ASSERT(channelName);
             data << channelName;
             data << uint32(playerRank);
             data << ObjectGuid(senderGuid);
             break;
-    
+
         default:
             data << ObjectGuid(senderGuid);
             break;

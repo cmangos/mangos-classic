@@ -273,7 +273,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                             // we need to open doors if they are closed (add there another condition if this code breaks some usage, but it need to be here for battlegrounds)
                             if (GetGoState() != GO_STATE_READY)
                                 ResetDoorOrButton();
-                            // flags in AB are type_button and we need to add them here so no break!
+                        // flags in AB are type_button and we need to add them here so no break!
                         default:
                             if (!m_spawnedByDefault)        // despawn timer
                             {

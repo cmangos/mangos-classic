@@ -119,7 +119,7 @@ void PlayerSocial::SendFriendList()
     {
         if (itr->second.Flags & SOCIAL_FLAG_FRIEND)         // if IsFriend()
         {
-            FriendInfo &friendInfo = itr->second;
+            FriendInfo& friendInfo = itr->second;
             sSocialMgr.GetFriendInfo(plr, itr->first, friendInfo);
 
             data << ObjectGuid(HIGHGUID_PLAYER, itr->first);// player guid

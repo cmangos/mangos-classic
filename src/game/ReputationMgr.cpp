@@ -133,7 +133,7 @@ void ReputationMgr::SendState(FactionState const* faction)
 
     for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
-        FactionState &subFaction = itr->second;
+        FactionState& subFaction = itr->second;
         if (subFaction.needSend)
         {
             subFaction.needSend = false;
@@ -255,7 +255,7 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
     FactionStateList::iterator itr = m_factions.find(factionEntry->reputationListID);
     if (itr != m_factions.end())
     {
-        FactionState &faction = itr->second;
+        FactionState& faction = itr->second;
         int32 BaseRep = GetBaseReputation(factionEntry);
 
         if (incremental)
@@ -452,7 +452,7 @@ void ReputationMgr::SaveToDB()
 
     for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
-        FactionState &faction = itr->second;
+        FactionState& faction = itr->second;
         if (faction.needSave)
         {
             stmtDel.PExecute(m_player->GetGUIDLow(), faction.ID);

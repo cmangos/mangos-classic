@@ -150,7 +150,7 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry* auction)
     Player* oldBidder = sObjectMgr.GetPlayer(oldBidder_guid);
 
     uint32 oldBidder_accId = 0;
-    if(!oldBidder)
+    if (!oldBidder)
         oldBidder_accId = sObjectMgr.GetPlayerAccountIdByGUID(oldBidder_guid);
 
     // old bidder exist

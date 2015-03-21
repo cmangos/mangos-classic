@@ -80,7 +80,7 @@ struct AreaTrigger
     {
         MANGOS_ASSERT(target_mapId == l->target_mapId);
         return requiredLevel <= l->requiredLevel && requiredItem <= l->requiredItem && requiredItem2 <= l->requiredItem2
-                && requiredQuest <= l->requiredQuest;
+               && requiredQuest <= l->requiredQuest;
     }
 };
 
@@ -806,7 +806,7 @@ class ObjectMgr
         }
 
         typedef std::string NpcTextArray[MAX_GOSSIP_TEXT_OPTIONS];
-        void GetNpcTextLocaleStringsAll(uint32 entry, int32 loc_idx, NpcTextArray *text0_Ptr, NpcTextArray* text1_Ptr) const;
+        void GetNpcTextLocaleStringsAll(uint32 entry, int32 loc_idx, NpcTextArray* text0_Ptr, NpcTextArray* text1_Ptr) const;
         void GetNpcTextLocaleStrings0(uint32 entry, int32 loc_idx, std::string* text0_0_Ptr, std::string* text1_0_Ptr) const;
 
         PageTextLocale const* GetPageTextLocale(uint32 entry) const

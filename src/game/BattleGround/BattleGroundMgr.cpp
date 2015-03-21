@@ -582,7 +582,7 @@ bool BattleGroundQueue::CheckNormalMatch(BattleGroundBracketId bracket_id, uint3
     if (m_SelectionPools[TEAM_INDEX_HORDE].GetPlayerCount() < m_SelectionPools[TEAM_INDEX_ALLIANCE].GetPlayerCount())
         j = TEAM_INDEX_HORDE;
     if (sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_INVITATION_TYPE) != 0
-        && m_SelectionPools[TEAM_INDEX_HORDE].GetPlayerCount() >= minPlayers && m_SelectionPools[TEAM_INDEX_ALLIANCE].GetPlayerCount() >= minPlayers)
+            && m_SelectionPools[TEAM_INDEX_HORDE].GetPlayerCount() >= minPlayers && m_SelectionPools[TEAM_INDEX_ALLIANCE].GetPlayerCount() >= minPlayers)
     {
         // we will try to invite more groups to team with less players indexed by j
         ++(itr_team[j]);                                    // this will not cause a crash, because for cycle above reached break;
@@ -661,7 +661,7 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
         sLog.outError("Battleground: Update: bg template not found for %u", bgTypeId);
         return;
     }
-    
+
     // get the min. players per team, properly for larger arenas as well.
     uint32 MinPlayersPerTeam = bg_template->GetMinPlayersPerTeam();
     uint32 MaxPlayersPerTeam = bg_template->GetMaxPlayersPerTeam();

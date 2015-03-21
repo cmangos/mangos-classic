@@ -25,7 +25,7 @@
 
 class SQLStorageBase
 {
-    template<class DerivedLoader, class StorageClass> friend class SQLStorageLoaderBase;
+        template<class DerivedLoader, class StorageClass> friend class SQLStorageLoaderBase;
 
     public:
         char const* GetTableName() const { return m_tableName; }
@@ -42,7 +42,7 @@ class SQLStorageBase
         template<typename T>
         class SQLSIterator
         {
-            friend class SQLStorageBase;
+                friend class SQLStorageBase;
 
             public:
                 T const* getValue() const { return reinterpret_cast<T const*>(pointer); }
@@ -100,7 +100,7 @@ class SQLStorageBase
 
 class SQLStorage : public SQLStorageBase
 {
-    template<class DerivedLoader, class StorageClass> friend class SQLStorageLoaderBase;
+        template<class DerivedLoader, class StorageClass> friend class SQLStorageLoaderBase;
 
     public:
         SQLStorage(const char* fmt, const char* _entry_field, const char* sqlname);
@@ -137,7 +137,7 @@ class SQLStorage : public SQLStorageBase
 
 class SQLHashStorage : public SQLStorageBase
 {
-    template<class DerivedLoader, class StorageClass> friend class SQLStorageLoaderBase;
+        template<class DerivedLoader, class StorageClass> friend class SQLStorageLoaderBase;
 
     public:
         SQLHashStorage(const char* fmt, const char* _entry_field, const char* sqlname);
@@ -174,9 +174,9 @@ class SQLHashStorage : public SQLStorageBase
 
 class SQLMultiStorage : public SQLStorageBase
 {
-    template<class DerivedLoader, class StorageClass> friend class SQLStorageLoaderBase;
-    template<typename T> friend class SQLMultiSIterator;
-    template<typename T> friend class SQLMSIteratorBounds;
+        template<class DerivedLoader, class StorageClass> friend class SQLStorageLoaderBase;
+        template<typename T> friend class SQLMultiSIterator;
+        template<typename T> friend class SQLMSIteratorBounds;
 
     private:
         typedef std::multimap<uint32 /*recordId*/, char* /*record*/> RecordMultiMap;
@@ -193,8 +193,8 @@ class SQLMultiStorage : public SQLStorageBase
         template<typename T>
         class SQLMultiSIterator
         {
-            friend class SQLMultiStorage;
-            friend class SQLMSIteratorBounds<T>;
+                friend class SQLMultiStorage;
+                friend class SQLMSIteratorBounds<T>;
 
             public:
                 T const* getValue() const { return reinterpret_cast<T const*>(citerator->second); }
@@ -214,7 +214,7 @@ class SQLMultiStorage : public SQLStorageBase
         template<typename T>
         class SQLMSIteratorBounds
         {
-            friend class SQLMultiStorage;
+                friend class SQLMultiStorage;
 
             public:
                 const SQLMultiSIterator<T> first;

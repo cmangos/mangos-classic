@@ -44,7 +44,7 @@ ChannelMgr::~ChannelMgr()
     channels.clear();
 }
 
-Channel* ChannelMgr::GetJoinChannel(const std::string &name)
+Channel* ChannelMgr::GetJoinChannel(const std::string& name)
 {
     std::wstring wname;
     Utf8toWStr(name, wname);
@@ -60,7 +60,7 @@ Channel* ChannelMgr::GetJoinChannel(const std::string &name)
     return channels[wname];
 }
 
-Channel* ChannelMgr::GetChannel(const std::string &name, Player* p, bool pkt)
+Channel* ChannelMgr::GetChannel(const std::string& name, Player* p, bool pkt)
 {
     std::wstring wname;
     Utf8toWStr(name, wname);
@@ -83,7 +83,7 @@ Channel* ChannelMgr::GetChannel(const std::string &name, Player* p, bool pkt)
         return i->second;
 }
 
-void ChannelMgr::LeftChannel(const std::string &name)
+void ChannelMgr::LeftChannel(const std::string& name)
 {
     std::wstring wname;
     Utf8toWStr(name, wname);
@@ -103,7 +103,7 @@ void ChannelMgr::LeftChannel(const std::string &name)
     }
 }
 
-void ChannelMgr::MakeNotOnPacket(WorldPacket* data, const std::string &name)
+void ChannelMgr::MakeNotOnPacket(WorldPacket* data, const std::string& name)
 {
     data->Initialize(SMSG_CHANNEL_NOTIFY, (1 + 10)); // we guess size
     (*data) << (uint8)CHAT_NOT_MEMBER_NOTICE << name;

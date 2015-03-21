@@ -62,7 +62,7 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator;
 template<>
 class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
     : public MovementGeneratorMedium< Creature, WaypointMovementGenerator<Creature> >,
-  public PathMovementBase<Creature, WaypointPath const*>
+      public PathMovementBase<Creature, WaypointPath const*>
 {
     public:
         WaypointMovementGenerator(Creature&) : i_nextMoveTime(0), m_isArrivalDone(false), m_lastReachedWaypoint(0) {}
@@ -107,7 +107,7 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
  */
 class MANGOS_DLL_SPEC FlightPathMovementGenerator
     : public MovementGeneratorMedium< Player, FlightPathMovementGenerator >,
-  public PathMovementBase<Player, TaxiPathNodeList const*>
+      public PathMovementBase<Player, TaxiPathNodeList const*>
 {
     public:
         explicit FlightPathMovementGenerator(TaxiPathNodeList const& pathnodes, uint32 startNode = 0)

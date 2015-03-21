@@ -273,7 +273,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
 
     // can't be learn, cheat? Or double learn with lags...
     uint32 reqLevel = 0;
-    if(!_player->IsSpellFitByClassAndRace(trainer_spell->spell, &reqLevel))
+    if (!_player->IsSpellFitByClassAndRace(trainer_spell->spell, &reqLevel))
         return;
 
     reqLevel = trainer_spell->isProvidedReqLevel ? trainer_spell->reqLevel : std::max(reqLevel, trainer_spell->reqLevel);

@@ -261,7 +261,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
 
         // Dynamic VMaps
         float GetHeight(float x, float y, float z) const;
-        bool GetHeightInRange(float x, float y, float &z, float maxSearchDist = 4.0f) const;
+        bool GetHeightInRange(float x, float y, float& z, float maxSearchDist = 4.0f) const;
         bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2) const;
         bool GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, float modifyDist) const;
 
@@ -302,7 +302,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void SendInitTransports(Player* player);
         void SendRemoveTransports(Player* player);
 
-        bool CreatureCellRelocation(Creature* creature, const Cell &new_cell);
+        bool CreatureCellRelocation(Creature* creature, const Cell& new_cell);
 
         bool loaded(const GridPair&) const;
         void EnsureGridCreated(const GridPair&);

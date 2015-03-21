@@ -512,7 +512,7 @@ class World
 
         void KickAll();
         void KickAllLess(AccountTypes sec);
-        BanReturn BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string &author);
+        BanReturn BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_secs, std::string reason, const std::string& author);
         bool RemoveBanAccount(BanMode mode, std::string nameOrIP);
 
         // for max speed access

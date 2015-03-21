@@ -111,7 +111,7 @@ inline bool IsAuraApplyEffect(SpellEntry const* spellInfo, SpellEffectIndex effe
 
 inline bool IsSpellAppliesAura(SpellEntry const* spellInfo, uint32 effectMask = ((1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)))
 {
-    for(int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (effectMask & (1 << i))
             if (IsAuraApplyEffect(spellInfo, SpellEffectIndex(i)))
                 return true;
@@ -436,7 +436,7 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
     return ((spellInfo->Stances & (1 << (form - 1))  || spellInfo->Id == 24864 && form == FORM_CAT) &&
             !spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
 }
- 
+
 inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
 {
     return (spellInfo->HasAttribute(SPELL_ATTR_OUTDOORS_ONLY) && spellInfo->HasAttribute(SPELL_ATTR_PASSIVE));

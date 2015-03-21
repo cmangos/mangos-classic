@@ -393,7 +393,7 @@ void ObjectMgr::LoadCreatureTemplates()
 {
     SQLCreatureLoader loader;
     loader.Load(sCreatureStorage);
-    
+
     // check data correctness
     for (uint32 i = 1; i < sCreatureStorage.GetMaxEntry(); ++i)
     {
@@ -732,7 +732,7 @@ void ObjectMgr::LoadCreatureClassLvlStats()
             continue;
         }
 
-        CreatureClassLvlStats &cCLS = m_creatureClassLvlStats[creatureLevel][classToIndex[creatureClass]];
+        CreatureClassLvlStats& cCLS = m_creatureClassLvlStats[creatureLevel][classToIndex[creatureClass]];
 
         cCLS.BaseMana               = fields[2].GetUInt32();
         cCLS.BaseMeleeAttackPower   = fields[3].GetFloat();
@@ -1917,7 +1917,7 @@ void ObjectMgr::LoadPetLevelInfo()
             pInfoMapEntry =  new PetLevelInfo[sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL)];
 
         // data for level 1 stored in [0] array element, ...
-        PetLevelInfo* pLevelInfo = &pInfoMapEntry[current_level-1];
+        PetLevelInfo* pLevelInfo = &pInfoMapEntry[current_level - 1];
 
         pLevelInfo->health = fields[2].GetUInt16();
         pLevelInfo->mana   = fields[3].GetUInt16();
@@ -1925,7 +1925,7 @@ void ObjectMgr::LoadPetLevelInfo()
 
         for (int i = 0; i < MAX_STATS; ++i)
         {
-            pLevelInfo->stats[i] = fields[i+4].GetUInt16();
+            pLevelInfo->stats[i] = fields[i + 4].GetUInt16();
         }
 
         bar.step();
@@ -6329,7 +6329,7 @@ static LanguageType GetRealmLanguageType(bool create)
     }
 }
 
-bool isValidString(const std::wstring &wstr, uint32 strictMask, bool numericOrSpace, bool create = false)
+bool isValidString(const std::wstring& wstr, uint32 strictMask, bool numericOrSpace, bool create = false)
 {
     if (strictMask == 0)                                    // any language, ignore realm
     {
@@ -7793,7 +7793,7 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         trainerSpell.reqLevel      = fields[5].GetUInt32();
 
         trainerSpell.isProvidedReqLevel = trainerSpell.reqLevel > 0;
-		
+
         if (trainerSpell.reqLevel)
         {
             if (trainerSpell.reqLevel == spellinfo->spellLevel)
@@ -8464,7 +8464,7 @@ void ObjectMgr::GetCreatureLocaleStrings(uint32 entry, int32 loc_idx, char const
 {
     if (loc_idx >= 0)
     {
-        if (CreatureLocale const *il = GetCreatureLocale(entry))
+        if (CreatureLocale const* il = GetCreatureLocale(entry))
         {
             if (namePtr && il->Name.size() > size_t(loc_idx) && !il->Name[loc_idx].empty())
                 *namePtr = il->Name[loc_idx].c_str();
@@ -8479,7 +8479,7 @@ void ObjectMgr::GetItemLocaleStrings(uint32 entry, int32 loc_idx, std::string* n
 {
     if (loc_idx >= 0)
     {
-        if(ItemLocale const *il = GetItemLocale(entry))
+        if (ItemLocale const* il = GetItemLocale(entry))
         {
             if (namePtr && il->Name.size() > size_t(loc_idx) && !il->Name[loc_idx].empty())
                 *namePtr = il->Name[loc_idx];
@@ -8494,7 +8494,7 @@ void ObjectMgr::GetQuestLocaleStrings(uint32 entry, int32 loc_idx, std::string* 
 {
     if (loc_idx >= 0)
     {
-        if(QuestLocale const *il = GetQuestLocale(entry))
+        if (QuestLocale const* il = GetQuestLocale(entry))
         {
             if (titlePtr && il->Title.size() > size_t(loc_idx) && !il->Title[loc_idx].empty())
                 *titlePtr = il->Title[loc_idx];
@@ -8506,7 +8506,7 @@ void ObjectMgr::GetNpcTextLocaleStringsAll(uint32 entry, int32 loc_idx, ObjectMg
 {
     if (loc_idx >= 0)
     {
-        if (NpcTextLocale const *nl = GetNpcTextLocale(entry))
+        if (NpcTextLocale const* nl = GetNpcTextLocale(entry))
         {
             if (text0_Ptr)
                 for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
@@ -8525,7 +8525,7 @@ void ObjectMgr::GetNpcTextLocaleStrings0(uint32 entry, int32 loc_idx, std::strin
 {
     if (loc_idx >= 0)
     {
-        if (NpcTextLocale const *nl = GetNpcTextLocale(entry))
+        if (NpcTextLocale const* nl = GetNpcTextLocale(entry))
         {
             if (text0_0_Ptr)
                 if (nl->Text_0[0].size() > (size_t)loc_idx && !nl->Text_0[0][loc_idx].empty())
