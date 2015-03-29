@@ -1077,7 +1077,24 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             break;
         }
         case SPELLFAMILY_DRUID:
+        {
+            // Loatheb Corrupted Mind triggered sub spells
+            if (m_spellInfo->Id == 29201)
+            {
+                uint32 spellid = 0;
+                switch (unitTarget->getClass())
+                {
+                    case CLASS_PALADIN: spellid = 29196; break;
+                    case CLASS_PRIEST: spellid = 29185; break;
+                    case CLASS_SHAMAN: spellid = 29198; break;
+                    case CLASS_DRUID: spellid = 29194; break;
+                    default: break;
+                }
+                if (spellid != 0)
+                m_caster->CastSpell(unitTarget, spellid, true, NULL);
+            }
             break;
+        }
         case SPELLFAMILY_ROGUE:
             break;
         case SPELLFAMILY_HUNTER:
