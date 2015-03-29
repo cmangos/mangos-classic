@@ -130,7 +130,7 @@ void Opcodes::BuildOpcodeList()
     /*[-ZERO] Need check /*0x04D*/  StoreOpcode(SMSG_LOGOUT_COMPLETE,              "SMSG_LOGOUT_COMPLETE",             STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*[-ZERO] Need check /*0x04E*/  StoreOpcode(CMSG_LOGOUT_CANCEL,                "CMSG_LOGOUT_CANCEL",               STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleLogoutCancelOpcode);
     /*[-ZERO] Need check /*0x04F*/  StoreOpcode(SMSG_LOGOUT_CANCEL_ACK,            "SMSG_LOGOUT_CANCEL_ACK",           STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    /*[-ZERO] Need check /*0x050*/  StoreOpcode(CMSG_NAME_QUERY,                   "CMSG_NAME_QUERY",                  STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleNameQueryOpcode);
+    /*[-ZERO] Need check /*0x050*/  StoreOpcode(CMSG_NAME_QUERY,                   "CMSG_NAME_QUERY",                  STATUS_AUTHED,    PROCESS_THREADUNSAFE, &WorldSession::HandleNameQueryOpcode);
     /*[-ZERO] Need check /*0x051*/  StoreOpcode(SMSG_NAME_QUERY_RESPONSE,          "SMSG_NAME_QUERY_RESPONSE",         STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     /*[-ZERO] Need check /*0x052*/  StoreOpcode(CMSG_PET_NAME_QUERY,               "CMSG_PET_NAME_QUERY",              STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandlePetNameQueryOpcode);
     /*[-ZERO] Need check /*0x053*/  StoreOpcode(SMSG_PET_NAME_QUERY_RESPONSE,      "SMSG_PET_NAME_QUERY_RESPONSE",     STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
