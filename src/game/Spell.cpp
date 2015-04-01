@@ -3954,7 +3954,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                         if ((*itr)->GetModifier()->m_miscvalue == 4327)
                         {
                             return SPELL_FAILED_FIZZLE;
-                            itr = auraClassScripts.begin();
                         }
                         else
                             ++itr;
