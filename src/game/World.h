@@ -384,9 +384,6 @@ struct CliCommandHolder
 };
 
 /// The World
-
-typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
-
 class World
 {
     public:
@@ -402,7 +399,6 @@ class World
         bool RemoveSession(uint32 id);
         /// Get the number of current active sessions
         void UpdateMaxSessionCounters();
-        const SessionMap& GetAllSessions() const { return m_sessions; }
         uint32 GetActiveAndQueuedSessionCount() const { return m_sessions.size(); }
         uint32 GetActiveSessionCount() const { return m_sessions.size() - m_QueuedSessions.size(); }
         uint32 GetQueuedSessionCount() const { return m_QueuedSessions.size(); }
@@ -598,6 +594,7 @@ class World
         uint32 mail_timer;
         uint32 mail_timer_expires;
 
+        typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
         uint32 m_maxActiveSessionCount;
         uint32 m_maxQueuedSessionCount;

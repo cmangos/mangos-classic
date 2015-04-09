@@ -70,7 +70,7 @@ class Field
             return value;
         }
 
-        uint64 GetInt64() const
+        int64 GetInt64() const
         {
             int64 value = 0;
             if (!mValue || sscanf(mValue, SI64FMTD, &value) == -1)

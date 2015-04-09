@@ -144,7 +144,6 @@ enum Powers
     POWER_FOCUS                         = 2,            // UNIT_FIELD_POWER3
     POWER_ENERGY                        = 3,            // UNIT_FIELD_POWER4
     POWER_HAPPINESS                     = 4,            // UNIT_FIELD_POWER5
-    POWER_ALL                           = 127,          // default for class? - need check for CLASSIC
     POWER_HEALTH                        = 0xFFFFFFFE    // (-2 as signed value)
 };
 

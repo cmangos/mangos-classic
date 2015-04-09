@@ -1533,20 +1533,28 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
 GameObject* WorldObject::SummonGameObject(uint32 id, float x, float y, float z, float angle, uint32 despwtime)
 {
-    GameObject* pGameObj = new GameObject;
-
-    Map *map = GetMap();
-
-    if (!map)
+    if (!IsInWorld())
         return NULL;
 
+    if (!sObjectMgr.GetGameObjectInfo(id))
+    {
+        sLog.outErrorDb("WorldObject::SummonGameObject: GameObject (Entry: %u) not existed for summoner: %s. ", id, GetGuidStr().c_str());
+        return NULL;
+    }
+
+    Map *map = GetMap();
+    GameObject* pGameObj = new GameObject;
     if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), id, map, x, y, z, angle))
     {
         delete pGameObj;
         return NULL;
     }
 
-    pGameObj->SetRespawnTime(despwtime/IN_MILLISECONDS);
+    pGameObj->SetRespawnTime(despwtime / IN_MILLISECONDS);
+    if (GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_UNIT)
+        ToUnit()->AddGameObject(pGameObj);
+    else
+        pGameObj->SetSpawnedByDefault(false);
 
     map->Add(pGameObj);
 

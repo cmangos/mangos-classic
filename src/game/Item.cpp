@@ -231,10 +231,6 @@ Item::Item() :
     m_lootState = ITEM_LOOT_NONE;
 }
 
-Item::~Item()
-{
-}
-
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 {
     Object::_Create(guidlow, 0, HIGHGUID_ITEM);
