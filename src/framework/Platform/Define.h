@@ -110,7 +110,7 @@ typedef uint32      DWORD;
 #define STATIC_ASSERT_WORKAROUND(expr, msg) typedef char CONCAT(static_assert_failed_at_line_, __LINE__) [(expr) ? 1 : -1]
 
 #if COMPILER == COMPILER_GNU
-#  if !defined(__GXX_EXPERIMENTAL_CXX0X__) || (__GNUC__ < 4) || (__GNUC__ == 4) && (__GNUC_MINOR__ < 7)
+#  if !defined(__clang__) && (!defined(__GXX_EXPERIMENTAL_CXX0X__) || (__GNUC__ < 4) || (__GNUC__ == 4) && (__GNUC_MINOR__ < 7))
 #    define override
 #    define static_assert(a, b) STATIC_ASSERT_WORKAROUND(a, b)
 #  endif

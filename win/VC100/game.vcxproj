@@ -437,11 +437,13 @@
     <ClCompile Include="..\..\src\game\LuaEngine\ElunaEventMgr.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\ElunaUtility.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\GameObjectHooks.cpp" />
+    <ClCompile Include="..\..\src\game\LuaEngine\GossipHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\GroupHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\GuildHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\ItemHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\LuaEngine.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\LuaFunctions.cpp" />
+    <ClCompile Include="..\..\src\game\LuaEngine\PacketHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\PlayerHooks.cpp" />
     <ClCompile Include="..\..\src\game\LuaEngine\ServerHooks.cpp" />
     <ClCompile Include="..\..\src\game\Mail.cpp" />
@@ -596,9 +598,9 @@
     <ClInclude Include="..\..\src\game\LootMgr.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\AuraMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\BattleGroundMethods.h" />
+    <ClInclude Include="..\..\src\game\LuaEngine\BindingMap.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\CorpseMethods.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\CreatureMethods.h" />
-    <ClInclude Include="..\..\src\game\LuaEngine\ElunaBinding.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaCreatureAI.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaEventMgr.h" />
     <ClInclude Include="..\..\src\game\LuaEngine\ElunaIncludes.h" />
