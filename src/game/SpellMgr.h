@@ -249,6 +249,7 @@ inline bool IsSpellAbleToCrit(const SpellEntry* entry)
 }
 
 int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2);
+int32 CompareIdenticalAura(uint32 spellId_1, uint32 spellId_2);
 
 // order from less to more strict
 bool IsSingleFromSpellSpecificPerTargetPerCaster(SpellSpecific spellSpec1, SpellSpecific spellSpec2);
@@ -299,6 +300,74 @@ bool IsExplicitNegativeTarget(uint32 targetA);
 
 bool IsSingleTargetSpell(SpellEntry const* spellInfo);
 bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2);
+
+inline bool IsStackableEffect(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2, Unit* pTarget = nullptr)
+{
+    if (!spellInfo_1->EffectApplyAuraName[0] && !spellInfo_1->EffectApplyAuraName[1] && !spellInfo_1->EffectApplyAuraName[2] ||
+        !spellInfo_2->EffectApplyAuraName[0] && !spellInfo_2->EffectApplyAuraName[1] && !spellInfo_2->EffectApplyAuraName[2])
+        return true;
+
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        // allow stack
+        switch (spellInfo_1->EffectApplyAuraName[i])
+        {
+            // Dummy/Triggers
+            case SPELL_AURA_DUMMY:
+            case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
+                if (spellInfo_1->SpellFamilyFlags & (0x10000000) && spellInfo_2->SpellFamilyFlags & (0x10000000) &&
+                    spellInfo_1->SpellFamilyName == SPELLFAMILY_PALADIN && spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN)
+                    return false;
+                return true;
+
+            // DoT
+            case SPELL_AURA_PERIODIC_LEECH:
+            case SPELL_AURA_PERIODIC_MANA_LEECH:
+                if (pTarget && pTarget->IsCharmerOrOwnerPlayerOrPlayerItself())
+                    return false;
+            case SPELL_AURA_PERIODIC_DAMAGE:
+            case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+            case SPELL_AURA_POWER_BURN_MANA:
+                return true;
+
+            // HoT
+            case SPELL_AURA_PERIODIC_HEAL:
+            case SPELL_AURA_OBS_MOD_HEALTH:
+            case SPELL_AURA_OBS_MOD_MANA:
+                return true;
+
+            // By default base stats cannot stack if they're similar
+            case SPELL_AURA_MOD_RESISTANCE:
+                if (spellInfo_1->SpellFamilyFlags != spellInfo_2->SpellFamilyFlags &&
+                    spellInfo_1->SpellFamilyName != spellInfo_2->SpellFamilyName)
+                    if (spellInfo_1->EffectMiscValue[i] == 1 || spellInfo_2->EffectMiscValue[i] == 1)
+                        return true;
+
+            case SPELL_AURA_MOD_STAT:
+            case SPELL_AURA_MOD_PERCENT_STAT:
+            case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
+                if (spellInfo_1->EffectMiscValue[i] == spellInfo_2->EffectMiscValue[i])
+                    return false;
+
+            case SPELL_AURA_MOD_MELEE_HASTE:
+            case SPELL_AURA_MOD_RANGED_HASTE:
+                if (IsPositiveSpell(spellInfo_1) && spellInfo_1->Id != spellInfo_2->Id)
+                    return true;
+
+            // Some general effects that stack and are handled by core
+            case SPELL_AURA_MOD_DECREASE_SPEED:
+            case SPELL_AURA_MOD_INCREASE_SPEED:
+                if (spellInfo_1->Id != spellInfo_2->Id)
+                    return true;
+        }
+    }
+
+    if (IsPositiveSpell(spellInfo_1) && IsPositiveSpell(spellInfo_2) &&
+        spellInfo_1->SpellFamilyName != spellInfo_2->SpellFamilyName)
+        return true;
+
+    return false;
+}
 
 // TODO: research binary spells
 inline bool IsBinarySpell(SpellEntry const* spellInfo)

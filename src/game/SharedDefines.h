@@ -335,7 +335,7 @@ enum SpellAttributesEx2
     SPELL_ATTR_EX2_UNK17                       = 0x00020000,// 17 suspend weapon timer instead of resetting it, (?Hunters Shot and Stings only have this flag?)
     SPELL_ATTR_EX2_REQ_DEAD_PET                = 0x00040000,// 18 Only Revive pet - possible req dead pet
     SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT         = 0x00080000,// 19 does not necessarly need shapeshift
-    SPELL_ATTR_EX2_UNK20                       = 0x00100000,// 20
+    SPELL_ATTR_EX2_FACING_TARGETS_BACK         = 0x00100000,// 20 TODO: CONFIRM!
     SPELL_ATTR_EX2_DAMAGE_REDUCED_SHIELD       = 0x00200000,// 21 for ice blocks, pala immunity buffs, priest absorb shields, but used also for other spells -> not sure!
     SPELL_ATTR_EX2_UNK22                       = 0x00400000,// 22
     SPELL_ATTR_EX2_IS_ARCANE_CONCENTRATION     = 0x00800000,// 23 Only mage Arcane Concentration have this flag
@@ -369,7 +369,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_UNK15                       = 0x00008000,// 15 Auto Shoot, Shoot, Throw,  - this is autoshot flag
     SPELL_ATTR_EX3_UNK16                       = 0x00010000,// 16 no triggers effects that trigger on casting a spell??
     SPELL_ATTR_EX3_NO_INITIAL_AGGRO            = 0x00020000,// 17 Causes no aggro if not missed
-    SPELL_ATTR_EX3_CANT_MISS                   = 0x00040000,// 18 Spell should always hit its target
+    SPELL_ATTR_EX3_CANT_MISS                   = 0x00040000,// 18 Spell should always hit its target 
     SPELL_ATTR_EX3_UNK19                       = 0x00080000,// 19
     SPELL_ATTR_EX3_DEATH_PERSISTENT            = 0x00100000,// 20 Death persistent spells
     SPELL_ATTR_EX3_UNK21                       = 0x00200000,// 21

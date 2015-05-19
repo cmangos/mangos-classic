@@ -386,6 +386,28 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2)
     return 0;
 }
 
+int32 CompareIdenticalAura(uint32 spellId_1, uint32 spellId_2)
+{
+    SpellEntry const* spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
+    SpellEntry const* spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
+    if (!spellInfo_1 || !spellInfo_2) return 0;
+    if (spellId_1 == spellId_2) return 0;
+
+    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (spellInfo_1->EffectApplyAuraName[i] == spellInfo_2->EffectApplyAuraName[i] &&
+            spellInfo_1->EffectMiscValue[i] == spellInfo_2->EffectMiscValue[i] &&
+            IsPositiveSpell(spellInfo_1) == IsPositiveSpell(spellInfo_2))
+        {
+            int32 diff = spellInfo_1->EffectBasePoints[i] - spellInfo_2->EffectBasePoints[i];
+            if (spellInfo_1->CalculateSimpleValue(SpellEffectIndex(i)) < 0 && spellInfo_2->CalculateSimpleValue(SpellEffectIndex(i)) < 0)
+                return -diff;
+            else return diff;
+        }
+    }
+    return 0;
+}
+
 SpellSpecific GetSpellSpecific(uint32 spellId)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
@@ -1549,9 +1571,6 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
     if (!spellInfo_1 || !spellInfo_2)
         return false;
 
-    if (spellInfo_1->Id == spellInfo_2->Id)
-        return false;
-
     // Resurrection sickness
     if ((spellInfo_1->Id == SPELL_ID_PASSIVE_RESURRECTION_SICKNESS) != (spellInfo_2->Id == SPELL_ID_PASSIVE_RESURRECTION_SICKNESS))
         return false;
@@ -1878,28 +1897,53 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
             break;
     }
 
-    // more generic checks
-    if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
-            spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
-    {
-        bool isModifier = false;
-        for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-        {
-            if (spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER ||
-                    spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_ADD_PCT_MODIFIER  ||
-                    spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER ||
-                    spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_PCT_MODIFIER)
-                isModifier = true;
-        }
-
-        if (!isModifier)
-            return true;
-    }
+    // Special case for potions
+    if (spellInfo_1->SpellFamilyName == SPELLFAMILY_POTION || spellInfo_2->SpellFamilyName == SPELLFAMILY_POTION)
+        return false;
 
     if (IsRankSpellDueToSpell(spellInfo_1, spellInfo_2->Id))
         return true;
 
-    if (spellInfo_1->SpellFamilyName == 0 || spellInfo_2->SpellFamilyName == 0)
+    // Generic check for stacking auras
+    bool bIdentical[MAX_EFFECT_INDEX] = { false, false, false };
+
+    // First find identical Aura applies
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        // Skip EXCLUSIVE auras, they can always stack but only best value will be chosen for player
+        if (spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE && spellInfo_1->SpellFamilyName != SPELLFAMILY_DRUID)
+            return false;
+
+        // Skip self spells, apparently they can always stack with similar spells
+        if (spellInfo_1->rangeIndex == SPELL_RANGE_IDX_SELF_ONLY && IsPositiveSpell(spellInfo_1) ||
+            spellInfo_2->rangeIndex == SPELL_RANGE_IDX_SELF_ONLY && IsPositiveSpell(spellInfo_2))
+            return false;
+
+        if (IsStackableEffect(spellInfo_1, spellInfo_2))
+            return false;
+
+        if (spellInfo_1->EffectApplyAuraName[i] == spellInfo_2->EffectApplyAuraName[i] &&
+            spellInfo_1->EffectMiscValue[i] == spellInfo_2->EffectMiscValue[i] &&
+            IsPositiveSpell(spellInfo_1) == IsPositiveSpell(spellInfo_2))
+            bIdentical[i] = true;
+
+        // Skip already identical applies for failsafe check
+        // This should filter spells that match with 1 or more of the effects but have also SPELL_EFFECT_DUMMY (Example. Expose Armor)
+        if (bIdentical[i])
+            continue;
+
+        // Check for dummy spells. If there is dummy effect and compareable spell does not have effect it's considered identical
+        // Always skip first effect. There is 1187 spells with SPELL_EFFECT_DUMMY and SPELL_EFFECT_NONE
+        if ((spellInfo_1->Effect[i] == SPELL_EFFECT_DUMMY && !spellInfo_2->Effect[i] ||
+            spellInfo_2->Effect[i] == SPELL_EFFECT_DUMMY && !spellInfo_1->Effect[i]) && i != 0)
+            bIdentical[i] = true;
+    }
+
+    // If all were identical
+    if (bIdentical[0] && bIdentical[1] && bIdentical[2])
+        return true;
+
+    if (spellInfo_1->SpellFamilyName == SPELLFAMILY_GENERIC || spellInfo_2->SpellFamilyName == SPELLFAMILY_GENERIC)
         return false;
 
     if (spellInfo_1->SpellFamilyName != spellInfo_2->SpellFamilyName)
@@ -1918,6 +1962,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
         if (spellInfo_1->Effect[i] && spellInfo_1->Effect[i] != SPELL_EFFECT_DUMMY && spellInfo_1->EffectApplyAuraName[i] != SPELL_AURA_DUMMY)
             dummy_only = false;
     }
+
     if (dummy_only)
         return false;
 
