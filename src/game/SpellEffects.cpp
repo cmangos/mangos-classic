@@ -3489,9 +3489,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    uint32 spells[3] = {26206, 26207, 45036};
+                    uint32 spells[2] = {26206, 26207};
 
-                    m_caster->CastSpell(unitTarget, spells[urand(0, 2)], true);
+                    m_caster->CastSpell(unitTarget, spells[urand(0, 1)], true);
                     return;
                 }
                 case 26275:                                 // PX-238 Winter Wondervolt TRAP
