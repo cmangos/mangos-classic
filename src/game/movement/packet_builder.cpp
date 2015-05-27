@@ -73,19 +73,31 @@ namespace Movement
 
     void WriteLinearPath(const Spline<int32>& spline, ByteBuffer& data)
     {
-        uint32 last_idx = spline.getPointCount() - 3;
+        uint32 pointCount = spline.getPointCount() - 3;
+        uint32 last_idx = pointCount;
         const Vector3* real_path = &spline.getPoint(1);
         Vector3 destination = real_path[last_idx];
 
+        size_t lastIndexPos = data.wpos();
         data << last_idx;
         data << destination;
         if (last_idx > 1)
         {
             Vector3 offset;
             // first and last points already appended
-            for (uint32 i = 1; i < last_idx; ++i)
+            for (uint32 i = 1; i < pointCount; ++i)
             {
                 offset = destination - real_path[i];
+                // TODO: check if there is a better way to handle this like reworking path formatting to avoid generating such zero offset
+                // [-CLASSIC] The client freezes or crashes when it gets a zero offset.
+                // If the offset would be rounded to zero, skip it.
+                if (fabs(offset.x) < 0.25 && fabs(offset.y) < 0.25 && fabs(offset.z) < 0.25)
+                {
+                    // Remove 1 from the counter that will be sent to the client.
+                    last_idx--;
+                    data.put(lastIndexPos, last_idx);
+                    continue;
+                }
                 data.appendPackXYZ(offset.x, offset.y, offset.z);
             }
         }
