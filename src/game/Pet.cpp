@@ -52,7 +52,8 @@ Pet::Pet(PetType type) :
     m_TrainingPoints(0), m_resetTalentsCost(0), m_resetTalentsTime(0),
     m_removed(false), m_happinessTimer(7500), m_loyaltyTimer(12000), m_petType(type), m_duration(0),
     m_loyaltyPoints(0), m_bonusdamage(0), m_auraUpdateMask(0), m_loading(false),
-    m_petModeFlags(PET_MODE_DEFAULT)
+    m_petModeFlags(PET_MODE_DEFAULT),
+    m_stayPosSet(false), m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0)
 {
     m_name = "Pet";
     m_regenTimer = 4000;
