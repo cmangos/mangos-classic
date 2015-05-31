@@ -1588,36 +1588,40 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 
     if (damageInfo->TargetState == VICTIMSTATE_PARRY)
     {
-        // Get attack timers
-        float offtime  = float(pVictim->getAttackTimer(OFF_ATTACK));
-        float basetime = float(pVictim->getAttackTimer(BASE_ATTACK));
-        // Reduce attack time
-        if (pVictim->haveOffhandWeapon() && offtime < basetime)
+        if (pVictim->GetTypeId() != TYPEID_UNIT ||
+            !(((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN))
         {
-            float percent20 = pVictim->GetAttackTime(OFF_ATTACK) * 0.20f;
-            float percent60 = 3.0f * percent20;
-            if (offtime > percent20 && offtime <= percent60)
+            // Get attack timers
+            float offtime = float(pVictim->getAttackTimer(OFF_ATTACK));
+            float basetime = float(pVictim->getAttackTimer(BASE_ATTACK));
+            // Reduce attack time
+            if (pVictim->haveOffhandWeapon() && offtime < basetime)
             {
-                pVictim->setAttackTimer(OFF_ATTACK, uint32(percent20));
+                float percent20 = pVictim->GetAttackTime(OFF_ATTACK) * 0.20f;
+                float percent60 = 3.0f * percent20;
+                if (offtime > percent20 && offtime <= percent60)
+                {
+                    pVictim->setAttackTimer(OFF_ATTACK, uint32(percent20));
+                }
+                else if (offtime > percent60)
+                {
+                    offtime -= 2.0f * percent20;
+                    pVictim->setAttackTimer(OFF_ATTACK, uint32(offtime));
+                }
             }
-            else if (offtime > percent60)
+            else
             {
-                offtime -= 2.0f * percent20;
-                pVictim->setAttackTimer(OFF_ATTACK, uint32(offtime));
-            }
-        }
-        else
-        {
-            float percent20 = pVictim->GetAttackTime(BASE_ATTACK) * 0.20f;
-            float percent60 = 3.0f * percent20;
-            if (basetime > percent20 && basetime <= percent60)
-            {
-                pVictim->setAttackTimer(BASE_ATTACK, uint32(percent20));
-            }
-            else if (basetime > percent60)
-            {
-                basetime -= 2.0f * percent20;
-                pVictim->setAttackTimer(BASE_ATTACK, uint32(basetime));
+                float percent20 = pVictim->GetAttackTime(BASE_ATTACK) * 0.20f;
+                float percent60 = 3.0f * percent20;
+                if (basetime > percent20 && basetime <= percent60)
+                {
+                    pVictim->setAttackTimer(BASE_ATTACK, uint32(percent20));
+                }
+                else if (basetime > percent60)
+                {
+                    basetime -= 2.0f * percent20;
+                    pVictim->setAttackTimer(BASE_ATTACK, uint32(basetime));
+                }
             }
         }
     }
