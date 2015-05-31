@@ -6652,9 +6652,9 @@ void Player::ApplyItemEquipSpell(Item* item, bool apply, bool form_change)
         else
         {
             // at un-apply remove all spells (not only at-apply, so any at-use active affects from item and etc)
-            // except with at-use with negative charges, so allow consuming item spells (including with extra flag that prevent consume really)
+            // except on form change and with at-use with negative charges, so allow consuming item spells (including with extra flag that prevent consume really)
             // applied to player after item remove from equip slot
-            if (spellData.SpellTrigger == ITEM_SPELLTRIGGER_ON_USE && spellData.SpellCharges < 0)
+            if (spellData.SpellTrigger == ITEM_SPELLTRIGGER_ON_USE && (form_change || spellData.SpellCharges < 0))
                 continue;
         }
 
