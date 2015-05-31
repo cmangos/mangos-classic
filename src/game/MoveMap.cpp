@@ -19,6 +19,7 @@
 #include "GridMap.h"
 #include "Log.h"
 #include "World.h"
+#include "Creature.h"
 
 #include "MoveMap.h"
 #include "MoveMapSharedDefines.h"
@@ -59,10 +60,30 @@ namespace MMAP
         delete[] mapList;
     }
 
-    bool MMapFactory::IsPathfindingEnabled(uint32 mapId)
+    bool MMapFactory::IsPathfindingEnabled(uint32 mapId, const Unit* unit = NULL)
     {
-        return sWorld.getConfig(CONFIG_BOOL_MMAP_ENABLED)
-               && g_mmapDisabledIds->find(mapId) == g_mmapDisabledIds->end();
+        if (!sWorld.getConfig(CONFIG_BOOL_MMAP_ENABLED))
+            return false;
+
+        if (unit)
+        {
+            // always use mmaps for players
+            if (unit->GetTypeId() == TYPEID_PLAYER)
+                return true;
+
+            if (IsPathfindingForceDisabled(unit))
+                return false;
+
+            if (IsPathfindingForceEnabled(unit))
+                return true;
+
+            // always use mmaps for pets of players (can still be disabled by extra-flag for pet creature)
+            if (unit->GetTypeId() == TYPEID_UNIT && ((Creature*)unit)->IsPet() && unit->GetOwner() &&
+                unit->GetOwner()->GetTypeId() == TYPEID_PLAYER)
+                return true;
+        }
+
+        return g_mmapDisabledIds->find(mapId) == g_mmapDisabledIds->end();
     }
 
     void MMapFactory::clear()
@@ -72,6 +93,34 @@ namespace MMAP
 
         g_mmapDisabledIds = NULL;
         g_MMapManager = NULL;
+    }
+
+    bool MMapFactory::IsPathfindingForceEnabled(const Unit* unit)
+    {
+        if (const Creature* pCreature = dynamic_cast<const Creature*>(unit))
+        {
+            if (const CreatureInfo* pInfo = pCreature->GetCreatureInfo())
+            {
+                if (pInfo->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool MMapFactory::IsPathfindingForceDisabled(const Unit* unit)
+    {
+        if (const Creature* pCreature = dynamic_cast<const Creature*>(unit))
+        {
+            if (const CreatureInfo* pInfo = pCreature->GetCreatureInfo())
+            {
+                if (pInfo->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     // ######################## MMapManager ########################
