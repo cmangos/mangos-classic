@@ -878,7 +878,10 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
         ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
 
         if (m_Session)
+        {
             m_Session->SetLatency(latency);
+            m_Session->ResetClientTimeDelay();
+        }
         else
         {
             sLog.outError("WorldSocket::HandlePing: peer sent CMSG_PING, "
