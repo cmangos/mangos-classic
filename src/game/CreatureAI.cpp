@@ -137,8 +137,6 @@ bool CreatureAI::DoMeleeAttackIfReady()
 
 void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=false*/)
 {
-    m_isCombatMovement = enable;
-
     if (enable)
         m_creature->clearUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
     else
@@ -155,14 +153,18 @@ void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=fals
 
 void CreatureAI::HandleMovementOnAttackStart(Unit* victim)
 {
-    MotionMaster* creatureMotion = m_creature->GetMotionMaster();
-    if (m_isCombatMovement)
-        creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle);
-    // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
-    else if (creatureMotion->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || creatureMotion->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
+    if (!m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
     {
-        creatureMotion->MoveIdle();
-        m_creature->StopMoving();
+        MotionMaster* creatureMotion = m_creature->GetMotionMaster();
+
+        if (!m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))
+            creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle);
+        // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
+        else if (creatureMotion->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || creatureMotion->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
+        {
+            creatureMotion->MoveIdle();
+            m_creature->StopMoving();
+        }
     }
 }
 

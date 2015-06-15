@@ -55,7 +55,7 @@ int CreatureEventAI::Permissible(const Creature* creature)
 void CreatureEventAI::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage(LANG_NPC_EVENTAI_PHASE, (uint32)m_Phase);
-    reader.PSendSysMessage(LANG_NPC_EVENTAI_MOVE, reader.GetOnOffStr(m_isCombatMovement));
+    reader.PSendSysMessage(LANG_NPC_EVENTAI_MOVE, reader.GetOnOffStr(m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT)));
     reader.PSendSysMessage(LANG_NPC_EVENTAI_COMBAT, reader.GetOnOffStr(m_MeleeEnabled));
 
     if (sLog.HasLogFilter(LOG_FILTER_EVENT_AI_DEV))         // Give some more details if in EventAI Dev Mode
@@ -611,26 +611,33 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         }
         case ACTION_T_CAST:
         {
-            uint32 selectFlags = 0;
-            uint32 spellId = 0;
-            if (!(action.cast.castFlags & (CAST_TRIGGERED | CAST_FORCE_CAST | CAST_FORCE_TARGET_SELF)))
+            //we should not cast if unit is unable to react due to unit state
+            if (!m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
             {
-                spellId = action.cast.spellId;
-                selectFlags = SELECT_FLAG_IN_LOS;
-            }
+                uint32 selectFlags = 0;
+                uint32 spellId = 0;
+                if (!(action.cast.castFlags & (CAST_TRIGGERED | CAST_FORCE_CAST | CAST_FORCE_TARGET_SELF)))
+                {
+                    spellId = action.cast.spellId;
+                    selectFlags = SELECT_FLAG_IN_LOS;
+                }
 
-            Unit* target = GetTargetByType(action.cast.target, pActionInvoker, pAIEventSender, reportTargetError, spellId, selectFlags);
-            if (!target)
-            {
-                if (reportTargetError)
-                    sLog.outErrorEventAI("nullptr target for ACTION_T_CAST creature entry %u casting spell id %u", m_creature->GetEntry(), action.cast.spellId);
-                return;
-            }
+                Unit* target = GetTargetByType(action.cast.target, pActionInvoker, pAIEventSender, reportTargetError, spellId, selectFlags);
+                if (!target)
+                {
+                    // If no target was found we should engage chase movement to our victim if one exists
+                    if (m_creature->getVictim())
+                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
 
-            CanCastResult castResult = DoCastSpellIfCan(target, action.cast.spellId, action.cast.castFlags);
+                    if (reportTargetError)
+                        sLog.outErrorEventAI("nullptr target for ACTION_T_CAST creature entry %u casting spell id %u", m_creature->GetEntry(), action.cast.spellId);
+                    return;
+                }
 
-            switch (castResult)
-            {
+                CanCastResult castResult = DoCastSpellIfCan(target, action.cast.spellId, action.cast.castFlags);
+
+                switch (castResult)
+                {
                 case CAST_OK:
                 {
                     if (m_DynamicMovement)
@@ -659,11 +666,8 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                             {
                             case CHASE_MOTION_TYPE:
                             case FOLLOW_MOTION_TYPE:
-                                m_attackDistance = 0.0f;
-                                m_attackAngle = 0.0f;
-
                                 m_creature->GetMotionMaster()->Clear(false);
-                                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle);
+                                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
                                 break;
                             default:
                                 break;
@@ -678,8 +682,8 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 }
                 default:
                     break;
+                }
             }
-
             break;
         }
         case ACTION_T_SUMMON:
@@ -763,17 +767,21 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_MeleeEnabled = action.auto_attack.state != 0;
             break;
         case ACTION_T_COMBAT_MOVEMENT:
+        {
+            bool hasCombatMovement = !m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
+
             // ignore no affect case
-            if (m_isCombatMovement == (action.combat_movement.state != 0) || m_creature->IsNonMeleeSpellCasted(false))
+            if (hasCombatMovement == (action.combat_movement.state != 0) || m_creature->IsNonMeleeSpellCasted(false))
                 return;
 
             SetCombatMovement(action.combat_movement.state != 0, true);
 
-            if (m_isCombatMovement && action.combat_movement.melee && m_creature->isInCombat() && m_creature->getVictim())
+            if (hasCombatMovement && action.combat_movement.melee && m_creature->isInCombat() && m_creature->getVictim())
                 m_creature->SendMeleeAttackStart(m_creature->getVictim());
             else if (action.combat_movement.melee && m_creature->isInCombat() && m_creature->getVictim())
                 m_creature->SendMeleeAttackStop(m_creature->getVictim());
             break;
+        }
         case ACTION_T_SET_PHASE:
             m_Phase = action.set_phase.phase;
             DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "CreatureEventAI: ACTION_T_SET_PHASE - script %u for %s, phase is now %u", EventId, m_creature->GetGuidStr().c_str(), m_Phase);
@@ -832,7 +840,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_attackDistance = (float)action.ranged_movement.distance;
             m_attackAngle = action.ranged_movement.angle / 180.0f * M_PI_F;
 
-            if (m_isCombatMovement)
+            if (!m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT | UNIT_STAT_CAN_NOT_REACT))
             {
                 if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
                 {

@@ -371,10 +371,10 @@ void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket& recv_data)
     recv_data.hexlike();
 
     ObjectGuid old_mover_guid;
-    MovementInfo mi;
+    MovementInfo movementInfo;
 
     recv_data >> old_mover_guid;
-    recv_data >> mi;
+    recv_data >> movementInfo;
 
     if (_player->GetMover()->GetObjectGuid() == old_mover_guid)
     {
@@ -386,7 +386,7 @@ void WorldSession::HandleMoveNotActiveMoverOpcode(WorldPacket& recv_data)
         return;
     }
 
-    _player->m_movementInfo = mi;
+    _player->m_movementInfo = movementInfo;
 }
 
 void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvdata*/)

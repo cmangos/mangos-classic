@@ -1913,7 +1913,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
 
 bool Creature::CanInitiateAttack()
 {
-    if (hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_DIED))
+    if (hasUnitState(UNIT_STAT_CAN_NOT_REACT))
         return false;
 
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))

@@ -98,7 +98,6 @@ class MANGOS_DLL_SPEC CreatureAI
     public:
         explicit CreatureAI(Creature* creature) :
             m_creature(creature),
-            m_isCombatMovement(true),
             m_attackDistance(0.0f),
             m_attackAngle(0.0f)
         {}
@@ -309,7 +308,7 @@ class MANGOS_DLL_SPEC CreatureAI
 
         /// Set combat movement (on/off), also sets UNIT_STAT_NO_COMBAT_MOVEMENT
         void SetCombatMovement(bool enable, bool stopOrStartMovement = false);
-        bool IsCombatMovement() const { return m_isCombatMovement; }
+        bool IsCombatMovement() const { return m_creature && !m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT); }
 
         ///== Event Handling ===============================
 
@@ -346,8 +345,6 @@ class MANGOS_DLL_SPEC CreatureAI
         /// Pointer to the Creature controlled by this AI
         Creature* const m_creature;
 
-        /// Combat movement currently enabled
-        bool m_isCombatMovement;
         /// How should an enemy be chased
         float m_attackDistance;
         float m_attackAngle;
