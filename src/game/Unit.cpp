@@ -1239,7 +1239,9 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
 
     if (!this || !pVictim)
         return;
-    if (!this->isAlive() || !pVictim->isAlive())
+
+    // units which are not alive cannot deal damage except for dying creatures
+    if ((!this->isAlive() || !pVictim->isAlive()) && (this->GetTypeId() != TYPEID_UNIT && this->getDeathState() != DEAD))
         return;
 
     // Check spell crit chance
