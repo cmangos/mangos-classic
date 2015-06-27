@@ -34,32 +34,53 @@ bool DBCFileLoader::Load(const char* filename, const char* fmt)
     delete[] data;
 
     FILE* f = fopen(filename, "rb");
-    if (!f)return false;
+    if (!f)
+        return false;
 
     if (fread(&header, 4, 1, f) != 1)                       // Number of records
+    {
+        fclose(f);
         return false;
+    }
+
 
     EndianConvert(header);
-    if (header != 0x43424457)
-        return false;                                       //'WDBC'
+
+    if (header != 0x43424457)                               //'WDBC'
+    {
+        fclose(f);
+        return false;
+    }
 
     if (fread(&recordCount, 4, 1, f) != 1)                  // Number of records
+    {
+        fclose(f);
         return false;
+    }
 
     EndianConvert(recordCount);
 
     if (fread(&fieldCount, 4, 1, f) != 1)                   // Number of fields
+    {
+        fclose(f);
         return false;
+    }
 
     EndianConvert(fieldCount);
 
     if (fread(&recordSize, 4, 1, f) != 1)                   // Size of a record
+    {
+        fclose(f);
         return false;
+    }
 
     EndianConvert(recordSize);
 
     if (fread(&stringSize, 4, 1, f) != 1)                   // String size
+    {
+        fclose(f);
         return false;
+    }
 
     EndianConvert(stringSize);
 
@@ -78,7 +99,10 @@ bool DBCFileLoader::Load(const char* filename, const char* fmt)
     stringTable = data + recordSize * recordCount;
 
     if (fread(data, recordSize * recordCount + stringSize, 1, f) != 1)
+    {
+        fclose(f);
         return false;
+    }
 
     fclose(f);
     return true;
@@ -124,13 +148,13 @@ uint32 DBCFileLoader::GetFormatRecordSize(const char* format, int32* index_pos)
                 recordsize += sizeof(uint8);
                 break;
             case FT_LOGIC:
-                assert(false && "DBC files not have logic field type");
+                assert(false && "Attempted to load DBC files that do not have field types that match what is in the core. Check DBCfmt.h or your DBC files.");
                 break;
             case FT_NA:
             case FT_NA_BYTE:
                 break;
             default:
-                assert(false && "unknown format character");
+                assert(false && "Unknown field format character in DBCfmt.h");
                 break;
         }
     }
@@ -169,7 +193,8 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
         for (uint32 y = 0; y < recordCount; ++y)
         {
             uint32 ind = getRecord(y).getUInt(i);
-            if (ind > maxi)maxi = ind;
+            if (ind > maxi)
+                maxi = ind;
         }
 
         ++maxi;
@@ -214,18 +239,18 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
                     offset += sizeof(uint8);
                     break;
                 case FT_STRING:
-                    *((char**)(&dataTable[offset])) = NULL; // will be replaces non-empty or "" strings in AutoProduceStrings
+                    *((char**)(&dataTable[offset])) = NULL; // will replace non-empty or "" strings in AutoProduceStrings
                     offset += sizeof(char*);
                     break;
                 case FT_LOGIC:
-                    assert(false && "DBC files not have logic field type");
+                    assert(false && "Attempted to load DBC files that do not have field types that match what is in the core. Check DBCfmt.h or your DBC files.");
                     break;
                 case FT_NA:
                 case FT_NA_BYTE:
                 case FT_SORT:
                     break;
                 default:
-                    assert(false && "unknown format character");
+                    assert(false && "Unknown field format character in DBCfmt.h");
                     break;
             }
         }
@@ -273,14 +298,14 @@ char* DBCFileLoader::AutoProduceStrings(const char* format, char* dataTable)
                     break;
                 }
                 case FT_LOGIC:
-                    assert(false && "DBC files not have logic field type");
+                    assert(false && "Attempted to load DBC files that does not have field types that match what is in the core. Check DBCfmt.h or your DBC files.");
                     break;
                 case FT_NA:
                 case FT_NA_BYTE:
                 case FT_SORT:
                     break;
                 default:
-                    assert(false && "unknown format character");
+                    assert(false && "Unknown field format character in DBCfmt.h");
                     break;
             }
         }
