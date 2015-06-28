@@ -1197,14 +1197,6 @@ void GameObject::Use(Unit* user)
                     }
                 }
 
-                // possible quest objective for active quests
-                if (info->goober.questId && sObjectMgr.GetQuestTemplate(info->goober.questId))
-                {
-                    // Quest require to be active for GO using
-                    if (player->GetQuestStatus(info->goober.questId) != QUEST_STATUS_INCOMPLETE)
-                        break;
-                }
-
                 if (info->goober.eventId)
                 {
                     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Goober ScriptStart id %u for %s (Used by %s).", info->goober.eventId, GetGuidStr().c_str(), player->GetGuidStr().c_str());
