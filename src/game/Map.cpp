@@ -52,6 +52,9 @@ Map::~Map()
     if (m_persistentState)
         m_persistentState->SetUsedByMapState(NULL);         // field pointer can be deleted after this
 
+    if (Instanceable())
+        sEluna->FreeInstanceId(GetInstanceId());
+
     delete i_data;
     i_data = NULL;
 
@@ -1170,23 +1173,28 @@ void Map::CreateInstanceData(bool load)
     if (i_data != NULL)
         return;
 
-    if (Instanceable())
-    {
-        if (InstanceTemplate const* mInstance = ObjectMgr::GetInstanceTemplate(GetId()))
-            i_script_id = mInstance->script_id;
-    }
-    else
-    {
-        if (WorldTemplate const* mInstance = ObjectMgr::GetWorldTemplate(GetId()))
-            i_script_id = mInstance->script_id;
-    }
+    i_data = sEluna->GetInstanceData(this);
 
-    if (!i_script_id)
-        return;
-
-    i_data = sScriptMgr.CreateInstanceData(this);
     if (!i_data)
-        return;
+    {
+        if (Instanceable())
+        {
+            if (InstanceTemplate const* mInstance = ObjectMgr::GetInstanceTemplate(GetId()))
+                i_script_id = mInstance->script_id;
+        }
+        else
+        {
+            if (WorldTemplate const* mInstance = ObjectMgr::GetWorldTemplate(GetId()))
+                i_script_id = mInstance->script_id;
+        }
+
+        if (!i_script_id)
+            return;
+
+        i_data = sScriptMgr.CreateInstanceData(this);
+        if (!i_data)
+            return;
+    }
 
     if (load)
     {
