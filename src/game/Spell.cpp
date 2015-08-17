@@ -4674,6 +4674,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                             !((Player*)m_caster)->CanUseBattleGroundObject())
                         return SPELL_FAILED_TRY_AGAIN;
 
+					if (((Player*)m_caster)->GetDistance(go->GetPositionX(), go->GetPositionY(), go->GetPositionZ()) > 5)
+						return SPELL_FAILED_OUT_OF_RANGE;
+
                     lockId = go->GetGOInfo()->GetLockId();
                     if (!lockId)
                         return SPELL_FAILED_ALREADY_OPEN;
