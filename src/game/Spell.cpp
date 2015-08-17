@@ -2685,6 +2685,19 @@ void Spell::cast(bool skipCheck)
                 AddPrecastSpell(25771);                     // Forbearance
             break;
         }
+		case SPELLFAMILY_DRUID:
+		{
+			switch (m_spellInfo->Id)
+			{
+			case 24866:
+				if (!m_caster->IsInFeralForm())
+					m_spellState = SPELL_STATE_FINISHED;
+				break;
+			default:
+				break;
+			}
+			break;
+		}
         case SPELLFAMILY_WARRIOR:
             break;
         case SPELLFAMILY_PRIEST:
