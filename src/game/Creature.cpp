@@ -436,13 +436,26 @@ uint32 Creature::ChooseDisplayId(const CreatureInfo* cinfo, const CreatureData* 
     // use defaults from the template
     uint32 display_id = 0;
 
+    // The follow decision tree needs to be updated if MAX_CREATURE_MODEL is changed.
+    static_assert(MAX_CREATURE_MODEL == 4, "Need to update model selection code for new or removed model fields");
+
     // model selected here may be replaced with other_gender using own function
     if (!cinfo->ModelId[1])
     {
         display_id = cinfo->ModelId[0];
     }
-    else
+    else if (!cinfo->ModelId[2])
+    {
         display_id = cinfo->ModelId[urand(0, 1)];
+    }
+    else if (!cinfo->ModelId[3])
+    {
+        display_id = cinfo->ModelId[urand(0, 2)];
+    }
+    else
+    {
+        display_id = cinfo->ModelId[urand(0, 3)];
+    }
 
     // fail safe, we use creature entry 1 and make error
     if (!display_id)
@@ -1084,7 +1097,11 @@ void Creature::SaveToDB(uint32 mapid)
     CreatureInfo const* cinfo = GetCreatureInfo();
     if (cinfo)
     {
-        if (displayId != cinfo->ModelId[0] && displayId != cinfo->ModelId[1])
+        // The following if-else assumes that there are 4 model fields and needs updating if this is changed.
+        static_assert(MAX_CREATURE_MODEL == 4, "Need to update custom model check for new/removed model fields.");
+
+        if (displayId != cinfo->ModelId[0] && displayId != cinfo->ModelId[1] &&
+            displayId != cinfo->ModelId[2] && displayId != cinfo->ModelId[3])
         {
             for (int i = 0; i < MAX_CREATURE_MODEL && displayId; ++i)
                 if (cinfo->ModelId[i])

@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2621_s2263_12823_04_mangos_creature` bit(1) DEFAULT NULL
+  `required_z2674_sxxxx_xxxxx_01_mangos_creature_template` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -1184,6 +1184,8 @@ CREATE TABLE `creature_template` (
   `MaxLevel` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `ModelId1` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ModelId2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `ModelId3` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `ModelId4` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `FactionAlliance` smallint(5) unsigned NOT NULL DEFAULT '0',
   `FactionHorde` smallint(5) unsigned NOT NULL DEFAULT '0',
   `Scale` float NOT NULL DEFAULT '1',
