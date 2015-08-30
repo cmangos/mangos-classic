@@ -69,7 +69,7 @@ class MANGOS_DLL_SPEC MySqlPreparedStatement : public SqlPreparedStatement
 class MANGOS_DLL_SPEC MySQLConnection : public SqlConnection
 {
     public:
-        MySQLConnection(Database& db) : SqlConnection(db), mMysql(NULL) {}
+        MySQLConnection(Database& db) : SqlConnection(db), mMysql(nullptr) {}
         ~MySQLConnection();
 
         //! Initializes Mysql and connects to a server.

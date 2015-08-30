@@ -117,7 +117,7 @@ class MANGOS_DLL_SPEC ViewPoint
 
         void Event_RemovedFromWorld()
         {
-            m_grid = NULL;
+            m_grid = nullptr;
             CameraCall(&Camera::Event_RemovedFromWorld);
         }
 

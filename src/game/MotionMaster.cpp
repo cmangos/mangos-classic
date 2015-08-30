@@ -53,7 +53,7 @@ void MotionMaster::Initialize()
     if (m_owner->GetTypeId() == TYPEID_UNIT && !m_owner->hasUnitState(UNIT_STAT_CONTROLLED))
     {
         MovementGenerator* movement = FactorySelector::selectMovementGenerator((Creature*)m_owner);
-        push(movement == NULL ? &si_idleMovement : movement);
+        push(movement == nullptr ? &si_idleMovement : movement);
         top()->Initialize(*m_owner);
         if (top()->GetMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
             (static_cast<WaypointMovementGenerator<Creature>*>(top()))->InitializeWaypointPath(*((Creature*)(m_owner)), 0, PATH_NO_PATH, 0, 0);
@@ -100,7 +100,7 @@ void MotionMaster::UpdateMotion(uint32 diff)
         }
 
         delete m_expList;
-        m_expList = NULL;
+        m_expList = nullptr;
 
         if (empty())
             Initialize();
@@ -174,7 +174,7 @@ void MotionMaster::DirectExpire(bool reset)
     }
 
     // Store current top MMGen, as Finalize might push a new MMGen
-    MovementGenerator* nowTop = empty() ? NULL : top();
+    MovementGenerator* nowTop = empty() ? nullptr : top();
     // it can add another motions instead
     curr->Finalize(*m_owner);
 

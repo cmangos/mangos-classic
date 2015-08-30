@@ -203,7 +203,7 @@ void WaypointManager::Load()
                 ++total_behaviors;
             }
             else
-                node.behavior = NULL;
+                node.behavior = nullptr;
         }
         while (result->NextRow());
 
@@ -356,7 +356,7 @@ void WaypointManager::Load()
                 ++total_behaviors;
             }
             else
-                node.behavior   = NULL;
+                node.behavior   = nullptr;
         }
         while (result->NextRow());
 
@@ -412,7 +412,7 @@ bool WaypointManager::AddExternalNode(uint32 entry, int32 pathId, uint32 pointId
         return false;
     }
 
-    m_externalPathTemplateMap[(entry << 8) + pathId][pointId] = WaypointNode(x, y, z, o, waittime, 0, NULL);
+    m_externalPathTemplateMap[(entry << 8) + pathId][pointId] = WaypointNode(x, y, z, o, waittime, 0, nullptr);
     return true;
 }
 
@@ -421,7 +421,7 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
 {
     // Support only normal movement tables
     if (wpDest != PATH_FROM_GUID && wpDest != PATH_FROM_ENTRY)
-        return NULL;
+        return nullptr;
 
     // Prepare information
     char const* const table     = wpDest == PATH_FROM_GUID ? "creature_movement" : "creature_movement_template";
@@ -437,7 +437,7 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
         pointId = 1;
 
     uint32 nextPoint = pointId;
-    WaypointNode temp = WaypointNode(x, y, z, 100, 0, 0, NULL);
+    WaypointNode temp = WaypointNode(x, y, z, 100, 0, 0, nullptr);
     WaypointPath::iterator find = path.find(nextPoint);
     if (find != path.end())                                 // Point already exists
     {

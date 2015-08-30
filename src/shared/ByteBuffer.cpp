@@ -27,7 +27,7 @@ void ByteBufferException::PrintPosError() const
     ACE_Stack_Trace trace;
     traceStr = trace.c_str();
 #else
-    traceStr = NULL;
+    traceStr = nullptr;
 #endif
 
     sLog.outError(

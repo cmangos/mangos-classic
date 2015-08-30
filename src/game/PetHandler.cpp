@@ -169,7 +169,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         case ACT_PASSIVE:                                   // 0x01
         case ACT_ENABLED:                                   // 0xC1    spell
         {
-            Unit* unit_target = NULL;
+            Unit* unit_target = nullptr;
             if (targetGuid)
                 unit_target = _player->GetMap()->GetUnit(targetGuid);
 
@@ -490,7 +490,7 @@ void WorldSession::HandlePetRename(WorldPacket& recv_data)
     CharacterDatabase.PExecute("UPDATE character_pet SET name = '%s', renamed = '1' WHERE owner = '%u' AND id = '%u'", name.c_str(), _player->GetGUIDLow(), pet->GetCharmInfo()->GetPetNumber());
     CharacterDatabase.CommitTransaction();
 
-    pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(NULL)));
+    pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
 }
 
 void WorldSession::HandlePetAbandon(WorldPacket& recv_data)
@@ -570,7 +570,7 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
     // relearn pet passives
     pet->LearnPetPassives();
 
-    pet->m_resetTalentsTime = time(NULL);
+    pet->m_resetTalentsTime = time(nullptr);
     pet->m_resetTalentsCost = cost;
     GetPlayer()->ModifyMoney(-(int32)cost);
 
@@ -656,7 +656,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     Spell* spell = new Spell(pet, spellInfo, false);
     spell->m_targets = targets;
 
-    SpellCastResult result = spell->CheckPetCast(NULL);
+    SpellCastResult result = spell->CheckPetCast(nullptr);
     if (result == SPELL_CAST_OK)
     {
         pet->AddCreatureSpellCooldown(spellid);

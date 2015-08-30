@@ -75,7 +75,7 @@ enum GroupUpdateFlags
     GROUP_UPDATE_FLAG_POSITION          = 0x00000100,       // uint16, uint16
     GROUP_UPDATE_FLAG_AURAS             = 0x00000200,       // uint32 mask, for each bit set uint16 spellid
     GROUP_UPDATE_FLAG_PET_GUID          = 0x00000400,       // uint64 pet guid
-    GROUP_UPDATE_FLAG_PET_NAME          = 0x00000800,       // pet name, NULL terminated string
+    GROUP_UPDATE_FLAG_PET_NAME          = 0x00000800,       // pet name, nullptr terminated string
     GROUP_UPDATE_FLAG_PET_MODEL_ID      = 0x00001000,       // uint16, model id
     GROUP_UPDATE_FLAG_PET_CUR_HP        = 0x00002000,       // uint16 pet cur health
     GROUP_UPDATE_FLAG_PET_MAX_HP        = 0x00004000,       // uint16 pet max health
@@ -98,7 +98,7 @@ struct InstanceGroupBind
     bool perm;
     /* permanent InstanceGroupBinds exist iff the leader has a permanent
        PlayerInstanceBind for the same instance. */
-    InstanceGroupBind() : state(NULL), perm(false) {}
+    InstanceGroupBind() : state(nullptr), perm(false) {}
 };
 
 /** request member stats checken **/
@@ -142,7 +142,7 @@ class MANGOS_DLL_SPEC Group
         uint32 GetId() const { return m_Id; }
         bool IsFull() const { return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE); }
         bool isRaidGroup() const { return m_groupType == GROUPTYPE_RAID; }
-        bool isBGGroup()   const { return m_bgGroup != NULL; }
+        bool isBGGroup()   const { return m_bgGroup != nullptr; }
         bool IsCreated()   const { return GetMembersCount() > 0; }
         ObjectGuid const& GetLeaderGuid() const { return m_leaderGuid; }
         const char*       GetLeaderName() const { return m_leaderName.c_str(); }
@@ -180,7 +180,7 @@ class MANGOS_DLL_SPEC Group
         GroupReference* GetFirstMember() { return m_memberMgr.getFirst(); }
         GroupReference const* GetFirstMember() const { return m_memberMgr.getFirst(); }
         uint32 GetMembersCount() const { return m_memberSlots.size(); }
-        void GetDataForXPAtKill(Unit const* victim, uint32& count, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level, Player* additional = NULL);
+        void GetDataForXPAtKill(Unit const* victim, uint32& count, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level, Player* additional = nullptr);
         uint8 GetMemberGroup(ObjectGuid guid) const
         {
             member_citerator mslot = _getMemberCSlot(guid);

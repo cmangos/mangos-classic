@@ -96,37 +96,37 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
 
         ~Log()
         {
-            if (logfile != NULL)
+            if (logfile != nullptr)
                 fclose(logfile);
-            logfile = NULL;
+            logfile = nullptr;
 
-            if (gmLogfile != NULL)
+            if (gmLogfile != nullptr)
                 fclose(gmLogfile);
-            gmLogfile = NULL;
+            gmLogfile = nullptr;
 
-            if (charLogfile != NULL)
+            if (charLogfile != nullptr)
                 fclose(charLogfile);
-            charLogfile = NULL;
+            charLogfile = nullptr;
 
-            if (dberLogfile != NULL)
+            if (dberLogfile != nullptr)
                 fclose(dberLogfile);
-            dberLogfile = NULL;
+            dberLogfile = nullptr;
 
-            if (eventAiErLogfile != NULL)
+            if (eventAiErLogfile != nullptr)
                 fclose(eventAiErLogfile);
-            eventAiErLogfile = NULL;
+            eventAiErLogfile = nullptr;
 
-            if (scriptErrLogFile != NULL)
+            if (scriptErrLogFile != nullptr)
                 fclose(scriptErrLogFile);
-            scriptErrLogFile = NULL;
+            scriptErrLogFile = nullptr;
 
-            if (raLogfile != NULL)
+            if (raLogfile != nullptr)
                 fclose(raLogfile);
-            raLogfile = NULL;
+            raLogfile = nullptr;
 
-            if (worldLogfile != NULL)
+            if (worldLogfile != nullptr)
                 fclose(worldLogfile);
-            worldLogfile = NULL;
+            worldLogfile = nullptr;
         }
     public:
         void Initialize();

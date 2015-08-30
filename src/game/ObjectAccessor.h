@@ -67,7 +67,7 @@ class HashMapHolder
         {
             ReadGuard guard(i_lock);
             typename MapType::iterator itr = m_objectMap.find(guid);
-            return (itr != m_objectMap.end()) ? itr->second : NULL;
+            return (itr != m_objectMap.end()) ? itr->second : nullptr;
         }
 
         static MapType& GetContainer() { return m_objectMap; }

@@ -128,7 +128,7 @@ ssize_t BufferedSocket::noblk_send(ACE_Message_Block& message_block)
 
 bool BufferedSocket::send(const char* buf, size_t len)
 {
-    if (buf == NULL || len == 0)
+    if (buf == nullptr || len == 0)
         return true;
 
     ACE_Data_Block db(

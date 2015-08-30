@@ -156,7 +156,7 @@ class CreatureLinkingHolder
         void AddMasterToHolder(Creature* pCreature);
 
         // Function to process actions for linked NPCs
-        void DoCreatureLinkingEvent(CreatureLinkingEvent eventType, Creature* pSource, Unit* pEnemy = NULL);
+        void DoCreatureLinkingEvent(CreatureLinkingEvent eventType, Creature* pSource, Unit* pEnemy = nullptr);
 
         // Function to check if a passive spawning condition is met
         bool CanSpawn(Creature* pCreature) const;

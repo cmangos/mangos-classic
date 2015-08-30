@@ -57,7 +57,7 @@ struct WaypointNode
     uint32 delay;
     uint32 script_id;                                       // Added may 2010. WaypointBehavior w/DB data should in time be removed.
     WaypointBehavior* behavior;
-    WaypointNode() : x(0.0f), y(0.0f), z(0.0f), orientation(0.0f), delay(0), script_id(0), behavior(NULL) {}
+    WaypointNode() : x(0.0f), y(0.0f), z(0.0f), orientation(0.0f), delay(0), script_id(0), behavior(nullptr) {}
     WaypointNode(float _x, float _y, float _z, float _o, uint32 _delay, uint32 _script_id, WaypointBehavior* _behavior)
         : x(_x), y(_y), z(_z), orientation(_o), delay(_delay), script_id(_script_id), behavior(_behavior) {}
 };
@@ -84,9 +84,9 @@ class WaypointManager
         //        Creators need to be sure that creature_movement_template is always valid for summons.
         //        Mob that can be summoned anywhere should not have creature_movement_template for example.
 
-        WaypointPath* GetDefaultPath(uint32 entry, uint32 lowGuid, WaypointPathOrigin* wpOrigin = NULL)
+        WaypointPath* GetDefaultPath(uint32 entry, uint32 lowGuid, WaypointPathOrigin* wpOrigin = nullptr)
         {
-            WaypointPath* path = NULL;
+            WaypointPath* path = nullptr;
             path = GetPath(lowGuid);
             if (path && wpOrigin)
                 *wpOrigin = PATH_FROM_GUID;
@@ -105,7 +105,7 @@ class WaypointManager
         // Helper function to get a path provided the required information
         WaypointPath* GetPathFromOrigin(uint32 entry, uint32 lowGuid, int32 pathId, WaypointPathOrigin wpOrigin)
         {
-            WaypointPathMap* wpMap = NULL;
+            WaypointPathMap* wpMap = nullptr;
             uint32 key = 0;
 
             switch (wpOrigin)
@@ -116,22 +116,22 @@ class WaypointManager
                     break;
                 case PATH_FROM_ENTRY:
                     if (pathId >= 0xFF || pathId < 0)
-                        return NULL;
+                        return nullptr;
                     key = (entry << 8) + pathId;
                     wpMap = &m_pathTemplateMap;
                     break;
                 case PATH_FROM_EXTERNAL:
                     if (pathId >= 0xFF || pathId < 0)
-                        return NULL;
+                        return nullptr;
                     key = (entry << 8) + pathId;
                     wpMap = &m_externalPathTemplateMap;
                     break;
                 case PATH_NO_PATH:
                 default:
-                    return NULL;
+                    return nullptr;
             }
             WaypointPathMap::iterator find = wpMap->find(key);
-            return find != wpMap->end() ? &find->second : NULL;
+            return find != wpMap->end() ? &find->second : nullptr;
         }
 
         void DeletePath(uint32 id);
@@ -171,13 +171,13 @@ class WaypointManager
         WaypointPath* GetPath(uint32 id)
         {
             WaypointPathMap::iterator itr = m_pathMap.find(id);
-            return itr != m_pathMap.end() ? &itr->second : NULL;
+            return itr != m_pathMap.end() ? &itr->second : nullptr;
         }
 
         WaypointPath* GetPathTemplate(uint32 entry)
         {
             WaypointPathMap::iterator itr = m_pathTemplateMap.find((entry << 8) /*+ pathId*/);
-            return itr != m_pathTemplateMap.end() ? &itr->second : NULL;
+            return itr != m_pathTemplateMap.end() ? &itr->second : nullptr;
         }
 
         void _clearPath(WaypointPath& path);

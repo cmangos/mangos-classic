@@ -51,7 +51,7 @@ void DynamicObject::RemoveFromWorld()
     ///- Remove the dynamicObject from the accessor
     if (IsInWorld())
     {
-        GetMap()->GetObjectsStore().erase<DynamicObject>(GetObjectGuid(), (DynamicObject*)NULL);
+        GetMap()->GetObjectsStore().erase<DynamicObject>(GetObjectGuid(), (DynamicObject*)nullptr);
         GetViewPoint().Event_RemovedFromWorld();
     }
 

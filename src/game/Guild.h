@@ -242,14 +242,14 @@ class Guild
         void BroadcastPacketToRank(WorldPacket* packet, uint32 rankId);
         void BroadcastPacket(WorldPacket* packet);
 
-        void BroadcastEvent(GuildEvents event, ObjectGuid guid, char const* str1 = NULL, char const* str2 = NULL, char const* str3 = NULL);
-        void BroadcastEvent(GuildEvents event, char const* str1 = NULL, char const* str2 = NULL, char const* str3 = NULL)
+        void BroadcastEvent(GuildEvents event, ObjectGuid guid, char const* str1 = nullptr, char const* str2 = nullptr, char const* str3 = nullptr);
+        void BroadcastEvent(GuildEvents event, char const* str1 = nullptr, char const* str2 = nullptr, char const* str3 = nullptr)
         {
             BroadcastEvent(event, ObjectGuid(), str1, str2, str3);
         }
 
         template<class Do>
-        void BroadcastWorker(Do& _do, Player* except = NULL)
+        void BroadcastWorker(Do& _do, Player* except = nullptr)
         {
             for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
                 if (Player* player = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
@@ -279,7 +279,7 @@ class Guild
         MemberSlot* GetMemberSlot(ObjectGuid guid)
         {
             MemberList::iterator itr = members.find(guid.GetCounter());
-            return itr != members.end() ? &itr->second : NULL;
+            return itr != members.end() ? &itr->second : nullptr;
         }
 
         MemberSlot* GetMemberSlot(const std::string& name)
@@ -288,10 +288,10 @@ class Guild
                 if (itr->second.Name == name)
                     return &itr->second;
 
-            return NULL;
+            return nullptr;
         }
 
-        void Roster(WorldSession* session = NULL);          // NULL = broadcast
+        void Roster(WorldSession* session = nullptr);          // nullptr = broadcast
         void Query(WorldSession* session);
 
         // Guild EventLog

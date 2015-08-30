@@ -24,11 +24,11 @@ inline LPTSTR ErrorMessage(DWORD dw)
     FormatMessage(
         FORMAT_MESSAGE_ALLOCATE_BUFFER |
         FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL,
+        nullptr,
         dw,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
         (LPTSTR) &lpMsgBuf,
-        0, NULL);
+        0, nullptr);
     return (LPTSTR)lpMsgBuf;
 }
 
@@ -79,7 +79,7 @@ LONG WINAPI WheatyExceptionReport::WheatyUnhandledExceptionFilter(
 
     TCHAR crash_folder_path[MAX_PATH];
     sprintf(crash_folder_path, "%s\\%s", module_folder_name, CrashFolder);
-    if (!CreateDirectory(crash_folder_path, NULL))
+    if (!CreateDirectory(crash_folder_path, nullptr))
     {
         if (GetLastError() != ERROR_ALREADY_EXISTS)
             return 0;
@@ -127,7 +127,7 @@ BOOL WheatyExceptionReport::_GetProcessorName(TCHAR* sProcessorName, DWORD maxco
         return FALSE;
     TCHAR szTmp[2048];
     DWORD cntBytes = sizeof(szTmp);
-    lRet = ::RegQueryValueEx(hKey, _T("ProcessorNameString"), NULL, NULL,
+    lRet = ::RegQueryValueEx(hKey, _T("ProcessorNameString"), nullptr, nullptr,
                              (LPBYTE)szTmp, &cntBytes);
     if (lRet != ERROR_SUCCESS)
         return FALSE;
@@ -372,7 +372,7 @@ void WheatyExceptionReport::GenerateExceptionReport(
 
     CONTEXT trashableContext = *pCtx;
 
-    WriteStackDetails(&trashableContext, false, NULL);
+    WriteStackDetails(&trashableContext, false, nullptr);
     printTracesForAllThreads();
 
 //    #ifdef _M_IX86                                        // X86 Only!
@@ -381,7 +381,7 @@ void WheatyExceptionReport::GenerateExceptionReport(
     _tprintf(_T("Local Variables And Parameters\r\n"));
 
     trashableContext = *pCtx;
-    WriteStackDetails(&trashableContext, true, NULL);
+    WriteStackDetails(&trashableContext, true, nullptr);
 
     _tprintf(_T("========================\r\n"));
     _tprintf(_T("Global Variables\r\n"));
@@ -553,7 +553,7 @@ void WheatyExceptionReport::WriteStackDetails(
         // Get the next stack frame
         if (! StackWalk64(dwMachineType,
                           m_hProcess,
-                          pThreadHandle != NULL ? pThreadHandle : GetCurrentThread(),
+                          pThreadHandle != nullptr ? pThreadHandle : GetCurrentThread(),
                           &sf,
                           pContext,
                           0,

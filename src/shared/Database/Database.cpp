@@ -49,12 +49,12 @@ SqlPreparedStatement* SqlConnection::GetStmt(uint32 nIndex)
 {
     // resize stmt container
     if (m_holder.size() <= nIndex)
-        m_holder.resize(nIndex + 1, NULL);
+        m_holder.resize(nIndex + 1, nullptr);
 
-    SqlPreparedStatement* pStmt = NULL;
+    SqlPreparedStatement* pStmt = nullptr;
 
     // create stmt if needed
-    if (m_holder[nIndex] == NULL)
+    if (m_holder[nIndex] == nullptr)
     {
         // obtain SQL request string
         std::string fmt = m_db.GetStmtString(nIndex);
@@ -65,7 +65,7 @@ SqlPreparedStatement* SqlConnection::GetStmt(uint32 nIndex)
         if (!pStmt->prepare())
         {
             MANGOS_ASSERT(false && "Unable to prepare SQL statement");
-            return NULL;
+            return nullptr;
         }
 
         // save statement in internal registry
@@ -151,8 +151,8 @@ void Database::StopServer()
     delete m_pResultQueue;
     delete m_pAsyncConn;
 
-    m_pResultQueue = NULL;
-    m_pAsyncConn = NULL;
+    m_pResultQueue = nullptr;
+    m_pAsyncConn = nullptr;
 
     for (size_t i = 0; i < m_pQueryConnections.size(); ++i)
         delete m_pQueryConnections[i];
@@ -182,8 +182,8 @@ void Database::HaltDelayThread()
     m_threadBody->Stop();                                   // Stop event
     m_delayThread->wait();                                  // Wait for flush to DB
     delete m_delayThread;                                   // This also deletes m_threadBody
-    m_delayThread = NULL;
-    m_threadBody = NULL;
+    m_delayThread = nullptr;
+    m_threadBody = nullptr;
 }
 
 void Database::ThreadStart()
@@ -286,7 +286,7 @@ bool Database::PExecuteLog(const char* format, ...)
 
 QueryResult* Database::PQuery(const char* format, ...)
 {
-    if (!format) return NULL;
+    if (!format) return nullptr;
 
     va_list ap;
     char szQuery [MAX_QUERY_LEN];
@@ -297,7 +297,7 @@ QueryResult* Database::PQuery(const char* format, ...)
     if (res == -1)
     {
         sLog.outError("SQL Query truncated (and not execute) for format: %s", format);
-        return NULL;
+        return nullptr;
     }
 
     return Query(szQuery);
@@ -305,7 +305,7 @@ QueryResult* Database::PQuery(const char* format, ...)
 
 QueryNamedResult* Database::PQueryNamed(const char* format, ...)
 {
-    if (!format) return NULL;
+    if (!format) return nullptr;
 
     va_list ap;
     char szQuery [MAX_QUERY_LEN];
@@ -316,7 +316,7 @@ QueryNamedResult* Database::PQueryNamed(const char* format, ...)
     if (res == -1)
     {
         sLog.outError("SQL Query truncated (and not execute) for format: %s", format);
-        return NULL;
+        return nullptr;
     }
 
     return QueryNamed(szQuery);
@@ -628,12 +628,12 @@ SqlTransaction* Database::TransHelper::init()
 SqlTransaction* Database::TransHelper::detach()
 {
     SqlTransaction* pRes = m_pTrans;
-    m_pTrans = NULL;
+    m_pTrans = nullptr;
     return pRes;
 }
 
 void Database::TransHelper::reset()
 {
     delete m_pTrans;
-    m_pTrans = NULL;
+    m_pTrans = nullptr;
 }

@@ -91,7 +91,7 @@ class FreezeDetectorRunnable : public ACE_Based::Runnable
                 else if (WorldTimer::getMSTimeDiff(w_lastchange, curtime) > _delaytime)
                 {
                     sLog.outError("World Thread hangs, kicking out server!");
-                    *((uint32 volatile*)NULL) = 0;          // bang crash
+                    *((uint32 volatile*)nullptr) = 0;          // bang crash
                 }
             }
             sLog.outString("Anti-freeze thread exiting without problems.");
@@ -223,7 +223,7 @@ int Master::Run()
         LoginDatabase.DirectPExecute("UPDATE realmlist SET realmflags = realmflags & ~(%u), population = 0, realmbuilds = '%s'  WHERE id = '%u'", REALM_FLAG_OFFLINE, builds.c_str(), realmID);
     }
 
-    ACE_Based::Thread* cliThread = NULL;
+    ACE_Based::Thread* cliThread = nullptr;
 
 #ifdef WIN32
     if (sConfig.GetBoolDefault("Console.Enable", true) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
@@ -235,7 +235,7 @@ int Master::Run()
         cliThread = new ACE_Based::Thread(new CliRunnable);
     }
 
-    ACE_Based::Thread* rar_thread = NULL;
+    ACE_Based::Thread* rar_thread = nullptr;
     if (sConfig.GetBoolDefault("Ra.Enable", false))
     {
         rar_thread = new ACE_Based::Thread(new RARunnable);
@@ -286,7 +286,7 @@ int Master::Run()
 #endif
 
     ///- Start soap serving thread
-    ACE_Based::Thread* soap_thread = NULL;
+    ACE_Based::Thread* soap_thread = nullptr;
 
     if (sConfig.GetBoolDefault("SOAP.Enabled", false))
     {
@@ -297,7 +297,7 @@ int Master::Run()
     }
 
     ///- Start up freeze catcher thread
-    ACE_Based::Thread* freeze_thread = NULL;
+    ACE_Based::Thread* freeze_thread = nullptr;
     if (uint32 freeze_delay = sConfig.GetIntDefault("MaxCoreStuckTime", 0))
     {
         FreezeDetectorRunnable* fdr = new FreezeDetectorRunnable();

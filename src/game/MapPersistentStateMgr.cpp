@@ -48,7 +48,7 @@ static uint32 resetEventTypeDelay[MAX_RESET_EVENT_TYPE] = { 0,                  
 //== MapPersistentState functions ==========================
 MapPersistentState::MapPersistentState(uint16 MapId, uint32 InstanceId)
     : m_instanceid(InstanceId), m_mapid(MapId),
-      m_usedByMap(NULL)
+      m_usedByMap(nullptr)
 {
 }
 
@@ -322,7 +322,7 @@ time_t DungeonResetScheduler::CalculateNextResetTime(InstanceTemplate const* tem
 
 void DungeonResetScheduler::LoadResetTimes()
 {
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     time_t today = (now / DAY) * DAY;
     time_t nextWeek = today + (7 * DAY);
 
@@ -504,7 +504,7 @@ void DungeonResetScheduler::ScheduleReset(bool add, time_t time, DungeonResetEve
 
 void DungeonResetScheduler::Update()
 {
-    time_t now = time(NULL), t;
+    time_t now = time(nullptr), t;
     while (!m_resetTimeQueue.empty() && (t = m_resetTimeQueue.begin()->first) < now)
     {
         DungeonResetEvent& event = m_resetTimeQueue.begin()->second;
@@ -555,7 +555,7 @@ void DungeonResetScheduler::Update()
 
 void DungeonResetScheduler::ResetAllRaid()
 {
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     ResetTimeQueue rTQ;
     rTQ.clear();
 
@@ -615,7 +615,7 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
                 resetTime = m_Scheduler.GetResetTimeFor(mapEntry->MapID);
             else
             {
-                resetTime = time(NULL) + 2 * HOUR;
+                resetTime = time(nullptr) + 2 * HOUR;
                 // normally this will be removed soon after in DungeonMap::Add, prevent error
                 m_Scheduler.ScheduleReset(true, resetTime, DungeonResetEvent(RESET_EVENT_NORMAL_DUNGEON, mapEntry->MapID, instanceId));
             }
@@ -653,12 +653,12 @@ MapPersistentState* MapPersistentStateManager::GetPersistentState(uint32 mapId, 
     if (instanceId)
     {
         PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.find(instanceId);
-        return itr != m_instanceSaveByInstanceId.end() ? itr->second : NULL;
+        return itr != m_instanceSaveByInstanceId.end() ? itr->second : nullptr;
     }
     else
     {
         PersistentStateMap::iterator itr = m_instanceSaveByMapId.find(mapId);
-        return itr != m_instanceSaveByMapId.end() ? itr->second : NULL;
+        return itr != m_instanceSaveByMapId.end() ? itr->second : nullptr;
     }
 }
 
@@ -880,7 +880,7 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 
     if (!mapEntry->IsDungeon())
         return;
 
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
 
     if (!warn)
     {
@@ -951,7 +951,7 @@ void MapPersistentStateManager::_CleanupExpiredInstancesAtTime(time_t t)
 
 void MapPersistentStateManager::InitWorldMaps()
 {
-    MapPersistentState* state = NULL;                       // need any from created for shared pool state
+    MapPersistentState* state = nullptr;                       // need any from created for shared pool state
     for (uint32 mapid = 0; mapid < sMapStore.GetNumRows(); ++mapid)
         if (MapEntry const* entry = sMapStore.LookupEntry(mapid))
             if (!entry->Instanceable())

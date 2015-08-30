@@ -525,25 +525,25 @@ SimpleFactionsList const* GetFactionTeamList(uint32 faction)
 {
     FactionTeamMap::const_iterator itr = sFactionTeamMap.find(faction);
     if (itr == sFactionTeamMap.end())
-        return NULL;
+        return nullptr;
     return &itr->second;
 }
 
 char const* GetPetName(uint32 petfamily, uint32 dbclang)
 {
     if (!petfamily)
-        return NULL;
+        return nullptr;
     CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(petfamily);
     if (!pet_family)
-        return NULL;
-    return pet_family->Name[dbclang] ? pet_family->Name[dbclang] : NULL;
+        return nullptr;
+    return pet_family->Name[dbclang] ? pet_family->Name[dbclang] : nullptr;
 }
 
 TalentSpellPos const* GetTalentSpellPos(uint32 spellId)
 {
     TalentSpellPosMap::const_iterator itr = sTalentSpellPosMap.find(spellId);
     if (itr == sTalentSpellPosMap.end())
-        return NULL;
+        return nullptr;
 
     return &itr->second;
 }
@@ -574,7 +574,7 @@ WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid
 {
     WMOAreaInfoByTripple::iterator i = sWMOAreaInfoByTripple.find(WMOAreaTableTripple(rootid, adtid, groupid));
     if (i == sWMOAreaInfoByTripple.end())
-        return NULL;
+        return nullptr;
     return i->second;
 }
 
@@ -586,7 +586,7 @@ AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
 AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_id)
 {
     // 1.12.1 areatable have duplicates for areaflag
-    AreaTableEntry const* aEntry = NULL;
+    AreaTableEntry const* aEntry = nullptr;
     for (uint32 i = 0; i <= sAreaStore.GetNumRows(); i++)
     {
         if (area_flag != 0)
@@ -611,7 +611,7 @@ AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_
     if (MapEntry const* mapEntry = sMapStore.LookupEntry(map_id))
         return GetAreaEntryByAreaID(mapEntry->linked_zone);
 
-    return NULL;
+    return nullptr;
 }
 
 uint32 GetAreaFlagByMapId(uint32 mapid)
@@ -633,7 +633,7 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
         if (ch && ch->ChannelID == channel_id)
             return ch;
     }
-    return NULL;
+    return nullptr;
 }
 
 ChatChannelsEntry const* GetChannelEntryFor(const std::string& name)
@@ -655,7 +655,7 @@ ChatChannelsEntry const* GetChannelEntryFor(const std::string& name)
                 return ch;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 /*[-ZERO]

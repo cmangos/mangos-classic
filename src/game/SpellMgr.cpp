@@ -1554,7 +1554,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
         procEvent_procEx = spellProcEvent->procEx;
 
         // For melee triggers
-        if (procSpell == NULL)
+        if (procSpell == nullptr)
         {
             // Check (if set) for school (melee attack have Normal school)
             if (spellProcEvent->schoolMask && (spellProcEvent->schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0)
@@ -2280,7 +2280,7 @@ SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, 
     }
 
     // not found
-    return NULL;
+    return nullptr;
 }
 
 typedef UNORDERED_MAP<uint32, uint32> AbilitySpellPrevMap;
@@ -3814,7 +3814,7 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
 {
     if (conditionId)
     {
-        if (!player || !sObjectMgr.IsPlayerMeetToCondition(conditionId, player, player->GetMap(), NULL, CONDITION_FROM_SPELL_AREA))
+        if (!player || !sObjectMgr.IsPlayerMeetToCondition(conditionId, player, player->GetMap(), nullptr, CONDITION_FROM_SPELL_AREA))
             return false;
     }
     else                                                    // This block will be removed

@@ -113,7 +113,7 @@ class SQLStorage : public SQLStorageBase
         T const* LookupEntry(uint32 id) const
         {
             if (id >= GetMaxEntry())
-                return NULL;
+                return nullptr;
             return reinterpret_cast<T const*>(m_Index[id]);
         }
 
@@ -151,7 +151,7 @@ class SQLHashStorage : public SQLStorageBase
             RecordMap::const_iterator find = m_indexMap.find(id);
             if (find != m_indexMap.end())
                 return reinterpret_cast<T const*>(find->second);
-            return NULL;
+            return nullptr;
         }
 
         void Load();

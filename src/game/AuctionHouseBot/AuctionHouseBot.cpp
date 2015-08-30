@@ -530,7 +530,7 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
 {
     config.SameItemInfo.clear();
     uint32 count = 0;
-    time_t Now = time(NULL);
+    time_t Now = time(nullptr);
 
     AuctionHouseObject::AuctionEntryMapBounds bounds = sAuctionMgr.GetAuctionsMap(config.GetHouseType())->GetAuctionsBounds();
     for (AuctionHouseObject::AuctionEntryMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
@@ -596,7 +596,7 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
 
 void AuctionBotBuyer::PrepareListOfEntry(AHB_Buyer_Config& config)
 {
-    time_t Now = time(NULL) - 5;
+    time_t Now = time(nullptr) - 5;
 
     for (CheckEntryMap::iterator itr = config.CheckedEntry.begin(); itr != config.CheckedEntry.end();)
     {
@@ -735,7 +735,7 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
 
     PrepareListOfEntry(config);
 
-    time_t Now = time(NULL);
+    time_t Now = time(nullptr);
     uint32 BuyCycles;
     if (config.CheckedEntry.size() > sAuctionBotConfig.GetItemPerCycleBoost())
     {
@@ -1600,7 +1600,7 @@ void AuctionBotSeller::addNewAuctions(AHB_Seller_Config& config)
         Item* item = Item::CreateItem(itemID, stackCount);
         if (!item)
         {
-            sLog.outError("AHBot: Item::CreateItem() returned NULL for item %u (stack: %u)", itemID, stackCount);
+            sLog.outError("AHBot: Item::CreateItem() returned nullptr for item %u (stack: %u)", itemID, stackCount);
             return;
         }
 
@@ -1633,7 +1633,7 @@ bool AuctionBotSeller::Update(AuctionHouseType houseType)
 
 //== AuctionHouseBot functions =============================
 
-AuctionHouseBot::AuctionHouseBot() : m_Buyer(NULL), m_Seller(NULL), m_OperationSelector(0)
+AuctionHouseBot::AuctionHouseBot() : m_Buyer(nullptr), m_Seller(nullptr), m_OperationSelector(0)
 {
 }
 
@@ -1652,7 +1652,7 @@ void AuctionHouseBot::InitilizeAgents()
         if (!m_Seller->Initialize())
         {
             delete m_Seller;
-            m_Seller = NULL;
+            m_Seller = nullptr;
         }
     }
     if (sAuctionBotConfig.getConfig(CONFIG_BOOL_AHBOT_BUYER_ENABLED))
@@ -1662,7 +1662,7 @@ void AuctionHouseBot::InitilizeAgents()
         if (!m_Buyer->Initialize())
         {
             delete m_Buyer;
-            m_Buyer = NULL;
+            m_Buyer = nullptr;
         }
     }
 }

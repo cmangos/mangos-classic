@@ -559,7 +559,7 @@ struct ClassFamilyMask
 
     bool Empty() const { return Flags == 0; }
     bool operator!() const { return Empty(); }
-    operator void const* () const { return Empty() ? NULL : this; } // for allow normal use in if(mask)
+    operator void const* () const { return Empty() ? nullptr : this; } // for allow normal use in if(mask)
 
     bool IsFitToFamilyMask(uint64 familyFlags) const
     {
@@ -946,7 +946,7 @@ typedef std::map<uint32, TaxiPathSetForSource> TaxiPathSetBySource;
 
 struct TaxiPathNodePtr
 {
-    TaxiPathNodePtr() : i_ptr(NULL) {}
+    TaxiPathNodePtr() : i_ptr(nullptr) {}
     TaxiPathNodePtr(TaxiPathNodeEntry const* ptr) : i_ptr(ptr) {}
 
     TaxiPathNodeEntry const* i_ptr;

@@ -150,7 +150,7 @@ typedef off_t ACE_OFF_T;
 
 inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
 
-#define atol(a) strtoul( a, NULL, 10)
+#define atol(a) strtoul( a, nullptr, 10)
 
 #define STRINGIZE(a) #a
 

@@ -90,11 +90,11 @@ class DBCFileLoader
 
         uint32 GetNumRows() const { return recordCount;}
         uint32 GetCols() const { return fieldCount; }
-        uint32 GetOffset(size_t id) const { return (fieldsOffset != NULL && id < fieldCount) ? fieldsOffset[id] : 0; }
-        bool IsLoaded() const { return data != NULL; }
+        uint32 GetOffset(size_t id) const { return (fieldsOffset != nullptr && id < fieldCount) ? fieldsOffset[id] : 0; }
+        bool IsLoaded() const { return data != nullptr; }
         char* AutoProduceData(const char* fmt, uint32& count, char**& indexTable);
         char* AutoProduceStrings(const char* fmt, char* dataTable);
-        static uint32 GetFormatRecordSize(const char* format, int32* index_pos = NULL);
+        static uint32 GetFormatRecordSize(const char* format, int32* index_pos = nullptr);
     private:
 
         uint32 recordSize;

@@ -83,12 +83,12 @@ void BattleGroundAB::Update(uint32 diff)
 
                     if (teamIndex == 0)
                     {
-                        SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_ALLIANCE, NULL, LANG_BG_ALLY, _GetNodeNameId(node));
+                        SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_ALLIANCE, nullptr, LANG_BG_ALLY, _GetNodeNameId(node));
                         PlaySoundToAll(BG_AB_SOUND_NODE_CAPTURED_ALLIANCE);
                     }
                     else
                     {
-                        SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_HORDE, NULL, LANG_BG_HORDE, _GetNodeNameId(node));
+                        SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_HORDE, nullptr, LANG_BG_HORDE, _GetNodeNameId(node));
                         PlaySoundToAll(BG_AB_SOUND_NODE_CAPTURED_HORDE);
                     }
                 }
@@ -398,9 +398,9 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player* source, GameObject* target
     if (m_Nodes[node] >= BG_AB_NODE_TYPE_OCCUPIED)
     {
         if (teamIndex == TEAM_INDEX_ALLIANCE)
-            SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_ALLIANCE, NULL, LANG_BG_ALLY, _GetNodeNameId(node));
+            SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_ALLIANCE, nullptr, LANG_BG_ALLY, _GetNodeNameId(node));
         else
-            SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_HORDE, NULL, LANG_BG_HORDE, _GetNodeNameId(node));
+            SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, CHAT_MSG_BG_SYSTEM_HORDE, nullptr, LANG_BG_HORDE, _GetNodeNameId(node));
     }
     PlaySoundToAll(sound);
 }
@@ -456,7 +456,7 @@ WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
         if (m_Nodes[i] == teamIndex + 3)
             nodes.push_back(i);
 
-    WorldSafeLocsEntry const* good_entry = NULL;
+    WorldSafeLocsEntry const* good_entry = nullptr;
     // If so, select the closest node to place ghost on
     if (!nodes.empty())
     {

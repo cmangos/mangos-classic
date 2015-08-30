@@ -33,7 +33,7 @@ ChannelMgr* channelMgr(Team team)
     if (team == HORDE)
         return &MaNGOS::Singleton<HordeChannelMgr>::Instance();
 
-    return NULL;
+    return nullptr;
 }
 
 ChannelMgr::~ChannelMgr()
@@ -77,7 +77,7 @@ Channel* ChannelMgr::GetChannel(const std::string& name, Player* p, bool pkt)
             p->GetSession()->SendPacket(&data);
         }
 
-        return NULL;
+        return nullptr;
     }
     else
         return i->second;

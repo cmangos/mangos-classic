@@ -652,7 +652,7 @@ WorldSafeLocsEntry const* BattleGroundAV::GetClosestGraveYard(Player* plr)
     float x = plr->GetPositionX();
     float y = plr->GetPositionY();
     BattleGroundAVTeamIndex teamIdx = GetAVTeamIndexByTeamId(plr->GetTeam());
-    WorldSafeLocsEntry const* good_entry = NULL;
+    WorldSafeLocsEntry const* good_entry = nullptr;
     if (GetStatus() == STATUS_IN_PROGRESS)
     {
         // Is there any occupied node for this team?

@@ -34,13 +34,13 @@ class Field
             DB_TYPE_BOOL    = 0x04
         };
 
-        Field() : mValue(NULL), mType(DB_TYPE_UNKNOWN) {}
+        Field() : mValue(nullptr), mType(DB_TYPE_UNKNOWN) {}
         Field(const char* value, enum DataTypes type) : mValue(value), mType(type) {}
 
         ~Field() {}
 
         enum DataTypes GetType() const { return mType; }
-        bool IsNULL() const { return mValue == NULL; }
+        bool IsNULL() const { return mValue == nullptr; }
 
         const char* GetString() const { return mValue; }
         std::string GetCppString() const

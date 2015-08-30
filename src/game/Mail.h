@@ -150,7 +150,7 @@ class MailSender
 class MailReceiver
 {
     public:                                                 // Constructors
-        explicit MailReceiver(ObjectGuid receiver_guid) : m_receiver(NULL), m_receiver_guid(receiver_guid) {}
+        explicit MailReceiver(ObjectGuid receiver_guid) : m_receiver(nullptr), m_receiver_guid(receiver_guid) {}
         MailReceiver(Player* receiver);
         MailReceiver(Player* receiver, ObjectGuid receiver_guid);
     public:                                                 // Accessors

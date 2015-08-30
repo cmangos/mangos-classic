@@ -48,7 +48,7 @@ enum UnitThreatEventType
     // New target should be fetched, could tbe the current target as well
     UEV_THREAT_SET_NEXT_TARGET          = 1 << 5,
 
-    // A new victim (target) was set. Could be NULL
+    // A new victim (target) was set. Could be nullptr
     UEV_THREAT_VICTIM_CHANGED           = 1 << 6,
 };
 
@@ -87,7 +87,7 @@ class MANGOS_DLL_SPEC ThreatRefStatusChangeEvent : public UnitBaseEvent
         };
         ThreatManager* iThreatManager;
     public:
-        ThreatRefStatusChangeEvent(uint32 pType) : UnitBaseEvent(pType) { iHostileReference = NULL; }
+        ThreatRefStatusChangeEvent(uint32 pType) : UnitBaseEvent(pType) { iHostileReference = nullptr; }
 
         ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference) : UnitBaseEvent(pType) { iHostileReference = pHostileReference; }
 

@@ -51,7 +51,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (!pItem)
     {
         recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, nullptr, nullptr);
         return;
     }
 
@@ -61,7 +61,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (!proto)
     {
         recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL);
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, nullptr);
         return;
     }
 
@@ -69,7 +69,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (proto->InventoryType != INVTYPE_NON_EQUIP && !pItem->IsEquipped())
     {
         recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL);
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, nullptr);
         return;
     }
 
@@ -77,7 +77,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (msg != EQUIP_ERR_OK)
     {
         recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(msg, pItem, NULL);
+        pUser->SendEquipError(msg, pItem, nullptr);
         return;
     }
 
@@ -85,7 +85,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (pItem->IsInTrade())
     {
         recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL);
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, nullptr);
         return;
     }
 
@@ -98,7 +98,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
                 if (IsNonCombatSpell(spellInfo))
                 {
                     recvPacket.rpos(recvPacket.wpos());     // prevent spam at not read packet tail
-                    pUser->SendEquipError(EQUIP_ERR_NOT_IN_COMBAT, pItem, NULL);
+                    pUser->SendEquipError(EQUIP_ERR_NOT_IN_COMBAT, pItem, nullptr);
                     return;
                 }
             }
@@ -124,7 +124,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (!pItem->IsTargetValidForItemUse(targets.getUnitTarget()))
     {
         // free gray item after use fail
-        pUser->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
+        pUser->SendEquipError(EQUIP_ERR_NONE, pItem, nullptr);
 
         // search spell for spell error
         uint32 spellid = 0;
@@ -176,14 +176,14 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
     Item* pItem = pUser->GetItemByPos(bagIndex, slot);
     if (!pItem)
     {
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, nullptr, nullptr);
         return;
     }
 
     ItemPrototype const* proto = pItem->GetProto();
     if (!proto)
     {
-        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL);
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, nullptr);
         return;
     }
 
@@ -195,7 +195,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 
         if (!lockInfo)
         {
-            pUser->SendEquipError(EQUIP_ERR_ITEM_LOCKED, pItem, NULL);
+            pUser->SendEquipError(EQUIP_ERR_ITEM_LOCKED, pItem, nullptr);
             sLog.outError("WORLD::OpenItem: item [guid = %u] has an unknown lockId: %u!", pItem->GetGUIDLow() , lockId);
             return;
         }
@@ -203,7 +203,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         // required picklocking
         if (lockInfo->Skill[1] || lockInfo->Skill[0])
         {
-            pUser->SendEquipError(EQUIP_ERR_ITEM_LOCKED, pItem, NULL);
+            pUser->SendEquipError(EQUIP_ERR_ITEM_LOCKED, pItem, nullptr);
             return;
         }
     }
@@ -369,7 +369,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     // auto-selection buff level base at target level (in spellInfo)
     if (Unit* target = targets.getUnitTarget())
     {
-        // if rank not found then function return NULL but in explicit cast case original spell can be casted and later failed with appropriate error message
+        // if rank not found then function return nullptr but in explicit cast case original spell can be casted and later failed with appropriate error message
         if (SpellEntry const* actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(spellInfo, target->getLevel()))
             spellInfo = actualSpellInfo;
     }

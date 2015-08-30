@@ -45,7 +45,7 @@ struct npc_escortAI : public ScriptedAI
         virtual void WaypointReached(uint32 uiPointId) = 0;
         virtual void WaypointStart(uint32 /*uiPointId*/) {}
 
-        void Start(bool bRun = false, const Player* pPlayer = NULL, const Quest* pQuest = NULL, bool bInstantRespawn = false, bool bCanLoopPath = false);
+        void Start(bool bRun = false, const Player* pPlayer = nullptr, const Quest* pQuest = nullptr, bool bInstantRespawn = false, bool bCanLoopPath = false);
 
         void SetRun(bool bRun = true);
         void SetEscortPaused(bool uPaused);

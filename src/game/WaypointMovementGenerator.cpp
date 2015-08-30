@@ -151,7 +151,7 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
             }
 
             if (MangosStringLocale const* textData = sObjectMgr.GetMangosStringLocale(textId))
-                creature.MonsterText(textData, NULL);
+                creature.MonsterText(textData, nullptr);
             else
                 sLog.outErrorDb("%s reached waypoint %u, attempted to do text %i, but required text-data could not be found", creature.GetGuidStr().c_str(), i_currentNode, textId);
         }

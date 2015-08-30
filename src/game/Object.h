@@ -472,9 +472,9 @@ class MANGOS_DLL_SPEC WorldObject : public Object
          * @param bounding_radius   -           radius for the searcher
          * @param distance2d        -           range in which to find a free spot. Default = 0.0f (which usually means the units will have contact)
          * @param angle             -           direction in which to look for a free spot. Default = 0.0f (direction in which 'this' is looking
-         * @param obj               -           for whom to look for a spot. Default = NULL
+         * @param obj               -           for whom to look for a spot. Default = nullptr
          */
-        void GetClosePoint(float& x, float& y, float& z, float bounding_radius, float distance2d = 0.0f, float angle = 0.0f, const WorldObject* obj = NULL) const
+        void GetClosePoint(float& x, float& y, float& z, float bounding_radius, float distance2d = 0.0f, float angle = 0.0f, const WorldObject* obj = nullptr) const
         {
             // angle calculated from current orientation
             GetNearPoint(obj, x, y, z, bounding_radius, distance2d + GetObjectBoundingRadius() + bounding_radius, GetOrientation() + angle);
@@ -494,9 +494,9 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         bool IsPositionValid() const;
         void UpdateGroundPositionZ(float x, float y, float& z) const;
-        void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = NULL) const;
+        void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = nullptr) const;
 
-        void GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist = 0.0f, float const* ori = NULL) const;
+        void GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist = 0.0f, float const* ori = nullptr) const;
 
         uint32 GetMapId() const { return m_mapId; }
         uint32 GetInstanceId() const { return m_InstanceId; }
@@ -556,14 +556,14 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         virtual void SendMessageToSetInRange(WorldPacket* data, float dist, bool self) const;
         void SendMessageToSetExcept(WorldPacket* data, Player const* skipped_receiver) const;
 
-        void MonsterSay(const char* text, uint32 language, Unit const* target = NULL) const;
-        void MonsterYell(const char* text, uint32 language, Unit const* target = NULL) const;
+        void MonsterSay(const char* text, uint32 language, Unit const* target = nullptr) const;
+        void MonsterYell(const char* text, uint32 language, Unit const* target = nullptr) const;
         void MonsterTextEmote(const char* text, Unit const* target, bool IsBossEmote = false) const;
         void MonsterWhisper(const char* text, Unit const* target, bool IsBossWhisper = false) const;
         void MonsterText(MangosStringLocale const* textData, Unit const* target) const;
 
-        void PlayDistanceSound(uint32 sound_id, Player const* target = NULL) const;
-        void PlayDirectSound(uint32 sound_id, Player const* target = NULL) const;
+        void PlayDistanceSound(uint32 sound_id, Player const* target = nullptr) const;
+        void PlayDirectSound(uint32 sound_id, Player const* target = nullptr) const;
 
         void SendObjectDeSpawnAnim(ObjectGuid guid);
         void SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId = 0);
@@ -587,7 +587,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void SetMap(Map* map);
         Map* GetMap() const { MANGOS_ASSERT(m_currMap); return m_currMap; }
         // used to check all object's GetMap() calls when object is not in world!
-        void ResetMap() { m_currMap = NULL; }
+        void ResetMap() { m_currMap = nullptr; }
 
         // obtain terrain data for map where this object belong...
         TerrainInfo const* GetTerrain() const;

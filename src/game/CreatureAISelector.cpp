@@ -39,13 +39,13 @@ namespace FactorySelector
 
         CreatureAIRegistry& ai_registry(CreatureAIRepository::Instance());
 
-        const CreatureAICreator* ai_factory = NULL;
+        const CreatureAICreator* ai_factory = nullptr;
 
         std::string ainame = creature->GetAIName();
 
         // select by NPC flags _first_ - otherwise EventAI might be choosen for pets/totems
         // excplicit check for isControlled() and owner type to allow guardian, mini-pets and pets controlled by NPCs to be scripted by EventAI
-        Unit* owner = NULL;
+        Unit* owner = nullptr;
         if ((creature->IsPet() && ((Pet*)creature)->isControlled() &&
                 ((owner = creature->GetOwner()) && owner->GetTypeId() == TYPEID_PLAYER)) || creature->isCharmed())
             ai_factory = ai_registry.GetRegistryItem("PetAI");
@@ -69,7 +69,7 @@ namespace FactorySelector
             {
                 const CreatureAICreator* factory = iter->second;
                 const SelectableAI* p = dynamic_cast<const SelectableAI*>(factory);
-                MANGOS_ASSERT(p != NULL);
+                MANGOS_ASSERT(p != nullptr);
                 int val = p->Permit(creature);
                 if (val > best_val)
                 {
@@ -80,20 +80,20 @@ namespace FactorySelector
         }
 
         // select NullCreatureAI if not another cases
-        ainame = (ai_factory == NULL) ? "NullCreatureAI" : ai_factory->key();
+        ainame = (ai_factory == nullptr) ? "NullCreatureAI" : ai_factory->key();
 
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature %u used AI is %s.", creature->GetGUIDLow(), ainame.c_str());
-        return (ai_factory == NULL ? new NullCreatureAI(creature) : ai_factory->Create(creature));
+        return (ai_factory == nullptr ? new NullCreatureAI(creature) : ai_factory->Create(creature));
     }
 
     MovementGenerator* selectMovementGenerator(Creature* creature)
     {
         MovementGeneratorRegistry& mv_registry(MovementGeneratorRepository::Instance());
-        MANGOS_ASSERT(creature->GetCreatureInfo() != NULL);
+        MANGOS_ASSERT(creature->GetCreatureInfo() != nullptr);
         MovementGeneratorCreator const* mv_factory = mv_registry.GetRegistryItem(
                     creature->GetOwnerGuid().IsPlayer() ? FOLLOW_MOTION_TYPE : creature->GetDefaultMovementType());
 
-        /* if( mv_factory == NULL  )
+        /* if( mv_factory == nullptr  )
         {
             int best_val = -1;
             std::vector<std::string> l;
@@ -102,7 +102,7 @@ namespace FactorySelector
             {
             const MovementGeneratorCreator *factory = mv_registry.GetRegistryItem((*iter).c_str());
             const SelectableMovement *p = dynamic_cast<const SelectableMovement *>(factory);
-            ASSERT( p != NULL );
+            ASSERT( p != nullptr );
             int val = p->Permit(creature);
             if( val > best_val )
             {
@@ -112,6 +112,6 @@ namespace FactorySelector
             }
         }*/
 
-        return (mv_factory == NULL ? NULL : mv_factory->Create(creature));
+        return (mv_factory == nullptr ? nullptr : mv_factory->Create(creature));
     }
 }

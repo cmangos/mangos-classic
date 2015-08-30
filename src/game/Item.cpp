@@ -41,7 +41,7 @@ void AddItemsSetItem(Player* player, Item* item)
     if (set->required_skill_id && player->GetSkillValue(set->required_skill_id) < set->required_skill_value)
         return;
 
-    ItemSetEffect* eff = NULL;
+    ItemSetEffect* eff = nullptr;
 
     for (size_t x = 0; x < player->ItemSetEff.size(); ++x)
     {
@@ -100,7 +100,7 @@ void AddItemsSetItem(Player* player, Item* item)
                 }
 
                 // spell casted only if fit form requirement, in other case will casted at form change
-                player->ApplyEquipSpell(spellInfo, NULL, true);
+                player->ApplyEquipSpell(spellInfo, nullptr, true);
                 eff->spells[y] = spellInfo;
                 break;
             }
@@ -120,7 +120,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
         return;
     }
 
-    ItemSetEffect* eff = NULL;
+    ItemSetEffect* eff = nullptr;
     size_t setindex = 0;
     for (; setindex < player->ItemSetEff.size(); ++setindex)
     {
@@ -151,8 +151,8 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
             if (eff->spells[z] && eff->spells[z]->Id == set->spells[x])
             {
                 // spell can be not active if not fit form requirement
-                player->ApplyEquipSpell(eff->spells[z], NULL, false);
-                eff->spells[z] = NULL;
+                player->ApplyEquipSpell(eff->spells[z], nullptr, false);
+                eff->spells[z] = nullptr;
                 break;
             }
         }
@@ -162,7 +162,7 @@ void RemoveItemsSetItem(Player* player, ItemPrototype const* proto)
     {
         MANGOS_ASSERT(eff == player->ItemSetEff[setindex]);
         delete eff;
-        player->ItemSetEff[setindex] = NULL;
+        player->ItemSetEff[setindex] = nullptr;
     }
 }
 
@@ -225,7 +225,7 @@ Item::Item()
     m_slot = 0;
     uState = ITEM_NEW;
     uQueuePos = -1;
-    m_container = NULL;
+    m_container = nullptr;
     mb_in_trade = false;
     m_lootState = ITEM_LOOT_NONE;
 }
@@ -748,7 +748,7 @@ void Item::RemoveFromUpdateQueueOf(Player* player)
     if (player->m_itemUpdateQueueBlocked)
         return;
 
-    player->m_itemUpdateQueue[uQueuePos] = NULL;
+    player->m_itemUpdateQueue[uQueuePos] = nullptr;
     uQueuePos = -1;
 }
 
@@ -917,7 +917,7 @@ void Item::SendTimeUpdate(Player* owner)
 Item* Item::CreateItem(uint32 item, uint32 count, Player const* player, uint32 randomPropertyId)
 {
     if (count < 1)
-        return NULL;                                        // don't create item at zero count
+        return nullptr;                                        // don't create item at zero count
 
     if (ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(item))
     {
@@ -938,14 +938,14 @@ Item* Item::CreateItem(uint32 item, uint32 count, Player const* player, uint32 r
         else
             delete pItem;
     }
-    return NULL;
+    return nullptr;
 }
 
 Item* Item::CloneItem(uint32 count, Player const* player) const
 {
     Item* newItem = CreateItem(GetEntry(), count, player, GetItemRandomPropertyId());
     if (!newItem)
-        return NULL;
+        return nullptr;
 
     newItem->SetGuidValue(ITEM_FIELD_CREATOR,     GetGuidValue(ITEM_FIELD_CREATOR));
     newItem->SetGuidValue(ITEM_FIELD_GIFTCREATOR, GetGuidValue(ITEM_FIELD_GIFTCREATOR));

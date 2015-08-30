@@ -111,7 +111,7 @@ class GroupLootRoll
 public:
     typedef UNORDERED_MAP<ObjectGuid, PlayerRollVote> RollVoteMap;
 
-    GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(NULL), m_loot(NULL) {}
+    GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(nullptr), m_loot(nullptr) {}
     ~GroupLootRoll();
 
     bool TryToStart(Loot& loot, uint32 itemSlot);
@@ -203,7 +203,7 @@ class LootStore
         void Verify() const;
 
         void LoadAndCollectLootIds(LootIdSet& ids_set);
-        void CheckLootRefs(LootIdSet* ref_set = NULL) const; // check existence reference and remove it from ref_set
+        void CheckLootRefs(LootIdSet* ref_set = nullptr) const; // check existence reference and remove it from ref_set
         void ReportUnusedIds(LootIdSet const& ids_set) const;
         void ReportNotExistedId(uint32 id) const;
 

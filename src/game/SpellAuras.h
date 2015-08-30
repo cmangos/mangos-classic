@@ -454,7 +454,7 @@ class MANGOS_DLL_SPEC Aura
 
         bool IsLastAuraOnHolder();
     protected:
-        Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = NULL, Item* castItem = NULL);
+        Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
 
         // must be called only from Aura::UpdateAura
         virtual void Update(uint32 diff);
@@ -493,7 +493,7 @@ class MANGOS_DLL_SPEC Aura
 class MANGOS_DLL_SPEC AreaAura : public Aura
 {
     public:
-        AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = NULL, Item* castItem = NULL, uint32 originalRankSpellId = 0);
+        AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr, uint32 originalRankSpellId = 0);
         ~AreaAura();
     protected:
         void Update(uint32 diff) override;
@@ -506,7 +506,7 @@ class MANGOS_DLL_SPEC AreaAura : public Aura
 class MANGOS_DLL_SPEC PersistentAreaAura : public Aura
 {
     public:
-        PersistentAreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = NULL, Item* castItem = NULL);
+        PersistentAreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
         ~PersistentAreaAura();
     protected:
         void Update(uint32 diff) override;
@@ -521,10 +521,10 @@ class MANGOS_DLL_SPEC SingleEnemyTargetAura : public Aura
         Unit* GetTriggerTarget() const override;
 
     protected:
-        SingleEnemyTargetAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster  = NULL, Item* castItem = NULL);
+        SingleEnemyTargetAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster  = nullptr, Item* castItem = nullptr);
         ObjectGuid m_castersTargetGuid;
 };
 
-Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = NULL, Item* castItem = NULL);
-SpellAuraHolder* CreateSpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem = NULL);
+Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
+SpellAuraHolder* CreateSpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem = nullptr);
 #endif

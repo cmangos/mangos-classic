@@ -110,7 +110,7 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
             if (uiCastFlags & CAST_INTERRUPT_PREVIOUS && pCaster->IsNonMeleeSpellCasted(false))
                 pCaster->InterruptNonMeleeSpells(false);
 
-            pCaster->CastSpell(pTarget, pSpell, uiCastFlags & CAST_TRIGGERED, NULL, NULL, uiOriginalCasterGUID);
+            pCaster->CastSpell(pTarget, pSpell, uiCastFlags & CAST_TRIGGERED, nullptr, nullptr, uiOriginalCasterGUID);
             return CAST_OK;
         }
         else
@@ -228,7 +228,7 @@ void CreatureAI::SendAIEventAround(AIEventType eventType, Unit* pInvoker, uint32
         else
         {
             // Use this check here to collect only assitable creatures in case of CALL_ASSISTANCE, else be less strict
-            MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_creature, eventType == AI_EVENT_CALL_ASSISTANCE ? pInvoker : NULL, fRadius);
+            MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_creature, eventType == AI_EVENT_CALL_ASSISTANCE ? pInvoker : nullptr, fRadius);
             MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(receiverList, u_check);
             Cell::VisitGridObjects(m_creature, searcher, fRadius);
         }

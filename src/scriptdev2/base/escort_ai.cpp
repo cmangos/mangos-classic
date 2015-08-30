@@ -18,7 +18,7 @@ const float MAX_PLAYER_DISTANCE = 66.0f;
 npc_escortAI::npc_escortAI(Creature* pCreature) : ScriptedAI(pCreature),
     m_uiPlayerCheckTimer(1000),
     m_uiEscortState(STATE_ESCORT_NONE),
-    m_pQuestForEscort(NULL),
+    m_pQuestForEscort(nullptr),
     m_bIsRunning(false),
     m_bCanInstantRespawn(false),
     m_bCanReturnToStart(false)
@@ -138,7 +138,7 @@ void npc_escortAI::JustDied(Unit* /*pKiller*/)
     {
         if (Group* pGroup = pPlayer->GetGroup())
         {
-            for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+            for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
             {
                 if (Player* pMember = pRef->getSource())
                 {
@@ -171,7 +171,7 @@ bool npc_escortAI::IsPlayerOrGroupInRange()
     {
         if (Group* pGroup = pPlayer->GetGroup())
         {
-            for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+            for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
             {
                 Player* pMember = pRef->getSource();
                 if (pMember && m_creature->IsWithinDistInMap(pMember, MAX_PLAYER_DISTANCE))

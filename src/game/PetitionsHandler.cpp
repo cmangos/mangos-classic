@@ -102,7 +102,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(charterid);
     if (!pProto)
     {
-        _player->SendBuyError(BUY_ERR_CANT_FIND_ITEM, NULL, charterid, 0);
+        _player->SendBuyError(BUY_ERR_CANT_FIND_ITEM, nullptr, charterid, 0);
         return;
     }
 
@@ -117,7 +117,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
     InventoryResult msg = _player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, charterid, pProto->BuyCount);
     if (msg != EQUIP_ERR_OK)
     {
-        _player->SendEquipError(msg, NULL, NULL, charterid);
+        _player->SendEquipError(msg, nullptr, nullptr, charterid);
         return;
     }
 
@@ -182,7 +182,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket& recv_data)
 
     QueryResult* result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", petitionguid_low);
 
-    // result==NULL also correct in case no sign yet
+    // result==nullptr also correct in case no sign yet
     if (result)
         signs = (uint8)result->GetRowCount();
 
@@ -474,7 +474,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recv_data)
     /// Get petition signs count
     uint8 signs = 0;
     QueryResult* result = CharacterDatabase.PQuery("SELECT playerguid FROM petition_sign WHERE petitionguid = '%u'", petitionGuid.GetCounter());
-    // result==NULL also correct charter without signs
+    // result==nullptr also correct charter without signs
     if (result)
         signs = (uint8)result->GetRowCount();
 

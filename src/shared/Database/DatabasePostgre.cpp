@@ -78,9 +78,9 @@ bool PostgreSQLConnection::Initialize(const char* infoString)
         database = *iter++;
 
     if (host == ".")
-        mPGconn = PQsetdbLogin(NULL, port_or_socket_dir == "." ? NULL : port_or_socket_dir.c_str(), NULL, NULL, database.c_str(), user.c_str(), password.c_str());
+        mPGconn = PQsetdbLogin(nullptr, port_or_socket_dir == "." ? nullptr : port_or_socket_dir.c_str(), nullptr, nullptr, database.c_str(), user.c_str(), password.c_str());
     else
-        mPGconn = PQsetdbLogin(host.c_str(), port_or_socket_dir.c_str(), NULL, NULL, database.c_str(), user.c_str(), password.c_str());
+        mPGconn = PQsetdbLogin(host.c_str(), port_or_socket_dir.c_str(), nullptr, nullptr, database.c_str(), user.c_str(), password.c_str());
 
     /* check to see that the backend connection was successfully made */
     if (PQstatus(mPGconn) != CONNECTION_OK)
@@ -88,7 +88,7 @@ bool PostgreSQLConnection::Initialize(const char* infoString)
         sLog.outError("Could not connect to Postgre database at %s: %s",
                       host.c_str(), PQerrorMessage(mPGconn));
         PQfinish(mPGconn);
-        mPGconn = NULL;
+        mPGconn = nullptr;
         return false;
     }
 
@@ -136,14 +136,14 @@ bool PostgreSQLConnection::_Query(const char* sql, PGresult** pResult, uint64* p
 QueryResult* PostgreSQLConnection::Query(const char* sql)
 {
     if (!mPGconn)
-        return NULL;
+        return nullptr;
 
-    PGresult* result = NULL;
+    PGresult* result = nullptr;
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
 
     if (!_Query(sql, &result, &rowCount, &fieldCount))
-        return NULL;
+        return nullptr;
 
     QueryResultPostgre* queryResult = new QueryResultPostgre(result, rowCount, fieldCount);
 
@@ -154,14 +154,14 @@ QueryResult* PostgreSQLConnection::Query(const char* sql)
 QueryNamedResult* PostgreSQLConnection::QueryNamed(const char* sql)
 {
     if (!mPGconn)
-        return NULL;
+        return nullptr;
 
-    PGresult* result = NULL;
+    PGresult* result = nullptr;
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
 
     if (!_Query(sql, &result, &rowCount, &fieldCount))
-        return NULL;
+        return nullptr;
 
     QueryFieldNames names(fieldCount);
     for (uint32 i = 0; i < fieldCount; ++i)

@@ -24,8 +24,8 @@
 
 DBCFileLoader::DBCFileLoader()
 {
-    data = NULL;
-    fieldsOffset = NULL;
+    data = nullptr;
+    fieldsOffset = nullptr;
 }
 
 bool DBCFileLoader::Load(const char* filename, const char* fmt)
@@ -180,7 +180,7 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
 
     typedef char* ptr;
     if (strlen(format) != fieldCount)
-        return NULL;
+        return nullptr;
 
     // get struct size and index pos
     int32 i;
@@ -239,7 +239,7 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
                     offset += sizeof(uint8);
                     break;
                 case FT_STRING:
-                    *((char**)(&dataTable[offset])) = NULL; // will replace non-empty or "" strings in AutoProduceStrings
+                    *((char**)(&dataTable[offset])) = nullptr; // will replace non-empty or "" strings in AutoProduceStrings
                     offset += sizeof(char*);
                     break;
                 case FT_LOGIC:
@@ -262,7 +262,7 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
 char* DBCFileLoader::AutoProduceStrings(const char* format, char* dataTable)
 {
     if (strlen(format) != fieldCount)
-        return NULL;
+        return nullptr;
 
     char* stringPool = new char[stringSize];
     memcpy(stringPool, stringTable, stringSize);

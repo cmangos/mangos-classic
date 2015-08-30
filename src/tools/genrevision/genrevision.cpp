@@ -83,9 +83,9 @@ void extractDataFromGit(FILE* EntriesFile, std::string path, bool url, RawData& 
 
     if (url)
     {
-        char* host_str = NULL;
-        char* acc_str  = NULL;
-        char* repo_str = NULL;
+        char* host_str = nullptr;
+        char* acc_str  = nullptr;
+        char* repo_str = nullptr;
 
         // parse URL like git@github.com:mangos/mangos
         char url_buf[200];
@@ -93,8 +93,8 @@ void extractDataFromGit(FILE* EntriesFile, std::string path, bool url, RawData& 
         if (res)
         {
             host_str = strtok(url_buf, ":");
-            acc_str  = strtok(NULL, "/");
-            repo_str = strtok(NULL, " ");
+            acc_str  = strtok(nullptr, "/");
+            repo_str = strtok(nullptr, " ");
         }
         else
         {
@@ -102,8 +102,8 @@ void extractDataFromGit(FILE* EntriesFile, std::string path, bool url, RawData& 
             if (res)
             {
                 host_str = strtok(url_buf, "/");
-                acc_str  = strtok(NULL, "/");
-                repo_str = strtok(NULL, ".");
+                acc_str  = strtok(nullptr, "/");
+                repo_str = strtok(nullptr, ".");
             }
         }
 

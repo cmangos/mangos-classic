@@ -54,7 +54,7 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 
     if (!lootItem)
     {
-        _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
+        _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, nullptr, nullptr);
         return;
     }
 
@@ -151,7 +151,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 
     if (!lootItem)
     {
-        _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL);
+        _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, nullptr, nullptr);
         return;
     }
 
@@ -168,9 +168,9 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     {
         // send duplicate of error massage to master looter
         if (LootItem* lootItem = pLoot->GetLootItemInSlot(itemSlot))
-            _player->SendEquipError(result, NULL, NULL, lootItem->itemId);
+            _player->SendEquipError(result, nullptr, nullptr, lootItem->itemId);
         else
-            _player->SendEquipError(result, NULL, NULL);
+            _player->SendEquipError(result, nullptr, nullptr);
         return;
     }
 }

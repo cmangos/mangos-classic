@@ -25,7 +25,7 @@
 #include "Player.h"
 #include "Chat.h"
 
-void WorldSession::SendGMTicketGetTicket(uint32 status, GMTicket* ticket /*= NULL*/)
+void WorldSession::SendGMTicketGetTicket(uint32 status, GMTicket* ticket /*= nullptr*/)
 {
     std::string text = ticket ? ticket->GetText() : "";
 

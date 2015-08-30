@@ -260,7 +260,7 @@ bool IsIPAddress(char const* ipaddress)
 uint32 CreatePIDFile(const std::string& filename)
 {
     FILE* pid_file = fopen(filename.c_str(), "w");
-    if (pid_file == NULL)
+    if (pid_file == nullptr)
         return 0;
 
 #ifdef WIN32

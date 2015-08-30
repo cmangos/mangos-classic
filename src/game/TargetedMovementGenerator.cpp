@@ -39,7 +39,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
 
     float x, y, z;
 
-    // i_path can be NULL in case this is the first call for this MMGen (via Update)
+    // i_path can be nullptr in case this is the first call for this MMGen (via Update)
     // Can happen for example if no path was created on MMGen-Initialize because of the owner being stunned
     if (updateDestination || !i_path)
     {
