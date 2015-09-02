@@ -975,8 +975,12 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     if (!_player->IsWithinDistInMap(plr, INSPECT_DISTANCE, false))
         return;
 
+    if (_player->IsHostileTo(plr))
+        return;
+
     WorldPacket data(SMSG_INSPECT, 8);
     data << ObjectGuid(guid);
+
     SendPacket(&data);
 }
 
@@ -994,6 +998,9 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     }
 
     if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+        return;
+
+    if (_player->IsHostileTo(player))
         return;
 
     WorldPacket data(MSG_INSPECT_HONOR_STATS, (8 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
@@ -1021,6 +1028,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     // Last Week Standing
     data << player->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
     data << (uint8)player->GetHonorHighestRankInfo().visualRank;           // Highest Rank, ??
+
     SendPacket(&data);
 }
 
