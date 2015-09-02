@@ -333,9 +333,8 @@ add_executable(genrev
   ${GENREV_SRC}
 )
 
-get_target_property(GENERATE_EXE genrev LOCATION)
 add_custom_target("revision.h" ALL
-  COMMAND ${GENERATE_EXE} ${CMAKE_SOURCE_DIR}
+  COMMAND genrev ${CMAKE_SOURCE_DIR}
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   DEPENDS genrev
 )
