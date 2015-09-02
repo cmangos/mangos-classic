@@ -1013,7 +1013,7 @@ int main(int argc, char* arg[])
 
     // Extract dbc
     if (CONF_extract & EXTRACT_DBC)
-		ExtractDBCFiles();
+        ExtractDBCFiles();
 
     // Extract maps
     if (CONF_extract & EXTRACT_MAP)

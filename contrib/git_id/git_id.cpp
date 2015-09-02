@@ -760,7 +760,7 @@ int main(int argc, char* argv[])
     DO(find_path);
 
     DO(find_origin);
-        if (do_fetch)
+    if (do_fetch)
         DO(fetch_origin);
     DO(check_fwd);
 

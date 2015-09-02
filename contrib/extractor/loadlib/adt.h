@@ -52,7 +52,7 @@ class adt_MCVT
         };
         uint32 size;
     public:
-        float height_map[(ADT_CELL_SIZE + 1) * (ADT_CELL_SIZE + 1) + ADT_CELL_SIZE* ADT_CELL_SIZE];
+        float height_map[(ADT_CELL_SIZE + 1) * (ADT_CELL_SIZE + 1) + ADT_CELL_SIZE * ADT_CELL_SIZE];
 
         bool  prepareLoadedData();
 };

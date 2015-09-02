@@ -110,8 +110,8 @@ bool Model::ConvertToVMAPModel(const char* outfilename)
             if ((i % 3) - 1 == 0)
             {
                 uint16 tmp = indices[i];
-                indices[i] = indices[i+1];
-                indices[i+1] = tmp;
+                indices[i] = indices[i + 1];
+                indices[i + 1] = tmp;
             }
         }
         fwrite(indices, sizeof(unsigned short), nIndexes, output);
