@@ -1,4 +1,5 @@
-option(DEBUG                "Debug mode"                            OFF)
+option(DEBUG                "Include additional debug-code in core" OFF)
+option(WARNINGS             "Show all warnings during compile"      OFF)
 option(TBB_USE_EXTERNAL     "Use external TBB"                      OFF)
 option(USE_STD_MALLOC       "Use standard malloc instead of TBB"    OFF)
 option(ACE_USE_EXTERNAL     "Use external ACE"                      OFF)
@@ -22,7 +23,8 @@ message(
   Options that can be used in order to configure the process:
     CMAKE_INSTALL_PREFIX    Path where the server should be installed to
     PCH                     Use precompiled headers
-    DEBUG                   Debug mode
+    DEBUG                   Include additional debug-code in core
+    WARNINGS                Show all warnings during compile
     INCLUDE_BINDINGS_DIR    Include a script library in src/bindings/ with the
                             defined name. the name must corespond to the name of
                             the folder and the folder must contain a valid

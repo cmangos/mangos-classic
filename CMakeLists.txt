@@ -246,14 +246,6 @@ if(UNIX)
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} --no-warnings")
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wfatal-errors -Wextra")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wfatal-errors -Wextra")
-elseif(WIN32)
-  # Disable warnings in Visual Studio 8 and above and add /MP
-  if(MSVC AND NOT CMAKE_GENERATOR MATCHES "Visual Studio 7")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /MP")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /wd4996 /wd4355 /wd4244 /wd4267 /MP")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /MP")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /MP")
-  endif()
 endif()
 
 # if(SQL)
@@ -267,14 +259,6 @@ endif()
 # else()
 #   message(STATUS "Build map/vmap tools  : No  (default)")
 # endif()
-
-# Some small tweaks for Visual Studio 7 and above.
-if(MSVC)
-  # Mark 32 bit executables large address aware so they can use > 2GB address space
-  if(PLATFORM MATCHES X86)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
-  endif()
-endif()
 
 # Generate revision-extractor
 set(GENREV_SRC
@@ -354,7 +338,6 @@ set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
 
 if(WIN32)
   set(DEFINITIONS ${DEFINITIONS} WIN32 _WIN32)
-  set(DEFINITIONS_RELEASE ${DEFINITIONS_RELEASE} _CRT_SECURE_NO_WARNINGS)
 endif()
 
 if(USE_STD_MALLOC)
