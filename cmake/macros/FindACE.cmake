@@ -7,9 +7,6 @@
 # ACE_LIBRARIES, the libraries to link against
 # ACE_FOUND, if false, you cannot build anything that requires ACE
 
-# also defined, but not for general use are
-# ACE_LIBRARY, where to find the ACE library.
-
 set( ACE_FOUND 0 )
 if ( UNIX )
   FIND_PATH( ACE_INCLUDE_DIR

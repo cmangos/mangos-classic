@@ -1,0 +1,37 @@
+option(DEBUG                "Debug mode"                            OFF)
+option(TBB_USE_EXTERNAL     "Use external TBB"                      OFF)
+option(USE_STD_MALLOC       "Use standard malloc instead of TBB"    OFF)
+option(ACE_USE_EXTERNAL     "Use external ACE"                      OFF)
+option(POSTGRESQL           "Use PostgreSQL"                        OFF)
+
+if(PCHSupport_FOUND AND WIN32) # TODO: why only enable it on windows by default?
+  option(PCH                "Use precompiled headers"               ON)
+else()
+  option(PCH                "Use precompiled headers"               OFF)
+endif()
+
+# TODO: options that should be checked/created:
+#option(CLI                  "With CLI"                              ON)
+#option(RA                   "With Remote Access"                    OFF)
+#option(SQL                  "Copy SQL files"                        OFF)
+#option(TOOLS                "Build tools"                           OFF)
+
+message("")
+message(
+  "This script builds the MaNGOS server.
+  Options that can be used in order to configure the process:
+    CMAKE_INSTALL_PREFIX    Path where the server should be installed to
+    PCH                     Use precompiled headers
+    DEBUG                   Debug mode
+    INCLUDE_BINDINGS_DIR    Include a script library in src/bindings/ with the
+                            defined name. the name must corespond to the name of
+                            the folder and the folder must contain a valid
+                            CMakeLists.txt
+    TBB_USE_EXTERNAL        Use external TBB
+    USE_STD_MALLOC          Use standard malloc instead of TBB
+    ACE_USE_EXTERNAL        Use external ACE
+  To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
+  Also, you can specify the generator with -G. see 'cmake --help' for more details
+  For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos"
+)
+message("")

@@ -15,54 +15,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+project(CMaNGOS)
+
 cmake_minimum_required(VERSION 2.8)
 
-project(MaNGOS)
 set(MANGOS_VERSION 0.12.2)
 
-set(CMAKE_MODULE_PATH
-  ${CMAKE_MODULE_PATH}
-  ${CMAKE_SOURCE_DIR}/cmake
-)
+# Set RPATH-handing (CMake parameters)
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH ${LIBS_DIR})
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-# define all options here
-option(DEBUG                "Debug mode"                            OFF)
-option(TBB_USE_EXTERNAL     "Use external TBB"                      OFF)
-option(USE_STD_MALLOC       "Use standard malloc instead of TBB"    OFF)
-option(ACE_USE_EXTERNAL     "Use external ACE"                      OFF)
-option(POSTGRESQL           "Use PostgreSQL"                        OFF)
+# set macro-directory
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/macros")
 
-if(PCHSupport_FOUND AND WIN32) # TODO: why only enable it on windows by default?
-  option(PCH                "Use precompiled headers"               ON)
-else()
-  option(PCH                "Use precompiled headers"               OFF)
-endif()
-# TODO: options that should be checked/created:
-#option(CLI                  "With CLI"                              ON)
-#option(RA                   "With Remote Access"                    OFF)
-#option(SQL                  "Copy SQL files"                        OFF)
-#option(TOOLS                "Build tools"                           OFF)
-
-# Output description of this script
-message("")
-message(
-  "This script builds the MaNGOS server.
-  Options that can be used in order to configure the process:
-    CMAKE_INSTALL_PREFIX    Path where the server should be installed to
-    PCH                     Use precompiled headers
-    DEBUG                   Debug mode
-    INCLUDE_BINDINGS_DIR    Include a script library in src/bindings/ with the
-                            defined name. the name must corespond to the name of
-                            the folder and the folder must contain a valid
-                            CMakeLists.txt
-    TBB_USE_EXTERNAL        Use external TBB
-    USE_STD_MALLOC          Use standard malloc instead of TBB
-    ACE_USE_EXTERNAL        Use external ACE
-  To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
-  Also, you can specify the generator with -G. see 'cmake --help' for more details
-  For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos"
-)
-message("")
+# set default buildoptions and print them
+include(cmake/options.cmake)
 
 # Force out-of-source build
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
@@ -148,7 +117,7 @@ if(ACE_USE_EXTERNAL)
     set(HAVE_ACE_STACK_TRACE_H ON) # config.h.cmake
   endif()
 else()
-  include(cmake/ImportACE.cmake)
+  include(cmake/macros/ImportACE.cmake)
 endif()
 
 if(NOT USE_STD_MALLOC)
@@ -166,7 +135,7 @@ if(NOT USE_STD_MALLOC)
       )
     endif()
   else()
-    include(cmake/ImportTBB.cmake)
+    include(cmake/macros/ImportTBB.cmake)
   endif()
 endif()
 
@@ -198,13 +167,14 @@ if(UNIX)
   find_package(ZLIB REQUIRED)
 endif()
 
-# Add uninstall script and target
+# configure uninstaller
 configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/platform/cmake_uninstall.cmake.in"
   "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
   IMMEDIATE @ONLY
 )
 
+# create uninstaller target (allows for using "make uninstall")
 add_custom_target(uninstall
   "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
 )
@@ -318,11 +288,6 @@ if(MSVC)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
   endif()
 endif()
-
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-set(CMAKE_INSTALL_RPATH ${LIBS_DIR})
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Generate revision-extractor
 set(GENREV_SRC
