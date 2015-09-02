@@ -54,7 +54,6 @@ void ScriptsInit()
     // -- Inicialize the Scripts to be Added --
     AddSC_default();
     // ----------------------------------------
-
 }
 
 MANGOS_DLL_EXPORT
