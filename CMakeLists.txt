@@ -23,7 +23,7 @@ set(MANGOS_VERSION 0.12.2)
 
 # Set RPATH-handing (CMake parameters)
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 set(CMAKE_INSTALL_RPATH ${LIBS_DIR})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -52,9 +52,10 @@ if(PREFIX)
   message(FATAL_ERROR "The parameter PREFIX has been removed. Please re-run CMake and use CMAKE_INSTALL_PREFIX instead to define your installation location!")
 endif()
 
+include(CheckPlatform)
+
 # TODO: use MSVC_CXX_ARCHITECTURE_ID instead to identify platform on windows (not required on other systems)
 # find platform: required to build 3rd party libraries w/o CMake files
-find_package(Platform REQUIRED)
 # Find out what system we use to include the needed libs
 if(WIN32)
   if(PLATFORM MATCHES X86) # 32-bit
@@ -96,8 +97,6 @@ endif()
 # For Unix systems set the rpath so that libraries are found
 set(CMAKE_INSTALL_RPATH ${LIBS_DIR})
 set(CMAKE_INSTALL_NAME_DIR ${LIBS_DIR})
-# Run out of build tree
-set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
 
 # Find needed packages and if necessery abort if something important is missing
 unset(ACE_INCLUDE_DIR CACHE)
@@ -166,18 +165,6 @@ if(UNIX)
   find_package(OpenSSL REQUIRED)
   find_package(ZLIB REQUIRED)
 endif()
-
-# configure uninstaller
-configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/platform/cmake_uninstall.cmake.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-  IMMEDIATE @ONLY
-)
-
-# create uninstaller target (allows for using "make uninstall")
-add_custom_target(uninstall
-  "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-)
 
 # Find core revision
 if(GIT_EXECUTABLE)

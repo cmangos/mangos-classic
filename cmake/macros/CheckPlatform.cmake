@@ -12,3 +12,7 @@ else()
     set(PLATFORM X86)
     message(STATUS "Detected 32-bit platform")
 endif()
+
+if(UNIX)
+  include("${CMAKE_SOURCE_DIR}/cmake/platform/unix/settings.cmake")
+endif()
