@@ -184,6 +184,8 @@ class BattleGroundAB : public BattleGround
         /* Nodes occupying */
         virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
 
+        virtual Team GetPrematureWinner() override;
+
     private:
         /* Gameobject spawning/despawning */
         void _CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay);

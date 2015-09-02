@@ -513,3 +513,22 @@ void BattleGroundAB::UpdatePlayerScore(Player* source, uint32 type, uint32 value
             break;
     }
 }
+
+Team BattleGroundAB::GetPrematureWinner()
+{
+    // How many bases each team owns
+    uint8 ally = 0, horde = 0;
+    for (uint8 node = 0; node < BG_AB_NODES_MAX; ++node)
+        if (m_Nodes[node] == BG_AB_NODE_STATUS_ALLY_OCCUPIED)
+            ++ally;
+        else if (m_Nodes[node] == BG_AB_NODE_STATUS_HORDE_OCCUPIED)
+            ++horde;
+
+    if (horde > ally)
+        return HORDE;
+    if (ally > horde)
+        return ALLIANCE;
+
+    // If the values are equal, fall back to number of players on each team
+    return BattleGround::GetPrematureWinner();
+}

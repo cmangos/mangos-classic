@@ -816,3 +816,17 @@ void BattleGroundAV::Reset()
 
     InitNode(BG_AV_NODES_SNOWFALL_GRAVE, BG_AV_TEAM_NEUTRAL, false);                            // give snowfall neutral owner
 }
+
+Team BattleGroundAV::GetPrematureWinner()
+{
+    int32 hordeScore = m_TeamScores[TEAM_INDEX_HORDE];
+    int32 allianceScore = m_TeamScores[TEAM_INDEX_ALLIANCE];
+
+    if (hordeScore > allianceScore)
+        return HORDE;
+    if (allianceScore > hordeScore)
+        return ALLIANCE;
+
+    // If the values are equal, fall back to number of players on each team
+    return BattleGround::GetPrematureWinner();
+}

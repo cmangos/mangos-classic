@@ -146,6 +146,7 @@ class BattleGroundWS : public BattleGround
         void ClearDroppedFlagGuid(Team team)  { m_DroppedFlagGuid[GetTeamIndexByTeamId(team)].Clear();}
         ObjectGuid const& GetDroppedFlagGuid(Team team) const { return m_DroppedFlagGuid[GetTeamIndexByTeamId(team)];}
         virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        virtual Team GetPrematureWinner() override;
 
     private:
         ObjectGuid m_flagCarrierAlliance;

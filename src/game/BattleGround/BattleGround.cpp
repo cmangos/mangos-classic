@@ -300,14 +300,7 @@ void BattleGround::Update(uint32 diff)
         }
         else if (m_PrematureCountDownTimer < diff)
         {
-            // time's up!
-            Team winner = TEAM_NONE;
-            if (GetPlayersCountByTeam(ALLIANCE) >= GetMinPlayersPerTeam())
-                winner = ALLIANCE;
-            else if (GetPlayersCountByTeam(HORDE) >= GetMinPlayersPerTeam())
-                winner = HORDE;
-
-            EndBattleGround(winner);
+            EndBattleGround(GetPrematureWinner());
             m_PrematureCountDown = false;
         }
         else if (!sBattleGroundMgr.isTesting())
@@ -1190,6 +1183,17 @@ void BattleGround::DoorOpen(ObjectGuid guid)
     }
     else
         sLog.outError("BattleGround: Door %s not found! - doors will be closed.", guid.GetString().c_str());
+}
+
+Team BattleGround::GetPrematureWinner()
+{
+    Team winner = TEAM_NONE;
+    if (GetPlayersCountByTeam(ALLIANCE) >= GetMinPlayersPerTeam())
+        winner = ALLIANCE;
+    else if (GetPlayersCountByTeam(HORDE) >= GetMinPlayersPerTeam())
+        winner = HORDE;
+
+    return winner;
 }
 
 void BattleGround::OnObjectDBLoad(Creature* creature)

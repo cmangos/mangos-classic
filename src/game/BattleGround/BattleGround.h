@@ -450,6 +450,8 @@ class BattleGround
         void DoorOpen(ObjectGuid guid);
         void DoorClose(ObjectGuid guid);
 
+        virtual Team GetPrematureWinner();
+
         virtual bool HandlePlayerUnderMap(Player* /*plr*/) { return false; }
 
         // since arenas can be AvA or Hvh, we have to get the "temporary" team of a player
