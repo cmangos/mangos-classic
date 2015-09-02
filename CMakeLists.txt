@@ -183,9 +183,6 @@ else()
   set(GIT_REVISION "Git not found")
 endif()
 
-message(STATUS "MaNGOS-Core revision  : ${GIT_REVISION}")
-message(STATUS "Install server to     : ${CMAKE_INSTALL_PREFIX}")
-
 if(DEFINED INCLUDE_BINDINGS_DIR AND INCLUDE_BINDINGS_DIR)
   # check if the directory exists
   if(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR})
@@ -195,24 +192,8 @@ if(DEFINED INCLUDE_BINDINGS_DIR AND INCLUDE_BINDINGS_DIR)
   if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR}/CMakeLists.txt)
     message(FATAL_ERROR "The script library does not contain a CMakeLists.txt!")
   endif()
-  message(STATUS "Build script library  : Yes (using ${INCLUDE_BINDINGS_DIR})")
 else()
-  message(STATUS "Build script library  : No")
 endif()
-
-# if(CLI)
-#   message(STATUS "Build with CLI        : Yes (default)")
-#   add_definitions(-DENABLE_CLI)
-# else()
-#   message(STATUS "Build with CLI        : No")
-# endif()
-
-# if(RA)
-#   message(STATUS "* Build with RA         : Yes")
-#   add_definitions(-DENABLE_RA)
-# else(RA)
-#   message(STATUS "* Build with RA         : No  (default)")
-# endif(RA)
 
 if(PCH AND NOT PCHSupport_FOUND)
   set(PCH 0 CACHE BOOL
@@ -221,31 +202,15 @@ if(PCH AND NOT PCHSupport_FOUND)
   message(WARNING "No PCH for your system possible but PCH was set to 1. Resetting it."
   )
 endif()
-if(PCH)
-  message(STATUS "Use PCH               : Yes")
-else()
-  message(STATUS "Use PCH               : No")
-endif()
 
 if(DEBUG)
-  message(STATUS "Build in debug-mode   : Yes")
   set(CMAKE_BUILD_TYPE Debug)
 else()
   set(CMAKE_BUILD_TYPE Release)
-  message(STATUS "Build in debug-mode   : No  (default)")
 endif()
 
-# if(SQL)
-#   message(STATUS "Install SQL-files     : Yes")
-# else()
-#   message(STATUS "Install SQL-files     : No  (default)")
-# endif()
-
-# if(TOOLS)
-#   message(STATUS "Build map/vmap tools  : Yes")
-# else()
-#   message(STATUS "Build map/vmap tools  : No  (default)")
-# endif()
+# print out the results before continuing
+include(cmake/showoptions.cmake)
 
 # Generate revision-extractor
 set(GENREV_SRC
