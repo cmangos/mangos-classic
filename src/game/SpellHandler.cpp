@@ -250,8 +250,11 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
     if (!_player->IsSelfMover())
         return;
 
-    GameObject* obj = GetPlayer()->GetMap()->GetGameObject(guid);
+    GameObject* obj = _player->GetMap()->GetGameObject(guid);
     if (!obj)
+        return;
+
+    if (!obj->IsWithinDistInMap(_player, obj->GetInteractionDistance()))
         return;
 
     // Additional check preventing exploits (ie loot despawned chests)

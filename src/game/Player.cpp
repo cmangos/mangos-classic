@@ -2013,22 +2013,7 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameo
     {
         if (uint32(go->GetGoType()) == gameobject_type || gameobject_type == MAX_GAMEOBJECT_TYPE)
         {
-            float maxdist;
-            switch (go->GetGoType())
-            {
-                // TODO: find out how the client calculates the maximal usage distance to spellless working
-                // gameobjects like mailboxes - 10.0 is a just an abitrary choosen number
-                case GAMEOBJECT_TYPE_MAILBOX:
-                    maxdist = 10.0f;
-                    break;
-                case GAMEOBJECT_TYPE_FISHINGHOLE:
-                    maxdist = 20.0f + CONTACT_DISTANCE;     // max spell range
-                    break;
-                default:
-                    maxdist = INTERACTION_DISTANCE;
-                    break;
-            }
-
+            float maxdist = go->GetInteractionDistance();
             if (go->IsWithinDistInMap(this, maxdist) && go->isSpawned())
                 return go;
 

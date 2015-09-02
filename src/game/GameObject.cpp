@@ -2077,3 +2077,19 @@ void GameObject::TickCapturePoint()
     if (eventId)
         StartEvents_Event(GetMap(), eventId, this, this, true, *capturingPlayers.begin());
 }
+
+float GameObject::GetInteractionDistance()
+{
+    switch (GetGoType())
+    {
+        // TODO: find out how the client calculates the maximal usage distance to spellless working
+        // gameobjects like mailboxes - 10.0 is a just an abitrary chosen number
+        case GAMEOBJECT_TYPE_MAILBOX:
+            return 10.0f;
+        case GAMEOBJECT_TYPE_FISHINGHOLE:
+        case GAMEOBJECT_TYPE_FISHINGNODE:
+            return 20.0f + CONTACT_DISTANCE; // max spell range
+        default:
+            return INTERACTION_DISTANCE;
+    }
+}
