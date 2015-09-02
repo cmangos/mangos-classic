@@ -972,6 +972,9 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     if (!plr)                                               // wrong player
         return;
 
+    if (!_player->IsWithinDistInMap(plr, INSPECT_DISTANCE, false))
+        return;
+
     WorldPacket data(SMSG_INSPECT, 8);
     data << ObjectGuid(guid);
     SendPacket(&data);
@@ -981,40 +984,44 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 {
     ObjectGuid guid;
     recv_data >> guid;
-    // DEBUG_LOG("Party Stats guid is " I64FMTD,guid);
 
-    Player* pl = sObjectMgr.GetPlayer(guid);
-    if (pl)
+    Player* player = sObjectMgr.GetPlayer(guid);
+
+    if (!player)
     {
-        WorldPacket data(MSG_INSPECT_HONOR_STATS, (8 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
-        data << guid;                                       // player guid
-        // Rank, filling bar, PLAYER_BYTES_3, ??
-        data << (uint8)pl->GetByteValue(PLAYER_FIELD_BYTES2, 0);
-        // Today Honorable and Dishonorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
-        // Yesterday Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
-        // Last Week Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS);
-        // This Week Honorable kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
-        // Lifetime Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
-        // Lifetime Dishonorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
-        // Yesterday Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
-        // Last Week Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
-        // This Week Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
-        // Last Week Standing
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
-        data << (uint8)pl->GetHonorHighestRankInfo().visualRank;           // Highest Rank, ??
-        SendPacket(&data);
-    }
-    else
         DEBUG_LOG("%s not found!", guid.GetString().c_str());
+        return;
+    }
+
+    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+        return;
+
+    WorldPacket data(MSG_INSPECT_HONOR_STATS, (8 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
+    data << guid;                                       // player guid
+    // Rank, filling bar, PLAYER_BYTES_3, ??
+    data << (uint8)player->GetByteValue(PLAYER_FIELD_BYTES2, 0);
+    // Today Honorable and Dishonorable Kills
+    data << player->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
+    // Yesterday Honorable Kills
+    data << player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
+    // Last Week Honorable Kills
+    data << player->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS);
+    // This Week Honorable kills
+    data << player->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
+    // Lifetime Honorable Kills
+    data << player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+    // Lifetime Dishonorable Kills
+    data << player->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
+    // Yesterday Honor
+    data << player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
+    // Last Week Honor
+    data << player->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
+    // This Week Honor
+    data << player->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
+    // Last Week Standing
+    data << player->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
+    data << (uint8)player->GetHonorHighestRankInfo().visualRank;           // Highest Rank, ??
+    SendPacket(&data);
 }
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
