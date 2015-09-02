@@ -1,19 +1,5 @@
 #!/bin/sh
 
-# Helper script to create a config file for the cleanup tools
-# The created config file must be edited manually
-
-
-if [ -f "${0%/*}/cleanupTools.config" ]
-then
-  # file already exists, exit
-  exit 0
-fi
-
-# Create file
-cat << EOF > "${0%/*}/cleanupTools.config"
-#!/bin/sh
-
 # Basic configuration for the cleanup helper scripts with mangos
 # Be sure to read this whole file and edit the variables as required
 #
@@ -58,11 +44,7 @@ BASE_COMMIT=""
 # Internal variables, do not change except you know what you are doing
 ###
 # cleanup-tool
-CLEANUP_TOOL="\$BASEPATH/contrib/cleanupTools/cleanupStyle.sh"
+CLEANUP_TOOL="$BASEPATH/contrib/cleanupTools/cleanupStyle.sh"
 # path from current's caller position to ASTYLE
-ASTYLE="\$BASEPATH/\$ASTYLE"
+ASTYLE="$BASEPATH/$ASTYLE"
 
-EOF
-
-# Return wil error, to display message if file is not found
-exit 1
