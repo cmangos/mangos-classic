@@ -180,6 +180,14 @@ void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& recv_data)
     {
         uint32 node;
         recv_data >> node;
+
+        if (!_player->m_taxi.IsTaximaskNodeKnown(node) && !_player->isTaxiCheater())
+        {
+            SendActivateTaxiReply(ERR_TAXINOTVISITED);
+            recv_data.rpos(recv_data.wpos()); // prevent additional spam at rejected packet
+            return;
+        }
+
         nodes.push_back(node);
     }
 
@@ -278,6 +286,15 @@ void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recv_data)
     {
         DEBUG_LOG("WORLD: HandleActivateTaxiOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
         return;
+    }
+
+    if (!_player->isTaxiCheater())
+    {
+        if (!_player->m_taxi.IsTaximaskNodeKnown(nodes[0]) || !_player->m_taxi.IsTaximaskNodeKnown(nodes[1]))
+        {
+            SendActivateTaxiReply(ERR_TAXINOTVISITED);
+            return;
+        }
     }
 
     GetPlayer()->ActivateTaxiPathTo(nodes, npc);
