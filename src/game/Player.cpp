@@ -13445,7 +13445,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             m_bgData.bgTypeID = currentBg->GetTypeID();     // bg data not marked as modified
 
             // join player to battleground group
-            currentBg->EventPlayerLoggedIn(this, GetObjectGuid());
+            currentBg->EventPlayerLoggedIn(this);
             currentBg->AddOrSetPlayerToCorrectBgGroup(this, GetObjectGuid(), m_bgData.bgTeam);
 
             SetInviteForBattleGroundQueueType(bgQueueTypeId, currentBg->GetInstanceID());
