@@ -383,13 +383,12 @@ namespace VMAP
                     fread(&referencedVal, sizeof(uint32), 1, tf);
                     if (!iLoadedSpawns.count(referencedVal))
                     {
-#ifdef VMAP_DEBUG
                         if (referencedVal > iNTreeValues)
                         {
-                            DEBUG_LOG("invalid tree element! (%u/%u)", referencedVal, iNTreeValues);
+                            ERROR_LOG("invalid tree element! (%u/%u)", referencedVal, iNTreeValues);
                             continue;
                         }
-#endif
+
                         iTreeValues[referencedVal] = ModelInstance(spawn, model);
                         iLoadedSpawns[referencedVal] = 1;
                     }
