@@ -6,9 +6,10 @@ if(PLATFORM EQUAL X64)
   message(STATUS "MSVC: 64-bit platform, enforced -D_WIN64 parameter")
 
   #Enable extended object support for debug compiles on X64 (not required on X86)
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
-  message(STATUS "MSVC: Enabled extended object-support for debug-compiles")
-else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+  message(STATUS "MSVC: Enabled increased number of sections in object files")
+
+elseif(PLATFORM EQUAL X86)
   # mark 32 bit executables large address aware so they can use > 2GB address space
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /LARGEADDRESSAWARE")
   message(STATUS "MSVC: Enabled large address awareness")
@@ -30,9 +31,9 @@ message(STATUS "MSVC: Disabled NON-SECURE warnings")
 
 # disable warnings in Visual Studio 8 and above if not wanted
 if(NOT WARNINGS)
-  if(MSVC AND NOT CMAKE_GENERATOR MATCHES "Visual Studio 7")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /wd4619")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267 /wd4619")
+  if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 7")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996 /wd4355 /wd4244 /wd4985 /wd4267")
     message(STATUS "MSVC: Disabled generic compiletime warnings")
   endif()
 endif()

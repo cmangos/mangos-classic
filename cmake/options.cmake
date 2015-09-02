@@ -18,7 +18,7 @@ endif()
 #option(TOOLS                "Build tools"                           OFF)
 
 message("")
-message(
+message(STATUS
   "This script builds the MaNGOS server.
   Options that can be used in order to configure the process:
     CMAKE_INSTALL_PREFIX    Path where the server should be installed to
