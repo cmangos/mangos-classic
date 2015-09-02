@@ -480,7 +480,6 @@
     <ClInclude Include="..\..\src\shared\LockedQueue.h" />
     <ClInclude Include="..\..\src\shared\Log.h" />
     <ClInclude Include="..\..\src\shared\ProgressBar.h" />
-    <ClInclude Include="..\..\src\shared\revision_nr.h" />
     <ClInclude Include="..\..\src\shared\revision_sql.h" />
     <ClInclude Include="..\..\src\shared\ServiceWin32.h" />
     <ClInclude Include="..\..\src\shared\Threading.h" />
