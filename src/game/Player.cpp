@@ -322,6 +322,15 @@ void TradeData::SetMoney(uint32 money)
     if (m_money == money)
         return;
 
+    if (money > m_player->GetMoney())
+    {
+        TradeStatusInfo info;
+        info.Status = TRADE_STATUS_CLOSE_WINDOW;
+        info.Result = EQUIP_ERR_NOT_ENOUGH_MONEY;
+        m_player->GetSession()->SendTradeStatus(info);
+        return;
+    }
+
     m_money = money;
 
     SetAccepted(false);
