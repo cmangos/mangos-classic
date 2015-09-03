@@ -1,6 +1,6 @@
 #ifndef __REVISION_SQL_H__
 #define __REVISION_SQL_H__
- #define REVISION_DB_CHARACTERS "required_z2559_s2204_12756_01_characters_pvpstats"
- #define REVISION_DB_MANGOS "required_z2674_sxxxx_xxxxx_01_mangos_creature_template"
- #define REVISION_DB_REALMD "required_10008_01_realmd_realmd_db_version"
+ #define REVISION_DB_CHARACTERS "required_z2678_02_characters"
+ #define REVISION_DB_MANGOS "required_z2678_03_mangos"
+ #define REVISION_DB_REALMD "required_z2678_01_realmd"
 #endif // __REVISION_SQL_H__
