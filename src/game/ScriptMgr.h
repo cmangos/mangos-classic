@@ -549,7 +549,6 @@ class ScriptMgr
         CreatureAI* GetCreatureAI(Creature* pCreature);
         InstanceData* CreateInstanceData(Map* pMap);
 
-        char const* GetScriptLibraryVersion() const;
         bool OnGossipHello(Player* pPlayer, Creature* pCreature);
         bool OnGossipHello(Player* pPlayer, GameObject* pGameObject);
         bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action, const char* code);
@@ -597,7 +596,6 @@ class ScriptMgr
 
         void (MANGOS_IMPORT* m_pOnInitScriptLibrary)();
         void (MANGOS_IMPORT* m_pOnFreeScriptLibrary)();
-        const char* (MANGOS_IMPORT* m_pGetScriptLibraryVersion)();
 
         CreatureAI* (MANGOS_IMPORT* m_pGetCreatureAI)(Creature*);
         InstanceData* (MANGOS_IMPORT* m_pCreateInstanceData)(Map*);

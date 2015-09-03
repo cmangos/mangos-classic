@@ -103,11 +103,7 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
 
     if (sScriptMgr.IsScriptLibraryLoaded())
     {
-        char const* ver = sScriptMgr.GetScriptLibraryVersion();
-        if (ver && *ver)
-            PSendSysMessage(LANG_USING_SCRIPT_LIB, ver);
-        else
-            SendSysMessage(LANG_USING_SCRIPT_LIB_UNKNOWN);
+        SendSysMessage(LANG_USING_SCRIPT_LIB);
     }
     else
         SendSysMessage(LANG_USING_SCRIPT_LIB_NONE);
