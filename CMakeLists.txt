@@ -19,7 +19,7 @@ project(CMaNGOS)
 
 cmake_minimum_required(VERSION 2.8)
 
-set(MANGOS_VERSION 0.12.2)
+set(MANGOS_VERSION 0.12.3)
 
 # Set RPATH-handing (CMake parameters)
 set(CMAKE_SKIP_BUILD_RPATH FALSE)

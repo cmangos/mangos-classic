@@ -27,7 +27,7 @@
 
 #ifndef _VERSION
 #if PLATFORM == PLATFORM_WINDOWS
-# define _VERSION(REVD,REVT,REVH) "0.12.2" " (" REVD " " REVT " - " REVH ")"
+# define _VERSION(REVD,REVT,REVH) "0.12.3" " (" REVD " " REVT " - " REVH ")"
 #else
 # define _VERSION(REVD,REVT,REVH) "@VERSION@" " (" REVD " " REVT " - " REVH ")"
 #endif
