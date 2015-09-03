@@ -133,7 +133,7 @@ class BattleGroundWS : public BattleGround
         virtual void EventPlayerCapturedFlag(Player* source) override;
 
         void RemovePlayer(Player* plr, ObjectGuid guid) override;
-        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         void HandleKillPlayer(Player* player, Player* killer) override;
         virtual void Reset() override;
         void EndBattleGround(Team winner) override;

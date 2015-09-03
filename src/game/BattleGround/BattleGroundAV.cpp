@@ -342,7 +342,7 @@ void BattleGroundAV::EndBattleGround(Team winner)
     BattleGround::EndBattleGround(winner);
 }
 
-void BattleGroundAV::HandleAreaTrigger(Player* source, uint32 trigger)
+bool BattleGroundAV::HandleAreaTrigger(Player* source, uint32 trigger)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
     switch (trigger)
@@ -360,19 +360,10 @@ void BattleGroundAV::HandleAreaTrigger(Player* source, uint32 trigger)
             else
                 source->LeaveBattleground();
             break;
-        case 3326:
-        case 3327:
-        case 3328:
-        case 3329:
-        case 3330:
-        case 3331:
-            // source->Unmount();
-            break;
         default:
-            DEBUG_LOG("BattleGroundAV: WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
-//            source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", trigger);
-            break;
+            return false;
     }
+    return true;
 }
 
 void BattleGroundAV::UpdatePlayerScore(Player* source, uint32 type, uint32 value)

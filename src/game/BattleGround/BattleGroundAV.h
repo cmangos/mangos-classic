@@ -335,7 +335,7 @@ class BattleGroundAV : public BattleGround
         // world states
         virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
-        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         virtual void Reset() override;
 
         /*general stuff*/
