@@ -92,13 +92,6 @@ char db_sql_rev_field[NUM_DATABASES][MAX_PATH] =
     "REVISION_DB_REALMD"
 };
 
-bool db_sql_rev_parent[NUM_DATABASES] =
-{
-    false,
-    false,
-    true
-};
-
 #define REV_PREFIX "z"
 #define REV_SCAN   REV_PREFIX "%d"
 #define REV_PRINT  REV_PREFIX "%04d"
@@ -368,7 +361,6 @@ bool amend_commit()
 struct sql_update_info
 {
     int rev;
-    char parentRev[MAX_BUF];
     int nr;
     int db_idx;
     char db[MAX_BUF];
@@ -380,14 +372,15 @@ bool get_sql_update_info(const char* buffer, sql_update_info& info)
 {
     info.table[0] = '\0';
     int dummy[3];
-    char dummyStr[MAX_BUF];
-    if (sscanf(buffer, REV_SCAN "_%[^_]_%d_%d", &dummy[0], &dummyStr, &dummy[1], &dummy[2]) == 4)
+    if (sscanf(buffer, REV_SCAN "_%d_%d", &dummy[0], &dummy[1], &dummy[2]) == 3)
         return false;
 
-    if (sscanf(buffer, REV_SCAN "_%[^_]_%d_%[^_]_%[^.].sql", &info.rev, &info.parentRev, &info.nr, info.db, info.table) != 5 &&
-            sscanf(buffer, REV_SCAN "_%[^_]_%d_%[^.].sql", &info.rev, &info.parentRev, &info.nr, info.db) != 3)
+    if (sscanf(buffer, REV_SCAN "_%d_%[^_]_%[^.].sql", &info.rev, &info.nr, info.db, info.table) != 4 &&
+            sscanf(buffer, REV_SCAN "_%d_%[^.].sql", &info.rev, &info.nr, info.db) != 3)
     {
-        return false;
+        if (sscanf(buffer, REV_SCAN "_%[^_]_%[^.].sql", &info.nr, info.db, info.table) != 3 &&
+                sscanf(buffer, REV_SCAN "_%[^.].sql", &info.nr, info.db) != 2)
+            return false;
     }
 
     for (info.db_idx = 0; info.db_idx < NUM_DATABASES; info.db_idx++)
@@ -457,10 +450,7 @@ bool find_sql_updates()
             {
                 last_sql_rev[info.db_idx] = info.rev;
                 last_sql_nr[info.db_idx] = info.nr;
-                if (db_sql_rev_parent[info.db_idx])
-                    snprintf(last_sql_update[info.db_idx], MAX_PATH, "%s_%0*d_%s%s%s", info.parentRev, 2, info.nr, info.db, info.has_table ? "_" : "", info.table);
-                else
-                    sscanf(buffer, "%[^.]", last_sql_update[info.db_idx]);
+                sscanf(buffer, "%[^.]", last_sql_update[info.db_idx]);
             }
             new_sql_updates.erase(itr);
         }
@@ -501,42 +491,33 @@ bool convert_sql_updates()
         if (info.db_idx == NUM_DATABASES) return false;
 
         // generating the new name should work for updates with or without a rev
-        char src_file[MAX_PATH], new_name[MAX_PATH], new_req_name[MAX_PATH], dst_file[MAX_PATH];
+        char src_file[MAX_PATH], new_name[MAX_PATH], dst_file[MAX_PATH];
         snprintf(src_file, MAX_PATH, "%s%s/%s", path_prefix, sql_update_dir, itr->c_str());
-        snprintf(new_name, MAX_PATH, REV_PRINT "_%s_%0*d_%s%s%s", rev, info.parentRev, 2, info.nr, info.db, info.has_table ? "_" : "", info.table);
+        snprintf(new_name, MAX_PATH, REV_PRINT "_%0*d_%s%s%s", rev, 2, info.nr, info.db, info.has_table ? "_" : "", info.table);
         snprintf(dst_file, MAX_PATH, "%s%s/%s.sql", path_prefix, sql_update_dir, new_name);
-
-        if (db_sql_rev_parent[info.db_idx])
-            snprintf(new_req_name, MAX_PATH, "%s_%0*d_%s%s%s", info.parentRev, 2, info.nr, info.db, info.has_table ? "_" : "", info.table);
-        else
-            strncpy(new_req_name, new_name, MAX_PATH);
 
         FILE* fin = fopen(src_file, "r");
         if (!fin) return false;
 
         std::ostringstream out_buff;
 
-        // add the update requirements for non-parent-controlled revision sql update
-        if (!db_sql_rev_parent[info.db_idx])
-        {
-            // add the update requirements
-            out_buff << "ALTER TABLE " << db_version_table[info.db_idx]
-                     << " CHANGE COLUMN required_" << last_sql_update[info.db_idx]
-                     << " required_" << new_name << " bit;\n\n";
+        // add the update requirements
+        out_buff << "ALTER TABLE " << db_version_table[info.db_idx]
+                 << " CHANGE COLUMN required_" << last_sql_update[info.db_idx]
+                 << " required_" << new_name << " bit;\n\n";
 
-            // skip the first one or two lines from the input
-            // if it already contains update requirements
-            if (fgets(buffer, MAX_BUF, fin))
+        // skip the first one or two lines from the input
+        // if it already contains update requirements
+        if (fgets(buffer, MAX_BUF, fin))
+        {
+            char dummy[MAX_BUF];
+            if (sscanf(buffer, "ALTER TABLE %s CHANGE COLUMN required_%s required_%s bit", dummy, dummy, dummy) == 3)
             {
-                char dummy[MAX_BUF];
-                if (sscanf(buffer, "ALTER TABLE %s CHANGE COLUMN required_%s required_%s bit", dummy, dummy, dummy) == 3)
-                {
-                    if (fgets(buffer, MAX_BUF, fin) && buffer[0] != '\n')
-                        out_buff << buffer;
-                }
-                else
+                if (fgets(buffer, MAX_BUF, fin) && buffer[0] != '\n')
                     out_buff << buffer;
             }
+            else
+                out_buff << buffer;
         }
 
         // copy the rest of the file
@@ -564,7 +545,7 @@ bool convert_sql_updates()
         }
 
         // update the last sql update for the current database
-        strncpy(last_sql_update[info.db_idx], new_req_name, MAX_PATH);
+        strncpy(last_sql_update[info.db_idx], new_name, MAX_PATH);
     }
 
     return true;
