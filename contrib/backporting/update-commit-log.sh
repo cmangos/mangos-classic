@@ -32,7 +32,7 @@ fi
 
 HASH=$1
 
-git log $HASH..$COMPARE_PATH --pretty=format:"${FULL_FORMAT}" --reverse --dirstat >> $OUTPUT_FILE
+git log $HASH..$COMPARE_PATH --pretty=format:"${FULL_FORMAT}" --reverse >> $OUTPUT_FILE
 echo "" >> $OUTPUT_FILE
 echo "$(git log -1 --pretty="${FOOTER_FORMAT}" $COMPARE_PATH)" >> $OUTPUT_FILE
 echo "" >> $OUTPUT_FILE
