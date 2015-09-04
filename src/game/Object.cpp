@@ -232,19 +232,23 @@ void Object::DestroyForPlayer(Player* target) const
 
 void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 {
-    uint32 moveFlags = MOVEFLAG_NONE;
+    Unit* unit = ((Unit*)this);
 
     *data << uint8(updateFlags);                            // update flags
 
     if (updateFlags & UPDATEFLAG_LIVING)
     {
         if (m_objectTypeId == TYPEID_PLAYER && ((Player*)this)->GetTransport())
-        {
-            moveFlags |= MOVEFLAG_ONTRANSPORT;
-        }
+            unit->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
+        else
+            unit->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
 
-        *data << uint32(moveFlags);                         // movement flags
-        *data << uint32(WorldTimer::getMSTime());           // time (in milliseconds)
+        if (m_objectTypeId == TYPEID_PLAYER)
+            if (unit->m_movementInfo.GetMovementFlags() & MOVEFLAG_SWIMMING)
+                unit->m_movementInfo.RemoveMovementFlag(MOVEFLAG_SWIMMING);
+
+        *data << uint32(unit->m_movementInfo.GetMovementFlags());   // movement flags
+        *data << uint32(WorldTimer::getMSTime());                   // time (in milliseconds)
     }
 
     if (updateFlags & UPDATEFLAG_HAS_POSITION)              // 0x40
@@ -280,11 +284,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 
     if (updateFlags & UPDATEFLAG_LIVING)                    // 0x20
     {
-        Unit* unit = ((Unit*)this);
-
         *data << (float)0;
 
-        if (moveFlags & 0x2000)                             // update self
+        if (unit->m_movementInfo.GetMovementFlags() & 0x02000)      // MOVEFLAG_FALLING
         {
             *data << (float)0;
             *data << (float)1.0;
@@ -300,36 +302,16 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
         *data << float(unit->GetSpeed(MOVE_SWIM_BACK));
         *data << float(unit->GetSpeed(MOVE_TURN_RATE));
 
-        if (m_objectTypeId == TYPEID_UNIT)
-        {
-            uint8 PosCount = 0;
-            if (moveFlags & 0x400000)
-            {
-                *data << (uint32)0x0;
-                *data << (uint32)0x659;
-                *data << (uint32)0xB7B;
-                *data << (uint32)0xFDA0B4;
-                *data << (uint32)PosCount;
-                for (int i = 0; i < PosCount + 1; i++)
-                {
-                    *data << (float)0;                      // x
-                    *data << (float)0;                      // y
-                    *data << (float)0;                      // z
-                }
-            }
-        }
+        if (unit->m_movementInfo.GetMovementFlags() & MOVEFLAG_SPLINE_ENABLED)        // 0x00400000
+            Movement::PacketBuilder::WriteCreate(*unit->movespline, *data);
     }
 
     if (updateFlags & UPDATEFLAG_ALL)                       // 0x10
-    {
         *data << (uint32)0x1;
-    }
 
     // 0x2
     if (updateFlags & UPDATEFLAG_TRANSPORT)
-    {
         *data << uint32(WorldTimer::getMSTime());           // ms time
-    }
 }
 
 void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* updateMask, Player* target) const
