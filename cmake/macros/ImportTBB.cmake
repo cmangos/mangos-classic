@@ -43,8 +43,8 @@ if(WIN32)
 #     IMPORTED_IMPLIB_DEBUG ${CMAKE_SOURCE_DIR}/dep/tbb/build/${VSDIR}/${ARCHDIR}/Debug/tbbmalloc_debug.lib
 #   )
   set(TBB_LIBRARIES_DIR
-    ${CMAKE_SOURCE_DIR}/dep/tbb/build/${VSDIR}/${ARCHDIR}/Release
-    ${CMAKE_SOURCE_DIR}/dep/tbb/build/${VSDIR}/${ARCHDIR}/Debug
+    ${ROOT_DIR}/dep/tbb/build/${VSDIR}/${ARCHDIR}/Release
+    ${ROOT_DIR}/dep/tbb/build/${VSDIR}/${ARCHDIR}/Debug
   )
 else()
   if(APPLE)
@@ -61,8 +61,8 @@ else()
 #     IMPORTED_LOCATION_DEBUG ${CMAKE_SOURCE_DIR}/dep/tbb/build/libs_debug/libtbbmalloc_debug.${LIB_SUFFIX}
 #   )
   set(TBB_LIBRARIES_DIR
-    ${CMAKE_SOURCE_DIR}/dep/tbb/build/libs_release
-    ${CMAKE_SOURCE_DIR}/dep/tbb/build/libs_debug
+    ${ROOT_DIR}/dep/tbb/build/libs_release
+    ${ROOT_DIR}/dep/tbb/build/libs_debug
   )
 endif()
 # Sadly doesn't work in current version
@@ -71,7 +71,7 @@ endif()
 # set_target_properties(tbb PROPERTIES DEPENDS TBB_Project)
 # set_target_properties(tbbmalloc PROPERTIES DEPENDS TBB_Project)
 
-set(TBB_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/tbb/include)
+set(TBB_INCLUDE_DIR ${ROOT_DIR}/dep/tbb/include)
 set(TBB_LIBRARIES optimized tbb optimized tbbmalloc debug tbb_debug debug tbbmalloc_debug)
 
 # Little Hack to remove the link warnings because of not found directories

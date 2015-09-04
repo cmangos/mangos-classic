@@ -14,6 +14,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-SET(CMAKE_VERBOSE_MAKEFILE ON)
-cmake_minimum_required (VERSION 2.6)
-ADD_EXECUTABLE (git_id git_id.cpp)
+cmake_minimum_required(VERSION 2.8)
+
+include(../../cmake/common.cmake)
+include(CheckPlatform)
+
+ADD_EXECUTABLE(git_id git_id.cpp)

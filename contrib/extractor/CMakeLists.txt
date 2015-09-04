@@ -17,6 +17,9 @@
 cmake_minimum_required (VERSION 2.6)
 project (MANGOS_MAP_EXTRACTOR)
 
+include(../../cmake/common.cmake)
+include(CheckPlatform)
+
 add_subdirectory (libmpq)
 add_subdirectory (loadlib)
 

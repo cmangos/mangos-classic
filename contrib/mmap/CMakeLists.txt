@@ -12,6 +12,9 @@ cmake_minimum_required (VERSION 2.6)
 
 project( MoveMapGen )
 
+include(../../cmake/common.cmake)
+include(CheckPlatform)
+
 ADD_DEFINITIONS(-DMMAP_GENERATOR -DNO_CORE_FUNCS -DDEBUG)
 ADD_DEFINITIONS(-DDT_POLYREF64)
 

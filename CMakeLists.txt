@@ -21,14 +21,13 @@ cmake_minimum_required(VERSION 2.8)
 
 set(MANGOS_VERSION 0.12.3)
 
+include(cmake/common.cmake)
+
 # Set RPATH-handing (CMake parameters)
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 set(CMAKE_INSTALL_RPATH ${LIBS_DIR})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-# set macro-directory
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/macros")
 
 # set default buildoptions and print them
 include(cmake/options.cmake)

@@ -12,6 +12,9 @@
 cmake_minimum_required (VERSION 2.6)
 project (MANGOS_VMAP_ASSEMB_IO)
 
+include(../../cmake/common.cmake)
+include(CheckPlatform)
+
 set(CMAKE_VERBOSE_MAKEFILE true)
 
 # uncomment next line to disable debug mode
