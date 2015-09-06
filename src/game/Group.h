@@ -183,6 +183,8 @@ class MANGOS_DLL_SPEC Group
         bool   AddMember(ObjectGuid guid, const char* name);
         uint32 RemoveMember(ObjectGuid guid, uint8 method); // method: 0=just remove, 1=kick
         void   ChangeLeader(ObjectGuid guid);
+        void   CheckLeader(const uint64 &guid, bool isLogout);
+        bool   ChangeLeaderToFirstOnlineMember();
         void   SetLootMethod(LootMethod method) { m_lootMethod = method; }
         void   SetLooterGuid(ObjectGuid guid) { m_looterGuid = guid; }
         void   UpdateLooterGuid(WorldObject* pSource, bool ifneed = false);
@@ -287,6 +289,7 @@ class MANGOS_DLL_SPEC Group
 
         void SendTargetIconList(WorldSession* session);
         void SendUpdate();
+        void Update();
         void UpdatePlayerOutOfRange(Player* pPlayer);
         // ignore: GUID of player that will be ignored
         void BroadcastPacket(WorldPacket* packet, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = ObjectGuid());
@@ -395,5 +398,6 @@ class MANGOS_DLL_SPEC Group
         Rolls               RollId;
         BoundInstancesMap   m_boundInstances;
         uint8*              m_subGroupsCounts;
+        time_t              m_leaderLogoutTime;
 };
 #endif

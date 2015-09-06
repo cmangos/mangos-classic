@@ -475,6 +475,8 @@ class ObjectMgr
         Group* GetGroupById(uint32 id) const;
         void AddGroup(Group* group);
         void RemoveGroup(Group* group);
+        GroupMap::const_iterator GetGroupSetBegin() { return mGroupMap.begin(); }
+        GroupMap::const_iterator GetGroupSetEnd() { return mGroupMap.end(); }
 
         CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id) const;
         uint32 GetCreatureModelOtherTeamModel(uint32 modelId) const;

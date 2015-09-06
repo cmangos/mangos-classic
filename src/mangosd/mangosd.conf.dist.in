@@ -542,6 +542,10 @@ LogColors = ""
 #        Enable or disable instant logout for security level (0..4) or high (NOT in combat/while dueling/while falling)
 #        Default: 1 (Mods/GMs/Admins)
 #
+#    GroupLeaderReconnectPeriod
+#        The time the leader of a group has to reconnect before the lead goes to another player (also applies for a server crash)
+#        Default: 120 (seconds)
+#
 #    AllFlightPaths
 #        Players will start with all flight paths (Note: ALL flight paths, not only player's team)
 #        Default: 0 (true)
@@ -733,6 +737,7 @@ StartHonorPoints = 0
 MinHonorKills = 15
 MaintenanceDay = 3
 InstantLogout = 1
+GroupLeaderReconnectPeriod = 120
 AllFlightPaths = 0
 AlwaysMaxSkillForLevel = 0
 ActivateWeather = 1

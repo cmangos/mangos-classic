@@ -51,7 +51,7 @@ void Roll::targetObjectBuildLink()
 
 Group::Group() : m_Id(0), m_groupType(GROUPTYPE_NORMAL),
     m_bgGroup(NULL), m_lootMethod(FREE_FOR_ALL), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
-    m_subGroupsCounts(NULL)
+    m_subGroupsCounts(NULL), m_leaderLogoutTime(0)
 {
 }
 
@@ -140,6 +140,7 @@ bool Group::LoadGroupFromDB(Field* fields)
 
     m_Id = fields[15].GetUInt32();
     m_leaderGuid = ObjectGuid(HIGHGUID_PLAYER, fields[14].GetUInt32());
+    m_leaderLogoutTime = time(NULL); // Give the leader a chance to keep his position after a server crash
 
     // group leader not exist
     if (!sObjectMgr.GetPlayerNameByGUID(m_leaderGuid, m_leaderName))
@@ -350,6 +351,53 @@ void Group::ChangeLeader(ObjectGuid guid)
     data << slot->name;
     BroadcastPacket(&data, true);
     SendUpdate();
+}
+
+void Group::CheckLeader(const uint64 &guid, bool isLogout)
+{
+    if(IsLeader(guid))
+    {
+        if(isLogout)
+            m_leaderLogoutTime = time(NULL);
+        else
+            m_leaderLogoutTime = 0;
+    }
+    else
+    {
+        if(!isLogout && !m_leaderLogoutTime) //normal member logins
+        {
+            Player *leader = NULL;
+
+            //find the leader from group members
+            for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                if(itr->getSource()->GetGUID() == m_leaderGuid)
+                {
+                    leader = itr->getSource();
+                    break;
+                }
+            }
+
+            if(!leader || !leader->IsInWorld())
+                m_leaderLogoutTime = time(NULL);
+        }
+    }
+}
+
+bool Group::ChangeLeaderToFirstOnlineMember()
+{
+
+    for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player* player = itr->getSource();
+
+        if (player && player->IsInWorld() && player->GetGUID() != m_leaderGuid)
+        {
+            ChangeLeader(player->GetGUID());
+            return true;
+        }
+    }
+    return false;
 }
 
 void Group::Disband(bool hideDestroy)
@@ -931,7 +979,13 @@ void Group::SendUpdate()
             if (citr->guid == citr2->guid)
                 continue;
             Player* member = sObjectMgr.GetPlayer(citr2->guid);
-            uint8 onlineState = (member) ? MEMBER_STATUS_ONLINE : MEMBER_STATUS_OFFLINE;
+            uint8 onlineState = MEMBER_STATUS_OFFLINE; //by default members are offline
+            
+            if(member && (!member->GetSession()->PlayerLogout()))
+            {
+                 onlineState = MEMBER_STATUS_ONLINE; //when player is login out member exists.
+            }            
+            
             onlineState = onlineState | ((isBGGroup()) ? MEMBER_STATUS_PVP : 0);
 
             data << citr2->name;
@@ -949,6 +1003,28 @@ void Group::SendUpdate()
             data << uint8(m_lootThreshold);                 // loot threshold
         }
         player->GetSession()->SendPacket(&data);
+        
+        //when player is loading we need a stats update
+        if(player->GetSession()->PlayerLoading())
+        {
+            player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
+            UpdatePlayerOutOfRange(player);
+        }
+    }
+}
+
+// Automatic Update by World thread
+void Group::Update()
+{
+    if (m_leaderLogoutTime)
+    {
+        time_t thisTime = time(NULL);
+
+        if ( thisTime > (int32) (m_leaderLogoutTime + sWorld.getConfig(CONFIG_UINT32_GROUPLEADER_RECONNECT_PERIOD)) )
+        {
+            ChangeLeaderToFirstOnlineMember();
+            m_leaderLogoutTime = 0;
+        }
     }
 }
 
