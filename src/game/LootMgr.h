@@ -114,7 +114,7 @@ public:
     GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(NULL), m_loot(NULL) {}
     ~GroupLootRoll();
 
-    void Start(Loot& loot, uint32 itemSlot);
+    bool TryToStart(Loot& loot, uint32 itemSlot);
     bool PlayerVote(Player* playerGuid, RollVote vote);
     bool UpdateRoll();
 

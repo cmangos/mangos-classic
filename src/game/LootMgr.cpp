@@ -622,36 +622,54 @@ GroupLootRoll::~GroupLootRoll()
         SendAllPassed();
 }
 
-// Start the group roll for the specified item
-void GroupLootRoll::Start(Loot& loot, uint32 itemSlot)
+// Try to start the group roll for the specified item (it may fail for quest item or any condition
+// If this method return false the roll have to be removed from the container to avoid any problem
+bool GroupLootRoll::TryToStart(Loot& loot, uint32 itemSlot)
 {
     if (!m_isStarted)
     {
         if (itemSlot >= loot.m_lootItems.size())
-            return;
+            return false;
 
         // initialize the data needed for the roll
         m_lootItem = loot.GetLootItemInSlot(itemSlot);
+
+        if (m_lootItem->lootItemType == LOOTITEM_TYPE_QUEST)
+            return false;
+
         m_loot = &loot;
         m_itemSlot = itemSlot;
         m_lootItem->isBlocked = true;                          // block the item while rolling
+
+        uint32 playerCount = 0;
         for (GuidSet::const_iterator itr = m_loot->m_ownerSet.begin(); itr != m_loot->m_ownerSet.end(); ++itr)
         {
-            if (loot.m_lootMethod != NEED_BEFORE_GREED)
-                m_rollVoteMap[*itr].vote = ROLL_NOT_EMITED_YET; // initialize player vote map
-            else
+            Player* plr = sObjectMgr.GetPlayer(*itr);
+            if (!plr || !m_lootItem->AllowedForPlayer(plr, loot.GetLootTarget()))   // check if player meet the condition to be able to roll this item
             {
-
+                m_rollVoteMap[*itr].vote = ROLL_NOT_VALID;
+                continue;
             }
+            m_rollVoteMap[*itr].vote = ROLL_NOT_EMITED_YET; // initialize player vote map
+            ++playerCount;
         }
 
         // initialize item prototype
         m_voteMask = ROLL_VOTE_MASK_ALL;
 
-        SendStartRoll();
-        m_endTime = time(NULL) + (LOOT_ROLL_TIMEOUT / 1000);
-        m_isStarted = true;
+        if (playerCount > 1)                                  // check if more than one player can loot this item
+        {
+            // start the roll
+            SendStartRoll();
+            m_endTime = time(NULL) + (LOOT_ROLL_TIMEOUT / 1000);
+            m_isStarted = true;
+            return true;
+        }
+        // no need to start roll if one or less player can loot this item so place it under threshold
+        m_lootItem->isUnderThreshold = true;
+        m_lootItem->isBlocked = false;
     }
+    return false;
 }
 
 // Add vote from playerGuid
@@ -1287,7 +1305,7 @@ void Loot::GroupCheck()
 
                 // roll for over-threshold item if it's one-player loot
                 if (!lootItem->freeForAll && itemProto->Quality < uint32(m_threshold))
-                    lootItem->isUnderThreshold = 1;
+                    lootItem->isUnderThreshold = true;
             }
             break;
         }
@@ -1306,9 +1324,12 @@ void Loot::GroupCheck()
 
                 // roll for over-threshold item if it's one-player loot
                 if (itemProto->Quality >= uint32(m_threshold) && !lootItem->freeForAll)
-                    m_roll[itemSlot].Start(*this, itemSlot);
+                {
+                    if (!m_roll[itemSlot].TryToStart(*this, itemSlot))      // Create and try to start a roll
+                        m_roll.erase(m_roll.find(itemSlot));                // Cannot start roll so we have to delete it (find will not fail as the item was just created)
+                }
                 else
-                    lootItem->isUnderThreshold = 1;
+                    lootItem->isUnderThreshold = true;
             }
             break;
         }
