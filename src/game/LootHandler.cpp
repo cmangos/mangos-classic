@@ -162,7 +162,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
         return;
     }
 
-    InventoryResult result = pLoot->SendItem(_player, lootItem);
+    InventoryResult result = pLoot->SendItem(target, lootItem);
 
     if (result != EQUIP_ERR_OK)
     {
