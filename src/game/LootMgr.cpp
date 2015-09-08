@@ -427,7 +427,7 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
         return MAX_LOOT_SLOT_TYPE;
 
     if (freeForAll)
-        return loot->m_lootMethod == NOT_GROUP_TYPE_LOOT ? LOOT_SLOT_OWNER : LOOT_SLOT_NORMAL; // player have not yet looted a free for all item
+        return LOOT_SLOT_NORMAL;                                         // player have not yet looted a free for all item
 
     if (!lootedBy.empty())
         return MAX_LOOT_SLOT_TYPE;                                       // a not free for all item should not be looted more than once
@@ -435,12 +435,12 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
     if (lootItemType != LOOTITEM_TYPE_NORMAL)
     {
         if (loot->m_lootMethod == NOT_GROUP_TYPE_LOOT || loot->m_lootMethod == FREE_FOR_ALL)
-            return LOOT_SLOT_OWNER;
+            return LOOT_SLOT_NORMAL;
         else
         {
             // Check if its turn of that player to loot a not party loot. The loot may be released or the item may be passed by currentLooter
             if (loot->m_isReleased || currentLooterPass || loot->m_currentLooterGuid == player->GetObjectGuid())
-                return LOOT_SLOT_OWNER;
+                return LOOT_SLOT_NORMAL;
             return MAX_LOOT_SLOT_TYPE;
         }
     }
@@ -479,11 +479,11 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
         case ROUND_ROBIN:
         {
             if (loot->m_isReleased || player->GetObjectGuid() == loot->m_currentLooterGuid)
-                return LOOT_SLOT_OWNER;
+                return LOOT_SLOT_NORMAL;
             return MAX_LOOT_SLOT_TYPE;
         }
         case NOT_GROUP_TYPE_LOOT:
-            return LOOT_SLOT_OWNER;
+            return LOOT_SLOT_NORMAL;
         default:
             return MAX_LOOT_SLOT_TYPE;
     }
