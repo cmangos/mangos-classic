@@ -42,7 +42,7 @@ void SystemMgr::LoadVersion()
     if (strSD2Version.empty())
         strSD2Version.append("ScriptDev2 ");
 
-    strSD2Version.append(_FULLVERSION);
+   strSD2Version.append(_FULLSD2VERSION);
 
     outstring_log("Loading %s", strSD2Version.c_str());
     outstring_log("");
