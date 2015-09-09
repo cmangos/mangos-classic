@@ -432,7 +432,7 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
     if (!lootedBy.empty())
         return MAX_LOOT_SLOT_TYPE;                                       // a not free for all item should not be looted more than once
 
-    if (lootItemType != LOOTITEM_TYPE_NORMAL)
+    if (lootItemType == LOOTITEM_TYPE_QUEST)
     {
         if (loot->m_lootMethod == NOT_GROUP_TYPE_LOOT || loot->m_lootMethod == FREE_FOR_ALL)
             return LOOT_SLOT_NORMAL;
@@ -1981,7 +1981,10 @@ bool Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
         LootItem* lootItem = *lootItemItr;
         LootSlotType slot_type = lootItem->GetSlotTypeForSharedLoot(player, this);
         if (slot_type >= MAX_LOOT_SLOT_TYPE)
+        {
+            sLog.outString("Item cannot send> itemid(%u) in slot (%u)!", lootItem->itemId, uint32(lootItem->lootSlot));
             continue;
+        }
 
         buffer << uint8(lootItem->lootSlot);
         buffer << *lootItem;
