@@ -1803,7 +1803,22 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
     else
     {
         if (IsLootedForAll())
+        {
             SendReleaseForAll();
+            if (m_isChest)
+            {
+                GameObject* go = (GameObject*)m_lootTarget;
+                uint32 go_min = go->GetGOInfo()->chest.minSuccessOpens;
+                uint32 go_max = go->GetGOInfo()->chest.maxSuccessOpens;
+                // only vein pass this check
+                if (go_min != 0 && go_max > go_min)
+                {
+                    // nothing to do refill is handled in Loot::Release()
+                }
+                else
+                    go->SetLootState(GO_JUST_DEACTIVATED);
+            }
+        }
         else
             if (IsLootedFor(target))
                 SendReleaseFor(target);
