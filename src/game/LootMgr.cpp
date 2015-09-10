@@ -1203,12 +1203,34 @@ void Loot::Release(Player* player)
                     break;
                 }
                 case LOOT_SKINNING:
+                {
+                    SetPlayerIsNotLooting(player);
+                    Creature* creature = (Creature*)m_lootTarget;
                     if (IsLootedFor(player))
                     {
-                        Creature* creature = (Creature*)m_lootTarget;
                         creature->SetLootStatus(CREATURE_LOOT_STATUS_SKINNED);
                     }
+                    else
+                    {
+                        // player released his skin so we can make it available for the member group or for himself
+                        Group* grp = player->GetGroup();
+                        m_ownerSet.clear();
+                        if (grp)
+                        {
+                            // we need to fill m_ownerSet with player who have access to the loot
+                            Group::MemberSlotList const& memberList = grp->GetMemberSlots();
+                            Group::MemberSlotList::const_iterator memberItr;
+                            for (memberItr = memberList.begin(); memberItr != memberList.end(); ++memberItr)
+                                m_ownerSet.insert(memberItr->guid);
+                        }
+                        else
+                            m_ownerSet.insert(player->GetObjectGuid());
+                        m_lootMethod = FREE_FOR_ALL;
+                        creature->SetLootStatus(CREATURE_LOOT_STATUS_SKIN_AVAILABLE);
+                        ForceLootAnimationCLientUpdate();
+                    }
                     break;
+                }
                 case LOOT_CORPSE:
                 {
                     Creature* creature = (Creature*)m_lootTarget;
