@@ -1798,7 +1798,7 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
             if (lootItem->freeForAll)
             {
                 NotifyItemRemoved(target, lootItem->lootSlot);
-                sLog.outString("This item is free for all!!");
+                sLog.outDebug("This item is free for all!!");
             }
             else
                 NotifyItemRemoved(lootItem->lootSlot);
@@ -2019,7 +2019,7 @@ bool Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
         LootSlotType slot_type = lootItem->GetSlotTypeForSharedLoot(player, this);
         if (slot_type >= MAX_LOOT_SLOT_TYPE)
         {
-            sLog.outString("Item cannot send> itemid(%u) in slot (%u)!", lootItem->itemId, uint32(lootItem->lootSlot));
+            sLog.outDebug("Item cannot send> itemid(%u) in slot (%u)!", lootItem->itemId, uint32(lootItem->lootSlot));
             continue;
         }
 
@@ -2028,7 +2028,7 @@ bool Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
         buffer << uint8(slot_type);                              // 0 - get 1 - look only 2 - master selection
         ++itemsShown;
 
-        sLog.outString("Sending loot> itemid(%u) in slot (%u)!", lootItem->itemId, uint32(lootItem->lootSlot));
+        sLog.outDebug("Sending loot> itemid(%u) in slot (%u)!", lootItem->itemId, uint32(lootItem->lootSlot));
     }
 
     // update number of items shown
