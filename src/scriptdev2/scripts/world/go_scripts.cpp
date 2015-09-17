@@ -17,35 +17,15 @@
 /* ScriptData
 SDName: GO_Scripts
 SD%Complete: 100
-SDComment: Quest support: 5097, 5098, 10990, 10991, 10992, Barov_journal->Teaches spell 26089
+SDComment: Quest support: 5097, 5098
 SDCategory: Game Objects
 EndScriptData */
 
 /* ContentData
-go_barov_journal
 go_andorhal_tower
 EndContentData */
 
 #include "precompiled.h"
-
-/*######
-## go_barov_journal
-######*/
-
-enum
-{
-    SPELL_TAILOR_FELCLOTH_BAG = 26086,
-    SPELL_LEARN_FELCLOTH_BAG  = 26095
-};
-
-bool GOUse_go_barov_journal(Player* pPlayer, GameObject* /*pGo*/)
-{
-    if (pPlayer->HasSkill(SKILL_TAILORING) && pPlayer->GetBaseSkillValue(SKILL_TAILORING) >= 280 && !pPlayer->HasSpell(SPELL_TAILOR_FELCLOTH_BAG))
-    {
-        pPlayer->CastSpell(pPlayer, SPELL_LEARN_FELCLOTH_BAG, false);
-    }
-    return true;
-}
 
 /*######
 ## go_andorhal_tower
@@ -86,11 +66,6 @@ bool GOUse_go_andorhal_tower(Player* pPlayer, GameObject* pGo)
 void AddSC_go_scripts()
 {
     Script* pNewScript;
-
-    pNewScript = new Script;
-    pNewScript->Name = "go_barov_journal";
-    pNewScript->pGOUse =          &GOUse_go_barov_journal;
-    pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "go_andorhal_tower";
