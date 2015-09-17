@@ -6,7 +6,11 @@ if(PLATFORM EQUAL X86)
   set(SSE_FLAGS "-msse2 -mfpmath=sse")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SSE_FLAGS}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SSE_FLAGS}")
+else()
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused*result")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result")
 endif()
+
 add_definitions(-DHAVE_SSE2)
 message(STATUS "GCC: SFMT enabled, SSE2 flags forced")
 

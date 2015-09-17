@@ -68,7 +68,7 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
         if (m_lAssistList.size() == MAX_BUDDY)
             reader.PSendSysMessage("Anubisath Sentinel - proper group found");
         else
-            reader.PSendSysMessage("Anubisath Sentinel - not correct number of mobs for group found. Number found %u, should be %u", m_lAssistList.size(), MAX_BUDDY);
+            reader.PSendSysMessage("Anubisath Sentinel - not correct number of mobs for group found. Number found %u, should be %u", uint32(m_lAssistList.size()), MAX_BUDDY);
     }
 
     void JustReachedHome() override
