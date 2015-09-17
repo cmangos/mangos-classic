@@ -31,6 +31,15 @@ compiler:
   - gcc
   - clang
 
+before_install:
+  - echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
+  - echo "yes" | sudo add-apt-repository ppa:boost-latest/ppa
+  - echo "yes" | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+  - sudo apt-get -qq update
+  - sudo apt-get -qq install build-essential libtool gcc-4.8 g++-4.8 make cmake
+  - export CXX="g++-4.8"
+  - export CC="gcc-4.8"
+
 script:
   - test -d _build || mkdir _build
   - test -d _install || mkdir _install
