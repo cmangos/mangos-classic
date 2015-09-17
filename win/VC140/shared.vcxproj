@@ -368,40 +368,40 @@
   <ItemGroup>
     <CustomBuild Include="..\..\src\shared\revision.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Extract revision</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cd "$(SolutionDir)..\src\shared"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cd "$(ProjectDir)..\..\src\shared"
 "$(TargetDir)..\genrevision__$(Platform)_$(Configuration)\genrevision.exe" "..\.."
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)../.svn/entries;$(SolutionDir)../_svn/entries;$(SolutionDir)../.git/FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\..\.svn\entries;$(ProjectDir)..\..\_svn\entries;$(ProjectDir)..\..\.git\FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">revision.h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|X64'">Extract revision</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|X64'">cd "$(SolutionDir)..\src\shared"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|X64'">cd "$(ProjectDir)..\..\src\shared"
 "$(TargetDir)..\genrevision__Win32_$(Configuration)\genrevision.exe" "..\.."
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|X64'">$(SolutionDir)../.svn/entries;$(SolutionDir)../_svn/entries;$(SolutionDir)../.git/FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|X64'">$(ProjectDir)..\..\.svn\entries;$(ProjectDir)..\..\_svn\entries;$(ProjectDir)..\..\.git\FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|X64'">revision.h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Extract revision</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cd "$(SolutionDir)..\src\shared"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cd "$(ProjectDir)..\..\src\shared"
 "$(TargetDir)..\genrevision__$(Platform)_$(Configuration)\genrevision.exe" "..\.."
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)../.svn/entries;$(SolutionDir)../_svn/entries;$(SolutionDir)../.git/FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\..\.svn\entries;$(ProjectDir)..\..\_svn\entries;$(ProjectDir)..\..\.git\FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">revision.h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">Extract revision</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">cd "$(SolutionDir)..\src\shared"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">cd "$(ProjectDir)..\..\src\shared"
 "$(TargetDir)..\genrevision__Win32_$(Configuration)\genrevision.exe" "..\.."
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">$(SolutionDir)../.svn/entries;$(SolutionDir)../_svn/entries;$(SolutionDir)../.git/FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">$(ProjectDir)..\..\.svn\entries;$(ProjectDir)..\..\_svn\entries;$(ProjectDir)..\..\.git\FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">revision.h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">Extract revision</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">cd "$(SolutionDir)..\src\shared"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">cd "$(ProjectDir)..\..\src\shared"
 "$(TargetDir)..\genrevision__$(Platform)_$(Configuration)\genrevision.exe" "..\.."
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">$(SolutionDir)../.svn/entries;$(SolutionDir)../_svn/entries;$(SolutionDir)../.git/FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">$(ProjectDir)..\..\.svn\entries;$(ProjectDir)..\..\_svn\entries;$(ProjectDir)..\..\.git\FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">revision.h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">Extract revision</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">cd "$(SolutionDir)..\src\shared"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">cd "$(ProjectDir)..\..\src\shared"
 "$(TargetDir)..\genrevision__Win32_$(Configuration)\genrevision.exe" "..\.."
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">$(SolutionDir)../.svn/entries;$(SolutionDir)../_svn/entries;$(SolutionDir)../.git/FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">$(ProjectDir)..\..\.svn\entries;$(ProjectDir)..\..\_svn\entries;$(ProjectDir)..\..\.git\FETCH_HEAD;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">revision.h;%(Outputs)</Outputs>
     </CustomBuild>
   </ItemGroup>
