@@ -57,7 +57,7 @@ class LootTemplate::LootGroup                               // A set of loot def
         bool HasQuestDrop() const;                          // True if group includes at least 1 quest drop entry
         bool HasQuestDropForPlayer(Player const* player) const;
         // The same for active quests of the player
-        void Process(Loot& loot) const;                     // Rolls an item from the group (if any) and adds the item to the loot
+        void Process(Loot& loot, Player const* lootOwner) const; // Rolls an item from the group (if any) and adds the item to the loot
         float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
         float TotalChance() const;                          // Overall chance for the group
 
@@ -68,7 +68,7 @@ class LootTemplate::LootGroup                               // A set of loot def
         LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
         LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
 
-        LootStoreItem const* Roll() const;                  // Rolls an item from the group, returns NULL if all miss their chances
+        LootStoreItem const* Roll(Loot const& loot, Player const* lootOwner) const; // Rolls an item from the group, returns NULL if all miss their chances
 };
 
 // Remove all data and free all memory
@@ -830,10 +830,10 @@ void Loot::AddItem(uint32 itemid, uint32 count, uint32 randomSuffix, int32 rando
 }
 
 // Calls processor of corresponding LootTemplate (which handles everything including references)
-bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, bool personal, bool noEmptyError)
+bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError)
 {
     // Must be provided
-    if (!loot_owner)
+    if (!lootOwner)
         return false;
 
     LootTemplate const* tab = store.GetLootFor(loot_id);
@@ -847,7 +847,7 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, 
 
     m_lootItems.reserve(MAX_NR_LOOT_ITEMS);
 
-    tab->Process(*this, store, store.IsRatesAllowed());     // Processing is done there, callback via Loot::AddItem()
+    tab->Process(*this, lootOwner, store, store.IsRatesAllowed()); // Processing is done there, callback via Loot::AddItem()
 
     // Must now check if current looter have right to loot all item or he will lockout that item until he look and release the loot
     if (!m_currentLooterGuid.IsEmpty() && m_ownerSet.size() > 1 && m_lootMethod != FREE_FOR_ALL) // only for group that are not free for all
@@ -2061,24 +2061,53 @@ void LootTemplate::LootGroup::AddEntry(LootStoreItem& item)
 }
 
 // Rolls an item from the group, returns NULL if all miss their chances
-LootStoreItem const* LootTemplate::LootGroup::Roll() const
+LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player const* lootOwner) const
 {
     if (!ExplicitlyChanced.empty())                         // First explicitly chanced entries are checked
     {
-        float Roll = rand_chance_f();
+        float chance = rand_chance_f();
 
         for (uint32 i = 0; i < ExplicitlyChanced.size(); ++i) // check each explicitly chanced entry in the template and modify its chance based on quality.
         {
-            if (ExplicitlyChanced[i].chance >= 100.0f)
-                return &ExplicitlyChanced[i];
+            LootStoreItem const& lsi = ExplicitlyChanced[i];
+            if (lsi.conditionId && !sObjectMgr.IsPlayerMeetToCondition(lsi.conditionId, lootOwner, lootOwner->GetMap(), loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT))
+            {
+                sLog.outDebug("In explicit chance -> This item cannot be added! (%u)", lsi.itemid);
+                continue;
+            }
 
-            Roll -= ExplicitlyChanced[i].chance;
-            if (Roll < 0)
-                return &ExplicitlyChanced[i];
+            if (lsi.chance >= 100.0f)
+                return &lsi;
+
+            chance -= lsi.chance;
+            if (chance < 0)
+                return &lsi;
         }
     }
+
     if (!EqualChanced.empty())                              // If nothing selected yet - an item is taken from equal-chanced part
-        return &EqualChanced[irand(0, EqualChanced.size() - 1)];
+    {
+        std::vector <LootStoreItem const*> lootStoreItemVector; // we'll use new vector to make easy the randomization
+
+        // fill the new vector with correct pointer to our item list
+        for (LootStoreItemList::const_iterator itr = EqualChanced.begin(); itr != EqualChanced.end(); ++itr)
+            lootStoreItemVector.push_back(&(*itr));
+
+        // randomize the new vector
+        random_shuffle(lootStoreItemVector.begin(), lootStoreItemVector.end());
+
+        // as the new vector is randomized we can start from first element and stop at first one that meet the condition
+        for (std::vector <LootStoreItem const*>::const_iterator itr = lootStoreItemVector.begin(); itr != lootStoreItemVector.end(); ++itr)
+        {
+            LootStoreItem const* lsi = *itr;
+            if (lsi->conditionId && !sObjectMgr.IsPlayerMeetToCondition(lsi->conditionId, lootOwner, lootOwner->GetMap(), loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT))
+            {
+                sLog.outDebug("In equal chance -> This item cannot be added! (%u)", lsi->itemid);
+                continue;
+            }
+            return lsi;
+        }
+    }
 
     return NULL;                                            // Empty drop from the group
 }
@@ -2108,9 +2137,9 @@ bool LootTemplate::LootGroup::HasQuestDropForPlayer(Player const* player) const
 }
 
 // Rolls an item from the group (if any takes its chance) and adds the item to the loot
-void LootTemplate::LootGroup::Process(Loot& loot) const
+void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner) const
 {
-    LootStoreItem const* item = Roll();
+    LootStoreItem const* item = Roll(loot, lootOwner);
     if (item != NULL)
         loot.AddItem(*item);
 }
@@ -2195,14 +2224,14 @@ void LootTemplate::AddEntry(LootStoreItem& item)
 }
 
 // Rolls for every item in the template and adds the rolled items the the loot
-void LootTemplate::Process(Loot& loot, LootStore const& store, bool rate, uint8 groupId) const
+void LootTemplate::Process(Loot& loot, Player const* lootOwner, LootStore const& store, bool rate, uint8 groupId) const
 {
     if (groupId)                                            // Group reference uses own processing of the group
     {
         if (groupId > Groups.size())
             return;                                         // Error message already printed at loading stage
 
-        Groups[groupId - 1].Process(loot);
+        Groups[groupId - 1].Process(loot, lootOwner);
         return;
     }
 
@@ -2224,7 +2253,7 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, bool rate, uint8 
                 continue;
 
             for (uint32 loop = 0; loop < i->maxcount; ++loop) // Ref multiplicator
-                Referenced->Process(loot, store, rate, i->group);
+                Referenced->Process(loot, lootOwner, store, rate, i->group);
         }
         else                                                // Plain entries (not a reference, not grouped)
             loot.AddItem(*i);                               // Chance is already checked, just add
@@ -2232,7 +2261,7 @@ void LootTemplate::Process(Loot& loot, LootStore const& store, bool rate, uint8 
 
     // Now processing groups
     for (LootGroups::const_iterator i = Groups.begin() ; i != Groups.end() ; ++i)
-        i->Process(loot);
+        i->Process(loot, lootOwner);
 }
 
 // True if template includes at least 1 quest drop entry
