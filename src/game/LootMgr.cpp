@@ -567,6 +567,7 @@ void GroupLootRoll::SendLootRollWon(ObjectGuid const& targetGuid, uint32 rollNum
         switch (itr->second.vote)
         {
             case ROLL_PASS:
+                break;
             case ROLL_NOT_EMITED_YET:
             case ROLL_NOT_VALID:
                 SendRoll(itr->first, 128, 128);
