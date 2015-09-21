@@ -468,7 +468,7 @@ bool find_sql_updates()
                 {
                     last_sql_rev[info.db_idx] = info.rev;
                     last_sql_nr[info.db_idx] = info.nr;
-                    sscanf(updatename, "%[^.]", last_sql_update[info.db_idx]);
+                    sscanf(buffer, "%[^.]", last_sql_update[info.db_idx]);
                 }
                 new_sql_updates.erase(itr);
             }
