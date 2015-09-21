@@ -66,30 +66,52 @@ char new_index_file[MAX_PATH] = ".git/git_id_index";
 
 char databases[NUM_DATABASES][MAX_DB] =
 {
+    "realmd",
     "characters",
     "mangos",
-    "realmd"
 };
 
 char db_version_table[NUM_DATABASES][MAX_DB] =
 {
+    "realmd_db_version",
     "character_db_version",
     "db_version",
-    "realmd_db_version",
 };
 
 char db_sql_file[NUM_DATABASES][MAX_PATH] =
 {
-    "sql/characters.sql",
-    "sql/mangos.sql",
-    "sql/realmd.sql"
+    "sql/base/realmd.sql",
+    "sql/base/characters.sql",
+    "sql/base/mangos.sql",
 };
 
 char db_sql_rev_field[NUM_DATABASES][MAX_PATH] =
 {
+    "REVISION_DB_REALMD",
     "REVISION_DB_CHARACTERS",
     "REVISION_DB_MANGOS",
-    "REVISION_DB_REALMD"
+};
+
+// last milestone's file information
+char last_sql_update[NUM_DATABASES][MAX_PATH] =
+{
+    "z2678_01_realmd",
+    "z2679_03_characters_guild_member",
+    "z2681_01_mangos_mangos_string",
+};
+
+int last_sql_rev[NUM_DATABASES] =
+{
+    2678,
+    2679,
+    2681
+};
+
+int last_sql_nr[NUM_DATABASES] =
+{
+    1,
+    3,
+    1
 };
 
 #define REV_PREFIX "z"
@@ -100,12 +122,9 @@ char db_sql_rev_field[NUM_DATABASES][MAX_PATH] =
 bool allow_replace = false;
 bool do_fetch = false;
 bool use_new_index = true;
-// aux
 
 char origins[NUM_REMOTES][MAX_REMOTE];
 int rev;
-int last_sql_rev[NUM_DATABASES] = {0, 0, 0};
-int last_sql_nr[NUM_DATABASES] = {0, 0, 0};
 
 char head_message[MAX_MSG];
 char path_prefix[MAX_PATH] = "";
@@ -113,7 +132,6 @@ char base_path[MAX_PATH];
 char buffer[MAX_BUF];
 char cmd[MAX_CMD];
 char origin_hash[MAX_HASH];
-char last_sql_update[NUM_DATABASES][MAX_PATH];
 char old_index_cmd[MAX_CMD];
 char new_index_cmd[MAX_CMD];
 
@@ -391,79 +409,73 @@ bool get_sql_update_info(const char* buffer, sql_update_info& info)
 
 bool find_sql_updates()
 {
-    // add all updates from HEAD
-    snprintf(cmd, MAX_CMD, "git show HEAD:%s", sql_update_dir);
-    if ((cmd_pipe = popen(cmd, "r")) == NULL)
-        return false;
+    char updatename[MAX_BUF];
 
-    // skip first two lines
-    if (!fgets(buffer, MAX_BUF, cmd_pipe)) { pclose(cmd_pipe); return false; }
-    if (!fgets(buffer, MAX_BUF, cmd_pipe)) { pclose(cmd_pipe); return false; }
-
-    sql_update_info info;
-
-    while (fgets(buffer, MAX_BUF, cmd_pipe))
+    for (int i = 0; i < NUM_DATABASES; i++)
     {
-        buffer[strlen(buffer) - 1] = '\0';
-        if (!get_sql_update_info(buffer, info)) continue;
+        // add all updates from HEAD
+        snprintf(cmd, MAX_CMD, "git show HEAD:%s/%s", sql_update_dir, databases[i]);
+        if ((cmd_pipe = popen(cmd, "r")) == NULL)
+            return false;
 
-        if (info.db_idx == NUM_DATABASES)
+        // skip first two lines
+        if (!fgets(buffer, MAX_BUF, cmd_pipe)) { pclose(cmd_pipe); return false; }
+        if (!fgets(buffer, MAX_BUF, cmd_pipe)) { pclose(cmd_pipe); return false; }
+
+        sql_update_info info;
+
+        while (fgets(buffer, MAX_BUF, cmd_pipe))
         {
-            if (info.rev > 0) printf("WARNING: incorrect database name for sql update %s\n", buffer);
-            continue;
-        }
+            buffer[strlen(buffer) - 1] = '\0';
+            if (!get_sql_update_info(buffer, info)) continue;
 
-        new_sql_updates.insert(buffer);
-    }
-
-    pclose(cmd_pipe);
-
-    // Add last milestone's file information
-    last_sql_rev[0] = 2678;
-    last_sql_nr[0] = 2;
-    sscanf("z2678_02_characters", "%s", last_sql_update[0]);
-    last_sql_rev[2] = 2678;
-    last_sql_nr[2] = 1;
-    sscanf("z2678_01_realmd", "%s", last_sql_update[2]);
-
-    // remove updates from the last commit also found on origin
-    snprintf(cmd, MAX_CMD, "git show %s:%s", origin_hash, sql_update_dir);
-    if ((cmd_pipe = popen(cmd, "r")) == NULL)
-        return false;
-
-    // skip first two lines
-    if (!fgets(buffer, MAX_BUF, cmd_pipe)) { pclose(cmd_pipe); return false; }
-    if (!fgets(buffer, MAX_BUF, cmd_pipe)) { pclose(cmd_pipe); return false; }
-
-    while (fgets(buffer, MAX_BUF, cmd_pipe))
-    {
-        buffer[strlen(buffer) - 1] = '\0';
-        if (!get_sql_update_info(buffer, info)) continue;
-
-        // find the old update with the highest rev for each database
-        // (will be the required version for the new update)
-        std::set<std::string>::iterator itr = new_sql_updates.find(buffer);
-        if (itr != new_sql_updates.end())
-        {
-            if (info.rev > 0 && (info.rev > last_sql_rev[info.db_idx] ||
-                                 (info.rev == last_sql_rev[info.db_idx] && info.nr > last_sql_nr[info.db_idx])))
+            if (info.db_idx == NUM_DATABASES)
             {
-                last_sql_rev[info.db_idx] = info.rev;
-                last_sql_nr[info.db_idx] = info.nr;
-                sscanf(buffer, "%[^.]", last_sql_update[info.db_idx]);
+                //incorrect database name for sql update
+                continue;
             }
-            new_sql_updates.erase(itr);
+
+            snprintf(updatename, MAX_BUF, "%s %s", databases[i], buffer);
+
+            new_sql_updates.insert(updatename);
         }
+
+        pclose(cmd_pipe);
+
+        // remove updates from the last commit also found on origin
+        snprintf(cmd, MAX_CMD, "git show %s:%s/%s", origin_hash, sql_update_dir, databases[i]);
+        if ((cmd_pipe = popen(cmd, "r")) == NULL)
+            return false;
+
+        // skip first two lines
+        if (!fgets(buffer, MAX_BUF, cmd_pipe)) { pclose(cmd_pipe); return false; }
+        if (!fgets(buffer, MAX_BUF, cmd_pipe)) { pclose(cmd_pipe); return false; }
+
+        while (fgets(buffer, MAX_BUF, cmd_pipe))
+        {
+            buffer[strlen(buffer) - 1] = '\0';
+            if (!get_sql_update_info(buffer, info)) continue;
+
+            snprintf(updatename, MAX_BUF, "%s %s", databases[i], buffer);
+
+            // find the old update with the highest rev for each database
+            // (will be the required version for the new update)
+            std::set<std::string>::iterator itr = new_sql_updates.find(updatename);
+            if (itr != new_sql_updates.end())
+            {
+                if (info.rev > 0 && (info.rev > last_sql_rev[info.db_idx] ||
+                    (info.rev == last_sql_rev[info.db_idx] && info.nr > last_sql_nr[info.db_idx])))
+                {
+                    last_sql_rev[info.db_idx] = info.rev;
+                    last_sql_nr[info.db_idx] = info.nr;
+                    sscanf(updatename, "%[^.]", last_sql_update[info.db_idx]);
+                }
+                new_sql_updates.erase(itr);
+            }
+        }
+
+        pclose(cmd_pipe);
     }
-
-    pclose(cmd_pipe);
-
-    if (!new_sql_updates.empty())
-    {
-        for (std::set<std::string>::iterator itr = new_sql_updates.begin(); itr != new_sql_updates.end(); ++itr)
-            printf("%s\n", itr->c_str());
-    }
-
     return true;
 }
 
@@ -483,18 +495,22 @@ bool copy_file(const char* src_file, const char* dst_file)
 
 bool convert_sql_updates()
 {
+    char filename[MAX_BUF];
+
     // rename the sql update files and add the required update statement
     for (std::set<std::string>::iterator itr = new_sql_updates.begin(); itr != new_sql_updates.end(); ++itr)
     {
+        sscanf(itr->c_str(), "%s %s", buffer, filename);
+
         sql_update_info info;
-        if (!get_sql_update_info(itr->c_str(), info)) return false;
+        if (!get_sql_update_info(filename, info)) return false;
         if (info.db_idx == NUM_DATABASES) return false;
 
         // generating the new name should work for updates with or without a rev
         char src_file[MAX_PATH], new_name[MAX_PATH], dst_file[MAX_PATH];
-        snprintf(src_file, MAX_PATH, "%s%s/%s", path_prefix, sql_update_dir, itr->c_str());
+        snprintf(src_file, MAX_PATH, "%s%s/%s/%s", path_prefix, sql_update_dir, buffer, filename);
         snprintf(new_name, MAX_PATH, REV_PRINT "_%0*d_%s%s%s", rev, 2, info.nr, info.db, info.has_table ? "_" : "", info.table);
-        snprintf(dst_file, MAX_PATH, "%s%s/%s.sql", path_prefix, sql_update_dir, new_name);
+        snprintf(dst_file, MAX_PATH, "%s%s/%s/%s.sql", path_prefix, sql_update_dir, buffer, new_name);
 
         FILE* fin = fopen(src_file, "r");
         if (!fin) return false;
