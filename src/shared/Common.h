@@ -67,7 +67,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <math.h>
+#include <cmath>
 #include <errno.h>
 #include <signal.h>
 #include <assert.h>
@@ -148,7 +148,7 @@ typedef off_t ACE_OFF_T;
 
 #define SIZEFMTD ACE_SIZE_T_FORMAT_SPECIFIER
 
-inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
+inline float finiteAlways(float f) { return std::isfinite(f) ? f : 0.0f; }
 
 #define atol(a) strtoul( a, nullptr, 10)
 
