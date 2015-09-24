@@ -340,7 +340,7 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=NU
     // check if we need to add swimming movement. TODO: i thing movement flags should be computed automatically at each movement of creature so we need a sort of UpdateMovementFlags() method
     if (cinfo->InhabitType & INHABIT_WATER &&                                   // check inhabit type water
             data &&                                                                 // check if there is data to get creature spawn pos
-            GetMap()->GetTerrain()->IsSwimable(data->posX, data->posY, data->posZ, minfo->bounding_radius))  // check if creature is in water and have enough space to swim
+            GetMap()->GetTerrain()->IsSwimmable(data->posX, data->posY, data->posZ, minfo->bounding_radius))  // check if creature is in water and have enough space to swim
         m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);                      // add swimming movement
 
     // checked at loading

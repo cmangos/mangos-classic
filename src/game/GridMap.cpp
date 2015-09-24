@@ -1035,7 +1035,7 @@ bool TerrainInfo::IsInWater(float x, float y, float pZ, GridMapLiquidData* data)
 }
 
 // check if creature is in water and have enough space to swim
-bool TerrainInfo::IsSwimable(float x, float y, float pZ, float radius /*= 1.5f*/, GridMapLiquidData* data /*= 0*/) const
+bool TerrainInfo::IsSwimmable(float x, float y, float pZ, float radius /*= 1.5f*/, GridMapLiquidData* data /*= 0*/) const
 {
     // Check surface in x, y point for liquid
     if (const_cast<TerrainInfo*>(this)->GetGrid(x, y))
