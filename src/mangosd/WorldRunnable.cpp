@@ -80,7 +80,7 @@ void WorldRunnable::run()
 
     sWorld.CleanupsBeforeStop();
 
-    sWorldSocketMgr->StopNetwork();
+    sWorldSocketMgr.StopNetwork();
 
     sMapMgr.UnloadAll();                                    // unload all grids (including locked in memory)
 

@@ -29,7 +29,6 @@
 #include <ace/Reactor_Impl.h>
 #include <ace/TP_Reactor.h>
 #include <ace/Dev_Poll_Reactor.h>
-#include <ace/Guard_T.h>
 #include <ace/os_include/arpa/os_inet.h>
 #include <ace/os_include/netinet/os_tcp.h>
 #include <ace/os_include/sys/os_types.h>
@@ -37,12 +36,14 @@
 
 #include <atomic>
 #include <set>
+#include <mutex>
 
 #include "Log.h"
 #include "Common.h"
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldSocket.h"
+#include "Policies/Lock.h"
 
 /**
 * This is a helper class to WorldSocketMgr ,that manages
@@ -106,7 +107,7 @@ class ReactorRunnable : protected ACE_Task_Base
 
         int AddSocket(WorldSocket* sock)
         {
-            ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, m_NewSockets_Lock, -1);
+            GUARD_RETURN(m_NewSockets_Lock, -1);
 
             ++m_Connections;
             sock->AddReference();
@@ -124,7 +125,7 @@ class ReactorRunnable : protected ACE_Task_Base
     protected:
         void AddNewSockets()
         {
-            ACE_GUARD(ACE_Thread_Mutex, Guard, m_NewSockets_Lock);
+            std::lock_guard<std::mutex> guard(m_NewSockets_Lock);
 
             if (m_NewSockets.empty())
                 return;
@@ -199,8 +200,10 @@ class ReactorRunnable : protected ACE_Task_Base
         SocketSet m_Sockets;
 
         SocketSet m_NewSockets;
-        ACE_Thread_Mutex m_NewSockets_Lock;
+        std::mutex m_NewSockets_Lock;
 };
+
+INSTANTIATE_SINGLETON_1(WorldSocketMgr);
 
 WorldSocketMgr::WorldSocketMgr():
     m_NetThreads(0),
@@ -341,7 +344,3 @@ int WorldSocketMgr::OnSocketOpen(WorldSocket* sock)
     return m_NetThreads[min].AddSocket(sock);
 }
 
-WorldSocketMgr* WorldSocketMgr::Instance()
-{
-    return ACE_Singleton<WorldSocketMgr, ACE_Thread_Mutex>::instance();
-}

@@ -26,8 +26,6 @@
 #define __WORLDSOCKETMGR_H
 
 #include <ace/Basic_Types.h>
-#include <ace/Singleton.h>
-#include <ace/Thread_Mutex.h>
 
 #include <string>
 
@@ -40,7 +38,9 @@ class WorldSocketMgr
 {
     public:
         friend class WorldSocket;
-        friend class ACE_Singleton<WorldSocketMgr, ACE_Thread_Mutex>;
+
+        WorldSocketMgr();
+        virtual ~WorldSocketMgr();
 
         /// Start network, listen at address:port .
         int StartNetwork(ACE_UINT16 port, std::string& address);
@@ -51,15 +51,12 @@ class WorldSocketMgr
         /// Wait untill all network threads have "joined" .
         void Wait();
 
-        /// Make this class singleton .
-        static WorldSocketMgr* Instance();
+        std::string& GetBindAddress() { return m_addr; }
+        ACE_UINT16 GetBindPort() { return m_port; }
 
     private:
         int OnSocketOpen(WorldSocket* sock);
         int StartReactiveIO(ACE_UINT16 port, const char* address);
-
-        WorldSocketMgr();
-        virtual ~WorldSocketMgr();
 
         ReactorRunnable* m_NetThreads;
         size_t m_NetThreadsCount;
@@ -74,7 +71,7 @@ class WorldSocketMgr
         ACE_Event_Handler* m_Acceptor;
 };
 
-#define sWorldSocketMgr WorldSocketMgr::Instance()
+#define sWorldSocketMgr MaNGOS::Singleton<WorldSocketMgr>::Instance()
 
 #endif
 /// @}

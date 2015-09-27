@@ -19,19 +19,19 @@
 #ifndef LOCKEDQUEUE_H
 #define LOCKEDQUEUE_H
 
-#include <ace/Guard_T.h>
-#include <ace/Thread_Mutex.h>
 #include <deque>
 #include <assert.h>
+#include <mutex>
 #include "Errors.h"
+#include "Policies/Lock.h"
 
 namespace ACE_Based
 {
-    template < class T, class LockType, typename StorageType = std::deque<T> >
+    template <class T, typename StorageType = std::deque<T> >
     class LockedQueue
     {
             //! Lock access to the queue.
-            LockType _lock;
+            std::mutex _lock;
 
             //! Storage backing the queue.
             StorageType _queue;
@@ -55,14 +55,14 @@ namespace ACE_Based
             //! Adds an item to the queue.
             void add(const T& item)
             {
-                ACE_Guard<LockType> g(this->_lock);
+                std::lock_guard<decltype(_lock)> g(_lock);
                 _queue.push_back(item);
             }
 
             //! Gets the next result in the queue, if any.
             bool next(T& result)
             {
-                ACE_GUARD_RETURN(LockType, g, this->_lock, false);
+                GUARD_RETURN(_lock, false);
 
                 if (_queue.empty())
                     return false;
@@ -76,7 +76,7 @@ namespace ACE_Based
             template<class Checker>
             bool next(T& result, Checker& check)
             {
-                ACE_GUARD_RETURN(LockType, g, this->_lock, false);
+                GUARD_RETURN(_lock, false);
 
                 if (_queue.empty())
                     return false;
@@ -102,33 +102,33 @@ namespace ACE_Based
             //! Cancels the queue.
             void cancel()
             {
-                ACE_Guard<LockType> g(this->_lock);
+                std::lock_guard<decltype(_lock)> g(_lock);
                 _canceled = true;
             }
 
             //! Checks if the queue is cancelled.
             bool cancelled()
             {
-                ACE_Guard<LockType> g(this->_lock);
+                std::lock_guard<decltype(_lock)> g(_lock);
                 return _canceled;
             }
 
             //! Locks the queue for access.
             void lock()
             {
-                this->_lock.acquire();
+                _lock.acquire();
             }
 
             //! Unlocks the queue.
             void unlock()
             {
-                this->_lock.release();
+                _lock.release();
             }
 
             ///! Checks if we're empty or not with locks held
             bool empty()
             {
-                ACE_Guard<LockType> g(this->_lock);
+                std::lock_guard<decltype(_lock)> g(_lock);
                 return _queue.empty();
             }
     };

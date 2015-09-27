@@ -88,10 +88,6 @@
 #include "LockedQueue.h"
 #include "Threading.h"
 
-#include <ace/Basic_Types.h>
-#include <ace/Guard_T.h>
-#include <ace/RW_Thread_Mutex.h>
-#include <ace/Thread_Mutex.h>
 #include <ace/OS_NS_arpa_inet.h>
 
 // Old ACE versions (pre-ACE-5.5.4) not have this type (add for allow use at Unix side external old ACE versions)
@@ -149,8 +145,6 @@ typedef off_t ACE_OFF_T;
 #define SIZEFMTD ACE_SIZE_T_FORMAT_SPECIFIER
 
 inline float finiteAlways(float f) { return std::isfinite(f) ? f : 0.0f; }
-
-#define atol(a) strtoul( a, nullptr, 10)
 
 #define STRINGIZE(a) #a
 

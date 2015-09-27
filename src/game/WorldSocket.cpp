@@ -44,6 +44,9 @@
 #include "WorldSocketMgr.h"
 #include "Log.h"
 #include "DBCStores.h"
+#include "Policies/Lock.h"
+
+#include <mutex>
 
 #if defined( __GNUC__ )
 #pragma pack(1)
@@ -109,7 +112,7 @@ bool WorldSocket::IsClosed(void) const
 void WorldSocket::CloseSocket(void)
 {
     {
-        ACE_GUARD(LockType, Guard, m_OutBufferLock);
+        std::lock_guard<std::mutex> guard(m_OutBufferLock);
 
         if (closing_)
             return;
@@ -119,7 +122,7 @@ void WorldSocket::CloseSocket(void)
     }
 
     {
-        ACE_GUARD(LockType, Guard, m_SessionLock);
+        std::lock_guard<std::mutex> guard(m_SessionLock);
 
         m_Session = nullptr;
     }
@@ -132,7 +135,7 @@ const std::string& WorldSocket::GetRemoteAddress(void) const
 
 int WorldSocket::SendPacket(const WorldPacket& pct)
 {
-    ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
+    GUARD_RETURN(m_OutBufferLock, -1);
 
     if (closing_)
         return -1;
@@ -182,7 +185,7 @@ int WorldSocket::open(void* a)
     m_OutActive = true;
 
     // Hook for the manager.
-    if (sWorldSocketMgr->OnSocketOpen(this) == -1)
+    if (sWorldSocketMgr.OnSocketOpen(this) == -1)
         return -1;
 
     // Allocate the buffer.
@@ -268,7 +271,7 @@ int WorldSocket::handle_input(ACE_HANDLE)
 
 int WorldSocket::handle_output(ACE_HANDLE)
 {
-    ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
+    GUARD_RETURN(m_OutBufferLock, -1);
 
     if (closing_)
         return -1;
@@ -276,7 +279,7 @@ int WorldSocket::handle_output(ACE_HANDLE)
     const size_t send_len = m_OutBuffer->length();
 
     if (send_len == 0)
-        return cancel_wakeup_output(Guard);
+        return handle_output_queue(guard);
 
 #ifdef MSG_NOSIGNAL
     ssize_t n = peer().send(m_OutBuffer->rd_ptr(), send_len, MSG_NOSIGNAL);
@@ -289,7 +292,7 @@ int WorldSocket::handle_output(ACE_HANDLE)
     else if (n == -1)
     {
         if (errno == EWOULDBLOCK || errno == EAGAIN)
-            return schedule_wakeup_output(Guard);
+            return schedule_wakeup_output(guard);
 
         return -1;
     }
@@ -300,16 +303,13 @@ int WorldSocket::handle_output(ACE_HANDLE)
         // move the data to the base of the buffer
         m_OutBuffer->crunch();
 
-        return schedule_wakeup_output(Guard);
+        return schedule_wakeup_output(guard);
     }
     else // now n == send_len
     {
         m_OutBuffer->reset();
 
-        if (!iFlushPacketQueue())
-            return cancel_wakeup_output(Guard);
-        else
-            return schedule_wakeup_output(Guard);
+        return handle_output_queue(guard);
     }
 
     ACE_NOTREACHED(return 0);
@@ -319,7 +319,7 @@ int WorldSocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
 {
     // Critical section
     {
-        ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
+        GUARD_RETURN(m_OutBufferLock, -1);
 
         closing_ = true;
 
@@ -329,7 +329,7 @@ int WorldSocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
 
     // Critical section
     {
-        ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
+        GUARD_RETURN(m_SessionLock, -1);
 
         m_Session = nullptr;
     }
@@ -507,7 +507,10 @@ int WorldSocket::cancel_wakeup_output(GuardType& g)
 
     m_OutActive = false;
 
-    g.release();
+    // FIXME: I think it is okay to let this be released when it goes out of scope?
+    // If we call the destructor here, the behavior when it is called again upon going
+    // out of scope is undefined.
+    //g.release();
 
     if (reactor()->cancel_wakeup
             (this, ACE_Event_Handler::WRITE_MASK) == -1)
@@ -527,7 +530,10 @@ int WorldSocket::schedule_wakeup_output(GuardType& g)
 
     m_OutActive = true;
 
-    g.release();
+    // FIXME: I think it is okay to let this be released when it goes out of scope?
+    // If we call the destructor here, the behavior when it is called again upon going
+    // out of scope is undefined.
+    //g.release();
 
     if (reactor()->schedule_wakeup
             (this, ACE_Event_Handler::WRITE_MASK) == -1)
@@ -580,7 +586,7 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 return 0;
             default:
             {
-                ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
+                GUARD_RETURN(m_SessionLock, -1);
 
                 if (m_Session != nullptr)
                 {
@@ -857,7 +863,7 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
 
             if (max_count && m_OverSpeedPings > max_count)
             {
-                ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
+                GUARD_RETURN(m_SessionLock, -1);
 
                 if (m_Session && m_Session->GetSecurity() == SEC_PLAYER)
                 {
@@ -875,7 +881,7 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
 
     // critical section
     {
-        ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
+        GUARD_RETURN(m_SessionLock, -1);
 
         if (m_Session)
         {

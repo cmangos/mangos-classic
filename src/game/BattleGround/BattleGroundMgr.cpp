@@ -35,6 +35,8 @@
 
 #include "Policies/Singleton.h"
 
+#include <mutex>
+
 INSTANTIATE_SINGLETON_1(BattleGroundMgr);
 
 /*********************************************************/
@@ -163,7 +165,7 @@ GroupQueueInfo* BattleGroundQueue::AddGroup(Player* leader, Group* grp, BattleGr
 
     // add players from group to ginfo
     {
-        // ACE_Guard<ACE_Recursive_Thread_Mutex> guard(m_Lock);
+        // std::lock_guard<std::recursive_mutex> guard(m_Lock);
         if (grp)
         {
             for (GroupReference* itr = grp->GetFirstMember(); itr != nullptr; itr = itr->next())
@@ -265,7 +267,7 @@ uint32 BattleGroundQueue::GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleG
 void BattleGroundQueue::RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount)
 {
     // Player *plr = sObjectMgr.GetPlayer(guid);
-    // ACE_Guard<ACE_Recursive_Thread_Mutex> guard(m_Lock);
+    // std::lock_guard<std::recursive_mutex> guard(m_Lock);
 
     int32 bracket_id = -1;                                  // signed for proper for-loop finish
     QueuedPlayersMap::iterator itr;
@@ -344,7 +346,7 @@ void BattleGroundQueue::RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount)
 // returns true when player pl_guid is in queue and is invited to bgInstanceGuid
 bool BattleGroundQueue::IsPlayerInvited(ObjectGuid pl_guid, const uint32 bgInstanceGuid, const uint32 removeTime)
 {
-    // ACE_Guard<ACE_Recursive_Thread_Mutex> g(m_Lock);
+    // std::lock_guard<std::recursive_mutex> g(m_Lock);
     QueuedPlayersMap::const_iterator qItr = m_QueuedPlayers.find(pl_guid);
     return (qItr != m_QueuedPlayers.end()
             && qItr->second.GroupInfo->IsInvitedToBGInstanceGUID == bgInstanceGuid
@@ -353,7 +355,7 @@ bool BattleGroundQueue::IsPlayerInvited(ObjectGuid pl_guid, const uint32 bgInsta
 
 bool BattleGroundQueue::GetPlayerGroupInfoData(ObjectGuid guid, GroupQueueInfo* ginfo)
 {
-    // ACE_Guard<ACE_Recursive_Thread_Mutex> g(m_Lock);
+    // std::lock_guard<std::recursive_mutex> g(m_Lock);
     QueuedPlayersMap::const_iterator qItr = m_QueuedPlayers.find(guid);
     if (qItr == m_QueuedPlayers.end())
         return false;
@@ -610,7 +612,7 @@ should be called from BattleGround::RemovePlayer function in some cases
 */
 void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id)
 {
-    // ACE_Guard<ACE_Recursive_Thread_Mutex> guard(m_Lock);
+    // std::lock_guard<std::recursive_mutex> guard(m_Lock);
     // if no players in queue - do nothing
     if (m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].empty() &&
             m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].empty() &&
@@ -844,7 +846,7 @@ void BattleGroundMgr::Update(uint32 diff)
         std::vector<uint32> scheduled;
         {
             // create mutex
-            // ACE_Guard<ACE_Thread_Mutex> guard(SchedulerLock);
+            // std::lock_guard<std::mutex> guard(SchedulerLock);
             // copy vector and clear the other
             scheduled = std::vector<uint32>(m_QueueUpdateScheduler);
             m_QueueUpdateScheduler.clear();
@@ -1321,7 +1323,7 @@ void BattleGroundMgr::ToggleTesting()
 
 void BattleGroundMgr::ScheduleQueueUpdate(BattleGroundQueueTypeId bgQueueTypeId, BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id)
 {
-    // ACE_Guard<ACE_Thread_Mutex> guard(SchedulerLock);
+    // std::lock_guard<std::mutex> guard(SchedulerLock);
     // we will use only 1 number created of bgTypeId and bracket_id
     uint32 schedule_id = (bgQueueTypeId << 16) | (bgTypeId << 8) | bracket_id;
     bool found = false;

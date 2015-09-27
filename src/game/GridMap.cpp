@@ -30,6 +30,8 @@
 #include "Policies/Singleton.h"
 #include "Util.h"
 
+#include <mutex>
+
 char const* MAP_MAGIC         = "MAPS";
 char const* MAP_VERSION_MAGIC = "z1.3";
 char const* MAP_AREA_MAGIC    = "AREA";
@@ -1180,9 +1182,9 @@ float TerrainInfo::GetWaterLevel(float x, float y, float z, float* pGround /*= n
 
 //////////////////////////////////////////////////////////////////////////
 
-#define CLASS_LOCK MaNGOS::ClassLevelLockable<TerrainManager, ACE_Thread_Mutex>
+#define CLASS_LOCK MaNGOS::ClassLevelLockable<TerrainManager, std::mutex>
 INSTANTIATE_SINGLETON_2(TerrainManager, CLASS_LOCK);
-INSTANTIATE_CLASS_MUTEX(TerrainManager, ACE_Thread_Mutex);
+INSTANTIATE_CLASS_MUTEX(TerrainManager, std::mutex);
 
 TerrainManager::TerrainManager()
 {

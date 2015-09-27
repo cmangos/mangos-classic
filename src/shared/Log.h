@@ -22,6 +22,8 @@
 #include "Common.h"
 #include "Policies/Singleton.h"
 
+#include <mutex>
+
 class Config;
 class ByteBuffer;
 
@@ -89,7 +91,7 @@ enum Color
 
 const int Color_count = int(WHITE) + 1;
 
-class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Thread_Mutex> >
+class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, std::mutex> >
 {
         friend class MaNGOS::OperatorNew<Log>;
         Log();
@@ -194,7 +196,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ACE_Th
         FILE* eventAiErLogfile;
         FILE* scriptErrLogFile;
         FILE* worldLogfile;
-        ACE_Thread_Mutex m_worldLogMtx;
+        std::mutex m_worldLogMtx;
 
         // log/console control
         LogLevel m_logLevel;

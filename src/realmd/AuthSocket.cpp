@@ -572,11 +572,11 @@ bool AuthSocket::_HandleLogonProof()
             return false;
         }
 
-        if (!PatchCache::instance()->GetHash(tmp, (uint8*)&xferh.md5))
+        if (!sPatchCache.GetHash(tmp, (uint8*)&xferh.md5))
         {
             // calculate patch md5, happens if patch was added while realmd was running
-            PatchCache::instance()->LoadPatchMD5(tmp);
-            PatchCache::instance()->GetHash(tmp, (uint8*)&xferh.md5);
+            sPatchCache.LoadPatchMD5(tmp);
+            sPatchCache.GetHash(tmp, (uint8*)&xferh.md5);
         }
 
         uint8 data[2] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_VERSION_UPDATE};

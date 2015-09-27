@@ -31,8 +31,6 @@
 #include <ace/SOCK_Stream.h>
 #include <ace/SOCK_Acceptor.h>
 #include <ace/Acceptor.h>
-#include <ace/Thread_Mutex.h>
-#include <ace/Guard_T.h>
 #include <ace/Unbounded_Queue.h>
 #include <ace/Message_Block.h>
 
@@ -42,6 +40,8 @@
 
 #include "Common.h"
 #include "Auth/AuthCrypt.h"
+
+#include <mutex>
 
 class ACE_Message_Block;
 class WorldPacket;
@@ -98,8 +98,8 @@ class WorldSocket : protected WorldHandler
         typedef ACE_Acceptor< WorldSocket, ACE_SOCK_ACCEPTOR > Acceptor;
 
         /// Mutex type used for various synchronizations.
-        typedef ACE_Thread_Mutex LockType;
-        typedef ACE_Guard<LockType> GuardType;
+        typedef std::mutex LockType;
+        typedef std::lock_guard<LockType> GuardType;
 
         /// Queue for storing packets for which there is no space.
         typedef ACE_Unbounded_Queue< WorldPacket* > PacketQueueT;

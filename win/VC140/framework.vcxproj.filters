@@ -93,6 +93,9 @@
     <ClInclude Include="..\..\src\framework\Dynamic\ObjectRegistry.h">
       <Filter>Dynamic</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\framework\Policies\Lock.h">
+      <Filter>Policies</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\framework\Policies\MemoryManagement.cpp">

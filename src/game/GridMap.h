@@ -29,6 +29,7 @@
 #include <atomic>
 #include <bitset>
 #include <list>
+#include <mutex>
 
 class Creature;
 class Unit;
@@ -272,14 +273,14 @@ class MANGOS_DLL_SPEC TerrainInfo : public Referencable<std::atomic_long>
         // global garbage collection timer
         ShortIntervalTimer i_timer;
 
-        typedef ACE_Thread_Mutex LOCK_TYPE;
-        typedef ACE_Guard<LOCK_TYPE> LOCK_GUARD;
+        typedef std::mutex LOCK_TYPE;
+        typedef std::lock_guard<LOCK_TYPE> LOCK_GUARD;
         LOCK_TYPE m_mutex;
         LOCK_TYPE m_refMutex;
 };
 
 // class for managing TerrainData object and all sort of geometry querying operations
-class TerrainManager : public MaNGOS::Singleton<TerrainManager, MaNGOS::ClassLevelLockable<TerrainManager, ACE_Thread_Mutex> >
+class TerrainManager : public MaNGOS::Singleton<TerrainManager, MaNGOS::ClassLevelLockable<TerrainManager, std::mutex> >
 {
         typedef UNORDERED_MAP<uint32,  TerrainInfo*> TerrainDataMap;
         friend class MaNGOS::OperatorNew<TerrainManager>;
@@ -320,7 +321,7 @@ class TerrainManager : public MaNGOS::Singleton<TerrainManager, MaNGOS::ClassLev
         TerrainManager(const TerrainManager&);
         TerrainManager& operator=(const TerrainManager&);
 
-        typedef MaNGOS::ClassLevelLockable<TerrainManager, ACE_Thread_Mutex>::Lock Guard;
+        typedef MaNGOS::ClassLevelLockable<TerrainManager, std::mutex>::Lock Guard;
         TerrainDataMap i_TerrainMap;
 };
 

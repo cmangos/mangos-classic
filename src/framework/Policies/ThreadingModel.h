@@ -36,12 +36,12 @@ namespace MaNGOS
             GeneralLock(MUTEX& m)
                 : i_mutex(m)
             {
-                i_mutex.acquire();
+                i_mutex.lock();;
             }
 
             ~GeneralLock()
             {
-                i_mutex.release();
+                i_mutex.unlock();
             }
 
         private:
@@ -123,22 +123,22 @@ namespace MaNGOS
 
                     Lock(const T& /*host*/)
                     {
-                        ClassLevelLockable<T, MUTEX>::si_mtx.acquire();
+                        ClassLevelLockable<T, MUTEX>::si_mtx.lock();
                     }
 
                     Lock(const ClassLevelLockable<T, MUTEX>&)
                     {
-                        ClassLevelLockable<T, MUTEX>::si_mtx.acquire();
+                        ClassLevelLockable<T, MUTEX>::si_mtx.lock();
                     }
 
                     Lock()
                     {
-                        ClassLevelLockable<T, MUTEX>::si_mtx.acquire();
+                        ClassLevelLockable<T, MUTEX>::si_mtx.lock();
                     }
 
                     ~Lock()
                     {
-                        ClassLevelLockable<T, MUTEX>::si_mtx.release();
+                        ClassLevelLockable<T, MUTEX>::si_mtx.unlock();
                     }
             };
 

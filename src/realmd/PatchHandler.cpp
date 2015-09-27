@@ -32,6 +32,8 @@
 
 #include <ace/os_include/netinet/os_tcp.h>
 
+#include <mutex>
+
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
@@ -131,6 +133,8 @@ int PatchHandler::svc(void)
     return 0;
 }
 
+INSTANTIATE_SINGLETON_1(PatchCache);
+
 PatchCache::~PatchCache()
 {
     for (Patches::iterator i = patches_.begin(); i != patches_.end(); ++i)
@@ -140,11 +144,6 @@ PatchCache::~PatchCache()
 PatchCache::PatchCache()
 {
     LoadPatchesInfo();
-}
-
-PatchCache* PatchCache::instance()
-{
-    return ACE_Singleton<PatchCache, ACE_Thread_Mutex>::instance();
 }
 
 void PatchCache::LoadPatchMD5(const char* szFileName)

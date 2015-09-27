@@ -875,7 +875,7 @@ void Log::outWorldPacketDump(uint32 socket, uint32 opcode, char const* opcodeNam
     if (!worldLogfile)
         return;
 
-    ACE_GUARD(ACE_Thread_Mutex, GuardObj, m_worldLogMtx);
+    std::lock_guard<std::mutex> guard(m_worldLogMtx);
 
     outTimestamp(worldLogfile);
 

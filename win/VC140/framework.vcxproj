@@ -311,6 +311,7 @@
     <ClInclude Include="..\..\src\framework\Platform\CompilerDefs.h" />
     <ClInclude Include="..\..\src\framework\Platform\Define.h" />
     <ClInclude Include="..\..\src\framework\Policies\CreationPolicy.h" />
+    <ClInclude Include="..\..\src\framework\Policies\Lock.h" />
     <ClInclude Include="..\..\src\framework\Policies\ObjectLifeTime.h" />
     <ClInclude Include="..\..\src\framework\Policies\Singleton.h" />
     <ClInclude Include="..\..\src\framework\Policies\ThreadingModel.h" />
