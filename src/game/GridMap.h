@@ -26,6 +26,7 @@
 #include "Object.h"
 #include "SharedDefines.h"
 
+#include <atomic>
 #include <bitset>
 #include <list>
 
@@ -203,8 +204,6 @@ class MANGOS_DLL_SPEC Referencable
         Countable m_count;
 };
 
-typedef ACE_Atomic_Op<ACE_Thread_Mutex, long> AtomicLong;
-
 #define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
 #define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
 #define INVALID_HEIGHT_VALUE -200000.0f                     // for return, must be equal to VMAP_INVALID_HEIGHT_VALUE, check value for unknown height is VMAP_INVALID_HEIGHT
@@ -213,7 +212,7 @@ typedef ACE_Atomic_Op<ACE_Thread_Mutex, long> AtomicLong;
 #define DEFAULT_WATER_SEARCH      50.0f                     // default search distance to case detection water level
 
 // class for sharing and managin GridMap objects
-class MANGOS_DLL_SPEC TerrainInfo : public Referencable<AtomicLong>
+class MANGOS_DLL_SPEC TerrainInfo : public Referencable<std::atomic_long>
 {
     public:
         TerrainInfo(uint32 mapid);
