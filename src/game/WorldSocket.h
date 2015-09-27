@@ -25,7 +25,6 @@
 #ifndef _WORLDSOCKET_H
 #define _WORLDSOCKET_H
 
-#include <ace/Basic_Types.h>
 #include <ace/Synch_Traits.h>
 #include <ace/Svc_Handler.h>
 #include <ace/SOCK_Stream.h>

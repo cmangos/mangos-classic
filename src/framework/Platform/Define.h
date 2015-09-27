@@ -23,7 +23,6 @@
 
 #include <sys/types.h>
 
-#include <ace/Basic_Types.h>
 #include <ace/Default_Constants.h>
 #include <ace/OS_NS_dlfcn.h>
 #include <ace/ACE_export.h>
