@@ -47,7 +47,6 @@ INSTANTIATE_SINGLETON_1(ScriptMgr);
 
 ScriptMgr::ScriptMgr() :
     m_hScriptLib(nullptr),
-    m_scheduledScripts(0),
 
     m_pOnInitScriptLibrary(nullptr),
     m_pOnFreeScriptLibrary(nullptr),
@@ -78,6 +77,7 @@ ScriptMgr::ScriptMgr() :
     m_pOnEffectScriptEffectCreature(nullptr),
     m_pOnAuraDummy(nullptr)
 {
+    m_scheduledScripts = 0;
 }
 
 ScriptMgr::~ScriptMgr()

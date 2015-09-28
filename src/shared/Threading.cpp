@@ -44,9 +44,6 @@ Thread::~Thread()
         m_task->decReference();
 }
 
-// initialize Thread's class static member
-thread_local Thread Thread::m_ThreadStorage;
-
 bool Thread::wait()
 {
     if (m_iThreadId == std::thread::id() || !m_task)
@@ -88,11 +85,6 @@ void Thread::ThreadTask(void* param)
 std::thread::id Thread::currentId()
 {
     return std::this_thread::get_id();
-}
-
-Thread* Thread::current()
-{
-	return &m_ThreadStorage;
 }
 
 void Thread::setPriority(Priority priority)

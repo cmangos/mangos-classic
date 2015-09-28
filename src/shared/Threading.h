@@ -65,7 +65,6 @@ namespace MaNGOS
 
             static void Sleep(unsigned long msecs);
             static std::thread::id currentId();
-            static Thread* current();
 
         private:
             Thread(const Thread&);
@@ -76,9 +75,6 @@ namespace MaNGOS
             Runnable* m_task;
             std::thread::id m_iThreadId;
             std::thread m_ThreadImp;
-
-            // global object - container for Thread class representation of every thread
-            static thread_local Thread m_ThreadStorage;
     };
 }
 #endif
