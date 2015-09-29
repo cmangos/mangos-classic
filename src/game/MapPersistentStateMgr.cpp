@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <list>
+
 #include "MapPersistentStateMgr.h"
 
 #include "SQLStorages.h"
@@ -891,9 +893,14 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, bool warn, uint32 
         }
 
         // remove all binds for online player
+        std::list<DungeonPersistentState *> unbindList;
+
         for (PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.begin(); itr != m_instanceSaveByInstanceId.end(); ++itr)
             if (itr->second->GetMapId() == mapid)
-                ((DungeonPersistentState*)(itr->second))->UnbindThisState();
+                unbindList.push_back((DungeonPersistentState *)itr->second);
+
+        for (std::list<DungeonPersistentState *>::iterator itr = unbindList.begin(); itr != unbindList.end(); itr++)
+            (*itr)->UnbindThisState();
 
         // reset maps, teleport player automaticaly to their homebinds and unload maps
         MapPersistantStateResetWorker worker;
