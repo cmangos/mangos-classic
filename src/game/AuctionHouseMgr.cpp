@@ -527,25 +527,26 @@ void AuctionHouseObject::Update()
     ///- Handle expired auctions
     for (AuctionEntryMap::iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end();)
     {
-        if (curTime > itr->second->expireTime)
+        if (curTime < itr->second->expireTime)
         {
-            ///- perform the transaction if there was bidder
-            if (itr->second->bid)
-                itr->second->AuctionBidWinning();
-            ///- cancel the auction if there was no bidder and clear the auction
-            else
-            {
-                sAuctionMgr.SendAuctionExpiredMail(itr->second);
-
-                itr->second->DeleteFromDB();
-                sAuctionMgr.RemoveAItem(itr->second->itemGuidLow);
-                delete itr->second;
-                AuctionsMap.erase(itr++);
-                continue;
-            }
+            itr++;
+            continue;
         }
 
-        ++itr;
+        ///- perform the transaction if there was bidder.  this will alyways have the side effect of
+        ///- removing the auction from the collection.  therefore we must increment the iterator here.
+        if (itr->second->bid)
+            (itr++)->second->AuctionBidWinning();
+        ///- cancel the auction if there was no bidder and clear the auction
+        else
+        {
+            sAuctionMgr.SendAuctionExpiredMail(itr->second);
+
+            itr->second->DeleteFromDB();
+            sAuctionMgr.RemoveAItem(itr->second->itemGuidLow);
+            delete itr->second;
+            AuctionsMap.erase(itr++);
+        }
     }
 }
 
