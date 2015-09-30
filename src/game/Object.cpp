@@ -177,15 +177,12 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         }
     }
 
-    // DEBUG_LOG("BuildCreateUpdate: update-type: %u, object-type: %u got updateFlags: %X", updatetype, m_objectTypeId, updateFlags);
-
     ByteBuffer buf(500);
     buf << uint8(updatetype);
     buf << GetPackGUID();
     buf << uint8(m_objectTypeId);
 
     BuildMovementUpdate(&buf, updateFlags);
-
     UpdateMask updateMask;
     updateMask.SetCount(m_valuesCount);
     _SetCreateBits(&updateMask, target);
@@ -236,66 +233,49 @@ void Object::DestroyForPlayer(Player* target) const
 
 void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
 {
-    uint32 moveFlags = MOVEFLAG_NONE;
+    Unit const* unit = nullptr;
+    uint32 highGuid = 0;
+    MovementFlags moveflags = MOVEFLAG_NONE;
 
-    *data << uint8(updateFlags);                            // update flags
+    switch (m_objectTypeId)
+    {
+        case TYPEID_OBJECT:
+        case TYPEID_ITEM:
+        case TYPEID_CONTAINER:
+        case TYPEID_GAMEOBJECT:
+        case TYPEID_DYNAMICOBJECT:
+        case TYPEID_CORPSE:
+            highGuid = uint32(GetObjectGuid().GetHigh());
+            break;
+
+        case TYPEID_PLAYER:
+            // TODO: this code must not be here
+            if (static_cast<Player const*>(this)->GetTransport())
+                ((Unit*)this)->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
+            else
+                ((Unit*)this)->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
+
+        case TYPEID_UNIT:
+            unit = static_cast<Unit const*>(this);
+            moveflags = unit->m_movementInfo.GetMovementFlags();
+            break;
+
+        default:
+            break;
+    }
+
+    *data << uint8(updateFlags);
 
     if (updateFlags & UPDATEFLAG_LIVING)
     {
-        if (m_objectTypeId == TYPEID_PLAYER && ((Player*)this)->GetTransport())
+        MANGOS_ASSERT(unit);
+        if (unit->IsStopped() && unit->m_movementInfo.HasMovementFlag(MOVEFLAG_SPLINE_ENABLED))
         {
-            moveFlags |= MOVEFLAG_ONTRANSPORT;
+            sLog.outError("%s is not moving but have spline movement enabled!", GetGuidStr().c_str());
+            ((Unit*)this)->m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
         }
 
-        *data << uint32(moveFlags);                         // movement flags
-        *data << uint32(WorldTimer::getMSTime());           // time (in milliseconds)
-    }
-
-    if (updateFlags & UPDATEFLAG_HAS_POSITION)              // 0x40
-    {
-        if (m_objectTypeId == TYPEID_PLAYER && ((Player*)this)->GetTransport())
-        {
-            *data << float(((Player*)this)->GetTransport()->GetPositionX());
-            *data << float(((Player*)this)->GetTransport()->GetPositionY());
-            *data << float(((Player*)this)->GetTransport()->GetPositionZ());
-            *data << float(((Player*)this)->GetTransport()->GetOrientation());
-
-            *data << ObjectGuid(((Player*)this)->GetTransport()->GetObjectGuid());
-            *data << float(((Player*)this)->GetTransOffsetX());
-            *data << float(((Player*)this)->GetTransOffsetY());
-            *data << float(((Player*)this)->GetTransOffsetZ());
-            *data << float(((Player*)this)->GetTransOffsetO());
-        }
-        else if (GetObjectGuid().GetHigh() == HIGHGUID_TRANSPORT)
-        {
-            *data << float(0);
-            *data << float(0);
-            *data << float(0);
-            *data << float(((WorldObject*)this)->GetOrientation());
-        }
-        else
-        {
-            *data << float(((WorldObject*)this)->GetPositionX());
-            *data << float(((WorldObject*)this)->GetPositionY());
-            *data << float(((WorldObject*)this)->GetPositionZ());
-            *data << float(((WorldObject*)this)->GetOrientation());
-        }
-    }
-
-    if (updateFlags & UPDATEFLAG_LIVING)                    // 0x20
-    {
-        Unit* unit = ((Unit*)this);
-
-        *data << (float)0;
-
-        if (moveFlags & 0x2000)                             // update self
-        {
-            *data << (float)0;
-            *data << (float)1.0;
-            *data << (float)0;
-            *data << (float)0;
-        }
-
+        *data << unit->m_movementInfo;
         // Unit speeds
         *data << float(unit->GetSpeed(MOVE_WALK));
         *data << float(unit->GetSpeed(MOVE_RUN));
@@ -304,36 +284,33 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint8 updateFlags) const
         *data << float(unit->GetSpeed(MOVE_SWIM_BACK));
         *data << float(unit->GetSpeed(MOVE_TURN_RATE));
 
-        if (m_objectTypeId == TYPEID_UNIT)
-        {
-            uint8 PosCount = 0;
-            if (moveFlags & 0x400000)
-            {
-                *data << (uint32)0x0;
-                *data << (uint32)0x659;
-                *data << (uint32)0xB7B;
-                *data << (uint32)0xFDA0B4;
-                *data << (uint32)PosCount;
-                for (int i = 0; i < PosCount + 1; i++)
-                {
-                    *data << (float)0;                      // x
-                    *data << (float)0;                      // y
-                    *data << (float)0;                      // z
-                }
-            }
-        }
+        if (unit->m_movementInfo.HasMovementFlag(MOVEFLAG_SPLINE_ENABLED))
+            Movement::PacketBuilder::WriteCreate(*unit->movespline, *data);
+    }
+    else if (updateFlags & UPDATEFLAG_HAS_POSITION)
+    {
+        *data << ((WorldObject*)this)->GetPositionX();
+        *data << ((WorldObject*)this)->GetPositionY();
+        *data << ((WorldObject*)this)->GetPositionZ();
+        *data << ((WorldObject*)this)->GetOrientation();
     }
 
-    if (updateFlags & UPDATEFLAG_ALL)                       // 0x10
-    {
+    if (updateFlags & UPDATEFLAG_HIGHGUID)
+        *data << highGuid;
+
+    if (updateFlags & UPDATEFLAG_ALL)
         *data << (uint32)0x1;
+
+    if (updateFlags & UPDATEFLAG_FULLGUID)
+    {
+        if (unit && unit->getVictim())
+            *data << unit->getVictim()->GetPackGUID();
+        else
+            data->appendPackGUID(0);
     }
 
-    // 0x2
     if (updateFlags & UPDATEFLAG_TRANSPORT)
-    {
-        *data << uint32(WorldTimer::getMSTime());           // ms time
-    }
+        *data << uint32(WorldTimer::getMSTime());
 }
 
 void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* updateMask, Player* target) const
