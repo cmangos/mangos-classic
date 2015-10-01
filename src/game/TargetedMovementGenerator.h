@@ -65,6 +65,7 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorMedium
         ShortTimeTracker i_recheckDistance;
         float i_offset;
         float i_angle;
+        G3D::Vector3 m_prevTargetPos;
         bool m_speedChanged : 1;
         bool i_targetReached : 1;
 
