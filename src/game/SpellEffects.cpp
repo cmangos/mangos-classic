@@ -4110,6 +4110,15 @@ void Spell::EffectSummonPossessed(SpellEffectIndex eff_idx)
         return;
     }
 
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        //remove any existing charm just in case
+        m_caster->Uncharm();
+
+        //pets should be temporarily removed when possesing a target
+        ((Player*)m_caster)->UnsummonPetTemporaryIfAny();
+    }
+
     // Changes to be sent
     spawnCreature->SetCharmerGuid(m_caster->GetObjectGuid());
     spawnCreature->SetCreatorGuid(m_caster->GetObjectGuid());
