@@ -1863,6 +1863,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         virtual bool CanSwim() const = 0;
         virtual bool CanFly() const = 0;
 
+        void ForceHealthAndPowerUpdate();   // force server to send new value for hp and power (including max)
+
     protected:
         explicit Unit();
 

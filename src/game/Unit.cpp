@@ -9101,3 +9101,12 @@ void Unit::DisableSpline()
     m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
     movespline->_Interrupt();
 }
+
+void Unit::ForceHealthAndPowerUpdate()
+{
+    uint32 powerType = GetPowerType();
+    ForceValuesUpdateAtIndex(UNIT_FIELD_HEALTH);
+    ForceValuesUpdateAtIndex(UNIT_FIELD_MAXHEALTH);
+    ForceValuesUpdateAtIndex(UNIT_FIELD_POWER1 + powerType);
+    ForceValuesUpdateAtIndex(UNIT_FIELD_MAXPOWER1 + powerType);
+}

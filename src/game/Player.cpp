@@ -6403,6 +6403,10 @@ void Player::DuelComplete(DuelCompleteType type)
     duel->opponent->SetGuidValue(PLAYER_DUEL_ARBITER, ObjectGuid());
     duel->opponent->SetUInt32Value(PLAYER_DUEL_TEAM, 0);
 
+    // restore health/mana view for friendly player
+    ForceHealthAndPowerUpdate();
+    duel->opponent->ForceHealthAndPowerUpdate();
+
     delete duel->opponent->duel;
     duel->opponent->duel = NULL;
     delete duel;
@@ -15307,6 +15311,10 @@ void Player::UpdateDuelFlag(time_t currTime)
 
     SetUInt32Value(PLAYER_DUEL_TEAM, 1);
     duel->opponent->SetUInt32Value(PLAYER_DUEL_TEAM, 2);
+
+    // force health/mana to be sent by percentage for dueler
+    ForceHealthAndPowerUpdate();
+    duel->opponent->ForceHealthAndPowerUpdate();
 
     duel->startTimer = 0;
     duel->startTime  = currTime;
