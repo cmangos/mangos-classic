@@ -82,7 +82,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
 
     if (GetPlayer()->GetInstanceId() != 0 && player->GetInstanceId() != 0 && GetPlayer()->GetInstanceId() != player->GetInstanceId() && GetPlayer()->GetMapId() == player->GetMapId())
     {
-        SendPartyResult(PARTY_OP_INVITE, membername, ERR_TARGET_NOT_IN_INSTANCE_S);
+        SendPartyResult(PARTY_OP_INVITE, membername, ERR_ALREADY_IN_GROUP_S); // error message is not so appropriated but no other option for classic
         return;
     }
 
@@ -330,7 +330,7 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
 
     if (_player->InBattleGround())
     {
-        SendPartyResult(PARTY_OP_INVITE, "", ERR_INVITE_RESTRICTED);
+        SendPartyResult(PARTY_OP_INVITE, "", ERR_NOT_LEADER);  // error message is not so appropriated but no other option for classic
         return;
     }
 

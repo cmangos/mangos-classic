@@ -17810,7 +17810,7 @@ PartyResult Player::CanUninviteFromGroup() const
         return ERR_NOT_LEADER;
 
     if (InBattleGround())
-        return ERR_INVITE_RESTRICTED;
+        return ERR_NOT_IN_GROUP;  // error message is not so appropriated but no other option for classic
 
     return ERR_PARTY_RESULT_OK;
 }
