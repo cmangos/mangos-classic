@@ -23,7 +23,7 @@ void FillSpellSummary();
 
 void LoadDatabase()
 {
-    std::string strSD2DBinfo = SD2Config.GetStringDefault("ScriptDev2DatabaseInfo", "");
+    std::string strSD2DBinfo = SD2Config.GetStringDefault("WorldDatabaseInfo", "");
 
     if (strSD2DBinfo.empty())
     {
