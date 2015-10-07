@@ -315,6 +315,67 @@ int WorldSocket::handle_output(ACE_HANDLE)
     ACE_NOTREACHED(return 0);
 }
 
+int WorldSocket::handle_output_queue(GuardType& g)
+{
+    if (msg_queue()->is_empty())
+        return cancel_wakeup_output(g);
+
+    ACE_Message_Block* mblk;
+
+    if (msg_queue()->dequeue_head(mblk, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
+    {
+        sLog.outError("WorldSocket::handle_output_queue dequeue_head");
+        return -1;
+    }
+
+    const size_t send_len = mblk->length();
+
+#ifdef MSG_NOSIGNAL
+    ssize_t n = peer().send(mblk->rd_ptr(), send_len, MSG_NOSIGNAL);
+#else
+    ssize_t n = peer().send(mblk->rd_ptr(), send_len);
+#endif // MSG_NOSIGNAL
+
+    if (n == 0)
+    {
+        mblk->release();
+
+        return -1;
+    }
+    else if (n == -1)
+    {
+        if (errno == EWOULDBLOCK || errno == EAGAIN)
+        {
+            msg_queue()->enqueue_head(mblk, (ACE_Time_Value*)&ACE_Time_Value::zero);
+            return schedule_wakeup_output(g);
+        }
+
+        mblk->release();
+        return -1;
+    }
+    else if (n < (ssize_t)send_len) // now n > 0
+    {
+        mblk->rd_ptr(static_cast<size_t>(n));
+
+        if (msg_queue()->enqueue_head(mblk, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
+        {
+            sLog.outError("WorldSocket::handle_output_queue enqueue_head");
+            mblk->release();
+            return -1;
+        }
+
+        return schedule_wakeup_output(g);
+    }
+    else // now n == send_len
+    {
+        mblk->release();
+
+        return msg_queue()->is_empty() ? cancel_wakeup_output(g) : ACE_Event_Handler::WRITE_MASK;
+    }
+
+    ACE_NOTREACHED(return -1);
+}
+
 int WorldSocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
 {
     // Critical section

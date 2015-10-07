@@ -140,6 +140,9 @@ class WorldSocket : protected WorldHandler
         /// Called when the socket can write.
         virtual int handle_output(ACE_HANDLE = ACE_INVALID_HANDLE) override;
 
+        /// Drain the queue if its not empty.
+        int handle_output_queue(GuardType& g);
+
         /// Called when connection is closed or error happens.
         virtual int handle_close(ACE_HANDLE = ACE_INVALID_HANDLE,
                                  ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
