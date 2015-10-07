@@ -347,12 +347,33 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
 
                     // Should trap trigger?
-                    Unit* enemy = NULL;                     // pointer to appropriate target if found any
-                    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
-                    MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(enemy, u_check);
-                    Cell::VisitAllObjects(this, checker, radius);
-                    if (enemy)
-                        Use(enemy);
+		    // Some traps have positive spells (like Basic Campfire ->Cozy Fire)
+		    SpellEntry const* spellproto = sSpellStore.LookupEntry(goInfo->trap.spellId);
+		    bool isAOETrap = false;
+                    if(IsPositiveSpell(spellproto))
+		    {
+			for(int i=0;i<MAX_EFFECT_INDEX;i++)
+			    if((spellproto->EffectImplicitTargetA[i]==TARGET_CASTER_COORDINATES) && (spellproto->EffectImplicitTargetB[i]==TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER))
+				{
+				isAOETrap = true;
+				break;
+				}
+			    if(isAOETrap)
+			    {
+				MaNGOS::AnyFriendlyUnitInObjectRangeDo f_do(this,radius);
+				MaNGOS::PlayerWorker<MaNGOS::AnyFriendlyUnitInObjectRangeDo> worker(f_do);
+				Cell::VisitAllObjects(this,worker,radius);
+			    }
+		    }
+		    else
+		    {
+			Unit* enemy = NULL;                     // pointer to appropriate target if found any
+                	MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
+                	MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(enemy, u_check);
+                	Cell::VisitAllObjects(this, checker, radius);
+                	if (enemy)
+                    	    Use(enemy);
+		    }
                 }
 
                 if (uint32 max_charges = goInfo->GetCharges())
