@@ -531,7 +531,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                         {
                             case GAMEOBJECT_TYPE_QUESTGIVER:
                             case GAMEOBJECT_TYPE_CHEST:
-                                sLog.outString("Chest %s is updated, state is %u", gameObject->GetGuidStr().c_str(), uint32(gameObject->getLootState()));
                                 if (gameObject->getLootState() == GO_READY || gameObject->getLootState() == GO_ACTIVATED)
                                     *data << uint16(GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
                                 else
