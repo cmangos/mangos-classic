@@ -353,7 +353,7 @@ struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
         if (uiEntry == NPC_WINDSOR)
             return m_creature->GetMap()->GetCreature(m_windsorGuid);
 
-        return NULL;
+        return nullptr;
     }
 
     // Check if the event is already running

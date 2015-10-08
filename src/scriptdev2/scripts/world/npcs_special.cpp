@@ -269,7 +269,7 @@ struct npc_injured_patientAI : public ScriptedAI
     void Reset() override
     {
         m_doctorGuid.Clear();
-        m_pCoord = NULL;
+        m_pCoord = nullptr;
 
         // no select
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);

@@ -59,14 +59,14 @@ enum EscortFaction
 struct Script
 {
     Script() :
-        pGossipHello(NULL), pGossipHelloGO(NULL), pGossipSelect(NULL), pGossipSelectGO(NULL),
-        pGossipSelectWithCode(NULL), pGossipSelectGOWithCode(NULL),
-        pDialogStatusNPC(NULL), pDialogStatusGO(NULL),
-        pQuestAcceptNPC(NULL), pQuestAcceptGO(NULL), pQuestAcceptItem(NULL),
-        pQuestRewardedNPC(NULL), pQuestRewardedGO(NULL),
-        pGOUse(NULL), pItemUse(NULL), pAreaTrigger(NULL), pProcessEventId(NULL),
-        pEffectDummyNPC(NULL), pEffectDummyGO(NULL), pEffectDummyItem(NULL), pEffectScriptEffectNPC(NULL),
-        pEffectAuraDummy(NULL), GetAI(NULL), GetInstanceData(NULL)
+        pGossipHello(nullptr), pGossipHelloGO(nullptr), pGossipSelect(nullptr), pGossipSelectGO(nullptr),
+        pGossipSelectWithCode(nullptr), pGossipSelectGOWithCode(nullptr),
+        pDialogStatusNPC(nullptr), pDialogStatusGO(nullptr),
+        pQuestAcceptNPC(nullptr), pQuestAcceptGO(nullptr), pQuestAcceptItem(nullptr),
+        pQuestRewardedNPC(nullptr), pQuestRewardedGO(nullptr),
+        pGOUse(nullptr), pItemUse(nullptr), pAreaTrigger(nullptr), pProcessEventId(nullptr),
+        pEffectDummyNPC(nullptr), pEffectDummyGO(nullptr), pEffectDummyItem(nullptr), pEffectScriptEffectNPC(nullptr),
+        pEffectAuraDummy(nullptr), GetAI(nullptr), GetInstanceData(nullptr)
     {}
 
     std::string Name;
@@ -104,8 +104,8 @@ struct Script
 // ************* Some functions used globally **************
 
 // Generic scripting text function
-void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget = NULL);
-void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource = NULL, Unit* pTarget = NULL);
+void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget = nullptr);
+void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource = nullptr, Unit* pTarget = nullptr);
 
 // *********************************************************
 // **************** Internal hook mechanics ****************

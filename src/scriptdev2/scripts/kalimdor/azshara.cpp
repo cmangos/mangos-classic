@@ -117,7 +117,7 @@ struct mobs_spitelashesAI : public ScriptedAI
 
     bool CanUseSpecialAbility(uint32 uiIndex)
     {
-        Unit* pTarget = NULL;
+        Unit* pTarget = nullptr;
 
         switch (m_aSpitelashAbility[uiIndex].m_uiTargetType)
         {

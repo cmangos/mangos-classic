@@ -116,7 +116,7 @@ struct boss_zumrahAI : public ScriptedAI
     GameObject* SelectNearbyShallowGrave()
     {
         if (!m_pInstance)
-            return NULL;
+            return nullptr;
 
         // Get the list of usable graves (not used already by players)
         GuidList lTempList;
@@ -132,7 +132,7 @@ struct boss_zumrahAI : public ScriptedAI
         }
 
         if (lGravesInRange.empty())
-            return NULL;
+            return nullptr;
 
         // Sort the graves
         lGravesInRange.sort(ObjectDistanceOrder(m_creature));
@@ -152,7 +152,7 @@ struct boss_zumrahAI : public ScriptedAI
                 // Use a nearby grave to spawn zombies
                 if (GameObject* pGrave = SelectNearbyShallowGrave())
                 {
-                    m_creature->CastSpell(pGrave->GetPositionX(), pGrave->GetPositionY(), pGrave->GetPositionZ(), SPELL_SUMMON_ZOMBIES, true, NULL, NULL, pGrave->GetObjectGuid());
+                    m_creature->CastSpell(pGrave->GetPositionX(), pGrave->GetPositionY(), pGrave->GetPositionZ(), SPELL_SUMMON_ZOMBIES, true, nullptr, nullptr, pGrave->GetObjectGuid());
                     pGrave->SetLootState(GO_JUST_DEACTIVATED);
 
                     if (roll_chance_i(30))

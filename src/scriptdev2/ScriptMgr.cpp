@@ -83,7 +83,7 @@ void FreeScriptLibrary()
 
     num_sc_scripts = 0;
 
-    setScriptLibraryErrorFile(NULL, NULL);
+    setScriptLibraryErrorFile(nullptr, nullptr);
 }
 
 MANGOS_DLL_EXPORT
@@ -129,7 +129,7 @@ void InitScriptLibrary()
     outstring_log("");
 
     // Resize script ids to needed ammount of assigned ScriptNames (from core)
-    m_scripts.resize(GetScriptIdsCount(), NULL);
+    m_scripts.resize(GetScriptIdsCount(), nullptr);
 
     FillSpellSummary();
 
@@ -153,7 +153,7 @@ void InitScriptLibrary()
  *
  * @param iTextEntry Entry of the text, stored in SD2-database
  * @param pSource Source of the text
- * @param pTarget Can be NULL (depending on CHAT_TYPE of iTextEntry). Possible target for the text
+ * @param pTarget Can be nullptr (depending on CHAT_TYPE of iTextEntry). Possible target for the text
  */
 void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
 {
@@ -181,10 +181,10 @@ void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget)
  * @param iTextEntry Entry of the text, stored in SD2-database, only type CHAT_TYPE_ZONE_YELL supported
  * @param uiCreatureEntry Id of the creature of whom saying will be simulated
  * @param pMap Given Map on which the map-wide text is displayed
- * @param pCreatureSource Can be NULL. If pointer to Creature is given, then the creature does the map-wide text
- * @param pTarget Can be NULL. Possible target for the text
+ * @param pCreatureSource Can be nullptr. If pointer to Creature is given, then the creature does the map-wide text
+ * @param pTarget Can be nullptr. Possible target for the text
  */
-void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource /*=NULL*/, Unit* pTarget /*=NULL*/)
+void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource /*=nullptr*/, Unit* pTarget /*=nullptr*/)
 {
     if (!pMap)
     {
@@ -469,7 +469,7 @@ CreatureAI* GetCreatureAI(Creature* pCreature)
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
 
     if (!pTempScript || !pTempScript->GetAI)
-        return NULL;
+        return nullptr;
 
     return pTempScript->GetAI(pCreature);
 }
@@ -546,7 +546,7 @@ InstanceData* CreateInstanceData(Map* pMap)
     Script* pTempScript = m_scripts[pMap->GetScriptId()];
 
     if (!pTempScript || !pTempScript->GetInstanceData)
-        return NULL;
+        return nullptr;
 
     return pTempScript->GetInstanceData(pMap);
 }

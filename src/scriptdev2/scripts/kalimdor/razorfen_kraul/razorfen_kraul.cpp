@@ -200,7 +200,7 @@ struct npc_snufflenose_gopherAI : public ScriptedPetAI
             return;
 
         lTubbersInRange.sort(ObjectDistanceOrder(m_creature));
-        GameObject* pNearestTubber = NULL;
+        GameObject* pNearestTubber = nullptr;
 
         // Always need to find new ones
         for (std::list<GameObject*>::const_iterator itr = lTubbersInRange.begin(); itr != lTubbersInRange.end(); ++itr)

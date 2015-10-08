@@ -69,7 +69,7 @@ struct mob_yennikuAI : public ScriptedAI
             m_creature->CombatStop(true);
             m_creature->LoadCreatureAddon(true);
 
-            m_creature->SetLootRecipient(NULL);
+            m_creature->SetLootRecipient(nullptr);
 
             m_creature->HandleEmote(EMOTE_STATE_STUN);
             m_creature->SetFactionTemporary(FACTION_ID_HORDE_GENERIC, TEMPFACTION_RESTORE_REACH_HOME);

@@ -442,7 +442,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
             case NPC_FEUGEN:  return m_pInstance->GetSingleCreatureFromStorage(NPC_STALAGG);
             case NPC_STALAGG: return m_pInstance->GetSingleCreatureFromStorage(NPC_FEUGEN);
             default:
-                return NULL;
+                return nullptr;
         }
     }
 

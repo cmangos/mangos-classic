@@ -718,7 +718,7 @@ struct npc_areiAI : public npc_escortAI, private DialogueHelper
         if (uiEntry == NPC_AREI)
             return m_creature;
 
-        return NULL;
+        return nullptr;
     }
 
     void JustDidDialogueStep(int32 iEntry) override

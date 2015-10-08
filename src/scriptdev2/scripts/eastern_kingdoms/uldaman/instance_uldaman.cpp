@@ -228,7 +228,7 @@ Creature* instance_uldaman::GetClosestDwarfNotInCombat(Creature* pSearcher)
     }
 
     if (lTemp.empty())
-        return NULL;
+        return nullptr;
 
     lTemp.sort(ObjectDistanceOrder(pSearcher));
     return lTemp.front();

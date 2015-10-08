@@ -221,7 +221,7 @@ Creature* instance_zulgurub::SelectRandomPantherTrigger(bool bIsLeft)
     }
 
     if (vTriggers.empty())
-        return NULL;
+        return nullptr;
 
     return vTriggers[urand(0, vTriggers.size() - 1)];
 }

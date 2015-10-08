@@ -118,7 +118,7 @@ struct boss_sarturaAI : public ScriptedAI
             // End Whirlwind Phase
             if (m_uiWhirlWindEndTimer <= uiDiff)
             {
-                m_creature->FixateTarget(NULL);
+                m_creature->FixateTarget(nullptr);
                 m_uiWhirlWindEndTimer = 0;
                 m_uiWhirlWindTimer = urand(25000, 40000);
             }
@@ -157,7 +157,7 @@ struct boss_sarturaAI : public ScriptedAI
                 // Remove remaining taunts
                 if (m_uiAggroResetEndTimer <= uiDiff)
                 {
-                    m_creature->FixateTarget(NULL);
+                    m_creature->FixateTarget(nullptr);
                     m_uiAggroResetEndTimer = 0;
                     m_uiAggroResetTimer = urand(35000, 45000);
                 }
@@ -233,7 +233,7 @@ struct mob_sartura_royal_guardAI : public ScriptedAI
             // End Whirlwind Phase
             if (m_uiWhirlWindEndTimer <= uiDiff)
             {
-                m_creature->FixateTarget(NULL);
+                m_creature->FixateTarget(nullptr);
                 m_uiWhirlWindEndTimer = 0;
                 m_uiWhirlWindTimer = urand(25000, 40000);
             }
@@ -271,7 +271,7 @@ struct mob_sartura_royal_guardAI : public ScriptedAI
             {
                 if (m_uiAggroResetEndTimer <= uiDiff)
                 {
-                    m_creature->FixateTarget(NULL);
+                    m_creature->FixateTarget(nullptr);
                     m_uiAggroResetEndTimer = 0;
                     m_uiAggroResetTimer = urand(30000, 40000);
                 }

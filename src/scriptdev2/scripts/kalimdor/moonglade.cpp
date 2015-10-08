@@ -280,7 +280,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
             case NPC_ERANIKUS_TYRANT: return m_creature->GetMap()->GetCreature(m_eranikusGuid);
 
             default:
-                return NULL;
+                return nullptr;
         }
     }
 
@@ -542,7 +542,7 @@ struct boss_eranikusAI : public ScriptedAI
             m_creature->CombatStop(true);
             m_creature->LoadCreatureAddon(true);
 
-            m_creature->SetLootRecipient(NULL);
+            m_creature->SetLootRecipient(nullptr);
 
             // Get Remulos guid and make him stop summoning shades
             if (Creature* pRemulos = GetClosestCreatureWithEntry(m_creature, NPC_REMULOS, 50.0f))

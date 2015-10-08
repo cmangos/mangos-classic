@@ -123,7 +123,7 @@ struct boss_ossirianAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        Creature* pOssirianTrigger = NULL;
+        Creature* pOssirianTrigger = nullptr;
         if (m_uiCrystalPosition == 0)
         {
             // Respawn static spawned crystal trigger

@@ -44,7 +44,7 @@ struct npc_the_scourge_cauldronAI : public ScriptedAI
     void DoDie()
     {
         // summoner dies here
-        m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         // override any database `spawntimesecs` to prevent duplicated summons
         uint32 rTime = m_creature->GetRespawnDelay();
         if (rTime < 600)
@@ -278,7 +278,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
             m_creature->RemoveAllAurasOnEvade();
             m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
-            m_creature->SetLootRecipient(NULL);
+            m_creature->SetLootRecipient(nullptr);
 
             m_creature->InterruptNonMeleeSpells(true);
             m_creature->SetHealth(0);
@@ -543,7 +543,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
             case NPC_TIRION_FORDRING:   return m_creature->GetMap()->GetCreature(m_tirionGuid);
 
             default:
-                return NULL;
+                return nullptr;
         }
     }
 
@@ -693,7 +693,7 @@ struct npc_isillienAI: public npc_escortAI
             m_creature->RemoveAllAurasOnEvade();
             m_creature->DeleteThreatList();
             m_creature->CombatStop(true);
-            m_creature->SetLootRecipient(NULL);
+            m_creature->SetLootRecipient(nullptr);
 
             m_creature->GetMotionMaster()->MoveIdle();
 
@@ -846,7 +846,7 @@ struct npc_tirion_fordringAI: public npc_escortAI
         m_creature->RemoveAllAurasOnEvade();
         m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         // on evade go to Taelan
         if (Creature* pTaelan = m_creature->GetMap()->GetCreature(m_taelanGuid))

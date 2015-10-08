@@ -39,7 +39,7 @@ class FollowerAI : public ScriptedAI
         void UpdateAI(const uint32) override;               // the "internal" update, calls UpdateFollowerAI()
         virtual void UpdateFollowerAI(const uint32);        // used when it's needed to add code in update (abilities, scripted events, etc)
 
-        void StartFollow(Player* pPlayer, uint32 uiFactionForFollower = 0, const Quest* pQuest = NULL);
+        void StartFollow(Player* pPlayer, uint32 uiFactionForFollower = 0, const Quest* pQuest = nullptr);
 
         void SetFollowPaused(bool bPaused);                 // if special event require follow mode to hold/resume during the follow
         void SetFollowComplete(bool bWithEndEvent = false);

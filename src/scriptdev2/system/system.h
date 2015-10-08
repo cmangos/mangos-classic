@@ -47,10 +47,10 @@ class SystemMgr
         {
             EntryPathInfo::const_iterator findEntry = m_pathInfo.find(entry);
             if (findEntry == m_pathInfo.end())
-                return NULL;
+                return nullptr;
             std::map<int32, PathInformation>::const_iterator findPath = findEntry->second.find(pathId);
             if (findPath == findEntry->second.end())
-                return NULL;
+                return nullptr;
 
             return &(findPath->second);
         }

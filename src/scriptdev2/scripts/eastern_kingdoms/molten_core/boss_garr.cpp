@@ -126,7 +126,7 @@ struct mob_fireswornAI : public ScriptedAI
         if (m_pInstance)
         {
             if (Creature* pGarr = m_pInstance->GetSingleCreatureFromStorage(NPC_GARR))
-                pGarr->CastSpell(pGarr, SPELL_ENRAGE, true, NULL, NULL, m_creature->GetObjectGuid());
+                pGarr->CastSpell(pGarr, SPELL_ENRAGE, true, nullptr, nullptr, m_creature->GetObjectGuid());
         }
     }
 

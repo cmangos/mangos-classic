@@ -180,7 +180,7 @@ struct npc_general_andorovAI : public ScriptedAI, private DialogueHelper
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_MOVE_INTRO, aAndorovMoveLocs[2].m_fX, aAndorovMoveLocs[2].m_fY, aAndorovMoveLocs[2].m_fZ);
         }
 
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         Reset();
     }
@@ -334,7 +334,7 @@ struct npc_kaldorei_eliteAI : public ScriptedAI
             }
         }
 
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         Reset();
     }

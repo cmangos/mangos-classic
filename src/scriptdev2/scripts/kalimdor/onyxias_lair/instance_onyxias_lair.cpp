@@ -32,7 +32,7 @@ instance_onyxias_lair::instance_onyxias_lair(Map* pMap) : ScriptedInstance(pMap)
 void instance_onyxias_lair::Initialize()
 {
     m_uiEncounter = NOT_STARTED;
-    m_tPhaseTwoStart = time(NULL);
+    m_tPhaseTwoStart = time(nullptr);
 }
 
 bool instance_onyxias_lair::IsEncounterInProgress() const
@@ -58,7 +58,7 @@ void instance_onyxias_lair::SetData(uint32 uiType, uint32 uiData)
     m_uiEncounter = uiData;
 
     if (uiData == DATA_LIFTOFF)
-        m_tPhaseTwoStart = time(NULL);
+        m_tPhaseTwoStart = time(nullptr);
 
     // Currently no reason to save anything
 }

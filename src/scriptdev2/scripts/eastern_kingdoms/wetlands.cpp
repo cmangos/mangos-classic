@@ -175,7 +175,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
         if (uiEntry == NPC_TAPOKE_SLIM_JAHN)
             return m_creature;
 
-        return NULL;
+        return nullptr;
     }
 
     void UpdateEscortAI(const uint32 uiDiff) override

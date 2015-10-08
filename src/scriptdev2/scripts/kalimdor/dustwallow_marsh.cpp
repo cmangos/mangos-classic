@@ -248,7 +248,7 @@ struct npc_ogronAI : public npc_escortAI
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 
     void WaypointReached(uint32 uiPointId) override

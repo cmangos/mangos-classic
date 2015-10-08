@@ -98,7 +98,7 @@ struct boss_sulfuronAI : public ScriptedAI
         // Inspire Timer
         if (m_uiInspireTimer < uiDiff)
         {
-            Creature* pTarget = NULL;
+            Creature* pTarget = nullptr;
             std::list<Creature*> pList = DoFindFriendlyMissingBuff(45.0f, SPELL_INSPIRE);
             if (!pList.empty())
             {

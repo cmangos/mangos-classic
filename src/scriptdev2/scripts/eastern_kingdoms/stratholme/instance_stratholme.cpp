@@ -662,7 +662,7 @@ void instance_stratholme::ThazudinAcolyteJustDied(Creature* pCreature)
 
             // Kill Crystal
             if (Creature* pCrystal = instance->GetCreature(m_zigguratStorage[i].m_crystalGuid))
-                pCrystal->DealDamage(pCrystal, pCrystal->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                pCrystal->DealDamage(pCrystal, pCrystal->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
 
             switch (i)
             {

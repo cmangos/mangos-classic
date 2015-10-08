@@ -145,7 +145,7 @@ struct boss_buruAI : public ScriptedAI
                         // Not sure of this but the boss should gain full speed in phase II
                         DoCastSpellIfCan(m_creature, SPELL_FULL_SPEED, CAST_TRIGGERED);
                         m_creature->RemoveAurasDueToSpell(SPELL_THORNS);
-                        m_creature->FixateTarget(NULL);
+                        m_creature->FixateTarget(nullptr);
                         m_uiPhase = PHASE_TRANSFORM;
                     }
                 }

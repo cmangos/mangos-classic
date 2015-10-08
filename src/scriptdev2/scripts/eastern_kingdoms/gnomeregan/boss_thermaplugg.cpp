@@ -67,7 +67,7 @@ struct boss_thermapluggAI : public ScriptedAI
         m_uiKnockAwayTimer = urand(17000, 20000);
         m_uiActivateBombTimer = urand(10000, 15000);
         m_bIsPhaseTwo = false;
-        m_asBombFaces = NULL;
+        m_asBombFaces = nullptr;
 
         memset(&m_afSpawnPos, 0, sizeof(m_afSpawnPos));
         m_lLandedBombGUIDs.clear();

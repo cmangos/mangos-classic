@@ -596,7 +596,7 @@ void instance_blackrock_spire::DoSendNextFlamewreathWave()
 
     if (m_uiFlamewreathWaveCount < 6)                       // Send two adds (6 waves, then boss)
     {
-        Creature* pSummoned = NULL;
+        Creature* pSummoned = nullptr;
         for (uint8 i = 0; i < 2; ++i)
         {
             float fX, fY, fZ;

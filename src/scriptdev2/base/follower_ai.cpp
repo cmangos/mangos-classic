@@ -22,7 +22,7 @@ enum
 FollowerAI::FollowerAI(Creature* pCreature) : ScriptedAI(pCreature),
     m_uiUpdateFollowTimer(2500),
     m_uiFollowState(STATE_FOLLOW_NONE),
-    m_pQuestForFollow(NULL)
+    m_pQuestForFollow(nullptr)
 {}
 
 void FollowerAI::AttackStart(Unit* pWho)
@@ -128,7 +128,7 @@ void FollowerAI::JustDied(Unit* /*pKiller*/)
     {
         if (Group* pGroup = pPlayer->GetGroup())
         {
-            for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+            for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
             {
                 if (Player* pMember = pRef->getSource())
                 {
@@ -160,7 +160,7 @@ void FollowerAI::EnterEvadeMode()
     m_creature->RemoveAllAurasOnEvade();
     m_creature->DeleteThreatList();
     m_creature->CombatStop(true);
-    m_creature->SetLootRecipient(NULL);
+    m_creature->SetLootRecipient(nullptr);
 
     if (HasFollowState(STATE_FOLLOW_INPROGRESS))
     {
@@ -210,7 +210,7 @@ void FollowerAI::UpdateAI(const uint32 uiDiff)
 
                 if (Group* pGroup = pPlayer->GetGroup())
                 {
-                    for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+                    for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
                     {
                         Player* pMember = pRef->getSource();
 
@@ -317,7 +317,7 @@ Player* FollowerAI::GetLeaderForFollower()
         {
             if (Group* pGroup = pLeader->GetGroup())
             {
-                for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+                for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
                 {
                     Player* pMember = pRef->getSource();
 
@@ -333,7 +333,7 @@ Player* FollowerAI::GetLeaderForFollower()
     }
 
     debug_log("SD2: FollowerAI GetLeader can not find suitable leader.");
-    return NULL;
+    return nullptr;
 }
 
 void FollowerAI::SetFollowComplete(bool bWithEndEvent)

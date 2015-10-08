@@ -438,7 +438,7 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
             case NPC_FANDRAL_STAGHELM:       return m_creature->GetMap()->GetCreature(m_fandralGuid);
 
             default:
-                return NULL;
+                return nullptr;
         }
     }
 

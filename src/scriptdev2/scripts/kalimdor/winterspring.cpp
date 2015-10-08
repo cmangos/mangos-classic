@@ -400,7 +400,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
             case NPC_PRIESTESS_DATA_2: return m_creature->GetMap()->GetCreature(m_secondPriestessGuid);
 
             default:
-                return NULL;
+                return nullptr;
         }
     }
 

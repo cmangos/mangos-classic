@@ -67,7 +67,7 @@ bool GOUse_go_gauntlet_gate(Player* pPlayer, GameObject* pGo)
 
     if (Group* pGroup = pPlayer->GetGroup())
     {
-        for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+        for (GroupReference* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
         {
             Player* pGroupie = itr->getSource();
             if (!pGroupie)
@@ -199,7 +199,7 @@ struct mob_restless_soulAI : public ScriptedAI
             if (m_uiDieTimer < uiDiff)
             {
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_taggerGuid))
-                    pPlayer->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    pPlayer->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
             }
             else
                 m_uiDieTimer -= uiDiff;
@@ -264,7 +264,7 @@ struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
         {
             if (m_uiDieTimer < uiDiff)
             {
-                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
             }
             else
                 m_uiDieTimer -= uiDiff;

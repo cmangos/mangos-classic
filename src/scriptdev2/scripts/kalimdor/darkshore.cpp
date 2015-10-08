@@ -672,7 +672,7 @@ struct npc_rabid_bearAI : public ScriptedAI
                     m_creature->RemoveAllAurasOnEvade();
                     m_creature->DeleteThreatList();
                     m_creature->CombatStop(true);
-                    m_creature->SetLootRecipient(NULL);
+                    m_creature->SetLootRecipient(nullptr);
                     Reset();
                     // Update Entry and start following player
                     m_creature->UpdateEntry(NPC_CAPTURED_RABID_THISTLE_BEAR);

@@ -162,7 +162,7 @@ struct npc_ringoAI : public FollowerAI
         m_uiFaintTimer = urand(30000, 60000);
         m_uiEndEventProgress = 0;
         m_uiEndEventTimer = 1000;
-        pSpraggle = NULL;
+        pSpraggle = nullptr;
     }
 
     void MoveInLineOfSight(Unit* pWho) override

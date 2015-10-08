@@ -166,7 +166,7 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                 {
                     SetData(TYPE_VAULT, IN_PROGRESS);
 
-                    Creature* pConstruct = NULL;
+                    Creature* pConstruct = nullptr;
 
                     // Activate vault constructs
                     for (GuidSet::const_iterator itr = m_sVaultNpcGuids.begin(); itr != m_sVaultNpcGuids.end(); ++itr)

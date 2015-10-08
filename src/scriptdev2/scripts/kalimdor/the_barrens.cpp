@@ -195,7 +195,7 @@ struct npc_taskmaster_fizzuleAI : public ScriptedAI
             m_creature->CombatStop(true);
             m_creature->LoadCreatureAddon(true);
 
-            m_creature->SetLootRecipient(NULL);
+            m_creature->SetLootRecipient(nullptr);
 
             m_creature->SetFactionTemporary(FACTION_FRIENDLY_F, TEMPFACTION_RESTORE_REACH_HOME);
             m_creature->HandleEmote(EMOTE_ONESHOT_SALUTE);

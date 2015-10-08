@@ -228,7 +228,7 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
         else
         {
             std::list<Creature*> lVoidwalkerList;
-            Creature* pNewLeader = NULL;
+            Creature* pNewLeader = nullptr;
             uint8 uiHighestPosition = 0;
             GetCreatureListWithEntryInGrid(lVoidwalkerList, m_creature, NPC_VOIDWALKER, 50.0f);
             for (std::list<Creature*>::iterator itr = lVoidwalkerList.begin(); itr != lVoidwalkerList.end(); ++itr)
@@ -376,7 +376,7 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
         m_creature->CombatStop(true);
         m_creature->LoadCreatureAddon(true);
 
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         Reset();
     }
@@ -512,8 +512,8 @@ struct boss_arugalAI : public ScriptedAI
                         break;
                     case 5:
                     {
-                        Creature* pVoidwalker = NULL;
-                        Creature* pLeader = NULL;
+                        Creature* pVoidwalker = nullptr;
+                        Creature* pLeader = nullptr;
 
                         for (uint8 i = 0; i < 4; ++i)
                         {
@@ -529,7 +529,7 @@ struct boss_arugalAI : public ScriptedAI
                             if (mob_arugal_voidwalkerAI* pVoidwalkerAI = dynamic_cast<mob_arugal_voidwalkerAI*>(pVoidwalker->AI()))
                                 pVoidwalkerAI->SetPosition(i, pLeader);
 
-                            pVoidwalker = NULL;
+                            pVoidwalker = nullptr;
                         }
                         m_uiSpeechStep = 0;
                         return;
@@ -889,7 +889,7 @@ struct npc_deathstalker_vincentAI : public ScriptedAI
         m_creature->DeleteThreatList();
         m_creature->CombatStop(true);
         m_creature->LoadCreatureAddon(true);
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
         Reset();
     }
 };

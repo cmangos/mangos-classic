@@ -80,7 +80,7 @@ struct boss_emerald_dragonAI : public ScriptedAI
     {
         // Mark killed players with Mark of Nature
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            pVictim->CastSpell(pVictim, SPELL_MARK_OF_NATURE_PLAYER, true, NULL, NULL, m_creature->GetObjectGuid());
+            pVictim->CastSpell(pVictim, SPELL_MARK_OF_NATURE_PLAYER, true, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -89,7 +89,7 @@ struct boss_emerald_dragonAI : public ScriptedAI
             pSummoned->AI()->AttackStart(pTarget);
 
         if (pSummoned->GetEntry() == NPC_DREAM_FOG)
-            pSummoned->CastSpell(pSummoned, SPELL_DREAM_FOG, true, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_DREAM_FOG, true, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     // Return true, if succeeded
@@ -177,7 +177,7 @@ struct boss_emerissAI : public boss_emerald_dragonAI
     {
         // summon a mushroom on the spot the player dies
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            pVictim->CastSpell(pVictim, SPELL_PUTRID_MUSHROOM, true, NULL, NULL, m_creature->GetObjectGuid());
+            pVictim->CastSpell(pVictim, SPELL_PUTRID_MUSHROOM, true, nullptr, nullptr, m_creature->GetObjectGuid());
 
         boss_emerald_dragonAI::KilledUnit(pVictim);
     }
@@ -269,7 +269,7 @@ struct boss_lethonAI : public boss_emerald_dragonAI
             // This might not be supported currently by core, but this spell's visual should be dependend on the player
             // Also possible that this was no problem due to the special way these NPCs had been summoned in classic times
             if (Creature* pSummoned = pTarget->SummonCreature(NPC_SPIRIT_SHADE, 0.0f, 0.0f, 0.0f, pTarget->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0))
-                pSummoned->CastSpell(pSummoned, SPELL_SPIRIT_SHAPE_VISUAL, true, NULL, NULL, pTarget->GetObjectGuid());
+                pSummoned->CastSpell(pSummoned, SPELL_SPIRIT_SHAPE_VISUAL, true, nullptr, nullptr, pTarget->GetObjectGuid());
         }
     }
 
