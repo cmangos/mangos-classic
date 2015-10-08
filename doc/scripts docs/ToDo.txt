@@ -1,0 +1,4 @@
+= ScriptDev2 TODO Points =
+
+== Classic content ==
+* Various quests which still require script (examples: 5721)

@@ -1,0 +1,32 @@
+[Git GUIDE] Easy use
+====================
+
+This assumes you have already cloned the SD2-repository.
+
+If not, please follow the _installation instructions_ how to do so:
+
+* link:How_to_install.html[Installation instructions]
+* http://www.scriptdev2.com/showthread.php?t=4[Installation instructions on SD2 Forum]
+
+Graphical user Interfaces for Windows
+-------------------------------------
+
+* http://code.google.com/p/tortoisegit[TortoiseGIT] - Similar to TortoiseSVN Shell-Extention based GUI
+* http://www.syntevo.com/smartgit/index.html[SmartGit]
+
+Updateting
+----------
+
+The word to look for is "Pull", both GUIs have this option.
+
+For Command-line fans, simple right-click ScriptDev2-directory, choose "Git Bash here" and then type +
+`$ git pull` +
+to Update
+
+Restoring
+---------
+
+In case you polluted something in your working directory open the Git bash, and type +
+`$ git reset --hard origin/master`
+
+Warning: This will remove *every* custom changes

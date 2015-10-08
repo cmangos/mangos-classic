@@ -47,6 +47,29 @@ To be able to accomplish these goals, we support and promote:
 
 -- The C(ontinued)-MaNGOS Team!
 
+## ScriptDev2
+  ScriptDev2 is a script library, an extention of the scripting capabilities
+  that comes with MaNGOS ( http://www.getmangos.com ), written in C++ and is
+  compatible with Windows and Linux. SQL needed for database support both
+  MySQL and PostgreSQL.
+
+  This script library provides unique scripts for NPCs, gameobjects, events
+  and other that need unique implementation.
+
+  Once ScriptDev2 is compiled it is automatically run by MaNGOS on server
+  startup.
+
+  For further information on ScriptDev2, please visit our project web site
+  at http://www.scriptdev2.com/
+
+  Documentation on various development related topics can be found in the
+  ../doc/ sub directory as well as on the web site.
+
+  The required SQL files for creating the database backend are included in
+  the ../sql/ sub directory. If you are updating from an older ScriptDev2
+  version, make sure to take a look at the SQL files provided in the
+  ../sql/updates/
+
 ## Further information
 
   You can find further information about CMaNGOS at the following places:

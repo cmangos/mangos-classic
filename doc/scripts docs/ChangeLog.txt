@@ -1,0 +1,100 @@
+= ScriptDev2 Milestones =
+
+*Current Version: <<currentMS, ScriptDev2 - 0.8  (17 November 2014)>>*
+
+*Supports:*
+
+* Classic (1.12.1), see https://github.com/scriptdev2/scriptdev2-classic
+* TBC (2.4.3), see https://github.com/scriptdev2/scriptdev2-tbc
+* WotLK (3.3.5a), see  https://github.com/scriptdev2/scriptdev2
+* Cata (4.3.4), see  https://github.com/scriptdev2/scriptdev2-cata
+
+[[currentMS]]
+== Milestone ScriptDev2 - 0.8 ==
+
+=== General ===
+* Implemented various missing quest scripts and similar events
+* Implemented many missing escort quests
+
+=== WotLK content ===
+* Implemented full script for Ulduar
+* Implemented full script for Culling of Stratholme
+
+=== TBC content ===
+* Implemented script for event boss Headless Horseman
+* Various improvements and bug fixes
+
+=== Classic content ===
+* Implemented script for boss Viscidus in AQ40
+* Various improvements and bug fixes
+
+==== Statistics ====
+* Total number of changes: over 144 revisions
+* Fixed many bugs from forum and issues from github
+
+
+== Milestone ScriptDev2 - 0.7 ==
+
+=== General ===
+* Unify texts loading with the core
+* Implemented support for ScriptEffect spell hooks
+* Implemented various missing quest scripts and similar events
+
+=== WotLK content ===
+* Finished script content for Death Knight area and Obsidian Sanctum
+* Implemented full script for Oculus and Pit of Saron instances
+* Improved script for the following dungeons or bosses: Ruby Sanctum, Halls of Stone, Ormorok, Hadronox, Herald Volazj, Skadi and Sapphiron
+* Implemented various missing achievements
+
+=== TBC content ===
+* Implemented script support for the Chess event, SSC water and Simon game
+* Improved script for the following dungeons or bosses: Felmyst, Kil'jaeden, Zul'jin, Al'ar, Shadow Labyrinth, Black Temple, Nazan and Vazruden and Netherspite
+* Implemented Year event boss - Ahune
+* Implemented Zul'Aman and Shattered Halls loot modes.
+
+=== Classic content ===
+* Improve script for the following dungeons or bosses: Razorgore, Archaedas, Zul'farrak, Ruins of AQ, Baroness Anastari and Zul'gurub
+* Implemented Dire Maul loot modes (tribute run event)
+
+==== Statistics ====
+* Total number of changes: over 166 revisions (183 commits)
+* Lots of bugs from forum and issues from github fixed
+
+
+== Milestone ScriptDev2 - 0.6 ==
+
+=== General ===
+* Added distinct script library support for all the server versions
+* Unified instance handling and added some generic patterns
+* Added support for spell scripts
+* Added support for world scripts for more complicated events
+* Codestyle cleanup on all scripts
+* Convert many old scripts to EventAI
+* Convert many old gossip scripts to DB-gossip system
+* Added script placeholders for future 4.x content
+* Implemented various missing quest scripts and similar events
+
+=== WotLK content ===
+* Added script content for the following dungeons: Azjol Nerub, Ahn-Kahet, Drak'tharon Keep, Gundrak, Halls of Stone, Oculus, Utgarde Keep, Utgarde Pinnacle, Violet Hold, Nexus
+* Finished raid script for Naxxramas and Onyxia
+* Added partial script content for the following: Eye of Eternity, Ruby Sanctum, Trial of the Crusader, Ulduar, Death Knight area quests.
+* Added some basic script support for all bosses in Icecrown Citadel
+* Implemented Year event boss - Apothecary Hummel
+
+=== TBC content ===
+* Cleanup and improve all the existing scripts by removing workarounds and adding missing content for all dungeons and raids.
+* Added script for the following dungeons or bosses: Arcatraz, Blood Furnace, Sunwell Plateau, A'lar, The Lurker Below, Malacras, Zul'jin.
+* Improve scripts for: Auchenai Crypts, Sethekk Halls, Shadow Labyrinth, Black Morass, Old Hillsbrad Foothills, Steamvault, Shattered Halls, Botanica, Mechanar, Karazhan, Black Temple, The Eye, Serperntshrine Cavern, Zul'Aman.
+* Properly downgraded Naxxramas and Onyxia for TBC and Classic versions
+* Implemented Year event boss - Coren Direbrew
+
+=== Classic content ===
+* Implemented epic quests script for the opening of Ahn'Qiraj and Onyxia events.
+* Cleanup and improve all the existing scripts by removing workarounds and adding missing content for all dungeons and raids.
+* Added or substantially improved script for the following dungeons: Blackrock Depths, Deathmines, Dire Maul, Gnomeregan, Razorfen Kraul, Shadowfang Keep, Sunken Temple, Wailing Caverns, Uldaman, Ruins of AQ
+* Improve script for the following dungeons: Blackrock Spire, Blackfathom Deeps, Marauudon, Scholomance, Stratholme, Blackwing Lair, Molten Core, Emerald Dragons, Temple of AQ, Zul'Gurub
+* Properly downgraded Lord Kazzak for Classic version
+
+==== Statistics ====
+* Total number of changes: over 1300 revisions (1300 commits)
+* Lots of bugs from forum and issues from github fixed

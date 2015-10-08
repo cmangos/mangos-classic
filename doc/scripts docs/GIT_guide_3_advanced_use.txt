@@ -1,0 +1,211 @@
+[Git GUIDE] Advanced use
+========================
+
+This guide is meant to help and provide information for those who want dig into the Git depths and explore its mysteries!
+
+It is likely very much possible, that many of these things can be done with GUIs, but this topic expects that the command line interfact (Git Bash) is used!
+
+Have phun with Git :)
+
+Setup Git for ScriptDev2
+------------------------
+
+"Copy" the offical branch to your system
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Execute this within your <MaNGOS>/src/bindings directory
+
+`$ git clone git://github.com/scriptdev2/scriptdev2.git ScriptDev2` +
+and `$ cd` into it.
+
+Setup some individual configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Username and Email
+^^^^^^^^^^^^^^^^^^
+
+`$ git config --global user.name "Your (Nick)Name"` +
+`$ git config --global user.email "some@email.adress"`
+
+Make life more colorful
+^^^^^^^^^^^^^^^^^^^^^^^
+
+`$ git config --global color.ui "auto"`
+
+Change the default editor
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Thanks to DasBlub and Zor for help with this. This is just an example for notepad++, so you might need to adapt to your needs (especially the path)
+
+`$ git config --global core.editor "'C:/Program Files/Notepad++/notepad++.exe' -multiInst -notabbar -nosession -noPlugin"`
+
+Lineendings-configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This is actually fairly dependend from own wishes - if you feel uneasy, stay with default values
+
+Windows
++++++++
+
+`$ git config core.autocrlf true` +
+`$ git config core.eol native`
+
+*nix
+++++
+
+`$ git config core.autocrlf input` +
+`$ git config core.eol native`
+
+Whitespace pre-commit hook
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This is really nice to force you to not commit code with corrupt whitespace (Needs to be set-up for every repository individually)
+
+`$ cp .git/hooks/pre-commit.sample .git/hooks/pre-commit` +
+This activates the default pre-commit hook, if the file doesn't exist, update your git-version (and after your repo)
+
+Use an external merge-tool
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+see http://getmangos.com/community/forum/27/source-code-management/TODOTODO[_Freghar_'s Thread]
+
+KDiff3 (not kdiff or kdiff2)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Reasons why to use http://kdiff3.sourceforge.net/doc/merging.html[KDiff3]:
+
+- has a fairly good visual interface and works on both windows and linux
+- you can get it from http://sourceforge.net/project/showf...ease_id=501369[TODO]
+- to make sure git can find it, for example on windows if you installed it to `c:/Program Files/KDiff3` +
+`$ git config mergetool.kdiff3.path "c:/Program Files/KDiff3/kdiff3.exe"`        <- either that or you could add `c:/Program Files/KDiff3` to your path
+- make it the default mergetool: +
+`$ git config merge.tool kdiff3`
+
+Tortoise(Git) Merge
+^^^^^^^^^^^^^^^^^^^
+
+Reasons why to use http://code.google.com/p/tortoisegit/[TortoiseGit]:
+
+- similar to well known TortoiseSVN software (a nice GUI tool for Git anyways)
+- does not require any further configuration to work as default merge tool (provided no other is installed)
+
+Tortoise Merge
+^^^^^^^^^^^^^^
+
+Reasons why to use http://tortoisesvn.tigris.org/TortoiseMerge.html[TortoiseMerge]
+
+- Good visual interface, only works on windows
+- Download and install http://tortoisesvn.net/downloads[TortoiseSVN]
+- In `C:\Program Files\TortoiseSVN\bin` create a file named TortMer.bat and add the following:
++
+----
+@ECHO OFF
+TortoiseMerge.exe /base:"%PWD%/%1" /theirs:"%PWD%/%2" /mine:"%PWD%/%3" /merged:"%PWD%/%4"
+----
++
+- add a custom merge tool to git that runs this batch file +
+`$ git config mergetool.tortoise.cmd ' "cmd.exe" "/CTortMer.bat" "$BASE" "$REMOTE" "$LOCAL" "$MERGED" '`
+- make it the default mergetool +
+`$ git config merge.tool tortoise`
+
+Some Links
+----------
+
+http://git-scm.com/ - Contains nearly everything one might want :)
+
+Obtaining Git
+~~~~~~~~~~~~~
+
+For *nix you should get Git from your distribution software repository.
+
+For Windows yout can get http://code.google.com/p/msysgit/downloads/list[mysysgit] - you would probably want Git-w.x.y.z.previewYYYYMMDD.exe
+
+Some Graphical User-Interfaces
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+(Not recommanded, but might make you happy)
+
+http://code.google.com/p/tortoisegit/[TortoiseGit] - Similar to TortoiseSVN Shell-Extention based GUI
+
+http://www.syntevo.com/smartgit/index.html[SmartGit] - More classical GUI, looks nice
+
+Documentation-Links
+~~~~~~~~~~~~~~~~~~~
+
+http://www.kernel.org/pub/software/scm/git/docs/everyday.html - Small overview of common commands
+
+http://git-scm.com/course/svn.html - SVN Crash Course, especially for *nix user
+
+http://book.git-scm.com/ - Very nice, including flash videos about most topics
+
+http://progit.org/book/ - A bit more detailed
+
+
+http://getmangos.com/community/forum/27/source-code-management/ - Collection of various topics on MaNGOS
+
+What is this Git about?
+~~~~~~~~~~~~~~~~~~~~~~
+
+http://www.youtube.com/watch?v=4XpnKHJAok8[Google TechTalk by _L. Torvalds_]
+
+http://www.youtube.com/watch?v=8dhZ9BXQgc4[Google TechTalk by _R. Schwartz_]
+
+https://git.wiki.kernel.org/index.php/GitSvnComparison[Compate Git vs. SVN]
+
+Most important Git-commands
+---------------------------
+
+Based on _Freghar_'s Thread
+
+Remark that all these commands display a very exhaustive help page with ` --help`
+
+[horizontal]
+`$ git clone` :: downloads a fresh repo.
+`$ git pull` :: is a shortcut for fetch and merge.
+`$ git log` :: displays the history
+`$ git show` :: shows the most recent commit
+`$ git commit` :: commits your changes (always local)
+`$ git checkout` :: switches the source to a specific version (local branch or commit)
+`$ git merge` :: merges changes from one point into current branch
+`$ git reset` :: leaves you on the current branch but changes what the branch "points to".
+
+Workflow with Git
+-----------------
+
+*Commit early, commit often*
+
+[horizontal]
+`$ git pull` :: to be on recent version
+`$ git checkout -b <NewBranchName>` :: create a new branch for the work
+Suggestion:: Create for _every_ project an own branch, this makes maintaining way easier!
+<edit some files> ::
++
+`$ git diff` :: see what is done since last commit
+`$ git commit -a -m "Some Commit Message"` :: this is only locally
+<edit and commit more> ::
++
+`$ git diff master` :: see what is done compared to master branch
+`$ git checkout master` :: change to master branch
+`$ git pull` :: there was an update in master, now we pulled this, tested it, and now we want to get our working branch up-to-date
+`$ git checkout <BranchName>` :: switch back to our working branch
+`$ git rebase master` :: set to state of master and rebase the own commits on top
+`$ git format-patch master --stdout > fileName.patch` :: Creates a nice formated patch into file "fileName.patch"
+
+Create and apply patches
+------------------------
+
+Create patches
+~~~~~~~~~~~~~~
+
+`$ git format-patch master` - creates a patchfile for every commit that diffs from master (includes author information)
+
+`$ git format-patch master --std.out > someFilename.patch` - creates an incremental patchfile, containing information of each individual commit
+
+Apply patches
+~~~~~~~~~~~~~
+
+`$ patch -X -d. < someFilename.patch`  - applies a patch in Git(X = 1) or SVN (X = 0) format to current workspace
+
+`$ git apply someFilename.patch`  - applies a Git-patch to current workspace
+
+`$ git am someFilename.patch`  - applies and commits a Git-patch with commit information (created by format-patch)
