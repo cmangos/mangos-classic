@@ -31,14 +31,23 @@ compiler:
   - gcc
   - clang
 
+addons:
+  apt:
+    sources:
+      - kalakris-cmake
+      - boost-latest
+      - ubuntu-toolchain-r-test
+    packages:
+      - build-essential
+      - libtool
+      - gcc-4.8
+      - g++-4.8
+      - make
+      - cmake
+
+# overwrite GCC version for GCC build only
 before_install:
-  - echo "yes" | sudo add-apt-repository ppa:kalakris/cmake
-  - echo "yes" | sudo add-apt-repository ppa:boost-latest/ppa
-  - echo "yes" | sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-  - sudo apt-get -qq update
-  - sudo apt-get -qq install build-essential libtool gcc-4.8 g++-4.8 make cmake
-  - export CXX="g++-4.8"
-  - export CC="gcc-4.8"
+  - if [ $CC = "gcc" ] ; then export CC=gcc-4.8 CXX=g++-4.8 ; fi
 
 script:
   - test -d _build || mkdir _build
