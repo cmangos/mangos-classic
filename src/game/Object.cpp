@@ -598,7 +598,7 @@ bool Object::LoadValues(const char* data)
     int index;
     for (iter = tokens.begin(), index = 0; index < m_valuesCount; ++iter, ++index)
     {
-        m_uint32Values[index] = atol((*iter).c_str());
+        m_uint32Values[index] = std::stoul((*iter).c_str());
     }
 
     return true;

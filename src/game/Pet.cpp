@@ -278,12 +278,12 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         int index;
         for (iter = tokens.begin(), index = 0; index < 4; ++iter, ++index)
         {
-            uint32 tmp = atol((*iter).c_str());
+            uint32 tmp = std::stoul((*iter).c_str());
 
             ++iter;
 
             if (tmp)
-                AddTeachSpell(tmp, atol((*iter).c_str()));
+                AddTeachSpell(tmp, std::stoul((*iter).c_str()));
             else
                 break;
         }

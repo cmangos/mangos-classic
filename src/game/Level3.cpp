@@ -1913,7 +1913,7 @@ bool ChatHandler::HandleLearnAllCommand(char* /*args*/)
     int loop = 0;
     while (strcmp(allSpellList[loop], "0"))
     {
-        uint32 spell = atol((char*)allSpellList[loop++]);
+        uint32 spell = std::stoul((char*)allSpellList[loop++]);
 
         if (m_session->GetPlayer()->HasSpell(spell))
             continue;
@@ -1956,7 +1956,7 @@ bool ChatHandler::HandleLearnAllGMCommand(char* /*args*/)
     uint16 gmSpellIter = 0;
     while (strcmp(gmSpellList[gmSpellIter], "0"))
     {
-        uint32 spell = atol((char*)gmSpellList[gmSpellIter++]);
+        uint32 spell = std::stoul((char*)gmSpellList[gmSpellIter++]);
 
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
         if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, m_session->GetPlayer()))
