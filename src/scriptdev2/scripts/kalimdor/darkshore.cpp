@@ -317,10 +317,13 @@ enum
     SAY_AT_CLOSE            = -1000326,
     QUEST_GYROMAST_REV      = 2078,
     NPC_GELKAK              = 6667,
-    FACTION_HOSTILE         = 14
-};
+    FACTION_HOSTILE         = 14,
 
-#define GOSSIP_ITEM_INSERT_KEY  "[PH] Insert key"
+    TEXT_ID_THRESH_DEFAULT  = 718,
+    TEXT_ID_KEY_READY       = 758,
+
+    GOSSIP_ITEM_TURN_KEY    = -3000111,
+};
 
 struct npc_threshwackonatorAI : public FollowerAI
 {
@@ -361,9 +364,13 @@ CreatureAI* GetAI_npc_threshwackonator(Creature* pCreature)
 bool GossipHello_npc_threshwackonator(Player* pPlayer, Creature* pCreature)
 {
     if (pPlayer->GetQuestStatus(QUEST_GYROMAST_REV) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_INSERT_KEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+    {
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TURN_KEY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_KEY_READY, pCreature->GetObjectGuid());
+    }
+    else
+        pPlayer->SEND_GOSSIP_MENU(TEXT_ID_THRESH_DEFAULT, pCreature->GetObjectGuid());
 
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
     return true;
 }
 
