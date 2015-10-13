@@ -108,7 +108,7 @@ class RegularGrid2D
 
             static Cell ComputeCell(float fx, float fy)
             {
-                Cell c = {fx* (1.f / CELL_SIZE) + (CELL_NUMBER / 2), fy* (1.f / CELL_SIZE) + (CELL_NUMBER / 2)};
+                Cell c = { static_cast<int>(fx* (1.f / CELL_SIZE) + (CELL_NUMBER / 2)), static_cast<int>(fy* (1.f / CELL_SIZE) + (CELL_NUMBER / 2)) };
                 return c;
             }
 
