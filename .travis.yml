@@ -22,6 +22,9 @@ language: cpp
 git:
   depth: 1
 
+# make use of the new container based infrastructure at travis to improve performance (we don't need sudo)
+sudo: false
+
 # only run travis on the master branch
 branches:
   only:
