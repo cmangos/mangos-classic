@@ -407,7 +407,10 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 else if (sendPercent && index == UNIT_FIELD_HEALTH)
                 {
                     // send health percentage instead of real value to enemy
-                    *data << uint32(m_uint32Values[UNIT_FIELD_HEALTH] * 100 / m_uint32Values[UNIT_FIELD_MAXHEALTH]);
+                    if (m_uint32Values[UNIT_FIELD_HEALTH] == 0)
+                        *data << uint32(0);
+                    else
+                        *data << uint32(ceil(m_uint32Values[UNIT_FIELD_HEALTH] * 100 / float(m_uint32Values[UNIT_FIELD_MAXHEALTH]))); // never less than 1 as health is not zero
                 }
                 else if (sendPercent && index == UNIT_FIELD_MAXHEALTH)
                 {
