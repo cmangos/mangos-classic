@@ -321,8 +321,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
     bool IsActivateToQuest = false;
     bool IsPerCasterAuraState = false;
     bool sendPercent = false;
-    uint32 fieldPowerType = 0;
-    uint32 fieldPowerTypeMax = 0;
 
     if (m_objectTypeId == TYPEID_UNIT)
     {
@@ -340,13 +338,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 sendPercent = true;
             }
         }
-    }
-
-    if (sendPercent == true)
-    {
-        uint32 powerType = static_cast<Unit const*>(this)->GetPowerType();
-        fieldPowerType = uint32(UNIT_FIELD_POWER1) + powerType;
-        fieldPowerTypeMax = uint32(UNIT_FIELD_MAXPOWER1) + powerType;
     }
 
     if (updatetype == UPDATETYPE_CREATE_OBJECT || updatetype == UPDATETYPE_CREATE_OBJECT2)
@@ -413,15 +404,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                         *data << uint32(ceil(m_uint32Values[UNIT_FIELD_HEALTH] * 100 / float(m_uint32Values[UNIT_FIELD_MAXHEALTH]))); // never less than 1 as health is not zero
                 }
                 else if (sendPercent && index == UNIT_FIELD_MAXHEALTH)
-                {
-                    *data << uint32(100);
-                }
-                else if (sendPercent && index == fieldPowerType)
-                {
-                    // send power percentage instead of real value to enemy
-                    *data << uint32(m_uint32Values[fieldPowerType] * 100 / m_uint32Values[fieldPowerTypeMax]);
-                }
-                else if (sendPercent && index == fieldPowerTypeMax)
                 {
                     *data << uint32(100);
                 }
