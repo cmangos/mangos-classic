@@ -24,6 +24,7 @@ EndScriptData */
 /* ContentData
 go_shadowforge_brazier
 go_relic_coffer_door
+at_shadowforge_bridge
 at_ring_of_law
 npc_grimstone
 npc_kharan_mighthammer
@@ -69,6 +70,53 @@ bool GOUse_go_relic_coffer_door(Player* /*pPlayer*/, GameObject* pGo)
     return false;
 }
 
+ /*######
+## at_shadowforge_bridge
+######*/
+
+static const float aGuardSpawnPositions[2][4] =
+{
+    {642.3660f, -274.5155f, -43.10918f, 0.4712389f},                // First guard spawn position
+    {740.1137f, -283.3448f, -42.75082f, 2.8623400f}                 // Meeting point (middle of the bridge)
+};
+
+enum
+{
+    SAY_GUARD_AGGRO                    = -1230043
+};
+
+// Two NPCs spawn when AT-1786 is triggered
+bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* pAt)
+{
+    if (instance_blackrock_depths* pInstance = (instance_blackrock_depths*)pPlayer->GetInstanceData())
+    {
+        if (pPlayer->isGameMaster() || !pPlayer->isAlive() || pInstance->m_bIsBridgeEventDone)
+            return false;
+
+        Creature* pPyromancer = pInstance->GetSingleCreatureFromStorage(NPC_LOREGRAIN);
+
+        if (!pPyromancer)
+            return false;
+
+        if (Creature* pMasterGuard = pPyromancer->SummonCreature(NPC_ANVILRAGE_GUARDMAN, aGuardSpawnPositions[0][0], aGuardSpawnPositions[0][1], aGuardSpawnPositions[0][2], aGuardSpawnPositions[0][3], TEMPSUMMON_TIMED_DESPAWN, 3 * HOUR * MINUTE * IN_MILLISECONDS))
+        {
+            pMasterGuard->SetWalk(false);
+            pMasterGuard->GetMotionMaster()->MoveWaypoint();
+            DoDisplayText(pMasterGuard, SAY_GUARD_AGGRO, pPlayer);
+            float fX, fY, fZ;
+            pPlayer->GetContactPoint(pMasterGuard, fX, fY, fZ);
+            pMasterGuard->GetMotionMaster()->MovePoint(1,fX, fY, fZ);
+
+            if (Creature* pSlaveGuard = pPyromancer->SummonCreature(NPC_ANVILRAGE_GUARDMAN, aGuardSpawnPositions[1][0], aGuardSpawnPositions[1][1], aGuardSpawnPositions[1][2], aGuardSpawnPositions[1][3], TEMPSUMMON_TIMED_DESPAWN, 3 * HOUR * MINUTE * IN_MILLISECONDS))
+            {
+                pSlaveGuard->GetMotionMaster()->MoveFollow(pMasterGuard, 2.0f, 0);
+            }
+        }
+        pInstance->m_bIsBridgeEventDone = true;
+    }
+    return false;
+}
+
 /*######
 ## npc_grimstone
 ######*/
@@ -105,7 +153,7 @@ enum
     SPELL_ARENA_FLASH_B             = 15739,
     SPELL_ARENA_FLASH_C             = 15740,
     SPELL_ARENA_FLASH_D             = 15741,
-    
+
     QUEST_THE_CHALLENGE             = 9015,
     NPC_THELDREN_QUEST_CREDIT       = 16166,
 };
@@ -1089,6 +1137,11 @@ void AddSC_blackrock_depths()
     pNewScript = new Script;
     pNewScript->Name = "go_relic_coffer_door";
     pNewScript->pGOUse = &GOUse_go_relic_coffer_door;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_shadowforge_bridge";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_shadowforge_bridge;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

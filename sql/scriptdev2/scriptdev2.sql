@@ -166,6 +166,8 @@ UPDATE gameobject_template SET ScriptName='go_fathom_stone' WHERE entry=177964;
 /* BLACKROCK DEPTHS */
 DELETE FROM scripted_areatrigger WHERE entry=1526;
 INSERT INTO scripted_areatrigger VALUES (1526,'at_ring_of_law');
+DELETE FROM scripted_areatrigger WHERE entry=1786;
+INSERT INTO scripted_areatrigger VALUES (1786,'at_shadowforge_bridge');
 UPDATE instance_template SET ScriptName='instance_blackrock_depths' WHERE map =230;
 UPDATE creature_template SET ScriptName='boss_emperor_dagran_thaurissan' WHERE entry=9019;
 UPDATE creature_template SET ScriptName='boss_moira_bronzebeard' WHERE entry=8929;
@@ -1850,7 +1852,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1230032,'Thank you! I will run for safety immediately!',0,0,0,0,'tobias SAY_TOBIAS_FREE_1'),
 (-1230033,'Finally!! I can leave this dump.',0,0,0,0,'tobias SAY_TOBIAS_FREE_2'),
 
-(-1230035,'%s cries out an alarm!',0,2,0,0,'general_angerforge EMOTE_ALARM');
+(-1230035,'%s cries out an alarm!',0,2,0,0,'general_angerforge EMOTE_ALARM'),
+(-1230043,'You can\'t hide from us. Prepare to burn!',0,1,0,0,'anvilrage guardsman SAY_GUARD_AGGRO');
 
 -- -1 249 000 ONYXIA'S LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

@@ -32,7 +32,8 @@ instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstan
 
     m_fArenaCenterX(0.0f),
     m_fArenaCenterY(0.0f),
-    m_fArenaCenterZ(0.0f)
+    m_fArenaCenterZ(0.0f),
+    m_bIsBridgeEventDone(false)
 {
     Initialize();
 }
@@ -65,6 +66,7 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
         case NPC_JAZ:
         case NPC_TOBIAS:
         case NPC_DUGHAL:
+        case NPC_LOREGRAIN:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 

@@ -35,6 +35,7 @@ enum
     NPC_MAGMUS              = 9938,
     NPC_WATCHER_DOOMGRIP    = 9476,
     NPC_WARBRINGER_CONST    = 8905,                         // Four of them in Relict Vault are related to Doomgrip summon event
+    NPC_LOREGRAIN           = 9024,
 
     // Jail Break event related
     NPC_OGRABISI            = 9677,
@@ -52,6 +53,9 @@ enum
     NPC_ANVILRAGE_SOLDIER   = 8893,
     NPC_ANVILRAGE_MEDIC     = 8894,
     NPC_ANVILRAGE_OFFICER   = 8895,
+
+    // Spawned on Shadowforge bridge
+    NPC_ANVILRAGE_GUARDMAN  = 8891,
 
     GO_ARENA_1              = 161525,
     GO_ARENA_2              = 161522,
@@ -180,6 +184,8 @@ class instance_blackrock_depths : public ScriptedInstance
         void SetArenaCenterCoords(float fX, float fY, float fZ) { m_fArenaCenterX = fX; m_fArenaCenterY = fY; m_fArenaCenterZ = fZ; }
         void GetArenaCenterCoords(float& fX, float& fY, float& fZ) { fX = m_fArenaCenterX; fY = m_fArenaCenterY; fZ = m_fArenaCenterZ; }
         void GetArenaCrowdGuid(GuidSet& sCrowdSet) { sCrowdSet = m_sArenaCrowdNpcGuids; }
+
+		bool m_bIsBridgeEventDone;
 
     private:
         void DoCallNextDwarf();
