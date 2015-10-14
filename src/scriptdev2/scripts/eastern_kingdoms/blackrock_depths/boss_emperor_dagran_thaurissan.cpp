@@ -27,8 +27,10 @@ EndScriptData */
 enum eEmperor
 {
     FACTION_NEUTRAL             = 734,
-    SAY_AGGRO                   = -1230001,
-    SAY_SLAY                    = -1230002,
+    YELL_AGGRO_1                = -1230001,
+    YELL_AGGRO_2                = -1230064,
+    YELL_AGGRO_3                = -1230065,
+    YELL_SLAY                   = -1230002,
 
     SPELL_HANDOFTHAURISSAN      = 17492,
     SPELL_AVATAROFFLAME         = 15636
@@ -55,7 +57,14 @@ struct boss_emperor_dagran_thaurissanAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        uint32 uiTextId;
+        switch (urand(0, 2))
+        {
+            case 0: uiTextId = YELL_AGGRO_1; break;
+            case 1: uiTextId = YELL_AGGRO_2; break;
+            default: uiTextId = YELL_AGGRO_3; break;
+        }
+        DoScriptText(uiTextId, m_creature);
         m_creature->CallForHelp(VISIBLE_RANGE);
     }
 
@@ -80,7 +89,7 @@ struct boss_emperor_dagran_thaurissanAI : public ScriptedAI
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(SAY_SLAY, m_creature);
+        DoScriptText(YELL_SLAY, m_creature);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -93,7 +102,7 @@ struct boss_emperor_dagran_thaurissanAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_HANDOFTHAURISSAN) == CAST_OK)
-                    m_uiHandOfThaurissanTimer = 5000;
+                    m_uiHandOfThaurissanTimer = urand(5, 10) * 1000;
             }
         }
         else

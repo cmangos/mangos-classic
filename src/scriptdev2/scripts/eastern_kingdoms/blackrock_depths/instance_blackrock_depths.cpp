@@ -33,6 +33,7 @@ instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstan
     m_uiPatronEmoteTimer(2000),
     m_uiPatrolTimer(0),
     m_uiStolenAles(0),
+    m_uiDagranTimer(0),
 
     m_fArenaCenterX(0.0f),
     m_fArenaCenterY(0.0f),
@@ -480,6 +481,7 @@ void instance_blackrock_depths::OnCreatureEvade(Creature* pCreature)
 
 void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
 {
+    uint32 uiTextId;
     switch (pCreature->GetEntry())
     {
         case NPC_WARBRINGER_CONST:
@@ -530,6 +532,28 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
                 return;
             else
                 SetData(TYPE_BAR, IN_PROGRESS);
+            break;
+        case NPC_SHADOWFORGE_SENATOR:
+            // Emperor Dagran Thaurissan performs a random yell upon the death
+            // of Shadowforge Senators in the Throne Room
+            if (Creature* pDagran = GetSingleCreatureFromStorage(NPC_EMPEROR))
+            {
+                if (!pDagran->isAlive())
+                    return;
+                
+                if (m_uiDagranTimer > 0)
+                    return;
+                
+                switch (urand(0, 3))
+                {
+                    case 0:uiTextId = YELL_SENATOR_1;break;
+                    case 1:uiTextId = YELL_SENATOR_2;break;
+                    case 2:uiTextId = YELL_SENATOR_3;break;
+                    default:uiTextId = YELL_SENATOR_4;break;
+                }
+                DoScriptText(uiTextId, pDagran);
+                m_uiDagranTimer = 30000;    // set a timer of 30 sec to avoid Emperor Thaurissan to spam yells in case many senators are killed in a short amount of time
+            }
             break;
     }
 }
@@ -734,6 +758,14 @@ void instance_blackrock_depths::Update(uint32 uiDiff)
             m_uiDwarfFightTimer -= uiDiff;
     }
 
+    if (m_uiDagranTimer)
+    {
+        if (m_uiDagranTimer <= uiDiff)
+            m_uiDagranTimer = 0;
+        else
+            m_uiDagranTimer -= uiDiff;
+    }
+    
     // Every second some of the patrons will do one random emote if they are not hostile (i.e. Plugger event is not done/in progress)
     if (m_uiPatronEmoteTimer)
     {

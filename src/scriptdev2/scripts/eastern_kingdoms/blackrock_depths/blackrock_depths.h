@@ -132,7 +132,13 @@ enum
     SAY_ROCKNOT_DESPAWN     = -1230047,
     YELL_PATROL_1           = -1230048,
     YELL_PATROL_2           = -1230049,
-    SPELL_NAGMARA_VANISH    = 15341
+    SPELL_NAGMARA_VANISH    = 15341,
+    
+    // Emperor Dagran Thaurissan
+    YELL_SENATOR_1			= -1230060,
+    YELL_SENATOR_2			= -1230061,
+    YELL_SENATOR_3			= -1230062,
+    YELL_SENATOR_4			= -1230063
 };
 
 // Random emotes for Grim Guzzler patrons
@@ -254,6 +260,7 @@ class instance_blackrock_depths : public ScriptedInstance
         uint8 m_uiBrokenKegs;
         uint32 m_uiPatrolTimer;
         uint8 m_uiStolenAles;
+        uint32 m_uiDagranTimer;
 
         uint8 m_uiCofferDoorsOpened;
 
