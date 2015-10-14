@@ -638,17 +638,18 @@ struct npc_phalanxAI : public npc_escortAI
 {
     npc_phalanxAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_blackrock_depths*)pCreature->GetInstanceData();
 
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_blackrock_depths* m_pInstance;
 
     float m_fKeepDoorOrientation;
     uint32 uiThunderclapTimer;
     uint32 uiMightyBlowTimer;
     uint32 uiFireballVolleyTimer;
+    uint32 uiCallPatrolTimer;
 
     void Reset() override
     {
@@ -664,6 +665,7 @@ struct npc_phalanxAI : public npc_escortAI
         uiThunderclapTimer     = 0;
         uiMightyBlowTimer      = 0;
         uiFireballVolleyTimer  = 0;
+        uiCallPatrolTimer      = 0;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -681,12 +683,27 @@ struct npc_phalanxAI : public npc_escortAI
         switch (uiPointId)
         {
             case 0:
-                m_creature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_NONE);
                 DoScriptText(YELL_PHALANX_AGGRO, m_creature);
-                SetRun(true);
                 break;
             case 1:
                 SetEscortPaused(true);
+                // There are two ways of activating Phalanx: completing Rocknot event, making Phalanx hostile to anyone
+                // killing Plugger making Phalanx hostile to Horde (do not ask why)
+                // In the later case, Phalanx should also spawn the bar patrol with some delay and only then set the Plugger
+                // event to DONE. In the weird case where Plugger was previously killed (event == DONE) but Phalanx is reactivated
+                //  (like on reset after a wipe), do not spawn the patrol again
+                if (m_pInstance->GetData(TYPE_PLUGGER) == DONE || m_pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS)
+                {
+                    m_creature->SetFactionTemporary(FACTION_IRONFORGE, TEMPFACTION_NONE);
+                    if (m_pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS)
+                    {
+                        uiCallPatrolTimer = 10000;
+                        m_pInstance->SetData(TYPE_PLUGGER, DONE);
+                    }
+                }
+                else
+                    m_creature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_NONE);
+
                 m_creature->SetFacingTo(m_fKeepDoorOrientation);
                 break;
             default:
@@ -698,6 +715,17 @@ struct npc_phalanxAI : public npc_escortAI
     {
         if (!m_pInstance)
             return;
+
+        if (uiCallPatrolTimer)
+        {
+            if (uiCallPatrolTimer < uiDiff && m_pInstance->GetData(TYPE_BAR) != DONE)
+            {
+                m_pInstance->SetData(TYPE_BAR, IN_PROGRESS);
+                uiCallPatrolTimer = 0;
+            }
+            else
+                uiCallPatrolTimer -= uiDiff;
+        }
 
         // Combat check
         if (m_creature->SelectHostileTarget() && m_creature->getVictim())
@@ -1427,6 +1455,228 @@ bool GossipSelect_boss_doomrel(Player* pPlayer, Creature* pCreature, uint32 /*ui
     return true;
 }
 
+/*######
+## boss_plugger_spazzring
+######*/
+
+enum
+{
+    SAY_OOC_1                       = -1230050,
+    SAY_OOC_2                       = -1230051,
+    SAY_OOC_3                       = -1230052,
+    SAY_OOC_4                       = -1230053,
+
+    YELL_STOLEN_1                   = -1230054,
+    YELL_STOLEN_2                   = -1230055,
+    YELL_STOLEN_3                   = -1230056,
+    YELL_AGRRO_1                    = -1230057,
+    YELL_AGRRO_2                    = -1230058,
+    YELL_PICKPOCKETED               = -1230059,
+
+    // spells
+    SPELL_BANISH                    = 8994,
+    SPELL_CURSE_OF_TONGUES          = 13338,
+    SPELL_DEMON_ARMOR               = 13787,
+    SPELL_IMMOLATE                  = 12742,
+    SPELL_SHADOW_BOLT               = 12739,
+    SPELL_PICKPOCKET                = 921,
+};
+
+static const uint32 aRandomSays[] = { SAY_OOC_1, SAY_OOC_2, SAY_OOC_3, SAY_OOC_4 };
+
+static const uint32 aRandomYells[] = { YELL_STOLEN_1, YELL_STOLEN_2, YELL_STOLEN_3 };
+
+struct boss_plugger_spazzringAI : public ScriptedAI
+{
+
+    boss_plugger_spazzringAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_blackrock_depths*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_blackrock_depths* m_pInstance;
+
+    uint32 m_uiOocSayTimer;
+    uint32 m_uiDemonArmorTimer;
+    uint32 m_uiBanishTimer;
+    uint32 m_uiImmolateTimer;
+    uint32 m_uiShadowBoltTimer;
+    uint32 m_uiCurseOfTonguesTimer;
+    uint32 m_uiPickpocketTimer;
+
+    void Reset() override
+    {
+        m_uiOocSayTimer          = 10000;
+        m_uiDemonArmorTimer      = 1000;
+        m_uiBanishTimer          = 0;
+        m_uiImmolateTimer        = 0;
+        m_uiShadowBoltTimer      = 0;
+        m_uiCurseOfTonguesTimer  = 0;
+        m_uiPickpocketTimer      = 0;
+    }
+
+    void Aggro() override
+    {
+        m_uiBanishTimer          = urand(8, 12) * 1000;
+        m_uiImmolateTimer        = urand(18, 20) * 1000;
+        m_uiShadowBoltTimer      = 1000;
+        m_uiCurseOfTonguesTimer  = 17000;
+    }
+
+    void JustDied(Unit* pKiller) override
+    {
+        // Activate Phalanx and handle patrons faction
+        if (Creature* pPhalanx = m_pInstance->GetSingleCreatureFromStorage(NPC_PHALANX))
+        {
+            if (npc_phalanxAI* pEscortAI = dynamic_cast<npc_phalanxAI*>(pPhalanx->AI()))
+                pEscortAI->Start(false, NULL, NULL, true);
+        }
+        m_pInstance->HandleBarPatrons(PATRON_HOSTILE);
+        m_pInstance->SetData(TYPE_PLUGGER, IN_PROGRESS); // The event is set IN_PROGRESS even if Plugger is dead because his death triggers more actions that are part of the event
+    }
+
+    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    {
+        if (pCaster->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (pSpell->Id == SPELL_PICKPOCKET)
+                m_uiPickpocketTimer = 5000;
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // Combat check
+        if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+        {
+            if (m_uiBanishTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_BANISH) == CAST_OK)
+                        m_uiBanishTimer = urand(26, 28) * 1000;
+                }
+            }
+            else
+                m_uiBanishTimer -= uiDiff;
+
+            if (m_uiImmolateTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_IMMOLATE) == CAST_OK)
+                    m_uiImmolateTimer = 25000;
+            }
+            else
+                m_uiImmolateTimer -= uiDiff;
+
+            if (m_uiShadowBoltTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
+                    m_uiShadowBoltTimer = urand(36, 63) * 100;
+            }
+            else
+                m_uiShadowBoltTimer -= uiDiff;
+
+            if (m_uiCurseOfTonguesTimer < uiDiff)
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_CURSE_OF_TONGUES, SELECT_FLAG_POWER_MANA))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_CURSE_OF_TONGUES) == CAST_OK)
+                        m_uiCurseOfTonguesTimer = urand(19, 31) * 1000;
+                }
+            }
+            else
+                m_uiCurseOfTonguesTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+        // Out of Combat (OOC)
+        else
+        {
+            if (m_uiOocSayTimer < uiDiff)
+            {
+                DoScriptText(aRandomSays[urand(0, 3)], m_creature);
+                m_uiOocSayTimer = urand(10, 20) * 1000;
+            }
+            else
+                m_uiOocSayTimer -= uiDiff;
+
+            if (m_uiPickpocketTimer)
+            {
+                if (m_uiPickpocketTimer < uiDiff)
+                {
+                    DoScriptText(YELL_PICKPOCKETED, m_creature);
+                    m_creature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
+                    m_uiPickpocketTimer = 0;
+                }
+                else
+                    m_uiPickpocketTimer -= uiDiff;
+            }
+
+            if (m_uiDemonArmorTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_DEMON_ARMOR) == CAST_OK)
+                    m_uiDemonArmorTimer = 30 * MINUTE * IN_MILLISECONDS;
+            }
+            else
+                m_uiDemonArmorTimer -= uiDiff;
+        }
+    }
+
+    // Players stole one of the ale mug/roasted boar: warn them
+    void WarnThief(Player* pPlayer)
+    {
+        DoScriptText(aRandomYells[urand(0, 2)], m_creature);
+        m_creature->SetFacingToObject(pPlayer);
+        return;
+    }
+
+    // Players stole too much of the ale mug/roasted boar: attack them
+    void AttackThief(Player* pPlayer)
+    {
+        if (pPlayer)
+        {
+            DoScriptText(urand(0, 1) < 1 ? YELL_AGRRO_1 : YELL_AGRRO_2, m_creature);
+            m_creature->SetFacingToObject(pPlayer);
+            m_creature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
+            AttackStart(pPlayer);
+        }
+        return;
+    }
+};
+
+CreatureAI* GetAI_boss_plugger_spazzring(Creature* pCreature)
+{
+    return new boss_plugger_spazzringAI(pCreature);
+}
+
+/*######
+## go_bar_ale_mug
+######*/
+
+bool GOUse_go_bar_ale_mug(Player* pPlayer, GameObject* pGo)
+{
+    if (ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData())
+    {
+        if (pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS || pInstance->GetData(TYPE_PLUGGER) == DONE) // GOs despawning on use, this check should never be true but this is proper to have it there
+            return false;
+        else
+            if (Creature* pPlugger = pInstance->GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
+            {
+                boss_plugger_spazzringAI* pPluggerAI = dynamic_cast<boss_plugger_spazzringAI*>(pPlugger->AI());
+                // Every time we set the event to SPECIAL, the instance script increments the number of stolen mugs/boars, capping at 3
+                pInstance->SetData(TYPE_PLUGGER, SPECIAL);
+                // If the cap is reached the instance script changes the type from SPECIAL to IN_PROGRESS
+                // Plugger then aggroes and engage players, else he just warns them
+                if (pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS)
+                    pPluggerAI->AttackThief(pPlayer);
+                else
+                    pPluggerAI->WarnThief(pPlayer);
+            }
+    }
+    return false;
+}
+
 void AddSC_blackrock_depths()
 {
     Script* pNewScript;
@@ -1510,5 +1760,15 @@ void AddSC_blackrock_depths()
     pNewScript->Name = "boss_doomrel";
     pNewScript->pGossipHello = &GossipHello_boss_doomrel;
     pNewScript->pGossipSelect = &GossipSelect_boss_doomrel;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "boss_plugger_spazzring";
+    pNewScript->GetAI = &GetAI_boss_plugger_spazzring;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_bar_ale_mug";
+    pNewScript->pGOUse = &GOUse_go_bar_ale_mug;
     pNewScript->RegisterSelf();
 }

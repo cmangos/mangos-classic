@@ -119,6 +119,7 @@ enum
     FACTION_DWARF_HOSTILE   = 754,                          // Hostile faction for the Tomb of the Seven dwarfs
     FACTION_ARENA_NEUTRAL   = 15,                           // Neutral faction for NPC in top of Arena after event complete
     FACTION_DARK_IRON       = 54,                           // Hostile faction for the Grim Guzzler
+    FACTION_IRONFORGE       = 122,                          // Faction used by Phalanx when Plugger is killed (yes, friendly to Alliance, Hostile to Horde, very strange)
 
     // enum used to handle the various Grim Guzzler  bar patron's reaction
     // depending on the actions and events triggered by players
@@ -236,6 +237,8 @@ class instance_blackrock_depths : public ScriptedInstance
         // Bar events
         void SetBarDoorIsOpen() { m_bIsBarDoorOpen = true; }
         void GetBarDoorIsOpen(bool& bIsOpen) { bIsOpen = m_bIsBarDoorOpen; }
+        void HandleBarPatrons(uint8 uiEventType);
+        void HandleBarPatrol(uint8 uiStep);
 
     private:
         void DoCallNextDwarf();
@@ -248,10 +251,9 @@ class instance_blackrock_depths : public ScriptedInstance
         bool  m_bIsBarDoorOpen;
         uint32 m_uiBarAleCount;
         uint32 m_uiPatronEmoteTimer;
-        void HandleBarPatrons(uint8 uiEventType);
         uint8 m_uiBrokenKegs;
-        void HandleBarPatrol(uint8 uiStep);
         uint32 m_uiPatrolTimer;
+        uint8 m_uiStolenAles;
 
         uint8 m_uiCofferDoorsOpened;
 

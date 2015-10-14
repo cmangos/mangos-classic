@@ -32,6 +32,7 @@ instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstan
     m_uiDwarfFightTimer(0),
     m_uiPatronEmoteTimer(2000),
     m_uiPatrolTimer(0),
+    m_uiStolenAles(0),
 
     m_fArenaCenterX(0.0f),
     m_fArenaCenterY(0.0f),
@@ -112,6 +113,8 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
         case NPC_MISTRESS_NAGMARA:
             if (m_auiEncounter[11] == DONE)
                 pCreature->ForcedDespawn();
+            else
+                m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
 }
@@ -349,8 +352,17 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[10] = uiData;
             break;
         case TYPE_PLUGGER:
+            if (uiData == SPECIAL)
+            {
+                if (Creature* pPlugger = GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
+                {
+                    ++m_uiStolenAles;
+                    if (m_uiStolenAles == 3)
+                        uiData = IN_PROGRESS;
+                }
+            }
             m_auiEncounter[11] = uiData;
-            return;
+            break;
     }
 
     if (uiData == DONE)
@@ -563,6 +575,9 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
     {
         // case for periodical handle of random emotes
         case PATRON_EMOTE:
+            if (GetData(TYPE_PLUGGER) == DONE)
+                return;
+
             for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
             {
                  // About 5% of patrons do emote at a given time
@@ -604,7 +619,7 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
                 }
             }
             return;
-        // case when Plugger is killed/pickpocketed or mad from stealing
+        // case when Plugger is killed
         case PATRON_HOSTILE:
             for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
             {
@@ -623,7 +638,7 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
             }
             if (Creature* pNagmara = GetSingleCreatureFromStorage(NPC_MISTRESS_NAGMARA))
             {
-                pNagmara->AI()->DoCastSpellIfCan(pNagmara, SPELL_NAGMARA_VANISH);
+                pNagmara->AI()->DoCastSpellIfCan(pNagmara, SPELL_NAGMARA_VANISH, CAST_TRIGGERED);
                 pNagmara->ForcedDespawn();
             }
             return;
@@ -648,7 +663,7 @@ void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
                     DoUseDoorOrButton(GO_BAR_DOOR);
                     SetBarDoorIsOpen();
                 }
-                
+
                 // One Fireguard Destroyer and two Anvilrage Officers are spawned
                 for (uint8 i = 0; i < 3; ++i)
                 {
