@@ -198,8 +198,8 @@ dnl of the configuration process we combine ACE_CXXFLAGS and CXXFLAGS
 dnl into CXXFLAGS (e.g., CXXFLAGS="$ACE_CXXFLAGS $CXXFLAGS").  CXXFLAGS
 dnl goes after ACE_CXXFLAGS so that the user's C++ flag command line
 dnl choices always override the configure script's choices.
-ACE_CXXFLAGS=""
-ACE_CFLAGS=""
+ACE_CXXFLAGS="-w "
+ACE_CFLAGS="-w "
 
 
 

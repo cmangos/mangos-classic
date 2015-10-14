@@ -4,6 +4,10 @@
 
 #include "ace/Truncate.h"
 
+#if __clang__
+# pragma GCC diagnostic ignored "-Wconstant-logical-operand"
+#endif
+
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 /// Returns the value of the object as a timeval.

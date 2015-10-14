@@ -7,6 +7,10 @@
 
 #include "soapH.h"
 
+#if defined(__clang__)
+# pragma GCC diagnostic ignored "-Wdeprecated-register"
+#endif
+
 SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.7.10 2010-02-18 18:41:56 GMT")
 
 

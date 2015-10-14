@@ -151,12 +151,16 @@ else()
      )
 endif()
 
+# include external dependencies without warnings
+include_directories(SYSTEM
+  ${CMAKE_SOURCE_DIR}/dep/include
+  ${ACE_INCLUDE_DIR}
+)
+
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/include
   ${CMAKE_SOURCE_DIR}/src/framework
   ${CMAKE_BINARY_DIR}
-  ${ACE_INCLUDE_DIR}
 )
 
 if(POSTGRESQL)
