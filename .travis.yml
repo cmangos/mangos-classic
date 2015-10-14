@@ -37,7 +37,7 @@ compiler:
 addons:
   apt:
     sources:
-      - kalakris-cmake
+      - kubuntu-backports
       - boost-latest
       - ubuntu-toolchain-r-test
     packages:

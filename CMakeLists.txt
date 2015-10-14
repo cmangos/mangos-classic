@@ -17,7 +17,7 @@
 
 project(CMaNGOS)
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 set(MANGOS_VERSION 0.12.3)
 
