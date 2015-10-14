@@ -17,11 +17,12 @@
 /* ScriptData
 SDName: Blackrock_Depths
 SD%Complete: 80
-SDComment: Quest support: 4001, 4322, 4342, 7604, 9015.
+SDComment: Quest support: 4001, 4134, 4322, 4342, 7604, 9015.
 SDCategory: Blackrock Depths
 EndScriptData */
 
 /* ContentData
+go_bar_beer_keg
 go_shadowforge_brazier
 go_relic_coffer_door
 at_shadowforge_bridge
@@ -33,12 +34,30 @@ npc_rocknot
 npc_marshal_windsor
 npc_dughal_stormwing
 npc_tobias_seecher
+npc_hurley_blackbreath
 boss_doomrel
 EndContentData */
 
 #include "precompiled.h"
 #include "blackrock_depths.h"
 #include "escort_ai.h"
+
+/*######
+## go_bar_beer_keg
+######*/
+
+bool GOUse_go_bar_beer_keg(Player* /*pPlayer*/, GameObject* pGo)
+{
+    if (ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData())
+    {
+        if (pInstance->GetData(TYPE_HURLEY) == IN_PROGRESS || pInstance->GetData(TYPE_HURLEY) == DONE) // GOs despawning on use, this check should never be true but this is proper to have it there
+            return false;
+        else
+            // Every time we set the event to SPECIAL, the instance script increments the number of broken kegs, capping at 3
+            pInstance->SetData(TYPE_HURLEY, SPECIAL);
+    }
+    return false;
+}
 
 /*######
 ## go_shadowforge_brazier
@@ -1245,6 +1264,136 @@ bool GossipSelect_npc_tobias_seecher(Player* pPlayer, Creature* pCreature, uint3
 }
 
 /*######
+## npc_hurley_blackbreath
+######*/
+
+enum
+{
+    YELL_HURLEY_SPAWN      = -1230041,
+    SAY_HURLEY_AGGRO       = -1230042,
+
+    // SPELL_DRUNKEN_RAGE      = 14872,
+    SPELL_FLAME_BREATH     = 9573,
+
+    NPC_RIBBLY_SCREWSPIGOT = 9543,
+    NPC_RIBBLY_CRONY       = 10043,
+};
+
+struct npc_hurley_blackbreathAI : public npc_escortAI
+{
+    npc_hurley_blackbreathAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+        Reset();
+    }
+
+    ScriptedInstance* m_pInstance;
+
+    uint32 uiFlameBreathTimer;
+    uint32 m_uiEventTimer;
+    bool   bIsEnraged;
+
+    void Reset() override
+    {
+        // If reset after an fight, we made him move to the keg room (end of the path)
+        if (HasEscortState(STATE_ESCORT_ESCORTING) || HasEscortState(STATE_ESCORT_PAUSED))
+        {
+            SetCurrentWaypoint(5);
+            SetEscortPaused(false);
+        }
+        else
+            m_uiEventTimer  = 1000;
+
+        bIsEnraged          = false;
+    }
+
+    // We want to prevent Hurley to go rampage on Ribbly and his friends.
+    // Everybody loves Ribbly. Except his family. They want him dead.
+    void AttackStart(Unit* pWho) override
+    {
+        if (pWho)
+        {
+            if (pWho->GetEntry() == NPC_RIBBLY_SCREWSPIGOT || pWho->GetEntry() == NPC_RIBBLY_CRONY)
+                return;
+            else
+                ScriptedAI::AttackStart(pWho);
+        }
+    }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        uiFlameBreathTimer  = 7000;
+        bIsEnraged  = false;
+        DoScriptText(SAY_HURLEY_AGGRO, m_creature);
+    }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        if (!m_pInstance)
+            return;
+
+        switch (uiPointId)
+        {
+            case 1:
+                DoScriptText(YELL_HURLEY_SPAWN, m_creature);
+                SetRun(true);
+                break;
+            case 5:
+                SetEscortPaused(true);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void UpdateEscortAI(const uint32 uiDiff) override
+    {
+        if (!m_pInstance)
+            return;
+
+        // Combat check
+        if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+        {
+            if (uiFlameBreathTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLAME_BREATH) == CAST_OK)
+                    uiFlameBreathTimer = 10000;
+            }
+            else
+                uiFlameBreathTimer -= uiDiff;
+
+            if (m_creature->GetHealthPercent() < 31.0f && !bIsEnraged)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_DRUNKEN_RAGE) == CAST_OK)
+                        bIsEnraged = true;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+        else
+        {
+            if (m_uiEventTimer)
+            {
+                if (m_uiEventTimer < uiDiff)
+                {
+                    Start(false);
+                    SetEscortPaused(false);
+                    m_uiEventTimer = 0;
+                }
+                else
+                    m_uiEventTimer -= uiDiff;
+            }
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_hurley_blackbreath(Creature* pCreature)
+{
+    return new npc_hurley_blackbreathAI(pCreature);
+}
+
+/*######
 ## boss_doomrel
 ######*/
 
@@ -1286,6 +1435,11 @@ bool GossipSelect_boss_doomrel(Player* pPlayer, Creature* pCreature, uint32 /*ui
 void AddSC_blackrock_depths()
 {
     Script* pNewScript;
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_bar_beer_keg";
+    pNewScript->pGOUse = &GOUse_go_bar_beer_keg;
+    pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "go_shadowforge_brazier";
@@ -1350,6 +1504,11 @@ void AddSC_blackrock_depths()
     pNewScript->Name = "npc_dughal_stormwing";
     pNewScript->pGossipHello =  &GossipHello_npc_dughal_stormwing;
     pNewScript->pGossipSelect = &GossipSelect_npc_dughal_stormwing;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_hurley_blackbreath";
+    pNewScript->GetAI = &GetAI_npc_hurley_blackbreath;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

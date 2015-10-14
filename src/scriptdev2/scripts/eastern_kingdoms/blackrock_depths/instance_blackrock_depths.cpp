@@ -26,6 +26,7 @@ EndScriptData */
 
 instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstance(pMap),
     m_uiBarAleCount(0),
+    m_uiBrokenKegs(0),
     m_uiCofferDoorsOpened(0),
     m_uiDwarfRound(0),
     m_uiDwarfFightTimer(0),
@@ -56,6 +57,7 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
             // no break;
         case NPC_EMPEROR:
         case NPC_PHALANX:
+        case NPC_PLUGGER_SPAZZRING:
         case NPC_HATEREL:
         case NPC_ANGERREL:
         case NPC_VILEREL:
@@ -280,6 +282,42 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
             for (int i = 0; i < MAX_DWARF_RUNES; ++i)
                 DoUseDoorOrButton(GO_DWARFRUNE_A01 + i);
             return;
+        case TYPE_HURLEY:
+            if (uiData == SPECIAL)
+            {
+                ++m_uiBrokenKegs;
+
+                if (m_uiBrokenKegs == 3)
+                {
+                    if (Creature* pPlugger = GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
+                    {
+                        // Summon Hurley Blackbreath
+                        Creature* pHurley = pPlugger->SummonCreature(NPC_HURLEY_BLACKBREATH, aHurleyPositions[0], aHurleyPositions[1], aHurleyPositions[2], aHurleyPositions[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+
+                        if (!pHurley)
+                            return;
+
+                        // Summon cronies around Hurley
+                        for (uint8 i = 0; i < MAX_CRONIES; ++i)
+                        {
+                            float fX, fY, fZ;
+                            pPlugger->GetRandomPoint(aHurleyPositions[0], aHurleyPositions[1], aHurleyPositions[2], 2.0f, fX, fY, fZ);
+                            Creature* pSummoned = pPlugger->SummonCreature(NPC_BLACKBREATH_CRONY, fX, fY, fZ, aHurleyPositions[3], TEMPSUMMON_DEAD_DESPAWN, 0);
+                            pSummoned->SetWalk(false);
+                            // The cronies should not engage anyone until their boss does so
+							// the linking is done by DB
+							pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+						    // The movement toward the kegs is handled by Hurley EscortAI
+							// and we want the cronies to follow him there
+                            pSummoned->GetMotionMaster()->MoveFollow(pHurley, 1.0f, 0);
+                        }
+                        SetData(TYPE_HURLEY, IN_PROGRESS);
+                    }
+                }
+            }
+            else
+                m_auiEncounter[8] = uiData;
+            break;
     }
 
     if (uiData == DONE)
@@ -289,7 +327,7 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
         std::ostringstream saveStream;
         saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
-                   << m_auiEncounter[6] << " " << m_auiEncounter[7];
+                   << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8];
 
         m_strInstData = saveStream.str();
 
@@ -321,6 +359,8 @@ uint32 instance_blackrock_depths::GetData(uint32 uiType) const
             return m_auiEncounter[6];
         case TYPE_FLAMELASH:
             return m_auiEncounter[7];
+        case TYPE_HURLEY:
+            return m_auiEncounter[8];
         default:
             return 0;
     }
@@ -338,7 +378,8 @@ void instance_blackrock_depths::Load(const char* chrIn)
 
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
-               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7];
+               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
+               >> m_auiEncounter[8];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
         if (m_auiEncounter[i] == IN_PROGRESS)
@@ -426,6 +467,9 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
             break;
         case NPC_MAGMUS:
             SetData(TYPE_IRON_HALL, DONE);
+            break;
+        case NPC_HURLEY_BLACKBREATH:
+            SetData(TYPE_HURLEY, DONE);
             break;
     }
 }

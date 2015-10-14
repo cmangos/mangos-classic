@@ -7,10 +7,11 @@
 
 enum
 {
-    MAX_ENCOUNTER           = 8,
+    MAX_ENCOUNTER           = 9,
     MAX_RELIC_DOORS         = 12,
     MAX_DWARFS              = 7,
     MAX_DWARF_RUNES         = 7,
+    MAX_CRONIES             = 3,
 
     TYPE_RING_OF_LAW        = 1,
     TYPE_VAULT              = 2,
@@ -20,6 +21,7 @@ enum
     TYPE_IRON_HALL          = 6,
     TYPE_QUEST_JAIL_BREAK   = 7,
     TYPE_FLAMELASH          = 8,
+    TYPE_HURLEY             = 9,
 
     NPC_EMPEROR             = 9019,
     NPC_PRINCESS            = 8929,
@@ -61,6 +63,9 @@ enum
     NPC_GRIM_PATRON         = 9545,
     NPC_GUZZLING_PATRON     = 9547,
     NPC_HAMMERED_PATRON     = 9554,
+    NPC_HURLEY_BLACKBREATH  = 9537,
+    NPC_BLACKBREATH_CRONY   = 9541,
+    NPC_PLUGGER_SPAZZRING   = 9499,
 
     GO_ARENA_1              = 161525,
     GO_ARENA_2              = 161522,
@@ -175,6 +180,9 @@ static const uint32 aArenaNPCs[] =
 // Used to summon Watcher Doomgrip
 static const float aVaultPositions[4] = {821.905f, -338.382f, -50.134f, 3.78736f};
 
+// Used to summon Hurley Blackbreath
+static const float aHurleyPositions[4] = {856.0867f, -149.7469f, -49.6719f, 0.05949629f};
+
 // Tomb of the Seven dwarfs
 static const uint32 aTombDwarfes[MAX_DWARFS] = {NPC_ANGERREL, NPC_SEETHREL, NPC_DOPEREL, NPC_GLOOMREL, NPC_VILEREL, NPC_HATEREL, NPC_DOOMREL};
 
@@ -223,6 +231,7 @@ class instance_blackrock_depths : public ScriptedInstance
         uint32 m_uiBarAleCount;
         uint32 m_uiPatronEmoteTimer;
         void HandleBarPatrons(uint8 uiEventType);
+        uint8 m_uiBrokenKegs;
 
         uint8 m_uiCofferDoorsOpened;
 
