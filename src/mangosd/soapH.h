@@ -7,6 +7,9 @@
 
 #ifndef soapH_H
 #define soapH_H
+#if __GNU__
+# pragma GCC diagnostic ignored "-w"
+#endif
 #include "soapStub.h"
 #ifndef WITH_NOIDREF
 

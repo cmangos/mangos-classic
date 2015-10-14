@@ -26,6 +26,7 @@ class GridState
     public:
 
         virtual void Update(Map&, NGridType&, GridInfo&, const uint32& x, const uint32& y, const uint32& t_diff) const = 0;
+        virtual ~GridState() {}
 };
 
 class InvalidState : public GridState
@@ -33,6 +34,7 @@ class InvalidState : public GridState
     public:
 
         void Update(Map&, NGridType&, GridInfo&, const uint32& x, const uint32& y, const uint32& t_diff) const override;
+        virtual ~InvalidState() {}
 };
 
 class ActiveState : public GridState
@@ -40,6 +42,7 @@ class ActiveState : public GridState
     public:
 
         void Update(Map&, NGridType&, GridInfo&, const uint32& x, const uint32& y, const uint32& t_diff) const override;
+        virtual ~ActiveState() {}
 };
 
 class IdleState : public GridState
@@ -47,6 +50,7 @@ class IdleState : public GridState
     public:
 
         void Update(Map&, NGridType&, GridInfo&, const uint32& x, const uint32& y, const uint32& t_diff) const override;
+        virtual ~IdleState() {}
 };
 
 class RemovalState : public GridState
@@ -54,6 +58,7 @@ class RemovalState : public GridState
     public:
 
         void Update(Map&, NGridType&, GridInfo&, const uint32& x, const uint32& y, const uint32& t_diff) const override;
+        virtual ~RemovalState() {}
 };
 
 #endif

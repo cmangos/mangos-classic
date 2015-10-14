@@ -3002,8 +3002,6 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
 
 void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed)
 {
-    MANGOS_ASSERT(spellType < CURRENT_MAX_SPELL);
-
     if (m_currentSpells[spellType] && (withDelayed || m_currentSpells[spellType]->getState() != SPELL_STATE_DELAYED))
     {
         // send autorepeat cancel message for autorepeat spells
@@ -3447,10 +3445,13 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 ++itr;
             }
 
+            // TODO remove this switch after confirming that we dont need other cases
             switch (trackedType)
             {
                 case TRACK_AURA_TYPE_SINGLE_TARGET:         // Register spell holder single target
                     scTargets[aurSpellInfo] = GetObjectGuid();
+                    break;
+                default:
                     break;
             }
         }
@@ -5211,7 +5212,7 @@ Unit* Unit::_GetTotem(TotemSlot slot) const
 
 Totem* Unit::GetTotem(TotemSlot slot) const
 {
-    if (slot >= MAX_TOTEM_SLOT || !IsInWorld() || !m_TotemSlot[slot])
+    if (!IsInWorld() || !m_TotemSlot[slot])
         return nullptr;
 
     Creature* totem = GetMap()->GetCreature(m_TotemSlot[slot]);
@@ -7075,7 +7076,7 @@ bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea)
     return
         pTarget->IsImmunedToDamage(GetMeleeDamageSchoolMask()) ||
         pTarget->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) ||
-        checkThreatArea && ((Creature*)this)->IsOutOfThreatArea(pTarget);
+        (checkThreatArea && ((Creature*)this)->IsOutOfThreatArea(pTarget));
 }
 
 //======================================================================
@@ -8569,10 +8570,10 @@ float Unit::GetObjectScaleMod() const
     float result = (100 + modValue) / 100.0f;
 
     // TODO:: not sure we have to do this sanity check, less than /100 or more than *100 seem not reasonable
-    if (result < 0.01)
-        result = 0.01;
-    else if (result > 100)
-        result = 100;
+    if (result < 0.01f)
+        result = 0.01f;
+    else if (result > 100.0f)
+        result = 100.0f;
 
     return result;
 }

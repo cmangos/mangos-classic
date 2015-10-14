@@ -289,6 +289,8 @@ struct boss_eye_of_cthunAI : public Scripted_NoMovementAI
                     m_uiDarkGlareEndTimer -= uiDiff;
 
                 break;
+            default:
+                break;
         }
 
         if (m_uiClawTentacleTimer < uiDiff)
@@ -611,6 +613,8 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                 else
                     m_uiPhaseTimer -= uiDiff;
 
+                break;
+            default:
                 break;
         }
 

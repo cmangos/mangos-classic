@@ -68,7 +68,7 @@ struct MassMailerQueryHandler
 
 void MassMailMgr::AddMassMailTask(MailDraft* mailProto, const MailSender& sender, char const* query)
 {
-    CharacterDatabase.AsyncPQuery(&massMailerQueryHandler, &MassMailerQueryHandler::HandleQueryCallback, mailProto, sender, query);
+    CharacterDatabase.AsyncPQuery(&massMailerQueryHandler, &MassMailerQueryHandler::HandleQueryCallback, mailProto, sender, "%s", query);
 }
 
 void MassMailMgr::Update(bool sendall /*= false*/)
