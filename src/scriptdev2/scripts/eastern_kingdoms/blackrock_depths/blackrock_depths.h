@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER           = 9,
+    MAX_ENCOUNTER           = 10,
     MAX_RELIC_DOORS         = 12,
     MAX_DWARFS              = 7,
     MAX_DWARF_RUNES         = 7,
@@ -22,6 +22,7 @@ enum
     TYPE_QUEST_JAIL_BREAK   = 7,
     TYPE_FLAMELASH          = 8,
     TYPE_HURLEY             = 9,
+    TYPE_BRIDGE             = 10,
 
     NPC_EMPEROR             = 9019,
     NPC_PRINCESS            = 8929,
@@ -212,8 +213,6 @@ class instance_blackrock_depths : public ScriptedInstance
         void SetArenaCenterCoords(float fX, float fY, float fZ) { m_fArenaCenterX = fX; m_fArenaCenterY = fY; m_fArenaCenterZ = fZ; }
         void GetArenaCenterCoords(float& fX, float& fY, float& fZ) { fX = m_fArenaCenterX; fY = m_fArenaCenterY; fZ = m_fArenaCenterZ; }
         void GetArenaCrowdGuid(GuidSet& sCrowdSet) { sCrowdSet = m_sArenaCrowdNpcGuids; }
-
-        bool m_bIsBridgeEventDone;
 
         // Bar events
         void SetBarDoorIsOpen() { m_bIsBarDoorOpen = true; }

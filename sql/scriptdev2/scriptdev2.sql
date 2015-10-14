@@ -186,6 +186,7 @@ UPDATE creature_template SET ScriptName='npc_tobias_seecher' WHERE entry=9679;
 UPDATE creature_template SET ScriptName='npc_hurley_blackbreath' WHERE entry=9537;
 UPDATE gameobject_template SET ScriptName='go_shadowforge_brazier' WHERE entry IN (174744, 174745);
 UPDATE gameobject_template SET ScriptName='go_relic_coffer_door' WHERE entry IN (174554, 174555, 174556, 174557, 174558, 174559, 174560, 174561, 174562, 174563, 174564, 174566);
+UPDATE gameobject_template SET ScriptName='go_bar_beer_keg' WHERE entry=164911;
 
 /* BLACKROCK SPIRE */
 UPDATE instance_template SET ScriptName='instance_blackrock_spire' WHERE map=229;
@@ -1863,7 +1864,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1230040,'Violence! Property damage! None shall pass!!',0,1,0,0,'Phalanx YELL_PHALANX_AGGRO'),
 (-1230041,'Get away from those kegs!',0,1,0,0,'Hurley Blackbreath YELL_HURLEY_SPAWN'),
 (-1230042,'You\'ll pay for that!',0,0,0,0,'Hurley Blackbreath SAY_HURLEY_AGGRO');
-(-1230043,'You can\'t hide from us. Prepare to burn!',0,1,0,0,'anvilrage guardsman SAY_GUARD_AGGRO');
+(-1230043,'You can\'t hide from us. Prepare to burn!',0,1,0,0,'anvilrage guardsman SAY_GUARD_AGGRO'),
+(-1230044,'That one\'s empty!!',0,0,0,60,'rocknot SAY_BARREL_1'),
+(-1230045,'Ah, empty again!',0,0,0,35,'rocknot SAY_BARREL_2'),
+(-1230046,'ALE!',0,0,0,60,'rocknot SAY_BARREL_3');
 
 -- -1 249 000 ONYXIA'S LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

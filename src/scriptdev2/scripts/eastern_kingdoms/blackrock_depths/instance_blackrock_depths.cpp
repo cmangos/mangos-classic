@@ -35,7 +35,6 @@ instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstan
     m_fArenaCenterX(0.0f),
     m_fArenaCenterY(0.0f),
     m_fArenaCenterZ(0.0f),
-    m_bIsBridgeEventDone(false),
     m_bIsBarDoorOpen(false)
 {
     Initialize();
@@ -122,7 +121,6 @@ void instance_blackrock_depths::OnObjectCreate(GameObject* pGo)
         case GO_SHADOW_DUMMY:
         case GO_BAR_KEG_SHOT:
         case GO_BAR_KEG_TRAP:
-        case GO_BAR_DOOR:
         case GO_TOMB_ENTER:
         case GO_TOMB_EXIT:
         case GO_LYCEUM:
@@ -144,6 +142,15 @@ void instance_blackrock_depths::OnObjectCreate(GameObject* pGo)
         case GO_DWARFRUNE_F01:
         case GO_DWARFRUNE_G01:
             break;
+        case GO_BAR_DOOR:
+			if (GetData(TYPE_ROCKNOT) == DONE)
+			{
+				// Rocknot event done: set the Grim Guzzler door animation to "broken"
+				// tell the instance script it is open to prevent some of the other events
+				pGo->SetGoState(GOState(2));
+				SetBarDoorIsOpen();
+			}
+			break;
 
         default:
             return;
@@ -305,10 +312,10 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                             Creature* pSummoned = pPlugger->SummonCreature(NPC_BLACKBREATH_CRONY, fX, fY, fZ, aHurleyPositions[3], TEMPSUMMON_DEAD_DESPAWN, 0);
                             pSummoned->SetWalk(false);
                             // The cronies should not engage anyone until their boss does so
-							// the linking is done by DB
-							pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-						    // The movement toward the kegs is handled by Hurley EscortAI
-							// and we want the cronies to follow him there
+                            // the linking is done by DB
+                            pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                            // The movement toward the kegs is handled by Hurley EscortAI
+                            // and we want the cronies to follow him there
                             pSummoned->GetMotionMaster()->MoveFollow(pHurley, 1.0f, 0);
                         }
                         SetData(TYPE_HURLEY, IN_PROGRESS);
@@ -318,6 +325,9 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
             else
                 m_auiEncounter[8] = uiData;
             break;
+        case TYPE_BRIDGE:
+            m_auiEncounter[9] = uiData;
+            return;
     }
 
     if (uiData == DONE)
@@ -327,7 +337,8 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
         std::ostringstream saveStream;
         saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
-                   << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8];
+                   << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
+                   << m_auiEncounter[9];
 
         m_strInstData = saveStream.str();
 
@@ -361,6 +372,8 @@ uint32 instance_blackrock_depths::GetData(uint32 uiType) const
             return m_auiEncounter[7];
         case TYPE_HURLEY:
             return m_auiEncounter[8];
+        case TYPE_BRIDGE:
+            return m_auiEncounter[9];
         default:
             return 0;
     }
@@ -379,7 +392,7 @@ void instance_blackrock_depths::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
-               >> m_auiEncounter[8];
+               >> m_auiEncounter[8] >> m_auiEncounter[9];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
         if (m_auiEncounter[i] == IN_PROGRESS)
@@ -519,7 +532,7 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
             {
                  // About 5% of patrons do emote at a given time
                 // So avoid executing follow up code for the 95% others
-                if (urand(0, 100) < 6)
+                if (urand(0, 100) < 4)
                 {
                     // Only three emotes are seen in data: laugh, cheer and exclamation
                     // the last one appearing the least and the first one appearing the most

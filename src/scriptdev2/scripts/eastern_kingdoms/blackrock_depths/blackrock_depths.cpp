@@ -98,7 +98,7 @@ bool GOUse_go_relic_coffer_door(Player* /*pPlayer*/, GameObject* pGo)
 static const float aGuardSpawnPositions[2][4] =
 {
     {642.3660f, -274.5155f, -43.10918f, 0.4712389f},                // First guard spawn position
-    {740.1137f, -283.3448f, -42.75082f, 2.8623400f}                 // Meeting point (middle of the bridge)
+    {740.1137f, -283.3448f, -42.75082f, 2.8623400f}                 // Second guard spawn position
 };
 
 enum
@@ -111,7 +111,7 @@ bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* 
 {
     if (instance_blackrock_depths* pInstance = (instance_blackrock_depths*)pPlayer->GetInstanceData())
     {
-        if (pPlayer->isGameMaster() || !pPlayer->isAlive() || pInstance->m_bIsBridgeEventDone)
+        if (pPlayer->isGameMaster() || !pPlayer->isAlive() || pInstance->GetData(TYPE_BRIDGE) == DONE)
             return false;
 
         Creature* pPyromancer = pInstance->GetSingleCreatureFromStorage(NPC_LOREGRAIN);
@@ -119,7 +119,7 @@ bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* 
         if (!pPyromancer)
             return false;
 
-        if (Creature* pMasterGuard = pPyromancer->SummonCreature(NPC_ANVILRAGE_GUARDMAN, aGuardSpawnPositions[0][0], aGuardSpawnPositions[0][1], aGuardSpawnPositions[0][2], aGuardSpawnPositions[0][3], TEMPSUMMON_TIMED_DESPAWN, 3 * HOUR * MINUTE * IN_MILLISECONDS))
+        if (Creature* pMasterGuard = pPyromancer->SummonCreature(NPC_ANVILRAGE_GUARDMAN, aGuardSpawnPositions[0][0], aGuardSpawnPositions[0][1], aGuardSpawnPositions[0][2], aGuardSpawnPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0))
         {
             pMasterGuard->SetWalk(false);
             pMasterGuard->GetMotionMaster()->MoveWaypoint();
@@ -128,12 +128,12 @@ bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* 
             pPlayer->GetContactPoint(pMasterGuard, fX, fY, fZ);
             pMasterGuard->GetMotionMaster()->MovePoint(1,fX, fY, fZ);
 
-            if (Creature* pSlaveGuard = pPyromancer->SummonCreature(NPC_ANVILRAGE_GUARDMAN, aGuardSpawnPositions[1][0], aGuardSpawnPositions[1][1], aGuardSpawnPositions[1][2], aGuardSpawnPositions[1][3], TEMPSUMMON_TIMED_DESPAWN, 3 * HOUR * MINUTE * IN_MILLISECONDS))
+            if (Creature* pSlaveGuard = pPyromancer->SummonCreature(NPC_ANVILRAGE_GUARDMAN, aGuardSpawnPositions[1][0], aGuardSpawnPositions[1][1], aGuardSpawnPositions[1][2], aGuardSpawnPositions[1][3], TEMPSUMMON_DEAD_DESPAWN, 0))
             {
                 pSlaveGuard->GetMotionMaster()->MoveFollow(pMasterGuard, 2.0f, 0);
             }
         }
-        pInstance->m_bIsBridgeEventDone = true;
+        pInstance->SetData(TYPE_BRIDGE, DONE);
     }
     return false;
 }
@@ -142,10 +142,7 @@ bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* 
 ## npc_grimstone
 ######*/
 
-/* Notes about this event:
- * Visual: Npc Grimstone should use some visual spell when appear/ disappear / opening/ closing doors
- * Texts: The texts and their positions need confirmation
- * Event timer might also need adjustment
+/* Note about this event:
  * Quest-Event: This needs to be clearified - there is some suggestion, that Theldren&Adds also might come as first wave.
  */
 
@@ -161,8 +158,6 @@ enum
     NPC_GRIMSTONE                   = 10096,
     DATA_BANNER_BEFORE_EVENT        = 5,
 
-    // 4 or 6 in total? 1+2+1 / 2+2+2 / 3+3. Depending on this, code should be changed.
-    MAX_MOB_AMOUNT                  = 4,
     MAX_THELDREN_ADDS               = 4,
     MAX_POSSIBLE_THELDREN_ADDS      = 8,
 
@@ -194,7 +189,10 @@ static const float aSpawnPositions[3][4] =
 };
 
 static const uint32 aGladiator[MAX_POSSIBLE_THELDREN_ADDS] = {NPC_LEFTY, NPC_ROTFANG, NPC_SNOKH, NPC_MALGEN, NPC_KORV, NPC_REZZNIK, NPC_VAJASHNI, NPC_VOLIDA};
-static const uint32 aRingMob[] = {NPC_WORM, NPC_STINGER, NPC_SCREECHER, NPC_THUNDERSNOUT, NPC_CREEPER, NPC_BEETLE};
+static const uint32 aRingMob[2][6] = {
+    {NPC_WORM, NPC_STINGER, NPC_SCREECHER, NPC_THUNDERSNOUT, NPC_CREEPER, NPC_BEETLE}, // NPC template entry
+    {4, 2, 5, 3, 3, 7}                                                                 // Number of NPCs per wave (two waves)
+};
 static const uint32 aRingBoss[] = {NPC_GOROSH, NPC_GRIZZLE, NPC_EVISCERATOR, NPC_OKTHOR, NPC_ANUBSHIAH, NPC_HEDRUM};
 
 enum Phases
@@ -233,6 +231,7 @@ struct npc_grimstoneAI : public npc_escortAI
     npc_grimstoneAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
         m_pInstance = (instance_blackrock_depths*)pCreature->GetInstanceData();
+        // select which trash NPC will be released for this run
         m_uiMobSpawnId = urand(0, 5);
         // Select MAX_THELDREN_ADDS(4) random adds for Theldren encounter
         uint8 uiCount = 0;
@@ -254,7 +253,7 @@ struct npc_grimstoneAI : public npc_escortAI
     uint32 m_uiEventTimer;
 
     uint8 m_uiMobSpawnId;
-    uint8 m_uiMobDeadCount;
+    uint8 m_uiAliveSummonedMob;
 
     Phases m_uiPhase;
 
@@ -267,9 +266,9 @@ struct npc_grimstoneAI : public npc_escortAI
     {
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
-        m_uiEventTimer    = 1000;
-        m_uiEventPhase    = 0;
-        m_uiMobDeadCount  = 0;
+        m_uiEventTimer        = 1000;
+        m_uiEventPhase        = 0;
+        m_uiAliveSummonedMob  = 0;
 
         m_uiPhase = PHASE_MOBS;
     }
@@ -286,6 +285,7 @@ struct npc_grimstoneAI : public npc_escortAI
         m_creature->GetRandomPoint(fX, fY, fZ, 10.0f, fcX, fcY, fcZ);
         pSummoned->GetMotionMaster()->MovePoint(1, fcX, fcY, fcZ);
 
+        ++m_uiAliveSummonedMob;
         m_lSummonedGUIDList.push_back(pSummoned->GetObjectGuid());
     }
 
@@ -303,42 +303,34 @@ struct npc_grimstoneAI : public npc_escortAI
 
     void SummonedCreatureJustDied(Creature* /*pSummoned*/) override
     {
-        ++m_uiMobDeadCount;
+        --m_uiAliveSummonedMob;
 
         switch (m_uiPhase)
         {
             case PHASE_MOBS:                                // Ring mob killed
-                if (m_uiMobDeadCount == MAX_MOB_AMOUNT)
-                {
-                    m_uiEventTimer = 5000;
-                    m_uiMobDeadCount = 0;
-                }
-                break;
             case PHASE_BOSS:                                // Ring boss killed
-                // One Boss
-                if (m_uiMobDeadCount == 1)
-                {
+                if (m_uiAliveSummonedMob == 0)
                     m_uiEventTimer = 5000;
-                    m_uiMobDeadCount = 0;
-                }
                 break;
             case PHASE_GLADIATORS:                          // Theldren and his band killed
                 // Adds + Theldren
-                if (m_uiMobDeadCount == MAX_THELDREN_ADDS + 1)
+                if (m_uiAliveSummonedMob == 0)
                 {
                     m_uiEventTimer = 5000;
-                    m_uiMobDeadCount = 0;
                     DoChallengeQuestCredit();
                 }
                 break;
         }
     }
 
-    void SummonRingMob(uint32 uiEntry, SpawnPosition uiPosition)
+    void SummonRingMob(uint32 uiEntry, uint8 uiNpcPerWave, SpawnPosition uiPosition)
     {
         float fX, fY, fZ;
-        m_creature->GetRandomPoint(aSpawnPositions[uiPosition][0], aSpawnPositions[uiPosition][1], aSpawnPositions[uiPosition][2], 2.0f, fX, fY, fZ);
-        m_creature->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+        for (uint8 i = 0; i < uiNpcPerWave; ++i)
+        {
+            m_creature->GetRandomPoint(aSpawnPositions[uiPosition][0], aSpawnPositions[uiPosition][1], aSpawnPositions[uiPosition][2], 2.0f, fX, fY, fZ);
+            m_creature->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+        }
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -370,7 +362,7 @@ struct npc_grimstoneAI : public npc_escortAI
                 if (m_pInstance)
                 {
                     m_pInstance->SetData(TYPE_RING_OF_LAW, DONE);
-                    debug_log("SD2: npc_grimstone: event reached end and set complete.");
+                    // debug_log("SD2: npc_grimstone: event reached end and set complete.");
                 }
                 break;
         }
@@ -426,7 +418,7 @@ struct npc_grimstoneAI : public npc_escortAI
                         {
                             if (Creature* pSpectator = m_creature->GetMap()->GetCreature(*itr))
                             {
-                                if (urand(0, 1) < 0.25)
+                                if (urand(0, 3) < 1)
                                     pSpectator->HandleEmote(EMOTE_ONESHOT_CHEER);
                             }
                         }
@@ -458,18 +450,12 @@ struct npc_grimstoneAI : public npc_escortAI
                         m_creature->SetVisibility(VISIBILITY_OFF);
                         SetEscortPaused(false);
                         // Summon Ring Mob(s)
-                        SummonRingMob(aRingMob[m_uiMobSpawnId], POS_EAST);
-                        m_uiEventTimer = 8000;
-                        break;
-                    case 6:
-                        // Summon Ring Mob(s)
-                        SummonRingMob(aRingMob[m_uiMobSpawnId], POS_EAST);
-                        SummonRingMob(aRingMob[m_uiMobSpawnId], POS_EAST);
-                        m_uiEventTimer = 8000;
+                        SummonRingMob(aRingMob[0][m_uiMobSpawnId], aRingMob[1][m_uiMobSpawnId], POS_EAST);
+                        m_uiEventTimer = 16000;
                         break;
                     case 7:
                         // Summon Ring Mob(s)
-                        SummonRingMob(aRingMob[m_uiMobSpawnId], POS_EAST);
+                        SummonRingMob(aRingMob[0][m_uiMobSpawnId], aRingMob[1][m_uiMobSpawnId], POS_EAST);
                         m_uiEventTimer = 0;
                         break;
                     case 8:
@@ -500,14 +486,14 @@ struct npc_grimstoneAI : public npc_escortAI
                         if (m_pInstance->GetData(TYPE_RING_OF_LAW) == SPECIAL && m_uiPhase == PHASE_MOBS)
                         {
                             m_uiPhase = PHASE_GLADIATORS;
-                            SummonRingMob(NPC_THELDREN, POS_NORTH);
+                            SummonRingMob(NPC_THELDREN, 1, POS_NORTH);
                             for (uint8 i = 0; i < MAX_THELDREN_ADDS; ++i)
-                                SummonRingMob(m_uiGladiatorId[i], POS_NORTH);
+                                SummonRingMob(m_uiGladiatorId[i], 1, POS_NORTH);
                         }
                         else
                         {
                             m_uiPhase = PHASE_BOSS;
-                            SummonRingMob(aRingBoss[urand(0, 5)], POS_NORTH);
+                            SummonRingMob(aRingBoss[urand(0, 5)], 1, POS_NORTH);
                         }
                         m_uiEventTimer = 0;
                         break;
@@ -761,6 +747,9 @@ enum
 {
     SAY_GOT_BEER       = -1230000,
     SAY_MORE_BEER      = -1230036,
+    SAY_BARREL_1       = -1230044,
+    SAY_BARREL_2       = -1230045,
+    SAY_BARREL_3       = -1230046,
 
     SPELL_DRUNKEN_RAGE = 14872,
 
@@ -779,6 +768,8 @@ struct npc_rocknotAI : public npc_escortAI
 
     uint32 m_uiBreakKegTimer;
     uint32 m_uiBreakDoorTimer;
+    uint32 m_uiEmoteTimer;
+    uint32 m_uiBarReactTimer;
 
     void Reset() override
     {
@@ -805,16 +796,16 @@ struct npc_rocknotAI : public npc_escortAI
         switch (uiPointId)
         {
             case 1:
-                m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
+                DoScriptText(SAY_BARREL_1, m_creature);
                 break;
             case 2:
-                m_creature->HandleEmote(EMOTE_ONESHOT_ATTACKUNARMED);
+                DoScriptText(SAY_BARREL_2, m_creature);
                 break;
             case 3:
-                m_creature->HandleEmote(EMOTE_ONESHOT_ATTACKUNARMED);
+                DoScriptText(SAY_BARREL_2, m_creature);
                 break;
             case 4:
-                m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
+                DoScriptText(SAY_BARREL_1, m_creature);
                 break;
             case 5:
                 DoCastSpellIfCan(m_creature, SPELL_DRUNKEN_RAGE, false);
@@ -847,11 +838,9 @@ struct npc_rocknotAI : public npc_escortAI
             {
                 // Open the bar back door
                 DoGo(GO_BAR_DOOR, 2);
-                m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
+                DoScriptText(SAY_BARREL_3, m_creature);
                 DoGo(GO_BAR_KEG_TRAP, 0);                   // doesn't work very well, leaving code here for future
                 // spell by trap has effect61
-
-                m_pInstance->SetData(TYPE_ROCKNOT, DONE);
 
                 m_uiBreakDoorTimer = 0;
             }
@@ -863,12 +852,13 @@ struct npc_rocknotAI : public npc_escortAI
         {
             if (m_uiBarReactTimer <= uiDiff)
             {
-                // Activate Phalanx
+                // Activate Phalanx and handle nearby patrons says
                 if (Creature* pPhalanx = m_pInstance->GetSingleCreatureFromStorage(NPC_PHALANX))
                 {
                     if (npc_phalanxAI* pEscortAI = dynamic_cast<npc_phalanxAI*>(pPhalanx->AI()))
                         pEscortAI->Start(false, NULL, NULL, true);
                 }
+                m_pInstance->SetData(TYPE_ROCKNOT, DONE);
 
                 m_uiBarReactTimer = 0;
             }
