@@ -28,6 +28,8 @@ at_shadowforge_bridge
 at_ring_of_law
 npc_grimstone
 npc_kharan_mighthammer
+npc_phalanx
+npc_rocknot
 npc_marshal_windsor
 npc_dughal_stormwing
 npc_tobias_seecher
@@ -615,12 +617,131 @@ bool GossipSelect_npc_kharan_mighthammer(Player* pPlayer, Creature* pCreature, u
 }
 
 /*######
++## npc_phalanx
++######*/
+
+enum
+{
+    YELL_PHALANX_AGGRO    = -1230040,
+
+    SPELL_THUNDERCLAP     = 15588,
+    SPELL_MIGHTY_BLOW     = 14099,
+    SPELL_FIREBALL_VOLLEY = 15285,
+};
+
+struct npc_phalanxAI : public npc_escortAI
+{
+    npc_phalanxAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+        Reset();
+    }
+
+    ScriptedInstance* m_pInstance;
+
+    float m_fKeepDoorOrientation;
+    uint32 uiThunderclapTimer;
+    uint32 uiMightyBlowTimer;
+    uint32 uiFireballVolleyTimer;
+
+    void Reset() override
+    {
+        // If reset after an fight, it means Phalanx has already started moving (if not already reached door)
+        // so we made him restart right before reaching the door to guard it (again)
+        if (HasEscortState(STATE_ESCORT_ESCORTING) || HasEscortState(STATE_ESCORT_PAUSED))
+        {
+            SetCurrentWaypoint(1);
+            SetEscortPaused(false);
+        }
+
+        m_fKeepDoorOrientation = 2.06059f;
+        uiThunderclapTimer     = 0;
+        uiMightyBlowTimer      = 0;
+        uiFireballVolleyTimer  = 0;
+    }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        uiThunderclapTimer     = 12000;
+        uiMightyBlowTimer      = 15000;
+        uiFireballVolleyTimer  = 1;
+    }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        if (!m_pInstance)
+            return;
+
+        switch (uiPointId)
+        {
+            case 0:
+                m_creature->SetFactionTemporary(14, TEMPFACTION_NONE);
+                DoScriptText(YELL_PHALANX_AGGRO, m_creature);
+                SetRun(true);
+                break;
+            case 1:
+                SetEscortPaused(true);
+                m_creature->SetFacingTo(m_fKeepDoorOrientation);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void UpdateEscortAI(const uint32 uiDiff) override
+    {
+        if (!m_pInstance)
+            return;
+
+        // Combat check
+        if (m_creature->SelectHostileTarget() && m_creature->getVictim())
+        {
+            if (uiThunderclapTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_THUNDERCLAP) == CAST_OK)
+                    uiThunderclapTimer = 10000;
+            }
+            else
+                uiThunderclapTimer -= uiDiff;
+
+            if (uiMightyBlowTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MIGHTY_BLOW) == CAST_OK)
+                    uiMightyBlowTimer = 10000;
+            }
+            else
+                uiMightyBlowTimer -= uiDiff;
+
+            if (m_creature->GetHealthPercent() < 51.0f)
+            {
+                if (uiFireballVolleyTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_FIREBALL_VOLLEY) == CAST_OK)
+                        uiFireballVolleyTimer = 15000;
+                }
+                else
+                    uiFireballVolleyTimer -= uiDiff;
+            }
+
+            DoMeleeAttackIfReady();
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_phalanx(Creature* pCreature)
+{
+    return new npc_phalanxAI(pCreature);
+}
+
+/*######
 ## npc_rocknot
 ######*/
 
 enum
 {
     SAY_GOT_BEER       = -1230000,
+    SAY_MORE_BEER      = -1230036,
 
     SPELL_DRUNKEN_RAGE = 14872,
 
@@ -647,6 +768,8 @@ struct npc_rocknotAI : public npc_escortAI
 
         m_uiBreakKegTimer  = 0;
         m_uiBreakDoorTimer = 0;
+        m_uiEmoteTimer     = 0;
+        m_uiBarReactTimer  = 0;
     }
 
     void DoGo(uint32 id, uint32 state)
@@ -675,7 +798,7 @@ struct npc_rocknotAI : public npc_escortAI
                 m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
                 break;
             case 5:
-                m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
+                DoCastSpellIfCan(m_creature, SPELL_DRUNKEN_RAGE, false);
                 m_uiBreakKegTimer = 2000;
                 break;
         }
@@ -693,6 +816,7 @@ struct npc_rocknotAI : public npc_escortAI
                 DoGo(GO_BAR_KEG_SHOT, 0);
                 m_uiBreakKegTimer = 0;
                 m_uiBreakDoorTimer = 1000;
+                m_uiBarReactTimer  = 5000;
             }
             else
                 m_uiBreakKegTimer -= uiDiff;
@@ -702,21 +826,57 @@ struct npc_rocknotAI : public npc_escortAI
         {
             if (m_uiBreakDoorTimer <= uiDiff)
             {
+                // Open the bar back door
                 DoGo(GO_BAR_DOOR, 2);
+                m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
                 DoGo(GO_BAR_KEG_TRAP, 0);                   // doesn't work very well, leaving code here for future
-                // spell by trap has effect61, this indicate the bar go hostile
+                // spell by trap has effect61
 
-                if (Creature* pTmp = m_pInstance->GetSingleCreatureFromStorage(NPC_PHALANX))
-                    pTmp->SetFactionTemporary(14, TEMPFACTION_NONE);
-
-                // for later, this event(s) has alot more to it.
-                // optionally, DONE can trigger bar to go hostile.
-                m_pInstance->SetData(TYPE_BAR, DONE);
+                m_pInstance->SetData(TYPE_ROCKNOT, DONE);
 
                 m_uiBreakDoorTimer = 0;
             }
             else
                 m_uiBreakDoorTimer -= uiDiff;
+        }
+
+        if (m_uiBarReactTimer)
+        {
+            if (m_uiBarReactTimer <= uiDiff)
+            {
+                // Activate Phalanx
+                if (Creature* pPhalanx = m_pInstance->GetSingleCreatureFromStorage(NPC_PHALANX))
+                {
+                    if (npc_phalanxAI* pEscortAI = dynamic_cast<npc_phalanxAI*>(pPhalanx->AI()))
+                        pEscortAI->Start(false, NULL, NULL, true);
+                }
+
+                m_uiBarReactTimer = 0;
+            }
+            else
+                m_uiBarReactTimer -= uiDiff;
+        }
+
+        // Several times Rocknot is supposed to perform an action (text, spell cast...) followed closely by an emote
+        // we handle it here
+        if (m_uiEmoteTimer)
+        {
+            if (m_uiEmoteTimer <= uiDiff)
+            {
+                // If event is SPECIAL (Rocknot moving to barrel), then we want him to say a special text and start moving
+                // if not, he is still accepting beers, so we want him to cheer player
+                if (m_pInstance->GetData(TYPE_ROCKNOT) == SPECIAL)
+                {
+                    DoScriptText(SAY_MORE_BEER, m_creature);
+                    Start(false);
+                }
+                else
+                    m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
+
+                m_uiEmoteTimer = 0;
+            }
+            else
+                m_uiEmoteTimer -= uiDiff;
         }
     }
 };
@@ -726,32 +886,30 @@ CreatureAI* GetAI_npc_rocknot(Creature* pCreature)
     return new npc_rocknotAI(pCreature);
 }
 
-bool QuestRewarded_npc_rocknot(Player* /*pPlayer*/, Creature* pCreature, Quest const* pQuest)
+bool QuestRewarded_npc_rocknot(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
     ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 
     if (!pInstance)
         return true;
 
-    if (pInstance->GetData(TYPE_BAR) == DONE || pInstance->GetData(TYPE_BAR) == SPECIAL)
+    if (pInstance->GetData(TYPE_ROCKNOT) == DONE || pInstance->GetData(TYPE_ROCKNOT) == SPECIAL)
         return true;
 
     if (pQuest->GetQuestId() == QUEST_ALE)
     {
-        if (pInstance->GetData(TYPE_BAR) != IN_PROGRESS)
-            pInstance->SetData(TYPE_BAR, IN_PROGRESS);
+        if (pInstance->GetData(TYPE_ROCKNOT) != IN_PROGRESS)
+            pInstance->SetData(TYPE_ROCKNOT, IN_PROGRESS);
 
-        pInstance->SetData(TYPE_BAR, SPECIAL);
+        pCreature->SetFacingToObject(pPlayer);
+        DoScriptText(SAY_GOT_BEER, pCreature);
+        if (npc_rocknotAI* pEscortAI = dynamic_cast<npc_rocknotAI*>(pCreature->AI()))
+            pEscortAI->m_uiEmoteTimer = 1500;
 
-        // keep track of amount in instance script, returns SPECIAL if amount ok and event in progress
-        if (pInstance->GetData(TYPE_BAR) == SPECIAL)
-        {
-            DoScriptText(SAY_GOT_BEER, pCreature);
-            pCreature->CastSpell(pCreature, SPELL_DRUNKEN_RAGE, false);
-
-            if (npc_rocknotAI* pEscortAI = dynamic_cast<npc_rocknotAI*>(pCreature->AI()))
-                pEscortAI->Start(false, nullptr, nullptr, true);
-        }
+        // We keep track of amount of beers given in the instance script by setting data to SPECIAL
+        // Once the correct amount is reached, the script will also returns SPECIAL, if not, it returns IN_PROGRESS/DONE
+        // the return state and the following of the script are handled in the Update->emote part of the Rocknot NPC escort AI script
+        pInstance->SetData(TYPE_ROCKNOT, SPECIAL);
     }
 
     return true;
@@ -1163,6 +1321,11 @@ void AddSC_blackrock_depths()
     pNewScript->Name = "npc_kharan_mighthammer";
     pNewScript->pGossipHello =  &GossipHello_npc_kharan_mighthammer;
     pNewScript->pGossipSelect = &GossipSelect_npc_kharan_mighthammer;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_phalanx";
+    pNewScript->GetAI = &GetAI_npc_phalanx;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

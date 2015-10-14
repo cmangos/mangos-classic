@@ -29,11 +29,13 @@ instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstan
     m_uiCofferDoorsOpened(0),
     m_uiDwarfRound(0),
     m_uiDwarfFightTimer(0),
+    m_uiPatronEmoteTimer(2000),
 
     m_fArenaCenterX(0.0f),
     m_fArenaCenterY(0.0f),
     m_fArenaCenterZ(0.0f),
-    m_bIsBridgeEventDone(false)
+    m_bIsBridgeEventDone(false),
+    m_bIsBarDoorOpen(false)
 {
     Initialize();
 }
@@ -94,6 +96,12 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
             m_sArenaCrowdNpcGuids.insert(pCreature->GetObjectGuid());
             if (m_auiEncounter[0] == DONE)
                 pCreature->SetFactionTemporary(FACTION_ARENA_NEUTRAL, TEMPFACTION_RESTORE_RESPAWN);
+            break;
+            // Grim Guzzler bar crowd
+        case NPC_GRIM_PATRON:
+        case NPC_GUZZLING_PATRON:
+        case NPC_HAMMERED_PATRON:
+            m_sBarPatronNpcGuids.insert(pCreature->GetObjectGuid());
             break;
     }
 }
@@ -194,11 +202,18 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
             }
             m_auiEncounter[1] = uiData;
             break;
-        case TYPE_BAR:
+        case TYPE_ROCKNOT:
             if (uiData == SPECIAL)
                 ++m_uiBarAleCount;
             else
+            {
+                if (uiData == DONE)
+                {
+                    HandleBarPatrons(PATRON_PISSED);
+                    SetBarDoorIsOpen();
+                }
                 m_auiEncounter[2] = uiData;
+            }
             break;
         case TYPE_TOMB_OF_SEVEN:
             // Don't set the same data twice
@@ -291,7 +306,7 @@ uint32 instance_blackrock_depths::GetData(uint32 uiType) const
             return m_auiEncounter[0];
         case TYPE_VAULT:
             return m_auiEncounter[1];
-        case TYPE_BAR:
+        case TYPE_ROCKNOT:
             if (m_auiEncounter[2] == IN_PROGRESS && m_uiBarAleCount == 3)
                 return SPECIAL;
             else
@@ -450,6 +465,62 @@ bool instance_blackrock_depths::CanReplacePrincess()
     return true;
 }
 
+void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
+{
+    switch (uiEventType)
+    {
+        // case for periodical handle of random emotes
+        case PATRON_EMOTE:
+            for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
+            {
+                 // About 5% of patrons do emote at a given time
+                // So avoid executing follow up code for the 95% others
+                if (urand(0, 100) < 6)
+                {
+                    // Only three emotes are seen in data: laugh, cheer and exclamation
+                    // the last one appearing the least and the first one appearing the most
+                    // emotes are stored in a table and frequency is handled there
+                    if (Creature* pPatron = instance->GetCreature(*itr))
+                       pPatron->HandleEmote(aPatronsEmotes[urand(0, 5)]);
+                }
+            }
+            return;
+        // case for Rocknot event when breaking the barrel
+        case PATRON_PISSED:
+            // Three texts are said, one less often than the two others
+            // Only by patrons near the broken barrel react to Rocknot's rampage
+            if (GameObject* pGo = GetSingleGameObjectFromStorage(GO_BAR_KEG_SHOT))
+            {
+                for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
+                {
+                    if (Creature* pPatron = instance->GetCreature(*itr))
+                    {
+                        if (pPatron->GetPositionZ() > pGo->GetPositionZ() - 1 && pPatron->IsWithinDist2d(pGo->GetPositionX(), pGo->GetPositionY(), 18.0f))
+                        {
+                            uint32 uiTextId = 0;
+                            switch (urand(0, 4))
+                            {
+                                case 0: uiTextId = SAY_PISSED_PATRON_3; break;
+                                case 1:  // case is double to give this text twice the chance of the previous one do be displayed
+                                case 2: uiTextId = SAY_PISSED_PATRON_2; break;
+                                // covers the two remaining cases
+                                default: uiTextId = SAY_PISSED_PATRON_1; break;
+                            }
+                            DoScriptText(uiTextId, pPatron);
+                        }
+                    }
+                }
+            }
+            return;
+        // case when Plugger is aggroed/pickpocketed
+        case PATRON_HOSTILE:
+            // Placeholder
+            return;
+        default:
+            return;
+    }
+}
+
 void instance_blackrock_depths::Update(uint32 uiDiff)
 {
     if (m_uiDwarfFightTimer)
@@ -466,6 +537,18 @@ void instance_blackrock_depths::Update(uint32 uiDiff)
         }
         else
             m_uiDwarfFightTimer -= uiDiff;
+    }
+
+    // Every second some of the patrons will do one random emote if they are not hostile (i.e. Plugger event is not done/in progress)
+    if (m_uiPatronEmoteTimer)
+    {
+        if (m_uiPatronEmoteTimer <= uiDiff)
+        {
+            HandleBarPatrons(PATRON_EMOTE);
+            m_uiPatronEmoteTimer = 1000;
+        }
+        else
+            m_uiPatronEmoteTimer -= uiDiff;
     }
 }
 
