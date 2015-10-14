@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER           = 12,
+    MAX_ENCOUNTER           = 13,
     MAX_RELIC_DOORS         = 12,
     MAX_DWARFS              = 7,
     MAX_DWARF_RUNES         = 7,
@@ -25,6 +25,7 @@ enum
     TYPE_BRIDGE             = 10,
     TYPE_BAR                = 11,
     TYPE_PLUGGER            = 12,
+    TYPE_NAGMARA            = 13,
 
     NPC_EMPEROR             = 9019,
     NPC_PRINCESS            = 8929,
@@ -135,10 +136,10 @@ enum
     SPELL_NAGMARA_VANISH    = 15341,
     
     // Emperor Dagran Thaurissan
-    YELL_SENATOR_1			= -1230060,
-    YELL_SENATOR_2			= -1230061,
-    YELL_SENATOR_3			= -1230062,
-    YELL_SENATOR_4			= -1230063
+    YELL_SENATOR_1          = -1230060,
+    YELL_SENATOR_2          = -1230061,
+    YELL_SENATOR_3          = -1230062,
+    YELL_SENATOR_4          = -1230063
 };
 
 // Random emotes for Grim Guzzler patrons

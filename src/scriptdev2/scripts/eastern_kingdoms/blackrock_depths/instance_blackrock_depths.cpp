@@ -364,6 +364,9 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
             }
             m_auiEncounter[11] = uiData;
             break;
+        case TYPE_NAGMARA:
+            m_auiEncounter[12] = uiData;
+            break;
     }
 
     if (uiData == DONE)
@@ -374,7 +377,8 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
         saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
                    << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
-                   << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11];
+                   << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11] << " "
+                   << m_auiEncounter[12];
 
         m_strInstData = saveStream.str();
 
@@ -414,6 +418,8 @@ uint32 instance_blackrock_depths::GetData(uint32 uiType) const
             return m_auiEncounter[10];
         case TYPE_PLUGGER:
             return m_auiEncounter[11];
+        case TYPE_NAGMARA:
+            return m_auiEncounter[12];
         default:
             return 0;
     }
@@ -432,7 +438,8 @@ void instance_blackrock_depths::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
-               >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11];
+               >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11]
+               >> m_auiEncounter[12];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
         if (m_auiEncounter[i] == IN_PROGRESS && i != TYPE_IRON_HALL) // specific check for Iron Hall event: once started, it never stops, the Ironhall Guardians switch to flamethrower mode and never stop even after event completion, i.e. the event remains started if Magmus resets
@@ -540,10 +547,10 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
             {
                 if (!pDagran->isAlive())
                     return;
-                
+
                 if (m_uiDagranTimer > 0)
                     return;
-                
+
                 switch (urand(0, 3))
                 {
                     case 0:uiTextId = YELL_SENATOR_1;break;
@@ -765,7 +772,7 @@ void instance_blackrock_depths::Update(uint32 uiDiff)
         else
             m_uiDagranTimer -= uiDiff;
     }
-    
+
     // Every second some of the patrons will do one random emote if they are not hostile (i.e. Plugger event is not done/in progress)
     if (m_uiPatronEmoteTimer)
     {

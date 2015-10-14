@@ -179,6 +179,7 @@ UPDATE creature_template SET ScriptName='npc_grimstone' WHERE entry=10096;
 UPDATE creature_template SET ScriptName='npc_theldren_trigger' WHERE entry=16079;
 UPDATE creature_template SET ScriptName='npc_kharan_mighthammer' WHERE entry=9021;
 UPDATE creature_template SET ScriptName='npc_phalanx' WHERE entry=9502;
+UPDATE creature_template SET ScriptName='npc_mistress_nagmara' WHERE entry=9500;
 UPDATE creature_template SET ScriptName='npc_rocknot' WHERE entry=9503;
 UPDATE creature_template SET ScriptName='npc_marshal_windsor' WHERE entry=9023;
 UPDATE creature_template SET ScriptName='npc_dughal_stormwing' WHERE entry=9022;
@@ -1821,7 +1822,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 230 000 BLACKROCK DEPTHS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1230000,'Ah, hits the spot!',0,0,5,0,'rocknot SAY_GOT_BEER'),
+(-1230000,'Ah, hits the spot!',0,0,0,5,'rocknot SAY_GOT_BEER'),
 (-1230001,'Come to aid the Throne!',0,1,0,0,'dagran SAY_AGGRO'),
 (-1230002,'Hail to the king, baby!',0,1,0,0,'dagran SAY_SLAY'),
 (-1230003,'You have challenged the Seven, and now you will die!',0,0,0,0,'doomrel SAY_DOOMREL_START_EVENT'),
@@ -1866,7 +1867,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1230039,'Oh! Now I\'m pissed!',0,0,0,0,'Grim Patron SAY_PISSED_PATRON_3'),
 (-1230040,'Violence! Property damage! None shall pass!!',0,1,0,0,'Phalanx YELL_PHALANX_AGGRO'),
 (-1230041,'Get away from those kegs!',0,1,0,0,'Hurley Blackbreath YELL_HURLEY_SPAWN'),
-(-1230042,'You\'ll pay for that!',0,0,0,0,'Hurley Blackbreath SAY_HURLEY_AGGRO');
+(-1230042,'You\'ll pay for that!',0,0,0,0,'Hurley Blackbreath SAY_HURLEY_AGGRO'),
 (-1230043,'You can\'t hide from us. Prepare to burn!',0,1,0,0,'anvilrage guardsman SAY_GUARD_AGGRO'),
 (-1230044,'That one\'s empty!!',0,0,0,60,'rocknot SAY_BARREL_1'),
 (-1230045,'Ah, empty again!',0,0,0,35,'rocknot SAY_BARREL_2'),
@@ -1889,7 +1890,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1230062,'They were just getting in the way anyways.',0,1,0,0,'Emperor Thaurissan YELL_SENATOR_3'),
 (-1230063,'Your efforts are utterly pointless, fools! You will never be able to defeat me!',0,1,0,0,'Emperor Thaurissan YELL_SENATOR_4'),
 (-1230064,'I will crush you into little tiny pieces!',0,1,0,0,'Emperor Thaurissan YELL_AGGRO_2'),
-(-1230065,'Prepare to meet your doom at the hands of Ragnaros\' most powerful servant!',0,1,0,0,'Emperor Thaurissan YELL_AGGRO_3');
+(-1230065,'Prepare to meet your doom at the hands of Ragnaros\' most powerful servant!',0,1,0,0,'Emperor Thaurissan YELL_AGGRO_3'),
+(-1230066,'Hey, Rocknot!',0,0,0,0,'Nagmara SAY_NAGMARA_1'),
+(-1230067,'Let\'s go, honey.',0,0,0,0,'Nagmara SAY_NAGMARA_2'),
+(-1230068,'%s kisses her lover.',0,2,0,0,'Nagmara TEXTEMOTE_NAGMARA'),
+(-1230069,'%s kisses Mistress Nagmara',0,2,0,17,'Rocknot TEXTEMOTE_ROCKNOT');
 
 -- -1 249 000 ONYXIA'S LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -2423,7 +2428,8 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3230000,'You\'re free, Dughal! Get out of here!','dughal GOSSIP_ITEM_DUGHAL'),
 (-3230001,'Get out of here, Tobias, you\'re free!','tobias GOSSIP_ITEM_TOBIAS'),
-(-3230002,'Your bondage is at an end, Doom\'rel. I challenge you!','doomrel GOSSIP_ITEM_CHALLENGE');
+(-3230002,'Your bondage is at an end, Doom\'rel. I challenge you!','doomrel GOSSIP_ITEM_CHALLENGE'),
+(-3230003,'Why don\'t you and Rocknot go find somewhere private...','nagmara GOSSIP_ITEM_NAGMARA');
 
 -- -3 409 000 MOLTEN CORE
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
@@ -3036,14 +3042,40 @@ INSERT INTO script_waypoint VALUES
 
 DELETE FROM script_waypoint WHERE entry=9503;
 INSERT INTO script_waypoint VALUES
-(9503, 0, 883.294861, -188.926300, -43.703655, 0,''),
-(9503, 1, 872.763550, -185.605621, -43.703655, 5000,'b1'),
-(9503, 2, 867.923401, -188.006393, -43.703655, 5000,'b2'),
-(9503, 3, 863.295898, -190.795212, -43.703655, 5000,'b3'),
-(9503, 4, 856.139587, -194.652756, -43.703655, 5000,'b4'),
-(9503, 5, 851.878906, -196.928131, -43.703655, 15000,'b5'),
-(9503, 6, 877.035217, -187.048080, -43.703655, 0,''),
-(9503, 7, 891.198000, -197.924000, -43.620400, 0,'home');
+(9503, 0, 885.1852, -194.0071, -43.45835, 0,''),
+(9503, 1, 885.1852, -194.0071, -43.45835, 0,''),
+(9503, 2, 872.763550, -185.605621, -43.703655, 5000,'b1'),
+(9503, 3, 867.923401, -188.006393, -43.703655, 5000,'b2'),
+(9503, 4, 863.295898, -190.795212, -43.703655, 5000,'b3'),
+(9503, 5, 856.139587, -194.652756, -43.703655, 5000,'b4'),
+(9503, 6, 851.878906, -196.928131, -43.703655, 15000,'b5'),
+(9503, 7, 877.035217, -187.048080, -43.703655, 0,''),
+(9503, 8, 891.198000, -197.924000, -43.620400, 0,'home'),
+(9503, 9, 876.9352, -189.0071, -43.45835, 0,'Nagmara escort'),
+(9503, 10, 885.1852, -194.0071, -43.45835, 0,''),
+(9503, 11, 869.1238, -202.8515, -43.70884, 0,''),
+(9503, 12, 869.4652, -202.8777, -43.45879, 0,''),
+(9503, 13, 864.2437, -210.8257, -43.45896, 0,''),
+(9503, 14, 866.8236, -220.959, -43.44718, 0,''),
+(9503, 15, 867.0736, -221.959, -43.44718, 0,''),
+(9503, 16, 870.4187, -225.6747, -43.55664, 0,'open door'),
+(9503, 17, 872.1687, -227.4247, -43.55664, 0,''),
+(9503, 18, 872.9187, -228.1747, -43.55664, 0,''),
+(9503, 19, 875.9187, -230.9247, -43.55664, 0,''),
+(9503, 20, 876.9187, -230.1747, -43.55664, 0,''),
+(9503, 21, 877.9187, -229.4247, -43.55664, 0,''),
+(9503, 22, 882.3948, -225.949, -46.74049, 0,''),
+(9503, 23, 885.8948, -223.699, -49.24049, 0,''),
+(9503, 24, 887.6448, -222.449, -49.24049, 0,''),
+(9503, 25, 885.937, -223.3513, -49.29544, 0,''),
+(9503, 26, 887.437, -222.3513, -49.29544, 0,''),
+(9503, 27, 888.937, -221.6013, -49.54544, 0,''),
+(9503, 28, 887.687, -220.1013, -49.54544, 0,''),
+(9503, 29, 886.687, -218.8513, -49.54544, 0,''),
+(9503, 30, 887.5667, -220.0395, -49.70586, 0,''),
+(9503, 31, 886.5667, -218.7895, -49.70586, 0,''),
+(9503, 32, 886.0667, -218.2895, -49.70586, 0,''),
+(9503, 33, 880.8252, -221.3895, -49.95622, 0,'stop');
 
 DELETE FROM script_waypoint WHERE entry=9537;
 INSERT INTO script_waypoint VALUES

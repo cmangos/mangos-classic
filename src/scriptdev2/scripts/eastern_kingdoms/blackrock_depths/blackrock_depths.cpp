@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Blackrock_Depths
-SD%Complete: 80
-SDComment: Quest support: 4001, 4134, 4322, 4342, 7604, 9015.
+SD%Complete: 95
+SDComment: Quest support: 4001, 4134, 4201, 4322, 4342, 7604, 9015.
 SDCategory: Blackrock Depths
 EndScriptData */
 
@@ -30,12 +30,16 @@ at_ring_of_law
 npc_grimstone
 npc_kharan_mighthammer
 npc_phalanx
+npc_mistress_nagmara
 npc_rocknot
 npc_marshal_windsor
 npc_dughal_stormwing
 npc_tobias_seecher
 npc_hurley_blackbreath
 boss_doomrel
+boss_plugger_spazzring
+go_bar_ale_mug
+npc_ironhand_guardian
 EndContentData */
 
 #include "precompiled.h"
@@ -91,7 +95,7 @@ bool GOUse_go_relic_coffer_door(Player* /*pPlayer*/, GameObject* pGo)
     return false;
 }
 
- /*######
+/*######
 ## at_shadowforge_bridge
 ######*/
 
@@ -768,6 +772,177 @@ CreatureAI* GetAI_npc_phalanx(Creature* pCreature)
 }
 
 /*######
+## npc_mistress_nagmara
+######*/
+
+enum
+{
+    GOSSIP_ITEM_NAGMARA         = -3230003,
+    GOSSIP_ID_NAGMARA           = 2727,
+    GOSSIP_ID_NAGMARA_2         = 2729,
+    SPELL_POTION_LOVE           = 14928,
+    SPELL_NAGMARA_ROCKNOT       = 15064,
+
+    SAY_NAGMARA_1               = -1230066,
+    SAY_NAGMARA_2               = -1230067,
+    TEXTEMOTE_NAGMARA           = -1230068,
+    TEXTEMOTE_ROCKNOT           = -1230069,
+
+    QUEST_POTION_LOVE           = 4201
+};
+
+struct npc_mistress_nagmaraAI : public ScriptedAI
+{
+    npc_mistress_nagmaraAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_blackrock_depths*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_blackrock_depths* m_pInstance;
+    uint8 m_uiPhase;
+    uint32 m_uiPhaseTimer;
+    Creature* pRocknot;
+
+    void Reset() override
+    {
+        m_uiPhase = 0;
+        m_uiPhaseTimer = 0;
+    }
+
+    void DoPotionOfLoveIfCan()
+    {
+        if (!m_pInstance)
+            return;
+
+        pRocknot = m_pInstance->GetSingleCreatureFromStorage(NPC_PRIVATE_ROCKNOT);
+        if (!pRocknot)
+            return;
+
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        pRocknot->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+        m_creature->GetMotionMaster()->MoveIdle();
+        m_creature->GetMotionMaster()->MoveFollow(pRocknot, 2.0f, 0);
+        m_uiPhase = 1;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiPhaseTimer)
+       {
+            if (m_uiPhaseTimer < uiDiff)
+                m_uiPhaseTimer = 0;
+            else
+            {
+                m_uiPhaseTimer -= uiDiff;
+                return;
+            }
+        }
+
+        switch (m_uiPhase)
+        {
+            case 0:     // Phase 0 : Nagmara patrols in the bar to serve patrons or is following Rocknot passively
+                break;
+            case 1:     // Phase 1 : Nagmara is moving towards Rocknot
+                if (m_creature->IsWithinDist2d(pRocknot->GetPositionX(), pRocknot->GetPositionY(), 5.0f))
+                {
+                    m_creature->GetMotionMaster()->MoveIdle();
+                    m_creature->SetFacingToObject(pRocknot);
+                    pRocknot->SetFacingToObject(m_creature);
+                    DoScriptText(SAY_NAGMARA_1, m_creature);
+                    m_uiPhase++;
+                    m_uiPhaseTimer = 5000;
+                }
+                else
+                    m_creature->GetMotionMaster()->MoveFollow(pRocknot, 2.0f, 0);
+                break;
+            case 2:     // Phase 2 : Nagmara is "seducing" Rocknot
+                DoScriptText(SAY_NAGMARA_2, m_creature);
+                m_uiPhaseTimer = 4000;
+                m_uiPhase++;
+                break;
+            case 3:     // Phase 3: Nagmara give potion to Rocknot and Rocknot escort AI will handle the next part of the event
+                if (DoCastSpellIfCan(m_creature, SPELL_POTION_LOVE) == CAST_OK)
+                {
+                    m_uiPhase = 0;
+                    m_pInstance->SetData(TYPE_NAGMARA, SPECIAL);
+                }
+                break;
+            case 4:     // Phase 4 : make the lovers face each other
+                m_creature->SetFacingToObject(pRocknot);
+                pRocknot->SetFacingToObject(m_creature);
+                m_uiPhaseTimer = 4000;
+                m_uiPhase++;
+                m_pInstance->SetData(TYPE_NAGMARA, DONE);
+                break;
+            case 5:     // Phase 5 : Nagmara and Rocknot are under the stair kissing (this phase repeats endlessly)
+                DoScriptText(TEXTEMOTE_NAGMARA, m_creature);
+                (DoCastSpellIfCan(m_creature, SPELL_NAGMARA_ROCKNOT) == CAST_OK);
+                DoScriptText(TEXTEMOTE_ROCKNOT, pRocknot);
+                (DoCastSpellIfCan(pRocknot, SPELL_NAGMARA_ROCKNOT) == CAST_OK);
+                m_uiPhaseTimer = 12000;
+                break;
+            default:
+                break;
+        }
+
+        return;
+    }
+};
+
+bool GossipHello_npc_mistress_nagmara(Player* pPlayer, Creature* pCreature)
+{
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+
+    if (pPlayer->GetQuestStatus(QUEST_POTION_LOVE) == QUEST_STATUS_COMPLETE)
+    {
+        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_NAGMARA, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        pPlayer->SEND_GOSSIP_MENU(GOSSIP_ID_NAGMARA_2, pCreature->GetObjectGuid());
+    }
+    else
+        pPlayer->SEND_GOSSIP_MENU(GOSSIP_ID_NAGMARA, pCreature->GetObjectGuid());
+
+    return true;
+}
+
+bool GossipSelect_npc_mistress_nagmara(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+{
+    switch (uiAction)
+    {
+        case GOSSIP_ACTION_INFO_DEF+1:
+            pPlayer->CLOSE_GOSSIP_MENU();
+            if (npc_mistress_nagmaraAI* pNagmaraAI = dynamic_cast<npc_mistress_nagmaraAI*>(pCreature->AI()))
+                pNagmaraAI->DoPotionOfLoveIfCan();
+            break;
+    }
+    return true;
+}
+
+bool QuestRewarded_npc_mistress_nagmara(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+    if (!pInstance)
+        return true;
+
+    if (pQuest->GetQuestId() == QUEST_POTION_LOVE)
+    {
+        if (npc_mistress_nagmaraAI* pNagmaraAI = dynamic_cast<npc_mistress_nagmaraAI*>(pCreature->AI()))
+            pNagmaraAI->DoPotionOfLoveIfCan();
+    }
+
+    return true;
+}
+
+CreatureAI* GetAI_npc_mistress_nagmara(Creature* pCreature)
+{
+    return new npc_mistress_nagmaraAI(pCreature);
+}
+
+/*######
 ## npc_rocknot
 ######*/
 
@@ -784,6 +959,8 @@ enum
     QUEST_ALE          = 4295
 };
 
+static const float aPosNagmaraRocknot[3] = {878.1779f, -222.0662f, -49.96714f};
+
 struct npc_rocknotAI : public npc_escortAI
 {
     npc_rocknotAI(Creature* pCreature) : npc_escortAI(pCreature)
@@ -798,18 +975,23 @@ struct npc_rocknotAI : public npc_escortAI
     uint32 m_uiBreakDoorTimer;
     uint32 m_uiEmoteTimer;
     uint32 m_uiBarReactTimer;
-    bool   m_bIsDoorOpen;
+    bool m_bIsDoorOpen;
+    Creature* pNagmara;
+    float m_fInitialOrientation;
 
     void Reset() override
     {
+        pNagmara                = m_pInstance->GetSingleCreatureFromStorage(NPC_MISTRESS_NAGMARA);
+
         if (HasEscortState(STATE_ESCORT_ESCORTING))
             return;
 
-        m_uiBreakKegTimer  = 0;
-        m_uiBreakDoorTimer = 0;
-        m_uiEmoteTimer     = 0;
-        m_uiBarReactTimer  = 0;
-        m_bIsDoorOpen      = false;
+        m_fInitialOrientation   = 3.21141f;
+        m_uiBreakKegTimer       = 0;
+        m_uiBreakDoorTimer      = 0;
+        m_uiEmoteTimer          = 0;
+        m_uiBarReactTimer       = 0;
+        m_bIsDoorOpen           = false;
     }
 
     void DoGo(uint32 id, uint32 state)
@@ -825,21 +1007,66 @@ struct npc_rocknotAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 1:
-                DoScriptText(SAY_BARREL_1, m_creature);
+            case 0:     // if Nagmara and Potion of Love event is in progress, switch to second part of the escort
+                SetEscortPaused(true);
+                if (m_pInstance->GetData(TYPE_NAGMARA) == IN_PROGRESS)
+                    SetCurrentWaypoint(9);
+
+                SetEscortPaused(false);
                 break;
             case 2:
-                DoScriptText(SAY_BARREL_2, m_creature);
+                DoScriptText(SAY_BARREL_1, m_creature);
                 break;
             case 3:
                 DoScriptText(SAY_BARREL_2, m_creature);
                 break;
             case 4:
-                DoScriptText(SAY_BARREL_1, m_creature);
+                DoScriptText(SAY_BARREL_2, m_creature);
                 break;
             case 5:
+                DoScriptText(SAY_BARREL_1, m_creature);
+                break;
+            case 6:
                 DoCastSpellIfCan(m_creature, SPELL_DRUNKEN_RAGE, false);
                 m_uiBreakKegTimer = 2000;
+                break;
+            case 8:     // Back home stop here
+                SetEscortPaused(true);
+                m_creature->SetFacingTo(m_fInitialOrientation);
+                break;
+            case 9:     // This step is the start of the "alternate" waypoint path used with Nagmara
+                // Make Nagmara follow Rocknot
+                if (!pNagmara)
+                {
+                    SetEscortPaused(true);
+                    SetCurrentWaypoint(8);
+                }
+                else
+                    pNagmara->GetMotionMaster()->MoveFollow(m_creature, 2.0f, 0);
+                break;
+            case 16:
+                // Open the bar back door if relevant
+                m_pInstance->GetBarDoorIsOpen(m_bIsDoorOpen);
+                if (!m_bIsDoorOpen)
+                {
+                    m_pInstance->DoUseDoorOrButton(GO_BAR_DOOR);
+                    m_pInstance->SetBarDoorIsOpen();
+                }
+                if (pNagmara)
+                    pNagmara->GetMotionMaster()->MoveFollow(m_creature, 2.0f, 0);
+                break;
+            case 33: // Reach under the stair, make Nagmara move to her position and give the handle back to Nagmara AI script
+                if (!pNagmara)
+                    break;
+
+                pNagmara->GetMotionMaster()->MoveIdle();
+                pNagmara->GetMotionMaster()->MovePoint(0, aPosNagmaraRocknot[0], aPosNagmaraRocknot[1], aPosNagmaraRocknot[2]);
+                if (npc_mistress_nagmaraAI* pNagmaraAI = dynamic_cast<npc_mistress_nagmaraAI*>(pNagmara->AI()))
+                {
+                    pNagmaraAI->m_uiPhase = 4;
+                    pNagmaraAI->m_uiPhaseTimer = 5000;
+                }
+                SetEscortPaused(true);
                 break;
         }
     }
@@ -848,6 +1075,15 @@ struct npc_rocknotAI : public npc_escortAI
     {
         if (!m_pInstance)
             return;
+
+        // When Nagmara is in Potion of Love event and reach Rocknot, she set TYPE_NAGMARA to SPECIAL
+        // in order to make Rocknot start the second part of his escort quest
+        if (m_pInstance->GetData(TYPE_NAGMARA) == SPECIAL)
+        {
+            m_pInstance->SetData(TYPE_NAGMARA, IN_PROGRESS);
+            Start(false, nullptr, nullptr, true);
+            return;
+        }
 
         if (m_uiBreakKegTimer)
         {
@@ -889,7 +1125,7 @@ struct npc_rocknotAI : public npc_escortAI
                 if (Creature* pPhalanx = m_pInstance->GetSingleCreatureFromStorage(NPC_PHALANX))
                 {
                     if (npc_phalanxAI* pEscortAI = dynamic_cast<npc_phalanxAI*>(pPhalanx->AI()))
-                        pEscortAI->Start(false, NULL, NULL, true);
+                        pEscortAI->Start(false, nullptr, nullptr, true);
                 }
                 m_pInstance->SetData(TYPE_ROCKNOT, DONE);
 
@@ -1482,9 +1718,9 @@ enum
     SPELL_PICKPOCKET                = 921,
 };
 
-static const uint32 aRandomSays[] = { SAY_OOC_1, SAY_OOC_2, SAY_OOC_3, SAY_OOC_4 };
+static const int aRandomSays[] = { SAY_OOC_1, SAY_OOC_2, SAY_OOC_3, SAY_OOC_4 };
 
-static const uint32 aRandomYells[] = { YELL_STOLEN_1, YELL_STOLEN_2, YELL_STOLEN_3 };
+static const int aRandomYells[] = { YELL_STOLEN_1, YELL_STOLEN_2, YELL_STOLEN_3 };
 
 struct boss_plugger_spazzringAI : public ScriptedAI
 {
@@ -1516,7 +1752,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
         m_uiPickpocketTimer      = 0;
     }
 
-    void Aggro() override
+    void Aggro()
     {
         m_uiBanishTimer          = urand(8, 12) * 1000;
         m_uiImmolateTimer        = urand(18, 20) * 1000;
@@ -1530,7 +1766,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
         if (Creature* pPhalanx = m_pInstance->GetSingleCreatureFromStorage(NPC_PHALANX))
         {
             if (npc_phalanxAI* pEscortAI = dynamic_cast<npc_phalanxAI*>(pPhalanx->AI()))
-                pEscortAI->Start(false, NULL, NULL, true);
+                pEscortAI->Start(false, nullptr, nullptr, true);
         }
         m_pInstance->HandleBarPatrons(PATRON_HOSTILE);
         m_pInstance->SetData(TYPE_PLUGGER, IN_PROGRESS); // The event is set IN_PROGRESS even if Plugger is dead because his death triggers more actions that are part of the event
@@ -1711,8 +1947,8 @@ struct npc_ironhand_guardianAI : public ScriptedAI
             return;
 
         if (m_pInstance->GetData(TYPE_IRON_HALL) == NOT_STARTED)
-		{
-		    m_uiPhase = 0;
+        {
+            m_uiPhase = 0;
             return;
         }
 
@@ -1789,6 +2025,14 @@ void AddSC_blackrock_depths()
     pNewScript = new Script;
     pNewScript->Name = "npc_phalanx";
     pNewScript->GetAI = &GetAI_npc_phalanx;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_mistress_nagmara";
+    pNewScript->GetAI = &GetAI_npc_mistress_nagmara;
+    pNewScript->pGossipHello = &GossipHello_npc_mistress_nagmara;
+    pNewScript->pGossipSelect = &GossipSelect_npc_mistress_nagmara;
+    pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_mistress_nagmara;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
