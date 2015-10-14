@@ -31,6 +31,7 @@ instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstan
     m_uiDwarfRound(0),
     m_uiDwarfFightTimer(0),
     m_uiPatronEmoteTimer(2000),
+    m_uiPatrolTimer(0),
 
     m_fArenaCenterX(0.0f),
     m_fArenaCenterY(0.0f),
@@ -70,9 +71,9 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
         case NPC_TOBIAS:
         case NPC_DUGHAL:
         case NPC_LOREGRAIN:
+        case NPC_RIBBLY_SCREWSPIGGOT:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
-
         case NPC_WARBRINGER_CONST:
             // Golems not in the Relict Vault?
             if (std::abs(pCreature->GetPositionZ() - aVaultPositions[2]) > 1.0f || !pCreature->IsWithinDist2d(aVaultPositions[0], aVaultPositions[1], 20.0f))
@@ -103,6 +104,14 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
         case NPC_GUZZLING_PATRON:
         case NPC_HAMMERED_PATRON:
             m_sBarPatronNpcGuids.insert(pCreature->GetObjectGuid());
+            if (m_auiEncounter[11] == DONE)
+                pCreature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
+                pCreature->SetStandState(UNIT_STAND_STATE_STAND);
+            break;
+        case NPC_PRIVATE_ROCKNOT:
+        case NPC_MISTRESS_NAGMARA:
+            if (m_auiEncounter[11] == DONE)
+                pCreature->ForcedDespawn();
             break;
     }
 }
@@ -143,14 +152,20 @@ void instance_blackrock_depths::OnObjectCreate(GameObject* pGo)
         case GO_DWARFRUNE_G01:
             break;
         case GO_BAR_DOOR:
-			if (GetData(TYPE_ROCKNOT) == DONE)
-			{
-				// Rocknot event done: set the Grim Guzzler door animation to "broken"
-				// tell the instance script it is open to prevent some of the other events
-				pGo->SetGoState(GOState(2));
-				SetBarDoorIsOpen();
-			}
-			break;
+            if (GetData(TYPE_ROCKNOT) == DONE)
+            {
+                // Rocknot event done: set the Grim Guzzler door animation to "broken"
+                // tell the instance script it is open to prevent some of the other events
+                pGo->SetGoState(GOState(2));
+                SetBarDoorIsOpen();
+            } else if (m_auiEncounter[10] == DONE || m_auiEncounter[11] == DONE)
+            {
+                // bar or Plugger event done: open the Grim Guzzler door
+                // tell the instance script it is open to prevent some of the other events
+                DoUseDoorOrButton(GO_BAR_DOOR);
+                SetBarDoorIsOpen();
+            }
+            break;
 
         default:
             return;
@@ -328,6 +343,14 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
         case TYPE_BRIDGE:
             m_auiEncounter[9] = uiData;
             return;
+        case TYPE_BAR:
+            if (uiData == IN_PROGRESS)
+                HandleBarPatrol(0);
+            m_auiEncounter[10] = uiData;
+            break;
+        case TYPE_PLUGGER:
+            m_auiEncounter[11] = uiData;
+            return;
     }
 
     if (uiData == DONE)
@@ -338,7 +361,7 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
         saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
                    << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
-                   << m_auiEncounter[9];
+                   << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11];
 
         m_strInstData = saveStream.str();
 
@@ -374,6 +397,10 @@ uint32 instance_blackrock_depths::GetData(uint32 uiType) const
             return m_auiEncounter[8];
         case TYPE_BRIDGE:
             return m_auiEncounter[9];
+        case TYPE_BAR:
+            return m_auiEncounter[10];
+        case TYPE_PLUGGER:
+            return m_auiEncounter[11];
         default:
             return 0;
     }
@@ -392,7 +419,7 @@ void instance_blackrock_depths::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
-               >> m_auiEncounter[8] >> m_auiEncounter[9];
+               >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
         if (m_auiEncounter[i] == IN_PROGRESS)
@@ -484,6 +511,14 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
         case NPC_HURLEY_BLACKBREATH:
             SetData(TYPE_HURLEY, DONE);
             break;
+        case NPC_RIBBLY_SCREWSPIGGOT:
+            // Do nothing if the patrol was already spawned or is about to:
+            // Plugger has made the bar hostile
+            if (GetData(TYPE_BAR) == IN_PROGRESS || GetData(TYPE_PLUGGER) == IN_PROGRESS || GetData(TYPE_BAR) == DONE || GetData(TYPE_PLUGGER) == DONE)
+                return;
+            else
+                SetData(TYPE_BAR, IN_PROGRESS);
+            break;
     }
 }
 
@@ -569,12 +604,100 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
                 }
             }
             return;
-        // case when Plugger is aggroed/pickpocketed
+        // case when Plugger is killed/pickpocketed or mad from stealing
         case PATRON_HOSTILE:
-            // Placeholder
+            for (GuidSet::const_iterator itr = m_sBarPatronNpcGuids.begin(); itr != m_sBarPatronNpcGuids.end(); ++itr)
+            {
+                if (Creature* pPatron = instance->GetCreature(*itr))
+                {
+                    pPatron->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
+                    pPatron->SetStandState(UNIT_STAND_STATE_STAND);
+                    // Patron should also start random movement around their current position (= home)
+                }
+            }
+            // Mistress Nagmara and Private Rocknot despawn if the bar turns hostile
+            if (Creature* pRocknot = GetSingleCreatureFromStorage(NPC_PRIVATE_ROCKNOT))
+            {
+                DoScriptText(SAY_ROCKNOT_DESPAWN, pRocknot);
+                pRocknot->ForcedDespawn();
+            }
+            if (Creature* pNagmara = GetSingleCreatureFromStorage(NPC_MISTRESS_NAGMARA))
+            {
+                pNagmara->AI()->DoCastSpellIfCan(pNagmara, SPELL_NAGMARA_VANISH);
+                pNagmara->ForcedDespawn();
+            }
             return;
         default:
             return;
+    }
+}
+
+void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
+{
+    if (GetData(TYPE_BAR) == DONE)
+        return;
+
+    switch (uiStep)
+    {
+        case 0:
+            if (Creature* pPlugger = GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
+            {
+                // if relevant, open the bar door and tell the instance it is open
+                if (!m_bIsBarDoorOpen)
+                {
+                    DoUseDoorOrButton(GO_BAR_DOOR);
+                    SetBarDoorIsOpen();
+                }
+                
+                // One Fireguard Destroyer and two Anvilrage Officers are spawned
+                for (uint8 i = 0; i < 3; ++i)
+                {
+                    float fX, fY, fZ;
+                    // spawn them behind the bar door
+                    pPlugger->GetRandomPoint(aBarPatrolPositions[0][0], aBarPatrolPositions[0][1], aBarPatrolPositions[0][2], 2.0f, fX, fY, fZ);
+                    if (Creature* pSummoned = pPlugger->SummonCreature(aBarPatrolId[i], fX, fY, fZ, aBarPatrolPositions[0][3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                    {
+                        m_sBarPatrolGuids.insert(pSummoned->GetObjectGuid());
+                        // move them to the Grim Guzzler
+                        pPlugger->GetRandomPoint(aBarPatrolPositions[1][0], aBarPatrolPositions[1][1], aBarPatrolPositions[1][2], 2.0f, fX, fY, fZ);
+                        pSummoned->GetMotionMaster()->MoveIdle();
+                        pSummoned->GetMotionMaster()->MovePoint(0,fX, fY, fZ);
+                    }
+                }
+                // start timer to handle the yells
+                m_uiPatrolTimer = 4000;
+                break;
+            }
+        case 1:
+            for (GuidSet::const_iterator itr = m_sBarPatrolGuids.begin(); itr != m_sBarPatrolGuids.end(); ++itr)
+            {
+                if (Creature* pTmp = instance->GetCreature(*itr))
+                {
+                    if (pTmp->GetEntry() == NPC_FIREGUARD_DESTROYER)
+                    {
+                        DoScriptText(YELL_PATROL_1, pTmp);
+                        SetData(TYPE_BAR, SPECIAL); // temporary set the status to special before the next yell: event will then be complete
+                        m_uiPatrolTimer = 2000;
+                        break;
+                    }
+                }
+            }
+            break;
+        case 2:
+            for (GuidSet::const_iterator itr = m_sBarPatrolGuids.begin(); itr != m_sBarPatrolGuids.end(); ++itr)
+            {
+                if (Creature* pTmp = instance->GetCreature(*itr))
+                {
+                    if (pTmp->GetEntry() == NPC_FIREGUARD_DESTROYER)
+                    {
+                        DoScriptText(YELL_PATROL_2, pTmp);
+                        SetData(TYPE_BAR, DONE);
+                        m_uiPatrolTimer = 0;
+                        break;
+                    }
+                }
+            }
+            break;
     }
 }
 
@@ -606,6 +729,26 @@ void instance_blackrock_depths::Update(uint32 uiDiff)
         }
         else
             m_uiPatronEmoteTimer -= uiDiff;
+    }
+
+    if (m_uiPatrolTimer)
+    {
+        if (m_uiPatrolTimer <= uiDiff)
+        {
+            switch(GetData(TYPE_BAR))
+            {
+                case IN_PROGRESS:
+                    HandleBarPatrol(1);
+                    break;
+                case SPECIAL:
+                    HandleBarPatrol(2);
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+            m_uiPatrolTimer -= uiDiff;
     }
 }
 

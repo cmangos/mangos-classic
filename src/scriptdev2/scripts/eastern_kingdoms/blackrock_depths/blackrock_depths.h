@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER           = 10,
+    MAX_ENCOUNTER           = 12,
     MAX_RELIC_DOORS         = 12,
     MAX_DWARFS              = 7,
     MAX_DWARF_RUNES         = 7,
@@ -23,6 +23,8 @@ enum
     TYPE_FLAMELASH          = 8,
     TYPE_HURLEY             = 9,
     TYPE_BRIDGE             = 10,
+    TYPE_BAR                = 11,
+    TYPE_PLUGGER            = 12,
 
     NPC_EMPEROR             = 9019,
     NPC_PRINCESS            = 8929,
@@ -38,6 +40,7 @@ enum
     NPC_WATCHER_DOOMGRIP    = 9476,
     NPC_WARBRINGER_CONST    = 8905,                         // Four of them in Relict Vault are related to Doomgrip summon event
     NPC_LOREGRAIN           = 9024,
+    NPC_FIREGUARD_DESTROYER = 8911,
 
     // Jail Break event related
     NPC_OGRABISI            = 9677,
@@ -67,6 +70,9 @@ enum
     NPC_HURLEY_BLACKBREATH  = 9537,
     NPC_BLACKBREATH_CRONY   = 9541,
     NPC_PLUGGER_SPAZZRING   = 9499,
+    NPC_PRIVATE_ROCKNOT     = 9503,
+    NPC_MISTRESS_NAGMARA    = 9500,
+    NPC_RIBBLY_SCREWSPIGGOT = 9543,
 
     GO_ARENA_1              = 161525,
     GO_ARENA_2              = 161522,
@@ -112,6 +118,7 @@ enum
 
     FACTION_DWARF_HOSTILE   = 754,                          // Hostile faction for the Tomb of the Seven dwarfs
     FACTION_ARENA_NEUTRAL   = 15,                           // Neutral faction for NPC in top of Arena after event complete
+    FACTION_DARK_IRON       = 54,                           // Hostile faction for the Grim Guzzler
 
     // enum used to handle the various Grim Guzzler  bar patron's reaction
     // depending on the actions and events triggered by players
@@ -120,7 +127,11 @@ enum
     PATRON_HOSTILE          = 2,
     SAY_PISSED_PATRON_1     = -1230037,
     SAY_PISSED_PATRON_2     = -1230038,
-    SAY_PISSED_PATRON_3     = -1230039
+    SAY_PISSED_PATRON_3     = -1230039,
+    SAY_ROCKNOT_DESPAWN     = -1230047,
+    YELL_PATROL_1           = -1230048,
+    YELL_PATROL_2           = -1230049,
+    SPELL_NAGMARA_VANISH    = 15341
 };
 
 // Random emotes for Grim Guzzler patrons
@@ -184,6 +195,14 @@ static const float aVaultPositions[4] = {821.905f, -338.382f, -50.134f, 3.78736f
 // Used to summon Hurley Blackbreath
 static const float aHurleyPositions[4] = {856.0867f, -149.7469f, -49.6719f, 0.05949629f};
 
+// Used to summon the patrol in Grim Guzzler
+static const float aBarPatrolPositions[2][4] = {
+    {872.7059f, -232.5491f, -43.7525f, 2.069044f},
+    {865.5645f, -219.7471f, -43.7033f, 2.033881f}
+};
+
+static const uint32 aBarPatrolId[3] = {NPC_FIREGUARD_DESTROYER, NPC_ANVILRAGE_OFFICER, NPC_ANVILRAGE_OFFICER};
+
 // Tomb of the Seven dwarfs
 static const uint32 aTombDwarfes[MAX_DWARFS] = {NPC_ANGERREL, NPC_SEETHREL, NPC_DOPEREL, NPC_GLOOMREL, NPC_VILEREL, NPC_HATEREL, NPC_DOOMREL};
 
@@ -216,7 +235,7 @@ class instance_blackrock_depths : public ScriptedInstance
 
         // Bar events
         void SetBarDoorIsOpen() { m_bIsBarDoorOpen = true; }
-        bool GetBarDoorIsOpen() { return m_bIsBarDoorOpen; }
+        void GetBarDoorIsOpen(bool& bIsOpen) { bIsOpen = m_bIsBarDoorOpen; }
 
     private:
         void DoCallNextDwarf();
@@ -231,6 +250,8 @@ class instance_blackrock_depths : public ScriptedInstance
         uint32 m_uiPatronEmoteTimer;
         void HandleBarPatrons(uint8 uiEventType);
         uint8 m_uiBrokenKegs;
+        void HandleBarPatrol(uint8 uiStep);
+        uint32 m_uiPatrolTimer;
 
         uint8 m_uiCofferDoorsOpened;
 
@@ -242,6 +263,7 @@ class instance_blackrock_depths : public ScriptedInstance
         GuidSet m_sVaultNpcGuids;
         GuidSet m_sArenaCrowdNpcGuids;
         GuidSet m_sBarPatronNpcGuids;
+        GuidSet m_sBarPatrolGuids;
 };
 
 #endif

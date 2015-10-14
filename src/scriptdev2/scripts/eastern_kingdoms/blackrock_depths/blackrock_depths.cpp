@@ -681,7 +681,7 @@ struct npc_phalanxAI : public npc_escortAI
         switch (uiPointId)
         {
             case 0:
-                m_creature->SetFactionTemporary(14, TEMPFACTION_NONE);
+                m_creature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_NONE);
                 DoScriptText(YELL_PHALANX_AGGRO, m_creature);
                 SetRun(true);
                 break;
@@ -760,16 +760,17 @@ struct npc_rocknotAI : public npc_escortAI
 {
     npc_rocknotAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_blackrock_depths*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_blackrock_depths* m_pInstance;
 
     uint32 m_uiBreakKegTimer;
     uint32 m_uiBreakDoorTimer;
     uint32 m_uiEmoteTimer;
     uint32 m_uiBarReactTimer;
+    bool   m_bIsDoorOpen;
 
     void Reset() override
     {
@@ -780,6 +781,7 @@ struct npc_rocknotAI : public npc_escortAI
         m_uiBreakDoorTimer = 0;
         m_uiEmoteTimer     = 0;
         m_uiBarReactTimer  = 0;
+        m_bIsDoorOpen      = false;
     }
 
     void DoGo(uint32 id, uint32 state)
@@ -836,8 +838,11 @@ struct npc_rocknotAI : public npc_escortAI
         {
             if (m_uiBreakDoorTimer <= uiDiff)
             {
-                // Open the bar back door
-                DoGo(GO_BAR_DOOR, 2);
+                // Open the bar back door if relevant
+                m_pInstance->GetBarDoorIsOpen(m_bIsDoorOpen);
+                if (!m_bIsDoorOpen)
+                    DoGo(GO_BAR_DOOR, 2);
+
                 DoScriptText(SAY_BARREL_3, m_creature);
                 DoGo(GO_BAR_KEG_TRAP, 0);                   // doesn't work very well, leaving code here for future
                 // spell by trap has effect61

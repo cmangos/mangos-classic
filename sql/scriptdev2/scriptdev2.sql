@@ -1867,7 +1867,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1230043,'You can\'t hide from us. Prepare to burn!',0,1,0,0,'anvilrage guardsman SAY_GUARD_AGGRO'),
 (-1230044,'That one\'s empty!!',0,0,0,60,'rocknot SAY_BARREL_1'),
 (-1230045,'Ah, empty again!',0,0,0,35,'rocknot SAY_BARREL_2'),
-(-1230046,'ALE!',0,0,0,60,'rocknot SAY_BARREL_3');
+(-1230046,'ALE!',0,0,0,60,'rocknot SAY_BARREL_3'),
+(-1230047,'I\m out of here!',0,0,0,60,'rocknot SAY_ROCKNOT_DESPAWN'),
+(-1230048,'HALT! There were...reports...of a...disturbance.',0,1,0,0,'Fireguard Destroyer YELL_PATROL_1'),
+(-1230049,'We...are...investigating.',0,1,0,0,'Fireguard Destroyer YELL_PATROL_2');
 
 -- -1 249 000 ONYXIA'S LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
