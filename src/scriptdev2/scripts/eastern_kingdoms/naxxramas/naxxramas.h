@@ -222,7 +222,7 @@ class instance_naxxramas : public ScriptedInstance
         GuidList m_lThadTeslaCoilList;
         GuidList m_lGothTriggerList;
 
-        UNORDERED_MAP<ObjectGuid, GothTrigger> m_mGothTriggerMap;
+        std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
 
         float m_fChamberCenterX;

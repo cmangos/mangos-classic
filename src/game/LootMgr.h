@@ -109,7 +109,7 @@ struct PlayerRollVote
 class GroupLootRoll
 {
 public:
-    typedef UNORDERED_MAP<ObjectGuid, PlayerRollVote> RollVoteMap;
+    typedef std::unordered_map<ObjectGuid, PlayerRollVote> RollVoteMap;
 
     GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(nullptr), m_loot(nullptr) {}
     ~GroupLootRoll();
@@ -133,7 +133,7 @@ private:
     RollVoteMask          m_voteMask;
     time_t                m_endTime;
 };
-typedef UNORDERED_MAP<uint32, GroupLootRoll> GroupLootRollMap;
+typedef std::unordered_map<uint32, GroupLootRoll> GroupLootRollMap;
 
 struct LootStoreItem
 {
@@ -190,7 +190,7 @@ struct LootItem
 
 typedef std::vector<LootItem*> LootItemList;
 typedef std::vector<LootStoreItem> LootStoreItemList;
-typedef UNORDERED_MAP<uint32, LootTemplate*> LootTemplateMap;
+typedef std::unordered_map<uint32, LootTemplate*> LootTemplateMap;
 typedef std::set<uint32> LootIdSet;
 
 class LootStore

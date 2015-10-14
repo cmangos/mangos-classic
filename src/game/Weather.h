@@ -116,7 +116,7 @@ class WeatherSystem
     private:
         Map const* const m_map;
 
-        typedef UNORDERED_MAP<uint32 /*zoneId*/, Weather*> WeatherMap;
+        typedef std::unordered_map<uint32 /*zoneId*/, Weather*> WeatherMap;
         WeatherMap m_weathers;
 };
 
@@ -155,7 +155,7 @@ class WeatherMgr
         }
 
     private:
-        typedef UNORDERED_MAP<uint32 /*zoneId*/, WeatherZoneChances> WeatherZoneMap;
+        typedef std::unordered_map<uint32 /*zoneId*/, WeatherZoneChances> WeatherZoneMap;
         WeatherZoneMap      mWeatherZoneMap;
 };
 

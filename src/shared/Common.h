@@ -62,7 +62,6 @@
 #endif                                                      // __SHOW_STUPID_WARNINGS__
 #endif                                                      // __GNUC__
 
-#include "Utilities/UnorderedMapSet.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -83,6 +82,8 @@
 #include <queue>
 #include <sstream>
 #include <algorithm>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "Errors.h"
 #include "LockedQueue.h"

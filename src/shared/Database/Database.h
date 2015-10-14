@@ -19,8 +19,8 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
+#include "Common.h"
 #include "Threading.h"
-#include "Utilities/UnorderedMapSet.h"
 #include "Database/SqlDelayThread.h"
 #include "Policies/ThreadingModel.h"
 #include <ace/TSS_T.h>
@@ -297,7 +297,7 @@ class MANGOS_DLL_SPEC Database
 
         mutable LOCK_TYPE m_stmtGuard;
 
-        typedef UNORDERED_MAP<std::string, int> PreparedStmtRegistry;
+        typedef std::unordered_map<std::string, int> PreparedStmtRegistry;
         PreparedStmtRegistry m_stmtRegistry;                ///<
 
         int m_iStmtIndex;

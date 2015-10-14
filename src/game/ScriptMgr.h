@@ -583,8 +583,8 @@ class ScriptMgr
         }
 
         typedef std::vector<std::string> ScriptNameMap;
-        typedef UNORDERED_MAP<uint32, uint32> AreaTriggerScriptMap;
-        typedef UNORDERED_MAP<uint32, uint32> EventIdScriptMap;
+        typedef std::unordered_map<uint32, uint32> AreaTriggerScriptMap;
+        typedef std::unordered_map<uint32, uint32> EventIdScriptMap;
 
         AreaTriggerScriptMap    m_AreaTriggerScripts;
         EventIdScriptMap        m_EventIdScripts;

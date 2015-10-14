@@ -55,7 +55,6 @@ set(SRC_GRP_UTIL
     Utilities/EventProcessor.h
     Utilities/LinkedList.h
     Utilities/TypeList.h
-    Utilities/UnorderedMapSet.h
 )
 
 set(SRC_GRP_LINKED_REFERENCE

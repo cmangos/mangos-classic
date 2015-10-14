@@ -22,7 +22,6 @@
 #include "Common.h"
 #include <vector>
 #include <string>
-#include "Utilities/UnorderedMapSet.h"
 #include "Policies/Singleton.h"
 
 enum WaypointPathOrigin
@@ -182,7 +181,7 @@ class WaypointManager
 
         void _clearPath(WaypointPath& path);
 
-        typedef UNORDERED_MAP<uint32 /*guidOrEntry*/, WaypointPath> WaypointPathMap;
+        typedef std::unordered_map<uint32 /*guidOrEntry*/, WaypointPath> WaypointPathMap;
         WaypointPathMap m_pathMap;
         WaypointPathMap m_pathTemplateMap;
         WaypointPathMap m_externalPathTemplateMap;

@@ -19,8 +19,7 @@
 #ifndef MANGOS_OBJECTREGISTRY_H
 #define MANGOS_OBJECTREGISTRY_H
 
-#include "Platform/Define.h"
-#include "Utilities/UnorderedMapSet.h"
+#include "Common.h"
 #include "Policies/Singleton.h"
 
 #include <string>

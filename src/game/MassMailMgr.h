@@ -54,7 +54,7 @@ class MassMailMgr
         void GetStatistic(uint32& tasks, uint32& mails, uint32& needTime) const;
 
     public:                                                 // modifiers
-        typedef UNORDERED_SET<uint32> ReceiversList;
+        typedef std::unordered_set<uint32> ReceiversList;
 
         /**
          * And new mass mail task for raceMask filter applied to characters list.

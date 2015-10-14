@@ -22,7 +22,6 @@
 #include "Common.h"
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
-#include "Utilities/UnorderedMapSet.h"
 #include "Policies/ThreadingModel.h"
 
 #include "UpdateData.h"
@@ -45,7 +44,7 @@ class HashMapHolder
 {
     public:
 
-        typedef UNORDERED_MAP<ObjectGuid, T*>   MapType;
+        typedef std::unordered_map<ObjectGuid, T*>   MapType;
         typedef std::mutex LockType;
         typedef std::lock_guard<std::mutex> ReadGuard;
         typedef std::lock_guard<std::mutex> WriteGuard;
@@ -92,7 +91,7 @@ class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLev
         ObjectAccessor& operator=(const ObjectAccessor&);
 
     public:
-        typedef UNORDERED_MAP<ObjectGuid, Corpse*> Player2CorpsesMapType;
+        typedef std::unordered_map<ObjectGuid, Corpse*> Player2CorpsesMapType;
 
         // Search player at any map in world and other objects at same map with `obj`
         // Note: recommended use Map::GetUnit version if player also expected at same map only
