@@ -1677,6 +1677,70 @@ bool GOUse_go_bar_ale_mug(Player* pPlayer, GameObject* pGo)
     return false;
 }
 
+/*######
+## npc_ironhand_guardian
+######*/
+
+enum
+{
+    SPELL_GOUT_OF_FLAME     = 15529,
+    SPELL_STONED_VISUAL     = 15533,
+};
+
+struct npc_ironhand_guardianAI : public ScriptedAI
+{
+    npc_ironhand_guardianAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    ScriptedInstance* m_pInstance;
+
+    uint32 m_uiGoutOfFlameTimer;
+    uint8 m_uiPhase;
+
+    void Reset() override
+    {
+        m_uiGoutOfFlameTimer    = urand(4, 8) * 1000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_pInstance)
+            return;
+
+        if (m_pInstance->GetData(TYPE_IRON_HALL) == NOT_STARTED)
+		{
+		    m_uiPhase = 0;
+            return;
+        }
+
+        switch (m_uiPhase)
+        {
+        case 0:
+            m_creature->RemoveAurasDueToSpell(SPELL_STONED);
+            if (DoCastSpellIfCan(m_creature, SPELL_STONED_VISUAL) == CAST_OK)
+                m_uiPhase = 1;
+            break;
+        case 1:
+                if (m_uiGoutOfFlameTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_GOUT_OF_FLAME) == CAST_OK)
+                        m_uiGoutOfFlameTimer = urand(13, 18) * 1000;
+                }
+                else
+                    m_uiGoutOfFlameTimer -= uiDiff;
+            break;
+        }
+    }
+};
+
+CreatureAI* GetAI_npc_ironhand_guardian(Creature* pCreature)
+{
+    return new npc_ironhand_guardianAI(pCreature);
+}
+
 void AddSC_blackrock_depths()
 {
     Script* pNewScript;
@@ -1770,5 +1834,10 @@ void AddSC_blackrock_depths()
     pNewScript = new Script;
     pNewScript->Name = "go_bar_ale_mug";
     pNewScript->pGOUse = &GOUse_go_bar_ale_mug;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_ironhand_guardian";
+    pNewScript->GetAI = &GetAI_npc_ironhand_guardian;
     pNewScript->RegisterSelf();
 }

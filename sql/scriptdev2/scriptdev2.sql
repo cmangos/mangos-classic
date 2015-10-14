@@ -185,6 +185,7 @@ UPDATE creature_template SET ScriptName='npc_dughal_stormwing' WHERE entry=9022;
 UPDATE creature_template SET ScriptName='npc_tobias_seecher' WHERE entry=9679;
 UPDATE creature_template SET ScriptName='npc_hurley_blackbreath' WHERE entry=9537;
 UPDATE creature_template SET ScriptName='boss_plugger_spazzring' WHERE entry=9499;
+UPDATE creature_template SET ScriptName='npc_ironhand_guardian' WHERE entry=8982;
 UPDATE gameobject_template SET ScriptName='go_shadowforge_brazier' WHERE entry IN (174744, 174745);
 UPDATE gameobject_template SET ScriptName='go_relic_coffer_door' WHERE entry IN (174554, 174555, 174556, 174557, 174558, 174559, 174560, 174561, 174562, 174563, 174564, 174566);
 UPDATE gameobject_template SET ScriptName='go_bar_beer_keg' WHERE entry=164911;

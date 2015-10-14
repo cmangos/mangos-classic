@@ -434,7 +434,7 @@ void instance_blackrock_depths::Load(const char* chrIn)
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11];
 
     for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-        if (m_auiEncounter[i] == IN_PROGRESS)
+        if (m_auiEncounter[i] == IN_PROGRESS && i != TYPE_IRON_HALL) // specific check for Iron Hall event: once started, it never stops, the Ironhall Guardians switch to flamethrower mode and never stop even after event completion, i.e. the event remains started if Magmus resets
             m_auiEncounter[i] = NOT_STARTED;
 
     OUT_LOAD_INST_DATA_COMPLETE;
