@@ -102,11 +102,11 @@ endif()
 set(EXECUTABLE_LINK_FLAGS "")
 
 if(UNIX)
-  set(EXECUTABLE_LINK_FLAGS "-pthread ${EXECUTABLE_LINK_FLAGS} -rdynamic")
-endif()
-
-if(APPLE)
-  set(EXECUTABLE_LINK_FLAGS "-framework Carbon ${EXECUTABLE_LINK_FLAGS}")
+  if (APPLE)
+    set(EXECUTABLE_LINK_FLAGS "-pthread -framework Carbon")
+  else()
+    set(EXECUTABLE_LINK_FLAGS "-pthread -rdynamic")
+  endif()
 endif()
 
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS

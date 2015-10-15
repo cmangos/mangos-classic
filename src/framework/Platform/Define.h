@@ -57,7 +57,8 @@ typedef ACE_SHLIB_HANDLE MANGOS_LIBRARY_HANDLE;
 #else // PLATFORM != PLATFORM_WINDOWS
 #  define MANGOS_EXPORT export
 #  if defined(__APPLE_CC__) && defined(BIG_ENDIAN)
-#    define MANGOS_IMPORT __attribute__ ((longcall))
+#    define MANGOS_IMPORT
+//#    define MANGOS_IMPORT __attribute__ ((longcall)) Is this still needed for some system? If yes we need to find a defined macro to identify wheter to use longcall or not
 #  elif defined(__x86_64__)
 #    define MANGOS_IMPORT
 #  else
