@@ -504,6 +504,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
 
                     m_originalCaster->CastSpell(channelTarget, 13481, true, nullptr, nullptr, m_originalCasterGUID, m_spellInfo);
+                }
+                case 13489:
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 14744, true);
                     return;
                 }
                 case 13567:                                 // Dummy Trigger

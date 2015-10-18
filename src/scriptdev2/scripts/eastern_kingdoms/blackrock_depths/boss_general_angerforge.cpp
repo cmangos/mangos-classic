@@ -94,9 +94,9 @@ struct boss_general_angerforgeAI : public ScriptedAI
             {
                 DoScriptText(EMOTE_ALARM, m_creature);
 
-                for (int i = 0; i < NPC_NORMAL_AMOUNT; i++)
+                for (uint8 i = 0; i < NPC_NORMAL_AMOUNT; i++)
                     SummonAdd(NPC_ANVILRAGE_RESERVIST);
-                for (int i = 0; i < NPC_ELITE_AMOUNT; i++)
+                for (uint8 i = 0; i < NPC_ELITE_AMOUNT; i++)
                     SummonAdd(NPC_ANVILRAGE_MEDIC);
 
                 m_uiAlarmTimer = 3 * MINUTE * IN_MILLISECONDS;

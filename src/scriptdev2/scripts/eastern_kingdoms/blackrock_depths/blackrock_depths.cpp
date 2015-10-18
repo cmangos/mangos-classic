@@ -193,7 +193,8 @@ static const float aSpawnPositions[3][4] =
 };
 
 static const uint32 aGladiator[MAX_POSSIBLE_THELDREN_ADDS] = {NPC_LEFTY, NPC_ROTFANG, NPC_SNOKH, NPC_MALGEN, NPC_KORV, NPC_REZZNIK, NPC_VAJASHNI, NPC_VOLIDA};
-static const uint32 aRingMob[2][6] = {
+static const uint32 aRingMob[2][6] =
+{
     {NPC_WORM, NPC_STINGER, NPC_SCREECHER, NPC_THUNDERSNOUT, NPC_CREEPER, NPC_BEETLE}, // NPC template entry
     {4, 2, 5, 3, 3, 7}                                                                 // Number of NPCs per wave (two waves)
 };
@@ -412,7 +413,7 @@ struct npc_grimstoneAI : public npc_escortAI
                 {
                     case 0:
                         // Shortly after spawn, start walking
-                        m_creature->CastSpell(m_creature, SPELL_ASHCROMBES_TELEPORT_A, true);
+                        DoCastSpellIfCan(m_creature, SPELL_ASHCROMBES_TELEPORT_A, CAST_TRIGGERED);
                         DoScriptText(SAY_START_2, m_creature);
                         m_pInstance->DoUseDoorOrButton(GO_ARENA_4);
                         // Some of the NPCs in the crowd do cheer emote at event start
@@ -440,14 +441,14 @@ struct npc_grimstoneAI : public npc_escortAI
                         break;
                     case 3:
                         // Open East Gate
-                        m_creature->CastSpell(m_creature, SPELL_ARENA_FLASH_A, true);
-                        m_creature->CastSpell(m_creature, SPELL_ARENA_FLASH_B, true);
+                        DoCastSpellIfCan(m_creature, SPELL_ARENA_FLASH_A, CAST_TRIGGERED);
+                        DoCastSpellIfCan(m_creature, SPELL_ARENA_FLASH_B, CAST_TRIGGERED);
                         m_pInstance->DoUseDoorOrButton(GO_ARENA_1);
                         m_uiEventTimer = 3000;
                         break;
                     case 4:
                         // timer for teleport out spell which has 2000 ms cast time
-                        m_creature->CastSpell(m_creature, SPELL_ASHCROMBES_TELEPORT_B, true);
+                        DoCastSpellIfCan(m_creature, SPELL_ASHCROMBES_TELEPORT_B, CAST_TRIGGERED);
                         m_uiEventTimer = 2500;
                         break;
                     case 5:
@@ -466,21 +467,21 @@ struct npc_grimstoneAI : public npc_escortAI
                         // Summoned Mobs are dead, continue event
                         DoScriptText(SAY_SUMMON_BOSS_2, m_creature);
                         m_creature->SetVisibility(VISIBILITY_ON);
-                        m_creature->CastSpell(m_creature, SPELL_ASHCROMBES_TELEPORT_A, true);
+                        DoCastSpellIfCan(m_creature, SPELL_ASHCROMBES_TELEPORT_A, CAST_TRIGGERED);
                         m_pInstance->DoUseDoorOrButton(GO_ARENA_1);
                         SetEscortPaused(false);
                         m_uiEventTimer = 0;
                         break;
                     case 9:
                         // Open North Gate
-                        m_creature->CastSpell(m_creature, SPELL_ARENA_FLASH_C, true);
-                        m_creature->CastSpell(m_creature, SPELL_ARENA_FLASH_D, true);
+                        DoCastSpellIfCan(m_creature, SPELL_ARENA_FLASH_C, CAST_TRIGGERED);
+                        DoCastSpellIfCan(m_creature, SPELL_ARENA_FLASH_D, CAST_TRIGGERED);
                         m_pInstance->DoUseDoorOrButton(GO_ARENA_2);
                         m_uiEventTimer = 5000;
                         break;
                     case 10:
                         // timer for teleport out spell which has 2000 ms cast time
-                        m_creature->CastSpell(m_creature, SPELL_ASHCROMBES_TELEPORT_B, true);
+                        DoCastSpellIfCan(m_creature, SPELL_ASHCROMBES_TELEPORT_B, CAST_TRIGGERED);
                         m_uiEventTimer = 2500;
                         break;
                     case 11:
@@ -643,7 +644,6 @@ struct npc_phalanxAI : public npc_escortAI
     npc_phalanxAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
         m_pInstance = (instance_blackrock_depths*)pCreature->GetInstanceData();
-
         Reset();
     }
 
@@ -709,8 +709,6 @@ struct npc_phalanxAI : public npc_escortAI
                     m_creature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_NONE);
 
                 m_creature->SetFacingTo(m_fKeepDoorOrientation);
-                break;
-            default:
                 break;
         }
     }
@@ -800,9 +798,10 @@ struct npc_mistress_nagmaraAI : public ScriptedAI
     }
 
     instance_blackrock_depths* m_pInstance;
+    Creature* pRocknot;
+
     uint8 m_uiPhase;
     uint32 m_uiPhaseTimer;
-    Creature* pRocknot;
 
     void Reset() override
     {
@@ -832,7 +831,7 @@ struct npc_mistress_nagmaraAI : public ScriptedAI
     {
         if (m_uiPhaseTimer)
        {
-            if (m_uiPhaseTimer < uiDiff)
+            if (m_uiPhaseTimer <= uiDiff)
                 m_uiPhaseTimer = 0;
             else
             {
@@ -840,6 +839,9 @@ struct npc_mistress_nagmaraAI : public ScriptedAI
                 return;
             }
         }
+
+        if (!pRocknot)
+            return;
 
         switch (m_uiPhase)
         {
@@ -879,16 +881,12 @@ struct npc_mistress_nagmaraAI : public ScriptedAI
                 break;
             case 5:     // Phase 5 : Nagmara and Rocknot are under the stair kissing (this phase repeats endlessly)
                 DoScriptText(TEXTEMOTE_NAGMARA, m_creature);
-                (DoCastSpellIfCan(m_creature, SPELL_NAGMARA_ROCKNOT) == CAST_OK);
                 DoScriptText(TEXTEMOTE_ROCKNOT, pRocknot);
-                (DoCastSpellIfCan(pRocknot, SPELL_NAGMARA_ROCKNOT) == CAST_OK);
+                DoCastSpellIfCan(m_creature, SPELL_NAGMARA_ROCKNOT);
+                pRocknot->CastSpell(pRocknot, SPELL_NAGMARA_ROCKNOT, false);
                 m_uiPhaseTimer = 12000;
                 break;
-            default:
-                break;
         }
-
-        return;
     }
 };
 
@@ -970,13 +968,14 @@ struct npc_rocknotAI : public npc_escortAI
     }
 
     instance_blackrock_depths* m_pInstance;
+    Creature* pNagmara;
 
     uint32 m_uiBreakKegTimer;
     uint32 m_uiBreakDoorTimer;
     uint32 m_uiEmoteTimer;
     uint32 m_uiBarReactTimer;
+
     bool m_bIsDoorOpen;
-    Creature* pNagmara;
     float m_fInitialOrientation;
 
     void Reset() override
@@ -994,10 +993,10 @@ struct npc_rocknotAI : public npc_escortAI
         m_bIsDoorOpen           = false;
     }
 
-    void DoGo(uint32 id, uint32 state)
+    void DoGo(uint32 id, GOState state)
     {
         if (GameObject* pGo = m_pInstance->GetSingleGameObjectFromStorage(id))
-            pGo->SetGoState(GOState(state));
+            pGo->SetGoState(state);
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -1089,7 +1088,7 @@ struct npc_rocknotAI : public npc_escortAI
         {
             if (m_uiBreakKegTimer <= uiDiff)
             {
-                DoGo(GO_BAR_KEG_SHOT, 0);
+                DoGo(GO_BAR_KEG_SHOT, GO_STATE_ACTIVE);
                 m_uiBreakKegTimer = 0;
                 m_uiBreakDoorTimer = 1000;
                 m_uiBarReactTimer  = 5000;
@@ -1105,10 +1104,10 @@ struct npc_rocknotAI : public npc_escortAI
                 // Open the bar back door if relevant
                 m_pInstance->GetBarDoorIsOpen(m_bIsDoorOpen);
                 if (!m_bIsDoorOpen)
-                    DoGo(GO_BAR_DOOR, 2);
+                    DoGo(GO_BAR_DOOR, GO_STATE_ACTIVE_ALTERNATIVE);
 
                 DoScriptText(SAY_BARREL_3, m_creature);
-                DoGo(GO_BAR_KEG_TRAP, 0);                   // doesn't work very well, leaving code here for future
+                DoGo(GO_BAR_KEG_TRAP, GO_STATE_ACTIVE);                   // doesn't work very well, leaving code here for future
                 // spell by trap has effect61
 
                 m_uiBreakDoorTimer = 0;
@@ -1498,7 +1497,6 @@ bool GossipHello_npc_tobias_seecher(Player* pPlayer, Creature* pCreature)
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ID_TOBIAS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
     pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_TOBIAS, pCreature->GetObjectGuid());
-
     return true;
 }
 
@@ -1543,7 +1541,6 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
     npc_hurley_blackbreathAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-
         Reset();
     }
 
@@ -1571,13 +1568,10 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
     // Everybody loves Ribbly. Except his family. They want him dead.
     void AttackStart(Unit* pWho) override
     {
-        if (pWho)
-        {
-            if (pWho->GetEntry() == NPC_RIBBLY_SCREWSPIGOT || pWho->GetEntry() == NPC_RIBBLY_CRONY)
-                return;
-            else
-                ScriptedAI::AttackStart(pWho);
-        }
+        if (pWho && (pWho->GetEntry() == NPC_RIBBLY_SCREWSPIGOT || pWho->GetEntry() == NPC_RIBBLY_CRONY))
+            return;
+        else
+            ScriptedAI::AttackStart(pWho);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -1601,8 +1595,6 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
             case 5:
                 SetEscortPaused(true);
                 break;
-            default:
-                break;
         }
     }
 
@@ -1625,7 +1617,7 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
             if (m_creature->GetHealthPercent() < 31.0f && !bIsEnraged)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_DRUNKEN_RAGE) == CAST_OK)
-                        bIsEnraged = true;
+                    bIsEnraged = true;
             }
 
             DoMeleeAttackIfReady();
@@ -1634,7 +1626,7 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
         {
             if (m_uiEventTimer)
             {
-                if (m_uiEventTimer < uiDiff)
+                if (m_uiEventTimer <= uiDiff)
                 {
                     Start(false);
                     SetEscortPaused(false);
@@ -1752,7 +1744,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
         m_uiPickpocketTimer      = 0;
     }
 
-    void Aggro()
+    void Aggro(Unit* /*pWho*/) override
     {
         m_uiBanishTimer          = urand(8, 12) * 1000;
         m_uiImmolateTimer        = urand(18, 20) * 1000;
@@ -1762,6 +1754,9 @@ struct boss_plugger_spazzringAI : public ScriptedAI
 
     void JustDied(Unit* pKiller) override
     {
+        if (!m_pInstance)
+            return;
+
         // Activate Phalanx and handle patrons faction
         if (Creature* pPhalanx = m_pInstance->GetSingleCreatureFromStorage(NPC_PHALANX))
         {
@@ -1778,6 +1773,25 @@ struct boss_plugger_spazzringAI : public ScriptedAI
         {
             if (pSpell->Id == SPELL_PICKPOCKET)
                 m_uiPickpocketTimer = 5000;
+        }
+    }
+
+    // Players stole one of the ale mug/roasted boar: warn them
+    void WarnThief(Player* pPlayer)
+    {
+        DoScriptText(aRandomYells[urand(0, 2)], m_creature);
+        m_creature->SetFacingToObject(pPlayer);
+    }
+
+    // Players stole too much of the ale mug/roasted boar: attack them
+    void AttackThief(Player* pPlayer)
+    {
+        if (pPlayer)
+        {
+            DoScriptText(urand(0, 1) < 1 ? YELL_AGRRO_1 : YELL_AGRRO_2, m_creature);
+            m_creature->SetFacingToObject(pPlayer);
+            m_creature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
+            AttackStart(pPlayer);
         }
     }
 
@@ -1858,27 +1872,6 @@ struct boss_plugger_spazzringAI : public ScriptedAI
                 m_uiDemonArmorTimer -= uiDiff;
         }
     }
-
-    // Players stole one of the ale mug/roasted boar: warn them
-    void WarnThief(Player* pPlayer)
-    {
-        DoScriptText(aRandomYells[urand(0, 2)], m_creature);
-        m_creature->SetFacingToObject(pPlayer);
-        return;
-    }
-
-    // Players stole too much of the ale mug/roasted boar: attack them
-    void AttackThief(Player* pPlayer)
-    {
-        if (pPlayer)
-        {
-            DoScriptText(urand(0, 1) < 1 ? YELL_AGRRO_1 : YELL_AGRRO_2, m_creature);
-            m_creature->SetFacingToObject(pPlayer);
-            m_creature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
-            AttackStart(pPlayer);
-        }
-        return;
-    }
 };
 
 CreatureAI* GetAI_boss_plugger_spazzring(Creature* pCreature)
@@ -1897,18 +1890,22 @@ bool GOUse_go_bar_ale_mug(Player* pPlayer, GameObject* pGo)
         if (pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS || pInstance->GetData(TYPE_PLUGGER) == DONE) // GOs despawning on use, this check should never be true but this is proper to have it there
             return false;
         else
+        {
             if (Creature* pPlugger = pInstance->GetSingleCreatureFromStorage(NPC_PLUGGER_SPAZZRING))
             {
-                boss_plugger_spazzringAI* pPluggerAI = dynamic_cast<boss_plugger_spazzringAI*>(pPlugger->AI());
-                // Every time we set the event to SPECIAL, the instance script increments the number of stolen mugs/boars, capping at 3
-                pInstance->SetData(TYPE_PLUGGER, SPECIAL);
-                // If the cap is reached the instance script changes the type from SPECIAL to IN_PROGRESS
-                // Plugger then aggroes and engage players, else he just warns them
-                if (pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS)
-                    pPluggerAI->AttackThief(pPlayer);
-                else
-                    pPluggerAI->WarnThief(pPlayer);
+                if (boss_plugger_spazzringAI* pPluggerAI = dynamic_cast<boss_plugger_spazzringAI*>(pPlugger->AI()))
+                {
+                    // Every time we set the event to SPECIAL, the instance script increments the number of stolen mugs/boars, capping at 3
+                    pInstance->SetData(TYPE_PLUGGER, SPECIAL);
+                    // If the cap is reached the instance script changes the type from SPECIAL to IN_PROGRESS
+                    // Plugger then aggroes and engage players, else he just warns them
+                    if (pInstance->GetData(TYPE_PLUGGER) == IN_PROGRESS)
+                        pPluggerAI->AttackThief(pPlayer);
+                    else
+                        pPluggerAI->WarnThief(pPlayer);
+                }
             }
+        }
     }
     return false;
 }
@@ -1954,20 +1951,20 @@ struct npc_ironhand_guardianAI : public ScriptedAI
 
         switch (m_uiPhase)
         {
-        case 0:
-            m_creature->RemoveAurasDueToSpell(SPELL_STONED);
-            if (DoCastSpellIfCan(m_creature, SPELL_STONED_VISUAL) == CAST_OK)
-                m_uiPhase = 1;
-            break;
-        case 1:
-                if (m_uiGoutOfFlameTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_GOUT_OF_FLAME) == CAST_OK)
-                        m_uiGoutOfFlameTimer = urand(13, 18) * 1000;
-                }
-                else
-                    m_uiGoutOfFlameTimer -= uiDiff;
-            break;
+            case 0:
+                m_creature->RemoveAurasDueToSpell(SPELL_STONED);
+                if (DoCastSpellIfCan(m_creature, SPELL_STONED_VISUAL) == CAST_OK)
+                    m_uiPhase = 1;
+                break;
+            case 1:
+                    if (m_uiGoutOfFlameTimer < uiDiff)
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_GOUT_OF_FLAME) == CAST_OK)
+                            m_uiGoutOfFlameTimer = urand(13, 18) * 1000;
+                    }
+                    else
+                        m_uiGoutOfFlameTimer -= uiDiff;
+                break;
         }
     }
 };

@@ -160,9 +160,10 @@ void instance_blackrock_depths::OnObjectCreate(GameObject* pGo)
             {
                 // Rocknot event done: set the Grim Guzzler door animation to "broken"
                 // tell the instance script it is open to prevent some of the other events
-                pGo->SetGoState(GOState(2));
+                pGo->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
                 SetBarDoorIsOpen();
-            } else if (m_auiEncounter[10] == DONE || m_auiEncounter[11] == DONE)
+            }
+            else if (m_auiEncounter[10] == DONE || m_auiEncounter[11] == DONE)
             {
                 // bar or Plugger event done: open the Grim Guzzler door
                 // tell the instance script it is open to prevent some of the other events
@@ -328,14 +329,16 @@ void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)
                         {
                             float fX, fY, fZ;
                             pPlugger->GetRandomPoint(aHurleyPositions[0], aHurleyPositions[1], aHurleyPositions[2], 2.0f, fX, fY, fZ);
-                            Creature* pSummoned = pPlugger->SummonCreature(NPC_BLACKBREATH_CRONY, fX, fY, fZ, aHurleyPositions[3], TEMPSUMMON_DEAD_DESPAWN, 0);
-                            pSummoned->SetWalk(false);
-                            // The cronies should not engage anyone until their boss does so
-                            // the linking is done by DB
-                            pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
-                            // The movement toward the kegs is handled by Hurley EscortAI
-                            // and we want the cronies to follow him there
-                            pSummoned->GetMotionMaster()->MoveFollow(pHurley, 1.0f, 0);
+                            if (Creature* pSummoned = pPlugger->SummonCreature(NPC_BLACKBREATH_CRONY, fX, fY, fZ, aHurleyPositions[3], TEMPSUMMON_DEAD_DESPAWN, 0))
+                            {
+                                pSummoned->SetWalk(false);
+                                // The cronies should not engage anyone until their boss does so
+                                // the linking is done by DB
+                                pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE);
+                                // The movement toward the kegs is handled by Hurley EscortAI
+                                // and we want the cronies to follow him there
+                                pSummoned->GetMotionMaster()->MoveFollow(pHurley, 1.0f, 0);
+                            }
                         }
                         SetData(TYPE_HURLEY, IN_PROGRESS);
                     }
@@ -488,7 +491,6 @@ void instance_blackrock_depths::OnCreatureEvade(Creature* pCreature)
 
 void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
 {
-    uint32 uiTextId;
     switch (pCreature->GetEntry())
     {
         case NPC_WARBRINGER_CONST:
@@ -545,6 +547,8 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
             // of Shadowforge Senators in the Throne Room
             if (Creature* pDagran = GetSingleCreatureFromStorage(NPC_EMPEROR))
             {
+                uint32 uiTextId;
+
                 if (!pDagran->isAlive())
                     return;
 
@@ -553,10 +557,10 @@ void instance_blackrock_depths::OnCreatureDeath(Creature* pCreature)
 
                 switch (urand(0, 3))
                 {
-                    case 0:uiTextId = YELL_SENATOR_1;break;
-                    case 1:uiTextId = YELL_SENATOR_2;break;
-                    case 2:uiTextId = YELL_SENATOR_3;break;
-                    default:uiTextId = YELL_SENATOR_4;break;
+                    case 0: uiTextId = YELL_SENATOR_1; break;
+                    case 1: uiTextId = YELL_SENATOR_2; break;
+                    case 2: uiTextId = YELL_SENATOR_3; break;
+                    case 3: uiTextId = YELL_SENATOR_4; break;
                 }
                 DoScriptText(uiTextId, pDagran);
                 m_uiDagranTimer = 30000;    // set a timer of 30 sec to avoid Emperor Thaurissan to spam yells in case many senators are killed in a short amount of time
@@ -669,11 +673,9 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
             }
             if (Creature* pNagmara = GetSingleCreatureFromStorage(NPC_MISTRESS_NAGMARA))
             {
-                pNagmara->AI()->DoCastSpellIfCan(pNagmara, SPELL_NAGMARA_VANISH, CAST_TRIGGERED);
+                pNagmara->CastSpell(pNagmara, SPELL_NAGMARA_VANISH, true);
                 pNagmara->ForcedDespawn();
             }
-            return;
-        default:
             return;
     }
 }

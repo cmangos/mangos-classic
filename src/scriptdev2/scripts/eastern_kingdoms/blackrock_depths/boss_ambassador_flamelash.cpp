@@ -28,7 +28,6 @@ enum
 {
     SPELL_FIREBLAST             = 15573,
     SPELL_BURNING_SPIRIT        = 13489,
-    SPELL_BURNING_SPIRIT_BUFF   = 14744,
 
     NPC_BURNING_SPIRIT          = 9178,
 };
@@ -125,17 +124,6 @@ struct boss_ambassador_flamelashAI : public ScriptedAI
     }
 };
 
-bool EffectDummyCreature_spell_boss_ambassador_flamelash(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    if (uiSpellId == SPELL_BURNING_SPIRIT && uiEffIndex == EFFECT_INDEX_1)
-    {
-        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_BURNING_SPIRIT_BUFF, true);
-        return true;
-    }
-
-    return false;
-}
-
 CreatureAI* GetAI_boss_ambassador_flamelash(Creature* pCreature)
 {
     return new boss_ambassador_flamelashAI(pCreature);
@@ -148,6 +136,5 @@ void AddSC_boss_ambassador_flamelash()
     pNewScript = new Script;
     pNewScript->Name = "boss_ambassador_flamelash";
     pNewScript->GetAI = &GetAI_boss_ambassador_flamelash;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_boss_ambassador_flamelash;
     pNewScript->RegisterSelf();
 }

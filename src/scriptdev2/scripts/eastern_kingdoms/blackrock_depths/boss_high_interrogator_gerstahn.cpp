@@ -58,9 +58,10 @@ struct boss_high_interrogator_gerstahnAI : public ScriptedAI
         if (m_uiShadowWordPainTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, SPELL_SHADOWWORDPAIN);
-
-            m_uiShadowWordPainTimer = 7000;
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_SHADOWWORDPAIN) == CAST_OK)
+                    m_uiShadowWordPainTimer = 7000;
+            }
         }
         else
             m_uiShadowWordPainTimer -= uiDiff;
@@ -69,9 +70,10 @@ struct boss_high_interrogator_gerstahnAI : public ScriptedAI
         if (m_uiManaBurnTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MANABURN, SELECT_FLAG_POWER_MANA))
-                DoCastSpellIfCan(pTarget, SPELL_MANABURN);
-
-            m_uiManaBurnTimer = 10000;
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_MANABURN) == CAST_OK)
+                    m_uiManaBurnTimer = 10000;
+            }
         }
         else
             m_uiManaBurnTimer -= uiDiff;
@@ -79,8 +81,8 @@ struct boss_high_interrogator_gerstahnAI : public ScriptedAI
         // PsychicScream_Timer
         if (m_uiPsychicScreamTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature, SPELL_PSYCHICSCREAM);
-            m_uiPsychicScreamTimer = 30000;
+            if (DoCastSpellIfCan(m_creature, SPELL_PSYCHICSCREAM) == CAST_OK)
+                m_uiPsychicScreamTimer = 30000;
         }
         else
             m_uiPsychicScreamTimer -= uiDiff;
@@ -88,8 +90,8 @@ struct boss_high_interrogator_gerstahnAI : public ScriptedAI
         // ShadowShield_Timer
         if (m_uiShadowShieldTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature, SPELL_SHADOWSHIELD);
-            m_uiShadowShieldTimer = 25000;
+            if (DoCastSpellIfCan(m_creature, SPELL_SHADOWSHIELD) == CAST_OK)
+                m_uiShadowShieldTimer = 25000;
         }
         else
             m_uiShadowShieldTimer -= uiDiff;
