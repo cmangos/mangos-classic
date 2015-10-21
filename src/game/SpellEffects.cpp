@@ -504,6 +504,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
 
                     m_originalCaster->CastSpell(channelTarget, 13481, true, nullptr, nullptr, m_originalCasterGUID, m_spellInfo);
+                    return;
                 }
                 case 13489:
                 {
