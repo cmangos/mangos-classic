@@ -299,7 +299,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE   = 0x00010000,            // 16 unaffected by school immunity
     SPELL_ATTR_EX_UNK17                         = 0x00020000,            // 17 for auras SPELL_AURA_TRACK_CREATURES, SPELL_AURA_TRACK_RESOURCES and SPELL_AURA_TRACK_STEALTHED select non-stacking tracking spells
     SPELL_ATTR_EX_UNK18                         = 0x00040000,            // 18
-    SPELL_ATTR_EX_UNK19                         = 0x00080000,            // 19
+    SPELL_ATTR_EX_CANT_TARGET_SELF              = 0x00080000,            // 19 spells with area effect or friendly targets that exclude the caster
     SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS       = 0x00100000,            // 20 Req combo points on target
     SPELL_ATTR_EX_UNK21                         = 0x00200000,            // 21
     SPELL_ATTR_EX_REQ_COMBO_POINTS              = 0x00400000,            // 22 Use combo points (in 4.x not required combo point target selected)

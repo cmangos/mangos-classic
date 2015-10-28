@@ -1709,9 +1709,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     }
                 }
             }
-
-            // exclude caster
-            targetUnitMap.remove(m_caster);
             break;
         }
         case TARGET_AREAEFFECT_CUSTOM:
@@ -2409,6 +2406,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // sLog.outError( "SPELL: Unknown implicit target (%u) for spell ID %u", targetMode, m_spellInfo->Id );
             break;
     }
+
+    // remove caster from the list if required by attribute
+    if (targetMode != TARGET_SELF && m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
+        targetUnitMap.remove(m_caster);
 
     if (unMaxTargets && targetUnitMap.size() > unMaxTargets)
     {
