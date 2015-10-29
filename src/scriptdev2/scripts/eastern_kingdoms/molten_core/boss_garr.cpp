@@ -32,9 +32,10 @@ enum
     SPELL_ENRAGE                = 19516,
 
     // Add spells
+    SPELL_THRASH                = 8876,
+    SPELL_IMMOLATE              = 15733,
     SPELL_ERUPTION              = 19497,
     SPELL_MASSIVE_ERUPTION      = 20483,                    // TODO possible on death
-    SPELL_IMMOLATE              = 20294,
     SPELL_SEPARATION_ANXIETY    = 23492,                    // Used if separated too far from Garr
 };
 
@@ -108,16 +109,17 @@ struct mob_fireswornAI : public ScriptedAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
+
+        DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, SPELL_IMMOLATE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     ScriptedInstance* m_pInstance;
 
-    uint32 m_uiImmolateTimer;
     uint32 m_uiSeparationCheckTimer;
 
     void Reset() override
     {
-        m_uiImmolateTimer = urand(4000, 8000);              // These times are probably wrong
         m_uiSeparationCheckTimer = 5000;
     }
 
@@ -129,22 +131,16 @@ struct mob_fireswornAI : public ScriptedAI
                 pGarr->CastSpell(pGarr, SPELL_ENRAGE, true, nullptr, nullptr, m_creature->GetObjectGuid());
         }
     }
+    void JustReachedHome() override
+    {
+        DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, SPELL_IMMOLATE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
-
-        // Immolate_Timer
-        if (m_uiImmolateTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_IMMOLATE) == CAST_OK)
-                    m_uiImmolateTimer = urand(5000, 10000);
-            }
-        }
-        else m_uiImmolateTimer -= uiDiff;
 
         if (m_uiSeparationCheckTimer < uiDiff)
         {

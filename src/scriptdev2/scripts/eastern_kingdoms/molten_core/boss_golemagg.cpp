@@ -31,9 +31,11 @@ enum
     SPELL_EARTHQUAKE        = 19798,
     SPELL_ENRAGE            = 19953,
     SPELL_GOLEMAGG_TRUST    = 20553,
+    SPELL_DOUBLE_ATTACK     = 18943,
 
     // Core Rager
     EMOTE_LOW_HP            = -1409002,
+    SPELL_THRASH            = 12787,
     SPELL_MANGLE            = 19820
 };
 
@@ -45,6 +47,7 @@ struct boss_golemaggAI : public ScriptedAI
         Reset();
 
         DoCastSpellIfCan(m_creature, SPELL_MAGMA_SPLASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     ScriptedInstance* m_pInstance;
@@ -80,6 +83,7 @@ struct boss_golemaggAI : public ScriptedAI
             m_pInstance->SetData(TYPE_GOLEMAGG, FAIL);
 
         DoCastSpellIfCan(m_creature, SPELL_MAGMA_SPLASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -137,6 +141,8 @@ struct mob_core_ragerAI : public ScriptedAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
+
+        DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     ScriptedInstance* m_pInstance;
@@ -158,6 +164,11 @@ struct mob_core_ragerAI : public ScriptedAI
                 uiDamage = 0;
             }
         }
+    }
+
+    void JustReachedHome() override
+    {
+        DoCastSpellIfCan(m_creature, SPELL_THRASH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void UpdateAI(const uint32 uiDiff) override

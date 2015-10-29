@@ -31,6 +31,8 @@ enum
     EMOTE_SPRAY                 = -1533148,
     EMOTE_BOSS_GENERIC_FRENZY   = -1000005,
 
+    SPELL_DOUBLE_ATTACK         = 19818,
+
     SPELL_WEBWRAP               = 28622,
     SPELL_WEBWRAP_2             = 28673,                    // purpose unknown
 
@@ -140,6 +142,8 @@ struct boss_maexxnaAI : public ScriptedAI
     {
         m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
         Reset();
+
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     instance_naxxramas* m_pInstance;
@@ -177,6 +181,8 @@ struct boss_maexxnaAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MAEXXNA, FAIL);
+
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustSummoned(Creature* pSummoned) override
