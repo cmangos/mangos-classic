@@ -403,6 +403,7 @@ UPDATE creature_template SET ScriptName='mob_scarlet_trainee' WHERE entry=6575;
 UPDATE instance_template SET ScriptName='instance_scholomance' WHERE map=289;
 UPDATE creature_template SET ScriptName='boss_darkmaster_gandling' WHERE entry=1853;
 UPDATE creature_template SET ScriptName='boss_jandice_barov' WHERE entry=10503;
+UPDATE creature_template SET ScriptName='npc_spectral_tutor' WHERE entry=10498;
 DELETE FROM scripted_event_id WHERE id IN (5618, 5619, 5620, 5621, 5622, 5623);
 INSERT INTO scripted_event_id VALUES
 (5618,'event_spell_gandling_shadow_portal'),

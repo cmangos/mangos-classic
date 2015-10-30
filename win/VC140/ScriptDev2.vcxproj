@@ -304,6 +304,7 @@
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\boss_darkmaster_gandling.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\boss_jandice_barov.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\instance_scholomance.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\scholomance.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\shadowfang_keep\instance_shadowfang_keep.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\shadowfang_keep\shadowfang_keep.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\boss_baroness_anastari.cpp" />

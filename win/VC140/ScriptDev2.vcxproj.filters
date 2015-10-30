@@ -375,6 +375,9 @@
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\instance_scholomance.cpp">
       <Filter>scripts\eastern_kingdoms\scholomance</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\scholomance.cpp">
+      <Filter>scripts\eastern_kingdoms\scholomance</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\shadowfang_keep\instance_shadowfang_keep.cpp">
       <Filter>scripts\eastern_kingdoms\shadowfang_keep</Filter>
     </ClCompile>
