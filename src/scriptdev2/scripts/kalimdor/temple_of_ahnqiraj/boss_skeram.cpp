@@ -213,6 +213,18 @@ struct boss_skeramAI : public ScriptedAI
         else
             m_uiBlinkTimer -= uiDiff;
 
+        // Earth Shock is cast every 1.2s on the victim if Skeram can't reach them or they are not auto attacking him
+        if (m_uiEarthShockTimer < uiDiff)
+        {
+            if (!m_creature->CanReachWithMeleeAttack(pVictim) || !pVictim->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
+            {
+                DoCastSpellIfCan(pVictim, SPELL_EARTH_SHOCK);
+                m_uiEarthShockTimer = 1200;
+            }
+        }
+        else
+            m_uiEarthShockTimer -= uiDiff;
+
         // Summon images at 75%, 50% and 25%
         if (!m_bIsImage && m_creature->GetHealthPercent() < m_fHpCheck)
         {
@@ -224,21 +236,6 @@ struct boss_skeramAI : public ScriptedAI
                 m_creature->SetVisibility(VISIBILITY_OFF);
                 m_uiBlinkTimer = 2000;
             }
-        }
-
-        // Earth Shock is cast each 1.2s on a random target if Skeram can't reach his victim or the victim is not auto attacking him
-        if (!m_creature->CanReachWithMeleeAttack(pVictim) || !pVictim->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
-        {
-            if (m_uiEarthShockTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    DoCastSpellIfCan(pTarget, SPELL_EARTH_SHOCK);
-                    m_uiEarthShockTimer = 1200;
-                }
-            }
-            else
-                m_uiEarthShockTimer -= uiDiff;
         }
 
         DoMeleeAttackIfReady();
