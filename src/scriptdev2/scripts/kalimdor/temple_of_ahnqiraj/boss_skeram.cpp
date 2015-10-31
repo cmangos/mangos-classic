@@ -64,6 +64,7 @@ struct boss_skeramAI : public ScriptedAI
     uint32 m_uiArcaneExplosionTimer;
     uint32 m_uiFullFillmentTimer;
     uint32 m_uiBlinkTimer;
+    uint32 m_uiEarthShockTimer;
 
     float m_fHpCheck;
 
@@ -74,6 +75,7 @@ struct boss_skeramAI : public ScriptedAI
         m_uiArcaneExplosionTimer = urand(6000, 12000);
         m_uiFullFillmentTimer    = 15000;
         m_uiBlinkTimer           = urand(30000, 45000);
+        m_uiEarthShockTimer      = 1200;
 
         m_fHpCheck               = 75.0f;
 
@@ -166,8 +168,9 @@ struct boss_skeramAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        Unit *pVictim = m_creature->getVictim();
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !pVictim)
             return;
 
         // ArcaneExplosion_Timer
@@ -223,17 +226,22 @@ struct boss_skeramAI : public ScriptedAI
             }
         }
 
-        // If we are within range melee the target
-        if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
-            DoMeleeAttackIfReady();
-        else
+        // Earth Shock is cast each 1.2s on a random target if Skeram can't reach his victim or the victim is not auto attacking him
+        if (!m_creature->CanReachWithMeleeAttack(pVictim) || !pVictim->hasUnitState(UNIT_STAT_MELEE_ATTACKING))
         {
-            if (!m_creature->IsNonMeleeSpellCasted(false))
+            if (m_uiEarthShockTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
                     DoCastSpellIfCan(pTarget, SPELL_EARTH_SHOCK);
+                    m_uiEarthShockTimer = 1200;
+                }
             }
+            else
+                m_uiEarthShockTimer -= uiDiff;
         }
+
+        DoMeleeAttackIfReady();
     }
 };
 
