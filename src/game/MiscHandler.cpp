@@ -31,7 +31,6 @@
 #include "Auth/BigNumber.h"
 #include "Auth/Sha1.h"
 #include "UpdateData.h"
-#include "LootMgr.h"
 #include "Chat.h"
 #include "ScriptMgr.h"
 #include <zlib/zlib.h>
@@ -269,9 +268,6 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_LOGOUT_REQUEST, security %u", GetSecurity());
 
-    if (ObjectGuid lootGuid = GetPlayer()->GetLootGuid())
-        DoLootRelease(lootGuid);
-
     // Can not logout if...
     if (GetPlayer()->isInCombat() ||                        //...is in combat
             //...is jumping ...is falling
@@ -309,7 +305,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
     data << uint32(0);
     data << uint8(0);
     SendPacket(&data);
-    LogoutRequest(time(NULL));
+    LogoutRequest(time(nullptr));
 }
 
 void WorldSession::HandlePlayerLogoutOpcode(WorldPacket& /*recv_data*/)
@@ -364,7 +360,7 @@ void WorldSession::HandleTogglePvP(WorldPacket& recv_data)
     else
     {
         if (!GetPlayer()->pvpInfo.inHostileArea && GetPlayer()->IsPvP())
-            GetPlayer()->pvpInfo.endTimer = time(NULL);     // start toggle-off
+            GetPlayer()->pvpInfo.endTimer = time(nullptr);     // start toggle-off
     }
 }
 
@@ -628,7 +624,7 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recv_data)
         return;
 
     // prevent resurrect before 30-sec delay after body release not finished
-    if (corpse->GetGhostTime() + GetPlayer()->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP) > time(NULL))
+    if (corpse->GetGhostTime() + GetPlayer()->GetCorpseReclaimDelay(corpse->GetType() == CORPSE_RESURRECTABLE_PVP) > time(nullptr))
         return;
 
     if (!corpse->IsWithinDistInMap(GetPlayer(), CORPSE_RECLAIM_RADIUS, true))
@@ -723,8 +719,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
 
     if (BattleGround* bg = player->GetBattleGround())
     {
-        bg->HandleAreaTrigger(player, Trigger_ID);
-        return;
+        if (bg->HandleAreaTrigger(player, Trigger_ID))
+            return;
     }
     else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
     {
@@ -732,7 +728,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
             return;
     }
 
-    // NULL if all values default (non teleport trigger)
+    // nullptr if all values default (non teleport trigger)
     AreaTrigger const* at = sObjectMgr.GetAreaTrigger(Trigger_ID);
     if (!at)
         return;
@@ -976,8 +972,15 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     if (!plr)                                               // wrong player
         return;
 
+    if (!_player->IsWithinDistInMap(plr, INSPECT_DISTANCE, false))
+        return;
+
+    if (_player->IsHostileTo(plr))
+        return;
+
     WorldPacket data(SMSG_INSPECT, 8);
     data << ObjectGuid(guid);
+
     SendPacket(&data);
 }
 
@@ -985,40 +988,48 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 {
     ObjectGuid guid;
     recv_data >> guid;
-    // DEBUG_LOG("Party Stats guid is " I64FMTD,guid);
 
-    Player* pl = sObjectMgr.GetPlayer(guid);
-    if (pl)
+    Player* player = sObjectMgr.GetPlayer(guid);
+
+    if (!player)
     {
-        WorldPacket data(MSG_INSPECT_HONOR_STATS, (8 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
-        data << guid;                                       // player guid
-        // Rank, filling bar, PLAYER_BYTES_3, ??
-        data << (uint8)pl->GetByteValue(PLAYER_FIELD_BYTES2, 0);
-        // Today Honorable and Dishonorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
-        // Yesterday Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
-        // Last Week Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS);
-        // This Week Honorable kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
-        // Lifetime Honorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
-        // Lifetime Dishonorable Kills
-        data << pl->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
-        // Yesterday Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
-        // Last Week Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
-        // This Week Honor
-        data << pl->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
-        // Last Week Standing
-        data << pl->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
-        data << (uint8)pl->GetHonorHighestRankInfo().visualRank;           // Highest Rank, ??
-        SendPacket(&data);
-    }
-    else
         DEBUG_LOG("%s not found!", guid.GetString().c_str());
+        return;
+    }
+
+    if (!_player->IsWithinDistInMap(player, INSPECT_DISTANCE, false))
+        return;
+
+    if (_player->IsHostileTo(player))
+        return;
+
+    WorldPacket data(MSG_INSPECT_HONOR_STATS, (8 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
+    data << guid;                                       // player guid
+    // Rank, filling bar, PLAYER_BYTES_3, ??
+    data << (uint8)player->GetByteValue(PLAYER_FIELD_BYTES2, 0);
+    // Today Honorable and Dishonorable Kills
+    data << player->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
+    // Yesterday Honorable Kills
+    data << player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
+    // Last Week Honorable Kills
+    data << player->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS);
+    // This Week Honorable kills
+    data << player->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS);
+    // Lifetime Honorable Kills
+    data << player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+    // Lifetime Dishonorable Kills
+    data << player->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
+    // Yesterday Honor
+    data << player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
+    // Last Week Honor
+    data << player->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
+    // This Week Honor
+    data << player->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION);
+    // Last Week Standing
+    data << player->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
+    data << (uint8)player->GetHonorHighestRankInfo().visualRank;           // Highest Rank, ??
+
+    SendPacket(&data);
 }
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)

@@ -1,20 +1,10 @@
 #!/bin/sh
 
-# Simple helper script to create backport lists
-
-# By user defined (remote/branch to the to-be-backported history)
-COMPARE_PATH="cmangos-tbc/master"
-OUTPUT_FILE="contrib/backporting/todo_tbc_commits.log"
-
-# By user defined (text format)
-#SMALL_FORMAT="tbc(cleaned): %h * %an (committer %cn)"
-#FULL_FORMAT="${SMALL_FORMAT}: %s"
-#FOOTER_FORMAT="FILE LAST UPDATED BASED ON... ${SMALL_FORMAT}"
-
-# By user defined (Textile markup based wiki format)
-SMALL_FORMAT="\"tbc\":http://github.com/cmangos/mangos-tbc/commit/%h: %h * %an (committer %cn)"
-FULL_FORMAT="</code></pre>%n%n%n* ${SMALL_FORMAT}<pre><code>%s"
-FOOTER_FORMAT="</code></pre>%n%n%nFILE LAST UPDATED BASED ON... ${SMALL_FORMAT}"
+# Simple helper script to create backport lists (github markup based wiki format)
+OUTPUT_FILE="contrib/backporting/update-commit-log.log"
+COMMIT_FORMAT=": %h"
+FULL_FORMAT="${COMMIT_FORMAT} * %an (committer %cn)%n\`\`\`%n%s%n\`\`\`"
+FOOTER_FORMAT="FILE LAST UPDATED BASED ON... "
 
 # param1 must be the commit hash of last backported commit (of original commit)
 if [ "$#" != "1" ]
@@ -32,7 +22,18 @@ fi
 
 HASH=$1
 
-git log $HASH..$COMPARE_PATH --pretty=format:"${FULL_FORMAT}" --reverse --dirstat >> $OUTPUT_FILE
+REMOTE=$(git branch -r --contains $HASH | sed 's% *\(.*\)%\1%')
+[[ $? != 0 ]] && exit 1
+
+REMOTE_NAME=$(echo $REMOTE | sed 's%\(.*\)/.*%\1%')
+[[ $? != 0 ]] && exit 1
+
+REPOSITORY=$(git ls-remote --get-url $REMOTE_NAME | sed 's%.*github.com.\(.*\)\.git%\1%')
+[[ $? != 0 ]] && exit 1
+
+LINK_FORMAT="[$REMOTE_NAME](http://github.com/$REPOSITORY/commit/%h)"
+
+git log $HASH..$REMOTE --pretty=format:"* $LINK_FORMAT$FULL_FORMAT" --reverse >> $OUTPUT_FILE
 echo "" >> $OUTPUT_FILE
-echo "$(git log -1 --pretty="${FOOTER_FORMAT}" $COMPARE_PATH)" >> $OUTPUT_FILE
+echo "$(git log -1 --pretty="$FOOTER_FORMAT$LINK_FORMAT$COMMIT_FORMAT" $REMOTE)" >> $OUTPUT_FILE
 echo "" >> $OUTPUT_FILE

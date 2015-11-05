@@ -28,8 +28,6 @@
 #include "DBCStructure.h"
 #include "DBCStores.h"
 
-#include "Utilities/UnorderedMapSet.h"
-
 #include <map>
 
 class Player;
@@ -76,7 +74,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId);
 
 // Different spell properties
 inline float GetSpellRadius(SpellRadiusEntry const* radius) { return (radius ? radius->Radius : 0); }
-uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell = NULL);
+uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell = nullptr);
 uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType damagetype);
 float CalculateDefaultCoefficient(SpellEntry const* spellProto, DamageEffectType const damagetype);
 inline float GetSpellMinRange(SpellRangeEntry const* range) { return (range ? range->minRange : 0); }
@@ -84,7 +82,7 @@ inline float GetSpellMaxRange(SpellRangeEntry const* range) { return (range ? ra
 inline uint32 GetSpellRecoveryTime(SpellEntry const* spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 int32 GetSpellDuration(SpellEntry const* spellInfo);
 int32 GetSpellMaxDuration(SpellEntry const* spellInfo);
-int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster = NULL);
+int32 CalculateSpellDuration(SpellEntry const* spellInfo, Unit const* caster = nullptr);
 uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo);
 uint16 GetSpellAuraMaxTicks(uint32 spellId);
 WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo);
@@ -433,7 +431,7 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
 
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
     // Feline Swiftness Passive 2a not have 0x1 mask in Stance field in spell data as expected
-    return ((spellInfo->Stances & (1 << (form - 1))  || spellInfo->Id == 24864 && form == FORM_CAT) &&
+    return (((spellInfo->Stances & (1 << (form - 1)) || (spellInfo->Id == 24864 && form == FORM_CAT))) &&
             !spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT));
 }
 
@@ -620,8 +618,8 @@ struct SpellBonusEntry
     float  ap_dot_bonus;
 };
 
-typedef UNORDERED_MAP<uint32, SpellProcEventEntry> SpellProcEventMap;
-typedef UNORDERED_MAP<uint32, SpellBonusEntry>     SpellBonusMap;
+typedef std::unordered_map<uint32, SpellProcEventEntry> SpellProcEventMap;
+typedef std::unordered_map<uint32, SpellBonusEntry>     SpellBonusMap;
 
 #define ELIXIR_FLASK_MASK     0x03                          // 2 bit mask for batter compatibility with more recent client version, flaks must have both bits set
 #define ELIXIR_WELL_FED       0x10                          // Some foods have SPELLFAMILY_POTION
@@ -668,7 +666,7 @@ struct SpellTargetPosition
     float  target_Orientation;
 };
 
-typedef UNORDERED_MAP<uint32, SpellTargetPosition> SpellTargetPositionMap;
+typedef std::unordered_map<uint32, SpellTargetPosition> SpellTargetPositionMap;
 
 // Spell pet auras
 class PetAura
@@ -758,7 +756,7 @@ struct SpellChainNode
     uint8  rank;
 };
 
-typedef UNORDERED_MAP<uint32, SpellChainNode> SpellChainMap;
+typedef std::unordered_map<uint32, SpellChainNode> SpellChainMap;
 typedef std::multimap<uint32, uint32> SpellChainMapNext;
 
 // Spell learning properties (accessed using SpellMgr functions)
@@ -856,7 +854,7 @@ class SpellMgr
             if (itr != mSpellThreatMap.end())
                 return &itr->second;
 
-            return NULL;
+            return nullptr;
         }
 
         float GetSpellThreatMultiplier(SpellEntry const* spellInfo) const
@@ -876,7 +874,7 @@ class SpellMgr
             SpellProcEventMap::const_iterator itr = mSpellProcEventMap.find(spellId);
             if (itr != mSpellProcEventMap.end())
                 return &itr->second;
-            return NULL;
+            return nullptr;
         }
 
         // Spell procs from item enchants
@@ -899,7 +897,7 @@ class SpellMgr
             if (itr != mSpellBonusMap.end())
                 return &itr->second;
 
-            return NULL;
+            return nullptr;
         }
 
         uint32 GetSpellFacingFlag(uint32 spellId) const
@@ -916,7 +914,7 @@ class SpellMgr
             SpellTargetPositionMap::const_iterator itr = mSpellTargetPositions.find(spell_id);
             if (itr != mSpellTargetPositions.end())
                 return &itr->second;
-            return NULL;
+            return nullptr;
         }
 
         // Spell ranks chains
@@ -924,7 +922,7 @@ class SpellMgr
         {
             SpellChainMap::const_iterator itr = mSpellChains.find(spell_id);
             if (itr == mSpellChains.end())
-                return NULL;
+                return nullptr;
 
             return &itr->second;
         }
@@ -1003,7 +1001,7 @@ class SpellMgr
             if (itr != mSpellLearnSkills.end())
                 return &itr->second;
             else
-                return NULL;
+                return nullptr;
         }
 
         bool IsSpellLearnSpell(uint32 spell_id) const
@@ -1033,7 +1031,7 @@ class SpellMgr
         bool IsSkillBonusSpell(uint32 spellId) const;
 
         // Spell correctness for client using
-        static bool IsSpellValid(SpellEntry const* spellInfo, Player* pl = NULL, bool msg = true);
+        static bool IsSpellValid(SpellEntry const* spellInfo, Player* pl = nullptr, bool msg = true);
 
         SkillLineAbilityMapBounds GetSkillLineAbilityMapBounds(uint32 spell_id) const
         {
@@ -1051,10 +1049,10 @@ class SpellMgr
             if (itr != mSpellPetAuraMap.end())
                 return &itr->second;
             else
-                return NULL;
+                return nullptr;
         }
 
-        SpellCastResult GetSpellAllowedInLocationError(SpellEntry const* spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player = NULL);
+        SpellCastResult GetSpellAllowedInLocationError(SpellEntry const* spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player = nullptr);
 
         SpellAreaMapBounds GetSpellAreaMapBounds(uint32 spell_id) const
         {

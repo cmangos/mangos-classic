@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
 
 set(LIBRARY_NAME shared)
 
@@ -32,7 +33,6 @@ set(SRC_GRP_AUTH
 set(SRC_GRP_CONFIG
     Config/Config.cpp
     Config/Config.h
-    Config/ConfigEnv.h
 )
 
 set(SRC_GRP_DATABASE
@@ -98,7 +98,6 @@ set(LIBRARY_SRCS
     Common.cpp
     Common.h
     LockedQueue.h
-    revision_nr.h
     revision_sql.h
     Threading.cpp
     Threading.h
@@ -152,12 +151,16 @@ else()
      )
 endif()
 
+# include external dependencies without warnings
+include_directories(SYSTEM
+  ${CMAKE_SOURCE_DIR}/dep/include
+  ${ACE_INCLUDE_DIR}
+)
+
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/dep/include
   ${CMAKE_SOURCE_DIR}/src/framework
   ${CMAKE_BINARY_DIR}
-  ${ACE_INCLUDE_DIR}
 )
 
 if(POSTGRESQL)

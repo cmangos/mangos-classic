@@ -53,7 +53,7 @@ Guild* GuildMgr::GetGuildById(uint32 guildId) const
     if (itr != m_GuildMap.end())
         return itr->second;
 
-    return NULL;
+    return nullptr;
 }
 
 Guild* GuildMgr::GetGuildByName(std::string const& name) const
@@ -62,7 +62,7 @@ Guild* GuildMgr::GetGuildByName(std::string const& name) const
         if (itr->second->GetName() == name)
             return itr->second;
 
-    return NULL;
+    return nullptr;
 }
 
 Guild* GuildMgr::GetGuildByLeader(ObjectGuid const& guid) const
@@ -71,7 +71,7 @@ Guild* GuildMgr::GetGuildByLeader(ObjectGuid const& guid) const
         if (itr->second->GetLeaderGuid() == guid)
             return itr->second;
 
-    return NULL;
+    return nullptr;
 }
 
 std::string GuildMgr::GetGuildNameById(uint32 guildId) const

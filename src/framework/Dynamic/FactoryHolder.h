@@ -41,7 +41,7 @@ class FactoryHolder
         void DeregisterSelf(void) { FactoryHolderRepository::Instance().RemoveItem(this, false); }
 
         /// Abstract Factory create method
-        virtual T* Create(void* data = NULL) const = 0;
+        virtual T* Create(void* data = nullptr) const = 0;
     private:
         Key i_key;
 };

@@ -53,6 +53,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Detour", "..\dep\recastnavi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lualib", "VC120\lualib.vcxproj", "{EE2D5A7D-2E9B-43F0-A016-66C46D01AC6B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScriptDev2", "VC120\ScriptDev2.vcxproj", "{4295C8A9-79B7-4354-8064-F05FB9CA0C96}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A3A04E47-43A2-4C08-90B3-029CEF558594} = {A3A04E47-43A2-4C08-90B3-029CEF558594}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_NoPCH|Win32 = Debug_NoPCH|Win32
@@ -218,6 +223,18 @@ Global
 		{EE2D5A7D-2E9B-43F0-A016-66C46D01AC6B}.Release|Win32.Build.0 = Release|Win32
 		{EE2D5A7D-2E9B-43F0-A016-66C46D01AC6B}.Release|x64.ActiveCfg = Release|x64
 		{EE2D5A7D-2E9B-43F0-A016-66C46D01AC6B}.Release|x64.Build.0 = Release|x64
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Debug_NoPCH|Win32.ActiveCfg = Debug|Win32
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Debug_NoPCH|Win32.Build.0 = Debug|Win32
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Debug_NoPCH|x64.ActiveCfg = Debug|x64
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Debug_NoPCH|x64.Build.0 = Debug|x64
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Debug|Win32.Build.0 = Debug|Win32
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Debug|x64.ActiveCfg = Debug|x64
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Debug|x64.Build.0 = Debug|x64
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Release|Win32.ActiveCfg = Release|Win32
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Release|Win32.Build.0 = Release|Win32
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Release|x64.ActiveCfg = Release|x64
+		{4295C8A9-79B7-4354-8064-F05FB9CA0C96}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

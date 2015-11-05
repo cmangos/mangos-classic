@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2014110301
+ConfVersion=2015090801
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -71,6 +71,9 @@ CharacterDatabaseConnections = 1
 MaxPingTime = 30
 WorldServerPort = 8085
 BindIP = "0.0.0.0"
+
+# Log File for SD2-Errors
+SD2ErrorLogFile = "SD2Errors.log"
 
 ###################################################################################################################
 # PERFORMANCE SETINGS

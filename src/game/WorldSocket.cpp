@@ -45,6 +45,9 @@
 #include "Log.h"
 #include "DBCStores.h"
 #include "LuaEngine.h"
+#include "Policies/Lock.h"
+
+#include <mutex>
 
 #if defined( __GNUC__ )
 #pragma pack(1)
@@ -110,7 +113,7 @@ bool WorldSocket::IsClosed(void) const
 void WorldSocket::CloseSocket(void)
 {
     {
-        ACE_GUARD(LockType, Guard, m_OutBufferLock);
+        std::lock_guard<std::mutex> guard(m_OutBufferLock);
 
         if (closing_)
             return;
@@ -120,9 +123,9 @@ void WorldSocket::CloseSocket(void)
     }
 
     {
-        ACE_GUARD(LockType, Guard, m_SessionLock);
+        std::lock_guard<std::mutex> guard(m_SessionLock);
 
-        m_Session = NULL;
+        m_Session = nullptr;
     }
 }
 
@@ -133,7 +136,7 @@ const std::string& WorldSocket::GetRemoteAddress(void) const
 
 int WorldSocket::SendPacket(const WorldPacket& pkt)
 {
-    ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
+    std::lock_guard<std::mutex> guard(m_OutBufferLock);
 
     if (closing_)
         return -1;
@@ -188,7 +191,7 @@ int WorldSocket::open(void* a)
     m_OutActive = true;
 
     // Hook for the manager.
-    if (sWorldSocketMgr->OnSocketOpen(this) == -1)
+    if (sWorldSocketMgr.OnSocketOpen(this) == -1)
         return -1;
 
     // Allocate the buffer.
@@ -274,7 +277,7 @@ int WorldSocket::handle_input(ACE_HANDLE)
 
 int WorldSocket::handle_output(ACE_HANDLE)
 {
-    ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
+    std::lock_guard<std::mutex> guard(m_OutBufferLock);
 
     if (closing_)
         return -1;
@@ -282,7 +285,7 @@ int WorldSocket::handle_output(ACE_HANDLE)
     const size_t send_len = m_OutBuffer->length();
 
     if (send_len == 0)
-        return cancel_wakeup_output(Guard);
+        return handle_output_queue(guard);
 
 #ifdef MSG_NOSIGNAL
     ssize_t n = peer().send(m_OutBuffer->rd_ptr(), send_len, MSG_NOSIGNAL);
@@ -295,7 +298,7 @@ int WorldSocket::handle_output(ACE_HANDLE)
     else if (n == -1)
     {
         if (errno == EWOULDBLOCK || errno == EAGAIN)
-            return schedule_wakeup_output(Guard);
+            return schedule_wakeup_output(guard);
 
         return -1;
     }
@@ -306,26 +309,84 @@ int WorldSocket::handle_output(ACE_HANDLE)
         // move the data to the base of the buffer
         m_OutBuffer->crunch();
 
-        return schedule_wakeup_output(Guard);
+        return schedule_wakeup_output(guard);
     }
     else // now n == send_len
     {
         m_OutBuffer->reset();
 
-        if (!iFlushPacketQueue())
-            return cancel_wakeup_output(Guard);
-        else
-            return schedule_wakeup_output(Guard);
+        return handle_output_queue(guard);
     }
 
     ACE_NOTREACHED(return 0);
+}
+
+int WorldSocket::handle_output_queue(GuardType& g)
+{
+    if (msg_queue()->is_empty())
+        return cancel_wakeup_output(g);
+
+    ACE_Message_Block* mblk;
+
+    if (msg_queue()->dequeue_head(mblk, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
+    {
+        sLog.outError("WorldSocket::handle_output_queue dequeue_head");
+        return -1;
+    }
+
+    const size_t send_len = mblk->length();
+
+#ifdef MSG_NOSIGNAL
+    ssize_t n = peer().send(mblk->rd_ptr(), send_len, MSG_NOSIGNAL);
+#else
+    ssize_t n = peer().send(mblk->rd_ptr(), send_len);
+#endif // MSG_NOSIGNAL
+
+    if (n == 0)
+    {
+        mblk->release();
+
+        return -1;
+    }
+    else if (n == -1)
+    {
+        if (errno == EWOULDBLOCK || errno == EAGAIN)
+        {
+            msg_queue()->enqueue_head(mblk, (ACE_Time_Value*)&ACE_Time_Value::zero);
+            return schedule_wakeup_output(g);
+        }
+
+        mblk->release();
+        return -1;
+    }
+    else if (n < (ssize_t)send_len) // now n > 0
+    {
+        mblk->rd_ptr(static_cast<size_t>(n));
+
+        if (msg_queue()->enqueue_head(mblk, (ACE_Time_Value*)&ACE_Time_Value::zero) == -1)
+        {
+            sLog.outError("WorldSocket::handle_output_queue enqueue_head");
+            mblk->release();
+            return -1;
+        }
+
+        return schedule_wakeup_output(g);
+    }
+    else // now n == send_len
+    {
+        mblk->release();
+
+        return msg_queue()->is_empty() ? cancel_wakeup_output(g) : ACE_Event_Handler::WRITE_MASK;
+    }
+
+    ACE_NOTREACHED(return -1);
 }
 
 int WorldSocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
 {
     // Critical section
     {
-        ACE_GUARD_RETURN(LockType, Guard, m_OutBufferLock, -1);
+        std::lock_guard<std::mutex> guard(m_OutBufferLock);
 
         closing_ = true;
 
@@ -335,9 +396,9 @@ int WorldSocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
 
     // Critical section
     {
-        ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
+        GUARD_RETURN(m_SessionLock, -1);
 
-        m_Session = NULL;
+        m_Session = nullptr;
     }
 
     reactor()->remove_handler(this, ACE_Event_Handler::DONT_CALL | ACE_Event_Handler::ALL_EVENTS_MASK);
@@ -357,7 +418,7 @@ int WorldSocket::Update(void)
 
 int WorldSocket::handle_input_header(void)
 {
-    MANGOS_ASSERT(m_RecvWPct == NULL);
+    MANGOS_ASSERT(m_RecvWPct == nullptr);
 
     MANGOS_ASSERT(m_Header.length() == sizeof(ClientPktHeader));
 
@@ -401,13 +462,13 @@ int WorldSocket::handle_input_payload(void)
 
     MANGOS_ASSERT(m_RecvPct.space() == 0);
     MANGOS_ASSERT(m_Header.space() == 0);
-    MANGOS_ASSERT(m_RecvWPct != NULL);
+    MANGOS_ASSERT(m_RecvWPct != nullptr);
 
     const int ret = ProcessIncoming(m_RecvWPct);
 
-    m_RecvPct.base(NULL, 0);
+    m_RecvPct.base(nullptr, 0);
     m_RecvPct.reset();
-    m_RecvWPct = NULL;
+    m_RecvWPct = nullptr;
 
     m_Header.reset();
 
@@ -473,7 +534,7 @@ int WorldSocket::handle_input_missing_data(void)
         // hope this is not hack ,as proper m_RecvWPct is asserted around
         if (!m_RecvWPct)
         {
-            sLog.outError("Forcing close on input m_RecvWPct = NULL");
+            sLog.outError("Forcing close on input m_RecvWPct = nullptr");
             errno = EINVAL;
             return -1;
         }
@@ -513,7 +574,10 @@ int WorldSocket::cancel_wakeup_output(GuardType& g)
 
     m_OutActive = false;
 
-    g.release();
+    // FIXME: I think it is okay to let this be released when it goes out of scope?
+    // If we call the destructor here, the behavior when it is called again upon going
+    // out of scope is undefined.
+    //g.release();
 
     if (reactor()->cancel_wakeup
             (this, ACE_Event_Handler::WRITE_MASK) == -1)
@@ -533,7 +597,10 @@ int WorldSocket::schedule_wakeup_output(GuardType& g)
 
     m_OutActive = true;
 
-    g.release();
+    // FIXME: I think it is okay to let this be released when it goes out of scope?
+    // If we call the destructor here, the behavior when it is called again upon going
+    // out of scope is undefined.
+    //g.release();
 
     if (reactor()->schedule_wakeup
             (this, ACE_Event_Handler::WRITE_MASK) == -1)
@@ -589,9 +656,9 @@ int WorldSocket::ProcessIncoming(WorldPacket* new_pct)
                 return 0;
             default:
             {
-                ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
+                GUARD_RETURN(m_SessionLock, -1);
 
-                if (m_Session != NULL)
+                if (m_Session != nullptr)
                 {
                     // OK ,give the packet to WorldSession
                     aptr.release();
@@ -744,9 +811,11 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     time_t mutetime = time_t (fields[7].GetUInt64());
 
-    locale = LocaleConstant(fields[8].GetUInt8());
-    if (locale >= MAX_LOCALE)
+    uint8 tempLoc = fields[8].GetUInt8();
+    if (tempLoc >= static_cast<uint8>(MAX_LOCALE))
         locale = LOCALE_enUS;
+    else
+        locale = LocaleConstant(tempLoc);
 
     delete result;
 
@@ -793,7 +862,7 @@ int WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     sha.UpdateData((uint8*) & t, 4);
     sha.UpdateData((uint8*) & clientSeed, 4);
     sha.UpdateData((uint8*) & seed, 4);
-    sha.UpdateBigNumbers(&K, NULL);
+    sha.UpdateBigNumbers(&K, nullptr);
     sha.Finalize();
 
     if (memcmp(sha.GetDigest(), digest, 20))
@@ -866,7 +935,7 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
 
             if (max_count && m_OverSpeedPings > max_count)
             {
-                ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
+                GUARD_RETURN(m_SessionLock, -1);
 
                 if (m_Session && m_Session->GetSecurity() == SEC_PLAYER)
                 {
@@ -884,7 +953,7 @@ int WorldSocket::HandlePing(WorldPacket& recvPacket)
 
     // critical section
     {
-        ACE_GUARD_RETURN(LockType, Guard, m_SessionLock, -1);
+        GUARD_RETURN(m_SessionLock, -1);
 
         if (m_Session)
         {

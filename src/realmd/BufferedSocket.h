@@ -23,12 +23,10 @@
 #ifndef _BUFFEREDSOCKET_H_
 #define _BUFFEREDSOCKET_H_
 
-#include <ace/Basic_Types.h>
 #include <ace/Synch_Traits.h>
 #include <ace/Svc_Handler.h>
 #include <ace/SOCK_Stream.h>
 #include <ace/Message_Block.h>
-#include <ace/Basic_Types.h>
 
 #include <string>
 

@@ -73,33 +73,19 @@ namespace Movement
 
     void WriteLinearPath(const Spline<int32>& spline, ByteBuffer& data)
     {
-        uint32 pointCount = spline.getPointCount() - 3;
-        uint32 last_idx = pointCount;
-        const Vector3* real_path = &spline.getPoint(1);
-        Vector3 destination = real_path[last_idx];
+        Movement::SplineBase::ControlArray const& pathPoint = spline.getPoints(); // get ref of whole path points array
 
-        size_t lastIndexPos = data.wpos();
-        data << last_idx;
+        uint32 pathSize = spline.last() - spline.first() - 1; // -1 as we send destination first and last index is destination
+        MANGOS_ASSERT(pathSize >= 0);                       // should never be less than 0
+
+        Vector3 destination = pathPoint[spline.last()];     // destination of this path should be send right after path size
+        data << pathSize;
         data << destination;
-        if (last_idx > 1)
+
+        for (uint32 i = spline.first(); i < spline.first() + pathSize; i++) // from first real index (this array contain also special data)
         {
-            Vector3 offset;
-            // first and last points already appended
-            for (uint32 i = 1; i < pointCount; ++i)
-            {
-                offset = destination - real_path[i];
-                // TODO: check if there is a better way to handle this like reworking path formatting to avoid generating such zero offset
-                // [-CLASSIC] The client freezes or crashes when it gets a zero offset.
-                // If the offset would be rounded to zero, skip it.
-                if (fabs(offset.x) < 0.25 && fabs(offset.y) < 0.25 && fabs(offset.z) < 0.25)
-                {
-                    // Remove 1 from the counter that will be sent to the client.
-                    last_idx--;
-                    data.put(lastIndexPos, last_idx);
-                    continue;
-                }
-                data.appendPackXYZ(offset.x, offset.y, offset.z);
-            }
+            Vector3 offset = destination - pathPoint[i];    // we have to send offset relative to destination instead of directly path point.
+            data.appendPackXYZ(offset.x, offset.y, offset.z); // we have to pack x,y,z before send
         }
     }
 
@@ -145,17 +131,17 @@ namespace Movement
 
             data << splineFlags.raw();
 
-            if (splineFlags.final_angle)
+            if (splineFlags.final_point)
             {
-                data << move_spline.facing.angle;
+                data << move_spline.facing.f.x << move_spline.facing.f.y << move_spline.facing.f.z;
             }
             else if (splineFlags.final_target)
             {
                 data << move_spline.facing.target;
             }
-            else if (splineFlags.final_point)
+            else if (splineFlags.final_angle)
             {
-                data << move_spline.facing.f.x << move_spline.facing.f.y << move_spline.facing.f.z;
+                data << move_spline.facing.angle;
             }
 
             data << move_spline.timePassed();

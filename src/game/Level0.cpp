@@ -28,7 +28,6 @@
 #include "ScriptMgr.h"
 #include "SystemConfig.h"
 #include "revision.h"
-#include "revision_nr.h"
 #include "Util.h"
 
 bool ChatHandler::HandleHelpCommand(char* args)
@@ -97,18 +96,14 @@ bool ChatHandler::HandleServerInfoCommand(char* /*args*/)
 
     char const* full;
     if (m_session)
-        full = _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, "|cffffffff|Hurl:" REVISION_ID "|h" REVISION_ID "|h|r");
+        full = _FULLVERSION(REVISION_DATE, REVISION_TIME, "|cffffffff|Hurl:" REVISION_ID "|h" REVISION_ID "|h|r");
     else
-        full = _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID);
+        full = _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID);
     SendSysMessage(full);
 
     if (sScriptMgr.IsScriptLibraryLoaded())
     {
-        char const* ver = sScriptMgr.GetScriptLibraryVersion();
-        if (ver && *ver)
-            PSendSysMessage(LANG_USING_SCRIPT_LIB, ver);
-        else
-            SendSysMessage(LANG_USING_SCRIPT_LIB_UNKNOWN);
+        SendSysMessage(LANG_USING_SCRIPT_LIB);
     }
     else
         SendSysMessage(LANG_USING_SCRIPT_LIB_NONE);

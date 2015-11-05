@@ -328,8 +328,9 @@ bool AuthSocket::_HandleLogonChallenge()
     buf.resize(4);
 
     recv((char*)&buf[0], 4);
-
-    EndianConvert(*((uint16*)(buf[0])));
+    void* pVoid = static_cast<void*>(&buf[0]);
+    uint16* pUint16 = static_cast<uint16 *>(pVoid);
+    EndianConvert(*pUint16);
     uint16 remaining = ((sAuthLogonChallenge_C*)&buf[0])->size;
     DEBUG_LOG("[AuthChallenge] got header, body is %#04x bytes", remaining);
 
@@ -529,7 +530,7 @@ bool AuthSocket::_HandleLogonProof()
         return false;
 
     ///- Check if the client has one of the expected version numbers
-    bool valid_version = FindBuildInfo(_build) != NULL;
+    bool valid_version = FindBuildInfo(_build) != nullptr;
 
     /// <ul><li> If the client has no valid version
     if (!valid_version)
@@ -544,7 +545,7 @@ bool AuthSocket::_HandleLogonProof()
         snprintf(tmp, 24, "./patches/%d%s.mpq", _build, _localizationName.c_str());
 
         char filename[PATH_MAX];
-        if (ACE_OS::realpath(tmp, filename) != NULL)
+        if (ACE_OS::realpath(tmp, filename) != nullptr)
         {
             patch_ = ACE_OS::open(filename, GENERIC_READ | FILE_FLAG_SEQUENTIAL_SCAN);
         }
@@ -572,11 +573,11 @@ bool AuthSocket::_HandleLogonProof()
             return false;
         }
 
-        if (!PatchCache::instance()->GetHash(tmp, (uint8*)&xferh.md5))
+        if (!sPatchCache.GetHash(tmp, (uint8*)&xferh.md5))
         {
             // calculate patch md5, happens if patch was added while realmd was running
-            PatchCache::instance()->LoadPatchMD5(tmp);
-            PatchCache::instance()->GetHash(tmp, (uint8*)&xferh.md5);
+            sPatchCache.LoadPatchMD5(tmp);
+            sPatchCache.GetHash(tmp, (uint8*)&xferh.md5);
         }
 
         uint8 data[2] = { CMD_AUTH_LOGON_PROOF, WOW_FAIL_VERSION_UPDATE};
@@ -601,7 +602,7 @@ bool AuthSocket::_HandleLogonProof()
         return false;
 
     Sha1Hash sha;
-    sha.UpdateBigNumbers(&A, &B, NULL);
+    sha.UpdateBigNumbers(&A, &B, nullptr);
     sha.Finalize();
     BigNumber u;
     u.SetBinary(sha.GetDigest(), 20);
@@ -638,11 +639,11 @@ bool AuthSocket::_HandleLogonProof()
     uint8 hash[20];
 
     sha.Initialize();
-    sha.UpdateBigNumbers(&N, NULL);
+    sha.UpdateBigNumbers(&N, nullptr);
     sha.Finalize();
     memcpy(hash, sha.GetDigest(), 20);
     sha.Initialize();
-    sha.UpdateBigNumbers(&g, NULL);
+    sha.UpdateBigNumbers(&g, nullptr);
     sha.Finalize();
     for (int i = 0; i < 20; ++i)
     {
@@ -658,9 +659,9 @@ bool AuthSocket::_HandleLogonProof()
     memcpy(t4, sha.GetDigest(), SHA_DIGEST_LENGTH);
 
     sha.Initialize();
-    sha.UpdateBigNumbers(&t3, NULL);
+    sha.UpdateBigNumbers(&t3, nullptr);
     sha.UpdateData(t4, SHA_DIGEST_LENGTH);
-    sha.UpdateBigNumbers(&s, &A, &B, &K, NULL);
+    sha.UpdateBigNumbers(&s, &A, &B, &K, nullptr);
     sha.Finalize();
     BigNumber M;
     M.SetBinary(sha.GetDigest(), 20);
@@ -678,7 +679,7 @@ bool AuthSocket::_HandleLogonProof()
 
         ///- Finish SRP6 and send the final result to the client
         sha.Initialize();
-        sha.UpdateBigNumbers(&A, &M, &K, NULL);
+        sha.UpdateBigNumbers(&A, &M, &K, nullptr);
         sha.Finalize();
 
         SendProof(sha);
@@ -755,7 +756,9 @@ bool AuthSocket::_HandleReconnectChallenge()
 
     recv((char*)&buf[0], 4);
 
-    EndianConvert(*((uint16*)(buf[0])));
+    void* pVoid = static_cast<void*>(&buf[0]);
+    uint16* pUint16 = static_cast<uint16 *>(pVoid);
+    EndianConvert(*pUint16);
     uint16 remaining = ((sAuthLogonChallenge_C*)&buf[0])->size;
     DEBUG_LOG("[ReconnectChallenge] got header, body is %#04x bytes", remaining);
 
@@ -823,7 +826,7 @@ bool AuthSocket::_HandleReconnectProof()
     Sha1Hash sha;
     sha.Initialize();
     sha.UpdateData(_login);
-    sha.UpdateBigNumbers(&t1, &_reconnectProof, &K, NULL);
+    sha.UpdateBigNumbers(&t1, &_reconnectProof, &K, nullptr);
     sha.Finalize();
 
     if (!memcmp(sha.GetDigest(), lp.R2, SHA_DIGEST_LENGTH))
@@ -917,7 +920,7 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid)
 
                 bool ok_build = std::find(i->second.realmbuilds.begin(), i->second.realmbuilds.end(), _build) != i->second.realmbuilds.end();
 
-                RealmBuildInfo const* buildInfo = ok_build ? FindBuildInfo(_build) : NULL;
+                RealmBuildInfo const* buildInfo = ok_build ? FindBuildInfo(_build) : nullptr;
                 if (!buildInfo)
                     buildInfo = &i->second.realmBuildInfo;
 
@@ -978,7 +981,7 @@ void AuthSocket::LoadRealmlist(ByteBuffer& pkt, uint32 acctid)
 
                 bool ok_build = std::find(i->second.realmbuilds.begin(), i->second.realmbuilds.end(), _build) != i->second.realmbuilds.end();
 
-                RealmBuildInfo const* buildInfo = ok_build ? FindBuildInfo(_build) : NULL;
+                RealmBuildInfo const* buildInfo = ok_build ? FindBuildInfo(_build) : nullptr;
                 if (!buildInfo)
                     buildInfo = &i->second.realmBuildInfo;
 

@@ -1,0 +1,2 @@
+ALTER TABLE character_db_version CHANGE COLUMN required_z2559_s2204_12756_01_characters_pvpstats required_z2678_02_characters bit;
+

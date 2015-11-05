@@ -57,7 +57,7 @@ INSTANTIATE_SINGLETON_1(Master);
 
 volatile uint32 Master::m_masterLoopCounter = 0;
 
-class FreezeDetectorRunnable : public ACE_Based::Runnable
+class FreezeDetectorRunnable : public MaNGOS::Runnable
 {
     public:
         FreezeDetectorRunnable() { _delaytime = 0; }
@@ -76,7 +76,7 @@ class FreezeDetectorRunnable : public ACE_Based::Runnable
             w_lastchange = 0;
             while (!World::IsStopped())
             {
-                ACE_Based::Thread::Sleep(1000);
+                MaNGOS::Thread::Sleep(1000);
 
                 uint32 curtime = WorldTimer::getMSTime();
                 // DEBUG_LOG("anti-freeze: time=%u, counters=[%u; %u]",curtime,Master::m_masterLoopCounter,World::m_worldLoopCounter);
@@ -91,14 +91,14 @@ class FreezeDetectorRunnable : public ACE_Based::Runnable
                 else if (WorldTimer::getMSTimeDiff(w_lastchange, curtime) > _delaytime)
                 {
                     sLog.outError("World Thread hangs, kicking out server!");
-                    *((uint32 volatile*)NULL) = 0;          // bang crash
+                    *((uint32 volatile*)nullptr) = 0;          // bang crash
                 }
             }
             sLog.outString("Anti-freeze thread exiting without problems.");
         }
 };
 
-class RARunnable : public ACE_Based::Runnable
+class RARunnable : public MaNGOS::Runnable
 {
     private:
         ACE_Reactor* m_Reactor;
@@ -213,8 +213,8 @@ int Master::Run()
     _HookSignals();
 
     ///- Launch WorldRunnable thread
-    ACE_Based::Thread world_thread(new WorldRunnable);
-    world_thread.setPriority(ACE_Based::Highest);
+    MaNGOS::Thread world_thread(new WorldRunnable);
+    world_thread.setPriority(MaNGOS::Priority_Highest);
 
     // set realmbuilds depend on mangosd expected builds, and set server online
     {
@@ -223,7 +223,7 @@ int Master::Run()
         LoginDatabase.DirectPExecute("UPDATE realmlist SET realmflags = realmflags & ~(%u), population = 0, realmbuilds = '%s'  WHERE id = '%u'", REALM_FLAG_OFFLINE, builds.c_str(), realmID);
     }
 
-    ACE_Based::Thread* cliThread = NULL;
+    MaNGOS::Thread* cliThread = nullptr;
 
 #ifdef WIN32
     if (sConfig.GetBoolDefault("Console.Enable", true) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
@@ -232,13 +232,13 @@ int Master::Run()
 #endif
     {
         ///- Launch CliRunnable thread
-        cliThread = new ACE_Based::Thread(new CliRunnable);
+        cliThread = new MaNGOS::Thread(new CliRunnable);
     }
 
-    ACE_Based::Thread* rar_thread = NULL;
+    MaNGOS::Thread* rar_thread = nullptr;
     if (sConfig.GetBoolDefault("Ra.Enable", false))
     {
-        rar_thread = new ACE_Based::Thread(new RARunnable);
+        rar_thread = new MaNGOS::Thread(new RARunnable);
     }
 
     ///- Handle affinity for multiple processors and process priority on Windows
@@ -286,31 +286,31 @@ int Master::Run()
 #endif
 
     ///- Start soap serving thread
-    ACE_Based::Thread* soap_thread = NULL;
+    MaNGOS::Thread* soap_thread = nullptr;
 
     if (sConfig.GetBoolDefault("SOAP.Enabled", false))
     {
         MaNGOSsoapRunnable* runnable = new MaNGOSsoapRunnable();
 
         runnable->setListenArguments(sConfig.GetStringDefault("SOAP.IP", "127.0.0.1"), sConfig.GetIntDefault("SOAP.Port", 7878));
-        soap_thread = new ACE_Based::Thread(runnable);
+        soap_thread = new MaNGOS::Thread(runnable);
     }
 
     ///- Start up freeze catcher thread
-    ACE_Based::Thread* freeze_thread = NULL;
+    MaNGOS::Thread* freeze_thread = nullptr;
     if (uint32 freeze_delay = sConfig.GetIntDefault("MaxCoreStuckTime", 0))
     {
         FreezeDetectorRunnable* fdr = new FreezeDetectorRunnable();
         fdr->SetDelayTime(freeze_delay * 1000);
-        freeze_thread = new ACE_Based::Thread(fdr);
-        freeze_thread->setPriority(ACE_Based::Highest);
+        freeze_thread = new MaNGOS::Thread(fdr);
+        freeze_thread->setPriority(MaNGOS::Priority_Highest);
     }
 
     ///- Launch the world listener socket
     uint16 wsport = sWorld.getConfig(CONFIG_UINT32_PORT_WORLD);
     std::string bind_ip = sConfig.GetStringDefault("BindIP", "0.0.0.0");
 
-    if (sWorldSocketMgr->StartNetwork(wsport, bind_ip) == -1)
+    if (sWorldSocketMgr.StartNetwork(wsport, bind_ip) == -1)
     {
         sLog.outError("Failed to start network");
         Log::WaitBeforeContinueIfNeed();
@@ -318,7 +318,7 @@ int Master::Run()
         // go down and shutdown the server
     }
 
-    sWorldSocketMgr->Wait();
+    sWorldSocketMgr.Wait();
 
     ///- Stop freeze protection before shutdown tasks
     if (freeze_thread)

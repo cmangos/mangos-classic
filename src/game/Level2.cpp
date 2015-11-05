@@ -92,7 +92,7 @@ bool ChatHandler::HandleMuteCommand(char* args)
     if (HasLowerSecurity(target, target_guid, true))
         return false;
 
-    time_t mutetime = time(NULL) + notspeaktime * 60;
+    time_t mutetime = time(nullptr) + notspeaktime * 60;
 
     if (target)
         target->GetSession()->m_muteTime = mutetime;
@@ -199,9 +199,9 @@ void ChatHandler::ShowTriggerListHelper(AreaTriggerEntry const* atEntry)
 
 bool ChatHandler::HandleTriggerCommand(char* args)
 {
-    AreaTriggerEntry const* atEntry = NULL;
+    AreaTriggerEntry const* atEntry = nullptr;
 
-    Player* pl = m_session ? m_session->GetPlayer() : NULL;
+    Player* pl = m_session ? m_session->GetPlayer() : nullptr;
 
     // select by args
     if (*args)
@@ -389,7 +389,7 @@ static char const* const areatriggerKeys[] =
 {
     "Hareatrigger",
     "Hareatrigger_target",
-    NULL
+    nullptr
 };
 
 bool ChatHandler::HandleGoTriggerCommand(char* args)
@@ -468,7 +468,7 @@ static char const* const creatureKeys[] =
 {
     "Hcreature",
     "Hcreature_entry",
-    NULL
+    nullptr
 };
 
 /** \brief Teleport the GM to the specified creature
@@ -506,7 +506,7 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
         crType = CREATURE_LINK_ENTRY;
     }
 
-    CreatureData const* data = NULL;
+    CreatureData const* data = nullptr;
 
     switch (crType)
     {
@@ -526,7 +526,7 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
                 return false;
             }
 
-            FindCreatureData worker(tEntry, m_session ? m_session->GetPlayer() : NULL);
+            FindCreatureData worker(tEntry, m_session ? m_session->GetPlayer() : nullptr);
 
             sObjectMgr.DoCreatureData(worker);
 
@@ -582,7 +582,7 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
                     return false;
                 }
 
-                FindCreatureData worker(0, m_session ? m_session->GetPlayer() : NULL);
+                FindCreatureData worker(0, m_session ? m_session->GetPlayer() : nullptr);
 
                 do
                 {
@@ -627,7 +627,7 @@ static char const* const gameobjectKeys[] =
 {
     "Hgameobject",
     "Hgameobject_entry",
-    NULL
+    nullptr
 };
 
 // teleport to gameobject
@@ -652,7 +652,7 @@ bool ChatHandler::HandleGoObjectCommand(char* args)
         goType = GAMEOBJECT_LINK_ENTRY;
     }
 
-    GameObjectData const* data = NULL;
+    GameObjectData const* data = nullptr;
 
     switch (goType)
     {
@@ -672,7 +672,7 @@ bool ChatHandler::HandleGoObjectCommand(char* args)
                 return false;
             }
 
-            FindGOData worker(tEntry, m_session ? m_session->GetPlayer() : NULL);
+            FindGOData worker(tEntry, m_session ? m_session->GetPlayer() : nullptr);
 
             sObjectMgr.DoGOData(worker);
 
@@ -730,7 +730,7 @@ bool ChatHandler::HandleGoObjectCommand(char* args)
                     return false;
                 }
 
-                FindGOData worker(0, m_session ? m_session->GetPlayer() : NULL);
+                FindGOData worker(0, m_session ? m_session->GetPlayer() : nullptr);
 
                 do
                 {
@@ -795,7 +795,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
     else
     {
         std::ostringstream eventFilter;
-        eventFilter << " AND (event IS NULL ";
+        eventFilter << " AND (event IS nullptr ";
         bool initString = true;
 
         for (GameEventMgr::ActiveEvents::const_iterator itr = activeEventsList.begin(); itr != activeEventsList.end(); ++itr)
@@ -869,7 +869,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
 
     if (target)
     {
-        time_t curRespawnDelay = target->GetRespawnTimeEx() - time(NULL);
+        time_t curRespawnDelay = target->GetRespawnTimeEx() - time(nullptr);
         if (curRespawnDelay < 0)
             curRespawnDelay = 0;
 
@@ -899,7 +899,7 @@ bool ChatHandler::HandleGameObjectDeleteCommand(char* args)
     if (!lowguid)
         return false;
 
-    GameObject* obj = NULL;
+    GameObject* obj = nullptr;
 
     // by DB guid
     if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))
@@ -945,7 +945,7 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
     if (!lowguid)
         return false;
 
-    GameObject* obj = NULL;
+    GameObject* obj = nullptr;
 
     // by DB guid
     if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))
@@ -989,7 +989,7 @@ bool ChatHandler::HandleGameObjectMoveCommand(char* args)
     if (!lowguid)
         return false;
 
-    GameObject* obj = NULL;
+    GameObject* obj = nullptr;
 
     // by DB guid
     if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))
@@ -1194,7 +1194,7 @@ bool ChatHandler::HandleGUIDCommand(char* /*args*/)
     return true;
 }
 
-void ChatHandler::ShowFactionListHelper(FactionEntry const* factionEntry, LocaleConstant loc, FactionState const* repState /*= NULL*/, Player* target /*= NULL */)
+void ChatHandler::ShowFactionListHelper(FactionEntry const* factionEntry, LocaleConstant loc, FactionState const* repState /*= nullptr*/, Player* target /*= nullptr */)
 {
     std::string name = factionEntry->name[loc];
     // send faction in "id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
@@ -1205,7 +1205,7 @@ void ChatHandler::ShowFactionListHelper(FactionEntry const* factionEntry, Locale
     else
         ss << factionEntry->ID << " - " << name << " " << localeNames[loc];
 
-    if (repState)                               // and then target!=NULL also
+    if (repState)                               // and then target!=nullptr also
     {
         ReputationRank rank = target->GetReputationMgr().GetRank(factionEntry);
         std::string rankName = GetMangosString(ReputationRankStrIndex[rank]);
@@ -1236,7 +1236,7 @@ bool ChatHandler::HandleLookupFactionCommand(char* args)
     if (!*args)
         return false;
 
-    // Can be NULL at console call
+    // Can be nullptr at console call
     Player* target = getSelectedPlayer();
 
     std::string namepart = args;
@@ -1279,7 +1279,7 @@ bool ChatHandler::HandleLookupFactionCommand(char* args)
 
             if (loc < MAX_LOCALE)
             {
-                FactionState const* repState = target ? target->GetReputationMgr().GetState(factionEntry) : NULL;
+                FactionState const* repState = target ? target->GetReputationMgr().GetState(factionEntry) : nullptr;
                 ShowFactionListHelper(factionEntry, LocaleConstant(loc), repState, target);
                 ++counter;
             }
@@ -1605,7 +1605,7 @@ bool ChatHandler::HandleNpcFlagCommand(char* args)
 
 bool ChatHandler::HandleNpcDeleteCommand(char* args)
 {
-    Creature* unit = NULL;
+    Creature* unit = nullptr;
 
     if (*args)
     {
@@ -1790,12 +1790,12 @@ bool ChatHandler::HandleNpcSetMoveTypeCommand(char* args)
     else
         return false;
 
-    bool doNotDelete = ExtractLiteralArg(&args, "NODEL") != NULL;
+    bool doNotDelete = ExtractLiteralArg(&args, "NODEL") != nullptr;
     if (!doNotDelete && *args)                              // need fail if false in result wrong literal
         return false;
 
     // now lowguid is low guid really existing creature
-    // and pCreature point (maybe) to this creature or NULL
+    // and pCreature point (maybe) to this creature or nullptr
 
     // update movement type
     if (!doNotDelete)
@@ -2162,7 +2162,7 @@ bool ChatHandler::HandleItemMoveCommand(char* args)
     if (!pParam1)
         return false;
 
-    char* pParam2 = strtok(NULL, " ");
+    char* pParam2 = strtok(nullptr, " ");
     if (!pParam2)
         return false;
 
@@ -2290,7 +2290,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     else
     {
         // check offline security
-        if (HasLowerSecurity(NULL, target_guid))
+        if (HasLowerSecurity(nullptr, target_guid))
             return false;
 
         //                                                     0          1      2      3
@@ -2418,7 +2418,7 @@ bool ChatHandler::HandleTicketCommand(char* args)
     // ticket respond
     if (strncmp(px, "respond", 8) == 0)
     {
-        GMTicket* ticket = NULL;
+        GMTicket* ticket = nullptr;
 
         // ticket respond #num
         uint32 num;
@@ -2441,7 +2441,7 @@ bool ChatHandler::HandleTicketCommand(char* args)
         {
             ObjectGuid target_guid;
             std::string target_name;
-            if (!ExtractPlayerTarget(&args, NULL, &target_guid, &target_name))
+            if (!ExtractPlayerTarget(&args, nullptr, &target_guid, &target_name))
                 return false;
 
             // ticket respond $char_name
@@ -2489,7 +2489,7 @@ bool ChatHandler::HandleTicketCommand(char* args)
 
     ObjectGuid target_guid;
     std::string target_name;
-    if (!ExtractPlayerTarget(&px, NULL, &target_guid, &target_name))
+    if (!ExtractPlayerTarget(&px, nullptr, &target_guid, &target_name))
         return false;
 
     // ticket $char_name
@@ -2584,7 +2584,7 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
     if (!wpCreature->Create(wpOwner->GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
     {
         delete wpCreature;
-        return NULL;
+        return nullptr;
     }
 
     wpCreature->SetVisibility(VISIBILITY_OFF);
@@ -2646,7 +2646,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
     WaypointPathOrigin wpDestination = PATH_NO_PATH;        ///< into which storage
     int32 wpPathId = 0;                                     ///< along which path
     uint32 wpPointId = 0;                                   ///< pointId if a waypoint was selected, in this case insert after
-    Creature* wpOwner = NULL;
+    Creature* wpOwner = nullptr;
 
     if (targetCreature)
     {
@@ -2836,7 +2836,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
 
     // Did user provide a GUID or did the user select a creature?
     Creature* targetCreature = getSelectedCreature();       // Expect a visual waypoint to be selected
-    Creature* wpOwner = NULL;                               // Who moves along the waypoint
+    Creature* wpOwner = nullptr;                               // Who moves along the waypoint
     uint32 wpId = 0;
     WaypointPathOrigin wpSource = PATH_NO_PATH;
     int32 wpPathId = 0;
@@ -3089,8 +3089,8 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         }
     }
 
-    Creature* wpOwner = NULL;                               ///< Npc that is moving
-    TemporarySummonWaypoint* wpTarget = NULL;               // Define here for wp-info command
+    Creature* wpOwner = nullptr;                               ///< Npc that is moving
+    TemporarySummonWaypoint* wpTarget = nullptr;               // Define here for wp-info command
 
     // Show info for the selected waypoint (Step one: get moving npc)
     if (subCmd == "info")
@@ -3127,7 +3127,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         wpOwner = targetCreature;
 
     // Get the path
-    WaypointPath* wpPath = NULL;
+    WaypointPath* wpPath = nullptr;
     if (wpOrigin != PATH_NO_PATH)                           // Might have been provided by param
         wpPath = sWaypointMgr.GetPathFromOrigin(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPathId, wpOrigin);
     else
@@ -3240,7 +3240,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
     if (!*args)
         return false;
 
-    Creature* wpOwner = NULL;
+    Creature* wpOwner = nullptr;
     WaypointPathOrigin wpOrigin = PATH_NO_PATH;
     int32 wpPathId = 0;
 
@@ -3414,7 +3414,7 @@ bool ChatHandler::HandleCharacterRenameCommand(char* args)
     else
     {
         // check offline security
-        if (HasLowerSecurity(NULL, target_guid))
+        if (HasLowerSecurity(nullptr, target_guid))
             return false;
 
         std::string oldNameLink = playerLink(target_name);
@@ -3524,8 +3524,8 @@ bool ChatHandler::HandleHonorShow(char* /*args*/)
         LANG_HRD_HIGH_WARLORD,
         // LANG_GAME_MASTER
     };
-    char const* rank_name = NULL;
-    char const* hrank_name = NULL;
+    char const* rank_name = nullptr;
+    char const* hrank_name = nullptr;
 
     uint32 honor_rank = target->GetHonorRankInfo().visualRank;
 
@@ -3789,8 +3789,8 @@ bool ChatHandler::HandleEventInfoCommand(char* args)
     std::string endTimeStr = TimeToTimestampStr(eventData.end);
 
     uint32 delay = sGameEventMgr.NextCheck(event_id);
-    time_t nextTime = time(NULL) + delay;
-    std::string nextStr = nextTime >= eventData.start && nextTime < eventData.end ? TimeToTimestampStr(time(NULL) + delay) : "-";
+    time_t nextTime = time(nullptr) + delay;
+    std::string nextStr = nextTime >= eventData.start && nextTime < eventData.end ? TimeToTimestampStr(time(nullptr) + delay) : "-";
 
     std::string occurenceStr = secsToTimeString(eventData.occurence * MINUTE);
     std::string lengthStr = secsToTimeString(eventData.length * MINUTE);
@@ -3971,7 +3971,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(char* args)
 
     std::string name;
 
-    SkillLineEntry const* targetSkillInfo = NULL;
+    SkillLineEntry const* targetSkillInfo = nullptr;
     for (uint32 i = 1; i < sSkillLineStore.GetNumRows(); ++i)
     {
         SkillLineEntry const* skillInfo = sSkillLineStore.LookupEntry(i);
@@ -4112,7 +4112,7 @@ bool ChatHandler::ShowAccountListHelper(QueryResult* result, uint32* limit, bool
         uint32 account = fields[0].GetUInt32();
 
         WorldSession* session = sWorld.FindSession(account);
-        Player* player = session ? session->GetPlayer() : NULL;
+        Player* player = session ? session->GetPlayer() : nullptr;
         char const* char_name = player ? player->GetName() : " - ";
 
         if (m_session)
@@ -4365,10 +4365,10 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
         return true;
     }
 
-    Player* player = m_session ? m_session->GetPlayer() : NULL;
+    Player* player = m_session ? m_session->GetPlayer() : nullptr;
 
-    MapPersistentState* mapState = player ? player->GetMap()->GetPersistentState() : NULL;
-    SpawnedPoolData const* spawns = mapState ? &mapState->GetSpawnedPoolData() : NULL;
+    MapPersistentState* mapState = player ? player->GetMap()->GetPersistentState() : nullptr;
+    SpawnedPoolData const* spawns = mapState ? &mapState->GetSpawnedPoolData() : nullptr;
 
     std::string active_str = GetMangosString(LANG_ACTIVE);
 
@@ -4388,7 +4388,7 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     }
 
     PoolGroup<Creature> const& poolCreatures = sPoolMgr.GetPoolCreatures(pool_id);
-    SpawnedPoolObjects const* crSpawns = spawns ? &spawns->GetSpawnedCreatures() : NULL;
+    SpawnedPoolObjects const* crSpawns = spawns ? &spawns->GetSpawnedCreatures() : nullptr;
 
     PoolObjectList const& poolCreaturesEx = poolCreatures.GetExplicitlyChanced();
     if (!poolCreaturesEx.empty())
@@ -4435,7 +4435,7 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     }
 
     PoolGroup<GameObject> const& poolGameObjects = sPoolMgr.GetPoolGameObjects(pool_id);
-    SpawnedPoolObjects const* goSpawns = spawns ? &spawns->GetSpawnedGameobjects() : NULL;
+    SpawnedPoolObjects const* goSpawns = spawns ? &spawns->GetSpawnedGameobjects() : nullptr;
 
     PoolObjectList const& poolGameObjectsEx = poolGameObjects.GetExplicitlyChanced();
     if (!poolGameObjectsEx.empty())
@@ -4482,7 +4482,7 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     }
 
     PoolGroup<Pool> const& poolPools = sPoolMgr.GetPoolPools(pool_id);
-    SpawnedPoolPools const* poolSpawns = spawns ? &spawns->GetSpawnedPools() : NULL;
+    SpawnedPoolPools const* poolSpawns = spawns ? &spawns->GetSpawnedPools() : nullptr;
 
     PoolObjectList const& poolPoolsEx = poolPools.GetExplicitlyChanced();
     if (!poolPoolsEx.empty())
@@ -4617,7 +4617,7 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
         if (strcmp(para, "go") == 0)
         {
             followPath = true;
-            para = strtok(NULL, " ");
+            para = strtok(nullptr, " ");
             if (para && strcmp(para, "straight") == 0)
                 useStraightPath = true;
         }
@@ -4656,7 +4656,7 @@ bool ChatHandler::HandleMmapPathCommand(char* args)
     path.calculate(x, y, z);
 
     PointsArray pointPath = path.getPath();
-    PSendSysMessage("%s's path to %s:", target->GetName(), player->GetName());
+    PSendSysMessage("%s's path to %s:", originUnit->GetName(), destinationUnit->GetName());
     PSendSysMessage("Building %s", useStraightPath ? "StraightPath" : "SmoothPath");
     PSendSysMessage("length " SIZEFMTD " type %u", pointPath.size(), path.getPathType());
 
@@ -4722,7 +4722,7 @@ bool ChatHandler::HandleMmapLocCommand(char* /*args*/)
     // navmesh poly -> navmesh tile location
     dtQueryFilter filter = dtQueryFilter();
     dtPolyRef polyRef = INVALID_POLYREF;
-    navmeshquery->findNearestPoly(location, extents, &filter, &polyRef, NULL);
+    navmeshquery->findNearestPoly(location, extents, &filter, &polyRef, nullptr);
 
     if (polyRef == INVALID_POLYREF)
         PSendSysMessage("Dt     [??,??] (invalid poly, probably no tile loaded)");

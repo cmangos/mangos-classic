@@ -27,7 +27,7 @@
 #include "Threading.h"
 
 /// Command Line Interface handling thread
-class CliRunnable : public ACE_Based::Runnable
+class CliRunnable : public MaNGOS::Runnable
 {
     public:
         void run() override;

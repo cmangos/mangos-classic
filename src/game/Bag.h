@@ -20,11 +20,16 @@
 #define MANGOS_BAG_H
 
 #include "Common.h"
-#include "ItemPrototype.h"
 #include "Item.h"
 
 // Maximum 28 Slots ( (CONTAINER_END - CONTAINER_FIELD_SLOT_1)/2
 #define MAX_BAG_SIZE 28                                     // 1.12
+
+enum InventorySlot
+{
+    NULL_BAG = 0,
+    NULL_SLOT = 255
+};
 
 class Bag : public Item
 {
@@ -44,7 +49,7 @@ class Bag : public Item
 
         Item* GetItemByPos(uint8 slot) const;
         Item* GetItemByEntry(uint32 item) const;
-        uint32 GetItemCount(uint32 item, Item* eItem = NULL) const;
+        uint32 GetItemCount(uint32 item, Item* eItem = nullptr) const;
 
         uint8 GetSlotByItemGUID(ObjectGuid guid) const;
         bool IsEmpty() const;

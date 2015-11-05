@@ -34,8 +34,6 @@
 #include "Mail.h"
 #include "LuaEngine.h"
 
-#include "revision_nr.h"
-
 ScriptMapMapName sQuestEndScripts;
 ScriptMapMapName sQuestStartScripts;
 ScriptMapMapName sSpellScripts;
@@ -49,39 +47,38 @@ ScriptMapMapName sCreatureMovementScripts;
 INSTANTIATE_SINGLETON_1(ScriptMgr);
 
 ScriptMgr::ScriptMgr() :
-    m_hScriptLib(NULL),
-    m_scheduledScripts(0),
+    m_hScriptLib(nullptr),
 
-    m_pOnInitScriptLibrary(NULL),
-    m_pOnFreeScriptLibrary(NULL),
-    m_pGetScriptLibraryVersion(NULL),
+    m_pOnInitScriptLibrary(nullptr),
+    m_pOnFreeScriptLibrary(nullptr),
 
-    m_pGetCreatureAI(NULL),
-    m_pCreateInstanceData(NULL),
+    m_pGetCreatureAI(nullptr),
+    m_pCreateInstanceData(nullptr),
 
-    m_pOnGossipHello(NULL),
-    m_pOnGOGossipHello(NULL),
-    m_pOnGossipSelect(NULL),
-    m_pOnGOGossipSelect(NULL),
-    m_pOnGossipSelectWithCode(NULL),
-    m_pOnGOGossipSelectWithCode(NULL),
-    m_pOnQuestAccept(NULL),
-    m_pOnGOQuestAccept(NULL),
-    m_pOnItemQuestAccept(NULL),
-    m_pOnQuestRewarded(NULL),
-    m_pOnGOQuestRewarded(NULL),
-    m_pGetNPCDialogStatus(NULL),
-    m_pGetGODialogStatus(NULL),
-    m_pOnGOUse(NULL),
-    m_pOnItemUse(NULL),
-    m_pOnAreaTrigger(NULL),
-    m_pOnProcessEvent(NULL),
-    m_pOnEffectDummyCreature(NULL),
-    m_pOnEffectDummyGO(NULL),
-    m_pOnEffectDummyItem(NULL),
-    m_pOnEffectScriptEffectCreature(NULL),
-    m_pOnAuraDummy(NULL)
+    m_pOnGossipHello(nullptr),
+    m_pOnGOGossipHello(nullptr),
+    m_pOnGossipSelect(nullptr),
+    m_pOnGOGossipSelect(nullptr),
+    m_pOnGossipSelectWithCode(nullptr),
+    m_pOnGOGossipSelectWithCode(nullptr),
+    m_pOnQuestAccept(nullptr),
+    m_pOnGOQuestAccept(nullptr),
+    m_pOnItemQuestAccept(nullptr),
+    m_pOnQuestRewarded(nullptr),
+    m_pOnGOQuestRewarded(nullptr),
+    m_pGetNPCDialogStatus(nullptr),
+    m_pGetGODialogStatus(nullptr),
+    m_pOnGOUse(nullptr),
+    m_pOnItemUse(nullptr),
+    m_pOnAreaTrigger(nullptr),
+    m_pOnProcessEvent(nullptr),
+    m_pOnEffectDummyCreature(nullptr),
+    m_pOnEffectDummyGO(nullptr),
+    m_pOnEffectDummyItem(nullptr),
+    m_pOnEffectScriptEffectCreature(nullptr),
+    m_pOnAuraDummy(nullptr)
 {
+    m_scheduledScripts = 0;
 }
 
 ScriptMgr::~ScriptMgr()
@@ -687,7 +684,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
-            case SCRIPT_COMMAND_SEND_AI_EVENT_AROUND:       // 35
+            case SCRIPT_COMMAND_SEND_AI_EVENT:              // 35
             {
                 if (tmp.sendAIEvent.eventType >= MAXIMAL_AI_EVENT_EVENTAI)
                 {
@@ -702,7 +699,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             {
                 if (tmp.moveDynamic.maxDist < tmp.moveDynamic.minDist)
                 {
-                    sLog.outErrorDb("Table `%s` has invalid min-dist (datalong2 = %u) less than max-dist (datalon = %u) in SCRIPT_COMMAND_MOVE_DYNAMIC for script id %u", tablename, tmp.moveDynamic.minDist, tmp.moveDynamic.maxDist, tmp.id);
+                    sLog.outErrorDb("Table `%s` has invalid min-dist (datalong2 = %u) less than max-dist (datalong = %u) in SCRIPT_COMMAND_MOVE_DYNAMIC for script id %u", tablename, tmp.moveDynamic.minDist, tmp.moveDynamic.maxDist, tmp.id);
                     continue;
                 }
                 break;
@@ -721,6 +718,10 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_SET_FLY:                    // 39
+            case SCRIPT_COMMAND_DESPAWN_GO:                 // 40
+            case SCRIPT_COMMAND_RESPAWN:                    // 41
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -921,7 +922,7 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32
 /// returns false iff an error happened
 bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeItem, Object*& resultObject)
 {
-    resultObject = NULL;
+    resultObject = nullptr;
 
     if (!guid)
         return true;
@@ -960,7 +961,7 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
     }
 
     if (resultObject && !resultObject->IsInWorld())
-        resultObject = NULL;
+        resultObject = nullptr;
 
     return true;
 }
@@ -969,7 +970,7 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
 /// Returns false iff an error happened
 bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject* pOrigTarget, WorldObject*& pFinalSource, WorldObject*& pFinalTarget)
 {
-    WorldObject* pBuddy = NULL;
+    WorldObject* pBuddy = nullptr;
 
     if (m_script->buddyEntry)
     {
@@ -1013,15 +1014,24 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
 
             if (m_script->IsCreatureBuddy())
             {
-                Creature* pCreatureBuddy = NULL;
+                Creature* pCreatureBuddy = nullptr;
 
-                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->buddyEntry, true, false, m_script->searchRadiusOrGuid, true);
-                MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
-
-                if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_PET)
-                    Cell::VisitWorldObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
-                else                                        // Normal Creature
+                if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_DESPAWNED)
+                {
+                    MaNGOS::AllCreaturesOfEntryInRangeCheck u_check(pSearcher, m_script->buddyEntry, m_script->searchRadiusOrGuid);
+                    MaNGOS::CreatureLastSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(pCreatureBuddy, u_check);
                     Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
+                }
+                else
+                {
+                    MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->buddyEntry, true, false, m_script->searchRadiusOrGuid, true);
+                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
+
+                    if (m_script->data_flags & SCRIPT_FLAG_BUDDY_IS_PET)
+                        Cell::VisitWorldObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
+                    else                                        // Normal Creature
+                        Cell::VisitGridObjects(pSearcher, searcher, m_script->searchRadiusOrGuid);
+                }
 
                 pBuddy = pCreatureBuddy;
 
@@ -1034,7 +1044,7 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
             }
             else
             {
-                GameObject* pGOBuddy = NULL;
+                GameObject* pGOBuddy = nullptr;
 
                 MaNGOS::NearestGameObjectEntryInObjectRangeCheck u_check(*pSearcher, m_script->buddyEntry, m_script->searchRadiusOrGuid);
                 MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> searcher(pGOBuddy, u_check);
@@ -1115,7 +1125,7 @@ Player* ScriptAction::GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldO
     if ((!pTarget || pTarget->GetTypeId() != TYPEID_PLAYER) && (!pSource || pSource->GetTypeId() != TYPEID_PLAYER))
     {
         sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u call for non player, skipping.", m_table, m_script->id, m_script->command);
-        return NULL;
+        return nullptr;
     }
 
     return pTarget && pTarget->GetTypeId() == TYPEID_PLAYER ? (Player*)pTarget : (Player*)pSource;
@@ -1131,8 +1141,8 @@ bool ScriptAction::HandleScriptStep()
 
     {
         // Add scope for source & target variables so that they are not used below
-        Object* source = NULL;
-        Object* target = NULL;
+        Object* source = nullptr;
+        Object* target = nullptr;
         if (!GetScriptCommandObject(m_sourceGuid, true, source))
             return false;
         if (!GetScriptCommandObject(m_targetGuid, false, target))
@@ -1142,12 +1152,12 @@ bool ScriptAction::HandleScriptStep()
         DEBUG_LOG("DB-SCRIPTS: Process table `%s` id %u, command %u for source %s (%sin world), target %s (%sin world)", m_table, m_script->id, m_script->command, m_sourceGuid.GetString().c_str(), source ? "" : "not ", m_targetGuid.GetString().c_str(), target ? "" : "not ");
 
         // Get expected source and target (if defined with buddy)
-        pSource = source && source->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)source : NULL;
-        pTarget = target && target->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)target : NULL;
+        pSource = source && source->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)source : nullptr;
+        pTarget = target && target->isType(TYPEMASK_WORLDOBJECT) ? (WorldObject*)target : nullptr;
         if (!GetScriptProcessTargets(pSource, pTarget, pSource, pTarget))
             return false;
 
-        pSourceOrItem = pSource ? pSource : (source && source->isType(TYPEMASK_ITEM) ? source : NULL);
+        pSourceOrItem = pSource ? pSource : (source && source->isType(TYPEMASK_ITEM) ? source : nullptr);
     }
 
     switch (m_script->command)
@@ -1160,7 +1170,7 @@ bool ScriptAction::HandleScriptStep()
                 break;
             }
 
-            Unit* unitTarget = pTarget && pTarget->isType(TYPEMASK_UNIT) ? static_cast<Unit*>(pTarget) : NULL;
+            Unit* unitTarget = pTarget && pTarget->isType(TYPEMASK_UNIT) ? static_cast<Unit*>(pTarget) : nullptr;
             int32 textId = m_script->textId[0];
 
             // May have text for random
@@ -1201,7 +1211,7 @@ bool ScriptAction::HandleScriptStep()
         case SCRIPT_COMMAND_FIELD_SET:                      // 2
             if (!pSourceOrItem)
             {
-                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u call for NULL object.", m_table, m_script->id, m_script->command);
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u call for nullptr object.", m_table, m_script->id, m_script->command);
                 break;
             }
             if (m_script->setField.fieldId <= OBJECT_FIELD_ENTRY || m_script->setField.fieldId >= pSourceOrItem->GetValuesCount())
@@ -1246,7 +1256,7 @@ bool ScriptAction::HandleScriptStep()
         case SCRIPT_COMMAND_FLAG_SET:                       // 4
             if (!pSourceOrItem)
             {
-                sLog.outErrorDb("SCRIPT_COMMAND_FLAG_SET (script id %u) call for NULL object.", m_script->id);
+                sLog.outErrorDb("SCRIPT_COMMAND_FLAG_SET (script id %u) call for nullptr object.", m_script->id);
                 break;
             }
             if (m_script->setFlag.fieldId <= OBJECT_FIELD_ENTRY || m_script->setFlag.fieldId >= pSourceOrItem->GetValuesCount())
@@ -1260,7 +1270,7 @@ bool ScriptAction::HandleScriptStep()
         case SCRIPT_COMMAND_FLAG_REMOVE:                    // 5
             if (!pSourceOrItem)
             {
-                sLog.outErrorDb("SCRIPT_COMMAND_FLAG_REMOVE (script id %u) call for NULL object.", m_script->id);
+                sLog.outErrorDb("SCRIPT_COMMAND_FLAG_REMOVE (script id %u) call for nullptr object.", m_script->id);
                 break;
             }
             if (m_script->removeFlag.fieldId <= OBJECT_FIELD_ENTRY || m_script->removeFlag.fieldId >= pSourceOrItem->GetValuesCount())
@@ -1286,7 +1296,7 @@ bool ScriptAction::HandleScriptStep()
             if (!pPlayer)
                 break;
 
-            WorldObject* pWorldObject = NULL;
+            WorldObject* pWorldObject = nullptr;
             if (pSource && pSource->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
                 pWorldObject = pSource;
             else if (pTarget && pTarget->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
@@ -1321,7 +1331,7 @@ bool ScriptAction::HandleScriptStep()
                 break;
 
             uint32 creatureEntry = m_script->killCredit.creatureEntry;
-            WorldObject* pRewardSource = pSource && pSource->GetTypeId() == TYPEID_UNIT ? pSource : (pTarget && pTarget->GetTypeId() == TYPEID_UNIT ? pTarget : NULL);
+            WorldObject* pRewardSource = pSource && pSource->GetTypeId() == TYPEID_UNIT ? pSource : (pTarget && pTarget->GetTypeId() == TYPEID_UNIT ? pTarget : nullptr);
 
             // dynamic effect, take entry of reward Source
             if (!creatureEntry)
@@ -1349,7 +1359,7 @@ bool ScriptAction::HandleScriptStep()
         }
         case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:             // 9
         {
-            GameObject* pGo = NULL;
+            GameObject* pGo = nullptr;
             uint32 time_to_despawn = m_script->respawnGo.despawnDelay < 5 ? 5 : m_script->respawnGo.despawnDelay;
 
             if (m_script->respawnGo.goGuid)
@@ -1493,7 +1503,7 @@ bool ScriptAction::HandleScriptStep()
             // TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
             if (pSource && pSource->GetTypeId() == TYPEID_GAMEOBJECT)
             {
-                ((Unit*)pTarget)->CastSpell(((Unit*)pTarget), spell, true, NULL, NULL, pSource->GetObjectGuid());
+                ((Unit*)pTarget)->CastSpell(((Unit*)pTarget), spell, true, nullptr, nullptr, pSource->GetObjectGuid());
                 break;
             }
 
@@ -1512,7 +1522,7 @@ bool ScriptAction::HandleScriptStep()
             }
 
             // bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide
-            Player* pSoundTarget = NULL;
+            Player* pSoundTarget = nullptr;
             if (m_script->playSound.flags & 1)
             {
                 pSoundTarget = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
@@ -1755,7 +1765,7 @@ bool ScriptAction::HandleScriptStep()
                 if (pSearcher->GetTypeId() == TYPEID_PLAYER && pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
                     pSearcher = pTarget;
 
-                Creature* pCreatureBuddy = NULL;
+                Creature* pCreatureBuddy = nullptr;
                 MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, true, false, m_script->terminateScript.searchDist, true);
                 MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
                 Cell::VisitGridObjects(pSearcher, searcher, m_script->terminateScript.searchDist);
@@ -1805,7 +1815,7 @@ bool ScriptAction::HandleScriptStep()
         }
         case SCRIPT_COMMAND_TERMINATE_COND:
         {
-            Player* player = NULL;
+            Player* player = nullptr;
             WorldObject* second = pSource;
             // First case: target is player
             if (pTarget && pTarget->GetTypeId() == TYPEID_PLAYER)
@@ -1827,7 +1837,7 @@ bool ScriptAction::HandleScriptStep()
             {
                 if (Group* group = player->GetGroup())
                 {
-                    for (GroupReference* groupRef = group->GetFirstMember(); groupRef != NULL; groupRef = groupRef->next())
+                    for (GroupReference* groupRef = group->GetFirstMember(); groupRef != nullptr; groupRef = groupRef->next())
                     {
                         Player* member = groupRef->getSource();
                         if (member->GetQuestStatus(m_script->terminateCond.failQuest) == QUEST_STATUS_INCOMPLETE)
@@ -1842,14 +1852,19 @@ bool ScriptAction::HandleScriptStep()
             }
             return terminateResult;
         }
-        case SCRIPT_COMMAND_SEND_AI_EVENT_AROUND:           // 35
+        case SCRIPT_COMMAND_SEND_AI_EVENT:                  // 35
         {
             if (LogIfNotCreature(pSource))
                 return false;
             if (LogIfNotUnit(pTarget))
                 break;
 
-            ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
+            // if radius is provided send AI event around
+            if (m_script->sendAIEvent.radius)
+                ((Creature*)pSource)->AI()->SendAIEventAround(AIEventType(m_script->sendAIEvent.eventType), (Unit*)pTarget, 0, float(m_script->sendAIEvent.radius));
+            // else if no radius and target is creature send AI event to target
+            else if (pTarget->GetTypeId() == TYPEID_UNIT)
+                ((Creature*)pSource)->AI()->SendAIEvent(AIEventType(m_script->sendAIEvent.eventType), nullptr, (Creature*)pTarget);
             break;
         }
         case SCRIPT_COMMAND_SET_FACING:                     // 36
@@ -1906,7 +1921,7 @@ bool ScriptAction::HandleScriptStep()
                     orientation = m_script->o;
 
                 pSource->GetRandomPoint(pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), m_script->moveDynamic.maxDist, x, y, z,
-                                        m_script->moveDynamic.minDist, (orientation == 0.0f ? NULL : &orientation));
+                                        m_script->moveDynamic.minDist, (orientation == 0.0f ? nullptr : &orientation));
                 z = std::max(z, pTarget->GetPositionZ());
                 pSource->UpdateAllowedPositionZ(x, y, z);
             }
@@ -1928,6 +1943,40 @@ bool ScriptAction::HandleScriptStep()
             uint32 deliverDelay = m_script->textId[0] > 0 ? (uint32)m_script->textId[0] : 0;
 
             MailDraft(m_script->sendMail.mailTemplateId).SendMailTo(static_cast<Player*>(pTarget), sender, MAIL_CHECK_MASK_HAS_BODY, deliverDelay);
+            break;
+        }
+        case SCRIPT_COMMAND_SET_FLY:                        // 39
+        {
+            if (LogIfNotCreature(pSource))
+                break;
+
+            // enable / disable the fly anim flag
+            if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
+            {
+                if (m_script->fly.fly)
+                    pSource->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                else
+                    pSource->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
+            }
+
+            ((Creature*)pSource)->SetLevitate(m_script->fly.fly);
+            break;
+        }
+        case SCRIPT_COMMAND_DESPAWN_GO:                     // 40
+        {
+            if (LogIfNotGameObject(pTarget))
+                break;
+
+            // ToDo: Change this to pGo->ForcedDespawn() when function is implemented!
+            ((GameObject*)pTarget)->SetLootState(GO_JUST_DEACTIVATED);
+            break;
+        }
+        case SCRIPT_COMMAND_RESPAWN:                        // 41
+        {
+            if (LogIfNotCreature(pTarget))
+                break;
+
+            ((Creature*)pTarget)->Respawn();
             break;
         }
         default:
@@ -2112,14 +2161,6 @@ uint32 ScriptMgr::GetEventIdScriptId(uint32 eventId) const
     return 0;
 }
 
-char const* ScriptMgr::GetScriptLibraryVersion() const
-{
-    if (!m_pGetScriptLibraryVersion)
-        return "";
-
-    return m_pGetScriptLibraryVersion();
-}
-
 CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
 {
     // used by eluna
@@ -2127,7 +2168,7 @@ CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
         return luaAI;
 
     if (!m_pGetCreatureAI)
-        return NULL;
+        return nullptr;
 
     return m_pGetCreatureAI(pCreature);
 }
@@ -2135,27 +2176,25 @@ CreatureAI* ScriptMgr::GetCreatureAI(Creature* pCreature)
 InstanceData* ScriptMgr::CreateInstanceData(Map* pMap)
 {
     if (!m_pCreateInstanceData)
-        return NULL;
+        return nullptr;
 
     return m_pCreateInstanceData(pMap);
 }
 
 bool ScriptMgr::OnGossipHello(Player* pPlayer, Creature* pCreature)
 {
-    // used by eluna
     if (sEluna->OnGossipHello(pPlayer, pCreature))
         return true;
 
-    return m_pOnGossipHello != NULL && m_pOnGossipHello(pPlayer, pCreature);
+    return m_pOnGossipHello != nullptr && m_pOnGossipHello(pPlayer, pCreature);
 }
 
 bool ScriptMgr::OnGossipHello(Player* pPlayer, GameObject* pGameObject)
 {
-    // used by eluna
     if (sEluna->OnGossipHello(pPlayer, pGameObject))
         return true;
 
-    return m_pOnGOGossipHello != NULL && m_pOnGOGossipHello(pPlayer, pGameObject);
+    return m_pOnGOGossipHello != nullptr && m_pOnGOGossipHello(pPlayer, pGameObject);
 }
 
 bool ScriptMgr::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 sender, uint32 action, const char* code)
@@ -2172,9 +2211,9 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 send
             return true;
 
     if (code)
-        return m_pOnGossipSelectWithCode != NULL && m_pOnGossipSelectWithCode(pPlayer, pCreature, sender, action, code);
+        return m_pOnGossipSelectWithCode != nullptr && m_pOnGossipSelectWithCode(pPlayer, pCreature, sender, action, code);
     else
-        return m_pOnGossipSelect != NULL && m_pOnGossipSelect(pPlayer, pCreature, sender, action);
+        return m_pOnGossipSelect != nullptr && m_pOnGossipSelect(pPlayer, pCreature, sender, action);
 }
 
 bool ScriptMgr::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 sender, uint32 action, const char* code)
@@ -2191,45 +2230,43 @@ bool ScriptMgr::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 
             return true;
 
     if (code)
-        return m_pOnGOGossipSelectWithCode != NULL && m_pOnGOGossipSelectWithCode(pPlayer, pGameObject, sender, action, code);
+        return m_pOnGOGossipSelectWithCode != nullptr && m_pOnGOGossipSelectWithCode(pPlayer, pGameObject, sender, action, code);
     else
-        return m_pOnGOGossipSelect != NULL && m_pOnGOGossipSelect(pPlayer, pGameObject, sender, action);
+        return m_pOnGOGossipSelect != nullptr && m_pOnGOGossipSelect(pPlayer, pGameObject, sender, action);
 }
 
 bool ScriptMgr::OnQuestAccept(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
-    // used by eluna
     if (sEluna->OnQuestAccept(pPlayer, pCreature, pQuest))
         return true;
 
-    return m_pOnQuestAccept != NULL && m_pOnQuestAccept(pPlayer, pCreature, pQuest);
+    return m_pOnQuestAccept != nullptr && m_pOnQuestAccept(pPlayer, pCreature, pQuest);
 }
 
 bool ScriptMgr::OnQuestAccept(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest)
 {
-    // used by eluna
     if (sEluna->OnQuestAccept(pPlayer, pGameObject, pQuest))
         return true;
-    return m_pOnGOQuestAccept != NULL && m_pOnGOQuestAccept(pPlayer, pGameObject, pQuest);
+
+    return m_pOnGOQuestAccept != nullptr && m_pOnGOQuestAccept(pPlayer, pGameObject, pQuest);
 }
 
 bool ScriptMgr::OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest)
 {
-    // used by eluna
     if (sEluna->OnQuestAccept(pPlayer, pItem, pQuest))
         return true;
 
-    return m_pOnItemQuestAccept != NULL && m_pOnItemQuestAccept(pPlayer, pItem, pQuest);
+    return m_pOnItemQuestAccept != nullptr && m_pOnItemQuestAccept(pPlayer, pItem, pQuest);
 }
 
 bool ScriptMgr::OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 {
-    return m_pOnQuestRewarded != NULL && m_pOnQuestRewarded(pPlayer, pCreature, pQuest);
+    return m_pOnQuestRewarded != nullptr && m_pOnQuestRewarded(pPlayer, pCreature, pQuest);
 }
 
 bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest)
 {
-    return m_pOnGOQuestRewarded != NULL && m_pOnGOQuestRewarded(pPlayer, pGameObject, pQuest);
+    return m_pOnGOQuestRewarded != nullptr && m_pOnGOQuestRewarded(pPlayer, pGameObject, pQuest);
 }
 
 uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
@@ -2261,67 +2298,62 @@ bool ScriptMgr::OnGameObjectUse(Player* pPlayer, GameObject* pGameObject)
     if (sEluna->OnGameObjectUse(pPlayer, pGameObject))
         return true;
 
-    return m_pOnGOUse != NULL && m_pOnGOUse(pPlayer, pGameObject);
+    return m_pOnGOUse != nullptr && m_pOnGOUse(pPlayer, pGameObject);
 }
 
 bool ScriptMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
 {
-    // used by eluna
     if (!sEluna->OnUse(pPlayer, pItem, targets))
         return true;
 
-    return m_pOnItemUse != NULL && m_pOnItemUse(pPlayer, pItem, targets);
+    return m_pOnItemUse != nullptr && m_pOnItemUse(pPlayer, pItem, targets);
 }
 
 bool ScriptMgr::OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry)
 {
-    // used by eluna
     if (sEluna->OnAreaTrigger(pPlayer, atEntry))
         return true;
 
-    return m_pOnAreaTrigger != NULL && m_pOnAreaTrigger(pPlayer, atEntry);
+    return m_pOnAreaTrigger != nullptr && m_pOnAreaTrigger(pPlayer, atEntry);
 }
 
 bool ScriptMgr::OnProcessEvent(uint32 eventId, Object* pSource, Object* pTarget, bool isStart)
 {
-    return m_pOnProcessEvent != NULL && m_pOnProcessEvent(eventId, pSource, pTarget, isStart);
+    return m_pOnProcessEvent != nullptr && m_pOnProcessEvent(eventId, pSource, pTarget, isStart);
 }
 
 bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
 {
-    // used by eluna
     if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
         return true;
 
-    return m_pOnEffectDummyCreature != NULL && m_pOnEffectDummyCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+    return m_pOnEffectDummyCreature != nullptr && m_pOnEffectDummyCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
 bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, GameObject* pTarget, ObjectGuid originalCasterGuid)
 {
-    // used by eluna
     if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
         return true;
 
-    return m_pOnEffectDummyGO != NULL && m_pOnEffectDummyGO(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+    return m_pOnEffectDummyGO != nullptr && m_pOnEffectDummyGO(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
 bool ScriptMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget, ObjectGuid originalCasterGuid)
 {
-    // used by eluna
     if (sEluna->OnDummyEffect(pCaster, spellId, effIndex, pTarget))
         return true;
 
-    return m_pOnEffectDummyItem != NULL && m_pOnEffectDummyItem(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+    return m_pOnEffectDummyItem != nullptr && m_pOnEffectDummyItem(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
 bool ScriptMgr::OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
 {
-    return m_pOnEffectScriptEffectCreature != NULL && m_pOnEffectScriptEffectCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
+    return m_pOnEffectScriptEffectCreature != nullptr && m_pOnEffectScriptEffectCreature(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
 }
 
 bool ScriptMgr::OnAuraDummy(Aura const* pAura, bool apply)
 {
-    return m_pOnAuraDummy != NULL && m_pOnAuraDummy(pAura, apply);
+    return m_pOnAuraDummy != nullptr && m_pOnAuraDummy(pAura, apply);
 }
 
 ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
@@ -2341,19 +2373,13 @@ ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
         if (!(P))                               \
         {                                       \
             /* prevent call before init */      \
-            m_pOnFreeScriptLibrary = NULL;      \
+            m_pOnFreeScriptLibrary = nullptr;      \
             UnloadScriptLibrary();              \
             return SCRIPT_LOAD_ERR_WRONG_API;   \
         }
 
-    // let check used mangosd revision for build library (unsafe use with different revision because changes in inline functions, define and etc)
-    char const*(MANGOS_IMPORT * pGetMangosRevStr)();
-
-    GET_SCRIPT_HOOK_PTR(pGetMangosRevStr,              "GetMangosRevStr");
-
     GET_SCRIPT_HOOK_PTR(m_pOnInitScriptLibrary,        "InitScriptLibrary");
     GET_SCRIPT_HOOK_PTR(m_pOnFreeScriptLibrary,        "FreeScriptLibrary");
-    GET_SCRIPT_HOOK_PTR(m_pGetScriptLibraryVersion,    "GetScriptLibraryVersion");
 
     GET_SCRIPT_HOOK_PTR(m_pGetCreatureAI,              "GetCreatureAI");
     GET_SCRIPT_HOOK_PTR(m_pCreateInstanceData,         "CreateInstanceData");
@@ -2383,13 +2409,6 @@ ScriptLoadResult ScriptMgr::LoadScriptLibrary(const char* libName)
 
 #   undef GET_SCRIPT_HOOK_PTR
 
-    if (strcmp(pGetMangosRevStr(), REVISION_NR) != 0)
-    {
-        m_pOnFreeScriptLibrary = NULL;                      // prevent call before init
-        UnloadScriptLibrary();
-        return SCRIPT_LOAD_ERR_OUTDATED;
-    }
-
     m_pOnInitScriptLibrary();
     return SCRIPT_LOAD_OK;
 }
@@ -2403,37 +2422,36 @@ void ScriptMgr::UnloadScriptLibrary()
         m_pOnFreeScriptLibrary();
 
     MANGOS_CLOSE_LIBRARY(m_hScriptLib);
-    m_hScriptLib = NULL;
+    m_hScriptLib = nullptr;
 
-    m_pOnInitScriptLibrary      = NULL;
-    m_pOnFreeScriptLibrary      = NULL;
-    m_pGetScriptLibraryVersion  = NULL;
+    m_pOnInitScriptLibrary      = nullptr;
+    m_pOnFreeScriptLibrary      = nullptr;
 
-    m_pGetCreatureAI            = NULL;
-    m_pCreateInstanceData       = NULL;
+    m_pGetCreatureAI            = nullptr;
+    m_pCreateInstanceData       = nullptr;
 
-    m_pOnGossipHello            = NULL;
-    m_pOnGOGossipHello          = NULL;
-    m_pOnGossipSelect           = NULL;
-    m_pOnGOGossipSelect         = NULL;
-    m_pOnGossipSelectWithCode   = NULL;
-    m_pOnGOGossipSelectWithCode = NULL;
-    m_pOnQuestAccept            = NULL;
-    m_pOnGOQuestAccept          = NULL;
-    m_pOnItemQuestAccept        = NULL;
-    m_pOnQuestRewarded          = NULL;
-    m_pOnGOQuestRewarded        = NULL;
-    m_pGetNPCDialogStatus       = NULL;
-    m_pGetGODialogStatus        = NULL;
-    m_pOnGOUse                  = NULL;
-    m_pOnItemUse                = NULL;
-    m_pOnAreaTrigger            = NULL;
-    m_pOnProcessEvent           = NULL;
-    m_pOnEffectDummyCreature    = NULL;
-    m_pOnEffectDummyGO          = NULL;
-    m_pOnEffectDummyItem        = NULL;
-    m_pOnEffectScriptEffectCreature = NULL;
-    m_pOnAuraDummy              = NULL;
+    m_pOnGossipHello            = nullptr;
+    m_pOnGOGossipHello          = nullptr;
+    m_pOnGossipSelect           = nullptr;
+    m_pOnGOGossipSelect         = nullptr;
+    m_pOnGossipSelectWithCode   = nullptr;
+    m_pOnGOGossipSelectWithCode = nullptr;
+    m_pOnQuestAccept            = nullptr;
+    m_pOnGOQuestAccept          = nullptr;
+    m_pOnItemQuestAccept        = nullptr;
+    m_pOnQuestRewarded          = nullptr;
+    m_pOnGOQuestRewarded        = nullptr;
+    m_pGetNPCDialogStatus       = nullptr;
+    m_pGetGODialogStatus        = nullptr;
+    m_pOnGOUse                  = nullptr;
+    m_pOnItemUse                = nullptr;
+    m_pOnAreaTrigger            = nullptr;
+    m_pOnProcessEvent           = nullptr;
+    m_pOnEffectDummyCreature    = nullptr;
+    m_pOnEffectDummyGO          = nullptr;
+    m_pOnEffectDummyItem        = nullptr;
+    m_pOnEffectScriptEffectCreature = nullptr;
+    m_pOnAuraDummy              = nullptr;
 }
 
 void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
@@ -2486,7 +2504,7 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
 }
 
 // Starters for events
-bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart/*=true*/, Unit* forwardToPvp/*=NULL*/)
+bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart/*=true*/, Unit* forwardToPvp/*=nullptr*/)
 {
     MANGOS_ASSERT(source);
 
@@ -2497,8 +2515,8 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
     // Handle PvP Calls
     if (forwardToPvp && source->GetTypeId() == TYPEID_GAMEOBJECT)
     {
-        BattleGround* bg = NULL;
-        OutdoorPvP* opvp = NULL;
+        BattleGround* bg = nullptr;
+        OutdoorPvP* opvp = nullptr;
         if (forwardToPvp->GetTypeId() == TYPEID_PLAYER)
         {
             bg = ((Player*)forwardToPvp)->GetBattleGround();

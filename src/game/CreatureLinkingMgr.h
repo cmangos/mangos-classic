@@ -130,8 +130,8 @@ class CreatureLinkingMgr
         CreatureLinkingMap m_creatureLinkingGuidMap;
 
         // Lookup Storage for fast access:
-        UNORDERED_SET<uint32> m_eventTriggers;              // master by entry
-        UNORDERED_SET<uint32> m_eventGuidTriggers;          // master by guid
+        std::unordered_set<uint32> m_eventTriggers;              // master by entry
+        std::unordered_set<uint32> m_eventGuidTriggers;          // master by guid
 
         // Check-routine
         static bool IsLinkingEntryValid(uint32 slaveEntry, CreatureLinkingInfo* pInfo, bool byEntry);
@@ -156,7 +156,7 @@ class CreatureLinkingHolder
         void AddMasterToHolder(Creature* pCreature);
 
         // Function to process actions for linked NPCs
-        void DoCreatureLinkingEvent(CreatureLinkingEvent eventType, Creature* pSource, Unit* pEnemy = NULL);
+        void DoCreatureLinkingEvent(CreatureLinkingEvent eventType, Creature* pSource, Unit* pEnemy = nullptr);
 
         // Function to check if a passive spawning condition is met
         bool CanSpawn(Creature* pCreature) const;

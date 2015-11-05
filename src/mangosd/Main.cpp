@@ -29,7 +29,6 @@
 #include "SystemConfig.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "revision.h"
-#include "revision_nr.h"
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 #include <ace/Version.h>
@@ -104,7 +103,7 @@ extern int main(int argc, char** argv)
                 cfg_file = cmd_opts.opt_arg();
                 break;
             case 'v':
-                printf("%s\n", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID));
+                printf("%s\n", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID));
                 return 0;
             case 's':
             {
@@ -179,7 +178,7 @@ extern int main(int argc, char** argv)
     }
 #endif
 
-    sLog.outString("%s [world-daemon]", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_NR, REVISION_ID));
+    sLog.outString("%s [world-daemon]", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID));
     sLog.outString("<Ctrl-C> to stop.");
     sLog.outString("\n\n"
                    "       _____     __  __       _   _  _____  ____   _____ \n"

@@ -32,6 +32,8 @@
 
 #include <ace/os_include/netinet/os_tcp.h>
 
+#include <mutex>
+
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
@@ -57,7 +59,7 @@ struct Chunk
 
 PatchHandler::PatchHandler(ACE_HANDLE socket, ACE_HANDLE patch)
 {
-    reactor(NULL);
+    reactor(nullptr);
     set_handle(socket);
     patch_fd_ = patch;
 }
@@ -131,6 +133,8 @@ int PatchHandler::svc(void)
     return 0;
 }
 
+INSTANTIATE_SINGLETON_1(PatchCache);
+
 PatchCache::~PatchCache()
 {
     for (Patches::iterator i = patches_.begin(); i != patches_.end(); ++i)
@@ -140,11 +144,6 @@ PatchCache::~PatchCache()
 PatchCache::PatchCache()
 {
     LoadPatchesInfo();
-}
-
-PatchCache* PatchCache::instance()
-{
-    return ACE_Singleton<PatchCache, ACE_Thread_Mutex>::instance();
 }
 
 void PatchCache::LoadPatchMD5(const char* szFileName)
@@ -200,7 +199,7 @@ void PatchCache::LoadPatchesInfo()
 
     ACE_DIRENT* dp;
 
-    while ((dp = ACE_OS::readdir(dirp)) != NULL)
+    while ((dp = ACE_OS::readdir(dirp)) != nullptr)
     {
         int l = strlen(dp->d_name);
         if (l < 8)

@@ -30,6 +30,7 @@
 #include "AccountMgr.h"
 #include "Language.h"
 #include "ObjectMgr.h"
+#include "Policies/Lock.h"
 
 /// RASocket constructor
 RASocket::RASocket()
@@ -100,7 +101,7 @@ int RASocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
     if (closing_)
         return -1;
     DEBUG_LOG("RASocket::handle_close");
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, outBufferLock, -1);
+    GUARD_RETURN(outBufferLock, -1);
 
     closing_ = true;
 
@@ -112,7 +113,7 @@ int RASocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
 
 int RASocket::handle_output(ACE_HANDLE)
 {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, outBufferLock, -1);
+    GUARD_RETURN(outBufferLock, -1);
 
     if (closing_)
         return -1;
@@ -298,7 +299,7 @@ void RASocket::commandFinished(void* callbackArg, bool /*success*/)
 
 int RASocket::sendf(const char* msg)
 {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, Guard, outBufferLock, -1);
+    GUARD_RETURN(outBufferLock, -1);
 
     if (closing_)
         return -1;

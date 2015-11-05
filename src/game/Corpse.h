@@ -23,7 +23,6 @@
 #include "Object.h"
 #include "Database/DatabaseEnv.h"
 #include "GridDefines.h"
-#include "LootMgr.h"
 
 enum CorpseType
 {
@@ -68,7 +67,7 @@ class Corpse : public WorldObject
         ObjectGuid const& GetOwnerGuid() const { return GetGuidValue(CORPSE_FIELD_OWNER); }
 
         time_t const& GetGhostTime() const { return m_time; }
-        void ResetGhostTime() { m_time = time(NULL); }
+        void ResetGhostTime() { m_time = time(nullptr); }
         CorpseType GetType() const { return m_type; }
 
         bool IsHostileTo(Unit const* unit) const override;
@@ -79,7 +78,6 @@ class Corpse : public WorldObject
 
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
 
-        Loot loot;                                          // remove insignia ONLY at BG
         Player* lootRecipient;
         bool lootForBody;
 

@@ -63,7 +63,7 @@ class GMTicket
         void SetText(const char* text)
         {
             m_text = text ? text : "";
-            m_lastUpdate = time(NULL);
+            m_lastUpdate = time(nullptr);
 
             std::string escapedString = m_text;
             CharacterDatabase.escape_string(escapedString);
@@ -73,7 +73,7 @@ class GMTicket
         void SetResponseText(const char* text)
         {
             m_responseText = text ? text : "";
-            m_lastUpdate = time(NULL);
+            m_lastUpdate = time(nullptr);
 
             std::string escapedString = m_responseText;
             CharacterDatabase.escape_string(escapedString);
@@ -122,7 +122,7 @@ class GMTicketMgr
         {
             GMTicketMap::iterator itr = m_GMTicketMap.find(guid);
             if (itr == m_GMTicketMap.end())
-                return NULL;
+                return nullptr;
             return &(itr->second);
         }
 
@@ -134,12 +134,12 @@ class GMTicketMgr
         GMTicket* GetGMTicketByOrderPos(uint32 pos)
         {
             if (pos >= GetTicketCount())
-                return NULL;
+                return nullptr;
 
             GMTicketList::iterator itr = m_GMTicketListByCreatingOrder.begin();
             std::advance(itr, pos);
             if (itr == m_GMTicketListByCreatingOrder.end())
-                return NULL;
+                return nullptr;
             return *itr;
         }
 
@@ -165,7 +165,7 @@ class GMTicketMgr
                 m_GMTicketListByCreatingOrder.remove(&ticket);
             }
 
-            ticket.Init(guid, text, "", time(NULL));
+            ticket.Init(guid, text, "", time(nullptr));
             ticket.SaveToDB();
             m_GMTicketListByCreatingOrder.push_back(&ticket);
         }

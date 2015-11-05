@@ -52,7 +52,7 @@ bool QueryResultPostgre::NextRow()
     {
         pPQgetvalue = PQgetvalue(mResult, mTableIndex, j);
         if (pPQgetvalue && !(*pPQgetvalue))
-            pPQgetvalue = NULL;
+            pPQgetvalue = nullptr;
 
         mCurrentRow[j].SetValue(pPQgetvalue);
     }

@@ -63,6 +63,7 @@ Field which holds a combination of these flags:
     SCRIPT_FLAG_COMMAND_ADDITIONAL          = 0x08      (Only for some commands possible)
     SCRIPT_FLAG_BUDDY_BY_GUID               = 0x10      (Interpret search_radius as buddy's guid)
     SCRIPT_FLAG_BUDDY_IS_PET                = 0x20      (Do not search for an npc, but for a pet)
+    SCRIPT_FLAG_BUDDY_IS_DESPAWNED          = 0X40      (Search for a buddy that is dead or despawned)
 
 Detailed meaning described below!
 
@@ -294,9 +295,9 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * !(data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL): terminate when condition is true
                                                 data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL:  terminate when condition is false
 
-35 SCRIPT_COMMAND_SEND_AI_EVENT_AROUND      * resultingSource = Creature, resultingTarget = Unit
+35 SCRIPT_COMMAND_SEND_AI_EVENT             * resultingSource = Creature, resultingTarget = Unit
                                             * datalong = AIEventType - limited only to EventAI supported events
-                                            * datalong2 = radius
+                                            * datalong2 = radius. If radius isn't provided and the target is a creature, then send AIEvent to target
 
 36 SCRIPT_COMMAND_SET_FACING                Turn resultingSource towards resultingTarget
                                             * resultingSource = Creature, resultingTarget WorldObject
@@ -317,3 +318,11 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * datalong = mailTemplateId
                                             * datalong2: AlternativeSenderEntry. Use as sender-Entry of the sent mail
                                             * dataint1: Delay (>= 0) in Seconds
+
+39 SCRIPT_COMMAND_SET_FLY                   * resultingSource = Creature
+                                            * datalong = bool 0=off, 1=on
+                                            * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL set/unset byte flag UNIT_BYTE1_FLAG_ALWAYS_STAND
+
+40 SCRIPT_COMMAND_DESPAWN_GO                * resultingTarget = GameObject. Please note that not all gameobject types support this command.
+
+41 SCRIPT_COMMAND_RESPAWN                   * resultingSource = Creature. Requires SCRIPT_FLAG_BUDDY_IS_DESPAWNED to find dead or despawned targets

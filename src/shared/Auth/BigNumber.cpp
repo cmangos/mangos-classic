@@ -23,20 +23,20 @@
 BigNumber::BigNumber()
 {
     _bn = BN_new();
-    _array = NULL;
+    _array = nullptr;
 }
 
 BigNumber::BigNumber(const BigNumber& bn)
 {
     _bn = BN_dup(bn._bn);
-    _array = NULL;
+    _array = nullptr;
 }
 
 BigNumber::BigNumber(uint32 val)
 {
     _bn = BN_new();
     BN_set_word(_bn, val);
-    _array = NULL;
+    _array = nullptr;
 }
 
 BigNumber::~BigNumber()
@@ -109,7 +109,7 @@ BigNumber BigNumber::operator/=(const BigNumber& bn)
     BN_CTX* bnctx;
 
     bnctx = BN_CTX_new();
-    BN_div(_bn, NULL, _bn, bn._bn, bnctx);
+    BN_div(_bn, nullptr, _bn, bn._bn, bnctx);
     BN_CTX_free(bnctx);
 
     return *this;

@@ -55,13 +55,17 @@ using std::difftime;
 
 # if !defined (ACE_HAS_POSIX_TIME)
 // Definition per POSIX.
-typedef struct timespec
-{
-  /// Seconds
-  time_t tv_sec;
-  /// Nanoseconds
-  long tv_nsec;
-} timespec_t;
+#  if (_MSC_VER >= 1900)
+      typedef struct timespec timespec_t;
+#  else
+      typedef struct timespec
+      {
+        /// Seconds
+        time_t tv_sec;
+        /// Nanoseconds
+        long tv_nsec;
+      } timespec_t;
+#  endif
 # elif defined (ACE_HAS_BROKEN_POSIX_TIME)
 #  if defined (ACE_OPENVMS)
 #     include /**/ <timers.h>

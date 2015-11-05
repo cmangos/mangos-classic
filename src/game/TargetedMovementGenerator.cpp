@@ -39,7 +39,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
 
     float x, y, z;
 
-    // i_path can be NULL in case this is the first call for this MMGen (via Update)
+    // i_path can be nullptr in case this is the first call for this MMGen (via Update)
     // Can happen for example if no path was created on MMGen-Initialize because of the owner being stunned
     if (updateDestination || !i_path)
     {
@@ -134,6 +134,24 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
         i_recheckDistance.Reset(this->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE ? 50 : 100);
         G3D::Vector3 dest = owner.movespline->FinalDestination();
         targetMoved = RequiresNewPosition(owner, dest.x, dest.y, dest.z);
+        if (!targetMoved)
+        {
+            // This unit is in hitbox of target
+            // howewer we have to check if the target not moved a bit to update the orientation
+            // client do it automatically 'visually' but it need this new orientation send or it will retrieve old orientation in some case (like stun)
+            G3D::Vector3 currTargetPos;
+            i_target->GetPosition(currTargetPos.x, currTargetPos.y, currTargetPos.z);
+            if (owner.movespline->Finalized() && currTargetPos != m_prevTargetPos)
+            {
+                // position changed we need to adjust owner orientation to continue facing it
+                m_prevTargetPos = currTargetPos;
+                owner.SetInFront(i_target.getTarget());         // set movementinfo orientation, needed for next movement if any
+
+                float angle = owner.GetAngle(i_target.getTarget());
+                owner.SetFacingTo(angle);                       // inform client that orientation changed
+                //sLog.outString("Updating facing to with angle (%3.3f)!!!", angle);
+            }
+        }
     }
 
     if (m_speedChanged || targetMoved)
@@ -141,9 +159,6 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
 
     if (owner.movespline->Finalized())
     {
-        if (i_angle == 0.f && !owner.HasInArc(0.01f, i_target.getTarget()))
-            owner.SetInFront(i_target.getTarget());
-
         if (!i_targetReached)
         {
             i_targetReached = true;
@@ -193,6 +208,8 @@ void ChaseMovementGenerator<Player>::Initialize(Player& owner)
 {
     owner.addUnitState(UNIT_STAT_CHASE);                    // _MOVE set in _SetTargetLocation after required checks
     _setTargetLocation(owner, true);
+
+    i_target->GetPosition(m_prevTargetPos.x, m_prevTargetPos.y, m_prevTargetPos.z);
 }
 
 template<>
@@ -201,6 +218,8 @@ void ChaseMovementGenerator<Creature>::Initialize(Creature& owner)
     owner.SetWalk(false, false);                            // Chase movement is running
     owner.addUnitState(UNIT_STAT_CHASE);                    // _MOVE set in _SetTargetLocation after required checks
     _setTargetLocation(owner, true);
+
+    i_target->GetPosition(m_prevTargetPos.x, m_prevTargetPos.y, m_prevTargetPos.z);
 }
 
 template<class T>

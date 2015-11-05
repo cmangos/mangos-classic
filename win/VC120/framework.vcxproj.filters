@@ -78,9 +78,6 @@
     <ClInclude Include="..\..\src\framework\Utilities\TypeList.h">
       <Filter>Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\framework\Utilities\UnorderedMapSet.h">
-      <Filter>Utilities</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\framework\Utilities\LinkedReference\Reference.h">
       <Filter>Utilities\LinkedReference</Filter>
     </ClInclude>
@@ -92,6 +89,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\framework\Dynamic\ObjectRegistry.h">
       <Filter>Dynamic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\framework\Policies\Lock.h">
+      <Filter>Policies</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

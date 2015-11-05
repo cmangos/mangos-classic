@@ -949,10 +949,10 @@ enum OpcodesList
 /// Player state
 enum SessionStatus
 {
-    STATUS_AUTHED = 0,                                      ///< Player authenticated (_player==NULL, m_playerRecentlyLogout = false or will be reset before handler call)
-    STATUS_LOGGEDIN,                                        ///< Player in game (_player!=NULL, inWorld())
-    STATUS_TRANSFER,                                        ///< Player transferring to another map (_player!=NULL, !inWorld())
-    STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT,                  ///< _player!= NULL or _player==NULL && m_playerRecentlyLogout)
+    STATUS_AUTHED = 0,                                      ///< Player authenticated (_player==nullptr, m_playerRecentlyLogout = false or will be reset before handler call)
+    STATUS_LOGGEDIN,                                        ///< Player in game (_player!=nullptr, inWorld())
+    STATUS_TRANSFER,                                        ///< Player transferring to another map (_player!=nullptr, !inWorld())
+    STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT,                  ///< _player!= nullptr or _player==nullptr && m_playerRecentlyLogout)
     STATUS_NEVER,                                           ///< Opcode not accepted from client (deprecated or server side only)
     STATUS_UNHANDLED                                        ///< We don' handle this opcode yet
 };
@@ -998,7 +998,7 @@ class Opcodes
             OpcodeMap::const_iterator itr = mOpcodeMap.find(id);
             if (itr != mOpcodeMap.end())
                 return &itr->second;
-            return NULL;
+            return nullptr;
         }
 
         /// compatible with other mangos branches access

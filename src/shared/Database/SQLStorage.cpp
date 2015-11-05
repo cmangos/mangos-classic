@@ -21,16 +21,16 @@
 // -----------------------------------  SQLStorageBase  ---------------------------------------- //
 
 SQLStorageBase::SQLStorageBase() :
-    m_tableName(NULL),
-    m_entry_field(NULL),
-    m_src_format(NULL),
-    m_dst_format(NULL),
+    m_tableName(nullptr),
+    m_entry_field(nullptr),
+    m_src_format(nullptr),
+    m_dst_format(nullptr),
     m_dstFieldCount(0),
     m_srcFieldCount(0),
     m_recordCount(0),
     m_maxEntry(0),
     m_recordSize(0),
-    m_data(NULL)
+    m_data(nullptr)
 {}
 
 void SQLStorageBase::Initialize(const char* tableName, const char* entry_field, const char* src_format, const char* dst_format)
@@ -113,7 +113,7 @@ void SQLStorageBase::Free()
         }
     }
     delete[] m_data;
-    m_data = NULL;
+    m_data = nullptr;
     m_recordCount = 0;
 }
 
@@ -121,14 +121,14 @@ void SQLStorageBase::Free()
 
 void SQLStorage::EraseEntry(uint32 id)
 {
-    m_Index[id] = NULL;
+    m_Index[id] = nullptr;
 }
 
 void SQLStorage::Free()
 {
     SQLStorageBase::Free();
     delete[] m_Index;
-    m_Index = NULL;
+    m_Index = nullptr;
 }
 
 void SQLStorage::Load(bool error_at_empty /*= true*/)
@@ -140,13 +140,13 @@ void SQLStorage::Load(bool error_at_empty /*= true*/)
 SQLStorage::SQLStorage(const char* fmt, const char* _entry_field, const char* sqlname)
 {
     Initialize(sqlname, _entry_field, fmt, fmt);
-    m_Index = NULL;
+    m_Index = nullptr;
 }
 
 SQLStorage::SQLStorage(const char* src_fmt, const char* dst_fmt, const char* _entry_field, const char* sqlname)
 {
     Initialize(sqlname, _entry_field, src_fmt, dst_fmt);
-    m_Index = NULL;
+    m_Index = nullptr;
 }
 
 void SQLStorage::prepareToLoad(uint32 maxRecordId, uint32 recordCount, uint32 recordSize)
@@ -156,7 +156,7 @@ void SQLStorage::prepareToLoad(uint32 maxRecordId, uint32 recordCount, uint32 re
 
     // Set index array
     m_Index = new char* [maxRecordId];
-    memset(m_Index, NULL, maxRecordId * sizeof(char*));
+    memset(m_Index, 0, maxRecordId * sizeof(char*));
 
     SQLStorageBase::prepareToLoad(maxRecordId, recordCount, recordSize);
 }
@@ -187,7 +187,7 @@ void SQLHashStorage::EraseEntry(uint32 id)
     // do not erase from m_records
     RecordMap::iterator find = m_indexMap.find(id);
     if (find != m_indexMap.end())
-        find->second = NULL;
+        find->second = nullptr;
 }
 
 SQLHashStorage::SQLHashStorage(const char* fmt, const char* _entry_field, const char* sqlname)

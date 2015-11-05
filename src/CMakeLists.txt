@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
 
 # Needs to link against mangos_worldd.lib
 if(WIN32)
@@ -25,9 +26,9 @@ if(WIN32)
   )
 endif()
 
-add_subdirectory(bindings)
 add_subdirectory(framework)
 add_subdirectory(shared)
 add_subdirectory(realmd)
 add_subdirectory(game)
 add_subdirectory(mangosd)
+add_subdirectory(scriptdev2)

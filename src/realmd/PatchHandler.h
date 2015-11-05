@@ -23,7 +23,6 @@
 #ifndef _PATCHHANDLER_H_
 #define _PATCHHANDLER_H_
 
-#include <ace/Basic_Types.h>
 #include <ace/Synch_Traits.h>
 #include <ace/Svc_Handler.h>
 #include <ace/SOCK_Stream.h>
@@ -42,8 +41,6 @@ class PatchCache
     public:
         ~PatchCache();
         PatchCache();
-
-        static PatchCache* instance();
 
         struct PATCH_INFO
         {
@@ -69,6 +66,8 @@ class PatchCache
         void LoadPatchesInfo();
         Patches patches_;
 };
+
+#define sPatchCache MaNGOS::Singleton<PatchCache>::Instance()
 
 class PatchHandler: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
 {

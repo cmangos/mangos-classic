@@ -22,6 +22,9 @@ language: cpp
 git:
   depth: 1
 
+# make use of the new container based infrastructure at travis to improve performance (we don't need sudo)
+sudo: false
+
 # only run travis on the master branch
 # branches:
 #   only:
@@ -30,6 +33,24 @@ git:
 compiler:
   - gcc
   - clang
+
+addons:
+  apt:
+    sources:
+      - kubuntu-backports
+      - boost-latest
+      - ubuntu-toolchain-r-test
+    packages:
+      - build-essential
+      - libtool
+      - gcc-4.8
+      - g++-4.8
+      - make
+      - cmake
+
+# overwrite GCC version for GCC build only
+before_install:
+  - if [ $CC = "gcc" ] ; then export CC=gcc-4.8 CXX=g++-4.8 ; fi
 
 before_install:
   # update compiling tools for c++11 support

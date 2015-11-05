@@ -1,0 +1,797 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="base">
+      <UniqueIdentifier>{3b1307a9-bc58-4773-9a93-0e9ceff55c82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts">
+      <UniqueIdentifier>{b7b35df3-4231-4370-aed5-5859ab4c312e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\battlegrounds">
+      <UniqueIdentifier>{ced0a1e2-6867-4f01-a762-390a3d1f01d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\custom">
+      <UniqueIdentifier>{af3d4b4d-a585-41c4-ba95-79669a614ea8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms">
+      <UniqueIdentifier>{ca2551e0-68d0-4331-88f3-ab0cdaa2bf9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\blackrock_depths">
+      <UniqueIdentifier>{45c59280-02fb-482f-859b-bd47cc230f0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\blackrock_spire">
+      <UniqueIdentifier>{5631f38e-66c8-4efd-ad3a-2834fbb49a6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\blackwing_lair">
+      <UniqueIdentifier>{31605090-12b9-4d42-a5e9-1cbfac8ab384}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\deadmines">
+      <UniqueIdentifier>{08fb5b22-710d-46d6-9893-f567aa75a5e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\gnomeregan">
+      <UniqueIdentifier>{cef5c3c5-f434-4b9f-9bad-8c106d46c755}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\molten_core">
+      <UniqueIdentifier>{920d1832-b347-4afd-bd05-4c943e5555f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\naxxramas">
+      <UniqueIdentifier>{a187836e-bd7b-4c74-a8bd-d86ed0793280}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\scarlet_monastery">
+      <UniqueIdentifier>{dd4995a8-6d86-4f21-82bc-a18acc2c688f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\scholomance">
+      <UniqueIdentifier>{2a3a25e5-51f1-4ab3-a1a0-1b9ec9c45d1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\shadowfang_keep">
+      <UniqueIdentifier>{7a028ad9-afa1-42ea-b147-20a40c5e716c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\stockade">
+      <UniqueIdentifier>{66401dac-d94c-4ed6-b912-229dda0906d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\stratholme">
+      <UniqueIdentifier>{385f26dc-dcaf-4022-921d-3a562617bf93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\sunken_temple">
+      <UniqueIdentifier>{25be39dd-536d-450d-ac94-6372d37a4fae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\uldaman">
+      <UniqueIdentifier>{c929f54b-22dd-49b4-862c-92dfa9a2d1f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\eastern_kingdoms\zulgurub">
+      <UniqueIdentifier>{22eca3e6-662f-4c53-9344-6e749c09c86b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\examples">
+      <UniqueIdentifier>{070541ef-a813-43f5-a8a6-e6674fe1a47e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor">
+      <UniqueIdentifier>{5cda7bda-399b-46b7-8bc2-5786f0202fa2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor\blackfathom_deeps">
+      <UniqueIdentifier>{226d4dc8-830b-4249-b28a-313ac21080a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor\dire_maul">
+      <UniqueIdentifier>{02135a7c-33cc-444e-af90-48a5193e5a6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor\maraudon">
+      <UniqueIdentifier>{014ada9a-13bf-4540-a0ce-5132bdc36fcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor\onyxias_lair">
+      <UniqueIdentifier>{9feb59d0-e6bd-4328-9a50-7ddb9852936e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor\ragefire_chasm">
+      <UniqueIdentifier>{00f03f8d-4af1-40d9-a95a-e2dc1a81ca7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor\razorfen_downs">
+      <UniqueIdentifier>{de2e959a-1ef4-41ef-9235-15a1f3f8a19d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor\razorfen_kraul">
+      <UniqueIdentifier>{8f8a60e0-223e-4517-918c-243e523a7892}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor\ruins_of_ahnqiraj">
+      <UniqueIdentifier>{416ccfc8-a1bb-43a5-b202-d7656981094a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor\temple_of_ahnqiraj">
+      <UniqueIdentifier>{ba031a13-787e-41da-bcaf-1986fdea8069}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor\wailing_caverns">
+      <UniqueIdentifier>{0412262e-b05b-4827-adef-97507204cb69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\kalimdor\zulfarrak">
+      <UniqueIdentifier>{e775610e-fa3c-4355-9c4c-473a6a5e57d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scripts\world">
+      <UniqueIdentifier>{ca7213e9-56c1-4084-a48b-19ff57dee433}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{2fd46769-c050-4e47-9533-461ef8695d6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="system">
+      <UniqueIdentifier>{90f3df6a-a1d0-4a6e-b8d7-d1d993fc795b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\scriptdev2\base\escort_ai.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\base\follower_ai.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\base\guard_ai.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\base\pet_ai.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\battlegrounds\battleground.cpp">
+      <Filter>scripts\battlegrounds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\alterac_mountains.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\arathi_highlands.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blasted_lands.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\boss_kazzak.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\burning_steppes.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\dun_morogh.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\eastern_plaguelands.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\elwynn_forest.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\hinterlands.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\ironforge.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\loch_modan.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\redridge_mountains.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\searing_gorge.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\silverpine_forest.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stormwind_city.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stranglethorn_vale.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\swamp_of_sorrows.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\tirisfal_glades.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\undercity.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\western_plaguelands.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\westfall.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\wetlands.cpp">
+      <Filter>scripts\eastern_kingdoms</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\blackrock_depths.cpp">
+      <Filter>scripts\eastern_kingdoms\blackrock_depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\boss_ambassador_flamelash.cpp">
+      <Filter>scripts\eastern_kingdoms\blackrock_depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\boss_emperor_dagran_thaurissan.cpp">
+      <Filter>scripts\eastern_kingdoms\blackrock_depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\boss_general_angerforge.cpp">
+      <Filter>scripts\eastern_kingdoms\blackrock_depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\boss_high_interrogator_gerstahn.cpp">
+      <Filter>scripts\eastern_kingdoms\blackrock_depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\instance_blackrock_depths.cpp">
+      <Filter>scripts\eastern_kingdoms\blackrock_depths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_spire\boss_gyth.cpp">
+      <Filter>scripts\eastern_kingdoms\blackrock_spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_spire\boss_overlord_wyrmthalak.cpp">
+      <Filter>scripts\eastern_kingdoms\blackrock_spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_spire\boss_pyroguard_emberseer.cpp">
+      <Filter>scripts\eastern_kingdoms\blackrock_spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_spire\instance_blackrock_spire.cpp">
+      <Filter>scripts\eastern_kingdoms\blackrock_spire</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_broodlord_lashlayer.cpp">
+      <Filter>scripts\eastern_kingdoms\blackwing_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_chromaggus.cpp">
+      <Filter>scripts\eastern_kingdoms\blackwing_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_ebonroc.cpp">
+      <Filter>scripts\eastern_kingdoms\blackwing_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_firemaw.cpp">
+      <Filter>scripts\eastern_kingdoms\blackwing_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_flamegor.cpp">
+      <Filter>scripts\eastern_kingdoms\blackwing_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_nefarian.cpp">
+      <Filter>scripts\eastern_kingdoms\blackwing_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_razorgore.cpp">
+      <Filter>scripts\eastern_kingdoms\blackwing_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_vaelastrasz.cpp">
+      <Filter>scripts\eastern_kingdoms\blackwing_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_victor_nefarius.cpp">
+      <Filter>scripts\eastern_kingdoms\blackwing_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\instance_blackwing_lair.cpp">
+      <Filter>scripts\eastern_kingdoms\blackwing_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\deadmines\boss_mr_smite.cpp">
+      <Filter>scripts\eastern_kingdoms\deadmines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\deadmines\deadmines.cpp">
+      <Filter>scripts\eastern_kingdoms\deadmines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\deadmines\instance_deadmines.cpp">
+      <Filter>scripts\eastern_kingdoms\deadmines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\gnomeregan\boss_thermaplugg.cpp">
+      <Filter>scripts\eastern_kingdoms\gnomeregan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\gnomeregan\gnomeregan.cpp">
+      <Filter>scripts\eastern_kingdoms\gnomeregan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\gnomeregan\instance_gnomeregan.cpp">
+      <Filter>scripts\eastern_kingdoms\gnomeregan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_baron_geddon.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_garr.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_gehennas.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_golemagg.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_lucifron.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_magmadar.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_majordomo_executus.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_ragnaros.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_shazzrah.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_sulfuron_harbinger.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\instance_molten_core.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\molten_core.cpp">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_anubrekhan.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_faerlina.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_four_horsemen.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_gluth.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_gothik.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_grobbulus.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_heigan.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_kelthuzad.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_loatheb.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_maexxna.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_noth.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_patchwerk.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_razuvious.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_sapphiron.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_thaddius.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\instance_naxxramas.cpp">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scarlet_monastery\boss_arcanist_doan.cpp">
+      <Filter>scripts\eastern_kingdoms\scarlet_monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scarlet_monastery\boss_herod.cpp">
+      <Filter>scripts\eastern_kingdoms\scarlet_monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scarlet_monastery\boss_mograine_and_whitemane.cpp">
+      <Filter>scripts\eastern_kingdoms\scarlet_monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scarlet_monastery\instance_scarlet_monastery.cpp">
+      <Filter>scripts\eastern_kingdoms\scarlet_monastery</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\boss_darkmaster_gandling.cpp">
+      <Filter>scripts\eastern_kingdoms\scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\boss_jandice_barov.cpp">
+      <Filter>scripts\eastern_kingdoms\scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\instance_scholomance.cpp">
+      <Filter>scripts\eastern_kingdoms\scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\scholomance.cpp">
+      <Filter>scripts\eastern_kingdoms\scholomance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\shadowfang_keep\instance_shadowfang_keep.cpp">
+      <Filter>scripts\eastern_kingdoms\shadowfang_keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\shadowfang_keep\shadowfang_keep.cpp">
+      <Filter>scripts\eastern_kingdoms\shadowfang_keep</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\boss_baroness_anastari.cpp">
+      <Filter>scripts\eastern_kingdoms\stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\boss_cannon_master_willey.cpp">
+      <Filter>scripts\eastern_kingdoms\stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\boss_dathrohan_balnazzar.cpp">
+      <Filter>scripts\eastern_kingdoms\stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\boss_maleki_the_pallid.cpp">
+      <Filter>scripts\eastern_kingdoms\stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\instance_stratholme.cpp">
+      <Filter>scripts\eastern_kingdoms\stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\stratholme.cpp">
+      <Filter>scripts\eastern_kingdoms\stratholme</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\instance_sunken_temple.cpp">
+      <Filter>scripts\eastern_kingdoms\sunken_temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\sunken_temple.cpp">
+      <Filter>scripts\eastern_kingdoms\sunken_temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\uldaman\boss_archaedas.cpp">
+      <Filter>scripts\eastern_kingdoms\uldaman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\uldaman\uldaman.cpp">
+      <Filter>scripts\eastern_kingdoms\uldaman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\uldaman\instance_uldaman.cpp">
+      <Filter>scripts\eastern_kingdoms\uldaman</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_arlokk.cpp">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_hakkar.cpp">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_hazzarah.cpp">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_jeklik.cpp">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_jindo.cpp">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_mandokir.cpp">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_marli.cpp">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_renataki.cpp">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_thekal.cpp">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_venoxis.cpp">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\instance_zulgurub.cpp">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\examples\example_creature.cpp">
+      <Filter>scripts\examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\examples\example_escort.cpp">
+      <Filter>scripts\examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\examples\example_gossip_codebox.cpp">
+      <Filter>scripts\examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\examples\example_misc.cpp">
+      <Filter>scripts\examples</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ashenvale.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\azshara.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\boss_azuregos.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\darkshore.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\desolace.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\durotar.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\dustwallow_marsh.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\felwood.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\feralas.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\moonglade.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\mulgore.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\orgrimmar.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\silithus.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\stonetalon_mountains.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\tanaris.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\teldrassil.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\the_barrens.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\thousand_needles.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\thunder_bluff.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ungoro_crater.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\winterspring.cpp">
+      <Filter>scripts\kalimdor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\blackfathom_deeps\instance_blackfathom_deeps.cpp">
+      <Filter>scripts\kalimdor\blackfathom_deeps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\dire_maul\dire_maul.cpp">
+      <Filter>scripts\kalimdor\dire_maul</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\dire_maul\instance_dire_maul.cpp">
+      <Filter>scripts\kalimdor\dire_maul</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\maraudon\boss_noxxion.cpp">
+      <Filter>scripts\kalimdor\maraudon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\onyxias_lair\boss_onyxia.cpp">
+      <Filter>scripts\kalimdor\onyxias_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\onyxias_lair\instance_onyxias_lair.cpp">
+      <Filter>scripts\kalimdor\onyxias_lair</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_downs\instance_razorfen_downs.cpp">
+      <Filter>scripts\kalimdor\razorfen_downs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_downs\razorfen_downs.cpp">
+      <Filter>scripts\kalimdor\razorfen_downs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_kraul\instance_razorfen_kraul.cpp">
+      <Filter>scripts\kalimdor\razorfen_kraul</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_kraul\razorfen_kraul.cpp">
+      <Filter>scripts\kalimdor\razorfen_kraul</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_ayamiss.cpp">
+      <Filter>scripts\kalimdor\ruins_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_buru.cpp">
+      <Filter>scripts\kalimdor\ruins_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_kurinnaxx.cpp">
+      <Filter>scripts\kalimdor\ruins_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_moam.cpp">
+      <Filter>scripts\kalimdor\ruins_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_ossirian.cpp">
+      <Filter>scripts\kalimdor\ruins_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_rajaxx.cpp">
+      <Filter>scripts\kalimdor\ruins_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\instance_ruins_of_ahnqiraj.cpp">
+      <Filter>scripts\kalimdor\ruins_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\ruins_of_ahnqiraj.cpp">
+      <Filter>scripts\kalimdor\ruins_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_bug_trio.cpp">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_cthun.cpp">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_fankriss.cpp">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_huhuran.cpp">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_ouro.cpp">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_sartura.cpp">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_skeram.cpp">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_twinemperors.cpp">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_viscidus.cpp">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\instance_temple_of_ahnqiraj.cpp">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\mob_anubisath_sentinel.cpp">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\wailing_caverns\instance_wailing_caverns.cpp">
+      <Filter>scripts\kalimdor\wailing_caverns</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\wailing_caverns\wailing_caverns.cpp">
+      <Filter>scripts\kalimdor\wailing_caverns</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\zulfarrak\boss_zumrah.cpp">
+      <Filter>scripts\kalimdor\zulfarrak</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\zulfarrak\instance_zulfarrak.cpp">
+      <Filter>scripts\kalimdor\zulfarrak</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\zulfarrak\zulfarrak.cpp">
+      <Filter>scripts\kalimdor\zulfarrak</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\areatrigger_scripts.cpp">
+      <Filter>scripts\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\bosses_emerald_dragons.cpp">
+      <Filter>scripts\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\go_scripts.cpp">
+      <Filter>scripts\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\guards.cpp">
+      <Filter>scripts\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\item_scripts.cpp">
+      <Filter>scripts\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\mob_generic_creature.cpp">
+      <Filter>scripts\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\npc_professions.cpp">
+      <Filter>scripts\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\npcs_special.cpp">
+      <Filter>scripts\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\spell_scripts.cpp">
+      <Filter>scripts\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\world_map_scripts.cpp">
+      <Filter>scripts\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\include\precompiled.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\include\sc_creature.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\include\sc_grid_searchers.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\include\sc_instance.cpp">
+      <Filter>include</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\system\MangosdRev.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\system\ScriptLoader.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\system\system.cpp">
+      <Filter>system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\ScriptMgr.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\scriptdev2\base\escort_ai.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\base\follower_ai.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\base\guard_ai.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\base\pet_ai.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\blackrock_depths.h">
+      <Filter>scripts\eastern_kingdoms\blackrock_depths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_spire\blackrock_spire.h">
+      <Filter>scripts\eastern_kingdoms\blackrock_spire</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\blackwing_lair.h">
+      <Filter>scripts\eastern_kingdoms\blackwing_lair</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\deadmines\deadmines.h">
+      <Filter>scripts\eastern_kingdoms\deadmines</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\gnomeregan\gnomeregan.h">
+      <Filter>scripts\eastern_kingdoms\gnomeregan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\molten_core.h">
+      <Filter>scripts\eastern_kingdoms\molten_core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\naxxramas.h">
+      <Filter>scripts\eastern_kingdoms\naxxramas</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scarlet_monastery\scarlet_monastery.h">
+      <Filter>scripts\eastern_kingdoms\scarlet_monastery</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\scholomance.h">
+      <Filter>scripts\eastern_kingdoms\scholomance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\shadowfang_keep\shadowfang_keep.h">
+      <Filter>scripts\eastern_kingdoms\shadowfang_keep</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\stratholme.h">
+      <Filter>scripts\eastern_kingdoms\stratholme</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\sunken_temple.h">
+      <Filter>scripts\eastern_kingdoms\sunken_temple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\uldaman\uldaman.h">
+      <Filter>scripts\eastern_kingdoms\uldaman</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\zulgurub.h">
+      <Filter>scripts\eastern_kingdoms\zulgurub</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\blackfathom_deeps\blackfathom_deeps.h">
+      <Filter>scripts\kalimdor\blackfathom_deeps</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\dire_maul\dire_maul.h">
+      <Filter>scripts\kalimdor\dire_maul</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\onyxias_lair\onyxias_lair.h">
+      <Filter>scripts\kalimdor\onyxias_lair</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_downs\razorfen_downs.h">
+      <Filter>scripts\kalimdor\razorfen_downs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_kraul\razorfen_kraul.h">
+      <Filter>scripts\kalimdor\razorfen_kraul</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\ruins_of_ahnqiraj.h">
+      <Filter>scripts\kalimdor\ruins_of_ahnqiraj</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\temple_of_ahnqiraj.h">
+      <Filter>scripts\kalimdor\temple_of_ahnqiraj</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\wailing_caverns\wailing_caverns.h">
+      <Filter>scripts\kalimdor\wailing_caverns</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\zulfarrak\zulfarrak.h">
+      <Filter>scripts\kalimdor\zulfarrak</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\scripts\world\world_map_scripts.h">
+      <Filter>scripts\world</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\include\precompiled.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\include\sc_creature.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\include\sc_gossip.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\include\sc_grid_searchers.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\include\sc_instance.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\system\ScriptLoader.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\system\system.h">
+      <Filter>system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\scriptdev2\config.h" />
+    <ClInclude Include="..\..\src\scriptdev2\sd2_revision_nr.h" />
+    <ClInclude Include="..\..\src\scriptdev2\sd2_revision_sql.h" />
+    <ClInclude Include="..\..\src\scriptdev2\ScriptMgr.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\src\scriptdev2\revision.h" />
+  </ItemGroup>
+</Project>

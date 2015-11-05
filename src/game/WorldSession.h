@@ -32,6 +32,7 @@
 struct ItemPrototype;
 struct AuctionEntry;
 struct AuctionHouseEntry;
+struct TradeStatusInfo;
 
 class ObjectGuid;
 class Creature;
@@ -61,14 +62,12 @@ enum PartyResult
     ERR_PARTY_RESULT_OK                 = 0,
     ERR_BAD_PLAYER_NAME_S               = 1,
     ERR_TARGET_NOT_IN_GROUP_S           = 2,
-    ERR_TARGET_NOT_IN_INSTANCE_S        = 3,
-    ERR_GROUP_FULL                      = 4,
-    ERR_ALREADY_IN_GROUP_S              = 5,
-    ERR_NOT_IN_GROUP                    = 6,
-    ERR_NOT_LEADER                      = 7,
-    ERR_PLAYER_WRONG_FACTION            = 8,
-    ERR_IGNORING_YOU_S                  = 9,
-    ERR_INVITE_RESTRICTED               = 13,
+    ERR_GROUP_FULL                      = 3,
+    ERR_ALREADY_IN_GROUP_S              = 4,
+    ERR_NOT_IN_GROUP                    = 5,
+    ERR_NOT_LEADER                      = 6,
+    ERR_PLAYER_WRONG_FACTION            = 7,
+    ERR_IGNORING_YOU_S                  = 8
 };
 
 enum TutorialDataState
@@ -191,13 +190,13 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTabardVendorActivate(ObjectGuid guid);
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);
-        void SendGMTicketGetTicket(uint32 status, GMTicket* ticket = NULL);
+        void SendGMTicketGetTicket(uint32 status, GMTicket* ticket = nullptr);
 
         void SendAttackStop(Unit const* enemy);
 
         void SendBattlegGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId);
 
-        void SendTradeStatus(TradeStatus status);
+        void SendTradeStatus(const TradeStatusInfo& status);
         void SendUpdateTrade(bool trader_state = true);
         void SendCancelTrade();
 
@@ -257,8 +256,6 @@ class MANGOS_DLL_SPEC WorldSession
         void SendBattleGroundJoinError(uint8 err);
 
         void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket* data);
-
-        void DoLootRelease(ObjectGuid lguid);
 
         // Account mute time
         time_t m_muteTime;
@@ -683,7 +680,7 @@ class MANGOS_DLL_SPEC WorldSession
         uint32 m_clientTimeDelay;
         uint32 m_Tutorials[8];
         TutorialDataState m_tutorialState;
-        ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
+        ACE_Based::LockedQueue<WorldPacket*> _recvQueue;
 };
 #endif
 /// @}

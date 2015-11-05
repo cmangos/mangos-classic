@@ -21,7 +21,6 @@
 
 #include "Common.h"
 #include "Object.h"
-#include "LootMgr.h"
 #include "ItemPrototype.h"
 
 struct SpellEntry;
@@ -29,6 +28,7 @@ class Bag;
 class Field;
 class QueryResult;
 class Unit;
+class Loot;
 
 struct ItemSetEffect
 {
@@ -230,8 +230,8 @@ bool ItemCanGoIntoBag(ItemPrototype const* proto, ItemPrototype const* pBagProto
 class MANGOS_DLL_SPEC Item : public Object
 {
     public:
-        static Item* CreateItem(uint32 item, uint32 count, Player const* player = NULL, uint32 randomPropertyId = 0);
-        Item* CloneItem(uint32 count, Player const* player = NULL) const;
+        static Item* CreateItem(uint32 item, uint32 count, Player const* player = nullptr, uint32 randomPropertyId = 0);
+        Item* CloneItem(uint32 count, Player const* player = nullptr) const;
 
         Item();
 
@@ -280,7 +280,7 @@ class MANGOS_DLL_SPEC Item : public Object
         uint16 GetPos() const { return uint16(GetBagSlot()) << 8 | GetSlot(); }
         void SetContainer(Bag* container) { m_container = container; }
 
-        bool IsInBag() const { return m_container != NULL; }
+        bool IsInBag() const { return m_container != nullptr; }
         bool IsEquipped() const;
 
         uint32 GetSkill();
@@ -306,17 +306,15 @@ class MANGOS_DLL_SPEC Item : public Object
         int32 GetSpellCharges(uint8 index/*0..5*/ = 0) const { return GetInt32Value(ITEM_FIELD_SPELL_CHARGES + index); }
         void SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, value); }
 
-        Loot loot;
-
         void SetLootState(ItemLootUpdateState state);
-        bool HasGeneratedLoot() const { return m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_REMOVED; }
-        bool HasTemporaryLoot() const { return m_lootState == ITEM_LOOT_TEMPORARY; }
+        bool HasGeneratedLoot() const { return loot && m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_REMOVED; }
+        bool HasTemporaryLoot() const { return loot && m_lootState == ITEM_LOOT_TEMPORARY; }
 
         bool HasSavedLoot() const { return m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_NEW && m_lootState != ITEM_LOOT_TEMPORARY; }
 
         // Update States
         ItemUpdateState GetState() const { return uState; }
-        void SetState(ItemUpdateState state, Player* forplayer = NULL);
+        void SetState(ItemUpdateState state, Player* forplayer = nullptr);
         void AddToUpdateQueueOf(Player* player);
         void RemoveFromUpdateQueueOf(Player* player);
         bool IsInUpdateQueue() const { return uQueuePos != -1; }

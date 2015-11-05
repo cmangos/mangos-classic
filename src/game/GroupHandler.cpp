@@ -82,7 +82,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
 
     if (GetPlayer()->GetInstanceId() != 0 && player->GetInstanceId() != 0 && GetPlayer()->GetInstanceId() != player->GetInstanceId() && GetPlayer()->GetMapId() == player->GetMapId())
     {
-        SendPartyResult(PARTY_OP_INVITE, membername, ERR_TARGET_NOT_IN_INSTANCE_S);
+        SendPartyResult(PARTY_OP_INVITE, membername, ERR_ALREADY_IN_GROUP_S); // error message is not so appropriated but no other option for classic
         return;
     }
 
@@ -330,7 +330,7 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
 
     if (_player->InBattleGround())
     {
-        SendPartyResult(PARTY_OP_INVITE, "", ERR_INVITE_RESTRICTED);
+        SendPartyResult(PARTY_OP_INVITE, "", ERR_NOT_LEADER);  // error message is not so appropriated but no other option for classic
         return;
     }
 
@@ -341,51 +341,6 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
     SendPartyResult(PARTY_OP_LEAVE, GetPlayer()->GetName(), ERR_PARTY_RESULT_OK);
 
     GetPlayer()->RemoveFromGroup();
-}
-
-void WorldSession::HandleLootMethodOpcode(WorldPacket& recv_data)
-{
-    uint32 lootMethod;
-    ObjectGuid lootMaster;
-    uint32 lootThreshold;
-    recv_data >> lootMethod >> lootMaster >> lootThreshold;
-
-    Group* group = GetPlayer()->GetGroup();
-    if (!group)
-        return;
-
-    /** error handling **/
-    if (!group->IsLeader(GetPlayer()->GetObjectGuid()))
-        return;
-    /********************/
-
-    // everything is fine, do it
-    group->SetLootMethod((LootMethod)lootMethod);
-    group->SetLooterGuid(lootMaster);
-    group->SetLootThreshold((ItemQualities)lootThreshold);
-    group->SendUpdate();
-}
-
-void WorldSession::HandleLootRoll(WorldPacket& recv_data)
-{
-    ObjectGuid lootedTarget;
-    uint32 itemSlot;
-    uint8  rollType;
-    recv_data >> lootedTarget;                              // guid of the item rolled
-    recv_data >> itemSlot;
-    recv_data >> rollType;
-
-    // DEBUG_LOG("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, rollType:%u", (uint32)Guid, NumberOfPlayers, rollType);
-
-    Group* group = GetPlayer()->GetGroup();
-    if (!group)
-        return;
-
-    if (rollType >= MAX_ROLL_FROM_CLIENT)
-        return;
-
-    // everything is fine, do it, if false then some cheating problem found (result not used in pre-3.0)
-    group->CountRollVote(GetPlayer(), lootedTarget, itemSlot, RollVote(rollType));
 }
 
 void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)

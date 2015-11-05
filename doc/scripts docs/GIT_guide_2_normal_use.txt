@@ -1,0 +1,86 @@
+[Git GUIDE] Normal use
+======================
+
+This topic is for people who want to do a little work with SD2.
+
+In this topic I assume that you are familar with basic use of Git and also that you are familiar with your GUI (if you use any).
+
+If you are not, maybe you should start with the _Easy use_ guide, see:
+
+* link:GIT_guide_1_easy_use.html[Git GUIDE - Easy use]
+* http://www.scriptdev2.com/showthread.php?t=5637[Git GUIDE - Easy use on SD2 Forums]
+
+In this topic I will describe the needed steps to test other people's patches, and how to create some own patches. However based on the Command-line tool.
+
+For Windows users you can start the command line with right-clicking the ScriptDev2 directory and selecting "Git Bash Here".
+
+Basic concepts in Git
+---------------------
+
+Git has a working directory, these are the actual files you edit, compile and work with.
+
+Git has a "index" which is the history information.+
+
+By default the working directory is clean related to the index.
+
+For this topic I assume that your working-tree is clean.
+
+You can check this with `$ git status` .
+
+Clean results in `nothing to commit (working directory clean)` .
+
+If your working directory is not clean, you can either commit your changes (if they were good) with `$ git commit -a` .
+
+or remove your changes with `$ git reset --hard` ,
+
+or reset your working dir to default state with `$ git reset -hard origin/master` .
+
+Testing ("applying") patches from other people
+----------------------------------------------
+
+You can apply a git patch (located in fileName.patch) with +
+`$ git apply fileName.patch` +
+or +
+`$ git am fileName.patch`
+
+The second expects a patch that includes history information, so if this fails, the first way must work (or it is no proper patch)
+
+Creating own patches
+--------------------
+
+You have spotted a bug, fixed it, and now you wonder how you can share this fix with other people.
+
+The recommanded way is, to commit your change locally and create a patch file from your commit
+
+To commit your patch locally, you simple need to +
+`$ git commit -a -m "Make Illidan more powerfull"`
+
+Then you can create a patch with +
+`$ git format-patch HEAD^ --stdout > IllidanFix.patch` +
+which will create a patch for the top-most commit into the file IllidanFix.patch
+
+You can also create a patch with +
+`$ git format-patch HEAD~n --stdout > IllidanFix.patch` +
+`HEAD^ == HEAD~1` and is the previous commit, `HEAD~n` is the n-th commit before the current
+
+A very usefull way to create a patch is based on clean ScriptDev2, with +
+`$ git format-patch origin/master --stdout > IllidanFix.patch`
+
+Branching projects, and tests
+-----------------------------
+
+This is actually the part, where Git has its power. If you don't use branches, you prevent yourself from using the best within Git!
+
+The main idea is to test patches, to create patches always into special branches, and this way they won't interfere with the main-branch.
+
+Assuming you are on clean master, you create and checkout into a new branch with +
+`$ git checkout -b IlllidanFixes` +
+(the -b is for "create", whereas the normal checkout means switching between branches) +
+so, you can edit, commit, apply patches as often as you want in your branch.
+
+To compare what actually happend in this branch relative to ie your master branch, simply do +
+`$ git diff master` +
+and to create a patch do +
+`$ git format-patch master --stdout > IllidanFix.patch`
+
+And the best thing: You can create as many branches as you wish - which makes separating different projects, tests and so on a piece of cake :)

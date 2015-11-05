@@ -1,0 +1,42 @@
+Overview of ScriptDev2 Documentation Section
+============================================
+
+License
+-------
+
+ScriptDev2 is GPL Software, you can find the link:LICENSE.txt[GNU General Public License] here.
+
+
+Basic Installation instructions
+-------------------------------
+
+See link:How_to_install.html[How to install] for basic instructions
+
+ScriptDev2 ChangeLog and TODO list
+----------------------------------
+See link:ChangeLog.html[Changelog] for basic points reached with the last milestones
+
+See link:ToDo.html[TODO List] for rough points that the SD2-Team wants to be adressed in the next milestones
+
+Various Guides related to Git
+-----------------------------
+
+link:GIT_guide_1_easy_use.html[Easy use of Git] - Look here if you are new to Git
+
+link:GIT_guide_2_normal_use.html[Normal use of Git] - Look here if you want to do basic work with Git
+
+link:GIT_guide_3_advanced_use.html[Advanced use of Git] - Look here if you want to dig deeper into Git, this also contains some configuration settings for Git
+
+Database content used with SD2
+------------------------------
+
+link:SQL_guide.html[Guide for SD2 SQL-Files] - Look here for an overview how to manipulate the database content in SD2
+
+link:Text-tables.txt[] - Manual like documentation for the tables \`script_texts` and \`custom_texts`
+
+Old documentation files
+-----------------------
+
+link:Script_Layout.txt[] :: Information about the subfolders of the `scripts` directory
+
+link:Text-tables.txt[] :: Documentation of the layout of the tables \`script_texts`, \`custom_texts` and \`gossip_texts`

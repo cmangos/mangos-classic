@@ -27,9 +27,9 @@
 
 #ifndef _VERSION
 #if PLATFORM == PLATFORM_WINDOWS
-# define _VERSION(REVD,REVT,REVN,REVH) "0.12.2" " (" REVD " " REVT " Revision " REVN " - " REVH ")"
+# define _VERSION(REVD,REVT,REVH) "0.12.3" " (" REVD " " REVT " - " REVH ")"
 #else
-# define _VERSION(REVD,REVT,REVN,REVH) "@VERSION@" " (" REVD " " REVT " Revision " REVN " - " REVH ")"
+# define _VERSION(REVD,REVT,REVH) "@VERSION@" " (" REVD " " REVT " - " REVH ")"
 #endif
 #endif
 
@@ -40,9 +40,6 @@
 #endif
 #ifndef _REALMDCONFVERSION
 # define _REALMDCONFVERSION 2010062001
-#endif
-#ifndef _MODSCONFVERSION
-# define _MODSCONFVERSION 2010062001
 #endif
 
 #if MANGOS_ENDIAN == MANGOS_BIGENDIAN
@@ -74,7 +71,6 @@
 # endif
 # define _MANGOSD_CONFIG  SYSCONFDIR"mangosd.conf"
 # define _REALMD_CONFIG   SYSCONFDIR"realmd.conf"
-# define _MODS_CONFIG     SYSCONFDIR"mods.conf"
 # define _AUCTIONHOUSEBOT_CONFIG   SYSCONFDIR"ahbot.conf"
 #else
 # if defined  (__FreeBSD__)
@@ -94,11 +90,10 @@
 # endif
 # define _MANGOSD_CONFIG  SYSCONFDIR"mangosd.conf"
 # define _REALMD_CONFIG  SYSCONFDIR"realmd.conf"
-# define _MODS_CONFIG  SYSCONFDIR"mods.conf"
 # define _AUCTIONHOUSEBOT_CONFIG   SYSCONFDIR"ahbot.conf"
 #endif
 
-#define _FULLVERSION(REVD,REVT,REVN,REVH) _PACKAGENAME "/" _VERSION(REVD,REVT,REVN,REVH) " for " _ENDIAN_PLATFORM
+#define _FULLVERSION(REVD,REVT,REVH) _PACKAGENAME "/" _VERSION(REVD,REVT,REVH) " for " _ENDIAN_PLATFORM
 
 #define DEFAULT_PLAYER_LIMIT 100
 #define DEFAULT_WORLDSERVER_PORT 8085                       //8129

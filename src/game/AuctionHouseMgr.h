@@ -75,8 +75,8 @@ struct AuctionEntry
     bool BuildAuctionInfo(WorldPacket& data) const;
     void DeleteFromDB() const;
     void SaveToDB() const;
-    void AuctionBidWinning(Player* bidder = NULL);
-    bool UpdateBid(uint32 newbid, Player* newbidder = NULL);// true if normal bid, false if buyout, bidder==NULL for generated bid
+    void AuctionBidWinning(Player* bidder = nullptr);
+    bool UpdateBid(uint32 newbid, Player* newbidder = nullptr);// true if normal bid, false if buyout, bidder==nullptr for generated bid
 };
 
 // this class is used as auctionhouse instance
@@ -107,7 +107,7 @@ class AuctionHouseObject
         AuctionEntry* GetAuction(uint32 id) const
         {
             AuctionEntryMap::const_iterator itr = AuctionsMap.find(id);
-            return itr != AuctionsMap.end() ? itr->second : NULL;
+            return itr != AuctionsMap.end() ? itr->second : nullptr;
         }
 
         bool RemoveAuction(uint32 id)
@@ -123,7 +123,7 @@ class AuctionHouseObject
                                    std::wstring const& searchedname, uint32 listfrom, uint32 levelmin, uint32 levelmax, uint32 usable,
                                    uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality,
                                    uint32& count, uint32& totalcount);
-        AuctionEntry* AddAuction(AuctionHouseEntry const* auctionHouseEntry, Item* newItem, uint32 etime, uint32 bid, uint32 buyout = 0, uint32 deposit = 0, Player* pl = NULL);
+        AuctionEntry* AddAuction(AuctionHouseEntry const* auctionHouseEntry, Item* newItem, uint32 etime, uint32 bid, uint32 buyout = 0, uint32 deposit = 0, Player* pl = nullptr);
     private:
         AuctionEntryMap AuctionsMap;
 };
@@ -143,7 +143,7 @@ class AuctionHouseMgr
         AuctionHouseMgr();
         ~AuctionHouseMgr();
 
-        typedef UNORDERED_MAP<uint32, Item*> ItemMap;
+        typedef std::unordered_map<uint32, Item*> ItemMap;
 
         AuctionHouseObject* GetAuctionsMap(AuctionHouseType houseType) { return &mAuctions[houseType]; }
         AuctionHouseObject* GetAuctionsMap(AuctionHouseEntry const* house);
@@ -155,7 +155,7 @@ class AuctionHouseMgr
             {
                 return itr->second;
             }
-            return NULL;
+            return nullptr;
         }
 
         // auction messages

@@ -40,8 +40,8 @@ When you decide to create a new bug report, please make sure that this report in
 * Revision on which you encountered this bug (if known, also the revision or timeframe where it first appeared) - you can also post the link to the commit on the upstream repository
 * Revisions of additional parts of the CMaNGOS familiy (SD2 version, database name and version, and such)
 * A detailed step-by-step report how this bug can be reproduced
-* A detailed explenation of what DOES happen
-* A detailed explenation of what SHOULD happen  - if possible also add a source why you think this should happen
+* A detailed explanation of what DOES happen
+* A detailed explanation of what SHOULD happen  - if possible also add a source why you think this should happen
 * When reporting spell-related bugs, please use spell-IDs in your description, and try to use .cast commands to reproduce your bug. This makes reproducing much easier!
 * When reporting crashes, please include a crash-log (as detailed as possible - we like GDB logs from debug builds!)
 * Only report one bug per issue/thread

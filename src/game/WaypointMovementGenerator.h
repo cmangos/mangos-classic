@@ -66,7 +66,7 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
 {
     public:
         WaypointMovementGenerator(Creature&) : i_nextMoveTime(0), m_isArrivalDone(false), m_lastReachedWaypoint(0) {}
-        ~WaypointMovementGenerator() { i_path = NULL; }
+        ~WaypointMovementGenerator() { i_path = nullptr; }
         void Initialize(Creature& u);
         void Interrupt(Creature&);
         void Finalize(Creature&);

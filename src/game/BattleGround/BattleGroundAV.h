@@ -335,7 +335,7 @@ class BattleGroundAV : public BattleGround
         // world states
         virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
-        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         virtual void Reset() override;
 
         /*general stuff*/
@@ -354,6 +354,9 @@ class BattleGroundAV : public BattleGround
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* plr) override;
 
         static BattleGroundAVTeamIndex GetAVTeamIndexByTeamId(Team team) { return BattleGroundAVTeamIndex(GetTeamIndexByTeamId(team)); }
+
+        virtual Team GetPrematureWinner() override;
+
     private:
         /* Nodes occupying */
         void EventPlayerAssaultsPoint(Player* player, BG_AV_Nodes node);

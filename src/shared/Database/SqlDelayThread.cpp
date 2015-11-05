@@ -45,7 +45,7 @@ void SqlDelayThread::run()
     {
         // if the running state gets turned off while sleeping
         // empty the queue before exiting
-        ACE_Based::Thread::Sleep(loopSleepms);
+        MaNGOS::Thread::Sleep(loopSleepms);
 
         ProcessRequests();
 
@@ -68,7 +68,7 @@ void SqlDelayThread::Stop()
 
 void SqlDelayThread::ProcessRequests()
 {
-    SqlOperation* s = NULL;
+    SqlOperation* s = nullptr;
     while (m_sqlQueue.next(s))
     {
         s->Execute(m_dbConnection);

@@ -1,0 +1,68 @@
+Installation Instructions
+=========================
+
+Clean install of ScriptDev2 (for Classic)
+-----------------------------------------
+
+Download C-MaNGOS (using git clone)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+See their http://www.ru-mangos.ru/[forum] or https://github.com/cmangos/mangos-classic/wiki[wiki] for more details
+
+Get the sources
+~~~~~~~~~~~~~~~
+
+Clone ScriptDev2 `git clone git://github.com/scriptdev2/scriptdev2-classic.git ScriptDev2` - execute from within src/bindings directory
+
+*MS Windows:* +
+Compile ScriptDev2 using the scriptVC80, scriptVC90 or scriptVC100 Solution within the ScriptDev2 folder (this will overwrite the Mangoscript dll in the output directory)
+
+*GNU/Linux or CMake:* +
+When running CMake on MaNGOS, make sure to set `-D INCLUDE_BINDINGS_DIR=ScriptDev2`
+Compile MaNGOS (ScriptDev2 will automatically be built when compiling Mangos from here on)
+
+
+Handle the databases
+~~~~~~~~~~~~~~~~~~~~
+
+Create ScriptDev2-Database::
+Execute `sql\scriptdev2_create_database.sql` , then execute +
+`sql\scriptdev2_create_structure.sql` on that database.
+Add content to ScriptDev2-Database::
+Execute `sql\scriptdev2_script_full.sql` on scriptdev2 databse
+Update ScriptNames::
+Execute `sql\mangos_scriptname_full.sql` on your MaNGOS world Database
+
+Configuration files
+~~~~~~~~~~~~~~~~~~~
+
+Place the included "scriptdev2.conf" file within the directory containing your "mangosd.conf" and "realmd.conf" files.
+
+You may need to change this file to match the database you created and any custom settings you wish to use.
+
+Note this file will be differently created for Unix based systems.
+
+Run mangosd
+~~~~~~~~~~~
+
+Run mangosd from your output directory. If you use another directory to run mangos, you need (on windows) copy the mangosscript.dll to that directory before starting mangosd.
+
+
+How to Update ScriptDev2
+------------------------
+
+. Enter src/bindings/ScriptDev2 directory (with git-bash)
+. Update ScriptDev2 with `git pull`
+. Compile ScriptDev2 +
+  On _windows_ you must still compile MaNGOS before ScriptDev2
+. Update your Database with new Scriptdev2 SQL changes. For this you can either:
+  * apply only the changes that were made during that revision by looking in the sql\update folder or (files named rXXX_scriptdev2.sql should be executed on the scriptdev2 db while rXXX_mangos.sql should be executed on your mangos db)
+  * reapply "mangos_scriptname_full.sql" to your MaNGOS database. - WARNING this will NOT include removed script names!
+
+ScriptDev2 Change Log
+---------------------
+
+You can view the ScriptDev2 change log on the https://github.com/scriptdev2/scriptdev2/commits/master[ScriptDev2 Github Repository].
+You can view the ScriptDev2-classic change log on the https://github.com/scriptdev2/scriptdev2-classic/commits/master[ScriptDev2 (Classic) Github Repository].
+
+Or of course locally with your Git GUI tools or with `git log` (Note that it should be up to date before looking into your local log)

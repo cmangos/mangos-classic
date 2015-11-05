@@ -133,7 +133,7 @@ class BattleGroundWS : public BattleGround
         virtual void EventPlayerCapturedFlag(Player* source) override;
 
         void RemovePlayer(Player* plr, ObjectGuid guid) override;
-        void HandleAreaTrigger(Player* source, uint32 trigger) override;
+        bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         void HandleKillPlayer(Player* player, Player* killer) override;
         virtual void Reset() override;
         void EndBattleGround(Team winner) override;
@@ -146,6 +146,7 @@ class BattleGroundWS : public BattleGround
         void ClearDroppedFlagGuid(Team team)  { m_DroppedFlagGuid[GetTeamIndexByTeamId(team)].Clear();}
         ObjectGuid const& GetDroppedFlagGuid(Team team) const { return m_DroppedFlagGuid[GetTeamIndexByTeamId(team)];}
         virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        virtual Team GetPrematureWinner() override;
 
     private:
         ObjectGuid m_flagCarrierAlliance;

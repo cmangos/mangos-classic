@@ -1,0 +1,5 @@
+This folder contains SQL files which will apply required updates to your MySQL
+database, whenever the CMaNGOS database structure has been changed or extended.
+
+After applying an update the DB is compatible with the CMaNGOS revision of this sql update.
+SQL updates include special protection against multiple and wrong order of update application.

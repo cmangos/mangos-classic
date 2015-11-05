@@ -6,17 +6,8 @@
 # Use at own Risk:
 # OVERRIDE_CORRECTNESS[2]   <- Appends override correctness (add 2 for second pass)
 
-# Do config stuff
-sh "${0%/*}/cleanupToolConfig.sh"
-if [ "$?" != "0" ]
-then
-  echo "You need to edit the configuration file before you can use this tool!"
-  echo "Configuration file: ${0%/*}/cleanupTools.config"
-  exit 0
-fi
-
-# And use config settings
-. "${0%/*}/cleanupTools.config"
+# Use config settings
+. "${0%/*}/cleanupStyleConfig.sh"
 
 
 ## Internal Stuff

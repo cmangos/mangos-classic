@@ -1,0 +1,458 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>ScriptDev2</ProjectName>
+    <ProjectGuid>{4295C8A9-79B7-4354-8064-F05FB9CA0C96}</ProjectGuid>
+    <RootNamespace>ScriptDev2</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\ScriptDev2__$(Platform)_$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\ScriptDev2__$(Platform)_$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\ScriptDev2__$(Platform)_$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\bin\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\ScriptDev2__$(Platform)_$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">mangosscript</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mangosscript</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mangosscript</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mangosscript</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\dep\include\;..\..\src\shared\;..\..\src\framework\;..\..\src\game\;..\..\src\scriptdev2\include\;..\..\src\scriptdev2\base\;..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;MANGOS_DEBUG;_WINDOWS;_USRDLL;SCRIPT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <StringPooling>true</StringPooling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>mangosd.lib;ACEd.lib;framework.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);.\mangosd__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(OutDir)mangosscript.lib</ImportLibrary>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\dep\include\;..\..\src\shared\;..\..\src\framework\;..\..\src\game\;..\..\src\scriptdev2\include\;..\..\src\scriptdev2\base\;..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;MANGOS_DEBUG;_WINDOWS;_USRDLL;SCRIPT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <StringPooling>true</StringPooling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>mangosd.lib;ACEd.lib;framework.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);.\mangosd__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(OutDir)mangosscript.lib</ImportLibrary>
+      <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\dep\include\;..\..\src\shared\;..\..\src\framework\;..\..\src\game\;..\..\src\scriptdev2\include\;..\..\src\scriptdev2\base\;..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <StringPooling>true</StringPooling>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>mangosd.lib;ACE.lib;framework.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);.\mangosd__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(OutDir)mangosscript.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/Zm200 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>..\..\dep\include\;..\..\src\shared\;..\..\src\framework\;..\..\src\game\;..\..\src\scriptdev2\include\;..\..\src\scriptdev2\base\;..\..\dep\ACE_wrappers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <StringPooling>true</StringPooling>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>mangosd.lib;ACE.lib;framework.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\dep\lib\$(Platform)_$(Configuration);.\framework__$(Platform)_$(Configuration);.\mangosd__$(Platform)_$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <ImportLibrary>$(OutDir)mangosscript.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\scriptdev2\base\escort_ai.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\base\follower_ai.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\base\guard_ai.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\base\pet_ai.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\battlegrounds\battleground.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\alterac_mountains.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\arathi_highlands.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blasted_lands.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\boss_kazzak.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\burning_steppes.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\dun_morogh.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\eastern_plaguelands.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\elwynn_forest.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\hinterlands.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\ironforge.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\loch_modan.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\redridge_mountains.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\searing_gorge.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\silverpine_forest.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stormwind_city.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stranglethorn_vale.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\swamp_of_sorrows.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\tirisfal_glades.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\undercity.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\western_plaguelands.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\westfall.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\wetlands.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\blackrock_depths.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\boss_ambassador_flamelash.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\boss_emperor_dagran_thaurissan.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\boss_general_angerforge.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\boss_high_interrogator_gerstahn.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\instance_blackrock_depths.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_spire\boss_gyth.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_spire\boss_overlord_wyrmthalak.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_spire\boss_pyroguard_emberseer.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_spire\instance_blackrock_spire.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_broodlord_lashlayer.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_chromaggus.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_ebonroc.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_firemaw.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_flamegor.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_nefarian.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_razorgore.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_vaelastrasz.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\boss_victor_nefarius.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\instance_blackwing_lair.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\deadmines\boss_mr_smite.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\deadmines\deadmines.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\deadmines\instance_deadmines.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\gnomeregan\boss_thermaplugg.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\gnomeregan\gnomeregan.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\gnomeregan\instance_gnomeregan.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_baron_geddon.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_garr.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_gehennas.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_golemagg.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_lucifron.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_magmadar.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_majordomo_executus.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_ragnaros.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_shazzrah.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\boss_sulfuron_harbinger.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\instance_molten_core.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\molten_core.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_anubrekhan.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_faerlina.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_four_horsemen.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_gluth.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_gothik.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_grobbulus.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_heigan.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_kelthuzad.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_loatheb.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_maexxna.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_noth.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_patchwerk.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_razuvious.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_sapphiron.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\boss_thaddius.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\instance_naxxramas.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scarlet_monastery\boss_arcanist_doan.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scarlet_monastery\boss_herod.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scarlet_monastery\boss_mograine_and_whitemane.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scarlet_monastery\instance_scarlet_monastery.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\boss_darkmaster_gandling.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\boss_jandice_barov.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\instance_scholomance.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\scholomance.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\shadowfang_keep\instance_shadowfang_keep.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\shadowfang_keep\shadowfang_keep.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\boss_baroness_anastari.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\boss_cannon_master_willey.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\boss_dathrohan_balnazzar.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\boss_maleki_the_pallid.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\instance_stratholme.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\stratholme.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\instance_sunken_temple.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\sunken_temple.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\uldaman\boss_archaedas.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\uldaman\uldaman.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\uldaman\instance_uldaman.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_arlokk.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_hakkar.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_hazzarah.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_jeklik.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_jindo.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_mandokir.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_marli.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_renataki.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_thekal.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\boss_venoxis.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\instance_zulgurub.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\examples\example_creature.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\examples\example_escort.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\examples\example_gossip_codebox.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\examples\example_misc.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ashenvale.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\azshara.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\boss_azuregos.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\darkshore.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\desolace.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\durotar.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\dustwallow_marsh.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\felwood.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\feralas.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\moonglade.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\mulgore.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\orgrimmar.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\silithus.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\stonetalon_mountains.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\tanaris.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\teldrassil.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\the_barrens.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\thousand_needles.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\thunder_bluff.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ungoro_crater.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\winterspring.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\blackfathom_deeps\instance_blackfathom_deeps.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\dire_maul\dire_maul.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\dire_maul\instance_dire_maul.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\maraudon\boss_noxxion.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\onyxias_lair\boss_onyxia.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\onyxias_lair\instance_onyxias_lair.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_downs\instance_razorfen_downs.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_downs\razorfen_downs.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_kraul\instance_razorfen_kraul.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_kraul\razorfen_kraul.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_ayamiss.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_buru.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_kurinnaxx.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_moam.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_ossirian.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\boss_rajaxx.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\instance_ruins_of_ahnqiraj.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\ruins_of_ahnqiraj.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_bug_trio.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_cthun.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_fankriss.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_huhuran.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_ouro.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_sartura.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_skeram.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_twinemperors.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\boss_viscidus.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\instance_temple_of_ahnqiraj.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\mob_anubisath_sentinel.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\wailing_caverns\instance_wailing_caverns.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\wailing_caverns\wailing_caverns.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\zulfarrak\boss_zumrah.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\zulfarrak\instance_zulfarrak.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\kalimdor\zulfarrak\zulfarrak.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\areatrigger_scripts.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\bosses_emerald_dragons.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\go_scripts.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\guards.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\item_scripts.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\mob_generic_creature.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\npc_professions.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\npcs_special.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\spell_scripts.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\world\world_map_scripts.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\include\precompiled.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\include\sc_creature.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\include\sc_grid_searchers.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\include\sc_instance.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\system\ScriptLoader.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\system\system.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\ScriptMgr.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\scriptdev2\base\escort_ai.h" />
+    <ClInclude Include="..\..\src\scriptdev2\base\follower_ai.h" />
+    <ClInclude Include="..\..\src\scriptdev2\base\guard_ai.h" />
+    <ClInclude Include="..\..\src\scriptdev2\base\pet_ai.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_depths\blackrock_depths.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackrock_spire\blackrock_spire.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\blackwing_lair\blackwing_lair.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\deadmines\deadmines.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\gnomeregan\gnomeregan.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\molten_core\molten_core.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\naxxramas\naxxramas.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scarlet_monastery\scarlet_monastery.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\scholomance\scholomance.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\shadowfang_keep\shadowfang_keep.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stratholme\stratholme.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\sunken_temple.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\uldaman\uldaman.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\zulgurub\zulgurub.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\blackfathom_deeps\blackfathom_deeps.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\dire_maul\dire_maul.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\onyxias_lair\onyxias_lair.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_downs\razorfen_downs.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\razorfen_kraul\razorfen_kraul.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\ruins_of_ahnqiraj\ruins_of_ahnqiraj.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\temple_of_ahnqiraj\temple_of_ahnqiraj.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\wailing_caverns\wailing_caverns.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\kalimdor\zulfarrak\zulfarrak.h" />
+    <ClInclude Include="..\..\src\scriptdev2\scripts\world\world_map_scripts.h" />
+    <ClInclude Include="..\..\src\scriptdev2\include\precompiled.h" />
+    <ClInclude Include="..\..\src\scriptdev2\include\sc_creature.h" />
+    <ClInclude Include="..\..\src\scriptdev2\include\sc_gossip.h" />
+    <ClInclude Include="..\..\src\scriptdev2\include\sc_grid_searchers.h" />
+    <ClInclude Include="..\..\src\scriptdev2\include\sc_instance.h" />
+    <ClInclude Include="..\..\src\scriptdev2\system\ScriptLoader.h" />
+    <ClInclude Include="..\..\src\scriptdev2\system\system.h" />
+    <ClInclude Include="..\..\src\scriptdev2\config.h" />
+    <ClInclude Include="..\..\src\scriptdev2\sd2_revision_nr.h" />
+    <ClInclude Include="..\..\src\scriptdev2\sd2_revision_sql.h" />
+    <ClInclude Include="..\..\src\scriptdev2\ScriptMgr.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

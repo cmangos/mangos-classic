@@ -1,7 +1,39 @@
 # Changelog of CMaNGOS
 
-## MaNGOS 0.12.2   (22 January 2013)
- 
+## MaNGOS 0.12.3   (03 September 2015)
+
+ MaNGOS 0.12.3 - adds further improvements to the
+ server core as well as to the majority of game classes and the game content
+ database.
+
+### Game Features ###
+* Implement support for many spells and auras
+* Improve blink handling
+* Improve weather handling
+* Improve creature linking
+* Fix some exploits
+* Polish battlegrounds and arenas
+* Add support for rabbit day
+
+### Server Features ###
+* Smoother movement updates
+* Improve movement generators
+* Improve chat system
+* Improve vmap and mmap system
+* Improve EventAI and DBScripts engine
+* Improve pool system
+* Improve cmake system
+* Clarify and better handle some packets
+* Cleanup and optimize code
+* Add Travis CI
+
+### Statistics ###
+* Total number of changes: 726 commits
+* Lots of bugs from forum and issues from github fixed
+
+
+## MaNGOS 0.12.2   (21 December 2012)
+
  MaNGOS 0.12.2 - adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.

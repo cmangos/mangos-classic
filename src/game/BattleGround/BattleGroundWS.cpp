@@ -449,23 +449,14 @@ void BattleGroundWS::UpdateTeamScore(Team team)
         UpdateWorldState(BG_WS_FLAG_CAPTURES_HORDE, m_TeamScores[TEAM_INDEX_HORDE]);
 }
 
-void BattleGroundWS::HandleAreaTrigger(Player* source, uint32 trigger)
+bool BattleGroundWS::HandleAreaTrigger(Player* source, uint32 trigger)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
+        return false;
 
-    // uint32 SpellId = 0;
-    // uint64 buff_guid = 0;
     switch (trigger)
     {
-        case 3686:                                          // Alliance elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-        case 3687:                                          // Horde elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-        case 3706:                                          // Alliance elixir of regeneration spawn
-        case 3708:                                          // Horde elixir of regeneration spawn
-        case 3707:                                          // Alliance elixir of berserk spawn
-        case 3709:                                          // Horde elixir of berserk spawn
-            break;
         case 3646:                                          // Alliance Flag spawn
             if (m_FlagState[TEAM_INDEX_HORDE] && !m_FlagState[TEAM_INDEX_ALLIANCE])
                 if (GetHordeFlagCarrierGuid() == source->GetObjectGuid())
@@ -488,16 +479,10 @@ void BattleGroundWS::HandleAreaTrigger(Player* source, uint32 trigger)
             else
                 source->LeaveBattleground();
             break;
-        /*case 3649:                                    // unk1
-          case 3688:                                    // unk2
-          case 4628:                                    // unk3
-          case 4629:                                    // unk4
-              break; */
         default:
-            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", trigger);
-            source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", trigger);
-            break;
+            return false;
     }
+    return true;
 }
 
 void BattleGroundWS::Reset()
@@ -621,4 +606,18 @@ void BattleGroundWS::FillInitialWorldStates(WorldPacket& data, uint32& count)
         FillInitialWorldState(data, count, BG_WS_FLAG_STATE_ALLIANCE, 2);
     else
         FillInitialWorldState(data, count, BG_WS_FLAG_STATE_ALLIANCE, 1);
+}
+
+Team BattleGroundWS::GetPrematureWinner()
+{
+    int32 hordeScore = m_TeamScores[TEAM_INDEX_HORDE];
+    int32 allianceScore = m_TeamScores[TEAM_INDEX_ALLIANCE];
+
+    if (hordeScore > allianceScore)
+        return HORDE;
+    if (allianceScore > hordeScore)
+        return ALLIANCE;
+
+    // If the values are equal, fall back to number of players on each team
+    return BattleGround::GetPrematureWinner();
 }

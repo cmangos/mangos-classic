@@ -26,8 +26,10 @@
 #include "Object.h"
 #include "SharedDefines.h"
 
+#include <atomic>
 #include <bitset>
 #include <list>
+#include <mutex>
 
 class Creature;
 class Unit;
@@ -203,8 +205,6 @@ class MANGOS_DLL_SPEC Referencable
         Countable m_count;
 };
 
-typedef ACE_Atomic_Op<ACE_Thread_Mutex, long> AtomicLong;
-
 #define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
 #define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
 #define INVALID_HEIGHT_VALUE -200000.0f                     // for return, must be equal to VMAP_INVALID_HEIGHT_VALUE, check value for unknown height is VMAP_INVALID_HEIGHT
@@ -213,7 +213,7 @@ typedef ACE_Atomic_Op<ACE_Thread_Mutex, long> AtomicLong;
 #define DEFAULT_WATER_SEARCH      50.0f                     // default search distance to case detection water level
 
 // class for sharing and managin GridMap objects
-class MANGOS_DLL_SPEC TerrainInfo : public Referencable<AtomicLong>
+class MANGOS_DLL_SPEC TerrainInfo : public Referencable<std::atomic_long>
 {
     public:
         TerrainInfo(uint32 mapid);
@@ -224,9 +224,10 @@ class MANGOS_DLL_SPEC TerrainInfo : public Referencable<AtomicLong>
         // TODO: move all terrain/vmaps data info query functions
         // from 'Map' class into this class
         float GetHeightStatic(float x, float y, float z, bool checkVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
-        float GetWaterLevel(float x, float y, float z, float* pGround = NULL) const;
-        float GetWaterOrGroundLevel(float x, float y, float z, float* pGround = NULL, bool swim = false) const;
+        float GetWaterLevel(float x, float y, float z, float* pGround = nullptr) const;
+        float GetWaterOrGroundLevel(float x, float y, float z, float* pGround = nullptr, bool swim = false) const;
         bool IsInWater(float x, float y, float z, GridMapLiquidData* data = 0) const;
+        bool IsSwimmable(float x, float y, float pZ, float radius = 1.5f, GridMapLiquidData* data = 0) const;
         bool IsUnderWater(float x, float y, float z) const;
 
         GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = 0) const;
@@ -272,16 +273,16 @@ class MANGOS_DLL_SPEC TerrainInfo : public Referencable<AtomicLong>
         // global garbage collection timer
         ShortIntervalTimer i_timer;
 
-        typedef ACE_Thread_Mutex LOCK_TYPE;
-        typedef ACE_Guard<LOCK_TYPE> LOCK_GUARD;
+        typedef std::mutex LOCK_TYPE;
+        typedef std::lock_guard<LOCK_TYPE> LOCK_GUARD;
         LOCK_TYPE m_mutex;
         LOCK_TYPE m_refMutex;
 };
 
 // class for managing TerrainData object and all sort of geometry querying operations
-class TerrainManager : public MaNGOS::Singleton<TerrainManager, MaNGOS::ClassLevelLockable<TerrainManager, ACE_Thread_Mutex> >
+class TerrainManager : public MaNGOS::Singleton<TerrainManager, MaNGOS::ClassLevelLockable<TerrainManager, std::mutex> >
 {
-        typedef UNORDERED_MAP<uint32,  TerrainInfo*> TerrainDataMap;
+        typedef std::unordered_map<uint32,  TerrainInfo*> TerrainDataMap;
         friend class MaNGOS::OperatorNew<TerrainManager>;
 
     public:
@@ -320,7 +321,7 @@ class TerrainManager : public MaNGOS::Singleton<TerrainManager, MaNGOS::ClassLev
         TerrainManager(const TerrainManager&);
         TerrainManager& operator=(const TerrainManager&);
 
-        typedef MaNGOS::ClassLevelLockable<TerrainManager, ACE_Thread_Mutex>::Lock Guard;
+        typedef MaNGOS::ClassLevelLockable<TerrainManager, std::mutex>::Lock Guard;
         TerrainDataMap i_TerrainMap;
 };
 

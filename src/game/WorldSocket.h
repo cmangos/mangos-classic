@@ -25,14 +25,11 @@
 #ifndef _WORLDSOCKET_H
 #define _WORLDSOCKET_H
 
-#include <ace/Basic_Types.h>
 #include <ace/Synch_Traits.h>
 #include <ace/Svc_Handler.h>
 #include <ace/SOCK_Stream.h>
 #include <ace/SOCK_Acceptor.h>
 #include <ace/Acceptor.h>
-#include <ace/Thread_Mutex.h>
-#include <ace/Guard_T.h>
 #include <ace/Unbounded_Queue.h>
 #include <ace/Message_Block.h>
 
@@ -42,6 +39,8 @@
 
 #include "Common.h"
 #include "Auth/AuthCrypt.h"
+
+#include <mutex>
 
 class ACE_Message_Block;
 class WorldPacket;
@@ -98,8 +97,8 @@ class WorldSocket : protected WorldHandler
         typedef ACE_Acceptor< WorldSocket, ACE_SOCK_ACCEPTOR > Acceptor;
 
         /// Mutex type used for various synchronizations.
-        typedef ACE_Thread_Mutex LockType;
-        typedef ACE_Guard<LockType> GuardType;
+        typedef std::mutex LockType;
+        typedef std::lock_guard<LockType> GuardType;
 
         /// Queue for storing packets for which there is no space.
         typedef ACE_Unbounded_Queue< WorldPacket* > PacketQueueT;
@@ -140,6 +139,9 @@ class WorldSocket : protected WorldHandler
 
         /// Called when the socket can write.
         virtual int handle_output(ACE_HANDLE = ACE_INVALID_HANDLE) override;
+
+        /// Drain the queue if its not empty.
+        int handle_output_queue(GuardType& g);
 
         /// Called when connection is closed or error happens.
         virtual int handle_close(ACE_HANDLE = ACE_INVALID_HANDLE,

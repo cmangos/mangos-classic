@@ -26,7 +26,7 @@ class DBCStorage
 {
         typedef std::list<char*> StringPoolList;
     public:
-        explicit DBCStorage(const char* f) : nCount(0), fieldCount(0), fmt(f), indexTable(NULL), m_dataTable(NULL) { }
+        explicit DBCStorage(const char* f) : nCount(0), fieldCount(0), fmt(f), indexTable(nullptr), m_dataTable(nullptr) { }
         ~DBCStorage() { Clear(); }
 
         uint32  GetNumRows() const { return loaded ? data.size() : nCount; }
@@ -41,7 +41,7 @@ class DBCStorage
                 if (it != data.end())
                     return it->second;
             }
-            return (id >= nCount) ? NULL : indexTable[id];
+            return (id >= nCount) ? nullptr : indexTable[id];
         }
 
         bool Load(char const* fn)
@@ -59,8 +59,8 @@ class DBCStorage
             // load strings from dbc data
             m_stringPoolList.push_back(dbc.AutoProduceStrings(fmt, (char*)m_dataTable));
 
-            // error in dbc file at loading if NULL
-            return indexTable != NULL;
+            // error in dbc file at loading if nullptr
+            return indexTable != nullptr;
         }
 
         void SetEntry(uint32 id, T* t) // Cryptic they say..
@@ -108,9 +108,9 @@ class DBCStorage
                 return;
 
             delete[]((char*)indexTable);
-            indexTable = NULL;
+            indexTable = nullptr;
             delete[]((char*)m_dataTable);
-            m_dataTable = NULL;
+            m_dataTable = nullptr;
 
             while (!m_stringPoolList.empty())
             {
@@ -120,7 +120,7 @@ class DBCStorage
             nCount = 0;
         }
 
-        void EraseEntry(uint32 id) { assert(id < nCount && "To be erased entry must be in bounds!") ; indexTable[id] = NULL; }
+        void EraseEntry(uint32 id) { assert(id < nCount && "To be erased entry must be in bounds!") ; indexTable[id] = nullptr; }
         void InsertEntry(T* entry, uint32 id) { assert(id < nCount && "To be inserted entry must be in bounds!"); indexTable[id] = entry; }
 
     private:

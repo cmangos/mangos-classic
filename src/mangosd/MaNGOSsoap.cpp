@@ -170,5 +170,5 @@ struct Namespace namespaces[] =
     { "xsi", "http://www.w3.org/1999/XMLSchema-instance", "http://www.w3.org/*/XMLSchema-instance" },
     { "xsd", "http://www.w3.org/1999/XMLSchema",          "http://www.w3.org/*/XMLSchema" },
     { "ns1", "urn:MaNGOS" },     // "ns1" namespace prefix
-    { NULL, NULL }
+    { nullptr, nullptr }
 };
