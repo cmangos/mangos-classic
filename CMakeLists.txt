@@ -210,10 +210,6 @@ endif()
 
 # print out the results before continuing
 include(cmake/showoptions.cmake)
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++11 -Wno-narrowing -Wno-deprecated-register")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -std=c++11 -Wno-narrowing -Wno-deprecated-register")
-endif()
-
 
 # Generate revision-extractor
 set(GENREV_SRC
