@@ -23,14 +23,15 @@
 #define _PACKAGENAME "CMaNGOS Classic"
 #endif
 
+#include "revision.h"
 #include "Platform/Define.h"
 
-#ifndef _VERSION
-#if PLATFORM == PLATFORM_WINDOWS
-# define _VERSION(REVD,REVT,REVH) "0.12.3" " (" REVD " " REVT " - " REVH ")"
-#else
-# define _VERSION(REVD,REVT,REVH) "@VERSION@" " (" REVD " " REVT " - " REVH ")"
+#ifndef VERSION
+#error "VERSION undeclared"
 #endif
+
+#ifndef _VERSION
+# define _VERSION(REVD,REVT,REVH) VERSION " (" REVD " " REVT " - " REVH ")"
 #endif
 
 // Format is YYYYMMDDRR where RR is the change in the conf file

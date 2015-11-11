@@ -1,7 +1,11 @@
 option(DEBUG                "Include additional debug-code in core" OFF)
 option(WARNINGS             "Show all warnings during compile"      OFF)
 option(TBB_USE_EXTERNAL     "Use external TBB"                      OFF)
-option(USE_STD_MALLOC       "Use standard malloc instead of TBB"    OFF)
+if (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+  option(USE_STD_MALLOC     "Use standard malloc instead of TBB"    ON)
+else()
+  option(USE_STD_MALLOC     "Use standard malloc instead of TBB"    OFF)
+endif()
 option(ACE_USE_EXTERNAL     "Use external ACE"                      OFF)
 option(POSTGRESQL           "Use PostgreSQL"                        OFF)
 

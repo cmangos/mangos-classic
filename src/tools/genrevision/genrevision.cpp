@@ -55,87 +55,144 @@ void extractDataFromSvn(FILE* EntriesFile, bool url, RawData& data)
         strcpy(data.rev_str, num_str);
 }
 
-void extractDataFromGit(FILE* EntriesFile, std::string path, bool url, RawData& data)
+bool extractDataFromSvn(std::string filename, bool url, RawData& data)
 {
-    char buf[200];
+    FILE* EntriesFile = fopen(filename.c_str(), "r");
+    if (!EntriesFile)
+        return false;
 
-    char hash_str[200];
-    char branch_str[200];
-    char url_str[200];
+    extractDataFromSvn(EntriesFile, url, data);
+    fclose(EntriesFile);
+    return true;
+}
 
-    bool found = false;
-    while (fgets(buf, 200, EntriesFile))
+bool extractDataFromGit(std::string filename, std::string path, bool url, RawData& data)
+{
+    FILE* EntriesFile = fopen(filename.c_str(), "r");
+
+    char buf[1024];
+
+    if (EntriesFile)
     {
-        if (sscanf(buf, "%s\t\tbranch %s of %s", hash_str, branch_str, url_str) == 3)
-        {
-            found = true;
-            break;
-        }
-    }
+        char hash_str[200];
+        char branch_str[200];
+        char url_str[200];
 
-    if (!found)
-    {
-        strcpy(data.rev_str, "*");
-        strcpy(data.date_str, "*");
-        strcpy(data.time_str, "*");
-        return;
-    }
-
-    if (url)
-    {
-        char* host_str = nullptr;
-        char* acc_str  = nullptr;
-        char* repo_str = nullptr;
-
-        // parse URL like git@github.com:mangos/mangos
-        char url_buf[200];
-        int res = sscanf(url_str, "git@%s", url_buf);
-        if (res)
+        bool found = false;
+        while (fgets(buf, 200, EntriesFile))
         {
-            host_str = strtok(url_buf, ":");
-            acc_str  = strtok(nullptr, "/");
-            repo_str = strtok(nullptr, " ");
-        }
-        else
-        {
-            res = sscanf(url_str, "git://%s", url_buf);
-            if (res)
+            if (sscanf(buf, "%s\t\tbranch %s of %s", hash_str, branch_str, url_str) == 3)
             {
-                host_str = strtok(url_buf, "/");
-                acc_str  = strtok(nullptr, "/");
-                repo_str = strtok(nullptr, ".");
+                found = true;
+                break;
             }
         }
 
-        // can generate nice link
-        if (res)
-            sprintf(data.rev_str, "http://%s/%s/%s/commit/%s", host_str, acc_str, repo_str, hash_str);
-        // unknonw URL format, use as-is
+        if (!found)
+        {
+            strcpy(data.rev_str, "*");
+            strcpy(data.date_str, "*");
+            strcpy(data.time_str, "*");
+            return false;
+        }
+
+        if (url)
+        {
+            char* host_str = nullptr;
+            char* acc_str = nullptr;
+            char* repo_str = nullptr;
+
+            // parse URL like git@github.com:mangos/mangos
+            char url_buf[200];
+            int res = sscanf(url_str, "git@%s", url_buf);
+            if (res)
+            {
+                host_str = strtok(url_buf, ":");
+                acc_str = strtok(nullptr, "/");
+                repo_str = strtok(nullptr, " ");
+            }
+            else
+            {
+                res = sscanf(url_str, "git://%s", url_buf);
+                if (res)
+                {
+                    host_str = strtok(url_buf, "/");
+                    acc_str = strtok(nullptr, "/");
+                    repo_str = strtok(nullptr, ".");
+                }
+            }
+
+            // can generate nice link
+            if (res)
+                sprintf(data.rev_str, "http://%s/%s/%s/commit/%s", host_str, acc_str, repo_str, hash_str);
+            // unknonw URL format, use as-is
+            else
+                sprintf(data.rev_str, "%s at %s", hash_str, url_str);
+        }
         else
-            sprintf(data.rev_str, "%s at %s", hash_str, url_str);
+            strcpy(data.rev_str, hash_str);
     }
     else
-        strcpy(data.rev_str, hash_str);
+    {
+        EntriesFile = fopen((path + ".git/HEAD").c_str(), "r");
+        if (!EntriesFile)
+            return false;
+
+        if (!fgets(buf, sizeof(buf), EntriesFile))
+        {
+            fclose(EntriesFile);
+            return false;
+        }
+
+        char refBuff[200];
+        if (!sscanf(buf, "ref: %s", refBuff))
+        {
+            fclose(EntriesFile);
+            return false;
+        }
+
+        fclose(EntriesFile);
+
+        FILE *refFile = fopen((path + ".git/" + refBuff).c_str(), "r");
+
+        if (!refFile)
+            return false;
+
+        char hash[41];
+
+        if (!fgets(hash, sizeof(hash), refFile))
+        {
+            fclose(refFile);
+            return false;
+        }
+
+        strcpy(data.rev_str, hash);
+    }
 
     time_t rev_time = 0;
     // extracting date/time
     FILE* LogFile = fopen((path + ".git/logs/HEAD").c_str(), "r");
     if (LogFile)
     {
-        while (fgets(buf, 200, LogFile))
+        while (fgets(buf, sizeof(buf), LogFile))
         {
-            char buf2[200];
-            char new_hash[200];
-            int unix_time = 0;
-            int res2 = sscanf(buf, "%s %s %s %s %i", buf2, new_hash, buf2, buf2, &unix_time);
-            if (res2 != 5)
-                continue;
+            char *hash = strchr(buf, ' ') + 1;
+            char *time = strchr(hash, ' ');
+            *(time++) = '\0';
 
-            if (strcmp(hash_str, new_hash))
-                continue;
+            if (!strcmp(data.rev_str, hash))
+            {
+                char *tab = strchr(time, '\t');
+                *tab = '\0';
 
-            rev_time = unix_time;
-            break;
+                tab = strrchr(time, ' ');
+                *tab = '\0';
+
+                time = strrchr(time, ' ') + 1;
+                rev_time = atoi(time);
+
+                break;
+            }
         }
 
         fclose(LogFile);
@@ -163,31 +220,12 @@ void extractDataFromGit(FILE* EntriesFile, std::string path, bool url, RawData& 
         strcpy(data.date_str, "*");
         strcpy(data.time_str, "*");
     }
-}
 
-bool extractDataFromSvn(std::string filename, bool url, RawData& data)
-{
-    FILE* EntriesFile = fopen(filename.c_str(), "r");
-    if (!EntriesFile)
-        return false;
-
-    extractDataFromSvn(EntriesFile, url, data);
     fclose(EntriesFile);
     return true;
 }
 
-bool extractDataFromGit(std::string filename, std::string path, bool url, RawData& data)
-{
-    FILE* EntriesFile = fopen(filename.c_str(), "r");
-    if (!EntriesFile)
-        return false;
-
-    extractDataFromGit(EntriesFile, path, url, data);
-    fclose(EntriesFile);
-    return true;
-}
-
-std::string generateHeader(char const* rev_str, char const* date_str, char const* time_str)
+std::string generateHeader(char const* rev_str, char const* date_str, char const* time_str, char const *ver_str)
 {
     std::ostringstream newData;
     newData << "#ifndef __REVISION_H__" << std::endl;
@@ -195,6 +233,7 @@ std::string generateHeader(char const* rev_str, char const* date_str, char const
     newData << " #define REVISION_ID \"" << rev_str << "\"" << std::endl;
     newData << " #define REVISION_DATE \"" << date_str << "\"" << std::endl;
     newData << " #define REVISION_TIME \"" << time_str << "\"" << std::endl;
+    newData << " #define VERSION \"" << ver_str << "\"" << std::endl;
     newData << "#endif // __REVISION_H__" << std::endl;
     return newData.str();
 }
@@ -210,7 +249,7 @@ int main(int argc, char** argv)
     //    -g use git prefered (default)
     //    -s use svn prefered
     //    -r use only revision (without repo URL) (default)
-    //    -u include repositire URL as commit URL or "rev at URL"
+    //    -u include repository URL as commit URL or "rev at URL"
     //    -o <file> write header to specified target file
     for (int k = 1; k <= argc; ++k)
     {
@@ -252,6 +291,18 @@ int main(int argc, char** argv)
     }
 
     /// new data extraction
+    char version[200];
+    if (FILE *versionFile = fopen((path + "/version.txt").c_str(), "r"))
+    {
+        if (!fgets(version, sizeof(version), versionFile))
+        {
+            fclose(versionFile);
+            return 1;
+        }
+
+        fclose(versionFile);
+    }
+
     std::string newData;
 
     {
@@ -281,9 +332,9 @@ int main(int argc, char** argv)
         }
 
         if (res)
-            newData = generateHeader(data.rev_str, data.date_str, data.time_str);
+            newData = generateHeader(data.rev_str, data.date_str, data.time_str, version);
         else
-            newData = generateHeader("*", "*", "*");
+            newData = generateHeader("*", "*", "*", "0.0");
     }
 
     /// get existed header data for compare
