@@ -123,6 +123,9 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL set/unset byte flag UNIT_BYTE1_FLAG_ALWAYS_STAND
     SCRIPT_COMMAND_DESPAWN_GO               = 40,           // resTarget = GameObject
     SCRIPT_COMMAND_RESPAWN                  = 41,           // resSource = Creature. Requires SCRIPT_FLAG_BUDDY_IS_DESPAWNED to find dead or despawned targets
+    SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS      = 42,           // resSource = Creature
+                                                            // datalong = resetDefault: bool 0=false, 1=true
+                                                            // dataint = main hand slot; dataint2 = off hand slot; dataint3 = ranged slot
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -373,6 +376,12 @@ struct ScriptInfo
 
         // datalong unsed                                   // SCRIPT_COMMAND_DESPAWN_GO (40)
         // datalong unsed                                   // SCRIPT_COMMAND_RESPAWN (41)
+
+        struct                                              // SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS (42)
+        {
+            uint32 resetDefault;                            // datalong
+            uint32 empty;                                   // datalong2
+        } setEquipment;
 
         struct
         {

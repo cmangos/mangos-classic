@@ -721,6 +721,15 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             case SCRIPT_COMMAND_DESPAWN_GO:                 // 40
             case SCRIPT_COMMAND_RESPAWN:                    // 41
                 break;
+            case SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS:        // 42
+            {
+                if (tmp.textId[0] < 0 || tmp.textId[1] < 0 || tmp.textId[2] < 0)
+                {
+                    sLog.outErrorDb("Table `%s` has invalid equipment slot (dataint = %u, dataint2 = %u, dataint3 = %u) in SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS for script id %u", tablename, tmp.textId[0], tmp.textId[1], tmp.textId[2], tmp.id);
+                    continue;
+                }
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -1976,6 +1985,32 @@ bool ScriptAction::HandleScriptStep()
                 break;
 
             ((Creature*)pTarget)->Respawn();
+            break;
+        }
+        case SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS:            // 42
+        {
+            if (LogIfNotCreature(pSource))
+                return false;
+
+            Creature* pCSource = static_cast<Creature*>(pSource);
+            // reset default
+            if (m_script->setEquipment.resetDefault)
+            {
+                pCSource->LoadEquipment(pCSource->GetCreatureInfo()->EquipmentTemplateId, true);
+                break;
+            }
+
+            // main hand
+            if (m_script->textId[0] >= 0)
+                pCSource->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, m_script->textId[0]);
+
+            // off hand
+            if (m_script->textId[1] >= 0)
+                pCSource->SetVirtualItem(VIRTUAL_ITEM_SLOT_1, m_script->textId[1]);
+
+            // ranged
+            if (m_script->textId[2] >= 0)
+                pCSource->SetVirtualItem(VIRTUAL_ITEM_SLOT_2, m_script->textId[2]);
             break;
         }
         default:
