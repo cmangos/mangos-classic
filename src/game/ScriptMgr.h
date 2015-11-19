@@ -126,6 +126,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS      = 42,           // resSource = Creature
                                                             // datalong = resetDefault: bool 0=false, 1=true
                                                             // dataint = main hand slot; dataint2 = off hand slot; dataint3 = ranged slot
+    SCRIPT_COMMAND_RESET_GO                 = 43,           // resTarget = GameObject
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -383,6 +384,8 @@ struct ScriptInfo
             uint32 empty;                                   // datalong2
         } setEquipment;
 
+        // datalong unsed                                   // SCRIPT_COMMAND_RESET_GO (43)
+
         struct
         {
             uint32 data[2];
@@ -426,6 +429,7 @@ struct ScriptInfo
             case SCRIPT_COMMAND_ACTIVATE_OBJECT:
             case SCRIPT_COMMAND_GO_LOCK_STATE:
             case SCRIPT_COMMAND_DESPAWN_GO:
+            case SCRIPT_COMMAND_RESET_GO:
                 return false;
             default:
                 return true;

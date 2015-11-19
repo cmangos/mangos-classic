@@ -730,6 +730,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_RESET_GO:                   // 43
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -2011,6 +2013,24 @@ bool ScriptAction::HandleScriptStep()
             // ranged
             if (m_script->textId[2] >= 0)
                 pCSource->SetVirtualItem(VIRTUAL_ITEM_SLOT_2, m_script->textId[2]);
+            break;
+        }
+        case SCRIPT_COMMAND_RESET_GO:                       // 43
+        {
+            if (LogIfNotGameObject(pTarget))
+                break;
+
+            GameObject* pGoTarget = static_cast<GameObject*>(pTarget);
+            switch (pGoTarget->GetGoType())
+            {
+                case GAMEOBJECT_TYPE_DOOR:
+                case GAMEOBJECT_TYPE_BUTTON:
+                    pGoTarget->ResetDoorOrButton();
+                    break;
+                default:
+                    sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed for gameobject(buddyEntry: %u). Gameobject is not a door or button", m_table, m_script->id, m_script->command, m_script->buddyEntry);
+                    break;
+            }
             break;
         }
         default:
