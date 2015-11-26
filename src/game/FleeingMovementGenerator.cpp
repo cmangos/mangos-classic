@@ -130,6 +130,7 @@ void FleeingMovementGenerator<T>::Initialize(T& owner)
 
     if (owner.GetTypeId() == TYPEID_UNIT)
     {
+		((Creature&)owner).UpdateSpeed(MOVE_RUN, true, 0.7);
         ((Creature&) owner).SetWalk(false, false);
         owner.SetTargetGuid(ObjectGuid());
     }
@@ -201,6 +202,8 @@ template bool FleeingMovementGenerator<Creature>::Update(Creature&, const uint32
 void TimedFleeingMovementGenerator::Finalize(Unit& owner)
 {
     owner.clearUnitState(UNIT_STAT_FLEEING | UNIT_STAT_FLEEING_MOVE);
+	if (owner.GetTypeId() == TYPEID_UNIT)
+		owner.UpdateSpeed(MOVE_RUN, true);
     if (Unit* victim = owner.getVictim())
     {
         if (owner.isAlive())

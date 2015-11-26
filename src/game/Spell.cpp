@@ -2648,6 +2648,10 @@ void Spell::cast(bool skipCheck)
 		else
 			return;
 	}
+	if((m_spellInfo->SpellIconID == 252 && m_caster->getClass() == CLASS_ROGUE)||
+			(m_spellInfo->SpellIconID == 857 && m_caster->getClass() == CLASS_HUNTER)||
+			(m_spellInfo->SpellIconID == 250 && m_caster->getClass() == CLASS_ROGUE))
+		ForceTargetsMissing(m_targets.getUnitTarget(), m_caster);
 
     if (!m_caster->CheckAndIncreaseCastCounter())
     {
@@ -2969,6 +2973,16 @@ void Spell::update(uint32 difftime)
         else if (!IsNextMeleeSwingSpell() && !IsAutoRepeat() && !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT))
             cancel();
     }
+
+	if(m_spellInfo->SpellIconID == 153 && m_caster->getClass() == CLASS_WARLOCK)
+	{
+		uint32 hp = m_spellInfo->EffectBasePoints[EFFECT_INDEX_0];
+		if(!m_caster->isAlive() || m_caster->GetHealth() < hp + 2)
+		{
+			cancel();
+			m_caster->CastStop();
+		}
+	}
 
     switch (m_spellState)
     {

@@ -51,6 +51,7 @@
 #include "CellImpl.h"
 #include "G3D/Vector3.h"
 #include "LootMgr.h"
+#include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include <iostream>
@@ -3800,22 +3801,7 @@ void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
         return;
     // unitTarget->CombatStop();
 
-	std::list<Unit*> targets;
-	MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(unitTarget, m_caster->GetMap()->GetVisibilityDistance());
-	MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
-	Cell::VisitAllObjects(unitTarget, searcher, m_caster->GetMap()->GetVisibilityDistance());
-	for (std::list<Unit*>::iterator iter = targets.begin(); iter != targets.end(); ++iter)
-	{
-		if (!(*iter)->IsNonMeleeSpellCasted(false))
-			continue;
-		for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
-		{
-			ObjectGuid tarGuidLow((uint64)unitTarget->GetGUIDLow());
-			if ((*iter)->GetCurrentSpell(CurrentSpellTypes(i))
-					&& (*iter)->GetCurrentSpell(CurrentSpellTypes(i))->m_targets.getUnitTargetGuid() == tarGuidLow)
-				(*iter)->InterruptSpell(CurrentSpellTypes(CurrentSpellTypes(i)), false);
-		}
-	}
+	ForceTargetsMissing(m_targets.getUnitTarget(), m_caster);
 
 	unitTarget->CombatStop();
     unitTarget->getHostileRefManager().deleteReferences();  // stop all fighting
@@ -5179,4 +5165,25 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
     data << m_caster->GetObjectGuid();
     data << uint32(area_id);
     player->SendDirectMessage(&data);
+}
+
+void Spell::ForceTargetsMissing(Unit* target, Unit* caster)
+{
+	std::list<Unit*> targets;
+	MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(target, caster->GetMap()->GetVisibilityDistance());
+	MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+	Cell::VisitAllObjects(target, searcher, caster->GetMap()->GetVisibilityDistance());
+	for (std::list<Unit*>::iterator iter = targets.begin(); iter != targets.end(); ++iter)
+	{
+		if (!(*iter)->IsNonMeleeSpellCasted(false))
+			continue;
+
+		for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
+		{
+			ObjectGuid tarGuidLow((uint64)target->GetGUIDLow());
+			if ((*iter)->GetCurrentSpell(CurrentSpellTypes(i))
+					&& (*iter)->GetCurrentSpell(CurrentSpellTypes(i))->m_targets.getUnitTargetGuid() == tarGuidLow)
+				(*iter)->InterruptSpell(CurrentSpellTypes(CurrentSpellTypes(i)), false);
+		}
+	}
 }

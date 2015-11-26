@@ -436,6 +436,9 @@ class Spell
 
         typedef std::list<Unit*> UnitList;
 
+		//addition
+		void ForceTargetsMissing(Unit* target, Unit* caster);
+
     protected:
         bool HasGlobalCooldown();
         void TriggerGlobalCooldown();
