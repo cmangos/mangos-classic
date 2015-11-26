@@ -51,6 +51,9 @@
 #include "CellImpl.h"
 #include "G3D/Vector3.h"
 #include "LootMgr.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include <iostream>
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
 {
@@ -3797,7 +3800,24 @@ void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
         return;
     // unitTarget->CombatStop();
 
-    unitTarget->CombatStop();
+	std::list<Unit*> targets;
+	MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(unitTarget, m_caster->GetMap()->GetVisibilityDistance());
+	MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+	Cell::VisitAllObjects(unitTarget, searcher, m_caster->GetMap()->GetVisibilityDistance());
+	for (std::list<Unit*>::iterator iter = targets.begin(); iter != targets.end(); ++iter)
+	{
+		if (!(*iter)->IsNonMeleeSpellCasted(false))
+			continue;
+		for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
+		{
+			ObjectGuid tarGuidLow((uint64)unitTarget->GetGUIDLow());
+			if ((*iter)->GetCurrentSpell(CurrentSpellTypes(i))
+					&& (*iter)->GetCurrentSpell(CurrentSpellTypes(i))->m_targets.getUnitTargetGuid() == tarGuidLow)
+				(*iter)->InterruptSpell(CurrentSpellTypes(CurrentSpellTypes(i)), false);
+		}
+	}
+
+	unitTarget->CombatStop();
     unitTarget->getHostileRefManager().deleteReferences();  // stop all fighting
 
     // Vanish allows to remove all threat and cast regular stealth so other spells can be used

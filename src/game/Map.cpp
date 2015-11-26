@@ -1954,6 +1954,33 @@ void Map::MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, Language lan
         say_do(itr->getSource());
 }
 
+void Map::MonsterYellToZone(ObjectGuid guid, int32 textId, Language language, Unit const* target, uint32 zoneId) const
+{
+	if (guid.IsAnyTypeCreature())
+	{
+		CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(guid.GetEntry());
+		if(!cInfo)
+		{
+			sLog.outError("Map::MonsterYellToZone: Called for nonexistent creature entry in guid: %s", guid.GetString().c_str());
+			return;
+		}
+		MonsterYellToZone(cInfo, textId, language, target, guid.GetCounter(), zoneId);
+	}
+	else
+		sLog.outError("Map::MonsterYellToZone: Called for non creature guid: %s", guid.GetString().c_str());
+}
+
+void Map::MonsterYellToZone(CreatureInfo const* cinfo, int32 textId, Language language, Unit const* target, uint32 senderLowGuid /*= 0*/, uint32 zoneId) const
+{
+	StaticMonsterChatBuilder say_build(cinfo, CHAT_MSG_MONSTER_YELL, textId, language, target, senderLowGuid);
+	MaNGOS::LocalizedPacketDo<StaticMonsterChatBuilder> say_do(say_build);
+	Map::PlayerList const& pList = GetPlayers();
+	for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+	{
+		if (!zoneId || itr->getSource()->GetZoneId() == zoneId)
+			say_do(itr->getSource());
+	}
+}
 /**
  * Function to play sound to all players in map
  *

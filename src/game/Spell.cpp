@@ -2636,6 +2636,18 @@ void Spell::cancel()
 void Spell::cast(bool skipCheck)
 {
     SetExecutedCurrently(true);
+	Player* pl = (Player*)m_caster->GetOwner();
+	if (m_caster->GetEntry() == 5433 && m_spellInfo->Id == 15550)
+	{
+		if (pl->GetMoney() >= int32((pl->getLevel()) * COPPER))
+		{
+			m_caster->ModifyPower(POWER_MANA, m_caster->GetMaxPower(POWER_MANA));
+			m_caster->ModifyHealth(m_caster->GetMaxHealth());
+			pl->ModifyMoney(-int32((pl->getLevel()) * 5 * COPPER));
+		}
+		else
+			return;
+	}
 
     if (!m_caster->CheckAndIncreaseCastCounter())
     {
