@@ -57,29 +57,27 @@ void extractDataFromSvn(FILE* EntriesFile, bool url, RawData& data)
 
 bool extractDataFromSvn(std::string filename, bool url, RawData& data)
 {
-    FILE* EntriesFile = fopen(filename.c_str(), "r");
-    if (!EntriesFile)
+    FILE* entriesFile = fopen(filename.c_str(), "r");
+    if (!entriesFile)
         return false;
 
-    extractDataFromSvn(EntriesFile, url, data);
-    fclose(EntriesFile);
+    extractDataFromSvn(entriesFile, url, data);
+    fclose(entriesFile);
     return true;
 }
 
 bool extractDataFromGit(std::string filename, std::string path, bool url, RawData& data)
 {
-    FILE* EntriesFile = fopen(filename.c_str(), "r");
-
     char buf[1024];
 
-    if (EntriesFile)
+    if (FILE* entriesFile = fopen(filename.c_str(), "r"))
     {
         char hash_str[200];
         char branch_str[200];
         char url_str[200];
 
         bool found = false;
-        while (fgets(buf, 200, EntriesFile))
+        while (fgets(buf, 200, entriesFile))
         {
             if (sscanf(buf, "%s\t\tbranch %s of %s", hash_str, branch_str, url_str) == 3)
             {
@@ -87,6 +85,8 @@ bool extractDataFromGit(std::string filename, std::string path, bool url, RawDat
                 break;
             }
         }
+
+        fclose(entriesFile);
 
         if (!found)
         {
@@ -132,49 +132,48 @@ bool extractDataFromGit(std::string filename, std::string path, bool url, RawDat
         else
             strcpy(data.rev_str, hash_str);
     }
-    else
+    else if (entriesFile = fopen((path + ".git/HEAD").c_str(), "r"))
     {
-        EntriesFile = fopen((path + ".git/HEAD").c_str(), "r");
-        if (!EntriesFile)
-            return false;
-
-        if (!fgets(buf, sizeof(buf), EntriesFile))
+        if (!fgets(buf, sizeof(buf), entriesFile))
         {
-            fclose(EntriesFile);
+            fclose(entriesFile);
             return false;
         }
 
         char refBuff[200];
         if (!sscanf(buf, "ref: %s", refBuff))
         {
-            fclose(EntriesFile);
+            fclose(entriesFile);
             return false;
         }
 
-        fclose(EntriesFile);
+        fclose(entriesFile);
 
-        FILE *refFile = fopen((path + ".git/" + refBuff).c_str(), "r");
-
-        if (!refFile)
-            return false;
-
-        char hash[41];
-
-        if (!fgets(hash, sizeof(hash), refFile))
+        if (FILE *refFile = fopen((path + ".git/" + refBuff).c_str(), "r"))
         {
-            fclose(refFile);
-            return false;
-        }
+            char hash[41];
 
-        strcpy(data.rev_str, hash);
+            if (!fgets(hash, sizeof(hash), refFile))
+            {
+                fclose(refFile);
+                return false;
+            }
+
+            strcpy(data.rev_str, hash);
+            
+            fclose(refFile);
+        }
+        else
+            return false;
     }
+    else
+        return false;
 
     time_t rev_time = 0;
     // extracting date/time
-    FILE* LogFile = fopen((path + ".git/logs/HEAD").c_str(), "r");
-    if (LogFile)
+    if (FILE* logFile = fopen((path + ".git/logs/HEAD").c_str(), "r"))
     {
-        while (fgets(buf, sizeof(buf), LogFile))
+        while (fgets(buf, sizeof(buf), logFile))
         {
             char *hash = strchr(buf, ' ') + 1;
             char *time = strchr(hash, ' ');
@@ -195,7 +194,7 @@ bool extractDataFromGit(std::string filename, std::string path, bool url, RawDat
             }
         }
 
-        fclose(LogFile);
+        fclose(logFile);
 
         if (rev_time)
         {
@@ -221,7 +220,6 @@ bool extractDataFromGit(std::string filename, std::string path, bool url, RawDat
         strcpy(data.time_str, "*");
     }
 
-    fclose(EntriesFile);
     return true;
 }
 
@@ -340,26 +338,26 @@ int main(int argc, char** argv)
     /// get existed header data for compare
     std::string oldData;
 
-    if (FILE* HeaderFile = fopen(outfile.c_str(), "rb"))
+    if (FILE* headerFile = fopen(outfile.c_str(), "rb"))
     {
-        while (!feof(HeaderFile))
+        while (!feof(headerFile))
         {
-            int c = fgetc(HeaderFile);
+            int c = fgetc(headerFile);
             if (c < 0)
                 break;
             oldData += (char)c;
         }
 
-        fclose(HeaderFile);
+        fclose(headerFile);
     }
 
     /// update header only if different data
     if (newData != oldData)
     {
-        if (FILE* OutputFile = fopen(outfile.c_str(), "wb"))
+        if (FILE* outputFile = fopen(outfile.c_str(), "w"))
         {
-            fprintf(OutputFile, "%s", newData.c_str());
-            fclose(OutputFile);
+            fprintf(outputFile, "%s", newData.c_str());
+            fclose(outputFile);
         }
         else
             return 1;
