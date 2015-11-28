@@ -128,6 +128,9 @@ World::~World()
     std::for_each(m_cliCommandQueue.begin(), m_cliCommandQueue.end(), [](const CliCommandHolder *p) { delete p; });
     m_cliCommandQueue.clear();
 
+    std::for_each(m_sessionAddQueue.begin(), m_sessionAddQueue.end(), [](const WorldSession *s) { delete s; });
+    m_sessionAddQueue.clear();
+
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
 
