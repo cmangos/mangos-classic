@@ -53,7 +53,6 @@
 #include <unordered_set>
 
 #include "Errors.h"
-#include "LockedQueue.h"
 #include "Threading.h"
 
 #include <ace/OS_NS_arpa_inet.h>

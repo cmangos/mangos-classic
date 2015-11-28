@@ -64,6 +64,9 @@
 #include "CreatureLinkingMgr.h"
 #include "Weather.h"
 
+#include <algorithm>
+#include <mutex>
+
 INSTANTIATE_SINGLETON_1(World);
 
 extern void LoadGameObjectModelList();
@@ -116,24 +119,19 @@ World::World()
 /// World destructor
 World::~World()
 {
-    ///- Empty the kicked session set
-    while (!m_sessions.empty())
-    {
-        // not remove from queue, prevent loading new sessions
-        delete m_sessions.begin()->second;
-        m_sessions.erase(m_sessions.begin());
-    }
+    // it is assumed that no other thread is accessing this data when the destructor is called.  therefore, no locks are necessary
 
-    CliCommandHolder* command = nullptr;
-    while (cliCmdQueue.next(command))
-        delete command;
+    ///- Empty the kicked session set
+    std::for_each(m_sessions.begin(), m_sessions.end(), [](const SessionMap::value_type &p) { delete p.second; });
+    m_sessions.clear();
+
+    std::for_each(m_cliCommandQueue.begin(), m_cliCommandQueue.end(), [](const CliCommandHolder *p) { delete p; });
+    m_cliCommandQueue.clear();
 
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
 
     delete m_configForceLoadMapIds;
-
-    // TODO free addSessQueue
 }
 
 /// Cleanups before world stop
@@ -173,7 +171,9 @@ bool World::RemoveSession(uint32 id)
 
 void World::AddSession(WorldSession* s)
 {
-    addSessQueue.add(s);
+    std::lock_guard<std::mutex> guard(m_sessionAddQueueLock);
+
+    m_sessionAddQueue.push_back(s);
 }
 
 void
@@ -1767,9 +1767,13 @@ void World::ShutdownCancel()
 void World::UpdateSessions(uint32 /*diff*/)
 {
     ///- Add new sessions
-    WorldSession* sess;
-    while (addSessQueue.next(sess))
-        AddSession_(sess);
+    {
+        std::lock_guard<std::mutex> guard(m_sessionAddQueueLock);
+
+        std::for_each(m_sessionAddQueue.begin(), m_sessionAddQueue.end(), [&](WorldSession *session) { AddSession_(session); });
+
+        m_sessionAddQueue.clear();
+    }
 
     ///- Then send an update signal to remaining ones
     for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
@@ -1833,9 +1837,13 @@ void World::InitServerMaintenanceCheck()
 // This handles the issued and queued CLI/RA commands
 void World::ProcessCliCommands()
 {
-    CliCommandHolder* command;
-    while (cliCmdQueue.next(command))
+    std::lock_guard<std::mutex> guard(m_cliCommandQueueLock);
+
+    while (!m_cliCommandQueue.empty())
     {
+        CliCommandHolder* command = m_cliCommandQueue.front();
+        m_cliCommandQueue.pop_front();
+
         DEBUG_LOG("CLI command under processing...");
         CliCommandHolder::Print* zprint = command->m_print;
         void* callbackArg = command->m_callbackArg;

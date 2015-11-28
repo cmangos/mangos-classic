@@ -29,6 +29,9 @@
 #include "AuctionHouseMgr.h"
 #include "Item.h"
 
+#include <deque>
+#include <mutex>
+
 struct ItemPrototype;
 struct AuctionEntry;
 struct AuctionHouseEntry;
@@ -679,7 +682,9 @@ class MANGOS_DLL_SPEC WorldSession
         uint32 m_clientTimeDelay;
         uint32 m_Tutorials[8];
         TutorialDataState m_tutorialState;
-        ACE_Based::LockedQueue<WorldPacket*> _recvQueue;
+
+        std::mutex m_recvQueueLock;
+        std::deque<WorldPacket *> m_recvQueue;
 };
 #endif
 /// @}
