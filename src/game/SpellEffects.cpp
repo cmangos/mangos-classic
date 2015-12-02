@@ -4865,6 +4865,7 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
     pet->SetDeathState(ALIVE);
     pet->clearUnitState(UNIT_STAT_ALL_STATE);
     pet->SetHealth(uint32(pet->GetMaxHealth() * (float(damage) / 100)));
+	pet->NearTeleportTo(m_castPositionX, m_castPositionY, m_castPositionZ, m_castOrientation);
 
     pet->AIM_Initialize();
 
