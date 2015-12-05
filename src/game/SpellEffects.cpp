@@ -4704,6 +4704,15 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
     // 3.666666 instead of ATTACK_DISTANCE(5.0f) in below seem to give more accurate result.
     float x, y, z;
     unitTarget->GetContactPoint(m_caster, x, y, z, 3.666666f);
+	float dx = unitTarget->GetPositionX() - x;
+	float dy = unitTarget->GetPositionY() - y;
+	float dz = unitTarget->GetPositionZ() - z;
+	if (abs(dx) > 1)
+		x += dx / 2;
+	if (abs(dy) > 1)
+		y += dy / 2;
+	if (abs(dz) > 1)
+		z += dz / 2;
 
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature*)unitTarget)->StopMoving();

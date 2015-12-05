@@ -1360,6 +1360,17 @@ SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(Unit* pVictim, uint32 d
     // The chance to dispel an aura depends on the damage taken with respect to the casters level.
     uint32 max_dmg = getLevel() > 8 ? 25 * getLevel() - 150 : 50;
     float chance = float(damage) / max_dmg * 100.0f;
+	///if (triggeredByAura->GetModifier()->m_auraname == SPELL_AURA_MOD_ROOT)
+	if (procSpell && pVictim && procSpell->SpellIconID == 193)
+	{
+		int dt = pVictim->getLevel() - getLevel();
+		if (dt >= 0)
+			chance = 1.0f;
+		else if (dt >= -6 && dt < 0)
+			chance = 1.0f * (-dt) + 1.5f;
+		if (chance <= 0)
+			chance = 5.0f;
+	}
     if (roll_chance_f(chance))
     {
         triggeredByAura->SetInUse(true);
