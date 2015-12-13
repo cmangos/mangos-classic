@@ -45,6 +45,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\game\AddonHandler.cpp">
+      <Filter>World/Handlers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\game\AccountMgr.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
@@ -567,16 +570,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\game\LuaEngine\lmarshal.cpp">
       <Filter>LuaEngine</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\src\game\AccountMgr.h">
-      <Filter>World/Handlers</Filter>
-    </ClInclude>
-      <Filter>BattleGround</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\AddonHandler.cpp">
-      <Filter>World/Handlers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
