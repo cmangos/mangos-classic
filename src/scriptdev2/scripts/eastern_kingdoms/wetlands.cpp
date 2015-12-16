@@ -144,6 +144,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
             uiDamage = 0;
             m_bEventComplete = true;
 
+            JustReachedHome();
             SetEscortPaused(true);
             EnterEvadeMode();
         }
