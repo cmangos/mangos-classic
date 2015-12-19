@@ -18,6 +18,7 @@
 
 #include "Config.h"
 #include "Policies/Singleton.h"
+#include <mutex>
 
 #include <boost/algorithm/string.hpp>
 
@@ -42,6 +43,7 @@ bool Config::Reload()
         return false;
 
     std::unordered_map<std::string, std::string> newEntries;
+    std::lock_guard<std::mutex> guard(m_configLock);
 
     do
     {

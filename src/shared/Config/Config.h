@@ -21,6 +21,8 @@
 
 #include "Common.h"
 #include "Policies/Singleton.h"
+#include "Platform/Define.h"
+#include <mutex>
 
 #include <string>
 #include <unordered_map>
@@ -43,6 +45,7 @@ class MANGOS_DLL_SPEC Config
         float GetFloatDefault(const std::string &name, float def) const;
 
         const std::string &GetFilename() const { return m_filename; }
+        std::mutex m_configLock;
 };
 
 #define sConfig MaNGOS::Singleton<Config>::Instance()
