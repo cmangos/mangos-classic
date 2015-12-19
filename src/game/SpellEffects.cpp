@@ -4735,7 +4735,7 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
     critter->SetCreatorGuid(m_caster->GetObjectGuid());
     critter->setFaction(m_caster->getFaction());
     critter->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-    critter->SelectLevel(critter->GetCreatureInfo());       // some summoned creaters have different from 1 DB data for level/hp
+    critter->SelectLevel();                                 // some summoned critters have different from 1 DB data for level/hp
     critter->SetUInt32Value(UNIT_NPC_FLAGS, critter->GetCreatureInfo()->NpcFlags);
     // some mini-pets have quests
 
