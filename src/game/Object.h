@@ -359,6 +359,7 @@ class MANGOS_DLL_SPEC Object
 
         virtual bool HasQuest(uint32 /* quest_id */) const { return false; }
         virtual bool HasInvolvedQuest(uint32 /* quest_id */) const { return false; }
+        void SetItsNewObject(bool enable) { m_itsNewObject = enable; }
 
         Loot* loot;
 
@@ -396,6 +397,7 @@ class MANGOS_DLL_SPEC Object
 
     private:
         bool m_inWorld;
+        bool m_itsNewObject;
 
         PackedGuid m_PackGUID;
 
