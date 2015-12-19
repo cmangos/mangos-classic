@@ -192,8 +192,9 @@ void TemporarySummon::Summon(TempSummonType type, uint32 lifetime)
     m_timer = lifetime;
     m_lifetime = lifetime;
 
-    AIM_Initialize();
     GetMap()->Add((Creature*)this);
+
+    AIM_Initialize();
 }
 
 void TemporarySummon::UnSummon()

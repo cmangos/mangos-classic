@@ -84,8 +84,8 @@ void Totem::Update(uint32 update_diff, uint32 time)
 
 void Totem::Summon(Unit* owner)
 {
-    AIM_Initialize();
     owner->GetMap()->Add((Creature*)this);
+    AIM_Initialize();
 
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
     data << GetObjectGuid();

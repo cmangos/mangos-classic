@@ -1385,6 +1385,8 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
     // checked at creature_template loading
     m_defaultMovementType = MovementGeneratorType(data->movementType);
 
+    map->Add(this);
+
     AIM_Initialize();
 
     // Creature Linking, Initial load is handled like respawn
@@ -2478,10 +2480,6 @@ struct SpawnCreatureInMapsWorker
             if (!pCreature->LoadFromDB(i_guid, map))
             {
                 delete pCreature;
-            }
-            else
-            {
-                map->Add(pCreature);
             }
         }
     }

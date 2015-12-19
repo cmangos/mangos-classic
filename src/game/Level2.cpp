@@ -1433,9 +1433,6 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
 
     // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
     pCreature->LoadFromDB(db_guid, map);
-
-    map->Add(pCreature);
-    sObjectMgr.AddCreatureToGrid(db_guid, sObjectMgr.GetCreatureData(db_guid));
     return true;
 }
 
