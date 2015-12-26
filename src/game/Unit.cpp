@@ -247,6 +247,7 @@ Unit::Unit() :
     m_isCreatureLinkingTrigger = false;
     m_isSpawningLinked = false;
     m_dummyCombatState = false;
+	m_lastNormalZ = 0.0f;
 }
 
 Unit::~Unit()

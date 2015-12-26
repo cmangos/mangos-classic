@@ -1866,6 +1866,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         virtual bool CanFly() const = 0;
 
         void ForceHealthAndPowerUpdate();   // force server to send new value for hp and power (including max)
+		void SetLastNormalHeight(float z){m_lastNormalZ = z;}
+		float GetLastNormalHeight(){ float ret = m_lastNormalZ; m_lastNormalZ = 0.0f; return ret; }
 
     protected:
         explicit Unit();
@@ -1921,6 +1923,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void DisableSpline();
         bool m_isCreatureLinkingTrigger;
         bool m_isSpawningLinked;
+		float m_lastNormalZ;
 
     private:
         void CleanupDeletedAuras();
