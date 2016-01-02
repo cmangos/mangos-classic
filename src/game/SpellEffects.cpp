@@ -4444,7 +4444,7 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         else
         {
             // fix z to ground if near of it
-            unitTarget->GetMap()->GetHeightInRange(nextPos.x, nextPos.y, nextPos.z, 10.0f);
+            unitTarget->GetMap()->GetHeightInRange(prevPos.x, prevPos.y, groundZ, 10.0f);
         }
 
         // check any obstacle and fix coords

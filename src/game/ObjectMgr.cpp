@@ -8584,6 +8584,15 @@ void ObjectMgr::LoadCreatureTemplateSpells()
     sLog.outString();
 }
 
+AntiCheatConfig const* ObjectMgr::GetAntiCheatConfig(uint32 checkType) const
+{
+	AntiCheatConfigMap::const_iterator itr = m_AntiCheatConfig.find(checkType);
+	if (itr == m_AntiCheatConfig.end())
+		return nullptr;
+	else
+		return &itr->second;
+}
+
 CreatureInfo const* GetCreatureTemplateStore(uint32 entry)
 {
     return sCreatureStorage.LookupEntry<CreatureInfo>(entry);

@@ -547,6 +547,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "spell_script_target",         SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellScriptTargetCommand,       "", nullptr },
         { "spell_target_position",       SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellTargetPositionCommand,     "", nullptr },
         { "spell_threats",               SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadSpellThreatsCommand,            "", nullptr },
+		{ "anticheat",					 SEC_ADMINISTRATOR, true,  &ChatHandler::HandleReloadAntiCheatCommand,				 "", nullptr },
 
         { nullptr,                       0,                 false, nullptr,                                                  "", nullptr }
     };
@@ -3367,6 +3368,16 @@ void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const
     data << uint32(strlen(message) + 1);
     data << message;
     data << uint8(chatTag);
+}
+
+bool ChatHandler::HandleReloadAntiCheatCommand(char* args)
+{
+#ifdef ANTICHEAT
+	sLog.outString("Re-Loading anticheat config table...");
+	sObjectMgr.LoadAntiCheatConfig();
+	SendGlobalSysMessage("Anticheat config reloaded.");
+#endif
+	return true;
 }
 
 // Instantiate template for helper function

@@ -688,6 +688,10 @@ void World::LoadConfigSettings(bool reload)
         sLog.outError("Visibility.Distance.Grey.Object can't be greater %f", MAX_VISIBILITY_DISTANCE);
         m_VisibleObjectGreyDistance = MAX_VISIBILITY_DISTANCE;
     }
+	setConfig(CONFIG_BOOL_ANTICHEAT_ENABLE, "Anticheat.Enable", false);
+	setConfig(CONFIG_UINT32_ANTICHEAT_ACTION_DELAY, "Anticheat.DelayAfterAction", 30);
+	setConfig(CONFIG_UINT32_ANTICHEAT_GMLEVEL, "Anticheat.GmLevel", 0);
+	setConfig(CONFIG_BOOL_ANTICHEAT_WARDEN, "Anticheat.Warden", false);
 
     // visibility on continents
     m_MaxVisibleDistanceOnContinents      = sConfig.GetFloatDefault("Visibility.Distance.Continents",     DEFAULT_VISIBILITY_DISTANCE);

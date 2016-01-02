@@ -537,6 +537,7 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
     lastReport = 0;
     initAntiCheat = false;
     reportAmount = 0;
+	m_anticheat = new AntiCheat(this);
 }
 
 Player::~Player()
@@ -569,6 +570,9 @@ Player::~Player()
 
     for (size_t x = 0; x < ItemSetEff.size(); ++x)
         delete ItemSetEff[x];
+
+	delete m_anticheat;
+	m_anticheat = nullptr;
 
     // clean up player-instance binds, may unload some instance saves
     for (BoundInstancesMap::iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
@@ -14865,6 +14869,7 @@ void Player::_SaveInventory()
         Item* item = m_itemUpdateQueue[i];
         if (!item || item->GetState() == ITEM_REMOVED) continue;
         Item* test = GetItemByPos(item->GetBagSlot(), item->GetSlot());
+		GetAntiCheat()->DoAntiCheatCheck(CHECK_ITEM_UPDATE, item, test);
 
         if (test == nullptr)
         {

@@ -171,6 +171,15 @@ enum eConfigUInt32Values
     CONFIG_UINT32_GUID_RESERVE_SIZE_CREATURE,
     CONFIG_UINT32_GUID_RESERVE_SIZE_GAMEOBJECT,
     CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY,
+    CONFIG_UINT32_WARDEN_CLIENT_RESPONSE_DELAY,
+    CONFIG_UINT32_WARDEN_CLIENT_CHECK_HOLDOFF,
+    CONFIG_UINT32_WARDEN_CLIENT_FAIL_ACTION,
+    CONFIG_UINT32_WARDEN_CLIENT_BAN_DURATION,
+    CONFIG_UINT32_WARDEN_NUM_MEM_CHECKS,
+    CONFIG_UINT32_WARDEN_NUM_OTHER_CHECKS,
+    CONFIG_UINT32_WARDEN_DB_LOGLEVEL,
+	CONFIG_UINT32_ANTICHEAT_ACTION_DELAY,
+	CONFIG_UINT32_ANTICHEAT_GMLEVEL,
     CONFIG_UINT32_VALUE_COUNT
 };
 
@@ -309,6 +318,10 @@ enum eConfigBoolValues
     CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,
     CONFIG_BOOL_MMAP_ENABLED,
     CONFIG_BOOL_PLAYER_COMMANDS,
+    CONFIG_BOOL_WARDEN_WIN_ENABLED,
+    CONFIG_BOOL_WARDEN_OSX_ENABLED,
+	CONFIG_BOOL_ANTICHEAT_ENABLE,
+	CONFIG_BOOL_ANTICHEAT_WARDEN,
     CONFIG_BOOL_VALUE_COUNT
 };
 
@@ -461,6 +474,7 @@ class World
         void LoadConfigSettings(bool reload = false);
 
         void SendWorldText(int32 string_id, ...);
+		void World::SendWorldTextWithSecurity(AccountTypes security, int32 string_id, ...);
         void SendGlobalMessage(WorldPacket* packet);
         void SendServerMessage(ServerMessageType type, const char* text = "", Player* player = nullptr);
         void SendZoneUnderAttackMessage(uint32 zoneId, Team team);

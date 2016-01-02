@@ -440,6 +440,37 @@ class IdGenerator
         T m_nextGuid;
 };
 
+#define ANTICHEAT_ACTIONS 2
+#define ANTICHEAT_CHECK_PARAMETERS 2
+
+struct AntiCheatConfig
+{
+	AntiCheatConfig() : checkType(0), alarmsCount(0), disableOperation(false), messageNum(0)
+	{
+		for (int i = 0; i < ANTICHEAT_ACTIONS; ++i)
+		{
+			actionType[i] = 0;
+			actionParam[i] = 0;
+		}
+		for (int i = 0; i < ANTICHEAT_CHECK_PARAMETERS; ++i)
+			checkParam[i] = 0;
+		for (int i = 0; i < ANTICHEAT_CHECK_PARAMETERS; ++i)
+			checkFloatParam[i] = 0.0f;
+		disabledZones.clear();
+	}
+	uint32 checkType;
+	uint32 checkPeriod;
+	uint32 alarmsCount;
+	bool   disableOperation;
+	uint32 messageNum;
+	uint32 checkParam[ANTICHEAT_CHECK_PARAMETERS];
+	float  checkFloatParam[ANTICHEAT_CHECK_PARAMETERS];
+	uint32 actionType[ANTICHEAT_ACTIONS];
+	uint32 actionParam[ANTICHEAT_ACTIONS];
+	std::unordered_set<uint32> disabledZones;
+	std::string description;
+};
+
 class ObjectMgr
 {
         friend class PlayerDumpReader;
@@ -476,6 +507,7 @@ class ObjectMgr
         uint32 GetCreatureModelOtherTeamModel(uint32 modelId) const;
 
         PetLevelInfo const* GetPetLevelInfo(uint32 creature_id, uint32 level) const;
+		AntiCheatConfig const* GetAntiCheatConfig(uint32 checkType) const;
 
         PlayerClassInfo const* GetPlayerClassInfo(uint32 class_) const
         {
@@ -1102,6 +1134,8 @@ class ObjectMgr
         typedef std::map<uint32, PetLevelInfo*> PetLevelInfoMap;
         // PetLevelInfoMap[creature_id][level]
         PetLevelInfoMap petInfo;                            // [creature_id][level]
+		typedef std::map<uint32, AntiCheatConfig> AntiCheatConfigMap;
+		AntiCheatConfigMap m_AntiCheatConfig;
 
         PlayerClassInfo playerClassInfo[MAX_CLASSES];
 
