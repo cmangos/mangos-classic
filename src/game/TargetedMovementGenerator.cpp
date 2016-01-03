@@ -98,6 +98,14 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     if (!owner.isAlive())
         return true;
 
+    // prevent movement while casting spells with cast time or channel time
+    if (owner.IsNonMeleeSpellCasted(false, false, true))
+    {
+        if (!owner.IsStopped())
+            owner.StopMoving();
+        return true;
+    }
+
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE))
     {
         D::_clearUnitStateMove(owner);
@@ -107,14 +115,6 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     if (this->GetMovementGeneratorType() == CHASE_MOTION_TYPE && owner.hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT))
     {
         D::_clearUnitStateMove(owner);
-        return true;
-    }
-
-    // prevent movement while casting spells with cast time or channel time
-    if (owner.IsNonMeleeSpellCasted(false, false,  true))
-    {
-        if (!owner.IsStopped())
-            owner.StopMoving();
         return true;
     }
 
