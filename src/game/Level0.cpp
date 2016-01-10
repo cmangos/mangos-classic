@@ -290,3 +290,154 @@ bool ChatHandler::HandleServerMotdCommand(char* /*args*/)
     PSendSysMessage(LANG_MOTD_CURRENT, sWorld.GetMotd());
     return true;
 }
+
+bool ChatHandler::HandleCreateBotSessionCommand(char* args)
+{
+    QueryResult* result =
+        LoginDatabase.PQuery("SELECT "
+            "id, "                      //0
+            "gmlevel, "                 //1
+            "sessionkey, "              //2
+            "last_ip, "                 //3
+            "locked, "                  //4
+            "v, "                       //5
+            "s, "                       //6
+            "expansion, "               //7
+            "mutetime, "                //8
+            "locale "                   //9
+            "FROM account "
+            "WHERE username = '%s'",
+            args);
+
+    // Stop if the account is not found
+    if (!result)
+    {
+        PSendSysMessage("Account not found");
+        return false;
+    }
+
+    Field* fields = result->Fetch();
+    uint32 id = fields[0].GetUInt32();
+    uint32 security = fields[1].GetUInt16();
+    uint8 expansion = fields[7].GetUInt8();
+    time_t mutetime = time_t(fields[8].GetUInt64());
+    LocaleConstant locale = LocaleConstant(fields[9].GetUInt8());
+    WorldSession* m_Session;
+    WorldSocket* sock = nullptr;
+
+    ACE_NEW_RETURN(m_Session, WorldSession(id, sock, AccountTypes(security), expansion, mutetime, locale), false);
+    m_Session->SetIsBot(true);
+    sWorld.AddSession(m_Session);
+    PSendSysMessage("Bot session created");
+
+    return true;
+}
+
+bool ChatHandler::HandleLoginBotCommand(char* args)
+{
+    QueryResult* result =
+        LoginDatabase.PQuery("SELECT "
+            "id "                      //0
+            "FROM account "
+            "WHERE username = '%s'",
+            args);
+
+    // Stop if the account is not found
+    if (!result)
+    {
+        PSendSysMessage("Account not found");
+        return true;
+    }
+
+    Field* fields = result->Fetch();
+    if (WorldSession* session = sWorld.FindSession(fields[0].GetUInt32()))
+    {
+        QueryResult* charResult =
+            CharacterDatabase.PQuery("SELECT "
+                "guid "
+                "FROM characters "
+                "WHERE account = '%u' ORDER BY guid ASC LIMIT 0, 1",
+                session->GetAccountId());
+
+        if (!charResult)
+        {
+            PSendSysMessage("No characters found");
+            return true;
+        }
+
+        Field* charFields = charResult->Fetch();
+
+        ObjectGuid characterGuid;
+        characterGuid.Set(charFields[0].GetUInt32());
+
+        session->HandleBotPlayerLogin(characterGuid);
+
+        PSendSysMessage("Bot successfully logged in");
+
+        return true;
+    }
+
+    PSendSysMessage("No bot session found");
+    return true;
+}
+
+bool ChatHandler::HandleLogoutBotCommand(char* args)
+{
+    QueryResult* result =
+        LoginDatabase.PQuery("SELECT "
+            "id "                      //0
+            "FROM account "
+            "WHERE username = '%s'",
+            args);
+
+    // Stop if the account is not found
+    if (!result)
+    {
+        PSendSysMessage("Account not found");
+        return false;
+    }
+
+    Field* fields = result->Fetch();
+    if (WorldSession* session = sWorld.FindSession(fields[0].GetUInt32()))
+    {
+        if (!session->GetPlayer())
+        {
+            PSendSysMessage("No logged in bot found for account.");
+            return true;
+        }
+
+        PSendSysMessage("Bot successfully logged out");
+        session->LogoutPlayer(true);
+        return true;
+    }
+
+    PSendSysMessage("No bot session found");
+    return true;
+}
+
+bool ChatHandler::HandleDestroyBotSessionCommand(char* args)
+{
+    QueryResult* result =
+        LoginDatabase.PQuery("SELECT "
+            "id "                      //0
+            "FROM account "
+            "WHERE username = '%s'",
+            args);
+
+    // Stop if the account is not found
+    if (!result)
+    {
+        PSendSysMessage("Account not found");
+        return true;
+    }
+
+    Field* fields = result->Fetch();
+    if (!sWorld.RemoveSession(fields[0].GetUInt32()))
+    {
+        PSendSysMessage("No bot session found");
+        return true;
+    }
+
+    PSendSysMessage("Bot session successfully destroyed");
+    return true;
+}
