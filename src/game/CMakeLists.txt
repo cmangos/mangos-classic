@@ -36,6 +36,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
   ${CMAKE_CURRENT_SOURCE_DIR}/BattleGround
   ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
+  ${CMAKE_CURRENT_SOURCE_DIR}/PlayerBot
   ${CMAKE_SOURCE_DIR}/src/shared
   ${CMAKE_SOURCE_DIR}/src/framework
   ${CMAKE_BINARY_DIR}
@@ -59,6 +60,11 @@ set(SRC_GRP_BATTLEGROUND
     BattleGround/BattleGroundMgr.h
     BattleGround/BattleGroundWS.cpp
     BattleGround/BattleGroundWS.h
+)
+
+file(GLOB SRC_FILES_PLAYERBOT PlayerBot/*.cpp PlayerBot/*.h)
+set(SRC_GRP_PLAYERBOT
+	${SRC_FILES_PLAYERBOT}
 )
 
 set(SRC_GRP_CHAT_COMMANDS
@@ -371,6 +377,7 @@ set(SRC_GRP_WORLD_HANDLERS
 set(LIBRARY_SRCS
     ${SRC_GRP_AHBOT}
     ${SRC_GRP_BATTLEGROUND}
+	${SRC_GRP_PLAYERBOT}
     ${SRC_GRP_CHAT_COMMANDS}
     ${SRC_GRP_MOTION_GEN}
     ${SRC_GRP_MOVEMENT}
@@ -393,6 +400,11 @@ source_group("AhBot"
 source_group("BattleGround"
   FILES
     ${SRC_GRP_BATTLEGROUND}
+)
+
+source_group("PlayerBot"
+  FILES
+    ${SRC_GRP_PLAYERBOT}
 )
 
 source_group("Chat Commands"
