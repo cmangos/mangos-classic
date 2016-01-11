@@ -29,6 +29,7 @@
 #include "SystemConfig.h"
 #include "revision.h"
 #include "Util.h"
+#include "PlayerBot/PlayerBotMgr.h"
 
 bool ChatHandler::HandleHelpCommand(char* args)
 {
@@ -293,151 +294,105 @@ bool ChatHandler::HandleServerMotdCommand(char* /*args*/)
 
 bool ChatHandler::HandleCreateBotSessionCommand(char* args)
 {
-    QueryResult* result =
-        LoginDatabase.PQuery("SELECT "
-            "id, "                      //0
-            "gmlevel, "                 //1
-            "sessionkey, "              //2
-            "last_ip, "                 //3
-            "locked, "                  //4
-            "v, "                       //5
-            "s, "                       //6
-            "expansion, "               //7
-            "mutetime, "                //8
-            "locale "                   //9
-            "FROM account "
-            "WHERE username = '%s'",
-            args);
-
-    // Stop if the account is not found
-    if (!result)
+    uint32 accountId;
+    if (!ExtractUInt32Base(&args, accountId, 10))
     {
-        PSendSysMessage("Account not found");
-        return false;
+        PSendSysMessage("Please provide a valid account id.");
+        return true;
     }
 
-    Field* fields = result->Fetch();
-    uint32 id = fields[0].GetUInt32();
-    uint32 security = fields[1].GetUInt16();
-    uint8 expansion = fields[7].GetUInt8();
-    time_t mutetime = time_t(fields[8].GetUInt64());
-    LocaleConstant locale = LocaleConstant(fields[9].GetUInt8());
-    WorldSession* m_Session;
-    WorldSocket* sock = nullptr;
-
-    ACE_NEW_RETURN(m_Session, WorldSession(id, sock, AccountTypes(security), expansion, mutetime, locale), false);
-    m_Session->SetIsBot(true);
-    sWorld.AddSession(m_Session);
-    PSendSysMessage("Bot session created");
-
+    uint32 botId = sPlayerBotMgr.CreateBot(accountId);
+    PSendSysMessage("Bot with id %u created", botId);
     return true;
 }
 
 bool ChatHandler::HandleLoginBotCommand(char* args)
 {
-    QueryResult* result =
-        LoginDatabase.PQuery("SELECT "
-            "id "                      //0
-            "FROM account "
-            "WHERE username = '%s'",
-            args);
-
-    // Stop if the account is not found
-    if (!result)
+    uint32 botId;
+    if (!ExtractUInt32Base(&args, botId, 10))
     {
-        PSendSysMessage("Account not found");
+        PSendSysMessage("Please provide a valid account id.");
         return true;
     }
 
-    Field* fields = result->Fetch();
-    if (WorldSession* session = sWorld.FindSession(fields[0].GetUInt32()))
+    uint32 characterId;
+    if (!ExtractUInt32Base(&args, characterId, 10))
     {
-        QueryResult* charResult =
-            CharacterDatabase.PQuery("SELECT "
-                "guid "
-                "FROM characters "
-                "WHERE account = '%u' ORDER BY guid ASC LIMIT 0, 1",
-                session->GetAccountId());
-
-        if (!charResult)
-        {
-            PSendSysMessage("No characters found");
-            return true;
-        }
-
-        Field* charFields = charResult->Fetch();
-
-        ObjectGuid characterGuid;
-        characterGuid.Set(charFields[0].GetUInt32());
-
-        session->HandleBotPlayerLogin(characterGuid);
-
-        PSendSysMessage("Bot successfully logged in");
-
+        PSendSysMessage("Please provide a valid character guid.");
         return true;
     }
 
-    PSendSysMessage("No bot session found");
+    ObjectGuid characterGuid;
+    characterGuid.Set(characterId);
+
+    if (sPlayerBotMgr.LoginBot(botId, characterGuid))
+    {
+        PSendSysMessage("Bot %u successfully logged in.", botId);
+    }
+    else
+    {
+        PSendSysMessage("Bot %u failed to log in.", botId);
+    }
+    
     return true;
 }
 
 bool ChatHandler::HandleLogoutBotCommand(char* args)
 {
-    QueryResult* result =
-        LoginDatabase.PQuery("SELECT "
-            "id "                      //0
-            "FROM account "
-            "WHERE username = '%s'",
-            args);
-
-    // Stop if the account is not found
-    if (!result)
+    uint32 botId;
+    if (!ExtractUInt32Base(&args, botId, 10))
     {
-        PSendSysMessage("Account not found");
-        return false;
-    }
-
-    Field* fields = result->Fetch();
-    if (WorldSession* session = sWorld.FindSession(fields[0].GetUInt32()))
-    {
-        if (!session->GetPlayer())
-        {
-            PSendSysMessage("No logged in bot found for account.");
-            return true;
-        }
-
-        PSendSysMessage("Bot successfully logged out");
-        session->LogoutPlayer(true);
+        PSendSysMessage("Please provide a valid account id.");
         return true;
     }
 
-    PSendSysMessage("No bot session found");
+    if (sPlayerBotMgr.LogoutBot(botId))
+    {
+        PSendSysMessage("Bot %u successfully logged out.", botId);
+    }
+    else
+    {
+        PSendSysMessage("Bot %u successfully logged out.", botId);
+    }
+
     return true;
 }
 
 bool ChatHandler::HandleDestroyBotSessionCommand(char* args)
 {
-    QueryResult* result =
-        LoginDatabase.PQuery("SELECT "
-            "id "                      //0
-            "FROM account "
-            "WHERE username = '%s'",
-            args);
-
-    // Stop if the account is not found
-    if (!result)
+    uint32 botId;
+    if (!ExtractUInt32Base(&args, botId, 10))
     {
-        PSendSysMessage("Account not found");
+        PSendSysMessage("Please provide a valid account id.");
         return true;
     }
 
-    Field* fields = result->Fetch();
-    if (!sWorld.RemoveSession(fields[0].GetUInt32()))
+    if (sPlayerBotMgr.DestroyBot(botId))
     {
-        PSendSysMessage("No bot session found");
-        return true;
+        PSendSysMessage("Bot %u successfully destroyed.", botId);
+    }
+    else
+    {
+        PSendSysMessage("Failed destroying bot %u", botId);
     }
 
-    PSendSysMessage("Bot session successfully destroyed");
+    return true;
+}
+
+bool ChatHandler::HandleListBotCommand(char* args)
+{
+    PlayerBotMap* map = sPlayerBotMgr.GetBots();
+
+    PSendSysMessage("%u bots active.", map->size());
+    for (auto itr = map->begin(); itr != map->end(); itr++)
+    {
+        if (!itr->second.GetPlayer())
+            continue;
+
+        Player* player = itr->second.GetPlayer();
+
+        PSendSysMessage("- AccountID: %u, Character: %s (Guid: %u)", itr->first, player->GetName(), player->GetGUIDLow());
+    }
+
     return true;
 }

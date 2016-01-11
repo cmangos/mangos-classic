@@ -37,6 +37,9 @@
     <Filter Include="BattleGround">
       <UniqueIdentifier>{0af4d063-6d01-4546-a429-59bd828ab270}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PlayerBot">
+      <UniqueIdentifier>{824ef00d-c090-41c4-9efe-951dbde9be25}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\game\AccountMgr.cpp">
@@ -475,6 +478,12 @@
     <ClCompile Include="..\..\src\game\AddonHandler.cpp">
       <Filter>World/Handlers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\game\PlayerBot\PlayerBotMgr.cpp">
+      <Filter>PlayerBot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\PlayerBot\PlayerBot.cpp">
+      <Filter>PlayerBot</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\AccountMgr.h">
@@ -909,6 +918,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\AddonHandler.h">
       <Filter>World/Handlers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\PlayerBot\PlayerBotMgr.h">
+      <Filter>PlayerBot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\PlayerBot\PlayerBot.h">
+      <Filter>PlayerBot</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

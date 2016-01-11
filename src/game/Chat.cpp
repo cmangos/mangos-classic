@@ -679,6 +679,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "login",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleLoginBotCommand,            "", nullptr },
         { "logout",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleLogoutBotCommand,           "", nullptr },
         { "destroy",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDestroyBotSessionCommand,   "", nullptr },
+        { "list",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleListBotCommand,             "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
