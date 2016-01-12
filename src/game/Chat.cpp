@@ -675,11 +675,11 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand botCommandTable[] =
     {
-        { "create",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleCreateBotSessionCommand,	   "", nullptr },
-        { "login",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleLoginBotCommand,            "", nullptr },
-        { "logout",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleLogoutBotCommand,           "", nullptr },
-        { "destroy",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDestroyBotSessionCommand,   "", nullptr },
-        { "list",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleListBotCommand,             "", nullptr },
+        { "create",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleCreateBotSessionCommand,	   "", nullptr },
+        { "login",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleLoginBotCommand,            "", nullptr },
+        { "logout",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleLogoutBotCommand,           "", nullptr },
+        { "destroy",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDestroyBotSessionCommand,   "", nullptr },
+        { "list",           SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleListBotCommand,             "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
@@ -772,7 +772,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "waterwalk",      SEC_GAMEMASTER,     false, &ChatHandler::HandleWaterwalkCommand,           "", nullptr },
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", nullptr },
         { "mmap",           SEC_GAMEMASTER,     false, nullptr,                                        "", mmapCommandTable },
-        { "bot",            SEC_ADMINISTRATOR,  false, nullptr,                                        "", botCommandTable },
+        { "bot",            SEC_ADMINISTRATOR,  true,  nullptr,                                        "", botCommandTable },
 
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
