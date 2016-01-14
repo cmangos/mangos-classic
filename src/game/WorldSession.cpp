@@ -91,11 +91,6 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_bPlayerBot(false), m_bPlayerBotActive(false)
 {
-    if (sock)
-    {
-        m_Address = sock->GetRemoteAddress();
-        sock->AddReference();
-    }
 }
 
 /// WorldSession destructor

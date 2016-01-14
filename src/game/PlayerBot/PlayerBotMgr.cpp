@@ -1,16 +1,5 @@
 #include "PlayerBotMgr.h"
 
-void PlayerBotMgr::UpdateAI(const uint32 diff)
-{
-    if (m_playerBots.size() < 1)
-        return;
-
-    for (auto itr = m_playerBots.begin(); itr != m_playerBots.end(); ++itr)
-    {
-        itr->second.UpdateAI(diff);
-    }
-}
-
 bool PlayerBotMgr::LoginBot(uint32 botId, ObjectGuid characterId)
 {
     auto itr = m_playerBots.find(botId);
@@ -46,9 +35,9 @@ void PlayerBotMgr::LogoutAllBots()
     }
 }
 
-PlayerBotMap* PlayerBotMgr::GetBots()
+PlayerBotMap& PlayerBotMgr::GetBots()
 {
-    return &m_playerBots;
+    return m_playerBots;
 }
 
 uint32 PlayerBotMgr::CreateBot(uint32 accountId)

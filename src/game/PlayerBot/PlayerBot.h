@@ -14,8 +14,6 @@ class PlayerBot
         PlayerBot(uint32 accountId);
         ~PlayerBot();
 
-        void UpdateAI(const uint32 diff);
-
         bool Login(ObjectGuid characterGuid);
         bool Logout();
 

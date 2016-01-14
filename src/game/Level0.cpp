@@ -297,7 +297,7 @@ bool ChatHandler::HandleCreateBotSessionCommand(char* args)
     uint32 accountId;
     if (!ExtractUInt32Base(&args, accountId, 10))
     {
-        PSendSysMessage("Please provide a valid account id.");
+        SendSysMessage("Please provide a valid account id.");
         return true;
     }
 
@@ -311,14 +311,14 @@ bool ChatHandler::HandleLoginBotCommand(char* args)
     uint32 botId;
     if (!ExtractUInt32Base(&args, botId, 10))
     {
-        PSendSysMessage("Please provide a valid account id.");
+        SendSysMessage("Please provide a valid account id.");
         return true;
     }
 
     uint32 characterId;
     if (!ExtractUInt32Base(&args, characterId, 10))
     {
-        PSendSysMessage("Please provide a valid character guid.");
+        SendSysMessage("Please provide a valid character guid.");
         return true;
     }
 
@@ -342,7 +342,7 @@ bool ChatHandler::HandleLogoutBotCommand(char* args)
     uint32 botId;
     if (!ExtractUInt32Base(&args, botId, 10))
     {
-        PSendSysMessage("Please provide a valid account id.");
+        SendSysMessage("Please provide a valid account id.");
         return true;
     }
 
@@ -363,7 +363,7 @@ bool ChatHandler::HandleDestroyBotSessionCommand(char* args)
     uint32 botId;
     if (!ExtractUInt32Base(&args, botId, 10))
     {
-        PSendSysMessage("Please provide a valid account id.");
+        SendSysMessage("Please provide a valid account id.");
         return true;
     }
 
@@ -381,10 +381,10 @@ bool ChatHandler::HandleDestroyBotSessionCommand(char* args)
 
 bool ChatHandler::HandleListBotCommand(char* args)
 {
-    PlayerBotMap* map = sPlayerBotMgr.GetBots();
+    PlayerBotMap map = sPlayerBotMgr.GetBots();
 
-    PSendSysMessage("%u bots active.", map->size());
-    for (auto itr = map->begin(); itr != map->end(); itr++)
+    PSendSysMessage("%u bots active.", map.size());
+    for (auto itr = map.begin(); itr != map.end(); itr++)
     {
         if (!itr->second.GetPlayer())
             continue;
