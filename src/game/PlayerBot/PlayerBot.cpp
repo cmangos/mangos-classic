@@ -42,7 +42,8 @@ void PlayerBot::InitializeSession(uint32 accountId)
         return;
     }
 
-    session->SetIsBot(true);
+    session->SetPlayerBot(true);
+    session->SetPlayerBotActive(true);
     sWorld.AddSession(session);
 
     m_session = session;

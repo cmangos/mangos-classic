@@ -277,8 +277,12 @@ class MANGOS_DLL_SPEC WorldSession
         void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed);
         void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit);
 
-        void SetIsBot(bool value) { m_bIsBot = value; }
-        bool GetIsBot() { return m_bIsBot; }
+        // PlayerBot-System
+        void SetPlayerBot(bool value) { m_bPlayerBot = value; }
+        bool GetPlayerBot() { return m_bPlayerBot; }
+        bool IsActivePlayerBot() { return m_bPlayerBot && m_bPlayerBotActive; }
+        bool GetPlayerBotActive() { return m_bPlayerBotActive; }
+        void SetPlayerBotActive(bool value) { m_bPlayerBotActive = value; }
 
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
@@ -689,7 +693,9 @@ class MANGOS_DLL_SPEC WorldSession
         std::mutex m_recvQueueLock;
         std::deque<WorldPacket *> m_recvQueue;
 
-        bool m_bIsBot;
+        // PlayerBot-System
+        bool m_bPlayerBot;
+        bool m_bPlayerBotActive;
 };
 #endif
 /// @}
