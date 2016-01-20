@@ -120,6 +120,7 @@ enum EventAI_ActionType
     ACTION_T_SET_THROW_MASK             = 46,               // EventTypeMask, unused, unused
     ACTION_T_SET_STAND_STATE            = 47,               // StandState, unused, unused
     ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance, unused
+    ACTION_T_DYNAMIC_MOVEMENT           = 49,               // EnableDynamicMovement (1 = on; 0 = off)
 
     ACTION_T_END,
 };
@@ -413,6 +414,13 @@ struct CreatureEventAI_Action
             uint32 wanderDistance;
             uint32 unused1;
         } changeMovement;
+        // ACTION_T_DYNAMIC_MOVEMENT                        = 49
+        struct
+        {
+            uint32 state;                                   // bool: 1 = on; 0 = off
+            uint32 unused1;
+            uint32 unused2;
+        } dynamicMovement;
         // RAW
         struct
         {
@@ -668,6 +676,7 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
 
         uint8  m_Phase;                                     // Current phase, max 32 phases
         bool   m_MeleeEnabled;                              // If we allow melee auto attack
+        bool   m_DynamicMovement;                           // Core will control creatures movement if this is enabled
         bool   m_HasOOCLoSEvent;                            // Cache if a OOC-LoS Event exists
         uint32 m_InvinceabilityHpLevel;                     // Minimal health level allowed at damage apply
 
@@ -675,6 +684,7 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         // Note that Step 100 means that AI_EVENT_GOT_FULL_HEALTH was sent
         // Steps 0..2 correspond to AI_EVENT_LOST_SOME_HEALTH(90%), AI_EVENT_LOST_HEALTH(50%), AI_EVENT_CRITICAL_HEALTH(10%)
         uint32 m_throwAIEventStep;                          // Used for damage taken/ received heal
+        float m_LastSpellMaxRange;                          // Maximum spell range that was cast during dynamic movement
 };
 
 #endif
