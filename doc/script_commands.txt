@@ -326,3 +326,10 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 40 SCRIPT_COMMAND_DESPAWN_GO                * resultingTarget = GameObject. Please note that not all gameobject types support this command.
 
 41 SCRIPT_COMMAND_RESPAWN                   * resultingSource = Creature. Requires SCRIPT_FLAG_BUDDY_IS_DESPAWNED to find dead or despawned targets
+
+42 SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS       Change equipment slots of the resultingSource
+                                            * resultingSource = Creature
+                                            * datalong = resetDefault: bool 0=false, 1=true
+                                            * dataint = main hand slot; dataint2 = off hand slot; dataint3 = ranged slot
+
+43 SCRIPT_COMMAND_RESET_GO                  * resultingTarget = GameObject. Reset doors or buttons (GO type 0 and 1)

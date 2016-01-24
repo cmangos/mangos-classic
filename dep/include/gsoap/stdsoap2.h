@@ -205,279 +205,265 @@ A commercial use license is available from Genivia, Inc., contact@genivia.com
 # endif
 #endif
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-# if defined(WITH_OPENSSL)
-#  ifndef HAVE_OPENSSL_SSL_H
-#   undef WITH_OPENSSL
-#  endif
+
+#if defined(UNDER_CE)
+# define WITH_LEAN
+# define HAVE_SSCANF
+#elif defined(WIN32)
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_SYS_TIMEB_H
+# define HAVE_FTIME
+# define HAVE_GMTIME
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+# define SOAP_LONG_FORMAT "%I64d"
+# define SOAP_ULONG_FORMAT "%I64u"
+#elif defined(CYGWIN)
+# define HAVE_POLL
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_SYS_TIMEB_H
+# define HAVE_FTIME
+# define HAVE_RAND_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+#elif defined(__APPLE__)
+# define HAVE_POLL
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOD_L
+# define HAVE_SSCANF_L
+# define HAVE_SPRINTF_L
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_RAND_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_TIMEGM
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+#elif defined(_AIX43)
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_SYS_TIMEB_H
+# define HAVE_FTIME
+# define HAVE_RAND_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+#elif defined(_AIX41)
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_SYS_TIMEB_H
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+#elif defined(HP_UX)
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_SYS_TIMEB_H
+# define HAVE_FTIME
+# define HAVE_RAND_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+#elif defined(FREEBSD) || defined(__FreeBSD__) || defined(OPENBSD)
+# define HAVE_POLL
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOD_L
+# define HAVE_SSCANF_L
+# define HAVE_SPRINTF_L
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_STRTOLL
+# define HAVE_STRTOULL
+# define HAVE_GETTIMEOFDAY
+# define HAVE_RAND_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+# define SOAP_LONG_FORMAT "%qd"
+# define SOAP_ULONG_FORMAT "%qu"
+#elif defined(__VMS)
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_SYS_TIMEB_H
+# define HAVE_FTIME
+# define HAVE_RAND_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+#elif defined(__GLIBC__) || defined(__GNU__)
+# define HAVE_POLL
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOD_L
+# define HAVE_SSCANF_L
+# define HAVE_SPRINTF_L
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_STRTOLL
+# define HAVE_STRTOULL
+# define HAVE_SYS_TIMEB_H
+# define HAVE_FTIME
+# define HAVE_RAND_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_TIMEGM
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+# define HAVE_ISNAN
+#elif defined(TRU64)
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_GETTIMEOFDAY
+# define HAVE_SYS_TIMEB_H
+# define HAVE_RAND_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define __USE_STD_IOSTREAM
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+# define SOAP_LONG_FORMAT "%ld"
+# define SOAP_ULONG_FORMAT "%lu"
+#elif defined(MAC_CARBON)
+# define WITH_NOIO
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOD_L
+# define HAVE_SSCANF_L
+# define HAVE_SPRINTF_L
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_FTIME
+# define HAVE_RAND_R
+# define HAVE_GETHOSTBYNAME_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+#elif defined(PALM)
+# define WITH_LEAN
+# define HAVE_STRTOD   /* strtod() is defined in palmFunctions.h */
+# include <stdlib.h>	/* Needs to be included before unix headers */
+# include <sys_types.h>
+# define IGNORE_STDIO_STUBS
+# include <StdIOPalm.h>
+# define O_NONBLOCK FNONBIO
+# include <sys_socket.h>
+# include "palmFunctions.h"
+#elif defined(SYMBIAN)
+# define WITH_LEAN
+# define WITH_NONAMESPACES
+# define HAVE_STRTOD	/* use STRTOD since sscanf doesn't seem to work */
+# include <e32def.h>
+# include <sys/ioctl.h>
+#elif defined(VXWORKS)
+# ifdef _WRS_KERNEL
+#  define _POSIX_THREADS 1
 # endif
-# if defined(WITH_ZLIB) || defined(WITH_GZIP)
-#  ifndef HAVE_ZLIB_H
-#   undef WITH_ZLIB
-#   undef WITH_GZIP
-#  endif
-# endif
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_GMTIME
+# define HAVE_LOCALTIME
+# define HAVE_MKTIME
+#elif defined(OS390)
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_SYS_TIMEB_H
+# define HAVE_FTIME
+# define HAVE_RAND_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+#elif defined(AS400)
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_SYS_TIMEB_H
+# define HAVE_FTIME
+# define HAVE_RAND_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+#elif defined(__QNX__) || defined(QNX)
+/ QNX does not have a working version of strtof */
+# undef HAVE_STRTOF
+# define HAVE_POLL
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_SYS_TIMEB_H
+# define HAVE_FTIME
+# define HAVE_RAND_R
+# define HAVE_GETHOSTBYNAME_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
+# define LONG64 long
+# define ULONG64 unsigned LONG64
+# define SOAP_LONG_FORMAT "%ld"
+# define SOAP_ULONG_FORMAT "%lu"
 #else
-# if defined(UNDER_CE)
-#  define WITH_LEAN
-#  define HAVE_SSCANF
-# elif defined(WIN32)
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_FTIME
-#  define HAVE_GMTIME
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-#  define SOAP_LONG_FORMAT "%I64d"
-#  define SOAP_ULONG_FORMAT "%I64u"
-# elif defined(CYGWIN)
-#  define HAVE_POLL
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_FTIME
-#  define HAVE_RAND_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-# elif defined(__APPLE__)
-#  define HAVE_POLL
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOD_L
-#  define HAVE_SSCANF_L
-#  define HAVE_SPRINTF_L
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_RAND_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_TIMEGM
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-# elif defined(_AIX43)
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_FTIME
-#  define HAVE_RAND_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-# elif defined(_AIX41)
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-# elif defined(HP_UX)
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_FTIME
-#  define HAVE_RAND_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-# elif defined(FREEBSD) || defined(__FreeBSD__) || defined(OPENBSD)
-#  define HAVE_POLL
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOD_L
-#  define HAVE_SSCANF_L
-#  define HAVE_SPRINTF_L
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_STRTOLL
-#  define HAVE_STRTOULL
-#  define HAVE_GETTIMEOFDAY
-#  define HAVE_RAND_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-#  define SOAP_LONG_FORMAT "%qd"
-#  define SOAP_ULONG_FORMAT "%qu"
-# elif defined(__VMS)
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_FTIME
-#  define HAVE_RAND_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-# elif defined(__GLIBC__) || defined(__GNU__)
-#  define HAVE_POLL
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOD_L
-#  define HAVE_SSCANF_L
-#  define HAVE_SPRINTF_L
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_STRTOLL
-#  define HAVE_STRTOULL
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_FTIME
-#  define HAVE_RAND_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_TIMEGM
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-#  define HAVE_ISNAN
-# elif defined(TRU64)
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_GETTIMEOFDAY
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_RAND_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define __USE_STD_IOSTREAM
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-#  define SOAP_LONG_FORMAT "%ld"
-#  define SOAP_ULONG_FORMAT "%lu"
-# elif defined(MAC_CARBON)
-#  define WITH_NOIO
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOD_L
-#  define HAVE_SSCANF_L
-#  define HAVE_SPRINTF_L
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_FTIME
-#  define HAVE_RAND_R
-#  define HAVE_GETHOSTBYNAME_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-# elif defined(PALM)
-#  define WITH_LEAN
-#  define HAVE_STRTOD   /* strtod() is defined in palmFunctions.h */
-#  include <stdlib.h>	/* Needs to be included before unix headers */
-#  include <sys_types.h>
-#  define IGNORE_STDIO_STUBS
-#  include <StdIOPalm.h>
-#  define O_NONBLOCK FNONBIO
-#  include <sys_socket.h>
-#  include "palmFunctions.h"
-# elif defined(SYMBIAN)
-#  define WITH_LEAN
-#  define WITH_NONAMESPACES
-#  define HAVE_STRTOD	/* use STRTOD since sscanf doesn't seem to work */
-#  include <e32def.h>
-#  include <sys/ioctl.h>
-# elif defined(VXWORKS)
-#  ifdef _WRS_KERNEL
-#   define _POSIX_THREADS 1
-#  endif
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_GMTIME
-#  define HAVE_LOCALTIME
-#  define HAVE_MKTIME
-# elif defined(OS390)
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_FTIME
-#  define HAVE_RAND_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-# elif defined(AS400)
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_FTIME
-#  define HAVE_RAND_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-# elif defined(__QNX__) || defined(QNX)
-/* QNX does not have a working version of strtof */
-#  undef HAVE_STRTOF
-#  define HAVE_POLL
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_FTIME
-#  define HAVE_RAND_R
-#  define HAVE_GETHOSTBYNAME_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-#  define LONG64 long
-#  define ULONG64 unsigned LONG64
-#  define SOAP_LONG_FORMAT "%ld"
-#  define SOAP_ULONG_FORMAT "%lu"
-# else
 /* Default asumptions on supported functions */
-#  define HAVE_STRRCHR
-#  define HAVE_STRTOD
-#  define HAVE_SSCANF
-#  define HAVE_STRTOL
-#  define HAVE_STRTOUL
-#  define HAVE_SYS_TIMEB_H
-#  define HAVE_FTIME
-#  define HAVE_RAND_R
-#  define HAVE_GETHOSTBYNAME_R
-#  define HAVE_GMTIME_R
-#  define HAVE_LOCALTIME_R
-#  define HAVE_WCTOMB
-#  define HAVE_MBTOWC
-# endif
+# define HAVE_STRRCHR
+# define HAVE_STRTOD
+# define HAVE_SSCANF
+# define HAVE_STRTOL
+# define HAVE_STRTOUL
+# define HAVE_SYS_TIMEB_H
+# define HAVE_FTIME
+# define HAVE_RAND_R
+# define HAVE_GETHOSTBYNAME_R
+# define HAVE_GMTIME_R
+# define HAVE_LOCALTIME_R
+# define HAVE_WCTOMB
+# define HAVE_MBTOWC
 #endif
 
 /* native Win and HP-UX compilers don't like empty structs */

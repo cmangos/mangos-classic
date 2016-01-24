@@ -23,12 +23,8 @@ void ByteBufferException::PrintPosError() const
 {
     char const* traceStr;
 
-#ifdef HAVE_ACE_STACK_TRACE_H
     ACE_Stack_Trace trace;
     traceStr = trace.c_str();
-#else
-    traceStr = nullptr;
-#endif
 
     sLog.outError(
         "Attempted to %s in ByteBuffer (pos: " SIZEFMTD " size: " SIZEFMTD ") "

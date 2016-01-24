@@ -21,9 +21,8 @@
 
 #include "Common.h"
 
-#ifndef HAVE_CONFIG_H
-#  define HAVE_ACE_STACK_TRACE_H 1
-#endif
+// FIXME - this will be removed/replaced with full boost adoption
+#define HAVE_ACE_STACK_TRACE_H 1
 
 #ifdef HAVE_ACE_STACK_TRACE_H
 #  include "ace/Stack_Trace.h"

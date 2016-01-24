@@ -34,6 +34,8 @@
 #include <ace/Version.h>
 #include <ace/Get_Opt.h>
 
+#include <boost/version.hpp>
+
 #ifdef WIN32
 #include "ServiceWin32.h"
 char serviceName[] = "mangosd";
@@ -104,7 +106,9 @@ extern int main(int argc, char** argv)
                 break;
             case 'v':
                 printf("%s\n", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID));
+                printf("Boost version %u.%u.%u\n", (BOOST_VERSION / 100000), ((BOOST_VERSION / 100) % 1000), (BOOST_VERSION % 100));
                 return 0;
+
             case 's':
             {
                 const char* mode = cmd_opts.opt_arg();

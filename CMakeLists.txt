@@ -19,8 +19,6 @@ project(CMaNGOS)
 
 cmake_minimum_required(VERSION 2.8.12)
 
-set(MANGOS_VERSION 0.12.3)
-
 include(cmake/common.cmake)
 
 # Set RPATH-handing (CMake parameters)
@@ -116,6 +114,14 @@ if(ACE_USE_EXTERNAL)
   endif()
 else()
   include(cmake/macros/ImportACE.cmake)
+endif()
+
+find_package(Boost REQUIRED)
+
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+else()
+  message(FATAL_ERROR "This project requires boost.  Please install from http://www.boost.org")
 endif()
 
 if(NOT USE_STD_MALLOC)
@@ -266,15 +272,11 @@ if(XCODE)
   endif()
 endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-
 add_subdirectory(dep) # TODO: add vmap extractor build support
 
 # Add definitions for all build types
 # Don't place this above 'dep' subdirectory! Because of defines build will crash.
 set(DEFINITIONS
-  HAVE_CONFIG_H
-  VERSION="${MANGOS_VERSION}"
   SYSCONFDIR="${CONF_DIR}/"
 )
 
@@ -295,9 +297,7 @@ if(USE_STD_MALLOC)
   set(DEFINITIONS ${DEFINITIONS} USE_STANDARD_MALLOC)
 endif()
 
-set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS}")
-set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_RELEASE "${DEFINITIONS_RELEASE}")
-set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_DEBUG "${DEFINITIONS_DEBUG}")
+set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};$<$<CONFIG:Release>:${DEFINITIONS_RELEASE}>;$<$<CONFIG:Debug>:${DEFINITIONS_DEBUG}>")
 
 add_subdirectory(src)
 # if(SQL)
