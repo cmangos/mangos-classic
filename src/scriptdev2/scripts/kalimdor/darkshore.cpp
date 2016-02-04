@@ -58,9 +58,12 @@ enum
 
     SAY_KER_END                 = -1000444,
 
+    SPELL_BEAR_FORM             = 18309,
     SPELL_SLEEP_VISUAL          = 25148,
     SPELL_AWAKEN                = 17536,
+
     QUEST_SLEEPER_AWAKENED      = 5321,
+
     NPC_LILADRIS                = 11219                     // attackers entries unknown
 };
 
@@ -74,6 +77,9 @@ struct npc_kerlonianAI : public FollowerAI
     void Reset() override
     {
         m_uiFallAsleepTimer = urand(10000, 45000);
+
+        if (!HasFollowState(STATE_FOLLOW_INPROGRESS))
+            DoCastSpellIfCan(m_creature, SPELL_BEAR_FORM);
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -97,12 +103,16 @@ struct npc_kerlonianAI : public FollowerAI
         }
     }
 
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
-        if (HasFollowState(STATE_FOLLOW_INPROGRESS | STATE_FOLLOW_PAUSED) && pSpell->Id == SPELL_AWAKEN)
-            ClearSleeping();
+        if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (HasFollowState(STATE_FOLLOW_INPROGRESS | STATE_FOLLOW_PAUSED))
+                ClearSleeping();
+        }
     }
 
+    // Function to set npc to sleep mode
     void SetSleeping()
     {
         SetFollowPaused(true);
@@ -122,10 +132,11 @@ struct npc_kerlonianAI : public FollowerAI
             case 3: DoScriptText(SAY_KER_SLEEP_4, m_creature); break;
         }
 
-        m_creature->SetStandState(UNIT_STAND_STATE_SLEEP);
-        m_creature->CastSpell(m_creature, SPELL_SLEEP_VISUAL, false);
+        if (DoCastSpellIfCan(m_creature, SPELL_SLEEP_VISUAL) == CAST_OK)
+            m_creature->SetStandState(UNIT_STAND_STATE_SLEEP);
     }
 
+    // Function to clear sleep mode
     void ClearSleeping()
     {
         m_creature->RemoveAurasDueToSpell(SPELL_SLEEP_VISUAL);
@@ -172,6 +183,7 @@ bool QuestAccept_npc_kerlonian(Player* pPlayer, Creature* pCreature, const Quest
     {
         if (npc_kerlonianAI* pKerlonianAI = dynamic_cast<npc_kerlonianAI*>(pCreature->AI()))
         {
+            pCreature->RemoveAurasDueToSpell(SPELL_BEAR_FORM);
             pCreature->SetStandState(UNIT_STAND_STATE_STAND);
             DoScriptText(SAY_KER_START, pCreature, pPlayer);
             pKerlonianAI->StartFollow(pPlayer, FACTION_ESCORT_N_FRIEND_PASSIVE, pQuest);
@@ -179,6 +191,17 @@ bool QuestAccept_npc_kerlonian(Player* pPlayer, Creature* pCreature, const Quest
     }
 
     return true;
+}
+
+bool EffectDummyCreature_awaken_kerlonian(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+{
+    if (uiSpellId == SPELL_AWAKEN && uiEffIndex == EFFECT_INDEX_0)
+    {
+        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
+        return true;
+    }
+
+    return false;
 }
 
 /*####
@@ -748,6 +771,7 @@ void AddSC_darkshore()
     pNewScript->Name = "npc_kerlonian";
     pNewScript->GetAI = &GetAI_npc_kerlonian;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_kerlonian;
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_awaken_kerlonian;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
