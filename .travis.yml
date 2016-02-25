@@ -47,7 +47,8 @@ addons:
       - g++-4.8
       - make
       - cmake
-      - libboost-dev
+      - libboost1.55-dev
+      - libboost-system1.55-dev
   
 # overwrite GCC version for GCC build only
 before_install:

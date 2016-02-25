@@ -18,15 +18,23 @@
 
 #include "AuthCrypt.h"
 #include "Hmac.h"
+#include "BigNumber.h"
 
 AuthCrypt::AuthCrypt()
 {
     _initialized = false;
 }
 
-void AuthCrypt::Init()
+void AuthCrypt::Init(BigNumber *bn)
 {
     _send_i = _send_j = _recv_i = _recv_j = 0;
+
+    const size_t len = 40;
+
+    _key.resize(len);
+    auto const key = bn->AsByteArray();
+    std::copy(key, key + len, _key.begin());
+
     _initialized = true;
 }
 
@@ -57,34 +65,4 @@ void AuthCrypt::EncryptSend(uint8* data, size_t len)
         ++_send_i;
         data[t] = _send_j = x;
     }
-}
-
-void AuthCrypt::SetKey(uint8* key, size_t len)
-{
-    _key.resize(len);
-    std::copy(key, key + len, _key.begin());
-}
-
-
-/*[-ZERO]
-void AuthCrypt::SetKey(BigNumber *bn)
-{
-    uint8 *key = new uint8[SHA_DIGEST_LENGTH];
-    GenerateKey(key, bn);
-    _key.resize(SHA_DIGEST_LENGTH);
-    std::copy(key, key + SHA_DIGEST_LENGTH, _key.begin());
-    delete[] key;
-}
-*/
-
-AuthCrypt::~AuthCrypt()
-{
-}
-
-void AuthCrypt::GenerateKey(uint8* key, BigNumber* bn)
-{
-    HmacHash hash;
-    hash.UpdateBigNumber(bn);
-    hash.Finalize();
-    memcpy(key, hash.GetDigest(), SHA_DIGEST_LENGTH);
 }

@@ -24,7 +24,6 @@
 #include "PosixDaemon.h"
 #endif
 
-#include "WorldSocketMgr.h"
 #include "Common.h"
 #include "Master.h"
 #include "WorldSocket.h"
@@ -43,6 +42,7 @@
 #include "MaNGOSsoap.h"
 #include "MassMailMgr.h"
 #include "DBCStores.h"
+#include "Network/Listener.hpp"
 
 #include <ace/OS_NS_signal.h>
 #include <ace/TP_Reactor.h>
@@ -310,15 +310,12 @@ int Master::Run()
     uint16 wsport = sWorld.getConfig(CONFIG_UINT32_PORT_WORLD);
     std::string bind_ip = sConfig.GetStringDefault("BindIP", "0.0.0.0");
 
-    if (sWorldSocketMgr.StartNetwork(wsport, bind_ip) == -1)
     {
-        sLog.outError("Failed to start network");
-        Log::WaitBeforeContinueIfNeed();
-        World::StopNow(ERROR_EXIT_CODE);
-        // go down and shutdown the server
-    }
+        MaNGOS::Listener<WorldSocket> listener(wsport, 8);
 
-    sWorldSocketMgr.Wait();
+        while (!World::IsStopped())
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 
     ///- Stop freeze protection before shutdown tasks
     if (freeze_thread)

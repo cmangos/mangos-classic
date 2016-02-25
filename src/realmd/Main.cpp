@@ -31,6 +31,8 @@
 #include "revision.h"
 #include "revision_sql.h"
 #include "Util.h"
+#include "Network/Listener.hpp"
+
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 
@@ -258,20 +260,11 @@ extern int main(int argc, char** argv)
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
     LoginDatabase.CommitTransaction();
 
-    ///- Launch the listening network socket
-    ACE_Acceptor<AuthSocket, ACE_SOCK_Acceptor> acceptor;
-
-    uint16 rmport = sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT);
+    auto rmport = sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT);
     std::string bind_ip = sConfig.GetStringDefault("BindIP", "0.0.0.0");
 
-    ACE_INET_Addr bind_addr(rmport, bind_ip.c_str());
-
-    if (acceptor.open(bind_addr, ACE_Reactor::instance(), ACE_NONBLOCK) == -1)
-    {
-        sLog.outError("MaNGOS realmd can not bind to %s:%d", bind_ip.c_str(), rmport);
-        Log::WaitBeforeContinueIfNeed();
-        return 1;
-    }
+    // FIXME - more intelligent selection of thread count is needed here.  config option?
+    MaNGOS::Listener<AuthSocket> listener(rmport, 1);
 
     ///- Catch termination signals
     HookSignals();
