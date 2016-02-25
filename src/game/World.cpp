@@ -112,8 +112,6 @@ World::World()
 
     for (int i = 0; i < CONFIG_BOOL_VALUE_COUNT; ++i)
         m_configBoolValues[i] = false;
-
-    m_configForceLoadMapIds = nullptr;
 }
 
 /// World destructor
@@ -133,8 +131,6 @@ World::~World()
 
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
-
-    delete m_configForceLoadMapIds;
 }
 
 /// Cleanups before world stop
@@ -456,12 +452,11 @@ void World::LoadConfigSettings(bool reload)
     std::string forceLoadGridOnMaps = sConfig.GetStringDefault("LoadAllGridsOnMaps", "");
     if (!forceLoadGridOnMaps.empty())
     {
-        m_configForceLoadMapIds = new std::set<uint32>;
         unsigned int pos = 0;
         unsigned int id;
         VMAP::VMapFactory::chompAndTrim(forceLoadGridOnMaps);
         while (VMAP::VMapFactory::getNextId(forceLoadGridOnMaps, pos, id))
-            m_configForceLoadMapIds->insert(id);
+            m_configForceLoadMapIds.insert(id);
     }
 
     setConfig(CONFIG_UINT32_INTERVAL_SAVE, "PlayerSave.Interval", 15 * MINUTE * IN_MILLISECONDS);
