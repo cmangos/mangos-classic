@@ -235,8 +235,6 @@ set(SRC_GRP_SERVER
     WorldSession.h
     WorldSocket.cpp
     WorldSocket.h
-    WorldSocketMgr.cpp
-    WorldSocketMgr.h
 )
 
 set(SRC_GRP_TOOL

@@ -75,6 +75,7 @@ target_link_libraries(${EXECUTABLE_NAME}
   g3dlite
   gsoap
   ${ACE_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 if(WIN32)

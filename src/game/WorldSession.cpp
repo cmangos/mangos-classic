@@ -89,14 +89,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_
     _player(nullptr), m_Socket(sock), _security(sec), _accountId(id), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
-    m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED)
-{
-    if (sock)
-    {
-        m_Address = sock->GetRemoteAddress();
-        sock->AddReference();
-    }
-}
+    m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED) {}
 
 /// WorldSession destructor
 WorldSession::~WorldSession()
@@ -105,16 +98,9 @@ WorldSession::~WorldSession()
     if (_player)
         LogoutPlayer(true);
 
-    /// - If have unclosed socket, close it
-    if (m_Socket)
-    {
-        m_Socket->CloseSocket();
-        m_Socket->RemoveReference();
-        m_Socket = nullptr;
-    }
-
     ///- empty incoming packet queue
-    std::for_each(m_recvQueue.begin(), m_recvQueue.end(), [](const WorldPacket *packet) { delete packet; });
+    for (auto const packet : m_recvQueue)
+        delete packet;
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -132,7 +118,7 @@ char const* WorldSession::GetPlayerName() const
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const* packet)
 {
-    if (!m_Socket)
+    if (m_Socket->IsClosed())
         return;
 
 #ifdef MANGOS_DEBUG
@@ -171,8 +157,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 
 #endif                                                  // !MANGOS_DEBUG
 
-    if (m_Socket->SendPacket(*packet) == -1)
-        m_Socket->CloseSocket();
+    m_Socket->SendPacket(*packet);
 }
 
 /// Add an incoming packet to the queue
@@ -209,14 +194,14 @@ bool WorldSession::Update(PacketFilter& updater)
     /// not process packets if socket already closed
     while (m_Socket && !m_Socket->IsClosed() && !m_recvQueue.empty())
     {
+        WorldPacket *packet = m_recvQueue.front();
+        m_recvQueue.pop_front();
+
         /*#if 1
         sLog.outError( "MOEP: %s (0x%.4X)",
                         packet->GetOpcodeName(),
                         packet->GetOpcode());
         #endif*/
-
-        WorldPacket* packet = m_recvQueue.front();
-        m_recvQueue.pop_front();
 
         OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
         try
@@ -305,24 +290,18 @@ bool WorldSession::Update(PacketFilter& updater)
         delete packet;
     }
 
-    ///- Cleanup socket pointer if need
-    if (m_Socket && m_Socket->IsClosed())
-    {
-        m_Socket->RemoveReference();
-        m_Socket = nullptr;
-    }
-
     // check if we are safe to proceed with logout
     // logout procedure should happen only in World::UpdateSessions() method!!!
     if (updater.ProcessLogout())
     {
         ///- If necessary, log the player out
-        time_t currTime = time(nullptr);
-        if (!m_Socket || (ShouldLogOut(currTime) && !m_playerLoading))
-            LogoutPlayer(true);
+        const time_t currTime = time(nullptr);
 
-        if (!m_Socket)
-            return false;                                   // Will remove this session from the world session map
+        if (m_Socket->IsClosed() || (ShouldLogOut(currTime) && !m_playerLoading))
+        {
+            LogoutPlayer(true);
+            return false;
+        }
     }
 
     return true;
@@ -459,7 +438,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         // remove player from the group if he is:
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
-        if (_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && m_Socket)
+        if (_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && !m_Socket->IsClosed())
             _player->RemoveFromGroup();
 
         ///- Send update to group
@@ -511,8 +490,8 @@ void WorldSession::LogoutPlayer(bool Save)
 /// Kick a player out of the World
 void WorldSession::KickPlayer()
 {
-    if (m_Socket)
-        m_Socket->CloseSocket();
+    if (m_Socket->IsClosed())
+        m_Socket->Close();
 }
 
 /// Cancel channeling handler

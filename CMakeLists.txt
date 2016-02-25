@@ -116,7 +116,7 @@ else()
   include(cmake/macros/ImportACE.cmake)
 endif()
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})

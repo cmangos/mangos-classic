@@ -122,14 +122,14 @@ World::~World()
     // it is assumed that no other thread is accessing this data when the destructor is called.  therefore, no locks are necessary
 
     ///- Empty the kicked session set
-    std::for_each(m_sessions.begin(), m_sessions.end(), [](const SessionMap::value_type &p) { delete p.second; });
-    m_sessions.clear();
+    for (auto const session : m_sessions)
+        delete session.second;
 
-    std::for_each(m_cliCommandQueue.begin(), m_cliCommandQueue.end(), [](const CliCommandHolder *p) { delete p; });
-    m_cliCommandQueue.clear();
+    for (auto const cliCommand : m_cliCommandQueue)
+        delete cliCommand;
 
-    std::for_each(m_sessionAddQueue.begin(), m_sessionAddQueue.end(), [](const WorldSession *s) { delete s; });
-    m_sessionAddQueue.clear();
+    for (auto const session : m_sessionAddQueue)
+        delete session;
 
     VMAP::VMapFactory::clear();
     MMAP::MMapFactory::clear();
@@ -1753,7 +1753,7 @@ void World::ShutdownMsg(bool show /*= false*/, Player* player /*= nullptr*/)
 /// Cancel a planned server shutdown
 void World::ShutdownCancel()
 {
-    // nothing cancel or too later
+    // nothing to cancel or too late
     if (!m_ShutdownTimer || m_stopEvent)
         return;
 
@@ -1787,11 +1787,12 @@ void World::UpdateSessions(uint32 /*diff*/)
         WorldSession* pSession = itr->second;
         WorldSessionFilter updater(pSession);
 
+        // the session itself is owned by the socket which created it.  that is where the destruction of the session will happen.
         if (!pSession->Update(updater))
         {
             RemoveQueuedSession(pSession);
             m_sessions.erase(itr);
-            delete pSession;
+            pSession->Finalize();
         }
     }
 }
