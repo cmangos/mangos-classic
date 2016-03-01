@@ -6554,6 +6554,16 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 
     // raw invisibility
     bool invisible = (m_invisibilityMask != 0 || u->m_invisibilityMask != 0);
+    if (u->GetTypeId() == TYPEID_PLAYER) // if object is player with mover, use its visibility masks, so that an invisible player MCing a creature can see stuff
+    {
+        if (Player* player = (Player*)u)
+        {
+            if (Unit* mover=player->GetMover())
+            {
+                invisible= (m_invisibilityMask != 0 || mover->m_invisibilityMask != 0);
+            }
+        }
+    }
 
     // detectable invisibility case
     if (invisible && (

@@ -202,9 +202,15 @@ void TemporarySummon::UnSummon()
     CombatStop();
 
     if (GetSummonerGuid().IsCreature())
+    {
         if (Creature* sum = GetMap()->GetCreature(GetSummonerGuid()))
             if (sum->AI())
                 sum->AI()->SummonedCreatureDespawn(this);
+    }
+    else if (GetSummonerGuid().IsPlayer()) // if player that summoned this creature was MCing it, uncharm
+        if (Player* player = GetMap()->GetPlayer(GetSummonerGuid()))
+            if (player->GetMover() == this)
+                player->Uncharm();
 
     AddObjectToRemoveList();
 }

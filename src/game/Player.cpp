@@ -17759,6 +17759,24 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
     GetSession()->SendPacket(&data);
 }
 
+void Player::Uncharm()
+{
+    if (Unit* charm = GetCharm())
+    {
+        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
+        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
+        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET);
+        if (charm == GetMover())
+        {
+            SetMover(nullptr);
+            GetCamera().ResetView();
+            RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+            SetCharm(nullptr);
+            SetClientControl(this, 1);
+        }
+    }
+}
+
 void Player::UpdateZoneDependentAuras()
 {
     // Some spells applied at enter into zone (with subzones), aura removed in UpdateAreaDependentAuras that called always at zone->area update
