@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "game", "VC140\game.vcxproj", "{1DC6C4DA-A028-41F3-877D-D5400C594F88}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -158,8 +158,8 @@ Global
 		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Debug|x64.Build.0 = Debug|x64
 		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Release|Win32.ActiveCfg = Release|Win32
 		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Release|Win32.Build.0 = Release|Win32
-		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Release|x64.ActiveCfg = Release|Win32
-		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Release|x64.Build.0 = Release|Win32
+		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Release|x64.ActiveCfg = Release|x64
+		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Release|x64.Build.0 = Release|x64
 		{B15F131E-328A-4D42-ADC2-9FF4CA6306D8}.Debug_NoPCH|Win32.ActiveCfg = Debug_NoPCH|Win32
 		{B15F131E-328A-4D42-ADC2-9FF4CA6306D8}.Debug_NoPCH|Win32.Build.0 = Debug_NoPCH|Win32
 		{B15F131E-328A-4D42-ADC2-9FF4CA6306D8}.Debug_NoPCH|x64.ActiveCfg = Debug_NoPCH|x64
