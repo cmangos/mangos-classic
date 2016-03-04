@@ -218,7 +218,7 @@ void Log::SetLogFileLevel(char* level)
 void Log::Initialize()
 {
     /// Common log files data
-    m_logsDir = sConfig.GetStringDefault("LogsDir", "");
+    m_logsDir = sConfig.GetStringDefault("LogsDir");
     if (!m_logsDir.empty())
     {
         if ((m_logsDir.at(m_logsDir.length() - 1) != '/') && (m_logsDir.at(m_logsDir.length() - 1) != '\\'))
@@ -236,7 +236,7 @@ void Log::Initialize()
     else
     {
         // GM log settings for per account case
-        m_gmlog_filename_format = sConfig.GetStringDefault("GMLogFile", "");
+        m_gmlog_filename_format = sConfig.GetStringDefault("GMLogFile");
         if (!m_gmlog_filename_format.empty())
         {
             bool m_gmlog_timestamp = sConfig.GetBoolDefault("GmLogTimestamp", false);
@@ -271,7 +271,7 @@ void Log::Initialize()
     m_includeTime  = sConfig.GetBoolDefault("LogTime", false);
     m_logLevel     = LogLevel(sConfig.GetIntDefault("LogLevel", 0));
     m_logFileLevel = LogLevel(sConfig.GetIntDefault("LogFileLevel", 0));
-    InitColors(sConfig.GetStringDefault("LogColors", ""));
+    InitColors(sConfig.GetStringDefault("LogColors"));
 
     m_logFilter = 0;
     for (int i = 0; i < LOG_FILTER_COUNT; ++i)
@@ -285,7 +285,7 @@ void Log::Initialize()
 
 FILE* Log::openLogFile(char const* configFileName, char const* configTimeStampFlag, char const* mode)
 {
-    std::string logfn = sConfig.GetStringDefault(configFileName, "");
+    std::string logfn = sConfig.GetStringDefault(configFileName);
     if (logfn.empty())
         return nullptr;
 

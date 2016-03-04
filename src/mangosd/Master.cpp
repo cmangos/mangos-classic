@@ -176,7 +176,7 @@ Master::~Master()
 int Master::Run()
 {
     /// worldd PID file creation
-    std::string pidfile = sConfig.GetStringDefault("PidFile", "");
+    std::string pidfile = sConfig.GetStringDefault("PidFile");
     if (!pidfile.empty())
     {
         uint32 pid = CreatePIDFile(pidfile);
@@ -420,7 +420,7 @@ int Master::Run()
 bool Master::_StartDB()
 {
     ///- Get world database info from configuration file
-    std::string dbstring = sConfig.GetStringDefault("WorldDatabaseInfo", "");
+    std::string dbstring = sConfig.GetStringDefault("WorldDatabaseInfo");
     int nConnections = sConfig.GetIntDefault("WorldDatabaseConnections", 1);
     if (dbstring.empty())
     {
@@ -443,7 +443,7 @@ bool Master::_StartDB()
         return false;
     }
 
-    dbstring = sConfig.GetStringDefault("CharacterDatabaseInfo", "");
+    dbstring = sConfig.GetStringDefault("CharacterDatabaseInfo");
     nConnections = sConfig.GetIntDefault("CharacterDatabaseConnections", 1);
     if (dbstring.empty())
     {
@@ -474,7 +474,7 @@ bool Master::_StartDB()
     }
 
     ///- Get login database info from configuration file
-    dbstring = sConfig.GetStringDefault("LoginDatabaseInfo", "");
+    dbstring = sConfig.GetStringDefault("LoginDatabaseInfo");
     nConnections = sConfig.GetIntDefault("LoginDatabaseConnections", 1);
     if (dbstring.empty())
     {
