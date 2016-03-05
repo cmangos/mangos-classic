@@ -36,14 +36,13 @@
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>
 
-#include <ace/Get_Opt.h>
-#include <ace/Dev_Poll_Reactor.h>
-#include <ace/TP_Reactor.h>
-#include <ace/ACE.h>
-#include <ace/Acceptor.h>
-#include <ace/SOCK_Acceptor.h>
-
+#include <boost/program_options.hpp>
 #include <boost/version.hpp>
+
+#include <iostream>
+#include <string>
+#include <chrono>
+#include <thread>
 
 #ifdef WIN32
 #include "ServiceWin32.h"
@@ -89,101 +88,74 @@ void usage(const char* prog)
 }
 
 /// Launch the realm server
-extern int main(int argc, char** argv)
+int main(int argc, char *argv[])
 {
-    ///- Command line parsing
-    char const* cfg_file = _REALMD_CONFIG;
+    std::string configFile, serviceParameter;
 
-    char const* options = ":c:s:";
-
-    ACE_Get_Opt cmd_opts(argc, argv, options);
-    cmd_opts.long_option("version", 'v');
-
-    char serviceDaemonMode = '\0';
-
-    int option;
-    while ((option = cmd_opts()) != EOF)
-    {
-        switch (option)
-        {
-            case 'c':
-                cfg_file = cmd_opts.opt_arg();
-                break;
-            case 'v':
-                printf("%s\n", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID));
-                printf("Boost version %u.%u.%u\n", (BOOST_VERSION / 100000), ((BOOST_VERSION / 100) % 1000), (BOOST_VERSION % 100));
-                return 0;
-
-            case 's':
-            {
-                const char* mode = cmd_opts.opt_arg();
-
-                if (!strcmp(mode, "run"))
-                    serviceDaemonMode = 'r';
+    boost::program_options::options_description desc("Allowed options");
+    desc.add_options()
+        ("config,c", boost::program_options::value<std::string>(&configFile)->default_value(_REALMD_CONFIG), "configuration file")
+        ("version,v", "print version and exit")
 #ifdef WIN32
-                else if (!strcmp(mode, "install"))
-                    serviceDaemonMode = 'i';
-                else if (!strcmp(mode, "uninstall"))
-                    serviceDaemonMode = 'u';
+        ("s", boost::program_options::value<std::string>(&serviceParameter), "<run, install, uninstall> service");
 #else
-                else if (!strcmp(mode, "stop"))
-                    serviceDaemonMode = 's';
+        ("s", boost::program_options::value<std::string>(&serviceParameter), "<run, stop> service");
 #endif
-                else
-                {
-                    sLog.outError("Runtime-Error: -%c unsupported argument %s", cmd_opts.opt_opt(), mode);
-                    usage(argv[0]);
-                    Log::WaitBeforeContinueIfNeed();
-                    return 1;
-                }
-                break;
-            }
-            case ':':
-                sLog.outError("Runtime-Error: -%c option requires an input argument", cmd_opts.opt_opt());
-                usage(argv[0]);
-                Log::WaitBeforeContinueIfNeed();
-                return 1;
-            default:
-                sLog.outError("Runtime-Error: bad format of commandline arguments");
-                usage(argv[0]);
-                Log::WaitBeforeContinueIfNeed();
-                return 1;
-        }
+
+    boost::program_options::variables_map vm;
+
+    try
+    {
+        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
+        boost::program_options::notify(vm);
+    }
+    catch (boost::program_options::error const &e)
+    {
+        std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+        std::cerr << desc << std::endl;
+
+        return 1;
     }
 
 #ifdef WIN32                                                // windows service command need execute before config read
-    switch (serviceDaemonMode)
+    if (vm.count("s"))
     {
-        case 'i':
-            if (WinServiceInstall())
-                sLog.outString("Installing service");
-            return 1;
-        case 'u':
-            if (WinServiceUninstall())
-                sLog.outString("Uninstalling service");
-            return 1;
-        case 'r':
-            WinServiceRun();
-            break;
+        switch (::tolower(serviceParameter[0]))
+        {
+            case 'i':
+                if (WinServiceInstall())
+                    sLog.outString("Installing service");
+                return 1;
+            case 'u':
+                if (WinServiceUninstall())
+                    sLog.outString("Uninstalling service");
+                return 1;
+            case 'r':
+                WinServiceRun();
+                break;
+        }
     }
 #endif
 
-    if (!sConfig.SetSource(cfg_file))
+    if (!sConfig.SetSource(configFile))
     {
-        sLog.outError("Could not find configuration file %s.", cfg_file);
+        sLog.outError("Could not find configuration file %s.", configFile.c_str());
         Log::WaitBeforeContinueIfNeed();
         return 1;
     }
 
 #ifndef WIN32                                               // posix daemon commands need apply after config read
-    switch (serviceDaemonMode)
+    if (vm.count("s"))
     {
-        case 'r':
-            startDaemon();
-            break;
-        case 's':
-            stopDaemon();
-            break;
+        switch (::tolower(serviceParameter[0]))
+        {
+            case 'r':
+                startDaemon();
+                break;
+            case 's':
+                stopDaemon();
+                break;
+        }
     }
 #endif
 
@@ -191,7 +163,7 @@ extern int main(int argc, char** argv)
 
     sLog.outString("%s [realm-daemon]", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID));
     sLog.outString("<Ctrl-C> to stop.\n");
-    sLog.outString("Using configuration file %s.", cfg_file);
+    sLog.outString("Using configuration file %s.", configFile.c_str());
 
     ///- Check the version of the configuration file
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
@@ -211,16 +183,6 @@ extern int main(int argc, char** argv)
         DETAIL_LOG("WARNING: Outdated version of OpenSSL lib. Logins to server may not work!");
         DETAIL_LOG("WARNING: Minimal required version [OpenSSL 0.9.8k]");
     }
-
-    DETAIL_LOG("Using ACE: %s", ACE_VERSION);
-
-#if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
-    ACE_Reactor::instance(new ACE_Reactor(new ACE_Dev_Poll_Reactor(ACE::max_handles(), 1), 1), true);
-#else
-    ACE_Reactor::instance(new ACE_Reactor(new ACE_TP_Reactor(), true), true);
-#endif
-
-    sLog.outBasic("Max allowed open files is %d", ACE::max_handles());
 
     /// realmd PID file creation
     std::string pidfile = sConfig.GetStringDefault("PidFile");
@@ -316,7 +278,7 @@ extern int main(int argc, char** argv)
     LoginDatabase.AllowAsyncTransactions();
 
     // maximum counter for next ping
-    uint32 numLoops = (sConfig.GetIntDefault("MaxPingTime", 30) * (MINUTE * 1000000 / 100000));
+    auto const numLoops = sConfig.GetIntDefault("MaxPingTime", 30) * MINUTE * 10;
     uint32 loopCounter = 0;
 
 #ifndef WIN32
@@ -325,18 +287,13 @@ extern int main(int argc, char** argv)
     ///- Wait for termination signal
     while (!stopEvent)
     {
-        // dont move this outside the loop, the reactor will modify it
-        ACE_Time_Value interval(0, 100000);
-
-        if (ACE_Reactor::instance()->run_reactor_event_loop(interval) == -1)
-            break;
-
         if ((++loopCounter) == numLoops)
         {
             loopCounter = 0;
             DETAIL_LOG("Ping MySQL to keep connection alive");
             LoginDatabase.Ping();
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 #ifdef WIN32
         if (m_ServiceStatus == 0) stopEvent = true;
         while (m_ServiceStatus == 2) Sleep(1000);
