@@ -23,8 +23,6 @@ set(EXECUTABLE_SRCS
     AuthSocket.cpp
     AuthSocket.h
     Main.cpp
-    PatchHandler.cpp
-    PatchHandler.h
     RealmList.cpp
     RealmList.h
    )

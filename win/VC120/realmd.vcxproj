@@ -415,14 +415,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\realmd\AuthCodes.h" />
     <ClInclude Include="..\..\src\realmd\AuthSocket.h" />
-    <ClInclude Include="..\..\src\realmd\PatchHandler.h" />
     <ClInclude Include="..\..\src\realmd\RealmList.h" />
     <ClInclude Include="..\..\src\shared\WheatyExceptionReport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\realmd\AuthSocket.cpp" />
     <ClCompile Include="..\..\src\realmd\Main.cpp" />
-    <ClCompile Include="..\..\src\realmd\PatchHandler.cpp" />
     <ClCompile Include="..\..\src\realmd\RealmList.cpp" />
     <ClCompile Include="..\..\src\shared\WheatyExceptionReport.cpp" />
   </ItemGroup>
