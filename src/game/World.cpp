@@ -1840,17 +1840,16 @@ void World::ProcessCliCommands()
 
     while (!m_cliCommandQueue.empty())
     {
-        CliCommandHolder* command = m_cliCommandQueue.front();
+        auto const command = m_cliCommandQueue.front();
         m_cliCommandQueue.pop_front();
 
         DEBUG_LOG("CLI command under processing...");
-        CliCommandHolder::Print* zprint = command->m_print;
-        void* callbackArg = command->m_callbackArg;
-        CliHandler handler(command->m_cliAccountId, command->m_cliAccessLevel, callbackArg, zprint);
-        handler.ParseCommands(command->m_command);
+
+        CliHandler handler(command->m_cliAccountId, command->m_cliAccessLevel, command->m_callbackArg, command->m_print);
+        handler.ParseCommands(&command->m_command[0]);
 
         if (command->m_commandFinished)
-            command->m_commandFinished(callbackArg, !handler.HasSentErrorMessage());
+            command->m_commandFinished(command->m_callbackArg, !handler.HasSentErrorMessage());
 
         delete command;
     }

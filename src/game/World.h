@@ -33,6 +33,8 @@
 #include <list>
 #include <deque>
 #include <mutex>
+#include <functional>
+#include <vector>
 
 class Object;
 class ObjectGuid;
@@ -360,27 +362,24 @@ enum RealmZone
 };
 
 /// Storage class for commands issued for delayed execution
+// FIXME - once SOAP is ported to C++11/ASIO this structure can be simplified by use of lambdas in handlers
 struct CliCommandHolder
 {
-    typedef void Print(void*, const char*);
-    typedef void CommandFinished(void*, bool success);
+    typedef std::function<void(void *, const char *)> Print;
+    typedef std::function<void(void *, bool)> CommandFinished;
 
     uint32 m_cliAccountId;                                  // 0 for console and real account id for RA/soap
     AccountTypes m_cliAccessLevel;
     void* m_callbackArg;
-    char* m_command;
-    Print* m_print;
-    CommandFinished* m_commandFinished;
+    std::vector<char> m_command;
+    Print m_print;
+    CommandFinished m_commandFinished;
 
-    CliCommandHolder(uint32 accountId, AccountTypes cliAccessLevel, void* callbackArg, const char* command, Print* zprint, CommandFinished* commandFinished)
-        : m_cliAccountId(accountId), m_cliAccessLevel(cliAccessLevel), m_callbackArg(callbackArg), m_print(zprint), m_commandFinished(commandFinished)
+    CliCommandHolder(uint32 accountId, AccountTypes cliAccessLevel, void* callbackArg, const char* command, Print zprint, CommandFinished commandFinished)
+        : m_cliAccountId(accountId), m_cliAccessLevel(cliAccessLevel), m_callbackArg(callbackArg), m_print(zprint), m_commandFinished(commandFinished), m_command(strlen(command) + 1)
     {
-        size_t len = strlen(command) + 1;
-        m_command = new char[len];
-        memcpy(m_command, command, len);
+        memcpy(&m_command[0], command, m_command.size() - 1);
     }
-
-    ~CliCommandHolder() { delete[] m_command; }
 };
 
 /// The World
@@ -532,7 +531,7 @@ class World
         void ServerMaintenanceStart();
 
         void ProcessCliCommands();
-        void QueueCliCommand(CliCommandHolder* commandHolder) { std::lock_guard<std::mutex> guard(m_cliCommandQueueLock); m_cliCommandQueue.push_back(commandHolder); }
+        void QueueCliCommand(const CliCommandHolder* commandHolder) { std::lock_guard<std::mutex> guard(m_cliCommandQueueLock); m_cliCommandQueue.push_back(commandHolder); }
 
         void UpdateResultQueue();
         void InitResultQueue();
@@ -626,7 +625,7 @@ class World
 
         // CLI command holder to be thread safe
         std::mutex m_cliCommandQueueLock;
-        std::deque<CliCommandHolder *> m_cliCommandQueue;
+        std::deque<const CliCommandHolder *> m_cliCommandQueue;
 
         // Player Queue
         Queue m_QueuedSessions;

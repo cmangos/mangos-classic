@@ -72,7 +72,7 @@ namespace MaNGOS
 
             static void ThreadTask(void* param);
 
-            Runnable* m_task;
+            Runnable* const m_task;
             std::thread::id m_iThreadId;
             std::thread m_ThreadImp;
     };
