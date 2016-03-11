@@ -205,17 +205,6 @@ int Master::Run()
     }
 #endif
 
-    ///- Start soap serving thread
-    MaNGOS::Thread* soap_thread = nullptr;
-
-    if (sConfig.GetBoolDefault("SOAP.Enabled", false))
-    {
-        MaNGOSsoapRunnable* runnable = new MaNGOSsoapRunnable();
-
-        runnable->setListenArguments(sConfig.GetStringDefault("SOAP.IP", "127.0.0.1"), sConfig.GetIntDefault("SOAP.Port", 7878));
-        soap_thread = new MaNGOS::Thread(runnable);
-    }
-
     ///- Start up freeze catcher thread
     MaNGOS::Thread* freeze_thread = nullptr;
     if (uint32 freeze_delay = sConfig.GetIntDefault("MaxCoreStuckTime", 0))
@@ -234,6 +223,10 @@ int Master::Run()
         if (sConfig.GetBoolDefault("Ra.Enable", false))
             raListener.reset(new MaNGOS::Listener<RASocket>(sConfig.GetIntDefault("Ra.Port", 3443), 1));
 
+        std::unique_ptr<SOAPThread> soapThread;
+        if (sConfig.GetBoolDefault("SOAP.Enabled", false))
+            soapThread.reset(new SOAPThread("0.0.0.0", sConfig.GetIntDefault("SOAP.Port", 7878)));
+
         // wait for shut down and then let things go out of scope to close them down
         while (!World::IsStopped())
             std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -244,14 +237,6 @@ int Master::Run()
     {
         freeze_thread->destroy();
         delete freeze_thread;
-    }
-
-    ///- Stop soap thread
-    if (soap_thread)
-    {
-        soap_thread->wait();
-        soap_thread->destroy();
-        delete soap_thread;
     }
 
     ///- Set server offline in realmlist

@@ -692,15 +692,14 @@ class MANGOS_DLL_SPEC ChatHandler
 class CliHandler : public ChatHandler
 {
     private:
-        typedef std::function<void(void *, const char *)> Print;
+        typedef std::function<void(const char *)> Print;
         uint32 m_accountId;
         AccountTypes m_loginAccessLevel;
-        void* m_callbackArg;
         Print m_print;
 
     public:        
-        CliHandler(uint32 accountId, AccountTypes accessLevel, void* callbackArg, Print zprint)
-            : m_accountId(accountId), m_loginAccessLevel(accessLevel), m_callbackArg(callbackArg), m_print(zprint) {}
+        CliHandler(uint32 accountId, AccountTypes accessLevel, Print zprint)
+            : m_accountId(accountId), m_loginAccessLevel(accessLevel), m_print(zprint) {}
 
         // overwrite functions
         const char* GetMangosString(int32 entry) const override;

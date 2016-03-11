@@ -1845,11 +1845,11 @@ void World::ProcessCliCommands()
 
         DEBUG_LOG("CLI command under processing...");
 
-        CliHandler handler(command->m_cliAccountId, command->m_cliAccessLevel, command->m_callbackArg, command->m_print);
+        CliHandler handler(command->m_cliAccountId, command->m_cliAccessLevel, command->m_print);
         handler.ParseCommands(&command->m_command[0]);
 
         if (command->m_commandFinished)
-            command->m_commandFinished(command->m_callbackArg, !handler.HasSentErrorMessage());
+            command->m_commandFinished(!handler.HasSentErrorMessage());
 
         delete command;
     }

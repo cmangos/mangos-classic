@@ -362,21 +362,19 @@ enum RealmZone
 };
 
 /// Storage class for commands issued for delayed execution
-// FIXME - once SOAP is ported to C++11/ASIO this structure can be simplified by use of lambdas in handlers
 struct CliCommandHolder
 {
-    typedef std::function<void(void *, const char *)> Print;
-    typedef std::function<void(void *, bool)> CommandFinished;
+    typedef std::function<void(const char *)> Print;
+    typedef std::function<void(bool)> CommandFinished;
 
     uint32 m_cliAccountId;                                  // 0 for console and real account id for RA/soap
     AccountTypes m_cliAccessLevel;
-    void* m_callbackArg;
     std::vector<char> m_command;
     Print m_print;
     CommandFinished m_commandFinished;
 
-    CliCommandHolder(uint32 accountId, AccountTypes cliAccessLevel, void* callbackArg, const char* command, Print zprint, CommandFinished commandFinished)
-        : m_cliAccountId(accountId), m_cliAccessLevel(cliAccessLevel), m_callbackArg(callbackArg), m_print(zprint), m_commandFinished(commandFinished), m_command(strlen(command) + 1)
+    CliCommandHolder(uint32 accountId, AccountTypes cliAccessLevel, const char* command, Print print, CommandFinished commandFinished)
+        : m_cliAccountId(accountId), m_cliAccessLevel(cliAccessLevel), m_print(print), m_commandFinished(commandFinished), m_command(strlen(command) + 1)
     {
         memcpy(&m_command[0], command, m_command.size() - 1);
     }
