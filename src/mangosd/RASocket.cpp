@@ -191,9 +191,9 @@ bool RASocket::ProcessIncomingData()
                 if (command == "quit")
                     return false;
 
-                sWorld.QueueCliCommand(new CliCommandHolder(m_accountId, m_accountLevel, this, command.c_str(),
-                    [this] (void *, const char *buffer) { this->Send(buffer); },
-                    [this] (void *, bool) { this->Send("mangos>"); }));
+                sWorld.QueueCliCommand(new CliCommandHolder(m_accountId, m_accountLevel, command.c_str(),
+                    [this] (const char *buffer) { this->Send(buffer); },
+                    [this] (bool) { this->Send("mangos>"); }));
             }
             else
                 Send("mangos>");
