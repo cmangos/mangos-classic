@@ -107,7 +107,6 @@ set(LIBRARY_SRCS
     ${SRC_GRP_NETWORK}
     Common.cpp
     Common.h
-    LockedQueue.h
     revision_sql.h
     Threading.cpp
     Threading.h
