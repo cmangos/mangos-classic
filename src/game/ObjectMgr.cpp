@@ -49,9 +49,11 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 
-#include <limits>
 #include "ItemEnchantmentMgr.h"
 #include "LootMgr.h"
+
+#include <limits>
+#include <cstdarg>
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 

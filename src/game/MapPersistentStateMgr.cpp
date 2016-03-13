@@ -16,8 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <list>
-
 #include "MapPersistentStateMgr.h"
 
 #include "SQLStorages.h"
@@ -37,6 +35,9 @@
 #include "Group.h"
 #include "InstanceData.h"
 #include "ProgressBar.h"
+
+#include <list>
+#include <cstdarg>
 
 INSTANTIATE_SINGLETON_1(MapPersistentStateManager);
 

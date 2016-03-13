@@ -22,7 +22,6 @@
 #include "Common.h"
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
-#include "ace/Recursive_Thread_Mutex.h"
 #include "Map.h"
 #include "GridStates.h"
 

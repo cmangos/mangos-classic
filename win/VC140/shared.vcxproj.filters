@@ -195,6 +195,7 @@
     <ClInclude Include="..\..\src\shared\Network\Listener.hpp">
       <Filter>Network</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\shared\TSS.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\shared\revision.h" />

@@ -36,6 +36,8 @@
 #include "GameEventMgr.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
 
+#include <cstdarg>
+
 // Supported shift-links (client generated and server side)
 // |color|Harea:area_id|h[name]|h|r
 // |color|Hareatrigger:id|h[name]|h|r

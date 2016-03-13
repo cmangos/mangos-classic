@@ -20,10 +20,14 @@
 #define MANGOS_TIMER_H
 
 #include "Common.h"
-#include <ace/OS_NS_sys_time.h>
 
 class WorldTimer
 {
+    private:
+        static MANGOS_DLL_SPEC uint32 m_iTime;
+        static MANGOS_DLL_SPEC uint32 m_iPrevTime;
+
+
     public:
 
         // get current server time
@@ -49,16 +53,6 @@ class WorldTimer
         static MANGOS_DLL_SPEC uint32 tickPrevTime();
         // tick world timer
         static MANGOS_DLL_SPEC uint32 tick();
-
-    private:
-        WorldTimer();
-        WorldTimer(const WorldTimer&);
-
-        // analogue to getMSTime() but it persists m_SystemTickTime
-        static uint32 getMSTime_internal();
-
-        static MANGOS_DLL_SPEC uint32 m_iTime;
-        static MANGOS_DLL_SPEC uint32 m_iPrevTime;
 };
 
 class IntervalTimer
