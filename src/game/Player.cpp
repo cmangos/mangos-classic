@@ -791,7 +791,7 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
     while (titem_amount > 0)
     {
         uint16 eDest;
-        uint8 msg = CanEquipNewItem(NULL_SLOT, eDest, titem_id, false);
+        InventoryResult msg = CanEquipNewItem(NULL_SLOT, eDest, titem_id, false);
         if (msg != EQUIP_ERR_OK)
             break;
 
