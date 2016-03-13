@@ -35,6 +35,8 @@
 #include "GridNotifiersImpl.h"
 #include "Chat.h"
 
+#include <cstdarg>
+
 namespace MaNGOS
 {
     class BattleGroundChatBuilder

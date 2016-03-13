@@ -42,6 +42,7 @@
 #include <mutex>
 #include <deque>
 #include <algorithm>
+#include <cstdarg>
 
 // select opcodes appropriate for processing in Map::Update context for current session state
 static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& opHandle)

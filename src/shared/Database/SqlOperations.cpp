@@ -21,6 +21,8 @@
 #include "DatabaseEnv.h"
 #include "DatabaseImpl.h"
 
+#include <cstdarg>
+
 #define LOCK_DB_CONN(conn) SqlConnection::Lock guard(conn)
 
 /// ---- ASYNC STATEMENTS / TRANSACTIONS ----

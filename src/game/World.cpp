@@ -66,6 +66,7 @@
 
 #include <algorithm>
 #include <mutex>
+#include <cstdarg>
 
 INSTANTIATE_SINGLETON_1(World);
 
