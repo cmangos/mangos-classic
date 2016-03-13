@@ -4171,7 +4171,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
 
         if (IsPositiveSpell(m_spellInfo->Id))
-            if (target->IsImmuneToSpell(m_spellInfo, target == m_caster))
+            if (target->IsImmuneToSpell(m_spellInfo, target == m_caster) && !target->hasUnitState(UNIT_STAT_ISOLATED))
                 return SPELL_FAILED_TARGET_AURASTATE;
 
         // Must be behind the target.
