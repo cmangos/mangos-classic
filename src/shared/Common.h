@@ -61,6 +61,7 @@
 #  define vsnprintf _vsnprintf
 #  define finite(X) _finite(X)
 
+#  pragma warning ( disable : 4251 )
 #else
 
 #  define stricmp strcasecmp
