@@ -62,6 +62,9 @@ branches:
   only:
     - master
 
+# Do not build on tags (GitHub only)
+skip_tags: true
+
 # scripts to run before build
 before_build:
   - cmd: if "%platform%"=="Win32" set BOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN32%"
