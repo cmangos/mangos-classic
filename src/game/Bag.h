@@ -43,7 +43,6 @@ class Bag : public Item
 
         bool Create(uint32 guidlow, uint32 itemid, Player const* owner) override;
 
-        void Clear();
         void StoreItem(uint8 slot, Item* pItem);
         void RemoveItem(uint8 slot);
 

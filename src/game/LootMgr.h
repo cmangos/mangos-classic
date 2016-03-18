@@ -307,8 +307,6 @@ private:
     void SetGroupLootRight(Player* player);
     void GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, bool personal, bool noEmptyError = false);
-    void AddConditionnalItem(ObjectGuid playerGuid, uint32 itemSlot);
-    void RemoveConditionnalItem(ObjectGuid playerGuid, uint32 itemSlot);
     void ForceLootAnimationCLientUpdate();
     void SetPlayerIsLooting(Player* player);
     void SetPlayerIsNotLooting(Player* player);
@@ -378,8 +376,6 @@ public:
     bool IsAllowedToLoot(Player* player, Creature* creature);
     void PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint32 itemSlot, RollVote vote);
     Loot* GetLoot(Player* player, ObjectGuid const& targetGuid = ObjectGuid());
-
-    void update(uint32 diff);
 };
 
 #define sLootMgr MaNGOS::Singleton<LootMgr>::Instance()

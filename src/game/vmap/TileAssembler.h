@@ -110,8 +110,6 @@ namespace VMAP
             void exportGameobjectModels();
             bool convertRawFile(const std::string& pModelFilename);
             void setModelNameFilterMethod(bool (*pFilterMethod)(char* pName)) { iFilterMethod = pFilterMethod; }
-            std::string getDirEntryNameFromModName(unsigned int pMapId, const std::string& pModPosName);
-            unsigned int getUniqueNameId(const std::string pName);
     };
 }                                                           // VMAP
 #endif                                                      /*_TILEASSEMBLER_H_*/

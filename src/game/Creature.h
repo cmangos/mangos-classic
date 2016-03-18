@@ -738,8 +738,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         // vendor items
         VendorItemCounts m_vendorItemCounts;
 
-        void _RealtimeSetCreatureInfo();
-
         uint32 m_lootMoney;
         ObjectGuid m_lootRecipientGuid;                     // player who will have rights for looting if m_lootGroupRecipient==0 or group disbanded
         uint32 m_lootGroupRecipientId;                      // group who will have rights for looting if set and exist
