@@ -30,9 +30,17 @@ branches:
   only:
     - master
 
+os:
+  - linux
+
 compiler:
-  - gcc
   - clang
+  - gcc
+
+env:
+  matrix:
+    - BUILD_TYPE=Release
+    - BUILD_TYPE=Release PCH_FLAG="ON"
 
 addons:
   apt:
@@ -60,7 +68,11 @@ script:
   - test -d _build || mkdir _build
   - test -d _install || mkdir _install
   - cd _build
-  - cmake -DCMAKE_INSTALL_PREFIX=../_install ..
+  - if [ $PCH_FLAG = "ON" ] ; then
+        cmake -DCMAKE_INSTALL_PREFIX=../_install .. -DPCH=1;
+    else
+        cmake -DCMAKE_INSTALL_PREFIX=../_install ..;
+    fi
   - make -j4
 
 # if this configuration file is not in one of the offical CMaNGOS repositories at http://github.com/cmangos/, PLEASE remove the notifications or point them to another IRC channel!
