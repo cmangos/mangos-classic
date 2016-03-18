@@ -315,7 +315,7 @@ CreatureLinkingInfo const* CreatureLinkingMgr::GetLinkedTriggerInformation(uint3
 {
     // guid case
     CreatureLinkingMapBounds bounds = m_creatureLinkingGuidMap.equal_range(lowGuid);
-    for (CreatureLinkingMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
+    for (CreatureLinkingMap::const_iterator iter = bounds.first; iter != bounds.second;)
         return &(iter->second);
 
     // entry case

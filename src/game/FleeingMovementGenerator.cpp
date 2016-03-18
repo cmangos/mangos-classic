@@ -31,9 +31,6 @@
 template<class T>
 void FleeingMovementGenerator<T>::_setTargetLocation(T& owner)
 {
-    if (!&owner)
-        return;
-
     // ignore in case other no reaction state
     if (owner.hasUnitState((UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_NOT_MOVE) & ~UNIT_STAT_FLEEING))
         return;
@@ -68,9 +65,6 @@ void FleeingMovementGenerator<T>::_setTargetLocation(T& owner)
 template<class T>
 bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float& z)
 {
-    if (!&owner)
-        return false;
-
     float dist_from_caster, angle_to_caster;
     if (Unit* fright = ObjectAccessor::GetUnit(owner, i_frightGuid))
     {

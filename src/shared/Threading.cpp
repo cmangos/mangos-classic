@@ -72,8 +72,8 @@ void Thread::destroy()
     if (m_iThreadId == std::thread::id() || !m_task)
         return;
 
-	// FIXME: We need to make sure that all threads can be trusted to
-	// halt execution on their own as this is not an interrupt
+    // FIXME: We need to make sure that all threads can be trusted to
+    // halt execution on their own as this is not an interrupt
     m_ThreadImp.join();
     m_iThreadId = std::thread::id();
 }

@@ -932,7 +932,6 @@ int32 Player::getMaxTimer(MirrorTimerType timer)
         default:
             return 0;
     }
-    return 0;
 }
 
 void Player::UpdateMirrorTimers()
