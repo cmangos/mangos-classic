@@ -76,9 +76,4 @@ script:
   - make -j4
 
 # if this configuration file is not in one of the offical CMaNGOS repositories at http://github.com/cmangos/, PLEASE remove the notifications or point them to another IRC channel!
-notifications:
-  irc:
-    channels:
-      - "irc.rizon.net#cmangos"
-    on_success: never
-    on_failure: always
+
