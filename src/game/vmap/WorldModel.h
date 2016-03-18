@@ -59,7 +59,7 @@ namespace VMAP
             bool writeToFile(FILE* wf);
             static bool readFromFile(FILE* rf, WmoLiquid*& liquid);
         private:
-            WmoLiquid(): iHeight(0), iFlags(0) {};
+            WmoLiquid() : iHeight(nullptr), iFlags(nullptr) {};
             uint32 iTilesX;  //!< number of tiles in x direction, each
             uint32 iTilesY;
             Vector3 iCorner; //!< the lower corner
@@ -76,10 +76,10 @@ namespace VMAP
     class GroupModel
     {
         public:
-            GroupModel(): iLiquid(0) {}
+            GroupModel() : iLiquid(nullptr) {}
             GroupModel(const GroupModel& other);
             GroupModel(uint32 mogpFlags, uint32 groupWMOID, const AABox& bound):
-                iBound(bound), iMogpFlags(mogpFlags), iGroupWMOID(groupWMOID), iLiquid(0) {}
+                iBound(bound), iMogpFlags(mogpFlags), iGroupWMOID(groupWMOID), iLiquid(nullptr) {}
             ~GroupModel() { delete iLiquid; }
 
             //! pass mesh data to object and create BIH. Passed vectors get get swapped with old geometry!

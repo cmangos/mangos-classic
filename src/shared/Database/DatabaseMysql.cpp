@@ -111,12 +111,12 @@ bool MySQLConnection::Initialize(const char* infoString)
         unsigned int opt = MYSQL_PROTOCOL_PIPE;
         mysql_options(mysqlInit, MYSQL_OPT_PROTOCOL, (char const*)&opt);
         port = 0;
-        unix_socket = 0;
+        unix_socket = nullptr;
     }
     else                                                    // generic case
     {
         port = atoi(port_or_socket.c_str());
-        unix_socket = 0;
+        unix_socket = nullptr;
     }
 #else
     if (host == ".")                                        // socket use option (Unix/Linux)
@@ -130,7 +130,7 @@ bool MySQLConnection::Initialize(const char* infoString)
     else                                                    // generic case
     {
         port = atoi(port_or_socket.c_str());
-        unix_socket = 0;
+        unix_socket = nullptr;
     }
 #endif
 
@@ -435,7 +435,7 @@ void MySqlPreparedStatement::addParam(unsigned int nIndex, const SqlStmtFieldDat
     pData.buffer_type = dataType;
     pData.is_unsigned = bUnsigned;
     pData.buffer = data.buff();
-    pData.length = 0;
+    pData.length = nullptr;
     pData.buffer_length = data.type() == FIELD_STRING ? data.size() : 0;
 }
 

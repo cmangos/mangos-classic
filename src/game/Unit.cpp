@@ -1572,7 +1572,9 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
 
 void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
 {
-    if (damageInfo == 0) return;
+    if (!damageInfo)
+        return;
+
     Unit* pVictim = damageInfo->target;
 
     if (!this || !pVictim)
@@ -1699,7 +1701,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
                 data << uint32(i_spellProto->School);
                 pVictim->SendMessageToSet(&data, true);
 
-                pVictim->DealDamage(this, damage, 0, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(i_spellProto), i_spellProto, true);
+                pVictim->DealDamage(this, damage, nullptr, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(i_spellProto), i_spellProto, true);
 
                 i = vDamageShields.begin();
             }
@@ -5127,7 +5129,7 @@ Pet* Unit::GetPet() const
             return pet;
 
         sLog.outError("Unit::GetPet: %s not exist.", pet_guid.GetString().c_str());
-        const_cast<Unit*>(this)->SetPet(0);
+        const_cast<Unit*>(this)->SetPet(nullptr);
     }
 
     return nullptr;

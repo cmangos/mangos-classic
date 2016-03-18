@@ -1083,7 +1083,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
             break;
         default:
             // error, but it is handled few lines above
-            return 0;
+            return nullptr;
     }
 
     // will also set m_bgMap, instanceid

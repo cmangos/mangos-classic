@@ -478,7 +478,7 @@ namespace VMAP
         }
 
         // ----- liquid
-        liquid = 0;
+        liquid = nullptr;
         if (liquidflags & 1)
         {
             WMOLiquidHeader hlq;

@@ -25,8 +25,8 @@
 class UpdateMask
 {
     public:
-        UpdateMask() : mCount(0), mBlocks(0), mUpdateMask(0) { }
-        UpdateMask(const UpdateMask& mask) : mUpdateMask(0) { *this = mask; }
+        UpdateMask() : mCount(0), mBlocks(0), mUpdateMask(nullptr) { }
+        UpdateMask(const UpdateMask& mask) : mUpdateMask(nullptr) { *this = mask; }
 
         ~UpdateMask()
         {

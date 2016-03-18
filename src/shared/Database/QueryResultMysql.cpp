@@ -60,12 +60,12 @@ bool QueryResultMysql::NextRow()
 void QueryResultMysql::EndQuery()
 {
     delete[] mCurrentRow;
-    mCurrentRow = 0;
+    mCurrentRow = nullptr;
 
     if (mResult)
     {
         mysql_free_result(mResult);
-        mResult = 0;
+        mResult = nullptr;
     }
 }
 

@@ -103,7 +103,7 @@ class MANGOS_DLL_SPEC ViewPoint
 
     public:
 
-        ViewPoint() : m_grid(0) {}
+        ViewPoint() : m_grid(nullptr) {}
         ~ViewPoint();
 
         bool hasViewers() const { return !m_cameras.empty(); }

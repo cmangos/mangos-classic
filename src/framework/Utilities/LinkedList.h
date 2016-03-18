@@ -156,7 +156,7 @@ class LinkedListHead
                 typedef _Ty const& const_reference;
 
                 Iterator()
-                    : _Ptr(0)
+                    : _Ptr(nullptr)
                 {
                     // construct with null node pointer
                 }

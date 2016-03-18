@@ -4459,7 +4459,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
         m->checked = fields[8].GetUInt32();
         m->mailTemplateId = fields[9].GetInt16();
 
-        Player* pl = 0;
+        Player* pl = nullptr;
         if (serverUp)
             pl = GetPlayer(m->receiverGuid);
         if (pl)

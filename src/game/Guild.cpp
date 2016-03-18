@@ -116,7 +116,7 @@ bool Guild::Create(Player* leader, std::string gname)
     m_Id = sObjectMgr.GenerateGuildId();
 
     // creating data
-    time_t now = time(0);
+    time_t now = time(nullptr);
     tm local = *(localtime(&now));                          // dereference and assign
     m_CreatedDay   = local.tm_mday;
     m_CreatedMonth = local.tm_mon + 1;
