@@ -342,7 +342,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
                     newY = keyFrames[i].node->y + (keyFrames[i + 1].node->y - keyFrames[i].node->y) * d / keyFrames[i + 1].distFromPrev;
                     newZ = keyFrames[i].node->z + (keyFrames[i + 1].node->z - keyFrames[i].node->z) * d / keyFrames[i + 1].distFromPrev;
 
-                    bool teleport = false;
+                    teleport = false;
                     if (keyFrames[i].node->mapid != cM)
                     {
                         teleport = true;
@@ -350,7 +350,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
                     }
 
                     //                    sLog.outString("T: %d, D: %f, x: %f, y: %f, z: %f", t, d, newX, newY, newZ);
-                    WayPoint pos(keyFrames[i].node->mapid, newX, newY, newZ, teleport);
+                    pos = WayPoint(keyFrames[i].node->mapid, newX, newY, newZ, teleport);
                     if (teleport)
                         m_WayPoints[t] = pos;
                 }
@@ -389,7 +389,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
         else
             t += (long)keyFrames[i + 1].tTo % 100;
 
-        bool teleport = false;
+        teleport = false;
         if ((keyFrames[i + 1].node->actionFlag == 1) || (keyFrames[i + 1].node->mapid != keyFrames[i].node->mapid))
         {
             teleport = true;

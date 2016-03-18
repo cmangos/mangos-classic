@@ -4566,8 +4566,8 @@ void Aura::PeriodicTick()
             if (target->GetMaxPower(power) == 0)
                 break;
 
-            SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
-            target->SendPeriodicAuraLog(&pInfo);
+            SpellPeriodicAuraLogInfo info(this, pdamage, 0, 0, 0.0f);
+            target->SendPeriodicAuraLog(&info);
 
             int32 gain = target->ModifyPower(power, pdamage);
 

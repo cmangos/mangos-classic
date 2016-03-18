@@ -167,11 +167,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     if (result != EQUIP_ERR_OK)
     {
         // send duplicate of error massage to master looter
-        if (LootItem* lootItem = pLoot->GetLootItemInSlot(itemSlot))
-            _player->SendEquipError(result, nullptr, nullptr, lootItem->itemId);
-        else
-            _player->SendEquipError(result, nullptr, nullptr);
-        return;
+        _player->SendEquipError(result, nullptr, nullptr, lootItem->itemId);
     }
 }
 

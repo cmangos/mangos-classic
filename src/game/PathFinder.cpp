@@ -728,17 +728,17 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
             npolys -= npos;
 
             // Handle the connection.
-            float startPos[VERTEX_SIZE], endPos[VERTEX_SIZE];
-            dtResult = m_navMesh->getOffMeshConnectionPolyEndPoints(prevRef, polyRef, startPos, endPos);
+            float newStartPos[VERTEX_SIZE], newEndPos[VERTEX_SIZE];
+            dtResult = m_navMesh->getOffMeshConnectionPolyEndPoints(prevRef, polyRef, newStartPos, newEndPos);
             if (dtStatusSucceed(dtResult))
             {
                 if (nsmoothPath < maxSmoothPathSize)
                 {
-                    dtVcopy(&smoothPath[nsmoothPath * VERTEX_SIZE], startPos);
+                    dtVcopy(&smoothPath[nsmoothPath * VERTEX_SIZE], newStartPos);
                     ++nsmoothPath;
                 }
                 // Move position at the other side of the off-mesh link.
-                dtVcopy(iterPos, endPos);
+                dtVcopy(iterPos, newEndPos);
 
                 m_navMeshQuery->getPolyHeight(polys[0], iterPos, &iterPos[1]);
                 iterPos[1] += 0.5f;
