@@ -792,9 +792,10 @@ ChatCommand* ChatHandler::getCommandTable()
     return commandTable;
 }
 
-ChatHandler::ChatHandler(WorldSession* session) : m_session(session) {}
+ChatHandler::ChatHandler(WorldSession* session) : m_session(session), sentErrorMessage(false)
+{}
 
-ChatHandler::ChatHandler(Player* player) : m_session(player->GetSession()) {}
+ChatHandler::ChatHandler(Player* player) : m_session(player->GetSession()), sentErrorMessage(false) {}
 
 ChatHandler::~ChatHandler() {}
 

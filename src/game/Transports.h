@@ -45,6 +45,7 @@ class Transport : public GameObject
             WayPoint() : mapid(0), x(0), y(0), z(0), teleport(false) {}
             WayPoint(uint32 _mapid, float _x, float _y, float _z, bool _teleport) :
                 mapid(_mapid), x(_x), y(_y), z(_z), teleport(_teleport) {}
+
             uint32 mapid;
             float x;
             float y;

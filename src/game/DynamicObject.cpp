@@ -28,7 +28,7 @@
 #include "SpellMgr.h"
 #include "DBCStores.h"
 
-DynamicObject::DynamicObject() : WorldObject()
+DynamicObject::DynamicObject() : WorldObject(), m_spellId(0), m_effIndex(), m_aliveDuration(0), m_radius(0), m_positive(false)
 {
     m_objectType |= TYPEMASK_DYNAMICOBJECT;
     m_objectTypeId = TYPEID_DYNAMICOBJECT;

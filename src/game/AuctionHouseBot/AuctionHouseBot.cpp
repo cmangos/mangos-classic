@@ -56,7 +56,7 @@ typedef std::map<uint32, BuyerAuctionEval > CheckEntryMap;
 struct AHB_Buyer_Config
 {
     public:
-        AHB_Buyer_Config() : m_houseType(AUCTION_HOUSE_NEUTRAL) {}
+        AHB_Buyer_Config() : FactionChance(0), BuyerEnabled(false), BuyerPriceRatio(0), m_houseType(AUCTION_HOUSE_NEUTRAL) {}
 
         void Initialize(AuctionHouseType houseType)
         {
@@ -107,7 +107,7 @@ struct SellerItemInfo
 class AHB_Seller_Config
 {
     public:
-        AHB_Seller_Config() : m_houseType(AUCTION_HOUSE_NEUTRAL)
+        AHB_Seller_Config() : LastMissedItem(0), m_houseType(AUCTION_HOUSE_NEUTRAL), m_minTime(0), m_maxTime(0)
         {
         }
 
@@ -229,7 +229,7 @@ INSTANTIATE_SINGLETON_1(AuctionBotConfig);
 
 //== AuctionBotConfig functions ============================
 
-AuctionBotConfig::AuctionBotConfig() : m_configFileName(_AUCTIONHOUSEBOT_CONFIG)
+AuctionBotConfig::AuctionBotConfig() : m_configFileName(_AUCTIONHOUSEBOT_CONFIG), m_ItemsPerCycleBoost(0), m_ItemsPerCycleNormal(0)
 {
 }
 
@@ -461,7 +461,7 @@ uint32 AuctionBotConfig::getConfigItemQualityAmount(AuctionQuality quality) cons
 
 //== AuctionBotBuyer functions =============================
 
-AuctionBotBuyer::AuctionBotBuyer()
+AuctionBotBuyer::AuctionBotBuyer(): m_CheckInterval(0)
 {
     // Define faction for our main data class.
     for (int i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)

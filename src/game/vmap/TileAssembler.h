@@ -74,7 +74,7 @@ namespace VMAP
         std::vector<G3D::Vector3> vertexArray;
         class WmoLiquid* liquid;
 
-        GroupModel_Raw() : liquid(nullptr) {}
+        GroupModel_Raw() : mogpflags(0), GroupWMOID(0), liquidflags(0), liquid(nullptr) {}
         ~GroupModel_Raw();
 
         bool Read(FILE* f);

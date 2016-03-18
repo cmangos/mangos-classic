@@ -25,7 +25,7 @@
 #include "movement/MoveSpline.h"
 
 template<>
-RandomMovementGenerator<Creature>::RandomMovementGenerator(const Creature& creature)
+RandomMovementGenerator<Creature>::RandomMovementGenerator(const Creature& creature): i_verticalZ(0)
 {
     float respX, respY, respZ, respO, wander_distance;
     creature.GetRespawnCoord(respX, respY, respZ, &respO, &wander_distance);

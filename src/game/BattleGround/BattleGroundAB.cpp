@@ -29,7 +29,7 @@
 #include "MapManager.h"
 #include "DBCStores.h"                                   // TODO REMOVE this when graveyard handling for pvp is updated
 
-BattleGroundAB::BattleGroundAB()
+BattleGroundAB::BattleGroundAB(): m_IsInformedNearVictory(false), m_honorTicks(0), m_ReputationTics(0)
 {
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_AB_START_ONE_MINUTE;

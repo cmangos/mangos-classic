@@ -64,7 +64,7 @@ namespace VMAP
     class ModelInstance: public ModelSpawn
     {
         public:
-            ModelInstance(): iModel(nullptr) {}
+            ModelInstance(): iInvScale(0), iModel(nullptr) {}
             ModelInstance(const ModelSpawn& spawn, WorldModel* model);
             void setUnloaded() { iModel = nullptr; }
             bool intersectRay(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const;

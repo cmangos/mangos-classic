@@ -41,7 +41,7 @@ char const* MAP_LIQUID_MAGIC  = "MLIQ";
 static uint16 holetab_h[4] = { 0x1111, 0x2222, 0x4444, 0x8888 };
 static uint16 holetab_v[4] = { 0x000F, 0x00F0, 0x0F00, 0xF000 };
 
-GridMap::GridMap()
+GridMap::GridMap(): m_gridIntHeightMultiplier(0)
 {
     m_flags = 0;
 

@@ -28,7 +28,7 @@
 
 INSTANTIATE_SINGLETON_1(SocialMgr);
 
-PlayerSocial::PlayerSocial()
+PlayerSocial::PlayerSocial(): m_playerLowGuid(0)
 {
 }
 

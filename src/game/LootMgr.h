@@ -111,7 +111,8 @@ class GroupLootRoll
 public:
     typedef std::unordered_map<ObjectGuid, PlayerRollVote> RollVoteMap;
 
-    GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(nullptr), m_loot(nullptr) {}
+    GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(nullptr), m_loot(nullptr), m_itemSlot(0), m_voteMask(), m_endTime(0)
+    {}
     ~GroupLootRoll();
 
     bool TryToStart(Loot& loot, uint32 itemSlot);
@@ -292,7 +293,8 @@ public:
     ObjectGuid const& GetMasterLootGuid() const { return m_masterOwnerGuid; }
 
 private:
-    Loot(){}
+    Loot(): m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(), m_clientLootType(), m_lootMethod(), m_threshold(), m_maxEnchantSkill(0), m_isReleased(false), m_haveItemOverThreshold(false), m_isChecked(false), m_isChest(false), m_isChanged(false)
+    {}
     void Clear();
     bool IsLootedFor(Player const* player) const;
     bool IsLootedForAll() const;
