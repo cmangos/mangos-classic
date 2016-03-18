@@ -611,7 +611,6 @@ void AuctionBotBuyer::PrepareListOfEntry(AHB_Buyer_Config& config)
 
 bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice, double MaxBuyablePrice, uint32 MinBuyPrice, uint32 MaxChance, uint32 ChanceRatio)
 {
-    double ratio = 0;
     uint32 Chance = 0;
 
     if (buyoutPrice <= MinBuyPrice)
@@ -622,7 +621,7 @@ bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice,
         {
             if ((buyoutPrice > 0) && (MaxBuyablePrice > 0))
             {
-                ratio = buyoutPrice / MaxBuyablePrice;
+                double ratio = buyoutPrice / MaxBuyablePrice;
                 if (ratio < 10)
                     Chance = MaxChance - (ratio * (MaxChance / 10));
                 else Chance = 1;
@@ -637,7 +636,7 @@ bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice,
         {
             if ((buyoutPrice > 0) && (MaxBuyablePrice > 0))
             {
-                ratio = buyoutPrice / MaxBuyablePrice;
+                double ratio = buyoutPrice / MaxBuyablePrice;
                 if (ratio < 10)
                     Chance = (MaxChance / 5) - (ratio * (MaxChance / 50));
                 else Chance = 1;
@@ -650,7 +649,7 @@ bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice,
     {
         if ((buyoutPrice > 0) && (MaxBuyablePrice > 0))
         {
-            ratio = buyoutPrice / MaxBuyablePrice;
+            double ratio = buyoutPrice / MaxBuyablePrice;
             if (ratio < 10)
                 Chance = (MaxChance / 5) - (ratio * (MaxChance / 50));
             else Chance = 0;
@@ -663,11 +662,8 @@ bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice,
         DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: WIN BUY! Chance = %u, num = %u.", Chance, RandNum);
         return true;
     }
-    else
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot:LOOSE BUY! Chance = %u, num = %u.", Chance, RandNum);
-        return false;
-    }
+    DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot:LOOSE BUY! Chance = %u, num = %u.", Chance, RandNum);
+    return false;
 }
 
 bool AuctionBotBuyer::IsBidableEntry(uint32 bidPrice, double InGame_BuyPrice, double MaxBidablePrice, uint32 MinBidPrice, uint32 MaxChance, uint32 ChanceRatio)

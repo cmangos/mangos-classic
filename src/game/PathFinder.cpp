@@ -397,7 +397,7 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 {
     float pathPoints[MAX_POINT_PATH_LENGTH * VERTEX_SIZE];
     uint32 pointCount = 0;
-    dtStatus dtResult = DT_FAILURE;
+    dtStatus dtResult;
     if (m_useStraightPath)
     {
         dtResult = m_navMeshQuery->findStraightPath(

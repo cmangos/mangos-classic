@@ -1200,17 +1200,14 @@ TerrainInfo* TerrainManager::LoadTerrain(const uint32 mapId)
 {
     Guard _guard(*this);
 
-    TerrainInfo* ptr = nullptr;
     TerrainDataMap::const_iterator iter = i_TerrainMap.find(mapId);
     if (iter == i_TerrainMap.end())
     {
-        ptr = new TerrainInfo(mapId);
-        i_TerrainMap[mapId] = ptr;
+        TerrainInfo* info = new TerrainInfo(mapId);
+        i_TerrainMap[mapId] = info;
+        return info;
     }
-    else
-        ptr = (*iter).second;
-
-    return ptr;
+    return (*iter).second;
 }
 
 void TerrainManager::UnloadTerrain(const uint32 mapId)

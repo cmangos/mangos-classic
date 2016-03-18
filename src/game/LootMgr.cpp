@@ -1676,7 +1676,7 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
     if (!corpse->lootForBody)
     {
         corpse->lootForBody = true;
-        uint32 pLevel = 0;
+        uint32 pLevel;
         if (Player* plr = sObjectAccessor.FindPlayer(corpse->GetOwnerGuid()))
             pLevel = plr->getLevel();
         else

@@ -360,8 +360,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             }
             case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:         // 9
             {
-                uint32 goEntry = 0;
-
+                uint32 goEntry;
                 if (!tmp.GetGOGuid())
                 {
                     if (!tmp.buddyEntry)
@@ -416,8 +415,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             case SCRIPT_COMMAND_OPEN_DOOR:                  // 11
             case SCRIPT_COMMAND_CLOSE_DOOR:                 // 12
             {
-                uint32 goEntry = 0;
-
+                uint32 goEntry;
                 if (!tmp.GetGOGuid())
                 {
                     if (!tmp.buddyEntry)
@@ -1383,9 +1381,7 @@ bool ScriptAction::HandleScriptStep()
         }
         case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:             // 9
         {
-            GameObject* pGo = nullptr;
-            uint32 time_to_despawn = m_script->respawnGo.despawnDelay < 5 ? 5 : m_script->respawnGo.despawnDelay;
-
+            GameObject* pGo;
             if (m_script->respawnGo.goGuid)
             {
                 GameObjectData const* goData = sObjectMgr.GetGOData(m_script->respawnGo.goGuid);
@@ -1418,6 +1414,8 @@ bool ScriptAction::HandleScriptStep()
 
             if (pGo->isSpawned())
                 break;                                      // gameobject already spawned
+
+            uint32 time_to_despawn = m_script->respawnGo.despawnDelay < 5 ? 5 : m_script->respawnGo.despawnDelay;
 
             pGo->SetLootState(GO_READY);
             pGo->SetRespawnTime(time_to_despawn);           // despawn object in ? seconds

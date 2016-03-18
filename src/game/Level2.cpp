@@ -1901,11 +1901,7 @@ bool ChatHandler::HandleNpcSpawnDistCommand(char* args)
         mtype = RANDOM_MOTION_TYPE;
 
     Creature* pCreature = getSelectedCreature();
-    uint32 u_guidlow = 0;
-
-    if (pCreature)
-        u_guidlow = pCreature->GetGUIDLow();
-    else
+    if (!pCreature)
         return false;
 
     pCreature->SetRespawnRadius((float)option);
@@ -1917,7 +1913,7 @@ bool ChatHandler::HandleNpcSpawnDistCommand(char* args)
         pCreature->Respawn();
     }
 
-    WorldDatabase.PExecuteLog("UPDATE creature SET spawndist=%f, MovementType=%i WHERE guid=%u", option, mtype, u_guidlow);
+    WorldDatabase.PExecuteLog("UPDATE creature SET spawndist=%f, MovementType=%i WHERE guid=%u", option, mtype, pCreature->GetGUIDLow());
     PSendSysMessage(LANG_COMMAND_SPAWNDIST, option);
     return true;
 }
@@ -2264,10 +2260,10 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     if (!ExtractPlayerTarget(&args, &target, &target_guid, &target_name))
         return false;
 
-    uint32 accId = 0;
-    uint32 money = 0;
-    uint32 total_player_time = 0;
-    uint32 level = 0;
+    uint32 accId;
+    uint32 money;
+    uint32 total_player_time;
+    uint32 level;
     uint32 latency = 0;
 
     // get additional information from Player object
@@ -2415,7 +2411,7 @@ bool ChatHandler::HandleTicketCommand(char* args)
     // ticket respond
     if (strncmp(px, "respond", 8) == 0)
     {
-        GMTicket* ticket = nullptr;
+        GMTicket* ticket;
 
         // ticket respond #num
         uint32 num;
@@ -2643,7 +2639,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
     WaypointPathOrigin wpDestination = PATH_NO_PATH;        ///< into which storage
     int32 wpPathId = 0;                                     ///< along which path
     uint32 wpPointId = 0;                                   ///< pointId if a waypoint was selected, in this case insert after
-    Creature* wpOwner = nullptr;
+    Creature* wpOwner;
 
     if (targetCreature)
     {
@@ -2833,7 +2829,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
 
     // Did user provide a GUID or did the user select a creature?
     Creature* targetCreature = getSelectedCreature();       // Expect a visual waypoint to be selected
-    Creature* wpOwner = nullptr;                               // Who moves along the waypoint
+    Creature* wpOwner;                                      // Who moves along the waypoint
     uint32 wpId = 0;
     WaypointPathOrigin wpSource = PATH_NO_PATH;
     int32 wpPathId = 0;
@@ -3086,7 +3082,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         }
     }
 
-    Creature* wpOwner = nullptr;                               ///< Npc that is moving
+    Creature* wpOwner;                                         ///< Npc that is moving
     TemporarySummonWaypoint* wpTarget = nullptr;               // Define here for wp-info command
 
     // Show info for the selected waypoint (Step one: get moving npc)
@@ -3237,7 +3233,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
     if (!*args)
         return false;
 
-    Creature* wpOwner = nullptr;
+    Creature* wpOwner;
     WaypointPathOrigin wpOrigin = PATH_NO_PATH;
     int32 wpPathId = 0;
 
@@ -3727,13 +3723,13 @@ bool ChatHandler::HandleEventListCommand(char* args)
 
     char const* active = GetMangosString(LANG_ACTIVE);
     char const* inactive = GetMangosString(LANG_FACTION_INACTIVE);
-    char const* state = "";
 
     for (uint32 event_id = 0; event_id < events.size(); ++event_id)
     {
         if (!sGameEventMgr.IsValidEvent(event_id))
             continue;
 
+        char const* state;
         if (!sGameEventMgr.IsActiveEvent(event_id))
         {
             if (!all)
