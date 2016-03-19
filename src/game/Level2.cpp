@@ -42,6 +42,8 @@
 #include "DBCStores.h"
 #include "Util.h"
 #include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 #include "WaypointMovementGenerator.h"
 #include "Formulas.h"
 #include "TargetedMovementGenerator.h"                      // for HandleNpcUnFollowCommand

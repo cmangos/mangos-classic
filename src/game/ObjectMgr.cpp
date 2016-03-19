@@ -42,6 +42,8 @@
 #include "Formulas.h"
 #include "InstanceData.h"
 #include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 #include "ItemEnchantmentMgr.h"
 #include "LootMgr.h"

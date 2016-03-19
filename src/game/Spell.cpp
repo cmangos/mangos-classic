@@ -34,6 +34,7 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "ObjectAccessor.h"
+#include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
 #include "LootMgr.h"

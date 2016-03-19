@@ -25,6 +25,7 @@
 #include "Chat.h"
 #include "Spell.h"
 #include "Unit.h"
+#include "World.h"
 
 bool IsPrimaryProfessionSkill(uint32 skill)
 {

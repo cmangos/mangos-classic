@@ -42,6 +42,8 @@
 #include "Util.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "CellImpl.h"
+#include "Language.h"
 #include "MapManager.h"
 #include "LootMgr.h"
 

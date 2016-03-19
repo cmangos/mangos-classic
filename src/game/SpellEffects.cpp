@@ -45,6 +45,10 @@
 #include "Util.h"
 #include "TemporarySummon.h"
 #include "ScriptMgr.h"
+#include "Formulas.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 #include "G3D/Vector3.h"
 #include "LootMgr.h"
 
@@ -4410,7 +4414,6 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
     prevPos.z = unitTarget->GetPositionZ();
 
     float groundZ = prevPos.z;
-    bool isPrevInLiquid = false;
 
     // falling case
     if (!unitTarget->GetMap()->GetHeightInRange(prevPos.x, prevPos.y, groundZ, 3.0f) && unitTarget->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
@@ -4447,7 +4450,7 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         prevPos.z = groundZ;
 
     //check if in liquid
-    isPrevInLiquid = unitTarget->GetMap()->GetTerrain()->IsInWater(prevPos.x, prevPos.y, prevPos.z);
+    bool isPrevInLiquid = unitTarget->GetMap()->GetTerrain()->IsInWater(prevPos.x, prevPos.y, prevPos.z);
 
     const float step = 2.0f;                                    // step length before next check slope/edge/water
     const float maxSlope = 50.0f;                               // 50(degree) max seem best value for walkable slope

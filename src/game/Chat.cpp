@@ -27,6 +27,8 @@
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "Player.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 #include "AccountMgr.h"
 #include "SpellMgr.h"
 #include "PoolManager.h"

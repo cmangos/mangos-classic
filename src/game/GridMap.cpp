@@ -17,6 +17,7 @@
  */
 
 #include "Log.h"
+#include "CellImpl.h"
 #include "Map.h"
 #include "DBCEnums.h"
 #include "DBCStores.h"

@@ -24,6 +24,8 @@
 #include "Corpse.h"
 #include "MapManager.h"
 #include "Map.h"
+#include "CellImpl.h"
+#include "GridNotifiersImpl.h"
 #include "ObjectGuid.h"
 #include "World.h"
 
