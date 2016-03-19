@@ -21,7 +21,6 @@
 
 #include "CreatureAI.h"
 #include "ObjectGuid.h"
-#include "Timer.h"
 
 class Creature;
 class Totem;

@@ -24,8 +24,6 @@
 #include "Transports.h"
 #include "GridDefines.h"
 #include "World.h"
-#include "CellImpl.h"
-#include "Corpse.h"
 #include "ObjectMgr.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, std::recursive_mutex>

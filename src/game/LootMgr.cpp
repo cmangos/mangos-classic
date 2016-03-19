@@ -26,6 +26,7 @@
 #include "DBCStores.h"
 #include "SQLStorages.h"
 #include "BattleGround/BattleGroundAV.h"
+#include "ItemEnchantmentMgr.h"
 
 INSTANTIATE_SINGLETON_1(LootMgr);
 

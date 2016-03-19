@@ -21,7 +21,6 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Player.h"
-#include "World.h"
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "Group.h"
@@ -30,7 +29,6 @@
 #include "BattleGround/BattleGround.h"
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
-#include "Util.h"
 
 //===================================================
 //============== Group ==============================

@@ -20,7 +20,6 @@
 #define MANGOS_OBJECTGRIDLOADER_H
 
 #include "Common.h"
-#include "Utilities/TypeList.h"
 #include "Platform/Define.h"
 #include "GameSystem/GridLoader.h"
 #include "GridDefines.h"

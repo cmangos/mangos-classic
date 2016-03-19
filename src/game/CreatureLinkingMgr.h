@@ -36,9 +36,7 @@
 #define CREATURE_LINKING_MGR_H
 
 #include "Common.h"
-#include "Policies/Singleton.h"
 #include "ObjectGuid.h"
-#include <functional>
 
 class Unit;
 class Creature;

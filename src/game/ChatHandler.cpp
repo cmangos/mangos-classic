@@ -24,7 +24,6 @@
 #include "Opcodes.h"
 #include "ObjectMgr.h"
 #include "Chat.h"
-#include "Database/DatabaseEnv.h"
 #include "ChannelMgr.h"
 #include "Group.h"
 #include "Guild.h"
@@ -34,7 +33,6 @@
 #include "Language.h"
 #include "Util.h"
 #include "GridNotifiersImpl.h"
-#include "CellImpl.h"
 
 bool WorldSession::processChatmessageFurtherAfterSecurityChecks(std::string& msg, uint32 lang)
 {

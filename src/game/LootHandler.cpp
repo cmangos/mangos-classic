@@ -19,8 +19,6 @@
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Log.h"
-#include "Corpse.h"
-#include "GameObject.h"
 #include "Player.h"
 #include "ObjectAccessor.h"
 #include "ObjectGuid.h"
@@ -28,10 +26,6 @@
 #include "LootMgr.h"
 #include "Object.h"
 #include "Group.h"
-#include "World.h"
-#include "Util.h"
-#include "DBCStores.h"
-#include "ObjectMgr.h"
 
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 {

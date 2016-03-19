@@ -19,10 +19,8 @@
 #ifndef MANGOS_CELL_H
 #define MANGOS_CELL_H
 
-#include "GameSystem/TypeContainer.h"
 #include "GameSystem/TypeContainerVisitor.h"
 #include "GridDefines.h"
-#include <cmath>
 
 class Map;
 class WorldObject;

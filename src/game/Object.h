@@ -27,7 +27,6 @@
 #include "Camera.h"
 
 #include <set>
-#include <string>
 
 #define CONTACT_DISTANCE            0.5f
 #define INTERACTION_DISTANCE        5.0f

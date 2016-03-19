@@ -23,6 +23,7 @@
 #include "AuctionHouseMgr.h"
 #include "SystemConfig.h"
 #include "SQLStorages.h"
+#include "World.h"
 
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.

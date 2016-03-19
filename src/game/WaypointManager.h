@@ -20,9 +20,6 @@
 #define MANGOS_WAYPOINTMANAGER_H
 
 #include "Common.h"
-#include <vector>
-#include <string>
-#include "Policies/Singleton.h"
 
 enum WaypointPathOrigin
 {

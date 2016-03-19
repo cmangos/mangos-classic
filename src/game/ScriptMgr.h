@@ -20,7 +20,6 @@
 #define _SCRIPTMGR_H
 
 #include "Common.h"
-#include "Policies/Singleton.h"
 #include "ObjectGuid.h"
 #include "DBCEnums.h"
 

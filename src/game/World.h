@@ -25,10 +25,8 @@
 
 #include "Common.h"
 #include "Timer.h"
-#include "Policies/Singleton.h"
 #include "SharedDefines.h"
 
-#include <map>
 #include <set>
 #include <list>
 #include <deque>

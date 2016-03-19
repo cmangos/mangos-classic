@@ -20,7 +20,6 @@
 #define _GUILDMGR_H
 
 #include "Common.h"
-#include "Policies/Singleton.h"
 
 class Guild;
 class ObjectGuid;

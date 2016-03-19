@@ -19,7 +19,6 @@
 #ifndef AUCTION_HOUSE_BOT_H
 #define AUCTION_HOUSE_BOT_H
 
-#include "World.h"
 #include "Config/Config.h"
 #include "AuctionHouseMgr.h"
 #include "SharedDefines.h"

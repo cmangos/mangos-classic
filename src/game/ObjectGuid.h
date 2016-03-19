@@ -22,8 +22,6 @@
 #include "Common.h"
 #include "ByteBuffer.h"
 
-#include <functional>
-
 enum TypeID
 {
     TYPEID_OBJECT        = 0,

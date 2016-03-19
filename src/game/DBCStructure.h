@@ -19,7 +19,6 @@
 #ifndef MANGOS_DBCSTRUCTURE_H
 #define MANGOS_DBCSTRUCTURE_H
 
-#include "Common.h"
 #include "DBCEnums.h"
 #include "Path.h"
 #include "Platform/Define.h"

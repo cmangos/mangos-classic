@@ -24,9 +24,7 @@
 #include "SpellMgr.h"
 #include "Formulas.h"
 #include "SpellAuras.h"
-#include "CreatureAI.h"
 #include "Unit.h"
-#include "Util.h"
 
 // numbers represent minutes * 100 while happy (you get 100 loyalty points per min while happy)
 uint32 const LevelUpLoyalty[6] =

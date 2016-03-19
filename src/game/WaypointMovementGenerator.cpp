@@ -16,15 +16,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <ctime>
-
 #include "WaypointMovementGenerator.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "WaypointManager.h"
-#include "WorldPacket.h"
 #include "ScriptMgr.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"

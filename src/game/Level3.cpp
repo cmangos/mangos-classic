@@ -18,7 +18,6 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
 #include "ObjectMgr.h"
@@ -26,7 +25,6 @@
 #include "PlayerDump.h"
 #include "SpellMgr.h"
 #include "Player.h"
-#include "Opcodes.h"
 #include "GameObject.h"
 #include "Chat.h"
 #include "Log.h"
@@ -38,7 +36,6 @@
 #include "ScriptMgr.h"
 #include "Language.h"
 #include "GridNotifiersImpl.h"
-#include "CellImpl.h"
 #include "Weather.h"
 #include "PointMovementGenerator.h"
 #include "PathFinder.h"

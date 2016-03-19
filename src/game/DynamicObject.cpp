@@ -17,13 +17,9 @@
  */
 
 #include "Common.h"
-#include "UpdateMask.h"
-#include "Opcodes.h"
 #include "World.h"
 #include "ObjectAccessor.h"
-#include "Database/DatabaseEnv.h"
 #include "GridNotifiers.h"
-#include "CellImpl.h"
 #include "GridNotifiersImpl.h"
 #include "SpellMgr.h"
 #include "DBCStores.h"

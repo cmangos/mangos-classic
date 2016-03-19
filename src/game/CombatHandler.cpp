@@ -20,7 +20,6 @@
 #include "Log.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "CreatureAI.h"
 #include "ObjectGuid.h"
 #include "Player.h"
 

@@ -27,9 +27,6 @@
 #include "DBCEnums.h"
 #include "SharedDefines.h"
 
-#include <map>
-#include <vector>
-
 class WorldSession;
 class Map;
 class BattleGround;

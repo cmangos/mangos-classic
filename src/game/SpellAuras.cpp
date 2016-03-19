@@ -22,7 +22,6 @@
 #include "WorldSession.h"
 #include "Opcodes.h"
 #include "Log.h"
-#include "UpdateMask.h"
 #include "World.h"
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
@@ -36,7 +35,6 @@
 #include "Policies/Singleton.h"
 #include "Totem.h"
 #include "Creature.h"
-#include "Formulas.h"
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "CreatureAI.h"
@@ -44,7 +42,6 @@
 #include "Util.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
-#include "CellImpl.h"
 #include "MapManager.h"
 #include "LootMgr.h"
 

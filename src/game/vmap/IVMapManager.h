@@ -19,7 +19,7 @@
 #ifndef _IVMAPMANAGER_H
 #define _IVMAPMANAGER_H
 
-#include<string>
+#include <string>
 #include <Platform/Define.h>
 
 //===========================================================

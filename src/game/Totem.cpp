@@ -17,7 +17,6 @@
  */
 
 #include "Totem.h"
-#include "WorldPacket.h"
 #include "Log.h"
 #include "Group.h"
 #include "Player.h"

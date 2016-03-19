@@ -18,7 +18,6 @@
 
 #include "Camera.h"
 #include "GridNotifiersImpl.h"
-#include "CellImpl.h"
 #include "Log.h"
 #include "Errors.h"
 #include "Player.h"

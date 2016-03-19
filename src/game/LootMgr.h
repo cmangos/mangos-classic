@@ -19,12 +19,10 @@
 #ifndef MANGOS_LOOTMGR_H
 #define MANGOS_LOOTMGR_H
 
-#include "ItemEnchantmentMgr.h"
 #include "ByteBuffer.h"
 #include "ObjectGuid.h"
 #include "SharedDefines.h"
 
-#include <map>
 #include <vector>
 #include "Bag.h"
 

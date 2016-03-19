@@ -16,9 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "ByteBuffer.h"
 #include "ReactorAI.h"
-#include "Errors.h"
 #include "Creature.h"
 #include "Map.h"
 #include "Log.h"

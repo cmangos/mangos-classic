@@ -31,8 +31,6 @@
 #include "Player.h"
 #include "Corpse.h"
 
-#include <set>
-#include <list>
 #include <mutex>
 
 class Unit;

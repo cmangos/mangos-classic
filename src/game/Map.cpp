@@ -21,10 +21,7 @@
 #include "Player.h"
 #include "GridNotifiers.h"
 #include "Log.h"
-#include "GridStates.h"
-#include "CellImpl.h"
 #include "InstanceData.h"
-#include "GridNotifiersImpl.h"
 #include "Transports.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
@@ -35,9 +32,9 @@
 #include "MapPersistentStateMgr.h"
 #include "VMapFactory.h"
 #include "MoveMap.h"
-#include "BattleGround/BattleGroundMgr.h"
 #include "Chat.h"
 #include "Weather.h"
+#include "ObjectGridLoader.h"
 
 Map::~Map()
 {

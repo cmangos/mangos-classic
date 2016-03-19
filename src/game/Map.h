@@ -27,18 +27,15 @@
 #include "GridDefines.h"
 #include "Cell.h"
 #include "Object.h"
-#include "Timer.h"
 #include "SharedDefines.h"
 #include "GridMap.h"
 #include "GameSystem/GridRefManager.h"
 #include "MapRefManager.h"
-#include "Utilities/TypeList.h"
 #include "ScriptMgr.h"
 #include "CreatureLinkingMgr.h"
 #include "vmap/DynamicTree.h"
 
 #include <bitset>
-#include <list>
 
 struct CreatureInfo;
 class Creature;
