@@ -8,7 +8,7 @@ else()
 endif()
 option(POSTGRESQL           "Use PostgreSQL"                        OFF)
 
-if(PCHSupport_FOUND AND WIN32) # TODO: why only enable it on windows by default?
+if(PCH)
   option(PCH                "Use precompiled headers"               ON)
 else()
   option(PCH                "Use precompiled headers"               OFF)

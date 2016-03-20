@@ -66,7 +66,8 @@ endif()
 find_package(Git)
 
 # check if the platform supports precomiled headers
-find_package(PCHSupport)
+#find_package(PCHSupport)
+include(cotire)
 
 # TODO: remove this (refactor TBB CMake code)
 # VS100 uses MSBuild.exe instead of devenv.com, so force it to use devenv.com
@@ -180,13 +181,16 @@ if(DEFINED INCLUDE_BINDINGS_DIR AND INCLUDE_BINDINGS_DIR)
 else()
 endif()
 
-if(PCH AND NOT PCHSupport_FOUND)
-  set(PCH 0 CACHE BOOL
-    "Use precompiled headers"
-    FORCE)
-  message(WARNING "No PCH for your system possible but PCH was set to 1. Resetting it."
-  )
-endif()
+#if(PCH AND NOT PCHSupport_FOUND)
+#  set(PCH 0 CACHE BOOL
+#    "Use precompiled headers"
+#    FORCE)
+#  message(WARNING "No PCH for your system possible but PCH was set to 1. Resetting it."
+#  )
+#endif()
+
+set(DEFINITIONS_RELEASE NDEBUG)
+set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
 
 if(DEBUG)
   set(CMAKE_BUILD_TYPE Debug)
@@ -265,9 +269,6 @@ if(POSTGRESQL)
 else()
   set(DEFINITIONS ${DEFINITIONS} DO_MYSQL)
 endif()
-
-set(DEFINITIONS_RELEASE NDEBUG)
-set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
 
 if(WIN32)
   set(DEFINITIONS ${DEFINITIONS} WIN32 _WIN32)

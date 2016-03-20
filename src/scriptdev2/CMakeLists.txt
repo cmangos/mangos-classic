@@ -119,14 +119,7 @@ endif()
 
 # Generate precompiled header
 if(PCH)
-  if(MSVC OR XCODE)
-    if(MSVC)
-      set(mangosscript_pch "${CMAKE_CURRENT_SOURCE_DIR}/include/precompiled.cpp")
-    endif()
-    add_native_precompiled_header(mangosscript ${CMAKE_CURRENT_SOURCE_DIR}/include/precompiled.h)
-  elseif(CMAKE_COMPILER_IS_GNUCXX)
-    add_precompiled_header(mangosscript ${CMAKE_CURRENT_SOURCE_DIR}/include/precompiled.h)
-  endif()
+  cotire(mangosscript)
 endif()
 
 # LIBRARY = dyld / so, RUNTIME = dll
