@@ -86,7 +86,11 @@
 
 #define SI64FMTD "%" PRId64
 
-#define SIZEFMTD "%zd"
+#if COMPILER == COMPILER_MICROSOFT
+#  define SIZEFMTD "%Iu"
+#else
+#  define SIZEFMTD "%zu"
+#endif
 
 inline float finiteAlways(float f) { return std::isfinite(f) ? f : 0.0f; }
 
