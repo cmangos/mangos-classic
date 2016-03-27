@@ -703,23 +703,27 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 }
                 Item* item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                 float speed = (item ? item->GetProto()->Delay : BASE_ATTACK_TIME) / 1000.0f;
+                int damagePoint;
 
-                float damageBasePoints;
-                if (item && item->GetProto()->InventoryType == INVTYPE_2HWEAPON)
-                    // two hand weapon
-                    damageBasePoints = 1.20f * triggerAmount * 1.2f * 1.03f * speed / 100.0f + 1;
-                else
-                    // one hand weapon/no weapon
-                    damageBasePoints = 0.85f * ceil(triggerAmount * 1.2f * 1.03f * speed / 100.0f) - 1;
-
-                int32 damagePoint = int32(damageBasePoints + 0.03f * (GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE) + GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE)) / 2.0f) + 1;
-
-                // apply damage bonuses manually
-                if (damagePoint >= 0)
+                // Talent - Improve Seal of Righteousness
+                uint32 ModSpellId[] = { 20224, 20225, 20330, 20331, 20332 };
+                float ModPct = 1.0f;
+                AuraList const& mModDamagePercentModifier = GetAurasByType(SPELL_AURA_ADD_PCT_MODIFIER);
+                for (AuraList::const_iterator i = mModDamagePercentModifier.begin(); i != mModDamagePercentModifier.end(); ++i)
                 {
-                    damagePoint = SpellDamageBonusDone(pVictim, dummySpell, damagePoint, SPELL_DIRECT_DAMAGE);
-                    damagePoint = pVictim->SpellDamageBonusTaken(this, dummySpell, damagePoint, SPELL_DIRECT_DAMAGE);
+                    for (int j = 0; j < 5; j++)
+                    {
+                        if ((*i)->GetId() == ModSpellId[j])
+                            ModPct *= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                    }
                 }
+                triggerAmount = triggerAmount * ModPct;
+
+                // In the description, we can find the divider of the base points for min/max effects.
+                int min = triggerAmount / 87;
+                int max = triggerAmount / 25;
+
+                damagePoint = (speed <= 1.5 ? min : (speed >= 4.0 ? max : min + (((max - min) / 2.5f)*(speed - 1.5))));
 
                 CastCustomSpell(pVictim, spellId, &damagePoint, nullptr, nullptr, true, nullptr, triggeredByAura);
                 return SPELL_AURA_PROC_OK;                  // no hidden cooldown
@@ -1186,6 +1190,10 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
     // default case
     if (!target || (target != this && !target->isAlive()))
         return SPELL_AURA_PROC_FAILED;
+
+    // trigger_spell_id trigge trigger_spell_id
+    if (trigger_spell_id == 20424)
+        triggeredByAura = nullptr;
 
     if (basepoints[EFFECT_INDEX_0] || basepoints[EFFECT_INDEX_1] || basepoints[EFFECT_INDEX_2])
         CastCustomSpell(target, trigger_spell_id,

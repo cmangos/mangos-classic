@@ -3736,6 +3736,13 @@ void Aura::HandleAuraModAttackPower(bool apply, bool /*Real*/)
         if (Player* modOwner = caster->GetSpellModOwner())
             modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_ATTACK_POWER, amount);
 
+    //Seal of the Crusader reduce caster's weapon damage PCT.
+    if (GetCaster())
+    {
+        if (GetCaster() == GetTarget() && GetCaster()->GetTypeId() == TYPEID_PLAYER && GetSpellProto()->IsFitToFamily(SPELLFAMILY_PALADIN, uint64(0x0000000000000200)))
+            GetTarget()->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, float(-28.0f), apply);
+    }
+
     GetTarget()->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, amount, apply);
 }
 

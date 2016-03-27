@@ -1883,7 +1883,7 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
     switch (m_spellInfo->Id)
     {
         case 9512:                                          // Restore Energy
-            level_diff = m_caster->getLevel() - 40;
+            level_diff = m_caster->getLevel() - 60;
             level_multiplier = 2;
             break;
         case 24571:                                         // Blood Fury
@@ -3175,6 +3175,23 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
                 break;
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
                 weaponDamagePercentMod *= float(CalculateDamage(SpellEffectIndex(j), unitTarget)) / 100.0f;
+
+                //Prevent Seal of Command damage overflow
+                if (m_spellInfo->Id == 20424)
+                {
+                Unit::AuraList const& mModDamagePercentDone = m_caster->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+                for (Unit::AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+                    {
+                    if (((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_HOLY) && ((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL) &&
+                        (*i)->GetSpellProto()->EquippedItemClass == -1 &&
+                                                    // -1 == any item class (not wand then)
+                        (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0)
+                                                    // 0 == any inventory type (not wand then)
+                        {
+                        totalDamagePercentMod /= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                        }
+                    }
+                }
 
                 // applied only to prev.effects fixed damage
                 if (customBonusDamagePercentMod)
