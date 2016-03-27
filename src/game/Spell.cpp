@@ -2954,7 +2954,7 @@ void Spell::update(uint32 difftime)
     // update pointers based at it's GUIDs
     UpdatePointers();
 
-    if (m_targets.getUnitTargetGuid() && !m_targets.getUnitTarget())
+    if (!m_targets.getUnitTargetGuid().IsEmpty() && !m_targets.getUnitTarget())
     {
         cancel();
         return;
@@ -2964,6 +2964,29 @@ void Spell::update(uint32 difftime)
     {
         cancel();
         return;
+    }
+
+    // check for target going invisiblity/fake death
+    if (Unit* target = m_targets.getUnitTarget())
+    {
+        if (!target->isVisibleForOrDetect(m_caster, m_caster, true) || target->HasAuraType(SPELL_AURA_FEIGN_DEATH))
+        {
+            if (m_caster->GetTargetGuid() == target->GetObjectGuid())
+                m_caster->SetTargetGuid(ObjectGuid());
+            cancel();
+            return;
+        }
+    }
+
+
+    if (m_targets.getUnitTarget() && (m_targets.getUnitTarget() != m_caster) && IsSingleTargetSpell(m_spellInfo) &&
+        !IsNextMeleeSwingSpell() && !IsAutoRepeat() && !m_IsTriggeredSpell)
+    {
+        if (!m_caster->IsWithinLOSInMap(m_targets.getUnitTarget()))
+        {
+            cancel();
+            return;
+        }
     }
 
     // check if the player or unit caster has moved before the spell finished (exclude casting on vehicles)
