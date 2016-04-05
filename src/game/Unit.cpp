@@ -829,19 +829,31 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
 
-        // TODO: Store auras by interrupt flag to speed this up.
-        SpellAuraHolderMap& vAuras = pVictim->GetSpellAuraHolderMap();
-        for (SpellAuraHolderMap::const_iterator i = vAuras.begin(), next; i != vAuras.end(); i = next)
+        if (damagetype == DIRECT_DAMAGE || damagetype == SPELL_DIRECT_DAMAGE || damagetype == DOT)
         {
-            const SpellEntry* se = i->second->GetSpellProto();
-            next = i; ++next;
-            if (spellProto && spellProto->Id == se->Id) // Not drop auras added by self
-                continue;
-            if (!se->procFlags && (se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE))
+            int32 auraInterruptFlags = AURA_INTERRUPT_FLAG_DAMAGE;
+            if (damagetype != DOT)
+                auraInterruptFlags = (auraInterruptFlags | AURA_INTERRUPT_FLAG_DIRECT_DAMAGE);
+
+            SpellAuraHolderMap& vInterrupts = pVictim->GetSpellAuraHolderMap();
+            std::vector<uint32> cleanupHolder;
+
+            for (auto aura : vInterrupts)
             {
-                pVictim->RemoveAurasDueToSpell(i->second->GetId());
-                next = vAuras.begin();
+                if (spellProto && spellProto->Id == aura.second->GetId()) // Not drop auras added by self
+                    continue;
+
+                const SpellEntry* se = aura.second->GetSpellProto();
+
+                if (!se)
+                    continue;
+
+                if (se->AuraInterruptFlags & auraInterruptFlags)
+                    cleanupHolder.push_back(aura.second->GetId());
             }
+
+            for (auto aura : cleanupHolder)
+                pVictim->RemoveAurasDueToSpell(aura);
         }
 
         if (damagetype != NODAMAGE && damage && pVictim->GetTypeId() == TYPEID_PLAYER)
