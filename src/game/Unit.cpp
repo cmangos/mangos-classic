@@ -6841,7 +6841,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
 
         propagateSpeedChange();
 
-        typedef const Opcodes SpeedOpcodePair[2];
+        typedef const uint16 SpeedOpcodePair[2];
         SpeedOpcodePair SetSpeed2Opc_table[MAX_MOVE_TYPE] =
         {
             {SMSG_FORCE_WALK_SPEED_CHANGE,        SMSG_SPLINE_SET_WALK_SPEED},
