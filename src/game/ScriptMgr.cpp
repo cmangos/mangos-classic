@@ -82,7 +82,7 @@ ScriptMgr::ScriptMgr() :
 
 ScriptMgr::~ScriptMgr()
 {
-    UnloadScriptLibrary();
+    //UnloadScriptLibrary();
 }
 
 // /////////////////////////////////////////////////////////

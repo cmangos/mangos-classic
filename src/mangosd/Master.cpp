@@ -44,6 +44,8 @@
 #include "MassMailMgr.h"
 #include "DBCStores.h"
 
+#include "ScriptMgr.h"
+
 #include <ace/OS_NS_signal.h>
 #include <ace/TP_Reactor.h>
 #include <ace/Dev_Poll_Reactor.h>
@@ -414,6 +416,11 @@ int Master::Run()
 
         delete cliThread;
     }
+
+    /// Since the script library gets unloaded before the
+    /// call to ~ScriptMgr(), we need to manually call
+    /// the destructor to prevent a segmentation fault
+    sScriptMgr.UnloadScriptLibrary();
 
     ///- Exit the process with specified return value
     return World::GetExitCode();
