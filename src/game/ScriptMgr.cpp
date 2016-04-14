@@ -732,6 +732,20 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             }
             case SCRIPT_COMMAND_RESET_GO:                   // 43
                 break;
+            case SCRIPT_COMMAND_UPDATE_TEMPLATE:            // 44
+            {
+                if (!sCreatureStorage.LookupEntry<CreatureInfo>(tmp.updateTemplate.newTemplate))
+                {
+                    sLog.outErrorDb("Table `%s` uses nonexistent creature entry %u in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u.", tablename, tmp.updateTemplate.newTemplate, tmp.id);
+                    continue;
+                }
+                if (tmp.updateTemplate.newFactionTeam != 0 && tmp.updateTemplate.newFactionTeam != 1)
+                {
+                    sLog.outErrorDb("Table `%s` uses nonexistent faction team %u in SCRIPT_COMMAND_UPDATE_TEMPLATE for script id %u.", tablename, tmp.updateTemplate.newFactionTeam, tmp.id);
+                    continue;
+                }
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -2031,6 +2045,19 @@ bool ScriptAction::HandleScriptStep()
                     sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed for gameobject(buddyEntry: %u). Gameobject is not a door or button", m_table, m_script->id, m_script->command, m_script->buddyEntry);
                     break;
             }
+            break;
+        }
+        case SCRIPT_COMMAND_UPDATE_TEMPLATE:
+        {
+            if (LogIfNotCreature(pSource))
+                return false;
+
+            Creature* pCSource = static_cast<Creature*>(pSource);
+
+            if (pCSource->GetEntry() != m_script->updateTemplate.newTemplate)
+                pCSource->UpdateEntry(m_script->updateTemplate.newTemplate, m_script->updateTemplate.newFactionTeam ? HORDE : ALLIANCE);
+            else
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. Source already has specified creature entry.", m_table, m_script->id, m_script->command);
             break;
         }
         default:

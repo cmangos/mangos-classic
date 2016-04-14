@@ -127,6 +127,9 @@ enum ScriptCommand                                          // resSource, resTar
                                                             // datalong = resetDefault: bool 0=false, 1=true
                                                             // dataint = main hand slot; dataint2 = off hand slot; dataint3 = ranged slot
     SCRIPT_COMMAND_RESET_GO                 = 43,           // resTarget = GameObject
+    SCRIPT_COMMAND_UPDATE_TEMPLATE          = 44,           // resSource = Creature
+                                                            // datalong = new Creature entry
+                                                            // datalong2 = Alliance(0) Horde(1), other values throw error
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -385,6 +388,12 @@ struct ScriptInfo
         } setEquipment;
 
         // datalong unsed                                   // SCRIPT_COMMAND_RESET_GO (43)
+
+        struct                                              // SCRIPT_COMMAND_UPDATE_TEMPLATE (44)
+        {
+            uint32 newTemplate;                             // datalong
+            uint32 newFactionTeam;                          // datalong2
+        } updateTemplate;
 
         struct
         {
