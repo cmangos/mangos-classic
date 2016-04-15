@@ -1,0 +1,2 @@
+ALTER TABLE gameobject_template ADD doLoad TINYINT(3) DEFAULT 1 NOT NULL;
+ALTER TABLE creature_template ADD doLoad TINYINT(3) DEFAULT 1 NOT NULL;
