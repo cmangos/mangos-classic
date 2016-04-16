@@ -129,6 +129,33 @@ int main(int argc, char *argv[])
     if (vm.count("ahbot"))
         sAuctionBotConfig.SetConfigFileName(auctionBotConfig);
 
+#ifdef WIN32                                                // windows service command need execute before config read
+    if (vm.count("s"))
+    {
+        switch (::tolower(serviceParameter[0]))
+        {
+            case 'i':
+                if (WinServiceInstall())
+                    sLog.outString("Installing service");
+                return 1;
+            case 'u':
+                if (WinServiceUninstall())
+                    sLog.outString("Uninstalling service");
+                return 1;
+            case 'r':
+                WinServiceRun();
+                break;
+}
+    }
+#endif
+
+    if (!sConfig.SetSource(configFile))
+    {
+        sLog.outError("Could not find configuration file %s.", configFile.c_str());
+        Log::WaitBeforeContinueIfNeed();
+        return 1;
+    }
+
 #ifndef WIN32                                               // posix daemon commands need apply after config read
     if (vm.count("s"))
     {
