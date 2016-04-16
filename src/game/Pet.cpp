@@ -1222,19 +1222,71 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             break;
         }
         case GUARDIAN_PET:
-            SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
+        {
+            PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(creature_ID, petlevel);
+            if (pInfo)                                      // exist in DB
+            {
+                SetCreateHealth(pInfo->health);
+                SetCreateMana(pInfo->mana);
+                SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
 
-            SetCreateMana(28 + 10 * petlevel);
-            SetCreateHealth(28 + 30 * petlevel);
+                for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+                {
+                    SetCreateStat(Stats(i),  float(pInfo->stats[i]));
+                }
+            }
+            else                                            // does not exist in DB, fallback to creature template values
+            {
+                float hMaxLevel = GetCreatureInfo()->MaxLevelHealth / GetCreatureInfo()->MaxLevel;
+                float hMinLevel = GetCreatureInfo()->MinLevelHealth / GetCreatureInfo()->MinLevel;
 
-            // FIXME: this is wrong formula, possible each guardian pet have own damage formula
-            // these formula may not be correct; however, it is designed to be close to what it should be
-            // this makes dps 0.5 of pets level
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
-            // damage range is then petlevel / 2
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                float mMaxLevel = GetCreatureInfo()->MaxLevelMana / GetCreatureInfo()->MaxLevel;
+                float mMinLevel = GetCreatureInfo()->MinLevelMana / GetCreatureInfo()->MinLevel;
+
+                if (petlevel >= GetCreatureInfo()->MaxLevel)
+                {
+                    SetCreateHealth(hMaxLevel * petlevel);
+                    SetCreateMana(mMaxLevel * petlevel);
+                }
+
+                else if (petlevel <= GetCreatureInfo()->MinLevel)
+                {
+                    SetCreateHealth(hMinLevel * petlevel);
+                    SetCreateMana(mMinLevel * petlevel);
+                }
+
+                else
+                {
+                    SetCreateHealth((hMaxLevel - ((hMaxLevel - hMinLevel)/2)) * petlevel);
+                    SetCreateMana((mMaxLevel - ((mMaxLevel - mMinLevel)/2)) * petlevel);
+                }
+            }
+
+            float dMaxLevel = GetCreatureInfo()->MaxMeleeDmg / GetCreatureInfo()->MaxLevel;
+            float dMinLevel = GetCreatureInfo()->MinMeleeDmg / GetCreatureInfo()->MinLevel;
+
+            if (petlevel >= GetCreatureInfo()->MaxLevel)
+            {
+                SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((dMaxLevel * petlevel) - ((dMaxLevel * petlevel)/4)));
+                SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((dMaxLevel * petlevel) + ((dMaxLevel * petlevel)/4)));
+            }
+
+            else if (petlevel <= GetCreatureInfo()->MinLevel)
+            {
+                SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float((dMinLevel * petlevel) - ((dMinLevel * petlevel)/4)));
+                SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float((dMinLevel * petlevel) + ((dMinLevel * petlevel)/4)));
+            }
+
+            else
+            {
+                float medDmg = (dMaxLevel - ((dMaxLevel - dMinLevel)/2)) * petlevel;
+
+                SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(medDmg - (medDmg/4)));
+                SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(medDmg + (medDmg/4)));
+            }
+
             break;
+        }
         default:
             sLog.outError("Pet have incorrect type (%u) for levelup.", getPetType());
             break;

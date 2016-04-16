@@ -2573,20 +2573,27 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         if (m_caster->FindGuardianWithEntry(pet_entry))
             return;                                         // find old guardian, ignore summon
 
-    // in another case summon new
-    uint32 level = m_caster->getLevel();
+    // level of pet summoned (random within range of creature table)
+    uint32 level = urand(cInfo->MinLevel, cInfo->MaxLevel);
 
     // level of pet summoned using engineering item based at engineering skill level
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_CastItem)
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        ItemPrototype const* proto = m_CastItem->GetProto();
-        if (proto && proto->RequiredSkill == SKILL_ENGINEERING)
+        if (m_CastItem)
         {
-            uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINEERING);
-            if (skill202)
+            ItemPrototype const* proto = m_CastItem->GetProto();
+            if (proto && proto->RequiredSkill == SKILL_ENGINEERING)
             {
-                level = skill202 / 5;
+                uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINEERING);
+                if (skill202)
+                {
+                    level = skill202 / 5;
+                }
             }
+        }
+        else                    // Level of pet summoned (level of caster, if caster is a player)
+        {
+            level = m_caster->getLevel();
         }
     }
 
