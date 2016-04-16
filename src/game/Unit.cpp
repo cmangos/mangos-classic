@@ -5459,6 +5459,18 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, Unit const* caste
                 coeff /= 100.0f;
             }
 
+            // Holy Light and Seal of Righteousness PROC and Flash of Light receive benefit from Spell Damage and Healing too low.
+            if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN && (spellProto->SpellIconID == 25 || spellProto->SpellIconID == 70 || spellProto->SpellIconID == 242))
+                lvlPenalty = 1.0f;
+
+            // Spellmod SpellDamage
+            if (Player* modOwner = GetSpellModOwner())
+            {
+                coeff *= 100.0f;
+                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_SPELL_BONUS_DAMAGE, coeff);
+                coeff /= 100.0f;
+            }
+
             total += int32(floor((spdBenefit * coeff * lvlPenalty) + 0.5f));
         }
     }
