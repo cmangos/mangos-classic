@@ -963,8 +963,8 @@ void ObjectMgr::LoadCreatures()
     QueryResult* result = WorldDatabase.Query("SELECT creature.guid, creature.id, map, modelid,"
                           //   4             5           6           7           8            9              10         11
                           "equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint,"
-                          //   12         13       14          15            16
-                          "curhealth, curmana, DeathState, MovementType, event,"
+                          //   12         13       14                15            16
+                          "curhealth, curmana, DeathState, creature.MovementType, event,"
                           //   17                        18
                           "pool_creature.pool_entry, pool_creature_template.pool_entry, creature_template.doLoad "
                           "FROM creature "
