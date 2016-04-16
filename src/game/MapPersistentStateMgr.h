@@ -72,7 +72,7 @@ class MapPersistentState
 
         MapEntry const* GetMapEntry() const;
 
-        bool IsUsedByMap() const { return m_usedByMap; }
+        bool IsUsedByMap() const { return !!m_usedByMap; }
         Map* GetMap() const { return m_usedByMap; }         // Can be nullptr if map not loaded for persistent state
         void SetUsedByMapState(Map* map)
         {

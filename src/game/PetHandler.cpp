@@ -606,11 +606,11 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
 
     if (pet->isCharmed())
         // state can be used as boolean
-        pet->GetCharmInfo()->ToggleCreatureAutocast(spellid, state);
+        pet->GetCharmInfo()->ToggleCreatureAutocast(spellid, !!state);
     else
-        ((Pet*)pet)->ToggleAutocast(spellid, state);
+        ((Pet*)pet)->ToggleAutocast(spellid, !!state);
 
-    charmInfo->SetSpellAutocast(spellid, state);
+    charmInfo->SetSpellAutocast(spellid, !!state);
 }
 
 void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
