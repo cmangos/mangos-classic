@@ -571,7 +571,7 @@ class MovementInfo
         // Movement flags manipulations
         void AddMovementFlag(MovementFlags f) { moveFlags |= f; }
         void RemoveMovementFlag(MovementFlags f) { moveFlags &= ~f; }
-        bool HasMovementFlag(MovementFlags f) const { return moveFlags & f; }
+        bool HasMovementFlag(MovementFlags f) const { return !!(moveFlags & f); }
         MovementFlags GetMovementFlags() const { return MovementFlags(moveFlags); }
         void SetMovementFlags(MovementFlags f) { moveFlags = f; }
 
@@ -1206,7 +1206,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendMeleeAttackStart(Unit* pVictim);
 
         void addUnitState(uint32 f) { m_state |= f; }
-        bool hasUnitState(uint32 f) const { return (m_state & f); }
+        bool hasUnitState(uint32 f) const { return !!(m_state & f); }
         void clearUnitState(uint32 f) { m_state &= ~f; }
         bool CanFreeMove() const
         {
@@ -1285,7 +1285,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsStandState() const;
         void SetStandState(uint8 state);
 
-        bool IsMounted() const { return GetMountID(); }
+        bool IsMounted() const { return !!GetMountID(); }
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
         void Mount(uint32 mount, uint32 spellId = 0);
         void Unmount(bool from_aura = false);
@@ -1780,7 +1780,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         {
             m_lastManaUseTimer = 5000;
         }
-        bool IsUnderLastManaUseEffect() const { return m_lastManaUseTimer; }
+        bool IsUnderLastManaUseEffect() const { return !!m_lastManaUseTimer; }
 
         void SetContestedPvP(Player* attackedPlayer = nullptr);
 

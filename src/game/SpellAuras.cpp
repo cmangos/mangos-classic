@@ -1270,7 +1270,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         if (m_removeMode == AURA_REMOVE_BY_DEATH)
         {
             // Stop caster Arcane Missle chanelling on death
-            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_MAGE && (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000800)))
+            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_MAGE && (GetSpellProto()->SpellFamilyFlags & uint64(0x0000000000000800)))
             {
                 if (Unit* caster = GetCaster())
                     caster->InterruptSpell(CURRENT_CHANNELED_SPELL);
@@ -2404,7 +2404,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         }
 
         // Wyvern Sting
-        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellFamilyFlags & UI64LIT(0x00010000))
+        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellFamilyFlags & uint64(0x00010000))
         {
             Unit* caster = GetCaster();
             if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
@@ -3046,7 +3046,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             case SPELLFAMILY_DRUID:
             {
                 // Rip
-                if (spellProto->SpellFamilyFlags & UI64LIT(0x000000000000800000))
+                if (spellProto->SpellFamilyFlags & uint64(0x000000000000800000))
                 {
                     // $AP * min(0.06*$cp, 0.24)/6 [Yes, there is no difference, whether 4 or 5 CPs are being used]
                     if (caster->GetTypeId() == TYPEID_PLAYER)
@@ -3062,7 +3062,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             case SPELLFAMILY_ROGUE:
             {
                 // Rupture
-                if (spellProto->SpellFamilyFlags & UI64LIT(0x000000000000100000))
+                if (spellProto->SpellFamilyFlags & uint64(0x000000000000100000))
                 {
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                         break;
@@ -3183,7 +3183,7 @@ void Aura::HandleAuraModResistance(bool apply, bool /*Real*/)
     // Faerie Fire (druid versions)
     if (spellProto->SpellIconID == 109 &&
             spellProto->SpellFamilyName == SPELLFAMILY_DRUID &&
-            spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000400))
+            spellProto->SpellFamilyFlags & uint64(0x0000000000000400))
     {
         target->ApplySpellDispelImmunity(spellProto, DISPEL_STEALTH, apply);
         target->ApplySpellDispelImmunity(spellProto, DISPEL_INVISIBILITY, apply);
@@ -4200,7 +4200,7 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
             {
                 case SPELLFAMILY_PRIEST:
                     // Power Word: Shield
-                    if (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000001))
+                    if (spellProto->SpellFamilyFlags & uint64(0x0000000000000001))
                     {
                         //+30% from +healing bonus
                         DoneActualBenefit = caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * 0.3f;
@@ -4209,13 +4209,13 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                     break;
                 case SPELLFAMILY_MAGE:
                     // Frost Ward, Fire Ward
-                    if (spellProto->IsFitToFamilyMask(UI64LIT(0x0000000100080108)))
+                    if (spellProto->IsFitToFamilyMask(uint64(0x0000000100080108)))
                         //+10% from +spell bonus
                         DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto)) * 0.1f;
                     break;
                 case SPELLFAMILY_WARLOCK:
                     // Shadow Ward
-                    if (spellProto->SpellFamilyFlags == UI64LIT(0x00))
+                    if (!spellProto->SpellFamilyFlags)
                         //+10% from +spell bonus
                         DoneActualBenefit = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto)) * 0.1f;
                     break;
@@ -4291,7 +4291,7 @@ void Aura::PeriodicTick()
             }
 
             // Curse of Agony damage-per-tick calculation
-            if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000400)) && spellProto->SpellIconID == 544)
+            if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags & uint64(0x0000000000000400)) && spellProto->SpellIconID == 544)
             {
                 // 1..4 ticks, 1/2 from normal tick damage
                 if (GetAuraTicks() <= 4)
@@ -4783,7 +4783,7 @@ void Aura::HandleManaShield(bool apply, bool Real)
             switch (GetSpellProto()->SpellFamilyName)
             {
                 case SPELLFAMILY_MAGE:
-                    if (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000008000))
+                    if (GetSpellProto()->SpellFamilyFlags & uint64(0x0000000000008000))
                     {
                         // Mana Shield
                         // +50% from +spd bonus

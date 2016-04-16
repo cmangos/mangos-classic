@@ -23,6 +23,8 @@
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
 
+#include <functional>
+
 struct AreaTrigger;
 struct AreaTriggerEntry;
 struct FactionEntry;
@@ -689,10 +691,15 @@ class MANGOS_DLL_SPEC ChatHandler
 
 class CliHandler : public ChatHandler
 {
-    public:
-        typedef void Print(void*, char const*);
-        explicit CliHandler(uint32 accountId, AccountTypes accessLevel, void* callbackArg, Print* zprint)
-            : m_accountId(accountId), m_loginAccessLevel(accessLevel), m_callbackArg(callbackArg), m_print(zprint) {}
+    private:
+        typedef std::function<void(const char *)> Print;
+        uint32 m_accountId;
+        AccountTypes m_loginAccessLevel;
+        Print m_print;
+
+    public:        
+        CliHandler(uint32 accountId, AccountTypes accessLevel, Print zprint)
+            : m_accountId(accountId), m_loginAccessLevel(accessLevel), m_print(zprint) {}
 
         // overwrite functions
         const char* GetMangosString(int32 entry) const override;
@@ -704,15 +711,6 @@ class CliHandler : public ChatHandler
         bool needReportToTarget(Player* chr) const override;
         LocaleConstant GetSessionDbcLocale() const override;
         int GetSessionDbLocaleIndex() const override;
-
-    private:
-        uint32 m_accountId;
-        AccountTypes m_loginAccessLevel;
-        void* m_callbackArg;
-        Print* m_print;
 };
-
-
-
 
 #endif

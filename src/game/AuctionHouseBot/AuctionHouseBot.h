@@ -127,7 +127,7 @@ class AuctionBotConfig
     public:
         AuctionBotConfig();
 
-        void        SetConfigFileName(char const* filename) { m_configFileName = filename; }
+        void        SetConfigFileName(const std::string &filename) { m_configFileName = filename; }
         bool        Initialize();
         const char* GetAHBotIncludes() const { return m_AHBotIncludes.c_str(); }
         const char* GetAHBotExcludes() const { return m_AHBotExcludes.c_str(); }

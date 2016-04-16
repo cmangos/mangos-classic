@@ -32,295 +32,196 @@
 #include "ObjectMgr.h"
 #include "Policies/Lock.h"
 
+#include <vector>
+#include <string>
+
 /// RASocket constructor
-RASocket::RASocket()
-    : RAHandler(),
-      pendingCommands(0, USYNC_THREAD, "pendingCommands"),
-      outActive(false),
-      inputBufferLen(0),
-      outputBufferLen(0),
-      stage(NONE)
+RASocket::RASocket(boost::asio::io_service &service, std::function<void(Socket *)> closeHandler) :
+    m_secure(sConfig.GetBoolDefault("RA.Secure", true)), MaNGOS::Socket(service, closeHandler),
+    m_authLevel(AuthLevel::None), m_accountId(0), m_accountLevel(AccountTypes::SEC_PLAYER)
 {
-    ///- Get the config parameters
-    bSecure = sConfig.GetBoolDefault("RA.Secure", true);
-    bStricted = sConfig.GetBoolDefault("RA.Stricted", false);
-    iMinLevel = AccountTypes(sConfig.GetIntDefault("RA.MinLevel", SEC_ADMINISTRATOR));
-    reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+    m_commandBuffer.reserve(InitialBufferSize);
+
+    if (sConfig.IsSet("RA.Stricted"))
+    {
+        sLog.outError("Deprecated config option RA.Stricted being used.  Use RA.Restricted instead.");
+        m_restricted = sConfig.GetBoolDefault("RA.Stricted", true);
+    }
+    else
+        m_restricted = sConfig.GetBoolDefault("RA.Restricted", true);
 }
 
 /// RASocket destructor
 RASocket::~RASocket()
 {
-    peer().close();
     sLog.outRALog("Connection was closed.");
 }
 
 /// Accept an incoming connection
-int RASocket::open(void*)
+bool RASocket::Open()
 {
-    if (reactor()->register_handler(this, ACE_Event_Handler::READ_MASK | ACE_Event_Handler::WRITE_MASK) == -1)
-    {
-        sLog.outError("RASocket::open: unable to register client handler errno = %s", ACE_OS::strerror(errno));
-        return -1;
-    }
+    if (!Socket::Open())
+        return false;
 
-    ACE_INET_Addr remote_addr;
-
-    if (peer().get_remote_addr(remote_addr) == -1)
-    {
-        sLog.outError("RASocket::open: peer ().get_remote_addr errno = %s", ACE_OS::strerror(errno));
-        return -1;
-    }
-
-
-    sLog.outRALog("Incoming connection from %s.", remote_addr.get_host_addr());
+    sLog.outRALog("Incoming connection from %s.", m_address.c_str());
 
     ///- print Motd
-    sendf(sWorld.GetMotd());
-    sendf("\r\n");
-    sendf(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_USER));
+    Send(sWorld.GetMotd());
+    Send("\r\n");
+    Send(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_USER));
 
-    return 0;
-}
-
-int RASocket::close(int)
-{
-    if (closing_)
-        return -1;
-    DEBUG_LOG("RASocket::close");
-    shutdown();
-
-    closing_ = true;
-
-    remove_reference();
-    return 0;
-}
-
-int RASocket::handle_close(ACE_HANDLE h, ACE_Reactor_Mask)
-{
-    if (closing_)
-        return -1;
-    DEBUG_LOG("RASocket::handle_close");
-    GUARD_RETURN(outBufferLock, -1);
-
-    closing_ = true;
-
-    if (h == ACE_INVALID_HANDLE)
-        peer().close_writer();
-    remove_reference();
-    return 0;
-}
-
-int RASocket::handle_output(ACE_HANDLE)
-{
-    GUARD_RETURN(outBufferLock, -1);
-
-    if (closing_)
-        return -1;
-
-    if (!outputBufferLen)
-    {
-        if (reactor()->cancel_wakeup(this, ACE_Event_Handler::WRITE_MASK) == -1)
-        {
-            sLog.outError("RASocket::handle_output: error while cancel_wakeup");
-            return -1;
-        }
-        outActive = false;
-        return 0;
-    }
-#ifdef MSG_NOSIGNAL
-    ssize_t n = peer().send(outputBuffer, outputBufferLen, MSG_NOSIGNAL);
-#else
-    ssize_t n = peer().send(outputBuffer, outputBufferLen);
-#endif // MSG_NOSIGNAL
-
-    if (n <= 0)
-        return -1;
-
-    ACE_OS::memmove(outputBuffer, outputBuffer + n, outputBufferLen - n);
-
-    outputBufferLen -= n;
-
-    return 0;
+    return true;
 }
 
 /// Read data from the network
-int RASocket::handle_input(ACE_HANDLE)
+bool RASocket::ProcessIncomingData()
 {
     DEBUG_LOG("RASocket::handle_input");
-    if (closing_)
-    {
-        sLog.outError("Called RASocket::handle_input with closing_ = true");
-        return -1;
-    }
 
-    size_t readBytes = peer().recv(inputBuffer + inputBufferLen, RA_BUFF_SIZE - inputBufferLen - 1);
+    std::vector<char> buffer(ReadLengthRemaining());
+    Read(&buffer[0], buffer.size());
 
-    if (readBytes <= 0)
+    bool completeCommand = false;
+    size_t newLine;
+    for (newLine = 0; newLine < buffer.size(); ++newLine)
     {
-        DEBUG_LOG("read " SIZEFMTD " bytes in RASocket::handle_input", readBytes);
-        return -1;
-    }
-
-    ///- Discard data after line break or line feed
-    bool gotenter = false;
-    for (; readBytes > 0 ; --readBytes)
-    {
-        char c = inputBuffer[inputBufferLen];
-        if (c == '\r' || c == '\n')
+        if (buffer[newLine] == '\r' || buffer[newLine] == '\n')
         {
-            gotenter = true;
+            if (newLine > 0)
+                std::copy(buffer.cbegin(), buffer.cbegin() + newLine - 1, std::back_inserter(m_commandBuffer));
+
+            completeCommand = true;
             break;
         }
-        ++inputBufferLen;
     }
 
-    if (gotenter)
+    // no newline found? save what we have and return
+    if (newLine == buffer.size())
     {
-        inputBuffer[inputBufferLen] = 0;
-        inputBufferLen = 0;
-        switch (stage)
-        {
-            /// <ul> <li> If the input is '<username>'
-            case NONE:
-            {
-                std::string szLogin = inputBuffer;
-
-                accId = sAccountMgr.GetId(szLogin);
-
-                ///- If the user is not found, deny access
-                if (!accId)
-                {
-                    sendf("-No such user.\r\n");
-                    sLog.outRALog("User %s does not exist.", szLogin.c_str());
-                    if (bSecure)
-                    {
-                        handle_output();
-                        return -1;
-                    }
-                    sendf("\r\n");
-                    sendf(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_USER));
-                    break;
-                }
-
-                accAccessLevel = sAccountMgr.GetSecurity(accId);
-
-                ///- if gmlevel is too low, deny access
-                if (accAccessLevel < iMinLevel)
-                {
-                    sendf("-Not enough privileges.\r\n");
-                    sLog.outRALog("User %s has no privilege.", szLogin.c_str());
-                    if (bSecure)
-                    {
-                        handle_output();
-                        return -1;
-                    }
-                    sendf("\r\n");
-                    sendf(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_USER));
-                    break;
-                }
-
-                ///- allow by remotely connected admin use console level commands dependent from config setting
-                if (accAccessLevel >= SEC_ADMINISTRATOR && !bStricted)
-                    accAccessLevel = SEC_CONSOLE;
-
-                stage = LG;
-                sendf(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_PASS));
-                break;
-            }
-            ///<li> If the input is '<password>' (and the user already gave his username)
-            case LG:
-            {
-                // login+pass ok
-                std::string pw = inputBuffer;
-
-                if (sAccountMgr.CheckPassword(accId, pw))
-                {
-                    stage = OK;
-
-                    sendf("+Logged in.\r\n");
-                    sLog.outRALog("User account %u has logged in.", accId);
-                    sendf("mangos>");
-                }
-                else
-                {
-                    ///- Else deny access
-                    sendf("-Wrong pass.\r\n");
-                    sLog.outRALog("User account %u has failed to log in.", accId);
-                    if (bSecure)
-                    {
-                        handle_output();
-                        return -1;
-                    }
-                    sendf("\r\n");
-                    sendf(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_PASS));
-                }
-                break;
-            }
-            ///<li> If user is logged, parse and execute the command
-            case OK:
-                if (strlen(inputBuffer))
-                {
-                    sLog.outRALog("Got '%s' cmd.", inputBuffer);
-                    if (strncmp(inputBuffer, "quit", 4) == 0)
-                        return -1;
-                    else
-                    {
-                        CliCommandHolder* cmd = new CliCommandHolder(accId, accAccessLevel, this, inputBuffer, &RASocket::zprint, &RASocket::commandFinished);
-                        sWorld.QueueCliCommand(cmd);
-                        pendingCommands.acquire();
-                    }
-                }
-                else
-                    sendf("mangos>");
-                break;
-                ///</ul>
-        };
+        std::copy(buffer.cbegin(), buffer.cend(), std::back_inserter(m_commandBuffer));
+        return true;
     }
-    // no enter yet? wait for next input...
-    return 0;
-}
 
-/// Output function
-void RASocket::zprint(void* callbackArg, const char* szText)
-{
-    if (!szText)
-        return;
+    auto const minLevel = static_cast<AccountTypes>(sConfig.GetIntDefault("RA.MinLevel", AccountTypes::SEC_ADMINISTRATOR));
 
-    ((RASocket*)callbackArg)->sendf(szText);
-}
-
-void RASocket::commandFinished(void* callbackArg, bool /*success*/)
-{
-    RASocket* raSocket = (RASocket*)callbackArg;
-    raSocket->sendf("mangos>");
-    raSocket->pendingCommands.release();
-}
-
-int RASocket::sendf(const char* msg)
-{
-    GUARD_RETURN(outBufferLock, -1);
-
-    if (closing_)
-        return -1;
-
-    int msgLen = strlen(msg);
-
-    if (msgLen + outputBufferLen > RA_BUFF_SIZE)
-        return -1;
-
-    ACE_OS::memcpy(outputBuffer + outputBufferLen, msg, msgLen);
-    outputBufferLen += msgLen;
-
-    if (!outActive)
+    switch (m_authLevel)
     {
-        if (reactor()->schedule_wakeup
-                (this, ACE_Event_Handler::WRITE_MASK) == -1)
+        /// <ul> <li> If the input is '<username>'
+        case AuthLevel::None:
         {
-            sLog.outError("RASocket::sendf error while schedule_wakeup");
-            return -1;
+            const std::string username(&m_commandBuffer[0], m_commandBuffer.size());
+
+            m_accountId = sAccountMgr.GetId(username);
+
+            ///- If the user is not found, deny access
+            if (!m_accountId)
+            {
+                Send("-No such user.\r\n");
+                sLog.outRALog("User %s does not exist.", username.c_str());
+
+                if (m_secure)
+                    return false;
+
+                Send("\r\n");
+                Send(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_USER));
+                break;
+            }
+
+            m_accountLevel = sAccountMgr.GetSecurity(m_accountId);
+
+            ///- if gmlevel is too low, deny access
+            if (m_accountLevel < minLevel)
+            {
+                Send("-Not enough privileges.\r\n");
+                sLog.outRALog("User %s has no privilege.", username.c_str());
+
+                if (m_secure)
+                    return false;
+
+                Send("\r\n");
+                Send(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_USER));
+                break;
+            }
+
+            ///- allow by remotely connected admin use console level commands dependent from config setting
+            if (m_accountLevel >= SEC_ADMINISTRATOR && !m_restricted)
+                m_accountLevel = SEC_CONSOLE;
+
+            m_authLevel = AuthLevel::HaveUsername;
+            Send(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_PASS));
+            break;
         }
-        outActive = true;
+        ///<li> If the input is '<password>' (and the user already gave his username)
+        case AuthLevel::HaveUsername:
+        {
+            // login+pass ok
+            const std::string pw(&m_commandBuffer[0], m_commandBuffer.size());
+
+            if (sAccountMgr.CheckPassword(m_accountId, pw))
+            {
+                m_authLevel = AuthLevel::Authenticated;
+
+                Send("+Logged in.\r\n");
+                sLog.outRALog("User account %u has logged in.", m_accountId);
+                Send("mangos>");
+            }
+            else
+            {
+                ///- Else deny access
+                Send("-Wrong pass.\r\n");
+                sLog.outRALog("User account %u has failed to log in.", m_accountId);
+
+                if (m_secure)
+                    return false;
+
+                Send("\r\n");
+                Send(sObjectMgr.GetMangosStringForDBCLocale(LANG_RA_PASS));
+            }
+            break;
+        }
+        ///<li> If user is logged, parse and execute the command
+        case AuthLevel::Authenticated:
+        {
+            const std::string command(&m_commandBuffer[0], m_commandBuffer.size());
+
+            if (command.length())
+            {
+                sLog.outRALog("Got '%s' cmd.", command.c_str());
+
+                if (command == "quit")
+                    return false;
+
+                sWorld.QueueCliCommand(new CliCommandHolder(m_accountId, m_accountLevel, command.c_str(),
+                    [this] (const char *buffer) { this->Send(buffer); },
+                    [this] (bool) { this->Send("mangos>"); }));
+            }
+            else
+                Send("mangos>");
+
+            break;
+        }
+
+        default:
+            return false;
+            ///</ul>
+    };
+
+    m_commandBuffer.clear();
+
+    // there might be additional data here, skip any newline characters first
+    for (; newLine < buffer.size(); ++newLine)
+    {
+        if (buffer[newLine] != '\r' && buffer[newLine] != '\n')
+            break;
     }
-    return 0;
+
+    if (newLine < buffer.size())
+        std::copy(buffer.cbegin() + newLine, buffer.cend(), std::back_inserter(m_commandBuffer));
+
+    return true;
+}
+
+void RASocket::Send(const std::string &message)
+{
+    Write(message.c_str(), message.length());
 }

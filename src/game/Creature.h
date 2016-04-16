@@ -509,11 +509,11 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool IsDespawned() const { return getDeathState() ==  DEAD; }
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         bool IsRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
-        bool IsCivilian() const { return GetCreatureInfo()->civilian; }
-        bool IsGuard() const { return GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_GUARD; }
+        bool IsCivilian() const { return !!GetCreatureInfo()->civilian; }
+        bool IsGuard() const { return !!(GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_GUARD); }
 
-        bool CanWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
-        bool CanSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
+        bool CanWalk() const { return !!(GetCreatureInfo()->InhabitType & INHABIT_GROUND); }
+        bool CanSwim() const { return !!(GetCreatureInfo()->InhabitType & INHABIT_WATER); }
         bool IsSwimming() const { return (m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_SWIMMING))); }
         bool CanFly() const { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_LEVITATING | MOVEFLAG_CAN_FLY)); }
         bool IsFlying() const { return (m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_FLYING | MOVEFLAG_LEVITATING))); }
@@ -632,7 +632,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         Player* GetLootRecipient() const;                   // use group cases as prefered
         Group* GetGroupLootRecipient() const;
         bool HasLootRecipient() const { return m_lootGroupRecipientId || m_lootRecipientGuid; }
-        bool IsGroupLootRecipient() const { return m_lootGroupRecipientId; }
+        bool IsGroupLootRecipient() const { return !!m_lootGroupRecipientId; }
         void SetLootRecipient(Unit* unit);
         Player* GetOriginalLootRecipient() const;           // ignore group changes/etc, not for looting
 
@@ -697,8 +697,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool HasInvolvedQuest(uint32 quest_id)  const override;
 
         GridReference<Creature>& GetGridRef() { return m_gridRef; }
-        bool IsRegeneratingHealth() { return GetCreatureInfo()->RegenerateStats & REGEN_FLAG_HEALTH; }
-        bool IsRegeneratingPower() { return GetCreatureInfo()->RegenerateStats & REGEN_FLAG_POWER; }
+        bool IsRegeneratingHealth() const { return !!(GetCreatureInfo()->RegenerateStats & REGEN_FLAG_HEALTH); }
+        bool IsRegeneratingPower() const { return !!(GetCreatureInfo()->RegenerateStats & REGEN_FLAG_POWER); }
         virtual uint8 GetPetAutoSpellSize() const { return CREATURE_MAX_SPELLS; }
         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
         {

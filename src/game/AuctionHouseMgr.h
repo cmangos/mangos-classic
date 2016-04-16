@@ -110,10 +110,7 @@ class AuctionHouseObject
             return itr != AuctionsMap.end() ? itr->second : nullptr;
         }
 
-        bool RemoveAuction(uint32 id)
-        {
-            return AuctionsMap.erase(id);
-        }
+        bool RemoveAuction(uint32 id) { return !!AuctionsMap.erase(id); }
 
         void Update();
 

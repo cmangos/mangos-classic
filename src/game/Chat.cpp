@@ -36,6 +36,8 @@
 #include "GameEventMgr.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
 
+#include <cstdarg>
+
 // Supported shift-links (client generated and server side)
 // |color|Harea:area_id|h[name]|h|r
 // |color|Hareatrigger:id|h[name]|h|r
@@ -3201,8 +3203,8 @@ bool CliHandler::isAvailable(ChatCommand const& cmd) const
 
 void CliHandler::SendSysMessage(const char* str)
 {
-    m_print(m_callbackArg, str);
-    m_print(m_callbackArg, "\r\n");
+    m_print(str);
+    m_print("\r\n");
 }
 
 std::string CliHandler::GetNameLink() const

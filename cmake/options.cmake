@@ -6,7 +6,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
 else()
   option(USE_STD_MALLOC     "Use standard malloc instead of TBB"    OFF)
 endif()
-option(ACE_USE_EXTERNAL     "Use external ACE"                      OFF)
 option(POSTGRESQL           "Use PostgreSQL"                        OFF)
 
 if(PCHSupport_FOUND AND WIN32) # TODO: why only enable it on windows by default?
@@ -35,7 +34,6 @@ message(STATUS
                             CMakeLists.txt
     TBB_USE_EXTERNAL        Use external TBB
     USE_STD_MALLOC          Use standard malloc instead of TBB
-    ACE_USE_EXTERNAL        Use external ACE
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. see 'cmake --help' for more details
   For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos"

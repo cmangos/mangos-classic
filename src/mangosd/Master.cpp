@@ -24,7 +24,6 @@
 #include "PosixDaemon.h"
 #endif
 
-#include "WorldSocketMgr.h"
 #include "Common.h"
 #include "Master.h"
 #include "WorldSocket.h"
@@ -32,10 +31,7 @@
 #include "World.h"
 #include "Log.h"
 #include "Timer.h"
-#include "Policies/Singleton.h"
 #include "SystemConfig.h"
-#include "Config/Config.h"
-#include "Database/DatabaseEnv.h"
 #include "CliRunnable.h"
 #include "RASocket.h"
 #include "Util.h"
@@ -44,9 +40,13 @@
 #include "MassMailMgr.h"
 #include "DBCStores.h"
 
-#include <ace/OS_NS_signal.h>
-#include <ace/TP_Reactor.h>
-#include <ace/Dev_Poll_Reactor.h>
+#include "Config/Config.h"
+#include "Database/DatabaseEnv.h"
+#include "Policies/Singleton.h"
+#include "Network/Listener.hpp"
+#include "Network/Socket.hpp"
+
+#include <memory>
 
 #ifdef WIN32
 #include "ServiceWin32.h"
@@ -98,85 +98,11 @@ class FreezeDetectorRunnable : public MaNGOS::Runnable
         }
 };
 
-class RARunnable : public MaNGOS::Runnable
-{
-    private:
-        ACE_Reactor* m_Reactor;
-        RASocket::Acceptor* m_Acceptor;
-    public:
-        RARunnable()
-        {
-            ACE_Reactor_Impl* imp = 0;
-
-#if defined (ACE_HAS_EVENT_POLL) || defined (ACE_HAS_DEV_POLL)
-
-            imp = new ACE_Dev_Poll_Reactor();
-
-            imp->max_notify_iterations(128);
-            imp->restart(1);
-
-#else
-
-            imp = new ACE_TP_Reactor();
-            imp->max_notify_iterations(128);
-
-#endif
-
-            m_Reactor = new ACE_Reactor(imp, 1 /* 1= delete implementation so we don't have to care */);
-
-            m_Acceptor = new RASocket::Acceptor;
-        }
-
-        ~RARunnable()
-        {
-            delete m_Reactor;
-            delete m_Acceptor;
-        }
-
-        void run()
-        {
-            uint16 raport = sConfig.GetIntDefault("Ra.Port", 3443);
-            std::string stringip = sConfig.GetStringDefault("Ra.IP", "0.0.0.0");
-
-            ACE_INET_Addr listen_addr(raport, stringip.c_str());
-
-            if (m_Acceptor->open(listen_addr, m_Reactor, ACE_NONBLOCK) == -1)
-            {
-                sLog.outError("MaNGOS RA can not bind to port %d on %s", raport, stringip.c_str());
-            }
-
-            sLog.outString("Starting Remote access listner on port %d on %s", raport, stringip.c_str());
-
-            while (!m_Reactor->reactor_event_loop_done())
-            {
-                ACE_Time_Value interval(0, 10000);
-
-                if (m_Reactor->run_reactor_event_loop(interval) == -1)
-                    break;
-
-                if (World::IsStopped())
-                {
-                    m_Acceptor->close();
-                    break;
-                }
-            }
-            sLog.outString("RARunnable thread ended");
-        }
-};
-
-Master::Master()
-{
-}
-
-Master::~Master()
-{
-}
-
 /// Main function
 int Master::Run()
 {
     /// worldd PID file creation
-    std::string pidfile = sConfig.GetStringDefault("PidFile", "");
+    std::string pidfile = sConfig.GetStringDefault("PidFile");
     if (!pidfile.empty())
     {
         uint32 pid = CreatePIDFile(pidfile);
@@ -235,12 +161,6 @@ int Master::Run()
         cliThread = new MaNGOS::Thread(new CliRunnable);
     }
 
-    MaNGOS::Thread* rar_thread = nullptr;
-    if (sConfig.GetBoolDefault("Ra.Enable", false))
-    {
-        rar_thread = new MaNGOS::Thread(new RARunnable);
-    }
-
     ///- Handle affinity for multiple processors and process priority on Windows
 #ifdef WIN32
     {
@@ -285,17 +205,6 @@ int Master::Run()
     }
 #endif
 
-    ///- Start soap serving thread
-    MaNGOS::Thread* soap_thread = nullptr;
-
-    if (sConfig.GetBoolDefault("SOAP.Enabled", false))
-    {
-        MaNGOSsoapRunnable* runnable = new MaNGOSsoapRunnable();
-
-        runnable->setListenArguments(sConfig.GetStringDefault("SOAP.IP", "127.0.0.1"), sConfig.GetIntDefault("SOAP.Port", 7878));
-        soap_thread = new MaNGOS::Thread(runnable);
-    }
-
     ///- Start up freeze catcher thread
     MaNGOS::Thread* freeze_thread = nullptr;
     if (uint32 freeze_delay = sConfig.GetIntDefault("MaxCoreStuckTime", 0))
@@ -306,33 +215,28 @@ int Master::Run()
         freeze_thread->setPriority(MaNGOS::Priority_Highest);
     }
 
-    ///- Launch the world listener socket
-    uint16 wsport = sWorld.getConfig(CONFIG_UINT32_PORT_WORLD);
-    std::string bind_ip = sConfig.GetStringDefault("BindIP", "0.0.0.0");
-
-    if (sWorldSocketMgr.StartNetwork(wsport, bind_ip) == -1)
     {
-        sLog.outError("Failed to start network");
-        Log::WaitBeforeContinueIfNeed();
-        World::StopNow(ERROR_EXIT_CODE);
-        // go down and shutdown the server
-    }
+        //auto const listenIP = sConfig.GetStringDefault("BindIP", "0.0.0.0");
+        MaNGOS::Listener<WorldSocket> listener(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD), 8);
 
-    sWorldSocketMgr.Wait();
+        std::unique_ptr<MaNGOS::Listener<RASocket>> raListener;
+        if (sConfig.GetBoolDefault("Ra.Enable", false))
+            raListener.reset(new MaNGOS::Listener<RASocket>(sConfig.GetIntDefault("Ra.Port", 3443), 1));
+
+        std::unique_ptr<SOAPThread> soapThread;
+        if (sConfig.GetBoolDefault("SOAP.Enabled", false))
+            soapThread.reset(new SOAPThread("0.0.0.0", sConfig.GetIntDefault("SOAP.Port", 7878)));
+
+        // wait for shut down and then let things go out of scope to close them down
+        while (!World::IsStopped())
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 
     ///- Stop freeze protection before shutdown tasks
     if (freeze_thread)
     {
         freeze_thread->destroy();
         delete freeze_thread;
-    }
-
-    ///- Stop soap thread
-    if (soap_thread)
-    {
-        soap_thread->wait();
-        soap_thread->destroy();
-        delete soap_thread;
     }
 
     ///- Set server offline in realmlist
@@ -344,13 +248,6 @@ int Master::Run()
     // when the main thread closes the singletons get unloaded
     // since worldrunnable uses them, it will crash if unloaded after master
     world_thread.wait();
-
-    if (rar_thread)
-    {
-        rar_thread->wait();
-        rar_thread->destroy();
-        delete rar_thread;
-    }
 
     ///- Clean account database before leaving
     clearOnlineAccounts();
@@ -423,7 +320,7 @@ int Master::Run()
 bool Master::_StartDB()
 {
     ///- Get world database info from configuration file
-    std::string dbstring = sConfig.GetStringDefault("WorldDatabaseInfo", "");
+    std::string dbstring = sConfig.GetStringDefault("WorldDatabaseInfo");
     int nConnections = sConfig.GetIntDefault("WorldDatabaseConnections", 1);
     if (dbstring.empty())
     {
@@ -446,7 +343,7 @@ bool Master::_StartDB()
         return false;
     }
 
-    dbstring = sConfig.GetStringDefault("CharacterDatabaseInfo", "");
+    dbstring = sConfig.GetStringDefault("CharacterDatabaseInfo");
     nConnections = sConfig.GetIntDefault("CharacterDatabaseConnections", 1);
     if (dbstring.empty())
     {
@@ -477,7 +374,7 @@ bool Master::_StartDB()
     }
 
     ///- Get login database info from configuration file
-    dbstring = sConfig.GetStringDefault("LoginDatabaseInfo", "");
+    dbstring = sConfig.GetStringDefault("LoginDatabaseInfo");
     nConnections = sConfig.GetIntDefault("LoginDatabaseConnections", 1);
     if (dbstring.empty())
     {

@@ -19,6 +19,9 @@
     <Filter Include="Auth">
       <UniqueIdentifier>{e35fd108-bd39-46ae-83f9-09cf1ebf4ea8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Network">
+      <UniqueIdentifier>{80912ad6-82b2-4836-86f4-aa75047f1da4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\shared\Database\Database.cpp">
@@ -80,6 +83,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\shared\Auth\Hmac.cpp">
       <Filter>Auth</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shared\Network\PacketBuffer.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shared\Network\Socket.cpp">
+      <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shared\Network\Listener.cpp">
+      <Filter>Network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -162,7 +174,6 @@
       <Filter>Auth</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\shared\Common.h" />
-    <ClInclude Include="..\..\src\shared\LockedQueue.h" />
     <ClInclude Include="..\..\src\shared\revision_sql.h" />
     <ClInclude Include="..\..\src\shared\ServiceWin32.h" />
     <ClInclude Include="..\..\src\shared\Threading.h" />
@@ -172,6 +183,19 @@
     <ClInclude Include="..\..\src\shared\Auth\Hmac.h">
       <Filter>Auth</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\shared\Network\NetworkThread.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shared\Network\PacketBuffer.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shared\Network\Socket.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shared\Network\Listener.hpp">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shared\TSS.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\shared\revision.h" />

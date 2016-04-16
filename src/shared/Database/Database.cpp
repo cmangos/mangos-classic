@@ -24,6 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <cstdarg>
 
 #define MIN_CONNECTION_POOL_SIZE 1
 #define MAX_CONNECTION_POOL_SIZE 16
@@ -101,7 +102,7 @@ bool Database::Initialize(const char* infoString, int nConns /*= 1*/)
     // Enable logging of SQL commands (usually only GM commands)
     // (See method: PExecuteLog)
     m_logSQL = sConfig.GetBoolDefault("LogSQL", false);
-    m_logsDir = sConfig.GetStringDefault("LogsDir", "");
+    m_logsDir = sConfig.GetStringDefault("LogsDir");
     if (!m_logsDir.empty())
     {
         if ((m_logsDir.at(m_logsDir.length() - 1) != '/') && (m_logsDir.at(m_logsDir.length() - 1) != '\\'))
@@ -327,7 +328,7 @@ bool Database::Execute(const char* sql)
     if (!m_pAsyncConn)
         return false;
 
-    SqlTransaction* pTrans = m_TransStorage->get();
+    auto const pTrans = m_currentTransaction.get();
     if (pTrans)
     {
         // add SQL request to trans queue
@@ -391,19 +392,17 @@ bool Database::BeginTransaction()
     if (!m_pAsyncConn)
         return false;
 
-    // initiate transaction on current thread
-    // currently we do not support queued transactions
-    m_TransStorage->init();
-    return true;
+    MANGOS_ASSERT(!m_currentTransaction.get());   // if we will get a nested transaction request - we MUST fix code!!!
+
+    if (!m_currentTransaction.get())
+        m_currentTransaction.reset(new SqlTransaction);
+
+    return !!m_currentTransaction.get();
 }
 
 bool Database::CommitTransaction()
 {
-    if (!m_pAsyncConn)
-        return false;
-
-    // check if we have pending transaction
-    if (!m_TransStorage->get())
+    if (!m_pAsyncConn || !m_currentTransaction.get())
         return false;
 
     // if async execution is not available
@@ -411,7 +410,7 @@ bool Database::CommitTransaction()
         return CommitTransactionDirect();
 
     // add SqlTransaction to the async queue
-    m_threadBody->Delay(m_TransStorage->detach());
+    m_threadBody->Delay(m_currentTransaction.release());
     return true;
 }
 
@@ -421,11 +420,11 @@ bool Database::CommitTransactionDirect()
         return false;
 
     // check if we have pending transaction
-    if (!m_TransStorage->get())
+    if (!m_currentTransaction.get())
         return false;
 
     // directly execute SqlTransaction
-    SqlTransaction* pTrans = m_TransStorage->detach();
+    auto const pTrans = m_currentTransaction.release();
     pTrans->Execute(m_pAsyncConn);
     delete pTrans;
 
@@ -437,11 +436,11 @@ bool Database::RollbackTransaction()
     if (!m_pAsyncConn)
         return false;
 
-    if (!m_TransStorage->get())
+    if (!m_currentTransaction.get())
         return false;
 
     // remove scheduled transaction
-    m_TransStorage->reset();
+    m_currentTransaction.reset();
 
     return true;
 }
@@ -539,7 +538,7 @@ bool Database::ExecuteStmt(const SqlStatementID& id, SqlStmtParameters* params)
     if (!m_pAsyncConn)
         return false;
 
-    SqlTransaction* pTrans = m_TransStorage->get();
+    auto const pTrans = m_currentTransaction.get();
     if (pTrans)
     {
         // add SQL request to trans queue
@@ -610,30 +609,4 @@ std::string Database::GetStmtString(const int stmtId) const
     }
 
     return std::string();
-}
-
-// HELPER CLASSES AND FUNCTIONS
-Database::TransHelper::~TransHelper()
-{
-    reset();
-}
-
-SqlTransaction* Database::TransHelper::init()
-{
-    MANGOS_ASSERT(!m_pTrans);   // if we will get a nested transaction request - we MUST fix code!!!
-    m_pTrans = new SqlTransaction;
-    return m_pTrans;
-}
-
-SqlTransaction* Database::TransHelper::detach()
-{
-    SqlTransaction* pRes = m_pTrans;
-    m_pTrans = nullptr;
-    return pRes;
-}
-
-void Database::TransHelper::reset()
-{
-    delete m_pTrans;
-    m_pTrans = nullptr;
 }

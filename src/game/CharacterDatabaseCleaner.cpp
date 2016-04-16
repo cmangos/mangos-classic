@@ -90,7 +90,7 @@ void CharacterDatabaseCleaner::CheckUnique(const char* column, const char* table
 
 bool CharacterDatabaseCleaner::SkillCheck(uint32 skill)
 {
-    return sSkillLineStore.LookupEntry(skill);
+    return !!sSkillLineStore.LookupEntry(skill);
 }
 
 void CharacterDatabaseCleaner::CleanCharacterSkills()
@@ -100,7 +100,7 @@ void CharacterDatabaseCleaner::CleanCharacterSkills()
 
 bool CharacterDatabaseCleaner::SpellCheck(uint32 spell_id)
 {
-    return sSpellStore.LookupEntry(spell_id);
+    return !!sSpellStore.LookupEntry(spell_id);
 }
 
 void CharacterDatabaseCleaner::CleanCharacterSpell()

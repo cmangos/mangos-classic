@@ -56,7 +56,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\src\;..\..\..\..\dep\recastnavigation\Detour\Include\;..\..\..\..\dep\recastnavigation\Recast\Include\;..\..\..\..\src\game\vmap;..\..\..\..\dep\include\g3dlite;..\..\..\..\src\framework\;..\..\..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\;..\..\..\..\dep\recastnavigation\Detour\Include\;..\..\..\..\dep\recastnavigation\Recast\Include\;..\..\..\..\src\game\vmap;..\..\..\..\dep\include\g3dlite;..\..\..\..\src\framework\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;DEBUG;MMAP_GENERATOR;NO_CORE_FUNCS;DT_POLYREF64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -81,7 +81,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\src\;..\..\..\..\dep\recastnavigation\Detour\Include\;..\..\..\..\dep\recastnavigation\Recast\Include\;..\..\..\..\src\game\vmap;..\..\..\..\dep\include\g3dlite;..\..\..\..\src\framework\;..\..\..\..\dep\ACE_wrappers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src\;..\..\..\..\dep\recastnavigation\Detour\Include\;..\..\..\..\dep\recastnavigation\Recast\Include\;..\..\..\..\src\game\vmap;..\..\..\..\dep\include\g3dlite;..\..\..\..\src\framework\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <PreprocessorDefinitions>WIN32;NDEBUG;MMAP_GENERATOR;_CRT_SECURE_NO_WARNINGS;NO_CORE_FUNCS;DT_POLYREF64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>

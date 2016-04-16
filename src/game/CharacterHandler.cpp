@@ -195,8 +195,8 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
             Team team = Player::TeamForRace(race_);
             switch (team)
             {
-                case ALLIANCE: disabled = mask & (1 << 0); break;
-                case HORDE:    disabled = mask & (1 << 1); break;
+                case ALLIANCE: disabled = !!(mask & (1 << 0)); break;
+                case HORDE:    disabled = !!(mask & (1 << 1)); break;
                 default: break;
             }
 
@@ -354,7 +354,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     data << (uint8)CHAR_CREATE_SUCCESS;
     SendPacket(&data);
 
-    std::string IP_str = GetRemoteAddress();
+    const std::string &IP_str = GetRemoteAddress();
     BASIC_LOG("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
     sLog.outChar("Account: %d (IP: %s) Create Character:[%s] (guid: %u)", GetAccountId(), IP_str.c_str(), name.c_str(), pNewChar->GetGUIDLow());
 
@@ -678,7 +678,7 @@ void WorldSession::HandleSetFactionAtWarOpcode(WorldPacket& recv_data)
     recv_data >> repListID;
     recv_data >> flag;
 
-    GetPlayer()->GetReputationMgr().SetAtWar(repListID, flag);
+    GetPlayer()->GetReputationMgr().SetAtWar(repListID, !!flag);
 }
 
 void WorldSession::HandleMeetingStoneInfoOpcode(WorldPacket& /*recv_data*/)
@@ -737,7 +737,7 @@ void WorldSession::HandleSetFactionInactiveOpcode(WorldPacket& recv_data)
     uint8 inactive;
     recv_data >> replistid >> inactive;
 
-    _player->GetReputationMgr().SetInactive(replistid, inactive);
+    _player->GetReputationMgr().SetInactive(replistid, !!inactive);
 }
 
 void WorldSession::HandleShowingHelmOpcode(WorldPacket& /*recv_data*/)

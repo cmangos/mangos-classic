@@ -68,7 +68,7 @@ find_package(Git)
 # check if the platform supports precomiled headers
 find_package(PCHSupport)
 
-# TODO: remove this (refactor ACE & TBB CMake code)
+# TODO: remove this (refactor TBB CMake code)
 # VS100 uses MSBuild.exe instead of devenv.com, so force it to use devenv.com
 if(WIN32 AND MSVC_VERSION MATCHES 1600)
   find_package(VisualStudio2010)
@@ -96,27 +96,7 @@ set(CMAKE_INSTALL_RPATH ${LIBS_DIR})
 set(CMAKE_INSTALL_NAME_DIR ${LIBS_DIR})
 
 # Find needed packages and if necessery abort if something important is missing
-unset(ACE_INCLUDE_DIR CACHE)
-unset(ACE_LIBRARIES CACHE)
-unset(ACE_LIBRARIES_DIR CACHE)
-unset(ACE_INCLUDE_DIR)
-unset(ACE_LIBRARIES)
-unset(ACE_LIBRARIES_DIR)
-if(ACE_USE_EXTERNAL)
-  find_package(ACE)
-  if(NOT ACE_FOUND)
-    message(FATAL_ERROR
-      "This project requires ACE installed when ACE_USE_EXTERNAL is set. Please download the ACE Micro Release Kit from http://download.dre.vanderbilt.edu/ and install it. If this script didn't find ACE and it was correctly installed please set ACE_ROOT to the correct path."
-    )
-  endif()
-  if(EXISTS ${ACE_INCLUDE_DIR}/ace/Stack_Trace.h)
-    set(HAVE_ACE_STACK_TRACE_H ON) # config.h.cmake
-  endif()
-else()
-  include(cmake/macros/ImportACE.cmake)
-endif()
-
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system program_options thread)
 
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})

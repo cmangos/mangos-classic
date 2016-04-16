@@ -22,11 +22,7 @@ set(EXECUTABLE_SRCS
     AuthCodes.h
     AuthSocket.cpp
     AuthSocket.h
-    BufferedSocket.cpp
-    BufferedSocket.h
     Main.cpp
-    PatchHandler.cpp
-    PatchHandler.h
     RealmList.cpp
     RealmList.h
    )
@@ -42,7 +38,6 @@ include_directories(
   ${CMAKE_BINARY_DIR}
   ${CMAKE_BINARY_DIR}/src/shared
   ${MYSQL_INCLUDE_DIR}
-  ${ACE_INCLUDE_DIR}
 )
 
 add_executable(${EXECUTABLE_NAME}
@@ -50,15 +45,11 @@ add_executable(${EXECUTABLE_NAME}
 )
 
 add_dependencies(${EXECUTABLE_NAME} revision.h)
-if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(${EXECUTABLE_NAME} ACE_Project)
-# add_dependencies(${EXECUTABLE_NAME} ace)
-endif()
 
 target_link_libraries(${EXECUTABLE_NAME}
   shared
   framework
-  ${ACE_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 if(WIN32)
