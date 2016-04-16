@@ -103,7 +103,7 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
             // Check if cannot cast spell
             if (!(uiCastFlags & (CAST_FORCE_TARGET_SELF | CAST_FORCE_CAST)))
             {
-                CanCastResult castResult = CanCastSpell(pTarget, pSpell, uiCastFlags & CAST_TRIGGERED);
+                CanCastResult castResult = CanCastSpell(pTarget, pSpell, !!(uiCastFlags & CAST_TRIGGERED));
 
                 if (castResult != CAST_OK)
                     return castResult;
@@ -116,7 +116,7 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
             // Creature should always stop before it will cast a new spell
             pCaster->StopMoving();
 
-            pCaster->CastSpell(pTarget, pSpell, uiCastFlags & CAST_TRIGGERED, nullptr, nullptr, uiOriginalCasterGUID);
+            pCaster->CastSpell(pTarget, pSpell, !!(uiCastFlags & CAST_TRIGGERED), nullptr, nullptr, uiOriginalCasterGUID);
             return CAST_OK;
         }
         else
