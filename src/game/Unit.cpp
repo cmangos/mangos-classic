@@ -2332,19 +2332,7 @@ uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized)
 
 float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
 {
-    uint32 spellLevel = spellProto->spellLevel;
-    if (spellLevel <= 0)
-        return 1.0f;
-
-    float LvlPenalty = 0.0f;
-
-    if (spellLevel < 20)
-        LvlPenalty = 20.0f - spellLevel * 3.75f;
-    float LvlFactor = (float(spellLevel) + 6.0f) / float(getLevel());
-    if (LvlFactor > 1.0f)
-        LvlFactor = 1.0f;
-
-    return (100.0f - LvlPenalty) * LvlFactor / 100.0f;
+    return spellProto->spellLevel < 20 && spellProto->spellLevel > 0 ? (1.0f - ((20.0f - spellProto->spellLevel) * 0.0375f)) : 1.0f;
 }
 
 void Unit::SendMeleeAttackStart(Unit* pVictim)
