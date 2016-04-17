@@ -2577,23 +2577,16 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
     uint32 level = urand(cInfo->MinLevel, cInfo->MaxLevel);
 
     // level of pet summoned using engineering item based at engineering skill level
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_CastItem)
     {
-        if (m_CastItem)
+        ItemPrototype const* proto = m_CastItem->GetProto();
+        if (proto && proto->RequiredSkill == SKILL_ENGINEERING)
         {
-            ItemPrototype const* proto = m_CastItem->GetProto();
-            if (proto && proto->RequiredSkill == SKILL_ENGINEERING)
+            uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINEERING);
+            if (skill202)
             {
-                uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINEERING);
-                if (skill202)
-                {
-                    level = skill202 / 5;
-                }
+                level = skill202 / 5;
             }
-        }
-        else                    // Level of pet summoned (level of caster, if caster is a player)
-        {
-            level = m_caster->getLevel();
         }
     }
 
@@ -2655,6 +2648,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
 
         spawnCreature->AIM_Initialize();
+        spawnCreature->InitPetCreateSpells();
 
         m_caster->AddGuardian(spawnCreature);
 
