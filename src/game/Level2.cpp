@@ -2320,6 +2320,22 @@ bool ChatHandler::HandlePInfoCommand(char* args)
         delete result;
     }
 
+    result = LoginDatabase.PQuery("SELECT noteTime, accountNote FROM account_note WHERE accountId = %u ORDER BY noteTime ASC", accId);
+    if (result)
+    {
+        PSendSysMessage("====== Account Notes ======");
+        do
+        {
+            Field* fields = result->Fetch();
+            std::string noteTime = fields[0].GetString();
+            std::string accountNote = fields[1].GetString();
+            PSendSysMessage("[%s] %s", noteTime, accountNote);
+        }
+        while (result->NextRow());
+
+        delete result;
+    }
+
     std::string nameLink = playerLink(target_name);
 
     PSendSysMessage(LANG_PINFO_ACCOUNT, (target ? "" : GetMangosString(LANG_OFFLINE)), nameLink.c_str(), target_guid.GetCounter(), username.c_str(), accId, security, last_ip.c_str(), last_login.c_str(), latency);

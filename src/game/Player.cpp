@@ -528,6 +528,15 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     m_lastFallTime = 0;
     m_lastFallZ = 0;
+
+    lastCheckMapId = 0;
+    lastCheckPosX = 0.0f;
+    lastCheckPosY = 0.0f;
+    lastCheckPosZ = 0.0f;
+    nextCheck = 0;
+    lastReport = 0;
+    initAntiCheat = false;
+    reportAmount = 0;
 }
 
 Player::~Player()
@@ -1303,6 +1312,49 @@ void Player::Update(uint32 update_diff, uint32 p_time)
 
     if (IsHasDelayedTeleport())
         TeleportTo(m_teleport_dest, m_teleport_options);
+
+    if (!isGameMaster() && nextCheck < time(nullptr))
+    {
+        if (GetTransport() || IsTaxiFlying())
+            ResetAntiCheatCheck(30);
+
+        if (initAntiCheat)
+        {
+            if (!IsTaxiFlying() && !GetTransport() && GetMapId() != 369 && GetDistance2d(lastCheckPosX, lastCheckPosY) > 50.0f)
+            {
+                if (lastReport < time(nullptr) - 10)
+                {
+                    if (++reportAmount >= 2)
+                    {
+                        reportAmount = 0;
+                        lastReport = time(nullptr);
+
+                        HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
+                        for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+                        {
+                            Player* player = itr->second;
+                            if (player->isGameMaster())
+                            {
+                                char msgbuffer[1000];
+                                sprintf(msgbuffer, "[ANTI-CHEAT] Player %s on AccountId %u is a possible cheater!", GetName(), GetSession()->GetAccountId());
+
+                                sLog.outChar(msgbuffer);
+                                sWorld.SendServerMessage(SERVER_MSG_CUSTOM, msgbuffer, player);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        lastCheckMapId = GetMapId();
+        lastCheckPosX = GetPositionX();
+        lastCheckPosY = GetPositionY();
+        lastCheckPosZ = GetPositionZ();
+        initAntiCheat = true;
+
+        nextCheck = time(nullptr) + 1;
+    }
 }
 
 void Player::SetDeathState(DeathState s)
@@ -1513,6 +1565,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // don't let gm level > 1 either
     if (!InBattleGround() && mEntry->IsBattleGround())
         return false;
+
+    ResetAntiCheatCheck(10);
 
     // Get MapEntrance trigger if teleport to other -nonBG- map
     bool assignedAreaTrigger = false;

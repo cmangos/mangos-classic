@@ -2059,6 +2059,17 @@ class MANGOS_DLL_SPEC Player : public Unit
         GridReference<Player>& GetGridRef() { return m_gridRef; }
         MapReference& GetMapRef() { return m_mapRef; }
 
+        void ResetAntiCheatCheck(uint32 nextCheckInSec = 5)
+        {
+            lastCheckPosX = 0.0f;
+            lastCheckPosY = 0.0f;
+            lastCheckPosZ = 0.0f;
+            lastCheckMapId = 0;
+            nextCheck = time(nullptr) + nextCheckInSec;
+            initAntiCheat = false;
+            reportAmount = 0;
+        }
+
     protected:
 
         uint32 m_contestedPvPTimer;
@@ -2226,6 +2237,17 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool m_canDualWield;
         uint8 m_swingErrorMsg;
         float m_ammoDPS;
+
+        /////////// TEMP CHEATING SOLUTION ///////////
+        float  lastCheckPosX;
+        float  lastCheckPosY;
+        float  lastCheckPosZ;
+        uint32 lastCheckMapId;
+        time_t nextCheck;
+        time_t lastReport;
+        uint32 reportAmount;
+        bool   initAntiCheat;
+        /////////// TEMP CHEATING SOLUTION ///////////
 
         //////////////////// Rest System/////////////////////
         time_t time_inn_enter;
