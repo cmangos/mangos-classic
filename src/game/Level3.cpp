@@ -2710,7 +2710,7 @@ bool ChatHandler::HandleLookupItemSetCommand(char* args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < MAX_DBC_LOCALE; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -2724,7 +2724,7 @@ bool ChatHandler::HandleLookupItemSetCommand(char* args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < MAX_DBC_LOCALE)
             {
                 // send item set in "id - [namedlink locale]" format
                 if (m_session)
@@ -2773,7 +2773,7 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < MAX_DBC_LOCALE; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -2787,7 +2787,7 @@ bool ChatHandler::HandleLookupSkillCommand(char* args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < MAX_DBC_LOCALE)
             {
                 char valStr[50] = "";
                 char const* knownStr = "";
@@ -2898,7 +2898,7 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < MAX_DBC_LOCALE; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -2912,7 +2912,7 @@ bool ChatHandler::HandleLookupSpellCommand(char* args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < MAX_DBC_LOCALE)
             {
                 ShowSpellListHelper(target, spellInfo, LocaleConstant(loc));
                 ++counter;
@@ -3137,7 +3137,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(char* args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < MAX_DBC_LOCALE; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -3151,7 +3151,7 @@ bool ChatHandler::HandleLookupTaxiNodeCommand(char* args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < MAX_DBC_LOCALE)
             {
                 // send taxinode in "id - [name] (Map:m X:x Y:y Z:z)" format
                 if (m_session)
