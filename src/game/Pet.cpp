@@ -1052,29 +1052,6 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
 
     uint32 creature_ID = (getPetType() == HUNTER_PET) ? 1 : cinfo->Entry;
 
-    switch (getPetType())
-    {
-        case SUMMON_PET:
-            SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
-
-            // this enables popup window (pet dismiss, cancel)
-            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-            break;
-        case HUNTER_PET:
-            SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_WARRIOR);
-            SetByteValue(UNIT_FIELD_BYTES_0, 2, GENDER_NONE);
-            SetSheath(SHEATH_STATE_MELEE);
-            SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5);
-
-            // this enables popup window (pet abandon, cancel), original value set in CreateBaseAtCreature
-            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
-            break;
-        case GUARDIAN_PET:
-        case MINI_PET:
-        default:
-            break;
-    }
-
     SetLevel(petlevel);
 
     SetMeleeDamageSchool(SpellSchools(cinfo->DamageSchool));
@@ -1121,6 +1098,9 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
         {
             if (owner->GetTypeId() == TYPEID_PLAYER && owner->getClass() == CLASS_WARLOCK)
             {
+                // this enables popup window (pet dismiss, cancel)
+                SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
                 // the damage bonus used for pets is either fire or shadow damage, whatever is higher
                 uint32 fire  = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE);
                 uint32 shadow = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW);
@@ -1129,6 +1109,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
                 SetBonusDamage(int32(val * 0.15f));
                 // bonusAP += val * 0.57;
             }
+
             float dMaxLevel = cinfo->MaxMeleeDmg / cinfo->MaxLevel;
             float dMinLevel = cinfo->MinMeleeDmg / cinfo->MinLevel;
             float mDmg = (dMaxLevel - ((dMaxLevel - dMinLevel)/2)) * petlevel;
@@ -1139,7 +1120,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             // SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
 
             PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(creature_ID, petlevel);
-            if (pInfo)                                      // exist in DB
+            if (pInfo)                                      // exist in pet_levelstats DB
             {
                 SetCreateHealth(pInfo->health);
                 SetCreateMana(pInfo->mana);
@@ -1152,24 +1133,41 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
                     SetCreateStat(Stats(stat), float(pInfo->stats[stat]));
                 }
             }
-            else                                            // not exist in DB, use some default fake data
+            else                                            // if not fall back to creature_template db values
             {
-                sLog.outErrorDb("Summoned pet (Entry: %u) not have pet stats data in DB", cinfo->Entry);
+                if (petlevel == cinfo->MaxLevel)
+                {
+                    SetCreateHealth(cinfo->MaxLevelHealth);
+                    SetCreateMana(cinfo->MaxLevelMana);
+                }
 
-                // remove elite bonuses included in DB values
-                SetCreateHealth(uint32(((float(cinfo->MaxLevelHealth) / cinfo->MaxLevel) / (1 + 2 * cinfo->Rank)) * petlevel));
-                SetCreateMana(uint32(((float(cinfo->MaxLevelMana)   / cinfo->MaxLevel) / (1 + 2 * cinfo->Rank)) * petlevel));
+                else if (petlevel == cinfo->MinLevel)
+                {
+                    SetCreateHealth(cinfo->MinLevelHealth);
+                    SetCreateMana(cinfo->MinLevelMana);
+                }
 
-                SetCreateStat(STAT_STRENGTH, 22);
-                SetCreateStat(STAT_AGILITY, 22);
-                SetCreateStat(STAT_STAMINA, 25);
-                SetCreateStat(STAT_INTELLECT, 28);
-                SetCreateStat(STAT_SPIRIT, 27);
+                else
+                {
+                    float dMaxLevel = cinfo->MaxLevelHealth / cinfo->MaxLevel;
+                    float dMinLevel = cinfo->MinLevelHealth / cinfo->MinLevel;
+                    SetCreateHealth((dMaxLevel - ((dMaxLevel - dMinLevel)/2)) * petlevel);
+
+                    dMaxLevel = cinfo->MaxLevelMana / cinfo->MaxLevel;
+                    dMinLevel = cinfo->MinLevelMana / cinfo->MinLevel;
+                    SetCreateMana((dMaxLevel - ((dMaxLevel - dMinLevel)/2)) * petlevel);
+                }
             }
             break;
         }
         case HUNTER_PET:
         {
+            SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_WARRIOR);
+            SetSheath(SHEATH_STATE_MELEE);
+            SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5);
+
+            // this enables popup window (pet abandon, cancel), original value set in CreateBaseAtCreature
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
             SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(petlevel));
             // these formula may not be correct; however, it is designed to be close to what it should be
             // this makes dps 0.5 of pets level
@@ -1209,6 +1207,9 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
 
         case GUARDIAN_PET:
         {
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(cinfo->MinMeleeDmg));
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(cinfo->MaxMeleeDmg));
+
             PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(creature_ID, petlevel);
 
             if (pInfo)               // exist in DB
@@ -1248,9 +1249,6 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
                     SetCreateMana((dMaxLevel - ((dMaxLevel - dMinLevel)/2)) * petlevel);
                 }
             }
-
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(cinfo->MinMeleeDmg));
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(cinfo->MaxMeleeDmg));
 
             break;
         }
