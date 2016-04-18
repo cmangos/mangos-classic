@@ -1519,7 +1519,7 @@ bool ChatHandler::HandleLookupAreaCommand(char* args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < MAX_DBC_LOCALE; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -1533,7 +1533,7 @@ bool ChatHandler::HandleLookupAreaCommand(char* args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < MAX_DBC_LOCALE)
             {
                 // send area in "id - [name]" format
                 std::ostringstream ss;
