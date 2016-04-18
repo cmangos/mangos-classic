@@ -1271,9 +1271,9 @@ void World::DetectDBCLang()
 {
     uint32 m_lang_confid = sConfig.GetIntDefault("DBC.Locale", 255);
 
-    if (m_lang_confid != 255 && m_lang_confid >= MAX_LOCALE)
+    if (m_lang_confid != 255 && m_lang_confid >= MAX_DBC_LOCALE)
     {
-        sLog.outError("Incorrect DBC.Locale! Must be >= 0 and < %d (set to 0)", MAX_LOCALE);
+        sLog.outError("Incorrect DBC.Locale! Must be >= 0 and < %d (set to 0)", MAX_DBC_LOCALE);
         m_lang_confid = LOCALE_enUS;
     }
 
@@ -1282,8 +1282,8 @@ void World::DetectDBCLang()
 
     std::string availableLocalsStr;
 
-    uint32 default_locale = MAX_LOCALE;
-    for (int i = MAX_LOCALE - 1; i >= 0; --i)
+    uint32 default_locale = MAX_DBC_LOCALE;
+    for (int i = MAX_DBC_LOCALE - 1; i >= 0; --i)
     {
         if (strlen(race->name[i]) > 0)                      // check by race names
         {
@@ -1294,13 +1294,13 @@ void World::DetectDBCLang()
         }
     }
 
-    if (default_locale != m_lang_confid && m_lang_confid < MAX_LOCALE &&
+    if (default_locale != m_lang_confid && m_lang_confid < MAX_DBC_LOCALE &&
             (m_availableDbcLocaleMask & (1 << m_lang_confid)))
     {
         default_locale = m_lang_confid;
     }
 
-    if (default_locale >= MAX_LOCALE)
+    if (default_locale >= MAX_DBC_LOCALE)
     {
         sLog.outError("Unable to determine your DBC Locale! (corrupt DBC?)");
         Log::WaitBeforeContinueIfNeed();
