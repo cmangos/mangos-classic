@@ -243,6 +243,8 @@ UPDATE gameobject_template SET ScriptName='go_defias_cannon' WHERE entry=16398;
 UPDATE creature_template SET ScriptName='npc_aged_dying_ancient_kodo' WHERE entry IN (4700, 4701, 4702, 11627);
 UPDATE creature_template SET ScriptName='npc_dalinda_malem' WHERE entry=5644;
 UPDATE creature_template SET ScriptName='npc_melizza_brimbuzzle' WHERE entry=12277;
+UPDATE creature_template SET ScriptName='npc_cork_gizelton' WHERE entry=11625;
+UPDATE creature_template SET ScriptName='npc_rigger_gizelton' WHERE entry=11626;
 
 /* DIRE MAUL */
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
@@ -1596,7 +1598,43 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001164,'I can sens it now, $N. Ashenvale lies down this path.',0,0,0,0,'arei SAY_ASHENVALE'),
 (-1001165,'I feel... something strange...',0,0,0,0,'arei SAY_TRANSFORM'),
 (-1001166,'$N my form has now changed! The true strength of my spirit is returing to me now... The cursed grasp of the forest is leaving me.',0,0,0,0,'arei SAY_LIFT_CURSE'),
-(-1001167,'Thank you, $N. Now my spirit will finally be at peace.',0,0,0,0,'arei SAY_ESCORT_COMPLETE');
+(-1001167,'Thank you, $N. Now my spirit will finally be at peace.',0,0,0,0,'arei SAY_ESCORT_COMPLETE'),
+
+(-1001168,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001169,'REUSE ME',0,0,0,0,'REUSE_ME'),
+
+(-1001170,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001171,'REUSE ME',0,0,0,0,'REUSE_ME'),
+
+(-1001172,'REUSE ME',0,0,0,0,'REUSE_ME'),
+
+(-1001173,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001174,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001175,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001176,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001177,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001178,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001179,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001180,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001181,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001182,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001183,'REUSE ME',0,0,0,0,'REUSE_ME'),
+
+(-1001184,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001185,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001186,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001187,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001188,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001189,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001190,'REUSE ME',0,0,0,0,'REUSE_ME'),
+
+(-1001191,'Hey, you call yourself a body guard? Get to work and protect us...',0,0,0,0,'SAY_CORK_AMBUSH1'),
+(-1001192,'Mister body guard, are you going to earn your money or what?',0,0,0,0,'SAY_CORK_AMBUSH2'),
+(-1001193,'You\'re fired! <Cough...Cork clears throat.> I mean, help!',0,0,0,0,'SAY_CORK_AMBUSH3'),
+(-1001194,'Blast those stupid centaurs! Sigh - well, it seems you kept your bargain. Up the road you shall find Smeed Scrabblescrew, he has your money.',0,0,0,1,'SAY_CORK_END'),
+(-1001195,'Eeck! Demons hungry for the kodos!',0,0,0,0,'SAY_RIGGER_AMBUSH1'),
+(-1001196,'What am I paying you for? The kodos are nearly dead!',0,0,0,0,'SAY_RIGGER_AMBUSH2'),
+(-1001197,'Wow! We did it... not sure why we thought we needed the likes of you. Nevertheless, speak with Smeed Srablescrew; he will give you your earnings!',0,0,0,0,'SAY_RIGGER_END');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
