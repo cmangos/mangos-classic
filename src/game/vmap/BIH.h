@@ -33,12 +33,6 @@
 
 #define MAX_STACK_SIZE 64
 
-#ifdef _MSC_VER
-#define isnan(x) _isnan(x)
-#else
-#define isnan(x) std::isnan(x)
-#endif
-
 using G3D::Vector3;
 using G3D::AABox;
 using G3D::Ray;
