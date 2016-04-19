@@ -3031,9 +3031,15 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     uint32 faction = m_caster->getFaction();
 
-    if (m_caster->GetTypeId() == TYPEID_UNIT)
+    NewSummon->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_caster->getClass() == CLASS_WARLOCK || m_caster->getClass() == CLASS_HUNTER))
     {
-        NewSummon->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
+        if (OldSummon->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
+            NewSummon->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
+
+        else if (OldSummon->GetCharmInfo()->HasReactState(REACT_PASSIVE))
+            NewSummon->GetCharmInfo()->SetReactState(REACT_PASSIVE);
     }
 
     NewSummon->SetOwnerGuid(m_caster->GetObjectGuid());
