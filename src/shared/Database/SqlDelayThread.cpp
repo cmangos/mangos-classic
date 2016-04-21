@@ -68,13 +68,19 @@ void SqlDelayThread::Stop()
 
 void SqlDelayThread::ProcessRequests()
 {
-    std::lock_guard<std::mutex> guard(m_queueMutex);
+    std::queue<std::unique_ptr<SqlOperation>> sqlQueue;
 
-    while (!m_sqlQueue.empty())
+    // we need to move the contents of the queue to a local copy because executing these statements with the
+    // lock in place can result in a deadlock with the world thread which calls Database::ProcessResultQueue()
     {
-        auto const s = std::move(m_sqlQueue.front());
-        m_sqlQueue.pop();
+        std::lock_guard<std::mutex> guard(m_queueMutex);
+        sqlQueue = std::move(m_sqlQueue);
+    }
+
+    while (!sqlQueue.empty())
+    {
+        auto const s = std::move(sqlQueue.front());
+        sqlQueue.pop();
         s->Execute(m_dbConnection);
     }
 }
-
