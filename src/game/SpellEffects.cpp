@@ -2668,12 +2668,10 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
 
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        spawnCreature->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
+            spawnCreature->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
 
         else
-        spawnCreature->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
-
-        spawnCreature->AIM_Initialize();
+            spawnCreature->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
 
         m_caster->AddGuardian(spawnCreature);
 
@@ -2857,6 +2855,8 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
 
     Creature* creatureTarget = (Creature*)unitTarget;
 
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creatureTarget->GetEntry());
+
     // cast finish successfully
     // SendChannelUpdate(0);
     finish();
@@ -2884,20 +2884,26 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
         return;
     }
 
-    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
+    uint32 pet_number = sObjectMgr.GeneratePetNumber();
+    pet->GetCharmInfo()->SetPetNumber(pet_number, true);
+
     pet->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
     // this enables pet details window (Shift+P)
     pet->AIM_Initialize();
     pet->InitPetCreateSpells();
-    pet->SetHealth(pet->GetMaxHealth());
+    pet->SetHealth(creatureTarget->GetHealth());
 
-    // "kill" original creature
+    // set the location and rotation of the pet to be the same as the original object
+    CreatureCreatePos pos(creatureTarget, creatureTarget->GetOrientation());
+    pet->Create(creatureTarget->GetMap()->GenerateLocalLowGuid(HIGHGUID_PET), pos, cInfo, pet_number);
+
+    // destroy creature object
     creatureTarget->ForcedDespawn();
 
     // prepare visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, creatureTarget->getLevel() - 1);
 
-    // add to world
+    // add pet object to the world
     pet->GetMap()->Add((Creature*)pet);
 
     // visual effect for levelup
