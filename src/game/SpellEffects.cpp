@@ -2650,8 +2650,6 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
             return;
         }
 
-        spawnCreature->SetRespawnCoord(pos);
-
         if (m_duration > 0)
             spawnCreature->SetDuration(m_duration);
 
@@ -2665,6 +2663,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
         spawnCreature->InitStatsForLevel(level, m_caster);
+        spawnCreature->AIM_Initialize();
         spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
 
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
