@@ -351,25 +351,14 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                 // Ferocious Bite
                 if ((m_spellInfo->SpellFamilyFlags & uint64(0x000800000)) && m_spellInfo->SpellVisual == 6587)
                 {
-                    // converts each extra point of energy into ($f1+$AP/630) additional damage
-                    float multiple = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 630 + m_spellInfo->DmgMultiplier[effect_idx];
-                    damage += int32(m_caster->GetPower(POWER_ENERGY) * multiple);
+                    // converts each extra point of energy into additional damage
+                    damage += int32(m_caster->GetPower(POWER_ENERGY) * m_spellInfo->DmgMultiplier[effect_idx]);
                     m_caster->SetPower(POWER_ENERGY, 0);
                 }
                 break;
             }
             case SPELLFAMILY_ROGUE:
-            {
-                // Eviscerate
-                if ((m_spellInfo->SpellFamilyFlags & uint64(0x00020000)) && m_caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
-                    {
-                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * combo * 0.03f);
-                    }
-                }
                 break;
-            }
             case SPELLFAMILY_HUNTER:
                 break;
             case SPELLFAMILY_PALADIN:
@@ -1673,9 +1662,11 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 
             addhealth += tickheal * tickcount;
         }
-
-        addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
-        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+        else
+        {
+            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+            addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+        }
 
         m_healing += addhealth;
     }

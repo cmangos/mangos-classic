@@ -253,6 +253,18 @@ class MANGOS_DLL_SPEC Item : public Object
         void DeleteFromInventoryDB();
         void LoadLootFromDB(Field* fields);
 
+        bool isWeapon() const{ return GetProto()->Class == ITEM_CLASS_WEAPON; }
+        bool isOneHandedWeapon() const 
+        {
+            return (isWeapon() &&
+                (GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_AXE ||
+                GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_SWORD ||
+                GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_MACE ||
+                GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_FIST ||
+                GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER ||
+                GetProto()->SubClass == ITEM_SUBCLASS_WEAPON_EXOTIC));
+        }
+
         bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
         bool CanBeTraded() const;

@@ -145,108 +145,6 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
     return (castTime > 0) ? uint32(castTime) : 0;
 }
 
-uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType damagetype)
-{
-    uint32 CastingTime = !IsChanneledSpell(spellProto) ? GetSpellCastTime(spellProto) : GetSpellDuration(spellProto);
-
-    if (CastingTime > 7000) CastingTime = 7000;
-    if (CastingTime < 1500) CastingTime = 1500;
-
-    if (damagetype == DOT && !IsChanneledSpell(spellProto))
-        CastingTime = 3500;
-
-    int32 overTime    = 0;
-    uint8 effects     = 0;
-    bool DirectDamage = false;
-    bool AreaEffect   = false;
-
-    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        if (IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetA[i])) || IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetB[i])))
-            AreaEffect = true;
-
-    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-    {
-        switch (spellProto->Effect[i])
-        {
-            case SPELL_EFFECT_SCHOOL_DAMAGE:
-            case SPELL_EFFECT_POWER_DRAIN:
-            case SPELL_EFFECT_HEALTH_LEECH:
-            case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
-            case SPELL_EFFECT_POWER_BURN:
-            case SPELL_EFFECT_HEAL:
-                DirectDamage = true;
-                break;
-            case SPELL_EFFECT_APPLY_AURA:
-                switch (spellProto->EffectApplyAuraName[i])
-                {
-                    case SPELL_AURA_PERIODIC_DAMAGE:
-                    case SPELL_AURA_PERIODIC_HEAL:
-                    case SPELL_AURA_PERIODIC_LEECH:
-                        if (GetSpellDuration(spellProto))
-                            overTime = GetSpellDuration(spellProto);
-                        break;
-                    // Penalty for additional effects
-                    case SPELL_AURA_DUMMY:
-                        ++effects;
-                        break;
-                    case SPELL_AURA_MOD_DECREASE_SPEED:
-                        ++effects;
-                        break;
-                    case SPELL_AURA_MOD_CONFUSE:
-                    case SPELL_AURA_MOD_STUN:
-                    case SPELL_AURA_MOD_ROOT:
-                        // -10% per effect
-                        effects += 2;
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    // Combined Spells with Both Over Time and Direct Damage
-    if (overTime > 0 && CastingTime > 0 && DirectDamage)
-    {
-        // mainly for DoTs which are 3500 here otherwise
-        uint32 OriginalCastTime = GetSpellCastTime(spellProto);
-        if (OriginalCastTime > 7000) OriginalCastTime = 7000;
-        if (OriginalCastTime < 1500) OriginalCastTime = 1500;
-        // Portion to Over Time
-        float PtOT = (overTime / 15000.0f) / ((overTime / 15000.0f) + (OriginalCastTime / 3500.0f));
-
-        if (damagetype == DOT)
-            CastingTime = uint32(CastingTime * PtOT);
-        else if (PtOT < 1.0f)
-            CastingTime  = uint32(CastingTime * (1 - PtOT));
-        else
-            CastingTime = 0;
-    }
-
-    // Area Effect Spells receive only half of bonus
-    if (AreaEffect)
-        CastingTime /= 2;
-
-    // 50% for damage and healing spells for leech spells from damage bonus and 0% from healing
-    for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-    {
-        if (spellProto->Effect[j] == SPELL_EFFECT_HEALTH_LEECH ||
-                (spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH))
-        {
-            CastingTime /= 2;
-            break;
-        }
-    }
-
-    // -5% of total per any additional effect (multiplicative)
-    for (int i = 0; i < effects; ++i)
-        CastingTime *= 0.95f;
-
-    return CastingTime;
-}
-
 uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo)
 {
     int32 DotDuration = GetSpellDuration(spellInfo);
@@ -285,23 +183,220 @@ uint16 GetSpellAuraMaxTicks(uint32 spellId)
     return GetSpellAuraMaxTicks(spellInfo);
 }
 
-float CalculateDefaultCoefficient(SpellEntry const* spellProto, DamageEffectType const damagetype)
+float CalculateDefaultCoefficient(SpellEntry const *spellProto, DamageEffectType const damagetype)
 {
-    // Damage over Time spells bonus calculation
-    float DotFactor = 1.0f;
-    if (damagetype == DOT)
-    {
-        if (!IsChanneledSpell(spellProto))
-            DotFactor = GetSpellDuration(spellProto) / 15000.0f;
+    // Distribute Damage over multiple effects, reduce by AoE
+    uint32 castingTime = !IsChanneledSpell(spellProto) ? GetSpellCastTime(spellProto) : GetSpellDuration(spellProto);
 
-        if (uint16 DotTicks = GetSpellAuraMaxTicks(spellProto))
-            DotFactor /= DotTicks;
+    if (castingTime > 3500) castingTime = 3500;
+    if (castingTime < 1500) castingTime = 1500;
+
+    if (damagetype == DOT && !IsChanneledSpell(spellProto))
+        castingTime = 3500;
+
+    uint16  ticksCount      = 0;
+    uint8   effectsCount    = 0;
+    bool    hasDirectDamage = false;
+
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        switch (spellProto->Effect[i])
+        {
+            case SPELL_EFFECT_SCHOOL_DAMAGE:
+            case SPELL_EFFECT_POWER_DRAIN:
+            case SPELL_EFFECT_HEALTH_LEECH:
+            case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+            case SPELL_EFFECT_POWER_BURN:
+            case SPELL_EFFECT_HEAL:
+                hasDirectDamage = true;
+                break;
+            case SPELL_EFFECT_APPLY_AURA:
+            case SPELL_EFFECT_PERSISTENT_AREA_AURA:
+            case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
+                switch (spellProto->EffectApplyAuraName[i])
+                {
+                    case SPELL_AURA_PERIODIC_DAMAGE:
+                    case SPELL_AURA_PERIODIC_HEAL:
+                    case SPELL_AURA_PERIODIC_LEECH:
+                        ticksCount = GetSpellAuraMaxTicks(spellProto);
+                        break;
+                    // Penalty for additional effects 5%
+                    case SPELL_AURA_DUMMY:
+                    case SPELL_AURA_MOD_DECREASE_SPEED:
+                    case SPELL_AURA_MOD_CONFUSE:
+                    case SPELL_AURA_MOD_STUN:
+                    case SPELL_AURA_MOD_ROOT:
+                        ++effectsCount;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case SPELL_EFFECT_INTERRUPT_CAST:
+                ++effectsCount;
+                break;
+            default:
+                break;
+        }
     }
 
-    // Distribute Damage over multiple effects, reduce by AoE
-    float coeff = GetSpellCastTimeForBonus(spellProto, damagetype) / 3500.0f;
+    // Combined Spells with Both Over Time and Direct Damage
+    if (ticksCount > 0 && castingTime > 0 && hasDirectDamage)
+    {
+        // mainly for DoTs which are 3500 here otherwise
+        uint32 originalCastTime = GetSpellCastTime(spellProto);
+        if (originalCastTime > 3500) originalCastTime = 3500;
+        if (originalCastTime < 1500) originalCastTime = 1500;
 
-    return coeff * DotFactor;
+        // Portion to Over Time
+        float PtOT = (ticksCount / 5.0f) / ((ticksCount / 5.0f) + (originalCastTime / 3500.0f));
+
+        if (damagetype == DOT)
+            castingTime = uint32(castingTime * PtOT);
+        else if (PtOT < 1.0f)
+            castingTime  = uint32(castingTime * (1 - PtOT));
+        else
+            castingTime = 0;
+    }
+
+    // Area Effect Spells receive only 1/3 of bonus
+    if (IsAreaEffect(spellProto))
+        castingTime /= 3;
+
+    // 50% for damage and healing spells for leech spells from damage bonus and 0% from healing
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (spellProto->Effect[i] == SPELL_EFFECT_HEALTH_LEECH ||
+           (spellProto->Effect[i] == SPELL_EFFECT_APPLY_AURA &&
+           spellProto->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_LEECH))
+        {
+            castingTime /= 2;
+            break;
+        }
+    }
+
+    // -5% of total per any additional effect (multiplicative)
+    for (uint8 i = 0; i < effectsCount; ++i)
+        castingTime *= 0.95f;
+        
+    float coeff = castingTime / 3500.0f;
+    
+    // Damage over Time spells bonus calculation
+    float dotFactor = 1.0f;
+    if (damagetype == DOT)
+    {
+        if (ticksCount)
+        {
+            if (!IsChanneledSpell(spellProto))
+                dotFactor = ticksCount < 5 ? float(ticksCount) / 5.0f : 1.0f;
+
+            dotFactor /= ticksCount;
+        }
+    }
+
+    return coeff * dotFactor;
+}
+
+float CalculateCustomCoefficient(SpellEntry const *spellProto, Unit const* caster, DamageEffectType const damageType, float coeff, uint8 targetNum)
+{
+    if (!caster)
+        return coeff;
+
+    if (caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        // Seal of Righteousness
+        if (spellProto->IsFitToFamily<SPELLFAMILY_PALADIN, CF_PALADIN_SEALS>() && spellProto->SpellIconID == 25)
+        {
+            coeff = 0.092f;
+            float speed = BASE_ATTACK_TIME;
+
+            if (Item *item = ((Player*)caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+            {
+                coeff = item->isOneHandedWeapon() ? 0.092f : 0.108f;
+                speed = item->GetProto()->Delay;
+            }
+
+            speed /= 1000.0f;
+
+            return speed * coeff;
+        }
+
+        // Chain Lightning / Chain Heal
+        if (spellProto->IsFitToFamily<SPELLFAMILY_SHAMAN, CF_SHAMAN_CHAIN_HEAL, CF_SHAMAN_CHAIN_LIGHTNING>())
+            for (uint8 i = 1; i < targetNum; ++i)
+                coeff *= 0.5f;
+
+        // Healing Wave (T1 bonus)
+        if (spellProto->IsFitToFamily<SPELLFAMILY_SHAMAN, CF_SHAMAN_HEALING_WAVE>())
+            for (uint8 i = 1; i < targetNum; ++i)
+                coeff *= 0.2f;
+    }
+
+    return coeff;
+}
+
+int32 CalculateBonusByAttackPower(SpellEntry const *spellProto, Unit const* caster, DamageEffectType const damageType, int32 total, int32 apBenefit)
+{
+    if (!caster)
+        return 0;
+        
+    switch (spellProto->SpellFamilyName)
+    {
+        case SPELLFAMILY_DRUID:
+        {
+            
+            if (spellProto->IsFitToFamily<SPELLFAMILY_DRUID, CF_DRUID_RIP_BITE>())
+            {
+                // Rip
+                if (damageType == DOT)
+                {
+                    // Dmg/tick = $AP * min(0.01 * $cp, 0.04) [Yes, there is no difference, whether 4 or 5 CPs are being used]
+                    uint8 cp = ((Player*)caster)->GetComboPoints();
+                    float coeff = std::min(0.01f * cp, 0.04f);
+                    total += int32(coeff * (caster->GetTotalAttackPowerValue(BASE_ATTACK) + apBenefit));
+                }
+                // Ferocious Bite
+                else
+                {
+                    // Dmg = $AP * $cp * 0.03
+                    uint8 cp = ((Player*)caster)->GetComboPoints();
+                    float coeff = cp * 0.03f;
+                    total += int32(coeff * (caster->GetTotalAttackPowerValue(BASE_ATTACK) + apBenefit));
+                }
+            }
+            break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            // Rupture
+            if (spellProto->IsFitToFamily<SPELLFAMILY_ROGUE, CF_ROGUE_RUPTURE>())
+            {
+                // Dmg/tick = $AP * min(0.01 * $cp, 0.03) [Like Rip: only the first three CP increase the contribution from AP]
+                uint8 cp = ((Player*)caster)->GetComboPoints();
+                float coeff = std::min(0.01f * cp, 0.03f);
+                total += int32(coeff * (caster->GetTotalAttackPowerValue(BASE_ATTACK) + apBenefit));
+            }
+            // Garrote
+            else if (spellProto->IsFitToFamily<SPELLFAMILY_ROGUE, CF_ROGUE_GARROTE>())
+            {
+                // Dmg/tick = $AP * 0.18 / 6 (0.03)
+                total += int32(0.03f * (caster->GetTotalAttackPowerValue(BASE_ATTACK) + apBenefit));
+            }
+            // Eviscerate
+            else if (spellProto->IsFitToFamily<SPELLFAMILY_ROGUE, CF_ROGUE_EVISCERATE>())
+            {
+                // Dmg = $AP * $cp * 0.03)
+                uint8 cp = ((Player*)caster)->GetComboPoints();
+                float coeff = cp * 0.03f;
+                total += int32(coeff * (caster->GetTotalAttackPowerValue(BASE_ATTACK) + apBenefit));
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    return total;
 }
 
 WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo)
@@ -1400,8 +1495,8 @@ void SpellMgr::LoadSpellBonuses()
 {
     mSpellBonusMap.clear();                             // need for reload case
     uint32 count = 0;
-    //                                                0      1             2          3
-    QueryResult* result = WorldDatabase.Query("SELECT entry, direct_bonus, dot_bonus, ap_bonus, ap_dot_bonus FROM spell_bonus_data");
+    //                                                0      1             2
+    QueryResult* result = WorldDatabase.Query("SELECT entry, direct_bonus, dot_bonus FROM spell_bonus_data");
     if (!result)
     {
         BarGoLink bar(1);
@@ -1438,8 +1533,6 @@ void SpellMgr::LoadSpellBonuses()
 
         sbe.direct_damage = fields[1].GetFloat();
         sbe.dot_damage    = fields[2].GetFloat();
-        sbe.ap_bonus      = fields[3].GetFloat();
-        sbe.ap_dot_bonus   = fields[4].GetFloat();
 
         bool need_dot = false;
         bool need_direct = false;
@@ -1493,28 +1586,23 @@ void SpellMgr::LoadSpellBonuses()
             dot_diff = std::abs(sbe.dot_damage - dot_calc);
         }
 
-        if (direct_diff < 0.02f && !need_dot && !sbe.ap_bonus && !sbe.ap_dot_bonus)
+        if (direct_diff < 0.02f && !need_dot)
             sLog.outErrorDb("`spell_bonus_data` entry for spell %u `direct_bonus` not needed (data from table: %f, calculated %f, difference of %f) and `dot_bonus` also not used",
                             entry, sbe.direct_damage, direct_calc, direct_diff);
-        else if (direct_diff < 0.02f && dot_diff < 0.02f && !sbe.ap_bonus && !sbe.ap_dot_bonus)
+        else if (direct_diff < 0.02f && dot_diff < 0.02f)
         {
             sLog.outErrorDb("`spell_bonus_data` entry for spell %u `direct_bonus` not needed (data from table: %f, calculated %f, difference of %f) and ",
                             entry, sbe.direct_damage, direct_calc, direct_diff);
             sLog.outErrorDb("                                  ... `dot_bonus` not needed (data from table: %f, calculated %f, difference of %f)",
                             sbe.dot_damage, dot_calc, dot_diff);
         }
-        else if (!need_direct && dot_diff < 0.02f && !sbe.ap_bonus && !sbe.ap_dot_bonus)
+        else if (!need_direct && dot_diff < 0.02f)
             sLog.outErrorDb("`spell_bonus_data` entry for spell %u `dot_bonus` not needed (data from table: %f, calculated %f, difference of %f) and direct also not used",
                             entry, sbe.dot_damage, dot_calc, dot_diff);
         else if (!need_direct && sbe.direct_damage)
             sLog.outErrorDb("`spell_bonus_data` entry for spell %u `direct_bonus` not used (spell not have non-periodic affects)", entry);
         else if (!need_dot && sbe.dot_damage)
             sLog.outErrorDb("`spell_bonus_data` entry for spell %u `dot_bonus` not used (spell not have periodic affects)", entry);
-
-        if (!need_direct && sbe.ap_bonus)
-            sLog.outErrorDb("`spell_bonus_data` entry for spell %u `ap_bonus` not used (spell not have non-periodic affects)", entry);
-        else if (!need_dot && sbe.ap_dot_bonus)
-            sLog.outErrorDb("`spell_bonus_data` entry for spell %u `ap_dot_bonus` not used (spell not have periodic affects)", entry);
 
         mSpellBonusMap[entry] = sbe;
 

@@ -75,8 +75,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId);
 // Different spell properties
 inline float GetSpellRadius(SpellRadiusEntry const* radius) { return (radius ? radius->Radius : 0); }
 uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell = nullptr);
-uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType damagetype);
-float CalculateDefaultCoefficient(SpellEntry const* spellProto, DamageEffectType const damagetype);
+float CalculateDefaultCoefficient(SpellEntry const *spellProto, DamageEffectType const damagetype);
+float CalculateCustomCoefficient(SpellEntry const *spellProto,  Unit const* caster, DamageEffectType const damageType, float coeff, uint8 targetNum = 1);
+int32 CalculateBonusByAttackPower(SpellEntry const *spellProto,  Unit const* caster, DamageEffectType const damageType, int32 total, int32 apBenefit);
 inline float GetSpellMinRange(SpellRangeEntry const* range) { return (range ? range->minRange : 0); }
 inline float GetSpellMaxRange(SpellRangeEntry const* range) { return (range ? range->maxRange : 0); }
 inline uint32 GetSpellRecoveryTime(SpellEntry const* spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
@@ -328,6 +329,22 @@ inline bool IsAreaEffectTarget(Targets target)
     }
     return false;
 }
+
+inline bool IsAreaEffect(SpellEntry const *spellInfo)
+{
+    for (uint8 eff = 0; eff < MAX_EFFECT_INDEX; ++eff)
+    {
+        if (IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[eff])) ||
+            IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[eff])))
+            return true;
+
+        if (SpellEntry const *triggerSpell = sSpellStore.LookupEntry(spellInfo->EffectTriggerSpell[eff]))
+            if (IsAreaEffect(triggerSpell))
+                return true;
+    }
+
+     return false;
+ }
 
 inline bool IsAreaOfEffectSpell(SpellEntry const* spellInfo)
 {
@@ -614,8 +631,6 @@ struct SpellBonusEntry
 {
     float  direct_damage;
     float  dot_damage;
-    float  ap_bonus;
-    float  ap_dot_bonus;
 };
 
 typedef std::unordered_map<uint32, SpellProcEventEntry> SpellProcEventMap;
