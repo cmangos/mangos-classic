@@ -339,7 +339,7 @@ inline bool IsAreaEffect(SpellEntry const *spellInfo)
             return true;
 
         if (SpellEntry const *triggerSpell = sSpellStore.LookupEntry(spellInfo->EffectTriggerSpell[eff]))
-            if (IsAreaEffect(triggerSpell))
+            if (triggerSpell->Id != spellInfo->Id && IsAreaEffect(triggerSpell))
                 return true;
     }
 
