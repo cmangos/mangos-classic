@@ -35,7 +35,7 @@ void LoadDatabase()
     if (SD2Database.Initialize(strSD2DBinfo.c_str()))
     {
         outstring_log("SD2: ScriptDev2 database initialized.");
-        outstring_log("");
+        outstring_log();
 
         // Extract DB-Name
         std::string::size_type n = strSD2DBinfo.rfind(';');
@@ -90,7 +90,7 @@ MANGOS_DLL_EXPORT
 void InitScriptLibrary()
 {
     // ScriptDev2 startup
-    outstring_log("");
+    outstring_log();
     outstring_log(" MMM  MMM    MM");
     outstring_log("M  MM M  M  M  M");
     outstring_log("MM    M   M   M");
@@ -98,7 +98,7 @@ void InitScriptLibrary()
     outstring_log("   MM M   M MMMM");
     outstring_log("MM  M M  M ");
     outstring_log(" MMM  MMM  http://www.scriptdev2.com");
-    outstring_log("");
+    outstring_log();
 
    // Get configuration file
    bool configFailure = false;
@@ -118,7 +118,7 @@ void InitScriptLibrary()
    if (SD2Config.GetIntDefault("ConfVersion", 0) != _MANGOSDCONFVERSION)
        script_error_log("Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
 
-   outstring_log("");
+   outstring_log();
 
    // Load database (must be called after SD2Config.SetSource).
     LoadDatabase();
@@ -126,7 +126,7 @@ void InitScriptLibrary()
     outstring_log("SD2: Loading C++ scripts");
     BarGoLink bar(1);
     bar.step();
-    outstring_log("");
+    outstring_log();
 
     // Resize script ids to needed ammount of assigned ScriptNames (from core)
     m_scripts.resize(GetScriptIdsCount(), nullptr);

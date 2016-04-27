@@ -268,6 +268,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, std::m
     ERROR_DB_FILTER_LOG(LOG_FILTER_DB_STRICTED_CHECK, __VA_ARGS__)
 
 // primary for script library
+void MANGOS_DLL_SPEC outstring_log();
 void MANGOS_DLL_SPEC outstring_log(const char* str, ...) ATTR_PRINTF(1, 2);
 void MANGOS_DLL_SPEC detail_log(const char* str, ...) ATTR_PRINTF(1, 2);
 void MANGOS_DLL_SPEC debug_log(const char* str, ...) ATTR_PRINTF(1, 2);
