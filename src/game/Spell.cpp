@@ -319,7 +319,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     // determine reflection
     m_canReflect = false;
 
-    if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED))
+    if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED))
     {
         for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
@@ -4083,7 +4083,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (target->IsTaxiFlying())
                 return SPELL_FAILED_BAD_TARGETS;
 
-            if (!m_IsTriggeredSpell && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
+            if (!m_IsTriggeredSpell && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS))
                 return SPELL_FAILED_LINE_OF_SIGHT;
 
             // auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
