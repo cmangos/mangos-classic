@@ -282,7 +282,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK0                          = 0x00000001,            // 0
     SPELL_ATTR_EX_DRAIN_ALL_POWER               = 0x00000002,            // 1 use all power (Only paladin Lay of Hands and Bunyanize)
     SPELL_ATTR_EX_CHANNELED_1                   = 0x00000004,            // 2 channeled 1
-    SPELL_ATTR_EX_UNK3                          = 0x00000008,            // 3
+    SPELL_ATTR_EX_CANT_REFLECTED                = 0x00000008,            // 3 used for detect can or not spell reflected
     SPELL_ATTR_EX_UNK4                          = 0x00000010,            // 4
     SPELL_ATTR_EX_NOT_BREAK_STEALTH             = 0x00000020,            // 5 Not break stealth
     SPELL_ATTR_EX_CHANNELED_2                   = 0x00000040,            // 6 channeled 2
@@ -317,7 +317,7 @@ enum SpellAttributesEx2
 {
     SPELL_ATTR_EX2_UNK0                         = 0x00000001,            // 0
     SPELL_ATTR_EX2_UNK1                         = 0x00000002,            // 1
-    SPELL_ATTR_EX2_CANT_REFLECTED               = 0x00000004,            // 2 ? used for detect can or not spell reflected // do not need LOS (e.g. 18220 since 3.3.3)
+    SPELL_ATTR_EX2_IGNORE_LOS                   = 0x00000004,            // 2 do not need LOS
     SPELL_ATTR_EX2_UNK3                         = 0x00000008,            // 3 auto targeting? (e.g. fishing skill enhancement items since 3.3.3)
     SPELL_ATTR_EX2_UNK4                         = 0x00000010,            // 4
     SPELL_ATTR_EX2_AUTOREPEAT_FLAG              = 0x00000020,            // 5
