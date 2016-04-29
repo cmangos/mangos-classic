@@ -65,6 +65,7 @@ bin/*
 *.vsp
 ipch
 *.user
+*.opendb
 
 #
 # CMake temporary files
