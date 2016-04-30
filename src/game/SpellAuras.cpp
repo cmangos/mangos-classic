@@ -2083,6 +2083,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
         {
             ((Player*)target)->setFactionForRace(target->getRace());
             ((Player*)target)->SetClientControl(target, 1);
+            target->StopMoving(true);
         }
         else if (target->GetTypeId() == TYPEID_UNIT)
         {
