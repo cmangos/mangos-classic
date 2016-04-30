@@ -34,9 +34,12 @@ namespace VMAP
     class MapRayCallback
     {
         public:
-            MapRayCallback(ModelInstance* val): prims(val), hit(false) {}
+            MapRayCallback(ModelInstance* val, bool los = false): prims(val), hit(false), los(los) {}
             bool operator()(const G3D::Ray& ray, uint32 entry, float& distance, bool pStopAtFirstHit = true)
             {
+                if (los && (prims[entry].flags & MOD_M2))
+                    return false;
+
                 bool result = prims[entry].intersectRay(ray, distance, pStopAtFirstHit);
                 if (result)
                     hit = true;
@@ -46,6 +49,7 @@ namespace VMAP
         protected:
             ModelInstance* prims;
             bool hit;
+            bool los;
     };
 
     class AreaInfoCallback
@@ -140,10 +144,10 @@ namespace VMAP
     Else, pMaxDist is not modified and returns false;
     */
 
-    bool StaticMapTree::getIntersectionTime(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit) const
+    bool StaticMapTree::getIntersectionTime(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, bool los) const
     {
         float distance = pMaxDist;
-        MapRayCallback intersectionCallBack(iTreeValues);
+        MapRayCallback intersectionCallBack(iTreeValues, los);
         iTree.intersectRay(pRay, intersectionCallBack, distance, pStopAtFirstHit);
         if (intersectionCallBack.didHit())
             pMaxDist = distance;
@@ -161,7 +165,7 @@ namespace VMAP
             return true;
         // direction with length of 1
         G3D::Ray ray = G3D::Ray::fromOriginAndDirection(pos1, (pos2 - pos1) / maxDist);
-        if (getIntersectionTime(ray, maxDist, true))
+        if (getIntersectionTime(ray, maxDist, true, true))
             return false;
 
         return true;
