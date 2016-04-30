@@ -8462,6 +8462,9 @@ void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 t
     {
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
 
+        if (GetTypeId() == TYPEID_PLAYER)
+            StopMoving(true);
+
         GetMotionMaster()->MovementExpired(false);
         if (GetTypeId() == TYPEID_PLAYER)
             StopMoving(true);
