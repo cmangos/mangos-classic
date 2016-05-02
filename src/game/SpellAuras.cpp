@@ -2923,6 +2923,19 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
     if (!Real)
         return;
 
+	// Stoneform (dwarven racial)
+	if (GetId() == 20594)
+	{
+		GetTarget()->ApplySpellDispelImmunity(GetSpellProto(), DISPEL_DISEASE, apply);
+		GetTarget()->ApplySpellDispelImmunity(GetSpellProto(), DISPEL_POISON, apply);
+		GetTarget()->ApplySpellImmune(20594, IMMUNITY_MECHANIC, MECHANIC_BLEED, apply);
+
+		uint32 mechanic = 1 << (MECHANIC_BLEED - 1);
+		GetTarget()->RemoveAurasAtMechanicImmunity(mechanic, 20594);
+
+		return;
+	}
+	
     GetTarget()->ApplySpellDispelImmunity(GetSpellProto(), DispelType(m_modifier.m_miscvalue), apply);
 }
 
