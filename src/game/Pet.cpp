@@ -1138,11 +1138,11 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             {
                 sLog.outErrorDb("warlock pet levelstats missing in DB");
 
-                SetCreateStat(STAT_STRENGTH, (10 + (1 * petlevel)));
-                SetCreateStat(STAT_AGILITY, (10 + (1 * petlevel)));
-                SetCreateStat(STAT_STAMINA, (12 + (1 * petlevel)));
-                SetCreateStat(STAT_INTELLECT, (15 + (1 * petlevel)));
-                SetCreateStat(STAT_SPIRIT, (14 + (1 * petlevel)));
+                SetCreateStat(STAT_STRENGTH, (5 + (1 * petlevel)));
+                SetCreateStat(STAT_AGILITY, (5 + (1 * petlevel)));
+                SetCreateStat(STAT_STAMINA, (7 + (1 * petlevel)));
+                SetCreateStat(STAT_INTELLECT, (10 + (1 * petlevel)));
+                SetCreateStat(STAT_SPIRIT, (9 + (1 * petlevel)));
             }
 
             break;
@@ -1166,8 +1166,8 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
                 SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
             }
 
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, ((GetAttackTime(BASE_ATTACK) * petlevel) - ((GetAttackTime(BASE_ATTACK) * petlevel) / 4)) / 1000);
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, ((GetAttackTime(BASE_ATTACK) * petlevel) + ((GetAttackTime(BASE_ATTACK) * petlevel) / 4)) / 1000);
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, ((GetAttackTime(BASE_ATTACK) * petlevel) - ((GetAttackTime(BASE_ATTACK) * petlevel) / 4)) / 2000);
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, ((GetAttackTime(BASE_ATTACK) * petlevel) + ((GetAttackTime(BASE_ATTACK) * petlevel) / 4)) / 2000);
             // damage is increased afterwards as strength and pet scaling modify attack power
 
             SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, ((cInfo->Armor * petlevel) / cInfo->MaxLevel));
@@ -1187,11 +1187,11 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             {
                 sLog.outErrorDb("Hunter pet levelstats missing in DB");
 
-                SetCreateStat(STAT_STRENGTH, int(14 + (1.1 * petlevel)));
-                SetCreateStat(STAT_AGILITY, int(10 + (0.9 * petlevel)));
-                SetCreateStat(STAT_STAMINA, int(15 + (1.5 * petlevel)));
-                SetCreateStat(STAT_INTELLECT, int(10 + (0.8 * petlevel)));
-                SetCreateStat(STAT_SPIRIT, int(15 + (1 * petlevel)));
+                SetCreateStat(STAT_STRENGTH, int(9 + (1.1 * petlevel)));
+                SetCreateStat(STAT_AGILITY, int(5 + (0.9 * petlevel)));
+                SetCreateStat(STAT_STAMINA, int(10 + (1.5 * petlevel)));
+                SetCreateStat(STAT_INTELLECT, int(5 + (0.8 * petlevel)));
+                SetCreateStat(STAT_SPIRIT, int(10 + (1 * petlevel)));
             }
 
             break;
