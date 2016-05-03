@@ -224,6 +224,12 @@
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\silverpine_forest.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stormwind_city.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\stranglethorn_vale.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_atalai_defender.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_atalai_dragon.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_atalalarion.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_avatar_of_hakkar.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_jammalan_ogom.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_shade_of_eranikus.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\swamp_of_sorrows.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\tirisfal_glades.cpp" />
     <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\undercity.cpp" />

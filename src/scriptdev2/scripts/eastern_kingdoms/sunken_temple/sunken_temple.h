@@ -17,10 +17,12 @@ enum
     TYPE_MALFURION        = 3,
     TYPE_AVATAR           = 4,
 
+	TYPE_SHADE_OF_ERANIKUS= 10,
+	TYPE_ATALAI_DEFENDERS = 11,
+
     NPC_ATALARION         = 8580,
-    NPC_DREAMSCYTH        = 5721,
-    NPC_WEAVER            = 5720,
     NPC_JAMMALAN          = 5710,
+	NPC_OGOM_THE_WRETCHED = 5711,
     NPC_AVATAR_OF_HAKKAR  = 8443,
     NPC_SHADE_OF_ERANIKUS = 5709,
 
@@ -31,6 +33,14 @@ enum
     NPC_HUKKU             = 5715,
     NPC_ZULLOR            = 5716,
     NPC_MIJAN             = 5717,
+
+	//Atal'ai Dragons
+	NPC_MORPHAZ           = 5719,
+	NPC_WEAVER            = 5720,
+	NPC_DREAMSCYTH        = 5721,
+	NPC_HAZZAS            = 5722,
+
+
 
     // Avatar of hakkar mobs
     NPC_SHADE_OF_HAKKAR   = 8440,                           // Shade of Hakkar appears when the event starts; will despawn when avatar of hakkar is summoned
@@ -90,9 +100,11 @@ struct SummonLocations
 
 static const SummonLocations aSunkenTempleLocation[] =
 {
-    { -466.5130f, 95.19820f, -189.646f, 0.0349f},           // Atalarion summon loc
-    { -466.8673f, 272.31204f, -90.7441f, 3.5255f},          // Shade of hakkar summon loc
-    { -660.5277f, -16.7117f, -90.8357f, 1.6055f}            // Malfurion summon loc
+	{ -466.5130f, 95.19820f, -189.646f, 0.0349f },           // Atalarion summon loc
+	{ -466.8673f, 272.31204f, -90.7441f, 3.5255f },          // Shade of hakkar summon loc
+	{ -660.5277f, -16.7117f, -90.8357f, 1.6055f },           // Malfurion summon loc
+	{ -467.1006f, 91.8945f, -94.7489f, 1.6055f },            // Weaver
+	{ -470.2635f, 105.2452f, -94.7115f, 1.6055f }            // Dreamscythe
 };
 
 // Summon location for the suppressors
@@ -125,6 +137,9 @@ class instance_sunken_temple : public ScriptedInstance
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
+
+
+		int8 GetFlameCount() { return m_uiFlameCounter; }
 
     protected:
         void DoSpawnAtalarionIfCan();
