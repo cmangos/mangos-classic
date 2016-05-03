@@ -100,6 +100,11 @@ extern void AddSC_instance_stratholme();
 extern void AddSC_stratholme();
 extern void AddSC_instance_sunken_temple();                 // sunken_temple
 extern void AddSC_sunken_temple();
+extern void AddSC_boss_atalai_defender();
+extern void AddSC_boss_atalai_dragon();
+extern void AddSC_boss_atalalarion();
+extern void AddSC_boss_jammalan_ogom();
+extern void AddSC_boss_shade_of_eranikus();
 extern void AddSC_boss_archaedas();                         // uldaman
 extern void AddSC_instance_uldaman();
 extern void AddSC_uldaman();
@@ -300,6 +305,11 @@ void AddScripts()
     AddSC_stratholme();
     AddSC_instance_sunken_temple();                         // sunken_temple
     AddSC_sunken_temple();
+    AddSC_boss_atalai_defender();
+    AddSC_boss_atalai_dragon();
+    AddSC_boss_atalalarion();
+    AddSC_boss_jammalan_ogom();
+    AddSC_boss_shade_of_eranikus();
     AddSC_boss_archaedas();                                 // uldaman
     AddSC_instance_uldaman();
     AddSC_uldaman();
