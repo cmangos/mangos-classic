@@ -2925,6 +2925,7 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
 
     switch (GetId()) 
     {
+        // Stoneform (dwarven racial)
         case 20594:
             GetTarget()->ApplySpellDispelImmunity(GetSpellProto(), DISPEL_DISEASE, apply);
             GetTarget()->ApplySpellDispelImmunity(GetSpellProto(), DISPEL_POISON, apply);
