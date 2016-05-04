@@ -6170,6 +6170,18 @@ void Unit::ApplySpellDispelImmunity(const SpellEntry* spellProto, DispelType typ
         RemoveAurasWithDispelType(type);
 }
 
+void Unit::ApplySpellMechanicImmunity(const SpellEntry* spellProto, Mechanics mechanic, bool apply)
+{
+    ApplySpellImmune(spellProto->Id, IMMUNITY_MECHANIC, mechanic, apply);
+
+    if (apply && spellProto->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
+    {
+        uint32 mechanicMask = 1 << (mechanic - 1);
+
+        RemoveAurasAtMechanicImmunity(mechanicMask, spellProto->Id);
+    }
+}
+
 float Unit::GetWeaponProcChance() const
 {
     // normalized proc chance for weapon attack speed
