@@ -114,10 +114,6 @@ void InitScriptLibrary()
    if (configFailure)
        script_error_log("Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
 
-   // Check config file version
-   if (SD2Config.GetIntDefault("ConfVersion", 0) != _MANGOSDCONFVERSION)
-       script_error_log("Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
-
    outstring_log("");
 
    // Load database (must be called after SD2Config.SetSource).
