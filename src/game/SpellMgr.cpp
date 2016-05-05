@@ -137,10 +137,21 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
     if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()))
         castTime += 500;
 
-    // [workaround] holy light need script effect, but 19968 spell for it have 2.5 cast time sec
-    // it should be instant instead
-    if (spellInfo->Id == 19968)
-        castTime = 0;
+    // workaround for instantly casted spells
+    switch (spellInfo->Id)
+    {
+        case 19968: // [workaround] holy light need script effect, but 19968 spell for it have 2.5 cast time sec
+        case 19970: // Entangling Roots (Rank 6) -- Nature's Grasp Proc
+        case 19971: // Entangling Roots (Rank 5) -- Nature's Grasp Proc
+        case 19972: // Entangling Roots (Rank 4) -- Nature's Grasp Proc
+        case 19973: // Entangling Roots (Rank 3) -- Nature's Grasp Proc
+        case 19974: // Entangling Roots (Rank 2) -- Nature's Grasp Proc
+        case 19975: // Entangling Roots (Rank 1) -- Nature's Grasp Proc
+        case 27010: // Entangling Roots (Rank 7) -- Nature's Grasp Proc
+        case 53313: // Entangling Roots (Rank 8) -- Nature's Grasp Proc
+            castTime = 0;
+            break;
+    }
 
     return (castTime > 0) ? uint32(castTime) : 0;
 }
