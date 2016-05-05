@@ -965,7 +965,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             if (real_caster && real_caster != unit)
             {
                 // can cause back attack (if detected)
-                if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->Id) &&
+                if (!m_spellInfo->HasNoInitialAggro() && !IsPositiveSpell(m_spellInfo->Id) &&
                         m_caster->isVisibleForOrDetect(unit, unit, false))
                 {
                     if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
@@ -1150,7 +1150,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
                 unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
             // can cause back attack (if detected), stealth removed at Spell::cast if spell break it
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !IsPositiveSpell(m_spellInfo->Id) &&
+            if (!m_spellInfo->HasNoInitialAggro() && !IsPositiveSpell(m_spellInfo->Id) &&
                     m_caster->isVisibleForOrDetect(unit, unit, false))
             {
                 // use speedup check to avoid re-remove after above lines
@@ -1188,7 +1188,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
             if (unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
                 realCaster->SetContestedPvP();
 
-            if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
+            if (unit->isInCombat() && !m_spellInfo->HasNoInitialAggro())
             {
                 realCaster->SetInCombatState(unit->GetCombatTimer() > 0);
                 unit->getHostileRefManager().threatAssist(realCaster, 0.0f, m_spellInfo);
