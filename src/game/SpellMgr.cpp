@@ -304,6 +304,10 @@ float CalculateCustomCoefficient(SpellEntry const *spellProto, Unit const* caste
 
     if (caster->GetTypeId() == TYPEID_PLAYER)
     {
+        // Holy Light / Flash of Light triggers without benefit (it is calculated before)
+        if (spellProto->IsFitToFamily<SPELLFAMILY_PALADIN, CF_PALADIN_HOLY_LIGHT1, CF_PALADIN_FLASH_OF_LIGHT1>())
+            return 0.0f;
+
         // Seal of Righteousness
         if (spellProto->IsFitToFamily<SPELLFAMILY_PALADIN, CF_PALADIN_SEALS>() && spellProto->SpellIconID == 25)
         {

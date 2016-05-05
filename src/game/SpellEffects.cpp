@@ -3696,6 +3696,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 if (!unitTarget || !unitTarget->isAlive())
                     return;
                 int32 heal = damage;
+                heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL);
+                heal = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, heal, HEAL);
                 int32 spellid = m_spellInfo->Id;            // send main spell id as basepoints for not used effect
 
                 heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL);
@@ -3709,6 +3711,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 if (!unitTarget || !unitTarget->isAlive())
                     return;
                 int32 heal = damage;
+                heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL);
+                heal = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, heal, HEAL);
                 int32 spellid = m_spellInfo->Id;            // send main spell id as basepoints for not used effect
                 heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL);
                 heal = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, heal, HEAL);
