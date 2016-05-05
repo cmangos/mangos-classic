@@ -992,6 +992,19 @@ struct SpellEntry
         inline uint32 GetEffectMiscValue(SpellEffectIndex j) const { return EffectMiscValue[j];};
         inline ClassFamilyMask GetSpellFamilyFlags() const { return SpellFamilyFlags; };
 
+        bool HasNoInitialAggro() const
+        {
+            switch (Id)
+            {
+                case 453:
+                case 8192:
+                case 10953:
+                    return true;
+            }
+
+            return HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO);
+        }
+
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation
