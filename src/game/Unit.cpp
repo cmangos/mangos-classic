@@ -3192,8 +3192,17 @@ int32 Unit::GetMaxPositiveAuraModifier(AuraType auratype) const
 
     AuraList const& mTotalAuraList = GetAurasByType(auratype);
     for (AuraList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+    {
         if ((*i)->GetModifier()->m_amount > modifier)
+        {
+            // hack for Feline Swiftness
+            // Todo: remove this hack and make it better
+            if (auratype == SPELL_AURA_MOD_INCREASE_SPEED && (*i)->GetId() == 24866 && !HasAura(768))
+                continue;
+
             modifier = (*i)->GetModifier()->m_amount;
+        }
+    }
 
     return modifier;
 }
