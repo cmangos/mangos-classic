@@ -2923,19 +2923,6 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
     if (!Real)
         return;
 
-    switch (GetId()) 
-    {
-        // Stoneform (dwarven racial)
-        case 20594:
-            GetTarget()->ApplySpellDispelImmunity(GetSpellProto(), DISPEL_DISEASE, apply);
-            GetTarget()->ApplySpellDispelImmunity(GetSpellProto(), DISPEL_POISON, apply);
-            GetTarget()->ApplySpellMechanicImmunity(GetSpellProto(), MECHANIC_BLEED, apply);
-
-            return;
-        default:
-            break;
-    }
-    
     GetTarget()->ApplySpellDispelImmunity(GetSpellProto(), DispelType(m_modifier.m_miscvalue), apply);
 }
 
@@ -5245,6 +5232,21 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 
     switch (GetSpellProto()->SpellFamilyName)
     {
+        case SPELLFAMILY_GENERIC:
+        {
+            switch (GetId())
+            {
+                // Stoneform (dwarven racial)
+                case 20594:
+                {
+                    spellId1 = 20612;
+                    break;
+                }
+                default:
+                    return;
+            }
+            break;
+        }
         case SPELLFAMILY_MAGE:
         {
             switch (GetId())
