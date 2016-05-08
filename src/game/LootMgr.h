@@ -280,6 +280,7 @@ public:
     void GetLootItemsListFor(Player* player, LootItemList& lootList);
     void SetGoldAmount(uint32 _gold);
     void SendGold(Player* player);
+    bool IsItemAlreadyIn(uint32 itemId) const;
     uint32 GetGoldAmount() const { return m_gold; }
     LootType GetLootType() const { return m_lootType; }
     LootItem* GetLootItemInSlot(uint32 itemSlot);

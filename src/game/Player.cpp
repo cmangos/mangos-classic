@@ -8775,6 +8775,10 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16& dest, Item* pItem, bool
 
                 if (IsNonMeleeSpellCasted(false))
                     return EQUIP_ERR_CANT_DO_RIGHT_NOW;
+
+                // prevent equip item in Spirit of Redemption (Aura: 27827)
+                if (HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
+                    return EQUIP_ERR_CANT_DO_RIGHT_NOW;
             }
 
             uint8 eslot = FindEquipSlot(pProto, slot, swap);

@@ -2009,6 +2009,17 @@ void Loot::SendGold(Player* player)
     ForceLootAnimationCLientUpdate();
 }
 
+bool Loot::IsItemAlreadyIn(uint32 itemId) const
+{
+    for (LootItemList::const_iterator lootItemItr = m_lootItems.begin(); lootItemItr != m_lootItems.end(); ++lootItemItr)
+    {
+        LootItem* lootItem = *lootItemItr;
+        if (lootItem->itemId == itemId)
+            return true;
+    }
+    return false;
+}
+
 // fill in the bytebuffer with loot content for specified player (return false if no items/gold filled)
 bool Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
 {
@@ -2071,23 +2082,34 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
 {
     if (!ExplicitlyChanced.empty())                         // First explicitly chanced entries are checked
     {
+        std::vector <LootStoreItem const*> lootStoreItemVector; // we'll use new vector to make easy the randomization
+
+        // fill the new vector with correct pointer to our item list
+        for (LootStoreItemList::const_iterator itr = ExplicitlyChanced.begin(); itr != ExplicitlyChanced.end(); ++itr)
+            lootStoreItemVector.push_back(&(*itr));
+
+        // randomize the new vector
+        random_shuffle(lootStoreItemVector.begin(), lootStoreItemVector.end());
+
         float chance = rand_chance_f();
 
-        for (uint32 i = 0; i < ExplicitlyChanced.size(); ++i) // check each explicitly chanced entry in the template and modify its chance based on quality.
+        // as the new vector is randomized we can start from first element and stop at first one that meet the condition
+        for (std::vector <LootStoreItem const*>::const_iterator itr = lootStoreItemVector.begin(); itr != lootStoreItemVector.end(); ++itr)
         {
-            LootStoreItem const& lsi = ExplicitlyChanced[i];
-            if (lsi.conditionId && !sObjectMgr.IsPlayerMeetToCondition(lsi.conditionId, lootOwner, lootOwner->GetMap(), loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT))
+            LootStoreItem const* lsi = *itr;
+
+            if (lsi->conditionId && !sObjectMgr.IsPlayerMeetToCondition(lsi->conditionId, lootOwner, lootOwner->GetMap(), loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT))
             {
-                sLog.outDebug("In explicit chance -> This item cannot be added! (%u)", lsi.itemid);
+                sLog.outDebug("In explicit chance -> This item cannot be added! (%u)", lsi->itemid);
                 continue;
             }
 
-            if (lsi.chance >= 100.0f)
-                return &lsi;
+            if (lsi->chance >= 100.0f)
+                return lsi;
 
-            chance -= lsi.chance;
+            chance -= lsi->chance;
             if (chance < 0)
-                return &lsi;
+                return lsi;
         }
     }
 
@@ -2106,6 +2128,17 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
         for (std::vector <LootStoreItem const*>::const_iterator itr = lootStoreItemVector.begin(); itr != lootStoreItemVector.end(); ++itr)
         {
             LootStoreItem const* lsi = *itr;
+
+            //check if we already have that item in the loot list
+            if (loot.IsItemAlreadyIn(lsi->itemid))
+            {
+                // the item is already looted, let's give a 50%  chance to pick another one
+                uint32 chance = urand(0,1);
+
+                if (chance)
+                    continue;                               // pass this item
+            }
+
             if (lsi->conditionId && !sObjectMgr.IsPlayerMeetToCondition(lsi->conditionId, lootOwner, lootOwner->GetMap(), loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT))
             {
                 sLog.outDebug("In equal chance -> This item cannot be added! (%u)", lsi->itemid);
