@@ -2082,23 +2082,34 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
 {
     if (!ExplicitlyChanced.empty())                         // First explicitly chanced entries are checked
     {
+        std::vector <LootStoreItem const*> lootStoreItemVector; // we'll use new vector to make easy the randomization
+
+        // fill the new vector with correct pointer to our item list
+        for (LootStoreItemList::const_iterator itr = ExplicitlyChanced.begin(); itr != ExplicitlyChanced.end(); ++itr)
+            lootStoreItemVector.push_back(&(*itr));
+
+        // randomize the new vector
+        random_shuffle(lootStoreItemVector.begin(), lootStoreItemVector.end());
+
         float chance = rand_chance_f();
 
-        for (uint32 i = 0; i < ExplicitlyChanced.size(); ++i) // check each explicitly chanced entry in the template and modify its chance based on quality.
+        // as the new vector is randomized we can start from first element and stop at first one that meet the condition
+        for (std::vector <LootStoreItem const*>::const_iterator itr = lootStoreItemVector.begin(); itr != lootStoreItemVector.end(); ++itr)
         {
-            LootStoreItem const& lsi = ExplicitlyChanced[i];
-            if (lsi.conditionId && !sObjectMgr.IsPlayerMeetToCondition(lsi.conditionId, lootOwner, lootOwner->GetMap(), loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT))
+            LootStoreItem const* lsi = *itr;
+
+            if (lsi->conditionId && !sObjectMgr.IsPlayerMeetToCondition(lsi->conditionId, lootOwner, lootOwner->GetMap(), loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT))
             {
-                sLog.outDebug("In explicit chance -> This item cannot be added! (%u)", lsi.itemid);
+                sLog.outDebug("In explicit chance -> This item cannot be added! (%u)", lsi->itemid);
                 continue;
             }
 
-            if (lsi.chance >= 100.0f)
-                return &lsi;
+            if (lsi->chance >= 100.0f)
+                return lsi;
 
-            chance -= lsi.chance;
+            chance -= lsi->chance;
             if (chance < 0)
-                return &lsi;
+                return lsi;
         }
     }
 
