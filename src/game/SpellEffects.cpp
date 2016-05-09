@@ -3040,6 +3040,8 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
         ((Player*)m_caster)->PetSpellInitialize();
     }
+
+    NewSummon->SetCanModifyStats(true);
 }
 
 void Spell::EffectLearnPetSpell(SpellEffectIndex eff_idx)
