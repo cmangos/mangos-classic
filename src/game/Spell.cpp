@@ -1050,7 +1050,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         caster->DealSpellDamage(&damageInfo, true);
 
         // Bloodthirst
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && m_spellInfo->SpellFamilyFlags & uint64(0x0000000002000000))
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && m_spellInfo->SpellFamilyFlags & uint64(0x0000000002000000) && m_spellInfo->SpellIconID == 38)
         {
             uint32 BTAura = 0;
             switch (m_spellInfo->Id)
