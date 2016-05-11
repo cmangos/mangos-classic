@@ -1088,14 +1088,14 @@ void Aura::TriggerSpell()
             case 21741: // Demonic Ally (warlock's T1 5/8 bonus)
             case 21922: // Demonic Ally (warlock's T2 5/8 bonus)
             {
-				if (Pet* pet = triggerTarget->GetPet())
-					if (SpellAuraHolder* holder = pet->GetSpellAuraHolder(trigger_spell_id))
-					{
-						holder->SetAuraDuration(4000);
-						return;
-					}
+                if (Pet* pet = triggerTarget->GetPet())
+                    if (SpellAuraHolder* holder = pet->GetSpellAuraHolder(trigger_spell_id))
+                    {
+                        holder->SetAuraDuration(4000);
+                        return;
+                    }
 
-				break;
+                break;
             }
         }
     }
