@@ -1312,8 +1312,8 @@ void Loot::ShowContentTo(Player* plr)
     data << m_guidTarget;
     data << uint8(m_clientLootType);
 
-    if (GetLootContentFor(plr, data))
-        SetPlayerIsLooting(plr);
+    GetLootContentFor(plr, data);                           // fill the data with items contained in the loot (may be empty)
+    SetPlayerIsLooting(plr);
 
     plr->SendDirectMessage(&data);
 }
@@ -2082,8 +2082,8 @@ bool Loot::IsItemAlreadyIn(uint32 itemId) const
     return false;
 }
 
-// fill in the bytebuffer with loot content for specified player (return false if no items/gold filled)
-bool Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
+// fill in the bytebuffer with loot content for specified player
+void Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
 {
     uint8 itemsShown = 0;
 
@@ -2099,7 +2099,7 @@ bool Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
         LootSlotType slot_type = lootItem->GetSlotTypeForSharedLoot(player, this);
         if (slot_type >= MAX_LOOT_SLOT_TYPE)
         {
-            sLog.outDebug("Item cannot send> itemid(%u) in slot (%u)!", lootItem->itemId, uint32(lootItem->lootSlot));
+            sLog.outDebug("Item not visible for %s> itemid(%u) in slot (%u)!", player->GetGuidStr().c_str(), lootItem->itemId, uint32(lootItem->lootSlot));
             continue;
         }
 
@@ -2108,12 +2108,11 @@ bool Loot::GetLootContentFor(Player* player, ByteBuffer& buffer)
         buffer << uint8(slot_type);                              // 0 - get 1 - look only 2 - master selection
         ++itemsShown;
 
-        sLog.outDebug("Sending loot> itemid(%u) in slot (%u)!", lootItem->itemId, uint32(lootItem->lootSlot));
+        sLog.outDebug("Sending loot to %s> itemid(%u) in slot (%u)!", player->GetGuidStr().c_str(), lootItem->itemId, uint32(lootItem->lootSlot));
     }
 
     // update number of items shown
     buffer.put<uint8>(count_pos, itemsShown);
-    return m_gold != 0 || itemsShown != 0;
 }
 
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
