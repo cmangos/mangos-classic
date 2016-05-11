@@ -171,6 +171,8 @@ struct LootItem
     bool         freeForAll        : 1;                             // free for all
     bool         isUnderThreshold  : 1;
     bool         currentLooterPass : 1;
+    bool         isNotVisibleForML : 1;                             // true when in master loot the leader do not have the condition to see the item
+    bool         checkRollNeed     : 1;                             // true if for this item we need to check if roll is needed
 
     // storing item prototype for fast access
     ItemPrototype const* itemProto;
@@ -305,6 +307,7 @@ private:
     void NotifyItemRemoved(uint32 lootIndex);
     void NotifyItemRemoved(Player* player, uint32 lootIndex);
     void GroupCheck();
+    void CheckIfRollIsNeeded(Player const* plr);
     void SetGroupLootRight(Player* player);
     void GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, bool personal, bool noEmptyError = false);

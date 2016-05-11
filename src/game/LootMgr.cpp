@@ -356,6 +356,8 @@ LootItem::LootItem(LootStoreItem const& li, uint32 _lootSlot, uint32 threshold)
     randomPropertyId  = Item::GenerateItemRandomPropertyId(itemId);
     isBlocked         = false;
     currentLooterPass = false;
+    isNotVisibleForML = false;
+    checkRollNeed     = false;
 }
 
 LootItem::LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _randomPropertyId, uint32 _lootSlot)
@@ -383,6 +385,8 @@ LootItem::LootItem(uint32 _itemId, uint32 _count, uint32 _randomSuffix, int32 _r
     isBlocked         = false;
     isUnderThreshold  = false;
     currentLooterPass = false;
+    isNotVisibleForML = false;
+    checkRollNeed     = false;
 }
 
 
@@ -473,6 +477,11 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
             {
                 if (player->GetObjectGuid() == loot->m_masterOwnerGuid)
                     return LOOT_SLOT_MASTER;
+                else
+                {
+                    if (!isBlocked && isNotVisibleForML)
+                        return LOOT_SLOT_NORMAL;
+                }
                 return LOOT_SLOT_VIEW;
             }
         }
@@ -1279,8 +1288,25 @@ void Loot::ShowContentTo(Player* plr)
         }
     }
 
-    if (m_lootMethod != NOT_GROUP_TYPE_LOOT && !m_isChecked)
-        GroupCheck();
+    if (m_lootMethod != NOT_GROUP_TYPE_LOOT)
+    {
+        if (!m_isChecked)
+            GroupCheck();
+
+        switch (m_lootMethod)
+        {
+            case MASTER_LOOT:
+            case NEED_BEFORE_GREED:
+            case GROUP_LOOT:
+            {
+                CheckIfRollIsNeeded(plr);               // check if there is the need to start a roll
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
 
     WorldPacket data(SMSG_LOOT_RESPONSE);
     data << m_guidTarget;
@@ -1299,6 +1325,7 @@ void Loot::GroupCheck()
     {
         case MASTER_LOOT:
         {
+            Player* masterLooter = nullptr;
             uint8 playerCount = 0;
             WorldPacket data(SMSG_LOOT_MASTER_LIST);
             data << uint8(0);
@@ -1307,6 +1334,10 @@ void Loot::GroupCheck()
                 Player* looter = sObjectAccessor.FindPlayer(*itr);
                 if (!looter)
                     continue;
+
+                if (*itr == m_masterOwnerGuid)
+                    masterLooter == looter;
+
                 data << *itr;
                 ++playerCount;
             }
@@ -1323,16 +1354,32 @@ void Loot::GroupCheck()
             for (uint8 itemSlot = 0; itemSlot < m_lootItems.size(); ++itemSlot)
             {
                 LootItem* lootItem = GetLootItemInSlot(itemSlot);
-                ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(lootItem->itemId);
-                if (!itemProto)
-                {
-                    DEBUG_LOG("Loot::GroupCheck> missing item prototype for item with id: %d", lootItem->itemId);
-                    continue;
-                }
 
                 // roll for over-threshold item if it's one-player loot
-                if (!lootItem->freeForAll && itemProto->Quality < uint32(m_threshold))
+                if (!lootItem->freeForAll && lootItem->itemProto->Quality < uint32(m_threshold))
                     lootItem->isUnderThreshold = true;
+
+                if (!lootItem->isUnderThreshold)
+                {
+                    // we have to check is the item is visible for the master or no one could be able to get it
+                    if (masterLooter)
+                    {
+                        if (!lootItem->AllowedForPlayer(masterLooter, m_lootTarget))
+                        {
+                            lootItem->isNotVisibleForML = true;
+                            lootItem->checkRollNeed = true;
+                        }
+                    }
+                    else
+                    {
+                        // master loot is not connected, thus we will just set all conditional and quest item visible for players that fulfill conditions
+                        if (lootItem->lootItemType != LOOTITEM_TYPE_NORMAL)
+                        {
+                            lootItem->isNotVisibleForML = true;
+                            lootItem->checkRollNeed = true;
+                        }
+                    }
+                }
             }
             break;
         }
@@ -1342,19 +1389,10 @@ void Loot::GroupCheck()
             for (uint8 itemSlot = 0; itemSlot < m_lootItems.size(); ++itemSlot)
             {
                 LootItem* lootItem = GetLootItemInSlot(itemSlot);
-                ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(lootItem->itemId);
-                if (!itemProto)
-                {
-                    DEBUG_LOG("Loot::GroupCheck> missing item prototype for item with id: %d", lootItem->itemId);
-                    continue;
-                }
 
                 // roll for over-threshold item if it's one-player loot
-                if (itemProto->Quality >= uint32(m_threshold) && !lootItem->freeForAll)
-                {
-                    if (!m_roll[itemSlot].TryToStart(*this, itemSlot))      // Create and try to start a roll
-                        m_roll.erase(m_roll.find(itemSlot));                // Cannot start roll so we have to delete it (find will not fail as the item was just created)
-                }
+                if (lootItem->itemProto->Quality >= uint32(m_threshold) && !lootItem->freeForAll)
+                    lootItem->checkRollNeed = true;
                 else
                     lootItem->isUnderThreshold = true;
             }
@@ -1362,6 +1400,30 @@ void Loot::GroupCheck()
         }
         default:
             break;
+    }
+}
+
+// check if there is need to launch a roll
+void Loot::CheckIfRollIsNeeded(Player const* plr)
+{
+    if (!plr)
+        return;
+
+    for (uint8 itemSlot = 0; itemSlot < m_lootItems.size(); ++itemSlot)
+    {
+        LootItem* lootItem = GetLootItemInSlot(itemSlot);
+
+        if (!lootItem->checkRollNeed)
+            continue;
+
+        if (((m_lootMethod == MASTER_LOOT && lootItem->isNotVisibleForML) || m_lootMethod != MASTER_LOOT) && lootItem->AllowedForPlayer(plr, m_lootTarget))
+        {
+            if (!m_roll[itemSlot].TryToStart(*this, itemSlot))      // Create and try to start a roll
+                m_roll.erase(m_roll.find(itemSlot));                // Cannot start roll so we have to delete it (find will not fail as the item was just created)
+
+            lootItem->checkRollNeed = false;                       // No more check is needed for this item
+            return;
+        }
     }
 }
 
