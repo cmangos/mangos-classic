@@ -2601,12 +2601,15 @@ void ObjectMgr::LoadStandingList()
     DistributeRankPoints(HORDE, LastWeekBegin);
 
     sLog.outString();
+    sLog.outString(">> LastWeekBegin: %d", LastWeekBegin);
     sLog.outString(">> Loaded %u Horde and %u Ally honor standing definitions", static_cast<uint32>(HordeHonorStandingList.size()), static_cast<uint32>(AllyHonorStandingList.size()));
 }
 
 
 void ObjectMgr::FlushRankPoints(uint32 dateTop)
 {
+    sLog.outString();
+    sLog.outString(">> Flushing all ranking points, dateTop: %d", dateTop);
     // FLUSH CP
     QueryResult* result = CharacterDatabase.PQuery("SELECT date FROM character_honor_cp WHERE TYPE = %u AND date <= %u GROUP BY date ORDER BY date DESC", HONORABLE, dateTop);
     if (result)
@@ -2632,6 +2635,8 @@ void ObjectMgr::FlushRankPoints(uint32 dateTop)
 
             flush = WeekBegin < dateTop - 7; // flush only with date < lastweek
 
+            sLog.outString();
+            sLog.outString(">> WeekBegin: %d", WeekBegin);
             DistributeRankPoints(ALLIANCE, WeekBegin, flush);
             DistributeRankPoints(HORDE, WeekBegin, flush);
 
@@ -2698,8 +2703,13 @@ void ObjectMgr::DistributeRankPoints(uint32 team, uint32 dateBegin , bool flush 
         RP = fields[0].GetFloat();
         HK = fields[1].GetUInt32();
 
+        sLog.outString(">> DistributeRankPoints: guid = %u, RP = %f, HK = %u", itr->guid, RP, HK);
+
         itr->rpEarning = MaNGOS::Honor::CalculateRpEarning(itr->GetInfo()->honorPoints, scores);
         RP             = MaNGOS::Honor::CalculateRpDecay(itr->rpEarning, RP);
+        
+        sLog.outString(">> DistributeRankPoints: guid = %u, stored_honor_rating = %f (rpEarning = %f, RP = %f), stored_honorable_kills = %u (honorKills = %u, HK = %u)"
+            , itr->guid , finiteAlways(RP + itr->rpEarning), itr->rpEarning, RP, HK + itr->honorKills, itr->honorKills, HK);
 
         if (flush)
         {
