@@ -96,6 +96,12 @@ enum ClientLootType
     CLIENT_LOOT_DISENCHANTING   = 4
 };
 
+enum LootStatus
+{
+    LOOT_STATUS_NOT_FULLY_LOOTED = 0x01,
+    LOOT_STATUS_CONTAIN_FFA      = 0x02,
+    LOOT_STATUS_CONTAIN_GOLD     = 0x04
+};
 
 struct PlayerRollVote
 {
@@ -315,6 +321,8 @@ private:
     void SetPlayerIsLooting(Player* player);
     void SetPlayerIsNotLooting(Player* player);
     void GetLootContentFor(Player* player, ByteBuffer& buffer);
+    uint32 GetLootStatusFor(Player const* player) const;
+
     // What is looted
     WorldObject*     m_lootTarget;
     Item*            m_itemTarget;
