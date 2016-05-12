@@ -260,7 +260,6 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     m_spellInfo = info;
     m_triggeredBySpellInfo = triggeredBy;
     m_caster = caster;
-    m_selfContainer = nullptr;
     m_referencedFromCurrentSpell = false;
     m_executedCurrently = false;
     m_delayStart = 0;
@@ -2664,7 +2663,7 @@ void Spell::cast(bool skipCheck)
     // triggered cast called from Spell::prepare where it was already checked
     if (!skipCheck)
     {
-        castResult = CheckCast(false);
+        castResult = CheckCast(false, true);
         if (castResult != SPELL_CAST_OK)
         {
             SendCastResult(castResult);
@@ -3885,7 +3884,7 @@ Unit* Spell::GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const
     return m_targets.getUnitTarget();
 }
 
-SpellCastResult Spell::CheckCast(bool strict)
+SpellCastResult Spell::CheckCast(bool strict, bool finalCheck)
 {
     // check cooldowns to prevent cheating (ignore passive spells, that client side visual only)
     if (m_caster->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) &&
@@ -4655,8 +4654,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_SKILL_NOT_HIGH_ENOUGH;
 
                 // chance for fail at orange skinning attempt
-                if ((m_selfContainer && (*m_selfContainer) == this) &&
-                        skillValue < sWorld.GetConfigMaxSkillValue() &&
+                if (finalCheck && skillValue < sWorld.GetConfigMaxSkillValue() &&
                         (ReqValue < 0 ? 0 : ReqValue) > irand(skillValue - 25, skillValue + 37))
                     return SPELL_FAILED_TRY_AGAIN;
 
@@ -4717,8 +4715,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return res;
 
                 // chance for fail at orange mining/herb/LockPicking gathering attempt
-                // second check prevent fail at rechecks
-                if (skillId != SKILL_NONE && (!m_selfContainer || ((*m_selfContainer) != this)))
+                if (finalCheck && skillId != SKILL_NONE )
                 {
                     bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING;
 

@@ -319,7 +319,7 @@ class Spell
         void TakeReagents();
         void TakeCastItem();
 
-        SpellCastResult CheckCast(bool strict);
+        SpellCastResult CheckCast(bool strict, bool finalCheck = false);
         SpellCastResult CheckPetCast(Unit* target);
 
         // handlers
@@ -445,8 +445,6 @@ class Spell
         ObjectGuid m_originalCasterGUID;                    // real source of cast (aura caster/etc), used for spell targets selection
         // e.g. damage around area spell trigered by victim aura and da,age emeies of aura caster
         Unit* m_originalCaster;                             // cached pointer for m_originalCaster, updated at Spell::UpdatePointers()
-
-        Spell** m_selfContainer;                            // pointer to our spell container (if applicable)
 
         // Spell data
         SpellSchoolMask m_spellSchoolMask;                  // Spell school (can be overwrite for some spells (wand shoot for example)
