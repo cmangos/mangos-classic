@@ -294,6 +294,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {\
 #       ifndef __stdcall
 #           define __stdcall
 #       endif
+
+#   elif defined(__arm__)
+        // CDECL does not apply to arm.
+#       define __cdecl
 #   endif // calling conventions
 
 /** @def G3D_CHECK_PRINTF_METHOD_ARGS()

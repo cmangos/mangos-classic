@@ -283,7 +283,15 @@ class ByteBuffer
         {
             if (pos + sizeof(T) > size())
                 throw ByteBufferException(false, pos, sizeof(T), size());
+
+#if defined(__arm__) || defined(_M_ARM)
+            //memcpy to avoid alignment issues
+            T val;
+            memcpy((void*)&val,(void*)&_storage[pos],sizeof(T));
+#else
             T val = *((T const*)&_storage[pos]);
+#endif
+
             EndianConvert(val);
             return val;
         }

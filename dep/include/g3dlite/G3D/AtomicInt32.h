@@ -76,12 +76,7 @@ public:
 
 #       elif defined(G3D_LINUX) || defined(G3D_FREEBSD)
 
-            int32 old;
-            asm volatile ("lock; xaddl %0,%1"
-                  : "=r"(old), "=m"(m_value) /* outputs */
-                  : "0"(x), "m"(m_value)   /* inputs */
-                  : "memory", "cc");
-            return old;
+            return __sync_fetch_and_add(&m_value, 1);
             
 #       elif defined(G3D_OSX)
 
@@ -115,14 +110,7 @@ public:
             // Note: returns the newly decremented value
             return InterlockedDecrement(&m_value);
 #       elif defined(G3D_LINUX)  || defined(G3D_FREEBSD)
-            unsigned char nz;
-
-            asm volatile ("lock; decl %1;\n\t"
-                          "setnz %%al"
-                          : "=a" (nz)
-                          : "m" (m_value)
-                          : "memory", "cc");
-            return nz;
+            return __sync_sub_and_fetch(&m_value, 1);
 #       elif defined(G3D_OSX)
             // Note: returns the newly decremented value
             return OSAtomicDecrement32(&m_value);
@@ -142,7 +130,9 @@ public:
     int32 compareAndSet(const int32 comperand, const int32 exchange) {
 #       if defined(G3D_WIN32)
             return InterlockedCompareExchange(&m_value, exchange, comperand);
-#       elif defined(G3D_LINUX) || defined(G3D_FREEBSD) || defined(G3D_OSX)
+#       elif defined(G3D_LINUX) || defined(G3D_FREEBSD)
+            return __sync_val_compare_and_swap(&m_value, comperand, exchange);
+#       elif defined(G3D_OSX)
             // Based on Apache Portable Runtime
             // http://koders.com/c/fid3B6631EE94542CDBAA03E822CA780CBA1B024822.aspx
             int32 ret;
