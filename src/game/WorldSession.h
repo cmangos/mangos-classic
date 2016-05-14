@@ -171,7 +171,7 @@ class MANGOS_DLL_SPEC WorldSession
             return (_logoutTime > 0 && currTime >= _logoutTime + 20);
         }
 
-        void LogoutPlayer(bool Save);
+        void LogoutPlayer(bool save);
         void KickPlayer();
 
         void QueuePacket(WorldPacket* new_packet);
@@ -659,6 +659,7 @@ class MANGOS_DLL_SPEC WorldSession
         void LogUnexpectedOpcode(WorldPacket* packet, const char* reason);
         void LogUnprocessedTail(WorldPacket* packet);
 
+        std::mutex m_logoutMutex;                           // this mutex is necessary to avoid two simultaneous logouts due to a valid logout request and socket error
         Player * _player;
         WorldSocket * const m_Socket;                       // socket pointer is owned by the network thread which created 
 
@@ -668,7 +669,9 @@ class MANGOS_DLL_SPEC WorldSession
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue
         bool m_playerLoading;                               // code processed in LoginPlayer
-        bool m_playerLogout;                                // code processed in LogoutPlayer
+
+        // True when the player is in the process of logging out (WorldSession::LogoutPlayer is currently executing)
+        bool m_playerLogout;
         bool m_playerRecentlyLogout;
         bool m_playerSave;                                  // code processed in LogoutPlayer with save request
         LocaleConstant m_sessionDbcLocale;

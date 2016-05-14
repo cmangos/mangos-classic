@@ -308,14 +308,20 @@ bool WorldSession::Update(PacketFilter& updater)
 }
 
 /// %Log the player out
-void WorldSession::LogoutPlayer(bool Save)
+void WorldSession::LogoutPlayer(bool save)
 {
+    // if the player has just logged out, there is no need to do anything here
+    if (m_playerRecentlyLogout)
+        return;
+
+    std::lock_guard<std::mutex> guard(m_logoutMutex);
+
     // finish pending transfers before starting the logout
     while (_player && _player->IsBeingTeleportedFar())
         HandleMoveWorldportAckOpcode();
 
     m_playerLogout = true;
-    m_playerSave = Save;
+    m_playerSave = save;
 
     if (_player)
     {
@@ -346,10 +352,10 @@ void WorldSession::LogoutPlayer(bool Save)
                 if (owner)
                 {
                     if (owner->GetTypeId() == TYPEID_PLAYER)
-                        aset.insert((Player*)owner);
+                        aset.insert(static_cast<Player*>(owner));
                 }
                 else if ((*itr)->GetTypeId() == TYPEID_PLAYER)
-                    aset.insert((Player*)(*itr));
+                    aset.insert(static_cast<Player*>(*itr));
             }
 
             _player->SetPvPDeath(!aset.empty());
@@ -427,7 +433,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         ///- empty buyback items and save the player in the database
         // some save parts only correctly work in case player present in map/player_lists (pets, etc)
-        if (Save)
+        if (save)
             _player->SaveToDB();
 
         ///- Leave all channels before player delete...
@@ -484,6 +490,7 @@ void WorldSession::LogoutPlayer(bool Save)
     m_playerLogout = false;
     m_playerSave = false;
     m_playerRecentlyLogout = true;
+
     LogoutRequest(0);
 }
 
