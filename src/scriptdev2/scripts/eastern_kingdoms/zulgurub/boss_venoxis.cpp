@@ -77,8 +77,22 @@ struct boss_venoxisAI : public ScriptedAI
 
     void Reset() override
     {
-        m_creature->RemoveAllAuras();
-        m_creature->GetCharmInfo()->SetReactState(REACT_PASSIVE);
+        // Always running events
+        m_uiTrashTimer = 5000;
+
+        // Phase one events (regular form)
+        m_uiHolyNovaTimer = 5000;
+        m_uiDispellTimer = 35000;
+        m_uiHolyFireTimer = 10000;
+        m_uiHolyWrathTimer = 60000;
+        m_uiRenewTimer = 30000;
+
+        m_uiVenomSpitTimer = 5000;
+        m_uiPoisonCloudTimer = 10000;
+        m_uiParasiticTimer = 30000;
+
+        m_bPhaseTwo = false;
+        m_bInBerserk = false;
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VENOXIS, NOT_STARTED);
@@ -105,23 +119,6 @@ struct boss_venoxisAI : public ScriptedAI
 
     void EnterCombat(Unit* /*who*/) override
     {
-        // Always running events
-        m_uiTrashTimer = 5000;
-
-        // Phase one events (regular form)
-        m_uiHolyNovaTimer = 5000;
-        m_uiDispellTimer = 35000;
-        m_uiHolyFireTimer = 10000;
-        m_uiHolyWrathTimer = 60000;
-        m_uiRenewTimer = 30000;
-
-        m_uiVenomSpitTimer = 5000;
-        m_uiPoisonCloudTimer = 10000;
-        m_uiParasiticTimer = 30000;
-
-        m_bPhaseTwo = false;
-        m_bInBerserk = false;
-
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VENOXIS, IN_PROGRESS);
     }
