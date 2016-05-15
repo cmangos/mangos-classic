@@ -2782,6 +2782,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     }
 
     TalentSpellPos const* talentPos = GetTalentSpellPos(spell_id);
+    bool replacedOldSpell = false;
 
     if (!disabled_case) // skip new spell adding if spell already known (disabled spells case)
     {
@@ -2845,6 +2846,8 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                             playerSpell2.active = false;
                             if (playerSpell2.state != PLAYERSPELL_NEW)
                                 playerSpell2.state = PLAYERSPELL_CHANGED;
+
+                            replacedOldSpell = true;
                         }
                         else if (sSpellMgr.IsHighRankOfSpell(itr2->first, spell_id))
                         {
@@ -2980,7 +2983,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     }
 
     // return true (for send learn packet) only if spell active (in case ranked spells) and not replace old spell
-    return active && !disabled;
+    return active && !disabled && !replacedOldSpell;
 }
 
 bool Player::IsNeedCastPassiveLikeSpellAtLearn(SpellEntry const* spellInfo) const
