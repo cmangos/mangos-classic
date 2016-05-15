@@ -1367,7 +1367,7 @@ SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(Unit* pVictim, uint32 d
     // The chance to dispel an aura depends on the damage taken with respect to the casters level.
     uint32 max_dmg = getLevel() > 8 ? 25 * getLevel() - 150 : 50;
     float chance = float(damage) / max_dmg * 100.0f;
-    if (roll_chance_f(chance))
+    if (roll_chance_f(chance) && triggeredByAura->GetAuraDuration() != triggeredByAura->GetAuraMaxDuration()) // TODO find a better way to handle this. Without the duration check, it will cancel the "Frost Nova"-Root imidiatly - What shouldn't happen
     {
         triggeredByAura->SetInUse(true);
         RemoveAurasByCasterSpell(triggeredByAura->GetId(), triggeredByAura->GetCasterGuid());
