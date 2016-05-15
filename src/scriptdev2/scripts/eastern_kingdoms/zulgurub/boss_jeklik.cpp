@@ -14,52 +14,52 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/* ScriptData
-SDName: Boss_Jeklik
-SD%Complete: 85
-SDComment: Some minor improvements are required; Bat rider movement not implemented
-SDCategory: Zul'Gurub
-EndScriptData */
+ /* ScriptData
+ SDName: Boss_Jeklik
+ SD%Complete: 85
+ SDComment: Some minor improvements are required; Bat rider movement not implemented
+ SDCategory: Zul'Gurub
+ EndScriptData */
 
 #include "precompiled.h"
 #include "zulgurub.h"
 
 enum
 {
-    SAY_AGGRO                   = -1309002,
-    SAY_RAIN_FIRE               = -1309003,
-    SAY_SHRIEK                  = -1309026,
-    SAY_HEAL                    = -1309027,
-    SAY_DEATH                   = -1309004,
+    SAY_AGGRO = -1309002,
+    SAY_RAIN_FIRE = -1309003,
+    SAY_SHRIEK = -1309026,
+    SAY_HEAL = -1309027,
+    SAY_DEATH = -1309004,
 
     // Bat spells
-    SPELL_CHARGE                = 22911,
-    SPELL_SONIC_BURST           = 23918,
-    // SPELL_PSYHIC_SCREAM       = 22884,                   // spell not confirmed - needs research
-    SPELL_SWOOP                 = 23919,
-    SPELL_SUMMON_FRENZIED_BATS  = 23974,
+    SPELL_CHARGE = 22911,
+    SPELL_SONIC_BURST = 23918,
+    SPELL_PSYHIC_SCREAM = 22884,                   // spell not confirmed - needs research
+    SPELL_SWOOP = 23919,
+    SPELL_SUMMON_FRENZIED_BATS = 23974,
 
     // Troll form spells
-    SPELL_SHADOW_WORD_PAIN      = 23952,
-    SPELL_MIND_FLAY             = 23953,
-    SPELL_BLOOD_LEECH           = 22644,
-    SPELL_GREATERHEAL           = 23954,
+    SPELL_SHADOW_WORD_PAIN = 23952,
+    SPELL_MIND_FLAY = 23953,
+    SPELL_BLOOD_LEECH = 22644,
+    SPELL_GREATERHEAL = 23954,
 
     // Common spells
-    SPELL_GREEN_CHANNELING      = 13540,                    // visual for idle mode
-    SPELL_BAT_FORM              = 23966,
+    SPELL_GREEN_CHANNELING = 13540,                    // visual for idle mode
+    SPELL_BAT_FORM = 23966,
 
     // Batriders Spell
-    SPELL_LIQUID_FIRE           = 23968,                    // script effect - triggers 23971,
-    SPELL_UNSTABLE_CONCOCTION   = 24024,
-    SPELL_TRASH                 = 8876,
-    SPELL_DEMORALIZING_SHOUT    = 23511,
-    SPELL_BATTLE_COMMAND        = 5115,
-    SPELL_INFECTED_BITE         = 16128,
+    SPELL_LIQUID_FIRE = 23970,                          // script effect - triggers 23971,19637
+    SPELL_UNSTABLE_CONCOCTION = 24024,
+    SPELL_TRASH = 8876,
+    SPELL_DEMORALIZING_SHOUT = 23511,
+    SPELL_BATTLE_COMMAND = 5115,
+    SPELL_INFECTED_BITE = 16128,
 
     // npcs
-    NPC_FRENZIED_BAT            = 14965,
-    NPC_BAT_RIDER               = 14750,
+    NPC_FRENZIED_BAT = 14965,
+    NPC_BAT_RIDER = 14750,
 };
 
 struct boss_jeklikAI : public ScriptedAI
@@ -81,6 +81,7 @@ struct boss_jeklikAI : public ScriptedAI
     uint32 m_uiChainMindFlayTimer;
     uint32 m_uiGreaterHealTimer;
     uint32 m_uiFlyingBatsTimer;
+    uint32 m_uiPsyhicScreamTimer;
 
     bool m_bIsPhaseOne;
 
@@ -88,17 +89,18 @@ struct boss_jeklikAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiChargeTimer         = 20000;
-        m_uiSwoopTimer          = 5000;
-        m_uiSonicBurstTimer     = 8000;
-        m_uiSpawnBatsTimer      = 50000;
+        m_uiChargeTimer = 20000;
+        m_uiSwoopTimer = 5000;
+        m_uiSonicBurstTimer = 8000;
+        m_uiSpawnBatsTimer = 45000;
         m_uiShadowWordPainTimer = 6000;
-        m_uiMindFlayTimer       = 11000;
-        m_uiChainMindFlayTimer  = 26000;
-        m_uiGreaterHealTimer    = 20000;
-        m_uiFlyingBatsTimer     = 30000;
+        m_uiMindFlayTimer = 11000;
+        m_uiChainMindFlayTimer = 26000;
+        m_uiGreaterHealTimer = 20000;
+        m_uiFlyingBatsTimer = 10000;
+        m_uiPsyhicScreamTimer = 5000;
 
-        m_bIsPhaseOne           = true;
+        m_bIsPhaseOne = true;
 
         DoCastSpellIfCan(m_creature, SPELL_GREEN_CHANNELING);
         SetCombatMovement(false);
@@ -139,16 +141,19 @@ struct boss_jeklikAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_FRENZIED_BAT)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                pSummoned->AI()->AttackStart(pTarget);
+            //if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            //    pSummoned->AI()->AttackStart(pTarget);
+            //pSummoned->SetLevitate(true);
         }
         else if (pSummoned->GetEntry() == NPC_BAT_RIDER)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_LIQUID_FIRE, true);
+            pSummoned->SetLevitate(true);
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0)) {
+                pSummoned->CastSpell(pTarget, SPELL_LIQUID_FIRE, true);
+                pTarget->CastSpell(pTarget, 23971, true);
+            }
             m_lBombRiderGuidsList.push_back(pSummoned->GetObjectGuid());
         }
-
-        pSummoned->SetLevitate(true);
     }
 
     void EnterEvadeMode() override
@@ -180,6 +185,24 @@ struct boss_jeklikAI : public ScriptedAI
         {
             if (Creature* pRider = m_creature->GetMap()->GetCreature(*itr))
                 pRider->ForcedDespawn();
+        }
+    }
+
+    void DoSpellBombRiders()
+    {
+        if (m_lBombRiderGuidsList.empty())
+            return;
+
+        for (GuidList::const_iterator itr = m_lBombRiderGuidsList.begin(); itr != m_lBombRiderGuidsList.end(); ++itr)
+        {
+            if (Creature* pRider = m_creature->GetMap()->GetCreature(*itr))
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0)) {
+                    //pTarget->GetMotionMaster()->MovePoint(1, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ() + 15.0f);
+                    pRider->CastSpell(pTarget, SPELL_LIQUID_FIRE, true);
+                    pTarget->CastSpell(pTarget, 23971, true);
+                }
+            }
         }
     }
 
@@ -215,7 +238,12 @@ struct boss_jeklikAI : public ScriptedAI
             if (m_uiSwoopTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SWOOP) == CAST_OK)
+                {
+                    if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
+                        m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -10);
+
                     m_uiSwoopTimer = urand(4000, 9000);
+                }
             }
             else
                 m_uiSwoopTimer -= uiDiff;
@@ -223,16 +251,38 @@ struct boss_jeklikAI : public ScriptedAI
             if (m_uiSonicBurstTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SONIC_BURST) == CAST_OK)
+                {
                     m_uiSonicBurstTimer = urand(8000, 13000);
+                }
             }
             else
                 m_uiSonicBurstTimer -= uiDiff;
 
+            if (m_uiPsyhicScreamTimer < uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_PSYHIC_SCREAM) == CAST_OK)
+                {
+                    if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
+                        m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -80);
+                    m_uiPsyhicScreamTimer = urand(18000, 26000);
+                }
+            }
+            else
+                m_uiPsyhicScreamTimer -= uiDiff;
+
             if (m_uiSpawnBatsTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_FRENZIED_BATS) == CAST_OK)
+                DoScriptText(SAY_SHRIEK, m_creature);
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    DoScriptText(SAY_SHRIEK, m_creature);
+                    for (uint8 i = 0; i < 6; ++i)
+                    {
+                        //DoCastSpellIfCan(pTarget, SPELL_SUMMON_FRENZIED_BATS);
+                        if (Creature* bat = m_creature->SummonCreature(NPC_FRENZIED_BAT, -12291.6220f, -1380.2640f, 144.8304f, 5.483f, TEMPSUMMON_DEAD_DESPAWN, 0)) {
+                            bat->SetLevitate(true);
+                            bat->AI()->AttackStart(pTarget);
+                        }
+                    }
                     m_uiSpawnBatsTimer = 60000;
                 }
             }
@@ -280,25 +330,27 @@ struct boss_jeklikAI : public ScriptedAI
             else
                 m_uiGreaterHealTimer -= uiDiff;
 
-            if (m_uiFlyingBatsTimer)
+            if (m_uiFlyingBatsTimer <= uiDiff)
             {
-                if (m_uiFlyingBatsTimer <= uiDiff)
-                {
+                if (m_lBombRiderGuidsList.empty()) {
                     // Note: the bat riders summoning and movement may need additional research
                     for (uint8 i = 0; i < 3; ++i)
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                            m_creature->SummonCreature(NPC_BAT_RIDER, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ() + 15.0f, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        {
+                            m_creature->SummonCreature(NPC_BAT_RIDER, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ() + 15.0f, 0, TEMPSUMMON_TIMED_OOC_DESPAWN, 5000);
+                        }
                     }
                     DoScriptText(SAY_RAIN_FIRE, m_creature);
-
-                    m_uiFlyingBatsTimer = 0;
                 }
-                else
-                    m_uiFlyingBatsTimer -= uiDiff;
+                else {
+                    DoSpellBombRiders();
+                }
+                m_uiFlyingBatsTimer = 15000;
             }
+            else
+                m_uiFlyingBatsTimer -= uiDiff;
         }
-
         DoMeleeAttackIfReady();
     }
 };
