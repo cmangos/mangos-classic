@@ -260,7 +260,6 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     m_spellInfo = info;
     m_triggeredBySpellInfo = triggeredBy;
     m_caster = caster;
-    m_selfContainer = nullptr;
     m_referencedFromCurrentSpell = false;
     m_executedCurrently = false;
     m_delayStart = 0;
