@@ -187,10 +187,11 @@ inline ByteBuffer& operator>> (ByteBuffer& buf, SpellCastTargetsReader const& ta
 
 enum SpellState
 {
-    SPELL_STATE_PREPARING = 0,                              // cast time delay period, non channeled spell
-    SPELL_STATE_CASTING   = 1,                              // channeled time period spell casting state
-    SPELL_STATE_FINISHED  = 2,                              // cast finished to success or fail
-    SPELL_STATE_DELAYED   = 3                               // spell casted but need time to hit target(s)
+    SPELL_STATE_CREATED =   0,                              // just created
+    SPELL_STATE_PREPARING = 1,                              // cast time delay period, non channeled spell
+    SPELL_STATE_CASTING   = 2,                              // channeled time period spell casting state
+    SPELL_STATE_FINISHED  = 3,                              // cast finished to success or fail
+    SPELL_STATE_DELAYED   = 4                               // spell casted but need time to hit target(s)
 };
 
 enum SpellTargets
