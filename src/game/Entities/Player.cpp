@@ -2832,6 +2832,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
     }
 
     TalentSpellPos const* talentPos = GetTalentSpellPos(spell_id);
+    bool replacedOldSpell = false;
 
     if (!disabled_case) // skip new spell adding if spell already known (disabled spells case)
     {
@@ -2924,6 +2925,8 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                             playerSpell2.active = false;
                             if (playerSpell2.state != PLAYERSPELL_NEW)
                                 playerSpell2.state = PLAYERSPELL_CHANGED;
+
+                            replacedOldSpell = true;
                         }
                         else if (sSpellMgr.IsHighRankOfSpell(itr2->first, spell_id))
                         {
@@ -3058,8 +3061,14 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
         }
     }
 
-    // return true (for send learn packet) only if spell active (in case ranked spells) and not replace old spell
-    return active && !disabled;
+    if (active && !disabled && !replacedOldSpell && learning && IsInWorld())
+    {
+        WorldPacket data(SMSG_LEARNED_SPELL, 4);
+        data << uint32(spell_id);
+        GetSession()->SendPacket(data);
+    }
+
+    return active && !disabled && !replacedOldSpell;
 }
 
 bool Player::IsNeedCastPassiveLikeSpellAtLearn(SpellEntry const* spellInfo) const
@@ -3087,15 +3096,7 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
     bool disabled = (itr != m_spells.end()) ? itr->second.disabled : false;
     bool active = disabled ? itr->second.active : true;
 
-    bool learning = addSpell(spell_id, active, true, dependent, false);
-
-    // prevent duplicated entires in spell book, also not send if not in world (loading)
-    if (learning && IsInWorld())
-    {
-        WorldPacket data(SMSG_LEARNED_SPELL, 4);
-        data << uint32(spell_id);
-        GetSession()->SendPacket(data);
-    }
+    addSpell(spell_id, active, true, dependent, false);
 
     // learn all disabled higher ranks (recursive)
     if (disabled)
