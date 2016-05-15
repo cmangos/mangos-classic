@@ -454,6 +454,7 @@ UPDATE creature_template SET ScriptName='boss_dathrohan_balnazzar' WHERE entry=1
 UPDATE creature_template SET ScriptName='boss_maleki_the_pallid' WHERE entry=10438;
 UPDATE creature_template SET ScriptName='boss_cannon_master_willey' WHERE entry=10997;
 UPDATE creature_template SET ScriptName='boss_baroness_anastari' WHERE entry=10436;
+UPDATE creature_template SET ScriptName='npc_aurius' WHERE entry=10917;
 UPDATE creature_template SET ScriptName='mobs_spectral_ghostly_citizen' WHERE entry IN (10384,10385);
 UPDATE creature_template SET ScriptName='mob_restless_soul' WHERE entry=11122;
 UPDATE gameobject_template SET ScriptName='go_gauntlet_gate' WHERE entry=175357;
@@ -2012,8 +2013,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1329017,'You fools think you can defeat me so easily? Face the true might of the Nathrezim!',0,1,0,0,'dathrohan SAY_TRANSFORM'),
 (-1329018,'Damn you mortals! All my plans of revenge, all my hate... all burned to ash...',0,0,0,0,'dathrohan SAY_DEATH'),
 (-1329019,'Don\'t worry about me!  Slay this dreadful beast and cleanse this world of his foul taint!',0,6,0,0,'ysida YSIDA_SAY_RUN_5_MIN'),
-(-1329020,'My death means nothing.... light... will... prevail!',0,6,0,0,'ysida YSIDA_SAY_RUN_FAIL');
+(-1329020,'My death means nothing.... light... will... prevail!',0,6,0,0,'ysida YSIDA_SAY_RUN_FAIL'),
 
+(-1329021,'Rivendare! I come for you!',0,1,0,0,'aurius YELL_AURIUS_AGGRO'),
+(-1329022,'Argh!',0,0,0,0,'aurius SAY_AURIUS_DEATH');
 
 -- -1 349 000 MARAUDON
 
