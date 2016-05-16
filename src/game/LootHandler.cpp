@@ -95,7 +95,12 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
         return;
 
     if (Loot* loot = sLootMgr.GetLoot(_player, lguid))
+    {
+        // remove stealth aura
+        _player->DoInteraction(lguid);
+
         loot->ShowContentTo(_player);
+    }
 }
 
 void WorldSession::HandleLootReleaseOpcode(WorldPacket& recv_data)

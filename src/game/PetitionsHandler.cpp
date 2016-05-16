@@ -76,10 +76,6 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
     if (!pCreature->isTabardDesigner())
         return;
 
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-
     // if tabard designer, then trying to buy a guild charter.
     // do not let if already in guild.
     if (_player->GetGuildId())
@@ -633,10 +629,6 @@ void WorldSession::SendPetitionShowList(ObjectGuid guid)
         DEBUG_LOG("WORLD: HandlePetitionShowListOpcode - %s not found or you can't interact with him.", guid.GetString().c_str());
         return;
     }
-
-    // remove fake death
-    if (GetPlayer()->hasUnitState(UNIT_STAT_DIED))
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     uint8 count = 1;
 
