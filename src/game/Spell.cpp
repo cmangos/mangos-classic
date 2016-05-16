@@ -754,7 +754,8 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
     target.processed  = false;                              // Effects not applied on target
 
     // Calculate hit result
-    target.missCondition = m_caster->SpellHitResult(pVictim, m_spellInfo, m_canReflect);
+    SpellMissInfo missInfo = m_caster->SpellHitResult(pVictim, m_spellInfo, m_canReflect);
+    target.missCondition = missInfo;
 
     // spell fly from visual cast object
     WorldObject* affectiveObject = GetAffectiveCasterObject();
@@ -2742,6 +2743,54 @@ void Spell::cast(bool skipCheck)
 
     // CAST SPELL
     SendSpellCooldown();
+
+    // There are spells which won't take power if they are missing
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (m_UniqueTargetInfo.begin() != m_UniqueTargetInfo.end())
+        {
+            bool spellMissed = false;
+
+            for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+            {
+                if ((*itr).missCondition == SPELL_MISS_MISS)
+                {
+                    spellMissed = true;
+                }
+                else
+                {
+                    spellMissed = false;
+                    break;
+                }
+            }
+
+            if (spellMissed)
+            {
+                switch (m_spellInfo->Id)
+                {
+                    case 1752:  // Sinister Strike Rank 1
+                    case 1757:  // Sinister Strike Rank 2
+                    case 1758:  // Sinister Strike Rank 3
+                    case 1759:  // Sinister Strike Rank 4
+                    case 1760:  // Sinister Strike Rank 5
+                    case 8621:  // Sinister Strike Rank 6
+                    case 11293: // Sinister Strike Rank 7
+                    case 11294: // Sinister Strike Rank 8
+                    case 2098:  // Eviscerate Rank 1
+                    case 6760:  // Eviscerate Rank 2
+                    case 6761:  // Eviscerate Rank 3
+                    case 6762:  // Eviscerate Rank 4
+                    case 8623:  // Eviscerate Rank 5
+                    case 8624:  // Eviscerate Rank 6
+                    case 11299: // Eviscerate Rank 7
+                    case 11300: // Eviscerate Rank 8
+                    case 31016: // Eviscerate Rank 9
+                        m_powerCost = 0;
+                        break;
+                }
+            }
+        }
+    }
 
     TakePower();
     TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
