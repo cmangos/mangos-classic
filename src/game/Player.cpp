@@ -18717,12 +18717,12 @@ void Player::DoInteraction(ObjectGuid const& interactObjGuid)
     if (interactObjGuid.IsUnit())
     {
         // remove some aura like stealth aura
-        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_UNK10);
+        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TALK);
     }
     else if (interactObjGuid.IsGameObject())
     {
         // remove some aura like stealth aura
-        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_UNK11);
+        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_USE);
     }
     SendForcedObjectUpdate();
 }
