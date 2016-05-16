@@ -346,7 +346,6 @@ bool GossipHello_npc_aurius(Player* pPlayer, Creature* pCreature)
         if (pCreature->isQuestGiver())
             pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
-        DEBUG_LOG("AURIUS TYPE: %u",pInstance->GetData(TYPE_AURIUS));
         switch (pInstance->GetData(TYPE_AURIUS))
         {
             case SPECIAL:
