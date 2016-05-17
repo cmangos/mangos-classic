@@ -39,6 +39,7 @@
 #include "MaNGOSsoap.h"
 #include "MassMailMgr.h"
 #include "DBCStores.h"
+#include "ScriptMgr.h"
 
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
@@ -311,6 +312,11 @@ int Master::Run()
 
         delete cliThread;
     }
+
+    /// Since the script library gets unloaded before the
+    /// call to ~ScriptMgr(), we need to manually call
+    /// the destructor to prevent a segmentation fault
+    sScriptMgr.UnloadScriptLibrary();
 
     ///- Exit the process with specified return value
     return World::GetExitCode();
