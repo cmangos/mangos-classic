@@ -18754,3 +18754,36 @@ void Player::DoInteraction(ObjectGuid const& interactObjGuid)
     }
     SendForcedObjectUpdate();
 }
+
+bool Player::AddItem(uint32 itemId, uint32 count)
+{
+    // 给角色添物品
+    uint32 noSpaceForCount = 0;
+
+    // check space and find places
+    ItemPosCountVec dest;
+    uint8 msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count, &noSpaceForCount);
+    if (msg != EQUIP_ERR_OK)                                // convert to possible store amount
+    {
+        count = noSpaceForCount;
+    }
+
+    if (count == 0 || dest.empty())                         // 不能添加任何东西
+    {
+        sWorld.SendWorldText(LANG_ITEM_CANNOT_CREATE, itemId, noSpaceForCount);
+        return false;
+    }
+
+    Item* item = StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
+
+    if (item)
+    {
+        SendNewItem(item, count, true, false);
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
+}
