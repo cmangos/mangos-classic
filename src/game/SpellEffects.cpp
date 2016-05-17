@@ -2134,7 +2134,8 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
         return;
     }
 
-    uint32 level = m_caster->getLevel();
+    // Level of pet summoned
+    uint8 level = m_caster->getLevel();
     Pet* spawnCreature = new Pet(SUMMON_PET);
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER && spawnCreature->LoadPetFromDB((Player*)m_caster, pet_entry))
@@ -2470,10 +2471,9 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
     if (!creature_entry)
         return;
 
-    uint32 level = m_caster->getLevel();
+    // Level of pet summoned
+    uint8 level = m_caster->getLevel();
 
-    {
-    }
 
     // select center of summon position
     float center_x = m_targets.m_destX;
@@ -2558,8 +2558,8 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         if (m_caster->FindGuardianWithEntry(pet_entry))
             return;                                         // find old guardian, ignore summon
 
-    // in another case summon new
-    uint32 level = m_caster->getLevel();
+    // Level of pet summoned
+    uint8 level = m_caster->getLevel();
 
     // level of pet summoned using engineering item based at engineering skill level
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_CastItem)
@@ -2956,8 +2956,9 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     NewSummon->SetRespawnCoord(pos);
 
-    uint32 petlevel = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
     NewSummon->setPetType(SUMMON_PET);
+    // Level of pet summoned
+    uint8 level = m_caster->getLevel();
 
     uint32 faction = m_caster->getFaction();
     if (m_caster->GetTypeId() == TYPEID_UNIT)
