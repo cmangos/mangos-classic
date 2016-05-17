@@ -93,7 +93,7 @@ struct boss_jeklikAI : public ScriptedAI
         m_uiChargeTimer = 20000;
         m_uiSwoopTimer = 5000;
         m_uiSonicBurstTimer = 8000;
-        m_uiSpawnBatsTimer = 60000;
+        m_uiSpawnBatsTimer = 20000;
         m_uiShadowWordPainTimer = 6000;
         m_uiMindFlayTimer = 11000;
         m_uiChainMindFlayTimer = 26000;
@@ -251,7 +251,7 @@ struct boss_jeklikAI : public ScriptedAI
                 {
                     DoCastSpellIfCan(m_creature, SPELL_SUMMON_FRENZIED_BATS);
                 }
-                m_uiSpawnBatsTimer = 60000;
+                m_uiSpawnBatsTimer = 20000;
             }
             else
                 m_uiSpawnBatsTimer -= uiDiff;
