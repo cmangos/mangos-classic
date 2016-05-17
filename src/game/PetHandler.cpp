@@ -110,32 +110,23 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
                     // This is true if pet has no target or has target but targets differs.
                     if (pet->getVictim() != TargetUnit)
-                    {
                         if (pet->getVictim())
                             pet->AttackStop();
 
-                        if (pet->hasUnitState(UNIT_STAT_CONTROLLED))
-                        {
-                            pet->Attack(TargetUnit, true);
-                            pet->SendPetAIReaction();
-                        }
-                        else
-                        {
-                            pet->GetMotionMaster()->Clear();
+                    pet->GetMotionMaster()->Clear();
 
-                            if (((Creature*)pet)->AI())
-                                ((Creature*)pet)->AI()->AttackStart(TargetUnit);
-
-                            // 10% chance to play special pet attack talk, else growl
-                            if (((Creature*)pet)->IsPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != TargetUnit && roll_chance_i(10))
-                                pet->SendPetTalk((uint32)PET_TALK_ATTACK);
-                            else
-                            {
-                                // 90% chance for pet and 100% chance for charmed creature
-                                pet->SendPetAIReaction();
-                            }
-                        }
+                    if (((Creature*)pet)->AI())
+                    {
+                        ((Creature*)pet)->AI()->AttackStart(TargetUnit);
+                        // 10% chance to play special warlock pet attack talk, else growl
+                        if (((Creature*)pet)->IsPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != TargetUnit && roll_chance_i(10))
+                            pet->SendPetTalk((uint32)PET_TALK_ATTACK);
                     }
+                    else
+                        pet->Attack(TargetUnit, true);
+
+                    pet->SendPetAIReaction();
+
                     break;
                 }
                 case COMMAND_ABANDON:                       // abandon (hunter pet) or dismiss (summoned pet)
@@ -159,10 +150,17 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             switch (spellid)
             {
                 case REACT_PASSIVE:                         // passive
+                {
+                    pet->AttackStop();
+                    if (!charmInfo->GetCommandState() == COMMAND_STAY)
+                        pet->GetMotionMaster()->MoveFollow(_player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                }
                 case REACT_DEFENSIVE:                       // recovery
                 case REACT_AGGRESSIVE:                      // activete
+                {
                     charmInfo->SetReactState(ReactStates(spellid));
                     break;
+                }
             }
             break;
         case ACT_DISABLED:                                  // 0x81    spell (disabled), ignore
