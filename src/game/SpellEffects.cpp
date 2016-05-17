@@ -2136,6 +2136,13 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
 
     // Level of pet summoned
     uint8 level = m_caster->getLevel();
+
+    if (m_caster->getLevel() >= cInfo->MaxLevel)
+        level = cInfo->MaxLevel;
+
+    if (m_caster->getLevel() <= cInfo->MinLevel)
+        level = cInfo->MinLevel;
+
     Pet* spawnCreature = new Pet(SUMMON_PET);
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER && spawnCreature->LoadPetFromDB((Player*)m_caster, pet_entry))
@@ -2474,6 +2481,13 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
     // Level of pet summoned
     uint8 level = m_caster->getLevel();
 
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature_entry);
+
+    if (m_caster->getLevel() >= cInfo->MaxLevel)
+        level = cInfo->MaxLevel;
+
+    else if (m_caster->getLevel() <= cInfo->MinLevel)
+        level = cInfo->MinLevel;
 
     // select center of summon position
     float center_x = m_targets.m_destX;
@@ -2560,6 +2574,12 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
 
     // Level of pet summoned
     uint8 level = m_caster->getLevel();
+
+    if (m_caster->getLevel() >= cInfo->MaxLevel)
+        level = cInfo->MaxLevel;
+
+    else if (m_caster->getLevel() <= cInfo->MinLevel)
+        level = cInfo->MinLevel;
 
     // level of pet summoned using engineering item based at engineering skill level
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_CastItem)
@@ -2990,6 +3010,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     if (NewSummon->getPetType() == SUMMON_PET)
     {
         // Remove Demonic Sacrifice auras (new pet)
+        level = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
         Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
         for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
         {
