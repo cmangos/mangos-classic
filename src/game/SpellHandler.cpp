@@ -375,7 +375,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     Spell* spell = new Spell(_player, spellInfo, false);
-    spell->prepare(&targets);
+    spell->SpellStart(&targets);
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)

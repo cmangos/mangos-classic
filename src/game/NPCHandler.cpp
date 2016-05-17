@@ -299,7 +299,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
     SpellCastTargets targets;
     targets.setUnitTarget(_player);
 
-    spell->prepare(&targets);
+    spell->SpellStart(&targets);
 }
 
 void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)

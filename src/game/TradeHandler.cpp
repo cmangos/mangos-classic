@@ -473,10 +473,10 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         trader->ModifyMoney(my_trade->GetMoney());
 
         if (my_spell)
-            my_spell->prepare(&my_targets);
+            my_spell->SpellStart(&my_targets);
 
         if (his_spell)
-            his_spell->prepare(&his_targets);
+            his_spell->SpellStart(&his_targets);
 
         // cleanup
         clearAcceptTradeMode(my_trade, his_trade);

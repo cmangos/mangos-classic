@@ -296,7 +296,7 @@ void PetAI::UpdateAI(const uint32 diff)
             if (m_creature->IsPet())
                 ((Pet*)m_creature)->CheckLearning(spell->m_spellInfo->Id);
 
-            spell->prepare(&targets);
+            spell->SpellStart(&targets);
         }
 
         // deleted cached Spell objects

@@ -187,11 +187,12 @@ inline ByteBuffer& operator>> (ByteBuffer& buf, SpellCastTargetsReader const& ta
 
 enum SpellState
 {
-    SPELL_STATE_CREATED =   0,                              // just created
-    SPELL_STATE_PREPARING = 1,                              // cast time delay period, non channeled spell
-    SPELL_STATE_CASTING   = 2,                              // channeled time period spell casting state
-    SPELL_STATE_FINISHED  = 3,                              // cast finished to success or fail
-    SPELL_STATE_DELAYED   = 4                               // spell casted but need time to hit target(s)
+    SPELL_STATE_CREATED   = 0,                              // just created
+    SPELL_STATE_STARTING  = 1,                              // doing initial check
+    SPELL_STATE_PREPARING = 2,                              // cast time delay period, non channeled spell
+    SPELL_STATE_CASTING   = 3,                              // channeled time period spell casting state
+    SPELL_STATE_FINISHED  = 4,                              // cast finished to success or fail
+    SPELL_STATE_DELAYED   = 5                               // spell casted but need time to hit target(s)
 };
 
 enum SpellTargets
@@ -308,7 +309,7 @@ class Spell
         Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
         ~Spell();
 
-        void prepare(SpellCastTargets const* targets, Aura* triggeredByAura = nullptr);
+        void SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura = nullptr);
 
         void cancel();
 
@@ -440,6 +441,9 @@ class Spell
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
         void UpdateOriginalCasterPointer();
+
+        SpellCastResult PreCastCheck(Aura* triggeredByAura = nullptr);
+        void Prepare();
 
         Unit* m_caster;
 
