@@ -52,8 +52,8 @@ void PetAI::MoveInLineOfSight(Unit* u)
     if (!m_creature->GetCharmInfo() || !m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
         return;
 
-    if (u->isTargetableForAttack() && m_creature->IsHostileTo(u) &&
-            u->isInAccessablePlaceFor(m_creature))
+    if (u->isTargetableForAttack() && u->isInAccessablePlaceFor(m_creature) &&
+           (m_creature->IsHostileTo(u) || u->IsHostileTo(m_creature->GetCharmerOrOwner())))
     {
         float attackRadius = m_creature->GetAttackDistance(u);
         if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
@@ -69,7 +69,7 @@ void PetAI::MoveInLineOfSight(Unit* u)
 
 void PetAI::AttackStart(Unit* u)
 {
-    if (!u || (m_creature->IsPet() && ((Pet*)m_creature)->getPetType() == MINI_PET))
+    if (!u || ((Pet*)m_creature)->getPetType() == MINI_PET)
         return;
 
     if (m_creature->Attack(u, true))
@@ -125,6 +125,7 @@ void PetAI::UpdateAI(const uint32 diff)
         return;
 
     Unit* owner = m_creature->GetCharmerOrOwner();
+    Unit* victim = m_creature->getVictim();
 
     if (m_updateAlliesTimer <= diff)
         // UpdateAllies self set update timer
@@ -132,7 +133,7 @@ void PetAI::UpdateAI(const uint32 diff)
     else
         m_updateAlliesTimer -= diff;
 
-    if (inCombat && (!m_creature->getVictim() || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
+    if (inCombat && (!victim || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
         _stopAttack();
 
     // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
@@ -217,14 +218,11 @@ void PetAI::UpdateAI(const uint32 diff)
                 // Consume Shadows, Lesser Invisibility, so ignore checks for its
                 if (!IsNonCombatSpell(spellInfo))
                 {
-                    // allow only spell without spell cost or with spell cost but not duration limit
                     int32 duration = GetSpellDuration(spellInfo);
-                    if ((spellInfo->manaCost || spellInfo->ManaCostPercentage || spellInfo->manaPerSecond) && duration > 0)
-                        continue;
-
-                    // allow only spell without cooldown > duration
                     int32 cooldown = GetSpellRecoveryTime(spellInfo);
-                    if (cooldown >= 0 && duration >= 0 && cooldown > duration)
+
+                    // allow only spell not on cooldown
+                    if (cooldown != 0 && duration < cooldown)
                         continue;
 
                     // not allow instant kill autocasts as full health cost
