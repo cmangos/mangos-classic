@@ -48,7 +48,9 @@ enum
 
     // common spells
     SPELL_SNAKE_FORM = 23849,
-    SPELL_FRENZY = 23537
+    SPELL_FRENZY = 23537,
+
+    NPC_PARASITIC_SERPENT = 14884
 };
 
 struct boss_venoxisAI : public ScriptedAI
@@ -84,12 +86,12 @@ struct boss_venoxisAI : public ScriptedAI
         m_uiHolyNovaTimer = 5000;
         m_uiDispellTimer = 35000;
         m_uiHolyFireTimer = 10000;
-        m_uiHolyWrathTimer = 60000;
+        m_uiHolyWrathTimer = 20000;
         m_uiRenewTimer = 30000;
 
         m_uiVenomSpitTimer = 5000;
         m_uiPoisonCloudTimer = 10000;
-        m_uiParasiticTimer = 30000;
+        m_uiParasiticTimer = 10000;
 
         m_bPhaseTwo = false;
         m_bInBerserk = false;
@@ -121,6 +123,14 @@ struct boss_venoxisAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VENOXIS, IN_PROGRESS);
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        if (pSummoned->GetEntry() == NPC_PARASITIC_SERPENT)
+        {
+            pSummoned->SetHealthPercent(10);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -166,7 +176,7 @@ struct boss_venoxisAI : public ScriptedAI
                 if (uiTargetsInRange >= 3)
                     DoCastSpellIfCan(m_creature, SPELL_HOLY_NOVA);
 
-                m_uiHolyNovaTimer = urand(45000, 75000);
+                m_uiHolyNovaTimer = urand(10000, 15000);
             }
             else
                 m_uiHolyNovaTimer -= uiDiff;
@@ -176,7 +186,7 @@ struct boss_venoxisAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     DoCastSpellIfCan(pTarget, SPELL_HOLY_WRATH);
 
-                m_uiHolyWrathTimer = urand(45000, 60000);
+                m_uiHolyWrathTimer = urand(20000, 25000);
             }
             else
                 m_uiHolyWrathTimer -= uiDiff;
@@ -186,7 +196,7 @@ struct boss_venoxisAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     DoCastSpellIfCan(pTarget, SPELL_HOLY_FIRE);
 
-                m_uiHolyNovaTimer = urand(45000, 60000);
+                m_uiHolyNovaTimer = urand(10000, 15000);
             }
             else
                 m_uiHolyFireTimer -= uiDiff;
@@ -208,11 +218,8 @@ struct boss_venoxisAI : public ScriptedAI
         {
             if (m_uiPoisonCloudTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_POISON_CLOUD) == CAST_OK)
-                        m_uiVenomSpitTimer = urand(15000, 20000);
-                }
+                if (DoCastSpellIfCan(m_creature, SPELL_POISON_CLOUD) == CAST_OK)
+                    m_uiPoisonCloudTimer = urand(15000, 20000);
             }
             else
                 m_uiPoisonCloudTimer -= uiDiff;
