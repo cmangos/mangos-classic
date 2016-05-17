@@ -1177,6 +1177,7 @@ Visibility.AIRelocationNotifyDelay = 1000
 #    Rate.Drop.Item.Legendary
 #    Rate.Drop.Item.Artifact
 #    Rate.Drop.Item.Referenced
+#    Rate.Drop.Item.Quest
 #    Rate.Drop.Money
 #         Drop rates (items by quality and money)
 #         Default: 1
@@ -1325,6 +1326,7 @@ Rate.Drop.Item.Epic = 1
 Rate.Drop.Item.Legendary = 1
 Rate.Drop.Item.Artifact = 1
 Rate.Drop.Item.Referenced = 1
+Rate.Drop.Item.Quest = 1
 Rate.Drop.Money = 1
 Rate.Pet.XP.Kill = 1
 Rate.XP.Kill    = 1
