@@ -324,7 +324,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                     {
                         DoScriptText(SAY_EPILOGUE, pYsida);
                         DoUseDoorOrButton(GO_YSIDA_CAGE);
-                        pYsida->GetMotionMaster()->MovePoint(0, aStratholmeLocation[8].m_fX, aStratholmeLocation[8].m_fY, aStratholmeLocation[8].m_fZ, aStratholmeLocation[8].m_fO);
+                        pYsida->GetMotionMaster()->MovePoint(0, aStratholmeLocation[8].m_fX, aStratholmeLocation[8].m_fY, aStratholmeLocation[8].m_fZ);
                     }
                 }
 
@@ -815,7 +815,7 @@ void instance_stratholme::Update(uint32 uiDiff)
                 // Open the cage and let Ysida face her doom
                 if (Creature* pYsida = GetSingleCreatureFromStorage(NPC_YSIDA))
                 {
-                    pYsida->GetMotionMaster()->MovePoint(0, aStratholmeLocation[8].m_fX, aStratholmeLocation[8].m_fY, aStratholmeLocation[8].m_fZ, aStratholmeLocation[8].m_fO);
+                    pYsida->GetMotionMaster()->MovePoint(0, aStratholmeLocation[8].m_fX, aStratholmeLocation[8].m_fY, aStratholmeLocation[8].m_fZ);
                     DoUseDoorOrButton(GO_YSIDA_CAGE);
                 }
 
