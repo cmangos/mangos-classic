@@ -135,57 +135,6 @@ void PetAI::UpdateAI(const uint32 diff)
     if (inCombat && (!m_creature->getVictim() || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
         _stopAttack();
 
-    // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
-    if (m_creature->getVictim())
-    {
-        if (_needToStop())
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "PetAI (guid = %u) is stopping attack.", m_creature->GetGUIDLow());
-            _stopAttack();
-            return;
-        }
-
-        bool meleeReach = m_creature->CanReachWithMeleeAttack(m_creature->getVictim());
-
-        if (m_creature->IsStopped() || meleeReach)
-        {
-            // required to be stopped cases
-            if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false))
-            {
-                if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
-                    m_creature->InterruptNonMeleeSpells(false);
-                else
-                    return;
-            }
-            // not required to be stopped case
-            else if (DoMeleeAttackIfReady())
-            {
-                if (!m_creature->getVictim())
-                    return;
-
-                // if pet misses its target, it will also be the first in threat list
-                m_creature->getVictim()->AddThreat(m_creature);
-
-                if (_needToStop())
-                    _stopAttack();
-            }
-        }
-    }
-    else if (owner && m_creature->GetCharmInfo())
-    {
-        if (owner->isInCombat() && !(m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) || m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY)))
-        {
-            AttackStart(owner->getAttackerForHelper());
-        }
-        else if (m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
-        {
-            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
-            {
-                m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-            }
-        }
-    }
-
     // Autocast (casted only in combat or persistent spells in any state)
     if (!m_creature->IsNonMeleeSpellCasted(false))
     {
@@ -302,6 +251,56 @@ void PetAI::UpdateAI(const uint32 diff)
         // deleted cached Spell objects
         for (TargetSpellList::const_iterator itr = targetSpellStore.begin(); itr != targetSpellStore.end(); ++itr)
             delete itr->second;
+    }
+
+    else
+    {
+        if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
+            m_creature->InterruptNonMeleeSpells(false);
+    }
+
+    if (victim)
+        {
+        // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
+        if (_needToStop())
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "PetAI (guid = %u) is stopping attack.", m_creature->GetGUIDLow());
+            _stopAttack();
+            return;
+        }
+
+        bool meleeReach = m_creature->CanReachWithMeleeAttack(victim);
+
+        // required to be stopped cases
+        if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false))
+        {
+            if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
+                    m_creature->InterruptNonMeleeSpells(false);
+        }
+
+        else if (meleeReach)
+        {
+            if (DoMeleeAttackIfReady())
+                // if pet misses its target, it will also be the first in threat list
+                victim->AddThreat(m_creature);
+            else
+                AttackStart(victim);
+        }
+    }
+
+    else if (owner && m_creature->GetCharmInfo())
+    {
+        if (owner->isInCombat() && !(m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) || m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY)))
+        {
+            AttackStart(owner->getAttackerForHelper());
+        }
+        else if (m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
+        {
+            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+            {
+                m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            }
+        }
     }
 }
 
