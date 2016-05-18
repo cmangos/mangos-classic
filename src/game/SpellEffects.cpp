@@ -2896,11 +2896,12 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     uint32 petentry = m_spellInfo->EffectMiscValue[eff_idx];
 
     Pet* OldSummon = m_caster->GetPet();
+    Pet* NewSummon = new Pet;
 
-    // if pet requested type already exist
-    if (OldSummon)
+    if (m_caster->getClass() == CLASS_HUNTER)
     {
-        if ((petentry == 0 || OldSummon->GetEntry() == petentry) && OldSummon->getPetType() != SUMMON_PET)
+        // if pet type is already roaming the world
+        if (OldSummon)
         {
             // pet in corpse state can't be summoned
             if (OldSummon->isDead())
@@ -2912,20 +2913,25 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
             m_caster->GetClosePoint(px, py, pz, OldSummon->GetObjectBoundingRadius());
 
             OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
+
             m_caster->GetMap()->Add((Creature*)OldSummon);
 
-            if (m_caster->GetTypeId() == TYPEID_PLAYER && OldSummon->isControlled())
-            {
-                ((Player*)m_caster)->PetSpellInitialize();
-            }
-            return;
+            ((Player*)m_caster)->PetSpellInitialize();
+        }
+        // if the pet is not currently roaming the world
+        else if (!NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
+        {
+            // The hunter does not have a pet to call
+            delete NewSummon;
+            // TODO: Inform the hunter he has no pet =/
         }
 
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            OldSummon->Unsummon(OldSummon->getPetType() == HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT, m_caster);
-        else
-            return;
+        delete OldSummon;
+        return;
     }
+    else if (m_caster->getClass() == CLASS_WARLOCK) 
+        if (OldSummon)
+            OldSummon->Unsummon(PET_SAVE_NOT_IN_SLOT, m_caster);
 
     CreatureInfo const* cInfo = petentry ? ObjectMgr::GetCreatureTemplate(petentry) : nullptr;
 
@@ -2933,37 +2939,6 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     if (petentry && !cInfo)
     {
         sLog.outErrorDb("EffectSummonPet: creature entry %u not found for spell %u.", petentry, m_spellInfo->Id);
-        return;
-    }
-
-    Pet* NewSummon = new Pet;
-
-    // petentry==0 for hunter "call pet" (current pet summoned if any)
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
-    {
-        if (NewSummon->getPetType() == SUMMON_PET)
-        {
-            // Remove Demonic Sacrifice auras (known pet)
-            Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-            for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-            {
-                if ((*itr)->GetModifier()->m_miscvalue == 2228)
-                {
-                    m_caster->RemoveAurasDueToSpell((*itr)->GetId());
-                    itr = auraClassScripts.begin();
-                }
-                else
-                    ++itr;
-            }
-        }
-
-        return;
-    }
-
-    // not error in case fail hunter call pet
-    if (!petentry)
-    {
-        delete NewSummon;
         return;
     }
 
@@ -2979,41 +2954,25 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     NewSummon->SetRespawnCoord(pos);
 
-    NewSummon->setPetType(SUMMON_PET);
     // Level of pet summoned
     uint8 level = m_caster->getLevel();
+    if (m_caster->getLevel() >= cInfo->MaxLevel)
+        level = cInfo->MaxLevel;
 
-    uint32 faction = m_caster->getFaction();
-    if (m_caster->GetTypeId() == TYPEID_UNIT)
+    else if (m_caster->getLevel() <= cInfo->MinLevel)
+        level = cInfo->MinLevel;
+
+    // Set pet reaction state
+    NewSummon->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
+
+    if (m_caster->getClass() == CLASS_WARLOCK)
     {
-        if (((Creature*)m_caster)->IsTotem())
-            NewSummon->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
-        else
-            NewSummon->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
-    }
-
-    NewSummon->SetOwnerGuid(m_caster->GetObjectGuid());
-    NewSummon->SetCreatorGuid(m_caster->GetObjectGuid());
-    NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
-    NewSummon->setFaction(faction);
-    NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
-    NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
-    NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
-    NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-
-    NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
-    // this enables pet details window (Shift+P)
-
-    if (m_caster->IsPvP())
-        NewSummon->SetPvP(true);
-
-    NewSummon->InitStatsForLevel(petlevel, m_caster);
-    NewSummon->InitPetCreateSpells();
-
-    if (NewSummon->getPetType() == SUMMON_PET)
-    {
-        // Remove Demonic Sacrifice auras (new pet)
         level = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
+
+        NewSummon->setPetType(SUMMON_PET);
+        NewSummon->GetCreatureInfo()->CreatureType == CREATURE_TYPE_DEMON;
+
+        // Remove Demonic Sacrifice auras (known pet)
         Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
         for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
         {
@@ -3025,20 +2984,35 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
             else
                 ++itr;
         }
-    }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && NewSummon->getPetType() == SUMMON_PET)
-    {
+        if (OldSummon)
+            NewSummon->GetCharmInfo()->SetReactState(OldSummon->GetCharmInfo()->GetReactState());
+
         // generate new name for summon pet
         std::string new_name = sObjectMgr.GeneratePetName(petentry);
         if (!new_name.empty())
             NewSummon->SetName(new_name);
-    }
-    else if (NewSummon->getPetType() == HUNTER_PET)
-        NewSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME);
 
-    NewSummon->SetHealth(NewSummon->GetMaxHealth());
-    NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
+        NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
+        NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
+
+        // this enables pet details window (Shift+P)
+        NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
+
+        if (m_caster->IsPvP())
+            NewSummon->SetPvP(true);
+    }
+    else
+        NewSummon->setPetType(GUARDIAN_PET);
+
+    NewSummon->SetOwnerGuid(m_caster->GetObjectGuid());
+    NewSummon->SetCreatorGuid(m_caster->GetObjectGuid());
+    NewSummon->setFaction(m_caster->getFaction());
+    NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
+    NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+
+    NewSummon->InitStatsForLevel(level, m_caster);
+    NewSummon->InitPetCreateSpells();
 
     map->Add((Creature*)NewSummon);
     NewSummon->AIM_Initialize();
@@ -3050,6 +3024,14 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     {
         NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
         ((Player*)m_caster)->PetSpellInitialize();
+    }
+    else
+    {
+        // Notify Summoner
+        if (m_originalCaster && m_originalCaster != m_caster)
+            ((Creature*)m_originalCaster)->AI()->JustSummoned(NewSummon);
+        else
+            ((Creature*)m_caster)->AI()->JustSummoned(NewSummon);
     }
 }
 
