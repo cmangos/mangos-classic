@@ -989,8 +989,8 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     if (!Create(guid, pos, creature->GetCreatureInfo(), pet_number))
         return false;
 
-    CreatureInfo const* cinfo = GetCreatureInfo();
-    if (!cinfo)
+    CreatureInfo const* cInfo = GetCreatureInfo();
+    if (!cInfo)
     {
         sLog.outError("CreateBaseAtCreature() failed, creatureInfo is missing!");
         return false;
@@ -1006,7 +1006,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, sObjectMgr.GetXPForPetLevel(creature->getLevel()));
     SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
-    if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->Family))
+    if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->Family))
         SetName(cFamily->Name[sWorld.GetDefaultDbcLocale()]);
     else
         SetName(creature->GetNameForLocaleIdx(sObjectMgr.GetDBCLocaleIndex()));
@@ -1916,8 +1916,8 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
             }
         }
     }
-    _SaveSpells();
 
+    _SaveSpells();
 }
 
 bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number)
