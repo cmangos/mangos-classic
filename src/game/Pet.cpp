@@ -62,8 +62,6 @@ Pet::Pet(PetType type) :
 
     if (type == MINI_PET)                                   // always passive
         charmInfo->SetReactState(REACT_PASSIVE);
-    else if (type == GUARDIAN_PET)                          // always aggressive
-        charmInfo->SetReactState(REACT_AGGRESSIVE);
 }
 
 Pet::~Pet()
@@ -209,9 +207,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     switch (getPetType())
     {
-        case SUMMON_PET:
-            petlevel = owner->getLevel();
-            break;
         case HUNTER_PET:
             // loyalty
             SetByteValue(UNIT_FIELD_BYTES_1, 1, fields[8].GetUInt32());
@@ -225,6 +220,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
             SetPower(POWER_HAPPINESS, fields[15].GetUInt32());
             SetPowerType(POWER_FOCUS);
+        case SUMMON_PET:
             break;
         default:
             sLog.outError("Pet have incorrect type (%u) for pet loading.", getPetType());
@@ -320,6 +316,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
         SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
     }
+
+    if (savedhealth <= 0)
+        SetDeathState(JUST_DIED);
 
     map->Add((Creature*)this);
     AIM_Initialize();
@@ -442,7 +441,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addUInt32(uint32(mode));
         savePet.addString(m_name);
         savePet.addUInt32(uint32(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME) ? 0 : 1));
-        savePet.addUInt32((curhealth < 1 ? 1 : curhealth));
+        savePet.addUInt32((curhealth < 1 ? 0 : curhealth));
         savePet.addUInt32(curpower);
         savePet.addUInt32(GetPower(POWER_HAPPINESS));
 
@@ -596,7 +595,7 @@ void Pet::Update(uint32 update_diff, uint32 diff)
 
 void Pet::RegenerateAll(uint32 update_diff)
 {
-    // regenerate focus
+    // regenerate power
     if (m_regenTimer <= update_diff)
     {
         if (!isInCombat() || IsPolymorphed())
@@ -997,11 +996,6 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
         return false;
     }
 
-    if (cinfo->CreatureType == CREATURE_TYPE_CRITTER)
-    {
-        setPetType(MINI_PET);
-        return true;
-    }
     SetDisplayId(creature->GetDisplayId());
     SetNativeDisplayId(creature->GetNativeDisplayId());
     SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
@@ -1018,18 +1012,21 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
         SetName(creature->GetNameForLocaleIdx(sObjectMgr.GetDBCLocaleIndex()));
 
     m_loyaltyPoints = 1000;
-    if (cinfo->CreatureType == CREATURE_TYPE_BEAST)
-    {
-        SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_WARRIOR);
-        SetByteValue(UNIT_FIELD_BYTES_0, 2, GENDER_NONE);
-        SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_FOCUS);
-        SetSheath(SHEATH_STATE_MELEE);
-        SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5);
-        SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING | UNIT_FLAG_RENAME);
 
-        SetUInt32Value(UNIT_MOD_CAST_SPEED, creature->GetUInt32Value(UNIT_MOD_CAST_SPEED));
-        SetLoyaltyLevel(REBELLIOUS);
-    }
+    setPetType(HUNTER_PET);
+    SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_WARRIOR);
+    SetByteValue(UNIT_FIELD_BYTES_0, 2, GENDER_NONE);
+    SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_FOCUS);
+    SetSheath(SHEATH_STATE_MELEE);
+    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5);
+    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING | UNIT_FLAG_RENAME);
+
+    // this enables popup window (pet abandon, cancel)
+    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
+
+    SetUInt32Value(UNIT_MOD_CAST_SPEED, creature->GetUInt32Value(UNIT_MOD_CAST_SPEED));
+    SetLoyaltyLevel(REBELLIOUS);
+
     return true;
 }
 
@@ -1064,8 +1061,6 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             SetSheath(SHEATH_STATE_MELEE);
             SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5);
 
-            // this enables popup window (pet abandon, cancel), original value set in CreateBaseAtCreature
-            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
             break;
         case GUARDIAN_PET:
         case MINI_PET:
@@ -1901,25 +1896,6 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
     }
 }
 
-bool Pet::IsPermanentPetFor(Player* owner)
-{
-    switch (getPetType())
-    {
-        case SUMMON_PET:
-            switch (owner->getClass())
-            {
-                // oddly enough, Mage's Water Elemental is still treated as temporary pet with Glyph of Eternal Water
-                // i.e. does not unsummon at mounting, gets dismissed at teleport etc.
-                case CLASS_WARLOCK:
-                    return GetCreatureInfo()->CreatureType == CREATURE_TYPE_DEMON;
-                default:
-                    return false;
-            }
-        case HUNTER_PET:
-            return true;
-        default:
-            return false;
-    }
 }
 
 bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number)
@@ -1978,7 +1954,7 @@ void Pet::CastPetAuras(bool current)
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if (!IsPermanentPetFor((Player*)owner))
+    if (!isControlled())
         return;
 
     for (PetAuraSet::const_iterator itr = owner->m_petAuras.begin(); itr != owner->m_petAuras.end();)
