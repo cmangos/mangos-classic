@@ -2836,11 +2836,13 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
 
     Creature* creatureTarget = (Creature*)unitTarget;
 
+    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creatureTarget->GetEntry());
+
     // cast finish successfully
     // SendChannelUpdate(0);
     finish();
 
-    Pet* pet = new Pet(HUNTER_PET);
+    Pet* pet = new Pet;
 
     if (!pet->CreateBaseAtCreature(creatureTarget))
     {
@@ -2856,36 +2858,37 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     if (plr->IsPvP())
         pet->SetPvP(true);
 
-    if (!pet->InitStatsForLevel(creatureTarget->getLevel()))
-    {
-        sLog.outError("Pet::InitStatsForLevel() failed for creature (Entry: %u)!", creatureTarget->GetEntry());
-        delete pet;
-        return;
-    }
+    uint32 pet_number = sObjectMgr.GeneratePetNumber();
+    pet->GetCharmInfo()->SetPetNumber(pet_number, true);
 
-    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
-    // this enables pet details window (Shift+P)
-    pet->AIM_Initialize();
-    pet->InitPetCreateSpells();
-    pet->SetHealth(pet->GetMaxHealth());
+    pet->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
 
-    // "kill" original creature
+    pet->InitStatsForLevel(creatureTarget->getLevel());
+
+    pet->SetHealthPercent(creatureTarget->GetHealthPercent());
+
+    // destroy creature object
     creatureTarget->ForcedDespawn();
+
+    // add pet object to the world
+    pet->GetMap()->Add((Creature*)pet);
 
     // prepare visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, creatureTarget->getLevel() - 1);
 
-    // add to world
-    pet->GetMap()->Add((Creature*)pet);
-
     // visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, creatureTarget->getLevel());
+
+    // this enables pet details window (Shift+P)
+    pet->AIM_Initialize();
+    pet->InitPetCreateSpells();
 
     // caster have pet now
     plr->SetPet(pet);
 
-    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
     plr->PetSpellInitialize();
+
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 
 void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
