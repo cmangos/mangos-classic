@@ -208,7 +208,6 @@ void PetAI::UpdateAI(const uint32 diff)
                     {
                         targetSpellStore.push_back(TargetSpellList::value_type(Target, spell));
                         spellUsed = true;
-                        break;
                     }
                 }
                 if (!spellUsed)
@@ -250,15 +249,12 @@ void PetAI::UpdateAI(const uint32 diff)
         for (TargetSpellList::const_iterator itr = targetSpellStore.begin(); itr != targetSpellStore.end(); ++itr)
             delete itr->second;
     }
-
     else
-    {
         if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
             m_creature->InterruptNonMeleeSpells(false);
-    }
 
     if (victim)
-        {
+    {
         // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
         if (_needToStop())
         {
@@ -285,7 +281,6 @@ void PetAI::UpdateAI(const uint32 diff)
                 AttackStart(victim);
         }
     }
-
     else if (owner && m_creature->GetCharmInfo())
     {
         if (owner->isInCombat() && !(m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) || m_creature->GetCharmInfo()->HasCommandState(COMMAND_STAY)))
@@ -294,9 +289,16 @@ void PetAI::UpdateAI(const uint32 diff)
         }
         else if (m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
         {
-            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
-            {
+            // The distance is to prevent the pet from running around to reach the hunters back when  walking towards it
+            //  and the reason for increasing it more than the follow distance is to prevent the same thing
+            // from happening when your character turns and twists (as this increases the distance between them)
+            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW) && owner->GetDistance(m_creature) > (PET_FOLLOW_DIST * 1.20f))
                 m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            // This is to stop the pet from following you when you're close to each other, to support the above condition.
+            else
+            {
+                m_creature->GetMotionMaster()->Clear(false);
+                m_creature->GetMotionMaster()->MoveIdle();
             }
         }
     }
