@@ -1120,6 +1120,14 @@ class ObjectMgr
         // Standing System
         HonorStandingList HordeHonorStandingList;
         HonorStandingList AllyHonorStandingList;
+        void SetStandingListBySide(uint32 side, HonorStandingList list) {
+            switch (side)
+            {
+                case ALLIANCE: AllyHonorStandingList = list; break;
+                case HORDE:    HordeHonorStandingList = list; break;
+                default:       break; // mustn't happen
+            }
+        };
 
         typedef std::map<uint32, std::vector<std::string> > HalfNameMap;
         HalfNameMap PetHalfName0;
