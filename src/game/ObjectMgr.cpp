@@ -2719,6 +2719,7 @@ void ObjectMgr::DistributeRankPoints(uint32 team, uint32 dateBegin , bool flush 
             CharacterDatabase.CommitTransaction();
         }
     }
+    SetStandingListBySide(team, list);
 
     delete result;
 }
@@ -2737,10 +2738,9 @@ HonorStanding* ObjectMgr::GetHonorStandingByGUID(uint32 guid, uint32 side)
 {
     HonorStandingList standingList = sObjectMgr.GetStandingListBySide(side);
 
-    for (HonorStandingList::iterator itr = standingList.begin(); itr != standingList.end() ; ++itr)
+    for (HonorStandingList::iterator itr = standingList.begin(); itr != standingList.end(); ++itr)
         if (itr->guid == guid)
             return itr->GetInfo();
-
     return 0;
 }
 
