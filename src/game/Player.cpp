@@ -2224,10 +2224,10 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     if (!isAlive())
         return;
 
-    uint32 level = getLevel();
+    uint8 pLevel = getLevel();
 
     // XP to money conversion processed in Player::RewardQuest
-    if (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    if (pLevel >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         return;
 
     // XP resting bonus for kill
@@ -2239,14 +2239,14 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     uint32 newXP = curXP + xp + rested_bonus_xp;
 
-    while (newXP >= nextLvlXP && level < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    while (newXP >= nextLvlXP && pLevel < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
     {
         newXP -= nextLvlXP;
 
-        if (level < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
-            GiveLevel(level + 1);
+        if (pLevel < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+            GiveLevel(pLevel + 1);
 
-        level = getLevel();
+        pLevel = getLevel();
         nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     }
 
@@ -2260,11 +2260,13 @@ void Player::GiveLevel(uint32 level)
     if (level == getLevel())
         return;
 
+    uint8 pClass = getClass();
+
     PlayerLevelInfo info;
-    sObjectMgr.GetPlayerLevelInfo(getRace(), getClass(), level, &info);
+    sObjectMgr.GetPlayerLevelInfo(getRace(), pClass, level, &info);
 
     PlayerClassLevelInfo classInfo;
-    sObjectMgr.GetPlayerClassLevelInfo(getClass(), level, &classInfo);
+    sObjectMgr.GetPlayerClassLevelInfo(pClass, level, &classInfo);
 
     // send levelup info to client
     WorldPacket data(SMSG_LEVELUP_INFO, (4 + 4 + MAX_POWERS * 4 + MAX_STATS * 4));
@@ -2308,8 +2310,6 @@ void Player::GiveLevel(uint32 level)
     SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
     if (GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
         SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
-    SetPower(POWER_FOCUS, 0);
-    SetPower(POWER_HAPPINESS, 0);
 
     // update level to hunter/summon pet
     if (Pet* pet = GetPet())
@@ -2359,12 +2359,15 @@ void Player::InitStatsForLevel(bool reapplyMods)
         _RemoveAllStatBonuses();
 
     PlayerClassLevelInfo classInfo;
-    sObjectMgr.GetPlayerClassLevelInfo(getClass(), getLevel(), &classInfo);
+
+    uint8 pLevel = getLevel();
+    uint8 pClass = getClass();
+    sObjectMgr.GetPlayerClassLevelInfo(pClass, pLevel, &classInfo);
 
     PlayerLevelInfo info;
-    sObjectMgr.GetPlayerLevelInfo(getRace(), getClass(), getLevel(), &info);
+    sObjectMgr.GetPlayerLevelInfo(getRace(), pClass, pLevel, &info);
 
-    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(getLevel()));
+    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(pLevel));
 
     // reset before any aura state sources (health set/aura apply)
     SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
@@ -2490,8 +2493,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
     if (GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
         SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
-    SetPower(POWER_FOCUS, 0);
-    SetPower(POWER_HAPPINESS, 0);
 
     // update level to hunter/summon pet
     if (Pet* pet = GetPet())
