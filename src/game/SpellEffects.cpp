@@ -2135,7 +2135,7 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
     }
 
     // Level of pet summoned
-    uint8 level = m_caster->getLevel();
+    uint32 level = m_caster->getLevel();
 
     if (m_caster->getLevel() >= cInfo->MaxLevel)
         level = cInfo->MaxLevel;
@@ -2479,7 +2479,7 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
         return;
 
     // Level of pet summoned
-    uint8 level = m_caster->getLevel();
+    uint32 level = m_caster->getLevel();
 
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature_entry);
 
@@ -2573,7 +2573,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
             return;                                         // find old guardian, ignore summon
 
     // Level of pet summoned
-    uint8 level = m_caster->getLevel();
+    uint32 level = m_caster->getLevel();
 
     if (m_caster->getLevel() >= cInfo->MaxLevel)
         level = cInfo->MaxLevel;
@@ -2904,7 +2904,10 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         {
             // pet in corpse state can't be summoned
             if (OldSummon->isDead())
+            {
+                delete NewSummon;
                 return;
+            }
 
             OldSummon->GetMap()->Remove((Creature*)OldSummon, false);
 
@@ -2954,7 +2957,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     NewSummon->SetRespawnCoord(pos);
 
     // Level of pet summoned
-    uint8 level = m_caster->getLevel();
+    uint32 level = m_caster->getLevel();
     if (m_caster->getLevel() >= cInfo->MaxLevel)
         level = cInfo->MaxLevel;
 

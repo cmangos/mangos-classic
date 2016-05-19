@@ -2224,10 +2224,10 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     if (!isAlive())
         return;
 
-    uint8 pLevel = getLevel();
+    uint32 level = getLevel();
 
     // XP to money conversion processed in Player::RewardQuest
-    if (pLevel >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    if (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         return;
 
     // XP resting bonus for kill
@@ -2239,14 +2239,14 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     uint32 newXP = curXP + xp + rested_bonus_xp;
 
-    while (newXP >= nextLvlXP && pLevel < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    while (newXP >= nextLvlXP && level < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
     {
         newXP -= nextLvlXP;
 
-        if (pLevel < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
-            GiveLevel(pLevel + 1);
+        if (level < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+            GiveLevel(level + 1);
 
-        pLevel = getLevel();
+        level = getLevel();
         nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     }
 
@@ -2260,13 +2260,13 @@ void Player::GiveLevel(uint32 level)
     if (level == getLevel())
         return;
 
-    uint8 pClass = getClass();
+    uint32 plClass = getClass();
 
     PlayerLevelInfo info;
-    sObjectMgr.GetPlayerLevelInfo(getRace(), pClass, level, &info);
+    sObjectMgr.GetPlayerLevelInfo(getRace(), plClass, level, &info);
 
     PlayerClassLevelInfo classInfo;
-    sObjectMgr.GetPlayerClassLevelInfo(pClass, level, &classInfo);
+    sObjectMgr.GetPlayerClassLevelInfo(plClass, level, &classInfo);
 
     // send levelup info to client
     WorldPacket data(SMSG_LEVELUP_INFO, (4 + 4 + MAX_POWERS * 4 + MAX_STATS * 4));
@@ -2360,14 +2360,14 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     PlayerClassLevelInfo classInfo;
 
-    uint8 pLevel = getLevel();
-    uint8 pClass = getClass();
-    sObjectMgr.GetPlayerClassLevelInfo(pClass, pLevel, &classInfo);
+    uint32 level = getLevel();
+    uint32 plClass = getClass();
+    sObjectMgr.GetPlayerClassLevelInfo(plClass, level, &classInfo);
 
     PlayerLevelInfo info;
-    sObjectMgr.GetPlayerLevelInfo(getRace(), pClass, pLevel, &info);
+    sObjectMgr.GetPlayerLevelInfo(getRace(), plClass, level, &info);
 
-    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(pLevel));
+    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
 
     // reset before any aura state sources (health set/aura apply)
     SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
