@@ -2162,7 +2162,11 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
     CreatureCreatePos pos(m_caster->GetMap(), m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, -m_caster->GetOrientation());
 
     if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
-        pos = CreatureCreatePos(m_caster, -m_caster->GetOrientation());
+    {
+        float px, py, pz;
+        m_caster->GetClosePoint(px, py, pz, 2.40f);
+        pos = CreatureCreatePos(m_caster->GetMap(), px, py, pz, -m_caster->GetOrientation());
+    }
 
     Map* map = m_caster->GetMap();
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
@@ -2624,7 +2628,11 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         }
         // Summon if dest location not present near caster
         else
-            pos = CreatureCreatePos(m_caster, m_caster->GetOrientation());
+        {
+            float px, py, pz;
+            m_caster->GetClosePoint(px, py, pz, 2.40f);
+            pos = CreatureCreatePos(m_caster->GetMap(), px, py, pz, m_caster->GetOrientation());
+        }
 
         Map* map = m_caster->GetMap();
         uint32 pet_number = sObjectMgr.GeneratePetNumber();
@@ -2841,7 +2849,7 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     // SendChannelUpdate(0);
     finish();
 
-    Pet* pet = new Pet;
+    Pet* pet = new Pet(HUNTER_PET);
 
     if (!pet->CreateBaseAtCreature(creatureTarget))
     {
@@ -2944,7 +2952,9 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         return;
     }
 
-    CreatureCreatePos pos(m_caster, m_caster->GetOrientation());
+    float px, py, pz;
+    m_caster->GetClosePoint(px, py, pz, 2.40f);
+    CreatureCreatePos pos(m_caster->GetMap(), px, py, pz, -m_caster->GetOrientation());
 
     Map* map = m_caster->GetMap();
     uint32 pet_number = sObjectMgr.GeneratePetNumber();
@@ -4813,7 +4823,12 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
     if (pet->isAlive())
         return;
 
-    ((Unit*)pet)->NearTeleportTo(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation());
+    if (_player->GetDistance(pet) >= 2.40f)
+    {
+        float px, py, pz;
+        m_caster->GetClosePoint(px, py, pz, pet->GetObjectBoundingRadius());
+        ((Unit*)pet)->NearTeleportTo(px, py, pz, -m_caster->GetOrientation());
+    }
 
     pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
     pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);

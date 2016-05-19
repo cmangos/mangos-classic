@@ -1013,7 +1013,6 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     m_loyaltyPoints = 1000;
 
-    setPetType(HUNTER_PET);
     SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_WARRIOR);
     SetByteValue(UNIT_FIELD_BYTES_0, 2, GENDER_NONE);
     SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_FOCUS);
