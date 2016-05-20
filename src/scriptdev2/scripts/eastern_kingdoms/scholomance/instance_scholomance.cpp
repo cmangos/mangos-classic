@@ -25,7 +25,8 @@ EndScriptData */
 #include "scholomance.h"
 
 instance_scholomance::instance_scholomance(Map* pMap) : ScriptedInstance(pMap),
-    m_uiGandlingEvent(0)
+    m_uiGandlingEvent(0),
+    m_bIsRoomReset(false)
 {
     Initialize();
 }
@@ -42,12 +43,24 @@ void instance_scholomance::OnPlayerEnter(Player* /*pPlayer*/)
 {
     // Summon Gandling if can
     DoSpawnGandlingIfCan(true);
+
+    if (GetData(TYPE_RATTLEGORE) == DONE)
+        DoRespawnEntranceRoom();
 }
 
 void instance_scholomance::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
+        // Store the Guids of the NPCs in the entrance room to remove them
+        // and spawn their replacement or Rattlegore's death
+        // (only store those located in the room volume)
+        case NPC_REANIMATED_CORPSE:
+        case NPC_DISEASED_GHOUL:
+        case NPC_RISEN_ABERRATION:
+            if (GetData(TYPE_RATTLEGORE) != DONE && (pCreature->GetPositionZ() > aEntranceRoom->m_fCenterZ) && (pCreature->GetPositionX() - aEntranceRoom->m_fCornerX < aEntranceRoom->m_uiLength) && (pCreature->GetPositionY() - aEntranceRoom->m_fCornerY < aEntranceRoom->m_uiWidth))
+                m_sEntranceRoomGuids.insert(pCreature->GetObjectGuid());
+            break;
         case NPC_DARKMASTER_GANDLING:
             m_mNpcEntryGuidStore[NPC_DARKMASTER_GANDLING] = pCreature->GetObjectGuid();
             break;
@@ -63,6 +76,10 @@ void instance_scholomance::OnObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())
     {
+        case GO_VIEWING_ROOM_DOOR:
+            // In normal flow of the instance, this door is opened by a dropped key
+            if (m_auiEncounter[TYPE_RATTLEGORE] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
         case GO_GATE_KIRTONOS:
         case GO_GATE_RAS:
         case GO_GATE_GANDLING:
@@ -75,13 +92,61 @@ void instance_scholomance::OnObjectCreate(GameObject* pGo)
         case GO_GATE_RAVENIAN: m_mGandlingData[EVENT_ID_RAVENIAN].m_doorGuid = pGo->GetObjectGuid(); break;
         case GO_GATE_BAROV:    m_mGandlingData[EVENT_ID_BAROV].m_doorGuid    = pGo->GetObjectGuid(); break;
         case GO_GATE_ILLUCIA:  m_mGandlingData[EVENT_ID_ILLUCIA].m_doorGuid  = pGo->GetObjectGuid(); break;
-
-        case GO_VIEWING_ROOM_DOOR:
-            // In normal flow of the instance, this door is opened by a dropped key
-            if (m_auiEncounter[TYPE_RATTLEGORE] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
     }
+}
+
+void instance_scholomance::DoRespawnEntranceRoom()
+{
+    // safety check to avoid the room being reset for each OnPlayerEnter() call if Rattlegore is dead
+    if (m_bIsRoomReset)
+        return;
+
+    // Despawn the mobs already in the room with the exception of the necrofiend (not stored, so not despawned)
+    for (GuidSet::const_iterator itr = m_sEntranceRoomGuids.begin(); itr != m_sEntranceRoomGuids.end(); ++itr)
+    {
+        if (Creature* pMob = instance->GetCreature(*itr))
+            pMob->ForcedDespawn();
+    }
+    // Spawn the new and less numerous groups instead
+    // Four groups, one in each corner
+    // The creatures in each point are random
+    // but follow the generic rule for each group of 4 NPCs:
+    // 2 risen aberrations, 1 diseased ghoul, 1 diseased ghoul/reanimated corpse
+    for (uint8 i = 0; i < MAX_GROUPS; ++i)
+    {
+        std::vector<uint32> uiMobList;              // Vector holding the 4 creatures entries for each spawned group
+        uiMobList.push_back(NPC_RISEN_ABERRATION);  // 3 static NPC entries
+        uiMobList.push_back(NPC_RISEN_ABERRATION);
+        uiMobList.push_back(NPC_DISEASED_GHOUL);
+
+        uint32 uiMobEntry;                          // will hold the last random creature entry
+
+        // Pick the fourth NPC in the group and randomize the four possible spawns
+        switch (urand(0, 1))
+        {
+            case 0: uiMobEntry = NPC_REANIMATED_CORPSE; break;
+            case 1: uiMobEntry = NPC_DISEASED_GHOUL;    break;
+        }
+
+        uiMobList.push_back(uiMobEntry);
+        std::random_shuffle(uiMobList.begin(), uiMobList.end());
+
+        for (uint8 j = 0; j < MAX_NPC_PER_GROUP; ++j)
+            // We use the Viewing Room door as the summoning object because we are sure it is here
+            if (GameObject* pGo = GetSingleGameObjectFromStorage(GO_VIEWING_ROOM_DOOR))
+                pGo->SummonCreature(uiMobList[j], aEntranceRoomSpawnLocs[4*i+j].m_fX, aEntranceRoomSpawnLocs[4*i+j].m_fY, aEntranceRoomSpawnLocs[4*i+j].m_fZ, aEntranceRoomSpawnLocs[4*i+j].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+    }
+    // spawn also a patrolling necrofiend
+    // the waypoints are handled in DB creature_movement_template table (shared with the other necrofiend in the room)
+    // the two other necrofiends in the instance are using DB creature_movement table
+    if (GameObject* pGo = GetSingleGameObjectFromStorage(GO_VIEWING_ROOM_DOOR))
+        if (Creature* pNecrofiend = pGo->SummonCreature(NPC_NECROFIEND, aEntranceRoomSpawnLocs[16].m_fX, aEntranceRoomSpawnLocs[16].m_fY, aEntranceRoomSpawnLocs[16].m_fZ, aEntranceRoomSpawnLocs[16].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+            pNecrofiend->GetMotionMaster()->MoveWaypoint();
+
+    m_bIsRoomReset = true;
+
+    debug_log("SD2: Entrance room in Scholomance reset after Rattlegore's death");
+    return;
 }
 
 void instance_scholomance::SetData(uint32 uiType, uint32 uiData)
@@ -97,6 +162,8 @@ void instance_scholomance::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_RATTLEGORE:
             m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+                DoRespawnEntranceRoom();
             break;
         case TYPE_RAS_FROSTWHISPER:
             m_auiEncounter[uiType] = uiData;

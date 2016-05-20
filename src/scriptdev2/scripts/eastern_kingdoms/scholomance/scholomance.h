@@ -9,6 +9,8 @@ enum
 {
     MAX_ENCOUNTER           = 10,
     MAX_EVENTS              = 6,
+    MAX_GROUPS              = 4,
+    MAX_NPC_PER_GROUP       = 4,
 
     TYPE_KIRTONOS           = 0,
     TYPE_RATTLEGORE         = 1,
@@ -20,6 +22,11 @@ enum
     TYPE_ALEXEI_BAROV       = 7,
     TYPE_ILLUCIA_BAROV      = 8,
     TYPE_GANDLING           = 9,
+
+    NPC_NECROFIEND          = 11551,
+    NPC_RISEN_ABERRATION    = 10485,
+    NPC_DISEASED_GHOUL      = 10495,
+    NPC_REANIMATED_CORPSE   = 10481,
 
     NPC_KIRTONOS            = 10506,
     NPC_RATTLEGORE          = 11622,
@@ -66,6 +73,29 @@ static const SpawnLocation aGandlingSpawnLocs[1] =
     {180.771f, -5.4286f, 75.5702f, 1.29154f}
 };
 
+// Coordinates used to respawn the NPCs in the entrance room
+// (right before the Viewing Room) on Rattlegore's death
+static const SpawnLocation aEntranceRoomSpawnLocs[17] =
+{
+    {186.036f, 94.5f, 104.72f, 1.29154f},      // First corner
+    {179.117f, 95.5166f, 104.81f, 1.29154f},
+    {180.612f, 100.176f, 104.80f, 1.29154f},
+    {185.926f, 100.079f, 104.80f, 1.29154f},
+    {178.999f, 75.2952f, 104.72f, 1.29154f},   // Second corner
+    {185.558f, 77.276f, 104.72f, 1.29154f},
+    {187.556f, 70.4334f, 104.72f, 1.29154f},
+    {180.51f, 82.3917f, 104.72f, 1.29154f},
+    {212.915f, 70.6005f, 104.80f, 1.29154f},   // Third corner
+    {221.199f, 77.0037f, 104.72f, 1.29154f},
+    {214.381f, 76.233f, 104.80f, 1.29154f},
+    {218.64f, 71.5957f, 104.72f, 1.29154f},
+    {221.249f, 94.9361f, 104.72f, 1.29154f},   // Fourth corner
+    {214.406f, 101.903f, 104.72f, 1.29154f},
+    {217.521f, 95.4237f, 104.72f, 1.29154f},
+    {223.296f, 105.101f, 104.72f, 1.29154f},
+    {209.233f, 73.2819f, 104.80f, 1.29154f}    // patrolling necrofiend
+};
+
 struct GandlingEventData
 {
     GandlingEventData() : m_bIsActive(false) {}
@@ -73,6 +103,17 @@ struct GandlingEventData
     ObjectGuid m_doorGuid;
     std::set<uint32> m_sAddGuids;
 };
+
+struct BoxVolume
+{
+    float m_fCornerX;
+    float m_fCornerY;
+    float m_fCenterZ;
+    uint32 m_uiLength;
+    uint32 m_uiWidth;
+};
+
+static const BoxVolume aEntranceRoom[] = {174.13f, 63.84f, 104.0f, 54, 44};
 
 static const uint32 aGandlingEvents[MAX_EVENTS] = {EVENT_ID_POLKELT, EVENT_ID_THEOLEN, EVENT_ID_MALICIA, EVENT_ID_ILLUCIA, EVENT_ID_BAROV, EVENT_ID_RAVENIAN};
 
@@ -104,12 +145,16 @@ class instance_scholomance : public ScriptedInstance
 
     private:
         void DoSpawnGandlingIfCan(bool bByPlayerEnter);
+        void DoRespawnEntranceRoom();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
         uint32 m_uiGandlingEvent;
         GandlingEventMap m_mGandlingData;
+
+        bool m_bIsRoomReset;
+        GuidSet m_sEntranceRoomGuids;
 };
 
 #endif
