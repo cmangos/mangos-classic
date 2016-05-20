@@ -992,6 +992,15 @@ struct SpellEntry
         inline uint32 GetEffectMiscValue(SpellEffectIndex j) const { return EffectMiscValue[j];};
         inline ClassFamilyMask GetSpellFamilyFlags() const { return SpellFamilyFlags; };
 
+        inline uint32 GetEffectIndex(SpellEffects effect) const
+        {
+            for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                if (Effect[i] == effect)
+                    return i;
+
+            return SPELL_EFFECT_NONE;
+        }
+
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation
