@@ -4031,6 +4031,35 @@ SpellCastResult Spell::CheckCast(bool strict)
                 && ((Creature*)target)->IsTotem())
             return SPELL_FAILED_IMMUNE;
 
+        if (m_spellInfo->Effect[0] == SPELL_EFFECT_DISPEL || m_spellInfo->Effect[1] == SPELL_EFFECT_DISPEL || m_spellInfo->Effect[2] == SPELL_EFFECT_DISPEL)
+        {
+            bool dispelTarget = false;
+
+            uint32 mechanic[3];
+            for (uint8 i = 0; i < 3; ++i)
+                mechanic[i] = m_spellInfo->Effect[i] == SPELL_EFFECT_DISPEL ? m_spellInfo->EffectMiscValue[i] : 0;
+
+            Unit::SpellAuraHolderMap& Auras = target->GetSpellAuraHolderMap();
+            for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
+            {
+                SpellEntry const* spell = iter->second->GetSpellProto();
+                for (uint8 i = 0; i < 3; ++i)
+                {
+                    if (mechanic[i] != DISPEL_NONE && spell->Dispel == mechanic[i])
+                    {
+                        dispelTarget = true;
+                        break;
+                    }
+                }
+
+                if (dispelTarget)
+                    break;
+            }
+
+            if (!dispelTarget)
+                return SPELL_FAILED_NOTHING_TO_DISPEL;
+        }
+
         bool non_caster_target = target != m_caster && !IsSpellWithCasterSourceTargetsOnly(m_spellInfo);
 
         if (non_caster_target)
