@@ -143,15 +143,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     uint32 summon_spell_id = fields[21].GetUInt32();
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
 
-    bool is_temporary_summoned = spellInfo && GetSpellDuration(spellInfo) > 0;
-
-    // check temporary summoned pets like mage water elemental
-    if (current && is_temporary_summoned)
-    {
-        delete result;
-        return false;
-    }
-
     PetType pet_type = PetType(fields[22].GetUInt8());
     if (pet_type == HUNTER_PET)
     {
@@ -163,13 +154,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     }
 
     uint32 pet_number = fields[0].GetUInt32();
-
-    if (current && owner->IsPetNeedBeTemporaryUnsummoned())
-    {
-        owner->SetTemporaryUnsummonedPetNumber(pet_number);
-        delete result;
-        return false;
-    }
 
     Map* map = owner->GetMap();
 
@@ -205,26 +189,23 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
     SetName(fields[11].GetString());
 
-    switch (getPetType())
+    if (getPetType() == HUNTER_PET)
     {
-        case HUNTER_PET:
-            // loyalty
-            SetByteValue(UNIT_FIELD_BYTES_1, 1, fields[8].GetUInt32());
+        // loyalty
+        SetByteValue(UNIT_FIELD_BYTES_1, 1, fields[8].GetUInt32());
 
-            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
+        SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
 
-            if (!fields[12].GetBool())
-                SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME);
+        if (!fields[12].GetBool())
+            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME);
 
-            SetTP(fields[9].GetInt32());
-            SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
-            SetPower(POWER_HAPPINESS, fields[15].GetUInt32());
-            SetPowerType(POWER_FOCUS);
-        case SUMMON_PET:
-            break;
-        default:
-            sLog.outError("Pet have incorrect type (%u) for pet loading.", getPetType());
+        SetTP(fields[9].GetInt32());
+        SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
+        SetPower(POWER_HAPPINESS, fields[15].GetUInt32());
+        SetPowerType(POWER_FOCUS);
     }
+    else if (getPetType() != SUMMON_PET)
+        sLog.outError("Pet have incorrect type (%u) for pet loading.", getPetType());
 
     if (owner->IsPvP())
         SetPvP(true);
@@ -262,25 +243,22 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     }
 
     // load action bar, if data broken will fill later by default spells.
-    if (!is_temporary_summoned)
+    m_charmInfo->LoadPetActionBar(fields[16].GetCppString());
+
+    // init teach spells
+    Tokens tokens = StrSplit(fields[17].GetString(), " ");
+    Tokens::const_iterator iter;
+    int index;
+    for (iter = tokens.begin(), index = 0; index < 4; ++iter, ++index)
     {
-        m_charmInfo->LoadPetActionBar(fields[16].GetCppString());
+        uint32 tmp = std::stoul((*iter).c_str());
 
-        // init teach spells
-        Tokens tokens = StrSplit(fields[17].GetString(), " ");
-        Tokens::const_iterator iter;
-        int index;
-        for (iter = tokens.begin(), index = 0; index < 4; ++iter, ++index)
-        {
-            uint32 tmp = std::stoul((*iter).c_str());
+        ++iter;
 
-            ++iter;
-
-            if (tmp)
-                AddTeachSpell(tmp, std::stoul((*iter).c_str()));
-            else
-                break;
-        }
+        if (tmp)
+            AddTeachSpell(tmp, std::stoul((*iter).c_str()));
+        else
+            continue;
     }
 
     // since last save (in seconds)
@@ -292,30 +270,14 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     _LoadAuras(timediff);
 
     // init AB
-    if (is_temporary_summoned)
-    {
-        // Temporary summoned pets always have initial spell list at load
-        InitPetCreateSpells();
-    }
-    else
-    {
-        LearnPetPassives();
-        CastPetAuras(current);
-        CastOwnerTalentAuras();
-    }
+    LearnPetPassives();
+    CastPetAuras(current);
+    CastOwnerTalentAuras();
 
     Powers powerType = GetPowerType();
 
-    if (getPetType() == SUMMON_PET && !current)             // all (?) summon pets come with full health when called, but not when they are current
-    {
-        SetHealth(GetMaxHealth());
-        SetPower(powerType, GetMaxPower(powerType));
-    }
-    else
-    {
-        SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
-        SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
-    }
+    SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
+    SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
 
     if (savedhealth <= 0)
         SetDeathState(JUST_DIED);
@@ -394,7 +356,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         _SaveAuras();
 
         uint32 loyalty = 1;
-        if (getPetType() != HUNTER_PET)
+        if (getPetType() == HUNTER_PET)
             loyalty = GetLoyaltyLevel();
 
         uint32 ownerLow = GetOwnerGuid().GetCounter();
@@ -441,7 +403,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addUInt32(uint32(mode));
         savePet.addString(m_name);
         savePet.addUInt32(uint32(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME) ? 0 : 1));
-        savePet.addUInt32((curhealth < 1 ? 0 : curhealth));
+        savePet.addUInt32(curhealth);
         savePet.addUInt32(curpower);
         savePet.addUInt32(GetPower(POWER_HAPPINESS));
 
