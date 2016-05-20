@@ -4244,7 +4244,31 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_MORE_POWERFUL_SPELL_ACTIVE;
             }
         }
+
+        // Classic only (seems to be handled client side tbc and later (not verified)) - Only check effect 0
+        // Spells such as Abolish Poison have dispel on effect 1 but should be castable even if target not poisoned
+        if (m_spellInfo->Effect[0] == SPELL_EFFECT_DISPEL)
+        {
+            bool dispelTarget = false;
+            uint32 mechanic = m_spellInfo->EffectMiscValue[0];
+            SpellEntry const* spell = nullptr;
+
+            Unit::SpellAuraHolderMap& Auras = target->GetSpellAuraHolderMap();
+            for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
+            {
+                spell = iter->second->GetSpellProto();
+                if (spell->Dispel == mechanic)
+                {
+                    dispelTarget = true;
+                    break;
+                }
+            }
+
+            if (!dispelTarget)
+                return SPELL_FAILED_NOTHING_TO_DISPEL;
+        }
     }
+
     // zone check
     uint32 zone, area;
     m_caster->GetZoneAndAreaId(zone, area);
