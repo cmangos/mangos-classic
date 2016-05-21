@@ -145,7 +145,7 @@ class instance_scholomance : public ScriptedInstance
 
     private:
         void DoSpawnGandlingIfCan(bool bByPlayerEnter);
-        void DoRespawnEntranceRoom();
+        void DoRespawnEntranceRoom(Player* pSummoner);
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;

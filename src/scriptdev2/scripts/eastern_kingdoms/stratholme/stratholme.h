@@ -36,7 +36,7 @@ enum
     NPC_MINDLESS_UNDEAD         = 11030,                    // Zombies summoned after Ramstein
     NPC_BLACK_GUARD             = 10394,                    // Zombies summoned after Ramstein
     NPC_YSIDA                   = 16031,
-    NPC_YSIDA_TRIGGER           = 16100,
+    // NPC_YSIDA_TRIGGER        = 16100,
     NPC_CRIMSON_INITIATE        = 10420,                    // A couple of them related to spawn Timmy
     NPC_CRIMSON_GALLANT         = 10424,
     NPC_CRIMSON_GUARDSMAN       = 10418,
@@ -59,6 +59,7 @@ enum
 
     QUEST_DEAD_MAN_PLEA         = 8945,
     QUEST_MEDALLION_FAITH       = 5122,
+
     SPELL_BARON_ULTIMATUM       = 27861,                    // Aura for player during the run (visual icon)
     SPELL_BARON_SOUL_DRAIN      = 27640,                    // Used by the Baron to kill Ysida
     SPELL_YSIDA_FREED           = 27773,                    // Argent Dawn extra-reputation reward on successful Baron run
@@ -73,14 +74,14 @@ enum
     SAY_ANNOUNCE_RUN_START      = -1329009,
     SAY_ANNOUNCE_RUN_10_MIN     = -1329010,
     SAY_ANNOUNCE_RUN_5_MIN      = -1329011,
-    YSIDA_SAY_RUN_5_MIN         = -1329019,
+    SAY_YSIDA_RUN_5_MIN         = -1329019,
     SAY_ANNOUNCE_RUN_FAIL       = -1329012,
-    YSIDA_SAY_RUN_FAIL          = -1329020,
+    SAY_YSIDA_RUN_FAIL          = -1329020,
     SAY_ANNOUNCE_RAMSTEIN       = -1329013,
     SAY_UNDEAD_DEFEAT           = -1329014,
     SAY_EPILOGUE                = -1329015,
 
-    YELL_AURIUS_AGGRO           = -1329021,
+    SAY_AURIUS_AGGRO            = -1329021,
     SAY_AURIUS_DEATH            = -1329022,
 };
 
@@ -98,7 +99,7 @@ static const EventLocation aStratholmeLocation[] =
     {3969.357f, -3391.871f, 119.116f, 5.91f},               // Skeletons summon loc
     {4033.044f, -3431.031f, 119.055f},                      // Skeletons move loc
     {4032.602f, -3378.506f, 119.752f, 4.74f},               // Guards summon loc
-    {4044.78f,  -3333.68f,  117.26f,  4.15f},               // Ysida summon loc
+    {4044.78f,  -3333.68f,  115.53f,  4.15f},               // Ysida summon loc
     {4041.9f,   -3337.6f,   115.06f,  3.82f}                // Ysida move/death loc
 };
 
@@ -122,6 +123,8 @@ class instance_stratholme : public ScriptedInstance
         ~instance_stratholme() {}
 
         void Initialize() override;
+
+        void OnPlayerEnter(Player* pPlayer) override;
 
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;

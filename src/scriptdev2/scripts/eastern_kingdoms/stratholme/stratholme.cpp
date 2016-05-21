@@ -326,11 +326,11 @@ bool QuestRewarded_npc_aurius(Player* pPlayer, Creature* pCreature, const Quest*
     if (!pInstance)
         return false;
 
-    if (pInstance->GetData(TYPE_BARON) == DONE || pInstance->GetData(TYPE_AURIUS) != NOT_STARTED)
+    if (pInstance->GetData(TYPE_BARON) == DONE || pInstance->GetData(TYPE_AURIUS) == DONE)
         return false;
 
     if ((pQuest->GetQuestId() == QUEST_MEDALLION_FAITH))
-        pInstance->SetData(TYPE_AURIUS, SPECIAL);
+        pInstance->SetData(TYPE_AURIUS, DONE);
 
     return true;
 }
@@ -338,32 +338,25 @@ bool QuestRewarded_npc_aurius(Player* pPlayer, Creature* pCreature, const Quest*
 bool GossipHello_npc_aurius(Player* pPlayer, Creature* pCreature)
 {
     ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+    if (!pInstance)
+        return false;
 
-    uint32 ui_GossipId;
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
-    if (pInstance)
-    {
-        if (pCreature->isQuestGiver())
-            pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+    uint32 uiGossipId;
 
-        switch (pInstance->GetData(TYPE_AURIUS))
-        {
-            case SPECIAL:
-                ui_GossipId = GOSSIP_TEXT_AURIUS_2;
-                break;
-            case DONE:
-                ui_GossipId = GOSSIP_TEXT_AURIUS_3;
-                break;
-            default:
-                ui_GossipId = GOSSIP_TEXT_AURIUS_1;
-                break;
-        }
-        pPlayer->SEND_GOSSIP_MENU(ui_GossipId, pCreature->GetObjectGuid());
+    // Baron encounter is complete and Aurius helped
+    if (pInstance->GetData(TYPE_BARON) == DONE && pInstance->GetData(TYPE_AURIUS) == DONE)
+        uiGossipId = GOSSIP_TEXT_AURIUS_3;
+    // Aurius rewarded the quest
+    else if (pInstance->GetData(TYPE_AURIUS) == DONE)
+        uiGossipId = GOSSIP_TEXT_AURIUS_2;
+    else
+        uiGossipId = GOSSIP_TEXT_AURIUS_1;
 
-        return true;
-    }
-
-    return false;
+    pPlayer->SEND_GOSSIP_MENU(uiGossipId, pCreature->GetObjectGuid());
+    return true;
 }
 
 void AddSC_stratholme()

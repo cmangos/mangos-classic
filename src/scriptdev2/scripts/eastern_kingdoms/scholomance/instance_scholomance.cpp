@@ -39,13 +39,13 @@ void instance_scholomance::Initialize()
         m_mGandlingData[aGandlingEvents[i]] = GandlingEventData();
 }
 
-void instance_scholomance::OnPlayerEnter(Player* /*pPlayer*/)
+void instance_scholomance::OnPlayerEnter(Player* pPlayer)
 {
     // Summon Gandling if can
     DoSpawnGandlingIfCan(true);
 
     if (GetData(TYPE_RATTLEGORE) == DONE)
-        DoRespawnEntranceRoom();
+        DoRespawnEntranceRoom(pPlayer);
 }
 
 void instance_scholomance::OnCreatureCreate(Creature* pCreature)
@@ -95,10 +95,13 @@ void instance_scholomance::OnObjectCreate(GameObject* pGo)
     }
 }
 
-void instance_scholomance::DoRespawnEntranceRoom()
+void instance_scholomance::DoRespawnEntranceRoom(Player* pSummoner)
 {
     // safety check to avoid the room being reset for each OnPlayerEnter() call if Rattlegore is dead
     if (m_bIsRoomReset)
+        return;
+
+    if (!pSummoner)
         return;
 
     // Despawn the mobs already in the room with the exception of the necrofiend (not stored, so not despawned)
@@ -132,16 +135,13 @@ void instance_scholomance::DoRespawnEntranceRoom()
         std::random_shuffle(uiMobList.begin(), uiMobList.end());
 
         for (uint8 j = 0; j < MAX_NPC_PER_GROUP; ++j)
-            // We use the Viewing Room door as the summoning object because we are sure it is here
-            if (GameObject* pGo = GetSingleGameObjectFromStorage(GO_VIEWING_ROOM_DOOR))
-                pGo->SummonCreature(uiMobList[j], aEntranceRoomSpawnLocs[4*i+j].m_fX, aEntranceRoomSpawnLocs[4*i+j].m_fY, aEntranceRoomSpawnLocs[4*i+j].m_fZ, aEntranceRoomSpawnLocs[4*i+j].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+            pSummoner->SummonCreature(uiMobList[j], aEntranceRoomSpawnLocs[4*i+j].m_fX, aEntranceRoomSpawnLocs[4*i+j].m_fY, aEntranceRoomSpawnLocs[4*i+j].m_fZ, aEntranceRoomSpawnLocs[4*i+j].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
     }
     // spawn also a patrolling necrofiend
     // the waypoints are handled in DB creature_movement_template table (shared with the other necrofiend in the room)
     // the two other necrofiends in the instance are using DB creature_movement table
-    if (GameObject* pGo = GetSingleGameObjectFromStorage(GO_VIEWING_ROOM_DOOR))
-        if (Creature* pNecrofiend = pGo->SummonCreature(NPC_NECROFIEND, aEntranceRoomSpawnLocs[16].m_fX, aEntranceRoomSpawnLocs[16].m_fY, aEntranceRoomSpawnLocs[16].m_fZ, aEntranceRoomSpawnLocs[16].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
-            pNecrofiend->GetMotionMaster()->MoveWaypoint();
+    if (Creature* pNecrofiend = pSummoner->SummonCreature(NPC_NECROFIEND, aEntranceRoomSpawnLocs[16].m_fX, aEntranceRoomSpawnLocs[16].m_fY, aEntranceRoomSpawnLocs[16].m_fZ, aEntranceRoomSpawnLocs[16].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+        pNecrofiend->GetMotionMaster()->MoveWaypoint();
 
     m_bIsRoomReset = true;
 
@@ -163,7 +163,10 @@ void instance_scholomance::SetData(uint32 uiType, uint32 uiData)
         case TYPE_RATTLEGORE:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                DoRespawnEntranceRoom();
+            {
+                if (Player* pPlayer = GetPlayerInMap())
+                    DoRespawnEntranceRoom(pPlayer);
+            }
             break;
         case TYPE_RAS_FROSTWHISPER:
             m_auiEncounter[uiType] = uiData;

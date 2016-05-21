@@ -42,6 +42,19 @@ void instance_stratholme::Initialize()
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 }
 
+void instance_stratholme::OnPlayerEnter(Player* pPlayer)
+{
+    // Baron ultimatum succeed: summon Ysida outside the cage alive
+    if (GetData(TYPE_BARON_RUN) == DONE)
+        pPlayer->SummonCreature(NPC_YSIDA, aStratholmeLocation[8].m_fX, aStratholmeLocation[8].m_fY, aStratholmeLocation[8].m_fZ, aStratholmeLocation[8].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+    // Baron ultimatum failed: summon Ysida outside the cage dead
+    else if (GetData(TYPE_BARON_RUN) == FAIL)
+    {
+        if (Creature* pYsida = pPlayer->SummonCreature(NPC_YSIDA, aStratholmeLocation[8].m_fX, aStratholmeLocation[8].m_fY, aStratholmeLocation[8].m_fZ, aStratholmeLocation[8].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+            pYsida->SetDeadByDefault(true);
+    }
+}
+
 bool instance_stratholme::StartSlaugtherSquare()
 {
     if (m_auiEncounter[TYPE_BARONESS] == SPECIAL && m_auiEncounter[TYPE_NERUB] == SPECIAL && m_auiEncounter[TYPE_PALLID] == SPECIAL)
@@ -63,11 +76,13 @@ void instance_stratholme::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
+        case NPC_AURIUS:
+            if (m_auiEncounter[TYPE_AURIUS] == DONE)
+                pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            // no break here
         case NPC_BARON:
         case NPC_YSIDA:
-        case NPC_YSIDA_TRIGGER:
         case NPC_BARTHILAS:
-        case NPC_AURIUS:
             m_mNpcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
@@ -291,10 +306,10 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                     DoUseDoorOrButton(GO_PORT_GAUNTLET);
 
                 // If Aurius was given the medaillon wait 5s before summoning him
-                if (m_auiEncounter[TYPE_AURIUS] == SPECIAL)
+                if (GetData(TYPE_AURIUS) == DONE)
                     m_uiAuriusSummonTimer = 5000;
             }
-            if (uiData == DONE)
+            else if (uiData == DONE)
             {
                 // Players successfully engaged Baron within the time-limit of his ultimatum
                 //     Note: UpdateAI() prevents TYPE_BARON_RUN to be marked as FAILED if the
@@ -328,14 +343,31 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                     }
                 }
 
-                // If Aurius was spawned to help fight the Baron, mark that event as DONE
-                if (m_auiEncounter[TYPE_AURIUS] == IN_PROGRESS)
-                    SetData(TYPE_AURIUS, DONE);
+                // If Aurius was spawned to help fight the Baron
+                if (GetData(TYPE_AURIUS) == DONE)
+                {
+                    // Baron killed and Aurius is alive: give him his NPC Flags back, so players can complete the quest and fake his death
+                    if (Creature* pAurius = GetSingleCreatureFromStorage(NPC_AURIUS))
+                    {
+                        if (pAurius->isAlive())
+                        {
+                            DoScriptText(SAY_AURIUS_DEATH, pAurius);
+                            pAurius->StopMoving();
+                            pAurius->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+                            pAurius->InterruptNonMeleeSpells(true);
+                            pAurius->SetHealth(1);
+                            pAurius->GetMotionMaster()->MovementExpired();
+                            pAurius->GetMotionMaster()->MoveIdle();
+                            pAurius->RemoveAllAurasOnDeath();
+                            pAurius->SetStandState(UNIT_STAND_STATE_DEAD);
+                        }
+                    }
+                }
 
                 // Open Slaughterhouse door again
                 DoUseDoorOrButton(GO_PORT_GAUNTLET);
             }
-            if (uiData == FAIL)
+            else if (uiData == FAIL)
                 DoUseDoorOrButton(GO_PORT_GAUNTLET);
 
             m_auiEncounter[uiType] = uiData;
@@ -389,70 +421,14 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
             // No need to save anything here, so return
             return;
         case TYPE_AURIUS:
-            m_auiEncounter[uiType] = uiData;
-            // Prevent further players to complete the quest in that instance
-            // or autocomplete the follow-up quest
-            // the flag will be set back if event is succeed
-            if (uiData == SPECIAL)
-            {
-                if (Creature* pAurius = GetSingleCreatureFromStorage(NPC_AURIUS))
-                    pAurius->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                break;
-            }
-            // Baron killed and Aurius is alive: give him his NPC Flags back
-            // So players can complete the quest
-            // Fake his death
+            // Prevent further players to complete the quest in that instance or autocomplete the follow-up quest. the flag will be set back if event is succeed
             if (uiData == DONE)
             {
                 if (Creature* pAurius = GetSingleCreatureFromStorage(NPC_AURIUS))
-                {
-                    DoScriptText(SAY_AURIUS_DEATH, pAurius);
-                    pAurius->StopMoving();
-                    pAurius->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                    pAurius->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    pAurius->InterruptNonMeleeSpells(true);
-                    pAurius->SetHealth(1);
-                    pAurius->GetMotionMaster()->MovementExpired();
-                    pAurius->GetMotionMaster()->MoveIdle();
-                    pAurius->RemoveAllAurasOnDeath();
-                    pAurius->SetStandState(UNIT_STAND_STATE_DEAD);
-                }
-                break;
+                    pAurius->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             }
-            if (uiData == IN_PROGRESS)
-            {
-                // Despawn Aurius in the Chapel and spawn it in the Slaughter House to engage Baron
-                if (Creature* pAurius_original = GetSingleCreatureFromStorage(NPC_AURIUS))
-                    pAurius_original->ForcedDespawn();
-                if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
-                {
-                    float fX, fY, fZ, fPosX, fPosY, fPosZ;
-                    fX = pBaron->GetPositionX();
-                    fY = pBaron->GetPositionY();
-                    fZ = pBaron->GetPositionZ();
-                    pBaron->GetRandomPoint(fX, fY, fZ, 4.0f, fPosX, fPosY, fPosZ);
-                    if (Creature* pAurius = pBaron->SummonCreature(NPC_AURIUS, fPosX, fPosY, fPosZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0))
-                    {
-                        DoScriptText(YELL_AURIUS_AGGRO, pAurius);
-                        pAurius->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                        pAurius->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                        pAurius->AI()->AttackStart(pBaron);
-                    }
-                }
-            }
-            if (uiData == FAIL)
-            {
-                // Baron encounter failed and Aurius is spawned: kill him
-                if (Creature* pAurius = GetSingleCreatureFromStorage(NPC_AURIUS))
-                {
-                    if (pAurius->isAlive())
-                    {
-                        DoScriptText(SAY_AURIUS_DEATH, pAurius);
-                        pAurius->DealDamage(pAurius, pAurius->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-                    }
-                }
-                break;
-            }
+            m_auiEncounter[uiType] = uiData;
+            break;
     }
 
     if (uiData == DONE)
@@ -498,20 +474,6 @@ void instance_stratholme::Load(const char* chrIn)
         m_auiEncounter[TYPE_NERUB] = SPECIAL;
     if (m_auiEncounter[TYPE_PALLID] == DONE)
         m_auiEncounter[TYPE_PALLID] = SPECIAL;
-
-    // Baron ultimatum succeed: summon Ysida outside the cage alive
-    if (m_auiEncounter[TYPE_BARON_RUN] == DONE)
-    {
-        if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
-            pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[8].m_fX, aStratholmeLocation[8].m_fY, aStratholmeLocation[8].m_fZ, aStratholmeLocation[8].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
-    }
-    // Baron ultimatum failed: summon Ysida outside the cage dead
-    if (m_auiEncounter[TYPE_BARON_RUN] == FAIL)
-    {
-        if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
-            if (Creature* pYsida = pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[8].m_fX, aStratholmeLocation[8].m_fY, aStratholmeLocation[8].m_fZ, aStratholmeLocation[8].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
-                pYsida->DealDamage(pYsida, pYsida->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-    }
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }
@@ -676,7 +638,10 @@ void instance_stratholme::OnCreatureDeath(Creature* pCreature)
         case NPC_NERUBENKAN:        SetData(TYPE_NERUB, DONE);    break;
         case NPC_RAMSTEIN:          SetData(TYPE_RAMSTEIN, DONE); break;
         case NPC_BARON:             SetData(TYPE_BARON, DONE);    break;
-        case NPC_AURIUS:            SetData(TYPE_AURIUS, FAIL);   break;
+
+        case NPC_AURIUS:
+            DoScriptText(SAY_AURIUS_DEATH, pCreature);
+            break;
 
         case NPC_THUZADIN_ACOLYTE:
             ThazudinAcolyteJustDied(pCreature);
@@ -759,6 +724,7 @@ void instance_stratholme::ThazudinAcolyteJustDied(Creature* pCreature)
 
 void instance_stratholme::Update(uint32 uiDiff)
 {
+    // Timer to teleport Barthilas
     if (m_uiBarthilasRunTimer)
     {
         if (m_uiBarthilasRunTimer <= uiDiff)
@@ -779,7 +745,21 @@ void instance_stratholme::Update(uint32 uiDiff)
     {
         if (m_uiAuriusSummonTimer <= uiDiff)
         {
-            SetData(TYPE_AURIUS, IN_PROGRESS);
+            // Teleport Aurius from the Chapel and spawn it in the Slaughter House to engage Baron
+            Creature* pAurius = GetSingleCreatureFromStorage(NPC_AURIUS);
+            if (pAurius && pAurius->isAlive() && !pAurius->isInCombat())
+            {
+                if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
+                {
+                    float fX, fY, fZ;
+                    pBaron->GetRandomPoint(pBaron->GetPositionX(), pBaron->GetPositionY(), pBaron->GetPositionZ(), 4.0f, fX, fY, fZ);
+                    pAurius->NearTeleportTo(fX, fY, fZ, pAurius->GetOrientation());
+                    pAurius->SetRespawnCoord(fX, fY, fZ, pAurius->GetOrientation());
+                    DoScriptText(SAY_AURIUS_AGGRO, pAurius);
+                    pAurius->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+                    pAurius->AI()->AttackStart(pBaron);
+                }
+            }
             m_uiAuriusSummonTimer = 0;
         }
         else
@@ -802,7 +782,7 @@ void instance_stratholme::Update(uint32 uiDiff)
         // Used to create a delay of 10s between Baron speech and Ysida's answer
         else if (m_uiYellCounter == 2 && m_uiBaronRunTimer <= (5 * MINUTE - 10) * IN_MILLISECONDS)
         {
-            DoOrSimulateScriptTextForThisInstance(YSIDA_SAY_RUN_5_MIN, NPC_YSIDA);
+            DoOrSimulateScriptTextForThisInstance(SAY_YSIDA_RUN_5_MIN, NPC_YSIDA);
             ++m_uiYellCounter;
         }
 
@@ -827,10 +807,12 @@ void instance_stratholme::Update(uint32 uiDiff)
             {
                 // Baron ultimatum failed: let the Baron kill her
                 if (Creature* pYsida = GetSingleCreatureFromStorage(NPC_YSIDA))
+                {
                     if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
-                        pBaron->CastSpell(pYsida, SPELL_BARON_SOUL_DRAIN, true);
+                        pBaron->CastSpell(pYsida, SPELL_BARON_SOUL_DRAIN, false);
+                }
 
-                DoOrSimulateScriptTextForThisInstance(YSIDA_SAY_RUN_FAIL, NPC_YSIDA);
+                DoOrSimulateScriptTextForThisInstance(SAY_YSIDA_RUN_FAIL, NPC_YSIDA);
 
                 m_uiBaronRunTimer = 0;  // event done for good, no more speech
                 debug_log("SD2: Instance Stratholme: Baron run event reached end. Event has state %u.", GetData(TYPE_BARON_RUN));
