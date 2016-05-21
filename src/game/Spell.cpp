@@ -4011,22 +4011,30 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         if (m_spellInfo->Effect[0] == SPELL_EFFECT_DISPEL || m_spellInfo->Effect[1] == SPELL_EFFECT_DISPEL || m_spellInfo->Effect[2] == SPELL_EFFECT_DISPEL)
         {
-            uint32 eff_idx = m_spellInfo->GetEffectIndex(SPELL_EFFECT_DISPEL);
-            uint32 mechanic = m_spellInfo->EffectMiscValue[eff_idx];
-            uint32 dispelCnt = 0;
+            bool dispelTarget = false;
+
+            uint32 mechanic[3];
+            for (uint8 i = 0; i < 3; ++i)
+                mechanic[i] = m_spellInfo->Effect[i] == SPELL_EFFECT_DISPEL ? m_spellInfo->EffectMiscValue[i] : 0;
 
             Unit::SpellAuraHolderMap& Auras = target->GetSpellAuraHolderMap();
             for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
             {
                 SpellEntry const* spell = iter->second->GetSpellProto();
-                if (spell->Dispel == mechanic)
+                for (uint8 i = 0; i < 3; ++i)
                 {
-                    dispelCnt++;
-                    break;
+                    if (mechanic[i] != DISPEL_NONE && spell->Dispel == mechanic[i])
+                    {
+                        dispelTarget = true;
+                        break;
+                    }
                 }
+
+                if (dispelTarget)
+                    break;
             }
 
-            if (dispelCnt == 0)
+            if (!dispelTarget)
                 return SPELL_FAILED_NOTHING_TO_DISPEL;
         }
 
