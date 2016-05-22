@@ -373,7 +373,7 @@ void PetAI::UpdateAllies()
 
 void PetAI::AttackedBy(Unit* attacker)
 {
-    // when attacked, fight back in case 1)no victim already AND 2)not set to passive AND 3)not set to stay, unless can it can reach attacker with melee attack anyway
-    if (!m_creature->getVictim() && m_creature->GetCharmInfo() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))
+    // when attacked, fight back if no victim unless we have a charm state set to passive
+    if (!m_creature->getVictim() && !(m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE)))
         AttackStart(attacker);
 }
