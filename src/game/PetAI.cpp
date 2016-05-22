@@ -289,10 +289,10 @@ void PetAI::UpdateAI(const uint32 diff)
         }
         else if (m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
         {
-            // The distance is to prevent the pet from running around to reach the hunters back when  walking towards it
+            // The distance is to prevent the pet from running around to reach the owners back when  walking towards it
             //  and the reason for increasing it more than the follow distance is to prevent the same thing
-            // from happening when your character turns and twists (as this increases the distance between them)
-            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW) && owner->GetDistance(m_creature) > (PET_FOLLOW_DIST * 1.20f))
+            // from happening when the owner turns and twists (as this increases the distance)
+            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW) && owner->GetDistance(m_creature) > (PET_FOLLOW_DIST * 2))
                 m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
             // This is to stop the pet from following you when you're close to each other, to support the above condition.
             else

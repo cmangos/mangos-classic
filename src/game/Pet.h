@@ -143,7 +143,7 @@ extern const uint32 LevelStartLoyalty[6];
 
 #define ACTIVE_SPELLS_MAX           4
 
-#define PET_FOLLOW_DIST  2.00f
+#define PET_FOLLOW_DIST  1.00f
 #define PET_FOLLOW_ANGLE (M_PI_F / 4.00f) * 3.50f
 
 class Player;

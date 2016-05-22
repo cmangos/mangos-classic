@@ -2164,7 +2164,7 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
     if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
     {
         float px, py, pz;
-        m_caster->GetClosePoint(px, py, pz, 2.40f);
+        m_caster->GetClosePoint(px, py, pz, 2.00f);
         pos = CreatureCreatePos(m_caster->GetMap(), px, py, pz, -m_caster->GetOrientation());
     }
 
@@ -2630,7 +2630,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         else
         {
             float px, py, pz;
-            m_caster->GetClosePoint(px, py, pz, 2.40f);
+            m_caster->GetClosePoint(px, py, pz, 2.00f);
             pos = CreatureCreatePos(m_caster->GetMap(), px, py, pz, m_caster->GetOrientation());
         }
 
@@ -2953,7 +2953,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     }
 
     float px, py, pz;
-    m_caster->GetClosePoint(px, py, pz, 2.40f);
+    m_caster->GetClosePoint(px, py, pz, 2.00f);
     CreatureCreatePos pos(m_caster->GetMap(), px, py, pz, -m_caster->GetOrientation());
 
     Map* map = m_caster->GetMap();
@@ -4823,7 +4823,7 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
     if (pet->isAlive())
         return;
 
-    if (_player->GetDistance(pet) >= 2.40f)
+    if (_player->GetDistance(pet) >= 2.00f)
     {
         float px, py, pz;
         m_caster->GetClosePoint(px, py, pz, pet->GetObjectBoundingRadius());
