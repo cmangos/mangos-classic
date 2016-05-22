@@ -114,31 +114,29 @@ void PetAI::_stopAttack()
             if (Pet* pet = (Pet*)m_creature)
             {
                 if (charmInfo->HasCommandState(COMMAND_FOLLOW))
-                {
                     pet->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-                    useDefaultMovement = false;
-                }
+
                 else if (charmInfo->HasCommandState(COMMAND_STAY))
                 {
                     //if stay command is already set but we dont have stay pos set then we need to establish current pos as stay position
                     if (!pet->IsStayPosSet())
-                    {
                         pet->SetStayPosition();
-                    }
 
                     pet->GetMotionMaster()->MovePoint(0, pet->GetStayPosX(), pet->GetStayPosY(), pet->GetStayPosZ(), false);
-                    useDefaultMovement = false;
                 }
+
+                useDefaultMovement = false;
             }
         }
     }
+
+    m_creature->AttackStop();
 
     if (useDefaultMovement)
     {
         m_creature->GetMotionMaster()->Clear(false);
         m_creature->GetMotionMaster()->MoveIdle();
     }
-    m_creature->AttackStop();
 }
 
 void PetAI::UpdateAI(const uint32 diff)
