@@ -2659,7 +2659,6 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         spawnCreature->InitStatsForLevel(level, m_caster);
 
         spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
-        spawnCreature->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
         m_caster->AddGuardian(spawnCreature);
 
         map->Add((Creature*)spawnCreature);
