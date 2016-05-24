@@ -169,7 +169,7 @@ void PetAI::UpdateAI(const uint32 diff)
            ((Pet*)m_creature)->SetIsRetreating();
     }
     // Autocast (casted only in combat or persistent spells in any state)
-    if (!m_creature->IsNonMeleeSpellCasted(false))
+    else if (!m_creature->IsNonMeleeSpellCasted(false))
     {
         typedef std::vector<std::pair<Unit*, Spell*> > TargetSpellList;
         TargetSpellList targetSpellStore;
@@ -211,12 +211,9 @@ void PetAI::UpdateAI(const uint32 diff)
                         continue;
                 }
             }
-            else
-            {
+            else if (IsNonCombatSpell(spellInfo))
                 // just ignore non-combat spells
-                if (IsNonCombatSpell(spellInfo))
-                    continue;
-            }
+                 continue;
 
             Spell* spell = new Spell(m_creature, spellInfo, false);
 
@@ -295,8 +292,6 @@ void PetAI::UpdateAI(const uint32 diff)
             return;
         }
 
-        bool meleeReach = m_creature->CanReachWithMeleeAttack(victim);
-
         // required to be stopped cases
         if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false))
         {
@@ -304,7 +299,7 @@ void PetAI::UpdateAI(const uint32 diff)
                     m_creature->InterruptNonMeleeSpells(false);
         }
 
-        else if (meleeReach)
+        else if (m_creature->CanReachWithMeleeAttack(victim))
         {
             if (DoMeleeAttackIfReady())
                 // if pet misses its target, it will also be the first in threat list
@@ -324,7 +319,7 @@ void PetAI::UpdateAI(const uint32 diff)
             // The distance is to prevent the pet from running around to reach the owners back when  walking towards it
             //  and the reason for increasing it more than the follow distance is to prevent the same thing
             // from happening when the owner turns and twists (as this increases the distance)
-            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW) && owner->GetDistance(m_creature) > (PET_FOLLOW_DIST * 2))
+            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW) && !owner->_IsWithinDist(m_creature, (PET_FOLLOW_DIST * 2), true))
                 m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
             // This is to stop the pet from following you when you're close to each other, to support the above condition.
             else
