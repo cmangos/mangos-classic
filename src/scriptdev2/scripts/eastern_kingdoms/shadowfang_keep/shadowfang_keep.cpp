@@ -598,8 +598,11 @@ struct boss_arugalAI : public ScriptedAI
         {
             if (!m_bAttacking)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_VOID_BOLT);
-                m_uiVoidboltTimer = urand(2900, 4800);
+                if (Unit* victim = m_creature->getVictim())
+                {
+                    DoCastSpellIfCan(victim, SPELL_VOID_BOLT);
+                    m_uiVoidboltTimer = urand(2900, 4800);
+                }
             }
         }
         else
