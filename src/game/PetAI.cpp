@@ -156,6 +156,18 @@ void PetAI::UpdateAI(const uint32 diff)
     if (inCombat && (!victim || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
         _stopAttack();
 
+    if (((Pet*)m_creature)->GetIsRetreating())
+    {
+        if (!owner->_IsWithinDist(m_creature, (PET_FOLLOW_DIST * 2), true))
+        {
+            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+                m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+
+            return;
+        }
+        else
+           ((Pet*)m_creature)->SetIsRetreating();
+    }
     // Autocast (casted only in combat or persistent spells in any state)
     if (!m_creature->IsNonMeleeSpellCasted(false))
     {
@@ -372,6 +384,7 @@ void PetAI::UpdateAllies()
 void PetAI::AttackedBy(Unit* attacker)
 {
     // when attacked, fight back if no victim unless we have a charm state set to passive
-    if (!m_creature->getVictim() && !(m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE)))
+    if (!(m_creature->getVictim() || ((Pet*)m_creature)->GetIsRetreating() == true)
+        && !(m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE)))
         AttackStart(attacker);
 }

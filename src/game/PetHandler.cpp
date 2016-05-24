@@ -91,6 +91,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     pet->GetMotionMaster()->Clear(false);
                     pet->GetMotionMaster()->MoveIdle();
                     ((Pet*)pet)->SetStayPosition();
+                    ((Pet*)pet)->SetIsRetreating();
                     charmInfo->SetCommandState(COMMAND_STAY);
                     break;
                 }
@@ -99,6 +100,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     ((Pet*)pet)->ClearStayPosition();
                     pet->AttackStop();
                     pet->GetMotionMaster()->MoveFollow(_player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                    ((Pet*)pet)->SetIsRetreating(true);
                     charmInfo->SetCommandState(COMMAND_FOLLOW);
                     break;
                 }
@@ -112,6 +114,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     if (GetPlayer()->IsFriendlyTo(TargetUnit))
                         return;
 
+                    ((Pet*)pet)->SetIsRetreating();
                     // This is true if pet has no target or has target but targets differs.
                     if (pet->getVictim() != TargetUnit)
                         pet->AttackStop();

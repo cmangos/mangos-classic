@@ -251,6 +251,15 @@ class MANGOS_DLL_SPEC Pet : public Creature
         bool removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
         void CleanupActionBar();
 
+        bool m_retreating;
+
+        bool GetIsRetreating() { return m_retreating; }
+        void SetIsRetreating(bool retreating = false)
+        {
+            m_retreating = retreating;
+            ((Unit*)this)->InterruptNonMeleeSpells(false);
+        }
+
         bool m_stayPosSet;
         float m_stayPosX;
         float m_stayPosY;
