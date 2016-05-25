@@ -168,6 +168,50 @@ void PetAI::UpdateAI(const uint32 diff)
         else
            ((Pet*)m_creature)->SetIsRetreating();
     }
+    // have opener stored
+    else if (((Pet*)m_creature)->GetSpellOpener() != 0)
+    {
+        uint32 minRange = ((Pet*)m_creature)->GetSpellOpenerMinRange();
+
+        if (minRange != 0 && m_creature->IsWithinDistInMap(victim, minRange))
+            ((Pet*)m_creature)->SetSpellOpener();
+
+        else if (m_creature->IsWithinDistInMap(victim, ((Pet*)m_creature)->GetSpellOpenerMaxRange()) && m_creature->IsWithinLOSInMap(victim))
+        {
+            // stop moving
+            m_creature->clearUnitState(UNIT_STAT_MOVING);
+
+            // auto turn to target
+            m_creature->SetInFront(victim);
+
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                m_creature->SendCreateUpdateToPlayer((Player*)victim);
+
+            if (owner->GetTypeId() == TYPEID_PLAYER)
+                m_creature->SendCreateUpdateToPlayer((Player*)owner);
+
+            uint32 spell_id = ((Pet*)m_creature)->GetSpellOpener();
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
+
+            Spell* spell = new Spell(m_creature, spellInfo, false);
+
+            SpellCastResult result = spell->CheckPetCast(victim);
+
+            if (result == SPELL_CAST_OK)
+            {
+                m_creature->AddCreatureSpellCooldown(spell_id);
+
+                spell->SpellStart(&(spell->m_targets));
+            }
+            else
+                delete spell;
+
+            ((Pet*)m_creature)->SetSpellOpener();
+        }
+
+        else
+            return;
+    }
     // Autocast (casted only in combat or persistent spells in any state)
     else if (!m_creature->IsNonMeleeSpellCasted(false))
     {
