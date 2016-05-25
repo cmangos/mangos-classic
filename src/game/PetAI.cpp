@@ -363,7 +363,7 @@ void PetAI::UpdateAI(const uint32 diff)
             // The distance is to prevent the pet from running around to reach the owners back when  walking towards it
             //  and the reason for increasing it more than the follow distance is to prevent the same thing
             // from happening when the owner turns and twists (as this increases the distance)
-            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW) && !owner->_IsWithinDist(m_creature, (PET_FOLLOW_DIST * 2), true))
+            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW) && !owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
                 m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
             // This is to stop the pet from following you when you're close to each other, to support the above condition.
             else
