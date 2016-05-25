@@ -215,8 +215,8 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
             const SpellRangeEntry* sRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
 
-            if (!(pet->_IsWithinDist(unit_target, sRange->maxRange, true) || GetPlayer()->IsFriendlyTo(unit_target) 
-                || pet->HasAuraType(SPELL_AURA_MOD_POSSESS)))
+            if (!(pet->IsWithinDistInMap(unit_target, sRange->maxRange) && pet->IsWithinLOSInMap(unit_target)) 
+                && !(GetPlayer()->IsFriendlyTo(unit_target) || pet->HasAuraType(SPELL_AURA_MOD_POSSESS)))
             {
                 ((Pet*)pet)->SetSpellOpener(spellid, sRange->minRange, sRange->maxRange);
                 spell->finish(false);
