@@ -1192,13 +1192,13 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
 
             SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(((cInfo->Armor * petlevel) / cInfo->MaxLevel) * cInfo->ArmorMultiplier));
 
-            if (petlevel >= cInfo->MaxLevel)
+            if (petlevel == cInfo->MaxLevel)
             {
                 SetCreateHealth(cInfo->MaxLevelHealth);
                 SetCreateMana(cInfo->MaxLevelMana);
             }
 
-            else if (petlevel <= cInfo->MinLevel)
+            else if (petlevel == cInfo->MinLevel)
             {
                 SetCreateHealth(cInfo->MinLevelHealth);
                 SetCreateMana(cInfo->MinLevelMana);
@@ -1206,13 +1206,26 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
 
             else
             {
-                float dMaxLevel = cInfo->MaxLevelHealth / cInfo->MaxLevel;
-                float dMinLevel = cInfo->MinLevelHealth / cInfo->MinLevel;
-                SetCreateHealth((dMaxLevel - ((dMaxLevel - dMinLevel)/2)) * petlevel);
+                float hMaxLevel = cInfo->MaxLevelHealth / cInfo->MaxLevel;
+                float hMinLevel = cInfo->MinLevelHealth / cInfo->MinLevel;
+                float mMaxLevel = cInfo->MaxLevelMana / cInfo->MaxLevel;
+                float mMinLevel = cInfo->MinLevelMana / cInfo->MinLevel;
 
-                dMaxLevel = cInfo->MaxLevelMana / cInfo->MaxLevel;
-                dMinLevel = cInfo->MinLevelMana / cInfo->MinLevel;
-                SetCreateMana((dMaxLevel - ((dMaxLevel - dMinLevel)/2)) * petlevel);
+                if (petlevel > cInfo->MaxLevel)
+                {
+                    SetCreateHealth(hMaxLevel * petlevel);
+                    SetCreateMana(mMaxLevel * petlevel);
+                }
+                else if (petlevel < cInfo->MinLevel)
+                {
+                    SetCreateHealth(hMinLevel * petlevel);
+                    SetCreateMana(mMinLevel * petlevel);
+                }
+                else
+                {
+                    SetCreateHealth((hMaxLevel - ((hMaxLevel - hMinLevel)/2)) * petlevel);
+                    SetCreateMana((mMaxLevel - ((mMaxLevel - mMinLevel)/2)) * petlevel);
+                }
             }
 
             break;

@@ -2212,10 +2212,10 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
         ((Player*)m_caster)->PetSpellInitialize();
     }
 
-    if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
-        ((Creature*)m_caster)->AI()->JustSummoned((Creature*)spawnCreature);
     if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
         ((Creature*)m_originalCaster)->AI()->JustSummoned((Creature*)spawnCreature);
+    else if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
+        ((Creature*)m_caster)->AI()->JustSummoned((Creature*)spawnCreature);
 }
 
 void Spell::EffectLearnSpell(SpellEffectIndex eff_idx)
@@ -2549,6 +2549,8 @@ void Spell::EffectSummonWild(SpellEffectIndex eff_idx)
             // Notify original caster if not done already
             if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
                 ((Creature*)m_originalCaster)->AI()->JustSummoned(summon);
+            else if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
+                ((Creature*)m_caster)->AI()->JustSummoned((Creature*)summon);
         }
     }
 }
@@ -2665,10 +2667,10 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         spawnCreature->AIM_Initialize();
 
         // Notify Summoner
-        if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
-            ((Creature*)m_caster)->AI()->JustSummoned(spawnCreature);
         if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
             ((Creature*)m_originalCaster)->AI()->JustSummoned(spawnCreature);
+        else if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
+            ((Creature*)m_caster)->AI()->JustSummoned(spawnCreature);
     }
 }
 
@@ -2966,20 +2968,13 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     NewSummon->SetRespawnCoord(pos);
 
     // Level of pet summoned
-    uint32 level = m_caster->getLevel();
-    if (m_caster->getLevel() >= cInfo->MaxLevel)
-        level = cInfo->MaxLevel;
-
-    else if (m_caster->getLevel() <= cInfo->MinLevel)
-        level = cInfo->MinLevel;
+    uint32 level = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
 
     // Set pet reaction state
     NewSummon->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
 
     if (m_caster->getClass() == CLASS_WARLOCK)
     {
-        level = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
-
         NewSummon->setPetType(SUMMON_PET);
         NewSummon->GetCreatureInfo()->CreatureType == CREATURE_TYPE_DEMON;
 
@@ -3039,9 +3034,9 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     else
     {
         // Notify Summoner
-        if (m_originalCaster && m_originalCaster != m_caster)
+        if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
             ((Creature*)m_originalCaster)->AI()->JustSummoned(NewSummon);
-        else
+        else if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
             ((Creature*)m_caster)->AI()->JustSummoned(NewSummon);
     }
 }
