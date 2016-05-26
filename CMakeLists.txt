@@ -83,17 +83,21 @@ if(CMAKE_CONFIGURATION_TYPES)
     FORCE)
 endif()
 
-set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
-set(CONF_DIR ${CMAKE_INSTALL_PREFIX}/etc)
+set(BIN_FOLDER_NAME bin)
+set(CONF_FOLDER_NAME etc)
+set(LIBS_FOLDER_NAME lib)
+
+set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/${BIN_FOLDER_NAME})
+set(CONF_DIR ${CMAKE_INSTALL_PREFIX}/${CONF_FOLDER_NAME})
 # If win32 put it in the bin dir not lib
 if(WIN32)
-  set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/bin)
+  set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/${BIN_FOLDER_NAME})
 else()
-  set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+  set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/${LIBS_FOLDER_NAME})
 endif()
 
 # For Unix systems set the rpath so that libraries are found
-set(CMAKE_INSTALL_RPATH ${LIBS_DIR})
+set(CMAKE_INSTALL_RPATH ../${LIBS_FOLDER_NAME})
 set(CMAKE_INSTALL_NAME_DIR ${LIBS_DIR})
 
 # Find needed packages and if necessery abort if something important is missing
@@ -261,7 +265,7 @@ add_subdirectory(dep) # TODO: add vmap extractor build support
 # Add definitions for all build types
 # Don't place this above 'dep' subdirectory! Because of defines build will crash.
 set(DEFINITIONS
-  SYSCONFDIR="${CONF_DIR}/"
+  SYSCONFDIR="../${CONF_FOLDER_NAME}/"
 )
 
 if(POSTGRESQL)
