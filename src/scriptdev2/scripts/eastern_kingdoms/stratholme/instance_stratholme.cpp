@@ -182,7 +182,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                     {
                         DoOrSimulateScriptTextForThisInstance(SAY_ANNOUNCE_RUN_START, NPC_BARON);
                         if (Creature* pYsida = pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[7].m_fX, aStratholmeLocation[7].m_fY, aStratholmeLocation[7].m_fZ, aStratholmeLocation[7].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
-                        	pYsida->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+                            pYsida->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
                     }
 
                     m_uiBaronRunTimer = 45 * MINUTE * IN_MILLISECONDS;
