@@ -181,7 +181,8 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                     if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
                     {
                         DoOrSimulateScriptTextForThisInstance(SAY_ANNOUNCE_RUN_START, NPC_BARON);
-                        pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[7].m_fX, aStratholmeLocation[7].m_fY, aStratholmeLocation[7].m_fZ, aStratholmeLocation[7].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                        if (Creature* pYsida = pBaron->SummonCreature(NPC_YSIDA, aStratholmeLocation[7].m_fX, aStratholmeLocation[7].m_fY, aStratholmeLocation[7].m_fZ, aStratholmeLocation[7].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+                        	pYsida->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
                     }
 
                     m_uiBaronRunTimer = 45 * MINUTE * IN_MILLISECONDS;
@@ -340,6 +341,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                         DoScriptText(SAY_EPILOGUE, pYsida);
                         DoUseDoorOrButton(GO_YSIDA_CAGE);
                         pYsida->GetMotionMaster()->MovePoint(0, aStratholmeLocation[8].m_fX, aStratholmeLocation[8].m_fY, aStratholmeLocation[8].m_fZ);
+                        pYsida->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
                     }
                 }
 

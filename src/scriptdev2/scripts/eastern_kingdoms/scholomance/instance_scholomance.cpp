@@ -64,7 +64,7 @@ void instance_scholomance::OnCreatureCreate(Creature* pCreature)
         case NPC_DARKMASTER_GANDLING:
             m_mNpcEntryGuidStore[NPC_DARKMASTER_GANDLING] = pCreature->GetObjectGuid();
             break;
-        case NPC_BONE_MINION:
+        case NPC_RISEN_GUARDIAN:
             GandlingEventMap::iterator find = m_mGandlingData.find(m_uiGandlingEvent);
             if (find != m_mGandlingData.end())
                 find->second.m_sAddGuids.insert(pCreature->GetGUIDLow());
@@ -324,7 +324,7 @@ void instance_scholomance::OnCreatureEnterCombat(Creature* pCreature)
         case NPC_INSTRUCTOR_MALICIA:  SetData(TYPE_MALICIA, IN_PROGRESS);          break;
         case NPC_DARKMASTER_GANDLING: SetData(TYPE_GANDLING, IN_PROGRESS);         break;
 
-        case NPC_BONE_MINION:
+        case NPC_RISEN_GUARDIAN:
             for (GandlingEventMap::iterator itr = m_mGandlingData.begin(); itr != m_mGandlingData.end(); ++itr)
             {
                 // if there are no minions for a room, skip it
@@ -357,7 +357,7 @@ void instance_scholomance::OnCreatureEvade(Creature* pCreature)
         case NPC_INSTRUCTOR_MALICIA:  SetData(TYPE_MALICIA, FAIL);          break;
         case NPC_DARKMASTER_GANDLING: SetData(TYPE_GANDLING, FAIL);         break;
 
-        case NPC_BONE_MINION:
+        case NPC_RISEN_GUARDIAN:
             for (GandlingEventMap::iterator itr = m_mGandlingData.begin(); itr != m_mGandlingData.end(); ++itr)
             {
                 // if there are no minions for a room, skip it
@@ -390,7 +390,7 @@ void instance_scholomance::OnCreatureDeath(Creature* pCreature)
         case NPC_INSTRUCTOR_MALICIA:  SetData(TYPE_MALICIA, DONE);          break;
         case NPC_DARKMASTER_GANDLING: SetData(TYPE_GANDLING, DONE);         break;
 
-        case NPC_BONE_MINION:
+        case NPC_RISEN_GUARDIAN:
             for (GandlingEventMap::iterator itr = m_mGandlingData.begin(); itr != m_mGandlingData.end(); ++itr)
             {
                 // if there are no minions for a room, skip it

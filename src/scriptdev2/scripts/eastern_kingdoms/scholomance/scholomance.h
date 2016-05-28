@@ -38,7 +38,7 @@ enum
     NPC_ALEXEI_BAROV        = 10504,
     NPC_INSTRUCTOR_MALICIA  = 10505,
     NPC_DARKMASTER_GANDLING = 1853,
-    NPC_BONE_MINION         = 16119,                        // summoned in random rooms by gandling
+    NPC_RISEN_GUARDIAN      = 11598,                        // summoned in random rooms by gandling
 
     GO_GATE_KIRTONOS        = 175570,
     GO_VIEWING_ROOM_DOOR    = 175167,                       // Must be opened in reload case
