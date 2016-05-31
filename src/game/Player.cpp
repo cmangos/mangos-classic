@@ -1626,6 +1626,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             ResetContestedPvP();
 
+            // reset extra attacks
+            ResetExtraAttacks();
+
             // remove player from battleground on far teleport (when changing maps)
             if (BattleGround const* bg = GetBattleGround())
             {
@@ -6413,6 +6416,10 @@ void Player::DuelComplete(DuelCompleteType type)
     ForceHealthAndPowerUpdate();
     duel->opponent->ForceHealthAndPowerUpdate();
 
+    // reset extra attacks
+    ResetExtraAttacks();
+    duel->opponent->ResetExtraAttacks();
+
     delete duel->opponent->duel;
     duel->opponent->duel = nullptr;
     delete duel;
@@ -6787,7 +6794,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
         }
 
         // not allow proc extra attack spell at extra attack
-        if (m_extraAttacks && IsSpellHaveEffect(spellInfo, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
+        if (GetExtraAttacks() && IsSpellHaveEffect(spellInfo, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
             return;
 
         float chance = (float)spellInfo->procChance;
@@ -9567,6 +9574,10 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
                     // remove held enchantments
                     if (slot == EQUIPMENT_SLOT_MAINHAND)
                         pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_3);
+
+                    // reset extra attacks
+                    if (slot == EQUIPMENT_SLOT_MAINHAND || slot == EQUIPMENT_SLOT_OFFHAND || slot == EQUIPMENT_SLOT_RANGED)
+                        ResetExtraAttacks();
                 }
             }
 

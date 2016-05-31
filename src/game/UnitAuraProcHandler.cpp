@@ -1139,8 +1139,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
         return SPELL_AURA_PROC_FAILED;
     }
 
-    // not allow proc extra attack spell at extra attack
-    if (m_extraAttacks && IsSpellHaveEffect(triggerEntry, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
+    // not allow proc extra attack spell at extra attack (exclude Reckoning)
+    if (GetExtraAttacks() && IsSpellHaveEffect(triggerEntry, SPELL_EFFECT_ADD_EXTRA_ATTACKS) && trigger_spell_id != 20178)
         return SPELL_AURA_PROC_FAILED;
 
     // Custom basepoints/target for exist spell
@@ -1174,6 +1174,14 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 return SPELL_AURA_PROC_OK;
             }
             return SPELL_AURA_PROC_FAILED;
+        }
+        case 20178: // Reckoning
+        {
+            if (hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
+                return SPELL_AURA_PROC_FAILED;
+
+            if (!IsStandState() && !procSpell)
+                return SPELL_AURA_PROC_FAILED;
         }
         // Shamanistic Rage triggered spell
         case 30824:
