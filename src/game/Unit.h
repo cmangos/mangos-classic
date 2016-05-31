@@ -1132,7 +1132,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
          * @return true if we can reach pVictim with a melee attack
          */
         bool CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod = 0.0f) const;
-        uint32 m_extraAttacks;
 
         void _addAttacker(Unit* pAttacker)                  //< (Internal Use) must be called only from Unit::Attack(Unit*)
         {
@@ -1204,6 +1203,12 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool hasNegativeAuraWithInterruptFlag(uint32 flag);
         void SendMeleeAttackStop(Unit* victim);
         void SendMeleeAttackStart(Unit* pVictim);
+        
+        uint32 GetExtraAttacks() const { return m_extraAttacks; }
+        void AddExtraAttack() { m_extraAttacks++; }
+        void SetExtraAttacks(uint32 extraAttacks) { m_extraAttacks = extraAttacks; }
+        void ResetExtraAttacks() { m_extraAttacks = 0; }
+        void DoExtraAttacks(Unit* pVictim, bool extra);
 
         void addUnitState(uint32 f) { m_state |= f; }
         bool hasUnitState(uint32 f) const { return !!(m_state & f); }
@@ -1939,6 +1944,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
         bool   m_dummyCombatState;                          // Used to keep combat state during some aura
+
+		uint32 m_extraAttacks;
 
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
         uint32 m_castCounter;                               // count casts chain of triggered spells for prevent infinity cast crashes
