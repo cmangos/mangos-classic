@@ -328,6 +328,10 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     // update abilities available only for fraction of time
     UpdateReactives(update_diff);
 
+    // reset extra attacks
+    if (hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
+        ResetExtraAttacks();
+
     if (isAlive())
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth() * 0.20f);
 
@@ -347,6 +351,9 @@ bool Unit::UpdateMeleeAttackingState()
     uint8 swingError = 0;
     if (!CanReachWithMeleeAttack(victim))
     {
+        // reset extra attacks
+        ResetExtraAttacks();
+
         setAttackTimer(BASE_ATTACK, 100);
         setAttackTimer(OFF_ATTACK, 100);
         swingError = 1;
@@ -2062,23 +2069,13 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     if (attType == RANGED_ATTACK)
         return;                                             // ignore ranged case
 
-    uint32 extraAttacks = m_extraAttacks;
-
     // melee attack spell casted at main hand attack only
     if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL])
     {
         m_currentSpells[CURRENT_MELEE_SPELL]->cast();
 
         // not recent extra attack only at any non extra attack (melee spell case)
-        if (!extra && extraAttacks)
-        {
-            while (m_extraAttacks)
-            {
-                AttackerStateUpdate(pVictim, BASE_ATTACK, true);
-                if (m_extraAttacks > 0)
-                    --m_extraAttacks;
-            }
-        }
+        DoExtraAttacks(pVictim, extra);
         return;
     }
 
@@ -2101,13 +2098,17 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     pVictim->AttackedBy(this);
 
     // extra attack only at any non extra attack (normal case)
-    if (!extra && extraAttacks)
+    DoExtraAttacks(pVictim, extra);
+}
+
+void Unit::DoExtraAttacks(Unit* pVictim, bool extra)
+{
+    if (!extra && m_extraAttacks)
     {
         while (m_extraAttacks)
         {
             AttackerStateUpdate(pVictim, BASE_ATTACK, true);
-            if (m_extraAttacks > 0)
-                --m_extraAttacks;
+            --m_extraAttacks;
         }
     }
 }
@@ -6298,6 +6299,9 @@ void Unit::Mount(uint32 mount, uint32 spellId)
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
+        // reset extra attacks
+        ResetExtraAttacks();
+
         // Called by Taxi system / GM command
         if (!spellId)
             ((Player*)this)->UnsummonPetTemporaryIfAny();
