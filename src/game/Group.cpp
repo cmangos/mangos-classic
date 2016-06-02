@@ -1108,6 +1108,9 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
 
             pGroupGuy->GiveXP(itr_xp, pVictim);
             if (Pet* pet = pGroupGuy->GetPet())
+                // TODO: Pets need to get exp based on their level diff to the target, not the owners.
+                // the whole RewardGroupAtKill needs a rewrite to match up with this anyways:
+                // http://wowwiki.wikia.com/wiki/Formulas:Mob_XP?oldid=228414
                 pet->GivePetXP(itr_xp / 2);
         }
 
