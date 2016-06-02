@@ -86,6 +86,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             {
                 case COMMAND_STAY:                          // flat=1792  // STAY
                     pet->StopMoving();
+                    pet->AttackStop();
                     pet->GetMotionMaster()->Clear(false);
                     pet->GetMotionMaster()->MoveIdle();
                     ((Pet*)pet)->SetStayPosition();
