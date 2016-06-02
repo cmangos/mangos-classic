@@ -1893,27 +1893,7 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
             }
         }
     }
-}
 
-bool Pet::IsPermanentPetFor(Player* owner)
-{
-    switch (getPetType())
-    {
-        case SUMMON_PET:
-            switch (owner->getClass())
-            {
-                // oddly enough, Mage's Water Elemental is still treated as temporary pet with Glyph of Eternal Water
-                // i.e. does not unsummon at mounting, gets dismissed at teleport etc.
-                case CLASS_WARLOCK:
-                    return GetCreatureInfo()->CreatureType == CREATURE_TYPE_DEMON;
-                default:
-                    return false;
-            }
-        case HUNTER_PET:
-            return true;
-        default:
-            return false;
-    }
 }
 
 bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number)
