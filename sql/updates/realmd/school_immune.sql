@@ -1,0 +1,1 @@
+ALTER TABLE `creature_template` ADD COLUMN `SchoolImmuneMask` INT(10) UNSIGNED DEFAULT 0 NOT NULL AFTER `MechanicImmuneMask`; 
