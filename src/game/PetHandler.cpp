@@ -91,6 +91,8 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     pet->GetMotionMaster()->Clear(false);
                     pet->GetMotionMaster()->MoveIdle();
                     ((Pet*)pet)->SetStayPosition();
+                    ((Pet*)pet)->SetIsRetreating();
+                    ((Pet*)pet)->SetSpellOpener();
                     charmInfo->SetCommandState(COMMAND_STAY);
                     break;
                 }
@@ -99,6 +101,8 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     ((Pet*)pet)->ClearStayPosition();
                     pet->AttackStop();
                     pet->GetMotionMaster()->MoveFollow(_player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+                    ((Pet*)pet)->SetIsRetreating(true);
+                    ((Pet*)pet)->SetSpellOpener();
                     charmInfo->SetCommandState(COMMAND_FOLLOW);
                     break;
                 }
@@ -111,6 +115,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     // not let attack friendly units.
                     if (GetPlayer()->IsFriendlyTo(TargetUnit))
                         return;
+
+                    ((Pet*)pet)->SetIsRetreating();
+                    ((Pet*)pet)->SetSpellOpener();
 
                     // This is true if pet has no target or has target but targets differs.
                     if (pet->getVictim() != TargetUnit)
@@ -158,6 +165,10 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             {
                 case REACT_PASSIVE:                         // passive
                 {
+                    pet->AttackStop();
+                    ((Pet*)pet)->SetSpellOpener();
+                    if (!charmInfo->GetCommandState() == COMMAND_STAY)
+                        pet->GetMotionMaster()->MoveFollow(_player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
                 }
                 case REACT_DEFENSIVE:                       // recovery
                 case REACT_AGGRESSIVE:                      // activete
@@ -204,6 +215,28 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
             SpellCastResult result = spell->CheckPetCast(unit_target);
 
+            const SpellRangeEntry* sRange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
+
+            if (unit_target && !(pet->IsWithinDistInMap(unit_target, sRange->maxRange) && pet->IsWithinLOSInMap(unit_target)) 
+                && !(GetPlayer()->IsFriendlyTo(unit_target) || pet->HasAuraType(SPELL_AURA_MOD_POSSESS)))
+            {
+                ((Pet*)pet)->SetSpellOpener(spellid, sRange->minRange, sRange->maxRange);
+                spell->finish(false);
+                delete spell;
+
+                pet->AttackStop();
+                pet->GetMotionMaster()->Clear();
+
+                ((Creature*)pet)->AI()->AttackStart(unit_target);
+                 // 10% chance to play special warlock pet attack talk, else growl
+                if (((Creature*)pet)->IsPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != unit_target && roll_chance_i(10))
+                    pet->SendPetTalk((uint32)PET_TALK_ATTACK);
+
+                pet->SendPetAIReaction();
+
+                return;
+            }
+
             // auto turn to target unless possessed
             if (result == SPELL_FAILED_UNIT_NOT_INFRONT && !pet->HasAuraType(SPELL_AURA_MOD_POSSESS))
             {
@@ -233,15 +266,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
                 unit_target = spell->m_targets.getUnitTarget();
 
-                // 10% chance to play special pet attack talk, else growl
-                // actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-                if (((Creature*)pet)->IsPet() && (((Pet*)pet)->getPetType() == SUMMON_PET) && (pet != unit_target) && (urand(0, 100) < 10))
-                    pet->SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
-                else
-                {
-                    pet->SendPetAIReaction();
-                }
-
                 if (unit_target && !GetPlayer()->IsFriendlyTo(unit_target) && !pet->HasAuraType(SPELL_AURA_MOD_POSSESS))
                 {
                     // This is true if pet has no target or has target but targets differs.
@@ -265,6 +289,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     }
                 }
 
+                ((Pet*)pet)->SetSpellOpener();
                 spell->SpellStart(&(spell->m_targets));
             }
             else
@@ -277,6 +302,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 if (!((Creature*)pet)->HasSpellCooldown(spellid))
                     GetPlayer()->SendClearCooldown(spellid, pet);
 
+                ((Pet*)pet)->SetSpellOpener();
                 spell->finish(false);
                 delete spell;
             }
@@ -675,16 +701,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     {
         pet->AddCreatureSpellCooldown(spellid);
         if (pet->IsPet())
-        {
             ((Pet*)pet)->CheckLearning(spellid);
-
-            // 10% chance to play special pet attack talk, else growl
-            // actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-            if (((Pet*)pet)->getPetType() == SUMMON_PET && (urand(0, 100) < 10))
-                pet->SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
-            else
-                pet->SendPetAIReaction();
-        }
 
         spell->SpellStart(&(spell->m_targets));
     }

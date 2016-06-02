@@ -52,8 +52,9 @@ Pet::Pet(PetType type) :
     m_TrainingPoints(0), m_resetTalentsCost(0), m_resetTalentsTime(0),
     m_removed(false), m_happinessTimer(7500), m_loyaltyTimer(12000), m_petType(type), m_duration(0),
     m_loyaltyPoints(0), m_bonusdamage(0), m_auraUpdateMask(0), m_loading(false),
-    m_petModeFlags(PET_MODE_DEFAULT),
-    m_stayPosSet(false), m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0)
+    m_petModeFlags(PET_MODE_DEFAULT), m_retreating(false),
+    m_stayPosSet(false), m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
+    m_opener(0), m_openerMinRange(0), m_openerMaxRange(0)
 {
     m_name = "Pet";
     m_regenTimer = 4000;
@@ -665,15 +666,41 @@ void Pet::ModifyLoyalty(int32 addvalue)
         }
         else
         {
-            m_loyaltyPoints = 0;
             Unit* owner = GetOwner();
             if (owner && owner->GetTypeId() == TYPEID_PLAYER)
             {
-                WorldPacket data(SMSG_PET_BROKEN, 0);
-                ((Player*)owner)->GetSession()->SendPacket(&data);
-
-                // run away
-                Unsummon(PET_SAVE_AS_DELETED, owner);
+                switch (urand(0, 2))
+                {
+                    case 0: // Abandon owner
+                    {
+                        WorldPacket data(SMSG_PET_BROKEN, 0);
+                        ((Player*)GetOwner())->GetSession()->SendPacket(&data);
+                        Unsummon(PET_SAVE_AS_DELETED, GetOwner());
+                        m_loyaltyPoints = 0;
+                        break;
+                    }
+                    case 1: // Turn aggressive
+                    {
+                        SetIsRetreating();
+                        GetCharmInfo()->SetReactState(ReactStates(REACT_AGGRESSIVE));
+                        m_loyaltyPoints = 500;
+                        break;
+                    }
+                    case 2: // Stay + passive
+                    {
+                        ((Unit*)this)->StopMoving();
+                        ((Unit*)this)->AttackStop();
+                        ((Unit*)this)->GetMotionMaster()->Clear(false);
+                        ((Unit*)this)->GetMotionMaster()->MoveIdle();
+                        SetStayPosition();
+                        SetIsRetreating();
+                        SetSpellOpener();
+                        GetCharmInfo()->SetCommandState(COMMAND_STAY);
+                        GetCharmInfo()->SetReactState(ReactStates(REACT_PASSIVE));
+                        m_loyaltyPoints = 500;
+                        break;
+                    }
+                }
             }
         }
     }
@@ -1975,12 +2002,10 @@ void Pet::LearnPetPassives()
 
 void Pet::CastPetAuras(bool current)
 {
-    Unit* owner = GetOwner();
-    if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
+    if (!isControlled())
         return;
 
-    if (!IsPermanentPetFor((Player*)owner))
-        return;
+    Unit* owner = GetOwner();
 
     for (PetAuraSet::const_iterator itr = owner->m_petAuras.begin(); itr != owner->m_petAuras.end();)
     {
