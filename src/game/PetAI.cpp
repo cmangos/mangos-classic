@@ -52,8 +52,8 @@ void PetAI::MoveInLineOfSight(Unit* u)
     if (!m_creature->GetCharmInfo() || !m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
         return;
 
-    if (u->isTargetableForAttack() && m_creature->IsHostileTo(u) &&
-            u->isInAccessablePlaceFor(m_creature))
+    if (u->isTargetableForAttack() && u->isInAccessablePlaceFor(m_creature) &&
+           (m_creature->IsHostileTo(u) || u->IsHostileTo(m_creature->GetCharmerOrOwner())))
     {
         float attackRadius = m_creature->GetAttackDistance(u);
         if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
@@ -69,7 +69,7 @@ void PetAI::MoveInLineOfSight(Unit* u)
 
 void PetAI::AttackStart(Unit* u)
 {
-    if (!u || (m_creature->IsPet() && ((Pet*)m_creature)->getPetType() == MINI_PET))
+    if (!u || ((Pet*)m_creature)->getPetType() == MINI_PET)
         return;
 
     if (m_creature->Attack(u, true))
@@ -114,31 +114,29 @@ void PetAI::_stopAttack()
             if (Pet* pet = (Pet*)m_creature)
             {
                 if (charmInfo->HasCommandState(COMMAND_FOLLOW))
-                {
                     pet->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-                    useDefaultMovement = false;
-                }
+
                 else if (charmInfo->HasCommandState(COMMAND_STAY))
                 {
                     //if stay command is already set but we dont have stay pos set then we need to establish current pos as stay position
                     if (!pet->IsStayPosSet())
-                    {
                         pet->SetStayPosition();
-                    }
 
                     pet->GetMotionMaster()->MovePoint(0, pet->GetStayPosX(), pet->GetStayPosY(), pet->GetStayPosZ(), false);
-                    useDefaultMovement = false;
                 }
+
+                useDefaultMovement = false;
             }
         }
     }
+
+    m_creature->AttackStop();
 
     if (useDefaultMovement)
     {
         m_creature->GetMotionMaster()->Clear(false);
         m_creature->GetMotionMaster()->MoveIdle();
     }
-    m_creature->AttackStop();
 }
 
 void PetAI::UpdateAI(const uint32 diff)
@@ -188,14 +186,11 @@ void PetAI::UpdateAI(const uint32 diff)
                 // Consume Shadows, Lesser Invisibility, so ignore checks for its
                 if (!IsNonCombatSpell(spellInfo))
                 {
-                    // allow only spell without spell cost or with spell cost but not duration limit
                     int32 duration = GetSpellDuration(spellInfo);
-                    if ((spellInfo->manaCost || spellInfo->ManaCostPercentage || spellInfo->manaPerSecond) && duration > 0)
-                        continue;
-
-                    // allow only spell without cooldown > duration
                     int32 cooldown = GetSpellRecoveryTime(spellInfo);
-                    if (cooldown >= 0 && duration >= 0 && cooldown > duration)
+
+                    // allow only spell not on cooldown
+                    if (cooldown != 0 && duration < cooldown)
                         continue;
 
                     // not allow instant kill autocasts as full health cost
@@ -203,12 +198,9 @@ void PetAI::UpdateAI(const uint32 diff)
                         continue;
                 }
             }
-            else
-            {
-                // just ignore non-combat spells
-                if (IsNonCombatSpell(spellInfo))
-                    continue;
-            }
+            // just ignore non-combat spells
+            else if (IsNonCombatSpell(spellInfo))
+                continue;
 
             Spell* spell = new Spell(m_creature, spellInfo, false);
 
@@ -232,7 +224,6 @@ void PetAI::UpdateAI(const uint32 diff)
                     {
                         targetSpellStore.push_back(TargetSpellList::value_type(Target, spell));
                         spellUsed = true;
-                        break;
                     }
                 }
                 if (!spellUsed)
@@ -274,15 +265,11 @@ void PetAI::UpdateAI(const uint32 diff)
         for (TargetSpellList::const_iterator itr = targetSpellStore.begin(); itr != targetSpellStore.end(); ++itr)
             delete itr->second;
     }
-
-    else
-    {
-        if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
-            m_creature->InterruptNonMeleeSpells(false);
-    }
+    else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
+        m_creature->InterruptNonMeleeSpells(false);
 
     if (victim)
-        {
+    {
         // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
         if (_needToStop())
         {
@@ -291,8 +278,6 @@ void PetAI::UpdateAI(const uint32 diff)
             return;
         }
 
-        bool meleeReach = m_creature->CanReachWithMeleeAttack(victim);
-
         // required to be stopped cases
         if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false))
         {
@@ -300,7 +285,7 @@ void PetAI::UpdateAI(const uint32 diff)
                     m_creature->InterruptNonMeleeSpells(false);
         }
 
-        else if (meleeReach)
+        else if (m_creature->CanReachWithMeleeAttack(victim))
         {
             if (DoMeleeAttackIfReady())
                 // if pet misses its target, it will also be the first in threat list
@@ -309,7 +294,6 @@ void PetAI::UpdateAI(const uint32 diff)
                 AttackStart(victim);
         }
     }
-
     else if (owner && m_creature->GetCharmInfo())
     {
         if (owner->isInCombat() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))
