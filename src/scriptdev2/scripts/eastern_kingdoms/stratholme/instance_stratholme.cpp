@@ -328,7 +328,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                                 pPlayer->RemoveAurasDueToSpell(SPELL_BARON_ULTIMATUM);
 
                             if (pPlayer->GetQuestStatus(QUEST_DEAD_MAN_PLEA) == QUEST_STATUS_INCOMPLETE)
-                                pPlayer->AreaExploredOrEventHappens(QUEST_DEAD_MAN_PLEA);
+                                pPlayer->KilledMonsterCredit(NPC_YSIDA);
 
                             // Argent Dawn reputation reward
                             pPlayer->CastSpell(pPlayer, SPELL_YSIDA_FREED, true);
