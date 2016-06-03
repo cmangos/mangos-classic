@@ -1083,6 +1083,20 @@ void Aura::TriggerSpell()
                 triggerTarget->CastCustomSpell(triggerTarget, 19698, &damageForTick[GetAuraTicks() - 1], nullptr, nullptr, true, nullptr);
                 return;
             }
+            case 21926: // Nature's Ally (hunter's T1 5/8 bonus)
+            case 21928: // Nature's Ally (hunter's T2 5/8 bonus)
+            case 21741: // Demonic Ally (warlock's T1 5/8 bonus)
+            case 21922: // Demonic Ally (warlock's T2 5/8 bonus)
+            {
+                if (Pet* pet = triggerTarget->GetPet())
+                    if (SpellAuraHolder* holder = pet->GetSpellAuraHolder(trigger_spell_id))
+                    {
+                        holder->SetAuraDuration(4000);
+                        return;
+                    }
+
+                break;
+            }
         }
     }
 
@@ -3231,19 +3245,9 @@ void Aura::HandleModResistancePercent(bool apply, bool /*Real*/)
 
 void Aura::HandleModBaseResistance(bool apply, bool /*Real*/)
 {
-    // only players have base stats
-    if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
-    {
-        // only pets have base stats
-        if (((Creature*)GetTarget())->IsPet() && (m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_NORMAL))
-            GetTarget()->HandleStatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(m_modifier.m_amount), apply);
-    }
-    else
-    {
-        for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
-            if (m_modifier.m_miscvalue & (1 << i))
-                GetTarget()->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + i), TOTAL_VALUE, float(m_modifier.m_amount), apply);
-    }
+    for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
+        if (m_modifier.m_miscvalue & (1 << i))
+            GetTarget()->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + i), TOTAL_VALUE, float(m_modifier.m_amount), apply);
 }
 
 /********************************/
