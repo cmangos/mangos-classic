@@ -446,6 +446,25 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spell_id, true, nullptr);
                     return;
                 }
+                case 8344:                                  // Gnomish Universal Remote (ItemID: 7506)
+                {
+                    if (!unitTarget || !m_CastItem)
+                        return;
+
+                    uint32 spell_id;
+                    switch (urand(1, 3))
+                    {
+                        // Control the machine - THIS CASE IS BROKEN, NO MIND CONTROL WORKS ATM
+                        case 1: spell_id = 8345 ; break;
+                        // Malfunction the machine
+                        case 2: spell_id = 8346 ; break;
+                        // Anger the machine
+                        case 3: spell_id = 8347 ; break;
+                    }
+
+                    m_caster->CastSpell(m_caster, spell_id, true);
+                    return;
+                }
                 case 9976:                                  // Polly Eats the E.C.A.C.
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
@@ -473,9 +492,37 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastCustomSpell(m_caster, 12976, &healthModSpellBasePoints0, nullptr, nullptr, true, nullptr);
                     return;
                 }
-                case 13120:                                 // net-o-matic
+                case 13006:                                 // Gnomish Shrink Ray (ItemID: 10716)
                 {
-                    if (!unitTarget)
+                    // NOT FINISHED
+                    if (!unitTarget || !m_CastItem)
+                        return;
+
+                    uint32 roll = urand(0, 99);
+
+                    // These rates are hella random; someone feel free to correct them
+                    if (roll < 2)                                         // Whole party will grow
+                        m_caster->CastSpell(m_caster, 13004, true);
+                    else if (roll < 4)                                    // Whole party will shrink
+                        m_caster->CastSpell(m_caster, 13010, true);
+                    else if (roll < 6)                                    // Whole enemy 'team' will grow
+                        m_caster->CastSpell(unitTarget, 13004, true);
+                    else if (roll < 8)                                    // Whole enemy 'team' will shrink
+                        m_caster->CastSpell(unitTarget, 13010, true);
+                    else if (roll < 14)                                   // Caster will grow (Now just where did Blizz hide this spell...)
+                        ;
+                    else if (roll < 20)                                   // Caster will shrink
+                        m_caster->CastSpell(m_caster, 13003, true);
+                    else if (roll < 32)                                   // Enemy target will grow (Now just where did Blizz hide this spell...)
+                        ;
+                    else                                                  // Enemy target will shrink
+                        m_caster->CastSpell(unitTarget, 13003, true);
+
+                    return;
+                }
+                case 13120:                                 // Net-O-Matic
+                {
+                    if (!unitTarget || !m_CastItem)
                         return;
 
                     uint32 spell_id = 0;
@@ -492,6 +539,66 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, spell_id, true, nullptr);
                     return;
                 }
+                case 13180:                                 // Gnomish Mind Control Cap (ItemID: 10726)
+                {
+                    if (!unitTarget || !m_CastItem)
+                        return;
+
+                    uint32 roll = urand(0, 99);
+
+                    // The spell 13181 is BROKEN - NO MIND CONTROLLING ITEMS WORK - NEEDS UPDATE ON CORE
+                    if (roll < 10)
+                        unitTarget->CastSpell(m_caster, 13181, true, nullptr);
+
+                    else if (roll < 85)
+                        m_caster->CastSpell(unitTarget, 13181, true, nullptr);
+                        
+                    return;
+                }
+                /*********************************************************/
+                /***         GNOMISH DEATH RAY (ItemID: 10645)         ***/
+                /*********************************************************/
+                case 13278:                                 // Gnomish Death Ray (Init)
+                {
+                    if (!unitTarget || !m_CastItem)
+                        return;
+
+                    int32 DRMod = 120 + urand((m_caster->GetMaxHealth()/100), (m_caster->GetMaxHealth()/20));
+
+                    m_caster->CastCustomSpell(unitTarget, 13493, &DRMod, nullptr, nullptr, true, m_CastItem);
+
+                    return;
+                }
+                case 13280:                                 // Gnomish Death Ray (Finish)
+                {
+                    if (!m_originalCaster)
+                        return;
+
+                    int32 DRMod = 600 + urand((m_caster->GetMaxHealth()/10), (m_caster->GetMaxHealth()/2));
+                    Unit* channelTarget = m_originalCaster->GetMap()->GetUnit(m_originalCaster->GetChannelObjectGuid());
+
+                    if (!channelTarget)
+                        return;
+
+
+                    uint32 roll = urand(0, 99);
+                    if (roll < 15)
+                        m_caster->CastCustomSpell(m_caster, 13279, &DRMod, nullptr, nullptr, true, m_CastItem);
+
+                    else
+                        m_caster->CastCustomSpell(channelTarget, 13279, &DRMod, nullptr, nullptr, true, m_CastItem);
+
+                    return;
+                }
+                /*********************************************************/
+                case 13489:
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 14744, true);
+                    return;
+                }
                 case 13535:                                 // Tame Beast
                 {
                     if (!m_originalCaster || m_originalCaster->GetTypeId() != TYPEID_PLAYER)
@@ -503,14 +610,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
 
                     m_originalCaster->CastSpell(channelTarget, 13481, true, nullptr, nullptr, m_originalCasterGUID, m_spellInfo);
-                    return;
-                }
-                case 13489:
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 14744, true);
                     return;
                 }
                 case 13567:                                 // Dummy Trigger
@@ -790,11 +889,21 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 23133:                                 // Gnomish Battle Chicken
+                // THIS CASE IS BROKEN! - SUMMON_TOTEM for a guardian pet?
+                // Our SUMMON_TOTEM doesn't seem to be able to handle it anyway.
                 {
                     if (!m_CastItem)
                         return;
 
                     m_caster->CastSpell(m_caster, 13166, true, m_CastItem);
+                    return;
+                }
+                case 23134:                                 // Goblin Bomb Dispenser
+                {
+                    if (!m_CastItem)
+                        return;
+
+                    m_caster->CastSpell(m_caster, 13258, true, m_CastItem);
                     return;
                 }
                 case 23138:                                 // Gate of Shazzrah
