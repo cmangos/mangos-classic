@@ -258,6 +258,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * kid10 (a.k.a. kid 10)
 * killdozer
 * KillerFrca
+* Killerwife
 * KiriX
 * kizura
 * Klark20
@@ -292,6 +293,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * Marik
 * marintrica
 * MaS0n
+* maximus (a.k.a. devmaximus)
 * Maxxie
 * MaxXx2021
 * McBen
@@ -353,6 +355,7 @@ The Authors of third party libraries are not explicitly mentioned, and usually a
 * paytheo
 * Peppers
 * phan
+* Phatcat (a.k.a. Thunderbear, Entrancler, ulp)
 * plaes
 * popovk
 * porteyoplait
