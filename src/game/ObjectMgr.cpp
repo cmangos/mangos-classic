@@ -1975,7 +1975,7 @@ PetLevelInfo const* ObjectMgr::GetPetLevelInfo(uint32 creature_id, uint32 level)
     return &itr->second[level - 1];                         // data for level 1 stored in [0] array element, ...
 }
 
-void ObjectMgr::GetPetFamilyStatMods(Pet* pet, uint32 family) const
+/* void ObjectMgr::GetPetFamilyStatMods(Pet* pet, uint32 family) const
 {
     // Loading levels data
     //                                                   0      1     2     3
@@ -2001,7 +2001,7 @@ void ObjectMgr::GetPetFamilyStatMods(Pet* pet, uint32 family) const
     pet->m_healthMod = healthMod;
     pet->m_armorMod = armorMod;
     pet->m_damageMod = damageMod;
-}
+} */
 
 void ObjectMgr::LoadPlayerInfo()
 {

@@ -494,7 +494,7 @@ class ObjectMgr
         }
         void GetPlayerLevelInfo(uint32 race, uint32 class_, uint32 level, PlayerLevelInfo* info) const;
 
-        void ObjectMgr::GetPetFamilyStatMods(Pet* pet, uint32 family) const;
+        //void ObjectMgr::GetPetFamilyStatMods(Pet* pet, uint32 family) const;
 
         ObjectGuid GetPlayerGuidByName(std::string name) const;
         bool GetPlayerNameByGUID(ObjectGuid guid, std::string& name) const;

@@ -67,7 +67,93 @@ Pet::Pet(PetType type) :
     {
         case HUNTER_PET:
         {
-            sObjectMgr.GetPetFamilyStatMods(this, GetCreatureInfo()->Family);
+            float hMod = 1, aMod = 1, dMod = 1;
+            switch(GetCreatureInfo()->Family)
+            {
+                case CREATURE_FAMILY_BAT:
+                case CREATURE_FAMILY_OWL:
+                case CREATURE_FAMILY_SPIDER:
+                case CREATURE_FAMILY_WIND_SERPENT:
+                {
+                    dMod = 1.07;
+                    break;
+                }
+                case CREATURE_FAMILY_BEAR:
+                {
+                    hMod = 1.08;
+                    aMod = 1.05;
+                    dMod = 0.91;
+                    break;
+                }
+                    case CREATURE_FAMILY_BOAR:
+                {
+                    hMod = 1.04;
+                    aMod = 1.09;
+                    dMod = 0.90;
+                    break;
+                }
+                case CREATURE_FAMILY_CARRION_BIRD:
+                case CREATURE_FAMILY_HYENA:
+                case CREATURE_FAMILY_WOLF:
+                {
+                    aMod = 1.05;
+                    break;
+                }
+                case CREATURE_FAMILY_CAT:
+                {
+                    hMod = 0.98;
+                    dMod = 1.10;
+                    break;
+                }
+                case CREATURE_FAMILY_CRAB:
+                {
+                    hMod = 0.96;
+                    aMod = 1.13;
+                    dMod = 0.95;
+                    break;
+                }
+                case CREATURE_FAMILY_CROCOLISK:
+                {
+                    hMod = 0.95;
+                    aMod = 1.10;
+                    break;
+                }
+                case CREATURE_FAMILY_GORILLA:
+                {
+                    hMod = 1.04;
+                    dMod = 1.02;
+                }
+                case CREATURE_FAMILY_RAPTOR:
+                {
+                    hMod = 0.95;
+                    aMod = 1.03;
+                    dMod = 1.10;
+                    break;
+                }
+                case CREATURE_FAMILY_SCORPID:
+                {
+                    aMod = 1.10;
+                    dMod = 0.94;
+                    break;
+                }
+                case CREATURE_FAMILY_TALLSTRIDER:
+                {
+                    hMod = 1.05;
+                    break;
+                }
+                case CREATURE_FAMILY_TURTLE:
+                {
+                    aMod = 1.13;
+                    dMod = 0.90;
+                    break;
+                }
+            }
+
+            m_healthMod = hMod;
+            m_armorMod = aMod;
+            m_damageMod = dMod;
+
+            //sObjectMgr.GetPetFamilyStatMods(this, GetCreatureInfo()->Family);
             break;
         }
         case GUARDIAN_PET:  // aggressive by default
