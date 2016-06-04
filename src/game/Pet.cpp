@@ -54,7 +54,8 @@ Pet::Pet(PetType type) :
     m_loyaltyPoints(0), m_bonusdamage(0), m_auraUpdateMask(0), m_loading(false),
     m_petModeFlags(PET_MODE_DEFAULT), m_retreating(false),
     m_stayPosSet(false), m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
-    m_opener(0), m_openerMinRange(0), m_openerMaxRange(0)
+    m_opener(0), m_openerMinRange(0), m_openerMaxRange(0),
+    m_healthMod(1), m_armorMod(1), m_damageMod(1)
 {
     m_name = "Pet";
     m_regenTimer = 4000;
@@ -62,10 +63,24 @@ Pet::Pet(PetType type) :
     // pets always have a charminfo, even if they are not actually charmed
     CharmInfo* charmInfo = InitCharmInfo(this);
 
-    if (type == MINI_PET)                                   // always passive
-        charmInfo->SetReactState(REACT_PASSIVE);
-    else if (type == GUARDIAN_PET)                          // always aggressive
-        charmInfo->SetReactState(REACT_AGGRESSIVE);
+    switch (type)
+    {
+        case HUNTER_PET:
+        {
+            sObjectMgr.GetPetFamilyStatMods(this, GetCreatureInfo()->Family);
+            break;
+        }
+        case GUARDIAN_PET:  // aggressive by default
+        {
+            charmInfo->SetReactState(REACT_AGGRESSIVE);
+            break;
+        }
+        case MINI_PET:      // always passive
+        {
+            charmInfo->SetReactState(REACT_PASSIVE);
+            break;
+        }
+    }
 }
 
 Pet::~Pet()
@@ -1090,15 +1105,11 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
                 SetCreateStat(Stats(i), float(pInfo->stats[i]));
 
-            // health, armor and damage modifiers (they're coming)
-            float aMod = 1.0f, hMod = 1.0f, dMod = 1.0f;
-
-
-            SetCreateHealth(pInfo->health * hMod);
-            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, pInfo->armor * aMod);
+            SetCreateHealth(pInfo->health * m_healthMod);
+            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, pInfo->armor * m_armorMod);
 
             // First we divide attack time by standard attack time, and then multipy by level and damage mod.
-            uint32 mDmg = (GetAttackTime(BASE_ATTACK)/2000) * petlevel * dMod;
+            uint32 mDmg = (GetAttackTime(BASE_ATTACK)/2000) * petlevel * m_damageMod;
             SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, (mDmg - mDmg/4));
             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, (mDmg + mDmg/4));
             // damage is increased afterwards as strength and pet scaling modify attack power

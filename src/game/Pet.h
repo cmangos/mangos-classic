@@ -299,6 +299,10 @@ class MANGOS_DLL_SPEC Pet : public Creature
         uint32          m_openerMinRange;
         uint32          m_openerMaxRange;
 
+        float           m_healthMod;
+        float           m_armorMod;
+        float           m_damageMod;
+
         uint32 GetSpellOpener()         { return m_opener; }
         uint32 GetSpellOpenerMinRange() { return m_openerMinRange; }
         uint32 GetSpellOpenerMaxRange() { return m_openerMaxRange; }

@@ -1975,6 +1975,34 @@ PetLevelInfo const* ObjectMgr::GetPetLevelInfo(uint32 creature_id, uint32 level)
     return &itr->second[level - 1];                         // data for level 1 stored in [0] array element, ...
 }
 
+void ObjectMgr::GetPetFamilyStatMods(Pet* pet, uint32 family) const
+{
+    // Loading levels data
+    //                                                   0      1     2     3
+    QueryResult* result = WorldDatabase.Query("SELECT Family, HealthModifier, ArmorModifier, DamageModifier FROM pet_familystats WHERE family");
+
+    float healthMod = 1.0, armorMod = 1.0, damageMod = 1.0;
+
+    if (!result)
+    {
+        sLog.outErrorDb("Error loading `pet_familystats` table or empty table.");
+        sLog.outString();
+    }
+    else
+    {
+        Field* fields = result->Fetch();
+        healthMod = fields[1].GetFloat();
+        armorMod = fields[2].GetFloat();
+        damageMod = fields[3].GetFloat();
+    }
+
+    delete result;
+
+    pet->m_healthMod = healthMod;
+    pet->m_armorMod = armorMod;
+    pet->m_damageMod = damageMod;
+}
+
 void ObjectMgr::LoadPlayerInfo()
 {
     // Load playercreate
