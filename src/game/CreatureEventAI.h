@@ -97,7 +97,7 @@ enum EventAI_ActionType
     ACTION_T_INC_PHASE                  = 23,               // Value (may be negative to decrement phase, should not be 0)
     ACTION_T_EVADE                      = 24,               // No Params
     ACTION_T_FLEE_FOR_ASSIST            = 25,               // No Params
-    ACTION_T_QUEST_EVENT_ALL            = 26,               // QuestID
+    ACTION_T_QUEST_EVENT_ALL            = 26,               // QuestID, UseThreatList (1 = true, 0 = false)
     ACTION_T_CAST_EVENT_ALL             = 27,               // CreatureId, SpellId
     ACTION_T_REMOVEAURASFROMSPELL       = 28,               // Target, Spellid
     ACTION_T_RANGED_MOVEMENT            = 29,               // Distance, Angle
@@ -290,6 +290,7 @@ struct CreatureEventAI_Action
         struct
         {
             uint32 questId;
+            uint32 useThreatList;                           // bool: 1 = true; 0 = false
         } quest_event_all;
         // ACTION_T_CAST_EVENT_ALL                          = 27
         struct

@@ -131,7 +131,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 23   ACTION_T_INC_PHASE                     Value                           Increments the phase by (Param1). May be negative to decrement, but should not be zero.
 24   ACTION_T_EVADE                         No Params                       Forces the creature to evade, wiping all threat and dropping combat.
 25   ACTION_T_FLEE_FOR_ASSIST               No Params                       Causes the creature to flee for assistence (often at low health).
-26   ACTION_T_QUEST_EVENT_ALL               QuestId                         Calls GroupEventHappens with (Param1). Only used if it's _expected_ event should call quest completion for all players in a current party.
+26   ACTION_T_QUEST_EVENT_ALL               QuestId, UseThreatList          Calls GroupEventHappens with (Param1). Only used if it's _expected_ event should call quest completion for all players in a current party. Can be used for the creature's threat list, for complex scripted events.
 27   ACTION_T_CASTCREATUREGO_ALL            QuestId, SpellId                Calls CastedCreatureOrGo for all players on the threat list with quest id specified in (Param1) and spell id in (Param2).
 28   ACTION_T_REMOVEAURASFROMSPELL          Target, Spellid                 Removes all auras on a target (Param1) caused by a spell (Param2).
 29   ACTION_T_RANGED_MOVEMENT               Distance, Angle                 Changes the movement generator to a ranged type. (note: default melee type can still be set by using 0 as angle and 0 as distance).
@@ -701,6 +701,7 @@ NOTE: All Param Values Are 0 for this Action.
 26 = ACTION_T_QUEST_EVENT_ALL:
 ------------------------------
 Parameter 1: QuestId - The quest ID to finish for everyone.
+Parameter 2: UseThreatList - Bool. If set to 1 (true), it will complete the QuestId for all the players in the threat list. If set to 0 (false), it will use the action invoker.
 
 This action does the same thing as the ACTION_T_QUEST_EVENT does but it does it for all players in the creature's threat list.
 NOTE: If a player is not in the NPC's threat list for whatever reason, he/she won't get the quest completed.
