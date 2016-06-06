@@ -2405,8 +2405,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
     }
 
     // remove caster from the list if required by attribute
-    if (targetMode != TARGET_SELF && m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
-        targetUnitMap.remove(m_caster);
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
+    {
+        if (targetMode != TARGET_SELF && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_SUMMON)
+            targetUnitMap.remove(m_caster);
+    }
 
     if (unMaxTargets && targetUnitMap.size() > unMaxTargets)
     {
