@@ -423,7 +423,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                 case 20230:
                 {
                     // check attack comes not from behind
-                    if (!HasInArc(M_PI_F, pVictim))
+                    if (!HasInArc(M_PI_F, pVictim) || this->hasUnitState(UNIT_STAT_STUNNED))
                         return SPELL_AURA_PROC_FAILED;
 
                     triggered_spell_id = 22858;
