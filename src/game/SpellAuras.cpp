@@ -4238,8 +4238,8 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                     // Power Word: Shield
                     if (spellProto->SpellFamilyFlags & uint64(0x0000000000000001))
                     {
-                        //+30% from +healing bonus
-                        DoneActualBenefit = caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * 0.3f;
+                        //+10% from +healing bonus
+                        DoneActualBenefit = caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * 0.1f;
                         break;
                     }
                     break;
