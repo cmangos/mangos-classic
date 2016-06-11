@@ -2149,3 +2149,19 @@ bool ChatHandler::HandleSetViewCommand(char* /*args*/)
 
     return true;
 }
+
+bool ChatHandler::HandleAccountNoteCommand(char* args)
+{
+    std::string account_name;
+    uint32 targetAccountId = ExtractAccountId(&args, &account_name);
+    if (!targetAccountId)
+        return false;
+
+    char* note = ExtractQuotedOrLiteralArg(&args);
+    if (!note)
+        return false;
+
+    LoginDatabase.PExecute("INSERT INTO account_note (accountId, accountNote) VALUES (%u, '%s')", targetAccountId, note);
+    PSendSysMessage("Note added");
+    return true;
+}

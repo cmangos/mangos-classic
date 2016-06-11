@@ -462,6 +462,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleReloadSpellTargetPositionCommand(char* args);
         bool HandleReloadSpellThreatsCommand(char* args);
         bool HandleReloadSpellPetAurasCommand(char* args);
+		bool HandleReloadAntiCheatCommand(char* args);
 
         bool HandleResetAchievementsCommand(char* args);
         bool HandleResetAllCommand(char* args);
@@ -531,6 +532,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleWhispersCommand(char* args);
         bool HandleModifyDrunkCommand(char* args);
         bool HandleSetViewCommand(char* args);
+        bool HandleAccountNoteCommand(char* args);
 
         bool HandleLoadScriptsCommand(char* args);
 

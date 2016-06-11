@@ -1546,3 +1546,159 @@ SOAP.Port = 7878
 CharDelete.Method = 0
 CharDelete.MinLevel = 0
 CharDelete.KeepDays = 30
+
+###################################################################################################
+# WARDEN SETTINGS
+#
+#    Warden.WinEnabled
+#        Description: Enables Warden checks for Windows clients.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#
+#    Warden.OSXEnabled
+#        Description: Enables Warden checks for OSX clients.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+#
+#    Warden.NumMemChecks
+#        Description: Number of Warden memory checks that are sent to the client each cycle.
+#        Default:     3 - (Enabled)
+#                     0 - (Disabled)
+#
+#    Warden.NumOtherChecks
+#        Description: Number of Warden checks other than memory checks that are added to request
+#                     each checking cycle.
+#        Default:     7 - (Enabled)
+#                     0 - (Disabled)
+#
+#    Warden.ClientResponseDelay
+#        Description: Time (in seconds) before client is getting disconnecting for not responding.
+#        Default:     600 - (10 Minutes)
+#                     0 - (Disabled, client won't be kicked)
+#
+#    Warden.ClientCheckHoldOff
+#        Description: Time (in seconds) to wait before sending the next check request to the client.
+#                     A low number increases traffic and load on client and server side.
+#        Default:     30 - (30 Seconds)
+#                     0  - (Send check as soon as possible)
+#
+#    Warden.ClientCheckFailAction
+#        Description: Default action being taken if a client check failed. Actions can be
+#                     overwritten for each single check via warden_action table in characters 
+#                     database.
+#        Default:     1 - (Kick)
+#                     0 - (Disabled, Logging only)
+#                     2 - (Ban)
+#
+#    Warden.BanDuration
+#        Description: Time (in seconds) an account will be banned if ClientCheckFailAction is set
+#                     to ban.
+#        Default:     86400 - (24 hours)
+#                     0     - (Permanent ban)
+#
+###################################################################################################
+
+Warden.WinEnabled = 0
+Warden.OSXEnabled = 0
+Warden.NumMemChecks = 3
+Warden.NumOtherChecks = 7
+Warden.ClientResponseDelay = 600
+Warden.ClientCheckHoldOff = 30
+Warden.ClientCheckFailAction = 1
+Warden.BanDuration = 86400
+
+################################################################################################################
+# MOVEMENT ANTICHEAT
+#
+#    Anticheat.Movement.Enable
+#        Enable Movement Anticheat
+#        Default: 0 - off
+#                 1 - on
+#
+#    Anticheat.Movement.AlarmCount+#        Count alarms. After AlarmCount is exceeded, actions are taken against the player. (default 5)
+#
+#    Anticheat.Movement.AlarmTime
+#        Reset alarm-count after this milliseconds. (default 5000)
+#
+#    Anticheat.Movement.Kill
+#        Enable Kill cheater
+#        Default: 0 - off
+#                 1 - on
+#
+#    Anticheat.Movement.Kick
+#        Enable Kick cheater
+#        Default: 0 - off
+#                 1 - on
+#
+#    Anticheat.Movement.BanType
+#        Enable Ban cheater
+#        Default: 0 - off
+#                 1 - Ban Account
+#                 2 - Ban IP
+#                 3 - Ban Account + IP
+#
+#    Anticheat.Movement.Announce
+#        Enable Announce cheater
+#        Default: 0 - off
+#                 1 - on
+#
+#    Anticheat.Movement.DetectSpeedHack
+#        Turn Speed Check on/off
+#        Default: 1 (on)
+#
+#    Anticheat.Movement.DetectWaterWalk
+#        Turn WaterWalk Check on/off
+#        Default: 1 (on)
+#
+#    Anticheat.Movement.DetectFlyHack
+#        Turn Fly Hack Check on/off
+#        Default: 1 (on)
+#
+#    Anticheat.Movement.DetectMountainHack
+#        Turn Speed Check on/off
+#        Default: 1 (on)
+#    Anticheat.Movement.DetectAirJumpHack
+#        Turn Air/Graviti Jump Check on/off
+#        Default: 1 (on)
+#
+#    Anticheat.Movement.DetectTeleportHack
+#        Turn Teleport Check on/off
+#        Default: 1 (on)
+#
+#    Anticheat.Movement.DetectTeleport2PlaneHack
+#        Turn Teleport2Plane Check on/off
+#        Default: 1 (on)
+#
+#    Anticheat.Movement.BanTime
+#        How long the ban should last.
+#        Default: 3600 = 3600s = 1h
+#
+#    Anticheat.Movement.MaxXYT
+#        Max units a player is allowed to travel per millisecond.
+#        Default: 0.04 (This is ~400% Speed, 0.007 is walk-speed, 310% is 0.0287)
+#
+#    Anticheat.Movement.IgnoreSecAfterTeleport
+#        After being teleported this number of seconds no cheat is reported.
+#        Default: 10 seconds - 10
+#
+#    Anticheat.Movement.GmLevel
+################################################################################################################
+
+Anticheat.Movement.Enable = 0
+Anticheat.Movement.AlarmCount = 5
+Anticheat.Movement.AlarmTime = 5000
+Anticheat.Movement.Kill = 0
+Anticheat.Movement.Kick = 0
+Anticheat.Movement.Announce = 0
+Anticheat.Movement.DetectSpeedHack = 1
+Anticheat.Movement.DetectWaterWalk = 1
+Anticheat.Movement.DetectFlyHack = 1
+Anticheat.Movement.DetectMountainHack = 1
+Anticheat.Movement.DetectAirJumpHack = 1
+Anticheat.Movement.DetectTeleportHack = 1
+Anticheat.Movement.DetectTeleport2PlaneHack = 0
+Anticheat.Movement.BanType = 0
+Anticheat.Movement.BanTime = "3600"
+Anticheat.Movement.MaxXYT = 0.04
+Anticheat.Movement.IgnoreSecAfterTeleport = 10
+Anticheat.Movement.GmLevel = 0

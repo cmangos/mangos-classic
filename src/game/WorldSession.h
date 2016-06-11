@@ -134,6 +134,11 @@ class MANGOS_DLL_SPEC WorldSession
         // the socket handling code know that the session can be safely deleted
         void Finalize() { m_Socket->FinalizeSession(); }
 
+        void InitWarden(BigNumber* k, std::string const& os);
+
+        inline bool Anti__CheatOccurred(uint32 CurTime, const char* Reason, float Speed, const char* Op = NULL, float Val1 = 0.0f, uint32 Val2 = 0);
+        bool Anti__ReportCheat(const char* Reason, float Speed, const char* Op = NULL, float Val1 = 0.0f, uint32 Val2 = 0);
+
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
         void SendPacket(WorldPacket const* packet);

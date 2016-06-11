@@ -171,6 +171,15 @@ enum eConfigUInt32Values
     CONFIG_UINT32_GUID_RESERVE_SIZE_CREATURE,
     CONFIG_UINT32_GUID_RESERVE_SIZE_GAMEOBJECT,
     CONFIG_UINT32_CREATURE_RESPAWN_AGGRO_DELAY,
+    CONFIG_UINT32_WARDEN_CLIENT_RESPONSE_DELAY,
+    CONFIG_UINT32_WARDEN_CLIENT_CHECK_HOLDOFF,
+    CONFIG_UINT32_WARDEN_CLIENT_FAIL_ACTION,
+    CONFIG_UINT32_WARDEN_CLIENT_BAN_DURATION,
+    CONFIG_UINT32_WARDEN_NUM_MEM_CHECKS,
+    CONFIG_UINT32_WARDEN_NUM_OTHER_CHECKS,
+    CONFIG_UINT32_WARDEN_DB_LOGLEVEL,
+	CONFIG_UINT32_ANTICHEAT_ACTION_DELAY,
+	CONFIG_UINT32_ANTICHEAT_GMLEVEL,
     CONFIG_UINT32_VALUE_COUNT
 };
 
@@ -309,6 +318,10 @@ enum eConfigBoolValues
     CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,
     CONFIG_BOOL_MMAP_ENABLED,
     CONFIG_BOOL_PLAYER_COMMANDS,
+    CONFIG_BOOL_WARDEN_WIN_ENABLED,
+    CONFIG_BOOL_WARDEN_OSX_ENABLED,
+	CONFIG_BOOL_ANTICHEAT_ENABLE,
+	CONFIG_BOOL_ANTICHEAT_WARDEN,
     CONFIG_BOOL_VALUE_COUNT
 };
 
@@ -461,6 +474,7 @@ class World
         void LoadConfigSettings(bool reload = false);
 
         void SendWorldText(int32 string_id, ...);
+		void World::SendWorldTextWithSecurity(AccountTypes security, int32 string_id, ...);
         void SendGlobalMessage(WorldPacket* packet);
         void SendServerMessage(ServerMessageType type, const char* text = "", Player* player = nullptr);
         void SendZoneUnderAttackMessage(uint32 zoneId, Team team);
@@ -519,6 +533,27 @@ class World
         static float GetMaxVisibleDistanceInFlight()        { return m_MaxVisibleDistanceInFlight;    }
         static float GetVisibleUnitGreyDistance()           { return m_VisibleUnitGreyDistance;       }
         static float GetVisibleObjectGreyDistance()         { return m_VisibleObjectGreyDistance;     }
+
+        //movement anticheat enable flag
+        inline bool GetMvAnticheatEnable()             { return m_MvAnticheatEnable; }
+        inline bool GetMvAnticheatKick()               { return m_MvAnticheatKick; }
+        inline bool GetMvAnticheatAnnounce()           { return m_MvAnticheatAnnounce; }
+        inline uint32 GetMvAnticheatAlarmCount()       { return m_MvAnticheatAlarmCount; }
+        inline uint32 GetMvAnticheatAlarmPeriod()      { return m_MvAnticheatAlarmPeriod; }
+        inline unsigned char GetMvAnticheatBan()       { return m_MvAntiCheatBan; }
+        inline std::string GetMvAnticheatBanTime()          { return m_MvAnticheatBanTime; }
+        inline unsigned char GetMvAnticheatGmLevel()   { return m_MvAnticheatGmLevel; }
+        inline bool GetMvAnticheatKill()               { return m_MvAnticheatKill; }
+        inline float GetMvAnticheatMaxXYT()            { return m_MvAnticheatMaxXYT; }
+        inline uint16 GetMvAnticheatIgnoreAfterTeleport()   { return m_MvAnticheatIgnoreAfterTeleport; }
+
+        inline bool GetMvAnticheatSpeedCheck()         { return m_MvAnticheatSpeedCheck; }
+        inline bool GetMvAnticheatWaterCheck()         { return m_MvAnticheatWaterCheck; }
+        inline bool GetMvAnticheatFlyCheck()           { return m_MvAnticheatFlyCheck; }
+        inline bool GetMvAnticheatMountainCheck()      { return m_MvAnticheatMountainCheck; }
+        inline bool GetMvAnticheatJumpCheck()          { return m_MvAnticheatJumpCheck; }
+        inline bool GetMvAnticheatTeleportCheck()      { return m_MvAnticheatTeleportCheck; }
+        inline bool GetMvAnticheatTeleport2PlaneCheck()  { return m_MvAnticheatTeleport2PlaneCheck; }
 
         static float GetRelocationLowerLimitSq()            { return m_relocation_lower_limit_sq; }
         static uint32 GetRelocationAINotifyDelay()          { return m_relocation_ai_notify_delay; }
@@ -618,6 +653,26 @@ class World
 
         static float  m_relocation_lower_limit_sq;
         static uint32 m_relocation_ai_notify_delay;
+
+        //movement anticheat enable flag
+        bool m_MvAnticheatEnable;
+        bool m_MvAnticheatKick;
+        bool m_MvAnticheatAnnounce;
+        uint32 m_MvAnticheatAlarmCount;
+        uint32 m_MvAnticheatAlarmPeriod;
+        unsigned char m_MvAntiCheatBan;
+        std::string m_MvAnticheatBanTime;
+        unsigned char m_MvAnticheatGmLevel;
+        bool m_MvAnticheatKill;
+        float m_MvAnticheatMaxXYT;
+        uint16 m_MvAnticheatIgnoreAfterTeleport;
+        bool m_MvAnticheatSpeedCheck;
+        bool m_MvAnticheatWaterCheck;
+        bool m_MvAnticheatFlyCheck;
+        bool m_MvAnticheatMountainCheck;
+        bool m_MvAnticheatJumpCheck;
+        bool m_MvAnticheatTeleportCheck;
+        bool m_MvAnticheatTeleport2PlaneCheck;
 
         // CLI command holder to be thread safe
         std::mutex m_cliCommandQueueLock;

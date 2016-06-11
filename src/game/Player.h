@@ -37,6 +37,7 @@
 #include "DBCStores.h"
 #include "SharedDefines.h"
 #include "Chat.h"
+#include "AntiCheat.h"
 
 #include<vector>
 
@@ -1932,6 +1933,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool isMoving() const { return m_movementInfo.HasMovementFlag(movementFlagsMask); }
         bool isMovingOrTurning() const { return m_movementInfo.HasMovementFlag(movementOrTurningFlagsMask); }
 
+        uint32 Anti__GetLastTeleTime() const { return m_anti_TeleTime; }
+        void Anti__SetLastTeleTime(uint32 TeleTime) { m_anti_TeleTime = TeleTime; }
+		AntiCheat* GetAntiCheat() { return m_anticheat; }
+
         bool CanSwim() const { return true; }
         bool CanFly() const { return false; }
         bool IsFlying() const { return false; }
@@ -2058,6 +2063,17 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         GridReference<Player>& GetGridRef() { return m_gridRef; }
         MapReference& GetMapRef() { return m_mapRef; }
+
+        void ResetAntiCheatCheck(uint32 nextCheckInSec = 5)
+        {
+            lastCheckPosX = 0.0f;
+            lastCheckPosY = 0.0f;
+            lastCheckPosZ = 0.0f;
+            lastCheckMapId = 0;
+            nextCheck = time(nullptr) + nextCheckInSec;
+            initAntiCheat = false;
+            reportAmount = 0;
+        }
 
     protected:
 
@@ -2227,12 +2243,32 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 m_swingErrorMsg;
         float m_ammoDPS;
 
+        /////////// TEMP CHEATING SOLUTION ///////////
+        float  lastCheckPosX;
+        float  lastCheckPosY;
+        float  lastCheckPosZ;
+        uint32 lastCheckMapId;
+        time_t nextCheck;
+        time_t lastReport;
+        uint32 reportAmount;
+        bool   initAntiCheat;
+        /////////// TEMP CHEATING SOLUTION ///////////
+
         //////////////////// Rest System/////////////////////
         time_t time_inn_enter;
         uint32 inn_trigger_id;
         float m_rest_bonus;
         RestType rest_type;
         //////////////////// Rest System/////////////////////
+        //movement anticheat
+        uint32 m_anti_lastmovetime;     //last movement time
+        float  m_anti_MovedLen;         //Length of traveled way
+        uint32 m_anti_NextLenCheck;
+        float  m_anti_BeginFallZ;    //alternative falling begin
+        uint32 m_anti_lastalarmtime;    //last time when alarm generated
+        uint32 m_anti_alarmcount;       //alarm counter
+        uint32 m_anti_TeleTime;
+        bool m_CanFly;
 
         // Transports
         Transport* m_transport;
@@ -2259,6 +2295,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         float  m_summon_x;
         float  m_summon_y;
         float  m_summon_z;
+
+		AntiCheat* m_anticheat;
 
     private:
         // internal common parts for CanStore/StoreItem functions
