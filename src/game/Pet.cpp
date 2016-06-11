@@ -286,7 +286,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
     SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
 
-    if (savedhealth <= 0)
+    if (getPetType() == HUNTER_PET && savedhealth <= 0)
         SetDeathState(JUST_DIED);
 
     map->Add((Creature*)this);
