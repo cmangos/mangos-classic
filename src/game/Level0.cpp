@@ -29,6 +29,7 @@
 #include "SystemConfig.h"
 #include "revision.h"
 #include "Util.h"
+#include "PlayerBot/PlayerBotMgr.h"
 
 bool ChatHandler::HandleHelpCommand(char* args)
 {
@@ -288,5 +289,110 @@ bool ChatHandler::HandleAccountLockCommand(char* args)
 bool ChatHandler::HandleServerMotdCommand(char* /*args*/)
 {
     PSendSysMessage(LANG_MOTD_CURRENT, sWorld.GetMotd());
+    return true;
+}
+
+bool ChatHandler::HandleCreateBotSessionCommand(char* args)
+{
+    uint32 accountId;
+    if (!ExtractUInt32Base(&args, accountId, 10))
+    {
+        SendSysMessage("Please provide a valid account id.");
+        return true;
+    }
+
+    uint32 botId = sPlayerBotMgr.CreateBot(accountId);
+    PSendSysMessage("Bot with id %u created", botId);
+    return true;
+}
+
+bool ChatHandler::HandleLoginBotCommand(char* args)
+{
+    uint32 botId;
+    if (!ExtractUInt32Base(&args, botId, 10))
+    {
+        SendSysMessage("Please provide a valid account id.");
+        return true;
+    }
+
+    uint32 characterId;
+    if (!ExtractUInt32Base(&args, characterId, 10))
+    {
+        SendSysMessage("Please provide a valid character guid.");
+        return true;
+    }
+
+    ObjectGuid characterGuid;
+    characterGuid.Set(characterId);
+
+    if (sPlayerBotMgr.LoginBot(botId, characterGuid))
+    {
+        PSendSysMessage("Bot %u successfully logged in.", botId);
+    }
+    else
+    {
+        PSendSysMessage("Bot %u failed to log in.", botId);
+    }
+    
+    return true;
+}
+
+bool ChatHandler::HandleLogoutBotCommand(char* args)
+{
+    uint32 botId;
+    if (!ExtractUInt32Base(&args, botId, 10))
+    {
+        SendSysMessage("Please provide a valid account id.");
+        return true;
+    }
+
+    if (sPlayerBotMgr.LogoutBot(botId))
+    {
+        PSendSysMessage("Bot %u successfully logged out.", botId);
+    }
+    else
+    {
+        PSendSysMessage("Bot %u successfully logged out.", botId);
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleDestroyBotSessionCommand(char* args)
+{
+    uint32 botId;
+    if (!ExtractUInt32Base(&args, botId, 10))
+    {
+        SendSysMessage("Please provide a valid account id.");
+        return true;
+    }
+
+    if (sPlayerBotMgr.DestroyBot(botId))
+    {
+        PSendSysMessage("Bot %u successfully destroyed.", botId);
+    }
+    else
+    {
+        PSendSysMessage("Failed destroying bot %u", botId);
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleListBotCommand(char* args)
+{
+    PlayerBotMap map = sPlayerBotMgr.GetBots();
+
+    PSendSysMessage("%u bots active.", map.size());
+    for (auto itr = map.begin(); itr != map.end(); itr++)
+    {
+        if (!itr->second.GetPlayer())
+            continue;
+
+        Player* player = itr->second.GetPlayer();
+
+        PSendSysMessage("- AccountID: %u, Character: %s (Guid: %u)", itr->first, player->GetName(), player->GetGUIDLow());
+    }
+
     return true;
 }

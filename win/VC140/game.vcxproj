@@ -439,6 +439,8 @@
     <ClCompile Include="..\..\src\game\PetHandler.cpp" />
     <ClCompile Include="..\..\src\game\PetitionsHandler.cpp" />
     <ClCompile Include="..\..\src\game\Player.cpp" />
+    <ClCompile Include="..\..\src\game\PlayerBot\PlayerBot.cpp" />
+    <ClCompile Include="..\..\src\game\PlayerBot\PlayerBotMgr.cpp" />
     <ClCompile Include="..\..\src\game\PlayerDump.cpp" />
     <ClCompile Include="..\..\src\game\PointMovementGenerator.cpp" />
     <ClCompile Include="..\..\src\game\PoolManager.cpp" />
@@ -585,6 +587,8 @@
     <ClInclude Include="..\..\src\game\Pet.h" />
     <ClInclude Include="..\..\src\game\PetAI.h" />
     <ClInclude Include="..\..\src\game\Player.h" />
+    <ClInclude Include="..\..\src\game\PlayerBot\PlayerBot.h" />
+    <ClInclude Include="..\..\src\game\PlayerBot\PlayerBotMgr.h" />
     <ClInclude Include="..\..\src\game\PlayerDump.h" />
     <ClInclude Include="..\..\src\game\PointMovementGenerator.h" />
     <ClInclude Include="..\..\src\game\PoolManager.h" />

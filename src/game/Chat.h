@@ -585,6 +585,12 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleMmapTestArea(char* args);
         bool HandleMmapTestHeight(char* args);
 
+        bool HandleCreateBotSessionCommand(char* args);
+        bool HandleLoginBotCommand(char* args);
+        bool HandleLogoutBotCommand(char* args);
+        bool HandleDestroyBotSessionCommand(char* args);
+        bool HandleListBotCommand(char* args);
+
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
 

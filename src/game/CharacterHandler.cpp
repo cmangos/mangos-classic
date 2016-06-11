@@ -440,6 +440,29 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
     CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, holder);
 }
 
+void WorldSession::HandleBotPlayerLogin(ObjectGuid characterGuid)
+{
+    if (PlayerLoading() || GetPlayer() != nullptr)
+    {
+        sLog.outError("Player tryes to login again, AccountId = %d", GetAccountId());
+        return;
+    }
+
+    m_playerLoading = true;
+
+    DEBUG_LOG("WORLD: Received opcode Player Logon Message");
+
+    LoginQueryHolder* holder = new LoginQueryHolder(GetAccountId(), characterGuid);
+    if (!holder->Initialize())
+    {
+        delete holder;                                      // delete all unprocessed queries
+        m_playerLoading = false;
+        return;
+    }
+
+    CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, holder);
+}
+
 void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 {
     ObjectGuid playerGuid = holder->GetGuid();

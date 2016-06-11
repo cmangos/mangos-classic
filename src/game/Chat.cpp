@@ -673,6 +673,16 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
+    static ChatCommand botCommandTable[] =
+    {
+        { "create",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleCreateBotSessionCommand,	   "", nullptr },
+        { "login",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleLoginBotCommand,            "", nullptr },
+        { "logout",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleLogoutBotCommand,           "", nullptr },
+        { "destroy",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDestroyBotSessionCommand,   "", nullptr },
+        { "list",           SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleListBotCommand,             "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                        "", nullptr }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "account",        SEC_PLAYER,         true,  nullptr,                                           "", accountCommandTable  },
@@ -762,6 +772,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "waterwalk",      SEC_GAMEMASTER,     false, &ChatHandler::HandleWaterwalkCommand,           "", nullptr },
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", nullptr },
         { "mmap",           SEC_GAMEMASTER,     false, nullptr,                                        "", mmapCommandTable },
+        { "bot",            SEC_ADMINISTRATOR,  true,  nullptr,                                        "", botCommandTable },
 
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };

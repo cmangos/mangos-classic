@@ -66,6 +66,7 @@
 #include <algorithm>
 #include <mutex>
 #include <cstdarg>
+#include "PlayerBot/PlayerBotMgr.h"
 
 INSTANTIATE_SINGLETON_1(World);
 
