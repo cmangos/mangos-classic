@@ -1323,7 +1323,7 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
         m_EventUpdateTime -= diff;
     }
 
-    if (!m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+    if (!m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT) && !IsNonMeleeSpellCasted(false))
     {
         m_creature->SelectHostileTarget();
 

@@ -4870,21 +4870,16 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     if (!isAlive() || !victim->IsInWorld() || !victim->isAlive())
         return false;
 
-    // player cannot attack in mount state
-    if (GetTypeId() == TYPEID_PLAYER && IsMounted())
-        return false;
-
     // nobody can attack GM in GM-mode
     if (victim->GetTypeId() == TYPEID_PLAYER)
     {
         if (((Player*)victim)->isGameMaster())
             return false;
     }
-    else
-    {
-        if (((Creature*)victim)->IsInEvadeMode())
-            return false;
-    }
+
+    // player cannot attack in mount state
+    if (GetTypeId() == TYPEID_PLAYER && IsMounted())
+        return false;
 
     // remove SPELL_AURA_MOD_UNATTACKABLE at attack (in case non-interruptible spells stun aura applied also that not let attack)
     if (HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
@@ -4969,15 +4964,16 @@ bool Unit::AttackStop(bool targetSwitch /*=false*/)
     m_attacking->_removeAttacker(this);
     m_attacking = nullptr;
 
-    // Clear our target
-    SetTargetGuid(ObjectGuid());
+    // Clear our target only if targetSwitch == true
+    if (targetSwitch)
+        SetTargetGuid(ObjectGuid());
 
     clearUnitState(UNIT_STAT_MELEE_ATTACKING);
 
     InterruptSpell(CURRENT_MELEE_SPELL);
 
     // reset only at real combat stop
-    if (!targetSwitch && GetTypeId() == TYPEID_UNIT)
+    if ((!targetSwitch && GetTypeId() == TYPEID_UNIT) && !IsNonMeleeSpellCasted(false))
     {
         ((Creature*)this)->SetNoCallAssistance(false);
 
