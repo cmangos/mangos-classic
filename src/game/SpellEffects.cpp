@@ -2894,12 +2894,14 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
                 // if pet type is already roaming the world
                 if (OldSummon)
                 {
-                    if (OldSummon->GetMap() == m_caster->GetMap())
+                    if (OldSummon->isDead())
                     {
-                        // pet will retreat to its owner if possible
-                        if (!OldSummon->isDead())
-                            OldSummon->SetIsRetreating(true);
+                        // TODO : INFORM HUNTER THEIR PET IS DEAD
                     }
+
+                    // pet will retreat to its owner if possible
+                    else if (OldSummon->GetMap() == m_caster->GetMap())
+                        OldSummon->SetIsRetreating(true);
 
                     else
                     {
@@ -2919,14 +2921,10 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
                 }
 
                 // Load pet from db; if we have anything to load
-                else if (NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
-                    delete OldSummon;
-
-                else
+                else if (!NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
                 {
-                    delete OldSummon;
+                    // TODO : INFORM HUNTER THEY HAVE NO CURRENT PET
                     delete NewSummon;
-                    // TODO: Inform the hunter he has no pet
                 }
 
                 return;
