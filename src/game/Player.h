@@ -1529,7 +1529,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateDamagePhysical(WeaponAttackType attType) override;
         void UpdateSpellDamageAndHealingBonus();
 
-        void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage);
+        void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage, uint8 index = 0);
 
         void UpdateDefenseBonusesMod();
         float GetMeleeCritFromAgility();
