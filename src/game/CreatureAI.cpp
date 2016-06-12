@@ -117,6 +117,12 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
             if (pCaster->isInCombat())
                 pCaster->StopMoving();
 
+            // Creature should stop attacking to cast spell
+            // Creature should stop wielding weapon while casting
+            pCaster->AttackStop(false);
+            pCaster->SetSheath(SHEATH_STATE_UNARMED);
+            pCaster->addUnitState(UNIT_STAT_MELEE_ATTACKING);
+
             pCaster->CastSpell(pTarget, pSpell, !!(uiCastFlags & CAST_TRIGGERED), nullptr, nullptr, uiOriginalCasterGUID);
             return CAST_OK;
         }
