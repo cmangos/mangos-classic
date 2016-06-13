@@ -2405,6 +2405,8 @@ void Creature::SetFactionTemporary(uint32 factionId, uint32 tempFactionFlags)
     m_temporaryFactionFlags = tempFactionFlags;
     setFaction(factionId);
 
+    ForceHealthAndPowerUpdate();                            // update health and power for client needed to hide enemy real value
+
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NON_ATTACKABLE)
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_OOC_NOT_ATTACK)
