@@ -2142,15 +2142,6 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
         return;
     }
 
-    // Level of pet summoned
-    uint32 level = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
-
-    if (level >= cInfo->MaxLevel)
-        level = cInfo->MaxLevel;
-
-    else if (level <= cInfo->MinLevel)
-        level = cInfo->MinLevel;
-
     Pet* spawnCreature = new Pet(GUARDIAN_PET);
 
     // Summon in dest location
@@ -2171,6 +2162,14 @@ void Spell::EffectSummon(SpellEffectIndex eff_idx)
         delete spawnCreature;
         return;
     }
+
+    // Level of pet summoned
+    uint32 level = std::max(m_caster->getLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
+
+    if (level >= cInfo->MaxLevel)
+        level = cInfo->MaxLevel;
+    else if (level <= cInfo->MinLevel)
+        level = cInfo->MinLevel;
 
     spawnCreature->SetRespawnCoord(pos);
 
@@ -2967,17 +2966,12 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
                     return;
                 }
-
-                // first time summoning this pet; create
-                else
-                    NewSummon->setPetType(SUMMON_PET);
-
-                break;
             }
             default:
             {
                 delete OldSummon;
-                NewSummon->setPetType(GUARDIAN_PET);
+                NewSummon->setPetType(SUMMON_PET);
+                break;
             }
         }
     }
@@ -2985,10 +2979,10 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         NewSummon->setPetType(GUARDIAN_PET);
 
     CreatureInfo const* cInfo = petentry ? ObjectMgr::GetCreatureTemplate(petentry) : nullptr;
-
     if (!cInfo)
     {
         sLog.outErrorDb("EffectSummonPet: creature entry %u not found for spell %u.", petentry, m_spellInfo->Id);
+        delete NewSummon;
         return;
     }
 
