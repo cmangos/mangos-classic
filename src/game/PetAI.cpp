@@ -281,6 +281,7 @@ void PetAI::UpdateAI(const uint32 diff)
                     {
                         targetSpellStore.push_back(TargetSpellList::value_type(Target, spell));
                         spellUsed = true;
+                        break;
                     }
                 }
                 if (!spellUsed)
