@@ -575,27 +575,24 @@ void Creature::Update(uint32 update_diff, uint32 diff)
 
             Unit::Update(update_diff, diff);
 
-            // creature can be dead after Unit::Update call
-            // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
-            if (!isAlive())
-                break;
-
-            if (!IsInEvadeMode())
+            // Creature can be dead after unit update
+            if (m_deathState == ALIVE)
             {
-                if (AI())
+                if (!IsInEvadeMode() && AI())
                 {
                     // do not allow the AI to be changed during update
                     m_AI_locked = true;
                     AI()->UpdateAI(diff);   // AI not react good at real update delays (while freeze in non-active part of map)
                     m_AI_locked = false;
+
+                    // Creature can be dead after ai update
+                    if (m_deathState != ALIVE)
+                        return;
                 }
+
+                RegenerateAll(update_diff);
             }
 
-            // creature can be dead after UpdateAI call
-            // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
-            if (!isAlive())
-                break;
-            RegenerateAll(update_diff);
             break;
         }
         default:
