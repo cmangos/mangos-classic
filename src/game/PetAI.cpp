@@ -339,7 +339,7 @@ void PetAI::UpdateAI(const uint32 diff)
         if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false))
         {
             if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
-                    m_creature->InterruptNonMeleeSpells(false);
+                m_creature->InterruptNonMeleeSpells(false);
         }
 
         else if (m_creature->CanReachWithMeleeAttack(victim))
