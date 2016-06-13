@@ -1090,17 +1090,13 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
                 SetCreateStat(Stats(i), float(pInfo->stats[i]));
 
-            // health, armor and damage modifiers (they're coming)
-            float aMod = 1.0f, hMod = 1.0f, dMod = 1.0f;
-
-
-            SetCreateHealth(pInfo->health * hMod);
-            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, pInfo->armor * aMod);
+            SetCreateHealth(pInfo->health);
+            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, pInfo->armor);
 
             // First we divide attack time by standard attack time, and then multipy by level and damage mod.
-            uint32 mDmg = (GetAttackTime(BASE_ATTACK)/2000) * petlevel * dMod;
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, (mDmg - mDmg/4));
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, (mDmg + mDmg/4));
+            float mDmg = (GetAttackTime(BASE_ATTACK) * petlevel) / 2000;
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, (mDmg - mDmg / 5));
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, (mDmg + mDmg / 5));
             // damage is increased afterwards as strength and pet scaling modify attack power
 
             break;
@@ -1113,7 +1109,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
 
             float dMaxLevel = cInfo->MaxMeleeDmg / cInfo->MaxLevel;
             float dMinLevel = cInfo->MinMeleeDmg / cInfo->MinLevel;
-            float mDmg = (dMaxLevel - ((dMaxLevel - dMinLevel)/2)) * petlevel;
+            float mDmg = (dMaxLevel - ((dMaxLevel - dMinLevel) / 2)) * petlevel;
 
             SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, (mDmg - mDmg / 5));
             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, (mDmg + mDmg / 5));
@@ -1171,8 +1167,8 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
                 }
                 else
                 {
-                    SetCreateHealth((hMaxLevel - ((hMaxLevel - hMinLevel)/2)) * petlevel);
-                    SetCreateMana((mMaxLevel - ((mMaxLevel - mMinLevel)/2)) * petlevel);
+                    SetCreateHealth(((hMaxLevel - ((hMaxLevel - hMinLevel) / 2))) * petlevel);
+                    SetCreateMana(((mMaxLevel - ((mMaxLevel - mMinLevel) / 2))) * petlevel);
                 }
             }
 
