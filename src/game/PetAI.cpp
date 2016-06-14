@@ -168,14 +168,13 @@ void PetAI::UpdateAI(const uint32 diff)
         else
            ((Pet*)m_creature)->SetIsRetreating();
     }
-    // have opener stored
-    else if (((Pet*)m_creature)->GetSpellOpener() != 0)
+    else if (((Pet*)m_creature)->GetSpellOpener() != 0) // have opener stored
     {
         uint32 minRange = ((Pet*)m_creature)->GetSpellOpenerMinRange();
 
-        if (minRange != 0 && m_creature->IsWithinDistInMap(victim, minRange))
+        if (!(victim = m_creature->getVictim())
+            || (minRange != 0 && m_creature->IsWithinDistInMap(victim, minRange)))
             ((Pet*)m_creature)->SetSpellOpener();
-
         else if (m_creature->IsWithinDistInMap(victim, ((Pet*)m_creature)->GetSpellOpenerMaxRange()) && m_creature->IsWithinLOSInMap(victim))
         {
             // stop moving
@@ -326,7 +325,7 @@ void PetAI::UpdateAI(const uint32 diff)
     else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
         m_creature->InterruptNonMeleeSpells(false);
 
-    if (victim)
+    if (victim = m_creature->getVictim())
     {
         // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
         if (_needToStop())
@@ -366,7 +365,7 @@ void PetAI::UpdateAI(const uint32 diff)
             if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW) && !owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
                 m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
             // This is to stop the pet from following you when you're close to each other, to support the above condition.
-            else
+            else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW))
             {
                 m_creature->GetMotionMaster()->Clear(false);
                 m_creature->GetMotionMaster()->MoveIdle();
