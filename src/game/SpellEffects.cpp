@@ -1280,13 +1280,13 @@ void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
     // special cases
     switch (triggered_spell_id)
     {
-    	// Temporal Parasite Summon #2, special case because chance is set to 101% in DBC while description is 67%
-        case 16630:                                         
+        // Temporal Parasite Summon #2, special case because chance is set to 101% in DBC while description is 67%
+        case 16630:
             if (urand(0, 100) < 67)
                 m_caster->CastSpell(unitTarget, triggered_spell_id, true);
             return;
         // Temporal Parasite Summon #3, special case because chance is set to 101% in DBC while description is 34%
-        case 16631:                                         
+        case 16631:
             if (urand(0, 100) < 34)
                 m_caster->CastSpell(unitTarget, triggered_spell_id, true);
             return;
@@ -1332,6 +1332,16 @@ void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
             m_caster->CastSpell(unitTarget, spellId, true);
             return;
         }
+        // Terrordale Haunting Spirit #2, special case because chance is set to 101% in DBC while description is 55%
+        case 23209:
+            if (urand(0, 100) < 55)
+                m_caster->CastSpell(unitTarget, triggered_spell_id, true);
+            return;
+        // Terrordale Haunting Spirit #3, special case because chance is set to 101% in DBC while description is 35%
+        case 23253:
+            if (urand(0, 100) < 35)
+                m_caster->CastSpell(unitTarget, triggered_spell_id, true);
+            return;
         // just skip
         case 23770:                                         // Sayge's Dark Fortune of *
             // not exist, common cooldown can be implemented in scripts if need.
@@ -2950,7 +2960,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
                     OldSummon->Unsummon(PET_SAVE_NOT_IN_SLOT, m_caster);
 
                 // Load pet from db; if any to load
-                if (NewSummon->LoadPetFromDB((Player*)m_caster, petentry)) 
+                if (NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
                 {
                     NewSummon->SetHealth(NewSummon->GetMaxHealth());
                     NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
