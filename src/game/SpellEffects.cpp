@@ -3616,6 +3616,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 27699, true);
                     return;
                 }
+                case 28352:                                 // Breath of Sargeras
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 28342, true);
+                    return;
+                }
                 case 28374:                                 // Decimate (Naxxramas: Gluth)
                 {
                     if (!unitTarget)
