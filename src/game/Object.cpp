@@ -493,10 +493,10 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 // send in current format (float as float, uint32 as uint32)
                 if (index == GAMEOBJECT_DYN_FLAGS)
                 {
+                    GameObject const* gameObject = static_cast<GameObject const*>(this);
                     if (IsActivateToQuest)
                     {
-                        GameObject const* gameObject = static_cast<GameObject const*>(this);
-                        switch (((GameObject*)this)->GetGoType())
+                        switch (gameObject->GetGoType())
                         {
                             case GAMEOBJECT_TYPE_QUESTGIVER:
                             case GAMEOBJECT_TYPE_CHEST:
@@ -518,7 +518,18 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                         }
                     }
                     else
-                        *data << uint32(0);                 // disable quest object
+                    {
+                        // flag (no interact) quest object when player not eligible for quest
+                        if (gameObject->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER &&
+                            !gameObject->ActivateToQuest(target) && !gameObject->GetGOInfo()->GetGossipMenuId())
+                        {
+                            updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);
+                            *data << uint16(GO_DYNFLAG_LO_NO_INTERACT);
+                            *data << uint16(0);
+                        }
+                        else
+                            *data << uint32(0);              // disable quest object
+                    }
                 }
                 else
                     *data << m_uint32Values[index];         // other cases
