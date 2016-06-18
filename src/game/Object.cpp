@@ -517,9 +517,8 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                                 break;
                         }
                     }
-                    else
+                    else    // flag (no interact) quest object when player not eligible for quest
                     {
-                        // flag (no interact) quest object when player not eligible for quest
                         if (gameObject->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER &&
                             !gameObject->ActivateToQuest(target) && !gameObject->GetGOInfo()->GetGossipMenuId())
                         {
