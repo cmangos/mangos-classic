@@ -17,12 +17,11 @@
 /* ScriptData
 SDName: The_Barrens
 SD%Complete: 90
-SDComment: Quest support: 863, 898, 1719, 2458, 4921.
+SDComment: Quest support: 863, 898, 1719, 2458.
 SDCategory: Barrens
 EndScriptData */
 
 /* ContentData
-npc_beaten_corpse
 npc_gilthares
 npc_taskmaster_fizzule
 npc_twiggy_flathead
@@ -32,35 +31,6 @@ EndContentData */
 
 #include "precompiled.h"
 #include "escort_ai.h"
-
-/*######
-## npc_beaten_corpse
-######*/
-
-enum
-{
-    QUEST_LOST_IN_BATTLE    = 4921
-};
-
-bool GossipHello_npc_beaten_corpse(Player* pPlayer, Creature* pCreature)
-{
-    if (pPlayer->GetQuestStatus(QUEST_LOST_IN_BATTLE) == QUEST_STATUS_INCOMPLETE ||
-            pPlayer->GetQuestStatus(QUEST_LOST_IN_BATTLE) == QUEST_STATUS_COMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Examine corpse in detail...", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-    pPlayer->SEND_GOSSIP_MENU(3557, pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_beaten_corpse(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
-    {
-        pPlayer->SEND_GOSSIP_MENU(3558, pCreature->GetObjectGuid());
-        pPlayer->TalkedToCreature(pCreature->GetEntry(), pCreature->GetObjectGuid());
-    }
-    return true;
-}
 
 /*######
 # npc_gilthares
@@ -624,12 +594,6 @@ CreatureAI* GetAI_npc_wizzlecranks_shredder(Creature* pCreature)
 void AddSC_the_barrens()
 {
     Script* pNewScript;
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_beaten_corpse";
-    pNewScript->pGossipHello = &GossipHello_npc_beaten_corpse;
-    pNewScript->pGossipSelect = &GossipSelect_npc_beaten_corpse;
-    pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_gilthares";

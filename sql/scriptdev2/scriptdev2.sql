@@ -150,7 +150,6 @@ UPDATE creature_template SET ScriptName='npc_loramus_thalipedes' WHERE entry=778
 /* BADLANDS */
 
 /* BARRENS */
-UPDATE creature_template SET ScriptName='npc_beaten_corpse' WHERE entry=10668;
 UPDATE creature_template SET ScriptName='npc_gilthares' WHERE entry=3465;
 UPDATE creature_template SET ScriptName='npc_taskmaster_fizzule' WHERE entry=7233;
 UPDATE creature_template SET ScriptName='npc_twiggy_flathead' WHERE entry=6248;
