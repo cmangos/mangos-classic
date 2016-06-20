@@ -4333,6 +4333,8 @@ SpellCastResult Spell::CheckCast(bool strict)
             return castResult;
     }
 
+    WorldObject* worldObject = m_caster->GetMap()->GetWorldObject(m_originalCasterGUID); // will be maybe needed in more places where we calculate distance
+
     // Database based targets from spell_target_script
     if (m_UniqueTargetInfo.empty())                         // skip second CheckCast apply (for delayed spells for example)
     {
@@ -4418,16 +4420,14 @@ SpellCastResult Spell::CheckCast(bool strict)
                             {
                                 if (pTarget->GetTypeId() == TYPEID_UNIT && pTarget->GetEntry() == i_spellST->targetEntry)
                                 {
-                                    if (i_spellST->type == SPELL_TARGET_TYPE_DEAD && ((Creature*)pTarget)->IsCorpse())
+                                    if ((i_spellST->type == SPELL_TARGET_TYPE_DEAD && ((Creature*)pTarget)->IsCorpse())
+                                        || (i_spellST->type == SPELL_TARGET_TYPE_CREATURE && pTarget->isAlive()))
                                     {
                                         // always use spellMaxRange, in case GetLastRange returned different in a previous pass
-                                        if (pTarget->IsWithinDistInMap(m_caster, GetSpellMaxRange(srange)))
+                                        if(worldObject && (worldObject->GetTypeId() == TYPEID_GAMEOBJECT || worldObject->GetTypeId() == TYPEID_DYNAMICOBJECT) 
+                                            && pTarget->IsWithinDistInMap(worldObject, GetSpellMaxRange(srange)))
                                             targetExplicit = (Creature*)pTarget;
-                                    }
-                                    else if (i_spellST->type == SPELL_TARGET_TYPE_CREATURE && pTarget->isAlive())
-                                    {
-                                        // always use spellMaxRange, in case GetLastRange returned different in a previous pass
-                                        if (pTarget->IsWithinDistInMap(m_caster, GetSpellMaxRange(srange)))
+                                        else if (pTarget->IsWithinDistInMap(m_caster, GetSpellMaxRange(srange)))
                                             targetExplicit = (Creature*)pTarget;
                                     }
                                 }
@@ -4436,11 +4436,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                             // no target provided or it was not valid, so use closest in range
                             if (!targetExplicit)
                             {
-                                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster, i_spellST->targetEntry, i_spellST->type != SPELL_TARGET_TYPE_DEAD, i_spellST->type == SPELL_TARGET_TYPE_DEAD, range);
+                                WorldObject* objectForSearch = (worldObject && (worldObject->GetTypeId() == TYPEID_GAMEOBJECT || worldObject->GetTypeId() == TYPEID_DYNAMICOBJECT)) ? worldObject : m_caster;
+                                MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*objectForSearch, i_spellST->targetEntry, i_spellST->type != SPELL_TARGET_TYPE_DEAD, i_spellST->type == SPELL_TARGET_TYPE_DEAD, range);
                                 MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(p_Creature, u_check);
 
                                 // Visit all, need to find also Pet* objects
-                                Cell::VisitAllObjects(m_caster, searcher, range);
+                                Cell::VisitAllObjects(objectForSearch, searcher, range);
 
                                 range = u_check.GetLastRange();
                             }
