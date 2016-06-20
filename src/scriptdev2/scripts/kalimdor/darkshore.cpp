@@ -647,6 +647,7 @@ enum
     GO_NIGHT_ELVEN_BEAR_TRAP        = 111148,               // This is actually the (visual) spell-focus GO
 
     SPELL_RABIES                    = 3150,                 // Spell used in comabt
+    SPELL_BEAR_CAPTURED             = 9439
 };
 
 struct npc_rabid_bearAI : public ScriptedAI
@@ -687,50 +688,35 @@ struct npc_rabid_bearAI : public ScriptedAI
         ScriptedAI::MoveInLineOfSight(pWho);
     }
 
+    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    {
+        if (pCaster->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_BEAR_CAPTURED)
+        {
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->DeleteThreatList();
+            m_creature->CombatStop(true);
+            m_creature->SetLootRecipient(nullptr);
+            Reset();
+            // Update Entry and start following player
+            m_creature->UpdateEntry(NPC_CAPTURED_RABID_THISTLE_BEAR);
+            // get player
+            if (((Player*)pCaster)->GetQuestStatus(QUEST_PLAGUED_LANDS) == QUEST_STATUS_INCOMPLETE)
+            {
+                ((Player*)pCaster)->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
+                m_creature->GetMotionMaster()->MoveFollow(pCaster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            }
+            else                                // Something unexpected happened
+                m_creature->ForcedDespawn(1000);
+
+            // No need to check any more
+            m_uiCheckTimer = 0;
+            // Despawn after a while (delay guesswork)
+            m_uiDespawnTimer = 3 * MINUTE * IN_MILLISECONDS;
+        }
+    }
+
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiCheckTimer && m_creature->isInCombat())
-        {
-            if (m_uiCheckTimer <= uiDiff)
-            {
-                // Trap nearby?
-                if (GameObject* pTrap = GetClosestGameObjectWithEntry(m_creature, GO_NIGHT_ELVEN_BEAR_TRAP, 0.5f))
-                {
-                    // Despawn trap
-                    pTrap->Use(m_creature);
-                    // "Evade"
-                    m_creature->RemoveAllAurasOnEvade();
-                    m_creature->DeleteThreatList();
-                    m_creature->CombatStop(true);
-                    m_creature->SetLootRecipient(nullptr);
-                    Reset();
-                    // Update Entry and start following player
-                    m_creature->UpdateEntry(NPC_CAPTURED_RABID_THISTLE_BEAR);
-                    // get player
-                    Unit* pTrapOwner = pTrap->GetOwner();
-                    if (pTrapOwner && pTrapOwner->GetTypeId() == TYPEID_PLAYER &&
-                            ((Player*)pTrapOwner)->GetQuestStatus(QUEST_PLAGUED_LANDS) == QUEST_STATUS_INCOMPLETE)
-                    {
-                        ((Player*)pTrapOwner)->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
-                        m_creature->GetMotionMaster()->MoveFollow(pTrapOwner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-                    }
-                    else                                // Something unexpected happened
-                        m_creature->ForcedDespawn(1000);
-
-                    // No need to check any more
-                    m_uiCheckTimer = 0;
-                    // Despawn after a while (delay guesswork)
-                    m_uiDespawnTimer = 3 * MINUTE * IN_MILLISECONDS;
-
-                    return;
-                }
-                else
-                    m_uiCheckTimer = 1000;
-            }
-            else
-                m_uiCheckTimer -= uiDiff;
-        }
-
         if (m_uiDespawnTimer && !m_creature->isInCombat())
         {
             if (m_uiDespawnTimer <= uiDiff)
