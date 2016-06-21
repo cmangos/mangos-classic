@@ -1087,11 +1087,25 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             }
 
             PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(1, petlevel);
-            for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
-                SetCreateStat(Stats(i), float(pInfo->stats[i]));
+            if (pInfo)
+            {
+                for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
+                    SetCreateStat(Stats(i), float(pInfo->stats[i]));
 
-            SetCreateHealth(pInfo->health);
-            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, pInfo->armor);
+                SetCreateHealth(pInfo->health);
+                SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, pInfo->armor);
+            }
+            else
+            {
+                sLog.outErrorDb("HUNTER PET levelstats missing in DB! 'Weakifying' pet");
+                return false;
+
+                for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
+                    SetCreateStat(Stats(i), 1.0f);
+
+                SetCreateHealth(1);
+                SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, 1);
+            }
 
             // First we divide attack time by standard attack time, and then multipy by level and damage mod.
             float mDmg = (GetAttackTime(BASE_ATTACK) * petlevel) / 2000;
@@ -1115,13 +1129,27 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, (mDmg + mDmg / 5));
 
             PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(cInfo->Entry, petlevel);
+            if (pInfo)
+            {
+                for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
+                    SetCreateStat(Stats(i), float(pInfo->stats[i]));
 
-            for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
-                SetCreateStat(Stats(i), float(pInfo->stats[i]));
+                SetCreateHealth(pInfo->health);
+                SetCreateMana(pInfo->mana);
+                SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, pInfo->armor);
+            }
+            else
+            {
+                sLog.outErrorDb("WARLOCK PET levelstats missing in DB! 'Weakifying' pet");
+                return false;
 
-            SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, pInfo->armor);
-            SetCreateHealth(pInfo->health);
-            SetCreateMana(pInfo->mana);
+                for (int i = STAT_STRENGTH; i < MAX_STATS;++i)
+                    SetCreateStat(Stats(i), 1.0f);
+
+                SetCreateHealth(1);
+                SetCreateMana(1);
+                SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, 1);
+            }
 
             break;
         }
