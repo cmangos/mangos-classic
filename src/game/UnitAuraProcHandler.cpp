@@ -1149,7 +1149,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
     {
         // Cast positive spell on enemy target
         case 7099:  // Curse of Mending
-        case 39647: // Curse of Mending
         case 29494: // Temptation
         case 20233: // Improved Lay on Hands (cast on target)
         {
@@ -1174,12 +1173,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
                 return SPELL_AURA_PROC_OK;
             }
             return SPELL_AURA_PROC_FAILED;
-        }
-        // Shamanistic Rage triggered spell
-        case 30824:
-        {
-            basepoints[0] = int32(GetTotalAttackPowerValue(BASE_ATTACK) * triggerAmount / 100);
-            break;
         }
     }
 
