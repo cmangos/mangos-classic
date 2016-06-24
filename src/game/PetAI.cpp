@@ -348,6 +348,16 @@ void PetAI::UpdateAI(const uint32 diff)
         // if pet misses its target, it will also be the first in threat list
         else if (m_creature->CanReachWithMeleeAttack(victim))
         {
+            if (!m_creature->HasInArc(2 * M_PI_F / 3, victim))
+            {
+                m_creature->SetInFront(victim);
+                if (victim->GetTypeId() == TYPEID_PLAYER)
+                    m_creature->SendCreateUpdateToPlayer((Player*)victim);
+
+                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                    m_creature->SendCreateUpdateToPlayer((Player*)owner);
+            }
+
             if (!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)
                 && DoMeleeAttackIfReady())
             {
