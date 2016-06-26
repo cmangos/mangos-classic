@@ -1579,69 +1579,74 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         }
         case TARGET_CHAIN_DAMAGE:
         {
+            Unit* pUnitTarget = m_targets.getUnitTarget();
+
+            if (!pUnitTarget)
+                break;
+
+            if (Unit* magnetTarget = m_caster->SelectMagnetTarget(pUnitTarget, this, effIndex))
+            {
+                m_targets.setUnitTarget(magnetTarget);
+                targetUnitMap.push_back(magnetTarget);
+                break;
+            }
+
             if (EffectChainTarget <= 1)
             {
-                if (Unit* pUnitTarget = m_caster->SelectMagnetTarget(m_targets.getUnitTarget(), this, effIndex))
-                {
-                    m_targets.setUnitTarget(pUnitTarget);
-                    targetUnitMap.push_back(pUnitTarget);
-                }
-            }
-            else
-            {
-                Unit* pUnitTarget = m_targets.getUnitTarget();
-                WorldObject* originalCaster = GetAffectiveCasterObject();
-                if (!pUnitTarget || !originalCaster)
-                    break;
-
-                unMaxTargets = EffectChainTarget;
-
-                float max_range;
-                if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
-                    max_range = radius;
-                else
-                    // FIXME: This very like horrible hack and wrong for most spells
-                    max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
-
-                UnitList tempTargetUnitMap;
-                {
-                    MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range);
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
-                    Cell::VisitAllObjects(m_caster, searcher, max_range);
-                }
-
-                if (tempTargetUnitMap.empty())
-                    break;
-
-                tempTargetUnitMap.sort(TargetDistanceOrderNear(pUnitTarget));
-
-                if (*tempTargetUnitMap.begin() == pUnitTarget)
-                    tempTargetUnitMap.erase(tempTargetUnitMap.begin());
-
                 targetUnitMap.push_back(pUnitTarget);
-                uint32 t = unMaxTargets - 1;
-                Unit* prev = pUnitTarget;
-                UnitList::iterator next = tempTargetUnitMap.begin();
+                break;
+            }
 
-                while (t && next != tempTargetUnitMap.end())
+            WorldObject* originalCaster = GetAffectiveCasterObject();
+            if (!originalCaster)
+                break;
+
+            unMaxTargets = EffectChainTarget;
+
+            float max_range;
+            if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
+                max_range = radius;
+            else
+                // FIXME: This very like horrible hack and wrong for most spells
+                max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
+
+            UnitList tempTargetUnitMap;
+            {
+                MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range);
+                MaNGOS::UnitListSearcher<MaNGOS::AnyAoEVisibleTargetUnitInObjectRangeCheck> searcher(tempTargetUnitMap, u_check);
+                Cell::VisitAllObjects(m_caster, searcher, max_range);
+            }
+
+            if (tempTargetUnitMap.empty())
+                break;
+
+            tempTargetUnitMap.sort(TargetDistanceOrderNear(pUnitTarget));
+
+            if (*tempTargetUnitMap.begin() == pUnitTarget)
+                tempTargetUnitMap.erase(tempTargetUnitMap.begin());
+
+            targetUnitMap.push_back(pUnitTarget);
+            uint32 t = unMaxTargets - 1;
+            Unit* prev = pUnitTarget;
+            UnitList::iterator next = tempTargetUnitMap.begin();
+
+            while (t && next != tempTargetUnitMap.end())
+            {
+                if (!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
+                    break;
+
+                if (!prev->IsWithinLOSInMap(*next))
                 {
-                    if (!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
-                        break;
-
-                    if (!prev->IsWithinLOSInMap(*next))
-                    {
-                        ++next;
-                        continue;
-                    }
-
-                    prev = *next;
-                    targetUnitMap.push_back(prev);
-                    tempTargetUnitMap.erase(next);
-                    tempTargetUnitMap.sort(TargetDistanceOrderNear(prev));
-                    next = tempTargetUnitMap.begin();
-
-                    --t;
+                    ++next;
+                    continue;
                 }
+                prev = *next;
+                targetUnitMap.push_back(prev);
+                tempTargetUnitMap.erase(next);
+                tempTargetUnitMap.sort(TargetDistanceOrderNear(prev));
+                next = tempTargetUnitMap.begin();
+
+                --t;
             }
             break;
         }
@@ -1995,6 +2000,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                         targetUnitMap.push_back(pUnitTarget);
                     }
+                    else
+                        targetUnitMap.push_back(target);
                 }
             }
             break;
