@@ -49,12 +49,17 @@ enum PetSaveMode
 // There might be a lot more
 enum PetModeFlags
 {
-    PET_MODE_UNKNOWN_0         = 0x0000001,
-    PET_MODE_UNKNOWN_2         = 0x0000100,
+    PET_MODE_STAY              = 0x0000000,
+    PET_MODE_FOLLOW            = 0x0000001,
+    PET_MODE_ATTACK            = 0x0000002,
+    PET_MODE_PASSIVE           = 0x0000000,
+    PET_MODE_DEFENSIVE         = 0x0000100,
+    PET_MODE_AGGRESSIVE        = 0x0000200,
+
     PET_MODE_DISABLE_ACTIONS   = 0x8000000,
 
     // autoset in client at summon
-    PET_MODE_DEFAULT           = PET_MODE_UNKNOWN_0 | PET_MODE_UNKNOWN_2,
+    PET_MODE_DEFAULT           = PET_MODE_FOLLOW | PET_MODE_DEFENSIVE,
 };
 
 enum HappinessState
@@ -227,7 +232,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
         bool   HasTPForSpell(uint32 spellid);
         int32  GetTPForSpell(uint32 spellid);
 
-        void ApplyModeFlags(PetModeFlags mode, bool apply);
+        void SetModeFlags(PetModeFlags mode);
         PetModeFlags GetModeFlags() const { return m_petModeFlags; }
 
         bool HasSpell(uint32 spell) const override;

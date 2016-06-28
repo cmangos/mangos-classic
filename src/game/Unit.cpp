@@ -6228,7 +6228,7 @@ void Unit::Mount(uint32 mount, uint32 spellId)
             ((Player*)this)->UnsummonPetTemporaryIfAny();
         // Called by mount aura
         else if (Pet* pet = GetPet())
-            pet->ApplyModeFlags(PET_MODE_DISABLE_ACTIONS, true);
+            pet->SetModeFlags(PET_MODE_DISABLE_ACTIONS);
     }
 }
 
@@ -6249,7 +6249,8 @@ void Unit::Unmount(bool from_aura)
         SendMessageToSet(&data, true);
 
         if (Pet* pet = GetPet())
-            pet->ApplyModeFlags(PET_MODE_DISABLE_ACTIONS, false);
+            if (CharmInfo* charmInfo = pet->GetCharmInfo())
+                pet->SetModeFlags(PetModeFlags(charmInfo->GetReactState() | charmInfo->GetCommandState() * 0x100));
     }
 
     // only resummon old pet if the player is already added to a map

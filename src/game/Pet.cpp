@@ -1981,12 +1981,9 @@ void Pet::SynchronizeLevelWithOwner()
     }
 }
 
-void Pet::ApplyModeFlags(PetModeFlags mode, bool apply)
+void Pet::SetModeFlags(PetModeFlags mode)
 {
-    if (apply)
-        m_petModeFlags = PetModeFlags(m_petModeFlags | mode);
-    else
-        m_petModeFlags = PetModeFlags(m_petModeFlags & ~mode);
+    m_petModeFlags = mode;
 
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
