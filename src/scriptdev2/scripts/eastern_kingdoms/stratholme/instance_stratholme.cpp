@@ -100,9 +100,23 @@ void instance_stratholme::OnCreatureCreate(Creature* pCreature)
         case NPC_CRIMSON_GALLANT:
         case NPC_CRIMSON_GUARDSMAN:
         case NPC_CRIMSON_CONJURER:
-            // Only store those in the yard
-            if (pCreature->IsWithinDist2d(aTimmyLocation[1].m_fX, aTimmyLocation[1].m_fY, 40.0f))
-                m_suiCrimsonLowGuids.insert(pCreature->GetGUIDLow());
+        case NPC_CRIMSON_BATTLE_MAGE:
+            // Store GUID of NPCs in the courtyard to spawn Timmy once they are all dead
+            if (pCreature->IsWithinDist2d(aDefensePoints[TIMMY].m_fX, aDefensePoints[TIMMY].m_fY, 40.0f))
+                m_suiCrimsonDefendersLowGuids[TIMMY].push_back(pCreature->GetObjectGuid());
+            // Iterate also over all the defense points where those NPCs are possibly spawned
+            for (uint8 i = BARRICADE; i <= FIRST_BARRICADES; i++)
+            {
+                // Do not store - again - GUIDs for Timmy spawn point, they were done previously with a different range
+                if (i == TIMMY)
+                    continue;
+                // Store the GUID of the nearby NPCs for each defense point
+                if (pCreature->IsWithinDist2d(aDefensePoints[i].m_fX, aDefensePoints[i].m_fY, 8.0f))
+                {
+                    m_suiCrimsonDefendersLowGuids[i].push_back(pCreature->GetObjectGuid());
+                    break;
+                }
+            }
             break;
     }
 }
@@ -679,19 +693,25 @@ void instance_stratholme::OnCreatureDeath(Creature* pCreature)
 
             break;
 
-            // Timmy spawn support
+        // Scarlet Bastion defense and Timmy spawn support
         case NPC_CRIMSON_INITIATE:
         case NPC_CRIMSON_GALLANT:
         case NPC_CRIMSON_GUARDSMAN:
         case NPC_CRIMSON_CONJURER:
-            if (m_suiCrimsonLowGuids.find(pCreature->GetGUIDLow()) != m_suiCrimsonLowGuids.end())
+        case NPC_CRIMSON_BATTLE_MAGE:
+            for (uint8 i = BARRICADE; i <= FIRST_BARRICADES; i++)
             {
-                m_suiCrimsonLowGuids.erase(pCreature->GetGUIDLow());
+            	if (m_suiCrimsonDefendersLowGuids[i].empty())
+            		continue;
 
-                // If all courtyard mobs are dead then summon Timmy
-                if (m_suiCrimsonLowGuids.empty())
-                    pCreature->SummonCreature(NPC_TIMMY_THE_CRUEL, aTimmyLocation[0].m_fX, aTimmyLocation[0].m_fY, aTimmyLocation[0].m_fZ, aTimmyLocation[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                m_suiCrimsonDefendersLowGuids[i].remove(pCreature->GetObjectGuid());
+                // If all mobs from a defense group are dead then activate the related defense event
+                if (m_suiCrimsonDefendersLowGuids[i].empty() && i != FIRST_BARRICADES)
+                    DoScarletBastionDefense(i, pCreature);
             }
+            break;
+        case NPC_BALNAZZAR:
+            DoScarletBastionDefense(CRIMSON_THRONE, pCreature);
             break;
     }
 }
@@ -722,6 +742,169 @@ void instance_stratholme::ThazudinAcolyteJustDied(Creature* pCreature)
             }
         }
     }
+}
+
+void instance_stratholme::DoSpawnScarletGuards(uint8 uiStep, Player* pSummoner)
+{
+    if (!pSummoner)
+        return;
+
+    uint32 uiNPCEntry[2];
+    uint8  uiIndex;
+
+    switch (uiStep)
+    {
+        case HALL_OF_LIGHTS:
+            uiNPCEntry[0] = NPC_CRIMSON_GALLANT;
+            uiNPCEntry[1] = NPC_CRIMSON_GALLANT;
+            uiIndex = 0;
+            break;
+        case INNER_BASTION_2:
+            uiNPCEntry[0] = NPC_CRIMSON_MONK;
+            uiNPCEntry[1] = NPC_CRIMSON_SORCERER;
+            uiIndex = 3;
+            break;
+        default:
+            return;    // avoid indexing the following tables with a wrong index. Should never happen.
+    }
+
+    // Spawn the two guards and move them to where they will guard (each side of a door)
+    for (uint8 i = 0; i < 2; i++)
+    {
+        if (Creature* pTemp = pSummoner->SummonCreature(uiNPCEntry[i], aScarletGuards[uiIndex].m_fX, aScarletGuards[uiIndex].m_fY, aScarletGuards[uiIndex].m_fZ, aScarletGuards[uiIndex].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+        {
+            pTemp->SetWalk(false);
+            pTemp->GetMotionMaster()->MovePoint(0, aScarletGuards[uiIndex + i + 1].m_fX, aScarletGuards[uiIndex + i + 1].m_fY, aScarletGuards[uiIndex + i + 1].m_fZ);
+        }
+    }
+
+    return;
+}
+
+void instance_stratholme::DoSpawnScourgeInvaders(uint8 uiStep, Player* pSummoner)
+{
+    if (!pSummoner)
+        return;
+
+    // Define the group of 5 Scourge invaders
+    std::vector<uint32> uiMobList;                  // Vector holding the 5 creatures entries for each Scourge invaders group
+    uiMobList.push_back(NPC_SKELETAL_GUARDIAN);     // 4 static NPC entries
+    uiMobList.push_back(NPC_SKELETAL_GUARDIAN);
+    uiMobList.push_back(NPC_SKELETAL_BERSERKER);
+    uiMobList.push_back(NPC_SKELETAL_BERSERKER);
+
+    uint32 uiMobEntry;                              // will hold the last random creature entry
+    uint8  uiIndex;
+
+    // Pick the fifth NPC in the group and randomize the five possible spawns
+    switch (urand(0, 1))
+    {
+        case 0: uiMobEntry = NPC_SKELETAL_GUARDIAN;     break;
+        case 1: uiMobEntry = NPC_SKELETAL_BERSERKER;    break;
+    }
+
+    uiMobList.push_back(uiMobEntry);
+    std::random_shuffle(uiMobList.begin(), uiMobList.end());
+
+    // Define the correct index for the spawn/move coords table
+    switch (uiStep)
+    {
+        case ENTRANCE:          uiIndex = 1; break;
+        case INNER_BASTION_1:   uiIndex = 3; break;
+        case CRIMSON_THRONE:    uiIndex = 5; break;
+        default: return;    // avoid indexing the following table with a wrong index. Should never happen.
+    }
+
+    // Summon the five invaders and make them run into the room
+    for (uint8 i = 0; i < 5; i++)
+    {
+        float fTargetPosX, fTargetPosY, fTargetPosZ;
+
+        if (Creature* pTemp = pSummoner->SummonCreature(uiMobList[i], aScourgeInvaders[uiIndex].m_fX, aScourgeInvaders[uiIndex].m_fY, aScourgeInvaders[uiIndex].m_fZ, aScourgeInvaders[uiIndex].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0))
+        {
+            pTemp->SetWalk(false);
+            pTemp->GetRandomPoint(aScourgeInvaders[uiIndex + 1].m_fX, aScourgeInvaders[uiIndex + 1].m_fY, aScourgeInvaders[uiIndex + 1].m_fZ, 6.0f, fTargetPosX, fTargetPosY, fTargetPosZ);
+            pTemp->GetMotionMaster()->MovePoint(0, fTargetPosX, fTargetPosY, fTargetPosZ);
+        }
+    }
+
+    return;
+}
+
+void instance_stratholme::DoMoveBackDefenders(uint8 uiStep, Creature* pCreature)
+{
+    uint8 uiIndex;
+    uint8 uiTreshold = 0;
+    uint8 uiFoundGuards = 0;
+
+    switch (uiStep)
+    {
+        case BARRICADE:
+            uiIndex = FIRST_BARRICADES;
+            break;
+        case STAIRS:
+            uiIndex = BARRICADE;
+            uiTreshold = 3;
+            break;
+        default:
+            return;     // avoid indexing the following table with a wrong index. Should never happen.
+    }
+
+    // Check that there are still defenders to move to the stairs/last barricade
+    if (m_suiCrimsonDefendersLowGuids[uiIndex].empty())
+        return;
+    if (pCreature)
+        DoScriptText(ScarletEventYells[uiStep], pCreature);
+
+    for (GuidList::const_iterator itr = m_suiCrimsonDefendersLowGuids[uiIndex].begin(); itr != m_suiCrimsonDefendersLowGuids[uiIndex].end(); ++itr)
+    {
+        Creature* pGuard = instance->GetCreature(*itr);
+        if (pGuard && pGuard->isAlive() && !pGuard->isInCombat())
+        {
+			pGuard->GetMotionMaster()->MoveIdle();
+        	pGuard->SetWalk(false);
+            pGuard->GetMotionMaster()->MovePoint(0, aScarletLastStand[uiTreshold + uiFoundGuards].m_fX, aScarletLastStand[uiTreshold + uiFoundGuards].m_fY, aScarletLastStand[uiTreshold + uiFoundGuards].m_fZ);
+            uiFoundGuards++;
+        }
+
+        if (uiFoundGuards == 3)
+            return;
+    }
+
+    return;
+}
+
+void instance_stratholme::DoScarletBastionDefense(uint8 uiStep, Creature* pCreature)
+{
+    if (!pCreature)
+        return;
+
+    switch (uiStep)
+    {
+        case BARRICADE:
+        case STAIRS:
+            DoMoveBackDefenders(uiStep, pCreature);
+            return;
+        case TIMMY:
+            pCreature->SummonCreature(NPC_TIMMY_THE_CRUEL, aScourgeInvaders[0].m_fX, aScourgeInvaders[0].m_fY, aScourgeInvaders[0].m_fZ, aScourgeInvaders[0].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+            return;
+        // Scarlet guards spawned
+        case HALL_OF_LIGHTS:
+        case INNER_BASTION_2:
+            DoScriptText(ScarletEventYells[uiStep], pCreature);
+            if (Player* pPlayer = GetPlayerInMap())
+                DoSpawnScarletGuards(uiStep, pPlayer);
+            return;
+        // Scourge invading
+        case ENTRANCE:
+        case INNER_BASTION_1:
+            DoScriptText(ScarletEventYells[uiStep], pCreature);
+        case CRIMSON_THRONE:
+            if (Player* pPlayer = GetPlayerInMap())
+                DoSpawnScourgeInvaders(uiStep, pPlayer);
+            return;
+    }
+    return;
 }
 
 void instance_stratholme::Update(uint32 uiDiff)

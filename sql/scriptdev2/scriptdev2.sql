@@ -2015,7 +2015,14 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1329020,'My death means nothing.... light... will... prevail!',0,6,0,0,'ysida YSIDA_SAY_RUN_FAIL'),
 
 (-1329021,'Rivendare! I come for you!',0,1,0,0,'aurius YELL_AURIUS_AGGRO'),
-(-1329022,'Argh!',0,0,0,0,'aurius SAY_AURIUS_DEATH');
+(-1329022,'Argh!',0,0,0,0,'aurius SAY_AURIUS_DEATH'),
+
+(-1329023,'Move back and hold the line! We cannot fail or all will be lost!',0,1,0,0,'YELL_BASTION_BARRICADE'),
+(-1329024,'Move to the stairs and defend!',0,1,0,0,'YELL_BASTION_STAIRS'),
+(-1329025,'The Scourge have broken into the Bastion! Redouble your efforts! We must not fail!',0,1,0,0,'YELL_BASTION_ENTRANCE'),
+(-1329026,'They have broken into the Hall of Lights! We must stop the intruders!',0,1,0,0,'YELL_BASTION_HALL_LIGHTS'),
+(-1329027,'The Scourge have broken through in all wings! May the light defeat these foul creatures! We shall fight to the last!',0,1,0,0,'YELL_BASTION_INNER_1'),
+(-1329028,'This will not be the end of the Scarlet Crusade! You will not break our line!',0,1,0,0,'YELL_BASTION_INNER_2');
 
 -- -1 349 000 MARAUDON
 
