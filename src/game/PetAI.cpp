@@ -78,7 +78,9 @@ void PetAI::AttackStart(Unit* u)
         // thus with the following clear the original TMG gets invalidated and crash, doh
         // hope it doesn't start to leak memory without this :-/
         // i_pet->Clear();
-        HandleMovementOnAttackStart(u);
+        if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+            HandleMovementOnAttackStart(u);
+
         inCombat = true;
     }
 }
@@ -325,7 +327,7 @@ void PetAI::UpdateAI(const uint32 diff)
     else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
         m_creature->InterruptNonMeleeSpells(false);
 
-    if (victim = m_creature->getVictim())
+    if ((victim = m_creature->getVictim()) && !m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE))
     {
         // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
         if (_needToStop())
@@ -341,8 +343,7 @@ void PetAI::UpdateAI(const uint32 diff)
             if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
                 m_creature->InterruptNonMeleeSpells(false);
         }
-
-        else if (m_creature->CanReachWithMeleeAttack(victim))
+        else if (m_creature->CanReachWithMeleeAttack(victim) && !(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE))
         {
             if (DoMeleeAttackIfReady())
                 // if pet misses its target, it will also be the first in threat list
@@ -423,6 +424,7 @@ void PetAI::AttackedBy(Unit* attacker)
 {
     // when attacked, fight back if no victim unless we have a charm state set to passive
     if (!(m_creature->getVictim() || ((Pet*)m_creature)->GetIsRetreating() == true)
-        && !(m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE)))
+        && !(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
+        || (m_creature->GetCharmInfo() && m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))))
         AttackStart(attacker);
 }
