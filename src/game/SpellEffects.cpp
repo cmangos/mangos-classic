@@ -2915,50 +2915,12 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        Pet* OldSummon = m_caster->GetPet();
-
         switch(m_caster->getClass())
         {
             case CLASS_HUNTER:
             {
-                // if pet type is already roaming the world
-                if (OldSummon)
-                {
-                    if (OldSummon->GetMap() == m_caster->GetMap())
-                    {
-                        // pet will retreat to its owner if possible
-                        if (!OldSummon->isDead())
-                            OldSummon->SetIsRetreating(true);
-                    }
-
-                    else
-                    {
-                        OldSummon->GetMap()->Remove((Creature*)OldSummon, false);
-
-                        float px, py, pz;
-                        m_caster->GetClosePoint(px, py, pz, OldSummon->GetObjectBoundingRadius());
-
-                        OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
-
-                        m_caster->GetMap()->Add((Creature*)OldSummon);
-
-                        ((Player*)m_caster)->PetSpellInitialize();
-                    }
-
-                    delete NewSummon;
-                }
-
-                // Load pet from db; if we have anything to load
-                else if (NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
-                    delete OldSummon;
-
-                else
-                {
-                    delete OldSummon;
-                    delete NewSummon;
-                    // TODO: Inform the hunter he has no pet
-                }
-
+                // Everything already taken care of, we are only here because we loaded pet from db successfully
+                delete NewSummon;
                 return;
             }
             case CLASS_WARLOCK:
@@ -2976,7 +2938,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
                         ++itr;
                 }
 
-                if (OldSummon)
+                if (Pet* OldSummon = m_caster->GetPet())
                     OldSummon->Unsummon(PET_SAVE_NOT_IN_SLOT, m_caster);
 
                 // Load pet from db; if any to load
@@ -2992,7 +2954,6 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
             }
             default:
             {
-                delete OldSummon;
                 NewSummon->setPetType(SUMMON_PET);
                 break;
             }

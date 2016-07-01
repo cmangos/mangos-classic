@@ -4779,21 +4779,40 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_EFFECT_SUMMON_PET:
             {
-                if (m_caster->GetPetGuid())                 // let warlock do a replacement summon
-                {
-                    Pet* pet = ((Player*)m_caster)->GetPet();
+                if (m_caster->GetCharmGuid())
+                    return SPELL_FAILED_ALREADY_HAVE_CHARM;
 
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARLOCK)
+                uint32 plClass = m_caster->getClass();
+                if (plClass == CLASS_HUNTER)
+                {
+                    if (Creature* pet = m_caster->GetPet())
                     {
-                        if (strict)                         // Summoning Disorientation, trigger pet stun (cast by pet so it doesn't attack player)
-                            pet->CastSpell(pet, 32752, true, nullptr, nullptr, pet->GetObjectGuid());
+                        if (!pet->isAlive() || pet->isDead()) // this one will not play along; tried and retried countless times....
+                            return SPELL_FAILED_TARGETS_DEAD;
+                        else
+                            return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+                    }
+                    else
+                    {
+                        Pet* dbPet = new Pet;
+                        if (!dbPet->LoadPetFromDB((Player*)m_caster, 0))
+                        {
+                            delete dbPet;
+                            return SPELL_FAILED_NO_PET;
+                        }
+                    }
+                }
+                else if (m_caster->GetPetGuid())
+                {
+                    if (plClass == CLASS_WARLOCK)                  // let warlock do a replacement summon
+                    {
+                        if (strict)     // Summoning Disorientation, trigger pet stun (cast by pet so it doesn't attack player)
+                            if (Pet* pet = ((Player*)m_caster)->GetPet())
+                                pet->CastSpell(pet, 32752, true, nullptr, nullptr, pet->GetObjectGuid());
                     }
                     else
                         return SPELL_FAILED_ALREADY_HAVE_SUMMON;
                 }
-
-                if (m_caster->GetCharmGuid())
-                    return SPELL_FAILED_ALREADY_HAVE_CHARM;
 
                 break;
             }
