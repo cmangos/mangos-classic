@@ -2653,10 +2653,21 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
         spawnCreature->AIM_Initialize();
 
         // Notify Summoner
-        if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
+        if (m_originalCaster && (m_originalCaster != m_caster)
+            && (m_originalCaster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_originalCaster)->AI())
+        {
             ((Creature*)m_originalCaster)->AI()->JustSummoned(spawnCreature);
-        else if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
+
+            if (m_originalCaster->isInCombat() && !(spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
+				((Creature*)spawnCreature)->AI()->AttackStart(m_originalCaster->getAttackerForHelper());
+        }
+        else if ((m_caster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_caster)->AI())
+        {
             ((Creature*)m_caster)->AI()->JustSummoned(spawnCreature);
+
+            if (m_caster->isInCombat() && !(spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
+				((Creature*)spawnCreature)->AI()->AttackStart(m_caster->getAttackerForHelper());
+        }
     }
 }
 
@@ -3041,10 +3052,19 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     else
     {
         // Notify Summoner
-        if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
+        if (m_originalCaster && (m_originalCaster != m_caster)
+            && (m_originalCaster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_originalCaster)->AI())
+        {
             ((Creature*)m_originalCaster)->AI()->JustSummoned(NewSummon);
-        else if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
+            if (m_originalCaster->isInCombat() && !(NewSummon->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
+                ((Creature*)NewSummon)->AI()->AttackStart(m_originalCaster->getAttackerForHelper());
+        }
+        else if ((m_caster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_caster)->AI())
+        {
             ((Creature*)m_caster)->AI()->JustSummoned(NewSummon);
+            if (m_caster->isInCombat() && !(NewSummon->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
+                ((Creature*)NewSummon)->AI()->AttackStart(m_caster->getAttackerForHelper());
+        }
     }
 }
 
