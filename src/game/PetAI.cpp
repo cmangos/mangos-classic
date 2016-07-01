@@ -345,10 +345,11 @@ void PetAI::UpdateAI(const uint32 diff)
             if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
                 m_creature->InterruptNonMeleeSpells(false);
         }
-        else if (m_creature->CanReachWithMeleeAttack(victim) && !(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE))
+        // if pet misses its target, it will also be the first in threat list
+        else if (m_creature->CanReachWithMeleeAttack(victim))
         {
-            if (DoMeleeAttackIfReady())
-                // if pet misses its target, it will also be the first in threat list
+            if (!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)
+                && DoMeleeAttackIfReady())
             {
                 m_creature->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
                 victim->AddThreat(m_creature);
@@ -357,26 +358,23 @@ void PetAI::UpdateAI(const uint32 diff)
                 AttackStart(victim);
         }
     }
-    else if (owner && m_creature->GetCharmInfo())
+    else if (owner)
     {
-        if (owner->isInCombat() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))
-        {
+        CharmInfo* charmInfo = m_creature->GetCharmInfo();
+        if (owner->isInCombat() && !(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
+            || (charmInfo && charmInfo->HasReactState(REACT_PASSIVE))))
             AttackStart(owner->getAttackerForHelper());
-        }
-        else if (m_creature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
+        else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW) || m_creature->hasUnitState(UNIT_STAT_MOVING))
         {
-            // The distance is to prevent the pet from running around to reach the owners back when  walking towards it
-            //  and the reason for increasing it more than the follow distance is to prevent the same thing
-            // from happening when the owner turns and twists (as this increases the distance between them)
-            if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW) && !owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
-                m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-            // This is to stop the pet from following you when you're close to each other, to support the above condition.
-            else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+            if (owner->IsWithinDistInMap(m_creature, PET_FOLLOW_DIST) || m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
             {
                 m_creature->GetMotionMaster()->Clear(false);
                 m_creature->GetMotionMaster()->MoveIdle();
             }
         }
+        else if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE) || owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
+            && charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW))
+            m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
     }
 }
 
