@@ -1344,11 +1344,18 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
         // Update creature dynamic movement position before doing anything else
         if (m_DynamicMovement)
         {
-            if (!m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT) && !m_creature->IsNonMeleeSpellCasted(false))
+            if (!m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
             {
-                if (m_LastSpellMaxRange && m_creature->IsInRange(m_creature->getVictim(), 0, (m_LastSpellMaxRange / 1.5f)))
-                    SetCombatMovement(false, true);
-                else
+                bool uiInLineOfSight = m_creature->IsWithinLOSInMap(m_creature->getVictim());
+                
+                if (uiInLineOfSight && !m_creature->IsNonMeleeSpellCasted(false))
+                {
+                    if (m_LastSpellMaxRange && m_creature->IsInRange(m_creature->getVictim(), 0, (m_LastSpellMaxRange / 1.5f)))
+                        SetCombatMovement(false, true);
+                    else
+                        SetCombatMovement(true, true);
+                }
+                else if (!uiInLineOfSight)
                     SetCombatMovement(true, true);
             }
         }
