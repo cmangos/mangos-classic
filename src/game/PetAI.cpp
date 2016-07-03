@@ -80,6 +80,9 @@ void PetAI::AttackStart(Unit* u)
 
 void PetAI::EnterEvadeMode()
 {
+    m_creature->AttackStop();
+    inCombat = false;
+
     if (Unit* owner = m_creature->GetCharmerOrOwner())
     {
         if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE) && owner->GetTypeId() == TYPEID_UNIT)
@@ -118,20 +121,13 @@ bool PetAI::_needToStop() const
 
 void PetAI::_stopAttack()
 {
+    m_creature->AttackStop();
     inCombat = false;
 
-    bool useDefaultMovement = true;
-
     if (Unit* owner = m_creature->GetCharmerOrOwner())
-    {
         if (CharmInfo* charmInfo = m_creature->GetCharmInfo())
-        {
-            if (Pet* pet = (Pet*)m_creature)
-            {
-                if (charmInfo->HasCommandState(COMMAND_FOLLOW))
-                    pet->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-
-                else if (charmInfo->HasCommandState(COMMAND_STAY))
+            if (charmInfo->HasCommandState(COMMAND_STAY) && !m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+                if (Pet* pet = (Pet*)m_creature)
                 {
                     //if stay command is already set but we dont have stay pos set then we need to establish current pos as stay position
                     if (!pet->IsStayPosSet())
@@ -139,19 +135,6 @@ void PetAI::_stopAttack()
 
                     pet->GetMotionMaster()->MovePoint(0, pet->GetStayPosX(), pet->GetStayPosY(), pet->GetStayPosZ(), false);
                 }
-
-                useDefaultMovement = false;
-            }
-        }
-    }
-
-    m_creature->AttackStop();
-
-    if (useDefaultMovement)
-    {
-        m_creature->GetMotionMaster()->Clear(false);
-        m_creature->GetMotionMaster()->MoveIdle();
-    }
 }
 
 void PetAI::UpdateAI(const uint32 diff)
@@ -173,7 +156,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
     if (((Pet*)m_creature)->GetIsRetreating())
     {
-        if (!owner->_IsWithinDist(m_creature, (PET_FOLLOW_DIST * 2), true))
+        if (!owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
         {
             if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
                 m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
@@ -190,7 +173,8 @@ void PetAI::UpdateAI(const uint32 diff)
         if (!(victim = m_creature->getVictim())
             || (minRange != 0 && m_creature->IsWithinDistInMap(victim, minRange)))
             ((Pet*)m_creature)->SetSpellOpener();
-        else if (m_creature->IsWithinDistInMap(victim, ((Pet*)m_creature)->GetSpellOpenerMaxRange()) && m_creature->IsWithinLOSInMap(victim))
+        else if (m_creature->IsWithinDistInMap(victim, ((Pet*)m_creature)->GetSpellOpenerMaxRange())
+                && m_creature->IsWithinLOSInMap(victim))
         {
             // stop moving
             m_creature->clearUnitState(UNIT_STAT_MOVING);
@@ -369,17 +353,20 @@ void PetAI::UpdateAI(const uint32 diff)
         if (owner->isInCombat() && !(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
             || (charmInfo && charmInfo->HasReactState(REACT_PASSIVE))))
             AttackStart(owner->getAttackerForHelper());
-        else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW) || m_creature->hasUnitState(UNIT_STAT_MOVING))
+        else if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         {
-            if (owner->IsWithinDistInMap(m_creature, PET_FOLLOW_DIST) || m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+            if (m_creature->hasUnitState(UNIT_STAT_FOLLOW))
             {
-                m_creature->GetMotionMaster()->Clear(false);
-                m_creature->GetMotionMaster()->MoveIdle();
+                if (owner->IsWithinDistInMap(m_creature, PET_FOLLOW_DIST))
+                {
+                    m_creature->GetMotionMaster()->Clear(false);
+                    m_creature->GetMotionMaster()->MoveIdle();
+                }
             }
+            else if (!(owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
+                    && charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW))
+                m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
         }
-        else if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE) || owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
-            && charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW))
-            m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
     }
 }
 
