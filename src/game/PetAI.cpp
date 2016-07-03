@@ -339,6 +339,16 @@ void PetAI::UpdateAI(const uint32 diff)
             return;
         }
 
+        if (!m_creature->HasInArc(2 * M_PI_F / 3, victim))
+        {
+            m_creature->SetInFront(victim);
+            if (victim->GetTypeId() == TYPEID_PLAYER)
+                m_creature->SendCreateUpdateToPlayer((Player*)victim);
+
+            if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                m_creature->SendCreateUpdateToPlayer((Player*)owner);
+        }
+
         // required to be stopped cases
         if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false))
         {
