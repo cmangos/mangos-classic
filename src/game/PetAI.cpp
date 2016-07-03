@@ -80,9 +80,26 @@ void PetAI::AttackStart(Unit* u)
 
 void PetAI::EnterEvadeMode()
 {
-    // TODO:
-    // This should not be empty, for creature pets they should return to their respwn point
-    // and when they reach that they should despawn (maybe after a slight delay)
+    if (Unit* owner = m_creature->GetCharmerOrOwner())
+    {
+        if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE) && owner->GetTypeId() == TYPEID_UNIT)
+        {
+            if (owner->isAlive())
+            {
+                if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+                    m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
+            }
+            else if (!owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
+            {
+                if (!m_creature->hasUnitState(UNIT_STAT_MOVING))
+                {
+                    float px, py, pz;
+                    owner->GetClosePoint(px, py, pz, 2.0f);
+                    m_creature->GetMotionMaster()->MovePoint(0, px, py, pz);
+                }
+            }
+        }
+    }
 }
 
 bool PetAI::IsVisible(Unit* pl) const
