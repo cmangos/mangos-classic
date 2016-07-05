@@ -108,7 +108,7 @@ void GameEventMgr::LoadFromDB()
         mGameEvent.resize(max_event_id + 1);
     }
 
-    QueryResult* result = WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time),occurence,length,holiday,description FROM game_event");
+    QueryResult* result = WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time),occurence,length,holiday,linkedTo,description FROM game_event");
     if (!result)
     {
         mGameEvent.clear();
@@ -123,7 +123,6 @@ void GameEventMgr::LoadFromDB()
         BarGoLink bar(result->GetRowCount());
         do
         {
-            ++count;
             Field* fields = result->Fetch();
 
             bar.step();
@@ -143,24 +142,40 @@ void GameEventMgr::LoadFromDB()
             pGameEvent.occurence    = fields[3].GetUInt32();
             pGameEvent.length       = fields[4].GetUInt32();
             pGameEvent.holiday_id   = HolidayIds(fields[5].GetUInt32());
+            pGameEvent.linkedTo     = fields[6].GetUInt32();
+            pGameEvent.description  = fields[7].GetCppString();
 
+            if (pGameEvent.occurence == 0)
+            {
+                sLog.outBasic("Event %u (%s) disabled", event_id, pGameEvent.description.c_str());
+                pGameEvent.start = time_t(FAR_FUTURE);
+                pGameEvent.occurence = pGameEvent.length;
+            }
             if (pGameEvent.length == 0)                     // length>0 is validity check
             {
                 sLog.outErrorDb("`game_event` game event id (%i) have length 0 and can't be used.", event_id);
-                continue;
+                pGameEvent.start = time_t(FAR_FUTURE);
             }
 
             if (pGameEvent.occurence < pGameEvent.length)   // occurence < length is useless. This also asserts that occurence > 0!
             {
                 sLog.outErrorDb("`game_event` game event id (%i) has occurence %u  < length %u and can't be used.", event_id, pGameEvent.occurence, pGameEvent.length);
-                continue;
+                pGameEvent.start = time_t(FAR_FUTURE);
             }
 
-            pGameEvent.description  = fields[6].GetCppString();
+            ++count;
         }
         while (result->NextRow());
         delete result;
 
+        for (uint16 itr = 1; itr < mGameEvent.size(); ++itr)
+        {
+            if (mGameEvent[itr].isValid() && mGameEvent[itr].linkedTo != 0 && (mGameEvent[itr].linkedTo >= mGameEvent.size() || mGameEvent[itr].linkedTo < 0 || !mGameEvent[mGameEvent[itr].linkedTo].isValid()))
+            {
+                sLog.outErrorDb("`game_event` game event id (%i) is Linked to invalid event %u", itr, mGameEvent[itr].linkedTo);
+                mGameEvent[itr].linkedTo = 0;
+            }
+        }
         sLog.outString();
         sLog.outString(">> Loaded %u game events", count);
     }
@@ -602,21 +617,30 @@ uint32 GameEventMgr::Update(ActiveEvents const* activeAtShutdown /*= nullptr*/)
     uint32 calcDelay;
     for (uint16 itr = 1; itr < mGameEvent.size(); ++itr)
     {
+        if (mGameEvent[itr].occurence == 0)
+            continue;
         // sLog.outErrorDb("Checking event %u",itr);
         if (CheckOneGameEvent(itr, currenttime))
         {
             // DEBUG_LOG("GameEvent %u is active",itr->first);
             if (!IsActiveEvent(itr))
             {
-                bool resume = activeAtShutdown && (activeAtShutdown->find(itr) != activeAtShutdown->end());
-                StartEvent(itr, false, resume);
+                if (mGameEvent[itr].linkedTo == 0 || IsActiveEvent(mGameEvent[itr].linkedTo))
+                {
+                    bool resume = activeAtShutdown && (activeAtShutdown->find(itr) != activeAtShutdown->end());
+                    StartEvent(itr, false, resume);
+                }
             }
         }
         else
         {
             // DEBUG_LOG("GameEvent %u is not active",itr->first);
             if (IsActiveEvent(itr))
+            {
                 StopEvent(itr);
+                if (mGameEvent[itr].linkedTo != 0)
+                    StopEvent(mGameEvent[itr].linkedTo);
+            }
             else
             {
                 if (!m_IsGameEventsInit)
@@ -656,12 +680,17 @@ void GameEventMgr::UnApplyEvent(uint16 event_id)
 void GameEventMgr::ApplyNewEvent(uint16 event_id, bool resume)
 {
     m_ActiveEvents.insert(event_id);
+    sLog.outString("GameEvent %u \"%s\" started.", event_id, mGameEvent[event_id].description.c_str());
+    if (event_id == 987) // daily restart event
+    {
+        sWorld.ShutdownServ(mGameEvent[event_id].length*60, SHUTDOWN_MASK_RESTART, 0);
+        return;
+    }
     CharacterDatabase.PExecute("INSERT INTO game_event_status (event) VALUES (%u)", event_id);
 
     if (sWorld.getConfig(CONFIG_BOOL_EVENT_ANNOUNCE))
         sWorld.SendWorldText(LANG_EVENTMESSAGE, mGameEvent[event_id].description.c_str());
 
-    sLog.outString("GameEvent %u \"%s\" started.", event_id, mGameEvent[event_id].description.c_str());
     // spawn positive event tagget objects
     GameEventSpawn(event_id);
     // un-spawn negative event tagged objects

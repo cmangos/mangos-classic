@@ -24,6 +24,7 @@
 #include "Platform/Define.h"
 
 #define max_ge_check_delay 86400                            // 1 day in seconds
+#define FAR_FUTURE 1609459200                               // 2021, January 1st
 
 class Creature;
 class GameObject;
@@ -37,6 +38,7 @@ struct GameEventData
     uint32 occurence;                                       // Delay in minutes between occurences of the event
     uint32 length;                                          // Length in minutes of the event
     HolidayIds holiday_id;
+    uint32 linkedTo;
     std::string description;
 
     bool isValid() const { return length > 0; }
