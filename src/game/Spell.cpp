@@ -5052,23 +5052,22 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_caster->GetTypeId() != TYPEID_PLAYER)
             return SPELL_FAILED_NOT_TRADING;
 
-        Player* pCaster = ((Player*)m_caster);
-        TradeData* my_trade = pCaster->GetTradeData();
-
-        if (!my_trade)
-            return SPELL_FAILED_NOT_TRADING;
-
-        TradeSlots slot = TradeSlots(m_targets.getItemTargetGuid().GetRawValue());
-        if (slot != TRADE_SLOT_NONTRADED)
+        if (TradeSlots(m_targets.getItemTargetGuid().GetRawValue()) != TRADE_SLOT_NONTRADED)
             return SPELL_FAILED_ITEM_NOT_READY;
 
         // if trade not complete then remember it in trade data
-        if (!my_trade->IsInAcceptProcess())
+        Player* pCaster = ((Player*)m_caster);
+        if (TradeData* my_trade = pCaster->GetTradeData())
         {
-            // Spell will be casted at completing the trade. Silently ignore at this place
-            my_trade->SetSpell(m_spellInfo->Id, m_CastItem);
-            return SPELL_FAILED_DONT_REPORT;
+            if (!my_trade->IsInAcceptProcess())
+            {
+                // Spell will be casted at completing the trade. Silently ignore at this place
+                my_trade->SetSpell(m_spellInfo->Id, m_CastItem);
+                return SPELL_FAILED_DONT_REPORT;
+            }
         }
+        else
+            return SPELL_FAILED_NOT_TRADING;
     }
 
     // all ok
@@ -5121,9 +5120,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         else if (script == true)
             return CheckCast(true);
 
-        Unit* _target = m_targets.getUnitTarget();
-
-        if (_target)                                        // for target dead/target not valid
+        if (Unit* _target = m_targets.getUnitTarget())      // for target dead/target not valid
         {
             if (!_target->isTargetableForAttack())
                 return SPELL_FAILED_BAD_TARGETS;            // guessed error
