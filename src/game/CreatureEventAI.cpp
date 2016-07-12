@@ -122,6 +122,8 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     }
     else
         sLog.outErrorEventAI("EventMap for Creature %u is empty but creature is using CreatureEventAI.", m_creature->GetEntry());
+
+    m_MeleeEnabled = (m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE) ? false : true;
 }
 
 #define LOG_PROCESS_EVENT                                                                                                       \
@@ -1259,29 +1261,15 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
         }
     }
 
-    if ((m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO) || m_creature->IsNeutralToAll())
-        return;
-
-    if (m_creature->CanInitiateAttack() && who->isTargetableForAttack() &&
-            m_creature->IsHostileTo(who) && who->isInAccessablePlaceFor(m_creature))
+    if (!(m_creature->IsCivilian() || (m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO)
+        || m_creature->IsNeutralToAll() || m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE) || m_creature->getVictim())
+        && m_creature->CanInitiateAttack() && who->isTargetableForAttack()
+        && m_creature->IsHostileTo(who) && who->isInAccessablePlaceFor(m_creature)
+        && m_creature->CanFly() && m_creature->GetDistanceZ(who) <= CREATURE_Z_ATTACK_RANGE
+        && m_creature->IsWithinDistInMap(who, m_creature->GetAttackDistance(who)) && m_creature->IsWithinLOSInMap(who))
     {
-        if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
-            return;
-
-        float attackRadius = m_creature->GetAttackDistance(who);
-        if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->IsWithinLOSInMap(who))
-        {
-            if (!m_creature->getVictim())
-            {
-                AttackStart(who);
-                who->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            }
-            else if (m_creature->GetMap()->IsDungeon())
-            {
-                m_creature->AddThreat(who);
-                who->SetInCombatWith(m_creature);
-            }
-        }
+        AttackStart(who);
+        who->SetInCombatWith(m_creature);
     }
 }
 
@@ -1297,9 +1285,6 @@ void CreatureEventAI::SpellHit(Unit* pUnit, const SpellEntry* pSpell)
 
 void CreatureEventAI::UpdateAI(const uint32 diff)
 {
-    // Check if we are in combat (also updates calls threat update code)
-    bool Combat = m_creature->SelectHostileTarget() && m_creature->getVictim();
-
     // Events are only updated once every EVENT_UPDATE_TIME ms to prevent lag with large amount of events
     if (m_EventUpdateTime < diff)
     {
@@ -1338,29 +1323,67 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
         m_EventUpdateTime -= diff;
     }
 
-    // Melee Auto-Attack (getVictim might be nullptr as result of timer based events and actions)
-    if (Combat && m_creature->getVictim())
+    if (!m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
     {
-        // Update creature dynamic movement position before doing anything else
-        if (m_DynamicMovement)
+        m_creature->SelectHostileTarget();
+
+        // Melee Auto-Attack (getVictim might be nullptr as result of timer based events and actions)
+        if (Unit* victim = m_creature->getVictim())
         {
-            if (!m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+            // Update creature dynamic movement position before doing anything else
+            if (m_DynamicMovement && !m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
             {
-                bool uiInLineOfSight = m_creature->IsWithinLOSInMap(m_creature->getVictim());
-                
-                if (uiInLineOfSight && !m_creature->IsNonMeleeSpellCasted(false))
+                if (m_creature->IsWithinLOSInMap(m_creature->getVictim()))
                 {
-                    if (m_LastSpellMaxRange && m_creature->IsInRange(m_creature->getVictim(), 0, (m_LastSpellMaxRange / 1.5f)))
-                        SetCombatMovement(false, true);
+                    if (!m_creature->IsNonMeleeSpellCasted(false))
+                    {
+                        if (m_LastSpellMaxRange && m_creature->IsInRange(m_creature->getVictim(), 0, (m_LastSpellMaxRange / 1.5f)))
+                            SetCombatMovement(false, true);
+                        else
+                            SetCombatMovement(true, true);
+                    }
                     else
                         SetCombatMovement(true, true);
                 }
-                else if (!uiInLineOfSight)
-                    SetCombatMovement(true, true);
+            }
+            else if (m_MeleeEnabled)
+            {
+                if (!m_creature->HasInArc(2 * M_PI_F / 3, victim))
+                {
+                    m_creature->SetInFront(victim);
+                    if (victim->GetTypeId() == TYPEID_PLAYER)
+                        m_creature->SendCreateUpdateToPlayer((Player*)victim);
+
+                    if (Unit* owner = m_creature->GetCharmerOrOwner())
+                        if (owner->GetTypeId() == TYPEID_PLAYER)
+                            m_creature->SendCreateUpdateToPlayer((Player*)owner);
+                }
+
+                if (DoMeleeAttackIfReady())
+                    victim->AddThreat(m_creature);
             }
         }
-        else if (m_MeleeEnabled)
-            DoMeleeAttackIfReady();
+        else if (Unit* owner = m_creature->GetCharmerOrOwner())
+        {
+            if (owner->isInCombat() && !m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE))
+            {
+                Unit* ownerAttacker = owner->getAttackerForHelper();
+                AttackStart(ownerAttacker);
+            }
+            else if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+            {
+                if (m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+                {
+                    if (owner->IsWithinDistInMap(m_creature, 10))
+                    {
+                        m_creature->GetMotionMaster()->Clear(false);
+                        m_creature->GetMotionMaster()->MoveIdle();
+                    }
+                }
+                else if (!owner->IsWithinDistInMap(m_creature, 15))
+                    m_creature->GetMotionMaster()->MoveFollow(owner, 10, PET_FOLLOW_ANGLE);
+            }
+        }
     }
 }
 
