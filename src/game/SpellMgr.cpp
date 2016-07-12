@@ -697,7 +697,9 @@ bool IsPositiveEffect(SpellEntry const* spellproto, SpellEffectIndex effIndex)
                     switch (spellproto->Id)
                     {
                         case 13139:                         // net-o-matic special effect
+                        case 23182:                         // Mark of Frost
                         case 23445:                         // evil twin
+                        case 25040:                         // Mark of Nature
                             return false;
                         // some spells have unclear target modes for selection, so just make effect positive
                         case 27184:

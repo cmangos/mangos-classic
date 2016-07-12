@@ -64,8 +64,6 @@ Pet::Pet(PetType type) :
 
     if (type == MINI_PET)                                   // always passive
         charmInfo->SetReactState(REACT_PASSIVE);
-    else if (type == GUARDIAN_PET)                          // always aggressive
-        charmInfo->SetReactState(REACT_AGGRESSIVE);
 }
 
 Pet::~Pet()
@@ -932,6 +930,8 @@ void Pet::GivePetXP(uint32 xp)
     if (level >= maxlevel)
         return;
 
+    xp *= sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL);
+
     uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
     uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);
     uint32 newXP = curXP + xp;
@@ -1024,14 +1024,13 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     return true;
 }
 
-bool Pet::InitStatsForLevel(uint32 petlevel)
+void Pet::InitStatsForLevel(uint32 petlevel)
 {
     CreatureInfo const* cInfo = GetCreatureInfo();
     MANGOS_ASSERT(cInfo);
 
     SetLevel(petlevel);
 
-    SetMeleeDamageSchool(SpellSchools(cInfo->DamageSchool));
     SetAttackTime(BASE_ATTACK, cInfo->MeleeBaseAttackTime);
     SetAttackTime(OFF_ATTACK, cInfo->MeleeBaseAttackTime);
     SetAttackTime(RANGED_ATTACK, cInfo->RangedBaseAttackTime);
@@ -1040,8 +1039,12 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
 
     int32 createResistance[MAX_SPELL_SCHOOL] = {0, 0, 0, 0, 0, 0, 0};
 
-    if (getPetType() != HUNTER_PET)
+    if (getPetType() == HUNTER_PET)
+        SetMeleeDamageSchool(SpellSchools(SPELL_SCHOOL_NORMAL));
+    else
     {
+        SetMeleeDamageSchool(SpellSchools(cInfo->DamageSchool));
+
         createResistance[SPELL_SCHOOL_HOLY]   = cInfo->ResistanceHoly;
         createResistance[SPELL_SCHOOL_FIRE]   = cInfo->ResistanceFire;
         createResistance[SPELL_SCHOOL_NATURE] = cInfo->ResistanceNature;
@@ -1072,8 +1075,6 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
                 SetObjectScale(scale);
                 UpdateModelData();
             }
-
-            SetMeleeDamageSchool(SpellSchools(SPELL_SCHOOL_NORMAL));
 
             uint32 maxlevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
 
@@ -1213,7 +1214,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
     // Remove rage bar from pets
     SetMaxPower(POWER_RAGE, 0);
 
-    return true;
+    return;
 }
 
 bool Pet::HaveInDiet(ItemPrototype const* item) const
@@ -1979,12 +1980,9 @@ void Pet::SynchronizeLevelWithOwner()
     }
 }
 
-void Pet::ApplyModeFlags(PetModeFlags mode, bool apply)
+void Pet::SetModeFlags(PetModeFlags mode)
 {
-    if (apply)
-        m_petModeFlags = PetModeFlags(m_petModeFlags | mode);
-    else
-        m_petModeFlags = PetModeFlags(m_petModeFlags & ~mode);
+    m_petModeFlags = mode;
 
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)

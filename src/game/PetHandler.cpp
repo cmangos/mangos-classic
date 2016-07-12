@@ -108,34 +108,34 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 }
                 case COMMAND_ATTACK:                        // spellid=1792  // ATTACK
                 {
-                    Unit* TargetUnit = _player->GetMap()->GetUnit(targetGuid);
-                    if (!TargetUnit)
+                    Unit* targetUnit = _player->GetMap()->GetUnit(targetGuid);
+                    if (!targetUnit)
                         return;
 
                     // not let attack friendly units.
-                    if (GetPlayer()->IsFriendlyTo(TargetUnit))
+                    if (GetPlayer()->IsFriendlyTo(targetUnit))
                         return;
 
                     ((Pet*)pet)->SetIsRetreating();
                     ((Pet*)pet)->SetSpellOpener();
 
                     // This is true if pet has no target or has target but targets differs.
-                    if (pet->getVictim() != TargetUnit)
+                    if (pet->getVictim() != targetUnit)
                         pet->AttackStop();
 
                     pet->GetMotionMaster()->Clear();
 
                     if (((Creature*)pet)->AI())
                     {
-                        ((Creature*)pet)->AI()->AttackStart(TargetUnit);
+                        ((Creature*)pet)->AI()->AttackStart(targetUnit);
                         // 10% chance to play special warlock pet attack talk, else growl
-                        if (((Creature*)pet)->IsPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != TargetUnit && roll_chance_i(10))
+                        if (((Creature*)pet)->IsPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != targetUnit && roll_chance_i(10))
                             pet->SendPetTalk((uint32)PET_TALK_ATTACK);
 
                         pet->SendPetAIReaction();
                     }
                     else
-                        pet->Attack(TargetUnit, true);
+                        pet->Attack(targetUnit, true);
 
                     break;
                 }

@@ -116,7 +116,7 @@ enum SpellCastTargetFlags
     TARGET_FLAG_OBJECT          = 0x00000800,               // pguid, 0 spells
     TARGET_FLAG_TRADE_ITEM      = 0x00001000,               // pguid, 0 spells
     TARGET_FLAG_STRING          = 0x00002000,               // string, 0 spells
-    TARGET_FLAG_UNK1            = 0x00004000,               // 199 spells, opening object/lock
+    TARGET_FLAG_GAMEOBJECT_ITEM = 0x00004000,               // 199 spells, opening object/lock
     TARGET_FLAG_CORPSE          = 0x00008000,               // pguid, resurrection spells
     TARGET_FLAG_UNK2            = 0x00010000,               // pguid, not used in any spells (can be set dynamically)
 };
