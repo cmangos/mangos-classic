@@ -41,7 +41,6 @@ set(SRC_GRP_PLATFORM
 
 set(SRC_GRP_POLICIES
     Policies/CreationPolicy.h
-    Policies/MemoryManagement.cpp
     Policies/ObjectLifeTime.cpp
     Policies/ObjectLifeTime.h
     Policies/Singleton.h
@@ -107,12 +106,4 @@ include_directories(
 
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
-)
-
-if(NOT TBB_USE_EXTERNAL AND NOT USE_STD_MALLOC)
-  add_dependencies(${LIBRARY_NAME} TBB_Project)
-endif()
-
-target_link_libraries(${LIBRARY_NAME}
-  ${TBB_LIBRARIES}
 )

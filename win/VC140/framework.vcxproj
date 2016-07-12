@@ -324,7 +324,6 @@
     <ClInclude Include="..\..\src\framework\Utilities\TypeList.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\framework\Policies\MemoryManagement.cpp" />
     <ClCompile Include="..\..\src\framework\Policies\ObjectLifeTime.cpp" />
     <ClCompile Include="..\..\src\framework\Utilities\EventProcessor.cpp" />
   </ItemGroup>

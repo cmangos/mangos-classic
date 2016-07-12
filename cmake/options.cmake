@@ -1,11 +1,5 @@
 option(DEBUG                "Include additional debug-code in core" OFF)
 option(WARNINGS             "Show all warnings during compile"      OFF)
-option(TBB_USE_EXTERNAL     "Use external TBB"                      OFF)
-if (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
-  option(USE_STD_MALLOC     "Use standard malloc instead of TBB"    ON)
-else()
-  option(USE_STD_MALLOC     "Use standard malloc instead of TBB"    OFF)
-endif()
 option(POSTGRESQL           "Use PostgreSQL"                        OFF)
 
 if(PCH)
@@ -32,8 +26,6 @@ message(STATUS
                             defined name. the name must corespond to the name of
                             the folder and the folder must contain a valid
                             CMakeLists.txt
-    TBB_USE_EXTERNAL        Use external TBB
-    USE_STD_MALLOC          Use standard malloc instead of TBB
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. see 'cmake --help' for more details
   For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos"
