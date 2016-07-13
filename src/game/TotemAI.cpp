@@ -25,8 +25,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 
-int
-TotemAI::Permissible(const Creature* creature)
+int TotemAI::Permissible(const Creature* creature)
 {
     if (creature->IsTotem())
         return PERMIT_BASE_PROACTIVE;
@@ -38,8 +37,7 @@ TotemAI::TotemAI(Creature* c) : CreatureAI(c)
 {
 }
 
-void
-TotemAI::MoveInLineOfSight(Unit*)
+void TotemAI::MoveInLineOfSight(Unit*)
 {
 }
 
@@ -48,8 +46,7 @@ void TotemAI::EnterEvadeMode()
     m_creature->CombatStop(true);
 }
 
-void
-TotemAI::UpdateAI(const uint32 /*diff*/)
+void TotemAI::UpdateAI(const uint32 /*diff*/)
 {
     if (getTotem().GetTotemType() != TOTEM_ACTIVE)
         return;
@@ -97,14 +94,12 @@ TotemAI::UpdateAI(const uint32 /*diff*/)
         i_victimGuid.Clear();
 }
 
-bool
-TotemAI::IsVisible(Unit*) const
+bool TotemAI::IsVisible(Unit*) const
 {
     return false;
 }
 
-void
-TotemAI::AttackStart(Unit*)
+void TotemAI::AttackStart(Unit*)
 {
 }
 
