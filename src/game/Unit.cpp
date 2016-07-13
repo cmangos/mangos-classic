@@ -7297,7 +7297,7 @@ bool Unit::SelectHostileTarget()
 
             // check if currently selected target is reachable
             // NOTE: path alrteady generated from AttackStart()
-            if (!GetMotionMaster()->GetCurrent()->IsReachable())
+            if (!(GetMotionMaster()->GetCurrent()->IsReachable() || GetMap()->IsDungeon()))
             {
                 // remove all taunts
                 RemoveSpellsCausingAura(SPELL_AURA_MOD_TAUNT);
@@ -7306,6 +7306,7 @@ bool Unit::SelectHostileTarget()
                 {
                     // only one target in list, we have to evade after timer
                     // TODO: make timer - inside Creature class
+                    // WHY on EARTH would we not just do it here? -.-
                     ((Creature*)this)->AI()->EnterEvadeMode();
                 }
                 else
