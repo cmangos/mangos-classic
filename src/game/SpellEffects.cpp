@@ -4281,7 +4281,7 @@ void Spell::EffectDismissPet(SpellEffectIndex /*eff_idx*/)
     if (!pet || !pet->isAlive())
         return;
 
-    pet->Unsummon(PET_SAVE_NOT_IN_SLOT, m_caster);
+    pet->Unsummon(PET_SAVE_AS_CURRENT, m_caster);
 }
 
 void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
