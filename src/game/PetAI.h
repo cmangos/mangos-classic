@@ -43,8 +43,6 @@ class PetAI : public CreatureAI
 
     private:
         bool _isVisible(Unit*) const;
-        bool _needToStop(void) const;
-        void _stopAttack(void);
 
         void UpdateAllies();
 

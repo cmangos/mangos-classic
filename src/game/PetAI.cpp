@@ -43,26 +43,25 @@ PetAI::PetAI(Creature* c) : CreatureAI(c), i_tracker(TIME_INTERVAL_LOOK), inComb
 
 void PetAI::MoveInLineOfSight(Unit* u)
 {
-    if (m_creature->getVictim())
-        return;
+    if (Unit* victim = m_creature->getVictim())
+        if (victim->isAlive())
+            return;
 
-    if (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
-        return;
-
-    if (!m_creature->GetCharmInfo() || !m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
-        return;
-
-    if (u->isTargetableForAttack() && u->isInAccessablePlaceFor(m_creature)
-        && (m_creature->IsHostileTo(u) || u->IsHostileTo(m_creature->GetCharmerOrOwner()))
-        && m_creature->IsWithinDistInMap(u, m_creature->GetAttackDistance(u)
-        && m_creature->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
-        && m_creature->IsWithinLOSInMap(u))
-        AttackStart(u);
+    if (CharmInfo* charmInfo = m_creature->GetCharmInfo())
+        if (charmInfo->HasReactState(REACT_AGGRESSIVE)
+            && !(m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+            && u && u->isTargetableForAttack() && u->isInAccessablePlaceFor(m_creature)
+            && (m_creature->IsHostileTo(u) || u->IsHostileTo(m_creature->GetCharmerOrOwner()))
+            && m_creature->IsWithinDistInMap(u, m_creature->GetAttackDistance(u))
+            && m_creature->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE
+            && m_creature->IsWithinLOSInMap(u))
+                AttackStart(u);
 }
 
 void PetAI::AttackStart(Unit* u)
 {
-    if (!u || ((Pet*)m_creature)->getPetType() == MINI_PET)
+    if (!u || m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE) || (m_creature->IsPet()
+        && (((Pet*)m_creature)->getPetType() == MINI_PET || ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
         return;
 
     if (m_creature->Attack(u, true))
@@ -87,53 +86,6 @@ bool PetAI::IsVisible(Unit* pl) const
     return _isVisible(pl);
 }
 
-bool PetAI::_needToStop() const
-{
-    // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
-    if (m_creature->isCharmed() && m_creature->getVictim() == m_creature->GetCharmer())
-        return true;
-
-    return !m_creature->getVictim()->isTargetableForAttack();
-}
-
-void PetAI::_stopAttack()
-{
-    inCombat = false;
-
-    bool useDefaultMovement = true;
-
-    if (Unit* owner = m_creature->GetCharmerOrOwner())
-    {
-        if (CharmInfo* charmInfo = m_creature->GetCharmInfo())
-        {
-            if (Pet* pet = (Pet*)m_creature)
-            {
-                if (charmInfo->HasCommandState(COMMAND_FOLLOW))
-                    pet->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-
-                else if (charmInfo->HasCommandState(COMMAND_STAY))
-                {
-                    //if stay command is already set but we dont have stay pos set then we need to establish current pos as stay position
-                    if (!pet->IsStayPosSet())
-                        pet->SetStayPosition();
-
-                    pet->GetMotionMaster()->MovePoint(0, pet->GetStayPosX(), pet->GetStayPosY(), pet->GetStayPosZ(), false);
-                }
-
-                useDefaultMovement = false;
-            }
-        }
-    }
-
-    m_creature->AttackStop();
-
-    if (useDefaultMovement)
-    {
-        m_creature->GetMotionMaster()->Clear(false);
-        m_creature->GetMotionMaster()->MoveIdle();
-    }
-}
-
 void PetAI::UpdateAI(const uint32 diff)
 {
     if (!m_creature->isAlive())
@@ -149,11 +101,14 @@ void PetAI::UpdateAI(const uint32 diff)
         m_updateAlliesTimer -= diff;
 
     if (inCombat && (!victim || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
-        _stopAttack();
+    {
+        m_creature->AttackStop();
+        inCombat = false;
+    }
 
     if (((Pet*)m_creature)->GetIsRetreating())
     {
-        if (!owner->_IsWithinDist(m_creature, (PET_FOLLOW_DIST * 2), true))
+        if (!owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
         {
             if (!m_creature->hasUnitState(UNIT_STAT_FOLLOW))
                 m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
@@ -170,7 +125,8 @@ void PetAI::UpdateAI(const uint32 diff)
         if (!(victim = m_creature->getVictim())
             || (minRange != 0 && m_creature->IsWithinDistInMap(victim, minRange)))
             ((Pet*)m_creature)->SetSpellOpener();
-        else if (m_creature->IsWithinDistInMap(victim, ((Pet*)m_creature)->GetSpellOpenerMaxRange()) && m_creature->IsWithinLOSInMap(victim))
+        else if (m_creature->IsWithinDistInMap(victim, ((Pet*)m_creature)->GetSpellOpenerMaxRange())
+                && m_creature->IsWithinLOSInMap(victim))
         {
             // stop moving
             m_creature->clearUnitState(UNIT_STAT_MOVING);
@@ -318,24 +274,28 @@ void PetAI::UpdateAI(const uint32 diff)
     else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
         m_creature->InterruptNonMeleeSpells(false);
 
-    if ((victim = m_creature->getVictim()) && !m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE))
+    if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE) && victim)
     {
         // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
-        if (_needToStop())
+        // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
+        if ((m_creature->isCharmed() && victim == m_creature->GetCharmer())
+            || !victim->isTargetableForAttack())
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "PetAI (guid = %u) is stopping attack.", m_creature->GetGUIDLow());
-            _stopAttack();
+            m_creature->CombatStop();
+            inCombat = false;
+            
             return;
         }
 
         // required to be stopped cases
-        if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false))
-        {
-            if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
-                m_creature->InterruptNonMeleeSpells(false);
-        }
+        if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false)
+            && m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
+            m_creature->InterruptNonMeleeSpells(false);
+
         // if pet misses its target, it will also be the first in threat list
-        else if (m_creature->CanReachWithMeleeAttack(victim))
+        if (!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)
+            && m_creature->CanReachWithMeleeAttack(victim))
         {
             if (!m_creature->HasInArc(2 * M_PI_F / 3, victim))
             {
@@ -347,12 +307,12 @@ void PetAI::UpdateAI(const uint32 diff)
                     m_creature->SendCreateUpdateToPlayer((Player*)owner);
             }
 
-            if (!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)
-                && DoMeleeAttackIfReady())
+            if (DoMeleeAttackIfReady())
                 victim->AddThreat(m_creature);
-            else
-                AttackStart(victim);
         }
+        else if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE)
+            || m_creature->hasUnitState(UNIT_STAT_MOVING)))
+            AttackStart(victim);
     }
     else if (owner)
     {
@@ -360,17 +320,41 @@ void PetAI::UpdateAI(const uint32 diff)
         if (owner->isInCombat() && !(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
             || (charmInfo && charmInfo->HasReactState(REACT_PASSIVE))))
             AttackStart(owner->getAttackerForHelper());
-        else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW) || m_creature->hasUnitState(UNIT_STAT_MOVING))
+        else if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         {
-            if (owner->IsWithinDistInMap(m_creature, PET_FOLLOW_DIST) || m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
+            if (charmInfo && charmInfo->HasCommandState(COMMAND_STAY))
             {
-                m_creature->GetMotionMaster()->Clear(false);
-                m_creature->GetMotionMaster()->MoveIdle();
+                if (Pet* pet = (Pet*)m_creature)
+                {
+                    //if stay command is already set but we dont have stay pos set then we need to establish current pos as stay position
+                    if (!pet->IsStayPosSet())
+                        pet->SetStayPosition();
+
+                    float stayPosX = pet->GetStayPosX();
+                    float stayPosY = pet->GetStayPosY();
+                    float stayPosZ = pet->GetStayPosZ();
+
+                    if (!(m_creature->hasUnitState(UNIT_STAT_MOVING)
+                        || (m_creature->GetPositionX() == stayPosX
+                        && m_creature->GetPositionY() == stayPosY
+                        && m_creature->GetPositionZ() == stayPosZ)))
+                            pet->GetMotionMaster()->MovePoint(0, stayPosX, stayPosY, stayPosZ, false);
+
+                    return;
+                }
             }
+            else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW))
+            {
+                if (owner->IsWithinDistInMap(m_creature, PET_FOLLOW_DIST))
+                {
+                    m_creature->GetMotionMaster()->Clear(false);
+                    m_creature->GetMotionMaster()->MoveIdle();
+                }
+            }
+            else if (charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW)
+                && !owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
+                m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
         }
-        else if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE) || owner->IsWithinDistInMap(m_creature, (PET_FOLLOW_DIST * 2)))
-            && charmInfo && charmInfo->HasCommandState(COMMAND_FOLLOW))
-            m_creature->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
     }
 }
 
