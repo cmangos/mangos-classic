@@ -55,7 +55,12 @@ void PetAI::MoveInLineOfSight(Unit* u)
             && m_creature->IsWithinDistInMap(u, m_creature->GetAttackDistance(u))
             && m_creature->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE
             && m_creature->IsWithinLOSInMap(u))
-                AttackStart(u);
+        {
+            AttackStart(u);
+
+            if (Unit* owner = m_creature->GetOwner())
+                owner->SetInCombatState(true, u);
+        }
 }
 
 void PetAI::AttackStart(Unit* u)

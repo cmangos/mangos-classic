@@ -2137,11 +2137,20 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
                          GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damageInfo.totalDamage, totalAbsorb, damageInfo.blocked_amount, totalResist);
 
     if (Unit* owner = GetOwner())
-    {
-        owner->AddThreat(pVictim);
-        owner->SetInCombatWith(pVictim);
-        pVictim->SetInCombatWith(owner);
-    }
+        if (owner->GetTypeId() == TYPEID_UNIT)
+        {
+            owner->SetInCombatWith(pVictim);
+            owner->AddThreat(pVictim);
+            pVictim->SetInCombatWith(owner);
+        }
+
+    for (GuidSet::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
+        if (Unit* pet = (Unit*)GetMap()->GetPet(*itr))
+        {
+            pet->SetInCombatWith(pVictim);
+            pet->AddThreat(pVictim);
+            pVictim->SetInCombatWith(pet);
+        }
 
     // if damage pVictim call AI reaction
     pVictim->AttackedBy(this);
