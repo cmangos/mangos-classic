@@ -137,114 +137,23 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
     if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()))
         castTime += 500;
 
-    // [workaround] holy light need script effect, but 19968 spell for it have 2.5 cast time sec
-    // it should be instant instead
-    if (spellInfo->Id == 19968)
-        castTime = 0;
+    // workaround for instantly casted spells
+    switch (spellInfo->Id)
+    {
+        case 19968: // [workaround] holy light need script effect, but 19968 spell for it have 2.5 cast time sec
+        case 19970: // Entangling Roots (Rank 6) -- Nature's Grasp Proc
+        case 19971: // Entangling Roots (Rank 5) -- Nature's Grasp Proc
+        case 19972: // Entangling Roots (Rank 4) -- Nature's Grasp Proc
+        case 19973: // Entangling Roots (Rank 3) -- Nature's Grasp Proc
+        case 19974: // Entangling Roots (Rank 2) -- Nature's Grasp Proc
+        case 19975: // Entangling Roots (Rank 1) -- Nature's Grasp Proc
+        case 27010: // Entangling Roots (Rank 7) -- Nature's Grasp Proc
+        case 53313: // Entangling Roots (Rank 8) -- Nature's Grasp Proc
+            castTime = 0;
+            break;
+    }
 
     return (castTime > 0) ? uint32(castTime) : 0;
-}
-
-uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType damagetype)
-{
-    uint32 CastingTime = !IsChanneledSpell(spellProto) ? GetSpellCastTime(spellProto) : GetSpellDuration(spellProto);
-
-    if (CastingTime > 7000) CastingTime = 7000;
-    if (CastingTime < 1500) CastingTime = 1500;
-
-    if (damagetype == DOT && !IsChanneledSpell(spellProto))
-        CastingTime = 3500;
-
-    int32 overTime    = 0;
-    uint8 effects     = 0;
-    bool DirectDamage = false;
-    bool AreaEffect   = false;
-
-    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-        if (IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetA[i])) || IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetB[i])))
-            AreaEffect = true;
-
-    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-    {
-        switch (spellProto->Effect[i])
-        {
-            case SPELL_EFFECT_SCHOOL_DAMAGE:
-            case SPELL_EFFECT_POWER_DRAIN:
-            case SPELL_EFFECT_HEALTH_LEECH:
-            case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
-            case SPELL_EFFECT_POWER_BURN:
-            case SPELL_EFFECT_HEAL:
-                DirectDamage = true;
-                break;
-            case SPELL_EFFECT_APPLY_AURA:
-                switch (spellProto->EffectApplyAuraName[i])
-                {
-                    case SPELL_AURA_PERIODIC_DAMAGE:
-                    case SPELL_AURA_PERIODIC_HEAL:
-                    case SPELL_AURA_PERIODIC_LEECH:
-                        if (GetSpellDuration(spellProto))
-                            overTime = GetSpellDuration(spellProto);
-                        break;
-                    // Penalty for additional effects
-                    case SPELL_AURA_DUMMY:
-                        ++effects;
-                        break;
-                    case SPELL_AURA_MOD_DECREASE_SPEED:
-                        ++effects;
-                        break;
-                    case SPELL_AURA_MOD_CONFUSE:
-                    case SPELL_AURA_MOD_STUN:
-                    case SPELL_AURA_MOD_ROOT:
-                        // -10% per effect
-                        effects += 2;
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    // Combined Spells with Both Over Time and Direct Damage
-    if (overTime > 0 && CastingTime > 0 && DirectDamage)
-    {
-        // mainly for DoTs which are 3500 here otherwise
-        uint32 OriginalCastTime = GetSpellCastTime(spellProto);
-        if (OriginalCastTime > 7000) OriginalCastTime = 7000;
-        if (OriginalCastTime < 1500) OriginalCastTime = 1500;
-        // Portion to Over Time
-        float PtOT = (overTime / 15000.0f) / ((overTime / 15000.0f) + (OriginalCastTime / 3500.0f));
-
-        if (damagetype == DOT)
-            CastingTime = uint32(CastingTime * PtOT);
-        else if (PtOT < 1.0f)
-            CastingTime  = uint32(CastingTime * (1 - PtOT));
-        else
-            CastingTime = 0;
-    }
-
-    // Area Effect Spells receive only half of bonus
-    if (AreaEffect)
-        CastingTime /= 2;
-
-    // 50% for damage and healing spells for leech spells from damage bonus and 0% from healing
-    for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-    {
-        if (spellProto->Effect[j] == SPELL_EFFECT_HEALTH_LEECH ||
-                (spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH))
-        {
-            CastingTime /= 2;
-            break;
-        }
-    }
-
-    // -5% of total per any additional effect (multiplicative)
-    for (int i = 0; i < effects; ++i)
-        CastingTime *= 0.95f;
-
-    return CastingTime;
 }
 
 uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo)
@@ -285,23 +194,224 @@ uint16 GetSpellAuraMaxTicks(uint32 spellId)
     return GetSpellAuraMaxTicks(spellInfo);
 }
 
-float CalculateDefaultCoefficient(SpellEntry const* spellProto, DamageEffectType const damagetype)
+float CalculateDefaultCoefficient(SpellEntry const *spellProto, DamageEffectType const damagetype)
 {
-    // Damage over Time spells bonus calculation
-    float DotFactor = 1.0f;
-    if (damagetype == DOT)
-    {
-        if (!IsChanneledSpell(spellProto))
-            DotFactor = GetSpellDuration(spellProto) / 15000.0f;
+    // Distribute Damage over multiple effects, reduce by AoE
+    uint32 castingTime = !IsChanneledSpell(spellProto) ? GetSpellCastTime(spellProto) : GetSpellDuration(spellProto);
 
-        if (uint16 DotTicks = GetSpellAuraMaxTicks(spellProto))
-            DotFactor /= DotTicks;
+    if (castingTime > 3500) castingTime = 3500;
+    if (castingTime < 1500) castingTime = 1500;
+
+    if (damagetype == DOT && !IsChanneledSpell(spellProto))
+        castingTime = 3500;
+
+    uint16  ticksCount      = 0;
+    uint8   effectsCount    = 0;
+    bool    hasDirectDamage = false;
+
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        switch (spellProto->Effect[i])
+        {
+            case SPELL_EFFECT_SCHOOL_DAMAGE:
+            case SPELL_EFFECT_POWER_DRAIN:
+            case SPELL_EFFECT_HEALTH_LEECH:
+            case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+            case SPELL_EFFECT_POWER_BURN:
+            case SPELL_EFFECT_HEAL:
+                hasDirectDamage = true;
+                break;
+            case SPELL_EFFECT_APPLY_AURA:
+            case SPELL_EFFECT_PERSISTENT_AREA_AURA:
+            case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
+                switch (spellProto->EffectApplyAuraName[i])
+                {
+                    case SPELL_AURA_PERIODIC_DAMAGE:
+                    case SPELL_AURA_PERIODIC_HEAL:
+                    case SPELL_AURA_PERIODIC_LEECH:
+                        ticksCount = GetSpellAuraMaxTicks(spellProto);
+                        break;
+                    // Penalty for additional effects 5%
+                    case SPELL_AURA_DUMMY:
+                    case SPELL_AURA_MOD_DECREASE_SPEED:
+                    case SPELL_AURA_MOD_CONFUSE:
+                    case SPELL_AURA_MOD_STUN:
+                    case SPELL_AURA_MOD_ROOT:
+                        ++effectsCount;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case SPELL_EFFECT_INTERRUPT_CAST:
+                ++effectsCount;
+                break;
+            default:
+                break;
+        }
     }
 
-    // Distribute Damage over multiple effects, reduce by AoE
-    float coeff = GetSpellCastTimeForBonus(spellProto, damagetype) / 3500.0f;
+    // Combined Spells with Both Over Time and Direct Damage
+    if (ticksCount > 0 && castingTime > 0 && hasDirectDamage)
+    {
+        // mainly for DoTs which are 3500 here otherwise
+        uint32 originalCastTime = GetSpellCastTime(spellProto);
+        if (originalCastTime > 3500) originalCastTime = 3500;
+        if (originalCastTime < 1500) originalCastTime = 1500;
 
-    return coeff * DotFactor;
+        // Portion to Over Time
+        float PtOT = (ticksCount / 5.0f) / ((ticksCount / 5.0f) + (originalCastTime / 3500.0f));
+
+        if (damagetype == DOT)
+            castingTime = uint32(castingTime * PtOT);
+        else if (PtOT < 1.0f)
+            castingTime  = uint32(castingTime * (1 - PtOT));
+        else
+            castingTime = 0;
+    }
+
+    // Area Effect Spells receive only 1/3 of bonus
+    if (IsAreaEffect(spellProto))
+        castingTime /= 3;
+
+    // 50% for damage and healing spells for leech spells from damage bonus and 0% from healing
+    for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (spellProto->Effect[i] == SPELL_EFFECT_HEALTH_LEECH ||
+           (spellProto->Effect[i] == SPELL_EFFECT_APPLY_AURA &&
+           spellProto->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_LEECH))
+        {
+            castingTime /= 2;
+            break;
+        }
+    }
+
+    // -5% of total per any additional effect (multiplicative)
+    for (uint8 i = 0; i < effectsCount; ++i)
+        castingTime *= 0.95f;
+        
+    float coeff = castingTime / 3500.0f;
+    
+    // Damage over Time spells bonus calculation
+    float dotFactor = 1.0f;
+    if (damagetype == DOT)
+    {
+        if (ticksCount)
+        {
+            if (!IsChanneledSpell(spellProto))
+                dotFactor = ticksCount < 5 ? float(ticksCount) / 5.0f : 1.0f;
+
+            dotFactor /= ticksCount;
+        }
+    }
+
+    return coeff * dotFactor;
+}
+
+float CalculateCustomCoefficient(SpellEntry const *spellProto, Unit const* caster, DamageEffectType const damageType, float coeff, uint8 targetNum)
+{
+    if (!caster)
+        return coeff;
+
+    if (caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        // Holy Light / Flash of Light triggers without benefit (it is calculated before)
+        if (spellProto->IsFitToFamily<SPELLFAMILY_PALADIN, CF_PALADIN_HOLY_LIGHT1, CF_PALADIN_FLASH_OF_LIGHT1>())
+            return 0.0f;
+
+        // Seal of Righteousness
+        if (spellProto->IsFitToFamily<SPELLFAMILY_PALADIN, CF_PALADIN_SEALS>() && spellProto->SpellIconID == 25)
+        {
+            coeff = 0.092f;
+            float speed = BASE_ATTACK_TIME;
+
+            if (Item *item = ((Player*)caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+            {
+                coeff = item->isOneHandedWeapon() ? 0.092f : 0.108f;
+                speed = item->GetProto()->Delay;
+            }
+
+            speed /= 1000.0f;
+
+            return speed * coeff;
+        }
+
+        // Chain Lightning / Chain Heal
+        if (spellProto->IsFitToFamily<SPELLFAMILY_SHAMAN, CF_SHAMAN_CHAIN_HEAL, CF_SHAMAN_CHAIN_LIGHTNING>())
+            for (uint8 i = 1; i < targetNum; ++i)
+                coeff *= 0.5f;
+
+        // Healing Wave (T1 bonus)
+        if (spellProto->IsFitToFamily<SPELLFAMILY_SHAMAN, CF_SHAMAN_HEALING_WAVE>())
+            for (uint8 i = 1; i < targetNum; ++i)
+                coeff *= 0.2f;
+    }
+
+    return coeff;
+}
+
+int32 CalculateBonusByAttackPower(SpellEntry const *spellProto, Unit const* caster, DamageEffectType const damageType, int32 total, int32 apBenefit)
+{
+    if (!caster)
+        return 0;
+        
+    switch (spellProto->SpellFamilyName)
+    {
+        case SPELLFAMILY_DRUID:
+        {
+            
+            if (spellProto->IsFitToFamily<SPELLFAMILY_DRUID, CF_DRUID_RIP_BITE>())
+            {
+                // Rip
+                if (damageType == DOT)
+                {
+                    // Dmg/tick = $AP * min(0.01 * $cp, 0.04) [Yes, there is no difference, whether 4 or 5 CPs are being used]
+                    uint8 cp = ((Player*)caster)->GetComboPoints();
+                    float coeff = std::min(0.01f * cp, 0.04f);
+                    total += int32(coeff * (caster->GetTotalAttackPowerValue(BASE_ATTACK) + apBenefit));
+                }
+                // Ferocious Bite
+                else
+                {
+                    // Dmg = $AP * $cp * 0.03
+                    uint8 cp = ((Player*)caster)->GetComboPoints();
+                    float coeff = cp * 0.03f;
+                    total += int32(coeff * (caster->GetTotalAttackPowerValue(BASE_ATTACK) + apBenefit));
+                }
+            }
+            break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            // Rupture
+            if (spellProto->IsFitToFamily<SPELLFAMILY_ROGUE, CF_ROGUE_RUPTURE>())
+            {
+                // Dmg/tick = $AP * min(0.01 * $cp, 0.03) [Like Rip: only the first three CP increase the contribution from AP]
+                uint8 cp = ((Player*)caster)->GetComboPoints();
+                float coeff = std::min(0.01f * cp, 0.03f);
+                total += int32(coeff * (caster->GetTotalAttackPowerValue(BASE_ATTACK) + apBenefit));
+            }
+            // Garrote
+            else if (spellProto->IsFitToFamily<SPELLFAMILY_ROGUE, CF_ROGUE_GARROTE>())
+            {
+                // Dmg/tick = $AP * 0.18 / 6 (0.03)
+                total += int32(0.03f * (caster->GetTotalAttackPowerValue(BASE_ATTACK) + apBenefit));
+            }
+            // Eviscerate
+            else if (spellProto->IsFitToFamily<SPELLFAMILY_ROGUE, CF_ROGUE_EVISCERATE>())
+            {
+                // Dmg = $AP * $cp * 0.03)
+                uint8 cp = ((Player*)caster)->GetComboPoints();
+                float coeff = cp * 0.03f;
+                total += int32(coeff * (caster->GetTotalAttackPowerValue(BASE_ATTACK) + apBenefit));
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    return total;
 }
 
 WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo)
@@ -390,7 +500,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
-        return SPELL_NORMAL;
+        return SPELL_SPECIFIC_NORMAL;
 
     switch (spellInfo->SpellFamilyName)
     {
@@ -398,7 +508,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         {
             // Aspect of the Beast
             if (spellInfo->Id == 13161)
-                return SPELL_ASPECT;
+                return SPELL_SPECIFIC_ASPECT;
 
             // Food / Drinks (mostly)
             if (spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
@@ -425,18 +535,21 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                 }
 
                 if (food && drink)
-                    return SPELL_FOOD_AND_DRINK;
+                    return SPELL_SPECIFIC_FOOD_AND_DRINK;
                 else if (food)
-                    return SPELL_FOOD;
+                    return SPELL_SPECIFIC_FOOD;
                 else if (drink)
-                    return SPELL_DRINK;
+                    return SPELL_SPECIFIC_DRINK;
             }
             else
             {
                 // Well Fed buffs (must be exclusive with Food / Drink replenishment effects, or else Well Fed will cause them to be removed)
-                // SpellIcon 2560 is Spell 46687, does not have this flag
                 if (spellInfo->HasAttribute(SPELL_ATTR_EX2_FOOD_BUFF))
-                    return SPELL_WELL_FED;
+                    return SPELL_SPECIFIC_WELL_FED;
+
+                if (spellInfo->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MOD_STAT && spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC &&
+                    spellInfo->School == SPELL_SCHOOL_NATURE && spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && spellInfo->Attributes == SPELL_ATTR_NOT_SHAPESHIFT)
+                    return SPELL_SPECIFIC_SCROLL;
             }
             break;
         }
@@ -444,17 +557,17 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         {
             // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
             if (spellInfo->SpellFamilyFlags & uint64(0x12000000))
-                return SPELL_MAGE_ARMOR;
+                return SPELL_SPECIFIC_MAGE_ARMOR;
 
             if (spellInfo->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MOD_CONFUSE && spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
-                return SPELL_MAGE_POLYMORPH;
+                return SPELL_SPECIFIC_MAGE_POLYMORPH;
 
             break;
         }
         case SPELLFAMILY_WARRIOR:
         {
             if (spellInfo->SpellFamilyFlags & uint64(0x00008000010000))
-                return SPELL_POSITIVE_SHOUT;
+                return SPELL_SPECIFIC_POSITIVE_SHOUT;
 
             break;
         }
@@ -462,7 +575,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         {
             // only warlock curses have this
             if (spellInfo->Dispel == DISPEL_CURSE)
-                return SPELL_CURSE;
+                return SPELL_SPECIFIC_CURSE;
             break;
         }
         case SPELLFAMILY_PRIEST:
@@ -471,44 +584,44 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_SITTING) &&
                     (spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK) &&
                     (spellInfo->SpellIconID == 52 || spellInfo->SpellIconID == 79))
-                return SPELL_WELL_FED;
+                return SPELL_SPECIFIC_WELL_FED;
             break;
         }
         case SPELLFAMILY_HUNTER:
         {
             // only hunter stings have this
             if (spellInfo->Dispel == DISPEL_POISON)
-                return SPELL_STING;
+                return SPELL_SPECIFIC_STING;
 
             // only hunter aspects have this (one have generic family), if exclude Auto Shot
             if (spellInfo->activeIconID == 122 && spellInfo->Id != 75)
-                return SPELL_ASPECT;
+                return SPELL_SPECIFIC_ASPECT;
 
             break;
         }
         case SPELLFAMILY_PALADIN:
         {
             if (IsSealSpell(spellInfo))
-                return SPELL_SEAL;
+                return SPELL_SPECIFIC_SEAL;
 
             if (spellInfo->IsFitToFamilyMask(uint64(0x0000000010000100)))
-                return SPELL_BLESSING;
+                return SPELL_SPECIFIC_BLESSING;
 
             if ((spellInfo->IsFitToFamilyMask(uint64(0x0000000020180400))) && spellInfo->baseLevel != 0)
-                return SPELL_JUDGEMENT;
+                return SPELL_SPECIFIC_JUDGEMENT;
 
             for (int i = 0; i < 3; ++i)
             {
                 // only paladin auras have this
                 if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_PARTY)
-                    return SPELL_AURA;
+                    return SPELL_SPECIFIC_AURA;
             }
             break;
         }
         case SPELLFAMILY_SHAMAN:
         {
             if (IsElementalShield(spellInfo))
-                return SPELL_ELEMENTAL_SHIELD;
+                return SPELL_SPECIFIC_ELEMENTAL_SHIELD;
 
             break;
         }
@@ -520,7 +633,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     // only warlock armor/skin have this (in additional to family cases)
     if (spellInfo->SpellVisual == 130 && spellInfo->SpellIconID == 89)
     {
-        return SPELL_WARLOCK_ARMOR;
+        return SPELL_SPECIFIC_WARLOCK_ARMOR;
     }
 
     // Tracking spells (exclude Well Fed, some other always allowed cases)
@@ -528,13 +641,58 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_RESOURCES)  ||
             IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_STEALTHED)) &&
             (spellInfo->HasAttribute(SPELL_ATTR_EX_UNK17) || spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_MOUNTED)))
-        return SPELL_TRACKER;
+        return SPELL_SPECIFIC_TRACKER;
 
     // elixirs can have different families, but potion most ofc.
     if (SpellSpecific sp = sSpellMgr.GetSpellElixirSpecific(spellInfo->Id))
         return sp;
 
-    return SPELL_NORMAL;
+    return SPELL_SPECIFIC_NORMAL;
+}
+
+SpellBuffType GetSpellBuffType(uint32 spellId)
+{
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+
+    if (!spellInfo)
+        return SPELL_BUFF_NONE;
+
+    if (GetSpellSpecific(spellId) == SPELL_SPECIFIC_SCROLL)
+    {
+        switch (spellInfo->EffectMiscValue[EFFECT_INDEX_0])
+        {
+            case UNIT_MOD_STAT_STRENGTH:
+                return SPELL_BUFF_STRENGTH;
+            case UNIT_MOD_STAT_AGILITY:
+                return SPELL_BUFF_AGILITY;
+            case UNIT_MOD_STAT_STAMINA:
+                return SPELL_BUFF_STAMINA;
+            case UNIT_MOD_STAT_INTELLECT:
+                return SPELL_BUFF_INTELLECT;
+            case UNIT_MOD_STAT_SPIRIT:
+                return SPELL_BUFF_SPIRIT;
+            default:
+                return SPELL_BUFF_NONE;
+        }
+
+        return SPELL_BUFF_NONE;
+    }
+
+    if (spellInfo->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_POWER_WORD_FORTITUDE>())
+        return SPELL_BUFF_STAMINA;
+
+    if (spellInfo->IsFitToFamily<SPELLFAMILY_MAGE, CF_MAGE_ARCANE_INT>())
+        return SPELL_BUFF_INTELLECT;
+
+    if (spellInfo->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_MISC2>() &&
+        spellInfo->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MOD_STAT)
+        return SPELL_BUFF_SPIRIT;
+
+    if (spellInfo->IsFitToFamily<SPELLFAMILY_PRIEST, CF_PRIEST_SHADOW_PROTECTION>() ||
+        (spellInfo->IsFitToFamily<SPELLFAMILY_PALADIN, CF_PALADIN_AURAS>() && spellInfo->EffectMiscValue[EFFECT_INDEX_0] == 32))
+        return SPELL_BUFF_SHADOW_RESISTANCE;
+
+    return SPELL_BUFF_NONE;
 }
 
 // target not allow have more one spell specific from same caster
@@ -542,13 +700,13 @@ bool IsSingleFromSpellSpecificPerTargetPerCaster(SpellSpecific spellSpec1, Spell
 {
     switch (spellSpec1)
     {
-        case SPELL_BLESSING:
-        case SPELL_AURA:
-        case SPELL_STING:
-        case SPELL_CURSE:
-        case SPELL_ASPECT:
-        case SPELL_POSITIVE_SHOUT:
-        case SPELL_JUDGEMENT:
+        case SPELL_SPECIFIC_BLESSING:
+        case SPELL_SPECIFIC_AURA:
+        case SPELL_SPECIFIC_STING:
+        case SPELL_SPECIFIC_CURSE:
+        case SPELL_SPECIFIC_ASPECT:
+        case SPELL_SPECIFIC_POSITIVE_SHOUT:
+        case SPELL_SPECIFIC_JUDGEMENT:
             return spellSpec1 == spellSpec2;
         default:
             return false;
@@ -560,10 +718,10 @@ bool IsSingleFromSpellSpecificSpellRanksPerTarget(SpellSpecific spellSpec1, Spel
 {
     switch (spellSpec1)
     {
-        case SPELL_BLESSING:
-        case SPELL_AURA:
-        case SPELL_CURSE:
-        case SPELL_ASPECT:
+        case SPELL_SPECIFIC_BLESSING:
+        case SPELL_SPECIFIC_AURA:
+        case SPELL_SPECIFIC_CURSE:
+        case SPELL_SPECIFIC_ASPECT:
             return spellSpec1 == spellSpec2;
         default:
             return false;
@@ -575,34 +733,26 @@ bool IsSingleFromSpellSpecificPerTarget(SpellSpecific spellSpec1, SpellSpecific 
 {
     switch (spellSpec1)
     {
-        case SPELL_SEAL:
-        case SPELL_TRACKER:
-        case SPELL_WARLOCK_ARMOR:
-        case SPELL_MAGE_ARMOR:
-        case SPELL_ELEMENTAL_SHIELD:
-        case SPELL_MAGE_POLYMORPH:
-        case SPELL_WELL_FED:
+        case SPELL_SPECIFIC_SEAL:
+        case SPELL_SPECIFIC_TRACKER:
+        case SPELL_SPECIFIC_WARLOCK_ARMOR:
+        case SPELL_SPECIFIC_MAGE_ARMOR:
+        case SPELL_SPECIFIC_ELEMENTAL_SHIELD:
+        case SPELL_SPECIFIC_MAGE_POLYMORPH:
+        case SPELL_SPECIFIC_WELL_FED:
+        case SPELL_SPECIFIC_FLASK_ELIXIR:
+        case SPELL_SPECIFIC_ZANZA_ELIXIR:
             return spellSpec1 == spellSpec2;
-        case SPELL_BATTLE_ELIXIR:
-            return spellSpec2 == SPELL_BATTLE_ELIXIR
-                   || spellSpec2 == SPELL_FLASK_ELIXIR;
-        case SPELL_GUARDIAN_ELIXIR:
-            return spellSpec2 == SPELL_GUARDIAN_ELIXIR
-                   || spellSpec2 == SPELL_FLASK_ELIXIR;
-        case SPELL_FLASK_ELIXIR:
-            return spellSpec2 == SPELL_BATTLE_ELIXIR
-                   || spellSpec2 == SPELL_GUARDIAN_ELIXIR
-                   || spellSpec2 == SPELL_FLASK_ELIXIR;
-        case SPELL_FOOD:
-            return spellSpec2 == SPELL_FOOD
-                   || spellSpec2 == SPELL_FOOD_AND_DRINK;
-        case SPELL_DRINK:
-            return spellSpec2 == SPELL_DRINK
-                   || spellSpec2 == SPELL_FOOD_AND_DRINK;
-        case SPELL_FOOD_AND_DRINK:
-            return spellSpec2 == SPELL_FOOD
-                   || spellSpec2 == SPELL_DRINK
-                   || spellSpec2 == SPELL_FOOD_AND_DRINK;
+        case SPELL_SPECIFIC_FOOD:
+            return spellSpec2 == SPELL_SPECIFIC_FOOD
+                   || spellSpec2 == SPELL_SPECIFIC_FOOD_AND_DRINK;
+        case SPELL_SPECIFIC_DRINK:
+            return spellSpec2 == SPELL_SPECIFIC_DRINK
+                   || spellSpec2 == SPELL_SPECIFIC_FOOD_AND_DRINK;
+        case SPELL_SPECIFIC_FOOD_AND_DRINK:
+            return spellSpec2 == SPELL_SPECIFIC_FOOD
+                   || spellSpec2 == SPELL_SPECIFIC_DRINK
+                   || spellSpec2 == SPELL_SPECIFIC_FOOD_AND_DRINK;
         default:
             return false;
     }
@@ -620,9 +770,6 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB)
         case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
         case TARGET_CURRENT_ENEMY_COORDINATES:
             return false;
-        // positive or dependent
-        case TARGET_CASTER_COORDINATES:
-            return (targetB == TARGET_ALL_PARTY || targetB == TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER);
         default:
             break;
     }
@@ -927,7 +1074,7 @@ bool IsSingleTargetSpell(SpellEntry const* spellInfo)
     // TODO - need found Judgements rule
     switch (GetSpellSpecific(spellInfo->Id))
     {
-        case SPELL_JUDGEMENT:
+        case SPELL_SPECIFIC_JUDGEMENT:
             return true;
         default:
             break;
@@ -949,8 +1096,8 @@ bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellI
     // spell with single target specific types
     switch (spec1)
     {
-        case SPELL_JUDGEMENT:
-        case SPELL_MAGE_POLYMORPH:
+        case SPELL_SPECIFIC_JUDGEMENT:
+        case SPELL_SPECIFIC_MAGE_POLYMORPH:
             if (GetSpellSpecific(spellInfo2->Id) == spec1)
                 return true;
             break;
@@ -1402,8 +1549,8 @@ void SpellMgr::LoadSpellBonuses()
 {
     mSpellBonusMap.clear();                             // need for reload case
     uint32 count = 0;
-    //                                                0      1             2          3
-    QueryResult* result = WorldDatabase.Query("SELECT entry, direct_bonus, dot_bonus, ap_bonus, ap_dot_bonus FROM spell_bonus_data");
+    //                                                0      1             2
+    QueryResult* result = WorldDatabase.Query("SELECT entry, direct_bonus, dot_bonus FROM spell_bonus_data");
     if (!result)
     {
         BarGoLink bar(1);
@@ -1440,8 +1587,6 @@ void SpellMgr::LoadSpellBonuses()
 
         sbe.direct_damage = fields[1].GetFloat();
         sbe.dot_damage    = fields[2].GetFloat();
-        sbe.ap_bonus      = fields[3].GetFloat();
-        sbe.ap_dot_bonus   = fields[4].GetFloat();
 
         bool need_dot = false;
         bool need_direct = false;
@@ -1495,28 +1640,23 @@ void SpellMgr::LoadSpellBonuses()
             dot_diff = std::abs(sbe.dot_damage - dot_calc);
         }
 
-        if (direct_diff < 0.02f && !need_dot && !sbe.ap_bonus && !sbe.ap_dot_bonus)
+        if (direct_diff < 0.02f && !need_dot)
             sLog.outErrorDb("`spell_bonus_data` entry for spell %u `direct_bonus` not needed (data from table: %f, calculated %f, difference of %f) and `dot_bonus` also not used",
                             entry, sbe.direct_damage, direct_calc, direct_diff);
-        else if (direct_diff < 0.02f && dot_diff < 0.02f && !sbe.ap_bonus && !sbe.ap_dot_bonus)
+        else if (direct_diff < 0.02f && dot_diff < 0.02f)
         {
             sLog.outErrorDb("`spell_bonus_data` entry for spell %u `direct_bonus` not needed (data from table: %f, calculated %f, difference of %f) and ",
                             entry, sbe.direct_damage, direct_calc, direct_diff);
             sLog.outErrorDb("                                  ... `dot_bonus` not needed (data from table: %f, calculated %f, difference of %f)",
                             sbe.dot_damage, dot_calc, dot_diff);
         }
-        else if (!need_direct && dot_diff < 0.02f && !sbe.ap_bonus && !sbe.ap_dot_bonus)
+        else if (!need_direct && dot_diff < 0.02f)
             sLog.outErrorDb("`spell_bonus_data` entry for spell %u `dot_bonus` not needed (data from table: %f, calculated %f, difference of %f) and direct also not used",
                             entry, sbe.dot_damage, dot_calc, dot_diff);
         else if (!need_direct && sbe.direct_damage)
             sLog.outErrorDb("`spell_bonus_data` entry for spell %u `direct_bonus` not used (spell not have non-periodic affects)", entry);
         else if (!need_dot && sbe.dot_damage)
             sLog.outErrorDb("`spell_bonus_data` entry for spell %u `dot_bonus` not used (spell not have periodic affects)", entry);
-
-        if (!need_direct && sbe.ap_bonus)
-            sLog.outErrorDb("`spell_bonus_data` entry for spell %u `ap_bonus` not used (spell not have non-periodic affects)", entry);
-        else if (!need_dot && sbe.ap_dot_bonus)
-            sLog.outErrorDb("`spell_bonus_data` entry for spell %u `ap_dot_bonus` not used (spell not have periodic affects)", entry);
 
         mSpellBonusMap[entry] = sbe;
 
@@ -1791,21 +1931,16 @@ bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
 
 bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) const
 {
+    if (spellId_1 == spellId_2)
+        return false;
+
+    if (GetSpellBuffType(spellId_1) != SPELL_BUFF_NONE && GetSpellBuffType(spellId_1) == GetSpellBuffType(spellId_2))
+        return true;
+
     SpellEntry const* spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
     SpellEntry const* spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
 
     if (!spellInfo_1 || !spellInfo_2)
-        return false;
-
-    if (spellId_1 == spellId_2)
-        return false;
-
-    // Resurrection sickness
-    if ((spellInfo_1->Id == SPELL_ID_PASSIVE_RESURRECTION_SICKNESS) != (spellInfo_2->Id == SPELL_ID_PASSIVE_RESURRECTION_SICKNESS))
-        return false;
-
-    // Allow stack passive and not passive spells
-    if (spellInfo_1->HasAttribute(SPELL_ATTR_PASSIVE) != spellInfo_2->HasAttribute(SPELL_ATTR_PASSIVE))
         return false;
 
     // Specific spell family spells
@@ -2017,8 +2152,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if (spellInfo_2->SpellFamilyName == SPELLFAMILY_PRIEST)
             {
                 // Devouring Plague and Shadow Vulnerability
-                if (((spellInfo_1->SpellFamilyFlags & uint64(0x2000000)) && (spellInfo_2->SpellFamilyFlags & uint64(0x800000000))) ||
-                        ((spellInfo_2->SpellFamilyFlags & uint64(0x2000000)) && (spellInfo_1->SpellFamilyFlags & uint64(0x800000000))))
+                if (((spellInfo_1->SpellFamilyFlags & uint64(0x2000000)) && (spellInfo_2->SpellFamilyFlags & uint64(0x800000000)))
+                    || ((spellInfo_2->SpellFamilyFlags & uint64(0x2000000)) && (spellInfo_1->SpellFamilyFlags & uint64(0x800000000)))
+                    || ((spellInfo_2->SpellFamilyFlags & uint64(0x2000000)) && (spellInfo_1->SpellFamilyFlags & uint64(0x4000000))))
                     return false;
 
                 // StarShards and Shadow Word: Pain
@@ -2086,90 +2222,30 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             // Wing Clip -> Improved Wing Clip (multi-family check)
             if ((spellInfo_1->SpellFamilyFlags & uint64(0x40)) && spellInfo_2->Id == 19229)
                 return false;
-
-            // Concussive Shot and Imp. Concussive Shot (multi-family check)
-            if (spellInfo_2->Id == 19410 && spellInfo_1->Id == 5116)
-                return false;
-            break;
-        case SPELLFAMILY_PALADIN:
-            if (spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN)
-            {
-                // Paladin Seals
-                if (IsSealSpell(spellInfo_1) && IsSealSpell(spellInfo_2))
-                    return true;
-                // Concentration Aura and Improved Concentration Aura and Aura Mastery
-                if ((spellInfo_1->SpellIconID == 1487) && (spellInfo_2->SpellIconID == 1487))
-                    return false;
-            }
-
-            // Combustion and Fire Protection Aura (multi-family check)
-            if (spellInfo_2->Id == 11129 && spellInfo_1->SpellIconID == 33 && spellInfo_1->SpellVisual == 321)
-                return false;
-
-            // *Sanctity Aura -> Unstable Currents and other (multi-family check)
-            if (spellInfo_1->SpellIconID == 502 && spellInfo_2->SpellFamilyName == SPELLFAMILY_GENERIC && spellInfo_2->SpellIconID == 502 && spellInfo_2->SpellVisual == 969)
-                return false;
-            break;
-        case SPELLFAMILY_SHAMAN:
-            if (spellInfo_2->SpellFamilyName == SPELLFAMILY_SHAMAN)
-            {
-                // Windfury weapon
-                if (spellInfo_1->SpellIconID == 220 && spellInfo_2->SpellIconID == 220 &&
-                        !spellInfo_1->IsFitToFamilyMask(spellInfo_2->SpellFamilyFlags))
-                    return false;
-            }
-            // Bloodlust and Bloodthirst (multi-family check)
-            if (spellInfo_1->Id == 2825 && spellInfo_2->SpellIconID == 38 && spellInfo_2->SpellVisual == 0)
-                return false;
-            break;
-        default:
             break;
     }
 
-    // more generic checks
-    if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
-            spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
-    {
-        bool isModifier = false;
-        for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-        {
-            if (spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER ||
-                    spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_ADD_PCT_MODIFIER  ||
-                    spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER ||
-                    spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_PCT_MODIFIER)
-                isModifier = true;
-        }
+    if (IsSealSpell(spellInfo_1) && IsSealSpell(spellInfo_2))
+        return true;
 
-        if (!isModifier)
-            return true;
-    }
+    if (spellInfo_1->IsFitToFamily<SPELLFAMILY_DRUID, CF_DRUID_MARK_OF_THE_WILD>() &&
+        spellInfo_2->IsFitToFamily<SPELLFAMILY_DRUID, CF_DRUID_MARK_OF_THE_WILD>())
+        return true;
+
+    if ((spellInfo_1->IsFitToFamily<SPELLFAMILY_WARRIOR, CF_WARRIOR_SUNDER_ARMOR>() ||
+         spellInfo_1->IsFitToFamily<SPELLFAMILY_ROGUE,   CF_ROGUE_EXPOSE_ARMOR>()) &&
+        (spellInfo_2->IsFitToFamily<SPELLFAMILY_WARRIOR, CF_WARRIOR_SUNDER_ARMOR>() ||
+         spellInfo_2->IsFitToFamily<SPELLFAMILY_ROGUE,   CF_ROGUE_EXPOSE_ARMOR>()))
+        return true;
+
+    if (spellInfo_1->IsFitToFamily<SPELLFAMILY_MAGE, CF_MAGE_D_A_MAGIC>() &&
+        spellInfo_2->IsFitToFamily<SPELLFAMILY_MAGE, CF_MAGE_D_A_MAGIC>())
+        return true;
 
     if (IsRankSpellDueToSpell(spellInfo_1, spellId_2))
         return true;
 
-    if (spellInfo_1->SpellFamilyName == 0 || spellInfo_2->SpellFamilyName == 0)
-        return false;
-
-    if (spellInfo_1->SpellFamilyName != spellInfo_2->SpellFamilyName)
-        return false;
-
-    bool dummy_only = true;
-    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-    {
-        if (spellInfo_1->Effect[i] != spellInfo_2->Effect[i] ||
-                spellInfo_1->EffectItemType[i] != spellInfo_2->EffectItemType[i] ||
-                spellInfo_1->EffectMiscValue[i] != spellInfo_2->EffectMiscValue[i] ||
-                spellInfo_1->EffectApplyAuraName[i] != spellInfo_2->EffectApplyAuraName[i])
-            return false;
-
-        // ignore dummy only spells
-        if (spellInfo_1->Effect[i] && spellInfo_1->Effect[i] != SPELL_EFFECT_DUMMY && spellInfo_1->EffectApplyAuraName[i] != SPELL_AURA_DUMMY)
-            dummy_only = false;
-    }
-    if (dummy_only)
-        return false;
-
-    return true;
+    return false;
 }
 
 bool SpellMgr::IsProfessionOrRidingSpell(uint32 spellId)
@@ -3743,7 +3819,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         return DIMINISHING_DISARM;
     if (mechanic & (1 << (MECHANIC_FREEZE - 1)))
         return DIMINISHING_FREEZE;
-    if (mechanic & ((1 << (MECHANIC_KNOCKOUT - 1)) | (1 << (MECHANIC_SAPPED - 1))))
+    if (mechanic & (1 << (MECHANIC_KNOCKOUT - 1)))
         return DIMINISHING_KNOCKOUT;
     if (mechanic & (1 << (MECHANIC_BANISH - 1)))
         return DIMINISHING_BANISH;

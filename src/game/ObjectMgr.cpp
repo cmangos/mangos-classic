@@ -963,11 +963,12 @@ void ObjectMgr::LoadCreatures()
     QueryResult* result = WorldDatabase.Query("SELECT creature.guid, creature.id, map, modelid,"
                           //   4             5           6           7           8            9              10         11
                           "equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint,"
-                          //   12         13       14          15            16
-                          "curhealth, curmana, DeathState, MovementType, event,"
+                          //   12         13       14                15            16
+                          "curhealth, curmana, DeathState, creature.MovementType, event,"
                           //   17                        18
-                          "pool_creature.pool_entry, pool_creature_template.pool_entry "
+                          "pool_creature.pool_entry, pool_creature_template.pool_entry, creature_template.doLoad "
                           "FROM creature "
+                          "INNER JOIN creature_template ON creature.id = creature_template.entry "
                           "LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid "
                           "LEFT OUTER JOIN pool_creature ON creature.guid = pool_creature.guid "
                           "LEFT OUTER JOIN pool_creature_template ON creature.id = pool_creature_template.id");
@@ -1020,6 +1021,10 @@ void ObjectMgr::LoadCreatures()
         int16 gameEvent         = fields[16].GetInt16();
         int16 GuidPoolId        = fields[17].GetInt16();
         int16 EntryPoolId       = fields[18].GetInt16();
+        bool  doLoad            = fields[19].GetBool();
+
+        if (!doLoad)
+            continue;
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -1136,8 +1141,9 @@ void ObjectMgr::LoadGameObjects()
                           //   7          8          9          10         11             12            13     14
                           "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, event,"
                           //   15                          16
-                          "pool_gameobject.pool_entry, pool_gameobject_template.pool_entry "
+                          "pool_gameobject.pool_entry, pool_gameobject_template.pool_entry, gameobject_template.doLoad "
                           "FROM gameobject "
+                          "INNER JOIN gameobject_template ON gameobject.id = gameobject_template.entry "
                           "LEFT OUTER JOIN game_event_gameobject ON gameobject.guid = game_event_gameobject.guid "
                           "LEFT OUTER JOIN pool_gameobject ON gameobject.guid = pool_gameobject.guid "
                           "LEFT OUTER JOIN pool_gameobject_template ON gameobject.id = pool_gameobject_template.id");
@@ -1160,6 +1166,10 @@ void ObjectMgr::LoadGameObjects()
 
         uint32 guid         = fields[ 0].GetUInt32();
         uint32 entry        = fields[ 1].GetUInt32();
+        bool   doLoad       = fields[17].GetBool();
+
+        if (!doLoad)
+            continue;
 
         GameObjectInfo const* gInfo = GetGameObjectInfo(entry);
         if (!gInfo)
@@ -2601,12 +2611,15 @@ void ObjectMgr::LoadStandingList()
     DistributeRankPoints(HORDE, LastWeekBegin);
 
     sLog.outString();
+    sLog.outString(">> LastWeekBegin: %d", LastWeekBegin);
     sLog.outString(">> Loaded %u Horde and %u Ally honor standing definitions", static_cast<uint32>(HordeHonorStandingList.size()), static_cast<uint32>(AllyHonorStandingList.size()));
 }
 
 
 void ObjectMgr::FlushRankPoints(uint32 dateTop)
 {
+    sLog.outString();
+    sLog.outString(">> Flushing all ranking points, dateTop: %d", dateTop);
     // FLUSH CP
     QueryResult* result = CharacterDatabase.PQuery("SELECT date FROM character_honor_cp WHERE TYPE = %u AND date <= %u GROUP BY date ORDER BY date DESC", HONORABLE, dateTop);
     if (result)
@@ -2632,6 +2645,8 @@ void ObjectMgr::FlushRankPoints(uint32 dateTop)
 
             flush = WeekBegin < dateTop - 7; // flush only with date < lastweek
 
+            sLog.outString();
+            sLog.outString(">> WeekBegin: %d", WeekBegin);
             DistributeRankPoints(ALLIANCE, WeekBegin, flush);
             DistributeRankPoints(HORDE, WeekBegin, flush);
 
@@ -2698,8 +2713,13 @@ void ObjectMgr::DistributeRankPoints(uint32 team, uint32 dateBegin , bool flush 
         RP = fields[0].GetFloat();
         HK = fields[1].GetUInt32();
 
+        sLog.outString(">> DistributeRankPoints: guid = %u, RP = %f, HK = %u", itr->guid, RP, HK);
+
         itr->rpEarning = MaNGOS::Honor::CalculateRpEarning(itr->GetInfo()->honorPoints, scores);
         RP             = MaNGOS::Honor::CalculateRpDecay(itr->rpEarning, RP);
+        
+        sLog.outString(">> DistributeRankPoints: guid = %u, stored_honor_rating = %f (rpEarning = %f, RP = %f), stored_honorable_kills = %u (honorKills = %u, HK = %u)"
+            , itr->guid , finiteAlways(RP + itr->rpEarning), itr->rpEarning, RP, HK + itr->honorKills, itr->honorKills, HK);
 
         if (flush)
         {
@@ -2709,6 +2729,7 @@ void ObjectMgr::DistributeRankPoints(uint32 team, uint32 dateBegin , bool flush 
             CharacterDatabase.CommitTransaction();
         }
     }
+    SetStandingListBySide(team, list);
 
     delete result;
 }
@@ -2727,10 +2748,9 @@ HonorStanding* ObjectMgr::GetHonorStandingByGUID(uint32 guid, uint32 side)
 {
     HonorStandingList standingList = sObjectMgr.GetStandingListBySide(side);
 
-    for (HonorStandingList::iterator itr = standingList.begin(); itr != standingList.end() ; ++itr)
+    for (HonorStandingList::iterator itr = standingList.begin(); itr != standingList.end(); ++itr)
         if (itr->guid == guid)
             return itr->GetInfo();
-
     return 0;
 }
 

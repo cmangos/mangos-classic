@@ -143,6 +143,7 @@ struct CreatureInfo
     uint32  civilian;
     char const* AIName;
     uint32  ScriptID;
+    bool    DoLoad;
 
     // helpers
     static HighGuid GetHighGuid()

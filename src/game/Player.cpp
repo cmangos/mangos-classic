@@ -791,7 +791,7 @@ bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
     while (titem_amount > 0)
     {
         uint16 eDest;
-        uint8 msg = CanEquipNewItem(NULL_SLOT, eDest, titem_id, false);
+        InventoryResult msg = CanEquipNewItem(NULL_SLOT, eDest, titem_id, false);
         if (msg != EQUIP_ERR_OK)
             break;
 
@@ -1625,6 +1625,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             CombatStop();
 
             ResetContestedPvP();
+
+            // reset extra attacks
+            ResetExtraAttacks();
 
             // remove player from battleground on far teleport (when changing maps)
             if (BattleGround const* bg = GetBattleGround())
@@ -5889,7 +5892,7 @@ void Player::UpdateHonor()
     uint32 lastWeekBegin = thisWeekBegin - 7;
     uint32 lastWeekEnd   = lastWeekBegin + 7;
 
-    DETAIL_LOG("PLAYER: UpdateHonor");
+    DETAIL_LOG("PLAYER: UpdateHonor, guid: %u", GetGUIDLow());
 
     uint32 total_dishonorableKills = GetHonorStoredKills(false);
     uint32 total_honorableKills = GetHonorStoredKills(true);
@@ -5944,8 +5947,12 @@ void Player::UpdateHonor()
     // RANK POINTS
     HonorStanding* standing = sObjectMgr.GetHonorStandingByGUID(GetGUIDLow(), GetTeam());
     float rankP = GetStoredHonor();
+    sLog.outString(">> StoredHonor: %f", rankP);
     if (standing)
+    {
+        sLog.outString(">> rpEarning: %f", standing->rpEarning);
         rankP += standing->rpEarning;
+    }
 
     SetRankPoints(rankP);
 
@@ -6414,6 +6421,10 @@ void Player::DuelComplete(DuelCompleteType type)
     ForceHealthAndPowerUpdate();
     duel->opponent->ForceHealthAndPowerUpdate();
 
+    // reset extra attacks
+    ResetExtraAttacks();
+    duel->opponent->ResetExtraAttacks();
+
     delete duel->opponent->duel;
     duel->opponent->duel = nullptr;
     delete duel;
@@ -6788,7 +6799,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
         }
 
         // not allow proc extra attack spell at extra attack
-        if (m_extraAttacks && IsSpellHaveEffect(spellInfo, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
+        if (GetExtraAttacks() && IsSpellHaveEffect(spellInfo, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
             return;
 
         float chance = (float)spellInfo->procChance;
@@ -9568,6 +9579,10 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
                     // remove held enchantments
                     if (slot == EQUIPMENT_SLOT_MAINHAND)
                         pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_3);
+
+                    // reset extra attacks
+                    if (slot == EQUIPMENT_SLOT_MAINHAND || slot == EQUIPMENT_SLOT_OFFHAND || slot == EQUIPMENT_SLOT_RANGED)
+                        ResetExtraAttacks();
                 }
             }
 
@@ -15672,6 +15687,44 @@ bool Player::IsAffectedBySpellmod(SpellEntry const* spellInfo, SpellModifier* mo
     return mod->isAffectedOnSpell(spellInfo);
 }
 
+void Player::SendSpellMods()
+{     
+    for (uint8 modOp = 0; modOp < MAX_SPELLMOD; ++modOp)
+    {
+        if (m_spellMods[modOp].empty())
+            continue;
+
+        for (uint8 eff = 0; eff < 64; ++eff)
+        {
+            uint64 mask = uint64(1) << eff;
+
+            int32 val = 0;
+            // SPELLMOD_FLAT
+            for (SpellModList::const_iterator itr = m_spellMods[modOp].begin(); itr != m_spellMods[modOp].end(); ++itr)
+                if ((*itr)->type == SPELLMOD_FLAT && (*itr)->mask.IsFitToFamilyMask(mask))
+                    val += (*itr)->value;
+
+            WorldPacket data(SMSG_SET_FLAT_SPELL_MODIFIER, (1 + 1 + 4));
+            data << eff;
+            data << modOp;
+            data << val;
+            SendDirectMessage(&data);
+            
+            val = 0;
+            // SPELLMOD_PCT
+            for (SpellModList::const_iterator itr = m_spellMods[modOp].begin(); itr != m_spellMods[modOp].end(); ++itr)
+                if ((*itr)->type == SPELLMOD_PCT && (*itr)->mask.IsFitToFamilyMask(mask))
+                    val += (*itr)->value;
+
+            data.Initialize(SMSG_SET_PCT_SPELL_MODIFIER, (1 + 1 + 4));
+            data << eff;
+            data << modOp;
+            data << val;
+            SendDirectMessage(&data);
+        }
+    }
+}
+
 void Player::AddSpellMod(SpellModifier* mod, bool apply)
 {
     uint16 opcode = (mod->type == SPELLMOD_FLAT) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
@@ -16876,6 +16929,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
     // tutorial stuff
     GetSession()->SendTutorialsData();
     SendInitialSpells();
+    SendSpellMods();
     SendInitialActionButtons();
     m_reputationMgr.SendInitialReputations();
     UpdateHonor();

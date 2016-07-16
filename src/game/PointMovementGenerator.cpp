@@ -32,6 +32,8 @@ void PointMovementGenerator<T>::Initialize(T& unit)
         return;
 
     unit.StopMoving();
+	if (unit.GetTypeId() == TYPEID_UNIT)
+		((Creature&)unit).UpdateSpeed(MOVE_RUN, true, 0.7);
 
     unit.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
     Movement::MoveSplineInit init(unit);
@@ -43,6 +45,8 @@ template<class T>
 void PointMovementGenerator<T>::Finalize(T& unit)
 {
     unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+	if (unit.GetTypeId() == TYPEID_UNIT)
+		unit.UpdateSpeed(MOVE_RUN, true);
 
     if (unit.movespline->Finalized())
         MovementInform(unit);

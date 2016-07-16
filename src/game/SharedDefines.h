@@ -282,7 +282,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK0                          = 0x00000001,            // 0
     SPELL_ATTR_EX_DRAIN_ALL_POWER               = 0x00000002,            // 1 use all power (Only paladin Lay of Hands and Bunyanize)
     SPELL_ATTR_EX_CHANNELED_1                   = 0x00000004,            // 2 channeled 1
-    SPELL_ATTR_EX_UNK3                          = 0x00000008,            // 3
+    SPELL_ATTR_EX_CANT_REFLECTED                = 0x00000008,            // 3 used for detect can or not spell reflected
     SPELL_ATTR_EX_UNK4                          = 0x00000010,            // 4
     SPELL_ATTR_EX_NOT_BREAK_STEALTH             = 0x00000020,            // 5 Not break stealth
     SPELL_ATTR_EX_CHANNELED_2                   = 0x00000040,            // 6 channeled 2
@@ -317,7 +317,7 @@ enum SpellAttributesEx2
 {
     SPELL_ATTR_EX2_UNK0                         = 0x00000001,            // 0
     SPELL_ATTR_EX2_UNK1                         = 0x00000002,            // 1
-    SPELL_ATTR_EX2_CANT_REFLECTED               = 0x00000004,            // 2 ? used for detect can or not spell reflected // do not need LOS (e.g. 18220 since 3.3.3)
+    SPELL_ATTR_EX2_IGNORE_LOS                   = 0x00000004,            // 2 do not need LOS
     SPELL_ATTR_EX2_UNK3                         = 0x00000008,            // 3 auto targeting? (e.g. fishing skill enhancement items since 3.3.3)
     SPELL_ATTR_EX2_UNK4                         = 0x00000010,            // 4
     SPELL_ATTR_EX2_AUTOREPEAT_FLAG              = 0x00000020,            // 5
@@ -831,14 +831,11 @@ enum Mechanics
     MECHANIC_HORROR           = 24,
     MECHANIC_INVULNERABILITY  = 25,
     MECHANIC_INTERRUPT        = 26,
-    MECHANIC_DAZE             = 27,
-    MECHANIC_DISCOVERY        = 28,
-    MECHANIC_IMMUNE_SHIELD    = 29,                         // Divine (Blessing) Shield/Protection and Ice Block
-    MECHANIC_SAPPED           = 30
+    MECHANIC_DAZE             = 27
 };
 
 #define FIRST_MECHANIC          1
-#define MAX_MECHANIC            31
+#define MAX_MECHANIC            28
 
 #define IMMUNE_TO_ROOT_AND_SNARE_MASK ( \
     (1<<(MECHANIC_ROOT-1))|(1<<(MECHANIC_SNARE-1)))
@@ -851,7 +848,7 @@ enum Mechanics
     (1<<(MECHANIC_CHARM -1))|(1<<(MECHANIC_DISORIENTED-1))|(1<<(MECHANIC_FEAR  -1))| \
     (1<<(MECHANIC_PACIFY-1))|(1<<(MECHANIC_STUN       -1))|(1<<(MECHANIC_FREEZE-1))| \
     (1<<(MECHANIC_BANISH-1))|(1<<(MECHANIC_SHACKLE    -1))|(1<<(MECHANIC_HORROR-1))| \
-    (1<<(MECHANIC_TURN  -1))|(1<<(MECHANIC_DAZE       -1))|(1<<(MECHANIC_SAPPED-1)))
+    (1<<(MECHANIC_TURN  -1))|(1<<(MECHANIC_DAZE       -1)))
 
 // Spell dispell type
 enum DispelType

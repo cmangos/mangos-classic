@@ -45,38 +45,49 @@ enum SpellCategories
 // Spell clasification
 enum SpellSpecific
 {
-    SPELL_NORMAL            = 0,
-    SPELL_SEAL              = 1,
-    SPELL_BLESSING          = 2,
-    SPELL_AURA              = 3,
-    SPELL_STING             = 4,
-    SPELL_CURSE             = 5,
-    SPELL_ASPECT            = 6,
-    SPELL_TRACKER           = 7,
-    SPELL_WARLOCK_ARMOR     = 8,
-    SPELL_MAGE_ARMOR        = 9,
-    SPELL_ELEMENTAL_SHIELD  = 10,
-    SPELL_MAGE_POLYMORPH    = 11,
-    SPELL_POSITIVE_SHOUT    = 12,
-    SPELL_JUDGEMENT         = 13,
-    SPELL_BATTLE_ELIXIR     = 14,
-    SPELL_GUARDIAN_ELIXIR   = 15,
-    SPELL_FLASK_ELIXIR      = 16,
-    // SPELL_PRESENCE          = 17,                        // used in 3.x
-    // SPELL_HAND              = 18,                        // used in 3.x
-    SPELL_WELL_FED          = 19,
-    SPELL_FOOD              = 20,
-    SPELL_DRINK             = 21,
-    SPELL_FOOD_AND_DRINK    = 22,
+    SPELL_SPECIFIC_NORMAL            = 0,
+    SPELL_SPECIFIC_SEAL              = 1,
+    SPELL_SPECIFIC_BLESSING          = 2,
+    SPELL_SPECIFIC_AURA              = 3,
+    SPELL_SPECIFIC_STING             = 4,
+    SPELL_SPECIFIC_CURSE             = 5,
+    SPELL_SPECIFIC_ASPECT            = 6,
+    SPELL_SPECIFIC_TRACKER           = 7,
+    SPELL_SPECIFIC_WARLOCK_ARMOR     = 8,
+    SPELL_SPECIFIC_MAGE_ARMOR        = 9,
+    SPELL_SPECIFIC_ELEMENTAL_SHIELD  = 10,
+    SPELL_SPECIFIC_MAGE_POLYMORPH    = 11,
+    SPELL_SPECIFIC_POSITIVE_SHOUT    = 12,
+    SPELL_SPECIFIC_JUDGEMENT         = 13,
+    SPELL_SPECIFIC_ZANZA_ELIXIR      = 14,
+    SPELL_SPECIFIC_FLASK_ELIXIR      = 15,
+    SPELL_SPECIFIC_WELL_FED          = 16,
+    SPELL_SPECIFIC_FOOD              = 17,
+    SPELL_SPECIFIC_DRINK             = 18,
+    SPELL_SPECIFIC_FOOD_AND_DRINK    = 19,
+    SPELL_SPECIFIC_SCROLL            = 20
+};
+
+enum SpellBuffType
+{
+    SPELL_BUFF_NONE                 = 0,
+    SPELL_BUFF_STRENGTH             = 1,
+    SPELL_BUFF_AGILITY              = 2,
+    SPELL_BUFF_STAMINA              = 3,
+    SPELL_BUFF_INTELLECT            = 4,
+    SPELL_BUFF_SPIRIT               = 5,
+    SPELL_BUFF_SHADOW_RESISTANCE    = 6
 };
 
 SpellSpecific GetSpellSpecific(uint32 spellId);
+SpellBuffType GetSpellBuffType(uint32 spellId);
 
 // Different spell properties
 inline float GetSpellRadius(SpellRadiusEntry const* radius) { return (radius ? radius->Radius : 0); }
 uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell = nullptr);
-uint32 GetSpellCastTimeForBonus(SpellEntry const* spellProto, DamageEffectType damagetype);
-float CalculateDefaultCoefficient(SpellEntry const* spellProto, DamageEffectType const damagetype);
+float CalculateDefaultCoefficient(SpellEntry const *spellProto, DamageEffectType const damagetype);
+float CalculateCustomCoefficient(SpellEntry const *spellProto,  Unit const* caster, DamageEffectType const damageType, float coeff, uint8 targetNum = 1);
+int32 CalculateBonusByAttackPower(SpellEntry const *spellProto,  Unit const* caster, DamageEffectType const damageType, int32 total, int32 apBenefit);
 inline float GetSpellMinRange(SpellRangeEntry const* range) { return (range ? range->minRange : 0); }
 inline float GetSpellMaxRange(SpellRangeEntry const* range) { return (range ? range->maxRange : 0); }
 inline uint32 GetSpellRecoveryTime(SpellEntry const* spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
@@ -328,6 +339,22 @@ inline bool IsAreaEffectTarget(Targets target)
     }
     return false;
 }
+
+inline bool IsAreaEffect(SpellEntry const *spellInfo)
+{
+    for (uint8 eff = 0; eff < MAX_EFFECT_INDEX; ++eff)
+    {
+        if (IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[eff])) ||
+            IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[eff])))
+            return true;
+
+        if (SpellEntry const *triggerSpell = sSpellStore.LookupEntry(spellInfo->EffectTriggerSpell[eff]))
+            if (triggerSpell->Id != spellInfo->Id && IsAreaEffect(triggerSpell))
+                return true;
+    }
+
+     return false;
+ }
 
 inline bool IsAreaOfEffectSpell(SpellEntry const* spellInfo)
 {
@@ -614,15 +641,16 @@ struct SpellBonusEntry
 {
     float  direct_damage;
     float  dot_damage;
-    float  ap_bonus;
-    float  ap_dot_bonus;
 };
 
 typedef std::unordered_map<uint32, SpellProcEventEntry> SpellProcEventMap;
 typedef std::unordered_map<uint32, SpellBonusEntry>     SpellBonusMap;
 
-#define ELIXIR_FLASK_MASK     0x03                          // 2 bit mask for batter compatibility with more recent client version, flaks must have both bits set
-#define ELIXIR_WELL_FED       0x10                          // Some foods have SPELLFAMILY_POTION
+enum SpellElixir
+{
+    ELIXIR_FLASK = 0x01,
+    ELIXIR_ZANZA = 0x02
+};
 
 struct SpellThreatEntry
 {
@@ -839,13 +867,13 @@ class SpellMgr
         {
             uint32 mask = GetSpellElixirMask(spellid);
 
-            // flasks must have all bits set from ELIXIR_FLASK_MASK
-            if ((mask & ELIXIR_FLASK_MASK) == ELIXIR_FLASK_MASK)
-                return SPELL_FLASK_ELIXIR;
-            else if (mask & ELIXIR_WELL_FED)
-                return SPELL_WELL_FED;
-            else
-                return SPELL_NORMAL;
+            if (mask & ELIXIR_FLASK)
+                return SPELL_SPECIFIC_FLASK_ELIXIR;
+
+            if (mask & ELIXIR_ZANZA)
+                return SPELL_SPECIFIC_ZANZA_ELIXIR;
+
+            return SPELL_SPECIFIC_NORMAL;
         }
 
         SpellThreatEntry const* GetSpellThreatEntry(uint32 spellid) const

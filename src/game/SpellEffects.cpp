@@ -51,6 +51,10 @@
 #include "CellImpl.h"
 #include "G3D/Vector3.h"
 #include "LootMgr.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include <iostream>
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
 {
@@ -351,25 +355,14 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                 // Ferocious Bite
                 if ((m_spellInfo->SpellFamilyFlags & uint64(0x000800000)) && m_spellInfo->SpellVisual == 6587)
                 {
-                    // converts each extra point of energy into ($f1+$AP/630) additional damage
-                    float multiple = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 630 + m_spellInfo->DmgMultiplier[effect_idx];
-                    damage += int32(m_caster->GetPower(POWER_ENERGY) * multiple);
+                    // converts each extra point of energy into additional damage
+                    damage += int32(m_caster->GetPower(POWER_ENERGY) * m_spellInfo->DmgMultiplier[effect_idx]);
                     m_caster->SetPower(POWER_ENERGY, 0);
                 }
                 break;
             }
             case SPELLFAMILY_ROGUE:
-            {
-                // Eviscerate
-                if ((m_spellInfo->SpellFamilyFlags & uint64(0x00020000)) && m_caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
-                    {
-                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * combo * 0.03f);
-                    }
-                }
                 break;
-            }
             case SPELLFAMILY_HUNTER:
                 break;
             case SPELLFAMILY_PALADIN:
@@ -1681,9 +1674,11 @@ void Spell::EffectHeal(SpellEffectIndex /*eff_idx*/)
 
             addhealth += tickheal * tickcount;
         }
-
-        addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
-        addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+        else
+        {
+            addhealth = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, addhealth, HEAL);
+            addhealth = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, addhealth, HEAL);
+        }
 
         m_healing += addhealth;
     }
@@ -1881,7 +1876,7 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
     switch (m_spellInfo->Id)
     {
         case 9512:                                          // Restore Energy
-            level_diff = m_caster->getLevel() - 40;
+            level_diff = m_caster->getLevel() - 60;
             level_multiplier = 2;
             break;
         case 24571:                                         // Blood Fury
@@ -2392,8 +2387,10 @@ void Spell::EffectDistract(SpellEffectIndex /*eff_idx*/)
     if (unitTarget->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
         return;
 
-    unitTarget->SetFacingTo(unitTarget->GetAngle(m_targets.m_destX, m_targets.m_destY));
+    float angle = unitTarget->GetAngle(m_targets.m_destX, m_targets.m_destY);
+    unitTarget->SetFacingTo(angle);
     unitTarget->clearUnitState(UNIT_STAT_MOVING);
+    unitTarget->SetOrientation(angle);
 
     if (unitTarget->GetTypeId() == TYPEID_UNIT)
         unitTarget->GetMotionMaster()->MoveDistract(damage * IN_MILLISECONDS);
@@ -3159,6 +3156,23 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
                 weaponDamagePercentMod *= float(CalculateDamage(SpellEffectIndex(j), unitTarget)) / 100.0f;
 
+                //Prevent Seal of Command damage overflow
+                if (m_spellInfo->Id == 20424)
+                {
+                Unit::AuraList const& mModDamagePercentDone = m_caster->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+                for (Unit::AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
+                    {
+                    if (((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_HOLY) && ((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL) &&
+                        (*i)->GetSpellProto()->EquippedItemClass == -1 &&
+                                                    // -1 == any item class (not wand then)
+                        (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0)
+                                                    // 0 == any inventory type (not wand then)
+                        {
+                        totalDamagePercentMod /= ((*i)->GetModifier()->m_amount + 100.0f) / 100.0f;
+                        }
+                    }
+                }
+
                 // applied only to prev.effects fixed damage
                 if (customBonusDamagePercentMod)
                     fixed_bonus = int32(fixed_bonus * bonusDamagePercentMod);
@@ -3697,13 +3711,21 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_PALADIN:
         {
+            Unit* caster = GetAffectiveCaster();
+
             // Holy Light
             if (m_spellInfo->SpellIconID == 70)
             {
                 if (!unitTarget || !unitTarget->isAlive())
                     return;
                 int32 heal = damage;
+                heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL);
+                heal = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, heal, HEAL);
                 int32 spellid = m_spellInfo->Id;            // send main spell id as basepoints for not used effect
+
+                heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL);
+                heal = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, heal, HEAL);
+
                 m_caster->CastCustomSpell(unitTarget, 19968, &heal, &spellid, nullptr, true);
             }
             // Flash of Light
@@ -3712,7 +3734,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 if (!unitTarget || !unitTarget->isAlive())
                     return;
                 int32 heal = damage;
+                heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL);
+                heal = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, heal, HEAL);
                 int32 spellid = m_spellInfo->Id;            // send main spell id as basepoints for not used effect
+                heal = caster->SpellHealingBonusDone(unitTarget, m_spellInfo, heal, HEAL);
+                heal = unitTarget->SpellHealingBonusTaken(caster, m_spellInfo, heal, HEAL);
                 m_caster->CastCustomSpell(unitTarget, 19993, &heal, &spellid, nullptr, true);
             }
             else if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000800000))
@@ -3778,7 +3804,9 @@ void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
         return;
     // unitTarget->CombatStop();
 
-    unitTarget->CombatStop();
+	ForceTargetsMissing(m_targets.getUnitTarget(), m_caster);
+
+	unitTarget->CombatStop();
     unitTarget->getHostileRefManager().deleteReferences();  // stop all fighting
 
     // Vanish allows to remove all threat and cast regular stealth so other spells can be used
@@ -4393,10 +4421,17 @@ void Spell::EffectAddExtraAttacks(SpellEffectIndex /*eff_idx*/)
     if (!unitTarget || !unitTarget->isAlive())
         return;
 
-    if (unitTarget->m_extraAttacks)
+    // Reckoning
+    if (m_spellInfo->Id == 20178 && unitTarget->GetExtraAttacks() < 4)
+    {
+        unitTarget->AddExtraAttack();
+        return;
+    }
+
+    if (unitTarget->GetExtraAttacks())
         return;
 
-    unitTarget->m_extraAttacks = damage;
+    unitTarget->SetExtraAttacks(damage);
 }
 
 void Spell::EffectParry(SpellEffectIndex /*eff_idx*/)
@@ -4678,6 +4713,15 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
     // 3.666666 instead of ATTACK_DISTANCE(5.0f) in below seem to give more accurate result.
     float x, y, z;
     unitTarget->GetContactPoint(m_caster, x, y, z, 3.666666f);
+	float dx = unitTarget->GetPositionX() - x;
+	float dy = unitTarget->GetPositionY() - y;
+	float dz = unitTarget->GetPositionZ() - z;
+	if (abs(dx) > 1)
+		x += dx / 2;
+	if (abs(dy) > 1)
+		y += dy / 2;
+	if (abs(dz) > 1)
+		z += dz / 2;
 
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature*)unitTarget)->StopMoving();
@@ -4838,6 +4882,7 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
     pet->SetDeathState(ALIVE);
     pet->clearUnitState(UNIT_STAT_ALL_STATE);
     pet->SetHealth(uint32(pet->GetMaxHealth() * (float(damage) / 100)));
+	pet->NearTeleportTo(m_castPositionX, m_castPositionY, m_castPositionZ, m_castOrientation);
 
     pet->AIM_Initialize();
 
@@ -5138,4 +5183,25 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
     data << m_caster->GetObjectGuid();
     data << uint32(area_id);
     player->SendDirectMessage(&data);
+}
+
+void Spell::ForceTargetsMissing(Unit* target, Unit* caster)
+{
+	std::list<Unit*> targets;
+	MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(target, caster->GetMap()->GetVisibilityDistance());
+	MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+	Cell::VisitAllObjects(target, searcher, caster->GetMap()->GetVisibilityDistance());
+	for (std::list<Unit*>::iterator iter = targets.begin(); iter != targets.end(); ++iter)
+	{
+		if (!(*iter)->IsNonMeleeSpellCasted(false))
+			continue;
+
+		for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
+		{
+			ObjectGuid tarGuidLow((uint64)target->GetGUIDLow());
+			if ((*iter)->GetCurrentSpell(CurrentSpellTypes(i))
+					&& (*iter)->GetCurrentSpell(CurrentSpellTypes(i))->m_targets.getUnitTargetGuid() == tarGuidLow)
+				(*iter)->InterruptSpell(CurrentSpellTypes(CurrentSpellTypes(i)), false);
+		}
+	}
 }

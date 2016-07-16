@@ -1074,6 +1074,13 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
         return false;
     }
 
+    if (!gInfo->DoLoad)
+    {
+        PSendSysMessage("DoLoad = false. Gameobject not added.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
     if (gInfo->displayId && !sGameObjectDisplayInfoStore.LookupEntry(gInfo->displayId))
     {
         // report to DB errors log as in loading case
@@ -1258,7 +1265,7 @@ bool ChatHandler::HandleLookupFactionCommand(char* args)
             if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
-                for (; loc < MAX_LOCALE; ++loc)
+                for (; loc < MAX_DBC_LOCALE; ++loc)
                 {
                     if (loc == GetSessionDbcLocale())
                         continue;
@@ -1272,7 +1279,7 @@ bool ChatHandler::HandleLookupFactionCommand(char* args)
                 }
             }
 
-            if (loc < MAX_LOCALE)
+            if (loc < MAX_DBC_LOCALE)
             {
                 FactionState const* repState = target ? target->GetReputationMgr().GetState(factionEntry) : nullptr;
                 ShowFactionListHelper(factionEntry, LocaleConstant(loc), repState, target);
@@ -1397,6 +1404,13 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
     if (!cinfo)
     {
         PSendSysMessage(LANG_COMMAND_INVALIDCREATUREID, id);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (!cinfo->DoLoad)
+    {
+        PSendSysMessage("DoLoad = false. Creature not added.");
         SetSentErrorMessage(true);
         return false;
     }
@@ -3978,7 +3992,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(char* args)
         if (!Utf8FitTo(name, wnamepart))
         {
             loc = 0;
-            for (; loc < MAX_LOCALE; ++loc)
+            for (; loc < MAX_DBC_LOCALE; ++loc)
             {
                 if (loc == GetSessionDbcLocale())
                     continue;
@@ -3992,7 +4006,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(char* args)
             }
         }
 
-        if (loc < MAX_LOCALE)
+        if (loc < MAX_DBC_LOCALE)
         {
             targetSkillInfo = skillInfo;
             break;

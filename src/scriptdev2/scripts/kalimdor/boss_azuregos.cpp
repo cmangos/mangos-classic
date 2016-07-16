@@ -26,6 +26,7 @@ EndScriptData */
 enum
 {
     SAY_TELEPORT                = -1000100,
+	SAY_KILLED_UNIT             = -1000099,
 
     SPELL_ARCANE_VACUUM         = 21147,
     SPELL_MARK_OF_FROST_PLAYER  = 23182,
@@ -65,7 +66,10 @@ struct boss_azuregosAI : public ScriptedAI
     {
         // Mark killed players with Mark of Frost
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
+		{
             pVictim->CastSpell(pVictim, SPELL_MARK_OF_FROST_PLAYER, true, nullptr, nullptr, m_creature->GetObjectGuid());
+			m_creature->GetMap()->MonsterYellToZone(m_creature->GetGUID(), SAY_KILLED_UNIT, LANG_UNIVERSAL, nullptr, m_creature->GetZoneId());
+		}
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -84,7 +88,8 @@ struct boss_azuregosAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_VACUUM) == CAST_OK)
             {
-                DoScriptText(SAY_TELEPORT, m_creature);
+                //DoScriptText(SAY_TELEPORT, m_creature);
+				m_creature->GetMap()->MonsterYellToZone(m_creature->GetGUID(), SAY_TELEPORT, LANG_UNIVERSAL, NULL, m_creature->GetZoneId());
                 m_uiTeleportTimer = 30000;
             }
         }

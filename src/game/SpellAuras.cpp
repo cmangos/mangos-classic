@@ -2092,6 +2092,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
         {
             ((Player*)target)->setFactionForRace(target->getRace());
             ((Player*)target)->SetClientControl(target, 1);
+            target->StopMoving(true);
         }
         else if (target->GetTypeId() == TYPEID_UNIT)
         {
@@ -3071,42 +3072,6 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
         if (!caster)
             return;
 
-        switch (spellProto->SpellFamilyName)
-        {
-            case SPELLFAMILY_DRUID:
-            {
-                // Rip
-                if (spellProto->SpellFamilyFlags & uint64(0x000000000000800000))
-                {
-                    // $AP * min(0.06*$cp, 0.24)/6 [Yes, there is no difference, whether 4 or 5 CPs are being used]
-                    if (caster->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        uint8 cp = ((Player*)caster)->GetComboPoints();
-
-                        if (cp > 4) cp = 4;
-                        m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
-                    }
-                }
-                break;
-            }
-            case SPELLFAMILY_ROGUE:
-            {
-                // Rupture
-                if (spellProto->SpellFamilyFlags & uint64(0x000000000000100000))
-                {
-                    if (caster->GetTypeId() != TYPEID_PLAYER)
-                        break;
-                    // Dmg/tick = $AP*min(0.01*$cp, 0.03) [Like Rip: only the first three CP increase the contribution from AP]
-                    uint8 cp = ((Player*)caster)->GetComboPoints();
-                    if (cp > 3) cp = 3;
-                    m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
-                }
-                break;
-            }
-            default:
-                break;
-        }
-
         if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
         {
             // SpellDamageBonusDone for magic spells
@@ -3736,6 +3701,13 @@ void Aura::HandleAuraModAttackPower(bool apply, bool /*Real*/)
         if (Player* modOwner = caster->GetSpellModOwner())
             modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_ATTACK_POWER, amount);
 
+    //Seal of the Crusader reduce caster's weapon damage PCT.
+    if (GetCaster())
+    {
+        if (GetCaster() == GetTarget() && GetCaster()->GetTypeId() == TYPEID_PLAYER && GetSpellProto()->IsFitToFamily(SPELLFAMILY_PALADIN, uint64(0x0000000000000200)))
+            GetTarget()->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, float(-28.0f), apply);
+    }
+
     GetTarget()->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, amount, apply);
 }
 
@@ -4338,7 +4310,7 @@ void Aura::PeriodicTick()
                 // 5..8 ticks have normal tick damage
             }
 
-            target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
+            target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !spellProto->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
@@ -4399,7 +4371,7 @@ void Aura::PeriodicTick()
 
             pdamage = target->SpellDamageBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
 
-            target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_REFLECTED));
+            target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, !spellProto->HasAttribute(SPELL_ATTR_EX_CANT_REFLECTED));
 
             if (target->GetHealth() < pdamage)
                 pdamage = uint32(target->GetHealth());
@@ -5287,6 +5259,22 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         {
             switch (GetId())
             {
+				case 11129:                                 // Combustion (remove triggered aura stack)
+				{
+					if (!apply)
+						spellId1 = 28682;
+					else
+						return;
+					break;
+				}
+				case 28682:                                 // Combustion (remove main aura)
+				{
+					if (!apply)
+						spellId1 = 11129;
+					else
+						return;
+					break;
+				}
                 case 11189:                                 // Frost Warding
                 case 28332:
                 {
