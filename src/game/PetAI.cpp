@@ -97,7 +97,13 @@ void PetAI::UpdateAI(const uint32 diff)
         return;
 
     Unit* owner = m_creature->GetCharmerOrOwner();
-    Unit* victim = m_creature->getVictim();
+    Unit* victim = nullptr;
+
+    // Creature pets and guardians will always look in threat list for victim
+    if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
+        || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
+        victim = ((Pet*)m_creature)->isControlled() ? m_creature->getVictim()
+            : m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0);
 
     if (m_updateAlliesTimer <= diff)
         // UpdateAllies self set update timer
@@ -105,7 +111,7 @@ void PetAI::UpdateAI(const uint32 diff)
     else
         m_updateAlliesTimer -= diff;
 
-    if (inCombat && (!victim || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
+    if (inCombat && !victim)
     {
         m_creature->AttackStop();
         inCombat = false;
@@ -279,7 +285,13 @@ void PetAI::UpdateAI(const uint32 diff)
     else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
         m_creature->InterruptNonMeleeSpells(false);
 
-    if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE) && victim)
+    // Creature pets and guardians will always look in threat list for victim
+    if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
+        || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
+        victim = ((Pet*)m_creature)->isControlled() ? m_creature->getVictim()
+            : m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0);
+
+    if (victim)
     {
         // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
         // This is needed for charmed creatures, as once their target was reset other effects can trigger threat

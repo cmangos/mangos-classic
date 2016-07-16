@@ -214,6 +214,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
         bool HaveInDiet(ItemPrototype const* item) const;
         uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel);
         void SetDuration(int32 dur) { m_duration = dur; }
+        int32 GetDuration() { return m_duration; }
 
         int32 GetBonusDamage() { return m_bonusdamage; }
         void SetBonusDamage(int32 damage) { m_bonusdamage = damage; }
