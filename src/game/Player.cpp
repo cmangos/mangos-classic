@@ -6519,49 +6519,63 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
 
     if (proto->ArcaneRes)
         HandleStatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(proto->ArcaneRes), apply);
-
-    WeaponAttackType attType = BASE_ATTACK;
-    float damage = 0.0f;
-
-    if (slot == EQUIPMENT_SLOT_RANGED && (
-                proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN ||
-                proto->InventoryType == INVTYPE_RANGEDRIGHT))
+    
+    if (proto->IsWeapon())
     {
-        attType = RANGED_ATTACK;
-    }
-    else if (slot == EQUIPMENT_SLOT_OFFHAND)
-    {
-        attType = OFF_ATTACK;
-    }
+        WeaponAttackType attType = BASE_ATTACK;
 
-    if (proto->Damage[0].DamageMin > 0)
-    {
-        damage = apply ? proto->Damage[0].DamageMin : BASE_MINDAMAGE;
-        SetBaseWeaponDamage(attType, MINDAMAGE, damage);
-        // sLog.outError("applying mindam: assigning %f to weapon mindamage, now is: %f", damage, GetWeaponDamageRange(attType, MINDAMAGE));
-    }
-
-    if (proto->Damage[0].DamageMax  > 0)
-    {
-        damage = apply ? proto->Damage[0].DamageMax : BASE_MAXDAMAGE;
-        SetBaseWeaponDamage(attType, MAXDAMAGE, damage);
-    }
-
-    if (!CanUseEquippedWeapon(attType))
-        return;
-
-    if (proto->Delay)
-    {
-        if (slot == EQUIPMENT_SLOT_RANGED)
-            SetAttackTime(RANGED_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
-        else if (slot == EQUIPMENT_SLOT_MAINHAND)
-            SetAttackTime(BASE_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
+        if (slot == EQUIPMENT_SLOT_RANGED && proto->IsRangedWeapon())
+            attType = RANGED_ATTACK;
         else if (slot == EQUIPMENT_SLOT_OFFHAND)
-            SetAttackTime(OFF_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
-    }
+            attType = OFF_ATTACK;
 
-    if (CanModifyStats() && (damage || proto->Delay))
-        UpdateDamagePhysical(attType);
+        bool hasDamage = false;
+        m_weaponDamageCount[attType] = 0;
+
+        for (int i = 0; i < MAX_ITEM_PROTO_DAMAGES; i++)
+        {
+            if (proto->Damage[i].DamageMax == 0)
+                break;
+
+            hasDamage = true;
+
+            float minDamage = 0.0f;
+            float maxDamage = 0.0f;
+            SpellSchools school = SPELL_SCHOOL_NORMAL;
+
+            if (apply)
+            {
+                minDamage = proto->Damage[i].DamageMin;
+                maxDamage = proto->Damage[i].DamageMax;
+                school = SpellSchools(proto->Damage[i].DamageType);
+
+                m_weaponDamageCount[attType]++;
+            }
+
+            SetBaseWeaponDamage(attType, MINDAMAGE, minDamage, i);
+            SetBaseWeaponDamage(attType, MAXDAMAGE, maxDamage, i);
+            SetWeaponDamageSchool(attType, school, i);
+        }
+
+        if (m_weaponDamageCount[attType] == 0)
+            m_weaponDamageCount[attType] = 1;
+
+        if (!CanUseEquippedWeapon(attType))
+            return;
+
+        if (proto->Delay)
+        {
+            if (slot == EQUIPMENT_SLOT_RANGED)
+                SetAttackTime(RANGED_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
+            else if (slot == EQUIPMENT_SLOT_MAINHAND)
+                SetAttackTime(BASE_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
+            else if (slot == EQUIPMENT_SLOT_OFFHAND)
+                SetAttackTime(OFF_ATTACK, apply ? proto->Delay : BASE_ATTACK_TIME);
+        }
+
+        if (CanModifyStats() && proto->Delay)
+            UpdateDamagePhysical(attType);
+    }
 }
 
 void Player::_ApplyWeaponDependentAuraMods(Item* item, WeaponAttackType attackType, bool apply)
