@@ -5077,10 +5077,13 @@ void Unit::AttackedBy(Unit* attacker)
         pet->AttackedBy(attacker);
 }
 
-bool Unit::AttackStop(bool targetSwitch /*=false*/)
+void Unit::AttackStop(bool targetSwitch /*=false*/, bool includingCast /*=false*/)
 {
+    if (includingCast && IsNonMeleeSpellCasted(false))
+        InterruptNonMeleeSpells(false);
+
     if (!m_attacking)
-        return false;
+        return;
 
     Unit* victim = m_attacking;
 
@@ -5107,25 +5110,17 @@ bool Unit::AttackStop(bool targetSwitch /*=false*/)
     }
 
     SendMeleeAttackStop(victim);
-
-    return true;
 }
 
 void Unit::CombatStop(bool includingCast)
 {
-    if (includingCast && IsNonMeleeSpellCasted(false))
-        InterruptNonMeleeSpells(false);
-
-    AttackStop();
+    AttackStop(true, includingCast);
     RemoveAllAttackers();
 
     if (GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
-    else if (GetTypeId() == TYPEID_UNIT)
-    {
-        if (((Creature*)this)->GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_COMBAT_STOP)
-            ((Creature*)this)->ClearTemporaryFaction();
-    }
+    else if (((Creature*)this)->GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_COMBAT_STOP)
+        ((Creature*)this)->ClearTemporaryFaction();
 
     ClearInCombat();
 }
@@ -5162,7 +5157,9 @@ void Unit::RemoveAllAttackers()
     while (!m_attackers.empty())
     {
         AttackerSet::iterator iter = m_attackers.begin();
-        if (!(*iter)->AttackStop())
+        (*iter)->AttackStop();
+
+        if (m_attacking)
         {
             sLog.outError("WORLD: Unit has an attacker that isn't attacking it!");
             m_attackers.erase(iter);

@@ -113,7 +113,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
     if (inCombat && !victim)
     {
-        m_creature->AttackStop();
+        m_creature->AttackStop(true, false);
         inCombat = false;
     }
 
