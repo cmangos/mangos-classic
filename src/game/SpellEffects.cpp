@@ -3003,15 +3003,17 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        // this enables popup window (pet dismiss, cancel)
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+        // This is done for hunters pets, so now we do it for other controlled pets as well, why not? they're all unknowns anyway.
+        NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5);
 
-        // this enables pet details window (Shift+P)
+        // this enables popup window (pet dismiss, cancel)
+        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
+        NewSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
+
         NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
 
-        // generate name for warlock summon pet
-        if (m_caster->getClass() == CLASS_WARLOCK)
-            NewSummon->SetName(sObjectMgr.GeneratePetName(petentry));
+        // generate name for summon pet
+        NewSummon->SetName(sObjectMgr.GeneratePetName(petentry));
 
         if (m_caster->IsPvP())
             NewSummon->SetPvP(true);
