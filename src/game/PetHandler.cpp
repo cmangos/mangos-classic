@@ -90,7 +90,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     pet->AttackStop(true, true);
                     pet->GetMotionMaster()->Clear(false);
                     pet->GetMotionMaster()->MoveIdle();
-                    ((Pet*)pet)->SetStayPosition();
+                    ((Pet*)pet)->SetStayPosition(true);
                     ((Pet*)pet)->SetIsRetreating();
                     ((Pet*)pet)->SetSpellOpener();
                     charmInfo->SetCommandState(COMMAND_STAY);
@@ -98,7 +98,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 }
                 case COMMAND_FOLLOW:                        // spellid=1792  // FOLLOW
                 {
-                    ((Pet*)pet)->ClearStayPosition();
+                    ((Pet*)pet)->SetStayPosition();
                     pet->AttackStop(true, true);
                     pet->GetMotionMaster()->MoveFollow(_player, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
                     ((Pet*)pet)->SetIsRetreating(true);
@@ -155,7 +155,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     else                                    // charmed
                         _player->Uncharm();
 
-                    ((Pet*)pet)->ClearStayPosition();
+                    ((Pet*)pet)->SetStayPosition();
                     break;
                 }
                 default:

@@ -2000,3 +2000,23 @@ void Pet::SetModeFlags(PetModeFlags mode)
     data << uint32(m_petModeFlags);
     ((Player*)owner)->GetSession()->SendPacket(&data);
 }
+
+void Pet::SetStayPosition(bool stay)
+{
+    if (stay)
+    {
+        m_stayPosX = GetPositionX();
+        m_stayPosY = GetPositionY();
+        m_stayPosZ = GetPositionZ();
+        m_stayPosO = GetOrientation();
+    }
+    else
+    {
+        m_stayPosX = 0;
+        m_stayPosY = 0;
+        m_stayPosZ = 0;
+        m_stayPosO = 0;
+    }
+
+    m_stayPosSet = stay;
+}

@@ -343,21 +343,30 @@ void PetAI::UpdateAI(const uint32 diff)
             {
                 if (Pet* pet = (Pet*)m_creature)
                 {
-                    //if stay command is already set but we dont have stay pos set then we need to establish current pos as stay position
+                    //if stay command is set but we dont have stay pos set then we need to establish current pos as stay position
                     if (!pet->IsStayPosSet())
-                        pet->SetStayPosition();
+                        pet->SetStayPosition(true);
 
                     float stayPosX = pet->GetStayPosX();
                     float stayPosY = pet->GetStayPosY();
                     float stayPosZ = pet->GetStayPosZ();
 
-                    if (!(m_creature->hasUnitState(UNIT_STAT_MOVING)
-                        || (m_creature->GetPositionX() == stayPosX
+                    if (m_creature->GetPositionX() == stayPosX
                         && m_creature->GetPositionY() == stayPosY
-                        && m_creature->GetPositionZ() == stayPosZ)))
-                            pet->GetMotionMaster()->MovePoint(0, stayPosX, stayPosY, stayPosZ, false);
+                        && m_creature->GetPositionZ() == stayPosZ)
+                    {
+                        float StayPosO = pet->GetStayPosO();
 
-                    return;
+                        if (m_creature->hasUnitState(UNIT_STAT_MOVING))
+                        {
+                            m_creature->GetMotionMaster()->Clear(false);
+                            m_creature->GetMotionMaster()->MoveIdle();
+                        }
+                        else if (m_creature->GetOrientation() != StayPosO)
+                            m_creature->SetOrientation(StayPosO);
+                    }
+                    else
+                        pet->GetMotionMaster()->MovePoint(0, stayPosX, stayPosY, stayPosZ, false);
                 }
             }
             else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW))
