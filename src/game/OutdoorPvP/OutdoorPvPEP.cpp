@@ -175,7 +175,7 @@ void OutdoorPvPEP::HandleObjectiveComplete(uint32 eventId, const std::list<Playe
         if ((*itr) && (*itr)->GetTeam() == team)
         {
             (*itr)->KilledMonsterCredit(credit);
-            (*itr)->AddHonorCP(HONOR_REWARD_PLAGUELANDS, HONORABLE, 0, 0);
+            (*itr)->AddHonorCP(HONOR_REWARD_PLAGUELANDS, HONORABLE);
         }
     }
 }

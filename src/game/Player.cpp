@@ -6064,14 +6064,14 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize)
         Creature* cVictim = (Creature*)uVictim;
         if (cVictim->IsCivilian())
         {
-            AddHonorCP(MaNGOS::Honor::DishonorableKillPoints(getLevel()), DISHONORABLE, cVictim->GetEntry(), TYPEID_UNIT);
+            AddHonorCP(MaNGOS::Honor::DishonorableKillPoints(getLevel()), DISHONORABLE, cVictim);
             return true;
         }
 
         if (cVictim->IsRacialLeader())
         {
             // maybe uncorrect honor value but no source to get it actually
-            AddHonorCP(398.0, HONORABLE, cVictim->GetEntry(), TYPEID_UNIT);
+            AddHonorCP(398.0, HONORABLE, cVictim);
             return true;
         }
     }
@@ -6084,7 +6084,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize)
 
         if (getLevel() < (pVictim->getLevel() + 5))
         {
-            AddHonorCP(MaNGOS::Honor::HonorableKillPoints(this, pVictim, groupsize), HONORABLE, pVictim->GetGUIDLow(), TYPEID_PLAYER);
+            AddHonorCP(MaNGOS::Honor::HonorableKillPoints(this, pVictim, groupsize), HONORABLE, pVictim);
             return true;
         }
     }
@@ -6092,20 +6092,25 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize)
     return false;
 }
 
-bool Player::AddHonorCP(float honor, uint8 type, uint32 victim, uint8 victimType)
+bool Player::AddHonorCP(float honor, uint8 type, Unit* victim)
 {
-
     if (!honor)
         return false;
+
+    // If not victim, then give yourself
+    if (!victim)
+        victim = this;
 
     // CharacterDatabase.PExecute("INSERT INTO `character_honor_cp` (`guid`,`victim`,`victim_type`,`honor`,`date`,`type`) VALUES (%u, %u, %u, %f, %u, %u)", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(),uVictim->GetType() (float)honor_points, (uint32)today, (uint8)kill_type);
 
     HonorCP CP;
     CP.date = sWorld.GetDateToday();
     CP.honorPoints = honor;
-    CP.victimID = victim;
-    CP.victimType = victimType;
+    CP.victimID = (victim->GetTypeId() == TYPEID_PLAYER ? victim->GetGUIDLow() : victim->GetEntry());
+    CP.victimType = (victim == this ? 0 : victim->GetTypeId());
     CP.type = type;
+    CP.state  =  HK_NEW;
+    CP.isKill =  isKill(CP.victimType);
 
     if (type == DISHONORABLE)
     {
@@ -6115,10 +6120,29 @@ bool Player::AddHonorCP(float honor, uint8 type, uint32 victim, uint8 victimType
         SetStoredHonor(RP);
     }
 
-    CP.state  =  HK_NEW;
-    CP.isKill =  isKill(victimType);
-
     m_honorCP.push_back(CP);
+    
+    WorldPacket data(SMSG_PVP_CREDIT, 4 + 8 + 4);
+    data << uint32(type == DISHONORABLE ? -honor : honor);
+
+    if (victim == this)
+        data << uint64(0);
+    else
+        data << (victim->GetObjectGuid());
+
+    if (victim->GetTypeId() == TYPEID_UNIT)
+    {
+        if (((Creature*)victim)->IsRacialLeader())
+            data << uint32(19); // racial leader 19 Rank
+        else
+            data << uint32(0);
+    }
+    else if (victim == this)
+        data << uint32(0);
+    else
+        data << uint32(((Player*)victim)->GetHonorRankInfo().rank);
+
+    SendDirectMessage(&data);
 
     UpdateHonor();
     return true;
