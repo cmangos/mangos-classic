@@ -1676,7 +1676,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
-        bool AddHonorCP(float honor, uint8 type, uint32 victim, uint8 victimType);
+        bool AddHonorCP(float honor, uint8 type, Unit* victim = nullptr);
         void UpdateHonor();
         void ResetHonor();
         void ClearHonorInfo();
