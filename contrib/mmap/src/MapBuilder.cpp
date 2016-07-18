@@ -15,6 +15,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+ 
+ #include <limits>
 
 #include "MMapCommon.h"
 #include "MapBuilder.h"
@@ -153,10 +155,10 @@ namespace MMAP
     /**************************************************************************/
     void MapBuilder::getGridBounds(uint32 mapID, uint32& minX, uint32& minY, uint32& maxX, uint32& maxY)
     {
-        maxX = INT_MAX;
-        maxY = INT_MAX;
-        minX = INT_MIN;
-        minY = INT_MIN;
+        maxX = numeric_limits<int>::max();
+        maxY = numeric_limits<int>::max();
+        minX = numeric_limits<int>::min();
+        minY = numeric_limits<int>::min();
 
         float bmin[3], bmax[3], lmin[3], lmax[3];
         MeshData meshData;
