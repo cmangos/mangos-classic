@@ -22,30 +22,28 @@
 #include "Common.h"
 #include "Policies/Singleton.h"
 #include "Platform/Define.h"
-#include <mutex>
 
 #include <string>
-#include <unordered_map>
 
 class MANGOS_DLL_SPEC Config
 {
-    private:
-        std::string m_filename;
-        std::unordered_map<std::string, std::string> m_entries; // keys are converted to lower case.  values cannot be.
-
     public:
+        Config();
+        ~Config();
+
         bool SetSource(const std::string &file);
         bool Reload();
+        const std::string &GetFilename() const;
 
         bool IsSet(const std::string &name) const;
-
         const std::string GetStringDefault(const std::string &name, const std::string &def = "") const;
         bool GetBoolDefault(const std::string &name, bool def) const;
         int32 GetIntDefault(const std::string &name, int32 def) const;
         float GetFloatDefault(const std::string &name, float def) const;
 
-        const std::string &GetFilename() const { return m_filename; }
-        std::mutex m_configLock;
+    private:
+        class Private;
+        Private* m_impl;
 };
 
 #define sConfig MaNGOS::Singleton<Config>::Instance()

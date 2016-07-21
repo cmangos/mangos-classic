@@ -17,33 +17,56 @@
  */
 
 #include "Config.h"
-#include "Policies/Singleton.h"
-#include <mutex>
-
-#include <boost/algorithm/string.hpp>
 
 #include <unordered_map>
 #include <string>
 #include <fstream>
+#include <mutex>
+
+#include <boost/algorithm/string.hpp>
 
 INSTANTIATE_SINGLETON_1(Config);
 
+typedef std::unordered_map<std::string, std::string> ConfigEntries;
+
+class Config::Private
+{
+    public:
+        std::string m_filename;
+        std::mutex m_configLock;
+        ConfigEntries m_entries;
+};
+
+Config::Config() : m_impl(new Private)
+{
+}
+
+Config::~Config()
+{
+    delete m_impl;
+}
+
 bool Config::SetSource(const std::string &file)
 {
-    m_filename = file;
+    m_impl->m_filename = file;
 
     return Reload();
 }
 
+const std::string &Config::GetFilename() const
+{
+    return m_impl->m_filename;
+}
+
 bool Config::Reload()
 {
-    std::ifstream in(m_filename, std::ifstream::in);
+    std::ifstream in(m_impl->m_filename, std::ifstream::in);
     
     if (in.fail())
         return false;
 
-    std::unordered_map<std::string, std::string> newEntries;
-    std::lock_guard<std::mutex> guard(m_configLock);
+    ConfigEntries newEntries;
+    std::lock_guard<std::mutex> guard(m_impl->m_configLock);
 
     do
     {
@@ -68,7 +91,7 @@ bool Config::Reload()
         newEntries[entry] = value;
     } while (in.good());
 
-    m_entries = std::move(newEntries);
+    m_impl->m_entries = std::move(newEntries);
 
     return true;
 }
@@ -76,16 +99,16 @@ bool Config::Reload()
 bool Config::IsSet(const std::string &name) const
 {
     auto const nameLower = boost::algorithm::to_lower_copy(name);
-    return m_entries.find(nameLower) != m_entries.cend();
+    return m_impl->m_entries.find(nameLower) != m_impl->m_entries.cend();
 }
 
 const std::string Config::GetStringDefault(const std::string &name, const std::string &def) const
 {
     auto const nameLower = boost::algorithm::to_lower_copy(name);
 
-    auto const entry = m_entries.find(nameLower);
+    auto const entry = m_impl->m_entries.find(nameLower);
 
-    return entry == m_entries.cend() ? def : entry->second;
+    return entry == m_impl->m_entries.cend() ? def : entry->second;
 }
 
 bool Config::GetBoolDefault(const std::string &name, bool def) const
