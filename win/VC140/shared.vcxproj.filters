@@ -143,9 +143,6 @@
     <ClInclude Include="..\..\src\shared\Errors.h">
       <Filter>Util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\dep\include\mersennetwister\MersenneTwister.h">
-      <Filter>Util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\shared\ProgressBar.h">
       <Filter>Util</Filter>
     </ClInclude>

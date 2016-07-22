@@ -430,7 +430,6 @@
     <ClCompile Include="..\..\src\shared\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\dep\include\mersennetwister\MersenneTwister.h" />
     <ClInclude Include="..\..\src\shared\Auth\AuthCrypt.h" />
     <ClInclude Include="..\..\src\shared\Auth\BigNumber.h" />
     <ClInclude Include="..\..\src\shared\Auth\Hmac.h" />
