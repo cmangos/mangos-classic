@@ -84,8 +84,5 @@ cmake_install.cmake
 # Special exceptions
 #
 
-# ned files from excluded dirs
-!dep/tbb/src/Makefile
-
 # recastnavigation directory needs exception
 !dep/recastnavigation/RecastDemo/Build/
