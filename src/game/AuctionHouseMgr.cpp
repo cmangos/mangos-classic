@@ -627,8 +627,11 @@ void AuctionHouseObject::BuildListAuctionItems(WorldPacket& data, Player* player
 
             std::string name = proto->Name1;
             sObjectMgr.GetItemLocaleStrings(proto->ItemId, loc_idx, &name);
-
-            if (!wsearchedname.empty() && !Utf8FitTo(name, wsearchedname))
+            ItemRandomPropertiesEntry const* random_id = sItemRandomPropertiesStore.LookupEntry(Aentry->itemRandomPropertyId);
+            std::string suffix = random_id->internalName;
+            std::string suffix_loc = random_id->nameSuffix[3];
+            
+            if (!wsearchedname.empty() && !Utf8FitTo(name, wsearchedname) && !Utf8FitTo(suffix, wsearchedname) && !Utf8FitTo(suffix_loc, wsearchedname))
                 continue;
 
             if (count < 50 && totalcount >= listfrom)
