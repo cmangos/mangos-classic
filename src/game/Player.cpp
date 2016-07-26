@@ -15484,13 +15484,13 @@ void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiv
     ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER, text.c_str(), Language(language), GetChatTag(), GetObjectGuid(), GetName());
     rPlayer->GetSession()->SendPacket(&data);
 
-    // not send confirmation for addon messages
-    if (language != LANG_ADDON)
-    {
-        data.clear();
-        ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER_INFORM, text.c_str(), Language(language), CHAT_TAG_NONE, rPlayer->GetObjectGuid());
-        GetSession()->SendPacket(&data);
-    }
+    // do not send confirmations, afk, dnd or system notifications for addon messages
+    if (language == LANG_ADDON)
+        return;
+
+    data.clear();
+    ChatHandler::BuildChatPacket(data, CHAT_MSG_WHISPER_INFORM, text.c_str(), Language(language), CHAT_TAG_NONE, rPlayer->GetObjectGuid());
+    GetSession()->SendPacket(&data);
 
     if (!isAcceptWhispers())
     {
