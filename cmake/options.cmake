@@ -1,12 +1,11 @@
 option(DEBUG                "Include additional debug-code in core" OFF)
 option(WARNINGS             "Show all warnings during compile"      OFF)
 option(POSTGRESQL           "Use PostgreSQL"                        OFF)
-
-if(PCH)
-  option(PCH                "Use precompiled headers"               ON)
-else()
-  option(PCH                "Use precompiled headers"               OFF)
-endif()
+option(PCH                  "Use precompiled headers"               OFF)
+option(BUILD_CORE           "Build server core"                     ON)
+option(BUILD_EXTRACTOR      "Build map/dbc extractor"               OFF)
+option(BUILD_VMAP_EXTRACTOR "Build vmap extractor/assembler"        OFF)
+option(BUILD_MMAP_EXTRACTOR "Build Mmap extractor"                  OFF)
 
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)

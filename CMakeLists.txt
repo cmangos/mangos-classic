@@ -180,6 +180,10 @@ endif()
 # print out the results before continuing
 include(cmake/showoptions.cmake)
 
+if(NOT BUILD_CORE AND NOT BUILD_EXTRACTOR AND NOT BUILD_VMAP_EXTRACTOR AND NOT BUILD_MMAP_EXTRACTOR)
+  message(FATAL_ERROR "You must select something to build!")
+endif()
+
 # Generate revision-extractor
 set(GENREV_SRC
   src/tools/genrevision/genrevision.cpp
@@ -235,7 +239,7 @@ if(XCODE)
   endif()
 endif()
 
-add_subdirectory(dep) # TODO: add vmap extractor build support
+add_subdirectory(dep)
 
 # Add definitions for all build types
 # Don't place this above 'dep' subdirectory! Because of defines build will crash.
@@ -259,7 +263,22 @@ else()
   set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_RELEASE}")
 endif()
 
-add_subdirectory(src)
+if(BUILD_CORE)
+  add_subdirectory(src)
+endif()
+
+if(BUILD_EXTRACTOR)
+  add_subdirectory(contrib/extractor)
+endif()
+
+if(BUILD_VMAP_EXTRACTOR)
+  add_subdirectory(contrib/vmap_extractor)
+  add_subdirectory(contrib/vmap_assembler)
+endif()
+
+if(BUILD_MMAP_EXTRACTOR)
+  add_subdirectory(contrib/mmap)
+endif()
 # if(SQL)
 #   add_subdirectory(sql)
 # endif()

@@ -1,3 +1,4 @@
+#
 # This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
 #
 # This program is free software; you can redistribute it and/or modify
@@ -13,10 +14,5 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-# disable warnings for dependencies
-add_compile_options(-w)
-
-add_library (libmpq common.cpp  explode.cpp  extract.cpp  huffman.cpp  mpq.cpp  parser.cpp  wave.cpp )
-# link libmpq with zlib
-target_link_libraries (libmpq z)
+#
+add_subdirectory(Source)
