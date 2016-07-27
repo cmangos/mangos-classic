@@ -2668,14 +2668,14 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
             ((Creature*)m_originalCaster)->AI()->JustSummoned(spawnCreature);
 
             if (m_originalCaster->isInCombat() && !(spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
-				((Creature*)spawnCreature)->AI()->AttackStart(m_originalCaster->getAttackerForHelper());
+                ((Creature*)spawnCreature)->AI()->AttackStart(m_originalCaster->getAttackerForHelper());
         }
         else if ((m_caster->GetTypeId() == TYPEID_UNIT) && ((Creature*)m_caster)->AI())
         {
             ((Creature*)m_caster)->AI()->JustSummoned(spawnCreature);
 
             if (m_caster->isInCombat() && !(spawnCreature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)))
-				((Creature*)spawnCreature)->AI()->AttackStart(m_caster->getAttackerForHelper());
+                ((Creature*)spawnCreature)->AI()->AttackStart(m_caster->getAttackerForHelper());
         }
     }
 }
@@ -2850,8 +2850,6 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
 
     Creature* creatureTarget = (Creature*)unitTarget;
 
-    CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creatureTarget->GetEntry());
-
     // cast finish successfully
     // SendChannelUpdate(0);
     finish();
@@ -2872,12 +2870,12 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     if (plr->IsPvP())
         pet->SetPvP(true);
 
-    uint32 pet_number = sObjectMgr.GeneratePetNumber();
-    pet->GetCharmInfo()->SetPetNumber(pet_number, true);
+    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
 
     pet->GetCharmInfo()->SetReactState(REACT_DEFENSIVE);
 
-    pet->InitStatsForLevel(creatureTarget->getLevel());
+    uint32 level = creatureTarget->getLevel();
+    pet->InitStatsForLevel(level);
 
     pet->SetHealthPercent(creatureTarget->GetHealthPercent());
 
@@ -2885,16 +2883,16 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     creatureTarget->ForcedDespawn();
 
     // prepare visual effect for levelup
-    pet->SetUInt32Value(UNIT_FIELD_LEVEL, creatureTarget->getLevel() - 1);
+    pet->SetUInt32Value(UNIT_FIELD_LEVEL, level - 1);
 
     // add pet object to the world
     pet->GetMap()->Add((Creature*)pet);
+    pet->AIM_Initialize();
 
     // visual effect for levelup
-    pet->SetUInt32Value(UNIT_FIELD_LEVEL, creatureTarget->getLevel());
+    pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
 
     // this enables pet details window (Shift+P)
-    pet->AIM_Initialize();
     pet->InitPetCreateSpells();
 
     // caster have pet now
@@ -3008,9 +3006,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         // This is done for hunters pets, so now we do it for other controlled pets as well, why not? they're all unknowns anyway.
         NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5);
 
-        // this enables popup window (pet dismiss, cancel)
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
-        NewSummon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
+        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
         NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
 
