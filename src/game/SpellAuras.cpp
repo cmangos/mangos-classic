@@ -4436,6 +4436,9 @@ void Aura::PeriodicTick()
             uint32 heal = pCaster->SpellHealingBonusTaken(pCaster, spellProto, int32(new_damage * multiplier), DOT, GetStackAmount());
 
             int32 gain = pCaster->DealHeal(pCaster, heal, spellProto);
+            // Health Leech effects do not generate healing aggro
+            if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_LEECH)
+                break;
             pCaster->getHostileRefManager().threatAssist(pCaster, gain * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
             break;
         }
