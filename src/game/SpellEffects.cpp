@@ -393,6 +393,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         {
             switch (m_spellInfo->Id)
             {
+                case 19614:
+                    if (Unit* tamedUnit = unitTarget->GetCharm())
+                    {
+                        tamedUnit->RemoveAura(tamedUnit->GetAura(SPELL_AURA_MOD_CHARM, SPELLFAMILY_HUNTER, 0x0000000000000800));
+                        ((Creature*)tamedUnit)->ForcedDespawn(100);
+                    }
+                    return;
+
                 case 3360:                                  // Curse of the Eye
                 {
                     if (!unitTarget)

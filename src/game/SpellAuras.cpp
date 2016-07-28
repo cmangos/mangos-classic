@@ -1203,7 +1203,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             Unit* caster = GetCaster();
             if (!caster || !caster->isAlive())
                 return;
-
+            
             uint32 finalSpellId = 0;
             switch (GetId())
             {
@@ -1219,11 +1219,15 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 19697: finalSpellId = 19683; break;
                 case 19699: finalSpellId = 19685; break;
                 case 19700: finalSpellId = 19686; break;
-            }
+            }   
 
             if (finalSpellId)
+            {
+                
                 caster->CastSpell(target, finalSpellId, true, nullptr, this);
-
+                target->GetMotionMaster()->MoveFollow(caster, 5.0f, 90);
+             
+            }
             return;
         }
 
@@ -4283,6 +4287,12 @@ void Aura::PeriodicTick()
             Unit* pCaster = GetCaster();
             if (!pCaster)
                 return;
+
+            if (target->GetTypeId() == TYPEID_PLAYER && GetCaster()->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (target->IsPvP() && !GetCaster()->IsPvP() && !IsPositiveSpell(GetSpellProto()) && IsAreaOfEffectSpell(GetSpellProto()))
+                    return;
+            }
 
             if (spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
                     pCaster->SpellHitResult(target, spellProto, false) != SPELL_MISS_NONE)

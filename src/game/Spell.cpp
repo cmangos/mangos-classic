@@ -585,9 +585,16 @@ void Spell::FillTargetMap()
             Player* me = (Player*)m_caster;
             for (UnitList::const_iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end(); ++itr)
             {
+
+
                 Player* targetOwner = (*itr)->GetCharmerOrOwnerPlayerOrPlayerItself();
                 if (targetOwner && targetOwner != me && targetOwner->IsPvP() && !me->IsInDuelWith(targetOwner))
                 {
+                    if (IsAreaOfEffectSpell(m_spellInfo)  && targetOwner->GetTeam() != me->GetTeam())
+                    {
+                        continue;
+                    }
+
                     me->UpdatePvP(true);
                     me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
                     break;
@@ -740,6 +747,11 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
             return;
         }
     }
+
+
+    // Dont add victim to targetlist if caster is not pvp flagged and casting AoE
+    if (pVictim->IsPvP() && !GetCaster()->IsPvP() && !IsPositiveSpell(m_spellInfo) && IsAreaOfEffectSpell(m_spellInfo))
+        return;
 
     // This is new target calculate data for him
 
@@ -2943,8 +2955,8 @@ void Spell::update(uint32 difftime)
 
     // check if the player or unit caster has moved before the spell finished (exclude casting on vehicles)
     if (((m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->GetTypeId() == TYPEID_UNIT) && m_timer != 0) &&
-            (m_castPositionX != m_caster->GetPositionX() || m_castPositionY != m_caster->GetPositionY() || m_castPositionZ != m_caster->GetPositionZ()) &&
-            (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_caster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)))
+        (m_castPositionX != m_caster->GetPositionX() || m_castPositionY != m_caster->GetPositionY() || m_castPositionZ != m_caster->GetPositionZ()) &&
+        (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_caster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)))
     {
         // always cancel for channeled spells
         if (m_spellState == SPELL_STATE_CASTING)
@@ -2954,10 +2966,21 @@ void Spell::update(uint32 difftime)
             cancel();
     }
 
+
+    if (Unit* unit = m_targets.getUnitTarget())
+    {
+        char textToWrite[16];
+        uint32_t currentScore = m_timer;
+        // as per comment from LS_dev, platform is int 16bits
+        sprintf(textToWrite, "%lu", currentScore);
+        unit->MonsterWhisper(textToWrite, GetCaster(),true);
+    }
+
     switch (m_spellState)
     {
         case SPELL_STATE_PREPARING:
         {
+
             if (m_timer)
             {
                 if (difftime >= m_timer)
@@ -2971,6 +2994,9 @@ void Spell::update(uint32 difftime)
         } break;
         case SPELL_STATE_CASTING:
         {
+
+
+
             if (m_timer > 0)
             {
                 if (m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->GetTypeId() == TYPEID_UNIT)
@@ -3370,7 +3396,14 @@ void Spell::SendLogExecute()
         for (uint32 j = 0; j < count2; ++j)
         {
             switch (m_spellInfo->Effect[EFFECT_INDEX_0])
-            {
+            {         
+                case SPELL_EFFECT_DISPEL:
+                case SPELL_EFFECT_THREAT:
+					if (Unit* unit = m_targets.getUnitTarget())
+						data << unit->GetObjectGuid();
+                    else
+						data << uint8(0);
+                    break;
                 case SPELL_EFFECT_POWER_DRAIN:
                     if (Unit* unit = m_targets.getUnitTarget())
                         data << unit->GetPackGUID();
@@ -3505,7 +3538,7 @@ void Spell::SendChannelUpdate(uint32 time)
                     ((Creature*)possessed)->ForcedDespawn();
             }
         }
- 
+
         //pets should be temporarily removed when possesing a target
         if (m_caster->GetTypeId() == TYPEID_PLAYER)
             ((Player*)m_caster)->ResummonPetTemporaryUnSummonedIfAny();
@@ -5018,6 +5051,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || m_CastItem)
                     break;
 
+                // Viper Sting - This spell can no longer be used on warrior and rogue targets. In addition, while it can be used on a druid target at any time
+                // it will only drain mana when the druid is in caster form (Patch 1.4)
+                if (expectedTarget->getClass() == CLASS_DRUID && m_spellInfo->SpellFamilyFlags & 0x0000000000010000)
+                    break;
+
                 if (expectedTarget->GetPowerType() != POWER_MANA)
                     return SPELL_FAILED_BAD_TARGETS;
 
@@ -6003,6 +6041,9 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
             return false;
     }
 
+
+
+
     // Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
     if (target != m_caster && target->GetTypeId() == TYPEID_PLAYER)
     {
@@ -6011,6 +6052,8 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 
         if (((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
             return false;
+
+
     }
 
     // Check targets for LOS visibility (except spells without range limitations )
