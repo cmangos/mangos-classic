@@ -26,6 +26,8 @@
 #include "Spell.h"
 #include "Unit.h"
 #include "World.h"
+#include "SpellAuras.h"
+
 
 bool IsPrimaryProfessionSkill(uint32 skill)
 {
@@ -120,23 +122,36 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
 
     int32 castTime = spellCastTimeEntry->CastTime;
 
+    // Multishot only (alternative set CastingTimeIndex = 3)
+    if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()) && spellInfo->SpellFamilyFlags & 0x0000000000001000) 
+        castTime = 500;
+    
     if (spell)
     {
         if (Player* modOwner = spell->GetCaster()->GetSpellModOwner())
             modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CASTING_TIME, castTime, spell);
 
-        if (!spellInfo->HasAttribute(SPELL_ATTR_UNK4) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL))
-            castTime = int32(castTime * spell->GetCaster()->GetFloatValue(UNIT_MOD_CAST_SPEED));
-        else
+        if (spell->IsRangedSpell() && !spell->IsAutoRepeat())
         {
-            if (spell->IsRangedSpell() && !spell->IsAutoRepeat())
-                castTime = int32(castTime * spell->GetCaster()->m_modAttackSpeedPct[RANGED_ATTACK]);
+            float bonus = 1.0f;
+            float malus = 1.0f;
+            Unit::AuraList const& hasteAuren = spell->GetCaster()->GetAurasByType(SPELL_AURA_MOD_RANGED_HASTE);
+            for (Unit::AuraList::const_iterator itr = hasteAuren.begin(); itr != hasteAuren.end(); ++itr)
+            {
+                float amount = (*itr)->GetModifier()->m_amount;
+                if (amount > 0)
+                    bonus *= ((100.0f + amount) / 100.0f);
+                else
+                    malus *= ((100.0f - amount) / 100.0f);
+            }
+            bonus = bonus < 0.5f ? 0.5f : bonus;
+            castTime = int32(castTime * (1.0f / bonus));
+            castTime = int32(castTime * malus);
         }
+        else if (!spellInfo->HasAttribute(SPELL_ATTR_UNK4) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL))
+            castTime = int32(castTime * spell->GetCaster()->GetFloatValue(UNIT_MOD_CAST_SPEED));
     }
-
-    if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()))
-        castTime += 500;
-
+    
     // [workaround] holy light need script effect, but 19968 spell for it have 2.5 cast time sec
     // it should be instant instead
     if (spellInfo->Id == 19968)
