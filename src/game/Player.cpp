@@ -15499,10 +15499,13 @@ void Player::Whisper(const std::string& text, uint32 language, ObjectGuid receiv
     }
 
     // announce afk or dnd message
-    if (rPlayer->isAFK())
-        ChatHandler(this).PSendSysMessage(LANG_PLAYER_AFK, rPlayer->GetName(), rPlayer->autoReplyMsg.c_str());
-    else if (rPlayer->isDND())
-        ChatHandler(this).PSendSysMessage(LANG_PLAYER_DND, rPlayer->GetName(), rPlayer->autoReplyMsg.c_str());
+    if (rPlayer->isAFK() || rPlayer->isDND())
+    {
+        const ChatMsg msgtype = rPlayer->isAFK() ? CHAT_MSG_AFK : CHAT_MSG_DND;
+        data.clear();
+        ChatHandler::BuildChatPacket(data, msgtype, rPlayer->autoReplyMsg.c_str(), LANG_UNIVERSAL, CHAT_TAG_NONE, rPlayer->GetObjectGuid());
+        GetSession()->SendPacket(&data);
+    }
 }
 
 void Player::PetSpellInitialize()
