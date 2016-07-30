@@ -2048,6 +2048,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
         Player* GetNextRandomRaidMember(float radius);
         PartyResult CanUninviteFromGroup() const;
+        void UpdateGroupLeaderFlag(const bool remove = false);
         // BattleGround Group System
         void SetBattleGroundRaid(Group* group, int8 subgroup = -1);
         void RemoveFromBattleGroundRaid();

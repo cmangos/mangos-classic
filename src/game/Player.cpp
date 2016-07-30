@@ -14161,6 +14161,7 @@ void Player::_LoadGroup(QueryResult* result)
             SetGroup(group, subgroup);
         }
     }
+    UpdateGroupLeaderFlag();
 }
 
 void Player::_LoadBoundInstances(QueryResult* result)
@@ -17941,6 +17942,18 @@ PartyResult Player::CanUninviteFromGroup() const
         return ERR_NOT_IN_GROUP;  // error message is not so appropriated but no other option for classic
 
     return ERR_PARTY_RESULT_OK;
+}
+
+void Player::UpdateGroupLeaderFlag(const bool remove /*= false*/)
+{
+    const Group* group = GetGroup();
+    if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER))
+    {
+        if (remove || !group || group->GetLeaderGuid() != GetObjectGuid())
+            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
+    }
+    else if (!remove && group && group->GetLeaderGuid() == GetObjectGuid())
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GROUP_LEADER);
 }
 
 void Player::SetBattleGroundRaid(Group* group, int8 subgroup)
