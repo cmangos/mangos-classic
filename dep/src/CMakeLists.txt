@@ -21,7 +21,4 @@ if (BUILD_CORE)
 endif()
 
 add_subdirectory(g3dlite)
-
-if(WIN32)
-  add_subdirectory(zlib)
-endif()
+add_subdirectory(zlib)
