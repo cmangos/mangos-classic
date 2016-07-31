@@ -20,8 +20,10 @@
 #define _VMAPMANAGER2_H
 
 #include "IVMapManager.h"
-#include "Common.h"
+
 #include <G3D/Vector3.h>
+
+#include <unordered_map>
 
 //===========================================================
 
