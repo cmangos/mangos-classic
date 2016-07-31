@@ -25,6 +25,12 @@ git:
 # make use of the new container based infrastructure at travis to improve performance (we don't need sudo)
 sudo: false
 
+# don't re-build for tags so that [publish binary] is not re-run
+# https://github.com/travis-ci/travis-ci/issues/1532
+branches:
+  except:
+    - /^Last_.*/
+
 os:
   - linux
 
