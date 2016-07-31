@@ -17,6 +17,6 @@
 # disable warnings for dependencies
 add_compile_options(-w)
 
-add_library (libmpq common.cpp  explode.cpp  extract.cpp  huffman.cpp  mpq.cpp  parser.cpp  wave.cpp )
+add_library (libmpq STATIC common.cpp  explode.cpp  extract.cpp  huffman.cpp  mpq.cpp  parser.cpp  wave.cpp)
 # link libmpq with zlib
 target_link_libraries (libmpq z)
