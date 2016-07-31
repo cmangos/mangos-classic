@@ -269,7 +269,7 @@ enum SpellAttributes
     SPELL_ATTR_UNK23                            = 0x00800000,            // 23 castable while dead?
     SPELL_ATTR_CASTABLE_WHILE_MOUNTED           = 0x01000000,            // 24 castable while mounted
     SPELL_ATTR_DISABLED_WHILE_ACTIVE            = 0x02000000,            // 25 Activate and start cooldown after aura fade or remove summoned creature or go
-    SPELL_ATTR_UNK26                            = 0x04000000,            // 26
+    SPELL_ATTR_NEGATIVE                         = 0x04000000,            // 26 Almost all negative spell have it
     SPELL_ATTR_CASTABLE_WHILE_SITTING           = 0x08000000,            // 27 castable while sitting
     SPELL_ATTR_CANT_USED_IN_COMBAT              = 0x10000000,            // 28 Cannot be used in combat
     SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY    = 0x20000000,            // 29 unaffected by invulnerability (hmm possible not...)
@@ -286,7 +286,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK4                          = 0x00000010,            // 4
     SPELL_ATTR_EX_NOT_BREAK_STEALTH             = 0x00000020,            // 5 Not break stealth
     SPELL_ATTR_EX_CHANNELED_2                   = 0x00000040,            // 6 channeled 2
-    SPELL_ATTR_EX_NEGATIVE                      = 0x00000080,            // 7
+    SPELL_ATTR_EX_UNK7                          = 0x00000080,            // 7
     SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET          = 0x00000100,            // 8 Spell req target not to be in combat state
     SPELL_ATTR_EX_UNK9                          = 0x00000200,            // 9
     SPELL_ATTR_EX_NO_THREAT                     = 0x00000400,            // 10 no generates threat on cast 100%
