@@ -596,7 +596,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
     }
 
     // Get in CombatState
-    if (pVictim != this && damagetype != DOT)
+    if (pVictim != this && damagetype != DOT && (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO)))
     {
         SetInCombatWith(pVictim);
         pVictim->SetInCombatWith(this);
