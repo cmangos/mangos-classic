@@ -5077,16 +5077,9 @@ void Unit::AttackedBy(Unit* attacker)
 
 void Unit::AttackStop(bool targetSwitch /*=false*/, bool includingCast /*=false*/)
 {
+    // interrupt cast only id includingCast == true and we have something to interrupt.
     if (includingCast && IsNonMeleeSpellCasted(false))
         InterruptNonMeleeSpells(false);
-
-    if (!m_attacking)
-        return;
-
-    Unit* victim = m_attacking;
-
-    m_attacking->_removeAttacker(this);
-    m_attacking = nullptr;
 
     // Clear our target only if targetSwitch == true
     if (targetSwitch)
@@ -5096,19 +5089,13 @@ void Unit::AttackStop(bool targetSwitch /*=false*/, bool includingCast /*=false*
 
     InterruptSpell(CURRENT_MELEE_SPELL);
 
-    // reset only at real combat stop
-    if (!targetSwitch && GetTypeId() == TYPEID_UNIT)
+    if (m_attacking)
     {
-        ((Creature*)this)->SetNoCallAssistance(false);
+        SendMeleeAttackStop(m_attacking);
 
-        if (((Creature*)this)->HasSearchedAssistance())
-        {
-            ((Creature*)this)->SetNoSearchAssistance(false);
-            UpdateSpeed(MOVE_RUN, false);
-        }
+        m_attacking->_removeAttacker(this);
+        m_attacking = nullptr;
     }
-
-    SendMeleeAttackStop(victim);
 }
 
 void Unit::CombatStop(bool includingCast)
@@ -5118,8 +5105,19 @@ void Unit::CombatStop(bool includingCast)
 
     if (GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
-    else if (((Creature*)this)->GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_COMBAT_STOP)
-        ((Creature*)this)->ClearTemporaryFaction();
+    else
+    {
+        ((Creature*)this)->SetNoCallAssistance(false);
+
+        if (((Creature*)this)->HasSearchedAssistance())
+        {
+            ((Creature*)this)->SetNoSearchAssistance(false);
+            UpdateSpeed(MOVE_RUN, false);
+        }
+
+        if (((Creature*)this)->GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_COMBAT_STOP)
+            ((Creature*)this)->ClearTemporaryFaction();
+    }
 
     ClearInCombat();
 }
