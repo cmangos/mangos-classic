@@ -141,7 +141,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
         return false;
     }
 
-
     uint32 summon_spell_id = fields[21].GetUInt32();
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
 
@@ -191,7 +190,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
     SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
     SetName(fields[11].GetString());
 
-    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5);
+    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS);
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
 
     if (getPetType() == HUNTER_PET)
@@ -1020,7 +1019,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     SetByteValue(UNIT_FIELD_BYTES_0, 3, POWER_FOCUS);
     SetSheath(SHEATH_STATE_MELEE);
 
-    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5);
+    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS);
     // SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED); (need to test and check these for vanilla and TBC)
 
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RENAME);
@@ -1892,7 +1891,7 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* ci
         return false;
 
     SetSheath(SHEATH_STATE_MELEE);
-    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5);
+    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS);
 
     if (getPetType() == MINI_PET)                           // always non-attackable
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);

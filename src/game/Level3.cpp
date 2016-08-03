@@ -4474,7 +4474,7 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
     if (powertype == POWER_RAGE || powertype == POWER_MANA)
         player->SetByteValue(UNIT_FIELD_BYTES_1, 1, 0xEE);
 
-    player->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_UNK5);
+    player->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_UNK5);
 
     player->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
