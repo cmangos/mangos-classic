@@ -4445,71 +4445,75 @@ void Aura::PeriodicTick()
         case SPELL_AURA_PERIODIC_HEAL:
         case SPELL_AURA_OBS_MOD_HEALTH:
         {
-            // don't heal target if not alive, mostly death persistent effects from items
-            if (!target->isAlive())
-                return;
-
             Unit* pCaster = GetCaster();
             if (!pCaster)
                 return;
 
-            // Don't heal target if it is already at max health
-            if (target->GetHealth() == target->GetMaxHealth())
-                return;
+            bool canApplyHealthPart = true;
+            bool canApplyDamagePart = true;
+
+            // don't heal target if max health or if not alive, mostly death persistent effects from items
+            if (!target->isAlive() || (target->GetHealth() == target->GetMaxHealth()))
+                canApplyHealthPart = false;
 
             // heal for caster damage (must be alive)
             if (target != pCaster && spellProto->SpellVisual == 163 && !pCaster->isAlive())
-                return;
+                canApplyHealthPart = false;
 
-            // ignore non positive values (can be result apply spellmods to aura damage
-            uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
-
-            uint32 pdamage;
-
-            if (m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
-                pdamage = uint32(target->GetMaxHealth() * amount / 100);
-            else
-                pdamage = amount;
-
-            pdamage = target->SpellHealingBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
-
-            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health inflicted by %u",
-                              GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
-
-            int32 gain = target->ModifyHealth(pdamage);
-            SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
-            target->SendPeriodicAuraLog(&pInfo);
-
-            // Set trigger flag
-            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;
-            uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;
-            uint32 procEx = PROC_EX_NORMAL_HIT | PROC_EX_PERIODIC_POSITIVE;
-            pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, gain, BASE_ATTACK, spellProto);
-
-            target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
-
-            // heal for caster damage
-            if (target != pCaster && spellProto->SpellVisual == 163)
+            if (canApplyHealthPart)
             {
-                uint32 dmg = spellProto->manaPerSecond;
-                if (pCaster->GetHealth() <= dmg && pCaster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    pCaster->RemoveAurasDueToSpell(GetId());
+                // ignore non positive values (can be result apply spellmods to aura damage
+                uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
-                    // finish current generic/channeling spells, don't affect autorepeat
-                    pCaster->FinishSpell(CURRENT_GENERIC_SPELL);
-                    pCaster->FinishSpell(CURRENT_CHANNELED_SPELL);
-                }
+                uint32 pdamage;
+
+                if (m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
+                    pdamage = uint32(target->GetMaxHealth() * amount / 100);
                 else
-                {
-                    uint32 damage = gain;
-                    uint32 absorb = 0;
-                    pCaster->DealDamageMods(pCaster, damage, &absorb);
-                    pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(spellProto), absorb, 0, false, 0, false);
+                    pdamage = amount;
 
-                    CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
-                    pCaster->DealDamage(pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
+                pdamage = target->SpellHealingBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
+
+                DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health inflicted by %u",
+                    GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
+
+                int32 gain = target->ModifyHealth(pdamage);
+                SpellPeriodicAuraLogInfo pInfo(this, pdamage, 0, 0, 0.0f);
+                target->SendPeriodicAuraLog(&pInfo);
+
+                // Set trigger flag
+                uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;
+                uint32 procVictim = PROC_FLAG_ON_TAKE_PERIODIC;
+                uint32 procEx = PROC_EX_NORMAL_HIT | PROC_EX_PERIODIC_POSITIVE;
+                pCaster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, gain, BASE_ATTACK, spellProto);
+
+                target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
+
+                // apply damage part to caster if needed (ex. health funnel)
+                if (target != pCaster && spellProto->SpellVisual == 163)
+                {
+                    uint32 damage = spellProto->manaPerSecond;
+                    uint32 absorb = 0;
+
+                    pCaster->DealDamageMods(pCaster, damage, &absorb);
+                    if (pCaster->GetHealth() > damage)
+                    {
+                        pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(spellProto), absorb, 0, false, 0, false);
+                        CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
+                        pCaster->DealDamage(pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
+                    }
+                    else
+                        canApplyDamagePart = false;
                 }
+            }
+
+            if (!canApplyHealthPart || !canApplyDamagePart)
+            {
+                pCaster->RemoveAurasDueToSpell(GetId());
+
+                // finish current generic/channeling spells, don't affect autorepeat
+                pCaster->FinishSpell(CURRENT_GENERIC_SPELL);
+                pCaster->FinishSpell(CURRENT_CHANNELED_SPELL);
             }
             break;
         }
@@ -5384,16 +5388,21 @@ void SpellAuraHolder::Update(uint32 diff)
         {
             if (Unit* caster = GetCaster())
             {
-                Powers powertype = Powers(GetSpellProto()->powerType);
-                int32 manaPerSecond = GetSpellProto()->manaPerSecond + GetSpellProto()->manaPerSecondPerLevel * caster->getLevel();
-                m_timeCla = 1 * IN_MILLISECONDS;
-
-                if (manaPerSecond)
+                // This should not be used for health funnel (already processed in PeriodicTick()).
+                // TODO:: is the fallowing code can be removed?
+                if (GetSpellProto()->SpellVisual != 163)
                 {
-                    if (powertype == POWER_HEALTH)
-                        caster->ModifyHealth(-manaPerSecond);
-                    else
-                        caster->ModifyPower(powertype, -manaPerSecond);
+                    Powers powertype = Powers(GetSpellProto()->powerType);
+                    int32 manaPerSecond = GetSpellProto()->manaPerSecond + GetSpellProto()->manaPerSecondPerLevel * caster->getLevel();
+                    m_timeCla = 1 * IN_MILLISECONDS;
+
+                    if (manaPerSecond)
+                    {
+                        if (powertype == POWER_HEALTH)
+                            caster->ModifyHealth(-manaPerSecond);
+                        else
+                            caster->ModifyPower(powertype, -manaPerSecond);
+                    }
                 }
             }
         }
