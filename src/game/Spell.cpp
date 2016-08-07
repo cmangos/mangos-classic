@@ -3343,6 +3343,8 @@ void Spell::WriteSpellGoTargets(WorldPacket* data)
         }
         else if (ihit->missCondition == SPELL_MISS_NONE)    // Add only hits
             m_needAliveTargetMask |= ihit->effectMask;
+        else if (IsChanneledSpell(m_spellInfo) && ihit->missCondition == SPELL_MISS_RESIST)
+            m_duration = 0;                                 // cancel aura to avoid visual effect continue
     }
 
     for (GOTargetList::const_iterator ighit = m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end(); ++ighit)
