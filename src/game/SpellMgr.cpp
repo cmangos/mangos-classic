@@ -2158,6 +2158,17 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
     return true;
 }
 
+bool SpellMgr::IsSpellCanAffectSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const
+{
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        ClassFamilyMask mask = sSpellMgr.GetSpellAffectMask(spellInfo_1->Id, SpellEffectIndex(i));
+        if (spellInfo_2->IsFitToFamilyMask(mask))
+            return true;
+    }
+    return false;
+}
+
 bool SpellMgr::IsProfessionOrRidingSpell(uint32 spellId)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
