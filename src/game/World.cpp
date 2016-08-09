@@ -188,7 +188,7 @@ World::AddSession_(WorldSession* s)
     // kick already loaded player with same account (if any)
     // the session gets replaced by s below and will be deleted
     // when the corresponding socket gets removed by asio
-    if (WorldSession* oldSession = FindSession(s->GetAccountId())
+    if (WorldSession* oldSession = FindSession(s->GetAccountId()))
     {
         oldSession->KickPlayer();
         decrease_session = false;
