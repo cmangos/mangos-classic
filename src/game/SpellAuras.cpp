@@ -4431,7 +4431,10 @@ void Aura::PeriodicTick()
                             spell->cancel();
 
             if (Player* modOwner = pCaster->GetSpellModOwner())
+            {
+                modOwner->ApplySpellMod(GetId(), SPELLMOD_ALL_EFFECTS, new_damage);
                 modOwner->ApplySpellMod(GetId(), SPELLMOD_MULTIPLE_VALUE, multiplier);
+            }
 
             uint32 heal = pCaster->SpellHealingBonusTaken(pCaster, spellProto, int32(new_damage * multiplier), DOT, GetStackAmount());
 
