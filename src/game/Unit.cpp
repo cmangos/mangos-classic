@@ -3750,7 +3750,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
         }
 
         // non single (per caster) per target spell specific (possible single spell per target at caster)
-        if (!is_spellSpecPerTargetPerCaster && !is_spellSpecPerTarget && sSpellMgr.IsNoStackSpellDueToSpell(spellId, i_spellId))
+        if (!is_spellSpecPerTargetPerCaster && !is_spellSpecPerTarget && sSpellMgr.IsNoStackSpellDueToSpell(spellProto, i_spellProto))
         {
             // Its a parent aura (create this aura in ApplyModifier)
             if ((*i).second->IsInUse())
