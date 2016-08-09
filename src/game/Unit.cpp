@@ -3674,20 +3674,9 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
                 continue;
         }
 
-        if (i_spellId == spellId) continue;
-
-        bool is_triggered_by_spell = false;
         // prevent triggering aura of removing aura that triggered it
-        for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-            if (i_spellProto->EffectTriggerSpell[j] == spellId)
-                is_triggered_by_spell = true;
-
-        // prevent triggered aura of removing aura that triggering it (triggered effect early some aura of parent spell
-        for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
-            if (spellProto->EffectTriggerSpell[j] == i_spellId)
-                is_triggered_by_spell = true;
-
-        if (is_triggered_by_spell)
+        if (((*i).second->GetTriggeredBy() && (*i).second->GetTriggeredBy()->Id == spellId)
+            || (holder->GetTriggeredBy() && holder->GetTriggeredBy()->Id == i_spellId))
             continue;
 
         SpellSpecific i_spellId_spec = GetSpellSpecific(i_spellId);
