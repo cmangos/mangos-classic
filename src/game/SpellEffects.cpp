@@ -1992,7 +1992,10 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
 
                 Loot*& loot = gameObjTarget->loot;
                 if (!loot)
+                {
                     loot = new Loot((Player*)m_caster, gameObjTarget, loottype);
+                    TakeCastItem();
+                }
                 loot->ShowContentTo((Player*)m_caster);
                 return;
             }
@@ -2005,7 +2008,10 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
             {
                 Loot*& loot = itemTarget->loot;
                 if (!loot)
+                {
                     loot = new Loot((Player*)m_caster, itemTarget, loottype);
+                    TakeCastItem();
+                }
                 loot->ShowContentTo((Player*)m_caster);
                 return;
             }
