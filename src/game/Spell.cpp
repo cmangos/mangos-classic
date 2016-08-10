@@ -301,6 +301,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     gameObjTarget = nullptr;
     focusObject = nullptr;
     m_triggeredByAuraSpell  = nullptr;
+    m_spellAuraHolder = nullptr;
 
     // Auto Shot & Shoot (wand)
     m_autoRepeat = IsAutoRepeatRangedSpell(m_spellInfo);
@@ -1090,6 +1091,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         ((Creature*)m_caster)->AI()->SpellHitTarget(unit, m_spellInfo);
     if (real_caster && real_caster != m_caster && real_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)real_caster)->AI())
         ((Creature*)real_caster)->AI()->SpellHitTarget(unit, m_spellInfo);
+
+    if (m_spellAuraHolder)
+        m_spellAuraHolder->SetState(SPELLAURAHOLDER_STATE_READY);
 }
 
 void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
@@ -1240,6 +1244,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
                 if (duration == 0)
                 {
                     delete m_spellAuraHolder;
+                    m_spellAuraHolder = nullptr;
                     return;
                 }
             }
@@ -1253,7 +1258,10 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
             unit->AddSpellAuraHolder(m_spellAuraHolder);
         }
         else
+        {
             delete m_spellAuraHolder;
+            m_spellAuraHolder = nullptr;
+        }
     }
 }
 
