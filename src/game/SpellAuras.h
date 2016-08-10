@@ -131,7 +131,7 @@ class MANGOS_DLL_SPEC SpellAuraHolder
         bool IsDeleted() const { return m_deleted;}
         bool IsEmptyHolder() const;
 
-        void SetDeleted() { m_deleted = true; m_spellAuraHolderState == SPELLAURAHOLDER_STATE_REMOVING; }
+        void SetDeleted() { m_deleted = true; m_spellAuraHolderState = SPELLAURAHOLDER_STATE_REMOVING; }
 
         void SetInUse(bool state)
         {
