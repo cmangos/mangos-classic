@@ -528,7 +528,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (unitTarget && m_CastItem)
                     {
-                        uint32 roll = (0, 9);
+                        uint32 roll = urand(0, 9);
                         if (roll == 1 && unitTarget->GetTypeId() == TYPEID_PLAYER)
                             unitTarget->CastSpell(m_caster, 13181, true, m_CastItem);
                         else if (roll)
@@ -849,7 +849,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     // reset or just forced upon target for teleport (SMSG_HIGHEST_THREAT_UPDATE)
                     if (unitTarget)
                         m_caster->CastSpell(unitTarget, 23139, true);
-                    
+
                     return;
                 }
                 case 23448:                                 // Transporter Arrival - Ultrasafe Transporter: Gadgetzan - backfires
