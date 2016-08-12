@@ -394,7 +394,7 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_UNK4                         = 0x00000010,            // 4 This will no longer cause guards to attack on use??
     SPELL_ATTR_EX4_UNK5                         = 0x00000020,            // 5
     SPELL_ATTR_EX4_NOT_STEALABLE                = 0x00000040,            // 6 although such auras might be dispellable, they cannot be stolen
-    SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING       = 0x00000080,            // 7 Can be cast while another cast is in progress
+    SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING       = 0x00000080,            // 7 In theory, can use this spell while another is channeled/cast/autocast
     SPELL_ATTR_EX4_STACK_DOT_MODIFIER           = 0x00000100,            // 8 no effect on non DoTs?
     SPELL_ATTR_EX4_UNK9                         = 0x00000200,            // 9
     SPELL_ATTR_EX4_SPELL_VS_EXTEND_COST         = 0x00000400,            // 10 Rogue Shiv have this flag
