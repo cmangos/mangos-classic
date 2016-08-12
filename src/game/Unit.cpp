@@ -5088,8 +5088,9 @@ void Unit::AttackStop(bool targetSwitch /*=false*/, bool includingCast /*=false*
     m_attacking->_removeAttacker(this);
     m_attacking = nullptr;
 
-    // Clear our target
-    SetTargetGuid(ObjectGuid());
+    // Clear our target only if targetSwitch == true
+    if (targetSwitch)
+        SetTargetGuid(ObjectGuid());
 
     clearUnitState(UNIT_STAT_MELEE_ATTACKING);
 

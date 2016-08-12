@@ -1338,28 +1338,25 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
         m_EventUpdateTime -= diff;
     }
 
-    // Melee Auto-Attack (getVictim might be nullptr as result of timer based events and actions)
-    if (Combat && m_creature->getVictim())
+    Unit* victim = m_creature->getVictim();
+    // Melee Auto-Attack
+    if (Combat && victim && !(m_creature->IsNonMeleeSpellCasted(false)) || m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
     {
         // Update creature dynamic movement position before doing anything else
         if (m_DynamicMovement)
         {
-            if (!m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+            if (m_creature->IsWithinLOSInMap(victim))
             {
-                bool uiInLineOfSight = m_creature->IsWithinLOSInMap(m_creature->getVictim());
-                
-                if (uiInLineOfSight && !m_creature->IsNonMeleeSpellCasted(false))
-                {
-                    if (m_LastSpellMaxRange && m_creature->IsInRange(m_creature->getVictim(), 0, (m_LastSpellMaxRange / 1.5f)))
-                        SetCombatMovement(false, true);
-                    else
-                        SetCombatMovement(true, true);
-                }
-                else if (!uiInLineOfSight)
+                if (m_LastSpellMaxRange && m_creature->IsInRange(victim, 0, (m_LastSpellMaxRange / 1.5f)))
+                    SetCombatMovement(false, true);
+                else
                     SetCombatMovement(true, true);
             }
+            else
+                SetCombatMovement(true, true);
         }
-        else if (m_MeleeEnabled)
+        else if (m_MeleeEnabled && m_creature->CanReachWithMeleeAttack(victim)
+            && !(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE))
             DoMeleeAttackIfReady();
     }
 }

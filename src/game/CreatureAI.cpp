@@ -20,6 +20,7 @@
 #include "Creature.h"
 #include "DBCStores.h"
 #include "Spell.h"
+#include "SpellMgr.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -113,9 +114,15 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
             if (uiCastFlags & CAST_INTERRUPT_PREVIOUS && pCaster->IsNonMeleeSpellCasted(false))
                 pCaster->InterruptNonMeleeSpells(false);
 
-            // Creature should always stop before it will cast a new spell (logic applies to combat movement only)
-            if (pCaster->isInCombat())
+            // Creature should always stop before it will cast a non-instant spell
+            if (GetSpellCastTime(pSpell))
                 pCaster->StopMoving();
+
+            // Creature should interrupt any current melee spell
+            pCaster->InterruptSpell(CURRENT_MELEE_SPELL);
+
+            // Creature should stop wielding weapon while casting
+            pCaster->SetSheath(SHEATH_STATE_UNARMED);
 
             pCaster->CastSpell(pTarget, pSpell, !!(uiCastFlags & CAST_TRIGGERED), nullptr, nullptr, uiOriginalCasterGUID);
             return CAST_OK;
