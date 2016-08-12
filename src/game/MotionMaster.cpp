@@ -329,30 +329,24 @@ void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generate
 
 void MotionMaster::MoveSeekAssistance(float x, float y, float z)
 {
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+    if (m_owner->GetTypeId() == TYPEID_UNIT)
     {
-        sLog.outError("%s attempt to seek assistance", m_owner->GetGuidStr().c_str());
-    }
-    else
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s seek assistance (X: %f Y: %f Z: %f)",
-                         m_owner->GetGuidStr().c_str(), x, y, z);
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s seek assistance (X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), x, y, z);
         Mutate(new AssistanceMovementGenerator(x, y, z));
     }
+    else
+        sLog.outError("%s attempt to seek assistance", m_owner->GetGuidStr().c_str());
 }
 
 void MotionMaster::MoveSeekAssistanceDistract(uint32 time)
 {
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+    if (m_owner->GetTypeId() == TYPEID_UNIT)
     {
-        sLog.outError("%s attempt to call distract after assistance", m_owner->GetGuidStr().c_str());
-    }
-    else
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s is distracted after assistance call (Time: %u)",
-                         m_owner->GetGuidStr().c_str(), time);
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s is distracted after assistance call (Time: %u)", m_owner->GetGuidStr().c_str(), time);
         Mutate(new AssistanceDistractMovementGenerator(time));
     }
+    else
+        sLog.outError("%s attempt to call distract after assistance", m_owner->GetGuidStr().c_str());
 }
 
 void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
@@ -362,15 +356,15 @@ void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s flee from %s", m_owner->GetGuidStr().c_str(), enemy->GetGuidStr().c_str());
 
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
-        Mutate(new FleeingMovementGenerator<Player>(enemy->GetObjectGuid()));
-    else
+    if (m_owner->GetTypeId() == TYPEID_UNIT)
     {
         if (time)
             Mutate(new TimedFleeingMovementGenerator(enemy->GetObjectGuid(), time));
         else
             Mutate(new FleeingMovementGenerator<Creature>(enemy->GetObjectGuid()));
     }
+    else
+        Mutate(new FleeingMovementGenerator<Player>(enemy->GetObjectGuid()));
 }
 
 void MotionMaster::MoveWaypoint(int32 id /*=0*/, uint32 source /*=0==PATH_NO_PATH*/, uint32 initialDelay /*=0*/, uint32 overwriteEntry /*=0*/)
@@ -391,14 +385,14 @@ void MotionMaster::MoveWaypoint(int32 id /*=0*/, uint32 source /*=0==PATH_NO_PAT
         newWPMMgen->InitializeWaypointPath(*creature, id, (WaypointPathOrigin)source, initialDelay, overwriteEntry);
     }
     else
-    {
         sLog.outError("Non-creature %s attempt to MoveWaypoint()", m_owner->GetGuidStr().c_str());
-    }
 }
 
 void MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
 {
-    if (m_owner->GetTypeId() == TYPEID_PLAYER)
+    if (m_owner->GetTypeId() == TYPEID_UNIT)
+        sLog.outError("%s attempt taxi to (Path %u node %u)", m_owner->GetGuidStr().c_str(), path, pathnode);
+    else
     {
         if (path < sTaxiPathNodesByPath.size())
         {
@@ -407,15 +401,7 @@ void MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
             Mutate(mgen);
         }
         else
-        {
-            sLog.outError("%s attempt taxi to (nonexistent Path %u node %u)",
-                          m_owner->GetGuidStr().c_str(), path, pathnode);
-        }
-    }
-    else
-    {
-        sLog.outError("%s attempt taxi to (Path %u node %u)",
-                      m_owner->GetGuidStr().c_str(), path, pathnode);
+            sLog.outError("%s attempt taxi to (nonexistent Path %u node %u)", m_owner->GetGuidStr().c_str(), path, pathnode);
     }
 }
 
@@ -428,11 +414,11 @@ void MotionMaster::MoveDistract(uint32 timer)
 
 void MotionMaster::MoveFlyOrLand(uint32 id, float x, float y, float z, bool liftOff)
 {
-    if (m_owner->GetTypeId() != TYPEID_UNIT)
-        return;
-
-    DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted point for %s (Id: %u X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), liftOff ? "liftoff" : "landing", id, x, y, z);
-    Mutate(new FlyOrLandMovementGenerator(id, x, y, z, liftOff));
+    if (m_owner->GetTypeId() == TYPEID_UNIT)
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted point for %s (Id: %u X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), liftOff ? "liftoff" : "landing", id, x, y, z);
+        Mutate(new FlyOrLandMovementGenerator(id, x, y, z, liftOff));
+    }
 }
 
 void MotionMaster::Mutate(MovementGenerator* m)
