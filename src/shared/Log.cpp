@@ -325,7 +325,6 @@ void Log::outTimestamp(FILE* file)
 
 void Log::outTime()
 {
-    std::lock_guard<std::mutex> guard(m_worldLogMtx);
     time_t t = time(nullptr);
     tm* aTm = localtime(&t);
     //       YYYY   year
