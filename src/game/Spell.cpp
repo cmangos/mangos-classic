@@ -5052,8 +5052,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     Player const* player = static_cast<Player const*>(expectedTarget);
 
-                    // Player is not allowed to cast water walk on shapeshifted/mounted player
-                    if (player->GetShapeshiftForm() != FORM_NONE || player->IsMounted())
+                    // Player is not allowed to cast water walk on shapeshifted/mounted player 
+                    if (player->IsInDisallowedMountForm() || player->IsMounted())
                         return SPELL_FAILED_BAD_TARGETS;
                 }
             }
