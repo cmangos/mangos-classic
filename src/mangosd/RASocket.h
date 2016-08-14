@@ -42,18 +42,17 @@ class RASocket : public MaNGOS::Socket
             Authenticated
         };
 
-        static const int InitialBufferSize = 64;
-
         const bool m_secure;
         bool m_restricted;
 
-        std::vector<char> m_commandBuffer;
+        std::string m_input;
 
         AuthLevel m_authLevel;
         AccountTypes m_accountLevel;
         uint32 m_accountId;
 
         virtual bool ProcessIncomingData() override;
+        bool HandleInput();
         void Send(const std::string &message);
 
     public:
