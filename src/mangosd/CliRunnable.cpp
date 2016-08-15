@@ -490,7 +490,7 @@ bool ChatHandler::HandleAccountCreateCommand(char* args)
             SendSysMessage(LANG_ACCOUNT_TOO_LONG);
             SetSentErrorMessage(true);
             return false;
-        case AOR_NAME_ALREDY_EXIST:
+        case AOR_NAME_ALREADY_EXIST:
             SendSysMessage(LANG_ACCOUNT_ALREADY_EXIST);
             SetSentErrorMessage(true);
             return false;
