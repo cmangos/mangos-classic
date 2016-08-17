@@ -1441,7 +1441,6 @@ void Loot::CheckIfRollIsNeeded(Player const* plr)
                 m_roll.erase(m_roll.find(itemSlot));                // Cannot start roll so we have to delete it (find will not fail as the item was just created)
 
             lootItem->checkRollNeed = false;                       // No more check is needed for this item
-            return;
         }
     }
 }
