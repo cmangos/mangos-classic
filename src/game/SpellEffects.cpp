@@ -2989,7 +2989,9 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
                     else
                         ++itr;
                 }
-
+            }
+            default:
+            {
                 if (Pet* OldSummon = m_caster->GetPet())
                     OldSummon->Unsummon(PET_SAVE_NOT_IN_SLOT, m_caster);
 
@@ -3003,11 +3005,8 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
                     return;
                 }
-            }
-            default:
-            {
+
                 NewSummon->setPetType(SUMMON_PET);
-                break;
             }
         }
     }
@@ -3059,14 +3058,12 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     {
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
 
-        // This is done for hunters pets, so now we do it for other controlled pets as well, why not? they're all unknowns anyway.
         NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS);
-
         NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
         NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
 
-        // generate name for summon pet
+        // generate new name for summon pet
         NewSummon->SetName(sObjectMgr.GeneratePetName(petentry));
 
         if (m_caster->IsPvP())
@@ -4802,6 +4799,8 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
     critter->SetUInt32Value(UNIT_NPC_FLAGS, critter->GetCreatureInfo()->NpcFlags);
     // some mini-pets have quests
 
+    critter->InitPetCreateSpells();                         // e.g. disgusting oozeling has a create spell as critter...
+
     // set timer for unsummon
     if (m_duration > 0)
         critter->SetDuration(m_duration);
@@ -4810,12 +4809,14 @@ void Spell::EffectSummonCritter(SpellEffectIndex eff_idx)
 
     map->Add((Creature*)critter);
     critter->AIM_Initialize();
-    critter->InitPetCreateSpells();                         // e.g. disgusting oozeling has a create spell as critter...
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        critter->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS);
 
     // Notify Summoner
-    if (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->AI())
+    else if (((Creature*)m_caster)->AI())
         ((Creature*)m_caster)->AI()->JustSummoned(critter);
-    if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
+    else if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
         ((Creature*)m_originalCaster)->AI()->JustSummoned(critter);
 }
 
