@@ -77,6 +77,7 @@ namespace MaNGOS
 
         protected:
             const std::string m_address;
+            const std::string m_remoteEndpoint;
 
             virtual bool ProcessIncomingData() = 0;
 
@@ -103,6 +104,7 @@ namespace MaNGOS
 
             boost::asio::ip::tcp::socket &GetAsioSocket() { return m_socket; }
 
+            const std::string &GetRemoteEndpoint() const { return m_remoteEndpoint; }
             const std::string &GetRemoteAddress() const { return m_address; }
     };
 }

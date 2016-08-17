@@ -23,6 +23,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "Socket.hpp"
 #include "Log.h"
@@ -38,6 +39,7 @@ bool Socket::Open()
     try
     {
         const_cast<std::string &>(m_address) = m_socket.remote_endpoint().address().to_string();
+        const_cast<std::string &>(m_remoteEndpoint) = boost::lexical_cast<std::string>(m_socket.remote_endpoint());
     }
     catch (boost::system::error_code& error)
     {
