@@ -308,8 +308,8 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
 
         if (leaderChanged)
         {
-            WorldPacket data(SMSG_GROUP_SET_LEADER, (m_memberSlots.front().name.size() + 1));
-            data << m_memberSlots.front().name;
+            WorldPacket data(SMSG_GROUP_SET_LEADER, (m_leaderName.size() + 1));
+            data << m_leaderName;
             BroadcastPacket(&data, true);
         }
 
@@ -695,12 +695,47 @@ bool Group::_removeMember(ObjectGuid guid)
     if (m_leaderGuid == guid)                               // leader was removed
     {
         _updateLeaderFlag(true);
-        if (GetMembersCount() > 0)
-            _setLeader(m_memberSlots.front().guid);
+        _chooseLeader();
         return true;
     }
 
     return false;
+}
+
+void Group::_chooseLeader()
+{
+    if (GetMembersCount() < 2)
+        return;
+
+    ObjectGuid first = ObjectGuid(); // First available: if no suitable canditates are found
+    ObjectGuid chosen = ObjectGuid(); // Player matching prio creteria
+
+    for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+    {
+        if (citr->guid == m_leaderGuid)
+            continue;
+
+        // Prioritize online players
+        Player* player = sObjectMgr.GetPlayer(citr->guid);
+        if (!player || !player->GetSession() || player->GetGroup() != this)
+            continue;
+
+        // Prioritize assistants for raids
+        if (isRaidGroup() && !citr->assistant)
+        {
+            if (first.IsEmpty())
+                first = citr->guid;
+            continue;
+        }
+
+        chosen = citr->guid;
+        break;
+    }
+
+    if (chosen.IsEmpty())
+        chosen = first;
+
+    _setLeader(!chosen.IsEmpty() ? chosen : m_memberSlots.front().guid);
 }
 
 void Group::_setLeader(ObjectGuid guid)

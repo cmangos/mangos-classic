@@ -260,6 +260,7 @@ class MANGOS_DLL_SPEC Group
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant = false);
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant, uint8 group);
         bool _removeMember(ObjectGuid guid);                // returns true if leader has changed
+        void _chooseLeader();
         void _setLeader(ObjectGuid guid);
         void _updateLeaderFlag(const bool remove = false);
 
