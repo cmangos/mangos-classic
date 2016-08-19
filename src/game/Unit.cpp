@@ -2437,6 +2437,8 @@ float Unit::MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 
     // PvP - PvE melee chances
     if (pVictim->GetTypeId() == TYPEID_PLAYER)
         hitChance = 95.0f + skillDiff * 0.04f;
+    else if (attType == RANGED_ATTACK)
+        hitChance = 95.0f + skillDiff * 0.24f;
     else if (skillDiff < -10)
         hitChance = 93.0f + (skillDiff + 10) * 0.4f;        // 7% base chance to miss for big skill diff (%6 in 3.x)
     else
