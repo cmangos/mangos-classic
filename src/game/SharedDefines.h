@@ -306,7 +306,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_UNK24                        = 0x01000000,// 24 Req fishing pole??
     SPELL_ATTR_EX_UNK25                        = 0x02000000,// 25 not set in 2.4.2
     SPELL_ATTR_EX_UNK26                        = 0x04000000,// 26
-    SPELL_ATTR_EX_UNK27                        = 0x08000000,// 27
+    SPELL_ATTR_EX_REFUND_POWER                 = 0x08000000,// 27 All these spells refund power on miss, dodge, parry (? Guesswork)
     SPELL_ATTR_EX_DONT_DISPLAY_IN_AURA_BAR     = 0x10000000,// 28
     SPELL_ATTR_EX_CHANNEL_DISPLAY_SPELL_NAME   = 0x20000000,// 29
     SPELL_ATTR_EX_ENABLE_AT_DODGE              = 0x40000000,// 30 overpower

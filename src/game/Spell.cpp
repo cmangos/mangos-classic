@@ -3117,6 +3117,25 @@ void Spell::finish(bool ok)
             m_caster->resetAttackTimer(OFF_ATTACK);
     }
 
+    if (m_spellInfo->AttributesEx & SPELL_ATTR_EX_REFUND_POWER)
+    {
+        for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+        {
+            switch (ihit->missCondition)
+            {
+                case SPELL_MISS_MISS:
+                case SPELL_MISS_DODGE:
+                case SPELL_MISS_PARRY:
+                {
+                    if (m_caster->GetTypeId() == TYPEID_PLAYER ||
+                        m_caster->GetTypeId() == TYPEID_UNIT && m_caster->GetCharmerOrOwner() && m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
+                        m_caster->ModifyPower(Powers(m_spellInfo->powerType), int32(m_spellInfo->manaCost * 0.8));
+                    break;
+                }
+            }
+        }
+    }
+
     /*if (IsRangedAttackResetSpell())
         m_caster->resetAttackTimer(RANGED_ATTACK);*/
 
