@@ -537,6 +537,28 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 13278:                                 // Gnomish Death Ray (Init)
+                {
+                    if (m_CastItem)
+                        m_caster->CastSpell(m_caster, 13493, true, m_CastItem);
+
+                    return;
+                }
+                case 13280:                                 // Gnomish Death Ray (Finish)
+                {
+                    if (!m_originalCaster || !m_CastItem)
+                        return;
+
+                    if (Unit* channelTarget = m_originalCaster->GetMap()->GetUnit(m_originalCaster->GetChannelObjectGuid()))
+                    {
+                        if (uint32 roll = urand(0, 9))
+                            m_originalCaster->CastSpell(channelTarget, 13279, true, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
+                        else
+                            m_caster->CastSpell(m_caster, 13279, true, m_CastItem);
+                    }
+
+                    return;
+                }
                 case 13489:
                 {
                     if (unitTarget)
