@@ -99,11 +99,13 @@ void PetAI::UpdateAI(const uint32 diff)
     Unit* owner = m_creature->GetCharmerOrOwner();
     Unit* victim = nullptr;
 
+    if (!((Pet*)m_creature)->isControlled())
+        m_creature->SelectHostileTarget();
+
     // Creature pets and guardians will always look in threat list for victim
     if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
         || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
-        victim = ((Pet*)m_creature)->isControlled() ? m_creature->getVictim()
-            : m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0);
+        victim = m_creature->getVictim();
 
     if (m_updateAlliesTimer <= diff)
         // UpdateAllies self set update timer
@@ -285,11 +287,13 @@ void PetAI::UpdateAI(const uint32 diff)
     else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
         m_creature->InterruptNonMeleeSpells(false);
 
-    // Creature pets and guardians will always look in threat list for victim
+    // Guardians will always look in threat list for victim
+    if (!((Pet*)m_creature)->isControlled())
+        m_creature->SelectHostileTarget();
+
     if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
         || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
-        victim = ((Pet*)m_creature)->isControlled() ? m_creature->getVictim()
-            : m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0);
+        victim = m_creature->getVictim();
 
     if (victim)
     {
