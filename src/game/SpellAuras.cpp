@@ -2024,7 +2024,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
             //pets should be removed when possesing a target if somehow check was bypassed
             ((Player*)caster)->UnsummonPetIfAny();
         }
-         
+
         target->addUnitState(UNIT_STAT_CONTROLLED);
 
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
@@ -2053,13 +2053,9 @@ void Aura::HandleModPossess(bool apply, bool Real)
         p_caster->PossessSpellInitialize();
 
         if (target->GetTypeId() == TYPEID_UNIT)
-        {
             ((Creature*)target)->AIM_Initialize();
-        }
-        else if (target->GetTypeId() == TYPEID_PLAYER)
-        {
+        else
             ((Player*)target)->SetClientControl(target, 0);
-        }
     }
     else
     {
@@ -2093,14 +2089,11 @@ void Aura::HandleModPossess(bool apply, bool Real)
             ((Player*)target)->setFactionForRace(target->getRace());
             ((Player*)target)->SetClientControl(target, 1);
         }
-        else if (target->GetTypeId() == TYPEID_UNIT)
+        else
         {
             CreatureInfo const* cinfo = ((Creature*)target)->GetCreatureInfo();
             target->setFaction(cinfo->FactionAlliance);
-        }
 
-        if (target->GetTypeId() == TYPEID_UNIT)
-        {
             ((Creature*)target)->AIM_Initialize();
             target->AttackedBy(caster);
         }
