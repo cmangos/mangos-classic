@@ -59,10 +59,10 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
     if (!pet->isAlive())
         return;
 
-    if (pet->GetTypeId() == TYPEID_PLAYER && pet->GetCharmer()->GetTypeId() == TYPEID_PLAYER)
+    if (pet->GetTypeId() == TYPEID_PLAYER)
     {
-        // controller player cannot use controlled player's spells
-        if (flag != (ACT_COMMAND || ACT_REACTION))
+        // controller player can only do melee attack
+        if (!(flag == ACT_COMMAND && spellid == COMMAND_ATTACK))
             return;
     }
     else if (((Creature*)pet)->IsPet())
@@ -115,7 +115,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
                     if (targetUnit && targetUnit != pet && targetUnit->isTargetableForAttack() && targetUnit->isInAccessablePlaceFor((Creature*)pet))
                     {
-                        _player->SetInCombatState(true, targetUnit);
+                        _player->SetInCombatState((targetUnit->GetTypeId() == TYPEID_PLAYER), targetUnit);
 
                         // This is true if pet has no target or has target but targets differs.
                         if (pet->getVictim() != targetUnit)
@@ -264,31 +264,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     ((Pet*)pet)->CheckLearning(spellid);
 
                 unit_target = spell->m_targets.getUnitTarget();
-
-                if (unit_target && !GetPlayer()->IsFriendlyTo(unit_target) && !pet->HasAuraType(SPELL_AURA_MOD_POSSESS))
-                {
-                    // This is true if pet has no target or has target but targets differs.
-                    if (pet->getVictim() != unit_target)
-                    {
-                        pet->AttackStop();
-                        pet->GetMotionMaster()->Clear();
-
-                        _player->SetInCombatState(true, unit_target);
-
-                        if (((Creature*)pet)->AI())
-                        {
-                            ((Creature*)pet)->AI()->AttackStart(unit_target);
-                             // 10% chance to play special warlock pet attack talk, else growl
-                            if (((Creature*)pet)->IsPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != unit_target && roll_chance_i(10))
-                                pet->SendPetTalk((uint32)PET_TALK_ATTACK);
-
-                            pet->SendPetAIReaction();
-                        }
-
-                        else
-                            pet->Attack(unit_target, true);
-                    }
-                }
 
                 ((Pet*)pet)->SetSpellOpener();
                 spell->SpellStart(&(spell->m_targets));

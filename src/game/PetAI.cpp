@@ -59,7 +59,7 @@ void PetAI::MoveInLineOfSight(Unit* u)
             AttackStart(u);
 
             if (Unit* owner = m_creature->GetOwner())
-                owner->SetInCombatState(true, u);
+                owner->SetInCombatState((u->GetTypeId() == TYPEID_PLAYER), u);
         }
 }
 
@@ -115,7 +115,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
     if (inCombat && !victim)
     {
-        m_creature->AttackStop(true, false);
+        m_creature->AttackStop(true, true);
         inCombat = false;
     }
 
@@ -222,9 +222,9 @@ void PetAI::UpdateAI(const uint32 diff)
 
             Spell* spell = new Spell(m_creature, spellInfo, false);
 
-            if (inCombat && !m_creature->hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(m_creature->getVictim()))
+            if (inCombat && !m_creature->hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(victim))
             {
-                targetSpellStore.push_back(TargetSpellList::value_type(m_creature->getVictim(), spell));
+                targetSpellStore.push_back(TargetSpellList::value_type(victim, spell));
                 continue;
             }
             else
@@ -284,8 +284,6 @@ void PetAI::UpdateAI(const uint32 diff)
         for (TargetSpellList::const_iterator itr = targetSpellStore.begin(); itr != targetSpellStore.end(); ++itr)
             delete itr->second;
     }
-    else if (m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
-        m_creature->InterruptNonMeleeSpells(false);
 
     // Guardians will always look in threat list for victim
     if (!((Pet*)m_creature)->isControlled())
@@ -299,8 +297,7 @@ void PetAI::UpdateAI(const uint32 diff)
     {
         // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
         // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
-        if ((m_creature->isCharmed() && victim == m_creature->GetCharmer())
-            || !victim->isTargetableForAttack())
+        if ((m_creature->isCharmed() && victim == m_creature->GetCharmer()) || !victim->isTargetableForAttack())
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "PetAI (guid = %u) is stopping attack.", m_creature->GetGUIDLow());
             m_creature->CombatStop();
