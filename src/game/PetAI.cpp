@@ -59,7 +59,7 @@ void PetAI::MoveInLineOfSight(Unit* u)
             AttackStart(u);
 
             if (Unit* owner = m_creature->GetOwner())
-                owner->SetInCombatState((u->GetTypeId() == TYPEID_PLAYER), u);
+                owner->SetInCombatState(true, u);
         }
 }
 
@@ -293,6 +293,10 @@ void PetAI::UpdateAI(const uint32 diff)
         || (m_creature->IsPet() && ((Pet*)m_creature)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)))
         victim = m_creature->getVictim();
 
+    // Stop here if casting spell (No melee and no movement)
+    if (m_creature->IsNonMeleeSpellCasted(false))
+        return;
+
     if (victim)
     {
         // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
@@ -305,11 +309,6 @@ void PetAI::UpdateAI(const uint32 diff)
             
             return;
         }
-
-        // required to be stopped cases
-        if (m_creature->IsStopped() && m_creature->IsNonMeleeSpellCasted(false)
-            && m_creature->hasUnitState(UNIT_STAT_FOLLOW_MOVE))
-            m_creature->InterruptNonMeleeSpells(false);
 
         // if pet misses its target, it will also be the first in threat list
         if (!(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)
@@ -335,6 +334,7 @@ void PetAI::UpdateAI(const uint32 diff)
     else if (owner)
     {
         CharmInfo* charmInfo = m_creature->GetCharmInfo();
+
         if (owner->isInCombat() && !(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
             || (charmInfo && charmInfo->HasReactState(REACT_PASSIVE))))
             AttackStart(owner->getAttackerForHelper());

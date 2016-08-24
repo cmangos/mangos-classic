@@ -115,7 +115,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
                     if (targetUnit && targetUnit != pet && targetUnit->isTargetableForAttack() && targetUnit->isInAccessablePlaceFor((Creature*)pet))
                     {
-                        _player->SetInCombatState((targetUnit->GetTypeId() == TYPEID_PLAYER), targetUnit);
+                        _player->SetInCombatState(true, targetUnit);
 
                         // This is true if pet has no target or has target but targets differs.
                         if (pet->getVictim() != targetUnit)
@@ -207,6 +207,8 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             // do not cast not learned spells
             if (!pet->HasSpell(spellid) || IsPassiveSpell(spellInfo))
                 return;
+
+            _player->SetInCombatState(true, unit_target);
 
             pet->clearUnitState(UNIT_STAT_MOVING);
 
