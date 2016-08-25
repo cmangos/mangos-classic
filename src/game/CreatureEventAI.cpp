@@ -1340,7 +1340,7 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
 
     Unit* victim = m_creature->getVictim();
     // Melee Auto-Attack
-    if (Combat && victim && !(m_creature->IsNonMeleeSpellCasted(false)) || m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+    if (Combat && victim && !(m_creature->IsNonMeleeSpellCasted(false) || m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT)))
     {
         // Update creature dynamic movement position before doing anything else
         if (m_DynamicMovement)
