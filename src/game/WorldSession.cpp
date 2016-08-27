@@ -298,10 +298,11 @@ bool WorldSession::Update(PacketFilter& updater)
         const time_t currTime = time(nullptr);
 
         if (m_Socket->IsClosed() || (ShouldLogOut(currTime) && !m_playerLoading))
-        {
             LogoutPlayer(true);
+
+        // finalize the session if disconnected.
+        if (m_Socket->IsClosed())
             return false;
-        }
     }
 
     return true;
