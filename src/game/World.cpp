@@ -180,33 +180,18 @@ World::AddSession_(WorldSession* s)
 {
     MANGOS_ASSERT(s);
 
-    // NOTE - Still there is race condition in WorldSession* being used in the Sockets
-
-    ///- kick already loaded player with same account (if any) and remove session
-    ///- if player is in loading and want to load again, return
-    if (!RemoveSession(s->GetAccountId()))
-    {
-        s->KickPlayer();
-        delete s;                                           // session not added yet in session list, so not listed in queue
-        return;
-    }
-
     // decrease session counts only at not reconnection case
     bool decrease_session = true;
 
-    // if session already exist, prepare to it deleting at next world update
-    // NOTE - KickPlayer() should be called on "old" in RemoveSession()
-    {
-        SessionMap::const_iterator old = m_sessions.find(s->GetAccountId());
+    // NOTE - Still there is race condition in WorldSession* being used in the Sockets
 
-        if (old != m_sessions.end())
-        {
-            // prevent decrease sessions count if session queued
-            if (RemoveQueuedSession(old->second))
-                decrease_session = false;
-            // not remove replaced session form queue if listed
-            delete old->second;
-        }
+    // kick already loaded player with same account (if any)
+    // the session gets replaced by s below and will be deleted
+    // when the corresponding socket gets removed by asio
+    if (WorldSession* oldSession = FindSession(s->GetAccountId()))
+    {
+        oldSession->KickPlayer();
+        decrease_session = false;
     }
 
     m_sessions[s->GetAccountId()] = s;
