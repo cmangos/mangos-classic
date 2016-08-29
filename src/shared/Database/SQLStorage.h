@@ -253,9 +253,12 @@ class SQLStorageLoaderBase
         template<class S, class D>
         void convert(uint32 field_pos, S src, D& dst);
         template<class S>
+        void convert_to_bool(uint32 field_pos, S src, bool& dst);
+        template<class S>
         void convert_to_str(uint32 field_pos, S src, char*& dst);
         template<class D>
         void convert_from_str(uint32 field_pos, char const* src, D& dst);
+        void convert_str_to_bool(uint32 field_pos, char const* src, bool& dst);
         void convert_str_to_str(uint32 field_pos, char const* src, char*& dst);
         template<class S, class D>
         void default_fill(uint32 field_pos, S src, D& dst);
