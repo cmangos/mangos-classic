@@ -217,6 +217,7 @@ class instance_stratholme : public ScriptedInstance
     protected:
         bool StartSlaugtherSquare();
         void DoSortZiggurats();
+        void DoOpenSlaughterhouseDoor(bool bOpen);
         void ThazudinAcolyteJustDied(Creature* pCreature);
 
         void DoSpawnScarletGuards(uint8 uiStep, Player* pSummoner);
@@ -231,7 +232,10 @@ class instance_stratholme : public ScriptedInstance
         uint32 m_uiBarthilasRunTimer;
         uint32 m_uiMindlessSummonTimer;
         uint32 m_uiSlaugtherSquareTimer;
+        uint32 m_uiSlaughterDoorTimer;
+        uint32 m_uiBlackGuardsTimer;
         uint32 m_uiAuriusSummonTimer;
+        bool m_bIsSlaughterDoorOpen;
 
         uint32 m_uiYellCounter;
         uint32 m_uiMindlessCount;
