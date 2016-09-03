@@ -302,6 +302,7 @@ enum AttackingTarget
     ATTACKING_TARGET_RANDOM = 0,                            // Just selects a random target
     ATTACKING_TARGET_TOPAGGRO,                              // Selects targes from top aggro to bottom
     ATTACKING_TARGET_BOTTOMAGGRO,                           // Selects targets from bottom aggro to top
+    ATTACKING_TARGET_FARTHEST_AWAY,                         // Selects the farthest away target
 };
 
 enum SelectFlags
