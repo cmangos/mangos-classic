@@ -51,7 +51,11 @@ namespace FactorySelector
             if (((Pet*)creature)->isControlled())
                 ai_factory = ai_registry.GetRegistryItem("PetAI");
             else
+            {
                 ai_factory = ai_registry.GetRegistryItem("GuardianAI");
+                if (!ainame.empty() && (ai_registry.GetRegistryItem(ainame.c_str()) != ai_registry.GetRegistryItem("GuardianAI")))
+                    sLog.outErrorDb("FactorySelector: creature pet / guardian not up-to-date on entry: %u ! it shouldn't have %s - GuardianAI will be used.", creature->GetEntry(), ainame.c_str());
+            }
         }
         else if (creature->IsTotem())
             ai_factory = ai_registry.GetRegistryItem("TotemAI");
