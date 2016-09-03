@@ -386,6 +386,7 @@
     <ClCompile Include="..\..\src\game\GroupHandler.cpp" />
     <ClCompile Include="..\..\src\game\GroupReference.cpp" />
     <ClCompile Include="..\..\src\game\GuardAI.cpp" />
+    <ClCompile Include="..\..\src\game\GuardianAI.cpp" />
     <ClCompile Include="..\..\src\game\Guild.cpp" />
     <ClCompile Include="..\..\src\game\GuildHandler.cpp" />
     <ClCompile Include="..\..\src\game\GuildMgr.cpp" />
@@ -540,6 +541,7 @@
     <ClInclude Include="..\..\src\game\GroupReference.h" />
     <ClInclude Include="..\..\src\game\GroupRefManager.h" />
     <ClInclude Include="..\..\src\game\GuardAI.h" />
+    <ClInclude Include="..\..\src\game\GuardianAI.h" />
     <ClInclude Include="..\..\src\game\Guild.h" />
     <ClInclude Include="..\..\src\game\GuildMgr.h" />
     <ClInclude Include="..\..\src\game\HomeMovementGenerator.h" />
