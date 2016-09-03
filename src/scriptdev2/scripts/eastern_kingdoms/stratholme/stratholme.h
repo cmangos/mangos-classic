@@ -49,6 +49,9 @@ enum
     NPC_UNDEAD_POSTMAN          = 11142,
     NPC_SKELETAL_GUARDIAN       = 10390,
     NPC_SKELETAL_BERSERKER      = 10391,
+    NPC_PLAGUED_RAT             = 10441,
+    NPC_PLAGUED_INSECT          = 10461,
+    NPC_PLAGUED_MAGGOT          = 10536,
 
     GO_SERVICE_ENTRANCE         = 175368,
     GO_GAUNTLET_GATE1           = 175357,
@@ -62,6 +65,10 @@ enum
     GO_PORT_SLAUGTHER           = 175373,                   // Port at slaugther
     GO_PORT_ELDERS              = 175377,                   // Port at elders square
     GO_YSIDA_CAGE               = 181071,                   // Cage to open after baron event is done
+    GO_PORT_TRAP_GATE_1         = 175351,                   // Portcullis used in the gate traps (rats trap)
+    GO_PORT_TRAP_GATE_2         = 175350,					// Scarlet side
+    GO_PORT_TRAP_GATE_3         = 175355,					// Undead side
+    GO_PORT_TRAP_GATE_4         = 175354,
 
     QUEST_DEAD_MAN_PLEA         = 8945,
     QUEST_MEDALLION_FAITH       = 5122,
@@ -97,6 +104,16 @@ enum
     YELL_BASTION_HALL_LIGHTS    = -1329026,
     YELL_BASTION_INNER_1        = -1329027,
     YELL_BASTION_INNER_2        = -1329028,
+};
+
+static const uint32 aGates[] =
+{
+    GO_PORT_TRAP_GATE_1, GO_PORT_TRAP_GATE_2, GO_PORT_TRAP_GATE_3, GO_PORT_TRAP_GATE_4
+};
+
+static const uint32 aPlaguedCritters[] =
+{
+    NPC_PLAGUED_RAT, NPC_PLAGUED_MAGGOT, NPC_PLAGUED_INSECT
 };
 
 struct EventLocation
@@ -182,6 +199,12 @@ static const EventLocation aScarletLastStand[] =            // Positions remaini
     {3661.57f, -3157.80f, 128.945f, 5.23599f}
 };
 
+static const EventLocation aGateTrap[] =                    // Positions of the two Gate Traps
+{
+    {3612.29f, -3335.39f, 124.077f, 3.14159f},              // Scarlet side
+    {3919.88f, -3547.34f, 134.269f, 2.94961f}               // Undead side
+};
+
 struct ZigguratStore
 {
     ObjectGuid m_doorGuid;
@@ -224,6 +247,10 @@ class instance_stratholme : public ScriptedInstance
         void DoSpawnScourgeInvaders(uint8 uiStep, Player* pSummoner);
         void DoMoveBackDefenders(uint8 uiStep, Creature* pCreature);
         void DoScarletBastionDefense(uint8 uiStep, Creature* pCreature);
+
+        void DoGateTrap(uint8 uiGate);
+        void DoSpawnPlaguedCritters(uint8 uiGate, Player* pPlayer);
+        uint32 m_uiGateTrapTimers[2][3];
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
