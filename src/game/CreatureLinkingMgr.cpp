@@ -39,7 +39,7 @@
 #include "ObjectMgr.h"
 #include "SharedDefines.h"
 #include "Creature.h"
-#include "CreatureAI.h"
+#include "AI/CreatureAI.h"
 
 INSTANTIATE_SINGLETON_1(CreatureLinkingMgr);
 

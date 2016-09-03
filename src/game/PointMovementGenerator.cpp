@@ -18,7 +18,7 @@
 
 #include "PointMovementGenerator.h"
 #include "Creature.h"
-#include "CreatureAI.h"
+#include "AI/CreatureAI.h"
 #include "TemporarySummon.h"
 #include "World.h"
 #include "movement/MoveSplineInit.h"

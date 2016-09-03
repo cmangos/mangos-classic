@@ -37,6 +37,9 @@
     <Filter Include="BattleGround">
       <UniqueIdentifier>{0af4d063-6d01-4546-a429-59bd828ab270}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AI">
+      <UniqueIdentifier>{fec503db-493c-43c0-96dd-8c0321d71407}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\game\AccountMgr.cpp">
@@ -237,9 +240,6 @@
     <ClCompile Include="..\..\src\game\WaypointMovementGenerator.cpp">
       <Filter>Motion generators</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\AggressorAI.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\game\AuctionHouseMgr.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -252,21 +252,6 @@
     <ClCompile Include="..\..\src\game\Creature.cpp">
       <Filter>Object</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\CreatureAI.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\CreatureAIRegistry.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\CreatureAISelector.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\CreatureEventAI.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\CreatureEventAIMgr.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\game\DynamicObject.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -274,12 +259,6 @@
       <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\GMTicketMgr.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\GuardAI.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\GuardianAI.cpp">
       <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\Guild.cpp">
@@ -292,9 +271,6 @@
       <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\LootMgr.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\NullCreatureAI.cpp">
       <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\Object.cpp">
@@ -315,13 +291,7 @@
     <ClCompile Include="..\..\src\game\Pet.cpp">
       <Filter>Object</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\game\PetAI.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\game\Player.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\ReactorAI.cpp">
       <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\ReputationMgr.cpp">
@@ -340,9 +310,6 @@
       <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\Totem.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\game\TotemAI.cpp">
       <Filter>Object</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\game\Unit.cpp">
@@ -477,6 +444,42 @@
     </ClCompile>
     <ClCompile Include="..\..\src\game\BattleGround\BattleGroundWS.cpp">
       <Filter>BattleGround</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\AggressorAI.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\CreatureAI.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\CreatureAIRegistry.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\CreatureAISelector.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\CreatureEventAI.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\CreatureEventAIMgr.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\GuardAI.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\GuardianAI.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\NullCreatureAI.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\PetAI.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\ReactorAI.cpp">
+      <Filter>AI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\game\AI\TotemAI.cpp">
+      <Filter>AI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -627,9 +630,6 @@
     <ClInclude Include="..\..\src\game\WaypointMovementGenerator.h">
       <Filter>Motion generators</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\AggressorAI.h">
-      <Filter>Object</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\game\AuctionHouseMgr.h">
       <Filter>Object</Filter>
     </ClInclude>
@@ -642,24 +642,6 @@
     <ClInclude Include="..\..\src\game\Creature.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\CreatureAI.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\CreatureAIImpl.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\CreatureAIRegistry.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\CreatureAISelector.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\CreatureEventAI.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\CreatureEventAIMgr.h">
-      <Filter>Object</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\game\DynamicObject.h">
       <Filter>Object</Filter>
     </ClInclude>
@@ -670,12 +652,6 @@
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\GMTicketMgr.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\GuardAI.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\GuardianAI.h">
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\Guild.h">
@@ -691,9 +667,6 @@
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\LootMgr.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\NullCreatureAI.h">
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\Object.h">
@@ -714,16 +687,7 @@
     <ClInclude Include="..\..\src\game\Pet.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\game\PetAI.h">
-      <Filter>Object</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\game\Player.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\PossessedAI.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\ReactorAI.h">
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\ReputationMgr.h">
@@ -739,9 +703,6 @@
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\Totem.h">
-      <Filter>Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\game\TotemAI.h">
       <Filter>Object</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\game\Unit.h">
@@ -918,6 +879,48 @@
     </ClInclude>
     <ClInclude Include="..\..\src\game\BattleGround\BattleGroundWS.h">
       <Filter>BattleGround</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\AggressorAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\CreatureAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\CreatureAIImpl.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\CreatureAIRegistry.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\CreatureAISelector.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\CreatureEventAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\CreatureEventAIMgr.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\GuardAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\GuardianAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\NullCreatureAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\PetAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\PossessedAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\ReactorAI.h">
+      <Filter>AI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\game\AI\TotemAI.h">
+      <Filter>AI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

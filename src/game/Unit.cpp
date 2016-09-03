@@ -31,7 +31,7 @@
 #include "Group.h"
 #include "SpellAuras.h"
 #include "ObjectAccessor.h"
-#include "CreatureAI.h"
+#include "AI/CreatureAI.h"
 #include "TemporarySummon.h"
 #include "Pet.h"
 #include "Util.h"
