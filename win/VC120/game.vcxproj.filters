@@ -714,6 +714,9 @@
     <ClInclude Include="..\..\src\game\Player.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\game\PossessedAI.h">
+      <Filter>Object</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\src\game\ReactorAI.h">
       <Filter>Object</Filter>
     </ClInclude>
