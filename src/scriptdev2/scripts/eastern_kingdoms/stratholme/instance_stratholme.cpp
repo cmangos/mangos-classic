@@ -35,7 +35,8 @@ instance_stratholme::instance_stratholme(Map* pMap) : ScriptedInstance(pMap),
     m_uiMindlessCount(0),
     m_uiPostboxesUsed(0),
     m_uiAuriusSummonTimer(0),
-    m_bIsSlaughterDoorOpen(false)
+    m_bIsSlaughterDoorOpen(false),
+    m_uiGateTrapTimers{{0,0,0},{0,0,0}}
 {
     Initialize();
 }
@@ -188,6 +189,10 @@ void instance_stratholme::OnObjectCreate(GameObject* pGo)
             break;
         case GO_PORT_ELDERS:
         case GO_YSIDA_CAGE:
+        case GO_PORT_TRAP_GATE_1:
+        case GO_PORT_TRAP_GATE_2:
+        case GO_PORT_TRAP_GATE_3:
+        case GO_PORT_TRAP_GATE_4:
             break;
 
         default:
@@ -921,8 +926,96 @@ void instance_stratholme::DoScarletBastionDefense(uint8 uiStep, Creature* pCreat
     return;
 }
 
+void instance_stratholme::DoGateTrap(uint8 uiGate)
+{
+    // Check if timer was not already set by another player/pet a few milliseconds before
+    if (m_uiGateTrapTimers[uiGate][0])
+        return;
+
+    debug_log("SD2: Instance Stratholme - Rat Trap activated %i.", uiGate);
+    // close the gates
+    DoUseDoorOrButton(aGates[2 * uiGate]);
+    DoUseDoorOrButton(aGates[2 * uiGate + 1]);
+
+    // set timer to reset the trap
+    m_uiGateTrapTimers[uiGate][0] = 30 * MINUTE * IN_MILLISECONDS;
+    // set timer to reopen gates
+    m_uiGateTrapTimers[uiGate][1] = 20 * IN_MILLISECONDS;
+    // set timer to spawn the plagued critters
+    m_uiGateTrapTimers[uiGate][2] = 2 * IN_MILLISECONDS;
+}
+
+void instance_stratholme::DoSpawnPlaguedCritters(uint8 uiGate, Player* pPlayer)
+{
+    if (!pPlayer)
+        return;
+
+    uint32 uiEntry = aPlaguedCritters[urand(0,2)];
+    for (uint8 i = 0; i < 30; ++i)
+    {
+        float fX, fY, fZ;
+        pPlayer->GetRandomPoint(aGateTrap[uiGate].m_fX, aGateTrap[uiGate].m_fY, aGateTrap[uiGate].m_fZ, 8.0f, fX, fY, fZ);
+        pPlayer->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+    }
+}
+
 void instance_stratholme::Update(uint32 uiDiff)
 {
+    // Loop over the two Gate traps, each one has up to three timers (trap reset, gate opening delay, critters spawning delay)
+    for (uint8 i = 0; i < 2; i++)
+    {
+        // Check that the trap is not on cooldown, if so check if player/pet is in range
+        if (m_uiGateTrapTimers[i][0])
+        {
+            m_uiGateTrapTimers[i][0] -= uiDiff;
+            if (m_uiGateTrapTimers[i][0] <= uiDiff)
+            {
+                debug_log("SD2: Instance Stratholme - Rat Trap reseted %u.", i);
+                m_uiGateTrapTimers[i][0] = 0;
+            }
+        }
+        else
+        {
+            Map::PlayerList const& players = instance->GetPlayers();
+            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+            {
+                if (Player* pPlayer = itr->getSource())
+                {
+                    if (!pPlayer->isGameMaster() && pPlayer->IsWithinDist2d(aGateTrap[i].m_fX, aGateTrap[i].m_fY, 5.5f))
+                        DoGateTrap(i);
+
+                    Pet* pet = pPlayer->GetPet();
+                    if (!pPlayer->isGameMaster() && pet && pet->IsWithinDist2d(aGateTrap[i].m_fX, aGateTrap[i].m_fY, 5.5f))
+                        DoGateTrap(i);
+                }
+            }
+        }
+        // Timer to reopen the gates
+        if (m_uiGateTrapTimers[i][1])
+        {
+            if (m_uiGateTrapTimers[i][1] <= uiDiff)
+            {
+                DoUseDoorOrButton(aGates[2 * i]);
+                DoUseDoorOrButton(aGates[2 * i + 1]);
+                m_uiGateTrapTimers[i][1] = 0;
+            }
+            else
+                m_uiGateTrapTimers[i][1] -= uiDiff;
+        }
+        // Delay timer to spawn the plagued critters once the gate are closing
+        if (m_uiGateTrapTimers[i][2])
+        {
+            if (m_uiGateTrapTimers[i][2] <= uiDiff)
+            {
+                if (Player* pPlayer = GetPlayerInMap())
+                    DoSpawnPlaguedCritters(i, pPlayer);
+                m_uiGateTrapTimers[i][2] = 0;
+            }
+            else
+                m_uiGateTrapTimers[i][2] -= uiDiff;
+        }
+    }
+
     // Timer to send the Black Guard Sentries out of the Slaughterhouse before Baron Rivendare
     if (m_uiBlackGuardsTimer)
     {
