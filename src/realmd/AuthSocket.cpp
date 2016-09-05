@@ -477,7 +477,9 @@ bool AuthSocket::_HandleLogonChallenge()
                         pkt << uint8(1); // securityFlags, only '1' is available in classic (PIN input)
                         pkt << gridSeedPkt;
                         pkt.append(serverSecuritySalt.AsByteArray(16), 16);
-                    } else {
+                    }
+                    else
+                    {
                         pkt << uint8(0);
                     }
 
@@ -512,7 +514,8 @@ bool AuthSocket::_HandleLogonProof()
         return false;
 
     PINData pinData;
-    if(lp.securityFlags) {
+    if(lp.securityFlags)
+    {
         if(!Read((char*)&pinData, sizeof(pinData)))
             return false;
     }
@@ -609,13 +612,11 @@ bool AuthSocket::_HandleLogonProof()
     ///- Check PIN data is correct
     bool pinResult = true;
 
-    if(securityFlags && !lp.securityFlags) {
+    if(securityFlags && !lp.securityFlags)
         pinResult = false; // expected PIN data but did not receive it
-    }
 
-    if(securityFlags && lp.securityFlags) {
+    if(securityFlags && lp.securityFlags)
         pinResult = VerifyPinData(pinData);
-    }
 
     ///- Check if SRP6 results match (password is correct), else send an error
     if (!memcmp(M.AsByteArray(), lp.M1, 20) && pinResult)
@@ -1015,7 +1016,8 @@ bool AuthSocket::VerifyPinData(const PINData& data)
 
     uint8* remappedIndex = remappedGrid.data();
 
-    for(size_t i = grid.size(); i > 0; --i) {
+    for(size_t i = grid.size(); i > 0; --i)
+    {
         auto remainder = gridSeed % i;
         gridSeed /= i;
         *remappedIndex = grid[remainder];
@@ -1034,7 +1036,8 @@ bool AuthSocket::VerifyPinData(const PINData& data)
     // convert the PIN to bytes (for ex. '1234' to {1, 2, 3, 4})
     std::vector<uint8> pinBytes;
 	    
-    while(pin != 0) {
+    while(pin != 0)
+    {
         pinBytes.push_back(pin % 10);
         pin /= 10;
     }
@@ -1042,20 +1045,19 @@ bool AuthSocket::VerifyPinData(const PINData& data)
     std::reverse(pinBytes.begin(), pinBytes.end());
 
     // validate PIN length
-    if(pinBytes.size() < 4 || pinBytes.size() > 10) {
+    if(pinBytes.size() < 4 || pinBytes.size() > 10)
         return false; // PIN outside of expected range
-    }
 
     // remap the PIN to calculate the expected client input sequence
-    for(std::size_t i = 0; i < pinBytes.size(); ++i) {
+    for(std::size_t i = 0; i < pinBytes.size(); ++i)
+    {
         auto index = std::find(remappedGrid.begin(), remappedGrid.end(), pinBytes[i]);
         pinBytes[i] = std::distance(remappedGrid.begin(), index);
     }
 
     // convert PIN bytes to their ASCII values
-    for(size_t i = 0; i < pinBytes.size(); ++i) {
+    for(size_t i = 0; i < pinBytes.size(); ++i)
         pinBytes[i] += 0x30;
-    }
 
     // validate the PIN, x = H(client_salt | H(server_salt | ascii(pin_bytes)))
     Sha1Hash sha;
