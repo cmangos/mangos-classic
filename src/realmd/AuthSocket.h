@@ -45,7 +45,7 @@ class AuthSocket : public MaNGOS::Socket
 
         void SendProof(Sha1Hash sha);
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
-		bool VerifyPinData(const PINData& data);
+        bool VerifyPinData(const PINData& data);
 
         bool _HandleLogonChallenge();
         bool _HandleLogonProof();
@@ -71,9 +71,9 @@ class AuthSocket : public MaNGOS::Socket
         std::string _login;
         std::string _safelogin;
 
-		BigNumber serverSecuritySalt;
-		uint8 securityFlags;
-		uint32 gridSeed, pin;
+        BigNumber serverSecuritySalt;
+        uint8 securityFlags;
+        uint32 gridSeed, pin;
 
         // Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ
         // between enUS and enGB, which is important for the patch system

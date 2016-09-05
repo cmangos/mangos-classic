@@ -138,8 +138,8 @@ typedef struct AUTH_RECONNECT_PROOF_C
 } sAuthReconnectProof_C;
 
 struct PINData {
-	uint8 salt[16];
-	uint8 hash[20];
+    uint8 salt[16];
+    uint8 hash[20];
 };
 
 typedef struct XFER_INIT
@@ -468,16 +468,18 @@ bool AuthSocket::_HandleLogonChallenge()
 
                     if (securityFlags)               // PIN input
                     {
-						BASIC_LOG("[AuthChallenge] account %s is using PIN authentication", _login.c_str());
-						pkt << uint8(1); // securityFlags, only '1' is available in classic (PIN input)
-						pin = (*result)[8].GetUInt32();
-						gridSeed = static_cast<uint32>(rand32());
-						serverSecuritySalt.SetRand(16 * 8); // 16 bytes random
-                        pkt << gridSeed;
-						pkt.append(serverSecuritySalt.AsByteArray(16), 16);
-					} else {
-						pkt << uint8(0);
-					}
+                        BASIC_LOG("[AuthChallenge] account %s is using PIN authentication", _login.c_str());
+                        pin = (*result)[8].GetUInt32();
+                        uint32 gridSeedPkt = gridSeed = static_cast<uint32>(rand32());
+                        EndianConvert(gridSeedPkt);
+                        serverSecuritySalt.SetRand(16 * 8); // 16 bytes random
+
+                        pkt << uint8(1); // securityFlags, only '1' is available in classic (PIN input)
+                        pkt << gridSeedPkt;
+                        pkt.append(serverSecuritySalt.AsByteArray(16), 16);
+                    } else {
+                        pkt << uint8(0);
+                    }
 
                     uint8 secLevel = (*result)[4].GetUInt8();
                     _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
@@ -509,11 +511,11 @@ bool AuthSocket::_HandleLogonProof()
     if (!Read((char*)&lp, sizeof(sAuthLogonProof_C)))
         return false;
 
-	PINData pinData;
-	if(lp.securityFlags) {
-		if(!Read((char*)&pinData, sizeof(pinData)))
-			return false;
-	}
+    PINData pinData;
+    if(lp.securityFlags) {
+        if(!Read((char*)&pinData, sizeof(pinData)))
+            return false;
+    }
 
     /// <ul><li> If the client has no valid version
     if (!FindBuildInfo(_build))
@@ -604,16 +606,16 @@ bool AuthSocket::_HandleLogonProof()
     BigNumber M;
     M.SetBinary(sha.GetDigest(), 20);
 
-	///- Check PIN data is correct
-	bool pinResult = true;
+    ///- Check PIN data is correct
+    bool pinResult = true;
 
-	if(securityFlags && !lp.securityFlags) {
-		pinResult = false; // expected PIN data but did not receive it
-	}
+    if(securityFlags && !lp.securityFlags) {
+        pinResult = false; // expected PIN data but did not receive it
+    }
 
-	if(securityFlags && lp.securityFlags) {
-		pinResult = VerifyPinData(pinData);
-	}
+    if(securityFlags && lp.securityFlags) {
+        pinResult = VerifyPinData(pinData);
+    }
 
     ///- Check if SRP6 results match (password is correct), else send an error
     if (!memcmp(M.AsByteArray(), lp.M1, 20) && pinResult)
@@ -1007,67 +1009,67 @@ bool AuthSocket::_HandleXferAccept()
 /// Very PIN entry data
 bool AuthSocket::VerifyPinData(const PINData& data)
 {
-	// remap the grid to match the client's layout
-	std::vector<uint8> grid { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	std::vector<uint8> remappedGrid(grid.size());
+    // remap the grid to match the client's layout
+    std::vector<uint8> grid { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    std::vector<uint8> remappedGrid(grid.size());
 
-	uint8* remappedIndex = remappedGrid.data();
+    uint8* remappedIndex = remappedGrid.data();
 
-	for(size_t i = grid.size(); i > 0; --i) {
-		auto remainder = gridSeed % i;
-		gridSeed /= i;
-		*remappedIndex = grid[remainder];
+    for(size_t i = grid.size(); i > 0; --i) {
+        auto remainder = gridSeed % i;
+        gridSeed /= i;
+        *remappedIndex = grid[remainder];
 
-		size_t copySize = i;
-		copySize -= remainder;
-		--copySize;
+        size_t copySize = i;
+        copySize -= remainder;
+        --copySize;
 
-		uint8* srcPtr = grid.data() + remainder + 1;
-		uint8* dstPtr = grid.data() + remainder;
+        uint8* srcPtr = grid.data() + remainder + 1;
+        uint8* dstPtr = grid.data() + remainder;
 
-		std::copy(srcPtr, srcPtr + copySize, dstPtr);
-		++remappedIndex;
-	}
+        std::copy(srcPtr, srcPtr + copySize, dstPtr);
+        ++remappedIndex;
+    }
 
-	// convert the PIN to bytes (for ex. '1234' to {1, 2, 3, 4})
-	std::vector<uint8> pinBytes;
-	
-	while(pin != 0) {
-		pinBytes.push_back(pin % 10);
-		pin /= 10;
-	}
+    // convert the PIN to bytes (for ex. '1234' to {1, 2, 3, 4})
+    std::vector<uint8> pinBytes;
+	    
+    while(pin != 0) {
+        pinBytes.push_back(pin % 10);
+        pin /= 10;
+    }
 
-	std::reverse(pinBytes.begin(), pinBytes.end());
+    std::reverse(pinBytes.begin(), pinBytes.end());
 
-	// validate PIN length
-	if(pinBytes.size() < 4 || pinBytes.size() > 10) {
-		return false; // PIN outside of expected range
-	}
+    // validate PIN length
+    if(pinBytes.size() < 4 || pinBytes.size() > 10) {
+        return false; // PIN outside of expected range
+    }
 
-	// remap the PIN to calculate the expected client input sequence
-	for(std::size_t i = 0; i < pinBytes.size(); ++i) {
-		auto index = std::find(remappedGrid.begin(), remappedGrid.end(), pinBytes[i]);
-		pinBytes[i] = std::distance(remappedGrid.begin(), index);
-	}
+    // remap the PIN to calculate the expected client input sequence
+    for(std::size_t i = 0; i < pinBytes.size(); ++i) {
+        auto index = std::find(remappedGrid.begin(), remappedGrid.end(), pinBytes[i]);
+        pinBytes[i] = std::distance(remappedGrid.begin(), index);
+    }
 
-	// convert PIN bytes to their ASCII values
-	for(size_t i = 0; i < pinBytes.size(); ++i) {
-		pinBytes[i] += 0x30;
-	}
+    // convert PIN bytes to their ASCII values
+    for(size_t i = 0; i < pinBytes.size(); ++i) {
+        pinBytes[i] += 0x30;
+    }
 
-	// validate the PIN, x = H(client_salt | H(server_salt | ascii(pin_bytes)))
-	Sha1Hash sha;
-	sha.UpdateData(serverSecuritySalt.AsByteArray(), serverSecuritySalt.GetNumBytes());
-	sha.UpdateData(pinBytes.data(), pinBytes.size());
-	sha.Finalize();
-	BigNumber hash;
-	hash.SetBinary(sha.GetDigest(), sha.GetLength());
+    // validate the PIN, x = H(client_salt | H(server_salt | ascii(pin_bytes)))
+    Sha1Hash sha;
+    sha.UpdateData(serverSecuritySalt.AsByteArray(), serverSecuritySalt.GetNumBytes());
+    sha.UpdateData(pinBytes.data(), pinBytes.size());
+    sha.Finalize();
+    BigNumber hash;
+    hash.SetBinary(sha.GetDigest(), sha.GetLength());
 
-	sha.Initialize();
-	sha.UpdateData(data.salt, sizeof(data.salt));
-	sha.UpdateData(hash.AsByteArray(), hash.GetNumBytes());
-	sha.Finalize();
-	hash.SetBinary(sha.GetDigest(), sha.GetLength());
+    sha.Initialize();
+    sha.UpdateData(data.salt, sizeof(data.salt));
+    sha.UpdateData(hash.AsByteArray(), hash.GetNumBytes());
+    sha.Finalize();
+    hash.SetBinary(sha.GetDigest(), sha.GetLength());
 
-	return !memcmp(hash.AsByteArray(), data.hash, 20);
+    return !memcmp(hash.AsByteArray(), data.hash, 20);
 }
