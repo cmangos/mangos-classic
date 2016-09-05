@@ -467,20 +467,6 @@ bool AuthSocket::_HandleLogonChallenge()
                         pkt << uint64(0) << uint64(0);      // 16 bytes hash?
                     }
 
-                    if (securityFlags & 0x02)               // Matrix input
-                    {
-                        pkt << uint8(0);
-                        pkt << uint8(0);
-                        pkt << uint8(0);
-                        pkt << uint8(0);
-                        pkt << uint64(0);
-                    }
-
-                    if (securityFlags & 0x04)               // Security token input
-                    {
-                        pkt << uint8(1);
-                    }
-
                     uint8 secLevel = (*result)[4].GetUInt8();
                     _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
