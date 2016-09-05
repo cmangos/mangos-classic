@@ -1038,19 +1038,32 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
 
 void CreatureEventAI::JustRespawned()                       // NOTE that this is called from the AI's constructor as well
 {
-    Reset();
+    m_EventUpdateTime = EVENT_UPDATE_TIME;
+    m_EventDiff = 0;
+    m_throwAIEventStep = 0;
+    m_LastSpellMaxRange = 0;
 
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
     {
-        // Reset generic timer
-        if (i->Event.event_type == EVENT_T_TIMER_GENERIC)
+        CreatureEventAI_Event const& event = i->Event;
+        switch (event.event_type)
         {
-            if (i->UpdateRepeatTimer(m_creature, i->Event.timer.initialMin, i->Event.timer.initialMax))
+            // Handle Spawned Events
+            case EVENT_T_SPAWNED:
+                if (SpawnedEventConditionsCheck(i->Event))
+                    ProcessEvent(*i);
+                break;
+            case EVENT_T_TIMER_IN_COMBAT:
+            case EVENT_T_TIMER_OOC:
+            case EVENT_T_TIMER_GENERIC:
+                if (i->UpdateRepeatTimer(m_creature, i->Event.timer.initialMin, i->Event.timer.initialMax))
+                    i->Enabled = true;
+                break;
+            default: // reset all events with initialMin/Max here
                 i->Enabled = true;
+                i->Time = 0;
+                break;
         }
-        // Handle Spawned Events
-        else if (SpawnedEventConditionsCheck(i->Event))
-            ProcessEvent(*i);
     }
 }
 
@@ -1059,6 +1072,7 @@ void CreatureEventAI::Reset()
     m_EventUpdateTime = EVENT_UPDATE_TIME;
     m_EventDiff = 0;
     m_throwAIEventStep = 0;
+    m_LastSpellMaxRange = 0;
 
     // Reset all events to enabled
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)
@@ -1066,17 +1080,18 @@ void CreatureEventAI::Reset()
         CreatureEventAI_Event const& event = i->Event;
         switch (event.event_type)
         {
-            // Reset all out of combat timers
+            // Dont reset any combat timers
+            case EVENT_T_TIMER_IN_COMBAT:
+            case EVENT_T_TIMER_GENERIC:
+            case EVENT_T_AGGRO:
+                break;
             case EVENT_T_TIMER_OOC:
-            {
                 if (i->UpdateRepeatTimer(m_creature, event.timer.initialMin, event.timer.initialMax))
                     i->Enabled = true;
                 break;
-            }
-            default:
-                // TODO: enable below code line / verify this is correct to enable events previously disabled (ex. aggro yell), instead of enable this in void Aggro()
-                //i->Enabled = true;
-                //i->Time = 0;
+            default: // reset all events here, was previously done on enter combat
+                i->Enabled = true;
+                i->Time = 0;
                 break;
         }
     }
@@ -1205,10 +1220,7 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
                 if (i->UpdateRepeatTimer(m_creature, event.timer.initialMin, event.timer.initialMax))
                     i->Enabled = true;
                 break;
-            // All normal events need to be re-enabled and their time set to 0
             default:
-                i->Enabled = true;
-                i->Time = 0;
                 break;
         }
     }
@@ -1311,14 +1323,14 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
             // Decrement Timers
             if (i->Time)
             {
-                if (i->Time > m_EventDiff)
+                // Do not decrement timers if event cannot trigger in this phase
+                if (!(i->Event.event_inverse_phase_mask & (1 << m_Phase)))
                 {
-                    // Do not decrement timers if event cannot trigger in this phase
-                    if (!(i->Event.event_inverse_phase_mask & (1 << m_Phase)))
+                    if (i->Time > m_EventDiff)
                         i->Time -= m_EventDiff;
+                    else
+                        i->Time = 0;
                 }
-                else
-                    i->Time = 0;
             }
 
             // Skip processing of events that have time remaining or are disabled
