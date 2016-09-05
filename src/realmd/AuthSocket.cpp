@@ -1049,7 +1049,7 @@ bool AuthSocket::VerifyPinData(const PINData& data)
         return false; // PIN outside of expected range
 
     // remap the PIN to calculate the expected client input sequence
-    for(std::size_t i = 0; i < pinBytes.size(); ++i)
+    for(size_t i = 0; i < pinBytes.size(); ++i)
     {
         auto index = std::find(remappedGrid.begin(), remappedGrid.end(), pinBytes[i]);
         pinBytes[i] = std::distance(remappedGrid.begin(), index);
