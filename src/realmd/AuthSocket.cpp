@@ -406,8 +406,8 @@ bool AuthSocket::_HandleLogonChallenge()
                 {
                     DEBUG_LOG("[AuthChallenge] Account IP differs");
 
+                    // account is IP locked and the player does not have 2FA enabled
                     if (((lockFlags & TOTP) != TOTP && (lockFlags & FIXED_PIN) != FIXED_PIN))
-                        // account is IP locked and the player does not have 2FA enabled
                         pkt << (uint8) WOW_FAIL_SUSPENDED;
 
                     locked = true;
@@ -486,7 +486,8 @@ bool AuthSocket::_HandleLogonChallenge()
                     // figure out whether we need to display the PIN grid
                     promptPin = locked; // always prompt if the account is IP locked & 2FA is enabled
 
-                    if (!locked && ((lockFlags & ALWAYS_ENFORCE) == ALWAYS_ENFORCE)) {
+                    if (!locked && ((lockFlags & ALWAYS_ENFORCE) == ALWAYS_ENFORCE))
+                    {
                         promptPin = true; // prompt if the lock hasn't been triggered but ALWAYS_ENFORCE is set
                     }
 
@@ -644,9 +645,7 @@ bool AuthSocket::_HandleLogonProof()
     if (promptPin && lp.securityFlags)
     {
         if ((lockFlags & FIXED_PIN) == FIXED_PIN)
-        {
             pinResult = VerifyPinData(std::stoi(securityInfo), pinData);
-        }
         else if ((lockFlags & TOTP) == TOTP)
         {
             for (int i = -2; i != 2; ++i)
@@ -655,13 +654,12 @@ bool AuthSocket::_HandleLogonProof()
 
                 if (pin == uint32(-1))
                 {
+                    pinResult = false;
                     break;
                 }
                 
                 if ((pinResult = VerifyPinData(pin, pinData)))
-                {
                     break;
-                }
             }
         }
         else
@@ -1131,11 +1129,13 @@ bool AuthSocket::VerifyPinData(uint32 pin, const PINData& clientData)
     return !memcmp(hash.AsByteArray(), clientData.hash, 20);
 }
 
-uint32 AuthSocket::generateTotpPin(const std::string& secret, int interval) {
+uint32 AuthSocket::generateTotpPin(const std::string& secret, int interval)
+{
     std::vector<uint8> decoded_key((secret.size() + 7) / 8 * 5);
     int key_size = base32_decode((const uint8_t*)secret.data(), decoded_key.data(), decoded_key.size());
 
-    if (key_size == -1) {
+    if (key_size == -1)
+    {
         DEBUG_LOG("Unable to base32 decode TOTP key for user %s", _safelogin.c_str());
         return -1;
     }
