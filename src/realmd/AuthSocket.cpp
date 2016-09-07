@@ -666,7 +666,8 @@ bool AuthSocket::_HandleLogonProof()
         }
         else
         {
-            // unknown security flag
+            DEBUG_LOG("Unknown lock flags set for %s", _safelogin.c_str());
+            pinResult = false;
         }
     }
 
@@ -1135,7 +1136,7 @@ uint32 AuthSocket::generateTotpPin(const std::string& secret, int interval) {
     int key_size = base32_decode((const uint8_t*)secret.data(), decoded_key.data(), decoded_key.size());
 
     if (key_size == -1) {
-        DEBUG_LOG("Unable to base32 decode TOTP key for user %s", _safelogin);
+        DEBUG_LOG("Unable to base32 decode TOTP key for user %s", _safelogin.c_str());
         return -1;
     }
 
