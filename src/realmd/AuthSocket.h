@@ -34,6 +34,9 @@
 
 #include <functional>
 
+struct PINData;
+enum LockFlag;
+
 class AuthSocket : public MaNGOS::Socket
 {
     public:
@@ -43,6 +46,8 @@ class AuthSocket : public MaNGOS::Socket
 
         void SendProof(Sha1Hash sha);
         void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
+        bool VerifyPinData(uint32 pin, const PINData& clientData);
+        uint32 generateTotpPin(const std::string& secret, int interval);
 
         bool _HandleLogonChallenge();
         bool _HandleLogonProof();
@@ -63,10 +68,15 @@ class AuthSocket : public MaNGOS::Socket
         BigNumber K;
         BigNumber _reconnectProof;
 
-        bool _authed;
+        bool _authed, promptPin;
 
         std::string _login;
         std::string _safelogin;
+        std::string securityInfo;
+
+        BigNumber serverSecuritySalt;
+        LockFlag lockFlags;
+        uint32 gridSeed;
 
         // Since GetLocaleByName() is _NOT_ bijective, we have to store the locale as a string. Otherwise we can't differ
         // between enUS and enGB, which is important for the patch system
