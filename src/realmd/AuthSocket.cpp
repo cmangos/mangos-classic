@@ -21,6 +21,8 @@
 */
 
 #include "Common.h"
+#include "Auth/Hmac.h"
+#include "Auth/base32.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
 #include "Log.h"
@@ -30,7 +32,7 @@
 #include "Util.h"
 
 #include <openssl/md5.h>
-//#include "Util.h" -- for commented utf8ToUpperOnlyLatin
+#include <ctime>
 
 extern DatabaseType LoginDatabase;
 
@@ -142,6 +144,14 @@ struct PINData {
     uint8 hash[20];
 };
 
+enum LockFlag {
+    NONE           = 0x00,
+    IP_LOCK        = 0x01,
+    FIXED_PIN      = 0x02,
+    TOTP           = 0x04,
+    ALWAYS_ENFORCE = 0x08
+};
+
 typedef struct XFER_INIT
 {
     uint8 cmd;                                              // XFER_INITIATE
@@ -167,7 +177,8 @@ typedef struct AuthHandler
 
 /// Constructor - set the N and g values for SRP6
 AuthSocket::AuthSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
-    : Socket(service, closeHandler), _authed(false), _build(0), _accountSecurityLevel(SEC_PLAYER)
+    : Socket(service, closeHandler), _authed(false), promptPin(false), _build(0), gridSeed(0),
+      _accountSecurityLevel(SEC_PLAYER)
 {
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
@@ -379,19 +390,26 @@ bool AuthSocket::_HandleLogonChallenge()
         ///- Get the account details from the account table
         // No SQL injection (escaped user name)
 
-        result = LoginDatabase.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel,v,s,security,pin FROM account WHERE username = '%s'", _safelogin.c_str());
+        result = LoginDatabase.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel,v,s,security FROM account WHERE username = '%s'", _safelogin.c_str());
         if (result)
         {
             ///- If the IP is 'locked', check that the player comes indeed from the correct IP address
             bool locked = false;
-            if ((*result)[2].GetUInt8() == 1)               // if ip is locked
+            lockFlags = (LockFlag)(*result)[2].GetUInt32();
+            securityInfo = (*result)[7].GetCppString();
+
+            if ((lockFlags & IP_LOCK) == IP_LOCK)               // if ip is locked
             {
                 DEBUG_LOG("[AuthChallenge] Account '%s' is locked to IP - '%s'", _login.c_str(), (*result)[3].GetString());
                 DEBUG_LOG("[AuthChallenge] Player address is '%s'", m_address.c_str());
                 if (strcmp((*result)[3].GetString(), m_address.c_str()))
                 {
                     DEBUG_LOG("[AuthChallenge] Account IP differs");
-                    pkt << (uint8) WOW_FAIL_SUSPENDED;
+
+                    if (((lockFlags & TOTP) != TOTP && (lockFlags & FIXED_PIN) != FIXED_PIN))
+                        // account is IP locked and the player does not have 2FA enabled
+                        pkt << (uint8) WOW_FAIL_SUSPENDED;
+
                     locked = true;
                 }
                 else
@@ -404,7 +422,7 @@ bool AuthSocket::_HandleLogonChallenge()
                 DEBUG_LOG("[AuthChallenge] Account '%s' is not locked to ip", _login.c_str());
             }
 
-            if (!locked)
+            if (!locked || (locked && ((lockFlags & FIXED_PIN) == FIXED_PIN || (lockFlags & TOTP) == TOTP)))
             {
                 ///- If the account is banned, reject the logon attempt
                 QueryResult* banresult = LoginDatabase.PQuery("SELECT bandate,unbandate FROM account_banned WHERE "
@@ -464,12 +482,18 @@ bool AuthSocket::_HandleLogonChallenge()
                     pkt.append(N.AsByteArray(32), 32);
                     pkt.append(s.AsByteArray(), s.GetNumBytes());// 32 bytes
                     pkt.append(unk3.AsByteArray(16), 16);
-                    securityFlags = (*result)[7].GetUInt8();
 
-                    if (securityFlags)               // PIN input
+                    // figure out whether we need to display the PIN grid
+                    promptPin = locked; // always prompt if the account is IP locked & 2FA is enabled
+
+                    if (!locked && ((lockFlags & ALWAYS_ENFORCE) == ALWAYS_ENFORCE)) {
+                        promptPin = true; // prompt if the lock hasn't been triggered but ALWAYS_ENFORCE is set
+                    }
+
+                    if (promptPin)
                     {
                         BASIC_LOG("[AuthChallenge] account %s is using PIN authentication", _login.c_str());
-                        pin = (*result)[8].GetUInt32();
+
                         uint32 gridSeedPkt = gridSeed = static_cast<uint32>(rand32());
                         EndianConvert(gridSeedPkt);
                         serverSecuritySalt.SetRand(16 * 8); // 16 bytes random
@@ -510,13 +534,15 @@ bool AuthSocket::_HandleLogonProof()
     DEBUG_LOG("Entering _HandleLogonProof");
     ///- Read the packet
     sAuthLogonProof_C lp;
+
     if (!Read((char*)&lp, sizeof(sAuthLogonProof_C)))
         return false;
 
     PINData pinData;
-    if(lp.securityFlags)
+
+    if (lp.securityFlags)
     {
-        if(!Read((char*)&pinData, sizeof(pinData)))
+        if (!Read((char*)&pinData, sizeof(pinData)))
             return false;
     }
 
@@ -612,11 +638,37 @@ bool AuthSocket::_HandleLogonProof()
     ///- Check PIN data is correct
     bool pinResult = true;
 
-    if(securityFlags && !lp.securityFlags)
+    if (promptPin && !lp.securityFlags)
         pinResult = false; // expected PIN data but did not receive it
 
-    if(securityFlags && lp.securityFlags)
-        pinResult = VerifyPinData(pinData);
+    if (promptPin && lp.securityFlags)
+    {
+        if ((lockFlags & FIXED_PIN) == FIXED_PIN)
+        {
+            pinResult = VerifyPinData(std::stoi(securityInfo), pinData);
+        }
+        else if ((lockFlags & TOTP) == TOTP)
+        {
+            for (int i = -2; i != 2; ++i)
+            {
+                auto pin = generateTotpPin(securityInfo, i);
+
+                if (pin == uint32(-1))
+                {
+                    break;
+                }
+                
+                if ((pinResult = VerifyPinData(pin, pinData)))
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // unknown security flag
+        }
+    }
 
     ///- Check if SRP6 results match (password is correct), else send an error
     if (!memcmp(M.AsByteArray(), lp.M1, 20) && pinResult)
@@ -1008,18 +1060,19 @@ bool AuthSocket::_HandleXferAccept()
 }
 
 /// Very PIN entry data
-bool AuthSocket::VerifyPinData(const PINData& data)
+bool AuthSocket::VerifyPinData(uint32 pin, const PINData& clientData)
 {
     // remap the grid to match the client's layout
     std::vector<uint8> grid { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     std::vector<uint8> remappedGrid(grid.size());
 
     uint8* remappedIndex = remappedGrid.data();
+    uint32 seed = gridSeed;
 
-    for(size_t i = grid.size(); i > 0; --i)
+    for (size_t i = grid.size(); i > 0; --i)
     {
-        auto remainder = gridSeed % i;
-        gridSeed /= i;
+        auto remainder = seed % i;
+        seed /= i;
         *remappedIndex = grid[remainder];
 
         size_t copySize = i;
@@ -1036,7 +1089,7 @@ bool AuthSocket::VerifyPinData(const PINData& data)
     // convert the PIN to bytes (for ex. '1234' to {1, 2, 3, 4})
     std::vector<uint8> pinBytes;
 	    
-    while(pin != 0)
+    while (pin != 0)
     {
         pinBytes.push_back(pin % 10);
         pin /= 10;
@@ -1045,18 +1098,18 @@ bool AuthSocket::VerifyPinData(const PINData& data)
     std::reverse(pinBytes.begin(), pinBytes.end());
 
     // validate PIN length
-    if(pinBytes.size() < 4 || pinBytes.size() > 10)
+    if (pinBytes.size() < 4 || pinBytes.size() > 10)
         return false; // PIN outside of expected range
 
     // remap the PIN to calculate the expected client input sequence
-    for(size_t i = 0; i < pinBytes.size(); ++i)
+    for (size_t i = 0; i < pinBytes.size(); ++i)
     {
         auto index = std::find(remappedGrid.begin(), remappedGrid.end(), pinBytes[i]);
         pinBytes[i] = std::distance(remappedGrid.begin(), index);
     }
 
     // convert PIN bytes to their ASCII values
-    for(size_t i = 0; i < pinBytes.size(); ++i)
+    for (size_t i = 0; i < pinBytes.size(); ++i)
         pinBytes[i] += 0x30;
 
     // validate the PIN, x = H(client_salt | H(server_salt | ascii(pin_bytes)))
@@ -1064,14 +1117,46 @@ bool AuthSocket::VerifyPinData(const PINData& data)
     sha.UpdateData(serverSecuritySalt.AsByteArray(), serverSecuritySalt.GetNumBytes());
     sha.UpdateData(pinBytes.data(), pinBytes.size());
     sha.Finalize();
+
     BigNumber hash;
     hash.SetBinary(sha.GetDigest(), sha.GetLength());
 
     sha.Initialize();
-    sha.UpdateData(data.salt, sizeof(data.salt));
+    sha.UpdateData(clientData.salt, sizeof(clientData.salt));
     sha.UpdateData(hash.AsByteArray(), hash.GetNumBytes());
     sha.Finalize();
     hash.SetBinary(sha.GetDigest(), sha.GetLength());
 
-    return !memcmp(hash.AsByteArray(), data.hash, 20);
+    return !memcmp(hash.AsByteArray(), clientData.hash, 20);
+}
+
+uint32 AuthSocket::generateTotpPin(const std::string& secret, int interval) {
+    std::vector<uint8> decoded_key((secret.size() + 7) / 8 * 5);
+    int key_size = base32_decode((const uint8_t*)secret.data(), decoded_key.data(), decoded_key.size());
+
+    if (key_size == -1) {
+        DEBUG_LOG("Unable to base32 decode TOTP key for user %s", _safelogin);
+        return -1;
+    }
+
+    // not guaranteed by the standard to be the UNIX epoch but it is on all supported platforms
+    auto time = std::time(NULL);
+    uint64 now = static_cast<uint64>(time);
+    uint64 step = static_cast<uint64>((floor(now / 30))) + interval;
+    EndianConvertReverse(step);
+    
+    HmacHash hmac(decoded_key.data(), key_size);
+    hmac.UpdateData((uint8*)&step, sizeof(step));
+    hmac.Finalize();
+
+    auto hmac_result = hmac.GetDigest();
+
+    unsigned int offset = hmac_result[19] & 0xF;
+    std::uint32_t pin = (hmac_result[offset] & 0x7f) << 24 | (hmac_result[offset + 1] & 0xff) << 16
+        | (hmac_result[offset + 2] & 0xff) << 8 | (hmac_result[offset + 3] & 0xff);
+    EndianConvert(pin);
+
+    pin &= 0x7FFFFFFF;
+    pin %= 1000000;
+    return pin;
 }

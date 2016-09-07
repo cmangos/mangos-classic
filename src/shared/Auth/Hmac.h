@@ -25,12 +25,10 @@
 
 class BigNumber;
 
-#define SEED_KEY_SIZE 16
-
 class HmacHash
 {
     public:
-        HmacHash();
+        HmacHash(const uint8* data, int length);
         ~HmacHash();
         void UpdateBigNumber(BigNumber* bn);
         void UpdateData(const uint8* data, int length);
@@ -40,7 +38,6 @@ class HmacHash
         int GetLength() { return SHA_DIGEST_LENGTH; };
     private:
         HMAC_CTX m_ctx;
-        uint8 m_key[SEED_KEY_SIZE];
         uint8 m_digest[SHA_DIGEST_LENGTH];
 };
 #endif
