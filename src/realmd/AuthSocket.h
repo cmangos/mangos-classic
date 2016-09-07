@@ -35,7 +35,7 @@
 #include <functional>
 
 struct PINData;
-enum LockFlag;
+enum LockFlag : uint32;
 
 class AuthSocket : public MaNGOS::Socket
 {

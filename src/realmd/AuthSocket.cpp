@@ -49,6 +49,14 @@ enum AccountFlags
     ACCOUNT_FLAG_PROPASS    = 0x00800000,
 };
 
+enum LockFlag : uint32 {
+    NONE           = 0x00,
+    IP_LOCK        = 0x01,
+    FIXED_PIN      = 0x02,
+    TOTP           = 0x04,
+    ALWAYS_ENFORCE = 0x08
+};
+
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some paltform
 #if defined( __GNUC__ )
 #pragma pack(1)
@@ -142,14 +150,6 @@ typedef struct AUTH_RECONNECT_PROOF_C
 struct PINData {
     uint8 salt[16];
     uint8 hash[20];
-};
-
-enum LockFlag {
-    NONE           = 0x00,
-    IP_LOCK        = 0x01,
-    FIXED_PIN      = 0x02,
-    TOTP           = 0x04,
-    ALWAYS_ENFORCE = 0x08
 };
 
 typedef struct XFER_INIT
