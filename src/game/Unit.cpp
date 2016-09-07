@@ -7285,7 +7285,7 @@ bool Unit::SelectHostileTarget()
 
             // check if currently selected target is reachable
             // NOTE: path alrteady generated from AttackStart()
-            if (!GetMotionMaster()->GetCurrent()->IsReachable())
+            if (!(GetMotionMaster()->GetCurrent()->IsReachable() || GetMap()->IsDungeon()))
             {
                 // remove all taunts
                 RemoveSpellsCausingAura(SPELL_AURA_MOD_TAUNT);
@@ -7294,6 +7294,7 @@ bool Unit::SelectHostileTarget()
                 {
                     // only one target in list, we have to evade after timer
                     // TODO: make timer - inside Creature class
+                    // WHY on EARTH would we not just do it here? -.-
                     ((Creature*)this)->AI()->EnterEvadeMode();
                 }
                 else
@@ -7313,7 +7314,7 @@ bool Unit::SelectHostileTarget()
     }
 
     // no target but something prevent go to evade mode
-    if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT))
+    if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT) || m_dummyCombatState)
         return false;
 
     // last case when creature don't must go to evade mode:
@@ -8517,6 +8518,9 @@ void Unit::SetFeared(bool apply, ObjectGuid casterGuid, uint32 spellID, uint32 t
     else
     {
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+
+        if (GetTypeId() == TYPEID_PLAYER)
+            StopMoving(true);
 
         GetMotionMaster()->MovementExpired(false);
 
