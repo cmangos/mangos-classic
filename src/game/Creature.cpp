@@ -789,12 +789,12 @@ void Creature::SetPossessed(bool isPossessed /*= true*/, Unit* owner /*= nullptr
             m_pausedAI = nullptr;
         }
 
-        // first find friendly target (stopping combat here is not recommended because m_CombatData->attackers will be modified)
+        // first find friendly target (stopping combat here is not recommended because m_attackers will be modified)
         AttackerSet friendlyTargets;
-        for (AttackerSet::const_iterator itr = m_combatData->attackers.begin(); itr != m_combatData->attackers.end(); ++itr)
+        for (Unit::AttackerSet::const_iterator itr =  getAttackers().begin(); itr != getAttackers().end(); ++itr)
         {
             Unit* attacker = (*itr);
-            if (GetTypeId() != TYPEID_UNIT)
+            if (attacker->GetTypeId() != TYPEID_UNIT)
                 continue;
 
             if (!factionEntry->IsHostileTo(*attacker->getFactionTemplateEntry()))
@@ -802,17 +802,12 @@ void Creature::SetPossessed(bool isPossessed /*= true*/, Unit* owner /*= nullptr
         }
 
         // now stop attackers combat and transfer threat generated from this to owner, also get the total generated threat
-        for (AttackerSet::iterator itr = friendlyTargets.begin(); itr != friendlyTargets.end(); ++itr)
+        for (Unit::AttackerSet::iterator itr = friendlyTargets.begin(); itr != friendlyTargets.end(); ++itr)
         {
             Unit* attacker = (*itr);
-            totalThreat += attacker->getThreatManager().getThreat(this);
-            if (attacker->getVictim() == this)
-            {
-                attacker->AttackStop(true, true);
-                attacker->m_Events.KillAllEvents(true);
-            }
-            attacker->_removeAttacker(this);
-            attacker->getThreatManager().modifyThreatPercent(this, -101); // only remove the possessed creature from threat list because it can be filled by other players
+            attacker->AttackStop(true, true);
+            attacker->m_Events.KillAllEvents(true);
+            attacker->getThreatManager().modifyThreatPercent(this, -101);           // only remove the possessed creature from threat list because it can be filled by other players
             attacker->AddThreat(owner);
         }
 
@@ -831,19 +826,16 @@ void Creature::SetPossessed(bool isPossessed /*= true*/, Unit* owner /*= nullptr
         {
             SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
 
-                                                                                    // check if its own pet
+            // check if its own pet
             if (IsPet() && GetOwner() == owner)
                 return;
 
             // TODO:: iam not sure we need that faction check
             if (factionEntry->IsHostileTo(*owner->getFactionTemplateEntry()))
-                getThreatManager().addThreat(owner, GetMaxHealth()); // generating threat by max life amount best way i found to make it realistic
+                getThreatManager().addThreat(owner, GetMaxHealth());                // generating threat by max life amount best way i found to make it realistic
         }
         else
-        {
-            m_combatData->attackers.clear();
             m_combatData->threatManager.clearReferences();
-        }
     }
 }
 
