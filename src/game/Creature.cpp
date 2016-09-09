@@ -2509,6 +2509,9 @@ void Creature::ClearTemporaryFaction()
 
     // Reset to original faction
     setFaction(GetCreatureInfo()->FactionAlliance);
+
+    ForceHealthAndPowerUpdate();                            // update health and power for client needed to hide enemy real value
+
     // Reset UNIT_FLAG_NON_ATTACKABLE, UNIT_FLAG_OOC_NOT_ATTACKABLE, UNIT_FLAG_PASSIVE, UNIT_FLAG_PACIFIED or UNIT_FLAG_NOT_SELECTABLE flags
     if (m_temporaryFactionFlags & TEMPFACTION_TOGGLE_NON_ATTACKABLE && GetCreatureInfo()->UnitFlags & UNIT_FLAG_NON_ATTACKABLE)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
