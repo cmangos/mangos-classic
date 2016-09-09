@@ -4162,55 +4162,16 @@ void Spell::EffectSummonPossessed(SpellEffectIndex eff_idx)
         return;
     }
 
-    Creature* spawnCreature = m_caster->SummonCreature(creatureEntry, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_caster->GetOrientation(), TEMPSUMMON_CORPSE_DESPAWN, 0);
-    if (!spawnCreature)
+    Unit* newUnit = m_caster->TakePossessOf(m_spellInfo, eff_idx, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, m_caster->GetOrientation());
+    if (!newUnit)
     {
         sLog.outError("Spell::DoSummonPossessed: creature entry %u for spell %u could not be summoned.", creatureEntry, m_spellInfo->Id);
         return;
     }
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        //remove any existing charm just in case
-        m_caster->Uncharm();
-
-        //pets should be temporarily removed when possesing a target
-        ((Player*)m_caster)->UnsummonPetTemporaryIfAny();
-    }
-
-    // Changes to be sent
-    spawnCreature->SetCharmerGuid(m_caster->GetObjectGuid());
-    spawnCreature->SetCreatorGuid(m_caster->GetObjectGuid());
-    spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-    spawnCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-
-    spawnCreature->SetLevel(m_caster->getLevel());
-
-    spawnCreature->SetWalk(m_caster->IsWalking());
-    // TODO: Set Fly
-
-    // Internal changes
-    spawnCreature->addUnitState(UNIT_STAT_CONTROLLED);
-
-    // Changes to owner
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        Player* player = (Player*)m_caster;
-
-        player->GetCamera().SetView(spawnCreature);
-
-        player->SetCharm(spawnCreature);
-        player->SetClientControl(spawnCreature, 1);
-        player->SetMover(spawnCreature);
-
-        if (CharmInfo* charmInfo = spawnCreature->InitCharmInfo(spawnCreature))
-            charmInfo->InitPossessCreateSpells();
-        player->PossessSpellInitialize();
-    }
-
     // Notify Summoner
     if (m_originalCaster && m_originalCaster != m_caster && m_originalCaster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_originalCaster)->AI())
-        ((Creature*)m_originalCaster)->AI()->JustSummoned(spawnCreature);
+        ((Creature*)m_originalCaster)->AI()->JustSummoned((Creature*)newUnit);
 }
 
 void Spell::EffectEnchantHeldItem(SpellEffectIndex eff_idx)

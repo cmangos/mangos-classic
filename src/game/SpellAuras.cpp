@@ -2008,7 +2008,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
         return;
 
     Unit* caster = GetCaster();
-    if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+    if (!caster || caster->GetTypeId() != TYPEID_PLAYER) // TODO:: well i know some bosses can take control of player???
         return;
 
     Player* p_caster = (Player*)caster;
@@ -2020,91 +2020,12 @@ void Aura::HandleModPossess(bool apply, bool Real)
         {
             //remove any existing charm just in case
             caster->Uncharm();
-
-            //pets should be removed when possesing a target if somehow check was bypassed
-            ((Player*)caster)->UnsummonPetIfAny();
-        }
-         
-        target->addUnitState(UNIT_STAT_CONTROLLED);
-
-        target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-        target->SetCharmerGuid(p_caster->GetObjectGuid());
-        target->setFaction(p_caster->getFaction());
-
-        // target should became visible at SetView call(if not visible before):
-        // otherwise client\p_caster will ignore packets from the target(SetClientControl for example)
-        camera.SetView(target);
-
-        p_caster->SetCharm(target);
-        p_caster->SetClientControl(target, 1);
-        p_caster->SetMover(target);
-
-        target->CombatStop(true);
-        target->DeleteThreatList();
-        target->getHostileRefManager().deleteReferences();
-
-        if (CharmInfo* charmInfo = target->InitCharmInfo(target))
-        {
-            charmInfo->InitPossessCreateSpells();
-            charmInfo->SetReactState(REACT_PASSIVE);
-            charmInfo->SetCommandState(COMMAND_STAY);
         }
 
-        p_caster->PossessSpellInitialize();
-
-        if (target->GetTypeId() == TYPEID_UNIT)
-        {
-            ((Creature*)target)->AIM_Initialize();
-        }
-        else if (target->GetTypeId() == TYPEID_PLAYER)
-        {
-            ((Player*)target)->SetClientControl(target, 0);
-        }
+        caster->TakePossessOf(target);
     }
     else
-    {
-        p_caster->SetCharm(nullptr);
-
-        p_caster->SetClientControl(target, 0);
-        p_caster->SetMover(nullptr);
-
-        // there is a possibility that target became invisible for client\p_caster at ResetView call:
-        // it must be called after movement control unapplying, not before! the reason is same as at aura applying
-        camera.ResetView();
-
-        p_caster->RemovePetActionBar();
-
-        // on delete only do caster related effects
-        if (m_removeMode == AURA_REMOVE_BY_DELETE)
-            return;
-
-        target->clearUnitState(UNIT_STAT_CONTROLLED);
-
-        target->CombatStop(true);
-        target->DeleteThreatList();
-        target->getHostileRefManager().deleteReferences();
-
-        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-
-        target->SetCharmerGuid(ObjectGuid());
-
-        if (target->GetTypeId() == TYPEID_PLAYER)
-        {
-            ((Player*)target)->setFactionForRace(target->getRace());
-            ((Player*)target)->SetClientControl(target, 1);
-        }
-        else if (target->GetTypeId() == TYPEID_UNIT)
-        {
-            CreatureInfo const* cinfo = ((Creature*)target)->GetCreatureInfo();
-            target->setFaction(cinfo->FactionAlliance);
-        }
-
-        if (target->GetTypeId() == TYPEID_UNIT)
-        {
-            ((Creature*)target)->AIM_Initialize();
-            target->AttackedBy(caster);
-        }
-    }
+        caster->ResetControlState();
 }
 
 void Aura::HandleModPossessPet(bool apply, bool Real)
@@ -2131,57 +2052,12 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
         {
             //remove any existing charm just in case
             caster->Uncharm();
-
-            //pets should be removed when possesing a target if somehow check was bypassed
-            ((Player*)caster)->UnsummonPetIfAny();
         }
 
-        pet->addUnitState(UNIT_STAT_CONTROLLED);
-
-        // target should became visible at SetView call(if not visible before):
-        // otherwise client\p_caster will ignore packets from the target(SetClientControl for example)
-        camera.SetView(pet);
-
-        p_caster->SetCharm(pet);
-        p_caster->SetClientControl(pet, 1);
-        ((Player*)caster)->SetMover(pet);
-
-        pet->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-
-        pet->StopMoving();
-        pet->GetMotionMaster()->Clear(false);
-        pet->GetMotionMaster()->MoveIdle();
+        caster->TakePossessOf(target);
     }
     else
-    {
-        p_caster->SetCharm(nullptr);
-        p_caster->SetClientControl(pet, 0);
-        p_caster->SetMover(nullptr);
-
-        // there is a possibility that target became invisible for client\p_caster at ResetView call:
-        // it must be called after movement control unapplying, not before! the reason is same as at aura applying
-        camera.ResetView();
-
-        // on delete only do caster related effects
-        if (m_removeMode == AURA_REMOVE_BY_DELETE)
-            return;
-
-        pet->clearUnitState(UNIT_STAT_CONTROLLED);
-
-        pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-
-        pet->AttackStop();
-
-        // out of range pet dismissed
-        if (!pet->IsWithinDistInMap(p_caster, pet->GetMap()->GetVisibilityDistance()))
-        {
-            p_caster->RemovePet(PET_SAVE_REAGENTS);
-        }
-        else
-        {
-            pet->GetMotionMaster()->MoveFollow(caster, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-        }
-    }
+        caster->ResetControlState();
 }
 
 void Aura::HandleModCharm(bool apply, bool Real)
@@ -2612,11 +2488,10 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
 
         target->addUnitState(UNIT_STAT_ROOT);
+        target->SetRoot(true);
 
         if (target->GetTypeId() == TYPEID_PLAYER)
         {
-            target->SetRoot(true);
-
             // Clear unit movement flags
             ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
         }
@@ -2654,7 +2529,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
 
         target->clearUnitState(UNIT_STAT_ROOT);
 
-        if (!target->hasUnitState(UNIT_STAT_STUNNED) && (target->GetTypeId() == TYPEID_PLAYER))     // prevent allow move if have also stun effect
+        if (!target->hasUnitState(UNIT_STAT_STUNNED))     // prevent allow move if have also stun effect
             target->SetRoot(false);
     }
 }

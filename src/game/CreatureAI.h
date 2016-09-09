@@ -286,6 +286,9 @@ class MANGOS_DLL_SPEC CreatureAI
          */
         virtual bool IsVisible(Unit* /*pWho*/) const { return false; }
 
+        /// Check if this AI can be replaced in possess case
+        virtual bool IsControllable() const { return false; }
+
         // Called when victim entered water and creature can not enter water
         // TODO: rather unused
         virtual bool canReachByRangeAttack(Unit*) { return false; }

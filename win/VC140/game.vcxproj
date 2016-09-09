@@ -588,6 +588,7 @@
     <ClInclude Include="..\..\src\game\PlayerDump.h" />
     <ClInclude Include="..\..\src\game\PointMovementGenerator.h" />
     <ClInclude Include="..\..\src\game\PoolManager.h" />
+    <ClInclude Include="..\..\src\game\PossessedAI.h" />
     <ClInclude Include="..\..\src\game\QuestDef.h" />
     <ClInclude Include="..\..\src\game\RandomMovementGenerator.h" />
     <ClInclude Include="..\..\src\game\ReactorAI.h" />

@@ -347,7 +347,7 @@ void WorldSession::LogoutPlayer(bool save)
 
             // build set of player who attack _player or who have pet attacking of _player
             std::set<Player*> aset;
-            for (Unit::AttackerSet::const_iterator itr = _player->getAttackers().begin(); itr != _player->getAttackers().end(); ++itr)
+            for (AttackerSet::const_iterator itr = _player->getAttackers().begin(); itr != _player->getAttackers().end(); ++itr)
             {
                 Unit* owner = (*itr)->GetOwner();           // including player controlled case
                 if (owner)

@@ -26,6 +26,7 @@ class MovementGenerator;
 namespace FactorySelector
 {
     CreatureAI* selectAI(Creature*);
+    CreatureAI* GetPossessAI(Creature*);
     MovementGenerator* selectMovementGenerator(Creature*);
 }
 #endif

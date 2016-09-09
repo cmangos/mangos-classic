@@ -17871,14 +17871,13 @@ void Player::Uncharm()
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
         charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET);
-        if (charm == GetMover())
-        {
-            SetMover(nullptr);
-            GetCamera().ResetView();
-            RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
-            SetCharm(nullptr);
-            SetClientControl(this, 1);
-        }
+    }
+
+    if (Unit* charm = GetCharm())
+    {
+        // try remove charm by spellid
+        if (uint32 spellid = charm->GetUInt32Value(UNIT_CREATED_BY_SPELL))
+            RemoveAurasDueToSpell(spellid);
     }
 }
 

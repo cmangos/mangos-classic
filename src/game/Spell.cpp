@@ -1157,15 +1157,18 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
                 if (!unit->IsStandState() && !unit->hasUnitState(UNIT_STAT_STUNNED))
                     unit->SetStandState(UNIT_STAND_STATE_STAND);
 
-                if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
-                    unit->AttackedBy(realCaster);
+                if (!m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
+                {
+                    if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
+                        unit->AttackedBy(realCaster);
 
-                unit->AddThreat(realCaster);
-                unit->SetInCombatWith(realCaster);
-                realCaster->SetInCombatWith(unit);
+                    unit->AddThreat(realCaster);
+                    unit->SetInCombatWith(realCaster);
+                    realCaster->SetInCombatWith(unit);
 
-                if (Player* attackedPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    realCaster->SetContestedPvP(attackedPlayer);
+                    if (Player* attackedPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
+                        realCaster->SetContestedPvP(attackedPlayer);
+                }
             }
         }
         else
@@ -3495,38 +3498,6 @@ void Spell::SendChannelUpdate(uint32 time)
 {
     if (time == 0)
     {
-        // Reset farsight for some possessing auras of possessed summoned (as they might work with different aura types)
-        if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_FARSIGHT) && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetCharmGuid()
-            && !IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_POSSESS) && !IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_POSSESS_PET))
-        {
-            Player* player = (Player*)m_caster;
-            // These Auras are applied to self, so get the possessed first
-            Unit* possessed = player->GetCharm();
-
-            player->SetCharm(nullptr);
-            if (possessed)
-                player->SetClientControl(possessed, 0);
-            player->SetMover(nullptr);
-            player->GetCamera().ResetView();
-            player->RemovePetActionBar();
-
-            if (possessed)
-            {
-                possessed->clearUnitState(UNIT_STAT_CONTROLLED);
-                possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-                possessed->SetCharmerGuid(ObjectGuid());
-                // TODO - Requires more specials for target?
-
-                // Some possessed might want to despawn?
-                if (possessed->GetUInt32Value(UNIT_CREATED_BY_SPELL) == m_spellInfo->Id && possessed->GetTypeId() == TYPEID_UNIT)
-                    ((Creature*)possessed)->ForcedDespawn();
-            }
-        }
- 
-        //pets should be temporarily removed when possesing a target
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_caster)->ResummonPetTemporaryUnSummonedIfAny();
-
         m_caster->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
 
         ObjectGuid target_guid = m_caster->GetChannelObjectGuid();

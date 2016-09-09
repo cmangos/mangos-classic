@@ -651,6 +651,7 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void SummonedCreatureJustDied(Creature* unit) override;
         void SummonedCreatureDespawn(Creature* unit) override;
         void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 miscValue) override;
+        bool IsControllable() const override { return true; }
 
         static int Permissible(const Creature*);
 

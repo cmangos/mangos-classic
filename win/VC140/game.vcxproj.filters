@@ -910,5 +910,8 @@
     <ClInclude Include="..\..\src\game\AddonHandler.h">
       <Filter>World/Handlers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\game\PossessedAI.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

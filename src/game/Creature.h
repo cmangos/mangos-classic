@@ -477,6 +477,8 @@ enum TemporaryFactionFlags                                  // Used at real fact
 class MANGOS_DLL_SPEC Creature : public Unit
 {
         CreatureAI* i_AI;
+        CreatureAI* m_pausedAI;                             // Main AI will be stored here during the possessing
+        CombatData* m_pausedCombatData;                     // Main Combat data will be stored here during possessing
 
     public:
 
@@ -554,6 +556,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool AIM_Initialize();
 
         CreatureAI* AI() { return i_AI; }
+
+        void SetPossessed(bool isPossessed = true, Unit* owner = nullptr);
 
         void SetWalk(bool enable, bool asDefault = true);
         void SetLevitate(bool enable) override;
