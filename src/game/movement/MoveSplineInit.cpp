@@ -86,12 +86,12 @@ namespace Movement
         return move_spline.Duration();
     }
 
-    void MoveSplineInit::Stop()
+    void MoveSplineInit::Stop(bool forceSend /*= false*/)
     {
         MoveSpline& move_spline = *unit.movespline;
 
         // No need to stop if we are not moving
-        if (move_spline.Finalized())
+        if (!forceSend && move_spline.Finalized())
             return;
 
         // ToDo: update transport info if required

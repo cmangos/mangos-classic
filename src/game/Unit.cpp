@@ -8479,7 +8479,7 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
         return;
 
     Movement::MoveSplineInit init(*this);
-    init.Stop();
+    init.Stop(forceSendStop);
 }
 
 void Unit::InterruptMoving(bool forceSendStop /*=false*/)
@@ -9425,8 +9425,9 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     possessed->clearUnitState(UNIT_STAT_CONTROLLED);
     possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     possessed->SetCharmerGuid(ObjectGuid());
-    SetCharmGuid(ObjectGuid());
+    possessed->StopMoving(true);
 
+    SetCharmGuid(ObjectGuid());
     Creature* possessedCreature = nullptr;
     if (possessed->GetTypeId() == TYPEID_UNIT)
     {
