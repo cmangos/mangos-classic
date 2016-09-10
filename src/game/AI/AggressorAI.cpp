@@ -52,10 +52,7 @@ AggressorAI::MoveInLineOfSight(Unit* u)
         if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->IsWithinLOSInMap(u))
         {
             if (!m_creature->getVictim())
-            {
                 AttackStart(u);
-                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            }
             else if (sMapStore.LookupEntry(m_creature->GetMapId())->IsDungeon())
             {
                 m_creature->AddThreat(u);
