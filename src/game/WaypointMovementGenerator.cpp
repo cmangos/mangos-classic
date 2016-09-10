@@ -441,7 +441,20 @@ bool FlightPathMovementGenerator::Update(Player& player, const uint32& /*diff*/)
         while (true);
     }
 
-    return i_currentNode < (i_path->size() - 1);
+    const bool flying = (i_currentNode < (i_path->size() - 1));
+
+    // Multi-map flight paths
+    if (flying && (*i_path)[i_currentNode + 1].mapid != player.GetMapId())
+    {
+        // short preparations to continue flight
+        Interrupt(player);                // will reset at map landing
+        SetCurrentNodeAfterTeleport();
+        TaxiPathNodeEntry const& node = (*i_path)[i_currentNode];
+        SkipCurrentNode();
+        player.TeleportTo(node.mapid, node.x, node.y, node.z, player.GetOrientation());
+    }
+
+    return flying;
 }
 
 void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
