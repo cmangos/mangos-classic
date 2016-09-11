@@ -35,7 +35,7 @@ namespace FactorySelector
     CreatureAI* selectAI(Creature* creature)
     {
         // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)
-        if ((!creature->IsPet() || !((Pet*)creature)->isControlled()) && !creature->isCharmed())
+        if ((!creature->IsPet() || !static_cast<Pet*>(creature)->isControlled()) && !creature->isCharmed())
             if (CreatureAI* scriptedAI = sScriptMgr.GetCreatureAI(creature))
                 return scriptedAI;
 
@@ -45,27 +45,21 @@ namespace FactorySelector
 
         std::string ainame = creature->GetAIName();
 
-        // select by NPC flags _first_ - otherwise EventAI might be choosen for pets/totems
+        // select by NPC flags
         if (creature->IsPet())
         {
-            if (((Pet*)creature)->isControlled())
+            if (static_cast<Pet*>(creature)->isControlled())
                 ai_factory = ai_registry.GetRegistryItem("PetAI");
-            else
-            {
+            else                            // For guardians and creature pets in general
                 ai_factory = ai_registry.GetRegistryItem("GuardianAI");
-                if (!ainame.empty() && (ai_registry.GetRegistryItem(ainame.c_str()) != ai_registry.GetRegistryItem("GuardianAI")))
-                    sLog.outErrorDb("FactorySelector: creature pet / guardian not up-to-date on entry: %u ! it shouldn't have %s - GuardianAI will be used.", creature->GetEntry(), ainame.c_str());
-            }
         }
         else if (creature->IsTotem())
             ai_factory = ai_registry.GetRegistryItem("TotemAI");
-        // select by script name
-        else if (!ainame.empty())
+        else if (!ainame.empty())           // select by script name
             ai_factory = ai_registry.GetRegistryItem(ainame.c_str());
         else if (creature->IsGuard())
             ai_factory = ai_registry.GetRegistryItem("GuardAI");
-        // select by permit check
-        else
+        else                                // select by permit check
         {
             int best_val = PERMIT_BASE_NO;
             typedef CreatureAIRegistry::RegistryMapType RMT;
