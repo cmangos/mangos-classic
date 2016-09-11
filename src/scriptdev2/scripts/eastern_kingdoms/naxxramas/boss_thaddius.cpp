@@ -54,11 +54,6 @@ enum
     SAY_SLAY                        = -1533033,
     SAY_ELECT                       = -1533034,
     SAY_DEATH                       = -1533035,
-    // Background screams in Instance if Thaddius still alive, needs general support most likely
-    SAY_SCREAM1                     = -1533036,
-    SAY_SCREAM2                     = -1533037,
-    SAY_SCREAM3                     = -1533038,
-    SAY_SCREAM4                     = -1533039,
     EMOTE_POLARITY_SHIFT            = -1533151,
 
     // Thaddius Spells
