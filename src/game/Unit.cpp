@@ -1387,7 +1387,9 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
     {
         SubDamageInfo *subDamage = &damageInfo->subDamage[i];
 
-        subDamage->damageSchoolMask = GetSchoolMask(GetWeaponDamageSchool(damageInfo->attackType, i));
+        subDamage->damageSchoolMask = GetTypeId() == TYPEID_PLAYER
+            ? GetSchoolMask(GetWeaponDamageSchool(damageInfo->attackType, i))
+            : GetMeleeDamageSchoolMask();
 
         if (damageInfo->target->IsImmuneToDamage(subDamage->damageSchoolMask))
         {
