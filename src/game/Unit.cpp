@@ -305,9 +305,9 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
             m_lastManaUseTimer -= update_diff;
     }
 
-    // update combat timer only for players and pets
-    if (isInCombat() && GetCharmerOrOwnerPlayerOrPlayerItself() && !m_dummyCombatState)
+    if (!CanHaveThreatList() && isInCombat())
     {
+        // update combat timer only for players and pets (they have no threat list)
         // Check UNIT_STAT_MELEE_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
         // These flags are reset after target dies or another command is given.
@@ -5108,6 +5108,9 @@ void Unit::CombatStop(bool includingCast)
             ((Creature*)this)->ClearTemporaryFaction();
     }
 
+    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
+        ((Creature*)this)->AI()->CombatStop();
+
     ClearInCombat();
 }
 
@@ -7080,7 +7083,12 @@ bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
 
     // pets can not have a threat list, unless they are controlled by a creature
     if (creature->IsPet() && creature->GetOwnerGuid().IsPlayer())
+    {
+        Pet const* pet = static_cast<Pet const*>(creature);
+        if (pet->getPetType() == GUARDIAN_PET)
+            return true;
         return false;
+    }
 
     // charmed units can not have a threat list if charmed by player
     if (creature->GetCharmerGuid().IsPlayer())

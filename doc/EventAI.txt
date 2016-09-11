@@ -155,6 +155,7 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 47   ACTION_T_SET_STAND_STATE               StandState                      Set the unit stand state (Param1) of the current creature.
 48   ACTION_T_CHANGE_MOVEMENT               MovementType, WanderDistance    Change the unit movement type (Param1). If the movement type is Random Movement (1), the WanderDistance (Param2) must be provided.
 49   ACTION_T_DYNAMIC_MOVEMENT              EnableDynamicMovement           Enable dynamic movement behavior (1 = on; 0 = off)
+50   ACTION_T_SET_REACT_STATE               ReactState                      Change react state of the creature
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -922,6 +923,11 @@ Parameter 2: WanderDistance - Wander distance to be used in case the movement ty
 49 = ACTION_T_DYNAMIC_MOVEMENT:
 -------------------------------
 Parameter 1: EnableDynamicMovement - Enable dynamic movement behavior. 1 = on / 0 = off.
+
+------------------------------
+50 = ACTION_T_SET_REACT_STATE:
+------------------------------
+Parameter 1: ReactState - Define the react state of the creature. 0 = Passive, 1 = Defensive, 2 = Aggresive. Default behavior is Aggresive.
 
 =========================================
 Target Types

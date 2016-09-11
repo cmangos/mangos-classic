@@ -270,6 +270,13 @@ class MANGOS_DLL_SPEC CreatureAI
         virtual void AttackStart(Unit* /*pWho*/) {}
 
         /**
+        * Called when creature stop attack expected
+        * Note: have to be called to reinitialize some states or movement
+        * Note: Not needed for creature, they use EnterEvadeMode
+        */
+        virtual void CombatStop() {}
+
+        /**
          * Called at World update tick, by default every 100ms
          * This setting is dependend on CONFIG_UINT32_INTERVAL_MAPUPDATE
          * Note: Use this function to handle Timers, Threat-Management and MeleeAttacking

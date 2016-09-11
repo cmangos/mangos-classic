@@ -59,6 +59,8 @@ set(SRC_GRP_AI
     AI/CreatureEventAIMgr.h
     AI/GuardAI.cpp
     AI/GuardAI.h
+    AI/GuardianAI.cpp
+    AI/GuardianAI.h
     AI/NullCreatureAI.cpp
     AI/NullCreatureAI.h
     AI/PetAI.cpp

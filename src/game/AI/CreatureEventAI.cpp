@@ -81,7 +81,8 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     m_InvinceabilityHpLevel(0),
     m_throwAIEventMask(0),
     m_throwAIEventStep(0),
-    m_LastSpellMaxRange(0)
+    m_LastSpellMaxRange(0),
+    m_reactState(REACT_AGGRESSIVE)
 {
     // Need make copy for filter unneeded steps and safe in case table reload
     CreatureEventAI_Event_Map::const_iterator creatureEventsItr = sEventAIMgr.GetCreatureEventAIMap().find(m_creature->GetEntry());
@@ -124,11 +125,7 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
         sLog.outErrorEventAI("EventMap for Creature %u is empty but creature is using CreatureEventAI.", m_creature->GetEntry());
 }
 
-#define LOG_PROCESS_EVENT                                                                                                       \
-    DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "CreatureEventAI: Event type %u (script %u) triggered for %s (invoked by %s)",    \
-                     pHolder.Event.event_type, pHolder.Event.event_id, m_creature->GetGuidStr().c_str(), pActionInvoker ? pActionInvoker->GetGuidStr().c_str() : "<no invoker>")
-
-inline bool IsTimerBasedEvent(EventAI_Type type)
+bool CreatureEventAI::IsTimerBasedEvent(EventAI_Type type)
 {
     switch (type)
     {
@@ -1023,11 +1020,18 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         }
         case ACTION_T_DYNAMIC_MOVEMENT:
         {
-            if (!!action.dynamicMovement.state == m_DynamicMovement)
+            if ((!!action.dynamicMovement.state) == m_DynamicMovement)
                 break;
 
             m_DynamicMovement = !!action.dynamicMovement.state;
             SetCombatMovement(!m_DynamicMovement, true);
+            break;
+        }
+        case ACTION_T_SET_REACT_STATE:
+        {
+            // only set this on spawn event for now (need more implementation to set it in another place)
+            m_reactState = ReactStates(action.setReactState.reactState);
+            sLog.outString("Set AI react state to %u for %s", uint32(m_reactState), m_creature->GetGuidStr().c_str());
             break;
         }
         default:
@@ -1114,6 +1118,7 @@ void CreatureEventAI::EnterEvadeMode()
     m_creature->DeleteThreatList();
     m_creature->CombatStop(true);
 
+    // only alive creatures that are not on transport can return to home position
     if (m_creature->isAlive())
         m_creature->GetMotionMaster()->MoveTargetedHome();
 
@@ -1231,7 +1236,7 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
 
 void CreatureEventAI::AttackStart(Unit* who)
 {
-    if (!who)
+    if (!who || m_reactState == REACT_PASSIVE)
         return;
 
     if (m_creature->Attack(who, m_MeleeEnabled))
@@ -1246,7 +1251,7 @@ void CreatureEventAI::AttackStart(Unit* who)
 
 void CreatureEventAI::MoveInLineOfSight(Unit* who)
 {
-    if (!who)
+    if (!who || m_reactState != REACT_AGGRESSIVE)
         return;
 
     // Check for OOC LOS Event
@@ -1271,6 +1276,7 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
         }
     }
 
+    // TODO:: in others core -> if (m_creature->IsCivilian() || m_creature->IsNeutralToAll()) so why we use EXTRA_FLAG here ?
     if ((m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO) || m_creature->IsNeutralToAll())
         return;
 

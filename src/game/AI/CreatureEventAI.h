@@ -31,6 +31,10 @@ class WorldObject;
 #define MAX_ACTIONS                     3
 #define MAX_PHASE                       32
 
+#define LOG_PROCESS_EVENT                                                                                                       \
+    DEBUG_FILTER_LOG(LOG_FILTER_EVENT_AI_DEV, "CreatureEventAI: Event type %u (script %u) triggered for %s (invoked by %s)",    \
+                     pHolder.Event.event_type, pHolder.Event.event_id, m_creature->GetGuidStr().c_str(), pActionInvoker ? pActionInvoker->GetGuidStr().c_str() : "<no invoker>")
+
 enum EventAI_Type
 {
     EVENT_T_TIMER_IN_COMBAT         = 0,                    // InitialMin, InitialMax, RepeatMin, RepeatMax
@@ -121,6 +125,7 @@ enum EventAI_ActionType
     ACTION_T_SET_STAND_STATE            = 47,               // StandState, unused, unused
     ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance, unused
     ACTION_T_DYNAMIC_MOVEMENT           = 49,               // EnableDynamicMovement (1 = on; 0 = off)
+    ACTION_T_SET_REACT_STATE            = 50,               // React state, unused, unused
 
     ACTION_T_END,
 };
@@ -422,6 +427,13 @@ struct CreatureEventAI_Action
             uint32 unused1;
             uint32 unused2;
         } dynamicMovement;
+        // ACTION_T_SET_REACT_STATE                         = 50
+        struct  
+        {
+            uint32 reactState;
+            uint32 unused1;
+            uint32 unused2;
+        } setReactState;
         // RAW
         struct
         {
@@ -655,8 +667,8 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
 
         static int Permissible(const Creature*);
 
-        bool ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker = nullptr, Creature* pAIEventSender = nullptr);
-        void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender);
+        virtual bool ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker = nullptr, Creature* pAIEventSender = nullptr);
+        virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender);
         inline uint32 GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3);
         inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3);
         /// If the bool& param is true, an error should be reported
@@ -669,6 +681,8 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void DoFindFriendlyCC(std::list<Creature*>& _list, float range);
 
     protected:
+        bool IsTimerBasedEvent(EventAI_Type type);
+
         uint32 m_EventUpdateTime;                           // Time between event updates
         uint32 m_EventDiff;                                 // Time between the last event call
 
@@ -687,6 +701,8 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         // Steps 0..2 correspond to AI_EVENT_LOST_SOME_HEALTH(90%), AI_EVENT_LOST_HEALTH(50%), AI_EVENT_CRITICAL_HEALTH(10%)
         uint32 m_throwAIEventStep;                          // Used for damage taken/ received heal
         float m_LastSpellMaxRange;                          // Maximum spell range that was cast during dynamic movement
+
+        ReactStates m_reactState;                           // Define if creature is passive or aggressive
 };
 
 #endif

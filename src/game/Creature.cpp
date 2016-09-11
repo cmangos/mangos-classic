@@ -152,6 +152,11 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
 
 Creature::~Creature()
 {
+    CleanupsBeforeDelete();
+}
+
+void Creature::CleanupsBeforeDelete()
+{
     delete i_AI;
     delete m_pausedAI;
     delete m_pausedCombatData;
