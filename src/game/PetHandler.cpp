@@ -668,7 +668,7 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
     }
 
     // do not add not learned spells/ passive spells
-    if (!pet->HasSpell(spellid) || IsPassiveSpell(spellid))
+    if (!pet->HasSpell(spellid) || !IsAutocastable(spellid))
         return;
 
     CharmInfo* charmInfo = pet->GetCharmInfo();

@@ -929,7 +929,7 @@ struct CharmInfo
         void InitEmptyActionBar();
 
         // return true if successful
-        bool AddSpellToActionBar(uint32 spellid, ActiveStates newstate = ACT_DECIDE);
+        bool AddSpellToActionBar(uint32 spellId, ActiveStates newstate = ACT_DECIDE);
         bool RemoveSpellFromActionBar(uint32 spell_id);
         void LoadPetActionBar(const std::string& data);
         void BuildActionBar(WorldPacket* data);

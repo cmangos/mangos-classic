@@ -392,7 +392,7 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_UNK2                        = 0x00000004,// 2
     SPELL_ATTR_EX4_UNK3                        = 0x00000008,// 3
     SPELL_ATTR_EX4_UNK4                        = 0x00000010,// 4 This will no longer cause guards to attack on use??
-    SPELL_ATTR_EX4_UNK5                        = 0x00000020,// 5
+    SPELL_ATTR_EX4_UNAUTOCASTABLE              = 0x00000020,// 5
     SPELL_ATTR_EX4_NOT_STEALABLE               = 0x00000040,// 6 although such auras might be dispellable, they cannot be stolen
     SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING      = 0x00000080,// 7 In theory, can use this spell while another is channeled/cast/autocast
     SPELL_ATTR_EX4_STACK_DOT_MODIFIER          = 0x00000100,// 8 no effect on non DoTs?
