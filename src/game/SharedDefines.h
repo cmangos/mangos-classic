@@ -380,14 +380,14 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_UNK26                       = 0x04000000,// 26
     SPELL_ATTR_EX3_UNK27                       = 0x08000000,// 27
     SPELL_ATTR_EX3_UNK28                       = 0x10000000,// 28 always cast ok ? (requires more research)
-    SPELL_ATTR_EX3_UNK29                       = 0x20000000,// 29
+    SPELL_ATTR_EX3_UNK29                       = 0x20000000,// 29 can only target ground targets (non fly non jump)
     SPELL_ATTR_EX3_DONT_DISPLAY_RANGE          = 0x40000000,// 30
     SPELL_ATTR_EX3_UNK31                       = 0x80000000,// 31
 };
 
 enum SpellAttributesEx4
 {
-    SPELL_ATTR_EX4_UNK0                        = 0x00000001,// 0
+    SPELL_ATTR_EX4_IGNORE_RESISTANCES          = 0x00000001,// 0
     SPELL_ATTR_EX4_UNK1                        = 0x00000002,// 1 proc on finishing move?
     SPELL_ATTR_EX4_UNK2                        = 0x00000004,// 2
     SPELL_ATTR_EX4_UNK3                        = 0x00000008,// 3
