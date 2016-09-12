@@ -1189,6 +1189,38 @@ bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
     return ((angle >= lborder) && (angle <= rborder));
 }
 
+bool WorldObject::IsFacingTargetsBack(const WorldObject* target, float arc /*= M_PI_F*/) const
+{
+    if (!target)
+        return false;
+
+    //if target is facing the current object then we know its not possible that the current object would be facing the targets back
+    if (target->HasInArc(arc, this))
+        return false;
+
+    //if current object is not facing the target then we know the current object is not facing the target at all
+    if (!this->HasInArc(arc, target))
+        return false;
+
+    return true;
+}
+
+bool WorldObject::IsFacingTargetsFront(const WorldObject* target, float arc /*= M_PI_F*/) const
+{
+    if (!target)
+        return false;
+
+    //if target is not facing the current object then we know its not possible that the current object would be facing the targets front
+    if (target->HasInArc(arc, this))
+        return false;
+
+    //if current object is not facing the target then we know the current object is not facing the target at all
+    if (!this->HasInArc(arc, target))
+        return false;
+
+    return true;
+}
+
 bool WorldObject::isInFrontInMap(WorldObject const* target, float distance,  float arc) const
 {
     return IsWithinDistInMap(target, distance) && HasInArc(arc, target);

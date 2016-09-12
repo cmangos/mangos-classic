@@ -2866,8 +2866,9 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
     // select enchantment duration
     uint32 duration;
 
+    // TODO: Strange stuff in following code
     // shaman family enchantments
-    if (m_spellInfo->Attributes == (SPELL_ATTR_UNK9 | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_UNK18))
+    if (m_spellInfo->Attributes == (SPELL_ATTR_TARGET_MAINHAND_ITEM | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_DONT_AFFECT_SHEATH_STATE))
         duration = 300;                                     // 5 mins
     // imbue enchantments except Imbue Weapon - Beastslayer
     else if (m_spellInfo->SpellIconID == 241 && m_spellInfo->Id != 7434)
@@ -2876,7 +2877,7 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
     else if (m_spellInfo->Id == 28891 && m_spellInfo->Id == 28898)
         duration = 3600;                                    // 1 hour
     // some fishing pole bonuses
-    else if (m_spellInfo->HasAttribute(SPELL_ATTR_UNK7))
+    else if (m_spellInfo->HasAttribute(SPELL_ATTR_HIDDEN_CLIENTSIDE))
         duration = 600;                                     // 10 mins
     // default case
     else
