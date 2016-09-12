@@ -3585,9 +3585,9 @@ void Spell::SendResurrectRequest(Player* target)
     data << uint32(strlen(sentName) + 1);
 
     data << sentName;
-    data << uint8(0);
-
-    data << uint8(m_caster->GetTypeId() == TYPEID_PLAYER ? 0 : 1);
+    data << uint8(m_caster->isSpiritHealer());
+    // override delay sent with SMSG_CORPSE_RECLAIM_DELAY, set instant resurrection for spells with this attribute
+    data << uint8(!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_RESURRECTION_TIMER));
     target->GetSession()->SendPacket(&data);
 }
 
