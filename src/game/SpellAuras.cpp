@@ -3059,11 +3059,32 @@ void Aura::HandlePeriodicHealthFunnel(bool apply, bool /*Real*/)
 
 void Aura::HandleAuraModResistanceExclusive(bool apply, bool /*Real*/)
 {
+    // Need to check if Exclusive aura is already in effect, if yes ignore application
     for (int8 x = SPELL_SCHOOL_NORMAL; x < MAX_SPELL_SCHOOL; ++x)
     {
         if (m_modifier.m_miscvalue & int32(1 << x))
         {
-            GetTarget()->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_VALUE, float(m_modifier.m_amount), apply);
+            int32 applyDiff = m_modifier.m_amount;
+            int32 highestValue = 0;
+
+            Unit::AuraList const& mTotalAuraList = GetTarget()->GetAurasByType(m_modifier.m_auraname);
+            for (Unit::AuraList::const_iterator i = mTotalAuraList.begin(); i != mTotalAuraList.end(); ++i)
+                if ((*i)->GetModifier()->m_amount > highestValue && (*i)->GetId() != GetId() && (*i)->GetMiscValue() & int32(1 << x))
+                    highestValue = (*i)->GetModifier()->m_amount;
+
+            // If current value is higher or equal value of currently existed value on apply calculate application difference.
+            // Ie. Current resistance 45 new 70 (70-45) = 35 difference will be applied
+            if (m_modifier.m_amount >= GetTarget()->GetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_EXCLUSIVE) && apply)
+                applyDiff -= GetTarget()->GetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_EXCLUSIVE);
+
+            if (m_modifier.m_amount >= highestValue && !apply)
+                applyDiff -= highestValue;
+            
+            if (GetTarget()->GetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_EXCLUSIVE) >= m_modifier.m_amount && apply ||
+                highestValue >= m_modifier.m_amount && !apply)
+                applyDiff = 0;
+
+            GetTarget()->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_EXCLUSIVE, float(applyDiff), apply);
             if (GetTarget()->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)GetTarget())->ApplyResistanceBuffModsMod(SpellSchools(x), m_positive, float(m_modifier.m_amount), apply);
         }
