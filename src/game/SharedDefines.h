@@ -321,7 +321,7 @@ enum SpellAttributesEx2
     SPELL_ATTR_EX2_UNK3                        = 0x00000008,// 3 auto targeting? (e.g. fishing skill enhancement items since 3.3.3)
     SPELL_ATTR_EX2_UNK4                        = 0x00000010,// 4
     SPELL_ATTR_EX2_AUTOREPEAT_FLAG             = 0x00000020,// 5
-    SPELL_ATTR_EX2_UNK6                        = 0x00000040,// 6 only usable on tabbed by yourself
+    SPELL_ATTR_EX2_CANT_TARGET_TAPPED          = 0x00000040,// 6 only usable on tabbed by yourself
     SPELL_ATTR_EX2_UNK7                        = 0x00000080,// 7
     SPELL_ATTR_EX2_UNK8                        = 0x00000100,// 8 not set in 2.4.2
     SPELL_ATTR_EX2_UNK9                        = 0x00000200,// 9
