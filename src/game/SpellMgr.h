@@ -238,6 +238,12 @@ bool IsExplicitNegativeTarget(uint32 targetA);
 bool IsSingleTargetSpell(SpellEntry const* spellInfo);
 bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2);
 
+// TODO: research binary spells
+inline bool IsBinarySpell(SpellEntry const* spellInfo)
+{
+    return false;
+}
+
 inline bool IsCasterSourceTarget(uint32 target)
 {
     switch (target)
