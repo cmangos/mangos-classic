@@ -66,26 +66,28 @@ enum ItemBondingType
 // Mask for ItemPrototype.Flags field
 enum ItemPrototypeFlags
 {
-    ITEM_FLAG_UNK0                            = 0x00000001, // not used
-    ITEM_FLAG_CONJURED                        = 0x00000002,
-    ITEM_FLAG_LOOTABLE                        = 0x00000004, // affect only non container items that can be "open" for loot. It or lockid set enable for client show "Right click to open". See also ITEM_DYNFLAG_UNLOCKED
-    ITEM_FLAG_UNK3                            = 0x00000008, // not used in pre-3.x
-    ITEM_FLAG_UNK4                            = 0x00000010, // can't repeat old note: appears red icon (like when item durability==0)
-    ITEM_FLAG_INDESTRUCTIBLE                  = 0x00000020, // used for totem. Item can not be destroyed, except by using spell (item can be reagent for spell and then allowed)
-    ITEM_FLAG_UNK6                            = 0x00000040, // ? old note: usable
-    ITEM_FLAG_NO_EQUIP_COOLDOWN               = 0x00000080,
-    ITEM_FLAG_UNK8                            = 0x00000100,
-    ITEM_FLAG_WRAPPER                         = 0x00000200, // used or not used wrapper
-    ITEM_FLAG_IGNORE_BAG_SPACE                = 0x00000400, // ignore bag space at new item creation?
-    ITEM_FLAG_PARTY_LOOT                      = 0x00000800, // determines if item is party loot or not
-    ITEM_FLAG_UNK12                           = 0x00001000, // not used in pre-3.x
-    ITEM_FLAG_CHARTER                         = 0x00002000, // guild charter
-    ITEM_FLAG_UNK14                           = 0x00004000,
-    ITEM_FLAG_UNK15                           = 0x00008000, // a lot of items have this
-    ITEM_FLAG_UNK16                           = 0x00010000, // a lot of items have this
-    ITEM_FLAG_UNK17                           = 0x00020000, // last used flag in 1.12.1
-
-    ITEM_FLAG_UNIQUE_EQUIPPED                 = 0x00080000, // custom server side check, in client added in 2.x
+    ITEM_FLAG_NO_PICKUP                         = 0x00000001, // not used
+    ITEM_FLAG_CONJURED                          = 0x00000002,
+    ITEM_FLAG_HAS_LOOT                          = 0x00000004, // affect only non container items that can be "open" for loot. It or lockid set enable for client show "Right click to open". See also ITEM_DYNFLAG_UNLOCKED
+    ITEM_FLAG_HEROIC_TOOLTIP                    = 0x00000008, // heroic item version
+    ITEM_FLAG_DEPRECATED                        = 0x00000010, // can't repeat old note: appears red icon (like when item durability==0)
+    ITEM_FLAG_NO_USER_DESTROY                   = 0x00000020, // used for totem. Item can not be destroyed, except by using spell (item can be reagent for spell and then allowed)
+    ITEM_FLAG_PLAYERCAST                        = 0x00000040, // ? old note: usable
+    ITEM_FLAG_NO_EQUIPCOOLDOWN                  = 0x00000080,
+    ITEM_FLAG_MULTILOOTQUEST                    = 0x00000100, // saw this on item 47115, 49295...
+    ITEM_FLAG_IS_WRAPPER                        = 0x00000200, // used or not used wrapper
+    ITEM_FLAG_USES_RESOURCES                    = 0x00000400, // ignore bag space at new item creation?
+    ITEM_FLAG_MULTI_DROP                        = 0x00000800, // determines if item is party loot or not
+    ITEM_FLAG_ITEMPURCHASE_RECORD               = 0x00001000, // item cost can be refunded within 2 hours after purchase
+    ITEM_FLAG_PETITION                          = 0x00002000, // arena/guild charter
+    ITEM_FLAG_HAS_TEXT                          = 0x00004000,
+    ITEM_FLAG_NO_DISENCHANT                     = 0x00008000, // a lot of items have this
+    ITEM_FLAG_REAL_DURATION                     = 0x00010000, // a lot of items have this
+    ITEM_FLAG_NO_CREATOR                        = 0x00020000,
+    ITEM_FLAG_IS_PROSPECTABLE                   = 0x00040000, // item can have prospecting loot (in fact some items expected have empty loot)
+    ITEM_FLAG_UNIQUE_EQUIPPABLE                 = 0x00080000,
+    ITEM_FLAG_IGNORE_FOR_AURAS                  = 0x00100000,
+    ITEM_FLAG_IGNORE_DEFAULT_ARENA_RESTRICTIONS = 0x00200000, // last used flag in 1.12.1
 };
 
 enum BagFamily

@@ -455,7 +455,7 @@ bool Item::LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid)
     if (HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED))
     {
         // wrapped item must be wrapper (used version that not stackable)
-        if (!(proto->Flags & ITEM_FLAG_WRAPPER) || GetMaxStackCount() > 1)
+        if (!(proto->Flags & ITEM_FLAG_IS_WRAPPER) || GetMaxStackCount() > 1)
         {
             RemoveFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_WRAPPED);
             need_save = true;
