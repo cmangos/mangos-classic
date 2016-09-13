@@ -3401,96 +3401,84 @@ void Spell::SendLogExecute()
         data << target->GetPackGUID();
 
     data << uint32(m_spellInfo->Id);
-    uint32 count1 = 1;
-    data << uint32(count1);                                 // count1 (effect count?)
-    for (uint32 i = 0; i < count1; ++i)
+    uint32 effectCount = 1;
+    data << uint32(effectCount);
+    for (uint32 i = 0; i < effectCount; ++i)
     {
-        data << uint32(m_spellInfo->Effect[EFFECT_INDEX_0]);// spell effect
-        uint32 count2 = 1;
-        data << uint32(count2);                             // count2 (target count?)
-        for (uint32 j = 0; j < count2; ++j)
+        data << uint32(m_spellInfo->Effect[EFFECT_INDEX_0]);
+        uint32 targetCount = 1;
+        data << uint32(targetCount);
+        for (uint32 j = 0; j < targetCount; ++j)
         {
             switch (m_spellInfo->Effect[EFFECT_INDEX_0])
             {
                 case SPELL_EFFECT_POWER_DRAIN:
                     if (Unit* unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
+                        data << unit->GetObjectGuid();
                     else
-                        data << uint8(0);
-                    data << uint32(0);
-                    data << uint32(0);
-                    data << float(0);
+                        data << ObjectGuid();
+                    data << uint32(0);                      // amount
+                    data << uint32(0);                      // power
+                    data << float(0);                       // multiplier
                     break;
                 case SPELL_EFFECT_ADD_EXTRA_ATTACKS:
                     if (Unit* unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
+                        data << unit->GetObjectGuid();
                     else
-                        data << uint8(0);
-                    data << uint32(0);                      // count?
-                    break;
-                case SPELL_EFFECT_INTERRUPT_CAST:
-                    if (Unit* unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
-                    else
-                        data << uint8(0);
-                    data << uint32(0);                      // spellid
-                    break;
-                case SPELL_EFFECT_DURABILITY_DAMAGE:
-                    if (Unit* unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
-                    else
-                        data << uint8(0);
-                    data << uint32(0);
-                    data << uint32(0);
-                    break;
-                case SPELL_EFFECT_OPEN_LOCK:
-                case SPELL_EFFECT_OPEN_LOCK_ITEM:
-                    if (Item* item = m_targets.getItemTarget())
-                        data << item->GetPackGUID();
-                    else
-                        data << uint8(0);
+                        data << ObjectGuid();
+                    data << uint32(0);                      // count
                     break;
                 case SPELL_EFFECT_CREATE_ITEM:
                     data << uint32(m_spellInfo->EffectItemType[EFFECT_INDEX_0]);
                     break;
-                case SPELL_EFFECT_SUMMON:
-                case SPELL_EFFECT_SUMMON_WILD:
-                case SPELL_EFFECT_SUMMON_GUARDIAN:
-                case SPELL_EFFECT_TRANS_DOOR:
-                case SPELL_EFFECT_SUMMON_PET:
-                case SPELL_EFFECT_SUMMON_POSSESSED:
-                case SPELL_EFFECT_SUMMON_TOTEM:
-                case SPELL_EFFECT_SUMMON_OBJECT_WILD:
-                case SPELL_EFFECT_CREATE_HOUSE:
-                case SPELL_EFFECT_DUEL:
-                case SPELL_EFFECT_SUMMON_TOTEM_SLOT1:
-                case SPELL_EFFECT_SUMMON_TOTEM_SLOT2:
-                case SPELL_EFFECT_SUMMON_TOTEM_SLOT3:
-                case SPELL_EFFECT_SUMMON_TOTEM_SLOT4:
-                case SPELL_EFFECT_SUMMON_PHANTASM:
-                case SPELL_EFFECT_SUMMON_CRITTER:
-                case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
-                case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
-                case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
-                case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
-                case SPELL_EFFECT_SUMMON_DEMON:
-                    if (Unit* unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
-                    else if (m_targets.getItemTargetGuid())
-                        data << m_targets.getItemTargetGuid().WriteAsPacked();
-                    else if (GameObject* go = m_targets.getGOTarget())
-                        data << go->GetPackGUID();
+                case SPELL_EFFECT_OPEN_LOCK:
+                case SPELL_EFFECT_OPEN_LOCK_ITEM:
+                    if (Item* item = m_targets.getItemTarget())
+                        data << item->GetObjectGuid();
                     else
-                        data << uint8(0);                   // guid
+                        data << ObjectGuid();
+                    break;
+                case SPELL_EFFECT_INTERRUPT_CAST:
+                    if (Unit* unit = m_targets.getUnitTarget())
+                        data << unit->GetObjectGuid();
+                    else
+                        data << ObjectGuid();
+                    data << uint32(0);                      // spellid
                     break;
                 case SPELL_EFFECT_FEED_PET:
                     data << uint32(m_targets.getItemTargetEntry());
                     break;
                 case SPELL_EFFECT_DISMISS_PET:
                     if (Unit* unit = m_targets.getUnitTarget())
-                        data << unit->GetPackGUID();
+                        data << unit->GetObjectGuid();
                     else
-                        data << uint8(0);
+                        data << ObjectGuid();
+                    break;
+                case SPELL_EFFECT_DURABILITY_DAMAGE:
+                    if (Unit* unit = m_targets.getUnitTarget())
+                        data << unit->GetObjectGuid();
+                    else
+                        data << ObjectGuid();
+                    data << int32(0);                       // itemid, -1 for all
+                    data << int32(0);                       // unknown, -1 for all
+                    break;
+                case SPELL_EFFECT_INSTAKILL:
+                case SPELL_EFFECT_RESURRECT:
+                case SPELL_EFFECT_DISPEL:
+                case SPELL_EFFECT_THREAT:
+                case SPELL_EFFECT_DISTRACT:
+                case SPELL_EFFECT_SANCTUARY:
+                case SPELL_EFFECT_THREAT_ALL:
+                case SPELL_EFFECT_DISPEL_MECHANIC:
+                case SPELL_EFFECT_RESURRECT_NEW:
+                case SPELL_EFFECT_ATTACK_ME:
+                case SPELL_EFFECT_SKIN_PLAYER_CORPSE:
+                case SPELL_EFFECT_MODIFY_THREAT_PERCENT:
+                case SPELL_EFFECT_126:
+                    if (Unit* unit = m_targets.getUnitTarget())
+                        data << unit->GetObjectGuid();
+                    else
+                        data << ObjectGuid();
                     break;
                 default:
                     return;
