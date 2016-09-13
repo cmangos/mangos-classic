@@ -254,8 +254,7 @@ void Spell::EffectInstaKill(SpellEffectIndex /*eff_idx*/)
 
     WorldObject* caster = GetCastingObject();               // we need the original casting object
 
-    WorldPacket data(SMSG_SPELLINSTAKILLLOG, (8 + 8 + 4));
-    data << (caster && caster->GetTypeId() != TYPEID_GAMEOBJECT ? m_caster->GetObjectGuid() : ObjectGuid()); // Caster GUID
+    WorldPacket data(SMSG_SPELLINSTAKILLLOG, (8 + 4));
     data << unitTarget->GetObjectGuid();                    // Victim GUID
     data << uint32(m_spellInfo->Id);
     m_caster->SendMessageToSet(&data, true);
