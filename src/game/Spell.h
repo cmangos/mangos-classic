@@ -592,6 +592,57 @@ class Spell
         // we can't store original aura link to prevent access to deleted auras
         // and in same time need aura data and after aura deleting.
         SpellEntry const* m_triggeredByAuraSpell;
+
+        struct ExecuteLogInfo
+        {
+            ExecuteLogInfo() = default;
+            ExecuteLogInfo(ObjectGuid _targetGuid) : targetGuid(_targetGuid) {}
+
+            ObjectGuid targetGuid;
+
+            union
+            {
+                struct
+                {
+                    uint32 power;
+                    uint32 amount;
+                    float multiplier;
+                } powerDrain;
+
+                struct
+                {
+                    uint32 count;
+                } extraAttacks;
+
+                struct
+                {
+                    uint32 itemEntry;
+                } createItem;
+
+                struct
+                {
+                    uint32 spellId;
+                } interruptCast;
+
+                struct
+                {
+                    uint32 itemEntry;
+                } feedPet;
+
+                struct
+                {
+                    int32 itemEntry;
+                    int32 unk;
+                } durabilityDamage;
+            };
+        };
+
+        std::vector<ExecuteLogInfo> m_executeLogInfo[MAX_EFFECT_INDEX];
+
+        void AddExecuteLogInfo(SpellEffectIndex i, ExecuteLogInfo info)
+        {
+            m_executeLogInfo[i].push_back(info);
+        }
 };
 
 enum ReplenishType
