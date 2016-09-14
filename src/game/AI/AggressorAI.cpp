@@ -113,13 +113,23 @@ void AggressorAI::EnterEvadeMode()
 
 void AggressorAI::UpdateAI(const uint32 /*diff*/)
 {
-    // update i_victimGuid if m_creature->getVictim() !=0 and changed
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    // update i_victimGuid
+    if (!m_creature->SelectHostileTarget())
         return;
 
-    i_victimGuid = m_creature->getVictim()->GetObjectGuid();
+    Unit* victim = m_creature->getVictim();
 
-    DoMeleeAttackIfReady();
+    if (!victim)
+        return;
+
+    i_victimGuid = victim->GetObjectGuid();
+
+    // if pet misses its target, it will also be the first in threat list
+    if (!(m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE)
+        || m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT)
+        || m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)
+        && victim->isTargetableForAttack() && m_creature->CanReachWithMeleeAttack(victim))
+        DoMeleeAttackIfReady();
 }
 
 bool AggressorAI::IsVisible(Unit* pl) const
@@ -130,7 +140,7 @@ bool AggressorAI::IsVisible(Unit* pl) const
 
 void AggressorAI::AttackStart(Unit* u)
 {
-    if (!u)
+    if (!u || m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE))
         return;
 
     if (m_creature->Attack(u, true))
