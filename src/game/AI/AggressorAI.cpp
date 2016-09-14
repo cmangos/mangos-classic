@@ -24,8 +24,7 @@
 #include "Map.h"
 #include "Log.h"
 
-int
-AggressorAI::Permissible(const Creature* creature)
+int AggressorAI::Permissible(const Creature* creature)
 {
     // have some hostile factions, it will be selected by IsHostileTo check at MoveInLineOfSight
     if (!(creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO) && !creature->IsNeutralToAll())
@@ -38,8 +37,7 @@ AggressorAI::AggressorAI(Creature* c) : CreatureAI(c), i_state(STATE_NORMAL), i_
 {
 }
 
-void
-AggressorAI::MoveInLineOfSight(Unit* u)
+void AggressorAI::MoveInLineOfSight(Unit* u)
 {
     // Ignore Z for flying creatures
     if (!m_creature->CanFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE)
@@ -113,8 +111,7 @@ void AggressorAI::EnterEvadeMode()
     m_creature->SetLootRecipient(nullptr);
 }
 
-void
-AggressorAI::UpdateAI(const uint32 /*diff*/)
+void AggressorAI::UpdateAI(const uint32 /*diff*/)
 {
     // update i_victimGuid if m_creature->getVictim() !=0 and changed
     if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -125,15 +122,13 @@ AggressorAI::UpdateAI(const uint32 /*diff*/)
     DoMeleeAttackIfReady();
 }
 
-bool
-AggressorAI::IsVisible(Unit* pl) const
+bool AggressorAI::IsVisible(Unit* pl) const
 {
     return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_MONSTER))
            && pl->isVisibleForOrDetect(m_creature, m_creature, true);
 }
 
-void
-AggressorAI::AttackStart(Unit* u)
+void AggressorAI::AttackStart(Unit* u)
 {
     if (!u)
         return;

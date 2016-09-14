@@ -23,8 +23,7 @@
 
 #define REACTOR_VISIBLE_RANGE (26.46f)
 
-int
-ReactorAI::Permissible(const Creature* creature)
+int ReactorAI::Permissible(const Creature* creature)
 {
     if ((creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO) || creature->IsNeutralToAll())
         return PERMIT_BASE_REACTIVE;
@@ -32,13 +31,11 @@ ReactorAI::Permissible(const Creature* creature)
     return PERMIT_BASE_NO;
 }
 
-void
-ReactorAI::MoveInLineOfSight(Unit*)
+void ReactorAI::MoveInLineOfSight(Unit*)
 {
 }
 
-void
-ReactorAI::AttackStart(Unit* p)
+void ReactorAI::AttackStart(Unit* p)
 {
     if (!p)
         return;
@@ -56,14 +53,12 @@ ReactorAI::AttackStart(Unit* p)
     }
 }
 
-bool
-ReactorAI::IsVisible(Unit*) const
+bool ReactorAI::IsVisible(Unit*) const
 {
     return false;
 }
 
-void
-ReactorAI::UpdateAI(const uint32 /*time_diff*/)
+void ReactorAI::UpdateAI(const uint32 /*time_diff*/)
 {
     // update i_victimGuid if i_creature.getVictim() !=0 and changed
     if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -74,8 +69,7 @@ ReactorAI::UpdateAI(const uint32 /*time_diff*/)
     DoMeleeAttackIfReady();
 }
 
-void
-ReactorAI::EnterEvadeMode()
+void ReactorAI::EnterEvadeMode()
 {
     if (!m_creature->isAlive())
     {
