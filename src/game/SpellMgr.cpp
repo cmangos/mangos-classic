@@ -1743,6 +1743,12 @@ bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
 {
     if (IsPassiveSpell(spellInfo))                          // ranked passive spell
         return false;
+    if (const SpellChainNode* node = GetSpellChainNode(spellInfo->Id))
+    {
+        // do not corrupt talent tree display by removing a rank from there, e.g. Faerie Fire (feral)
+        if (GetTalentSpellPos(node->first))
+            return true;
+    }
     if (spellInfo->powerType != POWER_MANA && spellInfo->powerType != POWER_HEALTH)
         return false;
     if (IsProfessionOrRidingSpell(spellInfo->Id))
