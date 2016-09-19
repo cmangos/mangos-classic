@@ -186,11 +186,16 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
     Creature::Update(update_diff, diff);
 }
 
-void TemporarySummon::Summon(TempSummonType type, uint32 lifetime)
+void TemporarySummon::SetSummonProperties(TempSummonType type, uint32 lifetime)
 {
     m_type = type;
     m_timer = lifetime;
     m_lifetime = lifetime;
+}
+
+void TemporarySummon::Summon(TempSummonType type, uint32 lifetime)
+{
+    SetSummonProperties(type, lifetime);
 
     GetMap()->Add((Creature*)this);
 
