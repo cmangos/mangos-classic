@@ -296,7 +296,7 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_CHANNEL_TRACK_TARGET         = 0x00004000,// 14
     SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY     = 0x00008000,// 15 remove auras on immunity
     SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE  = 0x00010000,// 16 unaffected by school immunity
-    SPELL_ATTR_EX_UNK17                        = 0x00020000,// 17 for auras SPELL_AURA_TRACK_CREATURES, SPELL_AURA_TRACK_RESOURCES and SPELL_AURA_TRACK_STEALTHED select non-stacking tracking spells
+    SPELL_ATTR_EX_UNAUTOCASTABLE_BY_CHARMED    = 0x00020000,// 17 TODO: Investigate more: SPELL_ATTR_EX_PLAYER_CANT_CAST_CHARMED, likely related to MC
     SPELL_ATTR_EX_UNK18                        = 0x00040000,// 18
     SPELL_ATTR_EX_CANT_TARGET_SELF             = 0x00080000,// 19 spells with area effect or friendly targets that exclude the caster
     SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS      = 0x00100000,// 20 Req combo points on target
@@ -392,7 +392,7 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_UNK2                        = 0x00000004,// 2
     SPELL_ATTR_EX4_UNK3                        = 0x00000008,// 3
     SPELL_ATTR_EX4_UNK4                        = 0x00000010,// 4 This will no longer cause guards to attack on use??
-    SPELL_ATTR_EX4_UNAUTOCASTABLE              = 0x00000020,// 5
+    SPELL_ATTR_EX4_UNK5                        = 0x00000020,// 5
     SPELL_ATTR_EX4_NOT_STEALABLE               = 0x00000040,// 6 although such auras might be dispellable, they cannot be stolen
     SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING      = 0x00000080,// 7 In theory, can use this spell while another is channeled/cast/autocast
     SPELL_ATTR_EX4_STACK_DOT_MODIFIER          = 0x00000100,// 8 no effect on non DoTs?

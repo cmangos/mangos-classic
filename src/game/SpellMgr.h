@@ -234,7 +234,7 @@ inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
 
 inline bool IsAutocastable(SpellEntry const* spellInfo)
 {
-    return !(spellInfo->HasAttribute(SPELL_ATTR_EX4_UNAUTOCASTABLE) || spellInfo->HasAttribute(SPELL_ATTR_PASSIVE));
+    return !(spellInfo->HasAttribute(SPELL_ATTR_EX_UNAUTOCASTABLE_BY_CHARMED) || spellInfo->HasAttribute(SPELL_ATTR_PASSIVE));
 }
 
 inline bool IsAutocastable(uint32 spellId)
