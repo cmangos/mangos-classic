@@ -59,6 +59,12 @@ enum TempSummonType
     TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN = 9,             // despawns after a specified time (OOC) OR when the creature dies
 };
 
+enum TempSummonLinkedAura
+{
+    TEMPSUMMON_LINKED_AURA_OWNER_CHECK = 0x00000001,
+    TEMPSUMMON_LINKED_AURA_REMOVE_OWNER = 0x00000002
+};
+
 class WorldPacket;
 class UpdateData;
 class WorldSession;

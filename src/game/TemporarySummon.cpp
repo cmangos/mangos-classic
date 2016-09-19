@@ -21,7 +21,7 @@
 #include "AI/CreatureAI.h"
 
 TemporarySummon::TemporarySummon(ObjectGuid summoner) :
-    Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_summoner(summoner)
+    Creature(CREATURE_SUBTYPE_TEMPORARY_SUMMON), m_type(TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_summoner(summoner), m_linkedToOwnerAura(0)
 {
 }
 
@@ -183,6 +183,31 @@ void TemporarySummon::Update(uint32 update_diff,  uint32 diff)
             break;
     }
 
+    switch (m_deathState)
+    {
+        case ALIVE:
+            if (m_linkedToOwnerAura & TEMPSUMMON_LINKED_AURA_OWNER_CHECK)
+            {
+                // we have to check if owner still have the required aura
+                Unit* owner = GetCharmerOrOwner();
+                uint32 const& spellId = GetUInt32Value(UNIT_CREATED_BY_SPELL);
+                if (!owner || !spellId || !owner->HasAura(spellId))
+                    UnSummon();
+            }
+            break;
+
+        case DEAD:
+        case CORPSE:
+            if (m_linkedToOwnerAura & TEMPSUMMON_LINKED_AURA_REMOVE_OWNER)
+            {
+                RemoveAuraFromOwner();
+                m_linkedToOwnerAura = 0;                    // we dont need to recheck
+            }
+
+        default:
+            break;
+    }
+
     Creature::Update(update_diff, diff);
 }
 
@@ -206,6 +231,9 @@ void TemporarySummon::UnSummon()
 {
     CombatStop();
 
+    if (m_linkedToOwnerAura & TEMPSUMMON_LINKED_AURA_REMOVE_OWNER)
+        RemoveAuraFromOwner();
+
     if (GetSummonerGuid().IsCreature())
     {
         if (Creature* sum = GetMap()->GetCreature(GetSummonerGuid()))
@@ -217,7 +245,29 @@ void TemporarySummon::UnSummon()
             if (player->GetMover() == this)
                 player->Uncharm();
 
+    if (AI())
+        AI()->SummonedCreatureDespawn(this);
+
     AddObjectToRemoveList();
+}
+
+void TemporarySummon::RemoveAuraFromOwner()
+{
+    // creature is dead and we have to remove the charmer aura if exist
+    uint32 const& spellId = GetUInt32Value(UNIT_CREATED_BY_SPELL);
+    if (spellId)
+    {
+
+        if (Unit* charmer = GetCharmer())
+        {
+            charmer->RemoveAurasDueToSpell(spellId);
+            charmer->ResetControlState(false);
+        }
+        else if (Unit* owner = GetOwner())
+        {
+            owner->RemoveAurasDueToSpell(spellId);
+        }
+    }
 }
 
 void TemporarySummon::SaveToDB()

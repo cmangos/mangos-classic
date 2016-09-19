@@ -35,11 +35,14 @@ class TemporarySummon : public Creature
         void SaveToDB();
         ObjectGuid const& GetSummonerGuid() const { return m_summoner ; }
         Unit* GetSummoner() const { return ObjectAccessor::GetUnit(*this, m_summoner); }
+        void SetLinkedToOwnerAura(uint32 flags) { m_linkedToOwnerAura |= flags; };
     private:
+        void RemoveAuraFromOwner();
         TempSummonType m_type;
         uint32 m_timer;
         uint32 m_lifetime;
         ObjectGuid m_summoner;
+        uint32 m_linkedToOwnerAura;
 };
 
 class TemporarySummonWaypoint : public TemporarySummon
