@@ -17859,6 +17859,14 @@ void Player::ResurectUsingRequestData()
     SpawnCorpseBones();
 }
 
+bool Player::IsClientControl(Unit* target) const
+{
+    return (target && !target->IsFleeing() && !target->IsConfused() && !target->IsTaxiFlying() &&
+            (target->GetTypeId() != TYPEID_PLAYER ||
+            !((Player*)target)->InBattleGround() || ((Player*)target)->GetBattleGround()->GetStatus() != STATUS_WAIT_LEAVE) &&
+            target->GetCharmerOrOwnerOrOwnGuid() == GetObjectGuid());
+}
+
 void Player::SetClientControl(Unit* target, uint8 allowMove)
 {
     WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, target->GetPackGUID().size() + 1);

@@ -2189,12 +2189,20 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     if (!Real)
         return;
 
+    // Do not remove it yet if more effects are up, do it for the last effect
+    if (!apply && GetTarget()->HasAuraType(SPELL_AURA_MOD_CONFUSE))
+        return;
+
     GetTarget()->SetConfused(apply, GetCasterGuid(), GetId());
 }
 
 void Aura::HandleModFear(bool apply, bool Real)
 {
     if (!Real)
+        return;
+
+    // Do not remove it yet if more effects are up, do it for the last effect
+    if (!apply && GetTarget()->HasAuraType(SPELL_AURA_MOD_FEAR))
         return;
 
     GetTarget()->SetFeared(apply, GetCasterGuid(), GetId());
@@ -2248,21 +2256,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
 
-        target->addUnitState(UNIT_STAT_STUNNED);
-        target->SetTargetGuid(ObjectGuid());
-
-        target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-        target->CastStop(target->GetObjectGuid() == GetCasterGuid() ? GetId() : 0);
-
-        // Creature specific
-        if (target->GetTypeId() != TYPEID_PLAYER)
-            target->StopMoving();
-        else
-        {
-            ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
-            target->SetStandState(UNIT_STAND_STATE_STAND);// in 1.5 client
-            target->SetRoot(true);
-        }
+        target->SetStunned(true);
     }
     else
     {
@@ -2293,16 +2287,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         if (target->HasAuraType(SPELL_AURA_MOD_STUN))
             return;
 
-        target->clearUnitState(UNIT_STAT_STUNNED);
-        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
-
-        if (!target->hasUnitState(UNIT_STAT_ROOT))        // prevent allow move if have also root effect
-        {
-            if (target->getVictim() && target->isAlive())
-                target->SetTargetGuid(target->getVictim()->GetObjectGuid());
-
-            target->SetRoot(false);
-        }
+        target->SetStunned(false);
 
         // Wyvern Sting
         if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellFamilyFlags & uint64(0x00010000))
@@ -2486,17 +2471,6 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         // Frost root aura -> freeze/unfreeze target
         if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_FROST)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
-
-        target->addUnitState(UNIT_STAT_ROOT);
-        target->SetRoot(true);
-
-        if (target->GetTypeId() == TYPEID_PLAYER)
-        {
-            // Clear unit movement flags
-            ((Player*)target)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
-        }
-        else
-            target->StopMoving();
     }
     else
     {
@@ -2526,12 +2500,9 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         // Real remove called after current aura remove from lists, check if other similar auras active
         if (target->HasAuraType(SPELL_AURA_MOD_ROOT))
             return;
-
-        target->clearUnitState(UNIT_STAT_ROOT);
-
-        if (!target->hasUnitState(UNIT_STAT_STUNNED))     // prevent allow move if have also stun effect
-            target->SetRoot(false);
     }
+
+    target->SetImmobilizedState(apply);
 }
 
 void Aura::HandleAuraModSilence(bool apply, bool Real)
@@ -4701,10 +4672,11 @@ void Aura::HandlePreventFleeing(bool apply, bool Real)
     Unit::AuraList const& fearAuras = GetTarget()->GetAurasByType(SPELL_AURA_MOD_FEAR);
     if (!fearAuras.empty())
     {
+        const Aura *first = fearAuras.front();
         if (apply)
-            GetTarget()->SetFeared(false, fearAuras.front()->GetCasterGuid());
+            GetTarget()->SetFeared(false, first->GetCasterGuid());
         else
-            GetTarget()->SetFeared(true);
+            GetTarget()->SetFeared(true, first->GetCasterGuid(), first->GetId());
     }
 }
 

@@ -413,7 +413,7 @@ enum UnitState
                                 UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING,
 
     // AI disabled by some reason
-    UNIT_STAT_LOST_CONTROL    = UNIT_STAT_FLEEING | UNIT_STAT_CONTROLLED,
+    UNIT_STAT_LOST_CONTROL    = UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING | UNIT_STAT_CONTROLLED,
 
     // above 2 state cases
     UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL  = UNIT_STAT_CAN_NOT_REACT | UNIT_STAT_LOST_CONTROL,
@@ -1847,8 +1847,24 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void StopMoving(bool forceSendStop = false);
         void InterruptMoving(bool forceSendStop = false);
 
+        ///----------Various crowd control methods-----------------
+        bool IsImmobilized() const { return hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNNED); }
+        void SetImmobilizedState(bool apply, bool stun = false);
+
+        // These getters operate on unit flags set by IncapacitatedState and are meant for formal usage in conjunction with spell effects only
+        // For actual internal movement states use UnitState flags
+        // TODO: The UnitState thing needs to be rewriten at some point, this kind of duality is bad
+        bool IsFleeing() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING); }
+        bool IsConfused() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED); }
+        bool IsStunned() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED); }
+        bool IsIncapacitated() const { return (IsFleeing() || IsConfused() || IsStunned()); }
+
         void SetFeared(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, uint32 time = 0);
         void SetConfused(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0);
+        void SetStunned(bool apply);
+        void SetIncapacitatedState(bool apply, uint32 state = 0, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, uint32 time = 0);
+        ///----------End of crowd control methods----------
+
         void SetFeignDeath(bool apply, ObjectGuid casterGuid = ObjectGuid());
 
         void AddComboPointHolder(uint32 lowguid) { m_ComboPointHolders.insert(lowguid); }
