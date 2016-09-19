@@ -5713,7 +5713,7 @@ int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask)
 bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType)
 {
     // not critting spell
-    if (spellProto->HasAttribute(SPELL_ATTR_EX2_CANT_CRIT))
+    if (!IsSpellAbleToCrit(spellProto))
         return false;
 
     // Creatures do not crit with their spells or abilities, unless it is owned by a player (pet, totem, etc)
@@ -5727,12 +5727,12 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
     float crit_chance = 0.0f;
     switch (spellProto->DmgClass)
     {
-        case SPELL_DAMAGE_CLASS_NONE:
-            return false;
+        case SPELL_DAMAGE_CLASS_NONE: // By default uses spell attack table: Many heals and damage spells
         case SPELL_DAMAGE_CLASS_MAGIC:
         {
+            // Physical school with spell attack table equals base crit chance: healthstone, potion, etc
             if (schoolMask & SPELL_SCHOOL_MASK_NORMAL)
-                crit_chance = 0.0f;
+                crit_chance = float(m_baseSpellCritChance);
             // For other schools
             else if (GetTypeId() == TYPEID_PLAYER)
                 crit_chance = ((Player*)this)->m_SpellCritPercentage[GetFirstSchoolInMask(schoolMask)];
