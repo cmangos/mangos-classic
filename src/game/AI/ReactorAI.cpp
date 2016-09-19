@@ -37,7 +37,7 @@ void ReactorAI::MoveInLineOfSight(Unit*)
 
 void ReactorAI::AttackStart(Unit* p)
 {
-    if (!p || m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE))
+    if (!p)
         return;
 
     if (m_creature->Attack(p, true))

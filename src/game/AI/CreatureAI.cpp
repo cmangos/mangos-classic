@@ -144,16 +144,16 @@ bool CreatureAI::DoMeleeAttackIfReady()
 
 void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=false*/)
 {
-    m_isCombatMovement = m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE) ? false : enable;
+    m_isCombatMovement = enable;
 
-    if (m_isCombatMovement)
+    if (enable)
         m_creature->clearUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
     else
         m_creature->addUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT);
 
     if (stopOrStartMovement && m_creature->getVictim())     // Only change current movement while in combat
     {
-        if (m_isCombatMovement)
+        if (enable)
             m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle);
         else if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
             m_creature->StopMoving();
@@ -162,9 +162,6 @@ void CreatureAI::SetCombatMovement(bool enable, bool stopOrStartMovement /*=fals
 
 void CreatureAI::HandleMovementOnAttackStart(Unit* victim)
 {
-    if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PASSIVE))
-        m_isCombatMovement = false;
-
     MotionMaster* creatureMotion = m_creature->GetMotionMaster();
     if (m_isCombatMovement)
         creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle);
