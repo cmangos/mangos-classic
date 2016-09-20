@@ -1165,6 +1165,8 @@ void Unit::CastCustomSpell(Unit* Victim, SpellEntry const* spellInfo, int32 cons
     if (bp2)
         spell->m_currentBasePoints[EFFECT_INDEX_2] = *bp2;
 
+    spell->m_ignoreHitResult = true;
+
     SpellCastTargets targets;
     targets.setUnitTarget(Victim);
     spell->m_CastItem = castItem;
