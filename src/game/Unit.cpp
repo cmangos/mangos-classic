@@ -8551,15 +8551,17 @@ void Unit::SetImmobilizedState(bool apply, bool stun)
 {
     const uint32 immobilized = (UNIT_STAT_ROOT | UNIT_STAT_STUNNED);
     const uint32 state = stun ? UNIT_STAT_STUNNED : UNIT_STAT_ROOT;
+    const Unit* charmer = GetCharmer();
+    const bool player = ((charmer ? charmer : this)->GetTypeId() == TYPEID_PLAYER);
     if (apply)
     {
         addUnitState(state);
-        if (GetTypeId() != TYPEID_PLAYER)
+        if (!player)
             StopMoving();
         else
         {
             // Clear unit movement flags
-            ((Player*)this)->m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
+            m_movementInfo.SetMovementFlags(MOVEFLAG_NONE);
             if (stun)
                 SetStandState(UNIT_STAND_STATE_STAND); // in 1.5 client
             SetRoot(true);
@@ -8569,7 +8571,7 @@ void Unit::SetImmobilizedState(bool apply, bool stun)
     {
         clearUnitState(state);
         // Prevent giving ability to move if more immobilizers are active
-        if (!hasUnitState(immobilized) && (GetTypeId() == TYPEID_PLAYER))
+        if (!hasUnitState(immobilized) && (player || m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT)))
             SetRoot(false);
     }
 }
