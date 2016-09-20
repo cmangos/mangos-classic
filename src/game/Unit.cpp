@@ -8586,9 +8586,9 @@ void Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
     SetIncapacitatedState(apply, UNIT_FLAG_CONFUSED, casterGuid, spellID);
 }
 
-void Unit::SetStunned(bool apply)
+void Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
 {
-    SetIncapacitatedState(apply, UNIT_FLAG_STUNNED);
+    SetIncapacitatedState(apply, UNIT_FLAG_STUNNED, casterGuid, spellID);
 }
 
 void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid, uint32 spellID, uint32 time)
