@@ -92,14 +92,14 @@ uint32 urand()
 
 double rand_norm()
 {
-    return std::generate_canonical<double,
-        std::numeric_limits<double>::digits>(*mtRand.get());
+    std::uniform_real_distribution<double> dist(0, 1.0f);
+    return dist(*mtRand.get());
 }
 
 float rand_norm_f()
 {
-    return float(std::generate_canonical<double,
-        std::numeric_limits<double>::digits>(*mtRand.get()));
+    std::uniform_real_distribution<float> dist(0, 1.0f);
+    return dist(*mtRand.get());
 }
 
 double rand_chance()
