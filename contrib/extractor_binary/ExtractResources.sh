@@ -88,14 +88,14 @@ fi
 if [ "$USE_MMAPS" = "1" ]
 then
   ## Obtain number ob processes
-  echo "How many CPUs should be used for extracting mmaps? (1-4)"
+  echo "How many CPUs should be used for extracting mmaps? (1-8)"
   read line
   echo
-  if [ "$line" -ge "1" -a "$line" -le "4" ]
+  if [ "$line" -ge "1" -a "$line" -le "8" ]
   then
     NUM_CPU=$line
   else
-    echo "Only number between 1 and 4 supported!"
+    echo "Only number between 1 and 8 supported!"
     exit 1
   fi
   ## Extract MMaps delayed?
