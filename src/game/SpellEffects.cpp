@@ -1594,18 +1594,18 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
     if (m_spellInfo->EffectMiscValue[eff_idx] < 0 || m_spellInfo->EffectMiscValue[eff_idx] >= MAX_POWERS)
         return;
 
-    Powers drain_power = Powers(m_spellInfo->EffectMiscValue[eff_idx]);
+    Powers powerType = Powers(m_spellInfo->EffectMiscValue[eff_idx]);
 
     if (!unitTarget)
         return;
     if (!unitTarget->isAlive())
         return;
-    if (unitTarget->GetPowerType() != drain_power)
+    if (unitTarget->GetPowerType() != powerType)
         return;
     if (damage < 0)
         return;
 
-    int32 curPower = unitTarget->GetPower(drain_power);
+    uint32 curPower = unitTarget->GetPower(powerType);
 
     // add spell damage bonus
     damage = m_caster->SpellDamageBonusDone(unitTarget, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
@@ -1617,26 +1617,21 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
     else
         new_damage = damage;
 
-    unitTarget->ModifyPower(drain_power, -new_damage);
+    unitTarget->ModifyPower(powerType, -new_damage);
 
-    int32 gain = 0;
     float gainMultiplier = 0.0f;
 
-    // Don`t restore from self drain
-    if (drain_power == POWER_MANA && m_caster != unitTarget)
+    // Do not gain power from self drain or when power types don't match
+    if (m_caster->GetPowerType() == powerType && m_caster != unitTarget)
     {
         gainMultiplier = m_spellInfo->EffectMultipleValue[eff_idx];
 
         if (Player* modOwner = m_caster->GetSpellModOwner())
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, gainMultiplier);
-
-        gain = int32(new_damage * gainMultiplier);
     }
 
-    if (!gain)
-        return;
-
-    m_caster->EnergizeBySpell(m_caster, m_spellInfo->Id, gain, drain_power);
+    if (int32 gain = int32(new_damage * gainMultiplier))
+        m_caster->EnergizeBySpell(m_caster, m_spellInfo->Id, gain, powerType);
 }
 
 void Spell::EffectSendEvent(SpellEffectIndex effectIndex)
