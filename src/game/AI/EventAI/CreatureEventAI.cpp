@@ -1054,6 +1054,11 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 m_creature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
             break;
         }
+        case ACTION_T_INTERRUPT_SPELL:
+        {
+            m_creature->InterruptSpell((CurrentSpellTypes)action.interruptSpell.currentSpellType);
+            break;
+        }
         default:
             sLog.outError("CreatureEventAi::ProcessAction(): action(%u) not implemented", static_cast<uint32>(action.type));
             break;

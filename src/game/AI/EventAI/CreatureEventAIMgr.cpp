@@ -891,8 +891,14 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             continue;
                         }
                         break;
-
                     case ACTION_T_PAUSE_WAYPOINTS:
+                        break;
+                    case ACTION_T_INTERRUPT_SPELL:
+                        if (action.interruptSpell.currentSpellType > 4)
+                        {
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid current cast spell %u (must be smaller or equal to 4)", i, j + 1, action.setReactState.reactState, REACT_AGGRESSIVE);
+                            continue;
+                        }
                         break;
                     default:
                         sLog.outErrorEventAI("Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j + 1, temp.action[j].type);

@@ -127,6 +127,7 @@ enum EventAI_ActionType
     ACTION_T_DYNAMIC_MOVEMENT           = 49,               // EnableDynamicMovement (1 = on; 0 = off)
     ACTION_T_SET_REACT_STATE            = 50,               // React state, unused, unused
     ACTION_T_PAUSE_WAYPOINTS            = 51,               // DoPause 0: unpause waypoint 1: pause waypoint, unused, unused
+    ACTION_T_INTERRUPT_SPELL            = 52,               // SpellType enum CurrentSpellTypes, unused, unused
 
     ACTION_T_END,
 };
@@ -445,6 +446,13 @@ struct CreatureEventAI_Action
             uint32 unused1;
             uint32 unused2;
         } pauseWaypoint;
+        // ACTION_T_INTERRUPT_SPELL                         = 52
+        struct
+        {
+            uint32 currentSpellType;                        // enum CurrentSpellTypes
+            uint32 unused1;
+            uint32 unused2;
+        } interruptSpell;
         // RAW
         struct
         {
