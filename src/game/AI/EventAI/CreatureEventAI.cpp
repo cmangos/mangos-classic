@@ -1046,6 +1046,14 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_reactState = ReactStates(action.setReactState.reactState);
             break;
         }
+        case ACTION_T_PAUSE_WAYPOINTS:
+        {
+            if (action.pauseWaypoint.doPause)
+                m_creature->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+            else
+                m_creature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+            break;
+        }
         default:
             sLog.outError("CreatureEventAi::ProcessAction(): action(%u) not implemented", static_cast<uint32>(action.type));
             break;
