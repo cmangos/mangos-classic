@@ -596,7 +596,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
     }
 
     // Get in CombatState
-    if (pVictim != this && damagetype != DOT && (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO)))
+    if (pVictim != this && damagetype != DOT && (!spellProto || (!IsPositiveSpellTargetMode(spellProto, this, pVictim) && !spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))))
     {
         SetInCombatWith(pVictim);
         pVictim->SetInCombatWith(this);
@@ -2697,7 +2697,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool 
 
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
-    if (IsPositiveSpell(spell->Id))
+    if (IsPositiveSpell(spell->Id, this, pVictim))
         return SPELL_MISS_NONE;
 
     // Check for immune (use charges)
@@ -5744,7 +5744,7 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
             // taken
             if (pVictim)
             {
-                if (!IsPositiveSpell(spellProto->Id))
+                if (!IsPositiveSpell(spellProto->Id, this, pVictim))
                 {
                     // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE
                     crit_chance += pVictim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE, schoolMask);

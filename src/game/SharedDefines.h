@@ -630,8 +630,8 @@ enum SpellEffects
     SPELL_EFFECT_MODIFY_THREAT_PERCENT     = 125,
     SPELL_EFFECT_126                       = 126,
     SPELL_EFFECT_127                       = 127,
-    SPELL_EFFECT_128                       = 128,
-    SPELL_EFFECT_129                       = 129,
+    SPELL_EFFECT_APPLY_AREA_AURA_FRIEND    = 128,
+    SPELL_EFFECT_APPLY_AREA_AURA_ENEMY     = 129,
     TOTAL_SPELL_EFFECTS                    = 130
 };
 
@@ -951,6 +951,7 @@ enum Targets
     TARGET_ALL_RAID_AROUND_CASTER      = 56,
     TARGET_SINGLE_FRIEND_2             = 57,
     TARGET_58                          = 58,
+    TARGET_FRIENDLY_FRONTAL_CONE       = 59,
     TARGET_NARROW_FRONTAL_CONE         = 60,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
     TARGET_DUELVSPLAYER_COORDINATES    = 63,
