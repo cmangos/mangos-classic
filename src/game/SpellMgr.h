@@ -607,6 +607,7 @@ inline bool IsNeutralTarget(uint32 target)
         case TARGET_DYNAMIC_OBJECT_BEHIND:
         case TARGET_DYNAMIC_OBJECT_LEFT_SIDE:
         case TARGET_DYNAMIC_OBJECT_RIGHT_SIDE:
+        case TARGET_DEST_CASTER_FRONT_LEAP:
         case TARGET_58:
         case TARGET_DUELVSPLAYER_COORDINATES:
             return true;

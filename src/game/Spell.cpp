@@ -43,6 +43,7 @@
 #include "Util.h"
 #include "Chat.h"
 #include "SQLStorages.h"
+#include "PathFinder.h"
 
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
@@ -2427,6 +2428,163 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     break;
             }
             break;
+        }
+        case TARGET_DEST_CASTER_FRONT_LEAP:
+        {
+            Unit* pUnitTarget = m_targets.getUnitTarget();
+
+            if (!pUnitTarget)
+                break;
+
+            float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
+            const float IN_OR_UNDER_LIQUID_RANGE = 0.8f;                // range to make player under liquid or on liquid surface from liquid level
+
+            G3D::Vector3 prevPos, nextPos;
+            float orientation = pUnitTarget->GetOrientation();
+
+            prevPos.x = pUnitTarget->GetPositionX();
+            prevPos.y = pUnitTarget->GetPositionY();
+            prevPos.z = pUnitTarget->GetPositionZ();
+
+            float groundZ = prevPos.z;
+            bool isPrevInLiquid = false;
+
+            // falling case
+            if (!pUnitTarget->GetMap()->GetHeightInRange(prevPos.x, prevPos.y, groundZ, 3.0f) && pUnitTarget->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
+            {
+                nextPos.x = prevPos.x + dist * cos(orientation);
+                nextPos.y = prevPos.y + dist * sin(orientation);
+                nextPos.z = prevPos.z - 2.0f; // little hack to avoid the impression to go up when teleporting instead of continue to fall. This value may need some tweak
+
+                                              //
+                GridMapLiquidData liquidData;
+                if (pUnitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z, &liquidData))
+                {
+                    if (fabs(nextPos.z - liquidData.level) < 10.0f)
+                        nextPos.z = liquidData.level - IN_OR_UNDER_LIQUID_RANGE;
+                }
+                else
+                {
+                    // fix z to ground if near of it
+                    pUnitTarget->GetMap()->GetHeightInRange(nextPos.x, nextPos.y, nextPos.z, 10.0f);
+                }
+
+                // check any obstacle and fix coords
+                pUnitTarget->GetMap()->GetHitPosition(prevPos.x, prevPos.y, prevPos.z + 0.5f, nextPos.x, nextPos.y, nextPos.z, -0.5f);
+            }
+            else
+            {
+                // fix origin position if player was jumping and near of the ground but not in ground
+                if (fabs(prevPos.z - groundZ) > 0.5f)
+                    prevPos.z = groundZ;
+
+                //check if in liquid
+                isPrevInLiquid = pUnitTarget->GetMap()->GetTerrain()->IsInWater(prevPos.x, prevPos.y, prevPos.z);
+
+                const float step = 2.0f;                                    // step length before next check slope/edge/water
+                const float maxSlope = 50.0f;                               // 50(degree) max seem best value for walkable slope
+                const float MAX_SLOPE_IN_RADIAN = maxSlope / 180.0f * M_PI_F;
+                float nextZPointEstimation = 1.0f;
+                float destx = prevPos.x + dist * cos(orientation);
+                float desty = prevPos.y + dist * sin(orientation);
+                const uint32 numChecks = ceil(fabs(dist / step));
+                const float DELTA_X = (destx - prevPos.x) / numChecks;
+                const float DELTA_Y = (desty - prevPos.y) / numChecks;
+
+                for (uint32 i = 1; i < numChecks + 1; ++i)
+                {
+                    // compute next point average position
+                    nextPos.x = prevPos.x + DELTA_X;
+                    nextPos.y = prevPos.y + DELTA_Y;
+                    nextPos.z = prevPos.z + nextZPointEstimation;
+
+                    bool isInLiquid = false;
+                    bool isInLiquidTested = false;
+                    bool isOnGround = false;
+                    GridMapLiquidData liquidData;
+
+                    // try fix height for next position
+                    if (!pUnitTarget->GetMap()->GetHeightInRange(nextPos.x, nextPos.y, nextPos.z))
+                    {
+                        // we cant so test if we are on water
+                        if (!pUnitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z, &liquidData))
+                        {
+                            // not in water and cannot get correct height, maybe flying?
+                            //sLog.outString("Can't get height of point %u, point value %s", i, nextPos.toString().c_str());
+                            nextPos = prevPos;
+                            break;
+                        }
+                        else
+                        {
+                            isInLiquid = true;
+                            isInLiquidTested = true;
+                        }
+                    }
+                    else
+                        isOnGround = true;                                  // player is on ground
+
+                    if (isInLiquid || (!isInLiquidTested && pUnitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z, &liquidData)))
+                    {
+                        if (!isPrevInLiquid && fabs(liquidData.level - prevPos.z) > 2.0f)
+                        {
+                            // on edge of water with difference a bit to high to continue
+                            //sLog.outString("Ground vs liquid edge detected!");
+                            nextPos = prevPos;
+                            break;
+                        }
+
+                        if ((liquidData.level - IN_OR_UNDER_LIQUID_RANGE) > nextPos.z)
+                            nextPos.z = prevPos.z;                                      // we are under water so next z equal prev z
+                        else
+                            nextPos.z = liquidData.level - IN_OR_UNDER_LIQUID_RANGE;    // we are on water surface, so next z equal liquid level
+
+                        isInLiquid = true;
+
+                        float ground = nextPos.z;
+                        if (pUnitTarget->GetMap()->GetHeightInRange(nextPos.x, nextPos.y, ground))
+                        {
+                            if (nextPos.z < ground)
+                            {
+                                nextPos.z = ground;
+                                isOnGround = true;                          // player is on ground of the water
+                            }
+                        }
+                    }
+
+                    //unitTarget->SummonCreature(VISUAL_WAYPOINT, nextPos.x, nextPos.y, nextPos.z, 0, TEMPSUMMON_TIMED_DESPAWN, 15000);
+                    float hitZ = nextPos.z + 1.5f;
+                    if (pUnitTarget->GetMap()->GetHitPosition(prevPos.x, prevPos.y, prevPos.z + 1.5f, nextPos.x, nextPos.y, hitZ, -1.0f))
+                    {
+                        //sLog.outString("Blink collision detected!");
+                        nextPos = prevPos;
+                        break;
+                    }
+
+                    if (isOnGround)
+                    {
+                        // project vector to get only positive value
+                        float ac = fabs(prevPos.z - nextPos.z);
+
+                        // compute slope (in radian)
+                        float slope = atan(ac / step);
+
+                        // check slope value
+                        if (slope > MAX_SLOPE_IN_RADIAN)
+                        {
+                            //sLog.outString("bad slope detected! %4.2f max %4.2f, ac(%4.2f)", slope * 180 / M_PI_F, maxSlope, ac);
+                            nextPos = prevPos;
+                            break;
+                        }
+                        //sLog.outString("slope is ok! %4.2f max %4.2f, ac(%4.2f)", slope * 180 / M_PI_F, maxSlope, ac);
+                    }
+
+                    //sLog.outString("point %u is ok, coords %s", i, nextPos.toString().c_str());
+                    nextZPointEstimation = (nextPos.z - prevPos.z) / 2.0f;
+                    isPrevInLiquid = isInLiquid;
+                    prevPos = nextPos;
+                }
+            }
+            m_targets.setDestination(nextPos.x, nextPos.y, nextPos.z);
         }
         default:
             // sLog.outError( "SPELL: Unknown implicit target (%u) for spell ID %u", targetMode, m_spellInfo->Id );
