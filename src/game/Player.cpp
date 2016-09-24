@@ -11884,9 +11884,19 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
 
     // cast spells after mark quest complete (some spells have quest completed state reqyurements in spell_area data)
     if (pQuest->GetRewSpellCast() > 0)
-        CastSpell(this, pQuest->GetRewSpellCast(), true);
+    {
+        if (questGiver->GetTypeId() == TYPEID_UNIT)
+            ((Creature*)questGiver)->CastSpell(this, pQuest->GetRewSpellCast(), true);
+        else
+            CastSpell(this, pQuest->GetRewSpellCast(), true);
+    }
     else if (pQuest->GetRewSpell() > 0)
-        CastSpell(this, pQuest->GetRewSpell(), true);
+    {
+        if (questGiver->GetTypeId() == TYPEID_UNIT)
+            ((Creature*)questGiver)->CastSpell(this, pQuest->GetRewSpell(), true);
+        else
+            CastSpell(this, pQuest->GetRewSpell(), true);
+    }
 
     // remove auras from spells with quest reward state limitations
     // Some spells applied at quest reward
