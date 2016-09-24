@@ -36,6 +36,17 @@ void instance_dire_maul::Initialize()
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 }
 
+void instance_dire_maul::Update(uint32 uiDiff)
+{
+    if (GetData(TYPE_RITUAL) == IN_PROGRESS)
+    {
+        if (instance->GetGameObject(m_mGoEntryGuidStore[GO_BELL_OF_DETHMOORA])->GetGoState() != GO_STATE_ACTIVE
+            && instance->GetGameObject(m_mGoEntryGuidStore[GO_WHEEL_OF_BLACK_MARCH])->GetGoState() != GO_STATE_ACTIVE
+            && instance->GetGameObject(m_mGoEntryGuidStore[GO_DOOMSDAY_CANDLE])->GetGoState() != GO_STATE_ACTIVE)
+            SetData(TYPE_RITUAL, FAIL);
+    }
+}
+
 void instance_dire_maul::OnPlayerEnter(Player* pPlayer)
 {
     // figure where to enter to set library doors accordingly
@@ -71,6 +82,8 @@ void instance_dire_maul::OnCreatureCreate(Creature* pCreature)
         case NPC_HIGHBORNE_SUMMONER:
             m_luiHighborneSummonerGUIDs.push_back(pCreature->GetObjectGuid());
             return;
+        case NPC_RITUAL_DUMMY:
+            break;
 
             // North
         case NPC_CHORUSH:
@@ -144,6 +157,19 @@ void instance_dire_maul::OnObjectCreate(GameObject* pGo)
         case GO_WEST_LIBRARY_DOOR:
             pGo->SetFlag(GAMEOBJECT_FLAGS, m_bDoNorthBeforeWest ? GO_FLAG_NO_INTERACT : GO_FLAG_LOCKED);
             pGo->RemoveFlag(GAMEOBJECT_FLAGS, m_bDoNorthBeforeWest ? GO_FLAG_LOCKED : GO_FLAG_NO_INTERACT);
+            break;
+        case GO_DREADSTEED_PORTAL:
+            m_lDreadsteedPortalGUIDs.push_back(pGo->GetObjectGuid());
+            break;
+        case GO_BELL_OF_DETHMOORA:
+        case GO_WHEEL_OF_BLACK_MARCH:
+        case GO_DOOMSDAY_CANDLE:
+        case GO_WARLOCK_RITUAL_CIRCLE:
+            break;
+        case GO_MOUNT_QUEST_SYMBOL1:
+        case GO_MOUNT_QUEST_SYMBOL2:
+        case GO_MOUNT_QUEST_SYMBOL3:
+            m_lRitualSymbolGUIDs.push_back(pGo->GetObjectGuid());
             break;
 
             // North
@@ -237,6 +263,48 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                     ProcessForceFieldOpening();
             }
             break;
+        case TYPE_RITUAL:
+            m_auiEncounter[uiType] = uiData;
+            if (uiData == IN_PROGRESS)
+            {
+                if (GameObject *pGo = GetSingleGameObjectFromStorage(GO_WARLOCK_RITUAL_CIRCLE))
+                {
+                    pGo->SetRespawnTime(900);
+                    pGo->Refresh();
+                }
+
+                m_lDreadsteedPortalGUIDs.sort();
+                int count = 0; // Skip boss portal - this is spawned when event is completed (must be lowest GUID)
+                for (auto portal : m_lDreadsteedPortalGUIDs)
+                {
+                    if (count != 0)
+                        DoRespawnGameObject(portal);
+                    count++;
+                }
+            }
+            else if (uiData == FAIL)
+            {
+                if (Creature* pRitual = GetSingleCreatureFromStorage(NPC_RITUAL_DUMMY))
+                    pRitual->ForcedDespawn();
+
+                for (auto portal : m_lDreadsteedPortalGUIDs)
+                    instance->GetGameObject(portal)->SetLootState(GO_JUST_DEACTIVATED);
+
+                for (auto symbol : m_lRitualSymbolGUIDs)
+                    instance->GetGameObject(symbol)->SetLootState(GO_JUST_DEACTIVATED);
+
+                if (GameObject *pGo = GetSingleGameObjectFromStorage(GO_BELL_OF_DETHMOORA))
+                    pGo->SetLootState(GO_JUST_DEACTIVATED);
+
+                if (GameObject *pGo = GetSingleGameObjectFromStorage(GO_DOOMSDAY_CANDLE))
+                    pGo->SetLootState(GO_JUST_DEACTIVATED);
+
+                if (GameObject *pGo = GetSingleGameObjectFromStorage(GO_WHEEL_OF_BLACK_MARCH))
+                    pGo->SetLootState(GO_JUST_DEACTIVATED);
+
+                if (GameObject *pGo = GetSingleGameObjectFromStorage(GO_WARLOCK_RITUAL_CIRCLE))
+                    pGo->SetLootState(GO_JUST_DEACTIVATED);
+            }
 
             // North
         case TYPE_KING_GORDOK:
@@ -293,7 +361,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                       << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
                       << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11] << " "
                       << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14] << " "
-                      << m_auiEncounter[15];
+                      << m_auiEncounter[15] << " " << m_auiEncounter[16];
 
         m_strInstData = saveStream.str();
 
@@ -391,7 +459,7 @@ void instance_dire_maul::Load(const char* chrIn)
                m_auiEncounter[6] >> m_auiEncounter[7] >> m_auiEncounter[8] >>
                m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11] >>
                m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >>
-               m_auiEncounter[15];
+               m_auiEncounter[15] >> m_auiEncounter[16];
 
     if (m_auiEncounter[TYPE_ALZZIN] >= DONE)
         m_bWallDestroyed = true;
@@ -420,11 +488,18 @@ bool instance_dire_maul::CheckConditionCriteriaMeet(Player const* pPlayer, uint3
 
             return uiInstanceConditionId == uiTributeRunAliveBosses;
         }
+        case 5:                                             // Don't allow summon Dreadsteed boss if ritual isn't complete
+            return GetData(TYPE_RITUAL) != DONE ? 1 : 0;
     }
 
     script_error_log("instance_dire_maul::CheckConditionCriteriaMeet called with unsupported Id %u. Called with param plr %s, src %s, condition source type %u",
                      uiInstanceConditionId, pPlayer ? pPlayer->GetGuidStr().c_str() : "nullptr", pConditionSource ? pConditionSource->GetGuidStr().c_str() : "nullptr", conditionSourceType);
     return false;
+}
+
+GuidVector instance_dire_maul::GetRitualSymbolGuids()
+{
+    return m_lRitualSymbolGUIDs;
 }
 
 bool instance_dire_maul::CheckAllGeneratorsDestroyed()
@@ -517,6 +592,197 @@ void instance_dire_maul::PylonGuardJustDied(Creature* pCreature)
     }
 }
 
+/*######
+## npc_warlock_ritual_mob
+######*/
+
+enum
+{
+    MAX_SUMMON_POSITIONS = 54,
+};
+
+struct sSummonInformation
+{
+    uint32 uiPosition, uiEntry;
+    float fX, fY, fZ, fO;
+};
+
+static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
+{
+    { 1, NPC_DREAD_GUARD, 7.560883f, 821.733826f, -33.061752f, 3.262215f },
+    { 1, NPC_XOROTHIAN_IMP, 7.140812f, 805.336304f, -33.061752f, 3.038393f },
+    { 1, NPC_XOROTHIAN_IMP, 1.663233f, 790.119873f, -33.061752f, 2.582858f },
+    { 1, NPC_XOROTHIAN_IMP, -8.462668f, 777.783691f, -33.061752f, 2.292259f },
+    { 1, NPC_XOROTHIAN_IMP, -22.089991f, 769.786194f, -33.061752f, 1.899560f },
+    { 1, NPC_XOROTHIAN_IMP, -38.081146f, 767.180725f, -33.061752f, 1.585401f },
+    { 2, NPC_XOROTHIAN_IMP, -54.105854f, 769.775146f, -33.061752f, 1.231972f },
+    { 2, NPC_DREAD_GUARD, -67.741684f, 777.387634f, -33.061752f, 0.913885f },
+    { 2, NPC_XOROTHIAN_IMP, -78.729424f, 789.356567f, -33.061752f, 0.540821f },
+    { 2, NPC_XOROTHIAN_IMP, -84.186119f, 804.605896f, -33.061752f, 0.128487f },
+    { 2, NPC_XOROTHIAN_IMP, -84.246315f, 820.786255f, -33.061752f, 6.140718f },
+    { 2, NPC_XOROTHIAN_IMP, -79.381973f, 836.385864f, -33.061752f, 5.759809f },
+    { 3, NPC_XOROTHIAN_IMP, -69.113953f, 848.995361f, -33.061752f, 5.422102f },
+    { 3, NPC_XOROTHIAN_IMP, -55.377537f, 857.077148f, -33.061752f, 5.037268f },
+    { 3, NPC_DREAD_GUARD, -38.862133f, 859.633423f, -33.061752f, 4.727053f },
+    { 3, NPC_XOROTHIAN_IMP, -22.643778f, 856.978699f, -33.061752f, 4.342230f },
+    { 3, NPC_XOROTHIAN_IMP, -8.277514f, 848.114502f, -33.061752f, 4.035941f },
+    { 3, NPC_XOROTHIAN_IMP, 1.658046f, 836.480164f, -33.061752f, 3.678585f },
+    { 4, NPC_XOROTHIAN_IMP, 7.560883f, 821.733826f, -33.061752f, 3.262215f },
+    { 4, NPC_XOROTHIAN_IMP, 7.140812f, 805.336304f, -33.061752f, 3.038393f },
+    { 4, NPC_XOROTHIAN_IMP, 1.663233f, 790.119873f, -33.061752f, 2.582858f },
+    { 4, NPC_DREAD_GUARD, -8.462668f, 777.783691f, -33.061752f, 2.292259f },
+    { 4, NPC_XOROTHIAN_IMP, -22.089991f, 769.786194f, -33.061752f, 1.899560f },
+    { 4, NPC_XOROTHIAN_IMP, -38.081146f, 767.180725f, -33.061752f, 1.585401f },
+    { 5, NPC_XOROTHIAN_IMP, -54.105854f, 769.775146f, -33.061752f, 1.231972f },
+    { 5, NPC_XOROTHIAN_IMP, -67.741684f, 777.387634f, -33.061752f, 0.913885f },
+    { 5, NPC_XOROTHIAN_IMP, -78.729424f, 789.356567f, -33.061752f, 0.540821f },
+    { 5, NPC_XOROTHIAN_IMP, -84.186119f, 804.605896f, -33.061752f, 0.128487f },
+    { 5, NPC_DREAD_GUARD, -84.246315f, 820.786255f, -33.061752f, 6.140718f },
+    { 5, NPC_XOROTHIAN_IMP, -79.381973f, 836.385864f, -33.061752f, 5.759809f },
+    { 6, NPC_XOROTHIAN_IMP, -69.113953f, 848.995361f, -33.061752f, 5.422102f },
+    { 6, NPC_XOROTHIAN_IMP, -55.377537f, 857.077148f, -33.061752f, 5.037268f },
+    { 6, NPC_XOROTHIAN_IMP, -38.862133f, 859.633423f, -33.061752f, 4.727053f },
+    { 6, NPC_XOROTHIAN_IMP, -22.643778f, 856.978699f, -33.061752f, 4.342230f },
+    { 6, NPC_XOROTHIAN_IMP, -8.277514f, 848.114502f, -33.061752f, 4.035941f },
+    { 6, NPC_DREAD_GUARD, 1.658046f, 836.480164f, -33.061752f, 3.678585f },
+    { 7, NPC_DREAD_GUARD, 7.560883f, 821.733826f, -33.061752f, 3.262215f },
+    { 7, NPC_XOROTHIAN_IMP, 7.140812f, 805.336304f, -33.061752f, 3.038393f },
+    { 7, NPC_XOROTHIAN_IMP, 1.663233f, 790.119873f, -33.061752f, 2.582858f },
+    { 7, NPC_XOROTHIAN_IMP, -8.462668f, 777.783691f, -33.061752f, 2.292259f },
+    { 7, NPC_XOROTHIAN_IMP, -22.089991f, 769.786194f, -33.061752f, 1.899560f },
+    { 7, NPC_XOROTHIAN_IMP, -38.081146f, 767.180725f, -33.061752f, 1.585401f },
+    { 8, NPC_XOROTHIAN_IMP, -54.105854f, 769.775146f, -33.061752f, 1.231972f },
+    { 8, NPC_DREAD_GUARD, -67.741684f, 777.387634f, -33.061752f, 0.913885f },
+    { 8, NPC_XOROTHIAN_IMP, -78.729424f, 789.356567f, -33.061752f, 0.540821f },
+    { 8, NPC_XOROTHIAN_IMP, -84.186119f, 804.605896f, -33.061752f, 0.128487f },
+    { 8, NPC_XOROTHIAN_IMP, -84.246315f, 820.786255f, -33.061752f, 6.140718f },
+    { 8, NPC_XOROTHIAN_IMP, -79.381973f, 836.385864f, -33.061752f, 5.759809f },
+    { 9, NPC_XOROTHIAN_IMP, -69.113953f, 848.995361f, -33.061752f, 5.422102f },
+    { 9, NPC_XOROTHIAN_IMP, -55.377537f, 857.077148f, -33.061752f, 5.037268f },
+    { 9, NPC_DREAD_GUARD, -38.862133f, 859.633423f, -33.061752f, 4.727053f },
+    { 9, NPC_XOROTHIAN_IMP, -22.643778f, 856.978699f, -33.061752f, 4.342230f },
+    { 9, NPC_XOROTHIAN_IMP, -8.277514f, 848.114502f, -33.061752f, 4.035941f },
+    { 9, NPC_XOROTHIAN_IMP, 1.658046f, 836.480164f, -33.061752f, 3.678585f },
+};
+
+struct npc_warlock_mount_ritualAI : public  Scripted_NoMovementAI
+{
+    npc_warlock_mount_ritualAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+        m_pInstance = (instance_dire_maul*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_dire_maul* m_pInstance;
+    uint8 m_uiPhase;
+    uint32 m_uiPhaseTimer;
+    GuidList m_luiSummonedMobGUIDs;
+
+    void Reset() override
+    {
+        m_uiPhase = 0;
+        m_uiPhaseTimer = 50000;
+    }
+
+    void DoSummonPack(uint8 uiIndex)
+    {
+        for (uint8 i = 0; i < MAX_SUMMON_POSITIONS; ++i)
+        {
+            if (asSummonInfo[i].uiPosition > uiIndex)
+                break;
+            if (asSummonInfo[i].uiPosition == uiIndex)
+                m_creature->SummonCreature(asSummonInfo[i].uiEntry, asSummonInfo[i].fX, asSummonInfo[i].fY, asSummonInfo[i].fZ, asSummonInfo[i].fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+        }
+        m_pInstance->DoRespawnGameObject(m_pInstance->GetRitualSymbolGuids().at(uiIndex - 1), 900);
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        switch (pSummoned->GetEntry())
+        {
+        case NPC_XOROTHIAN_IMP:
+        case NPC_DREAD_GUARD:
+            pSummoned->GetMotionMaster()->MoveIdle();
+            pSummoned->GetMotionMaster()->MovePoint(1, -38.8f, 812.69f, -29.53f);
+            break;
+        }
+        m_luiSummonedMobGUIDs.push_back(pSummoned->GetObjectGuid());
+    }
+
+    void UpdateAI(uint32 const uiDiff) override
+    {
+        if (m_uiPhaseTimer <= uiDiff)
+        {
+            switch (m_uiPhase)
+            {
+            case 1:
+                m_pInstance->SetData(TYPE_RITUAL, IN_PROGRESS);
+                m_uiPhaseTimer = 2000;
+                break;
+            case 2:
+                m_uiPhaseTimer = 40000;
+                DoSummonPack(1);
+                break;
+            case 3:
+                m_uiPhaseTimer = 40000;
+                DoSummonPack(2);
+                break;
+            case 4:
+                m_uiPhaseTimer = 40000;
+                DoSummonPack(3);
+                break;
+            case 5:
+                m_uiPhaseTimer = 40000;
+                DoSummonPack(4);
+                break;
+            case 6:
+                m_uiPhaseTimer = 40000;
+                DoSummonPack(5);
+                break;
+            case 7:
+                m_uiPhaseTimer = 40000;
+                DoSummonPack(6);
+                break;
+            case 8:
+                m_uiPhaseTimer = 40000;
+                DoSummonPack(7);
+                break;
+            case 9:
+                m_uiPhaseTimer = 40000;
+                DoSummonPack(8);
+                break;
+            case 10:
+                m_uiPhaseTimer = 40000;
+                DoSummonPack(9);
+                break;
+            case 11:
+                for (auto demon : m_luiSummonedMobGUIDs)
+                {
+                    if (Creature* pSummoned = m_creature->GetMap()->GetCreature(demon))
+                    {
+                        pSummoned->CastSpell(pSummoned, SPELL_TELEPORT, true);
+                        DoScriptText(SAY_UNSUMMON_DEMON, pSummoned);
+                        pSummoned->ForcedDespawn(1000);
+                    }
+                }
+                m_luiSummonedMobGUIDs.clear();
+                if (GameObject* pGo = m_pInstance->GetSingleGameObjectFromStorage(GO_WARLOCK_RITUAL_CIRCLE))
+                    pGo->UseDoorOrButton();
+                m_pInstance->SetData(TYPE_RITUAL, DONE);
+                m_creature->ForcedDespawn();
+            }
+            ++m_uiPhase;
+        }
+        else
+            m_uiPhaseTimer -= uiDiff;
+    }
+};
+
+CreatureAI* GetAI_npc_warlock_mount_ritual(Creature* pCreature)
+{
+    return new npc_warlock_mount_ritualAI(pCreature);
+}
+
 InstanceData* GetInstanceData_instance_dire_maul(Map* pMap)
 {
     return new instance_dire_maul(pMap);
@@ -529,5 +795,10 @@ void AddSC_instance_dire_maul()
     pNewScript = new Script;
     pNewScript->Name = "instance_dire_maul";
     pNewScript->GetInstanceData = &GetInstanceData_instance_dire_maul;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_warlock_mount_ritual";
+    pNewScript->GetAI = &GetAI_npc_warlock_mount_ritual;
     pNewScript->RegisterSelf();
 }

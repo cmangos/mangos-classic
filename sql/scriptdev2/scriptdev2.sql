@@ -247,6 +247,7 @@ UPDATE creature_template SET ScriptName='npc_rigger_gizelton' WHERE entry=11626;
 
 /* DIRE MAUL */
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
+UPDATE creature_template SET ScriptName='npc_warlock_mount_ritual' WHERE entry=14501;
 
 /* DUN MOROGH */
 
@@ -2067,7 +2068,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1429002,'At last... Freed from his cursed grasp!',0,6,0,0,'old ironbark SAY_IRONBARK_REDEEM'),
 
-(-1429003,'The king is dead - OH NOES! Summon Mizzle da Crafty! He knows what to do next!',0,1,0,0,'cho\'rush SAY_KING_DEAD');
+(-1429003,'The king is dead - OH NOES! Summon Mizzle da Crafty! He knows what to do next!',0,1,0,0,'cho\'rush SAY_KING_DEAD'),
+
+(-1429004,'%s is pulled back to Xoroth!',0,2,0,0,'Xorothian Imp/Dread Guard SAY_UNSUMMON_DEMON');
 
 -- -1 469 000 BLACKWING LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

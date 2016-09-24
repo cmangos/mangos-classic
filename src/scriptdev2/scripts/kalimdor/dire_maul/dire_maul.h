@@ -7,8 +7,9 @@
 
 enum
 {
-    MAX_ENCOUNTER               = 16,
+    MAX_ENCOUNTER               = 17,
     MAX_GENERATORS              = 5,
+    MAX_PORTALS                 = 19,
 
     // East
     TYPE_ALZZIN                 = 0,                        // Do not change - Handled with Acid
@@ -24,6 +25,7 @@ enum
     TYPE_PYLON_3                = TYPE_PYLON_1 + 2,
     TYPE_PYLON_4                = TYPE_PYLON_1 + 3,
     TYPE_PYLON_5                = TYPE_PYLON_1 + 4,
+    TYPE_RITUAL                 = 16,
 
     // North
     TYPE_KING_GORDOK            = 11,
@@ -61,6 +63,23 @@ enum
     GO_WARPWOOD_DOOR            = 177221,
     GO_WEST_LIBRARY_DOOR        = 179550,
 
+    GO_BELL_OF_DETHMOORA        = 179674,
+    GO_DOOMSDAY_CANDLE          = 179673,
+    GO_WHEEL_OF_BLACK_MARCH     = 179672,
+    GO_DREADSTEED_PORTAL        = 179681,
+    GO_WARLOCK_RITUAL_CIRCLE    = 179668,
+    GO_MOUNT_QUEST_SYMBOL1      = 179669,
+    GO_MOUNT_QUEST_SYMBOL2      = 179670,
+    GO_MOUNT_QUEST_SYMBOL3      = 179671,
+
+    SPELL_TELEPORT              = 41232,
+
+    NPC_RITUAL_DUMMY            = 14501,
+    NPC_XOROTHIAN_IMP           = 14482,
+    NPC_DREAD_GUARD             = 14483,
+
+    SAY_UNSUMMON_DEMON          = -1429004,
+
     // North
     NPC_GUARD_MOLDAR            = 14326,
     NPC_STOMPER_KREEG           = 14322,
@@ -95,6 +114,8 @@ class instance_dire_maul : public ScriptedInstance
 
         void Initialize() override;
 
+        void Update(uint32 uiDiff);
+
         void OnPlayerEnter(Player* pPlayer) override;
 
         void OnCreatureCreate(Creature* pCreature) override;
@@ -110,6 +131,8 @@ class instance_dire_maul : public ScriptedInstance
         void Load(const char* chrIn) override;
 
         bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
+
+        GuidVector GetRitualSymbolGuids();
 
     protected:
         bool CheckAllGeneratorsDestroyed();
@@ -130,6 +153,9 @@ class instance_dire_maul : public ScriptedInstance
         GuidList m_luiHighborneSummonerGUIDs;
         GuidList m_lGeneratorGuardGUIDs;
         std::set<uint32> m_sSortedGeneratorGuards[MAX_GENERATORS];
+
+        GuidList m_lDreadsteedPortalGUIDs;
+        GuidVector m_lRitualSymbolGUIDs;
 
         // North
         bool m_bDoNorthBeforeWest;
