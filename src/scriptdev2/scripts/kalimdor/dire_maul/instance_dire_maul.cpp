@@ -305,6 +305,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                 if (GameObject *pGo = GetSingleGameObjectFromStorage(GO_WARLOCK_RITUAL_CIRCLE))
                     pGo->SetLootState(GO_JUST_DEACTIVATED);
             }
+            break;
 
             // North
         case TYPE_KING_GORDOK:
