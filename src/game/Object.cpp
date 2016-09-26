@@ -1211,7 +1211,7 @@ bool WorldObject::IsFacingTargetsFront(const WorldObject* target, float arc /*= 
         return false;
 
     //if target is not facing the current object then we know its not possible that the current object would be facing the targets front
-    if (target->HasInArc(arc, this))
+    if (!target->HasInArc(arc, this))
         return false;
 
     //if current object is not facing the target then we know the current object is not facing the target at all
