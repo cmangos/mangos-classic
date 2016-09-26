@@ -1438,12 +1438,6 @@ void Spell::EffectTriggerSpell(SpellEffectIndex eff_idx)
                 return;
         }
     }
-    else
-    {
-        // Note: not exist spells with weapon req. and IsSpellHaveCasterSourceTargets == true
-        // so this just for speedup places in else
-        caster = IsSpellWithCasterSourceTargetsOnly(spellInfo) ? unitTarget : m_caster;
-    }
 
     caster->CastSpell(unitTarget, spellInfo, true, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
 }
