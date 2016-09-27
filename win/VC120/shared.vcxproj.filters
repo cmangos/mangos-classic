@@ -96,6 +96,9 @@
     <ClCompile Include="..\..\src\shared\Network\Socket.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\shared\Auth\base32.cpp">
+      <Filter>Auth</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\shared\Database\Database.h">
@@ -196,6 +199,9 @@
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\shared\TSS.h" />
+    <ClInclude Include="..\..\src\shared\Auth\base32.h">
+      <Filter>Auth</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\shared\revision.h" />

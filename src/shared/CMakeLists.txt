@@ -28,6 +28,8 @@ set(SRC_GRP_AUTH
     Auth/md5.h
     Auth/Sha1.cpp
     Auth/Sha1.h
+    Auth/base32.h
+    Auth/base32.cpp
 )
 
 set(SRC_GRP_CONFIG
