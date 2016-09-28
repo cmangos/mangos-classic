@@ -3907,6 +3907,25 @@ void Unit::RemoveAurasDueToSpellByCancel(uint32 spellId)
     }
 }
 
+void Unit::RemoveAurasTriggeredBySpell(uint32 spellId, ObjectGuid casterGuid /*= ObjectGuid()*/)
+{
+    if (!spellId)
+        return;
+
+    SpellAuraHolderMap& auras = GetSpellAuraHolderMap();
+    for (SpellAuraHolderMap::iterator itr = auras.begin(); itr != auras.end();)
+    {
+        const SpellEntry* entry = itr->second->GetTriggeredBy();
+        if ((entry && entry->Id == spellId) && (casterGuid.IsEmpty() || casterGuid == itr->second->GetCasterGuid()))
+        {
+            RemoveSpellAuraHolder(itr->second);
+            itr = auras.begin();
+        }
+        else
+            ++itr;
+    }
+}
+
 void Unit::RemoveAurasWithDispelType(DispelType type, ObjectGuid casterGuid)
 {
     // Create dispel mask by dispel type
