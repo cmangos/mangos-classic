@@ -600,7 +600,7 @@ void instance_dire_maul::PylonGuardJustDied(Creature* pCreature)
 
 enum
 {
-    MAX_SUMMON_POSITIONS = 202,
+    MAX_SUMMON_POSITIONS = 201,
 };
 
 struct sSummonInformation
@@ -611,6 +611,7 @@ struct sSummonInformation
 
 static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
 {
+    { 1, NPC_DREAD_GUARD, -37.7177f, 743.281f, -27.0769f, 1.5708f },
     { 1, NPC_XOROTHIAN_IMP, 5.8428f, 865.497f, -27.2486f, 3.9968f },
     { 1, NPC_XOROTHIAN_IMP, -106.235f, 800.934f, -27.3196f, 0.174533f },
     { 1, NPC_XOROTHIAN_IMP, -82.9582f, 866.112f, -27.2077f, 5.41052f },
@@ -630,6 +631,7 @@ static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
     { 1, NPC_XOROTHIAN_IMP, -82.6964f, 759.662f, -27.1815f, 0.890118f },
     { 1, NPC_XOROTHIAN_IMP, -82.9582f, 866.112f, -27.2077f, 5.41052f },
     { 1, NPC_XOROTHIAN_IMP, -14.4863f, 747.953f, -27.1958f, 1.91986f },
+    { 2, NPC_DREAD_GUARD, 21.162f, 778.232f, -27.2357f, 2.60054f },
     { 2, NPC_XOROTHIAN_IMP, -98.1468f, 778.083f, -27.254f, 0.541052f },
     { 2, NPC_XOROTHIAN_IMP, 5.8428f, 865.497f, -27.2486f, 3.9968f },
     { 2, NPC_XOROTHIAN_IMP, -62.4677f, 878.058f, -27.1771f, 5.07891f },
@@ -650,6 +652,8 @@ static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
     { 2, NPC_XOROTHIAN_IMP, -37.7177f, 743.281f, -27.0769f, 1.5708f },
     { 2, NPC_XOROTHIAN_IMP, -105.782f, 826.821f, -27.2819f, 6.0912f },
     { 2, NPC_XOROTHIAN_IMP, -14.4863f, 747.953f, -27.1958f, 1.91986f },
+    { 3, NPC_DREAD_GUARD, -82.6964f, 759.662f, -27.1815f, 0.890118f },
+    { 3, NPC_DREAD_GUARD, 5.62079f, 759.756f, -27.1948f, 2.25147f },
     { 3, NPC_XOROTHIAN_IMP, -15.0206f, 878.409f, -27.0947f, 4.36332f },
     { 3, NPC_XOROTHIAN_IMP, 20.9339f, 848.326f, -27.1628f, 3.66519f },
     { 3, NPC_XOROTHIAN_IMP, 21.162f, 778.232f, -27.2357f, 2.60054f },
@@ -670,6 +674,8 @@ static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
     { 3, NPC_XOROTHIAN_IMP, -61.2501f, 747.296f, -27.126f, 1.23918f },
     { 3, NPC_XOROTHIAN_IMP, -37.7177f, 743.281f, -27.0769f, 1.5708f },
     { 3, NPC_XOROTHIAN_IMP, -98.1468f, 778.083f, -27.254f, 0.541052f },
+    { 4, NPC_DREAD_GUARD, 5.8428f, 865.497f, -27.2486f, 3.9968f },
+    { 4, NPC_DREAD_GUARD, -15.0206f, 878.409f, -27.0947f, 4.36332f },
     { 4, NPC_XOROTHIAN_IMP, -39.7076f, 882.205f, -27.1575f, 4.7473f },
     { 4, NPC_XOROTHIAN_IMP, 5.62079f, 759.756f, -27.1948f, 2.25147f },
     { 4, NPC_XOROTHIAN_IMP, -14.4863f, 747.953f, -27.1958f, 1.91986f },
@@ -690,6 +696,8 @@ static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
     { 4, NPC_XOROTHIAN_IMP, -82.6964f, 759.662f, -27.1815f, 0.890118f },
     { 4, NPC_XOROTHIAN_IMP, 29.2777f, 824.413f, -27.2753f, 3.29867f },
     { 4, NPC_XOROTHIAN_IMP, -106.235f, 800.934f, -27.3196f, 0.174533f },
+    { 5, NPC_DREAD_GUARD, -39.7076f, 882.205f, -27.1575f, 4.7473f },
+    { 5, NPC_DREAD_GUARD, -37.7177f, 743.281f, -27.0769f, 1.5708f },
     { 5, NPC_XOROTHIAN_IMP, -97.5622f, 848.091f, -27.3099f, 5.75959f },
     { 5, NPC_XOROTHIAN_IMP, -98.1468f, 778.083f, -27.254f, 0.541052f },
     { 5, NPC_XOROTHIAN_IMP, -61.2501f, 747.296f, -27.126f, 1.23918f },
@@ -710,6 +718,9 @@ static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
     { 5, NPC_XOROTHIAN_IMP, -105.782f, 826.821f, -27.2819f, 6.0912f },
     { 5, NPC_XOROTHIAN_IMP, -97.5622f, 848.091f, -27.3099f, 5.75959f },
     { 5, NPC_XOROTHIAN_IMP, -82.6964f, 759.662f, -27.1815f, 0.890118f },
+    { 6, NPC_DREAD_GUARD, -97.5622f, 848.091f, -27.3099f, 5.75959f },
+    { 6, NPC_DREAD_GUARD, 29.5943f, 801.049f, -27.1773f, 2.96706f },
+    { 6, NPC_DREAD_GUARD, -62.4677f, 878.058f, -27.1771f, 5.07891f },
     { 6, NPC_XOROTHIAN_IMP, -61.2501f, 747.296f, -27.126f, 1.23918f },
     { 6, NPC_XOROTHIAN_IMP, -14.4863f, 747.953f, -27.1958f, 1.91986f },
     { 6, NPC_XOROTHIAN_IMP, -39.7076f, 882.205f, -27.1575f, 4.7473f },
@@ -730,6 +741,10 @@ static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
     { 6, NPC_XOROTHIAN_IMP, -82.6964f, 759.662f, -27.1815f, 0.890118f },
     { 6, NPC_XOROTHIAN_IMP, -106.235f, 800.934f, -27.3196f, 0.174533f },
     { 6, NPC_XOROTHIAN_IMP, 20.9339f, 848.326f, -27.1628f, 3.66519f },
+    { 7, NPC_DREAD_GUARD, 5.62079f, 759.756f, -27.1948f, 2.25147f },
+    { 7, NPC_DREAD_GUARD, -106.235f, 800.934f, -27.3196f, 0.174533f },
+    { 7, NPC_DREAD_GUARD, 29.5943f, 801.049f, -27.1773f, 2.96706f },
+    { 7, NPC_DREAD_GUARD, -105.782f, 826.821f, -27.2819f, 6.0912f },
     { 7, NPC_XOROTHIAN_IMP, 29.2777f, 824.413f, -27.2753f, 3.29867f },
     { 7, NPC_XOROTHIAN_IMP, -39.7076f, 882.205f, -27.1575f, 4.7473f },
     { 7, NPC_XOROTHIAN_IMP, -105.782f, 826.821f, -27.2819f, 6.0912f },
@@ -750,6 +765,11 @@ static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
     { 7, NPC_XOROTHIAN_IMP, 20.9339f, 848.326f, -27.1628f, 3.66519f },
     { 7, NPC_XOROTHIAN_IMP, -62.4677f, 878.058f, -27.1771f, 5.07891f },
     { 7, NPC_XOROTHIAN_IMP, -61.2501f, 747.296f, -27.126f, 1.23918f },
+    { 8, NPC_DREAD_GUARD, 20.9339f, 848.326f, -27.1628f, 3.66519f },
+    { 8, NPC_DREAD_GUARD, 29.2777f, 824.413f, -27.2753f, 3.29867f },
+    { 8, NPC_DREAD_GUARD, -14.4863f, 747.953f, -27.1958f, 1.91986f },
+    { 8, NPC_DREAD_GUARD, -37.7177f, 743.281f, -27.0769f, 1.5708f },
+    { 8, NPC_DREAD_GUARD, -106.235f, 800.934f, -27.3196f, 0.174533f },
     { 8, NPC_XOROTHIAN_IMP, -82.9582f, 866.112f, -27.2077f, 5.41052f },
     { 8, NPC_XOROTHIAN_IMP, -82.6964f, 759.662f, -27.1815f, 0.890118f },
     { 8, NPC_XOROTHIAN_IMP, 29.5943f, 801.049f, -27.1773f, 2.96706f },
@@ -770,6 +790,11 @@ static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
     { 8, NPC_XOROTHIAN_IMP, 5.62079f, 759.756f, -27.1948f, 2.25147f },
     { 8, NPC_XOROTHIAN_IMP, 20.9339f, 848.326f, -27.1628f, 3.66519f },
     { 8, NPC_XOROTHIAN_IMP, -82.9582f, 866.112f, -27.2077f, 5.41052f },
+    { 9, NPC_DREAD_GUARD, -61.2501f, 747.296f, -27.126f, 1.23918f },
+    { 9, NPC_DREAD_GUARD, -62.4677f, 878.058f, -27.1771f, 5.07891f },
+    { 9, NPC_DREAD_GUARD, 5.8428f, 865.497f, -27.2486f, 3.9968f },
+    { 9, NPC_DREAD_GUARD, 20.9339f, 848.326f, -27.1628f, 3.66519f },
+    { 9, NPC_DREAD_GUARD, -82.6964f, 759.662f, -27.1815f, 0.890118f },
     { 9, NPC_XOROTHIAN_IMP, -98.1468f, 778.083f, -27.254f, 0.541052f },
     { 9, NPC_XOROTHIAN_IMP, 29.2777f, 824.413f, -27.2753f, 3.29867f },
     { 9, NPC_XOROTHIAN_IMP, -62.4677f, 878.058f, -27.1771f, 5.07891f },
@@ -787,31 +812,6 @@ static const sSummonInformation asSummonInfo[MAX_SUMMON_POSITIONS] =
     { 9, NPC_XOROTHIAN_IMP, -37.7177f, 743.281f, -27.0769f, 1.5708f },
     { 9, NPC_XOROTHIAN_IMP, 5.8428f, 865.497f, -27.2486f, 3.9968f },
     { 9, NPC_XOROTHIAN_IMP, -82.6964f, 759.662f, -27.1815f, 0.890118f },
-    { 1, NPC_DREAD_GUARD, -37.7177f, 743.281f, -27.0769f, 1.5708f },
-    { 2, NPC_DREAD_GUARD, 21.162f, 778.232f, -27.2357f, 2.60054f },
-    { 3, NPC_DREAD_GUARD, -82.6964f, 759.662f, -27.1815f, 0.890118f },
-    { 3, NPC_DREAD_GUARD, 5.62079f, 759.756f, -27.1948f, 2.25147f },
-    { 4, NPC_DREAD_GUARD, 5.8428f, 865.497f, -27.2486f, 3.9968f },
-    { 4, NPC_DREAD_GUARD, -15.0206f, 878.409f, -27.0947f, 4.36332f },
-    { 5, NPC_DREAD_GUARD, -39.7076f, 882.205f, -27.1575f, 4.7473f },
-    { 5, NPC_DREAD_GUARD, -37.7177f, 743.281f, -27.0769f, 1.5708f },
-    { 6, NPC_DREAD_GUARD, -97.5622f, 848.091f, -27.3099f, 5.75959f },
-    { 6, NPC_DREAD_GUARD, 29.5943f, 801.049f, -27.1773f, 2.96706f },
-    { 6, NPC_DREAD_GUARD, -62.4677f, 878.058f, -27.1771f, 5.07891f },
-    { 7, NPC_DREAD_GUARD, 5.62079f, 759.756f, -27.1948f, 2.25147f },
-    { 7, NPC_DREAD_GUARD, -106.235f, 800.934f, -27.3196f, 0.174533f },
-    { 7, NPC_DREAD_GUARD, 29.5943f, 801.049f, -27.1773f, 2.96706f },
-    { 7, NPC_DREAD_GUARD, -105.782f, 826.821f, -27.2819f, 6.0912f },
-    { 8, NPC_DREAD_GUARD, 20.9339f, 848.326f, -27.1628f, 3.66519f },
-    { 8, NPC_DREAD_GUARD, 29.2777f, 824.413f, -27.2753f, 3.29867f },
-    { 8, NPC_DREAD_GUARD, -14.4863f, 747.953f, -27.1958f, 1.91986f },
-    { 8, NPC_DREAD_GUARD, -37.7177f, 743.281f, -27.0769f, 1.5708f },
-    { 8, NPC_DREAD_GUARD, -106.235f, 800.934f, -27.3196f, 0.174533f },
-    { 9, NPC_DREAD_GUARD, -61.2501f, 747.296f, -27.126f, 1.23918f },
-    { 9, NPC_DREAD_GUARD, -62.4677f, 878.058f, -27.1771f, 5.07891f },
-    { 9, NPC_DREAD_GUARD, 5.8428f, 865.497f, -27.2486f, 3.9968f },
-    { 9, NPC_DREAD_GUARD, 20.9339f, 848.326f, -27.1628f, 3.66519f },
-    { 9, NPC_DREAD_GUARD, -82.6964f, 759.662f, -27.1815f, 0.890118f },
 };
 
 struct npc_warlock_mount_ritualAI : public  Scripted_NoMovementAI
@@ -851,11 +851,9 @@ struct npc_warlock_mount_ritualAI : public  Scripted_NoMovementAI
         {
         case NPC_XOROTHIAN_IMP:
         case NPC_DREAD_GUARD:
-            pSummoned->GetMotionMaster()->MoveIdle();
-            pSummoned->GetMotionMaster()->MovePoint(1, -38.8f, 812.69f, -29.53f);
+            m_luiSummonedMobGUIDs.push_back(pSummoned->GetObjectGuid());
             break;
         }
-        m_luiSummonedMobGUIDs.push_back(pSummoned->GetObjectGuid());
     }
 
     void UpdateAI(uint32 const uiDiff) override

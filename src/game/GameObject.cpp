@@ -488,7 +488,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                 return;
 
             // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
-            
+
             switch (GetGoType()) // TODO: check, very experimental
             {
             case GAMEOBJECT_TYPE_BUTTON: // if button and not spawned by default, do not despawn
