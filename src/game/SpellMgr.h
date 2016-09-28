@@ -1378,11 +1378,11 @@ class SpellMgr
             return mSpellLearnSpells.equal_range(spell_id);
         }
 
-        bool IsSpellLearnToSpell(uint32 spell_id1, uint32 spell_id2) const
+        bool IsSpellLearnToSpell(uint32 parent, uint32 child) const
         {
-            SpellLearnSpellMapBounds bounds = GetSpellLearnSpellMapBounds(spell_id1);
+            SpellLearnSpellMapBounds bounds = GetSpellLearnSpellMapBounds(parent);
             for (SpellLearnSpellMap::const_iterator i = bounds.first; i != bounds.second; ++i)
-                if (i->second.spell == spell_id2)
+                if (i->second.spell == child)
                     return true;
             return false;
         }
