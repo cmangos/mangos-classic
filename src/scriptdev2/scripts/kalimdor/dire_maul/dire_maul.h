@@ -72,7 +72,7 @@ enum
     GO_MOUNT_QUEST_SYMBOL2      = 179670,
     GO_MOUNT_QUEST_SYMBOL3      = 179671,
 
-    SPELL_TELEPORT              = 41232,
+    SPELL_TELEPORT              = 21649,
 
     NPC_RITUAL_DUMMY            = 14501,
     NPC_XOROTHIAN_IMP           = 14482,
