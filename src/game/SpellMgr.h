@@ -186,6 +186,35 @@ inline bool IsElementalShield(SpellEntry const* spellInfo)
     return (spellInfo->SpellFamilyFlags & uint64(0x00000000400)) || spellInfo->Id == 23552;
 }
 
+inline bool IsSpellEffectTriggerSpell(const SpellEntry* entry, SpellEffectIndex effIndex)
+{
+    if (!entry)
+        return false;
+
+    switch (entry->Effect[effIndex])
+    {
+        case SPELL_EFFECT_TRIGGER_MISSILE:
+        case SPELL_EFFECT_TRIGGER_SPELL:
+            return true;
+    }
+    return false;
+}
+
+inline bool IsSpellEffectTriggerSpellByAura(const SpellEntry* entry, SpellEffectIndex effIndex)
+{
+    if (!entry || !IsAuraApplyEffect(entry, effIndex))
+        return false;
+
+    switch (entry->EffectApplyAuraName[effIndex])
+    {
+        case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
+        case SPELL_AURA_PROC_TRIGGER_SPELL:
+        case SPELL_AURA_PROC_TRIGGER_DAMAGE:
+            return true;
+    }
+    return false;
+}
+
 inline bool IsSpellEffectAbleToCrit(const SpellEntry* entry, SpellEffectIndex index)
 {
     if (!entry || entry->HasAttribute(SPELL_ATTR_EX2_CANT_CRIT))
@@ -412,21 +441,6 @@ inline bool HasAreaAuraEffect(SpellEntry const* spellInfo)
     return false;
 }
 
-inline bool HasAuraWithTriggerEffect(SpellEntry const* spellInfo)
-{
-    for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-    {
-        switch (spellInfo->Effect[i])
-        {
-            case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
-            case SPELL_AURA_PROC_TRIGGER_SPELL:
-            case SPELL_AURA_PROC_TRIGGER_DAMAGE:
-                return true;
-        }
-    }
-    return false;
-}
-
 inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -619,36 +633,60 @@ inline bool IsNeutralEffectTargetPositive(uint32 etarget, const WorldObject* cas
     return true;
 }
 
-inline bool IsPositiveEffectTargetMode(const SpellEntry* spellproto, SpellEffectIndex effIndex, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
+inline bool IsPositiveEffectTargetMode(const SpellEntry* entry, SpellEffectIndex effIndex, const WorldObject* caster = nullptr, const WorldObject* target = nullptr, bool recursive = false)
 {
-    const uint32 a = spellproto->EffectImplicitTargetA[effIndex];
-    const uint32 b = spellproto->EffectImplicitTargetB[effIndex];
-    if (a == 0 && b == 0)
+    if (!entry)
+        return false;
+
+    // Triggered spells case: prefer child spell via IsPositiveSpell()-like scan for triggered spell
+    if (IsSpellEffectTriggerSpell(entry, effIndex))
+    {
+        const uint32 spellid = entry->EffectTriggerSpell[effIndex];
+        // Its possible to go infinite cycle with triggered spells. We are interested to peek only at the first layer so far
+        if (!recursive && spellid && (spellid != entry->Id))
+        {
+            if (const SpellEntry* triggered = sSpellStore.LookupEntry(spellid))
+            {
+                for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
+                {
+                    if (!IsPositiveEffectTargetMode(triggered, SpellEffectIndex(i), caster, target, true))
+                        return false;
+                }
+            }
+        }
+        // For trigger effects target modes are inconsistent: we have invalid and coflicting ones
+        // Let's try to ignore them completely
         return true;
-    else if (IsEffectTargetPositive(a, b))
+    }
+
+    const uint32 a = entry->EffectImplicitTargetA[effIndex];
+    const uint32 b = entry->EffectImplicitTargetB[effIndex];
+
+    if ((!a && !b) || IsEffectTargetPositive(a, b) || IsEffectTargetScript(a, b))
         return true;
     else if (IsEffectTargetNegative(a, b))
     {
         // Workaround: Passive talents with negative target modes are getting removed by ice block and similar effects
         // TODO: Fix removal of passives in appropriate places and remove the check below afterwards
-        if (spellproto->HasAttribute(SPELL_ATTR_PASSIVE))
+        if (entry->HasAttribute(SPELL_ATTR_PASSIVE))
             return true;
         return false;
     }
-    else if (IsEffectTargetScript(a, b))
-        return true;
     else if (IsEffectTargetNeutral(a, b))
         return (IsPointEffectTarget(Targets(b ? b : a)) || IsNeutralEffectTargetPositive((b ? b : a), caster, target));
 
     // If we ever get to this point, we have unhandled target. Gotta say something about it.
-    if (spellproto && spellproto->Effect[effIndex])
-        DETAIL_LOG("IsPositiveEffect: Spell %u's effect %u has unhandled targets (A:%u B:%u)", spellproto->Id, effIndex,
-                   spellproto->EffectImplicitTargetA[effIndex], spellproto->EffectImplicitTargetB[effIndex]);
+    if (entry->Effect[effIndex])
+        DETAIL_LOG("IsPositiveEffectTargetMode: Spell %u's effect %u has unhandled targets (A:%u B:%u)", entry->Id, effIndex,
+                   entry->EffectImplicitTargetA[effIndex], entry->EffectImplicitTargetB[effIndex]);
     return true;
 }
 
 inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effIndex, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
 {
+    if (!spellproto)
+        return false;
+
     switch (spellproto->Effect[effIndex])
     {
         case SPELL_EFFECT_SEND_TAXI:                // Some NPCs that send taxis are neutral, so target mode fails
@@ -673,7 +711,7 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
                     break;
             }
             break;
-        // Known exceptions:
+        // Aura exceptions:
         case SPELL_EFFECT_APPLY_AURA:
         case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
         {
