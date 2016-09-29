@@ -8683,9 +8683,15 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
 
     // Update incapacitated movement if required:
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
+    {
+        StopMoving();
         GetMotionMaster()->MoveConfused();
+    }
     else if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING))
+    {
+        StopMoving();
         GetMotionMaster()->MoveFleeing(IsInWorld() ?  GetMap()->GetUnit(casterGuid) : nullptr, time);
+    }
 }
 
 void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/)
