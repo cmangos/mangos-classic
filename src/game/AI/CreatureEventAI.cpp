@@ -1038,7 +1038,6 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
         {
             // only set this on spawn event for now (need more implementation to set it in another place)
             m_reactState = ReactStates(action.setReactState.reactState);
-            sLog.outString("Set AI react state to %u for %s", uint32(m_reactState), m_creature->GetGuidStr().c_str());
             break;
         }
         default:
