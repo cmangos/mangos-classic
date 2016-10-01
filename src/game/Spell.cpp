@@ -4227,7 +4227,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (IsSealSpell(m_spellInfo))
                     continue;
 
-                if (CompareIdenticalAura(m_spellInfo->Id, foundHolder->GetSpellProto()->Id) < 0)
+                // We cannot overwrite someone else's more powerful spell
+                if (foundHolder->GetCaster() != m_caster && IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, foundHolder))
                     return SPELL_FAILED_MORE_POWERFUL_SPELL_ACTIVE;
             }
         }

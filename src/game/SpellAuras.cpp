@@ -473,9 +473,23 @@ void AreaAura::Update(uint32 diff)
                     if (!aur)
                         continue;
 
-                    // in generic case not allow stacking area auras
-                    apply = false;
-                    break;
+                    switch (m_areaAuraType)
+                    {
+                        case AREA_AURA_PARTY:
+                            // do not stack the same aura from the same caster
+                            // allows stack party-wide auras from totems/pets matching stacking rules
+                            // TODO: Find a better condition (Blizzlike Moonkin aura tricky case)
+                            if (aur == this || aur->GetCaster() == caster || caster->GetTypeId() == TYPEID_PLAYER || !actualSpellInfo->SpellFamilyName)
+                                apply = false;
+                            break;
+                        default:
+                            // in generic case not allow stacking area auras
+                            apply = false;
+                            break;
+                    }
+
+                    if (!apply)
+                        break;
                 }
 
                 if (!apply)

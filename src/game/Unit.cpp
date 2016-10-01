@@ -3458,7 +3458,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
             else
             {
                 //any stackable case with amount should mod existing stack amount
-                if (aurSpellInfo->StackAmount && aurSpellInfo->rangeIndex != SPELL_RANGE_IDX_SELF_ONLY && !aurSpellInfo->HasAttribute(SPELL_ATTR_EX3_UNK7))
+                if (aurSpellInfo->StackAmount && aurSpellInfo->rangeIndex != SPELL_RANGE_IDX_SELF_ONLY && !aurSpellInfo->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
                 {
                     foundHolder->ModStackAmount(holder->GetStackAmount());
                     delete holder;
@@ -3466,7 +3466,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 }
                 else
                 {
-                    if (!IsStackableEffect(holder->GetSpellProto(), foundHolder->GetSpellProto(), holder->GetTarget()))
+                    if (!IsStackableSpell(holder->GetSpellProto(), foundHolder->GetSpellProto(), holder->GetTarget()))
                     {
                         RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
                         break;
@@ -3607,8 +3607,6 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
     if (!spellProto)
         return false;
 
-    uint32 spellId = holder->GetId();
-
     // passive spell special case (only non stackable with ranks)
     if (IsPassiveSpell(spellProto))
     {
@@ -3616,28 +3614,9 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             return true;
     }
 
-    uint32 firstHoT = 0;
-    for (int eff = 0; eff < MAX_EFFECT_INDEX; ++eff)
-    {
-        if (Aura* aura = holder->GetAuraByEffectIndex(SpellEffectIndex(eff)))
-        {
-            switch (aura->GetModifier()->m_auraname)
-            {
-                case SPELL_AURA_PERIODIC_HEAL:
-                case SPELL_AURA_OBS_MOD_HEALTH:
-                {
-                    firstHoT = sSpellMgr.GetFirstSpellInChain(holder->GetId());
-                    break;
-                }
-                default: break;
-            }
-        }
-
-        if (firstHoT)
-            break;
-    }
-
-    SpellSpecific spellId_spec = GetSpellSpecific(spellId);
+    const uint32 spellId = holder->GetId();
+    const SpellSpecific specific = GetSpellSpecific(spellId);
+    SpellEntry const* triggeredBy = holder->GetTriggeredBy();
 
     SpellAuraHolderMap::iterator i, next;
     for (i = m_spellAuraHolders.begin(); i != m_spellAuraHolders.end(); i = next)
@@ -3646,137 +3625,75 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
         ++next;
         if (!(*i).second) continue;
 
-        SpellEntry const* i_spellProto = (*i).second->GetSpellProto();
+        SpellAuraHolder* existing = (*i).second;
+        SpellEntry const* existingSpellProto = existing->GetSpellProto();
 
-        if (!i_spellProto)
+        if (!existingSpellProto)
             continue;
 
-        uint32 i_spellId = i_spellProto->Id;
-
-        bool differentCaster = (holder->GetCasterGuid() != i->second->GetCasterGuid());
+        const uint32 existingSpellId = existingSpellProto->Id;
+        const SpellSpecific existingSpecific = GetSpellSpecific(existingSpellId);
+        const bool own = (holder->GetCasterGuid() == existing->GetCasterGuid());
 
         // early checks that spellId is passive non stackable spell
-        if (IsPassiveSpell(i_spellProto))
+        if (IsPassiveSpell(existingSpellProto))
         {
             // passive non-stackable spells not stackable only for same caster
-            if (differentCaster)
+            if (!own)
                 continue;
 
             // passive non-stackable spells not stackable only with another rank of same spell
-            if (!sSpellMgr.IsRankSpellDueToSpell(spellProto, i_spellId))
+            if (!sSpellMgr.IsRankSpellDueToSpell(spellProto, existingSpellId))
                 continue;
         }
 
         // prevent triggering aura of removing aura that triggered it
-        if (((*i).second->GetTriggeredBy() && (*i).second->GetTriggeredBy()->Id == spellId)
-            || (holder->GetTriggeredBy() && holder->GetTriggeredBy()->Id == i_spellId))
+        if ((existing->GetTriggeredBy() && existing->GetTriggeredBy()->Id == spellId)
+            || (holder->GetTriggeredBy() && holder->GetTriggeredBy()->Id == existingSpellId))
             continue;
 
-        SpellSpecific i_spellId_spec = GetSpellSpecific(i_spellId);
+        bool unique = false;
+        bool personal = false;
+        if (specific && existingSpecific && IsSpellSpecificIdentical(specific, existingSpecific))
 
-        // single allowed spell specific from same caster or from any caster at target
-        bool is_spellSpecPerTargetPerCaster = IsSingleFromSpellSpecificPerTargetPerCaster(spellId_spec, i_spellId_spec);
-
-        bool is_spellSpecPerTarget = IsSingleFromSpellSpecificPerTarget(spellId_spec, i_spellId_spec);
-        if (is_spellSpecPerTarget || (is_spellSpecPerTargetPerCaster && !differentCaster))
 
         {
-            // cannot remove higher rank
-            if (sSpellMgr.IsRankSpellDueToSpell(spellProto, i_spellId))
-                if (CompareAuraRanks(spellId, i_spellId) < 0)
+            personal = IsSpellSpecificUniquePerCaster(specific);
+            unique = (personal || IsSpellSpecificUniquePerTarget(specific));
+        }
+
+        if (unique || sSpellMgr.IsNoStackSpellDueToSpell(spellProto, existingSpellProto))
+        {
+            // check if this spell can be triggered by any talent aura
+            if (!unique && triggeredBy && sSpellMgr.IsSpellCanAffectSpell(triggeredBy, existingSpellProto))
+                continue;
+
+            if (personal && !own)
+                continue;
+
+            // holder cannot remove higher rank if it isn't from the same caster
+            if (!own)
+            {
+                if (IsSimilarExistingAuraStronger(holder, existing) || (sSpellMgr.IsRankSpellDueToSpell(spellProto, existingSpellId) && sSpellMgr.IsHighRankOfSpell(existingSpellId, spellId)))
                     return false;
+            }
 
             // Its a parent aura (create this aura in ApplyModifier)
-            if ((*i).second->IsInUse())
+            if (existing->IsInUse())
             {
                 sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", i->second->GetId(), holder->GetId());
                 continue;
             }
-            RemoveAurasDueToSpell(i_spellId);
 
-            if (m_spellAuraHolders.empty())
-                break;
+            if (personal)
+                RemoveAurasByCasterSpell(existingSpellId, holder->GetCasterGuid());
             else
-                next =  m_spellAuraHolders.begin();
-
-            continue;
-        }
-
-        // spell with spell specific that allow single ranks for spell from diff caster
-        // same caster case processed or early or later
-        bool is_spellPerTarget = IsSingleFromSpellSpecificSpellRanksPerTarget(spellId_spec, i_spellId_spec);
-        if (is_spellPerTarget && differentCaster && sSpellMgr.IsRankSpellDueToSpell(spellProto, i_spellId))
-        {
-            // cannot remove higher rank
-            if (CompareAuraRanks(spellId, i_spellId) < 0)
-                return false;
-
-            // Its a parent aura (create this aura in ApplyModifier)
-            if ((*i).second->IsInUse())
-            {
-                sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", i->second->GetId(), holder->GetId());
-                continue;
-            }
-            RemoveAurasDueToSpell(i_spellId);
-
-            if (m_spellAuraHolders.empty())
-                break;
-            else
-                next =  m_spellAuraHolders.begin();
-
-            continue;
-        }
-
-        // non single (per caster) per target spell specific (possible single spell per target at caster)
-        if (!is_spellSpecPerTargetPerCaster && !is_spellSpecPerTarget)
-        {
-            SpellEntry const* triggeredBy = holder->GetTriggeredBy();
-            if (triggeredBy && sSpellMgr.IsSpellCanAffectSpell(triggeredBy, i_spellProto)) // check if this spell can be triggered by any talent aura
-                continue;
-
-            if (sSpellMgr.IsNoStackSpellDueToSpell(spellProto, i_spellProto) && !differentCaster)
-            {
-                // cannot remove higher rank
-                if (CompareIdenticalAura(spellId, i_spellId) < 0)
-                    return false;
-
-                // Its a parent aura (create this aura in ApplyModifier)
-                if ((*i).second->IsInUse())
-                {
-                    sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", i->second->GetId(), holder->GetId());
-                    continue;
-                }
-                RemoveAurasByCasterSpell(i_spellId, holder->GetCasterGuid());
-
-                if (m_spellAuraHolders.empty())
-                    break;
-                else
-                    next = m_spellAuraHolders.begin();
-            }
-            continue;
-        }
-
-        if (IsPositiveSpell(spellId) && sSpellMgr.IsNoStackSpellDueToSpell(spellProto, i_spellProto) ||
-            !IsPositiveSpell(spellId) && sSpellMgr.IsNoStackSpellDueToSpell(spellProto, i_spellProto))
-        {
-            // cannot remove higher rank
-            if (CompareIdenticalAura(spellId, i_spellId) < 0)
-                return false;
-
-            // Its a parent aura (create this aura in ApplyModifier)
-            if ((*i).second->IsInUse())
-            {
-                sLog.outError("SpellAuraHolder (Spell %u) is in process but attempt removed at SpellAuraHolder (Spell %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAuraHolder", i->second->GetId(), holder->GetId());
-                continue;
-            }
-            RemoveAurasDueToSpell(i_spellId);
+                RemoveAurasDueToSpell(existingSpellId);
 
             if (m_spellAuraHolders.empty())
                 break;
             else
                 next = m_spellAuraHolders.begin();
-
-            continue;
         }
     }
     return true;
