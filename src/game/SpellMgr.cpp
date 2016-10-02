@@ -548,49 +548,30 @@ bool IsExplicitNegativeTarget(uint32 targetA)
 
 bool IsSingleTargetSpell(SpellEntry const* spellInfo)
 {
-    // hunter's mark and similar
-    if (spellInfo->SpellVisual == 3239)
-        return true;
-
-    // exceptions (have spellInfo->AttributesEx & (1<<18) but not single targeted)
-    switch (spellInfo->Id)
-    {
-        case 1833:                                          // Cheap Shot
-        case 4538:                                          // Extract Essence (group targets)
-        case 5106:                                          // Crystal Flash (group targets)
-        case 5530:                                          // Mace Stun Effect
-        case 5648:                                          // Stunning Blast, rank 1
-        case 5649:                                          // Stunning Blast, rank 2
-        case 5726:                                          // Stunning Blow, Rank 1
-        case 5727:                                          // Stunning Blow, Rank 2
-        case 6927:                                          // Shadowstalker Slash, Rank 1
-        case 8399:                                          // Sleep (group targets)
-        case 9159:                                          // Sleep (armor triggred affect)
-        case 9256:                                          // Deep Sleep (group targets)
-        case 13902:                                         // Fist of Ragnaros
-        case 14902:                                         // Cheap Shot
-        case 16104:                                         // Crystallize (group targets)
-        case 17286:                                         // Crusader's Hammer (group targets)
-        case 20277:                                         // Fist of Ragnaros (group targets)
-        case 20669:                                         // Sleep (group targets)
-        case 20683:                                         // Highlord's Justice
-        case 24664:                                         // Sleep (group targets)
-            return false;
-    }
-    // cannot be cast on another target while not cooled down anyway
-    if (GetSpellDuration(spellInfo) < int32(GetSpellRecoveryTime(spellInfo)))
+    // Not AoE
+    if (IsAreaOfEffectSpell(spellInfo))
         return false;
 
-    // all other single target spells have if it has AttributesEx
-    if (spellInfo->AttributesEx & (1 << 18))
-        return true;
+    // Mechanics
+    switch (spellInfo->Mechanic)
+    {
+        case MECHANIC_FEAR:         // Includes: Warlock's Fear, Scare Beast
+        case MECHANIC_TURN:         // Turn Undead
+            // Always single-target in classic
+            return true;
+        case MECHANIC_ROOT:
+        case MECHANIC_SLEEP:        // Includes: Hibernate, Wyvern Sting
+        case MECHANIC_KNOCKOUT:     // Includes: Sap, Gouge
+        case MECHANIC_POLYMORPH:
+        case MECHANIC_BANISH:
+        case MECHANIC_SHACKLE:
+            // Only spells used by players seem to be subjects to single target mechanics in classic
+            return (spellInfo->SpellFamilyName && spellInfo->SpellFamilyFlags.Flags);
+    }
 
-    // other single target
-    // Fear
-    if ((spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
-            // Banish
-            || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305)
-       ) return true;
+    // Hunter's Mark mechanics (Mind Vision also uses this spell, but it has no practical side effects)
+    if (IsSpellHaveAura(spellInfo, SPELL_AURA_MOD_STALKED))
+        return true;
 
     return false;
 }
@@ -598,7 +579,6 @@ bool IsSingleTargetSpell(SpellEntry const* spellInfo)
 bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2)
 {
     return ((spellInfo1->Id == spellInfo2->Id || spellInfo1->SpellFamilyFlags.Flags == spellInfo2->SpellFamilyFlags.Flags) && IsSingleTargetSpell(spellInfo1) && IsSingleTargetSpell(spellInfo2));
-
 }
 
 SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 form)
