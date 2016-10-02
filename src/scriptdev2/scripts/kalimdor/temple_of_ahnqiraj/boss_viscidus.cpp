@@ -207,7 +207,7 @@ struct boss_viscidusAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* pDealer, uint32& uiDamage) override
+    void DamageTaken(Unit* pDealer, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (m_uiPhase != PHASE_FROZEN)
             return;

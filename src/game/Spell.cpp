@@ -1034,7 +1034,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         unitTarget->CalculateAbsorbResistBlock(caster, &damageInfo, m_spellInfo);
 
-        caster->DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
+        caster->DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb, SPELL_DIRECT_DAMAGE);
 
         // Send log damage message to client
         caster->SendSpellNonMeleeDamageLog(&damageInfo);

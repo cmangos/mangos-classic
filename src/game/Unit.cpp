@@ -670,7 +670,7 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType, ObjectGuid casterGuid)
     }
 }
 
-void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb)
+void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb, DamageEffectType damagetype)
 {
     if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode()))
     {
@@ -684,10 +684,10 @@ void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb)
 
     // Script Event damage Deal
     if (AI())
-        AI()->DamageDeal(pVictim, damage);
+        AI()->DamageDeal(pVictim, damage, damagetype);
     // Script Event damage taken
     if (pVictim->AI())
-        pVictim->AI()->DamageTaken(this, damage);
+        pVictim->AI()->DamageTaken(this, damage, damagetype);
 
     if (absorb && originalDamage > damage)
         *absorb += (originalDamage - damage);
@@ -1398,7 +1398,7 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage
     SpellNonMeleeDamage damageInfo(this, pVictim, spellInfo->Id, SpellSchools(spellInfo->School));
     CalculateSpellDamage(&damageInfo, damage, spellInfo);
     damageInfo.target->CalculateAbsorbResistBlock(this, &damageInfo, spellInfo);
-    DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
+    DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb, SPELL_DIRECT_DAMAGE);
     SendSpellNonMeleeDamageLog(&damageInfo);
     DealSpellDamage(&damageInfo, true);
     return damageInfo.damage;
@@ -1906,7 +1906,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss)
                     // CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
                     // damage-=absorb + resist;
 
-                    pVictim->DealDamageMods(this, damage, nullptr);
+                    pVictim->DealDamageMods(this, damage, nullptr, SPELL_DIRECT_DAMAGE);
 
                     WorldPacket data(SMSG_SPELLDAMAGESHIELD, (8 + 8 + 4 + 4));
                     data << pVictim->GetObjectGuid();
@@ -2155,7 +2155,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 
             uint32 splitted = currentAbsorb;
             uint32 splitted_absorb = 0;
-            pCaster->DealDamageMods(caster, splitted, &splitted_absorb);
+            pCaster->DealDamageMods(caster, splitted, &splitted_absorb, DIRECT_DAMAGE);
 
             pCaster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, splitted_absorb, 0, false, 0, false);
 
@@ -2188,7 +2188,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
             }
 
             uint32 split_absorb = 0;
-            pCaster->DealDamageMods(caster, splitted, &split_absorb);
+            pCaster->DealDamageMods(caster, splitted, &split_absorb, DIRECT_DAMAGE);
 
             pCaster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, split_absorb, 0, false, 0, false);
 
@@ -2256,7 +2256,7 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     for (uint8 i = 0; i < m_weaponDamageCount[attType]; i++)
     {
         damageInfo.totalDamage -= damageInfo.subDamage[i].damage;
-        DealDamageMods(pVictim, damageInfo.subDamage[i].damage, &damageInfo.subDamage[i].absorb);
+        DealDamageMods(pVictim, damageInfo.subDamage[i].damage, &damageInfo.subDamage[i].absorb, DIRECT_DAMAGE);
         damageInfo.totalDamage += damageInfo.subDamage[i].damage;
     }
 

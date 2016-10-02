@@ -85,7 +85,7 @@ struct boss_twin_emperorsAI : public ScriptedAI
     }
 
     // Workaround for the shared health pool
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (!m_pInstance)
             return;

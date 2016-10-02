@@ -242,7 +242,7 @@ struct boss_majordomoAI : public ScriptedAI
         m_luiMajordomoAddsGUIDs.clear();
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (uiDamage > m_creature->GetHealth())
         {

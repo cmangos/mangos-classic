@@ -153,7 +153,7 @@ struct mob_core_ragerAI : public ScriptedAI
         m_uiMangleTimer = 7 * IN_MILLISECONDS;              // These times are probably wrong
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (m_creature->GetHealthPercent() < 50.0f)
         {

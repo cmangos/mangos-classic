@@ -383,7 +383,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         // Ignore damage reduction when vulnerable
         if (m_Phase == PHASE_CTHUN_WEAKENED)

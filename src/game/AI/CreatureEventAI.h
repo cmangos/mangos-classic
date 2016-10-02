@@ -658,7 +658,7 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         void AttackStart(Unit* who) override;
         void MoveInLineOfSight(Unit* who) override;
         void SpellHit(Unit* pUnit, const SpellEntry* pSpell) override;
-        void DamageTaken(Unit* done_by, uint32& damage) override;
+        void DamageTaken(Unit* done_by, uint32& damage, DamageEffectType damagetype) override;
         void HealedBy(Unit* healer, uint32& healedAmount) override;
         void UpdateAI(const uint32 diff) override;
         bool IsVisible(Unit*) const override;

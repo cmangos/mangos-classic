@@ -100,7 +100,7 @@ struct mob_anubisath_guardianAI : public ScriptedAI
         --m_uiSummonCount;
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& /*uiDamage*/) override
+    void DamageTaken(Unit* /*pDoneBy*/, uint32& /*uiDamage*/, DamageEffectType /*damagetype*/) override
     {
         // when we reach 10% of HP explode or enrage
         if (!m_bIsEnraged && m_creature->GetHealthPercent() < 10.0f)

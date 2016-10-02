@@ -73,10 +73,10 @@ struct ScriptedAI : public CreatureAI
         void HealedBy(Unit* /*pHealer*/, uint32& /*uiHealedAmount*/) override {}
 
         // Called at any Damage to any victim (before damage apply)
-        void DamageDeal(Unit* /*pDoneTo*/, uint32& /*uiDamage*/) override {}
+        void DamageDeal(Unit* /*pDoneTo*/, uint32& /*uiDamage*/, DamageEffectType damagetype) override {}
 
         // Called at any Damage from any attacker (before damage apply)
-        void DamageTaken(Unit* /*pDealer*/, uint32& /*uiDamage*/) override {}
+        void DamageTaken(Unit* /*pDealer*/, uint32& /*uiDamage*/, DamageEffectType damagetype) override {}
 
         // Called at creature death
         void JustDied(Unit* /*pKiller*/) override {}
