@@ -409,7 +409,6 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                     case 25037: // Rumsey Rum Light
                     case 25722: // Rumsey Rum Dark
                     case 25804: // Rumsey Rum Black Label
-                    case 37058: // Halaani Whiskey
                         return SPELL_WELL_FED;
                 }
             }
@@ -438,13 +437,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             // only warlock curses have this
             if (spellInfo->Dispel == DISPEL_CURSE)
                 return SPELL_CURSE;
+
             // Drain Soul and Shadowburn
             if (spellInfo->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_CHANNEL_DEATH_ITEM)
                 return SPELL_SOUL_CAPTURE;
-
-            // Corruption and Seed of Corruption
-            if (spellInfo->IsFitToFamilyMask(uint64(0x1000000002)))
-                return SPELL_CORRUPTION;
 
             break;
         }

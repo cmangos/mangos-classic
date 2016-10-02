@@ -75,7 +75,7 @@ enum SpellSpecific
     SPELL_DRINK             = 21,
     SPELL_FOOD_AND_DRINK    = 22,
     SPELL_SOUL_CAPTURE      = 23,
-    SPELL_CORRUPTION        = 24,
+    // SPELL_CORRUPTION        = 24,                        // used in 2.x+
 };
 
 SpellSpecific GetSpellSpecific(uint32 spellId);
@@ -925,7 +925,6 @@ inline bool IsSpellSpecificUniquePerCaster(SpellSpecific specific)
         case SPELL_POSITIVE_SHOUT:
         case SPELL_JUDGEMENT:
         case SPELL_SOUL_CAPTURE:
-        case SPELL_CORRUPTION:
             return true;
     }
     return false;
