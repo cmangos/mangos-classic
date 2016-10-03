@@ -1181,7 +1181,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
 
     // try detect target manually if not set
     if (target == nullptr)
-        target = !(procFlags & PROC_FLAG_SUCCESSFUL_POSITIVE_SPELL) && IsPositiveSpellTargetMode(triggerEntry, this, pVictim) ? this : pVictim;
+        target = !(procFlags & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS)) && IsPositiveSpellTargetMode(triggerEntry, this, pVictim) ? this : pVictim;
 
     // default case
     if (!target || (target != this && !target->isAlive()))

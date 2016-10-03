@@ -13778,6 +13778,7 @@ void Player::_LoadAuras(QueryResult* result, uint32 timediff)
                     holder->SetTrackedAuraType(TRACK_AURA_TYPE_NOT_TRACKED);
 
                 AddSpellAuraHolder(holder);
+                holder->SetState(SPELLAURAHOLDER_STATE_READY);
                 DETAIL_LOG("Added auras from spellid %u", spellproto->Id);
             }
             else
