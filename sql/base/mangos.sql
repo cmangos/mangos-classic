@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2685_01_mangos_event_linkedto` bit(1) DEFAULT NULL
+  `required_z2687_01_mangos_spell_chain` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -10789,6 +10789,11 @@ INSERT INTO `spell_chain` VALUES
 (10144,6129,587,5,0),
 (10145,10144,587,6,0),
 (28612,10145,587,7,0),
+/* Conjure Mana Gem */
+(759,0,759,1,0),
+(3552,759,759,2,0),
+(10053,3552,759,3,0),
+(10054,10053,759,4,0),
 /* Conjure Water */
 (5504,0,5504,1,0),
 (5505,5504,5504,2,0),
