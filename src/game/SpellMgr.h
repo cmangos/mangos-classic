@@ -51,31 +51,24 @@ enum SpellCategories
 // Spell clasification
 enum SpellSpecific
 {
-    SPELL_NORMAL            = 0,
-    SPELL_SEAL              = 1,
-    SPELL_BLESSING          = 2,
-    SPELL_AURA              = 3,
-    SPELL_STING             = 4,
-    SPELL_CURSE             = 5,
-    SPELL_ASPECT            = 6,
-    SPELL_TRACKER           = 7,
-    SPELL_WARLOCK_ARMOR     = 8,
-    SPELL_MAGE_ARMOR        = 9,
-    SPELL_ELEMENTAL_SHIELD  = 10,
-    SPELL_MAGE_POLYMORPH    = 11,                        // Semi-deprecated, not used for filtering anymore
-    SPELL_POSITIVE_SHOUT    = 12,
-    SPELL_JUDGEMENT         = 13,
-    SPELL_BATTLE_ELIXIR     = 14,
-    SPELL_GUARDIAN_ELIXIR   = 15,
-    SPELL_FLASK_ELIXIR      = 16,
-    // SPELL_PRESENCE          = 17,                        // used in 3.x
-    // SPELL_HAND              = 18,                        // used in 3.x
-    SPELL_WELL_FED          = 19,
-    SPELL_FOOD              = 20,
-    SPELL_DRINK             = 21,
-    SPELL_FOOD_AND_DRINK    = 22,
-    SPELL_SOUL_CAPTURE      = 23,
-    // SPELL_CORRUPTION        = 24,                        // used in 2.x+
+    SPELL_NORMAL,
+    SPELL_FOOD,
+    SPELL_DRINK,
+    SPELL_FOOD_AND_DRINK,
+    SPELL_WELL_FED,
+    SPELL_FLASK_ELIXIR,
+    SPELL_SEAL,
+    SPELL_JUDGEMENT,
+    SPELL_BLESSING,
+    SPELL_AURA,
+    SPELL_STING,
+    SPELL_ASPECT,
+    SPELL_TRACKER,
+    SPELL_CURSE,
+    SPELL_SOUL_CAPTURE,
+    SPELL_MAGE_ARMOR,
+    SPELL_WARLOCK_ARMOR,
+    SPELL_ELEMENTAL_SHIELD,
 };
 
 SpellSpecific GetSpellSpecific(uint32 spellId);
@@ -171,8 +164,6 @@ inline bool IsSpellLastAuraEffect(SpellEntry const* spellInfo, SpellEffectIndex 
     return true;
 }
 
-bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2);
-
 inline bool IsSealSpell(SpellEntry const* spellInfo)
 {
     // Collection of all the seal family flags. No other paladin spell has any of those.
@@ -184,10 +175,11 @@ inline bool IsAllowingDeadTarget(SpellEntry const* spellInfo)
     return spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD) || spellInfo->Targets & (TARGET_FLAG_PVP_CORPSE | TARGET_FLAG_UNIT_CORPSE | TARGET_FLAG_CORPSE_ALLY);
 }
 
-inline bool IsElementalShield(SpellEntry const* spellInfo)
+inline bool IsSpellMagePolymorph(uint32 spellid)
 {
-    // family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
-    return (spellInfo->SpellFamilyFlags & uint64(0x00000000400)) || spellInfo->Id == 23552;
+    // Only mage polymorph bears hidden scripted regeneration
+    const SpellEntry* entry = sSpellStore.LookupEntry(spellid);
+    return (entry && entry->SpellFamilyName == SPELLFAMILY_MAGE && (entry->SpellFamilyFlags & uint64(0x1000000)) && IsSpellHaveAura(entry, SPELL_AURA_MOD_CONFUSE));
 }
 
 inline bool IsSpellEffectTriggerSpell(const SpellEntry* entry, SpellEffectIndex effIndex)
@@ -252,11 +244,6 @@ inline bool IsSpellAbleToCrit(const SpellEntry* entry)
     return false;
 }
 
-// order from less to more strict
-bool IsSingleFromSpellSpecificPerTargetPerCaster(SpellSpecific spellSpec1, SpellSpecific spellSpec2);
-bool IsSingleFromSpellSpecificSpellRanksPerTarget(SpellSpecific spellSpec1, SpellSpecific spellSpec2);
-bool IsSingleFromSpellSpecificPerTarget(SpellSpecific spellSpec1, SpellSpecific spellSpec2);
-
 bool IsPassiveSpell(uint32 spellId);
 bool IsPassiveSpell(SpellEntry const* spellProto);
 
@@ -300,7 +287,10 @@ bool IsExplicitPositiveTarget(uint32 targetA);
 bool IsExplicitNegativeTarget(uint32 targetA);
 
 bool IsSingleTargetSpell(SpellEntry const* spellInfo);
-bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2);
+inline bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2)
+{
+    return (IsSingleTargetSpell(spellInfo1) && (spellInfo1->Id == spellInfo2->Id || (spellInfo1->SpellFamilyFlags.Flags == spellInfo2->SpellFamilyFlags.Flags && IsSingleTargetSpell(spellInfo2))));
+}
 
 // TODO: research binary spells
 inline bool IsBinarySpell(SpellEntry const* spellInfo)
@@ -922,7 +912,6 @@ inline bool IsSpellSpecificUniquePerCaster(SpellSpecific specific)
         case SPELL_STING:
         case SPELL_CURSE:
         case SPELL_ASPECT:
-        case SPELL_POSITIVE_SHOUT:
         case SPELL_JUDGEMENT:
         case SPELL_SOUL_CAPTURE:
             return true;
@@ -942,10 +931,7 @@ inline bool IsSpellSpecificUniquePerTarget(SpellSpecific specific)
         case SPELL_WARLOCK_ARMOR:
         case SPELL_MAGE_ARMOR:
         case SPELL_ELEMENTAL_SHIELD:
-        case SPELL_MAGE_POLYMORPH:
         case SPELL_WELL_FED:
-        case SPELL_BATTLE_ELIXIR:
-        case SPELL_GUARDIAN_ELIXIR:
         case SPELL_FLASK_ELIXIR:
         case SPELL_FOOD:
         case SPELL_DRINK:
@@ -963,16 +949,6 @@ inline bool IsSpellSpecificIdentical(SpellSpecific specific, SpellSpecific speci
     // Compare combined specifics
     switch (specific)
     {
-        case SPELL_BATTLE_ELIXIR:
-            return specific2 == SPELL_BATTLE_ELIXIR ||
-                   specific2 == SPELL_FLASK_ELIXIR;
-        case SPELL_GUARDIAN_ELIXIR:
-            return specific2 == SPELL_GUARDIAN_ELIXIR ||
-                   specific2 == SPELL_FLASK_ELIXIR;
-        case SPELL_FLASK_ELIXIR:
-            return specific2 == SPELL_BATTLE_ELIXIR ||
-                   specific2 == SPELL_GUARDIAN_ELIXIR ||
-                   specific2 == SPELL_FLASK_ELIXIR;
         case SPELL_FOOD:
             return specific2 == SPELL_FOOD ||
                    specific2 == SPELL_FOOD_AND_DRINK;
