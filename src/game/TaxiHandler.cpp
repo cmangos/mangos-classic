@@ -234,7 +234,12 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
             GetPlayer()->m_taxi.ClearTaxiDestinations();    // clear problematic path and next
     }
     else
+    {
         GetPlayer()->m_taxi.ClearTaxiDestinations();        // not destinations, clear source node
+
+        // has taxi flight just finished reset fall information to avoid receiving fall damage
+        GetPlayer()->SetFallInformation(0, movementInfo.GetPos()->z);
+    }
 }
 
 void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recv_data)
