@@ -744,6 +744,26 @@ inline bool IsPositiveAuraEffect(const SpellEntry* entry, SpellEffectIndex effIn
     return (IsAuraApplyEffect(entry, effIndex) && IsPositiveEffect(entry, effIndex, caster, target));
 }
 
+inline bool IsPositiveSpellTargetModeForSpecificTarget(const SpellEntry* entry, uint8 effectMask, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
+{
+    if (!entry)
+        return false;
+    // spells with at least one negative effect are considered negative
+    // some self-applied spells have negative effects but in self casting case negative check ignored.
+    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (effectMask & (1 << i))
+            if (entry->Effect[i] && !IsPositiveEffectTargetMode(entry, SpellEffectIndex(i), caster, target))
+                return false;
+    return true;
+}
+
+inline bool IsPositiveSpellTargetModeForSpecificTarget(uint32 spellId, uint8 effectMask, const WorldObject* caster, const WorldObject* target)
+{
+    if (!spellId)
+        return false;
+    return IsPositiveSpellTargetModeForSpecificTarget(sSpellStore.LookupEntry(spellId), effectMask, caster, target);
+}
+
 inline bool IsPositiveSpellTargetMode(const SpellEntry* entry, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)
 {
     if (!entry)

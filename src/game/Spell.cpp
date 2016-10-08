@@ -3094,7 +3094,7 @@ void Spell::finish(bool ok)
                     SpellEffectIndex auraSpellIdx = (*i)->GetEffIndex();
                     const uint32 procid = auraSpellInfo->EffectTriggerSpell[auraSpellIdx];
                     // Quick target mode check for procs and triggers (do not cast at friendly targets stuff against hostiles only)
-                    if (IsPositiveSpellTargetMode(m_spellInfo, m_caster, unit) != IsPositiveSpellTargetMode(procid, m_caster, unit))
+                    if (IsPositiveSpellTargetModeForSpecificTarget(m_spellInfo, ihit->effectMask, m_caster, unit) != IsPositiveSpellTargetModeForSpecificTarget(procid, ihit->effectMask, m_caster, unit))
                         continue;
                     // Calculate chance at that moment (can be depend for example from combo points)
                     int32 auraBasePoints = (*i)->GetBasePoints();
