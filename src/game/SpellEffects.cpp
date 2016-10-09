@@ -1211,8 +1211,10 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     // found spelldamage coefficients of 0.381% per 0.1 speed and 15.244 per 4.0 speed
                     // but own calculation say 0.385 gives at most one point difference to published values
-                    int32 totalDamage = (damage + 3.85f) * m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo))
-                    * 0.01 * m_CastItem->GetProto()->Delay / IN_MILLISECONDS;
+                    // calculation should really be; ((damage + 0.385 * BonusSpellDamage) * 0.1 * weaponSpeed)
+                    // base damage is multiplied by 10 in spell.dbc so we have to multiply the coefficients by 10 and then divide the whole bracket by 10.
+                    float weaponSpeed = (m_CastItem->GetProto()->Delay / IN_MILLISECONDS) * m_CastItem->GetProto()->Delay;
+                    int32 totalDamage = (damage + 3.85f * m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo))) * 0.01 * weaponSpeed;
 
                     m_caster->CastCustomSpell(unitTarget, 10444, &totalDamage, nullptr, nullptr, true, m_CastItem);
                 }
