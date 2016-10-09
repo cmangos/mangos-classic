@@ -4213,20 +4213,13 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         for (Unit::SpellAuraHolderMap::const_iterator iter = spair.begin(); iter != spair.end(); ++iter)
         {
-            SpellAuraHolder* foundHolder = iter->second;
-
-            if (sSpellMgr.IsNoStackSpellDueToSpell(m_spellInfo, foundHolder->GetSpellProto()))
+            const SpellAuraHolder* existing = iter->second;
+            const SpellEntry* entry = existing->GetSpellProto();
+            if (m_caster != existing->GetCaster() && sSpellMgr.IsNoStackSpellDueToSpell(m_spellInfo, entry))
             {
-                // Explicit check for same spells of different rank when casters are different
-                if (sSpellMgr.IsRankSpellDueToSpell(m_spellInfo, foundHolder->GetSpellProto()->Id) && m_caster != foundHolder->GetCaster())
-                    continue;
-
-                // Skip seals, don't check if we can apply them.
-                if (IsSealSpell(m_spellInfo))
-                    continue;
-
                 // We cannot overwrite someone else's more powerful spell
-                if (foundHolder->GetCaster() != m_caster && IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, foundHolder))
+                if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing) ||
+                    (sSpellMgr.IsRankSpellDueToSpell(m_spellInfo, entry->Id) && sSpellMgr.IsHighRankOfSpell(entry->Id, m_spellInfo->Id)))
                     return SPELL_FAILED_MORE_POWERFUL_SPELL_ACTIVE;
             }
         }
