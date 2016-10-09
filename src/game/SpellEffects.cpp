@@ -1875,6 +1875,10 @@ void Spell::EffectEnergize(SpellEffectIndex eff_idx)
     int level_diff = 0;
     switch (m_spellInfo->Id)
     {
+        case 5530:
+            if (m_caster->getClass() == CLASS_ROGUE) // Warrior and rogue use same spell, on rogue not supposed to give resource, WTF blizzard
+                return;
+            break;
         case 9512:                                          // Restore Energy
             level_diff = m_caster->getLevel() - 40;
             level_multiplier = 2;
