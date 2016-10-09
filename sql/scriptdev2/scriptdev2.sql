@@ -157,6 +157,7 @@ UPDATE creature_template SET ScriptName='npc_twiggy_flathead' WHERE entry=6248;
 DELETE FROM scripted_areatrigger WHERE entry=522;
 INSERT INTO scripted_areatrigger VALUES (522,'at_twiggy_flathead');
 UPDATE creature_template SET ScriptName='npc_wizzlecranks_shredder' WHERE entry=3439;
+UPDATE creature_template SET ScriptName='npc_gallywix' WHERE entry=7288;
 
 /* BLACKFATHOM DEPTHS */
 UPDATE instance_template SET ScriptName='instance_blackfathom_deeps' WHERE map=48;

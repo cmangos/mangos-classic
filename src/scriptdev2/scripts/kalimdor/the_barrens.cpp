@@ -591,6 +591,27 @@ CreatureAI* GetAI_npc_wizzlecranks_shredder(Creature* pCreature)
     return new npc_wizzlecranks_shredderAI(pCreature);
 }
 
+struct npc_gallywixAI : public ScriptedAI
+{
+    npc_gallywixAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
+    }
+
+    void Reset() override {}
+
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    {
+        if (spellInfo && spellInfo->IsFitToFamilyMask(0x0000000000800200)) // on Ambush
+            uiDamage = (m_creature->GetHealth()*0.5); // Ambush should do 50% health in damage to this creature
+    }
+};
+
+CreatureAI* GetAI_npc_gallywix(Creature* pCreature)
+{
+    return new npc_gallywixAI(pCreature);
+}
+
 void AddSC_the_barrens()
 {
     Script* pNewScript;
@@ -620,5 +641,10 @@ void AddSC_the_barrens()
     pNewScript->Name = "npc_wizzlecranks_shredder";
     pNewScript->GetAI = &GetAI_npc_wizzlecranks_shredder;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_wizzlecranks_shredder;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_gallywix";
+    pNewScript->GetAI = &GetAI_npc_gallywix;
     pNewScript->RegisterSelf();
 }
