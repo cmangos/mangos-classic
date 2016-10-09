@@ -89,7 +89,7 @@ struct npc_morokkAI : public npc_escortAI
         AttackStart(pAttacker);
     }
 
-    virtual void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/)
+    virtual void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING))
         {
