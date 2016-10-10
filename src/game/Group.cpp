@@ -506,13 +506,12 @@ void Group::SendUpdate()
             if (citr->guid == citr2->guid)
                 continue;
             Player* member = sObjectMgr.GetPlayer(citr2->guid);
-            uint8 onlineState = (member) ? MEMBER_STATUS_ONLINE : MEMBER_STATUS_OFFLINE;
+            uint8 onlineState = (member && member->GetSession() && !member->GetSession()->PlayerLogout()) ? MEMBER_STATUS_ONLINE : MEMBER_STATUS_OFFLINE;
             onlineState = onlineState | ((isBGGroup()) ? MEMBER_STATUS_PVP : 0);
 
             data << citr2->name;
             data << citr2->guid;
-            // online-state
-            data << uint8(sObjectMgr.GetPlayer(citr2->guid) ? 1 : 0);
+            data << uint8(onlineState);
             data << (uint8)(citr2->group | (citr2->assistant ? 0x80 : 0));
         }
 
