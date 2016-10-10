@@ -273,7 +273,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
 uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
 {
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove
-    if (GetMembersCount() > uint32(isBGGroup() ? 1 : 2))    // in BG group case allow 1 members group
+    if (GetMembersCount() > GetMembersMinCount())
     {
         bool leaderChanged = _removeMember(guid);
 
@@ -704,7 +704,7 @@ bool Group::_removeMember(ObjectGuid guid)
 
 void Group::_chooseLeader()
 {
-    if (GetMembersCount() < 2)
+    if (GetMembersCount() < GetMembersMinCount())
         return;
 
     ObjectGuid first = ObjectGuid(); // First available: if no suitable canditates are found
