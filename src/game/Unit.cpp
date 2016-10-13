@@ -969,6 +969,9 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
     }
 
     /* ******************************* Inform various hooks ************************************ */
+    // Inform victim's AI
+    if (victim->AI())
+        victim->AI()->JustDied(this);
 
     // Inform Owner
     Unit* pOwner = victim->GetCharmerOrOwner();
@@ -1035,10 +1038,6 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
     /* ********************************* Set Death finally ************************************* */
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "SET JUST_DIED");
     victim->SetDeathState(JUST_DIED);                       // if !spiritOfRedemtionTalentReady always true for unit
-
-    // Inform victim's AI
-    if (victim->AI()) // Must be done after auras/cleanup is done, so that things like stun do not influence events
-        victim->AI()->JustDied(this);
 
     if (isPet)
         return;                                             // Pets might have been unsummoned at this place, do not handle them further!
