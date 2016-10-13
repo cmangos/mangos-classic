@@ -1126,37 +1126,6 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
                 ResetEffectDamageAndHeal();
                 return;
             }
-
-            // not break stealth by cast targeting
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
-                unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-
-            // Hostile spell hits count as attack made against target (if detected), stealth removed at Spell::cast if spell break it
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
-                !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) &&
-                !IsPositiveSpell(m_spellInfo->Id, realCaster, unit) &&
-                m_caster->isVisibleForOrDetect(unit, unit, false))
-            {
-                // use speedup check to avoid re-remove after above lines
-                if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
-                    unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-
-                // caster can be detected but have stealth aura
-                m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-
-                if (!unit->IsStandState() && !unit->hasUnitState(UNIT_STAT_STUNNED))
-                    unit->SetStandState(UNIT_STAND_STATE_STAND);
-
-                if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
-                    unit->AttackedBy(realCaster);
-
-                unit->AddThreat(realCaster);
-                unit->SetInCombatWith(realCaster);
-                realCaster->SetInCombatWith(unit);
-
-                if (Player* attackedPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
-                    realCaster->SetContestedPvP(attackedPlayer);
-            }
         }
         else
         {
@@ -1165,16 +1134,6 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
             {
                 ResetEffectDamageAndHeal();
                 return;
-            }
-
-            // assisting case, healing and resurrection
-            if (unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
-                realCaster->SetContestedPvP();
-
-            if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
-            {
-                realCaster->SetInCombatState(unit->GetCombatTimer() > 0);
-                unit->getHostileRefManager().threatAssist(realCaster, 0.0f, m_spellInfo);
             }
         }
     }
@@ -1212,6 +1171,56 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
                     if (Player* modOwner = realCaster->GetSpellModOwner())
                         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_EFFECT_PAST_FIRST, multiplier, this);
                 m_damageMultipliers[effectNumber] *= multiplier;
+            }
+        }
+    }
+
+    if (realCaster && realCaster != unit)
+    {
+        if (!realCaster->IsFriendlyTo(unit))
+        {
+            // not break stealth by cast targeting
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
+                unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
+            // Hostile spell hits count as attack made against target (if detected), stealth removed at Spell::cast if spell break it
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
+                !m_spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) &&
+                !IsPositiveSpell(m_spellInfo->Id, realCaster, unit) &&
+                m_caster->isVisibleForOrDetect(unit, unit, false))
+            {
+                // use speedup check to avoid re-remove after above lines
+                if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
+                    unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
+                // caster can be detected but have stealth aura
+                m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
+                if (!unit->IsStandState() && !unit->hasUnitState(UNIT_STAT_STUNNED))
+                    unit->SetStandState(UNIT_STAND_STATE_STAND);
+
+                // TODO:: why testing AI here???
+                if (!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
+                    unit->AttackedBy(realCaster);
+
+                unit->AddThreat(realCaster);
+                unit->SetInCombatWith(realCaster);
+                realCaster->SetInCombatWith(unit);
+
+                if (Player* attackedPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    realCaster->SetContestedPvP(attackedPlayer);
+            }
+        }
+        else
+        {
+            // assisting case, healing and resurrection
+            if (unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
+                realCaster->SetContestedPvP();
+
+            if (unit->isInCombat() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
+            {
+                realCaster->SetInCombatState(unit->GetCombatTimer() > 0);
+                unit->getHostileRefManager().threatAssist(realCaster, 0.0f, m_spellInfo);
             }
         }
     }
