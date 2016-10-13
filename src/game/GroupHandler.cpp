@@ -565,14 +565,16 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleRaidReadyCheckFinishedOpcode(WorldPacket& /*recv_data*/)
 {
-    // Group* group = GetPlayer()->GetGroup();
-    // if(!group)
-    //    return;
+    Group* group = GetPlayer()->GetGroup();
+    if (!group)
+        return;
 
-    // if(!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
-    //    return;
+    if (!group->IsLeader(GetPlayer()->GetObjectGuid()) && !group->IsAssistant(GetPlayer()->GetObjectGuid()))
+        return;
 
-    // Is any reaction need?
+    // Broadcast finish:
+    WorldPacket data(MSG_RAID_READY_CHECK_FINISHED, 0);
+    group->BroadcastPacket(&data, false, -1);
 }
 
 void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket* data)
