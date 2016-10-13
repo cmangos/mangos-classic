@@ -542,7 +542,7 @@ void WorldSession::HandleRaidReadyCheckOpcode(WorldPacket& recv_data)
         // everything is fine, do it
         WorldPacket data(MSG_RAID_READY_CHECK, 8);
         data << ObjectGuid(GetPlayer()->GetObjectGuid());
-        group->BroadcastPacket(&data, false, -1);
+        group->BroadcastPacket(&data, true, -1);
 
         group->OfflineReadyCheck();
     }
@@ -574,7 +574,7 @@ void WorldSession::HandleRaidReadyCheckFinishedOpcode(WorldPacket& /*recv_data*/
 
     // Broadcast finish:
     WorldPacket data(MSG_RAID_READY_CHECK_FINISHED, 0);
-    group->BroadcastPacket(&data, false, -1);
+    group->BroadcastPacket(&data, true, -1);
 }
 
 void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket* data)
