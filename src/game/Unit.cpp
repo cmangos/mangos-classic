@@ -3402,12 +3402,12 @@ void Unit::SetFacingToObject(WorldObject* pObject)
     SetFacingTo(GetAngle(pObject));
 }
 
-bool Unit::isInAccessablePlaceFor(Creature const* c) const
+bool Unit::isInAccessablePlaceFor(Unit const* unit) const
 {
     if (IsInWater())
-        return c->CanSwim();
+        return unit->CanSwim();
     else
-        return c->CanWalk() || c->CanFly();
+        return unit->CanWalk() || unit->CanFly();
 }
 
 bool Unit::IsInWater() const

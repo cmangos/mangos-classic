@@ -1434,7 +1434,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         virtual bool IsInWater() const;
         virtual bool IsUnderWater() const;
-        bool isInAccessablePlaceFor(Creature const* c) const;
+        bool isInAccessablePlaceFor(Unit const* unit) const;
 
         void SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, bool critical = false);
         void SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype);
@@ -1921,6 +1921,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         virtual bool CanSwim() const = 0;
         virtual bool CanFly() const = 0;
+        virtual bool CanWalk() const = 0;
 
         void ForceHealthAndPowerUpdate();   // force server to send new value for hp and power (including max)
 

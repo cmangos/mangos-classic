@@ -1935,6 +1935,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool CanSwim() const { return true; }
         bool CanFly() const { return false; }
+        bool CanWalk() const { return true; }
         bool IsFlying() const { return false; }
         bool IsFreeFlying() const { return false; }
 
