@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2687_01_mangos_spell_chain` bit(1) DEFAULT NULL
+  `required_z2688_01_mangos_flametongue` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -10116,11 +10116,6 @@ INSERT INTO `spell_bonus_data` VALUES
 (8050,  0.2142, 0.1,     0,     0,     'Shaman - Flame Shock'),
 (10444, 0,      0,       0,     0,     'Shaman - Flametongue Attack'),
 (8026,  0.1,    0,       0,     0,     'Shaman - Flametongue Weapon Proc Rank 1'),
-(8028,  0.1,    0,       0,     0,     'Shaman - Flametongue Weapon Proc Rank 2'),
-(8029,  0.1,    0,       0,     0,     'Shaman - Flametongue Weapon Proc Rank 3'),
-(10445, 0.1,    0,       0,     0,     'Shaman - Flametongue Weapon Proc Rank 4'),
-(16343, 0.1,    0,       0,     0,     'Shaman - Flametongue Weapon Proc Rank 5'),
-(16344, 0.1,    0,       0,     0,     'Shaman - Flametongue Weapon Proc Rank 6'),
 (8056,  0.3858, 0,       0,     0,     'Shaman - Frost Shock'),
 (8034,  0.1,    0,       0,     0,     'Shaman - Frostbrand Attack Rank 1'),
 (5672,  0,      0.0450,  0,     0,     'Shaman - Healing Stream Totem'),
@@ -10207,6 +10202,13 @@ INSERT INTO `spell_chain` VALUES
 (14202,14201,12880,3,0),
 (14203,14202,12880,4,0),
 (14204,14203,12880,5,0),
+/* Flametongue Weapon Proc */
+(8026, 0, 8026, 1, 0),
+(8028, 8026, 8026, 2, 0),
+(8029, 8028, 8026, 3, 0),
+(10445, 8029, 8026, 4, 0),
+(16343, 10445, 8026, 5, 0),
+(16344, 16343, 8026, 6, 0),
 /* Flurry triggered, Warrior */
 (12966,0,12966,1,0),
 (12967,12966,12966,2,0),
