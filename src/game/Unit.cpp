@@ -8141,7 +8141,10 @@ CharmInfo* Unit::InitCharmInfo(Unit* charm)
 }
 
 CharmInfo::CharmInfo(Unit* unit)
-    : m_unit(unit), m_CommandState(COMMAND_FOLLOW), m_reactState(REACT_PASSIVE), m_petnumber(0)
+    : m_unit(unit), m_CommandState(COMMAND_FOLLOW), m_reactState(REACT_PASSIVE), m_petnumber(0),
+    m_retreating(false),
+    m_stayPosSet(false), m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
+    m_opener(0), m_openerMinRange(0), m_openerMaxRange(0)
 {
     for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
         m_charmspells[i].SetActionAndType(0, ACT_DISABLED);
@@ -8302,6 +8305,28 @@ void CharmInfo::SetPetNumber(uint32 petnumber, bool statwindow)
         m_unit->SetUInt32Value(UNIT_FIELD_PETNUMBER, 0);
 }
 
+void CharmInfo::SetCommandState(CommandStates st)
+{
+    m_CommandState = st;
+
+    switch (st)
+    {
+        case COMMAND_STAY:
+            SetIsRetreating();
+            SetStayPosition(true);
+            SetSpellOpener();
+            break;
+
+        case COMMAND_FOLLOW:
+            SetStayPosition();
+            SetSpellOpener();
+            break;
+
+        default:
+            break;
+    }
+}
+
 void CharmInfo::LoadPetActionBar(const std::string& data)
 {
     InitPetActionBar();
@@ -8350,6 +8375,26 @@ void CharmInfo::SetSpellAutocast(uint32 spell_id, bool state)
             break;
         }
     }
+}
+
+void CharmInfo::SetStayPosition(bool stay)
+{
+    if (stay)
+    {
+        m_stayPosX = m_unit->GetPositionX();
+        m_stayPosY = m_unit->GetPositionY();
+        m_stayPosZ = m_unit->GetPositionZ();
+        m_stayPosO = m_unit->GetOrientation();
+    }
+    else
+    {
+        m_stayPosX = 0;
+        m_stayPosY = 0;
+        m_stayPosZ = 0;
+        m_stayPosO = 0;
+    }
+
+    m_stayPosSet = stay;
 }
 
 bool Unit::isFrozen() const

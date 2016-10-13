@@ -257,43 +257,9 @@ class MANGOS_DLL_SPEC Pet : public Creature
         bool removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
         void CleanupActionBar();
 
-        bool m_retreating;
-
-        void SetIsRetreating(bool retreating = false) { m_retreating = retreating; }
-        bool GetIsRetreating() { return m_retreating; }
-
-        bool m_stayPosSet;
-        float m_stayPosX;
-        float m_stayPosY;
-        float m_stayPosZ;
-        float m_stayPosO;
-
-        void SetStayPosition(bool stay = false);
-        bool IsStayPosSet() { return m_stayPosSet; }
-
-        float GetStayPosX() { return m_stayPosX; }
-        float GetStayPosY() { return m_stayPosY; }
-        float GetStayPosZ() { return m_stayPosZ; }
-        float GetStayPosO() { return m_stayPosO; }
-
         PetSpellMap     m_spells;
         TeachSpellMap   m_teachspells;
         AutoSpellList   m_autospells;
-
-        uint32          m_opener;
-        uint32          m_openerMinRange;
-        uint32          m_openerMaxRange;
-
-        uint32 GetSpellOpener()         { return m_opener; }
-        uint32 GetSpellOpenerMinRange() { return m_openerMinRange; }
-        uint32 GetSpellOpenerMaxRange() { return m_openerMaxRange; }
-
-        void SetSpellOpener(uint32 spellId = 0, uint32 minRange = 0, uint32 maxRange = 0)
-        {
-            m_opener = spellId;
-            m_openerMinRange = minRange;
-            m_openerMaxRange = maxRange;
-        }
 
         void InitPetCreateSpells();
         void CheckLearning(uint32 spellid);

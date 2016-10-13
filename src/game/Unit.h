@@ -927,7 +927,7 @@ struct CharmInfo
         uint32 GetPetNumber() const { return m_petnumber; }
         void SetPetNumber(uint32 petnumber, bool statwindow);
 
-        void SetCommandState(CommandStates st) { m_CommandState = st; }
+        void SetCommandState(CommandStates st);
         CommandStates GetCommandState() { return m_CommandState; }
         bool HasCommandState(CommandStates state) { return (m_CommandState == state); }
         void SetReactState(ReactStates st) { m_reactState = st; }
@@ -957,6 +957,28 @@ struct CharmInfo
 
         GlobalCooldownMgr& GetGlobalCooldownMgr() { return m_GlobalCooldownMgr; }
 
+        void SetIsRetreating(bool retreating = false) { m_retreating = retreating; }
+        bool GetIsRetreating() { return m_retreating; }
+
+        void SetStayPosition(bool stay = false);
+        bool IsStayPosSet() { return m_stayPosSet; }
+
+        float GetStayPosX() { return m_stayPosX; }
+        float GetStayPosY() { return m_stayPosY; }
+        float GetStayPosZ() { return m_stayPosZ; }
+        float GetStayPosO() { return m_stayPosO; }
+
+        uint32 GetSpellOpener() { return m_opener; }
+        uint32 GetSpellOpenerMinRange() { return m_openerMinRange; }
+        uint32 GetSpellOpenerMaxRange() { return m_openerMaxRange; }
+
+        void SetSpellOpener(uint32 spellId = 0, uint32 minRange = 0, uint32 maxRange = 0)
+        {
+            m_opener = spellId;
+            m_openerMinRange = minRange;
+            m_openerMaxRange = maxRange;
+        }
+
     private:
         Unit* m_unit;
         UnitActionBarEntry PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
@@ -965,6 +987,15 @@ struct CharmInfo
         ReactStates     m_reactState;
         uint32          m_petnumber;
         GlobalCooldownMgr m_GlobalCooldownMgr;
+        bool            m_retreating;
+        uint32          m_opener;
+        uint32          m_openerMinRange;
+        uint32          m_openerMaxRange;
+        bool            m_stayPosSet;
+        float           m_stayPosX;
+        float           m_stayPosY;
+        float           m_stayPosZ;
+        float           m_stayPosO;
 };
 
 // used in CallForAllControlledUnits/CheckAllControlledUnits
