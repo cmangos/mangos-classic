@@ -653,8 +653,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         CreatureSpellCooldowns m_CreatureSpellCooldowns;
         CreatureSpellCooldowns m_CreatureCategoryCooldowns;
 
-        float GetAttackDistance(Unit const* pl) const;
-
         void SendAIReaction(AiReaction reactionType);
 
         void DoFleeToGetAssistance();
