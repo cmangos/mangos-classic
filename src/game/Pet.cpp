@@ -52,9 +52,7 @@ Pet::Pet(PetType type) :
     m_TrainingPoints(0), m_resetTalentsCost(0), m_resetTalentsTime(0),
     m_removed(false), m_happinessTimer(7500), m_loyaltyTimer(12000), m_petType(type), m_duration(0),
     m_loyaltyPoints(0), m_bonusdamage(0), m_auraUpdateMask(0), m_loading(false),
-    m_petModeFlags(PET_MODE_DEFAULT), m_retreating(false),
-    m_stayPosSet(false), m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
-    m_opener(0), m_openerMinRange(0), m_openerMaxRange(0)
+    m_petModeFlags(PET_MODE_DEFAULT)
 {
     m_name = "Pet";
     m_regenTimer = 4000;
@@ -624,6 +622,8 @@ void Pet::ModifyLoyalty(int32 addvalue)
 
     m_loyaltyPoints += addvalue;
 
+    CharmInfo* charminfo = GetCharmInfo();
+
     if (m_loyaltyPoints < 0)
     {
         if (loyaltylevel > REBELLIOUS)
@@ -651,22 +651,19 @@ void Pet::ModifyLoyalty(int32 addvalue)
                     }
                     case 1: // Turn aggressive
                     {
-                        SetIsRetreating();
-                        GetCharmInfo()->SetReactState(ReactStates(REACT_AGGRESSIVE));
+                        charminfo->SetIsRetreating();
+                        charminfo->SetReactState(ReactStates(REACT_AGGRESSIVE));
                         m_loyaltyPoints = 500;
                         break;
                     }
                     case 2: // Stay + passive
                     {
-                        ((Unit*)this)->StopMoving();
-                        ((Unit*)this)->AttackStop();
-                        ((Unit*)this)->GetMotionMaster()->Clear(false);
-                        ((Unit*)this)->GetMotionMaster()->MoveIdle();
-                        SetStayPosition();
-                        SetIsRetreating();
-                        SetSpellOpener();
-                        GetCharmInfo()->SetCommandState(COMMAND_STAY);
-                        GetCharmInfo()->SetReactState(ReactStates(REACT_PASSIVE));
+                        StopMoving();
+                        AttackStop();
+                        GetMotionMaster()->Clear(false);
+                        GetMotionMaster()->MoveIdle();
+                        charminfo->SetCommandState(COMMAND_STAY);
+                        charminfo->SetReactState(ReactStates(REACT_PASSIVE));
                         m_loyaltyPoints = 500;
                         break;
                     }
@@ -2071,24 +2068,4 @@ void Pet::SetModeFlags(PetModeFlags mode)
     data << GetObjectGuid();
     data << uint32(m_petModeFlags);
     ((Player*)owner)->GetSession()->SendPacket(&data);
-}
-
-void Pet::SetStayPosition(bool stay)
-{
-    if (stay)
-    {
-        m_stayPosX = GetPositionX();
-        m_stayPosY = GetPositionY();
-        m_stayPosZ = GetPositionZ();
-        m_stayPosO = GetOrientation();
-    }
-    else
-    {
-        m_stayPosX = 0;
-        m_stayPosY = 0;
-        m_stayPosZ = 0;
-        m_stayPosO = 0;
-    }
-
-    m_stayPosSet = stay;
 }
