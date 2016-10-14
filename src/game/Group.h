@@ -232,6 +232,8 @@ class MANGOS_DLL_SPEC Group
         void SendTargetIconList(WorldSession* session);
         void SendUpdate();
         void UpdatePlayerOutOfRange(Player* pPlayer);
+        void UpdatePlayerOnlineStatus(Player* player, bool online = true);
+        void UpdateOfflineLeader(time_t time, uint32 delay);
         // ignore: GUID of player that will be ignored
         void BroadcastPacket(WorldPacket* packet, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = ObjectGuid());
         void BroadcastReadyCheck(WorldPacket* packet);
@@ -261,7 +263,7 @@ class MANGOS_DLL_SPEC Group
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant = false);
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant, uint8 group);
         bool _removeMember(ObjectGuid guid);                // returns true if leader has changed
-        void _chooseLeader();
+        void _chooseLeader(bool offline = false);
         void _setLeader(ObjectGuid guid);
         void _updateLeaderFlag(const bool remove = false);
 
@@ -320,6 +322,7 @@ class MANGOS_DLL_SPEC Group
         InvitesList         m_invitees;
         ObjectGuid          m_leaderGuid;
         std::string         m_leaderName;
+        time_t              m_leaderLastOnline;
         ObjectGuid          m_mainTankGuid;
         ObjectGuid          m_mainAssistantGuid;
         GroupType           m_groupType;

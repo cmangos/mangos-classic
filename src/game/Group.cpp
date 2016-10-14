@@ -67,6 +67,7 @@ bool Group::Create(ObjectGuid guid, const char* name)
 {
     m_leaderGuid = guid;
     m_leaderName = name;
+    m_leaderLastOnline = time(nullptr);
 
     m_groupType  = isBGGroup() ? GROUPTYPE_RAID : GROUPTYPE_NORMAL;
 
@@ -125,6 +126,8 @@ bool Group::LoadGroupFromDB(Field* fields)
     // group leader not exist
     if (!sObjectMgr.GetPlayerNameByGUID(m_leaderGuid, m_leaderName))
         return false;
+
+    m_leaderLastOnline = time(nullptr);
 
     m_groupType  = fields[13].GetBool() ? GROUPTYPE_RAID : GROUPTYPE_NORMAL;
 
@@ -544,6 +547,35 @@ void Group::UpdatePlayerOutOfRange(Player* pPlayer)
                 player->GetSession()->SendPacket(&data);
 }
 
+void Group::UpdatePlayerOnlineStatus(Player* player, bool online /*= true*/)
+{
+    if (!player)
+        return;
+    const ObjectGuid guid = player->GetObjectGuid();
+    if (!IsMember(guid))
+        return;
+
+    SendUpdate();
+    if (online)
+    {
+        player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
+        UpdatePlayerOutOfRange(player);
+    }
+    else if (IsLeader(guid))
+        m_leaderLastOnline = time(nullptr);
+}
+
+void Group::UpdateOfflineLeader(time_t time, uint32 delay)
+{
+    // Do not update BG groups, BGs take care of offliners
+    if (isBGGroup())
+        return;
+    // Check for delay and leader presence
+    if ((time - m_leaderLastOnline) < delay || sObjectMgr.GetPlayer(m_leaderGuid))
+        return;
+    _chooseLeader(true);
+}
+
 void Group::BroadcastPacket(WorldPacket* packet, bool ignorePlayersInBGRaid, int group, ObjectGuid ignore)
 {
     for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
@@ -702,7 +734,7 @@ bool Group::_removeMember(ObjectGuid guid)
     return false;
 }
 
-void Group::_chooseLeader()
+void Group::_chooseLeader(bool offline /*= false*/)
 {
     if (GetMembersCount() < GetMembersMinCount())
         return;
@@ -735,7 +767,16 @@ void Group::_chooseLeader()
     if (chosen.IsEmpty())
         chosen = first;
 
-    _setLeader(!chosen.IsEmpty() ? chosen : m_memberSlots.front().guid);
+    // If we are choosing a new leader due to inactivity, check if everyone is offline first
+    if (offline && chosen.IsEmpty())
+        return;
+
+    // Still nobody online...
+    if (chosen.IsEmpty())
+        chosen = m_memberSlots.front().guid;
+
+    // Do announce if we are choosing a new leader due to old one being offline
+    return (offline ? ChangeLeader(chosen) : _setLeader(chosen));
 }
 
 void Group::_setLeader(ObjectGuid guid)
@@ -796,6 +837,7 @@ void Group::_setLeader(ObjectGuid guid)
     _updateLeaderFlag(true);
     m_leaderGuid = slot->guid;
     m_leaderName = slot->name;
+    m_leaderLastOnline = time(nullptr);
     _updateLeaderFlag();
 }
 

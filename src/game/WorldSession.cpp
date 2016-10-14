@@ -447,8 +447,8 @@ void WorldSession::LogoutPlayer(bool save)
             _player->RemoveFromGroup();
 
         ///- Send update to group
-        if (_player->GetGroup())
-            _player->GetGroup()->SendUpdate();
+        if (Group* group = _player->GetGroup())
+            group->UpdatePlayerOnlineStatus(_player, false);
 
         ///- Broadcast a logout message to the player's friends
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
