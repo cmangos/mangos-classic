@@ -3104,6 +3104,14 @@ void Spell::_handle_finish_phase()
     // spell log
     if (m_needSpellLog)
         SendLogExecute();
+
+    if (m_caster->m_extraAttacks && IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_ADD_EXTRA_ATTACKS))
+    {
+        if (Unit* victim = m_caster->getVictim())
+            m_caster->DoExtraAttacks(victim);
+        else
+            m_caster->m_extraAttacks = 0;
+    }
 }
 
 void Spell::SendSpellCooldown()
