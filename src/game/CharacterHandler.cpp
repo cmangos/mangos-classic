@@ -592,7 +592,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     // announce group about member online (must be after add to player list to receive announce to self)
     if (Group* group = pCurrChar->GetGroup())
+    {
         group->SendUpdate();
+        pCurrChar->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
+        group->UpdatePlayerOutOfRange(pCurrChar);
+    }
 
     // friend status
     sSocialMgr.SendFriendStatus(pCurrChar, FRIEND_ONLINE, pCurrChar->GetObjectGuid(), true);
