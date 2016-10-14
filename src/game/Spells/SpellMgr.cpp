@@ -3050,6 +3050,16 @@ void SpellArea::ApplyOrRemoveSpellIfCan(Player* player, uint32 newZone, uint32 n
         player->RemoveAurasDueToSpell(spellId);
 }
 
+struct DoSpellAffectMasks
+{
+    DoSpellAffectMasks(SpellAffectMap& _spellAffectMap, uint8& _effectId, uint64& _spellAffectMask) : spellAffectMap(_spellAffectMap), effectId(_effectId), spellAffectMask(_spellAffectMask) {}
+    void operator()(uint32 spell_id) { spellAffectMap.insert(SpellAffectMap::value_type((spell_id << 8) + effectId, spellAffectMask)); }
+
+    SpellAffectMap& spellAffectMap;
+    uint8& effectId;
+    uint64& spellAffectMask;
+};
+
 void SpellMgr::LoadSpellAffects()
 {
     mSpellAffectMap.clear();                                // need for reload case
@@ -3094,6 +3104,16 @@ void SpellMgr::LoadSpellAffects()
             continue;
         }
 
+        uint32 first_id = GetFirstSpellInChain(entry);
+
+        if (first_id != entry)
+        {
+            //sLog.outErrorDb("Spell %u listed in `spell_affect` is not first rank (%u) in chain", entry, first_id);
+            sLog.outErrorDb("%u,", entry);
+            // prevent loading since it won't have an effect anyway
+            continue;
+        }
+
         if (spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA || (
                     spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
                     spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
@@ -3117,6 +3137,9 @@ void SpellMgr::LoadSpellAffects()
         }
 
         mSpellAffectMap.insert(SpellAffectMap::value_type((entry << 8) + effectId, spellAffectMask));
+
+        DoSpellAffectMasks worker(mSpellAffectMap, effectId, spellAffectMask);
+        doForHighRanks(entry, worker);
 
         ++count;
     }
