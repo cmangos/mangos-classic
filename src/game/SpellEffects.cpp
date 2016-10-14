@@ -4189,6 +4189,24 @@ void Spell::EffectEnchantHeldItem(SpellEffectIndex eff_idx)
 
         // Apply the temporary enchantment
         item->SetEnchantment(slot, enchant_id, duration * IN_MILLISECONDS, 0);
+
+        // Improved Weapon Totems
+        if (m_spellInfo->IsFitToFamilyMask(0x0000000004000000)) // Flametongue totem
+        {
+            SpellAuraHolder* holder = m_caster->GetOwner()->GetSpellAuraHolder(29192);
+            if(!holder)
+                holder = m_caster->GetOwner()->GetSpellAuraHolder(29193);
+            if(holder && holder->m_auras[0] && holder->GetSpellProto())
+                item->SetEnchantmentModifier(new SpellModifier(SPELLMOD_ATTACK_POWER, SPELLMOD_PCT, holder->m_auras[1]->GetModifier()->m_amount, holder->GetId(), uint64(0x00400000000)));
+        }
+        if (m_spellInfo->IsFitToFamilyMask(0x0000000200000000)) // Windfury totem
+        {
+            SpellAuraHolder* holder = m_caster->GetOwner()->GetSpellAuraHolder(29192);
+            if (!holder)
+                holder = m_caster->GetOwner()->GetSpellAuraHolder(29193);
+            if (holder && holder->m_auras[0] && holder->GetSpellProto())
+                item->SetEnchantmentModifier(new SpellModifier(SPELLMOD_ATTACK_POWER, SPELLMOD_PCT, holder->m_auras[0]->GetModifier()->m_amount, holder->GetId(), uint64(0x00200000000)));
+        }
         item_owner->ApplyEnchantment(item, slot, true);
     }
 }

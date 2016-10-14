@@ -29,6 +29,7 @@ class Field;
 class QueryResult;
 class Unit;
 class Loot;
+struct SpellModifier;
 
 struct ItemSetEffect
 {
@@ -234,6 +235,7 @@ class MANGOS_DLL_SPEC Item : public Object
         Item* CloneItem(uint32 count, Player const* player = nullptr) const;
 
         Item();
+        virtual ~Item();
 
         virtual bool Create(uint32 guidlow, uint32 itemid, Player const* owner);
 
@@ -294,6 +296,9 @@ class MANGOS_DLL_SPEC Item : public Object
         uint32 GetEnchantmentDuration(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET);}
         uint32 GetEnchantmentCharges(EnchantmentSlot slot)  const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET);}
 
+        SpellModifier* GetEnchantmentModifier() { return m_enchantEffectModifier; }
+        void SetEnchantmentModifier(SpellModifier* mod);
+
         void SendTimeUpdate(Player* owner) const;
         void UpdateDuration(Player* owner, uint32 diff);
 
@@ -334,6 +339,7 @@ class MANGOS_DLL_SPEC Item : public Object
         int16 uQueuePos;
         bool mb_in_trade;                                   // true if item is currently in trade-window
         ItemLootUpdateState m_lootState;
+        SpellModifier* m_enchantEffectModifier;
 };
 
 #endif
