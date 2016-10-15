@@ -312,7 +312,7 @@ namespace MaNGOS
                 else if (creatureUnit->IsElite())
                     xp_gain *= 2;
 
-                xp_gain *= BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(pl->GetMapId(), pl->GetZoneId()));
+                xp_gain *= BaseGain(pl->getLevel(), u->getLevel());
                 xp_gain *= creatureUnit->GetCreatureInfo()->ExperienceMultiplier;
 
                 return (uint32)(xp_gain * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL));
