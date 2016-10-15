@@ -27,6 +27,114 @@ EndContentData */
 
 #include "precompiled.h"
 
+enum
+{
+	NPC_RAZELIKH = 7668,
+	NPC_SEVINE = 7671,
+	NPC_ALLISTARJ = 7670,
+	NPC_GROL = 7669,
+
+	GOB_RAZELIKH = 141812,
+	GOB_SEVINE = 141859,
+	GOB_ALLISTARJ = 141858,
+	GOB_GROL = 141857,
+
+	SPELL_SELFSTUN = 9032
+};
+
+bool m_uiStoneDestroyed = false;
+bool m_uiStoneEnabled = false;
+GameObject* m_uiStoneGameObject;
+uint32 m_uiStunTimer = 0;
+
+struct npc_stone_servantAI : public ScriptedAI
+{
+	npc_stone_servantAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+	void Reset() override
+	{
+		m_uiStoneDestroyed	= false;
+		m_uiStoneEnabled	= false;
+		m_uiStunTimer = 0;
+	}
+
+	GameObject* FindStoneOfBinding()
+	{
+		//Find nearest Stone of Binding object with an entry corresponding to the NPC entry.
+		switch (m_creature->GetEntry())
+		{
+		case NPC_RAZELIKH:
+			return GetClosestGameObjectWithEntry(m_creature, GOB_RAZELIKH, 40.0f);
+			break;
+		case NPC_SEVINE:
+			return GetClosestGameObjectWithEntry(m_creature, GOB_SEVINE, 40.0f);
+			break;
+		case NPC_ALLISTARJ:
+			return GetClosestGameObjectWithEntry(m_creature, GOB_ALLISTARJ, 40.0f);
+			break;
+		case NPC_GROL:
+			return GetClosestGameObjectWithEntry(m_creature, GOB_GROL, 40.0f);
+			break;
+		default:
+			return nullptr;
+			break;
+		}
+	}
+
+	void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage) override
+	{
+		if (uiDamage < m_creature->GetHealth())
+			return;
+
+		if(m_creature->GetHealth() >= 1)
+			m_creature->SetHealth((uint32)1);
+
+		if (!m_uiStoneDestroyed)
+		{
+			uiDamage = 0;
+		}
+	}
+
+	void UpdateAI(const uint32 uiDiff) override
+	{
+		if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+			return;
+
+		if ((m_creature->GetHealthPercent() < 5.0f))
+		{
+			if (m_uiStunTimer <= 0 && DoCastSpellIfCan(m_creature, SPELL_SELFSTUN))
+				m_uiStunTimer = 30000;
+			else
+				m_uiStunTimer -= uiDiff;
+
+			if(!m_uiStoneEnabled)
+				if (m_uiStoneGameObject = FindStoneOfBinding())
+				{
+					m_uiStoneGameObject->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+					m_uiStoneEnabled = true;
+				}
+		}
+		DoMeleeAttackIfReady();
+	}
+};
+
+bool GOUse_go_stone_of_binding(Player* pPlayer, GameObject* pGo)
+{
+	if (!(pGo == m_uiStoneGameObject))
+		return false;
+
+	m_uiStoneDestroyed = true;
+	m_uiStoneEnabled = false;
+	m_uiStoneGameObject->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+
+	return true;
+}
+
+CreatureAI* GetAI_npc_stone_servant(Creature* pCreature)
+{
+	return new npc_stone_servantAI(pCreature);
+}
+
 /*######
 ## npc_fallen_hero_of_horde
 ######*/
@@ -112,6 +220,16 @@ bool GossipSelect_npc_fallen_hero_of_horde(Player* pPlayer, Creature* pCreature,
 void AddSC_blasted_lands()
 {
     Script* pNewScript;
+
+	pNewScript = new Script;
+	pNewScript->Name = "npc_stone_servant";
+	pNewScript->GetAI = &GetAI_npc_stone_servant;
+	pNewScript->RegisterSelf();
+
+	pNewScript = new Script;
+	pNewScript->Name = "go_stone_of_binding";
+	pNewScript->pGOUse = &GOUse_go_stone_of_binding;
+	pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_fallen_hero_of_horde";
