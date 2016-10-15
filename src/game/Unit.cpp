@@ -2649,13 +2649,13 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
     if ((schoolMask & SPELL_SCHOOL_MASK_NORMAL) == 0 && IsBinarySpell(spell) && !spell->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES))
     {
         // Get base victim resistance for school
-        float targetResistance = (float)GetResistance(GetFirstSchoolInMask(schoolMask));
+        int32 targetResistance = pVictim->GetResistance(GetFirstSchoolInMask(schoolMask));
         // Ignore resistance by self SPELL_AURA_MOD_TARGET_RESISTANCE aura
-        targetResistance += (float)GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask);
+        targetResistance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask); // can be negative after this, but does not influence calculation
 
         rand = irand(0,9999); // exactly 10000 number range
 
-        float averageResistance = targetResistance / (getLevel() * 5) * 0.75;
+        float averageResistance = float(targetResistance) / (getLevel() * 5) * 0.75;
         averageResistance = averageResistance > 0.75 ? 0.75 : averageResistance; // cant have more than cap
 
         if (rand < averageResistance*10000) // compute resistance percentage for binary spell
