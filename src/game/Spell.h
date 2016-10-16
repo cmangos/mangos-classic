@@ -438,6 +438,8 @@ class Spell
         void CleanupTargetList();
         void ClearCastItem();
 
+        void ProcSpellAuraTriggers();
+
         typedef std::list<Unit*> UnitList;
 
     protected:

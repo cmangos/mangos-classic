@@ -2985,6 +2985,9 @@ void Spell::handle_immediate()
     {
         m_spellState = SPELL_STATE_CASTING;
         SendChannelStart(m_duration);
+
+        // Proc spell aura triggers on start of channeled spell
+        ProcSpellAuraTriggers();
     }
 
     for (TargetList::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
@@ -3267,35 +3270,9 @@ void Spell::finish(bool ok)
     if (!ok)
         return;
 
-    // handle SPELL_AURA_ADD_TARGET_TRIGGER auras
-    Unit::AuraList const& targetTriggers = m_caster->GetAurasByType(SPELL_AURA_ADD_TARGET_TRIGGER);
-    for (Unit::AuraList::const_iterator i = targetTriggers.begin(); i != targetTriggers.end(); ++i)
-    {
-        if (!(*i)->isAffectedOnSpell(m_spellInfo))
-            continue;
-        for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-        {
-            if (ihit->missCondition == SPELL_MISS_NONE)
-            {
-                // check m_caster->GetGUID() let load auras at login and speedup most often case
-                Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID);
-                if (unit && unit->isAlive())
-                {
-                    SpellEntry const* auraSpellInfo = (*i)->GetSpellProto();
-                    SpellEffectIndex auraSpellIdx = (*i)->GetEffIndex();
-                    const uint32 procid = auraSpellInfo->EffectTriggerSpell[auraSpellIdx];
-                    // Quick target mode check for procs and triggers (do not cast at friendly targets stuff against hostiles only)
-                    if (IsPositiveSpellTargetModeForSpecificTarget(m_spellInfo, ihit->effectMask, m_caster, unit) != IsPositiveSpellTargetModeForSpecificTarget(procid, ihit->effectMask, m_caster, unit))
-                        continue;
-                    // Calculate chance at that moment (can be depend for example from combo points)
-                    int32 auraBasePoints = (*i)->GetBasePoints();
-                    int32 chance = m_caster->CalculateSpellDamage(unit, auraSpellInfo, auraSpellIdx, &auraBasePoints);
-                    if (roll_chance_i(chance))
-                        m_caster->CastSpell(unit, procid, TRIGGERED_OLD_TRIGGERED, nullptr, (*i));
-                }
-            }
-        }
-    }
+    // Normal spells proc on finish, channeled spells proc on start
+    if(!IsChanneledSpell(m_spellInfo))
+        ProcSpellAuraTriggers();
 
     // Heal caster for all health leech from all targets
     if (m_healthLeech)
@@ -6662,6 +6639,39 @@ void Spell::ResetEffectDamageAndHeal()
 {
     m_damage = 0;
     m_healing = 0;
+}
+
+// handle SPELL_AURA_ADD_TARGET_TRIGGER auras
+void Spell::ProcSpellAuraTriggers()
+{
+    Unit::AuraList const& targetTriggers = m_caster->GetAurasByType(SPELL_AURA_ADD_TARGET_TRIGGER);
+    for (Unit::AuraList::const_iterator i = targetTriggers.begin(); i != targetTriggers.end(); ++i)
+    {
+        if (!(*i)->isAffectedOnSpell(m_spellInfo))
+            continue;
+        for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+        {
+            if (ihit->missCondition == SPELL_MISS_NONE)
+            {
+                // check m_caster->GetGUID() let load auras at login and speedup most often case
+                Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID);
+                if (unit && unit->isAlive())
+                {
+                    SpellEntry const* auraSpellInfo = (*i)->GetSpellProto();
+                    SpellEffectIndex auraSpellIdx = (*i)->GetEffIndex();
+                    const uint32 procid = auraSpellInfo->EffectTriggerSpell[auraSpellIdx];
+                    // Quick target mode check for procs and triggers (do not cast at friendly targets stuff against hostiles only)
+                    if (IsPositiveSpellTargetModeForSpecificTarget(m_spellInfo, ihit->effectMask, m_caster, unit) != IsPositiveSpellTargetModeForSpecificTarget(procid, ihit->effectMask, m_caster, unit))
+                        continue;
+                    // Calculate chance at that moment (can be depend for example from combo points)
+                    int32 auraBasePoints = (*i)->GetBasePoints();
+                    int32 chance = m_caster->CalculateSpellDamage(unit, auraSpellInfo, auraSpellIdx, &auraBasePoints);
+                    if (roll_chance_i(chance))
+                        m_caster->CastSpell(unit, procid, TRIGGERED_OLD_TRIGGERED, nullptr, (*i));
+                }
+            }
+        }
+    }
 }
 
 void Spell::ClearCastItem()
