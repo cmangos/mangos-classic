@@ -492,7 +492,7 @@ inline bool IsSingleTargetSpell(SpellEntry const* spellInfo)
 
 inline bool IsSingleTargetSpells(SpellEntry const* spellInfo1, SpellEntry const* spellInfo2)
 {
-    return (IsSingleTargetSpell(spellInfo1) && (spellInfo1->Id == spellInfo2->Id || (spellInfo1->SpellFamilyFlags.Flags == spellInfo2->SpellFamilyFlags.Flags && IsSingleTargetSpell(spellInfo2))));
+    return (IsSingleTargetSpell(spellInfo1) && (spellInfo1->Id == spellInfo2->Id || (spellInfo1->SpellFamilyFlags == spellInfo2->SpellFamilyFlags && IsSingleTargetSpell(spellInfo2))));
 }
 
 inline bool IsScriptTarget(uint32 target)
@@ -1029,17 +1029,10 @@ inline bool IsSimilarAuraEffect(SpellEntry const* entry, int32 effect, SpellEntr
 
 inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* entry2, int32 i, Unit* pTarget = nullptr)
 {
-    // Ignore non-aura effects
-    if (!entry->EffectApplyAuraName[i])
-        return true;
-
-    // Short alias
     const uint32 aura = entry->EffectApplyAuraName[i];
-    const bool positive = (IsPositiveEffect(entry, SpellEffectIndex(i)));
-    const bool related = (entry->SpellFamilyName == entry2->SpellFamilyName);
-    const bool player = (entry->SpellFamilyName && entry->SpellFamilyFlags.Flags);
-    const bool multirank = (player && related && entry->SpellFamilyFlags.Flags == entry2->SpellFamilyFlags.Flags);
-    const bool instance = (entry->Id == entry2->Id || multirank);
+    // Ignore non-aura effects
+    if (!aura)
+        return true;
 
     // Get first similar - second spell's same aura with the same sign
     int32 similar = EFFECT_INDEX_0;
@@ -1057,6 +1050,15 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
     // Special rule for food buffs
     if (GetSpellSpecific(entry->Id) == SPELL_WELL_FED && GetSpellSpecific(entry2->Id) != SPELL_WELL_FED)
         return true;
+
+    // Short alias
+    const bool positive = (IsPositiveEffect(entry, SpellEffectIndex(i)));
+    const bool related = (entry->SpellFamilyName == entry2->SpellFamilyName);
+    const bool siblings = (entry->SpellFamilyFlags == entry2->SpellFamilyFlags);
+    const bool player = (entry->SpellFamilyName && !entry->SpellFamilyFlags.Empty());
+    const bool player2 = (entry2->SpellFamilyName && !entry2->SpellFamilyFlags.Empty());
+    const bool multirank = (related && siblings && player);
+    const bool instance = (entry->Id == entry2->Id || multirank);
 
     // If aura makes spell not multi-instanceable (do not stack the same spell id or ranks of this spell)
     bool nonmui = false;
@@ -1107,10 +1109,10 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         // Raid debuffs: Hunter's Mark and Expose Weakness stack with each other, but not itself
         case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
         case SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS:
-            return (!related || entry->SpellFamilyFlags != entry2->SpellFamilyFlags);
+            return (!related || !siblings);
             break;
-        // Attack Power debuffs logic: Do not stack Curse of Weakness, Demoralizing Roars/Shouts
         case SPELL_AURA_MOD_ATTACK_POWER:
+            // Attack Power debuffs logic: Do not stack Curse of Weakness, Demoralizing Roars/Shouts
             if (!positive && entry->EffectBasePoints[i] < 1 && entry2->EffectBasePoints[similar] < 1)
                 return (!entry->SpellFamilyName && !entry->SpellFamilyName);
             break;
@@ -1127,7 +1129,7 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
                 return false; // Magical-physical armor debuff hybrid: Crystal yield and similar
             if (!positive && (entry->School != entry2->School))
                 return true;
-            return (positive && (!related || entry->SpellFamilyFlags != entry2->SpellFamilyFlags));
+            return (positive && (!related || !siblings));
             break;
         }
         // By default base stats cannot stack if they're similar
@@ -1202,8 +1204,8 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
 
 inline bool IsStackableSpell(SpellEntry const* entry, SpellEntry const* entry2, Unit* pTarget = nullptr)
 {
-    if (!entry->EffectApplyAuraName[0] && !entry->EffectApplyAuraName[1] && !entry->EffectApplyAuraName[2] ||
-        !entry2->EffectApplyAuraName[0] && !entry2->EffectApplyAuraName[1] && !entry2->EffectApplyAuraName[2])
+    if ((!entry->EffectApplyAuraName[0] && !entry->EffectApplyAuraName[1] && !entry->EffectApplyAuraName[2]) ||
+        (!entry2->EffectApplyAuraName[0] && !entry2->EffectApplyAuraName[1] && !entry2->EffectApplyAuraName[2]))
         return true;
 
     for (int32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
