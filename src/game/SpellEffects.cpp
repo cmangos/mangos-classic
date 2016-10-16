@@ -803,24 +803,20 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 23448:                                 // Transporter Arrival - Ultrasafe Transporter: Gadgetzan - backfires
+                case 23450:                                 // Transporter Arrival - (Gadgetzan + Everlook)
                 {
-                    int32 r = irand(0, 119);
-                    if (r < 20)                             // Transporter Malfunction - 1/6 polymorph
+                    uint32 rand = urand(0, 5);              // Roll for minor malfunctions:
+                    if (!rand)                              // (1/6) - Polymorph (23456 & 23457 are both carbon copies of this one)
                         m_caster->CastSpell(m_caster, 23444, true);
-                    else if (r < 100)                       // Evil Twin               - 4/6 evil twin
+                    else if (rand <= 2)                     // (2/6) - Evil Twin
                         m_caster->CastSpell(m_caster, 23445, true);
-                    else                                    // Transporter Malfunction - 1/6 miss the target
-                        m_caster->CastSpell(m_caster, 36902, true);
 
                     return;
                 }
                 case 23453:                                 // Gnomish Transporter - Ultrasafe Transporter: Gadgetzan
                 {
-                    if (roll_chance_i(50))                  // Gadgetzan Transporter         - success
-                        m_caster->CastSpell(m_caster, 23441, true);
-                    else                                    // Gadgetzan Transporter Failure - failure
-                        m_caster->CastSpell(m_caster, 23446, true);
+                    // Roll chance for major malfunction (1/6); 23441 = success | 23446 = malfunction (missed destination)
+                    m_caster->CastSpell(m_caster, (urand(0, 5) ? 23441 : 23446), true);
 
                     return;
                 }
@@ -1490,17 +1486,18 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
     // post effects for TARGET_TABLE_X_Y_Z_COORDINATES
     switch (m_spellInfo->Id)
     {
-        // Dimensional Ripper - Everlook
-        case 23442:
+        case 23441:                                 // Ultrasafe Transporter: Gadgetzan 
         {
-            int32 r = irand(0, 119);
-            if (r >= 70)                                    // 7/12 success
-            {
-                if (r < 100)                                // 4/12 evil twin
-                    m_caster->CastSpell(m_caster, 23445, true);
-                else                                        // 1/12 fire
-                    m_caster->CastSpell(m_caster, 23449, true);
-            }
+            // Wrong destination already rolled for, only handle minor malfunction on sucess
+            m_caster->CastSpell(m_caster, 23450, true); // Transporter Arrival
+
+            return;
+        }
+        case 23442:                                 // Dimensional Ripper - Everlook
+        {
+            // Roll for major malfunction (1/6); 23450 = success | 23449 = malfunction (being set afire)
+            m_caster->CastSpell(m_caster, (urand(0, 5) ? 23450 : 23449), true);
+
             return;
         }
     }
