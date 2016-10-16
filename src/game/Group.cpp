@@ -570,9 +570,20 @@ void Group::UpdateOfflineLeader(time_t time, uint32 delay)
     // Do not update BG groups, BGs take care of offliners
     if (isBGGroup())
         return;
-    // Check for delay and leader presence
-    if ((time - m_leaderLastOnline) < delay || sObjectMgr.GetPlayer(m_leaderGuid))
+
+    // Check leader presence
+    // TODO: Add a list of loading players or online/offline counter?
+    // FIXME: If player is loading a new map longer than delay, the leadership is going to be transfered
+    if (sObjectMgr.GetPlayer(m_leaderGuid))
+    {
+        m_leaderLastOnline = time;
         return;
+    }
+
+    // Check for delay
+    if ((time - m_leaderLastOnline) < delay)
+        return;
+
     _chooseLeader(true);
 }
 
