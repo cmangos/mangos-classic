@@ -4977,9 +4977,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (expectedTarget == m_caster)
                     return SPELL_FAILED_BAD_TARGETS;
 
-                if (m_caster->GetPetGuid())
-                    return SPELL_FAILED_ALREADY_HAVE_SUMMON;
-
                 if (m_caster->GetCharmGuid())
                     return SPELL_FAILED_ALREADY_HAVE_CHARM;
 
@@ -5001,9 +4998,6 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (expectedTarget == m_caster)
                     return SPELL_FAILED_BAD_TARGETS;
-
-                if (m_caster->GetPetGuid())
-                    return SPELL_FAILED_ALREADY_HAVE_SUMMON;
 
                 if (m_caster->GetCharmGuid())
                     return SPELL_FAILED_ALREADY_HAVE_CHARM;
