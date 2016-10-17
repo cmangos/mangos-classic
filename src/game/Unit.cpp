@@ -31,7 +31,7 @@
 #include "Group.h"
 #include "SpellAuras.h"
 #include "ObjectAccessor.h"
-#include "AI/CreatureAI.h"
+#include "AI/CreatureAISelector.h"
 #include "TemporarySummon.h"
 #include "Pet.h"
 #include "Util.h"
@@ -8140,14 +8140,40 @@ CharmInfo* Unit::InitCharmInfo(Unit* charm)
     return m_charmInfo;
 }
 
-CharmInfo::CharmInfo(Unit* unit)
-    : m_unit(unit), m_CommandState(COMMAND_FOLLOW), m_reactState(REACT_PASSIVE), m_petnumber(0),
-    m_retreating(false),
-    m_stayPosSet(false), m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
-    m_opener(0), m_openerMinRange(0), m_openerMaxRange(0)
+CharmInfo::CharmInfo(Unit* unit) :
+    m_unit(unit), m_ai(nullptr), m_combatData(nullptr),
+    m_CommandState(COMMAND_FOLLOW), m_reactState(REACT_PASSIVE),
+    m_petnumber(0), m_retreating(false), m_stayPosSet(false),
+    m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
+    m_opener(0), m_openerMinRange(0), m_openerMaxRange(0),
+    m_unitFieldBytes2_1(0)
 {
     for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
         m_charmspells[i].SetActionAndType(0, ACT_DISABLED);
+}
+
+CharmInfo::~CharmInfo()
+{
+    delete m_combatData;
+    delete m_ai;
+}
+
+void CharmInfo::SetCharmState(std::string const & ainame /*= "PetAI"*/, bool withNewThreatList /*= true*/)
+{
+    if (!ainame.empty())
+        m_ai = FactorySelector::GetSpecificAI(m_unit, ainame);
+    else
+        m_ai = FactorySelector::GetSpecificAI(m_unit, "PetAI");
+
+    if (withNewThreatList)
+        m_combatData = new CombatData(m_unit);
+
+    m_unitFieldBytes2_1 = m_unit->GetByteValue(UNIT_FIELD_BYTES_2, 1);
+}
+
+void CharmInfo::ResetCharmState()
+{
+    m_unit->SetByteValue(UNIT_FIELD_BYTES_2, 1, m_unitFieldBytes2_1);
 }
 
 void CharmInfo::InitPetActionBar()

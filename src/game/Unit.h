@@ -802,6 +802,17 @@ struct SpellPeriodicAuraLogInfo
 
 uint32 createProcExtendMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missCondition);
 
+struct CombatData
+{
+    public:
+        CombatData(Unit* owner) : threatManager(ThreatManager(owner)), hostileRefManager(HostileRefManager(owner)) {};
+
+        // Manage all Units threatening us
+        ThreatManager threatManager;
+        // Manage all Units that are threatened by us
+        HostileRefManager hostileRefManager;
+};
+
 enum SpellAuraProcResult
 {
     SPELL_AURA_PROC_OK              = 0,                    // proc was processed, will remove charges
@@ -920,10 +931,14 @@ enum ActionBarIndex
 
 #define MAX_UNIT_ACTION_BAR_INDEX (ACTION_BAR_INDEX_END-ACTION_BAR_INDEX_START)
 
-struct CharmInfo
+class MANGOS_DLL_SPEC CharmInfo
 {
     public:
         explicit CharmInfo(Unit* unit);
+        ~CharmInfo();
+
+        void SetCharmState(std::string const & ainame = "PetAI", bool withNewThreatList = true);
+        void ResetCharmState();
         uint32 GetPetNumber() const { return m_petnumber; }
         void SetPetNumber(uint32 petnumber, bool statwindow);
 
@@ -979,23 +994,29 @@ struct CharmInfo
             m_openerMaxRange = maxRange;
         }
 
+        CreatureAI* GetAI() { return m_ai; }
+        CombatData* GetCombatData() { return m_combatData; };
+
     private:
-        Unit* m_unit;
-        UnitActionBarEntry PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
-        CharmSpellEntry m_charmspells[CREATURE_MAX_SPELLS];
-        CommandStates   m_CommandState;
-        ReactStates     m_reactState;
-        uint32          m_petnumber;
-        GlobalCooldownMgr m_GlobalCooldownMgr;
-        bool            m_retreating;
-        uint32          m_opener;
-        uint32          m_openerMinRange;
-        uint32          m_openerMaxRange;
-        bool            m_stayPosSet;
-        float           m_stayPosX;
-        float           m_stayPosY;
-        float           m_stayPosZ;
-        float           m_stayPosO;
+        Unit*               m_unit;
+        CreatureAI*         m_ai;
+        CombatData*         m_combatData;
+        UnitActionBarEntry  PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
+        CharmSpellEntry     m_charmspells[CREATURE_MAX_SPELLS];
+        CommandStates       m_CommandState;
+        ReactStates         m_reactState;
+        uint32              m_petnumber;
+        GlobalCooldownMgr   m_GlobalCooldownMgr;
+        uint32              m_opener;
+        uint32              m_openerMinRange;
+        uint32              m_openerMaxRange;
+        uint8               m_unitFieldBytes2_1;
+        bool                m_retreating;
+        bool                m_stayPosSet;
+        float               m_stayPosX;
+        float               m_stayPosY;
+        float               m_stayPosZ;
+        float               m_stayPosO;
 };
 
 // used in CallForAllControlledUnits/CheckAllControlledUnits
@@ -1040,18 +1061,6 @@ enum PowerDefaults
 };
 
 struct SpellProcEventEntry;                                 // used only privately
-
-
-struct CombatData
-{
-public:
-    CombatData(Unit* owner) : threatManager(ThreatManager(owner)), hostileRefManager(HostileRefManager(owner)) {};
-
-    // Manage all Units threatening us
-    ThreatManager threatManager;
-    // Manage all Units that are threatened by us
-    HostileRefManager hostileRefManager;
-};
 
 class MANGOS_DLL_SPEC Unit : public WorldObject
 {
