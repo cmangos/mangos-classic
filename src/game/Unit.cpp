@@ -8220,13 +8220,12 @@ void CharmInfo::InitPossessCreateSpells()
 
 void CharmInfo::InitCharmCreateSpells()
 {
-    if (m_unit->GetTypeId() == TYPEID_PLAYER)               // charmed players don't have spells
-    {
-        InitEmptyActionBar();
-        return;
-    }
-
     InitPetActionBar();
+
+    SetActionBar(ACTION_BAR_INDEX_START, COMMAND_ATTACK, ACT_COMMAND);
+
+    if (m_unit->GetTypeId() == TYPEID_PLAYER)               // charmed players don't have spells
+        return;
 
     for (uint32 x = 0; x < CREATURE_MAX_SPELLS; ++x)
     {
