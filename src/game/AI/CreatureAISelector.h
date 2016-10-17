@@ -27,7 +27,6 @@ class MovementGenerator;
 namespace FactorySelector
 {
     CreatureAI* selectAI(Creature*);
-    CreatureAI* GetPossessAI(Creature*);
     CreatureAI* GetSpecificAI(Unit* unit, std::string const& ainame);
     MovementGenerator* selectMovementGenerator(Creature*);
 }
