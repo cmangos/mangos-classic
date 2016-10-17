@@ -8136,8 +8136,10 @@ void Unit::CleanupsBeforeDelete()
 
 CharmInfo* Unit::InitCharmInfo(Unit* charm)
 {
-    if (!m_charmInfo)
-        m_charmInfo = new CharmInfo(charm);
+    if (m_charmInfo)
+        delete m_charmInfo;
+    m_charmInfo = new CharmInfo(charm);
+
     return m_charmInfo;
 }
 
