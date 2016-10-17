@@ -206,7 +206,8 @@ void TimedFleeingMovementGenerator::Finalize(Unit& owner)
         if (owner.isAlive())
         {
             owner.AttackStop(true);
-            ((Creature*)&owner)->AI()->AttackStart(victim);
+            if (owner.AI())
+                owner.AI()->AttackStart(victim);
         }
     }
 }
