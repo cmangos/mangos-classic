@@ -43,6 +43,7 @@
 #include "Timer.h"
 
 #include <list>
+#include "AI/CreatureAI.h"
 
 enum SpellInterruptFlags
 {
@@ -1974,9 +1975,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // Reset control to player
         void ResetControlState(bool attackCharmer = true);
 
-        CombatData* m_combatData;
-
         float GetAttackDistance(Unit const* pl) const;
+
+        virtual CreatureAI* AI() { return nullptr; }
+        virtual CombatData* GetCombatData() { return m_combatData; }
 
     protected:
         explicit Unit();
@@ -2032,6 +2034,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void DisableSpline();
         bool m_isCreatureLinkingTrigger;
         bool m_isSpawningLinked;
+
+        CombatData* m_combatData;
 
     private:
         void CleanupDeletedAuras();
