@@ -405,6 +405,7 @@ Unit::~Unit()
         }
     }
 
+    delete m_combatData;
     delete m_charmInfo;
     delete movespline;
 
