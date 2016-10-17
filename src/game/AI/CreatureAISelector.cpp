@@ -25,7 +25,6 @@
 #include "ScriptMgr.h"
 #include "Pet.h"
 #include "Log.h"
-#include "PossessedAI.h"
 #include "PetAI.h"
 
 INSTANTIATE_SINGLETON_1(CreatureAIRegistry);
@@ -84,11 +83,6 @@ namespace FactorySelector
 
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature %u used AI is %s.", creature->GetGUIDLow(), ainame.c_str());
         return (ai_factory == nullptr ? new NullCreatureAI(creature) : ai_factory->Create(creature));
-    }
-
-    CreatureAI* GetPossessAI(Creature* creature)
-    {
-        return new PossessedAI(creature);
     }
 
     CreatureAI* GetSpecificAI(Unit* unit, std::string const& ainame)
