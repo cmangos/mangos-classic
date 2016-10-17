@@ -9630,8 +9630,11 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
         player->UnsummonPetTemporaryIfAny();
     }
 
+    // init CharmInfo class that will hold charm data
+    CharmInfo* charmInfo = pCreature->InitCharmInfo(pCreature);
+
     // set temp possess ai (creature will not be able to react by itself)
-    pCreature->SetPossessed();
+    charmInfo->SetCharmState("PossessedAI");
 
     if (player)
     {
@@ -9667,12 +9670,20 @@ bool Unit::TakePossessOf(Unit* possessed)
 
     Creature* possessedCreature = nullptr;
     Player* possessedPlayer = nullptr;
+    CharmInfo* charmInfo = possessed->InitCharmInfo(possessed);
+
+    // stop any generated movement TODO:: this may not be correct! what about possessing a feared creature?
+    possessed->GetMotionMaster()->Clear();
+    possessed->GetMotionMaster()->MoveIdle();
+    possessed->StopMoving(true);
+
     if (possessed->GetTypeId() == TYPEID_UNIT)
     {
         possessedCreature = static_cast<Creature *>(possessed);
-        possessedCreature->SetPossessed();
         possessedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
         possessedCreature->SetWalk(IsWalking(), true);
+        charmInfo->SetCharmState("PossessedAI");
+        getHostileRefManager().deleteReference(possessedCreature);
 
         // this seem to be needed for controlled creature (else cannot attack neutral creature)
         if (player)
@@ -9703,12 +9714,9 @@ bool Unit::TakePossessOf(Unit* possessed)
         // player pet is unsmumoned while possessing
         player->UnsummonPetTemporaryIfAny();
 
-        if (CharmInfo* charmInfo = possessed->InitCharmInfo(possessed))
-        {
-            charmInfo->InitPossessCreateSpells();
-            charmInfo->SetReactState(REACT_PASSIVE);
-            charmInfo->SetCommandState(COMMAND_STAY);
-        }
+        charmInfo->InitPossessCreateSpells();
+        charmInfo->SetReactState(REACT_PASSIVE);
+        charmInfo->SetCommandState(COMMAND_STAY);
         player->PossessSpellInitialize();
     }
 
