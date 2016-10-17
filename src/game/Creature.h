@@ -556,8 +556,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         virtual CreatureAI* AI() override { if (m_charmInfo && m_charmInfo->GetAI()) return m_charmInfo->GetAI(); else return m_ai; }
         virtual CombatData* GetCombatData() override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); else return m_combatData; }
 
-        void SetPossessed(bool isPossessed = true, Unit* owner = nullptr);
-
         void SetWalk(bool enable, bool asDefault = true);
         void SetLevitate(bool enable) override;
         void SetSwim(bool enable) override;
