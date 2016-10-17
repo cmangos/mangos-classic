@@ -9721,14 +9721,65 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     possessed->SetCharmerGuid(ObjectGuid());
     possessed->StopMoving(true);
+    possessed->GetMotionMaster()->Clear();
 
     SetCharmGuid(ObjectGuid());
     Creature* possessedCreature = nullptr;
+    CharmInfo* charmInfo = possessed->GetCharmInfo();
+
     if (possessed->GetTypeId() == TYPEID_UNIT)
     {
         possessedCreature = static_cast<Creature *>(possessed);
         possessedCreature->ClearTemporaryFaction();
-        possessedCreature->SetPossessed(false, this);
+
+
+        // now we have to clean threat list to be able to restore normal creature behavior
+        FactionTemplateEntry const* factionEntry = possessed->getFactionTemplateEntry();
+
+        // first find friendly target (stopping combat here is not recommended because m_attackers will be modified)
+        AttackerSet friendlyTargets;
+        for (Unit::AttackerSet::const_iterator itr = possessed->getAttackers().begin(); itr != possessed->getAttackers().end(); ++itr)
+        {
+            Unit* attacker = (*itr);
+            if (attacker->GetTypeId() != TYPEID_UNIT)
+                continue;
+
+            if (!factionEntry->IsHostileTo(*attacker->getFactionTemplateEntry()))
+                friendlyTargets.insert(attacker);
+        }
+
+        // now stop attackers combat and transfer threat generated from this to owner, also get the total generated threat
+        for (Unit::AttackerSet::iterator itr = friendlyTargets.begin(); itr != friendlyTargets.end(); ++itr)
+        {
+            Unit* attacker = (*itr);
+            attacker->AttackStop(true, true);
+            attacker->m_Events.KillAllEvents(true);
+            attacker->getThreatManager().modifyThreatPercent(possessed, -101);           // only remove the possessed creature from threat list because it can be filled by other players
+            attacker->AddThreat(this);
+        }
+
+
+        possessed->AttackStop(true, true);
+        possessed->m_Events.KillAllEvents(true);
+
+        charmInfo->ResetCharmState();
+        possessed->DeleteCharmInfo();
+
+        // we have to restore initial MotionMaster
+        GetMotionMaster()->Initialize();
+
+        if (possessed->isAlive())
+        {
+            if (!possessedCreature->IsPet() || possessedCreature->GetOwner() != this)
+            {
+                possessedCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
+                                                                                                           // TODO:: iam not sure we need that faction check
+                if (!factionEntry->IsFriendlyTo(*getFactionTemplateEntry()))
+                    possessed->getThreatManager().addThreat(this, GetMaxHealth());                // generating threat by max life amount best way i found to make it realistic
+            }
+        }
+        else
+            possessed->GetCombatData()->threatManager.clearReferences();
     }
 
     if (player)
@@ -9736,6 +9787,8 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         player->SetClientControl(possessed, 0);
         player->SetMover(nullptr);
         player->GetCamera().ResetView();
+
+        possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
         // player pet can be re summoned here
         player->ResummonPetTemporaryUnSummonedIfAny();
@@ -9746,6 +9799,14 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         Player* possessedPlayer = static_cast<Player *>(possessed);
         possessedPlayer->setFactionForRace(possessedPlayer->getRace());
         possessedPlayer->SetClientControl(possessedPlayer, possessedPlayer->IsClientControl(possessedPlayer));
+        charmInfo->ResetCharmState();
+        possessedPlayer->DeleteCharmInfo();
+
+        possessed->AttackStop(true, true);
+        possessed->m_Events.KillAllEvents(true);
+
+        // we have to restore initial MotionMaster
+        GetMotionMaster()->Initialize();
     }
     else if (possessedCreature)
     {
