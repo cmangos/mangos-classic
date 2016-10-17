@@ -472,11 +472,14 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     // update abilities available only for fraction of time
     UpdateReactives(update_diff);
 
-    if (isAlive())
-        ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth() * 0.20f);
-
     UpdateSplineMovement(p_time);
     i_motionMaster.UpdateMotion(p_time);
+
+    if (AI() && isAlive())
+        AI()->UpdateAI(p_time);   // AI not react good at real update delays (while freeze in non-active part of map)
+    
+    if (isAlive())
+        ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth() * 0.20f);
 }
 
 bool Unit::UpdateMeleeAttackingState()
@@ -661,11 +664,11 @@ void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb)
     uint32 originalDamage = damage;
 
     // Script Event damage Deal
-    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-        ((Creature*)this)->AI()->DamageDeal(pVictim, damage);
+    if (AI())
+        AI()->DamageDeal(pVictim, damage);
     // Script Event damage taken
-    if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->AI())
-        ((Creature*)pVictim)->AI()->DamageTaken(this, damage);
+    if (pVictim->AI())
+        pVictim->AI()->DamageTaken(this, damage);
 
     if (absorb && originalDamage > damage)
         *absorb += (originalDamage - damage);
@@ -843,8 +846,8 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             pVictim->SetHealth(0);
 
         // Call KilledUnit for creatures
-        if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-            ((Creature*)this)->AI()->KilledUnit(pVictim);
+        if (AI())
+            AI()->KilledUnit(pVictim);
 
         // Call AI OwnerKilledUnit (for any current summoned minipet/guardian/protector)
         PetOwnerKilledUnit(pVictim);
@@ -1072,8 +1075,8 @@ struct PetOwnerKilledUnitHelper
     {
         if (pTarget->GetTypeId() == TYPEID_UNIT)
         {
-            if (((Creature*)pTarget)->AI())
-                ((Creature*)pTarget)->AI()->OwnerKilledUnit(m_victim);
+            if (pTarget->AI())
+                pTarget->AI()->OwnerKilledUnit(m_victim);
         }
     }
 
@@ -1120,11 +1123,8 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
                 if (pSummoner->AI())
                     pSummoner->AI()->SummonedCreatureJustDied(victim);
     }
-    else if (pOwner && pOwner->GetTypeId() == TYPEID_UNIT)
-    {
-        if (((Creature*)pOwner)->AI())
-            ((Creature*)pOwner)->AI()->SummonedCreatureJustDied(victim);
-    }
+    else if (pOwner && pOwner->AI())
+            pOwner->AI()->SummonedCreatureJustDied(victim);
 
     // Inform Instance Data and Linking
     if (InstanceData* mapInstance = victim->GetInstanceData())
@@ -5183,8 +5183,8 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
 void Unit::AttackedBy(Unit* attacker)
 {
     // trigger AI reaction
-    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-        ((Creature*)this)->AI()->AttackedBy(attacker);
+    if (AI())
+        AI()->AttackedBy(attacker);
 
     // do not pet reaction for self inflicted damage (like environmental)
     if (attacker == this)
@@ -5241,8 +5241,8 @@ void Unit::CombatStop(bool includingCast)
             ((Creature*)this)->ClearTemporaryFaction();
     }
 
-    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-        ((Creature*)this)->AI()->CombatStop();
+    if (AI())
+        AI()->CombatStop();
 
     ClearInCombat();
 }
@@ -5525,8 +5525,8 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
         unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, critical);
 
     // Script Event HealedBy
-    if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->AI())
-        ((Creature*)pVictim)->AI()->HealedBy(this, addhealth);
+    if (pVictim->AI())
+        pVictim->AI()->HealedBy(this, addhealth);
 
     return gain;
 }
@@ -7310,8 +7310,8 @@ void Unit::TauntApply(Unit* taunter)
         if (GetTargetGuid() || !target)
             SetInFront(taunter);
 
-        if (((Creature*)this)->AI())
-            ((Creature*)this)->AI()->AttackStart(taunter);
+        if (AI())
+            AI()->AttackStart(taunter);
     }
 
     getThreatManager().tauntApply(taunter);
@@ -7338,8 +7338,8 @@ void Unit::TauntFadeOut(Unit* taunter)
     {
         m_fixateTargetGuid.Clear();
 
-        if (((Creature*)this)->AI())
-            ((Creature*)this)->AI()->EnterEvadeMode();
+        if (AI())
+            AI()->EnterEvadeMode();
 
         if (InstanceData* mapInstance = GetInstanceData())
             mapInstance->OnCreatureEvade((Creature*)this);
@@ -7358,8 +7358,8 @@ void Unit::TauntFadeOut(Unit* taunter)
         if (GetTargetGuid())
             SetInFront(target);
 
-        if (((Creature*)this)->AI())
-            ((Creature*)this)->AI()->AttackStart(target);
+        if (AI())
+            AI()->AttackStart(target);
     }
 }
 
@@ -7402,7 +7402,7 @@ bool Unit::SelectHostileTarget()
         return false;
 
     // This function only useful once AI has been initialized
-    if (!((Creature*)this)->AI())
+    if (!AI())
         return false;
 
     Unit* target = nullptr;
@@ -7450,7 +7450,7 @@ bool Unit::SelectHostileTarget()
         {
             SetInFront(target);
             if (oldTarget != target)
-                ((Creature*)this)->AI()->AttackStart(target);
+                AI()->AttackStart(target);
 
             // check if currently selected target is reachable
             // NOTE: path alrteady generated from AttackStart()
@@ -7463,7 +7463,7 @@ bool Unit::SelectHostileTarget()
                 {
                     // only one target in list, we have to evade after timer
                     // TODO: make timer - inside Creature class
-                    ((Creature*)this)->AI()->EnterEvadeMode();
+                    AI()->EnterEvadeMode();
                 }
                 else
                 {
@@ -7500,7 +7500,7 @@ bool Unit::SelectHostileTarget()
 
     // enter in evade mode in other case
     m_fixateTargetGuid.Clear();
-    ((Creature*)this)->AI()->EnterEvadeMode();
+    AI()->EnterEvadeMode();
 
     if (InstanceData* mapInstance = GetInstanceData())
         mapInstance->OnCreatureEvade((Creature*)this);

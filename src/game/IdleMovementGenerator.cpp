@@ -69,7 +69,8 @@ AssistanceDistractMovementGenerator::Finalize(Unit& unit)
         if (unit.isAlive())
         {
             unit.AttackStop(true);
-            ((Creature*)&unit)->AI()->AttackStart(victim);
+            if (unit.AI())
+                unit.AI()->AttackStart(victim);
         }
     }
 }
