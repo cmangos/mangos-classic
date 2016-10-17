@@ -2080,113 +2080,19 @@ void Aura::HandleModCharm(bool apply, bool Real)
     if (!caster)
         return;
 
+    Player* playerCaster = caster->GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(caster) : nullptr;
+
     if (apply)
     {
-        if (caster->GetTypeId() == TYPEID_PLAYER)
+        if (playerCaster)
         {
             //remove any existing charm just in case
-            caster->Uncharm();
- 
-            //pets should be removed when possesing a target if somehow check was bypassed
-            ((Player*)caster)->UnsummonPetIfAny();
+            playerCaster->Uncharm();
         }
-
-        // is it really need after spell check checks?
-        target->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM, GetHolder());
-        target->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS, GetHolder());
-
-        target->SetCharmerGuid(GetCasterGuid());
-        target->setFaction(caster->getFaction());
-        target->CastStop(target == caster ? GetId() : 0);
-        caster->SetCharm(target);
-
-        target->CombatStop(true);
-        target->DeleteThreatList();
-        target->getHostileRefManager().deleteReferences();
-
-        if (target->GetTypeId() == TYPEID_UNIT)
-        {
-            ((Creature*)target)->AIM_Initialize();
-            CharmInfo* charmInfo = target->InitCharmInfo(target);
-            charmInfo->InitCharmCreateSpells();
-            charmInfo->SetReactState(REACT_DEFENSIVE);
-
-            if (caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK)
-            {
-                CreatureInfo const* cinfo = ((Creature*)target)->GetCreatureInfo();
-                if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON)
-                {
-                    // creature with pet number expected have class set
-                    if (target->GetByteValue(UNIT_FIELD_BYTES_0, 1) == 0)
-                    {
-                        if (cinfo->UnitClass == 0)
-                            sLog.outErrorDb("Creature (Entry: %u) have UnitClass = 0 but used in charmed spell, that will be result client crash.", cinfo->Entry);
-                        else
-                            sLog.outError("Creature (Entry: %u) have UnitClass = %u but at charming have class 0!!! that will be result client crash.", cinfo->Entry, cinfo->UnitClass);
-
-                        target->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
-                    }
-
-                    // just to enable stat window
-                    charmInfo->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
-                    // if charmed two demons the same session, the 2nd gets the 1st one's name
-                    target->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
-                }
-            }
-        }
-
-        if (caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)caster)->CharmSpellInitialize();
+        caster->TakeCharmOf(target);
     }
     else
-    {
-        target->SetCharmerGuid(ObjectGuid());
-
-        if (target->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)target)->setFactionForRace(target->getRace());
-        else
-        {
-            CreatureInfo const* cinfo = ((Creature*)target)->GetCreatureInfo();
-
-            // restore faction
-            if (((Creature*)target)->IsPet())
-            {
-                if (Unit* owner = target->GetOwner())
-                    target->setFaction(owner->getFaction());
-                else if (cinfo)
-                    target->setFaction(cinfo->FactionAlliance);
-            }
-            else if (cinfo)                             // normal creature
-                target->setFaction(cinfo->FactionAlliance);
-
-            // restore UNIT_FIELD_BYTES_0
-            if (cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->CreatureType == CREATURE_TYPE_DEMON)
-            {
-                // DB must have proper class set in field at loading, not req. restore, including workaround case at apply
-                // m_target->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->unit_class);
-
-                if (target->GetCharmInfo())
-                    target->GetCharmInfo()->SetPetNumber(0, true);
-                else
-                    sLog.outError("Aura::HandleModCharm: target (GUID: %u TypeId: %u) has a charm aura but no charm info!", target->GetGUIDLow(), target->GetTypeId());
-            }
-        }
-
-        caster->SetCharm(nullptr);
-
-        if (caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)caster)->RemovePetActionBar();
-
-        target->CombatStop(true);
-        target->DeleteThreatList();
-        target->getHostileRefManager().deleteReferences();
-
-        if (target->GetTypeId() == TYPEID_UNIT)
-        {
-            ((Creature*)target)->AIM_Initialize();
-            target->AttackedBy(caster);
-        }
-    }
+        caster->ResetControlState();
 }
 
 void Aura::HandleModConfuse(bool apply, bool Real)

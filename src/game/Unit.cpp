@@ -9725,6 +9725,94 @@ bool Unit::TakePossessOf(Unit* possessed)
     return true;
 }
 
+bool Unit::TakeCharmOf(Unit* charmed)
+{
+    Player* charmerPlayer = nullptr;
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        charmerPlayer = static_cast<Player *>(this);
+
+        // player pet is unsmumoned while possessing
+        charmerPlayer->UnsummonPetTemporaryIfAny();
+    }
+
+    // stop combat but keep threat list
+    charmed->AttackStop(true, true);
+    charmed->ClearInCombat();
+
+    charmed->SetCharmerGuid(GetObjectGuid());
+    charmed->CastStop();
+    SetCharm(charmed);
+
+    CharmInfo* charmInfo = charmed->InitCharmInfo(charmed);
+    charmed->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS); // important have to be after charminfo initialization
+
+    if (charmed->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* charmedPlayer = static_cast<Player *>(charmed);
+        charmedPlayer->setFaction(getFaction());
+
+        charmInfo->SetCharmState("PetAI");
+        //charmedPlayer->SetWalk(IsWalking(), true);
+
+        charmInfo->InitCharmCreateSpells();
+        charmInfo->SetReactState(REACT_DEFENSIVE);
+        charmInfo->SetCommandState(COMMAND_FOLLOW);
+        charmInfo->SetIsRetreating(true);
+
+        charmedPlayer->SetClientControl(charmedPlayer, 0);
+        charmedPlayer->SendForcedObjectUpdate();
+    }
+    else if (charmed->GetTypeId() == TYPEID_UNIT)
+    {
+        Creature* charmedCreature = static_cast<Creature *>(charmed);
+        charmInfo->SetCharmState("PetAI");
+        getHostileRefManager().deleteReference(charmedCreature);
+        charmedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
+        charmedCreature->SetWalk(IsWalking(), true);
+
+        charmInfo->InitCharmCreateSpells();
+        charmInfo->SetReactState(REACT_DEFENSIVE);
+        charmInfo->SetCommandState(COMMAND_FOLLOW);
+        charmInfo->SetIsRetreating(true);
+
+        if (charmerPlayer)
+        {
+            // without this charmed unit will not be able to attack neutral target
+            charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
+            if (getClass() == CLASS_WARLOCK)
+            {
+                CreatureInfo const* cinfo = charmedCreature->GetCreatureInfo();
+                if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON)
+                {
+                    // creature with pet number expected have class set
+                    if (charmedCreature->GetByteValue(UNIT_FIELD_BYTES_0, 1) == 0)
+                    {
+                        if (cinfo->UnitClass == 0)
+                            sLog.outErrorDb("Creature (Entry: %u) have UnitClass = 0 but used in charmed spell, that will be result client crash.", cinfo->Entry);
+                        else
+                            sLog.outError("Creature (Entry: %u) have UnitClass = %u but at charming have class 0!!! that will be result client crash.", cinfo->Entry, cinfo->UnitClass);
+
+                        charmedCreature->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
+                    }
+
+                    // just to enable stat window
+                    charmInfo->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
+                    // if charmed two demons the same session, the 2nd gets the 1st one's name
+                    charmedCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
+                }
+            }
+        }
+    }
+
+    if (charmerPlayer)
+    {
+        charmerPlayer->CharmSpellInitialize();
+    }
+    return true;
+}
+
 void Unit::ResetControlState(bool attackCharmer /*= true*/)
 {
     Player* player = nullptr;
