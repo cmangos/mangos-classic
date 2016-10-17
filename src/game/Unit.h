@@ -1751,11 +1751,11 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void TauntFadeOut(Unit* taunter);
         void FixateTarget(Unit* pVictim);
         ObjectGuid GetFixateTargetGuid() const { return m_fixateTargetGuid; }
-        ThreatManager& getThreatManager() { return m_combatData->threatManager; }
-        ThreatManager const& getThreatManager() const { return m_combatData->threatManager; }
-        void addHatedBy(HostileReference* pHostileReference) { m_combatData->hostileRefManager.insertFirst(pHostileReference); };
+        ThreatManager& getThreatManager() { return GetCombatData()->threatManager; }
+        ThreatManager const& getThreatManager() const { return const_cast<Unit*>(this)->GetCombatData()->threatManager; }
+        void addHatedBy(HostileReference* pHostileReference) { GetCombatData()->hostileRefManager.insertFirst(pHostileReference); };
         void removeHatedBy(HostileReference* /*pHostileReference*/) { /* nothing to do yet */ }
-        HostileRefManager& getHostileRefManager() { return m_combatData->hostileRefManager; }
+        HostileRefManager& getHostileRefManager() { return GetCombatData()->hostileRefManager; }
 
         Aura* GetAura(uint32 spellId, SpellEffectIndex effindex);
         Aura* GetAura(AuraType type, SpellFamily family, uint64 familyFlag, ObjectGuid casterGuid = ObjectGuid());
