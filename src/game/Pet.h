@@ -280,6 +280,11 @@ class MANGOS_DLL_SPEC Pet : public Creature
         const char* GetNameForLocaleIdx(int32 locale_idx) const { return WorldObject::GetNameForLocaleIdx(locale_idx); }
 
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
+
+        // return charminfo ai only when this pet is possessed. (eye of the beast case for ex.)
+        virtual CreatureAI* AI() override { if (hasUnitState(UNIT_STAT_CONTROLLED) && m_charmInfo->GetAI()) return m_charmInfo->GetAI(); else return m_ai; }
+        virtual CombatData* GetCombatData() override { return m_combatData; }
+
     protected:
         uint32  m_happinessTimer;
         uint32  m_loyaltyTimer;
