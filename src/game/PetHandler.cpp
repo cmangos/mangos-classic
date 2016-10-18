@@ -417,22 +417,25 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
 
     recv_data >> petGuid;
 
-    Creature* pet = _player->GetMap()->GetAnyTypeCreature(petGuid);
+    Unit* petUnit = _player->GetMap()->GetUnit(petGuid);
 
-    if (!pet || (pet != _player->GetPet() && pet != _player->GetCharm()))
+    if (!petUnit || (petUnit != _player->GetPet() && petUnit != _player->GetCharm()))
     {
         sLog.outError("HandlePetSetAction: Unknown pet or pet owner.");
         return;
     }
 
+    Creature* petCreature = petUnit->GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(petUnit) : nullptr;
+    Pet* pet = (petCreature && petCreature->IsPet()) ? static_cast<Pet*>(petUnit) : nullptr;
+
     // pet can have action bar disabled
-    if (pet->IsPet() && ((Pet*)pet)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+    if (pet && (pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS))
         return;
 
-    CharmInfo* charmInfo = pet->GetCharmInfo();
+    CharmInfo* charmInfo = petUnit->GetCharmInfo();
     if (!charmInfo)
     {
-        sLog.outError("WorldSession::HandlePetSetAction: object (GUID: %u TypeId: %u) is considered pet-like but doesn't have a charminfo!", pet->GetGUIDLow(), pet->GetTypeId());
+        sLog.outError("WorldSession::HandlePetSetAction: %s is considered pet-like but doesn't have a charminfo!", petUnit->GetObjectGuid().GetString().c_str());
         return;
     }
 
@@ -497,23 +500,23 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
         DETAIL_LOG("Player %s has changed pet spell action. Position: %u, Spell: %u, State: 0x%X", _player->GetName(), position[i], spell_id, uint32(act_state));
 
         // if it's act for spell (en/disable/cast) and there is a spell given (0 = remove spell) which pet doesn't know, don't add
-        if (!((act_state == ACT_ENABLED || act_state == ACT_DISABLED || act_state == ACT_PASSIVE) && spell_id && !pet->HasSpell(spell_id)))
+        if (!((act_state == ACT_ENABLED || act_state == ACT_DISABLED || act_state == ACT_PASSIVE) && spell_id && !petUnit->HasSpell(spell_id)))
         {
             // sign for autocast
             if (act_state == ACT_ENABLED && spell_id)
             {
-                if (pet->isCharmed())
+                if (petUnit->isCharmed())
                     charmInfo->ToggleCreatureAutocast(spell_id, true);
-                else
-                    ((Pet*)pet)->ToggleAutocast(spell_id, true);
+                else if (pet)
+                    pet->ToggleAutocast(spell_id, true);
             }
             // sign for no/turn off autocast
             else if (act_state == ACT_DISABLED && spell_id)
             {
-                if (pet->isCharmed())
+                if (petUnit->isCharmed())
                     charmInfo->ToggleCreatureAutocast(spell_id, false);
                 else
-                    ((Pet*)pet)->ToggleAutocast(spell_id, false);
+                    pet->ToggleAutocast(spell_id, false);
             }
 
             charmInfo->SetActionBar(position[i], spell_id, ActiveStates(act_state));
@@ -577,16 +580,23 @@ void WorldSession::HandlePetAbandon(WorldPacket& recv_data)
         return;
 
     // pet/charmed
-    if (Creature* pet = _player->GetMap()->GetAnyTypeCreature(guid))
+    if (Unit* petUnit = _player->GetMap()->GetUnit(guid))
     {
-        if (pet->IsPet())
+        if (!petUnit ||
+            petUnit->GetOwnerGuid() != _player->GetObjectGuid() || !petUnit->GetCharmInfo())
+            return;
+
+        Creature* petCreature = petUnit->GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(petUnit) : nullptr;
+        Pet* pet = (petCreature && petCreature->IsPet()) ? static_cast<Pet*>(petUnit) : nullptr;
+
+        if (pet)
         {
             if (pet->GetObjectGuid() == _player->GetPetGuid())
                 pet->ModifyPower(POWER_HAPPINESS, -50000);
 
-            ((Pet*)pet)->Unsummon(PET_SAVE_AS_DELETED, _player);
+            pet->Unsummon(PET_SAVE_AS_DELETED, _player);
         }
-        else if (pet->GetObjectGuid() == _player->GetCharmGuid())
+        else if (petUnit->GetObjectGuid() == _player->GetCharmGuid())
         {
             _player->Uncharm();
         }
@@ -659,29 +669,32 @@ void WorldSession::HandlePetSpellAutocastOpcode(WorldPacket& recvPacket)
     uint8  state;                                           // 1 for on, 0 for off
     recvPacket >> guid >> spellid >> state;
 
-    Creature* pet = _player->GetMap()->GetAnyTypeCreature(guid);
-    if (!pet || (guid != _player->GetPetGuid() && guid != _player->GetCharmGuid()))
+    Unit* petUnit = _player->GetMap()->GetUnit(guid);
+    if (!petUnit || (guid != _player->GetPetGuid() && guid != _player->GetCharmGuid()))
     {
         sLog.outError("HandlePetSpellAutocastOpcode. %s isn't pet of %s .", guid.GetString().c_str(), _player->GetGuidStr().c_str());
         return;
     }
 
+    Creature* petCreature = petUnit->GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(petUnit) : nullptr;
+    Pet* pet = (petCreature && petCreature->IsPet()) ? static_cast<Pet*>(petUnit) : nullptr;
+
     // do not add not learned spells/ passive spells
-    if (!pet->HasSpell(spellid) || !IsAutocastable(spellid))
+    if (!petUnit->HasSpell(spellid) || !IsAutocastable(spellid))
         return;
 
-    CharmInfo* charmInfo = pet->GetCharmInfo();
+    CharmInfo* charmInfo = petUnit->GetCharmInfo();
     if (!charmInfo)
     {
         sLog.outError("WorldSession::HandlePetSpellAutocastOpcod: %s is considered pet-like but doesn't have a charminfo!", guid.GetString().c_str());
         return;
     }
 
-    if (pet->isCharmed())
+    if (petUnit->isCharmed())
         // state can be used as boolean
-        pet->GetCharmInfo()->ToggleCreatureAutocast(spellid, !!state);
-    else
-        ((Pet*)pet)->ToggleAutocast(spellid, !!state);
+        petUnit->GetCharmInfo()->ToggleCreatureAutocast(spellid, !!state);
+    else if (pet)
+        pet->ToggleAutocast(spellid, !!state);
 
     charmInfo->SetSpellAutocast(spellid, !!state);
 }
@@ -697,13 +710,15 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     DEBUG_LOG("WORLD: CMSG_PET_CAST_SPELL, %s, spellid %u", guid.GetString().c_str(), spellid);
 
-    Creature* pet = _player->GetMap()->GetAnyTypeCreature(guid);
-
-    if (!pet || (guid != _player->GetPetGuid() && guid != _player->GetCharmGuid()))
+    Unit* petUnit = _player->GetMap()->GetUnit(guid);
+    if (!petUnit || (guid != _player->GetPetGuid() && guid != _player->GetCharmGuid()))
     {
-        sLog.outError("HandlePetCastSpellOpcode: %s isn't pet of %s .", guid.GetString().c_str(), _player->GetGuidStr().c_str());
+        sLog.outError("HandlePetSpellAutocastOpcode. %s isn't pet of %s .", guid.GetString().c_str(), _player->GetGuidStr().c_str());
         return;
     }
+
+    Creature* petCreature = petUnit->GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(petUnit) : nullptr;
+    Pet* pet = (petCreature && petCreature->IsPet()) ? static_cast<Pet*>(petUnit) : nullptr;
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
     if (!spellInfo)
@@ -712,37 +727,38 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pet->GetCharmInfo() && pet->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
+    if (petUnit->GetCharmInfo() && petUnit->GetCharmInfo()->GetGlobalCooldownMgr().HasGlobalCooldown(spellInfo))
         return;
 
 
     // do not cast not learned spells
-    if (!pet->HasSpell(spellid) || IsPassiveSpell(spellInfo))
+    if (!petUnit->HasSpell(spellid) || IsPassiveSpell(spellInfo))
         return;
 
     SpellCastTargets targets;
 
-    recvPacket >> targets.ReadForCaster(pet);
+    recvPacket >> targets.ReadForCaster(petUnit);
 
-    pet->clearUnitState(UNIT_STAT_MOVING);
+    petUnit->clearUnitState(UNIT_STAT_MOVING);
 
-    Spell* spell = new Spell(pet, spellInfo, false);
+    Spell* spell = new Spell(petUnit, spellInfo, false);
     spell->m_targets = targets;
 
     SpellCastResult result = spell->CheckPetCast(nullptr);
     if (result == SPELL_CAST_OK)
     {
-        pet->AddCreatureSpellCooldown(spellid);
-        if (pet->IsPet())
-            ((Pet*)pet)->CheckLearning(spellid);
+        if (petCreature)
+            petCreature->AddCreatureSpellCooldown(spellid);
+        if (pet)
+            pet->CheckLearning(spellid);
 
         spell->SpellStart(&(spell->m_targets));
     }
     else
     {
-        pet->SendPetCastFail(spellid, result);
-        if (!pet->HasSpellCooldown(spellid))
-            GetPlayer()->SendClearCooldown(spellid, pet);
+        petUnit->SendPetCastFail(spellid, result);
+        if (petCreature && !petCreature->HasSpellCooldown(spellid))
+            GetPlayer()->SendClearCooldown(spellid, petUnit);
 
         spell->finish(false);
         delete spell;
