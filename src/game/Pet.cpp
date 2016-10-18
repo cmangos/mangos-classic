@@ -220,6 +220,15 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
 
     uint32 pet_number = fields[0].GetUInt32();
 
+    if (owner->IsPetNeedBeTemporaryUnsummoned())
+    {
+        // set temporary summon that way its possible if the player unmount to resummon it automaticaly
+        owner->SetTemporaryUnsummonedPetNumber(pet_number);
+
+        delete result;
+        return false;
+    }
+
     Map* map = owner->GetMap();
 
     CreatureCreatePos pos(owner, owner->GetOrientation(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);

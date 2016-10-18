@@ -2005,7 +2005,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UnsummonPetTemporaryIfAny();
         void UnsummonPetIfAny();
         void ResummonPetTemporaryUnSummonedIfAny();
-        bool IsPetNeedBeTemporaryUnsummoned() const { return !IsInWorld() || !isAlive() || IsMounted() /*+in flight*/; }
+        bool IsPetNeedBeTemporaryUnsummoned() const;
 
         void SendCinematicStart(uint32 CinematicSequenceId);
 
