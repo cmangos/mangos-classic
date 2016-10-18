@@ -16132,6 +16132,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     // Prepare to flight start now
 
+    // temporary remove pet
+    UnsummonPetTemporaryIfAny();
+
     // stop combat at start taxi flight if any
     CombatStop();
 
@@ -18638,6 +18641,20 @@ void Player::UnsummonPetIfAny()
         return;
  
     pet->Unsummon(PET_SAVE_NOT_IN_SLOT, this);
+}
+
+bool Player::IsPetNeedBeTemporaryUnsummoned() const
+{
+    if (!IsInWorld() || !isAlive())
+        return true;
+
+    if (sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT) && IsMounted())
+        return true;
+
+    if (hasUnitState(UNIT_STAT_TAXI_FLIGHT))
+        return true;
+
+    return false;
 }
 
 void Player::ResummonPetTemporaryUnSummonedIfAny()
