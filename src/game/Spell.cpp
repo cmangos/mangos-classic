@@ -4834,9 +4834,12 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 Creature* pet = m_caster->GetPet();
                 if (!pet)
-                    return SPELL_FAILED_NO_PET;
-
-                if (pet->isAlive())
+                {
+                    SpellCastResult result = Pet::TryLoadFromDB(m_caster);
+                    if (result != SPELL_FAILED_TARGETS_DEAD)
+                        return SPELL_FAILED_NO_PET;
+                }
+                else if (pet->isAlive())
                     return SPELL_FAILED_ALREADY_HAVE_SUMMON;
 
                 break;
@@ -4866,15 +4869,23 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     if (Creature* pet = m_caster->GetPet())
                     {
-                        if (!pet->isAlive() || pet->isDead()) // this one will not play along; tried and retried countless times....
-                            return SPELL_FAILED_TARGETS_DEAD;
+                        if (!pet->isAlive())
+                        {
+                            ((Player*)m_caster)->SendPetTameFailure(PETTAME_DEAD);
+                            return SPELL_FAILED_DONT_REPORT;
+                        }
                         else
                             return SPELL_FAILED_ALREADY_HAVE_SUMMON;
                     }
                     else
                     {
                         SpellCastResult result = Pet::TryLoadFromDB(m_caster);
-                        if (result != SPELL_CAST_OK)
+                        if (result == SPELL_FAILED_TARGETS_DEAD)
+                        {
+                            ((Player*)m_caster)->SendPetTameFailure(PETTAME_DEAD);
+                            return SPELL_FAILED_DONT_REPORT;
+                        }
+                        else if (result != SPELL_CAST_OK)
                             return result;
                     }
                 }
@@ -5137,6 +5148,24 @@ SpellCastResult Spell::CheckCast(bool strict)
         }
         else
             return SPELL_FAILED_NOT_TRADING;
+    }
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_UNK16))
+    {
+        Player* player = (Player*)m_caster;
+        if (player->GetPetGuid() || player->GetCharmGuid())
+        {
+            player->SendPetTameFailure(PETTAME_ANOTHERSUMMONACTIVE);
+            return SPELL_FAILED_DONT_REPORT;
+        }
+        else
+        {
+            if (Pet::TryLoadFromDB((Player*)m_caster) == SPELL_FAILED_TARGETS_DEAD)
+            {
+                player->SendPetTameFailure(PETTAME_ANOTHERSUMMONACTIVE);
+                return SPELL_FAILED_DONT_REPORT;
+            }
+        }
     }
 
     // all ok
