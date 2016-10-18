@@ -87,6 +87,72 @@ void Pet::RemoveFromWorld()
     Unit::RemoveFromWorld();
 }
 
+SpellCastResult Pet::TryLoadFromDB(Unit* owner, uint32 petentry /*= 0*/, uint32 petnumber /*= 0*/, bool current /*= false*/, PetType mandatoryPetType /*= MAX_PET_TYPE*/)
+{
+    uint32 ownerid = owner->GetGUIDLow();
+
+    std::ostringstream request;
+    //                 0      1          2               3
+    request << "SELECT entry, curhealth, CreatedBySpell, PetType ";
+
+    if (petnumber)
+        // known petnumber entry
+        request << "FROM character_pet WHERE owner = '" << ownerid << "' AND id = '" << petnumber <<"'";
+    else if (current)
+        // current pet (slot 0)
+        request << "FROM character_pet WHERE owner = '" << ownerid << "' AND slot = '" << uint32(PET_SAVE_AS_CURRENT) << "'";
+    else if (petentry)
+        // known petentry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
+        request << "FROM character_pet WHERE owner = '" << ownerid << "' AND entry = '" << petentry << "' AND (slot = '" << uint32(PET_SAVE_AS_CURRENT) << "' OR slot > '" << uint32(PET_SAVE_LAST_STABLE_SLOT) << "')";
+    else
+        // any current or other non-stabled pet (for hunter "call pet")
+        request << "FROM character_pet WHERE owner = '" << ownerid << "' AND (slot = '" << uint32(PET_SAVE_AS_CURRENT) << "' OR slot > '" << uint32(PET_SAVE_LAST_STABLE_SLOT) << "')";
+
+    QueryResult* result = CharacterDatabase.PQuery(request.str().c_str());
+
+    if (!result)
+        return SPELL_FAILED_NO_PET;
+
+    Field* fields = result->Fetch();
+
+    petentry                    = fields[0].GetUInt32();
+    uint32 savedHealth          = fields[1].GetUInt32();
+    uint32 summon_spell_id      = fields[2].GetUInt32();
+    PetType petType             = PetType(fields[3].GetUInt8());
+
+    delete result;
+
+    // update for case of current pet "slot = 0"
+    if (!petentry)
+        return SPELL_FAILED_NO_PET;
+
+    CreatureInfo const* creatureInfo = ObjectMgr::GetCreatureTemplate(petentry);
+    if (!creatureInfo)
+    {
+        sLog.outError("Pet entry %u does not exist but used at pet load (owner: %s).", petentry, owner->GetGuidStr().c_str());
+        return SPELL_FAILED_NO_PET;
+    }
+
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
+
+    bool is_temporary_summoned = spellInfo && GetSpellDuration(spellInfo) > 0;
+
+    // check temporary summoned pets like mage water elemental
+    if (current && is_temporary_summoned)
+        return SPELL_FAILED_NO_PET;
+
+    if (petType == HUNTER_PET && !creatureInfo->isTameable())
+        return SPELL_FAILED_NO_PET;
+
+    if (!savedHealth)
+        return SPELL_FAILED_TARGETS_DEAD;
+
+    if (mandatoryPetType != MAX_PET_TYPE && petType != mandatoryPetType)
+        return SPELL_FAILED_BAD_TARGETS;
+
+    return SPELL_CAST_OK; // If errors occur down the line, one must think about data consistency
+}
+
 bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool current)
 {
     m_loading = true;
