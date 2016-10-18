@@ -2936,8 +2936,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         {
             case CLASS_HUNTER:
             {
-                // Everything already taken care of, we are only here because we loaded pet from db successfully
-                delete NewSummon;
+                NewSummon->LoadPetFromDB((Player*)m_caster);
                 return;
             }
             case CLASS_WARLOCK:

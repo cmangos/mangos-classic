@@ -173,6 +173,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
         void SavePetToDB(PetSaveMode mode);
         void Unsummon(PetSaveMode mode, Unit* owner = nullptr);
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
+        static SpellCastResult TryLoadFromDB(Unit* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, PetType mandatoryPetType = MAX_PET_TYPE);
 
         void SetDeathState(DeathState s) override;          // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
         void Update(uint32 update_diff, uint32 diff) override;  // overwrite virtual Creature::Update and Unit::Update
