@@ -29,23 +29,23 @@ EndContentData */
 
 enum
 {
-    NPC_RAZELIKH = 7668,
-    NPC_SEVINE = 7671,
-    NPC_ALLISTARJ = 7670,
-    NPC_GROL = 7669,
+    NPC_RAZELIKH    = 7668,
+    NPC_SEVINE      = 7671,
+    NPC_ALLISTARJ   = 7670,
+    NPC_GROL        = 7669,
 
-    GOB_RAZELIKH = 141812,
-    GOB_SEVINE = 141859,
-    GOB_ALLISTARJ = 141858,
-    GOB_GROL = 141857,
+    GOB_RAZELIKH    = 141812,
+    GOB_SEVINE      = 141859,
+    GOB_ALLISTARJ   = 141858,
+    GOB_GROL        = 141857,
 
-    SPELL_SELFSTUN = 9032
+    SPELL_SELFSTUN  = 9032
 };
 
 bool m_uiStoneDestroyed = false;
-bool m_uiStoneEnabled = false;
+bool m_uiStoneEnabled   = false;
+uint32 m_uiStunTimer    = 0;
 GameObject* m_uiStoneGameObject;
-uint32 m_uiStunTimer = 0;
 
 struct npc_stone_servantAI : public ScriptedAI
 {
@@ -53,9 +53,9 @@ struct npc_stone_servantAI : public ScriptedAI
     
     void Reset() override
     {
-        m_uiStoneDestroyed	= false;
-        m_uiStoneEnabled	= false;
-        m_uiStunTimer = 0;
+        m_uiStoneDestroyed  = false;
+        m_uiStoneEnabled    = false;
+        m_uiStunTimer       = 0;
     }
     
     GameObject* FindStoneOfBinding()
@@ -86,7 +86,7 @@ struct npc_stone_servantAI : public ScriptedAI
         if (uiDamage < m_creature->GetHealth())
             return;
         
-        if(m_creature->GetHealth() >= 1)
+        if (m_creature->GetHealth() >= 1)
             m_creature->SetHealth((uint32)1);
         
         if (!m_uiStoneDestroyed)
@@ -105,13 +105,14 @@ struct npc_stone_servantAI : public ScriptedAI
             else
                 m_uiStunTimer -= uiDiff;
             
-            if(!m_uiStoneEnabled)
+            if (!m_uiStoneEnabled)
                 if (m_uiStoneGameObject = FindStoneOfBinding())
                 {
                     m_uiStoneGameObject->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                     m_uiStoneEnabled = true;
                 }
         }
+        
         DoMeleeAttackIfReady();
     }
 };
@@ -121,8 +122,8 @@ bool GOUse_go_stone_of_binding(Player* pPlayer, GameObject* pGo)
     if (!(pGo == m_uiStoneGameObject))
         return false;
     
-    m_uiStoneDestroyed = true;
-    m_uiStoneEnabled = false;
+    m_uiStoneDestroyed  = true;
+    m_uiStoneEnabled    = false;
     m_uiStoneGameObject->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
     
     return true;
