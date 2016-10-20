@@ -9951,6 +9951,9 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     // remove pet bar only if no pet
     if (player && !player->GetPet())
         player->RemovePetActionBar();
+
+    // be sure all those change will be made for clients
+    SendForcedObjectUpdate();
 }
 
 float Unit::GetAttackDistance(Unit const* pl) const
