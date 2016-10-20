@@ -552,6 +552,22 @@ void Pet::DeleteFromDB(uint32 guidlow, bool separate_transaction)
         CharacterDatabase.CommitTransaction();
 }
 
+void Pet::DeleteFromDB(Unit* owner, PetSaveMode slot)
+{
+    uint32 petNumber = 0;
+    QueryResult* result = CharacterDatabase.PQuery("SELECT id FROM character_pet WHERE owner = '%u'  AND slot = '%u' ", owner->GetGUIDLow(), uint32(slot));
+    if (result)
+    {
+        Field* fields = result->Fetch();
+        petNumber = fields[0].GetUInt32();
+
+        delete result;
+    }
+
+    if (petNumber)
+        DeleteFromDB(petNumber);
+}
+
 void Pet::SetDeathState(DeathState s)                       // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
 {
     Creature::SetDeathState(s);
