@@ -2961,14 +2961,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
                 // Load pet from db; if any to load
                 if (NewSummon->LoadPetFromDB((Player*)m_caster, petentry))
-                {
-                    NewSummon->SetHealth(NewSummon->GetMaxHealth());
-                    NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
-
-                    NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
-
                     return;
-                }
 
                 NewSummon->setPetType(SUMMON_PET);
             }
@@ -4810,7 +4803,13 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
     Player* _player = (Player*)m_caster;
     Pet* pet = _player->GetPet();
     if (!pet)
+    {
+        pet = new Pet();
+        if (!pet->LoadPetFromDB(_player, 0, 0, true, damage))
+            delete pet;
+        // if above successfully loaded the pet all is done
         return;
+    }
     if (pet->isAlive())
         return;
 
