@@ -9691,7 +9691,11 @@ bool Unit::TakePossessOf(Unit* possessed)
     else if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
         possessedPlayer = static_cast<Player *>(possessed);
-        possessedPlayer->setFaction(getFaction());
+
+        if (player && player->IsInDuelWith(possessedPlayer))
+            possessedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, player->GetUInt32Value(PLAYER_DUEL_TEAM));
+        else
+            possessedPlayer->setFaction(getFaction());
     }
 
     if (player)
@@ -9727,6 +9731,7 @@ bool Unit::TakePossessOf(Unit* possessed)
 
 bool Unit::TakeCharmOf(Unit* charmed)
 {
+
     Player* charmerPlayer = nullptr;
     if (GetTypeId() == TYPEID_PLAYER)
     {
@@ -9745,14 +9750,17 @@ bool Unit::TakeCharmOf(Unit* charmed)
     SetCharm(charmed);
 
     CharmInfo* charmInfo = charmed->InitCharmInfo(charmed);
-    charmed->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS); // important have to be after charminfo initialization
 
     if (charmed->GetTypeId() == TYPEID_PLAYER)
     {
         Player* charmedPlayer = static_cast<Player *>(charmed);
-        charmedPlayer->setFaction(getFaction());
+        if (charmerPlayer && charmerPlayer->IsInDuelWith(charmedPlayer))
+            charmedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, charmerPlayer->GetUInt32Value(PLAYER_DUEL_TEAM));
+        else
+            charmedPlayer->setFaction(getFaction());
 
         charmInfo->SetCharmState("PetAI");
+        charmed->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS); // important have to be after charminfo initialization
         //charmedPlayer->SetWalk(IsWalking(), true);
 
         charmInfo->InitCharmCreateSpells();
@@ -9846,7 +9854,9 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     {
         possessedCreature = static_cast<Creature *>(possessed);
         possessedCreature->ClearTemporaryFaction();
-
+        
+        if (player)
+            possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
         // now we have to clean threat list to be able to restore normal creature behavior
         FactionTemplateEntry const* factionEntry = possessed->getFactionTemplateEntry();
@@ -9903,8 +9913,6 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         player->SetMover(nullptr);
         player->GetCamera().ResetView();
 
-        possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-
         // player pet can be re summoned here
         player->ResummonPetTemporaryUnSummonedIfAny();
     }
@@ -9912,7 +9920,12 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
         Player* possessedPlayer = static_cast<Player *>(possessed);
-        possessedPlayer->setFactionForRace(possessedPlayer->getRace());
+
+        if (player && player->IsInDuelWith(possessedPlayer))
+            possessedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, player->GetUInt32Value(PLAYER_DUEL_TEAM) == 1 ? 2 : 1);
+        else
+            possessedPlayer->setFactionForRace(possessedPlayer->getRace());
+
         possessedPlayer->SetClientControl(possessedPlayer, possessedPlayer->IsClientControl(possessedPlayer));
         charmInfo->ResetCharmState();
         possessedPlayer->DeleteCharmInfo();
