@@ -4836,8 +4836,17 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (!pet)
                 {
                     SpellCastResult result = Pet::TryLoadFromDB(m_caster);
-                    if (result != SPELL_FAILED_TARGETS_DEAD)
+                    if (result == SPELL_FAILED_NO_PET)
                         return SPELL_FAILED_NO_PET;
+
+                    if (result == SPELL_CAST_OK)
+                    {
+                        ((Player*)m_caster)->SendPetTameFailure(PETTAME_NOTDEAD);
+                        return SPELL_FAILED_DONT_REPORT;
+                    }
+
+                    if (result != SPELL_FAILED_TARGETS_DEAD)
+                        return SPELL_FAILED_UNKNOWN;
                 }
                 else if (pet->isAlive())
                     return SPELL_FAILED_ALREADY_HAVE_SUMMON;
