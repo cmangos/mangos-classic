@@ -183,23 +183,31 @@ bool WorldSocket::ProcessIncomingData()
 
     try
     {
+        bool l_success;
         switch (opcode)
         {
             case CMSG_AUTH_SESSION:
                 if (m_session)
                 {
                     sLog.outError("WorldSocket::ProcessIncomingData: Player send CMSG_AUTH_SESSION again");
-                    return false;
+                    l_success = false;
                 }
-
-                return HandleAuthSession(*pct);
+                else
+                {
+                    l_success = HandleAuthSession(*pct);
+                }
+                delete pct;
+                return l_success;
 
             case CMSG_PING:
-                return HandlePing(*pct);
+                l_success =  HandlePing(*pct);
+                delete pct;
+                return l_success;
 
             case CMSG_KEEP_ALIVE:
                 DEBUG_LOG("CMSG_KEEP_ALIVE ,size: " SIZEFMTD " ", pct->size());
 
+                delete pct;
                 return true;
 
             default:
@@ -207,9 +215,12 @@ bool WorldSocket::ProcessIncomingData()
                 if (!m_session)
                 {
                     sLog.outError("WorldSocket::ProcessIncomingData: Client not authed opcode = %u", uint32(opcode));
+                    delete pct;
                     return false;
                 }
 
+                // pct will be deleted in WorldSession::Update or by the
+                // WorldSession destructor
                 m_session->QueuePacket(pct);
 
                 return true;
@@ -226,6 +237,7 @@ bool WorldSocket::ProcessIncomingData()
             DEBUG_LOG("Dumping error-causing packet:");
             pct->hexlike();
         }
+        delete pct;
 
         if (sWorld.getConfig(CONFIG_BOOL_KICK_PLAYER_ON_BAD_PACKET))
         {
