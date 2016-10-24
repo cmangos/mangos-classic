@@ -294,9 +294,75 @@ inline bool IsNonCombatSpell(SpellEntry const* spellInfo)
 bool IsExplicitPositiveTarget(uint32 targetA);
 bool IsExplicitNegativeTarget(uint32 targetA);
 
-// TODO: research binary spells
 inline bool IsBinarySpell(SpellEntry const* spellInfo)
 {
+    // Spell is considered binary if:
+    // * Its composed entirely out of non-damage and aura effects (Example: Mind Flay, Vampiric Embrace, DoTs, etc)
+    // * Has damage and non-damage effects with additional mechanics (Example: Death Coil, Frost Nova)
+    uint32 effectmask = 0;  // A bitmask of effects: set bits are valid effects
+    uint32 nondmgmask = 0;  // A bitmask of effects: set bits are non-damage effects
+    uint32 mechmask = 0;    // A bitmask of effects: set bits are non-damage effects with additional mechanics
+    for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (!spellInfo->Effect[i] || IsSpellEffectTriggerSpell(spellInfo, SpellEffectIndex(i)))
+            continue;
+
+        effectmask |= (1 << i);
+
+        bool damage = false;
+        if (!spellInfo->EffectApplyAuraName[i])
+        {
+            // If its not an aura effect, check for damage effects
+            switch (spellInfo->Effect[i])
+            {
+                case SPELL_EFFECT_SCHOOL_DAMAGE:
+                case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+                case SPELL_EFFECT_HEALTH_LEECH:
+                case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE:
+                //   SPELL_EFFECT_POWER_BURN: deals damage for power burned, but its either full damage or resist?
+                case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                    damage = true;
+                    break;
+            }
+        }
+        if (!damage)
+        {
+            nondmgmask |= (1 << i);
+            if (spellInfo->EffectMechanic[i])
+                mechmask |= (1 << i);
+        }
+    }
+    // No non-damage involved at all: assumed all effects which should be rolled separately or no effects
+    if (!effectmask || !nondmgmask)
+        return false;
+    // All effects are non-damage
+    if (nondmgmask == effectmask)
+        return true;
+    // No non-damage effects with additional mechanics
+    if (!mechmask)
+        return false;
+    // Binary spells execution order detection
+    for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        // If effect is present and not a non-damage effect
+        const uint32 effect = (1 << i);
+        if ((effectmask & effect) && !(nondmgmask & effect))
+        {
+            // Iterate over mechanics
+            for (uint32 e = EFFECT_INDEX_0; e < MAX_EFFECT_INDEX; ++e)
+            {
+                // If effect is extra mechanic on the same target as damage effect
+                if ((mechmask & (1 << e)) &&
+                    spellInfo->EffectImplicitTargetA[i] == spellInfo->EffectImplicitTargetA[e] &&
+                    spellInfo->EffectImplicitTargetB[i] == spellInfo->EffectImplicitTargetB[e])
+                {
+                    return true; // Pre-2.3: if such effect exists
+                }
+            }
+        }
+    }
     return false;
 }
 
