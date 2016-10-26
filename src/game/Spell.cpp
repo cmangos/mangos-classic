@@ -4244,27 +4244,31 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
         }
 
-        // Classic only (seems to be handled client side tbc and later (not verified)) - Only check effect 0
-        // Spells such as Abolish Poison have dispel on effect 1 but should be castable even if target not poisoned
-        if (m_spellInfo->Effect[0] == SPELL_EFFECT_DISPEL)
+        // Enable Shield Slam warrior spell. (from MZ 0.20)
+        if (!(m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && m_spellInfo->SpellFamilyFlags & uint64(0x100000000))) // the Shield Slam does not depend on its dispel effect
         {
-            bool dispelTarget = false;
-            uint32 mechanic = m_spellInfo->EffectMiscValue[0];
-            SpellEntry const* spell = nullptr;
-
-            Unit::SpellAuraHolderMap& Auras = target->GetSpellAuraHolderMap();
-            for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
+            // Classic only (seems to be handled client side tbc and later (not verified)) - Only check effect 0
+            // Spells such as Abolish Poison have dispel on effect 1 but should be castable even if target not poisoned
+            if (m_spellInfo->Effect[0] == SPELL_EFFECT_DISPEL)
             {
-                spell = iter->second->GetSpellProto();
-                if (spell->Dispel == mechanic)
-                {
-                    dispelTarget = true;
-                    break;
-                }
-            }
+                bool dispelTarget = false;
+                uint32 mechanic = m_spellInfo->EffectMiscValue[0];
+                SpellEntry const* spell = nullptr;
 
-            if (!dispelTarget)
-                return SPELL_FAILED_NOTHING_TO_DISPEL;
+                Unit::SpellAuraHolderMap& Auras = target->GetSpellAuraHolderMap();
+                for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
+                {
+                    spell = iter->second->GetSpellProto();
+                    if (spell->Dispel == mechanic)
+                    {
+                        dispelTarget = true;
+                        break;
+                    }
+                }
+
+                if (!dispelTarget)
+                    return SPELL_FAILED_NOTHING_TO_DISPEL;
+            }
         }
     }
 
