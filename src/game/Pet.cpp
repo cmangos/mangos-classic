@@ -135,10 +135,10 @@ SpellCastResult Pet::TryLoadFromDB(Unit* owner, uint32 petentry /*= 0*/, uint32 
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
 
-    bool is_temporary_summoned = spellInfo && GetSpellDuration(spellInfo) > 0;
+    bool isTemporarySummoned = spellInfo && GetSpellDuration(spellInfo) > 0;
 
     // check temporary summoned pets like mage water elemental
-    if (current && is_temporary_summoned)
+    if (current && isTemporarySummoned)
         return SPELL_FAILED_NO_PET;
 
     if (petType == HUNTER_PET && !creatureInfo->isTameable())
@@ -554,18 +554,17 @@ void Pet::DeleteFromDB(uint32 guidlow, bool separate_transaction)
 
 void Pet::DeleteFromDB(Unit* owner, PetSaveMode slot)
 {
-    uint32 petNumber = 0;
     QueryResult* result = CharacterDatabase.PQuery("SELECT id FROM character_pet WHERE owner = '%u'  AND slot = '%u' ", owner->GetGUIDLow(), uint32(slot));
     if (result)
     {
         Field* fields = result->Fetch();
-        petNumber = fields[0].GetUInt32();
+        uint32 petNumber = fields[0].GetUInt32();
+
+        if (petNumber)
+            DeleteFromDB(petNumber);
 
         delete result;
     }
-
-    if (petNumber)
-        DeleteFromDB(petNumber);
 }
 
 void Pet::SetDeathState(DeathState s)                       // overwrite virtual Creature::SetDeathState and Unit::SetDeathState

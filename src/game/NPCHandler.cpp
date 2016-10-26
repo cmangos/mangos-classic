@@ -664,7 +664,7 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
             pet->Unsummon(PetSaveMode(free_slot), _player);
         else
         {
-            // change pet slot directly in memory
+            // change pet slot directly in database
             CharacterDatabase.BeginTransaction();
             static SqlStatementID ChangePetSlot_ID;
             SqlStatement ChangePetSlot = CharacterDatabase.CreateStatement(ChangePetSlot_ID, "UPDATE character_pet SET slot = ? WHERE owner = ? AND slot = ? ");

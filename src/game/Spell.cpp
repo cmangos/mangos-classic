@@ -5167,13 +5167,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             player->SendPetTameFailure(PETTAME_ANOTHERSUMMONACTIVE);
             return SPELL_FAILED_DONT_REPORT;
         }
-        else
+        else if (Pet::TryLoadFromDB((Player*)m_caster) == SPELL_FAILED_TARGETS_DEAD)
         {
-            if (Pet::TryLoadFromDB((Player*)m_caster) == SPELL_FAILED_TARGETS_DEAD)
-            {
-                player->SendPetTameFailure(PETTAME_ANOTHERSUMMONACTIVE);
-                return SPELL_FAILED_DONT_REPORT;
-            }
+            player->SendPetTameFailure(PETTAME_ANOTHERSUMMONACTIVE);
+            return SPELL_FAILED_DONT_REPORT;
         }
     }
 
