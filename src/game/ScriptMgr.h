@@ -527,14 +527,13 @@ enum ScriptLoadResult
     SCRIPT_LOAD_OK,
     SCRIPT_LOAD_ERR_NOT_FOUND,
     SCRIPT_LOAD_ERR_WRONG_API,
-    SCRIPT_LOAD_ERR_OUTDATED,
 };
 
 class ScriptMgr
 {
     public:
         ScriptMgr();
-        ~ScriptMgr();
+        ~ScriptMgr() {};
 
         void LoadGameObjectScripts();
         void LoadGameObjectTemplateScripts();
