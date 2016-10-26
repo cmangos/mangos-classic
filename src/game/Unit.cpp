@@ -9815,9 +9815,8 @@ bool Unit::TakeCharmOf(Unit* charmed)
     }
 
     if (charmerPlayer)
-    {
         charmerPlayer->CharmSpellInitialize();
-    }
+
     return true;
 }
 
@@ -9882,7 +9881,6 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
             attacker->getThreatManager().modifyThreatPercent(possessed, -101);           // only remove the possessed creature from threat list because it can be filled by other players
             attacker->AddThreat(this);
         }
-
 
         possessed->AttackStop(true, true);
         possessed->m_Events.KillAllEvents(true);

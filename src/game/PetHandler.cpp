@@ -515,7 +515,7 @@ void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
             {
                 if (petUnit->isCharmed())
                     charmInfo->ToggleCreatureAutocast(spell_id, false);
-                else
+                else if (pet)
                     pet->ToggleAutocast(spell_id, false);
             }
 

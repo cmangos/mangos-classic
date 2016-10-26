@@ -29,7 +29,7 @@
 #include "CreatureAIRegistry.h"
 #include "WaypointMovementGenerator.h"
 #include "GuardianAI.h"
-#include "AI\PossessedAI.h"
+#include "PossessedAI.h"
 
 namespace AIRegistry
 {

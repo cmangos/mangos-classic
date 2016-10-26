@@ -19,6 +19,8 @@
 #ifndef MANGOS_CREATUREAISELECTOR_H
 #define MANGOS_CREATUREAISELECTOR_H
 
+#include <string>
+
 class CreatureAI;
 class Unit;
 class Creature;
