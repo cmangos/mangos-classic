@@ -233,8 +233,13 @@ Item::Item()
 
 Item::~Item()
 {
-    if(m_enchantEffectModifier)
-        GetOwner()->AddSpellMod(m_enchantEffectModifier, false);
+    if (m_enchantEffectModifier)
+    {
+        if (Player * owner = GetOwner())
+            owner->AddSpellMod(m_enchantEffectModifier, false);
+        else
+            delete m_enchantEffectModifier; // on logout/DC player is mid deletion and will be nullptr
+    }
 }
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
