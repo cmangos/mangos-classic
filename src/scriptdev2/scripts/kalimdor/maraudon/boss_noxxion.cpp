@@ -98,7 +98,7 @@ bool EffectAuraDummy_spell_aura_dummy_noxxion_spawns(const Aura* pAura, bool bAp
         {
             if (bApply)
             {
-                pTarget->CastSpell(pTarget, SPELL_NOXXION_SPAWNS_SUMMON, true);
+                pTarget->CastSpell(pTarget, SPELL_NOXXION_SPAWNS_SUMMON, TRIGGERED_OLD_TRIGGERED);
                 pTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
             else

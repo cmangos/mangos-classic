@@ -1825,7 +1825,7 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
     m_spells[spell_id] = newspell;
 
     if (IsPassiveSpell(spellInfo))
-        CastSpell(this, spell_id, true);
+        CastSpell(this, spell_id, TRIGGERED_OLD_TRIGGERED);
     else
         m_charmInfo->AddSpellToActionBar(spell_id, ActiveStates(newspell.active));
 
@@ -2152,7 +2152,7 @@ void Pet::CastPetAura(PetAura const* aura)
     if (!auraId)
         return;
 
-    CastSpell(this, auraId, true);
+    CastSpell(this, auraId, TRIGGERED_OLD_TRIGGERED);
 }
 
 void Pet::SynchronizeLevelWithOwner()

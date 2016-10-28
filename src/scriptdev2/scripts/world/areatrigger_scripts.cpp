@@ -49,7 +49,7 @@ bool AreaTrigger_at_childrens_week_spot(Player* pPlayer, AreaTriggerEntry const*
         if (pAt->id == TriggerOrphanSpell[i][0] &&
                 pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == TriggerOrphanSpell[i][1])
         {
-            pPlayer->CastSpell(pPlayer, TriggerOrphanSpell[i][2], true);
+            pPlayer->CastSpell(pPlayer, TriggerOrphanSpell[i][2], TRIGGERED_OLD_TRIGGERED);
             return true;
         }
     }

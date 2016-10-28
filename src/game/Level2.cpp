@@ -2012,7 +2012,7 @@ bool ChatHandler::HandleNpcTameCommand(char* /*args*/)
         return false;
     }
 
-    player->CastSpell(creatureTarget, 13481, true);         // Tame Beast, triggered effect
+    player->CastSpell(creatureTarget, 13481, TRIGGERED_OLD_TRIGGERED);         // Tame Beast, triggered effect
     return true;
 }
 

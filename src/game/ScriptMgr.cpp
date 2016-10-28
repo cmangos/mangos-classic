@@ -1524,13 +1524,15 @@ bool ScriptAction::HandleScriptStep()
             // TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
             if (pSource && pSource->GetTypeId() == TYPEID_GAMEOBJECT)
             {
-                ((Unit*)pTarget)->CastSpell(((Unit*)pTarget), spell, true, nullptr, nullptr, pSource->GetObjectGuid());
+                ((Unit*)pTarget)->CastSpell(((Unit*)pTarget), spell, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pSource->GetObjectGuid());
                 break;
             }
 
             if (LogIfNotUnit(pSource))
                 break;
-            ((Unit*)pSource)->CastSpell(((Unit*)pTarget), spell, (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) != 0);
+
+            uint32 castFlags = (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE); // TODO: Figure out nice support for other flags using some column
+            ((Unit*)pSource)->CastSpell(((Unit*)pTarget), spell, castFlags);
 
             break;
         }

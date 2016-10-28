@@ -71,12 +71,12 @@ bool GossipSelectWithCode_example_gossip_codebox(Player* pPlayer, Creature* pCre
                 if (std::strcmp(sCode, pPlayer->GetName()) != 0)
                 {
                     DoScriptText(SAY_WRONG, pCreature);
-                    pCreature->CastSpell(pPlayer, SPELL_POLYMORPH, true);
+                    pCreature->CastSpell(pPlayer, SPELL_POLYMORPH, TRIGGERED_OLD_TRIGGERED);
                 }
                 else
                 {
                     DoScriptText(SAY_CORRECT, pCreature);
-                    pCreature->CastSpell(pPlayer, SPELL_MARK_OF_THE_WILD, true);
+                    pCreature->CastSpell(pPlayer, SPELL_MARK_OF_THE_WILD, TRIGGERED_OLD_TRIGGERED);
                 }
                 pPlayer->CLOSE_GOSSIP_MENU();
 

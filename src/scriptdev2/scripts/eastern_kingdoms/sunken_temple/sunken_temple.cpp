@@ -237,7 +237,7 @@ bool EffectDummyCreature_summon_hakkar(Unit* pCaster, uint32 uiSpellId, SpellEff
 
         // Update entry to avatar of Hakkar and cast some visuals
         ((Creature*)pCaster)->UpdateEntry(NPC_AVATAR_OF_HAKKAR);
-        pCaster->CastSpell(pCaster, SPELL_AVATAR_SUMMONED, true);
+        pCaster->CastSpell(pCaster, SPELL_AVATAR_SUMMONED, TRIGGERED_OLD_TRIGGERED);
         DoScriptText(SAY_AVATAR_SPAWN, pCaster);
 
         // Always return true when we are handling this spell and effect

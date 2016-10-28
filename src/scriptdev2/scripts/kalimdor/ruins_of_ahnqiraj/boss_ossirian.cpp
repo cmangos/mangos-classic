@@ -153,11 +153,11 @@ struct boss_ossirianAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_OSSIRIAN_TRIGGER)
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_CRYSTAL, true);
+            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_CRYSTAL, TRIGGERED_OLD_TRIGGERED);
         else if (pSummoned->GetEntry() == NPC_SAND_VORTEX)
         {
             // The movement of this isn't very clear - may require additional research
-            pSummoned->CastSpell(pSummoned, SPELL_SAND_STORM, true);
+            pSummoned->CastSpell(pSummoned, SPELL_SAND_STORM, TRIGGERED_OLD_TRIGGERED);
             pSummoned->GetMotionMaster()->MoveRandomAroundPoint(aCrystalSpawnPos[0], aCrystalSpawnPos[1], aCrystalSpawnPos[2], 100.0f);
         }
     }
@@ -266,7 +266,7 @@ CreatureAI* GetAI_boss_ossirian(Creature* pCreature)
 bool GOUse_go_ossirian_crystal(Player* /*pPlayer*/, GameObject* pGo)
 {
     if (Creature* pOssirianTrigger = GetClosestCreatureWithEntry(pGo, NPC_OSSIRIAN_TRIGGER, 10.0f))
-        pOssirianTrigger->CastSpell(pOssirianTrigger, aWeaknessSpell[urand(0, 4)], false);
+        pOssirianTrigger->CastSpell(pOssirianTrigger, aWeaknessSpell[urand(0, 4)], TRIGGERED_NONE);
 
     return true;
 }

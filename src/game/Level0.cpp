@@ -82,7 +82,7 @@ bool ChatHandler::HandleStartCommand(char* /*args*/)
     }
 
     // cast spell Stuck
-    chr->CastSpell(chr, 7355, false);
+    chr->CastSpell(chr, 7355, TRIGGERED_NONE);
     return true;
 }
 

@@ -191,7 +191,7 @@ struct boss_mandokirAI : public ScriptedAI
             if (m_creature->isInCombat())
             {
                 if (Creature* pSpirit = GetClosestCreatureWithEntry(pVictim, NPC_CHAINED_SPIRIT, 50.0f))
-                    pSpirit->CastSpell(pVictim, SPELL_REVIVE, false);
+                    pSpirit->CastSpell(pVictim, SPELL_REVIVE, TRIGGERED_NONE);
             }
         }
     }
@@ -259,7 +259,7 @@ struct boss_mandokirAI : public ScriptedAI
                 if (pWatchTarget && pWatchTarget->isAlive() && m_creature->getThreatManager().getThreat(pWatchTarget) > m_fTargetThreat)
                 {
                     if (!m_creature->IsWithinLOSInMap(pWatchTarget))
-                        m_creature->CastSpell(pWatchTarget, SPELL_SUMMON_PLAYER, true);
+                        m_creature->CastSpell(pWatchTarget, SPELL_SUMMON_PLAYER, TRIGGERED_OLD_TRIGGERED);
 
                     DoCastSpellIfCan(pWatchTarget, SPELL_CHARGE);
                 }
@@ -271,7 +271,7 @@ struct boss_mandokirAI : public ScriptedAI
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (Player* pPlayer = pTarget->GetCharmerOrOwnerPlayerOrPlayerItself())
-                        m_creature->CastSpell(pPlayer, SPELL_WATCH, false);
+                        m_creature->CastSpell(pPlayer, SPELL_WATCH, TRIGGERED_NONE);
                 }
             }
 
@@ -358,7 +358,7 @@ struct mob_ohganAI : public ScriptedAI
             if (m_creature->isInCombat())
             {
                 if (Creature* pSpirit = GetClosestCreatureWithEntry(pVictim, NPC_CHAINED_SPIRIT, 50.0f))
-                    pSpirit->CastSpell(pVictim, SPELL_REVIVE, false);
+                    pSpirit->CastSpell(pVictim, SPELL_REVIVE, TRIGGERED_NONE);
             }
         }
     }

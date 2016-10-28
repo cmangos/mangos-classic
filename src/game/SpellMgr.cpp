@@ -3076,7 +3076,7 @@ void SpellArea::ApplyOrRemoveSpellIfCan(Player* player, uint32 newZone, uint32 n
     if (IsFitToRequirements(player, newZone, newArea))
     {
         if (autocast && !player->HasAura(spellId))
-            player->CastSpell(player, spellId, true);
+            player->CastSpell(player, spellId, TRIGGERED_OLD_TRIGGERED);
     }
     else if (!onlyApply && player->HasAura(spellId))
         player->RemoveAurasDueToSpell(spellId);

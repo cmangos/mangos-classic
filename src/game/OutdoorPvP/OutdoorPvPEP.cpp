@@ -69,11 +69,11 @@ void OutdoorPvPEP::HandlePlayerEnterZone(Player* player, bool isMainZone)
     {
         case ALLIANCE:
             if (m_towersAlliance > 0)
-                player->CastSpell(player, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance, true);
+                player->CastSpell(player, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance, TRIGGERED_OLD_TRIGGERED);
             break;
         case HORDE:
             if (m_towersHorde > 0)
-                player->CastSpell(player, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde, true);
+                player->CastSpell(player, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde, TRIGGERED_OLD_TRIGGERED);
             break;
         default:
             break;
@@ -96,7 +96,7 @@ void OutdoorPvPEP::HandleCreatureCreate(Creature* creature)
         case NPC_SPECTRAL_FLIGHT_MASTER:
             m_flightMaster = creature->GetObjectGuid();
             creature->setFaction(m_towerOwner[TOWER_ID_PLAGUEWOOD] == ALLIANCE ? FACTION_FLIGHT_MASTER_ALLIANCE : FACTION_FLIGHT_MASTER_HORDE);
-            creature->CastSpell(creature, m_towerOwner[TOWER_ID_PLAGUEWOOD] == ALLIANCE ? SPELL_SPIRIT_PARTICLES_BLUE : SPELL_SPIRIT_PARTICLES_RED, true);
+            creature->CastSpell(creature, m_towerOwner[TOWER_ID_PLAGUEWOOD] == ALLIANCE ? SPELL_SPIRIT_PARTICLES_BLUE : SPELL_SPIRIT_PARTICLES_RED, TRIGGERED_OLD_TRIGGERED);
             break;
         case NPC_LORDAERON_COMMANDER:
         case NPC_LORDAERON_SOLDIER:

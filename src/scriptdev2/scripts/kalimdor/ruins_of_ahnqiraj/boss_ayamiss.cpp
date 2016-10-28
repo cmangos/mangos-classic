@@ -125,7 +125,7 @@ struct boss_ayamissAI : public ScriptedAI
 
         // Cast feed on target
         if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_paralyzeTarget))
-            pSummoned->CastSpell(pTarget, SPELL_FEED, true, nullptr, nullptr, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pTarget, SPELL_FEED, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     void UpdateAI(const uint32 uiDiff) override

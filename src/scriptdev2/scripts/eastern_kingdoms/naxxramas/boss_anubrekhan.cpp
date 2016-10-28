@@ -97,7 +97,7 @@ struct boss_anubrekhanAI : public ScriptedAI
     {
         // Force the player to spawn corpse scarabs via spell
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            pVictim->CastSpell(pVictim, SPELL_SELF_SPAWN_5, true, nullptr, nullptr, m_creature->GetObjectGuid());
+            pVictim->CastSpell(pVictim, SPELL_SELF_SPAWN_5, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
 
         if (urand(0, 4))
             return;
@@ -160,7 +160,7 @@ struct boss_anubrekhanAI : public ScriptedAI
 
         if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SELF_SPAWN_10, true, nullptr, nullptr, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_SELF_SPAWN_10, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             DoScriptText(EMOTE_CORPSE_SCARABS, pSummoned);
         }
     }
