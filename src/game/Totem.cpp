@@ -100,10 +100,10 @@ void Totem::Summon(Unit* owner)
     switch (m_type)
     {
         case TOTEM_PASSIVE:
-            CastSpell(this, GetSpell(), true);
+            CastSpell(this, GetSpell(), TRIGGERED_OLD_TRIGGERED);
             break;
         case TOTEM_STATUE:
-            CastSpell(GetOwner(), GetSpell(), true);
+            CastSpell(GetOwner(), GetSpell(), TRIGGERED_OLD_TRIGGERED);
             break;
         default: break;
     }

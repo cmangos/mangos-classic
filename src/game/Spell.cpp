@@ -252,7 +252,7 @@ void SpellCastTargets::write(ByteBuffer& data) const
         data << m_strTarget;
 }
 
-Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy)
+Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy)
 {
     MANGOS_ASSERT(caster != nullptr && info != nullptr);
     MANGOS_ASSERT(info == sSpellStore.LookupEntry(info->Id) && "`info` must be pointer to sSpellStore element");
@@ -292,7 +292,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     m_castPositionX = m_castPositionY = m_castPositionZ = 0;
     m_TriggerSpells.clear();
     m_preCastSpells.clear();
-    m_IsTriggeredSpell = triggered;
+    m_IsTriggeredSpell = triggeredFlags & TRIGGERED_OLD_TRIGGERED;
     // m_AreaAura = false;
     m_CastItem = nullptr;
 
@@ -314,11 +314,15 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
     m_needAliveTargetMask = 0;
 
     m_ignoreHitResult = false;
+    m_ignoreUnselectableTarget = m_IsTriggeredSpell;
 
     // determine reflection
     m_canReflect = false;
 
     m_canReflect = IsReflectableSpell(m_spellInfo);
+
+    if (triggeredFlags & TRIGGERED_IGNORE_UNSELECTABLE_FLAG)
+        m_ignoreUnselectableTarget = true;
 
     CleanupTargetList();
 }
@@ -1048,7 +1052,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                     break;
             }
             if (BTAura)
-                m_caster->CastSpell(m_caster, BTAura, true);
+                m_caster->CastSpell(m_caster, BTAura, TRIGGERED_OLD_TRIGGERED);
         }
     }
     // Passive spell hits/misses or active spells only misses (only triggers if proc flags set)
@@ -3111,7 +3115,7 @@ void Spell::finish(bool ok)
                     int32 auraBasePoints = (*i)->GetBasePoints();
                     int32 chance = m_caster->CalculateSpellDamage(unit, auraSpellInfo, auraSpellIdx, &auraBasePoints);
                     if (roll_chance_i(chance))
-                        m_caster->CastSpell(unit, procid, true, nullptr, (*i));
+                        m_caster->CastSpell(unit, procid, TRIGGERED_OLD_TRIGGERED, nullptr, (*i));
                 }
             }
         }
@@ -3920,7 +3924,7 @@ void Spell::CastTriggerSpells()
 void Spell::CastPreCastSpells(Unit* target)
 {
     for (SpellInfoList::const_iterator si = m_preCastSpells.begin(); si != m_preCastSpells.end(); ++si)
-        m_caster->CastSpell(target, (*si), true, m_CastItem);
+        m_caster->CastSpell(target, (*si), TRIGGERED_OLD_TRIGGERED, m_CastItem);
 }
 
 Unit* Spell::GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const
@@ -4910,7 +4914,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     {
                         if (strict)     // Summoning Disorientation, trigger pet stun (cast by pet so it doesn't attack player)
                             if (Pet* pet = ((Player*)m_caster)->GetPet())
-                                pet->CastSpell(pet, 32752, true, nullptr, nullptr, pet->GetObjectGuid());
+                                pet->CastSpell(pet, 32752, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pet->GetObjectGuid());
                     }
                     else
                         return SPELL_FAILED_ALREADY_HAVE_SUMMON;
@@ -6107,7 +6111,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff)
 
             // unselectable targets skipped in all cases except TARGET_SCRIPT targeting
             // in case TARGET_SCRIPT target selected by server always and can't be cheated
-            if ((!m_IsTriggeredSpell || target != m_targets.getUnitTarget()) &&
+            if ((!m_ignoreUnselectableTarget || target != m_targets.getUnitTarget()) &&
                 target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) &&
                 m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT &&
                 m_spellInfo->EffectImplicitTargetB[eff] != TARGET_SCRIPT &&

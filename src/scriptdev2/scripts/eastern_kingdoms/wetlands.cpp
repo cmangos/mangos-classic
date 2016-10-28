@@ -207,7 +207,7 @@ bool QuestAccept_npc_mikhail(Player* pPlayer, Creature* pCreature, const Quest* 
             return false;
 
         if (!pSlim->HasAura(SPELL_STEALTH))
-            pSlim->CastSpell(pSlim, SPELL_STEALTH, true);
+            pSlim->CastSpell(pSlim, SPELL_STEALTH, TRIGGERED_OLD_TRIGGERED);
 
         pCreature->AI()->SendAIEvent(AI_EVENT_START_ESCORT, pPlayer, pSlim, pQuest->GetQuestId());
         return true;

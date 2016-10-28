@@ -184,7 +184,7 @@ void instance_sunken_temple::SetData(uint32 uiType, uint32 uiData)
                         // Summon the avatar of all flames are used
                     case MAX_FLAMES:
                         DoScriptText(SAY_AVATAR_BRAZIER_4, pShade);
-                        pShade->CastSpell(pShade, SPELL_SUMMON_AVATAR, true);
+                        pShade->CastSpell(pShade, SPELL_SUMMON_AVATAR, TRIGGERED_OLD_TRIGGERED);
                         m_uiAvatarSummonTimer = 0;
                         m_uiSupressorTimer = 0;
                         break;

@@ -145,7 +145,7 @@ struct boss_ouroAI : public Scripted_NoMovementAI
                 if (m_uiSummonBaseTimer <= uiDiff)
                 {
                     // Note: server side spells should be cast directly
-                    m_creature->CastSpell(m_creature, SPELL_SUMMON_BASE, true);
+                    m_creature->CastSpell(m_creature, SPELL_SUMMON_BASE, TRIGGERED_OLD_TRIGGERED);
                     m_uiSummonBaseTimer = 0;
                 }
                 else
@@ -281,7 +281,7 @@ struct npc_ouro_spawnerAI : public Scripted_NoMovementAI
         // Despanw when Ouro is spawned
         if (pSummoned->GetEntry() == NPC_OURO)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_BIRTH, false);
+            pSummoned->CastSpell(pSummoned, SPELL_BIRTH, TRIGGERED_NONE);
             pSummoned->SetInCombatWithZone();
             m_creature->ForcedDespawn();
         }

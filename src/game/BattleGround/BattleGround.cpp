@@ -530,7 +530,7 @@ void BattleGround::CastSpellOnTeam(uint32 SpellID, Team teamId)
         if (!team) team = plr->GetTeam();
 
         if (team == teamId)
-            plr->CastSpell(plr, SpellID, true);
+            plr->CastSpell(plr, SpellID, TRIGGERED_OLD_TRIGGERED);
     }
 }
 
@@ -791,7 +791,7 @@ void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id)
         return;
     }
 
-    plr->CastSpell(plr, spellInfo, true);
+    plr->CastSpell(plr, spellInfo, TRIGGERED_OLD_TRIGGERED);
 }
 
 void BattleGround::RewardItem(Player* plr, uint32 item_id, uint32 count)

@@ -280,9 +280,9 @@ struct boss_gothikAI : public ScriptedAI
                     // Wrong caster, it expected to be pSummoned.
                     // Mangos deletes the spell event at caster death, so for delayed spell like this
                     // it's just a workaround. Does not affect other than the visual though (+ spell takes longer to "travel")
-                case NPC_UNREL_TRAINEE:         m_creature->CastSpell(pAnchor, SPELL_A_TO_ANCHOR_1, true, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
-                case NPC_UNREL_DEATH_KNIGHT:    m_creature->CastSpell(pAnchor, SPELL_B_TO_ANCHOR_1, true, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
-                case NPC_UNREL_RIDER:           m_creature->CastSpell(pAnchor, SPELL_C_TO_ANCHOR_1, true, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
+                case NPC_UNREL_TRAINEE:         m_creature->CastSpell(pAnchor, SPELL_A_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
+                case NPC_UNREL_DEATH_KNIGHT:    m_creature->CastSpell(pAnchor, SPELL_B_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
+                case NPC_UNREL_RIDER:           m_creature->CastSpell(pAnchor, SPELL_C_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
             }
         }
     }
@@ -471,7 +471,7 @@ bool EffectDummyCreature_spell_anchor(Unit* /*pCaster*/, uint32 uiSpellId, Spell
                 else if (uiSpellId == SPELL_C_TO_ANCHOR_1)
                     uiTriggered = SPELL_C_TO_ANCHOR_2;
 
-                pCreatureTarget->CastSpell(pAnchor2, uiTriggered, true);
+                pCreatureTarget->CastSpell(pAnchor2, uiTriggered, TRIGGERED_OLD_TRIGGERED);
             }
 
             return true;
@@ -498,7 +498,7 @@ bool EffectDummyCreature_spell_anchor(Unit* /*pCaster*/, uint32 uiSpellId, Spell
                     else if (uiSpellId == SPELL_C_TO_ANCHOR_2)
                         uiTriggered = SPELL_C_TO_SKULL;
 
-                    pCreatureTarget->CastSpell(pTarget, uiTriggered, true);
+                    pCreatureTarget->CastSpell(pTarget, uiTriggered, TRIGGERED_OLD_TRIGGERED);
                 }
             }
             return true;

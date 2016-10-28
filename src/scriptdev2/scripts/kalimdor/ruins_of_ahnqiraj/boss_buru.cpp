@@ -190,7 +190,7 @@ struct npc_buru_eggAI : public Scripted_NoMovementAI
     {
         // The purpose of this is unk for the moment
         if (pSummoned->GetEntry() == NPC_BURU_EGG_TRIGGER)
-            pSummoned->CastSpell(pSummoned, SPELL_BURU_EGG_TRIGGER, true);
+            pSummoned->CastSpell(pSummoned, SPELL_BURU_EGG_TRIGGER, TRIGGERED_OLD_TRIGGERED);
         // The Hatchling should attack a random target
         else if (pSummoned->GetEntry() == NPC_HATCHLING)
         {

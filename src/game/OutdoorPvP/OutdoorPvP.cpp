@@ -140,7 +140,7 @@ void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/)
             if (remove)
                 player->RemoveAurasDueToSpell(spellId);
             else
-                player->CastSpell(player, spellId, true);
+                player->CastSpell(player, spellId, TRIGGERED_OLD_TRIGGERED);
         }
     }
 }
