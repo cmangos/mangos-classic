@@ -69,6 +69,7 @@ target_link_libraries(${EXECUTABLE_NAME}
   framework
   g3dlite
   gsoap
+  scriptdev2
   ${Boost_LIBRARIES}
 )
 

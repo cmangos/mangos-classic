@@ -24,7 +24,7 @@
 //============================================
 class LinkedListHead;
 
-class MANGOS_DLL_SPEC LinkedListElement
+class LinkedListElement
 {
     private:
 

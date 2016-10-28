@@ -1022,7 +1022,7 @@ public:
     HostileRefManager hostileRefManager;
 };
 
-class MANGOS_DLL_SPEC Unit : public WorldObject
+class Unit : public WorldObject
 {
     public:
         typedef std::set<Unit*> AttackerSet;

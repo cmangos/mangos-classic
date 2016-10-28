@@ -25,7 +25,7 @@
 #define MOVEMENT_RANDOM_MMGEN_CHANCE_NO_BREAK 30
 
 template<class T>
-class MANGOS_DLL_SPEC RandomMovementGenerator
+class RandomMovementGenerator
     : public MovementGeneratorMedium< T, RandomMovementGenerator<T> >
 {
     public:

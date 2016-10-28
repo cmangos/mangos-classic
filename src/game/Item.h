@@ -227,7 +227,7 @@ struct ItemRequiredTarget
 
 bool ItemCanGoIntoBag(ItemPrototype const* proto, ItemPrototype const* pBagProto);
 
-class MANGOS_DLL_SPEC Item : public Object
+class Item : public Object
 {
     public:
         static Item* CreateItem(uint32 item, uint32 count, Player const* player = nullptr, uint32 randomPropertyId = 0);
