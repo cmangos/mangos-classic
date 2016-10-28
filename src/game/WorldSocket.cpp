@@ -56,13 +56,8 @@ struct ServerPktHeader
 
 WorldSocket::WorldSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
     : Socket(service, closeHandler), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0),
-      m_useExistingHeader(false), m_session(nullptr), m_sessionFinalized(false), m_seed(urand())
+      m_useExistingHeader(false), m_session(nullptr), m_seed(urand())
 {}
-
-WorldSocket::~WorldSocket()
-{
-    delete m_session;
-}
 
 void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
 {

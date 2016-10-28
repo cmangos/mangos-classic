@@ -57,7 +57,7 @@ class RASocket : public MaNGOS::Socket
 
     public:
         RASocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler);
-        ~RASocket();
+        virtual ~RASocket();
 
         virtual bool Open() override;
 };

@@ -131,10 +131,6 @@ class WorldSession
         bool PlayerLogout() const { return m_playerLogout; }
         bool PlayerLogoutWithSave() const { return m_playerLogout && m_playerSave; }
 
-        // marks this session as finalized in the socket which owns it.  this lets
-        // the socket handling code know that the session can be safely deleted
-        void Finalize() { m_Socket->FinalizeSession(); }
-
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
         void SendPacket(WorldPacket const* packet);
