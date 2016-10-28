@@ -32,6 +32,7 @@
 
 #include <deque>
 #include <mutex>
+#include <memory>
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -174,7 +175,7 @@ class WorldSession
         void LogoutPlayer(bool save);
         void KickPlayer();
 
-        void QueuePacket(WorldPacket* new_packet);
+        void QueuePacket(std::unique_ptr<WorldPacket> new_packet);
 
         bool Update(PacketFilter& updater);
 
@@ -653,11 +654,11 @@ class WorldSession
         bool VerifyMovementInfo(MovementInfo const& movementInfo) const;
         void HandleMoverRelocation(MovementInfo& movementInfo);
 
-        void ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* packet);
+        void ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket& packet);
 
         // logging helper
-        void LogUnexpectedOpcode(WorldPacket* packet, const char* reason);
-        void LogUnprocessedTail(WorldPacket* packet);
+        void LogUnexpectedOpcode(WorldPacket const& packet, const char* reason);
+        void LogUnprocessedTail(WorldPacket const& packet);
 
         std::mutex m_logoutMutex;                           // this mutex is necessary to avoid two simultaneous logouts due to a valid logout request and socket error
         Player * _player;
@@ -682,7 +683,7 @@ class WorldSession
         TutorialDataState m_tutorialState;
 
         std::mutex m_recvQueueLock;
-        std::deque<WorldPacket *> m_recvQueue;
+        std::deque<std::unique_ptr<WorldPacket>> m_recvQueue;
 };
 #endif
 /// @}

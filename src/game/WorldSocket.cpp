@@ -34,6 +34,7 @@
 
 #include <chrono>
 #include <functional>
+#include <memory>
 
 #include <boost/asio.hpp>
 
@@ -69,7 +70,7 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
         return;
 
     // Dump outgoing packet.
-    sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct.GetOpcode(), pct.GetOpcodeName(), &pct, false);
+    sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct.GetOpcode(), pct.GetOpcodeName(), pct, false);
 
     ServerPktHeader header;
 
@@ -171,7 +172,7 @@ bool WorldSocket::ProcessIncomingData()
     if (IsClosed())
         return false;
 
-    WorldPacket *pct = new WorldPacket(opcode, validBytesRemaining);
+    std::unique_ptr<WorldPacket> pct(new WorldPacket(opcode, validBytesRemaining));
 
     if (validBytesRemaining)
     {
@@ -179,7 +180,7 @@ bool WorldSocket::ProcessIncomingData()
         ReadSkip(validBytesRemaining);
     }
 
-    sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct->GetOpcode(), pct->GetOpcodeName(), pct, true);
+    sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct->GetOpcode(), pct->GetOpcodeName(), *pct, true);
 
     try
     {
@@ -210,7 +211,7 @@ bool WorldSocket::ProcessIncomingData()
                     return false;
                 }
 
-                m_session->QueuePacket(pct);
+                m_session->QueuePacket(std::move(pct));
 
                 return true;
             }
