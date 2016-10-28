@@ -171,7 +171,7 @@ bool WorldSocket::ProcessIncomingData()
     if (IsClosed())
         return false;
 
-    WorldPacket *pct = new WorldPacket(opcode, validBytesRemaining);
+    std::unique_ptr<WorldPacket> pct(new WorldPacket(opcode, validBytesRemaining));
 
     if (validBytesRemaining)
     {
@@ -179,7 +179,8 @@ bool WorldSocket::ProcessIncomingData()
         ReadSkip(validBytesRemaining);
     }
 
-    sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct->GetOpcode(), pct->GetOpcodeName(), pct, true);
+    sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct->GetOpcode(),
+            pct->GetOpcodeName(), pct.get(), true);
 
     try
     {
@@ -209,8 +210,9 @@ bool WorldSocket::ProcessIncomingData()
                     sLog.outError("WorldSocket::ProcessIncomingData: Client not authed opcode = %u", uint32(opcode));
                     return false;
                 }
-
-                m_session->QueuePacket(pct);
+                // pct will be deleted in WorldSession::Update or by the
+                // WorldSession destructor
+                m_session->QueuePacket(pct.release());
 
                 return true;
             }
