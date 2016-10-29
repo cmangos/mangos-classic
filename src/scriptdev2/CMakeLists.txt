@@ -65,7 +65,7 @@ if(WIN32)
   )
 endif()
 
-add_dependencies(mangosscript mangosd)
+add_dependencies(mangosscript game)
 
 if(UNIX)
   set(mangosscript_LINK_FLAGS "-pthread")
