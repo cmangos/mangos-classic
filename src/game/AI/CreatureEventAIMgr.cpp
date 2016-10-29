@@ -233,6 +233,8 @@ bool IsValidTargetType(EventAI_Type eventType, EventAI_ActionType actionType, ui
                 return false;
             }
             return true;
+        case TARGET_T_SUMMONER:
+            return true;
         default:
             sLog.outErrorEventAI("Event %u Action%u uses incorrect Target type", eventId, action);
             return false;

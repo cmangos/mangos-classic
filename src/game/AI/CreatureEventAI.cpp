@@ -28,6 +28,7 @@
 #include "InstanceData.h"
 #include "Chat.h"
 #include "Language.h"
+#include "../TemporarySummon.h"
 
 bool CreatureEventAIHolder::UpdateRepeatTimer(Creature* creature, uint32 repeatMin, uint32 repeatMax)
 {
@@ -1465,6 +1466,16 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoke
             if (!pAIEventSender)
                 isError = true;
             return pAIEventSender;
+        case TARGET_T_SUMMONER:
+        {
+            if (TemporarySummon* summon = dynamic_cast<TemporarySummon*>(m_creature))
+                return summon->GetSummoner();
+            else
+            {
+                isError = true;
+                return nullptr;
+            }
+        }
         default:
             isError = true;
             return nullptr;
