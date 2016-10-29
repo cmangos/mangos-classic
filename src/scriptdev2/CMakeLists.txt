@@ -16,17 +16,15 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-## magic to include revision data in SD2 version string
-# revision.h: FORCE
-#   $(top_builddir)/src/tools/genrevision/genrevision $(srcdir)
+set(LIBRARY_NAME scriptdev2)
 
-file(GLOB_RECURSE mangosscript_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.h)
+file(GLOB_RECURSE LIBRARY_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.h)
 
 source_group("Other"
   REGULAR_EXPRESSION .*
 )
 
-foreach(SRC ${mangosscript_SRCS})
+foreach(SRC ${LIBRARY_SRCS})
   get_filename_component(PTH ${SRC} PATH)
   if(PTH)
     if(NOT XCODE) # FIXME: Xcode Generator has bug with nested dirs
@@ -54,8 +52,8 @@ if(PCH)
   )
 endif()
 
-add_library(mangosscript STATIC
-  ${mangosscript_SRCS}
+add_library(${LIBRARY_NAME} STATIC
+  ${LIBRARY_SRCS}
 )
 
 if(WIN32)
@@ -65,59 +63,34 @@ if(WIN32)
   )
 endif()
 
-add_dependencies(mangosscript game)
+add_dependencies(${LIBRARY_NAME} revision.h)
 
 if(UNIX)
-  set(mangosscript_LINK_FLAGS "-pthread")
+  set(LIBRARY_LINK_FLAGS "-pthread")
   if(APPLE)
-    set(mangosscript_LINK_FLAGS "-framework Carbon ${mangosscript_LINK_FLAGS}")
+    set(LIBRARY_LINK_FLAGS "-framework Carbon ${LIBRARY_LINK_FLAGS}")
     # Needed for the linking because of the missing symbols
-    set(mangosscript_LINK_FLAGS "-Wl,-undefined -Wl,dynamic_lookup ${mangosscript_LINK_FLAGS}")
-  endif()
-
-  if(APPLE)
-    set(mangosscript_PROPERTIES INSTALL_NAME_DIR "${LIBS_DIR}")
-  else()
-    set(mangosscript_PROPERTIES INSTALL_RPATH ${LIBS_DIR})
+    set(LIBRARY_LINK_FLAGS "-Wl,-undefined -Wl,dynamic_lookup ${LIBRARY_LINK_FLAGS}")
   endif()
 
   # Run out of build tree
-  set(mangosscript_PROPERTIES
-    ${mangosscript_PROPERTIES}
+  set(LIBRARY_PROPERTIES
     BUILD_WITH_INSTALL_RPATH OFF
   )
 
-  set_target_properties(mangosscript PROPERTIES
-    LINK_FLAGS ${mangosscript_LINK_FLAGS}
-    ${mangosscript_PROPERTIES}
+  set_target_properties(${LIBRARY_NAME} PROPERTIES
+    LINK_FLAGS ${LIBRARY_LINK_FLAGS}
+    ${LIBRARY_PROPERTIES}
   )
 endif()
 
 # Because size for linker is to big - seriously ?!
 if(WIN32)
-  set_target_properties(mangosscript PROPERTIES
+  set_target_properties(LIBRARY_PROPERTIES PROPERTIES
       LINK_FLAGS_DEBUG "/DEBUG /INCREMENTAL:NO"
   )
 endif()
 
-## libtool settings
-#  API versioning
-#  Link against dependencies
-#  How to increase version info:
-#  - only bug fixes implemented:
-#    bump the version to LTMANGOS_CURRENT:LTMANGOS_REVISION+1:LTMANGOS_AGE
-#  - augmented the interface:
-#    bump the version to LTMANGOS_CURRENT+1:0:LTMANGOS_AGE+1
-#  - broken old interface:
-#    bump the version to LTMANGOS_CURRENT+1:0:0
-# set(LTMANGOS_CURRENT 0)
-# set(LTMANGOS_REVISION 0)
-# set(LTMANGOS_AGE 0)
-# set_target_properties(script PROPERTIES LINK_FLAGS
-#   "-version-info ${LTMANGOS_CURRENT}:${LTMANGOS_REVISION}:${LTMANGOS_AGE}"
-# )
-
-# Generate precompiled header
 if(PCH)
-  cotire(mangosscript)
+  cotire(${LIBRARY_NAME})
 endif()
