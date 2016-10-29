@@ -2021,7 +2021,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
         return;
 
     // Magic damage, check for resists
-    if (!ignoreResists)
+    if (!ignoreResists && (schoolMask & SPELL_SCHOOL_MASK_MAGIC))
     {
         const float mitigation = CalculateMagicResistanceMitigation(pCaster, CalculateEffectiveMagicResistance(pCaster, schoolMask), false);
         const SpellPartialResistChanceEntry &chances = SPELL_PARTIAL_RESIST_DISTRIBUTION.at(uint32(mitigation * 10000));
