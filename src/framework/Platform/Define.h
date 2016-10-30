@@ -80,10 +80,12 @@ typedef void* MANGOS_LIBRARY_HANDLE;
 #endif // PLATFORM
 
 #if PLATFORM == PLATFORM_WINDOWS
+#  define MANGOS_DLL_SPEC __declspec(dllexport)
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
 #  endif // DECLSPEC_NORETURN
 #else // PLATFORM != PLATFORM_WINDOWS
+#  define MANGOS_DLL_SPEC
 #  define DECLSPEC_NORETURN
 #endif // PLATFORM
 

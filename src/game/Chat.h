@@ -71,7 +71,7 @@ enum PlayerChatTag
 };
 typedef uint32 ChatTagFlags;
 
-class ChatHandler
+class MANGOS_DLL_SPEC ChatHandler
 {
     public:
         explicit ChatHandler(WorldSession* session);

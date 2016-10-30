@@ -24,10 +24,10 @@
 class Creature;
 
 template < class T >
-class HomeMovementGenerator;
+class MANGOS_DLL_SPEC HomeMovementGenerator;
 
 template <>
-class HomeMovementGenerator<Creature>
+class MANGOS_DLL_SPEC HomeMovementGenerator<Creature>
     : public MovementGeneratorMedium< Creature, HomeMovementGenerator<Creature> >
 {
     public:

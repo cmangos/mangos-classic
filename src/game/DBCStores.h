@@ -41,8 +41,8 @@ uint32 GetAreaFlagByMapId(uint32 mapid);
 
 WMOAreaTableEntry const* GetWMOAreaTableEntryByTripple(int32 rootid, int32 adtid, int32 groupid);
 
-AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
-AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_id);
+MANGOS_DLL_SPEC AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
+MANGOS_DLL_SPEC AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_id);
 
 uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
 
@@ -60,7 +60,7 @@ uint32 const* /*[3]*/ GetTalentTabPages(uint32 cls);
 
 bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, float x, float y, float z, float delta = 0.0f);
 
-uint32 GetCreatureModelRace(uint32 model_id);
+MANGOS_DLL_SPEC uint32 GetCreatureModelRace(uint32 model_id);
 
 extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access using functions
 extern DBCStorage <AreaTriggerEntry>             sAreaTriggerStore;
@@ -124,11 +124,11 @@ extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
 void LoadDBCStores(const std::string& dataPath);
 
 // script support functions
-DBCStorage <SoundEntriesEntry>          const* GetSoundEntriesStore();
-DBCStorage <SpellEntry>                 const* GetSpellStore();
-DBCStorage <SpellRangeEntry>            const* GetSpellRangeStore();
-DBCStorage <FactionEntry>               const* GetFactionStore();
-DBCStorage <CreatureDisplayInfoEntry>   const* GetCreatureDisplayStore();
-DBCStorage <EmotesEntry>                const* GetEmotesStore();
-DBCStorage <EmotesTextEntry>            const* GetEmotesTextStore();
+MANGOS_DLL_SPEC DBCStorage <SoundEntriesEntry>          const* GetSoundEntriesStore();
+MANGOS_DLL_SPEC DBCStorage <SpellEntry>                 const* GetSpellStore();
+MANGOS_DLL_SPEC DBCStorage <SpellRangeEntry>            const* GetSpellRangeStore();
+MANGOS_DLL_SPEC DBCStorage <FactionEntry>               const* GetFactionStore();
+MANGOS_DLL_SPEC DBCStorage <CreatureDisplayInfoEntry>   const* GetCreatureDisplayStore();
+MANGOS_DLL_SPEC DBCStorage <EmotesEntry>                const* GetEmotesStore();
+MANGOS_DLL_SPEC DBCStorage <EmotesTextEntry>            const* GetEmotesTextStore();
 #endif

@@ -28,7 +28,7 @@ class Unit;
 class Creature;
 class Player;
 
-class MovementGenerator
+class MANGOS_DLL_SPEC MovementGenerator
 {
     public:
         virtual ~MovementGenerator();
@@ -61,7 +61,7 @@ class MovementGenerator
 };
 
 template<class T, class D>
-class MovementGeneratorMedium : public MovementGenerator
+class MANGOS_DLL_SPEC MovementGeneratorMedium : public MovementGenerator
 {
     public:
         void Initialize(Unit& u) override

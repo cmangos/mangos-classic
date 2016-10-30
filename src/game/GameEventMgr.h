@@ -130,6 +130,6 @@ class GameEventMgr
 
 #define sGameEventMgr MaNGOS::Singleton<GameEventMgr>::Instance()
 
-bool IsHolidayActive(HolidayIds id);
+MANGOS_DLL_SPEC bool IsHolidayActive(HolidayIds id);
 
 #endif

@@ -93,7 +93,7 @@ enum AIEventType
     AI_EVENT_CUSTOM_F           = 1005,
 };
 
-class CreatureAI
+class MANGOS_DLL_SPEC CreatureAI
 {
     public:
         explicit CreatureAI(Creature* creature) :

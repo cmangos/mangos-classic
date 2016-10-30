@@ -184,7 +184,7 @@ class GridMap
 };
 
 template<typename Countable>
-class Referencable
+class MANGOS_DLL_SPEC Referencable
 {
     public:
         Referencable() { m_count = 0; }
@@ -208,7 +208,7 @@ class Referencable
 #define DEFAULT_WATER_SEARCH      50.0f                     // default search distance to case detection water level
 
 // class for sharing and managin GridMap objects
-class TerrainInfo : public Referencable<std::atomic_long>
+class MANGOS_DLL_SPEC TerrainInfo : public Referencable<std::atomic_long>
 {
     public:
         TerrainInfo(uint32 mapid);

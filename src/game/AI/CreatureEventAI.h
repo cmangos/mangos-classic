@@ -633,7 +633,7 @@ struct CreatureEventAIHolder
     bool UpdateRepeatTimer(Creature* creature, uint32 repeatMin, uint32 repeatMax);
 };
 
-class CreatureEventAI : public CreatureAI
+class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
 {
     public:
         explicit CreatureEventAI(Creature* c);

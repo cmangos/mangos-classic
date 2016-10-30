@@ -28,7 +28,7 @@ namespace Movement
 {
     /*  Initializes and launches spline movement
      */
-    class MoveSplineInit
+    class MANGOS_DLL_SPEC MoveSplineInit
     {
         public:
 

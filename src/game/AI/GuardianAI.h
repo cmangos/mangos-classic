@@ -28,7 +28,7 @@
 class Creature;
 class Spell;
 
-class GuardianAI : public CreatureEventAI
+class MANGOS_DLL_SPEC GuardianAI : public CreatureEventAI
 {
 public:
 

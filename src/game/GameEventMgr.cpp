@@ -1015,7 +1015,7 @@ bool GameEventMgr::IsActiveHoliday(HolidayIds id)
     return false;
 }
 
-bool IsHolidayActive(HolidayIds id)
+MANGOS_DLL_SPEC bool IsHolidayActive(HolidayIds id)
 {
     return sGameEventMgr.IsActiveHoliday(id);
 }

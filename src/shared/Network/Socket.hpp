@@ -32,7 +32,7 @@
 
 namespace MaNGOS
 {
-    class Socket
+    class MANGOS_DLL_SPEC Socket
     {
         private:
             // buffer timeout period, in milliseconds.  higher values decrease responsiveness

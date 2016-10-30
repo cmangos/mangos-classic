@@ -23,7 +23,7 @@
 #include "Errors.h"
 #include "Field.h"
 
-class QueryResult
+class MANGOS_DLL_SPEC QueryResult
 {
     public:
         QueryResult(uint64 rowCount, uint32 fieldCount)

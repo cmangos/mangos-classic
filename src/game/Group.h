@@ -100,7 +100,7 @@ struct InstanceGroupBind
 
 /** request member stats checken **/
 /** todo: uninvite people that not accepted invite **/
-class Group
+class MANGOS_DLL_SPEC Group
 {
     public:
         struct MemberSlot

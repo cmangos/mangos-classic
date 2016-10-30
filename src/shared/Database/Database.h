@@ -38,7 +38,7 @@ class Database;
 #define MAX_QUERY_LEN   (32*1024)
 
 //
-class SqlConnection
+class MANGOS_DLL_SPEC SqlConnection
 {
     public:
         virtual ~SqlConnection() {}
@@ -99,7 +99,7 @@ class SqlConnection
         StmtHolder m_holder;
 };
 
-class Database
+class MANGOS_DLL_SPEC Database
 {
     public:
         virtual ~Database();

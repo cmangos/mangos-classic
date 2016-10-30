@@ -81,7 +81,7 @@ enum SpellAuraHolderState
     SPELLAURAHOLDER_STATE_REMOVING      = 2                 // removing steps
 };
 
-class SpellAuraHolder
+class MANGOS_DLL_SPEC SpellAuraHolder
 {
     public:
         SpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem, SpellEntry const* triggeredBy);
@@ -251,7 +251,7 @@ typedef void(Aura::*pAuraHandler)(bool Apply, bool Real);
 //      each setting object update field code line moved under if(Real) check is significant mangos speedup, and less server->client data sends
 //      each packet sending code moved under if(Real) check is _large_ mangos speedup, and lot less server->client data sends
 
-class Aura
+class MANGOS_DLL_SPEC Aura
 {
         friend struct ReapplyAffectedPassiveAurasHelper;
         friend Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem);
@@ -500,7 +500,7 @@ class Aura
         void ReapplyAffectedPassiveAuras(Unit* target);
 };
 
-class AreaAura : public Aura
+class MANGOS_DLL_SPEC AreaAura : public Aura
 {
     public:
         AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr, uint32 originalRankSpellId = 0);
@@ -513,7 +513,7 @@ class AreaAura : public Aura
         uint32       m_originalRankSpellId;
 };
 
-class PersistentAreaAura : public Aura
+class MANGOS_DLL_SPEC PersistentAreaAura : public Aura
 {
     public:
         PersistentAreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
@@ -522,7 +522,7 @@ class PersistentAreaAura : public Aura
         void Update(uint32 diff) override;
 };
 
-class SingleEnemyTargetAura : public Aura
+class MANGOS_DLL_SPEC SingleEnemyTargetAura : public Aura
 {
         friend Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem);
 

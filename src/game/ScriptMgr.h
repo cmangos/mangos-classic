@@ -652,12 +652,12 @@ bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool
 
 #define sScriptMgr MaNGOS::Singleton<ScriptMgr>::Instance()
 
-uint32 GetAreaTriggerScriptId(uint32 triggerId);
-uint32 GetEventIdScriptId(uint32 eventId);
-uint32 GetScriptId(const char* name);
-char const* GetScriptName(uint32 id);
-uint32 GetScriptIdsCount();
-void SetExternalWaypointTable(char const* tableName);
-bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
+MANGOS_DLL_SPEC uint32 GetAreaTriggerScriptId(uint32 triggerId);
+MANGOS_DLL_SPEC uint32 GetEventIdScriptId(uint32 eventId);
+MANGOS_DLL_SPEC uint32 GetScriptId(const char* name);
+MANGOS_DLL_SPEC char const* GetScriptName(uint32 id);
+MANGOS_DLL_SPEC uint32 GetScriptIdsCount();
+MANGOS_DLL_SPEC void SetExternalWaypointTable(char const* tableName);
+MANGOS_DLL_SPEC bool AddWaypointFromExternal(uint32 entry, int32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
 
 #endif

@@ -29,7 +29,7 @@ class WorldPacket;
 class Player;
 
 /// Camera - object-receiver. Receives broadcast packets from nearby worldobjects, object visibility changes and sends them to client
-class Camera
+class MANGOS_DLL_SPEC Camera
 {
         friend class ViewPoint;
     public:
@@ -77,7 +77,7 @@ class Camera
 };
 
 /// Object-observer, notifies farsight object state to cameras that attached to it
-class ViewPoint
+class MANGOS_DLL_SPEC ViewPoint
 {
         friend class Camera;
 

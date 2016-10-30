@@ -61,7 +61,7 @@ enum UnitThreatEventType
 
 //==============================================================
 
-class UnitBaseEvent
+class MANGOS_DLL_SPEC UnitBaseEvent
 {
     private:
         uint32 iType;
@@ -75,7 +75,7 @@ class UnitBaseEvent
 
 //==============================================================
 
-class ThreatRefStatusChangeEvent : public UnitBaseEvent
+class MANGOS_DLL_SPEC ThreatRefStatusChangeEvent : public UnitBaseEvent
 {
     private:
         HostileReference* iHostileReference;
@@ -116,7 +116,7 @@ class ThreatRefStatusChangeEvent : public UnitBaseEvent
 
 //==============================================================
 
-class ThreatManagerEvent : public ThreatRefStatusChangeEvent
+class MANGOS_DLL_SPEC ThreatManagerEvent : public ThreatRefStatusChangeEvent
 {
     private:
         ThreatContainer* iThreatContainer;
