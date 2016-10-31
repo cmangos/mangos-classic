@@ -514,6 +514,28 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 13278:                                 // Gnomish Death Ray (Init)
+                {
+                    if (m_CastItem)
+                        m_caster->CastSpell(m_caster, 13493, true, m_CastItem);
+
+                    return;
+                }
+                case 13280:                                 // Gnomish Death Ray (Finish)
+                {
+                    if (!m_originalCaster || !m_CastItem)
+                        return;
+
+                    if (Unit* channelTarget = m_originalCaster->GetMap()->GetUnit(m_originalCaster->GetChannelObjectGuid()))
+                    {
+                        if (uint32 roll = urand(0, 9))
+                            m_originalCaster->CastSpell(channelTarget, 13279, true, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
+                        else
+                            m_caster->CastSpell(m_caster, 13279, true, m_CastItem);
+                    }
+
+                    return;
+                }
                 case 13489:
                 {
                     if (unitTarget)
@@ -803,24 +825,36 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 23448:                                 // Transporter Arrival - Ultrasafe Transporter: Gadgetzan - backfires
+                case 23442:                                 // Goblin Transporter - Dimensional Ripper: Everlook
                 {
-                    int32 r = irand(0, 119);
-                    if (r < 20)                             // Transporter Malfunction - 1/6 polymorph
-                        m_caster->CastSpell(m_caster, 23444, true);
-                    else if (r < 100)                       // Evil Twin               - 4/6 evil twin
-                        m_caster->CastSpell(m_caster, 23445, true);
-                    else                                    // Transporter Malfunction - 1/6 miss the target
-                        m_caster->CastSpell(m_caster, 36902, true);
-
-                    return;
+                    // Everlook Transporter ; xxxxx = success | xxxxx = failure
                 }
                 case 23453:                                 // Gnomish Transporter - Ultrasafe Transporter: Gadgetzan
                 {
-                    if (roll_chance_i(50))                  // Gadgetzan Transporter         - success
-                        m_caster->CastSpell(m_caster, 23441, true);
-                    else                                    // Gadgetzan Transporter Failure - failure
-                        m_caster->CastSpell(m_caster, 23446, true);
+                   // Gadgetzan Transporter ; 23441 = success | 23446 = failure
+                    m_caster->CastSpell(m_caster, (urand(0, 1) ? 23441 : 23446), true);
+
+                    return;
+                }
+                case 23448:                                 // Transporter Arrival - Ultrasafe Transporter: Gadgetzan - backfires
+                {
+                    uint32 rand = urand(0, 5);
+                    if (!rand)                              // Transporter Malfunction - 1/6 polymorph
+                        m_caster->CastSpell(m_caster, 23444, true);
+                    else if (rand == 1)                     // Transporter Malfunction - 1/6 miss the target
+                        m_caster->CastSpell(m_caster, 36902, true);
+                    else                                    // Evil Twin               - 4/6 evil twin
+                        m_caster->CastSpell(m_caster, 23445, true);
+
+                    return;
+                }
+                case 23450:                                 // Transporter Arrival - Dimensional Ripper - Everlook - backfires
+                {
+                    uint32 rand = urand(0, 11);
+                    if (!rand)                              // 1/12 fire
+                        m_caster->CastSpell(m_caster, 23449, true);
+                    else if (rand <= 4)                     // 4/12 evil twin
+                        m_caster->CastSpell(m_caster, 23445, true);
 
                     return;
                 }
@@ -1483,24 +1517,6 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
             float orientation = unitTarget->GetOrientation();
             // Teleport
             unitTarget->NearTeleportTo(x, y, z, orientation, unitTarget == m_caster);
-            return;
-        }
-    }
-
-    // post effects for TARGET_TABLE_X_Y_Z_COORDINATES
-    switch (m_spellInfo->Id)
-    {
-        // Dimensional Ripper - Everlook
-        case 23442:
-        {
-            int32 r = irand(0, 119);
-            if (r >= 70)                                    // 7/12 success
-            {
-                if (r < 100)                                // 4/12 evil twin
-                    m_caster->CastSpell(m_caster, 23445, true);
-                else                                        // 1/12 fire
-                    m_caster->CastSpell(m_caster, 23449, true);
-            }
             return;
         }
     }
