@@ -3079,7 +3079,7 @@ void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
     // Always try to remove all dependent spells if present (needed to reset some talents properly)
     SpellLearnSpellMapBounds spell_bounds = sSpellMgr.GetSpellLearnSpellMapBounds(spell_id);
     for (SpellLearnSpellMap::const_iterator child_itr = spell_bounds.first; child_itr != spell_bounds.second; ++child_itr)
-        removeSpell(child_itr->second.spell, !IsPassiveSpell(child_itr->second.spell), learn_low_rank);
+        removeSpell(child_itr->second.spell, !IsPassiveSpell(child_itr->second.spell), !IsPassiveSpell(child_itr->second.spell));
 
     // search again just in case
     itr = m_spells.find(spell_id);
