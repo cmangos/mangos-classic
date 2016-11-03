@@ -39,7 +39,7 @@ class Unit;
 #define MAX_RAID_SUBGROUPS (MAX_RAID_SIZE / MAX_GROUP_SIZE)
 #define TARGET_ICON_COUNT 8
 
-enum GroupMemberOnlineStatus
+enum GroupMemberStatus
 {
     MEMBER_STATUS_OFFLINE   = 0x0000,
     MEMBER_STATUS_ONLINE    = 0x0001,                       // Lua_UnitIsConnected
@@ -51,6 +51,8 @@ enum GroupMemberOnlineStatus
     MEMBER_STATUS_AFK       = 0x0040,                       // Lua_UnitIsAFK
     MEMBER_STATUS_DND       = 0x0080,                       // Lua_UnitIsDND
 };
+
+GroupMemberStatus GetGroupMemberStatus(const ObjectGuid &guid);
 
 enum GroupType
 {

@@ -4014,6 +4014,9 @@ void Aura::HandleAuraGhost(bool apply, bool /*Real*/)
     {
         GetTarget()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
     }
+
+    if (((Player*)GetTarget())->GetGroup())
+        ((Player*)GetTarget())->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_STATUS);
 }
 
 void Aura::HandleShieldBlockValue(bool apply, bool /*Real*/)
