@@ -225,9 +225,18 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
         // set temporary summon that way its possible if the player unmount to resummon it automaticaly
         owner->SetTemporaryUnsummonedPetNumber(pet_number);
 
+        // change pet slot directly in database
+        CharacterDatabase.BeginTransaction();
+        static SqlStatementID ChangePetSlot_ID;
+        SqlStatement ChangePetSlot = CharacterDatabase.CreateStatement(ChangePetSlot_ID, "UPDATE character_pet SET slot = ? WHERE id = ? ");
+        ChangePetSlot.PExecute(uint32(PET_SAVE_AS_CURRENT), pet_number);
+        CharacterDatabase.CommitTransaction();
+
         delete result;
         return false;
     }
+    else
+        owner->SetTemporaryUnsummonedPetNumber(0);
 
     Map* map = owner->GetMap();
 
