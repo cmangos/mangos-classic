@@ -108,7 +108,7 @@ SpellCastResult Pet::TryLoadFromDB(Unit* owner, uint32 petentry /*= 0*/, uint32 
         // any current or other non-stabled pet (for hunter "call pet")
         request << "FROM character_pet WHERE owner = '" << ownerid << "' AND (slot = '" << uint32(PET_SAVE_AS_CURRENT) << "' OR slot > '" << uint32(PET_SAVE_LAST_STABLE_SLOT) << "')";
 
-    QueryResult* result = CharacterDatabase.PQuery(request.str().c_str());
+    QueryResult* result = CharacterDatabase.PQuery("%s", request.str().c_str());
 
     if (!result)
         return SPELL_FAILED_NO_PET;
