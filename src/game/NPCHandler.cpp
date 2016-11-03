@@ -672,6 +672,7 @@ void WorldSession::HandleStablePet(WorldPacket& recv_data)
             CharacterDatabase.CommitTransaction();
         }
         SendStableResult(STABLE_SUCCESS_STABLE);
+        _player->SetTemporaryUnsummonedPetNumber(0);
     }
     else
         SendStableResult(STABLE_ERR_STABLE);
@@ -692,20 +693,28 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
     }
 
     uint32 creature_id = 0;
+    uint32 slot = 0;
 
+    QueryResult* result = CharacterDatabase.PQuery("SELECT entry, slot FROM character_pet WHERE owner = '%u' AND id = '%u' AND slot >='%u' AND slot <= '%u'",
+                          _player->GetGUIDLow(), petnumber, PET_SAVE_FIRST_STABLE_SLOT, PET_SAVE_LAST_STABLE_SLOT);
+    if (result)
     {
-        QueryResult* result = CharacterDatabase.PQuery("SELECT entry FROM character_pet WHERE owner = '%u' AND id = '%u' AND slot >='%u' AND slot <= '%u'",
-                              _player->GetGUIDLow(), petnumber, PET_SAVE_FIRST_STABLE_SLOT, PET_SAVE_LAST_STABLE_SLOT);
-        if (result)
-        {
-            Field* fields = result->Fetch();
-            creature_id = fields[0].GetUInt32();
-            delete result;
-        }
+        Field* fields = result->Fetch();
+        creature_id   = fields[0].GetUInt32();
+        slot          = fields[1].GetUInt32();
+        delete result;
     }
 
     if (!creature_id)
     {
+        sLog.outError("HandleUnstablePet> %s trying to unstable a pet with invalid creature id!", _player->GetGuidStr().c_str());
+        SendStableResult(STABLE_ERR_STABLE);
+        return;
+    }
+
+    if (slot == uint32(PET_SAVE_AS_CURRENT))
+    {
+        sLog.outError("HandleUnstablePet> %s trying to unstable current pet!", _player->GetGuidStr().c_str());
         SendStableResult(STABLE_ERR_STABLE);
         return;
     }
@@ -717,6 +726,7 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
         return;
     }
 
+    // found if a pet is actually summoned
     Pet* pet = _player->GetPet();
     if (pet)
     {
@@ -738,27 +748,38 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
             SendStableResult(STABLE_ERR_STABLE);
             return;
         }
+
+        pet->Unsummon(PetSaveMode(slot), _player);
     }
     else
     {
-        SpellCastResult loadResult = Pet::TryLoadFromDB(_player, 0, petnumber, false, HUNTER_PET);
+        // try to find if pet is actually temporary unsummoned
+        SpellCastResult loadResult = Pet::TryLoadFromDB(_player, 0, 0, true, HUNTER_PET);
         if (loadResult != SPELL_CAST_OK)
         {
             if (loadResult == SPELL_FAILED_TARGETS_DEAD)
             {
                 _player->SendPetTameFailure(PETTAME_DEAD);
 
-                // TODO:: Possible DB corrupt here
                 sLog.outError("UnStablePet> trying to unstable a dead pet. Should not be possible!");
-            }
-
-            if (loadResult != SPELL_FAILED_BAD_TARGETS)
-            {
-                SendStableResult(STABLE_ERR_STABLE);
                 return;
             }
 
-            Pet::DeleteFromDB(_player, PET_SAVE_AS_CURRENT);
+            if (loadResult == SPELL_FAILED_BAD_TARGETS)
+            {
+                _player->SendPetTameFailure(PETTAME_ANOTHERSUMMONACTIVE);
+                SendStableResult(STABLE_ERR_STABLE);
+                return;
+            }
+        }
+        else
+        {
+            // change pet slot directly in database
+            CharacterDatabase.BeginTransaction();
+            static SqlStatementID ChangePetSlot_ID;
+            SqlStatement ChangePetSlot = CharacterDatabase.CreateStatement(ChangePetSlot_ID, "UPDATE character_pet SET slot = ? WHERE owner = ? AND slot = ? ");
+            ChangePetSlot.PExecute(slot, _player->GetObjectGuid().GetCounter(), uint32(PET_SAVE_AS_CURRENT));
+            CharacterDatabase.CommitTransaction();
         }
     }
 
@@ -767,8 +788,14 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
     {
         delete newpet;
         newpet = nullptr;
-        SendStableResult(STABLE_ERR_STABLE);
-        return;
+
+        // load failed but it may be normal if the pet is set as temporary unsummoned by any reason
+        if (!_player->GetTemporaryUnsummonedPetNumber())
+        {
+            // load really failed
+            SendStableResult(STABLE_ERR_STABLE);
+            return;
+        }
     }
 
     SendStableResult(STABLE_SUCCESS_UNSTABLE);
@@ -906,10 +933,17 @@ void WorldSession::HandleStableSwapPet(WorldPacket& recv_data)
     if (!newpet->LoadPetFromDB(_player, creature_id, pet_number))
     {
         delete newpet;
-        SendStableResult(STABLE_ERR_STABLE);
+
+        // load failed but it may be normal if the pet is set as temporary unsummoned by any reason
+        if (!_player->GetTemporaryUnsummonedPetNumber())
+        {
+            // load really failed
+            SendStableResult(STABLE_ERR_STABLE);
+            return;
+        }
     }
-    else
-        SendStableResult(STABLE_SUCCESS_UNSTABLE);
+
+    SendStableResult(STABLE_SUCCESS_UNSTABLE);
 }
 
 void WorldSession::HandleRepairItemOpcode(WorldPacket& recv_data)
