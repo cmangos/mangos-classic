@@ -52,7 +52,7 @@ enum GroupMemberStatus
     MEMBER_STATUS_DND       = 0x0080,                       // Lua_UnitIsDND
 };
 
-GroupMemberStatus GetGroupMemberStatus(const ObjectGuid &guid);
+GroupMemberStatus GetGroupMemberStatus(const Player* member);
 
 enum GroupType
 {

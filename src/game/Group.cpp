@@ -30,27 +30,24 @@
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
 
-GroupMemberStatus GetGroupMemberStatus(const ObjectGuid &guid)
+GroupMemberStatus GetGroupMemberStatus(const Player *member = nullptr)
 {
     uint8 flags = MEMBER_STATUS_OFFLINE;
-    if (const Player* member = sObjectMgr.GetPlayer(guid))
+    if (member && member->GetSession() && !member->GetSession()->PlayerLogout())
     {
-        if (member->GetSession() && !member->GetSession()->PlayerLogout())
-        {
-            flags |= MEMBER_STATUS_ONLINE;
-            if (member->IsPvP())
-                flags |= MEMBER_STATUS_PVP;
-            if (member->isDead())
-                flags |= MEMBER_STATUS_DEAD;
-            if (member->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-                flags |= MEMBER_STATUS_GHOST;
-            if (member->IsFFAPvP())
-                flags |= MEMBER_STATUS_PVP_FFA;
-            if (member->isAFK())
-                flags |= MEMBER_STATUS_AFK;
-            if (member->isDND())
-                flags |= MEMBER_STATUS_DND;
-        }
+        flags |= MEMBER_STATUS_ONLINE;
+        if (member->IsPvP())
+            flags |= MEMBER_STATUS_PVP;
+        if (member->isDead())
+            flags |= MEMBER_STATUS_DEAD;
+        if (member->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+            flags |= MEMBER_STATUS_GHOST;
+        if (member->IsFFAPvP())
+            flags |= MEMBER_STATUS_PVP_FFA;
+        if (member->isAFK())
+            flags |= MEMBER_STATUS_AFK;
+        if (member->isDND())
+            flags |= MEMBER_STATUS_DND;
     }
     return GroupMemberStatus(flags);
 }
@@ -535,7 +532,7 @@ void Group::SendUpdate()
                 continue;
             data << citr2->name;
             data << citr2->guid;
-            data << uint8(GetGroupMemberStatus(citr2->guid));
+            data << uint8(GetGroupMemberStatus(sObjectMgr.GetPlayer(citr2->guid)));
             data << (uint8)(citr2->group | (citr2->assistant ? 0x80 : 0));
         }
 
