@@ -488,7 +488,16 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                 return;
 
             // since pool system can fail to roll unspawned object, this one can remain spawned, so must set respawn nevertheless
-            m_respawnTime = m_spawnedByDefault ? time(nullptr) + m_respawnDelayTime : 0;
+
+            switch (GetGoType()) // TODO: check, very experimental
+            {
+            case GAMEOBJECT_TYPE_BUTTON: // if button and not spawned by default, do not despawn
+                m_respawnTime = time(nullptr) + m_respawnDelayTime;
+                break;
+            default: // Old logic, if !m_spawnedByDefault despawn on first usage
+                m_respawnTime = m_spawnedByDefault ? time(nullptr) + m_respawnDelayTime : 0;
+                break;
+            }
 
             // if option not set then object will be saved at grid unload
             if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
