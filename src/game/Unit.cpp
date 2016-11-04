@@ -9841,6 +9841,8 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     possessed->clearUnitState(UNIT_STAT_CONTROLLED);
     possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     possessed->SetCharmerGuid(ObjectGuid());
+
+    // may be not correct we have to remove only some generator taking account of the current situation
     possessed->StopMoving(true);
     possessed->GetMotionMaster()->Clear();
 
@@ -9850,71 +9852,72 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
 
     if (possessed->GetTypeId() == TYPEID_UNIT)
     {
-        possessedCreature = static_cast<Creature *>(possessed);
-        possessedCreature->ClearTemporaryFaction();
-        
-        if (player)
-            possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-
         // now we have to clean threat list to be able to restore normal creature behavior
         FactionTemplateEntry const* factionEntry = possessed->getFactionTemplateEntry();
 
-        // first find friendly target (stopping combat here is not recommended because m_attackers will be modified)
-        AttackerSet friendlyTargets;
-        for (Unit::AttackerSet::const_iterator itr = possessed->getAttackers().begin(); itr != possessed->getAttackers().end(); ++itr)
+        possessedCreature = static_cast<Creature *>(possessed);
+        if (!possessedCreature->IsPet())
         {
-            Unit* attacker = (*itr);
-            if (attacker->GetTypeId() != TYPEID_UNIT)
-                continue;
+            possessedCreature->ClearTemporaryFaction();
 
-            if (!factionEntry->IsHostileTo(*attacker->getFactionTemplateEntry()))
-                friendlyTargets.insert(attacker);
-        }
+            // first find friendly target (stopping combat here is not recommended because m_attackers will be modified)
+            AttackerSet friendlyTargets;
+            for (Unit::AttackerSet::const_iterator itr = possessed->getAttackers().begin(); itr != possessed->getAttackers().end(); ++itr)
+            {
+                Unit* attacker = (*itr);
+                if (attacker->GetTypeId() != TYPEID_UNIT)
+                    continue;
 
-        // now stop attackers combat and transfer threat generated from this to owner, also get the total generated threat
-        for (Unit::AttackerSet::iterator itr = friendlyTargets.begin(); itr != friendlyTargets.end(); ++itr)
-        {
-            Unit* attacker = (*itr);
-            attacker->AttackStop(true, true);
-            attacker->m_Events.KillAllEvents(true);
-            attacker->getThreatManager().modifyThreatPercent(possessed, -101);           // only remove the possessed creature from threat list because it can be filled by other players
-            attacker->AddThreat(this);
-        }
+                if (!factionEntry->IsHostileTo(*attacker->getFactionTemplateEntry()))
+                    friendlyTargets.insert(attacker);
+            }
 
-        possessed->AttackStop(true, true);
-        possessed->m_Events.KillAllEvents(true);
+            // now stop attackers combat and transfer threat generated from this to owner, also get the total generated threat
+            for (Unit::AttackerSet::iterator itr = friendlyTargets.begin(); itr != friendlyTargets.end(); ++itr)
+            {
+                Unit* attacker = (*itr);
+                attacker->AttackStop(true, true);
+                attacker->m_Events.KillAllEvents(true);
+                attacker->getThreatManager().modifyThreatPercent(possessed, -101);     // only remove the possessed creature from threat list because it can be filled by other players
+                attacker->AddThreat(this);
+            }
 
-        charmInfo->ResetCharmState();
-        possessed->DeleteCharmInfo();
+            possessed->AttackStop(true, true);
+            possessed->m_Events.KillAllEvents(true);
 
-        // we have to restore initial MotionMaster
-        GetMotionMaster()->Initialize();
+            charmInfo->ResetCharmState();
+            possessed->DeleteCharmInfo();
 
-        if (possessed->isAlive())
-        {
-            if (!possessedCreature->IsPet() || possessedCreature->GetOwner() != this)
+            // we have to restore initial MotionMaster
+            while (possessed->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+                possessed->GetMotionMaster()->MovementExpired(true);
+
+            if (possessed->isAlive())
             {
                 possessedCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
-                                                                                                           // TODO:: iam not sure we need that faction check
+
+                // TODO:: iam not sure we need that faction check
                 if (!factionEntry->IsFriendlyTo(*getFactionTemplateEntry()))
-                    possessed->getThreatManager().addThreat(this, GetMaxHealth());                // generating threat by max life amount best way i found to make it realistic
+                    possessed->getThreatManager().addThreat(this, GetMaxHealth());     // generating threat by max life amount best way i found to make it realistic
             }
+            else
+                possessed->GetCombatData()->threatManager.clearReferences();
+
+            // we can remove that flag if its set, that is supposed to be only for creature controlled by player
+            // however player's pet should keep it
+            possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
         }
         else
-            possessed->GetCombatData()->threatManager.clearReferences();
+        {
+            possessed->setFaction(possessedCreature->GetOwner()->getFaction());
+
+            charmInfo->ResetCharmState();
+
+            // as possessed is a pet we have to restore original charminfo so Pet::DeleteCharmInfo will take care of that
+            possessed->DeleteCharmInfo();
+        }
     }
-
-    if (player)
-    {
-        player->SetClientControl(possessed, 0);
-        player->SetMover(nullptr);
-        player->GetCamera().ResetView();
-
-        // player pet can be re summoned here
-        player->ResummonPetTemporaryUnSummonedIfAny();
-    }
-
-    if (possessed->GetTypeId() == TYPEID_PLAYER)
+    else if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
         Player* possessedPlayer = static_cast<Player *>(possessed);
 
@@ -9927,47 +9930,25 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
         charmInfo->ResetCharmState();
         possessedPlayer->DeleteCharmInfo();
 
-        possessed->AttackStop(true, true);
-        possessed->m_Events.KillAllEvents(true);
-
-        // we have to restore initial MotionMaster
-        GetMotionMaster()->Initialize();
+        while (possessedPlayer->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+            possessedPlayer->GetMotionMaster()->MovementExpired(true);
     }
-    else if (possessedCreature)
+
+    if (player)
     {
-        if (player && possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
-        {
-            // out of range pet dismissed
-            if (!possessedCreature->IsWithinDistInMap(this, possessedCreature->GetMap()->GetVisibilityDistance()))
-            {
-                player->RemovePet(PET_SAVE_REAGENTS);
-            }
-            else
-            {
-                // reset pet motion
-                if (possessedCreature->GetCharmInfo() && possessedCreature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
-                {
-                    possessedCreature->GetMotionMaster()->MoveFollow(this, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-                }
-                else
-                {
-                    possessedCreature->GetMotionMaster()->Clear(false);
-                    possessedCreature->GetMotionMaster()->MoveIdle();
-                }
-            }
-        }
-        else
-        {
-            // we can remove that flag if its set, that is supposed to be only for creature controlled by player
-            // however player's pet should keep it
-            if (!possessedCreature->IsPet() || possessedCreature->GetOwner()->GetTypeId() != TYPEID_PLAYER)
-                possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-        }
-    }
+        player->SetClientControl(possessed, 0);
+        player->SetMover(nullptr);
+        player->GetCamera().ResetView();
 
-    // remove pet bar only if no pet
-    if (player && !player->GetPet())
-        player->RemovePetActionBar();
+        // player pet can be re summoned here
+        player->ResummonPetTemporaryUnSummonedIfAny();
+
+        // remove pet bar only if no pet
+        if (!player->GetPet())
+            player->RemovePetActionBar();
+        else
+            player->PetSpellInitialize();   // reset spell on pet bar
+    }
 
     // be sure all those change will be made for clients
     SendForcedObjectUpdate();

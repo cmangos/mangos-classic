@@ -267,6 +267,9 @@ class MANGOS_DLL_SPEC Pet : public Creature
         void CheckLearning(uint32 spellid);
         uint32 resetTalentsCost() const;
 
+        virtual CharmInfo* InitCharmInfo(Unit* charm) override;
+        virtual void DeleteCharmInfo() override;
+
         void  SetTP(int32 TP);
         int32 GetDispTP();
 
@@ -299,6 +302,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
 
     private:
         PetModeFlags m_petModeFlags;
+        CharmInfo*   m_originalCharminfo;
 
         void SaveToDB(uint32) override                      // overwrited of Creature::SaveToDB     - don't must be called
         {

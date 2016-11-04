@@ -1580,8 +1580,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool isCharmed() const { return !GetCharmerGuid().IsEmpty(); }
 
         CharmInfo* GetCharmInfo() { return m_charmInfo; }
-        CharmInfo* InitCharmInfo(Unit* charm);
-        void DeleteCharmInfo() { delete m_charmInfo; m_charmInfo = nullptr; }
+        virtual CharmInfo* InitCharmInfo(Unit* charm);
+        virtual void DeleteCharmInfo() { delete m_charmInfo; m_charmInfo = nullptr; }
 
         ObjectGuid const& GetTotemGuid(TotemSlot slot) const { return m_TotemSlot[slot]; }
         Totem* GetTotem(TotemSlot slot) const;
