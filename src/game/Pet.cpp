@@ -52,7 +52,7 @@ Pet::Pet(PetType type) :
     m_TrainingPoints(0), m_resetTalentsCost(0), m_resetTalentsTime(0),
     m_removed(false), m_happinessTimer(7500), m_loyaltyTimer(12000), m_petType(type), m_duration(0),
     m_loyaltyPoints(0), m_bonusdamage(0), m_auraUpdateMask(0), m_loading(false),
-    m_petModeFlags(PET_MODE_DEFAULT)
+    m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr)
 {
     m_name = "Pet";
     m_regenTimer = 4000;
@@ -66,6 +66,7 @@ Pet::Pet(PetType type) :
 
 Pet::~Pet()
 {
+    delete m_originalCharminfo;
 }
 
 void Pet::AddToWorld()
@@ -1998,6 +1999,26 @@ uint32 Pet::resetTalentsCost() const
     // then increasing at a rate of 1 gold; cap 10 gold
     else
         return (m_resetTalentsCost + 1 * GOLD > 10 * GOLD ? 10 * GOLD : m_resetTalentsCost + 1 * GOLD);
+}
+
+CharmInfo* Pet::InitCharmInfo(Unit* charm)
+{
+    if (!m_originalCharminfo)
+    {
+        m_originalCharminfo = m_charmInfo;
+        m_charmInfo = new CharmInfo(charm);
+    }
+    return m_charmInfo;
+}
+
+void Pet::DeleteCharmInfo()
+{
+    if (m_originalCharminfo)
+    {
+        delete m_charmInfo;
+        m_charmInfo = m_originalCharminfo;
+        m_originalCharminfo = nullptr;
+    }
 }
 
 void Pet::ToggleAutocast(uint32 spellid, bool apply)
