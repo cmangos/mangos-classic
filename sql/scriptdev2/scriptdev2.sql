@@ -247,6 +247,10 @@ UPDATE creature_template SET ScriptName='npc_rigger_gizelton' WHERE entry=11626;
 
 /* DIRE MAUL */
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
+DELETE FROM scripted_event_id WHERE id IN (8420,8428);
+INSERT INTO scripted_event_id VALUES
+(8420,'event_spells_warlock_dreadsteed'),
+(8428,'event_spells_warlock_dreadsteed');
 
 /* DUN MOROGH */
 

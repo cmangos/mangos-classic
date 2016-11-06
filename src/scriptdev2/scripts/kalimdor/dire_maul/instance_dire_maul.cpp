@@ -26,7 +26,8 @@ EndScriptData */
 
 instance_dire_maul::instance_dire_maul(Map* pMap) : ScriptedInstance(pMap),
     m_bWallDestroyed(false),
-    m_bDoNorthBeforeWest(false)
+    m_bDoNorthBeforeWest(false),
+    m_uiDreadsteedEventTimer(0)
 {
     Initialize();
 }
@@ -67,6 +68,7 @@ void instance_dire_maul::OnCreatureCreate(Creature* pCreature)
             m_lGeneratorGuardGUIDs.push_back(pCreature->GetObjectGuid());
             return;
         case NPC_IMMOLTHAR:
+        case NPC_WARLOCK_DUMMY_INFERNAL:
             break;
         case NPC_HIGHBORNE_SUMMONER:
             m_luiHighborneSummonerGUIDs.push_back(pCreature->GetObjectGuid());
@@ -144,6 +146,13 @@ void instance_dire_maul::OnObjectCreate(GameObject* pGo)
         case GO_WEST_LIBRARY_DOOR:
             pGo->SetFlag(GAMEOBJECT_FLAGS, m_bDoNorthBeforeWest ? GO_FLAG_NO_INTERACT : GO_FLAG_LOCKED);
             pGo->RemoveFlag(GAMEOBJECT_FLAGS, m_bDoNorthBeforeWest ? GO_FLAG_LOCKED : GO_FLAG_NO_INTERACT);
+            break;
+        case GO_DREADSTEED_PORTAL:
+            // exclude the central portal
+            if (pGo->GetPositionZ() > -29.0f)
+                m_lDreadsteedPortalsGUIDs.push_back(pGo->GetObjectGuid());
+            return;
+        case GO_WARLOCK_RITUAL_CIRCLE:
             break;
 
             // North
@@ -224,6 +233,32 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
         case TYPE_PRINCE:
             m_auiEncounter[uiType] = uiData;
             break;
+        case TYPE_DREADSTEED:
+            // start timer
+            if (uiData == IN_PROGRESS)
+                m_uiDreadsteedEventTimer = 390000;
+            else if (uiData == SPECIAL)
+            {
+                // set animation for next stage
+                if (GameObject* pCircle = GetSingleGameObjectFromStorage(GO_WARLOCK_RITUAL_CIRCLE))
+                    pCircle->SetGoState(GO_STATE_ACTIVE);
+
+                // despawn the controller; Inform the attackers to teleport
+                if (Creature* pDummy = GetSingleCreatureFromStorage(NPC_WARLOCK_DUMMY_INFERNAL))
+                {
+                    pDummy->AI()->SendAIEventAround(AI_EVENT_CUSTOM_EVENTAI_A, pDummy, 4000, 100.0f);
+                    pDummy->ForcedDespawn(5000);
+                }
+
+                // despawn side portals
+                for (GuidList::const_iterator itr = m_lDreadsteedPortalsGUIDs.begin(); itr != m_lDreadsteedPortalsGUIDs.end(); ++itr)
+                {
+                    if (GameObject* pGo = instance->GetGameObject(*itr))
+                        pGo->SetLootState(GO_JUST_DEACTIVATED);
+                }
+            }
+            m_auiEncounter[uiType] = uiData;
+            break;
         case TYPE_PYLON_1:
         case TYPE_PYLON_2:
         case TYPE_PYLON_3:
@@ -293,7 +328,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                       << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
                       << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11] << " "
                       << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14] << " "
-                      << m_auiEncounter[15];
+                      << m_auiEncounter[15] << " " << m_auiEncounter[16];
 
         m_strInstData = saveStream.str();
 
@@ -391,7 +426,7 @@ void instance_dire_maul::Load(const char* chrIn)
                m_auiEncounter[6] >> m_auiEncounter[7] >> m_auiEncounter[8] >>
                m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11] >>
                m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >>
-               m_auiEncounter[15];
+               m_auiEncounter[15] >> m_auiEncounter[16];
 
     if (m_auiEncounter[TYPE_ALZZIN] >= DONE)
         m_bWallDestroyed = true;
@@ -514,6 +549,21 @@ void instance_dire_maul::PylonGuardJustDied(Creature* pCreature)
 
             break;
         }
+    }
+}
+
+void instance_dire_maul::Update(uint32 uiDiff)
+{
+    if (m_uiDreadsteedEventTimer)
+    {
+        if (m_uiDreadsteedEventTimer <= uiDiff)
+        {
+            // set encounter to special to allow the next event to proceed
+            SetData(TYPE_DREADSTEED, SPECIAL);
+            m_uiDreadsteedEventTimer = 0;
+        }
+        else
+            m_uiDreadsteedEventTimer -= uiDiff;
     }
 }
 
