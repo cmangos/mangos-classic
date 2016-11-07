@@ -1617,18 +1617,17 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, Weapo
         {
             damageInfo->HitInfo |= HITINFO_CRITICALHIT;
             damageInfo->TargetState = VICTIMSTATE_NORMAL;
-
             damageInfo->procEx |= PROC_EX_CRITICAL_HIT;
 
-            uint32 creatureTypeMask = damageInfo->target->GetCreatureTypeMask();
-
-            int32 mod = GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS, creatureTypeMask);
-
-            damageInfo->totalDamage = uint32((damageInfo->totalDamage) * float((200.0f + mod) / 100.0f));
-
             for (uint8 i = 0; i < m_weaponDamageCount[damageInfo->attackType]; i++)
-                damageInfo->subDamage[i].damage = uint32((damageInfo->subDamage[i].damage) * float((200.0f + mod) / 100.0f));
-
+            {
+                SubDamageInfo &subDamage = damageInfo->subDamage[i];
+                uint32 clean = 0;
+                const uint32 crit = MeleeCriticalDamageBonus(damageInfo->attackType, subDamage.damageSchoolMask, &clean, subDamage.damage, damageInfo->target);
+                damageInfo->cleanDamage += (clean - crit);
+                damageInfo->totalDamage += (crit - subDamage.damage);
+                subDamage.damage = crit;
+            }
             break;
         }
         case MELEE_HIT_PARRY:
@@ -5899,39 +5898,36 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
     return false;
 }
 
-uint32 Unit::SpellCriticalDamageBonus(SpellEntry const* spellProto, uint32 damage, Unit* pVictim)
+uint32 Unit::SpellCriticalDamageBonus(SpellEntry const* spellProto, uint32 amount, Unit* pVictim)
 {
-    // Calculate critical bonus
-    int32 crit_bonus;
+    // Base critical bonus:
+    int32 bonus = (amount / 2);         // magical default bonus is 50% of the amount
     switch (spellProto->DmgClass)
     {
-        case SPELL_DAMAGE_CLASS_MELEE:                      // for melee based spells is 100%
+        case SPELL_DAMAGE_CLASS_MELEE:
         case SPELL_DAMAGE_CLASS_RANGED:
-            crit_bonus = damage;
-            break;
-        default:
-            crit_bonus = damage / 2;                        // for spells is 50%
+            bonus = int32(amount);      // physical default bonus is 100% of the amount
             break;
     }
 
-    // adds additional damage to crit_bonus (from talents)
+    // Apply base critical bonus mods first:
+    int32 modPctBonus = 0;
+    // Apply SPELL_AURA_MOD_CRIT_DAMAGE_BONUS: gem mechanics
+    modPctBonus += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, GetSpellSchoolMask(spellProto));
+    // Apply SPELL_AURA_MOD_CRIT_PERCENT_VERSUS: creature type slaying talents
+    if (pVictim)
+        modPctBonus += GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS, pVictim->GetCreatureTypeMask());
+    // Calculate base critical bonus:
+    if (modPctBonus)
+        bonus += int32((int32(amount) + bonus) * float(modPctBonus / 100.0f));
+    // Apply total crit bonus mods (usually from talents)
     if (Player* modOwner = GetSpellModOwner())
-        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
+        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, bonus);
+    // A crit cannot deal less damage than a normal hit
+    bonus = std::max(bonus, 0);
 
-    if (!pVictim)
-        return damage += crit_bonus;
-
-    uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
-
-    int32 critPctDamageMod = GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS, creatureTypeMask);
-
-    if (critPctDamageMod != 0)
-        crit_bonus = int32(crit_bonus * float((100.0f + critPctDamageMod) / 100.0f));
-
-    if (crit_bonus > 0)
-        damage += crit_bonus;
-
-    return damage;
+    // Final crit damage
+    return (amount + uint32(bonus));
 }
 
 uint32 Unit::SpellCriticalHealingBonus(SpellEntry const* spellProto, uint32 damage, Unit* pVictim)
@@ -5960,6 +5956,32 @@ uint32 Unit::SpellCriticalHealingBonus(SpellEntry const* spellProto, uint32 dama
         damage += crit_bonus;
 
     return damage;
+}
+
+uint32 Unit::MeleeCriticalDamageBonus(WeaponAttackType attackType, SpellSchoolMask schoolMask, uint32 *cleanDamage, uint32 amount, Unit *pVictim)
+{
+    // Crit bonus calc: default physical crit bonus is 100% of amount
+    int32 bonus = int32(amount);
+    int32 clean = 0;
+
+    // Apply base critical bonus mods first:
+    int32 modPctBonus = 0;
+    // Apply SPELL_AURA_MOD_CRIT_DAMAGE_BONUS: gem mechanics
+    modPctBonus += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, schoolMask);
+    // Apply SPELL_AURA_MOD_CRIT_PERCENT_VERSUS: creature type slaying talents
+    if (pVictim)
+        modPctBonus += GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS, pVictim->GetCreatureTypeMask());
+    // Calculate base critical bonus:
+    if (modPctBonus)
+        bonus += int32((int32(amount) + bonus) * float(modPctBonus / 100.0f));
+
+    // A crit cannot deal less damage than a normal hit
+    bonus = std::max(bonus, 0);
+    clean = bonus;
+
+    // Final crit damage
+    *cleanDamage = (amount + uint32(clean));
+    return (amount + uint32(bonus));
 }
 
 /**
