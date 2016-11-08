@@ -255,7 +255,7 @@ void Spell::EffectInstaKill(SpellEffectIndex /*eff_idx*/)
     WorldPacket data(SMSG_SPELLINSTAKILLLOG, (8 + 4));
     data << unitTarget->GetObjectGuid();                    // Victim GUID
     data << uint32(m_spellInfo->Id);
-    m_caster->SendMessageToSet(&data, true);
+    m_caster->SendMessageToSet(data, true);
 
     m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, m_spellInfo, false);
 }
@@ -628,7 +628,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         {
                             WorldPacket data(SMSG_SPIRIT_HEALER_CONFIRM, 8);
                             data << unitTarget->GetObjectGuid();
-                            ((Player*)caster)->GetSession()->SendPacket(&data);
+                            ((Player*)caster)->GetSession()->SendPacket(data);
                         }
                     }
 
@@ -2331,7 +2331,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
                 data << uint32(dispelledHolder->GetId());   // Spell Id
                 unitTarget->RemoveAuraHolderDueToSpellByDispel(dispelledHolder->GetId(), j->second, dispelledHolder->GetCasterGuid(), m_caster);
             }
-            m_caster->SendMessageToSet(&data, true);
+            m_caster->SendMessageToSet(data, true);
 
             // On success dispel
             // Devour Magic
@@ -2361,7 +2361,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
             data << unitTarget->GetObjectGuid();            // Victim GUID
             for (std::list< uint32 >::iterator j = fail_list.begin(); j != fail_list.end(); ++j)
                 data << uint32(*j);                         // Spell Id
-            m_caster->SendMessageToSet(&data, true);
+            m_caster->SendMessageToSet(data, true);
         }
     }
 }
@@ -3882,8 +3882,8 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
     WorldPacket data(SMSG_DUEL_REQUESTED, 8 + 8);
     data << pGameObj->GetObjectGuid();
     data << caster->GetObjectGuid();
-    caster->GetSession()->SendPacket(&data);
-    target->GetSession()->SendPacket(&data);
+    caster->GetSession()->SendPacket(data);
+    target->GetSession()->SendPacket(data);
 
     // create duel-info
     DuelInfo* duel   = new DuelInfo;
@@ -3949,7 +3949,7 @@ void Spell::EffectSummonPlayer(SpellEffectIndex /*eff_idx*/)
     data << m_caster->GetObjectGuid();                      // summoner guid
     data << uint32(m_caster->GetZoneId());                  // summoner zone
     data << uint32(MAX_PLAYER_SUMMON_DELAY * IN_MILLISECONDS); // auto decline after msecs
-    ((Player*)unitTarget)->GetSession()->SendPacket(&data);
+    ((Player*)unitTarget)->GetSession()->SendPacket(data);
 }
 
 static ScriptInfo generateActivateCommand()
@@ -4317,7 +4317,7 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
     map->Add(pGameObj);
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
     data << ObjectGuid(pGameObj->GetObjectGuid());
-    m_caster->SendMessageToSet(&data, true);
+    m_caster->SendMessageToSet(data, true);
 
     m_caster->m_ObjectSlotGuid[slot] = pGameObj->GetObjectGuid();
 
@@ -5115,7 +5115,7 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
     data << float(loc.coord_z);
     data << uint32(loc.mapid);
     data << uint32(area_id);
-    player->SendDirectMessage(&data);
+    player->SendDirectMessage(data);
 
     DEBUG_LOG("New Home Position X is %f", loc.coord_x);
     DEBUG_LOG("New Home Position Y is %f", loc.coord_y);
@@ -5127,5 +5127,5 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
     data.Initialize(SMSG_PLAYERBOUND, 8 + 4);
     data << m_caster->GetObjectGuid();
     data << uint32(area_id);
-    player->SendDirectMessage(&data);
+    player->SendDirectMessage(data);
 }

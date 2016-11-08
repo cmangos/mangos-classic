@@ -143,7 +143,7 @@ bool ChatHandler::HandleNotifyCommand(char* args)
 
     WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
     data << str;
-    sWorld.SendGlobalMessage(&data);
+    sWorld.SendGlobalMessage(data);
 
     return true;
 }
@@ -1395,13 +1395,13 @@ bool ChatHandler::HandleModifyMountCommand(char* args)
     data << chr->GetPackGUID();
     data << (uint32)0;
     data << float(speed);
-    chr->SendMessageToSet(&data, true);
+    chr->SendMessageToSet(data, true);
 
     data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE, (8 + 4 + 4));
     data << chr->GetPackGUID();
     data << (uint32)0;
     data << float(speed);
-    chr->SendMessageToSet(&data, true);
+    chr->SendMessageToSet(data, true);
 
     return true;
 }

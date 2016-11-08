@@ -475,7 +475,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
         data << ObjectGuid(guid);
         data << uint32(msg);                             // valid values: 0-8
         data << uint8(0);
-        pPlayer->GetSession()->SendPacket(&data);
+        pPlayer->GetSession()->SendPacket(data);
         _player->ClearDividerGuid();
     }
 }

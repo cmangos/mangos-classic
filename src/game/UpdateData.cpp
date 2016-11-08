@@ -102,9 +102,9 @@ void UpdateData::Compress(void* dst, uint32* dst_size, void* src, int src_size)
     *dst_size = c_stream.total_out;
 }
 
-bool UpdateData::BuildPacket(WorldPacket* packet, bool hasTransport)
+bool UpdateData::BuildPacket(WorldPacket& packet, bool hasTransport)
 {
-    MANGOS_ASSERT(packet->empty());                         // shouldn't happen
+    MANGOS_ASSERT(packet.empty());                         // shouldn't happen
 
     ByteBuffer buf(4 + 1 + (m_outOfRangeGUIDs.empty() ? 0 : 1 + 4 + 9 * m_outOfRangeGUIDs.size()) + m_data.wpos());
 
@@ -127,20 +127,20 @@ bool UpdateData::BuildPacket(WorldPacket* packet, bool hasTransport)
     if (pSize > 100)                                        // compress large packets
     {
         uint32 destsize = compressBound(pSize);
-        packet->resize(destsize + sizeof(uint32));
+        packet.resize(destsize + sizeof(uint32));
 
-        packet->put<uint32>(0, pSize);
-        Compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32), &destsize, (void*)buf.contents(), pSize);
+        packet.put<uint32>(0, pSize);
+        Compress(const_cast<uint8*>(packet.contents()) + sizeof(uint32), &destsize, (void*)buf.contents(), pSize);
         if (destsize == 0)
             return false;
 
-        packet->resize(destsize + sizeof(uint32));
-        packet->SetOpcode(SMSG_COMPRESSED_UPDATE_OBJECT);
+        packet.resize(destsize + sizeof(uint32));
+        packet.SetOpcode(SMSG_COMPRESSED_UPDATE_OBJECT);
     }
     else                                                    // send small packets without compression
     {
-        packet->append(buf);
-        packet->SetOpcode(SMSG_UPDATE_OBJECT);
+        packet.append(buf);
+        packet.SetOpcode(SMSG_UPDATE_OBJECT);
     }
 
     return true;

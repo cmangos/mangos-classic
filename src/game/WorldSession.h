@@ -89,7 +89,7 @@ class PacketFilter
         explicit PacketFilter(WorldSession* pSession) : m_pSession(pSession) {}
         virtual ~PacketFilter() {}
 
-        virtual bool Process(WorldPacket* /*packet*/) { return true; }
+        virtual bool Process(WorldPacket const& /*packet*/) const { return true; }
         virtual bool ProcessLogout() const { return true; }
 
     protected:
@@ -102,7 +102,7 @@ class MapSessionFilter : public PacketFilter
         explicit MapSessionFilter(WorldSession* pSession) : PacketFilter(pSession) {}
         ~MapSessionFilter() {}
 
-        virtual bool Process(WorldPacket* packet) override;
+        virtual bool Process(WorldPacket const& packet) const override;
         // in Map::Update() we do not process player logout!
         virtual bool ProcessLogout() const override { return false; }
 };
@@ -115,7 +115,7 @@ class WorldSessionFilter : public PacketFilter
         explicit WorldSessionFilter(WorldSession* pSession) : PacketFilter(pSession) {}
         ~WorldSessionFilter() {}
 
-        virtual bool Process(WorldPacket* packet) override;
+        virtual bool Process(WorldPacket const& packet) const override;
 };
 
 /// Player session in the World
@@ -133,7 +133,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
-        void SendPacket(WorldPacket const* packet);
+        void SendPacket(WorldPacket const& packet);
         void SendNotification(const char* format, ...) ATTR_PRINTF(2, 3);
         void SendNotification(int32 string_id, ...);
         void SendPetNameInvalid(uint32 error, const std::string& name);
@@ -255,7 +255,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendSaveGuildEmblem(uint32 msg);
         void SendBattleGroundJoinError(uint8 err);
 
-        void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket* data);
+        void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
 
         // Account mute time
         time_t m_muteTime;

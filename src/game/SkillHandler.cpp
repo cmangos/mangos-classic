@@ -56,7 +56,7 @@ void WorldSession::HandleTalentWipeConfirmOpcode(WorldPacket& recv_data)
         WorldPacket data(MSG_TALENT_WIPE_CONFIRM, 8 + 4);   // you have not any talent
         data << uint64(0);
         data << uint32(0);
-        SendPacket(&data);
+        SendPacket(data);
         return;
     }
 

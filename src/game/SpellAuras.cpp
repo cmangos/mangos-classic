@@ -5455,7 +5455,7 @@ void SpellAuraHolder::UpdateAuraDuration()
         WorldPacket data(SMSG_UPDATE_AURA_DURATION, 5);
         data << uint8(GetAuraSlot());
         data << uint32(GetAuraDuration());
-        ((Player*)m_target)->SendDirectMessage(&data);
+        ((Player*)m_target)->SendDirectMessage(data);
     }
 
     // not send in case player loading (will not work anyway until player not added to map), sent in visibility change code
