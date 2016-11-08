@@ -240,16 +240,31 @@ void instance_blackrock_spire::SetData(uint32 uiType, uint32 uiData)
             if (uiData == IN_PROGRESS)
                 StartNextDialogueText(SAY_NEFARIUS_INTRO_1);
             else if (uiData == DONE)
+            {
+                // Event complete: remove the summoned spectators
+                for (GuidList::const_iterator itr = m_lStadiumSpectatorsGUIDList.begin(); itr != m_lStadiumSpectatorsGUIDList.end(); ++itr)
+                {
+                    Creature* pSpectator = instance->GetCreature(*itr);
+                    if (pSpectator)
+                        pSpectator->ForcedDespawn();
+                }
                 DoUseDoorOrButton(GO_GYTH_EXIT_DOOR);
+            }
             else if (uiData == FAIL)
             {
-                // Despawn Nefarius and Rend on fail (the others are despawned OnCreatureEvade())
+                // Despawn Nefarius, Rend and the spectators on fail (the others are despawned OnCreatureEvade())
                 if (Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
                     pNefarius->ForcedDespawn();
                 if (Creature* pRend = GetSingleCreatureFromStorage(NPC_REND_BLACKHAND))
                     pRend->ForcedDespawn();
                 if (Creature* pGyth = GetSingleCreatureFromStorage(NPC_GYTH))
                     pGyth->ForcedDespawn();
+                for (GuidList::const_iterator itr = m_lStadiumSpectatorsGUIDList.begin(); itr != m_lStadiumSpectatorsGUIDList.end(); ++itr)
+                {
+                    Creature* pSpectator = instance->GetCreature(*itr);
+                    if (pSpectator)
+                        pSpectator->ForcedDespawn();
+                }
 
                 m_uiStadiumEventTimer = 0;
                 m_uiStadiumMobsAlive = 0;
@@ -504,7 +519,21 @@ void instance_blackrock_spire::JustDidDialogueStep(int32 iEntry)
             if (Creature* pRend = GetSingleCreatureFromStorage(NPC_REND_BLACKHAND))
                 pRend->SetFacingTo(aStadiumLocs[5].m_fO);
             if (Creature* pNefarius = GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
+            {
                 pNefarius->GetMotionMaster()->MovePoint(0, aStadiumLocs[5].m_fX, aStadiumLocs[5].m_fY, aStadiumLocs[5].m_fZ);
+                // Summon the spectators and move them to the western balcony
+                for (uint8 i = 0; i <12; i++)
+                {
+                    Creature* pSpectator = pNefarius->SummonCreature(aStadiumSpectators[i], aSpectatorsSpawnLocs[i].m_fX, aSpectatorsSpawnLocs[i].m_fY, aSpectatorsSpawnLocs[i].m_fZ, aSpectatorsSpawnLocs[i].m_fO, TEMPSUMMON_DEAD_DESPAWN, 0);
+                    if (pSpectator)
+                    {
+                        pSpectator->SetFacingTo(aSpectatorsTargetLocs[i].m_fO);
+                        pSpectator->SetWalk(false);
+                        pSpectator->GetMotionMaster()->MovePoint(0, aSpectatorsTargetLocs[i].m_fX, aSpectatorsTargetLocs[i].m_fY, aSpectatorsTargetLocs[i].m_fZ);
+                        m_lStadiumSpectatorsGUIDList.push_back(pSpectator->GetObjectGuid());
+                    }
+                }
+            }
             break;
         case SAY_NEFARIUS_WARCHIEF:
             // Prepare for Gyth - note: Nefarius should be moving around the balcony

@@ -23,6 +23,7 @@ enum
     NPC_PYROGUARD_EMBERSEER     = 9816,
     NPC_SOLAKAR_FLAMEWREATH     = 10264,
     NPC_BLACKHAND_INCARCERATOR  = 10316,
+    NPC_BLACKHAND_ELITE         = 10317,
     NPC_LORD_VICTOR_NEFARIUS    = 10162,
     NPC_REND_BLACKHAND          = 10429,
     NPC_GYTH                    = 10339,
@@ -94,6 +95,44 @@ static const SpawnLocation aStadiumLocs[7] =
     {165.74f, -466.46f, 116.80f},                           // Rend move position
 };
 
+static const uint32 aStadiumSpectators[12] =
+{
+    NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_ELITE, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN,
+    NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_ELITE, NPC_BLACKHAND_VETERAN, NPC_BLACKHAND_VETERAN
+};
+
+static const SpawnLocation aSpectatorsSpawnLocs[12] =
+{
+    {163.3209f, -340.9818f, 111.0216f, 4.818223f},
+    {164.2471f, -339.0313f, 111.0368f, 1.413717f},
+    {161.124f, -339.5178f, 111.0381f, 3.001966f},
+    {162.5045f, -337.8101f, 111.0367f, 4.13643f},
+    {160.9896f, -337.7715f, 111.0368f, 1.117011f},
+    {161.8347f, -335.7923f, 111.0352f, 2.286381f},
+    {113.9726f, -366.0805f, 116.9195f, 6.252025f},
+    {112.7245f, -368.9635f, 116.9307f, 4.677482f},
+    {110.5757f, -368.2123f, 116.9278f, 4.310963f},
+    {109.3343f, -366.4785f, 116.9261f, 2.740167f},
+    {110.1331f, -363.9824f, 116.9272f, 0.5235988f},
+    {111.9971f, -363.0948f, 116.929f, 5.951573f},
+};
+
+static const SpawnLocation aSpectatorsTargetLocs[12] =
+{
+    {160.619f, -395.826f, 121.9752f, -1.502597f},
+    {162.1428f, -395.1175f, 121.9751f, -1.67753f},
+    {158.6822f, -395.7097f, 121.9753f, -1.787977f},
+    {164.384f, -395.3787f, 121.9751f, -1.502597f},
+    {156.9669f, -395.2188f, 121.9752f, -1.678662f},
+    {166.2515f, -395.0366f, 121.975f, -1.791467f},
+    {143.814f, -396.7092f, 121.9753f, -1.40136f},
+    {145.3893f, -396.1959f, 121.9752f, -1.419479f},
+    {142.1598f, -396.0284f, 121.9752f, -1.661444f},
+    {147.7274f, -396.3042f, 121.9753f, -1.40136f},
+    {139.9446f, -396.7277f, 121.9753f, -1.428414f},
+    {149.3754f, -395.7497f, 121.9753f, -1.714769f},
+};
+
 // Stadium event description
 static const uint32 aStadiumEventNpcs[MAX_STADIUM_WAVES][5] =
 {
@@ -162,6 +201,7 @@ class instance_blackrock_spire : public ScriptedInstance, private DialogueHelper
         GuidList m_lRoomEventMobGUIDList;
         GuidList m_lIncarceratorGUIDList;
         GuidList m_lEmberseerRunesGUIDList;
+        GuidList m_lStadiumSpectatorsGUIDList;
 };
 
 #endif
