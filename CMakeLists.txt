@@ -184,21 +184,6 @@ if(NOT BUILD_CORE AND NOT BUILD_EXTRACTOR AND NOT BUILD_VMAP_EXTRACTOR AND NOT B
   message(FATAL_ERROR "You must select something to build!")
 endif()
 
-# Generate revision-extractor
-set(GENREV_SRC
-  src/tools/genrevision/genrevision.cpp
-)
-
-add_executable(genrev
-  ${GENREV_SRC}
-)
-
-add_custom_target("revision.h" ALL
-  COMMAND genrev ${CMAKE_SOURCE_DIR}
-  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-  DEPENDS genrev
-)
-
 if(WIN32)
   install(
     FILES
