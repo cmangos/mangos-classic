@@ -94,5 +94,5 @@ void WorldSession::SendAttackStop(Unit const* enemy)
     data << GetPlayer()->GetPackGUID();
     data << (enemy ? enemy->GetPackGUID() : PackedGuid());  // must be packed guid
     data << uint32(0);                                      // unk, can be 1 also
-    SendPacket(&data);
+    SendPacket(data);
 }

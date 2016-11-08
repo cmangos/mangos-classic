@@ -351,7 +351,7 @@ Map::Add(T* obj)
     obj->SetItsNewObject(false);
 }
 
-void Map::MessageBroadcast(Player const* player, WorldPacket* msg, bool to_self)
+void Map::MessageBroadcast(Player const* player, WorldPacket const& msg, bool to_self)
 {
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
 
@@ -372,7 +372,7 @@ void Map::MessageBroadcast(Player const* player, WorldPacket* msg, bool to_self)
     cell.Visit(p, message, *this, *player, GetVisibilityDistance());
 }
 
-void Map::MessageBroadcast(WorldObject const* obj, WorldPacket* msg)
+void Map::MessageBroadcast(WorldObject const* obj, WorldPacket const& msg)
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
 
@@ -395,7 +395,7 @@ void Map::MessageBroadcast(WorldObject const* obj, WorldPacket* msg)
     cell.Visit(p, message, *this, *obj, GetVisibilityDistance());
 }
 
-void Map::MessageDistBroadcast(Player const* player, WorldPacket* msg, float dist, bool to_self, bool own_team_only)
+void Map::MessageDistBroadcast(Player const* player, WorldPacket const& msg, float dist, bool to_self, bool own_team_only)
 {
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
 
@@ -416,7 +416,7 @@ void Map::MessageDistBroadcast(Player const* player, WorldPacket* msg, float dis
     cell.Visit(p, message, *this, *player, dist);
 }
 
-void Map::MessageDistBroadcast(WorldObject const* obj, WorldPacket* msg, float dist)
+void Map::MessageDistBroadcast(WorldObject const* obj, WorldPacket const& msg, float dist)
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
 
@@ -900,8 +900,8 @@ void Map::SendInitSelf(Player* player)
     }
 
     WorldPacket packet;
-    data.BuildPacket(&packet, hasTransport);
-    player->GetSession()->SendPacket(&packet);
+    data.BuildPacket(packet, hasTransport);
+    player->GetSession()->SendPacket(packet);
 }
 
 void Map::SendInitTransports(Player* player)
@@ -930,8 +930,8 @@ void Map::SendInitTransports(Player* player)
     }
 
     WorldPacket packet;
-    transData.BuildPacket(&packet, hasTransport);
-    player->GetSession()->SendPacket(&packet);
+    transData.BuildPacket(packet, hasTransport);
+    player->GetSession()->SendPacket(packet);
 }
 
 void Map::SendRemoveTransports(Player* player)
@@ -953,8 +953,8 @@ void Map::SendRemoveTransports(Player* player)
             (*i)->BuildOutOfRangeUpdateBlock(&transData);
 
     WorldPacket packet;
-    transData.BuildPacket(&packet);
-    player->GetSession()->SendPacket(&packet);
+    transData.BuildPacket(packet);
+    player->GetSession()->SendPacket(packet);
 }
 
 inline void Map::setNGrid(NGridType* grid, uint32 x, uint32 y)
@@ -1026,13 +1026,13 @@ uint32 Map::GetPlayersCountExceptGMs() const
     return count;
 }
 
-void Map::SendToPlayers(WorldPacket const* data) const
+void Map::SendToPlayers(WorldPacket const& data) const
 {
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
         itr->getSource()->GetSession()->SendPacket(data);
 }
 
-bool Map::SendToPlayersInZone(WorldPacket const* data, uint32 zoneId) const
+bool Map::SendToPlayersInZone(WorldPacket const& data, uint32 zoneId) const
 {
     bool foundPlayer = false;
     for (MapRefManager::const_iterator itr = m_mapRefManager.begin(); itr != m_mapRefManager.end(); ++itr)
@@ -1367,7 +1367,7 @@ bool DungeonMap::Add(Player* player)
                 {
                     WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
                     data << uint32(0);
-                    player->GetSession()->SendPacket(&data);
+                    player->GetSession()->SendPacket(data);
                     player->BindToInstance(GetPersistanceState(), true);
                 }
             }
@@ -1474,7 +1474,7 @@ void DungeonMap::PermBindAllPlayers(Player* player)
             plr->BindToInstance(GetPersistanceState(), true);
             WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
             data << uint32(0);
-            plr->GetSession()->SendPacket(&data);
+            plr->GetSession()->SendPacket(data);
         }
 
         // if the leader is not in the instance the group will not get a perm bind
@@ -1846,8 +1846,8 @@ void Map::SendObjectUpdates()
     WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
     for (UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
     {
-        iter->second.BuildPacket(&packet);
-        iter->first->GetSession()->SendPacket(&packet);
+        iter->second.BuildPacket(packet);
+        iter->first->GetSession()->SendPacket(packet);
         packet.clear();                                     // clean the string
     }
 }
@@ -1968,7 +1968,7 @@ void Map::PlayDirectSoundToMap(uint32 soundId, uint32 zoneId /*=0*/) const
     Map::PlayerList const& pList = GetPlayers();
     for (PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
         if (!zoneId || itr->getSource()->GetZoneId() == zoneId)
-            itr->getSource()->SendDirectMessage(&data);
+            itr->getSource()->SendDirectMessage(data);
 }
 
 /**

@@ -434,7 +434,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket &recvPacket)
     sWorld.AddSession(m_session);
 
     // Create and send the Addon packet
-    if (sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked))
+    if (sAddOnHandler.BuildAddonPacket(recvPacket, SendAddonPacked))
         SendPacket(SendAddonPacked);
 
     return true;
