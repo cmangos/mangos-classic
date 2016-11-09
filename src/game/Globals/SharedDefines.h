@@ -348,7 +348,7 @@ enum SpellAttributesEx2
     SPELL_ATTR_EX2_UNK27                       = 0x08000000,// 27
     SPELL_ATTR_EX2_UNK28                       = 0x10000000,// 28 no breaks stealth if it fails??
     SPELL_ATTR_EX2_CANT_CRIT                   = 0x20000000,// 29 Spell can't crit
-    SPELL_ATTR_EX2_UNK30                       = 0x40000000,// 30
+    SPELL_ATTR_EX2_TRIGGERED_CAN_TRIGGER_PROC  = 0x40000000,// 30
     SPELL_ATTR_EX2_FOOD_BUFF                   = 0x80000000,// 31 Food or Drink Buff (like Well Fed)
 };
 
