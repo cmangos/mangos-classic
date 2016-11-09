@@ -16,10 +16,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-## magic to include revision data in SD2 version string
-# revision.h: FORCE
-#   $(top_builddir)/src/tools/genrevision/genrevision $(srcdir)
-
 file(GLOB_RECURSE mangosscript_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.h)
 
 source_group("Other"

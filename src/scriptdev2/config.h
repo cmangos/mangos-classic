@@ -33,7 +33,7 @@
 #endif
 
 #ifndef _SD2VERSION
-   #define _SD2VERSION "Revision [" SD2_REVISION_NR "] (" REVISION_ID ") " REVISION_DATE " " REVISION_TIME
+   #define _SD2VERSION "Revision [" SD2_REVISION_NR "] (" REVISION ")"
 #endif
 
 #if PLATFORM == PLATFORM_WINDOWS

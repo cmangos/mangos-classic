@@ -176,8 +176,6 @@ else()
   include_directories(${MYSQL_INCLUDE_DIR})
 endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/SystemConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h)
-
 add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
 )
@@ -185,6 +183,3 @@ add_library(${LIBRARY_NAME} STATIC
 if(POSTGRESQL)
   target_link_libraries(${LIBRARY_NAME} ${PostgreSQL_LIBRARIES})
 endif()
-
-add_dependencies(${LIBRARY_NAME} revision.h)
-

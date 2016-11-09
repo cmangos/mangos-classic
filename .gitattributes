@@ -5,6 +5,7 @@
 
 src/shared/revision_nr.h eol=lf
 src/shared/revision_sql.h eol=lf
+src/shared/revision.h ident
 
 # Whitespace rules
 # strict (no trailing, no tabs)
