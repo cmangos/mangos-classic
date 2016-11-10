@@ -37,7 +37,7 @@ class HmacHash
         void Initialize();
         void Finalize();
         uint8* GetDigest() { return m_digest; };
-        int GetLength() { return SHA_DIGEST_LENGTH; };
+        static int GetLength() { return SHA_DIGEST_LENGTH; };
     private:
         HMAC_CTX m_ctx;
         uint8 m_key[SEED_KEY_SIZE];

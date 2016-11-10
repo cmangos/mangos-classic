@@ -30,7 +30,7 @@ class MANGOS_DLL_SPEC FleeingMovementGenerator
         FleeingMovementGenerator(ObjectGuid fright) : i_frightGuid(fright), i_nextCheckTime(0) {}
 
         void Initialize(T&);
-        void Finalize(T&);
+        void Finalize(T&) const;
         void Interrupt(T&);
         void Reset(T&);
         bool Update(T&, const uint32&);

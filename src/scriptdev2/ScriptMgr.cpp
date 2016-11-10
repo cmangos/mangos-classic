@@ -361,7 +361,7 @@ bool QuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
 }
 
 MANGOS_DLL_EXPORT
-uint32 GetNPCDialogStatus(Player* pPlayer, Creature* pCreature)
+uint32 GetNPCDialogStatus(const Player* pPlayer, const Creature* pCreature)
 {
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
 
@@ -374,7 +374,7 @@ uint32 GetNPCDialogStatus(Player* pPlayer, Creature* pCreature)
 }
 
 MANGOS_DLL_EXPORT
-uint32 GetGODialogStatus(Player* pPlayer, GameObject* pGo)
+uint32 GetGODialogStatus(const Player* pPlayer, const GameObject* pGo)
 {
     Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
 

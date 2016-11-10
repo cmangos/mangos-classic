@@ -76,15 +76,15 @@ class BigNumber
         BigNumber ModExp(const BigNumber& bn1, const BigNumber& bn2);
         BigNumber Exp(const BigNumber&);
 
-        int GetNumBytes(void);
+        int GetNumBytes(void) const;
 
         struct bignum_st* BN() { return _bn; }
 
-        uint32 AsDword();
+        uint32 AsDword() const;
         uint8* AsByteArray(int minSize = 0);
 
-        const char* AsHexStr();
-        const char* AsDecStr();
+        const char* AsHexStr() const;
+        const char* AsDecStr() const;
 
     private:
         struct bignum_st* _bn;

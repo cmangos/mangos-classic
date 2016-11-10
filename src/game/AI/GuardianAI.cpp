@@ -105,7 +105,6 @@ bool GuardianAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvok
         }
         default:
             return CreatureEventAI::ProcessEvent(pHolder, pActionInvoker, pAIEventSender);
-            break;
     }
 
     // Disable non-repeatable events
@@ -201,7 +200,7 @@ void GuardianAI::EnterEvadeMode()
     }
 }
 
-Unit* GuardianAI::DoSelectLowestHpFriendly(float range, uint32 MinHPDiff, bool onlyInCombat)
+Unit* GuardianAI::DoSelectLowestHpFriendly(float range, uint32 MinHPDiff, bool onlyInCombat) const
 {
     Unit* owner = m_creature->GetOwner();
 

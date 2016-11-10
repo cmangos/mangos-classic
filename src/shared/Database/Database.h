@@ -126,7 +126,7 @@ class MANGOS_DLL_SPEC Database
         QueryResult* PQuery(const char* format, ...) ATTR_PRINTF(2, 3);
         QueryNamedResult* PQueryNamed(const char* format, ...) ATTR_PRINTF(2, 3);
 
-        inline bool DirectExecute(const char* sql)
+        bool DirectExecute(const char* sql) const
         {
             if (!m_pAsyncConn)
                 return false;
@@ -210,7 +210,7 @@ class MANGOS_DLL_SPEC Database
         void ProcessResultQueue();
 
         bool CheckRequiredField(char const* table_name, char const* required_name);
-        uint32 GetPingIntervall() { return m_pingIntervallms; }
+        uint32 GetPingIntervall() const { return m_pingIntervallms; }
 
         // function to ping database connections
         void Ping();

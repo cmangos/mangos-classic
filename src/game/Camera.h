@@ -37,8 +37,8 @@ class MANGOS_DLL_SPEC Camera
         explicit Camera(Player* pl);
         ~Camera();
 
-        WorldObject* GetBody() { return m_source;}
-        Player* GetOwner() { return &m_owner;}
+        WorldObject* GetBody() const { return m_source;}
+        Player* GetOwner() const { return &m_owner;}
 
         // set camera's view to any worldobject
         // Note: this worldobject must be in same map, in same phase with camera's owner(player)
@@ -50,7 +50,7 @@ class MANGOS_DLL_SPEC Camera
 
         template<class T>
         void UpdateVisibilityOf(T* obj, UpdateData& d, std::set<WorldObject*>& vis);
-        void UpdateVisibilityOf(WorldObject* obj);
+        void UpdateVisibilityOf(WorldObject* obj) const;
 
         void ReceivePacket(WorldPacket& data);
 

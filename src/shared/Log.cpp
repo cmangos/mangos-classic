@@ -323,7 +323,7 @@ void Log::outTimestamp(FILE* file)
     fprintf(file, "%-4d-%02d-%02d %02d:%02d:%02d ", aTm->tm_year + 1900, aTm->tm_mon + 1, aTm->tm_mday, aTm->tm_hour, aTm->tm_min, aTm->tm_sec);
 }
 
-void Log::outTime()
+void Log::outTime() const
 {
     time_t t = time(nullptr);
     tm* aTm = localtime(&t);

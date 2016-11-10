@@ -78,7 +78,7 @@ namespace Movement
     {
         FallInitializer(float _start_elevation) : start_elevation(_start_elevation) {}
         float start_elevation;
-        inline int32 operator()(Spline<int32>& s, int32 i)
+        int32 operator()(Spline<int32>& s, int32 i)
         {
             return Movement::computeFallTime(start_elevation - s.getPoint(i + 1).z, false) * 1000.f;
         }

@@ -35,7 +35,7 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
         explicit HostileRefManager(Unit* pOwner);
         ~HostileRefManager();
 
-        Unit* getOwner() { return iOwner; }
+        Unit* getOwner() const { return iOwner; }
 
         // send threat to all my hateres for the pVictim
         // The pVictim is hated than by them as well

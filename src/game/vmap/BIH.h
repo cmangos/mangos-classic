@@ -116,7 +116,7 @@ class BIH
             delete[] dat.primBound;
             delete[] dat.indices;
         }
-        uint32 primCount() { return objects.size(); }
+        size_t primCount() const { return objects.size(); }
 
         template<typename RayCallback>
         void intersectRay(const Ray& r, RayCallback& intersectCallback, float& maxDist, bool stopAtFirst = false) const
@@ -397,7 +397,7 @@ class BIH
 
         void buildHierarchy(std::vector<uint32>& tempTree, buildData& dat, BuildStats& stats);
 
-        void createNode(std::vector<uint32>& tempTree, int nodeIndex, uint32 left, uint32 right)
+        void createNode(std::vector<uint32>& tempTree, int nodeIndex, uint32 left, uint32 right) const
         {
             // write leaf node
             tempTree[nodeIndex + 0] = (3 << 30) | left;

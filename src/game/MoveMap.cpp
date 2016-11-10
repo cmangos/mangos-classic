@@ -178,7 +178,7 @@ namespace MMAP
         return true;
     }
 
-    uint32 MMapManager::packTileID(int32 x, int32 y)
+    uint32 MMapManager::packTileID(int32 x, int32 y) const
     {
         return uint32(x << 16 | y);
     }
