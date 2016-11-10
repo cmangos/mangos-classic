@@ -33,12 +33,6 @@
 
 extern DatabaseType LoginDatabase;
 
-enum eStatus
-{
-    STATUS_CONNECTED = 0,
-    STATUS_AUTHED
-};
-
 enum AccountFlags
 {
     ACCOUNT_FLAG_GM         = 0x00000001,
@@ -161,7 +155,7 @@ typedef struct AuthHandler
 
 /// Constructor - set the N and g values for SRP6
 AuthSocket::AuthSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
-    : Socket(service, closeHandler), _authed(false), _build(0), _accountSecurityLevel(SEC_PLAYER)
+    : Socket(service, closeHandler), _status(STATUS_CHALLENGE), _build(0), _accountSecurityLevel(SEC_PLAYER)
 {
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
@@ -173,14 +167,14 @@ bool AuthSocket::ProcessIncomingData()
     // benchmarking has demonstrated that this lookup method is faster than std::map
     const static AuthHandler table[] =
     {
-        { CMD_AUTH_LOGON_CHALLENGE,     STATUS_CONNECTED, &AuthSocket::_HandleLogonChallenge        },
-        { CMD_AUTH_LOGON_PROOF,         STATUS_CONNECTED, &AuthSocket::_HandleLogonProof            },
-        { CMD_AUTH_RECONNECT_CHALLENGE, STATUS_CONNECTED, &AuthSocket::_HandleReconnectChallenge    },
-        { CMD_AUTH_RECONNECT_PROOF,     STATUS_CONNECTED, &AuthSocket::_HandleReconnectProof        },
-        { CMD_REALM_LIST,               STATUS_AUTHED,    &AuthSocket::_HandleRealmList             },
-        { CMD_XFER_ACCEPT,              STATUS_CONNECTED, &AuthSocket::_HandleXferAccept            },
-        { CMD_XFER_RESUME,              STATUS_CONNECTED, &AuthSocket::_HandleXferResume            },
-        { CMD_XFER_CANCEL,              STATUS_CONNECTED, &AuthSocket::_HandleXferCancel            }
+        { CMD_AUTH_LOGON_CHALLENGE,     STATUS_CHALLENGE,   &AuthSocket::_HandleLogonChallenge      },
+        { CMD_AUTH_LOGON_PROOF,         STATUS_LOGON_PROOF, &AuthSocket::_HandleLogonProof          },
+        { CMD_AUTH_RECONNECT_CHALLENGE, STATUS_CHALLENGE,   &AuthSocket::_HandleReconnectChallenge  },
+        { CMD_AUTH_RECONNECT_PROOF,     STATUS_RECON_PROOF, &AuthSocket::_HandleReconnectProof      },
+        { CMD_REALM_LIST,               STATUS_AUTHED,      &AuthSocket::_HandleRealmList           },
+        { CMD_XFER_ACCEPT,              STATUS_PATCH,       &AuthSocket::_HandleXferAccept          },
+        { CMD_XFER_RESUME,              STATUS_PATCH,       &AuthSocket::_HandleXferResume          },
+        { CMD_XFER_CANCEL,              STATUS_PATCH,       &AuthSocket::_HandleXferCancel          }
     };
 
     const int tableLength = sizeof(table) / sizeof(AuthHandler);
@@ -199,7 +193,9 @@ bool AuthSocket::ProcessIncomingData()
                 continue;
 
             // unauthorized
-            if (!(table[i].status == STATUS_CONNECTED || (_authed && table[i].status == STATUS_AUTHED)))
+            DEBUG_LOG("[Auth] Status %u, table status %u", _status, table[i].status);
+
+            if (table[i].status != _status)
             {
                 DEBUG_LOG("[Auth] Received unauthorized command %u length %u", cmd, ReadLengthRemaining());
                 return false;
@@ -320,6 +316,9 @@ bool AuthSocket::_HandleLogonChallenge()
 
     if ((remaining < sizeof(sAuthLogonChallenge_C) - buf.size()) || (ReadLengthRemaining() < remaining))
         return false;
+
+    ///- Session is closed unless overriden
+    _status = STATUS_CLOSED;
 
     // No big fear of memory outage (size is int16, i.e. < 65536)
     buf.resize(remaining + buf.size() + 1);
@@ -489,6 +488,9 @@ bool AuthSocket::_HandleLogonChallenge()
                         _localizationName[i] = ch->country[4 - i - 1];
 
                     BASIC_LOG("[AuthChallenge] account %s is using '%c%c%c%c' locale (%u)", _login.c_str(), ch->country[3], ch->country[2], ch->country[1], ch->country[0], GetLocaleByName(_localizationName));
+
+                    ///- All good, await client's proof
+                    _status = STATUS_LOGON_PROOF;
                 }
             }
             delete result;
@@ -510,6 +512,9 @@ bool AuthSocket::_HandleLogonProof()
     sAuthLogonProof_C lp;
     if (!Read((char*)&lp, sizeof(sAuthLogonProof_C)))
         return false;
+
+    ///- Session is closed unless overriden
+    _status = STATUS_CLOSED;
 
     /// <ul><li> If the client has no valid version
     if (!FindBuildInfo(_build))
@@ -618,8 +623,8 @@ bool AuthSocket::_HandleLogonProof()
 
         SendProof(sha);
 
-        ///- Set _authed to true!
-        _authed = true;
+        ///- Set _status to authed!
+        _status = STATUS_AUTHED;
     }
     else
     {
@@ -699,6 +704,9 @@ bool AuthSocket::_HandleReconnectChallenge()
     if ((remaining < sizeof(sAuthLogonChallenge_C) - buf.size()) || (ReadLengthRemaining() < remaining))
         return false;
 
+    ///- Session is closed unless overriden
+    _status = STATUS_CLOSED;
+
     // No big fear of memory outage (size is int16, i.e. < 65536)
     buf.resize(remaining + buf.size() + 1);
     buf[buf.size() - 1] = 0;
@@ -731,6 +739,9 @@ bool AuthSocket::_HandleReconnectChallenge()
     K.SetHexStr(fields[0].GetString());
     delete result;
 
+    ///- All good, await client's proof
+    _status = STATUS_RECON_PROOF;
+
     ///- Sending response
     ByteBuffer pkt;
     pkt << (uint8)  CMD_AUTH_RECONNECT_CHALLENGE;
@@ -750,6 +761,9 @@ bool AuthSocket::_HandleReconnectProof()
     sAuthReconnectProof_C lp;
     if (!Read((char*)&lp, sizeof(sAuthReconnectProof_C)))
         return false;
+
+    ///- Session is closed unless overriden
+    _status = STATUS_CLOSED;
 
     if (_login.empty() || !_reconnectProof.GetNumBytes() || !K.GetNumBytes())
         return false;
@@ -772,8 +786,8 @@ bool AuthSocket::_HandleReconnectProof()
         pkt << (uint16) 0x00;                               // 2 bytes zeros
         Write((const char *)pkt.contents(), pkt.size());
 
-        ///- Set _authed to true!
-        _authed = true;
+        ///- Set _status to authed!
+        _status = STATUS_AUTHED;
 
         return true;
     }
