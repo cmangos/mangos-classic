@@ -370,7 +370,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_DONT_DISPLAY_CHANNEL_BAR    = 0x00002000,// 13
     SPELL_ATTR_EX3_IS_HONORLESS_TARGET         = 0x00004000,// 14 "Honorless Target" only this spells have this flag
     SPELL_ATTR_EX3_UNK15                       = 0x00008000,// 15 Auto Shoot, Shoot, Throw,  - this is autoshot flag
-    SPELL_ATTR_EX3_UNK16                       = 0x00010000,// 16 no triggers effects that trigger on casting a spell??
+    SPELL_ATTR_EX3_CANT_TRIGGER_PROC           = 0x00010000,// 16 confirmed by patchnotes
     SPELL_ATTR_EX3_NO_INITIAL_AGGRO            = 0x00020000,// 17 Causes no aggro if not missed
     SPELL_ATTR_EX3_CANT_MISS                   = 0x00040000,// 18 Spell should always hit its target 
     SPELL_ATTR_EX3_UNK19                       = 0x00080000,// 19
