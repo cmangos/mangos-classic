@@ -608,7 +608,7 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
     }
 
     data.put<uint8>(0, mailsCount);                         // set real send mails to client
-    SendPacket(&data);
+    SendPacket(data);
 
     // recalculate m_nextMailDelivereTime and unReadMails
     _player->UpdateNextMailTimeAndUnreads();
@@ -635,7 +635,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket& recv_data)
     WorldPacket data(SMSG_ITEM_TEXT_QUERY_RESPONSE, (4 + 10)); // guess size
     data << itemTextId;
     data << sObjectMgr.GetItemText(itemTextId);
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 /**
@@ -751,7 +751,7 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket& /**recv_data*/)
         data << uint32(0xC7A8C000);
         data << uint32(0x00000000);
     }
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 /*! @} */

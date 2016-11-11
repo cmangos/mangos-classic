@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 
         if (vm.count("version"))
         {
-            std::cout << _FULLVERSION << std::endl;
+            std::cout << _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID) << std::endl;
             std::cout << "Boost version " << (BOOST_VERSION / 10000) << "." << ((BOOST_VERSION / 100) % 1000) << "." << (BOOST_VERSION % 100) << std::endl;
             return 0;
         }
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
     }
 #endif
 
-    sLog.outString("%s [world-daemon]", _FULLVERSION);
+    sLog.outString("%s [world-daemon]", _FULLVERSION(REVISION_DATE, REVISION_TIME, REVISION_ID));
     sLog.outString("<Ctrl-C> to stop.");
     sLog.outString("\n\n"
                    "       _____     __  __       _   _  _____  ____   _____ \n"

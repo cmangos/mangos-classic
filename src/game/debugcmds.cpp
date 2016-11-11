@@ -58,7 +58,7 @@ bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
     if (failarg2)
         data << uint32(failarg2);
 
-    m_session->SendPacket(&data);
+    m_session->SendPacket(data);
 
     return true;
 }
@@ -192,7 +192,7 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
     DEBUG_LOG("Sending opcode %u, %s", data.GetOpcode(), data.GetOpcodeName());
 
     data.hexlike();
-    ((Player*)unit)->GetSession()->SendPacket(&data);
+    ((Player*)unit)->GetSession()->SendPacket(data);
 
     PSendSysMessage(LANG_COMMAND_OPCODESENT, data.GetOpcode(), unit->GetName());
 
@@ -279,7 +279,7 @@ bool ChatHandler::HandleDebugSendChannelNotifyCommand(char* args)
     data << name;                                           // channel name
     data << uint32(0);
     data << uint32(0);
-    m_session->SendPacket(&data);
+    m_session->SendPacket(data);
     return true;
 }
 
@@ -294,7 +294,7 @@ bool ChatHandler::HandleDebugSendChatMsgCommand(char* args)
 
     WorldPacket data;
     ChatHandler::BuildChatPacket(data, ChatMsg(type), msg, LANG_UNIVERSAL, CHAT_TAG_NONE, m_session->GetPlayer()->GetObjectGuid(), m_session->GetPlayerName());
-    m_session->SendPacket(&data);
+    m_session->SendPacket(data);
     return true;
 }
 
@@ -1101,7 +1101,7 @@ bool ChatHandler::HandleDebugSpellModsCommand(char* args)
     data << uint8(effidx);
     data << uint8(spellmodop);
     data << int32(value);
-    chr->GetSession()->SendPacket(&data);
+    chr->GetSession()->SendPacket(data);
 
     return true;
 }

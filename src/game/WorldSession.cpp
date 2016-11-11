@@ -60,9 +60,9 @@ static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& o
 }
 
 
-bool MapSessionFilter::Process(WorldPacket* packet)
+bool MapSessionFilter::Process(WorldPacket const& packet) const
 {
-    OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+    OpcodeHandler const& opHandle = opcodeTable[packet.GetOpcode()];
     if (opHandle.packetProcessing == PROCESS_INPLACE)
         return true;
 
@@ -72,9 +72,9 @@ bool MapSessionFilter::Process(WorldPacket* packet)
 
 // we should process ALL packets when player is not in world/logged in
 // OR packet handler is not thread-safe!
-bool WorldSessionFilter::Process(WorldPacket* packet)
+bool WorldSessionFilter::Process(WorldPacket const& packet) const
 {
-    OpcodeHandler const& opHandle = opcodeTable[packet->GetOpcode()];
+    OpcodeHandler const& opHandle = opcodeTable[packet.GetOpcode()];
     // check if packet handler is supposed to be safe
     if (opHandle.packetProcessing == PROCESS_INPLACE)
         return true;
@@ -116,7 +116,7 @@ char const* WorldSession::GetPlayerName() const
 }
 
 /// Send a packet to the client
-void WorldSession::SendPacket(WorldPacket const* packet)
+void WorldSession::SendPacket(WorldPacket const& packet)
 {
     if (m_Socket->IsClosed())
         return;
@@ -138,10 +138,10 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     if ((cur_time - lastTime) < 60)
     {
         sendPacketCount += 1;
-        sendPacketBytes += packet->size();
+        sendPacketBytes += packet.size();
 
         sendLastPacketCount += 1;
-        sendLastPacketBytes += packet->size();
+        sendLastPacketBytes += packet.size();
     }
     else
     {
@@ -152,12 +152,12 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 
         lastTime = cur_time;
         sendLastPacketCount = 1;
-        sendLastPacketBytes = packet->wpos();               // wpos is real written size
+        sendLastPacketBytes = packet.wpos();               // wpos is real written size
     }
 
 #endif                                                  // !MANGOS_DEBUG
 
-    m_Socket->SendPacket(*packet);
+    m_Socket->SendPacket(packet);
 }
 
 /// Add an incoming packet to the queue
@@ -473,7 +473,7 @@ void WorldSession::LogoutPlayer(bool save)
 
         ///- Send the 'logout complete' packet to the client
         WorldPacket data(SMSG_LOGOUT_COMPLETE, 0);
-        SendPacket(&data);
+        SendPacket(data);
 
         ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
         // No SQL injection as AccountId is uint32
@@ -516,7 +516,7 @@ void WorldSession::SendAreaTriggerMessage(const char* Text, ...)
     WorldPacket data(SMSG_AREA_TRIGGER_MESSAGE, 4 + length);
     data << length;
     data << szStr;
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::SendNotification(const char* format, ...)
@@ -532,7 +532,7 @@ void WorldSession::SendNotification(const char* format, ...)
 
         WorldPacket data(SMSG_NOTIFICATION, (strlen(szStr) + 1));
         data << szStr;
-        SendPacket(&data);
+        SendPacket(data);
     }
 }
 
@@ -550,7 +550,7 @@ void WorldSession::SendNotification(int32 string_id, ...)
 
         WorldPacket data(SMSG_NOTIFICATION, (strlen(szStr) + 1));
         data << szStr;
-        SendPacket(&data);
+        SendPacket(data);
     }
 }
 
@@ -593,14 +593,14 @@ void WorldSession::SendAuthWaitQue(uint32 position)
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
         packet << uint8(AUTH_OK);
-        SendPacket(&packet);
+        SendPacket(packet);
     }
     else
     {
         WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4);
         packet << uint8(AUTH_WAIT_QUEUE);
         packet << uint32(position);
-        SendPacket(&packet);
+        SendPacket(packet);
     }
 }
 
@@ -636,7 +636,7 @@ void WorldSession::SendTutorialsData()
     WorldPacket data(SMSG_TUTORIAL_FLAGS, 4 * 8);
     for (uint32 i = 0; i < 8; ++i)
         data << m_Tutorials[i];
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::SaveTutorialsData()
@@ -682,7 +682,7 @@ void WorldSession::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg)
     data << uint32(mapid);
     data << uint8(reason);                                  // transfer abort reason
     data << uint8(0);                                       // arg. not used
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket &packet)
@@ -714,5 +714,5 @@ void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit)
     WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 8 + 4);        // visual effect on guid
     data << guid;
     data << spellArtKit;                                    // index from SpellVisualKit.dbc
-    SendPacket(&data);
+    SendPacket(data);
 }

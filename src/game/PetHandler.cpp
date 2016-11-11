@@ -406,7 +406,7 @@ void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber)
     data << name;
     data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));
 
-    _player->GetSession()->SendPacket(&data);
+    _player->GetSession()->SendPacket(data);
 }
 
 void WorldSession::HandlePetSetAction(WorldPacket& recv_data)
@@ -757,5 +757,5 @@ void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name)
     data << uint32(error);
     data << name;
     data << uint8(0);                                       // possible not exist in 1.12.*
-    SendPacket(&data);
+    SendPacket(data);
 }
