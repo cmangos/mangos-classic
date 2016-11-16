@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Anubrekhan
 SD%Complete: 95
-SDComment: Intro text usage is not very clear. Requires additional research.
+SDComment: Intro text needs to be used when door is opened before encounter
 SDCategory: Naxxramas
 EndScriptData */
 
@@ -26,14 +26,14 @@ EndScriptData */
 
 enum
 {
-    SAY_GREET                   = -1533000,
+    SAY_INTRO_1                 = -1533000,
+    SAY_INTRO_2                 = -1533004,
+    SAY_INTRO_3                 = -1533005,
+    SAY_INTRO_4                 = -1533006,
+    SAY_INTRO_5                 = -1533007,
     SAY_AGGRO1                  = -1533001,
     SAY_AGGRO2                  = -1533002,
     SAY_AGGRO3                  = -1533003,
-    SAY_TAUNT1                  = -1533004,
-    SAY_TAUNT2                  = -1533005,
-    SAY_TAUNT3                  = -1533006,
-    SAY_TAUNT4                  = -1533007,
     SAY_SLAY                    = -1533008,
 
     EMOTE_CRYPT_GUARD           = -1533153,
@@ -55,11 +55,11 @@ enum
 
 static const DialogueEntry aIntroDialogue[] =
 {
-    {SAY_GREET,   NPC_ANUB_REKHAN,  7000},
-    {SAY_TAUNT1,  NPC_ANUB_REKHAN,  13000},
-    {SAY_TAUNT2,  NPC_ANUB_REKHAN,  11000},
-    {SAY_TAUNT3,  NPC_ANUB_REKHAN,  10000},
-    {SAY_TAUNT4,  NPC_ANUB_REKHAN,  0},
+    {SAY_INTRO_1,  NPC_ANUB_REKHAN,  7000},
+    {SAY_INTRO_2,  NPC_ANUB_REKHAN,  13000},
+    {SAY_INTRO_3,  NPC_ANUB_REKHAN,  11000},
+    {SAY_INTRO_4,  NPC_ANUB_REKHAN,  10000},
+    {SAY_INTRO_5,  NPC_ANUB_REKHAN,  0},
     {0, 0, 0}
 };
 
