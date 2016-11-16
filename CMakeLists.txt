@@ -127,6 +127,16 @@ if(UNIX)
     find_package(MySQL REQUIRED)
   endif()
 
+  # If OpenSSL path isn't specified on mac we set the one that homebrew uses
+  # since that's what most people will be using.
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    if (NOT OPENSSL_ROOT_DIR)
+      set(OPENSSL_ROOT_DIR /usr/local/opt/openssl/)
+    endif()
+    if (NOT OPENSSL_INCLUDE_DIR)
+      set(OPENSSL_INCLUDE_DIR /usr/local/opt/openssl/include)
+    endif()
+  endif()
   find_package(OpenSSL REQUIRED)
   find_package(ZLIB REQUIRED)
 endif()

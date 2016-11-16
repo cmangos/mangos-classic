@@ -25,6 +25,14 @@ ADD_DEFINITIONS("-Wall")
 ADD_DEFINITIONS("-ggdb")
 ADD_DEFINITIONS("-O3")
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  add_definitions("-Dfopen64=fopen")
+  add_definitions("-Dfseeko64=fseeko")
+  add_definitions("-Dfseek64=fseek")
+  add_definitions("-Dftell64=ftell")
+  add_definitions("-Dftello64=ftello")
+endif()
+
 include_directories(../../dep/libmpq)
 
 add_subdirectory(vmapextract)
