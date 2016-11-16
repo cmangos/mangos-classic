@@ -1,21 +1,4 @@
-Skip to content
-This repository
-Search
-Pull requests
-Issues
-Gist
- @Qingle
- Unwatch 1
-  Star 0
-  Fork 219 Qingle/mangos-tbc
-forked from cmangos/mangos-tbc
- Code  Pull requests 0  Projects 0  Wiki  Pulse  Graphs  Settings
-Branch: NaxxUpdate Find file Copy pathmangos-tbc/src/scriptdev2/scripts/eastern_kingdoms/naxxramas/boss_razuvious.cpp
-f24bcc5  a minute ago
-@Qingle Qingle Razuvious Triumphant Shout fix
-2 contributors @Qingle @cyberium
-RawBlameHistory     
-162 lines (137 sloc)  4.75 KB
+ 162 lines (137 sloc)  4.75 KB
 /* This file is part of the ScriptDev2 Project. See AUTHORS file for Copyright information
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
