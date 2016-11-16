@@ -1,3 +1,21 @@
+Skip to content
+This repository
+Search
+Pull requests
+Issues
+Gist
+ @Qingle
+ Unwatch 1
+  Star 0
+  Fork 219 Qingle/mangos-tbc
+forked from cmangos/mangos-tbc
+ Code  Pull requests 0  Projects 0  Wiki  Pulse  Graphs  Settings
+Branch: NaxxUpdate Find file Copy pathmangos-tbc/src/scriptdev2/scripts/eastern_kingdoms/naxxramas/boss_razuvious.cpp
+f24bcc5  a minute ago
+@Qingle Qingle Razuvious Triumphant Shout fix
+2 contributors @Qingle @cyberium
+RawBlameHistory     
+162 lines (137 sloc)  4.75 KB
 /* This file is part of the ScriptDev2 Project. See AUTHORS file for Copyright information
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +34,7 @@
 
 /* ScriptData
 SDName: Boss_Razuvious
-SD%Complete: 85%
+SD%Complete: 90%
 SDComment: TODO: Timers and sounds need confirmation
 SDCategory: Naxxramas
 EndScriptData */
@@ -54,13 +72,11 @@ struct boss_razuviousAI : public ScriptedAI
 
     uint32 m_uiUnbalancingStrikeTimer;
     uint32 m_uiDisruptingShoutTimer;
-    uint32 m_uiCommandSoundTimer;
 
     void Reset() override
     {
         m_uiUnbalancingStrikeTimer = 30000;                 // 30 seconds
-        m_uiDisruptingShoutTimer   = 15000;                 // 15 seconds
-        m_uiCommandSoundTimer      = 40000;                 // 40 seconds
+        m_uiDisruptingShoutTimer   = 25000;                 // 25 seconds               
     }
 
     void KilledUnit(Unit* /*Victim*/) override
@@ -103,6 +119,22 @@ struct boss_razuviousAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
     }
+    
+    // For Triumphant Shout, should be used anytime Disrupting Shout is used.
+    // Should probably use a dummy for this.
+    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpellEntry) override
+    {
+        if(pSpellEntry->Id == SPELL_DISRUPTING_SHOUT)
+        {
+            switch(urand(0,3))
+            {
+                case 0: DoScriptText(SAY_COMMAND1, m_creature); break;
+                case 1: DoScriptText(SAY_COMMAND2, m_creature); break;
+                case 2: DoScriptText(SAY_COMMAND3, m_creature); break;
+                case 3: DoScriptText(SAY_COMMAND4, m_creature); break;
+            }
+        }
+    }
 
     void UpdateAI(const uint32 uiDiff) override
     {
@@ -127,22 +159,6 @@ struct boss_razuviousAI : public ScriptedAI
         else
             m_uiDisruptingShoutTimer -= uiDiff;
 
-        // Random say
-        if (m_uiCommandSoundTimer < uiDiff)
-        {
-            switch (urand(0, 3))
-            {
-                case 0: DoScriptText(SAY_COMMAND1, m_creature); break;
-                case 1: DoScriptText(SAY_COMMAND2, m_creature); break;
-                case 2: DoScriptText(SAY_COMMAND3, m_creature); break;
-                case 3: DoScriptText(SAY_COMMAND4, m_creature); break;
-            }
-
-            m_uiCommandSoundTimer = 40000;
-        }
-        else
-            m_uiCommandSoundTimer -= uiDiff;
-
         DoMeleeAttackIfReady();
     }
 };
@@ -161,3 +177,5 @@ void AddSC_boss_razuvious()
     pNewScript->GetAI = &GetAI_boss_razuvious;
     pNewScript->RegisterSelf();
 }
+Contact GitHub API Training Shop Blog About
+© 2016 GitHub, Inc. Terms Privacy Security Status Help
