@@ -159,5 +159,3 @@ void AddSC_boss_razuvious()
     pNewScript->GetAI = &GetAI_boss_razuvious;
     pNewScript->RegisterSelf();
 }
-Contact GitHub API Training Shop Blog About
-© 2016 GitHub, Inc. Terms Privacy Security Status Help
