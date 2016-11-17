@@ -43,7 +43,12 @@ add_library(vmaplib
     ../../src/game/vmap/ModelInstance.cpp
 )
 
-target_link_libraries(vmaplib g3dlite zlib)
+IF(APPLE)
+   FIND_LIBRARY(CORE_SERVICES CoreServices )
+   SET(EXTRA_LIBS ${CORE_SERVICES})
+ENDIF (APPLE)
+
+target_link_libraries(vmaplib g3dlite zlib ${EXTRA_LIBS})
 
 set(SOURCES
     ./src/IntermediateValues.cpp

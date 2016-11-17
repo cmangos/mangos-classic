@@ -38,7 +38,12 @@ add_library(vmap
     ../../src/game/vmap/ModelInstance.cpp
     )
 
-target_link_libraries(vmap g3dlite z)
+IF(APPLE)
+   FIND_LIBRARY(CORE_SERVICES CoreServices )
+   SET(EXTRA_LIBS ${CORE_SERVICES})
+ENDIF (APPLE)
+
+target_link_libraries(vmap g3dlite z ${EXTRA_LIBS})
 
 add_executable(${EXECUTABLE_NAME} vmap_assembler.cpp)
 target_link_libraries(${EXECUTABLE_NAME} vmap)
