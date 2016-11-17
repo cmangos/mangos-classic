@@ -25,7 +25,7 @@ ADD_DEFINITIONS("-Wall")
 ADD_DEFINITIONS("-ggdb")
 ADD_DEFINITIONS("-O3")
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (APPLE)
   add_definitions("-Dfopen64=fopen")
   add_definitions("-Dfseeko64=fseeko")
   add_definitions("-Dfseek64=fseek")

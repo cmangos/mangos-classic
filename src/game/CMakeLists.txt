@@ -19,6 +19,7 @@
 set(LIBRARY_NAME game)
 
 add_definitions(-DDT_POLYREF64)
+add_definitions(-D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0)
 
 # include external dependencies libs headers (warnings disabled)
 include_directories(SYSTEM

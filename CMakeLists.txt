@@ -129,7 +129,7 @@ if(UNIX)
 
   # If OpenSSL path isn't specified on mac we set the one that homebrew uses
   # since that's what most people will be using.
-  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  if (APPLE)
     if (NOT OPENSSL_ROOT_DIR)
       set(OPENSSL_ROOT_DIR /usr/local/opt/openssl/)
     endif()
