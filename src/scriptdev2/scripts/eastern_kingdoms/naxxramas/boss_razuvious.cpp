@@ -102,7 +102,7 @@ struct boss_razuviousAI : public ScriptedAI
             m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
     }
     
-    // For Triumphant Shout, should be used anytime Disrupting Shout is used.
+    // For Triumphant Shout, should be used anytime Disrupting Shout hits a target
     // Should probably use a dummy for this.
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpellEntry) override
     {
