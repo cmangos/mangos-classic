@@ -153,7 +153,7 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
             {
                 m_uiMarkCounter++;
                 
-                if (m_uiMarkCounter =< 100)
+                if (m_uiMarkCounter < 100)
                     m_uiMarkTimer = 12000;
                 else
                     m_uiMarkTimer = 1000;
@@ -166,10 +166,11 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VOID_ZONE) == CAST_OK)
             {
-                if (m_uiMarkCounter =< 100)
+                if (m_uiMarkCounter < 100)
                     m_uiVoidZoneTimer = 15000;
                 else
                     m_uiVoidZoneTimer = 1000;
+            }
         }
         else
             m_uiVoidZoneTimer -= uiDiff;
@@ -258,7 +259,7 @@ struct boss_alexandros_mograineAI : public ScriptedAI
             {
                 m_uiMarkCounter++;
                 
-                if (m_uiMarkCounter =< 100)
+                if (m_uiMarkCounter < 100)
                     m_uiMarkTimer = 12000;
                 else
                     m_uiMarkTimer = 1000;
@@ -271,7 +272,7 @@ struct boss_alexandros_mograineAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RIGHTEOUS_FIRE) == CAST_OK)
             {
-                if (m_uiMarkCounter =< 100)
+                if (m_uiMarkCounter < 100)
                     m_uiRighteousFireTimer = 15000;
                 else
                     m_uiRighteousFireTimer = 1000;
@@ -359,7 +360,7 @@ struct boss_thane_korthazzAI : public ScriptedAI
             {
                 m_uiMarkCounter++;
                 
-                if (m_uiMarkCounter =< 100)
+                if (m_uiMarkCounter < 100)
                     m_uiMarkTimer = 12000;
                 else
                     m_uiMarkTimer = 1000;
@@ -372,10 +373,11 @@ struct boss_thane_korthazzAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_METEOR) == CAST_OK)
             {
-                if (m_uiMarkCounter =< 100)
+                if (m_uiMarkCounter < 100)
                     m_uiMeteorTimer = 20000;
                 else
                     m_uiMeteorTimer = 1000;
+            }
         }
         else
             m_uiMeteorTimer -= uiDiff;
@@ -459,7 +461,7 @@ struct boss_sir_zeliekAI : public ScriptedAI
             {
                 m_uiMarkCounter++;
                 
-                if (m_uiMarkCounter =< 100)
+                if (m_uiMarkCounter < 100)
                     m_uiMarkTimer = 12000;
                 else
                     m_uiMarkTimer = 1000;
@@ -472,10 +474,11 @@ struct boss_sir_zeliekAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLY_WRATH) == CAST_OK)
             {
-                if (m_uiMarkCounter =< 100)
+                if (m_uiMarkCounter < 100)
                     m_uiHolyWrathTimer = 15000;
                 else
                     m_uiHolyWrathTimer = 1000;
+             }
         }
         else
             m_uiHolyWrathTimer -= uiDiff;
