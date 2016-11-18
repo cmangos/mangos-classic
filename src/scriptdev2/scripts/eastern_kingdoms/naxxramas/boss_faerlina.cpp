@@ -70,14 +70,9 @@ struct boss_faerlinaAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        switch (urand(0, 3))
-        {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
-            case 3: DoScriptText(SAY_AGGRO_4, m_creature); break;
-        }
 
+        DoScriptText(SAY_AGGRO_1, m_creature);
+        
         if (m_pInstance)
             m_pInstance->SetData(TYPE_FAERLINA, IN_PROGRESS);
     }
