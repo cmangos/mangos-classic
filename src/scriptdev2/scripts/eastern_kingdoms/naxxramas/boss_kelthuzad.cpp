@@ -106,6 +106,7 @@ struct boss_kelthuzadAI : public ScriptedAI
     uint32 m_uiPhase1Timer;
     uint32 m_uiSoldierTimer;
     uint32 m_uiBansheeTimer;
+    uint32 m_uiAbominationBaseTimer;
     uint32 m_uiAbominationTimer;
     uint8  m_uiPhase;
     uint32 m_uiSoldierCount;
