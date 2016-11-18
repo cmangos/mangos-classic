@@ -51,131 +51,6 @@ struct npc_lazy_peonAI : public ScriptedAI
     npc_lazy_peonAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         Reset();
-        //tree waypoint
-        //TODO do this via invisible creatures once they're added in the db (or actual waypoints)
-        switch (m_creature->GetGUIDLow())
-        {
-            case 6527:
-            {
-                m_fTreeX = -754.196;
-                m_fTreeY = -4141.18;
-                m_fTreeZ = 39.4156;
-                m_fTreeO = 1.54425;
-                break;
-            }
-            case 7373:
-            {
-                m_fTreeX = -775.806;
-                m_fTreeY = -4196.64;
-                m_fTreeZ = 44.5941;
-                m_fTreeO = 2.26289;
-                break;
-            }
-            case 6525:
-            {
-                m_fTreeX = -757.896;
-                m_fTreeY = -4324.19;
-                m_fTreeZ = 45.1184;
-                m_fTreeO = 4.3012;
-                break;
-            }
-            case 7374:
-            {
-                m_fTreeX = -622.255;
-                m_fTreeY = -4348.61;
-                m_fTreeZ = 41.0623;
-                m_fTreeO = 4.83115;
-                break;
-            }
-            case 6524:
-            {
-                m_fTreeX = -634.882;
-                m_fTreeY = -4480.31;
-                m_fTreeZ = 46.2619;
-                m_fTreeO = 4.71333;
-                break;
-            }
-            case 7376:
-            {
-                m_fTreeX = -498.072;
-                m_fTreeY = -4455.45;
-                m_fTreeZ = 51.0777;
-                m_fTreeO = 3.27999;
-                break;
-            }
-            case 3348:
-            {
-                m_fTreeX = -510.965;
-                m_fTreeY = -4372.57;
-                m_fTreeZ = 45.6692;
-                m_fTreeO = 0.480042;
-                break;
-            }
-            case 3346:
-            {
-                m_fTreeX = -334.424;
-                m_fTreeY = -4439.34;
-                m_fTreeZ = 54.6275;
-                m_fTreeO = 4.45416;
-                break;
-            }
-            case 3347:
-            {
-                m_fTreeX = -229.428;
-                m_fTreeY = -4449.48;
-                m_fTreeZ = 63.3728;
-                m_fTreeO = 0.016658;
-                break;
-            }
-            case 3345:
-            {
-                m_fTreeX = -225.614;
-                m_fTreeY = -4284.88;
-                m_fTreeZ = 65.0956;
-                m_fTreeO = 5.00395;
-                break;
-            }
-            case 7372:
-            {
-                m_fTreeX = -213.599;
-                m_fTreeY = -4220.75;
-                m_fTreeZ = 62.2392;
-                m_fTreeO = 1.93932;
-                break;
-            }
-            case 7375:
-            {
-                m_fTreeX = -265.354;
-                m_fTreeY = -4145.13;
-                m_fTreeZ = 55.767;
-                m_fTreeO = 5.78542;
-                break;
-            }
-            case 6523:
-            {
-                m_fTreeX = -320.191;
-                m_fTreeY = -4122.77;
-                m_fTreeZ = 51.3316;
-                m_fTreeO = 1.09659;
-                break;
-            }
-            case 6526:
-            {
-                m_fTreeX = -375.545;
-                m_fTreeY = -4018.32;
-                m_fTreeZ = 50.3465;
-                m_fTreeO = 2.86373;
-                break;
-            }
-            default:
-            {
-                //if there's no tree point, set it to current so the peon doesn't wander off
-                m_fTreeX = m_creature->GetPositionX();
-                m_fTreeY = m_creature->GetPositionY();
-                m_fTreeZ = m_creature->GetPositionZ();
-                m_fTreeO = m_creature->GetOrientation();
-            }
-        }
     }
 
     uint32 m_uiSleepTimer; //Time, until the npc goes to sleep
@@ -184,10 +59,6 @@ struct npc_lazy_peonAI : public ScriptedAI
     uint32 m_uiKneelTimer; //Time, delay kneeling to allow sound to finish playing
     uint32 m_uiGetUpTimer; //Time, npc stays at the pile so kneel animation can finish
     bool m_bIsAtPile;
-    float m_fTreeX;
-    float m_fTreeY;
-    float m_fTreeZ;
-    float m_fTreeO;
     float m_fSpawnO;
 
     void RestartWakeTimer() {
@@ -242,33 +113,36 @@ struct npc_lazy_peonAI : public ScriptedAI
 
     void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
     {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
-            return;
+        /*if (!uiPointId)
+            return;*/
 
-        switch (uiPointId)
+        if (uiMotionType == POINT_MOTION_TYPE && uiPointId)
         {
-            case 1: //lumber pile
+            switch (uiPointId)
             {
-                m_creature->SetWalk(true);
-                m_bIsAtPile = true;
-                break;
+                case 1: //lumber pile
+                {
+                    m_creature->SetWalk(true);
+                    m_bIsAtPile = true;
+                    break;
+                }
+                case 2: //spawn
+                {
+                    m_creature->SetFacingTo(m_fSpawnO);
+                    m_creature->GetMotionMaster()->MoveTargetedHome(); //hacky way of getting the peon to sleep
+                    m_creature->HandleEmote(EMOTE_STATE_NONE);
+                    RestartWakeTimer();
+                    break;
+                }
             }
-            case 2: //tree
-            {
-                m_creature->SetFacingTo(m_fTreeO);
-                m_creature->PlayDistanceSound(SOUND_PEON_WORK);
-                m_creature->HandleEmote(EMOTE_STATE_WORK_CHOPWOOD);
-                m_uiChopTimer = urand(25000, 30000); //timer duration guessed, true retail time unknown
-                break;
-            }
-            case 3: //spawn
-            {
-                m_creature->SetFacingTo(m_fSpawnO);
-                m_creature->GetMotionMaster()->MoveTargetedHome(); //hacky way of getting the peon to sleep
-                m_creature->HandleEmote(EMOTE_STATE_NONE);
-                RestartWakeTimer();
-                break;
-            }
+        }
+        else if (uiMotionType == WAYPOINT_MOTION_TYPE)
+        {
+            //tree
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->PlayDistanceSound(SOUND_PEON_WORK);
+            m_creature->HandleEmote(EMOTE_STATE_WORK_CHOPWOOD);
+            m_uiChopTimer = urand(25000, 30000); //timer duration guessed, true retail time unknown
         }
     }
 
@@ -279,7 +153,7 @@ struct npc_lazy_peonAI : public ScriptedAI
             if (m_uiGetUpTimer <= uiDiff)
             {
                 m_uiGetUpTimer = 0;
-                m_creature->GetMotionMaster()->MovePoint(2, m_fTreeX, m_fTreeY, m_fTreeZ);
+                m_creature->GetMotionMaster()->MoveWaypoint();
                 m_bIsAtPile = false;
             }
             else
@@ -321,7 +195,7 @@ struct npc_lazy_peonAI : public ScriptedAI
                 float fX, fY, fZ;
                 m_creature->GetRespawnCoord(fX, fY, fZ, &m_fSpawnO);
                 m_uiSleepTimer = 0;
-                m_creature->GetMotionMaster()->MovePoint(3, fX, fY, fZ);
+                m_creature->GetMotionMaster()->MovePoint(2, fX, fY, fZ);
                 m_bIsAtPile = false;
                 m_uiGetUpTimer = 0;
                 m_uiKneelTimer = 0;
