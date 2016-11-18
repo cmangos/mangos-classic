@@ -60,7 +60,6 @@ static const DialogueEntry aIntroDialogue[] =
     {SAY_INTRO_3,  NPC_ANUB_REKHAN,  11000},
     {SAY_INTRO_4,  NPC_ANUB_REKHAN,  10000},
     {SAY_INTRO_5,  NPC_ANUB_REKHAN,  0},
-    {0, 0, 0}
 };
 
 static const float aCryptGuardLoc[4] = {3333.5f, -3475.9f, 287.1f, 3.17f};
@@ -72,7 +71,7 @@ struct boss_anubrekhanAI : public ScriptedAI
     {
         m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
         m_introDialogue.InitializeDialogueHelper(m_pInstance);
-        m_bHasTaunted = false;
+        m_bHasDoneIntro = false;
         Reset();
 
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
@@ -84,7 +83,7 @@ struct boss_anubrekhanAI : public ScriptedAI
     uint32 m_uiImpaleTimer;
     uint32 m_uiLocustSwarmTimer;
     uint32 m_uiSummonTimer;
-    bool   m_bHasTaunted;
+    bool   m_bHasDoneIntro;
 
     void Reset() override
     {
@@ -98,9 +97,6 @@ struct boss_anubrekhanAI : public ScriptedAI
         // Force the player to spawn corpse scarabs via spell
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
             pVictim->CastSpell(pVictim, SPELL_SELF_SPAWN_5, true, nullptr, nullptr, m_creature->GetObjectGuid());
-
-        if (urand(0, 4))
-            return;
 
         DoScriptText(SAY_SLAY, m_creature);
     }
@@ -136,8 +132,8 @@ struct boss_anubrekhanAI : public ScriptedAI
     {
         if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 110.0f) && m_creature->IsWithinLOSInMap(pWho))
         {
-            m_introDialogue.StartNextDialogueText(SAY_GREET);
-            m_bHasTaunted = true;
+            m_introDialogue.StartNextDialogueText(SAY_INTRO_1);
+            m_bHasDoneIntro = true;
         }
 
         ScriptedAI::MoveInLineOfSight(pWho);
