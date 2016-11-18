@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Gluth
 SD%Complete: 99
-SDComment: TODO: Test facing back to victim on devour
+SDComment: TODO: Test encounter.
 SDCategory: Naxxramas
 EndScriptData */
 
@@ -152,7 +152,6 @@ struct boss_gluthAI : public ScriptedAI
                 if (pZombie->IsWithinDistInMap(m_creature, 15.0f))
                     m_creature->SetFacingToObject(pZombie);
                     m_creature->DealDamage(pZombie, pZombie->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
-                    m_creature->SetFacingToObject(m_creature->getVictim());
             }
         }
     }
