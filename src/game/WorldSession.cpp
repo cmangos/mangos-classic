@@ -100,7 +100,7 @@ WorldSession::~WorldSession()
 
     // marks this session as finalized in the socket which references (BUT DOES NOT OWN) it.
     // this lets the socket handling code know that the socket can be safely deleted
-    m_Socket->ClearSession();
+    m_Socket->FinalizeSession();
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
