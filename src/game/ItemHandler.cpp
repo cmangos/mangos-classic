@@ -362,7 +362,9 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
 
                 data << pProto->Spells[s].SpellId;
                 data << pProto->Spells[s].SpellTrigger;
-                data << uint32(-abs(pProto->Spells[s].SpellCharges));
+
+                // let the database control the sign here.  negative means that the item should be consumed once the charges are consumed.
+                data << pProto->Spells[s].SpellCharges;
 
                 if (db_data)
                 {

@@ -221,7 +221,7 @@ class AuctionBotSeller : public AuctionBotAgent
         void        LoadSellerValues(AHB_Seller_Config& config);
         uint32      SetStat(AHB_Seller_Config& config);
         bool        getRandomArray(AHB_Seller_Config& config, RandomArray& ra, const std::vector<std::vector<uint32> >& addedItem);
-        void        SetPricesOfItem(AHB_Seller_Config& config, uint32& buyp, uint32& bidp, uint32 stackcnt, ItemQualities itemQuality);
+        void        SetPricesOfItem(AHB_Seller_Config& config, uint32& buyp, uint32& bidp, ItemQualities itemQuality);
         void        LoadItemsQuantity(AHB_Seller_Config& config);
 };
 
@@ -1177,6 +1177,9 @@ bool AuctionBotSeller::Initialize()
                         continue;
                 break;
             }
+
+            default:
+                continue;
         }
 
         m_ItemPool[prototype->Quality][prototype->Class].push_back(itemID);
@@ -1468,16 +1471,13 @@ bool AuctionBotSeller::getRandomArray(AHB_Seller_Config& config, RandomArray& ra
 }
 
 // Set items price. All important value are passed by address.
-void AuctionBotSeller::SetPricesOfItem(AHB_Seller_Config& config, uint32& buyp, uint32& bidp, uint32 stackcnt, ItemQualities itemQuality)
+void AuctionBotSeller::SetPricesOfItem(AHB_Seller_Config& config, uint32& buyp, uint32& bidp, ItemQualities itemQuality)
 {
-    double temp_buyp = buyp * stackcnt *
-                       (itemQuality < MAX_AUCTION_QUALITY ? config.GetPriceRatioPerQuality(AuctionQuality(itemQuality)) : 1) ;
+    double temp_buyp = buyp * (itemQuality < MAX_AUCTION_QUALITY ? (config.GetPriceRatioPerQuality(AuctionQuality(itemQuality)) / 100) : 1);
 
     double randrange = temp_buyp * 0.4;
-    buyp = (urand(temp_buyp - randrange, temp_buyp + randrange) / 100) + 1;
-    double urandrange = buyp * 40;
-    double temp_bidp = buyp * 50;
-    bidp = (urand(temp_bidp - urandrange, temp_bidp + urandrange) / 100) + 1;
+    buyp = (urand(temp_buyp - randrange, temp_buyp + randrange)) + 1;
+    bidp = buyp * frand(0.5f, 0.9f);
 }
 
 void AuctionBotSeller::SetItemsRatio(uint32 al, uint32 ho, uint32 ne)
@@ -1602,13 +1602,15 @@ void AuctionBotSeller::addNewAuctions(AHB_Seller_Config& config)
 
         uint32 buyoutPrice;
         uint32 bidPrice = 0;
+
         // Not sure if i will keep the next test
         if (sAuctionBotConfig.getConfig(CONFIG_BOOL_AHBOT_BUYPRICE_SELLER))
             buyoutPrice  = prototype->BuyPrice * item->GetCount();
         else
             buyoutPrice  = prototype->SellPrice * item->GetCount();
+
         // Price of items are set here
-        SetPricesOfItem(config, buyoutPrice, bidPrice, stackCount, ItemQualities(prototype->Quality));
+        SetPricesOfItem(config, buyoutPrice, bidPrice, ItemQualities(prototype->Quality));
 
         auctionHouse->AddAuction(ahEntry, item, urand(config.GetMinTime(), config.GetMaxTime()) * HOUR, bidPrice, buyoutPrice);
     }

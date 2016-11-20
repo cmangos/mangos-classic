@@ -297,7 +297,7 @@ class MANGOS_DLL_SPEC Item : public Object
         void SendTimeUpdate(Player* owner);
         void UpdateDuration(Player* owner, uint32 diff);
 
-        // spell charges (signed but stored as unsigned)
+        // spell charges (negative means that once charges are consumed the item should be deleted)
         int32 GetSpellCharges(uint8 index/*0..5*/ = 0) const { return GetInt32Value(ITEM_FIELD_SPELL_CHARGES + index); }
         void SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, value); }
 

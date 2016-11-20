@@ -1703,25 +1703,6 @@ void ObjectMgr::LoadItemPrototypes()
             if (proto->ExtraFlags & ~ITEM_EXTRA_ALL)
                 sLog.outErrorDb("Item (Entry: %u) has wrong ExtraFlags (%u) with unused bits set", i, proto->ExtraFlags);
 
-            if (proto->ExtraFlags & ITEM_EXTRA_NON_CONSUMABLE)
-            {
-                bool can_be_need = false;
-                for (int j = 0; j < MAX_ITEM_PROTO_SPELLS; ++j)
-                {
-                    if (proto->Spells[j].SpellCharges < 0)
-                    {
-                        can_be_need = true;
-                        break;
-                    }
-                }
-
-                if (!can_be_need)
-                {
-                    sLog.outErrorDb("Item (Entry: %u) has redundant non-consumable flag in ExtraFlags, item not have negative charges", i);
-                    const_cast<ItemPrototype*>(proto)->ExtraFlags &= ~ITEM_EXTRA_NON_CONSUMABLE;
-                }
-            }
-
             if (proto->ExtraFlags & ITEM_EXTRA_REAL_TIME_DURATION)
             {
                 if (proto->Duration == 0)

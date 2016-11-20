@@ -376,34 +376,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\src\shared\SystemConfig.h.in">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Performing Build SystemConfig.h</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\src\shared\SystemConfig.h;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|X64'">Performing Build SystemConfig.h</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|X64'">copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|X64'">..\..\src\shared\SystemConfig.h;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Build SystemConfig.h</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\src\shared\SystemConfig.h;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">Performing Build SystemConfig.h</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">..\..\src\shared\SystemConfig.h;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">Performing Build SystemConfig.h</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">..\..\src\shared\SystemConfig.h;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">Performing Build SystemConfig.h</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h
-</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">..\..\src\shared\SystemConfig.h;%(Outputs)</Outputs>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\src\shared\Auth\AuthCrypt.cpp" />
     <ClCompile Include="..\..\src\shared\Auth\BigNumber.cpp" />
     <ClCompile Include="..\..\src\shared\Auth\Hmac.cpp" />
