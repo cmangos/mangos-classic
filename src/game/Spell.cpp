@@ -4251,11 +4251,12 @@ SpellCastResult Spell::CheckCast(bool strict)
             bool dispelTarget = false;
             uint32 mechanic = m_spellInfo->EffectMiscValue[0];
             SpellEntry const* spell = nullptr;
-
+            
             Unit::SpellAuraHolderMap& Auras = target->GetSpellAuraHolderMap();
             for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
             {
                 spell = iter->second->GetSpellProto();
+                
                 if (spell->Dispel == mechanic)
                 {
                     dispelTarget = true;
@@ -4263,8 +4264,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
             }
 
+            // Need to see if target is a pet in order to avoid showing dispel fail message
+            Creature* target = (Creature*)m_targets.getUnitTarget();
+
             if (!dispelTarget)
-                return SPELL_FAILED_NOTHING_TO_DISPEL;
+                if (!target->IsPet())
+                    return SPELL_FAILED_NOTHING_TO_DISPEL;
         }
     }
 
