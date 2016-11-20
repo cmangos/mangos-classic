@@ -4251,12 +4251,11 @@ SpellCastResult Spell::CheckCast(bool strict)
             bool dispelTarget = false;
             uint32 mechanic = m_spellInfo->EffectMiscValue[0];
             SpellEntry const* spell = nullptr;
-            
+
             Unit::SpellAuraHolderMap& Auras = target->GetSpellAuraHolderMap();
             for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
             {
                 spell = iter->second->GetSpellProto();
-                
                 if (spell->Dispel == mechanic)
                 {
                     dispelTarget = true;
