@@ -4263,11 +4263,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
             }
 
-            // Need to see if target is a pet in order to avoid showing dispel fail message
-            Creature* target = (Creature*)m_targets.getUnitTarget();
-
             if (!dispelTarget)
-                if (!target->IsPet())
+                if (m_spellInfo->Id == 24406) // Hunter's Improved Mend Pet
+                    return SPELL_CAST_OK;
+                else
                     return SPELL_FAILED_NOTHING_TO_DISPEL;
         }
     }
