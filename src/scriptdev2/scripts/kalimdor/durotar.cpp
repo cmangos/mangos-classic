@@ -61,12 +61,14 @@ struct npc_lazy_peonAI : public ScriptedAI
     bool m_bIsAtPile;
     float m_fSpawnO;
 
-    void RestartWakeTimer() {
+    void RestartWakeTimer()
+    {
         m_uiWakeTimer = urand(100000, 120000); //Random wakeup timer 1m40s to 2m, retail times unknown, 2m is duration of sleep aura
         m_uiSleepTimer = 0; //Ensure only one of the two timers is running at any given time
     }
 
-    void RestartSleepTimer() {
+    void RestartSleepTimer()
+    {
         m_uiSleepTimer = 80000; //Go to sleep after 1m20s, confirmed blizzlike
         m_uiWakeTimer = 0; //Ensure only one of the two timers is running at any given time
     }
@@ -113,9 +115,6 @@ struct npc_lazy_peonAI : public ScriptedAI
 
     void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
     {
-        /*if (!uiPointId)
-            return;*/
-
         if (uiMotionType == POINT_MOTION_TYPE && uiPointId)
         {
             switch (uiPointId)
