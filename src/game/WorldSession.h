@@ -658,7 +658,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         std::mutex m_logoutMutex;                           // this mutex is necessary to avoid two simultaneous logouts due to a valid logout request and socket error
         Player * _player;
-        WorldSocket * const m_Socket;                       // socket pointer is owned by the network thread which created 
+        std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it
 
         AccountTypes _security;
         uint32 _accountId;

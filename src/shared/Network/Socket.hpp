@@ -19,20 +19,21 @@
 #ifndef __SOCKET_HPP_
 #define __SOCKET_HPP_
 
+#include "PacketBuffer.hpp"
+
+#include "Platform/Define.h"
+
+#include <boost/asio.hpp>
+
 #include <memory>
 #include <string>
 #include <mutex>
 #include <functional>
-
-#include <boost/asio.hpp>
-
-#include "Platform/Define.h"
-
-#include "PacketBuffer.hpp"
+#include <iostream>
 
 namespace MaNGOS
 {
-    class MANGOS_DLL_SPEC Socket
+    class MANGOS_DLL_SPEC Socket : public std::enable_shared_from_this<Socket>
     {
         private:
             // buffer timeout period, in milliseconds.  higher values decrease responsiveness
@@ -89,7 +90,6 @@ namespace MaNGOS
 
         public:
             Socket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler);
-            virtual ~Socket() { assert(Deletable()); }
 
             virtual bool Open();
             void Close();
@@ -106,6 +106,9 @@ namespace MaNGOS
 
             const std::string &GetRemoteEndpoint() const { return m_remoteEndpoint; }
             const std::string &GetRemoteAddress() const { return m_address; }
+
+            template <typename T>
+            std::shared_ptr<T> shared() { return std::static_pointer_cast<T>(shared_from_this()); }
     };
 }
 

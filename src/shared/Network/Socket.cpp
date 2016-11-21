@@ -31,8 +31,8 @@
 using namespace MaNGOS;
 
 Socket::Socket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
-    : m_socket(service), m_address("0.0.0.0"), m_outBufferFlushTimer(service),
-      m_closeHandler(closeHandler), m_writeState(WriteState::Idle), m_readState(ReadState::Idle) {}
+    : m_writeState(WriteState::Idle), m_readState(ReadState::Idle), m_socket(service),
+      m_closeHandler(closeHandler), m_outBufferFlushTimer(service), m_address("0.0.0.0") {}
 
 bool Socket::Open()
 {
@@ -78,7 +78,7 @@ void Socket::StartAsyncRead()
 
     m_readState = ReadState::Reading;
     m_socket.async_read_some(boost::asio::buffer(&m_inBuffer->m_buffer[m_inBuffer->m_writePosition], m_inBuffer->m_buffer.size() - m_inBuffer->m_writePosition),
-                             [this](const boost::system::error_code &error, size_t length) { this->OnRead(error, length); });
+                             [ptr = shared<Socket>()](const boost::system::error_code &error, size_t length) { ptr->OnRead(error, length); });
 }
 
 void Socket::OnRead(const boost::system::error_code &error, size_t length)
@@ -212,7 +212,7 @@ void Socket::StartWriteFlushTimer()
     m_writeState = WriteState::Buffering;
 
     m_outBufferFlushTimer.expires_from_now(boost::posix_time::milliseconds(BufferTimeout));
-    m_outBufferFlushTimer.async_wait([this](const boost::system::error_code &error) { this->FlushOut(); });
+    m_outBufferFlushTimer.async_wait([ptr = shared<Socket>()](const boost::system::error_code &error) { ptr->FlushOut(); });
 }
 
 void Socket::FlushOut()
@@ -232,7 +232,7 @@ void Socket::FlushOut()
     m_writeState = WriteState::Sending;
 
     m_socket.async_write_some(boost::asio::buffer(m_outBuffer->m_buffer, m_outBuffer->m_writePosition),
-        [this](const boost::system::error_code &error, size_t length) { this->OnWriteComplete(error, length); });
+        [ptr = shared<Socket>()](const boost::system::error_code &error, size_t length) { ptr->OnWriteComplete(error, length); });
 }
 
 // if the write state is idle, this will do nothing, which is correct
@@ -290,7 +290,7 @@ void Socket::OnWriteComplete(const boost::system::error_code &error, size_t leng
     // if there is any data to write, do so immediately
     if (m_outBuffer->m_writePosition > 0)
         m_socket.async_write_some(boost::asio::buffer(m_outBuffer->m_buffer, m_outBuffer->m_writePosition),
-            [this](const boost::system::error_code &error, size_t length) { this->OnWriteComplete(error, length); });
+            [ptr = shared<Socket>()](const boost::system::error_code &error, size_t length) { ptr->OnWriteComplete(error, length); });
     else
         m_writeState = WriteState::Idle;
 }
