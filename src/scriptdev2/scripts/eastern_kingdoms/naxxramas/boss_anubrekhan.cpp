@@ -128,15 +128,21 @@ struct boss_anubrekhanAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void OnAnubDoorGo (Player* pPlayer, Creature* pCreature)
     {
-        if (!m_bHasDoneIntro && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 110.0f) && m_creature->IsWithinLOSInMap(pWho))
+        if (Anubrekhan* Anub = GetObject(NPC_ANUB_REKHAN) && GO_ARAC_ANUB_DOOR == GO_STATE_ACTIVE)
+        {
+            Anub->SendAIEvent(AI_EVENT_ANUB_DOOR_OPEN, pPlayer, pCreature);
+        }
+    }
+    
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    {
+        if (!m_bHasDoneIntro && eventType == AI_EVENT_ANUB_DOOR_OPEN && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
             m_introDialogue.StartNextDialogueText(SAY_INTRO_1);
             m_bHasDoneIntro = true;
         }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
     }
 
     void JustSummoned(Creature* pSummoned) override
