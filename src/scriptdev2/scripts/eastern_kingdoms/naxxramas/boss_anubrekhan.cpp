@@ -130,15 +130,15 @@ struct boss_anubrekhanAI : public ScriptedAI
 
     void OnAnubDoorGo (Player* pPlayer, Creature* pCreature)
     {
-        if (Creature* Anub = getObject(NPC_ANUB_REKHAN) && GO_ARAC_ANUB_DOOR == GO_STATE_ACTIVE)
+        if (Creature* Anub = GetCreature(NPC_ANUB_REKHAN) && GO_ARAC_ANUB_DOOR == GO_STATE_ACTIVE)
         {
-            Anub->SendAIEvent(AI_EVENT_ANUB_DOOR_OPEN, pPlayer, pCreature);
+            Anub->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
         }
     }
     
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
-        if (!m_bHasDoneIntro && eventType == AI_EVENT_ANUB_DOOR_OPEN && pInvoker->GetTypeId() == TYPEID_PLAYER)
+        if (!m_bHasDoneIntro && eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
             m_introDialogue.StartNextDialogueText(SAY_INTRO_1);
             m_bHasDoneIntro = true;
