@@ -4394,8 +4394,8 @@ void Aura::PeriodicTick()
             if (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER && spellProto->SpellFamilyFlags && spellProto->SpellIconID == 267)
             {
                 // Check caster has one of the ranks of Improved Mend Pet
-                if (pCaster->HasSpell(19572) || pCaster->HasSpell(19573)) {
-
+                if (pCaster->HasSpell(19572) || pCaster->HasSpell(19573))
+                {
                     // The first tick is fired when channel starts, so only check other ticks
                     if (GetAuraTicks() > 1)
                     {
@@ -4409,9 +4409,7 @@ void Aura::PeriodicTick()
                             triggerAmount = 50; //rank 2
 
                         if (roll_chance_i(triggerAmount))
-                        {
                             pCaster->CastSpell(target, 24406, true, nullptr, this);
-                        }
                     }
                 }
             }
