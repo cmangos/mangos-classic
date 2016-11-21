@@ -3075,8 +3075,8 @@ void ObjectMgr::LoadQuests()
                           "IncompleteEmote, CompleteEmote, OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4,"
                           //   119                     120                     121                     122
                           "OfferRewardEmoteDelay1, OfferRewardEmoteDelay2, OfferRewardEmoteDelay3, OfferRewardEmoteDelay4,"
-                          //   123          124
-                          "StartScript, CompleteScript"
+                          //   123          124          125
+                          "StartScript, CompleteScript, RequiredCondition"
                           " FROM quest_template");
     if (!result)
     {
@@ -4239,6 +4239,18 @@ void ObjectMgr::LoadConditions()
             sLog.outErrorDb("ObjectMgr::LoadConditions: invalid condition_entry %u, skip", i);
             sConditionStorage.EraseEntry(i);
             continue;
+        }
+    }
+
+    for (QuestMap::iterator iter = mQuestTemplates.begin(); iter != mQuestTemplates.end(); ++iter) // needs to be checked after loading conditions
+    {
+        Quest* qinfo = iter->second;
+
+        if (qinfo->RequiredCondition)
+        {
+            const PlayerCondition* condition = sConditionStorage.LookupEntry<PlayerCondition>(qinfo->RequiredCondition);
+            if (!condition) // condition does not exist for some reason
+                sLog.outErrorDb("Quest %u has `RequiredCondition` = %u but does not exist.", qinfo->GetQuestId(), qinfo->RequiredCondition);
         }
     }
 
@@ -6789,6 +6801,7 @@ char const* conditionSourceToStr[] =
     "DBScript engine",               // CONDITION_FROM_DBSCRIPTS           
     "trainer's spell check",         // CONDITION_FROM_TRAINER             
     "areatrigger teleport check",    // CONDITION_FROM_AREATRIGGER_TELEPORT
+    "quest template",                // CONDITION_FROM_QUEST
 };
 
 // Checks if player meets the condition

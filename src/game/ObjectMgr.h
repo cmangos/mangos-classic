@@ -334,6 +334,7 @@ enum ConditionSource                                        // From where was th
     CONDITION_FROM_DBSCRIPTS            = 9,                    // Used to check a condition from DB Scripts Engine
     CONDITION_FROM_TRAINER              = 10,                   // Used to check a condition from npc_trainer and npc_trainer_template
     CONDITION_FROM_AREATRIGGER_TELEPORT = 11,                   // Used to check a condition from areatrigger_teleport
+    CONDITION_FROM_QUEST                = 12,                   // Used to check a condition from quest_template
 };
 
 class PlayerCondition
