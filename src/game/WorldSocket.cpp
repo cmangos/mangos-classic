@@ -56,7 +56,7 @@ struct ServerPktHeader
 
 WorldSocket::WorldSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
     : Socket(service, closeHandler), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0),
-      m_useExistingHeader(false), m_session(nullptr), m_deletable(false), m_seed(urand())
+      m_useExistingHeader(false), m_session(nullptr), m_deletable(true), m_seed(urand())
 {}
 
 void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
@@ -91,6 +91,8 @@ bool WorldSocket::Open()
     if (!Socket::Open())
         return false;
 
+    m_deletable = false;
+
     // Send startup packet.
     WorldPacket packet(SMSG_AUTH_CHALLENGE, 40);
     packet << m_seed;
@@ -104,6 +106,8 @@ bool WorldSocket::Open()
     packet.append(seed2.AsByteArray(16), 16);               // new encryption seeds
 
     SendPacket(packet);
+
+    m_deletable = true;
 
     return true;
 }
