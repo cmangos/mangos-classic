@@ -3185,6 +3185,11 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, SpellCas
 {
     WorldPacket data(SMSG_CAST_FAILED, (4 + 1 + 1));
     data << uint32(spellInfo->Id);
+    
+    if (spellInfo->Id == 24406 && result == SPELL_FAILED_NOTHING_TO_DISPEL) // Improved mend pet - don't send anything to player if nothing to dispel
+    {
+        return;
+    }
 
     if (result != SPELL_CAST_OK)
     {
@@ -4246,7 +4251,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         // Classic only (seems to be handled client side tbc and later (not verified)) - Only check effect 0
         // Spells such as Abolish Poison have dispel on effect 1 but should be castable even if target not poisoned
-        if (m_spellInfo->Effect[0] == SPELL_EFFECT_DISPEL && m_spellInfo->Id != 24406) // Ignore Hunter's Improved Mend Pet
+        if (m_spellInfo->Effect[0] == SPELL_EFFECT_DISPEL)
         {
             bool dispelTarget = false;
             uint32 mechanic = m_spellInfo->EffectMiscValue[0];
@@ -4256,7 +4261,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
             {
                 spell = iter->second->GetSpellProto();
-                if (spell->Dispel == mechanic)
+                if (spell->Dispel == mechanic || (m_spellInfo->Id == 24406 && (spell->Dispel == DISPEL_MAGIC || spell->Dispel == DISPEL_CURSE || spell->Dispel == DISPEL_DISEASE || spell->Dispel == DISPEL_POISON)))
                 {
                     dispelTarget = true;
                     break;
