@@ -130,9 +130,12 @@ struct boss_anubrekhanAI : public ScriptedAI
 
     void OnAnubDoorGo (Player* pPlayer, Creature* pCreature)
     {
-        if (Creature* Anub = GetSingleCreatureFromStorage(NPC_ANUB_REKHAN) && GO_ARAC_ANUB_DOOR == GO_STATE_ACTIVE)
+        if (GO_ARAC_ANUB_DOOR == GO_STATE_ACTIVE)
         {
-            Anub->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
+            if (boss_anubrekhanAI* pAnub = dynamic_cast<boss_anubrekhanAI*>(pCreature->AI()))
+            {
+                pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
+            }
         }
     }
     
