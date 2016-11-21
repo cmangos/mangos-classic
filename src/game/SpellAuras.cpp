@@ -4405,9 +4405,8 @@ void Aura::PeriodicTick()
                     if (pCaster->HasSpell(19573))
                         triggerAmount = 50; //rank 2
 
-                    if (roll_chance_i(triggerAmount)) {
+                    if (roll_chance_i(triggerAmount))
                         pCaster->CastSpell(target, 24406, true, nullptr, this);
-                    }
                 }
             }
             
