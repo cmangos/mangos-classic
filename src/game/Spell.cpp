@@ -4246,7 +4246,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         // Classic only (seems to be handled client side tbc and later (not verified)) - Only check effect 0
         // Spells such as Abolish Poison have dispel on effect 1 but should be castable even if target not poisoned
-        if (m_spellInfo->Effect[0] == SPELL_EFFECT_DISPEL)
+        if (m_spellInfo->Effect[0] == SPELL_EFFECT_DISPEL && m_spellInfo->Id != 24406) // Ignore Hunter's Improved Mend Pet
         {
             bool dispelTarget = false;
             uint32 mechanic = m_spellInfo->EffectMiscValue[0];
@@ -4264,10 +4264,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
 
             if (!dispelTarget)
-                if (m_spellInfo->Id == 24406) // Hunter's Improved Mend Pet
-                    return SPELL_CAST_OK;
-                else
-                    return SPELL_FAILED_NOTHING_TO_DISPEL;
+                return SPELL_FAILED_NOTHING_TO_DISPEL;
         }
     }
 
