@@ -127,9 +127,10 @@ struct npc_lazy_peonAI : public ScriptedAI
                 }
                 case 2: //spawn
                 {
-                    m_creature->SetFacingTo(m_fSpawnO);
-                    m_creature->GetMotionMaster()->MoveTargetedHome(); //hacky way of getting the peon to sleep
+                    m_creature->GetMotionMaster()->MoveIdle();
                     m_creature->HandleEmote(EMOTE_STATE_NONE);
+                    m_creature->SetFacingTo(m_fSpawnO);
+                    DoCastSpellIfCan(m_creature, SPELL_PEON_SLEEP);
                     RestartWakeTimer();
                     break;
                 }
@@ -152,6 +153,7 @@ struct npc_lazy_peonAI : public ScriptedAI
             if (m_uiGetUpTimer <= uiDiff)
             {
                 m_uiGetUpTimer = 0;
+                m_creature->HandleEmote(EMOTE_STATE_NONE);
                 m_creature->GetMotionMaster()->MoveWaypoint();
                 m_bIsAtPile = false;
             }
@@ -209,7 +211,13 @@ struct npc_lazy_peonAI : public ScriptedAI
             if (m_uiWakeTimer <= uiDiff)
                 Awaken(m_creature);
             else
+            {
+                //reapply aura if it fell off while the peon was unloaded
+                if (!m_creature->HasAura(SPELL_PEON_SLEEP))
+                    DoCastSpellIfCan(m_creature, SPELL_PEON_SLEEP);
+                //decrement timer
                 m_uiWakeTimer -= uiDiff;
+            }
         }
     }
 };
@@ -219,22 +227,18 @@ CreatureAI* GetAI_npc_lazy_peon(Creature* pCreature)
     return new npc_lazy_peonAI(pCreature);
 }
 
-bool EffectDummyCreature_lazy_peon_awake(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+bool EffectDummyCreature_lazy_peon_spell(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
-    // always check spellid and effectindex
+    //make sure it's the right spell
     if (uiSpellId == SPELL_AWAKEN_PEON && uiEffIndex == EFFECT_INDEX_0)
     {
-        //TODO some of these checks are now redundant, should be removed by someone who knows how to do so without breaking things
-        if (!pCreatureTarget->HasAura(SPELL_PEON_SLEEP) || pCaster->GetTypeId() != TYPEID_PLAYER || pCreatureTarget->GetEntry() != NPC_SLEEPING_PEON)
-            return true;
-
+        //awaken peon
         if (npc_lazy_peonAI* pPeonAI = dynamic_cast<npc_lazy_peonAI*>(pCreatureTarget->AI()))
             pPeonAI->Awaken(pCaster);
-
-        // always return true when we are handling this spell and effect
+        //right spell, return true
         return true;
     }
-
+    //wrong spell, return false
     return false;
 }
 
@@ -245,6 +249,6 @@ void AddSC_durotar()
     pNewScript = new Script;
     pNewScript->Name = "npc_lazy_peon";
     pNewScript->GetAI = &GetAI_npc_lazy_peon;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_lazy_peon_awake;
+    pNewScript->pEffectDummyNPC = &EffectDummyCreature_lazy_peon_spell;
     pNewScript->RegisterSelf();
 }
