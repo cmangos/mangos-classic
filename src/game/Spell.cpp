@@ -3186,11 +3186,6 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, SpellCas
     WorldPacket data(SMSG_CAST_FAILED, (4 + 1 + 1));
     data << uint32(spellInfo->Id);
     
-    if (spellInfo->Id == 24406 && result == SPELL_FAILED_NOTHING_TO_DISPEL) // Improved mend pet - don't send anything to player if nothing to dispel
-    {
-        return;
-    }
-
     if (result != SPELL_CAST_OK)
     {
         data << uint8(2); // status = fail
