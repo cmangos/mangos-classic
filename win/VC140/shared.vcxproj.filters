@@ -196,6 +196,5 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\shared\revision.h" />
-    <CustomBuild Include="..\..\src\shared\SystemConfig.h.in" />
   </ItemGroup>
 </Project>

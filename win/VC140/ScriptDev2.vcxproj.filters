@@ -669,9 +669,6 @@
     <ClCompile Include="..\..\src\scriptdev2\include\sc_instance.cpp">
       <Filter>include</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\scriptdev2\system\MangosdRev.cpp">
-      <Filter>system</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\scriptdev2\system\ScriptLoader.cpp">
       <Filter>system</Filter>
     </ClCompile>
@@ -790,8 +787,5 @@
     <ClInclude Include="..\..\src\scriptdev2\sd2_revision_nr.h" />
     <ClInclude Include="..\..\src\scriptdev2\sd2_revision_sql.h" />
     <ClInclude Include="..\..\src\scriptdev2\ScriptMgr.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\..\src\scriptdev2\revision.h" />
   </ItemGroup>
 </Project>
