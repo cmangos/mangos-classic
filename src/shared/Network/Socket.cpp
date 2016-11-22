@@ -27,6 +27,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
+#include <cstring>
 
 namespace MaNGOS
 {
@@ -120,20 +121,7 @@ void Socket::OnRead(const boost::system::error_code &error, size_t length)
             {
                 const size_t bytesRemaining = m_inBuffer->m_writePosition - m_inBuffer->m_readPosition;
 
-                // first, check to see if we can fit the remaining bytes at the absolute start of the existing input buffer.
-                // if we can, it will save us a re-allocation
-                if (m_inBuffer->m_readPosition >= bytesRemaining)
-                    memcpy(&m_inBuffer->m_buffer[0], &m_inBuffer->m_buffer[m_inBuffer->m_readPosition], bytesRemaining);
-                // otherwise, we cannot perform a simple memcpy as the source and destination ranges would overlap,
-                // which leads to undefined behavior.  we must create a new buffer, and insert it in place of the input buffer
-                else
-                {
-                    std::vector<uint8> temporaryBuffer(m_inBuffer->m_buffer.size());
-
-                    memcpy(&temporaryBuffer[0], &m_inBuffer->m_buffer[m_inBuffer->m_readPosition], bytesRemaining);
-
-                    m_inBuffer->m_buffer = std::move(temporaryBuffer);
-                }
+                ::memmove(&m_inBuffer->m_buffer[0], &m_inBuffer->m_buffer[m_inBuffer->m_readPosition], bytesRemaining);
 
                 m_inBuffer->m_readPosition = 0;
                 m_inBuffer->m_writePosition = bytesRemaining;
