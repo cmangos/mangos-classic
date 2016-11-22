@@ -29,7 +29,6 @@
 #include <string>
 #include <mutex>
 #include <functional>
-#include <iostream>
 
 namespace MaNGOS
 {
@@ -90,6 +89,7 @@ namespace MaNGOS
 
         public:
             Socket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler);
+            virtual ~Socket() = default;
 
             virtual bool Open();
             void Close();
