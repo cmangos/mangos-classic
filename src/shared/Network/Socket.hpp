@@ -109,6 +109,89 @@ namespace MaNGOS
 
             template <typename T>
             std::shared_ptr<T> shared() { return std::static_pointer_cast<T>(shared_from_this()); }
+
+        private:
+            // custom allocator based on example from http://www.boost.org/doc/libs/1_62_0/doc/html/boost_asio/example/cpp11/allocation/server.cpp
+
+            // Class to manage the memory to be used for handler-based custom allocation.
+            // It contains a single block of memory which may be returned for allocation
+            // requests. If the memory is in use when an allocation request is made, the
+            // allocator delegates allocation to the global heap.
+            class handler_allocator
+            {
+                private:
+                    static constexpr size_t BufferSize = 512;
+
+                    // Storage space used for handler-based custom memory allocation.
+                    std::aligned_storage<BufferSize>::type m_buffer;
+
+                    // Whether the handler-based custom allocation storage has been used.
+                    bool m_inUse;
+
+                public:
+                    handler_allocator() : m_inUse(false) {}
+
+                    handler_allocator(const handler_allocator&) = delete;
+                    handler_allocator& operator=(const handler_allocator&) = delete;
+
+                    void* allocate(std::size_t size)
+                    {
+                        if (!m_inUse && size <= sizeof(m_buffer))
+                        {
+                            m_inUse = true;
+                            return &m_buffer;
+                        }
+
+                        return ::operator new(size);
+                    }
+
+                    void deallocate(void* pointer)
+                    {
+                        if (pointer == &m_buffer)
+                            m_inUse = false;
+                        else
+                            ::operator delete(pointer);
+                    }
+            };
+
+            // Wrapper class template for handler objects to allow handler memory
+            // allocation to be customised. Calls to operator() are forwarded to the
+            // encapsulated handler.
+            template <typename Handler>
+            class custom_alloc_handler
+            {
+                private:
+                    handler_allocator& m_allocator;
+                    Handler m_handler;
+
+                public:
+                    custom_alloc_handler(handler_allocator& a, Handler h) : m_allocator(a), m_handler(h) {}
+
+                    template <typename ...Args>
+                    void operator()(Args&&... args)
+                    {
+                        m_handler(std::forward<Args>(args)...);
+                    }
+
+                    friend void* asio_handler_allocate(std::size_t size, custom_alloc_handler<Handler>* this_handler)
+                    {
+                        return this_handler->m_allocator.allocate(size);
+                    }
+
+                    friend void asio_handler_deallocate(void* pointer, std::size_t /*size*/, custom_alloc_handler<Handler>* this_handler)
+                    {
+                        this_handler->m_allocator.deallocate(pointer);
+                    }
+            };
+
+            // Helper function to wrap a handler object to add custom allocation.
+            template <typename Handler>
+            static custom_alloc_handler<Handler> make_custom_alloc_handler(handler_allocator& a, Handler h)
+            {
+                return custom_alloc_handler<Handler>(a, h);
+            }
+
+            handler_allocator m_allocator;
     };
 }
 
