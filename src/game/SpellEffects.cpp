@@ -2868,6 +2868,7 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     // Caster must be player, checked in Spell::CheckCast
     // Spell can be triggered, we need to check original caster prior to caster
     Player* plr = (Player*)GetAffectiveCaster();
+    ObjectGuid plrGuid = plr->GetObjectGuid();
 
     Creature* creatureTarget = (Creature*)unitTarget;
 
@@ -2883,8 +2884,8 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
         return;
     }
 
-    pet->SetOwnerGuid(plr->GetObjectGuid());
-    pet->SetCreatorGuid(plr->GetObjectGuid());
+    pet->SetOwnerGuid(plrGuid);
+    pet->SetCreatorGuid(plrGuid);
     pet->setFaction(plr->getFaction());
     pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
@@ -2909,6 +2910,11 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     // add pet object to the world
     pet->GetMap()->Add((Creature*)pet);
     pet->AIM_Initialize();
+
+    // set owner as pet's target
+    pet->SetTargetGuid(plrGuid);
+    // set pet as player's target
+    plr->SetSelectionGuid(pet->GetObjectGuid());
 
     // visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
