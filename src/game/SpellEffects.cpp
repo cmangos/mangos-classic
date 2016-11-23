@@ -321,7 +321,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex effect_idx)
                     damage = uint32(damage * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) / 100);
                 }
                 // Shield Slam
-                else if (m_spellInfo->SpellIconID == 413 && m_spellInfo->SpellFamilyFlags & uint64(0x2000000))
+                else if (m_spellInfo->SpellFamilyFlags & uint64(0x100000000)) // Unified method of Shield Slam spell recongizing (from MZ 0.20)
                     damage += int32(m_caster->GetShieldBlockValue());
                 break;
             }
