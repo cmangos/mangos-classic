@@ -2460,13 +2460,11 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
         if (victimLevel > 10)  // No glancing in starting zones or against critters
         {
             uint32 attackerLevel = getLevel();
-            uint8 attackerClass = getClass();
             int32 attackerSkill = (attackerWeaponSkill > attackerMaxSkillValueForLevel) ? attackerMaxSkillValueForLevel : attackerWeaponSkill; // pick whichever is lower
             int32 glancing_chance = 0;
 
             // Caster classes suffer differently from glancing in classic and TBC (not as drastically, though)
-            if (attackerIsPlayer && (attackerClass == CLASS_MAGE
-                || attackerClass == CLASS_PRIEST || attackerClass == CLASS_WARLOCK))
+            if (attackerIsPlayer && getClassMask() & CLASSMASK_WAND_USERS)
             {
                 if (attackerLevel < 30)
                     glancing_chance = (attackerLevel * 100) + ((victimDefenseSkill - attackerSkill) * 200);
