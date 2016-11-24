@@ -176,10 +176,11 @@ struct boss_grobbulusAI : public ScriptedAI
         {
             if (DoCastMutagenInjection())
             {
-                if (m_creature->GetHealthPercent() < 30.0f)
-                    m_uiInjectionTimer = urand(15000, 25000); // Wiki says ~20s 
+                // Mutagen Injection should be used more often when below 30%
+                if (m_creature->GetHealthPercent() > 30.0f)
+                    m_uiInjectionTimer = urand(7000, 13000);
                 else
-                    m_uiInjectionTimer = urand(10000, 12000); //Completely Estimated Timers
+                    m_uiInjectionTimer = urand(3000, 7000); 
             }
         }
         else
