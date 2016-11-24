@@ -152,11 +152,7 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_BLAUMEUX) == CAST_OK)
             {
                 m_uiMarkCounter++;
-                
-                if (m_uiMarkCounter < 100)
-                    m_uiMarkTimer = 12000;
-                else
-                    m_uiMarkTimer = 1000;
+                m_uiMarkTimer = 12000;
             }
         }
         else
@@ -258,11 +254,7 @@ struct boss_alexandros_mograineAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_MOGRAINE) == CAST_OK)
             {
                 m_uiMarkCounter++;
-                
-                if (m_uiMarkCounter < 100)
-                    m_uiMarkTimer = 12000;
-                else
-                    m_uiMarkTimer = 1000;
+                m_uiMarkTimer = 12000;
             }        
         }
         else
@@ -359,11 +351,7 @@ struct boss_thane_korthazzAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_KORTHAZZ) == CAST_OK)
             {
                 m_uiMarkCounter++;
-                
-                if (m_uiMarkCounter < 100)
-                    m_uiMarkTimer = 12000;
-                else
-                    m_uiMarkTimer = 1000;
+                m_uiMarkTimer = 12000;
             }  
         }
         else
@@ -460,11 +448,7 @@ struct boss_sir_zeliekAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_ZELIEK) == CAST_OK)
             {
                 m_uiMarkCounter++;
-                
-                if (m_uiMarkCounter < 100)
-                    m_uiMarkTimer = 12000;
-                else
-                    m_uiMarkTimer = 1000;
+                m_uiMarkTimer = 12000;
             }
         }
         else
