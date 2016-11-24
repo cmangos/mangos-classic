@@ -122,10 +122,10 @@ struct boss_kelthuzadAI : public ScriptedAI
     {
         m_uiFrostBoltTimer       = urand(1000, 60000);       // It won't be more than a minute without cast it
         m_uiFrostBoltNovaTimer   = 15000;                    // Cast every 15 seconds
-        m_uiChainsTimer          = 60000;                    // Cast every 60 seconds
+        m_uiChainsTimer          = urand(60000, 120000);     // Cast every 60 - 120 seconds
         m_uiManaDetonationTimer  = 20000;                    // Seems to cast about every 20 seconds
-        m_uiShadowFissureTimer   = 10000;                    // Cast every 10 seconds
-        m_uiFrostBlastTimer      = 30000;                    // Cast every 30 seconds
+        m_uiShadowFissureTimer   = urand(10000, 12000);      // Cast every 10 - 12 seconds
+        m_uiFrostBlastTimer      = urand(30000, 40000);      // Cast every 30 - 40 seconds
         m_uiGuardiansTimer       = 5000;                     // 5 seconds for summoning each Guardian of Icecrown in phase 3
         m_uiLichKingAnswerTimer  = 4000;
         m_uiGuardiansCount       = 0;
@@ -473,7 +473,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                         if (urand(0, 1))
                             DoScriptText(SAY_SPECIAL3_MANA_DET, m_creature);
 
-                        m_uiShadowFissureTimer = 10000;
+                        m_uiShadowFissureTimer = urand(10000, 12000);
                     }
                 }
             }
@@ -487,7 +487,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                     if (urand(0, 1))
                         DoScriptText(SAY_FROST_BLAST, m_creature);
 
-                    m_uiFrostBlastTimer = 30000;
+                    m_uiFrostBlastTimer = urand(30000, 40000);
                 }
             }
             else
@@ -499,7 +499,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                 {
                     DoScriptText(urand(0, 1) ? SAY_CHAIN1 : SAY_CHAIN2, m_creature);
 
-                    m_uiChainsTimer = 60000;
+                    m_uiChainsTimer = urand(60000, 120000);
                 }
             }
             else
