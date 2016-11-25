@@ -1935,6 +1935,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool CanSwim() const { return true; }
         bool CanFly() const { return false; }
+        bool CanWalk() const { return true; }
         bool IsFlying() const { return false; }
         bool IsFreeFlying() const { return false; }
 
@@ -2004,7 +2005,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UnsummonPetTemporaryIfAny();
         void UnsummonPetIfAny();
         void ResummonPetTemporaryUnSummonedIfAny();
-        bool IsPetNeedBeTemporaryUnsummoned() const { return !IsInWorld() || !isAlive() || IsMounted() /*+in flight*/; }
+        bool IsPetNeedBeTemporaryUnsummoned() const;
 
         void SendCinematicStart(uint32 CinematicSequenceId);
 
@@ -2061,6 +2062,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         GridReference<Player>& GetGridRef() { return m_gridRef; }
         MapReference& GetMapRef() { return m_mapRef; }
+
+        virtual CreatureAI* AI() override { if (m_charmInfo) return m_charmInfo->GetAI(); return nullptr; }
+        virtual CombatData* GetCombatData() override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); return m_combatData; }
 
     protected:
 

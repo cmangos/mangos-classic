@@ -31,7 +31,7 @@
 #include "Group.h"
 #include "SpellAuras.h"
 #include "ObjectAccessor.h"
-#include "AI/CreatureAI.h"
+#include "AI/CreatureAISelector.h"
 #include "TemporarySummon.h"
 #include "Pet.h"
 #include "Util.h"
@@ -405,6 +405,7 @@ Unit::~Unit()
         }
     }
 
+    delete m_combatData;
     delete m_charmInfo;
     delete movespline;
 
@@ -472,11 +473,14 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     // update abilities available only for fraction of time
     UpdateReactives(update_diff);
 
-    if (isAlive())
-        ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth() * 0.20f);
-
     UpdateSplineMovement(p_time);
     i_motionMaster.UpdateMotion(p_time);
+
+    if (AI() && isAlive())
+        AI()->UpdateAI(p_time);   // AI not react good at real update delays (while freeze in non-active part of map)
+    
+    if (isAlive())
+        ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth() * 0.20f);
 }
 
 bool Unit::UpdateMeleeAttackingState()
@@ -661,11 +665,11 @@ void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb)
     uint32 originalDamage = damage;
 
     // Script Event damage Deal
-    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-        ((Creature*)this)->AI()->DamageDeal(pVictim, damage);
+    if (AI())
+        AI()->DamageDeal(pVictim, damage);
     // Script Event damage taken
-    if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->AI())
-        ((Creature*)pVictim)->AI()->DamageTaken(this, damage);
+    if (pVictim->AI())
+        pVictim->AI()->DamageTaken(this, damage);
 
     if (absorb && originalDamage > damage)
         *absorb += (originalDamage - damage);
@@ -843,8 +847,8 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             pVictim->SetHealth(0);
 
         // Call KilledUnit for creatures
-        if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-            ((Creature*)this)->AI()->KilledUnit(pVictim);
+        if (AI())
+            AI()->KilledUnit(pVictim);
 
         // Call AI OwnerKilledUnit (for any current summoned minipet/guardian/protector)
         PetOwnerKilledUnit(pVictim);
@@ -1072,8 +1076,8 @@ struct PetOwnerKilledUnitHelper
     {
         if (pTarget->GetTypeId() == TYPEID_UNIT)
         {
-            if (((Creature*)pTarget)->AI())
-                ((Creature*)pTarget)->AI()->OwnerKilledUnit(m_victim);
+            if (pTarget->AI())
+                pTarget->AI()->OwnerKilledUnit(m_victim);
         }
     }
 
@@ -1120,11 +1124,8 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
                 if (pSummoner->AI())
                     pSummoner->AI()->SummonedCreatureJustDied(victim);
     }
-    else if (pOwner && pOwner->GetTypeId() == TYPEID_UNIT)
-    {
-        if (((Creature*)pOwner)->AI())
-            ((Creature*)pOwner)->AI()->SummonedCreatureJustDied(victim);
-    }
+    else if (pOwner && pOwner->AI())
+            pOwner->AI()->SummonedCreatureJustDied(victim);
 
     // Inform Instance Data and Linking
     if (InstanceData* mapInstance = victim->GetInstanceData())
@@ -3399,12 +3400,12 @@ void Unit::SetFacingToObject(WorldObject* pObject)
     SetFacingTo(GetAngle(pObject));
 }
 
-bool Unit::isInAccessablePlaceFor(Creature const* c) const
+bool Unit::isInAccessablePlaceFor(Unit const* unit) const
 {
     if (IsInWater())
-        return c->CanSwim();
+        return unit->CanSwim();
     else
-        return c->CanWalk() || c->CanFly();
+        return unit->CanWalk() || unit->CanFly();
 }
 
 bool Unit::IsInWater() const
@@ -5183,8 +5184,8 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
 void Unit::AttackedBy(Unit* attacker)
 {
     // trigger AI reaction
-    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-        ((Creature*)this)->AI()->AttackedBy(attacker);
+    if (AI())
+        AI()->AttackedBy(attacker);
 
     // do not pet reaction for self inflicted damage (like environmental)
     if (attacker == this)
@@ -5241,8 +5242,8 @@ void Unit::CombatStop(bool includingCast)
             ((Creature*)this)->ClearTemporaryFaction();
     }
 
-    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-        ((Creature*)this)->AI()->CombatStop();
+    if (AI())
+        AI()->CombatStop();
 
     ClearInCombat();
 }
@@ -5525,8 +5526,8 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
         unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, critical);
 
     // Script Event HealedBy
-    if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->AI())
-        ((Creature*)pVictim)->AI()->HealedBy(this, addhealth);
+    if (pVictim->AI())
+        pVictim->AI()->HealedBy(this, addhealth);
 
     return gain;
 }
@@ -7310,8 +7311,8 @@ void Unit::TauntApply(Unit* taunter)
         if (GetTargetGuid() || !target)
             SetInFront(taunter);
 
-        if (((Creature*)this)->AI())
-            ((Creature*)this)->AI()->AttackStart(taunter);
+        if (AI())
+            AI()->AttackStart(taunter);
     }
 
     getThreatManager().tauntApply(taunter);
@@ -7338,8 +7339,8 @@ void Unit::TauntFadeOut(Unit* taunter)
     {
         m_fixateTargetGuid.Clear();
 
-        if (((Creature*)this)->AI())
-            ((Creature*)this)->AI()->EnterEvadeMode();
+        if (AI())
+            AI()->EnterEvadeMode();
 
         if (InstanceData* mapInstance = GetInstanceData())
             mapInstance->OnCreatureEvade((Creature*)this);
@@ -7358,8 +7359,8 @@ void Unit::TauntFadeOut(Unit* taunter)
         if (GetTargetGuid())
             SetInFront(target);
 
-        if (((Creature*)this)->AI())
-            ((Creature*)this)->AI()->AttackStart(target);
+        if (AI())
+            AI()->AttackStart(target);
     }
 }
 
@@ -7402,7 +7403,7 @@ bool Unit::SelectHostileTarget()
         return false;
 
     // This function only useful once AI has been initialized
-    if (!((Creature*)this)->AI())
+    if (!AI())
         return false;
 
     Unit* target = nullptr;
@@ -7450,7 +7451,7 @@ bool Unit::SelectHostileTarget()
         {
             SetInFront(target);
             if (oldTarget != target)
-                ((Creature*)this)->AI()->AttackStart(target);
+                AI()->AttackStart(target);
 
             // check if currently selected target is reachable
             // NOTE: path alrteady generated from AttackStart()
@@ -7463,7 +7464,7 @@ bool Unit::SelectHostileTarget()
                 {
                     // only one target in list, we have to evade after timer
                     // TODO: make timer - inside Creature class
-                    ((Creature*)this)->AI()->EnterEvadeMode();
+                    AI()->EnterEvadeMode();
                 }
                 else
                 {
@@ -7500,7 +7501,7 @@ bool Unit::SelectHostileTarget()
 
     // enter in evade mode in other case
     m_fixateTargetGuid.Clear();
-    ((Creature*)this)->AI()->EnterEvadeMode();
+    AI()->EnterEvadeMode();
 
     if (InstanceData* mapInstance = GetInstanceData())
         mapInstance->OnCreatureEvade((Creature*)this);
@@ -8135,16 +8136,46 @@ void Unit::CleanupsBeforeDelete()
 
 CharmInfo* Unit::InitCharmInfo(Unit* charm)
 {
-    if (!m_charmInfo)
-        m_charmInfo = new CharmInfo(charm);
+    delete m_charmInfo;
+    m_charmInfo = new CharmInfo(charm);
+
     return m_charmInfo;
 }
 
-CharmInfo::CharmInfo(Unit* unit)
-    : m_unit(unit), m_CommandState(COMMAND_FOLLOW), m_reactState(REACT_PASSIVE), m_petnumber(0)
+CharmInfo::CharmInfo(Unit* unit) :
+    m_unit(unit), m_ai(nullptr), m_combatData(nullptr),
+    m_CommandState(COMMAND_FOLLOW), m_reactState(REACT_PASSIVE),
+    m_petnumber(0), m_retreating(false), m_stayPosSet(false),
+    m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
+    m_opener(0), m_openerMinRange(0), m_openerMaxRange(0),
+    m_unitFieldBytes2_1(0)
 {
     for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
         m_charmspells[i].SetActionAndType(0, ACT_DISABLED);
+}
+
+CharmInfo::~CharmInfo()
+{
+    delete m_combatData;
+    delete m_ai;
+}
+
+void CharmInfo::SetCharmState(std::string const & ainame /*= "PetAI"*/, bool withNewThreatList /*= true*/)
+{
+    if (!ainame.empty())
+        m_ai = FactorySelector::GetSpecificAI(m_unit, ainame);
+    else
+        m_ai = FactorySelector::GetSpecificAI(m_unit, "PetAI");
+
+    if (withNewThreatList)
+        m_combatData = new CombatData(m_unit);
+
+    m_unitFieldBytes2_1 = m_unit->GetByteValue(UNIT_FIELD_BYTES_2, 1);
+}
+
+void CharmInfo::ResetCharmState()
+{
+    m_unit->SetByteValue(UNIT_FIELD_BYTES_2, 1, m_unitFieldBytes2_1);
 }
 
 void CharmInfo::InitPetActionBar()
@@ -8188,13 +8219,12 @@ void CharmInfo::InitPossessCreateSpells()
 
 void CharmInfo::InitCharmCreateSpells()
 {
-    if (m_unit->GetTypeId() == TYPEID_PLAYER)               // charmed players don't have spells
-    {
-        InitEmptyActionBar();
-        return;
-    }
-
     InitPetActionBar();
+
+    SetActionBar(ACTION_BAR_INDEX_START, COMMAND_ATTACK, ACT_COMMAND);
+
+    if (m_unit->GetTypeId() == TYPEID_PLAYER)               // charmed players don't have spells
+        return;
 
     for (uint32 x = 0; x < CREATURE_MAX_SPELLS; ++x)
     {
@@ -8302,6 +8332,28 @@ void CharmInfo::SetPetNumber(uint32 petnumber, bool statwindow)
         m_unit->SetUInt32Value(UNIT_FIELD_PETNUMBER, 0);
 }
 
+void CharmInfo::SetCommandState(CommandStates st)
+{
+    m_CommandState = st;
+
+    switch (st)
+    {
+        case COMMAND_STAY:
+            SetIsRetreating();
+            SetStayPosition(true);
+            SetSpellOpener();
+            break;
+
+        case COMMAND_FOLLOW:
+            SetStayPosition();
+            SetSpellOpener();
+            break;
+
+        default:
+            break;
+    }
+}
+
 void CharmInfo::LoadPetActionBar(const std::string& data)
 {
     InitPetActionBar();
@@ -8350,6 +8402,26 @@ void CharmInfo::SetSpellAutocast(uint32 spell_id, bool state)
             break;
         }
     }
+}
+
+void CharmInfo::SetStayPosition(bool stay)
+{
+    if (stay)
+    {
+        m_stayPosX = m_unit->GetPositionX();
+        m_stayPosY = m_unit->GetPositionY();
+        m_stayPosZ = m_unit->GetPositionZ();
+        m_stayPosO = m_unit->GetOrientation();
+    }
+    else
+    {
+        m_stayPosX = 0;
+        m_stayPosY = 0;
+        m_stayPosZ = 0;
+        m_stayPosO = 0;
+    }
+
+    m_stayPosSet = stay;
 }
 
 bool Unit::isFrozen() const
@@ -9556,8 +9628,11 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
         player->UnsummonPetTemporaryIfAny();
     }
 
+    // init CharmInfo class that will hold charm data
+    CharmInfo* charmInfo = pCreature->InitCharmInfo(pCreature);
+
     // set temp possess ai (creature will not be able to react by itself)
-    pCreature->SetPossessed();
+    charmInfo->SetCharmState("PossessedAI");
 
     if (player)
     {
@@ -9593,12 +9668,20 @@ bool Unit::TakePossessOf(Unit* possessed)
 
     Creature* possessedCreature = nullptr;
     Player* possessedPlayer = nullptr;
+    CharmInfo* charmInfo = possessed->InitCharmInfo(possessed);
+
+    // stop any generated movement TODO:: this may not be correct! what about possessing a feared creature?
+    possessed->GetMotionMaster()->Clear();
+    possessed->GetMotionMaster()->MoveIdle();
+    possessed->StopMoving(true);
+
     if (possessed->GetTypeId() == TYPEID_UNIT)
     {
         possessedCreature = static_cast<Creature *>(possessed);
-        possessedCreature->SetPossessed();
         possessedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
         possessedCreature->SetWalk(IsWalking(), true);
+        charmInfo->SetCharmState("PossessedAI");
+        getHostileRefManager().deleteReference(possessedCreature);
 
         // this seem to be needed for controlled creature (else cannot attack neutral creature)
         if (player)
@@ -9607,7 +9690,11 @@ bool Unit::TakePossessOf(Unit* possessed)
     else if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
         possessedPlayer = static_cast<Player *>(possessed);
-        possessedPlayer->setFaction(getFaction());
+
+        if (player && player->IsInDuelWith(possessedPlayer))
+            possessedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, player->GetUInt32Value(PLAYER_DUEL_TEAM));
+        else
+            possessedPlayer->setFaction(getFaction());
     }
 
     if (player)
@@ -9629,17 +9716,105 @@ bool Unit::TakePossessOf(Unit* possessed)
         // player pet is unsmumoned while possessing
         player->UnsummonPetTemporaryIfAny();
 
-        if (CharmInfo* charmInfo = possessed->InitCharmInfo(possessed))
-        {
-            charmInfo->InitPossessCreateSpells();
-            charmInfo->SetReactState(REACT_PASSIVE);
-            charmInfo->SetCommandState(COMMAND_STAY);
-        }
+        charmInfo->InitPossessCreateSpells();
+        charmInfo->SetReactState(REACT_PASSIVE);
+        charmInfo->SetCommandState(COMMAND_STAY);
         player->PossessSpellInitialize();
     }
 
     if (possessedPlayer)
         possessedPlayer->SetClientControl(possessed, 0);
+
+    return true;
+}
+
+bool Unit::TakeCharmOf(Unit* charmed)
+{
+
+    Player* charmerPlayer = nullptr;
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        charmerPlayer = static_cast<Player *>(this);
+
+        // player pet is unsmumoned while possessing
+        charmerPlayer->UnsummonPetTemporaryIfAny();
+    }
+
+    // stop combat but keep threat list
+    charmed->AttackStop(true, true);
+    charmed->ClearInCombat();
+
+    charmed->SetCharmerGuid(GetObjectGuid());
+    charmed->CastStop();
+    SetCharm(charmed);
+
+    CharmInfo* charmInfo = charmed->InitCharmInfo(charmed);
+
+    if (charmed->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* charmedPlayer = static_cast<Player *>(charmed);
+        if (charmerPlayer && charmerPlayer->IsInDuelWith(charmedPlayer))
+            charmedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, charmerPlayer->GetUInt32Value(PLAYER_DUEL_TEAM));
+        else
+            charmedPlayer->setFaction(getFaction());
+
+        charmInfo->SetCharmState("PetAI");
+        charmed->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS); // important have to be after charminfo initialization
+        //charmedPlayer->SetWalk(IsWalking(), true);
+
+        charmInfo->InitCharmCreateSpells();
+        charmInfo->SetReactState(REACT_DEFENSIVE);
+        charmInfo->SetCommandState(COMMAND_FOLLOW);
+        charmInfo->SetIsRetreating(true);
+
+        charmedPlayer->SetClientControl(charmedPlayer, 0);
+        charmedPlayer->SendForcedObjectUpdate();
+    }
+    else if (charmed->GetTypeId() == TYPEID_UNIT)
+    {
+        Creature* charmedCreature = static_cast<Creature *>(charmed);
+        charmInfo->SetCharmState("PetAI");
+        getHostileRefManager().deleteReference(charmedCreature);
+        charmedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
+        charmedCreature->SetWalk(IsWalking(), true);
+
+        charmInfo->InitCharmCreateSpells();
+        charmInfo->SetReactState(REACT_DEFENSIVE);
+        charmInfo->SetCommandState(COMMAND_FOLLOW);
+        charmInfo->SetIsRetreating(true);
+
+        if (charmerPlayer)
+        {
+            // without this charmed unit will not be able to attack neutral target
+            charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+
+            if (getClass() == CLASS_WARLOCK)
+            {
+                CreatureInfo const* cinfo = charmedCreature->GetCreatureInfo();
+                if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON)
+                {
+                    // creature with pet number expected have class set
+                    if (charmedCreature->GetByteValue(UNIT_FIELD_BYTES_0, 1) == 0)
+                    {
+                        if (cinfo->UnitClass == 0)
+                            sLog.outErrorDb("Creature (Entry: %u) have UnitClass = 0 but used in charmed spell, that will be result client crash.", cinfo->Entry);
+                        else
+                            sLog.outError("Creature (Entry: %u) have UnitClass = %u but at charming have class 0!!! that will be result client crash.", cinfo->Entry, cinfo->UnitClass);
+
+                        charmedCreature->SetByteValue(UNIT_FIELD_BYTES_0, 1, CLASS_MAGE);
+                    }
+
+                    // just to enable stat window
+                    charmInfo->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
+                    // if charmed two demons the same session, the 2nd gets the 1st one's name
+                    charmedCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
+                }
+            }
+        }
+    }
+
+    if (charmerPlayer)
+        charmerPlayer->CharmSpellInitialize();
 
     return true;
 }
@@ -9666,15 +9841,97 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
     possessed->clearUnitState(UNIT_STAT_CONTROLLED);
     possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     possessed->SetCharmerGuid(ObjectGuid());
+
+    // may be not correct we have to remove only some generator taking account of the current situation
     possessed->StopMoving(true);
+    possessed->GetMotionMaster()->Clear();
 
     SetCharmGuid(ObjectGuid());
     Creature* possessedCreature = nullptr;
+    CharmInfo* charmInfo = possessed->GetCharmInfo();
+
     if (possessed->GetTypeId() == TYPEID_UNIT)
     {
+        // now we have to clean threat list to be able to restore normal creature behavior
+        FactionTemplateEntry const* factionEntry = possessed->getFactionTemplateEntry();
+
         possessedCreature = static_cast<Creature *>(possessed);
-        possessedCreature->ClearTemporaryFaction();
-        possessedCreature->SetPossessed(false, this);
+        if (!possessedCreature->IsPet())
+        {
+            possessedCreature->ClearTemporaryFaction();
+
+            // first find friendly target (stopping combat here is not recommended because m_attackers will be modified)
+            AttackerSet friendlyTargets;
+            for (Unit::AttackerSet::const_iterator itr = possessed->getAttackers().begin(); itr != possessed->getAttackers().end(); ++itr)
+            {
+                Unit* attacker = (*itr);
+                if (attacker->GetTypeId() != TYPEID_UNIT)
+                    continue;
+
+                if (!factionEntry->IsHostileTo(*attacker->getFactionTemplateEntry()))
+                    friendlyTargets.insert(attacker);
+            }
+
+            // now stop attackers combat and transfer threat generated from this to owner, also get the total generated threat
+            for (Unit::AttackerSet::iterator itr = friendlyTargets.begin(); itr != friendlyTargets.end(); ++itr)
+            {
+                Unit* attacker = (*itr);
+                attacker->AttackStop(true, true);
+                attacker->m_Events.KillAllEvents(true);
+                attacker->getThreatManager().modifyThreatPercent(possessed, -101);     // only remove the possessed creature from threat list because it can be filled by other players
+                attacker->AddThreat(this);
+            }
+
+            possessed->AttackStop(true, true);
+            possessed->m_Events.KillAllEvents(true);
+
+            charmInfo->ResetCharmState();
+            possessed->DeleteCharmInfo();
+
+            // we have to restore initial MotionMaster
+            while (possessed->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+                possessed->GetMotionMaster()->MovementExpired(true);
+
+            if (possessed->isAlive())
+            {
+                possessedCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
+
+                // TODO:: iam not sure we need that faction check
+                if (!factionEntry->IsFriendlyTo(*getFactionTemplateEntry()))
+                    possessed->getThreatManager().addThreat(this, GetMaxHealth());     // generating threat by max life amount best way i found to make it realistic
+            }
+            else
+                possessed->GetCombatData()->threatManager.clearReferences();
+
+            // we can remove that flag if its set, that is supposed to be only for creature controlled by player
+            // however player's pet should keep it
+            possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
+        }
+        else
+        {
+            possessed->setFaction(possessedCreature->GetOwner()->getFaction());
+
+            charmInfo->ResetCharmState();
+
+            // as possessed is a pet we have to restore original charminfo so Pet::DeleteCharmInfo will take care of that
+            possessed->DeleteCharmInfo();
+        }
+    }
+    else if (possessed->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* possessedPlayer = static_cast<Player *>(possessed);
+
+        if (player && player->IsInDuelWith(possessedPlayer))
+            possessedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, player->GetUInt32Value(PLAYER_DUEL_TEAM) == 1 ? 2 : 1);
+        else
+            possessedPlayer->setFactionForRace(possessedPlayer->getRace());
+
+        possessedPlayer->SetClientControl(possessedPlayer, possessedPlayer->IsClientControl(possessedPlayer));
+        charmInfo->ResetCharmState();
+        possessedPlayer->DeleteCharmInfo();
+
+        while (possessedPlayer->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+            possessedPlayer->GetMotionMaster()->MovementExpired(true);
     }
 
     if (player)
@@ -9685,47 +9942,52 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
 
         // player pet can be re summoned here
         player->ResummonPetTemporaryUnSummonedIfAny();
-    }
 
-    if (possessed->GetTypeId() == TYPEID_PLAYER)
-    {
-        Player* possessedPlayer = static_cast<Player *>(possessed);
-        possessedPlayer->setFactionForRace(possessedPlayer->getRace());
-        possessedPlayer->SetClientControl(possessedPlayer, possessedPlayer->IsClientControl(possessedPlayer));
-    }
-    else if (possessedCreature)
-    {
-        if (player && possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
-        {
-            // out of range pet dismissed
-            if (!possessedCreature->IsWithinDistInMap(this, possessedCreature->GetMap()->GetVisibilityDistance()))
-            {
-                player->RemovePet(PET_SAVE_REAGENTS);
-            }
-            else
-            {
-                // reset pet motion
-                if (possessedCreature->GetCharmInfo() && possessedCreature->GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
-                {
-                    possessedCreature->GetMotionMaster()->MoveFollow(this, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-                }
-                else
-                {
-                    possessedCreature->GetMotionMaster()->Clear(false);
-                    possessedCreature->GetMotionMaster()->MoveIdle();
-                }
-            }
-        }
+        // remove pet bar only if no pet
+        if (!player->GetPet())
+            player->RemovePetActionBar();
         else
-        {
-            // we can remove that flag if its set, that is supposed to be only for creature controlled by player
-            // however player's pet should keep it
-            if (!possessedCreature->IsPet() || possessedCreature->GetOwner()->GetTypeId() != TYPEID_PLAYER)
-                possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
-        }
+            player->PetSpellInitialize();   // reset spell on pet bar
     }
 
-    // remove pet bar only if no pet
-    if (player && !player->GetPet())
-        player->RemovePetActionBar();
+    // be sure all those change will be made for clients
+    SendForcedObjectUpdate();
+}
+
+float Unit::GetAttackDistance(Unit const* pl) const
+{
+    float aggroRate = sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_AGGRO);
+    if (aggroRate == 0)
+        return 0.0f;
+
+    uint32 playerlevel = pl->GetLevelForTarget(this);
+    uint32 creaturelevel = GetLevelForTarget(pl);
+
+    int32 leveldif = int32(playerlevel) - int32(creaturelevel);
+
+    // "The maximum Aggro Radius has a cap of 25 levels under. Example: A level 30 char has the same Aggro Radius of a level 5 char on a level 60 mob."
+    if (leveldif < -25)
+        leveldif = -25;
+
+    // "The aggro radius of a mob having the same level as the player is roughly 20 yards"
+    float RetDistance = 20;
+
+    // "Aggro Radius varies with level difference at a rate of roughly 1 yard/level"
+    // radius grow if playlevel < creaturelevel
+    RetDistance -= (float)leveldif;
+
+    if (creaturelevel + 5 <= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    {
+        // detect range auras
+        RetDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
+
+        // detected range auras
+        RetDistance += pl->GetTotalAuraModifier(SPELL_AURA_MOD_DETECTED_RANGE);
+    }
+
+    // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
+    if (RetDistance < 5)
+        RetDistance = 5;
+
+    return (RetDistance * aggroRate);
 }

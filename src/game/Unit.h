@@ -43,6 +43,7 @@
 #include "Timer.h"
 
 #include <list>
+#include "AI/CreatureAI.h"
 
 enum SpellInterruptFlags
 {
@@ -802,6 +803,17 @@ struct SpellPeriodicAuraLogInfo
 
 uint32 createProcExtendMask(SpellNonMeleeDamage* damageInfo, SpellMissInfo missCondition);
 
+struct CombatData
+{
+    public:
+        CombatData(Unit* owner) : threatManager(ThreatManager(owner)), hostileRefManager(HostileRefManager(owner)) {};
+
+        // Manage all Units threatening us
+        ThreatManager threatManager;
+        // Manage all Units that are threatened by us
+        HostileRefManager hostileRefManager;
+};
+
 enum SpellAuraProcResult
 {
     SPELL_AURA_PROC_OK              = 0,                    // proc was processed, will remove charges
@@ -920,14 +932,18 @@ enum ActionBarIndex
 
 #define MAX_UNIT_ACTION_BAR_INDEX (ACTION_BAR_INDEX_END-ACTION_BAR_INDEX_START)
 
-struct CharmInfo
+class MANGOS_DLL_SPEC CharmInfo
 {
     public:
         explicit CharmInfo(Unit* unit);
+        ~CharmInfo();
+
+        void SetCharmState(std::string const & ainame = "PetAI", bool withNewThreatList = true);
+        void ResetCharmState();
         uint32 GetPetNumber() const { return m_petnumber; }
         void SetPetNumber(uint32 petnumber, bool statwindow);
 
-        void SetCommandState(CommandStates st) { m_CommandState = st; }
+        void SetCommandState(CommandStates st);
         CommandStates GetCommandState() { return m_CommandState; }
         bool HasCommandState(CommandStates state) { return (m_CommandState == state); }
         void SetReactState(ReactStates st) { m_reactState = st; }
@@ -957,14 +973,51 @@ struct CharmInfo
 
         GlobalCooldownMgr& GetGlobalCooldownMgr() { return m_GlobalCooldownMgr; }
 
+        void SetIsRetreating(bool retreating = false) { m_retreating = retreating; }
+        bool GetIsRetreating() { return m_retreating; }
+
+        void SetStayPosition(bool stay = false);
+        bool IsStayPosSet() { return m_stayPosSet; }
+
+        float GetStayPosX() { return m_stayPosX; }
+        float GetStayPosY() { return m_stayPosY; }
+        float GetStayPosZ() { return m_stayPosZ; }
+        float GetStayPosO() { return m_stayPosO; }
+
+        uint32 GetSpellOpener() { return m_opener; }
+        uint32 GetSpellOpenerMinRange() { return m_openerMinRange; }
+        uint32 GetSpellOpenerMaxRange() { return m_openerMaxRange; }
+
+        void SetSpellOpener(uint32 spellId = 0, uint32 minRange = 0, uint32 maxRange = 0)
+        {
+            m_opener = spellId;
+            m_openerMinRange = minRange;
+            m_openerMaxRange = maxRange;
+        }
+
+        CreatureAI* GetAI() { return m_ai; }
+        CombatData* GetCombatData() { return m_combatData; };
+
     private:
-        Unit* m_unit;
-        UnitActionBarEntry PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
-        CharmSpellEntry m_charmspells[CREATURE_MAX_SPELLS];
-        CommandStates   m_CommandState;
-        ReactStates     m_reactState;
-        uint32          m_petnumber;
-        GlobalCooldownMgr m_GlobalCooldownMgr;
+        Unit*               m_unit;
+        CreatureAI*         m_ai;
+        CombatData*         m_combatData;
+        UnitActionBarEntry  PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
+        CharmSpellEntry     m_charmspells[CREATURE_MAX_SPELLS];
+        CommandStates       m_CommandState;
+        ReactStates         m_reactState;
+        uint32              m_petnumber;
+        GlobalCooldownMgr   m_GlobalCooldownMgr;
+        uint32              m_opener;
+        uint32              m_openerMinRange;
+        uint32              m_openerMaxRange;
+        uint8               m_unitFieldBytes2_1;
+        bool                m_retreating;
+        bool                m_stayPosSet;
+        float               m_stayPosX;
+        float               m_stayPosY;
+        float               m_stayPosZ;
+        float               m_stayPosO;
 };
 
 // used in CallForAllControlledUnits/CheckAllControlledUnits
@@ -1009,18 +1062,6 @@ enum PowerDefaults
 };
 
 struct SpellProcEventEntry;                                 // used only privately
-
-
-struct CombatData
-{
-public:
-    CombatData(Unit* owner) : threatManager(ThreatManager(owner)), hostileRefManager(HostileRefManager(owner)) {};
-
-    // Manage all Units threatening us
-    ThreatManager threatManager;
-    // Manage all Units that are threatened by us
-    HostileRefManager hostileRefManager;
-};
 
 class MANGOS_DLL_SPEC Unit : public WorldObject
 {
@@ -1434,7 +1475,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         virtual bool IsInWater() const;
         virtual bool IsUnderWater() const;
-        bool isInAccessablePlaceFor(Creature const* c) const;
+        bool isInAccessablePlaceFor(Unit const* unit) const;
 
         void SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, bool critical = false);
         void SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype);
@@ -1539,7 +1580,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool isCharmed() const { return !GetCharmerGuid().IsEmpty(); }
 
         CharmInfo* GetCharmInfo() { return m_charmInfo; }
-        CharmInfo* InitCharmInfo(Unit* charm);
+        virtual CharmInfo* InitCharmInfo(Unit* charm);
+        virtual void DeleteCharmInfo() { delete m_charmInfo; m_charmInfo = nullptr; }
 
         ObjectGuid const& GetTotemGuid(TotemSlot slot) const { return m_TotemSlot[slot]; }
         Totem* GetTotem(TotemSlot slot) const;
@@ -1709,11 +1751,11 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void TauntFadeOut(Unit* taunter);
         void FixateTarget(Unit* pVictim);
         ObjectGuid GetFixateTargetGuid() const { return m_fixateTargetGuid; }
-        ThreatManager& getThreatManager() { return m_combatData->threatManager; }
-        ThreatManager const& getThreatManager() const { return m_combatData->threatManager; }
-        void addHatedBy(HostileReference* pHostileReference) { m_combatData->hostileRefManager.insertFirst(pHostileReference); };
+        ThreatManager& getThreatManager() { return GetCombatData()->threatManager; }
+        ThreatManager const& getThreatManager() const { return const_cast<Unit*>(this)->GetCombatData()->threatManager; }
+        void addHatedBy(HostileReference* pHostileReference) { GetCombatData()->hostileRefManager.insertFirst(pHostileReference); };
         void removeHatedBy(HostileReference* /*pHostileReference*/) { /* nothing to do yet */ }
-        HostileRefManager& getHostileRefManager() { return m_combatData->hostileRefManager; }
+        HostileRefManager& getHostileRefManager() { return GetCombatData()->hostileRefManager; }
 
         Aura* GetAura(uint32 spellId, SpellEffectIndex effindex);
         Aura* GetAura(AuraType type, SpellFamily family, uint64 familyFlag, ObjectGuid casterGuid = ObjectGuid());
@@ -1922,6 +1964,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         virtual bool CanSwim() const = 0;
         virtual bool CanFly() const = 0;
+        virtual bool CanWalk() const = 0;
 
         void ForceHealthAndPowerUpdate();   // force server to send new value for hp and power (including max)
 
@@ -1931,10 +1974,16 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // Take possession of a new spawned unit
         Unit* TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, float y, float z, float ang);
 
+        // Take charm of an unit
+        bool TakeCharmOf(Unit* charmed);
+
         // Reset control to player
         void ResetControlState(bool attackCharmer = true);
 
-        CombatData* m_combatData;
+        float GetAttackDistance(Unit const* pl) const;
+
+        virtual CreatureAI* AI() { return nullptr; }
+        virtual CombatData* GetCombatData() { return m_combatData; }
 
     protected:
         explicit Unit();
@@ -1990,6 +2039,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void DisableSpline();
         bool m_isCreatureLinkingTrigger;
         bool m_isSpawningLinked;
+
+        CombatData* m_combatData;
 
     private:
         void CleanupDeletedAuras();

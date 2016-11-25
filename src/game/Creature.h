@@ -478,10 +478,6 @@ enum TemporaryFactionFlags                                  // Used at real fact
 
 class MANGOS_DLL_SPEC Creature : public Unit
 {
-        CreatureAI* i_AI;
-        CreatureAI* m_pausedAI;                             // Main AI will be stored here during the possessing
-        CombatData* m_pausedCombatData;                     // Main Combat data will be stored here during possessing
-
     public:
 
         explicit Creature(CreatureSubtype subtype = CREATURE_SUBTYPE_GENERIC);
@@ -557,10 +553,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool IsInEvadeMode() const;
 
         bool AIM_Initialize();
-
-        CreatureAI* AI() { return i_AI; }
-
-        void SetPossessed(bool isPossessed = true, Unit* owner = nullptr);
+        virtual CreatureAI* AI() override { if (m_charmInfo && m_charmInfo->GetAI()) return m_charmInfo->GetAI(); else return m_ai; }
+        virtual CombatData* GetCombatData() override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); else return m_combatData; }
 
         void SetWalk(bool enable, bool asDefault = true);
         void SetLevitate(bool enable) override;
@@ -652,8 +646,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_spells[CREATURE_MAX_SPELLS];
         CreatureSpellCooldowns m_CreatureSpellCooldowns;
         CreatureSpellCooldowns m_CreatureCategoryCooldowns;
-
-        float GetAttackDistance(Unit const* pl) const;
 
         void SendAIReaction(AiReaction reactionType);
 
@@ -768,7 +760,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         // below fields has potential for optimization
         bool m_AlreadyCallAssistance;
         bool m_AlreadySearchedAssistance;
-        bool m_AI_locked;
         bool m_isDeadByDefault;
         uint32 m_temporaryFactionFlags;                     // used for real faction changes (not auras etc)
 
@@ -780,6 +771,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         float m_combatStartZ;
 
         Position m_respawnPos;
+
+        CreatureAI* m_ai;
 
     private:
         GridReference<Creature> m_gridRef;

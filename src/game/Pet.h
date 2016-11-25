@@ -169,10 +169,12 @@ class MANGOS_DLL_SPEC Pet : public Creature
 
         bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, uint32 pet_number);
         bool CreateBaseAtCreature(Creature* creature);
-        bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false);
+        bool LoadPetFromDB(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, uint32 healthPercentage = 0);
         void SavePetToDB(PetSaveMode mode);
         void Unsummon(PetSaveMode mode, Unit* owner = nullptr);
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
+        static void DeleteFromDB(Unit* owner, PetSaveMode slot);
+        static SpellCastResult TryLoadFromDB(Unit* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, PetType mandatoryPetType = MAX_PET_TYPE);
 
         void SetDeathState(DeathState s) override;          // overwrite virtual Creature::SetDeathState and Unit::SetDeathState
         void Update(uint32 update_diff, uint32 diff) override;  // overwrite virtual Creature::Update and Unit::Update
@@ -257,47 +259,16 @@ class MANGOS_DLL_SPEC Pet : public Creature
         bool removeSpell(uint32 spell_id, bool learn_prev, bool clear_ab = true);
         void CleanupActionBar();
 
-        bool m_retreating;
-
-        void SetIsRetreating(bool retreating = false) { m_retreating = retreating; }
-        bool GetIsRetreating() { return m_retreating; }
-
-        bool m_stayPosSet;
-        float m_stayPosX;
-        float m_stayPosY;
-        float m_stayPosZ;
-        float m_stayPosO;
-
-        void SetStayPosition(bool stay = false);
-        bool IsStayPosSet() { return m_stayPosSet; }
-
-        float GetStayPosX() { return m_stayPosX; }
-        float GetStayPosY() { return m_stayPosY; }
-        float GetStayPosZ() { return m_stayPosZ; }
-        float GetStayPosO() { return m_stayPosO; }
-
         PetSpellMap     m_spells;
         TeachSpellMap   m_teachspells;
         AutoSpellList   m_autospells;
 
-        uint32          m_opener;
-        uint32          m_openerMinRange;
-        uint32          m_openerMaxRange;
-
-        uint32 GetSpellOpener()         { return m_opener; }
-        uint32 GetSpellOpenerMinRange() { return m_openerMinRange; }
-        uint32 GetSpellOpenerMaxRange() { return m_openerMaxRange; }
-
-        void SetSpellOpener(uint32 spellId = 0, uint32 minRange = 0, uint32 maxRange = 0)
-        {
-            m_opener = spellId;
-            m_openerMinRange = minRange;
-            m_openerMaxRange = maxRange;
-        }
-
         void InitPetCreateSpells();
         void CheckLearning(uint32 spellid);
         uint32 resetTalentsCost() const;
+
+        virtual CharmInfo* InitCharmInfo(Unit* charm) override;
+        virtual void DeleteCharmInfo() override;
 
         void  SetTP(int32 TP);
         int32 GetDispTP();
@@ -314,6 +285,11 @@ class MANGOS_DLL_SPEC Pet : public Creature
         const char* GetNameForLocaleIdx(int32 locale_idx) const { return WorldObject::GetNameForLocaleIdx(locale_idx); }
 
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
+
+        // return charminfo ai only when this pet is possessed. (eye of the beast case for ex.)
+        virtual CreatureAI* AI() override { if (hasUnitState(UNIT_STAT_CONTROLLED) && m_charmInfo->GetAI()) return m_charmInfo->GetAI(); else return m_ai; }
+        virtual CombatData* GetCombatData() override { return m_combatData; }
+
     protected:
         uint32  m_happinessTimer;
         uint32  m_loyaltyTimer;
@@ -326,6 +302,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
 
     private:
         PetModeFlags m_petModeFlags;
+        CharmInfo*   m_originalCharminfo;
 
         void SaveToDB(uint32) override                      // overwrited of Creature::SaveToDB     - don't must be called
         {
