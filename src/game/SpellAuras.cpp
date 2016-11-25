@@ -4393,21 +4393,15 @@ void Aura::PeriodicTick()
             // Hunter's Improved Mend Pet dispel check
             if (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER && spellProto->SpellFamilyFlags && spellProto->SpellIconID == 267)
             {
-                // Check caster has one of the ranks of Improved Mend Pet
-                if (pCaster->HasSpell(19572) || pCaster->HasSpell(19573))
+                int32 triggerAmount = 0;
+                
+                Unit::AuraList const& aurasOverrideClassScripts = pCaster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                for (Unit::AuraList::const_iterator iter = aurasOverrideClassScripts.begin(); iter != aurasOverrideClassScripts.end(); ++iter)
                 {
-                    int32 triggerAmount = 0;
-
-                    // Set threshold for dispel check
-                    if (pCaster->HasSpell(19572))
-                        triggerAmount = 15; //rank 1
-
-                    if (pCaster->HasSpell(19573))
-                        triggerAmount = 50; //rank 2
-
-                    if (roll_chance_i(triggerAmount))
-                        pCaster->CastSpell(target, 24406, true, nullptr, this);
+                    triggerAmount = (*iter)->GetModifier()->m_amount;
                 }
+                if (triggerAmount > 0 && roll_chance_i(triggerAmount))
+                    pCaster->CastSpell(target, 24406, true, nullptr, this);
             }
             
             break;
