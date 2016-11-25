@@ -669,9 +669,6 @@
     <ClCompile Include="..\..\src\scriptdev2\include\sc_instance.cpp">
       <Filter>include</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\scriptdev2\system\MangosdRev.cpp">
-      <Filter>system</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\scriptdev2\system\ScriptLoader.cpp">
       <Filter>system</Filter>
     </ClCompile>
@@ -679,6 +676,24 @@
       <Filter>system</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\scriptdev2\ScriptMgr.cpp" />
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_shade_of_eranikus.cpp">
+      <Filter>scripts\eastern_kingdoms\sunken_temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_atalai_defender.cpp">
+      <Filter>scripts\eastern_kingdoms\sunken_temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_atalai_dragon.cpp">
+      <Filter>scripts\eastern_kingdoms\sunken_temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_atalalarion.cpp">
+      <Filter>scripts\eastern_kingdoms\sunken_temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_avatar_of_hakkar.cpp">
+      <Filter>scripts\eastern_kingdoms\sunken_temple</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\scriptdev2\scripts\eastern_kingdoms\sunken_temple\boss_jammalan_ogom.cpp">
+      <Filter>scripts\eastern_kingdoms\sunken_temple</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\scriptdev2\base\escort_ai.h">
@@ -790,8 +805,5 @@
     <ClInclude Include="..\..\src\scriptdev2\sd2_revision_nr.h" />
     <ClInclude Include="..\..\src\scriptdev2\sd2_revision_sql.h" />
     <ClInclude Include="..\..\src\scriptdev2\ScriptMgr.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="..\..\src\scriptdev2\revision.h" />
   </ItemGroup>
 </Project>
