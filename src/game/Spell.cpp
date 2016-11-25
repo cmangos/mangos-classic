@@ -4264,7 +4264,13 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
 
             if (!dispelTarget)
-                return SPELL_FAILED_NOTHING_TO_DISPEL;
+            {
+                // Don't report triggered spells
+                if (m_triggeredByAuraSpell || m_IsTriggeredSpell)
+                    return SPELL_FAILED_DONT_REPORT;
+                else
+                    return SPELL_FAILED_NOTHING_TO_DISPEL;
+            }
         }
     }
 
