@@ -2233,9 +2233,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1533009,'Your old lives, your mortal desires, mean nothing. You are acolytes of the master now, and you will serve the cause without question! The greatest glory is to die in the master\'s service!',8799,1,0,0,'faerlina SAY_GREET'),
 (-1533010,'Slay them in the master\'s name!',8794,1,0,0,'faerlina SAY_AGGRO1'),
-(-1533011,'You cannot hide from me!',8795,1,0,0,'faerlina SAY_AGGRO2'),
-(-1533012,'Kneel before me, worm!',8796,1,0,0,'faerlina SAY_AGGRO3'),
-(-1533013,'Run while you still can!',8797,1,0,0,'faerlina SAY_AGGRO4'),
+(-1533011,'You cannot hide from me!',8795,1,0,0,'faerlina SAY_ENRAGE_1'),
+(-1533012,'Kneel before me, worm!',8796,1,0,0,'faerlina SAY_ENRAGE_2'),
+(-1533013,'Run while you still can!',8797,1,0,0,'faerlina SAY_ENRAGE_3'),
 (-1533014,'You have failed!',8800,1,0,0,'faerlina SAY_SLAY1'),
 (-1533015,'Pathetic wretch!',8801,1,0,0,'faerlina SAY_SLAY2'),
 (-1533016,'The master... will avenge me!',8798,1,0,0,'faerlina SAY_DEATH'),
