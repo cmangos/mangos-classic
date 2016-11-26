@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Razuvious
-SD%Complete: 85%
+SD%Complete: 90%
 SDComment: TODO: Timers and sounds need confirmation
 SDCategory: Naxxramas
 EndScriptData */
@@ -54,13 +54,11 @@ struct boss_razuviousAI : public ScriptedAI
 
     uint32 m_uiUnbalancingStrikeTimer;
     uint32 m_uiDisruptingShoutTimer;
-    uint32 m_uiCommandSoundTimer;
 
     void Reset() override
     {
         m_uiUnbalancingStrikeTimer = 30000;                 // 30 seconds
-        m_uiDisruptingShoutTimer   = 15000;                 // 15 seconds
-        m_uiCommandSoundTimer      = 40000;                 // 40 seconds
+        m_uiDisruptingShoutTimer   = 25000;                 // 25 seconds               
     }
 
     void KilledUnit(Unit* /*Victim*/) override
@@ -103,6 +101,22 @@ struct boss_razuviousAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
     }
+    
+    // For Triumphant Shout, should be used anytime Disrupting Shout hits a target
+    // Should probably use a dummy for this.
+    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpellEntry) override
+    {
+        if(pSpellEntry->Id == SPELL_DISRUPTING_SHOUT)
+        {
+            switch(urand(0,3))
+            {
+                case 0: DoScriptText(SAY_COMMAND1, m_creature); break;
+                case 1: DoScriptText(SAY_COMMAND2, m_creature); break;
+                case 2: DoScriptText(SAY_COMMAND3, m_creature); break;
+                case 3: DoScriptText(SAY_COMMAND4, m_creature); break;
+            }
+        }
+    }
 
     void UpdateAI(const uint32 uiDiff) override
     {
@@ -126,22 +140,6 @@ struct boss_razuviousAI : public ScriptedAI
         }
         else
             m_uiDisruptingShoutTimer -= uiDiff;
-
-        // Random say
-        if (m_uiCommandSoundTimer < uiDiff)
-        {
-            switch (urand(0, 3))
-            {
-                case 0: DoScriptText(SAY_COMMAND1, m_creature); break;
-                case 1: DoScriptText(SAY_COMMAND2, m_creature); break;
-                case 2: DoScriptText(SAY_COMMAND3, m_creature); break;
-                case 3: DoScriptText(SAY_COMMAND4, m_creature); break;
-            }
-
-            m_uiCommandSoundTimer = 40000;
-        }
-        else
-            m_uiCommandSoundTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
