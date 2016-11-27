@@ -2634,10 +2634,49 @@ bool Unit::IsSpellBlocked(Unit* pCaster, SpellEntry const* spellEntry, WeaponAtt
     return roll_chance_f(blockChance);
 }
 
+float Unit::SpellResistChance(Unit *pVictim, const SpellEntry *spell)
+{
+    float resistChance = 0;
+
+    // TODO: Verify if this attribute affects other resistances (mechanics, etc)
+    // Chance to fully resist a spell by magic resistance
+    if (!spell->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES) && spell->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
+    {
+        const bool binary = IsBinarySpell(spell);
+        const float mitigation = pVictim->CalculateMagicResistanceMitigation(this, pVictim->CalculateEffectiveMagicResistance(this, GetSpellSchoolMask(spell)), binary);
+        resistChance += binary ? (mitigation * 100) : (float(SPELL_PARTIAL_RESIST_DISTRIBUTION.at(uint32(mitigation * 10000)).at(SPELL_PARTIAL_RESIST_PCT_100)) / 100.0f);
+    }
+
+    int32 modResistChance = 0;
+
+    // Chance resist mechanic (select max value from every mechanic spell effect)
+    int32 modResistMechanics = 0;
+    // Get effects mechanic and chance
+    for (int eff = 0; eff < MAX_EFFECT_INDEX; ++eff)
+    {
+        if (const int32 mechanic = GetEffectMechanic(spell, SpellEffectIndex(eff)))
+        {
+            int32 mod = pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, mechanic);
+            if (modResistMechanics < mod)
+                modResistMechanics = mod;
+        }
+    }
+    // Apply mod
+    modResistChance += modResistMechanics;
+
+    // Chance resist debuff
+    modResistChance += pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel));
+
+    return std::max(0.0f, std::min(100.0f, (resistChance + modResistChance)));
+}
+
 // Melee based spells can be miss, parry or dodge on this step
 // Crit or block - determined on damage calculation phase! (and can be both in some time)
 float Unit::MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 skillDiff, SpellEntry const* spell)
 {
+    if (spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS))
+        return 0;
+
     // Calculate hit chance (more correct for chance mod)
     float hitChance = 0.0f;
 
@@ -2693,25 +2732,12 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 
     uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, fullSkillDiff, spell) * 100.0f);
     // Roll miss
-    uint32 tmp = spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS) ? 0 : missChance;
+    uint32 tmp = missChance;
     if (roll < tmp)
         return SPELL_MISS_MISS;
 
-    // Chance resist mechanic (select max value from every mechanic spell effect)
-    int32 resist_mech = 0;
-    // Get effects mechanic and chance
-    for (int eff = 0; eff < MAX_EFFECT_INDEX; ++eff)
-    {
-        int32 effect_mech = GetEffectMechanic(spell, SpellEffectIndex(eff));
-        if (effect_mech)
-        {
-            int32 temp = pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, effect_mech);
-            if (resist_mech < temp * 100)
-                resist_mech = temp * 100;
-        }
-    }
-    // Roll chance
-    tmp += resist_mech;
+    // Roll mechanic resistance
+    tmp += SpellResistChance(pVictim, spell);
     if (roll < tmp)
         return SPELL_MISS_RESIST;
 
@@ -2799,24 +2825,6 @@ float Unit::MagicSpellMissChance(Unit *pVictim, const SpellEntry *spell)
     // Reduce spell hit chance for Area of effect spells from victim SPELL_AURA_MOD_AOE_AVOIDANCE aura
     if (IsAreaOfEffectSpell(spell))
         modHitChance -= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE);
-    // Chance resist mechanic (select max value from every mechanic spell effect)
-    int32 resist_mech = 0;
-    // Get effects mechanic and chance
-    for (int eff = 0; eff < MAX_EFFECT_INDEX; ++eff)
-    {
-        int32 effect_mech = GetEffectMechanic(spell, SpellEffectIndex(eff));
-        if (effect_mech)
-        {
-            int32 temp = pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, effect_mech);
-            if (resist_mech < temp)
-                resist_mech = temp;
-        }
-    }
-    // Apply mod
-    modHitChance -= resist_mech;
-
-    // Chance resist debuff
-    modHitChance -= pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel));
 
     int32 HitChance = modHitChance * 100;
     // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
@@ -2832,27 +2840,17 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
     if (!pVictim->isAlive())
         return SPELL_MISS_NONE;
 
-    SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
+    uint32 rand = urand(0, 10000);
 
-    int32 miss = int32(MagicSpellMissChance(pVictim, spell)) * 100;
-
-    int32 rand = irand(0, 10000);
-
-    if (rand < miss)
+    // Spell miss
+    uint32 tmp = uint32(MagicSpellMissChance(pVictim, spell) * 100);
+    if (rand < tmp)
         return SPELL_MISS_RESIST;
 
-    // Chance to fully resist a spell by magic resistance
-    if (!spell->HasAttribute(SPELL_ATTR_EX4_IGNORE_RESISTANCES))
-    {
-        const bool binary = IsBinarySpell(spell);
-        const float mitigation = pVictim->CalculateMagicResistanceMitigation(this, pVictim->CalculateEffectiveMagicResistance(this, schoolMask), binary);
-        // Calculate full resist chance
-        const uint32 chance = binary ? uint32(mitigation * 10000) : SPELL_PARTIAL_RESIST_DISTRIBUTION.at(uint32(mitigation * 10000)).at(SPELL_PARTIAL_RESIST_PCT_100);
-        // Do a roll for full resist chance
-        if (urand(0,9999) < chance)
-            return SPELL_MISS_RESIST;
-        // Partial resistances for non-binary spells are rolled inside damage dealing
-    }
+    // Resist
+    tmp += uint32(SpellResistChance(pVictim, spell) * 100);
+    if (rand < tmp)
+        return SPELL_MISS_RESIST;
 
     return SPELL_MISS_NONE;
 }
