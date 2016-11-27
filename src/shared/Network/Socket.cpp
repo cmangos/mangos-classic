@@ -139,7 +139,7 @@ void Socket::OnRead(const boost::system::error_code &error, size_t length)
 
                 StartAsyncRead();
             }
-            else
+            else if (!IsClosed())
                 Close();
 
             return;

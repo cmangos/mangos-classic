@@ -138,7 +138,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
             pSummoned->GetMotionMaster()->Clear();
 
             pSummoned->RemoveAllAuras();
-            pSummoned->CastSpell(pSummoned, SPELL_ENTER_THE_LIGHT_DND, false);
+            pSummoned->CastSpell(pSummoned, SPELL_ENTER_THE_LIGHT_DND, TRIGGERED_NONE);
             pSummoned->ForcedDespawn(10000);
 
             // Event ended
@@ -209,7 +209,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
     void DoHandlePhaseEnd()
     {
         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-            pPlayer->CastSpell(pPlayer, SPELL_BLESSING_OF_NORDRASSIL, true);
+            pPlayer->CastSpell(pPlayer, SPELL_BLESSING_OF_NORDRASSIL, TRIGGERED_OLD_TRIGGERED);
 
         DoScriptText(SAY_PHASE_HEAL, m_creature);
 

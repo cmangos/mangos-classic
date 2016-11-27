@@ -64,7 +64,7 @@ struct boss_loathebAI : public ScriptedAI
         m_uiCorruptedMindTimer = 4000;
         m_uiRemoveCurseTimer = 2000;
         m_uiInevitableDoomTimer = MINUTE * 2 * IN_MILLISECONDS;
-        m_uiSummonTimer = urand(10000, 15000);              // first seen in vid after approx 12s
+        m_uiSummonTimer = 12000;
         // m_uiBerserkTimer = MINUTE*12*IN_MILLISECONDS;    // not used
         m_uiCorruptedMindCount = 0;
     }
@@ -135,7 +135,7 @@ struct boss_loathebAI : public ScriptedAI
         if (m_uiSummonTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE) == CAST_OK)
-                m_uiSummonTimer = 13000;
+                m_uiSummonTimer = 12000;
         }
         else
             m_uiSummonTimer -= uiDiff;

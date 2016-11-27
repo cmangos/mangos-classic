@@ -373,7 +373,7 @@ struct npc_ogronAI : public npc_escortAI
                                         DoScriptText(SAY_OGR_HALL_GLAD, pHallan);
 
                                         if (Creature* pReethe = GetCreature(NPC_REETHE))
-                                            pHallan->CastSpell(pReethe, SPELL_FAKE_SHOT, false);
+                                            pHallan->CastSpell(pReethe, SPELL_FAKE_SHOT, TRIGGERED_NONE);
                                     }
                                     break;
                                 case 9:

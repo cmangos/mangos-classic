@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Razuvious
-SD%Complete: 85%
+SD%Complete: 90%
 SDComment: TODO: Timers and sounds need confirmation
 SDCategory: Naxxramas
 EndScriptData */
@@ -29,12 +29,12 @@ enum
     SAY_AGGRO1               = -1533120,
     SAY_AGGRO2               = -1533121,
     SAY_AGGRO3               = -1533122,
-    SAY_SLAY1                = -1533123,
-    SAY_SLAY2                = -1533124,
-    SAY_COMMAND1             = -1533125,
-    SAY_COMMAND2             = -1533126,
-    SAY_COMMAND3             = -1533127,
-    SAY_COMMAND4             = -1533128,
+    SAY_AGGRO4               = -1533123,
+    SAY_SLAY1                = -1533124,
+    SAY_SLAY2                = -1533125,
+    SAY_TRIUMPHANT1          = -1533126,
+    SAY_TRIUMPHANT2          = -1533127,
+    SAY_TRIUMPHANT3          = -1533128,
     SAY_DEATH                = -1533129,
 
     SPELL_UNBALANCING_STRIKE = 26613,
@@ -54,13 +54,11 @@ struct boss_razuviousAI : public ScriptedAI
 
     uint32 m_uiUnbalancingStrikeTimer;
     uint32 m_uiDisruptingShoutTimer;
-    uint32 m_uiCommandSoundTimer;
 
     void Reset() override
     {
         m_uiUnbalancingStrikeTimer = 30000;                 // 30 seconds
-        m_uiDisruptingShoutTimer   = 15000;                 // 15 seconds
-        m_uiCommandSoundTimer      = 40000;                 // 40 seconds
+        m_uiDisruptingShoutTimer   = 25000;                 // 25 seconds               
     }
 
     void KilledUnit(Unit* /*Victim*/) override
@@ -87,11 +85,12 @@ struct boss_razuviousAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        switch (urand(0, 2))
+        switch (urand(0, 3))
         {
             case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
             case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
+            case 3: DoScriptText(SAY_AGGRO4, m_creature); break;
         }
 
         if (m_pInstance)
@@ -123,25 +122,18 @@ struct boss_razuviousAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_DISRUPTING_SHOUT) == CAST_OK)
                 m_uiDisruptingShoutTimer = 25000;
+
+            // TODO need core support to make this yells happen only when spell Disrupting Shout hit a target
+            // For now, Razuvious will yell it at each cast
+            switch (urand(0, 3))
+            {
+                case 0: DoScriptText(SAY_TRIUMPHANT1, m_creature); break;
+                case 1: DoScriptText(SAY_TRIUMPHANT2, m_creature); break;
+                case 2: DoScriptText(SAY_TRIUMPHANT3, m_creature); break;
+            }
         }
         else
             m_uiDisruptingShoutTimer -= uiDiff;
-
-        // Random say
-        if (m_uiCommandSoundTimer < uiDiff)
-        {
-            switch (urand(0, 3))
-            {
-                case 0: DoScriptText(SAY_COMMAND1, m_creature); break;
-                case 1: DoScriptText(SAY_COMMAND2, m_creature); break;
-                case 2: DoScriptText(SAY_COMMAND3, m_creature); break;
-                case 3: DoScriptText(SAY_COMMAND4, m_creature); break;
-            }
-
-            m_uiCommandSoundTimer = 40000;
-        }
-        else
-            m_uiCommandSoundTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }

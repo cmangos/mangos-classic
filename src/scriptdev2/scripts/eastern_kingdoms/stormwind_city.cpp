@@ -857,7 +857,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 break;
             case SPELL_WINDSOR_DEATH:
                 if (Creature* pOnyxia = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
-                    pOnyxia->CastSpell(m_creature, SPELL_WINDSOR_DEATH, false);
+                    pOnyxia->CastSpell(m_creature, SPELL_WINDSOR_DEATH, TRIGGERED_NONE);
                 break;
             case SAY_WINDSOR_KEEP_12:
                 if (Creature* pOnyxia = m_pScriptedMap->GetSingleCreatureFromStorage(NPC_PRESTOR))
@@ -881,7 +881,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 {
                     pOnyxia->ForcedDespawn(1000);
                     pOnyxia->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
-                    pOnyxia->CastSpell(pOnyxia, SPELL_ONYXIA_DESPAWN, false);
+                    pOnyxia->CastSpell(pOnyxia, SPELL_ONYXIA_DESPAWN, TRIGGERED_NONE);
                 }
                 break;
             case NPC_GUARD_ONYXIA:

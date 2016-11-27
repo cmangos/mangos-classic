@@ -295,7 +295,7 @@ void WorldSession::HandleGetChannelMemberCountOpcode(WorldPacket& recvPacket)
             data << chn->GetName();
             data << uint8(chn->GetFlags());
             data << uint32(chn->GetNumPlayers());
-            SendPacket(&data);
+            SendPacket(data);
         }
     }
 }

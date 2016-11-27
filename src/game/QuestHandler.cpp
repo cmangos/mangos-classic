@@ -178,7 +178,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recv_data)
             _player->PlayerTalkClass->CloseGossip();
 
             if (qInfo->GetSrcSpell() > 0)
-                _player->CastSpell(_player, qInfo->GetSrcSpell(), true);
+                _player->CastSpell(_player, qInfo->GetSrcSpell(), TRIGGERED_OLD_TRIGGERED);
 
             return;
         }
@@ -475,7 +475,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
         data << ObjectGuid(guid);
         data << uint32(msg);                             // valid values: 0-8
         data << uint8(0);
-        pPlayer->GetSession()->SendPacket(&data);
+        pPlayer->GetSession()->SendPacket(data);
         _player->ClearDividerGuid();
     }
 }

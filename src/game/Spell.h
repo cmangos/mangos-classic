@@ -306,7 +306,7 @@ class Spell
         void EffectSkinPlayerCorpse(SpellEffectIndex eff_idx);
         void EffectSummonDemon(SpellEffectIndex eff_idx);
 
-        Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
+        Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
         ~Spell();
 
         void SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura = nullptr);
@@ -347,8 +347,8 @@ class Spell
 
         void DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype);
 
-        void WriteSpellGoTargets(WorldPacket* data);
-        void WriteAmmoToPacket(WorldPacket* data);
+        void WriteSpellGoTargets(WorldPacket& data);
+        void WriteAmmoToPacket(WorldPacket& data);
 
         template<typename T> WorldObject* FindCorpseUsing();
 
@@ -378,7 +378,10 @@ class Spell
         Item* m_CastItem;
 
         SpellCastTargets m_targets;
+        
+        // Trigger flag system
         bool m_ignoreHitResult;
+        bool m_ignoreUnselectableTarget;
 
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() { return m_timer; }

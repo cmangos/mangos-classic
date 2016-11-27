@@ -119,10 +119,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
 
         virtual void Update(const uint32&);
 
-        void MessageBroadcast(Player const*, WorldPacket*, bool to_self);
-        void MessageBroadcast(WorldObject const*, WorldPacket*);
-        void MessageDistBroadcast(Player const*, WorldPacket*, float dist, bool to_self, bool own_team_only = false);
-        void MessageDistBroadcast(WorldObject const*, WorldPacket*, float dist);
+        void MessageBroadcast(Player const*, WorldPacket const&, bool to_self);
+        void MessageBroadcast(WorldObject const*, WorldPacket const&);
+        void MessageDistBroadcast(Player const*, WorldPacket const&, float dist, bool to_self, bool own_team_only = false);
+        void MessageDistBroadcast(WorldObject const*, WorldPacket const&, float dist);
 
         float GetVisibilityDistance() const { return m_VisibleDistance; }
         // function for setting up visibility distance for maps on per-type/per-Id basis
@@ -194,9 +194,9 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         bool ActiveObjectsNearGrid(uint32 x, uint32 y) const;
 
         /// Send a Packet to all players on a map
-        void SendToPlayers(WorldPacket const* data) const;
+        void SendToPlayers(WorldPacket const& data) const;
         /// Send a Packet to all players in a zone. Return false if no player found
-        bool SendToPlayersInZone(WorldPacket const* data, uint32 zoneId) const;
+        bool SendToPlayersInZone(WorldPacket const& data, uint32 zoneId) const;
 
         typedef MapRefManager PlayerList;
         PlayerList const& GetPlayers() const { return m_mapRefManager; }

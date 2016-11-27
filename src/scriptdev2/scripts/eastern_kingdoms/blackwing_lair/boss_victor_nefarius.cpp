@@ -225,7 +225,7 @@ struct boss_victor_nefariusAI : public ScriptedAI, private DialogueHelper
         if (pSummoned->GetEntry() == NPC_NEFARIAN)
             m_creature->ForcedDespawn();
         else
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_DRAKONID_BONES, true);
+            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_DRAKONID_BONES, TRIGGERED_OLD_TRIGGERED);
     }
 
     void JustDidDialogueStep(int32 iEntry) override

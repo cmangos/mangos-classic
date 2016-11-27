@@ -137,7 +137,7 @@ struct example_escortAI : public npc_escortAI
             if (m_uiDeathCoilTimer < uiDiff)
             {
                 DoScriptText(SAY_SPELL, m_creature);
-                m_creature->CastSpell(m_creature->getVictim(), SPELL_DEATH_COIL, false);
+                m_creature->CastSpell(m_creature->getVictim(), SPELL_DEATH_COIL, TRIGGERED_NONE);
                 m_uiDeathCoilTimer = 4000;
             }
             else
@@ -155,12 +155,12 @@ struct example_escortAI : public npc_escortAI
                     if (m_creature->HasAura(SPELL_ELIXIR_OF_FORTITUDE, EFFECT_INDEX_0))
                     {
                         DoScriptText(SAY_RAND_1, m_creature);
-                        m_creature->CastSpell(m_creature, SPELL_BLUE_FIREWORK, false);
+                        m_creature->CastSpell(m_creature, SPELL_BLUE_FIREWORK, TRIGGERED_NONE);
                     }
                     else
                     {
                         DoScriptText(SAY_RAND_2, m_creature);
-                        m_creature->CastSpell(m_creature, SPELL_ELIXIR_OF_FORTITUDE, false);
+                        m_creature->CastSpell(m_creature, SPELL_ELIXIR_OF_FORTITUDE, TRIGGERED_NONE);
                     }
 
                     m_uiChatTimer = 12000;

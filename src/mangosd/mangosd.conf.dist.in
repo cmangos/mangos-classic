@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2015090801
+ConfVersion=2016101401
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -618,6 +618,11 @@ LogColors = ""
 #        Default: 0 (not allowed)
 #                 1 (allowed)
 #
+#    Group.OfflineLeaderDelay
+#        A grace period for an offline group leader to reconnect before tranfering leadership to a next suitable member of the group (in secs) 
+#        Default: 300 (5 minutes)
+#                   0 (Do not transfer group leadership)
+#
 #    Guild.EventLogRecordsCount
 #        Count of guild event log records stored in guild_eventlog table
 #        Increase to store more guild events in table, minimum is 100
@@ -755,6 +760,7 @@ Instance.UnloadDelay = 1800000
 Quests.LowLevelHideDiff = 4
 Quests.HighLevelHideDiff = 7
 Quests.IgnoreRaid = 0
+Group.OfflineLeaderDelay = 300
 Guild.EventLogRecordsCount = 100
 TimerBar.Fatigue.GMLevel = 4
 TimerBar.Fatigue.Max = 60

@@ -96,7 +96,7 @@ struct boss_kurinnaxxAI : public ScriptedAI
             if (!pTarget)
                 pTarget = m_creature->getVictim();
 
-            pTarget->CastSpell(pTarget, SPELL_SANDTRAP, true, nullptr, nullptr, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, SPELL_SANDTRAP, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             m_uiSandTrapTimer = urand(10000, 15000);
         }
         else

@@ -66,6 +66,7 @@
 #include <algorithm>
 #include <mutex>
 #include <cstdarg>
+#include <memory>
 
 INSTANTIATE_SINGLETON_1(World);
 
@@ -232,7 +233,7 @@ World::AddSession_(WorldSession* s)
     packet << uint32(0);                                    // BillingTimeRemaining
     packet << uint8(0);                                     // BillingPlanFlags
     packet << uint32(0);                                    // BillingTimeRested
-    s->SendPacket(&packet);
+    s->SendPacket(packet);
 
     UpdateMaxSessionCounters();
 
@@ -276,7 +277,7 @@ void World::AddQueuedSession(WorldSession* sess)
     packet << uint8(0);                                     // BillingPlanFlags
     packet << uint32(0);                                    // BillingTimeRested
     packet << uint32(GetQueuedSessionPos(sess));            // position in queue
-    sess->SendPacket(&packet);
+    sess->SendPacket(packet);
 }
 
 bool World::RemoveQueuedSession(WorldSession* sess)
@@ -662,6 +663,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_PLAYER_COMMANDS, "PlayerCommands", true);
 
     setConfig(CONFIG_UINT32_INSTANT_LOGOUT, "InstantLogout", SEC_MODERATOR);
+
+    setConfigMin(CONFIG_UINT32_GROUP_OFFLINE_LEADER_DELAY, "Group.OfflineLeaderDelay", 300, 0);
 
     setConfigMin(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT, "Guild.EventLogRecordsCount", GUILD_EVENTLOG_MAX_RECORDS, GUILD_EVENTLOG_MAX_RECORDS);
 
@@ -1203,6 +1206,9 @@ void World::SetInitialWorldSettings()
     // for AhBot
     m_timers[WUPDATE_AHBOT].SetInterval(20 * IN_MILLISECONDS); // every 20 sec
 
+    // Update groups with offline leader after delay in seconds
+    m_timers[WUPDATE_GROUPS].SetInterval(IN_MILLISECONDS);
+
     // to set mailtimer to return mails every day between 4 and 5 am
     // mailtimer is increased when updating auctions
     // one second is 1000 -(tested on win system)
@@ -1375,6 +1381,17 @@ void World::Update(uint32 diff)
     sBattleGroundMgr.Update(diff);
     sOutdoorPvPMgr.Update(diff);
 
+    ///- Update groups with offline leaders
+    if (m_timers[WUPDATE_GROUPS].Passed())
+    {
+        m_timers[WUPDATE_GROUPS].Reset();
+        if (const uint32 delay = getConfig(CONFIG_UINT32_GROUP_OFFLINE_LEADER_DELAY))
+        {
+            for (ObjectMgr::GroupMap::const_iterator i = sObjectMgr.GetGroupMapBegin(); i != sObjectMgr.GetGroupMapEnd(); ++i)
+                i->second->UpdateOfflineLeader(m_gameTime, delay);
+        }
+    }
+
     ///- Delete all characters which have been deleted X days before
     if (m_timers[WUPDATE_DELETECHARS].Passed())
     {
@@ -1433,7 +1450,7 @@ namespace MaNGOS
     class WorldWorldTextBuilder
     {
         public:
-            typedef std::vector<WorldPacket*> WorldPacketList;
+            typedef std::vector<std::unique_ptr<WorldPacket>> WorldPacketList;
             explicit WorldWorldTextBuilder(int32 textId, va_list* args = nullptr) : i_textId(textId), i_args(args) {}
             void operator()(WorldPacketList& data_list, int32 loc_idx)
             {
@@ -1462,9 +1479,9 @@ namespace MaNGOS
 
                 while (char* line = lineFromMessage(pos))
                 {
-                    WorldPacket* data = new WorldPacket();
+                    auto data = std::unique_ptr<WorldPacket>(new WorldPacket());
                     ChatHandler::BuildChatPacket(*data, CHAT_MSG_SYSTEM, line);
-                    data_list.push_back(data);
+                    data_list.push_back(std::move(data));
                 }
             }
 
@@ -1495,9 +1512,9 @@ void World::SendWorldText(int32 string_id, ...)
 }
 
 /// Sends a packet to all players with optional team and instance restrictions
-void World::SendGlobalMessage(WorldPacket* packet)
+void World::SendGlobalMessage(WorldPacket const& packet) const
 {
-    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    for (SessionMap::const_iterator itr = m_sessions.cbegin(); itr != m_sessions.cend(); ++itr)
     {
         if (WorldSession* session = itr->second)
         {
@@ -1509,16 +1526,16 @@ void World::SendGlobalMessage(WorldPacket* packet)
 }
 
 /// Sends a server message to the specified or all players
-void World::SendServerMessage(ServerMessageType type, const char* text /*=""*/, Player* player /*= nullptr*/)
+void World::SendServerMessage(ServerMessageType type, const char* text /*=""*/, Player* player /*= nullptr*/) const
 {
     WorldPacket data(SMSG_SERVER_MESSAGE, 50);              // guess size
     data << uint32(type);
     data << text;
 
     if (player)
-        player->GetSession()->SendPacket(&data);
+        player->GetSession()->SendPacket(data);
     else
-        SendGlobalMessage(&data);
+        SendGlobalMessage(data);
 }
 
 /// Sends a zone under attack message to all players not in an instance
@@ -1533,7 +1550,7 @@ void World::SendZoneUnderAttackMessage(uint32 zoneId, Team team)
         {
             Player* player = session->GetPlayer();
             if (player && player->IsInWorld() && player->GetTeam() == team && !player->GetMap()->Instanceable())
-                itr->second->SendPacket(&data);
+                itr->second->SendPacket(data);
         }
     }
 }
@@ -1555,7 +1572,7 @@ void World::SendDefenseMessage(uint32 zoneId, int32 textId)
                 data << uint32(zoneId);
                 data << uint32(messageLength);
                 data << message;
-                session->SendPacket(&data);
+                session->SendPacket(data);
             }
         }
     }
@@ -1769,27 +1786,28 @@ void World::UpdateSessions(uint32 /*diff*/)
     {
         std::lock_guard<std::mutex> guard(m_sessionAddQueueLock);
 
-        std::for_each(m_sessionAddQueue.begin(), m_sessionAddQueue.end(), [&](WorldSession *session) { AddSession_(session); });
+        for (auto const &session : m_sessionAddQueue)
+            AddSession_(session);
 
         m_sessionAddQueue.clear();
     }
 
     ///- Then send an update signal to remaining ones
-    for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
+    for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); )
     {
-        next = itr;
-        ++next;
         ///- and remove not active sessions from the list
         WorldSession* pSession = itr->second;
         WorldSessionFilter updater(pSession);
 
-        // the session itself is owned by the socket which created it.  that is where the destruction of the session will happen.
+        // if WorldSession::Update fails, it means that the session should be destroyed
         if (!pSession->Update(updater))
         {
             RemoveQueuedSession(pSession);
-            m_sessions.erase(itr);
-            pSession->Finalize();
+            itr = m_sessions.erase(itr);
+            delete pSession;
         }
+        else
+            ++itr;
     }
 }
 
@@ -2092,5 +2110,5 @@ void World::InvalidatePlayerDataToAllClient(ObjectGuid guid)
 {
     WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
     data << guid;
-    SendGlobalMessage(&data);
+    SendGlobalMessage(data);
 }

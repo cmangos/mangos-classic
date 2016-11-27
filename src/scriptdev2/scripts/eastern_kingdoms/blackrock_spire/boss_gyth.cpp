@@ -86,7 +86,7 @@ struct boss_gythAI : public ScriptedAI
             {
                 if (Creature* pNefarius = m_pInstance->GetSingleCreatureFromStorage(NPC_LORD_VICTOR_NEFARIUS))
                 {
-                    pNefarius->CastSpell(m_creature, SPELL_CHROMATIC_CHAOS, true);
+                    pNefarius->CastSpell(m_creature, SPELL_CHROMATIC_CHAOS, TRIGGERED_OLD_TRIGGERED);
                     DoScriptText(SAY_NEFARIUS_BUFF_GYTH, pNefarius);
                     m_bHasChromaticChaos = true;
                 }

@@ -110,21 +110,17 @@ namespace MaNGOS
     {
         while (!m_pendingShutdown || !m_closingSockets.empty())
         {
-            {
-                std::lock_guard<std::mutex> guard(m_closingSocketLock);
-
-                for (auto i = m_closingSockets.begin(); i != m_closingSockets.end(); i++)
-                    if (i->get()->Deletable())
-                    {
-                        i = m_closingSockets.erase(i);
-
-                        // avoid incrementing the end iterator
-                        if (i == m_closingSockets.end())
-                            break;
-                    }
-            }
-
             std::this_thread::sleep_for(std::chrono::milliseconds(WorkDelay));
+
+            std::lock_guard<std::mutex> guard(m_closingSocketLock);
+
+            for (auto i = m_closingSockets.begin(); i != m_closingSockets.end(); )
+            {
+                if ((*i)->Deletable())
+                    i = m_closingSockets.erase(i);
+                else
+                    ++i;
+            }
         }
     }
 

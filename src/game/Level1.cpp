@@ -143,7 +143,7 @@ bool ChatHandler::HandleNotifyCommand(char* args)
 
     WorldPacket data(SMSG_NOTIFICATION, (str.size() + 1));
     data << str;
-    sWorld.SendGlobalMessage(&data);
+    sWorld.SendGlobalMessage(data);
 
     return true;
 }
@@ -250,7 +250,7 @@ bool ChatHandler::HandleGMVisibleCommand(char* args)
         m_session->SendNotification(LANG_INVISIBLE_INVISIBLE);
         player->SetGMVisible(false);
         if (invisibleAuraInfo)
-            player->CastSpell(player, invisibleAuraInfo, true);
+            player->CastSpell(player, invisibleAuraInfo, TRIGGERED_OLD_TRIGGERED);
     }
 
     return true;
@@ -1395,13 +1395,13 @@ bool ChatHandler::HandleModifyMountCommand(char* args)
     data << chr->GetPackGUID();
     data << (uint32)0;
     data << float(speed);
-    chr->SendMessageToSet(&data, true);
+    chr->SendMessageToSet(data, true);
 
     data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE, (8 + 4 + 4));
     data << chr->GetPackGUID();
     data << (uint32)0;
     data << float(speed);
-    chr->SendMessageToSet(&data, true);
+    chr->SendMessageToSet(data, true);
 
     return true;
 }

@@ -29,6 +29,7 @@
 #include "CreatureAIRegistry.h"
 #include "WaypointMovementGenerator.h"
 #include "GuardianAI.h"
+#include "PossessedAI.h"
 
 namespace AIRegistry
 {
@@ -42,6 +43,7 @@ namespace AIRegistry
         (new CreatureAIFactory<TotemAI>("TotemAI"))->RegisterSelf();
         (new CreatureAIFactory<CreatureEventAI>("EventAI"))->RegisterSelf();
         (new CreatureAIFactory<GuardianAI>("GuardianAI"))->RegisterSelf();
+        (new CreatureAIFactory<PossessedAI>("PossessedAI"))->RegisterSelf();
 
         (new MovementGeneratorFactory<RandomMovementGenerator<Creature> >(RANDOM_MOTION_TYPE))->RegisterSelf();
         (new MovementGeneratorFactory<WaypointMovementGenerator<Creature> >(WAYPOINT_MOTION_TYPE))->RegisterSelf();

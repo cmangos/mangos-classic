@@ -560,9 +560,9 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         virtual void CleanupsBeforeDelete();                // used in destructor or explicitly before mass creature delete to remove cross-references to already deleted units
 
-        virtual void SendMessageToSet(WorldPacket* data, bool self) const;
-        virtual void SendMessageToSetInRange(WorldPacket* data, float dist, bool self) const;
-        void SendMessageToSetExcept(WorldPacket* data, Player const* skipped_receiver) const;
+        virtual void SendMessageToSet(WorldPacket const& data, bool self) const;
+        virtual void SendMessageToSetInRange(WorldPacket const& data, float dist, bool self) const;
+        void SendMessageToSetExcept(WorldPacket& data, Player const* skipped_receiver) const;
 
         void MonsterSay(const char* text, uint32 language, Unit const* target = nullptr) const;
         void MonsterYell(const char* text, uint32 language, Unit const* target = nullptr) const;

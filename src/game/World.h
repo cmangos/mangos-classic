@@ -74,7 +74,8 @@ enum WorldTimers
     WUPDATE_EVENTS      = 3,
     WUPDATE_DELETECHARS = 4,
     WUPDATE_AHBOT       = 5,
-    WUPDATE_COUNT       = 6
+    WUPDATE_GROUPS      = 6,
+    WUPDATE_COUNT       = 7
 };
 
 /// Configuration elements
@@ -156,6 +157,7 @@ enum eConfigUInt32Values
     CONFIG_UINT32_BATTLEGROUND_PREMATURE_FINISH_TIMER,
     CONFIG_UINT32_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH,
     CONFIG_UINT32_BATTLEGROUND_QUEUE_ANNOUNCER_JOIN,
+    CONFIG_UINT32_GROUP_OFFLINE_LEADER_DELAY,
     CONFIG_UINT32_GUILD_EVENT_LOG_COUNT,
     CONFIG_UINT32_TIMERBAR_FATIGUE_GMLEVEL,
     CONFIG_UINT32_TIMERBAR_FATIGUE_MAX,
@@ -464,8 +466,8 @@ class World
         void LoadConfigSettings(bool reload = false);
 
         void SendWorldText(int32 string_id, ...);
-        void SendGlobalMessage(WorldPacket* packet);
-        void SendServerMessage(ServerMessageType type, const char* text = "", Player* player = nullptr);
+        void SendGlobalMessage(WorldPacket const& packet) const;
+        void SendServerMessage(ServerMessageType type, const char* text = "", Player* player = nullptr) const;
         void SendZoneUnderAttackMessage(uint32 zoneId, Team team);
         void SendDefenseMessage(uint32 zoneId, int32 textId);
 

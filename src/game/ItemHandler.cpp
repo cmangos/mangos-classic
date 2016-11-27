@@ -362,7 +362,9 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
 
                 data << pProto->Spells[s].SpellId;
                 data << pProto->Spells[s].SpellTrigger;
-                data << uint32(-abs(pProto->Spells[s].SpellCharges));
+
+                // let the database control the sign here.  negative means that the item should be consumed once the charges are consumed.
+                data << pProto->Spells[s].SpellCharges;
 
                 if (db_data)
                 {
@@ -403,14 +405,14 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
         data << pProto->Area;
         data << pProto->Map;                                // Added in 1.12.x & 2.0.1 client branch
         data << pProto->BagFamily;
-        SendPacket(&data);
+        SendPacket(data);
     }
     else
     {
         DEBUG_LOG("WORLD: CMSG_ITEM_QUERY_SINGLE - NO item INFO! (ENTRY: %u)", item);
         WorldPacket data(SMSG_ITEM_QUERY_SINGLE_RESPONSE, 4);
         data << uint32(item | 0x80000000);
-        SendPacket(&data);
+        SendPacket(data);
     }
 }
 
@@ -441,7 +443,7 @@ void WorldSession::HandleReadItemOpcode(WorldPacket& recv_data)
             _player->SendEquipError(msg, pItem, nullptr);
         }
         data << ObjectGuid(pItem->GetObjectGuid());
-        SendPacket(&data);
+        SendPacket(data);
     }
     else
         _player->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, nullptr, nullptr);
@@ -486,88 +488,105 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
     }
 
     Item* pItem = _player->GetItemByGuid(itemGuid);
-    if (pItem)
+
+    if (!pItem)
+        return;
+
+    // prevent sell not owner item
+    if (_player->GetObjectGuid() != pItem->GetOwnerGuid())
     {
-        // prevent sell not owner item
-        if (_player->GetObjectGuid() != pItem->GetOwnerGuid())
+        _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemGuid, 0);
+        return;
+    }
+
+    // prevent sell non empty bag by drag-and-drop at vendor's item list
+    if (pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
+    {
+        _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemGuid, 0);
+        return;
+    }
+
+    // prevent sell currently looted item
+    if (_player->GetLootGuid() == pItem->GetObjectGuid())
+    {
+        _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemGuid, 0);
+        return;
+    }
+
+    // special case at auto sell (sell all)
+    if (count == 0)
+    {
+        count = pItem->GetCount();
+    }
+    else
+    {
+        // prevent sell more items that exist in stack (possible only not from client)
+        if (count > pItem->GetCount())
         {
             _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemGuid, 0);
-            return;
-        }
-
-        // prevent sell non empty bag by drag-and-drop at vendor's item list
-        if (pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
-        {
-            _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemGuid, 0);
-            return;
-        }
-
-        // prevent sell currently looted item
-        if (_player->GetLootGuid() == pItem->GetObjectGuid())
-        {
-            _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemGuid, 0);
-            return;
-        }
-
-        // special case at auto sell (sell all)
-        if (count == 0)
-        {
-            count = pItem->GetCount();
-        }
-        else
-        {
-            // prevent sell more items that exist in stack (possible only not from client)
-            if (count > pItem->GetCount())
-            {
-                _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemGuid, 0);
-                return;
-            }
-        }
-
-        ItemPrototype const* pProto = pItem->GetProto();
-        if (pProto)
-        {
-            if (pProto->SellPrice > 0)
-            {
-                if (count < pItem->GetCount())              // need split items
-                {
-                    Item* pNewItem = pItem->CloneItem(count, _player);
-                    if (!pNewItem)
-                    {
-                        sLog.outError("WORLD: HandleSellItemOpcode - could not create clone of item %u; count = %u", pItem->GetEntry(), count);
-                        _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemGuid, 0);
-                        return;
-                    }
-
-                    pItem->SetCount(pItem->GetCount() - count);
-                    _player->ItemRemovedQuestCheck(pItem->GetEntry(), count);
-                    if (_player->IsInWorld())
-                        pItem->SendCreateUpdateToPlayer(_player);
-                    pItem->SetState(ITEM_CHANGED, _player);
-
-                    _player->AddItemToBuyBackSlot(pNewItem);
-                    if (_player->IsInWorld())
-                        pNewItem->SendCreateUpdateToPlayer(_player);
-                }
-                else
-                {
-                    _player->ItemRemovedQuestCheck(pItem->GetEntry(), pItem->GetCount());
-                    _player->RemoveItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
-                    pItem->RemoveFromUpdateQueueOf(_player);
-                    _player->AddItemToBuyBackSlot(pItem);
-                }
-
-                uint32 money = pProto->SellPrice * count;
-
-                _player->ModifyMoney(money);
-            }
-            else
-                _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemGuid, 0);
             return;
         }
     }
-    _player->SendSellError(SELL_ERR_CANT_FIND_ITEM, pCreature, itemGuid, 0);
-    return;
+
+    ItemPrototype const* pProto = pItem->GetProto();
+
+    if (!pProto)
+    {
+        _player->SendSellError(SELL_ERR_CANT_FIND_ITEM, pCreature, itemGuid, 0);
+        return;
+    }
+
+    if (pProto->SellPrice == 0)
+    {
+        _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemGuid, 0);
+        return;
+    }
+
+    uint32 money = pProto->SellPrice * count;
+
+    for (auto i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+    {
+        auto const &spell = pProto->Spells[i];
+
+        // if spell charges for this item are negative, it means that the item should be destroyed once the charges are consumed.
+        // it also means that the value of this item is relative to how many charges are remaining.
+        if (spell.SpellId != 0 && spell.SpellCharges < 0)
+        {
+            auto const multiplier = static_cast<float>(pItem->GetSpellCharges(i)) / spell.SpellCharges;
+            money *= multiplier;
+            break;
+        }
+    }
+
+    if (count < pItem->GetCount())              // need split items
+    {
+        Item* pNewItem = pItem->CloneItem(count, _player);
+        if (!pNewItem)
+        {
+            sLog.outError("WORLD: HandleSellItemOpcode - could not create clone of item %u; count = %u", pItem->GetEntry(), count);
+            _player->SendSellError(SELL_ERR_CANT_SELL_ITEM, pCreature, itemGuid, 0);
+            return;
+        }
+
+        pItem->SetCount(pItem->GetCount() - count);
+        _player->ItemRemovedQuestCheck(pItem->GetEntry(), count);
+        if (_player->IsInWorld())
+            pItem->SendCreateUpdateToPlayer(_player);
+        pItem->SetState(ITEM_CHANGED, _player);
+
+        _player->AddItemToBuyBackSlot(pNewItem, money);
+        if (_player->IsInWorld())
+            pNewItem->SendCreateUpdateToPlayer(_player);
+    }
+    else
+    {
+        _player->ItemRemovedQuestCheck(pItem->GetEntry(), pItem->GetCount());
+        _player->RemoveItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
+        pItem->RemoveFromUpdateQueueOf(_player);
+        _player->AddItemToBuyBackSlot(pItem, money);
+    }
+
+    _player->ModifyMoney(money);
 }
 
 void WorldSession::HandleBuybackItem(WorldPacket& recv_data)
@@ -701,7 +720,7 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
         data << ObjectGuid(vendorguid);
         data << uint8(0);                                   // count==0, next will be error code
         data << uint8(0);                                   // "Vendor has no inventory"
-        SendPacket(&data);
+        SendPacket(data);
         return;
     }
 
@@ -766,12 +785,12 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid)
     if (count == 0)
     {
         data << uint8(0);                                   // "Vendor has no inventory"
-        SendPacket(&data);
+        SendPacket(data);
         return;
     }
 
     data.put<uint8>(count_pos, count);
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleAutoStoreBagItemOpcode(WorldPacket& recv_data)
@@ -875,7 +894,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
     if (!slotEntry)
     {
         data << uint32(ERR_BANKSLOT_FAILED_TOO_MANY);
-        SendPacket(&data);
+        SendPacket(data);
         return;
     }
 
@@ -884,7 +903,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
     if (_player->GetMoney() < price)
     {
         data << uint32(ERR_BANKSLOT_INSUFFICIENT_FUNDS);
-        SendPacket(&data);
+        SendPacket(data);
         return;
     }
 
@@ -892,7 +911,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
     _player->ModifyMoney(-int32(price));
 
     data << uint32(ERR_BANKSLOT_OK);
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
@@ -994,7 +1013,7 @@ void WorldSession::SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGu
     data << uint32(itemId);
     data << uint32(spellId);
     data << uint8(0);
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::SendItemEnchantTimeUpdate(ObjectGuid playerGuid, ObjectGuid itemGuid, uint32 slot, uint32 duration)
@@ -1005,7 +1024,7 @@ void WorldSession::SendItemEnchantTimeUpdate(ObjectGuid playerGuid, ObjectGuid i
     data << uint32(slot);
     data << uint32(duration);
     data << ObjectGuid(playerGuid);
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleItemNameQueryOpcode(WorldPacket& recv_data)
@@ -1027,7 +1046,7 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket& recv_data)
         data << uint32(pProto->ItemId);
         data << name;
         data << uint32(pProto->InventoryType);
-        SendPacket(&data);
+        SendPacket(data);
         return;
     }
     else
