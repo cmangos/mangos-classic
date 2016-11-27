@@ -2722,10 +2722,7 @@ float Unit::MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 
 // Melee based spells hit result calculations
 SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 {
-    WeaponAttackType attType = BASE_ATTACK;
-
-    if (spell->DmgClass == SPELL_DAMAGE_CLASS_RANGED)
-        attType = RANGED_ATTACK;
+    const WeaponAttackType attType = (spell->DmgClass == SPELL_DAMAGE_CLASS_RANGED) ? RANGED_ATTACK : BASE_ATTACK;
 
     // bonus from skills is 0.04% per skill Diff
     int32 attackerWeaponSkill = (spell->EquippedItemClass == ITEM_CLASS_WEAPON) ? int32(GetWeaponSkillValue(attType, pVictim)) : GetMaxSkillValueForLevel();
@@ -2734,33 +2731,31 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 
     uint32 roll = urand(0, 10000);
 
-    uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, fullSkillDiff, spell) * 100.0f);
     // Roll miss
-    uint32 tmp = missChance;
+    uint32 tmp = uint32(MeleeSpellMissChance(pVictim, attType, fullSkillDiff, spell) * 100.0f);
     if (roll < tmp)
         return SPELL_MISS_MISS;
 
     // Roll mechanic resistance
-    tmp += SpellResistChance(pVictim, spell);
+    tmp += uint32(SpellResistChance(pVictim, spell) * 100.0f);
     if (roll < tmp)
         return SPELL_MISS_RESIST;
 
-    bool canDodge = true;
-    bool canParry = true;
-    bool canBlock = spell->HasAttribute(SPELL_ATTR_EX3_BLOCKABLE_SPELL);
-
-    // Same spells cannot be parry/dodge
+    // Some spells cannot be parried/dodged/blocked
     if (spell->HasAttribute(SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK))
         return SPELL_MISS_NONE;
 
-    // Ranged attack cannot be parry/dodge
-    if (attType == RANGED_ATTACK)
+    // Ranged attack cannot be parried/dodged
+    bool canDodge = (attType == BASE_ATTACK);
+    bool canParry = (attType == BASE_ATTACK);
+    bool canBlock = spell->HasAttribute(SPELL_ATTR_EX3_BLOCKABLE_SPELL);
+
+    // End early if no posssible miss causes
+    if (!canDodge && !canParry && !canBlock)
         return SPELL_MISS_NONE;
 
-    bool from_behind = !pVictim->HasInArc(M_PI_F, this);
-
     // Check for attack from behind
-    if (from_behind)
+    if (IsFacingTargetsBack(pVictim))
     {
         // Can`t dodge from behind in PvP (but its possible in PvE)
         if (GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
@@ -2769,12 +2764,15 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
         canParry = false;
         canBlock = false;
     }
-    // Check creatures flags_extra for disable parry
+
+    // Check creatures flags_extra for disable parry and block
     if (pVictim->GetTypeId() == TYPEID_UNIT)
     {
         uint32 flagEx = ((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags;
         if (flagEx & CREATURE_EXTRA_FLAG_NO_PARRY)
             canParry = false;
+        if (flagEx & CREATURE_EXTRA_FLAG_NO_BLOCK)
+            canBlock = false;
     }
 
     if (canDodge)
@@ -2805,13 +2803,8 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 
     if (canBlock)
     {
+        // Roll block
         int32 blockChance = int32(pVictim->GetUnitBlockChance() * 100.0f) - skillDiff * 4;
-
-        if (GetTypeId() == TYPEID_UNIT)
-        {
-            if (((Creature*)this)->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_BLOCK)
-                blockChance = 0;
-        }
 
         if (blockChance < 0)
             blockChance = 0;
