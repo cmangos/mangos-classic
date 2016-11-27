@@ -47,7 +47,7 @@ namespace MaNGOS
             std::list<std::unique_ptr<SocketType>> m_sockets;
 
             // note that the work member *must* be declared after the service member for the work constructor to function correctly
-            boost::asio::io_service::work m_work;
+            std::unique_ptr<boost::asio::io_service::work> m_work;
 
             std::mutex m_closingSocketLock;
             std::list<std::unique_ptr<SocketType>> m_closingSockets;
@@ -60,7 +60,8 @@ namespace MaNGOS
             void SocketCleanupWork();
 
         public:
-            NetworkThread() : m_work(m_service), m_pendingShutdown(false),
+            NetworkThread() : m_work(new boost::asio::io_service::work(m_service)),
+                m_pendingShutdown(false),
                 m_serviceThread([this] { boost::system::error_code ec; this->m_service.run(ec); }),
                 m_socketCleanupThread([this] { this->SocketCleanupWork(); })
             {
@@ -69,6 +70,8 @@ namespace MaNGOS
 
             ~NetworkThread()
             {
+                // Allow io_service::run() to exit.
+                m_work.reset();
                 // we do not lock the list here because Close() will call RemoveSocket which needs the lock
                 while (!m_sockets.empty())
                 {
