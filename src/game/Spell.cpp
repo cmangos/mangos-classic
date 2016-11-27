@@ -4259,7 +4259,10 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         // Classic only (seems to be handled client side tbc and later (not verified)) - Only check effect 0
         // Spells such as Abolish Poison have dispel on effect 1 but should be castable even if target not poisoned
-        if (m_spellInfo->Effect[0] == SPELL_EFFECT_DISPEL)
+        // shield slam has dispel on effect 0 which should be castable even if nothing to dispel
+        if (m_spellInfo->Effect[0] == SPELL_EFFECT_DISPEL
+            && m_spellInfo->Effect[1] == SPELL_EFFECT_NONE
+            && m_spellInfo->Effect[2] == SPELL_EFFECT_NONE)
         {
             bool dispelTarget = false;
             uint32 mechanic = m_spellInfo->EffectMiscValue[0];
