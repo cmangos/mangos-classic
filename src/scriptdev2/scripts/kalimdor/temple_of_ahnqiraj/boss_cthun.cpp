@@ -406,7 +406,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
         for (GuidList::const_iterator itr = m_lPlayersInStomachList.begin(); itr != m_lPlayersInStomachList.end(); ++itr)
         {
             if (Player* pPlayer = m_creature->GetMap()->GetPlayer(*itr))
-                pPlayer->CastSpell(pPlayer, SPELL_PORT_OUT_STOMACH_EFFECT, true);
+                pPlayer->CastSpell(pPlayer, SPELL_PORT_OUT_STOMACH_EFFECT, TRIGGERED_OLD_TRIGGERED);
         }
 
         Scripted_NoMovementAI::EnterEvadeMode();
@@ -570,7 +570,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                     {
                         // Cast the spell using the target as source
                         pTarget->InterruptNonMeleeSpells(false);
-                        pTarget->CastSpell(pTarget, SPELL_MOUTH_TENTACLE, true, nullptr, nullptr, m_creature->GetObjectGuid());
+                        pTarget->CastSpell(pTarget, SPELL_MOUTH_TENTACLE, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                         m_stomachEnterTargetGuid = pTarget->GetObjectGuid();
 
                         m_uiStomachEnterTimer  = 3800;
@@ -588,7 +588,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
                         // Check for valid player
                         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_stomachEnterTargetGuid))
                         {
-                            pPlayer->CastSpell(pPlayer, SPELL_DIGESTIVE_ACID_TELEPORT, true);
+                            pPlayer->CastSpell(pPlayer, SPELL_DIGESTIVE_ACID_TELEPORT, TRIGGERED_OLD_TRIGGERED);
                             m_lPlayersInStomachList.push_back(pPlayer->GetObjectGuid());
                         }
 
@@ -664,7 +664,7 @@ struct boss_cthunAI : public Scripted_NoMovementAI
             for (GuidList::const_iterator itr = m_lPlayersInStomachList.begin(); itr != m_lPlayersInStomachList.end(); ++itr)
             {
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(*itr))
-                    pPlayer->CastSpell(pPlayer, SPELL_DIGESTIVE_ACID, true, nullptr, nullptr, m_creature->GetObjectGuid());
+                    pPlayer->CastSpell(pPlayer, SPELL_DIGESTIVE_ACID, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             }
             m_uiDigestiveAcidTimer = 4000;
         }
@@ -762,7 +762,7 @@ bool AreaTrigger_at_stomach_cthun(Player* pPlayer, AreaTriggerEntry const* pAt)
 
         // Summon the exit trigger which should push the player outside the stomach - not used because missing eject spells
         // if (!GetClosestCreatureWithEntry(pPlayer, NPC_EXIT_TRIGGER, 10.0f))
-        //    pPlayer->CastSpell(pPlayer, SPELL_EXIT_STOMACH, true);
+        //    pPlayer->CastSpell(pPlayer, SPELL_EXIT_STOMACH, TRIGGERED_OLD_TRIGGERED);
 
         // Note: because of the missing spell id 26224, we will use basic jump movement
         // Disabled because of the missing jump effect
@@ -782,7 +782,7 @@ bool AreaTrigger_at_stomach_cthun(Player* pPlayer, AreaTriggerEntry const* pAt)
                 pPlayer->NearTeleportTo(pCthun->GetPositionX(), pCthun->GetPositionY(), pCthun->GetPositionZ() + 15.0f, frand(0, 2 * M_PI_F));
 
                 // Note: the real knockback spell id should be 26230
-                pPlayer->CastSpell(pPlayer, SPELL_EXIT_STOMACH_KNOCKBACK, true, nullptr, nullptr, pCthun->GetObjectGuid());
+                pPlayer->CastSpell(pPlayer, SPELL_EXIT_STOMACH_KNOCKBACK, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pCthun->GetObjectGuid());
             }
         }
     }

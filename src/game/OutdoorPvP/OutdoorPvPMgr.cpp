@@ -97,8 +97,8 @@ void OutdoorPvPMgr::HandlePlayerEnterZone(Player* player, uint32 zoneId)
 {
     if (OutdoorPvP* script = GetScript(zoneId))
         script->HandlePlayerEnterZone(player, true);
-    else if (OutdoorPvP* script = GetScriptOfAffectedZone(zoneId))
-        script->HandlePlayerEnterZone(player, false);
+    else if (OutdoorPvP* affectedScript = GetScriptOfAffectedZone(zoneId))
+        affectedScript->HandlePlayerEnterZone(player, false);
 }
 
 /**
@@ -112,8 +112,8 @@ void OutdoorPvPMgr::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
     // teleport: called once from Player::CleanupsBeforeDelete, once from Player::UpdateZone
     if (OutdoorPvP* script = GetScript(zoneId))
         script->HandlePlayerLeaveZone(player, true);
-    else if (OutdoorPvP* script = GetScriptOfAffectedZone(zoneId))
-        script->HandlePlayerLeaveZone(player, false);
+    else if (OutdoorPvP* affectedScript = GetScriptOfAffectedZone(zoneId))
+        affectedScript->HandlePlayerLeaveZone(player, false);
 }
 
 void OutdoorPvPMgr::Update(uint32 diff)

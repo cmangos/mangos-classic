@@ -52,7 +52,7 @@ class MANGOS_DLL_SPEC Camera
         void UpdateVisibilityOf(T* obj, UpdateData& d, std::set<WorldObject*>& vis);
         void UpdateVisibilityOf(WorldObject* obj);
 
-        void ReceivePacket(WorldPacket* data);
+        void ReceivePacket(WorldPacket& data);
 
         // updates visibility of worldobjects around viewpoint for camera's owner
         void UpdateVisibilityForOwner();
@@ -103,7 +103,7 @@ class MANGOS_DLL_SPEC ViewPoint
 
     public:
 
-        ViewPoint() : m_grid(0) {}
+        ViewPoint() : m_grid(nullptr) {}
         ~ViewPoint();
 
         bool hasViewers() const { return !m_cameras.empty(); }

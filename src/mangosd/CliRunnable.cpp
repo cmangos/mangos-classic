@@ -34,7 +34,7 @@
 #include "Player.h"
 #include "Chat.h"
 
-void utf8print(void* /*arg*/, const char* str)
+void utf8print(const char* str)
 {
 #if PLATFORM == PLATFORM_WINDOWS
     wchar_t wtemp_buf[6000];
@@ -50,7 +50,7 @@ void utf8print(void* /*arg*/, const char* str)
 #endif
 }
 
-void commandFinished(void*, bool /*sucess*/)
+void commandFinished(bool /*sucess*/)
 {
     printf("mangos>");
     fflush(stdout);
@@ -490,7 +490,7 @@ bool ChatHandler::HandleAccountCreateCommand(char* args)
             SendSysMessage(LANG_ACCOUNT_TOO_LONG);
             SetSentErrorMessage(true);
             return false;
-        case AOR_NAME_ALREDY_EXIST:
+        case AOR_NAME_ALREADY_EXIST:
             SendSysMessage(LANG_ACCOUNT_ALREADY_EXIST);
             SetSentErrorMessage(true);
             return false;
@@ -637,7 +637,7 @@ void CliRunnable::run()
                 continue;
             }
 
-            sWorld.QueueCliCommand(new CliCommandHolder(0, SEC_CONSOLE, nullptr, command.c_str(), &utf8print, &commandFinished));
+            sWorld.QueueCliCommand(new CliCommandHolder(0, SEC_CONSOLE, command.c_str(), &utf8print, &commandFinished));
         }
         else if (feof(stdin))
         {

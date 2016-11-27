@@ -20,8 +20,10 @@
 #define _VMAPMANAGER2_H
 
 #include "IVMapManager.h"
-#include "Common.h"
+
 #include <G3D/Vector3.h>
+
+#include <unordered_map>
 
 //===========================================================
 
@@ -47,7 +49,7 @@ namespace VMAP
     class ManagedModel
     {
         public:
-            ManagedModel(): iModel(0), iRefCount(0) {}
+            ManagedModel() : iModel(nullptr), iRefCount(0) {}
             void setModel(WorldModel* model) { iModel = model; }
             WorldModel* getModel() { return iModel; }
             void incRefCount() { ++iRefCount; }

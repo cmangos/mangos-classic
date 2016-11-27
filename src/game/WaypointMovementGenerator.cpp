@@ -16,15 +16,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <ctime>
-
 #include "WaypointMovementGenerator.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "Creature.h"
-#include "CreatureAI.h"
+#include "AI/CreatureAI.h"
 #include "WaypointManager.h"
-#include "WorldPacket.h"
 #include "ScriptMgr.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
@@ -128,7 +125,7 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
             creature.HandleEmote(behavior->emote);
 
         if (behavior->spell != 0)
-            creature.CastSpell(&creature, behavior->spell, false);
+            creature.CastSpell(&creature, behavior->spell, TRIGGERED_NONE);
 
         if (behavior->model1 != 0)
             creature.SetDisplayId(behavior->model1);
@@ -386,12 +383,13 @@ void FlightPathMovementGenerator::Finalize(Player& player)
 
     player.Unmount();
     player.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+    player.SetClientControl(&player, 1);
 
     if (player.m_taxi.empty())
     {
         player.getHostileRefManager().setOnlineOfflineState(true);
         if (player.pvpInfo.inHostileArea)
-            player.CastSpell(&player, 2479, true);
+            player.CastSpell(&player, 2479, TRIGGERED_OLD_TRIGGERED);
 
         // update z position to ground and orientation for landing point
         // this prevent cheating with landing  point at lags
@@ -412,6 +410,7 @@ void FlightPathMovementGenerator::Reset(Player& player)
     player.getHostileRefManager().setOnlineOfflineState(false);
     player.addUnitState(UNIT_STAT_TAXI_FLIGHT);
     player.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+    player.SetClientControl(&player, 0);
 
     Movement::MoveSplineInit init(player);
     uint32 end = GetPathAtMapEnd();
@@ -442,7 +441,20 @@ bool FlightPathMovementGenerator::Update(Player& player, const uint32& /*diff*/)
         while (true);
     }
 
-    return i_currentNode < (i_path->size() - 1);
+    const bool flying = (i_currentNode < (i_path->size() - 1));
+
+    // Multi-map flight paths
+    if (flying && (*i_path)[i_currentNode + 1].mapid != player.GetMapId())
+    {
+        // short preparations to continue flight
+        Interrupt(player);                // will reset at map landing
+        SetCurrentNodeAfterTeleport();
+        TaxiPathNodeEntry const& node = (*i_path)[i_currentNode];
+        SkipCurrentNode();
+        player.TeleportTo(node.mapid, node.x, node.y, node.z, player.GetOrientation());
+    }
+
+    return flying;
 }
 
 void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()

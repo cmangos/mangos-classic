@@ -25,7 +25,6 @@
 #include "GridDefines.h"
 #include "World.h"
 #include "CellImpl.h"
-#include "Corpse.h"
 #include "ObjectMgr.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, std::recursive_mutex>
@@ -33,7 +32,7 @@ INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(MapManager, std::recursive_mutex);
 
 MapManager::MapManager()
-    : i_gridCleanUpDelay(sWorld.getConfig(CONFIG_UINT32_INTERVAL_GRIDCLEAN))
+    : i_GridStateErrorCount(0), i_gridCleanUpDelay(sWorld.getConfig(CONFIG_UINT32_INTERVAL_GRIDCLEAN))
 {
     i_timer.SetInterval(sWorld.getConfig(CONFIG_UINT32_INTERVAL_MAPUPDATE));
 }
@@ -92,12 +91,11 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 {
     Guard _guard(*this);
 
-    Map* m = nullptr;
-
     const MapEntry* entry = sMapStore.LookupEntry(id);
     if (!entry)
         return nullptr;
 
+    Map* m;
     if (entry->Instanceable())
     {
         MANGOS_ASSERT(obj && obj->GetTypeId() == TYPEID_PLAYER);
@@ -282,7 +280,7 @@ Map* MapManager::CreateInstance(uint32 id, Player* player)
 {
     Map* map = nullptr;
     Map* pNewMap = nullptr;
-    uint32 NewInstanceId = 0;                               // instanceId of the resulting map
+    uint32 NewInstanceId;                                    // instanceId of the resulting map
     const MapEntry* entry = sMapStore.LookupEntry(id);
 
     if (entry->IsBattleGround())

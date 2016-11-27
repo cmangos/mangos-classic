@@ -278,11 +278,11 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
                 break;
             case SPELL_GREEN_DRAGON_TRANSFORM:
                 if (Creature* pMerithra = m_creature->GetMap()->GetCreature(m_merithraGuid))
-                    pMerithra->CastSpell(pMerithra, SPELL_GREEN_DRAGON_TRANSFORM, false);
+                    pMerithra->CastSpell(pMerithra, SPELL_GREEN_DRAGON_TRANSFORM, TRIGGERED_NONE);
                 break;
             case SAY_ARYGOS_ATTACK_2:
                 if (Creature* pMerithra = m_creature->GetMap()->GetCreature(m_merithraGuid))
-                    pMerithra->CastSpell(pMerithra, SPELL_MERITHRA_WAKE, false);
+                    pMerithra->CastSpell(pMerithra, SPELL_MERITHRA_WAKE, TRIGGERED_NONE);
                 break;
             case NPC_ARYGOS:
                 // Move Arygos to attack
@@ -307,11 +307,11 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
                 break;
             case SPELL_BLUE_DRAGON_TRANSFORM:
                 if (Creature* pArygos = m_creature->GetMap()->GetCreature(m_arygosGuid))
-                    pArygos->CastSpell(pArygos, SPELL_BLUE_DRAGON_TRANSFORM, false);
+                    pArygos->CastSpell(pArygos, SPELL_BLUE_DRAGON_TRANSFORM, TRIGGERED_NONE);
                 break;
             case SPELL_ARYGOS_VENGEANCE:
                 if (Creature* pArygos = m_creature->GetMap()->GetCreature(m_arygosGuid))
-                    pArygos->CastSpell(pArygos, SPELL_ARYGOS_VENGEANCE, false);
+                    pArygos->CastSpell(pArygos, SPELL_ARYGOS_VENGEANCE, TRIGGERED_NONE);
                 break;
             case POINT_ID_DRAGON_ATTACK:
                 // Move Arygos to the exit point
@@ -336,11 +336,11 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
                 break;
             case SPELL_RED_DRAGON_TRANSFORM:
                 if (Creature* pCaelestrasz = m_creature->GetMap()->GetCreature(m_CaelestraszGuid))
-                    pCaelestrasz->CastSpell(pCaelestrasz, SPELL_RED_DRAGON_TRANSFORM, false);
+                    pCaelestrasz->CastSpell(pCaelestrasz, SPELL_RED_DRAGON_TRANSFORM, TRIGGERED_NONE);
                 break;
             case SPELL_CAELESTRASZ_MOLTEN_RAIN:
                 if (Creature* pCaelestrasz = m_creature->GetMap()->GetCreature(m_CaelestraszGuid))
-                    pCaelestrasz->CastSpell(pCaelestrasz, SPELL_CAELESTRASZ_MOLTEN_RAIN, false);
+                    pCaelestrasz->CastSpell(pCaelestrasz, SPELL_CAELESTRASZ_MOLTEN_RAIN, TRIGGERED_NONE);
                 break;
             case SAY_ANACHRONOS_SEAL_1:
                 // Send Caelestrasz on flight
@@ -380,7 +380,7 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
             case SAY_FANDRAL_SEAL_6:
                 // Here Anachronos should continue to cast something
                 if (Creature* pFandral = m_creature->GetMap()->GetCreature(m_fandralGuid))
-                    pFandral->CastSpell(pFandral, SPELL_CALL_ANCIENTS, false);
+                    pFandral->CastSpell(pFandral, SPELL_CALL_ANCIENTS, TRIGGERED_NONE);
                 break;
             case EMOTE_FANDRAL_EXHAUSTED:
                 if (Creature* pFandral = m_creature->GetMap()->GetCreature(m_fandralGuid))
@@ -405,7 +405,7 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
             case EMOTE_FANDRAL_SHATTER:
                 // Shatter the scepter
                 if (Creature* pFandral = m_creature->GetMap()->GetCreature(m_fandralGuid))
-                    pFandral->CastSpell(pFandral, SPELL_SHATTER_HAMMER, false);
+                    pFandral->CastSpell(pFandral, SPELL_SHATTER_HAMMER, TRIGGERED_NONE);
                 break;
             case SAY_ANACHRONOS_EPILOGUE_6:
                 if (Creature* pFandral = m_creature->GetMap()->GetCreature(m_fandralGuid))

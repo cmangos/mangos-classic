@@ -41,7 +41,7 @@ extern int m_ServiceStatus;
 
 SERVICE_STATUS serviceStatus;
 
-SERVICE_STATUS_HANDLE serviceStatusHandle = 0;
+SERVICE_STATUS_HANDLE serviceStatusHandle = nullptr;
 
 typedef WINADVAPI BOOL (WINAPI* CSD_T)(SC_HANDLE, DWORD, LPCVOID);
 
@@ -49,7 +49,7 @@ bool WinServiceInstall()
 {
     CSD_T ChangeService_Config2;
     HMODULE advapi32;
-    SC_HANDLE serviceControlManager = OpenSCManager(0, 0, SC_MANAGER_CREATE_SERVICE);
+    SC_HANDLE serviceControlManager = OpenSCManager(nullptr, nullptr, SC_MANAGER_CREATE_SERVICE);
 
     if (!serviceControlManager)
     {
@@ -58,7 +58,7 @@ bool WinServiceInstall()
     }
 
     char path[_MAX_PATH + 10];
-    if (!GetModuleFileName(0, path, sizeof(path) / sizeof(path[0])))
+    if (!GetModuleFileName(nullptr, path, sizeof(path) / sizeof(path[0])))
     {
         CloseServiceHandle(serviceControlManager);
         sLog.outError("SERVICE: Can't get service binary filename.");
@@ -76,11 +76,11 @@ bool WinServiceInstall()
                                       SERVICE_AUTO_START,   // start type
                                       SERVICE_ERROR_IGNORE, // error control type
                                       path,                 // service's binary
-                                      0,                    // no load ordering group
-                                      0,                    // no tag identifier
-                                      0,                    // no dependencies
-                                      0,                    // LocalSystem account
-                                      0);                   // no password
+                                      nullptr,              // no load ordering group
+                                      nullptr,              // no tag identifier
+                                      nullptr,              // no dependencies
+                                      nullptr,              // LocalSystem account
+                                      nullptr);             // no password
 
     if (!service)
     {
@@ -134,7 +134,7 @@ bool WinServiceInstall()
 
 bool WinServiceUninstall()
 {
-    SC_HANDLE serviceControlManager = OpenSCManager(0, 0, SC_MANAGER_CONNECT);
+    SC_HANDLE serviceControlManager = OpenSCManager(nullptr, nullptr, SC_MANAGER_CONNECT);
 
     if (!serviceControlManager)
     {
@@ -221,7 +221,7 @@ void WINAPI ServiceMain(DWORD argc, char* argv[])
         char path[_MAX_PATH + 1];
         unsigned int i, last_slash = 0;
 
-        GetModuleFileName(0, path, sizeof(path) / sizeof(path[0]));
+        GetModuleFileName(nullptr, path, sizeof(path) / sizeof(path[0]));
 
         for (i = 0; i < std::strlen(path); ++i)
         {
@@ -268,7 +268,7 @@ bool WinServiceRun()
     SERVICE_TABLE_ENTRY serviceTable[] =
     {
         { serviceName, ServiceMain },
-        { 0, 0 }
+        { nullptr, nullptr }
     };
 
     if (!StartServiceCtrlDispatcher(serviceTable))

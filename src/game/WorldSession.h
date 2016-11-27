@@ -28,9 +28,11 @@
 #include "ObjectGuid.h"
 #include "AuctionHouseMgr.h"
 #include "Item.h"
+#include "WorldSocket.h"
 
 #include <deque>
 #include <mutex>
+#include <memory>
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -44,7 +46,6 @@ class Object;
 class Player;
 class Unit;
 class WorldPacket;
-class WorldSocket;
 class QueryResult;
 class LoginQueryHolder;
 class CharacterHandler;
@@ -88,7 +89,7 @@ class PacketFilter
         explicit PacketFilter(WorldSession* pSession) : m_pSession(pSession) {}
         virtual ~PacketFilter() {}
 
-        virtual bool Process(WorldPacket* /*packet*/) { return true; }
+        virtual bool Process(WorldPacket const& /*packet*/) const { return true; }
         virtual bool ProcessLogout() const { return true; }
 
     protected:
@@ -101,7 +102,7 @@ class MapSessionFilter : public PacketFilter
         explicit MapSessionFilter(WorldSession* pSession) : PacketFilter(pSession) {}
         ~MapSessionFilter() {}
 
-        virtual bool Process(WorldPacket* packet) override;
+        virtual bool Process(WorldPacket const& packet) const override;
         // in Map::Update() we do not process player logout!
         virtual bool ProcessLogout() const override { return false; }
 };
@@ -114,7 +115,7 @@ class WorldSessionFilter : public PacketFilter
         explicit WorldSessionFilter(WorldSession* pSession) : PacketFilter(pSession) {}
         ~WorldSessionFilter() {}
 
-        virtual bool Process(WorldPacket* packet) override;
+        virtual bool Process(WorldPacket const& packet) const override;
 };
 
 /// Player session in the World
@@ -130,10 +131,9 @@ class MANGOS_DLL_SPEC WorldSession
         bool PlayerLogout() const { return m_playerLogout; }
         bool PlayerLogoutWithSave() const { return m_playerLogout && m_playerSave; }
 
-
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
-        void SendPacket(WorldPacket const* packet);
+        void SendPacket(WorldPacket const& packet);
         void SendNotification(const char* format, ...) ATTR_PRINTF(2, 3);
         void SendNotification(int32 string_id, ...);
         void SendPetNameInvalid(uint32 error, const std::string& name);
@@ -148,7 +148,7 @@ class MANGOS_DLL_SPEC WorldSession
         Player* GetPlayer() const { return _player; }
         char const* GetPlayerName() const;
         void SetSecurity(AccountTypes security) { _security = security; }
-        std::string const& GetRemoteAddress() { return m_Address; }
+        const std::string &GetRemoteAddress() const { return m_Socket->GetRemoteAddress(); }
         void SetPlayer(Player* plr) { _player = plr; }
 
         /// Session in auth.queue currently
@@ -169,10 +169,10 @@ class MANGOS_DLL_SPEC WorldSession
             return (_logoutTime > 0 && currTime >= _logoutTime + 20);
         }
 
-        void LogoutPlayer(bool Save);
+        void LogoutPlayer(bool save);
         void KickPlayer();
 
-        void QueuePacket(WorldPacket* new_packet);
+        void QueuePacket(std::unique_ptr<WorldPacket> new_packet);
 
         bool Update(PacketFilter& updater);
 
@@ -229,8 +229,6 @@ class MANGOS_DLL_SPEC WorldSession
             }
         }
 
-        bool SendItemInfo(uint32 itemid, WorldPacket data);
-
         // auction
         void SendAuctionHello(Unit* unit);
         void SendAuctionCommandResult(AuctionEntry* auc, AuctionAction Action, AuctionError ErrorCode, InventoryResult invError = EQUIP_ERR_OK);
@@ -258,7 +256,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendSaveGuildEmblem(uint32 msg);
         void SendBattleGroundJoinError(uint8 err);
 
-        void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket* data);
+        void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
 
         // Account mute time
         time_t m_muteTime;
@@ -276,7 +274,6 @@ class MANGOS_DLL_SPEC WorldSession
         // Misc
         void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed);
         void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit);
-        void SendItemPageInfo(ItemPrototype* itemProto);
 
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
@@ -324,8 +321,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleMoveTeleportAckOpcode(WorldPacket& recvPacket);
         void HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data);
 
-        void HandlePingOpcode(WorldPacket& recvPacket);
-        void HandleAuthSessionOpcode(WorldPacket& recvPacket);
         void HandleRepopRequestOpcode(WorldPacket& recvPacket);
         void HandleAutostoreLootItemOpcode(WorldPacket& recvPacket);
         void HandleLootMoneyOpcode(WorldPacket& recvPacket);
@@ -494,8 +489,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleAuctionListOwnerItems(WorldPacket& recv_data);
         void HandleAuctionPlaceBid(WorldPacket& recv_data);
 
-        void AuctionBind(uint32 price, AuctionEntry* auction, Player* pl, Player* auction_owner);
-
         void HandleGetMailList(WorldPacket& recv_data);
         void HandleSendMail(WorldPacket& recv_data);
         void HandleMailTakeMoney(WorldPacket& recv_data);
@@ -658,15 +651,15 @@ class MANGOS_DLL_SPEC WorldSession
         bool VerifyMovementInfo(MovementInfo const& movementInfo) const;
         void HandleMoverRelocation(MovementInfo& movementInfo);
 
-        void ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket* packet);
+        void ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket& packet);
 
         // logging helper
-        void LogUnexpectedOpcode(WorldPacket* packet, const char* reason);
-        void LogUnprocessedTail(WorldPacket* packet);
+        void LogUnexpectedOpcode(WorldPacket const& packet, const char* reason);
+        void LogUnprocessedTail(WorldPacket const& packet);
 
-        Player* _player;
-        WorldSocket* m_Socket;
-        std::string m_Address;
+        std::mutex m_logoutMutex;                           // this mutex is necessary to avoid two simultaneous logouts due to a valid logout request and socket error
+        Player * _player;
+        WorldSocket * const m_Socket;                       // socket pointer is owned by the network thread which created 
 
         AccountTypes _security;
         uint32 _accountId;
@@ -674,7 +667,9 @@ class MANGOS_DLL_SPEC WorldSession
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue
         bool m_playerLoading;                               // code processed in LoginPlayer
-        bool m_playerLogout;                                // code processed in LogoutPlayer
+
+        // True when the player is in the process of logging out (WorldSession::LogoutPlayer is currently executing)
+        bool m_playerLogout;
         bool m_playerRecentlyLogout;
         bool m_playerSave;                                  // code processed in LogoutPlayer with save request
         LocaleConstant m_sessionDbcLocale;
@@ -685,7 +680,7 @@ class MANGOS_DLL_SPEC WorldSession
         TutorialDataState m_tutorialState;
 
         std::mutex m_recvQueueLock;
-        std::deque<WorldPacket *> m_recvQueue;
+        std::deque<std::unique_ptr<WorldPacket>> m_recvQueue;
 };
 #endif
 /// @}

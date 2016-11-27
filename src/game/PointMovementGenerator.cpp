@@ -17,9 +17,8 @@
  */
 
 #include "PointMovementGenerator.h"
-#include "Errors.h"
 #include "Creature.h"
-#include "CreatureAI.h"
+#include "AI/CreatureAI.h"
 #include "TemporarySummon.h"
 #include "World.h"
 #include "movement/MoveSplineInit.h"
@@ -66,9 +65,6 @@ void PointMovementGenerator<T>::Reset(T& unit)
 template<class T>
 bool PointMovementGenerator<T>::Update(T& unit, const uint32& /*diff*/)
 {
-    if (!&unit)
-        return false;
-
     if (unit.hasUnitState(UNIT_STAT_CAN_NOT_MOVE))
     {
         unit.clearUnitState(UNIT_STAT_ROAMING_MOVE);
@@ -133,8 +129,8 @@ void EffectMovementGenerator::Finalize(Unit& unit)
     if (unit.GetTypeId() != TYPEID_UNIT)
         return;
 
-    if (((Creature&)unit).AI() && unit.movespline->Finalized())
-        ((Creature&)unit).AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
+    if (unit.AI() && unit.movespline->Finalized())
+        unit.AI()->MovementInform(EFFECT_MOTION_TYPE, m_Id);
     // Need restore previous movement since we have no proper states system
     if (unit.isAlive() && !unit.hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING | UNIT_STAT_NO_COMBAT_MOVEMENT))
     {

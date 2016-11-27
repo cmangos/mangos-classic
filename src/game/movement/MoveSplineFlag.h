@@ -20,8 +20,6 @@
 #define MANGOSSERVER_MOVESPLINEFLAG_H
 
 #include "typedefs.h"
-#include <string>
-
 namespace Movement
 {
 #if defined( __GNUC__ )
@@ -86,8 +84,8 @@ namespace Movement
 
             // Constant interface
 
-            bool isSmooth() const { return raw() & Mask_CatmullRom;}
-            bool isFacing() const { return raw() & Mask_Final_Facing;}
+            bool isSmooth() const { return !!(raw() & Mask_CatmullRom); }
+            bool isFacing() const { return !!(raw() & Mask_Final_Facing); }
 
             bool hasAllFlags(uint32 f) const { return (raw() & f) == f;}
             uint32 operator & (uint32 f) const { return (raw() & f);}

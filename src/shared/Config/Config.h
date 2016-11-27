@@ -20,32 +20,32 @@
 #define CONFIG_H
 
 #include "Common.h"
-#include <Policies/Singleton.h>
+#include "Policies/Singleton.h"
 #include "Platform/Define.h"
+#include <mutex>
 
-class ACE_Configuration_Heap;
+#include <string>
+#include <unordered_map>
 
 class MANGOS_DLL_SPEC Config
 {
+    private:
+        std::string m_filename;
+        std::unordered_map<std::string, std::string> m_entries; // keys are converted to lower case.  values cannot be.
+
     public:
-
-        Config();
-        ~Config();
-
-        bool SetSource(const char* file);
+        bool SetSource(const std::string &file);
         bool Reload();
 
-        std::string GetStringDefault(const char* name, const char* def);
-        bool GetBoolDefault(const char* name, const bool def = false);
-        int32 GetIntDefault(const char* name, const int32 def);
-        float GetFloatDefault(const char* name, const float def);
+        bool IsSet(const std::string &name) const;
 
-        std::string GetFilename() const { return mFilename; }
+        const std::string GetStringDefault(const std::string &name, const std::string &def = "") const;
+        bool GetBoolDefault(const std::string &name, bool def) const;
+        int32 GetIntDefault(const std::string &name, int32 def) const;
+        float GetFloatDefault(const std::string &name, float def) const;
 
-    private:
-
-        std::string mFilename;
-        ACE_Configuration_Heap* mConf;
+        const std::string &GetFilename() const { return m_filename; }
+        std::mutex m_configLock;
 };
 
 #define sConfig MaNGOS::Singleton<Config>::Instance()

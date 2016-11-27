@@ -30,6 +30,7 @@
 //       struct OpcodeHandler in this header and Opcode.cpp and get totally wrong data from
 //       table opcodeTable in source when Opcode.h included but WorldSession.h not included
 #include "WorldSession.h"
+#include "Policies/Singleton.h"
 
 /// List of Opcodes
 enum OpcodesList

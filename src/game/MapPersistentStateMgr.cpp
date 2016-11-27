@@ -16,27 +16,25 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <list>
-
 #include "MapPersistentStateMgr.h"
 
 #include "SQLStorages.h"
 #include "Player.h"
-#include "GridNotifiers.h"
 #include "Log.h"
-#include "GridStates.h"
 #include "CellImpl.h"
 #include "Map.h"
 #include "MapManager.h"
 #include "Timer.h"
 #include "GridNotifiersImpl.h"
-#include "Transports.h"
 #include "ObjectMgr.h"
 #include "GameEventMgr.h"
 #include "World.h"
 #include "Group.h"
 #include "InstanceData.h"
 #include "ProgressBar.h"
+
+#include <list>
+#include <cstdarg>
 
 INSTANTIATE_SINGLETON_1(MapPersistentStateManager);
 
@@ -504,8 +502,8 @@ void DungeonResetScheduler::ScheduleReset(bool add, time_t time, DungeonResetEve
 
 void DungeonResetScheduler::Update()
 {
-    time_t now = time(nullptr), t;
-    while (!m_resetTimeQueue.empty() && (t = m_resetTimeQueue.begin()->first) < now)
+    time_t now = time(nullptr);
+    while (!m_resetTimeQueue.empty() && m_resetTimeQueue.begin()->first < now)
     {
         DungeonResetEvent& event = m_resetTimeQueue.begin()->second;
         if (event.type == RESET_EVENT_NORMAL_DUNGEON)
@@ -718,11 +716,11 @@ void MapPersistentStateManager::_DelHelper(DatabaseType& db, const char* fields,
     {
         do
         {
-            Field* fields = result->Fetch();
+            Field* resultFields = result->Fetch();
             std::ostringstream ss;
             for (size_t i = 0; i < fieldTokens.size(); ++i)
             {
-                std::string fieldValue = fields[i].GetCppString();
+                std::string fieldValue = resultFields[i].GetCppString();
                 db.escape_string(fieldValue);
                 ss << (i != 0 ? " AND " : "") << fieldTokens[i] << " = '" << fieldValue << "'";
             }

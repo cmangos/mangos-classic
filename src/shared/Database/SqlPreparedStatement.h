@@ -20,7 +20,7 @@
 #define SQLPREPAREDSTATEMENTS_H
 
 #include "Common.h"
-#include <ace/TSS_T.h>
+
 #include <vector>
 #include <stdexcept>
 
@@ -75,7 +75,7 @@ class MANGOS_DLL_SPEC SqlStmtFieldData
         void set(T1 param1);
 
         // getters
-        bool toBool() const { MANGOS_ASSERT(m_type == FIELD_BOOL); return static_cast<bool>(m_binaryData.ui8); }
+        bool toBool() const { MANGOS_ASSERT(m_type == FIELD_BOOL); return !!m_binaryData.ui8; }
         uint8 toUint8() const { MANGOS_ASSERT(m_type == FIELD_UI8); return m_binaryData.ui8; }
         int8 toInt8() const { MANGOS_ASSERT(m_type == FIELD_I8); return m_binaryData.i8; }
         uint16 toUint16() const { MANGOS_ASSERT(m_type == FIELD_UI16); return m_binaryData.ui16; }

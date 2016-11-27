@@ -18,7 +18,7 @@
 
 add_definitions(-DDT_POLYREF64)
 
-set(detour_SRCS
+set(DETOUR_SRCS
     DetourAlloc.cpp
     DetourCommon.cpp
     DetourNavMeshBuilder.cpp
@@ -35,5 +35,5 @@ include_directories(
 )
 
 add_library(detour STATIC
-  ${detour_SRCS}
+  ${DETOUR_SRCS}
 )

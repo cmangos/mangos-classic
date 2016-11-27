@@ -21,14 +21,14 @@
 
 #include "GridNotifiers.h"
 #include "WorldPacket.h"
-#include "Corpse.h"
 #include "Player.h"
-#include "UpdateData.h"
-#include "CreatureAI.h"
+#include "AI/CreatureAI.h"
 #include "SpellAuras.h"
 #include "DBCStores.h"
 #include "DBCEnums.h"
 #include "DBCStores.h"
+
+#include <memory>
 
 template<class T>
 inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T>& m)
@@ -576,7 +576,6 @@ void MaNGOS::LocalizedPacketDo<Builder>::operator()(Player* p)
 {
     int32 loc_idx = p->GetSession()->GetSessionDbLocaleIndex();
     uint32 cache_idx = loc_idx + 1;
-    WorldPacket* data;
 
     // create if not cached yet
     if (i_data_cache.size() < cache_idx + 1 || !i_data_cache[cache_idx])
@@ -584,16 +583,14 @@ void MaNGOS::LocalizedPacketDo<Builder>::operator()(Player* p)
         if (i_data_cache.size() < cache_idx + 1)
             i_data_cache.resize(cache_idx + 1);
 
-        data = new WorldPacket();
+        auto data = std::unique_ptr<WorldPacket>(new WorldPacket());
 
         i_builder(*data, loc_idx);
 
-        i_data_cache[cache_idx] = data;
+        i_data_cache[cache_idx] = std::move(data);
     }
-    else
-        data = i_data_cache[cache_idx];
 
-    p->SendDirectMessage(data);
+    p->SendDirectMessage(*i_data_cache[cache_idx]);
 }
 
 template<class Builder>
@@ -617,7 +614,7 @@ void MaNGOS::LocalizedPacketListDo<Builder>::operator()(Player* p)
         data_list = &i_data_cache[cache_idx];
 
     for (size_t i = 0; i < data_list->size(); ++i)
-        p->SendDirectMessage((*data_list)[i]);
+        p->SendDirectMessage(*(*data_list)[i]);
 }
 
 #endif                                                      // MANGOS_GRIDNOTIFIERSIMPL_H

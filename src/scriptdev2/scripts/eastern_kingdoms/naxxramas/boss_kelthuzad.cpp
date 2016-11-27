@@ -16,14 +16,10 @@
 
 /* ScriptData
 SDName: Boss_KelThuzad
-SD%Complete: 75
-SDComment: Timers will need adjustments, along with tweaking positions and amounts
+SD%Complete: 90
+SDComment: TODO: Tweak Positions and look more into say timers.
 SDCategory: Naxxramas
 EndScriptData */
-
-// some not answered questions:
-// - will intro mobs, not sent to center, despawn when phase 2 start?
-// - what happens if raid fail, can they start the event as soon after as they want?
 
 #include "precompiled.h"
 #include "naxxramas.h"
@@ -68,9 +64,9 @@ enum
 
     SPELL_CHANNEL_VISUAL                = 29423,
 
-    MAX_SOLDIER_COUNT                   = 71,
-    MAX_ABOMINATION_COUNT               = 8,
-    MAX_BANSHEE_COUNT                   = 8,
+    MAX_SOLDIER_COUNT                   = 120,
+    MAX_ABOMINATION_COUNT               = 14,
+    MAX_BANSHEE_COUNT                   = 14,
 };
 
 static float M_F_ANGLE = 0.2f;                              // to adjust for map rotation
@@ -110,6 +106,7 @@ struct boss_kelthuzadAI : public ScriptedAI
     uint32 m_uiPhase1Timer;
     uint32 m_uiSoldierTimer;
     uint32 m_uiBansheeTimer;
+    uint32 m_uiAbominationBaseTimer;
     uint32 m_uiAbominationTimer;
     uint8  m_uiPhase;
     uint32 m_uiSoldierCount;
@@ -123,26 +120,27 @@ struct boss_kelthuzadAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiFrostBoltTimer      = urand(1000, 60000);       // It won't be more than a minute without cast it
-        m_uiFrostBoltNovaTimer  = 15000;                    // Cast every 15 seconds
-        m_uiChainsTimer         = urand(30000, 60000);      // Cast no sooner than once every 30 seconds
-        m_uiManaDetonationTimer = 20000;                    // Seems to cast about every 20 seconds
-        m_uiShadowFissureTimer  = 25000;                    // 25 seconds
-        m_uiFrostBlastTimer     = urand(30000, 60000);      // Random time between 30-60 seconds
-        m_uiGuardiansTimer      = 5000;                     // 5 seconds for summoning each Guardian of Icecrown in phase 3
-        m_uiLichKingAnswerTimer = 4000;
-        m_uiGuardiansCount      = 0;
-        m_uiSummonIntroTimer    = 0;
-        m_uiIntroPackCount      = 0;
+        m_uiFrostBoltTimer       = urand(1000, 60000);       // It won't be more than a minute without cast it
+        m_uiFrostBoltNovaTimer   = 15000;                    // Cast every 15 seconds
+        m_uiChainsTimer          = urand(60000, 120000);     // Cast every 60 - 120 seconds
+        m_uiManaDetonationTimer  = 20000;                    // Seems to cast about every 20 seconds
+        m_uiShadowFissureTimer   = urand(10000, 12000);      // Cast every 10 - 12 seconds
+        m_uiFrostBlastTimer      = urand(30000, 40000);      // Cast every 30 - 40 seconds
+        m_uiGuardiansTimer       = 5000;                     // 5 seconds for summoning each Guardian of Icecrown in phase 3
+        m_uiLichKingAnswerTimer  = 4000;
+        m_uiGuardiansCount       = 0;
+        m_uiSummonIntroTimer     = 0;
+        m_uiIntroPackCount       = 0;
 
-        m_uiPhase1Timer         = 228000;                   // Phase 1 lasts "3 minutes and 48 seconds"
-        m_uiSoldierTimer        = 5000;
-        m_uiBansheeTimer        = 5000;
-        m_uiAbominationTimer    = 5000;
-        m_uiSoldierCount        = 0;
-        m_uiBansheeCount        = 0;
-        m_uiAbominationCount    = 0;
-        m_uiPhase               = PHASE_INTRO;
+        m_uiPhase1Timer          = 310000;                   // Phase 1 lasts 5 minutes and 10 seconds
+        m_uiSoldierTimer         = 2500;                     // 120 Soldiers will attack in phase 1
+        m_uiBansheeTimer         = 10000;                    // 14 Banshees will attack in phase 1
+        m_uiAbominationBaseTimer = 30000;                    // 14 Abominations will attack in phase 1
+        m_uiAbominationTimer     = m_uiAbominationBaseTimer;
+        m_uiSoldierCount         = 0;
+        m_uiBansheeCount         = 0;
+        m_uiAbominationCount     = 0;
+        m_uiPhase                = PHASE_INTRO;
 
         // it may be some spell should be used instead, to control the intro phase
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -209,7 +207,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                     if (pCreature->isAlive())
                     {
                         pCreature->AI()->EnterEvadeMode();
-                        pCreature->ForcedDespawn(15000);
+                        pCreature->ForcedDespawn(1000);
                     }
                 }
             }
@@ -401,7 +399,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                     {
                         SummonMob(NPC_SOLDIER_FROZEN);
                         ++m_uiSoldierCount;
-                        m_uiSoldierTimer = 3000;
+                        m_uiSoldierTimer = 2500;
                     }
                     else
                         m_uiSoldierTimer -= uiDiff;
@@ -413,7 +411,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                     {
                         SummonMob(NPC_UNSTOPPABLE_ABOM);
                         ++m_uiAbominationCount;
-                        m_uiAbominationTimer = 25000;
+                        m_uiAbominationTimer = m_uiAbominationBaseTimer - 1500 * m_uiAbominationCount;
                     }
                     else
                         m_uiAbominationTimer -= uiDiff;
@@ -425,7 +423,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                     {
                         SummonMob(NPC_SOUL_WEAVER);
                         ++m_uiBansheeCount;
-                        m_uiBansheeTimer = 25000;
+                        m_uiBansheeTimer = 22000;
                     }
                     else
                         m_uiBansheeTimer -= uiDiff;
@@ -475,7 +473,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                         if (urand(0, 1))
                             DoScriptText(SAY_SPECIAL3_MANA_DET, m_creature);
 
-                        m_uiShadowFissureTimer = 25000;
+                        m_uiShadowFissureTimer = urand(10000, 12000);
                     }
                 }
             }
@@ -489,7 +487,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                     if (urand(0, 1))
                         DoScriptText(SAY_FROST_BLAST, m_creature);
 
-                    m_uiFrostBlastTimer = urand(30000, 60000);
+                    m_uiFrostBlastTimer = urand(30000, 40000);
                 }
             }
             else
@@ -501,7 +499,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                 {
                     DoScriptText(urand(0, 1) ? SAY_CHAIN1 : SAY_CHAIN2, m_creature);
 
-                    m_uiChainsTimer = urand(30000, 60000);
+                    m_uiChainsTimer = urand(60000, 120000);
                 }
             }
             else
@@ -509,7 +507,7 @@ struct boss_kelthuzadAI : public ScriptedAI
 
             if (m_uiPhase == PHASE_NORMAL)
             {
-                if (m_creature->GetHealthPercent() < 45.0f)
+                if (m_creature->GetHealthPercent() < 40.0f)
                 {
                     m_uiPhase = PHASE_GUARDIANS;
                     DoScriptText(SAY_REQUEST_AID, m_creature);

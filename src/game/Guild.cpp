@@ -117,7 +117,7 @@ bool Guild::Create(Player* leader, std::string gname)
     m_Id = sObjectMgr.GenerateGuildId();
 
     // creating data
-    time_t now = time(0);
+    time_t now = time(nullptr);
     tm local = *(localtime(&now));                          // dereference and assign
     m_CreatedDay   = local.tm_mday;
     m_CreatedMonth = local.tm_mon + 1;
@@ -589,7 +589,7 @@ void Guild::BroadcastToGuild(WorldSession* session, const std::string& msg, uint
         Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
         if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_GCHATLISTEN) && !pl->GetSocial()->HasIgnore(player->GetObjectGuid()))
-            pl->GetSession()->SendPacket(&data);
+            pl->GetSession()->SendPacket(data);
     }
 }
 
@@ -610,11 +610,11 @@ void Guild::BroadcastToOfficers(WorldSession* session, const std::string& msg, u
         Player* pl = ObjectAccessor::FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
         if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_OFFCHATLISTEN) && !pl->GetSocial()->HasIgnore(player->GetObjectGuid()))
-            pl->GetSession()->SendPacket(&data);
+            pl->GetSession()->SendPacket(data);
     }
 }
 
-void Guild::BroadcastPacket(WorldPacket* packet)
+void Guild::BroadcastPacket(WorldPacket& packet)
 {
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
@@ -624,7 +624,7 @@ void Guild::BroadcastPacket(WorldPacket* packet)
     }
 }
 
-void Guild::BroadcastPacketToRank(WorldPacket* packet, uint32 rankId)
+void Guild::BroadcastPacketToRank(WorldPacket& packet, uint32 rankId)
 {
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
@@ -776,9 +776,9 @@ void Guild::Roster(WorldSession* session /*= nullptr*/)
         }
     }
     if (session)
-        session->SendPacket(&data);
+        session->SendPacket(data);
     else
-        BroadcastPacket(&data);
+        BroadcastPacket(data);
     DEBUG_LOG("WORLD: Sent (SMSG_GUILD_ROSTER)");
 }
 
@@ -803,7 +803,7 @@ void Guild::Query(WorldSession* session)
     data << uint32(m_BorderColor);
     data << uint32(m_BackgroundColor);
 
-    session->SendPacket(&data);
+    session->SendPacket(data);
     DEBUG_LOG("WORLD: Sent (SMSG_GUILD_QUERY_RESPONSE)");
 }
 
@@ -863,7 +863,7 @@ void Guild::DisplayGuildEventLog(WorldSession* session)
         // Event timestamp
         data << uint32(time(nullptr) - itr->TimeStamp);
     }
-    session->SendPacket(&data);
+    session->SendPacket(data);
     DEBUG_LOG("WORLD: Sent (MSG_GUILD_EVENT_LOG_QUERY)");
 }
 
@@ -952,7 +952,7 @@ void Guild::BroadcastEvent(GuildEvents event, ObjectGuid guid, char const* str1 
     if (!guid.IsEmpty())
         data << guid;
 
-    BroadcastPacket(&data);
+    BroadcastPacket(data);
 
     DEBUG_LOG("WORLD: Sent SMSG_GUILD_EVENT");
 }

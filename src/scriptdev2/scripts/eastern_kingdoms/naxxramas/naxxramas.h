@@ -12,6 +12,9 @@ enum
     // A few instance-script related texts
     SAY_THADDIUS_GREET          = -1533029,
 
+    // Background screams in Instance if Thaddius still alive, four of them from 8873 to 8876
+    SOUND_SCREAM1               = 8873,
+
     // Kel'Thuzad
     SAY_KELTHUZAD_CAT_DIED      = -1533089,
     // Kel'Thuzad's taunts after killing Wing Bosses
@@ -83,6 +86,7 @@ enum
     NPC_KELTHUZAD               = 15990,
     NPC_THE_LICHKING            = 16980,
     NPC_MR_BIGGLESWORTH         = 16998,
+    NPC_LIVING_POISON           = 16027,
 
     // Gothik
     NPC_GOTHIK                  = 16060,
@@ -174,6 +178,22 @@ struct GothTrigger
 
 static const float aSapphPositions[4] = {3521.48f, -5234.87f, 137.626f, 4.53329f};
 
+struct SpawnLocation
+{
+    float m_fX, m_fY, m_fZ, m_fO;
+};
+
+// Used in Construct Quarter for the deadly blobs continuously spawning in Patcherk corridor
+static const SpawnLocation aLivingPoisonPositions[6] =
+{
+    {3128.692f, -3119.211f, 293.346f, 4.725505f},
+    {3154.432f, -3125.669f, 293.408f, 4.456693f},
+    {3175.614f, -3134.716f, 293.282f, 4.244928f},
+    {3128.709f, -3157.404f, 293.3238f, 4.725505f},
+    {3145.881f, -3158.563f, 293.3216f, 4.456693f},
+    {3157.736f, -3164.859f, 293.2874f, 4.244928f},
+};
+
 class instance_naxxramas : public ScriptedInstance
 {
     public:
@@ -232,6 +252,8 @@ class instance_naxxramas : public ScriptedInstance
         uint32 m_uiSapphSpawnTimer;
         uint32 m_uiTauntTimer;
         uint8 m_uiHorseMenKilled;
+        uint32 m_uiLivingPoisonTimer;
+        uint32 m_uiScreamsTimer;
 
         DialogueHelper m_dialogueHelper;
 };

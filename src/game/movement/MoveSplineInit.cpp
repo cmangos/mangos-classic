@@ -81,17 +81,17 @@ namespace Movement
         WorldPacket data(SMSG_MONSTER_MOVE, 64);
         data << unit.GetPackGUID();
         PacketBuilder::WriteMonsterMove(move_spline, data);
-        unit.SendMessageToSet(&data, true);
+        unit.SendMessageToSet(data, true);
 
         return move_spline.Duration();
     }
 
-    void MoveSplineInit::Stop()
+    void MoveSplineInit::Stop(bool forceSend /*= false*/)
     {
         MoveSpline& move_spline = *unit.movespline;
 
         // No need to stop if we are not moving
-        if (move_spline.Finalized())
+        if (!forceSend && move_spline.Finalized())
             return;
 
         // ToDo: update transport info if required
@@ -134,7 +134,7 @@ namespace Movement
         data << real_position.x << real_position.y << real_position.z;
         data << move_spline.GetId();
         data << uint8(MonsterMoveStop);
-        unit.SendMessageToSet(&data, true);
+        unit.SendMessageToSet(data, true);
     }
 
     MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)

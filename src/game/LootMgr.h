@@ -19,12 +19,10 @@
 #ifndef MANGOS_LOOTMGR_H
 #define MANGOS_LOOTMGR_H
 
-#include "ItemEnchantmentMgr.h"
 #include "ByteBuffer.h"
 #include "ObjectGuid.h"
 #include "SharedDefines.h"
 
-#include <map>
 #include <vector>
 #include "Bag.h"
 
@@ -98,6 +96,12 @@ enum ClientLootType
     CLIENT_LOOT_DISENCHANTING   = 4
 };
 
+enum LootStatus
+{
+    LOOT_STATUS_NOT_FULLY_LOOTED = 0x01,
+    LOOT_STATUS_CONTAIN_FFA      = 0x02,
+    LOOT_STATUS_CONTAIN_GOLD     = 0x04
+};
 
 struct PlayerRollVote
 {
@@ -111,7 +115,8 @@ class GroupLootRoll
 public:
     typedef std::unordered_map<ObjectGuid, PlayerRollVote> RollVoteMap;
 
-    GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(nullptr), m_loot(nullptr) {}
+    GroupLootRoll() : m_rollVoteMap(ROLL_VOTE_MASK_ALL), m_isStarted(false), m_lootItem(nullptr), m_loot(nullptr), m_itemSlot(0), m_voteMask(), m_endTime(0)
+    {}
     ~GroupLootRoll();
 
     bool TryToStart(Loot& loot, uint32 itemSlot);
@@ -172,6 +177,8 @@ struct LootItem
     bool         freeForAll        : 1;                             // free for all
     bool         isUnderThreshold  : 1;
     bool         currentLooterPass : 1;
+    bool         isNotVisibleForML : 1;                             // true when in master loot the leader do not have the condition to see the item
+    bool         checkRollNeed     : 1;                             // true if for this item we need to check if roll is needed
 
     // storing item prototype for fast access
     ItemPrototype const* itemProto;
@@ -281,6 +288,7 @@ public:
     void GetLootItemsListFor(Player* player, LootItemList& lootList);
     void SetGoldAmount(uint32 _gold);
     void SendGold(Player* player);
+    bool IsItemAlreadyIn(uint32 itemId) const;
     uint32 GetGoldAmount() const { return m_gold; }
     LootType GetLootType() const { return m_lootType; }
     LootItem* GetLootItemInSlot(uint32 itemSlot);
@@ -292,7 +300,8 @@ public:
     ObjectGuid const& GetMasterLootGuid() const { return m_masterOwnerGuid; }
 
 private:
-    Loot(){}
+    Loot(): m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(), m_clientLootType(), m_lootMethod(), m_threshold(), m_maxEnchantSkill(0), m_isReleased(false), m_haveItemOverThreshold(false), m_isChecked(false), m_isChest(false), m_isChanged(false)
+    {}
     void Clear();
     bool IsLootedFor(Player const* player) const;
     bool IsLootedForAll() const;
@@ -304,15 +313,16 @@ private:
     void NotifyItemRemoved(uint32 lootIndex);
     void NotifyItemRemoved(Player* player, uint32 lootIndex);
     void GroupCheck();
+    void CheckIfRollIsNeeded(Player const* plr);
     void SetGroupLootRight(Player* player);
     void GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, bool personal, bool noEmptyError = false);
-    void AddConditionnalItem(ObjectGuid playerGuid, uint32 itemSlot);
-    void RemoveConditionnalItem(ObjectGuid playerGuid, uint32 itemSlot);
     void ForceLootAnimationCLientUpdate();
     void SetPlayerIsLooting(Player* player);
     void SetPlayerIsNotLooting(Player* player);
-    bool GetLootContentFor(Player* player, ByteBuffer& buffer);
+    void GetLootContentFor(Player* player, ByteBuffer& buffer);
+    uint32 GetLootStatusFor(Player const* player) const;
+
     // What is looted
     WorldObject*     m_lootTarget;
     Item*            m_itemTarget;
@@ -378,8 +388,6 @@ public:
     bool IsAllowedToLoot(Player* player, Creature* creature);
     void PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint32 itemSlot, RollVote vote);
     Loot* GetLoot(Player* player, ObjectGuid const& targetGuid = ObjectGuid());
-
-    void update(uint32 diff);
 };
 
 #define sLootMgr MaNGOS::Singleton<LootMgr>::Instance()

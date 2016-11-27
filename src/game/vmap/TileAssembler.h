@@ -74,7 +74,7 @@ namespace VMAP
         std::vector<G3D::Vector3> vertexArray;
         class WmoLiquid* liquid;
 
-        GroupModel_Raw() : liquid(0) {}
+        GroupModel_Raw() : mogpflags(0), GroupWMOID(0), liquidflags(0), liquid(nullptr) {}
         ~GroupModel_Raw();
 
         bool Read(FILE* f);
@@ -110,8 +110,6 @@ namespace VMAP
             void exportGameobjectModels();
             bool convertRawFile(const std::string& pModelFilename);
             void setModelNameFilterMethod(bool (*pFilterMethod)(char* pName)) { iFilterMethod = pFilterMethod; }
-            std::string getDirEntryNameFromModName(unsigned int pMapId, const std::string& pModPosName);
-            unsigned int getUniqueNameId(const std::string pName);
     };
 }                                                           // VMAP
 #endif                                                      /*_TILEASSEMBLER_H_*/

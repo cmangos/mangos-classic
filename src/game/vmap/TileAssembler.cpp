@@ -24,7 +24,6 @@
 #include <set>
 #include <iomanip>
 #include <sstream>
-#include <iomanip>
 
 using G3D::Vector3;
 using G3D::AABox;
@@ -210,14 +209,12 @@ namespace VMAP
             return false;
         }
         printf("Read coordinate mapping...\n");
-        uint32 mapID, tileX, tileY, check = 0;
-        G3D::Vector3 v1, v2;
+        uint32 mapID, tileX, tileY;
         ModelSpawn spawn;
         while (!feof(dirf))
         {
-            check = 0;
             // read mapID, tileX, tileY, Flags, adtID, ID, Pos, Rot, Scale, Bound_lo, Bound_hi, name
-            check += fread(&mapID, sizeof(uint32), 1, dirf);
+            uint32 check = fread(&mapID, sizeof(uint32), 1, dirf);
             if (check == 0) // EoF...
                 break;
             check += fread(&tileX, sizeof(uint32), 1, dirf);
@@ -295,7 +292,6 @@ namespace VMAP
     //=================================================================
     bool TileAssembler::convertRawFile(const std::string& pModelFilename)
     {
-        bool success = true;
         std::string filename = iSrcDir;
         if (filename.length() > 0)
             filename.append("/");
@@ -324,10 +320,8 @@ namespace VMAP
             model.setGroupModels(groupsArray);
         }
 
-        success = model.writeFile(iDestDir + "/" + pModelFilename + ".vmo");
-
         //std::cout << "readRawFile2: '" << pModelFilename << "' tris: " << nElements << " nodes: " << nNodes << std::endl;
-        return success;
+        return model.writeFile(iDestDir + "/" + pModelFilename + ".vmo");
     }
 
     void TileAssembler::exportGameobjectModels()
@@ -478,7 +472,7 @@ namespace VMAP
         }
 
         // ----- liquid
-        liquid = 0;
+        liquid = nullptr;
         if (liquidflags & 1)
         {
             WMOLiquidHeader hlq;

@@ -22,7 +22,6 @@
 #include "PoolManager.h"
 #include "SpellMgr.h"
 #include "Spell.h"
-#include "UpdateMask.h"
 #include "Opcodes.h"
 #include "WorldPacket.h"
 #include "World.h"
@@ -40,7 +39,6 @@
 #include "Util.h"
 #include "ScriptMgr.h"
 #include "vmap/GameObjectModel.h"
-#include "CreatureAISelector.h"
 #include "SQLStorages.h"
 #include "LuaEngine.h"
 
@@ -307,7 +305,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                                 caster->FinishSpell(CURRENT_CHANNELED_SPELL);
 
                                 WorldPacket data(SMSG_FISH_NOT_HOOKED, 0);
-                                ((Player*)caster)->GetSession()->SendPacket(&data);
+                                ((Player*)caster)->GetSession()->SendPacket(data);
                             }
                             // can be deleted
                             m_lootState = GO_JUST_DEACTIVATED;
@@ -440,7 +438,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                         for (GuidSet::const_iterator itr = m_UniqueUsers.begin(); itr != m_UniqueUsers.end(); ++itr)
                         {
                             if (Player* owner = GetMap()->GetPlayer(*itr))
-                                owner->CastSpell(owner, spellId, false, nullptr, nullptr, GetObjectGuid());
+                                owner->CastSpell(owner, spellId, TRIGGERED_NONE, nullptr, nullptr, GetObjectGuid());
                         }
 
                         ClearAllUsesData();
@@ -782,12 +780,46 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
             return false;
 
         // special invisibility cases
-        /* TODO: implement trap stealth, take look at spell 2836
-        if(GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed && u->IsHostileTo(GetOwner()))
+        if (GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP && GetGOInfo()->trap.stealthed)
         {
-            if(check stuff here)
+            bool trapNotVisible = false;
+
+            // handle summoned traps, usually by players
+            if (Unit* owner = GetOwner())
+            {
+                if (owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Player* ownerPlayer = (Player*)owner;
+                    if ((GetMap()->IsBattleGround() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
+                        (ownerPlayer->IsInDuelWith(u)) ||
+                        (ownerPlayer->GetTeam() != u->GetTeam()))
+                        trapNotVisible = true;
+                }
+                else
+                {
+                    if (u->IsFriendlyTo(owner))
+                        return true;
+                }
+            }
+            // handle environment traps (spawned by DB)
+            else
+            {
+                if (this->IsFriendlyTo(u))
+                    return true;
+                else
+                    trapNotVisible = true;
+            }
+
+            // only rogue have skill for traps detection
+            if (Aura* aura = ((Player*)u)->GetAura(2836, EFFECT_INDEX_0))
+            {
+                if (roll_chance_i(aura->GetModifier()->m_amount) && u->isInFront(this, 15.0f))
+                    return true;
+            }
+
+            if (trapNotVisible)
                 return false;
-        }*/
+        }
 
         // Smuggled Mana Cell required 10 invisibility type detection/state
         if (GetEntry() == 187039 && ((u->m_detectInvisibilityMask | u->m_invisibilityMask) & (1 << 10)) == 0)
@@ -1024,7 +1056,7 @@ void GameObject::Use(Unit* user)
     // by default spell caster is user
     Unit* spellCaster = user;
     uint32 spellId = 0;
-    bool triggered = false;
+    uint32 triggeredFlags = 0;
 
     // test only for exist cooldown data (cooldown timer used for door/buttons reset that not have use cooldown)
     if (uint32 cooldown = GetGOInfo()->GetCooldown())
@@ -1118,7 +1150,7 @@ void GameObject::Use(Unit* user)
 
             // FIXME: when GO casting will be implemented trap must cast spell to target
             if (goInfo->trap.spellId)
-                caster->CastSpell(user, goInfo->trap.spellId, true, nullptr, nullptr, GetObjectGuid());
+                caster->CastSpell(user, goInfo->trap.spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid());
             // use template cooldown if provided
             m_cooldownTime = time(nullptr) + (goInfo->trap.cooldown ? goInfo->trap.cooldown : uint32(4));
 
@@ -1244,7 +1276,7 @@ void GameObject::Use(Unit* user)
                 {
                     WorldPacket data(SMSG_GAMEOBJECT_PAGETEXT, 8);
                     data << ObjectGuid(GetObjectGuid());
-                    player->GetSession()->SendPacket(&data);
+                    player->GetSession()->SendPacket(data);
                 }
                 else if (info->goober.gossipID)             // ...or gossip, if page does not exist
                 {
@@ -1280,6 +1312,7 @@ void GameObject::Use(Unit* user)
 
             // cast this spell later if provided
             spellId = info->goober.spellId;
+            triggeredFlags = TRIGGERED_OLD_TRIGGERED;
 
             break;
         }
@@ -1386,7 +1419,7 @@ void GameObject::Use(Unit* user)
                         SetLootState(GO_JUST_DEACTIVATED);
 
                         WorldPacket data(SMSG_FISH_ESCAPED, 0);
-                        player->GetSession()->SendPacket(&data);
+                        player->GetSession()->SendPacket(data);
                     }
                     break;
                 }
@@ -1397,7 +1430,7 @@ void GameObject::Use(Unit* user)
                     SetLootState(GO_JUST_DEACTIVATED);
 
                     WorldPacket data(SMSG_FISH_NOT_HOOKED, 0);
-                    player->GetSession()->SendPacket(&data);
+                    player->GetSession()->SendPacket(data);
                     break;
                 }
             }
@@ -1452,10 +1485,10 @@ void GameObject::Use(Unit* user)
 
             if (info->summoningRitual.animSpell)
             {
-                player->CastSpell(player, info->summoningRitual.animSpell, true);
+                player->CastSpell(player, info->summoningRitual.animSpell, TRIGGERED_OLD_TRIGGERED);
 
                 // for this case, summoningRitual.spellId is always triggered
-                triggered = true;
+                triggeredFlags = TRIGGERED_OLD_TRIGGERED;
             }
 
             // full amount unique participants including original summoner, need more
@@ -1471,7 +1504,7 @@ void GameObject::Use(Unit* user)
 
             // spell have reagent and mana cost but it not expected use its
             // it triggered spell in fact casted at currently channeled GO
-            triggered = true;
+            triggeredFlags = TRIGGERED_OLD_TRIGGERED;
 
             // finish owners spell
             if (owner)
@@ -1522,7 +1555,7 @@ void GameObject::Use(Unit* user)
             Player* targetPlayer = ObjectAccessor::FindPlayer(player->GetSelectionGuid());
 
             // accept only use by player from same group for caster except caster itself
-            if (!targetPlayer || targetPlayer == player || !targetPlayer->IsInSameGroupWith(player))
+            if (!targetPlayer || targetPlayer == player || !targetPlayer->IsInSameRaidWith(player))
                 return;
 
             // required lvl checks!
@@ -1628,13 +1661,13 @@ void GameObject::Use(Unit* user)
         return;
     }
 
-    Spell* spell = new Spell(spellCaster, spellInfo, triggered, GetObjectGuid());
+    Spell* spell = new Spell(spellCaster, spellInfo, triggeredFlags, GetObjectGuid());
 
     // spell target is user of GO
     SpellCastTargets targets;
     targets.setUnitTarget(user);
 
-    spell->prepare(&targets);
+    spell->SpellStart(&targets);
 }
 
 // overwrite WorldObject function for proper name localization

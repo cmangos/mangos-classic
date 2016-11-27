@@ -375,7 +375,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     Spell* spell = new Spell(_player, spellInfo, false);
-    spell->prepare(&targets);
+    spell->SpellStart(&targets);
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
@@ -408,7 +408,12 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     if (IsPassiveSpell(spellInfo))
         return;
 
-    if (!IsPositiveSpell(spellId))
+    SpellAuraHolder* holder = _player->GetSpellAuraHolder(spellId);
+
+    if (!holder)
+        return;
+
+    if (!IsPositiveSpell(spellId, holder->GetCaster(), _player))
     {
         // ignore for remote control state
         if (!_player->IsSelfMover())
@@ -441,8 +446,6 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
                 _player->InterruptSpell(CURRENT_CHANNELED_SPELL);
         return;
     }
-
-    SpellAuraHolder* holder = _player->GetSpellAuraHolder(spellId);
 
     // not own area auras can't be cancelled (note: maybe need to check for aura on holder and not general on spell)
     if (holder && holder->GetCasterGuid() != _player->GetObjectGuid() && HasAreaAuraEffect(holder->GetSpellProto()))
@@ -545,7 +548,7 @@ void WorldSession::HandleSelfResOpcode(WorldPacket& /*recv_data*/)
     {
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL));
         if (spellInfo)
-            _player->CastSpell(_player, spellInfo, false);
+            _player->CastSpell(_player, spellInfo, TRIGGERED_NONE);
 
         _player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
     }

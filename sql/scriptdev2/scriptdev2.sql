@@ -150,7 +150,6 @@ UPDATE creature_template SET ScriptName='npc_loramus_thalipedes' WHERE entry=778
 /* BADLANDS */
 
 /* BARRENS */
-UPDATE creature_template SET ScriptName='npc_beaten_corpse' WHERE entry=10668;
 UPDATE creature_template SET ScriptName='npc_gilthares' WHERE entry=3465;
 UPDATE creature_template SET ScriptName='npc_taskmaster_fizzule' WHERE entry=7233;
 UPDATE creature_template SET ScriptName='npc_twiggy_flathead' WHERE entry=6248;
@@ -177,7 +176,6 @@ UPDATE creature_template SET ScriptName='boss_general_angerforge' WHERE entry=90
 UPDATE creature_template SET ScriptName='boss_high_interrogator_gerstahn' WHERE entry=9018;
 UPDATE creature_template SET ScriptName='npc_grimstone' WHERE entry=10096;
 UPDATE creature_template SET ScriptName='npc_theldren_trigger' WHERE entry=16079;
-UPDATE creature_template SET ScriptName='npc_kharan_mighthammer' WHERE entry=9021;
 UPDATE creature_template SET ScriptName='npc_phalanx' WHERE entry=9502;
 UPDATE creature_template SET ScriptName='npc_mistress_nagmara' WHERE entry=9500;
 UPDATE creature_template SET ScriptName='npc_rocknot' WHERE entry=9503;
@@ -244,9 +242,15 @@ UPDATE gameobject_template SET ScriptName='go_defias_cannon' WHERE entry=16398;
 UPDATE creature_template SET ScriptName='npc_aged_dying_ancient_kodo' WHERE entry IN (4700, 4701, 4702, 11627);
 UPDATE creature_template SET ScriptName='npc_dalinda_malem' WHERE entry=5644;
 UPDATE creature_template SET ScriptName='npc_melizza_brimbuzzle' WHERE entry=12277;
+UPDATE creature_template SET ScriptName='npc_cork_gizelton' WHERE entry=11625;
+UPDATE creature_template SET ScriptName='npc_rigger_gizelton' WHERE entry=11626;
 
 /* DIRE MAUL */
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
+DELETE FROM scripted_event_id WHERE id IN (8420,8428);
+INSERT INTO scripted_event_id VALUES
+(8420,'event_spells_warlock_dreadsteed'),
+(8428,'event_spells_warlock_dreadsteed');
 
 /* DUN MOROGH */
 
@@ -351,6 +355,7 @@ UPDATE creature_template SET ScriptName='boss_feugen' WHERE entry=15930;
 UPDATE creature_template SET ScriptName='npc_tesla_coil' WHERE entry=16218;
 UPDATE creature_template SET ScriptName='boss_sapphiron' WHERE entry=15989;
 UPDATE gameobject_template SET ScriptName='go_sapphiron_birth' WHERE entry=181356;
+UPDATE gameobject_template SET ScriptName='go_anub_door' WHERE entry=181126;
 UPDATE creature_template SET ScriptName='boss_kelthuzad' WHERE entry=15990;
 
 /* ONYXIA'S LAIR */
@@ -453,6 +458,7 @@ UPDATE creature_template SET ScriptName='boss_dathrohan_balnazzar' WHERE entry=1
 UPDATE creature_template SET ScriptName='boss_maleki_the_pallid' WHERE entry=10438;
 UPDATE creature_template SET ScriptName='boss_cannon_master_willey' WHERE entry=10997;
 UPDATE creature_template SET ScriptName='boss_baroness_anastari' WHERE entry=10436;
+UPDATE creature_template SET ScriptName='npc_aurius' WHERE entry=10917;
 UPDATE creature_template SET ScriptName='mobs_spectral_ghostly_citizen' WHERE entry IN (10384,10385);
 UPDATE creature_template SET ScriptName='mob_restless_soul' WHERE entry=11122;
 UPDATE gameobject_template SET ScriptName='go_gauntlet_gate' WHERE entry=175357;
@@ -1538,24 +1544,24 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001085,'You disappoint me, Taelan. I had plans for you... grand plans. Alas, it was only a matter of time before your filthy bloodline would catch up with you.',0,0,0,1,'isillien SAY_ISILLIEN_4'),
 (-1001086,'It is as they say: Like father, like son. You are as weak of will as Tirion... perhaps more so. I can only hope my assassins finally succeeded in ending his pitiful life.',0,0,0,1,'isillien SAY_ISILLIEN_5'),
 (-1001087,'The Grand Crusader has charged me with destroying you and your newfound friends, Taelan, but know this: I do this for pleasure, not of obligation or duty.',0,0,0,1,'isillien SAY_ISILLIEN_6'),
-(-1001088,'%s calls for his guardsman.',0,2,0,0,'isillien EMOTE_ISILLIEN_ATTACK'),
-(-1001089,'The end is now, Fordring.',0,0,0,1,'isillien SAY_ISILLIEN_ATTACK'),
+(-1001088,'%s calls for his guardsman.',0,2,0,22,'isillien EMOTE_ISILLIEN_ATTACK'),
+(-1001089,'The end is now, Fordring.',0,0,0,25,'isillien SAY_ISILLIEN_ATTACK'),
 (-1001090,'Enough!',0,0,0,0,'isillien SAY_KILL_TAELAN_1'),
 (-1001091,'%s laughs.',0,2,0,11,'isillien EMOTE_ISILLIEN_LAUGH'),
 (-1001092,'Did you really believe that you could defeat me? Your friends are soon to join you, Taelan.',0,0,0,0,'isillien SAY_KILL_TAELAN_2'),
-(-1001093,'% turns his attention towards you.',0,2,0,0,'isillien EMOTE_ATTACK_PLAYER'),
+(-1001093,'%s turns his attention towards you.',0,2,0,0,'isillien EMOTE_ATTACK_PLAYER'),
 (-1001094,'What have you done, Isillien? You once fought with honor, for the good of our people... and now... you have murdered my boy...',0,0,0,0,'tirion fordring SAY_TIRION_1'),
 (-1001095,'Tragic. The elder Fordring lives on... You are too late, old man. Retreat back to your cave, hermit, unless you wish to join your son in the Twisting Nether.',0,0,0,0,'isillien SAY_TIRION_2'),
-(-1001096,'May your soul burn in anguish, Isillien! Light give me strength to battle this fiend.',0,0,0,0,'tirion fordring SAY_TIRION_3'),
-(-1001097,'Face me, coward. Face the faith and strength that you once embodied.',0,0,0,0,'tirion fordring SAY_TIRION_4'),
+(-1001096,'May your soul burn in anguish, Isillien! Light give me strength to battle this fiend.',0,0,0,15,'tirion fordring SAY_TIRION_3'),
+(-1001097,'Face me, coward. Face the faith and strength that you once embodied.',0,0,0,25,'tirion fordring SAY_TIRION_4'),
 (-1001098,'Then come, hermit!',0,0,0,0,'isillien SAY_TIRION_5'),
 (-1001099,'A thousand more like him exist. Ten thousand. Should one fall, another will rise to take the seat of power.',0,0,0,0,'tirion fordring SAY_EPILOG_1'),
 (-1001100,'%s falls to one knee.',0,2,0,16,'tirion fordring EMOTE_FALL_KNEE'),
-(-1001101,'Look what they did to my boy.',0,0,0,0,'tirion fordring SAY_EPILOG_2'),
+(-1001101,'Look what they did to my boy.',0,0,0,5,'tirion fordring SAY_EPILOG_2'),
 (-1001102,'%s holds the limp body of Taelan Fordring and softly sobs.',0,2,0,0,'tirion fordring EMOTE_HOLD_TAELAN'),
 (-1001103,'Too long have I sat idle, gripped in this haze... this malaise, lamenting what could have been... what should have been.',0,0,0,0,'tirion fordring SAY_EPILOG_3'),
 (-1001104,'Your death will not have been in vain, Taelan. A new Order is born on this day... an Order which will dedicate itself to extinguising the evil that plagues this world. An evil that cannot hide behind politics and pleasantries.',0,0,0,0,'tirion fordring SAY_EPILOG_4'),
-(-1001105,'This I promise... This I vow...',0,0,0,0,'tirion fordring SAY_EPILOG_5'),
+(-1001105,'This I promise... This I vow...',0,0,0,15,'tirion fordring SAY_EPILOG_5'),
 
 (-1001106,'Don\'t forget to get my bell out of the chest here. And remember, if do happen to wander off, just ring it and I\'ll find you again.',0,0,0,1,'shay leafrunner SAY_ESCORT_START'),
 (-1001107,'Are we taking the scenic route?',0,0,0,0,'shay leafrunner SAY_WANDER_1'),
@@ -1597,7 +1603,43 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001164,'I can sens it now, $N. Ashenvale lies down this path.',0,0,0,0,'arei SAY_ASHENVALE'),
 (-1001165,'I feel... something strange...',0,0,0,0,'arei SAY_TRANSFORM'),
 (-1001166,'$N my form has now changed! The true strength of my spirit is returing to me now... The cursed grasp of the forest is leaving me.',0,0,0,0,'arei SAY_LIFT_CURSE'),
-(-1001167,'Thank you, $N. Now my spirit will finally be at peace.',0,0,0,0,'arei SAY_ESCORT_COMPLETE');
+(-1001167,'Thank you, $N. Now my spirit will finally be at peace.',0,0,0,0,'arei SAY_ESCORT_COMPLETE'),
+
+(-1001168,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001169,'REUSE ME',0,0,0,0,'REUSE_ME'),
+
+(-1001170,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001171,'REUSE ME',0,0,0,0,'REUSE_ME'),
+
+(-1001172,'REUSE ME',0,0,0,0,'REUSE_ME'),
+
+(-1001173,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001174,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001175,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001176,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001177,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001178,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001179,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001180,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001181,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001182,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001183,'REUSE ME',0,0,0,0,'REUSE_ME'),
+
+(-1001184,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001185,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001186,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001187,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001188,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001189,'REUSE ME',0,0,0,0,'REUSE_ME'),
+(-1001190,'REUSE ME',0,0,0,0,'REUSE_ME'),
+
+(-1001191,'Hey, you call yourself a body guard? Get to work and protect us...',0,0,0,0,'SAY_CORK_AMBUSH1'),
+(-1001192,'Mister body guard, are you going to earn your money or what?',0,0,0,0,'SAY_CORK_AMBUSH2'),
+(-1001193,'You\'re fired! <Cough...Cork clears throat.> I mean, help!',0,0,0,0,'SAY_CORK_AMBUSH3'),
+(-1001194,'Blast those stupid centaurs! Sigh - well, it seems you kept your bargain. Up the road you shall find Smeed Scrabblescrew, he has your money.',0,0,0,1,'SAY_CORK_END'),
+(-1001195,'Eeck! Demons hungry for the kodos!',0,0,0,0,'SAY_RIGGER_AMBUSH1'),
+(-1001196,'What am I paying you for? The kodos are nearly dead!',0,0,0,0,'SAY_RIGGER_AMBUSH2'),
+(-1001197,'Wow! We did it... not sure why we thought we needed the likes of you. Nevertheless, speak with Smeed Srablescrew; he will give you your earnings!',0,0,0,0,'SAY_RIGGER_END');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -1973,7 +2015,19 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1329016,'Today you have unmade what took me years to create! For this you shall all die by my hand!',0,1,0,0,'dathrohan SAY_AGGRO'),
 (-1329017,'You fools think you can defeat me so easily? Face the true might of the Nathrezim!',0,1,0,0,'dathrohan SAY_TRANSFORM'),
-(-1329018,'Damn you mortals! All my plans of revenge, all my hate... all burned to ash...',0,0,0,0,'dathrohan SAY_DEATH');
+(-1329018,'Damn you mortals! All my plans of revenge, all my hate... all burned to ash...',0,0,0,0,'dathrohan SAY_DEATH'),
+(-1329019,'Don\'t worry about me!  Slay this dreadful beast and cleanse this world of his foul taint!',0,6,0,0,'ysida YSIDA_SAY_RUN_5_MIN'),
+(-1329020,'My death means nothing.... light... will... prevail!',0,6,0,0,'ysida YSIDA_SAY_RUN_FAIL'),
+
+(-1329021,'Rivendare! I come for you!',0,1,0,0,'aurius YELL_AURIUS_AGGRO'),
+(-1329022,'Argh!',0,0,0,0,'aurius SAY_AURIUS_DEATH'),
+
+(-1329023,'Move back and hold the line! We cannot fail or all will be lost!',0,1,0,0,'YELL_BASTION_BARRICADE'),
+(-1329024,'Move to the stairs and defend!',0,1,0,0,'YELL_BASTION_STAIRS'),
+(-1329025,'The Scourge have broken into the Bastion! Redouble your efforts! We must not fail!',0,1,0,0,'YELL_BASTION_ENTRANCE'),
+(-1329026,'They have broken into the Hall of Lights! We must stop the intruders!',0,1,0,0,'YELL_BASTION_HALL_LIGHTS'),
+(-1329027,'The Scourge have broken through in all wings! May the light defeat these foul creatures! We shall fight to the last!',0,1,0,0,'YELL_BASTION_INNER_1'),
+(-1329028,'This will not be the end of the Scarlet Crusade! You will not break our line!',0,1,0,0,'YELL_BASTION_INNER_2');
 
 -- -1 349 000 MARAUDON
 
@@ -1985,17 +2039,17 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1409001,'REUSE ME',0,0,0,0,'REUSE ME'),
 (-1409002,'%s refuses to die while its master is in trouble.',0,2,0,0,'core rager EMOTE_LOWHP'),
 
-(-1409003,'Reckless mortals, none may challenge the sons of the living flame!',8035,1,0,0,'majordomo SAY_AGGRO'),
-(-1409004,'The runes of warding have been destroyed! Hunt down the infedels my bretheren.',8039,6,0,0,'majordomo SAY_SPAWN'),
+(-1409003,'Reckless mortals! None may challenge the Sons of the Living flame!',8035,1,0,0,'majordomo SAY_AGGRO'),
+(-1409004,'The runes of warding have been destroyed! Hunt down the infidels, my brethren!',8039,6,0,0,'majordomo SAY_SPAWN'),
 (-1409005,'Ashes to Ashes!',8037,1,0,0,'majordomo SAY_SLAY'),
 (-1409006,'Burn mortals! Burn for this transgression!',8036,1,0,0,'majordomo SAY_SPECIAL'),
-(-1409007,'Impossible! Stay your attack mortals! I submitt! I submitt!',8038,1,0,0,'majordomo SAY_DEFEAT_1'),
+(-1409007,'Impossible! Stay your attack, mortals... I submit! I submit!',8038,1,0,0,'majordomo SAY_DEFEAT_1'),
 
-(-1409008,'Behold Ragnaros, the Firelord! He who was ancient when this world was young! Bow before him, mortals! Bow before your ending!',8040,1,0,0,'ragnaros SAY_SUMMON_MAJ'),
-(-1409009,'TOO SOON! YOU HAVE AWAKENED ME TOO SOON, EXECUTUS! WHAT IS THE MEANING OF THIS INTRUSION?',8043,1,0,0,'ragnaros SAY_ARRIVAL1_RAG'),
-(-1409010,'These mortal infidels, my lord! They have invaded your sanctum, and seek to steal your secrets!',8041,1,0,0,'ragnaros SAY_ARRIVAL2_MAJ'),
-(-1409011,'FOOL! YOU ALLOWED THESE INSECTS TO RUN RAMPANT THROUGH THE HALLOWED CORE, AND NOW YOU LEAD THEM TO MY VERY LAIR? YOU HAVE FAILED ME, EXECUTUS! JUSTICE SHALL BE MET, INDEED!',8044,1,0,0,'ragnaros SAY_ARRIVAL3_RAG'),
-(-1409012,'NOW FOR YOU, INSECTS. BOLDLY YOU SAUGHT THE POWER OF RAGNAROS NOW YOU SHALL SEE IT FIRST HAND.',8045,1,0,0,'ragnaros SAY_ARRIVAL5_RAG'),
+(-1409008,'Behold Ragnaros - the Firelord! He who was ancient when this world was young! Bow before him, mortals! Bow before your ending!',8040,1,0,0,'ragnaros SAY_SUMMON_MAJ'),
+(-1409009,'TOO SOON! YOU HAVE AWAKENED ME TOO SOON, EXECUTUS! WHAT IS THE MEANING OF THIS INTRUSION???',8043,1,0,0,'ragnaros SAY_ARRIVAL1_RAG'),
+(-1409010,'These mortal infidels, my lord! They have invaded your sanctum and seek to steal your secrets!',8041,1,0,0,'ragnaros SAY_ARRIVAL2_MAJ'),
+(-1409011,'FOOL! YOU ALLOWED THESE INSECTS TO RUN RAMPANT THROUGH THE HALLOWED CORE? AND NOW YOU LEAD THEM TO MY VERY LAIR? YOU HAVE FAILED ME, EXECUTUS! JUSTICE SHALL BE MET, INDEED!',8044,1,0,0,'ragnaros SAY_ARRIVAL3_RAG'),
+(-1409012,'NOW FOR YOU, INSECTS! BOLDLY, YOU SOUGHT THE POWER OF RAGNAROS. NOW YOU SHALL SEE IT FIRSTHAND!',8045,1,0,0,'ragnaros SAY_ARRIVAL5_RAG'),
 
 (-1409013,'COME FORTH, MY SERVANTS! DEFEND YOUR MASTER!',8049,1,0,0,'ragnaros SAY_REINFORCEMENTS1'),
 (-1409014,'YOU CANNOT DEFEAT THE LIVING FLAME! COME YOU MINIONS OF FIRE! COME FORTH YOU CREATURES OF HATE! YOUR MASTER CALLS!',8050,1,0,0,'ragnaros SAY_REINFORCEMENTS2'),
@@ -2005,10 +2059,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1409018,'MY PATIENCE IS DWINDILING! COME NATS TO YOUR DEATH!',8048,1,0,0,'ragnaros SAY_MAGMABURST'),
 
 (-1409019,'You think you\'ve won already? Perhaps you\'ll need another lesson in pain!',0,1,0,0,'majordomo SAY_LAST_ADD'),
-(-1409020,'Brashly you have come to rest the secrets of the living flame. You will soon regret the recklessness of your quest.',0,1,0,0,'majordomo SAY_DEFEAT_2'),
-(-1409021,'I go now to summon the lord whos house this is. Should you seek an audiance with him your paltry lives will surly be forfit. Nevertheless seek out his lair if you dare!',0,1,0,0,'majordomo SAY_DEFEAT_3'),
+(-1409020,'Brashly, you have come to wrest the secrets of the Living Flame! You will soon regret the recklessness of your quest.',0,1,0,0,'majordomo SAY_DEFEAT_2'),
+(-1409021,'I go now to summon the lord whose house this is. Should you seek an audience with him, your paltry lives will surely be forfeit! Nevertheless, seek out his lair, if you dare!',0,1,0,0,'majordomo SAY_DEFEAT_3'),
 (-1409022,'My flame! Please don\'t take away my flame... ',8042,1,0,0,'ragnaros SAY_ARRIVAL4_MAJ'),
-(-1409023,'Very well, $N.',0,0,0,0,'majordomo SAY_SUMMON_0'),
+(-1409023,'Very well, $n.',0,0,0,0,'majordomo SAY_SUMMON_0'),
 (-1409024,'Impudent whelps! You\'ve rushed headlong to your own deaths! See now, the master stirs!',0,1,0,0,'majordomo SAY_SUMMON_1');
 
 -- -1 429 000 DIRE MAUL
@@ -2168,21 +2222,21 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 533 000 NAXXRAMAS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1533000,'Ahh... welcome to my parlor.',8788,1,0,0,'anubrekhan SAY_GREET'),
+(-1533000,'Ahh... welcome to my parlor.',8788,1,0,0,'anubrekhan SAY_GREET1'),
 (-1533001,'Just a little taste...',8785,1,0,0,'anubrekhan SAY_AGGRO1'),
 (-1533002,'There is no way out.',8786,1,0,0,'anubrekhan SAY_AGGRO2'),
-(-1533003,'Yes, Run! It makes the blood pump faster!',8787,1,0,0,'anubrekhan SAY_AGGRO3'),
-(-1533004,'I hear little hearts beating. Yesss... beating faster now. Soon the beating will stop.',8790,1,0,0,'anubrekhan SAY_TAUNT1'),
-(-1533005,'Where to go? What to do? So many choices that all end in pain, end in death.',8791,1,0,0,'anubrekhan SAY_TAUNT2'),
-(-1533006,'Which one shall I eat first? So difficult to choose... the all smell so delicious.',8792,1,0,0,'anubrekhan SAY_TAUNT3'),
-(-1533007,'Closer now... tasty morsels. I\'ve been too long without food. Without blood to drink.',8793,1,0,0,'anubrekhan SAY_TAUNT4'),
-(-1533008,'Shh... it will all be over soon.',8789,1,0,0,'anubrekhan SAY_SLAY'),
+(-1533003,'Yes, run! It makes the blood pump faster!',8787,1,0,0,'anubrekhan SAY_AGGRO3'),
+(-1533004,'I hear little hearts beating. Yesss... beating faster now. Soon the beating will stop.',8790,1,0,0,'anubrekhan SAY_GREET2'),
+(-1533005,'Where to go? What to do? So many choices that all end in pain, end in death.',8791,1,0,0,'anubrekhan SAY_GREET3'),
+(-1533006,'Which one shall I eat first? So difficult to choose. They all smell so delicious...',8792,1,0,0,'anubrekhan SAY_GREET4'),
+(-1533007,'Closer now... tasty morsels. I\'ve been too long without food. Without blood to drink.',8793,1,0,0,'anubrekhan SAY_GREET5'),
+(-1533008,'Shhh... it will all be over soon.',8789,1,0,0,'anubrekhan SAY_SLAY'),
 
 (-1533009,'Your old lives, your mortal desires, mean nothing. You are acolytes of the master now, and you will serve the cause without question! The greatest glory is to die in the master\'s service!',8799,1,0,0,'faerlina SAY_GREET'),
 (-1533010,'Slay them in the master\'s name!',8794,1,0,0,'faerlina SAY_AGGRO1'),
-(-1533011,'You cannot hide from me!',8795,1,0,0,'faerlina SAY_AGGRO2'),
-(-1533012,'Kneel before me, worm!',8796,1,0,0,'faerlina SAY_AGGRO3'),
-(-1533013,'Run while you still can!',8797,1,0,0,'faerlina SAY_AGGRO4'),
+(-1533011,'You cannot hide from me!',8795,1,0,0,'faerlina SAY_ENRAGE_1'),
+(-1533012,'Kneel before me, worm!',8796,1,0,0,'faerlina SAY_ENRAGE_2'),
+(-1533013,'Run while you still can!',8797,1,0,0,'faerlina SAY_ENRAGE_3'),
 (-1533014,'You have failed!',8800,1,0,0,'faerlina SAY_SLAY1'),
 (-1533015,'Pathetic wretch!',8801,1,0,0,'faerlina SAY_SLAY2'),
 (-1533016,'The master... will avenge me!',8798,1,0,0,'faerlina SAY_DEATH'),
@@ -2210,10 +2264,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1533033,'You die now!',8877,1,0,0,'thaddius SAY_SLAY'),
 (-1533034,'Now YOU feel pain!',8871,1,0,0,'thaddius SAY_ELECT'),
 (-1533035,'Thank... you...',8870,1,0,0,'thaddius SAY_DEATH'),
-(-1533036,'Pleeease!',8873,1,0,0,'thaddius SAY_SCREAM1'),
-(-1533037,'Stop, make it stop!',8874,1,0,0,'thaddius SAY_SCREAM2'),
-(-1533038,'Help me! Save me!',8875,1,0,0,'thaddius SAY_SCREAM3'),
-(-1533039,'Please, nooo!',8876,1,0,0,'thaddius SAY_SCREAM4'),
+(-1533036,'REUSE_ME',0,0,0,0,'REUSE'),
+(-1533037,'REUSE_ME',0,0,0,0,'REUSE'),
+(-1533038,'REUSE_ME',0,0,0,0,'REUSE'),
+(-1533039,'REUSE_ME',0,0,0,0,'REUSE'),
 
 (-1533040,'Foolishly you have sought your own demise.',8807,1,0,0,'gothik SAY_SPEECH_1'),
 (-1533041,'Death is the only escape.',8806,1,0,0,'gothik SAY_KILL'),
@@ -2305,15 +2359,15 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1533119,'%s spots a nearby Zombie to devour!',0,3,0,0,'gluth EMOTE_ZOMBIE'),
 
-(-1533120,'Hah hah, I\'m just getting warmed up!',8852,1,0,0,'razuvious SAY_AGGRO1'),
-(-1533121,'Stand and fight!',8853,1,0,0,'razuvious SAY_AGGRO2'),
-(-1533122,'Show me what you\'ve got!',8854,1,0,0,'razuvious SAY_AGGRO3'),
-(-1533123,'Sweep the leg! Do you have a problem with that?',8861,1,0,0,'razuvious SAY_SLAY1'),
-(-1533124,'You should have stayed home!',8862,1,0,0,'razuvious SAY_SLAY2'),
-(-1533125,'Do as I taught you!',8855,1,0,0,'razuvious SAY_COMMAND1'),
-(-1533126,'Show them no mercy!',8856,1,0,0,'razuvious SAY_COMMAND2'),
-(-1533127,'You disappoint me, students!',8858,1,0,0,'razuvious SAY_COMMAND3'),
-(-1533128,'The time for practice is over! Show me what you\'ve learned!',8859,1,0,0,'razuvious SAY_COMMAND4'),
+(-1533120,'Do as I taught you!',8855,1,0,0,'razuvious SAY_AGGRO1'),
+(-1533121,'Show them no mercy!',8856,1,0,0,'razuvious SAY_AGGRO2'),
+(-1533122,'The time for practice is over! Show me what you\'ve learned!',8859,1,0,0,'razuvious SAY_AGGRO3'),
+(-1533123,'Sweep the leg! Do you have a problem with that?',8861,1,0,0,'razuvious SAY_AGGRO4'),
+(-1533124,'You should have stayed home!',8862,1,0,0,'razuvious SAY_SLAY1'),
+(-1533125,'You disappoint me, students!',8858,1,0,0,'razuvious SAY_SLAY2'),
+(-1533126,'Hah hah, I\'m just getting warmed up!',8852,1,0,0,'razuvious SAY_TRIUMPHANT1'),
+(-1533127,'Stand and fight!',8853,1,0,0,'razuvious SAY_TRIUMPHANT2'),
+(-1533128,'Show me what you\'ve got!',8854,1,0,0,'razuvious SAY_TRIUMPHANT3'),
 (-1533129,'An honorable... death...',8860,1,0,0,'razuvious SAY_DEATH'),
 
 (-1533130,'%s summons forth Skeletal Warriors!',0,3,0,0,'noth EMOTE_WARRIOR'),

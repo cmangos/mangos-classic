@@ -19,7 +19,6 @@
 #include "Bag.h"
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
-#include "Log.h"
 #include "UpdateData.h"
 
 Bag::Bag(): Item()
@@ -198,7 +197,7 @@ uint32 Bag::GetItemCount(uint32 item, Item* eItem) const
 uint8 Bag::GetSlotByItemGUID(ObjectGuid guid) const
 {
     for (uint32 i = 0; i < GetBagSize(); ++i)
-        if (m_bagslot[i] != 0)
+        if (m_bagslot[i])
             if (m_bagslot[i]->GetObjectGuid() == guid)
                 return i;
 

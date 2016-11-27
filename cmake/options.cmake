@@ -1,19 +1,11 @@
 option(DEBUG                "Include additional debug-code in core" OFF)
 option(WARNINGS             "Show all warnings during compile"      OFF)
-option(TBB_USE_EXTERNAL     "Use external TBB"                      OFF)
-if (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
-  option(USE_STD_MALLOC     "Use standard malloc instead of TBB"    ON)
-else()
-  option(USE_STD_MALLOC     "Use standard malloc instead of TBB"    OFF)
-endif()
-option(ACE_USE_EXTERNAL     "Use external ACE"                      OFF)
 option(POSTGRESQL           "Use PostgreSQL"                        OFF)
-
-if(PCHSupport_FOUND AND WIN32) # TODO: why only enable it on windows by default?
-  option(PCH                "Use precompiled headers"               ON)
-else()
-  option(PCH                "Use precompiled headers"               OFF)
-endif()
+option(PCH                  "Use precompiled headers"               OFF)
+option(BUILD_CORE           "Build server core"                     ON)
+option(BUILD_EXTRACTOR      "Build map/dbc extractor"               OFF)
+option(BUILD_VMAP_EXTRACTOR "Build vmap extractor/assembler"        OFF)
+option(BUILD_MMAP_EXTRACTOR "Build Mmap extractor"                  OFF)
 
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)
@@ -33,9 +25,6 @@ message(STATUS
                             defined name. the name must corespond to the name of
                             the folder and the folder must contain a valid
                             CMakeLists.txt
-    TBB_USE_EXTERNAL        Use external TBB
-    USE_STD_MALLOC          Use standard malloc instead of TBB
-    ACE_USE_EXTERNAL        Use external ACE
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. see 'cmake --help' for more details
   For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos"

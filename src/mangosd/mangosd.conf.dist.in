@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2015090801
+ConfVersion=2016101401
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -206,6 +206,11 @@ SD2ErrorLogFile = "SD2Errors.log"
 #        Default: 1 (Enable)
 #                 0 (Disabled)
 #
+#
+#    MaxWhoListReturns
+#        Set the max number of players returned in the /who list and interface (0 means unlimited)
+#        Default:     49 - (stable)
+#
 ###################################################################################################################
 
 UseProcessors = 0
@@ -234,6 +239,7 @@ UpdateUptimeInterval = 10
 MaxCoreStuckTime = 0
 AddonChannel = 1
 CleanCharacterDB = 1
+MaxWhoListReturns = 49
 
 ###################################################################################################################
 # SERVER LOGGING
@@ -617,6 +623,11 @@ LogColors = ""
 #        Default: 0 (not allowed)
 #                 1 (allowed)
 #
+#    Group.OfflineLeaderDelay
+#        A grace period for an offline group leader to reconnect before tranfering leadership to a next suitable member of the group (in secs) 
+#        Default: 300 (5 minutes)
+#                   0 (Do not transfer group leadership)
+#
 #    Guild.EventLogRecordsCount
 #        Count of guild event log records stored in guild_eventlog table
 #        Increase to store more guild events in table, minimum is 100
@@ -754,11 +765,12 @@ Instance.UnloadDelay = 1800000
 Quests.LowLevelHideDiff = 4
 Quests.HighLevelHideDiff = 7
 Quests.IgnoreRaid = 0
+Group.OfflineLeaderDelay = 300
 Guild.EventLogRecordsCount = 100
 TimerBar.Fatigue.GMLevel = 4
 TimerBar.Fatigue.Max = 60
 TimerBar.Breath.GMLevel = 4
-TimerBar.Breath.Max = 180
+TimerBar.Breath.Max = 60
 TimerBar.Fire.GMLevel = 4
 TimerBar.Fire.Max = 1
 MaxPrimaryTradeSkill = 2
@@ -1176,10 +1188,12 @@ Visibility.AIRelocationNotifyDelay = 1000
 #    Rate.Drop.Item.Legendary
 #    Rate.Drop.Item.Artifact
 #    Rate.Drop.Item.Referenced
+#    Rate.Drop.Item.Quest
 #    Rate.Drop.Money
 #         Drop rates (items by quality and money)
 #         Default: 1
 #
+#    Rate.Pet.XP.Kill
 #    Rate.XP.Kill
 #    Rate.XP.Quest
 #    Rate.XP.Explore
@@ -1323,7 +1337,9 @@ Rate.Drop.Item.Epic = 1
 Rate.Drop.Item.Legendary = 1
 Rate.Drop.Item.Artifact = 1
 Rate.Drop.Item.Referenced = 1
+Rate.Drop.Item.Quest = 1
 Rate.Drop.Money = 1
+Rate.Pet.XP.Kill = 1
 Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1

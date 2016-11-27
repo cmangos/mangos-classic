@@ -197,6 +197,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * datalong = creature entry
                                             * datalong2 = despawn_delay
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: summon as active object
+                                            * dataint = (bool) setRun; 0 = off (default), 1 = on
 
 11 SCRIPT_COMMAND_OPEN_DOOR                 source = any
                                             * datalong = db_guid (can be skipped for buddy)
@@ -333,3 +334,8 @@ Where "A  ->  B" means that the command is executed from A with B as target.
                                             * dataint = main hand slot; dataint2 = off hand slot; dataint3 = ranged slot
 
 43 SCRIPT_COMMAND_RESET_GO                  * resultingTarget = GameObject. Reset doors or buttons (GO type 0 and 1)
+
+44 SCRIPT_COMMAND_UPDATE_TEMPLATE           Update creature entry of the resultingSource
+                                            * resultingSource = Creature
+                                            * datalong = new creature entry. Must be different than the current one
+                                            * datalong2 = faction for which the entry is updated. 0 = Alliance, 1 = Horde

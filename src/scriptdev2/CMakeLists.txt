@@ -45,7 +45,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/dep/include
   ${CMAKE_BINARY_DIR}
   ${CMAKE_BINARY_DIR}/src/shared
-  ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
 )
 
@@ -62,17 +61,11 @@ add_library(mangosscript SHARED
 if(WIN32)
   target_link_libraries(mangosscript
     mangosd # FIXME: could this be done for unix? because unix won't generate exe.libs
-    ${ACE_LIBRARIES}
     debug ${WIN_DEBUGLIBS}
   )
 endif()
 
 add_dependencies(mangosscript mangosd)
-
-if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(mangosscript ACE_Project)
-# add_dependencies(mangosscript ace)
-endif()
 
 if(UNIX)
   set(mangosscript_LINK_FLAGS "-pthread")
@@ -126,14 +119,7 @@ endif()
 
 # Generate precompiled header
 if(PCH)
-  if(MSVC OR XCODE)
-    if(MSVC)
-      set(mangosscript_pch "${CMAKE_CURRENT_SOURCE_DIR}/include/precompiled.cpp")
-    endif()
-    add_native_precompiled_header(mangosscript ${CMAKE_CURRENT_SOURCE_DIR}/include/precompiled.h)
-  elseif(CMAKE_COMPILER_IS_GNUCXX)
-    add_precompiled_header(mangosscript ${CMAKE_CURRENT_SOURCE_DIR}/include/precompiled.h)
-  endif()
+  cotire(mangosscript)
 endif()
 
 # LIBRARY = dyld / so, RUNTIME = dll

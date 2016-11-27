@@ -21,10 +21,8 @@
 
 #include "Common.h"
 #include "Channel.h"
-#include "Policies/Singleton.h"
 
 #include <map>
-#include <string>
 
 class ChannelMgr
 {
@@ -38,7 +36,7 @@ class ChannelMgr
         void LeftChannel(const std::string& name);
     private:
         ChannelMap channels;
-        void MakeNotOnPacket(WorldPacket* data, const std::string& name);
+        void MakeNotOnPacket(WorldPacket& data, const std::string& name);
 };
 
 class AllianceChannelMgr : public ChannelMgr {};

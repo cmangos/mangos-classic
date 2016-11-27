@@ -19,8 +19,6 @@
 #include "Common.h"
 #include "WorldPacket.h"
 #include "Log.h"
-#include "Corpse.h"
-#include "GameObject.h"
 #include "Player.h"
 #include "ObjectAccessor.h"
 #include "ObjectGuid.h"
@@ -28,11 +26,6 @@
 #include "LootMgr.h"
 #include "Object.h"
 #include "Group.h"
-#include "World.h"
-#include "Util.h"
-#include "DBCStores.h"
-#include "ObjectMgr.h"
-#include "LuaEngine.h"
 
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recv_data)
 {
@@ -102,7 +95,12 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
         return;
 
     if (Loot* loot = sLootMgr.GetLoot(_player, lguid))
+    {
+        // remove stealth aura
+        _player->DoInteraction(lguid);
+
         loot->ShowContentTo(_player);
+    }
 }
 
 void WorldSession::HandleLootReleaseOpcode(WorldPacket& recv_data)
@@ -168,11 +166,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
     if (result != EQUIP_ERR_OK)
     {
         // send duplicate of error massage to master looter
-        if (LootItem* lootItem = pLoot->GetLootItemInSlot(itemSlot))
-            _player->SendEquipError(result, nullptr, nullptr, lootItem->itemId);
-        else
-            _player->SendEquipError(result, nullptr, nullptr);
-        return;
+        _player->SendEquipError(result, nullptr, nullptr, lootItem->itemId);
     }
 }
 
@@ -219,3 +213,4 @@ void WorldSession::HandleLootRoll(WorldPacket& recv_data)
 
     sLootMgr.PlayerVote(GetPlayer(), lootedTarget, itemSlot, RollVote(rollType));
 }
+

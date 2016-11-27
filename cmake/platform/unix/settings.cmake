@@ -20,7 +20,3 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
 else()
 add_definitions(-D_BUILD_DIRECTIVE='"${CMAKE_BUILD_TYPE}"')
 endif()
-
-if (CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" AND NOT USE_STD_MALLOC)
-  message(FATAL_ERROR "Using std malloc is required on FreeBSD")
-endif()

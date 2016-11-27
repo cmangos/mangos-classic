@@ -22,6 +22,7 @@ SDCategory: Stratholme
 EndScriptData */
 
 #include "precompiled.h"
+#include "stratholme.h"
 
 enum
 {
@@ -44,33 +45,7 @@ enum
     SPELL_SLEEP                     = 12098,
     SPELL_MINDCONTROL               = 15690,
 
-    NPC_DATHROHAN                   = 10812,
-    NPC_BALNAZZAR                   = 10813,
-    NPC_SKELETAL_GUARDIAN           = 10390,
-    NPC_SKELETAL_BERSERKER          = 10391
-};
-
-struct SummonDef
-{
-    uint32 m_uiEntry;
-    float m_fX, m_fY, m_fZ, m_fOrient;
-};
-
-SummonDef m_aSummonPoint[] =
-{
-    {NPC_SKELETAL_BERSERKER, 3460.356f, -3070.572f, 135.086f, 0.332f},
-    {NPC_SKELETAL_BERSERKER, 3465.289f, -3069.987f, 135.086f, 5.480f},
-    {NPC_SKELETAL_BERSERKER, 3463.616f, -3074.912f, 135.086f, 5.009f},
-
-    {NPC_SKELETAL_GUARDIAN, 3460.012f, -3076.041f, 135.086f, 1.187f},
-    {NPC_SKELETAL_GUARDIAN, 3467.909f, -3076.401f, 135.086f, 3.770f},
-
-    {NPC_SKELETAL_BERSERKER, 3509.269f, -3066.474f, 135.080f, 4.817f},
-    {NPC_SKELETAL_BERSERKER, 3510.966f, -3069.011f, 135.080f, 3.491f},
-
-    {NPC_SKELETAL_GUARDIAN, 3516.042f, -3066.873f, 135.080f, 3.997f},
-    {NPC_SKELETAL_GUARDIAN, 3513.561f, -3063.027f, 135.080f, 2.356f},
-    {NPC_SKELETAL_GUARDIAN, 3518.825f, -3060.926f, 135.080f, 3.944f}
+    NPC_DATHROHAN                   = 10812
 };
 
 struct boss_dathrohan_balnazzarAI : public ScriptedAI
@@ -111,11 +86,6 @@ struct boss_dathrohan_balnazzarAI : public ScriptedAI
     void JustDied(Unit* /*Victim*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
-
-        for (uint32 i = 0; i < countof(m_aSummonPoint); ++i)
-            m_creature->SummonCreature(m_aSummonPoint[i].m_uiEntry,
-                                       m_aSummonPoint[i].m_fX, m_aSummonPoint[i].m_fY, m_aSummonPoint[i].m_fZ, m_aSummonPoint[i].m_fOrient,
-                                       TEMPSUMMON_TIMED_DESPAWN, HOUR * IN_MILLISECONDS);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -166,6 +136,9 @@ struct boss_dathrohan_balnazzarAI : public ScriptedAI
                 {
                     m_creature->UpdateEntry(NPC_BALNAZZAR);
                     DoScriptText(SAY_TRANSFORM, m_creature);
+                    // Dathrohan wield a weapon but Balnazzar does not need one
+                    SetEquipmentSlots(true);
+                    m_creature->SetSheath(SHEATH_STATE_UNARMED);
                     m_bTransformed = true;
                 }
             }

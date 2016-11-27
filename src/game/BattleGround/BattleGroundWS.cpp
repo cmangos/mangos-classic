@@ -20,15 +20,13 @@
 #include "Player.h"
 #include "BattleGround.h"
 #include "BattleGroundWS.h"
-#include "Creature.h"
 #include "GameObject.h"
 #include "ObjectMgr.h"
 #include "BattleGroundMgr.h"
 #include "WorldPacket.h"
 #include "Language.h"
-#include "MapManager.h"
 
-BattleGroundWS::BattleGroundWS()
+BattleGroundWS::BattleGroundWS(): m_ReputationCapture(0), m_HonorWinKills(0), m_HonorEndKills(0)
 {
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_WS_START_ONE_MINUTE;
@@ -264,7 +262,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player* source)
             ClearHordeFlagCarrier();
             source->RemoveAurasDueToSpell(BG_WS_SPELL_WARSONG_FLAG);
             m_FlagState[TEAM_INDEX_HORDE] = BG_WS_FLAG_STATE_ON_GROUND;
-            source->CastSpell(source, BG_WS_SPELL_WARSONG_FLAG_DROPPED, true);
+            source->CastSpell(source, BG_WS_SPELL_WARSONG_FLAG_DROPPED, TRIGGERED_OLD_TRIGGERED);
             set = true;
         }
     }
@@ -277,7 +275,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player* source)
             ClearAllianceFlagCarrier();
             source->RemoveAurasDueToSpell(BG_WS_SPELL_SILVERWING_FLAG);
             m_FlagState[TEAM_INDEX_ALLIANCE] = BG_WS_FLAG_STATE_ON_GROUND;
-            source->CastSpell(source, BG_WS_SPELL_SILVERWING_FLAG_DROPPED, true);
+            source->CastSpell(source, BG_WS_SPELL_SILVERWING_FLAG_DROPPED, TRIGGERED_OLD_TRIGGERED);
             set = true;
         }
     }
@@ -324,7 +322,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target
         // update world state to show correct flag carrier
         UpdateFlagState(HORDE, BG_WS_FLAG_STATE_ON_PLAYER);
         UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, 1);
-        source->CastSpell(source, BG_WS_SPELL_SILVERWING_FLAG, true);
+        source->CastSpell(source, BG_WS_SPELL_SILVERWING_FLAG, TRIGGERED_OLD_TRIGGERED);
     }
 
     // horde flag picked up from base
@@ -340,7 +338,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target
         // update world state to show correct flag carrier
         UpdateFlagState(ALLIANCE, BG_WS_FLAG_STATE_ON_PLAYER);
         UpdateWorldState(BG_WS_FLAG_UNK_HORDE, 1);
-        source->CastSpell(source, BG_WS_SPELL_WARSONG_FLAG, true);
+        source->CastSpell(source, BG_WS_SPELL_WARSONG_FLAG, TRIGGERED_OLD_TRIGGERED);
     }
 
     // Alliance flag on ground(not in base) (returned or picked up again from ground!)
@@ -362,7 +360,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target
             PlaySoundToAll(BG_WS_SOUND_ALLIANCE_FLAG_PICKED_UP);
             SpawnEvent(WS_EVENT_FLAG_A, 0, false);
             SetAllianceFlagCarrier(source->GetObjectGuid());
-            source->CastSpell(source, BG_WS_SPELL_SILVERWING_FLAG, true);
+            source->CastSpell(source, BG_WS_SPELL_SILVERWING_FLAG, TRIGGERED_OLD_TRIGGERED);
             m_FlagState[TEAM_INDEX_ALLIANCE] = BG_WS_FLAG_STATE_ON_PLAYER;
             UpdateFlagState(HORDE, BG_WS_FLAG_STATE_ON_PLAYER);
             UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, 1);
@@ -390,7 +388,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player* source, GameObject* target
             PlaySoundToAll(BG_WS_SOUND_HORDE_FLAG_PICKED_UP);
             SpawnEvent(WS_EVENT_FLAG_H, 0, false);
             SetHordeFlagCarrier(source->GetObjectGuid());
-            source->CastSpell(source, BG_WS_SPELL_WARSONG_FLAG, true);
+            source->CastSpell(source, BG_WS_SPELL_WARSONG_FLAG, TRIGGERED_OLD_TRIGGERED);
             m_FlagState[TEAM_INDEX_HORDE] = BG_WS_FLAG_STATE_ON_PLAYER;
             UpdateFlagState(ALLIANCE, BG_WS_FLAG_STATE_ON_PLAYER);
             UpdateWorldState(BG_WS_FLAG_UNK_HORDE, 1);

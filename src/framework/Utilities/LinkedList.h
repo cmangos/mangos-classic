@@ -19,12 +19,12 @@
 #ifndef _LINKEDLIST
 #define _LINKEDLIST
 
-#include "Common.h"
+#include <cstddef>
 
 //============================================
 class LinkedListHead;
 
-class LinkedListElement
+class MANGOS_DLL_SPEC LinkedListElement
 {
     private:
 
@@ -156,7 +156,7 @@ class LinkedListHead
                 typedef _Ty const& const_reference;
 
                 Iterator()
-                    : _Ptr(0)
+                    : _Ptr(nullptr)
                 {
                     // construct with null node pointer
                 }

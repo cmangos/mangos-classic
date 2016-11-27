@@ -226,7 +226,7 @@ void System::init() {
         }
 
         m_numCores = systemInfo.dwNumberOfProcessors;
-        uint32 maxAddr = (uint32)systemInfo.lpMaximumApplicationAddress;
+        uintptr_t maxAddr = (uintptr_t)systemInfo.lpMaximumApplicationAddress;
         {
             char c[1024];
             sprintf(c, "%d x %d-bit %s processor",

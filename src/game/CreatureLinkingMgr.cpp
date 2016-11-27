@@ -39,7 +39,7 @@
 #include "ObjectMgr.h"
 #include "SharedDefines.h"
 #include "Creature.h"
-#include "CreatureAI.h"
+#include "AI/CreatureAI.h"
 
 INSTANTIATE_SINGLETON_1(CreatureLinkingMgr);
 
@@ -283,7 +283,7 @@ bool CreatureLinkingMgr::IsLinkedEventTrigger(Creature* pCreature) const
 
     // Also return true for npcs that trigger reverse actions, or for followers(needed in respawn)
     if (CreatureLinkingInfo const* pInfo = GetLinkedTriggerInformation(pCreature))
-        return pInfo->linkingFlag & EVENT_MASK_TRIGGER_TO;
+        return !!(pInfo->linkingFlag & EVENT_MASK_TRIGGER_TO);
 
     return false;
 }
@@ -315,7 +315,7 @@ CreatureLinkingInfo const* CreatureLinkingMgr::GetLinkedTriggerInformation(uint3
 {
     // guid case
     CreatureLinkingMapBounds bounds = m_creatureLinkingGuidMap.equal_range(lowGuid);
-    for (CreatureLinkingMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
+    for (CreatureLinkingMap::const_iterator iter = bounds.first; iter != bounds.second;)
         return &(iter->second);
 
     // entry case

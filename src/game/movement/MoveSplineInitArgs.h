@@ -38,7 +38,8 @@ namespace Movement
         float   angle;
 
         FacingInfo(float o) : angle(o) {}
-        FacingInfo(uint64 t) : target(t) {}
+        FacingInfo(uint64 t) : target(t)
+        {}
         FacingInfo() {}
     };
 

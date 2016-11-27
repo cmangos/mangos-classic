@@ -17,8 +17,6 @@
  */
 
 #include "TargetedMovementGenerator.h"
-#include "ByteBuffer.h"
-#include "Errors.h"
 #include "PathFinder.h"
 #include "Unit.h"
 #include "Creature.h"

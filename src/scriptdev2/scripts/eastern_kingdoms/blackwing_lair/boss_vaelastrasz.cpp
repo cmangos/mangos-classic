@@ -183,7 +183,7 @@ struct boss_vaelastraszAI : public ScriptedAI
                     case 1:
                         if (Creature* pNefarius = m_creature->GetMap()->GetCreature(m_nefariusGuid))
                         {
-                            pNefarius->CastSpell(m_creature, SPELL_NEFARIUS_CORRUPTION, true);
+                            pNefarius->CastSpell(m_creature, SPELL_NEFARIUS_CORRUPTION, TRIGGERED_OLD_TRIGGERED);
                             DoScriptText(SAY_NEFARIUS_CORRUPT_1, pNefarius);
                         }
                         m_uiIntroTimer = 16000;
@@ -273,7 +273,7 @@ struct boss_vaelastraszAI : public ScriptedAI
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_BURNING_ADRENALINE, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
             {
-                pTarget->CastSpell(pTarget, SPELL_BURNING_ADRENALINE, true, nullptr, nullptr, m_creature->GetObjectGuid());
+                pTarget->CastSpell(pTarget, SPELL_BURNING_ADRENALINE, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                 m_uiBurningAdrenalineCasterTimer = 15000;
             }
         }
@@ -285,7 +285,7 @@ struct boss_vaelastraszAI : public ScriptedAI
         {
             // have the victim cast the spell on himself otherwise the third effect aura will be applied
             // to Vael instead of the player
-            m_creature->getVictim()->CastSpell(m_creature->getVictim(), SPELL_BURNING_ADRENALINE, true, nullptr, nullptr, m_creature->GetObjectGuid());
+            m_creature->getVictim()->CastSpell(m_creature->getVictim(), SPELL_BURNING_ADRENALINE, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
 
             m_uiBurningAdrenalineTankTimer = 45000;
         }

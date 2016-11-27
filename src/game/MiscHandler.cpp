@@ -28,8 +28,6 @@
 #include "GuildMgr.h"
 #include "ObjectMgr.h"
 #include "WorldSession.h"
-#include "Auth/BigNumber.h"
-#include "Auth/Sha1.h"
 #include "UpdateData.h"
 #include "Chat.h"
 #include "ScriptMgr.h"
@@ -243,8 +241,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
             continue;
 
         // 49 is maximum player count sent to client
-        ++matchcount;
-        if (matchcount > 49)
+        if (++matchcount > 49)
             continue;
 
         ++displaycount;
@@ -257,10 +254,13 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
         data << uint32(pzoneid);                            // player zone id
     }
 
+    if (sWorld.getConfig(CONFIG_UINT32_MAX_WHOLIST_RETURNS) && matchcount > sWorld.getConfig(CONFIG_UINT32_MAX_WHOLIST_RETURNS))
+        matchcount = sWorld.getConfig(CONFIG_UINT32_MAX_WHOLIST_RETURNS);
+
     data.put(0, displaycount);                              // insert right count, count displayed
     data.put(4, matchcount);                                // insert right count, count of matches
 
-    SendPacket(&data);
+    SendPacket(data);
     DEBUG_LOG("WORLD: Send SMSG_WHO Message");
 }
 
@@ -277,7 +277,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
         data << (uint8)0xC;
         data << uint32(0);
         data << uint8(0);
-        SendPacket(&data);
+        SendPacket(data);
         LogoutRequest(0);
         return;
     }
@@ -304,7 +304,7 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
     WorldPacket data(SMSG_LOGOUT_RESPONSE, 5);
     data << uint32(0);
     data << uint8(0);
-    SendPacket(&data);
+    SendPacket(data);
     LogoutRequest(time(nullptr));
 }
 
@@ -320,7 +320,7 @@ void WorldSession::HandleLogoutCancelOpcode(WorldPacket& /*recv_data*/)
     LogoutRequest(0);
 
     WorldPacket data(SMSG_LOGOUT_CANCEL_ACK, 0);
-    SendPacket(&data);
+    SendPacket(data);
 
     // not remove flags if can't free move - its not set in Logout request code.
     if (GetPlayer()->CanFreeMove())
@@ -957,7 +957,7 @@ void WorldSession::HandlePlayedTime(WorldPacket& /*recv_data*/)
     WorldPacket data(SMSG_PLAYED_TIME, 4 + 4);
     data << uint32(_player->GetTotalPlayedTime());
     data << uint32(_player->GetLevelPlayedTime());
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
@@ -965,8 +965,6 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     ObjectGuid guid;
     recv_data >> guid;
     DEBUG_LOG("Inspected guid is %s", guid.GetString().c_str());
-
-    _player->SetSelectionGuid(guid);
 
     Player* plr = sObjectMgr.GetPlayer(guid);
     if (!plr)                                               // wrong player
@@ -981,7 +979,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     WorldPacket data(SMSG_INSPECT, 8);
     data << ObjectGuid(guid);
 
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
@@ -1029,7 +1027,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     data << player->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
     data << (uint8)player->GetHonorHighestRankInfo().visualRank;           // Highest Rank, ??
 
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
@@ -1120,7 +1118,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 
     WorldPacket data(SMSG_WHOIS, msg.size() + 1);
     data << msg;
-    _player->GetSession()->SendPacket(&data);
+    _player->GetSession()->SendPacket(data);
 
     delete result;
 

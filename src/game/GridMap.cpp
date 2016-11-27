@@ -16,9 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "MapManager.h"
 #include "Log.h"
-#include "GridStates.h"
 #include "CellImpl.h"
 #include "Map.h"
 #include "DBCEnums.h"
@@ -41,7 +39,7 @@ char const* MAP_LIQUID_MAGIC  = "MLIQ";
 static uint16 holetab_h[4] = { 0x1111, 0x2222, 0x4444, 0x8888 };
 static uint16 holetab_v[4] = { 0x000F, 0x00F0, 0x0F00, 0xF000 };
 
-GridMap::GridMap()
+GridMap::GridMap(): m_gridIntHeightMultiplier(0)
 {
     m_flags = 0;
 
@@ -868,7 +866,7 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
 
 inline bool IsOutdoorWMO(uint32 mogpFlags)
 {
-    return mogpFlags & 0x8000;
+    return !!(mogpFlags & 0x8000);
 }
 
 bool TerrainInfo::IsOutdoors(float x, float y, float z) const
@@ -906,8 +904,8 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
 {
     uint32 mogpFlags;
     int32 adtId, rootId, groupId;
-    WMOAreaTableEntry const* wmoEntry = 0;
-    AreaTableEntry const* atEntry = 0;
+    WMOAreaTableEntry const* wmoEntry = nullptr;
+    AreaTableEntry const* atEntry = nullptr;
     bool haveAreaInfo = false;
 
     if (GetAreaInfo(x, y, z, mogpFlags, adtId, rootId, groupId))
@@ -1200,17 +1198,14 @@ TerrainInfo* TerrainManager::LoadTerrain(const uint32 mapId)
 {
     Guard _guard(*this);
 
-    TerrainInfo* ptr = nullptr;
     TerrainDataMap::const_iterator iter = i_TerrainMap.find(mapId);
     if (iter == i_TerrainMap.end())
     {
-        ptr = new TerrainInfo(mapId);
-        i_TerrainMap[mapId] = ptr;
+        TerrainInfo* info = new TerrainInfo(mapId);
+        i_TerrainMap[mapId] = info;
+        return info;
     }
-    else
-        ptr = (*iter).second;
-
-    return ptr;
+    return (*iter).second;
 }
 
 void TerrainManager::UnloadTerrain(const uint32 mapId)

@@ -16,14 +16,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <chrono>
-#include <system_error>
 #include "Threading.h"
 #include "Errors.h"
 
+#include <chrono>
+#include <system_error>
+
 using namespace MaNGOS;
 
-Thread::Thread() : m_task(NULL), m_iThreadId(), m_ThreadImp()
+Thread::Thread() : m_task(nullptr), m_iThreadId(), m_ThreadImp()
 {
 }
 
@@ -71,8 +72,8 @@ void Thread::destroy()
     if (m_iThreadId == std::thread::id() || !m_task)
         return;
 
-	// FIXME: We need to make sure that all threads can be trusted to
-	// halt execution on their own as this is not an interrupt
+    // FIXME: We need to make sure that all threads can be trusted to
+    // halt execution on their own as this is not an interrupt
     m_ThreadImp.join();
     m_iThreadId = std::thread::id();
 }

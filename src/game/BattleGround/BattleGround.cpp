@@ -30,11 +30,12 @@
 #include "ObjectMgr.h"
 #include "Mail.h"
 #include "WorldPacket.h"
-#include "Util.h"
 #include "Formulas.h"
 #include "GridNotifiersImpl.h"
 #include "Chat.h"
 #include "LuaEngine.h"
+
+#include <cstdarg>
 
 namespace MaNGOS
 {
@@ -166,7 +167,7 @@ void BattleGround::BroadcastWorker(Do& _do)
             _do(plr);
 }
 
-BattleGround::BattleGround()
+BattleGround::BattleGround(): m_BuffChange(false), m_StartDelayTime(0), m_startMaxDist(0)
 {
     m_TypeID            = BattleGroundTypeId(0);
     m_Status            = STATUS_NONE;
@@ -440,7 +441,7 @@ void BattleGround::SetTeamStartLoc(Team team, float X, float Y, float Z, float O
     m_TeamStartLocO[teamIdx] = O;
 }
 
-void BattleGround::SendPacketToAll(WorldPacket* packet)
+void BattleGround::SendPacketToAll(WorldPacket const& packet) const
 {
     for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
@@ -454,7 +455,7 @@ void BattleGround::SendPacketToAll(WorldPacket* packet)
     }
 }
 
-void BattleGround::SendPacketToTeam(Team teamId, WorldPacket* packet, Player* sender, bool self)
+void BattleGround::SendPacketToTeam(Team teamId, WorldPacket const& packet, Player* sender, bool self) const
 {
     for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
@@ -482,8 +483,8 @@ void BattleGround::SendPacketToTeam(Team teamId, WorldPacket* packet, Player* se
 void BattleGround::PlaySoundToAll(uint32 SoundID)
 {
     WorldPacket data;
-    sBattleGroundMgr.BuildPlaySoundPacket(&data, SoundID);
-    SendPacketToAll(&data);
+    sBattleGroundMgr.BuildPlaySoundPacket(data, SoundID);
+    SendPacketToAll(data);
 }
 
 void BattleGround::PlaySoundToTeam(uint32 SoundID, Team teamId)
@@ -507,8 +508,8 @@ void BattleGround::PlaySoundToTeam(uint32 SoundID, Team teamId)
 
         if (team == teamId)
         {
-            sBattleGroundMgr.BuildPlaySoundPacket(&data, SoundID);
-            plr->GetSession()->SendPacket(&data);
+            sBattleGroundMgr.BuildPlaySoundPacket(data, SoundID);
+            plr->GetSession()->SendPacket(data);
         }
     }
 }
@@ -532,7 +533,7 @@ void BattleGround::CastSpellOnTeam(uint32 SpellID, Team teamId)
         if (!team) team = plr->GetTeam();
 
         if (team == teamId)
-            plr->CastSpell(plr, SpellID, true);
+            plr->CastSpell(plr, SpellID, TRIGGERED_OLD_TRIGGERED);
     }
 }
 
@@ -590,15 +591,15 @@ void BattleGround::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, 
 void BattleGround::UpdateWorldState(uint32 Field, uint32 Value)
 {
     WorldPacket data;
-    sBattleGroundMgr.BuildUpdateWorldStatePacket(&data, Field, Value);
-    SendPacketToAll(&data);
+    sBattleGroundMgr.BuildUpdateWorldStatePacket(data, Field, Value);
+    SendPacketToAll(data);
 }
 
 void BattleGround::UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player* Source)
 {
     WorldPacket data;
-    sBattleGroundMgr.BuildUpdateWorldStatePacket(&data, Field, Value);
-    Source->GetSession()->SendPacket(&data);
+    sBattleGroundMgr.BuildUpdateWorldStatePacket(data, Field, Value);
+    Source->GetSession()->SendPacket(data);
 }
 
 void BattleGround::EndBattleGround(Team winner)
@@ -730,12 +731,12 @@ void BattleGround::EndBattleGround(Team winner)
 
         BlockMovement(plr);
 
-        sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
-        plr->GetSession()->SendPacket(&data);
+        sBattleGroundMgr.BuildPvpLogDataPacket(data, this);
+        plr->GetSession()->SendPacket(data);
 
         BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeID());
-        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
-        plr->GetSession()->SendPacket(&data);
+        sBattleGroundMgr.BuildBattleGroundStatusPacket(data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
+        plr->GetSession()->SendPacket(data);
     }
 
     if (winmsg_id)
@@ -795,7 +796,7 @@ void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id)
         return;
     }
 
-    plr->CastSpell(plr, spellInfo, true);
+    plr->CastSpell(plr, spellInfo, TRIGGERED_OLD_TRIGGERED);
 }
 
 void BattleGround::RewardItem(Player* plr, uint32 item_id, uint32 count)
@@ -930,8 +931,8 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
             if (SendPacket)
             {
                 WorldPacket data;
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_NONE, 0, 0);
-                plr->GetSession()->SendPacket(&data);
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_NONE, 0, 0);
+                plr->GetSession()->SendPacket(data);
             }
 
             // this call is important, because player, when joins to battleground, this method is not called, so it must be called when leaving bg
@@ -958,8 +959,8 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
 
         // Let others know
         WorldPacket data;
-        sBattleGroundMgr.BuildPlayerLeftBattleGroundPacket(&data, guid);
-        SendPacketToTeam(team, &data, plr, false);
+        sBattleGroundMgr.BuildPlayerLeftBattleGroundPacket(data, guid);
+        SendPacketToTeam(team, data, plr, false);
     }
 
     if (plr)
@@ -1041,8 +1042,8 @@ void BattleGround::AddPlayer(Player* plr)
     UpdatePlayersCountByTeam(team, false);                  // +1 player
 
     WorldPacket data;
-    sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
-    SendPacketToTeam(team, &data, plr, false);
+    sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(data, plr);
+    SendPacketToTeam(team, data, plr, false);
 
     // setup BG group membership
     PlayerAddedToBGCheckIfBGIsRunning(plr);
@@ -1175,7 +1176,7 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
             break;
         case SCORE_BONUS_HONOR:                             // Honor bonus
             // reward honor instantly
-            if (Source->AddHonorCP(value, HONORABLE, 0, 0))
+            if (Source->AddHonorCP(value, HONORABLE))
                 itr->second->BonusHonor += value;
             break;
         default:
@@ -1487,11 +1488,11 @@ void BattleGround::PlayerAddedToBGCheckIfBGIsRunning(Player* plr)
 
     BlockMovement(plr);
 
-    sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
-    plr->GetSession()->SendPacket(&data);
+    sBattleGroundMgr.BuildPvpLogDataPacket(data, this);
+    plr->GetSession()->SendPacket(data);
 
-    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, GetEndTime(), GetStartTime());
-    plr->GetSession()->SendPacket(&data);
+    sBattleGroundMgr.BuildBattleGroundStatusPacket(data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, GetEndTime(), GetStartTime());
+    plr->GetSession()->SendPacket(data);
 }
 
 uint32 BattleGround::GetAlivePlayersCountByTeam(Team team) const

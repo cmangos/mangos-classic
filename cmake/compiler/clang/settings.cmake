@@ -19,7 +19,7 @@ if(WARNINGS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS} -Woverloaded-virtual")
   message(STATUS "Clang: All warnings enabled")
 else()
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused*result")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-result")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-result")
 endif()
 

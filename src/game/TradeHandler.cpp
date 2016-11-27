@@ -27,7 +27,6 @@
 #include "Item.h"
 #include "Spell.h"
 #include "SocialMgr.h"
-#include "Language.h"
 #include "DBCStores.h"
 
 void WorldSession::SendTradeStatus(TradeStatusInfo const& info)
@@ -53,7 +52,7 @@ void WorldSession::SendTradeStatus(TradeStatusInfo const& info)
             break;
     }
 
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& /*recvPacket*/)
@@ -111,7 +110,7 @@ void WorldSession::SendUpdateTrade(bool trader_state /*= true*/)
         }
     }
 
-    SendPacket(&data);
+    SendPacket(data);
 }
 
 //==============================================================
@@ -474,10 +473,10 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         trader->ModifyMoney(my_trade->GetMoney());
 
         if (my_spell)
-            my_spell->prepare(&my_targets);
+            my_spell->SpellStart(&my_targets);
 
         if (his_spell)
-            his_spell->prepare(&his_targets);
+            his_spell->SpellStart(&his_targets);
 
         // cleanup
         clearAcceptTradeMode(my_trade, his_trade);

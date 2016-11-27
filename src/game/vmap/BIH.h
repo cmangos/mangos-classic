@@ -25,19 +25,10 @@
 
 #include <Platform/Define.h>
 
-#include <stdexcept>
 #include <vector>
 #include <algorithm>
-#include <limits>
-#include <cmath>
 
 #define MAX_STACK_SIZE 64
-
-#ifdef _MSC_VER
-#define isnan(x) _isnan(x)
-#else
-#define isnan(x) std::isnan(x)
-#endif
 
 using G3D::Vector3;
 using G3D::AABox;
@@ -108,7 +99,6 @@ class BIH
             for (uint32 i = 0; i < dat.numPrims; ++i)
             {
                 dat.indices[i] = i;
-                AABox tb;
                 getBounds(primitives[i], dat.primBound[i]);
                 bounds.merge(dat.primBound[i]);
             }
@@ -189,7 +179,7 @@ class BIH
                 {
                     uint32 tn = tree[node];
                     uint32 axis = (tn & (3 << 30)) >> 30;
-                    bool BVH2 = tn & (1 << 29);
+                    const bool BVH2 = !!(tn & (1 << 29));
                     int offset = tn & ~(7 << 29);
                     if (!BVH2)
                     {
@@ -288,7 +278,7 @@ class BIH
                 {
                     uint32 tn = tree[node];
                     uint32 axis = (tn & (3 << 30)) >> 30;
-                    bool BVH2 = tn & (1 << 29);
+                    const bool BVH2 = !!(tn & (1 << 29));
                     int offset = tn & ~(7 << 29);
                     if (!BVH2)
                     {

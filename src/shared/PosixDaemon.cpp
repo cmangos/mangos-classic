@@ -18,9 +18,13 @@
 
 #include "Config/Config.h"
 #include "PosixDaemon.h"
+
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 pid_t parent_pid = 0, sid = 0;
 

@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Gluth
-SD%Complete: 95
-SDComment: Gluth should turn around to face the victim when he devours a Zombie
+SD%Complete: 99
+SDComment: TODO: Test encounter.
 SDCategory: Naxxramas
 EndScriptData */
 
@@ -79,12 +79,12 @@ struct boss_gluthAI : public ScriptedAI
     {
         m_uiMortalWoundTimer  = 10000;
         m_uiDecimateTimer     = 110000;
-        m_uiEnrageTimer       = 25000;
+        m_uiEnrageTimer       = 10000;
         m_uiSummonTimer       = 6000;
-        m_uiRoarTimer         = 15000;
+        m_uiRoarTimer         = 20000;
         m_uiZombieSearchTimer = 3000;
 
-        m_uiBerserkTimer      = MINUTE * 8 * IN_MILLISECONDS;
+        m_uiBerserkTimer      = MINUTE * 6.5 * IN_MILLISECONDS; // ~15 seconds after the third Decimate
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -150,6 +150,7 @@ struct boss_gluthAI : public ScriptedAI
 
                 // Devour a Zombie
                 if (pZombie->IsWithinDistInMap(m_creature, 15.0f))
+                    m_creature->SetFacingToObject(pZombie);
                     m_creature->DealDamage(pZombie, pZombie->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
             }
         }
@@ -184,7 +185,7 @@ struct boss_gluthAI : public ScriptedAI
             {
                 DoScriptText(EMOTE_DECIMATE, m_creature);
                 DoCallAllZombieChow();
-                m_uiDecimateTimer = 100000;
+                m_uiDecimateTimer = urand(100000,110000);
             }
         }
         else
@@ -196,7 +197,7 @@ struct boss_gluthAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
             {
                 DoScriptText(EMOTE_BOSS_GENERIC_ENRAGED, m_creature);
-                m_uiEnrageTimer = urand(20000, 30000);
+                m_uiEnrageTimer = urand(10000, 12000);
             }
         }
         else

@@ -22,8 +22,6 @@
 #include "Common.h"
 #include "SharedDefines.h"
 #include "Object.h"
-#include "Database/DatabaseEnv.h"
-#include "Utilities/EventProcessor.h"
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
@@ -350,8 +348,8 @@ struct GameObjectInfo
     {
         switch (type)
         {
-            case GAMEOBJECT_TYPE_CHEST:  return chest.consumable;
-            case GAMEOBJECT_TYPE_GOOBER: return goober.consumable;
+            case GAMEOBJECT_TYPE_CHEST:  return !!chest.consumable;
+            case GAMEOBJECT_TYPE_GOOBER: return !!goober.consumable;
             default: return false;
         }
     }
@@ -379,12 +377,12 @@ struct GameObjectInfo
     {
         switch (type)
         {
-            case GAMEOBJECT_TYPE_DOOR:       return door.noDamageImmune;
-            case GAMEOBJECT_TYPE_BUTTON:     return button.noDamageImmune;
-            case GAMEOBJECT_TYPE_QUESTGIVER: return questgiver.noDamageImmune;
-            case GAMEOBJECT_TYPE_GOOBER:     return goober.noDamageImmune;
-            case GAMEOBJECT_TYPE_FLAGSTAND:  return flagstand.noDamageImmune;
-            case GAMEOBJECT_TYPE_FLAGDROP:   return flagdrop.noDamageImmune;
+            case GAMEOBJECT_TYPE_DOOR:       return !!door.noDamageImmune;
+            case GAMEOBJECT_TYPE_BUTTON:     return !!button.noDamageImmune;
+            case GAMEOBJECT_TYPE_QUESTGIVER: return !!questgiver.noDamageImmune;
+            case GAMEOBJECT_TYPE_GOOBER:     return !!goober.noDamageImmune;
+            case GAMEOBJECT_TYPE_FLAGSTAND:  return !!flagstand.noDamageImmune;
+            case GAMEOBJECT_TYPE_FLAGDROP:   return !!flagdrop.noDamageImmune;
             default: return true;
         }
     }
@@ -660,7 +658,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         Player* GetLootRecipient() const;                   // use group cases as prefered
         Group* GetGroupLootRecipient() const;
         bool HasLootRecipient() const { return m_lootGroupRecipientId || !m_lootRecipientGuid.IsEmpty(); }
-        bool IsGroupLootRecipient() const { return m_lootGroupRecipientId; }
+        bool IsGroupLootRecipient() const { return !!m_lootGroupRecipientId; }
         void SetLootRecipient(Unit* pUnit);
         Player* GetOriginalLootRecipient() const;           // ignore group changes/etc, not for looting
 

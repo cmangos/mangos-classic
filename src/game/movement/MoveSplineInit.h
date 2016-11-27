@@ -40,7 +40,7 @@ namespace Movement
             int32 Launch();
 
             /* Stop any creature movement */
-            void Stop();
+            void Stop(bool forceSend = false);
 
             /* Adds final facing animation
              * sets unit's facing to specified point/angle after all path done

@@ -20,10 +20,8 @@
 #include "ObjectMgr.h"
 #include "Policies/Singleton.h"
 #include "Player.h"
-#include "WorldPacket.h"
 #include "Item.h"
 #include "Corpse.h"
-#include "GridNotifiers.h"
 #include "MapManager.h"
 #include "Map.h"
 #include "CellImpl.h"
@@ -31,7 +29,6 @@
 #include "ObjectGuid.h"
 #include "World.h"
 
-#include <cmath>
 #include <mutex>
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, std::mutex>

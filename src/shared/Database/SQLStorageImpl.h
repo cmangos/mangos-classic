@@ -31,6 +31,14 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert(uint32 /*field_p
 }
 
 template<class DerivedLoader, class StorageClass>
+template<class S>                                           // S source-type
+void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_to_bool(uint32 /*field_pos*/, S src, bool& dst)
+{
+    dst = (src != 0);
+}
+
+template<class DerivedLoader, class StorageClass>
+
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_str_to_str(uint32 /*field_pos*/, char const* src, char*& dst)
 {
     if (!src)
@@ -62,6 +70,12 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_from_str(uint32 
 }
 
 template<class DerivedLoader, class StorageClass>
+void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_str_to_bool(uint32 /*field_pos*/, char const* /*src*/, bool& dst)
+{
+    dst = false;
+}
+
+template<class DerivedLoader, class StorageClass>
 template<class S, class D>                                  // S source-type, D destination-type
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::default_fill(uint32 /*field_pos*/, S src, D& dst)
 {
@@ -83,7 +97,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(V value, Stor
     switch (store.GetDstFormat(x))
     {
         case FT_LOGIC:
-            subclass->convert(x, value, *((bool*)(&p[offset])));
+            subclass->convert_to_bool(x, value, *((bool*)(&p[offset])));
             offset += sizeof(bool);
             break;
         case FT_BYTE:
@@ -131,7 +145,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(char const* v
     switch (store.GetDstFormat(x))
     {
         case FT_LOGIC:
-            subclass->convert_from_str(x, value, *((bool*)(&p[offset])));
+            subclass->convert_str_to_bool(x, value, *((bool*)(&p[offset])));
             offset += sizeof(bool);
             break;
         case FT_BYTE:

@@ -27,7 +27,6 @@
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "Player.h"
-#include "UpdateMask.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "AccountMgr.h"
@@ -36,6 +35,8 @@
 #include "GameEventMgr.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "LuaEngine.h"
+
+#include <cstdarg>
 
 // Supported shift-links (client generated and server side)
 // |color|Harea:area_id|h[name]|h|r
@@ -791,9 +792,10 @@ ChatCommand* ChatHandler::getCommandTable()
     return commandTable;
 }
 
-ChatHandler::ChatHandler(WorldSession* session) : m_session(session) {}
+ChatHandler::ChatHandler(WorldSession* session) : m_session(session), sentErrorMessage(false)
+{}
 
-ChatHandler::ChatHandler(Player* player) : m_session(player->GetSession()) {}
+ChatHandler::ChatHandler(Player* player) : m_session(player->GetSession()), sentErrorMessage(false) {}
 
 ChatHandler::~ChatHandler() {}
 
@@ -909,7 +911,7 @@ void ChatHandler::SendSysMessage(const char* str)
     while (char* line = LineFromMessage(pos))
     {
         ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, CHAT_TAG_NONE, m_session->GetPlayer()->GetObjectGuid());
-        m_session->SendPacket(&data);
+        m_session->SendPacket(data);
     }
 
     delete[] buf;
@@ -928,7 +930,7 @@ void ChatHandler::SendGlobalSysMessage(const char* str)
     while (char* line = LineFromMessage(pos))
     {
         ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, line, LANG_UNIVERSAL, CHAT_TAG_NONE, guid);
-        sWorld.SendGlobalMessage(&data);
+        sWorld.SendGlobalMessage(data);
     }
 
     delete[] buf;
@@ -2332,7 +2334,6 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
 
     // key:data...|h[name]|h|r
     char* keyStart = tail;                                  // remember key start for return
-    char* keyEnd   = tail;                                  // key end for truncate, will updated
 
     while (*tail && *tail != '|' && *tail != ':')
         ++tail;
@@ -2340,7 +2341,7 @@ char* ChatHandler::ExtractLinkArg(char** args, char const* const* linkTypes /*= 
     if (!*tail)
         return nullptr;
 
-    keyEnd = tail;                                          // remember key end for truncate
+    char* keyEnd = tail;                                    // remember key end for truncate
 
     // |h[name]|h|r or :something...|h[name]|h|r
 
@@ -3206,8 +3207,8 @@ bool CliHandler::isAvailable(ChatCommand const& cmd) const
 
 void CliHandler::SendSysMessage(const char* str)
 {
-    m_print(m_callbackArg, str);
-    m_print(m_callbackArg, "\r\n");
+    m_print(str);
+    m_print("\r\n");
 }
 
 std::string CliHandler::GetNameLink() const

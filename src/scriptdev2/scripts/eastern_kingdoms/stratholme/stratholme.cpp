@@ -27,6 +27,7 @@ go_gauntlet_gate
 go_stratholme_postbox
 mob_restless_soul
 mobs_spectral_ghostly_citizen
+npc_aurius
 EndContentData */
 
 #include "precompiled.h"
@@ -74,13 +75,13 @@ bool GOUse_go_gauntlet_gate(Player* pPlayer, GameObject* pGo)
                 continue;
 
             if (!pGroupie->HasAura(SPELL_BARON_ULTIMATUM))
-                pGroupie->CastSpell(pGroupie, SPELL_BARON_ULTIMATUM, true);
+                pGroupie->CastSpell(pGroupie, SPELL_BARON_ULTIMATUM, TRIGGERED_OLD_TRIGGERED);
         }
     }
     else
     {
         if (!pPlayer->HasAura(SPELL_BARON_ULTIMATUM))
-            pPlayer->CastSpell(pPlayer, SPELL_BARON_ULTIMATUM, true);
+            pPlayer->CastSpell(pPlayer, SPELL_BARON_ULTIMATUM, TRIGGERED_OLD_TRIGGERED);
     }
 
     pInstance->SetData(TYPE_BARON_RUN, IN_PROGRESS);
@@ -104,7 +105,7 @@ bool GOUse_go_stratholme_postbox(Player* pPlayer, GameObject* pGo)
     // When the data is Special, spawn the postmaster
     if (pInstance->GetData(TYPE_POSTMASTER) == SPECIAL)
     {
-        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_POSTMASTER, true);
+        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_POSTMASTER, TRIGGERED_OLD_TRIGGERED);
         pInstance->SetData(TYPE_POSTMASTER, DONE);
     }
     else
@@ -174,7 +175,7 @@ struct mob_restless_soulAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_FREED_SOUL)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SOUL_FREED, false);
+            pSummoned->CastSpell(pSummoned, SPELL_SOUL_FREED, TRIGGERED_NONE);
 
             switch (urand(0, 3))
             {
@@ -285,7 +286,7 @@ struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
                 break;
             case TEXTEMOTE_RUDE:
                 if (m_creature->IsWithinDistInMap(pPlayer, INTERACTION_DISTANCE))
-                    m_creature->CastSpell(pPlayer, SPELL_SLAP, false);
+                    m_creature->CastSpell(pPlayer, SPELL_SLAP, TRIGGERED_NONE);
                 else
                     m_creature->HandleEmote(EMOTE_ONESHOT_RUDE);
                 break;
@@ -305,6 +306,57 @@ struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
 CreatureAI* GetAI_mobs_spectral_ghostly_citizen(Creature* pCreature)
 {
     return new mobs_spectral_ghostly_citizenAI(pCreature);
+}
+
+/*######
+## npc_aurius
+######*/
+
+enum
+{
+    GOSSIP_TEXT_AURIUS_1  = 3755,
+    GOSSIP_TEXT_AURIUS_2  = 3756,
+    GOSSIP_TEXT_AURIUS_3  = 3757,
+};
+
+bool QuestRewarded_npc_aurius(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+    if (!pInstance)
+        return false;
+
+    if (pInstance->GetData(TYPE_BARON) == DONE || pInstance->GetData(TYPE_AURIUS) == DONE)
+        return false;
+
+    if ((pQuest->GetQuestId() == QUEST_MEDALLION_FAITH))
+        pInstance->SetData(TYPE_AURIUS, DONE);
+
+    return true;
+}
+
+bool GossipHello_npc_aurius(Player* pPlayer, Creature* pCreature)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+    if (!pInstance)
+        return false;
+
+    if (pCreature->isQuestGiver())
+        pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
+
+    uint32 uiGossipId;
+
+    // Baron encounter is complete and Aurius helped
+    if (pInstance->GetData(TYPE_BARON) == DONE && pInstance->GetData(TYPE_AURIUS) == DONE)
+        uiGossipId = GOSSIP_TEXT_AURIUS_3;
+    // Aurius rewarded the quest
+    else if (pInstance->GetData(TYPE_AURIUS) == DONE)
+        uiGossipId = GOSSIP_TEXT_AURIUS_2;
+    else
+        uiGossipId = GOSSIP_TEXT_AURIUS_1;
+
+    pPlayer->SEND_GOSSIP_MENU(uiGossipId, pCreature->GetObjectGuid());
+    return true;
 }
 
 void AddSC_stratholme()
@@ -334,5 +386,11 @@ void AddSC_stratholme()
     pNewScript = new Script;
     pNewScript->Name = "mobs_spectral_ghostly_citizen";
     pNewScript->GetAI = &GetAI_mobs_spectral_ghostly_citizen;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_aurius";
+    pNewScript->pGossipHello =  &GossipHello_npc_aurius;
+    pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_aurius;
     pNewScript->RegisterSelf();
 }

@@ -28,11 +28,12 @@
 #include "movement/MoveSpline.h"
 #include "movement/MoveSplineInit.h"
 #include "Map.h"
-#include "CreatureAISelector.h"
+#include "AI/CreatureAISelector.h"
 #include "Creature.h"
 #include "CreatureLinkingMgr.h"
 #include "Pet.h"
 #include "DBCStores.h"
+#include "Log.h"
 
 #include <cassert>
 

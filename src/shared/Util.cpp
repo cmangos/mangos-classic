@@ -18,16 +18,22 @@
 
 #include "Util.h"
 #include "Timer.h"
-
 #include "utf8cpp/utf8.h"
-#include "mersennetwister/MersenneTwister.h"
-#include <ace/TSS_T.h>
-#include <ace/INET_Addr.h>
+#include "TSS.h"
 
-typedef ACE_TSS<MTRand> MTRandTSS;
-static MTRandTSS mtRand;
+#include <boost/asio.hpp>
 
-static ACE_Time_Value g_SystemTickTime = ACE_OS::gettimeofday();
+#include <random>
+#include <chrono>
+#include <cstdarg>
+
+std::mt19937* initRand()
+{
+    std::seed_seq seq = { size_t(std::time(nullptr)), size_t(std::clock()) };
+    return new std::mt19937(seq);
+}
+
+static MaNGOS::thread_local_ptr<std::mt19937> mtRand(&initRand);
 
 uint32 WorldTimer::m_iTime = 0;
 uint32 WorldTimer::m_iPrevTime = 0;
@@ -41,7 +47,7 @@ uint32 WorldTimer::tick()
     m_iPrevTime = m_iTime;
 
     // get the new one and don't forget to persist current system time in m_SystemTickTime
-    m_iTime = WorldTimer::getMSTime_internal();
+    m_iTime = WorldTimer::getMSTime();
 
     // return tick diff
     return getMSTimeDiff(m_iPrevTime, m_iTime);
@@ -49,63 +55,63 @@ uint32 WorldTimer::tick()
 
 uint32 WorldTimer::getMSTime()
 {
-    return getMSTime_internal();
-}
-
-uint32 WorldTimer::getMSTime_internal()
-{
-    // get current time
-    const ACE_Time_Value currTime = ACE_OS::gettimeofday();
-    // calculate time diff between two world ticks
-    // special case: curr_time < old_time - we suppose that our time has not ticked at all
-    // this should be constant value otherwise it is possible that our time can start ticking backwards until next world tick!!!
-    ACE_UINT64 diff = 0;
-    (currTime - g_SystemTickTime).msec(diff);
-
-    // lets calculate current world time
-    uint32 iRes = uint32(diff % UI64LIT(0x00000000FFFFFFFF));
-    return iRes;
+    static auto const start_time = std::chrono::system_clock::now();
+    return static_cast<uint32>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start_time).count());
 }
 
 //////////////////////////////////////////////////////////////////////////
 int32 irand(int32 min, int32 max)
 {
-    return int32(mtRand->randInt(max - min)) + min;
+    std::uniform_int_distribution<int32> dist(min, max);
+    return dist(*mtRand.get());
 }
 
 uint32 urand(uint32 min, uint32 max)
 {
-    return mtRand->randInt(max - min) + min;
+    std::uniform_int_distribution<uint32> dist(min, max);
+    return dist(*mtRand.get());
 }
 
 float frand(float min, float max)
 {
-    return mtRand->randExc(max - min) + min;
+    std::uniform_real_distribution<double> dist(min, max);
+    return float(dist(*mtRand.get()));
 }
 
-int32 rand32()
+int32 irand()
 {
-    return mtRand->randInt();
+    std::uniform_int_distribution<int32> dist;
+    return dist(*mtRand.get());
 }
 
-double rand_norm(void)
+uint32 urand()
 {
-    return mtRand->randExc();
+    std::uniform_int_distribution<uint32> dist;
+    return dist(*mtRand.get());
 }
 
-float rand_norm_f(void)
+double rand_norm()
 {
-    return (float)mtRand->randExc();
+    std::uniform_real_distribution<double> dist(0, 1.0f);
+    return dist(*mtRand.get());
 }
 
-double rand_chance(void)
+float rand_norm_f()
 {
-    return mtRand->randExc(100.0);
+    std::uniform_real_distribution<float> dist(0, 1.0f);
+    return dist(*mtRand.get());
 }
 
-float rand_chance_f(void)
+double rand_chance()
 {
-    return (float)mtRand->randExc(100.0);
+    std::uniform_real_distribution<double> dist(0, 100.0);
+    return dist(*mtRand.get());
+}
+
+float rand_chance_f()
+{
+    std::uniform_real_distribution<double> dist(0, 100.0);
+    return float(dist(*mtRand.get()));
 }
 
 Tokens StrSplit(const std::string& src, const std::string& sep)
@@ -253,7 +259,9 @@ bool IsIPAddress(char const* ipaddress)
 
     // Let the big boys do it.
     // Drawback: all valid ip address formats are recognized e.g.: 12.23,121234,0xABCD)
-    return ACE_OS::inet_addr(ipaddress) != INADDR_NONE;
+    boost::system::error_code ec;
+    boost::asio::ip::address::from_string(ipaddress, ec);
+    return !!ec;
 }
 
 /// create PID file

@@ -92,7 +92,7 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
     // data for gm.log
     if (sWorld.getConfig(CONFIG_BOOL_GM_LOG_TRADE))
     {
-        AccountTypes bidder_security = SEC_PLAYER;
+        AccountTypes bidder_security;
         std::string bidder_name;
         if (bidder)
         {

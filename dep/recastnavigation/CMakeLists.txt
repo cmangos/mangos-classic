@@ -15,5 +15,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-add_subdirectory(Detour)
-#add_subdirectory(Recast)
+
+if (BUILD_CORE OR BUILD_MMAP_EXTRACTOR)
+  add_subdirectory(Detour)
+endif()
+
+if (BUILD_MMAP_EXTRACTOR)
+  add_subdirectory(Recast)
+endif()
