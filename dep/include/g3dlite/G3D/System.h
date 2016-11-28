@@ -1,8 +1,8 @@
-/** 
+/**
   @file System.h
- 
+
   @maintainer Morgan McGuire, http://graphics.cs.williams.edu
- 
+
   @cite Rob Wyatt http://www.gamasutra.com/features/wyatts_world/19990709/processor_detection_01.htm
   @cite Benjamin Jurke http://www.flipcode.com/cgi-bin/msg.cgi?showThread=COTD-ProcessorDetectionClass&forum=cotd&id=-1
   @cite Michael Herf http://www.stereopsis.com/memcpy.html
@@ -24,6 +24,10 @@
 #   include <CoreServices/CoreServices.h>
 #endif
 
+#ifdef __FreeBSD__
+#   include <sys/time.h>
+#endif
+
 namespace G3D {
 
 /**
@@ -39,7 +43,7 @@ std::string demoFindData(bool errorIfNotFound = true);
 
 /** G3D, SDL, and IJG libraries require license documentation
     to be distributed with your program.  This generates the
-    string that must appear in your documentation. 
+    string that must appear in your documentation.
     <B>Your program can be commercial, closed-source</B> under
     any license you want.
     @deprecated Use System::license
@@ -48,19 +52,19 @@ std::string license();
 
 /**
 @brief The order in which the bytes of an integer are stored on a
-machine. 
+machine.
 
 Intel/AMD chips tend to be G3D_LITTLE_ENDIAN, Mac PPC's and Suns are
 G3D_BIG_ENDIAN. However, this is primarily used to specify the byte
 order of file formats, which are fixed.
 */
 enum G3DEndian {
-    G3D_BIG_ENDIAN, 
+    G3D_BIG_ENDIAN,
     G3D_LITTLE_ENDIAN
 };
 
 /**
- @brief OS and processor abstraction.  
+ @brief OS and processor abstraction.
 
  The first time any method is called the processor will be analyzed.
  Future calls are then fast.
@@ -83,7 +87,7 @@ public:
        @param size Size of memory that the system was trying to allocate
 
        @param recoverable If true, the system will attempt to allocate again
-       if the callback returns true.  If false, malloc is going to return 
+       if the callback returns true.  If false, malloc is going to return
        NULL and this invocation is just to notify the application.
 
        @return Return true to force malloc to attempt allocation again if the
@@ -140,7 +144,7 @@ private:
     /** @brief Used for the singleton instance only. */
     System();
 
-    /** @brief The singleton instance. 
+    /** @brief The singleton instance.
 
         Used instead of a global variable to ensure that the order of
         intialization is correct, which is critical because other
@@ -155,7 +159,7 @@ private:
         CPUID_GET_HIGHEST_FUNCTION   = 0x80000000,
         CPUID_EXTENDED_FEATURES      = 0x80000001};
 
-    /** Helper macro to call cpuid functions and return all values 
+    /** Helper macro to call cpuid functions and return all values
 
        See http://software.intel.com/en-us/articles/intel-64-architecture-processor-topology-enumeration/
        or  http://www.amd.com/us-en/assets/content_type/white_papers_and_tech_docs/25481.pdf
@@ -171,10 +175,10 @@ private:
 
     /** Called from init() */
     void initTime();
-    
+
 public:
 
-    /** Returns the speed of processor 0 in MHz. 
+    /** Returns the speed of processor 0 in MHz.
         Always returns 0 on linux.*/
     inline static int cpuSpeedMHz() {
         return instance().m_cpuSpeed;
@@ -229,7 +233,7 @@ public:
     inline static const std::string& operatingSystem() {
         return instance().m_operatingSystem;
     }
-    
+
     /** e.g., 80686 */
     inline static const std::string& cpuArchitecture() {
         return instance().m_cpuArch;
@@ -241,24 +245,24 @@ public:
     static std::string currentDateString();
 
     /**
-       Guarantees that the start of the array is aligned to the 
+       Guarantees that the start of the array is aligned to the
        specified number of bytes.
     */
     static void* alignedMalloc(size_t bytes, size_t alignment);
-    
+
     /**
        Uses pooled storage to optimize small allocations (1 byte to 5
        kilobytes).  Can be 10x to 100x faster than calling ::malloc or
        new.
-       
+
        The result must be freed with free.
-       
+
        Threadsafe on Win32.
-       
+
        @sa calloc realloc OutOfMemoryCallback free
     */
     static void* malloc(size_t bytes);
-    
+
     static void* calloc(size_t n, size_t x);
 
     /**
@@ -272,7 +276,7 @@ public:
     static std::string mallocPerformance();
     static void resetMallocPerformanceCounters();
 
-    /** 
+    /**
        Returns a string describing the current usage of the buffer pools used for
        optimizing System::malloc.
      */
@@ -294,12 +298,12 @@ public:
         one on some processors.  Guaranteed to have the same behavior as memcpy
         in all cases. */
     static void memcpy(void* dst, const void* src, size_t numBytes);
-    
+
     /** An implementation of memset that may be up to 2x as fast as the C library
         one on some processors.  Guaranteed to have the same behavior as memset
         in all cases. */
     static void memset(void* dst, uint8 value, size_t numBytes);
-    
+
     /**
      Returns the fully qualified filename for the currently running executable.
 
@@ -331,7 +335,7 @@ public:
     /**
      Causes the current thread to yield for the specified duration
      and consume almost no CPU.
-     The sleep will be extremely precise; it uses System::time() 
+     The sleep will be extremely precise; it uses System::time()
      to calibrate the exact yeild time.
      */
     static void sleep(RealTime t);
@@ -347,7 +351,7 @@ public:
      Console programs only.
      */
     static bool consoleKeyPressed();
-    
+
     /**
      Blocks until a key is read (use consoleKeyPressed to determine if
      a key is waiting to be read) then returns the character code for
@@ -358,7 +362,7 @@ public:
     /**
      The actual time (measured in seconds since
      Jan 1 1970 midnight).
-     
+
      Adjusted for local timezone and daylight savings
      time.   This is as accurate and fast as getCycleCount().
     */
@@ -394,7 +398,7 @@ public:
      true, System::malloc will attempt to allocate the memory again.
      If the callback returns false, then System::malloc will return NULL.
 
-     You can use outOfMemoryCallback to free data structures or to 
+     You can use outOfMemoryCallback to free data structures or to
      register the failure.
      */
     inline static OutOfMemoryCallback outOfMemoryCallback() {
@@ -403,7 +407,7 @@ public:
 
     /** Set an environment variable for the current process */
     static void setEnv(const std::string& name, const std::string& value);
-	
+
     /** Get an environment variable for the current process.  Returns NULL if the variable doesn't exist. */
     static const char* getEnv(const std::string& name);
 
@@ -428,7 +432,7 @@ public:
      Tries to locate the resource by looking in related directories.
      If found, returns the full path to the resource, otherwise
      returns the empty string.
-     */    
+     */
     static std::string findDataFile(const std::string& full, bool errorIfNotFound = true);
 
     /**
@@ -475,11 +479,11 @@ public:
 #elif defined(G3D_OSX)
 
     inline uint64 System::getCycleCount() {
-		//Note:  To put off extra processing until the end, this does not 
+		//Note:  To put off extra processing until the end, this does not
 		//return the actual clock cycle count.  It is a bus cycle count.
 		//When endCycleCount() is called, it converts the two into a difference
 		//of clock cycles
-		
+
         return (uint64) UnsignedWideToUInt64(UpTime());
 		//return (uint64) mach_absolute_time();
     }
@@ -496,10 +500,10 @@ inline void System::endCycleCount(uint64& cycleCount) {
     cycleCount = getCycleCount() - cycleCount;
 #else
     AbsoluteTime end = UpTime();
-    Nanoseconds diffNS = 
+    Nanoseconds diffNS =
         AbsoluteDeltaToNanoseconds(end, UInt64ToUnsignedWide(cycleCount));
-    cycleCount = 
-        (uint64) ((double) (instance().m_OSXCPUSpeed) * 
+    cycleCount =
+        (uint64) ((double) (instance().m_OSXCPUSpeed) *
                   (double) UnsignedWideToUInt64(diffNS) * instance().m_secondsPerNS);
 #endif
 }
