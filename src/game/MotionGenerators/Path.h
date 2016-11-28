@@ -86,6 +86,9 @@ class Path
             return len;
         }
 
+        void push_back(const PathElem& node) { i_nodes.push_back(node); }
+        void pop_back() { i_nodes.pop_back(); }
+
         PathNode& operator[](size_t idx) { return i_nodes[idx]; }
         PathNode const& operator[](size_t idx) const { return i_nodes[idx]; }
 

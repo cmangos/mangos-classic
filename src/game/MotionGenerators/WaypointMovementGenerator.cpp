@@ -357,18 +357,65 @@ bool WaypointMovementGenerator<Creature>::SetNextWaypoint(uint32 pointId)
 //----------------------------------------------------//
 uint32 FlightPathMovementGenerator::GetPathAtMapEnd() const
 {
-    if (i_currentNode >= i_path->size())
-        return i_path->size();
+    if (i_currentNode >= i_path.size())
+        return i_path.size();
 
-    uint32 curMapId = (*i_path)[i_currentNode].mapid;
+    uint32 curMapId = i_path[i_currentNode]->mapid;
 
-    for (uint32 i = i_currentNode; i < i_path->size(); ++i)
+    for (uint32 i = i_currentNode; i < i_path.size(); ++i)
     {
-        if ((*i_path)[i].mapid != curMapId)
+        if (i_path[i]->mapid != curMapId)
             return i;
     }
 
-    return i_path->size();
+    return i_path.size();
+}
+
+#define SKIP_SPLINE_POINT_DISTANCE_SQ (40.0f * 40.0f)
+
+bool IsNodeIncludedInShortenedPath(TaxiPathNodeEntry const* p1, TaxiPathNodeEntry const* p2)
+{
+    return p1->mapid != p2->mapid || std::pow(p1->x - p2->x, 2) + std::pow(p1->y - p2->y, 2) > SKIP_SPLINE_POINT_DISTANCE_SQ;
+}
+
+void FlightPathMovementGenerator::LoadPath(Player& player)
+{
+    _pointsForPathSwitch.clear();
+    std::deque<uint32> const& taxi = player.m_taxi.GetPath();
+    for (uint32 src = 0, dst = 1; dst < taxi.size(); src = dst++)
+    {
+        uint32 path, cost;
+        sObjectMgr.GetTaxiPath(taxi[src], taxi[dst], path, cost);
+        if (path > sTaxiPathNodesByPath.size())
+            return;
+
+        TaxiPathNodeList const& nodes = sTaxiPathNodesByPath[path];
+        if (!nodes.empty())
+        {
+            TaxiPathNodeEntry const* start = nodes[0];
+            TaxiPathNodeEntry const* end = nodes[nodes.size() - 1];
+            bool passedPreviousSegmentProximityCheck = false;
+            for (uint32 i = 0; i < nodes.size(); ++i)
+            {
+                if (passedPreviousSegmentProximityCheck || !src || i_path.empty() || IsNodeIncludedInShortenedPath(i_path[i_path.size() - 1], nodes[i]))
+                {
+                    if ((!src || (IsNodeIncludedInShortenedPath(start, nodes[i]) && i >= 2)) &&
+                        (dst == taxi.size() - 1 || (IsNodeIncludedInShortenedPath(end, nodes[i]) && i < nodes.size() - 1)))
+                    {
+                        passedPreviousSegmentProximityCheck = true;
+                        i_path.push_back(nodes[i]);
+                    }
+                }
+                else
+                {
+                    i_path.pop_back();
+                    --_pointsForPathSwitch.back().PathIndex;
+                }
+            }
+        }
+
+        _pointsForPathSwitch.push_back({ uint32(i_path.size() - 1), int32(cost) });
+    }
 }
 
 void FlightPathMovementGenerator::Initialize(Player& player)
@@ -416,7 +463,7 @@ void FlightPathMovementGenerator::Reset(Player& player)
     uint32 end = GetPathAtMapEnd();
     for (uint32 i = GetCurrentNode(); i != end; ++i)
     {
-        G3D::Vector3 vertice((*i_path)[i].x, (*i_path)[i].y, (*i_path)[i].z);
+        G3D::Vector3 vertice(i_path[i]->x, i_path[i]->y, i_path[i]->z);
         init.Path().push_back(vertice);
     }
     init.SetFirstPointId(GetCurrentNode());
@@ -433,6 +480,16 @@ bool FlightPathMovementGenerator::Update(Player& player, const uint32& /*diff*/)
         bool departureEvent = true;
         do
         {
+            while (!_pointsForPathSwitch.empty() && _pointsForPathSwitch.front().PathIndex <= i_currentNode)
+            {
+                _pointsForPathSwitch.pop_front();
+                player.m_taxi.NextTaxiDestination();
+                if (!_pointsForPathSwitch.empty())
+                {
+                    player.ModifyMoney(-_pointsForPathSwitch.front().Cost);
+                }
+            }
+
             if (pointId == i_currentNode)
                 break;
             i_currentNode += (uint32)departureEvent;
@@ -441,17 +498,17 @@ bool FlightPathMovementGenerator::Update(Player& player, const uint32& /*diff*/)
         while (true);
     }
 
-    const bool flying = (i_currentNode < (i_path->size() - 1));
+    const bool flying = (i_currentNode < (i_path.size() - 1));
 
     // Multi-map flight paths
-    if (flying && (*i_path)[i_currentNode + 1].mapid != player.GetMapId())
+    if (flying && i_path[i_currentNode + 1]->mapid != player.GetMapId())
     {
         // short preparations to continue flight
         Interrupt(player);                // will reset at map landing
         SetCurrentNodeAfterTeleport();
-        TaxiPathNodeEntry const& node = (*i_path)[i_currentNode];
+        TaxiPathNodeEntry const* node = i_path[i_currentNode];
         SkipCurrentNode();
-        player.TeleportTo(node.mapid, node.x, node.y, node.z, player.GetOrientation());
+        player.TeleportTo(node->mapid, node->x, node->y, node->z, player.GetOrientation());
     }
 
     return flying;
@@ -459,14 +516,14 @@ bool FlightPathMovementGenerator::Update(Player& player, const uint32& /*diff*/)
 
 void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
 {
-    if (i_path->empty())
+    if (i_path.empty())
         return;
 
-    uint32 map0 = (*i_path)[0].mapid;
+    uint32 map0 = i_path[0]->mapid;
 
-    for (size_t i = 1; i < i_path->size(); ++i)
+    for (size_t i = 1; i < i_path.size(); ++i)
     {
-        if ((*i_path)[i].mapid != map0)
+        if (i_path[i]->mapid != map0)
         {
             i_currentNode = i;
             return;
@@ -476,10 +533,10 @@ void FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
 
 bool FlightPathMovementGenerator::GetResetPosition(Player&, float& x, float& y, float& z, float& o) const
 {
-    const TaxiPathNodeEntry& node = (*i_path)[i_currentNode];
-    x = node.x;
-    y = node.y;
-    z = node.z;
+    const TaxiPathNodeEntry* node = i_path[i_currentNode];
+    x = node->x;
+    y = node->y;
+    z = node->z;
 
     return true;
 }

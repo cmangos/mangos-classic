@@ -107,14 +107,14 @@ class WaypointMovementGenerator<Creature>
  */
 class FlightPathMovementGenerator
     : public MovementGeneratorMedium< Player, FlightPathMovementGenerator >,
-      public PathMovementBase<Player, TaxiPathNodeList const*>
+      public PathMovementBase<Player, TaxiPathNodeList>
 {
     public:
-        explicit FlightPathMovementGenerator(TaxiPathNodeList const& pathnodes, uint32 startNode = 0)
+        explicit FlightPathMovementGenerator(uint32 startNode = 0)
         {
-            i_path = &pathnodes;
             i_currentNode = startNode;
         }
+        void LoadPath(Player&);
         void Initialize(Player&);
         void Finalize(Player&);
         void Interrupt(Player&);
@@ -122,12 +122,20 @@ class FlightPathMovementGenerator
         bool Update(Player&, const uint32&);
         MovementGeneratorType GetMovementGeneratorType() const override { return FLIGHT_MOTION_TYPE; }
 
-        TaxiPathNodeList const& GetPath() { return *i_path; }
+        TaxiPathNodeList const& GetPath() { return i_path; }
         uint32 GetPathAtMapEnd() const;
-        bool HasArrived() const { return (i_currentNode >= i_path->size()); }
+        bool HasArrived() const { return (i_currentNode >= i_path.size()); }
         void SetCurrentNodeAfterTeleport();
         void SkipCurrentNode() { ++i_currentNode; }
         bool GetResetPosition(Player&, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const;
+
+        struct TaxiNodeChangeInfo
+        {
+            uint32 PathIndex;
+            int32 Cost;
+        };
+
+        std::deque<TaxiNodeChangeInfo> _pointsForPathSwitch;    //! node indexes and costs where TaxiPath changes
 };
 
 #endif

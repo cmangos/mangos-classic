@@ -750,6 +750,8 @@ class PlayerTaxi
         bool empty() const { return m_TaxiDestinations.empty(); }
 
         friend std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
+
+        std::deque<uint32> const& GetPath() const { return m_TaxiDestinations; }
     private:
         TaxiMask m_taximask;
         std::deque<uint32> m_TaxiDestinations;
