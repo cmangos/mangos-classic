@@ -150,8 +150,10 @@ struct boss_gluthAI : public ScriptedAI
 
                 // Devour a Zombie
                 if (pZombie->IsWithinDistInMap(m_creature, 15.0f))
+                {
                     m_creature->SetFacingToObject(pZombie);
                     m_creature->DealDamage(pZombie, pZombie->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                }
             }
         }
     }
