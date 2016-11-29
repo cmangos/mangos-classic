@@ -591,7 +591,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     pCurrChar->SetInGameTime(WorldTimer::getMSTime());
 
     // announce group about member online (must be after add to player list to receive announce to self)
-    if (Group* group = pCurrChar->GetGroup())
+    if (Group* group = pCurrChar->GetGroup() && pCurrChar->GetGroup->leader)
         group->UpdatePlayerOnlineStatus(pCurrChar);
 
     // friend status
@@ -666,6 +666,34 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     m_playerLoading = false;
     delete holder;
+
+    // allow cross faction raid set pve and the same faction in dungeon
+    if (pCurrChar->GetMap()->IsDungeon() && pCurrChar->GetGroup()) // IF player is in dungeon and raid
+    {
+        pCurrChar->UpdatePvP(false, true); // enable pve
+        Group* pGroup = pCurrChar->GetGroup();   // group
+        Player* pLeader = sObjectMgr.GetPlayer(pGroup->GetLeaderGuid());// group leader
+
+        if (pLeader) // IF leader is online
+        {
+            if (pGroup->IsLeader(pCurrChar->GetObjectGuid())) // IF player is leader
+            {
+                Group::MemberSlotList const& memberList = pGroup->GetMemberSlots();
+                Group::MemberSlotList::const_iterator memberItr;
+                for (memberItr = memberList.begin(); memberItr != memberList.end(); ++memberItr)
+                {
+                    Player* pMember = sObjectMgr.GetPlayer(memberItr->guid);
+                    if (pMember && pMember->GetMap()->IsDungeon()) // IF member is online and in dungeon
+                        pMember->setFactionForRace(pLeader->getRace());
+                }
+            }
+            else // IF player is not leader
+                pCurrChar->setFactionForRace(pLeader->getRace());
+        }
+        else // IF leader is offline
+            pCurrChar->setFactionForRace(RACE_ORC);
+    }
+    // allow cross faction raid set pve and the same faction in dungeon
 }
 
 void WorldSession::HandleSetFactionAtWarOpcode(WorldPacket& recv_data)
