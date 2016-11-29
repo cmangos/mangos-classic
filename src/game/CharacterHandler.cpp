@@ -591,7 +591,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     pCurrChar->SetInGameTime(WorldTimer::getMSTime());
 
     // announce group about member online (must be after add to player list to receive announce to self)
-    if (Group* group = pCurrChar->GetGroup() && pCurrChar->GetGroup->leader)
+    if (Group* group = pCurrChar->GetGroup())
         group->UpdatePlayerOnlineStatus(pCurrChar);
 
     // friend status
