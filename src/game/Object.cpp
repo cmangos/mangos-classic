@@ -381,6 +381,31 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                             if (target->getClass() != CLASS_HUNTER)
                                 appendValue &= ~UNIT_NPC_FLAG_STABLEMASTER;
                         }
+                        
+                        if (appendValue & UNIT_NPC_FLAG_FLIGHTMASTER)
+                        {
+                            QuestRelationsMapBounds bounds = sObjectMgr.GetCreatureQuestRelationsMapBounds(((Creature*)this)->GetEntry());
+                            for (QuestRelationsMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+                            {
+                                Quest const* pQuest = sObjectMgr.GetQuestTemplate(itr->second);
+                                if (target->CanSeeStartQuest(pQuest))
+                                {
+                                    appendValue &= ~UNIT_NPC_FLAG_FLIGHTMASTER;
+                                    break;
+                                }
+                            }
+
+                            bounds = sObjectMgr.GetCreatureQuestInvolvedRelationsMapBounds(((Creature*)this)->GetEntry());
+                            for (QuestRelationsMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+                            {
+                                Quest const* pQuest = sObjectMgr.GetQuestTemplate(itr->second);
+                                if (target->CanRewardQuest(pQuest, false))
+                                {
+                                    appendValue &= ~UNIT_NPC_FLAG_FLIGHTMASTER;
+                                    break;
+                                }
+                            }
+                        }
                     }
 
                     *data << uint32(appendValue);
