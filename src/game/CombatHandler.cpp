@@ -88,7 +88,7 @@ void WorldSession::HandleSetSheathedOpcode(WorldPacket& recv_data)
     GetPlayer()->SetSheath(SheathState(sheathed));
 }
 
-void WorldSession::SendAttackStop(Unit const* enemy)
+void WorldSession::SendAttackStop(Unit const* enemy) const
 {
     WorldPacket data(SMSG_ATTACKSTOP, (4 + 20));            // we guess size
     data << GetPlayer()->GetPackGUID();

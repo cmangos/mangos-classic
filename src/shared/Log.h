@@ -170,7 +170,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, std::m
         void SetLogFileLevel(char* Level);
         void SetColor(bool stdout_stream, Color color);
         void ResetColor(bool stdout_stream);
-        void outTime();
+        void outTime() const;
         static void outTimestamp(FILE* file);
         static std::string GetTimestampStr();
         bool HasLogFilter(uint32 filter) const { return !!(m_logFilter & filter); }

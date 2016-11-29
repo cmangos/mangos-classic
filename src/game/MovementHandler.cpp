@@ -439,7 +439,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
     mover->SendMessageToSetExcept(data, _player);
 }
 
-void WorldSession::SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed)
+void WorldSession::SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed) const
 {
     float vsin = sin(angle);
     float vcos = cos(angle);

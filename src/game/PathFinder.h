@@ -118,7 +118,7 @@ class PathFinder
         void BuildPointPath(const float* startPoint, const float* endPoint);
         void BuildShortcut();
 
-        NavTerrain getNavTerrain(float x, float y, float z);
+        NavTerrain getNavTerrain(float x, float y, float z) const;
         void createFilter();
         void updateFilter();
 
@@ -127,7 +127,7 @@ class PathFinder
                              const dtPolyRef* visited, uint32 nvisited);
         bool getSteerTarget(const float* startPos, const float* endPos, float minTargetDist,
                             const dtPolyRef* path, uint32 pathSize, float* steerPos,
-                            unsigned char& steerPosFlag, dtPolyRef& steerPosRef);
+                            unsigned char& steerPosFlag, dtPolyRef& steerPosRef) const;
         dtStatus findSmoothPath(const float* startPos, const float* endPos,
                                 const dtPolyRef* polyPath, uint32 polyPathSize,
                                 float* smoothPath, int* smoothPathSize, uint32 smoothPathMaxSize);

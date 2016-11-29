@@ -103,7 +103,7 @@ void TotemAI::AttackStart(Unit*)
 {
 }
 
-Totem& TotemAI::getTotem()
+Totem& TotemAI::getTotem() const
 {
     return static_cast<Totem&>(*m_creature);
 }

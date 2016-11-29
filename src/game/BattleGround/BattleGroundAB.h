@@ -195,7 +195,7 @@ class BattleGroundAB : public BattleGround
         // TODO: working, scripted peons spawning
         void _NodeOccupied(uint8 node, Team team);
 
-        int32 _GetNodeNameId(uint8 node);
+        int32 _GetNodeNameId(uint8 node) const;
 
         /* Nodes info:
             0: neutral

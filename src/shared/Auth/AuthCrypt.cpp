@@ -20,10 +20,7 @@
 #include "Hmac.h"
 #include "BigNumber.h"
 
-AuthCrypt::AuthCrypt()
-{
-    _initialized = false;
-}
+AuthCrypt::AuthCrypt() : _initialized(false) {}
 
 void AuthCrypt::Init(BigNumber *bn)
 {

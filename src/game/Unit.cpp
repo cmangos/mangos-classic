@@ -541,7 +541,7 @@ bool Unit::UpdateMeleeAttackingState()
         player->SwingErrorMsg(swingError);
     }
 
-    return swingError;
+    return !!swingError;
 }
 
 bool Unit::haveOffhandWeapon() const
@@ -2583,7 +2583,7 @@ float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
     return spellProto->spellLevel < 20 && spellProto->spellLevel > 0 ? (1.0f - ((20.0f - spellProto->spellLevel) * 0.0375f)) : 1.0f;
 }
 
-void Unit::SendMeleeAttackStart(Unit* pVictim)
+void Unit::SendMeleeAttackStart(Unit* pVictim) const
 {
     WorldPacket data(SMSG_ATTACKSTART, 8 + 8);
     data << GetObjectGuid();
@@ -2593,7 +2593,7 @@ void Unit::SendMeleeAttackStart(Unit* pVictim)
     DEBUG_LOG("WORLD: Sent SMSG_ATTACKSTART");
 }
 
-void Unit::SendMeleeAttackStop(Unit* victim)
+void Unit::SendMeleeAttackStop(Unit* victim) const
 {
     if (!victim)
         return;
@@ -2611,6 +2611,10 @@ void Unit::SendMeleeAttackStop(Unit* victim)
 
 bool Unit::IsSpellBlocked(Unit* pCaster, SpellEntry const* spellEntry, WeaponAttackType attackType)
 {
+    // Do not roll block twice: spells with this attribute are rolled as full block only (miss type)
+    if (spellEntry->HasAttribute(SPELL_ATTR_EX3_BLOCKABLE_SPELL))
+        return false;
+
     if (!HasInArc(M_PI_F, pCaster))
         return false;
 
@@ -2636,7 +2640,7 @@ bool Unit::IsSpellBlocked(Unit* pCaster, SpellEntry const* spellEntry, WeaponAtt
 
 float Unit::SpellResistChance(Unit *pVictim, const SpellEntry *spell)
 {
-    float resistChance = 0;
+    float resistChance = 0.0f;
 
     // TODO: Verify if this attribute affects other resistances (mechanics, etc)
     // Chance to fully resist a spell by magic resistance
@@ -2672,10 +2676,10 @@ float Unit::SpellResistChance(Unit *pVictim, const SpellEntry *spell)
 
 // Melee based spells can be miss, parry or dodge on this step
 // Crit or block - determined on damage calculation phase! (and can be both in some time)
-float Unit::MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 skillDiff, SpellEntry const* spell)
+float Unit::MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 skillDiff, SpellEntry const* spell) const
 {
     if (spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS))
-        return 0;
+        return 0.0f;
 
     // Calculate hit chance (more correct for chance mod)
     float hitChance = 0.0f;
@@ -2718,10 +2722,7 @@ float Unit::MeleeSpellMissChance(Unit* pVictim, WeaponAttackType attType, int32 
 // Melee based spells hit result calculations
 SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 {
-    WeaponAttackType attType = BASE_ATTACK;
-
-    if (spell->DmgClass == SPELL_DAMAGE_CLASS_RANGED)
-        attType = RANGED_ATTACK;
+    const WeaponAttackType attType = (spell->DmgClass == SPELL_DAMAGE_CLASS_RANGED) ? RANGED_ATTACK : BASE_ATTACK;
 
     // bonus from skills is 0.04% per skill Diff
     int32 attackerWeaponSkill = (spell->EquippedItemClass == ITEM_CLASS_WEAPON) ? int32(GetWeaponSkillValue(attType, pVictim)) : GetMaxSkillValueForLevel();
@@ -2730,45 +2731,48 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 
     uint32 roll = urand(0, 10000);
 
-    uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, fullSkillDiff, spell) * 100.0f);
     // Roll miss
-    uint32 tmp = missChance;
+    uint32 tmp = uint32(MeleeSpellMissChance(pVictim, attType, fullSkillDiff, spell) * 100.0f);
     if (roll < tmp)
         return SPELL_MISS_MISS;
 
     // Roll mechanic resistance
-    tmp += SpellResistChance(pVictim, spell);
+    tmp += uint32(SpellResistChance(pVictim, spell) * 100.0f);
     if (roll < tmp)
         return SPELL_MISS_RESIST;
 
-    bool canDodge = true;
-    bool canParry = true;
-
-    // Same spells cannot be parry/dodge
+    // Some spells cannot be parried/dodged/blocked
     if (spell->HasAttribute(SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK))
         return SPELL_MISS_NONE;
 
-    // Ranged attack cannot be parry/dodge
-    if (attType == RANGED_ATTACK)
+    // Ranged attack cannot be parried/dodged
+    bool canDodge = (attType == BASE_ATTACK);
+    bool canParry = (attType == BASE_ATTACK);
+    bool canBlock = spell->HasAttribute(SPELL_ATTR_EX3_BLOCKABLE_SPELL);
+
+    // End early if no posssible miss causes
+    if (!canDodge && !canParry && !canBlock)
         return SPELL_MISS_NONE;
 
-    bool from_behind = !pVictim->HasInArc(M_PI_F, this);
-
     // Check for attack from behind
-    if (from_behind)
+    if (IsFacingTargetsBack(pVictim))
     {
         // Can`t dodge from behind in PvP (but its possible in PvE)
         if (GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
             canDodge = false;
         // Can`t parry
         canParry = false;
+        canBlock = false;
     }
-    // Check creatures flags_extra for disable parry
+
+    // Check creatures flags_extra for disable parry and block
     if (pVictim->GetTypeId() == TYPEID_UNIT)
     {
         uint32 flagEx = ((Creature*)pVictim)->GetCreatureInfo()->ExtraFlags;
         if (flagEx & CREATURE_EXTRA_FLAG_NO_PARRY)
             canParry = false;
+        if (flagEx & CREATURE_EXTRA_FLAG_NO_BLOCK)
+            canBlock = false;
     }
 
     if (canDodge)
@@ -2797,13 +2801,26 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
             return SPELL_MISS_PARRY;
     }
 
+    if (canBlock)
+    {
+        // Roll block
+        int32 blockChance = int32(pVictim->GetUnitBlockChance() * 100.0f) - skillDiff * 4;
+
+        if (blockChance < 0)
+            blockChance = 0;
+
+        tmp += blockChance;
+        if (roll < tmp)
+            return SPELL_MISS_BLOCK;
+    }
+
     return SPELL_MISS_NONE;
 }
 
 float Unit::MagicSpellMissChance(Unit *pVictim, const SpellEntry *spell)
 {
     if (spell->HasAttribute(SPELL_ATTR_EX3_CANT_MISS))
-        return 0;
+        return 0.0f;
 
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
     // PvP - PvE spell misschances per leveldif > 2
@@ -2990,7 +3007,7 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
 
 float Unit::GetUnitDodgeChance() const
 {
-    if (hasUnitState(UNIT_STAT_STUNNED))
+    if (IsIncapacitated())
         return 0.0f;
     if (GetTypeId() == TYPEID_PLAYER)
         return GetFloatValue(PLAYER_DODGE_PERCENTAGE);
@@ -3009,7 +3026,7 @@ float Unit::GetUnitDodgeChance() const
 
 float Unit::GetUnitParryChance() const
 {
-    if (IsNonMeleeSpellCasted(false) || hasUnitState(UNIT_STAT_STUNNED))
+    if (IsNonMeleeSpellCasted(false) || IsIncapacitated())
         return 0.0f;
 
     float chance = 0.0f;
@@ -3041,7 +3058,7 @@ float Unit::GetUnitParryChance() const
 
 float Unit::GetUnitBlockChance() const
 {
-    if (IsNonMeleeSpellCasted(false) || hasUnitState(UNIT_STAT_STUNNED))
+    if (IsNonMeleeSpellCasted(false) || IsIncapacitated())
         return 0.0f;
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -4641,7 +4658,7 @@ void Unit::RemoveAllGameObjects()
     m_wildGameObjs.clear();
 }
 
-void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log)
+void Unit::SendSpellNonMeleeDamageLog(SpellNonMeleeDamage* log) const
 {
     WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16 + 4 + 4 + 1 + 4 + 4 + 1 + 1 + 4 + 4 + 1)); // we guess size
     data << log->target->GetPackGUID();
@@ -4673,7 +4690,7 @@ void Unit::SendSpellNonMeleeDamageLog(Unit* target, uint32 SpellID, uint32 Damag
     SendSpellNonMeleeDamageLog(&log);
 }
 
-void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo)
+void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo) const
 {
     Aura* aura = pInfo->aura;
     Modifier* mod = aura->GetModifier();
@@ -4726,7 +4743,7 @@ void Unit::ProcDamageAndSpell(Unit* pVictim, uint32 procAttacker, uint32 procVic
         pVictim->ProcDamageAndSpellFor(true, this, procVictim, procExtra, attType, procSpell, amount);
 }
 
-void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo)
+void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo) const
 {
     WorldPacket data(SMSG_SPELLLOGMISS, (4 + 8 + 1 + 4 + 8 + 1));
     data << uint32(spellID);
@@ -4740,7 +4757,7 @@ void Unit::SendSpellMiss(Unit* target, uint32 spellID, SpellMissInfo missInfo)
     SendMessageToSet(data, true);
 }
 
-void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo)
+void Unit::SendAttackStateUpdate(CalcDamageInfo* damageInfo) const
 {
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
 
@@ -5509,7 +5526,7 @@ void Unit::_RemoveTotem(Totem* totem)
     }
 }
 
-void Unit::UnsummonAllTotems()
+void Unit::UnsummonAllTotems() const
 {
     for (int i = 0; i < MAX_TOTEM_SLOT; ++i)
         if (Totem* totem = GetTotem(TotemSlot(i)))
@@ -5578,7 +5595,7 @@ void Unit::SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, bool c
     SendMessageToSet(data, true);
 }
 
-void Unit::SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype)
+void Unit::SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype) const
 {
     WorldPacket data(SMSG_SPELLENERGIZELOG, (8 + 8 + 4 + 4 + 4 + 1));
     data << pVictim->GetPackGUID();
@@ -5801,7 +5818,7 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
     return DoneAdvertisedBenefit;
 }
 
-int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask)
+int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask) const
 {
     int32 TakenAdvertisedBenefit = 0;
 
@@ -5900,7 +5917,7 @@ bool Unit::IsSpellCrit(Unit* pVictim, SpellEntry const* spellProto, SpellSchoolM
     return false;
 }
 
-uint32 Unit::SpellCriticalDamageBonus(SpellEntry const* spellProto, uint32 amount, Unit* pVictim)
+uint32 Unit::SpellCriticalDamageBonus(SpellEntry const* spellProto, uint32 amount, Unit* pVictim) const
 {
     // Base critical bonus:
     int32 bonus = (amount / 2);         // magical default bonus is 50% of the amount
@@ -5932,7 +5949,7 @@ uint32 Unit::SpellCriticalDamageBonus(SpellEntry const* spellProto, uint32 amoun
     return (amount + uint32(bonus));
 }
 
-uint32 Unit::SpellCriticalHealingBonus(SpellEntry const* spellProto, uint32 damage, Unit* pVictim)
+uint32 Unit::SpellCriticalHealingBonus(SpellEntry const* spellProto, uint32 damage, Unit* pVictim) const
 {
     // Calculate critical bonus
     int32 crit_bonus;
@@ -6139,7 +6156,7 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
     return AdvertisedBenefit;
 }
 
-int32 Unit::SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask)
+int32 Unit::SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask) const
 {
     int32 AdvertisedBenefit = 0;
     AuraList const& mDamageTaken = GetAurasByType(SPELL_AURA_MOD_HEALING);
@@ -8389,7 +8406,7 @@ void CharmInfo::LoadPetActionBar(const std::string& data)
     }
 }
 
-void CharmInfo::BuildActionBar(WorldPacket& data)
+void CharmInfo::BuildActionBar(WorldPacket& data) const
 {
     for (uint32 i = 0; i < MAX_UNIT_ACTION_BAR_INDEX; ++i)
         data << uint32(PetActionBar[i].packedData);
@@ -8670,7 +8687,7 @@ Player* Unit::GetSpellModOwner() const
 }
 
 ///----------Pet responses methods-----------------
-void Unit::SendPetCastFail(uint32 spellid, SpellCastResult msg)
+void Unit::SendPetCastFail(uint32 spellid, SpellCastResult msg) const
 {
     if (msg == SPELL_CAST_OK)
         return;
@@ -8685,7 +8702,7 @@ void Unit::SendPetCastFail(uint32 spellid, SpellCastResult msg)
     ((Player*)owner)->GetSession()->SendPacket(data);
 }
 
-void Unit::SendPetActionFeedback(uint8 msg)
+void Unit::SendPetActionFeedback(uint8 msg) const
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
@@ -8696,7 +8713,7 @@ void Unit::SendPetActionFeedback(uint8 msg)
     ((Player*)owner)->GetSession()->SendPacket(data);
 }
 
-void Unit::SendPetTalk(uint32 pettalk)
+void Unit::SendPetTalk(uint32 pettalk) const
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
@@ -8708,7 +8725,7 @@ void Unit::SendPetTalk(uint32 pettalk)
     ((Player*)owner)->GetSession()->SendPacket(data);
 }
 
-void Unit::SendPetAIReaction()
+void Unit::SendPetAIReaction() const
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
@@ -8806,8 +8823,8 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
     Player* controller = GetCharmerOrOwnerPlayerOrPlayerItself();
     const bool control = controller ? controller->IsClientControl(this) : false;
     const bool movement = (state != UNIT_FLAG_STUNNED);
-    const bool stun = (state & UNIT_FLAG_STUNNED);
-    const bool fleeing = (state & UNIT_FLAG_FLEEING);
+    const bool stun = !!(state & UNIT_FLAG_STUNNED);
+    const bool fleeing = !!(state & UNIT_FLAG_FLEEING);
 
     if (apply)
     {
@@ -9174,7 +9191,7 @@ Unit* Unit::SelectRandomFriendlyTarget(Unit* except /*= nullptr*/, float radius 
     return *tcIter;
 }
 
-bool Unit::hasNegativeAuraWithInterruptFlag(uint32 flag)
+bool Unit::hasNegativeAuraWithInterruptFlag(uint32 flag) const
 {
     for (SpellAuraHolderMap::const_iterator iter = m_spellAuraHolders.begin(); iter != m_spellAuraHolders.end(); ++iter)
     {

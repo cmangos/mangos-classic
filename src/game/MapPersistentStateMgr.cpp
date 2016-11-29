@@ -271,7 +271,7 @@ void DungeonPersistentState::DeleteRespawnTimes()
     ClearRespawnTimes();                                    // state can be deleted at call if only respawn data prevent unload
 }
 
-void DungeonPersistentState::DeleteFromDB()
+void DungeonPersistentState::DeleteFromDB() const
 {
     MapPersistentStateManager::DeleteInstanceFromDB(GetInstanceId());
 }
@@ -700,7 +700,7 @@ void MapPersistentStateManager::RemovePersistentState(uint32 mapId, uint32 insta
     }
 }
 
-void MapPersistentStateManager::_DelHelper(DatabaseType& db, const char* fields, const char* table, const char* queryTail, ...)
+void MapPersistentStateManager::_DelHelper(DatabaseType& db, const char* fields, const char* table, const char* queryTail, ...) const
 {
     Tokens fieldTokens = StrSplit(fields, ", ");
     MANGOS_ASSERT(fieldTokens.size() != 0);
@@ -763,7 +763,7 @@ void MapPersistentStateManager::CleanupInstances()
     sLog.outString();
 }
 
-void MapPersistentStateManager::PackInstances()
+void MapPersistentStateManager::PackInstances() const
 {
     // this routine renumbers player instance associations in such a way so they start from 1 and go up
     // TODO: this can be done a LOT more efficiently

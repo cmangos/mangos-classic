@@ -807,7 +807,7 @@ void Pet::KillLoyaltyBonus(uint32 level)
     ModifyLoyalty(bonus);
 }
 
-HappinessState Pet::GetHappinessState()
+HappinessState Pet::GetHappinessState() const
 {
     if (GetPower(POWER_HAPPINESS) < HAPPINESS_LEVEL_SIZE)
         return UNHAPPY;
@@ -822,7 +822,7 @@ void Pet::SetLoyaltyLevel(LoyaltyLevel level)
     SetByteValue(UNIT_FIELD_BYTES_1, 1, level);
 }
 
-bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
+bool Pet::CanTakeMoreActiveSpells(uint32 spellid) const
 {
     uint8  activecount = 1;
     uint32 chainstartstore[ACTIVE_SPELLS_MAX];
@@ -861,7 +861,7 @@ bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
     return true;
 }
 
-bool Pet::HasTPForSpell(uint32 spellid)
+bool Pet::HasTPForSpell(uint32 spellid) const
 {
     int32 neededtrainp = GetTPForSpell(spellid);
     if ((m_TrainingPoints - neededtrainp < 0 || neededtrainp < 0) && neededtrainp != 0)
@@ -869,7 +869,7 @@ bool Pet::HasTPForSpell(uint32 spellid)
     return true;
 }
 
-int32 Pet::GetTPForSpell(uint32 spellid)
+int32 Pet::GetTPForSpell(uint32 spellid) const
 {
     uint32 basetrainp = 0;
 
@@ -886,7 +886,7 @@ int32 Pet::GetTPForSpell(uint32 spellid)
     uint32 spenttrainp = 0;
     uint32 chainstart = sSpellMgr.GetFirstSpellInChain(spellid);
 
-    for (PetSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    for (PetSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if (itr->second.state == PETSPELL_REMOVED)
             continue;
@@ -909,14 +909,14 @@ int32 Pet::GetTPForSpell(uint32 spellid)
     return int32(basetrainp) - int32(spenttrainp);
 }
 
-uint32 Pet::GetMaxLoyaltyPoints(uint32 level)
+uint32 Pet::GetMaxLoyaltyPoints(uint32 level) const
 {
     if (level < 1) level = 1; // prevent SIGSEGV (out of range)
     if (level > 7) level = 7; // prevent SIGSEGV (out of range)
     return LevelUpLoyalty[level - 1];
 }
 
-uint32 Pet::GetStartLoyaltyPoints(uint32 level)
+uint32 Pet::GetStartLoyaltyPoints(uint32 level) const
 {
     if (level < 1) level = 1; // prevent SIGSEGV (out of range)
     if (level > 7) level = 7; // prevent SIGSEGV (out of range)
@@ -929,7 +929,7 @@ void Pet::SetTP(int32 TP)
     SetUInt32Value(UNIT_TRAINING_POINTS, (uint32)GetDispTP());
 }
 
-int32 Pet::GetDispTP()
+int32 Pet::GetDispTP() const
 {
     if (getPetType() != HUNTER_PET)
         return (0);
@@ -1413,7 +1413,7 @@ bool Pet::HaveInDiet(ItemPrototype const* item) const
     return !!(diet & FoodMask);
 }
 
-uint32 Pet::GetCurrentFoodBenefitLevel(uint32 itemlevel)
+uint32 Pet::GetCurrentFoodBenefitLevel(uint32 itemlevel) const
 {
     // -5 or greater food level
     if (getLevel() <= itemlevel + 5)                        // possible to feed level 60 pet with level 55 level food for full effect
