@@ -10969,7 +10969,10 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                     break;
                 case GOSSIP_OPTION_TAXIVENDOR:
                     if (GetSession()->SendLearnNewTaxiNode(pCreature))
+                    {
+                        pMenu->GetGossipMenu().SetIgnoreGossip(true);
                         return;
+                    }
                     break;
                 case GOSSIP_OPTION_BATTLEFIELD:
                     if (!pCreature->CanInteractWithBattleMaster(this, false))
@@ -11069,10 +11072,13 @@ void Player::SendPreparedGossip(WorldObject* pSource)
     if (!pSource)
         return;
 
+    GossipMenu gossipMenu = PlayerTalkClass->GetGossipMenu();
+    QuestMenu questMenu = PlayerTalkClass->GetQuestMenu();
+
     if (pSource->GetTypeId() == TYPEID_UNIT)
     {
         // in case no gossip flag and quest menu not empty, open quest menu (client expect gossip menu with this flag)
-        if (!((Creature*)pSource)->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && !PlayerTalkClass->GetQuestMenu().Empty())
+        if (!((Creature*)pSource)->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && !questMenu.Empty())
         {
             SendPreparedQuest(pSource->GetObjectGuid());
             return;
@@ -11081,7 +11087,7 @@ void Player::SendPreparedGossip(WorldObject* pSource)
     else if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
     {
         // probably need to find a better way here
-        if (!PlayerTalkClass->GetGossipMenu().GetMenuId() && !PlayerTalkClass->GetQuestMenu().Empty())
+        if (!gossipMenu.GetMenuId() && !questMenu.Empty())
         {
             SendPreparedQuest(pSource->GetObjectGuid());
             return;
@@ -11093,10 +11099,11 @@ void Player::SendPreparedGossip(WorldObject* pSource)
 
     uint32 textId = GetGossipTextId(pSource);
 
-    if (uint32 menuId = PlayerTalkClass->GetGossipMenu().GetMenuId())
+    if (uint32 menuId = gossipMenu.GetMenuId())
         textId = GetGossipTextId(menuId, pSource);
 
-    PlayerTalkClass->SendGossipMenu(textId, pSource->GetObjectGuid());
+    if (!gossipMenu.IsIgnoreGossipAcitve())
+        PlayerTalkClass->SendGossipMenu(textId, pSource->GetObjectGuid());
 }
 
 void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
