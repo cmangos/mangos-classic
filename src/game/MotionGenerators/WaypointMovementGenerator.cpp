@@ -432,7 +432,7 @@ void FlightPathMovementGenerator::Finalize(Player& player)
     player.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_MOVING_DEPRECATED | UNIT_FLAG_TAXI_FLIGHT);
     player.SetClientControl(&player, 1);
 
-    if (player.m_taxi.empty())
+    if (player.m_taxi.GetLastNode() == player.m_taxi.GetFinalTaxiDestination())
     {
         player.getHostileRefManager().setOnlineOfflineState(true);
         if (player.pvpInfo.inHostileArea)
@@ -443,6 +443,8 @@ void FlightPathMovementGenerator::Finalize(Player& player)
         // when client side flight end early in comparison server side
         player.StopMoving(true);
     }
+    else
+        sLog.outError("Flight path finalized in non-final point. Investigate causes. Destination: %d. Player name: %d.", player.m_taxi.GetNextTaxiDestination(), player.GetName());
 }
 
 void FlightPathMovementGenerator::Interrupt(Player& player)
