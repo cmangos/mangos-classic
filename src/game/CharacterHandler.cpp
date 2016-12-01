@@ -668,28 +668,24 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     delete holder;
 
     // allow cross faction raid set pve and the same faction in dungeon
-    if (pCurrChar->GetMap()->IsDungeon() && pCurrChar->GetGroup()) // IF player is in dungeon and raid
+    Map* pMap = pCurrChar->GetMap();
+    Group* pGroup = pCurrChar->GetGroup();
+    if (pMap && pMap->IsDungeon() && pGroup) // IF player is in dungeon and raid
     {
         pCurrChar->UpdatePvP(false, true); // enable pve
-        Group* pGroup = pCurrChar->GetGroup();   // group
-        Player* pLeader = sObjectMgr.GetPlayer(pGroup->GetLeaderGuid());// group leader
-
-        if (pLeader) // IF leader is online
-        {
+        if (Player* pLeader = sObjectMgr.GetPlayer(pGroup->GetLeaderGuid())) // IF leader is online
             if (pGroup->IsLeader(pCurrChar->GetObjectGuid())) // IF player is leader
             {
                 Group::MemberSlotList const& memberList = pGroup->GetMemberSlots();
                 Group::MemberSlotList::const_iterator memberItr;
                 for (memberItr = memberList.begin(); memberItr != memberList.end(); ++memberItr)
-                {
-                    Player* pMember = sObjectMgr.GetPlayer(memberItr->guid);
-                    if (pMember && pMember->GetMap()->IsDungeon()) // IF member is online and in dungeon
-                        pMember->setFactionForRace(pLeader->getRace());
-                }
+                    if (Player* pMember = sObjectMgr.GetPlayer(memberItr->guid)) // IF member is online
+                        if (Map* pMemberMap = pMember->GetMap())
+                            if (pMemberMap->IsDungeon()) // IF member is in dungeon
+                                pMember->setFactionForRace(pLeader->getRace());
             }
             else // IF player is not leader
                 pCurrChar->setFactionForRace(pLeader->getRace());
-        }
         else // IF leader is offline
             pCurrChar->setFactionForRace(RACE_ORC);
     }

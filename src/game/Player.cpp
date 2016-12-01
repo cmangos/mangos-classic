@@ -16613,7 +16613,7 @@ void Player::UpdatePvP(bool state, bool ovrride)
             SetPvP(state);
     }
     // allow cross faction raid set pve and the same faction in dungeon
-    if (!GetMap()->IsBattleGround() && !GetMap()->IsDungeon())
+    if (GetMap() && !GetMap()->IsBattleGround() && !GetMap()->IsDungeon())
         setFactionForRace(getRace()); // reset faction for native race
     // allow cross faction raid set pve and the same faction in dungeon
 }
