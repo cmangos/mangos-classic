@@ -1067,12 +1067,12 @@ void BattleGround::AddPlayer(Player* plr)
     if (hordePlayers < alliancePlayers) // IF alliance more than horde
     {
         plr->setFactionForRace(RACE_ORC);
-        plr->setBGTeam(HORDE);
+        plr->SetBGTeam(HORDE);
     }
     else if (hordePlayers > alliancePlayers) // IF horde more than alliance
     {
         plr->setFactionForRace(RACE_HUMAN);
-        plr->setBGTeam(ALLIANCE);
+        plr->SetBGTeam(ALLIANCE);
     }
     else // IF balance
     {
