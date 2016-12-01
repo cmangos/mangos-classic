@@ -120,7 +120,7 @@ namespace MaNGOS
             class handler_allocator
             {
                 private:
-                    static constexpr size_t BufferSize = 512;
+                    static const size_t BufferSize = 512;
 
                     // Storage space used for handler-based custom memory allocation.
                     std::aligned_storage<BufferSize>::type m_buffer;

@@ -77,10 +77,11 @@ void Socket::StartAsyncRead()
         return;
     }
 
+    std::shared_ptr<Socket> ptr = shared<Socket>();
     m_readState = ReadState::Reading;
     m_socket.async_read_some(boost::asio::buffer(&m_inBuffer->m_buffer[m_inBuffer->m_writePosition], m_inBuffer->m_buffer.size() - m_inBuffer->m_writePosition),
         make_custom_alloc_handler(m_allocator,
-            [ptr = shared<Socket>()](const boost::system::error_code &error, size_t length) { ptr->OnRead(error, length); }));
+            [ptr](const boost::system::error_code &error, size_t length) { ptr->OnRead(error, length); }));
 }
 
 void Socket::OnRead(const boost::system::error_code &error, size_t length)
@@ -200,8 +201,9 @@ void Socket::StartWriteFlushTimer()
 
     m_writeState = WriteState::Buffering;
 
+    std::shared_ptr<Socket> ptr = shared<Socket>();
     m_outBufferFlushTimer.expires_from_now(boost::posix_time::milliseconds(BufferTimeout));
-    m_outBufferFlushTimer.async_wait([ptr = shared<Socket>()](const boost::system::error_code &error) { ptr->FlushOut(); });
+    m_outBufferFlushTimer.async_wait([ptr](const boost::system::error_code &error) { ptr->FlushOut(); });
 }
 
 void Socket::FlushOut()
@@ -220,9 +222,10 @@ void Socket::FlushOut()
     // at this point we are guarunteed that there is data to send in the primary buffer.  send it.
     m_writeState = WriteState::Sending;
 
+    std::shared_ptr<Socket> ptr = shared<Socket>();
     m_socket.async_write_some(boost::asio::buffer(m_outBuffer->m_buffer, m_outBuffer->m_writePosition),
         make_custom_alloc_handler(m_allocator,
-            [ptr = shared<Socket>()](const boost::system::error_code &error, size_t length) { ptr->OnWriteComplete(error, length); }));
+            [ptr](const boost::system::error_code &error, size_t length) { ptr->OnWriteComplete(error, length); }));
 }
 
 // if the write state is idle, this will do nothing, which is correct
@@ -277,11 +280,12 @@ void Socket::OnWriteComplete(const boost::system::error_code &error, size_t leng
         m_secondaryOutBuffer->m_writePosition = 0;
     }
 
+    std::shared_ptr<Socket> ptr = shared<Socket>();
     // if there is any data to write, do so immediately
     if (m_outBuffer->m_writePosition > 0)
         m_socket.async_write_some(boost::asio::buffer(m_outBuffer->m_buffer, m_outBuffer->m_writePosition),
             make_custom_alloc_handler(m_allocator,
-                [ptr = shared<Socket>()](const boost::system::error_code &error, size_t length) { ptr->OnWriteComplete(error, length); }));
+                [ptr](const boost::system::error_code &error, size_t length) { ptr->OnWriteComplete(error, length);}));
     else
         m_writeState = WriteState::Idle;
 }
