@@ -434,6 +434,7 @@ void FlightPathMovementGenerator::Finalize(Player& player)
 
     if (player.m_taxi.GetLastNode() == player.m_taxi.GetFinalTaxiDestination())
     {
+        player.m_taxi.NextTaxiDestination(); // successfully reached end and pop final point
         player.getHostileRefManager().setOnlineOfflineState(true);
         if (player.pvpInfo.inHostileArea)
             player.CastSpell(&player, 2479, TRIGGERED_OLD_TRIGGERED);
