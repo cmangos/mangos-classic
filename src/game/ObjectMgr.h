@@ -331,6 +331,7 @@ enum ConditionSource                                        // From where was th
     CONDITION_FROM_SPELL_AREA       = 7,                    // Used to check a condition from spell_area table
     CONDITION_FROM_RESERVED_1       = 8,                    // reserved for 3.x and later
     CONDITION_FROM_DBSCRIPTS        = 9,                    // Used to check a condition from DB Scripts Engine
+    CONDITION_FROM_TRAINER          = 10,                   // Used to check a condition from npc_trainer and npc_trainer_template
 };
 
 class PlayerCondition

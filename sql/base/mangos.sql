@@ -3808,6 +3808,7 @@ CREATE TABLE `npc_trainer` (
   `reqskill` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqskillvalue` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `condition_id` INT(11) unsigned NOT NULL default '0',
   UNIQUE KEY `entry_spell` (`entry`,`spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -3832,6 +3833,7 @@ CREATE TABLE `npc_trainer_template` (
   `reqskill` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqskillvalue` smallint(5) unsigned NOT NULL DEFAULT '0',
   `reqlevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `condition_id` INT(11) unsigned NOT NULL default '0',
   UNIQUE KEY `entry_spell` (`entry`,`spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
