@@ -4952,8 +4952,8 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 
     uint32 count = 0;
 
-    //                                                0   1               2              3               4                    5           6                  7                  8                  9
-    QueryResult* result = WorldDatabase.Query("SELECT id, required_level, required_item, required_item2, required_quest_done, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport");
+    //                                                0   1               2              3               4                    5           6                  7                  8                  9                   10
+    QueryResult* result = WorldDatabase.Query("SELECT id, required_level, required_item, required_item2, required_quest_done, target_map, target_position_x, target_position_y, target_position_z, target_orientation, condition_id FROM areatrigger_teleport");
     if (!result)
     {
         BarGoLink bar(1);
@@ -4986,6 +4986,7 @@ void ObjectMgr::LoadAreaTriggerTeleports()
         at.target_Y           = fields[7].GetFloat();
         at.target_Z           = fields[8].GetFloat();
         at.target_Orientation = fields[9].GetFloat();
+        at.conditionId        = fields[10].GetUInt32();
 
         AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
         if (!atEntry)
@@ -5022,6 +5023,13 @@ void ObjectMgr::LoadAreaTriggerTeleports()
                 sLog.outErrorDb("Table `areatrigger_teleport` has nonexistent required quest %u for trigger %u, remove quest done requirement.", at.requiredQuest, Trigger_ID);
                 at.requiredQuest = 0;
             }
+        }
+
+        if (at.conditionId)
+        {
+            const PlayerCondition* condition = sConditionStorage.LookupEntry<PlayerCondition>(at.conditionId);
+            if (!condition) // condition does not exist for some reason
+                sLog.outErrorDb("Table `areatrigger_teleport` entry %u has `condition_id` = %u but does not exist.", Trigger_ID, at.conditionId);
         }
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(at.target_mapId);
@@ -6779,7 +6787,8 @@ char const* conditionSourceToStr[] =
     "spell_area check",              // CONDITION_FROM_SPELL_AREA 
     "npc_spellclick_spells check",   // Unused. For 3.x and later.                  
     "DBScript engine",               // CONDITION_FROM_DBSCRIPTS           
-    "trainer's spell check",         // CONDITION_FROM_TRAINER 
+    "trainer's spell check",         // CONDITION_FROM_TRAINER             
+    "areatrigger teleport check",    // CONDITION_FROM_AREATRIGGER_TELEPORT
 };
 
 // Checks if player meets the condition
