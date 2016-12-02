@@ -6800,16 +6800,17 @@ bool ObjectMgr::IsPlayerMeetToCondition(uint16 conditionId, Player const* pPlaye
 //            out of bounds access! It is accessed with ConditionSource as index!
 char const* conditionSourceToStr[] =
 {
-    "loot system",
-    "referencing loot",
-    "gossip menu",
-    "gossip menu option",
-    "event AI",
-    "hardcoded",
-    "vendor's item check",
-    "spell_area check",
-    "npc_spellclick_spells check", // Unused. For 3.x and later.
-    "DBScript engine"
+    "loot system",                   // CONDITION_FROM_LOOT         
+    "referencing loot",              // CONDITION_FROM_REFERING_LOOT
+    "gossip menu",                   // CONDITION_FROM_GOSSIP_MENU  
+    "gossip menu option",            // CONDITION_FROM_GOSSIP_OPTION
+    "event AI",                      // CONDITION_FROM_EVENTAI      
+    "hardcoded",                     // CONDITION_FROM_HARDCODED    
+    "vendor's item check",           // CONDITION_FROM_VENDOR       
+    "spell_area check",              // CONDITION_FROM_SPELL_AREA 
+    "npc_spellclick_spells check",   // Unused. For 3.x and later.                  
+    "DBScript engine",               // CONDITION_FROM_DBSCRIPTS           
+    "trainer's spell check",         // CONDITION_FROM_TRAINER 
 };
 
 // Checks if player meets the condition
@@ -7708,7 +7709,7 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
 
     std::set<uint32> skip_trainers;
 
-    QueryResult* result = WorldDatabase.PQuery("SELECT entry, spell,spellcost,reqskill,reqskillvalue,reqlevel FROM %s", tableName);
+    QueryResult* result = WorldDatabase.PQuery("SELECT entry, spell,spellcost,reqskill,reqskillvalue,reqlevel,condition_id FROM %s", tableName);
 
     if (!result)
     {
@@ -7811,6 +7812,7 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         trainerSpell.reqSkill      = fields[3].GetUInt32();
         trainerSpell.reqSkillValue = fields[4].GetUInt32();
         trainerSpell.reqLevel      = fields[5].GetUInt32();
+        trainerSpell.conditionId   = fields[6].GetUInt16();
 
         trainerSpell.isProvidedReqLevel = trainerSpell.reqLevel > 0;
 
@@ -7821,6 +7823,13 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         }
         else
             trainerSpell.reqLevel = spellinfo->spellLevel;
+
+        if (trainerSpell.conditionId)
+        {
+            const PlayerCondition* condition = sConditionStorage.LookupEntry<PlayerCondition>(trainerSpell.conditionId);
+            if (!condition) // condition does not exist for some reason
+                sLog.outErrorDb("Table `%s` (Entry: %u) has `condition_id` = %u but does not exist.", tableName, entry, trainerSpell.conditionId);
+        }
 
         if (SpellMgr::IsProfessionSpell(spellinfo->EffectTriggerSpell[0]))
             data.trainerType = 2;
