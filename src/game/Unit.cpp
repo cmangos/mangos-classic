@@ -7245,6 +7245,29 @@ void Unit::SetDeathState(DeathState s)
 ########                          ########
 ########################################*/
 
+// Check if this unit is controlled by provided controller or by one of its friendly faction
+bool Unit::IsTargetUnderControl(Unit const& target) const
+{
+    ObjectGuid charmerGuid = GetCharmerGuid();
+
+    if (!charmerGuid)
+        return false;
+    
+    if (target.GetCharmerGuid() == charmerGuid)
+        return true;
+
+    // also check if this unit is controlled by another creature from friendly faction
+    if (Unit const* charmer = GetMap()->GetUnit(charmerGuid))
+    {
+        FactionTemplateEntry const* charmerFactionEntry = charmer->getFactionTemplateEntry();
+        FactionTemplateEntry const* controllerFactionEntry = target.getFactionTemplateEntry();
+        if (controllerFactionEntry && charmerFactionEntry && !controllerFactionEntry->IsHostileTo(*controllerFactionEntry))
+            return true;
+    }
+
+    return false;
+}
+
 bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
 {
     // only creatures can have threat list
@@ -7404,6 +7427,7 @@ bool Unit::IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea)
     MANGOS_ASSERT(pTarget && GetTypeId() == TYPEID_UNIT);
 
     return
+        pTarget->IsTargetUnderControl(*this) ||
         pTarget->IsImmuneToDamage(GetMeleeDamageSchoolMask()) ||
         pTarget->hasNegativeAuraWithInterruptFlag(AURA_INTERRUPT_FLAG_DAMAGE) ||
         (checkThreatArea && ((Creature*)this)->IsOutOfThreatArea(pTarget));
