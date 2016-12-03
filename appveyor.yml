@@ -6,7 +6,6 @@ os: Visual Studio 2015
  
 # build platform, i.e. Win32 (instead of x86), x64, Any CPU. This setting is optional.
 platform:
-  - Win32
   - x64
 
 # specify custom environment variables
@@ -21,7 +20,6 @@ environment:
 
 # build configuration, i.e. Debug, Release, etc.
 configuration:
-  - Debug
   - Release
 
 # scripts that are called at very beginning, before repo cloning

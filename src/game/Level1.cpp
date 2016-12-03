@@ -250,7 +250,7 @@ bool ChatHandler::HandleGMVisibleCommand(char* args)
         m_session->SendNotification(LANG_INVISIBLE_INVISIBLE);
         player->SetGMVisible(false);
         if (invisibleAuraInfo)
-            player->CastSpell(player, invisibleAuraInfo, true);
+            player->CastSpell(player, invisibleAuraInfo, TRIGGERED_OLD_TRIGGERED);
     }
 
     return true;

@@ -530,7 +530,7 @@ void BattleGround::CastSpellOnTeam(uint32 SpellID, Team teamId)
         if (!team) team = plr->GetTeam();
 
         if (team == teamId)
-            plr->CastSpell(plr, SpellID, true);
+            plr->CastSpell(plr, SpellID, TRIGGERED_OLD_TRIGGERED);
     }
 }
 
@@ -592,7 +592,7 @@ void BattleGround::UpdateWorldState(uint32 Field, uint32 Value)
     SendPacketToAll(data);
 }
 
-void BattleGround::UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player* Source)
+void BattleGround::UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player* Source) const
 {
     WorldPacket data;
     sBattleGroundMgr.BuildUpdateWorldStatePacket(data, Field, Value);
@@ -782,7 +782,7 @@ void BattleGround::RewardMark(Player* plr, uint32 count)
     }
 }
 
-void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id)
+void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id) const
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
@@ -791,7 +791,7 @@ void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id)
         return;
     }
 
-    plr->CastSpell(plr, spellInfo, true);
+    plr->CastSpell(plr, spellInfo, TRIGGERED_OLD_TRIGGERED);
 }
 
 void BattleGround::RewardItem(Player* plr, uint32 item_id, uint32 count)
@@ -817,7 +817,7 @@ void BattleGround::RewardItem(Player* plr, uint32 item_id, uint32 count)
         SendRewardMarkByMail(plr, item_id, no_space_count);
 }
 
-void BattleGround::SendRewardMarkByMail(Player* plr, uint32 mark, uint32 count)
+void BattleGround::SendRewardMarkByMail(Player* plr, uint32 mark, uint32 count) const
 {
     uint32 bmEntry = GetBattlemasterEntry();
     if (!bmEntry)
@@ -1259,7 +1259,7 @@ void BattleGround::OnObjectDBLoad(GameObject* obj)
     }
 }
 
-bool BattleGround::IsDoor(uint8 event1, uint8 event2)
+bool BattleGround::IsDoor(uint8 event1, uint8 event2) const
 {
     if (event1 == BG_EVENT_DOOR)
     {
@@ -1424,7 +1424,6 @@ void BattleGround::HandleTriggerBuff(ObjectGuid go_guid)
         return;
 
     obj->SetLootState(GO_JUST_DEACTIVATED);             // can be despawned or destroyed
-    return;
 }
 
 void BattleGround::HandleKillPlayer(Player* player, Player* killer)

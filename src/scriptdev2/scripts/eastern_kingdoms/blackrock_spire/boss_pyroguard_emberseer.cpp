@@ -137,7 +137,7 @@ struct boss_pyroguard_emberseerAI : public ScriptedAI
                 for (GuidList::const_iterator itr = m_lIncarceratorsGuid.begin(); itr != m_lIncarceratorsGuid.end(); ++itr)
                 {
                     if (Creature* pIncarcerator = m_creature->GetMap()->GetCreature(*itr))
-                        pIncarcerator->CastSpell(m_creature, SPELL_ENCAGE_EMBERSEER, false);
+                        pIncarcerator->CastSpell(m_creature, SPELL_ENCAGE_EMBERSEER, TRIGGERED_NONE);
                 }
 
                 m_uiEncageTimer = 0;

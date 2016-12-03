@@ -203,7 +203,7 @@ class Guild
         typedef std::unordered_map<uint32, MemberSlot> MemberList;
         typedef std::vector<RankInfo> RankList;
 
-        uint32 GetId() { return m_Id; }
+        uint32 GetId() const { return m_Id; }
         ObjectGuid GetLeaderGuid() const { return m_LeaderGuid; }
         std::string const& GetName() const { return m_Name; }
         std::string const& GetMOTD() const { return MOTD; }

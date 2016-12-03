@@ -795,7 +795,7 @@ struct npc_mistress_nagmaraAI : public ScriptedAI
                 DoScriptText(TEXTEMOTE_NAGMARA, m_creature);
                 DoScriptText(TEXTEMOTE_ROCKNOT, pRocknot);
                 DoCastSpellIfCan(m_creature, SPELL_NAGMARA_ROCKNOT);
-                pRocknot->CastSpell(pRocknot, SPELL_NAGMARA_ROCKNOT, false);
+                pRocknot->CastSpell(pRocknot, SPELL_NAGMARA_ROCKNOT, TRIGGERED_NONE);
                 m_uiPhaseTimer = 12000;
                 break;
         }

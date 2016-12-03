@@ -186,7 +186,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void UpdateObjectVisibility(WorldObject* obj, Cell cell, CellPair cellpair);
 
         void resetMarkedCells() { marked_cells.reset(); }
-        bool isCellMarked(uint32 pCellId) { return marked_cells.test(pCellId); }
+        bool isCellMarked(uint32 pCellId) const { return marked_cells.test(pCellId); }
         void markCell(uint32 pCellId) { marked_cells.set(pCellId); }
 
         bool HavePlayers() const { return !m_mapRefManager.isEmpty(); }
@@ -223,7 +223,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         Creature* GetAnyTypeCreature(ObjectGuid guid);      // normal creature or pet
         GameObject* GetGameObject(ObjectGuid guid);
         DynamicObject* GetDynamicObject(ObjectGuid guid);
-        Corpse* GetCorpse(ObjectGuid guid);                 // !!! find corpse can be not in world
+        Corpse* GetCorpse(ObjectGuid guid) const;                 // !!! find corpse can be not in world
         Unit* GetUnit(ObjectGuid guid);                     // only use if sure that need objects at current map, specially for player case
         WorldObject* GetWorldObject(ObjectGuid guid);       // only use if sure that need objects at current map, specially for player case
 
@@ -282,20 +282,20 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         void SetWeather(uint32 zoneId, WeatherType type, float grade, bool permanently);
 
         // Random on map generation
-        bool GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius);
-        bool GetReachableRandomPointOnGround(float& x, float& y, float& z, float radius);
-        bool GetRandomPointInTheAir(float& x, float& y, float& z, float radius);
-        bool GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status);
+        bool GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius) const;
+        bool GetReachableRandomPointOnGround(float& x, float& y, float& z, float radius) const;
+        bool GetRandomPointInTheAir(float& x, float& y, float& z, float radius) const;
+        bool GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status) const;
 
     private:
         void LoadMapAndVMap(int gx, int gy);
 
         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }
 
-        void SendInitSelf(Player* player);
+        void SendInitSelf(Player* player) const;
 
-        void SendInitTransports(Player* player);
-        void SendRemoveTransports(Player* player);
+        void SendInitTransports(Player* player) const;
+        void SendRemoveTransports(Player* player) const;
 
         bool CreatureCellRelocation(Creature* creature, const Cell& new_cell);
 
@@ -433,7 +433,7 @@ class MANGOS_DLL_SPEC BattleGroundMap : public Map
         void UnloadAll(bool pForce) override;
 
         virtual void InitVisibilityDistance() override;
-        BattleGround* GetBG() { return m_bg; }
+        BattleGround* GetBG() const { return m_bg; }
         void SetBG(BattleGround* bg) { m_bg = bg; }
 
         // can't be nullptr for loaded map

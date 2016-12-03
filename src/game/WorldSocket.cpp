@@ -56,7 +56,7 @@ struct ServerPktHeader
 
 WorldSocket::WorldSocket(boost::asio::io_service &service, std::function<void (Socket *)> closeHandler)
     : Socket(service, closeHandler), m_lastPingTime(std::chrono::system_clock::time_point::min()), m_overSpeedPings(0),
-      m_useExistingHeader(false), m_session(nullptr), m_seed(urand())
+      m_useExistingHeader(false), m_session(nullptr),m_seed(urand())
 {}
 
 void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
@@ -227,7 +227,6 @@ bool WorldSocket::ProcessIncomingData()
         {
             DETAIL_LOG("Disconnecting session [account id %i / address %s] for badly formatted packet.",
                        m_session ? m_session->GetAccountId() : -1, GetRemoteAddress().c_str());
-
             return false;
         }
     }
@@ -470,7 +469,6 @@ bool WorldSocket::HandlePing(WorldPacket &recvPacket)
                     sLog.outError("WorldSocket::HandlePing: Player kicked for "
                                   "overspeeded pings address = %s",
                                   GetRemoteAddress().c_str());
-
                     return false;
                 }
             }

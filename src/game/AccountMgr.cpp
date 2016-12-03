@@ -35,7 +35,7 @@ AccountMgr::AccountMgr()
 AccountMgr::~AccountMgr()
 {}
 
-AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password)
+AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password) const
 {
     if (utf8length(username) > MAX_ACCOUNT_STR)
         return AOR_NAME_TOO_LONG;                           // username's too long
@@ -55,7 +55,7 @@ AccountOpResult AccountMgr::CreateAccount(std::string username, std::string pass
     return AOR_OK;                                          // everything's fine
 }
 
-AccountOpResult AccountMgr::DeleteAccount(uint32 accid)
+AccountOpResult AccountMgr::DeleteAccount(uint32 accid) const
 {
     QueryResult* result = LoginDatabase.PQuery("SELECT 1 FROM account WHERE id='%u'", accid);
     if (!result)
@@ -98,7 +98,7 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accid)
     return AOR_OK;
 }
 
-AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, std::string new_passwd)
+AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, std::string new_passwd) const
 {
     QueryResult* result = LoginDatabase.PQuery("SELECT 1 FROM account WHERE id='%u'", accid);
     if (!result)
@@ -124,7 +124,7 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
     return AOR_OK;
 }
 
-AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
+AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd) const
 {
     std::string username;
 
@@ -145,7 +145,7 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
     return AOR_OK;
 }
 
-uint32 AccountMgr::GetId(std::string username)
+uint32 AccountMgr::GetId(std::string username) const
 {
     LoginDatabase.escape_string(username);
     QueryResult* result = LoginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", username.c_str());
@@ -172,7 +172,7 @@ AccountTypes AccountMgr::GetSecurity(uint32 acc_id)
     return SEC_PLAYER;
 }
 
-bool AccountMgr::GetName(uint32 acc_id, std::string& name)
+bool AccountMgr::GetName(uint32 acc_id, std::string& name) const
 {
     QueryResult* result = LoginDatabase.PQuery("SELECT username FROM account WHERE id = '%u'", acc_id);
     if (result)
@@ -185,7 +185,7 @@ bool AccountMgr::GetName(uint32 acc_id, std::string& name)
     return false;
 }
 
-uint32 AccountMgr::GetCharactersCount(uint32 acc_id)
+uint32 AccountMgr::GetCharactersCount(uint32 acc_id) const
 {
     // check character count
     QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%u'", acc_id);
@@ -200,7 +200,7 @@ uint32 AccountMgr::GetCharactersCount(uint32 acc_id)
         return 0;
 }
 
-bool AccountMgr::CheckPassword(uint32 accid, std::string passwd)
+bool AccountMgr::CheckPassword(uint32 accid, std::string passwd) const
 {
     std::string username;
     if (!GetName(accid, username))
@@ -233,7 +233,7 @@ bool AccountMgr::normalizeString(std::string& utf8str)
     return WStrToUtf8(wstr_buf, wstr_len, utf8str);
 }
 
-std::string AccountMgr::CalculateShaPassHash(std::string& name, std::string& password)
+std::string AccountMgr::CalculateShaPassHash(std::string& name, std::string& password) const
 {
     Sha1Hash sha;
     sha.Initialize();

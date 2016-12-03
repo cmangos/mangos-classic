@@ -95,7 +95,7 @@ Player* ObjectAccessor::FindPlayerByName(const char* name)
 }
 
 void
-ObjectAccessor::SaveAllPlayers()
+ObjectAccessor::SaveAllPlayers() const
 {
     HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();

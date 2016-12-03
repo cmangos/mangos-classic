@@ -507,7 +507,7 @@ void MotionMaster::GetWaypointPathInformation(std::ostringstream& oss) const
     }
 }
 
-bool MotionMaster::GetDestination(float& x, float& y, float& z)
+bool MotionMaster::GetDestination(float& x, float& y, float& z) const
 {
     if (m_owner->movespline->Finalized())
         return false;

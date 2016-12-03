@@ -150,12 +150,12 @@ BigNumber BigNumber::ModExp(const BigNumber& bn1, const BigNumber& bn2)
     return ret;
 }
 
-int BigNumber::GetNumBytes(void)
+int BigNumber::GetNumBytes(void) const
 {
     return BN_num_bytes(_bn);
 }
 
-uint32 BigNumber::AsDword()
+uint32 BigNumber::AsDword() const
 {
     return (uint32)BN_get_word(_bn);
 }
@@ -183,12 +183,12 @@ uint8* BigNumber::AsByteArray(int minSize)
     return _array;
 }
 
-const char* BigNumber::AsHexStr()
+const char* BigNumber::AsHexStr() const
 {
     return BN_bn2hex(_bn);
 }
 
-const char* BigNumber::AsDecStr()
+const char* BigNumber::AsDecStr() const
 {
     return BN_bn2dec(_bn);
 }

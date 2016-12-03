@@ -93,7 +93,7 @@ struct npc_kittenAI : public FollowerAI
             {
                 if (m_uiMoonwellCooldown < uiDiff)
                 {
-                    m_creature->CastSpell(m_creature, SPELL_CORRUPT_SABER_VISUAL, false);
+                    m_creature->CastSpell(m_creature, SPELL_CORRUPT_SABER_VISUAL, TRIGGERED_NONE);
                     SetFollowPaused(false);
                 }
                 else

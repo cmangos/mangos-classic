@@ -5704,7 +5704,7 @@ bool ChatHandler::HandleCastCommand(char* args)
     if (!triggered && *args)                                // can be fail also at syntax error
         return false;
 
-    m_session->GetPlayer()->CastSpell(target, spell, triggered);
+    m_session->GetPlayer()->CastSpell(target, spell, triggered ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
 
     return true;
 }
@@ -5732,7 +5732,7 @@ bool ChatHandler::HandleCastBackCommand(char* args)
 
     caster->SetFacingToObject(m_session->GetPlayer());
 
-    caster->CastSpell(m_session->GetPlayer(), spell, triggered);
+    caster->CastSpell(m_session->GetPlayer(), spell, triggered ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
 
     return true;
 }
@@ -5769,7 +5769,7 @@ bool ChatHandler::HandleCastDistCommand(char* args)
     float x, y, z;
     m_session->GetPlayer()->GetClosePoint(x, y, z, dist);
 
-    m_session->GetPlayer()->CastSpell(x, y, z, spell, triggered);
+    m_session->GetPlayer()->CastSpell(x, y, z, spell, triggered ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
     return true;
 }
 
@@ -5802,7 +5802,7 @@ bool ChatHandler::HandleCastTargetCommand(char* args)
 
     caster->SetFacingToObject(m_session->GetPlayer());
 
-    caster->CastSpell(caster->getVictim(), spell, triggered);
+    caster->CastSpell(caster->getVictim(), spell, triggered ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
 
     return true;
 }
@@ -5863,7 +5863,7 @@ bool ChatHandler::HandleCastSelfCommand(char* args)
     if (!triggered && *args)                                // can be fail also at syntax error
         return false;
 
-    target->CastSpell(target, spell, triggered);
+    target->CastSpell(target, spell, triggered ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE);
 
     return true;
 }
@@ -6597,7 +6597,7 @@ bool ChatHandler::HandleMmapTestHeight(char* args)
     unit->GetPosition(gx, gy, gz);
 
     Creature* summoned = unit->SummonCreature(VISUAL_WAYPOINT, gx, gy, gz + 0.5f, 0, TEMPSUMMON_TIMED_DESPAWN, 20000);
-    summoned->CastSpell(summoned, 8599, false);
+    summoned->CastSpell(summoned, 8599, TRIGGERED_NONE);
     uint32 tries = 1;
     uint32 successes = 0;
     uint32 startTime = WorldTimer::getMSTime();

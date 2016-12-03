@@ -31,6 +31,7 @@ class PetAI : public CreatureAI
     public:
 
         explicit PetAI(Creature* c);
+        explicit PetAI(Unit* unit);
 
         void MoveInLineOfSight(Unit*) override;
         void AttackStart(Unit*) override;

@@ -672,19 +672,19 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
 
         virtual bool ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvoker = nullptr, Creature* pAIEventSender = nullptr);
         virtual void ProcessAction(CreatureEventAI_Action const& action, uint32 rnd, uint32 EventId, Unit* pActionInvoker, Creature* pAIEventSender);
-        inline uint32 GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3);
-        inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3);
+        inline uint32 GetRandActionParam(uint32 rnd, uint32 param1, uint32 param2, uint32 param3) const;
+        inline int32 GetRandActionParam(uint32 rnd, int32 param1, int32 param2, int32 param3) const;
         /// If the bool& param is true, an error should be reported
-        inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, bool& isError, uint32 forSpellId = 0, uint32 selectFlags = 0);
+        inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker, Creature* pAIEventSender, bool& isError, uint32 forSpellId = 0, uint32 selectFlags = 0) const;
 
-        bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event);
+        bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event) const;
 
-        Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff);
-        void DoFindFriendlyMissingBuff(std::list<Creature*>& _list, float range, uint32 spellid);
-        void DoFindFriendlyCC(std::list<Creature*>& _list, float range);
+        Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff) const;
+        void DoFindFriendlyMissingBuff(std::list<Creature*>& _list, float range, uint32 spellid) const;
+        void DoFindFriendlyCC(std::list<Creature*>& _list, float range) const;
 
     protected:
-        bool IsTimerBasedEvent(EventAI_Type type);
+        bool IsTimerBasedEvent(EventAI_Type type) const;
 
         uint32 m_EventUpdateTime;                           // Time between event updates
         uint32 m_EventDiff;                                 // Time between the last event call

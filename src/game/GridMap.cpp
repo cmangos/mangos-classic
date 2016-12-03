@@ -250,7 +250,7 @@ bool GridMap::loadGridMapLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
     return true;
 }
 
-uint16 GridMap::getArea(float x, float y)
+uint16 GridMap::getArea(float x, float y) const
 {
     if (!m_area_map)
         return m_gridArea;
@@ -500,7 +500,7 @@ float GridMap::getHeightFromUint16(float x, float y) const
     return (float)((a * x) + (b * y) + c) * m_gridIntHeightMultiplier + m_gridHeight;
 }
 
-float GridMap::getLiquidLevel(float x, float y)
+float GridMap::getLiquidLevel(float x, float y) const
 {
     if (!m_liquid_map)
         return m_liquidLevel;
@@ -520,7 +520,7 @@ float GridMap::getLiquidLevel(float x, float y)
     return m_liquid_map[cx_int * m_liquid_width + cy_int];
 }
 
-uint8 GridMap::getTerrainType(float x, float y)
+uint8 GridMap::getTerrainType(float x, float y) const
 {
     if (!m_liquidFlags)
         return (uint8)m_liquidType;

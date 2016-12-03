@@ -65,7 +65,7 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recv_data)
     SendBattlegGroundList(guid, bgTypeId);
 }
 
-void WorldSession::SendBattlegGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId)
+void WorldSession::SendBattlegGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId) const
 {
     WorldPacket data;
     sBattleGroundMgr.BuildBattleGroundListPacket(data, guid, _player, bgTypeId);
@@ -545,7 +545,7 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data)
     sScriptMgr.OnGossipHello(GetPlayer(), unit);
 }
 
-void WorldSession::SendBattleGroundJoinError(uint8 err)
+void WorldSession::SendBattleGroundJoinError(uint8 err) const
 {
     WorldPacket data;
     int32 msg;

@@ -39,7 +39,7 @@ class TotemAI : public CreatureAI
         void UpdateAI(const uint32) override;
         static int Permissible(const Creature*);
     protected:
-        Totem& getTotem();
+        Totem& getTotem() const;
 
     private:
         ObjectGuid i_victimGuid;

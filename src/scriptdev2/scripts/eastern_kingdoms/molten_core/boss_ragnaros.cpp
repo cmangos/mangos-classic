@@ -158,7 +158,7 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
             ++m_uiAddCount;
         }
         else if (pSummoned->GetEntry() == NPC_FLAME_OF_RAGNAROS)
-            pSummoned->CastSpell(pSummoned, SPELL_INTENSE_HEAT, true, nullptr, nullptr, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_INTENSE_HEAT, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override

@@ -868,7 +868,7 @@ void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, CellPair cellpair)
     cell.Visit(cellpair, player_notifier, *this, *obj, GetVisibilityDistance());
 }
 
-void Map::SendInitSelf(Player* player)
+void Map::SendInitSelf(Player* player) const
 {
     DETAIL_LOG("Creating player data for himself %u", player->GetGUIDLow());
 
@@ -904,7 +904,7 @@ void Map::SendInitSelf(Player* player)
     player->GetSession()->SendPacket(packet);
 }
 
-void Map::SendInitTransports(Player* player)
+void Map::SendInitTransports(Player* player) const
 {
     // Hack to send out transports
     MapManager::TransportMap& tmap = sMapMgr.m_TransportsByMap;
@@ -934,7 +934,7 @@ void Map::SendInitTransports(Player* player)
     player->GetSession()->SendPacket(packet);
 }
 
-void Map::SendRemoveTransports(Player* player)
+void Map::SendRemoveTransports(Player* player) const
 {
     // Hack to send out transports
     MapManager::TransportMap& tmap = sMapMgr.m_TransportsByMap;
@@ -1747,7 +1747,7 @@ Pet* Map::GetPet(ObjectGuid guid)
  *
  * @param guid must be corpse guid (HIGHGUID_CORPSE)
  */
-Corpse* Map::GetCorpse(ObjectGuid guid)
+Corpse* Map::GetCorpse(ObjectGuid guid) const
 {
     Corpse* ret = ObjectAccessor::GetCorpseInMap(guid, GetId());
     return ret && ret->GetInstanceId() == GetInstanceId() ? ret : nullptr;
@@ -2088,7 +2088,7 @@ bool Map::ContainsGameObjectModel(const GameObjectModel& mdl) const
 }
 
 // This will generate a random point to all directions in water for the provided point in radius range.
-bool Map::GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status)
+bool Map::GetRandomPointUnderWater(float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status) const
 {
     const float angle = rand_norm_f() * (M_PI_F * 2.0f);
     const float range = rand_norm_f() * radius;
@@ -2122,7 +2122,7 @@ bool Map::GetRandomPointUnderWater(float& x, float& y, float& z, float radius, G
 }
 
 // This will generate a random point to all directions in air for the provided point in radius range.
-bool Map::GetRandomPointInTheAir(float& x, float& y, float& z, float radius)
+bool Map::GetRandomPointInTheAir(float& x, float& y, float& z, float radius) const
 {
     const float angle = rand_norm_f() * (M_PI_F * 2.0f);
     const float range = rand_norm_f() * radius;
@@ -2148,7 +2148,7 @@ bool Map::GetRandomPointInTheAir(float& x, float& y, float& z, float radius)
 }
 
 // supposed to be used for not big radius, usually less than 20.0f
-bool Map::GetReachableRandomPointOnGround(float& x, float& y, float& z, float radius)
+bool Map::GetReachableRandomPointOnGround(float& x, float& y, float& z, float radius) const
 {
     // Generate a random range and direction for the new point
     const float angle = rand_norm_f() * (M_PI_F * 2.0f);
@@ -2195,7 +2195,7 @@ bool Map::GetReachableRandomPointOnGround(float& x, float& y, float& z, float ra
 }
 
 // Get random point by handling different situation depending of if the unit is flying/swimming/walking
-bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius)
+bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius) const
 {
     float i_x = x;
     float i_y = y;
