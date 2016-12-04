@@ -11957,7 +11957,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
                 }
             }
 
-            caster->CastSpell(this, spellProto, TRIGGERED_OLD_TRIGGERED);
+            caster->CastSpell(this, spellProto, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_LINE_OF_SIGHT);
         }
     }
 
