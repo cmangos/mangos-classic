@@ -955,6 +955,18 @@ inline bool IsReflectableSpell(SpellEntry const* spellInfo)
         && !spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !IsPositiveSpell(spellInfo);
 }
 
+// Mostly required by spells that target a creature inside GO
+inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
+{
+    //switch (spellInfo->Id)
+    //{
+    //    default:
+    //        break;
+    //}
+
+    return spellInfo->rangeIndex == 13 || spellInfo->HasAttribute(SPELL_ATTR_EX2_IGNORE_LOS);
+}
+
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
 {
     return spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS) || spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_COMBO_POINTS);

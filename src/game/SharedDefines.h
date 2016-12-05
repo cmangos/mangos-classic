@@ -319,7 +319,7 @@ enum SpellAttributesEx2
 {
     SPELL_ATTR_EX2_CAN_TARGET_DEAD             = 0x00000001,// 0 can target dead unit or corpse
     SPELL_ATTR_EX2_UNK1                        = 0x00000002,// 1
-    SPELL_ATTR_EX2_CANT_REFLECTED              = 0x00000004,// 2 ? used for detect can or not spell reflected // do not need LOS (e.g. 18220 since 3.3.3)
+    SPELL_ATTR_EX2_IGNORE_LOS                  = 0x00000004,// 2 do not need LOS (e.g. 18220 since 3.3.3)
     SPELL_ATTR_EX2_UNK3                        = 0x00000008,// 3 auto targeting? (e.g. fishing skill enhancement items since 3.3.3)
     SPELL_ATTR_EX2_DISPLAY_IN_STANCE_BAR       = 0x00000010,// 4
     SPELL_ATTR_EX2_AUTOREPEAT_FLAG             = 0x00000020,// 5
