@@ -2066,6 +2066,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         virtual CreatureAI* AI() override { if (m_charmInfo) return m_charmInfo->GetAI(); return nullptr; }
         virtual CombatData* GetCombatData() override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); return m_combatData; }
+        void ForceHealAndPowerUpdateInZone();
 
     protected:
 
