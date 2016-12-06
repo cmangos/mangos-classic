@@ -306,20 +306,26 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
     bool IsPerCasterAuraState = false;
     bool sendPercent = false;
 
-    if (m_objectTypeId == TYPEID_UNIT)
+    if (isType(TYPEMASK_UNIT))
     {
-        if (!static_cast<Creature const*>(this)->IsPet() && !target->IsFriendlyTo(static_cast<Unit const*>(this)))
-            sendPercent = true;
-    }
-    else
-    {
-        if (target != this && m_objectTypeId == TYPEID_PLAYER)
+        if (!static_cast<Unit const*>(this)->IsTargetUnderControl(*target))
         {
-            if (static_cast<Player const*>(this)->GetTeam() != static_cast<Player const*>(target)->GetTeam() ||
-                !target->IsFriendlyTo(static_cast<Unit const*>(this)))
+            if (m_objectTypeId == TYPEID_UNIT)
             {
-                // not same faction or not friendly
-                sendPercent = true;
+                if (!static_cast<Creature const*>(this)->IsPet() && !target->IsFriendlyTo(static_cast<Unit const*>(this)))
+                    sendPercent = true;
+            }
+            else
+            {
+                if (target != this && m_objectTypeId == TYPEID_PLAYER)
+                {
+                    if (static_cast<Player const*>(this)->GetTeam() != static_cast<Player const*>(target)->GetTeam() ||
+                        !target->IsFriendlyTo(static_cast<Unit const*>(this)))
+                    {
+                        // not same faction or not friendly
+                        sendPercent = true;
+                    }
+                }
             }
         }
     }
