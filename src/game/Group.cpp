@@ -706,6 +706,17 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
                 if (bind->state->GetInstanceId() == player->GetInstanceId())
                     player->m_InstanceValid = true;
         }
+
+        if (player->IsFFAPvP())
+        {
+            player->ForceHealthAndPowerUpdate();
+            for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
+            {
+                Player* groupMember = itr->getSource();
+                if (groupMember && groupMember->GetSession())
+                    groupMember->ForceHealthAndPowerUpdate();
+            }
+        }
     }
 
     if (!isRaidGroup())                                     // reset targetIcons for non-raid-groups
