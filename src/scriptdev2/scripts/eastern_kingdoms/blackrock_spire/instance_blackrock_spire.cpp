@@ -440,7 +440,7 @@ void instance_blackrock_spire::OnCreatureEnterCombat(Creature* pCreature)
 void instance_blackrock_spire::OnCreatureDespawn(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_THE_BEAST)
-        pCreature->CastSpell(pCreature, SPELL_FINKLE_IS_EINHORN, true);
+        pCreature->CastSpell(pCreature, SPELL_FINKLE_IS_EINHORN, TRIGGERED_OLD_TRIGGERED);
 }
 
 void instance_blackrock_spire::DoOpenUpperDoorIfCan(Player* pPlayer)
@@ -475,7 +475,7 @@ void instance_blackrock_spire::DoProcessEmberseerEvent()
             return;
 
         DoScriptText(EMOTE_BEGIN, pEmberseer);
-        pEmberseer->CastSpell(pEmberseer, SPELL_EMBERSEER_GROWING, true);
+        pEmberseer->CastSpell(pEmberseer, SPELL_EMBERSEER_GROWING, TRIGGERED_OLD_TRIGGERED);
     }
 
     // remove the incarcerators flags and stop casting

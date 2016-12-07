@@ -38,7 +38,7 @@
 #include "Opcodes.h"
 #include "Chat.h"
 
-bool WorldSession::CheckMailBox(ObjectGuid guid)
+bool WorldSession::CheckMailBox(ObjectGuid guid) const
 {
     if (!GetPlayer()->GetGameObjectIfCanInteractWith(guid, GAMEOBJECT_TYPE_MAILBOX))
     {

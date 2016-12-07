@@ -37,7 +37,7 @@ void WorldSession::HandleTaxiNodeStatusQueryOpcode(WorldPacket& recv_data)
     SendTaxiStatus(guid);
 }
 
-void WorldSession::SendTaxiStatus(ObjectGuid guid)
+void WorldSession::SendTaxiStatus(ObjectGuid guid) const
 {
     // cheating checks
     Creature* unit = GetPlayer()->GetMap()->GetCreature(guid);
@@ -86,7 +86,7 @@ void WorldSession::HandleTaxiQueryAvailableNodes(WorldPacket& recv_data)
     SendTaxiMenu(unit);
 }
 
-void WorldSession::SendTaxiMenu(Creature* unit)
+void WorldSession::SendTaxiMenu(Creature* unit) const
 {
     // find current node
     uint32 curloc = sObjectMgr.GetNearestTaxiNode(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ(), unit->GetMapId(), GetPlayer()->GetTeam());
@@ -106,7 +106,7 @@ void WorldSession::SendTaxiMenu(Creature* unit)
     DEBUG_LOG("WORLD: Sent SMSG_SHOWTAXINODES");
 }
 
-void WorldSession::SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode)
+void WorldSession::SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode) const
 {
     while (GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
         GetPlayer()->GetMotionMaster()->MovementExpired(false);
@@ -117,7 +117,7 @@ void WorldSession::SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathN
     GetPlayer()->GetMotionMaster()->MoveTaxiFlight(path, pathNode);
 }
 
-bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
+bool WorldSession::SendLearnNewTaxiNode(Creature* unit) const
 {
     // find current node
     uint32 curloc = sObjectMgr.GetNearestTaxiNode(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ(), unit->GetMapId(), GetPlayer()->GetTeam());
@@ -141,7 +141,7 @@ bool WorldSession::SendLearnNewTaxiNode(Creature* unit)
         return false;
 }
 
-void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply)
+void WorldSession::SendActivateTaxiReply(ActivateTaxiReply reply) const
 {
     WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
     data << uint32(reply);

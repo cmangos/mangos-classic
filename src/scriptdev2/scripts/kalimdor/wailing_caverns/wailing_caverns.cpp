@@ -373,7 +373,7 @@ struct npc_disciple_of_naralexAI : public npc_escortAI
                                 if (Creature* pNaralex = m_pInstance->GetSingleCreatureFromStorage(NPC_NARALEX))
                                 {
                                     DoScriptText(SAY_FAREWELL, pNaralex);
-                                    pNaralex->CastSpell(pNaralex, SPELL_SHAPESHIFT, false);
+                                    pNaralex->CastSpell(pNaralex, SPELL_SHAPESHIFT, TRIGGERED_NONE);
                                 }
                                 DoCastSpellIfCan(m_creature, SPELL_SHAPESHIFT);
                                 m_uiEventTimer = 10000;
@@ -449,7 +449,7 @@ bool GossipHello_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature)
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
     // Buff the players
-    pCreature->CastSpell(pPlayer, SPELL_MARK, false);
+    pCreature->CastSpell(pPlayer, SPELL_MARK, TRIGGERED_NONE);
 
     if (m_pInstance && m_pInstance->GetData(TYPE_DISCIPLE) == SPECIAL)
     {

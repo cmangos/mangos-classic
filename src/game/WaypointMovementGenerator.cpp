@@ -125,7 +125,7 @@ void WaypointMovementGenerator<Creature>::OnArrived(Creature& creature)
             creature.HandleEmote(behavior->emote);
 
         if (behavior->spell != 0)
-            creature.CastSpell(&creature, behavior->spell, false);
+            creature.CastSpell(&creature, behavior->spell, TRIGGERED_NONE);
 
         if (behavior->model1 != 0)
             creature.SetDisplayId(behavior->model1);
@@ -389,7 +389,7 @@ void FlightPathMovementGenerator::Finalize(Player& player)
     {
         player.getHostileRefManager().setOnlineOfflineState(true);
         if (player.pvpInfo.inHostileArea)
-            player.CastSpell(&player, 2479, true);
+            player.CastSpell(&player, 2479, TRIGGERED_OLD_TRIGGERED);
 
         // update z position to ground and orientation for landing point
         // this prevent cheating with landing  point at lags

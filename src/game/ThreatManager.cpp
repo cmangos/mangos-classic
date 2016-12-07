@@ -201,9 +201,9 @@ void HostileReference::removeReference()
 
 //============================================================
 
-Unit* HostileReference::getSourceUnit()
+Unit* HostileReference::getSourceUnit() const
 {
-    return (getSource()->getOwner());
+    return getSource()->getOwner();
 }
 
 //============================================================

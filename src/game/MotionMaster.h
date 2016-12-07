@@ -122,7 +122,7 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator*>
 
         uint32 getLastReachedWaypoint() const;
         void GetWaypointPathInformation(std::ostringstream& oss) const;
-        bool GetDestination(float& x, float& y, float& z);
+        bool GetDestination(float& x, float& y, float& z) const;
 
     private:
         void Mutate(MovementGenerator* m);                  // use Move* functions instead

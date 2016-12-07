@@ -289,7 +289,7 @@ namespace MaNGOS
 
             typedef void (*Method)();
             Method m_method;
-            void _Execute() { (*m_method)(); }
+            void _Execute() const { (*m_method)(); }
 
         public:
 

@@ -284,7 +284,7 @@ struct npc_plucky_johnsonAI : public ScriptedAI
         if (m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP))
             m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
 
-        m_creature->CastSpell(m_creature, SPELL_PLUCKY_CHICKEN, false);
+        m_creature->CastSpell(m_creature, SPELL_PLUCKY_CHICKEN, TRIGGERED_NONE);
     }
 
     void ReceiveEmote(Player* pPlayer, uint32 uiTextEmote) override
@@ -295,7 +295,7 @@ struct npc_plucky_johnsonAI : public ScriptedAI
             {
                 m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                m_creature->CastSpell(m_creature, SPELL_PLUCKY_HUMAN, false);
+                m_creature->CastSpell(m_creature, SPELL_PLUCKY_HUMAN, TRIGGERED_NONE);
             }
         }
 
@@ -307,7 +307,7 @@ struct npc_plucky_johnsonAI : public ScriptedAI
             {
                 m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                m_creature->CastSpell(m_creature, SPELL_PLUCKY_HUMAN, false);
+                m_creature->CastSpell(m_creature, SPELL_PLUCKY_HUMAN, TRIGGERED_NONE);
                 m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
             }
         }

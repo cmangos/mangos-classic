@@ -178,7 +178,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recv_data)
             _player->PlayerTalkClass->CloseGossip();
 
             if (qInfo->GetSrcSpell() > 0)
-                _player->CastSpell(_player, qInfo->GetSrcSpell(), true);
+                _player->CastSpell(_player, qInfo->GetSrcSpell(), TRIGGERED_OLD_TRIGGERED);
 
             return;
         }
@@ -486,7 +486,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
  * @param questgiver - from whom
  * @param defstatus - initial set status (usually it will be called with DIALOG_STATUS_NONE) - must not be DIALOG_STATUS_UNDEFINED
  */
-uint32 WorldSession::getDialogStatus(Player* pPlayer, Object* questgiver, uint32 defstatus)
+uint32 WorldSession::getDialogStatus(const Player* pPlayer, const Object* questgiver, uint32 defstatus) const
 {
     MANGOS_ASSERT(defstatus != DIALOG_STATUS_UNDEFINED);
 
@@ -557,7 +557,11 @@ uint32 WorldSession::getDialogStatus(Player* pPlayer, Object* questgiver, uint32
                 if (pPlayer->SatisfyQuestLevel(pQuest, false))
                 {
                     int32 lowLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF);
-                    if (pQuest->IsAutoComplete() || (pQuest->IsRepeatable() && pPlayer->getQuestStatusMap()[quest_id].m_rewarded))
+
+                    auto questStatusItr = pPlayer->getQuestStatusMap().find(quest_id);
+                    bool rewarded = (questStatusItr != pPlayer->getQuestStatusMap().end()) ? questStatusItr->second.m_rewarded : false;
+
+                    if (pQuest->IsAutoComplete() || (pQuest->IsRepeatable() && rewarded))
                     {
                         dialogStatusNew = DIALOG_STATUS_REWARD_REP;
                     }
@@ -587,7 +591,7 @@ void WorldSession::HandleQuestgiverStatusMultipleQuery(WorldPacket& /*recvPacket
     _player->SendQuestGiverStatusMultiple();
 }
 
-bool WorldSession::CanInteractWithQuestGiver(ObjectGuid guid, char const* descr)
+bool WorldSession::CanInteractWithQuestGiver(ObjectGuid guid, char const* descr) const
 {
     if (guid.IsCreature())
     {

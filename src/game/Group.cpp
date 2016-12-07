@@ -491,7 +491,7 @@ void Group::GetDataForXPAtKill(Unit const* victim, uint32& count, uint32& sum_le
     }
 }
 
-void Group::SendTargetIconList(WorldSession* session)
+void Group::SendTargetIconList(WorldSession* session) const
 {
     if (!session)
         return;
@@ -870,7 +870,7 @@ void Group::_setLeader(ObjectGuid guid)
     _updateLeaderFlag();
 }
 
-void Group::_updateLeaderFlag(const bool remove /*= false*/)
+void Group::_updateLeaderFlag(bool remove /*= false*/) const
 {
     if (Player* player = sObjectMgr.GetPlayer(m_leaderGuid))
         player->UpdateGroupLeaderFlag(remove);
@@ -1188,7 +1188,7 @@ void Group::UnbindInstance(uint32 mapid, bool unload)
     }
 }
 
-void Group::_homebindIfInstance(Player* player)
+void Group::_homebindIfInstance(Player* player) const
 {
     if (player && !player->isGameMaster())
     {

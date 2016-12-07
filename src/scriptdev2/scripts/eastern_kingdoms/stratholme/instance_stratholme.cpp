@@ -372,7 +372,7 @@ void instance_stratholme::SetData(uint32 uiType, uint32 uiData)
                                 pPlayer->KilledMonsterCredit(NPC_YSIDA);
 
                             // Argent Dawn reputation reward
-                            pPlayer->CastSpell(pPlayer, SPELL_YSIDA_FREED, true);
+                            pPlayer->CastSpell(pPlayer, SPELL_YSIDA_FREED, TRIGGERED_OLD_TRIGGERED);
                         }
                     }
 
@@ -1139,7 +1139,7 @@ void instance_stratholme::Update(uint32 uiDiff)
                 if (Creature* pYsida = GetSingleCreatureFromStorage(NPC_YSIDA))
                 {
                     if (Creature* pBaron = GetSingleCreatureFromStorage(NPC_BARON))
-                        pBaron->CastSpell(pYsida, SPELL_BARON_SOUL_DRAIN, false);
+                        pBaron->CastSpell(pYsida, SPELL_BARON_SOUL_DRAIN, TRIGGERED_NONE);
                 }
 
                 DoOrSimulateScriptTextForThisInstance(SAY_YSIDA_RUN_FAIL, NPC_YSIDA);

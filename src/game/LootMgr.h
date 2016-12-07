@@ -283,7 +283,7 @@ public:
     bool CanLoot(Player const* player);
     void ShowContentTo(Player* plr);
     void Update();
-    bool IsChanged() { return m_isChanged; }
+    bool IsChanged() const { return m_isChanged; }
     void Release(Player* player);
     void GetLootItemsListFor(Player* player, LootItemList& lootList);
     void SetGoldAmount(uint32 _gold);
@@ -311,13 +311,13 @@ private:
     void SendAllowedLooter();
     void NotifyMoneyRemoved();
     void NotifyItemRemoved(uint32 lootIndex);
-    void NotifyItemRemoved(Player* player, uint32 lootIndex);
+    void NotifyItemRemoved(Player* player, uint32 lootIndex) const;
     void GroupCheck();
     void CheckIfRollIsNeeded(Player const* plr);
     void SetGroupLootRight(Player* player);
     void GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner, bool personal, bool noEmptyError = false);
-    void ForceLootAnimationCLientUpdate();
+    void ForceLootAnimationCLientUpdate() const;
     void SetPlayerIsLooting(Player* player);
     void SetPlayerIsNotLooting(Player* player);
     void GetLootContentFor(Player* player, ByteBuffer& buffer);
@@ -385,9 +385,9 @@ inline void LoadLootTables()
 class LootMgr
 {
 public:
-    bool IsAllowedToLoot(Player* player, Creature* creature);
+    bool IsAllowedToLoot(Player* player, Creature* creature) const;
     void PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint32 itemSlot, RollVote vote);
-    Loot* GetLoot(Player* player, ObjectGuid const& targetGuid = ObjectGuid());
+    Loot* GetLoot(Player* player, ObjectGuid const& targetGuid = ObjectGuid()) const;
 };
 
 #define sLootMgr MaNGOS::Singleton<LootMgr>::Instance()

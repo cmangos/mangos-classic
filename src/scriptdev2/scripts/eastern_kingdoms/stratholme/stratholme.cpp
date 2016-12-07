@@ -75,13 +75,13 @@ bool GOUse_go_gauntlet_gate(Player* pPlayer, GameObject* pGo)
                 continue;
 
             if (!pGroupie->HasAura(SPELL_BARON_ULTIMATUM))
-                pGroupie->CastSpell(pGroupie, SPELL_BARON_ULTIMATUM, true);
+                pGroupie->CastSpell(pGroupie, SPELL_BARON_ULTIMATUM, TRIGGERED_OLD_TRIGGERED);
         }
     }
     else
     {
         if (!pPlayer->HasAura(SPELL_BARON_ULTIMATUM))
-            pPlayer->CastSpell(pPlayer, SPELL_BARON_ULTIMATUM, true);
+            pPlayer->CastSpell(pPlayer, SPELL_BARON_ULTIMATUM, TRIGGERED_OLD_TRIGGERED);
     }
 
     pInstance->SetData(TYPE_BARON_RUN, IN_PROGRESS);
@@ -105,7 +105,7 @@ bool GOUse_go_stratholme_postbox(Player* pPlayer, GameObject* pGo)
     // When the data is Special, spawn the postmaster
     if (pInstance->GetData(TYPE_POSTMASTER) == SPECIAL)
     {
-        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_POSTMASTER, true);
+        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_POSTMASTER, TRIGGERED_OLD_TRIGGERED);
         pInstance->SetData(TYPE_POSTMASTER, DONE);
     }
     else
@@ -175,7 +175,7 @@ struct mob_restless_soulAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_FREED_SOUL)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SOUL_FREED, false);
+            pSummoned->CastSpell(pSummoned, SPELL_SOUL_FREED, TRIGGERED_NONE);
 
             switch (urand(0, 3))
             {
@@ -286,7 +286,7 @@ struct mobs_spectral_ghostly_citizenAI : public ScriptedAI
                 break;
             case TEXTEMOTE_RUDE:
                 if (m_creature->IsWithinDistInMap(pPlayer, INTERACTION_DISTANCE))
-                    m_creature->CastSpell(pPlayer, SPELL_SLAP, false);
+                    m_creature->CastSpell(pPlayer, SPELL_SLAP, TRIGGERED_NONE);
                 else
                     m_creature->HandleEmote(EMOTE_ONESHOT_RUDE);
                 break;

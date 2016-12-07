@@ -250,7 +250,7 @@ class MANGOS_DLL_SPEC Item : public Object
         virtual void SaveToDB();
         virtual bool LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid = ObjectGuid());
         virtual void DeleteFromDB();
-        void DeleteFromInventoryDB();
+        void DeleteFromInventoryDB() const;
         void LoadLootFromDB(Field* fields);
 
         bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
@@ -260,7 +260,7 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsInTrade() const { return mb_in_trade; }
 
         bool IsFitToSpellRequirements(SpellEntry const* spellInfo) const;
-        bool IsTargetValidForItemUse(Unit* pUnitTarget);
+        bool IsTargetValidForItemUse(Unit* pUnitTarget) const;
         bool IsLimitedToAnotherMapOrZone(uint32 cur_mapId, uint32 cur_zoneId) const;
 
         uint32 GetCount() const { return GetUInt32Value(ITEM_FIELD_STACK_COUNT); }
@@ -269,7 +269,7 @@ class MANGOS_DLL_SPEC Item : public Object
         InventoryResult CanBeMergedPartlyWith(ItemPrototype const* proto) const;
 
         uint8 GetSlot() const {return m_slot;}
-        Bag* GetContainer() { return m_container; }
+        Bag* GetContainer() const { return m_container; }
         uint8 GetBagSlot() const;
         void SetSlot(uint8 slot) {m_slot = slot;}
         uint16 GetPos() const { return uint16(GetBagSlot()) << 8 | GetSlot(); }
@@ -278,8 +278,8 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsInBag() const { return m_container != nullptr; }
         bool IsEquipped() const;
 
-        uint32 GetSkill();
-        uint32 GetSpell();
+        uint32 GetSkill() const;
+        uint32 GetSpell() const;
 
         // RandomPropertyId (signed but stored as unsigned)
         int32 GetItemRandomPropertyId() const { return GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID); }
@@ -294,10 +294,10 @@ class MANGOS_DLL_SPEC Item : public Object
         uint32 GetEnchantmentDuration(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_DURATION_OFFSET);}
         uint32 GetEnchantmentCharges(EnchantmentSlot slot)  const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot * MAX_ENCHANTMENT_OFFSET + ENCHANTMENT_CHARGES_OFFSET);}
 
-        void SendTimeUpdate(Player* owner);
+        void SendTimeUpdate(Player* owner) const;
         void UpdateDuration(Player* owner, uint32 diff);
 
-        // spell charges (signed but stored as unsigned)
+        // spell charges (negative means that once charges are consumed the item should be deleted)
         int32 GetSpellCharges(uint8 index/*0..5*/ = 0) const { return GetInt32Value(ITEM_FIELD_SPELL_CHARGES + index); }
         void SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, value); }
 

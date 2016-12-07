@@ -58,7 +58,7 @@ struct npc_spirit_guideAI : public ScriptedAI
     {
         // auto cast the whole time this spell
         if (!m_creature->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-            m_creature->CastSpell(m_creature, SPELL_SPIRIT_HEAL_CHANNEL, false);
+            m_creature->CastSpell(m_creature, SPELL_SPIRIT_HEAL_CHANNEL, TRIGGERED_NONE);
     }
 
     void CorpseRemoved(uint32&) override
@@ -85,7 +85,7 @@ struct npc_spirit_guideAI : public ScriptedAI
 
 bool GossipHello_npc_spirit_guide(Player* pPlayer, Creature* /*pCreature*/)
 {
-    pPlayer->CastSpell(pPlayer, SPELL_WAITING_TO_RESURRECT, true);
+    pPlayer->CastSpell(pPlayer, SPELL_WAITING_TO_RESURRECT, TRIGGERED_OLD_TRIGGERED);
     return true;
 }
 

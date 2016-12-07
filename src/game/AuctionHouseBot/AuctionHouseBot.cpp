@@ -178,19 +178,19 @@ class AuctionBotBuyer : public AuctionBotAgent
         bool        Update(AuctionHouseType houseType) override;
 
         void        LoadConfig();
-        void        addNewAuctionBuyerBotBid(AHB_Buyer_Config& config);
+        void        addNewAuctionBuyerBotBid(AHB_Buyer_Config& config) const;
 
     private:
         uint32              m_CheckInterval;
         AHB_Buyer_Config    m_HouseConfig[MAX_AUCTION_HOUSE_TYPE];
 
-        void        LoadBuyerValues(AHB_Buyer_Config& config);
-        bool        IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice, double MaxBuyablePrice, uint32 MinBuyPrice, uint32 MaxChance, uint32 ChanceRatio);
-        bool        IsBidableEntry(uint32 bidPrice, double InGame_BuyPrice, double MaxBidablePrice, uint32 MinBidPrice, uint32 MaxChance, uint32 ChanceRatio);
-        void        PlaceBidToEntry(AuctionEntry* auction, uint32 bidPrice);
-        void        BuyEntry(AuctionEntry* auction);
-        void        PrepareListOfEntry(AHB_Buyer_Config& config);
-        uint32      GetBuyableEntry(AHB_Buyer_Config& config);
+        void        LoadBuyerValues(AHB_Buyer_Config& config) const;
+        bool        IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice, double MaxBuyablePrice, uint32 MinBuyPrice, uint32 MaxChance, uint32 ChanceRatio) const;
+        bool        IsBidableEntry(uint32 bidPrice, double InGame_BuyPrice, double MaxBidablePrice, uint32 MinBidPrice, uint32 MaxChance, uint32 ChanceRatio) const;
+        void        PlaceBidToEntry(AuctionEntry* auction, uint32 bidPrice) const;
+        void        BuyEntry(AuctionEntry* auction) const;
+        void        PrepareListOfEntry(AHB_Buyer_Config& config) const;
+        uint32      GetBuyableEntry(AHB_Buyer_Config& config) const;
 };
 
 // This class handle all Selling method
@@ -218,11 +218,11 @@ class AuctionBotSeller : public AuctionBotAgent
 
         ItemPool m_ItemPool[MAX_AUCTION_QUALITY][MAX_ITEM_CLASS];
 
-        void        LoadSellerValues(AHB_Seller_Config& config);
-        uint32      SetStat(AHB_Seller_Config& config);
-        bool        getRandomArray(AHB_Seller_Config& config, RandomArray& ra, const std::vector<std::vector<uint32> >& addedItem);
-        void        SetPricesOfItem(AHB_Seller_Config& config, uint32& buyp, uint32& bidp, uint32 stackcnt, ItemQualities itemQuality);
-        void        LoadItemsQuantity(AHB_Seller_Config& config);
+        void        LoadSellerValues(AHB_Seller_Config& config) const;
+        uint32      SetStat(AHB_Seller_Config& config) const;
+        bool        getRandomArray(AHB_Seller_Config& config, RandomArray& ra, const std::vector<std::vector<uint32> >& addedItem) const;
+        void        SetPricesOfItem(AHB_Seller_Config& config, uint32& buyp, uint32& bidp, ItemQualities itemQuality);
+        void        LoadItemsQuantity(AHB_Seller_Config& config) const;
 };
 
 INSTANTIATE_SINGLETON_1(AuctionHouseBot);
@@ -496,7 +496,7 @@ bool AuctionBotBuyer::Initialize()
     return true;
 }
 
-void AuctionBotBuyer::LoadBuyerValues(AHB_Buyer_Config& config)
+void AuctionBotBuyer::LoadBuyerValues(AHB_Buyer_Config& config) const
 {
     uint32 FactionChance;
     switch (config.GetHouseType())
@@ -527,7 +527,7 @@ void AuctionBotBuyer::LoadConfig()
     }
 }
 
-uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
+uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config) const
 {
     config.SameItemInfo.clear();
     uint32 count = 0;
@@ -595,14 +595,14 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config)
     return count;
 }
 
-void AuctionBotBuyer::PrepareListOfEntry(AHB_Buyer_Config& config)
+void AuctionBotBuyer::PrepareListOfEntry(AHB_Buyer_Config& config) const
 {
     time_t Now = time(nullptr) - 5;
 
     for (CheckEntryMap::iterator itr = config.CheckedEntry.begin(); itr != config.CheckedEntry.end();)
     {
         if (itr->second.LastExist  < (Now - 5))
-            config.CheckedEntry.erase(itr++);
+            itr = config.CheckedEntry.erase(itr);
         else
             ++itr;
     }
@@ -610,7 +610,7 @@ void AuctionBotBuyer::PrepareListOfEntry(AHB_Buyer_Config& config)
     DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: CheckedEntry size = " SIZEFMTD, config.CheckedEntry.size());
 }
 
-bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice, double MaxBuyablePrice, uint32 MinBuyPrice, uint32 MaxChance, uint32 ChanceRatio)
+bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice, double MaxBuyablePrice, uint32 MinBuyPrice, uint32 MaxChance, uint32 ChanceRatio) const
 {
     uint32 Chance = 0;
 
@@ -667,7 +667,7 @@ bool AuctionBotBuyer::IsBuyableEntry(uint32 buyoutPrice, double InGame_BuyPrice,
     return false;
 }
 
-bool AuctionBotBuyer::IsBidableEntry(uint32 bidPrice, double InGame_BuyPrice, double MaxBidablePrice, uint32 MinBidPrice, uint32 MaxChance, uint32 ChanceRatio)
+bool AuctionBotBuyer::IsBidableEntry(uint32 bidPrice, double InGame_BuyPrice, double MaxBidablePrice, uint32 MinBidPrice, uint32 MaxChance, uint32 ChanceRatio) const
 {
     uint32 Chance = 0;
 
@@ -713,19 +713,19 @@ bool AuctionBotBuyer::IsBidableEntry(uint32 bidPrice, double InGame_BuyPrice, do
     }
 }
 
-void AuctionBotBuyer::PlaceBidToEntry(AuctionEntry* auction, uint32 bidPrice)
+void AuctionBotBuyer::PlaceBidToEntry(AuctionEntry* auction, uint32 bidPrice) const
 {
     DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Bid placed to entry %u, %.2fg", auction->Id, float(bidPrice) / 10000.0f);
     auction->UpdateBid(bidPrice);
 }
 
-void AuctionBotBuyer::BuyEntry(AuctionEntry* auction)
+void AuctionBotBuyer::BuyEntry(AuctionEntry* auction) const
 {
     DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Entry %u buyed at %.2fg", auction->Id, float(auction->buyout) / 10000.0f);
     auction->UpdateBid(auction->buyout);
 }
 
-void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config)
+void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config) const
 {
     AuctionHouseObject* auctionHouse = sAuctionMgr.GetAuctionsMap(config.GetHouseType());
 
@@ -1177,6 +1177,9 @@ bool AuctionBotSeller::Initialize()
                         continue;
                 break;
             }
+
+            default:
+                continue;
         }
 
         m_ItemPool[prototype->Quality][prototype->Class].push_back(itemID);
@@ -1218,7 +1221,7 @@ void AuctionBotSeller::LoadConfig()
             LoadSellerValues(m_HouseConfig[i]);
 }
 
-void AuctionBotSeller::LoadItemsQuantity(AHB_Seller_Config& config)
+void AuctionBotSeller::LoadItemsQuantity(AHB_Seller_Config& config) const
 {
     uint32 ratio = sAuctionBotConfig.getConfigItemAmountRatio(config.GetHouseType());
 
@@ -1353,7 +1356,7 @@ void AuctionBotSeller::LoadItemsQuantity(AHB_Seller_Config& config)
     }
 }
 
-void AuctionBotSeller::LoadSellerValues(AHB_Seller_Config& config)
+void AuctionBotSeller::LoadSellerValues(AHB_Seller_Config& config) const
 {
     LoadItemsQuantity(config);
     uint32 PriceRatio;
@@ -1396,7 +1399,7 @@ void AuctionBotSeller::LoadSellerValues(AHB_Seller_Config& config)
 
 // Set static of items on one AH faction.
 // Fill ItemInfos object with real content of AH.
-uint32 AuctionBotSeller::SetStat(AHB_Seller_Config& config)
+uint32 AuctionBotSeller::SetStat(AHB_Seller_Config& config) const
 {
     std::vector<std::vector<uint32> > ItemsInAH(MAX_AUCTION_QUALITY, std::vector< uint32 > (MAX_ITEM_CLASS));
 
@@ -1445,7 +1448,7 @@ uint32 AuctionBotSeller::SetStat(AHB_Seller_Config& config)
 }
 
 // getRandomArray is used to make aviable the possibility to add any of missed item in place of first one to last one.
-bool AuctionBotSeller::getRandomArray(AHB_Seller_Config& config, RandomArray& ra, const std::vector<std::vector<uint32> >& addedItem)
+bool AuctionBotSeller::getRandomArray(AHB_Seller_Config& config, RandomArray& ra, const std::vector<std::vector<uint32> >& addedItem) const
 {
     ra.clear();
     bool Ok = false;
@@ -1468,16 +1471,13 @@ bool AuctionBotSeller::getRandomArray(AHB_Seller_Config& config, RandomArray& ra
 }
 
 // Set items price. All important value are passed by address.
-void AuctionBotSeller::SetPricesOfItem(AHB_Seller_Config& config, uint32& buyp, uint32& bidp, uint32 stackcnt, ItemQualities itemQuality)
+void AuctionBotSeller::SetPricesOfItem(AHB_Seller_Config& config, uint32& buyp, uint32& bidp, ItemQualities itemQuality)
 {
-    double temp_buyp = buyp * stackcnt *
-                       (itemQuality < MAX_AUCTION_QUALITY ? config.GetPriceRatioPerQuality(AuctionQuality(itemQuality)) : 1) ;
+    double temp_buyp = buyp * (itemQuality < MAX_AUCTION_QUALITY ? (config.GetPriceRatioPerQuality(AuctionQuality(itemQuality)) / 100) : 1);
 
     double randrange = temp_buyp * 0.4;
-    buyp = (urand(temp_buyp - randrange, temp_buyp + randrange) / 100) + 1;
-    double urandrange = buyp * 40;
-    double temp_bidp = buyp * 50;
-    bidp = (urand(temp_bidp - urandrange, temp_bidp + urandrange) / 100) + 1;
+    buyp = (urand(temp_buyp - randrange, temp_buyp + randrange)) + 1;
+    bidp = buyp * frand(0.5f, 0.9f);
 }
 
 void AuctionBotSeller::SetItemsRatio(uint32 al, uint32 ho, uint32 ne)
@@ -1602,13 +1602,15 @@ void AuctionBotSeller::addNewAuctions(AHB_Seller_Config& config)
 
         uint32 buyoutPrice;
         uint32 bidPrice = 0;
+
         // Not sure if i will keep the next test
         if (sAuctionBotConfig.getConfig(CONFIG_BOOL_AHBOT_BUYPRICE_SELLER))
             buyoutPrice  = prototype->BuyPrice * item->GetCount();
         else
             buyoutPrice  = prototype->SellPrice * item->GetCount();
+
         // Price of items are set here
-        SetPricesOfItem(config, buyoutPrice, bidPrice, stackCount, ItemQualities(prototype->Quality));
+        SetPricesOfItem(config, buyoutPrice, bidPrice, ItemQualities(prototype->Quality));
 
         auctionHouse->AddAuction(ahEntry, item, urand(config.GetMinTime(), config.GetMaxTime()) * HOUR, bidPrice, buyoutPrice);
     }
@@ -1669,25 +1671,25 @@ void AuctionHouseBot::Initialize()
         InitilizeAgents();
 }
 
-void AuctionHouseBot::SetItemsRatio(uint32 al, uint32 ho, uint32 ne)
+void AuctionHouseBot::SetItemsRatio(uint32 al, uint32 ho, uint32 ne) const
 {
     if (AuctionBotSeller* seller = dynamic_cast<AuctionBotSeller*>(m_Seller))
         seller->SetItemsRatio(al, ho, ne);
 }
 
-void AuctionHouseBot::SetItemsRatioForHouse(AuctionHouseType house, uint32 val)
+void AuctionHouseBot::SetItemsRatioForHouse(AuctionHouseType house, uint32 val) const
 {
     if (AuctionBotSeller* seller = dynamic_cast<AuctionBotSeller*>(m_Seller))
         seller->SetItemsRatioForHouse(house, val);
 }
 
-void AuctionHouseBot::SetItemsAmount(uint32(&vals) [MAX_AUCTION_QUALITY])
+void AuctionHouseBot::SetItemsAmount(uint32(&vals) [MAX_AUCTION_QUALITY]) const
 {
     if (AuctionBotSeller* seller = dynamic_cast<AuctionBotSeller*>(m_Seller))
         seller->SetItemsAmount(vals);
 }
 
-void AuctionHouseBot::SetItemsAmountForQuality(AuctionQuality quality, uint32 val)
+void AuctionHouseBot::SetItemsAmountForQuality(AuctionQuality quality, uint32 val) const
 {
     if (AuctionBotSeller* seller = dynamic_cast<AuctionBotSeller*>(m_Seller))
         seller->SetItemsAmountForQuality(quality, val);
@@ -1705,7 +1707,7 @@ bool AuctionHouseBot::ReloadAllConfig()
     return true;
 }
 
-void AuctionHouseBot::PrepareStatusInfos(AuctionHouseBotStatusInfo& statusInfo)
+void AuctionHouseBot::PrepareStatusInfos(AuctionHouseBotStatusInfo& statusInfo) const
 {
     for (uint32 i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
     {
@@ -1733,7 +1735,7 @@ void AuctionHouseBot::PrepareStatusInfos(AuctionHouseBotStatusInfo& statusInfo)
     }
 }
 
-void AuctionHouseBot::Rebuild(bool all)
+void AuctionHouseBot::Rebuild(bool all) const
 {
     for (uint32 i = 0; i < MAX_AUCTION_HOUSE_TYPE; ++i)
     {

@@ -188,7 +188,7 @@ struct boss_majordomoAI : public ScriptedAI
         else if (pSummoned->GetEntry() == NPC_RAGNAROS)
         {
             m_ragnarosGuid = pSummoned->GetObjectGuid();
-            pSummoned->CastSpell(pSummoned, SPELL_RAGNA_EMERGE, false);
+            pSummoned->CastSpell(pSummoned, SPELL_RAGNA_EMERGE, TRIGGERED_NONE);
         }
     }
 
@@ -341,7 +341,7 @@ struct boss_majordomoAI : public ScriptedAI
                         break;
                     case 18:
                         if (Creature* pRagnaros = m_creature->GetMap()->GetCreature(m_ragnarosGuid))
-                            pRagnaros->CastSpell(m_creature, SPELL_ELEMENTAL_FIRE, false);
+                            pRagnaros->CastSpell(m_creature, SPELL_ELEMENTAL_FIRE, TRIGGERED_NONE);
                         // Rest of summoning speech is handled by Ragnaros, as Majordomo will be dead
                         m_uiSpeech = 0;
                         break;

@@ -31,6 +31,9 @@ class PossessedAI : public CreatureAI
 public:
 
     explicit PossessedAI(Creature* c) : CreatureAI(c) {}
+    explicit PossessedAI(Unit* unit) : CreatureAI(unit) {}
+
+    static int Permissible(const Creature*) { return PERMIT_BASE_NO; }
 
     //void GetAIInformation(ChatHandler& reader) override;
 

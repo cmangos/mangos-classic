@@ -983,7 +983,7 @@ void Loot::NotifyItemRemoved(uint32 lootIndex)
     }
 }
 
-void Loot::NotifyItemRemoved(Player* player, uint32 lootIndex)
+void Loot::NotifyItemRemoved(Player* player, uint32 lootIndex) const
 {
     // notify a player that are looting this that the item was removed
     WorldPacket data(SMSG_LOOT_REMOVED, 1);
@@ -1984,7 +1984,7 @@ void Loot::Update()
     }
 }
 
-void Loot::ForceLootAnimationCLientUpdate()
+void Loot::ForceLootAnimationCLientUpdate() const
 {
     if (m_guidTarget.IsCreature() && m_lootTarget)
         m_lootTarget->ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);
@@ -2707,7 +2707,7 @@ void LootMgr::PlayerVote(Player* player, ObjectGuid const& lootTargetGuid, uint3
 
 // Get loot by object guid
 // If target guid is not provided, try to find it by recipient or current player target
-Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid)
+Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid) const
 {
     Loot* loot = nullptr;
     ObjectGuid lguid;
@@ -2769,7 +2769,7 @@ Loot* LootMgr::GetLoot(Player* player, ObjectGuid const& targetGuid)
     return loot;
 }
 
-bool LootMgr::IsAllowedToLoot(Player* player, Creature* creature)
+bool LootMgr::IsAllowedToLoot(Player* player, Creature* creature) const
 {
     // never tapped by any (mob solo kill)
     if (!creature->HasFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TAPPED))

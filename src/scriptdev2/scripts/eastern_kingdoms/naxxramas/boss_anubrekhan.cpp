@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Anubrekhan
-SD%Complete: 95
-SDComment: Intro text usage is not very clear. Requires additional research.
+SD%Complete: 100
+SDComment: -
 SDCategory: Naxxramas
 EndScriptData */
 
@@ -26,14 +26,14 @@ EndScriptData */
 
 enum
 {
-    SAY_GREET                   = -1533000,
+    SAY_GREET1                  = -1533000,
+    SAY_GREET2                  = -1533004,
+    SAY_GREET3                  = -1533005,
+    SAY_GREET4                  = -1533006,
+    SAY_GREET5                  = -1533007,
     SAY_AGGRO1                  = -1533001,
     SAY_AGGRO2                  = -1533002,
     SAY_AGGRO3                  = -1533003,
-    SAY_TAUNT1                  = -1533004,
-    SAY_TAUNT2                  = -1533005,
-    SAY_TAUNT3                  = -1533006,
-    SAY_TAUNT4                  = -1533007,
     SAY_SLAY                    = -1533008,
 
     EMOTE_CRYPT_GUARD           = -1533153,
@@ -55,12 +55,11 @@ enum
 
 static const DialogueEntry aIntroDialogue[] =
 {
-    {SAY_GREET,   NPC_ANUB_REKHAN,  7000},
-    {SAY_TAUNT1,  NPC_ANUB_REKHAN,  13000},
-    {SAY_TAUNT2,  NPC_ANUB_REKHAN,  11000},
-    {SAY_TAUNT3,  NPC_ANUB_REKHAN,  10000},
-    {SAY_TAUNT4,  NPC_ANUB_REKHAN,  0},
-    {0, 0, 0}
+    {SAY_GREET1,  NPC_ANUB_REKHAN,  7000},
+    {SAY_GREET2,  NPC_ANUB_REKHAN,  13000},
+    {SAY_GREET3,  NPC_ANUB_REKHAN,  11000},
+    {SAY_GREET4,  NPC_ANUB_REKHAN,  10000},
+    {SAY_GREET5,  NPC_ANUB_REKHAN,  0},
 };
 
 static const float aCryptGuardLoc[4] = {3333.5f, -3475.9f, 287.1f, 3.17f};
@@ -72,7 +71,7 @@ struct boss_anubrekhanAI : public ScriptedAI
     {
         m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
         m_introDialogue.InitializeDialogueHelper(m_pInstance);
-        m_bHasTaunted = false;
+        m_bHasDoneIntro = false;
         Reset();
 
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
@@ -84,7 +83,7 @@ struct boss_anubrekhanAI : public ScriptedAI
     uint32 m_uiImpaleTimer;
     uint32 m_uiLocustSwarmTimer;
     uint32 m_uiSummonTimer;
-    bool   m_bHasTaunted;
+    bool   m_bHasDoneIntro;
 
     void Reset() override
     {
@@ -97,10 +96,7 @@ struct boss_anubrekhanAI : public ScriptedAI
     {
         // Force the player to spawn corpse scarabs via spell
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            pVictim->CastSpell(pVictim, SPELL_SELF_SPAWN_5, true, nullptr, nullptr, m_creature->GetObjectGuid());
-
-        if (urand(0, 4))
-            return;
+            pVictim->CastSpell(pVictim, SPELL_SELF_SPAWN_5, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
 
         DoScriptText(SAY_SLAY, m_creature);
     }
@@ -132,15 +128,13 @@ struct boss_anubrekhanAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
-        if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 110.0f) && m_creature->IsWithinLOSInMap(pWho))
+        if (!m_bHasDoneIntro && eventType == AI_EVENT_START_EVENT)
         {
-            m_introDialogue.StartNextDialogueText(SAY_GREET);
-            m_bHasTaunted = true;
+            m_introDialogue.StartNextDialogueText(SAY_GREET1);
+            m_bHasDoneIntro = true;
         }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -160,7 +154,7 @@ struct boss_anubrekhanAI : public ScriptedAI
 
         if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SELF_SPAWN_10, true, nullptr, nullptr, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_SELF_SPAWN_10, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             DoScriptText(EMOTE_CORPSE_SCARABS, pSummoned);
         }
     }
@@ -225,6 +219,24 @@ CreatureAI* GetAI_boss_anubrekhan(Creature* pCreature)
     return new boss_anubrekhanAI(pCreature);
 }
 
+bool GOUse_go_anub_door(Player* pPlayer, GameObject* pGo)
+{
+    if (ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData())
+    {
+        if (pInstance->GetData(TYPE_ANUB_REKHAN) == IN_PROGRESS || pInstance->GetData(TYPE_ANUB_REKHAN) == DONE) // GOs always open once used (or handled by script), so this check is only there for safety
+            return false;
+        else
+        {
+            if (Creature* pAnub = pInstance->GetSingleCreatureFromStorage(NPC_ANUB_REKHAN))
+            {
+                if (boss_anubrekhanAI* pAnubAI = dynamic_cast<boss_anubrekhanAI*>(pAnub->AI()))
+                        pAnubAI->SendAIEvent(AI_EVENT_START_EVENT, pAnub, pAnub);
+            }
+        }
+    }
+    return false;
+}
+
 void AddSC_boss_anubrekhan()
 {
     Script* pNewScript;
@@ -232,5 +244,10 @@ void AddSC_boss_anubrekhan()
     pNewScript = new Script;
     pNewScript->Name = "boss_anubrekhan";
     pNewScript->GetAI = &GetAI_boss_anubrekhan;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_anub_door";
+    pNewScript->pGOUse = &GOUse_go_anub_door;
     pNewScript->RegisterSelf();
 }

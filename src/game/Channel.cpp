@@ -417,7 +417,7 @@ void Channel::SetOwner(Player* player, const char* targetName)
     SetOwner(targetGuid);
 }
 
-void Channel::SendWhoOwner(Player* player)
+void Channel::SendWhoOwner(Player* player) const
 {
     ObjectGuid guid = player->GetObjectGuid();
 
@@ -686,34 +686,34 @@ void Channel::SendToOne(WorldPacket const& data, ObjectGuid who) const
         plr->GetSession()->SendPacket(data);
 }
 
-void Channel::Voice(ObjectGuid /*guid1*/, ObjectGuid /*guid2*/)
+void Channel::Voice(ObjectGuid /*guid1*/, ObjectGuid /*guid2*/) const
 {
 }
 
-void Channel::DeVoice(ObjectGuid /*guid1*/, ObjectGuid /*guid2*/)
+void Channel::DeVoice(ObjectGuid /*guid1*/, ObjectGuid /*guid2*/) const
 {
 }
 
-void Channel::MakeNotifyPacket(WorldPacket& data, uint8 notify_type)
+void Channel::MakeNotifyPacket(WorldPacket& data, uint8 notify_type) const
 {
     data.Initialize(SMSG_CHANNEL_NOTIFY, 1 + m_name.size() + 1);
     data << uint8(notify_type);
     data << m_name;
 }
 
-void Channel::MakeJoined(WorldPacket& data, ObjectGuid guid)
+void Channel::MakeJoined(WorldPacket& data, ObjectGuid guid) const
 {
     MakeNotifyPacket(data, CHAT_JOINED_NOTICE);
     data << ObjectGuid(guid);
 }
 
-void Channel::MakeLeft(WorldPacket& data, ObjectGuid guid)
+void Channel::MakeLeft(WorldPacket& data, ObjectGuid guid) const
 {
     MakeNotifyPacket(data, CHAT_LEFT_NOTICE);
     data << ObjectGuid(guid);
 }
 
-void Channel::MakeYouJoined(WorldPacket& data)
+void Channel::MakeYouJoined(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_YOU_JOINED_NOTICE);
     data << uint8(GetFlags());
@@ -721,52 +721,52 @@ void Channel::MakeYouJoined(WorldPacket& data)
     data << uint32(0);
 }
 
-void Channel::MakeYouLeft(WorldPacket& data)
+void Channel::MakeYouLeft(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_YOU_LEFT_NOTICE);
     data << uint32(GetChannelId());
     data << uint8(0);                                      // can be 0x00 and 0x01
 }
 
-void Channel::MakeWrongPassword(WorldPacket& data)
+void Channel::MakeWrongPassword(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_WRONG_PASSWORD_NOTICE);
 }
 
-void Channel::MakeNotMember(WorldPacket& data)
+void Channel::MakeNotMember(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_NOT_MEMBER_NOTICE);
 }
 
-void Channel::MakeNotModerator(WorldPacket& data)
+void Channel::MakeNotModerator(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_NOT_MODERATOR_NOTICE);
 }
 
-void Channel::MakePasswordChanged(WorldPacket& data, ObjectGuid guid)
+void Channel::MakePasswordChanged(WorldPacket& data, ObjectGuid guid) const
 {
     MakeNotifyPacket(data, CHAT_PASSWORD_CHANGED_NOTICE);
     data << ObjectGuid(guid);
 }
 
-void Channel::MakeOwnerChanged(WorldPacket& data, ObjectGuid guid)
+void Channel::MakeOwnerChanged(WorldPacket& data, ObjectGuid guid) const
 {
     MakeNotifyPacket(data, CHAT_OWNER_CHANGED_NOTICE);
     data << ObjectGuid(guid);
 }
 
-void Channel::MakePlayerNotFound(WorldPacket& data, const std::string& name)
+void Channel::MakePlayerNotFound(WorldPacket& data, const std::string& name) const
 {
     MakeNotifyPacket(data, CHAT_PLAYER_NOT_FOUND_NOTICE);
     data << name;
 }
 
-void Channel::MakeNotOwner(WorldPacket& data)
+void Channel::MakeNotOwner(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_NOT_OWNER_NOTICE);
 }
 
-void Channel::MakeChannelOwner(WorldPacket& data)
+void Channel::MakeChannelOwner(WorldPacket& data) const
 {
     std::string name = "";
 
@@ -777,7 +777,7 @@ void Channel::MakeChannelOwner(WorldPacket& data)
     data << ((IsConstant() || !m_ownerGuid) ? "Nobody" : name);
 }
 
-void Channel::MakeModeChange(WorldPacket& data, ObjectGuid guid, uint8 oldflags)
+void Channel::MakeModeChange(WorldPacket& data, ObjectGuid guid, uint8 oldflags) const
 {
     MakeNotifyPacket(data, CHAT_MODE_CHANGE_NOTICE);
     data << ObjectGuid(guid);
@@ -785,112 +785,112 @@ void Channel::MakeModeChange(WorldPacket& data, ObjectGuid guid, uint8 oldflags)
     data << uint8(GetPlayerFlags(guid));
 }
 
-void Channel::MakeAnnouncementsOn(WorldPacket& data, ObjectGuid guid)
+void Channel::MakeAnnouncementsOn(WorldPacket& data, ObjectGuid guid) const
 {
     MakeNotifyPacket(data, CHAT_ANNOUNCEMENTS_ON_NOTICE);
     data << ObjectGuid(guid);
 }
 
-void Channel::MakeAnnouncementsOff(WorldPacket& data, ObjectGuid guid)
+void Channel::MakeAnnouncementsOff(WorldPacket& data, ObjectGuid guid) const
 {
     MakeNotifyPacket(data, CHAT_ANNOUNCEMENTS_OFF_NOTICE);
     data << ObjectGuid(guid);
 }
 
-void Channel::MakeModerationOn(WorldPacket& data, ObjectGuid guid)
+void Channel::MakeModerationOn(WorldPacket& data, ObjectGuid guid) const
 {
     MakeNotifyPacket(data, CHAT_MODERATION_ON_NOTICE);
     data << ObjectGuid(guid);
 }
 
-void Channel::MakeModerationOff(WorldPacket& data, ObjectGuid guid)
+void Channel::MakeModerationOff(WorldPacket& data, ObjectGuid guid) const
 {
     MakeNotifyPacket(data, CHAT_MODERATION_OFF_NOTICE);
     data << ObjectGuid(guid);
 }
 
-void Channel::MakeMuted(WorldPacket& data)
+void Channel::MakeMuted(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_MUTED_NOTICE);
 }
 
-void Channel::MakePlayerKicked(WorldPacket& data, ObjectGuid target, ObjectGuid source)
+void Channel::MakePlayerKicked(WorldPacket& data, ObjectGuid target, ObjectGuid source) const
 {
     MakeNotifyPacket(data, CHAT_PLAYER_KICKED_NOTICE);
     data << ObjectGuid(target);
     data << ObjectGuid(source);
 }
 
-void Channel::MakeBanned(WorldPacket& data)
+void Channel::MakeBanned(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_BANNED_NOTICE);
 }
 
-void Channel::MakePlayerBanned(WorldPacket& data, ObjectGuid target, ObjectGuid source)
+void Channel::MakePlayerBanned(WorldPacket& data, ObjectGuid target, ObjectGuid source) const
 {
     MakeNotifyPacket(data, CHAT_PLAYER_BANNED_NOTICE);
     data << ObjectGuid(target);
     data << ObjectGuid(source);
 }
 
-void Channel::MakePlayerUnbanned(WorldPacket& data, ObjectGuid target, ObjectGuid source)
+void Channel::MakePlayerUnbanned(WorldPacket& data, ObjectGuid target, ObjectGuid source) const
 {
     MakeNotifyPacket(data, CHAT_PLAYER_UNBANNED_NOTICE);
     data << ObjectGuid(target);
     data << ObjectGuid(source);
 }
 
-void Channel::MakePlayerNotBanned(WorldPacket& data, const std::string& name)
+void Channel::MakePlayerNotBanned(WorldPacket& data, const std::string& name) const
 {
     MakeNotifyPacket(data, CHAT_PLAYER_NOT_BANNED_NOTICE);
     data << name;
 }
 
-void Channel::MakePlayerAlreadyMember(WorldPacket& data, ObjectGuid guid)
+void Channel::MakePlayerAlreadyMember(WorldPacket& data, ObjectGuid guid) const
 {
     MakeNotifyPacket(data, CHAT_PLAYER_ALREADY_MEMBER_NOTICE);
     data << ObjectGuid(guid);
 }
 
-void Channel::MakeInvite(WorldPacket& data, ObjectGuid guid)
+void Channel::MakeInvite(WorldPacket& data, ObjectGuid guid) const
 {
     MakeNotifyPacket(data, CHAT_INVITE_NOTICE);
     data << ObjectGuid(guid);
 }
 
-void Channel::MakeInviteWrongFaction(WorldPacket& data)
+void Channel::MakeInviteWrongFaction(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_INVITE_WRONG_FACTION_NOTICE);
 }
 
-void Channel::MakeWrongFaction(WorldPacket& data)
+void Channel::MakeWrongFaction(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_WRONG_FACTION_NOTICE);
 }
 
-void Channel::MakeInvalidName(WorldPacket& data)
+void Channel::MakeInvalidName(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_INVALID_NAME_NOTICE);
 }
 
-void Channel::MakeNotModerated(WorldPacket& data)
+void Channel::MakeNotModerated(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_NOT_MODERATED_NOTICE);
 }
 
-void Channel::MakePlayerInvited(WorldPacket& data, const std::string& name)
+void Channel::MakePlayerInvited(WorldPacket& data, const std::string& name) const
 {
     MakeNotifyPacket(data, CHAT_PLAYER_INVITED_NOTICE);
     data << name;
 }
 
-void Channel::MakePlayerInviteBanned(WorldPacket& data, const std::string& name)
+void Channel::MakePlayerInviteBanned(WorldPacket& data, const std::string& name) const
 {
     MakeNotifyPacket(data, CHAT_PLAYER_INVITE_BANNED_NOTICE);
     data << name;
 }
 
-void Channel::MakeThrottled(WorldPacket& data)
+void Channel::MakeThrottled(WorldPacket& data) const
 {
     MakeNotifyPacket(data, CHAT_THROTTLED_NOTICE);
 }
