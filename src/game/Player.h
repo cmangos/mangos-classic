@@ -1117,6 +1117,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendItemDurations();
         void LoadCorpse();
         void LoadPet();
+        bool AddItem(uint32 itemId, uint32 count);
 
         uint32 m_stableSlots;
 
