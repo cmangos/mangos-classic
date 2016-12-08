@@ -558,10 +558,7 @@ uint32 WorldSession::getDialogStatus(const Player* pPlayer, const Object* questg
                 {
                     int32 lowLevelDiff = sWorld.getConfig(CONFIG_INT32_QUEST_LOW_LEVEL_HIDE_DIFF);
 
-                    auto questStatusItr = pPlayer->getQuestStatusMap().find(quest_id);
-                    bool rewarded = (questStatusItr != pPlayer->getQuestStatusMap().end()) ? questStatusItr->second.m_rewarded : false;
-
-                    if (pQuest->IsAutoComplete() || (pQuest->IsRepeatable() && rewarded))
+                    if (pQuest->IsAutoComplete())
                     {
                         dialogStatusNew = DIALOG_STATUS_REWARD_REP;
                     }

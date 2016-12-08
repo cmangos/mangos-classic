@@ -96,6 +96,7 @@ enum QuestStatus
     MAX_QUEST_STATUS
 };
 
+// TODO: Add comments
 enum __QuestGiverStatus
 {
     DIALOG_STATUS_NONE                     = 0,
