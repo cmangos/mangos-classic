@@ -58,6 +58,10 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
 
     LoadCreatureAddon(false);
 
+    SetCanDodge(false);
+    SetCanParry(false);
+    SetCanBlock(false);
+
     return true;
 }
 

@@ -1392,8 +1392,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void HandleEmoteState(uint32 emote_id);
         void AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType = BASE_ATTACK, bool extra = false);
 
-        float MeleeMissChanceCalc(const Unit* pVictim, WeaponAttackType attType) const;
-
         void CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* damageInfo, WeaponAttackType attackType = BASE_ATTACK);
         void DealMeleeDamage(CalcDamageInfo* damageInfo, bool durabilityLoss);
 
@@ -1407,10 +1405,48 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         SpellMissInfo MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell);
         SpellMissInfo SpellHitResult(Unit* pVictim, SpellEntry const* spell, bool canReflect = false);
 
-        float GetUnitDodgeChance()    const;
-        float GetUnitParryChance()    const;
-        float GetUnitBlockChance()    const;
-        float GetUnitCriticalChance(WeaponAttackType attackType, const Unit* pVictim) const;
+        // Unit Combat reactions API: Dodge/Parry/Block
+        bool CanDodge() const                             { return m_canDodge; }
+        bool CanParry() const                             { return m_canParry; }
+        bool CanBlock() const                             { return m_canBlock; }
+        // Unit Melee events API: Crush/Glance/Daze
+        bool CanCrush() const                             { return GetCharmerOrOwnerOrOwnGuid().IsCreature(); /* Creatures and creature-controlled players only */ }
+        bool CanGlance() const                            { return GetCharmerOrOwnerOrOwnGuid().IsPlayer(); /* Players and player-controlled units only */ }
+        bool CanDaze() const                              { return (GetTypeId() == TYPEID_UNIT && GetCharmerOrOwnerOrOwnGuid().IsCreature()); /* Creatures only */ }
+
+        void SetCanDodge(const bool flag);
+        void SetCanParry(const bool flag);
+        void SetCanBlock(const bool flag);
+
+        bool CanReactInCombat() const                     { return (isAlive() && !IsIncapacitated()); }
+        bool CanDodgeInCombat() const;
+        bool CanDodgeInCombat(const Unit* attacker) const;
+        bool CanParryInCombat() const;
+        bool CanParryInCombat(const Unit* attacker) const;
+        bool CanBlockInCombat() const;
+        bool CanBlockInCombat(const Unit* attacker) const;
+        bool CanCrushInCombat() const;
+        bool CanCrushInCombat(const Unit* victim) const;
+        bool CanGlanceInCombat() const                    { return CanGlance(); }
+        bool CanGlanceInCombat(const Unit* victim) const;
+        bool CanDazeInCombat() const                      { return CanDaze(); }
+        bool CanDazeInCombat(const Unit* victim) const;
+
+        float CalculateEffectiveDodgeChance(const Unit* attacker, WeaponAttackType attType) const;
+        float CalculateEffectiveParryChance(const Unit* attacker, WeaponAttackType attType) const;
+        float CalculateEffectiveBlockChance(const Unit* attacker, WeaponAttackType attType) const;
+        float CalculateEffectiveCrushChance(const Unit* victim, WeaponAttackType attType) const;
+        float CalculateEffectiveGlanceChance(const Unit* victim, WeaponAttackType attType) const;
+        float CalculateEffectiveDazeChance(const Unit* victim, WeaponAttackType attType) const;
+
+        float GetDodgeChance() const;
+        float GetParryChance() const;
+        float GetBlockChance() const;
+
+        float CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType attType) const;
+        float CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType attType) const;
+
+        float GetCritChance(WeaponAttackType attackType) const;
 
         virtual uint32 GetShieldBlockValue() const = 0;
         uint32 GetUnitMeleeSkill(Unit const* target = nullptr) const { return (target ? GetLevelForTarget(target) : getLevel()) * 5; }
@@ -1419,8 +1455,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetWeaponProcChance() const;
         float GetPPMProcChance(uint32 WeaponSpeed, float PPM) const;
 
-        MeleeHitOutcome RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType) const;
-        MeleeHitOutcome RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 dodge_chance, int32 parry_chance, int32 block_chance, bool SpellCasted) const;
+        MeleeHitOutcome RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackType attType, SpellSchoolMask schoolMask) const;
 
         bool isVendor()       const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR); }
         bool isTrainer()      const { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER); }
@@ -2077,6 +2112,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_reactiveTimer[MAX_REACTIVE];
         uint32 m_regenTimer;
         uint32 m_lastManaUseTimer;
+
+        bool m_canDodge;
+        bool m_canParry;
+        bool m_canBlock;
 
         void DisableSpline();
         bool m_isCreatureLinkingTrigger;
