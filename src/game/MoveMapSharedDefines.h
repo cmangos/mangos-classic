@@ -23,7 +23,7 @@
 #include "../../dep/recastnavigation/Detour/Include/DetourNavMesh.h"
 
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
-#define MMAP_VERSION 4
+#define MMAP_VERSION 5
 
 struct MmapTileHeader
 {
@@ -31,10 +31,10 @@ struct MmapTileHeader
     uint32 dtVersion;
     uint32 mmapVersion;
     uint32 size;
-    bool usesLiquids : 1;
+    uint32 usesLiquids;
 
     MmapTileHeader() : mmapMagic(MMAP_MAGIC), dtVersion(DT_NAVMESH_VERSION),
-        mmapVersion(MMAP_VERSION), size(0), usesLiquids(true) {}
+        mmapVersion(MMAP_VERSION), size(0), usesLiquids(0) {}
 };
 
 enum NavTerrain
