@@ -16,17 +16,19 @@
 
 /* ScriptData
 SDName: Azshara
-SD%Complete: 90
-SDComment: Quest support: 2744, 3141, 9364, 10994
+SD%Complete: 100%
+SDComment: Quest support: 2744, 3141, 3602, 9364, 10994
 SDCategory: Azshara
 EndScriptData */
 
 /* ContentData
 mobs_spitelashes
 npc_loramus_thalipedes
+npc_felhound_tracker
 EndContentData */
 
 #include "precompiled.h"
+#include "pet_ai.h"
 
 /*######
 ## mobs_spitelashes
@@ -243,6 +245,130 @@ bool GossipSelect_npc_loramus_thalipedes(Player* pPlayer, Creature* pCreature, u
     return true;
 }
 
+/*######
+## npc_felhound_tracker
+######*/
+
+enum
+{
+    QUEST_AZSHARITE     = 3602,
+
+    GO_AZSHARITE_1      = 152620,
+    GO_AZSHARITE_2      = 152621,
+    GO_AZSHARITE_3      = 152622,
+    GO_AZSHARITE_4      = 152631,
+    
+    SOUND_GROWL         = 1249
+};
+
+static const uint32 aGOList[] = {GO_AZSHARITE_1, GO_AZSHARITE_2, GO_AZSHARITE_3, GO_AZSHARITE_4};
+
+struct npc_felhound_trackerAI : public ScriptedPetAI
+{
+    npc_felhound_trackerAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
+
+    bool m_bIsMovementActive;
+    uint32 m_uiWaitTimer;
+
+    void Reset() override
+    {
+        m_bIsMovementActive  = false;
+        m_uiWaitTimer        = 0;
+    }
+
+    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+    {
+        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+            return;
+
+        m_creature->GetMotionMaster()->MoveIdle();
+        m_bIsMovementActive  = false;
+        m_uiWaitTimer = 20000;
+    }
+
+    void ReceiveEmote(Player* pPlayer, uint32 uiTextEmote)
+    {
+        // Only react if player is on the quest
+        if (pPlayer->GetQuestStatus(QUEST_AZSHARITE) != QUEST_STATUS_INCOMPLETE)
+            return;
+
+        if (uiTextEmote == TEXTEMOTE_ROAR)
+        {
+            m_uiWaitTimer = 0;
+            m_bIsMovementActive = false;
+            DoFindNewCrystal(pPlayer);
+        }
+    }
+
+    // Function to search for new tubber in range
+    void DoFindNewCrystal(Player* pMaster)
+    {
+        std::list<GameObject*> lCrystalsInRange;
+        for (uint8 i = 0; i < 4; i++)
+        {
+            GetGameObjectListWithEntryInGrid(lCrystalsInRange, m_creature, aGOList[i], 40.0f);
+            // If a crystal was found in range, stop the search here, else try with another GO
+            if (!lCrystalsInRange.empty())
+                break;
+        }
+
+        if (lCrystalsInRange.empty())   // Definely no GO found
+        {
+            m_creature->PlayDirectSound(SOUND_GROWL);
+            return;
+        }
+        lCrystalsInRange.sort(ObjectDistanceOrder(m_creature));
+        GameObject* pNearestCrystal = nullptr;
+
+        // Always need to find new ones
+        for (std::list<GameObject*>::const_iterator itr = lCrystalsInRange.begin(); itr != lCrystalsInRange.end(); ++itr)
+        {
+            if ((*itr)->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND))
+            {
+                pNearestCrystal = *itr;
+                break;
+            }
+        }
+
+        if (!pNearestCrystal)
+        {
+            m_creature->PlayDirectSound(SOUND_GROWL);
+            return;
+        }
+        float fX, fY, fZ;
+        pNearestCrystal->GetContactPoint(m_creature, fX, fY, fZ, 3.0f);
+        m_creature->SetWalk(false);
+        m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+        m_bIsMovementActive = true;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_bIsMovementActive)
+            return;
+
+        if (m_uiWaitTimer)
+        {
+            if (m_uiWaitTimer < uiDiff)
+            {
+                m_uiWaitTimer = 0;
+                m_bIsMovementActive = false;
+            }
+            else
+            {
+                m_uiWaitTimer -= uiDiff;
+                return;
+            }
+        }
+        ScriptedPetAI::UpdateAI(uiDiff);
+    }
+};
+
+CreatureAI* GetAI_npc_felhound_tracker(Creature* pCreature)
+{
+    return new npc_felhound_trackerAI(pCreature);
+}
+
 void AddSC_azshara()
 {
     Script* pNewScript;
@@ -256,5 +382,10 @@ void AddSC_azshara()
     pNewScript->Name = "npc_loramus_thalipedes";
     pNewScript->pGossipHello =  &GossipHello_npc_loramus_thalipedes;
     pNewScript->pGossipSelect = &GossipSelect_npc_loramus_thalipedes;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_felhound_tracker";
+    pNewScript->GetAI = &GetAI_npc_felhound_tracker;
     pNewScript->RegisterSelf();
 }
