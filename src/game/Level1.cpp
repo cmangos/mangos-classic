@@ -234,7 +234,7 @@ bool ChatHandler::HandleGMVisibleCommand(char* args)
     }
 
     Player* player = m_session->GetPlayer();
-    SpellEntry const* invisibleAuraInfo = sSpellStore.LookupEntry(sWorld.getConfig(CONFIG_UINT32_GM_INVISIBLE_AURA));
+    SpellEntry const* invisibleAuraInfo = sSpellTemplate.LookupEntry<SpellEntry>(sWorld.getConfig(CONFIG_UINT32_GM_INVISIBLE_AURA));
     if (!invisibleAuraInfo || !IsSpellAppliesAura(invisibleAuraInfo))
         invisibleAuraInfo = nullptr;
 

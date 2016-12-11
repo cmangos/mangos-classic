@@ -110,7 +110,7 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
     // Allowed to cast only if not casting (unless we interrupt ourself) or if spell is triggered
     if (!pCaster->IsNonMeleeSpellCasted(false) || (uiCastFlags & (CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS)))
     {
-        if (const SpellEntry* pSpell = sSpellStore.LookupEntry(uiSpell))
+        if (const SpellEntry* pSpell = sSpellTemplate.LookupEntry<SpellEntry>(uiSpell))
         {
             // If cast flag CAST_AURA_NOT_PRESENT is active, check if target already has aura on them
             if (uiCastFlags & CAST_AURA_NOT_PRESENT)

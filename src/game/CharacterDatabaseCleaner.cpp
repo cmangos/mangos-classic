@@ -22,6 +22,7 @@
 #include "Database/DatabaseEnv.h"
 #include "DBCStores.h"
 #include "ProgressBar.h"
+#include "SQLStorages.h"
 
 void CharacterDatabaseCleaner::CleanDatabase()
 {
@@ -100,7 +101,7 @@ void CharacterDatabaseCleaner::CleanCharacterSkills()
 
 bool CharacterDatabaseCleaner::SpellCheck(uint32 spell_id)
 {
-    return !!sSpellStore.LookupEntry(spell_id);
+    return !!sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
 }
 
 void CharacterDatabaseCleaner::CleanCharacterSpell()
