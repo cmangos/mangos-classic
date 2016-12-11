@@ -398,19 +398,20 @@ void Player::UpdateDefenseBonusesMod()
 
 void Player::UpdateBlockPercentage()
 {
-    // No block
     float value = 0.0f;
+    float real = 0.0f;
     if (CanBlock())
     {
         // Base value
         value = 5.0f;
-        // Modify value from defense skill
-        value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
         // Increase from SPELL_AURA_MOD_BLOCK_PERCENT aura
         value += GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT);
-        value = std::max(0.0f, std::min(value, 100.0f));
+        real = value;
+        // Set UI display value: modify value from defense skill against same level target
+        value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
     }
-    SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
+    m_modBlockChance = real;
+    SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, std::max(0.0f, std::min(value, 100.0f)));
 }
 
 void Player::UpdateCritPercentage(WeaponAttackType attType)
@@ -433,10 +434,10 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
     }
 
     float value = GetTotalPercentageModValue(modGroup);
+    m_modCritChance[attType] = value;
     // Modify crit from weapon skill and maximized defense skill of same level victim difference
     value += (int32(GetWeaponSkillValue(attType)) - int32(GetMaxSkillValueForLevel())) * 0.04f;
-    value = std::max(0.0f, std::min(value, 100.0f));
-    SetStatFloatValue(index, value);
+    SetStatFloatValue(index, std::max(0.0f, std::min(value, 100.0f)));
 }
 
 void Player::UpdateAllCritPercentages()
@@ -454,31 +455,53 @@ void Player::UpdateAllCritPercentages()
 
 void Player::UpdateParryPercentage()
 {
-    // No parry
     float value = 0.0f;
+    float real = 0.0f;
     if (CanParry())
     {
         // Base parry
         value  = 5.0f;
-        // Modify value from defense skill
-        value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
         // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
         value += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
-        value = std::max(0.0f, std::min(value, 100.0f));
+        real = value;
+        // Set UI display value: modify value from defense skill against same level target
+        value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
     }
-    SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
+    // Set current dodge chance
+    m_modParryChance = real;
+    SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, std::max(0.0f, std::min(value, 100.0f)));
 }
+
+// Base static dodge values in percentages (%)
+static const float PLAYER_BASE_DODGE[MAX_CLASSES] =
+{
+    0.00f, // [0]  <Unused>
+    0.00f, // [1]  Warrior
+    0.75f, // [2]  Paladin
+    0.64f, // [3]  Hunter
+    0.00f, // [4]  Rogue
+    3.00f, // [5]  Priest
+    0.00f, // [6]  <Unused>
+    1.75f, // [7]  Shaman
+    3.25f, // [8]  Mage
+    2.00f, // [9]  Warlock
+    0.00f, // [10] <Unused>
+    0.75f, // [11] Druid
+};
 
 void Player::UpdateDodgePercentage()
 {
+    // Base dodge
+    float value = (getClass() < MAX_CLASSES) ? PLAYER_BASE_DODGE[getClass()] : 0.0f;
     // Dodge from agility
-    float value = GetDodgeFromAgility();
-    // Modify value from defense skill
-    value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
+    value += GetDodgeFromAgility(GetStat(STAT_AGILITY));
     // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
     value += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
-    value = std::max(0.0f, std::min(value, 100.0f));
-    SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);
+    // Set current dodge chance
+    m_modDodgeChance = value;
+    // Set UI display value: modify value from defense skill against same level target
+    value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
+    SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, std::max(0.0f, std::min(value, 100.0f)));
 }
 
 void Player::UpdateSpellCritChance(uint32 school)

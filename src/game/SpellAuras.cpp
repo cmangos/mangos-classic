@@ -3329,27 +3329,42 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool /*Real*/)
 
 void Aura::HandleAuraModParryPercent(bool /*apply*/, bool /*Real*/)
 {
-    if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
-        return;
+    Unit* target = GetTarget();
 
-    ((Player*)GetTarget())->UpdateParryPercentage();
+    if (target->GetTypeId() != TYPEID_PLAYER)
+    {
+        target->m_modParryChance += m_modifier.m_amount;
+        return;
+    };
+
+    ((Player*)target)->UpdateParryPercentage();
 }
 
 void Aura::HandleAuraModDodgePercent(bool /*apply*/, bool /*Real*/)
 {
-    if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
-        return;
+    Unit* target = GetTarget();
 
-    ((Player*)GetTarget())->UpdateDodgePercentage();
+    if (target->GetTypeId() != TYPEID_PLAYER)
+    {
+        target->m_modDodgeChance += m_modifier.m_amount;
+        return;
+    }
+
+    ((Player*)target)->UpdateDodgePercentage();
     // sLog.outError("BONUS DODGE CHANCE: + %f", float(m_modifier.m_amount));
 }
 
 void Aura::HandleAuraModBlockPercent(bool /*apply*/, bool /*Real*/)
 {
-    if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
-        return;
+    Unit* target = GetTarget();
 
-    ((Player*)GetTarget())->UpdateBlockPercentage();
+    if (target->GetTypeId() != TYPEID_PLAYER)
+    {
+        target->m_modBlockChance += m_modifier.m_amount;
+        return;
+    }
+
+    ((Player*)target)->UpdateBlockPercentage();
     // sLog.outError("BONUS BLOCK CHANCE: + %f", float(m_modifier.m_amount));
 }
 
@@ -3370,7 +3385,11 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
     Unit* target = GetTarget();
 
     if (target->GetTypeId() != TYPEID_PLAYER)
+    {
+        for (int i = 0; i < MAX_ATTACK; ++i)
+            target->m_modCritChance[i] += m_modifier.m_amount;
         return;
+    }
 
     // apply item specific bonuses for already equipped weapon
     if (Real)
