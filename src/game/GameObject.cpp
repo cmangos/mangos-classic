@@ -940,7 +940,7 @@ void GameObject::TriggerLinkedGameObject(Unit* target) const
     if (!trapInfo || trapInfo->type != GAMEOBJECT_TYPE_TRAP)
         return;
 
-    SpellEntry const* trapSpell = sSpellStore.LookupEntry(trapInfo->trap.spellId);
+    SpellEntry const* trapSpell = sSpellTemplate.LookupEntry<SpellEntry>(trapInfo->trap.spellId);
 
     // The range to search for linked trap is weird. We set 0.5 as default. Most (all?)
     // traps are probably expected to be pretty much at the same location as the used GO,
@@ -1636,7 +1636,7 @@ void GameObject::Use(Unit* user)
     if (!spellId)
         return;
 
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellInfo)
     {
         sLog.outError("WORLD: unknown spell id %u at use action for gameobject (Entry: %u GoType: %u )", spellId, GetEntry(), GetGoType());

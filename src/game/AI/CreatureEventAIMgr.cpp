@@ -337,7 +337,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                 case EVENT_T_SPELLHIT:
                     if (temp.spell_hit.spellId)
                     {
-                        SpellEntry const* pSpell = sSpellStore.LookupEntry(temp.spell_hit.spellId);
+                        SpellEntry const* pSpell = sSpellTemplate.LookupEntry<SpellEntry>(temp.spell_hit.spellId);
                         if (!pSpell)
                         {
                             sLog.outErrorEventAI("Creature %u has nonexistent SpellID(%u) defined in event %u.", temp.creature_id, temp.spell_hit.spellId, i);
@@ -392,7 +392,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     break;
                 case EVENT_T_FRIENDLY_MISSING_BUFF:
                 {
-                    SpellEntry const* pSpell = sSpellStore.LookupEntry(temp.friendly_buff.spellId);
+                    SpellEntry const* pSpell = sSpellTemplate.LookupEntry<SpellEntry>(temp.friendly_buff.spellId);
                     if (!pSpell)
                     {
                         sLog.outErrorEventAI("Creature %u has nonexistent SpellID(%u) defined in event %u.", temp.creature_id, temp.friendly_buff.spellId, i);
@@ -472,7 +472,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                 case EVENT_T_MISSING_AURA:
                 case EVENT_T_TARGET_MISSING_AURA:
                 {
-                    SpellEntry const* pSpell = sSpellStore.LookupEntry(temp.buffed.spellId);
+                    SpellEntry const* pSpell = sSpellTemplate.LookupEntry<SpellEntry>(temp.buffed.spellId);
                     if (!pSpell)
                     {
                         sLog.outErrorEventAI("Creature %u has nonexistent SpellID(%u) defined in event %u.", temp.creature_id, temp.buffed.spellId, i);
@@ -624,7 +624,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         break;
                     case ACTION_T_CAST:
                     {
-                        const SpellEntry* spell = sSpellStore.LookupEntry(action.cast.spellId);
+                        const SpellEntry* spell = sSpellTemplate.LookupEntry<SpellEntry>(action.cast.spellId);
                         if (!spell)
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent SpellID %u.", i, j + 1, action.cast.spellId);
                         /* FIXME: temp.raw.param3 not have event tipes with recovery time in it....
@@ -695,7 +695,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_CAST_EVENT:
                         if (!sCreatureStorage.LookupEntry<CreatureInfo>(action.cast_event.creatureId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent creature entry %u.", i, j + 1, action.cast_event.creatureId);
-                        if (!sSpellStore.LookupEntry(action.cast_event.spellId))
+                        if (!sSpellTemplate.LookupEntry<SpellEntry>(action.cast_event.spellId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent SpellID %u.", i, j + 1, action.cast_event.spellId);
                         IsValidTargetType(temp.event_type, action.type, action.cast_event.target, i, j + 1);
                         break;
@@ -730,11 +730,11 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     case ACTION_T_CAST_EVENT_ALL:
                         if (!sCreatureStorage.LookupEntry<CreatureInfo>(action.cast_event_all.creatureId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent creature entry %u.", i, j + 1, action.cast_event_all.creatureId);
-                        if (!sSpellStore.LookupEntry(action.cast_event_all.spellId))
+                        if (!sSpellTemplate.LookupEntry<SpellEntry>(action.cast_event_all.spellId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent SpellID %u.", i, j + 1, action.cast_event_all.spellId);
                         break;
                     case ACTION_T_REMOVEAURASFROMSPELL:
-                        if (!sSpellStore.LookupEntry(action.remove_aura.spellId))
+                        if (!sSpellTemplate.LookupEntry<SpellEntry>(action.remove_aura.spellId))
                             sLog.outErrorEventAI("Event %u Action %u uses nonexistent SpellID %u.", i, j + 1, action.remove_aura.spellId);
                         IsValidTargetType(temp.event_type, action.type, action.remove_aura.target, i, j + 1);
                         break;

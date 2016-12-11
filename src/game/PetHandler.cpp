@@ -232,7 +232,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             Unit* unit_target = targetGuid ? _player->GetMap()->GetUnit(targetGuid) : nullptr;
 
             // do not cast unknown spells
-            SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellid);
             if (!spellInfo)
             {
                 sLog.outError("WORLD: unknown PET spell id %i", spellid);
@@ -720,7 +720,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     Creature* petCreature = petUnit->GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(petUnit) : nullptr;
     Pet* pet = (petCreature && petCreature->IsPet()) ? static_cast<Pet*>(petUnit) : nullptr;
 
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellid);
     if (!spellInfo)
     {
         sLog.outError("WORLD: unknown PET spell id %i", spellid);
