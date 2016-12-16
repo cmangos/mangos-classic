@@ -946,7 +946,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         SpellModifier* mod = new SpellModifier(SPELLMOD_RESIST_MISS_CHANCE, SPELLMOD_FLAT, damage, m_spellInfo->Id, uint64(0x0000000000000100));
                         ((Player*)unitTarget)->AddSpellMod(mod, true);
                     }
-                    
+
                     break;
                 }
                 case 12472:                                 // Cold Snap
@@ -1208,7 +1208,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     int32 bonusDamage = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo))
                         + unitTarget->SpellBaseDamageBonusTaken(GetSpellSchoolMask(m_spellInfo));
                         // Does Amplify Magic/Dampen Magic influence flametongue? If not, the above addition must be removed.
-                    float weaponSpeed = float(m_CastItem->GetProto()->Delay) / IN_MILLISECONDS;     
+                    float weaponSpeed = float(m_CastItem->GetProto()->Delay) / IN_MILLISECONDS;
                     bonusDamage = m_caster->SpellBonusWithCoeffs(m_spellInfo, bonusDamage, 0, 0, SPELL_DIRECT_DAMAGE, false); // apply spell coeff
                     int32 totalDamage = (damage * 0.01 * weaponSpeed) + bonusDamage;
 
@@ -1486,7 +1486,7 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
     // post effects for TARGET_TABLE_X_Y_Z_COORDINATES
     switch (m_spellInfo->Id)
     {
-        case 23441:                                 // Ultrasafe Transporter: Gadgetzan 
+        case 23441:                                 // Ultrasafe Transporter: Gadgetzan
         {
             // Wrong destination already rolled for, only handle minor malfunction on sucess
             m_caster->CastSpell(m_caster, 23450, TRIGGERED_OLD_TRIGGERED); // Transporter Arrival
@@ -2721,8 +2721,14 @@ void Spell::EffectTeleUnitsFaceCaster(SpellEffectIndex eff_idx)
         m_targets.getDestination(fx, fy, fz);
     else
     {
-        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
-        m_caster->GetClosePoint(fx, fy, fz, unitTarget->GetObjectBoundingRadius(), dis);
+        if (float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx])))
+            m_caster->GetClosePoint(fx, fy, fz, unitTarget->GetObjectBoundingRadius(), dis);
+        else
+        {
+            fx = m_caster->GetPositionX();
+            fy = m_caster->GetPositionY();
+            fz = m_caster->GetPositionZ();
+        }
     }
 
     unitTarget->NearTeleportTo(fx, fy, fz, -m_caster->GetOrientation(), unitTarget == m_caster);
