@@ -86,6 +86,7 @@ build_script:
         cp "$sourceFolder\mmap\bin\Win32_Release\*.exe" "$destinationFolder"
         cp "$sourceFolder\vmap_assembler\bin\Win32_Release\*.exe" "$destinationFolder"
         cp "$sourceFolder\vmap_extractor\bin\Win32_Release\*.exe" "$destinationFolder"
+        cp "$sourceFolder\extractor_scripts\*" "$destinationFolder"
 
 # unit test
 test: off

@@ -9,6 +9,14 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 Copy the content of this directory into your client directory.
+Those scripts need some binaries to works.
+Make sure there is in this folder all required binaries.
+- ad(.exe)              sources in contrib/extractor        dbc/maps extractor
+- vmapExtractor(.exe)   sources in contrib/vmap_extractor   VMAPS extractor
+- vmap_assembler(.exe)  sources in contrib/vmap_assembler   VMAPS builder
+- MoveMapGen(.exe)      sources in contrib/mmap             MMAPS biulder
+
+If you dont have them, you have to build them each one by one.
 
 Then just run ExtractResources.sh
 On Windows, you can run the file within the "Git bash" (which should be shipped with your Git software)
