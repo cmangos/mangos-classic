@@ -52,6 +52,14 @@ InstanceData* GetInstanceData_world_map_eastern_kingdoms(Map* pMap)
     return new world_map_eastern_kingdoms(pMap);
 }
 
+struct GhostOPlasmEvent
+{
+    ObjectGuid guid;
+    uint32 despawnTimer;
+    uint8 phaseCounter;
+    std::vector<ObjectGuid> summonedMagrami;
+};
+
 /* *********************************************************
  *                     KALIMDOR
  */
@@ -60,10 +68,12 @@ struct world_map_kalimdor : public ScriptedMap
     world_map_kalimdor(Map* pMap) : ScriptedMap(pMap) { Initialize(); }
 
     uint8 m_uiMurkdeepAdds_KilledAddCount;
+    std::vector<GhostOPlasmEvent> m_vGOEvents;
 
     void Initialize()
     {
         m_uiMurkdeepAdds_KilledAddCount = 0;
+        m_vGOEvents.clear();
     }
 
     void OnCreatureCreate(Creature* pCreature)
@@ -126,6 +136,68 @@ struct world_map_kalimdor : public ScriptedMap
                     }
                 }
                 break;
+        }
+    }
+
+    void OnObjectCreate(GameObject* pGo) override
+    {
+        switch (pGo->GetEntry())
+        {
+            case GO_GHOST_MAGNET:
+                m_vGOEvents.push_back({ pGo->GetObjectGuid(),0,0 }); // insert new event with 0 timer
+                pGo->SetActiveObjectState(true);
+                break;
+        }
+    }
+
+    bool GhostOPlasmEventStep(GhostOPlasmEvent& eventData)
+    {
+        if (eventData.despawnTimer > 180000)
+        {
+            for (auto guid : eventData.summonedMagrami)
+                if (Creature* magrami = instance->GetCreature(guid))
+                    magrami->ForcedDespawn();
+
+            if (GameObject* go = instance->GetGameObject(eventData.guid))
+                go->AddObjectToRemoveList(); // TODO: Establish rules for despawning temporary GOs that were used in their lifetime (buttons for example)
+
+            return false;
+        }
+            
+
+        if (GameObject* go = instance->GetGameObject(eventData.guid))
+        {
+            if (eventData.despawnTimer / 15000 >= eventData.phaseCounter)
+            {
+                float x, y, z;
+                go->GetPosition(x, y, z); // do some urand radius shenanigans to spawn it further and make it walk to go using doing X and Y yourself and using function in MAP to get proper Z
+                uint32 random = urand(0, 35);
+                float xR = x + random, yR = y + (35 - random), zR = z;
+                instance->GetHeightInRange(xR, yR, zR);
+                Creature* creature = go->SummonCreature(NPC_MAGRAMI_SPECTRE, xR, yR, zR, 0, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 180000); // add more timed logic here
+                instance->GetReachableRandomPointOnGround(x, y, z, 5.0f); // get position to which spectre will walk
+                eventData.phaseCounter++;
+                eventData.summonedMagrami.push_back(creature->GetObjectGuid());
+                creature->GetMotionMaster()->MovePoint(1, x, y, z);
+            }
+            return true;
+        }
+        else
+            return false;
+    }
+
+    void Update(uint32 diff)
+    {
+        if (!m_vGOEvents.empty())
+        {
+            for (auto iter = m_vGOEvents.begin(); iter != m_vGOEvents.end();)
+            {
+                iter->despawnTimer += diff;
+                if (!GhostOPlasmEventStep((*iter)))                
+                    iter = m_vGOEvents.erase(iter);
+                else
+                    ++iter;
+            }
         }
     }
 

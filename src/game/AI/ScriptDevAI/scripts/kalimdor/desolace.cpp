@@ -678,6 +678,74 @@ bool QuestAccept_npc_rigger_gizelton(Player* pPlayer, Creature* pCreature, const
     return true;
 }
 
+enum
+{
+    SPELL_CURSE_OF_MAGRAMI = 18159,
+    SPELL_GHOST_SPAWN_IN   = 17321,
+    SPELL_BLUE_AURA        = 17327,
+    SPELL_GREEN_AURA       = 18951,
+
+    FACTION_HOSTILE        = 16,
+};
+
+struct npc_magrami_spectre : public ScriptedAI
+{
+    npc_magrami_spectre(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiCurseTimer;
+
+    void Reset() override
+    {
+        m_uiCurseTimer = 4000;
+    }
+
+    void JustAIInit() override
+    {
+        m_creature->CastSpell(m_creature, SPELL_GHOST_SPAWN_IN, TRIGGERED_NONE);
+        m_creature->CastSpell(m_creature, SPELL_BLUE_AURA,TRIGGERED_NONE);
+    }
+
+    void MovementInform(uint32 uiMovementType, uint32 uiData) override
+    {
+        if (uiMovementType == POINT_MOTION_TYPE)
+        {
+            if (uiData == 1)
+            {
+                float x, y, z;
+                m_creature->GetPosition(x, y, z);
+                m_creature->GetMotionMaster()->MoveRandomAroundPoint(x, y, z, 3.f);
+                m_creature->RemoveAurasDueToSpell(SPELL_BLUE_AURA);
+                m_creature->CastSpell(m_creature, SPELL_GREEN_AURA, TRIGGERED_NONE);
+                m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_NONE);
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiCurseTimer)
+        {
+            if (m_uiCurseTimer <= uiDiff)
+            {
+                m_uiCurseTimer = 0;
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_CURSE_OF_MAGRAMI);
+            }
+            else
+                m_uiCurseTimer -= uiDiff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+CreatureAI* GetAI_npc_magrami_spectre(Creature* pCreature)
+{
+    return new npc_magrami_spectre(pCreature);
+}
+
 void AddSC_desolace()
 {
     Script* pNewScript;
@@ -711,5 +779,10 @@ void AddSC_desolace()
     pNewScript->Name = "npc_rigger_gizelton";
     pNewScript->GetAI = &GetAI_npc_rigger_gizelton;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_rigger_gizelton;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_magrami_spectre";
+    pNewScript->GetAI = &GetAI_npc_magrami_spectre;
     pNewScript->RegisterSelf();
 }

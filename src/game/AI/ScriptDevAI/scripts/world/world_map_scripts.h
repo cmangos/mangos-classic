@@ -14,6 +14,10 @@ enum
     NPC_MURKDEEP                = 10323,
     QUEST_WANTED_MURKDEEP       = 4740,
 
+    // Quest 6134
+    GO_GHOST_MAGNET             = 177746,
+    NPC_MAGRAMI_SPECTRE         = 11560,
+
     // Quest 6403
     NPC_JONATHAN                = 466,
     NPC_WRYNN                   = 1747,
