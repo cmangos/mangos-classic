@@ -207,7 +207,7 @@ void BattleGroundAB::_CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool
     SpawnEvent(node, type, true);                           // will automaticly despawn other events
 }
 
-int32 BattleGroundAB::_GetNodeNameId(uint8 node)
+int32 BattleGroundAB::_GetNodeNameId(uint8 node) const
 {
     switch (node)
     {

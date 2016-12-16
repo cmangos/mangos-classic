@@ -176,10 +176,10 @@ class GridMap
         static bool ExistMap(uint32 mapid, int gx, int gy);
         static bool ExistVMap(uint32 mapid, int gx, int gy);
 
-        uint16 getArea(float x, float y);
-        float getHeight(float x, float y) { return (this->*m_gridGetHeight)(x, y); }
-        float getLiquidLevel(float x, float y);
-        uint8 getTerrainType(float x, float y);
+        uint16 getArea(float x, float y) const;
+        float getHeight(float x, float y) const { return (this->*m_gridGetHeight)(x, y); }
+        float getLiquidLevel(float x, float y) const;
+        uint8 getTerrainType(float x, float y) const;
         GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr);
 };
 
@@ -300,7 +300,7 @@ class TerrainManager : public MaNGOS::Singleton<TerrainManager, MaNGOS::ClassLev
         {
             return TerrainManager::GetZoneIdByAreaFlag(GetAreaFlag(mapid, x, y, z), mapid);
         }
-        void GetZoneAndAreaId(uint32& zoneid, uint32& areaid, uint32 mapid, float x, float y, float z)
+        void GetZoneAndAreaId(uint32& zoneid, uint32& areaid, uint32 mapid, float x, float y, float z) const
         {
             TerrainManager::GetZoneAndAreaIdByAreaFlag(zoneid, areaid, GetAreaFlag(mapid, x, y, z), mapid);
         }

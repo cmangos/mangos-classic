@@ -203,9 +203,9 @@ class MANGOS_DLL_SPEC Pet : public Creature
         void LooseHappiness();
         void TickLoyaltyChange();
         void ModifyLoyalty(int32 addvalue);
-        HappinessState GetHappinessState();
-        uint32 GetMaxLoyaltyPoints(uint32 level);
-        uint32 GetStartLoyaltyPoints(uint32 level);
+        HappinessState GetHappinessState() const;
+        uint32 GetMaxLoyaltyPoints(uint32 level) const;
+        uint32 GetStartLoyaltyPoints(uint32 level) const;
         void KillLoyaltyBonus(uint32 level);
         uint32 GetLoyaltyLevel() { return GetByteValue(UNIT_FIELD_BYTES_1, 1); }
         void SetLoyaltyLevel(LoyaltyLevel level);
@@ -214,11 +214,11 @@ class MANGOS_DLL_SPEC Pet : public Creature
         void SynchronizeLevelWithOwner();
         void InitStatsForLevel(uint32 level);
         bool HaveInDiet(ItemPrototype const* item) const;
-        uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel);
+        uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel) const;
         void SetDuration(int32 dur) { m_duration = dur; }
-        int32 GetDuration() { return m_duration; }
+        int32 GetDuration() const { return m_duration; }
 
-        int32 GetBonusDamage() { return m_bonusdamage; }
+        int32 GetBonusDamage() const { return m_bonusdamage; }
         void SetBonusDamage(int32 damage) { m_bonusdamage = damage; }
 
         bool UpdateStats(Stats stat) override;
@@ -230,10 +230,10 @@ class MANGOS_DLL_SPEC Pet : public Creature
         void UpdateAttackPowerAndDamage(bool ranged = false) override;
         void UpdateDamagePhysical(WeaponAttackType attType) override;
 
-        bool   CanTakeMoreActiveSpells(uint32 SpellIconID);
+        bool   CanTakeMoreActiveSpells(uint32 SpellIconID) const;
         void   ToggleAutocast(uint32 spellid, bool apply);
-        bool   HasTPForSpell(uint32 spellid);
-        int32  GetTPForSpell(uint32 spellid);
+        bool   HasTPForSpell(uint32 spellid) const;
+        int32  GetTPForSpell(uint32 spellid) const;
 
         void SetModeFlags(PetModeFlags mode);
         PetModeFlags GetModeFlags() const { return m_petModeFlags; }
@@ -271,7 +271,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
         virtual void DeleteCharmInfo() override;
 
         void  SetTP(int32 TP);
-        int32 GetDispTP();
+        int32 GetDispTP() const;
 
         int32   m_TrainingPoints;
         uint32  m_resetTalentsCost;

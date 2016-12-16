@@ -522,7 +522,7 @@ void PathFinder::updateFilter()
     }
 }
 
-NavTerrain PathFinder::getNavTerrain(float x, float y, float z)
+NavTerrain PathFinder::getNavTerrain(float x, float y, float z) const
 {
     GridMapLiquidData data;
     m_sourceUnit->GetTerrain()->getLiquidStatus(x, y, z, MAP_ALL_LIQUIDS, &data);
@@ -598,7 +598,7 @@ uint32 PathFinder::fixupCorridor(dtPolyRef* path, uint32 npath, uint32 maxPath,
 
 bool PathFinder::getSteerTarget(const float* startPos, const float* endPos,
                                 float minTargetDist, const dtPolyRef* path, uint32 pathSize,
-                                float* steerPos, unsigned char& steerPosFlag, dtPolyRef& steerPosRef)
+                                float* steerPos, unsigned char& steerPosFlag, dtPolyRef& steerPosRef) const
 {
     // Find steer target.
     static const uint32 MAX_STEER_POINTS = 3;

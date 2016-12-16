@@ -34,8 +34,6 @@ class AuthCrypt
         void DecryptRecv(uint8*, size_t);
         void EncryptSend(uint8*, size_t);
 
-        bool IsInitialized() const { return _initialized; }
-
     private:
         const static size_t CRYPTED_SEND_LEN = 4;
         const static size_t CRYPTED_RECV_LEN = 6;

@@ -22,7 +22,7 @@
 #include "CreatureAI.h"
 
 template<class REAL_AI>
-inline CreatureAI*
+CreatureAI*
 CreatureAIFactory<REAL_AI>::Create(void* data) const
 {
     Creature* creature = reinterpret_cast<Creature*>(data);

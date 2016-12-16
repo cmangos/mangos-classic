@@ -942,7 +942,7 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32
 
 /// Helper function to get Object source or target for Script-Command
 /// returns false iff an error happened
-bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeItem, Object*& resultObject)
+bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeItem, Object*& resultObject) const
 {
     resultObject = nullptr;
 
@@ -990,7 +990,7 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
 
 /// Select source and target for a script command
 /// Returns false iff an error happened
-bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject* pOrigTarget, WorldObject*& pFinalSource, WorldObject*& pFinalTarget)
+bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject* pOrigTarget, WorldObject*& pFinalSource, WorldObject*& pFinalTarget) const
 {
     WorldObject* pBuddy = nullptr;
 
@@ -1104,7 +1104,7 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject
 }
 
 /// Helper to log error information
-bool ScriptAction::LogIfNotCreature(WorldObject* pWorldObject)
+bool ScriptAction::LogIfNotCreature(WorldObject* pWorldObject) const
 {
     if (!pWorldObject || pWorldObject->GetTypeId() != TYPEID_UNIT)
     {
@@ -1113,7 +1113,7 @@ bool ScriptAction::LogIfNotCreature(WorldObject* pWorldObject)
     }
     return false;
 }
-bool ScriptAction::LogIfNotUnit(WorldObject* pWorldObject)
+bool ScriptAction::LogIfNotUnit(WorldObject* pWorldObject) const
 {
     if (!pWorldObject || !pWorldObject->isType(TYPEMASK_UNIT))
     {
@@ -1122,7 +1122,7 @@ bool ScriptAction::LogIfNotUnit(WorldObject* pWorldObject)
     }
     return false;
 }
-bool ScriptAction::LogIfNotGameObject(WorldObject* pWorldObject)
+bool ScriptAction::LogIfNotGameObject(WorldObject* pWorldObject) const
 {
     if (!pWorldObject || pWorldObject->GetTypeId() != TYPEID_GAMEOBJECT)
     {
@@ -1131,7 +1131,7 @@ bool ScriptAction::LogIfNotGameObject(WorldObject* pWorldObject)
     }
     return false;
 }
-bool ScriptAction::LogIfNotPlayer(WorldObject* pWorldObject)
+bool ScriptAction::LogIfNotPlayer(WorldObject* pWorldObject) const
 {
     if (!pWorldObject || pWorldObject->GetTypeId() != TYPEID_PLAYER)
     {
@@ -1142,7 +1142,7 @@ bool ScriptAction::LogIfNotPlayer(WorldObject* pWorldObject)
 }
 
 /// Helper to get a player if possible (target preferred)
-Player* ScriptAction::GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldObject* pTarget)
+Player* ScriptAction::GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldObject* pTarget) const
 {
     if ((!pTarget || pTarget->GetTypeId() != TYPEID_PLAYER) && (!pSource || pSource->GetTypeId() != TYPEID_PLAYER))
     {
@@ -2350,7 +2350,7 @@ bool ScriptMgr::OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest 
     return m_pOnGOQuestRewarded != nullptr && m_pOnGOQuestRewarded(pPlayer, pGameObject, pQuest);
 }
 
-uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
+uint32 ScriptMgr::GetDialogStatus(const Player* pPlayer, const Creature* pCreature) const
 {
     // used by eluna
     if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pCreature))
@@ -2362,7 +2362,7 @@ uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, Creature* pCreature)
     return m_pGetNPCDialogStatus(pPlayer, pCreature);
 }
 
-uint32 ScriptMgr::GetDialogStatus(Player* pPlayer, GameObject* pGameObject)
+uint32 ScriptMgr::GetDialogStatus(const Player* pPlayer, const GameObject* pGameObject) const
 {
     // used by eluna
     if (uint32 dialogId = sEluna->GetDialogStatus(pPlayer, pGameObject))

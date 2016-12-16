@@ -87,7 +87,7 @@ bool WorldSessionFilter::Process(WorldPacket const& packet) const
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_t mute_time, LocaleConstant locale) :
     m_muteTime(mute_time),
-    _player(nullptr), m_Socket(sock), _security(sec), _accountId(id), _logoutTime(0),
+    _player(nullptr), m_Socket(sock->shared<WorldSocket>()), _security(sec), _accountId(id), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED) {}
@@ -101,7 +101,7 @@ WorldSession::~WorldSession()
 
     // marks this session as finalized in the socket which references (BUT DOES NOT OWN) it.
     // this lets the socket handling code know that the socket can be safely deleted
-    m_Socket->ClearSession();
+    m_Socket->FinalizeSession();
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -117,7 +117,7 @@ char const* WorldSession::GetPlayerName() const
 }
 
 /// Send a packet to the client
-void WorldSession::SendPacket(WorldPacket const& packet)
+void WorldSession::SendPacket(WorldPacket const& packet) const
 {
     if (m_Socket->IsClosed())
         return;
@@ -169,7 +169,7 @@ void WorldSession::QueuePacket(std::unique_ptr<WorldPacket> new_packet)
 }
 
 /// Logging helper for unexpected opcodes
-void WorldSession::LogUnexpectedOpcode(WorldPacket const& packet, const char* reason)
+void WorldSession::LogUnexpectedOpcode(WorldPacket const& packet, const char* reason) const
 {
     sLog.outError("SESSION: received unexpected opcode %s (0x%.4X) %s",
                   packet.GetOpcodeName(),
@@ -178,7 +178,7 @@ void WorldSession::LogUnexpectedOpcode(WorldPacket const& packet, const char* re
 }
 
 /// Logging helper for unexpected opcodes
-void WorldSession::LogUnprocessedTail(WorldPacket const& packet)
+void WorldSession::LogUnprocessedTail(WorldPacket const& packet) const
 {
     sLog.outError("SESSION: opcode %s (0x%.4X) have unprocessed tail data (read stop at " SIZEFMTD " from " SIZEFMTD ")",
                   packet.GetOpcodeName(),
@@ -506,7 +506,7 @@ void WorldSession::KickPlayer()
 
 /// Cancel channeling handler
 
-void WorldSession::SendAreaTriggerMessage(const char* Text, ...)
+void WorldSession::SendAreaTriggerMessage(const char* Text, ...) const
 {
     va_list ap;
     char szStr [1024];
@@ -523,7 +523,7 @@ void WorldSession::SendAreaTriggerMessage(const char* Text, ...)
     SendPacket(data);
 }
 
-void WorldSession::SendNotification(const char* format, ...)
+void WorldSession::SendNotification(const char* format, ...) const
 {
     if (format)
     {
@@ -540,7 +540,7 @@ void WorldSession::SendNotification(const char* format, ...)
     }
 }
 
-void WorldSession::SendNotification(int32 string_id, ...)
+void WorldSession::SendNotification(int32 string_id, ...) const
 {
     char const* format = GetMangosString(string_id);
     if (format)
@@ -591,7 +591,7 @@ void WorldSession::Handle_Deprecated(WorldPacket& recvPacket)
                   recvPacket.GetOpcode());
 }
 
-void WorldSession::SendAuthWaitQue(uint32 position)
+void WorldSession::SendAuthWaitQue(uint32 position) const
 {
     if (position == 0)
     {
@@ -680,7 +680,7 @@ void WorldSession::SaveTutorialsData()
 }
 
 // Send chat information about aborted transfer (mostly used by Player::SendTransferAbortedByLockstatus())
-void WorldSession::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg)
+void WorldSession::SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg) const
 {
     WorldPacket data(SMSG_TRANSFER_ABORTED, 4 + 2);
     data << uint32(mapid);
@@ -715,7 +715,7 @@ void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket &pac
         LogUnprocessedTail(packet);
 }
 
-void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit)
+void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) const
 {
     WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 8 + 4);        // visual effect on guid
     data << guid;

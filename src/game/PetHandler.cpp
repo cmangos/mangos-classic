@@ -385,7 +385,7 @@ void WorldSession::HandlePetNameQueryOpcode(WorldPacket& recv_data)
     SendPetNameQuery(petguid, petnumber);
 }
 
-void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber)
+void WorldSession::SendPetNameQuery(ObjectGuid petguid, uint32 petnumber) const
 {
     Creature* pet = _player->GetMap()->GetAnyTypeCreature(petguid);
     if (!pet || !pet->GetCharmInfo() || pet->GetCharmInfo()->GetPetNumber() != petnumber)
@@ -765,7 +765,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     }
 }
 
-void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name)
+void WorldSession::SendPetNameInvalid(uint32 error, const std::string& name) const
 {
     // [-ZERO] Need check
     WorldPacket data(SMSG_PET_NAME_INVALID, 4 + name.size() + 1 + 1);

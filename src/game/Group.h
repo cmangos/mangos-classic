@@ -231,7 +231,7 @@ class MANGOS_DLL_SPEC Group
         bool InCombatToInstance(uint32 instanceId);
         void ResetInstances(InstanceResetMethod method, Player* SendMsgTo);
 
-        void SendTargetIconList(WorldSession* session);
+        void SendTargetIconList(WorldSession* session) const;
         void SendUpdate();
         void UpdatePlayerOutOfRange(Player* pPlayer);
         void UpdatePlayerOnlineStatus(Player* player, bool online = true);
@@ -254,7 +254,7 @@ class MANGOS_DLL_SPEC Group
         ObjectGuid const& GetCurrentLooterGuid() const { return m_currentLooterGuid; }
 
         void LinkMember(GroupReference* pRef) { m_memberMgr.insertFirst(pRef); }
-        void DelinkMember(GroupReference* /*pRef*/) { }
+        void DelinkMember(GroupReference* /*pRef*/) const { }
 
         InstanceGroupBind* BindToInstance(DungeonPersistentState* save, bool permanent, bool load = false);
         void UnbindInstance(uint32 mapid, bool unload = false);
@@ -267,14 +267,14 @@ class MANGOS_DLL_SPEC Group
         bool _removeMember(ObjectGuid guid);                // returns true if leader has changed
         void _chooseLeader(bool offline = false);
         void _setLeader(ObjectGuid guid);
-        void _updateLeaderFlag(const bool remove = false);
+        void _updateLeaderFlag(bool remove = false) const;
 
         bool _setMembersGroup(ObjectGuid guid, uint8 group);
         bool _setAssistantFlag(ObjectGuid guid, const bool& state);
         bool _setMainTank(ObjectGuid guid);
         bool _setMainAssistant(ObjectGuid guid);
 
-        void _homebindIfInstance(Player* player);
+        void _homebindIfInstance(Player* player) const;
 
         void _initRaidSubGroupsCounter()
         {

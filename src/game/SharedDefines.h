@@ -97,6 +97,8 @@ static const uint8 classToIndex[MAX_CLASSES] = { 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0
 
 #define CLASSMASK_WAND_USERS ((1<<(CLASS_PRIEST-1))|(1<<(CLASS_MAGE-1))|(1<<(CLASS_WARLOCK-1)))
 
+#define CLASSMASK_RELIC_USERS ((1<<(CLASS_PALADIN-1))|(1<<(CLASS_SHAMAN-1))|(1<<(CLASS_DRUID-1)))
+
 #define PLAYER_MAX_BATTLEGROUND_QUEUES 3
 
 #define HONOR_STANDING_MIN_KILL 15
@@ -357,7 +359,7 @@ enum SpellAttributesEx3
     SPELL_ATTR_EX3_UNK0                        = 0x00000001,// 0
     SPELL_ATTR_EX3_UNK1                        = 0x00000002,// 1
     SPELL_ATTR_EX3_UNK2                        = 0x00000004,// 2
-    SPELL_ATTR_EX3_UNK3                        = 0x00000008,// 3
+    SPELL_ATTR_EX3_BLOCKABLE_SPELL             = 0x00000008,// 3 TODO: Investigate more
     SPELL_ATTR_EX3_IGNORE_RESURRECTION_TIMER   = 0x00000010,// 4 Druid Rebirth only this spell have this flag
     SPELL_ATTR_EX3_UNK5                        = 0x00000020,// 5
     SPELL_ATTR_EX3_UNK6                        = 0x00000040,// 6

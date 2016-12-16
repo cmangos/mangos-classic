@@ -176,7 +176,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     data->AddUpdateBlock(buf);
 }
 
-void Object::SendCreateUpdateToPlayer(Player* player)
+void Object::SendCreateUpdateToPlayer(Player* player) const
 {
     // send create update to player
     UpdateData upd;
@@ -308,20 +308,26 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
     bool IsPerCasterAuraState = false;
     bool sendPercent = false;
 
-    if (m_objectTypeId == TYPEID_UNIT)
+    if (isType(TYPEMASK_UNIT))
     {
-        if (!static_cast<Creature const*>(this)->IsPet() && !target->IsFriendlyTo(static_cast<Unit const*>(this)))
-            sendPercent = true;
-    }
-    else
-    {
-        if (target != this && m_objectTypeId == TYPEID_PLAYER)
+        if (!static_cast<Unit const*>(this)->IsTargetUnderControl(*target))
         {
-            if (static_cast<Player const*>(this)->GetTeam() != static_cast<Player const*>(target)->GetTeam() ||
-                !target->IsFriendlyTo(static_cast<Unit const*>(this)))
+            if (m_objectTypeId == TYPEID_UNIT)
             {
-                // not same faction or not friendly
-                sendPercent = true;
+                if (!static_cast<Creature const*>(this)->IsPet() && !target->IsFriendlyTo(static_cast<Unit const*>(this)))
+                    sendPercent = true;
+            }
+            else
+            {
+                if (target != this && m_objectTypeId == TYPEID_PLAYER)
+                {
+                    if (static_cast<Player const*>(this)->GetTeam() != static_cast<Player const*>(target)->GetTeam() ||
+                        !target->IsFriendlyTo(static_cast<Unit const*>(this)))
+                    {
+                        // not same faction or not friendly
+                        sendPercent = true;
+                    }
+                }
             }
         }
     }
@@ -837,7 +843,7 @@ bool Object::PrintEntryError(char const* descr) const
 }
 
 
-void Object::BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players)
+void Object::BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players) const
 {
     UpdateDataMapType::iterator iter = update_players.find(pl);
 
@@ -1514,14 +1520,14 @@ void WorldObject::SendMessageToSetExcept(WorldPacket& data, Player const* skippe
     }
 }
 
-void WorldObject::SendObjectDeSpawnAnim(ObjectGuid guid)
+void WorldObject::SendObjectDeSpawnAnim(ObjectGuid guid) const
 {
     WorldPacket data(SMSG_GAMEOBJECT_DESPAWN_ANIM, 8);
     data << ObjectGuid(guid);
     SendMessageToSet(data, true);
 }
 
-void WorldObject::SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId /*= 0*/)
+void WorldObject::SendGameObjectCustomAnim(ObjectGuid guid, uint32 animId /*= 0*/) const
 {
     WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM, 8 + 4);
     data << ObjectGuid(guid);

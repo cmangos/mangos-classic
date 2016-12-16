@@ -169,7 +169,7 @@ class MANGOS_DLL_SPEC GossipMenu
         void AddMenuItem(uint8 Icon, int32 itemText, uint32 dtSender, uint32 dtAction, int32 boxText, bool Coded = false);
 
         void SetMenuId(uint32 menu_id) { m_gMenuId = menu_id; }
-        uint32 GetMenuId() { return m_gMenuId; }
+        uint32 GetMenuId() const { return m_gMenuId; }
 
         void AddGossipMenuItemData(int32 action_menu, uint32 action_poi, uint32 action_script);
 
@@ -264,23 +264,23 @@ class MANGOS_DLL_SPEC PlayerMenu
         bool GossipOptionCoded(unsigned int Selection);
 
         void SendGossipMenu(uint32 titleTextId, ObjectGuid objectGuid);
-        void CloseGossip();
-        void SendPointOfInterest(float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const char* locName);
-        void SendPointOfInterest(uint32 poi_id);
-        void SendTalking(uint32 textID);
-        void SendTalking(char const* title, char const* text);
+        void CloseGossip() const;
+        void SendPointOfInterest(float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const char* locName) const;
+        void SendPointOfInterest(uint32 poi_id) const;
+        void SendTalking(uint32 textID) const;
+        void SendTalking(char const* title, char const* text) const;
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
         /*********************************************************/
-        void SendQuestGiverStatus(uint8 questStatus, ObjectGuid npcGUID);
+        void SendQuestGiverStatus(uint8 questStatus, ObjectGuid npcGUID) const;
 
         void SendQuestGiverQuestList(QEmote eEmote, const std::string& Title, ObjectGuid npcGUID);
 
-        void SendQuestQueryResponse(Quest const* pQuest);
-        void SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid npcGUID, bool ActivateAccept);
+        void SendQuestQueryResponse(Quest const* pQuest) const;
+        void SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid npcGUID, bool ActivateAccept) const;
 
-        void SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGUID, bool EnbleNext);
-        void SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcGUID, bool Completable, bool CloseOnCancel);
+        void SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGUID, bool EnbleNext) const;
+        void SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcGUID, bool Completable, bool CloseOnCancel) const;
 };
 #endif

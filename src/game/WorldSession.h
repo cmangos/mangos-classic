@@ -133,15 +133,15 @@ class MANGOS_DLL_SPEC WorldSession
 
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
-        void SendPacket(WorldPacket const& packet);
-        void SendNotification(const char* format, ...) ATTR_PRINTF(2, 3);
-        void SendNotification(int32 string_id, ...);
-        void SendPetNameInvalid(uint32 error, const std::string& name);
-        void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res);
+        void SendPacket(WorldPacket const& packet) const;
+        void SendNotification(const char* format, ...) const ATTR_PRINTF(2, 3);
+        void SendNotification(int32 string_id, ...) const;
+        void SendPetNameInvalid(uint32 error, const std::string& name) const;
+        void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res) const;
         void SendGuildInvite(Player* player, bool alreadyInGuild = false);
-        void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2, 3);
-        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
-        void SendQueryTimeResponse();
+        void SendAreaTriggerMessage(const char* Text, ...) const ATTR_PRINTF(2, 3);
+        void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0) const;
+        void SendQueryTimeResponse() const;
 
         AccountTypes GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
@@ -177,39 +177,39 @@ class MANGOS_DLL_SPEC WorldSession
         bool Update(PacketFilter& updater);
 
         /// Handle the authentication waiting queue (to be completed)
-        void SendAuthWaitQue(uint32 position);
+        void SendAuthWaitQue(uint32 position) const;
 
-        void SendNameQueryOpcode(Player* p);
-        void SendNameQueryOpcodeFromDB(ObjectGuid guid);
+        void SendNameQueryOpcode(Player* p) const;
+        void SendNameQueryOpcodeFromDB(ObjectGuid guid) const;
         static void SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32 accountId);
 
-        void SendTrainerList(ObjectGuid guid);
-        void SendTrainerList(ObjectGuid guid, const std::string& strTitle);
+        void SendTrainerList(ObjectGuid guid) const;
+        void SendTrainerList(ObjectGuid guid, const std::string& strTitle) const;
 
-        void SendListInventory(ObjectGuid guid);
-        bool CheckBanker(ObjectGuid guid);
-        void SendShowBank(ObjectGuid guid);
-        bool CheckMailBox(ObjectGuid guid);
-        void SendTabardVendorActivate(ObjectGuid guid);
-        void SendSpiritResurrect();
-        void SendBindPoint(Creature* npc);
-        void SendGMTicketGetTicket(uint32 status, GMTicket* ticket = nullptr);
+        void SendListInventory(ObjectGuid guid) const;
+        bool CheckBanker(ObjectGuid guid) const;
+        void SendShowBank(ObjectGuid guid) const;
+        bool CheckMailBox(ObjectGuid guid) const;
+        void SendTabardVendorActivate(ObjectGuid guid) const;
+        void SendSpiritResurrect() const;
+        void SendBindPoint(Creature* npc) const;
+        void SendGMTicketGetTicket(uint32 status, GMTicket* ticket = nullptr) const;
 
-        void SendAttackStop(Unit const* enemy);
+        void SendAttackStop(Unit const* enemy) const;
 
-        void SendBattlegGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId);
+        void SendBattlegGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId) const;
 
-        void SendTradeStatus(const TradeStatusInfo& status);
-        void SendUpdateTrade(bool trader_state = true);
-        void SendCancelTrade();
+        void SendTradeStatus(const TradeStatusInfo& status) const;
+        void SendUpdateTrade(bool trader_state = true) const;
+        void SendCancelTrade() const;
 
-        void SendPetitionQueryOpcode(ObjectGuid petitionguid);
+        void SendPetitionQueryOpcode(ObjectGuid petitionguid) const;
 
         // pet
-        void SendPetNameQuery(ObjectGuid guid, uint32 petnumber);
-        void SendStablePet(ObjectGuid guid);
-        void SendStableResult(uint8 res);
-        bool CheckStableMaster(ObjectGuid guid);
+        void SendPetNameQuery(ObjectGuid guid, uint32 petnumber) const;
+        void SendStablePet(ObjectGuid guid) const;
+        void SendStableResult(uint8 res) const;
+        bool CheckStableMaster(ObjectGuid guid) const;
 
         void LoadTutorialsData();
         void SendTutorialsData();
@@ -230,33 +230,33 @@ class MANGOS_DLL_SPEC WorldSession
         }
 
         // auction
-        void SendAuctionHello(Unit* unit);
-        void SendAuctionCommandResult(AuctionEntry* auc, AuctionAction Action, AuctionError ErrorCode, InventoryResult invError = EQUIP_ERR_OK);
-        void SendAuctionBidderNotification(AuctionEntry* auction, bool won);
-        void SendAuctionOwnerNotification(AuctionEntry* auction, bool sold);
-        void SendAuctionRemovedNotification(AuctionEntry* auction);
+        void SendAuctionHello(Unit* unit) const;
+        void SendAuctionCommandResult(AuctionEntry* auc, AuctionAction Action, AuctionError ErrorCode, InventoryResult invError = EQUIP_ERR_OK) const;
+        void SendAuctionBidderNotification(AuctionEntry* auction, bool won) const;
+        void SendAuctionOwnerNotification(AuctionEntry* auction, bool sold) const;
+        void SendAuctionRemovedNotification(AuctionEntry* auction) const;
         static void SendAuctionOutbiddedMail(AuctionEntry* auction);
-        void SendAuctionCancelledToBidderMail(AuctionEntry* auction);
-        AuctionHouseEntry const* GetCheckedAuctionHouseForAuctioneer(ObjectGuid guid);
+        void SendAuctionCancelledToBidderMail(AuctionEntry* auction) const;
+        AuctionHouseEntry const* GetCheckedAuctionHouseForAuctioneer(ObjectGuid guid) const;
 
         // Item Enchantment
-        void SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 spellId);
-        void SendItemEnchantTimeUpdate(ObjectGuid playerGuid, ObjectGuid itemGuid, uint32 slot, uint32 duration);
+        void SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 spellId) const;
+        void SendItemEnchantTimeUpdate(ObjectGuid playerGuid, ObjectGuid itemGuid, uint32 slot, uint32 duration) const;
 
         // Taxi
-        void SendTaxiStatus(ObjectGuid guid);
-        void SendTaxiMenu(Creature* unit);
-        void SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode = 0);
-        bool SendLearnNewTaxiNode(Creature* unit);
-        void SendActivateTaxiReply(ActivateTaxiReply reply);
+        void SendTaxiStatus(ObjectGuid guid) const;
+        void SendTaxiMenu(Creature* unit) const;
+        void SendDoFlight(uint32 mountDisplayId, uint32 path, uint32 pathNode = 0) const;
+        bool SendLearnNewTaxiNode(Creature* unit) const;
+        void SendActivateTaxiReply(ActivateTaxiReply reply) const;
 
         // Guild Team
-        void SendGuildCommandResult(uint32 typecmd, const std::string& str, uint32 cmdresult);
-        void SendPetitionShowList(ObjectGuid guid);
-        void SendSaveGuildEmblem(uint32 msg);
-        void SendBattleGroundJoinError(uint8 err);
+        void SendGuildCommandResult(uint32 typecmd, const std::string& str, uint32 cmdresult) const;
+        void SendPetitionShowList(ObjectGuid guid) const;
+        void SendSaveGuildEmblem(uint32 msg) const;
+        void SendBattleGroundJoinError(uint8 err) const;
 
-        void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
+    static void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
 
         // Account mute time
         time_t m_muteTime;
@@ -269,11 +269,11 @@ class MANGOS_DLL_SPEC WorldSession
         uint32 GetLatency() const { return m_latency; }
         void SetLatency(uint32 latency) { m_latency = latency; }
         void ResetClientTimeDelay() { m_clientTimeDelay = 0; }
-        uint32 getDialogStatus(Player* pPlayer, Object* questgiver, uint32 defstatus);
+        uint32 getDialogStatus(const Player* pPlayer, const Object* questgiver, uint32 defstatus) const;
 
         // Misc
-        void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed);
-        void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit);
+        void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed) const;
+        void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) const;
 
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
@@ -548,16 +548,16 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleQuestLogRemoveQuest(WorldPacket& recv_data);
         void HandleQuestConfirmAccept(WorldPacket& recv_data);
         void HandleQuestgiverCompleteQuest(WorldPacket& recv_data);
-        bool CanInteractWithQuestGiver(ObjectGuid guid, char const* descr);
+        bool CanInteractWithQuestGiver(ObjectGuid guid, char const* descr) const;
 
         void HandleQuestgiverQuestAutoLaunch(WorldPacket& recvPacket);
         void HandlePushQuestToParty(WorldPacket& recvPacket);
         void HandleQuestPushResult(WorldPacket& recvPacket);
 
         bool processChatmessageFurtherAfterSecurityChecks(std::string&, uint32);
-        void SendPlayerNotFoundNotice(const std::string& name);
-        void SendWrongFactionNotice();
-        void SendChatRestrictedNotice();
+        void SendPlayerNotFoundNotice(const std::string& name) const;
+        void SendWrongFactionNotice() const;
+        void SendChatRestrictedNotice() const;
         void HandleMessagechatOpcode(WorldPacket& recvPacket);
         void HandleTextEmoteOpcode(WorldPacket& recvPacket);
         void HandleChatIgnoredOpcode(WorldPacket& recvPacket);
@@ -654,12 +654,12 @@ class MANGOS_DLL_SPEC WorldSession
         void ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket& packet);
 
         // logging helper
-        void LogUnexpectedOpcode(WorldPacket const& packet, const char* reason);
-        void LogUnprocessedTail(WorldPacket const& packet);
+        void LogUnexpectedOpcode(WorldPacket const& packet, const char* reason) const;
+        void LogUnprocessedTail(WorldPacket const& packet) const;
 
         std::mutex m_logoutMutex;                           // this mutex is necessary to avoid two simultaneous logouts due to a valid logout request and socket error
         Player * _player;
-        WorldSocket * const m_Socket;                       // socket pointer is owned by the network thread which created 
+        std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it
 
         AccountTypes _security;
         uint32 _accountId;

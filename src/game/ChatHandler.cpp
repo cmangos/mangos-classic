@@ -675,20 +675,20 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data)
     player->GetSession()->SendPacket(data);
 }
 
-void WorldSession::SendPlayerNotFoundNotice(const std::string& name)
+void WorldSession::SendPlayerNotFoundNotice(const std::string& name) const
 {
     WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, name.size() + 1);
     data << name;
     SendPacket(data);
 }
 
-void WorldSession::SendWrongFactionNotice()
+void WorldSession::SendWrongFactionNotice() const
 {
     WorldPacket data(SMSG_CHAT_WRONG_FACTION, 0);
     SendPacket(data);
 }
 
-void WorldSession::SendChatRestrictedNotice()
+void WorldSession::SendChatRestrictedNotice() const
 {
     WorldPacket data(SMSG_CHAT_RESTRICTED, 0);
     SendPacket(data);

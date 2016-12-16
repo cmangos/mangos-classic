@@ -206,7 +206,7 @@ class DungeonPersistentState : public MapPersistentState
         /* Saved when the instance is generated for the first time */
         void SaveToDB();
         /* When the instance is being reset (permanently deleted) */
-        void DeleteFromDB();
+        void DeleteFromDB() const;
         /* Delete respawn data at dungeon reset */
         void DeleteRespawnTimes();
         /* Remove players bind to this state */
@@ -342,7 +342,7 @@ class MapPersistentStateManager : public MaNGOS::Singleton<MapPersistentStateMan
 
     public:                                                 // DungeonPersistentState specific
         void CleanupInstances();
-        void PackInstances();
+        void PackInstances() const;
 
         DungeonResetScheduler& GetScheduler() { return m_Scheduler; }
 
@@ -360,7 +360,7 @@ class MapPersistentStateManager : public MaNGOS::Singleton<MapPersistentStateMan
         void _CleanupExpiredInstancesAtTime(time_t t);
 
         void _ResetSave(PersistentStateMap& holder, PersistentStateMap::iterator& itr);
-        void _DelHelper(DatabaseType& db, const char* fields, const char* table, const char* queryTail, ...);
+        void _DelHelper(DatabaseType& db, const char* fields, const char* table, const char* queryTail, ...) const;
 
         // used during global instance resets
         bool lock_instLists;

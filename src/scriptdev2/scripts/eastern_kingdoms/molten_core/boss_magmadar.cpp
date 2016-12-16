@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Magmadar
-SD%Complete: 75
-SDComment: Lavabomb needs still core support
+SD%Complete: 100
+SDComment: Complete
 SDCategory: Molten Core
 EndScriptData */
 
@@ -28,11 +28,12 @@ enum
 {
     EMOTE_GENERIC_FRENZY_KILL   = -1000001,
 
+    // SPELL_LAVA_BREATH           = 19272,                    // Triggered by SPELL_FRENZY (19451)
     SPELL_FRENZY                = 19451,
     SPELL_MAGMASPIT             = 19449,                    // This is actually a buff he gives himself
     SPELL_PANIC                 = 19408,
-    SPELL_LAVABOMB              = 19411,                    // This calls a dummy server side effect that isn't implemented yet
-    SPELL_LAVABOMB_ALT          = 19428
+    SPELL_LAVABOMB              = 19411,                    // This calls a dummy server side effect that cast spell 20494 to spawn GO 177704
+    // SPELL_CONFLAGRATION         = 19428                     // Trap spell for GO 177704
 };
 
 struct boss_magmadarAI : public ScriptedAI
@@ -87,7 +88,7 @@ struct boss_magmadarAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
             {
                 DoScriptText(EMOTE_GENERIC_FRENZY_KILL, m_creature);
-                m_uiFrenzyTimer = 15000;
+                m_uiFrenzyTimer = urand(15000, 20000);
             }
         }
         else
@@ -97,7 +98,7 @@ struct boss_magmadarAI : public ScriptedAI
         if (m_uiPanicTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_PANIC) == CAST_OK)
-                m_uiPanicTimer = 30000;
+                m_uiPanicTimer = urand(30000, 40000);
         }
         else
             m_uiPanicTimer -= uiDiff;
@@ -108,7 +109,7 @@ struct boss_magmadarAI : public ScriptedAI
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_LAVABOMB) == CAST_OK)
-                    m_uiLavabombTimer = 12000;
+                    m_uiLavabombTimer = urand(12000, 15000);
             }
         }
         else

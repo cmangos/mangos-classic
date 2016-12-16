@@ -574,7 +574,7 @@ void CreatureLinkingHolder::ProcessSlave(CreatureLinkingEvent eventType, Creatur
 }
 
 // Helper function to set following
-void CreatureLinkingHolder::SetFollowing(Creature* pWho, Creature* pWhom)
+void CreatureLinkingHolder::SetFollowing(Creature* pWho, Creature* pWhom) const
 {
     // Do some calculations
     float sX, sY, sZ, mX, mY, mZ, mO;

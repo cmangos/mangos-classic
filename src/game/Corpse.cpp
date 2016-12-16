@@ -136,7 +136,7 @@ void Corpse::DeleteBonesFromWorld()
     AddObjectToRemoveList();
 }
 
-void Corpse::DeleteFromDB()
+void Corpse::DeleteFromDB() const
 {
     // bones should not be saved to DB (would be deleted on startup anyway)
     MANGOS_ASSERT(GetType() != CORPSE_BONES);

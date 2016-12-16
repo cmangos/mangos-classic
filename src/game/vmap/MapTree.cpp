@@ -42,7 +42,7 @@ namespace VMAP
                     hit = true;
                 return result;
             }
-            bool didHit() { return hit; }
+            bool didHit() const { return hit; }
         protected:
             ModelInstance* prims;
             bool hit;

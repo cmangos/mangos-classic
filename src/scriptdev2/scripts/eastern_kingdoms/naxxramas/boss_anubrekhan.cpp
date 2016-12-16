@@ -127,7 +127,7 @@ struct boss_anubrekhanAI : public ScriptedAI
 
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
-    
+
     void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (!m_bHasDoneIntro && eventType == AI_EVENT_START_EVENT)
@@ -221,20 +221,20 @@ CreatureAI* GetAI_boss_anubrekhan(Creature* pCreature)
 
 bool GOUse_go_anub_door(Player* pPlayer, GameObject* pGo)
 {
-	if (ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData())
-	{
-		if (pInstance->GetData(TYPE_ANUB_REKHAN) == IN_PROGRESS || pInstance->GetData(TYPE_ANUB_REKHAN) == DONE) // GOs always open once used (or handled by script), so this check is only there for safety
-			return false;
-		else
-		{
-			if (Creature* pAnub = pInstance->GetSingleCreatureFromStorage(NPC_ANUB_REKHAN))
-			{
-				if (boss_anubrekhanAI* pAnubAI = dynamic_cast<boss_anubrekhanAI*>(pAnub->AI()))
-						pAnubAI->SendAIEvent(AI_EVENT_START_EVENT, pAnub, pAnub);
-			}
-		}
-	}
-	return false;
+    if (ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData())
+    {
+        if (pInstance->GetData(TYPE_ANUB_REKHAN) == IN_PROGRESS || pInstance->GetData(TYPE_ANUB_REKHAN) == DONE) // GOs always open once used (or handled by script), so this check is only there for safety
+            return false;
+        else
+        {
+            if (Creature* pAnub = pInstance->GetSingleCreatureFromStorage(NPC_ANUB_REKHAN))
+            {
+                if (boss_anubrekhanAI* pAnubAI = dynamic_cast<boss_anubrekhanAI*>(pAnub->AI()))
+                        pAnubAI->SendAIEvent(AI_EVENT_START_EVENT, pAnub, pAnub);
+            }
+        }
+    }
+    return false;
 }
 
 void AddSC_boss_anubrekhan()
@@ -246,8 +246,8 @@ void AddSC_boss_anubrekhan()
     pNewScript->GetAI = &GetAI_boss_anubrekhan;
     pNewScript->RegisterSelf();
 
-	pNewScript = new Script;
-	pNewScript->Name = "go_anub_door";
-	pNewScript->pGOUse = &GOUse_go_anub_door;
-	pNewScript->RegisterSelf();
+    pNewScript = new Script;
+    pNewScript->Name = "go_anub_door";
+    pNewScript->pGOUse = &GOUse_go_anub_door;
+    pNewScript->RegisterSelf();
 }

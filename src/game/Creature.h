@@ -656,9 +656,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void CallAssistance();
         void SetNoCallAssistance(bool val) { m_AlreadyCallAssistance = val; }
         void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }
-        bool HasSearchedAssistance() { return m_AlreadySearchedAssistance; }
+        bool HasSearchedAssistance() const { return m_AlreadySearchedAssistance; }
         bool CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction = true) const;
-        bool CanInitiateAttack();
+        bool CanInitiateAttack() const;
 
         MovementGeneratorType GetDefaultMovementType() const { return m_defaultMovementType; }
         void SetDefaultMovementType(MovementGeneratorType mgt) { m_defaultMovementType = mgt; }
@@ -690,7 +690,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         static void AddToRemoveListInMaps(uint32 db_guid, CreatureData const* data);
         static void SpawnInMaps(uint32 db_guid, CreatureData const* data);
 
-        void SendZoneUnderAttackMessage(Player* attacker);
+        void SendZoneUnderAttackMessage(Player* attacker) const;
 
         void SetInCombatWithZone();
 
@@ -713,7 +713,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         }
 
         void SetCombatStartPosition(float x, float y, float z) { m_combatStartX = x; m_combatStartY = y; m_combatStartZ = z; }
-        void GetCombatStartPosition(float& x, float& y, float& z) { x = m_combatStartX; y = m_combatStartY; z = m_combatStartZ; }
+        void GetCombatStartPosition(float& x, float& y, float& z) const { x = m_combatStartX; y = m_combatStartY; z = m_combatStartZ; }
 
         void SetRespawnCoord(CreatureCreatePos const& pos) { m_respawnPos = pos.m_pos; }
         void SetRespawnCoord(float x, float y, float z, float ori) { m_respawnPos.x = x; m_respawnPos.y = y; m_respawnPos.z = z; m_respawnPos.o = ori; }
@@ -724,7 +724,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         void SetFactionTemporary(uint32 factionId, uint32 tempFactionFlags = TEMPFACTION_ALL);
         void ClearTemporaryFaction();
-        uint32 GetTemporaryFactionFlags() { return m_temporaryFactionFlags; }
+        uint32 GetTemporaryFactionFlags() const { return m_temporaryFactionFlags; }
 
         void SendAreaSpiritHealerQueryOpcode(Player* pl);
 

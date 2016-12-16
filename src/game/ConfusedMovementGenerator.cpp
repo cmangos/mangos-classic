@@ -103,14 +103,14 @@ bool ConfusedMovementGenerator<T>::Update(T& unit, const uint32& diff)
 }
 
 template<>
-void ConfusedMovementGenerator<Player>::Finalize(Player& unit)
+void ConfusedMovementGenerator<Player>::Finalize(Player& unit) const
 {
     unit.clearUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
     unit.StopMoving(true);
 }
 
 template<>
-void ConfusedMovementGenerator<Creature>::Finalize(Creature& unit)
+void ConfusedMovementGenerator<Creature>::Finalize(Creature& unit) const
 {
     unit.clearUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_CONFUSED_MOVE);
 }

@@ -499,13 +499,13 @@ class ScriptAction
         ScriptInfo const* m_script;                         // pointer to static script data
 
         // Helper functions
-        bool GetScriptCommandObject(const ObjectGuid guid, bool includeItem, Object*& resultObject);
-        bool GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject* pOrigTarget, WorldObject*& pFinalSource, WorldObject*& pFinalTarget);
-        bool LogIfNotCreature(WorldObject* pWorldObject);
-        bool LogIfNotUnit(WorldObject* pWorldObject);
-        bool LogIfNotGameObject(WorldObject* pWorldObject);
-        bool LogIfNotPlayer(WorldObject* pWorldObject);
-        Player* GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldObject* pTarget);
+        bool GetScriptCommandObject(const ObjectGuid guid, bool includeItem, Object*& resultObject) const;
+        bool GetScriptProcessTargets(WorldObject* pOrigSource, WorldObject* pOrigTarget, WorldObject*& pFinalSource, WorldObject*& pFinalTarget) const;
+        bool LogIfNotCreature(WorldObject* pWorldObject) const;
+        bool LogIfNotUnit(WorldObject* pWorldObject) const;
+        bool LogIfNotGameObject(WorldObject* pWorldObject) const;
+        bool LogIfNotPlayer(WorldObject* pWorldObject) const;
+        Player* GetPlayerTargetOrSourceAndLog(WorldObject* pSource, WorldObject* pTarget) const;
 };
 
 typedef std::multimap < uint32 /*delay*/, ScriptInfo > ScriptMap;
@@ -581,8 +581,8 @@ class ScriptMgr
         bool OnQuestAccept(Player* pPlayer, Item* pItem, Quest const* pQuest);
         bool OnQuestRewarded(Player* pPlayer, Creature* pCreature, Quest const* pQuest);
         bool OnQuestRewarded(Player* pPlayer, GameObject* pGameObject, Quest const* pQuest);
-        uint32 GetDialogStatus(Player* pPlayer, Creature* pCreature);
-        uint32 GetDialogStatus(Player* pPlayer, GameObject* pGameObject);
+        uint32 GetDialogStatus(const Player* pPlayer, const Creature* pCreature) const;
+        uint32 GetDialogStatus(const Player* pPlayer, const GameObject* pGameObject) const;
         bool OnGameObjectUse(Player* pPlayer, GameObject* pGameObject);
         bool OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets);
         bool OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry);
@@ -596,7 +596,7 @@ class ScriptMgr
     private:
         void CollectPossibleEventIds(std::set<uint32>& eventIds);
         void LoadScripts(ScriptMapMapName& scripts, const char* tablename);
-        void CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32>& ids);
+        static void CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32>& ids);
 
         template<class T>
         void GetScriptHookPtr(T& ptr, const char* name)
@@ -634,8 +634,8 @@ class ScriptMgr
         bool (MANGOS_IMPORT* m_pOnItemQuestAccept)(Player*, Item*, Quest const*);
         bool (MANGOS_IMPORT* m_pOnQuestRewarded)(Player*, Creature*, Quest const*);
         bool (MANGOS_IMPORT* m_pOnGOQuestRewarded)(Player*, GameObject*, Quest const*);
-        uint32(MANGOS_IMPORT* m_pGetNPCDialogStatus)(Player*, Creature*);
-        uint32(MANGOS_IMPORT* m_pGetGODialogStatus)(Player*, GameObject*);
+        uint32(MANGOS_IMPORT* m_pGetNPCDialogStatus)(const Player*, const Creature*);
+        uint32(MANGOS_IMPORT* m_pGetGODialogStatus)(const Player*, const GameObject*);
         bool (MANGOS_IMPORT* m_pOnGOUse)(Player*, GameObject*);
         bool (MANGOS_IMPORT* m_pOnItemUse)(Player*, Item*, SpellCastTargets const&);
         bool (MANGOS_IMPORT* m_pOnAreaTrigger)(Player*, AreaTriggerEntry const*);

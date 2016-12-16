@@ -2080,7 +2080,15 @@ void Spell::EffectSummonChangeItem(SpellEffectIndex eff_idx)
     // prevent crash at access and unexpected charges counting with item update queue corrupt
     ClearCastItem();
 
-    player->ConvertItem(oldItem, newitemid);
+    uint32 curItemCount = player->GetItemCount(newitemid, true);
+
+    if (Item* newItem = player->ConvertItem(oldItem, newitemid))
+    {
+        player->ItemAddedQuestCheck(newItem->GetEntry(), newItem->GetCount());
+
+        // Push packet to client so it knows we've created an item and quest can show objective update
+        player->SendNewItem(newItem, newItem->GetCount() - curItemCount, true, false);
+    }
 }
 
 void Spell::EffectProficiency(SpellEffectIndex /*eff_idx*/)
@@ -4407,14 +4415,14 @@ void Spell::EffectAddExtraAttacks(SpellEffectIndex /*eff_idx*/)
 
 void Spell::EffectParry(SpellEffectIndex /*eff_idx*/)
 {
-    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)unitTarget)->SetCanParry(true);
+    if (unitTarget)
+        unitTarget->SetCanParry(true);
 }
 
 void Spell::EffectBlock(SpellEffectIndex /*eff_idx*/)
 {
-    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)unitTarget)->SetCanBlock(true);
+    if (unitTarget)
+        unitTarget->SetCanBlock(true);
 }
 
 void Spell::EffectLeapForward(SpellEffectIndex eff_idx)

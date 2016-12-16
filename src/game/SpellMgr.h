@@ -226,7 +226,7 @@ inline bool IsSpellEffectAbleToCrit(const SpellEntry* entry, SpellEffectIndex in
         case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
             return true;
         case SPELL_EFFECT_ENERGIZE: // Mana Potion and similar spells, Lay on hands
-            return (entry->SpellFamilyName && entry->DmgClass);
+            return (entry->EffectMiscValue[index] == POWER_MANA && entry->SpellFamilyName && entry->DmgClass);
     }
     return false;
 }
@@ -1906,7 +1906,7 @@ class SpellMgr
                 return nullptr;
         }
 
-        SpellCastResult GetSpellAllowedInLocationError(SpellEntry const* spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player = nullptr);
+        SpellCastResult GetSpellAllowedInLocationError(SpellEntry const* spellInfo, uint32 map_id, uint32 zone_id, uint32 area_id, Player const* player = nullptr) const;
 
         SpellAreaMapBounds GetSpellAreaMapBounds(uint32 spell_id) const
         {
@@ -1927,7 +1927,7 @@ class SpellMgr
     public:
         static SpellMgr& Instance();
 
-        void CheckUsedSpells(char const* table);
+        void CheckUsedSpells(char const* table) const;
 
         // Loading data at server startup
         void LoadSpellChains();
