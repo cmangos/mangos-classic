@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Azuregos
-SD%Complete: 90
-SDComment: Spell reflect not effecting dots (Core problem). Enrage is disabled because it is very doubtful that Azuregos had one in Classic
+SD%Complete: 99
+SDComment: Enrage is disabled because it is very doubtful that Azuregos had one in Classic
 SDCategory: Azshara
 EndScriptData */
 

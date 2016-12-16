@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Kazzak
-SD%Complete: 80
-SDComment: Spells and timers need to be confirmed.
+SD%Complete: 90
+SDComment: Some timers need to be confirmed.
 SDCategory: Bosses
 EndScriptData */
 
@@ -123,7 +123,7 @@ struct boss_kazzakAI : public ScriptedAI
             if (m_uiShadowVolleyTimer < uiDiff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_VOLLEY) == CAST_OK)
-                    m_uiShadowVolleyTimer = urand(4000, 20000);
+                    m_uiShadowVolleyTimer = urand(5000, 30000);
             }
             else
                 m_uiShadowVolleyTimer -= uiDiff;
