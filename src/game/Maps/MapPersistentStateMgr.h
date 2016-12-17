@@ -38,6 +38,8 @@ class Player;
 class Group;
 class Map;
 
+#define NORMAL_INSTANCE_RESET_TIME 30 * MINUTE
+
 typedef std::set<uint32> CellGuidSet;
 
 struct MapCellObjectGuids
@@ -188,7 +190,7 @@ class DungeonPersistentState : public MapPersistentState
         void AddGroup(Group* group) { m_groupList.push_back(group); }
         bool RemoveGroup(Group* group) { m_groupList.remove(group); return UnloadIfEmpty(); }
 
-        /* for normal instances this corresponds to max(creature respawn time) + X hours
+        /* for normal instances this corresponds to max(creature respawn time) + 30 minutes
            for raid instances this caches the global respawn time for the map */
         time_t GetResetTime() const { return m_resetTime; }
         void SetResetTime(time_t resetTime) { m_resetTime = resetTime; }

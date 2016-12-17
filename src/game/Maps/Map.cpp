@@ -1514,7 +1514,18 @@ void DungeonMap::SetResetSchedule(bool on)
     // the reset time is only scheduled when there are no payers inside
     // it is assumed that the reset time will rarely (if ever) change while the reset is scheduled
     if (!HavePlayers() && !IsRaid())
-        sMapPersistentStateMgr.GetScheduler().ScheduleReset(on, GetPersistanceState()->GetResetTime(), DungeonResetEvent(RESET_EVENT_NORMAL_DUNGEON, GetId(), GetInstanceId()));
+    {
+        time_t resetTime;
+        if (on)
+        {
+            resetTime = (uint64)(time(nullptr) + NORMAL_INSTANCE_RESET_TIME);
+            GetPersistanceState()->SetResetTime(resetTime);
+        }
+        else
+            resetTime = GetPersistanceState()->GetResetTime();
+
+        sMapPersistentStateMgr.GetScheduler().ScheduleReset(on, resetTime, DungeonResetEvent(RESET_EVENT_NORMAL_DUNGEON, GetId(), GetInstanceId()));
+    }
 }
 
 uint32 DungeonMap::GetMaxPlayers() const
