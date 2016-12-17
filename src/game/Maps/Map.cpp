@@ -541,6 +541,31 @@ bool Map::loaded(const GridPair& p) const
     return (getNGrid(p.x_coord, p.y_coord) && isGridObjectDataLoaded(p.x_coord, p.y_coord));
 }
 
+void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<MaNGOS::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<MaNGOS::ObjectUpdater, WorldTypeMapContainer> &worldVisitor)
+{
+    // lets update mobs/objects in ALL visible cells around player!
+    CellArea area = Cell::CalculateCellArea(obj->GetPositionX(), obj->GetPositionY(), GetVisibilityDistance());
+
+    for (uint32 x = area.low_bound.x_coord; x <= area.high_bound.x_coord; ++x)
+    {
+        for (uint32 y = area.low_bound.y_coord; y <= area.high_bound.y_coord; ++y)
+        {
+            // marked cells are those that have been visited
+            // don't visit the same cell twice
+            uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
+            if (!isCellMarked(cell_id))
+            {
+                markCell(cell_id);
+                CellPair pair(x, y);
+                Cell cell(pair);
+                cell.SetNoCreate();
+                Visit(cell, gridVisitor);
+                Visit(cell, worldVisitor);
+            }
+        }
+    }
+}
+
 void Map::Update(const uint32& t_diff)
 {
     m_dyn_tree.update(t_diff);
@@ -593,26 +618,16 @@ void Map::Update(const uint32& t_diff)
         if (!plr->IsInWorld() || !plr->IsPositionValid())
             continue;
 
-        // lets update mobs/objects in ALL visible cells around player!
-        CellArea area = Cell::CalculateCellArea(plr->GetPositionX(), plr->GetPositionY(), GetVisibilityDistance());
 
-        for (uint32 x = area.low_bound.x_coord; x <= area.high_bound.x_coord; ++x)
+        VisitNearbyCellsOf(plr, grid_object_update, world_object_update);
+
+        // If player is using far sight, visit that object too
+        if (WorldObject* viewPoint = GetWorldObject(plr->GetFarSightGuid()))
         {
-            for (uint32 y = area.low_bound.y_coord; y <= area.high_bound.y_coord; ++y)
-            {
-                // marked cells are those that have been visited
-                // don't visit the same cell twice
-                uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
-                if (!isCellMarked(cell_id))
-                {
-                    markCell(cell_id);
-                    CellPair pair(x, y);
-                    Cell cell(pair);
-                    cell.SetNoCreate();
-                    Visit(cell, grid_object_update);
-                    Visit(cell, world_object_update);
-                }
-            }
+            if (viewPoint->isType(TYPEMASK_UNIT))
+                VisitNearbyCellsOf(reinterpret_cast<Creature*>(viewPoint), grid_object_update, world_object_update);
+            else if (viewPoint->isType(TYPEMASK_DYNAMICOBJECT))
+                VisitNearbyCellsOf(reinterpret_cast<DynamicObject*>(viewPoint), grid_object_update, world_object_update);
         }
     }
 

@@ -31,6 +31,8 @@
 #include "Globals/ObjectMgr.h"
 #include "Entities/ObjectGuid.h"
 #include "Spells/SpellMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
+#include "Cinematics/M2Stores.h"
 
 bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
 {
@@ -226,6 +228,23 @@ bool ChatHandler::HandleDebugPlayCinematicCommand(char* args)
         PSendSysMessage(LANG_CINEMATIC_NOT_EXIST, dwId);
         SetSentErrorMessage(true);
         return false;
+    }
+
+    // Dump camera locations
+    if (CinematicSequencesEntry const* cineSeq = sCinematicSequencesStore.LookupEntry(dwId))
+    {
+        std::unordered_map<uint32, FlyByCameraCollection>::const_iterator itr = sFlyByCameraStore.find(cineSeq->cinematicCamera);
+        if (itr != sFlyByCameraStore.end())
+        {
+            PSendSysMessage("Waypoints for sequence %u, camera %u", dwId, cineSeq->cinematicCamera);
+            uint32 count = 1;
+            for (FlyByCamera cam : itr->second)
+            {
+                PSendSysMessage("%02u - %7ums [%f, %f, %f] Facing %f (%f degrees)", count, cam.timeStamp, cam.locations.x, cam.locations.y, cam.locations.z, cam.locations.w, cam.locations.w * (180 / M_PI));
+                count++;
+            }
+            PSendSysMessage("%u waypoints dumped", itr->second.size());
+        }
     }
 
     m_session->GetPlayer()->SendCinematicStart(dwId);

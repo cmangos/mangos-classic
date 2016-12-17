@@ -167,22 +167,20 @@ struct ChrRacesEntry
     // 28       m_hairCustomization
 };
 
-/*struct CinematicCameraEntry
+struct CinematicCameraEntry
 {
-    uint32      id;                                         // 0        m_ID
-    char*       filename;                                   // 1        m_model
-    uint32      soundid;                                    // 2        m_soundID
-    float       start_x;                                    // 3        m_originX
-    float       start_y;                                    // 4        m_originY
-    float       start_z;                                    // 5        m_originZ
-    float       unk6;                                       // 6        m_originFacing
-};*/
+    uint32 ID;                                               // 0
+    char const* Model;                                       // 1    Model filename (translate .mdx to .m2)
+    uint32 SoundID;                                          // 2    Sound ID       (voiceover for cinematic)
+    DBCPosition3D Origin;                                    // 3-5  Position in map used for basis for M2 co-ordinates
+    float OriginFacing;                                      // 4    Orientation in map used for basis for M2 co-ordinates
+};
 
 struct CinematicSequencesEntry
 {
     uint32      Id;                                         // 0        m_ID
     // uint32      unk1;                                    // 1        m_soundID
-    // uint32      cinematicCamera;                         // 2        m_camera[8]
+    uint32      cinematicCamera;                            // 2        m_camera[8]
 };
 
 struct CreatureDisplayInfoEntry
