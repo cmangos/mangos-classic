@@ -355,7 +355,7 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
         {
             // send DBC data for cooldowns in same way as it used in Spell::SendSpellCooldown
             // use `item_template` or if not set then only use spell cooldowns
-            SpellEntry const* spell = sSpellStore.LookupEntry(pProto->Spells[s].SpellId);
+            SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(pProto->Spells[s].SpellId);
             if (spell)
             {
                 bool db_data = pProto->Spells[s].SpellCooldown >= 0 || pProto->Spells[s].SpellCategoryCooldown >= 0;

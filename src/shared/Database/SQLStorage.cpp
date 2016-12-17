@@ -103,6 +103,9 @@ void SQLStorageBase::Free()
                 // TODO- possible (and small) memleak here possible
                 offset += sizeof(char*);
                 break;
+            case FT_64BITINT:
+                offset += sizeof(uint64);
+                break;
             case FT_IND:
             case FT_SORT:
                 assert(false && "SQL storage not have sort field types");
