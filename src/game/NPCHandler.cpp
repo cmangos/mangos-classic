@@ -176,10 +176,13 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
         {
             TrainerSpell const* tSpell = &itr->second;
 
-            uint32 triggerSpell = sSpellStore.LookupEntry(tSpell->spell)->EffectTriggerSpell[0];
+            uint32 triggerSpell = sSpellTemplate.LookupEntry<SpellEntry>(tSpell->spell)->EffectTriggerSpell[0];
 
             uint32 reqLevel = 0;
             if (!_player->IsSpellFitByClassAndRace(tSpell->spell, &reqLevel))
+                continue;
+
+            if (tSpell->conditionId && !sObjectMgr.IsPlayerMeetToCondition(tSpell->conditionId, GetPlayer(), unit->GetMap(), unit, CONDITION_FROM_TRAINER))
                 continue;
 
             reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
@@ -198,10 +201,13 @@ void WorldSession::SendTrainerList(ObjectGuid guid, const std::string& strTitle)
         {
             TrainerSpell const* tSpell = &itr->second;
 
-            uint32 triggerSpell = sSpellStore.LookupEntry(tSpell->spell)->EffectTriggerSpell[0];
+            uint32 triggerSpell = sSpellTemplate.LookupEntry<SpellEntry>(tSpell->spell)->EffectTriggerSpell[0];
 
             uint32 reqLevel = 0;
             if (!_player->IsSpellFitByClassAndRace(tSpell->spell, &reqLevel))
+                continue;
+
+            if (tSpell->conditionId && !sObjectMgr.IsPlayerMeetToCondition(tSpell->conditionId, GetPlayer(), unit->GetMap(), unit, CONDITION_FROM_TRAINER))
                 continue;
 
             reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
@@ -265,8 +271,8 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
     if (_player->GetTrainerSpellState(trainer_spell, reqLevel) != TRAINER_SPELL_GREEN)
         return;
 
-    SpellEntry const* proto = sSpellStore.LookupEntry(trainer_spell->spell);
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(proto->EffectTriggerSpell[0]);
+    SpellEntry const* proto = sSpellTemplate.LookupEntry<SpellEntry>(trainer_spell->spell);
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(proto->EffectTriggerSpell[0]);
 
     // apply reputation discount
     uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));

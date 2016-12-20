@@ -128,6 +128,10 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(V value, Stor
             subclass->default_fill(x, value, *((float*)(&p[offset])));
             offset += sizeof(float);
             break;
+        case FT_64BITINT:
+            subclass->default_fill(x, value, *((uint64*)(&p[offset])));
+            offset += sizeof(uint64);
+            break;
         case FT_IND:
         case FT_SORT:
             assert(false && "SQL storage not have sort field types");
@@ -167,6 +171,10 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::storeValue(char const* v
         case FT_NA_POINTER:
             subclass->default_fill_to_str(x, value, *((char**)(&p[offset])));
             offset += sizeof(char*);
+            break;
+        case FT_64BITINT:
+            subclass->convert_from_str(x, value, *((uint64*)(&p[offset])));
+            offset += sizeof(uint64);
             break;
         case FT_IND:
         case FT_SORT:
@@ -249,6 +257,8 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
                 recordsize += sizeof(float);  break;
             case FT_NA_POINTER:
                 recordsize += sizeof(char*);  break;
+            case FT_64BITINT:
+                recordsize += sizeof(uint64);  break;
             case FT_IND:
             case FT_SORT:
                 assert(false && "SQL storage not have sort field types");
@@ -299,6 +309,7 @@ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::Load(StorageClass& store
                 case FT_INT:    storeValue((uint32)fields[y].GetUInt32(), store, record, x, offset);      ++x; break;
                 case FT_FLOAT:  storeValue((float)fields[y].GetFloat(), store, record, x, offset);        ++x; break;
                 case FT_STRING: storeValue((char const*)fields[y].GetString(), store, record, x, offset); ++x; break;
+                case FT_64BITINT: storeValue(fields[y].GetUInt64(), store, record, x, offset);            ++x; break;
                 case FT_NA:
                 case FT_NA_BYTE:
                 case FT_NA_FLOAT:

@@ -1008,7 +1008,7 @@ bool ChatHandler::HandleDebugSpellCoefsCommand(char* args)
     if (!spellid)
         return false;
 
-    SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellid);
+    SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(spellid);
     if (!spellEntry)
         return false;
 

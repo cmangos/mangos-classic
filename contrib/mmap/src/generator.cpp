@@ -61,7 +61,7 @@ bool checkDirectories(bool debugOutput)
 void printUsage()
 {
     printf("Generator command line args\n\n");
-    printf("-? : This help\n");
+    printf("-? or /? or -h : This help\n");
     printf("[#] : Build only the map specified by #.\n");
     printf("--maxAngle [#] : Max walkable inclination angle\n");
     printf("--tile [#,#] : Build the specified tile\n");
@@ -73,10 +73,10 @@ void printUsage()
     printf("--bigBaseUnit [true|false] : Generate tile/map using bigger basic unit.\n");
     printf("--silent : Make script friendly. No wait for user input, error, completion.\n");
     printf("--offMeshInput [file.*] : Path to file containing off mesh connections data.\n\n");
-    printf("Exemple:\nmovemapgen (generate all mmap with default arg\n"
-           "movemapgen 0 (generate map 0)\n"
-           "movemapgen --tile 34,46 (builds only tile 34,46 of map 0)\n\n");
-    printf("Please read readme file for more information and exemples.\n");
+    printf("Example:\nmovemapgen (generate all mmap with default arg\n"
+        "movemapgen 0 (generate map 0)\n"
+        "movemapgen 0 --tile 34,46 (builds only tile 34,46 of map 0)\n\n");
+    printf("Please read readme file for more information and examples.\n");
 }
 
 bool handleArgs(int argc, char** argv,
@@ -220,7 +220,7 @@ bool handleArgs(int argc, char** argv,
 
             offMeshInputPath = param;
         }
-        else if (strcmp(argv[i], "-?") == 0)
+        else if ((strcmp(argv[i], "-?") == 0) || (strcmp(argv[i], "/?") == 0) || (strcmp(argv[i], "-h") == 0))
         {
             printUsage();
             exit(1);

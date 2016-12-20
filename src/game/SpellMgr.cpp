@@ -275,7 +275,7 @@ uint16 GetSpellAuraMaxTicks(SpellEntry const* spellInfo)
 
 uint16 GetSpellAuraMaxTicks(uint32 spellId)
 {
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellInfo)
     {
         sLog.outError("GetSpellAuraMaxTicks: Spell %u not exist!", spellId);
@@ -331,7 +331,7 @@ WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo)
 
 SpellSpecific GetSpellSpecific(uint32 spellId)
 {
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellInfo)
         return SPELL_NORMAL;
 
@@ -614,7 +614,7 @@ void SpellMgr::LoadSpellTargetPositions()
             continue;
         }
 
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(Spell_ID);
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(Spell_ID);
         if (!spellInfo)
         {
             sLog.outErrorDb("Spell (ID:%u) listed in `spell_target_position` does not exist.", Spell_ID);
@@ -653,7 +653,7 @@ struct SpellRankHelper
     SpellRankHelper(SpellMgr& _mgr, StorageType& _storage): mgr(_mgr), worker(_storage), customRank(0) {}
     void RecordRank(EntryType& entry, uint32 spell_id)
     {
-        const SpellEntry* spell = sSpellStore.LookupEntry(spell_id);
+        const SpellEntry* spell = sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
         if (!spell)
         {
             sLog.outErrorDb("Spell %u listed in `%s` does not exist", spell_id, worker.TableName());
@@ -916,7 +916,7 @@ void SpellMgr::LoadSpellProcItemEnchant()
         uint32 entry = fields[0].GetUInt32();
         float ppmRate = fields[1].GetFloat();
 
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry);
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(entry);
 
         if (!spellInfo)
         {
@@ -980,7 +980,7 @@ void SpellMgr::LoadSpellBonuses()
         bar.step();
         uint32 entry = fields[0].GetUInt32();
 
-        SpellEntry const* spell = sSpellStore.LookupEntry(entry);
+        SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(entry);
         if (!spell)
         {
             sLog.outErrorDb("Spell %u listed in `spell_bonus_data` does not exist", entry);
@@ -1107,6 +1107,43 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
     if (EventProcFlag & (PROC_FLAG_KILLED | PROC_FLAG_KILL | PROC_FLAG_ON_TRAP_ACTIVATION))
         return true;
 
+    if (procFlags & PROC_FLAG_ON_DO_PERIODIC && EventProcFlag & PROC_FLAG_ON_DO_PERIODIC)
+    {
+        if (procExtra & PROC_EX_INTERNAL_HOT)
+        {
+            if (EventProcFlag == PROC_FLAG_ON_DO_PERIODIC)
+            {
+                /// no aura with only PROC_FLAG_DONE_PERIODIC and spellFamilyName == 0 can proc from a HOT.
+                if (!procSpell->SpellFamilyName)
+                    return false;
+            }
+            /// Aura must have positive procflags for a HOT to proc
+            else if (!(EventProcFlag & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS)))
+                return false;
+        }
+        /// Aura must have negative or neutral(PROC_FLAG_DONE_PERIODIC only) procflags for a DOT to proc
+        else if (EventProcFlag != PROC_FLAG_ON_DO_PERIODIC)
+            if (!(EventProcFlag & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG)))
+                return false;
+    }
+
+    if (procFlags & PROC_FLAG_ON_TAKE_PERIODIC && EventProcFlag & PROC_FLAG_ON_TAKE_PERIODIC)
+    {
+        if (procExtra & PROC_EX_INTERNAL_HOT)
+        {
+            /// No aura that only has PROC_FLAG_TAKEN_PERIODIC can proc from a HOT.
+            if (EventProcFlag == PROC_FLAG_ON_TAKE_PERIODIC)
+                return false;
+            /// Aura must have positive procflags for a HOT to proc
+            if (!(EventProcFlag & (PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS)))
+                return false;
+        }
+        /// Aura must have negative or neutral(PROC_FLAG_TAKEN_PERIODIC only) procflags for a DOT to proc
+        else if (EventProcFlag != PROC_FLAG_ON_TAKE_PERIODIC)
+            if (!(EventProcFlag & (PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG | PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG)))
+                return false;
+    }
+
     if (spellProcEvent)     // Exist event data
     {
         // Store extra req
@@ -1134,10 +1171,6 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
     // Check for extra req (if none) and hit/crit
     if (procEvent_procEx == PROC_EX_NONE)
     {
-        // Don't allow proc from periodic heal if no extra requirement is defined
-        if (EventProcFlag & (PROC_FLAG_ON_DO_PERIODIC | PROC_FLAG_ON_TAKE_PERIODIC) && (procExtra & PROC_EX_PERIODIC_POSITIVE))
-            return false;
-
         // No extra req, so can trigger for (damage/healing present) and hit/crit
         if (procExtra & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT))
             return true;
@@ -1184,7 +1217,7 @@ void SpellMgr::LoadSpellElixirs()
         uint32 entry = fields[0].GetUInt32();
         uint8 mask = fields[1].GetUInt8();
 
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry);
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(entry);
 
         if (!spellInfo)
         {
@@ -1303,7 +1336,7 @@ void SpellMgr::LoadSpellThreats()
 
 bool SpellMgr::IsRankSpellDueToSpell(SpellEntry const* spellInfo_1, uint32 spellId_2) const
 {
-    SpellEntry const* spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
+    SpellEntry const* spellInfo_2 = sSpellTemplate.LookupEntry<SpellEntry>(spellId_2);
     if (!spellInfo_1 || !spellInfo_2) return false;
     if (spellInfo_1->Id == spellId_2) return false;
 
@@ -1374,7 +1407,7 @@ bool SpellMgr::IsSpellCanAffectSpell(SpellEntry const* spellInfo_1, SpellEntry c
 
 bool SpellMgr::IsProfessionOrRidingSpell(uint32 spellId)
 {
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellInfo)
         return false;
 
@@ -1388,7 +1421,7 @@ bool SpellMgr::IsProfessionOrRidingSpell(uint32 spellId)
 
 bool SpellMgr::IsProfessionSpell(uint32 spellId)
 {
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellInfo)
         return false;
 
@@ -1402,7 +1435,7 @@ bool SpellMgr::IsProfessionSpell(uint32 spellId)
 
 bool SpellMgr::IsPrimaryProfessionSpell(uint32 spellId)
 {
-    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellInfo)
         return false;
 
@@ -1467,7 +1500,7 @@ SpellEntry const* SpellMgr::SelectAuraRankForLevel(SpellEntry const* spellInfo, 
 
     for (uint32 nextSpellId = spellInfo->Id; nextSpellId != 0; nextSpellId = GetPrevSpellInChain(nextSpellId))
     {
-        SpellEntry const* nextSpellInfo = sSpellStore.LookupEntry(nextSpellId);
+        SpellEntry const* nextSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(nextSpellId);
         if (!nextSpellInfo)
             break;
 
@@ -1571,7 +1604,7 @@ void SpellMgr::LoadSpellChains()
             if (!spell_id)
                 continue;
 
-            if (!sSpellStore.LookupEntry(spell_id))
+            if (!sSpellTemplate.LookupEntry<SpellEntry>(spell_id))
             {
                 // sLog.outErrorDb("Talent %u not exist as spell",spell_id);
                 continue;
@@ -1596,7 +1629,7 @@ void SpellMgr::LoadSpellChains()
             uint32 spell_id = ab_itr->first;
 
             // some forward spells not exist and can be ignored (some outdated data)
-            SpellEntry const* spell_entry = sSpellStore.LookupEntry(spell_id);
+            SpellEntry const* spell_entry = sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
             if (!spell_entry)                               // no cases
                 continue;
 
@@ -1611,7 +1644,7 @@ void SpellMgr::LoadSpellChains()
                 continue;
 
             // some forward spells not exist and can be ignored (some outdated data)
-            SpellEntry const* forward_entry = sSpellStore.LookupEntry(forward_id);
+            SpellEntry const* forward_entry = sSpellTemplate.LookupEntry<SpellEntry>(forward_id);
             if (!forward_entry)
                 continue;
 
@@ -1695,7 +1728,7 @@ void SpellMgr::LoadSpellChains()
         node.rank  = fields[3].GetUInt8();
         node.req   = fields[4].GetUInt32();
 
-        if (!sSpellStore.LookupEntry(spell_id))
+        if (!sSpellTemplate.LookupEntry<SpellEntry>(spell_id))
         {
             sLog.outErrorDb("Spell %u listed in `spell_chain` does not exist", spell_id);
             continue;
@@ -1739,14 +1772,14 @@ void SpellMgr::LoadSpellChains()
             continue;
         }
 
-        if (node.prev != 0 && !sSpellStore.LookupEntry(node.prev))
+        if (node.prev != 0 && !sSpellTemplate.LookupEntry<SpellEntry>(node.prev))
         {
             sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has nonexistent previous rank spell.",
                             spell_id, node.prev, node.first, node.rank, node.req);
             continue;
         }
 
-        if (!sSpellStore.LookupEntry(node.first))
+        if (!sSpellTemplate.LookupEntry<SpellEntry>(node.first))
         {
             sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has not existing first rank spell.",
                             spell_id, node.prev, node.first, node.rank, node.req);
@@ -1763,7 +1796,7 @@ void SpellMgr::LoadSpellChains()
             continue;
         }
 
-        if (node.req != 0 && !sSpellStore.LookupEntry(node.req))
+        if (node.req != 0 && !sSpellTemplate.LookupEntry<SpellEntry>(node.req))
         {
             sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has not existing required spell.",
                             spell_id, node.prev, node.first, node.rank, node.req);
@@ -1898,11 +1931,11 @@ void SpellMgr::LoadSpellLearnSkills()
 
     // search auto-learned skills and add its to map also for use in unlearn spells/talents
     uint32 dbc_count = 0;
-    BarGoLink bar(sSpellStore.GetNumRows());
-    for (uint32 spell = 0; spell < sSpellStore.GetNumRows(); ++spell)
+    BarGoLink bar(sSpellTemplate.GetMaxEntry());
+    for (uint32 spell = 0; spell < sSpellTemplate.GetMaxEntry(); ++spell)
     {
         bar.step();
-        SpellEntry const* entry = sSpellStore.LookupEntry(spell);
+        SpellEntry const* entry = sSpellTemplate.LookupEntry<SpellEntry>(spell);
 
         if (!entry)
             continue;
@@ -1963,13 +1996,13 @@ void SpellMgr::LoadSpellLearnSpells()
         node.active     = fields[2].GetBool();
         node.autoLearned = false;
 
-        if (!sSpellStore.LookupEntry(spell_id))
+        if (!sSpellTemplate.LookupEntry<SpellEntry>(spell_id))
         {
             sLog.outErrorDb("Spell %u listed in `spell_learn_spell` does not exist", spell_id);
             continue;
         }
 
-        if (!sSpellStore.LookupEntry(node.spell))
+        if (!sSpellTemplate.LookupEntry<SpellEntry>(node.spell))
         {
             sLog.outErrorDb("Spell %u listed in `spell_learn_spell` learning nonexistent spell %u", spell_id, node.spell);
             continue;
@@ -1991,9 +2024,9 @@ void SpellMgr::LoadSpellLearnSpells()
 
     // search auto-learned spells and add its to map also for use in unlearn spells/talents
     uint32 dbc_count = 0;
-    for (uint32 spell = 0; spell < sSpellStore.GetNumRows(); ++spell)
+    for (uint32 spell = 0; spell < sSpellTemplate.GetMaxEntry(); ++spell)
     {
-        SpellEntry const* entry = sSpellStore.LookupEntry(spell);
+        SpellEntry const* entry = sSpellTemplate.LookupEntry<SpellEntry>(spell);
 
         if (!entry)
             continue;
@@ -2007,7 +2040,7 @@ void SpellMgr::LoadSpellLearnSpells()
                 dbc_node.active      = true;                // all dbc based learned spells is active (show in spell book or hide by client itself)
 
                 // ignore learning nonexistent spells (broken/outdated/or generic learning spell 483
-                if (!sSpellStore.LookupEntry(dbc_node.spell))
+                if (!sSpellTemplate.LookupEntry<SpellEntry>(dbc_node.spell))
                     continue;
 
                 // talent or passive spells or skill-step spells auto-casted and not need dependent learning,
@@ -2049,7 +2082,7 @@ void SpellMgr::LoadSpellScriptTarget()
     // Check content
     for (SQLMultiStorage::SQLSIterator<SpellTargetEntry> itr = sSpellScriptTargetStorage.getDataBegin<SpellTargetEntry>(); itr < sSpellScriptTargetStorage.getDataEnd<SpellTargetEntry>(); ++itr)
     {
-        SpellEntry const* spellProto = sSpellStore.LookupEntry(itr->spellId);
+        SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(itr->spellId);
         if (!spellProto)
         {
             sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not exist.", itr->spellId, itr->targetEntry);
@@ -2140,9 +2173,9 @@ void SpellMgr::LoadSpellScriptTarget()
     // Check all spells
     if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
     {
-        for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
+        for (uint32 i = 1; i < sSpellTemplate.GetMaxEntry(); ++i)
         {
-            SpellEntry const* spellInfo = sSpellStore.LookupEntry(i);
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(i);
             if (!spellInfo)
                 continue;
 
@@ -2202,7 +2235,7 @@ void SpellMgr::LoadSpellPetAuras()
         }
         else
         {
-            SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell);
             if (!spellInfo)
             {
                 sLog.outErrorDb("Spell %u listed in `spell_pet_auras` does not exist", spell);
@@ -2221,7 +2254,7 @@ void SpellMgr::LoadSpellPetAuras()
                 continue;
             }
 
-            SpellEntry const* spellInfo2 = sSpellStore.LookupEntry(aura);
+            SpellEntry const* spellInfo2 = sSpellTemplate.LookupEntry<SpellEntry>(aura);
             if (!spellInfo2)
             {
                 sLog.outErrorDb("Aura %u listed in `spell_pet_auras` does not exist", aura);
@@ -2279,7 +2312,7 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
             }
             case SPELL_EFFECT_LEARN_SPELL:
             {
-                SpellEntry const* spellInfo2 = sSpellStore.LookupEntry(spellInfo->EffectTriggerSpell[i]);
+                SpellEntry const* spellInfo2 = sSpellTemplate.LookupEntry<SpellEntry>(spellInfo->EffectTriggerSpell[i]);
                 if (!IsSpellValid(spellInfo2, pl, msg))
                 {
                     if (msg)
@@ -2357,7 +2390,7 @@ void SpellMgr::LoadSpellAreas()
         spellArea.gender              = Gender(fields[8].GetUInt8());
         spellArea.autocast            = fields[9].GetBool();
 
-        if (!sSpellStore.LookupEntry(spell))
+        if (!sSpellTemplate.LookupEntry<SpellEntry>(spell))
         {
             sLog.outErrorDb("Spell %u listed in `spell_area` does not exist", spell);
             continue;
@@ -2442,7 +2475,7 @@ void SpellMgr::LoadSpellAreas()
 
         if (spellArea.auraSpell)
         {
-            SpellEntry const* spellInfo = sSpellStore.LookupEntry(abs(spellArea.auraSpell));
+            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(abs(spellArea.auraSpell));
             if (!spellInfo)
             {
                 sLog.outErrorDb("Spell %u listed in `spell_area` have wrong aura spell (%u) requirement", spell, abs(spellArea.auraSpell));
@@ -2718,7 +2751,7 @@ void SpellMgr::CheckUsedSpells(char const* table) const
         {
             ++countSpells;
 
-            SpellEntry const* spellEntry = sSpellStore.LookupEntry(spell);
+            SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(spell);
             if (!spellEntry)
             {
                 sLog.outError("Spell %u '%s' not exist but used in %s.", spell, name.c_str(), code.c_str());
@@ -2804,9 +2837,9 @@ void SpellMgr::CheckUsedSpells(char const* table) const
             ++countMasks;
 
             bool found = false;
-            for (uint32 spellId = 1; spellId < sSpellStore.GetNumRows(); ++spellId)
+            for (uint32 spellId = 1; spellId < sSpellTemplate.GetMaxEntry(); ++spellId)
             {
-                SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellId);
+                SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
                 if (!spellEntry)
                     continue;
 
@@ -3112,7 +3145,7 @@ void SpellMgr::LoadSpellAffects()
         uint32 entry = fields[0].GetUInt32();
         uint8 effectId = fields[1].GetUInt8();
 
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry);
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(entry);
 
         if (!spellInfo)
         {
@@ -3159,9 +3192,9 @@ void SpellMgr::LoadSpellAffects()
     sLog.outString();
     sLog.outString(">> Loaded %u spell affect definitions", count);
 
-    for (uint32 id = 0; id < sSpellStore.GetNumRows(); ++id)
+    for (uint32 id = 0; id < sSpellTemplate.GetMaxEntry(); ++id)
     {
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(id);
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(id);
         if (!spellInfo)
             continue;
 
@@ -3211,7 +3244,7 @@ void SpellMgr::LoadFacingCasterFlags()
         uint32 entry              = fields[0].GetUInt32();
         uint32 FacingCasterFlags  = fields[1].GetUInt32();
 
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry);
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(entry);
         if (!spellInfo)
         {
             sLog.outErrorDb("Spell %u listed in `spell_facing` does not exist", entry);

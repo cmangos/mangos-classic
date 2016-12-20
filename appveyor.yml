@@ -68,11 +68,25 @@ before_build:
   - cmd: if "%platform%"=="Win32" set BOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN32%"
   - cmd: if "%platform%"=="x64" set BOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN64%"
 
-# build settings
-build:
-  project: C:\projects\cmangos\win\mangosdVC140.sln       # path to Visual Studio solution or project
-  parallel: true                                          # enable MSBuild parallel builds
-  verbosity: quiet                                        # MSBuild verbosity level (quiet|minimal|normal|detailed)
+# build script
+build_script:
+  - ps: |
+        $destinationFolder = "$env:APPVEYOR_BUILD_FOLDER\bin\extractors"
+        $sourceFolder = "$env:APPVEYOR_BUILD_FOLDER\contrib\"
+        Write-Host "Building main $env:APPVEYOR_PROJECT_NAME project ..." -f Yellow
+        msbuild "$env:APPVEYOR_BUILD_FOLDER\win\mangosdVC140.sln" /m /verbosity:quiet /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+        Write-Host "Building extractors ..." -f Yellow;
+        msbuild "$sourceFolder\extractor\VC140_AD.sln" /verbosity:quiet /p:Configuration="Release" /p:Platform="Win32" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+        msbuild "$sourceFolder\mmap\win\MoveMapGen_VC140.sln" /verbosity:quiet /p:Configuration="Release" /p:Platform="Win32" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+        msbuild "$sourceFolder\vmap_assembler\vmap_assemblerVC140.sln" /verbosity:quiet /p:Configuration="Release" /p:Platform="Win32" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+        msbuild "$sourceFolder\vmap_extractor\win\vmapExtractor_VC140.sln" /verbosity:quiet /p:Configuration="Release" /p:Platform="Win32" /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+        Write-Host "Copying successfuly builded extractors binaries ..." -f Yellow
+        mkdir -p "$destinationFolder"
+        cp "$sourceFolder\extractor\*.exe" "$destinationFolder"
+        cp "$sourceFolder\mmap\bin\Win32_Release\*.exe" "$destinationFolder"
+        cp "$sourceFolder\vmap_assembler\bin\Win32_Release\*.exe" "$destinationFolder"
+        cp "$sourceFolder\vmap_extractor\bin\Win32_Release\*.exe" "$destinationFolder"
+        cp "$sourceFolder\extractor_scripts\*" "$destinationFolder"
 
 # unit test
 test: off
@@ -80,6 +94,9 @@ test: off
 artifacts:
   - path: bin\$(platform)_$(configuration)
     name: $(APPVEYOR_PROJECT_NAME)_$(platform)_$(configuration)
+    
+  - path: bin\extractors
+    name: Extractors
 
 # scripts to run before deployment
 before_deploy:
@@ -91,7 +108,7 @@ deploy:
     auth_token: $(SEC_ACCESS_TOKEN)
     release: $(SNAPSHOT_TAG) # name of the tag used
     description: 'Binaries of commit $(APPVEYOR_REPO_COMMIT) \n$(APPVEYOR_REPO_COMMIT_MESSAGE) \nSnapshot v$(APPVEYOR_BUILD_VERSION)'
-    artifact: $(APPVEYOR_PROJECT_NAME)_$(platform)_$(configuration)
+    artifact: $(APPVEYOR_PROJECT_NAME)_$(platform)_$(configuration), Extractors
     draft: false
     prerelease: true
     on:

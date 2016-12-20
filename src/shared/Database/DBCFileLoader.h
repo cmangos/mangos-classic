@@ -34,7 +34,8 @@ enum FieldFormat
     FT_BYTE = 'b',                                          // uint8
     FT_SORT = 'd',                                          // sorted by this field, field is not included
     FT_IND = 'n',                                           // the same,but parsed to data
-    FT_LOGIC = 'l'                                          // Logical (boolean)
+    FT_LOGIC = 'l',                                         // Logical (boolean)
+    FT_64BITINT = 'L'                                       // uint64
 };
 
 class DBCFileLoader
