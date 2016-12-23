@@ -49,3 +49,11 @@ void GetCreatureListWithEntryInGrid(std::list<Creature*>& lList, WorldObject* pS
 
     Cell::VisitGridObjects(pSource, searcher, fMaxSearchRange);
 }
+
+void GetPlayerListWithEntryInWorld(std::list<Player*>& lList, WorldObject* pSource, float fMaxSearchRange)
+{
+    MaNGOS::AnyPlayerInObjectRangeCheck check(pSource, fMaxSearchRange);
+    MaNGOS::PlayerListSearcher<MaNGOS::AnyPlayerInObjectRangeCheck> searcher(lList, check);
+
+    Cell::VisitWorldObjects(pSource, searcher, fMaxSearchRange);
+}

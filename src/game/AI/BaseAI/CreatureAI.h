@@ -259,6 +259,10 @@ class CreatureAI
          */
         virtual void ReceiveEmote(Player* /*pPlayer*/, uint32 /*uiEmote*/) {}
 
+        ///== Data Fetch bind ==============================
+
+        virtual uint32 GetScriptData() { return 0; }
+
         ///== Triggered Actions Requested ==================
 
         /**

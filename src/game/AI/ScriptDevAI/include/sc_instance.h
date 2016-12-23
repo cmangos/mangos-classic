@@ -26,12 +26,16 @@ enum EncounterState
 class ScriptedInstance : public InstanceData
 {
     public:
+        typedef std::map<uint32, ObjectGuid> EntryGuidMap;
+        typedef std::multimap<uint32, ObjectGuid> EntryGuidSet;
+
         ScriptedInstance(Map* pMap) : InstanceData(pMap) {}
         ~ScriptedInstance() {}
 
         // Default accessor functions
         GameObject* GetSingleGameObjectFromStorage(uint32 uiEntry);
         Creature* GetSingleCreatureFromStorage(uint32 uiEntry, bool bSkipDebugLog = false);
+        void GetCreatureGuidMapFromStorage(uint32 uiEntry, EntryGuidSet &uiEntryGuidSet, bool bSkipDebugLog = false);
 
         // Change active state of doors or buttons
         void DoUseDoorOrButton(ObjectGuid guid, uint32 uiWithRestoreTime = 0, bool bUseAlternativeState = false);
@@ -60,9 +64,9 @@ class ScriptedInstance : public InstanceData
 
     protected:
         // Storage for GO-Guids and NPC-Guids
-        typedef std::map<uint32, ObjectGuid> EntryGuidMap;
         EntryGuidMap m_mGoEntryGuidStore;                   ///< Store unique GO-Guids by entry
         EntryGuidMap m_mNpcEntryGuidStore;                  ///< Store unique NPC-Guids by entry
+        EntryGuidSet m_mNpcEntryGuidCollection;             ///< Store all Guids by entry
 };
 
 // Class for world maps (May need additional zone-wide functions later on)
