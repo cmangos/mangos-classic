@@ -33,8 +33,8 @@ namespace MaNGOS
     class Listener
     {
         private:
-            boost::asio::io_service m_service;
-            boost::asio::ip::tcp::acceptor m_acceptor;
+            std::unique_ptr<boost::asio::io_service> m_service;
+            std::unique_ptr<boost::asio::ip::tcp::acceptor> m_acceptor;
 
             std::thread m_acceptorThread;
             std::vector<std::unique_ptr<NetworkThread<SocketType>>> m_workerThreads;
@@ -71,7 +71,7 @@ namespace MaNGOS
 
     template <typename SocketType>
     Listener<SocketType>::Listener(int port, int workerThreads)
-        : m_acceptor(m_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
+        : m_service(new boost::asio::io_service()), m_acceptor(new boost::asio::ip::tcp::acceptor(*m_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)))
     {
         m_workerThreads.reserve(workerThreads);
         for (auto i = 0; i < workerThreads; ++i)
@@ -79,16 +79,18 @@ namespace MaNGOS
 
         BeginAccept();
 
-        m_acceptorThread = std::thread([this]() { this->m_service.run(); });
+        m_acceptorThread = std::thread([this]() { this->m_service->run(); });
     }
 
     // FIXME - is this needed?
     template <typename SocketType>
     Listener<SocketType>::~Listener()
     {
-        m_service.stop();
-        m_acceptor.close();
+        m_acceptor->close();
+        m_service->stop();
         m_acceptorThread.join();
+        m_acceptor.reset();
+        m_service.reset();
     }
 
     template <typename SocketType>
@@ -97,8 +99,8 @@ namespace MaNGOS
         auto worker = SelectWorker();
         auto socket = worker->CreateSocket();
 
-        m_acceptor.async_accept(socket->GetAsioSocket(),
-            [this,worker,socket] (const boost::system::error_code &ec)
+        m_acceptor->async_accept(socket->GetAsioSocket(),
+            [this, worker, socket] (const boost::system::error_code &ec)
         {
             this->OnAccept(worker, socket, ec);
         });
