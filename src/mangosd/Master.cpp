@@ -55,7 +55,7 @@ extern int m_ServiceStatus;
 
 INSTANTIATE_SINGLETON_1(Master);
 
-volatile uint32 Master::m_masterLoopCounter = 0;
+volatile bool Master::m_canBeKilled = false;
 
 class FreezeDetectorRunnable : public MaNGOS::Runnable
 {
@@ -79,7 +79,6 @@ class FreezeDetectorRunnable : public MaNGOS::Runnable
                 MaNGOS::Thread::Sleep(1000);
 
                 uint32 curtime = WorldTimer::getMSTime();
-                // DEBUG_LOG("anti-freeze: time=%u, counters=[%u; %u]",curtime,Master::m_masterLoopCounter,World::m_worldLoopCounter);
 
                 // normal work
                 if (w_loops != World::m_worldLoopCounter)
@@ -312,6 +311,9 @@ int Master::Run()
         delete cliThread;
     }
 
+    // mark this can be killable
+    m_canBeKilled = true;
+
     ///- Exit the process with specified return value
     return World::GetExitCode();
 }
@@ -463,6 +465,14 @@ void Master::_OnSignal(int s)
 #endif
             World::StopNow(SHUTDOWN_EXIT_CODE);
             break;
+    }
+
+    // give a 30 sec timeout in case of Master cannot finish properly
+    int32 timeOut = 200;
+    while (!m_canBeKilled && timeOut > 0)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        --timeOut;
     }
 
     signal(s, _OnSignal);

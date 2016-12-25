@@ -31,7 +31,7 @@ class Master
 {
     public:
         int Run();
-        static volatile uint32 m_masterLoopCounter;
+        static volatile bool m_canBeKilled;
 
     private:
         bool _StartDB();
