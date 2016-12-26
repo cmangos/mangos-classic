@@ -702,7 +702,7 @@ struct npc_magrami_spectre : public ScriptedAI
         m_uiCurseTimer = 4000;
     }
 
-    void JustAIInit() override
+    void JustRespawned() override
     {
         m_creature->CastSpell(m_creature, SPELL_GHOST_SPAWN_IN, TRIGGERED_NONE);
         m_creature->CastSpell(m_creature, SPELL_BLUE_AURA,TRIGGERED_NONE);
