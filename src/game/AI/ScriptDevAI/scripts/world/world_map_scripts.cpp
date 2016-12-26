@@ -156,7 +156,8 @@ struct world_map_kalimdor : public ScriptedMap
         {
             for (auto guid : eventData.summonedMagrami)
                 if (Creature* magrami = instance->GetCreature(guid))
-                    magrami->ForcedDespawn();
+                    if(magrami->isAlive()) // dont despawn corpses with loot
+                        magrami->ForcedDespawn();
 
             if (GameObject* go = instance->GetGameObject(eventData.guid))
                 go->AddObjectToRemoveList(); // TODO: Establish rules for despawning temporary GOs that were used in their lifetime (buttons for example)
@@ -172,10 +173,10 @@ struct world_map_kalimdor : public ScriptedMap
                 float x, y, z;
                 go->GetPosition(x, y, z); // do some urand radius shenanigans to spawn it further and make it walk to go using doing X and Y yourself and using function in MAP to get proper Z
                 uint32 random = urand(0, 35);
-                float xR = x + random, yR = y + (35 - random), zR = z;
+                float xR = x + random, yR = y + (40 - random), zR = z;
                 instance->GetHeightInRange(xR, yR, zR);
-                Creature* creature = go->SummonCreature(NPC_MAGRAMI_SPECTRE, xR, yR, zR, 0, TEMPSUMMON_TIMED_OOC_OR_CORPSE_DESPAWN, 180000); // add more timed logic here
-                instance->GetReachableRandomPointOnGround(x, y, z, 5.0f); // get position to which spectre will walk
+                Creature* creature = go->SummonCreature(NPC_MAGRAMI_SPECTRE, xR, yR, zR, 0, TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 180000); // add more timed logic here
+                instance->GetReachableRandomPointOnGround(x, y, z, 10.0f); // get position to which spectre will walk
                 eventData.phaseCounter++;
                 eventData.summonedMagrami.push_back(creature->GetObjectGuid());
                 creature->GetMotionMaster()->MovePoint(1, x, y, z);

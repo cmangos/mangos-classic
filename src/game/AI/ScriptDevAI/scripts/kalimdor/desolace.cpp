@@ -686,6 +686,9 @@ enum
     SPELL_GREEN_AURA       = 18951,
 
     FACTION_HOSTILE        = 16,
+
+    SAY_EMOTE_1            = -1001226,
+    SAY_EMOTE_2            = -1001227,
 };
 
 struct npc_magrami_spectre : public ScriptedAI
@@ -703,6 +706,16 @@ struct npc_magrami_spectre : public ScriptedAI
     {
         m_creature->CastSpell(m_creature, SPELL_GHOST_SPAWN_IN, TRIGGERED_NONE);
         m_creature->CastSpell(m_creature, SPELL_BLUE_AURA,TRIGGERED_NONE);
+
+        switch (urand(0, 1))
+        {
+            case 0:
+                DoScriptText(SAY_EMOTE_1, m_creature);
+                break;
+            case 1:
+                DoScriptText(SAY_EMOTE_2, m_creature);
+                break;
+        }
     }
 
     void MovementInform(uint32 uiMovementType, uint32 uiData) override
@@ -713,7 +726,7 @@ struct npc_magrami_spectre : public ScriptedAI
             {
                 float x, y, z;
                 m_creature->GetPosition(x, y, z);
-                m_creature->GetMotionMaster()->MoveRandomAroundPoint(x, y, z, 3.f);
+                m_creature->GetMotionMaster()->MoveRandomAroundPoint(x, y, z, 5.f);
                 m_creature->RemoveAurasDueToSpell(SPELL_BLUE_AURA);
                 m_creature->CastSpell(m_creature, SPELL_GREEN_AURA, TRIGGERED_NONE);
                 m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_NONE);
