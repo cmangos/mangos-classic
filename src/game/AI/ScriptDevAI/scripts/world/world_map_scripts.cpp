@@ -156,7 +156,7 @@ struct world_map_kalimdor : public ScriptedMap
         {
             for (auto guid : eventData.summonedMagrami)
                 if (Creature* magrami = instance->GetCreature(guid))
-                    if(magrami->isAlive()) // dont despawn corpses with loot
+                    if (magrami->isAlive()) // dont despawn corpses with loot
                         magrami->ForcedDespawn();
 
             if (GameObject* go = instance->GetGameObject(eventData.guid))
