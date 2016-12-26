@@ -2565,13 +2565,9 @@ void Spell::CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTa
             if ((*iter)->GetEntry() == i_spellST->targetEntry)
             {
                 if (i_spellST->type == SPELL_TARGET_TYPE_DEAD && ((Creature*)(*iter))->IsCorpse())
-                {
                     targetUnitMap.push_back((*iter));
-                }
                 else if (i_spellST->type == SPELL_TARGET_TYPE_CREATURE && (*iter)->isAlive())
-                {
                     targetUnitMap.push_back((*iter));
-                }
                 break;
             }
         }
