@@ -84,8 +84,6 @@ void WorldRunnable::run()
 
     sWorld.CleanupsBeforeStop();
 
-    sMapMgr.UnloadAll();                                    // unload all grids (including locked in memory)
-
     // Eluna must be unloaded after Maps, since ~Map calls sEluna->OnDestroy,
     //   and must be unloaded before the DB, since it can access the DB.
     Eluna::Uninitialize();

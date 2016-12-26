@@ -39,18 +39,21 @@ namespace MaNGOS
             std::unordered_set<std::shared_ptr<SocketType>> m_sockets;
 
             // note that the work member *must* be declared after the service member for the work constructor to function correctly
-            boost::asio::io_service::work m_work;
+            std::unique_ptr<boost::asio::io_service::work> m_work;
 
             std::thread m_serviceThread;
 
         public:
-            NetworkThread() : m_work(m_service), m_serviceThread([this] { boost::system::error_code ec; this->m_service.run(ec); })
+            NetworkThread() : m_work(new boost::asio::io_service::work(m_service)), m_serviceThread([this] { boost::system::error_code ec; this->m_service.run(ec); })
             {
                 m_serviceThread.detach();
             }
 
             ~NetworkThread()
             {
+                // Allow io_service::run() to exit.
+                m_work.reset();
+
                 // attempt to gracefully close any open connections
                 for (auto i = m_sockets.begin(); i != m_sockets.end();)
                 {

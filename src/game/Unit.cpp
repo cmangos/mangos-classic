@@ -7321,8 +7321,7 @@ struct SetSpeedRateHelper
 
 void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
 {
-    if (rate < 0)
-        rate = 0.0f;
+    rate = std::max(rate, 0.01f);
 
     // Update speed only on change
     if (m_speed_rate[mtype] != rate)

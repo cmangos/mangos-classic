@@ -141,6 +141,8 @@ void World::CleanupsBeforeStop()
     KickAll();                                       // save and kick all players
     UpdateSessions(1);                               // real players unload required UpdateSessions call
     sBattleGroundMgr.DeleteAllBattleGrounds();       // unload battleground templates before different singletons destroyed
+    sMapMgr.UnloadAll();                             // unload all grids (including locked in memory)
+    sScriptMgr.UnloadScriptLibrary();                // unload all scripts
 }
 
 /// Find a session by its id
@@ -1186,9 +1188,6 @@ void World::SetInitialWorldSettings()
             break;
         case SCRIPT_LOAD_ERR_WRONG_API:
             sLog.outError("Scripting library has wrong list functions (outdated?).");
-            break;
-        case SCRIPT_LOAD_ERR_OUTDATED:
-            sLog.outError("Scripting library build for old mangosd revision. You need rebuild it.");
             break;
     }
     sLog.outString();

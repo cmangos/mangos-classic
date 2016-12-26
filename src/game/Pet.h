@@ -287,7 +287,7 @@ class MANGOS_DLL_SPEC Pet : public Creature
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
 
         // return charminfo ai only when this pet is possessed. (eye of the beast case for ex.)
-        virtual CreatureAI* AI() override { if (hasUnitState(UNIT_STAT_CONTROLLED) && m_charmInfo->GetAI()) return m_charmInfo->GetAI(); else return m_ai; }
+        virtual CreatureAI* AI() override { if (hasUnitState(UNIT_STAT_CONTROLLED) && m_charmInfo->GetAI()) return m_charmInfo->GetAI(); else return m_ai.get(); }
         virtual CombatData* GetCombatData() override { return m_combatData; }
 
     protected:
