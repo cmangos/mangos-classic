@@ -2246,8 +2246,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
     std::list <std::pair<SpellAuraHolder*, uint32> > dispel_list;
 
     // Create dispel mask by dispel type
-    uint32 dispel_type = m_spellInfo->EffectMiscValue[eff_idx];
-    uint32 dispelMask  = GetDispellMask(DispelType(dispel_type));
+    uint32 dispelMask  = GetDispellMask(DispelType(m_spellInfo->EffectMiscValue[eff_idx]));
     Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
     for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
