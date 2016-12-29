@@ -84,6 +84,27 @@ inline bool roll_chance_i(int chance)
     return chance > irand(0, 99);
 }
 
+/* An abstract die for combat rolls with premultiplied integer chances (100.00 = 10000). */
+template<class Side, Side Default, uint8 Sides>
+struct Die
+{
+    Side roll(uint32 random)
+    {
+        uint32 rolling = 0;
+        for (uint8 side = 0; side < Sides; ++side)
+        {
+            if (chance[side])
+            {
+                rolling += chance[side];
+                if (random <= rolling)
+                    return Side(side);
+            }
+        }
+        return Default;
+    }
+    uint32 chance[Sides] = {0};
+};
+
 inline void ApplyModUInt32Var(uint32& var, int32 val, bool apply)
 {
     int32 cur = var;

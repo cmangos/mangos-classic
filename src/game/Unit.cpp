@@ -1993,19 +1993,10 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
         // We do a roll between remaining chances
         const uint8 outcomes = (NUM_SPELL_PARTIAL_RESISTS - 1);
         const uint32 roll = urand(1, (10000 - chances.at(SPELL_PARTIAL_RESIST_PCT_100)));
-        uint32 sum = 0;
+        Die<SpellPartialResist, SPELL_PARTIAL_RESIST_NONE, outcomes> die;
         for (uint8 outcome = SPELL_PARTIAL_RESIST_NONE; outcome < outcomes; ++outcome)
-        {
-            if (const uint32 chance = chances.at(outcome))
-            {
-                sum += chance;
-                if (roll <= sum)
-                {
-                    portion = outcome;
-                    break;
-                }
-            }
-        }
+            die.chance[outcome] = chances.at(outcome);
+        portion = die.roll(roll);
         const uint32 amount = uint32(damage * (portion * (1.0f / float(outcomes))));
         // We already rolled for full resist on hit, so we need to deal at least *some* amount of damage...
         *resist = (amount >= damage) ? (damage - 1) : amount;
@@ -2304,90 +2295,50 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit* pVictim, WeaponAttackT
     if (pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return MELEE_HIT_EVADE;
 
-    int32 sum = 0;
-    int32 roll = irand(0, 10000);
-
-    if (IsFacingTargetsBack(pVictim))
-        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: attack came from behind.");
-
-    // Miss chance based on melee
-    if (int32 miss_chance = int32(CalculateEffectiveMissChance(pVictim, attType) * 100))
-    {
-        if (miss_chance > 0 && roll < (sum += miss_chance))
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: MISS <%d, %d)", sum - miss_chance, miss_chance);
-            return MELEE_HIT_MISS;
-        }
-    }
-
-    // Attack against sitting player: always crit, except cases when attacker's own crit chance is zero for some reason
+    Die<UnitCombatDieSide, UNIT_COMBAT_DIE_HIT, NUM_UNIT_COMBAT_DIE_SIDES> die;
+    die.chance[UNIT_COMBAT_DIE_MISS] = uint32(CalculateEffectiveMissChance(pVictim, attType) * 100);
     if (pVictim->GetTypeId() == TYPEID_PLAYER && !pVictim->IsStandState() && CanCrit(attType))
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: CRIT (sitting victim)");
-        return MELEE_HIT_CRIT;
+        die.chance[UNIT_COMBAT_DIE_CRIT] = 10000;
+        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: New attack die: [MISS:%u, CRIT:%u] (target is sitting)",
+                         die.chance[UNIT_COMBAT_DIE_MISS], die.chance[UNIT_COMBAT_DIE_CRIT]);
     }
-
-    if (pVictim->CanDodgeInCombat(this))
+    else
     {
-        int32 dodge_chance = int32(pVictim->CalculateEffectiveDodgeChance(this, attType) * 100);
-        if (dodge_chance > 0 && roll < (sum += dodge_chance))
+        if (pVictim->CanReactInCombat())
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum - dodge_chance, dodge_chance);
-            return MELEE_HIT_DODGE;
+            if (pVictim->CanDodgeInCombat(this))
+                die.chance[UNIT_COMBAT_DIE_DODGE] = uint32(pVictim->CalculateEffectiveDodgeChance(this, attType) * 100);
+            if (pVictim->CanParryInCombat(this))
+                die.chance[UNIT_COMBAT_DIE_PARRY] = uint32(pVictim->CalculateEffectiveParryChance(this, attType) * 100);
+            if (pVictim->CanBlockInCombat(this, schoolMask))
+                die.chance[UNIT_COMBAT_DIE_BLOCK] = uint32(pVictim->CalculateEffectiveBlockChance(this, attType) * 100);
         }
+        if (CanGlanceInCombat(pVictim))
+            die.chance[UNIT_COMBAT_DIE_GLANCE] = uint32(CalculateEffectiveGlanceChance(pVictim, attType) * 100);
+        die.chance[UNIT_COMBAT_DIE_CRIT] = uint32(CalculateEffectiveCritChance(pVictim, attType) * 100);
+        if (CanCrushInCombat(pVictim))
+            die.chance[UNIT_COMBAT_DIE_CRUSH] = uint32(CalculateEffectiveCrushChance(pVictim, attType) * 100);
+        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: New attack die: [MISS:%u, DODGE:%u, PARRY:%u, BLOCK:%u, GLANCE:%u, CRIT:%u, CRUSH:%u]",
+                         die.chance[UNIT_COMBAT_DIE_MISS], die.chance[UNIT_COMBAT_DIE_DODGE], die.chance[UNIT_COMBAT_DIE_PARRY], die.chance[UNIT_COMBAT_DIE_BLOCK],
+                         die.chance[UNIT_COMBAT_DIE_GLANCE], die.chance[UNIT_COMBAT_DIE_CRIT], die.chance[UNIT_COMBAT_DIE_CRUSH]);
     }
 
-    if (pVictim->CanParryInCombat(this))
+    const uint32 random = urand(1, 10000);
+    const UnitCombatDieSide side = die.roll(random);
+    if (side != UNIT_COMBAT_DIE_HIT)
+        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: Rolled %u, result: %s (chance %u)", random, UnitCombatDieSideText(side), die.chance[side]);
+    switch (uint32(side))
     {
-        int32 parry_chance = int32(pVictim->CalculateEffectiveParryChance(this, attType) * 100);
-        if (parry_chance > 0 && roll < (sum += parry_chance))
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum - parry_chance, parry_chance);
-            return MELEE_HIT_PARRY;
-        }
+        case UNIT_COMBAT_DIE_MISS:   return MELEE_HIT_MISS;
+        case UNIT_COMBAT_DIE_DODGE:  return MELEE_HIT_DODGE;
+        case UNIT_COMBAT_DIE_PARRY:  return MELEE_HIT_PARRY;
+        case UNIT_COMBAT_DIE_BLOCK:  return MELEE_HIT_BLOCK;
+        case UNIT_COMBAT_DIE_GLANCE: return MELEE_HIT_GLANCING;
+        case UNIT_COMBAT_DIE_CRIT:   return MELEE_HIT_CRIT;
+        case UNIT_COMBAT_DIE_CRUSH:  return MELEE_HIT_CRUSHING;
     }
-
-    if (pVictim->CanBlockInCombat(this, schoolMask))
-    {
-        int32 block_chance = int32(pVictim->CalculateEffectiveBlockChance(this, attType) * 100);
-        if (block_chance > 0 && roll < (sum += block_chance))
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum - block_chance, block_chance);
-            return MELEE_HIT_BLOCK;
-        }
-    }
-
-    if (CanGlanceInCombat(pVictim))
-    {
-        int32 glancing_chance = int32(CalculateEffectiveGlanceChance(pVictim, attType) * 100);
-        if (glancing_chance > 0 && roll < (sum += glancing_chance))
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum - glancing_chance, glancing_chance);
-            return MELEE_HIT_GLANCING;
-        }
-    }
-
-    // Critical hit chance
-    if (int32 crit_chance = int32(CalculateEffectiveCritChance(pVictim, attType) * 100))
-    {
-        if (crit_chance > 0 && roll < (sum += crit_chance))
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: CRIT <%d, %d)", sum - crit_chance, crit_chance);
-            return MELEE_HIT_CRIT;
-        }
-    }
-
-    if (CanCrushInCombat(pVictim))
-    {
-        int32 crushing_chance = int32(CalculateEffectiveCrushChance(pVictim, attType) * 100);
-        if (crushing_chance > 0 && roll < (sum += crushing_chance))
-        {
-            DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: CRUSHING %d)", crushing_chance);
-            return MELEE_HIT_CRUSHING;
-        }
-    }
-
-    DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: NORMAL");
+    DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "RollMeleeOutcomeAgainst: Rolled %u, result: HIT", random);
     return MELEE_HIT_NORMAL;
 }
 
@@ -2469,46 +2420,37 @@ void Unit::SendMeleeAttackStop(Unit* victim) const
 // Melee based spells hit result calculations
 SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell)
 {
-    const uint32 roll = urand(1, 10000);
-    uint32 tmp = 0;
-
-    tmp += uint32(CalculateAbilityMissChance(pVictim, GetWeaponAttackType(spell), spell) * 100.0f);
-    if (roll < tmp)
-        return SPELL_MISS_MISS;
-
-    tmp += uint32(CalculateSpellResistChance(pVictim, SPELL_SCHOOL_MASK_NORMAL, spell) * 100);
-    if (roll < tmp)
-        return SPELL_MISS_RESIST;
-
+    Die<UnitCombatDieSide, UNIT_COMBAT_DIE_HIT, NUM_UNIT_COMBAT_DIE_SIDES> die;
+    die.chance[UNIT_COMBAT_DIE_MISS] = uint32(CalculateAbilityMissChance(pVictim, GetWeaponAttackType(spell), spell) * 100);
+    die.chance[UNIT_COMBAT_DIE_RESIST] = uint32(CalculateSpellResistChance(pVictim, SPELL_SCHOOL_MASK_NORMAL, spell) * 100);
     if (pVictim->CanReactOnAbility(spell))
     {
         if (pVictim->CanDodgeAbility(this, spell))
-        {
-            tmp += uint32(pVictim->CalculateAbilityDodgeChance(this, spell) * 100);
-            if (roll < tmp)
-                return SPELL_MISS_DODGE;
-        }
+           die.chance[UNIT_COMBAT_DIE_DODGE] = uint32(pVictim->CalculateAbilityDodgeChance(this, spell) * 100);
         if (pVictim->CanParryAbility(this, spell))
-        {
-            tmp += uint32(pVictim->CalculateAbilityParryChance(this, spell) * 100);
-            if (roll < tmp)
-                return SPELL_MISS_PARRY;
-        }
-
+           die.chance[UNIT_COMBAT_DIE_PARRY] = uint32(pVictim->CalculateAbilityParryChance(this, spell) * 100);
         if (pVictim->CanDeflectAbility(this, spell))
-        {
-            tmp += uint32(pVictim->CalculateAbilityDeflectChance(this, spell) * 100);
-            if (roll < tmp)
-                return SPELL_MISS_DEFLECT;
-        }
-
+           die.chance[UNIT_COMBAT_DIE_DEFLECT] = uint32(pVictim->CalculateAbilityDeflectChance(this, spell) * 100);
         if (pVictim->CanBlockAbility(this, spell, true))
-        {
-            tmp += uint32(pVictim->CalculateAbilityBlockChance(this, spell) * 100);
-            if (roll < tmp)
-                return SPELL_MISS_BLOCK;
-        }
+           die.chance[UNIT_COMBAT_DIE_BLOCK] = uint32(pVictim->CalculateAbilityBlockChance(this, spell) * 100);
     }
+    DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "MeleeSpellHitResult: New ability hit die: %u [MISS:%u, RESIST:%u, DODGE:%u, PARRY:%u, DEFLECT:%u, BLOCK:%u]", spell->Id,
+                     die.chance[UNIT_COMBAT_DIE_MISS], die.chance[UNIT_COMBAT_DIE_RESIST], die.chance[UNIT_COMBAT_DIE_DODGE],
+                     die.chance[UNIT_COMBAT_DIE_PARRY], die.chance[UNIT_COMBAT_DIE_DEFLECT], die.chance[UNIT_COMBAT_DIE_BLOCK]);
+    const uint32 random = urand(1, 10000);
+    const UnitCombatDieSide side = die.roll(random);
+    if (side != UNIT_COMBAT_DIE_HIT)
+        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "MeleeSpellHitResult: Rolled %u, result: %s (chance %u)", random, UnitCombatDieSideText(side), die.chance[side]);
+    switch (uint32(side))
+    {
+        case UNIT_COMBAT_DIE_MISS:      return SPELL_MISS_MISS;
+        case UNIT_COMBAT_DIE_RESIST:    return SPELL_MISS_RESIST;
+        case UNIT_COMBAT_DIE_DODGE:     return SPELL_MISS_DODGE;
+        case UNIT_COMBAT_DIE_PARRY:     return SPELL_MISS_PARRY;
+        case UNIT_COMBAT_DIE_DEFLECT:   return SPELL_MISS_DEFLECT;
+        case UNIT_COMBAT_DIE_BLOCK:     return SPELL_MISS_BLOCK;
+    }
+    DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "MeleeSpellHitResult: Rolled %u, result: HIT", random);
     return SPELL_MISS_NONE;
 }
 
@@ -2519,17 +2461,27 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell)
         return SPELL_MISS_NONE;
 
     const SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
-    const uint32 rand = urand(1, 10000);
-    uint32 tmp = 0;
 
-    tmp += uint32(CalculateSpellMissChance(pVictim, schoolMask, spell) * 100);
-    if (rand < tmp)
-        return SPELL_MISS_RESIST;
-
-    tmp += uint32(CalculateSpellResistChance(pVictim, schoolMask, spell) * 100);
-    if (rand < tmp)
-        return SPELL_MISS_RESIST;
-
+    Die<UnitCombatDieSide, UNIT_COMBAT_DIE_HIT, NUM_UNIT_COMBAT_DIE_SIDES> die;
+    die.chance[UNIT_COMBAT_DIE_MISS] = uint32(CalculateSpellMissChance(pVictim, schoolMask, spell) * 100);
+    die.chance[UNIT_COMBAT_DIE_RESIST] = uint32(CalculateSpellResistChance(pVictim, schoolMask, spell) * 100);
+    /* Deflect for spells is currently unused up until WotLK, commented out for performance
+    if (pVictim->CanDeflectAbility(this, spell))
+       die.chance[UNIT_COMBAT_DIE_DEFLECT] = uint32(pVictim->CalculateAbilityDeflectChance(this, spell) * 100);
+    */
+    DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "MagicSpellHitResult: New spell hit die: %u [MISS:%u, RESIST:%u, DEFLECT:%u]", spell->Id,
+                     die.chance[UNIT_COMBAT_DIE_MISS], die.chance[UNIT_COMBAT_DIE_RESIST], die.chance[UNIT_COMBAT_DIE_DEFLECT]);
+    const uint32 random = urand(1, 10000);
+    const UnitCombatDieSide side = die.roll(random);
+    if (side != UNIT_COMBAT_DIE_HIT)
+        DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "MagicSpellHitResult: Rolled %u, result: %s (chance %u)", random, UnitCombatDieSideText(side), die.chance[side]);
+    switch (uint32(side))
+    {
+        case UNIT_COMBAT_DIE_MISS:      // Shows up as "Resist" up until WotLK
+        case UNIT_COMBAT_DIE_RESIST:    return SPELL_MISS_RESIST;
+        case UNIT_COMBAT_DIE_DEFLECT:   return SPELL_MISS_DEFLECT;
+    }
+    DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "MagicSpellHitResult: Rolled %u, result: HIT", random);
     return SPELL_MISS_NONE;
 }
 

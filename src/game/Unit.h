@@ -740,6 +740,41 @@ enum MeleeHitOutcome
     MELEE_HIT_BLOCK_CRIT = 9,
 };
 
+enum UnitCombatDieSide
+{
+    UNIT_COMBAT_DIE_MISS,
+    UNIT_COMBAT_DIE_RESIST,
+    UNIT_COMBAT_DIE_DODGE,
+    UNIT_COMBAT_DIE_PARRY,
+    UNIT_COMBAT_DIE_DEFLECT,
+    UNIT_COMBAT_DIE_BLOCK,
+    UNIT_COMBAT_DIE_GLANCE,
+    UNIT_COMBAT_DIE_CRIT,
+    UNIT_COMBAT_DIE_CRUSH,
+    UNIT_COMBAT_DIE_HIT,
+};
+
+#define NUM_UNIT_COMBAT_DIE_SIDES (UNIT_COMBAT_DIE_HIT + 1)
+
+// A little helper func for a nice attack table debug output
+inline const char* UnitCombatDieSideText(UnitCombatDieSide side)
+{
+    switch (side)
+    {
+        case UNIT_COMBAT_DIE_MISS:    return "MISS";
+        case UNIT_COMBAT_DIE_RESIST:  return "RESIST";
+        case UNIT_COMBAT_DIE_DODGE:   return "DODGE";
+        case UNIT_COMBAT_DIE_PARRY:   return "PARRY";
+        case UNIT_COMBAT_DIE_DEFLECT: return "DEFLECT";
+        case UNIT_COMBAT_DIE_BLOCK:   return "BLOCK";
+        case UNIT_COMBAT_DIE_GLANCE:  return "GLANCE";
+        case UNIT_COMBAT_DIE_CRIT:    return "CRIT";
+        case UNIT_COMBAT_DIE_CRUSH:   return "CRUSH";
+        case UNIT_COMBAT_DIE_HIT:     return "HIT";
+    }
+    return "INVALID";
+}
+
 struct CleanDamage
 {
     CleanDamage(uint32 _damage, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome) :
