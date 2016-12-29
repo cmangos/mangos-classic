@@ -786,6 +786,7 @@ void WorldSession::HandleUnstablePet(WorldPacket& recv_data)
             SqlStatement ChangePetSlot = CharacterDatabase.CreateStatement(ChangePetSlot_ID, "UPDATE character_pet SET slot = ? WHERE owner = ? AND slot = ? ");
             ChangePetSlot.PExecute(slot, _player->GetObjectGuid().GetCounter(), uint32(PET_SAVE_AS_CURRENT));
             CharacterDatabase.CommitTransaction();
+            _player->SetTemporaryUnsummonedPetNumber(0);
         }
     }
 
