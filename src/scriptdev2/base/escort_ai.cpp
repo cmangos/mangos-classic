@@ -307,7 +307,7 @@ void npc_escortAI::Start(bool bRun, const Player* pPlayer, const Quest* pQuest, 
 
     if (!pSystemMgr.GetPathInfo(m_creature->GetEntry(), 1))
     {
-        script_error_log("EscortAI attempt to start escorting for %s, but has no waypints loaded", m_creature->GetGuidStr().c_str());
+        script_error_log("EscortAI attempt to start escorting for %s, but has no waypoints loaded", m_creature->GetGuidStr().c_str());
         return;
     }
 
