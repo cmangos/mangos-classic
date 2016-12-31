@@ -6639,3 +6639,204 @@ bool ChatHandler::HandleServerResetAllRaidCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleLinkAddCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+
+    if (!player->GetSelectionGuid())
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 masterCounter;
+    if (!ExtractUInt32(&args, masterCounter))
+        return false;
+
+    uint32 flags;
+    if (!ExtractUInt32(&args, flags))
+        return false;
+
+    if (QueryResult* result = WorldDatabase.PQuery("SELECT flag FROM creature_linking WHERE guid = '%u' AND master_guid = '%u'", player->GetSelectionGuid().GetCounter(), masterCounter))
+    {
+        Field* fields = result->Fetch();
+        uint32 flag = fields[0].GetUInt32();
+        PSendSysMessage("Link already exists with flag = %u", flag);
+        delete result;
+    }
+    else
+    {
+        WorldDatabase.PExecute("INSERT INTO creature_linking(guid,master_guid,flag) VALUES('%u','%u','%u')", player->GetSelectionGuid().GetCounter(), masterCounter, flags);
+        PSendSysMessage("Created link for guid = %u , master_guid = %u and flags = %u", player->GetSelectionGuid().GetCounter(), masterCounter, flags);
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleLinkRemoveCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+
+    if (!player->GetSelectionGuid())
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 masterCounter;
+    if (!ExtractUInt32(&args, masterCounter))
+        return false;
+
+    if (QueryResult* result = WorldDatabase.PQuery("SELECT flag FROM creature_linking WHERE guid = '%u' AND master_guid = '%u'", player->GetSelectionGuid().GetCounter(), masterCounter))
+    {
+        delete result;
+        WorldDatabase.PExecute("DELETE FROM creature_linking WHERE guid = '%u' AND master_guid = '%u'", player->GetSelectionGuid().GetCounter(), masterCounter);
+        PSendSysMessage("Deleted link for guid = %u and master_guid = %u", player->GetSelectionGuid().GetCounter(), masterCounter);
+    }
+    else
+        SendSysMessage("Link does not exist.");
+
+    return true;
+}
+
+bool ChatHandler::HandleLinkEditCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+
+    if (!player->GetSelectionGuid())
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 masterCounter;
+    if (!ExtractUInt32(&args, masterCounter))
+        return false;
+
+    uint32 flags;
+    if (!ExtractUInt32(&args, flags))
+        return false;
+
+    if (QueryResult* result = WorldDatabase.PQuery("SELECT flag FROM creature_linking WHERE guid = '%u' AND master_guid = '%u'", player->GetSelectionGuid().GetCounter(), masterCounter))
+    {
+        delete result;
+            
+        if (flags)
+        {
+            WorldDatabase.PExecute("UPDATE creature_linking SET flags = flags | '%u' WHERE guid = '%u' AND master_guid = '%u'", flags, player->GetSelectionGuid().GetCounter(), masterCounter);
+            SendSysMessage("Flag added to link.");
+        }
+        else
+        {
+            WorldDatabase.PExecute("DELETE FROM creature_linking WHERE guid = '%u' AND master_guid = '%u')", player->GetSelectionGuid().GetCounter(), masterCounter);
+            SendSysMessage("Link removed.");
+        }
+    }
+    else
+    {
+        if (flags)
+        {
+            WorldDatabase.PExecute("INSERT INTO creature_linking(guid,master_guid,flags) VALUES('%u','%u','%u')", player->GetSelectionGuid().GetCounter(), masterCounter, flags);
+            SendSysMessage("Link did not exist. Inserted link");
+        }
+        else
+            SendSysMessage("Link does not exist.");
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleLinkToggleCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+
+    if (!player->GetSelectionGuid())
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 masterCounter;
+    if (!ExtractUInt32(&args, masterCounter))
+        return false;
+
+    uint32 flags;
+    if (!ExtractUInt32(&args, flags))
+        return false;
+
+    uint32 toggle; // 0 add flags, 1 remove flags
+    if (!ExtractUInt32(&args, toggle))
+        return false;
+
+    if (QueryResult* result = WorldDatabase.PQuery("SELECT flag FROM creature_linking WHERE guid = '%u' AND master_guid = '%u'", player->GetSelectionGuid().GetCounter(), masterCounter))
+    {
+        delete result;
+        if (toggle)
+        {
+            WorldDatabase.PExecute("UPDATE creature_linking SET flags = flags &~ '%u' WHERE guid = '%u' AND master_guid = '%u'", flags, player->GetSelectionGuid().GetCounter(), masterCounter);
+            SendSysMessage("Flag removed from link.");
+        }
+        else
+        {
+            WorldDatabase.PExecute("UPDATE creature_linking SET flags = flags | '%u' WHERE guid = '%u' AND master_guid = '%u'", flags, player->GetSelectionGuid().GetCounter(), masterCounter);
+            SendSysMessage("Flag added to link.");
+        }
+    }
+    else
+    {
+        if (toggle)
+            SendSysMessage("Link does not exist. No changes done.");
+        else
+        {
+            WorldDatabase.PExecute("INSERT INTO creature_linking(guid,master_guid,flags) VALUES('%u','%u','%u')", player->GetSelectionGuid().GetCounter(), masterCounter, flags);
+            SendSysMessage("Link did not exist, added.");
+        }
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleLinkCheckCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+
+    if (!player->GetSelectionGuid())
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 masterCounter;
+    if (!ExtractUInt32(&args, masterCounter))
+        return false;
+
+    bool found = false;
+
+    if (QueryResult* result = WorldDatabase.PQuery("SELECT flag FROM creature_linking WHERE guid = '%u' AND master_guid = '%u'", player->GetSelectionGuid().GetCounter(), masterCounter))
+    {
+        Field* fields = result->Fetch();
+        uint32 flags = fields[0].GetUInt32();
+        PSendSysMessage("Link for guid = %u , master_guid = %u has flags = %u", player->GetSelectionGuid().GetCounter(), masterCounter, flags);
+        delete result;
+        found = true;
+    }
+
+    if (QueryResult* result = WorldDatabase.PQuery("SELECT flag FROM creature_linking WHERE guid = '%u' AND master_guid = '%u'", masterCounter, player->GetSelectionGuid().GetCounter()))
+    {
+        Field* fields = result->Fetch();
+        uint32 flags = fields[0].GetUInt32();
+        PSendSysMessage("Link for guid = %u , master_guid = %u has flags = %u", masterCounter, player->GetSelectionGuid().GetCounter(), flags);
+        delete result;
+        found = true;
+    }
+
+    if (!found)
+        PSendSysMessage("Link for guids = %u , %u not found", masterCounter, player->GetSelectionGuid().GetCounter());
+
+    return true;
+}
