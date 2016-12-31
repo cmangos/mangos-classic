@@ -1123,7 +1123,6 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
     const bool related = (entry->SpellFamilyName == entry2->SpellFamilyName);
     const bool siblings = (entry->SpellFamilyFlags == entry2->SpellFamilyFlags);
     const bool player = (entry->SpellFamilyName && !entry->SpellFamilyFlags.Empty());
-    const bool player2 = (entry2->SpellFamilyName && !entry2->SpellFamilyFlags.Empty());
     const bool multirank = (related && siblings && player);
     const bool instance = (entry->Id == entry2->Id || multirank);
 
@@ -1206,6 +1205,8 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
             if (positive && entry->EffectMiscValue[i] == entry2->EffectMiscValue[similar] &&
                     ((entry->DmgClass && entry->DmgClass == entry2->DmgClass) || entry->HasAttribute(SPELL_ATTR_CANT_CANCEL)))
                 return false;
+            if (!positive && entry->EffectMiscValue[i] == entry2->EffectMiscValue[similar] && entry->Dispel == entry2->Dispel)
+                return false;
             break;
         case SPELL_AURA_MOD_HEALING_DONE:
         case SPELL_AURA_MOD_HEALING_PCT:
@@ -1263,8 +1264,8 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
     if (nonmui && instance && !IsChanneledSpell(entry) && !IsChanneledSpell(entry2))
         return false; // Forbids multi-ranking and multi-application on rule, exclude channeled spells (like Mind Flay)
 
-    if (multirank && IsPositiveSpell(entry) && IsPositiveSpell(entry2) && !entry->HasAttribute(SPELL_ATTR_EX2_UNK24))
-        return false; // Forbids multi-ranking for positive spells, excludes class weapon enchants (semi-hackish)
+    if (multirank && IsPositiveSpell(entry) && IsPositiveSpell(entry2))
+        return false; // Forbids multi-ranking for positive spells
 
     return true;
 }
