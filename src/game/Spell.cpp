@@ -4993,7 +4993,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 // chance for fail at orange mining/herb/LockPicking gathering attempt
                 // second check prevent fail at rechecks
-                if (m_spellState != SPELL_STATE_CREATED && skillId != SKILL_NONE)
+                if (m_spellState > SPELL_STATE_STARTING && skillId != SKILL_NONE)
                 {
                     bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING;
 
