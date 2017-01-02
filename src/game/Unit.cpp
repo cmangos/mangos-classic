@@ -169,26 +169,33 @@ static inline SpellPartialResistDistribution InitSpellPartialResistDistribution(
         {{0,0,100,200,9700}},
         {{0,0,0,0,10000}},
     };
-    // Inflate up to two decimal places of chance %: add intermediate values
-    SpellPartialResistDistribution inflated;
-    for (size_t index = 0; index < precalculated.size(); ++index)
+    // Inflate up to two decimal places of chance %: add all intermediate values and 100% value (100*100 + 1)
+    SpellPartialResistDistribution inflated(10001, {{}});
+    for (size_t row = 0; row < precalculated.size(); ++row)
     {
-        for (uint8 intermediate = 0; intermediate < 100; ++intermediate)
+        const size_t next = (row + 1);
+        const size_t shift = (row * 100);
+        const auto &source = precalculated.at(row);
+        // Check if this is the last one first
+        if (next == precalculated.size())
         {
-            // Check if this is the last one first
-            if ((index + 1) == precalculated.size())
-            {
-                inflated.push_back(precalculated[index]);
-                break;
-            }
-            SpellPartialResistChanceEntry values;
+            for (uint8 column = SPELL_PARTIAL_RESIST_NONE; column < NUM_SPELL_PARTIAL_RESISTS; ++column)
+                inflated[shift][column] = source.at(column);
+            break;
+        }
+        const auto &ahead = precalculated.at(next);
+        for (size_t intermediate = 0; intermediate < 100; ++intermediate)
+        {
+            const size_t index = (shift + intermediate);
+            auto &values = inflated[index];
             for (uint8 column = SPELL_PARTIAL_RESIST_NONE; column < NUM_SPELL_PARTIAL_RESISTS; ++column)
             {
-                const uint32 base = precalculated.at(index).at(column);
-                const uint32 next = precalculated.at(index + 1).at(column);
-                values[column] = base + ((next - base) * intermediate / 100);
+                const uint32 base = source.at(column);
+                const uint32 upcoming = ahead.at(column);
+                const int64 diff = (int64(upcoming) - base);
+                // Use bigger types signed math to avoid potential erratic behavior on some compilers...
+                values[column] = uint32(std::max(0.0, (base + std::round(diff * (intermediate / double(100.0))))));
             }
-            inflated.push_back(values);
         }
     }
     return inflated;
