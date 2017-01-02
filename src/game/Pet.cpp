@@ -1375,21 +1375,18 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     SetCreateHealth(health);
     SetMaxHealth(health);
     SetHealth(health);
-    SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, health);
 
     // Set mana
     SetCreateMana(mana);
     SetMaxPower(POWER_MANA, mana);
     SetPower(POWER_MANA, mana);
-    SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, mana);
 
     // Remove rage bar from pets (By setting rage = 0, and ensuring it stays that way by setting max rage = 0 as well)
     SetMaxPower(POWER_RAGE, 0);
     SetPower(POWER_RAGE, 0);
-    SetModifierValue(UNIT_MOD_RAGE, BASE_VALUE, 0);
 
     // Set armor
-    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, armor);
+    SetArmor(armor);
 
     return;
 }
