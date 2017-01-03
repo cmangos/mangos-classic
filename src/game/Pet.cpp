@@ -350,6 +350,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     LearnPetPassives();
     CastPetAuras(current);
     CastOwnerTalentAuras();
+    InitTamedPetPassives(owner);
 
     // failsafe check
     savedhealth = savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth;
@@ -2190,4 +2191,40 @@ void Pet::SetModeFlags(PetModeFlags mode)
     data << GetObjectGuid();
     data << uint32(m_petModeFlags);
     ((Player*)owner)->GetSession()->SendPacket(data);
+}
+
+void Pet::InitTamedPetPassives(Unit* player)
+{
+    switch (player->getClass())
+    {
+        case CLASS_HUNTER:
+        {
+            // case 13481: Tame Beast
+            player->CastSpell(this, 8875, TRIGGERED_OLD_TRIGGERED);
+            break;
+        }
+        case CLASS_WARLOCK:
+        {
+            switch (GetUInt32Value(UNIT_CREATED_BY_SPELL))
+            {
+                case 688: // imp
+                    player->CastSpell(this, 18728, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                case 691: // felhunter
+                    player->CastSpell(this, 18730, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                case 697: // voidwalker
+                    player->CastSpell(this, 18727, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                case 712: // succubus
+                    player->CastSpell(this, 18729, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                default:
+                    break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
 }

@@ -290,6 +290,8 @@ class MANGOS_DLL_SPEC Pet : public Creature
         virtual CreatureAI* AI() override { if (hasUnitState(UNIT_STAT_CONTROLLED) && m_charmInfo->GetAI()) return m_charmInfo->GetAI(); else return m_ai.get(); }
         virtual CombatData* GetCombatData() override { return m_combatData; }
 
+        void InitTamedPetPassives(Unit* player);
+
     protected:
         uint32  m_happinessTimer;
         uint32  m_loyaltyTimer;
