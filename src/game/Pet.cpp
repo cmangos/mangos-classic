@@ -351,6 +351,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     CastPetAuras(current);
     CastOwnerTalentAuras();
     InitTamedPetPassives(owner);
+    UpdateAllStats();
 
     // failsafe check
     savedhealth = savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth;
