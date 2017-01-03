@@ -308,32 +308,6 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     uint32 savedpower = fields[14].GetUInt32();
     Powers powerType = GetPowerType();
 
-    // failsafe check
-    savedhealth = savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth;
-    savedpower = savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower;
-
-    if (getPetType() == SUMMON_PET)
-    {
-        savedhealth = GetMaxHealth();
-        savedpower = GetMaxPower(powerType);
-    }
-    else if (!savedhealth)
-    {
-        if (getPetType() == HUNTER_PET && healthPercentage)
-        {
-            savedhealth = GetMaxHealth() * (float(healthPercentage) / 100);
-            savedpower = 0;
-        }
-        else
-        {
-            delete result;
-            return false;
-        }
-    }
-
-    SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
-    SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
-
     // load action bar, if data broken will fill later by default spells.
     m_charmInfo->LoadPetActionBar(fields[16].GetCppString());
 
@@ -368,6 +342,32 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     LearnPetPassives();
     CastPetAuras(current);
     CastOwnerTalentAuras();
+
+    // failsafe check
+    savedhealth = savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth;
+    savedpower = savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower;
+
+    if (getPetType() == SUMMON_PET)
+    {
+        savedhealth = GetMaxHealth();
+        savedpower = GetMaxPower(powerType);
+    }
+    else if (!savedhealth)
+    {
+        if (getPetType() == HUNTER_PET && healthPercentage)
+        {
+            savedhealth = GetMaxHealth() * (float(healthPercentage) / 100);
+            savedpower = 0;
+        }
+        else
+        {
+            delete result;
+            return false;
+        }
+    }
+
+    SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
+    SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
 
     map->Add((Creature*)this);
     AIM_Initialize();
