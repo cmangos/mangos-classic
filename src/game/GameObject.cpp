@@ -348,12 +348,33 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                     }
 
                     // Should trap trigger?
-                    Unit* enemy = nullptr;                     // pointer to appropriate target if found any
-                    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
-                    MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(enemy, u_check);
-                    Cell::VisitAllObjects(this, checker, radius);
-                    if (enemy)
-                        Use(enemy);
+                    Unit* target = nullptr;                     // pointer to appropriate target if found any
+                    switch (goInfo->trapCustom.triggerOn)
+                    {
+                        case 1: // friendly
+                        {
+                            MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, radius);
+                            MaNGOS::UnitSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> checker(target, u_check);
+                            Cell::VisitAllObjects(this, checker, radius);
+                            break;
+                        }
+                        case 2: // all
+                        {
+                            MaNGOS::AnyUnitInObjectRangeCheck u_check(this, radius);
+                            MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck> checker(target, u_check);
+                            Cell::VisitAllObjects(this, checker, radius);
+                            break;
+                        }
+                        default: // unfriendly
+                        {
+                            MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, radius);
+                            MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(target, u_check);
+                            Cell::VisitAllObjects(this, checker, radius);
+                            break;
+                        }
+                    }
+                    if (target && (!goInfo->trapCustom.triggerOn || !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))) // do not trigger on hostile traps if not selectable
+                        Use(target);
                 }
 
                 if (uint32 max_charges = goInfo->GetCharges())
@@ -1152,7 +1173,7 @@ void GameObject::Use(Unit* user)
             // Some may have have animation and/or are expected to despawn.
 
             // TODO: Improve this when more information is available, currently these traps are known that must send the anim (Onyxia/ Heigan Fissures/ Trap in DireMaul)
-            if (GetDisplayId() == 4392 || GetDisplayId() == 4472 || GetDisplayId() == 4491 || GetDisplayId() == 6785 || GetDisplayId() == 3073)
+            if (goInfo->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_CUSTOM_ANIM_ON_USE)
                 SendGameObjectCustomAnim(GetObjectGuid());
 
             // TODO: Despawning of traps? (Also related to code in ::Update)
@@ -1244,8 +1265,8 @@ void GameObject::Use(Unit* user)
             SetLootState(GO_ACTIVATED);
 
             // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
-            if (info->goober.customAnim)
-                SendGameObjectCustomAnim(GetObjectGuid());
+            if (info->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_CUSTOM_ANIM_ON_USE)
+                SendGameObjectCustomAnim(GetObjectGuid(), info->goober.customAnim);
             else
                 SetGoState(GO_STATE_ACTIVE);
 

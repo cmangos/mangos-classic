@@ -39,6 +39,7 @@ struct GameObjectInfo
     char*   name;
     uint32  faction;
     uint32  flags;
+    uint32  ExtraFlags;
     float   size;
     union                                                   // different GO types have different data field
     {
@@ -339,6 +340,20 @@ struct GameObjectInfo
         } raw;
     };
 
+    union
+    {
+        //6 GAMEOBJECT_TYPE_TRAP
+        struct
+        {
+            uint32 triggerOn;
+        } trapCustom;
+
+        struct
+        {
+            uint32 data[1];
+        } rawCustom;
+    };
+
     uint32 MinMoneyLoot;
     uint32 MaxMoneyLoot;
     uint32 ScriptId;
@@ -525,6 +540,11 @@ enum CapturePointSliderValue
     CAPTURE_SLIDER_ALLIANCE         = 100,                  // full alliance
     CAPTURE_SLIDER_HORDE            = 0,                    // full horde
     CAPTURE_SLIDER_MIDDLE           = 50                    // middle
+};
+
+enum GameobjectExtraFlags
+{
+    GAMEOBJECT_EXTRA_FLAG_CUSTOM_ANIM_ON_USE = 0x00000001,    // GO that plays custom animation on usage
 };
 
 class Unit;
