@@ -3154,12 +3154,10 @@ void Spell::finish(bool ok)
         {
             switch (ihit->missCondition)
             {
-                case SPELL_MISS_MISS:
-                case SPELL_MISS_DODGE:
+                case SPELL_MISS_DEFLECT:
                 case SPELL_MISS_PARRY:
                 {
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER ||
-                        m_caster->GetTypeId() == TYPEID_UNIT && m_caster->GetCharmerOrOwner() && m_caster->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
+                    if (m_caster->GetCharmerOrOwnerOrOwnGuid().IsPlayer())
                         m_caster->ModifyPower(Powers(m_spellInfo->powerType), int32(m_powerCost * 0.8));
                     break;
                 }
