@@ -2586,12 +2586,20 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
     // set timer for unsummon
     int32 duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
-    // Search old Guardian only for players (if casted spell not have duration or cooldown)
-    // FIXME: some guardians have control spell applied and controlled by player and anyway player can't summon in this time
-    //        so this code hack in fact
-    if (m_caster->GetTypeId() == TYPEID_PLAYER && (duration <= 0 || GetSpellRecoveryTime(m_spellInfo) == 0))
-        if (m_caster->FindGuardianWithEntry(pet_entry))
-            return;                                         // find old guardian, ignore summon
+    // second direct cast unsummon guardian(s) (guardians without like functionality have cooldown > spawn time)
+    if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        bool found = false;
+        // including protector
+        while (Pet* old_summon = m_caster->FindGuardianWithEntry(pet_entry))
+        {
+            old_summon->Unsummon(PET_SAVE_AS_DELETED, m_caster);
+            found = true;
+        }
+
+        if (found && !(m_spellInfo->DurationIndex && m_spellInfo->Category))
+            return;
+    }
 
     // Get casting object
     WorldObject* realCaster = GetCastingObject();
