@@ -1178,7 +1178,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (unitTarget)
                         if (SpellEntry const* spell_proto = sSpellTemplate.LookupEntry<SpellEntry>(m_currentBasePoints[eff_idx]))
                         {
-                            if (!unitTarget->IsIncapacitated() && m_caster->GetTypeId() == TYPEID_PLAYER)
+                            if (!unitTarget->IsStunned() && m_caster->GetTypeId() == TYPEID_PLAYER)
                             {
                                 // decreased damage (/2) for non-stunned target.
                                 SpellModifier* mod = new SpellModifier(SPELLMOD_DAMAGE, SPELLMOD_PCT, -50, m_spellInfo->Id, uint64(0x0000020000000000));
