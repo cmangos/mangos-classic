@@ -3821,7 +3821,12 @@ void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
 
     // Vanish allows to remove all threat and cast regular stealth so other spells can be used
     if (m_spellInfo->IsFitToFamily(SPELLFAMILY_ROGUE, uint64(0x0000000000000800)))
-        ((Player*)m_caster)->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
+    {
+        MANGOS_ASSERT(m_caster->GetTypeId() == TYPEID_PLAYER);
+        Player* casterPlayer = static_cast<Player*>(m_caster);
+        casterPlayer->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
+        casterPlayer->SetCannotBeDetectedTimer(1000);
+    }
 }
 
 void Spell::EffectAddComboPoints(SpellEffectIndex /*eff_idx*/)

@@ -528,6 +528,8 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 
     m_lastFallTime = 0;
     m_lastFallZ = 0;
+
+    m_cannotBeDetectedTimer = 0;
 }
 
 Player::~Player()
@@ -1225,6 +1227,9 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         else
             m_zoneUpdateTimer -= update_diff;
     }
+
+    if (m_cannotBeDetectedTimer > 0)
+        m_cannotBeDetectedTimer -= update_diff;
 
     if (isAlive())
     {
