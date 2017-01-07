@@ -1371,22 +1371,18 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     // Apply custom health setting (from config)
     health *= _GetHealthMod(cInfo->Rank);
 
-    // Need to update stats before setting health and power or it will bug out in-game displaying it as the mob missing about 2/3
-    UpdateAllStats();
-
     // A pet cannot not have health
     if (health < 1)
         health = 1;
 
-    // Set health
     SetCreateHealth(health);
-    SetMaxHealth(health);
-    SetHealth(health);
-
-    // Set mana
     SetCreateMana(mana);
-    SetMaxPower(POWER_MANA, mana);
-    SetPower(POWER_MANA, mana);
+
+    // Need to update stats - calculates max health/mana etc
+    UpdateAllStats();
+
+    // Need to set Health to full
+    SetHealth(GetMaxHealth());
 
     // Remove rage bar from pets (By setting rage = 0, and ensuring it stays that way by setting max rage = 0 as well)
     SetMaxPower(POWER_RAGE, 0);
