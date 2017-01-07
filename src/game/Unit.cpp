@@ -9081,12 +9081,12 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
     // Update incapacitated movement if required:
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED))
     {
-        StopMoving();
+        StopMoving(true);
         GetMotionMaster()->MoveConfused();
     }
     else if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING))
     {
-        StopMoving();
+        StopMoving(true);
         GetMotionMaster()->MoveFleeing(IsInWorld() ?  GetMap()->GetUnit(casterGuid) : nullptr, time);
     }
 }
