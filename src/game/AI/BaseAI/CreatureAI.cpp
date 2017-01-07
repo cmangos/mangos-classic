@@ -139,7 +139,7 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
                 pCaster->InterruptNonMeleeSpells(false);
 
             // Creature should always stop before it will cast a non-instant spell
-            if (GetSpellCastTime(pSpell))
+            if (GetSpellCastTime(pSpell) || (IsChanneledSpell(pSpell) && pSpell->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT))
                 pCaster->StopMoving();
 
             // Creature should interrupt any current melee spell
