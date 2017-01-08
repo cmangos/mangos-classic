@@ -1306,7 +1306,7 @@ class Unit : public WorldObject
          * @return false if we weren't attacking already, true otherwise
          * \see Unit::m_attacking
          */
-        bool AttackStop(bool targetSwitch = false, bool includingCast = false);
+        virtual bool AttackStop(bool targetSwitch = false, bool includingCast = false, bool includingCombo = false);
         /**
          * Removes all attackers from the Unit::m_attackers set and logs it if someone that
          * wasn't attacking it was in the list. Does this check by checking if Unit::AttackStop()
@@ -1321,7 +1321,7 @@ class Unit : public WorldObject
         bool isAttackingPlayer() const;                     //< Returns if this unit is attacking a player (or this unit's minions/pets are attacking a player)
 
         Unit* getVictim() const { return m_attacking; }     //< Returns the victim that this unit is currently attacking
-        void CombatStop(bool includingCast = false);        //< Stop this unit from combat, if includingCast==true, also interrupt casting
+        void CombatStop(bool includingCast = false, bool includingCombo = true);        //< Stop this unit from combat, if includingCast==true, also interrupt casting
         void CombatStopWithPets(bool includingCast = false);
         void StopAttackFaction(uint32 faction_id);
         Unit* SelectRandomUnfriendlyTarget(Unit* except = nullptr, float radius = ATTACK_DISTANCE) const;

@@ -5564,7 +5564,7 @@ void Unit::AttackedBy(Unit* attacker)
         pet->AttackedBy(attacker);
 }
 
-bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= false*/)
+bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= false*/, bool includingCombo /*= false*/)
 {
     // interrupt cast only id includingCast == true and we have something to interrupt.
     if (includingCast && IsNonMeleeSpellCasted(false))
@@ -5589,9 +5589,9 @@ bool Unit::AttackStop(bool targetSwitch /*= false*/, bool includingCast /*= fals
     return false;
 }
 
-void Unit::CombatStop(bool includingCast)
+void Unit::CombatStop(bool includingCast, bool includingCombo)
 {
-    AttackStop(true, includingCast);
+    AttackStop(true, includingCast, includingCombo);
     RemoveAllAttackers();
 
     if (GetTypeId() == TYPEID_PLAYER)
