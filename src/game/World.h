@@ -416,8 +416,11 @@ class World
         // player Queue
         typedef std::list<WorldSession*> Queue;
         void AddQueuedSession(WorldSession*);
+        void ReplaceQueuedSession(WorldSession* sess_old, WorldSession* sess_new);
         bool RemoveQueuedSession(WorldSession* session);
         int32 GetQueuedSessionPos(WorldSession*);
+        bool SessionShouldBeQueued(WorldSession* s);
+        WorldSession* AccountHasSession(uint32 accountId);
 
         /// \todo Actions on m_allowMovement still to be implemented
         /// Is movement allowed?
@@ -643,6 +646,10 @@ class World
 
         // List of Maps that should be force-loaded on startup
         std::set<uint32> m_configForceLoadMapIds;
+
+    void NotifyQueuedSessions(uint32 start);
+
+    void PopSessionFromQueue();
 };
 
 extern uint32 realmID;

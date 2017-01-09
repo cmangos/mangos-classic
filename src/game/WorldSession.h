@@ -151,6 +151,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SetPlayer(Player* plr) { _player = plr; }
 
         /// Session in auth.queue currently
+        bool GetInQueue() { return m_inQueue; }
         void SetInQueue(bool state) { m_inQueue = state; }
 
         /// Is the user engaged in a log out process?
