@@ -29,7 +29,7 @@ class PointMovementGenerator
         PointMovementGenerator(uint32 _id, float _x, float _y, float _z, bool _generatePath) :
             id(_id), i_x(_x), i_y(_y), i_z(_z), m_generatePath(_generatePath) {}
 
-        void Initialize(T&);
+        virtual void Initialize(T&);
         void Finalize(T&);
         void Interrupt(T&);
         void Reset(T& unit);
@@ -54,6 +54,7 @@ class AssistanceMovementGenerator
             PointMovementGenerator<Creature>(0, _x, _y, _z, true) {}
 
         MovementGeneratorType GetMovementGeneratorType() const override { return ASSISTANCE_MOTION_TYPE; }
+        void Initialize(Creature&) override;
         void Finalize(Unit&) override;
 };
 

@@ -7719,7 +7719,7 @@ bool Unit::SelectHostileTarget()
 
     if (target)
     {
-        if (CanReactInCombat())
+        if (CanReactInCombat() && !hasUnitState(UNIT_STAT_DONT_TURN | UNIT_STAT_SEEKING_ASSISTANCE))
         {
             SetInFront(target);
             if (oldTarget != target)

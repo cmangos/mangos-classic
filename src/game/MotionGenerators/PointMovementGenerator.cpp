@@ -109,9 +109,15 @@ template void PointMovementGenerator<Creature>::Reset(Creature&);
 template bool PointMovementGenerator<Player>::Update(Player&, const uint32& diff);
 template bool PointMovementGenerator<Creature>::Update(Creature&, const uint32& diff);
 
+void AssistanceMovementGenerator::Initialize(Creature& unit)
+{
+    unit.addUnitState(UNIT_STAT_SEEKING_ASSISTANCE);
+    PointMovementGenerator::Initialize(unit);
+}
+
 void AssistanceMovementGenerator::Finalize(Unit& unit)
 {
-    unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE | UNIT_STAT_SEEKING_ASSISTANCE);
 
     ((Creature*)&unit)->SetNoCallAssistance(false);
     ((Creature*)&unit)->CallAssistance();
