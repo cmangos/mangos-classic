@@ -101,6 +101,13 @@ SD2ErrorLogFile = "SD2Errors.log"
 #                -2 (for GM's and Admins only)
 #                -3 (for Admins only)
 #
+#    ReconnectGraceTime
+#        Time in seconds a player is able to get her or his spot in a realm login queue back,
+#        instead of being enqueued at the end of the list.
+#        This also implies that whenever a player disconnects (for whatever reason),
+#        the server waits 'ReconnectGraceTime' seconds before allowing another player in.
+#        Default: 0 (immediately remove the players sessions and potentially fill his spot)
+#
 #    SaveRespawnTimeImmediately
 #        Save respawn time for creatures at death and for gameobjects at use/open
 #        Default: 1 (save creature/gameobject respawn time without waiting grid unload)
@@ -217,6 +224,7 @@ UseProcessors = 0
 ProcessPriority = 1
 Compression = 1
 PlayerLimit = 100
+ReconnectGraceTime = 0
 SaveRespawnTimeImmediately = 1
 MaxOverspeedPings = 2
 GridUnload = 1

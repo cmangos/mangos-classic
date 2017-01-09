@@ -382,6 +382,7 @@ void World::LoadConfigSettings(bool reload)
 
     ///- Read the player limit and the Message of the day from the config file
     SetPlayerLimit(sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT), true);
+    setConfig(CONFIG_UINT32_RECONNECT_GRACE_TIME,     "ReconnectGraceTime",     0);
     SetMotd(sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server."));
 
     ///- Read all rates from the config file
@@ -1822,8 +1823,9 @@ void World::UpdateSessions(uint32 /*diff*/)
             // This means that is was previously marked for log out
             if(!pSession->isLogingOut()){
                 // if so, mark session as logging out with a logOut time in the near future
-                pSession->LogoutRequest(currTime+0-20);
-                DEBUG_LOG("Account %u lost session, keeping it around for re-connects for %us", pSession->GetAccountId(), 0);
+                pSession->LogoutRequest(currTime + getConfig(CONFIG_UINT32_RECONNECT_GRACE_TIME) - 20);
+                DEBUG_LOG("Account %u lost session, keeping it around for re-connects for %us",
+                          pSession->GetAccountId(), getConfig(CONFIG_UINT32_RECONNECT_GRACE_TIME));
             }
             else
             {
