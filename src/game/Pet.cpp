@@ -366,8 +366,8 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
         }
     }
 
-    SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
-    SetPower(powerType, savedpower > GetMaxPower(powerType) ? GetMaxPower(powerType) : savedpower);
+    SetHealth(savedhealth);
+    SetPower(powerType, savedpower);
 
     map->Add((Creature*)this);
     AIM_Initialize();
