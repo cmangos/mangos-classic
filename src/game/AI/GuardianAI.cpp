@@ -171,7 +171,7 @@ void GuardianAI::CombatStop()
 {
     Unit* owner = m_creature->GetOwner();
 
-    if (!owner)
+    if (!owner || !m_creature->IsInWorld())
         return;
 
     // only alive creatures that are not on transport can return to home position
