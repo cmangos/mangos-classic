@@ -360,10 +360,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
             savedpower = 0;
         }
         else
-        {
-            delete result;
             return false;
-        }
     }
 
     SetHealth(savedhealth);
