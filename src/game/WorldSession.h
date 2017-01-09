@@ -33,6 +33,9 @@
 #include <deque>
 #include <mutex>
 #include <memory>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -127,6 +130,7 @@ class MANGOS_DLL_SPEC WorldSession
         WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_t mute_time, LocaleConstant locale);
         ~WorldSession();
 
+        bool operator==(WorldSession const& other) const { return _uuid == other.GetUuid(); }
         bool PlayerLoading() const { return m_playerLoading; }
         bool PlayerLogout() const { return m_playerLogout; }
         bool PlayerLogoutWithSave() const { return m_playerLogout && m_playerSave; }
@@ -144,6 +148,8 @@ class MANGOS_DLL_SPEC WorldSession
 
         AccountTypes GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
+        boost::uuids::uuid GetUuid() const { return _uuid; }
+        std::string GetUuidStr() const { return  boost::uuids::to_string(_uuid); }
         Player* GetPlayer() const { return _player; }
         char const* GetPlayerName() const;
         void SetSecurity(AccountTypes security) { _security = security; }
@@ -256,7 +262,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendSaveGuildEmblem(uint32 msg) const;
         void SendBattleGroundJoinError(uint8 err) const;
 
-    static void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
+        static void BuildPartyMemberStatsChangedPacket(Player* player, WorldPacket& data);
 
         // Account mute time
         time_t m_muteTime;
@@ -657,6 +663,7 @@ class MANGOS_DLL_SPEC WorldSession
         void LogUnexpectedOpcode(WorldPacket const& packet, const char* reason) const;
         void LogUnprocessedTail(WorldPacket const& packet) const;
 
+        boost::uuids::uuid _uuid;
         std::mutex m_logoutMutex;                           // this mutex is necessary to avoid two simultaneous logouts due to a valid logout request and socket error
         Player * _player;
         std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it

@@ -89,7 +89,15 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_
     _player(nullptr), m_Socket(sock->shared<WorldSocket>()), _security(sec), _accountId(id), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
-    m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED) {}
+    m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED) {
+    // manually constructing a uuid generator here, so Valgrind does not complain.
+    // See http://www.boost.org/doc/libs/1_61_0/libs/uuid/uuid.html.
+    boost::mt19937 ran;
+    ran.seed(time(NULL)); // Seeding with `time(NULL)` is no concern in this case, as we don't use it for security or something
+    boost::uuids::basic_random_generator<boost::mt19937> gen(&ran);
+    _uuid = gen();
+}
+
 
 /// WorldSession destructor
 WorldSession::~WorldSession()
