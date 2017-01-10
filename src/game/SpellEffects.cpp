@@ -2619,7 +2619,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
     {
         // pet players do not need this
         // TODO :: Totem, Pet and Critter may not use this. This is probably wrongly used and need more research.
-        uint32 resultLevel = level + std::max(m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
+        uint32 resultLevel = level + std::max(m_spellInfo->EffectMultipleValue[eff_idx], .0f);
 
         // result level should be a possible level for creatures
         if (resultLevel > 0 && resultLevel <= DEFAULT_MAX_CREATURE_LEVEL)
