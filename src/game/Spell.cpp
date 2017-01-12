@@ -4152,7 +4152,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // caster state requirements
     if (m_spellInfo->CasterAuraState && !m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraState)))
-        return SPELL_FAILED_CANT_DO_THAT_YET;
+        return SPELL_FAILED_CASTER_AURASTATE;
 
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -4170,7 +4170,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (!m_IsTriggeredSpell && NeedsComboPoints(m_spellInfo) &&
                 (!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetObjectGuid() != ((Player*)m_caster)->GetComboTargetGuid()))
             // warrior not have real combo-points at client side but use this way for mark allow Overpower use
-            return m_caster->getClass() == CLASS_WARRIOR ? SPELL_FAILED_CANT_DO_THAT_YET : SPELL_FAILED_NO_COMBO_POINTS;
+            return m_caster->getClass() == CLASS_WARRIOR ? SPELL_FAILED_CASTER_AURASTATE : SPELL_FAILED_NO_COMBO_POINTS;
 
         // Loatheb Corrupted Mind spell failed
         switch(m_spellInfo->SpellFamilyName)
@@ -4412,7 +4412,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 // We cannot overwrite someone else's more powerful spell
                 if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing) ||
                     (sSpellMgr.IsRankSpellDueToSpell(m_spellInfo, entry->Id) && sSpellMgr.IsHighRankOfSpell(entry->Id, m_spellInfo->Id)))
-                    return SPELL_FAILED_MORE_POWERFUL_SPELL_ACTIVE;
+                    return SPELL_FAILED_AURA_BOUNCED;
             }
         }
 
@@ -4927,7 +4927,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 int32 TargetLevel = m_targets.getUnitTarget()->getLevel();
                 int32 ReqValue = (skillValue < 100 ? (TargetLevel - 10) * 10 : TargetLevel * 5);
                 if (ReqValue > skillValue)
-                    return SPELL_FAILED_SKILL_NOT_HIGH_ENOUGH;
+                    return SPELL_FAILED_LOW_CASTLEVEL;
 
                 // chance for fail at orange skinning attempt
                 if (m_spellState != SPELL_STATE_CREATED &&
@@ -5725,7 +5725,7 @@ SpellCastResult Spell::CheckPower()
     if (m_spellInfo->powerType == POWER_HEALTH)
     {
         if (m_caster->GetHealth() <= m_powerCost)
-            return SPELL_FAILED_CANT_DO_THAT_YET;
+            return SPELL_FAILED_CASTER_AURASTATE;
         return SPELL_CAST_OK;
     }
 
@@ -5820,14 +5820,14 @@ SpellCastResult Spell::CheckItems()
                 {
                     if (m_spellInfo->EffectMiscValue[i] < 0 || m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
                     {
-                        failReason = SPELL_FAILED_ALREADY_AT_FULL_MANA;
+                        failReason = SPELL_FAILED_ALREADY_AT_FULL_POWER;
                         continue;
                     }
 
                     Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
                     if (m_targets.getUnitTarget()->GetPower(power) == m_targets.getUnitTarget()->GetMaxPower(power))
                     {
-                        failReason = SPELL_FAILED_ALREADY_AT_FULL_MANA;
+                        failReason = SPELL_FAILED_ALREADY_AT_FULL_POWER;
                         continue;
                     }
                     else
@@ -6550,7 +6550,7 @@ SpellCastResult Spell::CanOpenLock(SpellEffectIndex effIndex, uint32 lockId, Ski
                     skillValue += spellSkillBonus;
 
                     if (skillValue < reqSkillValue)
-                        return SPELL_FAILED_SKILL_NOT_HIGH_ENOUGH;
+                        return SPELL_FAILED_LOW_CASTLEVEL;
                 }
 
                 return SPELL_CAST_OK;
