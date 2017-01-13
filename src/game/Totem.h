@@ -32,7 +32,7 @@ class Totem : public Creature
 {
     public:
         explicit Totem();
-        virtual ~Totem() {};
+        virtual ~Totem() {}
         bool Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, Unit* owner);
         void Update(uint32 update_diff, uint32 time) override;
         void Summon(Unit* owner);
@@ -44,6 +44,15 @@ class Totem : public Creature
         void SetTypeBySummonSpell(SpellEntry const* spellProto);
         void SetDuration(uint32 dur) { m_duration = dur; }
         void SetOwner(Unit* owner);
+
+        float GetCritChance(WeaponAttackType attackType) const override;
+        float GetCritChance(SpellSchoolMask schoolMask) const override;
+        float GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureTypeMask, const SpellEntry* spell = nullptr, bool heal = false) const override;
+        float GetHitChance(WeaponAttackType attackType) const override;
+        float GetHitChance(SpellSchoolMask schoolMask) const override;
+        float GetMissChance(WeaponAttackType attackType) const override;
+        float GetMissChance(SpellSchoolMask schoolMask) const override;
+        int32 GetResistancePenetration(SpellSchools school) const override;
 
         bool UpdateStats(Stats /*stat*/) override { return true; }
         bool UpdateAllStats() override { return true; }

@@ -181,6 +181,66 @@ void Totem::SetTypeBySummonSpell(SpellEntry const* spellProto)
         m_type = TOTEM_STATUE;                              // Jewelery statue
 }
 
+float Totem::GetCritChance(WeaponAttackType attackType) const
+{
+    // Totems use owner's crit chance (when owner is available)
+    if (const Unit* owner = GetOwner())
+        return owner->GetCritChance(attackType);
+    return Creature::GetCritChance(attackType);
+}
+
+float Totem::GetCritChance(SpellSchoolMask schoolMask) const
+{
+    // Totems use owner's crit chance (when owner is available)
+    if (const Unit* owner = GetOwner())
+        return owner->GetCritChance(schoolMask);
+    return Creature::GetCritChance(schoolMask);
+}
+
+float Totem::GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureTypeMask, const SpellEntry *spell, bool heal) const
+{
+    // Totems use owner's crit multiplier
+    if (const Unit* owner = GetOwner())
+        return owner->GetCritMultiplier(dmgSchoolMask, creatureTypeMask, spell, heal);
+    return Creature::GetCritMultiplier(dmgSchoolMask, creatureTypeMask, spell, heal);
+}
+
+float Totem::GetHitChance(WeaponAttackType attackType) const
+{
+    // Totems use owner's hit chance (when owner is available)
+    if (const Unit* owner = GetOwner())
+        return owner->GetHitChance(attackType);
+    return Creature::GetHitChance(attackType);
+}
+
+float Totem::GetHitChance(SpellSchoolMask schoolMask) const
+{
+    // Totems use owner's hit chance (when owner is available)
+    if (const Unit* owner = GetOwner())
+        return owner->GetHitChance(schoolMask);
+    return Creature::GetHitChance(schoolMask);
+}
+
+float Totem::GetMissChance(WeaponAttackType /*attackType*/) const
+{
+    // Totems have no inherit miss chance
+    return 0.0f;
+}
+
+float Totem::GetMissChance(SpellSchoolMask /*schoolMask*/) const
+{
+    // Totems have no inherit miss chance
+    return 0.0f;
+}
+
+int32 Totem::GetResistancePenetration(SpellSchools school) const
+{
+    // Totems use owner's penetration (when owner is available)
+    if (const Unit* owner = GetOwner())
+        return owner->GetResistancePenetration(school);
+    return Creature::GetResistancePenetration(school);
+}
+
 bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index, bool castOnSelf) const
 {
     // Totem may affected by some specific spells

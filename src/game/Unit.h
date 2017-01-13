@@ -1489,24 +1489,24 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool CanCrit(SpellSchoolMask schoolMask) const { return (GetCritChance(schoolMask) >= 0.01f); }
         bool CanCrit(const SpellEntry* entry, SpellSchoolMask schoolMask, WeaponAttackType attType) const;
 
-        float GetCritChance(WeaponAttackType attackType) const;
-        float GetCritChance(SpellSchoolMask schoolMask) const;
-        float GetCritChance(const SpellEntry* entry, SpellSchoolMask schoolMask) const;
+        virtual float GetCritChance(WeaponAttackType attackType) const;
+        virtual float GetCritChance(SpellSchoolMask schoolMask) const;
+        virtual float GetCritChance(const SpellEntry* entry, SpellSchoolMask schoolMask) const;
 
-        float GetCritTakenChance(SpellSchoolMask dmgSchoolMask, SpellDmgClass dmgClass, bool heal = false) const;
+        virtual float GetCritTakenChance(SpellSchoolMask dmgSchoolMask, SpellDmgClass dmgClass, bool heal = false) const;
 
-        float GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureTypeMask, const SpellEntry* spell = nullptr, bool heal = false) const;
-        float GetCritTakenMultiplier(SpellSchoolMask dmgSchoolMask, SpellDmgClass dmgClass, float ignorePct = 0.0f, bool heal = false) const;
+        virtual float GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureTypeMask, const SpellEntry* spell = nullptr, bool heal = false) const;
+        virtual float GetCritTakenMultiplier(SpellSchoolMask dmgSchoolMask, SpellDmgClass dmgClass, float ignorePct = 0.0f, bool heal = false) const;
         uint32 CalculateCritAmount(const Unit* victim, uint32 amount, const SpellEntry* entry, bool heal = false) const;
         uint32 CalculateCritAmount(CalcDamageInfo* meleeInfo) const;
 
-        float GetHitChance(WeaponAttackType attackType) const;
-        float GetHitChance(SpellSchoolMask schoolMask) const;
-        float GetHitChance(const SpellEntry* entry, SpellSchoolMask schoolMask) const;
+        virtual float GetHitChance(WeaponAttackType attackType) const;
+        virtual float GetHitChance(SpellSchoolMask schoolMask) const;
+        virtual float GetHitChance(const SpellEntry* entry, SpellSchoolMask schoolMask) const;
 
-        float GetMissChance(WeaponAttackType attackType) const;
-        float GetMissChance(SpellSchoolMask schoolMask) const;
-        float GetMissChance(const SpellEntry* entry, SpellSchoolMask schoolMask) const;
+        virtual float GetMissChance(WeaponAttackType attackType) const;
+        virtual float GetMissChance(SpellSchoolMask schoolMask) const;
+        virtual float GetMissChance(const SpellEntry* entry, SpellSchoolMask schoolMask) const;
 
         float CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType attType, const SpellEntry *ability = nullptr) const;
         float CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType attType, const SpellEntry *ability = nullptr) const;
@@ -1514,7 +1514,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float CalculateSpellCritChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
         float CalculateSpellMissChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
 
-        int32 GetResistancePenetration(SpellSchools school) const;
+        virtual int32 GetResistancePenetration(SpellSchools school) const;
 
         float CalculateEffectiveMagicResistancePercent(const Unit* attacker, SpellSchoolMask schoolMask, bool binary = false) const;
 
