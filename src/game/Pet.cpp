@@ -1604,7 +1604,7 @@ void Pet::_LoadAuras(uint32 timediff)
             if (casterGuid != GetObjectGuid() && IsSingleTargetSpell(spellproto))
                 continue;
 
-            if (remaintime != -1 && !IsPositiveSpell(spellproto))
+            if (remaintime != -1)
             {
                 if (remaintime / IN_MILLISECONDS <= int32(timediff))
                     continue;
