@@ -96,6 +96,7 @@ UPDATE creature_template SET ScriptName='guard_dunmorogh' WHERE entry IN (727,13
 UPDATE creature_template SET ScriptName='guard_tirisfal' WHERE entry IN (1735,1738,2210,1744,1745,5725,1743,2209,1746,1742);
 
 /* ITEM */
+UPDATE item_template SET ScriptName='item_orb_of_draconic_energy' WHERE entry=12300;
 
 /* NPC (usually creatures to be found in more than one specific zone) */
 UPDATE creature_template SET ScriptName='npc_chicken_cluck' WHERE entry=620;

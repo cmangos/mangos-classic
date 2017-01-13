@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Item_Scripts
-SD%Complete: 0
-SDComment: Empty
+SD%Complete: 100
+SDComment: quest 4743
 SDCategory: Items
 EndScriptData */
 
@@ -25,7 +25,41 @@ EndScriptData */
 EndContentData */
 
 #include "precompiled.h"
+#include "Spell.h"
+
+/*#####
+# item_orb_of_draconic_energy
+#####*/
+
+enum
+{
+    SPELL_DOMINION_SOUL     = 16053,
+    NPC_EMBERSTRIFE         = 10321
+};
+
+bool ItemUse_item_orb_of_draconic_energy(Player* pPlayer, Item* pItem, const SpellCastTargets& pTargets)
+{
+    Creature* pEmberstrife = GetClosestCreatureWithEntry(pPlayer, NPC_EMBERSTRIFE, 20.0f);
+    // If Emberstrife is already mind controled or above 10% HP: force spell cast failure
+    if (pEmberstrife && pEmberstrife->HasAura(SPELL_DOMINION_SOUL) || pEmberstrife->GetHealth() / pEmberstrife->GetMaxHealth() > 0.1f)
+    {
+        pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
+
+        if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_DOMINION_SOUL))
+            Spell::SendCastResult(pPlayer, pSpellInfo, SPELL_FAILED_TARGET_AURASTATE);
+
+        return true;
+     }
+
+    return false;
+}
 
 void AddSC_item_scripts()
 {
+    Script* pNewScript;
+
+    pNewScript = new Script;
+    pNewScript->Name = "item_orb_of_draconic_energy";
+    pNewScript->pItemUse = &ItemUse_item_orb_of_draconic_energy;
+    pNewScript->RegisterSelf();
 }
