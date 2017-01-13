@@ -26,6 +26,7 @@
 #include "ObjectGuid.h"
 #include "Unit.h"
 #include "Player.h"
+#include "SQLStorages.h"
 
 class WorldSession;
 class WorldPacket;
@@ -34,6 +35,7 @@ class Item;
 class GameObject;
 class Group;
 class Aura;
+struct SpellTargetEntry;
 
 enum SpellCastFlags
 {
@@ -517,6 +519,7 @@ class Spell
         //*****************************************
         void FillTargetMap();
         void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap);
+        void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> &bounds, UnitList &tempTargetUnitMap, UnitList &targetUnitMap, SpellEffectIndex effIndex);
 
         void FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = nullptr);
         void FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, float radius, bool raid, bool withPets, bool withcaster) const;
