@@ -427,13 +427,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
     {
         // reagents must be returned before save call
         if (mode == PET_SAVE_REAGENTS)
-        {
-            // Hunter Pets always save as current if dismissed or unsummoned due to range/etc.
-            if (getPetType() == HUNTER_PET)
-                mode = PET_SAVE_AS_CURRENT;
-            else
-                mode = PET_SAVE_NOT_IN_SLOT;
-        }
+            mode = PET_SAVE_NOT_IN_SLOT;
         // not save pet as current if another pet temporary unsummoned
         else if (mode == PET_SAVE_AS_CURRENT && pOwner->GetTemporaryUnsummonedPetNumber() &&
                  pOwner->GetTemporaryUnsummonedPetNumber() != m_charmInfo->GetPetNumber())
@@ -450,7 +444,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         uint32 curpower = GetPower(GetPowerType());
 
         // stable and not in slot saves
-        if (mode != PET_SAVE_AS_CURRENT)
+        if (mode != PET_SAVE_AS_CURRENT && getPetType() != HUNTER_PET)
             RemoveAllAuras();
 
         // save pet's data as one single transaction
