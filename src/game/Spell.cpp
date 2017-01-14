@@ -4400,8 +4400,8 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
             return SPELL_FAILED_BAD_TARGETS;
 
-        // Check if more powerful spell applied on target (if spell only contains auras)
-        if (IsAuraApplyEffects(m_spellInfo, EFFECT_MASK_ALL))
+        // Check if more powerful spell applied on target (if spell only contains non-aoe auras)
+        if (IsAuraApplyEffects(m_spellInfo, EFFECT_MASK_ALL) && !IsAreaOfEffectSpell(m_spellInfo) && !HasAreaAuraEffect(m_spellInfo))
         {
             Unit::SpellAuraHolderMap const& spair = target->GetSpellAuraHolderMap();
             for (Unit::SpellAuraHolderMap::const_iterator iter = spair.begin(); iter != spair.end(); ++iter)
