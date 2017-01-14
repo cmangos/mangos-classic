@@ -309,7 +309,7 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* pAttacker, Hostile
         // some units are prefered in comparison to others
         // if (checkThreatArea) consider IsOutOfThreatArea - expected to be only set for pCurrentVictim
         //     This prevents dropping valid targets due to 1.1 or 1.3 threat rule vs invalid current target
-        if (!onlySecondChoiceTargetsFound && pAttacker->IsSecondChoiceTarget(pTarget, pCurrentRef == pCurrentVictim))
+        if (!onlySecondChoiceTargetsFound && pAttacker->IsSecondChoiceTarget(pTarget, false, pCurrentRef == pCurrentVictim))
         {
             if (iter != lastRef)
                 ++iter;
@@ -345,7 +345,7 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* pAttacker, Hostile
                 {
                     Unit* pCurrentTarget = pCurrentVictim->getTarget();
                     MANGOS_ASSERT(pCurrentTarget);
-                    if (pAttacker->IsSecondChoiceTarget(pCurrentTarget, true))
+                    if (pAttacker->IsSecondChoiceTarget(pCurrentTarget, false, true))
                     {
                         // CurrentVictim is invalid, so return CurrentRef
                         found = true;

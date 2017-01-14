@@ -1892,7 +1892,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void AddThreat(Unit* pVictim, float threat = 0.0f, bool crit = false, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NONE, SpellEntry const* threatSpell = nullptr);
         float ApplyTotalThreatModifier(float threat, SpellSchoolMask schoolMask = SPELL_SCHOOL_MASK_NORMAL);
         void DeleteThreatList();
-        bool IsSecondChoiceTarget(Unit* pTarget, bool checkThreatArea);
+        bool IsSecondChoiceTarget(Unit* pTarget, bool taunt, bool checkThreatArea);
         bool SelectHostileTarget();
         void TauntApply(Unit* pVictim);
         void TauntFadeOut(Unit* taunter);
