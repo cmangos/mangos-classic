@@ -110,6 +110,25 @@ inline bool IsAuraApplyEffect(SpellEntry const* spellInfo, SpellEffectIndex effe
     return false;
 }
 
+inline bool IsAuraApplyEffects(SpellEntry const* entry, SpellEffectIndexMask mask)
+{
+    if (!entry)
+        return false;
+    uint32 emptyMask = 0;
+    for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        const bool current = (1 << i);
+        if (entry->Effect[i])
+        {
+            if ((mask & current) && !IsAuraApplyEffect(entry, SpellEffectIndex(i)))
+                return false;
+        }
+        else
+            emptyMask |= current;
+    }
+    return !(mask & emptyMask);
+}
+
 inline bool IsSpellAppliesAura(SpellEntry const* spellInfo, uint32 effectMask = ((1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)))
 {
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -1318,8 +1337,8 @@ inline bool IsSimilarExistingAuraStronger(const SpellAuraHolder* holder, const S
             {
                 Aura* aura1 = holder->GetAuraByEffectIndex(SpellEffectIndex(e));
                 Aura* aura2 = existing->GetAuraByEffectIndex(SpellEffectIndex(e2));
-                int32 value = aura1 ? aura1->GetModifier()->m_amount : 0;
-                int32 value2 = aura2 ? aura2->GetModifier()->m_amount : 0;
+                int32 value = aura1 ? (aura1->GetModifier()->m_amount / int32(aura1->GetStackAmount())) : 0;
+                int32 value2 = aura2 ? (aura2->GetModifier()->m_amount / int32(aura2->GetStackAmount())) : 0;
                 if (value < 0 && value2 < 0)
                 {
                     value = abs(value);
@@ -1349,7 +1368,7 @@ inline bool IsSimilarExistingAuraStronger(const Unit* caster, const SpellEntry* 
             {
                 Aura* aura = existing->GetAuraByEffectIndex(SpellEffectIndex(e2));
                 int32 value = entry->CalculateSimpleValue(SpellEffectIndex(e));
-                int32 value2 = aura ? aura->GetModifier()->m_amount : 0;
+                int32 value2 = aura ? (aura->GetModifier()->m_amount / int32(aura->GetStackAmount())) : 0;
                 // FIXME: We need API to peacefully pre-calculate static base spell damage without destroying mods
                 // Until then this is a rather lame set of hacks
                 // Apply combo points base damage for spells like expose armor

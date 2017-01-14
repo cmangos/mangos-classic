@@ -130,6 +130,14 @@ enum SpellEffectIndex
 
 #define MAX_EFFECT_INDEX 3
 
+enum SpellEffectIndexMask
+{
+    EFFECT_MASK_INDEX_0 = (1 << EFFECT_INDEX_0),
+    EFFECT_MASK_INDEX_1 = (1 << EFFECT_INDEX_1),
+    EFFECT_MASK_INDEX_2 = (1 << EFFECT_INDEX_2),
+    EFFECT_MASK_ALL = (EFFECT_MASK_INDEX_0 | EFFECT_MASK_INDEX_1 | EFFECT_MASK_INDEX_2)
+};
+
 enum SpellFamily
 {
     SPELLFAMILY_GENERIC     = 0,

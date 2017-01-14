@@ -4400,19 +4400,21 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (target->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
             return SPELL_FAILED_BAD_TARGETS;
 
-        // Check if more powerful spell applied on target
-        Unit::SpellAuraHolderMap const& spair = target->GetSpellAuraHolderMap();
-
-        for (Unit::SpellAuraHolderMap::const_iterator iter = spair.begin(); iter != spair.end(); ++iter)
+        // Check if more powerful spell applied on target (if spell only contains auras)
+        if (IsAuraApplyEffects(m_spellInfo, EFFECT_MASK_ALL))
         {
-            const SpellAuraHolder* existing = iter->second;
-            const SpellEntry* entry = existing->GetSpellProto();
-            if (m_caster != existing->GetCaster() && sSpellMgr.IsNoStackSpellDueToSpell(m_spellInfo, entry))
+            Unit::SpellAuraHolderMap const& spair = target->GetSpellAuraHolderMap();
+            for (Unit::SpellAuraHolderMap::const_iterator iter = spair.begin(); iter != spair.end(); ++iter)
             {
-                // We cannot overwrite someone else's more powerful spell
-                if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing) ||
-                    (sSpellMgr.IsRankSpellDueToSpell(m_spellInfo, entry->Id) && sSpellMgr.IsHighRankOfSpell(entry->Id, m_spellInfo->Id)))
-                    return SPELL_FAILED_AURA_BOUNCED;
+                const SpellAuraHolder* existing = iter->second;
+                const SpellEntry* entry = existing->GetSpellProto();
+                if (m_caster != existing->GetCaster() && sSpellMgr.IsNoStackSpellDueToSpell(m_spellInfo, entry))
+                {
+                    // We cannot overwrite someone else's more powerful spell
+                    if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing) ||
+                        (sSpellMgr.IsRankSpellDueToSpell(m_spellInfo, entry->Id) && sSpellMgr.IsHighRankOfSpell(entry->Id, m_spellInfo->Id)))
+                        return SPELL_FAILED_AURA_BOUNCED;
+                }
             }
         }
 
