@@ -282,15 +282,14 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     SetName(fields[11].GetString());
 
     SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS);
-    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RESTING);
+    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
 
     if (getPetType() == HUNTER_PET)
     {
         // loyalty
         SetByteValue(UNIT_FIELD_BYTES_1, 1, fields[8].GetUInt32());
 
-        if (!fields[12].GetBool())
-            SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME);
+        SetFlag(UNIT_FIELD_FLAGS, fields[12].GetBool() ? UNIT_FLAG_PET_ABANDON : UNIT_FLAG_PET_RENAME | UNIT_FLAG_PET_ABANDON);
 
         SetTP(fields[9].GetInt32());
         SetMaxPower(POWER_HAPPINESS, GetCreatePowers(POWER_HAPPINESS));
@@ -504,7 +503,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         savePet.addInt32(m_TrainingPoints);
         savePet.addUInt32(uint32(mode));
         savePet.addString(m_name);
-        savePet.addUInt32(uint32(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME) ? 0 : 1));
+        savePet.addUInt32(uint32(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_RENAME) ? 0 : 1));
         savePet.addUInt32(curhealth);
         savePet.addUInt32(curpower);
         savePet.addUInt32(GetPower(POWER_HAPPINESS));
@@ -1124,9 +1123,8 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     SetSheath(SHEATH_STATE_MELEE);
 
     SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS);
-    // SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED); (need to test and check these for vanilla and TBC)
 
-    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_RENAME);
+    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE | UNIT_FLAG_PET_RENAME | UNIT_FLAG_PET_ABANDON);
 
     SetUInt32Value(UNIT_MOD_CAST_SPEED, creature->GetUInt32Value(UNIT_MOD_CAST_SPEED));
     SetLoyaltyLevel(REBELLIOUS);

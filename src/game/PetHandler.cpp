@@ -542,7 +542,7 @@ void WorldSession::HandlePetRename(WorldPacket& recv_data)
     Pet* pet = _player->GetMap()->GetPet(petGuid);
     // check it!
     if (!pet || pet->getPetType() != HUNTER_PET ||
-            !pet->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME) ||
+            !pet->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_RENAME) ||
             pet->GetOwnerGuid() != _player->GetObjectGuid() || !pet->GetCharmInfo())
         return;
 
@@ -564,7 +564,7 @@ void WorldSession::HandlePetRename(WorldPacket& recv_data)
     if (_player->GetGroup())
         _player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_NAME);
 
-    pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME);
+    pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_RENAME);
 
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.escape_string(name);
