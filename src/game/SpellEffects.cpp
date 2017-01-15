@@ -2055,16 +2055,6 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
         // update skill if really known
         if (uint32 pureSkillValue = player->GetPureSkillValue(skillId))
         {
-            // chance for fail at orange mining/herb/LockPicking gathering attempt
-            bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING;
-
-            // chance for failure in orange gather / lockpick (gathering skill can't fail at maxskill)
-            if ((canFailAtMax || skillValue < sWorld.GetConfigMaxSkillValue()) && reqSkillValue > irand(skillValue - 25, skillValue + 37))
-            {
-                SendCastResult(SPELL_FAILED_TRY_AGAIN);
-                return;
-            }
-
             if (gameObjTarget)
             {
                 // Allow one skill-up until respawned
@@ -4554,16 +4544,6 @@ void Spell::EffectSkinning(SpellEffectIndex /*eff_idx*/)
     int32 targetLevel = creature->getLevel();
 
     uint32 skill = creature->GetCreatureInfo()->GetRequiredLootSkill();
-    uint32 pureSkillValue = ((Player*)m_caster)->GetPureMaxSkillValue(skill);
-    int32 reqValue = (pureSkillValue < 100 ? (targetLevel - 10) * 10 : targetLevel * 5);
-
-    // chance for fail at orange skinning attempt
-    if (pureSkillValue < sWorld.GetConfigMaxSkillValue() &&
-        (reqValue < 0 ? 0 : reqValue) > irand(pureSkillValue - 25, reqValue + 37))
-    {
-        SendCastResult(SPELL_FAILED_TRY_AGAIN);
-        return;
-    }
 
     Loot*& loot = unitTarget->loot;
     if (!loot)
