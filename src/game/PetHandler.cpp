@@ -587,8 +587,7 @@ void WorldSession::HandlePetAbandon(WorldPacket& recv_data)
     // pet/charmed
     if (Unit* petUnit = _player->GetMap()->GetUnit(guid))
     {
-        if (!petUnit ||
-            petUnit->GetOwnerGuid() != _player->GetObjectGuid() || !petUnit->GetCharmInfo())
+        if (petUnit->GetOwnerGuid() != _player->GetObjectGuid() || !petUnit->GetCharmInfo())
             return;
 
         Creature* petCreature = petUnit->GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(petUnit) : nullptr;
@@ -596,10 +595,12 @@ void WorldSession::HandlePetAbandon(WorldPacket& recv_data)
 
         if (pet)
         {
-            if (pet->GetObjectGuid() == _player->GetPetGuid())
-                pet->ModifyPower(POWER_HAPPINESS, -50000);
-
-            pet->Unsummon(PET_SAVE_AS_DELETED, _player);
+            // Permanently abandon pet
+            if (pet->getPetType() == HUNTER_PET)
+                pet->Unsummon(PET_SAVE_AS_DELETED, _player);
+            // Simply dismiss
+            else
+                petUnit->SetDeathState(CORPSE);
         }
         else if (petUnit->GetObjectGuid() == _player->GetCharmGuid())
         {
