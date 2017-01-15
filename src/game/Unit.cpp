@@ -3164,7 +3164,7 @@ float Unit::GetHitChance(const SpellEntry *entry, SpellSchoolMask schoolMask) co
     }
     // Add mod
     if (Player* modOwner = GetSpellModOwner())
-        modOwner->ApplySpellMod(entry->Id, SPELLMOD_CRITICAL_CHANCE, chance);
+        modOwner->ApplySpellMod(entry->Id, SPELLMOD_RESIST_MISS_CHANCE, chance);
     return chance;
 }
 
