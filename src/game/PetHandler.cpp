@@ -111,7 +111,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     }
                     break;
                 }
-                case COMMAND_ABANDON:
+                case COMMAND_DISMISS:
                     _player->Uncharm();
                     break;
                 default:
@@ -186,15 +186,14 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     }
                     break;
                 }
-                case COMMAND_ABANDON:                       // abandon (hunter pet) or dismiss (summoned pet)
+                case COMMAND_DISMISS:                       // dismiss permanent pet, remove temporary pet, uncharm unit
                 {
                     if (pet)
                     {
-                        if(pet->getPetType() == HUNTER_PET)
-                            pet->Unsummon(PET_SAVE_AS_DELETED, _player);
-                        else
+                        // No action for Hunter pets, Hunters must use their Dismiss Pet spell
+                        if (pet->getPetType() != HUNTER_PET)
                             petUnit->SetDeathState(CORPSE);
-                    }                        
+                    }
                     else
                     {
                         // dismissing a summoned pet is like killing them (this prevents returning a soulshard...)
