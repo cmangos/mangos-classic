@@ -4867,13 +4867,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 int32 ReqValue = (skillValue < 100 ? (TargetLevel - 10) * 10 : TargetLevel * 5);
                 if (ReqValue > skillValue)
                     return SPELL_FAILED_LOW_CASTLEVEL;
-
-                // chance for fail at orange skinning attempt
-                if (m_spellState != SPELL_STATE_CREATED &&
-                        skillValue < sWorld.GetConfigMaxSkillValue() &&
-                        (ReqValue < 0 ? 0 : ReqValue) > irand(skillValue - 25, skillValue + 37))
-                    return SPELL_FAILED_TRY_AGAIN;
-
                 break;
             }
             case SPELL_EFFECT_OPEN_LOCK_ITEM:
@@ -4929,17 +4922,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 SpellCastResult res = CanOpenLock(SpellEffectIndex(i), lockId, skillId, reqSkillValue, skillValue);
                 if (res != SPELL_CAST_OK)
                     return res;
-
-                // chance for fail at orange mining/herb/LockPicking gathering attempt
-                // second check prevent fail at rechecks
-                if (m_spellState > SPELL_STATE_STARTING && skillId != SKILL_NONE)
-                {
-                    bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING;
-
-                    // chance for failure in orange gather / lockpick (gathering skill can't fail at maxskill)
-                    if ((canFailAtMax || skillValue < sWorld.GetConfigMaxSkillValue()) && reqSkillValue > irand(skillValue - 25, skillValue + 37))
-                        return SPELL_FAILED_TRY_AGAIN;
-                }
                 break;
             }
             case SPELL_EFFECT_SUMMON_DEAD_PET:
@@ -5587,6 +5569,8 @@ SpellCastResult Spell::CheckRange(bool strict) const
             return SPELL_FAILED_OUT_OF_RANGE;
         if (min_range && m_caster->IsWithinDist3d(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, min_range))
             return SPELL_FAILED_TOO_CLOSE;
+        if (!m_caster->IsWithinLOS(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ))
+            return SPELL_FAILED_LINE_OF_SIGHT;
     }
 
     return SPELL_CAST_OK;
