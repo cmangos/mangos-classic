@@ -4629,7 +4629,16 @@ SpellCastResult Spell::CheckCast(bool strict)
         {
             case SPELL_EFFECT_DUMMY:
             {
-                if (m_spellInfo->SpellIconID == 1648)       // Execute
+                // By Spell ID
+                if (m_spellInfo->Id == 19938)               // Awaken Lazy Peon
+                {
+                    Unit* target = m_targets.getUnitTarget();
+                    // 17743 = Lazy Peon Sleep | 10556 = Lazy Peon
+                    if (!target || !target->HasAura(17743) || target->GetEntry() != 10556)
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+                // By SpellIconID
+                else if (m_spellInfo->SpellIconID == 1648)       // Execute
                 {
                     Unit* target = m_targets.getUnitTarget();
                     if (!target || target->GetHealth() > target->GetMaxHealth() * 0.2)
