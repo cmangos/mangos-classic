@@ -3995,13 +3995,10 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                     delete holder;
                     return false;
                 }
-                else
+                else if (!IsStackableSpell(aurSpellInfo, foundHolder->GetSpellProto(), holder->GetTarget()))
                 {
-                    if (!IsStackableSpell(holder->GetSpellProto(), foundHolder->GetSpellProto(), holder->GetTarget()))
-                    {
-                        RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
-                        break;
-                    }
+                    RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
+                    break;
                 }
             }
         }

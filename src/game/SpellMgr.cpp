@@ -335,6 +335,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     if (!spellInfo)
         return SPELL_NORMAL;
 
+    if (SpellSpecific food = sSpellMgr.GetSpellFoodSpecific(spellInfo))
+        return food;
+
     switch (spellInfo->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
@@ -347,63 +350,6 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
                     return SPELL_WARLOCK_ARMOR;
                 case 13161:     // Aspect of the Beast
                     return SPELL_ASPECT;
-            }
-
-            // Food / Drinks (mostly)
-            if (spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
-            {
-                bool food = false;
-                bool drink = false;
-                for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-                {
-                    switch (spellInfo->EffectApplyAuraName[i])
-                    {
-                        // Food
-                        case SPELL_AURA_MOD_REGEN:
-                        case SPELL_AURA_OBS_MOD_HEALTH:
-                            food = true;
-                            break;
-                        // Drink
-                        case SPELL_AURA_MOD_POWER_REGEN:
-                        case SPELL_AURA_OBS_MOD_MANA:
-                            drink = true;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                if (food && drink)
-                    return SPELL_FOOD_AND_DRINK;
-                else if (food)
-                    return SPELL_FOOD;
-                else if (drink)
-                    return SPELL_DRINK;
-            }
-            else
-            {
-                // Well Fed buffs (must be exclusive with Food / Drink replenishment effects, or else Well Fed will cause them to be removed)
-                // SpellIcon 2560 is Spell 46687, does not have this flag
-                if (spellInfo->HasAttribute(SPELL_ATTR_EX2_FOOD_BUFF))
-                    return SPELL_WELL_FED;
-
-                // Alcoholic beverages
-                switch (spellInfo->Id)
-                {
-                    case 5020:  // Stormstout
-                    case 5021:  // Trogg Ale
-                    case 5257:  // Thunderbrew Lager
-                    case 5909:  // Watered-down Beer
-                    case 6114:  // Raptor Punch
-                    case 8553:  // Barleybrew Scalder
-                    case 20875: // Rumsey Rum
-                    case 22789: // Gordok Green Grog
-                    case 22790: // Kreeg's Stout Beatdown
-                    case 25037: // Rumsey Rum Light
-                    case 25722: // Rumsey Rum Dark
-                    case 25804: // Rumsey Rum Black Label
-                        return SPELL_WELL_FED;
-                }
             }
             break;
         }
@@ -425,15 +371,6 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (IsSpellHaveAura(spellInfo, SPELL_AURA_CHANNEL_DEATH_ITEM))
                 return SPELL_SOUL_CAPTURE;
 
-            break;
-        }
-        case SPELLFAMILY_PRIEST:
-        {
-            // "Well Fed" buff from Blessed Sunfruit, Blessed Sunfruit Juice, Alterac Spring Water
-            if (spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_SITTING) &&
-                    (spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK) &&
-                    (spellInfo->SpellIconID == 52 || spellInfo->SpellIconID == 79))
-                return SPELL_WELL_FED;
             break;
         }
         case SPELLFAMILY_HUNTER:
@@ -483,9 +420,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         (IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_RESOURCES) && !spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !spellInfo->HasAttribute(SPELL_ATTR_CANT_CANCEL)))
         return SPELL_TRACKER;
 
-    // elixirs can have different families, but potion most ofc.
-    if (SpellSpecific sp = sSpellMgr.GetSpellElixirSpecific(spellInfo->Id))
-        return sp;
+    // Elixirs can have different families, but potions mostly
+    if (SpellSpecific elixir = sSpellMgr.GetSpellElixirSpecific(spellInfo->Id))
+        return elixir;
 
     return SPELL_NORMAL;
 }
@@ -1373,8 +1310,8 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
     if (!spellInfo_1 || !spellInfo_2)
         return false;
 
-    // Resurrection sickness
-    if ((spellInfo_1->Id == SPELL_ID_PASSIVE_RESURRECTION_SICKNESS) != (spellInfo_2->Id == SPELL_ID_PASSIVE_RESURRECTION_SICKNESS))
+    // Uncancellable spells are expected to be persistent at all times
+    if (spellInfo_1->HasAttribute(SPELL_ATTR_CANT_CANCEL) || spellInfo_2->HasAttribute(SPELL_ATTR_CANT_CANCEL))
         return false;
 
     // Allow stack passive and not passive spells
