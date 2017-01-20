@@ -526,10 +526,12 @@ void AreaAura::Update(uint32 diff)
                     holder->SetInUse(false);
                 }
                 else
+                {
                     if ((*tIter)->AddSpellAuraHolder(holder))
                         holder->SetState(SPELLAURAHOLDER_STATE_READY);
                     else
                         delete holder;
+                }
             }
         }
         Aura::Update(diff);
