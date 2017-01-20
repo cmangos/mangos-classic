@@ -84,10 +84,25 @@ inline bool roll_chance_i(int chance)
     return chance > irand(0, 99);
 }
 
-/* An abstract die for combat rolls with premultiplied integer chances (100.00 = 10000). */
+/* Convert floating point chance to premultiplied integer chance (100.00 = 10000). */
+inline uint32 chance_u(float chance)
+{
+    return uint32(::roundf(std::max(0.0f, chance) * 100)); // Nearest 2 decimal places
+}
+
+/* Perform a quick non-die combat roll with premultiplied integer chance */
+inline bool roll_chance_combat(float chance)
+{
+    uint32 u = chance_u(chance);
+    return (u && (u > urand(1, 10000)));
+}
+
+/* An abstract die for combat rolls with premultiplied integer chances */
 template<class Side, Side Default, uint8 Sides>
 struct Die
 {
+    // MSVC++13-friendly initialization, switch to {0} when we end support for it
+    explicit Die() { for(uint8 i = 0; i < Sides; ++i) chance[i] = 0; }
     Side roll(uint32 random)
     {
         uint32 rolling = 0;
@@ -102,7 +117,12 @@ struct Die
         }
         return Default;
     }
-    uint32 chance[Sides] = {0};
+    void set(uint8 side, float chancef)
+    {
+        if (side && side < Sides)
+            chance[side] = chance_u(chancef);
+    }
+    uint32 chance[Sides];
 };
 
 inline void ApplyModUInt32Var(uint32& var, int32 val, bool apply)
