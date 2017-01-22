@@ -194,7 +194,7 @@ static inline SpellPartialResistDistribution InitSpellPartialResistDistribution(
                 const uint32 upcoming = ahead.at(column);
                 const int64 diff = (int64(upcoming) - base);
                 // Use bigger types signed math to avoid potential erratic behavior on some compilers...
-                values[column] = uint32(std::max(0.0, (base + std::round(diff * (intermediate / double(100.0))))));
+                values[column] = uint32(std::max(0.0, (base + ::round(diff * (intermediate / double(100.0))))));
             }
         }
     }
