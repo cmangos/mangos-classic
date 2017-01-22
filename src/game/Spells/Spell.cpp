@@ -4378,6 +4378,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_NOTHING_TO_DISPEL;
             }
         }
+
+        if (m_spellInfo->MaxTargetLevel && target->getLevel() > m_spellInfo->MaxTargetLevel)
+            return SPELL_FAILED_HIGHLEVEL;
     }
 
     // zone check
