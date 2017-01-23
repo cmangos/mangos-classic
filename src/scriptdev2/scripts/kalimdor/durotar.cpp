@@ -242,13 +242,92 @@ bool EffectDummyCreature_lazy_peon_spell(Unit* pCaster, uint32 uiSpellId, SpellE
     return false;
 }
 
+enum
+{
+	OPTION_LOW_SPIRITS = -3501000,
+	OPTION_BAD_HANGNAIL = -3501001,
+	OPTION_FEELING_UNDERPOWERED = -3501002,
+	OPTION_JUNGLE_FEVER = -3501003,
+	OPTION_UNIBROW = -3501004,
+	OPTION_WHIPLASH = -3501005,
+	OPTION_BACK_TO_WORK = -3501006
+};
+
+bool GossipBomBayHello_gossip_codebox(Player* pPlayer, Creature* pCreature)
+{
+
+	QuestStatus minsh_skull = pPlayer->GetQuestStatus(808);
+	QuestStatus zalazane = pPlayer->GetQuestStatus(826);
+
+	// Only show the gossip options if the user has completed required quests
+
+	if (minsh_skull == QUEST_STATUS_COMPLETE && zalazane == QUEST_STATUS_COMPLETE)
+	{
+		pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, OPTION_LOW_SPIRITS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+		pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, OPTION_BAD_HANGNAIL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+		pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, OPTION_FEELING_UNDERPOWERED, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+		pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, OPTION_JUNGLE_FEVER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+		pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, OPTION_UNIBROW, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
+		pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, OPTION_WHIPLASH, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
+		pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, OPTION_BACK_TO_WORK, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
+
+
+		pPlayer->PlayerTalkClass->SendGossipMenu(3795, pCreature->GetObjectGuid());
+	}
+	else
+	{
+		pPlayer->PlayerTalkClass->SendGossipMenu(3794, pCreature->GetObjectGuid());
+	}
+
+	return true;
+}
+
+bool GossipBomBaySelect_gossip_codebox(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+{
+	switch (urand(1, 7))
+	{
+	case 1:
+		pCreature->AI()->DoCastSpellIfCan(pPlayer, 16707);
+		break;
+	case 2:
+		pCreature->AI()->DoCastSpellIfCan(pPlayer, 16708);
+		break;
+	case 3:
+		pCreature->AI()->DoCastSpellIfCan(pPlayer, 16709);
+		break;
+	case 4:
+		pCreature->AI()->DoCastSpellIfCan(pPlayer, 16711);
+		break;
+	case 5:
+		pCreature->AI()->DoCastSpellIfCan(pPlayer, 16716);
+		break;
+	case 6:
+		pCreature->AI()->DoCastSpellIfCan(pPlayer, 16712);
+		break;
+	case 7:
+		pCreature->AI()->DoCastSpellIfCan(pPlayer, 17009);
+		break;
+	}
+	pPlayer->CLOSE_GOSSIP_MENU();
+
+	return true;
+}
+
+
+
 void AddSC_durotar()
 {
-    Script* pNewScript;
+	Script* pNewScript;
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_lazy_peon";
-    pNewScript->GetAI = &GetAI_npc_lazy_peon;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_lazy_peon_spell;
-    pNewScript->RegisterSelf();
+	pNewScript = new Script;
+	pNewScript->Name = "npc_lazy_peon";
+	pNewScript->GetAI = &GetAI_npc_lazy_peon;
+	pNewScript->pEffectDummyNPC = &EffectDummyCreature_lazy_peon_spell;
+	pNewScript->RegisterSelf();
+
+	pNewScript = new Script;
+	pNewScript->Name = "npc_bombay_witchdoctor";
+	pNewScript->pGossipHello = &GossipBomBayHello_gossip_codebox;
+	pNewScript->pGossipSelect = &GossipBomBaySelect_gossip_codebox;
+	pNewScript->RegisterSelf();
 }
