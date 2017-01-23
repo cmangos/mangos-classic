@@ -35,13 +35,13 @@ class BIHWrap
 
             MDLCallback(RayCallback& callback, const T* const* objects_array, uint32 objSize) : objects(objects_array), cb(callback), objectsSize(objSize) {}
 
-            bool operator()(const Ray& r, uint32 Idx, float& MaxDist, bool /*stopAtFirst*/)
+            bool operator()(const Ray& r, uint32 Idx, float& MaxDist, bool /*stopAtFirst*/, bool /*checkLOS*/)
             {
                 if (Idx >= objectsSize)
                     return false;
 
                 if (const T* obj = objects[Idx])
-                    return cb(r, *obj, MaxDist/*, stopAtFirst*/);
+                    return cb(r, *obj, MaxDist/*, stopAtFirst, checkLOS*/);
                 return false;
             }
 
