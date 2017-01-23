@@ -1188,10 +1188,9 @@ void WorldSession::HandleCancelMountAuraOpcode(WorldPacket& /*recv_data*/)
 
 void WorldSession::HandleRequestPetInfoOpcode(WorldPacket& /*recv_data */)
 {
-    /*
-        DEBUG_LOG("WORLD: Received opcode CMSG_REQUEST_PET_INFO");
-        recv_data.hexlike();
-    */
+    DEBUG_LOG("WORLD: CMSG_REQUEST_PET_INFO");
+
+    _player->PetSpellInitialize();
 }
 
 void WorldSession::HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data)
