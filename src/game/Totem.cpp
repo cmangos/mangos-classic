@@ -161,7 +161,8 @@ void Totem::SetOwner(Unit* owner)
 
 Unit* Totem::GetOwner() const
 {
-    if (ObjectGuid ownerGuid = GetOwnerGuid())
+    // Owner is actually creator in our case
+    if (ObjectGuid ownerGuid = GetCreatorGuid())
         return ObjectAccessor::GetUnit(*this, ownerGuid);
 
     return nullptr;

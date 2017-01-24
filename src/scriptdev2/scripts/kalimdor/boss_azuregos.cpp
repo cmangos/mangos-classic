@@ -35,7 +35,7 @@ enum
     SPELL_FROST_BREATH          = 21099,
     SPELL_REFLECT               = 22067,
     SPELL_CLEAVE                = 19983,                    // Was 8255; this one is from wowhead and seems to be the correct one
-//    SPELL_ENRAGE                = 23537,					// Enrage code is disabled. See comment above
+//    SPELL_ENRAGE                = 23537,                  // Enrage code is disabled. See comment above
 };
 
 struct boss_azuregosAI : public ScriptedAI
@@ -85,7 +85,7 @@ struct boss_azuregosAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_VACUUM) == CAST_OK)
             {
                 DoScriptText(SAY_TELEPORT, m_creature);
-                m_uiTeleportTimer = 30000;
+                m_uiTeleportTimer = urand(20000, 30000);
             }
         }
         else
@@ -104,7 +104,7 @@ struct boss_azuregosAI : public ScriptedAI
         if (m_uiBreathTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_FROST_BREATH) == CAST_OK)
-                m_uiBreathTimer = urand(10000, 15000);
+                m_uiBreathTimer = urand(10000, 25000);
         }
         else
             m_uiBreathTimer -= uiDiff;
@@ -112,10 +112,10 @@ struct boss_azuregosAI : public ScriptedAI
         // Mana Storm Timer
         if (m_uiManaStormTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_MANA_STORM) == CAST_OK)
-                    m_uiManaStormTimer = urand(7500, 12500);
+                    m_uiManaStormTimer = urand(18000, 35000);
             }
         }
         else
