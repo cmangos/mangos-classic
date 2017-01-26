@@ -429,9 +429,15 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         sLog.outErrorEventAI("Creature %u are using event(%u) with nonexistent quest id (%u) in param1, skipped.", temp.creature_id, i, temp.quest.questId);
                     sLog.outErrorEventAI("Creature %u using not implemented event (%u) in event %u.", temp.creature_id, temp.event_id, i);
                     continue;
-
-                case EVENT_T_AGGRO:
                 case EVENT_T_DEATH:
+                {
+                    if (!sConditionStorage.LookupEntry<PlayerCondition>(temp.death.conditionId)) // condition does not exist for some reason
+                    {
+                        sLog.outErrorDb("Creature %u has `ConditionId` = %u but does not exist. Setting ConditionId to 0 for event %u.", temp.creature_id, temp.death.conditionId, i);
+                        temp.death.conditionId = 0;
+                    }
+                }
+                case EVENT_T_AGGRO:
                 case EVENT_T_EVADE:
                 case EVENT_T_REACHED_HOME:
                 {

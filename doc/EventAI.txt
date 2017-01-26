@@ -233,6 +233,8 @@ NOTE: For Repeat Events the Repeat Timer ONLY Re-Check's Event Conditions to see
 ------------------
 6 = EVENT_T_DEATH:
 ------------------
+Parameter 1: ConditionId - condition from Conditions table
+
 BOTH - This Event Expires upon Death of the Scripted NPC. This is normally only used in combat though.
 This is commonly used for NPC's who have a Yell or Spell Cast when they Die.
 

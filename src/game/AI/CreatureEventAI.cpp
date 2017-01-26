@@ -237,6 +237,11 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             pHolder.UpdateRepeatTimer(m_creature, event.kill.repeatMin, event.kill.repeatMax);
             break;
         case EVENT_T_DEATH:
+            if (event.death.conditionId)
+                if (Player* player = pActionInvoker->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    if (!sObjectMgr.IsPlayerMeetToCondition(event.death.conditionId, player, player->GetMap(), m_creature, CONDITION_FROM_EVENTAI))
+                        return false;
+            break;
         case EVENT_T_EVADE:
             break;
         case EVENT_T_SPELLHIT:
