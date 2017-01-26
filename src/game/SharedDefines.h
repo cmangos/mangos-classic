@@ -2459,6 +2459,12 @@ enum TradeStatus
     TRADE_STATUS_NOT_ON_TAPLIST = 23                        // Related to trading soulbound loot items
 };
 
+enum EncounterCreditType
+{
+    ENCOUNTER_CREDIT_KILL_CREATURE = 0,
+    ENCOUNTER_CREDIT_CAST_SPELL = 1
+};
+
 enum WorldStateType
 {
     WORLD_STATE_REMOVE              = 0,

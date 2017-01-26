@@ -2721,6 +2721,8 @@ void Spell::cancel()
     m_autoRepeat = false;
     switch (m_spellState)
     {
+        case SPELL_STATE_CREATED:
+        case SPELL_STATE_STARTING:
         case SPELL_STATE_PREPARING:
             CancelGlobalCooldown();
 
@@ -2752,9 +2754,7 @@ void Spell::cancel()
                 SendCastResult(SPELL_FAILED_INTERRUPTED);
         } break;
 
-        default:
-        {
-        } break;
+        case SPELL_STATE_FINISHED: break; // should not occur
     }
 
     finish(false);
@@ -3280,6 +3280,13 @@ void Spell::finish(bool ok)
     // Stop Attack for some spells
     if (m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
         m_caster->AttackStop();
+
+    if (m_caster->IsInWorld()) // some teleport spells put caster in between maps, need to check
+    {
+        Map* map = m_caster->GetMap();
+        if (map->IsDungeon())
+            ((DungeonMap*)map)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, m_spellInfo->Id);
+    }
 }
 
 void Spell::SendCastResult(SpellCastResult result) const
@@ -4883,9 +4890,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_LOW_CASTLEVEL;
 
                 // chance for fail at orange skinning attempt
-                if (m_spellState != SPELL_STATE_CREATED &&
-                        skillValue < sWorld.GetConfigMaxSkillValue() &&
-                        (ReqValue < 0 ? 0 : ReqValue) > irand(skillValue - 25, skillValue + 37))
+                if (!strict && skillValue < sWorld.GetConfigMaxSkillValue() && (ReqValue < 0 ? 0 : ReqValue) > irand(skillValue - 25, skillValue + 37))
                     return SPELL_FAILED_TRY_AGAIN;
 
                 break;
@@ -4946,7 +4951,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 // chance for fail at orange mining/herb/LockPicking gathering attempt
                 // second check prevent fail at rechecks
-                if (m_spellState > SPELL_STATE_STARTING && skillId != SKILL_NONE)
+                if (!strict && skillId != SKILL_NONE)
                 {
                     bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING;
 
@@ -5601,6 +5606,8 @@ SpellCastResult Spell::CheckRange(bool strict) const
             return SPELL_FAILED_OUT_OF_RANGE;
         if (min_range && m_caster->IsWithinDist3d(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, min_range))
             return SPELL_FAILED_TOO_CLOSE;
+        if (!m_caster->IsWithinLOS(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ))
+            return SPELL_FAILED_LINE_OF_SIGHT;
     }
 
     return SPELL_CAST_OK;

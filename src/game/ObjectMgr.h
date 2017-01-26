@@ -260,6 +260,19 @@ struct PetCreateSpellEntry
     uint32 spellid[4];
 };
 
+struct DungeonEncounter
+{
+    DungeonEncounter(DungeonEncounterEntry const* _dbcEntry, EncounterCreditType _creditType, uint32 _creditEntry, uint32 _lastEncounterDungeon)
+        : dbcEntry(_dbcEntry), creditType(_creditType), creditEntry(_creditEntry), lastEncounterDungeon(_lastEncounterDungeon) { }
+    DungeonEncounterEntry const* dbcEntry;
+    EncounterCreditType creditType;
+    uint32 creditEntry;
+    uint32 lastEncounterDungeon;
+};
+
+typedef std::multimap<uint32, DungeonEncounter const*> DungeonEncounterMap;
+typedef std::pair<DungeonEncounterMap::const_iterator, DungeonEncounterMap::const_iterator> DungeonEncounterMapBounds;
+
 struct GraveYardData
 {
     uint32 safeLocId;
@@ -310,7 +323,7 @@ enum ConditionType
     // True if player has skill skill_id and skill less than (and not equal) skill_value (for skill_value > 1)
     // If skill_value == 1, then true if player has not skill skill_id
     CONDITION_REPUTATION_RANK_MAX   = 30,                   // faction_id   max_rank
-    CONDITION_RESERVED_3            = 31,                   // reserved for 3.x and later
+    CONDITION_COMPLETED_ENCOUNTER   = 31,                   // encounter_id encounter_id2       encounter_id[2] = DungeonEncounter(dbc).id (if value2 provided it will return value1 OR value2)
     CONDITION_SOURCE_AURA           = 32,                   // spell_id     effindex (returns true if the source of the condition check has aura of spell_id, effIndex)
     CONDITION_LAST_WAYPOINT         = 33,                   // waypointId   0 = exact, 1: wp <= waypointId, 2: wp > waypointId  Use to check what waypoint was last reached
     CONDITION_RESERVED_4            = 34,                   // reserved for 3.x and later
@@ -642,6 +655,7 @@ class ObjectMgr
         void LoadPageTextLocales();
         void LoadGossipMenuItemsLocales();
         void LoadPointOfInterestLocales();
+        void LoadInstanceEncounters();
         void LoadInstanceTemplate();
         void LoadWorldTemplate();
         void LoadConditions();
@@ -677,6 +691,8 @@ class ObjectMgr
         void LoadNpcGossips();
 
         void LoadGossipMenus();
+
+        void LoadDungeonEncounters();
 
         void LoadVendorTemplates();
         void LoadVendors() { LoadVendors("npc_vendor", false); }
@@ -973,6 +989,11 @@ class ObjectMgr
             return m_ItemRequiredTarget.equal_range(uiItemEntry);
         }
 
+        DungeonEncounterMapBounds GetDungeonEncounterBounds(uint32 creditEntry) const
+        {
+            return m_DungeonEncounters.equal_range(creditEntry);
+        }
+
         GossipMenusMapBounds GetGossipMenusMapBounds(uint32 uiMenuId) const
         {
             return m_mGossipMenusMap.equal_range(uiMenuId);
@@ -1150,6 +1171,7 @@ class ObjectMgr
         std::map<int32 /*minEntryOfBracket*/, uint32 /*count*/> m_loadedStringCount;
         GossipMenuItemsLocaleMap mGossipMenuItemsLocaleMap;
         PointOfInterestLocaleMap mPointOfInterestLocaleMap;
+        DungeonEncounterMap m_DungeonEncounters;
 
         CacheNpcTextIdMap m_mCacheNpcTextIdMap;
         CacheVendorItemMap m_mCacheVendorTemplateItemMap;

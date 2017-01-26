@@ -4737,7 +4737,7 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
     if (!pet)
     {
         pet = new Pet();
-        if (!pet->LoadPetFromDB(_player, 0, 0, true, damage))
+        if (!pet->LoadPetFromDB(_player, 0, 0, false, damage))
             delete pet;
         // if above successfully loaded the pet all is done
         return;
