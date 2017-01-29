@@ -377,6 +377,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\shared\Auth\AuthCrypt.cpp" />
+    <ClCompile Include="..\..\src\shared\Auth\base32.cpp" />
     <ClCompile Include="..\..\src\shared\Auth\BigNumber.cpp" />
     <ClCompile Include="..\..\src\shared\Auth\Hmac.cpp" />
     <ClCompile Include="..\..\src\shared\Auth\md5.c" />
@@ -401,9 +402,11 @@
     <ClCompile Include="..\..\src\shared\ServiceWin32.cpp" />
     <ClCompile Include="..\..\src\shared\Threading.cpp" />
     <ClCompile Include="..\..\src\shared\Util.cpp" />
+    <ClCompile Include="Hmac.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\shared\Auth\AuthCrypt.h" />
+    <ClInclude Include="..\..\src\shared\Auth\base32.h" />
     <ClInclude Include="..\..\src\shared\Auth\BigNumber.h" />
     <ClInclude Include="..\..\src\shared\Auth\Hmac.h" />
     <ClInclude Include="..\..\src\shared\Auth\md5.h" />
@@ -439,6 +442,7 @@
     <ClInclude Include="..\..\src\shared\Threading.h" />
     <ClInclude Include="..\..\src\shared\Timer.h" />
     <ClInclude Include="..\..\src\shared\Util.h" />
+    <ClInclude Include="Hmac.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="framework.vcxproj">

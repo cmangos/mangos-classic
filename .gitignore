@@ -85,5 +85,9 @@ cmake_install.cmake
 # Special exceptions
 #
 
+*.aps
+*.vcxproj*
+*.vcxproj.filters*
+
 # recastnavigation directory needs exception
 !dep/recastnavigation/RecastDemo/Build/
