@@ -317,10 +317,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
     m_ignoreHitResult = false;
     m_ignoreUnselectableTarget = m_IsTriggeredSpell;
 
-    // determine reflection
-    m_canReflect = false;
-
-    m_canReflect = IsReflectableSpell(m_spellInfo);
+    m_reflectable = IsReflectableSpell(m_spellInfo);
 
     if (triggeredFlags & TRIGGERED_IGNORE_UNSELECTABLE_FLAG)
         m_ignoreUnselectableTarget = true;
@@ -757,7 +754,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
     target.processed  = false;                              // Effects not applied on target
 
     // Calculate hit result
-    target.missCondition = m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(pVictim, m_spellInfo, m_canReflect);
+    target.missCondition = m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(pVictim, m_spellInfo, m_reflectable);
 
     // spell fly from visual cast object
     WorldObject* affectiveObject = GetAffectiveCasterObject();
@@ -792,12 +789,18 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
     // If target reflect spell back to caster
     if (target.missCondition == SPELL_MISS_REFLECT)
     {
+        // Victim reflects, apply reflect procs
+        m_caster->ProcDamageAndSpell(pVictim, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo);
         // Calculate reflected spell result on caster
-        target.reflectResult =  m_caster->SpellHitResult(m_caster, m_spellInfo, m_canReflect);
-
-        if (target.reflectResult == SPELL_MISS_REFLECT)     // Impossible reflect again, so simply deflect spell
+        target.reflectResult =  m_caster->SpellHitResult(m_caster, m_spellInfo, m_reflectable);
+        // Caster reflects back spell which was already reflected by victim
+        if (target.reflectResult == SPELL_MISS_REFLECT)
+        {
+            // Apply reflect procs on self
+            m_caster->ProcDamageAndSpell(m_caster, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo);
+            // Full circle: it's impossible to reflect further, "Immune" shows up
             target.reflectResult = SPELL_MISS_IMMUNE;
-
+        }
         // Increase time interval for reflected spells by 1.5
         target.timeDelay += target.timeDelay >> 1;
     }
@@ -984,7 +987,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     // Do healing and triggers
     if (m_healing)
     {
-        bool crit = real_caster && real_caster->IsSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask);
+        bool crit = real_caster && real_caster->RollSpellCritOutcome(unitTarget, m_spellSchoolMask, m_spellInfo);
         uint32 addhealth = m_healing;
         if (crit)
         {
@@ -2718,6 +2721,8 @@ void Spell::cancel()
     m_autoRepeat = false;
     switch (m_spellState)
     {
+        case SPELL_STATE_CREATED:
+        case SPELL_STATE_STARTING:
         case SPELL_STATE_PREPARING:
             CancelGlobalCooldown();
 
@@ -2749,9 +2754,7 @@ void Spell::cancel()
                 SendCastResult(SPELL_FAILED_INTERRUPTED);
         } break;
 
-        default:
-        {
-        } break;
+        case SPELL_STATE_FINISHED: break; // should not occur
     }
 
     finish(false);
@@ -3277,6 +3280,13 @@ void Spell::finish(bool ok)
     // Stop Attack for some spells
     if (m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
         m_caster->AttackStop();
+
+    if (m_caster->IsInWorld()) // some teleport spells put caster in between maps, need to check
+    {
+        Map* map = m_caster->GetMap();
+        if (map->IsDungeon())
+            ((DungeonMap*)map)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_CAST_SPELL, m_spellInfo->Id);
+    }
 }
 
 void Spell::SendCastResult(SpellCastResult result) const
@@ -4340,14 +4350,16 @@ SpellCastResult Spell::CheckCast(bool strict)
         // Check if more powerful spell applied on target (if spell only contains non-aoe auras)
         if (IsAuraApplyEffects(m_spellInfo, EFFECT_MASK_ALL) && !IsAreaOfEffectSpell(m_spellInfo) && !HasAreaAuraEffect(m_spellInfo))
         {
+            const ObjectGuid casterGuid = m_caster->GetObjectGuid();
             Unit::SpellAuraHolderMap const& spair = target->GetSpellAuraHolderMap();
             for (Unit::SpellAuraHolderMap::const_iterator iter = spair.begin(); iter != spair.end(); ++iter)
             {
                 const SpellAuraHolder* existing = iter->second;
                 const SpellEntry* entry = existing->GetSpellProto();
-                if (m_caster != existing->GetCaster() && sSpellMgr.IsNoStackSpellDueToSpell(m_spellInfo, entry))
+                const bool own = (casterGuid == existing->GetCasterGuid());
+                // Cannot overwrite someone else's auras
+                if (!own && sSpellMgr.IsNoStackSpellDueToSpell(m_spellInfo, entry))
                 {
-                    // We cannot overwrite someone else's more powerful spell
                     if (IsSimilarExistingAuraStronger(m_caster, m_spellInfo->Id, existing) ||
                         (sSpellMgr.IsRankSpellDueToSpell(m_spellInfo, entry->Id) && sSpellMgr.IsHighRankOfSpell(entry->Id, m_spellInfo->Id)))
                         return SPELL_FAILED_AURA_BOUNCED;
@@ -4878,9 +4890,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_LOW_CASTLEVEL;
 
                 // chance for fail at orange skinning attempt
-                if (m_spellState != SPELL_STATE_CREATED &&
-                        skillValue < sWorld.GetConfigMaxSkillValue() &&
-                        (ReqValue < 0 ? 0 : ReqValue) > irand(skillValue - 25, skillValue + 37))
+                if (!strict && skillValue < sWorld.GetConfigMaxSkillValue() && (ReqValue < 0 ? 0 : ReqValue) > irand(skillValue - 25, skillValue + 37))
                     return SPELL_FAILED_TRY_AGAIN;
 
                 break;
@@ -4941,7 +4951,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 // chance for fail at orange mining/herb/LockPicking gathering attempt
                 // second check prevent fail at rechecks
-                if (m_spellState > SPELL_STATE_STARTING && skillId != SKILL_NONE)
+                if (!strict && skillId != SKILL_NONE)
                 {
                     bool canFailAtMax = skillId != SKILL_HERBALISM && skillId != SKILL_MINING;
 
@@ -5596,6 +5606,8 @@ SpellCastResult Spell::CheckRange(bool strict) const
             return SPELL_FAILED_OUT_OF_RANGE;
         if (min_range && m_caster->IsWithinDist3d(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, min_range))
             return SPELL_FAILED_TOO_CLOSE;
+        if (!m_caster->IsWithinLOS(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ))
+            return SPELL_FAILED_LINE_OF_SIGHT;
     }
 
     return SPELL_CAST_OK;

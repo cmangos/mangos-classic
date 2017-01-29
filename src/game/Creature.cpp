@@ -2679,6 +2679,14 @@ void Creature::SetWaterWalk(bool enable)
     SendMessageToSet(data, true);
 }
 
+bool Creature::CanCrit(const SpellEntry *entry, SpellSchoolMask schoolMask, WeaponAttackType attType) const
+{
+    // Creatures do not crit with their spells or abilities, unless it belongs to a player (pet, totem, etc)
+    if (!GetOwnerGuid().IsPlayer())
+        return false;
+    return Unit::CanCrit(entry, schoolMask, attType);
+}
+
 // Set loot status. Also handle remove corpse timer
 void Creature::SetLootStatus(CreatureLootStatus status)
 {

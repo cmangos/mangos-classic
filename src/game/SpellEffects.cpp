@@ -2744,8 +2744,14 @@ void Spell::EffectTeleUnitsFaceCaster(SpellEffectIndex eff_idx)
         m_targets.getDestination(fx, fy, fz);
     else
     {
-        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
-        m_caster->GetClosePoint(fx, fy, fz, unitTarget->GetObjectBoundingRadius(), dis);
+        if (float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx])))
+            m_caster->GetClosePoint(fx, fy, fz, unitTarget->GetObjectBoundingRadius(), dis);
+        else
+        {
+            fx = m_caster->GetPositionX();
+            fy = m_caster->GetPositionY();
+            fz = m_caster->GetPositionZ();
+        }
     }
 
     unitTarget->NearTeleportTo(fx, fy, fz, -m_caster->GetOrientation(), unitTarget == m_caster);
@@ -4731,7 +4737,7 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
     if (!pet)
     {
         pet = new Pet();
-        if (!pet->LoadPetFromDB(_player, 0, 0, true, damage))
+        if (!pet->LoadPetFromDB(_player, 0, 0, false, damage))
             delete pet;
         // if above successfully loaded the pet all is done
         return;
