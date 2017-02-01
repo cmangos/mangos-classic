@@ -17,12 +17,13 @@
 /* ScriptData
 SDName: Eastern_Plaguelands
 SD%Complete: 100
-SDComment: Quest support: 7622.
+SDComment: Quest support: 7622, 6148.
 SDCategory: Eastern Plaguelands
 EndScriptData */
 
 /* ContentData
 npc_eris_havenfire
+npc_nathanos_blightcaller
 EndContentData */
 
 #include "precompiled.h"
@@ -309,6 +310,139 @@ bool QuestAccept_npc_eris_havenfire(Player* pPlayer, Creature* pCreature, const 
     return true;
 }
 
+/*######
+## npc_nathanos_blightcaller
+######*/
+
+enum
+{
+    QUEST_SCARLET_ORACLE_DEMETRIA   = 6148,
+
+    NPC_DEMETRIA                    = 12339,
+    NPC_SCARLET_TROOPER             = 12352,
+
+    MAX_TROOPERS                    = 9,
+
+    SPELL_PSYCHIC_SCREAM            = 13704,
+    SPELL_BACKHAND                  = 6253,
+    SPELL_SHADOW_SHOT               = 6660,
+    SPELL_MULTI_SHOT                = 18651,
+};
+
+static const float aDemetriaSpawnLoc[3] = { 1567.16f, -5611.0f, 114.19f };
+
+struct npc_nathanos_blightcallerAI : public ScriptedAI
+{
+    npc_nathanos_blightcallerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    bool m_bCanSummon;
+
+    uint32 m_uiMultiShotTimer;
+    uint32 m_uiShadowShotTimer;
+    uint32 m_uiBackhandTimer;
+    uint32 m_uiPsychicScreamTimer;
+
+    void DoSummonPatrol()
+    {
+        float fX, fY, fZ;
+        if (m_bCanSummon)
+        {
+            m_creature->SummonCreature(NPC_DEMETRIA, aDemetriaSpawnLoc[0], aDemetriaSpawnLoc[1], aDemetriaSpawnLoc[2], 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+
+            for (uint8 i = 0; i < MAX_TROOPERS; ++i)
+            {
+                m_creature->GetRandomPoint(aDemetriaSpawnLoc[0], aDemetriaSpawnLoc[1], aDemetriaSpawnLoc[2], 5.0f, fX, fY, fZ);
+                m_creature->SummonCreature(NPC_SCARLET_TROOPER, fX, fY, fZ, 0, TEMPSUMMON_DEAD_DESPAWN, 0);
+            }
+
+            m_bCanSummon = false;
+        }
+    }
+
+    void SummonedCreatureJustDied(Creature* pSummoned) override
+    {
+        if (pSummoned->GetEntry() == NPC_DEMETRIA)
+            m_bCanSummon = true;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiPsychicScreamTimer < uiDiff)
+        {
+            Unit* pTarget = nullptr;
+            std::list<Creature*> lTempList = DoFindFriendlyCC(50.0f);
+
+            if (!lTempList.empty())
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_PSYCHIC_SCREAM) == CAST_OK)
+                    m_uiPsychicScreamTimer = urand(12000, 15000);
+            }
+        }
+        else
+            m_uiPsychicScreamTimer -= uiDiff;
+
+        if (m_uiBackhandTimer < uiDiff)
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0))
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_BACKHAND) == CAST_OK)
+                    m_uiBackhandTimer = urand(7000, 9000);
+            }
+        }
+        else
+            m_uiBackhandTimer -= uiDiff;
+
+        if (m_uiShadowShotTimer < uiDiff)
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0))
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_SHOT) == CAST_OK)
+                    m_uiShadowShotTimer = urand(2300, 3900);
+            }
+        }
+        else
+            m_uiShadowShotTimer -= uiDiff;
+
+        if (m_uiMultiShotTimer < uiDiff)
+        {
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_MULTI_SHOT) == CAST_OK)
+                    m_uiMultiShotTimer = urand(8000, 11000);
+            }
+        }
+        else
+            m_uiMultiShotTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+
+    void Reset() override
+    {
+        m_uiMultiShotTimer = urand(4000, 6000);
+        m_uiShadowShotTimer = 1000;
+        m_uiPsychicScreamTimer = 1000;
+        m_uiBackhandTimer = urand(7000, 9000);
+        m_bCanSummon = true;
+    }
+};
+
+CreatureAI* GetAI_npc_nathanos_blightcaller(Creature* pCreature)
+{
+    return new npc_nathanos_blightcallerAI(pCreature);
+}
+
+bool QuestAccept_npc_nathanos_blightcaller(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_SCARLET_ORACLE_DEMETRIA)
+    {
+        if (npc_nathanos_blightcallerAI* pNathanosAI = dynamic_cast<npc_nathanos_blightcallerAI*>(pCreature->AI()))
+            pNathanosAI->DoSummonPatrol();
+    }
+
+    return true;
+}
+
 void AddSC_eastern_plaguelands()
 {
     Script* pNewScript;
@@ -317,5 +451,11 @@ void AddSC_eastern_plaguelands()
     pNewScript->Name = "npc_eris_havenfire";
     pNewScript->GetAI = &GetAI_npc_eris_havenfire;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_eris_havenfire;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_nathanos_blightcaller";
+    pNewScript->GetAI = &GetAI_npc_nathanos_blightcaller;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_nathanos_blightcaller;
     pNewScript->RegisterSelf();
 }
