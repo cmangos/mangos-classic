@@ -312,6 +312,7 @@ bool QuestAccept_npc_eris_havenfire(Player* pPlayer, Creature* pCreature, const 
 
 /*######
 ## npc_nathanos_blightcaller
+## TODO: remove this when generic map-wide IsSpawned condition is implemented
 ######*/
 
 enum
