@@ -2036,9 +2036,6 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
         if ((selectFlags & SELECT_FLAG_POWER_ENERGY) && pTarget->GetPowerType() != POWER_ENERGY)
             return false;
 
-        if ((selectFlags & SELECT_FLAG_POWER_RUNIC) && pTarget->GetPowerType() != POWER_RUNIC_POWER)
-            return false;
-
         if ((selectFlags & SELECT_FLAG_IN_MELEE_RANGE) && !CanReachWithMeleeAttack(pTarget))
             return false;
 
