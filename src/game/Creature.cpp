@@ -2048,7 +2048,7 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
 
     if (pSpellInfo)
     {
-        if (selectFlags)
+        if (selectFlags & (SELECT_FLAG_HAS_AURA | SELECT_FLAG_NOT_AURA))
         {
             if (selectFlags & SELECT_FLAG_HAS_AURA)
             {
@@ -2061,6 +2061,8 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
                 if (pTarget->HasAura(pSpellInfo->Id))
                     return false;
             }
+
+            return true;
         }
 
         switch (pSpellInfo->rangeIndex)
@@ -2158,6 +2160,7 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         case ATTACKING_TARGET_FARTHEST_AWAY:
         {
             std::list<Unit*> suitableUnits;
+            suitableUnits.reserve(threatlist.size());
 
             for (; itr != threatlist.end(); ++itr)
             {
@@ -2169,7 +2172,7 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
             }
 
             if (suitableUnits.empty() || position >= suitableUnits.size())
-                break;
+                return nullptr;
 
             if (suitableUnits.size() > 1)
             {
