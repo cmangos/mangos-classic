@@ -2160,7 +2160,6 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         case ATTACKING_TARGET_FARTHEST_AWAY:
         {
             std::list<Unit*> suitableUnits;
-            suitableUnits.reserve(threatlist.size());
 
             for (; itr != threatlist.end(); ++itr)
             {
