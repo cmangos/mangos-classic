@@ -1603,7 +1603,7 @@ bool Creature::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf)
     {
         if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
             return true;
-        
+
         if (GetCreatureInfo()->SchoolImmuneMask & (1 << spellInfo->School))
             return true;
     }
@@ -2024,27 +2024,47 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
 {
     if (selectFlags)
     {
-        if (selectFlags & SELECT_FLAG_PLAYER && pTarget->GetTypeId() != TYPEID_PLAYER)
+        if ((selectFlags & SELECT_FLAG_PLAYER) && pTarget->GetTypeId() != TYPEID_PLAYER)
             return false;
 
-        if (selectFlags & SELECT_FLAG_POWER_MANA && pTarget->GetPowerType() != POWER_MANA)
-            return false;
-        else if (selectFlags & SELECT_FLAG_POWER_RAGE && pTarget->GetPowerType() != POWER_RAGE)
-            return false;
-        else if (selectFlags & SELECT_FLAG_POWER_ENERGY && pTarget->GetPowerType() != POWER_ENERGY)
+        if ((selectFlags & SELECT_FLAG_POWER_MANA) && pTarget->GetPowerType() != POWER_MANA)
             return false;
 
-        if (selectFlags & SELECT_FLAG_IN_MELEE_RANGE && !CanReachWithMeleeAttack(pTarget))
-            return false;
-        else if (selectFlags & SELECT_FLAG_NOT_IN_MELEE_RANGE && CanReachWithMeleeAttack(pTarget))
+        if ((selectFlags & SELECT_FLAG_POWER_RAGE) && pTarget->GetPowerType() != POWER_RAGE)
             return false;
 
-        if (selectFlags & SELECT_FLAG_IN_LOS && !IsWithinLOSInMap(pTarget))
+        if ((selectFlags & SELECT_FLAG_POWER_ENERGY) && pTarget->GetPowerType() != POWER_ENERGY)
+            return false;
+
+        if ((selectFlags & SELECT_FLAG_IN_MELEE_RANGE) && !CanReachWithMeleeAttack(pTarget))
+            return false;
+
+        if ((selectFlags & SELECT_FLAG_NOT_IN_MELEE_RANGE) && CanReachWithMeleeAttack(pTarget))
+            return false;
+
+        if ((selectFlags & SELECT_FLAG_IN_LOS) && !IsWithinLOSInMap(pTarget))
             return false;
     }
 
     if (pSpellInfo)
     {
+        if (selectFlags & (SELECT_FLAG_HAS_AURA | SELECT_FLAG_NOT_AURA))
+        {
+            if (selectFlags & SELECT_FLAG_HAS_AURA)
+            {
+                if (!pTarget->HasAura(pSpellInfo->Id))
+                    return false;
+            }
+
+            if (selectFlags & SELECT_FLAG_NOT_AURA)
+            {
+                if (pTarget->HasAura(pSpellInfo->Id))
+                    return false;
+            }
+
+            return true;
+        }
+
         switch (pSpellInfo->rangeIndex)
         {
             case SPELL_RANGE_IDX_SELF_ONLY: return false;
@@ -2073,30 +2093,28 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
     if (!CanHaveThreatList())
         return nullptr;
 
-    // ThreatList m_threatlist;
     ThreatList const& threatlist = getThreatManager().getThreatList();
-    ThreatList::const_iterator itr = threatlist.begin();
-    ThreatList::const_reverse_iterator ritr = threatlist.rbegin();
-
-    if (position >= threatlist.size() || !threatlist.size())
+    if (threatlist.empty() || position >= threatlist.size())
         return nullptr;
+
+    ThreatList::const_iterator itr = threatlist.begin();
 
     switch (target)
     {
         case ATTACKING_TARGET_RANDOM:
         {
-            Unit* pTarget = nullptr;
             std::vector<Unit*> suitableUnits;
             suitableUnits.reserve(threatlist.size() - position);
+            if (position)
+                advance(itr, position);
 
-            advance(itr, position);
-            while (itr != threatlist.end())
+            for (; itr != threatlist.end(); ++itr)
             {
-                pTarget = GetMap()->GetUnit((*itr)->getUnitGuid());
-                if (pTarget && MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
-                    suitableUnits.push_back(pTarget);
-
-                ++itr;
+                if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
+                {
+                    if ((!selectFlags && !pSpellInfo) || MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
+                        suitableUnits.push_back(pTarget);
+                }
             }
 
             if (!suitableUnits.empty())
@@ -2106,32 +2124,34 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         }
         case ATTACKING_TARGET_TOPAGGRO:
         {
-            Unit* pTarget = nullptr;
+            if (position)
+                advance(itr, position);
 
-            advance(itr, position);
-            while (itr != threatlist.end())
+            for (; itr != threatlist.end(); ++itr)
             {
-                pTarget = GetMap()->GetUnit((*itr)->getUnitGuid());
-                if (pTarget && MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
-                    return pTarget;
-
-                ++itr;
+                if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
+                {
+                    if ((!selectFlags && !pSpellInfo) || MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
+                        return pTarget;
+                }
             }
 
             break;
         }
         case ATTACKING_TARGET_BOTTOMAGGRO:
         {
-            Unit* pTarget = nullptr;
+            ThreatList::const_reverse_iterator ritr = threatlist.rbegin();
 
-            advance(ritr, position);
-            while (ritr != threatlist.rend())
+            if (position)
+                advance(ritr, position);
+
+            for (; ritr != threatlist.rend(); ++ritr)
             {
-                pTarget = GetMap()->GetUnit((*itr)->getUnitGuid());
-                if (pTarget && MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
-                    return pTarget;
-
-                ++ritr;
+                if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
+                {
+                    if ((!selectFlags && !pSpellInfo) || MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
+                        return pTarget;
+                }
             }
 
             break;
@@ -2139,42 +2159,32 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
         case ATTACKING_TARGET_NEAREST_BY:
         case ATTACKING_TARGET_FARTHEST_AWAY:
         {
-            float distance = -1;
-            float combatDistance = 0;
-            Unit* pTarget = nullptr;
-            Unit* suitableTarget = nullptr;
+            std::list<Unit*> suitableUnits;
 
-            advance(itr, position);
-            while (itr != threatlist.end())
+            for (; itr != threatlist.end(); ++itr)
             {
-                pTarget = GetMap()->GetUnit((*itr)->getUnitGuid());
-
-                if (pTarget && MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
+                if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    combatDistance = Creature::GetCombatDistance(pTarget, false);
-
-                    if (target == ATTACKING_TARGET_NEAREST_BY)
-                    {
-                        if (!suitableTarget || combatDistance < distance)
-                        {
-                            distance = combatDistance;
-                            suitableTarget = pTarget;
-                        }
-                    }
-                    else // FARTHEST
-                    {
-                        if (combatDistance > distance)
-                        {
-                            distance = combatDistance;
-                            suitableTarget = pTarget;
-                        }
-                    }
+                    if ((!selectFlags && !pSpellInfo) || MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
+                        suitableUnits.push_back(pTarget);
                 }
-
-                ++itr;
             }
 
-            return suitableTarget;
+            if (suitableUnits.empty() || position >= suitableUnits.size())
+                return nullptr;
+
+            if (suitableUnits.size() > 1)
+            {
+                if (target == ATTACKING_TARGET_NEAREST_BY)
+                    suitableUnits.sort(TargetDistanceOrderNear(this));
+                else
+                    suitableUnits.sort(TargetDistanceOrderFarAway(this));
+            }
+
+            std::list<Unit*>::iterator itr2 = suitableUnits.begin();
+            if (position)
+                std::advance(itr2, position);
+            return *itr2;
         }
     }
 
