@@ -34,25 +34,30 @@ EndContentData */
 
 static uint32 TriggerOrphanSpell[6][3] =
 {
-    {3546, 14305, 65056},                                   // The Bough of the Eternals
-    {3547, 14444, 65059},                                   // Lordaeron Throne Room
-    {3548, 14305, 65055},                                   // The Stonewrought Dam
-    {3549, 14444, 65058},                                   // Gateway to the Frontier
-    {3550, 14444, 65057},                                   // Down at the Docks
-    {3552, 14305, 65054}                                    // Spooky Lighthouse
+    {3546, 14305, 1479},                                    // The Bough of the Eternals
+    {3547, 14444, 1800},                                    // Lordaeron Throne Room
+    {3548, 14305, 1558},                                    // The Stonewrought Dam
+    {3549, 14444, 911},                                     // Gateway to the Frontier
+    {3550, 14444, 910},                                     // Down at the Docks
+    {3552, 14305, 1687}                                     // Spooky Lighthouse
 };
 
 bool AreaTrigger_at_childrens_week_spot(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     for (uint8 i = 0; i < 6; ++i)
     {
-        if (pAt->id == TriggerOrphanSpell[i][0] &&
-                pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == TriggerOrphanSpell[i][1])
+        if (pPlayer->IsCurrentQuest(TriggerOrphanSpell[i][2]))
         {
-            pPlayer->CastSpell(pPlayer, TriggerOrphanSpell[i][2], TRIGGERED_OLD_TRIGGERED);
-            return true;
+            if (pAt->id == TriggerOrphanSpell[i][0] &&
+                pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == TriggerOrphanSpell[i][1])
+            {
+                pPlayer->SendQuestCompleteEvent(TriggerOrphanSpell[i][2]);
+                pPlayer->CompleteQuest(TriggerOrphanSpell[i][2]);
+                return true;
+            }
         }
     }
+
     return false;
 }
 
