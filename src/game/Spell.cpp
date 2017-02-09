@@ -4517,24 +4517,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                             // no target provided or it was not valid, so use closest in range
                             if (!targetExplicit)
                             {
-                                WorldObject* objectForSearch = m_caster;
-                                uint32 savePhaseMask = 0;
-
-                                if (worldObject && (worldObject->GetTypeId() == TYPEID_GAMEOBJECT || worldObject->GetTypeId() == TYPEID_DYNAMICOBJECT))
-                                {
-                                    objectForSearch = worldObject;
-                                    savePhaseMask = worldObject->GetPhaseMask();
-                                    objectForSearch->SetPhaseMask(m_caster->GetPhaseMask(), false);
-                                }
-
+                                WorldObject* objectForSearch = (worldObject && (worldObject->GetTypeId() == TYPEID_GAMEOBJECT || worldObject->GetTypeId() == TYPEID_DYNAMICOBJECT)) ? worldObject : m_caster;
                                 MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*objectForSearch, i_spellST->targetEntry, i_spellST->type != SPELL_TARGET_TYPE_DEAD, i_spellST->type == SPELL_TARGET_TYPE_DEAD, range);
                                 MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(p_Creature, u_check);
 
                                 // Visit all, need to find also Pet* objects
                                 Cell::VisitAllObjects(objectForSearch, searcher, range);
-
-                                if (savePhaseMask)
-                                    objectForSearch->SetPhaseMask(savePhaseMask, false);
 
                                 range = u_check.GetLastRange();
                             }
