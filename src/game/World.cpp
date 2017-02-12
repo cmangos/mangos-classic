@@ -98,7 +98,6 @@ World::World(): mail_timer(0), mail_timer_expires(0)
     m_startTime = m_gameTime;
     m_maxActiveSessionCount = 0;
     m_maxQueuedSessionCount = 0;
-    m_MaintenanceTimeChecker = 0;
 
     m_defaultDbcLocale = LOCALE_enUS;
     m_availableDbcLocaleMask = 0;
@@ -793,9 +792,6 @@ void World::LoadConfigSettings(bool reload)
     MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMapIds.c_str());
     sLog.outString("WORLD: MMap pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
 
-    setConfig(CONFIG_BOOL_PATH_FIND_OPTIMIZE, "PathFinder.OptimizePath", true);
-    setConfig(CONFIG_BOOL_PATH_FIND_NORMALIZE_Z, "PathFinder.NormalizeZ", false);
-
     sLog.outString();
 }
 
@@ -1003,9 +999,6 @@ void World::SetInitialWorldSettings()
     sLog.outString(">>> Game Event Data loaded");
     sLog.outString();
 
-    sLog.outString("Loading Dungeon Encounters...");
-    sObjectMgr.LoadDungeonEncounters();                     // Load DungeonEncounter.dbc from DB
-
     sLog.outString("Loading Conditions...");                // Load Conditions
     sObjectMgr.LoadConditions();
 
@@ -1079,9 +1072,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Skill Fishing base level requirements...");
     sObjectMgr.LoadFishingBaseSkillLevel();
-
-    sLog.outString("Loading Instance encounters data...");  // must be after Creature loading
-    sObjectMgr.LoadInstanceEncounters();
 
     sLog.outString("Loading Npc Text Id...");
     sObjectMgr.LoadNpcGossips();                            // must be after load Creature and LoadGossipText

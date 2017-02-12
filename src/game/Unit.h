@@ -270,7 +270,7 @@ enum UnitModifierType
 {
     BASE_VALUE = 0,
     BASE_EXCLUSIVE = 1,
-    BASE_PCT = 2,
+    BASE_PCT = 2,    
     TOTAL_VALUE = 3,
     TOTAL_PCT = 4,
     MODIFIER_TYPE_END = 5
@@ -2318,32 +2318,6 @@ bool Unit::CheckAllControlledUnits(Func const& func, uint32 controlledMask) cons
 
     return false;
 }
-
-// Helper for targets nearest to the spell target
-// The spell target is always first unless there is a target at _completely_ the same position (unbelievable case)
-struct TargetDistanceOrderNear : public std::binary_function<Unit const, Unit const, bool>
-{
-    Unit const* m_mainTarget;
-    TargetDistanceOrderNear(Unit const* target) : m_mainTarget(target) {}
-    // functor for operator ">"
-    bool operator()(Unit const* _Left, Unit const* _Right) const
-    {
-        return m_mainTarget->GetDistanceOrder(_Left, _Right);
-    }
-};
-
-// Helper for targets furthest away to the spell target
-// The spell target is always first unless there is a target at _completely_ the same position (unbelievable case)
-struct TargetDistanceOrderFarAway : public std::binary_function<Unit const, Unit const, bool>
-{
-    Unit const* m_mainTarget;
-    TargetDistanceOrderFarAway(Unit const* target) : m_mainTarget(target) {}
-    // functor for operator "<"
-    bool operator()(Unit const* _Left, Unit const* _Right) const
-    {
-        return !m_mainTarget->GetDistanceOrder(_Left, _Right);
-    }
-};
 
 /** @} */
 

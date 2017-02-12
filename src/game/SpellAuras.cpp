@@ -3273,14 +3273,10 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
                 }
                 else
                 {
-                    if (m_removeMode != AURA_REMOVE_BY_DEATH)
-                    {
-                        if (int32(target->GetHealth()) > m_modifier.m_amount)
-                            target->ModifyHealth(-m_modifier.m_amount);
-                        else
-                            target->SetHealth(1);
-                    }
-
+                    if (int32(target->GetHealth()) > m_modifier.m_amount)
+                        target->ModifyHealth(-m_modifier.m_amount);
+                    else
+                        target->SetHealth(1);
                     target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
                 }
             }
