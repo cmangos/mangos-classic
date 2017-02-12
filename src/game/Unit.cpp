@@ -1186,8 +1186,6 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
                 if (save->GetResetTime() < resettime)
                     save->SetResetTime(resettime);
             }
-
-            ((DungeonMap*)m)->GetPersistanceState()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, victim->GetEntry());
         }
     }
 
