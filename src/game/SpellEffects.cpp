@@ -469,7 +469,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     if (unitTarget && m_CastItem)
                     {
-                        uint32 roll = urand(0, 99)
+                        uint32 roll = urand(0, 99);
                         // These rates are hella random; someone feel free to correct them
                         if (roll < 3)                   // Whole party will grow
                             m_caster->CastSpell(m_caster, 13004, TRIGGERED_OLD_TRIGGERED);
