@@ -2258,3 +2258,14 @@ bool Map::GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, f
 
     return false;
 }
+
+bool Map::IsMountAllowed() const
+{
+    if (!IsDungeon())
+        return true;
+
+    if (InstanceTemplate const* data = ObjectMgr::GetInstanceTemplate(GetId()))
+        return data->mountAllowed;
+
+    return true;
+}

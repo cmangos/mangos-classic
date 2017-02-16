@@ -64,7 +64,7 @@ struct InstanceTemplate
 {
     uint32 map;                                             // instance map
     uint32 parent;                                          // non-continent parent instance (for instance with entrance in another instances)
-    // or 0 (not related to continent 0 map id)
+                                                            // or 0 (not related to continent 0 map id)
     uint32 levelMin;
     uint32 levelMax;
     uint32 maxPlayers;
@@ -73,6 +73,7 @@ struct InstanceTemplate
     float ghostEntranceX;
     float ghostEntranceY;
     uint32 script_id;
+    bool   mountAllowed;
 };
 
 struct WorldTemplate
@@ -177,6 +178,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>
         bool IsRaid() const { return i_mapEntry && i_mapEntry->IsRaid(); }
         bool IsBattleGround() const { return i_mapEntry && i_mapEntry->IsBattleGround(); }
         bool IsContinent() const { return i_mapEntry && i_mapEntry->IsContinent(); }
+        bool IsMountAllowed() const;
 
         // can't be nullptr for loaded map
         MapPersistentState* GetPersistentState() const { return m_persistentState; }
