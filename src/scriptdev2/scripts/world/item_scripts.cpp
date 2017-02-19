@@ -41,7 +41,9 @@ bool ItemUse_item_orb_of_draconic_energy(Player* pPlayer, Item* pItem, const Spe
 {
     Creature* pEmberstrife = GetClosestCreatureWithEntry(pPlayer, NPC_EMBERSTRIFE, 20.0f);
     // If Emberstrife is already mind controled or above 10% HP: force spell cast failure
-    if (pEmberstrife && pEmberstrife->HasAura(SPELL_DOMINION_SOUL) || pEmberstrife->GetHealth() / pEmberstrife->GetMaxHealth() > 0.1f)
+    if (pEmberstrife && pEmberstrife->HasAura(SPELL_DOMINION_SOUL) 
+        || ((float)pEmberstrife->GetHealth()) /
+        ((float)pEmberstrife->GetMaxHealth()) > 0.1f)
     {
         pPlayer->SendEquipError(EQUIP_ERR_NONE, pItem, NULL);
 
