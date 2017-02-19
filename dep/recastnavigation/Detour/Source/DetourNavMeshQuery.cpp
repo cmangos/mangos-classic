@@ -1775,12 +1775,12 @@ dtStatus dtNavMeshQuery::findStraightPath(const float* startPos, const float* en
 					{
 						stat = appendPortals(apexIndex, i, closestEndPos, path,
 											 straightPath, straightPathFlags, straightPathRefs,
-											 straightPathCount, maxStraightPath, options);
+											 straightPathCount, maxStraightPath, options); // <-
 					}
 
 					stat = appendVertex(closestEndPos, 0, path[i],
 										straightPath, straightPathFlags, straightPathRefs,
-										straightPathCount, maxStraightPath);
+										straightPathCount, maxStraightPath); //<-
 					
 					return DT_SUCCESS | DT_PARTIAL_RESULT | ((*straightPathCount >= maxStraightPath) ? DT_BUFFER_TOO_SMALL : 0);
 				}
