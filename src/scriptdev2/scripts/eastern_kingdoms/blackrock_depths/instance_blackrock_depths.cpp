@@ -107,8 +107,10 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
         case NPC_HAMMERED_PATRON:
             m_sBarPatronNpcGuids.insert(pCreature->GetObjectGuid());
             if (m_auiEncounter[11] == DONE)
+            {
                 pCreature->SetFactionTemporary(FACTION_DARK_IRON, TEMPFACTION_RESTORE_RESPAWN);
                 pCreature->SetStandState(UNIT_STAND_STATE_STAND);
+            }
             break;
         case NPC_PRIVATE_ROCKNOT:
         case NPC_MISTRESS_NAGMARA:
