@@ -210,9 +210,6 @@ BattleGround::BattleGround(): m_BuffChange(false), m_StartDelayTime(0), m_startM
     m_PlayersCount[TEAM_INDEX_ALLIANCE]    = 0;
     m_PlayersCount[TEAM_INDEX_HORDE]       = 0;
 
-    m_PlayersCount[TEAM_INDEX_ALLIANCE]    = 0;
-    m_PlayersCount[TEAM_INDEX_HORDE]       = 0;
-
     m_TeamScores[TEAM_INDEX_ALLIANCE]      = 0;
     m_TeamScores[TEAM_INDEX_HORDE]         = 0;
 
