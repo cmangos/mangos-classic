@@ -101,7 +101,7 @@ struct npc_belnistraszAI : public npc_escortAI
         {
             if (!m_bAggro)
             {
-                DoScriptText(urand(0, 1) ? SAY_BELNISTRASZ_AGGRO_1 : SAY_BELNISTRASZ_AGGRO_1, m_creature, pAttacker);
+                DoScriptText(urand(0, 1) ? SAY_BELNISTRASZ_AGGRO_1 : SAY_BELNISTRASZ_AGGRO_2, m_creature, pAttacker);
                 m_bAggro = true;
             }
 
