@@ -978,11 +978,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             }
         }
     }
-
-    // In 1.12.1 we need explicit miss info
-    if (real_caster && missInfo && missInfo != SPELL_MISS_REFLECT)
-        real_caster->SendSpellMiss(unit, m_spellInfo->Id, missInfo);
-
+    
     // All calculated do it!
     // Do healing and triggers
     if (m_healing)
