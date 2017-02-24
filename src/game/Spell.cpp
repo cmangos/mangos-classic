@@ -3222,13 +3222,14 @@ void Spell::finish(bool ok)
         {
             switch (ihit->missCondition)
             {
-                case SPELL_MISS_DEFLECT:
+                case SPELL_MISS_MISS:
+                case SPELL_MISS_DODGE:
+                    if (m_spellInfo->powerType == POWER_RAGE) // For Warriors only refund on parry/deflect, for rogues on all 4
+                        break;
                 case SPELL_MISS_PARRY:
-                {
-                    if (m_caster->GetCharmerOrOwnerOrOwnGuid().IsPlayer())
-                        m_caster->ModifyPower(Powers(m_spellInfo->powerType), int32(m_powerCost * 0.8));
+                case SPELL_MISS_DEFLECT:
+                    m_caster->ModifyPower(Powers(m_spellInfo->powerType), int32(m_powerCost * 0.8));
                     break;
-                }
             }
         }
     }
