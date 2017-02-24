@@ -104,6 +104,12 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
 {
     Unit* pCaster = m_unit;
 
+    if (!pTarget)
+        return CAST_FAIL_OTHER;
+
+    if (uiCastFlags & CAST_SWITCH_CASTER_TARGET)
+        std::swap(pCaster, pTarget);
+
     if (uiCastFlags & CAST_FORCE_TARGET_SELF)
         pCaster = pTarget;
 
