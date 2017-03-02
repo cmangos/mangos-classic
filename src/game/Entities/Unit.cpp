@@ -291,7 +291,8 @@ Unit::Unit() :
     m_charmInfo(nullptr),
     i_motionMaster(this),
     m_regenTimer(0),
-    m_combatData(new CombatData(this))
+    m_combatData(new CombatData(this)),
+    m_spellUpdateHappening(false)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -434,8 +435,10 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     // Spells must be processed with event system BEFORE they go to _UpdateSpells.
     // Or else we may have some SPELL_STATE_FINISHED spells stalled in pointers, that is bad.
     UpdateCooldowns(Clock::now());
+    m_spellUpdateHappening = true;
     m_Events.Update(update_diff);
     _UpdateSpells(update_diff);
+    m_spellUpdateHappening = false;
 
     CleanupDeletedAuras();
 
@@ -4090,6 +4093,8 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
 
     // add aura, register in lists and arrays
     holder->_AddSpellAuraHolder();
+    if(m_spellUpdateHappening)
+        holder->SetCreationDelayFlag();
     m_spellAuraHolders.insert(SpellAuraHolderMap::value_type(holder->GetId(), holder));
 
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)

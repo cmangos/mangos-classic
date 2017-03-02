@@ -222,6 +222,7 @@ class SpellAuraHolder
         bool m_isDeathPersist: 1;
         bool m_isRemovedOnShapeLost: 1;
         bool m_deleted: 1;
+        bool m_skipUpdate: 1;
 };
 
 typedef void(Aura::*pAuraHandler)(bool Apply, bool Real);

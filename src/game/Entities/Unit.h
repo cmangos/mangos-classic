@@ -2213,6 +2213,8 @@ class Unit : public WorldObject
 
         ObjectGuid m_fixateTargetGuid;                      //< Stores the Guid of a fixated target
 
+        // Need to safeguard aura application in Unit::Update
+        bool m_spellUpdateHappening;
     private:                                                // Error traps for some wrong args using
         // this will catch and prevent build for any cases when all optional args skipped and instead triggered used non boolean type
         // no bodies expected for this declarations
