@@ -265,6 +265,28 @@ bool ChatHandler::HandleDebugPlaySoundCommand(char* args)
     return true;
 }
 
+// Play Music
+bool ChatHandler::HandleDebugPlayMusicCommand(char* args)
+{
+    // USAGE: .debug playmusic #musicid
+    // #musicid - ID decimal number from SoundEntries.dbc (1st column)
+    uint32 dwMusicId;
+    if (!ExtractUInt32(&args, dwMusicId))
+        return false;
+
+    if (!sSoundEntriesStore.LookupEntry(dwMusicId))
+    {
+        PSendSysMessage(LANG_SOUND_NOT_EXIST, dwMusicId);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    m_session->GetPlayer()->PlayMusic(dwMusicId, dynamic_cast<Player*>(getSelectedUnit()));
+
+    PSendSysMessage(LANG_YOU_HEAR_SOUND, dwMusicId);
+    return true;
+}
+
 // Send notification in channel
 bool ChatHandler::HandleDebugSendChannelNotifyCommand(char* args)
 {
