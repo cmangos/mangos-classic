@@ -138,9 +138,23 @@ void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/)
         if (player && player->GetTeam() == team)
         {
             if (remove)
-                player->RemoveAurasDueToSpell(spellId);
+            {
+                ObjectGuid guid = player->GetObjectGuid();
+                player->GetMap()->AddMessage([guid, spellId](Map* map) -> void
+                {
+                    if (Player* player = map->GetPlayer(guid))
+                        player->RemoveAurasDueToSpell(spellId);
+                });
+            }
             else
-                player->CastSpell(player, spellId, TRIGGERED_OLD_TRIGGERED);
+            {
+                ObjectGuid guid = player->GetObjectGuid();
+                player->GetMap()->AddMessage([guid, spellId](Map* map) -> void
+                {
+                    if(Player* player = map->GetPlayer(guid))
+                        player->CastSpell(player, spellId, TRIGGERED_OLD_TRIGGERED);
+                });
+            }
         }
     }
 }
