@@ -2884,7 +2884,7 @@ float Unit::CalculateAbilityDeflectChance(const Unit *attacker, const SpellEntry
 
 bool Unit::RollAbilityPartialBlockOutcome(const Unit *attacker, WeaponAttackType attType, const SpellEntry *ability) const
 {
-    if (CanBlockAbility(attacker, ability))
+    if (!CanBlockAbility(attacker, ability))
         return false;
     const float chance = CalculateEffectiveBlockChance(attacker, attType, ability);
     return roll_chance_combat(chance);
