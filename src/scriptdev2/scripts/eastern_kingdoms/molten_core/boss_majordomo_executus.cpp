@@ -27,6 +27,7 @@ EndScriptData */
 
 enum
 {
+    // Majordomo Executus Encounter
     SAY_AGGRO               = -1409003,
     SAY_SLAY                = -1409005,
     SAY_SPECIAL             = -1409006,                     // Use unknown
@@ -34,6 +35,17 @@ enum
     SAY_DEFEAT_1            = -1409007,
     SAY_DEFEAT_2            = -1409020,
     SAY_DEFEAT_3            = -1409021,
+
+    SPELL_MAGIC_REFLECTION  = 20619,
+    SPELL_DAMAGE_REFLECTION = 21075,
+    SPELL_BLASTWAVE         = 20229,
+    SPELL_AEGIS             = 20620,
+    SPELL_TELEPORT          = 20618,
+
+    // Ragnaros summoning event
+    GOSSIP_ITEM_SUMMON_1    = -3409000,
+    GOSSIP_ITEM_SUMMON_2    = -3409001,
+    GOSSIP_ITEM_SUMMON_3    = -3409002,
 
     SAY_SUMMON_0            = -1409023,
     SAY_SUMMON_1            = -1409024,
@@ -43,19 +55,9 @@ enum
     SAY_ARRIVAL3_RAG        = -1409011,
     SAY_ARRIVAL4_MAJ        = -1409022,
 
-    GOSSIP_ITEM_SUMMON_1    = -3409000,
-    GOSSIP_ITEM_SUMMON_2    = -3409001,
-    GOSSIP_ITEM_SUMMON_3    = -3409002,
-
     TEXT_ID_SUMMON_1        = 4995,
     TEXT_ID_SUMMON_2        = 5011,
     TEXT_ID_SUMMON_3        = 5012,
-
-    SPELL_MAGIC_REFLECTION  = 20619,
-    SPELL_DAMAGE_REFLECTION = 21075,
-    SPELL_BLASTWAVE         = 20229,
-    SPELL_AEGIS             = 20620,
-    SPELL_TELEPORT          = 20618,
 
     SPELL_TELEPORT_SELF     = 19484,
     SPELL_SUMMON_RAGNAROS   = 19774,
@@ -192,12 +194,6 @@ struct boss_majordomoAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* pKiller) override
-    {
-        if (pKiller->GetTypeId() == TYPEID_UNIT && pKiller->GetEntry() == NPC_RAGNAROS)
-            DoScriptText(SAY_ARRIVAL4_MAJ, m_creature);
-    }
-
     void CorpseRemoved(uint32& uiRespawnDelay) override
     {
         uiRespawnDelay = urand(2 * HOUR, 3 * HOUR);
@@ -300,46 +296,45 @@ struct boss_majordomoAI : public ScriptedAI
                         // TODO - Move along, this expects to be handled with mmaps
                         m_creature->GetMotionMaster()->MovePoint(1, 831.079590f, -816.023193f, -229.023270f);
                         ++m_uiSpeech;
-                        m_uiSpeechTimer = 7000;
+                        m_uiSpeechTimer = 11500;
                         break;
                     case 12:
                         // Reset orientation
                         if (GameObject* pLavaSteam = m_pInstance->GetSingleGameObjectFromStorage(GO_LAVA_STEAM))
                             m_creature->SetFacingToObject(pLavaSteam);
-                        m_uiSpeechTimer = 4500;
-                        ++m_uiSpeech;
-                        break;
-                    case 13:
                         DoScriptText(SAY_SUMMON_MAJ, m_creature);
                         ++m_uiSpeech;
                         m_uiSpeechTimer = 8000;
                         break;
-                    case 14:
-                        // Summon Ragnaros
+                    case 13:
+                        // Summon Ragnaros and make sure it faces Majordomo Executus
                         if (m_pInstance)
                             if (GameObject* pGo = m_pInstance->GetSingleGameObjectFromStorage(GO_LAVA_STEAM))
                                 m_creature->SummonCreature(NPC_RAGNAROS, pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), fmod(m_creature->GetOrientation() + M_PI, 2 * M_PI), TEMPSUMMON_TIMED_OOC_OR_DEAD_DESPAWN, 2 * HOUR * IN_MILLISECONDS);
                         ++m_uiSpeech;
                         m_uiSpeechTimer = 8700;
                         break;
-                    case 15:
+                    case 14:
                         if (Creature* pRagnaros = m_creature->GetMap()->GetCreature(m_ragnarosGuid))
+                        {
+                            pRagnaros->HandleEmote(EMOTE_ONESHOT_ROAR);
                             DoScriptText(SAY_ARRIVAL1_RAG, pRagnaros);
+                        }
                         ++m_uiSpeech;
                         m_uiSpeechTimer = 11700;
                         break;
-                    case 16:
+                    case 15:
                         DoScriptText(SAY_ARRIVAL2_MAJ, m_creature);
                         ++m_uiSpeech;
                         m_uiSpeechTimer = 8700;
                         break;
-                    case 17:
+                    case 16:
                         if (Creature* pRagnaros = m_creature->GetMap()->GetCreature(m_ragnarosGuid))
                             DoScriptText(SAY_ARRIVAL3_RAG, pRagnaros);
                         ++m_uiSpeech;
                         m_uiSpeechTimer = 16500;
                         break;
-                    case 18:
+                    case 17:
                         if (Creature* pRagnaros = m_creature->GetMap()->GetCreature(m_ragnarosGuid))
                             pRagnaros->CastSpell(m_creature, SPELL_ELEMENTAL_FIRE, TRIGGERED_NONE);
                         // Rest of summoning speech is handled by Ragnaros, as Majordomo will be dead

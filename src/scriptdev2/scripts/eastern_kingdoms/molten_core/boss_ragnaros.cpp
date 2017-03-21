@@ -16,18 +16,13 @@
 
 /* ScriptData
 SDName: Boss_Ragnaros
-SD%Complete: 70
-SDComment: Melee/ Range Combat behavior is not correct(any enemy in melee range, not only getVictim), Some abilities are missing
+SD%Complete: 90
+SDComment: Melee/ Range Combat behavior is not correct(any enemy in melee range, not only getVictim), Submerge emote is not played
 SDCategory: Molten Core
 EndScriptData */
 
 #include "precompiled.h"
 #include "molten_core.h"
-
-/* There have been quite some bugs about his spells, keep this as reference untill all finished
- * Missing features (based on wowwiki)
- *   Lava Burst - this spell is handled by Go 178088 which is summoned by spells 21886, 21900 - 21907
- */
 
 enum
 {
@@ -45,9 +40,12 @@ enum
     SPELL_MELT_WEAPON           = 21387,
     SPELL_RAGNA_SUBMERGE        = 21107,                    // Stealth aura
     SPELL_RAGNA_EMERGE          = 20568,                    // Emerge from lava
+    SPELL_SUBMERGE_EFFECT       = 21859,                    // Make Ragnaros immune and passive while submerged
     SPELL_ELEMENTAL_FIRE_KILL   = 19773,
     SPELL_MIGHT_OF_RAGNAROS     = 21154,
     SPELL_INTENSE_HEAT          = 21155,
+    SPELL_LAVA_BURST            = 21908,                    // Randomly trigger one of spells 21886, 21900 - 21907 which summons Go 178088
+    SPELL_SUMMON_SONS_FLAME     = 21108,                    // Trigger the eight spells summoning the Son of Flame adds
 
     MAX_ADDS_IN_SUBMERGE        = 8,
     NPC_SON_OF_FLAME            = 12143,
@@ -72,6 +70,7 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
     uint32 m_uiMagmaBlastTimer;
     uint32 m_uiElementalFireTimer;
     uint32 m_uiSubmergeTimer;
+    uint32 m_uiLavaBurstTimer;
     uint32 m_uiAttackTimer;
     uint32 m_uiAddCount;
 
@@ -82,10 +81,11 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
 
     void Reset() override
     {
-        m_uiWrathOfRagnarosTimer = 30000;                   // TODO Research more, according to wowwiki 25s, but timers up to 34s confirmed
-        m_uiHammerTimer = 11000;                            // TODO wowwiki states 20-30s timer, but ~11s confirmed
+        m_uiWrathOfRagnarosTimer = 30000;
+        m_uiHammerTimer = 11000;
         m_uiMagmaBlastTimer = 2000;
         m_uiElementalFireTimer = 3000;
+        m_uiLavaBurstTimer = 20 * IN_MILLISECONDS;
         m_uiSubmergeTimer = 3 * MINUTE * IN_MILLISECONDS;
         m_uiAttackTimer = 90 * IN_MILLISECONDS;
         m_uiAddCount = 0;
@@ -128,7 +128,9 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_RAGNAROS, FAIL);
 
-        // Reset flag if had been submerged
+        // Reset flag if Ragnaros had been submerged
+        if (m_bIsSubmerged)
+            DoCastSpellIfCan(m_creature, SPELL_RAGNA_EMERGE);
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
@@ -208,6 +210,8 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
             if (m_uiAttackTimer < uiDiff)
             {
                 // Become emerged again
+                m_creature->RemoveAurasDueToSpell(SPELL_RAGNA_SUBMERGE);
+                m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE_EFFECT);
                 DoCastSpellIfCan(m_creature, SPELL_RAGNA_EMERGE);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_uiSubmergeTimer = 3 * MINUTE * IN_MILLISECONDS;
@@ -227,7 +231,7 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
             if (DoCastSpellIfCan(m_creature, SPELL_WRATH_OF_RAGNAROS) == CAST_OK)
             {
                 DoScriptText(SAY_WRATH, m_creature);
-                m_uiWrathOfRagnarosTimer = 30000;
+                m_uiWrathOfRagnarosTimer = 25000;
             }
         }
         else
@@ -242,6 +246,15 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
         else
             m_uiElementalFireTimer -= uiDiff;
 
+        // Lava Burst Timer
+        if (m_uiLavaBurstTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_LAVA_BURST) == CAST_OK)
+                m_uiLavaBurstTimer = urand(5000, 25000);                   // Upper value is guess work based on videos. It could be up to 45 secs
+        }
+        else
+            m_uiLavaBurstTimer -= uiDiff;
+
         // Hammer of Ragnaros
         if (m_uiHammerTimer < uiDiff)
         {
@@ -250,11 +263,11 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
                 if (DoCastSpellIfCan(pTarget, SPELL_MIGHT_OF_RAGNAROS) == CAST_OK)
                 {
                     DoScriptText(SAY_HAMMER, m_creature);
-                    m_uiHammerTimer = 11000;
+                    m_uiHammerTimer = urand(11000, 30000);
                 }
             }
             else
-                m_uiHammerTimer = 11000;
+                m_uiHammerTimer = urand(11000, 30000);
         }
         else
             m_uiHammerTimer -= uiDiff;
@@ -263,24 +276,19 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
         if (m_uiSubmergeTimer < uiDiff)
         {
             // Submerge and attack again after 90 secs
-            DoCastSpellIfCan(m_creature, SPELL_RAGNA_SUBMERGE, CAST_INTERRUPT_PREVIOUS);
             m_creature->HandleEmote(EMOTE_ONESHOT_SUBMERGE);
+            DoCastSpellIfCan(m_creature, SPELL_RAGNA_SUBMERGE, CAST_INTERRUPT_PREVIOUS);
             m_bIsSubmerged = true;
             m_uiAttackTimer = 90 * IN_MILLISECONDS;
-
+            DoCastSpellIfCan(m_creature, SPELL_SUBMERGE_EFFECT, CAST_INTERRUPT_PREVIOUS);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
             // Say dependend if first time or not
             DoScriptText(!m_bHasSubmergedOnce ? SAY_REINFORCEMENTS_1 : SAY_REINFORCEMENTS_2, m_creature);
             m_bHasSubmergedOnce = true;
 
-            // Summon 8 elementals at random points around the boss
-            float fX, fY, fZ;
-            for (uint8 i = 0; i < MAX_ADDS_IN_SUBMERGE; ++i)
-            {
-                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 30.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_SON_OF_FLAME, fX, fY, fZ, 0.0f, TEMPSUMMON_TIMED_OOC_DESPAWN, 1000);
-            }
+            // Summon 8 elementals around the boss
+            DoCastSpellIfCan(m_creature, SPELL_SUMMON_SONS_FLAME);
 
             return;
         }
