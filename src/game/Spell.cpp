@@ -1273,7 +1273,11 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool isReflected)
                 m_spellAuraHolder->SetAuraDuration(duration);
             }
 
-            unit->AddSpellAuraHolder(m_spellAuraHolder);
+            if (!unit->AddSpellAuraHolder(m_spellAuraHolder))
+            {
+                delete m_spellAuraHolder;
+                m_spellAuraHolder = nullptr;
+            }
         }
         else
         {

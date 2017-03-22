@@ -3515,7 +3515,8 @@ bool ChatHandler::HandleAuraCommand(char* args)
             holder->AddAura(aur, SpellEffectIndex(i));
         }
     }
-    target->AddSpellAuraHolder(holder);
+    if (!target->AddSpellAuraHolder(holder))
+        delete holder;
 
     return true;
 }
