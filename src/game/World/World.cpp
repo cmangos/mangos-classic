@@ -1544,6 +1544,29 @@ void World::SendWorldText(int32 string_id, ...)
     va_end(ap);
 }
 
+/// Sends a system message to all given security level and above
+void World::SendWorldTextToAboveSecurity(uint32 securityLevel, int32 string_id, ...)
+{
+    va_list ap;
+    va_start(ap, string_id);
+
+    MaNGOS::WorldWorldTextBuilder wt_builder(string_id, &ap);
+    MaNGOS::LocalizedPacketListDo<MaNGOS::WorldWorldTextBuilder> wt_do(wt_builder);
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    {
+        if (WorldSession* session = itr->second)
+        {
+            Player* player = session->GetPlayer();
+            if (player && player->IsInWorld())
+                if (WorldSession* session = player->GetSession())
+                    if (session->GetSecurity() >= securityLevel)
+                        wt_do(player);
+        }
+    }
+
+    va_end(ap);
+}
+
 /// Sends a packet to all players with optional team and instance restrictions
 void World::SendGlobalMessage(WorldPacket const& packet) const
 {
