@@ -2044,8 +2044,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1409003,'Reckless mortals! None may challenge the Sons of the Living flame!',8035,1,0,0,'majordomo SAY_AGGRO'),
 (-1409004,'The runes of warding have been destroyed! Hunt down the infidels, my brethren!',8039,6,0,0,'majordomo SAY_SPAWN'),
-(-1409005,'Ashes to Ashes!',8037,1,0,0,'majordomo SAY_SLAY'),
-(-1409006,'Burn mortals! Burn for this transgression!',8036,1,0,0,'majordomo SAY_SPECIAL'),
+(-1409005,'Ashes to Ashes!',8037,1,0,0,'majordomo SAY_SLAY_1'),
+(-1409006,'Burn mortals! Burn for this transgression!',8036,1,0,0,'majordomo SAY_SLAY_2'),
 (-1409007,'Impossible! Stay your attack, mortals... I submit! I submit!',8038,1,0,0,'majordomo SAY_DEFEAT_1'),
 
 (-1409008,'Behold Ragnaros - the Firelord! He who was ancient when this world was young! Bow before him, mortals! Bow before your ending!',8040,1,0,0,'ragnaros SAY_SUMMON_MAJ'),

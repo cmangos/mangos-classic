@@ -29,8 +29,8 @@ enum
 {
     // Majordomo Executus Encounter
     SAY_AGGRO               = -1409003,
-    SAY_SLAY                = -1409005,
-    SAY_SPECIAL             = -1409006,                     // Use unknown
+    SAY_SLAY_1              = -1409005,
+    SAY_SLAY_2              = -1409006,
     SAY_LAST_ADD            = -1409019,                     // When only one add remaining
     SAY_DEFEAT_1            = -1409007,
     SAY_DEFEAT_2            = -1409020,
@@ -41,6 +41,7 @@ enum
     SPELL_BLASTWAVE         = 20229,
     SPELL_AEGIS             = 20620,
     SPELL_TELEPORT          = 20618,
+    SPELL_IMMUNE_POLY       = 21087,                        // Cast onto Flamewaker Healers when half the adds are dead
 
     // Ragnaros summoning event
     GOSSIP_ITEM_SUMMON_1    = -3409000,
@@ -107,7 +108,7 @@ struct boss_majordomoAI : public ScriptedAI
         if (urand(0, 4))
             return;
 
-        DoScriptText(SAY_SLAY, m_creature);
+        DoScriptText((urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2), m_creature);
     }
 
     void Aggro(Unit* pWho) override
@@ -211,6 +212,10 @@ struct boss_majordomoAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_FLAMEWAKER_HEALER || pSummoned->GetEntry() == NPC_FLAMEWAKER_ELITE)
         {
             m_uiAddsKilled += 1;
+
+            // If 4 adds (half of them) are dead, make all remaining healers immune to polymorph via aura
+            if (m_uiAddsKilled >= MAX_MAJORDOMO_ADDS / 2)
+                DoCastSpellIfCan(m_creature, SPELL_IMMUNE_POLY);
 
             // Yell if only one Add alive
             if (m_uiAddsKilled == m_luiMajordomoAddsGUIDs.size() - 1)
