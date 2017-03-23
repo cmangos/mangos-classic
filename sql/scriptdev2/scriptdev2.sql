@@ -2059,7 +2059,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1409015,'BY FIRE BE PURGED!',8046,1,0,0,'ragnaros SAY_HAND'),
 (-1409016,'TASTE THE FLAMES OF SULFURON!',8047,1,0,0,'ragnaros SAY_WRATH'),
 (-1409017,'DIE INSECT!',8051,1,0,0,'ragnaros SAY_KILL'),
-(-1409018,'MY PATIENCE IS DWINDILING! COME NATS TO YOUR DEATH!',8048,1,0,0,'ragnaros SAY_MAGMABURST'),
+(-1409018,'MY PATIENCE IS DWINDLING! COME GNATS: TO YOUR DEATH!',8048,1,0,0,'ragnaros SAY_MAGMABURST'),
 
 (-1409019,'You think you\'ve won already? Perhaps you\'ll need another lesson in pain!',0,1,0,0,'majordomo SAY_LAST_ADD'),
 (-1409020,'Brashly, you have come to wrest the secrets of the Living Flame! You will soon regret the recklessness of your quest.',0,1,0,0,'majordomo SAY_DEFEAT_2'),

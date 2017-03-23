@@ -35,7 +35,7 @@ enum
     SAY_MAGMABURST              = -1409018,
 
     SPELL_WRATH_OF_RAGNAROS     = 20566,
-    SPELL_ELEMENTAL_FIRE        = 20564,
+    SPELL_ELEMENTAL_FIRE        = 20563,                    // Aura, proc spell 20564 when doing melee damage
     SPELL_MAGMA_BLAST           = 20565,                    // Ranged attack if nobody is in melee range
     SPELL_MELT_WEAPON           = 21387,
     SPELL_RAGNA_SUBMERGE        = 21107,                    // Stealth aura
@@ -68,7 +68,6 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
     uint32 m_uiWrathOfRagnarosTimer;
     uint32 m_uiHammerTimer;
     uint32 m_uiMagmaBlastTimer;
-    uint32 m_uiElementalFireTimer;
     uint32 m_uiSubmergeTimer;
     uint32 m_uiLavaBurstTimer;
     uint32 m_uiAttackTimer;
@@ -84,7 +83,6 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
         m_uiWrathOfRagnarosTimer = 30000;
         m_uiHammerTimer = 11000;
         m_uiMagmaBlastTimer = 2000;
-        m_uiElementalFireTimer = 3000;
         m_uiLavaBurstTimer = 20 * IN_MILLISECONDS;
         m_uiSubmergeTimer = 3 * MINUTE * IN_MILLISECONDS;
         m_uiAttackTimer = 90 * IN_MILLISECONDS;
@@ -118,6 +116,7 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
             return;
 
         DoCastSpellIfCan(m_creature, SPELL_MELT_WEAPON);
+        DoCastSpellIfCan(m_creature, SPELL_ELEMENTAL_FIRE);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_RAGNAROS, IN_PROGRESS);
@@ -236,15 +235,6 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
         }
         else
             m_uiWrathOfRagnarosTimer -= uiDiff;
-
-        // Elemental Fire Timer
-        if (m_uiElementalFireTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ELEMENTAL_FIRE) == CAST_OK)
-                m_uiElementalFireTimer = urand(10000, 14000);
-        }
-        else
-            m_uiElementalFireTimer -= uiDiff;
 
         // Lava Burst Timer
         if (m_uiLavaBurstTimer < uiDiff)
