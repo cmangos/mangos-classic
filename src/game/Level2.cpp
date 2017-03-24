@@ -860,7 +860,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
 
     GameObject* target = m_session->GetPlayer()->GetMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, id, lowguid));
 
-    PSendSysMessage(LANG_GAMEOBJECT_DETAIL, lowguid, goI->name, lowguid, id, x, y, z, mapid, o);
+    PSendSysMessage(LANG_GAMEOBJECT_DETAIL, lowguid, goI->name, lowguid, id, x, y, z, uint32(mapid), o);
 
     if (target)
     {
@@ -876,9 +876,9 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         ShowNpcOrGoSpawnInformation<GameObject>(target->GetGUIDLow());
 
         if (target->GetGoType() == GAMEOBJECT_TYPE_DOOR)
-            PSendSysMessage(LANG_COMMAND_GO_STATUS_DOOR, target->GetGoState(), target->getLootState(), GetOnOffStr(target->IsCollisionEnabled()), goI->door.startOpen ? "open" : "closed");
+            PSendSysMessage(LANG_COMMAND_GO_STATUS_DOOR, uint32(target->GetGoState()), uint32(target->getLootState()), GetOnOffStr(target->IsCollisionEnabled()), goI->door.startOpen ? "open" : "closed");
         else
-            PSendSysMessage(LANG_COMMAND_GO_STATUS, target->GetGoState(), target->getLootState(), GetOnOffStr(target->IsCollisionEnabled()));
+            PSendSysMessage(LANG_COMMAND_GO_STATUS, uint32(target->GetGoState()), uint32(target->getLootState()), GetOnOffStr(target->IsCollisionEnabled()));
     }
     return true;
 }
@@ -2322,7 +2322,7 @@ bool ChatHandler::HandlePInfoCommand(char* args)
 
     std::string nameLink = playerLink(target_name);
 
-    PSendSysMessage(LANG_PINFO_ACCOUNT, (target ? "" : GetMangosString(LANG_OFFLINE)), nameLink.c_str(), target_guid.GetCounter(), username.c_str(), accId, security, last_ip.c_str(), last_login.c_str(), latency);
+    PSendSysMessage(LANG_PINFO_ACCOUNT, (target ? "" : GetMangosString(LANG_OFFLINE)), nameLink.c_str(), target_guid.GetCounter(), username.c_str(), accId, uint32(security), last_ip.c_str(), last_login.c_str(), latency);
 
     std::string timeStr = secsToTimeString(total_player_time, true, true);
     uint32 gold = money / GOLD;
@@ -4234,11 +4234,11 @@ void ChatHandler::ShowPoolListHelper(uint16 pool_id)
     PoolTemplateData const& pool_template = sPoolMgr.GetPoolTemplate(pool_id);
     if (m_session)
         PSendSysMessage(LANG_POOL_ENTRY_LIST_CHAT,
-                        pool_id, pool_id, pool_template.description.c_str(), pool_template.AutoSpawn ? 1 : 0, pool_template.MaxLimit,
+                        uint32(pool_id), uint32(pool_id), pool_template.description.c_str(), pool_template.AutoSpawn ? 1 : 0, pool_template.MaxLimit,
                         sPoolMgr.GetPoolCreatures(pool_id).size(), sPoolMgr.GetPoolGameObjects(pool_id).size(), sPoolMgr.GetPoolPools(pool_id).size());
     else
         PSendSysMessage(LANG_POOL_ENTRY_LIST_CONSOLE,
-                        pool_id, pool_template.description.c_str(), pool_template.AutoSpawn ? 1 : 0, pool_template.MaxLimit,
+                        uint32(pool_id), pool_template.description.c_str(), pool_template.AutoSpawn ? 1 : 0, pool_template.MaxLimit,
                         sPoolMgr.GetPoolCreatures(pool_id).size(), sPoolMgr.GetPoolGameObjects(pool_id).size(), sPoolMgr.GetPoolPools(pool_id).size());
 }
 

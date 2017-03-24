@@ -3234,9 +3234,9 @@ void ChatHandler::ShowNpcOrGoSpawnInformation(uint32 guid)
     {
         uint16 top_pool_id = sPoolMgr.IsPartOfTopPool<Pool>(pool_id);
         if (!top_pool_id || top_pool_id == pool_id)
-            PSendSysMessage(LANG_NPC_GO_INFO_POOL, pool_id);
+            PSendSysMessage(LANG_NPC_GO_INFO_POOL, uint32(pool_id));
         else
-            PSendSysMessage(LANG_NPC_GO_INFO_TOP_POOL, pool_id, top_pool_id);
+            PSendSysMessage(LANG_NPC_GO_INFO_TOP_POOL, uint32(pool_id), uint32(top_pool_id));
 
         if (int16 event_id = sGameEventMgr.GetGameEventId<Pool>(top_pool_id))
         {
@@ -3244,9 +3244,9 @@ void ChatHandler::ShowNpcOrGoSpawnInformation(uint32 guid)
             GameEventData const& eventData = events[std::abs(event_id)];
 
             if (event_id > 0)
-                PSendSysMessage(LANG_NPC_GO_INFO_POOL_GAME_EVENT_S, top_pool_id, std::abs(event_id), eventData.description.c_str());
+                PSendSysMessage(LANG_NPC_GO_INFO_POOL_GAME_EVENT_S, uint32(top_pool_id), uint32(std::abs(event_id)), eventData.description.c_str());
             else
-                PSendSysMessage(LANG_NPC_GO_INFO_POOL_GAME_EVENT_D, top_pool_id, std::abs(event_id), eventData.description.c_str());
+                PSendSysMessage(LANG_NPC_GO_INFO_POOL_GAME_EVENT_D, uint32(top_pool_id), uint32(std::abs(event_id)), eventData.description.c_str());
         }
     }
     else if (int16 event_id = sGameEventMgr.GetGameEventId<T>(guid))
@@ -3255,9 +3255,9 @@ void ChatHandler::ShowNpcOrGoSpawnInformation(uint32 guid)
         GameEventData const& eventData = events[std::abs(event_id)];
 
         if (event_id > 0)
-            PSendSysMessage(LANG_NPC_GO_INFO_GAME_EVENT_S, std::abs(event_id), eventData.description.c_str());
+            PSendSysMessage(LANG_NPC_GO_INFO_GAME_EVENT_S, uint32(std::abs(event_id)), eventData.description.c_str());
         else
-            PSendSysMessage(LANG_NPC_GO_INFO_GAME_EVENT_D, std::abs(event_id), eventData.description.c_str());
+            PSendSysMessage(LANG_NPC_GO_INFO_GAME_EVENT_D, uint32(std::abs(event_id)), eventData.description.c_str());
     }
 }
 
