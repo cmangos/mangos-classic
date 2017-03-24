@@ -38,9 +38,9 @@ enum
 
     SPELL_MAGIC_REFLECTION  = 20619,
     SPELL_DAMAGE_REFLECTION = 21075,
-    SPELL_BLASTWAVE         = 20229,
     SPELL_AEGIS             = 20620,
-    SPELL_TELEPORT          = 20618,
+    SPELL_TELEPORT_RANDOM   = 20618,                        // Teleport random target
+    SPELL_TELEPORT_TARGET   = 20534,                        // Teleport Victim
     SPELL_IMMUNE_POLY       = 21087,                        // Cast onto Flamewaker Healers when half the adds are dead
 
     // Ragnaros summoning event
@@ -77,10 +77,9 @@ struct boss_majordomoAI : public ScriptedAI
 
     instance_molten_core* m_pInstance;
 
-    uint32 m_uiMagicReflectionTimer;
-    uint32 m_uiDamageReflectionTimer;
-    uint32 m_uiBlastwaveTimer;
-    uint32 m_uiTeleportTimer;
+    uint32 m_uiReflectionShieldTimer;
+    uint32 m_uiTeleportRandomTimer;
+    uint32 m_uiTeleportTargetTimer;
     uint32 m_uiAegisTimer;
     uint32 m_uiSpeechTimer;
 
@@ -92,10 +91,9 @@ struct boss_majordomoAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiMagicReflectionTimer  = 30000;                  // Damage reflection first so we alternate
-        m_uiDamageReflectionTimer = 15000;
-        m_uiBlastwaveTimer = 10000;
-        m_uiTeleportTimer = 20000;
+        m_uiReflectionShieldTimer = 15000;
+        m_uiTeleportRandomTimer = 15000;
+        m_uiTeleportTargetTimer = 30000;
         m_uiAegisTimer = 5000;
         m_uiSpeechTimer = 1000;
 
@@ -370,44 +368,35 @@ struct boss_majordomoAI : public ScriptedAI
             m_uiAegisTimer = 10000;
         }
 
-        // Magic Reflection Timer
-        if (m_uiMagicReflectionTimer < uiDiff)
+        // Damage/Magic Reflection Timer
+        if (m_uiReflectionShieldTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_MAGIC_REFLECTION) == CAST_OK)
-                m_uiMagicReflectionTimer = 30000;
+            if (DoCastSpellIfCan(m_creature, (urand(0 , 1) ? SPELL_DAMAGE_REFLECTION : SPELL_MAGIC_REFLECTION)) == CAST_OK)
+                m_uiReflectionShieldTimer = 30000;
         }
         else
-            m_uiMagicReflectionTimer -= uiDiff;
+            m_uiReflectionShieldTimer -= uiDiff;
 
-        // Damage Reflection Timer
-        if (m_uiDamageReflectionTimer < uiDiff)
+        // Teleports the main target to the heated rock in the center of the area
+        if (m_uiTeleportTargetTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_DAMAGE_REFLECTION) == CAST_OK)
-                m_uiDamageReflectionTimer = 30000;
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TELEPORT_TARGET) == CAST_OK)
+                m_uiTeleportTargetTimer = urand (25000, 30000);
         }
         else
-            m_uiDamageReflectionTimer -= uiDiff;
+            m_uiTeleportTargetTimer -= uiDiff;
 
-        // Teleports the target to the heated rock in the center of the area
-        if (m_uiTeleportTimer < uiDiff)
+        // Teleports a random target to the heated rock in the center of the area
+        if (m_uiTeleportRandomTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_TELEPORT) == CAST_OK)
-                    m_uiTeleportTimer = 20000;
+                if (DoCastSpellIfCan(pTarget, SPELL_TELEPORT_RANDOM) == CAST_OK)
+                    m_uiTeleportRandomTimer = urand (25000, 30000);
             }
         }
         else
-            m_uiTeleportTimer -= uiDiff;
-
-        // Blastwave Timer
-        if (m_uiBlastwaveTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BLASTWAVE) == CAST_OK)
-                m_uiBlastwaveTimer = 10000;
-        }
-        else
-            m_uiBlastwaveTimer -= uiDiff;
+            m_uiTeleportRandomTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
