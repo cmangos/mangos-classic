@@ -747,8 +747,8 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config) const
         AuctionEntry* auction = auctionHouse->GetAuction(auctionEval.AuctionId);
         if (!auction)                                       // is auction not active now
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Entry %u on ah %u doesn't exists, perhaps bought already?",
-                             auctionEval.AuctionId, auction->GetHouseId());
+            DEBUG_FILTER_LOG(LOG_FILTER_AHBOT_BUYER, "AHBot: Entry %u on ah doesn't exists, perhaps bought already?",
+                             auctionEval.AuctionId);
 
             config.CheckedEntry.erase(itr++);
             continue;
