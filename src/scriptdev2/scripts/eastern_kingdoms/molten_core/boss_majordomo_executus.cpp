@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Majordomo_Executus
-SD%Complete: 95
-SDComment: Minor weaknesses
+SD%Complete: 100
+SDComment:
 SDCategory: Molten Core
 EndScriptData */
 
@@ -28,42 +28,43 @@ EndScriptData */
 enum
 {
     // Majordomo Executus Encounter
-    SAY_AGGRO               = -1409003,
-    SAY_SLAY_1              = -1409005,
-    SAY_SLAY_2              = -1409006,
-    SAY_LAST_ADD            = -1409019,                     // When only one add remaining
-    SAY_DEFEAT_1            = -1409007,
-    SAY_DEFEAT_2            = -1409020,
-    SAY_DEFEAT_3            = -1409021,
+    SAY_AGGRO                = -1409003,
+    SAY_SLAY_1               = -1409005,
+    SAY_SLAY_2               = -1409006,
+    SAY_LAST_ADD             = -1409019,                    // When only one add remaining
+    SAY_DEFEAT_1             = -1409007,
+    SAY_DEFEAT_2             = -1409020,
+    SAY_DEFEAT_3             = -1409021,
 
-    SPELL_MAGIC_REFLECTION  = 20619,
-    SPELL_DAMAGE_REFLECTION = 21075,
-    SPELL_AEGIS             = 20620,
-    SPELL_TELEPORT_RANDOM   = 20618,                        // Teleport random target
-    SPELL_TELEPORT_TARGET   = 20534,                        // Teleport Victim
-    SPELL_IMMUNE_POLY       = 21087,                        // Cast onto Flamewaker Healers when half the adds are dead
+    SPELL_MAGIC_REFLECTION   = 20619,
+    SPELL_DAMAGE_REFLECTION  = 21075,
+    SPELL_AEGIS              = 20620,
+    SPELL_TELEPORT_RANDOM    = 20618,                       // Teleport random target
+    SPELL_TELEPORT_TARGET    = 20534,                       // Teleport Victim
+    SPELL_IMMUNE_POLY        = 21087,                       // Cast onto Flamewaker Healers when half the adds are dead
+    SPELL_SEPARATION_ANXIETY = 21094,                       // Aura cast on himself by Majordomo Executus, if adds move out of range, they will cast spell 21095 on themselves
 
     // Ragnaros summoning event
-    GOSSIP_ITEM_SUMMON_1    = -3409000,
-    GOSSIP_ITEM_SUMMON_2    = -3409001,
-    GOSSIP_ITEM_SUMMON_3    = -3409002,
+    GOSSIP_ITEM_SUMMON_1     = -3409000,
+    GOSSIP_ITEM_SUMMON_2     = -3409001,
+    GOSSIP_ITEM_SUMMON_3     = -3409002,
 
-    SAY_SUMMON_0            = -1409023,
-    SAY_SUMMON_1            = -1409024,
-    SAY_SUMMON_MAJ          = -1409008,
-    SAY_ARRIVAL1_RAG        = -1409009,
-    SAY_ARRIVAL2_MAJ        = -1409010,
-    SAY_ARRIVAL3_RAG        = -1409011,
-    SAY_ARRIVAL4_MAJ        = -1409022,
+    SAY_SUMMON_0             = -1409023,
+    SAY_SUMMON_1             = -1409024,
+    SAY_SUMMON_MAJ           = -1409008,
+    SAY_ARRIVAL1_RAG         = -1409009,
+    SAY_ARRIVAL2_MAJ         = -1409010,
+    SAY_ARRIVAL3_RAG         = -1409011,
+    SAY_ARRIVAL4_MAJ         = -1409022,
 
-    TEXT_ID_SUMMON_1        = 4995,
-    TEXT_ID_SUMMON_2        = 5011,
-    TEXT_ID_SUMMON_3        = 5012,
+    TEXT_ID_SUMMON_1         = 4995,
+    TEXT_ID_SUMMON_2         = 5011,
+    TEXT_ID_SUMMON_3         = 5012,
 
-    SPELL_TELEPORT_SELF     = 19484,
-    SPELL_SUMMON_RAGNAROS   = 19774,
-    SPELL_ELEMENTAL_FIRE    = 19773,
-    SPELL_RAGNA_EMERGE      = 20568,
+    SPELL_TELEPORT_SELF      = 19484,
+    SPELL_SUMMON_RAGNAROS    = 19774,
+    SPELL_ELEMENTAL_FIRE     = 19773,
+    SPELL_RAGNA_EMERGE       = 20568,
 };
 
 struct boss_majordomoAI : public ScriptedAI
@@ -115,6 +116,8 @@ struct boss_majordomoAI : public ScriptedAI
             return;
 
         DoScriptText(SAY_AGGRO, m_creature);
+        // Majordomo Executus has a 100 yard aura to keep track of the distance of each of his adds, the Flamewaker Healers will enrage if moved out of it
+        DoCastSpellIfCan(m_creature, SPELL_SEPARATION_ANXIETY, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MAJORDOMO, IN_PROGRESS);
