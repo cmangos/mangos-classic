@@ -538,12 +538,13 @@ bool ChatHandler::HandleServerLogFilterCommand(char* args)
         return true;
     }
 
+    size_t _len = strlen(filtername);
     for (int i = 0; i < LOG_FILTER_COUNT; ++i)
     {
         if (!*logFilterData[i].name)
             continue;
 
-        if (!strncmp(filtername, logFilterData[i].name, strlen(filtername)))
+        if (!strncmp(filtername, logFilterData[i].name, _len))
         {
             sLog.SetLogFilter(LogFilters(1 << i), value);
             PSendSysMessage("  %-20s = %s", logFilterData[i].name, GetOnOffStr(value));

@@ -892,7 +892,7 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             sLog.outErrorEventAI("Event %u Action %u uses invalid event type %u (must be less than %u), skipping", i, j + 1, action.throwEvent.eventType, MAXIMAL_AI_EVENT_EVENTAI);
                             continue;
                         }
-                        if (action.throwEvent.radius > SIZE_OF_GRIDS)
+                        if (action.throwEvent.radius > (uint32)SIZE_OF_GRIDS)
                             sLog.outErrorEventAI("Event %u Action %u uses unexpectedly huge radius %u (expected to be less than %f)", i, j + 1, action.throwEvent.radius, SIZE_OF_GRIDS);
 
                         if (action.throwEvent.radius == 0)
