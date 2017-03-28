@@ -170,41 +170,13 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
     // Custom threat management for targets in melee range
     bool CanMeleeTargetInRange()
     {
-        Unit* pTarget = nullptr;
-        Unit* pMostHatedTarget = nullptr;
-
-        // if current victim is in melee range, job done
-        if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
-            pTarget = m_creature->getVictim();
-        else
-        {
-            // First check if the most hated target is back in range
-            if (!m_creature->getThreatManager().isThreatListEmpty())
-                pMostHatedTarget = m_creature->getThreatManager().getHostileTarget();
-
-            if (pMostHatedTarget && m_creature->CanReachWithMeleeAttack(pMostHatedTarget))
-                pTarget = m_creature->getThreatManager().getHostileTarget();
-            // Else check for another target in melee reach
-            else
-            {
-                Map::PlayerList const& lPlayers = m_creature->GetMap()->GetPlayers();
-                for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
-                {
-                    Player* pPlayer = itr->getSource();
-                    if (pPlayer && pPlayer->isAlive() && !pPlayer->isGameMaster() && m_creature->CanReachWithMeleeAttack(pPlayer))
-                        pTarget = (Unit*)pPlayer;
-                }
-            }
-        }
-
-        // If a target is found in range
-        if (pTarget)
+        // If a target is found in melee range (descending threat), attack it
+        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
         {
             // Target is not current victim, force select and attack it
             if (pTarget != m_creature->getVictim())
             {
                 AttackStart(pTarget);
-                m_creature->SetTargetGuid(pTarget->GetObjectGuid());
                 m_creature->SetInFront(pTarget);
             }
             // Make sure our attack is ready
