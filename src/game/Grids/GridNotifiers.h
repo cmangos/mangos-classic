@@ -1108,7 +1108,7 @@ namespace MaNGOS
                 return false;
             }
             float GetLastRange() const { return i_range; }
-            float FoundOutOfRange() const { return i_foundOutOfRange; }
+            bool FoundOutOfRange() const { return i_foundOutOfRange; }
         private:
             WorldObject const& i_obj;
             uint32 i_entry;
