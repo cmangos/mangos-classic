@@ -122,7 +122,7 @@ namespace VMAP
     StaticMapTree::StaticMapTree(uint32 mapID, const std::string& basePath):
         iMapID(mapID), iIsTiled(false), iTreeValues(nullptr), iNTreeValues(0), iBasePath(basePath)
     {
-        if (iBasePath.length() > 0 && (iBasePath[iBasePath.length() - 1] != '/' || iBasePath[iBasePath.length() - 1] != '\\'))
+        if (iBasePath.length() > 0 && (iBasePath[iBasePath.length() - 1] != '/' && iBasePath[iBasePath.length() - 1] != '\\'))
         {
             iBasePath.append("/");
         }
@@ -231,7 +231,7 @@ namespace VMAP
     bool StaticMapTree::CanLoadMap(const std::string& vmapPath, uint32 mapID, uint32 tileX, uint32 tileY)
     {
         std::string basePath = vmapPath;
-        if (basePath.length() > 0 && (basePath[basePath.length() - 1] != '/' || basePath[basePath.length() - 1] != '\\'))
+        if (basePath.length() > 0 && (basePath[basePath.length() - 1] != '/' && basePath[basePath.length() - 1] != '\\'))
             basePath.append("/");
         std::string fullname = basePath + VMapManager2::getMapFileName(mapID);
         bool success = true;
@@ -300,10 +300,10 @@ namespace VMAP
             if (!iIsTiled && ModelSpawn::readFromFile(rf, spawn))
             {
                 WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name);
-                model->setModelFlags(spawn.flags);
                 DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "StaticMapTree::InitMap(): loading %s", spawn.name.c_str());
                 if (model)
                 {
+                    model->setModelFlags(spawn.flags);
                     // assume that global model always is the first and only tree value (could be improved...)
                     iTreeValues[0] = ModelInstance(spawn, model);
                     iLoadedSpawns[0] = 1;
@@ -371,8 +371,9 @@ namespace VMAP
                 {
                     // acquire model instance
                     WorldModel* model = vm->acquireModelInstance(iBasePath, spawn.name);
-                    model->setModelFlags(spawn.flags);
-                    if (!model)
+                    if (model)
+                        model->setModelFlags(spawn.flags);
+                    else
                         ERROR_LOG("StaticMapTree::LoadMapTile() could not acquire WorldModel pointer for '%s'!", spawn.name.c_str());
 
                     // update tree
