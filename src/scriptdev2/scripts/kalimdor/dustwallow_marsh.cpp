@@ -792,14 +792,13 @@ struct npc_private_hendelAI : public HelperAI
     {
         Reset();
     }
-    bool m_bTervoshSummoned;
+
     uint32 m_uiQuestPhase;
     ObjectGuid m_guidPlayer;
 
     void Reset() override 
     {
         m_guidPlayer.Clear();
-        m_bTervoshSummoned = false;
         m_uiQuestPhase = MD_PHASE_NONE;
         //m_creature->HandleEmote(0);
         m_creature->setFaction(m_creature->GetCreatureInfo()->FactionAlliance);
@@ -841,8 +840,11 @@ struct npc_private_hendelAI : public HelperAI
         m_creature->RemoveAllAuras();
         m_creature->setFaction(m_creature->GetCreatureInfo()->FactionAlliance);
         m_creature->DeleteThreatList();
+
         if (MotionMaster* pMotionMaster = m_creature->GetMotionMaster())
             pMotionMaster->MoveTargetedHome();
+
+        SummonTervosh();
         m_uiQuestPhase = MD_PHASE_SUMMON;
     }
 
@@ -858,18 +860,15 @@ struct npc_private_hendelAI : public HelperAI
         }
 
     }
-    
 
     void UpdateAI(const uint32 uiDiff) override
     {
-
-        if (m_uiQuestPhase == MD_PHASE_SUMMON && !m_bTervoshSummoned)
+        switch (m_uiQuestPhase)
         {
-            SummonTervosh();
-            m_bTervoshSummoned = true;
+            case MD_PHASE_FIGHT:
+            case MD_PHASE_NONE:
+                ScriptedAI::UpdateAI(uiDiff);
         }
-
-       DoMeleeAttackIfReady();
     }
 
     void SummonTervosh()
