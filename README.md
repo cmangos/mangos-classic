@@ -27,22 +27,22 @@ This means, we want to focus on:
     we want to emulate.
   * Developing things right also includes documenting and discussing
     _how_ to do things better, hence...
-  * Learning and Teaching are very important in our view, and must
-    always be part of what we do.
+  * Learning and teaching are very important in our view, and must
+    always be a part of what we do.
 
 To be able to accomplish these goals, we support and promote:
 
 * Freedom
-  * of our work: Our work - including our code - is released under the GPL
-    So everbody is free to use and contribute to this open source project
-  * for our developers and contributers on things that interest them.
+  * of our work: Our work - including our code - is released under the GPL.
+    So everybody is free to use and contribute to this open source project.
+  * for our developers and contributors on things that interest them.
     No one here is telling anybody _what_ to do.
-    If you want somebody to do something for you, pay him,
+    If you want somebody to do something for you, pay them,
     but we are here to enjoy.
   * to have FUN with developing.
 
 * A friendly environment
-  * We try to let personal issues behind us.
+  * We try to leave personal issues behind us.
   * We only argue about content, and not about thin air!
   * We follow the [Netiquette](http://tools.ietf.org/html/rfc1855).
 
@@ -82,7 +82,7 @@ To be able to accomplish these goals, we support and promote:
   * [Current build status on Travis CI](https://travis-ci.org/cmangos/mangos-classic/)
   * [Wiki](https://github.com/cmangos/issues/wiki) with additional information on installation
   * [Contributing Guidelines](CONTRIBUTING.md)
-  * Documentation can be found in the doc/ subdirectory and on the github wiki
+  * Documentation can be found in the doc/ subdirectory and on the GitHub wiki
 
 ## License
 
