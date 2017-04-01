@@ -1369,9 +1369,7 @@ SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(Unit* pVictim, uint32 d
     float chance = float(damage) / max_dmg * 100.0f;
     if (roll_chance_f(chance))
     {
-        triggeredByAura->SetInUse(true);
         RemoveAurasByCasterSpell(triggeredByAura->GetId(), triggeredByAura->GetCasterGuid());
-        triggeredByAura->SetInUse(false);
         return SPELL_AURA_PROC_OK;
     }
 

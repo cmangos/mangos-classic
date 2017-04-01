@@ -254,7 +254,7 @@ static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_
 Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem) :
     m_spellmod(nullptr), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
     m_effIndex(eff), m_positive(false), m_isPeriodic(false), m_isAreaAura(false),
-    m_isPersistent(false), m_in_use(0), m_spellAuraHolder(holder)
+    m_isPersistent(false), m_spellAuraHolder(holder)
 {
     MANGOS_ASSERT(target);
     MANGOS_ASSERT(spellproto && spellproto == sSpellTemplate.LookupEntry<SpellEntry>(spellproto->Id) && "`info` must be pointer to sSpellTemplate element");
@@ -521,9 +521,7 @@ void AreaAura::Update(uint32 diff)
                 if (addedToExisting)
                 {
                     (*tIter)->AddAuraToModList(aur);
-                    holder->SetInUse(true);
                     aur->ApplyModifier(true, true);
-                    holder->SetInUse(false);
                 }
                 else
                 {
@@ -616,13 +614,8 @@ void Aura::ApplyModifier(bool apply, bool Real)
 {
     AuraType aura = m_modifier.m_auraname;
 
-    GetHolder()->SetInUse(true);
-    SetInUse(true);
     if (aura < TOTAL_AURAS)
         (*this.*AuraHandler [aura])(apply, Real);
-
-    SetInUse(false);
-    GetHolder()->SetInUse(false);
 }
 
 bool Aura::isAffectedOnSpell(SpellEntry const* spell) const
@@ -4700,7 +4693,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     m_auraSlot(MAX_AURAS), m_auraLevel(1),
     m_procCharges(0), m_stackAmount(1),
     m_timeCla(1000), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_AuraDRGroup(DIMINISHING_NONE),
-    m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0),
+    m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false),
     m_spellAuraHolderState(SPELLAURAHOLDER_STATE_CREATED)
 {
     MANGOS_ASSERT(target);
@@ -5162,9 +5155,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             return;
     }
 
-    // prevent aura deletion, specially in multi-boost case
-    SetInUse(true);
-
     if (apply)
     {
         if (spellId1)
@@ -5187,8 +5177,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         if (spellId4)
             m_target->RemoveAurasByCasterSpell(spellId4, GetCasterGuid());
     }
-
-    SetInUse(false);
 }
 
 void Aura::HandleAuraSafeFall(bool Apply, bool Real)

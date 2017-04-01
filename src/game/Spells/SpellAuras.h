@@ -85,6 +85,7 @@ class SpellAuraHolder
 {
     public:
         SpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem, SpellEntry const* triggeredBy);
+        ~SpellAuraHolder();
         Aura* m_auras[MAX_EFFECT_INDEX];
 
         void AddAura(Aura* aura, SpellEffectIndex index);
@@ -127,24 +128,12 @@ class SpellAuraHolder
         bool IsWeaponBuffCoexistableWith(SpellAuraHolder const* ref) const;
         bool IsNeedVisibleSlot(Unit const* caster) const;
         bool IsRemovedOnShapeLost() const { return m_isRemovedOnShapeLost; }
-        bool IsInUse() const { return !!m_in_use;}
         bool IsDeleted() const { return m_deleted;}
         bool IsEmptyHolder() const;
 
         void SetDeleted() { m_deleted = true; m_spellAuraHolderState = SPELLAURAHOLDER_STATE_REMOVING; }
 
-        void SetInUse(bool state)
-        {
-            if (state)
-                ++m_in_use;
-            else
-            {
-                if (m_in_use)
-                    --m_in_use;
-            }
-        }
-
-        void UpdateHolder(uint32 diff) { SetInUse(true); Update(diff); SetInUse(false); }
+        void UpdateHolder(uint32 diff) { Update(diff); }
         void Update(uint32 diff);
         void RefreshHolder();
 
@@ -203,7 +192,7 @@ class SpellAuraHolder
         void SetAuraFlag(uint32 slot, bool add);
         void SetAuraLevel(uint32 slot, uint32 level);
 
-        ~SpellAuraHolder();
+        void SetCreationDelayFlag();
     private:
         void UpdateAuraApplication();                       // called at charges or stack changes
 
@@ -233,8 +222,6 @@ class SpellAuraHolder
         bool m_isDeathPersist: 1;
         bool m_isRemovedOnShapeLost: 1;
         bool m_deleted: 1;
-
-        uint32 m_in_use;                                    // > 0 while in SpellAuraHolder::ApplyModifiers call/SpellAuraHolder::Update/etc
 };
 
 typedef void(Aura::*pAuraHandler)(bool Apply, bool Real);
@@ -430,21 +417,10 @@ class Aura
         bool IsPersistent() const { return m_isPersistent; }
         bool IsAreaAura() const { return m_isAreaAura; }
         bool IsPeriodic() const { return m_isPeriodic; }
-        bool IsInUse() const { return !!m_in_use; }
 
-        void SetInUse(bool state)
-        {
-            if (state)
-                ++m_in_use;
-            else
-            {
-                if (m_in_use)
-                    --m_in_use;
-            }
-        }
         void ApplyModifier(bool apply, bool Real = false);
 
-        void UpdateAura(uint32 diff) { SetInUse(true); Update(diff); SetInUse(false); }
+        void UpdateAura(uint32 diff) { Update(diff); }
 
         void SetRemoveMode(AuraRemoveMode mode) { m_removeMode = mode; }
 
@@ -492,8 +468,6 @@ class Aura
         bool m_isPeriodic: 1;
         bool m_isAreaAura: 1;
         bool m_isPersistent: 1;
-
-        uint32 m_in_use;                                    // > 0 while in Aura::ApplyModifier call/Aura::Update/etc
 
         SpellAuraHolder* const m_spellAuraHolder;
     private:

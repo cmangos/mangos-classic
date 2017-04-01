@@ -199,9 +199,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
             PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, eff_index, nullptr, holder, target, i_dynobject.GetCaster());
             holder->AddAura(Aur, eff_index);
             target->AddAuraToModList(Aur);
-            holder->SetInUse(true);
             Aur->ApplyModifier(true, true);
-            holder->SetInUse(false);
         }
         else if (holder->GetAuraDuration() >= 0 && uint32(holder->GetAuraDuration()) < i_dynobject.GetDuration())
         {
