@@ -485,68 +485,105 @@ enum
 
     MD_PHASE_NONE               = 0,                        // do nothing
     MD_PHASE_FIGHT              = 1,                        // fight with a player
-    MD_PHASE_SUMMON             = 2                         // handle the end event
+    MD_PHASE_SUMMON             = 2,                        
+    MD_PHASE_SPEECH             = 3,
+    MD_PHASE_COMPLETE           = 4
+
 };
-
-
-const float tervoshSpawn[4]  = { -2857.604492f, -3354.784912f, 35.369640f, 3.466099f };
-const float tervoshDest[3]   = { -2881.546631f, -3346.477539f, 34.143719f };
-
 
 struct Spawn
 {
     float x, y, z, o;
+    float dest_x, dest_y, dest_z;
     uint32 entry;
 };
 
 const Spawn spawns[] = 
 {
-    { -2858.120117f, -3358.469971f, 36.086300f, 3.466099f , NPC_JAINA },
-    { -2857.379883f, -3351.370117f, 34.178001f, 3.466099f , NPC_PAINED}
+    { 
+        -2857.604492f, -3354.784912f, 35.369640f, 3.466099f,
+        -2881.546631f, -3346.477539f, 34.143719f,
+        NPC_TERVOSH
+    },
+    { 
+        -2858.120117f, -3358.469971f, 36.086300f, 3.466099f,
+        -2878.110107f, -3349.449951f, 35.199100f,
+        NPC_JAINA 
+    },
+    {
+        -2857.379883f, -3351.370117f, 34.178001f, 3.466099f,
+        -2877.679932f, -3342.479980f, 35.116001f,
+        NPC_PAINED
+    }
 };
 
-const float dests[][3] = 
+const Spawn guardsSpawn[] =
 {
-    { -2878.110107f, -3349.449951f, 35.199100f }, //Jaina
-    { -2877.679932f, -3342.479980f, 35.116001f }  // Pained
-
+    {
+        -2889.72f, -3337.92f, 32.4705f, 5.58505f,
+        0.0f, 0.0f, 0.0f,
+        NPC_SENTRY
+    }, 
+    {
+        -2891.22f, -3344.70f, 32.3499f, 2.9721f,
+        0.0f, 0.0f, 0.0f,
+        NPC_SENTRY
+    }
 };
-const float guardsSpawn[][4] = 
-{
-    { -2889.72f, -3337.92f, 32.4705f, 5.58505f }, //1-st guard
-    { -2891.22f, -3344.70f, 32.3499f, 2.9721f  }  //2-nd guard
-};
-
-// TODO: develop this further, end event not created
 
 #define TEMPSUMMON_DURATION 60000 // 60 sec
 #define SPEECH_DELAY        4000  // 4 sec
 
 
+#define ARRIVE_TIMER        4000
+#define ENCAGE_TIMER        ARRIVE_TIMER + 1500
 #define WAVE_TIMER          TEMPSUMMON_DURATION - 7500
-#define CAST_TELEPORT_TIMER TEMPSUMMON_DURATION - 2500
-#define TELEPORT_BACK_TIMER TEMPSUMMON_DURATION - 1000
-enum
-{
-    TERVOSH_STATE_NONE,
-    TERVOSH_STATE_MD_ACTIVE,
-    TERVOSH_STATE_MD_ARRIVED,
-    TERVOSH_STATE_MD_SPEECH,
-    TERVOSH_STATE_MD_COMPLETE,
-    TERVOSH_STATE_MD_FINAL
-};
+#define TELEPORT_TIMER      TEMPSUMMON_DURATION - 2500
+#define TELEPORT_BACK_TIMER TEMPSUMMON_DURATION - 1500
 
-struct HelperAI: ScriptedAI
+struct npc_private_hendelAI : public ScriptedAI
 {
-    HelperAI(Creature *pCreature) : ScriptedAI(pCreature) {};
+    npc_private_hendelAI(Creature* pCreature):
+        ScriptedAI(pCreature)
+    {
+        Reset();
+    }
 
+    uint32 m_uiQuestPhase;
+    uint32 m_uiSpeechDelay;
+    uint32 m_uiArriveTimer;
+    uint32 m_uiDespawnTimer;
+    uint32 m_uiWave;
+    uint32 m_uiTeleportTimer;
+    uint32 m_uiTeleportBack;
+    uint32 m_uiSayCounter;
+    
+
+    ObjectGuid m_guidPlayer;
     GuidList m_guids;
+
+    void Reset() override 
+    {
+        m_guidPlayer.Clear();
+        m_uiSayCounter    = 0;
+        m_uiQuestPhase    = MD_PHASE_NONE;
+        m_uiArriveTimer   = ARRIVE_TIMER;
+        m_uiWave          = WAVE_TIMER;
+        m_uiTeleportTimer = TELEPORT_TIMER;
+        m_uiTeleportBack  = TELEPORT_BACK_TIMER;
+        m_uiSpeechDelay   = SPEECH_DELAY;
+        m_uiDespawnTimer  = TEMPSUMMON_DURATION;
+        m_creature->setFaction(m_creature->GetCreatureInfo()->FactionAlliance);
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP); 
+        m_creature->SetVisibility(VISIBILITY_ON);
+
+    }
 
     Creature* GetCreature(uint32 entry)
     {
         if (!m_guids.empty())
         {
-            for (std::list<ObjectGuid>::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+            for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
             {
                 Creature *pCreature = m_creature->GetMap()->GetCreature(*itr);
 
@@ -556,254 +593,7 @@ struct HelperAI: ScriptedAI
         }
         return nullptr;
     }
-};
-// TODO: initial teleport delay timer that prevents Jaina, Tervosh, Pained from moving
-// TODO: guards who defend Hendel should flee when tervosh and jaina arrive
-// TODO: buff all party members depending on their class
-// TODO: find a way to access original NPCs
-struct npc_tervoshAI : public HelperAI
-{
-    npc_tervoshAI(Creature* pCreature) :HelperAI(pCreature){ Reset(); }
-    ObjectGuid m_guidPlayer;
-    uint32 m_uiState;
-    uint32 m_uiEncage;
-    uint32 m_uiNextPhase;
-    uint32 m_uiSayCounter;
-    uint32 m_uiSpeechDelay;
-    uint32 m_uiDespawnTimer;
-    uint32 m_uiWave;
-    uint32 m_uiTeleportBack;
-    uint32 m_uiCastTeleport;
-    uint32 m_uiSummCount;
 
-    void CompleteQuest(uint32 uiQuestID)
-    {
-        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer))
-            pPlayer->GroupEventHappens(uiQuestID, m_creature);
-        
-    };
-
-    void JustSummoned(Creature* pCreature ) override
-    {
-        uint32 entry = pCreature->GetEntry();
-
-        if (!(entry == NPC_JAINA || entry == NPC_PAINED))
-            return;
-
-        pCreature->CastSpell(pCreature, TELEPORT_VISUAL, TRIGGERED_NONE);
-       
-        MotionMaster* pMotionMaster = pCreature->GetMotionMaster();
-
-        if (pMotionMaster)
-            pMotionMaster->MovePoint(0, dests[m_uiSummCount][0], dests[m_uiSummCount][1], dests[m_uiSummCount][2]);
-
-        m_guids.push_back(pCreature->GetObjectGuid());
-        ++m_uiSummCount;
-
-    }
-
-    void OnSummon(Creature* pcSummoner, ObjectGuid& player)
-    {
-        m_guids.push_back(pcSummoner->GetObjectGuid());
-        m_guidPlayer = player;
-
-        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP); 
-
-        for (int i = 0; i < sizeof(spawns) / sizeof(Spawn) ;++i)
-            m_creature->SummonCreature(spawns[i].entry, spawns[i].x, spawns[i].y, spawns[i].z, spawns[i].o, TEMPSUMMON_TIMED_DESPAWN, TEMPSUMMON_DURATION, false, true);
-
-        m_creature->CastSpell(m_creature, TELEPORT_VISUAL, TRIGGERED_NONE);
-
-        if(MotionMaster* pMotionMaster = m_creature->GetMotionMaster())
-            pMotionMaster->MovePoint(0, tervoshDest[0], tervoshDest[1], tervoshDest[2]);
-        
-        m_uiState = TERVOSH_STATE_MD_ACTIVE;
-    }
-
-    void SetFacing(WorldObject* obj, bool bTurnAll = true)
-    {
-        if (!obj)
-            return;
-
-        m_creature->SetFacingTo(m_creature->GetAngle(obj));
-
-        if (!bTurnAll)
-            return;
-
-        for (std::list<ObjectGuid>::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
-        {
-            Creature* pCreature = m_creature->GetMap()->GetCreature(*itr);
-            if (pCreature && (pCreature->GetEntry() == NPC_JAINA || pCreature->GetEntry() == NPC_PAINED))
-                pCreature->SetFacingTo(pCreature->GetAngle(obj));
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        switch (m_uiState)
-        {
-            case TERVOSH_STATE_NONE: // default state
-                break;
-            case TERVOSH_STATE_MD_ACTIVE:
-            {
-                float x, y, z;
-                m_creature->GetPosition(x,y,z);
-
-                if (x == tervoshDest[0] && y == tervoshDest[1] && z == tervoshDest[2])
-                {
-                    // set facing
-                    if (Creature* pCreature = GetCreature(NPC_HENDEL))
-                        SetFacing(pCreature);
-                    m_uiState = TERVOSH_STATE_MD_ARRIVED;
-                }
-            }
-                break;
-            case TERVOSH_STATE_MD_ARRIVED:
-                if (m_uiEncage < uiDiff)
-                {
-                    if (Creature* pCreature = GetCreature(NPC_HENDEL))
-                        DoCastSpellIfCan(pCreature, SPELL_ENCAGE, CAST_FORCE_CAST);
-                    m_uiEncage = 3000;
-                }
-                else
-                    m_uiEncage -= uiDiff;
-
-                if (m_uiNextPhase < uiDiff)
-                    m_uiState     = TERVOSH_STATE_MD_SPEECH;
-                else
-                    m_uiNextPhase -= uiDiff;
-                break;
-            case TERVOSH_STATE_MD_SPEECH:
-                if (m_uiSpeechDelay < uiDiff)
-                {
-                    switch (m_uiSayCounter)
-                    {
-                        case 0:
-                            DoScriptText(SAY_PROGRESS_1_TER, m_creature);
-                            break;
-                        case 1:
-                            if (Creature *pCreature = GetCreature(NPC_HENDEL))
-                            {
-                                DoScriptText(SAY_PROGRESS_2_HEN, pCreature);
-                                m_creature->CastSpell(pCreature, SPELL_TELEPORT, TRIGGERED_NONE);
-                            }
-                            m_uiSpeechDelay = 1000 + 500; // teleport casting time + little delay for smooth effect
-                            break;
-                        case 2:
-                            if (Creature *pCreature = GetCreature(NPC_HENDEL))
-                                pCreature->ForcedDespawn();
-                            DoScriptText(SAY_PROGRESS_3_TER, m_creature);
-                            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
-                            break;
-                        case 3:
-                            DoScriptText(SAY_PROGRESS_4_TER, m_creature);
-                            m_uiState = TERVOSH_STATE_MD_COMPLETE;
-                            return;
-                    }
-                    if (m_uiSayCounter != 1)
-                        m_uiSpeechDelay = SPEECH_DELAY;
-                   
-                    ++m_uiSayCounter;
-                }
-                else
-                    m_uiSpeechDelay -= uiDiff;
-                break;
-            case TERVOSH_STATE_MD_COMPLETE:
-                CompleteQuest(QUEST_MISSING_DIPLO_PT16);
-                m_uiState = TERVOSH_STATE_MD_FINAL;
-                break;
-        }
-        if (m_uiState != TERVOSH_STATE_NONE)
-        {
-            // handle despawn timer
-            if (m_uiDespawnTimer < uiDiff)
-            {
-                m_uiState = TERVOSH_STATE_NONE;
-                return;
-            }
-            else
-                m_uiDespawnTimer -= uiDiff;
-
-            if (m_uiWave < uiDiff)
-            {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer))
-                    SetFacing(pPlayer);
-                // Jaina waves :)
-                if (Creature* pCreature = GetCreature(NPC_JAINA))
-                    pCreature->HandleEmote(EMOTE_ONESHOT_WAVE);
-                DoScriptText(SAY_FAREWELL_TER, m_creature);
-                m_uiWave = WAVE_TIMER;
-            }
-            else
-                m_uiWave -= uiDiff;
-
-            if (m_uiCastTeleport < uiDiff)
-            {
-                if (Creature* pCreature = GetCreature(NPC_JAINA))
-                    pCreature->CastSpell(m_creature, SPELL_TELEPORT, TRIGGERED_NONE);
-                m_uiCastTeleport = CAST_TELEPORT_TIMER;
-            }
-            else
-                m_uiCastTeleport -= uiDiff;
-
-            if (m_uiTeleportBack < uiDiff)
-            {
-                if (Creature* pJaina = GetCreature(NPC_JAINA))
-                    pJaina->CastSpell(pJaina, SPELL_TELEPORT_GROUP, TRIGGERED_NONE);
-
-                m_uiTeleportBack = TELEPORT_BACK_TIMER;
-            }
-            else
-                m_uiTeleportBack -= uiDiff;
-        }
-    }
-
-    void SummonedCreatureDespawn(Creature* pCreature) override
-    {
-        m_guids.remove(pCreature->GetObjectGuid());
-    }
-
-    void Reset() override
-    {
-        m_uiState        = TERVOSH_STATE_NONE;
-        m_uiEncage       = 0;
-        m_uiNextPhase    = 1500;
-        m_uiSayCounter   = 0;
-        m_uiSpeechDelay  = SPEECH_DELAY;
-        m_uiDespawnTimer = TEMPSUMMON_DURATION;
-        m_uiSummCount    = 0;
-        m_uiTeleportBack = TELEPORT_BACK_TIMER;
-        m_uiWave         = WAVE_TIMER;
-        m_uiCastTeleport = CAST_TELEPORT_TIMER;
-        m_guids.clear();
-        m_guidPlayer.Clear();
-    }
-};
-
-CreatureAI* GetAI_npc_tervoshAI(Creature* pCreature)
-{
-    return new npc_tervoshAI(pCreature);
-}
-
-struct npc_private_hendelAI : public HelperAI
-{
-    npc_private_hendelAI(Creature* pCreature):
-        HelperAI(pCreature)
-    {
-        Reset();
-    }
-
-    uint32 m_uiQuestPhase;
-    ObjectGuid m_guidPlayer;
-
-    void Reset() override 
-    {
-        m_guidPlayer.Clear();
-        m_uiQuestPhase = MD_PHASE_NONE;
-        //m_creature->HandleEmote(0);
-        m_creature->setFaction(m_creature->GetCreatureInfo()->FactionAlliance);
-        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP); 
-    }
 
     void AttackedBy(Unit* pAttacker) override
     {
@@ -818,19 +608,6 @@ struct npc_private_hendelAI : public HelperAI
 
     void JustSummoned(Creature* pCreature) override
     {
-        uint32 entry = pCreature->GetEntry();
-        switch (entry)
-        {
-            case NPC_TERVOSH:
-            {
-                npc_tervoshAI* AI = dynamic_cast<npc_tervoshAI*>(pCreature->AI());
-                if (AI)
-                    AI->OnSummon(m_creature, m_guidPlayer);
-            }
-                break;
-            case NPC_SENTRY:
-                break;
-        }
         m_guids.push_back(pCreature->GetObjectGuid());
     }
 
@@ -841,23 +618,42 @@ struct npc_private_hendelAI : public HelperAI
         m_creature->setFaction(m_creature->GetCreatureInfo()->FactionAlliance);
         m_creature->DeleteThreatList();
 
+        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer))
+            pPlayer->CombatStop(true);
+        
+        
         if (MotionMaster* pMotionMaster = m_creature->GetMotionMaster())
             pMotionMaster->MoveTargetedHome();
 
-        SummonTervosh();
+        DoSummon();
         m_uiQuestPhase = MD_PHASE_SUMMON;
     }
 
     void JustReachedHome() override
     {
         if (m_uiQuestPhase == MD_PHASE_SUMMON)
-        {
-            /*
-            // Actually this doesnt stop random moving around respawn point
-            m_creature->StopMoving();
-            m_creature->HandleEmote(EMOTE_STATE_STUN); */
             m_creature->CastSpell(m_creature, SPELL_SELF_STUN, TRIGGERED_NONE);
+
+    }
+
+    void EnterEvadeMode() override
+    {
+        
+        if (!m_guids.empty())
+        {
+            for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+            {
+                Creature* pCreature = m_creature->GetMap()->GetCreature(*itr);
+                if (pCreature && pCreature->GetEntry() == NPC_SENTRY)
+                {
+                    pCreature->setFaction(pCreature->GetCreatureInfo()->FactionAlliance);
+                    if (CreatureAI* AI = pCreature->AI())
+                        AI->EnterEvadeMode();
+
+                }
+            }
         }
+        ScriptedAI::EnterEvadeMode();
 
     }
 
@@ -868,12 +664,226 @@ struct npc_private_hendelAI : public HelperAI
             case MD_PHASE_FIGHT:
             case MD_PHASE_NONE:
                 ScriptedAI::UpdateAI(uiDiff);
+                break;
+            case MD_PHASE_SUMMON:
+                if (m_uiArriveTimer < uiDiff)
+                {
+                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer))
+                    {
+                        for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+                        {
+                            Creature* pCreature = m_creature->GetMap()->GetCreature(*itr);
+                            if (pCreature && pCreature->GetEntry() == NPC_SENTRY)
+                            {
+                                // if target has stun aura MoveFleeing will break
+                                pCreature->RemoveAllAuras();
+                                pCreature->GetMotionMaster()->MoveFleeing(pPlayer, 30000);
+                            }
+                                
+                        }
+                    }
+
+                    SetFacing(m_creature);
+
+                    Creature* pCreature = GetCreature(NPC_TERVOSH);
+                    if (pCreature)
+                    {
+                        // hack
+                        float angle = pCreature->GetAngle(m_creature);
+                        pCreature->SetRespawnCoord(spawns[0].dest_x, spawns[0].dest_y, spawns[0].dest_z , angle);
+                        pCreature->CastSpell(m_creature, SPELL_ENCAGE, TRIGGERED_NONE);
+                    }
+
+                    m_uiQuestPhase  = MD_PHASE_SPEECH;
+                }
+                else
+                    m_uiArriveTimer -= uiDiff;
+                break;
+            case MD_PHASE_SPEECH:
+                if (m_uiSpeechDelay < uiDiff)
+                {
+                    switch (m_uiSayCounter)
+                    {
+                        case 0:
+                            if (Creature* pTervosh = GetCreature(NPC_TERVOSH))
+                                DoScriptText(SAY_PROGRESS_1_TER, pTervosh);
+                            
+                            break;
+                        case 1:
+                            DoScriptText(SAY_PROGRESS_2_HEN, m_creature);
+                            break;
+                        case 2:
+                           
+                            if (Creature *pTervosh = GetCreature(NPC_TERVOSH))
+                            {
+                                DoScriptText(SAY_PROGRESS_3_TER, pTervosh);
+                                pTervosh->CastSpell(m_creature, SPELL_TELEPORT, TRIGGERED_NONE);
+                            }
+                            m_uiSpeechDelay = 1000;
+                            break;
+                        case 3:
+                            // another hack
+                            m_creature->SetVisibility(VISIBILITY_OFF);
+                            DoDespawnGuards();
+
+                            if (Creature *pCreature = GetCreature(NPC_TERVOSH))
+                            {
+                                DoScriptText(SAY_PROGRESS_4_TER, pCreature);
+                                pCreature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+                            }
+
+                            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer))
+                                pPlayer->GroupEventHappens(QUEST_MISSING_DIPLO_PT16, m_creature);
+
+                            m_uiQuestPhase = MD_PHASE_COMPLETE;
+                            return;
+                    }
+                    if (m_uiSayCounter != 2)
+                        m_uiSpeechDelay = SPEECH_DELAY;
+                    ++m_uiSayCounter;
+                }
+                else
+                    m_uiSpeechDelay -= uiDiff;
+                break;
+        }
+
+        if (m_uiQuestPhase != MD_PHASE_NONE && m_uiQuestPhase != MD_PHASE_FIGHT)
+        {
+            if (m_uiDespawnTimer < uiDiff)
+            {
+                m_creature->ForcedDespawn();
+                m_uiQuestPhase = MD_PHASE_NONE;
+                return;
+            }
+            else
+                m_uiDespawnTimer -= uiDiff;
+
+            if (m_uiWave < uiDiff)
+            {
+                Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer);
+                SetFacing(pPlayer);
+                
+                if (Creature* pCreature = GetCreature(NPC_JAINA))
+                    pCreature->HandleEmote(EMOTE_ONESHOT_WAVE);
+
+                if (Creature* pCreature = GetCreature(NPC_TERVOSH))
+                    DoScriptText(SAY_FAREWELL_TER, pCreature);
+
+                m_uiWave = WAVE_TIMER;
+            }
+            else
+                m_uiWave -= uiDiff;
+
+            if (m_uiTeleportTimer < uiDiff)
+            {
+                if (Creature* pCreature = GetCreature(NPC_JAINA))
+                    pCreature->CastSpell(m_creature, SPELL_TELEPORT, TRIGGERED_NONE);
+                m_uiTeleportTimer = TELEPORT_TIMER;
+            }
+            else
+                m_uiTeleportTimer -= uiDiff;
+
+            if (m_uiTeleportBack < uiDiff)
+            {
+                if (Creature* pJaina = GetCreature(NPC_JAINA))
+                    pJaina->CastSpell(pJaina, SPELL_TELEPORT_GROUP, TRIGGERED_NONE);
+
+                m_uiTeleportBack = TELEPORT_BACK_TIMER;
+            }
+            else
+                m_uiTeleportBack -= uiDiff;
         }
     }
 
-    void SummonTervosh()
+    void DoDespawnGuards()
     {
-        m_creature->SummonCreature(NPC_TERVOSH, tervoshSpawn[0], tervoshSpawn[1], tervoshSpawn[2], tervoshSpawn[3], TEMPSUMMON_TIMED_DESPAWN, TEMPSUMMON_DURATION, false, true);
+        if (!m_guids.empty())
+        {
+            for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+            {
+                if (TemporarySummon* pCreature = dynamic_cast<TemporarySummon*>(m_creature->GetMap()->GetCreature(*itr)))
+                {
+                    if (pCreature->GetEntry() == NPC_SENTRY)
+                        pCreature->UnSummon();
+
+                }
+
+            }
+        }
+    }
+
+    void SetFacing(WorldObject* obj)
+    {
+        if (!m_guids.empty())
+        {
+            for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+            {
+                Creature* pCreature = m_creature->GetMap()->GetCreature(*itr);
+                if (pCreature)
+                {
+                    uint32 entry = pCreature->GetEntry();
+                    switch (entry)
+                    {
+                        case NPC_JAINA:
+                        case NPC_TERVOSH:
+                        case NPC_PAINED:
+                            pCreature->SetFacingTo(pCreature->GetAngle(obj));
+                    }
+
+               }
+            }
+        }
+    }
+
+    void CallGuards()
+    {
+        if (!m_guids.empty())
+        {
+            for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+            {
+                Creature* pCreature = m_creature->GetMap()->GetCreature(*itr);
+                if (pCreature && pCreature->GetEntry() == NPC_SENTRY)
+                {
+                    CreatureAI* AI = pCreature->AI();
+                    if (!AI)
+                        return;
+
+                    if (!pCreature->isAlive())
+                        m_creature->Respawn();
+
+                    pCreature->SetFactionTemporary(FACTION_HOSTILE);
+
+                    Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer);
+
+                    if (pPlayer)
+                        AI->AttackStart(pPlayer);
+                }
+            }
+        }
+    }
+
+    void JustRespawned() override
+    {
+        for (int i = 0; i < sizeof(guardsSpawn) / sizeof(Spawn); ++i)
+            m_creature->SummonCreature(guardsSpawn[i].entry, guardsSpawn[i].x, guardsSpawn[i].y, guardsSpawn[i].z, guardsSpawn[i].o, TEMPSUMMON_MANUAL_DESPAWN, 0);
+        ScriptedAI::JustRespawned();
+    }
+
+    void DoSummon()
+    {
+        for (int i = 0; i < sizeof(spawns) / sizeof(Spawn); ++i)
+        {
+            Creature* pCreature = m_creature->SummonCreature(spawns[i].entry, spawns[i].x, spawns[i].y, spawns[i].z, spawns[i].o, TEMPSUMMON_TIMED_DESPAWN, TEMPSUMMON_DURATION, false, true);
+            if (pCreature)
+            {
+                if (pCreature->GetEntry() == NPC_TERVOSH)
+                    pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+                
+                pCreature->CastSpell(pCreature, TELEPORT_VISUAL, TRIGGERED_NONE);
+                if (MotionMaster* pMotionMaster = pCreature->GetMotionMaster())
+                    pMotionMaster->MovePoint(0, spawns[i].dest_x, spawns[i].dest_y, spawns[i].dest_z);
+            }
+        }
     }
 
     void SummonedCreatureDespawn(Creature* pCreature) override
@@ -883,7 +893,7 @@ struct npc_private_hendelAI : public HelperAI
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
-        if (m_uiQuestPhase == MD_PHASE_NONE)
+        if (m_uiQuestPhase != MD_PHASE_FIGHT)
             return;
 
         if (uiDamage > m_creature->GetHealth() || m_creature->GetHealthPercent() < 20.0f)
@@ -895,7 +905,7 @@ struct npc_private_hendelAI : public HelperAI
 
     void JustDied(Unit* /*pUnit*/) override
     {
-
+        
     }
 };
 
@@ -910,6 +920,7 @@ bool QuestAccept_npc_private_hendel(Player* pPlayer, Creature* pCreature, const 
         {
             ai->m_guidPlayer = pPlayer->GetObjectGuid();
             ai->m_uiQuestPhase = MD_PHASE_FIGHT;
+            ai->CallGuards();
         }
         
     }
@@ -1063,11 +1074,6 @@ void AddSC_dustwallow_marsh()
     pNewScript->Name = "npc_private_hendel";
     pNewScript->GetAI = &GetAI_npc_private_hendel;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_private_hendel;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_tervosh";
-    pNewScript->GetAI = &GetAI_npc_tervoshAI;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
