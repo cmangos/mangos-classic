@@ -162,11 +162,8 @@ FileSystem::Dir& FileSystem::getContents(const std::string& path, bool forceUpda
         const bool exists = _stat(key.c_str(), &st) != -1;
         const bool isDirectory = (st.st_mode & S_IFDIR) != 0;
 
-        // Does this path exist on the real filesystem?
+        // Does this path exist on the real filesystem and is it actually a directory?
         if (exists && isDirectory) {
-
-            // Is this path actually a directory?
-            if (isDirectory) {
                 dir.exists = true;
                 // Update contents
 #               ifdef G3D_WIN32
@@ -224,8 +221,6 @@ FileSystem::Dir& FileSystem::getContents(const std::string& path, bool forceUpda
                     listing = NULL;
                     entry = NULL;
 #               endif
-            }
-
         } else {
             std::string zip;
 
