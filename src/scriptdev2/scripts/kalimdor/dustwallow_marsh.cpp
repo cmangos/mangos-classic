@@ -849,7 +849,17 @@ struct npc_private_hendelAI : public ScriptedAI
                         return;
 
                     if (!pCreature->isAlive())
-                        m_creature->Respawn();
+                    {
+                        if (TemporarySummon* pTemporary = dynamic_cast<TemporarySummon*>(pCreature))
+                        {
+                            pTemporary->UnSummon();
+
+                            float x, y, z, o;
+                            pCreature->GetRespawnCoord(x,y,z,&o);
+                            m_creature->SummonCreature(pTemporary->GetEntry(), x, y, z, o, TEMPSUMMON_MANUAL_DESPAWN, 0);   // summon new guard
+                        }
+                    }
+
 
                     pCreature->SetFactionTemporary(FACTION_HOSTILE);
 
@@ -860,6 +870,7 @@ struct npc_private_hendelAI : public ScriptedAI
                 }
             }
         }
+
     }
 
     void JustRespawned() override
