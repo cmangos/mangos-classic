@@ -594,7 +594,6 @@ struct npc_private_hendelAI : public ScriptedAI
         return nullptr;
     }
 
-
     void AttackedBy(Unit* pAttacker) override
     {
         if (m_creature->getVictim())
@@ -631,7 +630,7 @@ struct npc_private_hendelAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        if (m_uiQuestPhase == MD_PHASE_SUMMON)
+        if (m_uiQuestPhase != MD_PHASE_NONE && m_uiQuestPhase != MD_PHASE_FIGHT)
             m_creature->CastSpell(m_creature, SPELL_SELF_STUN, TRIGGERED_NONE);
 
     }
@@ -668,30 +667,25 @@ struct npc_private_hendelAI : public ScriptedAI
             case MD_PHASE_SUMMON:
                 if (m_uiArriveTimer < uiDiff)
                 {
-                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer))
+                    if (Creature* pTervosh = GetCreature(NPC_TERVOSH))
                     {
+                        // hack
+                        float angle = pTervosh->GetAngle(m_creature);
+                        pTervosh->SetRespawnCoord(spawns[0].dest_x, spawns[0].dest_y, spawns[0].dest_z , angle);
+                        pTervosh->CastSpell(m_creature, SPELL_ENCAGE, TRIGGERED_NONE);
+
                         for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
                         {
                             Creature* pCreature = m_creature->GetMap()->GetCreature(*itr);
-                            if (pCreature && pCreature->GetEntry() == NPC_SENTRY)
+                            if (pCreature && pCreature->GetEntry() == NPC_SENTRY && pCreature->isAlive())
                             {
-                                // if target has stun aura MoveFleeing will break
+                                // if Creature has stun aura MoveFleeing will break
+                                // and RemoveAllAuras() doesnt stop it from breaking
                                 pCreature->RemoveAllAuras();
-                                pCreature->GetMotionMaster()->MoveFleeing(pPlayer, 30000);
+                                pCreature->GetMotionMaster()->MoveFleeing(pTervosh, 30000);
                             }
-                                
+
                         }
-                    }
-
-                    SetFacing(m_creature);
-
-                    Creature* pCreature = GetCreature(NPC_TERVOSH);
-                    if (pCreature)
-                    {
-                        // hack
-                        float angle = pCreature->GetAngle(m_creature);
-                        pCreature->SetRespawnCoord(spawns[0].dest_x, spawns[0].dest_y, spawns[0].dest_z , angle);
-                        pCreature->CastSpell(m_creature, SPELL_ENCAGE, TRIGGERED_NONE);
                     }
 
                     m_uiQuestPhase  = MD_PHASE_SPEECH;
@@ -837,6 +831,11 @@ struct npc_private_hendelAI : public ScriptedAI
 
     void CallGuards()
     {
+        Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer);
+
+        if (!pPlayer)
+            return;
+
         if (!m_guids.empty())
         {
             for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
@@ -851,22 +850,15 @@ struct npc_private_hendelAI : public ScriptedAI
                     if (!pCreature->isAlive())
                     {
                         if (TemporarySummon* pTemporary = dynamic_cast<TemporarySummon*>(pCreature))
-                        {
                             pTemporary->UnSummon();
-
-                            float x, y, z, o;
-                            pCreature->GetRespawnCoord(x,y,z,&o);
-                            m_creature->SummonCreature(pTemporary->GetEntry(), x, y, z, o, TEMPSUMMON_MANUAL_DESPAWN, 0);   // summon new guard
-                        }
+                        
+                        float x, y, z, o;
+                        pCreature->GetRespawnCoord(x, y, z, &o);
+                        m_creature->SummonCreature(pCreature->GetEntry(), x, y, z, o, TEMPSUMMON_MANUAL_DESPAWN, 0);   // summon new guard
                     }
 
-
-                    pCreature->SetFactionTemporary(FACTION_HOSTILE);
-
-                    Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer);
-
-                    if (pPlayer)
-                        AI->AttackStart(pPlayer);
+                    pCreature->setFaction(FACTION_HOSTILE);
+                    AI->AttackStart(pPlayer);
                 }
             }
         }
