@@ -2204,7 +2204,12 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
     if (!Real)
         return;
 
-    GetTarget()->SetFeignDeath(apply, GetCasterGuid());
+    Unit* target = GetTarget();
+
+    if (apply)
+        target->InterruptSpellsCastedOnMe();
+
+    target->SetFeignDeath(apply, GetCasterGuid());
 }
 
 void Aura::HandleAuraModDisarm(bool apply, bool Real)

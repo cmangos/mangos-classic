@@ -864,6 +864,8 @@ class SpellEvent : public BasicEvent
         virtual bool Execute(uint64 e_time, uint32 p_time) override;
         virtual void Abort(uint64 e_time) override;
         virtual bool IsDeletable() const override;
+
+        Spell* GetSpell() { return m_Spell; }
     protected:
         Spell* m_Spell;
 };

@@ -10719,3 +10719,30 @@ float Unit::GetAttackDistance(Unit const* pl) const
 
     return (RetDistance * aggroRate);
 }
+
+void Unit::InterruptSpellsCastedOnMe(bool killDelayed)
+{
+    std::list<Unit*> targets;
+    // Maximum spell range=100m ?
+    MaNGOS::AnyUnitInObjectRangeCheck u_check(this, 100.0f);
+    MaNGOS::UnitListSearcher<MaNGOS::AnyUnitInObjectRangeCheck> searcher(targets, u_check);
+    Cell::VisitAllObjects(this, searcher, GetMap()->GetVisibilityDistance());
+    for (std::list<Unit*>::iterator iter = targets.begin(); iter != targets.end(); ++iter)
+    {
+        if (!CanAttack(*iter))
+            continue;
+        for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
+            if (Spell *spell = (*iter)->GetCurrentSpell(CurrentSpellTypes(i)))
+                if (spell->m_targets.getUnitTargetGuid() == GetObjectGuid())
+                    if (killDelayed || (spell->getState() == SPELL_STATE_CASTING && spell->GetCastedTime()) || i == CURRENT_CHANNELED_SPELL)
+                        (*iter)->InterruptSpell(CurrentSpellTypes(i), true);
+        if (!killDelayed)
+            continue;
+        // 2/ Interrupt spells that are not referenced but that still have an event (like delayed spell)
+        for (auto i_Events = (*iter)->m_Events.GetEvents().begin(); i_Events != (*iter)->m_Events.GetEvents().end(); ++i_Events)
+            if (SpellEvent* event = dynamic_cast<SpellEvent*>(i_Events->second))
+                if (event && event->GetSpell()->m_targets.getUnitTargetGuid() == GetObjectGuid())
+                    if (event->GetSpell()->getState() != SPELL_STATE_FINISHED)
+                        event->GetSpell()->cancel();
+    }
+}
