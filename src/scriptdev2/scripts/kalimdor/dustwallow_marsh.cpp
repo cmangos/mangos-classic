@@ -507,12 +507,12 @@ const Spawn spawns[] =
     },
     { 
         -2858.120117f, -3358.469971f, 36.086300f, 3.466099f,
-        -2878.110107f, -3349.449951f, 35.199100f,
+        -2879.697998f, -3347.789063f, 34.772892f,
         NPC_JAINA 
     },
     {
         -2857.379883f, -3351.370117f, 34.178001f, 3.466099f,
-        -2877.679932f, -3342.479980f, 35.116001f,
+        -2879.959961f, -3344.469971f, 34.670502f,
         NPC_PAINED
     }
 };
@@ -680,13 +680,14 @@ struct npc_private_hendelAI : public ScriptedAI
                             if (pCreature && pCreature->GetEntry() == NPC_SENTRY && pCreature->isAlive())
                             {
                                 // if Creature has stun aura MoveFleeing will break
-                                // and RemoveAllAuras() doesnt stop it from breaking
                                 pCreature->RemoveAllAuras();
                                 pCreature->GetMotionMaster()->MoveFleeing(pTervosh, 30000);
                             }
 
                         }
                     }
+
+                    SetFacing(m_creature);
 
                     m_uiQuestPhase  = MD_PHASE_SPEECH;
                 }
