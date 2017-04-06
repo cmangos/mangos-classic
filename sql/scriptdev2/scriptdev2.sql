@@ -1168,7 +1168,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000540,'So you have defeated the Crimson Sigil. You now seek to challenge my rule? Not even Arthas could defeat me, yet you dare to even harbor such thoughts? Then I say to you, come! Come $N! The Black Temple awaits...',0,1,0,0,'lordillidan EVENT_COMPLETED'),
 
 (-1000541,'%s jumps into the moonwell and goes underwater...',0,2,0,0,'kitten EMOTE_SAB_JUMP'),
-(-1000542,'%s follows $n obediertly.',0,2,0,0,'kitten EMOTE_SAB_FOLLOW'),
+(-1000542,'%s follows $n obediently.',0,2,0,0,'kitten EMOTE_SAB_FOLLOW'),
 
 (-1000543,'Why have you come here, outsider? You will only find pain! Our fate will be yours...',0,0,0,25,'restless app SAY_RAND_1'),
 (-1000544,'It was ... terrible... the demon...',0,0,0,25,'restless app SAY_RAND_2'),
