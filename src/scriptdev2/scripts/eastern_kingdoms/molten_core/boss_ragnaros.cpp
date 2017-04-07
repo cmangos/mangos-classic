@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Ragnaros
-SD%Complete: 90
-SDComment: Melee/ Range Combat behavior is not correct(any enemy in melee range, not only getVictim), Submerge emote is not played
+SD%Complete: 99
+SDComment: Submerge emote is not played
 SDCategory: Molten Core
 EndScriptData */
 
@@ -155,8 +155,6 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pSummoned->AI()->AttackStart(pTarget);
-
-            ++m_uiAddCount;
         }
         else if (pSummoned->GetEntry() == NPC_FLAME_OF_RAGNAROS)
             pSummoned->CastSpell(pSummoned, SPELL_INTENSE_HEAT, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
@@ -167,6 +165,30 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
         // As Majordomo is now killed, the last timer (until attacking) must be handled with ragnaros script
         if (pSpell->Id == SPELL_ELEMENTAL_FIRE_KILL && pTarget->GetTypeId() == TYPEID_UNIT && pTarget->GetEntry() == NPC_MAJORDOMO)
             m_uiEnterCombatTimer = 10000;
+    }
+
+    // Custom threat management for targets in melee range
+    bool CanMeleeTargetInRange()
+    {
+        // If a target is found in melee range (descending threat), attack it
+        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
+        {
+            // Target is not current victim, force select and attack it
+            if (pTarget != m_creature->getVictim())
+            {
+                AttackStart(pTarget);
+                m_creature->SetInFront(pTarget);
+            }
+            // Make sure our attack is ready
+            if (m_creature->isAttackReady())
+            {
+                m_creature->AttackerStateUpdate(pTarget);
+                m_creature->resetAttackTimer();
+                m_bHasYelledMagmaBurst = false;
+            }
+            return true;
+        }
+        return false;
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -278,30 +300,20 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
             m_bHasSubmergedOnce = true;
 
             // Summon 8 elementals around the boss
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_SONS_FLAME);
+            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SONS_FLAME) == CAST_OK)
+                m_uiAddCount = 8;
 
             return;
         }
         else
             m_uiSubmergeTimer -= uiDiff;
 
-        // TODO this actually should select _any_ enemy in melee range, not only the tank
-        // Range check for melee target, if nobody is found in range, then cast magma blast on random
-        // If we are within range melee the target
+        // Range check for melee target, if nobody is found in range, then cast magma blast on random target
+        // If we are within range melee the target (done in CanMeleeTargetInRange())
         if (m_creature->IsNonMeleeSpellCasted(false) || !m_creature->getVictim())
             return;
 
-        if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
-        {
-            // Make sure our attack is ready
-            if (m_creature->isAttackReady())
-            {
-                m_creature->AttackerStateUpdate(m_creature->getVictim());
-                m_creature->resetAttackTimer();
-                m_bHasYelledMagmaBurst = false;
-            }
-        }
-        else
+        if (!CanMeleeTargetInRange())
         {
             // Magma Burst Timer
             if (m_uiMagmaBlastTimer < uiDiff)
