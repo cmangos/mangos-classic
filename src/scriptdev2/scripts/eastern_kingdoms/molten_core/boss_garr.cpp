@@ -30,13 +30,13 @@ enum
     SPELL_ANTIMAGICPULSE        = 19492,
     SPELL_MAGMASHACKLES         = 19496,
     SPELL_ENRAGE                = 19516,
+    SPELL_SEPARATION_ANXIETY    = 23487,                    // Aura cast on himself by Garr, if adds move out of range, they will cast spell 23492 on themselves
 
     // Add spells
     SPELL_THRASH                = 8876,
     SPELL_IMMOLATE              = 15733,
     SPELL_ERUPTION              = 19497,
     SPELL_MASSIVE_ERUPTION      = 20483,                    // TODO possible on death
-    SPELL_SEPARATION_ANXIETY    = 23492,                    // Used if separated too far from Garr
 };
 
 struct boss_garrAI : public ScriptedAI
@@ -62,6 +62,8 @@ struct boss_garrAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_GARR, IN_PROGRESS);
+        // Garr has a 100 yard aura to keep track of the distance of each of his adds, they will enrage if moved out of it
+        DoCastSpellIfCan(m_creature, SPELL_SEPARATION_ANXIETY, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -116,12 +118,7 @@ struct mob_fireswornAI : public ScriptedAI
 
     ScriptedInstance* m_pInstance;
 
-    uint32 m_uiSeparationCheckTimer;
-
-    void Reset() override
-    {
-        m_uiSeparationCheckTimer = 5000;
-    }
+    void Reset() override {}
 
     void JustDied(Unit* /*pKiller*/) override
     {
@@ -141,21 +138,6 @@ struct mob_fireswornAI : public ScriptedAI
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
-
-        if (m_uiSeparationCheckTimer < uiDiff)
-        {
-            if (!m_pInstance)
-                return;
-
-            // Distance guesswork, but should be ok
-            Creature* pGarr = m_pInstance->GetSingleCreatureFromStorage(NPC_GARR);
-            if (pGarr && pGarr->isAlive() && !m_creature->IsWithinDist2d(pGarr->GetPositionX(), pGarr->GetPositionY(), 50.0f))
-                DoCastSpellIfCan(m_creature, SPELL_SEPARATION_ANXIETY, CAST_TRIGGERED);
-
-            m_uiSeparationCheckTimer = 5000;
-        }
-        else
-            m_uiSeparationCheckTimer -= uiDiff;
 
         // Cast Erruption and let them die
         if (m_creature->GetHealthPercent() <= 10.0f)

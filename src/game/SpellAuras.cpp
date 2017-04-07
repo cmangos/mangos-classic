@@ -1165,6 +1165,15 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (Unit* caster = GetCaster())
                             caster->CastSpell(caster, 13138, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
+                    case 21094:                             // Separation Anxiety (Majordomo Executus)
+                    case 23487:                             // Separation Anxiety (Garr)
+                    {
+                        // expected to tick with 5 sec period (tick part see in Aura::PeriodicTick)
+                        m_isPeriodic = true;
+                        m_modifier.periodictime = 5 * IN_MILLISECONDS;
+                        m_periodicTimer = m_modifier.periodictime;
+                        return;
+                    }
                     case 23183:                             // Mark of Frost
                     {
                         if (Unit* target = GetTarget())
@@ -2969,7 +2978,7 @@ void Aura::HandleAuraModResistanceExclusive(bool apply, bool /*Real*/)
 
             if (m_modifier.m_amount >= highestValue && !apply)
                 applyDiff -= highestValue;
-            
+
             if (GetTarget()->GetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_EXCLUSIVE) >= m_modifier.m_amount && apply ||
                 highestValue >= m_modifier.m_amount && !apply)
                 applyDiff = 0;
@@ -4600,6 +4609,15 @@ void Aura::PeriodicDummyTick()
                 case 7057:                                  // Haunting Spirits
                     if (roll_chance_i(33))
                         target->CastSpell(target, m_modifier.m_amount, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                    return;
+                case 21094:                                 // Separation Anxiety (Majordomo Executus)
+                case 23487:                                 // Separation Anxiety (Garr)
+                    if (Unit* caster = GetCaster())
+                    {
+                        float m_radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spell->EffectRadiusIndex[m_effIndex]));
+                        if (caster->isAlive() && !caster->IsWithinDistInMap(target, m_radius))
+                            target->CastSpell(target, (spell->Id == 21094 ? 21095 : 23492), TRIGGERED_OLD_TRIGGERED, nullptr);      // Spell 21095: Separation Anxiety for Majordomo Executus' adds, 23492: Separation Anxiety for Garr's adds
+                    }
                     return;
             }
             break;
