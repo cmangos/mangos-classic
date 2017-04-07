@@ -316,11 +316,15 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
 
     m_ignoreHitResult = false;
     m_ignoreUnselectableTarget = m_IsTriggeredSpell;
+    m_ignoreLineOfSight = false;
 
     m_reflectable = IsReflectableSpell(m_spellInfo);
 
     if (triggeredFlags & TRIGGERED_IGNORE_UNSELECTABLE_FLAG)
         m_ignoreUnselectableTarget = true;
+
+    if (triggeredFlags & TRIGGERED_IGNORE_LINE_OF_SIGHT)
+        m_ignoreLineOfSight = true;
 
     CleanupTargetList();
 }
@@ -6296,7 +6300,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
             // Get GO cast coordinates if original caster -> GO
             if (!IsIgnoreLosSpell(m_spellInfo) && target != m_caster)
                 if (WorldObject* caster = GetCastingObject())
-                    if (!target->IsWithinLOSInMap(caster))
+                    if (!m_ignoreLineOfSight && !target->IsWithinLOSInMap(caster))
                         return false;
             break;
     }
