@@ -298,6 +298,7 @@ class Loot
         WorldObject const* GetLootTarget() const { return m_lootTarget; }
         ObjectGuid const& GetLootGuid() const { return m_guidTarget; }
         ObjectGuid const& GetMasterLootGuid() const { return m_masterOwnerGuid; }
+        GuidSet const& GetOwnerSet() const { return m_ownerSet; }
 
     private:
         Loot(): m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(), m_clientLootType(), m_lootMethod(), m_threshold(), m_maxEnchantSkill(0), m_isReleased(false), m_haveItemOverThreshold(false), m_isChecked(false), m_isChest(false), m_isChanged(false)
