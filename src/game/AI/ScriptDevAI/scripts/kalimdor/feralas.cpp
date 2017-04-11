@@ -58,6 +58,8 @@ struct npc_oox22feAI : public npc_escortAI
 {
     npc_oox22feAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
+    GuidList m_lSummonsList;
+
     void WaypointReached(uint32 i) override
     {
         switch (i)
@@ -112,6 +114,18 @@ struct npc_oox22feAI : public npc_escortAI
     void JustSummoned(Creature* summoned) override
     {
         summoned->AI()->AttackStart(m_creature);
+        m_lSummonsList.push_back(summoned->GetObjectGuid());
+    }
+
+    void JustDied(Unit* pKiller) override
+    {
+        for (GuidList::const_iterator itr = m_lSummonsList.begin(); itr != m_lSummonsList.end(); ++itr)
+        {
+            if (Creature* pSummoned = m_creature->GetMap()->GetCreature(*itr))
+                pSummoned->ForcedDespawn();
+        }
+
+        npc_escortAI::JustDied(pKiller);
     }
 };
 
@@ -125,14 +139,9 @@ bool QuestAccept_npc_oox22fe(Player* pPlayer, Creature* pCreature, const Quest* 
     if (pQuest->GetQuestId() == QUEST_RESCUE_OOX22FE)
     {
         DoScriptText(SAY_OOX_START, pCreature);
-        // change that the npc is not lying dead on the ground
+        pCreature->SetActiveObjectState(true);
         pCreature->SetStandState(UNIT_STAND_STATE_STAND);
-
-        if (pPlayer->GetTeam() == ALLIANCE)
-            pCreature->SetFactionTemporary(FACTION_ESCORT_A_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-
-        if (pPlayer->GetTeam() == HORDE)
-            pCreature->SetFactionTemporary(FACTION_ESCORT_H_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+        pCreature->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_ACTIVE);
 
         if (npc_oox22feAI* pEscortAI = dynamic_cast<npc_oox22feAI*>(pCreature->AI()))
             pEscortAI->Start(false, pPlayer, pQuest);

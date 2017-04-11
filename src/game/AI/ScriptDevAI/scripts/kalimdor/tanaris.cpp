@@ -157,6 +157,8 @@ struct npc_oox17tnAI : public npc_escortAI
 {
     npc_oox17tnAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
+    GuidList m_lSummonsList;
+
     void WaypointReached(uint32 i) override
     {
         Player* pPlayer = GetPlayerForEscort();
@@ -192,7 +194,11 @@ struct npc_oox17tnAI : public npc_escortAI
         }
     }
 
-    void Reset() override { }
+    void Reset() override
+    {
+        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+    }
 
     void Aggro(Unit* /*who*/) override
     {
@@ -207,6 +213,18 @@ struct npc_oox17tnAI : public npc_escortAI
     void JustSummoned(Creature* summoned) override
     {
         summoned->AI()->AttackStart(m_creature);
+        m_lSummonsList.push_back(summoned->GetObjectGuid());
+    }
+
+    void JustDied(Unit* pKiller) override
+    {
+        for (GuidList::const_iterator itr = m_lSummonsList.begin(); itr != m_lSummonsList.end(); ++itr)
+        {
+            if (Creature* pSummoned = m_creature->GetMap()->GetCreature(*itr))
+                pSummoned->ForcedDespawn();
+        }
+
+        npc_escortAI::JustDied(pKiller);
     }
 };
 
@@ -220,14 +238,9 @@ bool QuestAccept_npc_oox17tn(Player* pPlayer, Creature* pCreature, const Quest* 
     if (pQuest->GetQuestId() == QUEST_RESCUE_OOX_17TN)
     {
         DoScriptText(SAY_OOX_START, pCreature);
-
+        pCreature->SetActiveObjectState(true);
         pCreature->SetStandState(UNIT_STAND_STATE_STAND);
-
-        if (pPlayer->GetTeam() == ALLIANCE)
-            pCreature->SetFactionTemporary(FACTION_ESCORT_A_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-
-        if (pPlayer->GetTeam() == HORDE)
-            pCreature->SetFactionTemporary(FACTION_ESCORT_H_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+        pCreature->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_ACTIVE);
 
         if (npc_oox17tnAI* pEscortAI = dynamic_cast<npc_oox17tnAI*>(pCreature->AI()))
             pEscortAI->Start(false, pPlayer, pQuest);

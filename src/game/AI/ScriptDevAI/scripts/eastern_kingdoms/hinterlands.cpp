@@ -54,11 +54,15 @@ struct npc_00x09hlAI : public npc_escortAI
     npc_00x09hlAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
     uint8 m_uiSummonCount;
+    GuidList m_lSummonsList;
 
     void Reset() override
     {
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
+        {
             m_uiSummonCount = 0;
+            m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        }
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -110,9 +114,6 @@ struct npc_00x09hlAI : public npc_escortAI
                 }
                 break;
         }
-
-        // make sure we always have the right stand state
-        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
     }
 
     void Aggro(Unit* pWho) override
@@ -126,6 +127,18 @@ struct npc_00x09hlAI : public npc_escortAI
     void JustSummoned(Creature* pSummoned) override
     {
         pSummoned->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+        m_lSummonsList.push_back(pSummoned->GetObjectGuid());
+    }
+
+    void JustDied(Unit* pKiller) override
+    {
+        for (GuidList::const_iterator itr = m_lSummonsList.begin(); itr != m_lSummonsList.end(); ++itr)
+        {
+            if (Creature* pSummoned = m_creature->GetMap()->GetCreature(*itr))
+                pSummoned->ForcedDespawn();
+        }
+
+        npc_escortAI::JustDied(pKiller);
     }
 };
 
@@ -133,10 +146,10 @@ bool QuestAccept_npc_00x09hl(Player* pPlayer, Creature* pCreature, const Quest* 
 {
     if (pQuest->GetQuestId() == QUEST_RESQUE_OOX_09)
     {
-        pCreature->SetStandState(UNIT_STAND_STATE_STAND);
-        pCreature->SetFactionTemporary(pPlayer->GetTeam() == ALLIANCE ? FACTION_ESCORT_A_PASSIVE : FACTION_ESCORT_H_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-
         DoScriptText(SAY_OOX_START, pCreature, pPlayer);
+        pCreature->SetActiveObjectState(true);
+        pCreature->SetStandState(UNIT_STAND_STATE_STAND);
+        pCreature->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_ACTIVE);
 
         if (npc_00x09hlAI* pEscortAI = dynamic_cast<npc_00x09hlAI*>(pCreature->AI()))
             pEscortAI->Start(false, pPlayer, pQuest);
