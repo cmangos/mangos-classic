@@ -54,7 +54,9 @@ enum
 
     QUEST_BALANCE_OF_LIGHT_AND_SHADOW   = 7622,
 
-    MAX_PEASANTS                        = 12,
+    BASE_PEASANTS_PER_WAVE              = 11,
+    MAX_KILLED_PEASANT                  = 15,
+    MAX_SAVED_PEASANT                   = 50,
     MAX_ARCHERS                         = 8,
 };
 
@@ -81,22 +83,25 @@ struct npc_eris_havenfireAI : public ScriptedAI
 
     uint32 m_uiEventTimer;
     uint32 m_uiSadEndTimer;
+    uint32 m_uiArcherCheckTargetTimer;
     uint8 m_uiPhase;
     uint8 m_uiCurrentWave;
     uint8 m_uiKillCounter;
     uint8 m_uiSaveCounter;
+    uint8 m_uiTotalCounter;
 
     ObjectGuid m_playerGuid;
     GuidList m_lSummonedGuidList;
 
     void Reset() override
     {
-        m_uiEventTimer      = 0;
-        m_uiSadEndTimer     = 0;
-        m_uiPhase           = 0;
-        m_uiCurrentWave     = 0;
-        m_uiKillCounter     = 0;
-        m_uiSaveCounter     = 0;
+        m_uiEventTimer              = 0;
+        m_uiSadEndTimer             = 0;
+        m_uiPhase                   = 0;
+        m_uiCurrentWave             = 0;
+        m_uiKillCounter             = 0;
+        m_uiSaveCounter             = 0;
+        m_uiArcherCheckTargetTimer  = 0;
 
         m_playerGuid.Clear();
         m_lSummonedGuidList.clear();
@@ -112,7 +117,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
                 float fX, fY, fZ;
                 pSummoned->GetRandomPoint(aPeasantMoveLoc[0], aPeasantMoveLoc[1], aPeasantMoveLoc[2], 10.0f, fX, fY, fZ);
                 pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
-                m_lSummonedGuidList.push_back(pSummoned->GetObjectGuid());
+                m_uiTotalCounter++;
                 break;
             case NPC_SCOURGE_FOOTSOLDIER:
             case NPC_THE_CLEANER:
@@ -120,7 +125,6 @@ struct npc_eris_havenfireAI : public ScriptedAI
                     pSummoned->AI()->AttackStart(pPlayer);
                 break;
             case NPC_SCOURGE_ARCHER:
-                // ToDo: make these ones attack the peasants
                 break;
         }
 
@@ -142,10 +146,10 @@ struct npc_eris_havenfireAI : public ScriptedAI
             pSummoned->ForcedDespawn(10000);
 
             // Event ended
-            if (m_uiSaveCounter >= 50 && m_uiCurrentWave == 5)
+            if (m_uiSaveCounter >= MAX_SAVED_PEASANT)
                 DoBalanceEventEnd();
             // Phase ended
-            else if (m_uiSaveCounter + m_uiKillCounter == m_uiCurrentWave * MAX_PEASANTS)
+            else if (m_uiSaveCounter + m_uiKillCounter == m_uiTotalCounter)
                 DoHandlePhaseEnd();
         }
     }
@@ -157,7 +161,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
             ++m_uiKillCounter;
 
             // If more than 15 peasants have died, then fail the quest
-            if (m_uiKillCounter == MAX_PEASANTS)
+            if (m_uiKillCounter == MAX_KILLED_PEASANT)
             {
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                     pPlayer->FailQuest(QUEST_BALANCE_OF_LIGHT_AND_SHADOW);
@@ -165,7 +169,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
                 DoScriptText(SAY_EVENT_FAIL_1, m_creature);
                 m_uiSadEndTimer = 4000;
             }
-            else if (m_uiSaveCounter + m_uiKillCounter == m_uiCurrentWave * MAX_PEASANTS)
+            else if (m_uiSaveCounter + m_uiKillCounter == m_uiTotalCounter)
                 DoHandlePhaseEnd();
         }
     }
@@ -176,7 +180,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
 
         if (!uiSummonId)
         {
-            for (uint8 i = 0; i < MAX_PEASANTS; ++i)
+            for (uint8 i = 0; i < BASE_PEASANTS_PER_WAVE + m_uiCurrentWave; ++i)
             {
                 uint32 uiSummonEntry = roll_chance_i(70) ? NPC_INJURED_PEASANT : NPC_PLAGUED_PEASANT;
                 m_creature->GetRandomPoint(aPeasantSpawnLoc[0], aPeasantSpawnLoc[1], aPeasantSpawnLoc[2], 10.0f, fX, fY, fZ);
@@ -223,6 +227,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         m_playerGuid = pPlayer->GetObjectGuid();
         m_uiEventTimer = 5000;
+        m_uiArcherCheckTargetTimer = 2000;
     }
 
     void DoBalanceEventEnd()
@@ -231,6 +236,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
             pPlayer->AreaExploredOrEventHappens(QUEST_BALANCE_OF_LIGHT_AND_SHADOW);
 
         DoScriptText(SAY_EVENT_END, m_creature);
+        m_uiArcherCheckTargetTimer = 0;
         DoDespawnSummons(true);
         EnterEvadeMode();
     }
@@ -245,6 +251,32 @@ struct npc_eris_havenfireAI : public ScriptedAI
                     continue;
 
                 pTemp->ForcedDespawn();
+            }
+        }
+    }
+    
+    // Loop over all Scourge Archer NPCs to pick a target and attack it
+    void DoAttackArchersTarget()
+    {
+        for (GuidList::const_iterator itr = m_lSummonedGuidList.begin(); itr != m_lSummonedGuidList.end(); ++itr)
+        {
+            Creature* pTemp = m_creature->GetMap()->GetCreature(*itr);
+            if (pTemp && pTemp->GetEntry() == NPC_SCOURGE_ARCHER)
+            {
+                // Archer has a victim and is in range, keep on attacking it
+                if (pTemp->getVictim() && pTemp->IsWithinDistInMap(pTemp->getVictim(), 30.0f))
+                    continue;
+                // Else, find a new target in range
+                else
+                {
+                    // First look for an Injured Peasant in range (arbitrary choice), if none look for a Plagued Peasant
+                    Creature* pTarget = GetClosestCreatureWithEntry(pTemp, NPC_INJURED_PEASANT, 30.0f);
+                    if (!pTarget)
+                        pTarget = GetClosestCreatureWithEntry(pTemp, NPC_PLAGUED_PEASANT, 30.0f);
+
+                    if (pTarget)
+                        pTemp->AI()->AttackStart(pTarget);
+                }
             }
         }
     }
@@ -289,6 +321,19 @@ struct npc_eris_havenfireAI : public ScriptedAI
             }
             else
                 m_uiSadEndTimer -= uiDiff;
+        }
+
+        // Timer to force Scourge Archer NPCs to refresh their target
+        if (m_uiArcherCheckTargetTimer)
+        {
+            if (m_uiArcherCheckTargetTimer <= uiDiff)
+            {
+                // Make Scourge Archer search for a target in range and attack it
+                DoAttackArchersTarget();
+                m_uiArcherCheckTargetTimer = 2000;
+            }
+            else
+                m_uiArcherCheckTargetTimer -= uiDiff;
         }
     }
 };
