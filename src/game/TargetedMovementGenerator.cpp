@@ -242,14 +242,26 @@ void ChaseMovementGenerator<T>::Reset(T& owner)
 // Chase-Movement: These factors depend on combat-reach distance
 #define CHASE_DEFAULT_RANGE_FACTOR                        0.5f
 #define CHASE_RECHASE_RANGE_FACTOR                        0.75f
+#define CHASE_MOVE_CLOSER_FACTOR                          0.875f
 
 template<class T>
 float ChaseMovementGenerator<T>::GetDynamicTargetDistance(T& owner, bool forRangeCheck) const
 {
-    if (!forRangeCheck)
-        return this->i_offset + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombatReach(&owner);
+    if (m_moveFurther)
+    {
+        if (!forRangeCheck)
+            return this->i_offset + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombatReach(&owner);
 
-    return CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
+        return CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombatReach(&owner) - this->i_target->GetObjectBoundingRadius();
+    }
+    else
+    {
+        if (!forRangeCheck) // move slightly closer than setting to prevent jittery movement
+            return this->i_offset * CHASE_MOVE_CLOSER_FACTOR + CHASE_DEFAULT_RANGE_FACTOR * this->i_target->GetCombatReach(&owner);
+
+        // check against actual max range setting
+        return this->i_offset + CHASE_RECHASE_RANGE_FACTOR * this->i_target->GetCombatReach(&owner) - this->i_target->GetObjectBoundingRadius(); 
+    }
 }
 
 //-----------------------------------------------//

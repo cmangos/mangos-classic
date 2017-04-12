@@ -284,7 +284,7 @@ void MotionMaster::MoveConfused()
         Mutate(new ConfusedMovementGenerator<Creature>());
 }
 
-void MotionMaster::MoveChase(Unit* target, float dist, float angle)
+void MotionMaster::MoveChase(Unit* target, float dist, float angle, bool moveFurther)
 {
     // ignore movement request if target not exist
     if (!target)
@@ -293,9 +293,9 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle)
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s chase to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
 
     if (m_owner->GetTypeId() == TYPEID_PLAYER)
-        Mutate(new ChaseMovementGenerator<Player>(*target, dist, angle));
+        Mutate(new ChaseMovementGenerator<Player>(*target, dist, angle, moveFurther));
     else
-        Mutate(new ChaseMovementGenerator<Creature>(*target, dist, angle));
+        Mutate(new ChaseMovementGenerator<Creature>(*target, dist, angle, moveFurther));
 }
 
 void MotionMaster::MoveFollow(Unit* target, float dist, float angle)
