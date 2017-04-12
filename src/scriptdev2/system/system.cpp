@@ -93,7 +93,7 @@ void SystemMgr::LoadScriptWaypoints()
             Field* pFields = pResult->Fetch();
 
             uint32 uiEntry  = pFields[0].GetUInt32();
-            int32 pathId    = 1; // pFields[X].GetInt32();
+            uint32 pathId   = 1; // pFields[X].GetUInt32();
             uint32 pointId  = pFields[1].GetUInt32();
             uint32 delay    = pFields[5].GetUInt32();
 

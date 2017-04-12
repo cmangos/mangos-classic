@@ -1018,10 +1018,10 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                     m_creature->GetMotionMaster()->MoveIdle();
                     break;
                 case RANDOM_MOTION_TYPE:
-                    m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), float(action.changeMovement.wanderDistance));
+                    m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), float(action.changeMovement.wanderORpathID));
                     break;
                 case WAYPOINT_MOTION_TYPE:
-                    m_creature->GetMotionMaster()->MoveWaypoint();
+                    m_creature->GetMotionMaster()->MoveWaypoint(action.changeMovement.wanderORpathID);
                     break;
             }
             break;

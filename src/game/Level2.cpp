@@ -2632,7 +2632,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
 
     Creature* targetCreature = getSelectedCreature();
     WaypointPathOrigin wpDestination = PATH_NO_PATH;        ///< into which storage
-    int32 wpPathId = 0;                                     ///< along which path
+    uint32 wpPathId = 0;                                    ///< along which path
     uint32 wpPointId = 0;                                   ///< pointId if a waypoint was selected, in this case insert after
     Creature* wpOwner;
 
@@ -2700,7 +2700,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
 
     if (wpDestination == PATH_NO_PATH)                      // No Waypoint selected, parse additional params
     {
-        if (ExtractOptInt32(&args, wpPathId, 0))            // Fill path-id and source
+        if (ExtractOptUInt32(&args, wpPathId, 0))           // Fill path-id and source
         {
             uint32 src = (uint32)PATH_NO_PATH;
             if (ExtractOptUInt32(&args, src, src))
@@ -2738,7 +2738,7 @@ bool ChatHandler::HandleWpAddCommand(char* args)
 
     float x, y, z;
     m_session->GetPlayer()->GetPosition(x, y, z);
-    if (!sWaypointMgr.AddNode(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPointId, wpDestination, x, y, z))
+    if (!sWaypointMgr.AddNode(wpOwner->GetEntry(), wpOwner->GetGUIDLow(), wpPathId, wpPointId, wpDestination, x, y, z, m_session->GetPlayer()->GetOrientation()))
     {
         PSendSysMessage(LANG_WAYPOINT_NOTCREATED, wpPointId, wpOwner->GetGuidStr().c_str(), wpPathId, WaypointManager::GetOriginString(wpDestination).c_str());
         SetSentErrorMessage(true);
@@ -2827,7 +2827,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     Creature* wpOwner;                                      // Who moves along the waypoint
     uint32 wpId = 0;
     WaypointPathOrigin wpSource = PATH_NO_PATH;
-    int32 wpPathId = 0;
+    uint32 wpPathId = 0;
 
     if (targetCreature)
     {
@@ -3033,14 +3033,14 @@ bool ChatHandler::HandleWpShowCommand(char* args)
     std::string subCmd = subCmd_str;                        ///< info, on, off, first, last
 
     uint32 dbGuid = 0;
-    int32 wpPathId = 0;
+    uint32 wpPathId = 0;
     WaypointPathOrigin wpOrigin = PATH_NO_PATH;
 
     // User selected an npc?
     Creature* targetCreature = getSelectedCreature();
     if (targetCreature)
     {
-        if (ExtractOptInt32(&args, wpPathId, 0))            // Fill path-id and source
+        if (ExtractOptUInt32(&args, wpPathId, 0))           // Fill path-id and source
         {
             uint32 src;
             if (ExtractOptUInt32(&args, src, (uint32)PATH_NO_PATH))
@@ -3052,7 +3052,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         if (!ExtractUInt32(&args, dbGuid))                  // No creature selected and no dbGuid provided
             return false;
 
-        if (ExtractOptInt32(&args, wpPathId, 0))            // Fill path-id and source
+        if (ExtractOptUInt32(&args, wpPathId, 0))           // Fill path-id and source
         {
             uint32 src = (uint32)PATH_NO_PATH;
             if (ExtractOptUInt32(&args, src, src))
@@ -3230,7 +3230,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
 
     Creature* wpOwner;
     WaypointPathOrigin wpOrigin = PATH_NO_PATH;
-    int32 wpPathId = 0;
+    uint32 wpPathId = 0;
 
     if (Creature* targetCreature = getSelectedCreature())
     {
@@ -3304,7 +3304,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
 
     if (wpOrigin == PATH_NO_PATH)                           // No WP selected, Extract optional arguments
     {
-        if (ExtractOptInt32(&args, wpPathId, 0))            // Fill path-id and source
+        if (ExtractOptUInt32(&args, wpPathId, 0))           // Fill path-id and source
         {
             uint32 src = (uint32)PATH_NO_PATH;
             if (ExtractOptUInt32(&args, src, src))

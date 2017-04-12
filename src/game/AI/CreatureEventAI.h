@@ -123,7 +123,7 @@ enum EventAI_ActionType
     ACTION_T_THROW_AI_EVENT             = 45,               // EventType, Radius, unused
     ACTION_T_SET_THROW_MASK             = 46,               // EventTypeMask, unused, unused
     ACTION_T_SET_STAND_STATE            = 47,               // StandState, unused, unused
-    ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance, unused
+    ACTION_T_CHANGE_MOVEMENT            = 48,               // MovementType, WanderDistance if Movement Type 1 and PathId if Movement Type 2, unused
     ACTION_T_DYNAMIC_MOVEMENT           = 49,               // EnableDynamicMovement (1 = on; 0 = off)
     ACTION_T_SET_REACT_STATE            = 50,               // React state, unused, unused
 
@@ -420,7 +420,7 @@ struct CreatureEventAI_Action
         struct
         {
             uint32 movementType;
-            uint32 wanderDistance;
+            uint32 wanderORpathID;
             uint32 unused1;
         } changeMovement;
         // ACTION_T_DYNAMIC_MOVEMENT                        = 49

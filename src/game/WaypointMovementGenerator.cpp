@@ -68,9 +68,9 @@ void WaypointMovementGenerator<Creature>::Initialize(Creature& creature)
     creature.clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
 }
 
-void WaypointMovementGenerator<Creature>::InitializeWaypointPath(Creature& u, int32 id, WaypointPathOrigin wpSource, uint32 initialDelay, uint32 overwriteEntry)
+void WaypointMovementGenerator<Creature>::InitializeWaypointPath(Creature& u, int32 pathId, WaypointPathOrigin wpSource, uint32 initialDelay, uint32 overwriteEntry)
 {
-    LoadPath(u, id, wpSource, overwriteEntry);
+    LoadPath(u, pathId, wpSource, overwriteEntry);
     i_nextMoveTime.Reset(initialDelay);
     // Start moving if possible
     StartMove(u);

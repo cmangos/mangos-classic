@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2695_01_mangos_instance_template` bit(1) DEFAULT NULL
+  `required_z2696_02_mangos_creature_movement_template` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1069,6 +1069,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_movement_template`;
 CREATE TABLE `creature_movement_template` (
   `entry` mediumint(8) unsigned NOT NULL COMMENT 'Creature entry',
+  `pathId` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Path ID for entry',
   `point` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `position_x` float NOT NULL DEFAULT '0',
   `position_y` float NOT NULL DEFAULT '0',
@@ -1085,7 +1086,7 @@ CREATE TABLE `creature_movement_template` (
   `orientation` float NOT NULL DEFAULT '0',
   `model1` mediumint(9) NOT NULL DEFAULT '0',
   `model2` mediumint(9) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`entry`,`point`)
+  PRIMARY KEY (`entry`,`pathId`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature waypoint system';
 
 --
@@ -1365,6 +1366,7 @@ CREATE TABLE `dbscripts_on_creature_movement` (
   `command` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `datalong` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `datalong2` int(10) unsigned NOT NULL DEFAULT '0',
+  `datalong3` int(11) unsigned NOT NULL DEFAULT '0',
   `buddy_entry` int(10) unsigned NOT NULL DEFAULT '0',
   `search_radius` int(10) unsigned NOT NULL DEFAULT '0',
   `data_flags` tinyint(3) unsigned NOT NULL DEFAULT '0',
@@ -1408,6 +1410,26 @@ DROP TABLE IF EXISTS dbscripts_on_spell;
 CREATE TABLE dbscripts_on_spell LIKE dbscripts_on_creature_movement;
 DROP TABLE IF EXISTS dbscripts_on_creature_death;
 CREATE TABLE dbscripts_on_creature_death LIKE dbscripts_on_creature_movement;
+
+--
+-- Dumping data for table `dbscript_string_template`
+--
+
+LOCK TABLES `dbscript_string_template` WRITE;
+/*!40000 ALTER TABLE `dbscript_string_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `dbscript_string_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `dbscript_string_template`
+--
+
+DROP TABLE IF EXISTS `dbscript_string_template`;
+CREATE TABLE `dbscript_string_template` (
+  `id` int(11) unsigned NOT NULL COMMENT 'Id of template' AUTO_INCREMENT,
+  `string_id` int(11) NOT NULL DEFAULT '0' COMMENT 'db_script_string id',
+  PRIMARY KEY (`id`,`string_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='DBScript system';
 
 --
 -- Table structure for table `disenchant_loot_template`

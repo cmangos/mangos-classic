@@ -72,13 +72,13 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
         void Finalize(Creature&);
         void Reset(Creature& u);
         bool Update(Creature& u, const uint32& diff);
-        void InitializeWaypointPath(Creature& u, int32 id, WaypointPathOrigin wpSource, uint32 initialDelay, uint32 overwriteEntry);
+        void InitializeWaypointPath(Creature& u, int32 pathId, WaypointPathOrigin wpSource, uint32 initialDelay, uint32 overwriteEntry);
 
         MovementGeneratorType GetMovementGeneratorType() const { return WAYPOINT_MOTION_TYPE; }
 
         bool GetResetPosition(Creature&, float& /*x*/, float& /*y*/, float& /*z*/, float& /*o*/) const;
         uint32 getLastReachedWaypoint() const { return m_lastReachedWaypoint; }
-        void GetPathInformation(int32& pathId, WaypointPathOrigin& wpOrigin) const { pathId = m_pathId; wpOrigin = m_PathOrigin; }
+        void GetPathInformation(uint32& pathId, WaypointPathOrigin& wpOrigin) const { pathId = m_pathId; wpOrigin = m_PathOrigin; }
         void GetPathInformation(std::ostringstream& oss) const;
 
         void AddToWaypointPauseTime(int32 waitTimeDiff);
@@ -98,7 +98,7 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
         bool m_isArrivalDone;
         uint32 m_lastReachedWaypoint;
 
-        int32 m_pathId;
+        uint32 m_pathId;
         WaypointPathOrigin m_PathOrigin;
 };
 

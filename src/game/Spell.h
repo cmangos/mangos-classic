@@ -384,6 +384,7 @@ class Spell
         // Trigger flag system
         bool m_ignoreHitResult;
         bool m_ignoreUnselectableTarget;
+        bool m_ignoreUnattackableTarget;
 
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() const { return m_timer; }
@@ -716,9 +717,8 @@ namespace MaNGOS
             {
                 // there are still more spells which can be casted on dead, but
                 // they are no AOE and don't have such a nice SPELL_ATTR flag
-                if ((i_TargetType != SPELL_TARGETS_ALL && !itr->getSource()->isTargetableForAttack(i_spell.m_spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD)))
-                        // mostly phase check
-                        || !itr->getSource()->IsInMap(i_originalCaster))
+                // mostly phase check
+                if (!itr->getSource()->IsInMap(i_originalCaster))
                     continue;
 
                 switch (i_TargetType)
