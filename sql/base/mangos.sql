@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
-  `required_z2696_02_mangos_creature_movement_template` bit(1) DEFAULT NULL
+  `required_z2697_02_mangos_gameobjects` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -707,7 +707,8 @@ CREATE TABLE `creature` (
   `position_y` float NOT NULL DEFAULT '0',
   `position_z` float NOT NULL DEFAULT '0',
   `orientation` float NOT NULL DEFAULT '0',
-  `spawntimesecs` int(10) unsigned NOT NULL DEFAULT '120',
+  `spawntimesecsmin` int(10) unsigned NOT NULL DEFAULT '120' COMMENT 'Creature respawn time minimum',
+  `spawntimesecsmax` int(10) unsigned NOT NULL DEFAULT '120' COMMENT 'Creature respawn time maximum',
   `spawndist` float NOT NULL DEFAULT '5',
   `currentwaypoint` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `curhealth` int(10) unsigned NOT NULL DEFAULT '1',
@@ -1791,7 +1792,8 @@ CREATE TABLE `gameobject` (
   `rotation1` float NOT NULL DEFAULT '0',
   `rotation2` float NOT NULL DEFAULT '0',
   `rotation3` float NOT NULL DEFAULT '0',
-  `spawntimesecs` int(11) NOT NULL DEFAULT '0',
+  `spawntimesecsmin` int(11) NOT NULL DEFAULT '0' COMMENT 'GameObject respawn time minimum',
+  `spawntimesecsmax` int(11) NOT NULL DEFAULT '0' COMMENT 'Gameobject respawn time maximum',
   `animprogress` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `state` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`),

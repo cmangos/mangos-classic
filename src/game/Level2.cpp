@@ -1062,8 +1062,8 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
     if (!id)
         return false;
 
-    int32 spawntimeSecs;
-    if (!ExtractOptInt32(&args, spawntimeSecs, 0))
+    int32 spawntimeSecsmin;
+    if (!ExtractOptInt32(&args, spawntimeSecsmin, 0))
         return false;
 
     const GameObjectInfo* gInfo = ObjectMgr::GetGameObjectInfo(id);
@@ -1106,8 +1106,8 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
         return false;
     }
 
-    if (spawntimeSecs)
-        pGameObj->SetRespawnTime(spawntimeSecs);
+    if (spawntimeSecsmin)
+        pGameObj->SetRespawnTime(spawntimeSecsmin);
 
     // fill the gameobject data and save to the db
     pGameObj->SaveToDB(map->GetId());

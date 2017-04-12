@@ -399,6 +399,7 @@ void PoolGroup<Creature>::Spawn1Object(MapPersistentState& mapState, PoolObject*
                     // if new spawn replaces a just despawned creature, not instantly spawn but set respawn timer
                     if (!instantly)
                     {
+                        pCreature->SetRespawnDelay(data->GetRandomRespawnTime());
                         pCreature->SetRespawnTime(pCreature->GetRespawnDelay());
                         if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY) || pCreature->IsWorldBoss())
                             pCreature->SaveRespawnTime();
@@ -409,7 +410,7 @@ void PoolGroup<Creature>::Spawn1Object(MapPersistentState& mapState, PoolObject*
             // for not loaded grid just update respawn time (avoid work for instances until implemented support)
             else if (!instantly)
             {
-                dataMapState->SaveCreatureRespawnTime(obj->guid, time(nullptr) + data->spawntimesecs);
+                dataMapState->SaveCreatureRespawnTime(obj->guid, time(nullptr) + data->GetRandomRespawnTime());
             }
         }
     }
@@ -445,7 +446,7 @@ void PoolGroup<GameObject>::Spawn1Object(MapPersistentState& mapState, PoolObjec
                         // if new spawn replaces a just despawned object, not instantly spawn but set respawn timer
                         if (!instantly)
                         {
-                            pGameobject->SetRespawnTime(pGameobject->GetRespawnDelay());
+                            pGameobject->SetRespawnTime(data->GetRandomRespawnTime());
                             if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
                                 pGameobject->SaveRespawnTime();
                         }
@@ -457,8 +458,8 @@ void PoolGroup<GameObject>::Spawn1Object(MapPersistentState& mapState, PoolObjec
             else if (!instantly)
             {
                 // for spawned by default object only
-                if (data->spawntimesecs >= 0)
-                    dataMapState->SaveGORespawnTime(obj->guid, time(nullptr) + data->spawntimesecs);
+                if (data->spawntimesecsmin >= 0)
+                    dataMapState->SaveGORespawnTime(obj->guid, time(nullptr) + data->GetRandomRespawnTime());
             }
         }
     }

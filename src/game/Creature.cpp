@@ -1073,7 +1073,8 @@ void Creature::SaveToDB(uint32 mapid)
     data.posY = GetPositionY();
     data.posZ = GetPositionZ();
     data.orientation = GetOrientation();
-    data.spawntimesecs = m_respawnDelay;
+    data.spawntimesecsmin = m_respawnDelay;
+    data.spawntimesecsmax = m_respawnDelay;
     // prevent add data integrity problems
     data.spawndist = GetDefaultMovementType() == IDLE_MOTION_TYPE ? 0 : m_respawnradius;
     data.currentwaypoint = 0;
@@ -1100,7 +1101,8 @@ void Creature::SaveToDB(uint32 mapid)
        << data.posY << ","
        << data.posZ << ","
        << data.orientation << ","
-       << data.spawntimesecs << ","                        // respawn time
+       << data.spawntimesecsmin << ","                     // respawn time minimum
+       << data.spawntimesecsmax << ","                     // respawn time maximum
        << (float) data.spawndist << ","                    // spawn distance (float)
        << data.currentwaypoint << ","                      // currentwaypoint
        << data.curhealth << ","                            // curhealth
@@ -1335,7 +1337,7 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
     SetRespawnCoord(pos);
     m_respawnradius = data->spawndist;
 
-    m_respawnDelay = data->spawntimesecs;
+    m_respawnDelay = data->GetRandomRespawnTime();
     m_corpseDelay = std::min(m_respawnDelay * 9 / 10, m_corpseDelay); // set corpse delay to 90% of the respawn delay
     m_isDeadByDefault = data->is_dead;
     m_deathState = m_isDeadByDefault ? DEAD : ALIVE;
@@ -1504,8 +1506,11 @@ void Creature::SetDeathState(DeathState s)
 {
     if ((s == JUST_DIED && !m_isDeadByDefault) || (s == JUST_ALIVED && m_isDeadByDefault))
     {
+        if(CreatureData const* data = sObjectMgr.GetCreatureData(GetObjectGuid().GetCounter()))
+            m_respawnDelay = data->GetRandomRespawnTime();
+
         m_corpseDecayTimer = m_corpseDelay * IN_MILLISECONDS; // the max/default time for corpse decay (before creature is looted/AllLootRemovedFromCorpse() is called)
-        m_respawnTime = time(nullptr) + m_respawnDelay;        // respawn delay (spawntimesecs)
+        m_respawnTime = time(nullptr) + m_respawnDelay; // respawn delay (spawntimesecs)
 
         // always save boss respawn time at death to prevent crash cheating
         if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY) || IsWorldBoss())
