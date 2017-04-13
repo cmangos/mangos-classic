@@ -431,7 +431,7 @@ class HonorStanding
         HonorStanding* GetInfo() { return this; };
 
         // create the standing order
-        bool operator < (const HonorStanding& rhs)
+        bool operator < (const HonorStanding& rhs) const
         {
             return honorPoints > rhs.honorPoints;
         }
