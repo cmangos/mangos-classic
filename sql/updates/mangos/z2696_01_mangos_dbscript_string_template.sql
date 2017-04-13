@@ -15,7 +15,6 @@ ALTER TABLE dbscripts_on_event ADD COLUMN datalong3 INT(11) UNSIGNED NOT NULL DE
 ALTER TABLE dbscripts_on_go_template_use ADD COLUMN datalong3 INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER datalong2;
 ALTER TABLE dbscripts_on_go_use ADD COLUMN datalong3 INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER datalong2;
 ALTER TABLE dbscripts_on_gossip ADD COLUMN datalong3 INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER datalong2;
-ALTER TABLE dbscripts_on_promo_code_use ADD COLUMN datalong3 INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER datalong2;
 ALTER TABLE dbscripts_on_quest_end ADD COLUMN datalong3 INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER datalong2;
 ALTER TABLE dbscripts_on_quest_start ADD COLUMN datalong3 INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER datalong2;
 ALTER TABLE dbscripts_on_spell ADD COLUMN datalong3 INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER datalong2;
@@ -27,7 +26,6 @@ UPDATE dbscripts_on_event SET datalong=0 WHERE command=0;
 UPDATE dbscripts_on_go_template_use SET datalong=0 WHERE command=0;
 UPDATE dbscripts_on_go_use SET datalong=0 WHERE command=0;
 UPDATE dbscripts_on_gossip SET datalong=0 WHERE command=0;
-UPDATE dbscripts_on_promo_code_use SET datalong=0 WHERE command=0;
 UPDATE dbscripts_on_quest_end SET datalong=0 WHERE command=0;
 UPDATE dbscripts_on_quest_start SET datalong=0 WHERE command=0;
 UPDATE dbscripts_on_spell SET datalong=0 WHERE command=0;
