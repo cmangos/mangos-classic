@@ -1413,15 +1413,6 @@ DROP TABLE IF EXISTS dbscripts_on_creature_death;
 CREATE TABLE dbscripts_on_creature_death LIKE dbscripts_on_creature_movement;
 
 --
--- Dumping data for table `dbscript_string_template`
---
-
-LOCK TABLES `dbscript_string_template` WRITE;
-/*!40000 ALTER TABLE `dbscript_string_template` DISABLE KEYS */;
-/*!40000 ALTER TABLE `dbscript_string_template` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `dbscript_string_template`
 --
 
@@ -1431,6 +1422,15 @@ CREATE TABLE `dbscript_string_template` (
   `string_id` int(11) NOT NULL DEFAULT '0' COMMENT 'db_script_string id',
   PRIMARY KEY (`id`,`string_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='DBScript system';
+
+--
+-- Dumping data for table `dbscript_string_template`
+--
+
+LOCK TABLES `dbscript_string_template` WRITE;
+/*!40000 ALTER TABLE `dbscript_string_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `dbscript_string_template` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `disenchant_loot_template`
