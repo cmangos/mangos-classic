@@ -189,8 +189,8 @@ class CreatureLinkingHolder
         // Helper function to set following
         void SetFollowing(Creature* pWho, Creature* pWhom) const;
         // Helper function to return if a slave is in range of a boss
-        bool IsSlaveInRangeOfBoss(Creature const* pSlave, Creature const* pBoss, uint16 searchRange) const;
-        bool IsSlaveInRangeOfBoss(Creature const* pBoss, float slaveX, float slaveY, uint16 searchRange) const;
+        bool IsSlaveInRangeOfMaster(Creature const* pSlave, Creature const* pBoss, uint16 searchRange) const;
+        bool IsSlaveInRangeOfMaster(Creature const* pBoss, float slaveX, float slaveY, uint16 searchRange) const;
         // Another helper function
         bool IsRespawnReady(uint32 dbLowGuid, Map* _map) const;
         // Helper function for recursive spawning-checks of an additional linked
