@@ -431,8 +431,9 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     continue;
                 case EVENT_T_DEATH:
                 {
-                    if (!sConditionStorage.LookupEntry<PlayerCondition>(temp.death.conditionId)) // condition does not exist for some reason
+                    if (temp.death.conditionId && !sConditionStorage.LookupEntry<PlayerCondition>(temp.death.conditionId))
                     {
+                        // condition does not exist for some reason
                         sLog.outErrorDb("Creature %u has `ConditionId` = %u but does not exist. Setting ConditionId to 0 for event %u.", temp.creature_id, temp.death.conditionId, i);
                         temp.death.conditionId = 0;
                     }
