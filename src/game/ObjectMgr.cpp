@@ -1021,6 +1021,13 @@ void ObjectMgr::LoadCreatures()
             continue;
         }
 
+        if (data.spawntimesecsmax < data.spawntimesecsmin)
+        {
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `spawntimesecsmax` (%u) value lower than `spawntimesecsmin` (%u), it will be adjusted to %u.",
+                guid, data.id, uint32(data.spawntimesecsmax), uint32(data.spawntimesecsmin), uint32(data.spawntimesecsmin));
+            data.spawntimesecsmax = data.spawntimesecsmin;
+        }
+
         if (data.modelid_override > 0 && !sCreatureDisplayInfoStore.LookupEntry(data.modelid_override))
         {
             sLog.outErrorDb("Table `creature` GUID %u (entry %u) has model for nonexistent model id (%u), set to 0.", guid, data.id, data.modelid_override);
@@ -1197,6 +1204,13 @@ void ObjectMgr::LoadGameObjects()
         if (data.spawntimesecsmin == 0 && gInfo->IsDespawnAtAction())
         {
             sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with `spawntimesecs` (0) value, but gameobejct marked as despawnable at action.", guid, data.id);
+        }
+
+        if (data.spawntimesecsmax < data.spawntimesecsmin)
+        {
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u Entry: %u) with `spawntimesecsmax` (%u) value lower than `spawntimesecsmin` (%u), it will be adjusted to %u.",
+                guid, data.id, uint32(data.spawntimesecsmax), uint32(data.spawntimesecsmin), uint32(data.spawntimesecsmin));
+            data.spawntimesecsmax = data.spawntimesecsmin;
         }
 
         if (go_state >= MAX_GO_STATE)
