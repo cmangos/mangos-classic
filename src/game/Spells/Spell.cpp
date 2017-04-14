@@ -5561,6 +5561,11 @@ SpellCastResult Spell::CheckRange(bool strict) const
     // add radius of caster and ~5 yds "give" for non stricred (landing) check
     float range_mod = strict ? 1.25f : 6.25;
 
+    // leeway for moving
+    if (target && m_caster->IsMoving() && target->IsMoving() && !m_caster->IsWalking() && !target->IsWalking() &&
+        (m_spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT || target->GetTypeId() == TYPEID_PLAYER))
+        range_mod += 8.0f / 3.0f;
+
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
     float max_range = GetSpellMaxRange(srange) + range_mod;
     float min_range = GetSpellMinRange(srange);
