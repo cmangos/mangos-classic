@@ -1933,7 +1933,6 @@ class Player : public Unit
 
         void BuildTeleportAckMsg(WorldPacket& data, float x, float y, float z, float ang) const;
 
-        bool isMoving() const { return m_movementInfo.HasMovementFlag(movementFlagsMask); }
         bool isMovingOrTurning() const { return m_movementInfo.HasMovementFlag(movementOrTurningFlagsMask); }
 
         bool CanSwim() const { return true; }
