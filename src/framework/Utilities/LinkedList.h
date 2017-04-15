@@ -20,7 +20,7 @@
 #define _LINKEDLIST
 
 #include <cstddef>
-#include "Platform\Define.h"
+#include "Platform/Define.h"
 
 //============================================
 class LinkedListHead;
