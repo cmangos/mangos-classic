@@ -854,7 +854,7 @@ char* WheatyExceptionReport::FormatOutputValue(char* pszCurrBuffer,
             if (!IsBadStringPtr(*(PSTR*)pAddress, 32))
             {
                 pszCurrBuffer += sprintf(pszCurrBuffer, " = \"%.31s\"",
-                                         *(PDWORD)pAddress);
+                                         (char *)*(PDWORD)pAddress);
             }
             else
                 pszCurrBuffer += sprintf(pszCurrBuffer, " = %X",

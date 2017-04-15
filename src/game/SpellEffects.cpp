@@ -1579,7 +1579,7 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
     damage = unitTarget->SpellDamageBonusTaken(m_caster, m_spellInfo, uint32(damage), SPELL_DIRECT_DAMAGE);
 
     int32 new_damage;
-    if (curPower < damage)
+    if (curPower < uint32(damage)) // damage should not be under zero at this point (checked above)
         new_damage = curPower;
     else
         new_damage = damage;
