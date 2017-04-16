@@ -25,7 +25,7 @@
 #include "TemporarySummon.h"
 #include "Totem.h"
 #include "Pet.h"
-#include "AI/CreatureAI.h"
+#include "AI/BaseAI/CreatureAI.h"
 #include "GameObject.h"
 #include "Opcodes.h"
 #include "Chat.h"

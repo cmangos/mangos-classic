@@ -23,7 +23,7 @@
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
 #include "DBCStores.h"
-#include "AI/CreatureAI.h"
+#include "AI/BaseAI/CreatureAI.h"
 #include "InstanceData.h"
 
 Totem::Totem() : Creature(CREATURE_SUBTYPE_TOTEM)

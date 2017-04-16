@@ -22,7 +22,7 @@
 #include "GridNotifiers.h"
 #include "WorldPacket.h"
 #include "Player.h"
-#include "AI/CreatureAI.h"
+#include "AI/BaseAI/CreatureAI.h"
 #include "SpellAuras.h"
 #include "DBCStores.h"
 #include "DBCEnums.h"

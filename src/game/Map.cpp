@@ -37,6 +37,7 @@
 #include "Chat.h"
 #include "Weather.h"
 #include "ObjectGridLoader.h"
+#include "ScriptDevAIMgr.h"
 
 Map::~Map()
 {
@@ -1168,7 +1169,7 @@ void Map::CreateInstanceData(bool load)
     if (!i_script_id)
         return;
 
-    i_data = sScriptMgr.CreateInstanceData(this);
+    i_data = sScriptDevAIMgr.CreateInstanceData(this);
     if (!i_data)
         return;
 
@@ -1188,7 +1189,7 @@ void Map::CreateInstanceData(bool load)
             const char* data = fields[0].GetString();
             if (data)
             {
-                DEBUG_LOG("Loading instance data for `%s` (Map: %u Instance: %u)", sScriptMgr.GetScriptName(i_script_id), GetId(), i_InstanceId);
+                DEBUG_LOG("Loading instance data for `%s` (Map: %u Instance: %u)", sScriptDevAIMgr.GetScriptName(i_script_id), GetId(), i_InstanceId);
                 i_data->Load(data);
             }
             delete result;
@@ -1202,7 +1203,7 @@ void Map::CreateInstanceData(bool load)
     }
     else
     {
-        DEBUG_LOG("New instance data, \"%s\" ,initialized!", sScriptMgr.GetScriptName(i_script_id));
+        DEBUG_LOG("New instance data, \"%s\" ,initialized!", sScriptDevAIMgr.GetScriptName(i_script_id));
         i_data->Initialize();
     }
 }

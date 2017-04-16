@@ -18,7 +18,7 @@
 
 #include "HomeMovementGenerator.h"
 #include "Creature.h"
-#include "AI/CreatureAI.h"
+#include "AI/BaseAI/CreatureAI.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 

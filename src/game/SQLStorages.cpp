@@ -58,4 +58,4 @@ SQLHashStorage sCreatureTemplateSpellsStorage(CreatureTemplateSpellsFmt, "entry"
 
 SQLMultiStorage sSpellScriptTargetStorage(SpellScriptTargetFmt, "entry", "spell_script_target");
 
-MANGOS_DLL_SPEC SQLStorage const* GetSpellStore() { return &sSpellTemplate; }
+SQLStorage const* GetSpellStore() { return &sSpellTemplate; }

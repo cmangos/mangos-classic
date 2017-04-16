@@ -22,7 +22,7 @@
 #include "MovementGenerator.h"
 
 template<class T>
-class MANGOS_DLL_SPEC ConfusedMovementGenerator
+class ConfusedMovementGenerator
     : public MovementGeneratorMedium< T, ConfusedMovementGenerator<T> >
 {
     public:

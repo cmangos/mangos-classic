@@ -18,14 +18,14 @@
 
 #include "CreatureAISelector.h"
 #include "Creature.h"
-#include "CreatureAIImpl.h"
-#include "NullCreatureAI.h"
+#include "BaseAI/CreatureAIImpl.h"
+#include "BaseAI/NullCreatureAI.h"
 #include "Policies/Singleton.h"
 #include "MovementGenerator.h"
-#include "ScriptMgr.h"
+#include "ScriptDevAIMgr.h"
 #include "Pet.h"
 #include "Log.h"
-#include "PetAI.h"
+#include "BaseAI/PetAI.h"
 
 INSTANTIATE_SINGLETON_1(CreatureAIRegistry);
 INSTANTIATE_SINGLETON_1(MovementGeneratorRegistry);
@@ -36,7 +36,7 @@ namespace FactorySelector
     {
         // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)
         if ((!creature->IsPet() || !static_cast<Pet*>(creature)->isControlled()) && !creature->isCharmed())
-            if (CreatureAI* scriptedAI = sScriptMgr.GetCreatureAI(creature))
+            if (CreatureAI* scriptedAI = sScriptDevAIMgr.GetCreatureAI(creature))
                 return scriptedAI;
 
         CreatureAIRegistry& ai_registry(CreatureAIRepository::Instance());

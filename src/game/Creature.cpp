@@ -21,7 +21,6 @@
 #include "WorldPacket.h"
 #include "World.h"
 #include "ObjectMgr.h"
-#include "ScriptMgr.h"
 #include "ObjectGuid.h"
 #include "SQLStorages.h"
 #include "SpellMgr.h"
@@ -33,7 +32,7 @@
 #include "Log.h"
 #include "LootMgr.h"
 #include "MapManager.h"
-#include "AI/CreatureAI.h"
+#include "AI/BaseAI/CreatureAI.h"
 #include "AI/CreatureAISelector.h"
 #include "InstanceData.h"
 #include "MapPersistentStateMgr.h"
@@ -49,6 +48,7 @@
 
 // apply implementation of the singletons
 #include "Policies/Singleton.h"
+#include "ScriptDevAIMgr.h"
 
 
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
@@ -2308,7 +2308,7 @@ std::string Creature::GetAIName() const
 
 std::string Creature::GetScriptName() const
 {
-    return sScriptMgr.GetScriptName(GetScriptId());
+    return sScriptDevAIMgr.GetScriptName(GetScriptId());
 }
 
 uint32 Creature::GetScriptId() const

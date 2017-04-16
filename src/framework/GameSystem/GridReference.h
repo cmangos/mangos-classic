@@ -24,7 +24,7 @@
 template<class OBJECT> class GridRefManager;
 
 template<class OBJECT>
-class MANGOS_DLL_SPEC GridReference : public Reference<GridRefManager<OBJECT>, OBJECT>
+class GridReference : public Reference<GridRefManager<OBJECT>, OBJECT>
 {
     protected:
 

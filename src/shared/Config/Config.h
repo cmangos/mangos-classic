@@ -27,7 +27,7 @@
 #include <string>
 #include <unordered_map>
 
-class MANGOS_DLL_SPEC Config
+class Config
 {
     private:
         std::string m_filename;

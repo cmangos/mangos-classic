@@ -29,7 +29,7 @@
 #include "BattleGroundWS.h"
 #include "BattleGround.h"
 #include "Language.h"
-#include "ScriptMgr.h"
+#include "ScriptDevAIMgr.h"
 #include "World.h"
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recv_data)
@@ -542,7 +542,7 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data)
     if (!unit->isSpiritService())                           // it's not spirit service
         return;
 
-    sScriptMgr.OnGossipHello(GetPlayer(), unit);
+    sScriptDevAIMgr.OnGossipHello(GetPlayer(), unit);
 }
 
 void WorldSession::SendBattleGroundJoinError(uint8 err) const

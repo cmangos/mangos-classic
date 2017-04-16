@@ -28,7 +28,7 @@
 
 namespace MaNGOS
 {
-    class MANGOS_DLL_SPEC PacketBuffer
+    class PacketBuffer
     {
         friend class Socket;
 

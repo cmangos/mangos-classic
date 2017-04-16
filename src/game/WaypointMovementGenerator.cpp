@@ -20,7 +20,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "Creature.h"
-#include "AI/CreatureAI.h"
+#include "AI/BaseAI/CreatureAI.h"
 #include "WaypointManager.h"
 #include "ScriptMgr.h"
 #include "movement/MoveSplineInit.h"

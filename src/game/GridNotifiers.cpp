@@ -24,7 +24,7 @@
 #include "Transports.h"
 #include "ObjectAccessor.h"
 #include "BattleGround/BattleGroundMgr.h"
-#include "AI/CreatureAI.h"
+#include "AI/BaseAI/CreatureAI.h"
 
 using namespace MaNGOS;
 

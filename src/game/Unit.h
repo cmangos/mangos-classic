@@ -43,7 +43,7 @@
 #include "Timer.h"
 
 #include <list>
-#include "AI/CreatureAI.h"
+#include "AI/BaseAI/CreatureAI.h"
 
 enum SpellInterruptFlags
 {
@@ -980,7 +980,7 @@ enum ActionBarIndex
 
 #define MAX_UNIT_ACTION_BAR_INDEX (ACTION_BAR_INDEX_END-ACTION_BAR_INDEX_START)
 
-class MANGOS_DLL_SPEC CharmInfo
+class CharmInfo
 {
     public:
         explicit CharmInfo(Unit* unit);
@@ -1111,7 +1111,7 @@ enum PowerDefaults
 
 struct SpellProcEventEntry;                                 // used only privately
 
-class MANGOS_DLL_SPEC Unit : public WorldObject
+class Unit : public WorldObject
 {
     public:
         typedef std::set<Unit*> AttackerSet;

@@ -201,6 +201,6 @@ class WaypointManager
 #define sWaypointMgr MaNGOS::Singleton<WaypointManager>::Instance()
 
 /// Accessor for Scripting library
-MANGOS_DLL_SPEC bool AddWaypointFromExternal(uint32 entry, uint32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
+bool AddWaypointFromExternal(uint32 entry, uint32 pathId, uint32 pointId, float x, float y, float z, float o, uint32 waittime);
 
 #endif

@@ -122,7 +122,7 @@ class WorldUpdateCounter
         uint32 m_tmStart;
 };
 
-class MANGOS_DLL_SPEC Object
+class Object
 {
     public:
         virtual ~Object();
@@ -416,7 +416,7 @@ class MANGOS_DLL_SPEC Object
 
 struct WorldObjectChangeAccumulator;
 
-class MANGOS_DLL_SPEC WorldObject : public Object
+class WorldObject : public Object
 {
         friend struct WorldObjectChangeAccumulator;
 
@@ -424,7 +424,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         // class is used to manipulate with WorldUpdateCounter
         // it is needed in order to get time diff between two object's Update() calls
-        class MANGOS_DLL_SPEC UpdateHelper
+        class UpdateHelper
         {
             public:
                 explicit UpdateHelper(WorldObject* obj) : m_obj(obj) {}
