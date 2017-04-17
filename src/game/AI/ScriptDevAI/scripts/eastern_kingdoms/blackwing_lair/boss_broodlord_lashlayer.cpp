@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Blackwing Lair
 EndScriptData */
 
-#include "precompiled.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "blackwing_lair.h"
 
 enum

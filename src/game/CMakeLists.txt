@@ -34,7 +34,6 @@ include_directories(SYSTEM
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/vmap
-  ${CMAKE_CURRENT_SOURCE_DIR}/AI
   ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
   ${CMAKE_CURRENT_SOURCE_DIR}/BattleGround
   ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
@@ -44,34 +43,9 @@ include_directories(
   ${CMAKE_BINARY_DIR}/src/shared
 )
 
-set(SRC_GRP_AI
-    AI/AggressorAI.cpp
-    AI/AggressorAI.h
-    AI/CreatureAI.cpp
-    AI/CreatureAI.h
-    AI/CreatureAIImpl.h
-    AI/CreatureAIRegistry.cpp
-    AI/CreatureAIRegistry.h
-    AI/CreatureAISelector.cpp
-    AI/CreatureAISelector.h
-    AI/CreatureEventAI.cpp
-    AI/CreatureEventAI.h
-    AI/CreatureEventAIMgr.cpp
-    AI/CreatureEventAIMgr.h
-    AI/GuardAI.cpp
-    AI/GuardAI.h
-    AI/GuardianAI.cpp
-    AI/GuardianAI.h
-    AI/NullCreatureAI.cpp
-    AI/NullCreatureAI.h
-    AI/PetAI.cpp
-    AI/PetAI.h
-    AI/PossessedAI.h
-    AI/ReactorAI.cpp
-    AI/ReactorAI.h
-    AI/TotemAI.cpp
-    AI/TotemAI.h
-)
+# Find all the input files
+FILE(GLOB_RECURSE SRC_GRP_AI RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 
 set(SRC_GRP_AHBOT
     AuctionHouseBot/AuctionHouseBot.cpp

@@ -29,7 +29,7 @@
 #include "BattleGroundWS.h"
 #include "BattleGround.h"
 #include "Language.h"
-#include "ScriptDevAIMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "World.h"
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recv_data)

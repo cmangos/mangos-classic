@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Stratholme
 EndScriptData */
 
-#include "precompiled.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {

@@ -38,7 +38,7 @@
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "AI/BaseAI/CreatureAI.h"
-#include "ScriptDevAIMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Util.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"

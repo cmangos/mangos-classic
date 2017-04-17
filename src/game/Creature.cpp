@@ -34,6 +34,7 @@
 #include "MapManager.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "AI/CreatureAISelector.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "InstanceData.h"
 #include "MapPersistentStateMgr.h"
 #include "BattleGround/BattleGroundMgr.h"
@@ -48,8 +49,6 @@
 
 // apply implementation of the singletons
 #include "Policies/Singleton.h"
-#include "ScriptDevAIMgr.h"
-
 
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
 {

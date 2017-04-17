@@ -27,7 +27,7 @@
 #include "GossipDef.h"
 #include "QuestDef.h"
 #include "ObjectAccessor.h"
-#include "ScriptDevAIMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Group.h"
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode(WorldPacket& recv_data)

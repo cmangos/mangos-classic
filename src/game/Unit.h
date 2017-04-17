@@ -30,6 +30,7 @@
 #include "Object.h"
 #include "Opcodes.h"
 #include "SpellAuraDefines.h"
+#include "AI/BaseAI/CreatureAI.h"
 #include "UpdateFields.h"
 #include "SharedDefines.h"
 #include "ThreatManager.h"
@@ -43,7 +44,6 @@
 #include "Timer.h"
 
 #include <list>
-#include "AI/BaseAI/CreatureAI.h"
 
 enum SpellInterruptFlags
 {

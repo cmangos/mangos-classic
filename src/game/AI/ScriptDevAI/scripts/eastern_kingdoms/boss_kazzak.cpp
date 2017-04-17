@@ -21,7 +21,7 @@ SDComment: Some timers need to be confirmed.
 SDCategory: Bosses
 EndScriptData */
 
-#include "precompiled.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {

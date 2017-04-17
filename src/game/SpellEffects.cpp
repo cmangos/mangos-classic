@@ -44,7 +44,7 @@
 #include "SocialMgr.h"
 #include "Util.h"
 #include "TemporarySummon.h"
-#include "ScriptDevAIMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Formulas.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"

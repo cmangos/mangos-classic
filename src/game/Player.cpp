@@ -54,7 +54,7 @@
 #include "Chat.h"
 #include "Database/DatabaseImpl.h"
 #include "Spell.h"
-#include "ScriptDevAIMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "SocialMgr.h"
 #include "Mail.h"
 #include "DBCStores.h"

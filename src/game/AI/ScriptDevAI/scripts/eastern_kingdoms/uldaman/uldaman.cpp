@@ -21,7 +21,7 @@ SDComment: Placeholder
 SDCategory: Uldaman
 EndScriptData */
 
-#include "precompiled.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "uldaman.h"
 
 void AddSC_uldaman()

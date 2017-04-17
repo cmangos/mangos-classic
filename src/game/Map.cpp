@@ -37,7 +37,7 @@
 #include "Chat.h"
 #include "Weather.h"
 #include "ObjectGridLoader.h"
-#include "ScriptDevAIMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
 Map::~Map()
 {

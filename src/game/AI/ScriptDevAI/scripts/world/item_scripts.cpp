@@ -24,7 +24,7 @@ EndScriptData */
 /* ContentData
 EndContentData */
 
-#include "precompiled.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "Spell.h"
 
 /*#####

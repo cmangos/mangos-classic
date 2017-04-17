@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Ruins of Ahn'Qiraj
 EndScriptData */
 
-#include "precompiled.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
 {

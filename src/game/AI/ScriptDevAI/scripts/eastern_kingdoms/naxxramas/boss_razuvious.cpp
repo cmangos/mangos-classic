@@ -21,7 +21,7 @@ SDComment: TODO: Timers and sounds need confirmation
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "precompiled.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "naxxramas.h"
 
 enum

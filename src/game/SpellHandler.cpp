@@ -25,7 +25,7 @@
 #include "Log.h"
 #include "Opcodes.h"
 #include "Spell.h"
-#include "ScriptDevAIMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Totem.h"
 #include "SpellAuras.h"
 #include "LootMgr.h"

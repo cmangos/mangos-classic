@@ -16,13 +16,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "CreatureAISelector.h"
+#include "AI/CreatureAISelector.h"
 #include "Creature.h"
 #include "BaseAI/CreatureAIImpl.h"
 #include "BaseAI/NullCreatureAI.h"
 #include "Policies/Singleton.h"
 #include "MovementGenerator.h"
-#include "ScriptDevAIMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Pet.h"
 #include "Log.h"
 #include "BaseAI/PetAI.h"

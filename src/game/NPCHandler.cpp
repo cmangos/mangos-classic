@@ -27,7 +27,7 @@
 #include "SpellMgr.h"
 #include "Player.h"
 #include "GossipDef.h"
-#include "ScriptDevAIMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Creature.h"
 #include "Pet.h"
 #include "Guild.h"

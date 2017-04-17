@@ -27,7 +27,7 @@ event_spell_unlocking
 at_zulfarrak
 EndContentData */
 
-#include "precompiled.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulfarrak.h"
 
 /*######

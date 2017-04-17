@@ -2,7 +2,7 @@
 * This program is free software licensed under GPL version 2
 * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "precompiled.h"
+#include "include/precompiled.h"
 #include "Policies/Singleton.h"
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
@@ -12,7 +12,7 @@
 #include "system/ScriptLoader.h"
 #include "system/system.h"
 #include "ScriptDevAIMgr.h"
-#include "sc_creature.h"
+#include "include/sc_creature.h"
 
 INSTANTIATE_SINGLETON_1(ScriptDevAIMgr);
 

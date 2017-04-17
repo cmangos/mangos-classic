@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Zul'Farrak
 EndScriptData */
 
-#include "precompiled.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulfarrak.h"
 
 enum

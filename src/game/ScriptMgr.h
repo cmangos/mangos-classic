@@ -26,7 +26,11 @@
 #include <atomic>
 
 class Map;
+class Object;
 class WorldObject;
+class Unit;
+class Player;
+struct SpellEntry;
 
 enum ScriptCommand                                          // resSource, resTarget are the resulting Source/ Target after buddy search is done
 {

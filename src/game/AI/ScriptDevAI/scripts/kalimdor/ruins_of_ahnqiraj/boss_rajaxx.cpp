@@ -21,7 +21,7 @@ SDComment: General Andorov script
 SDCategory: Ruins of Ahn'Qiraj
 EndScriptData */
 
-#include "precompiled.h"
+#include "AI/ScriptDevAI/include/precompiled.h"
 #include "ruins_of_ahnqiraj.h"
 
 enum

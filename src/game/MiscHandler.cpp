@@ -30,7 +30,7 @@
 #include "WorldSession.h"
 #include "UpdateData.h"
 #include "Chat.h"
-#include "ScriptDevAIMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include <zlib/zlib.h>
 #include "ObjectAccessor.h"
 #include "Object.h"

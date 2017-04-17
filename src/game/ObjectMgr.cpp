@@ -24,7 +24,7 @@
 #include "Log.h"
 #include "MapManager.h"
 #include "ObjectGuid.h"
-#include "ScriptDevAIMgr.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "SpellMgr.h"
 #include "World.h"
 #include "Group.h"
