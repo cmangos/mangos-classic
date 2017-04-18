@@ -2805,6 +2805,19 @@ void Spell::cast(bool skipCheck)
                 AddPrecastSpell(25771);                     // Forbearance
             break;
         }
+		case SPELLFAMILY_DRUID:
+		{
+			switch (m_spellInfo->Id)
+			{
+			case 24866:
+				if (!m_caster->IsInFeralForm())
+					m_spellState = SPELL_STATE_FINISHED;
+				break;
+			default:
+				break;
+			}
+			break;
+		}
         case SPELLFAMILY_WARRIOR:
             break;
         case SPELLFAMILY_PRIEST:
@@ -4894,6 +4907,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (((Player*)m_caster)->InBattleGround() &&
                             !((Player*)m_caster)->CanUseBattleGroundObject())
                         return SPELL_FAILED_TRY_AGAIN;
+
+					if (m_spellInfo->Id == 1842 && ((Player*)m_caster)->GetDistance(go) > 5)
+						return SPELL_FAILED_OUT_OF_RANGE;
 
                     lockId = go->GetGOInfo()->GetLockId();
                     if (!lockId)
