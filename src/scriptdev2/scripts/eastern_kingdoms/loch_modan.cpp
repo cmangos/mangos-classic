@@ -133,9 +133,11 @@ struct npc_miranAI: public npc_escortAI
                 m_creature->SummonCreature(NPC_DARK_IRON_DWARF, m_afAmbushSpawn[1].m_fX, m_afAmbushSpawn[1].m_fY, m_afAmbushSpawn[1].m_fZ, m_afAmbushSpawn[1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000);
                 break;
             case 23:
-                DoScriptText(SAY_MIRAN_3, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    DoScriptText(SAY_MIRAN_3, m_creature);
                     pPlayer->GroupEventHappens(QUEST_PROTECTING_THE_SHIPMENT, m_creature);
+                }
                 break;
         }
     }
