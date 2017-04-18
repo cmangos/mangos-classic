@@ -25,6 +25,7 @@
 
 #include <Platform/Define.h>
 
+#include <stdexcept>
 #include <vector>
 #include <algorithm>
 
