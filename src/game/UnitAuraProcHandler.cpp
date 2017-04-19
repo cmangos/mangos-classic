@@ -1085,6 +1085,8 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(Unit* pVictim, uint32 d
             // Lightning Shield (overwrite non existing triggered spell call in spell.dbc
             if (auraSpellInfo->IsFitToFamilyMask(uint64(0x0000000000000400)) && auraSpellInfo->SpellVisual == 37)
             {
+				if (procSpell && procSpell->SpellFamilyFlags & uint64(0x0000000000000400))
+					return SPELL_AURA_PROC_FAILED;
                 switch (auraSpellInfo->Id)
                 {
                     case 324:                           // Rank 1
