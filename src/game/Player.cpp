@@ -5920,7 +5920,7 @@ void Player::UpdateHonor()
     uint32 lastWeekBegin = thisWeekBegin - 7;
     uint32 lastWeekEnd   = lastWeekBegin + 7;
 
-    DETAIL_LOG("PLAYER: UpdateHonor");
+    DETAIL_LOG("PLAYER: UpdateHonor, guid: %u", GetGUIDLow());
 
     uint32 total_dishonorableKills = GetHonorStoredKills(false);
     uint32 total_honorableKills = GetHonorStoredKills(true);
@@ -5975,8 +5975,12 @@ void Player::UpdateHonor()
     // RANK POINTS
     HonorStanding* standing = sObjectMgr.GetHonorStandingByGUID(GetGUIDLow(), GetTeam());
     float rankP = GetStoredHonor();
+    sLog.outString(">> StoredHonor: %f", rankP);
     if (standing)
+    {
+        sLog.outString(">> rpEarning: %f", standing->rpEarning);
         rankP += standing->rpEarning;
+    }
 
     SetRankPoints(rankP);
 
