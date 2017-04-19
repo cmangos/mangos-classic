@@ -191,7 +191,6 @@ World::AddSession_(WorldSession* s)
     if (!RemoveSession(s->GetAccountId()))
     {
         s->KickPlayer();
-        delete s;                                           // session not added yet in session list, so not listed in queue
         return;
     }
 
