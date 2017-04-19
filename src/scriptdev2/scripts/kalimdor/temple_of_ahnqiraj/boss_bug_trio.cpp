@@ -32,9 +32,9 @@ enum
     SPELL_SUMMON_CLOUD      = 26590,            // summons 15933
 
     // vem
+    SPELL_KNOCK_AWAY        = 18670,
     SPELL_CHARGE            = 26561,
     SPELL_VENGEANCE         = 25790,
-    SPELL_KNOCKBACK         = 26027,
 
     // yauj
     SPELL_HEAL              = 25807,
@@ -123,12 +123,12 @@ struct boss_vemAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
 
     uint32 m_uiChargeTimer;
-    uint32 m_uiKnockBackTimer;
+    uint32 m_uiKnockAwayTimer;
 
     void Reset() override
     {
         m_uiChargeTimer     = urand(15000, 27000);
-        m_uiKnockBackTimer  = urand(8000, 20000);
+        m_uiKnockAwayTimer  = urand(10000, 20000);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -159,6 +159,15 @@ struct boss_vemAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
+        // KnockAway_Timer
+        if (m_uiKnockAwayTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                m_uiKnockAwayTimer = urand(10000, 20000);
+        }
+        else
+            m_uiKnockAwayTimer -= uiDiff;
+
         // Charge_Timer
         if (m_uiChargeTimer < uiDiff)
         {
@@ -170,20 +179,6 @@ struct boss_vemAI : public ScriptedAI
         }
         else
             m_uiChargeTimer -= uiDiff;
-
-        // KnockBack_Timer
-        if (m_uiKnockBackTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_KNOCKBACK) == CAST_OK)
-            {
-                if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                    m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -80);
-
-                m_uiKnockBackTimer = urand(15000, 25000);
-            }
-        }
-        else
-            m_uiKnockBackTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }

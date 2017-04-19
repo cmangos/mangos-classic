@@ -29,10 +29,10 @@ enum
     SAY_AGGRO                   = -1469000,
     SAY_LEASH                   = -1469001,
 
-    SPELL_CLEAVE                = 26350,
+    SPELL_CLEAVE                = 15284,
+    SPELL_KNOCK_AWAY            = 18670,
     SPELL_BLAST_WAVE            = 23331,
     SPELL_MORTAL_STRIKE         = 24573,
-    SPELL_KNOCK_AWAY            = 25778
 };
 
 struct boss_broodlordAI : public ScriptedAI
@@ -110,14 +110,11 @@ struct boss_broodlordAI : public ScriptedAI
         else
             m_uiMortalStrikeTimer -= uiDiff;
 
+        // Knock Away Timer
         if (m_uiKnockAwayTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY);
-            // Drop 50% aggro - TODO should be scriptedEffect?
-            if (m_creature->getThreatManager().getThreat(m_creature->getVictim()))
-                m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -50);
-
-            m_uiKnockAwayTimer = urand(15000, 30000);
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                m_uiKnockAwayTimer = urand(15000, 30000);
         }
         else
             m_uiKnockAwayTimer -= uiDiff;
