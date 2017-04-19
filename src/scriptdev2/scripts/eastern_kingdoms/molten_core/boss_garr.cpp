@@ -131,12 +131,7 @@ struct boss_garrAI : public ScriptedAI
 
 struct mob_fireswornAI : public ScriptedAI
 {
-    mob_fireswornAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-    }
-
-    ScriptedInstance* m_pInstance;
+    mob_fireswornAI(Creature* pCreature) : ScriptedAI(pCreature) {}
 
     void Reset() override {}
 
