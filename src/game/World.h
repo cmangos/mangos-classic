@@ -386,6 +386,9 @@ struct CliCommandHolder
 };
 
 /// The World
+
+typedef std::unordered_map<uint32, WorldSession*> SessionMap;
+
 class World
 {
     public:
@@ -401,6 +404,7 @@ class World
         bool RemoveSession(uint32 id);
         /// Get the number of current active sessions
         void UpdateMaxSessionCounters();
+        const SessionMap& GetAllSessions() const { return m_sessions; }
         uint32 GetActiveAndQueuedSessionCount() const { return m_sessions.size(); }
         uint32 GetActiveSessionCount() const { return m_sessions.size() - m_QueuedSessions.size(); }
         uint32 GetQueuedSessionCount() const { return m_QueuedSessions.size(); }
