@@ -285,6 +285,10 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
         return;
     }
 
+    // Supress default greeting text for quest dialog when interaction with quest giver game object is not appropiate.
+    if (obj->GetGoType() == GAMEOBJECT_TYPE_QUESTGIVER && !obj->ActivateToQuest(_player) && !obj->GetGOInfo()->GetGossipMenuId())
+        return;
+
     obj->Use(_player);
 }
 
