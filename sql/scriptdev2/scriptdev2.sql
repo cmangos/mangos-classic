@@ -78,6 +78,7 @@ UPDATE creature_template SET ScriptName='npc_spirit_shade' WHERE entry=15261;
 /* GO */
 UPDATE gameobject_template SET ScriptName='go_andorhal_tower' WHERE entry IN (176094,176095,176096,176097);
 UPDATE gameobject_template SET ScriptName='go_veil_skith_cage' WHERE entry IN (185202,185203,185204,185205);
+UPDATE gameobject_template SET ScriptName='go_stone_of_binding' WHERE entry IN (141812,141857,141858,141859);
 
 /* GUARD */
 UPDATE creature_template SET ScriptName='guard_orgrimmar' WHERE entry=3296;
@@ -219,6 +220,7 @@ UPDATE creature_template SET ScriptName='boss_nefarian' WHERE entry=11583;
 /* BLASTED LANDS */
 UPDATE creature_template SET ScriptName='npc_fallen_hero_of_horde' WHERE entry=7572;
 UPDATE creature_template SET ScriptName='boss_kazzak' WHERE entry=12397;
+UPDATE creature_template SET ScriptName='npc_stone_servant' WHERE entry IN (7668,7669,7670,7671);
 
 /* BURNING STEPPES */
 UPDATE creature_template SET ScriptName='npc_ragged_john' WHERE entry=9563;
