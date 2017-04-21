@@ -26,9 +26,9 @@ EndScriptData */
 
 enum
 {
+    SPELL_SHADOWSHOCK       = 19460,
     SPELL_IMPENDINGDOOM     = 19702,
     SPELL_LUCIFRONCURSE     = 19703,
-    SPELL_SHADOWSHOCK       = 19460
 };
 
 struct boss_lucifronAI : public ScriptedAI
@@ -41,15 +41,15 @@ struct boss_lucifronAI : public ScriptedAI
 
     ScriptedInstance* m_pInstance;
 
+    uint32 m_uiShadowShockTimer;
     uint32 m_uiImpendingDoomTimer;
     uint32 m_uiLucifronCurseTimer;
-    uint32 m_uiShadowShockTimer;
 
     void Reset() override
     {
-        m_uiImpendingDoomTimer = 10000;
-        m_uiLucifronCurseTimer = 20000;
-        m_uiShadowShockTimer   = 6000;
+        m_uiShadowShockTimer   = urand(3 * IN_MILLISECONDS, 6 * IN_MILLISECONDS);
+        m_uiImpendingDoomTimer = urand(5 * IN_MILLISECONDS, 10 * IN_MILLISECONDS);
+        m_uiLucifronCurseTimer = urand(10 * IN_MILLISECONDS, 15 * IN_MILLISECONDS);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -75,11 +75,20 @@ struct boss_lucifronAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
+        // Shadowshock
+        if (m_uiShadowShockTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWSHOCK) == CAST_OK)
+                m_uiShadowShockTimer = urand(3 * IN_MILLISECONDS, 6 * IN_MILLISECONDS);
+        }
+        else
+            m_uiShadowShockTimer -= uiDiff;
+
         // Impending doom timer
         if (m_uiImpendingDoomTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_IMPENDINGDOOM) == CAST_OK)
-                m_uiImpendingDoomTimer = 20000;
+                m_uiImpendingDoomTimer = urand(20 * IN_MILLISECONDS, 25 * IN_MILLISECONDS);
         }
         else
             m_uiImpendingDoomTimer -= uiDiff;
@@ -88,22 +97,10 @@ struct boss_lucifronAI : public ScriptedAI
         if (m_uiLucifronCurseTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_LUCIFRONCURSE) == CAST_OK)
-                m_uiLucifronCurseTimer = 20000;
+                m_uiLucifronCurseTimer = urand(20 * IN_MILLISECONDS, 25 * IN_MILLISECONDS);
         }
         else
             m_uiLucifronCurseTimer -= uiDiff;
-
-        // Shadowshock
-        if (m_uiShadowShockTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_SHADOWSHOCK) == CAST_OK)
-                    m_uiShadowShockTimer = 6000;
-            }
-        }
-        else
-            m_uiShadowShockTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
