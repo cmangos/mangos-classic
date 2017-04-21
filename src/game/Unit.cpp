@@ -426,6 +426,7 @@ Unit::~Unit()
     delete m_combatData;
     delete m_charmInfo;
     delete movespline;
+    delete m_combatData;
 
     // those should be already removed at "RemoveFromWorld()" call
     MANGOS_ASSERT(m_gameObj.size() == 0);
