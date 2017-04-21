@@ -82,9 +82,11 @@ struct boss_ossirianAI : public ScriptedAI
     uint32 m_uiCycloneTimer;
     uint32 m_uiStompTimer;
     uint32 m_uiSilenceTimer;
+    uint32 m_uiSpeedUpTimer;
     uint8 m_uiCrystalPosition;
 
     bool m_bSaidIntro;
+    bool m_bSpeedUp;
 
     void Reset() override
     {
@@ -93,6 +95,10 @@ struct boss_ossirianAI : public ScriptedAI
         m_uiStompTimer   = 30000;
         m_uiSilenceTimer = 30000;
         m_uiSupremeTimer = 45000;
+        m_uiSpeedUpTimer = 10000;
+
+        m_bSpeedUp = false;
+        m_creature->UpdateSpeed(MOVE_RUN, false, 1.0f);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -206,6 +212,15 @@ struct boss_ossirianAI : public ScriptedAI
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
+
+        // Speed Up
+        if (!m_bSpeedUp && m_uiSpeedUpTimer <= uiDiff)
+        {
+            m_creature->UpdateSpeed(MOVE_RUN, false, 2.2f);
+            m_bSpeedUp = true;
+        }
+        else
+            m_uiSpeedUpTimer -= uiDiff;
 
         // Supreme
         if (m_uiSupremeTimer <= uiDiff)
