@@ -21,7 +21,7 @@ SDComment: Chromatic Mutation disabled due to lack of core support
 SDCategory: Blackwing Lair
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "blackwing_lair.h"
 
 enum

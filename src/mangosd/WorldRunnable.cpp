@@ -21,11 +21,11 @@
 */
 
 #include "Common.h"
-#include "World.h"
+#include "World/World.h"
 #include "WorldRunnable.h"
 #include "Timer.h"
-#include "ObjectAccessor.h"
-#include "MapManager.h"
+#include "Globals/ObjectAccessor.h"
+#include "Maps/MapManager.h"
 
 #include "Database/DatabaseEnv.h"
 

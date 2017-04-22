@@ -21,7 +21,7 @@ SDComment: Enlarge for small spiders NYI
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "zulgurub.h"
 
 enum

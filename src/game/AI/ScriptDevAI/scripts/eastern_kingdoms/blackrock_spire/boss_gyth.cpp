@@ -21,7 +21,7 @@ SDComment: Timers may need adjustments
 SDCategory: Blackrock Spire
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "blackrock_spire.h"
 
 enum

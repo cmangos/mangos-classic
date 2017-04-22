@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Uldaman
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "uldaman.h"
 
 enum

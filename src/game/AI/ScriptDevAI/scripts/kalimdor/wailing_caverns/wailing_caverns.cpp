@@ -21,7 +21,7 @@ SDComment: Missing vipers emerge effect, Naralex doesn't fly at exit(Core issue)
 SDCategory: Wailing Caverns
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "wailing_caverns.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 

@@ -25,7 +25,7 @@ EndScriptData */
 npc_mist
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/follower_ai.h"
 
 /*####

@@ -24,8 +24,8 @@ EndScriptData */
 /* ContentData
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
-#include "Spell.h"
+
+#include "Spells/Spell.h"
 
 /*#####
 # item_orb_of_draconic_energy

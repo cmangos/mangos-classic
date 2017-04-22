@@ -29,7 +29,7 @@ npc_squire_rowe
 npc_reginald_windsor
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "../world/world_map_scripts.h"
 #include "../../base/escort_ai.h"
 

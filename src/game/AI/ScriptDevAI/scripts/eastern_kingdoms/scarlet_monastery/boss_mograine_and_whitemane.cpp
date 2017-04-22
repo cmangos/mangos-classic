@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Scarlet Monastery
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "scarlet_monastery.h"
 
 enum

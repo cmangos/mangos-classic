@@ -42,7 +42,7 @@ go_bar_ale_mug
 npc_ironhand_guardian
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "blackrock_depths.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 

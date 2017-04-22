@@ -26,9 +26,9 @@
 #include "BaseAI/PossessedAI.h"
 #include "BaseAI/CreatureAIImpl.h"
 #include "EventAI/CreatureEventAI.h"
-#include "RandomMovementGenerator.h"
-#include "MovementGeneratorImpl.h"
-#include "WaypointMovementGenerator.h"
+#include "MotionGenerators/RandomMovementGenerator.h"
+#include "MotionGenerators/MovementGeneratorImpl.h"
+#include "MotionGenerators/WaypointMovementGenerator.h"
 #include "CreatureAIRegistry.h"
 
 namespace AIRegistry

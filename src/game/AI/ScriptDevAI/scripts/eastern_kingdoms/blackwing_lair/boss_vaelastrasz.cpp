@@ -21,7 +21,7 @@ SDComment: Burning Adrenaline not correctly implemented in core
 SDCategory: Blackwing Lair
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "blackwing_lair.h"
 
 enum

@@ -26,7 +26,7 @@ npc_mikhail
 npc_tapoke_slim_jahn
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

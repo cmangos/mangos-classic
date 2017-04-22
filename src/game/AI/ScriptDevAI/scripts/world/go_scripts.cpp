@@ -25,7 +25,7 @@ EndScriptData */
 go_andorhal_tower
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*######
 ## go_andorhal_tower

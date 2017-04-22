@@ -17,13 +17,13 @@
  */
 
 #include "TotemAI.h"
-#include "Totem.h"
-#include "Creature.h"
-#include "DBCStores.h"
-#include "SpellMgr.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
-#include "CellImpl.h"
+#include "Entities/Totem.h"
+#include "Entities/Creature.h"
+#include "Server/DBCStores.h"
+#include "Spells/SpellMgr.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
+#include "Grids/CellImpl.h"
 
 int TotemAI::Permissible(const Creature* creature)
 {

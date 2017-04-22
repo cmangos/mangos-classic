@@ -21,7 +21,7 @@ SDComment: TODO: Tweak Positions and look more into say timers.
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "naxxramas.h"
 
 enum

@@ -21,7 +21,7 @@ SDComment: Summon Player spell NYI; Poison Cloud damage spell NYI; Timers need a
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "temple_of_ahnqiraj.h"
 
 enum

@@ -26,7 +26,7 @@ npc_ame01
 npc_ringo
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/follower_ai.h"
 

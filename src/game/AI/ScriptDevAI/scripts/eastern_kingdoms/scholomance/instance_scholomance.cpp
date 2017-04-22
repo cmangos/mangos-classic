@@ -21,7 +21,7 @@ SDComment: Possible some D2 or other exotic missing
 SDCategory: Scholomance
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "scholomance.h"
 
 instance_scholomance::instance_scholomance(Map* pMap) : ScriptedInstance(pMap),

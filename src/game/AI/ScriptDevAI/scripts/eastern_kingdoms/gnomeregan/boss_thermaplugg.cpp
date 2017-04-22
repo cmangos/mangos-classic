@@ -21,7 +21,7 @@ SDComment: Timer need improvement, especially for bomb-spawning
 SDCategory: Gnomeregan
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "gnomeregan.h"
 
 enum

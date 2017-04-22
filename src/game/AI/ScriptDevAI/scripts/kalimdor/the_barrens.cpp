@@ -29,7 +29,7 @@ at_twiggy_flathead
 npc_wizzlecrank_shredder
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

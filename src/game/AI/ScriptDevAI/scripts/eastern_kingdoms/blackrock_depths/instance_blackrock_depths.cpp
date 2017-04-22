@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Blackrock Depths
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "blackrock_depths.h"
 
 instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstance(pMap),

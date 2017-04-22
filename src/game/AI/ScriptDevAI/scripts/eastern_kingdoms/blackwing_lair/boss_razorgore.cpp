@@ -21,7 +21,7 @@ SDComment: Timers may be improved.
 SDCategory: Blackwing Lair
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "blackwing_lair.h"
 
 enum

@@ -29,7 +29,7 @@ spell 19512
 spell 21050
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /* When you make a spell effect:
 - always check spell id and effect index

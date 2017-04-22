@@ -16,15 +16,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Object.h"
-#include "Player.h"
+#include "Entities/Object.h"
+#include "Entities/Player.h"
 #include "BattleGround.h"
 #include "BattleGroundAB.h"
-#include "GameObject.h"
+#include "Entities/GameObject.h"
 #include "BattleGroundMgr.h"
-#include "Language.h"
+#include "Tools/Language.h"
 #include "WorldPacket.h"
-#include "DBCStores.h"                                   // TODO REMOVE this when graveyard handling for pvp is updated
+#include "Server/DBCStores.h"                                   // TODO REMOVE this when graveyard handling for pvp is updated
 
 BattleGroundAB::BattleGroundAB(): m_IsInformedNearVictory(false), m_honorTicks(0), m_ReputationTics(0)
 {

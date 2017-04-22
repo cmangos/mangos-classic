@@ -26,7 +26,7 @@ npc_shenthul
 npc_thrall_warchief
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*######
 ## npc_shenthul

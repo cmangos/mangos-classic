@@ -18,12 +18,12 @@
 
 #include "OutdoorPvPEP.h"
 #include "WorldPacket.h"
-#include "World.h"
-#include "ObjectMgr.h"
-#include "Object.h"
-#include "Creature.h"
-#include "GameObject.h"
-#include "Player.h"
+#include "World/World.h"
+#include "Globals/ObjectMgr.h"
+#include "Entities/Object.h"
+#include "Entities/Creature.h"
+#include "Entities/GameObject.h"
+#include "Entities/Player.h"
 
 OutdoorPvPEP::OutdoorPvPEP() : OutdoorPvP(),
     m_towersAlliance(0),

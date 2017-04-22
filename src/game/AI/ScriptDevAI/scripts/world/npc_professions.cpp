@@ -21,7 +21,7 @@ SDComment: Provides learn/unlearn/relearn-options for professions. Not supported
 SDCategory: NPCs
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*
 A few notes for future developement:

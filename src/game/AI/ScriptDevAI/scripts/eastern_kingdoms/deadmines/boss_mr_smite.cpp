@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Deadmines
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "deadmines.h"
 
 enum

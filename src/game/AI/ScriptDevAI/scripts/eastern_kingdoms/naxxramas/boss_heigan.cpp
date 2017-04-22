@@ -21,7 +21,7 @@ SDComment: Missing poison inside the tunnel in phase 2
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "naxxramas.h"
 
 enum

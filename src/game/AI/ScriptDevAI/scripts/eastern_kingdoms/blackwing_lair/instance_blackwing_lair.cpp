@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Blackwing Lair
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "blackwing_lair.h"
 
 instance_blackwing_lair::instance_blackwing_lair(Map* pMap) : ScriptedInstance(pMap),

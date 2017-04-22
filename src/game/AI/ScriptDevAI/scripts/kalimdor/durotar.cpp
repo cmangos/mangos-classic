@@ -25,7 +25,7 @@ EndScriptData */
 npc_lazy_peon
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*######
 ## npc_lazy_peon

@@ -21,7 +21,7 @@ SDComment: Summons need verify, need better phase-switch support (unattackable?)
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "naxxramas.h"
 
 enum

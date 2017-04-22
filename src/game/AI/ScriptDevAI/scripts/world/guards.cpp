@@ -37,7 +37,7 @@ guard_tirisfal
 guard_undercity
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/guard_ai.h"
 
 CreatureAI* GetAI_guard_bluffwatcher(Creature* pCreature)

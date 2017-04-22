@@ -17,10 +17,10 @@
 */
 
 #include "GuardianAI.h"
-#include "Cell.h"
-#include "CellImpl.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
+#include "Grids/Cell.h"
+#include "Grids/CellImpl.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
 
 GuardianAI::GuardianAI(Creature* c) : CreatureEventAI(c)
 {

@@ -21,7 +21,7 @@ SDComment: Timers and summon coords need adjustments
 SDCategory: Ruins of Ahn'Qiraj
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "ruins_of_ahnqiraj.h"
 
 enum

@@ -18,10 +18,10 @@
 
 #include "AggressorAI.h"
 #include "Errors.h"
-#include "Creature.h"
-#include "World.h"
-#include "DBCStores.h"
-#include "Map.h"
+#include "Entities/Creature.h"
+#include "World/World.h"
+#include "Server/DBCStores.h"
+#include "Maps/Map.h"
 #include "Log.h"
 
 int AggressorAI::Permissible(const Creature* creature)

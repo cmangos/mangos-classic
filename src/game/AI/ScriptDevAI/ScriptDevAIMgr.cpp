@@ -2,12 +2,11 @@
 * This program is free software licensed under GPL version 2
 * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "include/precompiled.h"
 #include "Policies/Singleton.h"
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
-#include "DBCStores.h"
-#include "ObjectMgr.h"
+#include "Server/DBCStores.h"
+#include "Globals/ObjectMgr.h"
 #include "ProgressBar.h"
 #include "system/ScriptLoader.h"
 #include "system/system.h"

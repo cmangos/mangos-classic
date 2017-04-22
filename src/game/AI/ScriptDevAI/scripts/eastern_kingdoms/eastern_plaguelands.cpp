@@ -25,7 +25,7 @@ EndScriptData */
 npc_eris_havenfire
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*######
 ## npc_eris_havenfire

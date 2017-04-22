@@ -19,9 +19,9 @@
 #ifndef MANGOS_CREATUREAI_H
 #define MANGOS_CREATUREAI_H
 
-#include "SharedDefines.h"
+#include "Globals/SharedDefines.h"
 #include "Dynamic/FactoryHolder.h"
-#include "ObjectGuid.h"
+#include "Entities/ObjectGuid.h"
 
 class WorldObject;
 class GameObject;

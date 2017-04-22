@@ -21,7 +21,7 @@ SDComment: Contains GO for Iron Clad door event
 SDCategory: Deadmines
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "deadmines.h"
 
 bool GOUse_go_defias_cannon(Player* /*pPlayer*/, GameObject* pGo)
