@@ -512,6 +512,8 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
             if (GameObjectData const* data = sObjectMgr.GetGOData(GetObjectGuid().GetCounter()))
                 m_respawnDelayTime = data->GetRandomRespawnTime();
 
+            m_respawnTime = m_spawnedByDefault ? time(nullptr) + m_respawnDelayTime : 0;
+
             // if option not set then object will be saved at grid unload
             if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
                 SaveRespawnTime();
