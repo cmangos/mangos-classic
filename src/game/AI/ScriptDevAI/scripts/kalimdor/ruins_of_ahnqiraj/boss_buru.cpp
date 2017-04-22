@@ -21,7 +21,7 @@ SDComment: Timers; Kill eggs on transform NYI; Egg explode damage and Buru stun 
 SDCategory: Ruins of Ahn'Qiraj
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "ruins_of_ahnqiraj.h"
 
 enum

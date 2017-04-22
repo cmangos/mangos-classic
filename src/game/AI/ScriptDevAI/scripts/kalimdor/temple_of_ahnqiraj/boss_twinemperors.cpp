@@ -21,7 +21,7 @@ SDComment: Timers
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "temple_of_ahnqiraj.h"
 
 enum

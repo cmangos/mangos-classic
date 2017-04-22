@@ -29,10 +29,10 @@ npc_captured_arkonarin
 npc_arei
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/follower_ai.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
-#include "ObjectMgr.h"
+#include "Globals/ObjectMgr.h"
 
 /*####
 # npc_kitten

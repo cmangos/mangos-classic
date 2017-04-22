@@ -21,7 +21,7 @@ SDComment: Quest support: 6921
 SDCategory: Blackfathom Deeps
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "blackfathom_deeps.h"
 
 /* Encounter 0 = Twilight Lord Kelris

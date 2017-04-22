@@ -21,7 +21,7 @@ SDComment: Armaggedon is not working properly (core issue)
 SDCategory: Molten Core
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "molten_core.h"
 
 enum

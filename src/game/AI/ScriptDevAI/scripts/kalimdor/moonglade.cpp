@@ -26,9 +26,9 @@ npc_keeper_remulos
 boss_eranikus
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
-#include "ObjectMgr.h"
+#include "Globals/ObjectMgr.h"
 
 /*######
 ## npc_keeper_remulos

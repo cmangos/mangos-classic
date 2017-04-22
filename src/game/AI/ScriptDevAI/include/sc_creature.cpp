@@ -2,15 +2,15 @@
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
-#include "Item.h"
-#include "Spell.h"
+
+#include "Entities/Item.h"
+#include "Spells/Spell.h"
 #include "WorldPacket.h"
-#include "ObjectMgr.h"
-#include "Cell.h"
-#include "CellImpl.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
+#include "Globals/ObjectMgr.h"
+#include "Grids/Cell.h"
+#include "Grids/CellImpl.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
 
 // Spell summary for ScriptedAI::SelectSpell
 struct TSpellSummary

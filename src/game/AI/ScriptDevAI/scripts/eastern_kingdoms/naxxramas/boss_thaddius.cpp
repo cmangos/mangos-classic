@@ -28,7 +28,7 @@ boss_stalagg
 boss_feugen
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "naxxramas.h"
 
 enum

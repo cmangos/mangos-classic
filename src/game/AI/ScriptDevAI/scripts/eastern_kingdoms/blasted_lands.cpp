@@ -25,7 +25,7 @@ EndScriptData */
 npc_fallen_hero_of_horde
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*######
 ## npc_fallen_hero_of_horde

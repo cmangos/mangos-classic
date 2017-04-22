@@ -21,7 +21,7 @@ SDComment: 'Summon Player' missing
 SDCategory: Molten Core
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "molten_core.h"
 
 enum

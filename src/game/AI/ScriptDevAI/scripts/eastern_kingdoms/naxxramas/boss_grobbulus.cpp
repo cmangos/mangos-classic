@@ -27,7 +27,7 @@ Fallout slime 28218
 Mutating Injection 28169
 Enrages 26527*/
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "naxxramas.h"
 
 enum

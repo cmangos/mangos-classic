@@ -21,7 +21,7 @@ SDComment: Rager need to be tied to boss (Despawn on boss-death)
 SDCategory: Molten Core
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "molten_core.h"
 
 enum

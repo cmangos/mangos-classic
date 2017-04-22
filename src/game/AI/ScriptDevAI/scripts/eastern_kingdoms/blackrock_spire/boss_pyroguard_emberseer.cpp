@@ -21,7 +21,7 @@ SDComment: Dummy spells used during the transformation may need further research
 SDCategory: Blackrock Spire
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "blackrock_spire.h"
 
 enum

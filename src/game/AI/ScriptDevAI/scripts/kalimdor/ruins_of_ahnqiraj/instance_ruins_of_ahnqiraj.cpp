@@ -21,7 +21,7 @@ SDComment: It's not clear if the Rajaxx event should reset if Andorov dies, or p
 SDCategory: Ruins of Ahn'Qiraj
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "ruins_of_ahnqiraj.h"
 
 instance_ruins_of_ahnqiraj::instance_ruins_of_ahnqiraj(Map* pMap) : ScriptedInstance(pMap),

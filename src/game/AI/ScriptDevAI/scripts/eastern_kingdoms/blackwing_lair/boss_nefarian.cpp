@@ -21,9 +21,9 @@ SDComment: Some issues with class calls effecting more than one class
 SDCategory: Blackwing Lair
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "blackwing_lair.h"
-#include "TemporarySummon.h"
+#include "Entities/TemporarySummon.h"
 
 enum
 {

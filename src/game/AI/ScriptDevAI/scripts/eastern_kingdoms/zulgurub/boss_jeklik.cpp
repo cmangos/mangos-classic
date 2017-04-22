@@ -21,7 +21,7 @@ SDComment: Some minor improvements are required; Bat rider movement not implemen
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "zulgurub.h"
 
 enum

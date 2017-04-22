@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Thunder Bluff
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*#####
 #

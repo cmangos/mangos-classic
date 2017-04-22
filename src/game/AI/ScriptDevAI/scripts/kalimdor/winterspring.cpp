@@ -25,7 +25,7 @@ EndScriptData */
 npc_ranshalla
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

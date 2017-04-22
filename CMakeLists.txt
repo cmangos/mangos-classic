@@ -15,7 +15,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-project(CMaNGOS)
+project(CMaNGOS_Classic)
+
+# Define here name of the binaries
+set(CMANGOS_BINARY_SERVER_NAME "mangosd")
+set(CMANGOS_BINARY_REALMD_NAME "realmd")
 
 cmake_minimum_required(VERSION 2.8.12)
 
@@ -44,11 +48,6 @@ if(WIN32 AND NOT MSVC)
   )
 endif()
 
-# TODO: remove this in the future! it has only been added to make the switch easier for end users
-if(PREFIX)
-  message(FATAL_ERROR "The parameter PREFIX has been removed. Please re-run CMake and use CMAKE_INSTALL_PREFIX instead to define your installation location!")
-endif()
-
 include(CheckPlatform)
 
 # TODO: use MSVC_CXX_ARCHITECTURE_ID instead to identify platform on windows (not required on other systems)
@@ -56,50 +55,101 @@ include(CheckPlatform)
 # Find out what system we use to include the needed libs
 if(WIN32)
   if(PLATFORM MATCHES X86) # 32-bit
-    set(DEP_ARCH win32)
+    set(DEP_ARCH Win32)
   else() # 64-bit
     set(DEP_ARCH x64)
   endif()
 endif()
 
+# Override configuration-types - we don't use anything else than debug and release
+if(CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_CONFIGURATION_TYPES "Release;Debug" CACHE STRING "Reset the configurations to what we need" FORCE)
+else()
+  if(NOT CMAKE_BUILD_TYPE)
+    if (NOT DEBUG)
+      message("Defaulting to release build.")
+      set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
+    else()
+      set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
+    endif()
+  endif()
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY HELPSTRING "Choose the type of build")
+  # set the valid options for cmake-gui drop-down list
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release")
+endif()
+
 # find Git: used to get the revision number
 find_package(Git)
 
-# check if the platform supports precomiled headers
-#find_package(PCHSupport)
+# Include cotire to manage PCH support
 include(cotire)
-
-# Override configuration-types - we don't use anything else than debug and release
-if(CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_CONFIGURATION_TYPES Release Debug)
-  set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
-    "Reset the configurations to what we need"
-    FORCE)
-endif()
 
 set(BIN_FOLDER_NAME bin)
 set(CONF_FOLDER_NAME etc)
 set(LIBS_FOLDER_NAME lib)
 
+# Set Install folders
 set(BIN_DIR ${CMAKE_INSTALL_PREFIX}/${BIN_FOLDER_NAME})
 set(CONF_DIR ${CMAKE_INSTALL_PREFIX}/${CONF_FOLDER_NAME})
-# If win32 put it in the bin dir not lib
+set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/${LIBS_FOLDER_NAME})
+
+# On windows define more developpement folders and install provided libs
 if(WIN32)
-  set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/${BIN_FOLDER_NAME})
-else()
-  set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/${LIBS_FOLDER_NAME})
+  set(DEV_BIN_DIR ${CMAKE_SOURCE_DIR}/${BIN_FOLDER_NAME}/_${DEP_ARCH}_$(Configuration))
+  set(DEV_PROVIDED_LIBS_FOLDER ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_$(Configuration))
+
+  # Define install rules for provided libs
+  install(
+    FILES
+      ${PROVIDED_LIBS_FOLDER}/libeay32.dll
+      ${PROVIDED_LIBS_FOLDER}/libmySQL.dll
+    DESTINATION ${LIBS_DIR}
+  )
+
+  # TODO:: check why x64 is not provided
+  if(PLATFORM MATCHES X86)
+    install(
+      FILES
+        ${PROVIDED_LIBS_FOLDER}/dbghelp.dll
+      DESTINATION ${LIBS_DIR}
+    )
+  endif()
 endif()
 
 # For Unix systems set the rpath so that libraries are found
 set(CMAKE_INSTALL_RPATH ../${LIBS_FOLDER_NAME})
 set(CMAKE_INSTALL_NAME_DIR ${LIBS_DIR})
 
+# Add alternate lib dir for boost on windows
+if(WIN32 AND NOT "$ENV{BOOST_ROOT}" STREQUAL "")
+  set(BOOST_LIBRARYDIR "$ENV{BOOST_ROOT}\\lib\\${DEP_ARCH}")
+  set(BOOST_LIBRARYDIR "${BOOST_LIBRARYDIR};$ENV{BOOST_ROOT}\\stage\\${DEP_ARCH}")
+  set(BOOST_LIBRARYDIR "${BOOST_LIBRARYDIR};$ENV{BOOST_ROOT}\\stage")
+endif()
+
+# Be sure to search only static lib
+add_definitions(-DBOOST_ALL_NO_LIB)
+set(Boost_USE_STATIC_LIBS ON)
+
 # Find needed packages and if necessery abort if something important is missing
-find_package(Boost REQUIRED COMPONENTS system program_options thread)
+find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
 
 if(Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS})
+    include_directories(${Boost_INCLUDE_DIRS})
+    link_libraries(${Boost_LIBRARIES})
 else()
+  message(STATUS "BOOST_ROOT = $ENV{BOOST_ROOT}")
+  message(STATUS "BOOST_LIBRARYDIR = $ENV{BOOST_LIBRARYDIR}")
+  if ("$ENV{BOOST_ROOT}" STREQUAL "")
+    message(WARNING "BOOST_ROOT is not set, please set it correctly to your boost folder.")
+  else()
+    if (BOOST_LIBRARYDIR_FORCED STREQUAL "TRUE")
+        message(STATUS "Please put all ${DEP_ARCH} boost lib files in $ENV{BOOST_ROOT}\\lib\\${DEP_ARCH} folder")
+        message(STATUS "Or set BOOST_LIBRARYDIR to your boost lib folder.")
+    else()
+        message(STATUS "BOOST_LIBRARYDIR is set, please verify if correct libs files are in that folder.")
+    endif()
+  endif()
   message(FATAL_ERROR "This project requires boost.  Please install from http://www.boost.org")
 endif()
 
@@ -158,34 +208,8 @@ else()
   set(GIT_REVISION "Git not found")
 endif()
 
-if(DEFINED INCLUDE_BINDINGS_DIR AND INCLUDE_BINDINGS_DIR)
-  # check if the directory exists
-  if(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR})
-    message(FATAL_ERROR "Could not find the script library which was supposed to be: " ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR})
-  endif()
-  # check if it really contains a CMakeLists.txt
-  if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/bindings/${INCLUDE_BINDINGS_DIR}/CMakeLists.txt)
-    message(FATAL_ERROR "The script library does not contain a CMakeLists.txt!")
-  endif()
-else()
-endif()
-
-#if(PCH AND NOT PCHSupport_FOUND)
-#  set(PCH 0 CACHE BOOL
-#    "Use precompiled headers"
-#    FORCE)
-#  message(WARNING "No PCH for your system possible but PCH was set to 1. Resetting it."
-#  )
-#endif()
-
 set(DEFINITIONS_RELEASE NDEBUG)
 set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
-
-if(DEBUG)
-  set(CMAKE_BUILD_TYPE Debug)
-else()
-  set(CMAKE_BUILD_TYPE Release)
-endif()
 
 # print out the results before continuing
 include(cmake/showoptions.cmake)
@@ -209,38 +233,6 @@ add_custom_target("revision.h" ALL
   DEPENDS genrev
 )
 
-if(WIN32)
-  install(
-    FILES
-      ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libeay32.dll
-      ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmySQL.dll
-    DESTINATION ${LIBS_DIR}
-    CONFIGURATIONS Release
-  )
-  install(
-    FILES
-      ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libeay32.dll
-      ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmySQL.dll
-    DESTINATION ${LIBS_DIR}
-    CONFIGURATIONS Debug
-  )
-  if(PLATFORM MATCHES X86)
-    # Copy dll's Windows needs
-    install(
-      FILES
-        ${CMAKE_SOURCE_DIR}/dep/lib/win32_release/dbghelp.dll
-      DESTINATION ${LIBS_DIR}
-      CONFIGURATIONS Release
-    )
-    install(
-      FILES
-        ${CMAKE_SOURCE_DIR}/dep/lib/win32_debug/dbghelp.dll
-      DESTINATION ${LIBS_DIR}
-      CONFIGURATIONS Debug
-    )
-  endif()
-endif()
-
 if(XCODE)
   if(PLATFORM MATCHES X86)
     set(CMAKE_OSX_ARCHITECTURES i386)
@@ -253,9 +245,13 @@ add_subdirectory(dep)
 
 # Add definitions for all build types
 # Don't place this above 'dep' subdirectory! Because of defines build will crash.
-set(DEFINITIONS
-  SYSCONFDIR="../${CONF_FOLDER_NAME}/"
-)
+set(DEFINITIONS "")
+
+if(WIN32)
+  set(DEFINITIONS ${DEFINITIONS} WIN32 _WIN32)
+else()
+  set(DEFINITIONS SYSCONFDIR="../${CONF_FOLDER_NAME}/")
+endif()
 
 if(POSTGRESQL)
   set(DEFINITIONS ${DEFINITIONS} DO_POSTGRESQL)
@@ -263,11 +259,7 @@ else()
   set(DEFINITIONS ${DEFINITIONS} DO_MYSQL)
 endif()
 
-if(WIN32)
-  set(DEFINITIONS ${DEFINITIONS} WIN32 _WIN32)
-endif()
-
-if(DEBUG)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_DEBUG}")
 else()
   set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_RELEASE}")
@@ -275,6 +267,9 @@ endif()
 
 if(BUILD_CORE)
   add_subdirectory(src)
+  if(WIN32)
+    set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_SERVER_NAME})
+  endif()
 endif()
 
 if(BUILD_EXTRACTOR)
@@ -289,6 +284,7 @@ endif()
 if(BUILD_MMAP_EXTRACTOR)
   add_subdirectory(contrib/mmap)
 endif()
+
 # if(SQL)
 #   add_subdirectory(sql)
 # endif()

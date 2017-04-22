@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Scholomance
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 enum
 {

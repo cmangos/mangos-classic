@@ -29,7 +29,7 @@ at_murkdeep                     1966
 at_ancient_leaf                 3587
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "world_map_scripts.h"
 
 static uint32 TriggerOrphanSpell[6][3] =

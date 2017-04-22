@@ -25,7 +25,7 @@ EndScriptData */
 mob_yenniku
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*######
 ## mob_yenniku

@@ -25,7 +25,7 @@ EndScriptData */
 npc_anachronos_the_ancient
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*###
 ## npc_anachronos_the_ancient

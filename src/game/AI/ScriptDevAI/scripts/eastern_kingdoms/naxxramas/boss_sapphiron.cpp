@@ -32,7 +32,7 @@ EndScriptData */
  *                       and to hack the targeting to be "on the ground" - Hence the prefered way as it is now!
  */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "naxxramas.h"
 
 enum

@@ -27,7 +27,7 @@ npc_loramus_thalipedes
 npc_felhound_tracker
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/pet_ai.h"
 
 /*######

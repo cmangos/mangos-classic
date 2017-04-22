@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Onyxia's Lair
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "onyxias_lair.h"
 
 instance_onyxias_lair::instance_onyxias_lair(Map* pMap) : ScriptedInstance(pMap)

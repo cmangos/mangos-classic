@@ -29,7 +29,7 @@ boss_arugal
 npc_deathstalker_vincent
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "shadowfang_keep.h"
 

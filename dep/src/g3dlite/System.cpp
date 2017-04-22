@@ -29,6 +29,7 @@
 #include "G3D/units.h"
 #include "G3D/FileSystem.h"
 #include <time.h>
+#include <intrin.h>
 
 #include <cstring>
 #include <cstdio>

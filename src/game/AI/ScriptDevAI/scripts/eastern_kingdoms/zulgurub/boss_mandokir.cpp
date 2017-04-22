@@ -21,7 +21,7 @@ SDComment: test Threating Gaze. Script depends on ACID script for Vilebranch Spe
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "zulgurub.h"
 
 enum

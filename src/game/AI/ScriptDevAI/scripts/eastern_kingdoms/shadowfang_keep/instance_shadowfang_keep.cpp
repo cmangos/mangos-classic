@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Shadowfang Keep
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "shadowfang_keep.h"
 
 instance_shadowfang_keep::instance_shadowfang_keep(Map* pMap) : ScriptedInstance(pMap)

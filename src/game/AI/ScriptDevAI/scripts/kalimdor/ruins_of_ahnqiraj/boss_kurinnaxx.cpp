@@ -21,7 +21,7 @@ SDComment: Summon Player ability NYI
 SDCategory: Ruins of Ahn'Qiraj
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 enum
 {

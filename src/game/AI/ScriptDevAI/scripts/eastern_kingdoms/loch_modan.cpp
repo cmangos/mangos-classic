@@ -26,7 +26,7 @@ npc_mountaineer_pebblebitty
 npc_miran
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

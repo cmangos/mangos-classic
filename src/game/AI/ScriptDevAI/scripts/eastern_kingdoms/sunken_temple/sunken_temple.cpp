@@ -30,7 +30,7 @@ go_eternal_flame
 effectDummy_summon_hakkar
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "sunken_temple.h"
 
 enum

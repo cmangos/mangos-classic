@@ -21,7 +21,7 @@ SDComment: TODO: Test encounter.
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "naxxramas.h"
 
 enum

@@ -25,7 +25,7 @@ EndScriptData */
 npc_spectral_tutor
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*######
 ## npc_spectral_tutor

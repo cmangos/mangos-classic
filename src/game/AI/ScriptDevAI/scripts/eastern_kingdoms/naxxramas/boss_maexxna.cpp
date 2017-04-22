@@ -21,7 +21,7 @@ SDComment: Web wrap effect still needs more love and research.
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "naxxramas.h"
 
 enum

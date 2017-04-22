@@ -21,7 +21,7 @@ SDComment: The Stadium event is missing some yells. Seal of Ascension related ev
 SDCategory: Blackrock Spire
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "blackrock_spire.h"
 
 enum

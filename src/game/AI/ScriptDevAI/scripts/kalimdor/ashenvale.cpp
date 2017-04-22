@@ -28,7 +28,7 @@ npc_torek
 npc_feero_ironhand
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*####

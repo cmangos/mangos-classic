@@ -5,8 +5,8 @@
 #ifndef SC_CREATURE_H
 #define SC_CREATURE_H
 
-#include "Chat.h"
-#include "DBCStores.h"                                      // Mostly only used the Lookup acces, but a few cases really do use the DBC-Stores
+#include "Chat/Chat.h"
+#include "Server/DBCStores.h"                                      // Mostly only used the Lookup acces, but a few cases really do use the DBC-Stores
 
 // Spell targets used by SelectSpell
 enum SelectTarget

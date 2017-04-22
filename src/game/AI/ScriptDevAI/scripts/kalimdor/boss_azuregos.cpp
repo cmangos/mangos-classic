@@ -21,7 +21,7 @@ SDComment: Enrage is disabled because it is very doubtful that Azuregos had one 
 SDCategory: Azshara
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 enum
 {

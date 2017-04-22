@@ -21,7 +21,7 @@ SDComment: Quest support: 4740, 11538
 SDCategory: World Map Scripts
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "world_map_scripts.h"
 
 /* *********************************************************

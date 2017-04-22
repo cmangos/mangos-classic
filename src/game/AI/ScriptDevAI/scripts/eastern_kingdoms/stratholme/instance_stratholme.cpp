@@ -21,7 +21,7 @@ SDComment: Undead side 90% implemented, event needs better implementation, Barth
 SDCategory: Stratholme
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "stratholme.h"
 
 instance_stratholme::instance_stratholme(Map* pMap) : ScriptedInstance(pMap),

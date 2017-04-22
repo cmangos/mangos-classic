@@ -21,7 +21,7 @@ SDComment: Mind Control not working because of core bug. Shades invisible is rem
 SDCategory: Zul'Gurub
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "zulgurub.h"
 
 enum

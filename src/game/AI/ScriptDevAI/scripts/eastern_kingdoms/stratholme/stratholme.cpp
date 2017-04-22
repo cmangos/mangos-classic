@@ -30,7 +30,7 @@ mobs_spectral_ghostly_citizen
 npc_aurius
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "stratholme.h"
 
 /*######

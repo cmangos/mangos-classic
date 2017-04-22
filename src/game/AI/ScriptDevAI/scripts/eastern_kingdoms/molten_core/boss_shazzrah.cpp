@@ -21,7 +21,7 @@ SDComment: Teleport NYI (need core support, remove hack here when implemented)
 SDCategory: Molten Core
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "molten_core.h"
 
 enum

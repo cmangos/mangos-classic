@@ -28,7 +28,7 @@ npc_stone_watcher_of_norgannon
 npc_tooga
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/follower_ai.h"
 

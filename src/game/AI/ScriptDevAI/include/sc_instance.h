@@ -5,8 +5,8 @@
 #ifndef SC_INSTANCE_H
 #define SC_INSTANCE_H
 
-#include "InstanceData.h"
-#include "Map.h"
+#include "Maps/InstanceData.h"
+#include "Maps/Map.h"
 
 enum EncounterState
 {

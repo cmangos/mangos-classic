@@ -16,7 +16,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-set(EXECUTABLE_NAME realmd)
+set(EXECUTABLE_NAME ${CMANGOS_BINARY_REALMD_NAME})
 
 set(EXECUTABLE_SRCS
     AuthCodes.h
@@ -60,9 +60,21 @@ if(WIN32)
     debug ${MYSQL_DEBUG_LIBRARY}
     debug ${OPENSSL_DEBUG_LIBRARIES}
   )
-  if(PLATFORM MATCHES X86)
-    target_link_libraries(${EXECUTABLE_NAME})
-  endif()
+
+  # Define OutDir to source/bin/(platform)_(configuaration) folder.
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DEV_BIN_DIR}")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
+
+  # Add provided dependency lib to dev folder
+  # Add provided dependency lib to dev folder
+  string(REGEX REPLACE "/" "\\\\" LibFolder ${DEV_PROVIDED_LIBS_FOLDER})
+  add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND copy ${LibFolder}\\*.dll $(OutDir))
+
+  # Add conf file to dev folder
+  add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/realmd.conf.dist.in $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/realmd.conf.dist)
 endif()
 
 if(UNIX)

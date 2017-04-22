@@ -26,7 +26,7 @@ npc_professor_phizzlethorpe
 npc_kinelory
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

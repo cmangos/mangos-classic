@@ -24,7 +24,7 @@ EndScriptData */
 /* ContentData
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 void AddSC_alterac_mountains()
 {

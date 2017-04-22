@@ -21,7 +21,7 @@ SDComment: Prevent Gothik from turning and "in combat state" while on balcony
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "naxxramas.h"
 
 enum
