@@ -1103,6 +1103,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Waypoint scripts...");          // before loading from creature_movement
     sScriptMgr.LoadCreatureMovementScripts();
 
+    sLog.outString("Loading Relay scripts...");
+    sScriptMgr.LoadRelayScripts();
+
     sLog.outString("Loading Waypoints...");
     sWaypointMgr.Load();
 

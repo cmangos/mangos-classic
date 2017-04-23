@@ -121,6 +121,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_UPDATE_TEMPLATE          = 44,           // resSource = Creature
                                                             // datalong = new Creature entry
                                                             // datalong2 = Alliance(0) Horde(1), other values throw error
+    SCRIPT_COMMAND_START_RELAY_SCRIPT       = 45,           // datalong = dbscript_on_relay id
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -391,6 +392,11 @@ struct ScriptInfo
             uint32 newFactionTeam;                          // datalong2
         } updateTemplate;
 
+        struct                                              // SCRIPT_COMMAND_START_RELAY_SCRIPT
+        {
+            uint32 relayId;                                 // datalong
+        } relayScript;
+
         struct
         {
             uint32 data[3];
@@ -517,6 +523,7 @@ extern ScriptMapMapName sEventScripts;
 extern ScriptMapMapName sGossipScripts;
 extern ScriptMapMapName sCreatureDeathScripts;
 extern ScriptMapMapName sCreatureMovementScripts;
+extern ScriptMapMapName sRelayScripts;
 
 class ScriptMgr
 {
@@ -533,6 +540,7 @@ class ScriptMgr
         void LoadGossipScripts();
         void LoadCreatureDeathScripts();
         void LoadCreatureMovementScripts();
+        void LoadRelayScripts();
 
         void LoadDbScriptStrings();
         void LoadDbScriptStringTemplates(std::set<int32>& ids);

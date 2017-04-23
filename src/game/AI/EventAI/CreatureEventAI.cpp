@@ -1076,6 +1076,19 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             m_creature->InterruptSpell((CurrentSpellTypes)action.interruptSpell.currentSpellType);
             break;
         }
+        case ACTION_T_START_RELAY_SCRIPT:
+        {
+            Unit* target = GetTargetByType(action.relayScript.target, pActionInvoker, pAIEventSender, reportTargetError);
+            if (!target)
+            {
+                if (reportTargetError)
+                    sLog.outErrorEventAI("Event %d attempt to start relay script but Target == nullptr. Creature %d", EventId, m_creature->GetEntry());
+                return;
+            }
+
+            m_creature->GetMap()->ScriptsStart(sRelayScripts, action.relayScript.relayId, target, nullptr);
+            break;
+        }
         default:
             sLog.outError("CreatureEventAi::ProcessAction(): action(%u) not implemented", static_cast<uint32>(action.type));
             break;

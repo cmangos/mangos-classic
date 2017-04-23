@@ -299,6 +299,7 @@ bool ChatHandler::HandleReloadAllScriptsCommand(char* /*args*/)
     HandleReloadDBScriptsOnQuestEndCommand((char*)"a");
     HandleReloadDBScriptsOnQuestStartCommand((char*)"a");
     HandleReloadDBScriptsOnSpellCommand((char*)"a");
+    HandleReloadDBScriptsOnRelayCommand((char*)"a");
     SendGlobalSysMessage("DB tables `*_scripts` reloaded.");
     HandleReloadDbScriptStringCommand((char*)"a");
     return true;
@@ -935,6 +936,26 @@ bool ChatHandler::HandleReloadDBScriptsOnCreatureDeathCommand(char* args)
 
     if (*args != 'a')
         SendGlobalSysMessage("DB table `dbscripts_on_creature_death` reloaded.");
+
+    return true;
+}
+
+bool ChatHandler::HandleReloadDBScriptsOnRelayCommand(char* args)
+{
+    if (sScriptMgr.IsScriptScheduled())
+    {
+        SendSysMessage("DB scripts used currently, please attempt reload later.");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    if (*args != 'a')
+        sLog.outString("Re-Loading Scripts from `dbscripts_on_quest_end`...");
+
+    sScriptMgr.LoadQuestEndScripts();
+
+    if (*args != 'a')
+        SendGlobalSysMessage("DB table `dbscripts_on_quest_end` reloaded.");
 
     return true;
 }

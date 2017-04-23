@@ -43,6 +43,7 @@ ScriptMapMapName sEventScripts;
 ScriptMapMapName sGossipScripts;
 ScriptMapMapName sCreatureDeathScripts;
 ScriptMapMapName sCreatureMovementScripts;
+ScriptMapMapName sRelayScripts;
 
 INSTANTIATE_SINGLETON_1(ScriptMgr);
 
@@ -707,6 +708,15 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_START_RELAY_SCRIPT:         // 45
+            {
+                if (sRelayScripts.second.find(tmp.relayScript.relayId) == sRelayScripts.second.end())
+                {
+                    sLog.outErrorDb("Table `%s` uses nonexistent relay ID %u in SCRIPT_COMMAND_START_RELAY_SCRIPT for script id %u.", tablename, tmp.relayScript.relayId, tmp.id);
+                    continue;
+                }
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -852,6 +862,18 @@ void ScriptMgr::LoadCreatureDeathScripts()
     }
 }
 
+void ScriptMgr::LoadRelayScripts()
+{
+    LoadScripts(sRelayScripts, "dbscripts_on_relay");
+
+    // check ids
+    for (ScriptMapMap::const_iterator itr = sRelayScripts.second.begin(); itr != sRelayScripts.second.end(); ++itr)
+    {
+        if (!sObjectMgr.GetCreatureTemplate(itr->first))
+            sLog.outErrorDb("Table `dbscripts_on_creature_death` has not existing creature (Entry: %u) as script id", itr->first);
+    }
+}
+
 void ScriptMgr::LoadDbScriptStrings()
 {
     sObjectMgr.LoadMangosStrings(WorldDatabase, "db_script_string", MIN_DB_SCRIPT_STRING_ID, MAX_DB_SCRIPT_STRING_ID, true);
@@ -873,6 +895,7 @@ void ScriptMgr::LoadDbScriptStrings()
     CheckScriptTexts(sGossipScripts, ids);
     CheckScriptTexts(sCreatureDeathScripts, ids);
     CheckScriptTexts(sCreatureMovementScripts, ids);
+    CheckScriptTexts(sRelayScripts, ids);
 
     sWaypointMgr.CheckTextsExistance(ids);
 
@@ -2068,6 +2091,13 @@ bool ScriptAction::HandleScriptStep()
             else
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u failed. Source already has specified creature entry.", m_table, m_script->id, m_script->command);
             break;
+        }
+        case SCRIPT_COMMAND_START_RELAY_SCRIPT:             // 45
+        {
+            if (LogIfNotUnit(pSource))
+                return false;
+
+            m_map->ScriptsStart(sRelayScripts, m_script->relayScript.relayId, pSource, pTarget);
         }
         default:
             sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u unknown command used.", m_table, m_script->id, m_script->command);

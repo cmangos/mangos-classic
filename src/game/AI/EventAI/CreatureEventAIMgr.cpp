@@ -909,6 +909,13 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                             continue;
                         }
                         break;
+                    case ACTION_T_START_RELAY_SCRIPT:
+                        if (sRelayScripts.second.find(action.relayScript.relayId) == sRelayScripts.second.end())
+                        {
+                            sLog.outErrorEventAI("Event %u Action %u uses invalid dbscript_on_relay id %u", i, j + 1, action.setReactState.reactState, REACT_AGGRESSIVE);
+                            continue;
+                        }
+                        break;
                     default:
                         sLog.outErrorEventAI("Event %u Action %u have currently not checked at load action type (%u). Need check code update?", i, j + 1, temp.action[j].type);
                         break;
