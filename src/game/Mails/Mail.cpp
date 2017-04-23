@@ -113,7 +113,7 @@ MailDraft::MailDraft(std::string subject, std::string text) : m_mailTemplateId(0
 {
 }
 
-MailDraft& MailDraft::SetSubjectAndBody(std::string subject, std::string text)
+MailDraft& MailDraft::SetSubjectAndBody(const std::string& subject, const std::string& text)
 {
     m_subject = subject;
 

@@ -776,7 +776,7 @@ class ObjectMgr
         uint32 GeneratePetNumber() { return m_PetNumbers.Generate(); }
 
         uint32 CreateItemText(std::string text);
-        void AddItemText(uint32 itemTextId, std::string text) { mItemTexts[itemTextId] = text; }
+        void AddItemText(uint32 itemTextId, const std::string& text) { mItemTexts[itemTextId] = text; }
         std::string GetItemText(uint32 id)
         {
             ItemTextMap::const_iterator itr = mItemTexts.find(id);

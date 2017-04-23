@@ -934,10 +934,11 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             }
 
             Creature* pCreature;
+            const CreatureEventAI_Summon* cEventAI = &i->second;
             if (i->second.SpawnTimeSecs)
-                pCreature = m_creature->SummonCreature(action.summon_id.creatureId, i->second.position_x, i->second.position_y, i->second.position_z, i->second.orientation, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, i->second.SpawnTimeSecs);
+                pCreature = m_creature->SummonCreature(action.summon_id.creatureId, cEventAI->position_x, cEventAI->position_y, cEventAI->position_z, cEventAI->orientation, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, cEventAI->SpawnTimeSecs);
             else
-                pCreature = m_creature->SummonCreature(action.summon_id.creatureId, i->second.position_x, i->second.position_y, i->second.position_z, i->second.orientation, TEMPSPAWN_TIMED_OOC_DESPAWN, 0);
+                pCreature = m_creature->SummonCreature(action.summon_id.creatureId, cEventAI->position_x, cEventAI->position_y, cEventAI->position_z, cEventAI->orientation, TEMPSPAWN_TIMED_OOC_DESPAWN, 0);
 
             if (!pCreature)
                 sLog.outErrorEventAI("failed to spawn creature %u. EventId %d.Creature %d", action.summon_id.creatureId, eventId, m_creature->GetEntry());

@@ -697,17 +697,18 @@ void BattleGround::EndBattleGround(Team winner)
 
             stmt.addUInt32(battleground_id);
             stmt.addUInt32(plr->GetGUIDLow());
-            stmt.addUInt32(score->second->GetKillingBlows());
-            stmt.addUInt32(score->second->GetDeaths());
-            stmt.addUInt32(score->second->GetHonorableKills());
-            stmt.addUInt32(score->second->GetBonusHonor());
-            stmt.addUInt32(score->second->GetDamageDone());
-            stmt.addUInt32(score->second->GetHealingDone());
-            stmt.addUInt32(score->second->GetAttr1());
-            stmt.addUInt32(score->second->GetAttr2());
-            stmt.addUInt32(score->second->GetAttr3());
-            stmt.addUInt32(score->second->GetAttr4());
-            stmt.addUInt32(score->second->GetAttr5());
+            BattleGroundScore *pScore = score->second;
+            stmt.addUInt32(pScore->GetKillingBlows());
+            stmt.addUInt32(pScore->GetDeaths());
+            stmt.addUInt32(pScore->GetHonorableKills());
+            stmt.addUInt32(pScore->GetBonusHonor());
+            stmt.addUInt32(pScore->GetDamageDone());
+            stmt.addUInt32(pScore->GetHealingDone());
+            stmt.addUInt32(pScore->GetAttr1());
+            stmt.addUInt32(pScore->GetAttr2());
+            stmt.addUInt32(pScore->GetAttr3());
+            stmt.addUInt32(pScore->GetAttr4());
+            stmt.addUInt32(pScore->GetAttr5());
 
             stmt.Execute();
         }
