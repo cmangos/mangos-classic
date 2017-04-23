@@ -26,7 +26,7 @@ namespace G3D {
     static bool iswspace(int ch) { return (ch==' ' || ch=='\t' || ch=='\n' || ch=='\r'); }
 #endif
 
-void parseCommaSeparated(const std::string s, Array<std::string>& array, bool stripQuotes) {
+void parseCommaSeparated(const std::string &s, Array<std::string>& array, bool stripQuotes) {
     array.fastClear();
     if (s == "") {
         return;

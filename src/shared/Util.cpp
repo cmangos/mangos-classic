@@ -123,7 +123,7 @@ Tokens StrSplit(const std::string& src, const std::string& sep)
         if (sep.find(*i) != std::string::npos)
         {
             if (s.length()) r.push_back(s);
-            s = "";
+            s.clear();
         }
         else
         {
