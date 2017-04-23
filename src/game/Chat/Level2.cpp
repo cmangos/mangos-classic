@@ -1411,6 +1411,7 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
     {
         SendSysMessage(LANG_NO_FREE_STATIC_GUID_FOR_SPAWN);
         SetSentErrorMessage(true);
+        delete pCreature;
         return false;
     }
 

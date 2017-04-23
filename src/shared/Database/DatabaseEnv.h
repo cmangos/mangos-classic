@@ -41,7 +41,7 @@ typedef DatabasePostgre DatabaseType;
 #include "Database/DatabaseMysql.h"
 typedef DatabaseMysql DatabaseType;
 #define _LIKE_           "LIKE"
-#define _TABLE_SIM_      "`"
+#define _TABLE_SIM_      '`'
 #define _CONCAT3_(A,B,C) "CONCAT( " A " , " B " , " C " )"
 #define _OFFSET_         "LIMIT %d,1"
 #endif
