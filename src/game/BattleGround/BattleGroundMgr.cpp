@@ -364,7 +364,7 @@ bool BattleGroundQueue::GetPlayerGroupInfoData(ObjectGuid guid, GroupQueueInfo* 
 bool BattleGroundQueue::InviteGroupToBG(GroupQueueInfo* ginfo, BattleGround* bg, Team side)
 {
     // set side if needed
-    if (side)
+    if (side == ALLIANCE || side == HORDE)
         ginfo->GroupTeam = side;
 
     if (!ginfo->IsInvitedToBGInstanceGUID)

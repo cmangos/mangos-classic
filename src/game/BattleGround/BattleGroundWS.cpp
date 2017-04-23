@@ -207,7 +207,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player* source)
     else if (m_TeamScores[TEAM_INDEX_HORDE] == BG_WS_MAX_TEAM_SCORE)
         winner = HORDE;
 
-    if (winner)
+    if (winner == ALLIANCE || winner == HORDE)
     {
         UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, 0);
         UpdateWorldState(BG_WS_FLAG_UNK_HORDE, 0);

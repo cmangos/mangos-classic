@@ -909,13 +909,13 @@ namespace MaNGOS
 
                 return false;
             }
+            // prevent clone this object
+            NearestAttackableUnitInObjectRangeCheck(NearestAttackableUnitInObjectRangeCheck const&);
+
         private:
             WorldObject const* i_obj;
             Unit const* i_funit;
             float i_range;
-
-            // prevent clone this object
-            NearestAttackableUnitInObjectRangeCheck(NearestAttackableUnitInObjectRangeCheck const&);
     };
 
     class AnyAoEVisibleTargetUnitInObjectRangeCheck
@@ -1077,13 +1077,14 @@ namespace MaNGOS
                 return true;
             }
             float GetLastRange() const { return i_range; }
+
+            // prevent clone this object
+            NearestAssistCreatureInCreatureRangeCheck(NearestAssistCreatureInCreatureRangeCheck const&);
+
         private:
             Creature* const i_obj;
             Unit* const i_enemy;
             float  i_range;
-
-            // prevent clone this object
-            NearestAssistCreatureInCreatureRangeCheck(NearestAssistCreatureInCreatureRangeCheck const&);
     };
 
     // Success at unit in range, range update for next check (this can be use with CreatureLastSearcher to find nearest creature)
@@ -1168,13 +1169,13 @@ namespace MaNGOS
                 return false;
             }
 
+            // prevent clone this object
+            AllCreaturesOfEntryInRangeCheck(AllCreaturesOfEntryInRangeCheck const&);
+
         private:
             const WorldObject* m_pObject;
             uint32 m_uiEntry;
             float m_fRange;
-
-            // prevent clone this object
-            AllCreaturesOfEntryInRangeCheck(AllCreaturesOfEntryInRangeCheck const&);
     };
 
     // Player checks and do

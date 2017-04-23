@@ -545,8 +545,8 @@ uint32 AuctionBotBuyer::GetBuyableEntry(AHB_Buyer_Config& config) const
             {
                 BuyerItemInfo& buyerItem = config.SameItemInfo[item->GetEntry()];    // Structure constructor will make sure Element are correctly initialised if entry is created here.
                 ++buyerItem.ItemCount;
-                buyerItem.BuyPrice = buyerItem.BuyPrice + (Aentry->buyout / item->GetCount());
-                buyerItem.BidPrice = buyerItem.BidPrice + (Aentry->startbid / item->GetCount());
+                buyerItem.BuyPrice = buyerItem.BuyPrice + (double(Aentry->buyout) / item->GetCount());
+                buyerItem.BidPrice = buyerItem.BidPrice + (double(Aentry->startbid) / item->GetCount());
                 if (Aentry->buyout != 0)
                 {
                     if (Aentry->buyout / item->GetCount() < buyerItem.MinBuyPrice)
@@ -778,7 +778,7 @@ void AuctionBotBuyer::addNewAuctionBuyerBotBid(AHB_Buyer_Config& config) const
         uint32 BasePrice = sAuctionBotConfig.getConfig(CONFIG_BOOL_AHBOT_BUYPRICE_BUYER) ? prototype->BuyPrice : prototype->SellPrice;
         BasePrice *= item->GetCount();
 
-        double MaxBuyablePrice = (BasePrice * config.BuyerPriceRatio) / 100;
+        double MaxBuyablePrice = (double(BasePrice) * config.BuyerPriceRatio) / 100;
         uint32 buyoutPrice = auction->buyout / item->GetCount();
         uint32 bidPrice;
         uint32 bidPriceByItem;
