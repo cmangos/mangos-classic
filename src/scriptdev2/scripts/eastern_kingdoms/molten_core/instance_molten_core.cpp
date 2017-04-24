@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Instance_Molten_Core
-SD%Complete: 25
-SDComment: Majordomos and Ragnaros Event missing
+SD%Complete: 100
+SDComment:
 SDCategory: Molten Core
 EndScriptData */
 
@@ -88,6 +88,36 @@ void instance_molten_core::OnObjectCreate(GameObject* pGo)
         case GO_RUNE_ZETH:
         case GO_RUNE_THERI:
         case GO_RUNE_KORO:
+            // Activate the rune if it was previously doused by a player (encounter set to SPECIAL) 
+            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            for (uint8 i = 0; i < MAX_MOLTEN_RUNES; ++i)
+            {
+                if (m_aMoltenCoreRunes[i].m_uiRuneEntry == pGo->GetEntry() && GetData(m_aMoltenCoreRunes[i].m_uiType) == SPECIAL)
+                {
+                    pGo->UseDoorOrButton();
+                    break;
+                }
+            }
+            break;
+            // Runes' Flames Circles
+        case GO_CIRCLE_MAGMADAR:
+        case GO_CIRCLE_GEHENNAS:
+        case GO_CIRCLE_GARR:
+        case GO_CIRCLE_SHAZZRAH:
+        case GO_CIRCLE_BARON_GEDDON:
+        case GO_CIRCLE_SULFURON:
+        case GO_CIRCLE_GOLEMAGG:
+            // Delete the Flames Circle around the rune if the boss guarding it is killed 
+            m_mGoEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            for (uint8 i = 0; i < MAX_MOLTEN_RUNES; ++i)
+            {
+                if (m_aMoltenCoreRunes[i].m_uiFlamesCircleEntry == pGo->GetEntry() && (GetData(m_aMoltenCoreRunes[i].m_uiType) == SPECIAL || GetData(m_aMoltenCoreRunes[i].m_uiType) == DONE))
+                {
+                    pGo->Delete();
+                    break;
+                }
+            }
+            break;
 
             // Majordomo event chest
         case GO_CACHE_OF_THE_FIRE_LORD:
@@ -107,25 +137,25 @@ void instance_molten_core::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_MAGMADAR:
-            m_auiEncounter[uiType] = uiData;
-            break;
         case TYPE_GEHENNAS:
-            m_auiEncounter[uiType] = uiData;
-            break;
         case TYPE_GARR:
-            m_auiEncounter[uiType] = uiData;
-            break;
         case TYPE_SHAZZRAH:
-            m_auiEncounter[uiType] = uiData;
-            break;
         case TYPE_GEDDON:
-            m_auiEncounter[uiType] = uiData;
-            break;
         case TYPE_GOLEMAGG:
-            m_auiEncounter[uiType] = uiData;
-            break;
         case TYPE_SULFURON:
             m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+            {
+                for (uint8 i = 0; i < MAX_MOLTEN_RUNES; ++i)
+                {
+                    if (m_aMoltenCoreRunes[i].m_uiType == uiType)
+                    {
+                        if (GameObject* pGo = GetSingleGameObjectFromStorage(m_aMoltenCoreRunes[i].m_uiFlamesCircleEntry))
+                            pGo->Delete();
+                        break;
+                    }
+                }
+            }
             break;
         case TYPE_MAJORDOMO:
             m_auiEncounter[uiType] = uiData;

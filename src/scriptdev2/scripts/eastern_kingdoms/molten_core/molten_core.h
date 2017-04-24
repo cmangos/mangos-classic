@@ -47,10 +47,17 @@ enum
     GO_RUNE_KRESS               = 176956,                   // Magmadar
     GO_RUNE_MOHN                = 176957,                   // Gehennas
     GO_RUNE_BLAZ                = 176955,                   // Garr
-    GO_RUNE_MAZJ                = 176953,                   // Shazzah
+    GO_RUNE_MAZJ                = 176953,                   // Shazzrah
     GO_RUNE_ZETH                = 176952,                   // Geddon
     GO_RUNE_THERI               = 176954,                   // Golemagg
     GO_RUNE_KORO                = 176951,                   // Sulfuron
+    GO_CIRCLE_MAGMADAR          = 178192,                   // Flames circle around each rune, removed when each boss is killed
+    GO_CIRCLE_GEHENNAS          = 178193,
+    GO_CIRCLE_GARR              = 178191,
+    GO_CIRCLE_SHAZZRAH          = 178189,
+    GO_CIRCLE_BARON_GEDDON      = 178188,
+    GO_CIRCLE_GOLEMAGG          = 178190,
+    GO_CIRCLE_SULFURON          = 178187,
 
     MAX_MOLTEN_RUNES            = 7,
     MAX_MAJORDOMO_ADDS          = 8,
@@ -60,18 +67,18 @@ enum
 
 struct sRuneEncounters
 {
-    uint32 m_uiRuneEntry, m_uiType;
+    uint32 m_uiRuneEntry, m_uiFlamesCircleEntry, m_uiType;
 };
 
 static const sRuneEncounters m_aMoltenCoreRunes[MAX_MOLTEN_RUNES] =
 {
-    {GO_RUNE_KRESS, TYPE_MAGMADAR},
-    {GO_RUNE_MOHN,  TYPE_GEHENNAS},
-    {GO_RUNE_BLAZ,  TYPE_GARR},
-    {GO_RUNE_MAZJ,  TYPE_SHAZZRAH},
-    {GO_RUNE_ZETH,  TYPE_GEDDON},
-    {GO_RUNE_THERI, TYPE_GOLEMAGG},
-    {GO_RUNE_KORO,  TYPE_SULFURON}
+    {GO_RUNE_KRESS, GO_CIRCLE_MAGMADAR,     TYPE_MAGMADAR},
+    {GO_RUNE_MOHN,  GO_CIRCLE_GEHENNAS,     TYPE_GEHENNAS},
+    {GO_RUNE_BLAZ,  GO_CIRCLE_GARR,         TYPE_GARR},
+    {GO_RUNE_MAZJ,  GO_CIRCLE_SHAZZRAH,     TYPE_SHAZZRAH},
+    {GO_RUNE_ZETH,  GO_CIRCLE_BARON_GEDDON, TYPE_GEDDON},
+    {GO_RUNE_THERI, GO_CIRCLE_GOLEMAGG,     TYPE_GOLEMAGG},
+    {GO_RUNE_KORO,  GO_CIRCLE_SULFURON,     TYPE_SULFURON}
 };
 
 struct sSpawnLocation
