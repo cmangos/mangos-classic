@@ -113,7 +113,7 @@ void instance_molten_core::OnObjectCreate(GameObject* pGo)
             {
                 if (m_aMoltenCoreRunes[i].m_uiFlamesCircleEntry == pGo->GetEntry() && (GetData(m_aMoltenCoreRunes[i].m_uiType) == SPECIAL || GetData(m_aMoltenCoreRunes[i].m_uiType) == DONE))
                 {
-                    pGo->Delete();
+                    pGo->SetLootState(GO_JUST_DEACTIVATED);
                     break;
                 }
             }
@@ -151,7 +151,7 @@ void instance_molten_core::SetData(uint32 uiType, uint32 uiData)
                     if (m_aMoltenCoreRunes[i].m_uiType == uiType)
                     {
                         if (GameObject* pGo = GetSingleGameObjectFromStorage(m_aMoltenCoreRunes[i].m_uiFlamesCircleEntry))
-                            pGo->Delete();
+                            pGo->SetLootState(GO_JUST_DEACTIVATED);
                         break;
                     }
                 }
