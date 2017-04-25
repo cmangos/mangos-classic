@@ -43,11 +43,10 @@ endif()
 
 include_directories(
   ${CMAKE_SOURCE_DIR}/src/shared
-  ${CMAKE_SOURCE_DIR}/dep/include/gsoap
   ${CMAKE_SOURCE_DIR}/src/framework
   ${CMAKE_SOURCE_DIR}/src/game
-  ${CMAKE_BINARY_DIR}
-  ${CMAKE_BINARY_DIR}/src/shared
+  ${CMAKE_SOURCE_DIR}/dep/include/gsoap
+  ${MYSQL_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
 )
 
@@ -61,8 +60,6 @@ add_executable(${EXECUTABLE_NAME}
   ${EXECUTABLE_SRCS}
 )
 
-add_dependencies(${EXECUTABLE_NAME} revision.h)
-
 target_link_libraries(${EXECUTABLE_NAME}
   game
   shared
@@ -71,7 +68,7 @@ target_link_libraries(${EXECUTABLE_NAME}
   gsoap
 )
 
-if(WIN32)
+if(MSVC)
   target_link_libraries(${EXECUTABLE_NAME}
     zlib
     optimized ${MYSQL_LIBRARY}

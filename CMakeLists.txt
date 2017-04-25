@@ -23,6 +23,30 @@ set(CMANGOS_BINARY_REALMD_NAME "realmd")
 
 cmake_minimum_required(VERSION 2.8.12)
 
+# Function to remove duplicate entries in provided string
+function(RemoveDuplicateSubstring stringIn stringOut)
+    separate_arguments(stringIn)
+    list(REMOVE_DUPLICATES stringIn)
+    string(REPLACE ";" " " stringIn "${stringIn}")
+    set(${stringOut} "${stringIn}" PARENT_SCOPE)
+endfunction()
+
+# Macro that replace /Wx with /W0 (supposed to disable warnings)
+MACRO(DisableWarnings)
+  foreach(temp_flag
+          CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+          CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS)
+     if(${temp_flag} MATCHES "/W[0-4]")
+        string(REGEX REPLACE "/W[0-4]" "/W0" ${temp_flag} "${${temp_flag}}")
+     else()
+        string(CONCAT ${temp_flag} "${${temp_flag}} /W0")
+     endif()
+  endforeach()
+ENDMACRO()
+
+# Remove duplicate entries in default flags. (occur when after a second make or configure)
+RemoveDuplicateSubstring(${CMAKE_CXX_FLAGS} CMAKE_CXX_FLAGS)
+
 include(cmake/common.cmake)
 
 # Set RPATH-handing (CMake parameters)
@@ -81,8 +105,10 @@ endif()
 # find Git: used to get the revision number
 find_package(Git)
 
-# Include cotire to manage PCH support
-include(cotire)
+if (NOT WIN32)
+  # Include cotire to manage PCH support
+  include(cotire)
+endif()
 
 set(BIN_FOLDER_NAME bin)
 set(CONF_FOLDER_NAME etc)
@@ -94,8 +120,8 @@ set(CONF_DIR ${CMAKE_INSTALL_PREFIX}/${CONF_FOLDER_NAME})
 set(LIBS_DIR ${CMAKE_INSTALL_PREFIX}/${LIBS_FOLDER_NAME})
 
 # On windows define more developpement folders and install provided libs
-if(WIN32)
-  set(DEV_BIN_DIR ${CMAKE_SOURCE_DIR}/${BIN_FOLDER_NAME}/_${DEP_ARCH}_$(Configuration))
+if(MSVC)
+  set(DEV_BIN_DIR ${CMAKE_SOURCE_DIR}/${BIN_FOLDER_NAME}/${DEP_ARCH}_$(Configuration))
   set(DEV_PROVIDED_LIBS_FOLDER ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_$(Configuration))
 
   # Define install rules for provided libs
@@ -130,6 +156,7 @@ endif()
 # Be sure to search only static lib
 add_definitions(-DBOOST_ALL_NO_LIB)
 set(Boost_USE_STATIC_LIBS ON)
+#set (Boost_DEBUG ON)
 
 # Find needed packages and if necessery abort if something important is missing
 find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
@@ -143,7 +170,7 @@ else()
   if ("$ENV{BOOST_ROOT}" STREQUAL "")
     message(WARNING "BOOST_ROOT is not set, please set it correctly to your boost folder.")
   else()
-    if (BOOST_LIBRARYDIR_FORCED STREQUAL "TRUE")
+    if ("$ENV{BOOST_LIBRARYDIR}" STREQUAL "")
         message(STATUS "Please put all ${DEP_ARCH} boost lib files in $ENV{BOOST_ROOT}\\lib\\${DEP_ARCH} folder")
         message(STATUS "Or set BOOST_LIBRARYDIR to your boost lib folder.")
     else()
@@ -155,10 +182,10 @@ endif()
 
 # Win32 delivered packages
 if(WIN32)
-  set(MYSQL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/include/mysql)
+  set(MYSQL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/include)
   set(MYSQL_LIBRARY ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmySQL.lib)
   set(MYSQL_DEBUG_LIBRARY ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmySQL.lib)
-  set(OPENSSL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/include/openssl)
+  set(OPENSSL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/include)
   set(OPENSSL_LIBRARIES ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libeay32.lib)
   set(OPENSSL_DEBUG_LIBRARIES ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libeay32.lib)
   # zlib is build
@@ -214,24 +241,9 @@ set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
 # print out the results before continuing
 include(cmake/showoptions.cmake)
 
-if(NOT BUILD_CORE AND NOT BUILD_EXTRACTOR AND NOT BUILD_VMAP_EXTRACTOR AND NOT BUILD_MMAP_EXTRACTOR)
+if(NOT BUILD_GAME_SERVER AND NOT BUILD_LOGIN_SERVER AND NOT BUILD_EXTRACTOR AND NOT BUILD_VMAP_EXTRACTOR AND NOT BUILD_MMAP_EXTRACTOR)
   message(FATAL_ERROR "You must select something to build!")
 endif()
-
-# Generate revision-extractor
-set(GENREV_SRC
-  src/tools/genrevision/genrevision.cpp
-)
-
-add_executable(genrev
-  ${GENREV_SRC}
-)
-
-add_custom_target("revision.h" ALL
-  COMMAND genrev ${CMAKE_SOURCE_DIR}
-  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-  DEPENDS genrev
-)
 
 if(XCODE)
   if(PLATFORM MATCHES X86)
@@ -247,9 +259,7 @@ add_subdirectory(dep)
 # Don't place this above 'dep' subdirectory! Because of defines build will crash.
 set(DEFINITIONS "")
 
-if(WIN32)
-  set(DEFINITIONS ${DEFINITIONS} WIN32 _WIN32)
-else()
+if(UNIX)
   set(DEFINITIONS SYSCONFDIR="../${CONF_FOLDER_NAME}/")
 endif()
 
@@ -265,11 +275,20 @@ else()
   set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS};${DEFINITIONS_RELEASE}")
 endif()
 
-if(BUILD_CORE)
+if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER)
   add_subdirectory(src)
-  if(WIN32)
+  if(MSVC)
     set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMANGOS_BINARY_SERVER_NAME})
   endif()
+
+  # Generate revision-extractor
+  set(GENREV_SRC
+    src/tools/genrevision/genrevision.cpp
+  )
+
+  add_executable(RevisionGenerator
+    ${GENREV_SRC}
+  )
 endif()
 
 if(BUILD_EXTRACTOR)

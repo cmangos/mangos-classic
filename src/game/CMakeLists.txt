@@ -46,6 +46,18 @@ include_directories(
 # Find all the input files
 FILE(GLOB_RECURSE LIBRARY_SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.h" "*.cpp")
 
+if(NOT BUILD_SCRIPTDEV)
+  # exclude script folder for faster build time (used for dev mode)
+  set (EXCLUDE_DIR "AI/ScriptDevAI/scripts/")
+  foreach (TMP_PATH ${LIBRARY_SRCS})
+      string (FIND ${TMP_PATH} ${EXCLUDE_DIR} EXCLUDE_DIR_FOUND)
+      if (NOT ${EXCLUDE_DIR_FOUND} EQUAL -1)
+          list(REMOVE_ITEM LIBRARY_SRCS ${TMP_PATH})
+      endif ()
+  endforeach()
+endif()
+
+# Create visual studio groups using folder structure
 foreach(source ${LIBRARY_SRCS})
     get_filename_component(source_path "${source}" PATH)
     string(REPLACE "/" "\\" source_path_msvc "${source_path}")
@@ -61,7 +73,7 @@ target_link_libraries(${LIBRARY_NAME}
   detour
 )
 
-add_dependencies(${LIBRARY_NAME} revision.h)
+add_dependencies(${LIBRARY_NAME} RevisionGenerator)
 
 if(UNIX)
   # Both systems don't have libdl and don't need them
@@ -72,6 +84,11 @@ if(UNIX)
   endif()
 endif()
 
+# Define BUILD_SCRIPTDEV if need
+if (BUILD_SCRIPTDEV)
+  add_definitions(-DBUILD_SCRIPTDEV)
+endif()
+
 # Generate precompiled header
 if(PCH)
   if (WIN32)
@@ -79,7 +96,7 @@ if(PCH)
     set(PrecompiledBinary "$(IntDir)/${PCHBaseName}.pch")
     set(PrecompiledHeader "${PCHBaseName}.h")
     set(PrecompiledSource "${PCHBaseName}.cpp")
-    set_property(TARGET ${LIBRARY_NAME} PROPERTY COMPILE_FLAGS "/Yu\"${PrecompiledHeader}\" /FI\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\"")
+    set_property(TARGET ${LIBRARY_NAME} PROPERTY COMPILE_FLAGS " /Yu\"${PrecompiledHeader}\" /FI\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\"")
     set_property(SOURCE ${PrecompiledSource} PROPERTY COMPILE_FLAGS "/Yc\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\"")
   else()
     cotire(${LIBRARY_NAME})

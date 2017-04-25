@@ -1,3 +1,4 @@
+#
 # This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
 #
 # This program is free software; you can redistribute it and/or modify
@@ -14,9 +15,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# disable warnings for dependencies
-add_compile_options(-w)
+list(APPEND BZIP2_SRCS
+     compress.c
+     crctable.c
+     decompress.c
+     huffman.c
+     randtable.c
+     blocksort.c
+     bzlib.c)
 
-add_library (loadlib STATIC loadlib.cpp  adt.cpp  wdt.cpp)
-# link loadlib with zlib
-target_link_libraries (loadlib z)
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_library(bzip2 STATIC ${BZIP2_SRCS})
