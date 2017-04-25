@@ -6755,7 +6755,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackTy
 
     // differentiate for weapon damage based spells
     bool isWeaponDamageBasedSpell = !(spellProto && (damagetype == DOT || IsSpellHaveEffect(spellProto, SPELL_EFFECT_SCHOOL_DAMAGE)));
-    uint32 schoolMask       = spellProto ? GetSpellSchoolMask(spellProto) : uint32(GetMeleeDamageSchoolMask());
+    uint32 schoolMask       = spellProto ? GetSpellSchoolMask(spellProto) : uint32(pCaster->GetMeleeDamageSchoolMask());
 
     // FLAT damage bonus auras
     // =======================
