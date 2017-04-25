@@ -818,12 +818,13 @@ namespace MMAP
     /**************************************************************************/
     bool MapBuilder::isTransportMap(uint32 mapID)
     {
-        switch (mapID)
+        /*switch (mapID)
         {
             // no transport maps
             default:
                 return false;
-        }
+        }*/
+        return false;
     }
 
     /**************************************************************************/

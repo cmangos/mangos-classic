@@ -9,7 +9,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-cmake_minimum_required (VERSION 2.6)
 set(EXECUTABLE_NAME "vmap_assembler")
 project (${EXECUTABLE_NAME})
 
@@ -20,33 +19,37 @@ endif()
 
 ADD_DEFINITIONS("-DNO_CORE_FUNCS")
 
-ADD_DEFINITIONS("-Wall")
-ADD_DEFINITIONS("-ggdb")
-ADD_DEFINITIONS("-O3")
+if(UNIX)
+  ADD_DEFINITIONS("-ggdb")
+endif()
 
-include_directories(../../src/shared)
-include_directories(../../src/game/vmap/)
-include_directories(../../dep/include/g3dlite/)
-include_directories(../../src/framework/)
+include_directories(${CMAKE_SOURCE_DIR}/src/shared
+                    ${CMAKE_SOURCE_DIR}/src/game/vmap
+                    ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
+                    ${CMAKE_SOURCE_DIR}/src/framework)
 
-add_library(vmap
-    ../../src/game/vmap/BIH.cpp
-    ../../src/game/vmap/VMapManager2.cpp
-    ../../src/game/vmap/MapTree.cpp
-    ../../src/game/vmap/TileAssembler.cpp
-    ../../src/game/vmap/WorldModel.cpp
-    ../../src/game/vmap/ModelInstance.cpp
-    )
+list(APPEND VMAP_ASSEMBLER_SOURCE
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/BIH.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/VMapManager2.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/MapTree.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/TileAssembler.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/WorldModel.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/vmap/ModelInstance.cpp
+    vmap_assembler.cpp)
 
 IF(APPLE)
-   FIND_LIBRARY(CORE_SERVICES CoreServices )
+   FIND_LIBRARY(CORE_SERVICES CoreServices)
    SET(EXTRA_LIBS ${CORE_SERVICES})
 ENDIF (APPLE)
 
-target_link_libraries(vmap g3dlite z ${EXTRA_LIBS})
+add_executable(${EXECUTABLE_NAME} ${VMAP_ASSEMBLER_SOURCE})
+target_link_libraries(${EXECUTABLE_NAME} g3dlite zlib ${EXTRA_LIBS})
 
-add_executable(${EXECUTABLE_NAME} vmap_assembler.cpp)
-target_link_libraries(${EXECUTABLE_NAME} vmap)
+if(MSVC)
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/contrib/vmap_assembler/bin/${DEP_ARCH}_Debug")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/contrib/vmap_assembler/bin/${DEP_ARCH}_Release")
+endif()
+
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)
 
 # add_executable(vmap_test coordinate_test.cpp)

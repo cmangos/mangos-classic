@@ -13,14 +13,16 @@ cmake_minimum_required (VERSION 2.6)
 set(EXECUTABLE_NAME "MoveMapGen")
 project (${EXECUTABLE_NAME})
 
-ADD_DEFINITIONS(-DMMAP_GENERATOR -DNO_CORE_FUNCS -DDEBUG)
+# disable warnings for dependencies
+DisableWarnings()
+
+ADD_DEFINITIONS(-DMMAP_GENERATOR -DNO_CORE_FUNCS)
 ADD_DEFINITIONS(-DDT_POLYREF64)
+ADD_DEFINITIONS(-DNO_vsnprintf)
 
-# zlib
-ADD_DEFINITIONS( -DNO_vsnprintf )
-
-ADD_DEFINITIONS("-ggdb")
-ADD_DEFINITIONS("-O3")
+if(UNIX)
+  ADD_DEFINITIONS("-ggdb")
+endif()
 
 include_directories(
     ../../src
@@ -61,4 +63,10 @@ set(SOURCES
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
 
 target_link_libraries(${EXECUTABLE_NAME} g3dlite vmaplib detour recast zlib)
+
+if(MSVC)
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/contrib/mmap/bin/${DEP_ARCH}_Debug")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/contrib/mmap/bin/${DEP_ARCH}_Release")
+endif()
+
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)

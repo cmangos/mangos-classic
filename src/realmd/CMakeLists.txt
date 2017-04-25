@@ -45,7 +45,7 @@ add_executable(${EXECUTABLE_NAME}
   ${EXECUTABLE_SRCS}
 )
 
-add_dependencies(${EXECUTABLE_NAME} revision.h)
+add_dependencies(${EXECUTABLE_NAME} RevisionGenerator)
 
 target_link_libraries(${EXECUTABLE_NAME}
   shared
@@ -66,7 +66,6 @@ if(WIN32)
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DEV_BIN_DIR}")
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
 
-  # Add provided dependency lib to dev folder
   # Add provided dependency lib to dev folder
   string(REGEX REPLACE "/" "\\\\" LibFolder ${DEV_PROVIDED_LIBS_FOLDER})
   add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
