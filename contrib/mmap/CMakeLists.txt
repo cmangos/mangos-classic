@@ -65,8 +65,10 @@ add_executable(${EXECUTABLE_NAME} ${SOURCES})
 target_link_libraries(${EXECUTABLE_NAME} g3dlite vmaplib detour recast zlib)
 
 if(MSVC)
-  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/contrib/mmap/bin/${DEP_ARCH}_Debug")
-  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/contrib/mmap/bin/${DEP_ARCH}_Release")
+  # Define OutDir to source/bin/(platform)_(configuaration) folder.
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}/Extractors")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DEV_BIN_DIR}/Extractors")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
 endif()
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)

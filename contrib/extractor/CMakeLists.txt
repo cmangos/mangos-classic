@@ -33,8 +33,10 @@ add_executable(${EXECUTABLE_NAME} ${AD_SOURCE})
 target_link_libraries(${EXECUTABLE_NAME} mpqlib zlib bzip2)
 
 if(MSVC)
-  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/contrib/extractor/bin/${DEP_ARCH}_Debug")
-  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/contrib/extractor/bin/${DEP_ARCH}_Release")
+  # Define OutDir to source/bin/(platform)_(configuaration) folder.
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}/Extractors")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DEV_BIN_DIR}/Extractors")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
 endif()
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)
