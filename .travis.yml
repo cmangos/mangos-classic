@@ -26,6 +26,9 @@ git:
 # make use of the new container based infrastructure at travis to improve performance (we don't need sudo)
 sudo: false
 
+# use ubuntu 14.04 VM
+dist: trusty
+
 # don't re-build for tags so that [publish binary] is not re-run
 # https://github.com/travis-ci/travis-ci/issues/1532
 branches:
@@ -66,6 +69,7 @@ addons:
       - libboost-system1.55-dev
       - libboost-program-options1.55-dev
       - libboost-thread1.55-dev
+      - libboost-regex1.55-dev
 
 # overwrite GCC version for GCC build only
 before_install:
@@ -82,8 +86,9 @@ script: |-
   mkdir _build
   mkdir _install
   cd _build
-  cmake -DCMAKE_INSTALL_PREFIX=../_install -DBUILD_EXTRACTOR=ON -DBUILD_VMAP_EXTRACTOR=ON -DBUILD_MMAP_EXTRACTOR=ON -DPCH=$PCH_FLAG ..
-  make -j4
+  export CCACHE_SLOPPINESS=pch_defines,time_macros
+  cmake -DCMAKE_INSTALL_PREFIX=../_install -DBUILD_EXTRACTOR=ON -DBUILD_VMAP_EXTRACTOR=ON -DBUILD_MMAP_EXTRACTOR=ON -DBUILD_GAME_SERVER=ON -DBUILD_LOGIN_SERVER=ON -DPCH=$PCH_FLAG ..
+  make -j2
   make install
 
 # if this configuration file is not in one of the offical CMaNGOS repositories at http://github.com/cmangos/, PLEASE remove the notifications or point them to another IRC channel!
