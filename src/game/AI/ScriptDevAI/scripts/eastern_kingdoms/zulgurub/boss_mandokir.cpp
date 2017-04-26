@@ -19,9 +19,11 @@ SDName: Boss_Mandokir
 SD%Complete: 80
 SDComment: test Threating Gaze. Script depends on ACID script for Vilebranch Speaker
 SDCategory: Zul'Gurub
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "zulgurub.h"
 
 enum

@@ -19,9 +19,11 @@ SDName: Boss_Baroness_Anastari
 SD%Complete: 100
 SDComment:
 SDCategory: Stratholme
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 enum
 {

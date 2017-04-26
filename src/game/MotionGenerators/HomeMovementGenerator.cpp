@@ -19,8 +19,8 @@
 #include "HomeMovementGenerator.h"
 #include "Entities/Creature.h"
 #include "AI/BaseAI/CreatureAI.h"
-#include "movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSplineInit.h"
+#include "Movement/MoveSpline.h"
 
 void HomeMovementGenerator<Creature>::Initialize(Creature& owner)
 {

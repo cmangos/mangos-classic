@@ -19,9 +19,11 @@ SDName: Alterac_Mountains
 SD%Complete: 0
 SDComment: Placeholder
 SDCategory: Alterac Mountains
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 EndContentData */
 
 

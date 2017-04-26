@@ -19,9 +19,11 @@ SDName: Boss_Moam
 SD%Complete: 100
 SDComment:
 SDCategory: Ruins of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 enum
 {

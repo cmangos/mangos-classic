@@ -19,9 +19,11 @@ SDName: Stonetalon_Mountains
 SD%Complete: 100
 SDComment: Quest support: 6523.
 SDCategory: Stonetalon Mountains
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

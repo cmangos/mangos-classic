@@ -19,9 +19,11 @@ SDName: Boss_Four_Horsemen
 SD%Complete: 99
 SDComment: TODO: Test enrages
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "naxxramas.h"
 
 enum

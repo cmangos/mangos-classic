@@ -19,9 +19,11 @@ SDName: Azshara
 SD%Complete: 100%
 SDComment: Quest support: 2744, 3141, 3602, 9364, 10994
 SDCategory: Azshara
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 mobs_spitelashes
 npc_loramus_thalipedes
 npc_felhound_tracker

@@ -19,9 +19,11 @@ SDName: Blackrock_Depths
 SD%Complete: 95
 SDComment: Quest support: 4134, 4201, 4322, 7604, 9015.
 SDCategory: Blackrock Depths
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 go_bar_beer_keg
 go_shadowforge_brazier
 go_relic_coffer_door

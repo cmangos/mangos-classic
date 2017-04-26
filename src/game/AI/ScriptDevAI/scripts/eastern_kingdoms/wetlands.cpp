@@ -19,9 +19,11 @@ SDName: Wetlands
 SD%Complete: 100
 SDComment: Quest support: 1249
 SDCategory: Wetlands
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_mikhail
 npc_tapoke_slim_jahn
 EndContentData */

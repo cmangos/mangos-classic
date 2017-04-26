@@ -19,9 +19,11 @@ SDName: Boss_Twinemperors
 SD%Complete: 95
 SDComment: Timers
 SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "temple_of_ahnqiraj.h"
 
 enum

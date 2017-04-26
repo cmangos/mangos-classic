@@ -19,9 +19,11 @@ SDName: Boss_Azuregos
 SD%Complete: 99
 SDComment: Enrage is disabled because it is very doubtful that Azuregos had one in Classic
 SDCategory: Azshara
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 enum
 {

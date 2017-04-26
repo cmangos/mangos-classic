@@ -19,9 +19,11 @@ SDName: Silverpine_Forest
 SD%Complete: 100
 SDComment: Quest support: 435, 452
 SDCategory: Silverpine Forest
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_deathstalker_erland
 npc_deathstalker_faerleia
 EndContentData */

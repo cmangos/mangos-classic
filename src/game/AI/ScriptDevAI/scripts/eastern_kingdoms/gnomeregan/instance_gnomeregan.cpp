@@ -19,9 +19,11 @@ SDName: Instance_Gnomeregan
 SD%Complete: 90%
 SDComment:  Support for Grubbis and Thermaplugg Encounters
 SDCategory: Gnomeregan
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "gnomeregan.h"
 
 instance_gnomeregan::instance_gnomeregan(Map* pMap) : ScriptedInstance(pMap)

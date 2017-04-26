@@ -19,9 +19,11 @@ SDName: Boss_Ouro
 SD%Complete: 90
 SDComment: Some minor adjustments may be required
 SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "temple_of_ahnqiraj.h"
 
 enum

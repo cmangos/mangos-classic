@@ -19,9 +19,11 @@ SDName: world_map_scripts
 SD%Complete: 100
 SDComment: Quest support: 4740, 11538
 SDCategory: World Map Scripts
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "world_map_scripts.h"
 
 /* *********************************************************

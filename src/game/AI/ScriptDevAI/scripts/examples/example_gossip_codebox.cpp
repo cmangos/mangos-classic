@@ -19,9 +19,11 @@ SDName: Example_Gossip_Codebox
 SD%Complete: 100
 SDComment: Show a codebox in gossip option
 SDCategory: Script Examples
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include <cstring>
 
 enum

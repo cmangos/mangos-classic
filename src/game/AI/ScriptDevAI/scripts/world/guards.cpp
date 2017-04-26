@@ -19,9 +19,11 @@ SDName: Guards
 SD%Complete: 100
 SDComment: CombatAI should be organized better for future.
 SDCategory: Guards
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 guard_bluffwatcher
 guard_contested
 guard_darnassus

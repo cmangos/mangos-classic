@@ -19,9 +19,11 @@ SDName: Boss_Gyth
 SD%Complete: 100
 SDComment: Timers may need adjustments
 SDCategory: Blackrock Spire
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "blackrock_spire.h"
 
 enum

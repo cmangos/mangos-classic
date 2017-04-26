@@ -19,9 +19,11 @@ SDName: Boss_Broodlord_Lashlayer
 SD%Complete: 100
 SDComment:
 SDCategory: Blackwing Lair
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "blackwing_lair.h"
 
 enum

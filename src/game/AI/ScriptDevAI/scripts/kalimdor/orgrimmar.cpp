@@ -19,9 +19,11 @@ SDName: Orgrimmar
 SD%Complete: 100
 SDComment: Quest support: 2460, 6566
 SDCategory: Orgrimmar
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_shenthul
 npc_thrall_warchief
 EndContentData */

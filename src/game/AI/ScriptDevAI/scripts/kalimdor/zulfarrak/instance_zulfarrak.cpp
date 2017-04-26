@@ -19,9 +19,11 @@ SDName: instance_zulfarrak
 SD%Complete: 80%
 SDComment:
 SDCategory: Zul'Farrak
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "zulfarrak.h"
 
 instance_zulfarrak::instance_zulfarrak(Map* pMap) : ScriptedInstance(pMap),

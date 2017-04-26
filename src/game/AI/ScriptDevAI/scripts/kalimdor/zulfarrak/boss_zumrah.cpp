@@ -19,9 +19,11 @@ SDName: boss_zumrah
 SD%Complete: 100
 SDComment:
 SDCategory: Zul'Farrak
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "zulfarrak.h"
 
 enum

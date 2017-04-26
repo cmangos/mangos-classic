@@ -19,9 +19,11 @@ SDName: Tirisfal_Glades
 SD%Complete: 100
 SDComment: Quest support: 590, 1819
 SDCategory: Tirisfal Glades
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 go_mausoleum_door
 go_mausoleum_trigger
 npc_calvin_montague

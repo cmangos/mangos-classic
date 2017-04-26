@@ -19,9 +19,11 @@ SDName: Razorfen_Kraul
 SD%Complete: 100
 SDComment: Quest support: 1144, 1221
 SDCategory: Razorfen Kraul
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 quest_willix_the_importer
 EndContentData */
 

@@ -19,9 +19,11 @@ SDName: Boss_Flamegor
 SD%Complete: 90
 SDComment: Thrash is missing
 SDCategory: Blackwing Lair
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "blackwing_lair.h"
 
 enum

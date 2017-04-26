@@ -19,9 +19,11 @@ SDName: Instance_Naxxramas
 SD%Complete: 90%
 SDComment:
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "naxxramas.h"
 
 static const DialogueEntry aNaxxDialogue[] =

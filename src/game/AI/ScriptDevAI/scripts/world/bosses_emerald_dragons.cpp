@@ -19,9 +19,11 @@ SDName: bosses_emerald_dragons
 SD%Complete: 95
 SDComment: Missing correct behaviour of used trigger NPCs, some spell issues
 SDCategory: Emerald Dragon Bosses
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 boss_emerald_dragon -- Superclass for the four dragons
 boss_emeriss
 boss_lethon

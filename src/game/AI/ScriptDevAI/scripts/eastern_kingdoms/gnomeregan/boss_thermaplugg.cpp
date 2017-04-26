@@ -19,9 +19,11 @@ SDName: Boss_Mekgineer_Thermaplugg
 SD%Complete: 90 - Timer
 SDComment: Timer need improvement, especially for bomb-spawning
 SDCategory: Gnomeregan
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "gnomeregan.h"
 
 enum

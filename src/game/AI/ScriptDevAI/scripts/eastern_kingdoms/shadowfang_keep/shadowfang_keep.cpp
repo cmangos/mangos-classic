@@ -19,9 +19,11 @@ SDName: Shadowfang_Keep
 SD%Complete: 75
 SDComment: npc_shadowfang_prisoner using escortAI for movement to door.
 SDCategory: Shadowfang Keep
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_shadowfang_prisoner
 mob_arugal_voidwalker
 npc_arugal

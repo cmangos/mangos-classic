@@ -19,9 +19,11 @@ SDName: Stormwind_City
 SD%Complete: 100
 SDComment: Quest support: 1640, 1447, 4185, 6402, 6403.
 SDCategory: Stormwind City
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_bartleby
 npc_dashel_stonefist
 npc_lady_katrana_prestor

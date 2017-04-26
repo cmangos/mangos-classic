@@ -19,9 +19,11 @@ SDName: Battleground
 SD%Complete: 100
 SDComment: Spirit guides in battlegrounds will revive all players every 30 sec
 SDCategory: Battlegrounds
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 // **** Script Info ****
 // Spiritguides in battlegrounds resurrecting many players at once

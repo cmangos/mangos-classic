@@ -19,9 +19,11 @@ SDName: Instance_Stratholme
 SD%Complete: 70
 SDComment: Undead side 90% implemented, event needs better implementation, Barthildas relocation for reload case is missing, Baron Combat handling is buggy.
 SDCategory: Stratholme
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "stratholme.h"
 
 instance_stratholme::instance_stratholme(Map* pMap) : ScriptedInstance(pMap),

@@ -19,9 +19,11 @@ SDName: Boss_Lucifron
 SD%Complete: 100
 SDComment:
 SDCategory: Molten Core
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "molten_core.h"
 
 enum

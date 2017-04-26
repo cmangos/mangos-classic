@@ -19,9 +19,11 @@ SDName: Eastern_Plaguelands
 SD%Complete: 100
 SDComment: Quest support: 7622.
 SDCategory: Eastern Plaguelands
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_eris_havenfire
 EndContentData */
 

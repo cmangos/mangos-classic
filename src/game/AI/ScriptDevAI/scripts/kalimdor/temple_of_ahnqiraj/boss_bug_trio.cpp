@@ -19,9 +19,11 @@ SDName: bug_trio
 SD%Complete: 75
 SDComment: Summon Player spell NYI; Poison Cloud damage spell NYI; Timers need adjustments
 SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "temple_of_ahnqiraj.h"
 
 enum

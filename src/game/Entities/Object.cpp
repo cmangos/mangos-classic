@@ -35,7 +35,7 @@
 #include "Grids/GridNotifiersImpl.h"
 #include "Maps/ObjectPosSelector.h"
 #include "Entities/TemporarySummon.h"
-#include "movement/packet_builder.h"
+#include "Movement/packet_builder.h"
 #include "Entities/CreatureLinkingMgr.h"
 #include "Chat/Chat.h"
 #include "Loot/LootMgr.h"

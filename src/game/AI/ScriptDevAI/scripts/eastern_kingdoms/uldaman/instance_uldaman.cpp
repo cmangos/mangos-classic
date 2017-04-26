@@ -20,9 +20,10 @@ SD%Complete: 60
 SDComment:
 SDCategory: Uldaman
 EndScriptData
+
 */
 
-
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "uldaman.h"
 
 instance_uldaman::instance_uldaman(Map* pMap) : ScriptedInstance(pMap),

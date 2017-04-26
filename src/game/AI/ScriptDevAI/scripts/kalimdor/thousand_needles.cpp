@@ -20,9 +20,10 @@ SD%Complete: 90
 SDComment: Quest support: 1950, 4770, 4904, 4966
 SDCategory: Thousand Needles
 EndScriptData
+
 */
 
-/* ContentData
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_kanati
 npc_lakota_windsong
 npc_paoka_swiftmountain

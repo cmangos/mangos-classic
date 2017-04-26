@@ -19,9 +19,11 @@ SDName: Boss_Buru
 SD%Complete: 70
 SDComment: Timers; Kill eggs on transform NYI; Egg explode damage and Buru stun are missing
 SDCategory: Ruins of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "ruins_of_ahnqiraj.h"
 
 enum

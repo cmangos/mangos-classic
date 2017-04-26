@@ -19,9 +19,11 @@ SDName: Boss_Faerlina
 SD%Complete: 100
 SDComment:
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "naxxramas.h"
 
 enum

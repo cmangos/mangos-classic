@@ -19,9 +19,11 @@ SDName: Instance_Temple_of_Ahnqiraj
 SD%Complete: 80
 SDComment: C'thun whisperings spells NYI.
 SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "temple_of_ahnqiraj.h"
 
 static const DialogueEntry aIntroDialogue[] =

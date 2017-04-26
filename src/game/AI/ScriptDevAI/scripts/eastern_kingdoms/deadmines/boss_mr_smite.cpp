@@ -19,9 +19,11 @@ SDName: Boss_Mr_Smite
 SD%Complete: 100
 SDComment:
 SDCategory: Deadmines
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "deadmines.h"
 
 enum

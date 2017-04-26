@@ -19,9 +19,11 @@ SDName: Silithus
 SD%Complete: 100
 SDComment: Quest support: 8519.
 SDCategory: Silithus
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_anachronos_the_ancient
 EndContentData */
 

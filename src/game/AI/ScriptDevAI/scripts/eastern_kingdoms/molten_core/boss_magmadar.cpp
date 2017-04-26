@@ -19,9 +19,11 @@ SDName: Boss_Magmadar
 SD%Complete: 100
 SDComment: Complete
 SDCategory: Molten Core
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "molten_core.h"
 
 enum

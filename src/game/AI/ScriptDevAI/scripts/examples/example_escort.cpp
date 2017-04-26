@@ -19,9 +19,11 @@ SDName: Example_Escort
 SD%Complete: 100
 SDComment: Script used for testing escortAI
 SDCategory: Script Examples
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 enum

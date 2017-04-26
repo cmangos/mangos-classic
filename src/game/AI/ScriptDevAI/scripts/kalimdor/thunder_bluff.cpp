@@ -19,9 +19,11 @@ SDName: Thunder_Bluff
 SD%Complete: 0
 SDComment:
 SDCategory: Thunder Bluff
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 /*#####
 #

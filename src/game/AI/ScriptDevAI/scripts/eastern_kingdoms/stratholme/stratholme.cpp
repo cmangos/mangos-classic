@@ -19,9 +19,11 @@ SDName: Stratholme
 SD%Complete: 100
 SDComment: Misc mobs for instance. GO-script to apply aura and start event for quest 8945
 SDCategory: Stratholme
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 go_service_gate
 go_gauntlet_gate
 go_stratholme_postbox

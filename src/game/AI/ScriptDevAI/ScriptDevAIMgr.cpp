@@ -2,6 +2,7 @@
 * This program is free software licensed under GPL version 2
 * Please see the included DOCS/LICENSE.TXT for more information */
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "Policies/Singleton.h"
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
@@ -11,6 +12,7 @@
 #include "system/system.h"
 #include "ScriptDevAIMgr.h"
 #include "include/sc_creature.h"
+#include "Entities/Player.h"
 
 #ifdef BUILD_SCRIPTDEV
   #include "system/ScriptLoader.h"

@@ -19,9 +19,11 @@ SDName: Ruins of Ahn'Qiraj
 SD%Complete: 40
 SDComment:
 SDCategory: Ruins of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 mob_anubisath_guardian
 EndContentData */
 

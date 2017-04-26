@@ -19,9 +19,11 @@ SDName: Boss_Noth
 SD%Complete: 80
 SDComment: Summons need verify, need better phase-switch support (unattackable?)
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "naxxramas.h"
 
 enum

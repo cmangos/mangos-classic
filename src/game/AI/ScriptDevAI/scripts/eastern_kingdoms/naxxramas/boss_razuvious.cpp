@@ -19,9 +19,11 @@ SDName: Boss_Razuvious
 SD%Complete: 90%
 SDComment: TODO: Timers and sounds need confirmation
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "naxxramas.h"
 
 enum

@@ -19,9 +19,11 @@ SDName: Boss_Rajaxx
 SD%Complete: 100
 SDComment: General Andorov script
 SDCategory: Ruins of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "ruins_of_ahnqiraj.h"
 
 enum

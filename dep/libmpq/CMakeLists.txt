@@ -16,7 +16,6 @@ DisableWarnings()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/libmpq
-                    ${CMAKE_CURRENT_SOURCE_DIR}/win
                     ${CMAKE_SOURCE_DIR}/dep/src/zlib
                     ${CMAKE_SOURCE_DIR}/dep/src/bzip2)
 
@@ -24,4 +23,8 @@ file(GLOB mpqfiles libmpq/*.c libmpq/*.h *.h)
 
 add_library(mpqlib STATIC ${mpqfiles})
 target_link_libraries(mpqlib zlib)
-target_compile_options(mpqlib PRIVATE /wd4103)
+
+if(MSVC)
+  target_compile_options(mpqlib PRIVATE /wd4103)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/win)
+endif()

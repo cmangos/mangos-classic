@@ -19,9 +19,11 @@ SDName: Boss_Fankriss
 SD%Complete: 100
 SDComment: sound not implemented
 SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "temple_of_ahnqiraj.h"
 
 enum
