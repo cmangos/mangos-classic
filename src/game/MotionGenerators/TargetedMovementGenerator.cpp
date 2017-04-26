@@ -22,8 +22,8 @@
 #include "Entities/Creature.h"
 #include "Entities/Player.h"
 #include "World/World.h"
-#include "movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSplineInit.h"
+#include "Movement/MoveSpline.h"
 
 //-----------------------------------------------//
 template<class T, typename D>

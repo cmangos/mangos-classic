@@ -19,9 +19,11 @@ SDName: Swamp_of_Sorrows
 SD%Complete: 100
 SDComment: Quest support: 1393
 SDCategory: Swap of Sorrows
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_galen_goodward
 EndContentData */
 

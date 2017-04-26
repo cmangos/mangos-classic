@@ -19,9 +19,11 @@ SDName: Boss_Razorgore
 SD%Complete: 95
 SDComment: Timers may be improved.
 SDCategory: Blackwing Lair
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "blackwing_lair.h"
 
 enum

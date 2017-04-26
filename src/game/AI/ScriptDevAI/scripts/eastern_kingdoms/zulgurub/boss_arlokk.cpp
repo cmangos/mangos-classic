@@ -19,9 +19,11 @@ SDName: Boss_Arlokk
 SD%Complete: 80
 SDComment: Vanish spell is replaced by workaround; Timers
 SDCategory: Zul'Gurub
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "zulgurub.h"
 
 enum

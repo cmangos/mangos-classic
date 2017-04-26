@@ -19,9 +19,11 @@ SDName: Boss_Mograine_And_Whitemane
 SD%Complete: 90
 SDComment:
 SDCategory: Scarlet Monastery
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "scarlet_monastery.h"
 
 enum

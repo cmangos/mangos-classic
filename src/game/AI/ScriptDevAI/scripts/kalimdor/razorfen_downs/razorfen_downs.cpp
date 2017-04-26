@@ -19,9 +19,11 @@ SDName: Razorfen_Downs
 SD%Complete: 100
 SDComment: Quest 3525
 SDCategory: Razorfen Downs
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_belnistrasz
 EndContentData */
 

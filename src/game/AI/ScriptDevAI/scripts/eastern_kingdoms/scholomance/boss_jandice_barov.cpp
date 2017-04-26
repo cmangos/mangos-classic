@@ -19,9 +19,11 @@ SDName: Boss_jandicebarov
 SD%Complete: 100
 SDComment:
 SDCategory: Scholomance
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 enum
 {

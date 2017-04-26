@@ -19,9 +19,11 @@ SDName: Boss_Sartura
 SD%Complete: 95
 SDComment:
 SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "temple_of_ahnqiraj.h"
 
 enum

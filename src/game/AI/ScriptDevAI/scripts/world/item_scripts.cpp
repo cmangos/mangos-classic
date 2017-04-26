@@ -19,9 +19,11 @@ SDName: Item_Scripts
 SD%Complete: 100
 SDComment: quest 4743
 SDCategory: Items
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 EndContentData */
 
 

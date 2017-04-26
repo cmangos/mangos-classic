@@ -19,9 +19,11 @@ SDName: Boss_Kurinnaxx
 SD%Complete: 90
 SDComment: Summon Player ability NYI
 SDCategory: Ruins of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 enum
 {

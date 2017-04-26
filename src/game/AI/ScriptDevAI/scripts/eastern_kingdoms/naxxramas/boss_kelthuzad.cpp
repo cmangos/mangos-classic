@@ -19,9 +19,11 @@ SDName: Boss_KelThuzad
 SD%Complete: 90
 SDComment: TODO: Tweak Positions and look more into say timers.
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "naxxramas.h"
 
 enum

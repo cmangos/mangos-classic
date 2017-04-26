@@ -19,9 +19,11 @@ SDName: Boss_Thekal
 SD%Complete: 95
 SDComment: Almost finished.
 SDCategory: Zul'Gurub
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "zulgurub.h"
 
 enum

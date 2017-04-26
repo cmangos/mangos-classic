@@ -19,9 +19,11 @@ SDName: redridge_mountains
 SD%Complete: 100%
 SDComment: Quest support: 219
 SDCategory: Redridge Mountains
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_corporal_keeshan */
 
 

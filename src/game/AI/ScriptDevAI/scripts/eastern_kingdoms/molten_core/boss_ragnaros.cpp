@@ -19,9 +19,11 @@ SDName: Boss_Ragnaros
 SD%Complete: 99
 SDComment: Submerge emote is not played
 SDCategory: Molten Core
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "molten_core.h"
 
 enum

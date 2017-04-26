@@ -2,7 +2,7 @@
  * This program is free software licensed under GPL version 2
  * Please see the included DOCS/LICENSE.TXT for more information */
 
-
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "Entities/Item.h"
 #include "Spells/Spell.h"
 #include "WorldPacket.h"

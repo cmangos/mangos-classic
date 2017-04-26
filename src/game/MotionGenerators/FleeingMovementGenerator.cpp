@@ -20,8 +20,8 @@
 #include "AI/BaseAI/CreatureAI.h"
 #include "FleeingMovementGenerator.h"
 #include "Globals/ObjectAccessor.h"
-#include "movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSplineInit.h"
+#include "Movement/MoveSpline.h"
 #include "PathFinder.h"
 
 #define MIN_QUIET_DISTANCE 28.0f

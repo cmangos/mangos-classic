@@ -44,7 +44,7 @@
 #include "Grids/CellImpl.h"
 #include "MotionGenerators/MovementGenerator.h"
 #include "Movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSpline.h"
 #include "Entities/CreatureLinkingMgr.h"
 
 #include <math.h>

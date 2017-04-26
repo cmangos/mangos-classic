@@ -19,9 +19,11 @@ SDName: Boss_Sapphiron
 SD%Complete: 80
 SDComment: Some spells need core implementation
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
-/* Additional comments:
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* Additional comments:
  * Bugged spells:   28560 (needs maxTarget = 1, Summon of 16474 implementation, TODO, 30s duration)
  *                  28526 (needs ScriptEffect to cast 28522 onto random target)
  *

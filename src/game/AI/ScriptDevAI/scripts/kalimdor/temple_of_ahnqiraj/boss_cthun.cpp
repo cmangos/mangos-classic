@@ -19,9 +19,11 @@ SDName: Boss_Cthun
 SD%Complete: 95
 SDComment: Transform spell has some minor core issues. Eject from stomach event contains workarounds because of the missing spells. Digestive Acid should be handled in core.
 SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "temple_of_ahnqiraj.h"
 
 enum

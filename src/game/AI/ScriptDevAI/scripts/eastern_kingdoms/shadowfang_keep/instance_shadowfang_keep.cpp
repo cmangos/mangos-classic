@@ -19,9 +19,11 @@ SDName: Instance_Shadowfang_Keep
 SD%Complete: 90
 SDComment:
 SDCategory: Shadowfang Keep
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "shadowfang_keep.h"
 
 instance_shadowfang_keep::instance_shadowfang_keep(Map* pMap) : ScriptedInstance(pMap)

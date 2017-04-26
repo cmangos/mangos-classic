@@ -19,9 +19,11 @@ SDName: Boss_Chromaggus
 SD%Complete: 95
 SDComment: Chromatic Mutation disabled due to lack of core support
 SDCategory: Blackwing Lair
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "blackwing_lair.h"
 
 enum

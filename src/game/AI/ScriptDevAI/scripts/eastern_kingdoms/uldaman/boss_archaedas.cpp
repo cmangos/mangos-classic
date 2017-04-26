@@ -19,9 +19,11 @@ SDName: Boss_Archaedas
 SD%Complete: 100
 SDComment:
 SDCategory: Uldaman
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "uldaman.h"
 
 enum

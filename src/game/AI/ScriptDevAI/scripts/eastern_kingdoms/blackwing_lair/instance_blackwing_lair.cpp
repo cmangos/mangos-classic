@@ -19,9 +19,11 @@ SDName: Instance_Blackwing_Lair
 SD%Complete: 90
 SDComment:
 SDCategory: Blackwing Lair
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "blackwing_lair.h"
 
 instance_blackwing_lair::instance_blackwing_lair(Map* pMap) : ScriptedInstance(pMap),

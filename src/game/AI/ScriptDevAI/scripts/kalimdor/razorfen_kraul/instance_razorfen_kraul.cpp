@@ -19,9 +19,11 @@ SDName: instance_razorfen_kraul
 SD%Complete: 50
 SDComment:
 SDCategory: Razorfen Kraul
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "razorfen_kraul.h"
 
 instance_razorfen_kraul::instance_razorfen_kraul(Map* pMap) : ScriptedInstance(pMap),

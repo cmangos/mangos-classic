@@ -21,8 +21,8 @@
 #include "AI/BaseAI/CreatureAI.h"
 #include "Entities/TemporarySummon.h"
 #include "World/World.h"
-#include "movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSplineInit.h"
+#include "Movement/MoveSpline.h"
 
 //----- Point Movement Generator
 template<class T>

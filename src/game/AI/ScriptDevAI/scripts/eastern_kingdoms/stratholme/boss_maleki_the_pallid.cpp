@@ -19,9 +19,11 @@ SDName: Boss_Maleki_the_Pallid
 SD%Complete: 100
 SDComment:
 SDCategory: Stratholme
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 enum
 {

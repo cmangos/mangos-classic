@@ -19,9 +19,11 @@ SDName: instance_sunken_temple
 SD%Complete: 90
 SDComment: Hakkar Summon Event needs more sources to improve
 SDCategory: Sunken Temple
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "sunken_temple.h"
 
 instance_sunken_temple::instance_sunken_temple(Map* pMap) : ScriptedInstance(pMap),

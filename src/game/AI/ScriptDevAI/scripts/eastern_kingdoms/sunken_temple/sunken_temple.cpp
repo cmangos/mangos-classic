@@ -19,9 +19,11 @@ SDName: Sunken_Temple
 SD%Complete: 100
 SDComment: Quest support: 8733
 SDCategory: Sunken Temple
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 at_shade_of_eranikus
 npc_malfurion_stormrage
 event_antalarion_statue_activation

@@ -19,9 +19,11 @@ SDName: Boss_Viscidus
 SD%Complete: 90
 SDComment: ToDo: Use aura proc to handle freeze event instead of direct function
 SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "temple_of_ahnqiraj.h"
 
 enum

@@ -19,9 +19,11 @@ SDName: Zulfarrak
 SD%Complete: 100
 SDComment:
 SDCategory: Zul'Farrak
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 event_go_zulfarrak_gong
 event_spell_unlocking
 at_zulfarrak

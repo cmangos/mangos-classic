@@ -19,9 +19,11 @@ SDName: Boss_Vaelastrasz
 SD%Complete: 75
 SDComment: Burning Adrenaline not correctly implemented in core
 SDCategory: Blackwing Lair
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "blackwing_lair.h"
 
 enum

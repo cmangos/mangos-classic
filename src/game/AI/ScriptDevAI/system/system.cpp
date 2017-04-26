@@ -2,6 +2,7 @@
 * This program is free software licensed under GPL version 2
 * Please see the included DOCS/LICENSE.TXT for more information */
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "system.h"
 #include "ProgressBar.h"
 #include "Globals/ObjectMgr.h"

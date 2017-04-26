@@ -19,9 +19,11 @@ SDName: instance_dire_maul
 SD%Complete: 30
 SDComment: Basic Support - Most events and quest-related stuff missing
 SDCategory: Dire Maul
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "dire_maul.h"
 
 instance_dire_maul::instance_dire_maul(Map* pMap) : ScriptedInstance(pMap),

@@ -19,9 +19,11 @@ SDName: Instance_Scarlet_Monastery
 SD%Complete: 50
 SDComment:
 SDCategory: Scarlet Monastery
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "scarlet_monastery.h"
 
 instance_scarlet_monastery::instance_scarlet_monastery(Map* pMap) : ScriptedInstance(pMap)

@@ -19,9 +19,11 @@ SDName: Western_Plaguelands
 SD%Complete: 90
 SDComment: Quest support: 5216, 5219, 5222, 5225, 5229, 5231, 5233, 5235, 5862, 5944.
 SDCategory: Western Plaguelands
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_the_scourge_cauldron
 npc_taelan_fordring
 npc_isillien

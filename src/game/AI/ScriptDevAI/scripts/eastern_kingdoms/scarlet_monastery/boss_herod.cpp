@@ -19,9 +19,11 @@ SDName: Boss_Herod
 SD%Complete: 95
 SDComment: Should in addition spawn Myrmidons in the hallway outside
 SDCategory: Scarlet Monastery
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 enum

@@ -19,9 +19,11 @@ SDName: Boss_Darkmaster_Gandling
 SD%Complete: 100
 SDComment:
 SDCategory: Scholomance
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "scholomance.h"
 
 enum

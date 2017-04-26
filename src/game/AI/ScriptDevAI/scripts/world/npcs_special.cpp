@@ -20,9 +20,10 @@ SD%Complete: 100
 SDComment: To be used for special NPCs that are located globally.
 SDCategory: NPCs
 EndScriptData
+
 */
 
-
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Globals/ObjectMgr.h"
 #include "GameEvents/GameEventMgr.h"

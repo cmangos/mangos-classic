@@ -19,9 +19,11 @@ SDName: Boss_Golemagg
 SD%Complete: 80
 SDComment: Rager need to be tied to boss (Despawn on boss-death)
 SDCategory: Molten Core
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "molten_core.h"
 
 enum

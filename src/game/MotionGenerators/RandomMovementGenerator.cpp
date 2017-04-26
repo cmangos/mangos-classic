@@ -20,8 +20,8 @@
 #include "RandomMovementGenerator.h"
 #include "Maps/Map.h"
 #include "Util.h"
-#include "movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSplineInit.h"
+#include "Movement/MoveSpline.h"
 
 template<>
 RandomMovementGenerator<Creature>::RandomMovementGenerator(const Creature& creature): i_verticalZ(0)

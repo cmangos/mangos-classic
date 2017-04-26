@@ -19,9 +19,11 @@ SDName: Boss_Hakkar
 SD%Complete: 100
 SDComment:
 SDCategory: Zul'Gurub
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "zulgurub.h"
 
 enum

@@ -19,9 +19,11 @@ SDName: Boss_Onyxia
 SD%Complete: 85
 SDComment: Phase 3 need additional code. The spawning Whelps need GO-Support.
 SDCategory: Onyxia's Lair
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "onyxias_lair.h"
 
 enum

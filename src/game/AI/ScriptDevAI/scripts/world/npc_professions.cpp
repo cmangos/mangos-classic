@@ -19,9 +19,11 @@ SDName: Npc_Professions
 SD%Complete: 80
 SDComment: Provides learn/unlearn/relearn-options for professions. Not supported: Unlearn engineering, re-learn engineering, re-learn leatherworking.
 SDCategory: NPCs
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 /*
 A few notes for future developement:

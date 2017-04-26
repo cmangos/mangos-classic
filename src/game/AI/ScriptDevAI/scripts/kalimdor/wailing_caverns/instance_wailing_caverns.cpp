@@ -19,9 +19,11 @@ SDName: Instance_Wailing_Caverns
 SD%Complete: 90
 SDComment:
 SDCategory: Wailing Caverns
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "wailing_caverns.h"
 
 instance_wailing_caverns::instance_wailing_caverns(Map* pMap) : ScriptedInstance(pMap)

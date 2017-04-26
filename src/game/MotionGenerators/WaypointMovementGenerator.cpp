@@ -23,8 +23,8 @@
 #include "AI/BaseAI/CreatureAI.h"
 #include "WaypointManager.h"
 #include "DBScripts/ScriptMgr.h"
-#include "movement/MoveSplineInit.h"
-#include "movement/MoveSpline.h"
+#include "Movement/MoveSplineInit.h"
+#include "Movement/MoveSpline.h"
 
 #include <cassert>
 

@@ -19,9 +19,11 @@ SDName: Boss_Victor_Nefarius
 SD%Complete: 90
 SDComment: Small adjustments needed; Timers
 SDCategory: Blackwing Lair
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "blackwing_lair.h"
 
 enum

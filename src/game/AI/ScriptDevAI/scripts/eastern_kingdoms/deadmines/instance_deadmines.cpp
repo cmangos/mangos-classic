@@ -19,9 +19,11 @@ SDName: Instance_Deadmines
 SD%Complete: 0
 SDComment: Placeholder
 SDCategory: Deadmines
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "deadmines.h"
 
 instance_deadmines::instance_deadmines(Map* pMap) : ScriptedInstance(pMap),

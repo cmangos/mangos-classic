@@ -19,9 +19,11 @@ SDName: Boss_Heigan
 SD%Complete: 80
 SDComment: Missing poison inside the tunnel in phase 2
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "naxxramas.h"
 
 enum

@@ -19,9 +19,11 @@ SDName: instance_blackrock_spire
 SD%Complete: 75
 SDComment: The Stadium event is missing some yells. Seal of Ascension related event NYI
 SDCategory: Blackrock Spire
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "blackrock_spire.h"
 
 enum

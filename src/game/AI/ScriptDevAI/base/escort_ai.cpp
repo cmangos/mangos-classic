@@ -9,7 +9,7 @@ SDComment:
 SDCategory: Npc
 EndScriptData */
 
-
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "escort_ai.h"
 #include "../system/system.h"
 

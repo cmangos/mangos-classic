@@ -19,9 +19,11 @@ SDName: Boss_Sulfuron_Harbringer
 SD%Complete: 80
 SDComment: Spells Dark strike and Flamespear need confirmation
 SDCategory: Molten Core
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "molten_core.h"
 
 enum

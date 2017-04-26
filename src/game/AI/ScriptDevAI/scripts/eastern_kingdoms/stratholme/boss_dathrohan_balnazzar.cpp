@@ -19,9 +19,11 @@ SDName: Boss_Dathrohan_Balnazzar
 SD%Complete: 95
 SDComment: Possibly need to fix/improve summons after death
 SDCategory: Stratholme
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "stratholme.h"
 
 enum

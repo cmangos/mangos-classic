@@ -20,7 +20,3 @@
 #include "Spells/SpellAuras.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
-#include "AI/ScriptDevAI/include/sc_creature.h"
-#include "AI/ScriptDevAI/include/sc_gossip.h"
-#include "AI/ScriptDevAI/include/sc_grid_searchers.h"
-#include "AI/ScriptDevAI/include/sc_instance.h"

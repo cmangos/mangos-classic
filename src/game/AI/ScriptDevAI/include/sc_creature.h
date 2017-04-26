@@ -7,6 +7,7 @@
 
 #include "Chat/Chat.h"
 #include "Server/DBCStores.h"                                      // Mostly only used the Lookup acces, but a few cases really do use the DBC-Stores
+#include "AI/BaseAI/CreatureAI.h"
 
 // Spell targets used by SelectSpell
 enum SelectTarget

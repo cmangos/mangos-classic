@@ -19,9 +19,11 @@ SDName: Boss_Shazzrah
 SD%Complete: 75
 SDComment: Teleport NYI (need core support, remove hack here when implemented)
 SDCategory: Molten Core
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "molten_core.h"
 
 enum

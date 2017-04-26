@@ -19,9 +19,11 @@ SDName: Instance_Molten_Core
 SD%Complete: 100
 SDComment:
 SDCategory: Molten Core
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "molten_core.h"
 
 static sSpawnLocation m_aBosspawnLocs[MAX_MAJORDOMO_ADDS] =

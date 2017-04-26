@@ -19,9 +19,11 @@ SDName: Boss_Nefarian
 SD%Complete: 80
 SDComment: Some issues with class calls effecting more than one class
 SDCategory: Blackwing Lair
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "blackwing_lair.h"
 #include "Entities/TemporarySummon.h"
 

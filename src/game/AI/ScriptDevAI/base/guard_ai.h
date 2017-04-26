@@ -5,6 +5,8 @@
 #ifndef SC_GUARDAI_H
 #define SC_GUARDAI_H
 
+#include "AI/ScriptDevAI/include/sc_creature.h"
+
 enum
 {
     GENERIC_CREATURE_COOLDOWN       = 5000,

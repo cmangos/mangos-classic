@@ -19,9 +19,11 @@ SDName: Boss_Maexxna
 SD%Complete: 90
 SDComment: Web wrap effect still needs more love and research.
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "naxxramas.h"
 
 enum

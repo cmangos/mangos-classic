@@ -1,24 +1,25 @@
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include "wdt.h"
+#include <string.h>
 
 bool wdt_MWMO::prepareLoadedData()
 {
-    if (fcc != 'MWMO')
+    if (!strncmp(fcc_txt, "MWMO", 4))
         return false;
     return true;
 }
 
 bool wdt_MPHD::prepareLoadedData()
 {
-    if (fcc != 'MPHD')
+    if (!strncmp(fcc_txt, "MPHD", 4))
         return false;
     return true;
 }
 
 bool wdt_MAIN::prepareLoadedData()
 {
-    if (fcc != 'MAIN')
+    if (!strncmp(fcc_txt, "MAIN", 4))
         return false;
     return true;
 }

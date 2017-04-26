@@ -19,9 +19,11 @@ SDName: Boss_Ayamiss
 SD%Complete: 80
 SDComment: Timers and summon coords need adjustments
 SDCategory: Ruins of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "ruins_of_ahnqiraj.h"
 
 enum

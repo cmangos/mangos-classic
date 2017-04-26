@@ -19,9 +19,11 @@ SDName: Generic_Creature
 SD%Complete: 80
 SDComment: Should be replaced with core based AI
 SDCategory: Creatures
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 #define GENERIC_CREATURE_COOLDOWN   5000
 

@@ -19,9 +19,11 @@ SDName: Boss_Gothik
 SD%Complete: 95
 SDComment: Prevent Gothik from turning and "in combat state" while on balcony
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "naxxramas.h"
 
 enum

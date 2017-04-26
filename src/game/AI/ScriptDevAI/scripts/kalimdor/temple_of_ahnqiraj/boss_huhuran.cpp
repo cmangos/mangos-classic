@@ -19,9 +19,11 @@ SDName: Boss_Huhuran
 SD%Complete: 90
 SDComment: Timed enrage NYI; Timers
 SDCategory: Temple of Ahn'Qiraj
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "temple_of_ahnqiraj.h"
 
 enum

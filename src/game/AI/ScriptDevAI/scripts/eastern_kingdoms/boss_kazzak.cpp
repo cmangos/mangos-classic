@@ -19,9 +19,11 @@ SDName: Boss_Kazzak
 SD%Complete: 90
 SDComment: Some timers need to be confirmed.
 SDCategory: Bosses
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 enum
 {

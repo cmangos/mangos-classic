@@ -33,19 +33,30 @@ endfunction()
 
 # Macro that replace /Wx with /W0 (supposed to disable warnings)
 MACRO(DisableWarnings)
+  if(MSVC)
+    set(DisableWarningsFlag " /W0")
+    set(SearchWarningsFlag1 "/W[0-4]")
+    set(SearchWarningsFlag2 "/Wall")
+  else()
+    set(DisableWarningsFlag " -w")
+    set(SearchWarningsFlag1 "-[+W?]pedentic")
+    set(SearchWarningsFlag2 "-Wall")
+  endif()
   foreach(temp_flag
           CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
           CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS)
-     if(${temp_flag} MATCHES "/W[0-4]")
-        string(REGEX REPLACE "/W[0-4]" "/W0" ${temp_flag} "${${temp_flag}}")
+     if(${temp_flag} MATCHES "${SearchWarningsFlag1}")
+        string(REGEX REPLACE "${SearchWarningsFlag1}" "${DisableWarningsFlag}" ${temp_flag} "${${temp_flag}}")
+     elseif(${temp_flag} MATCHES "${SearchWarningsFlag2}")
+        string(REGEX REPLACE "${SearchWarningsFlag2}" "${DisableWarningsFlag}" ${temp_flag} "${${temp_flag}}")
      else()
-        string(CONCAT ${temp_flag} "${${temp_flag}} /W0")
+        string(CONCAT ${temp_flag} "${${temp_flag}}" "${DisableWarningsFlag}")
      endif()
   endforeach()
 ENDMACRO()
 
 # Remove duplicate entries in default flags. (occur when after a second make or configure)
-RemoveDuplicateSubstring(${CMAKE_CXX_FLAGS} CMAKE_CXX_FLAGS)
+RemoveDuplicateSubstring("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS)
 
 include(cmake/common.cmake)
 
@@ -105,7 +116,7 @@ endif()
 # find Git: used to get the revision number
 find_package(Git)
 
-if (NOT WIN32)
+if(NOT MSVC)
   # Include cotire to manage PCH support
   include(cotire)
 endif()
@@ -237,6 +248,11 @@ endif()
 
 set(DEFINITIONS_RELEASE NDEBUG)
 set(DEFINITIONS_DEBUG _DEBUG MANGOS_DEBUG)
+
+if(NOT BUILD_GAME_SERVER AND BUILD_SCRIPTDEV)
+  set(BUILD_SCRIPTDEV OFF)
+  message(STATUS "BUILD_SCRIPTDEV forced to OFF due to BUILD_GAME_SERVER is not set")
+endif()
 
 # print out the results before continuing
 include(cmake/showoptions.cmake)

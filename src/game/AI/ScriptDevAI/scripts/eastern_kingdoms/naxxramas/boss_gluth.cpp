@@ -19,9 +19,11 @@ SDName: Boss_Gluth
 SD%Complete: 99
 SDComment: TODO: Test encounter.
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
+*/
 
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "naxxramas.h"
 
 enum
