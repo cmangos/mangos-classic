@@ -460,10 +460,18 @@ CreatureAI* GetAI_npc_ogron(Creature* pCreature)
 
 enum
 {
+    SPELL_ENCAGE                = 7081,                     // guessed
+    TELEPORT_VISUAL             = 12980,                    // guessed
+    SPELL_SELF_STUN             = 9032,                     // guessed
+    SPELL_TELEPORT              = 7794,
+    SPELL_TELEPORT_GROUP        = 7143,
+
     SAY_PROGRESS_1_TER          = -1000411,
     SAY_PROGRESS_2_HEN          = -1000412,
     SAY_PROGRESS_3_TER          = -1000413,
     SAY_PROGRESS_4_TER          = -1000414,
+    SAY_FAREWELL_TER            = -1999926,
+
     EMOTE_SURRENDER             = -1000415,
 
     QUEST_MISSING_DIPLO_PT16    = 1324,
@@ -471,15 +479,120 @@ enum
 
     NPC_SENTRY                  = 5184,                     // helps hendel
     NPC_JAINA                   = 4968,                     // appears once hendel gives up
-    NPC_TERVOSH                 = 4967
+    NPC_TERVOSH                 = 4967,
+    NPC_PAINED                  = 4965,
+    NPC_HENDEL                  = 4966,
+
+    MD_PHASE_NONE               = 0,                        // do nothing
+    MD_PHASE_FIGHT              = 1,                        // fight with a player
+    MD_PHASE_SUMMON             = 2,                        
+    MD_PHASE_SPEECH             = 3,
+    MD_PHASE_COMPLETE           = 4
+
 };
 
-// TODO: develop this further, end event not created
+struct Spawn
+{
+    float x, y, z, o;
+    float dest_x, dest_y, dest_z;
+    uint32 entry;
+};
+
+const Spawn spawns[] = 
+{
+    { 
+        -2857.604492f, -3354.784912f, 35.369640f, 3.466099f,
+        -2881.546631f, -3346.477539f, 34.143719f,
+        NPC_TERVOSH
+    },
+    { 
+        -2858.120117f, -3358.469971f, 36.086300f, 3.466099f,
+        -2879.697998f, -3347.789063f, 34.772892f,
+        NPC_JAINA 
+    },
+    {
+        -2857.379883f, -3351.370117f, 34.178001f, 3.466099f,
+        -2879.959961f, -3344.469971f, 34.670502f,
+        NPC_PAINED
+    }
+};
+
+const Spawn guardsSpawn[] =
+{
+    {
+        -2889.72f, -3337.92f, 32.4705f, 5.58505f,
+        0.0f, 0.0f, 0.0f,
+        NPC_SENTRY
+    }, 
+    {
+        -2891.22f, -3344.70f, 32.3499f, 2.9721f,
+        0.0f, 0.0f, 0.0f,
+        NPC_SENTRY
+    }
+};
+
+#define TEMPSUMMON_DURATION 60000 // 60 sec
+#define SPEECH_DELAY        4000  // 4 sec
+
+
+#define ARRIVE_TIMER        4000
+#define ENCAGE_TIMER        ARRIVE_TIMER + 1500
+#define WAVE_TIMER          TEMPSUMMON_DURATION - 7500
+#define TELEPORT_TIMER      TEMPSUMMON_DURATION - 2500
+#define TELEPORT_BACK_TIMER TEMPSUMMON_DURATION - 1500
+
 struct npc_private_hendelAI : public ScriptedAI
 {
-    npc_private_hendelAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_private_hendelAI(Creature* pCreature):
+        ScriptedAI(pCreature)
+    {
+        Reset();
+    }
 
-    void Reset() override {}
+    uint32 m_uiQuestPhase;
+    uint32 m_uiSpeechDelay;
+    uint32 m_uiArriveTimer;
+    uint32 m_uiDespawnTimer;
+    uint32 m_uiWave;
+    uint32 m_uiTeleportTimer;
+    uint32 m_uiTeleportBack;
+    uint32 m_uiSayCounter;
+    
+
+    ObjectGuid m_guidPlayer;
+    GuidList m_guids;
+
+    void Reset() override 
+    {
+        m_guidPlayer.Clear();
+        m_uiSayCounter    = 0;
+        m_uiQuestPhase    = MD_PHASE_NONE;
+        m_uiArriveTimer   = ARRIVE_TIMER;
+        m_uiWave          = WAVE_TIMER;
+        m_uiTeleportTimer = TELEPORT_TIMER;
+        m_uiTeleportBack  = TELEPORT_BACK_TIMER;
+        m_uiSpeechDelay   = SPEECH_DELAY;
+        m_uiDespawnTimer  = TEMPSUMMON_DURATION;
+        m_creature->setFaction(m_creature->GetCreatureInfo()->FactionAlliance);
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP); 
+        m_creature->SetVisibility(VISIBILITY_ON);
+
+    }
+
+    Creature* GetCreature(uint32 entry)
+    {
+        if (!m_guids.empty())
+        {
+            for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+            {
+                Creature *pCreature = m_creature->GetMap()->GetCreature(*itr);
+
+                if (pCreature && pCreature->GetEntry() == entry)
+                    return pCreature;
+            }
+        }
+        return nullptr;
+    }
 
     void AttackedBy(Unit* pAttacker) override
     {
@@ -492,26 +605,329 @@ struct npc_private_hendelAI : public ScriptedAI
         AttackStart(pAttacker);
     }
 
+    void JustSummoned(Creature* pCreature) override
+    {
+        m_guids.push_back(pCreature->GetObjectGuid());
+    }
+
+    void DoGiveUp()
+    {
+        DoScriptText(EMOTE_SURRENDER, m_creature);
+        m_creature->RemoveAllAuras();
+        m_creature->setFaction(m_creature->GetCreatureInfo()->FactionAlliance);
+        m_creature->DeleteThreatList();
+
+        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer))
+            pPlayer->CombatStop(true);
+        
+        
+        if (MotionMaster* pMotionMaster = m_creature->GetMotionMaster())
+            pMotionMaster->MoveTargetedHome();
+
+        DoSummon();
+        m_uiQuestPhase = MD_PHASE_SUMMON;
+    }
+
+    void JustReachedHome() override
+    {
+        if (m_uiQuestPhase != MD_PHASE_NONE && m_uiQuestPhase != MD_PHASE_FIGHT)
+            m_creature->CastSpell(m_creature, SPELL_SELF_STUN, TRIGGERED_NONE);
+
+    }
+
+    void EnterEvadeMode() override
+    {
+        
+        if (!m_guids.empty())
+        {
+            for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+            {
+                Creature* pCreature = m_creature->GetMap()->GetCreature(*itr);
+                if (pCreature && pCreature->GetEntry() == NPC_SENTRY)
+                {
+                    pCreature->setFaction(pCreature->GetCreatureInfo()->FactionAlliance);
+                    if (CreatureAI* AI = pCreature->AI())
+                        AI->EnterEvadeMode();
+
+                }
+            }
+        }
+        ScriptedAI::EnterEvadeMode();
+
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        switch (m_uiQuestPhase)
+        {
+            case MD_PHASE_FIGHT:
+            case MD_PHASE_NONE:
+                ScriptedAI::UpdateAI(uiDiff);
+                break;
+            case MD_PHASE_SUMMON:
+                if (m_uiArriveTimer < uiDiff)
+                {
+                    if (Creature* pTervosh = GetCreature(NPC_TERVOSH))
+                    {
+                        // hack
+                        float angle = pTervosh->GetAngle(m_creature);
+                        pTervosh->SetRespawnCoord(spawns[0].dest_x, spawns[0].dest_y, spawns[0].dest_z , angle);
+                        pTervosh->CastSpell(m_creature, SPELL_ENCAGE, TRIGGERED_NONE);
+
+                        for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+                        {
+                            Creature* pCreature = m_creature->GetMap()->GetCreature(*itr);
+                            if (pCreature && pCreature->GetEntry() == NPC_SENTRY && pCreature->isAlive())
+                            {
+                                // if Creature has stun aura MoveFleeing will break
+                                pCreature->RemoveAllAuras();
+                                pCreature->GetMotionMaster()->MoveFleeing(pTervosh, 30000);
+                            }
+
+                        }
+                    }
+
+                    SetFacing(m_creature);
+
+                    m_uiQuestPhase  = MD_PHASE_SPEECH;
+                }
+                else
+                    m_uiArriveTimer -= uiDiff;
+                break;
+            case MD_PHASE_SPEECH:
+                if (m_uiSpeechDelay < uiDiff)
+                {
+                    switch (m_uiSayCounter)
+                    {
+                        case 0:
+                            if (Creature* pTervosh = GetCreature(NPC_TERVOSH))
+                                DoScriptText(SAY_PROGRESS_1_TER, pTervosh);
+                            
+                            break;
+                        case 1:
+                            DoScriptText(SAY_PROGRESS_2_HEN, m_creature);
+                            break;
+                        case 2:
+                           
+                            if (Creature *pTervosh = GetCreature(NPC_TERVOSH))
+                            {
+                                DoScriptText(SAY_PROGRESS_3_TER, pTervosh);
+                                pTervosh->CastSpell(m_creature, SPELL_TELEPORT, TRIGGERED_NONE);
+                            }
+                            m_uiSpeechDelay = 1000;
+                            break;
+                        case 3:
+                            // another hack
+                            m_creature->SetVisibility(VISIBILITY_OFF);
+                            DoDespawnGuards();
+
+                            if (Creature *pCreature = GetCreature(NPC_TERVOSH))
+                            {
+                                DoScriptText(SAY_PROGRESS_4_TER, pCreature);
+                                pCreature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+                            }
+
+                            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer))
+                                pPlayer->GroupEventHappens(QUEST_MISSING_DIPLO_PT16, m_creature);
+
+                            m_uiQuestPhase = MD_PHASE_COMPLETE;
+                            return;
+                    }
+                    if (m_uiSayCounter != 2)
+                        m_uiSpeechDelay = SPEECH_DELAY;
+                    ++m_uiSayCounter;
+                }
+                else
+                    m_uiSpeechDelay -= uiDiff;
+                break;
+        }
+
+        if (m_uiQuestPhase != MD_PHASE_NONE && m_uiQuestPhase != MD_PHASE_FIGHT)
+        {
+            if (m_uiDespawnTimer < uiDiff)
+            {
+                m_creature->ForcedDespawn();
+                m_uiQuestPhase = MD_PHASE_NONE;
+                return;
+            }
+            else
+                m_uiDespawnTimer -= uiDiff;
+
+            if (m_uiWave < uiDiff)
+            {
+                Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer);
+                SetFacing(pPlayer);
+                
+                if (Creature* pCreature = GetCreature(NPC_JAINA))
+                    pCreature->HandleEmote(EMOTE_ONESHOT_WAVE);
+
+                if (Creature* pCreature = GetCreature(NPC_TERVOSH))
+                    DoScriptText(SAY_FAREWELL_TER, pCreature);
+
+                m_uiWave = WAVE_TIMER;
+            }
+            else
+                m_uiWave -= uiDiff;
+
+            if (m_uiTeleportTimer < uiDiff)
+            {
+                if (Creature* pCreature = GetCreature(NPC_JAINA))
+                    pCreature->CastSpell(m_creature, SPELL_TELEPORT, TRIGGERED_NONE);
+                m_uiTeleportTimer = TELEPORT_TIMER;
+            }
+            else
+                m_uiTeleportTimer -= uiDiff;
+
+            if (m_uiTeleportBack < uiDiff)
+            {
+                if (Creature* pJaina = GetCreature(NPC_JAINA))
+                    pJaina->CastSpell(pJaina, SPELL_TELEPORT_GROUP, TRIGGERED_NONE);
+
+                m_uiTeleportBack = TELEPORT_BACK_TIMER;
+            }
+            else
+                m_uiTeleportBack -= uiDiff;
+        }
+    }
+
+    void DoDespawnGuards()
+    {
+        if (!m_guids.empty())
+        {
+            for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+            {
+                if (TemporarySummon* pCreature = dynamic_cast<TemporarySummon*>(m_creature->GetMap()->GetCreature(*itr)))
+                {
+                    if (pCreature->GetEntry() == NPC_SENTRY)
+                        pCreature->UnSummon();
+
+                }
+
+            }
+        }
+    }
+
+    void SetFacing(WorldObject* obj)
+    {
+        if (!m_guids.empty())
+        {
+            for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+            {
+                Creature* pCreature = m_creature->GetMap()->GetCreature(*itr);
+                if (pCreature)
+                {
+                    uint32 entry = pCreature->GetEntry();
+                    switch (entry)
+                    {
+                        case NPC_JAINA:
+                        case NPC_TERVOSH:
+                        case NPC_PAINED:
+                            pCreature->SetFacingTo(pCreature->GetAngle(obj));
+                    }
+
+               }
+            }
+        }
+    }
+
+    void CallGuards()
+    {
+        Player* pPlayer = m_creature->GetMap()->GetPlayer(m_guidPlayer);
+
+        if (!pPlayer)
+            return;
+
+        if (!m_guids.empty())
+        {
+            for (GuidList::iterator itr = m_guids.begin(); itr != m_guids.end(); ++itr)
+            {
+                Creature* pCreature = m_creature->GetMap()->GetCreature(*itr);
+                if (pCreature && pCreature->GetEntry() == NPC_SENTRY)
+                {
+                    CreatureAI* AI = pCreature->AI();
+                    if (!AI)
+                        return;
+
+                    if (!pCreature->isAlive())
+                    {
+                        if (TemporarySummon* pTemporary = dynamic_cast<TemporarySummon*>(pCreature))
+                            pTemporary->UnSummon();
+                        
+                        float x, y, z, o;
+                        pCreature->GetRespawnCoord(x, y, z, &o);
+                        m_creature->SummonCreature(pCreature->GetEntry(), x, y, z, o, TEMPSUMMON_MANUAL_DESPAWN, 0);   // summon new guard
+                    }
+
+                    pCreature->setFaction(FACTION_HOSTILE);
+                    AI->AttackStart(pPlayer);
+                }
+            }
+        }
+
+    }
+
+    void JustRespawned() override
+    {
+        for (int i = 0; i < sizeof(guardsSpawn) / sizeof(Spawn); ++i)
+            m_creature->SummonCreature(guardsSpawn[i].entry, guardsSpawn[i].x, guardsSpawn[i].y, guardsSpawn[i].z, guardsSpawn[i].o, TEMPSUMMON_MANUAL_DESPAWN, 0);
+        ScriptedAI::JustRespawned();
+    }
+
+    void DoSummon()
+    {
+        for (int i = 0; i < sizeof(spawns) / sizeof(Spawn); ++i)
+        {
+            Creature* pCreature = m_creature->SummonCreature(spawns[i].entry, spawns[i].x, spawns[i].y, spawns[i].z, spawns[i].o, TEMPSUMMON_TIMED_DESPAWN, TEMPSUMMON_DURATION, false, true);
+            if (pCreature)
+            {
+                if (pCreature->GetEntry() == NPC_TERVOSH)
+                    pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
+                
+                pCreature->CastSpell(pCreature, TELEPORT_VISUAL, TRIGGERED_NONE);
+                if (MotionMaster* pMotionMaster = pCreature->GetMotionMaster())
+                    pMotionMaster->MovePoint(0, spawns[i].dest_x, spawns[i].dest_y, spawns[i].dest_z);
+            }
+        }
+    }
+
+    void SummonedCreatureDespawn(Creature* pCreature) override
+    {
+        m_guids.remove(pCreature->GetObjectGuid());
+    }
+
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
+        if (m_uiQuestPhase != MD_PHASE_FIGHT)
+            return;
+
         if (uiDamage > m_creature->GetHealth() || m_creature->GetHealthPercent() < 20.0f)
         {
             uiDamage = 0;
-
-            if (Player* pPlayer = pDoneBy->GetCharmerOrOwnerPlayerOrPlayerItself())
-                pPlayer->GroupEventHappens(QUEST_MISSING_DIPLO_PT16, m_creature);
-
-            DoScriptText(EMOTE_SURRENDER, m_creature);
-            EnterEvadeMode();
+            DoGiveUp();
         }
+    }
+
+    void JustDied(Unit* /*pUnit*/) override
+    {
+        
     }
 };
 
-bool QuestAccept_npc_private_hendel(Player* /*pPlayer*/, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_private_hendel(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
     if (pQuest->GetQuestId() == QUEST_MISSING_DIPLO_PT16)
-        pCreature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
+    {
+        pCreature->SetFactionTemporary(FACTION_HOSTILE);
+        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_GOSSIP);
 
+        if (npc_private_hendelAI* ai = dynamic_cast<npc_private_hendelAI *>(pCreature->AI()))
+        {
+            ai->m_guidPlayer = pPlayer->GetObjectGuid();
+            ai->m_uiQuestPhase = MD_PHASE_FIGHT;
+            ai->CallGuards();
+        }
+        
+    }
     return true;
 }
 
