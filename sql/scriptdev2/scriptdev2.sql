@@ -270,6 +270,7 @@ UPDATE creature_template SET ScriptName='npc_stinky_ignatz' WHERE entry=4880;
 
 /* EASTERN PLAGUELANDS */
 UPDATE creature_template SET ScriptName='npc_eris_havenfire' WHERE entry=14494;
+UPDATE creature_template SET ScriptName='npc_nathanos_blightcaller' WHERE entry=11878;
 
 /* ELWYNN FOREST */
 
