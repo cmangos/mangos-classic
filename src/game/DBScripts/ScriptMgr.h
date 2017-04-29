@@ -547,6 +547,7 @@ class ScriptMgr
 
         bool CheckScriptStringTemplateId(uint32 id) const { return m_stringTemplates.find(id) != m_stringTemplates.end(); }
         void GetScriptStringTemplate(uint32 id, std::vector<int32>& stringTemplate) { stringTemplate = m_stringTemplates[id]; }
+        uint32 GetRandomScriptStringFromTemplate(uint32 id, bool includingNone = false);
 
         uint32 IncreaseScheduledScriptsCount() { return (uint32)++m_scheduledScripts; }
         uint32 DecreaseScheduledScriptCount() { return (uint32)--m_scheduledScripts; }

@@ -1220,10 +1220,10 @@ bool ScriptAction::HandleScriptStep()
 
             if (m_script->talk.stringTemplateId)
             {
-                std::vector<int32> stringTemplate;
-                sScriptMgr.GetScriptStringTemplate(m_script->talk.stringTemplateId, stringTemplate);
-                if (!stringTemplate.empty())
-                    textId = stringTemplate[urand(0, stringTemplate.size() - 1)];
+                bool includingNone = m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL;
+                textId = sScriptMgr.GetRandomScriptStringFromTemplate(m_script->talk.stringTemplateId, includingNone);
+                if (textId == 0 && includingNone)
+                    break;
             }
             else
             {
