@@ -4342,6 +4342,21 @@ void Aura::PeriodicTick()
                     }
                 }
             }
+
+            // Hunter's Improved Mend Pet dispel check
+            if (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER && spellProto->SpellFamilyFlags && spellProto->SpellIconID == 267)
+            {
+                int32 triggerAmount = 0;
+                
+                Unit::AuraList const& aurasOverrideClassScripts = pCaster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                for (Unit::AuraList::const_iterator iter = aurasOverrideClassScripts.begin(); iter != aurasOverrideClassScripts.end(); ++iter)
+                {
+                    triggerAmount = (*iter)->GetModifier()->m_amount;
+                }
+                if (triggerAmount > 0 && roll_chance_i(triggerAmount))
+                    pCaster->CastSpell(target, 24406, true, nullptr, this);
+            }
+            
             break;
         }
         case SPELL_AURA_PERIODIC_MANA_LEECH:

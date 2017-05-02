@@ -1265,7 +1265,7 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(Unit* pVictim, uint3
             if (!roll_chance_i(triggerAmount))
                 return SPELL_AURA_PROC_FAILED;
 
-            triggered_spell_id = 24406;
+            //triggered_spell_id = 24406; // we don't actually want to cast this until the first tick
             break;
         }
         case 4309:

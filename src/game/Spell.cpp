@@ -3279,7 +3279,7 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, SpellCas
 {
     WorldPacket data(SMSG_CAST_FAILED, (4 + 1 + 1));
     data << uint32(spellInfo->Id);
-
+    
     if (result != SPELL_CAST_OK)
     {
         data << uint8(2); // status = fail
@@ -4357,7 +4357,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
             {
                 spell = iter->second->GetSpellProto();
-                if (spell->Dispel == mechanic)
+                if (spell->Dispel == mechanic || (m_spellInfo->Id == 24406 && (spell->Dispel == DISPEL_MAGIC || spell->Dispel == DISPEL_CURSE || spell->Dispel == DISPEL_DISEASE || spell->Dispel == DISPEL_POISON)))
                 {
                     dispelTarget = true;
                     break;
