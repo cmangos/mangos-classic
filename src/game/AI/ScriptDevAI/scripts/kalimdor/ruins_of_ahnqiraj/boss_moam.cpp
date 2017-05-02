@@ -60,13 +60,11 @@ struct boss_moamAI : public ScriptedAI
         m_uiCheckoutManaTimer       = 1500;
         m_uiPhase                   = PHASE_ATTACKING;
         m_creature->SetPower(POWER_MANA, 0);
-        m_creature->SetMaxPower(POWER_MANA, 0);
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(EMOTE_AGGRO, m_creature);
-        m_creature->SetMaxPower(POWER_MANA, m_creature->GetCreatureInfo()->MaxLevelMana);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -80,7 +78,7 @@ struct boss_moamAI : public ScriptedAI
                 if (m_uiCheckoutManaTimer <= uiDiff)
                 {
                     m_uiCheckoutManaTimer = 1500;
-                    if (m_creature->GetPower(POWER_MANA) * 100 / m_creature->GetMaxPower(POWER_MANA) > 75.0f)
+                    if (m_creature->GetPowerPercent() > 75.0f)
                     {
                         DoCastSpellIfCan(m_creature, SPELL_ENERGIZE);
                         DoScriptText(EMOTE_ENERGIZING, m_creature);
@@ -126,7 +124,7 @@ struct boss_moamAI : public ScriptedAI
                 if (m_uiCheckoutManaTimer <= uiDiff)
                 {
                     m_uiCheckoutManaTimer = 1500;
-                    if (m_creature->GetPower(POWER_MANA) == m_creature->GetMaxPower(POWER_MANA))
+                    if (m_creature->GetPowerPercent() == 100)
                     {
                         m_creature->RemoveAurasDueToSpell(SPELL_ENERGIZE);
                         DoCastSpellIfCan(m_creature, SPELL_ARCANE_ERUPTION);
