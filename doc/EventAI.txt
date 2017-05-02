@@ -156,6 +156,8 @@ For all ACTION_T_RANDOM Actions, When a Particular Param is selected for the Eve
 48   ACTION_T_CHANGE_MOVEMENT               MovementType, WanderDistance    Change the unit movement type (Param1). If the movement type is Random Movement (1), the WanderDistance (Param2) must be provided. If the movement type is Waypoint Movement (2), Param2 is PathId.
 49   ACTION_T_DYNAMIC_MOVEMENT              EnableDynamicMovement           Enable dynamic movement behavior (1 = on; 0 = off)
 50   ACTION_T_SET_REACT_STATE               ReactState                      Change react state of the creature
+51   ACTION_T_PAUSE_WAYPOINTS               DoPause                         Pause waypoints of creature
+52   ACTION_T_INTERRUPT_SPELL               SpellType - CurrentSpellTypes   Interrupt spell in given slot for creature
 
 * = Use -1 where the param is expected to do nothing. Random constant is generated for each event, so if you have a random yell and a random sound, they will be linked up with each other (ie. param2 with param2).
 
@@ -930,6 +932,22 @@ Parameter 1: EnableDynamicMovement - Enable dynamic movement behavior. 1 = on / 
 50 = ACTION_T_SET_REACT_STATE:
 ------------------------------
 Parameter 1: ReactState - Define the react state of the creature. 0 = Passive, 1 = Defensive, 2 = Aggresive. Default behavior is Aggresive.
+
+------------------------------
+51 = ACTION_T_PAUSE_WAYPOINTS:
+------------------------------
+Parameter 1: DoPause - Pause or unpause waypoints for creature. 0 - Unpause, 1 - Pause. Identical in behaviour to DBScript command.
+
+------------------------------
+52 = ACTION_T_INTERRUPT_SPELL:
+------------------------------
+Parameter 1: SpellType - Interrupt spell in SpellType slot. SpellType is based on CurrentSpellTypes in code.
+CURRENT_MELEE_SPELL             = 0
+CURRENT_GENERIC_SPELL           = 1
+CURRENT_AUTOREPEAT_SPELL        = 2
+CURRENT_CHANNELED_SPELL         = 3
+Melee spells, generic spells and autorepeat spells have their interruptability based on interrupt flags, albeit this flag is wrongly missing for some spells.
+Main purpose of this command is to research and find channeled spells, which do not interrupt as a result of not having found an interrupt flag.
 
 =========================================
 Target Types
