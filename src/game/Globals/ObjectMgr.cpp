@@ -1063,9 +1063,9 @@ void ObjectMgr::LoadCreatures()
                                 guid, data.id, CREATURE_EXTRA_FLAG_AGGRO_ZONE);
         }
 
-        if (data.curmana < cInfo->MinLevelMana)
+        if (cInfo->RegenerateStats & REGEN_FLAG_POWER && data.curmana < cInfo->MinLevelMana)
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with low current mana (%u), `creature_template`.`MinLevelMana`=%u.", guid, data.id, data.curmana, cInfo->MinLevelMana);
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenerateStats` & REGEN_FLAG_POWER and low current mana (%u), `creature_template`.`MinLevelMana`=%u.", guid, data.id, data.curmana, cInfo->MinLevelMana);
             data.curmana = cInfo->MinLevelMana;
         }
 
