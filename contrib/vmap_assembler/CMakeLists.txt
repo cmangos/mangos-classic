@@ -43,7 +43,7 @@ IF(APPLE)
 ENDIF (APPLE)
 
 add_executable(${EXECUTABLE_NAME} ${VMAP_ASSEMBLER_SOURCE})
-target_link_libraries(${EXECUTABLE_NAME} g3dlite zlib ${EXTRA_LIBS})
+target_link_libraries(${EXECUTABLE_NAME} g3dlite ${ZLIB_LIBRARIES} ${EXTRA_LIBS})
 
 if(MSVC)
   # Define OutDir to source/bin/(platform)_(configuaration) folder.

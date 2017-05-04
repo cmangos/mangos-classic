@@ -16,13 +16,13 @@ DisableWarnings()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/libmpq
-                    ${CMAKE_SOURCE_DIR}/dep/src/zlib
-                    ${CMAKE_SOURCE_DIR}/dep/src/bzip2)
+                    ${ZLIB_INCLUDE_DIRS}
+                    ${BZIP2_INCLUDE_DIRS})
 
 file(GLOB mpqfiles libmpq/*.c libmpq/*.h *.h)
 
 add_library(mpqlib STATIC ${mpqfiles})
-target_link_libraries(mpqlib zlib)
+target_link_libraries(mpqlib ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
 
 if(MSVC)
   target_compile_options(mpqlib PRIVATE /wd4103)

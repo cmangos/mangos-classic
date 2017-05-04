@@ -71,7 +71,7 @@ before_build:
   - cmd: set BUILD_DIR="%APPVEYOR_BUILD_FOLDER%\BuildDir"
   - cmd: mkdir "%BUILD_DIR%"
   - cmd: cd "%BUILD_DIR%"
-  - cmd: cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX=/"%APPVEYOR_BUILD_FOLDER%"/installed -DBUILD_EXTRACTOR=ON -DBUILD_VMAP_EXTRACTOR=ON -DBUILD_MMAP_EXTRACTOR=ON -DBUILD_GAME_SERVER=ON -DBUILD_LOGIN_SERVER=ON ..
+  - cmd: cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX=/"%APPVEYOR_BUILD_FOLDER%"/installed -DBUILD_EXTRACTORS=ON ..
 
 # build script
 build_script:

@@ -66,11 +66,11 @@ target_link_libraries(${EXECUTABLE_NAME}
   framework
   g3dlite
   gsoap
+  ${ZLIB_LIBRARIES}
 )
 
 if(MSVC)
   target_link_libraries(${EXECUTABLE_NAME}
-    zlib
     optimized ${MYSQL_LIBRARY}
     optimized ${OPENSSL_LIBRARIES}
     debug ${MYSQL_DEBUG_LIBRARY}
@@ -97,7 +97,6 @@ if(UNIX)
     ${MYSQL_LIBRARY}
     ${OPENSSL_LIBRARIES}
     ${OPENSSL_EXTRA_LIBRARIES}
-    ${ZLIB_LIBRARIES}
   )
 endif()
 
