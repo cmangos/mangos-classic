@@ -21,4 +21,3 @@ if (BUILD_CORE)
 endif()
 
 add_subdirectory(g3dlite)
-add_subdirectory(zlib)

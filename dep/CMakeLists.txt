@@ -20,6 +20,7 @@ add_compile_options(-w)
 
 add_subdirectory(recastnavigation)
 add_subdirectory(src)
+add_subdirectory(zlib)
 if (BUILD_VMAP_EXTRACTOR)
   add_subdirectory(libmpq)
 endif()

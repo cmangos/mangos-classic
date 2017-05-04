@@ -122,7 +122,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/dep/include
   ${CMAKE_SOURCE_DIR}/dep/include/g3dlite
-  ${CMAKE_SOURCE_DIR}/dep/include/zlib
+  ${CMAKE_SOURCE_DIR}/dep/zlib
 )
 
 add_library(${LIBRARY_NAME} STATIC

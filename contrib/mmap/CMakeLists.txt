@@ -31,7 +31,7 @@ include_directories(
     ../../src/framework
     ../../dep/recastnavigation/Detour/Include
     ../../dep/recastnavigation/Recast/Include
-    ../../dep/src/zlib
+    ../../dep/zlib
 )
 
 add_library(vmaplib

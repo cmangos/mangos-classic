@@ -50,6 +50,36 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+    <ItemGroup>
+    <ClCompile Include="..\..\dep\zlib\adler32.c" />
+    <ClCompile Include="..\..\dep\zlib\compress.c" />
+    <ClCompile Include="..\..\dep\zlib\crc32.c" />
+    <ClCompile Include="..\..\dep\zlib\deflate.c" />
+    <ClCompile Include="..\..\dep\zlib\gzclose.c" />
+    <ClCompile Include="..\..\dep\zlib\gzlib.c" />
+    <ClCompile Include="..\..\dep\zlib\gzread.c" />
+    <ClCompile Include="..\..\dep\zlib\gzwrite.c" />
+    <ClCompile Include="..\..\dep\zlib\infback.c" />
+    <ClCompile Include="..\..\dep\zlib\inffast.c" />
+    <ClCompile Include="..\..\dep\zlib\inflate.c" />
+    <ClCompile Include="..\..\dep\zlib\inftrees.c" />
+    <ClCompile Include="..\..\dep\zlib\trees.c" />
+    <ClCompile Include="..\..\dep\zlib\uncompr.c" />
+    <ClCompile Include="..\..\dep\zlib\zutil.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\dep\zlib\crc32.h" />
+    <ClInclude Include="..\..\dep\zlib\deflate.h" />
+    <ClInclude Include="..\..\dep\zlib\gzguts.h" />
+    <ClInclude Include="..\..\dep\zlib\inffast.h" />
+    <ClInclude Include="..\..\dep\zlib\inffixed.h" />
+    <ClInclude Include="..\..\dep\zlib\inflate.h" />
+    <ClInclude Include="..\..\dep\zlib\inftrees.h" />
+    <ClInclude Include="..\..\dep\zlib\trees.h" />
+    <ClInclude Include="..\..\dep\zlib\zconf.h" />
+    <ClInclude Include="..\..\dep\zlib\zlib.h" />
+    <ClInclude Include="..\..\dep\zlib\zutil.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGUID>{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}</ProjectGUID>
     <RootNamespace>zlib</RootNamespace>
@@ -141,8 +171,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_NONSTDC_NO_DEPRECATE;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -162,8 +192,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_NONSTDC_NO_DEPRECATE;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -180,8 +210,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>..\..\dep\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_NONSTDC_NO_DEPRECATE;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -199,8 +229,8 @@
     </Midl>
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>..\..\dep\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_NONSTDC_NO_DEPRECATE;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -215,8 +245,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_NONSTDC_NO_DEPRECATE;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -236,8 +266,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\dep\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\dep\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_CRT_NONSTDC_NO_DEPRECATE;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -251,33 +281,6 @@
       <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\dep\src\zlib\crc32.h" />
-    <ClInclude Include="..\..\dep\src\zlib\deflate.h" />
-    <ClInclude Include="..\..\dep\src\zlib\inffast.h" />
-    <ClInclude Include="..\..\dep\src\zlib\inffixed.h" />
-    <ClInclude Include="..\..\dep\src\zlib\inflate.h" />
-    <ClInclude Include="..\..\dep\src\zlib\inftrees.h" />
-    <ClInclude Include="..\..\dep\src\zlib\trees.h" />
-    <ClInclude Include="..\..\dep\src\zlib\zconf.h" />
-    <ClInclude Include="..\..\dep\src\zlib\zlib.h" />
-    <ClInclude Include="..\..\dep\src\zlib\zutil.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\dep\src\zlib\adler32.c" />
-    <ClCompile Include="..\..\dep\src\zlib\compress.c" />
-    <ClCompile Include="..\..\dep\src\zlib\crc32.c" />
-    <ClCompile Include="..\..\dep\src\zlib\deflate.c" />
-    <ClCompile Include="..\..\dep\src\zlib\example.c" />
-    <ClCompile Include="..\..\dep\src\zlib\gzio.c" />
-    <ClCompile Include="..\..\dep\src\zlib\infback.c" />
-    <ClCompile Include="..\..\dep\src\zlib\inffast.c" />
-    <ClCompile Include="..\..\dep\src\zlib\inflate.c" />
-    <ClCompile Include="..\..\dep\src\zlib\inftrees.c" />
-    <ClCompile Include="..\..\dep\src\zlib\trees.c" />
-    <ClCompile Include="..\..\dep\src\zlib\uncompr.c" />
-    <ClCompile Include="..\..\dep\src\zlib\zutil.c" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
