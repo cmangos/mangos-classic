@@ -4895,6 +4895,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                             !((Player*)m_caster)->CanUseBattleGroundObject())
                         return SPELL_FAILED_TRY_AGAIN;
 
+					//Fix for disarm trap, range is 5 yards
+					//http://db.vanillagaming.org/?spell=1842
+					if (m_spellInfo->Id == 1842 && ((Player*)m_caster)->GetDistance(go) > 5)
+						return SPELL_FAILED_OUT_OF_RANGE;
+
                     lockId = go->GetGOInfo()->GetLockId();
                     if (!lockId)
                         return SPELL_FAILED_ALREADY_OPEN;
