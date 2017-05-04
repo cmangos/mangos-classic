@@ -1446,9 +1446,9 @@ class Unit : public WorldObject
         bool CanParry() const { return m_canParry; }
         bool CanBlock() const { return m_canBlock; }
         // Unit Melee events API: Crush/Glance/Daze
-        bool CanCrush() const { return GetCharmerOrOwnerOrOwnGuid().IsCreature(); /* Creatures and creature-controlled players only */ }
-        bool CanGlance() const { return GetCharmerOrOwnerOrOwnGuid().IsPlayer(); /* Players and player-controlled units only */ }
-        bool CanDaze() const { return (GetTypeId() == TYPEID_UNIT && GetCharmerOrOwnerOrOwnGuid().IsCreature()); /* Creatures only */ }
+        bool CanCrush() const;
+        bool CanGlance() const;
+        bool CanDaze() const;
 
         void SetCanDodge(const bool flag);
         void SetCanParry(const bool flag);

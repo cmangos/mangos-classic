@@ -2525,6 +2525,28 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
         return GetUnitMeleeSkill(target);
 }
 
+bool Unit::CanCrush() const
+{
+    // Generally, only npcs and npc-controlled players/units are eligible to deal crushing blows
+    if (GetTypeId() == TYPEID_PLAYER || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+        return GetCharmerGuid().IsCreature();
+    return !GetCharmerOrOwnerGuid().IsPlayer();
+}
+
+bool Unit::CanGlance() const
+{
+    // Generally, only players and player-controlled units are eligible to deal glancing blows
+    if (GetTypeId() == TYPEID_PLAYER || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE))
+        return !GetCharmerGuid().IsCreature();
+    return false;
+}
+
+bool Unit::CanDaze() const
+{
+    // Generally, only npcs are able to daze targets in melee
+    return (GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE));
+}
+
 void Unit::SetCanDodge(const bool flag)
 {
     if (m_canDodge == flag)
