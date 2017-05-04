@@ -33,7 +33,7 @@ include_directories(
     ../../src/framework
     ../../dep/recastnavigation/Detour/Include
     ../../dep/recastnavigation/Recast/Include
-    ../../dep/src/zlib
+    ${ZLIB_INCLUDE_DIRS}
 )
 
 add_library(vmaplib
@@ -50,7 +50,7 @@ IF(APPLE)
    SET(EXTRA_LIBS ${CORE_SERVICES})
 ENDIF (APPLE)
 
-target_link_libraries(vmaplib g3dlite zlib ${EXTRA_LIBS})
+target_link_libraries(vmaplib g3dlite ${ZLIB_LIBRARIES} ${EXTRA_LIBS})
 
 set(SOURCES
     ./src/IntermediateValues.cpp
@@ -62,7 +62,7 @@ set(SOURCES
 
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
 
-target_link_libraries(${EXECUTABLE_NAME} g3dlite vmaplib detour recast zlib)
+target_link_libraries(${EXECUTABLE_NAME} g3dlite vmaplib detour recast ${ZLIB_LIBRARIES})
 
 if(MSVC)
   # Define OutDir to source/bin/(platform)_(configuaration) folder.

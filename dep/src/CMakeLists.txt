@@ -20,9 +20,11 @@ if (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER)
   add_subdirectory(gsoap)
 endif()
 
-if(BUILD_EXTRACTOR OR BUILD_VMAP_EXTRACTOR OR BUILD_MMAP_EXTRACTOR)
-  add_subdirectory(bzip2)
-endif()
-
 add_subdirectory(g3dlite)
-add_subdirectory(zlib)
+
+if(MSVC)
+  if(BUILD_EXTRACTORS)
+    add_subdirectory(bzip2)
+  endif()
+  add_subdirectory(zlib)
+endif()

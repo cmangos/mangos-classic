@@ -193,13 +193,16 @@ endif()
 
 # Win32 delivered packages
 if(WIN32)
-  set(MYSQL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/include)
-  set(MYSQL_LIBRARY ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmySQL.lib)
-  set(MYSQL_DEBUG_LIBRARY ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmySQL.lib)
-  set(OPENSSL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/dep/include)
-  set(OPENSSL_LIBRARIES ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libeay32.lib)
-  set(OPENSSL_DEBUG_LIBRARIES ${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libeay32.lib)
-  # zlib is build
+  set(MYSQL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/include")
+  set(MYSQL_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmySQL.lib")
+  set(MYSQL_DEBUG_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmySQL.lib")
+  set(OPENSSL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/include")
+  set(OPENSSL_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libeay32.lib")
+  set(OPENSSL_DEBUG_LIBRARIES "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libeay32.lib")
+  set(ZLIB_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/dep/src/zlib")
+  set(ZLIB_LIBRARIES "z")
+  set(BZIP2_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/dep/src/bzip2")
+  set(BZIP2_LIBRARIES "bzip2")
 endif()
 
 # *nix-specific packages
@@ -225,8 +228,14 @@ if(UNIX)
       set(OPENSSL_INCLUDE_DIR /usr/local/opt/openssl/include)
     endif()
   endif()
-  find_package(OpenSSL REQUIRED)
+  find_package(OpenSSL 1.0 REQUIRED)
+  if(NOT OPENSSL_VERSION VERSION_LESS "1.1")
+    message(FATAL_ERROR "You have unsupported version of OpenSSL library. Use version below 1.1")
+  endif()
   find_package(ZLIB REQUIRED)
+  if(BUILD_EXTRACTORS)
+    find_package(BZip2 REQUIRED)
+  endif()
 endif()
 
 # Find core revision
@@ -307,16 +316,10 @@ if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER)
   )
 endif()
 
-if(BUILD_EXTRACTOR)
+if(BUILD_EXTRACTORS)
   add_subdirectory(contrib/extractor)
-endif()
-
-if(BUILD_VMAP_EXTRACTOR)
   add_subdirectory(contrib/vmap_extractor)
   add_subdirectory(contrib/vmap_assembler)
-endif()
-
-if(BUILD_MMAP_EXTRACTOR)
   add_subdirectory(contrib/mmap)
 endif()
 

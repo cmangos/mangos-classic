@@ -26,11 +26,10 @@ list(APPEND AD_SOURCE
      mpq_libmpq.cpp
      System.cpp)
 
-include_directories(loadlib
-                    ${CMAKE_SOURCE_DIR}/dep/libmpq)
+include_directories(loadlib ${CMAKE_SOURCE_DIR}/dep/libmpq)
 
 add_executable(${EXECUTABLE_NAME} ${AD_SOURCE})
-target_link_libraries(${EXECUTABLE_NAME} mpqlib zlib bzip2)
+target_link_libraries(${EXECUTABLE_NAME} mpqlib ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
 
 if(MSVC)
   # Define OutDir to source/bin/(platform)_(configuaration) folder.

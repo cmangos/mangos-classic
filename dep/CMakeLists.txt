@@ -19,6 +19,6 @@
 DisableWarnings()
 add_subdirectory(recastnavigation)
 add_subdirectory(src)
-if (BUILD_VMAP_EXTRACTOR OR BUILD_EXTRACTOR)
+if (BUILD_EXTRACTORS)
   add_subdirectory(libmpq)
 endif()
