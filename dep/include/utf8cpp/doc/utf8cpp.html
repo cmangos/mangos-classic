@@ -67,7 +67,7 @@
             <li>
               <a href=#fixinvalid>Ensure that a string contains valid UTF-8 text</a>
             </li>
-        </li>
+          </ul>
         <li>
           <a href="#reference">Reference</a>
           <ul class="toc">
@@ -89,9 +89,6 @@
           <a href="#points">Points of Interest</a>
         </li>
         <li>
-          <a href="#conclusion">Conclusion</a>
-        </li>
-        <li>
           <a href="#links">Links</a>
         </li>
       </ul>
@@ -101,10 +98,12 @@
     </h2>
     <p>
       Many C++ developers miss an easy and portable way of handling Unicode encoded
-      strings. The original C++ Standard (known as C++98 or C++03) is Unicode agnostic,
-      and while some work is being done to introduce Unicode to the next incarnation
-      called C++0x, for the moment nothing of the sort is available. In the meantime,
-      developers use third party libraries like ICU, OS specific capabilities, or simply
+      strings. The original C++ Standard (known as C++98 or C++03) is Unicode agnostic.
+      C++11 provides some support for Unicode on core language and library level:
+      u8, u, and U character and string literals, char16_t and char32_t character types,
+      u16string and u32string library classes, and codecvt support for conversions 
+      between Unicode encoding forms.
+      In the meantime, developers use third party libraries like ICU, OS specific capabilities, or simply
       roll out their own solutions.
     </p>
     <p>
@@ -275,11 +274,12 @@ octet_iterator append(uint32_t cp, octet_iterator result);
    
 </pre>
     <p>
-      <code>cp</code>: A 32 bit integer representing a code point to append to the
+	  <code>octet_iterator</code>: an output iterator.<br>
+      <code>cp</code>: a 32 bit integer representing a code point to append to the
       sequence.<br>
-       <code>result</code>: An output iterator to the place in the sequence where to
+       <code>result</code>: an output iterator to the place in the sequence where to
       append the code point.<br>
-       <span class="return_value">Return value</span>: An iterator pointing to the place
+       <span class="return_value">Return value</span>: an iterator pointing to the place
       after the newly appended sequence.
     </p>
     <p>
@@ -326,6 +326,7 @@ uint32_t next(octet_iterator&amp; it, octet_iterator end);
    
 </pre>
     <p>
+	  <code>octet_iterator</code>: an input iterator.<br>
       <code>it</code>: a reference to an iterator pointing to the beginning of an UTF-8
       encoded code point. After the function returns, it is incremented to point to the
       beginning of the next code point.<br>
@@ -370,6 +371,7 @@ uint32_t peek_next(octet_iterator it, octet_iterator end);
    
 </pre>
     <p>
+	  <code>octet_iterator</code>: an input iterator.<br>
       <code>it</code>: an iterator pointing to the beginning of an UTF-8
       encoded code point.<br>
        <code>end</code>: end of the UTF-8 sequence to be processed. If <code>it</code>
@@ -400,7 +402,7 @@ assert (w == twochars);
     Available in version 1.02 and later.
     </p>
     <p>
-      Given a reference to an iterator pointing to an octet in a UTF-8 seqence, it
+      Given a reference to an iterator pointing to an octet in a UTF-8 sequence, it
       decreases the iterator until it hits the beginning of the previous UTF-8 encoded
       code point and returns the 32 bits representation of the code point.
     </p>
@@ -411,6 +413,7 @@ uint32_t prior(octet_iterator&amp; it, octet_iterator start);
    
 </pre>
     <p>
+	  <code>octet_iterator</code>: a bidirectional iterator.<br>
       <code>it</code>: a reference pointing to an octet within a UTF-8 encoded string.
       After the function returns, it is decremented to point to the beginning of the
       previous code point.<br>
@@ -437,7 +440,9 @@ assert (w == twochars);
       This function has two purposes: one is two iterate backwards through a UTF-8
       encoded string. Note that it is usually a better idea to iterate forward instead,
       since <code>utf8::next</code> is faster. The second purpose is to find a beginning
-      of a UTF-8 sequence if we have a random position within a string.
+      of a UTF-8 sequence if we have a random position within a string. Note that in that
+      case <code>utf8::prior</code> may not detect an invalid UTF-8 sequence in some scenarios:
+      for instance if there are superfluous trail octets, it will just skip them.
     </p> 
     <p>
       <code>it</code> will typically point to the beginning of
@@ -447,10 +452,12 @@ assert (w == twochars);
       beginning with that octet is decoded to a 32 bit representation and returned.
     </p>
     <p>
-      In case <code>pass_end</code> is reached before a UTF-8 lead octet is hit, or if an
+      In case <code>start</code> is reached before a UTF-8 lead octet is hit, or if an
       invalid UTF-8 sequence is started by the lead octet, an <code>invalid_utf8</code>
       exception is thrown.
     </p>
+    <p>In case <code>start</code> equals <code>it</code>, a <code>not_enough_room</code>
+      exception is thrown.
     <h4>
       utf8::previous
     </h4>
@@ -469,6 +476,7 @@ uint32_t previous(octet_iterator&amp; it, octet_iterator pass_start);
    
 </pre>
     <p>
+	  <code>octet_iterator</code>: a random access iterator.<br>
       <code>it</code>: a reference pointing to an octet within a UTF-8 encoded string.
       After the function returns, it is decremented to point to the beginning of the
       previous code point.<br>
@@ -507,7 +515,7 @@ assert (w == twochars);
       beginning with that octet is decoded to a 32 bit representation and returned.
     </p>
     <p>
-      In case <code>pass_end</code> is reached before a UTF-8 lead octet is hit, or if an
+      In case <code>pass_start</code> is reached before a UTF-8 lead octet is hit, or if an
       invalid UTF-8 sequence is started by the lead octet, an <code>invalid_utf8</code>
       exception is thrown
     </p>
@@ -529,6 +537,8 @@ assert (w == twochars);
    
 </pre>
     <p>
+      <code>octet_iterator</code>: an input iterator.<br>
+      <code>distance_type</code>: an integral type convertible to <code>octet_iterator</code>'s difference type.<br>
       <code>it</code>: a reference to an iterator pointing to the beginning of an UTF-8
       encoded code point. After the function returns, it is incremented to point to the
       nth following code point.<br>
@@ -574,8 +584,9 @@ assert (w == twochars + <span class="literal">5</span>);
    
 </pre>
     <p>
+      <code>octet_iterator</code>: an input iterator.<br>
       <code>first</code>: an iterator to a beginning of a UTF-8 encoded code point.<br>
-       <code>last</code>: an iterator to a "post-end" of the last UTF-8 encoded code
+      <code>last</code>: an iterator to a "post-end" of the last UTF-8 encoded code
       point in the sequence we are trying to determine the length. It can be the
       beginning of a new code point, or not.<br>
        <span class="return_value">Return value</span> the distance between the iterators,
@@ -619,6 +630,8 @@ octet_iterator utf16to8 (u16bit_iterator start, u16bit_iterator end, octet_itera
    
 </pre>
     <p>
+      <code>u16bit_iterator</code>: an input iterator.<br>
+      <code>octet_iterator</code>: an output iterator.<br>
       <code>start</code>: an iterator pointing to the beginning of the UTF-16 encoded
       string to convert.<br>
        <code>end</code>: an iterator pointing to pass-the-end of the UTF-16 encoded
@@ -661,6 +674,8 @@ u16bit_iterator utf8to16 (octet_iterator start, octet_iterator end, u16bit_itera
    
 </pre>
     <p>
+      <code>octet_iterator</code>: an input iterator.<br>
+      <code>u16bit_iterator</code>: an output iterator.<br>
       <code>start</code>: an iterator pointing to the beginning of the UTF-8 encoded
       string to convert. &lt; br /&gt; <code>end</code>: an iterator pointing to
       pass-the-end of the UTF-8 encoded string to convert.<br>
@@ -705,6 +720,8 @@ octet_iterator utf32to8 (u32bit_iterator start, u32bit_iterator end, octet_itera
    
 </pre>
     <p>
+      <code>octet_iterator</code>: an output iterator.<br>
+      <code>u32bit_iterator</code>: an input iterator.<br>
       <code>start</code>: an iterator pointing to the beginning of the UTF-32 encoded
       string to convert.<br>
        <code>end</code>: an iterator pointing to pass-the-end of the UTF-32 encoded
@@ -747,6 +764,8 @@ u32bit_iterator utf8to32 (octet_iterator start, octet_iterator end, u32bit_itera
    
 </pre>
     <p>
+      <code>octet_iterator</code>: an input iterator.<br>
+      <code>u32bit_iterator</code>: an output iterator.<br>
       <code>start</code>: an iterator pointing to the beginning of the UTF-8 encoded
       string to convert.<br>
        <code>end</code>: an iterator pointing to pass-the-end of the UTF-8 encoded string
@@ -787,6 +806,7 @@ assert (utf32result.size() == <span class="literal">2</span>);
 octet_iterator find_invalid(octet_iterator start, octet_iterator end);
 </pre>
     <p>
+      <code>octet_iterator</code>: an input iterator.<br>
       <code>start</code>: an iterator pointing to the beginning of the UTF-8 string to
       test for validity.<br>
        <code>end</code>: an iterator pointing to pass-the-end of the UTF-8 string to test
@@ -827,6 +847,7 @@ assert (invalid == utf_invalid + <span class="literal">5</span>);
    
 </pre>
     <p>
+      <code>octet_iterator</code>: an input iterator.<br>
       <code>start</code>: an iterator pointing to the beginning of the UTF-8 string to
       test for validity.<br>
        <code>end</code>: an iterator pointing to pass-the-end of the UTF-8 string to test
@@ -868,6 +889,8 @@ output_iterator replace_invalid(octet_iterator start, octet_iterator end, output
    
 </pre>
     <p>
+      <code>octet_iterator</code>: an input iterator.<br>
+      <code>output_iterator</code>: an output iterator.<br>
       <code>start</code>: an iterator pointing to the beginning of the UTF-8 string to
       look for invalid UTF-8 sequences.<br>
        <code>end</code>: an iterator pointing to pass-the-end of the UTF-8 string to look
@@ -905,10 +928,47 @@ assert (std::equal(replace_invalid_result.begin(), replace_invalid_result.end(),
       <code>utf8::not_enough_room</code> exception is thrown.
     </p>
     <h4>
+      utf8::starts_with_bom
+    </h4>
+    <p class="version">
+    Available in version 2.3 and later. Relaces deprecated <code>is_bom()</code> function.
+    </p>
+    <p>
+      Checks whether an octet sequence starts with a UTF-8 byte order mark (BOM)
+    </p>
+<pre>
+<span class="keyword">template</span> &lt;<span class=
+"keyword">typename</span> octet_iterator&gt; 
+<span class="keyword">bool</span> starts_with_bom (octet_iterator it, octet_iterator end);
+</pre>
+    <p>
+      <code>octet_iterator</code>: an input iterator.<br>
+      <code>it</code>: beginning of the octet sequence to check<br>
+      <code>end</code>: pass-end of the sequence to check<br>
+       <span class="return_value">Return value</span>: <code>true</code> if the sequence
+      starts with a UTF-8 byte order mark; <code>false</code> if not.
+    </p>
+    <p>
+      Example of use:
+    </p>
+<pre>
+<span class="keyword">unsigned char</span> byte_order_mark[] = {<span class=
+"literal">0xef</span>, <span class="literal">0xbb</span>, <span class=
+"literal">0xbf</span>};
+<span class="keyword">bool</span> bbom = starts_with_bom(byte_order_mark, byte_order_mark + <span class="keyword">sizeof</span>(byte_order_mark));
+assert (bbom == <span class="literal">true</span>);
+</pre>
+    <p>
+      The typical use of this function is to check the first three bytes of a file. If
+      they form the UTF-8 BOM, we want to skip them before processing the actual UTF-8
+      encoded text.
+    </p>
+    <h4>
       utf8::is_bom
     </h4>
     <p class="version">
-    Available in version 1.0 and later.
+    Available in version 1.0 and later. Deprecated in version 2.3. <code>starts_with_bom()</code> should be used
+    instead.
     </p>
     <p>
       Checks whether a sequence of three octets is a UTF-8 byte order mark (BOM)
@@ -916,9 +976,10 @@ assert (std::equal(replace_invalid_result.begin(), replace_invalid_result.end(),
 <pre>
 <span class="keyword">template</span> &lt;<span class=
 "keyword">typename</span> octet_iterator&gt; 
-<span class="keyword">bool</span> is_bom (octet_iterator it);
+<span class="keyword">bool</span> is_bom (octet_iterator it); <span class="comment"> // Deprecated</span>
 </pre>
     <p>
+      <code>octet_iterator</code>: an input iterator.<br>
       <code>it</code>: beginning of the 3-octet sequence to check<br>
        <span class="return_value">Return value</span>: <code>true</code> if the sequence
       is UTF-8 byte order mark; <code>false</code> if not.
@@ -938,9 +999,113 @@ assert (bbom == <span class="literal">true</span>);
       they form the UTF-8 BOM, we want to skip them before processing the actual UTF-8
       encoded text.
     </p>
+    <p>
+      If a sequence is 
+      shorter than three bytes, an invalid iterator will be dereferenced. Therefore, this function is deprecated
+      in favor of <code>starts_with_bom()</code>that takes the end of sequence as an argument.
+    </p>
     <h3 id="typesutf8">
       Types From utf8 Namespace
     </h3>
+    <h4>utf8::exception
+    </h4>
+    <p class="version">
+    Available in version 2.3 and later.
+    </p>
+    <p>
+    Base class for the exceptions thrown by UTF CPP library functions.
+    </p>
+<pre>
+<span class="keyword">class</span> exception : <span class="keyword">public</span> std::exception {};
+</pre>
+    <p>
+    Example of use:
+    </p>
+<pre>
+<span class="keyword">try</span> {
+  code_that_uses_utf_cpp_library();
+}
+<span class="keyword">catch</span>(<span class="keyword">const</span> utf8::exception&amp; utfcpp_ex) {
+  cerr &lt;&lt; utfcpp_ex.what();
+}
+</pre>
+    
+    <h4>utf8::invalid_code_point
+    </h4>
+    <p class="version">
+    Available in version 1.0 and later.
+    </p>
+    <p>
+    Thrown by UTF8 CPP functions such as <code>advance</code> and <code>next</code> if an UTF-8 sequence represents and invalid code point.
+    </p>
+
+<pre>
+<span class="keyword">class</span> invalid_code_point : <span class="keyword">public</span> exception {
+<span class="keyword">public</span>: 
+    uint32_t code_point() <span class="keyword">const</span>;
+};
+
+</pre>
+    <p>
+    Member function <code>code_point()</code> can be used to determine the invalid code point that
+    caused the exception to be thrown.
+    </p>
+    <h4>utf8::invalid_utf8
+    </h4>
+    <p class="version">
+    Available in version 1.0 and later.
+    </p>
+    <p>
+    Thrown by UTF8 CPP functions such as <code>next</code> and <code>prior</code> if an invalid UTF-8 sequence
+    is detected during decoding.
+    </p>
+
+<pre>
+<span class="keyword">class</span> invalid_utf8 : <span class="keyword">public</span> exception {
+<span class="keyword">public</span>: 
+    uint8_t utf8_octet() <span class="keyword">const</span>;
+};
+</pre>
+
+    <p>
+    Member function <code>utf8_octet()</code> can be used to determine the beginning of the byte 
+    sequence that caused the exception to be thrown.
+    </p>
+</pre>
+    <h4>utf8::invalid_utf16
+    </h4>
+    <p class="version">
+    Available in version 1.0 and later.
+    </p>
+    <p>
+    Thrown by UTF8 CPP function <code>utf16to8</code> if an invalid UTF-16 sequence
+    is detected during decoding.
+    </p>
+
+<pre>
+<span class="keyword">class</span> invalid_utf16 : <span class="keyword">public</span> exception {
+<span class="keyword">public</span>: 
+    uint16_t utf16_word() <span class="keyword">const</span>;
+};
+</pre>
+
+    <p>
+    Member function <code>utf16_word()</code> can be used to determine the UTF-16 code unit 
+    that caused the exception to be thrown.
+    </p>
+    <h4>utf8::not_enough_room
+    </h4>
+    <p class="version">
+    Available in version 1.0 and later.
+    </p>
+    <p>
+    Thrown by UTF8 CPP functions such as <code>next</code> if the end of the decoded UTF-8 sequence
+    was reached before the code point was decoded.
+    </p>
+
+<pre>
+<span class="keyword">class</span> not_enough_room : <span class="keyword">public</span> exception {};
+</pre>
     <h4>
       utf8::iterator
     </h4>
@@ -1564,7 +1729,7 @@ assert (*un_it == <span class="literal">0x10346</span>);
         for Windows (both 32 and 64 bit), and most 32 bit and 64 bit Unix derivatives.
       </li>
       <li>
-        Lightweight: follow the "pay only for what you use" guidline.
+        Lightweight: follow the "pay only for what you use" guideline.
       </li>
       <li>
         Unintrusive: avoid forcing any particular design or even programming style on the
@@ -1586,6 +1751,10 @@ assert (*un_it == <span class="literal">0x10346</span>);
         recommend looking at ICU even if you don't plan to use it.
       </li>
       <li>
+        C++11 language and library features. Still far from complete, and not widely
+        supported by compiler vendors. 
+      </li>
+      <li>
         <a href=
         "http://www.gtkmm.org/gtkmm2/docs/tutorial/html/ch03s04.html">Glib::ustring</a>.
         A class specifically made to work with UTF-8 strings, and also feel like
@@ -1595,18 +1764,9 @@ assert (*un_it == <span class="literal">0x10346</span>);
       <li>
         Platform dependent solutions: Windows and POSIX have functions to convert strings
         from one encoding to another. That is only a subset of what my library offers,
-        but if that is all you need it may be good enough, especially given the fact that
-        these functions are mature and tested in production.
+        but if that is all you need it may be good enough.
       </li>
     </ol>
-    <h2 id="conclusion">
-      Conclusion
-    </h2>
-    <p>
-      Until Unicode becomes officially recognized by the C++ Standard Library, we need to
-      use other means to work with UTF-8 strings. Template functions I describe in this
-      article may be a good step in this direction.
-    </p>
     <h2 id="links">
       Links
     </h2>
