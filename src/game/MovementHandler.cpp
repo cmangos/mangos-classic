@@ -194,6 +194,30 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // notify group after successful teleport
     if (_player->GetGroup())
         _player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
+
+    // allow cross faction raid set pve and the same faction in dungeon
+    Map* pMap = GetPlayer()->GetMap();
+    Group* pGroup = GetPlayer()->GetGroup();
+    if (pMap && pMap->IsDungeon() && pGroup) // IF player is in dungeon and raid
+    {
+        GetPlayer()->UpdatePvP(false, true);    // enable pve
+        if (Player* pLeader = sObjectMgr.GetPlayer(pGroup->GetLeaderGuid())) // IF leader is online
+            if (pGroup->IsLeader(GetPlayer()->GetObjectGuid())) // IF player is leader
+            {
+                Group::MemberSlotList const& memberList = pGroup->GetMemberSlots();
+                Group::MemberSlotList::const_iterator memberItr;
+                for (memberItr = memberList.begin(); memberItr != memberList.end(); ++memberItr)
+                    if(Player* pMember = sObjectMgr.GetPlayer(memberItr->guid))// IF member is online
+                        if (Map* pMemberMap = pMember->GetMap())
+                            if (pMemberMap->IsDungeon()) // IF member is in dungeon
+                                pMember->setFactionForRace(pLeader->getRace());
+            }
+            else // IF player is not leader
+                GetPlayer()->setFactionForRace(pLeader->getRace());
+        else // IF leader is offline
+            GetPlayer()->setFactionForRace(RACE_ORC);
+    }
+    // allow cross faction raid set pve and the same faction in dungeon
 }
 
 void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)

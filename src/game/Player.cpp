@@ -16628,6 +16628,10 @@ void Player::UpdatePvP(bool state, bool ovrride)
         else
             SetPvP(state);
     }
+    // allow cross faction raid set pve and the same faction in dungeon
+    if (GetMap() && !GetMap()->IsBattleGround() && !GetMap()->IsDungeon())
+        setFactionForRace(getRace()); // reset faction for native race
+    // allow cross faction raid set pve and the same faction in dungeon
 }
 
 void Player::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo, uint32 itemId, Spell* spell, bool infinityCooldown)
