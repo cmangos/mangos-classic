@@ -19,13 +19,15 @@ SDName: Searing_Gorge
 SD%Complete: 80
 SDComment: Quest support: 3367.
 SDCategory: Searing Gorge
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_dorius_stonetender
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

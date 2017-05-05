@@ -19,9 +19,11 @@ SDName: The_Barrens
 SD%Complete: 90
 SDComment: Quest support: 863, 898, 1719, 2458.
 SDCategory: Barrens
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_gilthares
 npc_taskmaster_fizzule
 npc_twiggy_flathead
@@ -29,7 +31,7 @@ at_twiggy_flathead
 npc_wizzlecrank_shredder
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

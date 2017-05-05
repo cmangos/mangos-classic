@@ -19,13 +19,15 @@ SDName: GO_Scripts
 SD%Complete: 100
 SDComment: Quest support: 5097, 5098
 SDCategory: Game Objects
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 go_andorhal_tower
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*######
 ## go_andorhal_tower

@@ -13,14 +13,16 @@ cmake_minimum_required (VERSION 2.6)
 set(EXECUTABLE_NAME "MoveMapGen")
 project (${EXECUTABLE_NAME})
 
-ADD_DEFINITIONS(-DMMAP_GENERATOR -DNO_CORE_FUNCS -DDEBUG)
+# disable warnings for dependencies
+DisableWarnings()
+
+ADD_DEFINITIONS(-DMMAP_GENERATOR -DNO_CORE_FUNCS)
 ADD_DEFINITIONS(-DDT_POLYREF64)
+ADD_DEFINITIONS(-DNO_vsnprintf)
 
-# zlib
-ADD_DEFINITIONS( -DNO_vsnprintf )
-
-ADD_DEFINITIONS("-ggdb")
-ADD_DEFINITIONS("-O3")
+if(UNIX)
+  ADD_DEFINITIONS("-ggdb")
+endif()
 
 include_directories(
     ../../src
@@ -31,7 +33,7 @@ include_directories(
     ../../src/framework
     ../../dep/recastnavigation/Detour/Include
     ../../dep/recastnavigation/Recast/Include
-    ../../dep/src/zlib
+    ${ZLIB_INCLUDE_DIRS}
 )
 
 add_library(vmaplib
@@ -48,7 +50,7 @@ IF(APPLE)
    SET(EXTRA_LIBS ${CORE_SERVICES})
 ENDIF (APPLE)
 
-target_link_libraries(vmaplib g3dlite zlib ${EXTRA_LIBS})
+target_link_libraries(vmaplib g3dlite ${ZLIB_LIBRARIES} ${EXTRA_LIBS})
 
 set(SOURCES
     ./src/IntermediateValues.cpp
@@ -60,5 +62,13 @@ set(SOURCES
 
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
 
-target_link_libraries(${EXECUTABLE_NAME} g3dlite vmaplib detour recast zlib)
+target_link_libraries(${EXECUTABLE_NAME} g3dlite vmaplib detour recast ${ZLIB_LIBRARIES})
+
+if(MSVC)
+  # Define OutDir to source/bin/(platform)_(configuaration) folder.
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}/Extractors")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DEV_BIN_DIR}/Extractors")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
+endif()
+
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)

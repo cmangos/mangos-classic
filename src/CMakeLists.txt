@@ -16,18 +16,16 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-# Needs to link against mangos_worldd.lib
-if(WIN32)
-  link_directories(
-    ${CMAKE_BINARY_DIR}/src/mangosd/${CMAKE_CFG_INTDIR}
-  )
-  include_directories(
-    ${CMAKE_SOURCE_DIR}/dep/include # For Win32
-  )
+if(BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER)
+  add_subdirectory(framework)
+  add_subdirectory(shared)
 endif()
 
-add_subdirectory(framework)
-add_subdirectory(shared)
-add_subdirectory(realmd)
-add_subdirectory(game)
-add_subdirectory(mangosd)
+if(BUILD_GAME_SERVER)
+  add_subdirectory(game)
+  add_subdirectory(mangosd)
+endif()
+
+if(BUILD_LOGIN_SERVER)
+  add_subdirectory(realmd)
+endif()

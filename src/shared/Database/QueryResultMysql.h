@@ -24,11 +24,12 @@
 #include "Common.h"
 
 #ifdef WIN32
-#include <WinSock2.h>
-#include <mysql/mysql.h>
+  #include <WinSock2.h>
+  #include <mysql/mysql.h>
 #else
-#include <mysql.h>
+  #include <mysql.h>
 #endif
+
 
 class QueryResultMysql : public QueryResult
 {

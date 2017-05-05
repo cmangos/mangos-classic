@@ -20,7 +20,7 @@
 #define MANGOS_POSSESSEDAI_H
 
 #include "CreatureAI.h"
-#include "ObjectGuid.h"
+#include "Entities/ObjectGuid.h"
 #include "Timer.h"
 
 class Creature;

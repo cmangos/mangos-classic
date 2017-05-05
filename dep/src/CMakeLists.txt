@@ -16,9 +16,15 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-if (BUILD_CORE)
+if (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER)
   add_subdirectory(gsoap)
 endif()
 
 add_subdirectory(g3dlite)
-add_subdirectory(zlib)
+
+if(MSVC)
+  if(BUILD_EXTRACTORS)
+    add_subdirectory(bzip2)
+  endif()
+  add_subdirectory(zlib)
+endif()

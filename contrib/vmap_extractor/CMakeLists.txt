@@ -21,9 +21,10 @@ project (MANGOS_VMAP_EXTRACT_IO)
 ADD_DEFINITIONS("-DIOMAP_DEBUG")
 # build setup currently only supports libmpq 0.4.x
 ADD_DEFINITIONS("-DUSE_LIBMPQ04")
-ADD_DEFINITIONS("-Wall")
-ADD_DEFINITIONS("-ggdb")
-ADD_DEFINITIONS("-O3")
+
+if(UNIX)
+  ADD_DEFINITIONS("-ggdb")
+endif()
 
 if (APPLE)
   add_definitions("-Dfopen64=fopen")
@@ -33,6 +34,6 @@ if (APPLE)
   add_definitions("-Dftello64=ftello")
 endif()
 
-include_directories(../../dep/libmpq)
+include_directories(${CMAKE_SOURCE_DIR}/dep/libmpq)
 
 add_subdirectory(vmapextract)

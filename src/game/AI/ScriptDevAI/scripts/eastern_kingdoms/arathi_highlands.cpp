@@ -19,14 +19,16 @@ SDName: Arathi Highlands
 SD%Complete: 100
 SDComment: Quest support: 660, 665
 SDCategory: Arathi Highlands
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_professor_phizzlethorpe
 npc_kinelory
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

@@ -1,11 +1,11 @@
 option(DEBUG                "Include additional debug-code in core" OFF)
 option(WARNINGS             "Show all warnings during compile"      OFF)
 option(POSTGRESQL           "Use PostgreSQL"                        OFF)
-option(PCH                  "Use precompiled headers"               OFF)
-option(BUILD_CORE           "Build server core"                     ON)
-option(BUILD_EXTRACTOR      "Build map/dbc extractor"               OFF)
-option(BUILD_VMAP_EXTRACTOR "Build vmap extractor/assembler"        OFF)
-option(BUILD_MMAP_EXTRACTOR "Build Mmap extractor"                  OFF)
+option(PCH                  "Use precompiled headers"               ON)
+option(BUILD_GAME_SERVER    "Build game server"                     ON)
+option(BUILD_LOGIN_SERVER   "Build login server"                    ON)
+option(BUILD_EXTRACTORS     "Build map/dbc/vmap/mmap extractors"    OFF)
+option(BUILD_SCRIPTDEV      "Build ScriptDev. (OFF Speedup build)"  ON)
 
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)
@@ -21,12 +21,26 @@ message(STATUS
     PCH                     Use precompiled headers
     DEBUG                   Include additional debug-code in core
     WARNINGS                Show all warnings during compile
-    INCLUDE_BINDINGS_DIR    Include a script library in src/bindings/ with the
-                            defined name. the name must corespond to the name of
-                            the folder and the folder must contain a valid
-                            CMakeLists.txt
+    DEBUG                   Include additional debug-code in core
+    POSTGRESQL              Use PostgreSQL instead of mysql
+    BUILD_GAME_SERVER       Build game server (core server)
+    BUILD_LOGIN_SERVER      Build login server (auth server)
+    BUILD_EXTRACTORS        Build map/dbc/vmap/mmap extractor
+    BUILD_SCRIPTDEV         Build scriptdev. (Disable it to speedup build in dev mode by not including scripts)
+
   To set an option simply type -D<OPTION>=<VALUE> after 'cmake <srcs>'.
   Also, you can specify the generator with -G. see 'cmake --help' for more details
-  For example: cmake .. -DDEBUG=1 -DCMAKE_INSTALL_PREFIX=/opt/mangos"
+  For example:
+    Build server
+    cmake -DCMAKE_INSTALL_PREFIX=../opt/cmangos ..
+
+    Build full server with extractor
+    cmake -DCMAKE_INSTALL_PREFIX=../opt/cmangos -DBUILD_EXTRACTORS=ON ..
+
+    Build only server without scripts and extractors and in debug mode
+    cmake -DCMAKE_INSTALL_PREFIX=../opt/cmangos -DDEBUG=ON -DBUILD_ALL_SCRIPTS=OFF ..
+
+    Build only login server
+    cmake -DCMAKE_INSTALL_PREFIX=../opt/cmangos -DBUILD_GAME_SERVER=OFF .."
 )
 message("")

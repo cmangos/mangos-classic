@@ -5,7 +5,7 @@
 #ifndef SC_GRIDSEARCH_H
 #define SC_GRIDSEARCH_H
 
-#include "Object.h"
+#include "Entities/Object.h"
 class GameObject;
 class Creature;
 

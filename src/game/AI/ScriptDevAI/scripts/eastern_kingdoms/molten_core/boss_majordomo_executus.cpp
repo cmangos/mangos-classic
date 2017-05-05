@@ -19,11 +19,13 @@ SDName: Boss_Majordomo_Executus
 SD%Complete: 100
 SDComment:
 SDCategory: Molten Core
-EndScriptData */
+EndScriptData
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "molten_core.h"
-#include "TemporarySummon.h"
+#include "Entities/TemporarySummon.h"
 
 enum
 {

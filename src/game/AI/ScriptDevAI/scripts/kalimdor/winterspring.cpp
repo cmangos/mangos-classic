@@ -19,13 +19,15 @@ SDName: Winterspring
 SD%Complete: 90
 SDComment: Quest support: 4901.
 SDCategory: Winterspring
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_ranshalla
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

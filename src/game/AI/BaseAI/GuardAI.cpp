@@ -17,9 +17,9 @@
  */
 
 #include "GuardAI.h"
-#include "Creature.h"
-#include "Player.h"
-#include "World.h"
+#include "Entities/Creature.h"
+#include "Entities/Player.h"
+#include "World/World.h"
 
 int GuardAI::Permissible(const Creature* creature)
 {

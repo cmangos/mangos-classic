@@ -19,14 +19,16 @@ SDName: Burning_Steppes
 SD%Complete: 100
 SDComment: Quest support: 4121, 4122, 4866
 SDCategory: Burning Steppes
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_ragged_john
 npc_grark_lorkrub
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

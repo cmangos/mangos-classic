@@ -19,12 +19,14 @@ SDName: Undercity
 SD%Complete:
 SDComment: Placeholder
 SDCategory: Undercity
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 void AddSC_undercity()
 {

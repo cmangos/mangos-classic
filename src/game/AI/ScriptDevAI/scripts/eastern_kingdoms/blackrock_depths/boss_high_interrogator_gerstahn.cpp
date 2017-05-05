@@ -19,9 +19,11 @@ SDName: Boss_High_Interrogator_Gerstahn
 SD%Complete: 100
 SDComment:
 SDCategory: Blackrock Depths
-EndScriptData */
+EndScriptData
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 
 enum
 {

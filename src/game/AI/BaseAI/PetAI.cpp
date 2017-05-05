@@ -18,13 +18,13 @@
 
 #include "PetAI.h"
 #include "Errors.h"
-#include "Pet.h"
-#include "Player.h"
-#include "DBCStores.h"
-#include "Spell.h"
-#include "SpellMgr.h"
-#include "Creature.h"
-#include "World.h"
+#include "Entities/Pet.h"
+#include "Entities/Player.h"
+#include "Server/DBCStores.h"
+#include "Spells/Spell.h"
+#include "Spells/SpellMgr.h"
+#include "Entities/Creature.h"
+#include "World/World.h"
 #include "Util.h"
 
 int PetAI::Permissible(const Creature* creature)

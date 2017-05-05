@@ -9,11 +9,22 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 cmake_minimum_required (VERSION 2.8)
-project(mpq)
+project(mpqlib)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libmpq)
+# disable warnings for dependencies
+DisableWarnings()
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/libmpq
+                    ${ZLIB_INCLUDE_DIRS}
+                    ${BZIP2_INCLUDE_DIRS})
 
 file(GLOB mpqfiles libmpq/*.c libmpq/*.h *.h)
 
-add_library(mpq ${mpqfiles})
+add_library(mpqlib STATIC ${mpqfiles})
+target_link_libraries(mpqlib ${ZLIB_LIBRARIES} ${BZIP2_LIBRARIES})
+
+if(MSVC)
+  target_compile_options(mpqlib PRIVATE /wd4103)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/win)
+endif()

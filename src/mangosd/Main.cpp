@@ -28,7 +28,6 @@
 #include "Master.h"
 #include "SystemConfig.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
-#include "revision.h"
 
 #include <openssl/opensslv.h>
 #include <openssl/crypto.h>

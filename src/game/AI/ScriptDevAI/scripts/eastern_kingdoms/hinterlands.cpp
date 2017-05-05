@@ -19,14 +19,16 @@ SDName: Hinterlands
 SD%Complete: 100
 SDComment: Quest support: 836, 2742
 SDCategory: The Hinterlands
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_00x09hl
 npc_rinji
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

@@ -19,16 +19,18 @@ SDName: Moonglade
 SD%Complete: 100
 SDComment: Quest support: 8736, 10965.
 SDCategory: Moonglade
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_keeper_remulos
 boss_eranikus
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
-#include "ObjectMgr.h"
+#include "Globals/ObjectMgr.h"
 
 /*######
 ## npc_keeper_remulos

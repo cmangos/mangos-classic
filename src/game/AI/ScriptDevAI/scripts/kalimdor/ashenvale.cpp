@@ -19,16 +19,18 @@ SDName: Ashenvale
 SD%Complete: 70
 SDComment: Quest support: 976, 6482, 6544, 6641
 SDCategory: Ashenvale Forest
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_muglash
 npc_ruul_snowhoof
 npc_torek
 npc_feero_ironhand
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*####

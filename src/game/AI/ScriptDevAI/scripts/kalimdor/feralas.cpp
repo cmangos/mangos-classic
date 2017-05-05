@@ -19,14 +19,16 @@ SDName: Feralas
 SD%Complete: 100
 SDComment: Quest support: 2767, 2845.
 SDCategory: Feralas
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_oox22fe
 npc_shay_leafrunner
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/follower_ai.h"
 

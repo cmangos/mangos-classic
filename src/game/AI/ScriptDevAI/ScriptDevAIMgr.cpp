@@ -2,17 +2,21 @@
 * This program is free software licensed under GPL version 2
 * Please see the included DOCS/LICENSE.TXT for more information */
 
-#include "include/precompiled.h"
+#include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "Policies/Singleton.h"
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"
-#include "DBCStores.h"
-#include "ObjectMgr.h"
+#include "Server/DBCStores.h"
+#include "Globals/ObjectMgr.h"
 #include "ProgressBar.h"
-#include "system/ScriptLoader.h"
 #include "system/system.h"
 #include "ScriptDevAIMgr.h"
 #include "include/sc_creature.h"
+#include "Entities/Player.h"
+
+#ifdef BUILD_SCRIPTDEV
+  #include "system/ScriptLoader.h"
+#endif
 
 INSTANTIATE_SINGLETON_1(ScriptDevAIMgr);
 
@@ -432,16 +436,18 @@ Script* ScriptDevAIMgr::GetScript(uint32 id) const
 
 void ScriptDevAIMgr::Initialize()
 {
-    // ScriptDev2 startup
-    outstring_log("");
-    outstring_log(" MMM  MMM    MM");
-    outstring_log("M  MM M  M  M  M");
-    outstring_log("MM    M   M   M");
-    outstring_log(" MMM  M   M  M");
-    outstring_log("   MM M   M MMMM");
-    outstring_log("MM  M M  M ");
-    outstring_log(" MMM  MMM  http://www.scriptdev2.com");
-    outstring_log("");
+#ifdef BUILD_SCRIPTDEV
+    // ScriptDev startup
+    outstring_log("  _____           _       _   _____ ");
+    outstring_log(" / ____|         (_)     | | |  __ \\");
+    outstring_log("| (___   ___ _ __ _ _ __ | |_| |  | | _____   __");
+    outstring_log(" \\___ \\ / __| '__| | '_ \\| __| |  | |/ _ \\ \\ / /");
+    outstring_log(" ____) | (__| |  | | |_) | |_| |__| |  __/\\ V / ");
+    outstring_log("|_____/ \\___|_|  |_| .__/ \\__|_____/ \\___| \\_/ ");
+    outstring_log("                   | |");
+    outstring_log("                   |_| http://www.cmangos.net");
+
+
 
     // Load database (must be called after SD2Config.SetSource).
     LoadDatabase();
@@ -466,6 +472,10 @@ void ScriptDevAIMgr::Initialize()
     }
 
     outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
+#else
+    outstring_log("");
+    outstring_log(">> ScriptDev is disabled!");
+#endif
 }
 
 void ScriptDevAIMgr::LoadScriptNames()

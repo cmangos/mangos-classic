@@ -19,9 +19,11 @@ SDName: Darkshore
 SD%Complete: 100
 SDComment: Quest support: 731, 945, 994, 995, 2078, 2118, 5321
 SDCategory: Darkshore
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_kerlonian
 npc_prospector_remtravel
 npc_threshwackonator
@@ -30,7 +32,7 @@ npc_therylune
 npc_rabid_bear
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/follower_ai.h"
 

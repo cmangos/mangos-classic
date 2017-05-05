@@ -19,13 +19,15 @@ SDName: Durotar
 SD%Complete: 100
 SDComment: Quest support: 5441
 SDCategory: Durotar
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 npc_lazy_peon
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /*######
 ## npc_lazy_peon

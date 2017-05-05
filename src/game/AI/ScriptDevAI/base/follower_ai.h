@@ -5,6 +5,8 @@
 #ifndef SC_FOLLOWERAI_H
 #define SC_FOLLOWERAI_H
 
+#include "AI/ScriptDevAI/include/sc_creature.h"
+
 enum FollowState
 {
     STATE_FOLLOW_NONE       = 0x000,

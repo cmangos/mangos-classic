@@ -26,9 +26,9 @@
 
 #include "Common.h"
 #include "Master.h"
-#include "WorldSocket.h"
+#include "Server/WorldSocket.h"
 #include "WorldRunnable.h"
-#include "World.h"
+#include "World/World.h"
 #include "Log.h"
 #include "Timer.h"
 #include "SystemConfig.h"
@@ -37,8 +37,8 @@
 #include "Util.h"
 #include "revision_sql.h"
 #include "MaNGOSsoap.h"
-#include "MassMailMgr.h"
-#include "DBCStores.h"
+#include "Mails/MassMailMgr.h"
+#include "Server/DBCStores.h"
 
 #include "Config/Config.h"
 #include "Database/DatabaseEnv.h"

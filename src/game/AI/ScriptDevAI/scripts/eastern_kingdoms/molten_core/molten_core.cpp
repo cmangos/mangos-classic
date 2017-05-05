@@ -19,12 +19,14 @@ SDName: Molten_Core
 SD%Complete:
 SDComment:
 SDCategory: Molten Core
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "molten_core.h"
 
 /*######

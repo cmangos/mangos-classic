@@ -4,6 +4,7 @@
 #include "../mpq_libmpq.h"
 
 #include <stdio.h>
+#include <string.h>
 
 class MPQFile;
 
@@ -50,7 +51,7 @@ bool FileLoader::prepareLoadedData()
 {
     // Check version
     version = (file_MVER*) data;
-    if (version->fcc != 'MVER')
+    if (!strncmp(version->fcc_txt, "MVER", 4))
         return false;
     if (version->ver != FILE_FORMAT_VERSION)
         return false;

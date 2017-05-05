@@ -19,16 +19,18 @@ SDName: Boss_Thaddius
 SD%Complete: 85
 SDComment: Magnetic Pull, Tesla-Chains, Polaritiy-Shift missing (core!)
 SDCategory: Naxxramas
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 boss_thaddius
 npc_tesla_coil
 boss_stalagg
 boss_feugen
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "naxxramas.h"
 
 enum

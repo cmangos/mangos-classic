@@ -21,18 +21,18 @@
 /// \file
 
 #include "Common.h"
-#include "Language.h"
+#include "Tools/Language.h"
 #include "Log.h"
-#include "World.h"
-#include "ObjectMgr.h"
-#include "WorldSession.h"
+#include "World/World.h"
+#include "Globals/ObjectMgr.h"
+#include "Server/WorldSession.h"
 #include "Config/Config.h"
 #include "Util.h"
-#include "AccountMgr.h"
+#include "Accounts/AccountMgr.h"
 #include "CliRunnable.h"
-#include "MapManager.h"
-#include "Player.h"
-#include "Chat.h"
+#include "Maps/MapManager.h"
+#include "Entities/Player.h"
+#include "Chat/Chat.h"
 
 void utf8print(const char* str)
 {

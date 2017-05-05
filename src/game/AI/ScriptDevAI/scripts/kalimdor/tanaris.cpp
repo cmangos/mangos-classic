@@ -19,16 +19,18 @@ SDName: Tanaris
 SD%Complete: 80
 SDComment: Quest support: 648, 1560, 2954, 4005, 10277.
 SDCategory: Tanaris
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 mob_aquementas
 npc_oox17tn
 npc_stone_watcher_of_norgannon
 npc_tooga
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/follower_ai.h"
 

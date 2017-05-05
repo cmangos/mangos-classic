@@ -19,9 +19,11 @@ SDName: Spell_Scripts
 SD%Complete: 100
 SDComment: Spell scripts for dummy effects (if script need access/interaction with parts of other AI or instance, add it in related source files)
 SDCategory: Spell
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 spell 8913
 spell 10848
 spell 17327
@@ -29,7 +31,7 @@ spell 19512
 spell 21050
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 /* When you make a spell effect:
 - always check spell id and effect index

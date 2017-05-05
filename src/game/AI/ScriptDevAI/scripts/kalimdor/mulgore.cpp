@@ -19,12 +19,14 @@ SDName: Mulgore
 SD%Complete: 100
 SDComment: Placeholder
 SDCategory: Mulgore
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 void AddSC_mulgore()
 {

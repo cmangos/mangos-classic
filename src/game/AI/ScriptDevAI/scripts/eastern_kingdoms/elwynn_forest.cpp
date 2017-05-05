@@ -19,12 +19,14 @@ SDName: Elwynn_Forest
 SD%Complete: 0
 SDComment: Placeholder
 SDCategory: Elwynn Forest
-EndScriptData */
+EndScriptData
 
-/* ContentData
+*/
+
+#include "AI/ScriptDevAI/PreCompiledHeader.h"/* ContentData
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+
 
 void AddSC_elwynn_forest()
 {
