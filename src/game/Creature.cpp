@@ -1209,7 +1209,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
         uint32 value = maxValue;
 
         // For non regenerating powers set 0
-        if ((i == POWER_ENERGY || i == POWER_MANA) && !IsRegeneratingPower())
+        if (i == POWER_ENERGY && !IsRegeneratingPower())
             value = 0;
 
         // Mana requires an extra field to be set
