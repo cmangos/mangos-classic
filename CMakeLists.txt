@@ -66,6 +66,13 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 set(CMAKE_INSTALL_RPATH ${LIBS_DIR})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+if(MSVC)
+  # Turn on the ability to create folders to organize projects (.vcproj)
+  # It creates "CMakePredefinedTargets" folder by default and adds CMake
+  # defined projects like INSTALL.vcproj and ZERO_CHECK.vcproj
+  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+endif()
+
 # set default buildoptions and print them
 include(cmake/options.cmake)
 
@@ -159,7 +166,8 @@ set(CMAKE_INSTALL_NAME_DIR ${LIBS_DIR})
 
 # Add alternate lib dir for boost on windows
 if(WIN32 AND NOT "$ENV{BOOST_ROOT}" STREQUAL "")
-  set(BOOST_LIBRARYDIR "$ENV{BOOST_ROOT}\\lib\\${DEP_ARCH}")
+  set(BOOST_LIBRARYDIR "$ENV{BOOST_LIBRARYDIR}")
+  set(BOOST_LIBRARYDIR "${BOOST_LIBRARYDIR};$ENV{BOOST_ROOT}\\lib\\${DEP_ARCH}")
   set(BOOST_LIBRARYDIR "${BOOST_LIBRARYDIR};$ENV{BOOST_ROOT}\\stage\\${DEP_ARCH}")
   set(BOOST_LIBRARYDIR "${BOOST_LIBRARYDIR};$ENV{BOOST_ROOT}\\stage")
 endif()
