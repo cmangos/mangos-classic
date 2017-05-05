@@ -11,75 +11,84 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\dep\src\zlib\adler32.c">
+    <ClCompile Include="..\..\dep\zlib\zutil.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\compress.c">
+    <ClCompile Include="..\..\dep\zlib\adler32.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\crc32.c">
+    <ClCompile Include="..\..\dep\zlib\compress.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\deflate.c">
+    <ClCompile Include="..\..\dep\zlib\crc32.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\example.c">
+    <ClCompile Include="..\..\dep\zlib\deflate.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\gzio.c">
+    <ClCompile Include="..\..\dep\zlib\gzclose.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\infback.c">
+    <ClCompile Include="..\..\dep\zlib\gzlib.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\inffast.c">
+    <ClCompile Include="..\..\dep\zlib\gzread.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\inflate.c">
+    <ClCompile Include="..\..\dep\zlib\gzwrite.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\inftrees.c">
+    <ClCompile Include="..\..\dep\zlib\infback.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\trees.c">
+    <ClCompile Include="..\..\dep\zlib\inffast.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\uncompr.c">
+    <ClCompile Include="..\..\dep\zlib\inflate.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dep\src\zlib\zutil.c">
+    <ClCompile Include="..\..\dep\zlib\inftrees.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dep\zlib\trees.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dep\zlib\uncompr.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\dep\src\zlib\crc32.h">
+    <ClInclude Include="..\..\dep\zlib\zutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\dep\src\zlib\deflate.h">
+    <ClInclude Include="..\..\dep\zlib\crc32.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\dep\src\zlib\inffast.h">
+    <ClInclude Include="..\..\dep\zlib\deflate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\dep\src\zlib\inffixed.h">
+    <ClInclude Include="..\..\dep\zlib\gzguts.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\dep\src\zlib\inflate.h">
+    <ClInclude Include="..\..\dep\zlib\inffast.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\dep\src\zlib\inftrees.h">
+    <ClInclude Include="..\..\dep\zlib\inffixed.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\dep\src\zlib\trees.h">
+    <ClInclude Include="..\..\dep\zlib\inflate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\dep\src\zlib\zconf.h">
+    <ClInclude Include="..\..\dep\zlib\inftrees.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\dep\src\zlib\zlib.h">
+    <ClInclude Include="..\..\dep\zlib\trees.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\dep\src\zlib\zutil.h">
+    <ClInclude Include="..\..\dep\zlib\zconf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\dep\zlib\zlib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
