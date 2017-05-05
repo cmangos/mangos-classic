@@ -3515,6 +3515,13 @@ void Spell::SendLogExecute() const
         {
             switch (m_spellInfo->Effect[EFFECT_INDEX_0])
             {
+                case SPELL_EFFECT_DISPEL:
+                case SPELL_EFFECT_THREAT:
+                    if (Unit* unit = m_targets.getUnitTarget())
+                        data << unit->GetObjectGuid();
+                    else
+                        data << uint8(0);
+                    break;
                 case SPELL_EFFECT_POWER_DRAIN:
                     if (Unit* unit = m_targets.getUnitTarget())
                         data << unit->GetPackGUID();
