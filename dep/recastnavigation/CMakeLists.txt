@@ -18,8 +18,11 @@
 
 if (BUILD_GAME_SERVER OR BUILD_EXTRACTORS)
   add_subdirectory(Detour)
+
+  set_target_properties(detour PROPERTIES FOLDER "Dependencies")
 endif()
 
 if (BUILD_EXTRACTORS)
   add_subdirectory(Recast)
+  set_target_properties(recast PROPERTIES FOLDER "Dependencies")
 endif()

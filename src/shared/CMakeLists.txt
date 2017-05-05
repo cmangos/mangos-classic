@@ -194,3 +194,6 @@ add_custom_command(TARGET ${LIBRARY_NAME} PRE_BUILD
 set_source_files_properties(${CMAKE_SOURCE_DIR}/src/shared/revision.h
   PROPERTIES GENERATED TRUE
              HEADER_FILE_ONLY TRUE)
+if(MSVC)
+  set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "Shared")
+endif()

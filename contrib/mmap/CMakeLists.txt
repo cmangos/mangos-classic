@@ -36,6 +36,7 @@ include_directories(
     ${ZLIB_INCLUDE_DIRS}
 )
 
+# TODO: Do we still need that vmaplib?
 add_library(vmaplib
     ../../src/game/vmap/BIH.cpp
     ../../src/game/vmap/VMapManager2.cpp
@@ -69,6 +70,16 @@ if(MSVC)
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}/Extractors")
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DEV_BIN_DIR}/Extractors")
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$(OutDir)")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES PROJECT_LABEL "MoveMapGen")
+  set_target_properties(${EXECUTABLE_NAME} PROPERTIES FOLDER "Extractors")
+  set_target_properties(vmaplib PROPERTIES FOLDER "Dependencies")
+  
+  # Add script file to dev folder
+  set(FILES_LIST_TO_COPY
+        ${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/MoveMapGen.sh
+        ${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/offmesh.txt)
+  add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILES_LIST_TO_COPY} $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>)
 endif()
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)

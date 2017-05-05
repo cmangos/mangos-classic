@@ -129,8 +129,9 @@ add_library(${LIBRARY_NAME} STATIC
   ${LIBRARY_SRCS}
 )
 
-if(WIN32)
+if(MSVC)
   target_link_libraries(${LIBRARY_NAME}
     ${ZLIB_LIBRARIES}
   )
+  set_target_properties(${LIBRARY_NAME} PROPERTIES FOLDER "Dependencies")
 endif()
