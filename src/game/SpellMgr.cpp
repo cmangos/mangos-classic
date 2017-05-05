@@ -1036,6 +1036,10 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy(SpellProcEventEntry const* spellPr
     // No extra req need
     uint32 procEvent_procEx = PROC_EX_NONE;
 
+    // wand should not proc anything
+    if (procSpell && procSpell->Id == 5019)
+        return false;
+
     // check prockFlags for condition
     if ((procFlags & EventProcFlag) == 0)
         return false;
