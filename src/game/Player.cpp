@@ -16814,6 +16814,8 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
             }
         }
     }
+    
+    setFactionForRace(getRace()); // reset faction
 }
 
 bool Player::CanJoinToBattleground() const
