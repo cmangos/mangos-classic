@@ -79,7 +79,7 @@ if(MSVC)
         ${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/MoveMapGen.sh
         ${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/offmesh.txt)
   add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILES_LIST_TO_COPY} $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>)
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${FILES_LIST_TO_COPY}\" \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>\")
 endif()
 
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)

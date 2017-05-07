@@ -31,6 +31,6 @@ if(MSVC)
   
   # Add script file to dev folder
   add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/ExtractResources.sh $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>)
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${CMAKE_SOURCE_DIR}/contrib/extractor_scripts/ExtractResources.sh\" \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>\")
 endif()
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR}/tools)

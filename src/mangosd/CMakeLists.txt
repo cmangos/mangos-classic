@@ -86,11 +86,11 @@ if(MSVC)
   # Add provided dependency lib to dev folder
   string(REGEX REPLACE "/" "\\\\" LibFolder ${DEV_PROVIDED_LIBS_FOLDER})
   add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-    COMMAND copy ${LibFolder}\\*.dll $(OutDir))
+    COMMAND copy \"${LibFolder}\\*.dll\" \"$(OutDir)\")
 
   # Add conf file to dev folder
   add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/mangosd.conf.dist.in $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/mangosd.conf.dist)
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different \"${CMAKE_CURRENT_SOURCE_DIR}/mangosd.conf.dist.in\" \"$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>/mangosd.conf.dist\")
 endif()
 
 if(UNIX)
