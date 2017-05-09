@@ -171,14 +171,14 @@ bool ScriptDevAIMgr::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32
 
     if (code)
     {
-        if (!pTempScript->pGossipSelectGOWithCode)
+        if (!pTempScript->pGossipSelectWithCode)
             return false;
 
         pPlayer->PlayerTalkClass->ClearMenus();
         return pTempScript->pGossipSelectWithCode(pPlayer, pCreature, uiSender, uiAction, code);
     }
 
-    if (!pTempScript->pGossipSelectGO)
+    if (!pTempScript->pGossipSelect)
         return false;
 
     pPlayer->PlayerTalkClass->ClearMenus();
