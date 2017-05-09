@@ -144,7 +144,7 @@ void TemporarySpawn::Update(uint32 update_diff,  uint32 diff)
                 return;
             }
 
-            if (!isInCombat() && isAlive())
+            if (!isInCombat() && isAlive() && !GetCharmerGuid())
             {
                 if (m_timer <= update_diff)
                 {
