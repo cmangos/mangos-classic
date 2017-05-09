@@ -358,6 +358,7 @@ bool Creature::InitEntry(uint32 Entry, Team team, CreatureData const* data /*=nu
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
+    SetMeleeDamageSchool(SpellSchools(cinfo->DamageSchool));
 
     SetCanParry(!(cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_PARRY));
     SetCanBlock(!(cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_BLOCK));
@@ -1476,8 +1477,6 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
 
     SetHealth(m_deathState == ALIVE ? curhealth : 0);
     SetPower(POWER_MANA, data->curmana);
-
-    SetMeleeDamageSchool(SpellSchools(GetCreatureInfo()->DamageSchool));
 
     // checked at creature_template loading
     m_defaultMovementType = MovementGeneratorType(data->movementType);
