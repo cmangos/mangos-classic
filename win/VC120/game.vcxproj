@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug_NoPCH|Win32">
       <Configuration>Debug_NoPCH</Configuration>
@@ -60,43 +60,43 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|Win32'">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug_NoPCH|X64'">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(LocalAppData)\Microsoft\VisualStudio\12.0\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(LocalAppData)\Microsoft\VisualStudio\10.0\Microsoft.Cpp.$(Platform).user.props')" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="Precompiled Headers.props" />
@@ -339,207 +339,18 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\game\AccountMgr.cpp" />
     <ClCompile Include="..\..\src\game\AddonHandler.cpp" />
-    <ClCompile Include="..\..\src\game\AI\BaseAI\AggressorAI.cpp" />
-    <ClCompile Include="..\..\src\game\AI\BaseAI\CreatureAI.cpp" />
-    <ClCompile Include="..\..\src\game\AI\BaseAI\GuardAI.cpp" />
-    <ClCompile Include="..\..\src\game\AI\BaseAI\GuardianAI.cpp" />
-    <ClCompile Include="..\..\src\game\AI\BaseAI\NullCreatureAI.cpp" />
-    <ClCompile Include="..\..\src\game\AI\BaseAI\PetAI.cpp" />
-    <ClCompile Include="..\..\src\game\AI\BaseAI\ReactorAI.cpp" />
-    <ClCompile Include="..\..\src\game\AI\BaseAI\TotemAI.cpp" />
+    <ClCompile Include="..\..\src\game\AI\AggressorAI.cpp" />
+    <ClCompile Include="..\..\src\game\AI\CreatureAI.cpp" />
     <ClCompile Include="..\..\src\game\AI\CreatureAIRegistry.cpp" />
     <ClCompile Include="..\..\src\game\AI\CreatureAISelector.cpp" />
-    <ClCompile Include="..\..\src\game\AI\EventAI\CreatureEventAI.cpp" />
-    <ClCompile Include="..\..\src\game\AI\EventAI\CreatureEventAIMgr.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\base\escort_ai.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\base\follower_ai.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\base\guard_ai.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\base\pet_ai.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\include\precompiled.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\include\sc_creature.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\include\sc_grid_searchers.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\include\sc_instance.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\ScriptDevAIMgr.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\battlegrounds\battlegrounds.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\alterac_mountains.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\arathi_highlands.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_depths\blackrock_depths.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_depths\boss_ambassador_flamelash.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_depths\boss_emperor_dagran_thaurissan.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_depths\boss_general_angerforge.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_depths\boss_high_interrogator_gerstahn.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_depths\instance_blackrock_depths.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_spire\boss_gyth.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_spire\boss_overlord_wyrmthalak.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_spire\boss_pyroguard_emberseer.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_spire\instance_blackrock_spire.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackwing_lair\boss_broodlord_lashlayer.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackwing_lair\boss_chromaggus.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackwing_lair\boss_ebonroc.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackwing_lair\boss_firemaw.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackwing_lair\boss_flamegor.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackwing_lair\boss_nefarian.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackwing_lair\boss_razorgore.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackwing_lair\boss_vaelastrasz.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackwing_lair\boss_victor_nefarius.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackwing_lair\instance_blackwing_lair.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blasted_lands.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\boss_kazzak.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\burning_steppes.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\deadmines\boss_mr_smite.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\deadmines\deadmines.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\deadmines\instance_deadmines.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\dun_morogh.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\eastern_plaguelands.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\elwynn_forest.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\gnomeregan\boss_thermaplugg.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\gnomeregan\gnomeregan.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\gnomeregan\instance_gnomeregan.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\hinterlands.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\ironforge.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\loch_modan.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\boss_baron_geddon.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\boss_garr.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\boss_gehennas.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\boss_golemagg.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\boss_lucifron.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\boss_magmadar.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\boss_majordomo_executus.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\boss_ragnaros.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\boss_shazzrah.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\boss_sulfuron_harbinger.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\instance_molten_core.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\molten_core.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_anubrekhan.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_faerlina.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_four_horsemen.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_gluth.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_gothik.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_grobbulus.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_heigan.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_kelthuzad.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_loatheb.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_maexxna.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_noth.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_patchwerk.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_razuvious.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_sapphiron.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\boss_thaddius.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\instance_naxxramas.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\redridge_mountains.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\scarlet_monastery\boss_arcanist_doan.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\scarlet_monastery\boss_herod.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\scarlet_monastery\boss_mograine_and_whitemane.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\scarlet_monastery\instance_scarlet_monastery.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\scholomance\boss_darkmaster_gandling.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\scholomance\boss_jandice_barov.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\scholomance\instance_scholomance.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\scholomance\scholomance.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\searing_gorge.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\shadowfang_keep\instance_shadowfang_keep.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\shadowfang_keep\shadowfang_keep.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\silverpine_forest.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\stormwind_city.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\stranglethorn_vale.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\stratholme\boss_baroness_anastari.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\stratholme\boss_cannon_master_willey.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\stratholme\boss_dathrohan_balnazzar.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\stratholme\boss_maleki_the_pallid.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\stratholme\instance_stratholme.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\stratholme\stratholme.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\sunken_temple\instance_sunken_temple.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\sunken_temple\sunken_temple.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\swamp_of_sorrows.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\tirisfal_glades.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\uldaman\boss_archaedas.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\uldaman\instance_uldaman.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\uldaman\uldaman.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\undercity.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\western_plaguelands.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\westfall.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\wetlands.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\boss_arlokk.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\boss_hakkar.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\boss_hazzarah.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\boss_jeklik.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\boss_jindo.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\boss_mandokir.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\boss_marli.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\boss_renataki.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\boss_thekal.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\boss_venoxis.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\instance_zulgurub.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\examples\example_creature.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\examples\example_escort.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\examples\example_gossip_codebox.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\examples\example_misc.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\ashenvale.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\azshara.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\blackfathom_deeps\instance_blackfathom_deeps.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\boss_azuregos.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\darkshore.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\desolace.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\dire_maul\dire_maul.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\dire_maul\instance_dire_maul.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\durotar.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\dustwallow_marsh.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\felwood.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\feralas.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\maraudon\boss_noxxion.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\moonglade.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\mulgore.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\onyxias_lair\boss_onyxia.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\onyxias_lair\instance_onyxias_lair.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\orgrimmar.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\razorfen_downs\instance_razorfen_downs.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\razorfen_downs\razorfen_downs.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\razorfen_kraul\instance_razorfen_kraul.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\razorfen_kraul\razorfen_kraul.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\ruins_of_ahnqiraj\boss_ayamiss.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\ruins_of_ahnqiraj\boss_buru.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\ruins_of_ahnqiraj\boss_kurinnaxx.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\ruins_of_ahnqiraj\boss_moam.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\ruins_of_ahnqiraj\boss_ossirian.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\ruins_of_ahnqiraj\boss_rajaxx.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\ruins_of_ahnqiraj\instance_ruins_of_ahnqiraj.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\ruins_of_ahnqiraj\ruins_of_ahnqiraj.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\silithus.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\stonetalon_mountains.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\tanaris.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\teldrassil.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\boss_bug_trio.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\boss_cthun.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\boss_fankriss.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\boss_huhuran.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\boss_ouro.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\boss_sartura.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\boss_skeram.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\boss_twinemperors.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\boss_viscidus.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\instance_temple_of_ahnqiraj.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\mob_anubisath_sentinel.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\the_barrens.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\thousand_needles.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\thunder_bluff.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\ungoro_crater.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\wailing_caverns\instance_wailing_caverns.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\wailing_caverns\wailing_caverns.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\winterspring.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\zulfarrak\boss_zumrah.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\zulfarrak\instance_zulfarrak.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\zulfarrak\zulfarrak.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\world\areatrigger_scripts.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\world\bosses_emerald_dragons.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\world\go_scripts.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\world\guards.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\world\item_scripts.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\world\mob_generic_creature.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\world\npcs_special.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\world\npc_professions.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\world\spell_scripts.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\scripts\world\world_map_scripts.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\system\ScriptLoader.cpp" />
-    <ClCompile Include="..\..\src\game\AI\ScriptDevAI\system\system.cpp" />
+    <ClCompile Include="..\..\src\game\AI\CreatureEventAI.cpp" />
+    <ClCompile Include="..\..\src\game\AI\CreatureEventAIMgr.cpp" />
+    <ClCompile Include="..\..\src\game\AI\GuardAI.cpp" />
+    <ClCompile Include="..\..\src\game\AI\GuardianAI.cpp" />
+    <ClCompile Include="..\..\src\game\AI\NullCreatureAI.cpp" />
+    <ClCompile Include="..\..\src\game\AI\PetAI.cpp" />
+    <ClCompile Include="..\..\src\game\AI\ReactorAI.cpp" />
+    <ClCompile Include="..\..\src\game\AI\TotemAI.cpp" />
     <ClCompile Include="..\..\src\game\AuctionHouseBot\AuctionHouseBot.cpp" />
     <ClCompile Include="..\..\src\game\AuctionHouseHandler.cpp" />
     <ClCompile Include="..\..\src\game\AuctionHouseMgr.cpp" />
@@ -682,56 +493,20 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\game\AccountMgr.h" />
     <ClInclude Include="..\..\src\game\AddonHandler.h" />
-    <ClInclude Include="..\..\src\game\AI\BaseAI\AggressorAI.h" />
-    <ClInclude Include="..\..\src\game\AI\BaseAI\CreatureAI.h" />
-    <ClInclude Include="..\..\src\game\AI\BaseAI\CreatureAIImpl.h" />
-    <ClInclude Include="..\..\src\game\AI\BaseAI\GuardAI.h" />
-    <ClInclude Include="..\..\src\game\AI\BaseAI\GuardianAI.h" />
-    <ClInclude Include="..\..\src\game\AI\BaseAI\NullCreatureAI.h" />
-    <ClInclude Include="..\..\src\game\AI\BaseAI\PetAI.h" />
-    <ClInclude Include="..\..\src\game\AI\BaseAI\PossessedAI.h" />
-    <ClInclude Include="..\..\src\game\AI\BaseAI\ReactorAI.h" />
-    <ClInclude Include="..\..\src\game\AI\BaseAI\TotemAI.h" />
+    <ClInclude Include="..\..\src\game\AI\AggressorAI.h" />
+    <ClInclude Include="..\..\src\game\AI\CreatureAI.h" />
+    <ClInclude Include="..\..\src\game\AI\CreatureAIImpl.h" />
     <ClInclude Include="..\..\src\game\AI\CreatureAIRegistry.h" />
     <ClInclude Include="..\..\src\game\AI\CreatureAISelector.h" />
-    <ClInclude Include="..\..\src\game\AI\EventAI\CreatureEventAI.h" />
-    <ClInclude Include="..\..\src\game\AI\EventAI\CreatureEventAIMgr.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\base\escort_ai.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\base\follower_ai.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\base\guard_ai.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\base\pet_ai.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\include\precompiled.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\include\sc_creature.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\include\sc_gossip.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\include\sc_grid_searchers.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\include\sc_instance.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\ScriptDevAIMgr.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_depths\blackrock_depths.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackrock_spire\blackrock_spire.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\blackwing_lair\blackwing_lair.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\deadmines\deadmines.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\gnomeregan\gnomeregan.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\molten_core\molten_core.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\naxxramas\naxxramas.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\scarlet_monastery\scarlet_monastery.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\scholomance\scholomance.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\shadowfang_keep\shadowfang_keep.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\stratholme\stratholme.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\sunken_temple\sunken_temple.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\uldaman\uldaman.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\eastern_kingdoms\zulgurub\zulgurub.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\blackfathom_deeps\blackfathom_deeps.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\dire_maul\dire_maul.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\onyxias_lair\onyxias_lair.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\razorfen_downs\razorfen_downs.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\razorfen_kraul\razorfen_kraul.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\ruins_of_ahnqiraj\ruins_of_ahnqiraj.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\temple_of_ahnqiraj\temple_of_ahnqiraj.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\wailing_caverns\wailing_caverns.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\kalimdor\zulfarrak\zulfarrak.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\scripts\world\world_map_scripts.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\system\ScriptLoader.h" />
-    <ClInclude Include="..\..\src\game\AI\ScriptDevAI\system\system.h" />
+    <ClInclude Include="..\..\src\game\AI\CreatureEventAI.h" />
+    <ClInclude Include="..\..\src\game\AI\CreatureEventAIMgr.h" />
+    <ClInclude Include="..\..\src\game\AI\GuardAI.h" />
+    <ClInclude Include="..\..\src\game\AI\GuardianAI.h" />
+    <ClInclude Include="..\..\src\game\AI\NullCreatureAI.h" />
+    <ClInclude Include="..\..\src\game\AI\PetAI.h" />
+    <ClInclude Include="..\..\src\game\AI\PossessedAI.h" />
+    <ClInclude Include="..\..\src\game\AI\ReactorAI.h" />
+    <ClInclude Include="..\..\src\game\AI\TotemAI.h" />
     <ClInclude Include="..\..\src\game\AuctionHouseBot\AuctionHouseBot.h" />
     <ClInclude Include="..\..\src\game\AuctionHouseMgr.h" />
     <ClInclude Include="..\..\src\game\Bag.h" />
@@ -865,7 +640,7 @@
     <ClInclude Include="..\..\src\game\vmap\WorldModel.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\dep\recastnavigation\Detour\win\VC140\Detour.vcxproj">
+    <ProjectReference Include="..\..\dep\recastnavigation\Detour\win\VC120\Detour.vcxproj">
       <Project>{72bdf975-4d4a-42c7-b2c4-f9ed90a2abb6}</Project>
     </ProjectReference>
     <ProjectReference Include="shared.vcxproj">

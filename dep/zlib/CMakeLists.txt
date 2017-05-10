@@ -20,7 +20,10 @@ set(zlib_SRCS
   compress.c
   crc32.c
   deflate.c
-  example.c
+  gzclose.c
+  gzlib.c
+  gzread.c
+  gzwrite.c
   infback.c
   inffast.c
   inflate.c
