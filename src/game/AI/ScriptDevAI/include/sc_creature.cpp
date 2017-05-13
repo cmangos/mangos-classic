@@ -49,13 +49,39 @@ bool ScriptedAI::IsVisible(Unit* pWho) const
  */
 void ScriptedAI::MoveInLineOfSight(Unit* pWho)
 {
-    if (m_creature->CanInitiateAttack() && pWho->isTargetableForAttack() &&
-            m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
+    if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(pWho) &&
+        m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
     {
-        if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
-            return;
+        if (pWho->GetTypeId() == TYPEID_PLAYER && pWho->GetTypeId() != TYPEID_PLAYER)
+        {
+            if (m_creature->IsWithinDistInMap(pWho, 5.0) && m_creature->IsWithinDistInMap(pWho, 10.0) && m_creature->IsWithinLOSInMap(pWho))
+            {
+                AttackStart(pWho);
+            }
+        }
+        else if (pWho->GetTypeId() == TYPEID_PLAYER && pWho->GetTypeId() == TYPEID_PLAYER || pWho->GetObjectGuid().IsCreature() && ((Creature*)pWho)->IsPet() && ((Creature*)pWho)->GetOwnerGuid().IsPlayer())
+        {
+            if (m_creature->IsWithinDistInMap(pWho, 30.0) && m_creature->IsWithinLOSInMap(pWho))
+            {
+                AttackStart(pWho);
+            }
+        }
+        else if (pWho->GetObjectGuid().IsCreature())
+        {
+            if (((Creature*)pWho)->IsGuard() || ((Creature*)pWho)->IsCivilian())
+            {
+                if (m_creature->IsWithinDistInMap(pWho, 20.0) && m_creature->IsWithinLOSInMap(pWho))
+                {
+                    AttackStart(pWho);
+                }
+            }
+        }
+    }
 
-        if (m_creature->IsWithinDistInMap(pWho, m_creature->GetAttackDistance(pWho)) && m_creature->IsWithinLOSInMap(pWho))
+    if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(pWho) &&
+        m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
+    {
+        if (m_creature->IsGuard() && pWho->GetTypeId() != TYPEID_PLAYER)
         {
             if (!m_creature->getVictim())
             {

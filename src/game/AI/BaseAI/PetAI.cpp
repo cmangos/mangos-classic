@@ -59,7 +59,7 @@ void PetAI::MoveInLineOfSight(Unit* u)
         if (charmInfo->HasReactState(REACT_AGGRESSIVE)
             && !(pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
             && u && (m_unit->IsHostileTo(u) || u->IsHostileTo(m_unit->GetMaster()))
-            && u->isTargetableForAttack() && u->isInAccessablePlaceFor(m_unit)
+            && m_creature->CanAttackOnSight(u) && u->isInAccessablePlaceFor(m_unit)
             && m_unit->IsWithinDistInMap(u, m_unit->GetAttackDistance(u))
             && m_unit->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE
             && m_unit->IsWithinLOSInMap(u))
@@ -302,7 +302,7 @@ void PetAI::UpdateAI(const uint32 diff)
     {
         // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clear at Unit death etc.
         // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
-        if (!victim->isTargetableForAttack())
+        if (!m_creature->CanAttack(victim))
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "PetAI (guid = %u) is stopping attack.", m_unit->GetGUIDLow());
             m_unit->CombatStop();

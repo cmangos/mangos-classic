@@ -43,8 +43,12 @@ void AggressorAI::MoveInLineOfSight(Unit* u)
     if (!m_creature->CanFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE)
         return;
 
-    if (m_creature->CanInitiateAttack() && u->isTargetableForAttack() &&
-            m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
+    // Check if we can help our friend creature
+    if (u->GetObjectGuid().IsCreature() && u->isInCombat())
+        CheckForHelp(u, m_creature, 10.0);
+
+    if (m_creature->CanInitiateAttack() && m_creature->CanAttack(u) &&
+        m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
     {
         float attackRadius = m_creature->GetAttackDistance(u);
         if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->IsWithinLOSInMap(u))
@@ -114,21 +118,10 @@ void AggressorAI::EnterEvadeMode()
 void AggressorAI::UpdateAI(const uint32 /*diff*/)
 {
     // update i_victimGuid
-    if (!m_creature->SelectHostileTarget())
+    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
         return;
 
-    Unit* victim = m_creature->getVictim();
-
-    if (!victim)
-        return;
-
-    i_victimGuid = victim->GetObjectGuid();
-
-    // if pet misses its target, it will also be the first in threat list
-    if (!(m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT)
-        || m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)
-        && victim->isTargetableForAttack() && m_creature->CanReachWithMeleeAttack(victim))
-        DoMeleeAttackIfReady();
+    DoMeleeAttackIfReady();
 }
 
 bool AggressorAI::IsVisible(Unit* pl) const

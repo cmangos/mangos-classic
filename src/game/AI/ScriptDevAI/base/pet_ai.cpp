@@ -29,7 +29,7 @@ void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
     if (!m_creature->GetCharmInfo() || !m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
         return;
 
-    if (m_creature->CanInitiateAttack() && pWho->isTargetableForAttack() &&
+    if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(pWho) &&
             m_creature->IsHostileTo(pWho) && pWho->isInAccessablePlaceFor(m_creature))
     {
         if (!m_creature->CanFly() && m_creature->GetDistanceZ(pWho) > CREATURE_Z_ATTACK_RANGE)
@@ -94,7 +94,7 @@ void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
 
     if (m_creature->getVictim())                            // in combat
     {
-        if (!m_creature->getVictim()->isTargetableForAttack())
+        if (!m_creature->CanAttack(m_creature->getVictim()))
         {
             // target no longer valid for pet, so either attack stops or new target are selected
             // doesn't normally reach this, because of how petAi is designed in Mangos. CombatStop

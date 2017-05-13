@@ -495,6 +495,12 @@ bool Unit::UpdateMeleeAttackingState()
     if (!victim || IsNonMeleeSpellCasted(false))
         return false;
 
+    if (GetTypeId() != TYPEID_PLAYER && (!((Creature*)this)->CanInitiateAttack() || !victim->isInAccessablePlaceFor((Creature*)this)))
+        return false;
+ 
+    if (!CanAttack(victim) || !IsHostileTo(victim))
+        return false;
+ 
     if (!isAttackReady(BASE_ATTACK) && !(isAttackReady(OFF_ATTACK) && haveOffhandWeapon()))
         return false;
 
@@ -3538,7 +3544,7 @@ void Unit::_UpdateAutoRepeatSpell()
         }
 
         // some check about new target are necessary
-        if (!currTarget || !currTarget->isTargetableForAttack() || IsFriendlyTo(currTarget))
+        if (!currTarget || !CanAttack(currTarget))
         {
             // no valid target
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
@@ -6967,28 +6973,6 @@ void Unit::ClearInCombat()
         static_cast<Player*>(this)->pvpInfo.inPvPCombat = false;
 }
 
-bool Unit::isTargetableForAttack(bool inverseAlive /*=false*/) const
-{
-    if (!CanBeDetected())
-        return false;
-
-    if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->isGameMaster())
-        return false;
-
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
-        return false;
-
-    // This check should be done only for players or players controlled creature
-    if (GetBeneficiaryPlayer() && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
-        return false;
-
-    // inversealive is needed for some spells which need to be casted at dead targets (aoe)
-    if (isAlive() == inverseAlive)
-        return false;
-
-    return IsInWorld() && !hasUnitState(UNIT_STAT_FEIGN_DEATH) && !IsTaxiFlying();
-}
-
 int32 Unit::ModifyHealth(int32 dVal)
 {
     if (dVal == 0)
@@ -7741,7 +7725,7 @@ void Unit::FixateTarget(Unit* pVictim)
 {
     if (!pVictim)                                           // Remove Fixation
         m_fixateTargetGuid.Clear();
-    else if (pVictim->isTargetableForAttack())              // Apply Fixation
+    else if (CanAttack(pVictim))                            // Apply Fixation
         m_fixateTargetGuid = pVictim->GetObjectGuid();
 
     // Start attacking the fixated target or the next proper one
@@ -7807,7 +7791,7 @@ bool Unit::SelectHostileTarget()
         for (AuraList::const_reverse_iterator aura = tauntAuras.rbegin(); aura != tauntAuras.rend(); ++aura)
         {
             if ((caster = (*aura)->GetCaster()) && caster->IsInMap(this) &&
-                    caster->isTargetableForAttack() && caster->isInAccessablePlaceFor((Creature*)this) &&
+                    CanAttack(caster) && caster->isInAccessablePlaceFor((Creature*)this) &&
                     !IsSecondChoiceTarget(caster, true, true))
             {
                 target = caster;
@@ -7869,7 +7853,7 @@ bool Unit::SelectHostileTarget()
     {
         for (AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
         {
-            if ((*itr)->IsInMap(this) && (*itr)->isTargetableForAttack() && (*itr)->isInAccessablePlaceFor((Creature*)this))
+            if ((*itr)->IsInMap(this) && CanAttack((*itr)) && (*itr)->isInAccessablePlaceFor((Creature*)this))
                 return false;
         }
     }

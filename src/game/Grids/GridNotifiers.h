@@ -854,8 +854,8 @@ namespace MaNGOS
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
-                if (u->isTargetableForAttack() && i_obj->IsWithinDistInMap(u, i_range) &&
-                    i_funit->IsHostileTo(u) && u->isVisibleForOrDetect(i_funit, i_funit, false))
+                if (i_obj->CanAttackSpell(u) && i_obj->IsWithinDistInMap(u, i_range) &&
+                        i_funit->IsHostileTo(u) && u->isVisibleForOrDetect(i_funit, i_funit, false))
                 {
                     i_range = i_obj->GetDistance(u);        // use found unit range as new range limit for next check
                     return true;
@@ -885,7 +885,7 @@ namespace MaNGOS
             bool operator()(Unit* u)
             {
                 // Check contains checks for: live, non-selectable, non-attackable flags, flight check and GM check, ignore totems
-                if (!u->isTargetableForAttack())
+                if (!i_obj->CanAttackSpell(u))
                     return false;
 
                 // ignore totems as AoE targets
@@ -921,7 +921,7 @@ namespace MaNGOS
             bool operator()(Unit* u)
             {
                 // Check contains checks for: live, non-selectable, non-attackable flags, flight check and GM check, ignore totems
-                if (!u->isTargetableForAttack())
+                if (!i_obj->CanAttackSpell(u))
                     return false;
 
                 if (u->GetTypeId() == TYPEID_UNIT && ((Creature*)u)->IsTotem())

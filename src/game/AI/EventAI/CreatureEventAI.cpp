@@ -1435,8 +1435,11 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
     if ((m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO) || m_creature->IsNeutralToAll())
         return;
 
-    if (m_creature->CanInitiateAttack() && who->isTargetableForAttack() &&
-            m_creature->IsHostileTo(who) && who->isInAccessablePlaceFor(m_creature))
+    if (who->GetObjectGuid().IsCreature() && who->isInCombat())
+        CheckForHelp(who, m_creature, 10.0);
+
+    if (m_creature->CanInitiateAttack() && m_creature->CanAttack(who) &&
+        m_creature->IsHostileTo(who) && who->isInAccessablePlaceFor(m_creature))
     {
         if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
             return;
