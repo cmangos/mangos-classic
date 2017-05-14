@@ -93,7 +93,7 @@ void Thread::setPriority(Priority priority)
 {
     std::thread::native_handle_type handle = m_ThreadImp.native_handle();
     bool _ok = true;
-#ifdef WIN32
+#if defined(_WIN32) && !defined(__WINPTHREADS_VERSION)
 
     switch (priority)
     {

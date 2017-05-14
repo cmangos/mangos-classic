@@ -23,7 +23,7 @@
 
 #include "Common.h"
 
-#ifdef WIN32
+#ifdef _WIN32
   #include <WinSock2.h>
   #include <mysql/mysql.h>
 #else
