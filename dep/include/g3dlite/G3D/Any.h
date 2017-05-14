@@ -363,7 +363,7 @@ public:
     /** NUMBER constructor */
     Any(double x);
 
-#ifdef G3D_32BIT
+#if defined(G3D_32BIT) || defined(__MINGW32__)
     /** NUMBER constructor */
     Any(int64 x);
 #endif    // G3D_32BIT

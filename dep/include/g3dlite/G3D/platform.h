@@ -49,7 +49,7 @@
 #define __fastcall
 #endif
 
-#ifdef _MSC_VER 
+#if defined (_MSC_VER) || defined(__MINGW32__)
     #define G3D_WIN32
 #elif  defined(__FreeBSD__) || defined(__OpenBSD__)
     #define G3D_FREEBSD
@@ -229,6 +229,16 @@ int WINAPI G3D_WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {\
     return G3D_WinMain(hInst, hPrev, szCmdLine, sw);\
 }
+
+#elif defined(__MINGW32__)
+
+#   include <windows.h>
+#   undef WIN32_LEAN_AND_MEAN
+#   undef NOMINMAX
+
+/** @def G3D_START_AT_MAIN()
+    Defines necessary wrapper around WinMain on Windows to allow transfer of execution to main(). */
+#   define G3D_START_AT_MAIN()
 
 #else
 
