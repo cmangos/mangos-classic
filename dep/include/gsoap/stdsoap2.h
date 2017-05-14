@@ -900,6 +900,10 @@ extern "C" {
 
 #ifdef WIN32
 # include <float.h>
+# ifdef __MINGW32__
+#  include <math.h>
+#  define _isnan(num) __isnan(num)
+# endif
 # ifndef HAVE_ISNAN
 #  define HAVE_ISNAN
 # endif
