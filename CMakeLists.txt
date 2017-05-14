@@ -145,8 +145,8 @@ if(MSVC)
   # Define install rules for provided libs
   install(
     FILES
-      ${PROVIDED_LIBS_FOLDER}/libeay32.dll
-      ${PROVIDED_LIBS_FOLDER}/libmySQL.dll
+      ${DEV_PROVIDED_LIBS_FOLDER}/libeay32.dll
+      ${DEV_PROVIDED_LIBS_FOLDER}/libmySQL.dll
     DESTINATION ${LIBS_DIR}
   )
 
@@ -154,7 +154,7 @@ if(MSVC)
   if(PLATFORM MATCHES X86)
     install(
       FILES
-        ${PROVIDED_LIBS_FOLDER}/dbghelp.dll
+        ${DEV_PROVIDED_LIBS_FOLDER}/dbghelp.dll
       DESTINATION ${LIBS_DIR}
     )
   endif()
