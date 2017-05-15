@@ -27,7 +27,7 @@
 #include <list>
 #include <sstream>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <direct.h>
 #define popen _popen
 #define pclose _pclose
