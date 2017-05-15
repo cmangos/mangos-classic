@@ -132,7 +132,7 @@ namespace MaNGOS
         Creature& i_creature;
         CreatureRelocationNotifier(Creature& c) : i_creature(c) {}
         template<class T> void Visit(GridRefManager<T>&) {}
-#ifdef WIN32
+#ifdef _MSC_VER
         template<> void Visit(PlayerMapType&);
 #endif
     };
@@ -151,7 +151,7 @@ namespace MaNGOS
         }
 
         template<class T> inline void Visit(GridRefManager<T>&) {}
-#ifdef WIN32
+#ifdef _MSC_VER
         template<> inline void Visit<Player>(PlayerMapType&);
         template<> inline void Visit<Creature>(CreatureMapType&);
 #endif
@@ -1150,7 +1150,7 @@ namespace MaNGOS
             // 0 = default, i => i-1 locale index
     };
 
-#ifndef WIN32
+#ifndef _MSC_VER
     template<> void PlayerRelocationNotifier::Visit<Creature>(CreatureMapType&);
     template<> void CreatureRelocationNotifier::Visit<Player>(PlayerMapType&);
     template<> void CreatureRelocationNotifier::Visit<Creature>(CreatureMapType&);
