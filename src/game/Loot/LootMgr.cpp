@@ -484,6 +484,9 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
                     return LOOT_SLOT_MASTER;
                 else
                 {
+                    if (!isAllowed)
+                        return MAX_LOOT_SLOT_TYPE;
+
                     if (!isBlocked && isNotVisibleForML)
                         return LOOT_SLOT_NORMAL;
                 }
