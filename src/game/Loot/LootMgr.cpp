@@ -1491,7 +1491,7 @@ void Loot::SetGroupLootRight(Player* player)
             if (!looter)
                 continue;
 
-            if (looter->IsWithinDist(m_lootTarget, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE), false))
+            if (IsEligibleForLoot(looter, m_lootTarget))
             {
                 m_ownerSet.insert(itr->guid);   // save this guid to main owner set
                 ownerList.push_back(itr->guid); // save this guid to local ordered GuidList (we need to keep it ordered only here)
