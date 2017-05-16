@@ -50,7 +50,6 @@ add_dependencies(${EXECUTABLE_NAME} RevisionGenerator)
 target_link_libraries(${EXECUTABLE_NAME}
   shared
   framework
-  ${Boost_LIBRARIES}
 )
 
 if(WIN32)
@@ -60,6 +59,12 @@ if(WIN32)
     debug ${MYSQL_DEBUG_LIBRARY}
     debug ${OPENSSL_DEBUG_LIBRARIES}
   )
+  if(MINGW)
+    target_link_libraries(${EXECUTABLE_NAME}
+      wsock32
+      ws2_32
+    )
+  endif()
 
   # Define OutDir to source/bin/(platform)_(configuaration) folder.
   set_target_properties(${EXECUTABLE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DEV_BIN_DIR}")
@@ -102,6 +107,6 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS
 install(TARGETS ${EXECUTABLE_NAME} DESTINATION ${BIN_DIR})
 install(FILES realmd.conf.dist.in DESTINATION ${CONF_DIR} RENAME realmd.conf.dist)
 
-if(WIN32 AND MSVC)
+if(MSVC)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/\${BUILD_TYPE}/${EXECUTABLE_NAME}.pdb DESTINATION ${BIN_DIR} CONFIGURATIONS Debug)
 endif()

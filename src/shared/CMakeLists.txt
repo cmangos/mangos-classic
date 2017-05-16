@@ -147,11 +147,16 @@ source_group("Util"
 if(WIN32)
   set(LIBRARY_SRCS
       ${LIBRARY_SRCS}
-      WheatyExceptionReport.cpp
-      WheatyExceptionReport.h
       ServiceWin32.cpp
       ServiceWin32.h
      )
+  if(MSVC)
+    set(LIBRARY_SRCS
+      ${LIBRARY_SRCS}
+      WheatyExceptionReport.cpp
+      WheatyExceptionReport.h
+     )
+  endif()
 else()
   set(LIBRARY_SRCS
       ${LIBRARY_SRCS}

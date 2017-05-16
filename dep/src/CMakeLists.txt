@@ -23,7 +23,7 @@ endif()
 
 add_subdirectory(g3dlite)
 
-if(MSVC)
+if(WIN32)
   if(BUILD_EXTRACTORS)
     add_subdirectory(bzip2)
     set_target_properties(${BZIP2_LIBRARIES} PROPERTIES FOLDER "Dependencies")

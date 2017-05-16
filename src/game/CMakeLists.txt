@@ -103,7 +103,8 @@ if(PCH)
     set_source_files_properties(${PrecompiledSource} PROPERTIES COMPILE_FLAGS "/Yc\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\"")
     set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "Game")
     
-  else()
+  elseif(NOT MINGW)
+    # TODO: Resolve issues with order of includes before enabling Cotire for MinGW builds
     cotire(${LIBRARY_NAME})
   endif()
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
