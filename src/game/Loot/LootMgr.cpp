@@ -1452,6 +1452,18 @@ void Loot::CheckIfRollIsNeeded(Player const* plr)
     }
 }
 
+bool IsEligibleForLoot(Player* looter, WorldObject* lootTarget)
+{
+    if (looter->IsAtGroupRewardDistance(lootTarget))
+        return true;
+    else if (lootTarget->GetTypeId() == TYPEID_UNIT)
+    {
+        Unit* creature = (Unit*)lootTarget;
+        return creature->getThreatManager().HasThreat(looter);
+    }
+    return false;
+}
+
 // Set the player who have right for this loot
 void Loot::SetGroupLootRight(Player* player)
 {
