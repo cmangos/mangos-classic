@@ -289,7 +289,7 @@ endif()
 # print out the results before continuing
 include(cmake/showoptions.cmake)
 
-if(NOT BUILD_GAME_SERVER AND NOT BUILD_LOGIN_SERVER AND NOT BUILD_EXTRACTOR AND NOT BUILD_VMAP_EXTRACTOR AND NOT BUILD_MMAP_EXTRACTOR)
+if(NOT BUILD_GAME_SERVER AND NOT BUILD_LOGIN_SERVER AND NOT BUILD_EXTRACTORS)
   message(FATAL_ERROR "You must select something to build!")
 endif()
 
