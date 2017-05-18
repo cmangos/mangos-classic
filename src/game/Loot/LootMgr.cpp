@@ -2375,6 +2375,10 @@ void LootTemplate::Process(Loot& loot, Player const* lootOwner, LootStore const&
     // Rolling non-grouped items
     for (LootStoreItemList::const_iterator i = Entries.begin() ; i != Entries.end() ; ++i)
     {
+        // Check condition
+        if (i->conditionId && !PlayerOrGroupFulfilsCondition(loot, lootOwner, i->conditionId))
+            continue;
+
         if (!i->Roll(rate))
             continue;                                       // Bad luck for the entry
 
@@ -2384,10 +2388,6 @@ void LootTemplate::Process(Loot& loot, Player const* lootOwner, LootStore const&
 
             if (!Referenced)
                 continue;                                   // Error message already printed at loading stage
-
-            // Check condition
-            if (i->conditionId && !sObjectMgr.IsPlayerMeetToCondition(i->conditionId, nullptr, nullptr, loot.GetLootTarget(), CONDITION_FROM_REFERING_LOOT))
-                continue;
 
             for (uint32 loop = 0; loop < i->maxcount; ++loop) // Ref multiplicator
                 Referenced->Process(loot, lootOwner, store, rate, i->group);
