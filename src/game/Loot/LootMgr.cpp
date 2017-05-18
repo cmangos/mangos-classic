@@ -432,7 +432,12 @@ bool LootItem::AllowedForPlayer(Player const* player, WorldObject const* lootTar
 LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const* loot) const
 {
     // ignore looted, FFA (each player get own copy) and not allowed items
-    if (IsLootedFor(player->GetObjectGuid()) || !AllowedForPlayer(player, loot->GetLootTarget()))
+    if (IsLootedFor(player->GetObjectGuid()))
+        return MAX_LOOT_SLOT_TYPE;
+
+    // Master looter needs to see conditional items above threshold so he can distribute them
+    bool isAllowed = AllowedForPlayer(player, loot->GetLootTarget());
+    if (!isAllowed && (loot->m_lootMethod != MASTER_LOOT || freeForAll))
         return MAX_LOOT_SLOT_TYPE;
 
     if (freeForAll)
@@ -474,6 +479,8 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
         {
             if (isUnderThreshold)
             {
+                if (!isAllowed)
+                    return MAX_LOOT_SLOT_TYPE;
                 if (loot->m_isReleased || player->GetObjectGuid() == loot->m_currentLooterGuid)
                     return LOOT_SLOT_NORMAL;
                 return MAX_LOOT_SLOT_TYPE;
@@ -1387,23 +1394,11 @@ void Loot::GroupCheck()
 
                 if (!lootItem->isUnderThreshold)
                 {
-                    // we have to check is the item is visible for the master or no one could be able to get it
-                    if (masterLooter)
+                    // we need to skip quest items
+                    if (lootItem->lootItemType == LOOTITEM_TYPE_QUEST)
                     {
-                        if (!lootItem->AllowedForPlayer(masterLooter, m_lootTarget))
-                        {
-                            lootItem->isNotVisibleForML = true;
-                            lootItem->checkRollNeed = true;
-                        }
-                    }
-                    else
-                    {
-                        // master loot is not connected, thus we will just set all conditional and quest item visible for players that fulfill conditions
-                        if (lootItem->lootItemType != LOOTITEM_TYPE_NORMAL)
-                        {
-                            lootItem->isNotVisibleForML = true;
-                            lootItem->checkRollNeed = true;
-                        }
+                        lootItem->isNotVisibleForML = true;
+                        lootItem->checkRollNeed = true;
                     }
                 }
             }
@@ -1442,7 +1437,7 @@ void Loot::CheckIfRollIsNeeded(Player const* plr)
         if (!lootItem->checkRollNeed)
             continue;
 
-        if (((m_lootMethod == MASTER_LOOT && lootItem->isNotVisibleForML) || m_lootMethod != MASTER_LOOT) && lootItem->AllowedForPlayer(plr, m_lootTarget))
+        if (lootItem->AllowedForPlayer(plr, m_lootTarget))
         {
             if (!m_roll[itemSlot].TryToStart(*this, itemSlot))      // Create and try to start a roll
                 m_roll.erase(m_roll.find(itemSlot));                // Cannot start roll so we have to delete it (find will not fail as the item was just created)
