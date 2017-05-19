@@ -1062,7 +1062,7 @@ inline bool IsAuraAddedBySpell(uint32 auraType, uint32 spellId)
 // Example: Curses. One curse per caster, Curse of Agony and Curse of Doom ranks are stackable among casters, the rest of curse stacking logic is handled on effect basis
 inline bool IsSpellSpecificUniquePerCaster(SpellSpecific specific)
 {
-    switch (specific)
+    switch (int32(specific))
     {
         case SPELL_BLESSING:
         case SPELL_AURA:
@@ -1072,6 +1072,8 @@ inline bool IsSpellSpecificUniquePerCaster(SpellSpecific specific)
         case SPELL_JUDGEMENT:
         case SPELL_SOUL_CAPTURE:
             return true;
+        default:
+            break;
     }
     return false;
 }
@@ -1081,7 +1083,7 @@ inline bool IsSpellSpecificUniquePerCaster(SpellSpecific specific)
 // Example: Elemental Shield. No matter who it came from, only last one and the strongest one should stay.
 inline bool IsSpellSpecificUniquePerTarget(SpellSpecific specific)
 {
-    switch (specific)
+    switch (int32(specific))
     {
         case SPELL_SEAL:
         case SPELL_TRACKER:
@@ -1094,6 +1096,8 @@ inline bool IsSpellSpecificUniquePerTarget(SpellSpecific specific)
         case SPELL_DRINK:
         case SPELL_FOOD_AND_DRINK:
             return true;
+        default:
+            break;
     }
     return false;
 }
@@ -1104,7 +1108,7 @@ inline bool IsSpellSpecificIdentical(SpellSpecific specific, SpellSpecific speci
     if (specific == specific2)
         return true;
     // Compare combined specifics
-    switch (specific)
+    switch (int32(specific))
     {
         case SPELL_FOOD:
             return specific2 == SPELL_FOOD ||
@@ -1116,6 +1120,8 @@ inline bool IsSpellSpecificIdentical(SpellSpecific specific, SpellSpecific speci
             return specific2 == SPELL_FOOD ||
                    specific2 == SPELL_DRINK ||
                    specific2 == SPELL_FOOD_AND_DRINK;
+        default:
+            break;
     }
     return false;
 }
