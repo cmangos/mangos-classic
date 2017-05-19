@@ -110,13 +110,7 @@ namespace MMAP
     bool MMapFactory::IsPathfindingForceDisabled(const Unit* unit)
     {
         if (const Creature* pCreature = dynamic_cast<const Creature*>(unit))
-        {
-            if (const CreatureInfo* pInfo = pCreature->GetCreatureInfo())
-            {
-                if (pInfo->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_DISABLE)
-                    return true;
-            }
-        }
+            return pCreature->IsIgnoringMMAP();
 
         return false;
     }

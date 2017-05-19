@@ -787,10 +787,18 @@ class Creature : public Unit
 
         void SetVirtualItem(VirtualItemSlot slot, uint32 item_id);
 
+        void SetInvisible(bool invisible) { m_isInvisible = invisible; }
+        bool IsInvisible() const { return m_isInvisible; }
+
+        void SetIgnoreMMAP(bool ignore) { m_ignoreMMAP = ignore; }
+        bool IsIgnoringMMAP() const { return m_ignoreMMAP; }
+
         void OnEventHappened(uint16 eventId, bool activate, bool resume) override { return AI()->OnEventHappened(eventId, activate, resume); }
 
         void SetIgnoreRangedTargets(bool state) { m_ignoreRangedTargets = state; }
         bool IsIgnoringRangedTargets() override { return m_ignoreRangedTargets; }
+
+        void SetSpawnCounting(bool state) { m_countSpawns = state; }
 
         uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }
     protected:
@@ -835,12 +843,16 @@ class Creature : public Unit
         Position m_respawnPos;
 
         std::unique_ptr<CreatureAI> m_ai;
+        bool m_isInvisible;
+        bool m_ignoreMMAP;
 
         void SetBaseWalkSpeed(float speed) override;
         void SetBaseRunSpeed(float speed) override;
 
         // Script logic
         bool m_ignoreRangedTargets;                         // Ignores ranged targets when picking someone to attack
+        bool m_countSpawns;
+
     private:
         GridReference<Creature> m_gridRef;
         CreatureInfo const* m_creatureInfo;
