@@ -847,12 +847,9 @@
     <ClCompile Include="..\..\src\game\Weather\Weather.cpp"  />
     <ClCompile Include="..\..\src\game\World\World.cpp"  />
     <ClCompile Include="..\..\src\game\pchdef.cpp" >
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pchdef.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/pchdef.pch</PrecompiledHeaderOutputFile>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pchdef.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/pchdef.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>pchdef.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)/game.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <ClCompile Include="..\..\src\game\vmap\BIH.cpp"  />
     <ClCompile Include="..\..\src\game\vmap\DynamicTree.cpp"  />
