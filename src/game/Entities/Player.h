@@ -38,6 +38,7 @@
 #include "Globals/SharedDefines.h"
 #include "Chat/Chat.h"
 #include "Server/SQLStorages.h"
+#include "Loot/LootMgr.h"
 
 #include<vector>
 
@@ -2076,6 +2077,8 @@ class Player : public Unit
         void SetBotDeathTimer() { m_deathTimer = 0; }
         bool IsInDuel() const { return duel && duel->startTime != 0; }
 #endif
+
+        void SendLootError(ObjectGuid guid, LootError error) const;
 
         // cooldown system
         virtual void AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration = 0, bool updateClient = 0) override;
