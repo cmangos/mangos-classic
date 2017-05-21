@@ -215,8 +215,8 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 
 15 SCRIPT_COMMAND_CAST_SPELL                resultingSource = Unit, cast spell at resultingTarget = Unit
                                             * datalong = spell id
+                                            * datalong2 = TriggerCastFlags
                                             * dataint1-dataint4 optional. If some of these are set to a spell id, a random spell out of datalong, datint1, ..,dataintX is cast.
-                                            * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: cast triggered
 
 16 SCRIPT_COMMAND_PLAY_SOUND                source = any object, target=any/player
                                             * datalong = sound_id
