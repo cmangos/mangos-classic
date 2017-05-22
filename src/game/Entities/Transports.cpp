@@ -249,7 +249,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
     // find the rest of the distances between key points
     for (size_t i = 1; i < keyFrames.size(); ++i)
     {
-        if ((keyFrames[i].node->actionFlag == 1) || (keyFrames[i].node->mapid != keyFrames[i - 1].node->mapid))
+        if ((keyFrames[i - 1].node->actionFlag == 1) || (keyFrames[i].node->mapid != keyFrames[i - 1].node->mapid))
         {
             keyFrames[i].distFromPrev = 0;
         }
@@ -313,7 +313,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
     // speed = max(30, t) (remember x = 0.5s^2, and when accelerating, a = 1 unit/s^2
     int t = 0;
     bool teleport = false;
-    if (keyFrames[keyFrames.size() - 1].node->mapid != keyFrames[0].node->mapid)
+    if (keyFrames[keyFrames.size() - 1].node->mapid != keyFrames[0].node->mapid || keyFrames[keyFrames.size() - 1].node->actionFlag == 1)
         teleport = true;
 
     WayPoint pos(keyFrames[0].node->mapid, keyFrames[0].node->x, keyFrames[0].node->y, keyFrames[0].node->z, teleport);
@@ -342,8 +342,8 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
                     newY = keyFrames[i].node->y + (keyFrames[i + 1].node->y - keyFrames[i].node->y) * d / keyFrames[i + 1].distFromPrev;
                     newZ = keyFrames[i].node->z + (keyFrames[i + 1].node->z - keyFrames[i].node->z) * d / keyFrames[i + 1].distFromPrev;
 
-                    teleport = false;
-                    if (keyFrames[i].node->mapid != cM)
+                    bool teleport = false;
+                    if (keyFrames[i].node->mapid != cM || (i && keyFrames[i - 1].node->actionFlag == 1))
                     {
                         teleport = true;
                         cM = keyFrames[i].node->mapid;
@@ -389,8 +389,8 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32>& mapids)
         else
             t += (long)keyFrames[i + 1].tTo % 100;
 
-        teleport = false;
-        if ((keyFrames[i + 1].node->actionFlag == 1) || (keyFrames[i + 1].node->mapid != keyFrames[i].node->mapid))
+        bool teleport = false;
+        if ((keyFrames[i].node->actionFlag == 1) || (keyFrames[i + 1].node->mapid != keyFrames[i].node->mapid))
         {
             teleport = true;
             cM = keyFrames[i + 1].node->mapid;
