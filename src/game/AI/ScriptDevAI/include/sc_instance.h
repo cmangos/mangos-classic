@@ -27,7 +27,7 @@ class ScriptedInstance : public InstanceData
 {
     public:
         typedef std::map<uint32, ObjectGuid> EntryGuidMap;
-        typedef std::multimap<uint32, ObjectGuid> EntryGuidSet;
+        typedef std::unordered_map<uint32, GuidVector> EntryGuidCollection;
 
         ScriptedInstance(Map* pMap) : InstanceData(pMap) {}
         ~ScriptedInstance() {}
@@ -35,7 +35,8 @@ class ScriptedInstance : public InstanceData
         // Default accessor functions
         GameObject* GetSingleGameObjectFromStorage(uint32 uiEntry);
         Creature* GetSingleCreatureFromStorage(uint32 uiEntry, bool bSkipDebugLog = false);
-        void GetCreatureGuidMapFromStorage(uint32 uiEntry, EntryGuidSet &uiEntryGuidSet, bool bSkipDebugLog = false);
+        void GetCreatureGuidVectorFromStorage(uint32 uiEntry, GuidVector &uiEntryGuidVector, bool bSkipDebugLog = false);
+        void GetGameObjectGuidVectorFromStorage(uint32 uiEntry, GuidVector &uiEntryGuidVector, bool bSkipDebugLog = false);
 
         // Change active state of doors or buttons
         void DoUseDoorOrButton(ObjectGuid guid, uint32 uiWithRestoreTime = 0, bool bUseAlternativeState = false);
@@ -66,7 +67,8 @@ class ScriptedInstance : public InstanceData
         // Storage for GO-Guids and NPC-Guids
         EntryGuidMap m_mGoEntryGuidStore;                   ///< Store unique GO-Guids by entry
         EntryGuidMap m_mNpcEntryGuidStore;                  ///< Store unique NPC-Guids by entry
-        EntryGuidSet m_mNpcEntryGuidCollection;             ///< Store all Guids by entry
+        EntryGuidCollection m_mNpcEntryGuidCollection;      ///< Store all Guids by entry
+        EntryGuidCollection m_mGoEntryGuidCollection;       ///< Store all Guids by entry
 };
 
 // Class for world maps (May need additional zone-wide functions later on)

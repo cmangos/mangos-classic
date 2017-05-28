@@ -174,10 +174,18 @@ Creature* ScriptedInstance::GetSingleCreatureFromStorage(uint32 uiEntry, bool bS
     return nullptr;
 }
 
-void ScriptedInstance::GetCreatureGuidMapFromStorage(uint32 uiEntry, EntryGuidSet &uiEntryGuidSet, bool bSkipDebugLog)
+void ScriptedInstance::GetCreatureGuidVectorFromStorage(uint32 uiEntry, GuidVector &uiEntryGuidVector, bool bSkipDebugLog)
 {
-    std::pair<EntryGuidSet::iterator, EntryGuidSet::iterator> range = m_mNpcEntryGuidCollection.equal_range(uiEntry);
-    uiEntryGuidSet.insert(range.first, range.second);
+    auto iter = m_mNpcEntryGuidCollection.find(uiEntry);
+    if (iter != m_mNpcEntryGuidCollection.end())
+        uiEntryGuidVector = (*iter).second;
+}
+
+void ScriptedInstance::GetGameObjectGuidVectorFromStorage(uint32 uiEntry, GuidVector &uiEntryGuidVector, bool bSkipDebugLog)
+{
+    auto iter = m_mGoEntryGuidCollection.find(uiEntry);
+    if (iter != m_mGoEntryGuidCollection.end())
+        uiEntryGuidVector = (*iter).second;
 }
 
 /**
