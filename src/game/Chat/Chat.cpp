@@ -767,7 +767,6 @@ ChatCommand* ChatHandler::getCommandTable()
         { "quit",           SEC_CONSOLE,        true,  &ChatHandler::HandleQuitCommand,                "", nullptr },
         { "mmap",           SEC_GAMEMASTER,     false, nullptr,                                        "", mmapCommandTable },
 
-
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
