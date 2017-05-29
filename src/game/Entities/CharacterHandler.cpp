@@ -39,6 +39,9 @@
 #include "Chat/Chat.h"
 #include "Spells/SpellMgr.h"
 
+// Playerbot mod:
+#include "PlayerBot/PlayerbotMgr.h"
+
 // config option SkipCinematics supported values
 enum CinematicsSkipMode
 {
@@ -114,6 +117,30 @@ class CharacterHandler
 
             if (WorldSession* session = sWorld.FindSession(((LoginQueryHolder*)holder)->GetAccountId()))
                 session->HandlePlayerLogin((LoginQueryHolder*)holder);
+        }
+        // Playerbot mod: is different from the normal HandlePlayerLoginCallback in that it
+        // sets up the bot's world session and also stores the pointer to the bot player in the master's
+        // world session m_playerBots map
+        void HandlePlayerBotLoginCallback(QueryResult * /*dummy*/, SqlQueryHolder * holder)
+        {
+            if (!holder)
+                return;
+
+            LoginQueryHolder* lqh = (LoginQueryHolder*) holder;
+
+            WorldSession* masterSession = sWorld.FindSession(lqh->GetAccountId());
+
+            if (! masterSession || sObjectMgr.GetPlayer(lqh->GetGuid()))
+            {
+                delete holder;
+                return;
+            }
+
+            // The bot's WorldSession is owned by the bot's Player object
+            // The bot's WorldSession is deleted by PlayerbotMgr::LogoutPlayerBot
+            WorldSession *botSession = new WorldSession(lqh->GetAccountId(), nullptr, SEC_PLAYER, 0, LOCALE_enUS);
+            botSession->HandlePlayerLogin(lqh); // will delete lqh
+            masterSession->GetPlayer()->GetPlayerbotMgr()->OnBotLogin(botSession->GetPlayer());
         }
 } chrHandler;
 
@@ -429,6 +456,27 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
     }
 
     CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, holder);
+}
+
+// Playerbot mod. Can't easily reuse HandlePlayerLoginOpcode for logging in bots because it assumes
+// a WorldSession exists for the bot. The WorldSession for a bot is created after the character is loaded.
+void PlayerbotMgr::LoginPlayerBot(ObjectGuid playerGuid)
+{
+    // has bot already been added?
+    if (sObjectMgr.GetPlayer(playerGuid))
+        return;
+
+    uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(playerGuid);
+    if (accountId == 0)
+        return;
+
+    LoginQueryHolder *holder = new LoginQueryHolder(accountId, playerGuid);
+    if(!holder->Initialize())
+    {
+        delete holder;                                      // delete all unprocessed queries
+        return;
+    }
+    CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerBotLoginCallback, holder);
 }
 
 void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
