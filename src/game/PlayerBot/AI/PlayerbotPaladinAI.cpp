@@ -6,8 +6,7 @@
  */
 
 #include "PlayerbotPaladinAI.h"
-#include "PlayerbotMgr.h"
-#include "../Spells/SpellAuras.h"
+#include "../Base/PlayerbotMgr.h"
 
 class PlayerbotAI;
 

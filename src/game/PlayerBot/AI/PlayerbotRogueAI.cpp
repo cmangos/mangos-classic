@@ -5,7 +5,7 @@
    Version : 0.37
  */
 #include "PlayerbotRogueAI.h"
-#include "PlayerbotMgr.h"
+#include "../Base/PlayerbotMgr.h"
 
 class PlayerbotAI;
 PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)

@@ -1,4 +1,3 @@
-
 #include "PlayerbotWarlockAI.h"
 
 class PlayerbotAI;

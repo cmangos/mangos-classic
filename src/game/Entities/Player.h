@@ -55,8 +55,8 @@ class Spell;
 class Item;
 
 // ------ Playerbot mod ------ //
-#include "PlayerBot/PlayerbotMgr.h"
-#include "PlayerBot/PlayerbotAI.h"
+#include "PlayerBot/Base/PlayerbotMgr.h"
+#include "PlayerBot/Base/PlayerbotAI.h"
 // ---- End Playerbot mod ---- //
 
 struct AreaTrigger;

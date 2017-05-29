@@ -5,7 +5,6 @@
     Version : 0.42
  */
 #include "PlayerbotDruidAI.h"
-#include "../Spells/SpellAuras.h"
 
 class PlayerbotAI;
 

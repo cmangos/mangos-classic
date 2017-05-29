@@ -2,7 +2,7 @@
 #ifndef _PlayerbotRogueAI_H
 #define _PlayerbotRogueAI_H
 
-#include "PlayerbotClassAI.h"
+#include "../Base/PlayerbotClassAI.h"
 
 enum
 {

@@ -2,15 +2,16 @@
 #define _PLAYERBOTCLASSAI_H
 
 #include "Common.h"
-#include "../World/World.h"
-#include "../Spells/SpellMgr.h"
-#include "../Entities/Player.h"
-#include "../Globals/ObjectMgr.h"
-#include "../Globals/ObjectAccessor.h"
 #include "WorldPacket.h"
-#include "../Entities/Unit.h"
-#include "../Globals/SharedDefines.h"
 #include "PlayerbotAI.h"
+#include "../../Entities/Player.h"
+#include "../../Entities/Unit.h"
+#include "../../Globals/ObjectMgr.h"
+#include "../../Globals/ObjectAccessor.h"
+#include "../../Globals/SharedDefines.h"
+#include "../../Spells/SpellMgr.h"
+#include "../../Spells/SpellAuras.h"
+#include "../../World/World.h"
 
 class Player;
 class PlayerbotAI;
