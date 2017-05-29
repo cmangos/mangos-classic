@@ -1279,6 +1279,7 @@ void World::SetInitialWorldSettings()
     sAuctionBot.Initialize();
     sLog.outString();
 
+    // ------ Playerbot mod ------ //
     PlayerbotMgr::SetInitialWorldSettings();
 
     sLog.outString("---------------------------------------");

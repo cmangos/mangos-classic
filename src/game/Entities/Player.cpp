@@ -61,10 +61,11 @@
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
 
-// Playerbot mod:
+// ------ Playerbot mod ------ //
 #include "PlayerBot/PlayerbotAI.h"
 #include "PlayerBot/PlayerbotMgr.h"
 #include "Config/Config.h"
+// ---- End Playerbot mod ---- //
 
 #include <cmath>
 
@@ -82,6 +83,7 @@
 #define SKILL_PERM_BONUS(x)    int16(PAIR32_HIPART(x))
 #define MAKE_SKILL_BONUS(t, p) MAKE_PAIR32(t,p)
 
+// ------ Playerbot mod ------ //
 extern Config botConfig;
 
 // [-ZERO] need recheck, some values known not existed in 1.12.1
@@ -377,9 +379,10 @@ Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_
 {
     m_transport = nullptr;
 
-    // Playerbot mod:
+    // ------ Playerbot mod ------ //
     m_playerbotAI = 0;
     m_playerbotMgr = 0;
+    // ---- End Playerbot mod ---- //
 
     m_speakTime = 0;
     m_speakCount = 0;
@@ -578,15 +581,18 @@ Player::~Player()
     for (BoundInstancesMap::iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end(); ++itr)
         itr->second.state->RemovePlayer(this);
 
-    // Playerbot mod
-    if (m_playerbotAI) {
+    // ------ Playerbot mod ------ //
+    if (m_playerbotAI)
+    {
         delete m_playerbotAI;
         m_playerbotAI = 0;
     }
-    if (m_playerbotMgr) {
+    if (m_playerbotMgr)
+    {
         delete m_playerbotMgr;
         m_playerbotMgr = 0;
     }
+    // ---- End Playerbot mod ---- //
 }
 
 void Player::CleanupsBeforeDelete()
@@ -1330,11 +1336,12 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     if (IsHasDelayedTeleport())
         TeleportTo(m_teleport_dest, m_teleport_options);
 
-    // Playerbot mod
+    // ------ Playerbot mod ------ //
     if (m_playerbotAI)
         m_playerbotAI->UpdateAI(p_time);
     else if (m_playerbotMgr)
         m_playerbotMgr->UpdateAI(p_time);
+    // ---- End Playerbot mod ---- //
 }
 
 void Player::SetDeathState(DeathState s)
@@ -1551,10 +1558,12 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (isCharmed())
         return false;
 
-    // Playerbot mod: if this user has bots, tell them to stop following master
+    // ------ Playerbot mod ------ //
+    // If this user has bots, tell them to stop following master
     // so they don't try to follow the master after the master teleports
     if (GetPlayerbotMgr())
         GetPlayerbotMgr()->Stay();
+    // ---- End Playerbot mod ---- //
 
     // don't let enter battlegrounds without assigned battleground id (for example through areatrigger)...
     // don't let gm level > 1 either
@@ -11003,6 +11012,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                 case GOSSIP_OPTION_TABARDDESIGNER:
                 case GOSSIP_OPTION_AUCTIONEER:
                     break;                                  // no checks
+                // ------ Playerbot mod ------ //
                 case GOSSIP_OPTION_BOT:
                 {
                     std::string reqQuestIds = botConfig.GetStringDefault("PlayerbotAI.BotguyQuests","");
@@ -11012,6 +11022,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                     hasMenuItem = false;
                     break;
                 }
+                // ---- End Playerbot mod ---- //
                 default:
                     sLog.outErrorDb("Creature entry %u have unknown gossip option %u for menu %u", pCreature->GetEntry(), gossipMenu.option_id, gossipMenu.menu_id);
                     hasMenuItem = false;
@@ -11145,11 +11156,13 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
             return;
         }
     }
-
+    // ------ Playerbot mod ------ //
+    // GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
     switch (gossipOptionId)
     {
         case GOSSIP_OPTION_GOSSIP:
         {
+            // ------ Playerbot mod ------ //
             GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
 
             if (pMenuData.m_gAction_poi)
@@ -11233,6 +11246,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
             GetSession()->SendBattlegGroundList(guid, bgTypeId);
             break;
         }
+        // ------ Playerbot mod ------ //
         case GOSSIP_OPTION_BOT:
         {
             // DEBUG_LOG("GOSSIP_OPTION_BOT");
@@ -11286,8 +11300,10 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
             }
             return;
         }
+        // ---- End Playerbot mod ---- //
     }
 
+    // ------ Playerbot mod ------ //
     GossipMenuItemData pMenuData = gossipmenu.GetItemData(gossipListId);
 
     if (pMenuData.m_gAction_script)
