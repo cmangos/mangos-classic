@@ -45,26 +45,6 @@ include_directories(
   ${CMAKE_BINARY_DIR}/src/shared
 )
 
-
-set(LIBRARY_SRCS
-    ${SRC_GRP_PLAYERBOT}
-    ${SRC_GRP_AI}
-    ${SRC_GRP_AHBOT}
-    ${SRC_GRP_BATTLEGROUND}
-    ${SRC_GRP_CHAT_COMMANDS}
-    ${SRC_GRP_MOTION_GEN}
-    ${SRC_GRP_MOVEMENT}
-    ${SRC_GRP_OBJECT}
-    ${SRC_GRP_OUTDOOR_PVP}
-    ${SRC_GRP_REFERENCES}
-    ${SRC_GRP_SERVER}
-    ${SRC_GRP_TOOL}
-    ${SRC_GRP_VMAPS}
-    ${SRC_GRP_WORLD_HANDLERS}
-    pchdef.cpp
-    pchdef.h
-)
-
 # Find all the input files
 FILE(GLOB_RECURSE LIBRARY_SRCS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.h" "*.cpp")
 
