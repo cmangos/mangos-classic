@@ -1,7 +1,7 @@
 #ifndef _PLAYERBOTDRUIDAI_H
 #define _PLAYERBOTDRUIDAI_H
 
-#include "PlayerbotClassAI.h"
+#include "../Base/PlayerbotClassAI.h"
 
 enum DruidSpells
 {

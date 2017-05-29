@@ -1,5 +1,4 @@
 #include "PlayerbotPriestAI.h"
-#include "../Spells/SpellAuras.h"
 
 class PlayerbotAI;
 

@@ -1,7 +1,7 @@
 #ifndef _PlayerbotPaladinAI_H
 #define _PlayerbotPaladinAI_H
 
-#include "PlayerbotClassAI.h"
+#include "../Base/PlayerbotClassAI.h"
 
 enum
 {

@@ -1,7 +1,7 @@
 #ifndef _PlayerbotMageAI_H
 #define _PlayerbotMageAI_H
 
-#include "PlayerbotClassAI.h"
+#include "../Base/PlayerbotClassAI.h"
 
 enum
 {

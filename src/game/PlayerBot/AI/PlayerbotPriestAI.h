@@ -1,7 +1,7 @@
 #ifndef _PLAYERBOTPRIESTAI_H
 #define _PLAYERBOTPRIESTAI_H
 
-#include "PlayerbotClassAI.h"
+#include "../Base/PlayerbotClassAI.h"
 
 enum
 {

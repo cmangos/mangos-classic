@@ -1,7 +1,7 @@
 #ifndef _PlayerbotWarlockAI_H
 #define _PlayerbotWarlockAI_H
 
-#include "PlayerbotClassAI.h"
+#include "../Base/PlayerbotClassAI.h"
 
 #define SOUL_SHARD 6265
 #define SPELLSTONE 5522

@@ -62,8 +62,8 @@
 #include "Loot/LootMgr.h"
 
 // ------ Playerbot mod ------ //
-#include "PlayerBot/PlayerbotAI.h"
-#include "PlayerBot/PlayerbotMgr.h"
+#include "PlayerBot/Base/PlayerbotAI.h"
+#include "PlayerBot/Base/PlayerbotMgr.h"
 #include "Config/Config.h"
 // ---- End Playerbot mod ---- //
 

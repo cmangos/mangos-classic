@@ -1,7 +1,7 @@
 // an improved Hunter by rrtn & Runsttren :)
 
 #include "PlayerbotHunterAI.h"
-#include "PlayerbotMgr.h"
+#include "../Base/PlayerbotMgr.h"
 
 class PlayerbotAI;
 
