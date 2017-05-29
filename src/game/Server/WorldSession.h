@@ -147,8 +147,11 @@ class WorldSession
         Player* GetPlayer() const { return _player; }
         char const* GetPlayerName() const;
         void SetSecurity(AccountTypes security) { _security = security; }
-        //playerbot mod: player connected without socket are bot
+        // ------ Playerbot mod ------ //
+        // Players connected without socket are bot
         const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "bot"; }
+        // Unmodded core code below
+        // const std::string GetRemoteAddress() const { return m_Socket->GetRemoteAddress(); }
         void SetPlayer(Player* plr) { _player = plr; }
 
         /// Session in auth.queue currently

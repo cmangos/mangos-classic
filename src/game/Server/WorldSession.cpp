@@ -43,9 +43,10 @@
 #include <memory>
 #include <cstdarg>
 
-// Playerbot mod
+// ------ Playerbot mod ------ //
 #include "PlayerBot/PlayerbotMgr.h"
 #include "PlayerBot/PlayerbotAI.h"
+// ---- End Playerbot mod ---- //
 
 // select opcodes appropriate for processing in Map::Update context for current session state
 static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& opHandle)
@@ -90,7 +91,11 @@ bool WorldSessionFilter::Process(WorldPacket const& packet) const
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, time_t mute_time, LocaleConstant locale) :
     m_muteTime(mute_time),
+    // ------ Playerbot mod ------ //
     _player(nullptr), m_Socket(sock ? sock->shared<WorldSocket>() : nullptr), _security(sec), _accountId(id), _logoutTime(0),
+    // Unmodded code below
+    // _player(nullptr), m_Socket(sock->shared<WorldSocket>()), _security(sec), _accountId(id), _logoutTime(0),
+    // ---- End Playerbot mod ---- //
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED) {}
@@ -104,7 +109,9 @@ WorldSession::~WorldSession()
 
     // marks this session as finalized in the socket which references (BUT DOES NOT OWN) it.
     // this lets the socket handling code know that the socket can be safely deleted
+    // ------ Playerbot mod ------ //
     if (m_Socket)
+    // ---- End Playerbot mod ---- //
         m_Socket->FinalizeSession();
 }
 
@@ -123,8 +130,10 @@ char const* WorldSession::GetPlayerName() const
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const& packet) const
 {
-    // Playerbot mod: send packet to bot AI
-    if (GetPlayer()) {
+    // ------ Playerbot mod ------ //
+    // Send packet to bot AI
+    if (GetPlayer())
+    {
         if (GetPlayer()->GetPlayerbotAI())
             GetPlayer()->GetPlayerbotAI()->HandleBotOutgoingPacket(packet);
         else if (GetPlayer()->GetPlayerbotMgr())
@@ -133,6 +142,7 @@ void WorldSession::SendPacket(WorldPacket const& packet) const
 
     if (!m_Socket)
         return;
+    // ---- End Playerbot mod ---- //
 
     if (m_Socket->IsClosed())
         return;
@@ -236,10 +246,10 @@ bool WorldSession::Update(PacketFilter& updater)
 
                     // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
 
-                    // playerbot mod
+                    // ------ Playerbot mod ------ //
                     if (_player && _player->GetPlayerbotMgr())
                         _player->GetPlayerbotMgr()->HandleMasterIncomingPacket(*packet);
-                    // playerbot mod end
+                    // ---- End Playerbot mod ---- //
                     break;
                 case STATUS_LOGGEDIN_OR_RECENTLY_LOGGEDOUT:
                     if (!_player && !m_playerRecentlyLogout)
@@ -309,7 +319,8 @@ bool WorldSession::Update(PacketFilter& updater)
         }
     }
 
-    // Playerbot mod - Process player bot packets
+    // ------ Playerbot mod ------ //
+    // Process player bot packets
     // The PlayerbotAI class adds to the packet queue to simulate a real player
     // since Playerbots are known to the World obj only by its master's WorldSession object
     // we need to process all master's bot's packets.
@@ -332,6 +343,7 @@ bool WorldSession::Update(PacketFilter& updater)
             }
         }
     }
+    // ---- End Playerbot mod ---- //
 
     // check if we are safe to proceed with logout
     // logout procedure should happen only in World::UpdateSessions() method!!!
@@ -340,11 +352,19 @@ bool WorldSession::Update(PacketFilter& updater)
         ///- If necessary, log the player out
         const time_t currTime = time(nullptr);
 
+        // ------ Playerbot mod ------ //
         if (!m_Socket || m_Socket->IsClosed() || (ShouldLogOut(currTime) && !m_playerLoading))
+        // Unmodded core code below
+        // if (m_Socket->IsClosed() || (ShouldLogOut(currTime) && !m_playerLoading))
+        // ---- End Playerbot mod ---- //
             LogoutPlayer(true);
 
         // finalize the session if disconnected.
+        // ------ Playerbot mod ------ //
         if (!m_Socket || m_Socket->IsClosed())
+        // Unmodded core code below
+        // if (m_Socket->IsClosed())
+        // ---- End Playerbot mod ---- //
             return false;
     }
 
@@ -369,9 +389,11 @@ void WorldSession::LogoutPlayer(bool save)
 
     if (_player)
     {
-        // Playerbot mod: log out all player bots owned by this toon
+        // ------ Playerbot mod ------ //
+        // Log out all player bots owned by this toon
         if (_player->GetPlayerbotMgr())
             _player->GetPlayerbotMgr()->LogoutAllBots();
+        // ---- End Playerbot mod ---- //
 
         sLog.outChar("Account: %d (IP: %s) Logout Character:[%s] (guid: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() , _player->GetGUIDLow());
 
@@ -461,11 +483,14 @@ void WorldSession::LogoutPlayer(bool save)
         // No SQL injection as AccountID is uint32
         static SqlStatementID id;
 
+        // ------ Playerbot mod ------ //
         if (! _player->GetPlayerbotAI())
         {
+            // Unmodded core code below
             SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
             stmt.PExecute(uint32(0), GetAccountId());
         }
+        // ---- End Playerbot mod ---- //
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
         if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
@@ -495,7 +520,10 @@ void WorldSession::LogoutPlayer(bool save)
 
         // remove player from the group if he is:
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
+        // ------ Playerbot mod ------ //
         if (_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && m_Socket && !m_Socket->IsClosed())
+        // Unmodded core code below
+        // if (_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && !m_Socket->IsClosed())
             _player->RemoveFromGroup();
 
         ///- Send update to group
@@ -506,7 +534,8 @@ void WorldSession::LogoutPlayer(bool save)
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
         sSocialMgr.RemovePlayerSocial(_player->GetGUIDLow());
 
-        // Playerbot - remember player GUID for update SQL below
+        // ------ Playerbot mod ------ //
+        // Remember player GUID for update SQL below
         uint32 guid = _player->GetGUIDLow();
 
         ///- Remove the player from the world
@@ -535,9 +564,11 @@ void WorldSession::LogoutPlayer(bool save)
 
         static SqlStatementID updChars;
 
-        // Playerbot mod: set for only character instead of accountid
+        // ------ Playerbot mod ------ //
+        // Set for only character instead of accountid
         SqlStatement stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE guid = ?");
         stmt.PExecute(guid);
+        // ---- End Playerbot mod ---- //
 
         DEBUG_LOG("SESSION: Sent SMSG_LOGOUT_COMPLETE Message");
     }
@@ -552,7 +583,10 @@ void WorldSession::LogoutPlayer(bool save)
 /// Kick a player out of the World
 void WorldSession::KickPlayer()
 {
+    // ------ Playerbot mod ------ //
     if (m_Socket && !m_Socket->IsClosed())
+    // Unmodded core code below
+    // if (!m_Socket->IsClosed())
         m_Socket->Close();
 }
 

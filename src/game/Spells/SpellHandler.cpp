@@ -363,7 +363,10 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     // client provided targets
     SpellCastTargets targets;
 
+    // ------ Playerbot mod ------ //
     recvPacket >> targets.ReadForCaster(mover);
+    // Unmodded core code below
+    // recvPacket >> targets.ReadForCaster(_player);
 
     // auto-selection buff level base at target level (in spellInfo)
     if (Unit* target = targets.getUnitTarget())
