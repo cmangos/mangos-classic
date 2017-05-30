@@ -29,8 +29,9 @@
 #include "BattleGround/BattleGround.h"
 #include "Maps/MapManager.h"
 #include "Maps/MapPersistentStateMgr.h"
-// ------ Playerbot mod ------ //
-#include "PlayerBot/Base/PlayerbotMgr.h"
+#ifdef BUILD_PLAYERBOT
+    #include "PlayerBot/Base/PlayerbotMgr.h"
+#endif
 
 GroupMemberStatus GetGroupMemberStatus(const Player *member = nullptr)
 {
@@ -299,12 +300,12 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
 
 uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
 {
-    // ------ Playerbot mod ------ //
+#ifdef BUILD_PLAYERBOT
     // if master leaves group, all bots leave group
     Player* const player = sObjectMgr.GetPlayer(guid);
     if (player && player->GetPlayerbotMgr())
         player->GetPlayerbotMgr()->RemoveAllBotsFromGroup();
-    // ---- End Playerbot mod ---- //
+#endif
 
     // remove member and change leader (if need) only if strong more 2 members _before_ member remove
     if (GetMembersCount() > GetMembersMinCount())
