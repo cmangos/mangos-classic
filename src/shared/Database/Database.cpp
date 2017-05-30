@@ -497,7 +497,7 @@ bool Database::CheckRequiredField(char const* table_name, char const* required_n
             sLog.outErrorDb("  [B] You need: --> `%s.sql`", req_sql_update_name);
             sLog.outErrorDb();
             sLog.outErrorDb("You must apply all updates after [A] to [B] to use mangos with this database.");
-            // ------ Playerbot mod ------ //
+#ifdef BUILD_PLAYERBOT
             if (reqName.find("playerbot") != std::string::npos)
             {
                 sLog.outErrorDb("These updates are included in the [sql/PlayerBot] folder.");
@@ -509,7 +509,10 @@ bool Database::CheckRequiredField(char const* table_name, char const* required_n
                 sLog.outErrorDb("These updates are included in the sql/updates folder.");
                 sLog.outErrorDb("Please read the included [README] in sql/updates for instructions on updating.");
             }
-            // ---- End Playerbot mod ---- //
+#else
+            sLog.outErrorDb("These updates are included in the sql/updates folder.");
+            sLog.outErrorDb("Please read the included [README] in sql/updates for instructions on updating.");
+#endif
         }
         else
         {
