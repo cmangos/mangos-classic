@@ -286,6 +286,11 @@ if(NOT BUILD_GAME_SERVER AND BUILD_SCRIPTDEV)
   message(STATUS "BUILD_SCRIPTDEV forced to OFF due to BUILD_GAME_SERVER is not set")
 endif()
 
+if(NOT BUILD_GAME_SERVER AND BUILD_PLAYERBOT)
+  set(BUILD_PLAYERBOT OFF)
+  message(STATUS "BUILD_PLAYERBOT forced to OFF due to BUILD_GAME_SERVER is not set")
+endif()
+
 # print out the results before continuing
 include(cmake/showoptions.cmake)
 
