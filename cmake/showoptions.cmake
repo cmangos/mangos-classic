@@ -48,6 +48,12 @@ else()
   message(STATUS "Build ScriptDev       : No")
 endif()
 
+if(BUILD_PLAYERBOT)
+  message(STATUS "Build Playerbot       : Yes")
+else()
+  message(STATUS "Build Playerbot       : No  (default)")
+endif()
+
 if(BUILD_EXTRACTORS)
   message(STATUS "Build extractors      : Yes")
 else()

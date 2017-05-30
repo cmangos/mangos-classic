@@ -91,6 +91,11 @@ if (BUILD_SCRIPTDEV)
   add_definitions(-DBUILD_SCRIPTDEV)
 endif()
 
+# Define BUILD_PLAYERBOT if need
+if (BUILD_PLAYERBOT)
+  add_definitions(-DBUILD_PLAYERBOT)
+endif()
+
 # Generate precompiled header
 if(PCH)
   if (MSVC)
