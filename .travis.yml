@@ -87,6 +87,6 @@ script: |-
   mkdir _install
   cd _build
   export CCACHE_SLOPPINESS=pch_defines,time_macros
-  cmake -DCMAKE_INSTALL_PREFIX=../_install -DBUILD_EXTRACTORS=ON -DPCH=$PCH_FLAG ..
+  cmake -DCMAKE_INSTALL_PREFIX=../_install -DBUILD_EXTRACTORS=ON -BUILD_PLAYERBOT=ON -DPCH=$PCH_FLAG ..
   make -j2
   make install
