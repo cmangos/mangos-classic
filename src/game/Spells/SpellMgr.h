@@ -313,6 +313,18 @@ inline bool IsNonCombatSpell(SpellEntry const* spellInfo)
     return spellInfo->HasAttribute(SPELL_ATTR_CANT_USED_IN_COMBAT);
 }
 
+// some creatures should run immediately after being summoned by spell
+inline bool IsSpellSetRun(SpellEntry const* spellInfo)
+{
+    switch (spellInfo->Id)
+    {
+        case 39163:    // [DND]Rescue Wyvern
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool IsExplicitPositiveTarget(uint32 targetA);
 bool IsExplicitNegativeTarget(uint32 targetA);
 
