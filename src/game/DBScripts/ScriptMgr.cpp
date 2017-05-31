@@ -652,14 +652,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 break;
             }
             case SCRIPT_COMMAND_SEND_AI_EVENT:              // 35
-            {
-                if (tmp.sendAIEvent.eventType >= MAXIMAL_AI_EVENT_EVENTAI)
-                {
-                    sLog.outErrorDb("Table `%s` has invalid AI event (datalong = %u) in SCRIPT_COMMAND_SEND_AI_EVENT for script id %u", tablename, tmp.sendAIEvent.eventType, tmp.id);
-                    continue;
-                }
                 break;
-            }
             case SCRIPT_COMMAND_SET_FACING:                 // 36
                 break;
             case SCRIPT_COMMAND_MOVE_DYNAMIC:               // 37
