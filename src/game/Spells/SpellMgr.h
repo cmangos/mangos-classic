@@ -947,6 +947,40 @@ inline bool IsSpellRequiresRangedAP(SpellEntry const* spellInfo)
     return (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE);
 }
 
+inline uint32 GetAffectedTargets(SpellEntry const* spellInfo)
+{
+    // custom target amount cases
+    switch (spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_GENERIC:
+        {
+            switch (spellInfo->Id)
+            {
+                case 802:                                   // Mutate Bug (AQ40, Emperor Vek'nilash)
+                case 804:                                   // Explode Bug (AQ40, Emperor Vek'lor)
+                case 23138:                                 // Gate of Shazzrah (MC, Shazzrah)
+                case 24781:                                 // Dream Fog (Emerald Dragons)
+                case 28560:                                 // Summon Blizzard (Naxx, Sapphiron)
+                    return 1;
+                case 10258:                                 // Awaken Vault Warder (Uldaman)
+                case 28542:                                 // Life Drain (Naxx, Sapphiron)
+                    return 2;
+                case 28796:                                 // Poison Bolt Volley (Naxx, Faerlina)
+                    return 10;
+                case 25991:                                 // Poison Bolt Volley (AQ40, Pincess Huhuran)
+                    return 15;
+                default:
+                    break;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+
+    return spellInfo->MaxAffectedTargets;
+}
+
 SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 form);
 
 inline bool IsChanneledSpell(SpellEntry const* spellInfo)

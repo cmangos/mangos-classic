@@ -527,7 +527,7 @@ class Spell
 
         // Returns a target that was filled by SPELL_SCRIPT_TARGET (or selected victim) Can return nullptr
         Unit* GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const;
-        void GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uint32& EffectChainTarget, uint32& unMaxTargets) const;
+        void GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uint32& EffectChainTarget) const;
 
         //*****************************************
         // Spell target subsystem
@@ -597,6 +597,7 @@ class Spell
         float m_castPositionZ;
         float m_castOrientation;
         bool m_IsTriggeredSpell;
+        uint32 m_affectedTargetCount;
 
         // if need this can be replaced by Aura copy
         // we can't store original aura link to prevent access to deleted auras

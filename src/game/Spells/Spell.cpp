@@ -320,6 +320,8 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
 
     m_reflectable = IsReflectableSpell(m_spellInfo);
 
+    m_affectedTargetCount = GetAffectedTargets(m_spellInfo);
+
     CleanupTargetList();
 }
 
@@ -590,6 +592,25 @@ void Spell::FillTargetMap()
             }
             else
                 ++itr;
+        }
+
+        if (m_affectedTargetCount && tmpUnitLists[effToIndex[i]].size() > m_affectedTargetCount)
+        {
+            // remove random units from the map
+            while (tmpUnitLists[effToIndex[i]].size() > m_affectedTargetCount)
+            {
+                uint32 poz = urand(0, tmpUnitLists[effToIndex[i]].size() - 1);
+                for (UnitList::iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end(); ++itr, --poz)
+                {
+                    if (!*itr) continue;
+
+                    if (!poz)
+                    {
+                        itr = tmpUnitLists[effToIndex[i]].erase(itr);
+                        break;
+                    }
+                }
+            }
         }
 
         for (UnitList::const_iterator iunit = tmpUnitLists[effToIndex[i]].begin(); iunit != tmpUnitLists[effToIndex[i]].end(); ++iunit)
@@ -1467,9 +1488,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 {
     float radius;
     uint32 EffectChainTarget = m_spellInfo->EffectChainTarget[effIndex];
-    uint32 unMaxTargets = m_spellInfo->MaxAffectedTargets;  // Get spell max affected targets
+    uint32 unMaxTargets = m_affectedTargetCount;  // Get spell max affected targets
 
-    GetSpellRangeAndRadius(effIndex, radius, EffectChainTarget, unMaxTargets);
+    GetSpellRangeAndRadius(effIndex, radius, EffectChainTarget);
 
     std::list<GameObject*> tempTargetGOList;
 
@@ -2480,41 +2501,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             targetUnitMap.remove(m_caster);
     }
 
-    if (unMaxTargets && targetUnitMap.size() > unMaxTargets)
-    {
-        // make sure one unit is always removed per iteration
-        uint32 removed_utarget = 0;
-        for (UnitList::iterator itr = targetUnitMap.begin(), next; itr != targetUnitMap.end(); itr = next)
-        {
-            next = itr;
-            ++next;
-            if (!*itr) continue;
-            if ((*itr) == m_targets.getUnitTarget())
-            {
-                targetUnitMap.erase(itr);
-                removed_utarget = 1;
-                //        break;
-            }
-        }
-        // remove random units from the map
-        while (targetUnitMap.size() > unMaxTargets - removed_utarget)
-        {
-            uint32 poz = urand(0, targetUnitMap.size() - 1);
-            for (UnitList::iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr, --poz)
-            {
-                if (!*itr) continue;
-
-                if (!poz)
-                {
-                    targetUnitMap.erase(itr);
-                    break;
-                }
-            }
-        }
-        // the player's target will always be added to the map
-        if (removed_utarget && m_targets.getUnitTarget())
-            targetUnitMap.push_back(m_targets.getUnitTarget());
-    }
     if (!tempTargetGOList.empty())                          // GO CASE
     {
         if (unMaxTargets && tempTargetGOList.size() > unMaxTargets)
@@ -6309,6 +6295,16 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff) const
     if (!IsAllowingDeadTarget(m_spellInfo) && !target->isAlive() && !(target == m_caster && m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD)) && m_caster->GetTypeId() == TYPEID_PLAYER)
         return false;
 
+    switch (m_spellInfo->Id)
+    {
+        case 25676:                                         // Drain Mana
+            if (target->GetPowerType() != POWER_MANA)
+                return false;
+            break;
+        default:
+            break;
+    }
+
     return true;
 }
 
@@ -6702,7 +6698,7 @@ void Spell::CancelGlobalCooldown()
         ((Player*)m_caster)->GetGlobalCooldownMgr().CancelGlobalCooldown(m_spellInfo);
 }
 
-void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uint32& EffectChainTarget, uint32& unMaxTargets) const
+void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uint32& EffectChainTarget) const
 {
     if (m_spellInfo->EffectRadiusIndex[effIndex])
         radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
@@ -6716,37 +6712,6 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius, this);
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
         }
-    }
-
-    // custom target amount cases
-    switch (m_spellInfo->SpellFamilyName)
-    {
-        case SPELLFAMILY_GENERIC:
-        {
-            switch (m_spellInfo->Id)
-            {
-                case 802:                                   // Mutate Bug (AQ40, Emperor Vek'nilash)
-                case 804:                                   // Explode Bug (AQ40, Emperor Vek'lor)
-                case 23138:                                 // Gate of Shazzrah (MC, Shazzrah)
-                case 24781:                                 // Dream Fog (Emerald Dragons)
-                case 28560:                                 // Summon Blizzard (Naxx, Sapphiron)
-                    unMaxTargets = 1;
-                    break;
-                case 10258:                                 // Awaken Vault Warder (Uldaman)
-                case 28542:                                 // Life Drain (Naxx, Sapphiron)
-                    unMaxTargets = 2;
-                    break;
-                case 28796:                                 // Poison Bolt Volley (Naxx, Faerlina)
-                    unMaxTargets = 10;
-                    break;
-                case 25991:                                 // Poison Bolt Volley (AQ40, Pincess Huhuran)
-                    unMaxTargets = 15;
-                    break;
-            }
-            break;
-        }
-        default:
-            break;
     }
 
     // custom radius cases
