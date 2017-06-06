@@ -3,7 +3,8 @@ language: erlang
 env:
   - ARCH=arm
 
-sudo: required
+sudo: enabled
+dist: trusty
 
 script:
   - "bash -ex .travis-ci.sh"
