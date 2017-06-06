@@ -1,7 +1,7 @@
 language: erlang
 
 env:
-  - ARCH=arm
+  - ARCH=armhf
 
 sudo: enabled
 dist: trusty
