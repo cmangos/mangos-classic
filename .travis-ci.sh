@@ -62,6 +62,6 @@ fi
 
 echo "Running tests"
 echo "Environment: $(uname -a)"
-echo "Folder content: $(ll)"
+echo "Folder content: $(ls -al)"
 
 ./compile.sh
