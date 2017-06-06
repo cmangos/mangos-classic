@@ -1,0 +1,174 @@
+From 0ac3e82fb419e071a46a4d92a3089c4d3dc12865 Mon Sep 17 00:00:00 2001
+From: katz1 <secret@gmail.com>
+Date: Fri, 13 May 2016 18:53:17 +0200
+Subject: [PATCH] Changes needed to be able to compile and run mangos on a
+ raspberry pi.
+
+---
+ dep/include/g3dlite/G3D/AtomicInt32.h | 20 +++++---------------
+ dep/include/g3dlite/G3D/platform.h    |  4 ++++
+ dep/src/g3dlite/System.cpp            | 13 +++++++++++++
+ src/shared/ByteBuffer.h               |  8 ++++++++
+ src/shared/Database/SQLStorageImpl.h  | 21 +++++++++++++++++++++
+ 5 files changed, 51 insertions(+), 15 deletions(-)
+
+diff --git a/dep/include/g3dlite/G3D/AtomicInt32.h b/dep/include/g3dlite/G3D/AtomicInt32.h
+index 2d63f99..62f3eac 100644
+--- a/dep/include/g3dlite/G3D/AtomicInt32.h
++++ b/dep/include/g3dlite/G3D/AtomicInt32.h
+@@ -76,12 +76,7 @@ public:
+ 
+ #       elif defined(G3D_LINUX) || defined(G3D_FREEBSD)
+ 
+-            int32 old;
+-            asm volatile ("lock; xaddl %0,%1"
+-                  : "=r"(old), "=m"(m_value) /* outputs */
+-                  : "0"(x), "m"(m_value)   /* inputs */
+-                  : "memory", "cc");
+-            return old;
++            return __sync_fetch_and_add(&m_value, 1);
+             
+ #       elif defined(G3D_OSX)
+ 
+@@ -115,14 +110,7 @@ public:
+             // Note: returns the newly decremented value
+             return InterlockedDecrement(&m_value);
+ #       elif defined(G3D_LINUX)  || defined(G3D_FREEBSD)
+-            unsigned char nz;
+-
+-            asm volatile ("lock; decl %1;\n\t"
+-                          "setnz %%al"
+-                          : "=a" (nz)
+-                          : "m" (m_value)
+-                          : "memory", "cc");
+-            return nz;
++            return __sync_sub_and_fetch(&m_value, 1);
+ #       elif defined(G3D_OSX)
+             // Note: returns the newly decremented value
+             return OSAtomicDecrement32(&m_value);
+@@ -142,7 +130,9 @@ public:
+     int32 compareAndSet(const int32 comperand, const int32 exchange) {
+ #       if defined(G3D_WIN32)
+             return InterlockedCompareExchange(&m_value, exchange, comperand);
+-#       elif defined(G3D_LINUX) || defined(G3D_FREEBSD) || defined(G3D_OSX)
++#       elif defined(G3D_LINUX) || defined(G3D_FREEBSD)
++            return __sync_val_compare_and_swap(&m_value, comperand, exchange);
++#       elif defined(G3D_OSX)
+             // Based on Apache Portable Runtime
+             // http://koders.com/c/fid3B6631EE94542CDBAA03E822CA780CBA1B024822.aspx
+             int32 ret;
+diff --git a/dep/include/g3dlite/G3D/platform.h b/dep/include/g3dlite/G3D/platform.h
+index c6018bb..2104514 100644
+--- a/dep/include/g3dlite/G3D/platform.h
++++ b/dep/include/g3dlite/G3D/platform.h
+@@ -270,6 +270,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {\
+ #       ifndef __stdcall
+ #           define __stdcall
+ #       endif
++
++#   elif defined(__arm__)
++        // CDECL does not apply to arm.
++#       define __cdecl
+ #   endif // calling conventions
+ 
+ /** @def G3D_CHECK_PRINTF_METHOD_ARGS()
+diff --git a/dep/src/g3dlite/System.cpp b/dep/src/g3dlite/System.cpp
+index ce190d0..0cb90d9 100644
+--- a/dep/src/g3dlite/System.cpp
++++ b/dep/src/g3dlite/System.cpp
+@@ -525,7 +525,11 @@ static bool checkForCPUID() {
+     // add cases for incompatible architectures if they are added
+     // e.g., if we ever support __powerpc__ being defined again
+ 
++#if defined(__arm__)
++    return false;
++#else
+     return true;
++#endif
+ }
+ 
+ 
+@@ -1730,6 +1734,15 @@ void System::cpuid(CPUIDFunction func, uint32& eax, uint32& ebx, uint32& ecx, ui
+     edx = 0;
+ }
+ 
++#elif defined(G3D_LINUX) && defined(__arm__)
++// non-x86 CPU; no CPUID, at least in userspace
++void System::cpuid(CPUIDFunction func, uint32& eax, uint32& ebx, uint32& ecx, uint32& edx) {
++    eax = 0;
++    ebx = 0;
++    ecx = 0;
++    edx = 0;
++}
++
+ #else
+ 
+ // See http://sam.zoy.org/blog/2007-04-13-shlib-with-non-pic-code-have-inline-assembly-and-pic-mix-well
+diff --git a/src/shared/ByteBuffer.h b/src/shared/ByteBuffer.h
+index fde1b18..43d33b0 100644
+--- a/src/shared/ByteBuffer.h
++++ b/src/shared/ByteBuffer.h
+@@ -283,7 +283,15 @@ class ByteBuffer
+         {
+             if (pos + sizeof(T) > size())
+                 throw ByteBufferException(false, pos, sizeof(T), size());
++
++#if defined(__arm__) || defined(_M_ARM)
++            //memcpy to avoid alignment issues
++            T val;
++            memcpy((void*)&val,(void*)&_storage[pos],sizeof(T));
++#else
+             T val = *((T const*)&_storage[pos]);
++#endif
++
+             EndianConvert(val);
+             return val;
+         }
+diff --git a/src/shared/Database/SQLStorageImpl.h b/src/shared/Database/SQLStorageImpl.h
+index b33b310..319aba1 100644
+--- a/src/shared/Database/SQLStorageImpl.h
++++ b/src/shared/Database/SQLStorageImpl.h
+@@ -27,6 +27,13 @@ template<class DerivedLoader, class StorageClass>
+ template<class S, class D>                                  // S source-type, D destination-type
+ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert(uint32 /*field_pos*/, S src, D& dst)
+ {
++#if defined(__arm__) || defined(_M_ARM)
++    if(((unsigned)&dst)%sizeof(D)){
++        //address not aligned. Use memcpy to avoid unaligned trap
++        D converted(src);
++        memcpy((void*) &dst,(void*) &converted,sizeof(D));
++    }else
++#endif
+     dst = D(src);
+ }
+ 
+@@ -58,6 +65,13 @@ template<class DerivedLoader, class StorageClass>
+ template<class D>                                           // D destination-type
+ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_from_str(uint32 /*field_pos*/, char const* /*src*/, D& dst)
+ {
++#if defined(__arm__) || defined(_M_ARM)
++    if(((unsigned)&dst)%sizeof(D)){
++        //address not aligned. Use memcpy to avoid unaligned trap
++        D converted(0);
++        memcpy((void*) &dst,(void*) &converted,sizeof(D));
++    }else
++#endif
+     dst = 0;
+ }
+ 
+@@ -65,6 +79,13 @@ template<class DerivedLoader, class StorageClass>
+ template<class S, class D>                                  // S source-type, D destination-type
+ void SQLStorageLoaderBase<DerivedLoader, StorageClass>::default_fill(uint32 /*field_pos*/, S src, D& dst)
+ {
++#if defined(__arm__) || defined(_M_ARM)
++    if(((unsigned)&dst)%sizeof(D)){
++        //address not aligned. Use memcpy to avoid unaligned trap
++        D converted(src);
++        memcpy((void*) &dst,(void*) &converted,sizeof(D));
++    }else
++#endif
+     dst = D(src);
+ }
+ 
+-- 
+2.8.0.windows.1
