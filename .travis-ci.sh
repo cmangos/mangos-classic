@@ -3,7 +3,7 @@
 
 CHROOT_DIR=/tmp/arm-chroot
 MIRROR=http://archive.raspbian.org/raspbian
-VERSION=jessie
+VERSION=wheezy
 CHROOT_ARCH=armhf
 
 # Debian package dependencies for the host
