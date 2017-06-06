@@ -2,8 +2,8 @@
 # Based on a test script from avsm/ocaml repo https://github.com/avsm/ocaml
 
 CHROOT_DIR=/tmp/arm-chroot
-MIRROR=http://archive.raspbian.org/raspbian
-VERSION=wheezy
+MIRROR=http://mirrordirector.raspbian.org/raspbian
+VERSION=jessie
 CHROOT_ARCH=armhf
 
 # Debian package dependencies for the host
