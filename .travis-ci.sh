@@ -66,4 +66,10 @@ fi
 echo "Running tests"
 echo "Environment: $(uname -a)"
 
-${TEST_COMMAND}
+echo "Finally.. Building this repo."
+
+https://github.com/Morlackx/mangos-classic-raspberry-pi.git
+
+cd mangos-classic-raspberry-pi/
+
+./compile.sh
