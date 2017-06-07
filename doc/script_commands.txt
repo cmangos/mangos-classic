@@ -197,6 +197,7 @@ Where "A  ->  B" means that the command is executed from A with B as target.
 10 SCRIPT_COMMAND_TEMP_SUMMON_CREATURE      source = any, target = any
                                             * datalong = creature entry
                                             * datalong2 = despawn_delay
+                                            * datalong3 = pathId - creature_movement_template
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: summon as active object
                                             * dataint = (bool) setRun; 0 = off (default), 1 = on
 
