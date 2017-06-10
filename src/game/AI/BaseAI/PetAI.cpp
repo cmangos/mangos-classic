@@ -55,20 +55,19 @@ void PetAI::MoveInLineOfSight(Unit* u)
 
     Pet* pet = (m_unit->GetTypeId() == TYPEID_UNIT && static_cast<Creature*>(m_unit)->IsPet()) ? static_cast<Pet*>(m_unit) : nullptr;
 
-    if (CharmInfo* charmInfo = m_unit->GetCharmInfo())
-        if (charmInfo->HasReactState(REACT_AGGRESSIVE)
-            && !(pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
-            && u && (m_unit->IsHostileTo(u) || u->IsHostileTo(m_unit->GetMaster()))
-            && m_creature->CanAttackOnSight(u) && u->isInAccessablePlaceFor(m_unit)
-            && m_unit->IsWithinDistInMap(u, m_unit->GetAttackDistance(u))
-            && m_unit->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE
-            && m_unit->IsWithinLOSInMap(u))
-        {
-            AttackStart(u);
+    if (HasReactState(REACT_AGGRESSIVE)
+        && !(pet && pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+        && u && (m_unit->IsHostileTo(u) || u->IsHostileTo(m_unit->GetMaster()))
+        && m_creature->CanAttackOnSight(u) && u->isInAccessablePlaceFor(m_unit)
+        && m_unit->IsWithinDistInMap(u, m_unit->GetAttackDistance(u))
+        && m_unit->GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE
+        && m_unit->IsWithinLOSInMap(u))
+    {
+        AttackStart(u);
 
-            if (Unit* owner = m_unit->GetOwner())
-                owner->SetInCombatState(true, u);
-        }
+        if (Unit* owner = m_unit->GetOwner())
+            owner->SetInCombatState(true, u);
+    }
 }
 
 void PetAI::AttackStart(Unit* u)
@@ -334,7 +333,7 @@ void PetAI::UpdateAI(const uint32 diff)
     {
         CharmInfo* charmInfo = m_unit->GetCharmInfo();
 
-        if (owner->isInCombat() && !(charmInfo && charmInfo->HasReactState(REACT_PASSIVE)))
+        if (owner->isInCombat() && !HasReactState(REACT_PASSIVE))
             AttackStart(owner->getAttackerForHelper());
         else
         {
@@ -431,6 +430,6 @@ void PetAI::AttackedBy(Unit* attacker)
     MANGOS_ASSERT(charminfo);
 
     // when attacked, fight back if no victim unless we have a charm state set to passive
-    if (!(m_unit->getVictim() || charminfo->GetIsRetreating() || charminfo->HasReactState(REACT_PASSIVE)))
+    if (!(m_unit->getVictim() || charminfo->GetIsRetreating() || HasReactState(REACT_PASSIVE)))
         AttackStart(attacker);
 }

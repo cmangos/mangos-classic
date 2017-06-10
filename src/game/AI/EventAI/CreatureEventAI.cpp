@@ -82,8 +82,7 @@ CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     m_InvinceabilityHpLevel(0),
     m_throwAIEventMask(0),
     m_throwAIEventStep(0),
-    m_LastSpellMaxRange(0),
-    m_reactState(REACT_AGGRESSIVE)
+    m_LastSpellMaxRange(0)
 {
     // Need make copy for filter unneeded steps and safe in case table reload
     CreatureEventAI_Event_Map::const_iterator creatureEventsItr = sEventAIMgr.GetCreatureEventAIMap().find(m_creature->GetEntry());

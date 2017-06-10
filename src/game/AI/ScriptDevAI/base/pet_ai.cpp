@@ -26,7 +26,7 @@ void ScriptedPetAI::MoveInLineOfSight(Unit* pWho)
     if (m_creature->getVictim())
         return;
 
-    if (!m_creature->GetCharmInfo() || !m_creature->GetCharmInfo()->HasReactState(REACT_AGGRESSIVE))
+    if (!HasReactState(REACT_AGGRESSIVE))
         return;
 
     if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(pWho) &&
@@ -54,8 +54,7 @@ void ScriptedPetAI::AttackedBy(Unit* pAttacker)
     if (m_creature->getVictim())
         return;
 
-    if (m_creature->GetCharmInfo() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE) &&
-            m_creature->CanReachWithMeleeAttack(pAttacker))
+    if (!HasReactState(REACT_PASSIVE) && m_creature->CanReachWithMeleeAttack(pAttacker))
         AttackStart(pAttacker);
 }
 
@@ -113,7 +112,7 @@ void ScriptedPetAI::UpdateAI(const uint32 uiDiff)
         if (!pOwner)
             return;
 
-        if (pOwner->isInCombat() && !m_creature->GetCharmInfo()->HasReactState(REACT_PASSIVE))
+        if (pOwner->isInCombat() && !HasReactState(REACT_PASSIVE))
         {
             // Not correct in all cases.
             // When mob initiate attack by spell, pet should not start attack before spell landed.

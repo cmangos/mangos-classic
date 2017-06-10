@@ -782,8 +782,6 @@ class CreatureEventAI : public CreatureAI
         uint32 m_throwAIEventStep;                          // Used for damage taken/ received heal
         float m_LastSpellMaxRange;                          // Maximum spell range that was cast during dynamic movement
 
-        ReactStates m_reactState;                           // Define if creature is passive or aggressive
-
         Unit* m_eventTarget;                                // Target filled on specific event to be used in action
 };
 

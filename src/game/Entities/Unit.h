@@ -894,13 +894,6 @@ enum ActiveStates
     ACT_DECIDE   = 0x00                                     // custom
 };
 
-enum ReactStates
-{
-    REACT_PASSIVE    = 0,
-    REACT_DEFENSIVE  = 1,
-    REACT_AGGRESSIVE = 2
-};
-
 enum CommandStates
 {
     COMMAND_STAY    = 0,
@@ -971,9 +964,6 @@ class CharmInfo
         void SetCommandState(CommandStates st);
         CommandStates GetCommandState() { return m_CommandState; }
         bool HasCommandState(CommandStates state) { return (m_CommandState == state); }
-        void SetReactState(ReactStates st) { m_reactState = st; }
-        ReactStates GetReactState() const { return m_reactState; }
-        bool HasReactState(ReactStates state) const { return (m_reactState == state); }
 
         void InitPossessCreateSpells();
         void InitCharmCreateSpells();
@@ -1028,7 +1018,6 @@ class CharmInfo
         UnitActionBarEntry  PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
         CharmSpellEntry     m_charmspells[CREATURE_MAX_SPELLS];
         CommandStates       m_CommandState;
-        ReactStates         m_reactState;
         uint32              m_petnumber;
         uint32              m_opener;
         uint32              m_openerMinRange;

@@ -6778,7 +6778,7 @@ void Unit::Unmount(bool from_aura)
         if (Pet* pet = GetPet())
         {
             if (CharmInfo* charmInfo = pet->GetCharmInfo())
-                pet->SetModeFlags(PetModeFlags(charmInfo->GetReactState() | charmInfo->GetCommandState() * 0x100));
+                pet->SetModeFlags(PetModeFlags(charmInfo->GetAI()->GetReactState() | charmInfo->GetCommandState() * 0x100));
         }
         else
             ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny();
@@ -8502,7 +8502,7 @@ CharmInfo* Unit::InitCharmInfo(Unit* charm)
 
 CharmInfo::CharmInfo(Unit* unit) :
     m_unit(unit), m_ai(nullptr), m_combatData(nullptr),
-    m_CommandState(COMMAND_FOLLOW), m_reactState(REACT_PASSIVE),
+    m_CommandState(COMMAND_FOLLOW),
     m_petnumber(0), m_retreating(false), m_stayPosSet(false),
     m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
     m_opener(0), m_openerMinRange(0), m_openerMaxRange(0),
@@ -10146,7 +10146,7 @@ bool Unit::TakePossessOf(Unit* possessed)
         player->UnsummonPetTemporaryIfAny();
 
         charmInfo->InitPossessCreateSpells();
-        charmInfo->SetReactState(REACT_PASSIVE);
+        charmInfo->GetAI()->SetReactState(REACT_PASSIVE);
         charmInfo->SetCommandState(COMMAND_STAY);
         player->PossessSpellInitialize();
     }
@@ -10191,7 +10191,7 @@ bool Unit::TakeCharmOf(Unit* charmed)
         //charmedPlayer->SetWalk(IsWalking(), true);
 
         charmInfo->InitCharmCreateSpells();
-        charmInfo->SetReactState(REACT_DEFENSIVE);
+        charmInfo->GetAI()->SetReactState(REACT_DEFENSIVE);
         charmInfo->SetCommandState(COMMAND_FOLLOW);
         charmInfo->SetIsRetreating(true);
 
@@ -10207,7 +10207,7 @@ bool Unit::TakeCharmOf(Unit* charmed)
         charmedCreature->SetWalk(IsWalking(), true);
 
         charmInfo->InitCharmCreateSpells();
-        charmInfo->SetReactState(REACT_DEFENSIVE);
+        charmInfo->GetAI()->SetReactState(REACT_DEFENSIVE);
         charmInfo->SetCommandState(COMMAND_FOLLOW);
         charmInfo->SetIsRetreating(true);
 

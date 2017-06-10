@@ -95,6 +95,13 @@ enum AIEventType
     AI_EVENT_CUSTOM_F           = 1005,
 };
 
+enum ReactStates
+{
+    REACT_PASSIVE    = 0,
+    REACT_DEFENSIVE  = 1,
+    REACT_AGGRESSIVE = 2
+};
+
 class CreatureAI
 {
     public:
@@ -365,6 +372,10 @@ class CreatureAI
 
         // Returns friendly unit with the most amount of hp missing from max hp
         Unit* DoSelectLowestHpFriendly(float range, float minMissing = 1.f, bool percent = false);
+        
+        void SetReactState(ReactStates st) { m_reactState = st; }
+        ReactStates GetReactState() const { return m_reactState; }
+        bool HasReactState(ReactStates state) const { return (m_reactState == state); }
 
     protected:
         void HandleMovementOnAttackStart(Unit* victim) const;
@@ -380,6 +391,8 @@ class CreatureAI
         /// How should an enemy be chased
         float m_attackDistance;
         float m_attackAngle;
+
+        ReactStates m_reactState;
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>
