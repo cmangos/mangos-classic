@@ -221,7 +221,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 case REACT_DEFENSIVE:                       // recovery
                 case REACT_AGGRESSIVE:                      // activete
                 {
-                    charmInfo->GetAI()->SetReactState(ReactStates(spellid));
+                    pet->AI()->SetReactState(ReactStates(spellid));
                     break;
                 }
             }

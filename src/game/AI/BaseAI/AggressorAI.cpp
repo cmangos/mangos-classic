@@ -37,57 +37,6 @@ AggressorAI::AggressorAI(Creature* c) : CreatureAI(c), i_state(STATE_NORMAL), i_
 {
 }
 
-void AggressorAI::EnterEvadeMode()
-{
-    if (!m_creature->isAlive())
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, he is dead [guid=%u]", m_creature->GetGUIDLow());
-        i_victimGuid.Clear();
-        m_creature->CombatStop(true);
-        m_creature->DeleteThreatList();
-        return;
-    }
-
-    Unit* victim = m_creature->GetMap()->GetUnit(i_victimGuid);
-
-    if (!victim)
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, no victim [guid=%u]", m_creature->GetGUIDLow());
-    }
-    else if (!victim->isAlive())
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim is dead [guid=%u]", m_creature->GetGUIDLow());
-    }
-    else if (victim->HasStealthAura())
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim is in stealth [guid=%u]", m_creature->GetGUIDLow());
-    }
-    else if (victim->IsTaxiFlying())
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim is in flight [guid=%u]", m_creature->GetGUIDLow());
-    }
-    else
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Creature stopped attacking, victim out run him [guid=%u]", m_creature->GetGUIDLow());
-        // i_state = STATE_LOOK_AT_VICTIM;
-        // i_tracker.Reset(TIME_INTERVAL_LOOK);
-    }
-
-    if (!m_creature->isCharmed())
-    {
-        m_creature->RemoveAllAurasOnEvade();
-
-        // Remove ChaseMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-        if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-            m_creature->GetMotionMaster()->MoveTargetedHome();
-    }
-
-    m_creature->DeleteThreatList();
-    i_victimGuid.Clear();
-    m_creature->CombatStop(true);
-    m_creature->SetLootRecipient(nullptr);
-}
-
 void AggressorAI::UpdateAI(const uint32 /*diff*/)
 {
     // update i_victimGuid

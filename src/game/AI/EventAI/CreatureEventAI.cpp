@@ -1262,15 +1262,7 @@ void CreatureEventAI::EnterEvadeMode()
         SetCombatMovement(!m_DynamicMovement);
     }
 
-    m_creature->RemoveAllAurasOnEvade();
-    m_creature->DeleteThreatList();
-    m_creature->CombatStop(true);
-
-    // only alive creatures that are not on transport can return to home position
-    if (m_creature->isAlive())
-        m_creature->GetMotionMaster()->MoveTargetedHome();
-
-    m_creature->SetLootRecipient(nullptr);
+    CreatureAI::EnterEvadeMode();
 
     // Handle Evade events
     for (CreatureEventAIList::iterator i = m_CreatureEventAIList.begin(); i != m_CreatureEventAIList.end(); ++i)

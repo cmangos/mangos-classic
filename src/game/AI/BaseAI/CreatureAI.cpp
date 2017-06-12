@@ -55,7 +55,7 @@ CreatureAI::~CreatureAI()
 
 void CreatureAI::MoveInLineOfSight(Unit * who)
 {
-    if (m_reactState != REACT_AGGRESSIVE)
+    if (!HasReactState(REACT_AGGRESSIVE))
         return;
 
     if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
@@ -75,6 +75,21 @@ void CreatureAI::MoveInLineOfSight(Unit * who)
     {
         DetectOrAttack(who, m_creature);
     }
+}
+
+void CreatureAI::EnterEvadeMode()
+{
+    m_creature->RemoveAllAurasOnEvade();
+    m_creature->DeleteThreatList();
+    m_creature->CombatStop(true);
+
+    // only alive creatures that are not on transport can return to home position
+    if (m_creature->isAlive() && !m_creature->IsBoarded())
+        m_creature->GetMotionMaster()->MoveTargetedHome();
+
+    m_creature->SetLootRecipient(nullptr);
+
+    m_creature->TriggerEvadeEvents();
 }
 
 void CreatureAI::AttackedBy(Unit* attacker)
@@ -193,7 +208,7 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
 
 void CreatureAI::AttackStart(Unit* who)
 {
-    if (!who || m_reactState == REACT_PASSIVE)
+    if (!who || HasReactState(REACT_PASSIVE))
         return;
 
     if (m_creature->Attack(who, m_meleeEnabled))

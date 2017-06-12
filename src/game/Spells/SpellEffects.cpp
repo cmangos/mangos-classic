@@ -2792,16 +2792,7 @@ void Spell::EffectSummonGuardian(SpellEffectIndex eff_idx)
             spawnCreature->SetPvP(true);
 
         if (CharmInfo* charmInfo = spawnCreature->GetCharmInfo())
-        {
             charmInfo->SetPetNumber(pet_number, false);
-
-            if (cInfo->UnitFlags & UNIT_FLAG_IMMUNE_TO_NPC)
-                charmInfo->GetAI()->SetReactState(REACT_PASSIVE);
-            else if (cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE)
-                charmInfo->GetAI()->SetReactState(REACT_DEFENSIVE);
-            else
-                charmInfo->GetAI()->SetReactState(REACT_AGGRESSIVE);
-        }
 
         m_caster->AddGuardian(spawnCreature);
 
@@ -3143,7 +3134,6 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
             level = resultLevel;
     }
 
-    NewSummon->GetCharmInfo()->GetAI()->SetReactState(REACT_DEFENSIVE);
     NewSummon->SetOwnerGuid(m_caster->GetObjectGuid());
     NewSummon->setFaction(m_caster->getFaction());
     NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
@@ -3154,6 +3144,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     map->Add((Creature*)NewSummon);
     NewSummon->AIM_Initialize();
+    NewSummon->GetCharmInfo()->GetAI()->SetReactState(REACT_DEFENSIVE);
 
     m_caster->SetPet(NewSummon);
     DEBUG_LOG("New Pet has guid %u", NewSummon->GetGUIDLow());

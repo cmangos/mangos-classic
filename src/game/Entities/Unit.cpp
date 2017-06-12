@@ -489,6 +489,15 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth() * 0.20f);
 }
 
+void Unit::TriggerEvadeEvents()
+{
+    if (InstanceData* mapInstance = GetInstanceData())
+        mapInstance->OnCreatureEvade((Creature*)this);
+
+    if (m_isCreatureLinkingTrigger)
+        GetMap()->GetCreatureLinkingHolder()->DoCreatureLinkingEvent(LINKING_EVENT_EVADE, (Creature*)this);
+}
+
 bool Unit::UpdateMeleeAttackingState()
 {
     Unit* victim = getVictim();
@@ -6778,7 +6787,7 @@ void Unit::Unmount(bool from_aura)
         if (Pet* pet = GetPet())
         {
             if (CharmInfo* charmInfo = pet->GetCharmInfo())
-                pet->SetModeFlags(PetModeFlags(charmInfo->GetAI()->GetReactState() | charmInfo->GetCommandState() * 0x100));
+                pet->SetModeFlags(PetModeFlags(pet->AI()->GetReactState() | charmInfo->GetCommandState() * 0x100));
         }
         else
             ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny();

@@ -32,7 +32,7 @@ class ReactorAI : public CreatureAI
 
         void MoveInLineOfSight(Unit*) override;
         void AttackStart(Unit*) override;
-        void EnterEvadeMode() override;
+        void EnterCombat(Unit* enemy) override;
         bool IsVisible(Unit*) const override;
         bool IsControllable() const override { return true; }
 

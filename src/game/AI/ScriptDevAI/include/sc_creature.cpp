@@ -74,14 +74,7 @@ void ScriptedAI::UpdateAI(const uint32 /*uiDiff*/)
  */
 void ScriptedAI::EnterEvadeMode()
 {
-    m_creature->RemoveAllAurasOnEvade();
-    m_creature->DeleteThreatList();
-    m_creature->CombatStop(true);
-
-    if (m_creature->isAlive())
-        m_creature->GetMotionMaster()->MoveTargetedHome();
-
-    m_creature->SetLootRecipient(nullptr);
+    CreatureAI::EnterEvadeMode();
 
     Reset();
 }

@@ -38,9 +38,6 @@ class GuardAI : public CreatureAI
         explicit GuardAI(Creature* c);
 
         void MoveInLineOfSight(Unit*) override;
-        void AttackStart(Unit*) override;
-        void EnterEvadeMode() override;
-        void JustDied(Unit*) override;
         bool IsVisible(Unit*) const override;
         bool IsControllable() const override { return true; }
 

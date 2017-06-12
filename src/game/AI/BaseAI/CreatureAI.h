@@ -139,7 +139,7 @@ class CreatureAI
          * Called for reaction at stopping attack at no attackers or targets
          * This is called usually in Unit::SelectHostileTarget, if no more target exists
          */
-        virtual void EnterEvadeMode() {}
+        virtual void EnterEvadeMode();
 
         /**
          * Called at reaching home after MoveTargetedHome
