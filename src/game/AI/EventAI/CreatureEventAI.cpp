@@ -56,8 +56,8 @@ int CreatureEventAI::Permissible(const Creature* creature)
 void CreatureEventAI::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage(LANG_NPC_EVENTAI_PHASE, uint32(m_Phase));
-    reader.PSendSysMessage(LANG_NPC_EVENTAI_MOVE, reader.GetOnOffStr(m_isCombatMovement));
-    reader.PSendSysMessage(LANG_NPC_EVENTAI_COMBAT, reader.GetOnOffStr(m_MeleeEnabled));
+    reader.PSendSysMessage(LANG_NPC_EVENTAI_MOVE, reader.GetOnOffStr(!m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT)));
+    reader.PSendSysMessage(LANG_NPC_EVENTAI_COMBAT, reader.GetOnOffStr(m_meleeEnabled));
 
     if (sLog.HasLogFilter(LOG_FILTER_EVENT_AI_DEV))         // Give some more details if in EventAI Dev Mode
         return;
@@ -76,7 +76,6 @@ void CreatureEventAI::GetAIInformation(ChatHandler& reader)
 
 CreatureEventAI::CreatureEventAI(Creature* c) : CreatureAI(c),
     m_Phase(0),
-    m_MeleeEnabled(true),
     m_DynamicMovement(false),
     m_HasOOCLoSEvent(false),
     m_InvinceabilityHpLevel(0),
@@ -805,7 +804,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                 sLog.outErrorEventAI("Event %u - nullptr target for ACTION_T_REMOVE_UNIT_FLAG(%u), target-type %u", EventId, action.type, action.unit_flag.target);
             break;
         case ACTION_T_AUTO_ATTACK:
-            m_MeleeEnabled = action.auto_attack.state != 0;
+            m_meleeEnabled = action.auto_attack.state != 0;
             break;
         case ACTION_T_COMBAT_MOVEMENT:
             // ignore no affect case
@@ -1388,26 +1387,8 @@ void CreatureEventAI::EnterCombat(Unit* enemy)
     m_EventDiff = 0;
 }
 
-void CreatureEventAI::AttackStart(Unit* who)
-{
-    if (!who || m_reactState == REACT_PASSIVE)
-        return;
-
-    if (m_creature->Attack(who, m_MeleeEnabled))
-    {
-        m_creature->AddThreat(who);
-        m_creature->SetInCombatWith(who);
-        who->SetInCombatWith(m_creature);
-
-        HandleMovementOnAttackStart(who);
-    }
-}
-
 void CreatureEventAI::MoveInLineOfSight(Unit* who)
 {
-    if (!who || m_reactState != REACT_AGGRESSIVE)
-        return;
-
     // Check for OOC LOS Event
     if (m_HasOOCLoSEvent && !m_creature->getVictim())
     {
@@ -1420,7 +1401,7 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
 
                 // if friendly event && who is not hostile OR hostile event && who is hostile
                 if ((itr->Event.ooc_los.noHostile && !m_creature->IsHostileTo(who)) ||
-                        ((!itr->Event.ooc_los.noHostile) && m_creature->IsHostileTo(who)))
+                    ((!itr->Event.ooc_los.noHostile) && m_creature->IsHostileTo(who)))
                 {
                     // if range is ok and we are actually in LOS
                     if (m_creature->IsWithinDistInMap(who, fMaxAllowedRange) && m_creature->IsWithinLOSInMap(who))
@@ -1430,31 +1411,7 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
         }
     }
 
-    // TODO:: in others core -> if (m_creature->IsCivilian() || m_creature->IsNeutralToAll()) so why we use EXTRA_FLAG here ?
-    if ((m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_AGGRO) || m_creature->IsNeutralToAll())
-        return;
-
-    if (who->GetObjectGuid().IsCreature() && who->isInCombat())
-        CheckForHelp(who, m_creature, 10.0);
-
-    if (m_creature->CanInitiateAttack() && m_creature->CanAttack(who) &&
-        m_creature->IsHostileTo(who) && who->isInAccessablePlaceFor(m_creature))
-    {
-        if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
-            return;
-
-        float attackRadius = m_creature->GetAttackDistance(who);
-        if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->IsWithinLOSInMap(who))
-        {
-            if (!m_creature->getVictim())
-                AttackStart(who);
-            else if (m_creature->GetMap()->IsDungeon())
-            {
-                m_creature->AddThreat(who);
-                who->SetInCombatWith(m_creature);
-            }
-        }
-    }
+    CreatureAI::MoveInLineOfSight(who);
 }
 
 void CreatureEventAI::SpellHit(Unit* pUnit, const SpellEntry* pSpell)
@@ -1531,7 +1488,7 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
             else
                 SetCombatMovement(true, true);
         }
-        else if (m_MeleeEnabled && m_creature->CanReachWithMeleeAttack(victim)
+        else if (m_meleeEnabled && m_creature->CanReachWithMeleeAttack(victim)
             && !(m_creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_NO_MELEE))
             DoMeleeAttackIfReady();
     }

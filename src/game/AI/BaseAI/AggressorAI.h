@@ -37,8 +37,6 @@ class AggressorAI : public CreatureAI
 
         explicit AggressorAI(Creature* c);
 
-        void MoveInLineOfSight(Unit*) override;
-        void AttackStart(Unit*) override;
         void EnterEvadeMode() override;
         bool IsVisible(Unit*) const override;
         bool IsControllable() const override { return true; }

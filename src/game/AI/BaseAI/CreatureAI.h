@@ -127,7 +127,7 @@ class CreatureAI
          * Note: This function is not called for creatures who are in evade mode
          * @param pWho Unit* who moved in the visibility range and is visisble
          */
-        virtual void MoveInLineOfSight(Unit* /*pWho*/) {}
+        virtual void MoveInLineOfSight(Unit* /*pWho*/);
 
         /**
          * Called for reaction at enter to combat if not in combat yet
@@ -278,7 +278,7 @@ class CreatureAI
          * Note: Usually called by MoveInLineOfSight, in Unit::SelectHostileTarget or when the AI is forced to attack an enemy
          * @param pWho Unit* who is possible target
          */
-        virtual void AttackStart(Unit* /*pWho*/) {}
+        virtual void AttackStart(Unit* /*who*/);
 
         /**
         * Called when creature stop attack expected
@@ -391,6 +391,8 @@ class CreatureAI
         /// How should an enemy be chased
         float m_attackDistance;
         float m_attackAngle;
+
+        bool m_meleeEnabled;                              // If we allow melee auto attack
 
         ReactStates m_reactState;
 };

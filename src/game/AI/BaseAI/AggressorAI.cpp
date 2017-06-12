@@ -37,33 +37,6 @@ AggressorAI::AggressorAI(Creature* c) : CreatureAI(c), i_state(STATE_NORMAL), i_
 {
 }
 
-void AggressorAI::MoveInLineOfSight(Unit* u)
-{
-    // Ignore Z for flying creatures
-    if (!m_creature->CanFly() && m_creature->GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE)
-        return;
-
-    // Check if we can help our friend creature
-    if (u->GetObjectGuid().IsCreature() && u->isInCombat())
-        CheckForHelp(u, m_creature, 10.0);
-
-    if (m_creature->CanInitiateAttack() && m_creature->CanAttack(u) &&
-        m_creature->IsHostileTo(u) && u->isInAccessablePlaceFor(m_creature))
-    {
-        float attackRadius = m_creature->GetAttackDistance(u);
-        if (m_creature->IsWithinDistInMap(u, attackRadius) && m_creature->IsWithinLOSInMap(u))
-        {
-            if (!m_creature->getVictim())
-                AttackStart(u);
-            else if (sMapStore.LookupEntry(m_creature->GetMapId())->IsDungeon())
-            {
-                m_creature->AddThreat(u);
-                u->SetInCombatWith(m_creature);
-            }
-        }
-    }
-}
-
 void AggressorAI::EnterEvadeMode()
 {
     if (!m_creature->isAlive())
@@ -128,21 +101,4 @@ bool AggressorAI::IsVisible(Unit* pl) const
 {
     return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_MONSTER))
            && pl->isVisibleForOrDetect(m_creature, m_creature, true);
-}
-
-void AggressorAI::AttackStart(Unit* u)
-{
-    if (!u)
-        return;
-
-    if (m_creature->Attack(u, true))
-    {
-        i_victimGuid = u->GetObjectGuid();
-
-        m_creature->AddThreat(u);
-        m_creature->SetInCombatWith(u);
-        u->SetInCombatWith(m_creature);
-
-        HandleMovementOnAttackStart(u);
-    }
 }

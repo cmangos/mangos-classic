@@ -59,7 +59,7 @@ struct ScriptedAI : public CreatureAI
         // == Reactions At =================================
 
         // Called if IsVisible(Unit* pWho) is true at each relative pWho move
-        void MoveInLineOfSight(Unit* pWho) override;
+        // void MoveInLineOfSight(Unit* pWho) override;
 
         // Called for reaction at enter to combat if not in combat yet (enemy can be nullptr)
         void EnterCombat(Unit* pEnemy) override;
@@ -126,7 +126,7 @@ struct ScriptedAI : public CreatureAI
         void ReceiveEmote(Player* /*pPlayer*/, uint32 /*uiEmote*/) override {}
 
         // Called at each attack of m_creature by any victim
-        void AttackStart(Unit* pWho) override;
+        // void AttackStart(Unit* pWho) override;
 
         // Called at World update tick
         void UpdateAI(const uint32) override;

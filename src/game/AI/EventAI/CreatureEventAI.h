@@ -733,7 +733,7 @@ class CreatureEventAI : public CreatureAI
         void JustDied(Unit* killer) override;
         void KilledUnit(Unit* victim) override;
         void JustSummoned(Creature* pUnit) override;
-        void AttackStart(Unit* who) override;
+        // void AttackStart(Unit* who) override;
         void MoveInLineOfSight(Unit* who) override;
         void SpellHit(Unit* pUnit, const SpellEntry* pSpell) override;
         void DamageTaken(Unit* done_by, uint32& damage, DamageEffectType damagetype) override;
@@ -771,7 +771,6 @@ class CreatureEventAI : public CreatureAI
         CreatureEventAIList m_CreatureEventAIList;          // Holder for events (stores enabled, time, and eventid)
 
         uint8  m_Phase;                                     // Current phase, max 32 phases
-        bool   m_MeleeEnabled;                              // If we allow melee auto attack
         bool   m_DynamicMovement;                           // Core will control creatures movement if this is enabled
         bool   m_HasOOCLoSEvent;                            // Cache if a OOC-LoS Event exists
         uint32 m_InvinceabilityHpLevel;                     // Minimal health level allowed at damage apply

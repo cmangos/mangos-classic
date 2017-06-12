@@ -33,7 +33,8 @@ CreatureAI::CreatureAI(Creature* creature) :
     m_isCombatMovement(true),
     m_attackDistance(0.0f),
     m_attackAngle(0.0f),
-    m_reactState(REACT_AGGRESSIVE)
+    m_reactState(REACT_AGGRESSIVE),
+    m_meleeEnabled(true)
 {
 }
 
@@ -43,12 +44,37 @@ CreatureAI::CreatureAI(Unit* unit) :
     m_isCombatMovement(true),
     m_attackDistance(0.0f),
     m_attackAngle(0.0f),
-    m_reactState(REACT_AGGRESSIVE)
+    m_reactState(REACT_AGGRESSIVE),
+    m_meleeEnabled(true)
 {
 }
 
 CreatureAI::~CreatureAI()
 {
+}
+
+void CreatureAI::MoveInLineOfSight(Unit * who)
+{
+    if (m_reactState != REACT_AGGRESSIVE)
+        return;
+
+    if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+        return;
+
+    if (m_creature->getVictim() && !m_creature->GetMap()->IsDungeon())
+        return;
+
+    if (m_creature->IsCivilian() || m_creature->IsNeutralToAll())
+        return;
+
+    if (who->GetObjectGuid().IsCreature() && who->isInCombat())
+        CheckForHelp(who, m_creature, 10.0);
+
+    if (m_creature->CanInitiateAttack() && m_creature->CanAttackOnSight(who) &&
+        m_creature->IsHostileTo(who) && who->isInAccessablePlaceFor(m_creature))
+    {
+        DetectOrAttack(who, m_creature);
+    }
 }
 
 void CreatureAI::AttackedBy(Unit* attacker)
@@ -163,6 +189,21 @@ CanCastResult CreatureAI::DoCastSpellIfCan(Unit* pTarget, uint32 uiSpell, uint32
     }
     else
         return CAST_FAIL_IS_CASTING;
+}
+
+void CreatureAI::AttackStart(Unit* who)
+{
+    if (!who || m_reactState == REACT_PASSIVE)
+        return;
+
+    if (m_creature->Attack(who, m_meleeEnabled))
+    {
+        m_creature->AddThreat(who);
+        m_creature->SetInCombatWith(who);
+        who->SetInCombatWith(m_creature);
+
+        HandleMovementOnAttackStart(who);
+    }
 }
 
 bool CreatureAI::DoMeleeAttackIfReady() const
