@@ -112,7 +112,7 @@ bool GuardianAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvok
         pHolder.Enabled = false;
 
     // Store random here so that all random actions match up
-    uint32 rnd = rand();
+    uint32 rnd = urand();
 
     // Return if chance for event is not met
     if (pHolder.Event.event_chance <= rnd % 100)
@@ -149,6 +149,8 @@ bool GuardianAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pActionInvok
                     --idx;
                 }
             }
+
+            rnd = urand(); // need to randomize again to prevent always same result when both event and action are randomized
 
             ProcessAction(pHolder.Event.action[j], rnd, pHolder.Event.event_id, pActionInvoker, pAIEventSender);
         }
