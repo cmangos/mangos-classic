@@ -1077,7 +1077,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             }
         }
     }
-    
+
     // All calculated do it!
     // Do healing and triggers
     if (m_healing)
@@ -6225,6 +6225,9 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
     switch (m_spellInfo->Id)
     {
         case 25676:                                         // Drain Mana
+        case 25754:
+        case 26457:
+        case 26559:
             if (target->GetPowerType() != POWER_MANA)
                 return false;
             break;
