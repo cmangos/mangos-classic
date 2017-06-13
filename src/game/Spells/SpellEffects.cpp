@@ -891,6 +891,24 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 24150:                                 // Stinger Charge Primer
+                {
+                    if (unitTarget->HasAura(25187))
+                        m_caster->CastSpell(unitTarget, 25191, TRIGGERED_OLD_TRIGGERED);
+                    else
+                        m_caster->CastSpell(unitTarget, 25190, TRIGGERED_OLD_TRIGGERED);
+
+                    return;
+                }
+                case 26080:                                 // Stinger Charge Primer
+                {
+                    if (unitTarget->HasAura(26078))
+                        m_caster->CastSpell(unitTarget, 26082, TRIGGERED_OLD_TRIGGERED);
+                    else
+                        m_caster->CastSpell(unitTarget, 26081, TRIGGERED_OLD_TRIGGERED);
+
+                    return;
+                }
                 case 24781:                                 // Dream Fog
                 {
                     // TODO Note: Should actually not only AttackStart, but fixate on the target
