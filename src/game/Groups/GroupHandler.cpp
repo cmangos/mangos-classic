@@ -327,10 +327,12 @@ void WorldSession::HandleGroupSetLeaderOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
 {
-    if (!GetPlayer()->GetGroup())
+    Player* player = GetPlayer();
+    Group* group = player->GetGroup();
+    if (!group)
         return;
 
-    if (_player->InBattleGround())
+    if (player->InBattleGround())
     {
         SendPartyResult(PARTY_OP_INVITE, "", ERR_NOT_LEADER);  // error message is not so appropriated but no other option for classic
         return;
@@ -340,9 +342,9 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
     /********************/
 
     // everything is fine, do it
-    SendPartyResult(PARTY_OP_LEAVE, GetPlayer()->GetName(), ERR_PARTY_RESULT_OK);
+    SendPartyResult(PARTY_OP_LEAVE, player->GetName(), ERR_PARTY_RESULT_OK);
 
-    GetPlayer()->RemoveFromGroup();
+    player->RemoveFromGroup();
 }
 
 void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
