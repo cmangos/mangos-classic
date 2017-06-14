@@ -98,6 +98,8 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     Group* initiatorGroup = initiator->GetGroup();
     if (initiatorGroup && initiatorGroup->isBGGroup())
         initiatorGroup = initiator->GetOriginalGroup();
+    if (!initiatorGroup)
+        initiatorGroup = initiator->GetGroupInvite();
 
     Group* recipientGroup = recipient->GetGroup();
     if (recipientGroup && recipientGroup->isBGGroup())
@@ -114,7 +116,8 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
         // not have permissions for invite
         if (!initiatorGroup->IsLeader(initiator->GetObjectGuid()) && !initiatorGroup->IsAssistant(initiator->GetObjectGuid()))
         {
-            SendPartyResult(PARTY_OP_INVITE, "", ERR_NOT_LEADER);
+            if (initiatorGroup->IsCreated())
+                SendPartyResult(PARTY_OP_INVITE, "", ERR_NOT_LEADER);
             return;
         }
         // not have place
@@ -329,7 +332,8 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
 {
     Player* player = GetPlayer();
     Group* group = player->GetGroup();
-    if (!group)
+    Group* groupPending = player->GetGroupInvite();
+    if (!group && !groupPending)
         return;
 
     if (player->InBattleGround())
@@ -342,9 +346,17 @@ void WorldSession::HandleGroupDisbandOpcode(WorldPacket& /*recv_data*/)
     /********************/
 
     // everything is fine, do it
-    SendPartyResult(PARTY_OP_LEAVE, player->GetName(), ERR_PARTY_RESULT_OK);
-
-    player->RemoveFromGroup();
+    if (group)
+    {
+        SendPartyResult(PARTY_OP_LEAVE, player->GetName(), ERR_PARTY_RESULT_OK);
+        player->RemoveFromGroup();
+    }
+    else if (groupPending && groupPending->GetLeaderGuid() == player->GetObjectGuid())
+    {
+        // pending group creation being cancelled
+        SendPartyResult(PARTY_OP_LEAVE, player->GetName(), ERR_PARTY_RESULT_OK);
+        groupPending->Disband();
+    }
 }
 
 void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)
