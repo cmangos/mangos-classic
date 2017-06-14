@@ -7,7 +7,7 @@ The purpose of this fork is to modify the original **CMaNGOS Classic** project i
 
 That has been possible thanks a [patch file](https://github.com/Morlackx/mangos-classic-raspberry-pi/blob/master/MangosPI.patch) from **katz1** (found this name in patch file). The original patch file is available in this [pastebin](https://pastebin.com/ZKNWcBPY).
 
-I don't take any credit (nor MaNGOS, nor the patch, nor the WoW game). I'm just sharing some my hours of google search and my attemplt too setup a Travis-CI in order to compile on arm image (QEMU workaround).
+I don't take any credit (nor MaNGOS, nor the patch, nor the WoW game). I'm just sharing some my hours of google search and my attempt to setup a Travis-CI in order to compile on arm image (QEMU workaround).
 
 At the time of writing, this code was able to compile and it is running on Raspberry Pi 3 (Raspbian jessie) with RetroPie (256mb split memory). MySQL server is on another Pi 1. 
 
