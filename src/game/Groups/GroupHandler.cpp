@@ -101,11 +101,19 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     if (!initiatorGroup)
         initiatorGroup = initiator->GetGroupInvite();
 
+    // player already invited
+    if (recipient->GetGroupInvite())
+    {
+        SendPartyResult(PARTY_OP_INVITE, membername, ERR_ALREADY_IN_GROUP_S);
+        return;
+    }
+
     Group* recipientGroup = recipient->GetGroup();
     if (recipientGroup && recipientGroup->isBGGroup())
         recipientGroup = recipient->GetOriginalGroup();
-    // player already in another group or invited
-    if (recipientGroup || recipient->GetGroupInvite())
+
+    // player already in another group
+    if (recipientGroup)
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_ALREADY_IN_GROUP_S);
         return;
