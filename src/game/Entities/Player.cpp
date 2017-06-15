@@ -2201,7 +2201,6 @@ bool Player::IsInSameGroupWith(Player const* p) const
 }
 
 ///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
-/// \todo Shouldn't we also check if there is no other invitees before disbanding the group?
 void Player::UninviteFromGroup()
 {
     Group* group = GetGroupInvite();
@@ -2210,17 +2209,22 @@ void Player::UninviteFromGroup()
 
     group->RemoveInvite(this);
 
-    if (group->GetMembersCount() <= 1)                      // group has just 1 member => disband
+    if (group->IsCreated())
     {
-        if (group->IsCreated())
+        if (group->GetMembersCount() < group->GetMembersMinCount()) // group has not enough members to exist => disband and destroy
         {
             group->Disband(true);
             sObjectMgr.RemoveGroup(group);
+            delete group;
         }
-        else
+    }
+    else
+    {
+        if (group->GetInviteesCount() <= 1) // group creation was cancelled due to everyone declining invitations => destroy
+        {
             group->RemoveAllInvites();
-
-        delete group;
+            delete group;
+        }
     }
 }
 
