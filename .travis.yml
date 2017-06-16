@@ -1,10 +1,24 @@
-language: erlang
-
-env:
-  - ARCH=arm
-
-sudo: enabled
+language: generic
+sudo: true
 dist: trusty
 
+before_install:
+    - sudo apt-get update
+    - sudo apt-get install qemu-system-arm wget xz-utils sshpass ansible
+
+install:
+    - wget "https://kragniz.eu/pub/2015-11-21-raspbian-jessie-lite.img.xz"
+    - unxz "2015-11-21-raspbian-jessie-lite.img.xz"
+    - git clone https://github.com/polaco1782/raspberry-qemu.git
+
+before_script:
+    - mkdir -p ~/.ssh/
+    - printf 'Host localhost\n  User pi\n  Port 10022\n  StrictHostKeyChecking no' > ~/.ssh/config
+    - cat ~/.ssh/config
+    - qemu-system-arm -kernel raspberry-qemu/kernel-qemu -cpu arm1176 -m 256 -M versatilepb -no-reboot -serial stdio -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" -net user,hostfwd=tcp::10022-:22 -net nic -display none -hda 2015-11-21-raspbian-jessie-lite.img &
+    - ./piutils/wait-for-ssh
+    - ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
+    - sshpass -p raspberry ssh-copy-id -o StrictHostKeyChecking=no pi@localhost -p 10022
+
 script:
-  - "bash -ex .travis-ci.sh"
+    - ./piutils/run-on-pi "cat /etc/os-release"
