@@ -314,6 +314,18 @@ struct FactionEntry
     }
 };
 
+/*
+// NOTE: FactionGroup.dbc - currently unused, please refer to related hardcoded enum FactionMasks
+struct FactionGroupEntry
+{
+    uint32      ID;                                         // 0        m_ID
+    uint32      maskID;                                     // 1        m_maskID       index of the bit to check for in the faction group mask
+    char*       internalName;                               // 2        m_internalName
+    // char*       name[8];                                 // 3-10     m_name_lang    localized display name in the UI
+    // 11 string flags
+};
+*/
+
 struct FactionTemplateEntry
 {
     uint32      ID;                                         // 0
