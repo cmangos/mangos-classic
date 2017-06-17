@@ -5142,6 +5142,13 @@ void PlayerbotAI::findNearbyGO()
 
 void PlayerbotAI::findNearbyCreature()
 {
+    // Do not waste time finding a creature if bot has nothing to do
+    // and clear list (sanity check)
+    if (m_tasks.empty())
+    {
+        m_findNPC.clear();
+        return;
+    }
     CreatureList creatureList;
     float radius = INTERACTION_DISTANCE;
 
