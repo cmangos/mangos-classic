@@ -1936,20 +1936,6 @@ bool Creature::LoadCreatureAddon(bool reload)
     if (cainfo->mount != 0)
         Mount(cainfo->mount);
 
-    if (cainfo->bytes1 != 0)
-    {
-        // 0 StandState
-        // 1 LoyaltyLevel  Pet only, so always 0 for default creature
-        // 2 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
-        // 3 StandMiscFlags
-
-        SetByteValue(UNIT_FIELD_BYTES_1, 0, uint8(cainfo->bytes1 & 0xFF));
-        // SetByteValue(UNIT_FIELD_BYTES_1, 1, uint8((cainfo->bytes1 >> 8) & 0xFF));
-        // SetByteValue(UNIT_FIELD_BYTES_1, 1, 0);
-        // SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
-        SetByteValue(UNIT_FIELD_BYTES_1, 3, uint8((cainfo->bytes1 >> 24) & 0xFF));
-    }
-
     // UNIT_FIELD_BYTES_2
     // 0 SheathState
     // 1 Bytes2Flags, in 3.x used UnitPVPStateFlags, that have different meaning
@@ -1981,6 +1967,23 @@ bool Creature::LoadCreatureAddon(bool reload)
             CastSpell(this, *cAura, TRIGGERED_OLD_TRIGGERED);
         }
     }
+
+	// Setting the StandState flags last to allow a change in StandState in the database to be unaffected by the spell listed in auras
+	// This fixes the StandState issue with spell 16093 for example
+	if (cainfo->bytes1 != 0)
+	{
+		// 0 StandState
+		// 1 LoyaltyLevel  Pet only, so always 0 for default creature
+		// 2 ShapeshiftForm     Must be determined/set by shapeshift spell/aura
+		// 3 StandMiscFlags
+
+		SetByteValue(UNIT_FIELD_BYTES_1, 0, uint8(cainfo->bytes1 & 0xFF));
+		// SetByteValue(UNIT_FIELD_BYTES_1, 1, uint8((cainfo->bytes1 >> 8) & 0xFF));
+		// SetByteValue(UNIT_FIELD_BYTES_1, 1, 0);
+		// SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
+		SetByteValue(UNIT_FIELD_BYTES_1, 3, uint8((cainfo->bytes1 >> 24) & 0xFF));
+	}
+
     return true;
 }
 
