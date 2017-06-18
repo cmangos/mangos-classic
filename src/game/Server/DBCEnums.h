@@ -59,13 +59,13 @@ enum FactionTemplateFlags
     FACTION_TEMPLATE_FLAG_CONTESTED_GUARD   = 0x00001000,   // faction will attack players that were involved in PvP combats
 };
 
-enum FactionMasks
+enum FactionGroupMask
 {
-    FACTION_MASK_PLAYER   = 1,                              // any player
-    FACTION_MASK_ALLIANCE = 2,                              // player or creature from alliance team
-    FACTION_MASK_HORDE    = 4,                              // player or creature from horde team
-    FACTION_MASK_MONSTER  = 8                               // aggressive creature from monster team
-                            // if none flags set then non-aggressive creature
+    FACTION_GROUP_MASK_PLAYER   = 1,                              // any player
+    FACTION_GROUP_MASK_ALLIANCE = 2,                              // player or creature from alliance team
+    FACTION_GROUP_MASK_HORDE    = 4,                              // player or creature from horde team
+    FACTION_GROUP_MASK_MONSTER  = 8                               // aggressive creature from monster team
+                                                                  // if none flags set then non-aggressive creature
 };
 
 enum MapTypes
