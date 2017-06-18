@@ -1125,7 +1125,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000500,'Me scared! Me run now!',0,1,0,0,'morokk SAY_MOR_SCARED'),
 
 (-1000501,'Are you sure that you are ready? If we do not have a group of your allies to aid us, we will surely fail.',0,0,1,0,'muglash SAY_MUG_START1'),
-(-1000502,'This will be a though fight, $n. Follow me closely.',0,0,1,0,'muglash SAY_MUG_START2'),
+(-1000502,'This will be a tough fight, $n. Follow me closely.',0,0,1,0,'muglash SAY_MUG_START2'),
 (-1000503,'This is the brazier, $n. Put it out. Vorsha is a beast, worthy of praise from no one!',0,0,1,0,'muglash SAY_MUG_BRAZIER'),
 (-1000504,'Now we must wait. It won\'t be long before the naga realize what we have done.',0,0,1,0,'muglash SAY_MUG_BRAZIER_WAIT'),
 (-1000505,'Be on your guard, $n!',0,0,1,0,'muglash SAY_MUG_ON_GUARD'),
