@@ -1409,6 +1409,7 @@ class Unit : public WorldObject
         uint8 getStandState() const { return GetByteValue(UNIT_FIELD_BYTES_1, 0); }
         bool IsSitState() const;
         bool IsStandState() const;
+        bool IsSeatedState() const;
         void SetStandState(uint8 state);
 
         bool IsMounted() const { return !!GetMountID(); }
