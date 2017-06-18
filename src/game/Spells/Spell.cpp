@@ -4022,6 +4022,12 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (strict && !m_IsTriggeredSpell && HasGlobalCooldown())
         return SPELL_FAILED_NOT_READY;
 
+    // check players m_weaponChangeTimer to prevent GCD being ignored by Macros when using
+    // ** /cast some ability **
+    // after a new weapon has been equipted
+    if (m_caster->isAlive() && m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->GetWeaponChangeTimer() != 0)
+            return SPELL_FAILED_CASTER_AURASTATE;
+
     // only allow triggered spells if at an ended battleground
     if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
         if (BattleGround* bg = ((Player*)m_caster)->GetBattleGround())
