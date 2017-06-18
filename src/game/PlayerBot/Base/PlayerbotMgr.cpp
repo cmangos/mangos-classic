@@ -30,6 +30,7 @@
 #include "../../Loot/LootMgr.h"
 #include "../../MotionGenerators/WaypointMovementGenerator.h"
 #include "../../Tools/Language.h"
+#include "../../World/World.h"
 
 class LoginQueryHolder;
 class CharacterHandler;
@@ -988,17 +989,39 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
         return false;
     }
 
-    char* cmd = strtok((char*) args, " ");
-    char* charname = strtok(nullptr, " ");
-
-    if (!cmd || !charname)
+    // create the playerbot manager if it doesn't already exist
+    PlayerbotMgr* mgr = m_session->GetPlayer()->GetPlayerbotMgr();
+    if (!mgr)
     {
-        PSendSysMessage("|cffff0000usage: add PLAYERNAME  or  remove PLAYERNAME");
+        mgr = new PlayerbotMgr(m_session->GetPlayer());
+        m_session->GetPlayer()->SetPlayerbotMgr(mgr);
+    }
+
+    char* cmd = strtok((char*) args, " ");
+    if (!cmd)
+    {
+        PSendSysMessage("|cffff0000usage: add PLAYERNAME, remove PLAYERNAME, removeall");
         SetSentErrorMessage(true);
         return false;
     }
 
     std::string cmdStr = cmd;
+
+    if (cmdStr == "removeall")
+    {
+        mgr->LogoutAllBots();
+        return true;
+    }
+
+    // commands that require botname
+    char* charname = strtok(NULL, " ");
+    if (!charname)
+    {
+        PSendSysMessage("|cffff0000usage: add PLAYERNAME, remove PLAYERNAME, removeall");
+        SetSentErrorMessage(true);
+        return false;
+    }
+
     std::string charnameStr = charname;
 
     if (!normalizePlayerName(charnameStr))
@@ -1018,14 +1041,6 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
         PSendSysMessage("|cffff0000You may only add bots from the same account.");
         SetSentErrorMessage(true);
         return false;
-    }
-
-    // create the playerbot manager if it doesn't already exist
-    PlayerbotMgr* mgr = m_session->GetPlayer()->GetPlayerbotMgr();
-    if (!mgr)
-    {
-        mgr = new PlayerbotMgr(m_session->GetPlayer());
-        m_session->GetPlayer()->SetPlayerbotMgr(mgr);
     }
 
     QueryResult* resultchar = CharacterDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online = '1' AND account = '%u'", m_session->GetAccountId());
