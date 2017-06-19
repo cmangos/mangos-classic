@@ -199,7 +199,7 @@ enum
 {
     QUEST_RESUPPLYING_THE_EXCAVATION = 273,
 
-    NPC_SAEN = 1380,
+    NPC_SAEAN = 1380,
     NPC_DARK_IRON_AMBUSHER = 1981,
 
     FACTION_HOSTILE = 14
@@ -230,11 +230,11 @@ bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*
 
     pPlayer->CompleteQuest(QUEST_RESUPPLYING_THE_EXCAVATION);
 
-    if (Creature* m_creature = GetClosestCreatureWithEntry(pPlayer, NPC_SAEN, 80.0f))
+    if (Creature* m_creature = GetClosestCreatureWithEntry(pPlayer, NPC_SAEAN, 80.0f))
         m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
     else
         pPlayer
-            ->SummonCreature(NPC_SAEN, m_miranAmbushSpawns[0].m_fX, m_miranAmbushSpawns[0].m_fY, m_miranAmbushSpawns[0].m_fZ, m_miranAmbushSpawns[0].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000)
+            ->SummonCreature(NPC_SAEAN, m_miranAmbushSpawns[0].m_fX, m_miranAmbushSpawns[0].m_fY, m_miranAmbushSpawns[0].m_fZ, m_miranAmbushSpawns[0].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000)
             ->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
 
     if (!pScriptedMap->GetSingleCreatureFromStorage(NPC_DARK_IRON_AMBUSHER, true))
