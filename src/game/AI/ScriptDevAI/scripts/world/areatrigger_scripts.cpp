@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Areatrigger_Scripts
 SD%Complete: 100
-SDComment: Quest support: 4291, 6681, 7632
+SDComment: Quest support: 4291, 6681, 7632, 273
 SDCategory: Areatrigger
 EndScriptData
 
@@ -190,6 +190,62 @@ bool AreaTrigger_at_ancient_leaf(Player* pPlayer, AreaTriggerEntry const* pAt)
     return false;
 }
 
+/*######
+## Miran and Huldar are Ambushed when AT-171 is triggered
+## when quest 273 is active
+######*/
+
+enum
+{
+    QUEST_RESUPPLYING_THE_EXCAVATION = 273,
+
+    NPC_SAEN = 1380,
+    NPC_DARK_IRON_AMBUSHER = 1981,
+
+    FACTION_HOSTILE = 14
+};
+
+struct Location
+{
+    float m_fX, m_fY, m_fZ, m_fO;
+};
+
+static const Location m_miranAmbushSpawns[] =
+{
+    { -5760.73f, -3437.71f, 305.54f, 2.41f },   // Saean 
+    { -5759.85f, -3441.29f, 305.57f, 2.24f },   // Dark Iron Ambusher 1
+    { -5757.75f, -3437.61f, 304.32f, 2.56f },   // Dark Iron Ambusher 2
+};
+
+bool AreaTrigger_at_huldar_miran(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
+{
+    if (!pPlayer->isAlive() || pPlayer->isGameMaster() ||
+        pPlayer->GetQuestStatus(QUEST_RESUPPLYING_THE_EXCAVATION) == QUEST_STATUS_COMPLETE ||
+        pPlayer->GetQuestStatus(QUEST_RESUPPLYING_THE_EXCAVATION) == QUEST_STATUS_NONE)
+        return false;
+
+    ScriptedMap* pScriptedMap = (ScriptedMap*)pPlayer->GetInstanceData();
+    if (!pScriptedMap)
+        return false;
+
+    pPlayer->CompleteQuest(QUEST_RESUPPLYING_THE_EXCAVATION);
+
+    if (Creature* m_creature = GetClosestCreatureWithEntry(pPlayer, NPC_SAEN, 80.0f))
+        m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
+    else
+        pPlayer
+            ->SummonCreature(NPC_SAEN, m_miranAmbushSpawns[0].m_fX, m_miranAmbushSpawns[0].m_fY, m_miranAmbushSpawns[0].m_fZ, m_miranAmbushSpawns[0].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000)
+            ->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
+
+    if (!pScriptedMap->GetSingleCreatureFromStorage(NPC_DARK_IRON_AMBUSHER, true))
+    {
+        pPlayer->SummonCreature(NPC_DARK_IRON_AMBUSHER, m_miranAmbushSpawns[1].m_fX, m_miranAmbushSpawns[1].m_fY, m_miranAmbushSpawns[1].m_fZ, m_miranAmbushSpawns[1].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000);
+        pPlayer->SummonCreature(NPC_DARK_IRON_AMBUSHER, m_miranAmbushSpawns[2].m_fX, m_miranAmbushSpawns[2].m_fY, m_miranAmbushSpawns[2].m_fZ, m_miranAmbushSpawns[2].m_fO, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 25000);
+    }
+
+    return true;
+}
+
 void AddSC_areatrigger_scripts()
 {
     Script* pNewScript;
@@ -217,5 +273,10 @@ void AddSC_areatrigger_scripts()
     pNewScript = new Script;
     pNewScript->Name = "at_ancient_leaf";
     pNewScript->pAreaTrigger = &AreaTrigger_at_ancient_leaf;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_huldar_miran";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_huldar_miran;
     pNewScript->RegisterSelf();
 }
