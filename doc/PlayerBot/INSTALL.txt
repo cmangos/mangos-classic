@@ -1,9 +1,6 @@
 Installation:
 =============
-Merge PlayerbotAI code with your favorite core/mods, or simply compile. Follow CMangos Core installation steps for installation and building.
-
-Copy src/game/PlayerBot/playerbot.conf.dist.in for configuration variables!
-Install appropriate files from sql/PlayerBot
+Build CMaNGOS core as usual and add -DBUILD_PLAYERBOT=ON option
 
 Developers:
 ===========
@@ -15,26 +12,6 @@ define PLAYERBOT_CONF_VERSION    YYYYMMDDVV
 * src/game/PlayerBot/playerbot.conf.dist.in
 ConfVersion=YYYYMMDDVV
 * Of course don't forget to update your server's playerbot.conf.
-
-When updating the sql file(s), keep in mind the following:
-
-=== File Name Description in [sql/PlayerBot] folder ===
-
-    FULL_playerbotai_characters_r2_update
-    |    |           |          |  |
-    |    |           |          |  Only if the sql updates a previous sql
-    |    |           |          |
-    |    |           |          Playerbot revision related to sql
-    |    |           |
-    |    |           |Name of affected DB (default recommended name)
-    |    |
-    |    Playerbot sql file..drrr!
-    |
-    For clean install, just apply this sql
-
-* src/game/PlayerBot/revision_sql.h
-#define REVISION_DB_PLAYERBOTAI "required_playerbotai_characters_svdata_003"
-NOTE: This string should be an exact copy of your SQL file's second field name in the `playerbotai_db_version` table.
 
 Configuration variables:
 ========================
