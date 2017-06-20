@@ -457,7 +457,7 @@ void ScriptDevAIMgr::Initialize()
     outstring_log("SD2: Loading C++ scripts");
     BarGoLink bar(1);
     bar.step();
-    outstring_log("");
+    outstring_log();
 
     // Resize script ids to needed amount of assigned ScriptNames (from core)
     m_scripts.resize(GetScriptIdsCount(), nullptr);
@@ -475,7 +475,7 @@ void ScriptDevAIMgr::Initialize()
 
     outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
 #else
-    outstring_log("");
+    outstring_log();
     outstring_log(">> ScriptDev is disabled!");
 #endif
 }
