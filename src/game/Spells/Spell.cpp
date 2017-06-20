@@ -5513,6 +5513,9 @@ SpellCastResult Spell::CheckRange(bool strict) const
 {
     Unit* target = m_targets.getUnitTarget();
 
+    // add radius of caster and ~5 yds "give" for non stricred (landing) check
+    float range_mod = strict ? 1.25f : 6.25;
+
     // special range cases
     switch (m_spellInfo->rangeIndex)
     {
@@ -5524,28 +5527,10 @@ SpellCastResult Spell::CheckRange(bool strict) const
         // combat range spells are treated differently
         case SPELL_RANGE_IDX_COMBAT:
         {
-            if (target)
-            {
-                if (target == m_caster)
-                    return SPELL_CAST_OK;
-
-                float range_mod = strict ? 0.0f : 5.0f;
-                float base = ATTACK_DISTANCE;
-                if (Player* modOwner = m_caster->GetSpellModOwner())
-                {
-                    float base = ATTACK_DISTANCE;
-                    range_mod += modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, base, this);
-                }
-
-                // with additional 5 dist for non stricted case (some melee spells have delay in apply
-                return m_caster->CanReachWithMeleeAttack(target, range_mod) ? SPELL_CAST_OK : SPELL_FAILED_OUT_OF_RANGE;
-            }
-            break;                                          // let continue in generic way for no target
+            range_mod = 0.0f; // These spells do not have any leeway like ranged ones do
+            break;
         }
     }
-
-    // add radius of caster and ~5 yds "give" for non stricred (landing) check
-    float range_mod = strict ? 1.25f : 6.25;
 
     // leeway for moving
     if (target && m_caster->IsMoving() && target->IsMoving() && !m_caster->IsWalking() && !target->IsWalking() &&
