@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_z2694_01_characters_instance` bit(1) DEFAULT NULL
+  `required_z2698_01_characters_playerbot_saved_data` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -1212,6 +1212,22 @@ LOCK TABLES `petition_sign` WRITE;
 /*!40000 ALTER TABLE `petition_sign` DISABLE KEYS */;
 /*!40000 ALTER TABLE `petition_sign` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `playerbot_saved_data`
+--
+
+DROP TABLE IF EXISTS `playerbot_saved_data`;
+CREATE TABLE `playerbot_saved_data` (
+  `guid` int(11) unsigned NOT NULL DEFAULT '0',
+  `combat_order` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `primary_target` int(11) unsigned NOT NULL DEFAULT '0',
+  `secondary_target` int(11) unsigned NOT NULL DEFAULT '0',
+  `pname` varchar(12) NOT NULL DEFAULT '',
+  `sname` varchar(12) NOT NULL DEFAULT '',
+  `combat_delay` INT(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Table structure for table `pvpstats_battlegrounds`
