@@ -2154,7 +2154,7 @@ Unit* Creature::SelectAttackingTarget(AttackingTarget target, uint32 position, S
 
             for (; ritr != threatlist.rend(); ++ritr)
             {
-                if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
+                if (Unit* pTarget = GetMap()->GetUnit((*ritr)->getUnitGuid()))
                 {
                     if ((!selectFlags && !pSpellInfo) || MeetsSelectAttackingRequirement(pTarget, pSpellInfo, selectFlags))
                         return pTarget;
