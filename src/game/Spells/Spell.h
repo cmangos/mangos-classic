@@ -209,6 +209,49 @@ enum SpellTargets
 
 typedef std::multimap<uint64, uint64> SpellTargetTimeMap;
 
+struct SpellLogData
+{
+    SpellLogData() : counter(0) {}
+
+    ByteBuffer data;
+    uint32     counter;
+};
+typedef std::map<uint32, SpellLogData> SpellLogDataMap;
+
+// SpellLog class to manage spells logs that have to be sent to clients
+class SpellLog
+{
+    public:
+        SpellLog(Spell* spell) : m_spell(spell) {}
+        SpellLog() = delete;
+        SpellLog(const SpellLog&) = delete;
+
+        void AddInterruptCast(ObjectGuid const& targetGuid, uint32 interruptedSpellId);
+        void AddPowerDrain(ObjectGuid const& targetGuid, uint32 amount, uint32 power, float multiplier);
+        void AddExtraAttack(ObjectGuid const& targetGuid, uint32 amount);
+        void AddCreateItem(uint32 itemEntry);
+        void AddOpenLockGObj(ObjectGuid const& objectGuid);
+        void AddOpenLockItem(ObjectGuid const& objectGuid);
+        void AddFeedPet(uint32 itemEntry);
+        void AddDismissPet(ObjectGuid const& petGuid);
+        void AddDurability(ObjectGuid const& targetGuid, int32 itemEntry = -1, int32 amount = -1);
+        void AddDummy(ObjectGuid const& targetGuid);
+        void AddLog(uint32 spellEffect, ObjectGuid const& targetGuid);
+
+        // TODO: This is mostly "You start casting (spell name)" I don't know all cases that this should be fired.
+        void AddLogStartCast();
+
+        // Build the packet using collected data
+        void BuildPacket(WorldPacket& data);
+
+        // Send collected logs
+        void SendToSet();
+
+private:
+        Spell* m_spell;
+        SpellLogDataMap m_effectsMap;
+};
+
 class Spell
 {
         friend struct MaNGOS::SpellNotifierPlayer;
@@ -347,7 +390,7 @@ class Spell
         uint32 getState() const { return m_spellState; }
         void setState(uint32 state) { m_spellState = state; }
 
-        void DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype);
+        bool DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype);
 
         void WriteSpellGoTargets(WorldPacket& data);
         void WriteAmmoToPacket(WorldPacket& data) const;
@@ -362,7 +405,6 @@ class Spell
         void SendSpellStart() const;
         void SendSpellGo();
         void SendSpellCooldown();
-        void SendLogExecute() const;
         void SendInterrupted(uint8 result) const;
         void SendChannelUpdate(uint32 time) const;
         void SendChannelStart(uint32 duration);
@@ -603,6 +645,9 @@ class Spell
         // we can't store original aura link to prevent access to deleted auras
         // and in same time need aura data and after aura deleting.
         SpellEntry const* m_triggeredByAuraSpell;
+
+        // needed to store all log for this spell
+        SpellLog m_spellLog;
 };
 
 enum ReplenishType
