@@ -19,7 +19,7 @@ before_script:
     - ./piutils/run-on-pi "df -h"
     - ./piutils/run-on-pi "sudo dpkg --add-architecture armhf"
     - ./piutils/run-on-pi "sudo apt-get update"
-    - ./piutils/run-on-pi "sudo apt-get --allow-unauthenticated install -qq -y build-essential git m4 sudo python gcc-4.8 g++-4.8 make cmake libboost1.55-dev libboost-system1.55-dev libboost-program-options1.55-dev libboost-thread1.55-dev libboost-regex1.55-dev"
+    - ./piutils/run-on-pi "sudo apt-get --allow-unauthenticated install -qq -y libmysql++-dev build-essential git m4 sudo python gcc-4.8 g++-4.8 make cmake libboost1.55-dev libboost-system1.55-dev libboost-program-options1.55-dev libboost-thread1.55-dev libboost-regex1.55-dev"
     - ./piutils/run-on-pi "git clone https://github.com/Morlackx/mangos-classic-raspberry-pi.git"
     - ./piutils/run-on-pi "df -h"
 
