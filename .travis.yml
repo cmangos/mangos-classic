@@ -17,8 +17,8 @@ before_script:
     - cat ~/.ssh/config
     - qemu-system-arm -kernel raspberry-qemu/kernel-qemu -cpu arm1176 -m 256 -M versatilepb -no-reboot -serial stdio -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" -net user,hostfwd=tcp::10022-:22 -net nic -display none -hda 2015-11-21-raspbian-jessie-lite.img &
     - ./piutils/wait-for-ssh
-    - ssh-keygen -f ~/.ssh/id_rsa -t rsa -N ''
-    - sshpass -p raspberry ssh-copy-id -o StrictHostKeyChecking=no pi@localhost -p 10022
+    - sleep 60
+    - sshpass -p raspberry ssh localhost -o StrictHostKeyChecking=no -p 10022 -l pi "cat /etc/os-release"
 
 script:
     - ./piutils/run-on-pi "cat /etc/os-release"
