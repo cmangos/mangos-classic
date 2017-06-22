@@ -171,7 +171,7 @@ void GameEventMgr::LoadFromDB()
 
         for (uint16 itr = 1; itr < mGameEvent.size(); ++itr)
         {
-            if (mGameEvent[itr].isValid() && mGameEvent[itr].linkedTo != 0 && (mGameEvent[itr].linkedTo >= mGameEvent.size() || mGameEvent[itr].linkedTo < 0 || !mGameEvent[mGameEvent[itr].linkedTo].isValid()))
+            if (mGameEvent[itr].isValid() && mGameEvent[itr].linkedTo != 0 && (mGameEvent[itr].linkedTo >= mGameEvent.size() || !mGameEvent[mGameEvent[itr].linkedTo].isValid()))
             {
                 sLog.outErrorDb("`game_event` game event id (%i) is Linked to invalid event %u", itr, mGameEvent[itr].linkedTo);
                 mGameEvent[itr].linkedTo = 0;
