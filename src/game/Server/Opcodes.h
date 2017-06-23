@@ -339,7 +339,7 @@ enum OpcodesList
     CMSG_NEW_SPELL_SLOT                             = 0x12D,
     CMSG_CAST_SPELL                                 = 0x12E,
     CMSG_CANCEL_CAST                                = 0x12F,
-    SMSG_CAST_FAILED                                = 0x130,
+    SMSG_CAST_RESULT                                = 0x130,
     SMSG_SPELL_START                                = 0x131,
     SMSG_SPELL_GO                                   = 0x132,
     SMSG_SPELL_FAILURE                              = 0x133,
