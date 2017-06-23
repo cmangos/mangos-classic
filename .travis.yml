@@ -12,17 +12,14 @@ install:
     - git clone https://github.com/polaco1782/raspberry-qemu.git
 
 before_script:
-    - qemu-system-arm -kernel raspberry-qemu/kernel-qemu -cpu arm1176 -smp 2 -m 256 -M versatilepb -no-reboot -serial stdio -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" -net user,hostfwd=tcp::10022-:22 -net nic -display none -hda 2015-11-21-raspbian-jessie-lite.img &
+    - qemu-system-arm -kernel raspberry-qemu/kernel-qemu -cpu arm1176 -m 256 -M versatilepb -no-reboot -serial stdio -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" -net user,hostfwd=tcp::10022-:22 -net nic -display none -hda 2015-11-21-raspbian-jessie-lite.img &
     - ./piutils/wait-for-ssh
     - sleep 120
     - ./piutils/run-on-pi "cat /etc/os-release"
     - ./piutils/run-on-pi "df -h"
     - ./piutils/run-on-pi "free"
-    - ./piutils/run-on-pi "ps -ef"    
-    - ./piutils/run-on-pi "sudo dpkg --add-architecture armhf"
-    - ./piutils/run-on-pi "sudo apt-get update"
     - ./piutils/run-on-pi "sudo apt-get --allow-unauthenticated install -qq -y libssl-dev libcurl4-openssl-dev libmysql++-dev build-essential git m4 sudo python gcc-4.8 g++-4.8 make cmake libboost1.55-dev libboost-system1.55-dev libboost-program-options1.55-dev libboost-thread1.55-dev libboost-regex1.55-dev"
-    - ./piutils/run-on-pi "git clone https://github.com/Morlackx/mangos-classic-raspberry-pi.git"
+    - ./piutils/run-on-pi "git pull origin master"
     - ./piutils/run-on-pi "df -h"
 
 script:
