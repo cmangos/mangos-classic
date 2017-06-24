@@ -2146,7 +2146,7 @@ class Unit : public WorldObject
         explicit Unit();
 
         void _UpdateSpells(uint32 time);
-        void _UpdateAutoRepeatSpell();
+        virtual void _UpdateAutoRepeatSpell();
         bool m_AutoRepeatFirstCast;
 
         uint32 m_attackTimer[MAX_ATTACK];
@@ -2202,6 +2202,7 @@ class Unit : public WorldObject
         bool m_isSpawningLinked;
 
         CombatData* m_combatData;
+        Spell* m_currentSpells[CURRENT_MAX_SPELL];
 
     private:
         void CleanupDeletedAuras();
@@ -2218,7 +2219,6 @@ class Unit : public WorldObject
         bool   m_dummyCombatState;                          // Used to keep combat state during some aura
 
         AttackerSet m_attackers;                            // Used to help know who is currently attacking this unit
-        Spell* m_currentSpells[CURRENT_MAX_SPELL];
         uint32 m_castCounter;                               // count casts chain of triggered spells for prevent infinity cast crashes
 
         UnitVisibility m_Visibility;
