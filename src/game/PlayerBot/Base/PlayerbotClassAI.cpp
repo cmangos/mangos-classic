@@ -222,12 +222,27 @@ Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type)
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel())
+            if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel() || !groupMember->IsInSameGroupWith(m_bot))
                 continue;
+			if (groupMember->IsInSameGroupWith(m_bot))
+			{
             JOB_TYPE job = GetTargetJob(groupMember);
             if (job & type)
                 targets.push_back( heal_priority(groupMember, (groupMember->GetHealth() * 100 / groupMember->GetMaxHealth()), job) );
+			}
         }
+		for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel())
+                continue;
+			if (!groupMember->IsInSameGroupWith(m_bot) && m_ai->GetManaPercent() >= 80)
+			{
+            JOB_TYPE job = GetTargetJob(groupMember);
+            if (job & type)
+                targets.push_back( heal_priority(groupMember, (groupMember->GetHealth() * 100 / groupMember->GetMaxHealth()), job) );
+			}
+		}
     }
     else
     {
@@ -529,24 +544,52 @@ Player* PlayerbotClassAI::GetDispelTarget(DispelType dispelType, JOB_TYPE type, 
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember || !groupMember->isAlive() || !groupMember->IsInSameGroupWith(m_bot))
+                continue;
+			if (groupMember->IsInSameGroupWith(m_bot))
+			{
+                JOB_TYPE job = GetTargetJob(groupMember);
+                if (job & type)
+               {
+                    uint32 dispelMask  = GetDispellMask(dispelType);
+                    Unit::SpellAuraHolderMap const& auras = groupMember->GetSpellAuraHolderMap();
+                    for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                    {
+                        SpellAuraHolder *holder = itr->second;
+                        // Only return group members with negative magic effect
+                        if (dispelType == DISPEL_MAGIC && holder->IsPositive())
+                            continue;
+                        // poison, disease and curse are always negative: return everyone
+                        if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
+                            targets.push_back( heal_priority(groupMember, 0, job) );
+                    }
+                }
+			}
+        }
+		for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
             if (!groupMember || !groupMember->isAlive())
                 continue;
-            JOB_TYPE job = GetTargetJob(groupMember);
-            if (job & type)
-            {
-                uint32 dispelMask  = GetDispellMask(dispelType);
-                Unit::SpellAuraHolderMap const& auras = groupMember->GetSpellAuraHolderMap();
-                for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+			if (!groupMember->IsInSameGroupWith(m_bot))
+			{
+                JOB_TYPE job = GetTargetJob(groupMember);
+                if (job & type)
                 {
-                    SpellAuraHolder *holder = itr->second;
-                    // Only return group members with negative magic effect
-                    if (dispelType == DISPEL_MAGIC && holder->IsPositive())
-                        continue;
-                    // poison, disease and curse are always negative: return everyone
-                    if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
-                        targets.push_back( heal_priority(groupMember, 0, job) );
+                    uint32 dispelMask  = GetDispellMask(dispelType);
+                    Unit::SpellAuraHolderMap const& auras = groupMember->GetSpellAuraHolderMap();
+                    for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                    {
+                        SpellAuraHolder *holder = itr->second;
+                        // Only return group members with negative magic effect
+                        if (dispelType == DISPEL_MAGIC && holder->IsPositive())
+                            continue;
+                        // poison, disease and curse are always negative: return everyone
+                        if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
+                            targets.push_back( heal_priority(groupMember, 0, job) );
+                    }
                 }
-            }
+			}
         }
 
         // Sorts according to type: Healers first, tanks next, then master followed by DPS, thanks to the order of the TYPE enum
@@ -576,13 +619,27 @@ Player* PlayerbotClassAI::GetResurrectionTarget(JOB_TYPE type, bool bMustBeOOC)
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!groupMember || groupMember->isAlive())
+            if (!groupMember || groupMember->isAlive() || !groupMember->IsInSameGroupWith(m_bot))
                 continue;
-            JOB_TYPE job = GetTargetJob(groupMember);
-            if (job & type)
-                targets.push_back( heal_priority(groupMember, 0, job) );
+			if (groupMember->IsInSameGroupWith(m_bot))
+			{
+				JOB_TYPE job = GetTargetJob(groupMember);
+				if (job & type)
+					targets.push_back(heal_priority(groupMember, 0, job));
+			}            
         }
-
+		for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+		{
+			Player *groupMember = sObjectMgr.GetPlayer(itr->guid);
+			if (!groupMember || groupMember->isAlive())
+				continue;
+			if (!groupMember->IsInSameGroupWith(m_bot))
+			{
+				JOB_TYPE job = GetTargetJob(groupMember);
+				if (job & type)
+					targets.push_back(heal_priority(groupMember, 0, job));
+			}
+		}
         // Sorts according to type: Healers first, tanks next, then master followed by DPS, thanks to the order of the TYPE enum
         std::sort(targets.begin(), targets.end());
 
