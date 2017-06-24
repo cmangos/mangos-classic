@@ -88,6 +88,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<T, ChaseMo
         void Finalize(T&);
         void Interrupt(T&);
         void Reset(T&);
+        void SetOffsetAndAngle(float offset, float angle, bool moveFurther);
 
         static void _clearUnitStateMove(T& u);
         static void _addUnitStateMove(T& u);

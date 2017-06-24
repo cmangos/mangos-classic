@@ -242,6 +242,14 @@ void ChaseMovementGenerator<T>::Reset(T& owner)
     Initialize(owner);
 }
 
+template<class T>
+void ChaseMovementGenerator<T>::SetOffsetAndAngle(float offset, float angle, bool moveFurther)
+{
+    i_offset = offset;
+    i_angle = angle;
+    m_moveFurther = moveFurther;
+}
+
 // Chase-Movement: These factors depend on combat-reach distance
 #define CHASE_DEFAULT_RANGE_FACTOR                        0.5f
 #define CHASE_RECHASE_RANGE_FACTOR                        0.75f
@@ -390,6 +398,8 @@ template void ChaseMovementGenerator<Player>::Reset(Player&);
 template void ChaseMovementGenerator<Creature>::Reset(Creature&);
 template float ChaseMovementGenerator<Creature>::GetDynamicTargetDistance(Creature&, bool) const;
 template float ChaseMovementGenerator<Player>::GetDynamicTargetDistance(Player&, bool) const;
+template void ChaseMovementGenerator<Creature>::SetOffsetAndAngle(float, float, bool);
+template void ChaseMovementGenerator<Player>::SetOffsetAndAngle(float, float, bool);
 
 template void FollowMovementGenerator<Player>::_clearUnitStateMove(Player& u);
 template void FollowMovementGenerator<Creature>::_addUnitStateMove(Creature& u);
